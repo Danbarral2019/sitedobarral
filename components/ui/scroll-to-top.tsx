@@ -1,0 +1,50 @@
+'use client';
+
+import React, { useState, useEffect } from 'react';
+import { ArrowUp } from 'lucide-react';
+
+export function ScrollToTop() {
+  const [isVisible, setIsVisible] = useState(false);
+
+  useEffect(() => {
+    const toggleVisibility = () => {
+      // Mostrar o botão quando rolar mais de 300px
+      if (window.scrollY > 300) {
+        setIsVisible(true);
+      } else {
+        setIsVisible(false);
+      }
+    };
+
+    window.addEventListener('scroll', toggleVisibility);
+
+    return () => {
+      window.removeEventListener('scroll', toggleVisibility);
+    };
+  }, []);
+
+  const scrollToTop = () => {
+    window.scrollTo({
+      top: 0,
+      behavior: 'smooth',
+    });
+  };
+
+  if (!isVisible) {
+    return null;
+  }
+
+  return (
+    <button
+      onClick={scrollToTop}
+      className="fixed bottom-6 right-6 z-50 bg-gradient-to-r from-blue-600 to-purple-600 text-white p-3 rounded-full shadow-lg hover:from-blue-700 hover:to-purple-700 transition-all transform hover:scale-110 active:scale-95 group"
+      aria-label="Voltar ao topo"
+      title="Voltar ao topo"
+    >
+      <ArrowUp className="w-6 h-6" />
+      <span className="absolute -top-10 right-0 bg-gray-900 text-white text-xs py-1 px-2 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
+        Voltar ao topo
+      </span>
+    </button>
+  );
+}

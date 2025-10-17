@@ -1,0 +1,18 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm run dev:*)",
+      "Bash(npm install:*)",
+      "Bash(npm run build:*)",
+      "Bash(npx prisma generate:*)",
+      "Bash(taskkill:*)",
+      "Bash(npx prisma db push:*)",
+      "Bash(node scripts/create-admin.js:*)",
+      "Bash(node scripts/migrate-blog-posts.js:*)",
+      "Bash(node scripts/seed-publications.js:*)",
+      "Bash(git add:*)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}

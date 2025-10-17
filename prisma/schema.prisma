@@ -1,0 +1,160 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+// QR Codes para acesso aos cursos
+model QRCode {
+  id         String   @id @default(uuid())
+  code       String   @unique
+  courseId   String
+  turma      String
+  validUntil DateTime
+  maxUses    Int?
+  usedCount  Int      @default(0)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@index([courseId])
+  @@index([validUntil])
+  @@index([courseId, turma])
+}
+
+// Documentos dos cursos
+model Document {
+  id          String   @id @default(uuid())
+  title       String
+  description String?
+  type        String   // pdf, doc, link, video
+  url         String
+  category    String   // apostila, acordao, parecer, edital, artigo, outro
+  courseId    String
+  isPublic    Boolean  @default(false)
+  tags        String?  // JSON array como string
+  size        Int?
+  uploadedAt  DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([courseId])
+  @@index([category])
+  @@index([courseId, isPublic])
+  @@index([uploadedAt])
+}
+
+// Usuários (admin e estudantes)
+model User {
+  id           String   @id @default(uuid())
+  email        String   @unique
+  name         String
+  passwordHash String
+  role         String   // admin, student
+
+  // Verificação de email
+  emailVerified         Boolean   @default(false)
+  verificationToken     String?   @unique
+  verificationExpiry    DateTime?
+
+  // Recuperação de senha
+  resetPasswordToken    String?   @unique
+  resetPasswordExpiry   DateTime?
+
+  // Relacionamento com cursos (para estudantes)
+  enrollments  Enrollment[]
+
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
+
+// Matrícula de aluno em curso (via QR Code)
+model Enrollment {
+  id                  String    @id @default(uuid())
+  userId              String
+  user                User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  courseId            String
+  turma               String?
+  qrCodeId            String?   // QR Code usado no primeiro acesso
+  enrolledAt          DateTime  @default(now())
+  expiresAt           DateTime? // Data de expiração (1 ano após criação do QR Code da turma)
+  isLifetime          Boolean   @default(false) // Acesso vitalício
+  lifetimeUpgradedAt  DateTime? // Data do upgrade para vitalício
+  lifetimePrice       Float?    // Valor pago pelo upgrade vitalício
+  notificationSentAt  DateTime? // Data em que notificação de expiração foi enviada
+
+  @@unique([userId, courseId])
+}
+
+// Log de acessos (para auditoria)
+model AccessLog {
+  id        String   @id @default(uuid())
+  userId    String?
+  qrCode    String?
+  courseId  String?
+  action    String   // login, access, download
+  ip        String?
+  userAgent String?
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+  @@index([createdAt])
+  @@index([userId, action])
+  @@index([courseId, createdAt])
+}
+
+// Posts do Blog
+model BlogPost {
+  id          String   @id @default(uuid())
+  slug        String   @unique
+  title       String
+  excerpt     String
+  content     String   // Texto longo do artigo
+  author      String
+  publishedAt DateTime
+  isPublished Boolean  @default(false)
+  tags        String?  // JSON array como string
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([slug])
+  @@index([isPublished])
+  @@index([publishedAt])
+}
+
+// Publicações Acadêmicas (Livros, Artigos, Notícias)
+model Publication {
+  id          String   @id @default(uuid())
+  type        String   // livro, artigo, noticia
+  title       String
+  description String   // Resumo/descrição
+  content     String?  // Conteúdo completo (opcional para artigos externos)
+  author      String
+  publishedAt DateTime
+  isPublished Boolean  @default(false)
+
+  // Campos específicos para livros
+  publisher   String?  // Editora
+  isbn        String?  // ISBN
+  coverImage  String?  // URL da imagem de capa
+
+  // Campos para artigos/links externos
+  externalUrl String?  // Link para artigo externo
+  journal     String?  // Nome da revista/jornal
+
+  // Campos para notícias/eventos
+  eventDate   DateTime? // Data do evento
+  location    String?   // Local do evento
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([type])
+  @@index([isPublished])
+  @@index([publishedAt])
+  @@index([type, isPublished])
+}

@@ -1,0 +1,375 @@
+/**
+ * Utilitário para envio de emails
+ * Em desenvolvimento: simula envio (console.log)
+ * Em produção: usa Resend
+ */
+
+import { Resend } from 'resend';
+
+export interface EmailOptions {
+  to: string;
+  subject: string;
+  html: string;
+  text?: string;
+}
+
+export async function sendEmail(options: EmailOptions): Promise<boolean> {
+  const { to, subject, html, text } = options;
+
+  // Em desenvolvimento, apenas loga no console
+  if (process.env.NODE_ENV === 'development' && !process.env.RESEND_API_KEY) {
+    console.log('\n📧 ===== EMAIL SIMULADO (DEV) =====');
+    console.log(`Para: ${to}`);
+    console.log(`Assunto: ${subject}`);
+    console.log(`Conteúdo HTML:\n${html.substring(0, 200)}...`);
+    if (text) console.log(`Conteúdo Texto:\n${text.substring(0, 200)}...`);
+    console.log('===== FIM DO EMAIL =====\n');
+    return true;
+  }
+
+  // Em produção ou desenvolvimento com RESEND_API_KEY configurado
+  if (process.env.RESEND_API_KEY) {
+    try {
+      const resend = new Resend(process.env.RESEND_API_KEY);
+
+      const fromEmail = process.env.EMAIL_FROM || 'noreply@profbarral.com.br';
+
+      const result = await resend.emails.send({
+        from: fromEmail,
+        to,
+        subject,
+        html,
+        text: text || undefined,
+      });
+
+      console.log('✅ Email enviado com sucesso:', { to, subject, id: result.data?.id });
+      return true;
+    } catch (error) {
+      console.error('❌ Erro ao enviar email:', error);
+      return false;
+    }
+  }
+
+  // Fallback se não tiver API key configurada
+  console.warn('⚠️ RESEND_API_KEY não configurado - Email não enviado');
+  console.log(`📧 Email que seria enviado para: ${to}`);
+  console.log(`📧 Assunto: ${subject}`);
+  return false;
+}
+
+/**
+ * Envia email de verificação de conta
+ */
+export async function sendVerificationEmail(
+  email: string,
+  name: string,
+  token: string
+): Promise<boolean> {
+  const verificationUrl = `${process.env.NEXT_PUBLIC_BASE_URL}/verificar-email?token=${token}`;
+
+  const html = `
+    <!DOCTYPE html>
+    <html>
+      <head>
+        <style>
+          body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+          .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+          .header { background: linear-gradient(135deg, #2563eb 0%, #9333ea 100%); color: white; padding: 30px; text-align: center; border-radius: 10px 10px 0 0; }
+          .content { background: #f9fafb; padding: 30px; border-radius: 0 0 10px 10px; }
+          .button { display: inline-block; background: linear-gradient(135deg, #2563eb 0%, #9333ea 100%); color: white; padding: 15px 30px; text-decoration: none; border-radius: 8px; font-weight: bold; margin: 20px 0; }
+          .footer { text-align: center; margin-top: 30px; color: #666; font-size: 14px; }
+          .warning { background: #fef3c7; border-left: 4px solid #f59e0b; padding: 15px; margin: 20px 0; }
+        </style>
+      </head>
+      <body>
+        <div class="container">
+          <div class="header">
+            <h1>Bem-vindo(a), ${name}!</h1>
+          </div>
+          <div class="content">
+            <p>Olá ${name},</p>
+            <p>Obrigado por se cadastrar no site do <strong>Prof. Daniel Barral</strong>!</p>
+            <p>Para ativar sua conta e ter acesso aos materiais dos cursos, por favor confirme seu endereço de email clicando no botão abaixo:</p>
+
+            <div style="text-align: center;">
+              <a href="${verificationUrl}" class="button">Verificar Meu Email</a>
+            </div>
+
+            <div class="warning">
+              <strong>⏰ Link válido por 24 horas</strong><br>
+              Este link de verificação expira em 24 horas por questões de segurança.
+            </div>
+
+            <p>Se o botão não funcionar, copie e cole este link no seu navegador:</p>
+            <p style="word-break: break-all; color: #2563eb;">${verificationUrl}</p>
+
+            <p>Se você não se cadastrou no nosso site, por favor ignore este email.</p>
+
+            <p>Atenciosamente,<br><strong>Equipe Prof. Daniel Barral</strong></p>
+          </div>
+          <div class="footer">
+            <p>Este é um email automático, por favor não responda.</p>
+            <p>© ${new Date().getFullYear()} Prof. Daniel Barral - Todos os direitos reservados</p>
+          </div>
+        </div>
+      </body>
+    </html>
+  `;
+
+  const text = `
+Bem-vindo(a), ${name}!
+
+Obrigado por se cadastrar no site do Prof. Daniel Barral!
+
+Para ativar sua conta, acesse o link abaixo:
+${verificationUrl}
+
+Este link é válido por 24 horas.
+
+Se você não se cadastrou no nosso site, por favor ignore este email.
+
+Atenciosamente,
+Equipe Prof. Daniel Barral
+  `;
+
+  return sendEmail({
+    to: email,
+    subject: 'Confirme seu email - Prof. Daniel Barral',
+    html,
+    text,
+  });
+}
+
+/**
+ * Envia email de recuperação de senha
+ */
+export async function sendPasswordResetEmail(
+  email: string,
+  name: string,
+  token: string
+): Promise<boolean> {
+  const resetUrl = `${process.env.NEXT_PUBLIC_BASE_URL}/redefinir-senha?token=${token}`;
+
+  const html = `
+    <!DOCTYPE html>
+    <html>
+      <head>
+        <style>
+          body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+          .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+          .header { background: linear-gradient(135deg, #2563eb 0%, #9333ea 100%); color: white; padding: 30px; text-align: center; border-radius: 10px 10px 0 0; }
+          .content { background: #f9fafb; padding: 30px; border-radius: 0 0 10px 10px; }
+          .button { display: inline-block; background: linear-gradient(135deg, #2563eb 0%, #9333ea 100%); color: white; padding: 15px 30px; text-decoration: none; border-radius: 8px; font-weight: bold; margin: 20px 0; }
+          .footer { text-align: center; margin-top: 30px; color: #666; font-size: 14px; }
+          .warning { background: #fee2e2; border-left: 4px solid #ef4444; padding: 15px; margin: 20px 0; }
+        </style>
+      </head>
+      <body>
+        <div class="container">
+          <div class="header">
+            <h1>Recuperação de Senha</h1>
+          </div>
+          <div class="content">
+            <p>Olá ${name},</p>
+            <p>Recebemos uma solicitação para redefinir a senha da sua conta no site do <strong>Prof. Daniel Barral</strong>.</p>
+            <p>Para criar uma nova senha, clique no botão abaixo:</p>
+
+            <div style="text-align: center;">
+              <a href="${resetUrl}" class="button">Redefinir Minha Senha</a>
+            </div>
+
+            <div class="warning">
+              <strong>⏰ Link válido por 1 hora</strong><br>
+              Este link de recuperação expira em 1 hora por questões de segurança.
+            </div>
+
+            <p>Se o botão não funcionar, copie e cole este link no seu navegador:</p>
+            <p style="word-break: break-all; color: #2563eb;">${resetUrl}</p>
+
+            <p><strong>Se você não solicitou esta recuperação de senha, ignore este email.</strong> Sua senha permanecerá inalterada.</p>
+
+            <p>Atenciosamente,<br><strong>Equipe Prof. Daniel Barral</strong></p>
+          </div>
+          <div class="footer">
+            <p>Este é um email automático, por favor não responda.</p>
+            <p>© ${new Date().getFullYear()} Prof. Daniel Barral - Todos os direitos reservados</p>
+          </div>
+        </div>
+      </body>
+    </html>
+  `;
+
+  const text = `
+Recuperação de Senha
+
+Olá ${name},
+
+Recebemos uma solicitação para redefinir a senha da sua conta no site do Prof. Daniel Barral.
+
+Para criar uma nova senha, acesse o link abaixo:
+${resetUrl}
+
+Este link é válido por 1 hora.
+
+Se você não solicitou esta recuperação de senha, ignore este email. Sua senha permanecerá inalterada.
+
+Atenciosamente,
+Equipe Prof. Daniel Barral
+  `;
+
+  return sendEmail({
+    to: email,
+    subject: 'Recuperação de Senha - Prof. Daniel Barral',
+    html,
+    text,
+  });
+}
+
+/**
+ * Envia email de notificação de expiração de acesso (3 meses antes)
+ */
+export async function sendExpirationNotification(
+  email: string,
+  name: string,
+  courseId: string,
+  daysRemaining: number,
+  expiresAt: Date
+): Promise<boolean> {
+  const upgradeUrl = `${process.env.NEXT_PUBLIC_BASE_URL}/upgrade/${courseId}`;
+  const expirationDate = new Date(expiresAt).toLocaleDateString('pt-BR', {
+    day: '2-digit',
+    month: 'long',
+    year: 'numeric',
+  });
+
+  // Formatação da mensagem de dias restantes
+  let remainingMessage = '';
+  if (daysRemaining <= 7) {
+    remainingMessage = `apenas ${daysRemaining} ${daysRemaining === 1 ? 'dia' : 'dias'}`;
+  } else if (daysRemaining <= 30) {
+    remainingMessage = `${daysRemaining} dias`;
+  } else {
+    const months = Math.floor(daysRemaining / 30);
+    remainingMessage = `aproximadamente ${months} ${months === 1 ? 'mês' : 'meses'}`;
+  }
+
+  const html = `
+    <!DOCTYPE html>
+    <html>
+      <head>
+        <style>
+          body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+          .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+          .header { background: linear-gradient(135deg, #f59e0b 0%, #dc2626 100%); color: white; padding: 30px; text-align: center; border-radius: 10px 10px 0 0; }
+          .content { background: #f9fafb; padding: 30px; border-radius: 0 0 10px 10px; }
+          .button { display: inline-block; background: linear-gradient(135deg, #7c3aed 0%, #2563eb 100%); color: white; padding: 15px 30px; text-decoration: none; border-radius: 8px; font-weight: bold; margin: 20px 0; }
+          .footer { text-align: center; margin-top: 30px; color: #666; font-size: 14px; }
+          .warning { background: #fef3c7; border-left: 4px solid #f59e0b; padding: 20px; margin: 20px 0; border-radius: 8px; }
+          .highlight { background: linear-gradient(135deg, #7c3aed 0%, #2563eb 100%); color: white; padding: 20px; border-radius: 8px; text-align: center; margin: 20px 0; }
+          .benefits { background: white; padding: 20px; border-radius: 8px; margin: 20px 0; border: 2px solid #e5e7eb; }
+          .benefit-item { display: flex; align-items: start; margin: 10px 0; }
+          .check { color: #10b981; margin-right: 10px; font-weight: bold; }
+        </style>
+      </head>
+      <body>
+        <div class="container">
+          <div class="header">
+            <h1>⏰ Seu Acesso Está Expirando</h1>
+          </div>
+          <div class="content">
+            <p>Olá ${name},</p>
+
+            <div class="warning">
+              <strong>⚠️ Atenção:</strong> Seu acesso ao curso está próximo do vencimento!<br><br>
+              <strong>Tempo restante:</strong> ${remainingMessage}<br>
+              <strong>Data de expiração:</strong> ${expirationDate}
+            </div>
+
+            <p>Não perca o acesso aos valiosos materiais do curso. Temos uma oferta especial para você!</p>
+
+            <div class="highlight">
+              <h2 style="margin: 0 0 10px 0;">✨ Acesso Vitalício Disponível</h2>
+              <p style="margin: 0; font-size: 16px;">Garanta acesso ilimitado por toda a vida!</p>
+            </div>
+
+            <div class="benefits">
+              <h3 style="margin-top: 0;">Com o Acesso Vitalício você terá:</h3>
+              <div class="benefit-item">
+                <span class="check">✓</span>
+                <span><strong>Acesso para sempre</strong> - Sem preocupações com renovação</span>
+              </div>
+              <div class="benefit-item">
+                <span class="check">✓</span>
+                <span><strong>Todas as atualizações futuras</strong> - Material sempre atualizado</span>
+              </div>
+              <div class="benefit-item">
+                <span class="check">✓</span>
+                <span><strong>Download ilimitado</strong> - Baixe todos os materiais</span>
+              </div>
+              <div class="benefit-item">
+                <span class="check">✓</span>
+                <span><strong>Investimento único</strong> - Pague uma vez, use sempre</span>
+              </div>
+            </div>
+
+            <div style="text-align: center;">
+              <a href="${upgradeUrl}" class="button">👑 Fazer Upgrade Agora</a>
+            </div>
+
+            <p style="text-align: center; color: #666; font-size: 14px; margin-top: 20px;">
+              Ou acesse: <a href="${upgradeUrl}" style="color: #2563eb;">${upgradeUrl}</a>
+            </p>
+
+            <hr style="border: none; border-top: 1px solid #e5e7eb; margin: 30px 0;">
+
+            <p style="font-size: 14px; color: #666;">
+              <strong>Dúvidas?</strong> Entre em contato conosco através do site ou responda este email.
+            </p>
+
+            <p>Atenciosamente,<br><strong>Equipe Prof. Daniel Barral</strong></p>
+          </div>
+          <div class="footer">
+            <p>Este é um email automático enviado para lembrá-lo sobre a expiração do seu acesso.</p>
+            <p>© ${new Date().getFullYear()} Prof. Daniel Barral - Todos os direitos reservados</p>
+          </div>
+        </div>
+      </body>
+    </html>
+  `;
+
+  const text = `
+⏰ Seu Acesso Está Expirando
+
+Olá ${name},
+
+ATENÇÃO: Seu acesso ao curso está próximo do vencimento!
+
+Tempo restante: ${remainingMessage}
+Data de expiração: ${expirationDate}
+
+Não perca o acesso aos valiosos materiais do curso. Temos uma oferta especial para você!
+
+✨ ACESSO VITALÍCIO DISPONÍVEL
+Garanta acesso ilimitado por toda a vida!
+
+Com o Acesso Vitalício você terá:
+✓ Acesso para sempre - Sem preocupações com renovação
+✓ Todas as atualizações futuras - Material sempre atualizado
+✓ Download ilimitado - Baixe todos os materiais
+✓ Investimento único - Pague uma vez, use sempre
+
+Faça upgrade agora em: ${upgradeUrl}
+
+Dúvidas? Entre em contato conosco através do site ou responda este email.
+
+Atenciosamente,
+Equipe Prof. Daniel Barral
+  `;
+
+  return sendEmail({
+    to: email,
+    subject: `⏰ Seu acesso expira em ${remainingMessage} - Prof. Daniel Barral`,
+    html,
+    text,
+  });
+}

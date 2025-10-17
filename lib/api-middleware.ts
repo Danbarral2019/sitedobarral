@@ -1,0 +1,56 @@
+import { NextRequest, NextResponse } from 'next/server';
+import { isAdmin } from './auth';
+
+/**
+ * Tipo para funções de handler de API
+ */
+type ApiHandler = (request: NextRequest, context?: any) => Promise<NextResponse>;
+
+/**
+ * Middleware que protege rotas de API para admin apenas
+ * Uso:
+ *
+ * export const GET = withAdminAuth(async (request) => {
+ *   // Código que só admin pode acessar
+ *   return NextResponse.json({ data: 'secret' });
+ * });
+ */
+export function withAdminAuth(handler: ApiHandler): ApiHandler {
+  return async (request: NextRequest, context?: any) => {
+    const admin = await isAdmin();
+
+    if (!admin) {
+      return NextResponse.json(
+        { error: 'Acesso negado. Apenas administradores.' },
+        { status: 403 }
+      );
+    }
+
+    return handler(request, context);
+  };
+}
+
+/**
+ * Middleware que protege rotas de API para usuários autenticados
+ * Uso:
+ *
+ * export const GET = withAuth(async (request) => {
+ *   // Código que qualquer usuário autenticado pode acessar
+ *   return NextResponse.json({ data: 'content' });
+ * });
+ */
+export function withAuth(handler: ApiHandler): ApiHandler {
+  return async (request: NextRequest, context?: any) => {
+    const { getCurrentUser } = await import('./auth');
+    const user = await getCurrentUser();
+
+    if (!user) {
+      return NextResponse.json(
+        { error: 'Não autenticado. Faça login.' },
+        { status: 401 }
+      );
+    }
+
+    return handler(request, context);
+  };
+}

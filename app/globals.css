@@ -1,8 +1,9 @@
 @import "tailwindcss";
 
+/* Forçar sempre tema claro - sem dark mode automático */
 :root {
   --background: #ffffff;
-  --foreground: #171717;
+  --foreground: #111827;
 }
 
 @theme inline {
@@ -12,15 +13,40 @@
   --font-mono: var(--font-geist-mono);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+/* Tema claro forçado apenas no body principal */
+body {
+  background: #f9fafb;
+  color: #111827;
+  font-family: Inter, Arial, Helvetica, sans-serif;
+}
+
+/* Permitir que classes Tailwind sobrescrevam */
+[class*="bg-"], [class*="text-"] {
+  /* Classes Tailwind têm prioridade */
+}
+
+/* Animação de skeleton loading */
+@keyframes skeleton-loading {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
   }
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+/* Animação de fade-in para carrossel */
+@keyframes fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fade-in {
+  animation: fade-in 0.5s ease-out;
 }

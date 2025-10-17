@@ -1,0 +1,208 @@
+'use client';
+
+import { useAuth } from '@/hooks/use-auth';
+import Link from 'next/link';
+
+interface EnrollmentStatusBannerProps {
+  courseId: string;
+}
+
+export default function EnrollmentStatusBanner({ courseId }: EnrollmentStatusBannerProps) {
+  const { user, getEnrollmentStatus } = useAuth();
+
+  if (!user) {
+    return null;
+  }
+
+  const status = getEnrollmentStatus(courseId);
+
+  if (!status) {
+    return null; // Usuário não matriculado neste curso
+  }
+
+  // Usuário tem acesso vitalício
+  if (status.isLifetime) {
+    return (
+      <div className="bg-gradient-to-r from-green-50 to-emerald-50 border border-green-200 rounded-lg p-4 mb-6">
+        <div className="flex items-start justify-between">
+          <div className="flex items-start">
+            <div className="flex-shrink-0">
+              <svg
+                className="w-6 h-6 text-green-600"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+                />
+              </svg>
+            </div>
+            <div className="ml-3 flex-1">
+              <h3 className="text-sm font-semibold text-green-900">
+                ⭐ Acesso Vitalício Ativo
+              </h3>
+              <p className="mt-1 text-sm text-green-800">
+                Você tem acesso ilimitado a todos os materiais deste curso. Seu acesso nunca expira!
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Acesso expirado
+  if (status.isExpired) {
+    return (
+      <div className="bg-red-50 border border-red-200 rounded-lg p-4 mb-6">
+        <div className="flex items-start">
+          <div className="flex-shrink-0">
+            <svg
+              className="w-6 h-6 text-red-600"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+              />
+            </svg>
+          </div>
+          <div className="ml-3 flex-1">
+            <h3 className="text-sm font-semibold text-red-900">
+              Acesso Expirado
+            </h3>
+            <p className="mt-1 text-sm text-red-800">
+              Seu período de acesso ao curso expirou. Para continuar acessando os materiais, entre em contato com o professor.
+            </p>
+            <div className="mt-3 flex flex-col sm:flex-row gap-2">
+              <Link
+                href={`/upgrade/${courseId}`}
+                className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
+              >
+                Renovar Acesso
+              </Link>
+              <Link
+                href="/contato"
+                className="inline-flex items-center px-4 py-2 border border-red-300 text-sm font-medium rounded-md text-red-700 bg-white hover:bg-red-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
+              >
+                Falar com Professor
+              </Link>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Acesso expirando em breve (menos de 90 dias)
+  if (status.isExpiringSoon) {
+    const daysRemaining = status.daysRemaining || 0;
+    const expiryDate = status.expiresAt ? new Date(status.expiresAt).toLocaleDateString('pt-BR') : '';
+
+    return (
+      <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-6">
+        <div className="flex items-start">
+          <div className="flex-shrink-0">
+            <svg
+              className="w-6 h-6 text-yellow-600"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
+              />
+            </svg>
+          </div>
+          <div className="ml-3 flex-1">
+            <h3 className="text-sm font-semibold text-yellow-900">
+              ⚠️ Seu acesso está expirando
+            </h3>
+            <p className="mt-1 text-sm text-yellow-800">
+              {daysRemaining > 0 ? (
+                <>
+                  Faltam <strong>{daysRemaining} dias</strong> para seu acesso expirar ({expiryDate}).
+                  Faça o upgrade para acesso vitalício e nunca perca o acesso aos materiais!
+                </>
+              ) : (
+                <>
+                  Seu acesso expira em <strong>{expiryDate}</strong>.
+                  Garanta acesso vitalício aos materiais do curso!
+                </>
+              )}
+            </p>
+            <div className="mt-3 flex flex-col sm:flex-row gap-2">
+              <Link
+                href={`/upgrade/${courseId}`}
+                className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-yellow-600 hover:bg-yellow-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-yellow-500"
+              >
+                ⭐ Upgrade para Vitalício
+              </Link>
+              <span className="inline-flex items-center px-4 py-2 text-sm text-yellow-700">
+                Consulte as condições especiais
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Acesso ativo normal (mais de 90 dias restantes)
+  const daysRemaining = status.daysRemaining || 0;
+  const expiryDate = status.expiresAt ? new Date(status.expiresAt).toLocaleDateString('pt-BR') : '';
+
+  return (
+    <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
+      <div className="flex items-start justify-between">
+        <div className="flex items-start flex-1">
+          <div className="flex-shrink-0">
+            <svg
+              className="w-6 h-6 text-blue-600"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+              />
+            </svg>
+          </div>
+          <div className="ml-3 flex-1">
+            <h3 className="text-sm font-semibold text-blue-900">
+              ✓ Acesso Ativo
+            </h3>
+            <p className="mt-1 text-sm text-blue-800">
+              Seu acesso é válido até <strong>{expiryDate}</strong> ({daysRemaining} dias restantes)
+            </p>
+            <p className="mt-2 text-xs text-blue-700">
+              💡 Dica: Faça o upgrade para acesso vitalício e nunca se preocupe com renovação!
+            </p>
+          </div>
+        </div>
+        <div className="ml-3 flex-shrink-0">
+          <Link
+            href={`/upgrade/${courseId}`}
+            className="inline-flex items-center px-3 py-1.5 border border-blue-300 text-xs font-medium rounded-md text-blue-700 bg-white hover:bg-blue-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+          >
+            Ver Upgrade
+          </Link>
+        </div>
+      </div>
+    </div>
+  );
+}

@@ -1,103 +1,283 @@
-import Image from "next/image";
+import Link from 'next/link';
+import { ArrowRight, BookOpen, Users, Award, FileText, CheckCircle, Star } from 'lucide-react';
+import { courses } from '@/data/courses';
+import TestimonialsCarousel from '@/components/TestimonialsCarousel';
 
 export default function Home() {
-  return (
-    <div className="font-sans grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20">
-      <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="font-mono list-inside list-decimal text-sm/6 text-center sm:text-left">
-          <li className="mb-2 tracking-[-.01em]">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] font-mono font-semibold px-1 py-0.5 rounded">
-              app/page.tsx
-            </code>
-            .
-          </li>
-          <li className="tracking-[-.01em]">
-            Save and see your changes instantly.
-          </li>
-        </ol>
+  const featuredCourses = courses.slice(0, 3);
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:w-auto"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 w-full sm:w-auto md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
+  return (
+    <main>
+      <section className="text-white py-20" style={{background: 'linear-gradient(to bottom, #1e40af 0%, #3b82f6 100%)'}}>
+        <div className="container mx-auto px-4">
+          <div className="max-w-4xl mx-auto text-center">
+            <h1 className="text-4xl md:text-5xl font-bold mb-6">
+              Prof. Daniel Barral
+            </h1>
+            <p className="text-xl md:text-2xl mb-4">
+              Professor | Mestre em Direito Público
+            </p>
+            <p className="text-lg mb-8 text-white">
+              Especialista em Licitações e Contratos Administrativos
+            </p>
+            <p className="text-lg mb-10 max-w-2xl mx-auto">
+              Repositório especializado de materiais jurídicos em Direito Administrativo, 
+              com foco em fortalecer seu conhecimento e aprimorar suas atividades funcionais.
+            </p>
+            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+              <Link
+                href="/cursos"
+                className="px-8 py-3 rounded-lg font-semibold transition-colors inline-flex items-center justify-center gap-2"
+                style={{backgroundColor: '#ffffff', color: '#2563eb'}}
+              >
+                <BookOpen className="w-5 h-5" style={{color: '#2563eb'}} />
+                Explorar Cursos
+              </Link>
+              <Link
+                href="/validar-acesso"
+                className="bg-primary-700 text-white px-8 py-3 rounded-lg font-semibold hover:bg-primary-800 transition-colors inline-flex items-center justify-center gap-2 border border-primary-500"
+              >
+                Área do Aluno
+                <ArrowRight className="w-5 h-5 text-white" />
+              </Link>
+            </div>
+          </div>
         </div>
-      </main>
-      <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
-    </div>
+      </section>
+
+      <section className="py-16 bg-gradient-to-b from-gray-50 to-white">
+        <div className="container mx-auto px-4">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <div className="text-center group">
+              <div className="relative mb-6">
+                <div className="w-24 h-24 bg-gradient-to-br from-blue-500 to-blue-700 rounded-2xl flex items-center justify-center mx-auto shadow-lg transform group-hover:scale-110 transition-transform duration-300">
+                  <Award className="w-12 h-12 text-white" />
+                </div>
+                <div className="absolute -bottom-2 left-1/2 transform -translate-x-1/2 w-16 h-1 bg-blue-600 rounded-full"></div>
+              </div>
+              <h3 className="text-xl font-bold mb-3 text-gray-900">Experiência Comprovada</h3>
+              <p className="text-gray-700 leading-relaxed">
+                Anos de atuação como professor especializado em Direito Administrativo
+              </p>
+            </div>
+            <div className="text-center group">
+              <div className="relative mb-6">
+                <div className="w-24 h-24 bg-gradient-to-br from-green-500 to-green-700 rounded-2xl flex items-center justify-center mx-auto shadow-lg transform group-hover:scale-110 transition-transform duration-300">
+                  <Users className="w-12 h-12 text-white" />
+                </div>
+                <div className="absolute -bottom-2 left-1/2 transform -translate-x-1/2 w-16 h-1 bg-green-600 rounded-full"></div>
+              </div>
+              <h3 className="text-xl font-bold mb-3 text-gray-900">Conteúdo Atualizado</h3>
+              <p className="text-gray-700 leading-relaxed">
+                Material sempre atualizado com as últimas mudanças legislativas e jurisprudenciais
+              </p>
+            </div>
+            <div className="text-center group">
+              <div className="relative mb-6">
+                <div className="w-24 h-24 bg-gradient-to-br from-purple-500 to-purple-700 rounded-2xl flex items-center justify-center mx-auto shadow-lg transform group-hover:scale-110 transition-transform duration-300">
+                  <FileText className="w-12 h-12 text-white" />
+                </div>
+                <div className="absolute -bottom-2 left-1/2 transform -translate-x-1/2 w-16 h-1 bg-purple-600 rounded-full"></div>
+              </div>
+              <h3 className="text-xl font-bold mb-3 text-gray-900">Material Exclusivo</h3>
+              <p className="text-gray-700 leading-relaxed">
+                Acesso a documentos e acórdãos organizados por tema
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section className="py-16 bg-white">
+        <div className="container mx-auto px-4">
+          <div className="text-center mb-12">
+            <div className="inline-block">
+              <h2 className="text-4xl font-bold text-gray-900 mb-2">Cursos em Destaque</h2>
+              <div className="h-1 w-32 bg-gradient-to-r from-blue-600 to-purple-600 rounded-full mx-auto"></div>
+            </div>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            {featuredCourses.map((course, index) => (
+              <div key={course.id} className="bg-white border-2 border-gray-200 rounded-xl overflow-hidden hover:border-blue-500 hover:shadow-2xl transition-all duration-300 group">
+                <div className="h-2 bg-gradient-to-r from-blue-500 to-purple-500"></div>
+                <div className="p-6">
+                  <div className="flex items-center gap-2 mb-4">
+                    <div className="w-10 h-10 bg-gradient-to-br from-blue-100 to-purple-100 rounded-lg flex items-center justify-center">
+                      <BookOpen className="w-5 h-5 text-blue-700" />
+                    </div>
+                    <span className="text-sm font-semibold text-blue-700 bg-blue-50 px-3 py-1 rounded-full">
+                      Curso {String(index + 1).padStart(2, '0')}
+                    </span>
+                  </div>
+                  <h3 className="text-xl font-bold mb-3 text-gray-900 group-hover:text-blue-700 transition-colors">{course.title}</h3>
+                  <p className="text-gray-700 mb-6 leading-relaxed">{course.shortDescription}</p>
+                  <Link
+                    href={`/cursos/${course.slug}`}
+                    className="text-blue-600 font-bold hover:text-blue-700 inline-flex items-center gap-2 group-hover:gap-3 transition-all"
+                  >
+                    Saiba mais
+                    <ArrowRight className="w-5 h-5" />
+                  </Link>
+                </div>
+              </div>
+            ))}
+          </div>
+          <div className="text-center mt-12">
+            <Link
+              href="/cursos"
+              className="bg-gradient-to-r from-blue-600 to-blue-700 text-white px-10 py-4 rounded-xl font-bold hover:from-blue-700 hover:to-blue-800 transition-all inline-flex items-center gap-2 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
+            >
+              Ver todos os cursos
+              <ArrowRight className="w-5 h-5" />
+            </Link>
+          </div>
+        </div>
+      </section>
+
+      <section className="py-16 bg-gradient-to-b from-blue-50 to-white">
+        <div className="container mx-auto px-4">
+          <div className="max-w-5xl mx-auto">
+            <div className="text-center mb-12">
+              <h2 className="text-4xl font-bold text-gray-900 mb-2">Como Funciona</h2>
+              <div className="h-1 w-24 bg-gradient-to-r from-blue-600 to-green-600 rounded-full mx-auto"></div>
+            </div>
+            <div className="space-y-8">
+              <div className="flex gap-6 items-start bg-white p-6 rounded-2xl border-l-4 border-blue-500 shadow-md hover:shadow-xl transition-shadow">
+                <div className="flex-shrink-0">
+                  <div className="w-14 h-14 bg-gradient-to-br from-blue-500 to-blue-700 text-white rounded-xl flex items-center justify-center font-bold text-2xl shadow-lg">
+                    1
+                  </div>
+                </div>
+                <div>
+                  <h3 className="text-2xl font-bold mb-2 text-gray-900">Explore os Cursos</h3>
+                  <p className="text-gray-700 text-lg leading-relaxed">
+                    Navegue pela nossa biblioteca de cursos especializados em Direito Administrativo
+                  </p>
+                </div>
+              </div>
+              <div className="flex gap-6 items-start bg-white p-6 rounded-2xl border-l-4 border-green-500 shadow-md hover:shadow-xl transition-shadow">
+                <div className="flex-shrink-0">
+                  <div className="w-14 h-14 bg-gradient-to-br from-green-500 to-green-700 text-white rounded-xl flex items-center justify-center font-bold text-2xl shadow-lg">
+                    2
+                  </div>
+                </div>
+                <div>
+                  <h3 className="text-2xl font-bold mb-2 text-gray-900">Participe dos Cursos Presenciais</h3>
+                  <p className="text-gray-700 text-lg leading-relaxed">
+                    Inscreva-se nos cursos presenciais abertos ou in company
+                  </p>
+                </div>
+              </div>
+              <div className="flex gap-6 items-start bg-white p-6 rounded-2xl border-l-4 border-purple-500 shadow-md hover:shadow-xl transition-shadow">
+                <div className="flex-shrink-0">
+                  <div className="w-14 h-14 bg-gradient-to-br from-purple-500 to-purple-700 text-white rounded-xl flex items-center justify-center font-bold text-2xl shadow-lg">
+                    3
+                  </div>
+                </div>
+                <div>
+                  <h3 className="text-2xl font-bold mb-2 text-gray-900">Acesse Material Exclusivo</h3>
+                  <p className="text-gray-700 text-lg leading-relaxed">
+                    Receba QR Code exclusivo para acessar todo o material complementar do curso
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section className="py-16 bg-gradient-to-b from-white to-gray-50">
+        <div className="container mx-auto px-4">
+          <div className="max-w-4xl mx-auto">
+            <div className="text-center mb-12">
+              <h2 className="text-4xl font-bold text-gray-900 mb-2">Depoimentos de Alunos</h2>
+              <div className="h-1 w-24 bg-gradient-to-r from-yellow-500 to-orange-500 rounded-full mx-auto"></div>
+            </div>
+
+            {/* Carrossel de Depoimentos */}
+            <TestimonialsCarousel />
+
+            {/* Botão para Enviar Depoimento */}
+            <div className="text-center mt-10">
+              <p className="text-gray-700 mb-4 text-lg">
+                Você também é aluno e quer compartilhar sua experiência?
+              </p>
+              <Link
+                href="/contato?motivo=depoimento"
+                className="inline-flex items-center gap-2 bg-gradient-to-r from-yellow-500 to-orange-500 text-white px-8 py-4 rounded-xl font-bold hover:from-yellow-600 hover:to-orange-600 transition-all shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
+              >
+                <Star className="w-5 h-5" />
+                Enviar Meu Depoimento
+                <ArrowRight className="w-5 h-5" />
+              </Link>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section className="py-16 bg-gradient-to-b from-gray-50 to-white">
+        <div className="container mx-auto px-4">
+          <div className="max-w-4xl mx-auto">
+            <div className="relative overflow-hidden bg-gradient-to-br from-blue-600 via-blue-700 to-purple-700 rounded-2xl p-10 md:p-12 text-center shadow-2xl border-4 border-blue-400">
+              <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9IiNmZmYiIGZpbGwtb3BhY2l0eT0iMC4wMyI+PHBhdGggZD0iTTM2IDE0YzMuMzE0IDAgNiAyLjY4NiA2IDZzLTIuNjg2IDYtNiA2LTYtMi42ODYtNi02IDIuNjg2LTYgNi02ek0yNCAzOGMzLjMxNCAwIDYgMi42ODYgNiA2cy0yLjY4NiA2LTYgNi02LTIuNjg2LTYtNiAyLjY4Ni02IDYtNnoiLz48L2c+PC9nPjwvc3ZnPg==')] opacity-50"></div>
+
+              <div className="relative z-10">
+                <div className="inline-block mb-4">
+                  <div className="bg-white/20 backdrop-blur-sm px-4 py-2 rounded-full">
+                    <span className="text-white font-semibold text-sm">📧 Newsletter Jurídica</span>
+                  </div>
+                </div>
+
+                <h2 className="text-4xl md:text-5xl font-bold mb-4 text-white">
+                  Mantenha-se Atualizado
+                </h2>
+                <p className="text-xl text-white mb-10 max-w-2xl mx-auto leading-relaxed">
+                  Cadastre-se em nossa newsletter e receba novidades sobre legislação,
+                  jurisprudência e novos materiais disponíveis.
+                </p>
+
+                <form className="flex flex-col sm:flex-row gap-4 max-w-xl mx-auto bg-white/10 backdrop-blur-md p-2 rounded-2xl border-2 border-white/30">
+                  <input
+                    type="email"
+                    placeholder="seuemail@exemplo.com"
+                    aria-label="Digite seu e-mail para receber atualizações"
+                    required
+                    className="flex-1 px-6 py-4 rounded-xl bg-white text-gray-900 placeholder:text-gray-500 font-medium text-lg focus:outline-none focus:ring-4 focus:ring-white/50"
+                  />
+                  <button
+                    type="submit"
+                    aria-label="Cadastrar na newsletter"
+                    className="bg-gradient-to-r from-yellow-400 to-orange-500 text-gray-900 px-10 py-4 rounded-xl text-lg font-bold hover:from-yellow-500 hover:to-orange-600 transition-all hover:scale-105 shadow-xl whitespace-nowrap"
+                  >
+                    Cadastrar Agora
+                  </button>
+                </form>
+
+                <p className="text-white/80 text-sm mt-4">
+                  ✓ Sem spam · ✓ Cancele quando quiser · ✓ Conteúdo exclusivo
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Botão Admin - Discreto */}
+      <section className="py-8 bg-gray-50">
+        <div className="container mx-auto px-4">
+          <div className="max-w-4xl mx-auto text-center">
+            <Link
+              href="/admin/login"
+              className="inline-flex items-center gap-2 px-4 py-2 text-sm text-gray-500 hover:text-gray-700 transition-colors"
+            >
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+              </svg>
+              Área Administrativa
+            </Link>
+          </div>
+        </div>
+      </section>
+    </main>
   );
 }
