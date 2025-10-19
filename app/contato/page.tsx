@@ -48,7 +48,7 @@ export default function ContatoPage() {
           <div className="text-center mb-12">
             <div className="inline-block">
               <h1 className="text-5xl font-bold mb-3 text-gray-900">Entre em Contato</h1>
-              <div className="h-1.5 w-32 bg-gradient-to-r from-blue-600 via-green-600 to-purple-600 rounded-full mx-auto mb-6"></div>
+              <div className="h-1.5 w-32 bg-gradient-to-r from-blue-500 to-blue-600 rounded-full mx-auto mb-6"></div>
             </div>
             <p className="text-xl text-gray-700 leading-relaxed">
               Tire suas dúvidas, solicite informações sobre cursos ou contrate palestras
@@ -60,12 +60,12 @@ export default function ContatoPage() {
               <div className="bg-white rounded-2xl shadow-lg p-8 border-2 border-gray-200 hover:border-blue-400 hover:shadow-2xl transition-all">
                 <div className="inline-block mb-6">
                   <h2 className="text-2xl font-bold mb-2 text-gray-900">Envie sua mensagem</h2>
-                  <div className="h-1 w-24 bg-gradient-to-r from-blue-600 to-green-600 rounded-full"></div>
+                  <div className="h-1 w-24 bg-gradient-to-r from-blue-500 to-blue-600 rounded-full"></div>
                 </div>
-                
+
                 {isSubmitted ? (
-                  <div className="bg-gradient-to-r from-green-50 to-teal-100 border-2 border-green-500 rounded-2xl p-8 text-center">
-                    <div className="w-20 h-20 bg-gradient-to-br from-green-500 to-green-700 rounded-full flex items-center justify-center mx-auto mb-4 shadow-lg">
+                  <div className="bg-gradient-to-r from-blue-50 to-blue-100 border-2 border-blue-500 rounded-2xl p-8 text-center">
+                    <div className="w-20 h-20 bg-gradient-to-br from-blue-500 to-blue-600 rounded-full flex items-center justify-center mx-auto mb-4 shadow-lg">
                       <CheckCircle className="w-12 h-12 text-white" />
                     </div>
                     <h3 className="text-2xl font-bold text-gray-900 mb-3">Mensagem enviada com sucesso!</h3>
@@ -220,10 +220,10 @@ export default function ContatoPage() {
               </div>
               FIM DA SEÇÃO OCULTA */}
 
-              <div className="bg-white rounded-2xl shadow-lg p-6 border-2 border-gray-200 hover:border-purple-400 hover:shadow-2xl transition-all">
+              <div className="bg-white rounded-2xl shadow-lg p-6 border-2 border-gray-200 hover:border-blue-400 hover:shadow-2xl transition-all">
                 <div className="inline-block mb-4">
                   <h3 className="text-lg font-bold mb-2 text-gray-900">Redes Sociais</h3>
-                  <div className="h-1 w-16 bg-gradient-to-r from-pink-600 to-purple-600 rounded-full"></div>
+                  <div className="h-1 w-16 bg-gradient-to-r from-blue-500 to-blue-600 rounded-full"></div>
                 </div>
                 <div className="space-y-3">
                   <a
@@ -231,9 +231,9 @@ export default function ContatoPage() {
                     target="_blank"
                     rel="noopener noreferrer"
                     aria-label="Visite nosso perfil no Instagram"
-                    className="flex items-center gap-3 bg-gradient-to-r from-pink-50 to-rose-100 p-3 rounded-xl border-l-4 border-pink-500 hover:shadow-md transition-all group"
+                    className="flex items-center gap-3 bg-gradient-to-r from-pink-50 to-purple-50 p-3 rounded-xl border-l-4 border-pink-500 hover:shadow-md transition-all group"
                   >
-                    <div className="w-10 h-10 bg-gradient-to-br from-pink-500 to-rose-600 rounded-lg flex items-center justify-center group-hover:scale-110 transition-transform">
+                    <div className="w-10 h-10 bg-gradient-to-br from-purple-600 via-pink-600 to-orange-500 rounded-lg flex items-center justify-center group-hover:scale-110 transition-transform">
                       <Instagram className="w-5 h-5 text-white" />
                     </div>
                     <span className="text-gray-900 font-bold">@profbarral</span>
@@ -243,9 +243,9 @@ export default function ContatoPage() {
                     target="_blank"
                     rel="noopener noreferrer"
                     aria-label="Visite nosso canal no YouTube"
-                    className="flex items-center gap-3 bg-gradient-to-r from-red-50 to-orange-100 p-3 rounded-xl border-l-4 border-red-500 hover:shadow-md transition-all group"
+                    className="flex items-center gap-3 bg-gradient-to-r from-red-50 to-red-100 p-3 rounded-xl border-l-4 border-red-600 hover:shadow-md transition-all group"
                   >
-                    <div className="w-10 h-10 bg-gradient-to-br from-red-500 to-red-700 rounded-lg flex items-center justify-center group-hover:scale-110 transition-transform">
+                    <div className="w-10 h-10 bg-gradient-to-br from-red-600 to-red-700 rounded-lg flex items-center justify-center group-hover:scale-110 transition-transform">
                       <Youtube className="w-5 h-5 text-white" />
                     </div>
                     <span className="text-gray-900 font-bold">Prof. Daniel Barral</span>
@@ -255,9 +255,9 @@ export default function ContatoPage() {
                     target="_blank"
                     rel="noopener noreferrer"
                     aria-label="Visite nosso perfil no LinkedIn"
-                    className="flex items-center gap-3 bg-gradient-to-r from-blue-50 to-cyan-100 p-3 rounded-xl border-l-4 border-blue-500 hover:shadow-md transition-all group"
+                    className="flex items-center gap-3 bg-gradient-to-r from-blue-50 to-blue-100 p-3 rounded-xl border-l-4 border-blue-700 hover:shadow-md transition-all group"
                   >
-                    <div className="w-10 h-10 bg-gradient-to-br from-blue-600 to-cyan-600 rounded-lg flex items-center justify-center group-hover:scale-110 transition-transform">
+                    <div className="w-10 h-10 bg-gradient-to-br from-blue-700 to-blue-800 rounded-lg flex items-center justify-center group-hover:scale-110 transition-transform">
                       <Linkedin className="w-5 h-5 text-white" />
                     </div>
                     <span className="text-gray-900 font-bold">Daniel Barral</span>
@@ -266,7 +266,7 @@ export default function ContatoPage() {
               </div>
 
               <div className="relative overflow-hidden">
-                <div className="absolute inset-0 bg-gradient-to-br from-green-600 via-teal-600 to-blue-600 opacity-95"></div>
+                <div className="absolute inset-0 bg-gradient-to-br from-blue-800 via-blue-700 to-blue-600 opacity-95"></div>
                 <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9IiNmZmYiIGZpbGwtb3BhY2l0eT0iMC4wNSI+PHBhdGggZD0iTTM2IDE0YzMuMzE0IDAgNiAyLjY4NiA2IDZzLTIuNjg2IDYtNiA2LTYtMi42ODYtNi02IDIuNjg2LTYgNi02ek0yNCAzOGMzLjMxNCAwIDYgMi42ODYgNiA2cy0yLjY4NiA2LTYgNi02LTIuNjg2LTYtNiAyLjY4Ni02IDYtNnoiLz48L2c+PC9nPjwvc3ZnPg==')] opacity-20"></div>
                 <div className="relative p-6 rounded-2xl">
                   <div className="inline-block mb-3">

@@ -55,7 +55,9 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   };
 }
 
-// Mapeamento de cores por ID do curso (1-10)
+// Mapeamento de cores por ID do curso (1-10) - Paleta crescente de azul
+// Hero usa cores mais escuras para contraste com texto branco
+// Cards/borders usam as cores originais mais claras
 const getCourseColor = (courseId: string) => {
   const colorMap: Record<string, {
     gradient: string;
@@ -66,84 +68,84 @@ const getCourseColor = (courseId: string) => {
     hover: string;
   }> = {
     '1': {
-      gradient: 'from-blue-500 to-blue-700',
+      gradient: 'from-blue-500 to-blue-600',  // Escurecido para melhor contraste no hero
+      border: 'border-blue-300',
+      bg: 'bg-blue-50',
+      bgLight: 'bg-blue-100',
+      text: 'text-blue-600',
+      hover: 'hover:bg-blue-600',
+    },
+    '2': {
+      gradient: 'from-blue-600 to-blue-700',  // Escurecido para melhor contraste no hero
+      border: 'border-blue-400',
+      bg: 'bg-blue-50',
+      bgLight: 'bg-blue-100',
+      text: 'text-blue-700',
+      hover: 'hover:bg-blue-700',
+    },
+    '3': {
+      gradient: 'from-blue-600 to-blue-700',
       border: 'border-blue-500',
       bg: 'bg-blue-50',
       bgLight: 'bg-blue-100',
       text: 'text-blue-700',
       hover: 'hover:bg-blue-700',
     },
-    '2': {
-      gradient: 'from-green-500 to-green-700',
-      border: 'border-green-500',
-      bg: 'bg-green-50',
-      bgLight: 'bg-green-100',
-      text: 'text-green-700',
-      hover: 'hover:bg-green-700',
-    },
-    '3': {
-      gradient: 'from-purple-500 to-purple-700',
-      border: 'border-purple-500',
-      bg: 'bg-purple-50',
-      bgLight: 'bg-purple-100',
-      text: 'text-purple-700',
-      hover: 'hover:bg-purple-700',
-    },
     '4': {
-      gradient: 'from-pink-500 to-pink-700',
-      border: 'border-pink-500',
-      bg: 'bg-pink-50',
-      bgLight: 'bg-pink-100',
-      text: 'text-pink-700',
-      hover: 'hover:bg-pink-700',
+      gradient: 'from-blue-600 to-blue-700',
+      border: 'border-blue-600',
+      bg: 'bg-blue-100',
+      bgLight: 'bg-blue-200',
+      text: 'text-blue-800',
+      hover: 'hover:bg-blue-700',
     },
     '5': {
-      gradient: 'from-indigo-500 to-indigo-700',
-      border: 'border-indigo-500',
-      bg: 'bg-indigo-50',
-      bgLight: 'bg-indigo-100',
-      text: 'text-indigo-700',
-      hover: 'hover:bg-indigo-700',
+      gradient: 'from-blue-700 to-blue-800',
+      border: 'border-blue-700',
+      bg: 'bg-blue-100',
+      bgLight: 'bg-blue-200',
+      text: 'text-blue-800',
+      hover: 'hover:bg-blue-800',
     },
     '6': {
-      gradient: 'from-teal-500 to-teal-700',
-      border: 'border-teal-500',
-      bg: 'bg-teal-50',
-      bgLight: 'bg-teal-100',
-      text: 'text-teal-700',
-      hover: 'hover:bg-teal-700',
+      gradient: 'from-blue-800 to-blue-900',
+      border: 'border-blue-800',
+      bg: 'bg-blue-100',
+      bgLight: 'bg-blue-200',
+      text: 'text-blue-900',
+      hover: 'hover:bg-blue-900',
     },
     '7': {
-      gradient: 'from-orange-500 to-orange-700',
-      border: 'border-orange-500',
-      bg: 'bg-orange-50',
-      bgLight: 'bg-orange-100',
-      text: 'text-orange-700',
-      hover: 'hover:bg-orange-700',
+      gradient: 'from-sky-600 to-sky-700',
+      border: 'border-sky-600',
+      bg: 'bg-sky-50',
+      bgLight: 'bg-sky-100',
+      text: 'text-sky-800',
+      hover: 'hover:bg-sky-700',
     },
     '8': {
-      gradient: 'from-cyan-500 to-cyan-700',
-      border: 'border-cyan-500',
-      bg: 'bg-cyan-50',
-      bgLight: 'bg-cyan-100',
-      text: 'text-cyan-700',
-      hover: 'hover:bg-cyan-700',
+      gradient: 'from-sky-700 to-sky-800',
+      border: 'border-sky-700',
+      bg: 'bg-sky-100',
+      bgLight: 'bg-sky-200',
+      text: 'text-sky-900',
+      hover: 'hover:bg-sky-800',
     },
     '9': {
-      gradient: 'from-rose-500 to-rose-700',
-      border: 'border-rose-500',
-      bg: 'bg-rose-50',
-      bgLight: 'bg-rose-100',
-      text: 'text-rose-700',
-      hover: 'hover:bg-rose-700',
+      gradient: 'from-indigo-700 to-indigo-800',
+      border: 'border-indigo-700',
+      bg: 'bg-indigo-50',
+      bgLight: 'bg-indigo-100',
+      text: 'text-indigo-800',
+      hover: 'hover:bg-indigo-800',
     },
     '10': {
-      gradient: 'from-violet-500 to-violet-700',
-      border: 'border-violet-500',
-      bg: 'bg-violet-50',
-      bgLight: 'bg-violet-100',
-      text: 'text-violet-700',
-      hover: 'hover:bg-violet-700',
+      gradient: 'from-indigo-800 to-indigo-900',
+      border: 'border-indigo-800',
+      bg: 'bg-indigo-100',
+      bgLight: 'bg-indigo-200',
+      text: 'text-indigo-900',
+      hover: 'hover:bg-indigo-900',
     },
   };
 
@@ -346,12 +348,12 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ s
                   <h2 className="text-3xl font-bold text-gray-900">Material de Apoio Exclusivo</h2>
                 </div>
 
-                <div className="bg-gradient-to-r from-yellow-50 to-amber-50 border-l-4 border-yellow-500 p-6 mb-6 rounded-xl">
+                <div className="bg-gradient-to-r from-accent-50 to-accent-100 border-l-4 border-accent-500 p-6 mb-6 rounded-xl">
                   <div className="flex items-start gap-3">
-                    <Lightbulb className="w-6 h-6 text-yellow-600 flex-shrink-0 mt-1" />
+                    <Lightbulb className="w-6 h-6 text-accent-600 flex-shrink-0 mt-1" />
                     <div>
-                      <p className="text-yellow-900 font-semibold mb-2">Acesso Exclusivo para Alunos</p>
-                      <p className="text-yellow-800 text-sm leading-relaxed">
+                      <p className="text-accent-900 font-semibold mb-2">Acesso Exclusivo para Alunos</p>
+                      <p className="text-accent-800 text-sm leading-relaxed">
                         O material completo deste curso está disponível apenas para alunos matriculados
                         que receberam o QR Code de acesso durante o curso presencial.
                       </p>
@@ -453,7 +455,7 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ s
                       <p className="text-sm text-white/90">Download de todo material</p>
                     </div>
                     <div className="flex items-start gap-3">
-                      <Star className="w-5 h-5 text-yellow-300 flex-shrink-0 mt-0.5" />
+                      <Star className="w-5 h-5 text-accent-300 flex-shrink-0 mt-0.5" />
                       <p className="text-sm text-white/90 font-semibold">Opção de upgrade vitalício disponível</p>
                     </div>
                   </div>
@@ -505,7 +507,7 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ s
               {/* Card Rápido - Outros Cursos */}
               <div className="bg-gradient-to-br from-gray-100 to-gray-200 rounded-2xl p-6 border-2 border-gray-300">
                 <h3 className="text-lg font-bold text-gray-900 mb-3 flex items-center gap-2">
-                  <Star className="w-5 h-5 text-yellow-600" />
+                  <Star className="w-5 h-5 text-accent-600" />
                   Explore Outros Cursos
                 </h3>
                 <p className="text-sm text-gray-700 mb-4">
@@ -513,7 +515,7 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ s
                 </p>
                 <Link
                   href="/cursos"
-                  className="block text-center bg-gray-800 text-white px-6 py-3 rounded-xl font-semibold hover:bg-gray-900 transition-colors text-sm"
+                  className="block text-center bg-blue-600 text-white px-6 py-3 rounded-xl font-semibold hover:bg-blue-700 transition-colors text-sm"
                 >
                   Ver Todos os Cursos
                 </Link>

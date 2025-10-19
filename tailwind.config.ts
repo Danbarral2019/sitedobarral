@@ -9,7 +9,22 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
+        // Azul profissional e sóbrio como cor principal
         primary: {
+          50: '#f8fafc',
+          100: '#f1f5f9',
+          200: '#e2e8f0',
+          300: '#cbd5e1',
+          400: '#94a3b8',
+          500: '#64748b',
+          600: '#475569',
+          700: '#334155',
+          800: '#1e293b',
+          900: '#0f172a',
+          950: '#020617',
+        },
+        // Azul vibrante para destaques pontuais
+        blue: {
           50: '#eff6ff',
           100: '#dbeafe',
           200: '#bfdbfe',
@@ -20,10 +35,9 @@ const config: Config = {
           700: '#1d4ed8',
           800: '#1e40af',
           900: '#1e3a8a',
-          950: '#172554',
         },
-        secondary: '#ffffff',
-        accent: {
+        // Cinza como cor complementar
+        gray: {
           50: '#f9fafb',
           100: '#f3f4f6',
           200: '#e5e7eb',
@@ -35,6 +49,20 @@ const config: Config = {
           800: '#1f2937',
           900: '#111827',
         },
+        // Amarelo/âmbar suave para CTAs pontuais
+        accent: {
+          50: '#fffbeb',
+          100: '#fef3c7',
+          200: '#fde68a',
+          300: '#fcd34d',
+          400: '#fbbf24',
+          500: '#f59e0b',
+          600: '#d97706',
+          700: '#b45309',
+          800: '#92400e',
+          900: '#78350f',
+        },
+        secondary: '#ffffff',
       },
       fontFamily: {
         sans: ['Inter', 'system-ui', 'sans-serif'],

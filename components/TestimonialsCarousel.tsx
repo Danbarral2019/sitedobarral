@@ -58,11 +58,11 @@ export default function TestimonialsCarousel() {
         {visibleTestimonials.map((testimonial, idx) => (
           <div
             key={`${testimonial.id}-${idx}`}
-            className="bg-white p-8 rounded-2xl border-2 border-gray-200 hover:border-yellow-400 shadow-lg hover:shadow-2xl transition-all animate-fade-in"
+            className="bg-white p-8 rounded-2xl border-2 border-gray-200 hover:border-accent-400 shadow-lg hover:shadow-2xl transition-all animate-fade-in"
           >
             <div className="flex mb-4 gap-1">
               {[...Array(testimonial.rating)].map((_, i) => (
-                <Star key={i} className="w-6 h-6 fill-yellow-400 text-yellow-400" />
+                <Star key={i} className="w-6 h-6 fill-amber-400 text-amber-400" />
               ))}
             </div>
             <p className="text-gray-800 mb-6 italic text-lg leading-relaxed">
@@ -101,7 +101,7 @@ export default function TestimonialsCarousel() {
               aria-label={`Ir para depoimento ${index + 1}`}
               className={`transition-all ${
                 index === currentIndex
-                  ? 'w-8 h-3 bg-gradient-to-r from-yellow-500 to-orange-500 rounded-full'
+                  ? 'w-8 h-3 bg-gradient-to-r from-accent-400 to-accent-500 rounded-full'
                   : 'w-3 h-3 bg-gray-300 hover:bg-gray-400 rounded-full'
               }`}
             />

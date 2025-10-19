@@ -10,7 +10,7 @@ export default function CursosPage() {
           <div className="text-center mb-12">
             <div className="inline-block">
               <h1 className="text-5xl font-bold mb-3 text-gray-900">Cursos Especializados</h1>
-              <div className="h-1.5 w-40 bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 rounded-full mx-auto mb-6"></div>
+              <div className="h-1.5 w-40 bg-gradient-to-r from-blue-500 to-blue-600 rounded-full mx-auto mb-6"></div>
             </div>
             <p className="text-xl text-gray-700 max-w-3xl mx-auto leading-relaxed">
               Explore nossa biblioteca completa de cursos em Direito Administrativo,
@@ -18,7 +18,7 @@ export default function CursosPage() {
             </p>
           </div>
 
-          <div className="bg-gradient-to-r from-blue-50 to-purple-50 border-l-4 border-blue-600 p-8 mb-12 rounded-2xl shadow-md">
+          <div className="bg-gradient-to-r from-blue-50 to-gray-50 border-l-4 border-blue-600 p-8 mb-12 rounded-2xl shadow-md">
             <div className="flex items-start gap-4">
               <div className="w-12 h-12 bg-blue-600 rounded-lg flex items-center justify-center flex-shrink-0">
                 <BookOpen className="w-6 h-6 text-white" />
@@ -37,16 +37,16 @@ export default function CursosPage() {
           <div className="grid gap-8">
             {courses.map((course, index) => {
               const colors = [
-                { gradient: 'from-blue-500 to-blue-700', border: 'border-blue-500', bg: 'bg-blue-50' },
-                { gradient: 'from-green-500 to-green-700', border: 'border-green-500', bg: 'bg-green-50' },
-                { gradient: 'from-purple-500 to-purple-700', border: 'border-purple-500', bg: 'bg-purple-50' },
-                { gradient: 'from-pink-500 to-pink-700', border: 'border-pink-500', bg: 'bg-pink-50' },
-                { gradient: 'from-indigo-500 to-indigo-700', border: 'border-indigo-500', bg: 'bg-indigo-50' },
-                { gradient: 'from-teal-500 to-teal-700', border: 'border-teal-500', bg: 'bg-teal-50' },
-                { gradient: 'from-orange-500 to-orange-700', border: 'border-orange-500', bg: 'bg-orange-50' },
-                { gradient: 'from-cyan-500 to-cyan-700', border: 'border-cyan-500', bg: 'bg-cyan-50' },
-                { gradient: 'from-rose-500 to-rose-700', border: 'border-rose-500', bg: 'bg-rose-50' },
-                { gradient: 'from-violet-500 to-violet-700', border: 'border-violet-500', bg: 'bg-violet-50' },
+                { gradient: 'from-blue-300 to-blue-400', border: 'border-blue-300', bg: 'bg-blue-50' },     // Curso 01 - Azul muito claro
+                { gradient: 'from-blue-400 to-blue-500', border: 'border-blue-400', bg: 'bg-blue-50' },     // Curso 02 - Azul claro
+                { gradient: 'from-blue-500 to-blue-600', border: 'border-blue-500', bg: 'bg-blue-50' },     // Curso 03 - Azul claro-médio
+                { gradient: 'from-blue-600 to-blue-700', border: 'border-blue-600', bg: 'bg-blue-100' },    // Curso 04 - Azul médio
+                { gradient: 'from-blue-700 to-blue-800', border: 'border-blue-700', bg: 'bg-blue-100' },    // Curso 05 - Azul médio-escuro
+                { gradient: 'from-blue-800 to-blue-900', border: 'border-blue-800', bg: 'bg-blue-100' },    // Curso 06 - Azul escuro
+                { gradient: 'from-sky-600 to-sky-700', border: 'border-sky-600', bg: 'bg-sky-50' },         // Curso 07 - Sky médio
+                { gradient: 'from-sky-700 to-sky-800', border: 'border-sky-700', bg: 'bg-sky-100' },        // Curso 08 - Sky escuro
+                { gradient: 'from-indigo-700 to-indigo-800', border: 'border-indigo-700', bg: 'bg-indigo-50' }, // Curso 09 - Indigo escuro
+                { gradient: 'from-indigo-800 to-indigo-900', border: 'border-indigo-800', bg: 'bg-indigo-100' }, // Curso 10 - Indigo muito escuro
               ];
               const color = colors[index % colors.length];
 
@@ -76,15 +76,15 @@ export default function CursosPage() {
 
                       <div className="grid md:grid-cols-3 gap-4 mb-6">
                         <div className={`flex items-center gap-2 text-sm font-medium ${color.bg} px-3 py-2 rounded-lg`}>
-                          <FileText className="w-5 h-5 text-primary-600" />
+                          <FileText className="w-5 h-5 text-blue-600" />
                           <span className="text-gray-900">{course.bibliography.length} Referências</span>
                         </div>
                         <div className={`flex items-center gap-2 text-sm font-medium ${color.bg} px-3 py-2 rounded-lg`}>
-                          <Clock className="w-5 h-5 text-green-600" />
+                          <Clock className="w-5 h-5 text-blue-600" />
                           <span className="text-gray-900">Material Atualizado</span>
                         </div>
                         <div className={`flex items-center gap-2 text-sm font-medium ${color.bg} px-3 py-2 rounded-lg`}>
-                          <Users className="w-5 h-5 text-purple-600" />
+                          <Users className="w-5 h-5 text-gray-600" />
                           <span className="text-gray-900">Acesso Exclusivo</span>
                         </div>
                       </div>
@@ -105,7 +105,7 @@ export default function CursosPage() {
           </div>
 
           <div className="mt-12 relative overflow-hidden">
-            <div className="absolute inset-0 bg-gradient-to-br from-blue-600 via-purple-600 to-pink-600 opacity-90"></div>
+            <div className="absolute inset-0 bg-gradient-to-br from-blue-800 via-blue-700 to-blue-600 opacity-95"></div>
             <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9IiNmZmYiIGZpbGwtb3BhY2l0eT0iMC4wNSI+PHBhdGggZD0iTTM2IDE0YzMuMzE0IDAgNiAyLjY4NiA2IDZzLTIuNjg2IDYtNiA2LTYtMi42ODYtNi02IDIuNjg2LTYgNi02ek0yNCAzOGMzLjMxNCAwIDYgMi42ODYgNiA2cy0yLjY4NiA2LTYgNi02LTIuNjg2LTYtNiAyLjY4Ni02IDYtNnoiLz48L2c+PC9nPjwvc3ZnPg==')] opacity-20"></div>
             <div className="relative p-10 md:p-12 text-center rounded-2xl">
               <h2 className="text-4xl md:text-5xl font-bold mb-4 text-white">
@@ -117,7 +117,7 @@ export default function CursosPage() {
               </p>
               <Link
                 href="/contato"
-                className="inline-flex items-center gap-3 bg-white text-blue-700 px-12 py-5 rounded-xl text-xl font-bold hover:bg-gray-50 transition-all hover:scale-105 shadow-2xl"
+                className="inline-flex items-center gap-3 bg-white text-gray-900 px-12 py-5 rounded-xl text-xl font-bold hover:bg-gray-50 transition-all hover:scale-105 shadow-2xl"
                 aria-label="Entre em contato conosco para saber mais sobre os cursos"
               >
                 Fale Conosco

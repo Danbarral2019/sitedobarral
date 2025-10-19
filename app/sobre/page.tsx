@@ -10,7 +10,7 @@ export default function SobrePage() {
           <div className="text-center mb-12">
             <div className="inline-block">
               <h1 className="text-5xl font-bold mb-3 text-gray-900">Prof. Daniel Barral</h1>
-              <div className="h-1.5 w-48 bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 rounded-full mx-auto mb-6"></div>
+              <div className="h-1.5 w-48 bg-gradient-to-r from-blue-500 to-blue-600 rounded-full mx-auto mb-6"></div>
             </div>
             <p className="text-xl text-gray-700 leading-relaxed">
               Mestre em Direito Público e Professor Especializado em Licitações e Contratos Administrativos
@@ -29,30 +29,30 @@ export default function SobrePage() {
                     className="object-cover"
                   />
                 </div>
-                <div className="absolute -bottom-3 -right-3 w-16 h-16 bg-gradient-to-br from-blue-500 to-blue-700 rounded-full flex items-center justify-center shadow-lg">
+                <div className="absolute -bottom-3 -right-3 w-16 h-16 bg-gradient-to-br from-blue-500 to-blue-600 rounded-full flex items-center justify-center shadow-lg">
                   <Scale className="w-8 h-8 text-white" />
                 </div>
               </div>
               <div className="flex-1">
                 <div className="inline-block mb-4">
                   <h2 className="text-2xl font-bold mb-2 text-gray-900">Perfil Profissional</h2>
-                  <div className="h-1 w-24 bg-gradient-to-r from-blue-600 to-purple-600 rounded-full"></div>
+                  <div className="h-1 w-24 bg-gradient-to-r from-blue-500 to-blue-600 rounded-full"></div>
                 </div>
                 <div className="space-y-4">
                   <div className="flex items-center gap-3 bg-gradient-to-r from-blue-50 to-blue-100 p-3 rounded-xl border-l-4 border-blue-500">
-                    <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-blue-700 rounded-lg flex items-center justify-center flex-shrink-0">
+                    <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-blue-600 rounded-lg flex items-center justify-center flex-shrink-0">
                       <GraduationCap className="text-white" size={20} />
                     </div>
                     <span className="text-gray-900 font-semibold">Mestre em Direito Público</span>
                   </div>
-                  <div className="flex items-center gap-3 bg-gradient-to-r from-green-50 to-green-100 p-3 rounded-xl border-l-4 border-green-500">
-                    <div className="w-10 h-10 bg-gradient-to-br from-green-500 to-green-700 rounded-lg flex items-center justify-center flex-shrink-0">
-                      <BookOpen className="text-white" size={20} />
+                  <div className="flex items-center gap-3 bg-gradient-to-r from-blue-50 to-blue-100 p-3 rounded-xl border-l-4 border-blue-500">
+                    <div className="w-10 h-10 bg-white border-4 border-blue-500 rounded-lg flex items-center justify-center flex-shrink-0">
+                      <BookOpen className="text-blue-600" size={20} />
                     </div>
                     <span className="text-gray-900 font-semibold">Professor de Licitações e Contratos</span>
                   </div>
-                  <div className="flex items-center gap-3 bg-gradient-to-r from-purple-50 to-purple-100 p-3 rounded-xl border-l-4 border-purple-500">
-                    <div className="w-10 h-10 bg-gradient-to-br from-purple-500 to-purple-700 rounded-lg flex items-center justify-center flex-shrink-0">
+                  <div className="flex items-center gap-3 bg-gradient-to-r from-gray-50 to-gray-100 p-3 rounded-xl border-l-4 border-gray-600">
+                    <div className="w-10 h-10 bg-gradient-to-br from-gray-600 to-gray-700 rounded-lg flex items-center justify-center flex-shrink-0">
                       <Briefcase className="text-white" size={20} />
                     </div>
                     <span className="text-gray-900 font-semibold">Palestrante Especializado</span>
@@ -64,7 +64,7 @@ export default function SobrePage() {
 
           {/* Mission Section */}
           <div className="relative overflow-hidden mb-8">
-            <div className="absolute inset-0 bg-gradient-to-br from-blue-600 via-purple-600 to-pink-600 opacity-95"></div>
+            <div className="absolute inset-0 bg-gradient-to-br from-blue-800 via-blue-700 to-blue-600 opacity-95"></div>
             <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9IiNmZmYiIGZpbGwtb3BhY2l0eT0iMC4wNSI+PHBhdGggZD0iTTM2IDE0YzMuMzE0IDAgNiAyLjY4NiA2IDZzLTIuNjg2IDYtNiA2LTYtMi42ODYtNi02IDIuNjg2LTYgNi02ek0yNCAzOGMzLjMxNCAwIDYgMi42ODYgNiA2cy0yLjY4NiA2LTYgNi02LTIuNjg2LTYtNiAyLjY4Ni02IDYtNnoiLz48L2c+PC9nPjwvc3ZnPg==')] opacity-20"></div>
             <div className="relative p-10 md:p-12 text-center rounded-2xl">
               <div className="inline-block mb-4">
@@ -102,12 +102,12 @@ export default function SobrePage() {
           <div className="bg-white rounded-2xl shadow-lg p-8 mb-8 border-2 border-gray-200 hover:shadow-2xl transition-all">
             <div className="inline-block mb-6">
               <h2 className="text-2xl font-bold mb-2 text-gray-900">Áreas de Especialização</h2>
-              <div className="h-1 w-32 bg-gradient-to-r from-green-600 to-teal-600 rounded-full"></div>
+              <div className="h-1 w-32 bg-gradient-to-r from-blue-500 to-blue-600 rounded-full"></div>
             </div>
             <div className="grid md:grid-cols-2 gap-6">
               <div className="space-y-4">
                 <div className="flex items-start gap-4 bg-gradient-to-r from-blue-50 to-blue-100 p-4 rounded-xl border-l-4 border-blue-500 hover:shadow-md transition-all group">
-                  <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-blue-700 rounded-lg flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform">
+                  <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-blue-600 rounded-lg flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform">
                     <Scale className="text-white" size={24} />
                   </div>
                   <div>
@@ -115,9 +115,9 @@ export default function SobrePage() {
                     <p className="text-gray-800 text-sm leading-relaxed">Atuação especializada em todos os aspectos do Direito Administrativo, com foco em aplicação prática</p>
                   </div>
                 </div>
-                <div className="flex items-start gap-4 bg-gradient-to-r from-green-50 to-green-100 p-4 rounded-xl border-l-4 border-green-500 hover:shadow-md transition-all group">
-                  <div className="w-12 h-12 bg-gradient-to-br from-green-500 to-green-700 rounded-lg flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform">
-                    <BookOpen className="text-white" size={24} />
+                <div className="flex items-start gap-4 bg-gradient-to-r from-blue-50 to-blue-100 p-4 rounded-xl border-l-4 border-blue-500 hover:shadow-md transition-all group">
+                  <div className="w-12 h-12 bg-white border-4 border-blue-500 rounded-lg flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform">
+                    <BookOpen className="text-blue-600" size={24} />
                   </div>
                   <div>
                     <h3 className="font-bold text-gray-900 mb-1">Licitações e Contratos</h3>
@@ -126,8 +126,8 @@ export default function SobrePage() {
                 </div>
               </div>
               <div className="space-y-4">
-                <div className="flex items-start gap-4 bg-gradient-to-r from-purple-50 to-purple-100 p-4 rounded-xl border-l-4 border-purple-500 hover:shadow-md transition-all group">
-                  <div className="w-12 h-12 bg-gradient-to-br from-purple-500 to-purple-700 rounded-lg flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform">
+                <div className="flex items-start gap-4 bg-gradient-to-r from-gray-50 to-gray-100 p-4 rounded-xl border-l-4 border-gray-600 hover:shadow-md transition-all group">
+                  <div className="w-12 h-12 bg-gradient-to-br from-gray-600 to-gray-700 rounded-lg flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform">
                     <Briefcase className="text-white" size={24} />
                   </div>
                   <div>
@@ -135,8 +135,8 @@ export default function SobrePage() {
                     <p className="text-gray-800 text-sm leading-relaxed">Conhecimento aprofundado em processos administrativos e procedimentos sancionadores</p>
                   </div>
                 </div>
-                <div className="flex items-start gap-4 bg-gradient-to-r from-orange-50 to-orange-100 p-4 rounded-xl border-l-4 border-orange-500 hover:shadow-md transition-all group">
-                  <div className="w-12 h-12 bg-gradient-to-br from-orange-500 to-orange-700 rounded-lg flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform">
+                <div className="flex items-start gap-4 bg-gradient-to-r from-blue-100 to-blue-200 p-4 rounded-xl border-l-4 border-blue-600 hover:shadow-md transition-all group">
+                  <div className="w-12 h-12 bg-gradient-to-br from-blue-600 to-blue-700 rounded-lg flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform">
                     <Award className="text-white" size={24} />
                   </div>
                   <div>
@@ -152,13 +152,13 @@ export default function SobrePage() {
           <div className="bg-white rounded-2xl shadow-lg p-8 mb-8 border-2 border-gray-200 hover:shadow-2xl transition-all">
             <div className="inline-block mb-6">
               <h2 className="text-2xl font-bold mb-2 text-gray-900">Formação e Experiência Profissional</h2>
-              <div className="h-1 w-40 bg-gradient-to-r from-pink-600 to-purple-600 rounded-full"></div>
+              <div className="h-1 w-40 bg-gradient-to-r from-blue-500 to-blue-600 rounded-full"></div>
             </div>
 
             <div className="space-y-8">
-              <div className="bg-gradient-to-r from-blue-50 to-indigo-50 p-6 rounded-xl border-l-4 border-blue-500">
+              <div className="bg-gradient-to-r from-blue-50 to-blue-100 p-6 rounded-xl border-l-4 border-blue-500">
                 <div className="flex items-center gap-3 mb-4">
-                  <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-blue-700 rounded-lg flex items-center justify-center">
+                  <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-blue-600 rounded-lg flex items-center justify-center">
                     <GraduationCap className="text-white" size={20} />
                   </div>
                   <h3 className="text-xl font-bold text-gray-900">Formação Acadêmica</h3>
@@ -187,10 +187,10 @@ export default function SobrePage() {
                 </div>
               </div>
 
-              <div className="bg-gradient-to-r from-green-50 to-teal-50 p-6 rounded-xl border-l-4 border-green-500">
+              <div className="bg-gradient-to-r from-blue-50 to-blue-100 p-6 rounded-xl border-l-4 border-blue-500">
                 <div className="flex items-center gap-3 mb-4">
-                  <div className="w-10 h-10 bg-gradient-to-br from-green-500 to-green-700 rounded-lg flex items-center justify-center">
-                    <Briefcase className="text-white" size={20} />
+                  <div className="w-10 h-10 bg-white border-4 border-blue-500 rounded-lg flex items-center justify-center">
+                    <Briefcase className="text-blue-600" size={20} />
                   </div>
                   <h3 className="text-xl font-bold text-gray-900">Experiência como Procurador Federal</h3>
                 </div>
@@ -204,9 +204,9 @@ export default function SobrePage() {
                 </div>
               </div>
 
-              <div className="bg-gradient-to-r from-purple-50 to-pink-50 p-6 rounded-xl border-l-4 border-purple-500">
+              <div className="bg-gradient-to-r from-gray-50 to-gray-100 p-6 rounded-xl border-l-4 border-gray-600">
                 <div className="flex items-center gap-3 mb-4">
-                  <div className="w-10 h-10 bg-gradient-to-br from-purple-500 to-purple-700 rounded-lg flex items-center justify-center">
+                  <div className="w-10 h-10 bg-gradient-to-br from-gray-600 to-gray-700 rounded-lg flex items-center justify-center">
                     <BookOpen className="text-white" size={20} />
                   </div>
                   <h3 className="text-xl font-bold text-gray-900">Atividades Acadêmicas e Docência</h3>
@@ -224,24 +224,24 @@ export default function SobrePage() {
                 </div>
               </div>
 
-              <div className="bg-gradient-to-r from-orange-50 to-amber-50 p-6 rounded-xl border-l-4 border-orange-500">
+              <div className="bg-gradient-to-r from-blue-100 to-blue-200 p-6 rounded-xl border-l-4 border-blue-600">
                 <div className="flex items-center gap-3 mb-4">
-                  <div className="w-10 h-10 bg-gradient-to-br from-orange-500 to-orange-700 rounded-lg flex items-center justify-center">
+                  <div className="w-10 h-10 bg-gradient-to-br from-blue-600 to-blue-700 rounded-lg flex items-center justify-center">
                     <Users className="text-white" size={20} />
                   </div>
                   <h3 className="text-xl font-bold text-gray-900">Participação Institucional</h3>
                 </div>
                 <div className="grid md:grid-cols-2 gap-4 mb-4">
-                  <div className="bg-white p-5 rounded-xl border-2 border-orange-200 hover:border-orange-400 transition-all hover:shadow-md">
+                  <div className="bg-white p-5 rounded-xl border-2 border-blue-200 hover:border-blue-400 transition-all hover:shadow-md">
                     <div className="flex items-center gap-2 mb-2">
-                      <div className="w-2 h-2 bg-orange-600 rounded-full"></div>
+                      <div className="w-2 h-2 bg-blue-600 rounded-full"></div>
                       <h4 className="font-bold text-gray-900">INCP</h4>
                     </div>
                     <p className="text-sm text-gray-800 leading-relaxed">Membro do Instituto Nacional de Concurso Público</p>
                   </div>
-                  <div className="bg-white p-5 rounded-xl border-2 border-orange-200 hover:border-orange-400 transition-all hover:shadow-md">
+                  <div className="bg-white p-5 rounded-xl border-2 border-blue-200 hover:border-blue-400 transition-all hover:shadow-md">
                     <div className="flex items-center gap-2 mb-2">
-                      <div className="w-2 h-2 bg-orange-600 rounded-full"></div>
+                      <div className="w-2 h-2 bg-blue-600 rounded-full"></div>
                       <h4 className="font-bold text-gray-900">IDASAN</h4>
                     </div>
                     <p className="text-sm text-gray-800 leading-relaxed">Membro do Instituto de Direito Administrativo Sancionador Brasileiro</p>
@@ -258,12 +258,12 @@ export default function SobrePage() {
           <div className="bg-white rounded-2xl shadow-lg p-8 mb-8 border-2 border-gray-200">
             <div className="inline-block mb-6">
               <h2 className="text-2xl font-bold mb-2 text-gray-900">Público-Alvo</h2>
-              <div className="h-1 w-24 bg-gradient-to-r from-teal-600 to-cyan-600 rounded-full"></div>
+              <div className="h-1 w-24 bg-gradient-to-r from-blue-500 to-blue-600 rounded-full"></div>
             </div>
             <div className="grid md:grid-cols-2 gap-6">
-              <div className="bg-gradient-to-br from-blue-50 to-indigo-50 p-6 rounded-xl border-2 border-blue-200 hover:border-blue-400 hover:shadow-lg transition-all">
+              <div className="bg-gradient-to-br from-blue-50 to-blue-100 p-6 rounded-xl border-2 border-blue-200 hover:border-blue-400 hover:shadow-lg transition-all">
                 <div className="flex items-center gap-3 mb-4">
-                  <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-blue-700 rounded-lg flex items-center justify-center">
+                  <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-blue-600 rounded-lg flex items-center justify-center">
                     <Users className="text-white" size={20} />
                   </div>
                   <h3 className="text-lg font-bold text-gray-900">Perfil Principal</h3>
@@ -289,28 +289,28 @@ export default function SobrePage() {
                   </li>
                 </ul>
               </div>
-              <div className="bg-gradient-to-br from-purple-50 to-pink-50 p-6 rounded-xl border-2 border-purple-200 hover:border-purple-400 hover:shadow-lg transition-all">
+              <div className="bg-gradient-to-br from-blue-50 to-blue-100 p-6 rounded-xl border-2 border-blue-200 hover:border-blue-400 hover:shadow-lg transition-all">
                 <div className="flex items-center gap-3 mb-4">
-                  <div className="w-10 h-10 bg-gradient-to-br from-purple-500 to-purple-700 rounded-lg flex items-center justify-center">
-                    <Scale className="text-white" size={20} />
+                  <div className="w-10 h-10 bg-white border-4 border-blue-500 rounded-lg flex items-center justify-center">
+                    <Scale className="text-blue-600" size={20} />
                   </div>
                   <h3 className="text-lg font-bold text-gray-900">Perfil Secundário</h3>
                 </div>
                 <ul className="space-y-3">
                   <li className="flex items-start gap-3">
-                    <div className="w-6 h-6 bg-purple-600 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
+                    <div className="w-6 h-6 bg-blue-600 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
                       <CheckCircle className="w-4 h-4 text-white" />
                     </div>
                     <span className="text-gray-900 font-medium leading-relaxed">Advogados especializados em Direito Público</span>
                   </li>
                   <li className="flex items-start gap-3">
-                    <div className="w-6 h-6 bg-purple-600 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
+                    <div className="w-6 h-6 bg-blue-600 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
                       <CheckCircle className="w-4 h-4 text-white" />
                     </div>
                     <span className="text-gray-900 font-medium leading-relaxed">Concurseiros de nível superior</span>
                   </li>
                   <li className="flex items-start gap-3">
-                    <div className="w-6 h-6 bg-purple-600 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
+                    <div className="w-6 h-6 bg-blue-600 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
                       <CheckCircle className="w-4 h-4 text-white" />
                     </div>
                     <span className="text-gray-900 font-medium leading-relaxed">Procuradores e operadores do direito</span>
@@ -322,7 +322,7 @@ export default function SobrePage() {
 
           {/* Call to Action */}
           <div className="relative overflow-hidden">
-            <div className="absolute inset-0 bg-gradient-to-br from-green-600 via-teal-600 to-blue-600 opacity-95"></div>
+            <div className="absolute inset-0 bg-gradient-to-br from-blue-800 via-blue-700 to-blue-600 opacity-95"></div>
             <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9IiNmZmYiIGZpbGwtb3BhY2l0eT0iMC4wNSI+PHBhdGggZD0iTTM2IDE0YzMuMzE0IDAgNiAyLjY4NiA2IDZzLTIuNjg2IDYtNiA2LTYtMi42ODYtNi02IDIuNjg2LTYgNi02ek0yNCAzOGMzLjMxNCAwIDYgMi42ODYgNiA2cy0yLjY4NiA2LTYgNi02LTIuNjg2LTYtNiAyLjY4Ni02IDYtNnoiLz48L2c+PC9nPjwvc3ZnPg==')] opacity-20"></div>
             <div className="relative p-10 md:p-12 text-center rounded-2xl">
               <div className="inline-block mb-4">
@@ -340,7 +340,7 @@ export default function SobrePage() {
               <div className="flex flex-col sm:flex-row gap-4 justify-center">
                 <Link
                   href="/cursos"
-                  className="inline-flex items-center gap-3 bg-white text-teal-700 px-10 py-5 rounded-xl text-lg font-bold hover:bg-gray-50 transition-all hover:scale-105 shadow-2xl"
+                  className="inline-flex items-center gap-3 bg-white text-gray-900 px-10 py-5 rounded-xl text-lg font-bold hover:bg-gray-50 transition-all hover:scale-105 shadow-2xl"
                   aria-label="Ver todos os cursos disponíveis"
                 >
                   <BookOpen className="w-6 h-6" />
@@ -349,7 +349,7 @@ export default function SobrePage() {
                 </Link>
                 <Link
                   href="/contato"
-                  className="inline-flex items-center gap-3 bg-gradient-to-r from-green-400 to-teal-500 text-gray-900 px-10 py-5 rounded-xl text-lg font-bold hover:from-green-500 hover:to-teal-600 transition-all hover:scale-105 shadow-2xl"
+                  className="inline-flex items-center gap-3 bg-accent-400 text-gray-900 px-10 py-5 rounded-xl text-lg font-bold hover:bg-accent-500 transition-all hover:scale-105 shadow-2xl"
                   aria-label="Entre em contato conosco"
                 >
                   Entre em Contato

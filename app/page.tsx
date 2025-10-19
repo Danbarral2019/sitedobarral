@@ -8,7 +8,7 @@ export default function Home() {
 
   return (
     <main>
-      <section className="text-white py-20" style={{background: 'linear-gradient(to bottom, #1e40af 0%, #3b82f6 100%)'}}>
+      <section className="text-white py-20" style={{background: 'linear-gradient(to bottom, #1e293b 0%, #334155 100%)'}}>
         <div className="container mx-auto px-4">
           <div className="max-w-4xl mx-auto text-center">
             <h1 className="text-4xl md:text-5xl font-bold mb-6">
@@ -17,25 +17,24 @@ export default function Home() {
             <p className="text-xl md:text-2xl mb-4">
               Professor | Mestre em Direito Público
             </p>
-            <p className="text-lg mb-8 text-white">
+            <p className="text-lg mb-8 text-blue-100">
               Especialista em Licitações e Contratos Administrativos
             </p>
-            <p className="text-lg mb-10 max-w-2xl mx-auto">
-              Repositório especializado de materiais jurídicos em Direito Administrativo, 
+            <p className="text-lg mb-10 max-w-2xl mx-auto text-gray-100">
+              Repositório especializado de materiais jurídicos em Direito Administrativo,
               com foco em fortalecer seu conhecimento e aprimorar suas atividades funcionais.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Link
                 href="/cursos"
-                className="px-8 py-3 rounded-lg font-semibold transition-colors inline-flex items-center justify-center gap-2"
-                style={{backgroundColor: '#ffffff', color: '#2563eb'}}
+                className="bg-white text-gray-900 px-8 py-3 rounded-lg font-semibold hover:bg-gray-50 transition-colors inline-flex items-center justify-center gap-2"
               >
-                <BookOpen className="w-5 h-5" style={{color: '#2563eb'}} />
+                <BookOpen className="w-5 h-5" />
                 Explorar Cursos
               </Link>
               <Link
                 href="/validar-acesso"
-                className="bg-primary-700 text-white px-8 py-3 rounded-lg font-semibold hover:bg-primary-800 transition-colors inline-flex items-center justify-center gap-2 border border-primary-500"
+                className="bg-blue-600 text-white px-8 py-3 rounded-lg font-semibold hover:bg-blue-700 transition-colors inline-flex items-center justify-center gap-2 border border-blue-500"
               >
                 Área do Aluno
                 <ArrowRight className="w-5 h-5 text-white" />
@@ -50,10 +49,10 @@ export default function Home() {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             <div className="text-center group">
               <div className="relative mb-6">
-                <div className="w-24 h-24 bg-gradient-to-br from-blue-500 to-blue-700 rounded-2xl flex items-center justify-center mx-auto shadow-lg transform group-hover:scale-110 transition-transform duration-300">
+                <div className="w-24 h-24 bg-gradient-to-br from-blue-500 to-blue-600 rounded-2xl flex items-center justify-center mx-auto shadow-lg transform group-hover:scale-110 transition-transform duration-300">
                   <Award className="w-12 h-12 text-white" />
                 </div>
-                <div className="absolute -bottom-2 left-1/2 transform -translate-x-1/2 w-16 h-1 bg-blue-600 rounded-full"></div>
+                <div className="absolute -bottom-2 left-1/2 transform -translate-x-1/2 w-16 h-1 bg-blue-500 rounded-full"></div>
               </div>
               <h3 className="text-xl font-bold mb-3 text-gray-900">Experiência Comprovada</h3>
               <p className="text-gray-700 leading-relaxed">
@@ -62,10 +61,10 @@ export default function Home() {
             </div>
             <div className="text-center group">
               <div className="relative mb-6">
-                <div className="w-24 h-24 bg-gradient-to-br from-green-500 to-green-700 rounded-2xl flex items-center justify-center mx-auto shadow-lg transform group-hover:scale-110 transition-transform duration-300">
-                  <Users className="w-12 h-12 text-white" />
+                <div className="w-24 h-24 bg-white border-4 border-blue-500 rounded-2xl flex items-center justify-center mx-auto shadow-lg transform group-hover:scale-110 transition-transform duration-300">
+                  <Users className="w-12 h-12 text-blue-600" />
                 </div>
-                <div className="absolute -bottom-2 left-1/2 transform -translate-x-1/2 w-16 h-1 bg-green-600 rounded-full"></div>
+                <div className="absolute -bottom-2 left-1/2 transform -translate-x-1/2 w-16 h-1 bg-blue-500 rounded-full"></div>
               </div>
               <h3 className="text-xl font-bold mb-3 text-gray-900">Conteúdo Atualizado</h3>
               <p className="text-gray-700 leading-relaxed">
@@ -74,10 +73,10 @@ export default function Home() {
             </div>
             <div className="text-center group">
               <div className="relative mb-6">
-                <div className="w-24 h-24 bg-gradient-to-br from-purple-500 to-purple-700 rounded-2xl flex items-center justify-center mx-auto shadow-lg transform group-hover:scale-110 transition-transform duration-300">
+                <div className="w-24 h-24 bg-gradient-to-br from-gray-600 to-gray-700 rounded-2xl flex items-center justify-center mx-auto shadow-lg transform group-hover:scale-110 transition-transform duration-300">
                   <FileText className="w-12 h-12 text-white" />
                 </div>
-                <div className="absolute -bottom-2 left-1/2 transform -translate-x-1/2 w-16 h-1 bg-purple-600 rounded-full"></div>
+                <div className="absolute -bottom-2 left-1/2 transform -translate-x-1/2 w-16 h-1 bg-gray-600 rounded-full"></div>
               </div>
               <h3 className="text-xl font-bold mb-3 text-gray-900">Material Exclusivo</h3>
               <p className="text-gray-700 leading-relaxed">
@@ -93,23 +92,23 @@ export default function Home() {
           <div className="text-center mb-12">
             <div className="inline-block">
               <h2 className="text-4xl font-bold text-gray-900 mb-2">Cursos em Destaque</h2>
-              <div className="h-1 w-32 bg-gradient-to-r from-blue-600 to-purple-600 rounded-full mx-auto"></div>
+              <div className="h-1 w-32 bg-gradient-to-r from-blue-500 to-blue-600 rounded-full mx-auto"></div>
             </div>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             {featuredCourses.map((course, index) => (
               <div key={course.id} className="bg-white border-2 border-gray-200 rounded-xl overflow-hidden hover:border-blue-500 hover:shadow-2xl transition-all duration-300 group">
-                <div className="h-2 bg-gradient-to-r from-blue-500 to-purple-500"></div>
+                <div className="h-2 bg-gradient-to-r from-blue-500 to-blue-600"></div>
                 <div className="p-6">
                   <div className="flex items-center gap-2 mb-4">
-                    <div className="w-10 h-10 bg-gradient-to-br from-blue-100 to-purple-100 rounded-lg flex items-center justify-center">
-                      <BookOpen className="w-5 h-5 text-blue-700" />
+                    <div className="w-10 h-10 bg-blue-50 rounded-lg flex items-center justify-center">
+                      <BookOpen className="w-5 h-5 text-blue-600" />
                     </div>
                     <span className="text-sm font-semibold text-blue-700 bg-blue-50 px-3 py-1 rounded-full">
                       Curso {String(index + 1).padStart(2, '0')}
                     </span>
                   </div>
-                  <h3 className="text-xl font-bold mb-3 text-gray-900 group-hover:text-blue-700 transition-colors">{course.title}</h3>
+                  <h3 className="text-xl font-bold mb-3 text-gray-900 group-hover:text-blue-600 transition-colors">{course.title}</h3>
                   <p className="text-gray-700 mb-6 leading-relaxed">{course.shortDescription}</p>
                   <Link
                     href={`/cursos/${course.slug}`}
@@ -125,7 +124,7 @@ export default function Home() {
           <div className="text-center mt-12">
             <Link
               href="/cursos"
-              className="bg-gradient-to-r from-blue-600 to-blue-700 text-white px-10 py-4 rounded-xl font-bold hover:from-blue-700 hover:to-blue-800 transition-all inline-flex items-center gap-2 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
+              className="bg-blue-600 text-white px-10 py-4 rounded-xl font-bold hover:bg-blue-700 transition-all inline-flex items-center gap-2 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
             >
               Ver todos os cursos
               <ArrowRight className="w-5 h-5" />
@@ -139,12 +138,12 @@ export default function Home() {
           <div className="max-w-5xl mx-auto">
             <div className="text-center mb-12">
               <h2 className="text-4xl font-bold text-gray-900 mb-2">Como Funciona</h2>
-              <div className="h-1 w-24 bg-gradient-to-r from-blue-600 to-green-600 rounded-full mx-auto"></div>
+              <div className="h-1 w-24 bg-gradient-to-r from-blue-500 to-blue-600 rounded-full mx-auto"></div>
             </div>
             <div className="space-y-8">
               <div className="flex gap-6 items-start bg-white p-6 rounded-2xl border-l-4 border-blue-500 shadow-md hover:shadow-xl transition-shadow">
                 <div className="flex-shrink-0">
-                  <div className="w-14 h-14 bg-gradient-to-br from-blue-500 to-blue-700 text-white rounded-xl flex items-center justify-center font-bold text-2xl shadow-lg">
+                  <div className="w-14 h-14 bg-blue-600 text-white rounded-xl flex items-center justify-center font-bold text-2xl shadow-lg">
                     1
                   </div>
                 </div>
@@ -155,9 +154,9 @@ export default function Home() {
                   </p>
                 </div>
               </div>
-              <div className="flex gap-6 items-start bg-white p-6 rounded-2xl border-l-4 border-green-500 shadow-md hover:shadow-xl transition-shadow">
+              <div className="flex gap-6 items-start bg-white p-6 rounded-2xl border-l-4 border-blue-600 shadow-md hover:shadow-xl transition-shadow">
                 <div className="flex-shrink-0">
-                  <div className="w-14 h-14 bg-gradient-to-br from-green-500 to-green-700 text-white rounded-xl flex items-center justify-center font-bold text-2xl shadow-lg">
+                  <div className="w-14 h-14 bg-white border-4 border-blue-500 text-blue-600 rounded-xl flex items-center justify-center font-bold text-2xl shadow-lg">
                     2
                   </div>
                 </div>
@@ -168,9 +167,9 @@ export default function Home() {
                   </p>
                 </div>
               </div>
-              <div className="flex gap-6 items-start bg-white p-6 rounded-2xl border-l-4 border-purple-500 shadow-md hover:shadow-xl transition-shadow">
+              <div className="flex gap-6 items-start bg-white p-6 rounded-2xl border-l-4 border-gray-600 shadow-md hover:shadow-xl transition-shadow">
                 <div className="flex-shrink-0">
-                  <div className="w-14 h-14 bg-gradient-to-br from-purple-500 to-purple-700 text-white rounded-xl flex items-center justify-center font-bold text-2xl shadow-lg">
+                  <div className="w-14 h-14 bg-gray-600 text-white rounded-xl flex items-center justify-center font-bold text-2xl shadow-lg">
                     3
                   </div>
                 </div>
@@ -191,7 +190,7 @@ export default function Home() {
           <div className="max-w-4xl mx-auto">
             <div className="text-center mb-12">
               <h2 className="text-4xl font-bold text-gray-900 mb-2">Depoimentos de Alunos</h2>
-              <div className="h-1 w-24 bg-gradient-to-r from-yellow-500 to-orange-500 rounded-full mx-auto"></div>
+              <div className="h-1 w-24 bg-gradient-to-r from-accent-400 to-accent-500 rounded-full mx-auto"></div>
             </div>
 
             {/* Carrossel de Depoimentos */}
@@ -204,9 +203,9 @@ export default function Home() {
               </p>
               <Link
                 href="/contato?motivo=depoimento"
-                className="inline-flex items-center gap-2 bg-gradient-to-r from-yellow-500 to-orange-500 text-white px-8 py-4 rounded-xl font-bold hover:from-yellow-600 hover:to-orange-600 transition-all shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
+                className="inline-flex items-center gap-2 bg-gradient-to-r from-orange-500 to-orange-600 text-white px-8 py-4 rounded-xl font-bold hover:from-orange-600 hover:to-orange-700 transition-all shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
               >
-                <Star className="w-5 h-5" />
+                <Star className="w-5 h-5 fill-white" />
                 Enviar Meu Depoimento
                 <ArrowRight className="w-5 h-5" />
               </Link>
@@ -218,7 +217,7 @@ export default function Home() {
       <section className="py-16 bg-gradient-to-b from-gray-50 to-white">
         <div className="container mx-auto px-4">
           <div className="max-w-4xl mx-auto">
-            <div className="relative overflow-hidden bg-gradient-to-br from-blue-600 via-blue-700 to-purple-700 rounded-2xl p-10 md:p-12 text-center shadow-2xl border-4 border-blue-400">
+            <div className="relative overflow-hidden bg-gradient-to-br from-blue-800 via-blue-700 to-blue-600 rounded-2xl p-10 md:p-12 text-center shadow-2xl border-4 border-blue-700">
               <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9IiNmZmYiIGZpbGwtb3BhY2l0eT0iMC4wMyI+PHBhdGggZD0iTTM2IDE0YzMuMzE0IDAgNiAyLjY4NiA2IDZzLTIuNjg2IDYtNiA2LTYtMi42ODYtNi02IDIuNjg2LTYgNi02ek0yNCAzOGMzLjMxNCAwIDYgMi42ODYgNiA2cy0yLjY4NiA2LTYgNi02LTIuNjg2LTYtNiAyLjY4Ni02IDYtNnoiLz48L2c+PC9nPjwvc3ZnPg==')] opacity-50"></div>
 
               <div className="relative z-10">
@@ -247,7 +246,7 @@ export default function Home() {
                   <button
                     type="submit"
                     aria-label="Cadastrar na newsletter"
-                    className="bg-gradient-to-r from-yellow-400 to-orange-500 text-gray-900 px-10 py-4 rounded-xl text-lg font-bold hover:from-yellow-500 hover:to-orange-600 transition-all hover:scale-105 shadow-xl whitespace-nowrap"
+                    className="bg-accent-400 text-gray-900 px-10 py-4 rounded-xl text-lg font-bold hover:bg-accent-500 transition-all hover:scale-105 shadow-xl whitespace-nowrap"
                   >
                     Cadastrar Agora
                   </button>
