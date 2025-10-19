@@ -15,6 +15,7 @@ import { Pagination } from '@/components/ui/pagination';
 interface QRCodeData {
   id: string;
   code: string;
+  qrCodeImage?: string | null;
   courseId: string;
   turma: string;
   validUntil: string;
@@ -127,12 +128,15 @@ export default function AdminPage() {
     }
   };
 
-  const downloadQRCode = () => {
-    if (!generatedQR) return;
+  const downloadQRCode = (image?: string, code?: string) => {
+    const qrImage = image || generatedQR?.image;
+    const qrCode = code || generatedQR?.code;
+
+    if (!qrImage || !qrCode) return;
 
     const link = document.createElement('a');
-    link.download = `qrcode-${generatedQR.code}.png`;
-    link.href = generatedQR.image;
+    link.download = `qrcode-${qrCode}.png`;
+    link.href = qrImage;
     link.click();
 
     success('QR Code baixado!', 'O arquivo foi salvo no seu computador.');
@@ -362,57 +366,80 @@ export default function AdminPage() {
                               : 'bg-gradient-to-r from-blue-50 to-purple-50 border-blue-200'
                           }`}
                         >
-                          <div className="flex justify-between items-start mb-3">
-                            <div>
-                              <h3 className="font-bold text-gray-900">{course?.title}</h3>
-                              <p className="text-sm text-gray-700 font-medium">
-                                <Users className="w-4 h-4 inline mr-1" />
-                                {qr.turma}
-                              </p>
-                            </div>
-                            {isExpired ? (
-                              <span className="px-3 py-1 bg-red-100 text-red-800 text-xs font-bold rounded-full flex items-center gap-1">
-                                <XCircle className="w-3 h-3" />
-                                Expirado
-                              </span>
-                            ) : isMaxedOut ? (
-                              <span className="px-3 py-1 bg-orange-100 text-orange-800 text-xs font-bold rounded-full flex items-center gap-1">
-                                <XCircle className="w-3 h-3" />
-                                Limite atingido
-                              </span>
-                            ) : (
-                              <span className="px-3 py-1 bg-green-100 text-green-800 text-xs font-bold rounded-full flex items-center gap-1">
-                                <CheckCircle className="w-3 h-3" />
-                                Ativo
-                              </span>
+                          <div className="flex gap-4">
+                            {/* Imagem do QR Code */}
+                            {qr.qrCodeImage && (
+                              <div className="flex-shrink-0">
+                                <img
+                                  src={qr.qrCodeImage}
+                                  alt={`QR Code ${qr.turma}`}
+                                  className="w-32 h-32 border-4 border-white shadow-lg rounded-lg"
+                                />
+                                <button
+                                  onClick={() => downloadQRCode(qr.qrCodeImage!, qr.code)}
+                                  className="w-full mt-2 bg-blue-600 text-white px-3 py-1.5 rounded-lg text-xs font-bold hover:bg-blue-700 transition-colors flex items-center justify-center gap-1"
+                                >
+                                  <Download className="w-3 h-3" />
+                                  Baixar
+                                </button>
+                              </div>
                             )}
-                          </div>
 
-                          <div className="grid grid-cols-2 gap-3 text-sm">
-                            <div>
-                              <p className="text-gray-600 font-medium">Código:</p>
-                              <p className="text-gray-900 font-mono text-xs break-all">{qr.code}</p>
-                            </div>
-                            <div>
-                              <p className="text-gray-600 font-medium">Usos:</p>
-                              <p className="text-gray-900 font-bold">
-                                {qr.usedCount} {qr.maxUses ? `/ ${qr.maxUses}` : ''}
-                              </p>
-                            </div>
-                            <div>
-                              <p className="text-gray-600 font-medium">
-                                <Calendar className="w-3 h-3 inline mr-1" />
-                                Válido até:
-                              </p>
-                              <p className="text-gray-900 font-medium">
-                                {new Date(qr.validUntil).toLocaleDateString('pt-BR')}
-                              </p>
-                            </div>
-                            <div>
-                              <p className="text-gray-600 font-medium">Criado em:</p>
-                              <p className="text-gray-900 font-medium">
-                                {new Date(qr.createdAt).toLocaleDateString('pt-BR')}
-                              </p>
+                            {/* Informações do QR Code */}
+                            <div className="flex-1">
+                              <div className="flex justify-between items-start mb-3">
+                                <div>
+                                  <h3 className="font-bold text-gray-900">{course?.title}</h3>
+                                  <p className="text-sm text-gray-700 font-medium">
+                                    <Users className="w-4 h-4 inline mr-1" />
+                                    {qr.turma}
+                                  </p>
+                                </div>
+                                {isExpired ? (
+                                  <span className="px-3 py-1 bg-red-100 text-red-800 text-xs font-bold rounded-full flex items-center gap-1">
+                                    <XCircle className="w-3 h-3" />
+                                    Expirado
+                                  </span>
+                                ) : isMaxedOut ? (
+                                  <span className="px-3 py-1 bg-orange-100 text-orange-800 text-xs font-bold rounded-full flex items-center gap-1">
+                                    <XCircle className="w-3 h-3" />
+                                    Limite atingido
+                                  </span>
+                                ) : (
+                                  <span className="px-3 py-1 bg-green-100 text-green-800 text-xs font-bold rounded-full flex items-center gap-1">
+                                    <CheckCircle className="w-3 h-3" />
+                                    Ativo
+                                  </span>
+                                )}
+                              </div>
+
+                              <div className="grid grid-cols-2 gap-3 text-sm">
+                                <div>
+                                  <p className="text-gray-600 font-medium">Código:</p>
+                                  <p className="text-gray-900 font-mono text-xs break-all">{qr.code}</p>
+                                </div>
+                                <div>
+                                  <p className="text-gray-600 font-medium">Usos:</p>
+                                  <p className="text-gray-900 font-bold">
+                                    {qr.usedCount} {qr.maxUses ? `/ ${qr.maxUses}` : ''}
+                                  </p>
+                                </div>
+                                <div>
+                                  <p className="text-gray-600 font-medium">
+                                    <Calendar className="w-3 h-3 inline mr-1" />
+                                    Válido até:
+                                  </p>
+                                  <p className="text-gray-900 font-medium">
+                                    {new Date(qr.validUntil).toLocaleDateString('pt-BR')}
+                                  </p>
+                                </div>
+                                <div>
+                                  <p className="text-gray-600 font-medium">Criado em:</p>
+                                  <p className="text-gray-900 font-medium">
+                                    {new Date(qr.createdAt).toLocaleDateString('pt-BR')}
+                                  </p>
+                                </div>
+                              </div>
                             </div>
                           </div>
                         </div>
