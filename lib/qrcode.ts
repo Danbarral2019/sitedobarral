@@ -6,6 +6,7 @@ import { prisma } from './prisma';
 export interface QRCodeData {
   id: string;
   code: string;
+  qrCodeImage?: string | null;
   courseId: string;
   turma: string;
   validUntil: string;
@@ -32,10 +33,16 @@ export async function createQRCode(
 ): Promise<{ code: string; qrCodeImage: string }> {
   const code = generateUniqueCode();
 
-  // Salva no banco de dados
+  // Gera a imagem do QR Code
+  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000';
+  const qrUrl = `${baseUrl}/validar-acesso?code=${code}`;
+  const qrCodeImage = await QRCode.toDataURL(qrUrl);
+
+  // Salva no banco de dados com a imagem
   await prisma.qRCode.create({
     data: {
       code,
+      qrCodeImage, // Salva a imagem base64
       courseId,
       turma,
       validUntil: validUntilDate,
@@ -43,11 +50,6 @@ export async function createQRCode(
       usedCount: 0,
     },
   });
-
-  // Gera a imagem do QR Code
-  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000';
-  const qrUrl = `${baseUrl}/validar-acesso?code=${code}`;
-  const qrCodeImage = await QRCode.toDataURL(qrUrl);
 
   return { code, qrCodeImage };
 }
@@ -110,6 +112,7 @@ export async function listQRCodes(): Promise<QRCodeData[]> {
   return qrCodes.map((qr) => ({
     id: qr.id,
     code: qr.code,
+    qrCodeImage: qr.qrCodeImage, // Retorna a imagem
     courseId: qr.courseId,
     turma: qr.turma,
     validUntil: qr.validUntil.toISOString(),
@@ -133,6 +136,7 @@ export async function getQRCodesByCourse(courseId: string): Promise<QRCodeData[]
   return qrCodes.map((qr) => ({
     id: qr.id,
     code: qr.code,
+    qrCodeImage: qr.qrCodeImage, // Retorna a imagem
     courseId: qr.courseId,
     turma: qr.turma,
     validUntil: qr.validUntil.toISOString(),
@@ -171,6 +175,7 @@ export async function getQRCodeStats(code: string): Promise<QRCodeData | null> {
   return {
     id: qrData.id,
     code: qrData.code,
+    qrCodeImage: qrData.qrCodeImage, // Retorna a imagem
     courseId: qrData.courseId,
     turma: qrData.turma,
     validUntil: qrData.validUntil.toISOString(),
