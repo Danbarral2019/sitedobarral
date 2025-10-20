@@ -1,0 +1,25 @@
+{
+  "recommendations": [
+    // Essenciais
+    "dbaeumer.vscode-eslint",
+    "esbenp.prettier-vscode",
+    "bradlc.vscode-tailwindcss",
+
+    // TypeScript
+    "ms-vscode.vscode-typescript-next",
+
+    // Next.js e React
+    "dsznajder.es7-react-js-snippets",
+
+    // Prisma (para o banco de dados)
+    "prisma.prisma",
+
+    // Úteis
+    "usernamehw.errorlens",
+    "christian-kohler.path-intellisense",
+    "zignd.html-css-class-completion",
+    "formulahendry.auto-rename-tag",
+    "eamodio.gitlens"
+  ],
+  "unwantedRecommendations": []
+}

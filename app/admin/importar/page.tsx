@@ -1,19 +1,19 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import {
   Upload, FileSpreadsheet, Loader2, Download, CheckCircle,
-  AlertCircle, Eye, FileText, AlertTriangle, Info,
+  AlertCircle, FileText, AlertTriangle, Info,
   FileCheck, XCircle, ArrowRight, Sparkles, FolderUp,
-  Link as LinkIcon, ArrowLeft, Check
+  Link as LinkIcon, Check
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
-import { Breadcrumb } from '@/components/ui/breadcrumb';
 import { FileDropzone } from '@/components/ui/file-dropzone';
 import { MultiFileDropzone } from '@/components/ui/multi-file-dropzone';
 import { Progress } from '@/components/ui/progress';
 import { courses } from '@/data/courses';
+import AdminLayout from '@/components/AdminLayout';
 
 interface ProcessedDocument {
   title: string;
@@ -70,7 +70,6 @@ export default function ImportarPage() {
   const [isImporting, setIsImporting] = useState(false);
   const [validationResult, setValidationResult] = useState<ValidationResult | null>(null);
   const [importProgress, setImportProgress] = useState(0);
-  const [importCompleted, setImportCompleted] = useState(false);
 
   // Step 2: PDF Upload
   const [pdfFiles, setPdfFiles] = useState<File[]>([]);
@@ -78,11 +77,7 @@ export default function ImportarPage() {
   const [uploadPdfsProgress, setUploadPdfsProgress] = useState(0);
   const [uploadResult, setUploadResult] = useState<UploadFilesResult | null>(null);
 
-  useEffect(() => {
-    verifyAdmin();
-  }, []);
-
-  const verifyAdmin = async () => {
+  const verifyAdmin = useCallback(async () => {
     try {
       const response = await fetch('/api/auth/verify');
       if (!response.ok) {
@@ -101,7 +96,11 @@ export default function ImportarPage() {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [router]);
+
+  useEffect(() => {
+    verifyAdmin();
+  }, [verifyAdmin]);
 
   const handleDownloadTemplate = async () => {
     try {
@@ -215,8 +214,6 @@ export default function ImportarPage() {
         `${data.results.imported} documento(s) importado(s) com sucesso`
       );
 
-      setImportCompleted(true);
-
       // Aguarda um pouco antes de avançar para o próximo passo
       setTimeout(() => {
         setCurrentStep(2);
@@ -317,23 +314,15 @@ export default function ImportarPage() {
   }
 
   return (
-    <main className="py-12 bg-gradient-to-br from-green-50 via-white to-blue-50 min-h-screen">
-      <div className="container mx-auto px-4">
+    <AdminLayout>
+      <div className="p-8">
         <div className="max-w-6xl mx-auto">
-          <Breadcrumb
-            items={[
-              { label: 'Admin', href: '/admin' },
-              { label: 'Importar Documentos' }
-            ]}
-            className="mb-6"
-          />
-
           <div className="mb-8">
-            <h1 className="text-4xl font-bold text-gray-900 mb-2 flex items-center gap-3">
+            <h2 className="text-3xl font-bold text-gray-900 mb-2 flex items-center gap-3">
               <FileSpreadsheet className="w-10 h-10 text-green-600" />
               Importar Documentos via Excel
-            </h1>
-            <p className="text-gray-700">
+            </h2>
+            <p className="text-gray-600">
               Importe múltiplos documentos de uma vez usando planilha Excel
             </p>
           </div>
@@ -405,11 +394,11 @@ export default function ImportarPage() {
                       </li>
                       <li className="flex items-start gap-2">
                         <span className="font-bold text-blue-600">3.</span>
-                        <span>Na coluna "Arquivo", coloque o nome exato do PDF (ex: acordao_1234.pdf)</span>
+                        <span>Na coluna &quot;Arquivo&quot;, coloque o nome exato do PDF (ex: acordao_1234.pdf)</span>
                       </li>
                       <li className="flex items-start gap-2">
                         <span className="font-bold text-blue-600">4.</span>
-                        <span>Ou use a coluna "URL" para linkar documentos externos</span>
+                        <span>Ou use a coluna &quot;URL&quot; para linkar documentos externos</span>
                       </li>
                       <li className="flex items-start gap-2">
                         <span className="font-bold text-blue-600">5.</span>
@@ -685,7 +674,7 @@ export default function ImportarPage() {
                       <ul className="space-y-1.5 text-sm text-gray-700">
                         <li className="flex items-start gap-2">
                           <span className="text-blue-600 font-bold">•</span>
-                          <span>Se você colocou "acordao_1234.pdf" na coluna Arquivo do Excel, faça upload do arquivo com esse nome exato</span>
+                          <span>Se você colocou &quot;acordao_1234.pdf&quot; na coluna Arquivo do Excel, faça upload do arquivo com esse nome exato</span>
                         </li>
                         <li className="flex items-start gap-2">
                           <span className="text-blue-600 font-bold">•</span>
@@ -697,7 +686,7 @@ export default function ImportarPage() {
                         </li>
                         <li className="flex items-start gap-2">
                           <span className="text-blue-600 font-bold">•</span>
-                          <span>Se não encontrar correspondência, o arquivo será listado como "não vinculado"</span>
+                          <span>Se não encontrar correspondência, o arquivo será listado como &quot;não vinculado&quot;</span>
                         </li>
                       </ul>
                     </div>
@@ -859,7 +848,7 @@ export default function ImportarPage() {
                         ))}
                       </ul>
                       <p className="text-sm text-orange-800 mt-3">
-                        <strong>Dica:</strong> Verifique se os nomes dos arquivos correspondem exatamente aos nomes informados na coluna "Arquivo" do Excel.
+                        <strong>Dica:</strong> Verifique se os nomes dos arquivos correspondem exatamente aos nomes informados na coluna &quot;Arquivo&quot; do Excel.
                       </p>
                     </div>
                   )}
@@ -893,6 +882,6 @@ export default function ImportarPage() {
           )}
         </div>
       </div>
-    </main>
+    </AdminLayout>
   );
 }

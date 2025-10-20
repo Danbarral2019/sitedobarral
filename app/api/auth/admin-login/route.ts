@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { generateToken } from '@/lib/auth';
 import { cookies } from 'next/headers';
 import bcrypt from 'bcryptjs';
+import { rateLimiters } from '@/lib/rate-limit';
 
 // Usuário admin padrão (em produção, usar banco de dados)
 const ADMIN_USERS = [
@@ -15,6 +16,16 @@ const ADMIN_USERS = [
 ];
 
 export async function POST(request: NextRequest) {
+  // Rate limiting: 5 tentativas de login admin por minuto
+  try {
+    await rateLimiters.auth.check(request, 5);
+  } catch {
+    return NextResponse.json(
+      { error: 'Muitas tentativas de login. Tente novamente em alguns instantes.' },
+      { status: 429 }
+    );
+  }
+
   try {
     const { email, password } = await request.json();
 
@@ -72,7 +83,7 @@ export async function POST(request: NextRequest) {
         role: 'admin',
       },
     });
-  } catch (error) {
+  } catch {
     console.error('Erro no login admin:', error);
     return NextResponse.json(
       { error: 'Erro ao processar login' },

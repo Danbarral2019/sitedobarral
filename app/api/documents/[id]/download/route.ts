@@ -35,7 +35,7 @@ export async function GET(
     let decoded: JWTPayload;
     try {
       decoded = jwt.verify(token, JWT_SECRET) as JWTPayload;
-    } catch (jwtError) {
+    } catch {
       return NextResponse.json(
         { error: 'Token inválido ou expirado' },
         { status: 401 }
@@ -132,7 +132,7 @@ export async function GET(
 /**
  * Realiza o download do arquivo
  */
-async function downloadFile(document: any): Promise<NextResponse> {
+async function downloadFile(document: Record<string, unknown>): Promise<NextResponse> {
   // Se for link externo, redirecionar
   if (document.type === 'link' && document.url.startsWith('http')) {
     return NextResponse.redirect(document.url);

@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useSearchParams } from 'next/navigation';
-import { Mail, Phone, MapPin, Instagram, Youtube, Linkedin, Send, CheckCircle } from 'lucide-react';
+import { Mail, Phone, MapPin, Instagram, Youtube, Linkedin, Send, CheckCircle, Loader2 } from 'lucide-react';
 import { courses } from '@/data/courses';
 
 export default function ContatoPage() {
@@ -17,21 +17,44 @@ export default function ContatoPage() {
     message: ''
   });
   const [isSubmitted, setIsSubmitted] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [error, setError] = useState('');
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log('Form submitted:', formData);
-    setIsSubmitted(true);
-    setTimeout(() => {
-      setIsSubmitted(false);
-      setFormData({
-        name: '',
-        email: '',
-        phone: '',
-        courseInterest: '',
-        message: ''
+    setIsSubmitting(true);
+    setError('');
+
+    try {
+      const response = await fetch('/api/contact', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(formData),
       });
-    }, 3000);
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Erro ao enviar mensagem');
+      }
+
+      setIsSubmitted(true);
+      setTimeout(() => {
+        setIsSubmitted(false);
+        setFormData({
+          name: '',
+          email: '',
+          phone: '',
+          courseInterest: '',
+          message: ''
+        });
+      }, 5000);
+    } catch (err) {
+      console.error('Erro ao enviar contato:', err);
+      setError(err instanceof Error ? err.message : 'Erro ao enviar mensagem. Tente novamente.');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
@@ -62,6 +85,12 @@ export default function ContatoPage() {
                   <h2 className="text-2xl font-bold mb-2 text-gray-900">Envie sua mensagem</h2>
                   <div className="h-1 w-24 bg-gradient-to-r from-blue-500 to-blue-600 rounded-full"></div>
                 </div>
+
+                {error && (
+                  <div className="bg-red-50 border-2 border-red-500 rounded-xl p-4 mb-6">
+                    <p className="text-red-800 font-medium">{error}</p>
+                  </div>
+                )}
 
                 {isSubmitted ? (
                   <div className="bg-gradient-to-r from-blue-50 to-blue-100 border-2 border-blue-500 rounded-2xl p-8 text-center">
@@ -167,11 +196,21 @@ export default function ContatoPage() {
 
                     <button
                       type="submit"
+                      disabled={isSubmitting}
                       aria-label="Enviar formulário de contato"
-                      className="w-full bg-gradient-to-r from-blue-600 to-blue-700 text-white px-6 py-4 rounded-xl text-lg font-bold hover:from-blue-700 hover:to-blue-800 transition-all hover:scale-105 flex items-center justify-center gap-2 shadow-lg hover:shadow-2xl"
+                      className="w-full bg-gradient-to-r from-blue-600 to-blue-700 text-white px-6 py-4 rounded-xl text-lg font-bold hover:from-blue-700 hover:to-blue-800 transition-all hover:scale-105 flex items-center justify-center gap-2 shadow-lg hover:shadow-2xl disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
                     >
-                      <Send className="w-5 h-5" />
-                      Enviar Mensagem
+                      {isSubmitting ? (
+                        <>
+                          <Loader2 className="w-5 h-5 animate-spin" />
+                          Enviando...
+                        </>
+                      ) : (
+                        <>
+                          <Send className="w-5 h-5" />
+                          Enviar Mensagem
+                        </>
+                      )}
                     </button>
                   </form>
                 )}

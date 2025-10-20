@@ -1,0 +1,205 @@
+'use client';
+
+import { useState } from 'react';
+import { Mail, Loader2, CheckCircle } from 'lucide-react';
+
+interface NewsletterFormProps {
+  className?: string;
+  showInterests?: boolean;
+  variant?: 'default' | 'inline';
+}
+
+export default function NewsletterForm({
+  className = '',
+  showInterests = false,
+  variant = 'default'
+}: NewsletterFormProps) {
+  const [email, setEmail] = useState('');
+  const [name, setName] = useState('');
+  const [interests, setInterests] = useState<string[]>([]);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isSuccess, setIsSuccess] = useState(false);
+  const [error, setError] = useState('');
+
+  const availableInterests = [
+    'Lei 14.133/2021',
+    'Gestão de Contratos',
+    'Licitações',
+    'Direito Administrativo',
+    'Jurisprudência',
+  ];
+
+  const toggleInterest = (interest: string) => {
+    setInterests(prev =>
+      prev.includes(interest)
+        ? prev.filter(i => i !== interest)
+        : [...prev, interest]
+    );
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsSubmitting(true);
+    setError('');
+
+    try {
+      const response = await fetch('/api/newsletter', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          email,
+          name: name || null,
+          interests: interests.length > 0 ? interests : null,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Erro ao cadastrar');
+      }
+
+      setIsSuccess(true);
+      setEmail('');
+      setName('');
+      setInterests([]);
+
+      setTimeout(() => {
+        setIsSuccess(false);
+      }, 5000);
+    } catch (err) {
+      console.error('Erro ao cadastrar newsletter:', err);
+      setError(err instanceof Error ? err.message : 'Erro ao cadastrar. Tente novamente.');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  if (isSuccess) {
+    return (
+      <div className={`bg-green-50 border-2 border-green-500 rounded-xl p-6 text-center ${className}`}>
+        <div className="w-12 h-12 bg-green-500 rounded-full flex items-center justify-center mx-auto mb-3">
+          <CheckCircle className="w-6 h-6 text-white" />
+        </div>
+        <h3 className="text-lg font-bold text-gray-900 mb-2">Cadastro realizado!</h3>
+        <p className="text-gray-700">Você receberá nossos conteúdos no e-mail informado.</p>
+      </div>
+    );
+  }
+
+  if (variant === 'inline') {
+    return (
+      <form onSubmit={handleSubmit} className={`flex flex-col sm:flex-row gap-4 ${className}`}>
+        {error && (
+          <div className="w-full bg-red-50 border-2 border-red-500 rounded-lg p-3">
+            <p className="text-red-800 text-sm font-medium">{error}</p>
+          </div>
+        )}
+        <input
+          type="email"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          placeholder="Seu e-mail"
+          required
+          disabled={isSubmitting}
+          className="flex-1 px-4 py-3 rounded-lg border-2 border-gray-300 focus:outline-none focus:border-primary-500 text-gray-900 disabled:opacity-50"
+        />
+        <button
+          type="submit"
+          disabled={isSubmitting}
+          className="bg-primary-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-primary-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 whitespace-nowrap"
+        >
+          {isSubmitting ? (
+            <>
+              <Loader2 className="w-4 h-4 animate-spin" />
+              Cadastrando...
+            </>
+          ) : (
+            <>
+              <Mail className="w-4 h-4" />
+              Cadastrar
+            </>
+          )}
+        </button>
+      </form>
+    );
+  }
+
+  return (
+    <div className={className}>
+      {error && (
+        <div className="bg-red-50 border-2 border-red-500 rounded-lg p-3 mb-4">
+          <p className="text-red-800 text-sm font-medium">{error}</p>
+        </div>
+      )}
+
+      <form onSubmit={handleSubmit} className="space-y-4">
+        <div>
+          <input
+            type="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            placeholder="Seu e-mail *"
+            required
+            disabled={isSubmitting}
+            className="w-full px-4 py-3 rounded-lg border-2 border-gray-300 focus:outline-none focus:border-primary-500 text-gray-900 disabled:opacity-50"
+          />
+        </div>
+
+        <div>
+          <input
+            type="text"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            placeholder="Seu nome (opcional)"
+            disabled={isSubmitting}
+            className="w-full px-4 py-3 rounded-lg border-2 border-gray-300 focus:outline-none focus:border-primary-500 text-gray-900 disabled:opacity-50"
+          />
+        </div>
+
+        {showInterests && (
+          <div>
+            <p className="text-sm font-semibold text-gray-700 mb-2">
+              Áreas de interesse (opcional):
+            </p>
+            <div className="flex flex-wrap gap-2">
+              {availableInterests.map((interest) => (
+                <button
+                  key={interest}
+                  type="button"
+                  onClick={() => toggleInterest(interest)}
+                  disabled={isSubmitting}
+                  className={`px-3 py-1.5 rounded-full text-sm font-medium transition-colors ${
+                    interests.includes(interest)
+                      ? 'bg-primary-600 text-white'
+                      : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                  } disabled:opacity-50`}
+                >
+                  {interest}
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
+
+        <button
+          type="submit"
+          disabled={isSubmitting}
+          className="w-full bg-primary-600 text-white px-6 py-3 rounded-lg font-bold hover:bg-primary-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+        >
+          {isSubmitting ? (
+            <>
+              <Loader2 className="w-5 h-5 animate-spin" />
+              Cadastrando...
+            </>
+          ) : (
+            <>
+              <Mail className="w-5 h-5" />
+              Cadastrar na Newsletter
+            </>
+          )}
+        </button>
+      </form>
+    </div>
+  );
+}

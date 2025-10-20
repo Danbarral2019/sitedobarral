@@ -1,6 +1,7 @@
 import QRCode from 'qrcode';
 import { randomBytes } from 'crypto';
 import { prisma } from './prisma';
+import { QRCode as PrismaQRCode } from '@prisma/client';
 
 // Interface para dados do QR Code
 export interface QRCodeData {
@@ -109,7 +110,7 @@ export async function listQRCodes(): Promise<QRCodeData[]> {
     },
   });
 
-  return qrCodes.map((qr) => ({
+  return qrCodes.map((qr: PrismaQRCode) => ({
     id: qr.id,
     code: qr.code,
     qrCodeImage: qr.qrCodeImage, // Retorna a imagem
@@ -133,7 +134,7 @@ export async function getQRCodesByCourse(courseId: string): Promise<QRCodeData[]
     },
   });
 
-  return qrCodes.map((qr) => ({
+  return qrCodes.map((qr: PrismaQRCode) => ({
     id: qr.id,
     code: qr.code,
     qrCodeImage: qr.qrCodeImage, // Retorna a imagem
@@ -155,7 +156,7 @@ export async function deleteQRCode(code: string): Promise<boolean> {
       where: { code },
     });
     return true;
-  } catch (error) {
+  } catch {
     return false;
   }
 }

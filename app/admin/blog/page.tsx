@@ -1,14 +1,14 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import {
   Plus, Loader2, Eye, Edit, Trash2, Calendar, CheckCircle, XCircle
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
-import { Breadcrumb } from '@/components/ui/breadcrumb';
 import { Pagination } from '@/components/ui/pagination';
+import AdminLayout from '@/components/AdminLayout';
 
 interface BlogPostData {
   id: string;
@@ -31,12 +31,7 @@ export default function AdminBlogPage() {
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
 
-  useEffect(() => {
-    verifyAdmin();
-    loadPosts();
-  }, []);
-
-  const verifyAdmin = async () => {
+  const verifyAdmin = useCallback(async () => {
     try {
       const response = await fetch('/api/auth/verify');
 
@@ -57,9 +52,9 @@ export default function AdminBlogPage() {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [router]);
 
-  const loadPosts = async () => {
+  const loadPosts = useCallback(async () => {
     try {
       const response = await fetch('/api/admin/blog-posts');
       const data = await response.json();
@@ -68,7 +63,12 @@ export default function AdminBlogPage() {
       console.error('Erro ao carregar posts:', error);
       errorToast('Erro ao carregar posts', 'Tente novamente.');
     }
-  };
+  }, [errorToast]);
+
+  useEffect(() => {
+    verifyAdmin();
+    loadPosts();
+  }, [verifyAdmin, loadPosts]);
 
   const handleDelete = async (id: string, title: string) => {
     if (!confirm(`Tem certeza que deseja deletar "${title}"?`)) {
@@ -107,22 +107,14 @@ export default function AdminBlogPage() {
   }
 
   return (
-    <main className="py-12 bg-gradient-to-br from-orange-50 via-white to-amber-50 min-h-screen">
-      <div className="container mx-auto px-4">
+    <AdminLayout>
+      <div className="p-8">
         <div className="max-w-7xl mx-auto">
-          <Breadcrumb
-            items={[
-              { label: 'Admin', href: '/admin' },
-              { label: 'Blog' }
-            ]}
-            className="mb-6"
-          />
-
           <div className="mb-8">
             <div className="flex justify-between items-start">
               <div>
-                <h1 className="text-4xl font-bold text-gray-900 mb-2">Gerenciar Blog</h1>
-                <p className="text-gray-700">Crie e edite posts do blog</p>
+                <h1 className="text-3xl font-bold text-gray-900 mb-2">Gerenciar Blog</h1>
+                <p className="text-gray-600">Crie e edite posts do blog</p>
               </div>
               <Link
                 href="/admin/blog/new"
@@ -253,6 +245,6 @@ export default function AdminBlogPage() {
           </div>
         </div>
       </div>
-    </main>
+    </AdminLayout>
   );
 }

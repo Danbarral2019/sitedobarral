@@ -4,10 +4,11 @@ import { useEffect, useState, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import {
   FileText, Video, ExternalLink, Download, CheckCircle,
-  Loader2, LogOut, BookOpen, GraduationCap, Clock, Star
+  Loader2, LogOut, BookOpen, GraduationCap, Clock, Heart
 } from 'lucide-react';
 import { courses } from '@/data/courses';
 import { useAuth } from '@/hooks/use-auth';
+import { useFavorites } from '@/hooks/use-favorites';
 import EnrollmentStatusBanner from '@/components/EnrollmentStatusBanner';
 import DocumentFilters, { DocumentFilterState } from '@/components/DocumentFilters';
 import { Pagination } from '@/components/ui/pagination';
@@ -15,6 +16,7 @@ import { Pagination } from '@/components/ui/pagination';
 export default function AreaRestritaPage() {
   const router = useRouter();
   const { user, isLoading, logout } = useAuth();
+  const { favorites, isFavorite, toggleFavorite } = useFavorites();
 
   // Estado dos filtros
   const [filters, setFilters] = useState<DocumentFilterState>({
@@ -27,6 +29,29 @@ export default function AreaRestritaPage() {
   // Estado da paginação (por curso)
   const [currentPages, setCurrentPages] = useState<Record<string, number>>({});
   const DOCS_PER_PAGE = 6;
+
+  // Função para registrar acesso
+  const logAccess = async (action: string, courseId: string, documentId?: string) => {
+    try {
+      await fetch('/api/access-log', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action, courseId, documentId }),
+      });
+    } catch (error) {
+      console.error('Erro ao registrar acesso:', error);
+    }
+  };
+
+  // Função para lidar com download
+  const handleDownload = (doc: Record<string, unknown>, courseId: string) => {
+    logAccess('download', courseId, doc.id);
+  };
+
+  // Função para lidar com visualização de link
+  const handleView = (doc: Record<string, unknown>, courseId: string) => {
+    logAccess('view', courseId, doc.id);
+  };
 
   useEffect(() => {
     if (!isLoading && !user) {
@@ -60,8 +85,8 @@ export default function AreaRestritaPage() {
   ).filter(Boolean);
 
   // Função para filtrar e ordenar documentos
-  const filterDocuments = useMemo(() => {
-    return (docs: any[]) => {
+  const filterDocuments = useMemo(() => {  // eslint-disable-line react-hooks/rules-of-hooks
+    return (docs: unknown[]) => {
       let filtered = [...docs];
 
       // Filtro de busca (título ou descrição)
@@ -123,18 +148,105 @@ export default function AreaRestritaPage() {
                   </p>
                 </div>
               </div>
-              <button
-                onClick={handleLogout}
-                className="flex items-center gap-2 px-4 py-2 text-gray-700 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors font-medium"
-              >
-                <LogOut className="w-4 h-4" />
-                Sair
-              </button>
+              <div className="flex items-center gap-3">
+                <a
+                  href="/area-restrita/historico"
+                  className="flex items-center gap-2 px-4 py-2 text-gray-700 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors font-medium"
+                >
+                  <Clock className="w-4 h-4" />
+                  Histórico
+                </a>
+                <button
+                  onClick={handleLogout}
+                  className="flex items-center gap-2 px-4 py-2 text-gray-700 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors font-medium"
+                >
+                  <LogOut className="w-4 h-4" />
+                  Sair
+                </button>
+              </div>
             </div>
           </div>
 
           {userCourses.length > 0 ? (
             <>
+              {/* Seção de Favoritos */}
+              {favorites.length > 0 && (
+                <div className="bg-white rounded-2xl shadow-lg p-8 mb-8 border-2 border-red-200">
+                  <div className="flex items-center gap-3 mb-6">
+                    <div className="w-10 h-10 bg-gradient-to-br from-red-500 to-pink-600 rounded-lg flex items-center justify-center">
+                      <Heart className="w-5 h-5 text-white fill-current" />
+                    </div>
+                    <div>
+                      <h2 className="text-2xl font-bold text-gray-900">Meus Favoritos</h2>
+                      <p className="text-sm text-gray-600">
+                        {favorites.length} documento{favorites.length !== 1 ? 's' : ''} favorito{favorites.length !== 1 ? 's' : ''}
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="grid md:grid-cols-3 gap-4">
+                    {favorites.slice(0, 6).map((fav) => {
+                      // Buscar o curso e documento correspondentes
+                      const course = userCourses.find(c => c?.id === fav.courseId);
+                      const doc = course?.restrictedDocuments?.find(d => d.id === fav.documentId);
+
+                      if (!doc || !course) return null;
+
+                      return (
+                        <div
+                          key={fav.id}
+                          className="bg-gradient-to-r from-red-50 to-pink-50 rounded-lg p-4 border-2 border-red-200 hover:border-red-300 transition-all"
+                        >
+                          <div className="flex items-start gap-2 mb-2">
+                            <div className="w-8 h-8 bg-gradient-to-br from-red-500 to-pink-600 rounded-lg flex items-center justify-center flex-shrink-0">
+                              {doc.type === 'video' ? (
+                                <Video className="w-4 h-4 text-white" />
+                              ) : (
+                                <FileText className="w-4 h-4 text-white" />
+                              )}
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <h4 className="font-bold text-sm text-gray-900 line-clamp-2">{doc.title}</h4>
+                              <p className="text-xs text-gray-600 mt-1">{course.title}</p>
+                            </div>
+                          </div>
+                          <div className="flex gap-2 mt-3">
+                            {doc.type === 'link' && doc.url ? (
+                              <a
+                                href={doc.url}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                onClick={() => handleView(doc, course.id)}
+                                className="flex-1 bg-gradient-to-r from-red-600 to-pink-600 text-white px-3 py-1.5 rounded text-xs font-bold hover:from-red-700 hover:to-pink-700 transition-all flex items-center justify-center gap-1"
+                              >
+                                <ExternalLink className="w-3 h-3" />
+                                Acessar
+                              </a>
+                            ) : (
+                              <a
+                                href={`/api/documents/${doc.id}/download`}
+                                onClick={() => handleDownload(doc, course.id)}
+                                className="flex-1 bg-gradient-to-r from-red-600 to-pink-600 text-white px-3 py-1.5 rounded text-xs font-bold hover:from-red-700 hover:to-pink-700 transition-all flex items-center justify-center gap-1"
+                              >
+                                <Download className="w-3 h-3" />
+                                Download
+                              </a>
+                            )}
+                            <button
+                              onClick={() => toggleFavorite(doc.id, course.id)}
+                              className="p-1.5 text-red-600 bg-red-100 hover:bg-red-200 rounded transition-colors"
+                              title="Remover dos favoritos"
+                            >
+                              <Heart className="w-3 h-3 fill-current" />
+                            </button>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
+
               {/* Lista de cursos matriculados */}
               {userCourses.map((course) => {
                 if (!course) return null;
@@ -249,6 +361,17 @@ export default function AreaRestritaPage() {
                                     </span>
                                   </div>
                                 </div>
+                                <button
+                                  onClick={() => toggleFavorite(doc.id, course.id)}
+                                  className={`p-2 rounded-lg transition-colors ${
+                                    isFavorite(doc.id)
+                                      ? 'text-red-600 bg-red-50 hover:bg-red-100'
+                                      : 'text-gray-400 hover:text-red-600 hover:bg-red-50'
+                                  }`}
+                                  title={isFavorite(doc.id) ? 'Remover dos favoritos' : 'Adicionar aos favoritos'}
+                                >
+                                  <Heart className={`w-5 h-5 ${isFavorite(doc.id) ? 'fill-current' : ''}`} />
+                                </button>
                               </div>
 
                               {doc.description && (
@@ -261,6 +384,7 @@ export default function AreaRestritaPage() {
                                     href={doc.url}
                                     target="_blank"
                                     rel="noopener noreferrer"
+                                    onClick={() => handleView(doc, course.id)}
                                     className="flex-1 bg-gradient-to-r from-blue-600 to-blue-700 text-white px-4 py-2 rounded-lg text-sm font-bold hover:from-blue-700 hover:to-blue-800 transition-all flex items-center justify-center gap-2"
                                   >
                                     <ExternalLink className="w-4 h-4" />
@@ -269,6 +393,7 @@ export default function AreaRestritaPage() {
                                 ) : (
                                   <a
                                     href={`/api/documents/${doc.id}/download`}
+                                    onClick={() => handleDownload(doc, course.id)}
                                     className="flex-1 bg-gradient-to-r from-blue-600 to-blue-700 text-white px-4 py-2 rounded-lg text-sm font-bold hover:from-blue-700 hover:to-blue-800 transition-all flex items-center justify-center gap-2"
                                   >
                                     <Download className="w-4 h-4" />

@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { withAdminAuth } from '@/lib/api-middleware';
-import { processExcelFile, ProcessedDocument } from '@/lib/excel-processor';
+import { processExcelFile } from '@/lib/excel-processor';
 import { addDocument } from '@/lib/documents';
 
 /**

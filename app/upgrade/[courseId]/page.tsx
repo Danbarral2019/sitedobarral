@@ -18,7 +18,7 @@ export default function UpgradePage({ params }: PageProps) {
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
-  const [enrollmentStatus, setEnrollmentStatus] = useState<any>(null);
+  const [enrollmentStatus, setEnrollmentStatus] = useState<unknown>(null);
 
   useEffect(() => {
     if (!isLoading && !user) {

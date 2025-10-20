@@ -60,7 +60,7 @@ export const POST = withAdminAuth(async (request: NextRequest) => {
       title,
       description || '',
       fileType,
-      category as any,
+      category as "apostila" | "acordao" | "parecer" | "edital" | "artigo" | "outro",
       isPublic,
       fileUrl,
       file.size,

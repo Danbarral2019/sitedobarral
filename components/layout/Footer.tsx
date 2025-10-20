@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import { memo } from 'react';
-import { Instagram, Youtube, Linkedin, Mail, Phone, MapPin } from 'lucide-react';
+import { Instagram, Youtube, Linkedin, Mail } from 'lucide-react';
 
 export const Footer = memo(function Footer() {
   return (

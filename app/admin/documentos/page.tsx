@@ -1,22 +1,22 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import {
-  Upload, FileText, Loader2, Trash2, CheckCircle,
-  AlertCircle, Eye, EyeOff, File, Search, Filter, X,
-  Download, FolderUp, Edit, CheckSquare, Square
+  Upload, FileText, Loader2, Trash2,
+  Eye, EyeOff, File, Search, Filter, X,
+  Download, FolderUp, CheckSquare, Square
 } from 'lucide-react';
 import { courses } from '@/data/courses';
 import { useToast } from '@/hooks/use-toast';
 import { AlertDialog } from '@/components/ui/alert-dialog';
 import { FileDropzone } from '@/components/ui/file-dropzone';
-import { Breadcrumb } from '@/components/ui/breadcrumb';
 import { DocumentPreview } from '@/components/ui/document-preview';
 import { Progress } from '@/components/ui/progress';
 import { DocumentCardSkeleton } from '@/components/ui/skeleton';
 import { Pagination } from '@/components/ui/pagination';
 import { MultiFileDropzone } from '@/components/ui/multi-file-dropzone';
+import AdminLayout from '@/components/AdminLayout';
 
 interface Document {
   id: string;
@@ -74,12 +74,7 @@ export default function DocumentosPage() {
 
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
 
-  useEffect(() => {
-    verifyAdmin();
-    loadDocuments();
-  }, []);
-
-  const verifyAdmin = async () => {
+  const verifyAdmin = useCallback(async () => {
     try {
       const response = await fetch('/api/auth/verify');
       if (!response.ok) {
@@ -98,9 +93,9 @@ export default function DocumentosPage() {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [router]);
 
-  const loadDocuments = async () => {
+  const loadDocuments = useCallback(async () => {
     setIsLoadingDocs(true);
     try {
       const response = await fetch('/api/admin/documents');
@@ -111,7 +106,12 @@ export default function DocumentosPage() {
     } finally {
       setIsLoadingDocs(false);
     }
-  };
+  }, []);
+
+  useEffect(() => {
+    verifyAdmin();
+    loadDocuments();
+  }, [verifyAdmin, loadDocuments]);
 
   const handleFileSelect = (file: File) => {
     setSelectedFile(file);
@@ -179,7 +179,7 @@ export default function DocumentosPage() {
         } else {
           errorCount++;
         }
-      } catch (error) {
+      } catch {
         errorCount++;
       }
     }
@@ -222,7 +222,7 @@ export default function DocumentosPage() {
         );
         setSelectedDocuments(new Set());
         loadDocuments();
-      } catch (error) {
+      } catch {
         errorToast('Erro ao deletar', 'Não foi possível remover os documentos');
       } finally {
         setIsDeleting(false);
@@ -446,19 +446,12 @@ export default function DocumentosPage() {
   }
 
   return (
-    <main className="py-12 bg-gradient-to-br from-blue-50 via-white to-purple-50 min-h-screen">
-      <div className="container mx-auto px-4">
+    <AdminLayout>
+      <div className="p-8">
         <div className="max-w-7xl mx-auto">
-          <Breadcrumb
-            items={[
-              { label: 'Admin', href: '/admin' },
-              { label: 'Documentos' }
-            ]}
-            className="mb-6"
-          />
           <div className="mb-8">
-            <h1 className="text-4xl font-bold text-gray-900 mb-2">Gerenciar Documentos</h1>
-            <p className="text-gray-700">Faça upload e gerencie materiais dos cursos</p>
+            <h2 className="text-3xl font-bold text-gray-900 mb-2">Gerenciar Documentos</h2>
+            <p className="text-gray-600">Faça upload e gerencie materiais dos cursos</p>
           </div>
 
           <div className="grid lg:grid-cols-3 gap-8">
@@ -553,7 +546,7 @@ export default function DocumentosPage() {
                     </label>
                     <select
                       value={formData.category}
-                      onChange={(e) => setFormData({ ...formData, category: e.target.value as any })}
+                      onChange={(e) => setFormData({ ...formData, category: e.target.value as 'apostila' | 'acordao' | 'parecer' | 'edital' | 'artigo' | 'outro' })}
                       required
                       className="w-full px-3 py-2 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-600 text-gray-900"
                     >
@@ -952,6 +945,6 @@ export default function DocumentosPage() {
         variant="danger"
         isLoading={isDeleting}
       />
-    </main>
+    </AdminLayout>
   );
 }

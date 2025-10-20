@@ -10,7 +10,18 @@
       "Bash(node scripts/create-admin.js:*)",
       "Bash(node scripts/migrate-blog-posts.js:*)",
       "Bash(node scripts/seed-publications.js:*)",
-      "Bash(git add:*)"
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(git push:*)",
+      "Bash(node -e:*)",
+      "Bash(git log -1 --format=\"%h - %s (%ar)\")",
+      "Read(//c/Projeto de site do Barral/**)",
+      "Bash(git log -3 --format=\"%h - %s\")",
+      "Bash(npx prisma migrate dev --name add-qrcode-image)",
+      "Bash(git restore --staged .claude/settings.local.json)",
+      "Bash(npm run lint)",
+      "WebSearch",
+      "WebFetch(domain:mailchimp.com)"
     ],
     "deny": [],
     "ask": []

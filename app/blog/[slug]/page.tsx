@@ -1,9 +1,47 @@
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
-import { ArrowLeft, Calendar, Clock, User, Tag, Share2, Linkedin, Twitter } from 'lucide-react';
-import { PrismaClient } from '@prisma/client';
+import { ArrowLeft, Calendar, Clock, User, Tag } from 'lucide-react';
+import { PrismaClient, BlogPost } from '@prisma/client';
+import MarkdownContent from '@/components/MarkdownContent';
+import ShareButtons from '@/components/ShareButtons';
+import type { Metadata } from 'next';
 
 const prisma = new PrismaClient();
+
+export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
+  const { slug } = await params;
+  const post = await prisma.blogPost.findUnique({
+    where: { slug }
+  });
+
+  if (!post || !post.isPublished) {
+    return {
+      title: 'Post não encontrado',
+    };
+  }
+
+  const tags = post.tags ? JSON.parse(post.tags) : [];
+
+  return {
+    title: post.title,
+    description: post.excerpt,
+    keywords: tags,
+    authors: [{ name: post.author }],
+    openGraph: {
+      title: post.title,
+      description: post.excerpt,
+      type: 'article',
+      publishedTime: post.publishedAt.toISOString(),
+      authors: [post.author],
+      tags: tags,
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title: post.title,
+      description: post.excerpt,
+    },
+  };
+}
 
 export async function generateStaticParams() {
   const posts = await prisma.blogPost.findMany({
@@ -11,7 +49,7 @@ export async function generateStaticParams() {
     select: { slug: true }
   });
 
-  return posts.map((post) => ({
+  return posts.map((post: { slug: string }) => ({
     slug: post.slug,
   }));
 }
@@ -59,11 +97,11 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
   });
 
   const relatedPosts = relatedPostsData
-    .map(p => ({
+    .map((p: BlogPost) => ({
       ...p,
       tags: p.tags ? JSON.parse(p.tags) : []
     }))
-    .filter(p => p.tags.some((tag: string) => post.tags.includes(tag)))
+    .filter((p: BlogPost & { tags: string[] }) => p.tags.some((tag: string) => post.tags.includes(tag)))
     .slice(0, 3);
 
   return (
@@ -112,32 +150,19 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
               </div>
             </header>
 
-            <div className="prose prose-lg max-w-none mb-8">
+            <div className="mb-8">
               <div className="text-xl text-gray-700 font-medium mb-6">
                 {post.excerpt}
               </div>
-              <div className="text-gray-700 whitespace-pre-line">
-                {post.content}
-              </div>
+              <MarkdownContent content={post.content} />
             </div>
 
             <footer className="border-t pt-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm text-gray-600 mb-2">Compartilhe este artigo:</p>
-                  <div className="flex gap-3">
-                    <button className="text-gray-600 hover:text-primary-600 transition-colors">
-                      <Linkedin className="w-5 h-5" />
-                    </button>
-                    <button className="text-gray-600 hover:text-primary-600 transition-colors">
-                      <Twitter className="w-5 h-5" />
-                    </button>
-                    <button className="text-gray-600 hover:text-primary-600 transition-colors">
-                      <Share2 className="w-5 h-5" />
-                    </button>
-                  </div>
-                </div>
-              </div>
+              <ShareButtons
+                url={`/blog/${post.slug}`}
+                title={post.title}
+                description={post.excerpt}
+              />
             </footer>
           </article>
 
@@ -145,7 +170,7 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
             <div className="mt-12">
               <h2 className="text-2xl font-bold mb-6">Artigos Relacionados</h2>
               <div className="grid md:grid-cols-3 gap-6">
-                {relatedPosts.map((relatedPost) => (
+                {relatedPosts.map((relatedPost: BlogPost & { tags: string[] }) => (
                   <Link
                     key={relatedPost.id}
                     href={`/blog/${relatedPost.slug}`}

@@ -49,7 +49,7 @@ export async function GET(request: NextRequest) {
           enrollments: user.enrollments,
         },
       });
-    } catch (jwtError) {
+    } catch {
       // Token inválido ou expirado
       return NextResponse.json(
         { error: 'Token inválido ou expirado' },

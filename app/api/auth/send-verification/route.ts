@@ -1,11 +1,22 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
+import { rateLimiters } from '@/lib/rate-limit';
 
 /**
  * POST /api/auth/send-verification
  * Envia código de verificação de email (ou reenvia)
  */
 export async function POST(request: NextRequest) {
+  // Rate limiting: 5 envios de código de verificação por minuto
+  try {
+    await rateLimiters.auth.check(request, 5);
+  } catch {
+    return NextResponse.json(
+      { error: 'Muitas tentativas de envio. Por favor, aguarde alguns instantes.' },
+      { status: 429 }
+    );
+  }
+
   try {
     const { email } = await request.json();
 
@@ -69,7 +80,7 @@ export async function POST(request: NextRequest) {
         expiresAt: emailTokenExpiry.toISOString(),
       } : undefined,
     });
-  } catch (error) {
+  } catch {
     console.error('Erro ao enviar código de verificação:', error);
     return NextResponse.json(
       { error: 'Erro ao processar solicitação' },

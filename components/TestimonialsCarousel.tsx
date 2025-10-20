@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { ChevronLeft, ChevronRight, Star } from 'lucide-react';
-import { testimonials, Testimonial } from '@/data/testimonials';
+import { testimonials } from '@/data/testimonials';
 
 export default function TestimonialsCarousel() {
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -66,7 +66,7 @@ export default function TestimonialsCarousel() {
               ))}
             </div>
             <p className="text-gray-800 mb-6 italic text-lg leading-relaxed">
-              "{testimonial.text}"
+              &quot;{testimonial.text}&quot;
             </p>
             <div className="flex items-center gap-3">
               <div className={`w-12 h-12 bg-gradient-to-br ${testimonial.color} rounded-full flex items-center justify-center text-white font-bold text-xl`}>
