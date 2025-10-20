@@ -9,7 +9,7 @@ const ToastProvider = ToastPrimitives.Provider;
 const ToastViewport = React.forwardRef<
   React.ElementRef<typeof ToastPrimitives.Viewport>,
   React.ComponentPropsWithoutRef<typeof ToastPrimitives.Viewport>
->(({ className, ...props }, ref) => (
+>(({ className: _className, ...props }, ref) => (
   <ToastPrimitives.Viewport
     ref={ref}
     className="fixed top-0 right-0 z-[100] flex max-h-screen w-full flex-col-reverse p-4 sm:top-auto sm:right-0 sm:bottom-0 sm:flex-col md:max-w-[420px]"
@@ -23,7 +23,7 @@ const Toast = React.forwardRef<
   React.ComponentPropsWithoutRef<typeof ToastPrimitives.Root> & {
     variant?: 'success' | 'error' | 'info' | 'warning';
   }
->(({ className, variant = 'info', ...props }, ref) => {
+>(({ _className, variant = 'info', ...props }, ref) => {
   return (
     <ToastPrimitives.Root
       ref={ref}
@@ -54,7 +54,7 @@ Toast.displayName = ToastPrimitives.Root.displayName;
 const ToastAction = React.forwardRef<
   React.ElementRef<typeof ToastPrimitives.Action>,
   React.ComponentPropsWithoutRef<typeof ToastPrimitives.Action>
->(({ className, ...props }, ref) => (
+>(({ className: _className, ...props }, ref) => (
   <ToastPrimitives.Action
     ref={ref}
     className="inline-flex h-8 shrink-0 items-center justify-center rounded-md border bg-transparent px-3 text-sm font-medium transition-colors hover:bg-secondary focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none disabled:opacity-50"
@@ -66,7 +66,7 @@ ToastAction.displayName = ToastPrimitives.Action.displayName;
 const ToastClose = React.forwardRef<
   React.ElementRef<typeof ToastPrimitives.Close>,
   React.ComponentPropsWithoutRef<typeof ToastPrimitives.Close>
->(({ className, ...props }, ref) => (
+>(({ className: _className, ...props }, ref) => (
   <ToastPrimitives.Close
     ref={ref}
     className="absolute right-2 top-2 rounded-md p-1 text-foreground/50 opacity-0 transition-opacity hover:text-foreground focus:opacity-100 focus:outline-none focus:ring-2 group-hover:opacity-100"
@@ -81,7 +81,7 @@ ToastClose.displayName = ToastPrimitives.Close.displayName;
 const ToastTitle = React.forwardRef<
   React.ElementRef<typeof ToastPrimitives.Title>,
   React.ComponentPropsWithoutRef<typeof ToastPrimitives.Title>
->(({ className, ...props }, ref) => (
+>(({ className: _className, ...props }, ref) => (
   <ToastPrimitives.Title
     ref={ref}
     className="text-sm font-semibold"
@@ -93,7 +93,7 @@ ToastTitle.displayName = ToastPrimitives.Title.displayName;
 const ToastDescription = React.forwardRef<
   React.ElementRef<typeof ToastPrimitives.Description>,
   React.ComponentPropsWithoutRef<typeof ToastPrimitives.Description>
->(({ className, ...props }, ref) => (
+>(({ className: _className, ...props }, ref) => (
   <ToastPrimitives.Description
     ref={ref}
     className="text-sm opacity-90"

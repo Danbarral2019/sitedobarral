@@ -4,7 +4,7 @@ import { isAdmin } from './auth';
 /**
  * Tipo para funções de handler de API
  */
-type ApiHandler = (request: NextRequest, context?: any) => Promise<NextResponse>;
+type ApiHandler = (request: NextRequest, context?: Record<string, unknown>) => Promise<NextResponse>;
 
 /**
  * Middleware que protege rotas de API para admin apenas
@@ -16,7 +16,7 @@ type ApiHandler = (request: NextRequest, context?: any) => Promise<NextResponse>
  * });
  */
 export function withAdminAuth(handler: ApiHandler): ApiHandler {
-  return async (request: NextRequest, context?: any) => {
+  return async (request: NextRequest, context?: Record<string, unknown>) => {
     const admin = await isAdmin();
 
     if (!admin) {
@@ -40,7 +40,7 @@ export function withAdminAuth(handler: ApiHandler): ApiHandler {
  * });
  */
 export function withAuth(handler: ApiHandler): ApiHandler {
-  return async (request: NextRequest, context?: any) => {
+  return async (request: NextRequest, context?: Record<string, unknown>) => {
     const { getCurrentUser } = await import('./auth');
     const user = await getCurrentUser();
 

@@ -34,7 +34,7 @@ export default function NewPublicationPage() {
 
   useEffect(() => {
     verifyAdmin();
-  }, []);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   const verifyAdmin = async () => {
     try {

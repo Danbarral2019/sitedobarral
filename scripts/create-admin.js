@@ -8,8 +8,8 @@
  *   node scripts/create-admin.js admin@profbarral.com.br SenhaSegura123 "Prof. Daniel Barral"
  */
 
-const { PrismaClient } = require('@prisma/client');
-const bcrypt = require('bcryptjs');
+import { PrismaClient } from '@prisma/client';
+import bcrypt from 'bcryptjs';
 
 const prisma = new PrismaClient();
 

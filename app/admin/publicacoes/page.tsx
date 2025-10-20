@@ -7,8 +7,8 @@ import {
   Plus, Loader2, Eye, Edit, Trash2, Calendar, CheckCircle, XCircle, BookOpen, FileText
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
-import { Breadcrumb } from '@/components/ui/breadcrumb';
 import { Pagination } from '@/components/ui/pagination';
+import AdminLayout from '@/components/AdminLayout';
 
 interface PublicationData {
   id: string;
@@ -39,7 +39,7 @@ export default function AdminPublicacoesPage() {
   useEffect(() => {
     verifyAdmin();
     loadPublications();
-  }, []);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
     if (filterType === 'all') {
@@ -139,22 +139,14 @@ export default function AdminPublicacoesPage() {
   }
 
   return (
-    <main className="py-12 bg-gradient-to-br from-blue-50 via-white to-purple-50 min-h-screen">
-      <div className="container mx-auto px-4">
+    <AdminLayout>
+      <div className="p-8">
         <div className="max-w-7xl mx-auto">
-          <Breadcrumb
-            items={[
-              { label: 'Admin', href: '/admin' },
-              { label: 'Publicações' }
-            ]}
-            className="mb-6"
-          />
-
           <div className="mb-8">
             <div className="flex justify-between items-start">
               <div>
-                <h1 className="text-4xl font-bold text-gray-900 mb-2">Gerenciar Publicações</h1>
-                <p className="text-gray-700">Livros, artigos e notícias acadêmicas</p>
+                <h2 className="text-3xl font-bold text-gray-900 mb-2">Gerenciar Publicações</h2>
+                <p className="text-gray-600">Livros, artigos e notícias acadêmicas</p>
               </div>
               <Link
                 href="/admin/publicacoes/new"
@@ -323,6 +315,6 @@ export default function AdminPublicacoesPage() {
           </div>
         </div>
       </div>
-    </main>
+    </AdminLayout>
   );
 }

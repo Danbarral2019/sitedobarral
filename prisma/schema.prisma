@@ -6,7 +6,7 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
+  provider = "sqlite"
   url      = env("DATABASE_URL")
 }
 
@@ -14,7 +14,7 @@ datasource db {
 model QRCode {
   id          String   @id @default(uuid())
   code        String   @unique
-  qrCodeImage String?  @db.Text // Imagem do QR Code em base64
+  qrCodeImage String?  // Imagem do QR Code em base64
   courseId    String
   turma       String
   validUntil  DateTime
@@ -93,19 +93,34 @@ model Enrollment {
 
 // Log de acessos (para auditoria)
 model AccessLog {
-  id        String   @id @default(uuid())
-  userId    String?
-  qrCode    String?
-  courseId  String?
-  action    String   // login, access, download
-  ip        String?
-  userAgent String?
-  createdAt DateTime @default(now())
+  id         String   @id @default(uuid())
+  userId     String?
+  qrCode     String?
+  courseId   String?
+  documentId String?  // ID do documento acessado/baixado
+  action     String   // login, access, download, view
+  ip         String?
+  userAgent  String?
+  createdAt  DateTime @default(now())
 
   @@index([userId])
   @@index([createdAt])
   @@index([userId, action])
   @@index([courseId, createdAt])
+  @@index([documentId])
+}
+
+// Favoritos dos usuários
+model Favorite {
+  id         String   @id @default(uuid())
+  userId     String
+  documentId String
+  courseId   String   // Para facilitar filtros por curso
+  createdAt  DateTime @default(now())
+
+  @@unique([userId, documentId])
+  @@index([userId])
+  @@index([courseId])
 }
 
 // Posts do Blog
@@ -158,4 +173,33 @@ model Publication {
   @@index([isPublished])
   @@index([publishedAt])
   @@index([type, isPublished])
+}
+
+// Formulário de Contato
+model ContactForm {
+  id             String   @id @default(uuid())
+  name           String
+  email          String
+  phone          String?
+  courseInterest String?  // Nome do curso de interesse
+  message        String
+  isRead         Boolean  @default(false)
+  createdAt      DateTime @default(now())
+
+  @@index([isRead])
+  @@index([createdAt])
+}
+
+// Newsletter - Cadastro de Interessados
+model NewsletterSubscriber {
+  id             String   @id @default(uuid())
+  email          String   @unique
+  name           String?
+  interests      String?  // JSON array com temas de interesse
+  isActive       Boolean  @default(true)
+  subscribedAt   DateTime @default(now())
+  unsubscribedAt DateTime?
+
+  @@index([isActive])
+  @@index([subscribedAt])
 }

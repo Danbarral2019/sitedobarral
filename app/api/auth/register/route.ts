@@ -3,8 +3,19 @@ import { prisma } from '@/lib/prisma';
 import bcrypt from 'bcryptjs';
 import crypto from 'crypto';
 import { sendVerificationEmail } from '@/lib/email';
+import { rateLimiters } from '@/lib/rate-limit';
 
 export async function POST(request: NextRequest) {
+  // Rate limiting: 10 cadastros por minuto por IP
+  try {
+    await rateLimiters.forms.check(request, 10);
+  } catch {
+    return NextResponse.json(
+      { error: 'Muitas tentativas de cadastro. Por favor, aguarde alguns instantes.' },
+      { status: 429 }
+    );
+  }
+
   try {
     const body = await request.json();
     const { email, name, password, courseId, qrCodeId } = body;
@@ -142,7 +153,7 @@ export async function POST(request: NextRequest) {
       },
       { status: 201 }
     );
-  } catch (error) {
+  } catch {
     console.error('Registration error:', error);
     return NextResponse.json(
       { error: 'Erro ao processar cadastro' },

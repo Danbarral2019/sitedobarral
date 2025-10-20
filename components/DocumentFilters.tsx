@@ -161,7 +161,7 @@ export default function DocumentFilters({
             </label>
             <select
               value={filters.sortBy}
-              onChange={(e) => handleSortChange(e.target.value as any)}
+              onChange={(e) => handleSortChange(e.target.value as "recent" | "title" | "category")}
               className="w-full px-3 py-2 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-600 text-gray-900"
             >
               <option value="recent">Mais Recentes</option>
@@ -179,7 +179,7 @@ export default function DocumentFilters({
 
           {filters.searchQuery && (
             <span className="inline-flex items-center gap-1 px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-sm font-medium">
-              Busca: "{filters.searchQuery}"
+              Busca: &quot;{filters.searchQuery}&quot;
               <button
                 onClick={() => handleSearchChange('')}
                 className="hover:bg-blue-200 rounded-full p-0.5"

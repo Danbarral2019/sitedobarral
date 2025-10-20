@@ -2,9 +2,21 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
+import { rateLimiters } from '@/lib/rate-limit';
+
 const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key-change-in-production';
 
 export async function POST(request: NextRequest) {
+  // Rate limiting: 5 tentativas de login por minuto
+  try {
+    await rateLimiters.auth.check(request, 5);
+  } catch {
+    return NextResponse.json(
+      { error: 'Muitas tentativas de login. Tente novamente em alguns instantes.' },
+      { status: 429 }
+    );
+  }
+
   try {
     const body = await request.json();
     const { email, password } = body;
@@ -111,7 +123,7 @@ export async function POST(request: NextRequest) {
     });
 
     return response;
-  } catch (error) {
+  } catch {
     console.error('Login error:', error);
     return NextResponse.json(
       { error: 'Erro ao processar login' },

@@ -1,12 +1,23 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { randomBytes } from 'crypto';
+import { rateLimiters } from '@/lib/rate-limit';
 
 /**
  * POST /api/auth/request-reset
  * Solicita reset de senha - gera token e salva no banco
  */
 export async function POST(request: NextRequest) {
+  // Rate limiting: 5 solicitações de reset por minuto
+  try {
+    await rateLimiters.auth.check(request, 5);
+  } catch {
+    return NextResponse.json(
+      { error: 'Muitas tentativas de reset de senha. Por favor, aguarde alguns instantes.' },
+      { status: 429 }
+    );
+  }
+
   try {
     const { email } = await request.json();
 
@@ -67,7 +78,7 @@ export async function POST(request: NextRequest) {
         expiresAt: resetTokenExpiry.toISOString(),
       } : undefined,
     });
-  } catch (error) {
+  } catch {
     console.error('Erro ao solicitar reset de senha:', error);
     return NextResponse.json(
       { error: 'Erro ao processar solicitação' },

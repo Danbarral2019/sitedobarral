@@ -1,5 +1,6 @@
 import { Document } from './types';
 import { prisma } from './prisma';
+import { Document as PrismaDocument } from '@prisma/client';
 
 /**
  * Adiciona um novo documento
@@ -54,7 +55,7 @@ export async function listDocuments(): Promise<Document[]> {
     },
   });
 
-  return dbDocuments.map((doc) => ({
+  return dbDocuments.map((doc: PrismaDocument) => ({
     id: doc.id,
     title: doc.title,
     description: doc.description || undefined,
@@ -83,7 +84,7 @@ export async function getDocumentsByCourse(courseId: string): Promise<{
     },
   });
 
-  const mapDocument = (doc: any): Document => ({
+  const mapDocument = (doc: PrismaDocument): Document => ({
     id: doc.id,
     title: doc.title,
     description: doc.description || undefined,
@@ -98,8 +99,8 @@ export async function getDocumentsByCourse(courseId: string): Promise<{
   });
 
   return {
-    public: allDocs.filter(doc => doc.isPublic).map(mapDocument),
-    restricted: allDocs.filter(doc => !doc.isPublic).map(mapDocument),
+    public: allDocs.filter((doc: PrismaDocument) => doc.isPublic).map(mapDocument),
+    restricted: allDocs.filter((doc: PrismaDocument) => !doc.isPublic).map(mapDocument),
   };
 }
 
@@ -139,7 +140,7 @@ export async function deleteDocument(id: string): Promise<boolean> {
       where: { id },
     });
     return true;
-  } catch (error) {
+  } catch {
     return false;
   }
 }
@@ -152,7 +153,7 @@ export async function updateDocument(
   updates: Partial<Omit<Document, 'id' | 'courseId' | 'uploadedAt'>>
 ): Promise<Document | null> {
   try {
-    const data: any = {};
+    const data: Record<string, unknown> = {};
 
     if (updates.title !== undefined) data.title = updates.title;
     if (updates.description !== undefined) data.description = updates.description || null;
@@ -181,7 +182,7 @@ export async function updateDocument(
       uploadedAt: doc.uploadedAt,
       size: doc.size || undefined,
     };
-  } catch (error) {
+  } catch {
     return null;
   }
 }

@@ -1,6 +1,6 @@
 import Link from 'next/link';
-import { Calendar, Clock, Tag, ArrowRight } from 'lucide-react';
-import { PrismaClient } from '@prisma/client';
+import { Calendar, Clock, ArrowRight } from 'lucide-react';
+import { PrismaClient, BlogPost } from '@prisma/client';
 
 const prisma = new PrismaClient();
 
@@ -10,7 +10,7 @@ export default async function BlogPage() {
     orderBy: { publishedAt: 'desc' }
   });
 
-  const publishedPosts = posts.map(post => ({
+  const publishedPosts = posts.map((post: BlogPost) => ({
     ...post,
     publishedAt: new Date(post.publishedAt),
     tags: post.tags ? JSON.parse(post.tags) : []
@@ -47,7 +47,7 @@ export default async function BlogPage() {
           </div>
 
           <div className="space-y-8">
-            {publishedPosts.map((post, index) => {
+            {publishedPosts.map((post: BlogPost & { tags: string[] }, index: number) => {
               const colorIndex = index % 5;
               const borderColors = ['border-l-blue-500', 'border-l-green-500', 'border-l-purple-500', 'border-l-pink-500', 'border-l-orange-500'];
               const tagColors = [

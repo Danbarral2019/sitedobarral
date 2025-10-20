@@ -1,6 +1,7 @@
 import { prisma } from '@/lib/prisma';
 import { BookOpen, FileText, Calendar, ExternalLink, MapPin } from 'lucide-react';
-import Link from 'next/link';
+// import Link from 'next/link';
+import { Publication } from '@prisma/client';
 
 export default async function PublicacoesPage() {
   const publications = await prisma.publication.findMany({
@@ -8,9 +9,9 @@ export default async function PublicacoesPage() {
     orderBy: { publishedAt: 'desc' }
   });
 
-  const livros = publications.filter(p => p.type === 'livro');
-  const artigos = publications.filter(p => p.type === 'artigo');
-  const noticias = publications.filter(p => p.type === 'noticia');
+  const livros = publications.filter((p: Publication) => p.type === 'livro');
+  const artigos = publications.filter((p: Publication) => p.type === 'artigo');
+  const noticias = publications.filter((p: Publication) => p.type === 'noticia');
 
   const formatDate = (date: Date) => {
     return new Intl.DateTimeFormat('pt-BR', {
@@ -50,7 +51,7 @@ export default async function PublicacoesPage() {
               </p>
             ) : (
               <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {livros.map((livro) => (
+                {livros.map((livro: Publication) => (
                   <div key={livro.id} className="bg-white rounded-2xl shadow-lg overflow-hidden hover:shadow-2xl transition-all group border-2 border-gray-100 hover:border-blue-500">
                     {livro.coverImage && (
                       <div className="aspect-[3/4] bg-gray-200 overflow-hidden">
@@ -105,7 +106,7 @@ export default async function PublicacoesPage() {
               </p>
             ) : (
               <div className="space-y-6">
-                {artigos.map((artigo) => (
+                {artigos.map((artigo: Publication) => (
                   <div key={artigo.id} className="bg-white rounded-2xl shadow-lg p-6 hover:shadow-2xl transition-all border-l-4 border-purple-500">
                     <h3 className="text-2xl font-bold mb-2 text-gray-900">
                       {artigo.title}
@@ -155,7 +156,7 @@ export default async function PublicacoesPage() {
               </p>
             ) : (
               <div className="grid md:grid-cols-2 gap-6">
-                {noticias.map((noticia) => (
+                {noticias.map((noticia: Publication) => (
                   <div key={noticia.id} className="bg-white rounded-2xl shadow-lg p-6 hover:shadow-2xl transition-all border-2 border-gray-100 hover:border-pink-500">
                     <h3 className="text-xl font-bold mb-2 text-gray-900">
                       {noticia.title}

@@ -77,9 +77,9 @@ export default function SobrePage() {
               </div>
               <h2 className="text-3xl md:text-4xl font-bold mb-6 text-white">Missão</h2>
               <p className="text-xl text-white leading-relaxed max-w-3xl mx-auto opacity-95">
-                "Compartilhar conhecimento prático e atualizado em Direito Administrativo,
+                &quot;Compartilhar conhecimento prático e atualizado em Direito Administrativo,
                 contribuindo para a excelência na gestão pública e o aprimoramento contínuo
-                dos profissionais que atuam com licitações e contratos."
+                dos profissionais que atuam com licitações e contratos.&quot;
               </p>
               <div className="mt-8 flex flex-wrap justify-center gap-6">
                 <div className="flex items-center gap-2 text-white">

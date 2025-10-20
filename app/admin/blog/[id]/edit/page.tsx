@@ -1,11 +1,11 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
-import { Loader2, Save, ArrowLeft, Trash2 } from 'lucide-react';
+import { Loader2, Save, ArrowLeft, Trash2, Plus, X } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
-import { Breadcrumb } from '@/components/ui/breadcrumb';
-import Link from 'next/link';
+import AdminLayout from '@/components/AdminLayout';
+import MarkdownEditor from '@/components/MarkdownEditor';
 
 interface BlogPostData {
   id: string;
@@ -34,20 +34,11 @@ export default function EditBlogPostPage({ params }: { params: Promise<{ id: str
     author: '',
     publishedAt: '',
     isPublished: false,
-    tags: '',
   });
+  const [tags, setTags] = useState<string[]>([]);
+  const [tagInput, setTagInput] = useState('');
 
-  useEffect(() => {
-    const init = async () => {
-      const resolvedParams = await params;
-      setId(resolvedParams.id);
-      await verifyAdmin();
-      await loadPost(resolvedParams.id);
-    };
-    init();
-  }, [params]);
-
-  const verifyAdmin = async () => {
+  const verifyAdmin = useCallback(async () => {
     try {
       const response = await fetch('/api/auth/verify');
 
@@ -66,9 +57,9 @@ export default function EditBlogPostPage({ params }: { params: Promise<{ id: str
       console.error('Erro ao verificar admin:', error);
       router.push('/validar-acesso');
     }
-  };
+  }, [router]);
 
-  const loadPost = async (postId: string) => {
+  const loadPost = useCallback(async (postId: string) => {
     try {
       const response = await fetch(`/api/admin/blog-posts/${postId}`);
 
@@ -79,7 +70,7 @@ export default function EditBlogPostPage({ params }: { params: Promise<{ id: str
       const data = await response.json();
       const post: BlogPostData = data.post;
 
-      const tags = post.tags ? JSON.parse(post.tags) : [];
+      const parsedTags = post.tags ? JSON.parse(post.tags) : [];
 
       setFormData({
         title: post.title,
@@ -89,8 +80,8 @@ export default function EditBlogPostPage({ params }: { params: Promise<{ id: str
         author: post.author,
         publishedAt: new Date(post.publishedAt).toISOString().split('T')[0],
         isPublished: post.isPublished,
-        tags: tags.join(', '),
       });
+      setTags(parsedTags);
     } catch (error) {
       console.error('Erro ao carregar post:', error);
       errorToast('Erro ao carregar post', 'Post não encontrado.');
@@ -98,7 +89,17 @@ export default function EditBlogPostPage({ params }: { params: Promise<{ id: str
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [errorToast, router]);
+
+  useEffect(() => {
+    const init = async () => {
+      const resolvedParams = await params;
+      setId(resolvedParams.id);
+      await verifyAdmin();
+      await loadPost(resolvedParams.id);
+    };
+    init();
+  }, [params, verifyAdmin, loadPost]);
 
   const generateSlug = (title: string) => {
     return title
@@ -117,22 +118,28 @@ export default function EditBlogPostPage({ params }: { params: Promise<{ id: str
     }));
   };
 
+  const handleAddTag = () => {
+    if (tagInput.trim() && !tags.includes(tagInput.trim())) {
+      setTags([...tags, tagInput.trim()]);
+      setTagInput('');
+    }
+  };
+
+  const handleRemoveTag = (tagToRemove: string) => {
+    setTags(tags.filter(tag => tag !== tagToRemove));
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSaving(true);
 
     try {
-      const tagsArray = formData.tags
-        .split(',')
-        .map(tag => tag.trim())
-        .filter(tag => tag.length > 0);
-
       const response = await fetch(`/api/admin/blog-posts/${id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           ...formData,
-          tags: tagsArray,
+          tags: tags.length > 0 ? tags : null,
         }),
       });
 
@@ -189,29 +196,19 @@ export default function EditBlogPostPage({ params }: { params: Promise<{ id: str
   }
 
   return (
-    <main className="py-12 bg-gradient-to-br from-orange-50 via-white to-amber-50 min-h-screen">
-      <div className="container mx-auto px-4">
-        <div className="max-w-4xl mx-auto">
-          <Breadcrumb
-            items={[
-              { label: 'Admin', href: '/admin' },
-              { label: 'Blog', href: '/admin/blog' },
-              { label: 'Editar Post' }
-            ]}
-            className="mb-6"
-          />
-
+    <AdminLayout>
+      <div className="p-8">
+        <div className="max-w-5xl mx-auto">
           <div className="mb-8">
-            <div className="flex items-center justify-between">
-              <h1 className="text-4xl font-bold text-gray-900">Editar Post</h1>
-              <Link
-                href="/admin/blog"
-                className="text-gray-600 hover:text-gray-900 flex items-center gap-2"
-              >
-                <ArrowLeft className="w-5 h-5" />
-                Voltar
-              </Link>
-            </div>
+            <button
+              onClick={() => router.push('/admin/blog')}
+              className="flex items-center gap-2 text-gray-700 hover:text-blue-600 transition-colors mb-4 font-medium"
+            >
+              <ArrowLeft className="w-4 h-4" />
+              Voltar para Blog
+            </button>
+            <h1 className="text-3xl font-bold text-gray-900 mb-2">Editar Post</h1>
+            <p className="text-gray-600">Edite as informações do post</p>
           </div>
 
           <div className="bg-white rounded-2xl shadow-lg p-8 border-2 border-gray-200">
@@ -261,21 +258,15 @@ export default function EditBlogPostPage({ params }: { params: Promise<{ id: str
                 />
               </div>
 
-              <div>
-                <label className="block text-sm font-bold text-gray-900 mb-2">
-                  Conteúdo *
+              <div className="col-span-full">
+                <label className="block text-sm font-bold text-gray-900 mb-4">
+                  Conteúdo * <span className="text-xs font-normal text-gray-500">(Suporta Markdown)</span>
                 </label>
-                <textarea
+                <MarkdownEditor
                   value={formData.content}
-                  onChange={(e) => setFormData({ ...formData, content: e.target.value })}
-                  required
-                  rows={15}
-                  className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-600 text-gray-900 font-mono text-sm"
-                  placeholder="Conteúdo completo do post"
+                  onChange={(content) => setFormData({ ...formData, content })}
+                  placeholder="Escreva o conteúdo completo do post em Markdown..."
                 />
-                <p className="text-xs text-gray-600 mt-1">
-                  Use quebras de linha para separar parágrafos. O texto será exibido formatado automaticamente.
-                </p>
               </div>
 
               <div className="grid md:grid-cols-2 gap-6">
@@ -308,15 +299,46 @@ export default function EditBlogPostPage({ params }: { params: Promise<{ id: str
 
               <div>
                 <label className="block text-sm font-bold text-gray-900 mb-2">
-                  Tags (separadas por vírgula)
+                  Tags
                 </label>
-                <input
-                  type="text"
-                  value={formData.tags}
-                  onChange={(e) => setFormData({ ...formData, tags: e.target.value })}
-                  className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-600 text-gray-900"
-                  placeholder="Ex: Lei 14.133/2021, Licitações, PNCP"
-                />
+                <div className="flex gap-2 mb-3">
+                  <input
+                    type="text"
+                    value={tagInput}
+                    onChange={(e) => setTagInput(e.target.value)}
+                    onKeyPress={(e) => e.key === 'Enter' && (e.preventDefault(), handleAddTag())}
+                    placeholder="Digite uma tag e pressione Enter"
+                    className="flex-1 px-4 py-2 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-600 text-gray-900"
+                  />
+                  <button
+                    type="button"
+                    onClick={handleAddTag}
+                    className="px-4 py-2 bg-orange-600 text-white rounded-lg font-bold hover:bg-orange-700 transition-colors flex items-center gap-2"
+                  >
+                    <Plus className="w-4 h-4" />
+                    Adicionar
+                  </button>
+                </div>
+
+                {tags.length > 0 && (
+                  <div className="flex flex-wrap gap-2">
+                    {tags.map((tag) => (
+                      <span
+                        key={tag}
+                        className="px-3 py-1 bg-orange-100 text-orange-800 rounded-full text-sm font-medium flex items-center gap-2"
+                      >
+                        {tag}
+                        <button
+                          type="button"
+                          onClick={() => handleRemoveTag(tag)}
+                          className="hover:text-orange-900"
+                        >
+                          <X className="w-3 h-3" />
+                        </button>
+                      </span>
+                    ))}
+                  </div>
+                )}
               </div>
 
               <div className="flex items-center gap-3 p-4 bg-gray-50 rounded-lg">
@@ -373,6 +395,6 @@ export default function EditBlogPostPage({ params }: { params: Promise<{ id: str
           </div>
         </div>
       </div>
-    </main>
+    </AdminLayout>
   );
 }

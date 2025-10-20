@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 
 export interface UserData {
@@ -31,11 +31,7 @@ export function useAdminAuth() {
   const [user, setUser] = useState<UserData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
-  useEffect(() => {
-    verifyAdminAccess();
-  }, []);
-
-  const verifyAdminAccess = async () => {
+  const verifyAdminAccess = useCallback(async () => {
     try {
       const response = await fetch('/api/auth/verify');
 
@@ -60,7 +56,11 @@ export function useAdminAuth() {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [router]);
+
+  useEffect(() => {
+    verifyAdminAccess();
+  }, [verifyAdminAccess]);
 
   return {
     user,
@@ -87,11 +87,7 @@ export function useAuth() {
   const [user, setUser] = useState<UserData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
-  useEffect(() => {
-    verifyAccess();
-  }, []);
-
-  const verifyAccess = async () => {
+  const verifyAccess = useCallback(async () => {
     try {
       const response = await fetch('/api/auth/verify');
 
@@ -109,7 +105,11 @@ export function useAuth() {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [router]);
+
+  useEffect(() => {
+    verifyAccess();
+  }, [verifyAccess]);
 
   return {
     user,
