@@ -47,7 +47,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: "Prof. Daniel Barral - Especialista em Licitações e Contratos",
     description: "Repositório especializado de materiais jurídicos em Direito Administrativo. Cursos sobre Nova Lei 14.133/2021, gestão de contratos e mais.",
-    url: "https://profbarral.com.br",
+    url: "https://profdanielbarral.com",
     siteName: "Prof. Daniel Barral",
     locale: "pt_BR",
     type: "website",

@@ -54,6 +54,9 @@ export async function generateStaticParams() {
   }));
 }
 
+// Revalidar a cada 1 hora
+export const revalidate = 3600;
+
 export default async function BlogPostPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
   const dbPost = await prisma.blogPost.findUnique({

@@ -1,6 +1,37 @@
 import { Award, BookOpen, Users, Briefcase, GraduationCap, Scale, ArrowRight, CheckCircle } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
+import type { Metadata } from 'next';
+
+export const metadata: Metadata = {
+  title: 'Sobre o Prof. Daniel Barral',
+  description: 'Mestre em Direito Público, Professor Especializado em Licitações e Contratos Administrativos. Conheça a trajetória profissional e acadêmica do Prof. Daniel Barral.',
+  keywords: [
+    'Daniel Barral',
+    'professor direito administrativo',
+    'mestre direito público',
+    'especialista licitações',
+    'contratos administrativos',
+    'AGU',
+    'TCU',
+    'perfil profissional',
+  ],
+  openGraph: {
+    title: 'Sobre o Prof. Daniel Barral',
+    description: 'Mestre em Direito Público, Professor Especializado em Licitações e Contratos Administrativos',
+    url: 'https://profdanielbarral.com/sobre',
+    type: 'profile',
+    locale: 'pt_BR',
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Sobre o Prof. Daniel Barral',
+    description: 'Mestre em Direito Público, Professor Especializado em Licitações e Contratos Administrativos',
+  },
+  alternates: {
+    canonical: '/sobre',
+  },
+};
 
 export default function SobrePage() {
   return (

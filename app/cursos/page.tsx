@@ -1,6 +1,38 @@
 import Link from 'next/link';
 import { ArrowRight, BookOpen, Clock, Users, FileText } from 'lucide-react';
 import { courses } from '@/data/courses';
+import type { Metadata } from 'next';
+
+export const metadata: Metadata = {
+  title: 'Cursos Especializados',
+  description: '10 cursos especializados em Direito Administrativo, Licitações e Contratos. Material atualizado com a Nova Lei 14.133/2021, jurisprudência do TCU e pareceres da AGU.',
+  keywords: [
+    'cursos licitações',
+    'cursos contratos administrativos',
+    'direito administrativo',
+    'nova lei licitações',
+    'lei 14.133/2021',
+    'cursos presenciais',
+    'cursos in company',
+    'TCU',
+    'AGU',
+  ],
+  openGraph: {
+    title: 'Cursos Especializados | Prof. Daniel Barral',
+    description: '10 cursos especializados em Direito Administrativo, Licitações e Contratos com material exclusivo',
+    url: 'https://profdanielbarral.com/cursos',
+    type: 'website',
+    locale: 'pt_BR',
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Cursos Especializados | Prof. Daniel Barral',
+    description: '10 cursos especializados em Direito Administrativo e Licitações',
+  },
+  alternates: {
+    canonical: '/cursos',
+  },
+};
 
 export default function CursosPage() {
   return (
