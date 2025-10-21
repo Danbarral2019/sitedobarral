@@ -15,6 +15,59 @@ Quando você publica um post no blog, o sistema automaticamente:
 
 ---
 
+## 🚧 STATUS DA CONFIGURAÇÃO
+
+**Última atualização:** 21/10/2025
+
+### ✅ Concluído:
+- ✅ **Backend completo implementado** (schema, libs, APIs)
+- ✅ **UI de administração criada** (telas de log e configuração)
+- ✅ **Formulários de blog atualizados** (checkbox de auto-publicação)
+- ✅ **Menu admin atualizado** (link "Redes Sociais")
+- ✅ **Fix de deploy** (OG image runtime nodejs)
+- ✅ **Documentação completa**
+
+### 🔄 Em Progresso - Instagram:
+**Parou em:** Passo 5 - Adicionar Produto Instagram
+
+**O que já foi feito:**
+1. ✅ Conta Instagram convertida para Business Account
+2. ✅ Página do Facebook criada
+3. ✅ Instagram conectado à Página do Facebook
+4. ✅ Facebook App criado:
+   - ✅ Nome: "Prof Daniel Barral - Social Publisher"
+   - ✅ Tipo: Outro → Empresa
+   - ✅ Produto Instagram adicionado
+   - ✅ URL de exclusão de dados configurada: `https://profdanielbarral.com/`
+
+**Próximos passos (para amanhã):**
+1. ⏳ **Continuar configuração do produto Instagram:**
+   - Adicionar permissões necessárias:
+     - `instagram_basic`
+     - `instagram_content_publish`
+     - `pages_read_engagement`
+     - `pages_show_list`
+   - Conectar Página do Facebook ao app
+   - Vincular conta Instagram Business
+
+2. ⏳ **Obter credenciais (Passo 6):**
+   - App ID e App Secret
+   - Access Token de longa duração
+   - Instagram Business Account ID
+
+3. ⏳ **Adicionar variáveis no Vercel (Passo 7)**
+
+### ⏸️ Pendente:
+- ⏸️ **LinkedIn** - Não iniciado (Parte 2 completa)
+- ⏸️ **Testes** - Aguardando conclusão da configuração
+
+### 📝 Notas Importantes:
+- **Portfólio empresarial:** Necessário conectar ao app (obrigatório para Instagram API)
+- **Tokens:** Lembrar que expiram em 60 dias e precisam ser renovados
+- **Ambiente:** Tudo pronto no código, só falta configurar as variáveis de ambiente
+
+---
+
 ## 📋 Pré-requisitos
 
 ### Para Instagram:
