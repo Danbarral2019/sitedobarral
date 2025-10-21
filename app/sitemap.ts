@@ -72,23 +72,8 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     console.error('Erro ao gerar sitemap do blog:', error);
   }
 
-  // Publicações (dinâmicas)
-  let publicationPages: MetadataRoute.Sitemap = [];
-  try {
-    const publications = await prisma.publication.findMany({
-      where: { isPublished: true },
-      select: { slug: true, updatedAt: true },
-    });
+  // Publicações não têm páginas individuais, apenas listagem em /publicacoes
+  // A página de listagem já está incluída em staticPages
 
-    publicationPages = publications.map((pub) => ({
-      url: `${BASE_URL}/publicacoes/${pub.slug}`,
-      lastModified: pub.updatedAt,
-      changeFrequency: 'monthly',
-      priority: 0.6,
-    }));
-  } catch (error) {
-    console.error('Erro ao gerar sitemap de publicações:', error);
-  }
-
-  return [...staticPages, ...coursesPages, ...blogPages, ...publicationPages];
+  return [...staticPages, ...coursesPages, ...blogPages];
 }
