@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { usePathname } from 'next/navigation';
 import Link from 'next/link';
 import {
-  QrCode, FileSpreadsheet, Menu, X, ChevronLeft, ChevronRight
+  QrCode, FileSpreadsheet, Menu, X, ChevronLeft, ChevronRight, Share2
 } from 'lucide-react';
 
 interface AdminLayoutProps {
@@ -54,6 +54,11 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
       path: '/admin/importar',
       label: 'Importar Excel',
       icon: FileSpreadsheet,
+    },
+    {
+      path: '/admin/redes-sociais',
+      label: 'Redes Sociais',
+      icon: Share2,
     },
   ];
 
