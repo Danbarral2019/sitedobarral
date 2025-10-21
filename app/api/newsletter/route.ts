@@ -55,23 +55,24 @@ export async function POST(request: NextRequest) {
           }
         });
 
-        // Sincronizar com MailChimp (não bloqueia se falhar)
+        // Sincronizar com MailChimp (agora aguarda a sincronização)
         if (isMailChimpConfigured()) {
           const [firstName, ...lastNameParts] = (name || existing.name || '').split(' ');
           const lastName = lastNameParts.join(' ');
 
           console.log(`[MailChimp] Reativando: ${email}`);
 
-          addSubscriber(email, firstName, lastName, interests)
-            .then(result => {
-              console.log('[MailChimp] Reativação sucesso:', result);
-            })
-            .catch(err => {
-              console.error('[MailChimp] ERRO na reativação:', {
-                message: err.message,
-                error: err
-              });
+          try {
+            const result = await addSubscriber(email, firstName, lastName, interests);
+            console.log('[MailChimp] Reativação sucesso:', result);
+          } catch (err: unknown) {
+            const error = err as Error;
+            console.error('[MailChimp] ERRO na reativação:', {
+              message: error.message,
+              error: error
             });
+            // Não falha a requisição se MailChimp falhar - email já foi reativado no BD
+          }
         }
 
         return NextResponse.json(
@@ -95,24 +96,25 @@ export async function POST(request: NextRequest) {
       },
     });
 
-    // Sincronizar com MailChimp (não bloqueia se falhar)
+    // Sincronizar com MailChimp (agora aguarda a sincronização)
     if (isMailChimpConfigured()) {
       const [firstName, ...lastNameParts] = (name || '').split(' ');
       const lastName = lastNameParts.join(' ');
 
       console.log(`[MailChimp] Tentando adicionar: ${email}, Nome: ${firstName} ${lastName}`);
 
-      addSubscriber(email, firstName, lastName, interests)
-        .then(result => {
-          console.log('[MailChimp] Sucesso:', result);
-        })
-        .catch(err => {
-          console.error('[MailChimp] ERRO DETALHADO:', {
-            message: err.message,
-            error: err,
-            stack: err.stack
-          });
+      try {
+        const result = await addSubscriber(email, firstName, lastName, interests);
+        console.log('[MailChimp] Sucesso:', result);
+      } catch (err: unknown) {
+        const error = err as Error;
+        console.error('[MailChimp] ERRO DETALHADO:', {
+          message: error.message,
+          error: error,
+          stack: error.stack
         });
+        // Não falha a requisição se MailChimp falhar - email já foi salvo no BD
+      }
     } else {
       console.warn('[MailChimp] NÃO CONFIGURADO - pulando sincronização');
     }
@@ -192,11 +194,16 @@ export async function DELETE(request: NextRequest) {
       }
     });
 
-    // Sincronizar com MailChimp (não bloqueia se falhar)
+    // Sincronizar com MailChimp (agora aguarda a sincronização)
     if (isMailChimpConfigured()) {
-      unsubscribeSubscriber(email).catch(err => {
-        console.error('Erro ao cancelar inscrição no MailChimp:', err);
-      });
+      try {
+        await unsubscribeSubscriber(email);
+        console.log('[MailChimp] Cancelamento sincronizado com sucesso');
+      } catch (err: unknown) {
+        const error = err as Error;
+        console.error('[MailChimp] Erro ao cancelar inscrição:', error);
+        // Não falha a requisição se MailChimp falhar - email já foi desativado no BD
+      }
     }
 
     return NextResponse.json({
