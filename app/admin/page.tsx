@@ -102,43 +102,28 @@ export default function AdminPage() {
     setIsGenerating(true);
 
     try {
-      console.log('[Frontend] Enviando requisição para gerar QR Code...');
-
       const response = await fetch('/api/admin/generate-qr', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(formData),
       });
 
-      console.log('[Frontend] Resposta recebida. Status:', response.status);
-      console.log('[Frontend] Headers:', Object.fromEntries(response.headers.entries()));
-
       const data = await response.json();
-      console.log('[Frontend] Dados parseados:', {
-        success: data.success,
-        code: data.code,
-        hasImage: !!data.qrCodeImage,
-        imageLength: data.qrCodeImage?.length
-      });
 
       if (!response.ok) {
         throw new Error(data.error);
       }
 
-      console.log('[Frontend] Definindo QR Code gerado...');
       setGeneratedQR({
         code: data.code,
         image: data.qrCodeImage,
       });
 
-      console.log('[Frontend] Mostrando toast de sucesso...');
       success('QR Code gerado com sucesso!', 'O código já está disponível para uso.');
 
-      console.log('[Frontend] Recarregando lista de QR Codes...');
       // Recarrega lista
       loadQRCodes();
 
-      console.log('[Frontend] Resetando formulário...');
       // Reset form
       setFormData({
         courseId: '',
@@ -146,10 +131,8 @@ export default function AdminPage() {
         validDays: '90',
         maxUses: '',
       });
-
-      console.log('[Frontend] Processo concluído com sucesso!');
     } catch (error) {
-      console.error('[Frontend] ERRO ao gerar QR Code:', error);
+      console.error('Erro ao gerar QR Code:', error);
       errorToast('Erro ao gerar QR Code', error instanceof Error ? error.message : 'Tente novamente.');
     } finally {
       setIsGenerating(false);
