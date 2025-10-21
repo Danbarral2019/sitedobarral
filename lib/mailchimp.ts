@@ -1,4 +1,5 @@
 import mailchimp from '@mailchimp/mailchimp_marketing';
+import crypto from 'crypto';
 
 /**
  * Biblioteca de integração com MailChimp
@@ -59,6 +60,11 @@ export async function addSubscriber(
   }
 
   try {
+    const emailLower = email.toLowerCase();
+
+    // Criar MD5 hash do email (requerido pelo MailChimp)
+    const subscriberHash = crypto.createHash('md5').update(emailLower).digest('hex');
+
     // Preparar merge fields (campos personalizados)
     const mergeFields: Record<string, string> = {};
     if (firstName) mergeFields.FNAME = firstName;
@@ -72,9 +78,9 @@ export async function addSubscriber(
     // Adicionar/atualizar inscrito
     const response = await mailchimp.lists.setListMember(
       MAILCHIMP_AUDIENCE_ID,
-      email.toLowerCase(),
+      subscriberHash,
       {
-        email_address: email.toLowerCase(),
+        email_address: emailLower,
         status_if_new: 'subscribed', // 'subscribed', 'pending', 'unsubscribed', 'cleaned'
         merge_fields: mergeFields,
         tags: tags,
@@ -118,9 +124,12 @@ export async function unsubscribeSubscriber(
   }
 
   try {
+    const emailLower = email.toLowerCase();
+    const subscriberHash = crypto.createHash('md5').update(emailLower).digest('hex');
+
     await mailchimp.lists.updateListMember(
       MAILCHIMP_AUDIENCE_ID,
-      email.toLowerCase(),
+      subscriberHash,
       {
         status: 'unsubscribed',
       }
@@ -156,6 +165,9 @@ export async function updateSubscriberTags(
   }
 
   try {
+    const emailLower = email.toLowerCase();
+    const subscriberHash = crypto.createHash('md5').update(emailLower).digest('hex');
+
     const tags = [
       ...tagsToAdd.map(tag => ({ name: tag, status: 'active' as const })),
       ...(tagsToRemove || []).map(tag => ({ name: tag, status: 'inactive' as const })),
@@ -163,7 +175,7 @@ export async function updateSubscriberTags(
 
     await mailchimp.lists.updateListMemberTags(
       MAILCHIMP_AUDIENCE_ID,
-      email.toLowerCase(),
+      subscriberHash,
       {
         tags: tags,
       }
@@ -197,9 +209,12 @@ export async function getSubscriber(
   }
 
   try {
+    const emailLower = email.toLowerCase();
+    const subscriberHash = crypto.createHash('md5').update(emailLower).digest('hex');
+
     const response = await mailchimp.lists.getListMember(
       MAILCHIMP_AUDIENCE_ID,
-      email.toLowerCase()
+      subscriberHash
     );
 
     return {
