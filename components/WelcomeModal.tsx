@@ -81,7 +81,7 @@ export default function WelcomeModal() {
                 <h2 id="welcome-title" className="text-xl sm:text-3xl font-bold text-white mb-2 leading-tight">
                   Bem-vindo ao Site do Prof. Daniel Barral
                 </h2>
-                <p className="text-blue-100 text-sm sm:text-lg">
+                <p className="hidden sm:block text-blue-100 text-sm sm:text-lg">
                   Especialista em Licitações e Contratos Administrativos
                 </p>
               </div>
