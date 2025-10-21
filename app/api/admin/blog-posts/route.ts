@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { withAdminAuth } from '@/lib/api-middleware';
 import { PrismaClient } from '@prisma/client';
+import { publishToSocialMedia } from '@/lib/social-publisher';
 
 const prisma = new PrismaClient();
 
@@ -27,7 +28,7 @@ export const GET = withAdminAuth(async () => {
 export const POST = withAdminAuth(async (request: NextRequest) => {
   try {
     const data = await request.json();
-    const { title, slug, excerpt, content, author, publishedAt, isPublished, tags } = data;
+    const { title, slug, excerpt, content, author, publishedAt, isPublished, autoPublishSocial, tags } = data;
 
     if (!title || !slug || !excerpt || !content || !author) {
       return NextResponse.json(
@@ -57,9 +58,24 @@ export const POST = withAdminAuth(async (request: NextRequest) => {
         author,
         publishedAt: publishedAt ? new Date(publishedAt) : new Date(),
         isPublished: isPublished ?? false,
+        autoPublishSocial: autoPublishSocial ?? true,
         tags: tags ? JSON.stringify(tags) : null,
       },
     });
+
+    // Se publicado E autoPublishSocial habilitado, publicar nas redes sociais
+    if (isPublished && autoPublishSocial) {
+      console.log(`[BlogPost] Publicando post ${post.id} nas redes sociais...`);
+
+      // Publicar em background (não bloqueia a resposta)
+      publishToSocialMedia(post.id)
+        .then((result) => {
+          console.log('[BlogPost] Resultado publicação social:', result);
+        })
+        .catch((error) => {
+          console.error('[BlogPost] Erro ao publicar nas redes sociais:', error);
+        });
+    }
 
     return NextResponse.json({ post }, { status: 201 });
   } catch (error) {

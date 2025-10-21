@@ -16,6 +16,7 @@ interface BlogPostData {
   author: string;
   publishedAt: string;
   isPublished: boolean;
+  autoPublishSocial: boolean;
   tags: string | null;
 }
 
@@ -34,6 +35,7 @@ export default function EditBlogPostPage({ params }: { params: Promise<{ id: str
     author: '',
     publishedAt: '',
     isPublished: false,
+    autoPublishSocial: true,
   });
   const [tags, setTags] = useState<string[]>([]);
   const [tagInput, setTagInput] = useState('');
@@ -341,17 +343,37 @@ export default function EditBlogPostPage({ params }: { params: Promise<{ id: str
                 )}
               </div>
 
-              <div className="flex items-center gap-3 p-4 bg-gray-50 rounded-lg">
-                <input
-                  type="checkbox"
-                  id="isPublished"
-                  checked={formData.isPublished}
-                  onChange={(e) => setFormData({ ...formData, isPublished: e.target.checked })}
-                  className="w-5 h-5 text-orange-600 border-gray-300 rounded focus:ring-orange-500"
-                />
-                <label htmlFor="isPublished" className="text-sm font-bold text-gray-900 cursor-pointer">
-                  Post publicado
-                </label>
+              <div className="space-y-3">
+                <div className="flex items-center gap-3 p-4 bg-gray-50 rounded-lg">
+                  <input
+                    type="checkbox"
+                    id="isPublished"
+                    checked={formData.isPublished}
+                    onChange={(e) => setFormData({ ...formData, isPublished: e.target.checked })}
+                    className="w-5 h-5 text-orange-600 border-gray-300 rounded focus:ring-orange-500"
+                  />
+                  <label htmlFor="isPublished" className="text-sm font-bold text-gray-900 cursor-pointer">
+                    Post publicado
+                  </label>
+                </div>
+
+                <div className="flex items-center gap-3 p-4 bg-blue-50 rounded-lg border-2 border-blue-200">
+                  <input
+                    type="checkbox"
+                    id="autoPublishSocial"
+                    checked={formData.autoPublishSocial}
+                    onChange={(e) => setFormData({ ...formData, autoPublishSocial: e.target.checked })}
+                    className="w-5 h-5 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                  />
+                  <div className="flex-1">
+                    <label htmlFor="autoPublishSocial" className="text-sm font-bold text-gray-900 cursor-pointer flex items-center gap-2">
+                      📱 Publicar nas redes sociais
+                    </label>
+                    <p className="text-xs text-gray-600 mt-1">
+                      Ao salvar como publicado, o post será automaticamente compartilhado no Instagram e LinkedIn
+                    </p>
+                  </div>
+                </div>
               </div>
 
               <div className="flex gap-4 pt-4 border-t border-gray-200">
