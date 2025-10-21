@@ -127,20 +127,46 @@ model Favorite {
 
 // Posts do Blog
 model BlogPost {
-  id          String   @id @default(uuid())
-  slug        String   @unique
-  title       String
-  excerpt     String
-  content     String   // Texto longo do artigo
-  author      String
-  publishedAt DateTime
-  isPublished Boolean  @default(false)
-  tags        String?  // JSON array como string
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  id                 String             @id @default(uuid())
+  slug               String             @unique
+  title              String
+  excerpt            String
+  content            String             // Texto longo do artigo
+  author             String
+  publishedAt        DateTime
+  isPublished        Boolean            @default(false)
+  tags               String?            // JSON array como string
+  autoPublishSocial  Boolean            @default(true) // Publicar automaticamente nas redes sociais
+  socialMediaImage   String?            // URL da imagem gerada para OG/redes sociais
+  createdAt          DateTime           @default(now())
+  updatedAt          DateTime           @updatedAt
+
+  socialMediaPosts   SocialMediaPost[]  // Relação com publicações sociais
 
   @@index([slug])
   @@index([isPublished])
+  @@index([publishedAt])
+}
+
+// Publicações em Redes Sociais
+model SocialMediaPost {
+  id          String    @id @default(uuid())
+  blogPostId  String
+  platform    String    // 'instagram' | 'linkedin' | 'twitter'
+  postId      String?   // ID do post na rede social
+  postUrl     String?   // URL do post publicado
+  status      String    @default("pending") // 'pending' | 'published' | 'failed'
+  error       String?   // Mensagem de erro se falhar
+  retryCount  Int       @default(0) // Número de tentativas
+  publishedAt DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  blogPost    BlogPost  @relation(fields: [blogPostId], references: [id], onDelete: Cascade)
+
+  @@index([blogPostId])
+  @@index([platform])
+  @@index([status])
   @@index([publishedAt])
 }
 

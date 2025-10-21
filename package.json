@@ -23,6 +23,7 @@
     "@types/jsonwebtoken": "^9.0.10",
     "@types/qrcode": "^1.5.5",
     "@types/video.js": "^7.3.58",
+    "@vercel/og": "^0.8.5",
     "bcryptjs": "^3.0.2",
     "jose": "^6.1.0",
     "jsonwebtoken": "^9.0.2",
