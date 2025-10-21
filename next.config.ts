@@ -13,6 +13,15 @@ const nextConfig: NextConfig = {
   },
   // Desabilita geração estática durante build
   output: 'standalone',
+
+  // Garante que módulos server-only não sejam incluídos no bundle do cliente
+  serverExternalPackages: ['qrcode', 'bcryptjs', 'jsonwebtoken'],
+
+  // Configurações experimentais
+  experimental: {
+    // Otimiza importações de servidor
+    serverComponentsExternalPackages: ['qrcode', 'bcryptjs', 'jsonwebtoken'],
+  },
 };
 
 export default nextConfig;
