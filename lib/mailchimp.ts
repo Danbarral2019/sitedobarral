@@ -33,10 +33,6 @@ if (isConfigured) {
     apiKey: MAILCHIMP_API_KEY,
     server: MAILCHIMP_SERVER_PREFIX,
   });
-
-  // Configurar timeout para evitar socket hang up
-  // @ts-ignore - SDK não exporta tipos para timeout
-  mailchimp.client.setTimeout(10000); // 10 segundos
 }
 
 /**
