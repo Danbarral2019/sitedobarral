@@ -33,6 +33,10 @@ if (isConfigured) {
     apiKey: MAILCHIMP_API_KEY,
     server: MAILCHIMP_SERVER_PREFIX,
   });
+
+  // Configurar timeout para evitar socket hang up
+  // @ts-ignore - SDK não exporta tipos para timeout
+  mailchimp.client.setTimeout(10000); // 10 segundos
 }
 
 /**
@@ -40,6 +44,41 @@ if (isConfigured) {
  */
 export function isMailChimpConfigured(): boolean {
   return isConfigured;
+}
+
+/**
+ * Função auxiliar para retry em caso de erros de rede temporários
+ */
+async function retryOnNetworkError<T>(
+  fn: () => Promise<T>,
+  maxRetries = 2,
+  delayMs = 1000
+): Promise<T> {
+  let lastError;
+
+  for (let attempt = 0; attempt <= maxRetries; attempt++) {
+    try {
+      return await fn();
+    } catch (error: unknown) {
+      lastError = error;
+      const err = error as { code?: string; message?: string };
+
+      // Apenas retry em erros de rede temporários
+      const isNetworkError = err.code === 'ECONNRESET' ||
+                            err.code === 'ETIMEDOUT' ||
+                            err.message?.includes('socket hang up');
+
+      if (!isNetworkError || attempt === maxRetries) {
+        throw error;
+      }
+
+      // Aguardar antes de tentar novamente (com backoff exponencial)
+      await new Promise(resolve => setTimeout(resolve, delayMs * (attempt + 1)));
+      console.log(`[MailChimp] Tentando novamente (${attempt + 1}/${maxRetries})...`);
+    }
+  }
+
+  throw lastError;
 }
 
 /**
@@ -75,16 +114,18 @@ export async function addSubscriber(
       ? interests.map(interest => ({ name: interest, status: 'active' as const }))
       : [];
 
-    // Adicionar/atualizar inscrito
-    const response = await mailchimp.lists.setListMember(
-      MAILCHIMP_AUDIENCE_ID,
-      subscriberHash,
-      {
-        email_address: emailLower,
-        status_if_new: 'subscribed', // 'subscribed', 'pending', 'unsubscribed', 'cleaned'
-        merge_fields: mergeFields,
-        tags: tags,
-      }
+    // Adicionar/atualizar inscrito com retry em caso de erro de rede
+    const response = await retryOnNetworkError(() =>
+      mailchimp.lists.setListMember(
+        MAILCHIMP_AUDIENCE_ID,
+        subscriberHash,
+        {
+          email_address: emailLower,
+          status_if_new: 'subscribed', // 'subscribed', 'pending', 'unsubscribed', 'cleaned'
+          merge_fields: mergeFields,
+          tags: tags,
+        }
+      )
     );
 
     return {
