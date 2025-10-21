@@ -32,42 +32,30 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Verifica limite de usos
+    // Verifica limite de usos (vagas da turma)
     if (qrCodeData.maxUses && qrCodeData.usedCount >= qrCodeData.maxUses) {
       return NextResponse.json(
-        { error: 'QR Code atingiu o limite de usos' },
-        { status: 401 }
+        {
+          error: `Turma lotada! Este QR Code já foi usado por ${qrCodeData.usedCount} alunos (limite: ${qrCodeData.maxUses}).`,
+          isFull: true
+        },
+        { status: 403 }
       );
     }
 
-    // Verifica se já existe alguma matrícula usando este QR Code
-    const existingEnrollment = await prisma.enrollment.findFirst({
-      where: {
-        qrCodeId: qrCodeData.id
-      },
-      include: {
-        user: true
-      }
-    });
-
-    // Se não existe matrícula, é um QR Code novo que precisa de registro
-    if (!existingEnrollment) {
-      return NextResponse.json({
-        success: true,
-        needsRegistration: true,
-        qrCode: code,
-        courseId: qrCodeData.courseId,
-        turma: qrCodeData.turma,
-      });
-    }
-
-    // Já existe matrícula com este QR Code
-    // Direciona para login com informação da conta existente
+    // Retorna informações do QR Code válido
+    // O sistema permitirá registro de múltiplos alunos até atingir maxUses
     return NextResponse.json({
       success: true,
-      needsRegistration: false,
+      needsRegistration: true,
+      qrCode: code,
       courseId: qrCodeData.courseId,
-      message: 'Você já possui uma conta. Use a página de login.',
+      turma: qrCodeData.turma,
+      vagas: {
+        usadas: qrCodeData.usedCount,
+        total: qrCodeData.maxUses,
+        disponiveis: qrCodeData.maxUses ? qrCodeData.maxUses - qrCodeData.usedCount : null
+      }
     });
   } catch (error) {
     console.error('Erro ao validar QR Code:', error);

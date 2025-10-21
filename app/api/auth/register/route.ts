@@ -87,26 +87,48 @@ export async function POST(request: NextRequest) {
         });
 
         if (qrCode && new Date() < qrCode.validUntil) {
-          // Calcular data de expiração: 1 ano após criação do QR Code da turma
-          const expirationDate = new Date(qrCode.createdAt);
-          expirationDate.setFullYear(expirationDate.getFullYear() + 1);
-
-          // Criar enrollment
-          await prisma.enrollment.create({
-            data: {
+          // Verificar se usuário já tem matrícula neste curso com este QR Code
+          const existingEnrollment = await prisma.enrollment.findFirst({
+            where: {
               userId: user.id,
-              courseId,
-              turma: qrCode.turma,
-              qrCodeId: qrCode.id, // Usar o ID do QR Code, não o código em si
-              expiresAt: expirationDate,
-            },
+              courseId: courseId,
+              qrCodeId: qrCode.id
+            }
           });
 
-          // Incrementar contador de uso do QR Code
-          await prisma.qRCode.update({
-            where: { code: qrCodeId },
-            data: { usedCount: { increment: 1 } },
-          });
+          if (existingEnrollment) {
+            console.log('Usuário já possui matrícula com este QR Code');
+            // Não criar duplicata, mas não falhar o registro
+          } else {
+            // Verificar se ainda há vagas disponíveis
+            if (qrCode.maxUses && qrCode.usedCount >= qrCode.maxUses) {
+              console.error('QR Code atingiu limite de usos');
+              // Não criar enrollment mas não falhar o registro
+            } else {
+              // ✅ PRAZO INDIVIDUALIZADO: 1 ano a partir da data de REGISTRO do aluno
+              const expirationDate = new Date(); // Data ATUAL (momento do registro)
+              expirationDate.setFullYear(expirationDate.getFullYear() + 1);
+
+              // Criar enrollment
+              await prisma.enrollment.create({
+                data: {
+                  userId: user.id,
+                  courseId,
+                  turma: qrCode.turma,
+                  qrCodeId: qrCode.id,
+                  expiresAt: expirationDate,
+                },
+              });
+
+              // Incrementar contador de uso do QR Code
+              await prisma.qRCode.update({
+                where: { code: qrCodeId },
+                data: { usedCount: { increment: 1 } },
+              });
+
+              console.log(`Enrollment criado para ${user.email}. Expira em: ${expirationDate.toISOString()}`);
+            }
+          }
         }
       } catch (enrollmentError) {
         console.error('Erro ao criar enrollment:', enrollmentError);
