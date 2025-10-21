@@ -17,26 +17,22 @@ export default function ConfirmacaoRegistroPage() {
     setResendMessage('');
 
     try {
-      // TODO: Implementar endpoint de reenvio de email de verificação
-      // const response = await fetch('/api/auth/resend-verification', {
-      //   method: 'POST',
-      //   headers: { 'Content-Type': 'application/json' },
-      //   body: JSON.stringify({ email }),
-      // });
+      const response = await fetch('/api/auth/send-verification', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email }),
+      });
 
-      // if (response.ok) {
-      //   setResendMessage('Email reenviado com sucesso! Verifique sua caixa de entrada.');
-      // } else {
-      //   setResendMessage('Erro ao reenviar email. Tente novamente mais tarde.');
-      // }
+      const data = await response.json();
 
-      // Simulação temporária
-      setTimeout(() => {
-        setResendMessage('Funcionalidade de reenvio será implementada em breve. Entre em contato com o professor se não receber o email.');
-        setResendLoading(false);
-      }, 1000);
-    } catch (error) {
+      if (response.ok) {
+        setResendMessage('✅ Email reenviado com sucesso! Verifique sua caixa de entrada (e spam).');
+      } else {
+        setResendMessage(data.error || 'Erro ao reenviar email. Tente novamente mais tarde.');
+      }
+    } catch {
       setResendMessage('Erro ao reenviar email. Tente novamente mais tarde.');
+    } finally {
       setResendLoading(false);
     }
   };

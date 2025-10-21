@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { rateLimiters } from '@/lib/rate-limit';
+import { sendVerificationEmail } from '@/lib/email';
 
 /**
  * POST /api/auth/send-verification
@@ -65,11 +66,12 @@ export async function POST(request: NextRequest) {
       },
     });
 
-    // TODO: Aqui você implementaria o envio de email
-    // Por enquanto, vamos logar no console para desenvolvimento
-    console.log('📧 Código de verificação para:', user.email);
-    console.log('🔑 Código:', verificationCode);
-    console.log('⏰ Válido até:', emailTokenExpiry.toLocaleString('pt-BR'));
+    // Envia email de verificação
+    const emailSent = await sendVerificationEmail(user.email, user.name, verificationCode);
+
+    if (!emailSent) {
+      console.warn('⚠️ Não foi possível enviar o email de verificação, mas o código foi salvo.');
+    }
 
     return NextResponse.json({
       success: true,
@@ -80,7 +82,7 @@ export async function POST(request: NextRequest) {
         expiresAt: emailTokenExpiry.toISOString(),
       } : undefined,
     });
-  } catch {
+  } catch (error) {
     console.error('Erro ao enviar código de verificação:', error);
     return NextResponse.json(
       { error: 'Erro ao processar solicitação' },
