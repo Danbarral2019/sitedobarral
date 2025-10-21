@@ -34,10 +34,20 @@ export async function createQRCode(
 ): Promise<{ code: string; qrCodeImage: string }> {
   const code = generateUniqueCode();
 
-  // Gera a imagem do QR Code
+  // Gera a imagem do QR Code com configurações otimizadas
   const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000';
   const qrUrl = `${baseUrl}/validar-acesso?code=${code}`;
-  const qrCodeImage = await QRCode.toDataURL(qrUrl);
+
+  // Configurações para reduzir o tamanho da imagem
+  const qrCodeImage = await QRCode.toDataURL(qrUrl, {
+    errorCorrectionLevel: 'M', // Nível médio de correção de erros (menor que 'H')
+    margin: 2, // Margem reduzida
+    width: 300, // Tamanho fixo (não muito grande)
+    color: {
+      dark: '#000000',
+      light: '#FFFFFF'
+    }
+  });
 
   // Salva no banco de dados com a imagem
   await prisma.qRCode.create({
