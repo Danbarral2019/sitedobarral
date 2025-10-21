@@ -42,7 +42,7 @@ export const POST = withAdminAuth(async (request: NextRequest) => {
       qrCodeImage,
       validUntil: validUntil.toISOString(),
     });
-  } catch {
+  } catch (error) {
     console.error('Erro ao gerar QR Code:', error);
     return NextResponse.json(
       { error: 'Erro ao gerar QR Code' },
