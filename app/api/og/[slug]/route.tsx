@@ -2,7 +2,10 @@ import { ImageResponse } from '@vercel/og';
 import { NextRequest } from 'next/server';
 import { prisma } from '@/lib/prisma';
 
-export const runtime = 'edge';
+// Mudado de 'edge' para 'nodejs' devido ao limite de tamanho (1MB) em Edge Functions
+// Node.js runtime não tem limite de tamanho
+export const runtime = 'nodejs';
+export const dynamic = 'force-dynamic';
 
 export async function GET(
   request: NextRequest,
