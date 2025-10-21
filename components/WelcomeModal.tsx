@@ -89,7 +89,7 @@ export default function WelcomeModal() {
 
             {/* Content */}
             <div className="p-5 sm:p-8">
-              <p className="text-gray-700 text-base sm:text-lg mb-5 sm:mb-6 text-center leading-relaxed">
+              <p className="hidden sm:block text-gray-700 text-base sm:text-lg mb-5 sm:mb-6 text-center leading-relaxed">
                 Repositório especializado de materiais jurídicos em Direito Administrativo,
                 organizados por tema e curso.
               </p>
