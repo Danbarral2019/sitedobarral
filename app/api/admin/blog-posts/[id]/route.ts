@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { withAdminAuth } from '@/lib/api-middleware';
 import { PrismaClient } from '@prisma/client';
+import { publishToSocialMedia } from '@/lib/social-publisher';
 
 const prisma = new PrismaClient();
 
@@ -41,7 +42,7 @@ export const PUT = withAdminAuth(async (
   try {
     const { id } = await context.params;
     const data = await request.json();
-    const { title, slug, excerpt, content, author, publishedAt, isPublished, tags } = data;
+    const { title, slug, excerpt, content, author, publishedAt, isPublished, autoPublishSocial, tags } = data;
 
     // Verificar se o post existe
     const existingPost = await prisma.blogPost.findUnique({
@@ -79,9 +80,28 @@ export const PUT = withAdminAuth(async (
         ...(author && { author }),
         ...(publishedAt && { publishedAt: new Date(publishedAt) }),
         ...(typeof isPublished === 'boolean' && { isPublished }),
+        ...(typeof autoPublishSocial === 'boolean' && { autoPublishSocial }),
         ...(tags !== undefined && { tags: tags ? JSON.stringify(tags) : null }),
       },
     });
+
+    // Se está sendo publicado agora (mudou de não publicado para publicado) E autoPublishSocial está habilitado
+    const wasPublished = existingPost.isPublished;
+    const isNowPublished = isPublished ?? existingPost.isPublished;
+    const shouldAutoPublish = autoPublishSocial ?? existingPost.autoPublishSocial;
+
+    if (!wasPublished && isNowPublished && shouldAutoPublish) {
+      console.log(`[BlogPost] Publicando post ${post.id} nas redes sociais...`);
+
+      // Publicar em background (não bloqueia a resposta)
+      publishToSocialMedia(post.id)
+        .then((result) => {
+          console.log('[BlogPost] Resultado publicação social:', result);
+        })
+        .catch((error) => {
+          console.error('[BlogPost] Erro ao publicar nas redes sociais:', error);
+        });
+    }
 
     return NextResponse.json({ post });
   } catch (error) {
