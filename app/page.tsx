@@ -2,6 +2,7 @@ import Link from 'next/link';
 import { ArrowRight, BookOpen, Users, Award, FileText, CheckCircle, Star } from 'lucide-react';
 import { courses } from '@/data/courses';
 import TestimonialsCarousel from '@/components/TestimonialsCarousel';
+import NewsletterForm from '@/components/NewsletterForm';
 
 export default function Home() {
   const featuredCourses = courses.slice(0, 3);
@@ -235,22 +236,9 @@ export default function Home() {
                   jurisprudência e novos materiais disponíveis.
                 </p>
 
-                <form className="flex flex-col sm:flex-row gap-4 max-w-xl mx-auto bg-white/10 backdrop-blur-md p-2 rounded-2xl border-2 border-white/30">
-                  <input
-                    type="email"
-                    placeholder="seuemail@exemplo.com"
-                    aria-label="Digite seu e-mail para receber atualizações"
-                    required
-                    className="flex-1 px-6 py-4 rounded-xl bg-white text-gray-900 placeholder:text-gray-500 font-medium text-lg focus:outline-none focus:ring-4 focus:ring-white/50"
-                  />
-                  <button
-                    type="submit"
-                    aria-label="Cadastrar na newsletter"
-                    className="bg-accent-400 text-gray-900 px-10 py-4 rounded-xl text-lg font-bold hover:bg-accent-500 transition-all hover:scale-105 shadow-xl whitespace-nowrap"
-                  >
-                    Cadastrar Agora
-                  </button>
-                </form>
+                <div className="max-w-xl mx-auto bg-white/10 backdrop-blur-md p-2 rounded-2xl border-2 border-white/30">
+                  <NewsletterForm variant="inline" className="[&_input]:bg-white [&_input]:text-gray-900 [&_input]:placeholder:text-gray-500 [&_input]:font-medium [&_input]:text-lg [&_input]:focus:ring-white/50 [&_input]:border-0 [&_button]:bg-accent-400 [&_button]:text-gray-900 [&_button]:font-bold [&_button]:hover:bg-accent-500 [&_button]:shadow-xl" />
+                </div>
 
                 <p className="text-white/80 text-sm mt-4">
                   ✓ Sem spam · ✓ Cancele quando quiser · ✓ Conteúdo exclusivo
