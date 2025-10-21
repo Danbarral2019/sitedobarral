@@ -6,8 +6,10 @@ generator client {
 }
 
 datasource db {
-  provider = "sqlite"
+  provider = "postgresql"
   url      = env("DATABASE_URL")
+  // Opcional: usar connection pooling para produção
+  // directUrl = env("DIRECT_DATABASE_URL")
 }
 
 // QR Codes para acesso aos cursos
