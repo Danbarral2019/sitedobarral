@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { randomBytes } from 'crypto';
 import { rateLimiters } from '@/lib/rate-limit';
+import { sendPasswordResetEmail } from '@/lib/email';
 
 /**
  * POST /api/auth/request-reset
@@ -58,27 +59,23 @@ export async function POST(request: NextRequest) {
       },
     });
 
-    // TODO: Aqui você pode implementar envio de email
-    // Por enquanto, vamos retornar o link para fins de desenvolvimento
-    const resetUrl = `${process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'}/redefinir-senha?token=${resetToken}`;
+    // Envia email de recuperação de senha
+    const emailSent = await sendPasswordResetEmail(user.email, user.name, resetToken);
 
-    // Em produção, você enviaria o email aqui
-    // await sendPasswordResetEmail(user.email, resetUrl);
-
-    console.log('🔑 Reset de senha solicitado para:', user.email);
-    console.log('🔗 Link de reset:', resetUrl);
-    console.log('⏰ Token válido até:', resetTokenExpiry.toLocaleString('pt-BR'));
+    if (!emailSent) {
+      console.warn('⚠️ Não foi possível enviar o email de reset, mas o token foi salvo.');
+    }
 
     return NextResponse.json({
       success: true,
       message: 'Se o email estiver cadastrado, você receberá instruções para redefinir sua senha.',
       // ATENÇÃO: Remover este campo em produção! Só para desenvolvimento
       devInfo: process.env.NODE_ENV === 'development' ? {
-        resetUrl,
+        resetUrl: `${process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'}/redefinir-senha?token=${resetToken}`,
         expiresAt: resetTokenExpiry.toISOString(),
       } : undefined,
     });
-  } catch {
+  } catch (error) {
     console.error('Erro ao solicitar reset de senha:', error);
     return NextResponse.json(
       { error: 'Erro ao processar solicitação' },
