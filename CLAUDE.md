@@ -4,16 +4,20 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-This is a professional website for Prof. Daniel Barral, a specialist in Administrative Law focusing on public procurement and contracts. The site serves as a specialized repository of legal materials organized by course topics, with public and restricted access areas controlled via QR codes.
+Professional website for Prof. Daniel Barral, specialist in Administrative Law focusing on public procurement and contracts. The site is a specialized repository of legal materials organized by course topics, featuring public areas and QR code-controlled restricted access for enrolled students.
 
 **Tech Stack:**
 - **Framework:** Next.js 15.5.2 with App Router
 - **Language:** TypeScript 5
+- **Database:** Prisma ORM with SQLite (dev) / PostgreSQL (production)
 - **Styling:** Tailwind CSS 4
-- **UI Components:** Radix UI primitives
-- **Authentication:** JWT tokens via QR codes (bcryptjs, jsonwebtoken)
+- **UI Components:** Radix UI primitives (Dialog, Toast, Dropdown Menu)
+- **Authentication:** JWT tokens (jose library) + bcryptjs for password hashing
+- **Email:** Resend API
+- **Newsletter:** MailChimp API integration
 - **Form Handling:** React Hook Form with Zod validation
-- **Video:** Video.js
+- **Video Player:** Video.js
+- **File Processing:** xlsx (Excel import/export), qrcode generation
 
 ## Common Commands
 
@@ -25,7 +29,27 @@ npm start            # Start production server
 npm run lint         # Run ESLint
 ```
 
-**Working Directory:** The Next.js project is located at `projeto do site no claude/site-prof-barral/` (not at the repository root).
+### Database
+```bash
+npx prisma generate        # Generate Prisma client after schema changes
+npx prisma db push         # Push schema changes to database
+npx prisma studio          # Open database GUI at localhost:5555
+npx prisma db push --force-reset  # Reset database (CAUTION: deletes all data)
+```
+
+### Admin Setup
+```bash
+# Create admin user (first time)
+node scripts/create-admin.js email@example.com SuaSenha "Nome Completo"
+
+# Migrate blog posts from static data to database
+node scripts/migrate-blog-posts.js
+
+# Seed sample publications data
+node scripts/seed-publications.js
+```
+
+**Working Directory:** The Next.js project is at `projeto do site no claude/site-prof-barral/` (not repository root).
 
 ## Architecture
 
@@ -33,191 +57,449 @@ npm run lint         # Run ESLint
 
 ```
 projeto do site no claude/site-prof-barral/
-├── app/                    # Next.js App Router pages
-│   ├── page.tsx           # Homepage with hero, features, courses
-│   ├── layout.tsx         # Root layout with Header/Footer
-│   ├── sobre/             # About page
-│   ├── cursos/            # Courses listing and individual course pages
-│   ├── blog/              # Blog listing and individual posts
-│   ├── area-restrita/     # Restricted area (QR Code access)
-│   └── contato/           # Contact form
+├── app/                          # Next.js App Router
+│   ├── page.tsx                  # Homepage
+│   ├── layout.tsx                # Root layout with Header/Footer
+│   ├── sobre/                    # About page
+│   ├── cursos/[slug]/            # Course detail pages
+│   ├── blog/[slug]/              # Blog post pages
+│   ├── publicacoes/              # Publications (books, articles, news)
+│   ├── contato/                  # Contact form
+│   ├── login/                    # Student login
+│   ├── registro/                 # Student registration
+│   ├── validar-acesso/           # QR Code validation
+│   ├── area-restrita/            # Protected area for enrolled students
+│   │   ├── page.tsx              # Documents listing with filters
+│   │   └── historico/            # Access history
+│   ├── admin/                    # Admin panel
+│   │   ├── login/                # Admin login
+│   │   ├── page.tsx              # Admin dashboard (QR code management)
+│   │   ├── documentos/           # Document upload/management
+│   │   ├── importar/             # Excel bulk import
+│   │   ├── blog/                 # Blog post CRUD
+│   │   └── publicacoes/          # Publications CRUD
+│   └── api/                      # API routes
+│       ├── auth/                 # Auth endpoints (login, register, verify, etc.)
+│       ├── admin/                # Admin endpoints (QR, documents, imports)
+│       ├── enrollment/           # Enrollment checks and upgrades
+│       ├── newsletter/           # Newsletter subscription
+│       ├── contact/              # Contact form submission
+│       └── favorites/            # User favorites
 ├── components/
-│   └── layout/            # Header and Footer components
+│   ├── layout/                   # Header, Footer
+│   ├── ui/                       # Reusable UI components (Dialog, Toast, etc.)
+│   ├── AdminLayout.tsx           # Admin panel layout wrapper
+│   ├── VideoPlayer.tsx           # Video.js wrapper
+│   ├── DocumentFilters.tsx       # Document filtering component
+│   ├── EnrollmentStatusBanner.tsx # Shows enrollment expiration status
+│   ├── NewsletterForm.tsx        # Newsletter signup
+│   └── MarkdownEditor.tsx        # Rich text editor for blog/publications
 ├── lib/
-│   └── types.ts           # Core TypeScript interfaces
+│   ├── prisma.ts                 # Prisma client singleton
+│   ├── auth.ts                   # JWT token utilities
+│   ├── email.ts                  # Resend email templates and sending
+│   ├── qrcode.ts                 # QR code generation utilities
+│   ├── documents.ts              # Document access validation
+│   ├── mailchimp.ts              # MailChimp API integration
+│   ├── rate-limit.ts             # API rate limiting
+│   ├── api-middleware.ts         # Common API middleware (auth, CORS)
+│   ├── excel-processor.ts        # Excel import processing
+│   ├── auto-classifier.ts        # Auto-classification for document categories
+│   └── enrollment-utils.ts       # Enrollment status checks
 ├── data/
-│   ├── courses.ts         # Course data (10 courses)
-│   └── blog-posts.ts      # Blog post data
-├── hooks/                 # (empty, for custom React hooks)
-├── public/                # Static assets
-└── styles/                # Global styles
+│   ├── courses.ts                # Static course data (10 courses)
+│   └── testimonials.ts           # Testimonials for homepage
+├── prisma/
+│   ├── schema.prisma             # Database schema
+│   └── dev.db                    # SQLite database (dev)
+├── scripts/                      # Utility scripts
+├── types/                        # TypeScript type declarations
+├── public/
+│   └── uploads/                  # Uploaded files storage (local dev)
+├── middleware.ts                 # Next.js middleware (route protection)
+└── .env.local                    # Environment variables (not committed)
 ```
 
-### Data Architecture
+### Database Schema (Prisma)
 
-All data is currently **mock/hardcoded** in TypeScript files (`data/courses.ts`, `data/blog-posts.ts`). There is no database or backend API yet - this is planned for future phases.
+**Core Models:**
 
-**Core Data Models** (see `lib/types.ts`):
+1. **User** - Admin and student accounts
+   - Fields: email, name, passwordHash, role (admin/student), emailVerified
+   - Password reset and email verification tokens
+   - Relations: enrollments[]
 
-1. **Course** - 10 specialized courses on Administrative Law topics
-   - Each has: title, slug, description, bibliography (always public), public/restricted documents
-   - Slug-based routing: `/cursos/[slug]`
+2. **Enrollment** - Student course enrollments
+   - Links User to courseId (from static courses.ts data)
+   - Fields: expiresAt (1 year from QR code creation), isLifetime, turma, qrCodeId
+   - Supports upgrade to lifetime access
+   - Tracks notification sending for expiration warnings
 
-2. **Document** - Course materials
-   - Types: pdf, doc, link, video
-   - Categories: apostila, acordao, parecer, edital, artigo, outro
-   - Access control: `isPublic` boolean
+3. **QRCode** - Access codes for course enrollment
+   - Fields: code (unique), courseId, turma, validUntil, maxUses, usedCount
+   - Stores qrCodeImage (base64 PNG)
+   - Generated by admin panel, scanned by students
 
-3. **BlogPost** - Articles with slug-based routing
+4. **Document** - Course materials (PDFs, links, videos)
+   - Fields: title, description, type (pdf/doc/link/video), url, category
+   - Access control: isPublic, courseId
+   - Supports tags (JSON array as string)
 
-4. **QRCodeAccess** - Temporary access codes for restricted areas
-   - Links to specific course
-   - Has expiration dates and usage limits
-   - Currently not fully implemented
+5. **BlogPost** - Blog articles
+   - Fields: slug, title, excerpt, content (markdown), author, publishedAt, isPublished
+   - Full CRUD via admin panel
 
-5. **User** - Admin or student roles
+6. **Publication** - Academic publications (books, articles, news)
+   - Type: livro, artigo, noticia
+   - Fields vary by type (ISBN for books, journal for articles, eventDate for news)
+   - Supports external URLs or full content
 
-6. **NewsletterSubscriber** - Email subscriptions with interest segmentation
+7. **AccessLog** - Audit trail
+   - Tracks login, access, download, view actions
+   - Records userId, documentId, courseId, IP, userAgent
 
-7. **ContactForm** - Contact form submissions
+8. **Favorite** - User document bookmarks
+
+9. **ContactForm** - Contact form submissions
+
+10. **NewsletterSubscriber** - Email list with interest segmentation
+
+See `prisma/schema.prisma` for complete schema with indexes and constraints.
+
+### Authentication System
+
+**Two authentication flows:**
+
+1. **QR Code First-Time Access** (Primary enrollment method)
+   - Admin generates QR code for course/turma in `/admin`
+   - Student scans QR → redirected to `/validar-acesso?code=XXX`
+   - If not registered: creates account with email/password
+   - System creates Enrollment record (1 year expiration from QR creation date)
+   - Sets httpOnly `auth-token` cookie with JWT
+
+2. **Email/Password Login** (Subsequent access)
+   - Student logs in at `/login`
+   - Validates credentials, checks emailVerified
+   - Returns JWT token with userId, role, enrollments
+   - Middleware (`middleware.ts`) protects `/area-restrita` and `/admin` routes
+
+**Admin Login:**
+- Separate flow at `/admin/login`
+- Requires role='admin' in User table
+- Admin panel accessible at `/admin/*`
+
+**JWT Structure:**
+```typescript
+{
+  userId: string,
+  email: string,
+  role: 'admin' | 'student',
+  enrollments: Array<{ courseId, expiresAt, isLifetime }>
+}
+```
+
+### Enrollment & Access Control
+
+**Enrollment Lifecycle:**
+1. QR code scanned → Enrollment created with expiresAt = QR.validUntil + 1 year
+2. Student accesses `/area-restrita` → shows documents for enrolled courses only
+3. 90 days before expiration → cron job sends notification email
+4. After expiration → enrollment still exists but access restricted
+5. Student can upgrade to lifetime via `/upgrade/[courseId]` (payment TBD)
+
+**Document Access Rules:**
+- Public documents (`isPublic=true`): accessible to everyone
+- Private documents: require valid enrollment for document's courseId
+- Downloads tracked in AccessLog
+- See `lib/documents.ts` for validation logic
+
+**Expiration Banner:**
+- Component: `EnrollmentStatusBanner.tsx`
+- Shows color-coded warnings: green (>90 days), yellow (30-90 days), red (expired/expiring soon)
+- Appears on `/area-restrita` pages
 
 ### Key Features by Area
 
-**Public Area:**
-- Homepage with hero section, course highlights, testimonials
-- 10 course pages (each shows bibliography publicly, some "teaser" documents)
-- Blog with articles on legal topics
-- About page (professor bio)
-- Contact form
-- Newsletter signup
+**Public Pages:**
+- Homepage: hero, course highlights, testimonials carousel, newsletter signup
+- 10 course pages at `/cursos/[slug]` - always show bibliography publicly
+- Blog at `/blog` - published posts with markdown rendering
+- Publications at `/publicacoes` - books, articles, news (filterable by type)
+- About at `/sobre` - professor bio
+- Contact at `/contato` - form submission to database
 
-**Restricted Area (Future):**
-- QR Code authentication for course students
-- Access to full course materials (apostilas, acórdãos, pareceres, editais)
-- Advanced search and filtering
-- Download functionality
-- Access history tracking
+**Restricted Area (`/area-restrita`):**
+- Document library with filters (course, category, type, search)
+- Download protected documents
+- Access history at `/area-restrita/historico`
+- Favorites system
+- Enrollment status banner showing expiration warnings
 
-### Design System
+**Admin Panel (`/admin`):**
+- Dashboard: QR code generation/management (list, create, delete, update)
+- Documents: upload individual files or bulk via Excel import
+- Excel Import: download template, validate, import with auto-classification
+- Blog: create/edit/delete posts with markdown editor
+- Publications: CRUD for books/articles/news with type-specific fields
 
-**Colors** (see `tailwind.config.ts`):
-- **Primary:** Blue scale (`primary-600` = #2563eb) - corporate/legal trust
-- **Secondary:** White
-- **Accent:** Gray scale for secondary elements
+### Excel Import System
 
-**Typography:**
-- Primary font: Inter (Google Font)
-- Serif font: Merriweather (for special text)
+**Comprehensive documentation:** `IMPORTACAO_EXCEL.md`
 
-**Design Philosophy:**
-- Corporate/professional tone (inspired by legal professionals like Jacoby Fernandes, Marçal Justen Filho)
-- Minimalist with focus on content
-- Clean typography and generous spacing
-- Fully responsive (70% desktop, 30% mobile usage)
+**Workflow:**
+1. Download template: `/api/admin/import-excel/template`
+2. Fill Excel with columns: Titulo, Descricao, Categoria, Curso, Publico, Tags, URL, Arquivo
+3. Upload Excel + PDF/DOC files via `/admin/importar`
+4. System validates, auto-classifies categories, matches files
+5. **Multi-course support:** one document can be added to multiple courses (comma-separated slugs)
+6. Preview → confirm → import to database
+
+**Auto-Classification:**
+- Uses `lib/auto-classifier.ts` to suggest categories based on title/description
+- Keywords: "acórdão" → acordao, "parecer" → parecer, "lei" → apostila, etc.
+- Manual override supported in Excel
+
+### Email System (Resend)
+
+**Email Templates:** `lib/email.ts`
+
+1. **Welcome Email** - sent after registration (with verification link)
+2. **Verification Email** - email confirmation link
+3. **Password Reset** - reset password link
+4. **Expiration Warning** - 90 days before enrollment expiration
+5. **Contact Form Notification** - to admin when contact form submitted
+
+**Configuration:**
+- API Key: `RESEND_API_KEY` in `.env.local`
+- From address: `EMAIL_FROM` (must be verified domain)
+- See `CONFIGURACAO_EMAIL.md` for setup guide
+
+### Newsletter (MailChimp)
+
+**Integration:** `lib/mailchimp.ts`
+
+- Syncs subscribers to MailChimp audience
+- Tags based on course interests
+- Form component: `NewsletterForm.tsx`
+- API: `/api/newsletter` (public), `/api/admin/newsletter/sync` (admin)
+
+### Rate Limiting & Security
+
+**Rate Limiting:** `lib/rate-limit.ts`
+- IP-based rate limiting for sensitive endpoints
+- Auth endpoints: 5 requests/15 minutes
+- API endpoints: configurable limits
+
+**Middleware:** `middleware.ts`
+- Protects `/area-restrita/*` and `/admin/*` routes
+- JWT verification using `jose` library
+- Redirects unauthenticated users to login
+
+**Security Features:**
+- Passwords hashed with bcryptjs (10 rounds)
+- JWT tokens with expiration
+- HttpOnly cookies for auth tokens
+- Email verification required for student accounts
+- CSRF protection on forms
+- File upload validation (type, size)
 
 ## Development Guidelines
 
 ### Routing Conventions
-- All routes use Next.js App Router (app directory)
-- Dynamic routes: `[slug]` for courses and blog posts
-- Course slugs follow kebab-case: `nova-lei-licitacoes`, `planejamento-contratacoes`, etc.
+- App Router (app directory)
+- Dynamic routes: `[slug]` for courses, blog, `[id]` for admin editing
+- Course slugs (kebab-case): `nova-lei-licitacoes`, `contratacao-direta`, etc.
+- All 10 course slugs defined in `data/courses.ts`
 
 ### Component Patterns
-- Server Components by default (Next.js 15)
-- Client Components only when needed (forms, interactivity)
-- Layout components in `components/layout/`
-- Shared UI components should use Radix UI primitives
+- **Server Components** by default (fetch data, no interactivity)
+- **Client Components** (`'use client'`) for forms, modals, interactive UI
+- Radix UI for dialogs, toasts, dropdowns (see `components/ui/`)
+- Shared layouts: `AdminLayout.tsx`, `app/layout.tsx`
 
 ### Data Fetching
-- Currently static data imports from `data/` folder
-- When implementing API/database:
-  - Use Next.js Server Actions for mutations
-  - Use Server Components for data fetching
-  - Implement proper loading and error states
+- **Static course data:** imported from `data/courses.ts`
+- **Dynamic database data:** Prisma queries in Server Components or API routes
+- **API Routes:** REST endpoints in `app/api/` for mutations
+- **Loading states:** use `loading.tsx` in route segments
+- **Error handling:** use `error.tsx` for boundaries
 
-### Authentication (Future Implementation)
-- QR Code generates JWT token
-- Token includes: courseId, validUntil, turma
-- Validate on restricted pages
-- Store in httpOnly cookies
+### Working with Prisma
+```typescript
+import { prisma } from '@/lib/prisma';
 
-### Content Management (Future)
-- File upload system for PDFs, DOCs, videos
-- Categorization by course and document type
-- Tag system for advanced search
-- Version control for document updates
+// Always use the singleton instance
+const documents = await prisma.document.findMany({
+  where: { courseId: 'nova-lei-licitacoes', isPublic: true },
+  orderBy: { uploadedAt: 'desc' }
+});
+```
 
-## Important Context from PRD
+### Environment Variables
+Required in `.env.local` (see `.env.example` for full list):
+- `DATABASE_URL` - Database connection string
+- `JWT_SECRET` - Secret for signing JWT tokens
+- `RESEND_API_KEY` - Email sending API key
+- `EMAIL_FROM` - Sender email address
+- `NEXT_PUBLIC_BASE_URL` - Site URL for absolute links
+- `CRON_SECRET` - Protect cron job endpoints
+- `MAILCHIMP_API_KEY`, `MAILCHIMP_SERVER_PREFIX`, `MAILCHIMP_AUDIENCE_ID` - Newsletter
+- `ADMIN_EMAIL`, `ADMIN_PASSWORD_HASH` - Initial admin credentials (optional)
 
-**Target Audience:**
-- Primary: Public servants (active/future), beginner to advanced
-- Secondary: Lawyers, procurement specialists, public sector legal counsel
+### Path Aliases
+TypeScript configured with `@/*` mapping to project root:
+```typescript
+import { prisma } from '@/lib/prisma';
+import { Course } from '@/lib/types';
+import Header from '@/components/layout/Header';
+```
 
-**10 Specialized Courses:**
-1. Nova Lei de Licitações e Contratos (Lei 14.133/2021)
-2. Planejamento das Contratações Públicas
-3. Gestão e Fiscalização de Contratos Administrativos
-4. Processo Administrativo Sancionador
-5. Inovação nas Contratações Públicas
-6. Terceirização e Formação de Preços
-7. Assessoramento Jurídico na Nova Lei de Licitações
-8. Revisão, Reajuste e Repactuação
-9. Alterações Contratuais
-10. Contratação Direta
+## Important Business Logic
 
-**Key Business Logic:**
-- Bibliography is ALWAYS public (educational/reference)
-- Some sample documents are public ("degustação")
-- Full materials require QR Code access (given in physical classes)
-- QR Codes are course-specific and time-limited
-- Future: subscription model for extended access
+### Course Data
+**10 Specialized Courses** (defined in `data/courses.ts`):
+1. `nova-lei-licitacoes` - Nova Lei de Licitações (Lei 14.133/2021)
+2. `planejamento-contratacoes` - Planejamento das Contratações Públicas
+3. `gestao-fiscalizacao-contratos` - Gestão e Fiscalização de Contratos
+4. `processo-administrativo-sancionador` - Processo Administrativo Sancionador
+5. `inovacao-contratacoes` - Inovação nas Contratações Públicas
+6. `terceirizacao-formacao-precos` - Terceirização e Formação de Preços
+7. `assessoramento-juridico` - Assessoramento Jurídico na Nova Lei
+8. `revisao-reajuste-repactuacao` - Revisão, Reajuste e Repactuação
+9. `alteracoes-contratuais` - Alterações Contratuais
+10. `contratacao-direta` - Contratação Direta
 
-**Integration Points (Future):**
-- Newsletter: MailChimp or ConvertKit API
-- Social media: Auto-posting to Instagram/LinkedIn from blog
-- Analytics: Google Analytics
-- Payment gateway: For future subscription model
+**Critical Rule:** Bibliography (`bibliography` field in Course) is ALWAYS public and visible to everyone. This is for educational/reference purposes.
 
-## Development Phases
+### Target Audience
+- **Primary:** Public servants (active/future), beginner to advanced level
+- **Secondary:** Lawyers, procurement specialists
+- **Usage:** 70% desktop (work/study), 30% mobile (quick reference)
 
-**Current Status:** Phase 1 (MVP) - Basic structure complete
+### Content Language
+- All content in Brazilian Portuguese (pt-BR)
+- Legal citations follow ABNT standards
+- Formal, academic tone throughout
 
-**Phase 1 - MVP** ✓
-- Basic site structure
-- Public pages
-- Static content
+## Common Development Tasks
+
+### Add a New Document
+1. Via admin panel: `/admin/documentos`
+2. Via Excel import: `/admin/importar`
+3. Direct database: `npx prisma studio`
+
+### Create QR Code for New Course Turma
+1. Go to `/admin`
+2. Fill form: select course, enter turma name, set expiration date
+3. System generates unique code and QR image
+4. Download/print QR code for distribution to students
+
+### Check Enrollment Expiration
+API endpoint: `/api/enrollment/check-expiration`
+- Requires `CRON_SECRET` header for security
+- Finds enrollments expiring in 90 days
+- Sends email notifications
+- Updates `notificationSentAt` field
+- Should be called by scheduled cron job (e.g., Vercel Cron)
+
+### Modify Course Information
+Edit `data/courses.ts` - this is static data, not in database.
+Courses are referenced by `courseId` (slug) in Enrollment and Document models.
+
+### Customize Email Templates
+Edit template functions in `lib/email.ts`:
+- `sendWelcomeEmail()`
+- `sendVerificationEmail()`
+- `sendPasswordResetEmail()`
+- `sendExpirationWarningEmail()`
+- Uses React Email syntax with `@react-email/render`
+
+## Documentation Files
+
+Reference these files in the project for detailed info:
+
+- **`SETUP.md`** - Initial setup guide (dependencies, env vars, database, admin creation)
+- **`IMPORTACAO_EXCEL.md`** - Complete Excel import documentation with examples
+- **`CONFIGURACAO_EMAIL.md`** - Resend email setup and troubleshooting
+- **`DEPLOY.md`** - Production deployment guide
+- **`RESUMO_MIGRACAO.md`** - Migration summary for enrollment/renewal system
+- **`README.md`** - Standard Next.js readme
+- **`prd_daniel_barral.md`** (repo root) - Original Product Requirements Document
+
+## Development Status
+
+**Current Phase:** Phase 2/3 - Core features implemented
+
+**✅ Completed:**
+- Full authentication system (QR code + email/password)
+- Admin panel with QR code management
+- Document upload (individual + Excel bulk import)
+- Auto-classification for documents
+- Multi-course document support
+- Enrollment system with expiration tracking
+- Email notifications (welcome, verification, expiration warnings)
+- Protected download system
+- Access logging and audit trail
+- Blog and publications CRUD
+- Newsletter integration (MailChimp)
 - Responsive design
+- Lifetime access upgrade flow
 
-**Phase 2 - QR System** (Next)
-- JWT authentication
-- QR Code generation
-- Restricted area access
-- Advanced file upload
+**🚧 In Progress / Planned:**
+- Payment integration for lifetime upgrades (currently manual)
+- Advanced document search (full-text)
+- Analytics dashboard for admin
+- Social media auto-posting from blog
+- PWA/offline support
+- Performance optimizations for large document sets
 
-**Phase 3 - Advanced Features**
-- Full-text search
-- Social media integration
-- Automated newsletter
-- Admin dashboard
+## Troubleshooting
 
-**Phase 4 - Optimizations**
-- Performance tuning
-- SEO optimization
-- Production deployment
+### Database Issues
+```bash
+# Reset database (CAUTION: deletes all data)
+npx prisma db push --force-reset
+npx prisma generate
 
-## File Locations Reference
+# Check database schema
+npx prisma studio
+```
 
-- **Homepage content:** `app/page.tsx`
-- **Course data:** `data/courses.ts` (10 courses with full bibliography)
-- **Blog posts:** `data/blog-posts.ts`
-- **Type definitions:** `lib/types.ts`
-- **Global layout:** `app/layout.tsx`
-- **Navigation:** `components/layout/Header.tsx`
-- **Styling config:** `tailwind.config.ts`
+### Email Not Sending
+1. Verify `RESEND_API_KEY` in `.env.local`
+2. Confirm domain verified in Resend dashboard
+3. Check `EMAIL_FROM` matches verified domain
+4. See `CONFIGURACAO_EMAIL.md` for detailed setup
 
-## Notes
+### QR Code Access Not Working
+1. Check QR code not expired (`validUntil` field)
+2. Verify code exists in database
+3. Check JWT_SECRET configured correctly
+4. Inspect browser cookies for `auth-token`
 
-- The repository root contains the PRD (`prd_daniel_barral.md`) and current content documentation (`CONTEUDO_ATUAL.md`) for reference
-- When making content changes, consult these documents for professor's specifications
-- The site uses Brazilian Portuguese (pt-BR) for all content
-- Legal citations follow ABNT standards for Brazilian legal documentation
+### File Upload Failures
+1. Ensure `public/uploads/` directory exists and is writable
+2. Check file size limits in upload handlers
+3. Verify MIME type validation
+4. For Excel import, ensure files match names in spreadsheet
+
+### Build Errors
+```bash
+# Clear Next.js cache
+rm -rf .next
+npm run build
+
+# Regenerate Prisma client
+npx prisma generate
+```
+
+## Notes for Future Claude Instances
+
+- This is a production website for a real legal professional - treat all changes with care
+- Course data in `data/courses.ts` is the source of truth for courseId values
+- Always test authentication flows after making auth-related changes
+- Enrollment expiration is critical business logic - don't modify without understanding impact
+- Bibliography must remain public per business requirements
+- Excel import is a heavily-used feature - maintain backward compatibility with existing templates
+- Email templates should maintain professional, formal tone appropriate for legal audience
+- When adding new features, update this CLAUDE.md file accordingly
