@@ -2,6 +2,38 @@ import { prisma } from '@/lib/prisma';
 import { BookOpen, FileText, Calendar, ExternalLink, MapPin } from 'lucide-react';
 // import Link from 'next/link';
 import { Publication } from '@prisma/client';
+import type { Metadata } from 'next';
+
+export const metadata: Metadata = {
+  title: 'Publicações Acadêmicas',
+  description: 'Livros, artigos científicos e notícias sobre Direito Administrativo, Licitações e Contratos publicados pelo Prof. Daniel Barral.',
+  keywords: [
+    'publicações direito administrativo',
+    'livros licitações',
+    'artigos contratos administrativos',
+    'publicações acadêmicas',
+    'Daniel Barral livros',
+    'pesquisa direito público',
+  ],
+  openGraph: {
+    title: 'Publicações Acadêmicas | Prof. Daniel Barral',
+    description: 'Livros, artigos científicos e notícias sobre Direito Administrativo, Licitações e Contratos',
+    url: 'https://profdanielbarral.com/publicacoes',
+    type: 'website',
+    locale: 'pt_BR',
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Publicações Acadêmicas | Prof. Daniel Barral',
+    description: 'Livros, artigos científicos e notícias sobre Direito Administrativo',
+  },
+  alternates: {
+    canonical: '/publicacoes',
+  },
+};
+
+// Revalidar a cada 1 hora
+export const revalidate = 3600;
 
 export default async function PublicacoesPage() {
   const publications = await prisma.publication.findMany({

@@ -75,27 +75,15 @@ export default function OptimizedImage({
   }
 
   // Para imagens com dimensões específicas
-  if (width && height) {
-    return (
-      <Image
-        src={src}
-        alt={alt}
-        width={width}
-        height={height}
-        className={className}
-        priority={priority}
-        sizes={sizes}
-      />
-    );
-  }
-
-  // Fallback
   return (
-    <img
+    <Image
       src={src}
       alt={alt}
+      width={width || 800}
+      height={height || 600}
       className={className}
-      loading={priority ? 'eager' : 'lazy'}
+      priority={priority}
+      sizes={sizes}
     />
   );
 }

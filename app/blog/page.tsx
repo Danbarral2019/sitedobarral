@@ -1,8 +1,42 @@
 import Link from 'next/link';
 import { Calendar, Clock, ArrowRight } from 'lucide-react';
 import { PrismaClient, BlogPost } from '@prisma/client';
+import type { Metadata } from 'next';
 
 const prisma = new PrismaClient();
+
+export const metadata: Metadata = {
+  title: 'Blog Jurídico',
+  description: 'Artigos e análises sobre Direito Administrativo, Licitações, Contratos Públicos, jurisprudência e legislação atualizada pelo Prof. Daniel Barral.',
+  keywords: [
+    'blog direito administrativo',
+    'artigos licitações',
+    'análise jurisprudência',
+    'nova lei licitações',
+    'contratos administrativos',
+    'TCU',
+    'AGU',
+    'direito público',
+  ],
+  openGraph: {
+    title: 'Blog Jurídico | Prof. Daniel Barral',
+    description: 'Artigos e análises sobre Direito Administrativo, Licitações e Contratos Públicos',
+    url: 'https://profdanielbarral.com/blog',
+    type: 'website',
+    locale: 'pt_BR',
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Blog Jurídico | Prof. Daniel Barral',
+    description: 'Artigos sobre Direito Administrativo e Licitações',
+  },
+  alternates: {
+    canonical: '/blog',
+  },
+};
+
+// Revalidar a cada 1 hora
+export const revalidate = 3600;
 
 export default async function BlogPage() {
   const posts = await prisma.blogPost.findMany({

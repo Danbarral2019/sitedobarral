@@ -1,23 +1,59 @@
 import { MetadataRoute } from 'next';
 
-export default function robots(): MetadataRoute.Robots {
-  const baseUrl = 'https://profbarral.com.br';
+const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || 'https://profdanielbarral.com';
 
+export default function robots(): MetadataRoute.Robots {
   return {
     rules: [
       {
         userAgent: '*',
         allow: '/',
         disallow: [
-          '/admin/',
-          '/area-restrita/',
-          '/api/',
-          '/validar-acesso/',
-          '/_next/',
-          '/node_modules/',
+          '/admin',
+          '/admin/*',
+          '/area-restrita',
+          '/area-restrita/*',
+          '/api',
+          '/api/*',
+          '/login',
+          '/registro',
+          '/validar-acesso',
+          '/_next/static/*',
         ],
       },
+      {
+        userAgent: 'Googlebot',
+        allow: '/',
+        disallow: [
+          '/admin',
+          '/admin/*',
+          '/area-restrita',
+          '/area-restrita/*',
+          '/api',
+          '/api/*',
+          '/login',
+          '/registro',
+          '/validar-acesso',
+        ],
+        crawlDelay: 0,
+      },
+      {
+        userAgent: 'Bingbot',
+        allow: '/',
+        disallow: [
+          '/admin',
+          '/admin/*',
+          '/area-restrita',
+          '/area-restrita/*',
+          '/api',
+          '/api/*',
+          '/login',
+          '/registro',
+          '/validar-acesso',
+        ],
+        crawlDelay: 0,
+      },
     ],
-    sitemap: `${baseUrl}/sitemap.xml`,
+    sitemap: `${BASE_URL}/sitemap.xml`,
   };
 }
