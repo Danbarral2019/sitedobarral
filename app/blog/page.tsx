@@ -1,9 +1,8 @@
 import Link from 'next/link';
 import { Calendar, Clock, ArrowRight } from 'lucide-react';
-import { PrismaClient, BlogPost } from '@prisma/client';
+import { BlogPost } from '@prisma/client';
 import type { Metadata } from 'next';
-
-const prisma = new PrismaClient();
+import { getCachedPublishedBlogPosts } from '@/lib/cached-queries';
 
 export const metadata: Metadata = {
   title: 'Blog Jurídico',
@@ -39,10 +38,8 @@ export const metadata: Metadata = {
 export const revalidate = 3600;
 
 export default async function BlogPage() {
-  const posts = await prisma.blogPost.findMany({
-    where: { isPublished: true },
-    orderBy: { publishedAt: 'desc' }
-  });
+  // Usa query cacheada para melhor performance
+  const posts = await getCachedPublishedBlogPosts();
 
   const publishedPosts = posts.map((post: BlogPost) => ({
     ...post,

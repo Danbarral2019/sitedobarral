@@ -1,5 +1,4 @@
-'use client';
-
+// Server Component - Renderiza markdown sem JavaScript no cliente
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 
