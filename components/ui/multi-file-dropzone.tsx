@@ -23,7 +23,7 @@ export function MultiFileDropzone({
   const [isDragging, setIsDragging] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const validateFiles = (files: FileList): File[] => {
+  const validateFiles = useCallback((files: FileList): File[] => {
     const validFiles: File[] = [];
     const acceptedTypes = accept.split(',').map(t => t.trim());
 
@@ -55,7 +55,7 @@ export function MultiFileDropzone({
 
     setError(null);
     return validFiles;
-  };
+  }, [accept, maxSize, maxFiles, selectedFiles]);
 
   const handleDragEnter = useCallback((e: React.DragEvent) => {
     e.preventDefault();
@@ -86,7 +86,7 @@ export function MultiFileDropzone({
         onFilesSelect(validFiles);
       }
     }
-  }, [onFilesSelect, selectedFiles]);
+  }, [onFilesSelect, validateFiles]);
 
   const handleFileInput = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
@@ -98,7 +98,7 @@ export function MultiFileDropzone({
     }
     // Reset input
     e.target.value = '';
-  }, [onFilesSelect, selectedFiles]);
+  }, [onFilesSelect, validateFiles]);
 
   const getFileIcon = (file: File) => {
     const ext = file.name.split('.').pop()?.toLowerCase();

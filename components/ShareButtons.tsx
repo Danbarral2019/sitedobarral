@@ -16,14 +16,13 @@ export default function ShareButtons({ url, title, description, className = '' }
   const shareUrl = url.startsWith('http') ? url : `https://profbarral.com.br${url}`;
   const encodedUrl = encodeURIComponent(shareUrl);
   const encodedTitle = encodeURIComponent(title);
-  const _encodedDescription = encodeURIComponent(description || title);
 
   const copyToClipboard = async () => {
     try {
       await navigator.clipboard.writeText(shareUrl);
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
-    } catch {
+    } catch (err) {
       console.error('Erro ao copiar link:', err);
     }
   };

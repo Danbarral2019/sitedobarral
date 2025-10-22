@@ -169,7 +169,6 @@ export async function createLinkedInImagePost(
     }
 
     const imageBuffer = await imageResponse.arrayBuffer();
-    const imageSize = imageBuffer.byteLength;
 
 
     // Passo 2: Registrar upload da imagem

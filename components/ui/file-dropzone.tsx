@@ -21,7 +21,7 @@ export function FileDropzone({
   const [isDragging, setIsDragging] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const validateFile = (file: File): boolean => {
+  const validateFile = useCallback((file: File): boolean => {
     // Valida tamanho
     const fileSizeMB = file.size / 1024 / 1024;
     if (fileSizeMB > maxSize) {
@@ -40,7 +40,7 @@ export function FileDropzone({
 
     setError(null);
     return true;
-  };
+  }, [accept, maxSize]);
 
   const handleDragEnter = useCallback((e: React.DragEvent) => {
     e.preventDefault();
@@ -71,7 +71,7 @@ export function FileDropzone({
         onFileSelect(file);
       }
     }
-  }, [onFileSelect]);
+  }, [onFileSelect, validateFile]);
 
   const handleFileInput = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
@@ -81,7 +81,7 @@ export function FileDropzone({
         onFileSelect(file);
       }
     }
-  }, [onFileSelect]);
+  }, [onFileSelect, validateFile]);
 
   const getFileIcon = (file: File) => {
     const ext = file.name.split('.').pop()?.toLowerCase();
