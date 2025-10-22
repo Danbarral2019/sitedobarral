@@ -45,6 +45,18 @@ npx prisma db push --force-reset  # Reset database (CAUTION: deletes all data)
 # Create admin user (first time)
 node scripts/create-admin.js email@example.com SuaSenha "Nome Completo"
 
+# List all admin users
+node scripts/list-admins.js
+
+# Update admin email
+node scripts/update-admin-email.js old@email.com new@email.com
+
+# Reset admin password
+node scripts/reset-admin-password.js admin@email.com
+
+# Set admin password directly
+node scripts/set-admin-password.js admin@email.com NewPassword
+
 # Migrate blog posts from static data to database
 node scripts/migrate-blog-posts.js
 
@@ -175,6 +187,16 @@ projeto do site no claude/site-prof-barral/
 
 10. **NewsletterSubscriber** - Email list with interest segmentation
 
+11. **SocialMediaPost** - Social media publishing tracking
+   - Links to BlogPost for auto-publishing
+   - Tracks platform (Instagram, LinkedIn), status, errors
+   - Supports retry mechanism for failed posts
+
+12. **Testimonial** - User testimonials/reviews
+   - Includes moderation workflow (pending/approved/rejected)
+   - Supports ratings (1-5 stars)
+   - Can be linked to contact form or authenticated users
+
 See `prisma/schema.prisma` for complete schema with indexes and constraints.
 
 ### Authentication System
@@ -253,6 +275,10 @@ See `prisma/schema.prisma` for complete schema with indexes and constraints.
 - Blog: create/edit/delete posts with markdown editor
 - Publications: CRUD for books/articles/news with type-specific fields
 - Social Media: auto-publish blog posts to Instagram and LinkedIn (at `/admin/redes-sociais`)
+- Testimonials: moderate user reviews at `/admin/depoimentos` (approve/reject)
+- Contact Forms: view submissions at `/admin/contatos`
+- Analytics: access statistics at `/admin/analytics`
+- Newsletter: manage subscribers at `/admin/newsletter`
 
 ### Excel Import System
 
@@ -308,6 +334,56 @@ See `prisma/schema.prisma` for complete schema with indexes and constraints.
 **Configuration:**
 - Instagram: `INSTAGRAM_ACCESS_TOKEN`, `INSTAGRAM_BUSINESS_ACCOUNT_ID`
 - LinkedIn: `LINKEDIN_ACCESS_TOKEN`, `LINKEDIN_PERSON_URN`
+
+### API Routes
+
+**Public Endpoints:**
+- `POST /api/auth/register` - Student registration
+- `POST /api/auth/login` - Student login
+- `POST /api/auth/logout` - Logout (clears cookie)
+- `GET /api/auth/verify-email?token=XXX` - Email verification
+- `POST /api/auth/forgot-password` - Request password reset
+- `POST /api/auth/reset-password` - Reset password with token
+- `POST /api/auth/validate-qr` - Validate QR code and create enrollment
+- `POST /api/newsletter` - Newsletter subscription
+- `POST /api/contact` - Contact form submission
+- `POST /api/testimonials` - Submit testimonial
+- `GET /api/documents/[id]/download` - Download document (requires auth)
+
+**Admin Endpoints:**
+- `POST /api/admin/generate-qr` - Generate new QR code
+- `GET /api/admin/list-qr` - List all QR codes
+- `DELETE /api/admin/delete-qr` - Delete QR code
+- `PUT /api/admin/update-qr` - Update QR code
+- `POST /api/admin/upload` - Upload document
+- `GET /api/admin/documents` - List documents
+- `POST /api/admin/import-excel/validate` - Validate Excel import
+- `POST /api/admin/import-excel/upload-files` - Upload files for import
+- `POST /api/admin/import-excel/import` - Execute import
+- `GET /api/admin/import-excel/template` - Download Excel template
+- `GET /api/admin/blog-posts` - List blog posts
+- `POST /api/admin/blog-posts` - Create blog post
+- `PUT /api/admin/blog-posts/[id]` - Update blog post
+- `DELETE /api/admin/blog-posts/[id]` - Delete blog post
+- `GET /api/admin/publications` - List publications
+- `POST /api/admin/publications` - Create publication
+- `PUT /api/admin/publications/[id]` - Update publication
+- `DELETE /api/admin/publications/[id]` - Delete publication
+- `POST /api/admin/social/publish` - Publish blog to social media
+- `GET /api/admin/social/posts` - List social media posts
+- `POST /api/admin/social/retry` - Retry failed social post
+- `GET /api/admin/analytics` - Get analytics data
+- `GET /api/admin/testimonials` - List/moderate testimonials
+- `POST /api/admin/newsletter/sync` - Sync with MailChimp
+
+**Protected Student Endpoints:**
+- `GET /api/auth/me` - Get current user info
+- `POST /api/favorites` - Add/remove favorite
+- `GET /api/access-log` - Get user access history
+- `POST /api/enrollment/upgrade-lifetime` - Upgrade to lifetime access
+
+**Cron Job Endpoints:**
+- `GET /api/enrollment/check-expiration` - Check and notify expiring enrollments (requires CRON_SECRET header)
 
 ### Rate Limiting & Security
 
@@ -430,6 +506,22 @@ API endpoint: `/api/enrollment/check-expiration`
 - Updates `notificationSentAt` field
 - Should be called by scheduled cron job (e.g., Vercel Cron)
 
+**Vercel Cron Configuration** (add to `vercel.json`):
+```json
+{
+  "crons": [{
+    "path": "/api/enrollment/check-expiration",
+    "schedule": "0 9 * * *"
+  }]
+}
+```
+
+**Manual testing:**
+```bash
+curl -X GET https://your-domain.com/api/enrollment/check-expiration \
+  -H "x-cron-secret: YOUR_CRON_SECRET"
+```
+
 ### Modify Course Information
 Edit `data/courses.ts` - this is static data, not in database.
 Courses are referenced by `courseId` (slug) in Enrollment and Document models.
@@ -486,6 +578,10 @@ Reference these files in the project for detailed info:
 - Blog and publications CRUD
 - Newsletter integration (MailChimp)
 - Social media auto-posting (Instagram and LinkedIn)
+- Testimonials system with moderation workflow
+- Contact form management
+- Analytics dashboard (basic)
+- Favorites/bookmarks for documents
 - Responsive design
 - Lifetime access upgrade flow
 
