@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from 'react';
 import { ChevronLeft, ChevronRight, Star } from 'lucide-react';
-import { testimonials as staticTestimonials } from '@/data/testimonials';
 
 interface Testimonial {
   id: string;
@@ -14,10 +13,20 @@ interface Testimonial {
   color: string;
 }
 
+// Limite máximo de depoimentos a serem exibidos no carrossel
+const MAX_TESTIMONIALS = 10;
+
+// Função para selecionar aleatoriamente N itens de um array
+function getRandomItems<T>(array: T[], count: number): T[] {
+  const shuffled = [...array].sort(() => Math.random() - 0.5);
+  return shuffled.slice(0, Math.min(count, array.length));
+}
+
 export default function TestimonialsCarousel() {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isAutoPlaying, setIsAutoPlaying] = useState(true);
-  const [testimonials, setTestimonials] = useState<Testimonial[]>(staticTestimonials);
+  const [testimonials, setTestimonials] = useState<Testimonial[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
 
   // Buscar depoimentos aprovados da API
   useEffect(() => {
@@ -27,13 +36,18 @@ export default function TestimonialsCarousel() {
         const data = await response.json();
 
         if (data.success && data.testimonials.length > 0) {
-          // Combinar depoimentos do banco com os estáticos
-          // Priorizar os do banco (mais recentes)
-          setTestimonials([...data.testimonials, ...staticTestimonials]);
+          // Se houver mais depoimentos do que o limite, fazer rodízio aleatório
+          const selectedTestimonials =
+            data.testimonials.length > MAX_TESTIMONIALS
+              ? getRandomItems(data.testimonials, MAX_TESTIMONIALS)
+              : data.testimonials;
+
+          setTestimonials(selectedTestimonials);
         }
       } catch (error) {
         console.error('Erro ao carregar depoimentos:', error);
-        // Mantém os depoimentos estáticos em caso de erro
+      } finally {
+        setIsLoading(false);
       }
     }
 
@@ -73,6 +87,19 @@ export default function TestimonialsCarousel() {
     goToNext();
     setIsAutoPlaying(false);
   };
+
+  // Não mostrar nada se estiver carregando ou não houver depoimentos
+  if (isLoading) {
+    return (
+      <div className="text-center py-12">
+        <p className="text-gray-500">Carregando depoimentos...</p>
+      </div>
+    );
+  }
+
+  if (testimonials.length === 0) {
+    return null; // Não mostrar a seção se não houver depoimentos
+  }
 
   // Mostrar 2 depoimentos no desktop, 1 no mobile
   const testimonialsPerView = 2;
