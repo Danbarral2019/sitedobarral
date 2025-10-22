@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { usePathname } from 'next/navigation';
 import Link from 'next/link';
 import {
-  QrCode, FileSpreadsheet, ChevronLeft, ChevronRight, Share2, BarChart3, Mail, MessageSquare, Send
+  QrCode, FileSpreadsheet, ChevronLeft, ChevronRight, Share2, BarChart3, Mail, MessageSquare, Send, GraduationCap
 } from 'lucide-react';
 
 interface AdminLayoutProps {
@@ -136,8 +136,16 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
             })}
           </div>
 
-          <div className="mt-6 pt-6 border-t border-gray-200">
-                        <Link
+          <div className="mt-6 pt-6 border-t border-gray-200 space-y-1">
+            <Link
+              href="/area-restrita"
+              className="flex items-center gap-3 px-4 py-3 rounded-lg text-blue-700 hover:bg-blue-50 font-medium transition-colors"
+              title={isCollapsed ? 'Área do Aluno' : ''}
+            >
+              <GraduationCap className="w-5 h-5 flex-shrink-0" />
+              {!isCollapsed && <span>Área do Aluno</span>}
+            </Link>
+            <Link
               href="/"
               className="flex items-center gap-3 px-4 py-3 rounded-lg text-gray-700 hover:bg-gray-100 font-medium transition-colors"
               title={isCollapsed ? 'Voltar ao Site' : ''}
