@@ -139,11 +139,20 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
           <div className="mt-6 pt-6 border-t border-gray-200 space-y-1">
             <Link
               href="/area-restrita"
+              target="_blank"
+              rel="noopener noreferrer"
               className="flex items-center gap-3 px-4 py-3 rounded-lg text-blue-700 hover:bg-blue-50 font-medium transition-colors"
-              title={isCollapsed ? 'Área do Aluno' : ''}
+              title={isCollapsed ? 'Área do Aluno (abre em nova aba)' : ''}
             >
               <GraduationCap className="w-5 h-5 flex-shrink-0" />
-              {!isCollapsed && <span>Área do Aluno</span>}
+              {!isCollapsed && (
+                <div className="flex items-center gap-2">
+                  <span>Área do Aluno</span>
+                  <svg className="w-3 h-3 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                  </svg>
+                </div>
+              )}
             </Link>
             <Link
               href="/"
