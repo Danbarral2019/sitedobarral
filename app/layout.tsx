@@ -8,6 +8,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { ScrollToTop } from "@/components/ui/scroll-to-top";
 import Analytics from "@/components/Analytics";
 import WelcomeModal from "@/components/WelcomeModal";
+import { SpeedInsights } from "@vercel/speed-insights/next";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -84,6 +85,7 @@ export default function RootLayout({
     <html lang="pt-BR">
       <body className={`${inter.variable} font-sans antialiased bg-white text-gray-900`}>
         <Analytics />
+        <SpeedInsights />
         <ToastProviderWrapper>
           <div className="min-h-screen flex flex-col">
             <Header />
