@@ -72,6 +72,49 @@ export default function AreaRestritaPage() {
   }, [isLoading, user, router]);
 
   // Buscar documentos dos cursos matriculados
+  // Função para filtrar e ordenar documentos (DEVE estar antes dos early returns)
+  const filterDocuments = useMemo(() => {
+    return (docs: DocumentType[]) => {
+      let filtered = [...docs];
+
+      // Filtro de busca (título ou descrição)
+      if (filters.searchQuery) {
+        const query = filters.searchQuery.toLowerCase();
+        filtered = filtered.filter(
+          (doc) =>
+            doc.title.toLowerCase().includes(query) ||
+            (doc.description && doc.description.toLowerCase().includes(query))
+        );
+      }
+
+      // Filtro de categoria
+      if (filters.category) {
+        filtered = filtered.filter((doc) => doc.category === filters.category);
+      }
+
+      // Filtro de tipo
+      if (filters.type) {
+        filtered = filtered.filter((doc) => doc.type === filters.type);
+      }
+
+      // Ordenação
+      filtered.sort((a, b) => {
+        switch (filters.sortBy) {
+          case 'title':
+            return a.title.localeCompare(b.title);
+          case 'category':
+            return a.category.localeCompare(b.category);
+          case 'recent':
+          default:
+            // Assumindo que docs mais recentes têm IDs maiores
+            return b.id.localeCompare(a.id);
+        }
+      });
+
+      return filtered;
+    };
+  }, [filters]);
+
   useEffect(() => {
     const fetchDocuments = async () => {
       if (!user) return;
@@ -133,49 +176,6 @@ export default function AreaRestritaPage() {
     : userEnrollments.map(enrollment =>
         courses.find(c => c.id === enrollment.courseId)
       ).filter(Boolean);
-
-  // Função para filtrar e ordenar documentos
-  const filterDocuments = useMemo(() => {  // eslint-disable-line react-hooks/rules-of-hooks
-    return (docs: DocumentType[]) => {
-      let filtered = [...docs];
-
-      // Filtro de busca (título ou descrição)
-      if (filters.searchQuery) {
-        const query = filters.searchQuery.toLowerCase();
-        filtered = filtered.filter(
-          (doc) =>
-            doc.title.toLowerCase().includes(query) ||
-            (doc.description && doc.description.toLowerCase().includes(query))
-        );
-      }
-
-      // Filtro de categoria
-      if (filters.category) {
-        filtered = filtered.filter((doc) => doc.category === filters.category);
-      }
-
-      // Filtro de tipo
-      if (filters.type) {
-        filtered = filtered.filter((doc) => doc.type === filters.type);
-      }
-
-      // Ordenação
-      filtered.sort((a, b) => {
-        switch (filters.sortBy) {
-          case 'title':
-            return a.title.localeCompare(b.title);
-          case 'category':
-            return a.category.localeCompare(b.category);
-          case 'recent':
-          default:
-            // Assumindo que docs mais recentes têm IDs maiores
-            return b.id.localeCompare(a.id);
-        }
-      });
-
-      return filtered;
-    };
-  }, [filters]);
 
   return (
     <main className="py-12 bg-gradient-to-br from-blue-50 via-white to-purple-50 min-h-screen">
