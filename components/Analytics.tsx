@@ -1,5 +1,4 @@
-'use client';
-
+// Server Component - Analytics renderizado no servidor
 import { GoogleAnalytics } from '@next/third-parties/google';
 
 export default function Analytics() {

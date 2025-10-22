@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
+import Image from 'next/image';
 import {
   QrCode, Plus, Loader2, Download, Calendar,
   Users, CheckCircle, XCircle, BarChart3,
@@ -403,10 +404,13 @@ export default function AdminPage() {
                     <div className="bg-gradient-to-r from-green-50 to-teal-100 rounded-xl p-4 text-center">
                       <CheckCircle className="w-8 h-8 text-green-600 mx-auto mb-3" />
                       <p className="text-sm font-bold text-gray-900 mb-3">QR Code Gerado!</p>
-                      <img
+                      <Image
                         src={generatedQR.image}
                         alt="QR Code"
+                        width={256}
+                        height={256}
                         className="mx-auto mb-3 border-4 border-white shadow-lg rounded-lg"
+                        unoptimized
                       />
                       <p className="text-xs text-gray-700 font-mono mb-3 break-all">
                         {generatedQR.code}
@@ -466,10 +470,13 @@ export default function AdminPage() {
                             {/* Imagem do QR Code */}
                             {qr.qrCodeImage && (
                               <div className="flex-shrink-0">
-                                <img
+                                <Image
                                   src={qr.qrCodeImage}
                                   alt={`QR Code ${qr.turma}`}
+                                  width={128}
+                                  height={128}
                                   className="w-32 h-32 border-4 border-white shadow-lg rounded-lg"
+                                  unoptimized
                                 />
                                 <button
                                   onClick={() => downloadQRCode(qr.qrCodeImage!, qr.code)}

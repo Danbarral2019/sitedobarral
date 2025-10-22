@@ -1,4 +1,5 @@
 import { prisma } from '@/lib/prisma';
+import Image from 'next/image';
 import { BookOpen, FileText, Calendar, ExternalLink, MapPin } from 'lucide-react';
 // import Link from 'next/link';
 import { Publication } from '@prisma/client';
@@ -86,11 +87,13 @@ export default async function PublicacoesPage() {
                 {livros.map((livro: Publication) => (
                   <div key={livro.id} className="bg-white rounded-2xl shadow-lg overflow-hidden hover:shadow-2xl transition-all group border-2 border-gray-100 hover:border-blue-500">
                     {livro.coverImage && (
-                      <div className="aspect-[3/4] bg-gray-200 overflow-hidden">
-                        <img
+                      <div className="aspect-[3/4] bg-gray-200 overflow-hidden relative">
+                        <Image
                           src={livro.coverImage}
                           alt={livro.title}
-                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                          fill
+                          className="object-cover group-hover:scale-105 transition-transform duration-300"
+                          sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                         />
                       </div>
                     )}
