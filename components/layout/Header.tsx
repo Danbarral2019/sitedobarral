@@ -99,7 +99,7 @@ export const Header = memo(function Header() {
             </Link>
 
             <Link
-              href="/validar-acesso"
+              href="/login"
               className="flex items-center space-x-1 text-gray-700 hover:text-primary-600 transition-colors"
             >
               <LogIn className="w-4 h-4" />
@@ -160,7 +160,7 @@ export const Header = memo(function Header() {
               Contato
             </Link>
             <Link
-              href="/validar-acesso"
+              href="/login"
               className="flex items-center space-x-2 py-2 text-gray-700 hover:text-primary-600"
               onClick={() => setIsMenuOpen(false)}
             >
