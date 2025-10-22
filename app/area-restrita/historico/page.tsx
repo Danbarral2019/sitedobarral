@@ -23,6 +23,9 @@ export default function HistoricoPage() {
   const [isLoadingLogs, setIsLoadingLogs] = useState(true);
   const [filter, setFilter] = useState<'all' | 'download' | 'view'>('all');
 
+  // Cache de documentos buscados
+  const [documentsCache, setDocumentsCache] = useState<Record<string, unknown>>({});
+
   useEffect(() => {
     if (!isLoading && !user) {
       router.push('/login');
@@ -113,9 +116,6 @@ export default function HistoricoPage() {
         return 'bg-gray-100 text-gray-800 border-gray-200';
     }
   };
-
-  // Cache de documentos buscados
-  const [documentsCache, setDocumentsCache] = useState<Record<string, any>>({});
 
   // Encontrar documento (busca no banco se necessário)
   const findDocument = useCallback(async (courseId: string | null, documentId: string | null) => {
