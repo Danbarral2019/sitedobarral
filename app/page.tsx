@@ -1,8 +1,18 @@
 import Link from 'next/link';
+import dynamic from 'next/dynamic';
 import { ArrowRight, BookOpen, Users, Award, FileText, CheckCircle, Star } from 'lucide-react';
 import { courses } from '@/data/courses';
-import TestimonialsCarousel from '@/components/TestimonialsCarousel';
 import NewsletterForm from '@/components/NewsletterForm';
+
+// Lazy load do carrossel de depoimentos (otimização de performance)
+const TestimonialsCarousel = dynamic(() => import('@/components/TestimonialsCarousel'), {
+  loading: () => (
+    <div className="flex justify-center py-12">
+      <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+    </div>
+  ),
+  ssr: true
+});
 
 export default function Home() {
   const featuredCourses = courses.slice(0, 3);

@@ -2,10 +2,20 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
+import dynamic from 'next/dynamic';
 import { Loader2, Save, ArrowLeft, Trash2, Plus, X } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import AdminLayout from '@/components/AdminLayout';
-import MarkdownEditor from '@/components/MarkdownEditor';
+
+// Lazy load do editor Markdown (150KB+ economia)
+const MarkdownEditor = dynamic(() => import('@/components/MarkdownEditor'), {
+  loading: () => (
+    <div className="flex justify-center items-center p-8 border-2 border-dashed border-gray-300 rounded-lg">
+      <Loader2 className="w-8 h-8 animate-spin text-blue-600" />
+    </div>
+  ),
+  ssr: false
+});
 
 interface BlogPostData {
   id: string;
