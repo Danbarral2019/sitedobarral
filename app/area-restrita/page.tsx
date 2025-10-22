@@ -230,7 +230,7 @@ export default function AreaRestritaPage() {
                       // Buscar o curso e documento correspondentes
                       const course = userCourses.find(c => c?.id === fav.courseId);
                       const courseDocs = course ? courseDocuments[course.id] || [] : [];
-                      const doc = courseDocs.find((d: any) => d.id === fav.documentId);
+                      const doc = courseDocs.find((d: unknown) => (d as { id: string }).id === fav.documentId);
 
                       if (!doc || !course) return null;
 
