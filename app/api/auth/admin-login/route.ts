@@ -3,17 +3,9 @@ import { generateToken } from '@/lib/auth';
 import { cookies } from 'next/headers';
 import bcrypt from 'bcryptjs';
 import { rateLimiters } from '@/lib/rate-limit';
+import { PrismaClient } from '@prisma/client';
 
-// Usuário admin padrão (em produção, usar banco de dados)
-const ADMIN_USERS = [
-  {
-    id: 'admin-1',
-    email: 'admin@profbarral.com.br',
-    // Senha: admin123 (hash gerado com bcrypt)
-    passwordHash: '$2a$10$rK8YvVE5R.xqF5qJ5qxJFuZxN5qxN5qxN5qxN5qxN5qxN5qxN5qxO',
-    name: 'Administrador',
-  },
-];
+const prisma = new PrismaClient();
 
 export async function POST(request: NextRequest) {
   // Rate limiting: 5 tentativas de login admin por minuto
@@ -36,20 +28,22 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Busca usuário admin
-    const admin = ADMIN_USERS.find(u => u.email === email);
+    // Busca usuário admin no banco de dados
+    const admin = await prisma.user.findUnique({
+      where: {
+        email: email.toLowerCase()
+      },
+    });
 
-    if (!admin) {
+    if (!admin || admin.role !== 'admin') {
       return NextResponse.json(
         { error: 'Credenciais inválidas' },
         { status: 401 }
       );
     }
 
-    // Verifica senha (temporariamente aceita senha direta para desenvolvimento)
-    const isValidPassword =
-      password === 'admin123' ||
-      await bcrypt.compare(password, admin.passwordHash);
+    // Verifica senha
+    const isValidPassword = await bcrypt.compare(password, admin.passwordHash);
 
     if (!isValidPassword) {
       return NextResponse.json(
@@ -83,11 +77,13 @@ export async function POST(request: NextRequest) {
         role: 'admin',
       },
     });
-  } catch {
+  } catch (error) {
     console.error('Erro no login admin:', error);
     return NextResponse.json(
       { error: 'Erro ao processar login' },
       { status: 500 }
     );
+  } finally {
+    await prisma.$disconnect();
   }
 }
