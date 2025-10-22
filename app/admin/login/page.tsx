@@ -112,13 +112,13 @@ export default function AdminLoginPage() {
               </button>
             </form>
 
-            <div className="mt-8 pt-6 border-t border-gray-200 text-center">
-              <p className="text-sm text-gray-600">
-                Credenciais de teste:
-              </p>
-              <p className="text-xs text-gray-500 mt-2">
-                admin@profbarral.com.br / admin123
-              </p>
+            <div className="mt-6 text-center">
+              <a
+                href="/admin/redefinir-senha"
+                className="text-sm text-blue-600 hover:text-blue-700 font-medium hover:underline"
+              >
+                Esqueci minha senha
+              </a>
             </div>
           </div>
         </div>
