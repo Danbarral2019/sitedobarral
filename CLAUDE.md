@@ -2,6 +2,8 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
+**⚠️ IMPORTANT:** Always run commands from the project directory: `projeto do site no claude/site-prof-barral/` (not the repository root).
+
 ## Project Overview
 
 Professional website for Prof. Daniel Barral, specialist in Administrative Law focusing on public procurement and contracts. The site is a specialized repository of legal materials organized by course topics, featuring public areas and QR code-controlled restricted access for enrolled students.
@@ -15,6 +17,7 @@ Professional website for Prof. Daniel Barral, specialist in Administrative Law f
 - **Authentication:** JWT tokens (jose library) + bcryptjs for password hashing
 - **Email:** Resend API
 - **Newsletter:** MailChimp API integration
+- **Social Media:** Instagram Graph API, LinkedIn API (auto-posting from blog)
 - **Form Handling:** React Hook Form with Zod validation
 - **Video Player:** Video.js
 - **File Processing:** xlsx (Excel import/export), qrcode generation
@@ -101,11 +104,16 @@ projeto do site no claude/site-prof-barral/
 │   ├── qrcode.ts                 # QR code generation utilities
 │   ├── documents.ts              # Document access validation
 │   ├── mailchimp.ts              # MailChimp API integration
+│   ├── instagram.ts              # Instagram API integration
+│   ├── linkedin.ts               # LinkedIn API integration
+│   ├── social-publisher.ts       # Unified social media publishing
 │   ├── rate-limit.ts             # API rate limiting
 │   ├── api-middleware.ts         # Common API middleware (auth, CORS)
 │   ├── excel-processor.ts        # Excel import processing
 │   ├── auto-classifier.ts        # Auto-classification for document categories
 │   └── enrollment-utils.ts       # Enrollment status checks
+├── hooks/                        # Custom React hooks
+├── types/                        # TypeScript type declarations
 ├── data/
 │   ├── courses.ts                # Static course data (10 courses)
 │   └── testimonials.ts           # Testimonials for homepage
@@ -113,10 +121,13 @@ projeto do site no claude/site-prof-barral/
 │   ├── schema.prisma             # Database schema
 │   └── dev.db                    # SQLite database (dev)
 ├── scripts/                      # Utility scripts
-├── types/                        # TypeScript type declarations
+│   ├── create-admin.js           # Create admin user
+│   ├── migrate-blog-posts.js    # Migrate blog posts to DB
+│   └── seed-publications.js     # Seed sample publications
 ├── public/
 │   └── uploads/                  # Uploaded files storage (local dev)
 ├── middleware.ts                 # Next.js middleware (route protection)
+├── .env.example                  # Example environment variables
 └── .env.local                    # Environment variables (not committed)
 ```
 
@@ -241,6 +252,7 @@ See `prisma/schema.prisma` for complete schema with indexes and constraints.
 - Excel Import: download template, validate, import with auto-classification
 - Blog: create/edit/delete posts with markdown editor
 - Publications: CRUD for books/articles/news with type-specific fields
+- Social Media: auto-publish blog posts to Instagram and LinkedIn (at `/admin/redes-sociais`)
 
 ### Excel Import System
 
@@ -282,6 +294,20 @@ See `prisma/schema.prisma` for complete schema with indexes and constraints.
 - Tags based on course interests
 - Form component: `NewsletterForm.tsx`
 - API: `/api/newsletter` (public), `/api/admin/newsletter/sync` (admin)
+
+### Social Media Integration
+
+**Auto-publishing from Blog:** `lib/social-publisher.ts`, `lib/instagram.ts`, `lib/linkedin.ts`
+
+- Publish blog posts automatically to Instagram and LinkedIn
+- Admin interface at `/admin/redes-sociais`
+- Post status tracking and retry mechanism
+- API endpoints: `/api/admin/social/publish`, `/api/admin/social/posts`, `/api/admin/social/retry`
+- See `CONFIGURACAO_REDES_SOCIAIS.md` for setup guide
+
+**Configuration:**
+- Instagram: `INSTAGRAM_ACCESS_TOKEN`, `INSTAGRAM_BUSINESS_ACCOUNT_ID`
+- LinkedIn: `LINKEDIN_ACCESS_TOKEN`, `LINKEDIN_PERSON_URN`
 
 ### Rate Limiting & Security
 
@@ -344,6 +370,8 @@ Required in `.env.local` (see `.env.example` for full list):
 - `NEXT_PUBLIC_BASE_URL` - Site URL for absolute links
 - `CRON_SECRET` - Protect cron job endpoints
 - `MAILCHIMP_API_KEY`, `MAILCHIMP_SERVER_PREFIX`, `MAILCHIMP_AUDIENCE_ID` - Newsletter
+- `INSTAGRAM_ACCESS_TOKEN`, `INSTAGRAM_BUSINESS_ACCOUNT_ID` - Instagram auto-posting
+- `LINKEDIN_ACCESS_TOKEN`, `LINKEDIN_PERSON_URN` - LinkedIn auto-posting
 - `ADMIN_EMAIL`, `ADMIN_PASSWORD_HASH` - Initial admin credentials (optional)
 
 ### Path Aliases
@@ -418,11 +446,26 @@ Edit template functions in `lib/email.ts`:
 
 Reference these files in the project for detailed info:
 
+### Setup & Configuration
 - **`SETUP.md`** - Initial setup guide (dependencies, env vars, database, admin creation)
-- **`IMPORTACAO_EXCEL.md`** - Complete Excel import documentation with examples
 - **`CONFIGURACAO_EMAIL.md`** - Resend email setup and troubleshooting
+- **`RESEND_SETUP_COMPLETO.md`** - Complete Resend configuration guide
+- **`CONFIGURACAO_INTEGRACOES.md`** - External integrations setup
+- **`CONFIGURACAO_REDES_SOCIAIS.md`** - Social media API configuration (Instagram, LinkedIn)
+- **`POSTGRES_LOCAL.md`** - Local PostgreSQL setup with Docker
+
+### Deployment
 - **`DEPLOY.md`** - Production deployment guide
+- **`DEPLOY_VERCEL.md`** - Vercel-specific deployment instructions
+
+### Features & Usage
+- **`IMPORTACAO_EXCEL.md`** - Complete Excel import documentation with examples
 - **`RESUMO_MIGRACAO.md`** - Migration summary for enrollment/renewal system
+- **`TESTES_EMAIL.md`** - Email testing procedures
+- **`STATUS_PROJETO.md`** - Current project status and feature tracking
+- **`RESUMO_SESSAO_REDES_SOCIAIS.md`** - Social media integration session summary
+
+### Other
 - **`README.md`** - Standard Next.js readme
 - **`prd_daniel_barral.md`** (repo root) - Original Product Requirements Document
 
@@ -442,6 +485,7 @@ Reference these files in the project for detailed info:
 - Access logging and audit trail
 - Blog and publications CRUD
 - Newsletter integration (MailChimp)
+- Social media auto-posting (Instagram and LinkedIn)
 - Responsive design
 - Lifetime access upgrade flow
 
@@ -449,7 +493,6 @@ Reference these files in the project for detailed info:
 - Payment integration for lifetime upgrades (currently manual)
 - Advanced document search (full-text)
 - Analytics dashboard for admin
-- Social media auto-posting from blog
 - PWA/offline support
 - Performance optimizations for large document sets
 
