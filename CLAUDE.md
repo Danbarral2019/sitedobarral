@@ -348,6 +348,8 @@ See `prisma/schema.prisma` for complete schema with indexes and constraints.
 - `POST /api/newsletter` - Newsletter subscription
 - `POST /api/contact` - Contact form submission
 - `POST /api/testimonials` - Submit testimonial
+- `GET /api/documents?courseId=XXX` - List documents for a course (requires auth, checks enrollment)
+- `GET /api/documents/[id]` - Get single document by ID (requires auth)
 - `GET /api/documents/[id]/download` - Download document (requires auth)
 
 **Admin Endpoints:**
@@ -632,13 +634,99 @@ npm run build
 npx prisma generate
 ```
 
+### React Hooks Errors (Error #310, #301, etc.)
+
+**CRITICAL: React Hooks must be called in the SAME ORDER in EVERY render**
+
+**Common mistake:**
+```typescript
+// ❌ WRONG - Hooks after early returns
+function MyComponent() {
+  if (isLoading) return <Loading />;
+  if (!user) return null;
+
+  const data = useMemo(() => { ... }, [deps]); // ❌ Error #310!
+  useEffect(() => { ... }, [deps]); // ❌ Conditional hook call
+}
+```
+
+**Correct pattern:**
+```typescript
+// ✅ CORRECT - All hooks BEFORE any early returns
+function MyComponent() {
+  // 1. ALL useState first
+  const [state, setState] = useState(initial);
+
+  // 2. ALL useMemo and useCallback
+  const computed = useMemo(() => { ... }, [deps]);
+  const callback = useCallback(() => { ... }, [deps]);
+
+  // 3. ALL useEffect
+  useEffect(() => { ... }, [deps]);
+
+  // 4. THEN early returns
+  if (isLoading) return <Loading />;
+  if (!user) return null;
+
+  // 5. Finally, render
+  return <Component />;
+}
+```
+
+**If you get React Hooks errors:**
+1. Move ALL hooks to the very top of the component
+2. Ensure hooks are never inside conditionals or loops
+3. Ensure hooks are called in the same order every render
+
+### Static vs Dynamic Data
+
+**IMPORTANT: Course documents are stored in the DATABASE, not in static files**
+
+```typescript
+// ❌ WRONG - Static array is always empty
+const docs = course.restrictedDocuments; // Empty array!
+
+// ✅ CORRECT - Fetch from database via API
+const response = await fetch(`/api/documents?courseId=${courseId}`);
+const { documents } = await response.json();
+```
+
+**Data structure:**
+- `data/courses.ts` - Static course info (title, description, bibliography)
+- Database `Document` table - Dynamic documents (PDFs, links, videos)
+- Bibliography is ALWAYS public (static is OK)
+- Restricted documents MUST be fetched from database
+
 ## Notes for Future Claude Instances
 
 - This is a production website for a real legal professional - treat all changes with care
-- Course data in `data/courses.ts` is the source of truth for courseId values
+- Course data in `data/courses.ts` is the source of truth for courseId values (use IDs like '1', '2', not slugs)
 - Always test authentication flows after making auth-related changes
 - Enrollment expiration is critical business logic - don't modify without understanding impact
 - Bibliography must remain public per business requirements
 - Excel import is a heavily-used feature - maintain backward compatibility with existing templates
 - Email templates should maintain professional, formal tone appropriate for legal audience
+- **React Hooks:** ALWAYS call hooks in the same order, BEFORE any early returns (see troubleshooting section)
+- **Documents:** NEVER access `course.restrictedDocuments` - fetch from database via `/api/documents`
 - When adding new features, update this CLAUDE.md file accordingly
+
+## Recent Critical Fixes
+
+### 2025-01-22: Área Restrita Document Loading
+**Issue:** Area restrita showing "Erro na Área Restrita" - documents not loading
+**Root Cause:**
+1. Page tried to access `course.restrictedDocuments` (static empty array) instead of database
+2. React Hooks called after early returns (Error #310)
+
+**Solution:**
+- Created `/api/documents` endpoint to fetch from database
+- Created `/api/documents/[id]` endpoint for single document
+- Fixed React Hooks order in `app/area-restrita/page.tsx`
+- Fixed document fetching in favorites and history pages
+
+**Commit:** `e6f31fb` - See `SESSAO_2025-01-22_CORRECAO_AREA_RESTRITA.md` for complete details
+
+**Test credentials:**
+- Email: `aluno@teste.com`
+- Password: `aluno123`
+- Course: Nova Lei de Licitações (14 test documents)
