@@ -18,6 +18,10 @@ export default function AreaRestritaPage() {
   const { user, isLoading, logout } = useAuth();
   const { favorites, isFavorite, toggleFavorite } = useFavorites();
 
+  // Estado dos documentos por curso
+  const [courseDocuments, setCourseDocuments] = useState<Record<string, any[]>>({});
+  const [isLoadingDocs, setIsLoadingDocs] = useState(true);
+
   // Estado dos filtros
   const [filters, setFilters] = useState<DocumentFilterState>({
     searchQuery: '',
@@ -58,6 +62,44 @@ export default function AreaRestritaPage() {
       router.push('/login');
     }
   }, [isLoading, user, router]);
+
+  // Buscar documentos dos cursos matriculados
+  useEffect(() => {
+    const fetchDocuments = async () => {
+      if (!user) return;
+
+      const userEnrollments = user.enrollments || [];
+      const enrolledCourseIds = user.role === 'admin'
+        ? courses.map(c => c.id)
+        : userEnrollments.map(e => e.courseId);
+
+      setIsLoadingDocs(true);
+
+      const docsPromises = enrolledCourseIds.map(async (courseId) => {
+        try {
+          const response = await fetch(`/api/documents?courseId=${courseId}`);
+          if (response.ok) {
+            const data = await response.json();
+            return { courseId, documents: data.documents || [] };
+          }
+        } catch (error) {
+          console.error(`Erro ao buscar documentos do curso ${courseId}:`, error);
+        }
+        return { courseId, documents: [] };
+      });
+
+      const results = await Promise.all(docsPromises);
+      const docsMap: Record<string, any[]> = {};
+      results.forEach(({ courseId, documents }) => {
+        docsMap[courseId] = documents;
+      });
+
+      setCourseDocuments(docsMap);
+      setIsLoadingDocs(false);
+    };
+
+    fetchDocuments();
+  }, [user]);
 
   const handleLogout = async () => {
     await logout();
@@ -255,7 +297,7 @@ export default function AreaRestritaPage() {
                 if (!course) return null;
 
                 const enrollment = userEnrollments.find(e => e.courseId === course.id);
-                const restrictedDocs = course.restrictedDocuments || [];
+                const restrictedDocs = courseDocuments[course.id] || [];
                 const filteredDocs = filterDocuments(restrictedDocs);
 
                 // Paginação
