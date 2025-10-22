@@ -71,6 +71,7 @@ export default function DocumentosPage() {
     description: string;
     category: DocumentCategory;
     isPublic: boolean;
+    tags: string;
   }>({
     courseId: '',
     title: '',
