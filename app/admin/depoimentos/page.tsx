@@ -33,7 +33,7 @@ export default function DepoimentosPage() {
   const [loading, setLoading] = useState(true);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editForm, setEditForm] = useState<Partial<Testimonial>>({});
-  const { successToast, errorToast } = useToast();
+  const { success: successToast, error: errorToast } = useToast();
 
   useEffect(() => {
     loadTestimonials();
@@ -60,6 +60,7 @@ export default function DepoimentosPage() {
   };
 
   const handleApprove = async (id: string) => {
+    console.log('[Depoimentos] Aprovando depoimento:', id);
     try {
       const response = await fetch('/api/admin/testimonials', {
         method: 'PATCH',
@@ -67,7 +68,9 @@ export default function DepoimentosPage() {
         body: JSON.stringify({ id, action: 'approve' }),
       });
 
+      console.log('[Depoimentos] Response status:', response.status);
       const data = await response.json();
+      console.log('[Depoimentos] Response data:', data);
 
       if (data.success) {
         successToast('Depoimento aprovado!');
@@ -76,7 +79,7 @@ export default function DepoimentosPage() {
         errorToast(data.error || 'Erro ao aprovar');
       }
     } catch (error) {
-      console.error('Erro ao aprovar:', error);
+      console.error('[Depoimentos] Erro ao aprovar:', error);
       errorToast('Erro ao aprovar depoimento');
     }
   };

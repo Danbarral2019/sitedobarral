@@ -56,10 +56,13 @@ export const GET = withAdminAuth(async (request: NextRequest) => {
  */
 export const PATCH = withAdminAuth(async (request: NextRequest) => {
   try {
+    console.log('[API Testimonials] Recebendo PATCH request');
     const body = await request.json();
+    console.log('[API Testimonials] Body:', body);
     const { id, action, data } = body;
 
     if (!id) {
+      console.log('[API Testimonials] Erro: ID não fornecido');
       return NextResponse.json(
         { error: 'ID do depoimento é obrigatório' },
         { status: 400 }
@@ -67,16 +70,20 @@ export const PATCH = withAdminAuth(async (request: NextRequest) => {
     }
 
     // Buscar o testimonial
+    console.log('[API Testimonials] Buscando depoimento:', id);
     const testimonial = await prisma.testimonial.findUnique({
       where: { id },
     });
 
     if (!testimonial) {
+      console.log('[API Testimonials] Depoimento não encontrado:', id);
       return NextResponse.json(
         { error: 'Depoimento não encontrado' },
         { status: 404 }
       );
     }
+
+    console.log('[API Testimonials] Depoimento encontrado, action:', action);
 
     let updateData: Record<string, unknown> = {};
 
@@ -108,17 +115,19 @@ export const PATCH = withAdminAuth(async (request: NextRequest) => {
       );
     }
 
+    console.log('[API Testimonials] Atualizando com dados:', updateData);
     const updated = await prisma.testimonial.update({
       where: { id },
       data: updateData,
     });
 
+    console.log('[API Testimonials] Depoimento atualizado com sucesso');
     return NextResponse.json({
       success: true,
       testimonial: updated,
     });
   } catch (error) {
-    console.error('Erro ao atualizar testimonial:', error);
+    console.error('[API Testimonials] Erro ao atualizar testimonial:', error);
     return NextResponse.json(
       { error: 'Erro ao atualizar depoimento' },
       { status: 500 }

@@ -27,7 +27,7 @@ export default function ContatosPage() {
   const [filter, setFilter] = useState<'all' | 'true' | 'false'>('false'); // false = não lidos
   const [loading, setLoading] = useState(true);
   const [expandedId, setExpandedId] = useState<string | null>(null);
-  const { successToast, errorToast } = useToast();
+  const { success: successToast, error: errorToast } = useToast();
 
   useEffect(() => {
     loadContacts();
