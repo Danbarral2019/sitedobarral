@@ -231,3 +231,35 @@ model NewsletterSubscriber {
   @@index([isActive])
   @@index([subscribedAt])
 }
+
+// Depoimentos/Testemunhos de Alunos
+model Testimonial {
+  id             String   @id @default(uuid())
+  name           String
+  email          String
+  phone          String?
+  role           String   // Cargo/função da pessoa
+  text           String   // Texto do depoimento
+  rating         Int      @default(5) // Avaliação de 1-5 estrelas
+  avatar         String   @default("U") // Inicial para avatar
+  color          String   @default("from-blue-400 to-blue-600") // Cor do avatar
+
+  // Status de moderação
+  status         String   @default("pending") // pending, approved, rejected
+  moderatedBy    String?  // ID do admin que moderou
+  moderatedAt    DateTime?
+  rejectionReason String? // Motivo da rejeição (se aplicável)
+
+  // Relacionamento com formulário de contato (opcional)
+  contactFormId  String?  @unique
+
+  // Relacionamento com usuário (se for um aluno logado)
+  userId         String?
+
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  @@index([status])
+  @@index([createdAt])
+  @@index([status, createdAt])
+}
