@@ -57,7 +57,6 @@ export async function createLinkedInTextPost(
   text: string
 ): Promise<{ success: boolean; postId?: string; postUrl?: string; error?: string }> {
   if (!isLinkedInConfigured()) {
-    console.warn('LinkedIn não configurado. Configure as variáveis de ambiente.');
     return {
       success: false,
       error: 'LinkedIn não configurado',
@@ -72,8 +71,6 @@ export async function createLinkedInTextPost(
         error: 'Texto muito longo (máximo 3000 caracteres)',
       };
     }
-
-    console.log('[LinkedIn] Criando post de texto...');
 
     const response = await fetch(`${LINKEDIN_API_BASE}/ugcPosts`, {
       method: 'POST',
@@ -110,8 +107,6 @@ export async function createLinkedInTextPost(
 
     const data: LinkedInPostResponse = await response.json();
     const postId = data.id;
-
-    console.log('[LinkedIn] Post criado com sucesso:', postId);
 
     // Construir URL do post (aproximado)
     const postUrl = `https://www.linkedin.com/feed/update/${postId}`;
@@ -163,7 +158,6 @@ export async function createLinkedInImagePost(
       };
     }
 
-    console.log('[LinkedIn] Baixando imagem...');
 
     // Passo 1: Baixar a imagem
     const imageResponse = await fetch(imageUrl);
@@ -177,7 +171,6 @@ export async function createLinkedInImagePost(
     const imageBuffer = await imageResponse.arrayBuffer();
     const imageSize = imageBuffer.byteLength;
 
-    console.log('[LinkedIn] Registrando upload de imagem...');
 
     // Passo 2: Registrar upload da imagem
     const registerResponse = await fetch(`${LINKEDIN_API_BASE}/assets?action=registerUpload`, {
@@ -216,7 +209,6 @@ export async function createLinkedInImagePost(
         .uploadUrl;
     const asset = registerData.value.asset;
 
-    console.log('[LinkedIn] Fazendo upload da imagem...');
 
     // Passo 3: Upload da imagem
     const uploadResponse = await fetch(uploadUrl, {
@@ -236,7 +228,6 @@ export async function createLinkedInImagePost(
       };
     }
 
-    console.log('[LinkedIn] Criando post com imagem...');
 
     // Passo 4: Criar post com a imagem
     const postResponse = await fetch(`${LINKEDIN_API_BASE}/ugcPosts`, {
@@ -287,7 +278,6 @@ export async function createLinkedInImagePost(
     const data: LinkedInPostResponse = await postResponse.json();
     const postId = data.id;
 
-    console.log('[LinkedIn] Post com imagem criado com sucesso:', postId);
 
     const postUrl = `https://www.linkedin.com/feed/update/${postId}`;
 
