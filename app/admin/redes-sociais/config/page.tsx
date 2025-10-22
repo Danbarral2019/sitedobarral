@@ -211,7 +211,7 @@ export default function RedesSociaisConfigPage() {
             <ol className="space-y-3 list-decimal list-inside text-gray-700">
               <li>Configure as variáveis de ambiente na Vercel</li>
               <li>Redeploy o site</li>
-              <li>Ao criar ou editar um post do blog, marque a opção "Publicar nas redes sociais"</li>
+              <li>Ao criar ou editar um post do blog, marque a opção &quot;Publicar nas redes sociais&quot;</li>
               <li>Ao publicar o post, ele será automaticamente compartilhado no Instagram e LinkedIn</li>
               <li>Acompanhe o status das publicações na tela de <Link href="/admin/redes-sociais" className="text-blue-600 hover:underline">Redes Sociais</Link></li>
             </ol>

@@ -18,6 +18,8 @@ import { Pagination } from '@/components/ui/pagination';
 import { MultiFileDropzone } from '@/components/ui/multi-file-dropzone';
 import AdminLayout from '@/components/AdminLayout';
 
+type DocumentCategory = 'apostila' | 'acordao' | 'parecer' | 'edital' | 'artigo' | 'outro';
+
 interface Document {
   id: string;
   title: string;
@@ -63,11 +65,17 @@ export default function DocumentosPage() {
   const [bulkAction, setBulkAction] = useState('');
   const [bulkCategory, setBulkCategory] = useState('');
 
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<{
+    courseId: string;
+    title: string;
+    description: string;
+    category: DocumentCategory;
+    isPublic: boolean;
+  }>({
     courseId: '',
     title: '',
     description: '',
-    category: 'apostila' as const,
+    category: 'apostila',
     isPublic: false,
     tags: '',
   });
@@ -546,7 +554,7 @@ export default function DocumentosPage() {
                     </label>
                     <select
                       value={formData.category}
-                      onChange={(e) => setFormData({ ...formData, category: e.target.value as 'apostila' | 'acordao' | 'parecer' | 'edital' | 'artigo' | 'outro' })}
+                      onChange={(e) => setFormData({ ...formData, category: e.target.value as DocumentCategory })}
                       required
                       className="w-full px-3 py-2 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-600 text-gray-900"
                     >

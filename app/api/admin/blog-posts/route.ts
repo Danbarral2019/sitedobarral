@@ -1,20 +1,36 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { withAdminAuth } from '@/lib/api-middleware';
-import { PrismaClient } from '@prisma/client';
+import { prisma } from '@/lib/prisma';
 import { publishToSocialMedia } from '@/lib/social-publisher';
 
-const prisma = new PrismaClient();
-
-// GET - Lista todos os posts do blog
-export const GET = withAdminAuth(async () => {
+// GET - Lista posts do blog com paginação
+export const GET = withAdminAuth(async (request: NextRequest) => {
   try {
-    const posts = await prisma.blogPost.findMany({
-      orderBy: {
-        publishedAt: 'desc'
+    const { searchParams } = new URL(request.url);
+    const page = parseInt(searchParams.get('page') || '1');
+    const limit = parseInt(searchParams.get('limit') || '20');
+    const skip = (page - 1) * limit;
+
+    const [posts, total] = await Promise.all([
+      prisma.blogPost.findMany({
+        orderBy: {
+          publishedAt: 'desc'
+        },
+        take: limit,
+        skip: skip,
+      }),
+      prisma.blogPost.count()
+    ]);
+
+    return NextResponse.json({
+      posts,
+      pagination: {
+        page,
+        limit,
+        total,
+        totalPages: Math.ceil(total / limit)
       }
     });
-
-    return NextResponse.json({ posts });
   } catch (error) {
     console.error('Erro ao listar posts:', error);
     return NextResponse.json(

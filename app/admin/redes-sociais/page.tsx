@@ -26,6 +26,9 @@ interface SocialMediaPost {
   blogPost: BlogPost;
 }
 
+type FilterStatus = 'all' | 'published' | 'failed' | 'pending';
+type FilterPlatform = 'all' | 'instagram' | 'linkedin';
+
 interface Stats {
   total: number;
   published: number;
@@ -233,7 +236,7 @@ export default function RedesSociaisPage() {
                 <label className="block text-sm font-bold text-gray-900 mb-2">Status</label>
                 <select
                   value={filter}
-                  onChange={(e) => setFilter(e.target.value as any)}
+                  onChange={(e) => setFilter(e.target.value as FilterStatus)}
                   className="px-4 py-2 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-600"
                 >
                   <option value="all">Todos</option>
@@ -246,7 +249,7 @@ export default function RedesSociaisPage() {
                 <label className="block text-sm font-bold text-gray-900 mb-2">Plataforma</label>
                 <select
                   value={platformFilter}
-                  onChange={(e) => setPlatformFilter(e.target.value as any)}
+                  onChange={(e) => setPlatformFilter(e.target.value as FilterPlatform)}
                   className="px-4 py-2 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-600"
                 >
                   <option value="all">Todas</option>
