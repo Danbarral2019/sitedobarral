@@ -79,10 +79,13 @@ export default function AreaRestritaPage() {
   }
 
   // Pega os cursos que o usuário está matriculado
+  // Se for admin, mostra todos os cursos. Se for aluno, mostra apenas os matriculados.
   const userEnrollments = user.enrollments || [];
-  const userCourses = userEnrollments.map(enrollment =>
-    courses.find(c => c.id === enrollment.courseId)
-  ).filter(Boolean);
+  const userCourses = user.role === 'admin'
+    ? courses // Admin vê todos os cursos
+    : userEnrollments.map(enrollment =>
+        courses.find(c => c.id === enrollment.courseId)
+      ).filter(Boolean);
 
   // Função para filtrar e ordenar documentos
   const filterDocuments = useMemo(() => {  // eslint-disable-line react-hooks/rules-of-hooks
