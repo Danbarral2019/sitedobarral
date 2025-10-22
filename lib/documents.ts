@@ -49,25 +49,40 @@ export async function addDocument(
  * Lista todos os documentos
  */
 export async function listDocuments(): Promise<Document[]> {
-  const dbDocuments = await prisma.document.findMany({
-    orderBy: {
-      uploadedAt: 'desc',
-    },
-  });
+  try {
+    console.log('[listDocuments] Buscando documentos no banco...');
+    const dbDocuments = await prisma.document.findMany({
+      orderBy: {
+        uploadedAt: 'desc',
+      },
+    });
 
-  return dbDocuments.map((doc: PrismaDocument) => ({
-    id: doc.id,
-    title: doc.title,
-    description: doc.description || undefined,
-    type: doc.type as 'pdf' | 'doc' | 'link' | 'video',
-    url: doc.url,
-    category: doc.category as 'apostila' | 'acordao' | 'parecer' | 'edital' | 'artigo' | 'outro',
-    courseId: doc.courseId,
-    isPublic: doc.isPublic,
-    tags: doc.tags ? JSON.parse(doc.tags) : [],
-    uploadedAt: doc.uploadedAt,
-    size: doc.size || undefined,
-  }));
+    console.log('[listDocuments] Encontrados', dbDocuments.length, 'documentos');
+
+    return dbDocuments.map((doc: PrismaDocument) => {
+      try {
+        return {
+          id: doc.id,
+          title: doc.title,
+          description: doc.description || undefined,
+          type: doc.type as 'pdf' | 'doc' | 'link' | 'video',
+          url: doc.url,
+          category: doc.category as 'apostila' | 'acordao' | 'parecer' | 'edital' | 'artigo' | 'outro',
+          courseId: doc.courseId,
+          isPublic: doc.isPublic,
+          tags: doc.tags ? JSON.parse(doc.tags) : [],
+          uploadedAt: doc.uploadedAt,
+          size: doc.size || undefined,
+        };
+      } catch (error) {
+        console.error('[listDocuments] Erro ao mapear documento:', doc.id, error);
+        throw error;
+      }
+    });
+  } catch (error) {
+    console.error('[listDocuments] Erro:', error);
+    throw error;
+  }
 }
 
 /**
