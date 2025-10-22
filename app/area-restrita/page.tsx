@@ -19,8 +19,7 @@ export default function AreaRestritaPage() {
   const { favorites, isFavorite, toggleFavorite } = useFavorites();
 
   // Estado dos documentos por curso
-  const [courseDocuments, setCourseDocuments] = useState<Record<string, any[]>>({});
-  const [isLoadingDocs, setIsLoadingDocs] = useState(true);
+  const [courseDocuments, setCourseDocuments] = useState<Record<string, unknown[]>>({});
 
   // Estado dos filtros
   const [filters, setFilters] = useState<DocumentFilterState>({
@@ -73,8 +72,6 @@ export default function AreaRestritaPage() {
         ? courses.map(c => c.id)
         : userEnrollments.map(e => e.courseId);
 
-      setIsLoadingDocs(true);
-
       const docsPromises = enrolledCourseIds.map(async (courseId) => {
         try {
           const response = await fetch(`/api/documents?courseId=${courseId}`);
@@ -89,13 +86,12 @@ export default function AreaRestritaPage() {
       });
 
       const results = await Promise.all(docsPromises);
-      const docsMap: Record<string, any[]> = {};
+      const docsMap: Record<string, unknown[]> = {};
       results.forEach(({ courseId, documents }) => {
         docsMap[courseId] = documents;
       });
 
       setCourseDocuments(docsMap);
-      setIsLoadingDocs(false);
     };
 
     fetchDocuments();
