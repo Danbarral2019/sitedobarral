@@ -8,8 +8,8 @@ async function createTestStudent() {
   const password = 'aluno123';
   const name = 'Aluno Teste';
 
-  // Cursos disponíveis (pegue um curso válido de data/courses.ts)
-  const courseId = 'nova-lei-licitacoes'; // Lei 14.133/2021
+  // Cursos disponíveis (usar o ID do curso de data/courses.ts, não o slug)
+  const courseId = '1'; // Nova Lei de Licitações (Lei 14.133/2021)
   const turma = 'Turma Teste 2025';
 
   try {

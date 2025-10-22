@@ -3,7 +3,8 @@ import { PrismaClient } from '@prisma/client';
 const prisma = new PrismaClient();
 
 async function seedTestDocuments() {
-  const courseId = 'nova-lei-licitacoes';
+  // Usar o ID do curso de data/courses.ts, não o slug
+  const courseId = '1'; // Nova Lei de Licitações
 
   console.log('\n📚 Criando documentos de teste...\n');
 
