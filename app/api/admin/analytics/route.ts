@@ -52,145 +52,189 @@ export const GET = withAdminAuth(async (_request: NextRequest) => {
     const thirtyDaysAgo = new Date();
     thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
 
-    const topDocuments = await prisma.accessLog.groupBy({
-      by: ['documentId'],
-      where: {
-        documentId: { not: null },
-        action: { in: ['download', 'view'] },
-        createdAt: { gte: thirtyDaysAgo },
-      },
-      _count: {
-        id: true,
-      },
-      orderBy: {
-        _count: {
-          id: 'desc',
+    let topDocumentsWithDetails: Array<{
+      id: string;
+      title: string;
+      type: string;
+      category: string;
+      accessCount: number;
+    } | null> = [];
+
+    try {
+      const topDocuments = await prisma.accessLog.groupBy({
+        by: ['documentId'],
+        where: {
+          documentId: { not: null },
+          action: { in: ['download', 'view'] },
+          createdAt: { gte: thirtyDaysAgo },
         },
-      },
-      take: 10,
-    });
-
-    // Buscar detalhes dos documentos mais acessados
-    const topDocumentsWithDetails = await Promise.all(
-      topDocuments.map(async (item) => {
-        if (!item.documentId) return null;
-
-        const document = await prisma.document.findUnique({
-          where: { id: item.documentId },
-          select: {
-            id: true,
-            title: true,
-            type: true,
-            category: true,
+        _count: {
+          id: true,
+        },
+        orderBy: {
+          _count: {
+            id: 'desc',
           },
-        });
+        },
+        take: 10,
+      });
 
-        return document ? {
-          ...document,
-          accessCount: item._count.id,
-        } : null;
-      })
-    );
+      // Buscar detalhes dos documentos mais acessados
+      topDocumentsWithDetails = await Promise.all(
+        topDocuments.map(async (item) => {
+          if (!item.documentId) return null;
+
+          const document = await prisma.document.findUnique({
+            where: { id: item.documentId },
+            select: {
+              id: true,
+              title: true,
+              type: true,
+              category: true,
+            },
+          });
+
+          return document ? {
+            ...document,
+            accessCount: item._count.id,
+          } : null;
+        })
+      );
+    } catch (error) {
+      console.error('Erro ao buscar documentos mais acessados:', error);
+    }
 
     // 5. Cursos com mais acessos (últimos 30 dias)
-    const topCourses = await prisma.accessLog.groupBy({
-      by: ['courseId'],
-      where: {
-        courseId: { not: null },
-        createdAt: { gte: thirtyDaysAgo },
-      },
-      _count: {
-        id: true,
-      },
-      orderBy: {
-        _count: {
-          id: 'desc',
+    let topCoursesData: Array<{ courseId: string | null; accessCount: number }> = [];
+    try {
+      const topCourses = await prisma.accessLog.groupBy({
+        by: ['courseId'],
+        where: {
+          courseId: { not: null },
+          createdAt: { gte: thirtyDaysAgo },
         },
-      },
-      take: 10,
-    });
+        _count: {
+          id: true,
+        },
+        orderBy: {
+          _count: {
+            id: 'desc',
+          },
+        },
+        take: 10,
+      });
 
-    const topCoursesData = topCourses.map(item => ({
-      courseId: item.courseId,
-      accessCount: item._count.id,
-    }));
+      topCoursesData = topCourses.map(item => ({
+        courseId: item.courseId,
+        accessCount: item._count.id,
+      }));
+    } catch (error) {
+      console.error('Erro ao buscar cursos mais acessados:', error);
+    }
 
     // 6. Acessos por dia (últimos 30 dias)
-    const accessByDay = await prisma.$queryRaw<Array<{ date: string; count: bigint }>>`
-      SELECT
-        DATE(createdAt) as date,
-        COUNT(*) as count
-      FROM "AccessLog"
-      WHERE createdAt >= ${thirtyDaysAgo}
-      GROUP BY DATE(createdAt)
-      ORDER BY date ASC
-    `;
+    let accessByDayFormatted: Array<{ date: string; count: number }> = [];
+    try {
+      const accessByDay = await prisma.$queryRaw<Array<{ date: string; count: bigint }>>`
+        SELECT
+          DATE("createdAt") as date,
+          COUNT(*) as count
+        FROM "AccessLog"
+        WHERE "createdAt" >= ${thirtyDaysAgo}
+        GROUP BY DATE("createdAt")
+        ORDER BY date ASC
+      `;
 
-    const accessByDayFormatted = accessByDay.map(item => ({
-      date: item.date,
-      count: Number(item.count),
-    }));
+      accessByDayFormatted = accessByDay.map(item => ({
+        date: item.date,
+        count: Number(item.count),
+      }));
+    } catch (error) {
+      console.error('Erro ao buscar acessos por dia:', error);
+      // Continua sem os dados de acessos por dia
+    }
 
     // 7. Usuários mais ativos (últimos 30 dias)
-    const topUsers = await prisma.accessLog.groupBy({
-      by: ['userId'],
-      where: {
-        userId: { not: null },
-        createdAt: { gte: thirtyDaysAgo },
-      },
-      _count: {
-        id: true,
-      },
-      orderBy: {
-        _count: {
-          id: 'desc',
+    let topUsersWithDetails: Array<{
+      id: string;
+      name: string | null;
+      email: string;
+      accessCount: number;
+    } | null> = [];
+
+    try {
+      const topUsers = await prisma.accessLog.groupBy({
+        by: ['userId'],
+        where: {
+          userId: { not: null },
+          createdAt: { gte: thirtyDaysAgo },
         },
-      },
-      take: 10,
-    });
-
-    const topUsersWithDetails = await Promise.all(
-      topUsers.map(async (item) => {
-        if (!item.userId) return null;
-
-        const user = await prisma.user.findUnique({
-          where: { id: item.userId },
-          select: {
-            id: true,
-            name: true,
-            email: true,
+        _count: {
+          id: true,
+        },
+        orderBy: {
+          _count: {
+            id: 'desc',
           },
-        });
+        },
+        take: 10,
+      });
 
-        return user ? {
-          ...user,
-          accessCount: item._count.id,
-        } : null;
-      })
-    );
+      topUsersWithDetails = await Promise.all(
+        topUsers.map(async (item) => {
+          if (!item.userId) return null;
+
+          const user = await prisma.user.findUnique({
+            where: { id: item.userId },
+            select: {
+              id: true,
+              name: true,
+              email: true,
+            },
+          });
+
+          return user ? {
+            ...user,
+            accessCount: item._count.id,
+          } : null;
+        })
+      );
+    } catch (error) {
+      console.error('Erro ao buscar usuários mais ativos:', error);
+    }
 
     // 8. Estatísticas de Ações (últimos 30 dias)
-    const actionStats = await prisma.accessLog.groupBy({
-      by: ['action'],
-      where: {
-        createdAt: { gte: thirtyDaysAgo },
-      },
-      _count: {
-        id: true,
-      },
-    });
+    let actionStatsFormatted: Array<{ action: string; count: number }> = [];
+    try {
+      const actionStats = await prisma.accessLog.groupBy({
+        by: ['action'],
+        where: {
+          createdAt: { gte: thirtyDaysAgo },
+        },
+        _count: {
+          id: true,
+        },
+      });
 
-    const actionStatsFormatted = actionStats.map(item => ({
-      action: item.action,
-      count: item._count.id,
-    }));
+      actionStatsFormatted = actionStats.map(item => ({
+        action: item.action,
+        count: item._count.id,
+      }));
+    } catch (error) {
+      console.error('Erro ao buscar estatísticas de ações:', error);
+    }
 
     // 9. Total de acessos (últimos 30 dias)
-    const totalAccesses = await prisma.accessLog.count({
-      where: {
-        createdAt: { gte: thirtyDaysAgo },
-      },
-    });
+    let totalAccesses = 0;
+    try {
+      totalAccesses = await prisma.accessLog.count({
+        where: {
+          createdAt: { gte: thirtyDaysAgo },
+        },
+      });
+    } catch (error) {
+      console.error('Erro ao contar total de acessos:', error);
+    }
 
     // 10. Blog Posts
     const totalBlogPosts = await prisma.blogPost.count();
