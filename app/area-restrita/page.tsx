@@ -13,13 +13,22 @@ import EnrollmentStatusBanner from '@/components/EnrollmentStatusBanner';
 import DocumentFilters, { DocumentFilterState } from '@/components/DocumentFilters';
 import { Pagination } from '@/components/ui/pagination';
 
+interface DocumentType {
+  id: string;
+  title: string;
+  description?: string;
+  type: string;
+  url?: string;
+  category: string;
+}
+
 export default function AreaRestritaPage() {
   const router = useRouter();
   const { user, isLoading, logout } = useAuth();
   const { favorites, isFavorite, toggleFavorite } = useFavorites();
 
   // Estado dos documentos por curso
-  const [courseDocuments, setCourseDocuments] = useState<Record<string, unknown[]>>({});
+  const [courseDocuments, setCourseDocuments] = useState<Record<string, DocumentType[]>>({});
 
   // Estado dos filtros
   const [filters, setFilters] = useState<DocumentFilterState>({
@@ -34,7 +43,7 @@ export default function AreaRestritaPage() {
   const DOCS_PER_PAGE = 6;
 
   // Função para registrar acesso
-  const logAccess = async (action: string, courseId: string, documentId?: string) => {
+  const logAccess = async (action: string, courseId: string, documentId?: string | undefined) => {
     try {
       await fetch('/api/access-log', {
         method: 'POST',
@@ -47,12 +56,12 @@ export default function AreaRestritaPage() {
   };
 
   // Função para lidar com download
-  const handleDownload = (doc: Record<string, unknown>, courseId: string) => {
+  const handleDownload = (doc: DocumentType, courseId: string) => {
     logAccess('download', courseId, doc.id);
   };
 
   // Função para lidar com visualização de link
-  const handleView = (doc: Record<string, unknown>, courseId: string) => {
+  const handleView = (doc: DocumentType, courseId: string) => {
     logAccess('view', courseId, doc.id);
   };
 
@@ -86,9 +95,9 @@ export default function AreaRestritaPage() {
       });
 
       const results = await Promise.all(docsPromises);
-      const docsMap: Record<string, unknown[]> = {};
+      const docsMap: Record<string, DocumentType[]> = {};
       results.forEach(({ courseId, documents }) => {
-        docsMap[courseId] = documents;
+        docsMap[courseId] = documents as DocumentType[];
       });
 
       setCourseDocuments(docsMap);
@@ -127,7 +136,7 @@ export default function AreaRestritaPage() {
 
   // Função para filtrar e ordenar documentos
   const filterDocuments = useMemo(() => {  // eslint-disable-line react-hooks/rules-of-hooks
-    return (docs: unknown[]) => {
+    return (docs: DocumentType[]) => {
       let filtered = [...docs];
 
       // Filtro de busca (título ou descrição)
@@ -230,7 +239,7 @@ export default function AreaRestritaPage() {
                       // Buscar o curso e documento correspondentes
                       const course = userCourses.find(c => c?.id === fav.courseId);
                       const courseDocs = course ? courseDocuments[course.id] || [] : [];
-                      const doc = courseDocs.find((d: unknown) => (d as { id: string }).id === fav.documentId);
+                      const doc = courseDocs.find((d) => d.id === fav.documentId);
 
                       if (!doc || !course) return null;
 
