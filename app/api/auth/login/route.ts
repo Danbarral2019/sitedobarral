@@ -4,7 +4,11 @@ import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import { rateLimiters } from '@/lib/rate-limit';
 
-const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key-change-in-production';
+const JWT_SECRET = process.env.JWT_SECRET;
+
+if (!JWT_SECRET) {
+  throw new Error('JWT_SECRET environment variable is required');
+}
 
 export async function POST(request: NextRequest) {
   // Rate limiting: 5 tentativas de login por minuto
@@ -123,7 +127,7 @@ export async function POST(request: NextRequest) {
     });
 
     return response;
-  } catch {
+  } catch (error) {
     console.error('Login error:', error);
     return NextResponse.json(
       { error: 'Erro ao processar login' },

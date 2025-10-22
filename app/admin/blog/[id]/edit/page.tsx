@@ -82,6 +82,7 @@ export default function EditBlogPostPage({ params }: { params: Promise<{ id: str
         author: post.author,
         publishedAt: new Date(post.publishedAt).toISOString().split('T')[0],
         isPublished: post.isPublished,
+        autoPublishSocial: post.autoPublishSocial ?? true,
       });
       setTags(parsedTags);
     } catch (error) {
