@@ -54,8 +54,6 @@ export async function publishToSocialMedia(
   platforms: ('instagram' | 'linkedin')[] = ['instagram', 'linkedin']
 ): Promise<SocialPublishResult> {
   try {
-    console.log(`[SocialPublisher] Iniciando publicação do post ${blogPostId}...`);
-
     // 1. Buscar post do blog
     const post = await prisma.blogPost.findUnique({
       where: { id: blogPostId },
@@ -100,15 +98,11 @@ export async function publishToSocialMedia(
     const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://profdanielbarral.com';
     const imageUrl = `${baseUrl}/api/og/${post.slug}`;
 
-    console.log(`[SocialPublisher] Imagem OG: ${imageUrl}`);
-
     // 3. Publicar em cada plataforma
     const results: PublicationResult[] = [];
 
     // Instagram
     if (platforms.includes('instagram') && isInstagramConfigured()) {
-      console.log('[SocialPublisher] Publicando no Instagram...');
-
       const caption = generateInstagramCaption(post.title, post.excerpt, post.slug);
 
       const instagramResult = await createInstagramPost(imageUrl, caption);
@@ -133,18 +127,10 @@ export async function publishToSocialMedia(
         postUrl: instagramResult.permalink,
         error: instagramResult.error,
       });
-
-      console.log(
-        `[SocialPublisher] Instagram: ${instagramResult.success ? 'Sucesso' : 'Falhou'}`
-      );
-    } else if (platforms.includes('instagram')) {
-      console.log('[SocialPublisher] Instagram não configurado - pulando');
     }
 
     // LinkedIn
     if (platforms.includes('linkedin') && isLinkedInConfigured()) {
-      console.log('[SocialPublisher] Publicando no LinkedIn...');
-
       const linkedinText = generateLinkedInText(post.title, post.excerpt, post.slug);
 
       const linkedinResult = await createLinkedInImagePost(linkedinText, imageUrl);
@@ -169,12 +155,6 @@ export async function publishToSocialMedia(
         postUrl: linkedinResult.postUrl,
         error: linkedinResult.error,
       });
-
-      console.log(
-        `[SocialPublisher] LinkedIn: ${linkedinResult.success ? 'Sucesso' : 'Falhou'}`
-      );
-    } else if (platforms.includes('linkedin')) {
-      console.log('[SocialPublisher] LinkedIn não configurado - pulando');
     }
 
     // 4. Atualizar campo socialMediaImage no post
@@ -251,10 +231,6 @@ export async function retryFailedPost(
         error: `Número máximo de tentativas (${maxRetries}) atingido`,
       };
     }
-
-    console.log(
-      `[SocialPublisher] Tentando republicar no ${socialPost.platform} (tentativa ${socialPost.retryCount + 1}/${maxRetries})...`
-    );
 
     const imageUrl = socialPost.blogPost.socialMediaImage || '';
 

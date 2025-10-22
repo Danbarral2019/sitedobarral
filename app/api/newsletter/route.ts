@@ -1,9 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { PrismaClient } from '@prisma/client';
 import { rateLimiters } from '@/lib/rate-limit';
 import { addSubscriber, unsubscribeSubscriber, isMailChimpConfigured } from '@/lib/mailchimp';
-
-const prisma = new PrismaClient();
+import { prisma } from '@/lib/prisma';
 
 // POST - Cadastrar na newsletter
 export async function POST(request: NextRequest) {
@@ -60,11 +58,8 @@ export async function POST(request: NextRequest) {
           const [firstName, ...lastNameParts] = (name || existing.name || '').split(' ');
           const lastName = lastNameParts.join(' ');
 
-          console.log(`[MailChimp] Reativando: ${email}`);
-
           try {
-            const result = await addSubscriber(email, firstName, lastName, interests);
-            console.log('[MailChimp] Reativação sucesso:', result);
+            await addSubscriber(email, firstName, lastName, interests);
           } catch (err: unknown) {
             const error = err as Error;
             console.error('[MailChimp] ERRO na reativação:', {
@@ -101,11 +96,8 @@ export async function POST(request: NextRequest) {
       const [firstName, ...lastNameParts] = (name || '').split(' ');
       const lastName = lastNameParts.join(' ');
 
-      console.log(`[MailChimp] Tentando adicionar: ${email}, Nome: ${firstName} ${lastName}`);
-
       try {
-        const result = await addSubscriber(email, firstName, lastName, interests);
-        console.log('[MailChimp] Sucesso:', result);
+        await addSubscriber(email, firstName, lastName, interests);
       } catch (err: unknown) {
         const error = err as Error;
         console.error('[MailChimp] ERRO DETALHADO:', {
@@ -115,8 +107,6 @@ export async function POST(request: NextRequest) {
         });
         // Não falha a requisição se MailChimp falhar - email já foi salvo no BD
       }
-    } else {
-      console.warn('[MailChimp] NÃO CONFIGURADO - pulando sincronização');
     }
 
     return NextResponse.json(
@@ -198,7 +188,6 @@ export async function DELETE(request: NextRequest) {
     if (isMailChimpConfigured()) {
       try {
         await unsubscribeSubscriber(email);
-        console.log('[MailChimp] Cancelamento sincronizado com sucesso');
       } catch (err: unknown) {
         const error = err as Error;
         console.error('[MailChimp] Erro ao cancelar inscrição:', error);

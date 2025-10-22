@@ -57,7 +57,6 @@ export async function createInstagramPost(
   caption: string
 ): Promise<{ success: boolean; postId?: string; permalink?: string; error?: string }> {
   if (!isInstagramConfigured()) {
-    console.warn('Instagram não configurado. Configure as variáveis de ambiente.');
     return {
       success: false,
       error: 'Instagram não configurado',
@@ -81,8 +80,6 @@ export async function createInstagramPost(
     }
 
     // Passo 1: Criar container com a imagem
-    console.log('[Instagram] Criando container de mídia...');
-
     const createContainerResponse = await fetch(
       `${INSTAGRAM_API_BASE}/${INSTAGRAM_BUSINESS_ACCOUNT_ID}/media`,
       {
@@ -110,13 +107,10 @@ export async function createInstagramPost(
     const containerData: InstagramMediaResponse = await createContainerResponse.json();
     const creationId = containerData.id;
 
-    console.log('[Instagram] Container criado:', creationId);
-
     // Aguardar alguns segundos para o Instagram processar a imagem
     await new Promise((resolve) => setTimeout(resolve, 3000));
 
     // Passo 2: Publicar o container
-    console.log('[Instagram] Publicando post...');
 
     const publishResponse = await fetch(
       `${INSTAGRAM_API_BASE}/${INSTAGRAM_BUSINESS_ACCOUNT_ID}/media_publish`,
@@ -144,8 +138,6 @@ export async function createInstagramPost(
     const publishData: InstagramPostResponse = await publishResponse.json();
     const postId = publishData.id;
 
-    console.log('[Instagram] Post publicado com sucesso:', postId);
-
     // Obter permalink do post (opcional)
     let permalink: string | undefined;
     try {
@@ -157,8 +149,8 @@ export async function createInstagramPost(
         const mediaData = await mediaResponse.json();
         permalink = mediaData.permalink;
       }
-    } catch (error) {
-      console.warn('[Instagram] Não foi possível obter permalink:', error);
+    } catch {
+      // Silently fail - permalink is optional
     }
 
     return {

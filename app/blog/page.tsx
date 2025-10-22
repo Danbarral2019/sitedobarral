@@ -3,6 +3,7 @@ import { Calendar, Clock, ArrowRight } from 'lucide-react';
 import { BlogPost } from '@prisma/client';
 import type { Metadata } from 'next';
 import { getCachedPublishedBlogPosts } from '@/lib/cached-queries';
+import { getBlogPostBorderColor, getBlogPostTagColor } from '@/lib/course-colors';
 
 export const metadata: Metadata = {
   title: 'Blog Jurídico',
@@ -79,22 +80,14 @@ export default async function BlogPage() {
 
           <div className="space-y-8">
             {publishedPosts.map((post: BlogPost & { tags: string[] }, index: number) => {
-              const colorIndex = index % 5;
-              const borderColors = ['border-l-blue-500', 'border-l-green-500', 'border-l-purple-500', 'border-l-pink-500', 'border-l-orange-500'];
-              const tagColors = [
-                { bg: 'bg-blue-100', text: 'text-blue-800' },
-                { bg: 'bg-green-100', text: 'text-green-800' },
-                { bg: 'bg-purple-100', text: 'text-purple-800' },
-                { bg: 'bg-pink-100', text: 'text-pink-800' },
-                { bg: 'bg-orange-100', text: 'text-orange-800' }
-              ];
+              const borderColor = getBlogPostBorderColor(index);
 
               return (
-                <article key={post.id} className={`bg-white rounded-2xl shadow-lg overflow-hidden hover:shadow-2xl transition-all border-l-4 ${borderColors[colorIndex]} hover:scale-[1.01]`}>
+                <article key={post.id} className={`bg-white rounded-2xl shadow-lg overflow-hidden hover:shadow-2xl transition-all border-l-4 ${borderColor} hover:scale-[1.01]`}>
                   <div className="p-8">
                     <div className="flex flex-wrap gap-2 mb-4">
                       {post.tags.map((tag: string, idx: number) => {
-                        const tagColor = tagColors[idx % tagColors.length];
+                        const tagColor = getBlogPostTagColor(idx);
                         return (
                           <span
                             key={tag}
