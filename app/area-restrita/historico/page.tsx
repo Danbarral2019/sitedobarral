@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import {
   Clock, Download, Eye, Loader2, ArrowLeft, FileText
@@ -29,13 +29,7 @@ export default function HistoricoPage() {
     }
   }, [isLoading, user, router]);
 
-  useEffect(() => {
-    if (user) {
-      loadLogs();
-    }
-  }, [user, filter]);
-
-  const loadLogs = async () => {
+  const loadLogs = useCallback(async () => {
     try {
       setIsLoadingLogs(true);
       const url = filter === 'all'
@@ -52,7 +46,13 @@ export default function HistoricoPage() {
     } finally {
       setIsLoadingLogs(false);
     }
-  };
+  }, [filter]);
+
+  useEffect(() => {
+    if (user) {
+      loadLogs();
+    }
+  }, [user, loadLogs]);
 
   if (isLoading) {
     return (

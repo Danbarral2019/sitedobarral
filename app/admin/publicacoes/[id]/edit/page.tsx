@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { Loader2, Save, ArrowLeft, Trash2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
@@ -38,18 +38,7 @@ export default function EditPublicationPage({ params }: EditPublicationPageProps
     location: '',
   });
 
-  useEffect(() => {
-    const loadData = async () => {
-      const resolvedParams = await params;
-      setPublicationId(resolvedParams.id);
-      await verifyAdmin();
-      await loadPublication(resolvedParams.id);
-    };
-
-    loadData();
-  }, [params]);
-
-  const verifyAdmin = async () => {
+  const verifyAdmin = useCallback(async () => {
     try {
       const response = await fetch('/api/auth/verify');
 
@@ -68,9 +57,9 @@ export default function EditPublicationPage({ params }: EditPublicationPageProps
       console.error('Erro ao verificar admin:', error);
       router.push('/validar-acesso');
     }
-  };
+  }, [router]);
 
-  const loadPublication = async (id: string) => {
+  const loadPublication = useCallback(async (id: string) => {
     try {
       const response = await fetch(`/api/admin/publications/${id}`);
 
@@ -107,7 +96,18 @@ export default function EditPublicationPage({ params }: EditPublicationPageProps
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [errorToast, router]);
+
+  useEffect(() => {
+    const loadData = async () => {
+      const resolvedParams = await params;
+      setPublicationId(resolvedParams.id);
+      await verifyAdmin();
+      await loadPublication(resolvedParams.id);
+    };
+
+    loadData();
+  }, [params, verifyAdmin, loadPublication]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

@@ -101,12 +101,6 @@ export default function RedesSociaisPage() {
   }, [verifyAdmin]);
 
   useEffect(() => {
-    if (!isLoading) {
-      loadPosts();
-    }
-  }, [filter, platformFilter]);
-
-  useEffect(() => {
     loadPosts();
   }, [loadPosts]);
 

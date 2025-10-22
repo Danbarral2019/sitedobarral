@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import dynamic from 'next/dynamic';
-import { ArrowRight, BookOpen, Users, Award, FileText, CheckCircle, Star } from 'lucide-react';
+import { ArrowRight, BookOpen, Users, Award, FileText, Star } from 'lucide-react';
 import { courses } from '@/data/courses';
 import NewsletterForm from '@/components/NewsletterForm';
 

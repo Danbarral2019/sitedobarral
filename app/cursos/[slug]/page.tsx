@@ -1,8 +1,8 @@
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
 import {
-  ArrowLeft, BookOpen, Download, Lock, FileText,
-  ExternalLink, QrCode, CheckCircle, Users,
+  ArrowLeft, BookOpen, Lock, FileText,
+  QrCode, CheckCircle, Users,
   Clock, Award, Target, Lightbulb, Star
 } from 'lucide-react';
 import { courses } from '@/data/courses';

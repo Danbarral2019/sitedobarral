@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useSearchParams } from 'next/navigation';
-import { Mail, Phone, MapPin, Instagram, Youtube, Linkedin, Send, CheckCircle, Loader2 } from 'lucide-react';
+import { Instagram, Youtube, Linkedin, Send, CheckCircle, Loader2 } from 'lucide-react';
 import { courses } from '@/data/courses';
 
 export default function ContatoPage() {

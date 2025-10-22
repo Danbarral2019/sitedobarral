@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { QrCode, Loader2, CheckCircle, XCircle, KeyRound } from 'lucide-react';
@@ -13,22 +13,7 @@ export default function ValidarAcessoPage() {
   const [error, setError] = useState('');
   const [success, setSuccess] = useState(false);
 
-  useEffect(() => {
-    // Se veio com código na URL, valida automaticamente
-    const urlCode = searchParams.get('code');
-    if (urlCode) {
-      setCode(urlCode);
-      handleValidation(urlCode);
-    }
-
-    // Verifica se veio com erro de token expirado
-    const errorParam = searchParams.get('error');
-    if (errorParam === 'expired') {
-      setError('Sua sessão expirou. Por favor, valide novamente seu código.');
-    }
-  }, [searchParams]);
-
-  const handleValidation = async (codeToValidate?: string) => {
+  const handleValidation = useCallback(async (codeToValidate?: string) => {
     const finalCode = codeToValidate || code;
 
     if (!finalCode) {
@@ -72,7 +57,22 @@ export default function ValidarAcessoPage() {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [code, router]);
+
+  useEffect(() => {
+    // Se veio com código na URL, valida automaticamente
+    const urlCode = searchParams.get('code');
+    if (urlCode) {
+      setCode(urlCode);
+      handleValidation(urlCode);
+    }
+
+    // Verifica se veio com erro de token expirado
+    const errorParam = searchParams.get('error');
+    if (errorParam === 'expired') {
+      setError('Sua sessão expirou. Por favor, valide novamente seu código.');
+    }
+  }, [searchParams, handleValidation]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
