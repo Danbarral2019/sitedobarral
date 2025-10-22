@@ -5,13 +5,19 @@ import { listDocuments, deleteDocument } from '@/lib/documents';
 // GET - Lista todos os documentos
 export const GET = withAdminAuth(async () => {
   try {
+    console.log('[API] Iniciando listagem de documentos...');
     const documents = await listDocuments();
+    console.log('[API] Documentos carregados:', documents.length);
 
     return NextResponse.json({ documents });
   } catch (error) {
-    console.error('Erro ao listar documentos:', error);
+    console.error('[API] Erro ao listar documentos:', error);
+    console.error('[API] Stack:', error instanceof Error ? error.stack : 'N/A');
     return NextResponse.json(
-      { error: 'Erro ao listar documentos' },
+      {
+        error: 'Erro ao listar documentos',
+        details: error instanceof Error ? error.message : String(error)
+      },
       { status: 500 }
     );
   }

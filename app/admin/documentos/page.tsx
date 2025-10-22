@@ -107,15 +107,26 @@ export default function DocumentosPage() {
   const loadDocuments = useCallback(async () => {
     setIsLoadingDocs(true);
     try {
+      console.log('[Client] Carregando documentos...');
       const response = await fetch('/api/admin/documents');
+      console.log('[Client] Response status:', response.status);
+
       const data = await response.json();
+      console.log('[Client] Data received:', data);
+
+      if (!response.ok) {
+        throw new Error(data.error || data.details || 'Erro ao carregar documentos');
+      }
+
       setDocuments(data.documents || []);
+      console.log('[Client] Documentos setados:', data.documents?.length || 0);
     } catch (error) {
-      console.error('Erro ao carregar documentos:', error);
+      console.error('[Client] Erro ao carregar documentos:', error);
+      errorToast('Erro ao carregar documentos', error instanceof Error ? error.message : 'Erro desconhecido');
     } finally {
       setIsLoadingDocs(false);
     }
-  }, []);
+  }, [errorToast]);
 
   useEffect(() => {
     verifyAdmin();
