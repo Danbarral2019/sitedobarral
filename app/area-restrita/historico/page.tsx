@@ -26,6 +26,38 @@ export default function HistoricoPage() {
   // Cache de documentos buscados
   const [documentsCache, setDocumentsCache] = useState<Record<string, unknown>>({});
 
+  // Encontrar documento (busca no banco se necessário)
+  const findDocument = useCallback(async (courseId: string | null, documentId: string | null) => {
+    if (!courseId || !documentId) return null;
+
+    const course = courses.find(c => c.id === courseId);
+    if (!course) return null;
+
+    // Verificar cache primeiro
+    const cacheKey = `${courseId}-${documentId}`;
+    if (documentsCache[cacheKey]) {
+      return { course, doc: documentsCache[cacheKey] };
+    }
+
+    // Buscar do banco
+    try {
+      const response = await fetch(`/api/documents/${documentId}`);
+      if (response.ok) {
+        const data = await response.json();
+        const doc = data.document;
+
+        // Adicionar ao cache
+        setDocumentsCache(prev => ({ ...prev, [cacheKey]: doc }));
+
+        return { course, doc };
+      }
+    } catch (error) {
+      console.error('Erro ao buscar documento:', error);
+    }
+
+    return null;
+  }, [documentsCache]);
+
   useEffect(() => {
     if (!isLoading && !user) {
       router.push('/login');
@@ -116,38 +148,6 @@ export default function HistoricoPage() {
         return 'bg-gray-100 text-gray-800 border-gray-200';
     }
   };
-
-  // Encontrar documento (busca no banco se necessário)
-  const findDocument = useCallback(async (courseId: string | null, documentId: string | null) => {
-    if (!courseId || !documentId) return null;
-
-    const course = courses.find(c => c.id === courseId);
-    if (!course) return null;
-
-    // Verificar cache primeiro
-    const cacheKey = `${courseId}-${documentId}`;
-    if (documentsCache[cacheKey]) {
-      return { course, doc: documentsCache[cacheKey] };
-    }
-
-    // Buscar do banco
-    try {
-      const response = await fetch(`/api/documents/${documentId}`);
-      if (response.ok) {
-        const data = await response.json();
-        const doc = data.document;
-
-        // Adicionar ao cache
-        setDocumentsCache(prev => ({ ...prev, [cacheKey]: doc }));
-
-        return { course, doc };
-      }
-    } catch (error) {
-      console.error('Erro ao buscar documento:', error);
-    }
-
-    return null;
-  }, [documentsCache]);
 
   return (
     <main className="py-12 bg-gradient-to-br from-blue-50 via-white to-purple-50 min-h-screen">
