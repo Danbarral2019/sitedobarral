@@ -2,11 +2,43 @@
 
 import { useState, useEffect } from 'react';
 import { ChevronLeft, ChevronRight, Star } from 'lucide-react';
-import { testimonials } from '@/data/testimonials';
+import { testimonials as staticTestimonials } from '@/data/testimonials';
+
+interface Testimonial {
+  id: string;
+  name: string;
+  role: string;
+  text: string;
+  rating: number;
+  avatar: string;
+  color: string;
+}
 
 export default function TestimonialsCarousel() {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isAutoPlaying, setIsAutoPlaying] = useState(true);
+  const [testimonials, setTestimonials] = useState<Testimonial[]>(staticTestimonials);
+
+  // Buscar depoimentos aprovados da API
+  useEffect(() => {
+    async function loadApprovedTestimonials() {
+      try {
+        const response = await fetch('/api/testimonials');
+        const data = await response.json();
+
+        if (data.success && data.testimonials.length > 0) {
+          // Combinar depoimentos do banco com os estáticos
+          // Priorizar os do banco (mais recentes)
+          setTestimonials([...data.testimonials, ...staticTestimonials]);
+        }
+      } catch (error) {
+        console.error('Erro ao carregar depoimentos:', error);
+        // Mantém os depoimentos estáticos em caso de erro
+      }
+    }
+
+    loadApprovedTestimonials();
+  }, []);
 
   // Autoplay
   useEffect(() => {

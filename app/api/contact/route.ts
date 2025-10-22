@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { PrismaClient } from '@prisma/client';
 import { rateLimiters } from '@/lib/rate-limit';
+import { sendContactNotification } from '@/lib/email';
 
 const prisma = new PrismaClient();
 
@@ -47,6 +48,57 @@ export async function POST(request: NextRequest) {
       },
     });
 
+    // Se for um depoimento, criar registro de Testimonial para moderação
+    if (courseInterest === 'depoimento') {
+      const colors = [
+        'from-blue-400 to-blue-600',
+        'from-green-400 to-green-600',
+        'from-purple-400 to-purple-600',
+        'from-orange-400 to-orange-600',
+        'from-pink-400 to-pink-600',
+        'from-indigo-400 to-indigo-600',
+        'from-red-400 to-red-600',
+        'from-teal-400 to-teal-600',
+      ];
+      const avatar = name.charAt(0).toUpperCase();
+      const color = colors[Math.floor(Math.random() * colors.length)];
+
+      try {
+        await prisma.testimonial.create({
+          data: {
+            name,
+            email,
+            phone: phone || null,
+            role: 'Aluno', // Padrão - pode ser editado na moderação
+            text: message,
+            rating: 5, // Padrão
+            avatar,
+            color,
+            status: 'pending',
+            contactFormId: contact.id,
+          },
+        });
+      } catch (error) {
+        console.error('Erro ao criar testimonial:', error);
+        // Não propaga o erro - o contato já foi salvo
+      }
+    }
+
+    // Enviar notificação por email ao admin (não bloqueia a resposta)
+    sendContactNotification(
+      {
+        name,
+        email,
+        phone: phone || null,
+        courseInterest: courseInterest || null,
+        message,
+      },
+      contact.id
+    ).catch((error) => {
+      console.error('Erro ao enviar notificação de contato:', error);
+      // Não propaga o erro - o contato já foi salvo com sucesso
+    });
+
     return NextResponse.json(
       {
         message: 'Mensagem enviada com sucesso!',
@@ -77,10 +129,10 @@ export async function GET(request: NextRequest) {
 
     const { searchParams } = new URL(request.url);
     const isRead = searchParams.get('isRead');
-    const limit = parseInt(searchParams.get('limit') || '50');
+    const limit = parseInt(searchParams.get('limit') || '100');
 
     const where: Record<string, unknown> = {};
-    if (isRead !== null) {
+    if (isRead !== null && isRead !== 'all') {
       where.isRead = isRead === 'true';
     }
 
@@ -90,12 +142,95 @@ export async function GET(request: NextRequest) {
       take: limit,
     });
 
-    return NextResponse.json({ contacts });
-  } catch {
+    const stats = {
+      unread: await prisma.contactForm.count({ where: { isRead: false } }),
+      read: await prisma.contactForm.count({ where: { isRead: true } }),
+    };
+
+    return NextResponse.json({ contacts, stats });
+  } catch (error) {
     console.error('Erro ao listar contatos:', error);
     return NextResponse.json(
       { error: 'Erro ao carregar contatos' },
       { status: 500 }
     );
+  } finally {
+    await prisma.$disconnect();
+  }
+}
+
+// PATCH - Marcar contato como lido/não lido (admin apenas)
+export async function PATCH(request: NextRequest) {
+  try {
+    // Verificar autenticação admin
+    const token = request.cookies.get('auth-token')?.value;
+    if (!token) {
+      return NextResponse.json({ error: 'Não autorizado' }, { status: 401 });
+    }
+
+    const { id, isRead } = await request.json();
+
+    if (!id) {
+      return NextResponse.json(
+        { error: 'ID do contato é obrigatório' },
+        { status: 400 }
+      );
+    }
+
+    const contact = await prisma.contactForm.update({
+      where: { id },
+      data: { isRead: isRead !== undefined ? isRead : true },
+    });
+
+    return NextResponse.json({
+      success: true,
+      contact,
+    });
+  } catch (error) {
+    console.error('Erro ao atualizar contato:', error);
+    return NextResponse.json(
+      { error: 'Erro ao atualizar contato' },
+      { status: 500 }
+    );
+  } finally {
+    await prisma.$disconnect();
+  }
+}
+
+// DELETE - Deletar contato (admin apenas)
+export async function DELETE(request: NextRequest) {
+  try {
+    // Verificar autenticação admin
+    const token = request.cookies.get('auth-token')?.value;
+    if (!token) {
+      return NextResponse.json({ error: 'Não autorizado' }, { status: 401 });
+    }
+
+    const { searchParams } = new URL(request.url);
+    const id = searchParams.get('id');
+
+    if (!id) {
+      return NextResponse.json(
+        { error: 'ID do contato é obrigatório' },
+        { status: 400 }
+      );
+    }
+
+    await prisma.contactForm.delete({
+      where: { id },
+    });
+
+    return NextResponse.json({
+      success: true,
+      message: 'Contato deletado com sucesso',
+    });
+  } catch (error) {
+    console.error('Erro ao deletar contato:', error);
+    return NextResponse.json(
+      { error: 'Erro ao deletar contato' },
+      { status: 500 }
+    );
+  } finally {
+    await prisma.$disconnect();
   }
 }

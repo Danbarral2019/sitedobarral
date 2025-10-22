@@ -373,3 +373,121 @@ Equipe Prof. Daniel Barral
     text,
   });
 }
+
+/**
+ * Envia notificação ao admin sobre nova mensagem de contato
+ */
+export async function sendContactNotification(
+  contactData: {
+    name: string;
+    email: string;
+    phone?: string | null;
+    courseInterest?: string | null;
+    message: string;
+  },
+  contactId: string
+): Promise<boolean> {
+  const adminEmail = process.env.ADMIN_EMAIL || 'admin@profdanielbarral.com';
+  const isTestimonial = contactData.courseInterest === 'depoimento';
+
+  const html = `
+    <!DOCTYPE html>
+    <html>
+      <head>
+        <style>
+          body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+          .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+          .header { background: linear-gradient(135deg, ${isTestimonial ? '#f59e0b 0%, #ea580c' : '#2563eb 0%, #1d4ed8'} 100%); color: white; padding: 30px; text-align: center; border-radius: 10px 10px 0 0; }
+          .content { background: #f9fafb; padding: 30px; border-radius: 0 0 10px 10px; }
+          .field { background: white; padding: 15px; margin: 15px 0; border-radius: 8px; border-left: 4px solid #2563eb; }
+          .field-label { font-weight: bold; color: #1f2937; margin-bottom: 5px; }
+          .field-value { color: #4b5563; }
+          .message-box { background: white; padding: 20px; margin: 20px 0; border-radius: 8px; border: 2px solid #e5e7eb; }
+          .footer { text-align: center; margin-top: 30px; color: #666; font-size: 14px; }
+          .badge { display: inline-block; background: ${isTestimonial ? '#f59e0b' : '#2563eb'}; color: white; padding: 5px 15px; border-radius: 20px; font-size: 12px; font-weight: bold; margin: 10px 0; }
+        </style>
+      </head>
+      <body>
+        <div class="container">
+          <div class="header">
+            <h1>${isTestimonial ? '⭐' : '📧'} ${isTestimonial ? 'Novo Depoimento Recebido' : 'Nova Mensagem de Contato'}</h1>
+          </div>
+          <div class="content">
+            ${isTestimonial ? '<div class="badge">AGUARDANDO MODERAÇÃO</div>' : ''}
+
+            <div class="field">
+              <div class="field-label">Nome:</div>
+              <div class="field-value">${contactData.name}</div>
+            </div>
+
+            <div class="field">
+              <div class="field-label">E-mail:</div>
+              <div class="field-value"><a href="mailto:${contactData.email}">${contactData.email}</a></div>
+            </div>
+
+            ${contactData.phone ? `
+              <div class="field">
+                <div class="field-label">Telefone:</div>
+                <div class="field-value">${contactData.phone}</div>
+              </div>
+            ` : ''}
+
+            ${contactData.courseInterest && contactData.courseInterest !== 'depoimento' ? `
+              <div class="field">
+                <div class="field-label">Curso de Interesse:</div>
+                <div class="field-value">${contactData.courseInterest}</div>
+              </div>
+            ` : ''}
+
+            <div class="message-box">
+              <div class="field-label">${isTestimonial ? 'Depoimento:' : 'Mensagem:'}</div>
+              <div class="field-value" style="white-space: pre-wrap;">${contactData.message}</div>
+            </div>
+
+            <div style="background: #eff6ff; padding: 15px; border-radius: 8px; margin-top: 20px;">
+              <p style="margin: 0; color: #1e40af; font-size: 14px;">
+                <strong>ID da Mensagem:</strong> ${contactId}<br>
+                <strong>Recebida em:</strong> ${new Date().toLocaleString('pt-BR')}
+              </p>
+            </div>
+
+            ${isTestimonial ? `
+              <p style="margin-top: 20px; color: #f59e0b; font-weight: bold;">
+                Este depoimento precisa ser moderado antes de aparecer no site.<br>
+                Acesse o painel admin para aprovar ou rejeitar.
+              </p>
+            ` : ''}
+          </div>
+          <div class="footer">
+            <p>Notificação automática do sistema de contato</p>
+            <p>© ${new Date().getFullYear()} Prof. Daniel Barral</p>
+          </div>
+        </div>
+      </body>
+    </html>
+  `;
+
+  const text = `
+${isTestimonial ? '⭐ NOVO DEPOIMENTO RECEBIDO' : '📧 NOVA MENSAGEM DE CONTATO'}
+${isTestimonial ? '(AGUARDANDO MODERAÇÃO)' : ''}
+
+Nome: ${contactData.name}
+E-mail: ${contactData.email}
+${contactData.phone ? `Telefone: ${contactData.phone}` : ''}
+${contactData.courseInterest && contactData.courseInterest !== 'depoimento' ? `Curso: ${contactData.courseInterest}` : ''}
+
+${isTestimonial ? 'DEPOIMENTO' : 'MENSAGEM'}:
+${contactData.message}
+
+---
+ID: ${contactId}
+Recebida em: ${new Date().toLocaleString('pt-BR')}
+  `;
+
+  return sendEmail({
+    to: adminEmail,
+    subject: isTestimonial ? '⭐ Novo Depoimento para Moderação' : '📧 Nova Mensagem de Contato',
+    html,
+    text,
+  });
+}

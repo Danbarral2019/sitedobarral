@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { usePathname } from 'next/navigation';
 import Link from 'next/link';
 import {
-  QrCode, FileSpreadsheet, ChevronLeft, ChevronRight, Share2, BarChart3
+  QrCode, FileSpreadsheet, ChevronLeft, ChevronRight, Share2, BarChart3, Mail, MessageSquare
 } from 'lucide-react';
 
 interface AdminLayoutProps {
@@ -54,6 +54,16 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
         </svg>
       ),
+    },
+    {
+      path: '/admin/contatos',
+      label: 'Contatos',
+      icon: Mail,
+    },
+    {
+      path: '/admin/depoimentos',
+      label: 'Depoimentos',
+      icon: MessageSquare,
     },
     {
       path: '/admin/importar',
