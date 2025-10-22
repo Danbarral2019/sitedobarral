@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { usePathname } from 'next/navigation';
 import Link from 'next/link';
 import {
-  QrCode, FileSpreadsheet, ChevronLeft, ChevronRight, Share2, BarChart3, Mail, MessageSquare
+  QrCode, FileSpreadsheet, ChevronLeft, ChevronRight, Share2, BarChart3, Mail, MessageSquare, Send
 } from 'lucide-react';
 
 interface AdminLayoutProps {
@@ -59,6 +59,11 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
       path: '/admin/contatos',
       label: 'Contatos',
       icon: Mail,
+    },
+    {
+      path: '/admin/newsletter',
+      label: 'Newsletter',
+      icon: Send,
     },
     {
       path: '/admin/depoimentos',
