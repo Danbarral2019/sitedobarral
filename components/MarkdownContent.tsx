@@ -8,29 +8,201 @@ interface MarkdownContentProps {
 
 export default function MarkdownContent({ content }: MarkdownContentProps) {
   return (
-    <div className="prose prose-lg prose-slate max-w-none
-      prose-headings:font-bold prose-headings:text-gray-900 prose-headings:tracking-tight
-      prose-h1:text-4xl prose-h1:mb-6 prose-h1:mt-8 prose-h1:border-b prose-h1:border-gray-200 prose-h1:pb-4
-      prose-h2:text-3xl prose-h2:mb-5 prose-h2:mt-10 prose-h2:text-blue-900
-      prose-h3:text-2xl prose-h3:mb-4 prose-h3:mt-8 prose-h3:text-blue-800
-      prose-h4:text-xl prose-h4:mb-3 prose-h4:mt-6 prose-h4:text-gray-800
-      prose-p:text-gray-700 prose-p:leading-relaxed prose-p:mb-4 prose-p:text-justify
-      prose-a:text-blue-600 prose-a:font-medium prose-a:no-underline hover:prose-a:text-blue-800 hover:prose-a:underline
-      prose-blockquote:border-l-4 prose-blockquote:border-blue-500 prose-blockquote:bg-blue-50 prose-blockquote:py-3 prose-blockquote:px-6 prose-blockquote:italic prose-blockquote:text-gray-700 prose-blockquote:rounded-r-lg prose-blockquote:my-6 prose-blockquote:shadow-sm
-      prose-strong:text-gray-900 prose-strong:font-bold
-      prose-em:text-gray-700 prose-em:italic
-      prose-code:text-blue-700 prose-code:bg-blue-50 prose-code:px-2 prose-code:py-1 prose-code:rounded prose-code:text-sm prose-code:font-mono prose-code:before:content-none prose-code:after:content-none
-      prose-pre:bg-gray-900 prose-pre:text-gray-100 prose-pre:rounded-lg prose-pre:p-4 prose-pre:overflow-x-auto prose-pre:shadow-lg
-      prose-ol:list-decimal prose-ol:pl-6 prose-ol:my-6 prose-ol:space-y-2
-      prose-ul:list-disc prose-ul:pl-6 prose-ul:my-6 prose-ul:space-y-2
-      prose-li:text-gray-700 prose-li:leading-relaxed
-      prose-table:border-collapse prose-table:w-full prose-table:my-6
-      prose-thead:bg-gray-100 prose-thead:border-b-2 prose-thead:border-gray-300
-      prose-th:px-4 prose-th:py-3 prose-th:text-left prose-th:font-bold prose-th:text-gray-900
-      prose-td:px-4 prose-td:py-3 prose-td:border-b prose-td:border-gray-200
-      prose-hr:border-gray-300 prose-hr:my-8
-      prose-img:rounded-lg prose-img:shadow-lg prose-img:mx-auto
-    ">
+    <div className="markdown-content">
+      <style jsx>{`
+        .markdown-content {
+          font-size: 1.125rem;
+          line-height: 2;
+          color: #374151;
+          max-width: 100%;
+        }
+
+        /* TÍTULOS - Hierarquia clara e espaçamento generoso */
+        .markdown-content :global(h1) {
+          font-size: 2.5rem;
+          font-weight: 800;
+          color: #111827;
+          margin-top: 3rem;
+          margin-bottom: 2rem;
+          padding-bottom: 1rem;
+          border-bottom: 3px solid #E5E7EB;
+          line-height: 1.3;
+        }
+
+        .markdown-content :global(h2) {
+          font-size: 2rem;
+          font-weight: 700;
+          color: #1E40AF;
+          margin-top: 3.5rem;
+          margin-bottom: 1.5rem;
+          line-height: 1.4;
+        }
+
+        .markdown-content :global(h3) {
+          font-size: 1.625rem;
+          font-weight: 700;
+          color: #1E3A8A;
+          margin-top: 2.5rem;
+          margin-bottom: 1.25rem;
+          line-height: 1.4;
+        }
+
+        .markdown-content :global(h4) {
+          font-size: 1.375rem;
+          font-weight: 600;
+          color: #374151;
+          margin-top: 2rem;
+          margin-bottom: 1rem;
+          line-height: 1.5;
+        }
+
+        /* PARÁGRAFOS - Espaçamento GENEROSO e texto justificado */
+        .markdown-content :global(p) {
+          text-align: justify;
+          text-justify: inter-word;
+          margin-bottom: 2rem;
+          line-height: 2;
+          color: #374151;
+          hyphens: auto;
+        }
+
+        /* CITAÇÕES - Recuo visual CLARO e destaque */
+        .markdown-content :global(blockquote) {
+          margin: 2.5rem 0;
+          margin-left: 2rem;
+          margin-right: 1rem;
+          padding: 1.5rem 2rem;
+          border-left: 6px solid #3B82F6;
+          background: linear-gradient(to right, #EFF6FF, #DBEAFE);
+          border-radius: 0 0.75rem 0.75rem 0;
+          font-style: italic;
+          color: #1E3A8A;
+          box-shadow: 0 2px 8px rgba(59, 130, 246, 0.1);
+        }
+
+        .markdown-content :global(blockquote p) {
+          margin-bottom: 0.75rem;
+        }
+
+        .markdown-content :global(blockquote p:last-child) {
+          margin-bottom: 0;
+        }
+
+        /* LISTAS - Espaçamento entre itens */
+        .markdown-content :global(ul),
+        .markdown-content :global(ol) {
+          margin: 2rem 0;
+          padding-left: 2rem;
+        }
+
+        .markdown-content :global(li) {
+          margin-bottom: 1rem;
+          line-height: 1.8;
+          color: #374151;
+        }
+
+        .markdown-content :global(li p) {
+          margin-bottom: 0.5rem;
+        }
+
+        /* NEGRITO e ITÁLICO */
+        .markdown-content :global(strong) {
+          font-weight: 700;
+          color: #111827;
+        }
+
+        .markdown-content :global(em) {
+          font-style: italic;
+          color: #4B5563;
+        }
+
+        /* LINKS */
+        .markdown-content :global(a) {
+          color: #2563EB;
+          text-decoration: none;
+          font-weight: 500;
+          border-bottom: 1px solid transparent;
+          transition: all 0.2s;
+        }
+
+        .markdown-content :global(a:hover) {
+          color: #1D4ED8;
+          border-bottom-color: #1D4ED8;
+        }
+
+        /* CÓDIGO INLINE */
+        .markdown-content :global(code) {
+          background: #F3F4F6;
+          color: #1F2937;
+          padding: 0.25rem 0.5rem;
+          border-radius: 0.375rem;
+          font-size: 0.9em;
+          font-family: 'Courier New', monospace;
+          border: 1px solid #E5E7EB;
+        }
+
+        /* BLOCOS DE CÓDIGO */
+        .markdown-content :global(pre) {
+          background: #1F2937;
+          color: #F9FAFB;
+          padding: 1.5rem;
+          border-radius: 0.75rem;
+          overflow-x: auto;
+          margin: 2rem 0;
+          box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .markdown-content :global(pre code) {
+          background: transparent;
+          color: inherit;
+          padding: 0;
+          border: none;
+          font-size: 0.95rem;
+        }
+
+        /* TABELAS */
+        .markdown-content :global(table) {
+          width: 100%;
+          border-collapse: collapse;
+          margin: 2rem 0;
+          box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+
+        .markdown-content :global(thead) {
+          background: #F3F4F6;
+        }
+
+        .markdown-content :global(th) {
+          padding: 1rem;
+          text-align: left;
+          font-weight: 700;
+          color: #111827;
+          border-bottom: 2px solid #D1D5DB;
+        }
+
+        .markdown-content :global(td) {
+          padding: 1rem;
+          border-bottom: 1px solid #E5E7EB;
+          color: #374151;
+        }
+
+        /* LINHAS HORIZONTAIS */
+        .markdown-content :global(hr) {
+          border: none;
+          border-top: 2px solid #E5E7EB;
+          margin: 3rem 0;
+        }
+
+        /* IMAGENS */
+        .markdown-content :global(img) {
+          max-width: 100%;
+          height: auto;
+          border-radius: 0.75rem;
+          box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+          margin: 2rem auto;
+          display: block;
+        }
+      `}</style>
       <ReactMarkdown remarkPlugins={[remarkGfm]}>
         {content}
       </ReactMarkdown>
