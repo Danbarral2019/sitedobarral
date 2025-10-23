@@ -82,6 +82,9 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
   };
 
   const calculateReadTime = (content: string) => {
+    if (!content || content.trim() === '') {
+      return '1 min de leitura';
+    }
     const wordsPerMinute = 200;
     const words = content.split(' ').length;
     const minutes = Math.ceil(words / wordsPerMinute);
