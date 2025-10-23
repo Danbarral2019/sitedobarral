@@ -2,7 +2,12 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
-**⚠️ IMPORTANT:** Always run commands from the project directory: `projeto do site no claude/site-prof-barral/` (not the repository root).
+## ⚠️ CRITICAL REMINDERS
+
+1. **Working Directory:** ALWAYS run commands from `projeto do site no claude/site-prof-barral/` (NOT the repository root)
+2. **Course IDs:** Database uses numeric IDs (`'1'`, `'2'`, etc.), URLs use slugs (`nova-lei-licitacoes`). See `COURSE_IDS_REFERENCE.md`
+3. **Documents:** NEVER access `course.restrictedDocuments` - always fetch from database via `/api/documents`
+4. **React Hooks:** ALL hooks must be called BEFORE any early returns (see Troubleshooting section)
 
 ## Project Overview
 
@@ -64,7 +69,16 @@ node scripts/migrate-blog-posts.js
 node scripts/seed-publications.js
 ```
 
-**Working Directory:** The Next.js project is at `projeto do site no claude/site-prof-barral/` (not repository root).
+### Test Credentials
+
+**Student Account (for testing area restrita):**
+- Email: `aluno@teste.com`
+- Password: `aluno123`
+- Has enrollment in: Nova Lei de Licitações (courseId: '1')
+- Test documents: 14 documents available
+
+**Admin Account:**
+- Create using: `node scripts/create-admin.js` (see Admin Setup above)
 
 ## Architecture
 
@@ -440,17 +454,28 @@ const documents = await prisma.document.findMany({
 ```
 
 ### Environment Variables
-Required in `.env.local` (see `.env.example` for full list):
-- `DATABASE_URL` - Database connection string
-- `JWT_SECRET` - Secret for signing JWT tokens
-- `RESEND_API_KEY` - Email sending API key
-- `EMAIL_FROM` - Sender email address
-- `NEXT_PUBLIC_BASE_URL` - Site URL for absolute links
-- `CRON_SECRET` - Protect cron job endpoints
-- `MAILCHIMP_API_KEY`, `MAILCHIMP_SERVER_PREFIX`, `MAILCHIMP_AUDIENCE_ID` - Newsletter
+
+**IMPORTANT:** Copy `.env.example` to `.env.local` and fill in the required values.
+
+**Required for basic functionality:**
+- `DATABASE_URL` - Database connection string (PostgreSQL for production, SQLite for dev)
+- `JWT_SECRET` - Secret for signing JWT tokens (generate with `openssl rand -base64 32`)
+- `NEXT_PUBLIC_BASE_URL` - Site URL for absolute links (e.g., `http://localhost:3000`)
+
+**Required for email features:**
+- `RESEND_API_KEY` - Email sending API key (get from resend.com)
+- `EMAIL_FROM` - Sender email address (must be verified in Resend)
+
+**Required for cron jobs:**
+- `CRON_SECRET` - Protect cron job endpoints (generate random string)
+
+**Optional (for full functionality):**
+- `MAILCHIMP_API_KEY`, `MAILCHIMP_SERVER_PREFIX`, `MAILCHIMP_AUDIENCE_ID` - Newsletter integration
 - `INSTAGRAM_ACCESS_TOKEN`, `INSTAGRAM_BUSINESS_ACCOUNT_ID` - Instagram auto-posting
 - `LINKEDIN_ACCESS_TOKEN`, `LINKEDIN_PERSON_URN` - LinkedIn auto-posting
-- `ADMIN_EMAIL`, `ADMIN_PASSWORD_HASH` - Initial admin credentials (optional)
+- `ADMIN_EMAIL`, `ADMIN_PASSWORD_HASH` - Initial admin credentials (alternative to scripts)
+
+See `.env.example` for complete list and `SETUP.md` for detailed configuration guide.
 
 ### Path Aliases
 TypeScript configured with `@/*` mapping to project root:
@@ -463,17 +488,28 @@ import Header from '@/components/layout/Header';
 ## Important Business Logic
 
 ### Course Data
-**10 Specialized Courses** (defined in `data/courses.ts`):
-1. `nova-lei-licitacoes` - Nova Lei de Licitações (Lei 14.133/2021)
-2. `planejamento-contratacoes` - Planejamento das Contratações Públicas
-3. `gestao-fiscalizacao-contratos` - Gestão e Fiscalização de Contratos
-4. `processo-administrativo-sancionador` - Processo Administrativo Sancionador
-5. `inovacao-contratacoes` - Inovação nas Contratações Públicas
-6. `terceirizacao-formacao-precos` - Terceirização e Formação de Preços
-7. `assessoramento-juridico` - Assessoramento Jurídico na Nova Lei
-8. `revisao-reajuste-repactuacao` - Revisão, Reajuste e Repactuação
-9. `alteracoes-contratuais` - Alterações Contratuais
-10. `contratacao-direta` - Contratação Direta
+
+**⚠️ CRITICAL: Course ID vs Slug**
+
+Courses have **TWO** identifiers - use the correct one for each context:
+
+| ID (Database) | Slug (URLs) | Title |
+|---|---|---|
+| `'1'` | `nova-lei-licitacoes` | Nova Lei de Licitações (Lei 14.133/2021) |
+| `'2'` | `planejamento-contratacoes` | Planejamento das Contratações Públicas |
+| `'3'` | `gestao-fiscalizacao-contratos` | Gestão e Fiscalização de Contratos |
+| `'4'` | `processo-sancionador` | Processo Administrativo Sancionador |
+| `'5'` | `inovacao-contratacoes` | Inovação nas Contratações Públicas |
+| `'6'` | `terceirizacao-formacao-precos` | Terceirização e Formação de Preços |
+| `'7'` | `assessoramento-juridico` | Assessoramento Jurídico na Nova Lei |
+| `'8'` | `revisao-reajuste-repactuacao` | Revisão, Reajuste e Repactuação |
+| `'9'` | `alteracoes-contratuais` | Alterações Contratuais |
+| `'10'` | `contratacao-direta` | Contratação Direta |
+
+**Usage Rules:**
+- ✅ Use **numeric ID** (`'1'`, `'2'`, etc.) for: Database operations (Enrollment.courseId, Document.courseId, QRCode.courseId)
+- ✅ Use **slug** for: URLs (`/cursos/[slug]`), frontend routing, links
+- 📚 See `COURSE_IDS_REFERENCE.md` for detailed examples and conversion functions
 
 **Critical Rule:** Bibliography (`bibliography` field in Course) is ALWAYS public and visible to everyone. This is for educational/reference purposes.
 
@@ -699,16 +735,23 @@ const { documents } = await response.json();
 
 ## Notes for Future Claude Instances
 
+### General Guidelines
 - This is a production website for a real legal professional - treat all changes with care
-- Course data in `data/courses.ts` is the source of truth for courseId values (use IDs like '1', '2', not slugs)
 - Always test authentication flows after making auth-related changes
-- Enrollment expiration is critical business logic - don't modify without understanding impact
-- Bibliography must remain public per business requirements
-- Excel import is a heavily-used feature - maintain backward compatibility with existing templates
-- Email templates should maintain professional, formal tone appropriate for legal audience
-- **React Hooks:** ALWAYS call hooks in the same order, BEFORE any early returns (see troubleshooting section)
-- **Documents:** NEVER access `course.restrictedDocuments` - fetch from database via `/api/documents`
 - When adding new features, update this CLAUDE.md file accordingly
+- Email templates should maintain professional, formal tone appropriate for legal audience
+
+### Critical Technical Rules
+1. **Course IDs:** `data/courses.ts` is the source of truth. Use numeric IDs (`'1'`, `'2'`) for database, slugs for URLs. See `COURSE_IDS_REFERENCE.md`
+2. **Documents:** NEVER access `course.restrictedDocuments` (empty array) - ALWAYS fetch from database via `/api/documents`
+3. **React Hooks:** ALL hooks must be called in the SAME ORDER in EVERY render, BEFORE any early returns. See troubleshooting section for examples.
+4. **Working Directory:** ALL commands must be run from `projeto do site no claude/site-prof-barral/`, NOT repository root
+
+### Business Rules
+- **Bibliography:** Must ALWAYS remain public per business requirements (educational/reference)
+- **Enrollment Expiration:** Critical business logic - don't modify without understanding full impact (affects access, notifications, renewals)
+- **Excel Import:** Heavily-used feature - maintain backward compatibility with existing templates
+- **Multi-course Documents:** One document can belong to multiple courses (comma-separated in Excel import)
 
 ## Recent Critical Fixes
 
@@ -730,3 +773,38 @@ const { documents } = await response.json();
 - Email: `aluno@teste.com`
 - Password: `aluno123`
 - Course: Nova Lei de Licitações (14 test documents)
+
+---
+
+## Quick Reference Card
+
+**First Time Setup:**
+```bash
+cd "projeto do site no claude/site-prof-barral"
+npm install
+cp .env.example .env.local  # Edit with your values
+npx prisma generate
+npx prisma db push
+node scripts/create-admin.js admin@email.com password123 "Admin Name"
+npm run dev
+```
+
+**Most Common Commands:**
+```bash
+npm run dev                    # Start dev server
+npx prisma studio              # View database
+node scripts/create-admin.js   # Create admin
+npx prisma generate            # After schema changes
+```
+
+**Most Common Issues:**
+1. **"Command not found"** → Wrong directory, must be in `projeto do site no claude/site-prof-barral/`
+2. **"Documents not loading"** → Fetching from static array instead of database API
+3. **React Hooks Error #310** → Hooks called after early returns
+4. **Wrong courseId** → Using slug instead of numeric ID in database operations
+
+**Key Files to Reference:**
+- `COURSE_IDS_REFERENCE.md` - Course ID vs Slug usage
+- `SETUP.md` - Complete setup instructions
+- `IMPORTACAO_EXCEL.md` - Excel import documentation
+- `.env.example` - All environment variables
