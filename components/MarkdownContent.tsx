@@ -13,56 +13,57 @@ export default function MarkdownContent({ content }: MarkdownContentProps) {
       <style jsx>{`
         .markdown-content {
           font-size: 1.125rem;
-          line-height: 2;
+          line-height: 1.75;
           color: #374151;
           max-width: 100%;
         }
 
         /* TÍTULOS - Hierarquia clara e espaçamento generoso */
+        /* H1 dentro do conteúdo é tratado como H2 (título principal já está fora) */
         .markdown-content :global(h1) {
-          font-size: 2.5rem;
-          font-weight: 800;
-          color: #111827;
-          margin-top: 3rem;
-          margin-bottom: 2rem;
-          padding-bottom: 1rem;
-          border-bottom: 3px solid #E5E7EB;
-          line-height: 1.3;
-        }
-
-        .markdown-content :global(h2) {
           font-size: 2rem;
           font-weight: 700;
           color: #1E40AF;
           margin-top: 3.5rem;
           margin-bottom: 1.5rem;
+          padding-bottom: 0;
+          border-bottom: none;
           line-height: 1.4;
         }
 
-        .markdown-content :global(h3) {
-          font-size: 1.625rem;
+        .markdown-content :global(h2) {
+          font-size: 1.75rem;
           font-weight: 700;
-          color: #1E3A8A;
-          margin-top: 2.5rem;
+          color: #1E40AF;
+          margin-top: 3rem;
           margin-bottom: 1.25rem;
           line-height: 1.4;
         }
 
+        .markdown-content :global(h3) {
+          font-size: 1.5rem;
+          font-weight: 700;
+          color: #1E3A8A;
+          margin-top: 2.25rem;
+          margin-bottom: 1rem;
+          line-height: 1.4;
+        }
+
         .markdown-content :global(h4) {
-          font-size: 1.375rem;
+          font-size: 1.25rem;
           font-weight: 600;
           color: #374151;
-          margin-top: 2rem;
-          margin-bottom: 1rem;
+          margin-top: 1.75rem;
+          margin-bottom: 0.75rem;
           line-height: 1.5;
         }
 
-        /* PARÁGRAFOS - Espaçamento GENEROSO e texto justificado */
+        /* PARÁGRAFOS - Espaçamento balanceado e texto justificado */
         .markdown-content :global(p) {
           text-align: justify;
           text-justify: inter-word;
-          margin-bottom: 2rem;
-          line-height: 2;
+          margin-bottom: 1.5rem;
+          line-height: 1.75;
           color: #374151;
           hyphens: auto;
         }

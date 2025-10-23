@@ -157,7 +157,7 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
             </header>
 
             <div className="mb-8">
-              <div className="text-xl text-gray-700 font-medium mb-6">
+              <div className="text-xl text-gray-700 font-medium mb-6 text-justify leading-relaxed">
                 {post.excerpt}
               </div>
               <MarkdownContent content={post.content} />
