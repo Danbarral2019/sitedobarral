@@ -44,11 +44,14 @@ model Document {
   size        Int?
   uploadedAt  DateTime @default(now())
   updatedAt   DateTime @updatedAt
+  notifiedAt  DateTime? // Data em que os alunos foram notificados sobre este documento
 
   @@index([courseId])
   @@index([category])
   @@index([courseId, isPublic])
   @@index([uploadedAt])
+  @@index([notifiedAt])
+  @@index([courseId, notifiedAt])
 }
 
 // Usuários (admin e estudantes)
