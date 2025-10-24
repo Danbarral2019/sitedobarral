@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
-import { verifyAuth } from '@/lib/auth';
+import { getCurrentUser } from '@/lib/auth';
 
 /**
  * DELETE /api/newsletter/[id]
@@ -12,9 +12,9 @@ export async function DELETE(
 ) {
   try {
     // Verificar autenticação de admin
-    const authResult = await verifyAuth(request);
+    const user = await getCurrentUser();
 
-    if (!authResult.user || authResult.user.role !== 'admin') {
+    if (!user || user.role !== 'admin') {
       return NextResponse.json(
         { error: 'Não autorizado' },
         { status: 401 }
