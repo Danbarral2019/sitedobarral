@@ -266,7 +266,7 @@ export default function ContatoPage() {
                 </div>
                 <div className="space-y-3">
                   <a
-                    href="https://instagram.com"
+                    href="https://instagram.com/danbarral"
                     target="_blank"
                     rel="noopener noreferrer"
                     aria-label="Visite nosso perfil no Instagram"
@@ -275,7 +275,7 @@ export default function ContatoPage() {
                     <div className="w-10 h-10 bg-gradient-to-br from-purple-600 via-pink-600 to-orange-500 rounded-lg flex items-center justify-center group-hover:scale-110 transition-transform">
                       <Instagram className="w-5 h-5 text-white" />
                     </div>
-                    <span className="text-gray-900 font-bold">@profbarral</span>
+                    <span className="text-gray-900 font-bold">@danbarral</span>
                   </a>
                   <a
                     href="https://youtube.com"
@@ -290,7 +290,7 @@ export default function ContatoPage() {
                     <span className="text-gray-900 font-bold">Prof. Daniel Barral</span>
                   </a>
                   <a
-                    href="https://linkedin.com"
+                    href="https://www.linkedin.com/in/daniel-de-andrade-oliveira-barral-b5110870/"
                     target="_blank"
                     rel="noopener noreferrer"
                     aria-label="Visite nosso perfil no LinkedIn"
