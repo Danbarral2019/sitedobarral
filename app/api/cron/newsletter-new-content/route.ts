@@ -89,7 +89,7 @@ export async function GET(request: NextRequest) {
     }
 
     // Buscar detalhes dos documentos por curso
-    let coursesWithNewContent: Array<{
+    const coursesWithNewContent: Array<{
       courseTitle: string;
       documentCount: number;
       documents: Array<{ title: string; category: string }>;
