@@ -212,21 +212,24 @@ Você pode adicionar ou remover hashtags diretamente no campo de texto antes de 
 - Faça perguntas nos posts para incentivar interação
 - Use Stories do Instagram para reforçar posts
 
-## Limpeza Futura (Opcional)
+## Arquivos Removidos
 
-Arquivos que podem ser removidos se não forem mais necessários:
+Os seguintes arquivos do sistema antigo foram **removidos** em 24/01/2025:
 
-1. `/lib/social-publisher.ts` - Orquestrador de publicação automática
-2. `/app/admin/redes-sociais/page.tsx` - Interface antiga de monitoramento
-3. `/app/api/admin/social/*` - Endpoints de publicação automática
-4. Dependências não usadas: verificar se alguma lib pode ser removida
+1. ✅ `/app/admin/redes-sociais/page.tsx` - Interface antiga de monitoramento (REMOVIDO)
+2. ✅ `/app/admin/redes-sociais/config/page.tsx` - Página de configurações (REMOVIDO)
+3. ✅ Menu item "Redes Sociais" do AdminLayout (REMOVIDO)
 
-**⚠️ Aviso:** Antes de remover, verifique se não há outras referências no código.
+**Mantidos (podem ser úteis no futuro):**
+- `/lib/social-publisher.ts` - Orquestrador de publicação automática
+- `/lib/instagram.ts` - Funções de formatação de texto
+- `/lib/linkedin.ts` - Funções de formatação de texto
+- `/app/api/admin/social/*` - Endpoints de publicação automática
 
 ## Perguntas Frequentes
 
 **P: E se eu quiser voltar para publicação automática?**
-R: Todos os arquivos de integração foram mantidos. Basta reconfigurar os tokens nas variáveis de ambiente e usar a interface antiga em `/admin/redes-sociais`.
+R: As APIs de integração (`/lib/instagram.ts`, `/lib/linkedin.ts`, `/app/api/admin/social/*`) foram mantidas. Você precisaria recriar as páginas de interface e reconfigurar os tokens nas variáveis de ambiente. Contudo, recomenda-se continuar com o sistema manual pela simplicidade e confiabilidade.
 
 **P: A imagem OG é gerada toda vez?**
 R: Sim, mas é cacheada pelo navegador. A geração é rápida (usa Vercel OG).
