@@ -204,8 +204,129 @@ export default function MarkdownContent({ content }: MarkdownContentProps) {
           margin: 2rem auto;
           display: block;
         }
+
+        /* NOTAS DE RODAPÉ - Estilo acadêmico tradicional */
+        .markdown-content :global(sup) {
+          font-size: 0.75em;
+          line-height: 0;
+          position: relative;
+          vertical-align: baseline;
+          top: -0.5em;
+        }
+
+        .markdown-content :global(sup a) {
+          color: #2563EB;
+          font-weight: 600;
+          text-decoration: none;
+          padding: 0 0.15em;
+          border-bottom: none;
+        }
+
+        .markdown-content :global(sup a:hover) {
+          color: #1D4ED8;
+          text-decoration: underline;
+        }
+
+        /* Seção de Notas de Rodapé */
+        .markdown-content :global(h2:has(+ p [id^="fn"])),
+        .markdown-content :global(h2):has-text("Notas de Rodapé") {
+          margin-top: 4rem;
+          padding-top: 2rem;
+          border-top: 3px double #D1D5DB;
+          font-size: 1.5rem;
+          color: #1E3A8A;
+        }
+
+        /* Estilo das notas individuais */
+        .markdown-content :global([id^="fn"]) {
+          display: block;
+          margin-bottom: 1rem;
+          padding-left: 2rem;
+          position: relative;
+          font-size: 0.95rem;
+          line-height: 1.6;
+          color: #4B5563;
+          text-align: justify;
+        }
+
+        .markdown-content :global([id^="fn"]::before) {
+          content: attr(id);
+          position: absolute;
+          left: 0;
+          font-weight: 600;
+          color: #2563EB;
+        }
+
+        /* Link de retorno da nota */
+        .markdown-content :global([id^="fn"] a[href^="#ref"]) {
+          font-size: 0.75em;
+          margin-left: 0.5em;
+          color: #6B7280;
+        }
+
+        /* REFERÊNCIAS BIBLIOGRÁFICAS - Estilo ABNT */
+        .markdown-content :global(h2):has-text("Referências Bibliográficas"),
+        .markdown-content :global(h2):has-text("Referências") {
+          margin-top: 4rem;
+          padding-top: 2rem;
+          border-top: 3px double #D1D5DB;
+          font-size: 1.5rem;
+          color: #1E3A8A;
+        }
+
+        /* Parágrafos de referências - recuo francês ABNT */
+        .markdown-content :global(h2:has-text("Referências") + p),
+        .markdown-content :global(h2:has-text("Referências Bibliográficas") + p) {
+          margin-left: 0;
+          padding-left: 2rem;
+          text-indent: -2rem;
+          margin-bottom: 1rem;
+          line-height: 1.5;
+          font-size: 0.95rem;
+          color: #374151;
+        }
+
+        /* Separadores especiais para seções */
+        .markdown-content :global(hr) {
+          border: none;
+          border-top: 3px double #D1D5DB;
+          margin: 4rem 0 2rem 0;
+        }
+
+        /* Estilos especiais para seções após HR (geralmente notas e referências) */
+        .markdown-content :global(hr + h2) {
+          margin-top: 2rem;
+          font-size: 1.5rem;
+          color: #1E3A8A;
+          border-top: none;
+          padding-top: 0;
+        }
+
+        /* Destaque para citações de leis */
+        .markdown-content :global(strong):has-text("Lei nº"),
+        .markdown-content :global(strong):has-text("Decreto"),
+        .markdown-content :global(strong):has-text("Portaria") {
+          color: #1E40AF;
+        }
       `}</style>
-      <ReactMarkdown remarkPlugins={[remarkGfm]}>
+      <ReactMarkdown
+        remarkPlugins={[remarkGfm]}
+        components={{
+          // Customizar renderização de links para notas de rodapé
+          a: ({ href, children, ...props }) => {
+            if (href?.startsWith('#fn')) {
+              return (
+                <sup>
+                  <a href={href} {...props}>
+                    {children}
+                  </a>
+                </sup>
+              );
+            }
+            return <a href={href} {...props}>{children}</a>;
+          },
+        }}
+      >
         {content}
       </ReactMarkdown>
     </div>

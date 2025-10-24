@@ -4,7 +4,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import {
-  Plus, Loader2, Eye, Edit, Trash2, Calendar, CheckCircle, XCircle
+  Plus, Loader2, Eye, Edit, Trash2, Calendar, CheckCircle, XCircle, Share2
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { Pagination } from '@/components/ui/pagination';
@@ -116,13 +116,24 @@ export default function AdminBlogPage() {
                 <h1 className="text-3xl font-bold text-gray-900 mb-2">Gerenciar Blog</h1>
                 <p className="text-gray-600">Crie e edite posts do blog</p>
               </div>
-              <Link
-                href="/admin/blog/new"
-                className="bg-gradient-to-r from-orange-600 to-amber-600 text-white px-6 py-3 rounded-xl font-bold hover:from-orange-700 hover:to-amber-700 transition-all shadow-lg flex items-center gap-2"
-              >
-                <Plus className="w-5 h-5" />
-                Novo Post
-              </Link>
+              <div className="flex items-center gap-3">
+                <Link
+                  href="/admin/blog/upload-word"
+                  className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-6 py-3 rounded-xl font-bold hover:from-blue-700 hover:to-indigo-700 transition-all shadow-lg flex items-center gap-2"
+                >
+                  <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M14 2H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V8l-6-6zm-1 13H7v-2h6v2zm3-4H7v-2h9v2zm0-4H7V5h9v2z"/>
+                  </svg>
+                  Upload Word
+                </Link>
+                <Link
+                  href="/admin/blog/new"
+                  className="bg-gradient-to-r from-orange-600 to-amber-600 text-white px-6 py-3 rounded-xl font-bold hover:from-orange-700 hover:to-amber-700 transition-all shadow-lg flex items-center gap-2"
+                >
+                  <Plus className="w-5 h-5" />
+                  Novo Post
+                </Link>
+              </div>
             </div>
           </div>
 
@@ -205,6 +216,13 @@ export default function AdminBlogPage() {
                                   title="Ver post"
                                 >
                                   <Eye className="w-4 h-4" />
+                                </Link>
+                                <Link
+                                  href={`/admin/assistente-social?postId=${post.id}`}
+                                  className="p-2 text-purple-600 hover:bg-purple-50 rounded-lg transition-colors"
+                                  title="Preparar post para redes sociais"
+                                >
+                                  <Share2 className="w-4 h-4" />
                                 </Link>
                                 <Link
                                   href={`/admin/blog/${post.id}/edit`}
