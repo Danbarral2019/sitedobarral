@@ -491,3 +491,168 @@ Recebida em: ${new Date().toLocaleString('pt-BR')}
     text,
   });
 }
+
+/**
+ * Envia notificação de novos documentos para aluno matriculado
+ */
+export async function sendNewDocumentsNotification(
+  email: string,
+  name: string,
+  courseTitle: string,
+  documents: Array<{
+    title: string;
+    description?: string | null;
+    category: string;
+    uploadedAt: Date;
+  }>
+): Promise<boolean> {
+  const areaRestritaUrl = `${process.env.NEXT_PUBLIC_BASE_URL}/area-restrita`;
+  const documentCount = documents.length;
+
+  // Agrupar documentos por categoria
+  const docsByCategory = documents.reduce((acc, doc) => {
+    const category = doc.category || 'outro';
+    if (!acc[category]) {
+      acc[category] = [];
+    }
+    acc[category].push(doc);
+    return acc;
+  }, {} as Record<string, typeof documents>);
+
+  // Mapeamento de categorias para labels amigáveis
+  const categoryLabels: Record<string, string> = {
+    'apostila': '📖 Apostilas',
+    'conteudo-programatico': '📋 Conteúdo Programático',
+    'bibliografia': '📚 Bibliografia',
+    'acordao': '⚖️ Acórdãos',
+    'parecer': '📝 Pareceres',
+    'artigo': '📑 Artigos',
+    'edital': '📰 Editais',
+    'link': '🔗 Links',
+    'video': '🎥 Vídeos',
+    'outro': '📄 Outros',
+  };
+
+  // Construir lista HTML de documentos por categoria
+  let documentsHtml = '';
+  Object.entries(docsByCategory).forEach(([category, docs]) => {
+    const categoryLabel = categoryLabels[category] || '📄 Outros';
+    documentsHtml += `
+      <div style="background: white; padding: 20px; margin: 15px 0; border-radius: 8px; border-left: 4px solid #2563eb;">
+        <h3 style="margin: 0 0 15px 0; color: #1f2937; font-size: 16px;">${categoryLabel}</h3>
+        ${docs.map(doc => `
+          <div style="margin: 10px 0; padding: 10px 0; border-bottom: 1px solid #e5e7eb;">
+            <div style="font-weight: bold; color: #374151; margin-bottom: 5px;">${doc.title}</div>
+            ${doc.description ? `<div style="font-size: 14px; color: #6b7280; line-height: 1.5;">${doc.description}</div>` : ''}
+            <div style="font-size: 12px; color: #9ca3af; margin-top: 5px;">
+              Adicionado em: ${new Date(doc.uploadedAt).toLocaleDateString('pt-BR', { day: '2-digit', month: 'long', year: 'numeric' })}
+            </div>
+          </div>
+        `).join('')}
+      </div>
+    `;
+  });
+
+  const html = `
+    <!DOCTYPE html>
+    <html>
+      <head>
+        <style>
+          body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+          .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+          .header { background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white; padding: 30px; text-align: center; border-radius: 10px 10px 0 0; }
+          .content { background: #f9fafb; padding: 30px; border-radius: 0 0 10px 10px; }
+          .button { display: inline-block; background: linear-gradient(135deg, #2563eb 0%, #9333ea 100%); color: white; padding: 15px 30px; text-decoration: none; border-radius: 8px; font-weight: bold; margin: 20px 0; }
+          .footer { text-align: center; margin-top: 30px; color: #666; font-size: 14px; }
+          .highlight-box { background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white; padding: 20px; border-radius: 8px; text-align: center; margin: 20px 0; }
+          .info-box { background: #dbeafe; border-left: 4px solid #2563eb; padding: 15px; border-radius: 8px; margin: 20px 0; }
+        </style>
+      </head>
+      <body>
+        <div class="container">
+          <div class="header">
+            <h1>📚 Novos Materiais Disponíveis!</h1>
+          </div>
+          <div class="content">
+            <p>Olá <strong>${name}</strong>,</p>
+
+            <div class="highlight-box">
+              <h2 style="margin: 0 0 10px 0; font-size: 24px;">${documentCount} ${documentCount === 1 ? 'novo material' : 'novos materiais'}</h2>
+              <p style="margin: 0; font-size: 16px;">foram adicionados ao curso <strong>${courseTitle}</strong></p>
+            </div>
+
+            <p>Confira abaixo os materiais que acabaram de ser disponibilizados para você:</p>
+
+            ${documentsHtml}
+
+            <div class="info-box">
+              <p style="margin: 0; color: #1e40af;">
+                <strong>💡 Dica:</strong> Acesse sua área restrita para visualizar e fazer download de todos os materiais.
+              </p>
+            </div>
+
+            <div style="text-align: center;">
+              <a href="${areaRestritaUrl}" class="button">📖 Acessar Área Restrita</a>
+            </div>
+
+            <p style="text-align: center; color: #666; font-size: 14px; margin-top: 20px;">
+              Ou acesse diretamente: <a href="${areaRestritaUrl}" style="color: #2563eb;">${areaRestritaUrl}</a>
+            </p>
+
+            <hr style="border: none; border-top: 1px solid #e5e7eb; margin: 30px 0;">
+
+            <p style="font-size: 14px; color: #666;">
+              Este material é de uso exclusivo dos alunos matriculados. O compartilhamento não autorizado pode resultar na suspensão do acesso.
+            </p>
+
+            <p>Bons estudos!<br><strong>Equipe Prof. Daniel Barral</strong></p>
+          </div>
+          <div class="footer">
+            <p>Você está recebendo este email porque está matriculado no curso <strong>${courseTitle}</strong>.</p>
+            <p>© ${new Date().getFullYear()} Prof. Daniel Barral - Todos os direitos reservados</p>
+          </div>
+        </div>
+      </body>
+    </html>
+  `;
+
+  const text = `
+📚 NOVOS MATERIAIS DISPONÍVEIS!
+
+Olá ${name},
+
+${documentCount} ${documentCount === 1 ? 'novo material foi adicionado' : 'novos materiais foram adicionados'} ao curso: ${courseTitle}
+
+MATERIAIS ADICIONADOS:
+
+${Object.entries(docsByCategory).map(([category, docs]) => {
+  const categoryLabel = categoryLabels[category] || 'Outros';
+  return `
+${categoryLabel}
+${docs.map(doc => `
+- ${doc.title}
+  ${doc.description || ''}
+  Adicionado em: ${new Date(doc.uploadedAt).toLocaleDateString('pt-BR')}
+`).join('\n')}`;
+}).join('\n')}
+
+💡 DICA: Acesse sua área restrita para visualizar e fazer download de todos os materiais.
+
+Acessar área restrita: ${areaRestritaUrl}
+
+---
+Este material é de uso exclusivo dos alunos matriculados. O compartilhamento não autorizado pode resultar na suspensão do acesso.
+
+Bons estudos!
+Equipe Prof. Daniel Barral
+
+Você está recebendo este email porque está matriculado no curso ${courseTitle}.
+  `;
+
+  return sendEmail({
+    to: email,
+    subject: `📚 ${documentCount} ${documentCount === 1 ? 'novo material disponível' : 'novos materiais disponíveis'} - ${courseTitle}`,
+    html,
+    text,
+  });
+}
