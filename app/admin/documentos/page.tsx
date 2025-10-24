@@ -130,8 +130,13 @@ export default function DocumentosPage() {
 
   useEffect(() => {
     verifyAdmin();
-    loadDocuments();
-  }, [verifyAdmin, loadDocuments]);
+  }, [verifyAdmin]);
+
+  useEffect(() => {
+    if (!isLoading) {
+      loadDocuments();
+    }
+  }, [isLoading]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const handleFileSelect = (file: File) => {
     setSelectedFile(file);
