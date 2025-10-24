@@ -7,10 +7,6 @@
     {
       "path": "/api/cron/notify-new-documents",
       "schedule": "0 9 * * *"
-    },
-    {
-      "path": "/api/cron/newsletter-new-content",
-      "schedule": "0 10 * * 1"
     }
   ]
 }
