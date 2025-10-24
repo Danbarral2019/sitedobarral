@@ -128,11 +128,11 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
         } bg-white border-r border-gray-200 fixed h-full overflow-y-auto transition-all duration-300 z-40`}
       >
         {/* Header */}
-        <div className="p-6 border-b border-gray-200 flex items-center justify-between">
+        <div className="p-4 border-b border-gray-200 flex items-center justify-between flex-shrink-0">
           {!isCollapsed && (
             <div>
-              <h1 className="text-xl font-bold text-gray-900">Painel Admin</h1>
-              <p className="text-sm text-gray-600 mt-1">Prof. Daniel Barral</p>
+              <h1 className="text-lg font-bold text-gray-900">Painel Admin</h1>
+              <p className="text-xs text-gray-600 mt-0.5">Prof. Daniel Barral</p>
             </div>
           )}
           <button
@@ -149,8 +149,8 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
         </div>
 
         {/* Navigation */}
-        <nav className="p-4">
-          <div className="space-y-1">
+        <nav className="p-3 flex-1 overflow-y-auto">
+          <div className="space-y-0.5">
             {menuItems.map((item) => {
               const Icon = item.icon;
               const active = isActive(item.path);
@@ -159,26 +159,26 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
                             <Link
                   key={item.path}
                   href={item.path}
-                  className={`flex items-center gap-3 px-4 py-3 rounded-lg font-medium transition-colors ${
+                  className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
                     active
                       ? 'bg-blue-50 text-blue-700 font-semibold'
                       : 'text-gray-700 hover:bg-gray-100'
                   }`}
                   title={isCollapsed ? item.label : ''}
                 >
-                  <Icon className="w-5 h-5 flex-shrink-0" />
+                  <Icon className="w-4 h-4 flex-shrink-0" />
                   {!isCollapsed && (
                     <div className="flex items-center gap-2 flex-1">
                       <span>{item.label}</span>
                       {item.badge && item.badge > 0 && (
-                        <span className="bg-red-500 text-white text-xs font-bold px-2 py-0.5 rounded-full min-w-[20px] text-center">
+                        <span className="bg-red-500 text-white text-xs font-bold px-1.5 py-0.5 rounded-full min-w-[18px] text-center">
                           {item.badge}
                         </span>
                       )}
                     </div>
                   )}
                   {isCollapsed && item.badge && item.badge > 0 && (
-                    <span className="absolute top-1 right-1 w-3 h-3 bg-red-500 rounded-full border-2 border-white"></span>
+                    <span className="absolute top-1 right-1 w-2.5 h-2.5 bg-red-500 rounded-full border-2 border-white"></span>
                   )}
                 </Link>
               );
