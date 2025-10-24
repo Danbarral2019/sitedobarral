@@ -6,6 +6,9 @@ import { Lock, Mail, Phone, Building, ArrowLeft, CheckCircle, AlertCircle } from
 import { courses } from '@/data/courses';
 import { useAuth } from '@/hooks/use-auth';
 
+// Força renderização dinâmica (não pre-render) pois depende de query params
+export const dynamic = 'force-dynamic';
+
 export default function CursoBloqueadoPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
