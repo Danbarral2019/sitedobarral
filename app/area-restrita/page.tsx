@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { Loader2, LogOut, Clock, GraduationCap, CheckCircle } from 'lucide-react';
+import { Loader2, LogOut, Clock, GraduationCap, CheckCircle, Heart } from 'lucide-react';
 import { courses } from '@/data/courses';
 import { useAuth } from '@/hooks/use-auth';
 import { useFavorites } from '@/hooks/use-favorites';
@@ -279,6 +279,13 @@ export default function AreaRestritaPage() {
                   </div>
                 </div>
                 <div className="flex items-center gap-3">
+                  <a
+                    href="/area-restrita/favoritos"
+                    className="flex items-center gap-2 px-4 py-2 text-gray-700 hover:text-pink-600 hover:bg-pink-50 rounded-lg transition-colors font-medium"
+                  >
+                    <Heart className="w-4 h-4" />
+                    Favoritos
+                  </a>
                   <a
                     href="/area-restrita/historico"
                     className="flex items-center gap-2 px-4 py-2 text-gray-700 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors font-medium"
