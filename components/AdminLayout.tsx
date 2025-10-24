@@ -1,10 +1,10 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { usePathname } from 'next/navigation';
 import Link from 'next/link';
 import {
-  QrCode, FileSpreadsheet, ChevronLeft, ChevronRight, BarChart3, Mail, MessageSquare, Send, GraduationCap
+  QrCode, FileSpreadsheet, ChevronLeft, ChevronRight, BarChart3, Mail, MessageSquare, Send, GraduationCap, Youtube, Globe
 } from 'lucide-react';
 
 interface AdminLayoutProps {
@@ -13,16 +13,41 @@ interface AdminLayoutProps {
 
 export default function AdminLayout({ children }: AdminLayoutProps) {
   const [isCollapsed, setIsCollapsed] = useState(false);
+  const [unreadCounts, setUnreadCounts] = useState({ contatos: 0, depoimentos: 0 });
   const pathname = usePathname();
 
   const isActive = (path: string) => pathname === path;
 
+  // Buscar contadores de notificações
+  useEffect(() => {
+    const loadCounts = async () => {
+      try {
+        const [contatosRes, depoimentosRes] = await Promise.all([
+          fetch('/api/admin/contatos?unreadOnly=true'),
+          fetch('/api/admin/depoimentos?status=pending'),
+        ]);
+
+        if (contatosRes.ok) {
+          const contatosData = await contatosRes.json();
+          setUnreadCounts(prev => ({ ...prev, contatos: contatosData.total || 0 }));
+        }
+
+        if (depoimentosRes.ok) {
+          const depoimentosData = await depoimentosRes.json();
+          setUnreadCounts(prev => ({ ...prev, depoimentos: depoimentosData.total || 0 }));
+        }
+      } catch (error) {
+        console.error('Erro ao carregar contadores:', error);
+      }
+    };
+
+    loadCounts();
+    const interval = setInterval(loadCounts, 60000); // Atualiza a cada minuto
+    return () => clearInterval(interval);
+  }, []);
+
+  // Menus em ORDEM ALFABÉTICA
   const menuItems = [
-    {
-      path: '/admin',
-      label: 'QR Codes',
-      icon: QrCode,
-    },
     {
       path: '/admin/analytics',
       label: 'Analytics',
@@ -38,13 +63,16 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
       ),
     },
     {
-      path: '/admin/publicacoes',
-      label: 'Publicações',
-      icon: (props: Record<string, unknown>) => (
-        <svg {...props} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
-        </svg>
-      ),
+      path: '/admin/contatos',
+      label: 'Contatos',
+      icon: Mail,
+      badge: unreadCounts.contatos,
+    },
+    {
+      path: '/admin/depoimentos',
+      label: 'Depoimentos',
+      icon: MessageSquare,
+      badge: unreadCounts.depoimentos,
     },
     {
       path: '/admin/documentos',
@@ -56,9 +84,9 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
       ),
     },
     {
-      path: '/admin/contatos',
-      label: 'Contatos',
-      icon: Mail,
+      path: '/admin/importar',
+      label: 'Importar Excel',
+      icon: FileSpreadsheet,
     },
     {
       path: '/admin/newsletter',
@@ -66,14 +94,28 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
       icon: Send,
     },
     {
-      path: '/admin/depoimentos',
-      label: 'Depoimentos',
-      icon: MessageSquare,
+      path: '/admin/publicacoes',
+      label: 'Publicações',
+      icon: (props: Record<string, unknown>) => (
+        <svg {...props} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+        </svg>
+      ),
     },
     {
-      path: '/admin/importar',
-      label: 'Importar Excel',
-      icon: FileSpreadsheet,
+      path: '/admin',
+      label: 'QR Codes',
+      icon: QrCode,
+    },
+    {
+      path: '/admin/sites',
+      label: 'Sites Recomendados',
+      icon: Globe,
+    },
+    {
+      path: '/admin/videos',
+      label: 'Vídeos YouTube',
+      icon: Youtube,
     },
   ];
 
@@ -125,7 +167,19 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
                   title={isCollapsed ? item.label : ''}
                 >
                   <Icon className="w-5 h-5 flex-shrink-0" />
-                  {!isCollapsed && <span>{item.label}</span>}
+                  {!isCollapsed && (
+                    <div className="flex items-center gap-2 flex-1">
+                      <span>{item.label}</span>
+                      {item.badge && item.badge > 0 && (
+                        <span className="bg-red-500 text-white text-xs font-bold px-2 py-0.5 rounded-full min-w-[20px] text-center">
+                          {item.badge}
+                        </span>
+                      )}
+                    </div>
+                  )}
+                  {isCollapsed && item.badge && item.badge > 0 && (
+                    <span className="absolute top-1 right-1 w-3 h-3 bg-red-500 rounded-full border-2 border-white"></span>
+                  )}
                 </Link>
               );
             })}
