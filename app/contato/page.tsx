@@ -278,7 +278,7 @@ export default function ContatoPage() {
                     <span className="text-gray-900 font-bold">@danbarral</span>
                   </a>
                   <a
-                    href="https://youtube.com"
+                    href="https://www.youtube.com/@danbarral"
                     target="_blank"
                     rel="noopener noreferrer"
                     aria-label="Visite nosso canal no YouTube"
@@ -287,7 +287,7 @@ export default function ContatoPage() {
                     <div className="w-10 h-10 bg-gradient-to-br from-red-600 to-red-700 rounded-lg flex items-center justify-center group-hover:scale-110 transition-transform">
                       <Youtube className="w-5 h-5 text-white" />
                     </div>
-                    <span className="text-gray-900 font-bold">Prof. Daniel Barral</span>
+                    <span className="text-gray-900 font-bold">@danbarral</span>
                   </a>
                   <a
                     href="https://www.linkedin.com/in/daniel-de-andrade-oliveira-barral-b5110870/"
