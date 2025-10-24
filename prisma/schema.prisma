@@ -6,10 +6,10 @@ generator client {
 }
 
 datasource db {
-  provider = "sqlite"
+  provider = "postgresql"
   url      = env("DATABASE_URL")
-  // Para produção com PostgreSQL, altere provider para "postgresql"
-  // e DATABASE_URL para "postgresql://..."
+  // Para desenvolvimento local com SQLite, altere provider para "sqlite"
+  // e DATABASE_URL para "file:./dev.db"
 }
 
 // QR Codes para acesso aos cursos
