@@ -11,6 +11,8 @@ import CoursesSidebar from '@/components/CoursesSidebar';
 import HighlightedMaterials from '@/components/HighlightedMaterials';
 import DocumentsByCategory from '@/components/DocumentsByCategory';
 import DocumentDetailModal from '@/components/DocumentDetailModal';
+import CourseVideos from '@/components/CourseVideos';
+import RecommendedSites from '@/components/RecommendedSites';
 
 interface DocumentType {
   id: string;
@@ -23,6 +25,23 @@ interface DocumentType {
   tags?: string;
 }
 
+interface VideoType {
+  id: string;
+  title: string;
+  description?: string | null;
+  youtubeUrl: string;
+  youtubeId: string;
+  thumbnailUrl?: string | null;
+}
+
+interface SiteType {
+  id: string;
+  title: string;
+  description: string;
+  url: string;
+  faviconUrl?: string | null;
+}
+
 export default function AreaRestritaPage() {
   const router = useRouter();
   const { user, isLoading, logout } = useAuth();
@@ -30,6 +49,12 @@ export default function AreaRestritaPage() {
 
   // Estado dos documentos por curso
   const [courseDocuments, setCourseDocuments] = useState<Record<string, DocumentType[]>>({});
+
+  // Estado dos vídeos por curso
+  const [courseVideos, setCourseVideos] = useState<Record<string, VideoType[]>>({});
+
+  // Estado dos sites por curso
+  const [courseSites, setCourseSites] = useState<Record<string, SiteType[]>>({});
 
   // Curso selecionado (inicialmente null, será o primeiro curso após carregamento)
   const [selectedCourseId, setSelectedCourseId] = useState<string | null>(null);
@@ -77,9 +102,9 @@ export default function AreaRestritaPage() {
     }
   }, [isLoading, user, router]);
 
-  // Buscar documentos dos cursos matriculados
+  // Buscar documentos, vídeos e sites dos cursos matriculados
   useEffect(() => {
-    const fetchDocuments = async () => {
+    const fetchCourseData = async () => {
       if (!user) return;
 
       const userEnrollments = user.enrollments || [];
@@ -87,6 +112,7 @@ export default function AreaRestritaPage() {
         ? courses.map(c => c.id)
         : userEnrollments.map(e => e.courseId);
 
+      // Buscar documentos
       const docsPromises = enrolledCourseIds.map(async (courseId) => {
         try {
           const response = await fetch(`/api/documents?courseId=${courseId}`);
@@ -100,13 +126,61 @@ export default function AreaRestritaPage() {
         return { courseId, documents: [] };
       });
 
-      const results = await Promise.all(docsPromises);
-      const docsMap: Record<string, DocumentType[]> = {};
-      results.forEach(({ courseId, documents }) => {
-        docsMap[courseId] = documents as DocumentType[];
+      // Buscar vídeos
+      const videosPromises = enrolledCourseIds.map(async (courseId) => {
+        try {
+          const response = await fetch(`/api/course-videos?courseId=${courseId}`);
+          if (response.ok) {
+            const data = await response.json();
+            return { courseId, videos: data.videos || [] };
+          }
+        } catch (error) {
+          console.error(`Erro ao buscar vídeos do curso ${courseId}:`, error);
+        }
+        return { courseId, videos: [] };
       });
 
+      // Buscar sites
+      const sitesPromises = enrolledCourseIds.map(async (courseId) => {
+        try {
+          const response = await fetch(`/api/recommended-sites?courseId=${courseId}`);
+          if (response.ok) {
+            const data = await response.json();
+            return { courseId, sites: data.sites || [] };
+          }
+        } catch (error) {
+          console.error(`Erro ao buscar sites do curso ${courseId}:`, error);
+        }
+        return { courseId, sites: [] };
+      });
+
+      // Aguardar todas as requisições
+      const [docsResults, videosResults, sitesResults] = await Promise.all([
+        Promise.all(docsPromises),
+        Promise.all(videosPromises),
+        Promise.all(sitesPromises),
+      ]);
+
+      // Mapear documentos
+      const docsMap: Record<string, DocumentType[]> = {};
+      docsResults.forEach(({ courseId, documents }) => {
+        docsMap[courseId] = documents as DocumentType[];
+      });
       setCourseDocuments(docsMap);
+
+      // Mapear vídeos
+      const videosMap: Record<string, VideoType[]> = {};
+      videosResults.forEach(({ courseId, videos }) => {
+        videosMap[courseId] = videos as VideoType[];
+      });
+      setCourseVideos(videosMap);
+
+      // Mapear sites
+      const sitesMap: Record<string, SiteType[]> = {};
+      sitesResults.forEach(({ courseId, sites }) => {
+        sitesMap[courseId] = sites as SiteType[];
+      });
+      setCourseSites(sitesMap);
 
       // Selecionar primeiro curso automaticamente
       if (enrolledCourseIds.length > 0 && !selectedCourseId) {
@@ -114,7 +188,7 @@ export default function AreaRestritaPage() {
       }
     };
 
-    fetchDocuments();
+    fetchCourseData();
   }, [user, selectedCourseId]);
 
   const handleLogout = async () => {
@@ -149,6 +223,8 @@ export default function AreaRestritaPage() {
   // Curso selecionado atual
   const selectedCourse = userCourses.find(c => c.id === selectedCourseId);
   const selectedCourseDocuments = selectedCourseId ? (courseDocuments[selectedCourseId] || []) : [];
+  const selectedCourseVideos = selectedCourseId ? (courseVideos[selectedCourseId] || []) : [];
+  const selectedCourseSites = selectedCourseId ? (courseSites[selectedCourseId] || []) : [];
   const selectedEnrollment = userEnrollments.find(e => e.courseId === selectedCourseId);
 
   // Contagem de documentos por curso
@@ -245,6 +321,18 @@ export default function AreaRestritaPage() {
                       onDownload={(doc) => handleDownload(doc, selectedCourse.id)}
                     />
 
+                    {/* Vídeos do YouTube (se houver) */}
+                    <CourseVideos
+                      videos={selectedCourseVideos}
+                      displayMode="thumbnails"
+                    />
+                    {/*
+                      💡 NOTA: displayMode pode ser "thumbnails" ou "embedded"
+                      - thumbnails: Grid de thumbnails que abrem modal ao clicar
+                      - embedded: Players do YouTube direto na página
+                      Altere acima para testar as duas opções!
+                    */}
+
                     {/* Documentos Agrupados por Categoria */}
                     <DocumentsByCategory
                       documents={selectedCourseDocuments}
@@ -253,6 +341,9 @@ export default function AreaRestritaPage() {
                       isFavorite={isFavorite}
                       toggleFavorite={toggleFavorite}
                     />
+
+                    {/* Sites de Interesse (sempre por último) */}
+                    <RecommendedSites sites={selectedCourseSites} />
                   </div>
                 ) : (
                   <div className="bg-blue-50 border-2 border-blue-200 rounded-xl p-8 text-center">

@@ -263,3 +263,57 @@ model Testimonial {
   @@index([createdAt])
   @@index([status, createdAt])
 }
+
+// Sites Recomendados (compartilhados entre cursos)
+model RecommendedSite {
+  id          String   @id @default(uuid())
+  title       String   // Nome do site
+  description String   // Breve descrição do site
+  url         String   // URL completa do site
+  faviconUrl  String?  // URL do favicon (buscado automaticamente)
+  category    String?  // Categoria opcional (jurisprudência, legislação, etc.)
+  displayOrder Int     @default(0) // Ordem de exibição
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relação many-to-many com cursos
+  courses     SiteToCourse[]
+
+  @@index([isActive])
+  @@index([displayOrder])
+}
+
+// Tabela de junção: Sites x Cursos (many-to-many)
+model SiteToCourse {
+  id             String          @id @default(uuid())
+  siteId         String
+  courseId       String
+  displayOrder   Int             @default(0) // Ordem específica para este curso
+  createdAt      DateTime        @default(now())
+
+  site           RecommendedSite @relation(fields: [siteId], references: [id], onDelete: Cascade)
+
+  @@unique([siteId, courseId])
+  @@index([courseId])
+  @@index([siteId])
+}
+
+// Vídeos do YouTube por curso
+model CourseVideo {
+  id            String   @id @default(uuid())
+  courseId      String   // ID do curso (da lista estática)
+  title         String   // Título do vídeo
+  description   String?  // Descrição do vídeo
+  youtubeUrl    String   // URL completa do YouTube
+  youtubeId     String   // ID extraído do YouTube (para embed)
+  thumbnailUrl  String?  // URL da thumbnail (gerado automaticamente)
+  displayOrder  Int      @default(0) // Ordem de exibição
+  isActive      Boolean  @default(true)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@index([courseId])
+  @@index([isActive])
+  @@index([courseId, isActive, displayOrder])
+}
