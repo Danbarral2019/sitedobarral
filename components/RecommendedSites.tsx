@@ -42,52 +42,44 @@ export default function RecommendedSites({ sites }: RecommendedSitesProps) {
         </p>
       </div>
 
-      <div className="grid md:grid-cols-2 gap-4">
+      <div className="space-y-2">
         {sites.map((site) => (
           <a
             key={site.id}
             href={site.url}
             target="_blank"
             rel="noopener noreferrer"
-            className="group flex items-start gap-4 p-4 rounded-xl border-2 border-gray-200 hover:border-blue-400 hover:shadow-md transition-all bg-gradient-to-br from-white to-gray-50 hover:from-blue-50 hover:to-purple-50"
+            className="group flex items-center gap-3 p-3 rounded-lg hover:bg-blue-50 transition-colors"
           >
             {/* Favicon */}
-            <div className="flex-shrink-0 w-12 h-12 rounded-lg bg-gradient-to-br from-blue-100 to-purple-100 flex items-center justify-center overflow-hidden border border-gray-200">
+            <div className="flex-shrink-0 w-6 h-6 flex items-center justify-center">
               {site.faviconUrl ? (
                 <Image
                   src={site.faviconUrl}
                   alt={`${site.title} favicon`}
-                  width={32}
-                  height={32}
-                  className="w-8 h-8"
+                  width={16}
+                  height={16}
+                  className="w-4 h-4"
                   onError={(e) => {
-                    // Se o favicon falhar, mostra o ícone padrão
                     const target = e.target as HTMLImageElement;
                     target.style.display = 'none';
-                    const parent = target.parentElement;
-                    if (parent) {
-                      parent.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-blue-600"><circle cx="12" cy="12" r="10"></circle><line x1="2" y1="12" x2="22" y2="12"></line><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path></svg>';
-                    }
                   }}
                 />
               ) : (
-                <Globe className="w-6 h-6 text-blue-600" />
+                <Globe className="w-4 h-4 text-gray-400" />
               )}
             </div>
 
             {/* Conteúdo */}
             <div className="flex-1 min-w-0">
-              <div className="flex items-start justify-between gap-2 mb-1">
-                <h3 className="font-bold text-gray-900 group-hover:text-blue-600 transition-colors">
+              <div className="flex items-center gap-2">
+                <h3 className="font-medium text-gray-900 group-hover:text-blue-600 transition-colors truncate">
                   {site.title}
                 </h3>
-                <ExternalLink className="w-4 h-4 text-gray-400 group-hover:text-blue-600 flex-shrink-0 mt-1" />
+                <ExternalLink className="w-3 h-3 text-gray-400 group-hover:text-blue-600 flex-shrink-0" />
               </div>
-              <p className="text-sm text-gray-600 mb-2 line-clamp-2">
+              <p className="text-xs text-gray-500 truncate">
                 {site.description}
-              </p>
-              <p className="text-xs text-blue-600 font-medium truncate">
-                {getDomain(site.url)}
               </p>
             </div>
           </a>

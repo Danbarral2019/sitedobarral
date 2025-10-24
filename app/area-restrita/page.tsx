@@ -344,18 +344,6 @@ export default function AreaRestritaPage() {
                       onDownload={(doc) => handleDownload(doc, selectedCourse.id)}
                     />
 
-                    {/* Vídeos do YouTube (se houver) */}
-                    <CourseVideos
-                      videos={selectedCourseVideos}
-                      displayMode="thumbnails"
-                    />
-                    {/*
-                      💡 NOTA: displayMode pode ser "thumbnails" ou "embedded"
-                      - thumbnails: Grid de thumbnails que abrem modal ao clicar
-                      - embedded: Players do YouTube direto na página
-                      Altere acima para testar as duas opções!
-                    */}
-
                     {/* Documentos Agrupados por Categoria */}
                     <DocumentsByCategory
                       documents={selectedCourseDocuments}
@@ -364,6 +352,14 @@ export default function AreaRestritaPage() {
                       isFavorite={isFavorite}
                       toggleFavorite={toggleFavorite}
                     />
+
+                    {/* Vídeos do YouTube (se houver) - Aparece ANTES dos sites */}
+                    {selectedCourseVideos.length > 0 && (
+                      <CourseVideos
+                        videos={selectedCourseVideos}
+                        displayMode="thumbnails"
+                      />
+                    )}
 
                     {/* Sites de Interesse (sempre por último) */}
                     <RecommendedSites sites={selectedCourseSites} />
