@@ -1,7 +1,7 @@
 # 📊 Status do Projeto - Site Prof. Daniel Barral
 
-**Última atualização**: 21 de outubro de 2025
-**Versão**: 1.0.0
+**Última atualização**: 24 de outubro de 2025
+**Versão**: 1.1.0
 **Status**: ✅ Produção (https://profdanielbarral.com)
 
 ---
@@ -32,7 +32,10 @@ Site completo para Prof. Daniel Barral, especialista em Licitações e Contratos
 - ✅ Páginas individuais de cada curso (/cursos/[slug])
 - ✅ Blog com posts dinâmicos (/blog)
 - ✅ Publicações acadêmicas (/publicacoes)
-- ✅ Formulário de contato (/contato)
+- ✅ Formulário de contato (/contato) com links de redes sociais atualizados
+  - Instagram: @danbarral
+  - YouTube: @danbarral
+  - LinkedIn: Perfil completo configurado
 
 #### Curso (Páginas Individuais)
 - ✅ Descrição completa do curso
@@ -66,9 +69,13 @@ Site completo para Prof. Daniel Barral, especialista em Licitações e Contratos
 - ✅ Filtros: curso, categoria, tipo, busca por texto
 - ✅ Download de PDFs/documentos
 - ✅ Player de vídeo integrado (Video.js)
-- ✅ Sistema de favoritos
+- ✅ Sistema de favoritos com página dedicada
 - ✅ Histórico de acessos
 - ✅ Banner de status de matrícula (expirando em X dias)
+- ✅ **Vídeos do YouTube** incorporados por curso (suporte a vídeos não listados)
+- ✅ **Sites Recomendados** organizados por curso
+- ✅ Sidebar com todos os cursos (sempre visível)
+- ✅ Notificação de novos documentos por email
 
 #### Controle de Acesso
 - ✅ Middleware de proteção de rotas
@@ -77,6 +84,14 @@ Site completo para Prof. Daniel Barral, especialista em Licitações e Contratos
 - ✅ Log de acessos (IP, user-agent, ação)
 
 ### 4. Painel Admin (/admin)
+
+#### Interface e Navegação
+- ✅ **Menus em ordem alfabética** para melhor organização
+- ✅ **Analytics como página inicial** (/admin redireciona para /admin/analytics)
+- ✅ **Badges com contadores** em tempo real (contatos não lidos, depoimentos pendentes)
+- ✅ **Atualização automática** de notificações a cada 60 segundos
+- ✅ Menu lateral otimizado com espaçamento reduzido
+- ✅ Suporte a menu colapsável
 
 #### Dashboard
 - ✅ Geração de QR Codes
@@ -92,6 +107,22 @@ Site completo para Prof. Daniel Barral, especialista em Licitações e Contratos
 - ✅ **Suporte multi-curso** (um documento em vários cursos)
 - ✅ Edição e exclusão de documentos
 
+#### Vídeos YouTube (/admin/videos)
+- ✅ **CRUD completo de vídeos do YouTube**
+- ✅ Organização por curso
+- ✅ Extração automática de YouTube ID
+- ✅ Thumbnail automático do YouTube
+- ✅ Suporte a vídeos **não listados** (recomendado para área restrita)
+- ✅ Preview de vídeos antes de adicionar
+- ✅ Ordem de exibição configurável
+
+#### Sites Recomendados (/admin/sites)
+- ✅ **CRUD completo de sites recomendados**
+- ✅ Vinculação a múltiplos cursos
+- ✅ Extração automática de favicon
+- ✅ Categorização de sites
+- ✅ Links para recursos externos úteis
+
 #### Blog
 - ✅ CRUD completo de posts
 - ✅ Editor Markdown
@@ -105,6 +136,12 @@ Site completo para Prof. Daniel Barral, especialista em Licitações e Contratos
 - ✅ ISBN para livros
 - ✅ Journal/DOI para artigos
 - ✅ Data/local para notícias
+
+#### Outros Módulos
+- ✅ Contatos (/admin/contatos) - visualização e gestão
+- ✅ Depoimentos (/admin/depoimentos) - moderação
+- ✅ Newsletter (/admin/newsletter) - gestão de inscritos
+- ✅ Analytics (/admin/analytics) - estatísticas de acesso
 
 ### 5. Sistema de Notificações
 
@@ -263,18 +300,31 @@ site-prof-barral/
 │   │   ├── page.tsx              # Lista de documentos
 │   │   └── historico/            # Histórico de acessos
 │   ├── admin/                    # Painel admin
-│   │   ├── page.tsx              # Dashboard QR Codes
+│   │   ├── page.tsx              # Dashboard QR Codes (redireciona para /analytics)
+│   │   ├── analytics/            # Dashboard de analytics (página inicial)
 │   │   ├── documentos/           # Gestão de documentos
 │   │   ├── importar/             # Import Excel
 │   │   ├── blog/                 # CRUD Blog
-│   │   └── publicacoes/          # CRUD Publicações
+│   │   ├── publicacoes/          # CRUD Publicações
+│   │   ├── videos/               # CRUD Vídeos YouTube
+│   │   ├── sites/                # CRUD Sites Recomendados
+│   │   ├── contatos/             # Gestão de contatos
+│   │   ├── depoimentos/          # Moderação de depoimentos
+│   │   └── newsletter/           # Gestão de inscritos
 │   └── api/                      # API Routes
 │       ├── auth/                 # Autenticação
 │       ├── admin/                # Admin endpoints
+│       │   ├── course-videos/    # Gestão de vídeos (POST, DELETE)
+│       │   ├── recommended-sites/ # Gestão de sites (GET, POST, DELETE)
+│       │   ├── contatos/         # Listagem de contatos
+│       │   ├── depoimentos/      # Moderação de depoimentos
+│       │   └── analytics/        # Estatísticas
 │       ├── enrollment/           # Matrículas
 │       │   └── check-expiration/ # Cron job
 │       ├── newsletter/           # Newsletter
-│       └── contact/              # Contato
+│       ├── contact/              # Contato
+│       ├── documents/            # Listagem e download de documentos
+│       └── favorites/            # Gestão de favoritos
 ├── components/                   # Componentes React
 │   ├── layout/                   # Header, Footer
 │   ├── ui/                       # UI components
@@ -315,12 +365,16 @@ site-prof-barral/
 2. **Enrollment** - Matrículas de alunos em cursos
 3. **QRCode** - QR Codes de acesso
 4. **Document** - Materiais (PDFs, vídeos, links)
-5. **BlogPost** - Posts do blog
-6. **Publication** - Livros, artigos, notícias
-7. **AccessLog** - Logs de acesso
-8. **Favorite** - Favoritos dos alunos
-9. **ContactForm** - Formulários de contato
-10. **NewsletterSubscriber** - Inscritos newsletter
+5. **CourseVideo** - **NOVO** - Vídeos do YouTube por curso
+6. **RecommendedSite** - **NOVO** - Sites recomendados
+7. **SiteToCourse** - **NOVO** - Relação many-to-many entre sites e cursos
+8. **BlogPost** - Posts do blog
+9. **Publication** - Livros, artigos, notícias
+10. **AccessLog** - Logs de acesso
+11. **Favorite** - Favoritos dos alunos
+12. **ContactForm** - Formulários de contato
+13. **NewsletterSubscriber** - Inscritos newsletter
+14. **Testimonial** - Depoimentos de alunos
 
 ---
 
@@ -359,30 +413,45 @@ site-prof-barral/
 
 ## 🚀 Próximos Passos Recomendados
 
-### Curto Prazo (Próximas Semanas)
+### Curto Prazo (Próximas Semanas) - **PRIORIDADE MÁXIMA**
 
-1. **Monitorar Métricas** ✨ NOVO
-   - Acompanhar Google Analytics diariamente
-   - Ver páginas mais visitadas
+1. **🎯 Popular Site com Conteúdo** - **CRÍTICO**
+   - ⚠️ **Adicionar documentos (PDFs)** para todos os cursos via `/admin/documentos`
+   - ⚠️ **Gravar e adicionar vídeos do YouTube** (vídeos não listados) via `/admin/videos`
+   - ⚠️ **Adicionar sites recomendados** úteis para cada curso via `/admin/sites`
+   - ⚠️ **Criar posts no blog** sobre temas relevantes via `/admin/blog`
+   - ⚠️ **Adicionar publicações acadêmicas** via `/admin/publicacoes`
+   - **Status**: Sem conteúdo, o site não pode ser testado ou demonstrado
+
+2. **🧪 Testar Fluxo Completo**
+   - Gerar QR Code de teste para um curso
+   - Escanear e registrar-se como aluno
+   - Acessar área restrita e testar todos os recursos
+   - Verificar downloads, vídeos, sites recomendados
+   - Testar sistema de favoritos
+
+3. **📊 Monitorar Métricas**
+   - Verificar Google Analytics está recebendo dados (G-T0WQ5QC4EM)
+   - Acompanhar páginas mais visitadas
    - Identificar cursos com mais interesse
    - Analisar origem do tráfego
 
-2. **Crescer Lista de Newsletter** ✨ NOVO
-   - Criar primeira campanha no MailChimp
-   - Segmentar envios por interesse (curso)
-   - Enviar conteúdo exclusivo para inscritos
-   - Monitorar taxa de abertura e cliques
+4. **📧 Verificar Integrações**
+   - Confirmar emails estão sendo enviados (Resend)
+   - Verificar cron job de expiração rodando diariamente às 9h
+   - Testar sincronização com MailChimp
+   - Enviar formulário de contato e verificar recebimento
 
-3. **Ajustes de Conteúdo**
-   - Adicionar mais posts no blog
-   - Adicionar publicações acadêmicas
-   - Upload de materiais para área restrita
-   - Criar depoimentos de alunos
+### Vídeos YouTube - Importante
 
-4. **Verificar Cron Job**
-   - Acompanhar logs diários (9:00 AM)
-   - Confirmar envio de emails de expiração
-   - Verificar se alunos estão recebendo avisos
+**Como usar vídeos na área restrita:**
+- ✅ **Use vídeos "Não listados"** no YouTube (recomendado)
+  - Não aparecem em buscas
+  - Apenas quem tem o link pode assistir
+  - Funcionam perfeitamente incorporados no site
+- ❌ **NÃO use vídeos "Privados"** (não funcionam em sites)
+- 🔒 Segurança: Links não listados são praticamente impossíveis de descobrir
+- 🎬 Canal: www.youtube.com/@danbarral
 
 ### Médio Prazo (Próximos Meses)
 
