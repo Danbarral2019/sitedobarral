@@ -214,17 +214,22 @@ export default function AreaRestritaPage() {
 
   // Pega os cursos que o usuário está matriculado
   const userEnrollments = user.enrollments || [];
-  const userCourses = user.role === 'admin'
-    ? courses
-    : userEnrollments.map(enrollment =>
-        courses.find(c => c.id === enrollment.courseId)
-      ).filter(Boolean) as typeof courses;
+  const enrolledCourseIds = user.role === 'admin'
+    ? courses.map(c => c.id)
+    : userEnrollments.map(e => e.courseId);
+
+  // TODOS os cursos com flag isEnrolled
+  const allCoursesWithEnrollment = courses.map(course => ({
+    ...course,
+    isEnrolled: enrolledCourseIds.includes(course.id),
+  }));
 
   // Curso selecionado atual
-  const selectedCourse = userCourses.find(c => c.id === selectedCourseId);
-  const selectedCourseDocuments = selectedCourseId ? (courseDocuments[selectedCourseId] || []) : [];
-  const selectedCourseVideos = selectedCourseId ? (courseVideos[selectedCourseId] || []) : [];
-  const selectedCourseSites = selectedCourseId ? (courseSites[selectedCourseId] || []) : [];
+  const selectedCourse = courses.find(c => c.id === selectedCourseId);
+  const isSelectedCourseEnrolled = selectedCourse ? enrolledCourseIds.includes(selectedCourse.id) : false;
+  const selectedCourseDocuments = selectedCourseId && isSelectedCourseEnrolled ? (courseDocuments[selectedCourseId] || []) : [];
+  const selectedCourseVideos = selectedCourseId && isSelectedCourseEnrolled ? (courseVideos[selectedCourseId] || []) : [];
+  const selectedCourseSites = selectedCourseId && isSelectedCourseEnrolled ? (courseSites[selectedCourseId] || []) : [];
   const selectedEnrollment = userEnrollments.find(e => e.courseId === selectedCourseId);
 
   // Contagem de documentos por curso
@@ -233,14 +238,25 @@ export default function AreaRestritaPage() {
     return acc;
   }, {} as Record<string, number>);
 
+  // Handler para seleção de curso (redireciona se bloqueado)
+  const handleCourseSelect = (courseId: string) => {
+    const course = allCoursesWithEnrollment.find(c => c.id === courseId);
+    if (course && !course.isEnrolled) {
+      // Redirecionar para página de curso bloqueado
+      router.push(`/area-restrita/curso-bloqueado?courseId=${courseId}`);
+    } else {
+      setSelectedCourseId(courseId);
+    }
+  };
+
   return (
     <main className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
       <div className="flex">
         {/* Sidebar de Cursos */}
         <CoursesSidebar
-          courses={userCourses.map(c => ({ id: c.id, title: c.title, slug: c.slug }))}
+          courses={allCoursesWithEnrollment}
           selectedCourseId={selectedCourseId}
-          onCourseSelect={setSelectedCourseId}
+          onCourseSelect={handleCourseSelect}
           documentCounts={documentCounts}
         />
 
@@ -257,7 +273,7 @@ export default function AreaRestritaPage() {
                   <div>
                     <h2 className="text-2xl font-bold text-gray-900 mb-1">Bem-vindo, {user.name}</h2>
                     <p className="text-gray-700 font-medium">
-                      {userCourses.length} {userCourses.length === 1 ? 'curso' : 'cursos'} matriculado{userCourses.length !== 1 ? 's' : ''}
+                      {enrolledCourseIds.length} {enrolledCourseIds.length === 1 ? 'curso' : 'cursos'} matriculado{enrolledCourseIds.length !== 1 ? 's' : ''}
                     </p>
                     <p className="text-sm text-gray-600 mt-1">{user.email}</p>
                   </div>
@@ -282,9 +298,9 @@ export default function AreaRestritaPage() {
             </div>
 
             {/* Conteúdo do Curso Selecionado */}
-            {userCourses.length > 0 ? (
+            {enrolledCourseIds.length > 0 ? (
               <>
-                {selectedCourse ? (
+                {selectedCourse && isSelectedCourseEnrolled ? (
                   <div>
                     {/* Banner de Status */}
                     <EnrollmentStatusBanner courseId={selectedCourse.id} />
