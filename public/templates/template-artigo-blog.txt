@@ -1,0 +1,132 @@
+Título: [Digite o título do seu artigo aqui]
+Autor: Prof. Daniel Barral
+Data: 24/01/2025
+Tags: [Selecione tags relevantes: Direito Administrativo, Direito Público, Licitações, Lei 14.133/2021, Nova Lei de Licitações, Contratações Públicas, Contratos Administrativos, Planejamento de Contratações, Diálogo Competitivo, Contratação Direta, Matriz de Riscos, ETP, PNCP, Sanções Administrativas, Gestão Pública, Administração Pública, Processo Licitatório, Gestão de Contratos, Fiscalização Contratual, Inovação em Contratações]
+Resumo: [Digite um breve resumo do artigo em 1-2 frases, explicando do que se trata e qual sua relevância]
+
+
+═══════════════════════════════════════════════════════════
+INÍCIO DO CONTEÚDO
+═══════════════════════════════════════════════════════════
+
+[Digite o conteúdo do seu artigo abaixo desta linha]
+
+Introdução
+
+A [tema do artigo] representa um dos aspectos mais relevantes do Direito Administrativo contemporâneo. Este artigo analisa...
+
+
+1. Primeiro Tópico Principal
+
+Lorem ipsum dolor sit amet, consectetur adipiscing elit. Conforme estabelecido pela Lei 14.133/2021¹, as contratações públicas devem...
+
+Use números sobrescritos (¹, ², ³) ou [1], [2], [3] para indicar notas de rodapé.
+
+
+1.1. Subtópico
+
+Detalhamento do primeiro tópico. Segundo a doutrina², o entendimento majoritário...
+
+Use negrito para termos importantes.
+Use itálico para citações ou ênfase.
+
+
+1.2. Outro Subtópico
+
+Mais conteúdo relevante sobre o tema...
+
+
+2. Segundo Tópico Principal
+
+Desenvolvimento do segundo ponto principal do artigo...
+
+
+2.1. Análise Jurisprudencial
+
+A jurisprudência do STJ³ tem se posicionado...
+
+
+3. Terceiro Tópico Principal
+
+Aprofundamento de aspectos específicos...
+
+
+Conclusão
+
+Em síntese, verificamos que... As principais contribuições deste estudo são...
+
+
+═══════════════════════════════════════════════════════════
+FIM DO CONTEÚDO
+═══════════════════════════════════════════════════════════
+
+---
+
+Notas de Rodapé
+
+¹ BRASIL. Lei nº 14.133, de 1º de abril de 2021. Estabelece normas gerais de licitação e contratação para as Administrações Públicas diretas, autárquicas e fundacionais da União, dos Estados, do Distrito Federal e dos Municípios. Diário Oficial da União, Brasília, DF, 1 abr. 2021.
+
+² DI PIETRO, Maria Sylvia Zanella. Direito Administrativo. 34. ed. São Paulo: Editora Atlas, 2021, p. 456-458.
+
+³ SUPERIOR TRIBUNAL DE JUSTIÇA. REsp 1.234.567/DF, Relator: Ministro João Silva Santos, Segunda Turma, julgado em 15/03/2023, DJe 20/03/2023.
+
+---
+
+Referências Bibliográficas
+
+BRASIL. Lei nº 14.133, de 1º de abril de 2021. Estabelece normas gerais de licitação e contratação para as Administrações Públicas diretas, autárquicas e fundacionais da União, dos Estados, do Distrito Federal e dos Municípios. Diário Oficial da União, Brasília, DF, 1 abr. 2021.
+
+DI PIETRO, Maria Sylvia Zanella. Direito Administrativo. 34. ed. São Paulo: Editora Atlas, 2021.
+
+JUSTEN FILHO, Marçal. Comentários à Lei de Licitações e Contratos Administrativos. 18. ed. São Paulo: Revista dos Tribunais, 2019.
+
+MEIRELLES, Hely Lopes. Direito Administrativo Brasileiro. 42. ed. São Paulo: Malheiros Editores, 2016.
+
+NIEBUHR, Joel de Menezes. Nova Lei de Licitações e Contratos Administrativos. 3. ed. Belo Horizonte: Fórum, 2021.
+
+OLIVEIRA, Rafael Carvalho Rezende. As inovações da Lei 14.133/2021 em matéria de planejamento da contratação. Revista de Direito Administrativo, Rio de Janeiro, v. 280, n. 2, p. 45-78, mai./ago. 2021.
+
+SUPERIOR TRIBUNAL DE JUSTIÇA. REsp 1.234.567/DF, Relator: Ministro João Silva Santos, Segunda Turma, julgado em 15/03/2023, DJe 20/03/2023.
+
+TRIBUNAL DE CONTAS DA UNIÃO. Acórdão nº 1.234/2022-Plenário, Relator: Ministro Antonio Carlos Silva, Sessão de 20/04/2022, DOU 25/04/2022.
+
+
+═══════════════════════════════════════════════════════════
+INSTRUÇÕES IMPORTANTES
+═══════════════════════════════════════════════════════════
+
+1. CAMPOS OBRIGATÓRIOS (não delete):
+   - Título
+   - Autor
+   - Data
+   - Tags (selecione da lista fornecida)
+   - Resumo
+
+2. TAGS: Escolha de 3 a 7 tags da lista fornecida que melhor descrevem seu artigo. Delete as tags que não se aplicam.
+
+3. NOTAS DE RODAPÉ:
+   - No texto: use ¹ ² ³ ou [1] [2] [3]
+   - Na seção "Notas de Rodapé": liste todas em ordem
+
+4. REFERÊNCIAS:
+   - Siga o formato ABNT
+   - Liste em ordem alfabética por sobrenome do autor
+   - Inclua todas as fontes citadas no texto
+
+5. FORMATAÇÃO:
+   - Use NEGRITO para termos importantes
+   - Use ITÁLICO para ênfase ou citações curtas
+   - Use listas numeradas ou com marcadores quando apropriado
+   - Use Título 1, Título 2, Título 3 para hierarquia de seções
+
+6. SALVAR:
+   - Salve o arquivo em formato .docx (Word)
+   - Nome sugerido: [titulo-do-artigo].docx
+
+7. APÓS SALVAR:
+   - Acesse /admin/blog/upload-word no sistema
+   - Faça upload do arquivo
+   - Revise o preview
+   - Salve como rascunho ou publique
+
+═══════════════════════════════════════════════════════════
