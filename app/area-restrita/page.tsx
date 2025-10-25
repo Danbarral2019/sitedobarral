@@ -1,11 +1,13 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import { Loader2, LogOut, Clock, GraduationCap, CheckCircle, Heart } from 'lucide-react';
 import { courses } from '@/data/courses';
 import { useAuth } from '@/hooks/use-auth';
 import { useFavorites } from '@/hooks/use-favorites';
+import { useSearch } from '@/hooks/use-search';
+import { searchAndFilterDocuments } from '@/lib/search-utils';
 import EnrollmentStatusBanner from '@/components/EnrollmentStatusBanner';
 import CoursesSidebar from '@/components/CoursesSidebar';
 import HighlightedMaterials from '@/components/HighlightedMaterials';
@@ -13,6 +15,8 @@ import DocumentsByCategory from '@/components/DocumentsByCategory';
 import DocumentDetailModal from '@/components/DocumentDetailModal';
 import CourseVideos from '@/components/CourseVideos';
 import RecommendedSites from '@/components/RecommendedSites';
+import SearchBar from '@/components/SearchBar';
+import SearchFilters from '@/components/SearchFilters';
 
 interface DocumentType {
   id: string;
@@ -45,7 +49,8 @@ interface SiteType {
 export default function AreaRestritaPage() {
   const router = useRouter();
   const { user, isLoading, logout } = useAuth();
-  const { isFavorite, toggleFavorite } = useFavorites();
+  const { isFavorite, toggleFavorite, favoriteIds } = useFavorites();
+  const search = useSearch();
 
   // Estado dos documentos por curso
   const [courseDocuments, setCourseDocuments] = useState<Record<string, DocumentType[]>>({});
@@ -232,6 +237,37 @@ export default function AreaRestritaPage() {
   const selectedCourseSites = selectedCourseId && isSelectedCourseEnrolled ? (courseSites[selectedCourseId] || []) : [];
   const selectedEnrollment = userEnrollments.find(e => e.courseId === selectedCourseId);
 
+  // Documentos filtrados pela busca
+  const searchableDocuments = useMemo(() => {
+    if (search.scope === 'current') {
+      // Apenas documentos do curso atual
+      return selectedCourseDocuments;
+    } else {
+      // Todos os documentos de todos os cursos matriculados
+      return Object.values(courseDocuments).flat();
+    }
+  }, [search.scope, selectedCourseDocuments, courseDocuments]);
+
+  const filteredDocuments = useMemo(() => {
+    if (!search.isSearchActive) {
+      return selectedCourseDocuments; // Sem busca ativa, mostra todos do curso atual
+    }
+
+    return searchAndFilterDocuments(
+      searchableDocuments,
+      search.searchTerm,
+      search.filters,
+      favoriteIds
+    );
+  }, [searchableDocuments, search.searchTerm, search.filters, search.isSearchActive, favoriteIds, selectedCourseDocuments]);
+
+  // Lista de cursos disponíveis para os filtros
+  const availableCourses = useMemo(() => {
+    return courses
+      .filter(c => enrolledCourseIds.includes(c.id))
+      .map(c => ({ id: c.id, title: c.title }));
+  }, [enrolledCourseIds]);
+
   // Contagem de documentos por curso
   const documentCounts = Object.keys(courseDocuments).reduce((acc, courseId) => {
     acc[courseId] = courseDocuments[courseId].length;
@@ -374,6 +410,21 @@ export default function AreaRestritaPage() {
               </div>
             )}
 
+            {/* Barra de Busca - Topo Fixo */}
+            {enrolledCourseIds.length > 0 && (
+              <SearchBar
+                value={search.searchTerm}
+                onChange={search.setSearchTerm}
+                onClear={search.clearSearch}
+                scope={search.scope}
+                onScopeToggle={search.toggleScope}
+                onFiltersClick={() => search.setIsFiltersOpen(true)}
+                activeFiltersCount={search.activeFiltersCount}
+                resultsCount={search.isSearchActive ? filteredDocuments.length : undefined}
+                currentCourseName={selectedCourse?.title}
+              />
+            )}
+
             {/* Conteúdo do Curso Selecionado */}
             {enrolledCourseIds.length > 0 ? (
               <>
@@ -407,16 +458,18 @@ export default function AreaRestritaPage() {
                       </div>
                     </div>
 
-                    {/* Materiais Destacados (Apostila, Conteúdo, Bibliografia) */}
-                    <HighlightedMaterials
-                      documents={selectedCourseDocuments}
-                      courseId={selectedCourse.id}
-                      onDownload={(doc) => handleDownload(doc, selectedCourse.id)}
-                    />
+                    {/* Materiais Destacados (Apostila, Conteúdo, Bibliografia) - Apenas sem busca ativa */}
+                    {!search.isSearchActive && (
+                      <HighlightedMaterials
+                        documents={selectedCourseDocuments}
+                        courseId={selectedCourse.id}
+                        onDownload={(doc) => handleDownload(doc, selectedCourse.id)}
+                      />
+                    )}
 
-                    {/* Documentos Agrupados por Categoria */}
+                    {/* Documentos Agrupados por Categoria - Usa documentos filtrados */}
                     <DocumentsByCategory
-                      documents={selectedCourseDocuments}
+                      documents={filteredDocuments}
                       courseId={selectedCourse.id}
                       onDocumentClick={handleDocumentClick}
                       isFavorite={isFavorite}
@@ -473,6 +526,16 @@ export default function AreaRestritaPage() {
           </div>
         </div>
       </div>
+
+      {/* Filtros Avançados - Drawer Lateral */}
+      <SearchFilters
+        isOpen={search.isFiltersOpen}
+        onClose={() => search.setIsFiltersOpen(false)}
+        filters={search.filters}
+        onUpdateFilters={search.updateFilters}
+        onClearFilters={search.clearFilters}
+        availableCourses={availableCourses}
+      />
 
       {/* Modal de Detalhes do Documento */}
       {selectedDocument && selectedCourse && (
