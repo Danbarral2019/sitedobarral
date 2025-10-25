@@ -80,8 +80,8 @@ export default function DocumentsByCategory({
 
   if (sortedCategories.length === 0) {
     return (
-      <div className="bg-blue-50 border-2 border-blue-200 rounded-xl p-6 text-center">
-        <p className="text-blue-800 font-medium">
+      <div className="bg-blue-50 border-2 border-blue-200 rounded-xl p-6 lg:p-6 text-center">
+        <p className="text-base lg:text-lg text-blue-800 font-medium">
           Não há outros documentos disponíveis para este curso no momento.
         </p>
       </div>
@@ -89,10 +89,10 @@ export default function DocumentsByCategory({
   }
 
   return (
-    <div className="bg-white rounded-2xl shadow-lg p-8 border-2 border-gray-200">
+    <div className="bg-white rounded-2xl shadow-lg p-6 lg:p-8 border-2 border-gray-200">
       <div className="mb-6">
-        <h2 className="text-2xl font-bold text-gray-900 mb-2">📚 Materiais por Categoria</h2>
-        <p className="text-gray-600">Clique em um documento para ver detalhes completos</p>
+        <h2 className="text-xl lg:text-2xl font-bold text-gray-900 mb-2">📚 Materiais por Categoria</h2>
+        <p className="text-base lg:text-base text-gray-600">Clique em um documento para ver detalhes completos</p>
       </div>
 
       <div className="space-y-4">
@@ -119,20 +119,20 @@ export default function DocumentsByCategory({
               {/* Header da categoria */}
               <button
                 onClick={() => toggleCategory(category)}
-                className="w-full flex items-center justify-between p-4 hover:opacity-80 transition-opacity"
+                className="w-full flex items-center justify-between p-5 lg:p-4 hover:opacity-80 transition-opacity min-h-[64px] lg:min-h-0"
               >
                 <div className="flex items-center gap-3">
-                  <span className="text-2xl">{config.icon}</span>
+                  <span className="text-2xl lg:text-2xl">{config.icon}</span>
                   <div className="text-left">
-                    <h3 className="font-bold text-gray-900">{config.label}</h3>
-                    <p className="text-sm text-gray-600">{categoryDocs.length} documento{categoryDocs.length !== 1 ? 's' : ''}</p>
+                    <h3 className="text-base lg:text-lg font-bold text-gray-900">{config.label}</h3>
+                    <p className="text-sm lg:text-sm text-gray-600">{categoryDocs.length} documento{categoryDocs.length !== 1 ? 's' : ''}</p>
                   </div>
                 </div>
                 <div className="text-gray-600">
                   {isExpanded ? (
-                    <ChevronUp className="w-6 h-6" />
+                    <ChevronUp className="w-6 h-6 lg:w-6 lg:h-6" />
                   ) : (
-                    <ChevronDown className="w-6 h-6" />
+                    <ChevronDown className="w-6 h-6 lg:w-6 lg:h-6" />
                   )}
                 </div>
               </button>
@@ -143,7 +143,7 @@ export default function DocumentsByCategory({
                   {categoryDocs.map((doc, index) => (
                     <div
                       key={doc.id}
-                      className={`p-4 hover:bg-white/50 transition-colors ${
+                      className={`p-5 lg:p-4 hover:bg-white/50 transition-colors ${
                         index < categoryDocs.length - 1 ? 'border-b border-gray-200' : ''
                       }`}
                     >
@@ -152,22 +152,22 @@ export default function DocumentsByCategory({
                         <div className="flex-1 min-w-0">
                           <button
                             onClick={() => onDocumentClick(doc)}
-                            className="text-left w-full group"
+                            className="text-left w-full group min-h-[48px] flex items-start"
                           >
-                            <div className="flex items-start gap-3">
-                              <div className="w-8 h-8 bg-gray-700 rounded-lg flex items-center justify-center flex-shrink-0 mt-1">
+                            <div className="flex items-start gap-3 w-full">
+                              <div className="w-10 h-10 lg:w-8 lg:h-8 bg-gray-700 rounded-lg flex items-center justify-center flex-shrink-0 mt-1">
                                 {doc.type === 'video' ? (
-                                  <Video className="w-4 h-4 text-white" />
+                                  <Video className="w-5 h-5 lg:w-4 lg:h-4 text-white" />
                                 ) : (
-                                  <FileText className="w-4 h-4 text-white" />
+                                  <FileText className="w-5 h-5 lg:w-4 lg:h-4 text-white" />
                                 )}
                               </div>
                               <div className="flex-1">
-                                <h4 className="font-bold text-gray-900 group-hover:text-blue-600 transition-colors line-clamp-2">
+                                <h4 className="text-base lg:text-base font-bold text-gray-900 group-hover:text-blue-600 transition-colors line-clamp-2">
                                   {doc.title}
                                 </h4>
                                 {doc.description && (
-                                  <p className="text-sm text-gray-600 mt-1 line-clamp-2">
+                                  <p className="text-sm lg:text-sm text-gray-600 mt-1 line-clamp-2">
                                     {truncateDescription(doc.description)}
                                   </p>
                                 )}
@@ -182,14 +182,14 @@ export default function DocumentsByCategory({
                             e.stopPropagation();
                             toggleFavorite(doc.id, courseId);
                           }}
-                          className={`p-2 rounded-lg transition-colors flex-shrink-0 ${
+                          className={`p-3 lg:p-2 rounded-lg transition-colors flex-shrink-0 min-h-[48px] min-w-[48px] lg:min-h-0 lg:min-w-0 flex items-center justify-center ${
                             isFavorite(doc.id)
                               ? 'text-red-600 bg-red-100 hover:bg-red-200'
                               : 'text-gray-400 hover:text-red-600 hover:bg-red-50'
                           }`}
                           title={isFavorite(doc.id) ? 'Remover dos favoritos' : 'Adicionar aos favoritos'}
                         >
-                          <Heart className={`w-5 h-5 ${isFavorite(doc.id) ? 'fill-current' : ''}`} />
+                          <Heart className={`w-6 h-6 lg:w-5 lg:h-5 ${isFavorite(doc.id) ? 'fill-current' : ''}`} />
                         </button>
                       </div>
                     </div>
@@ -202,8 +202,8 @@ export default function DocumentsByCategory({
       </div>
 
       {/* Dica */}
-      <div className="mt-6 p-4 bg-gray-50 border border-gray-200 rounded-lg">
-        <p className="text-sm text-gray-700">
+      <div className="mt-6 p-4 lg:p-4 bg-gray-50 border border-gray-200 rounded-lg">
+        <p className="text-sm lg:text-sm text-gray-700 leading-relaxed">
           💡 <strong>Dica:</strong> Clique em qualquer documento para ver a descrição completa e fazer o download.
         </p>
       </div>
