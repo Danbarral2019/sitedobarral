@@ -89,13 +89,13 @@ export default function DocumentsByCategory({
   }
 
   return (
-    <div className="bg-white rounded-2xl shadow-lg p-6 lg:p-8 border-2 border-gray-200">
-      <div className="mb-6">
-        <h2 className="text-xl lg:text-2xl font-bold text-gray-900 mb-2">📚 Materiais por Categoria</h2>
-        <p className="text-base lg:text-base text-gray-600">Clique em um documento para ver detalhes completos</p>
+    <div className="bg-white rounded-2xl shadow-lg p-4 lg:p-8 border-2 border-gray-200">
+      <div className="mb-4 lg:mb-6">
+        <h2 className="text-base lg:text-2xl font-bold text-gray-900 mb-1 lg:mb-2">📚 Materiais por Categoria</h2>
+        <p className="text-sm lg:text-base text-gray-600">Clique em um documento para ver detalhes completos</p>
       </div>
 
-      <div className="space-y-4">
+      <div className="space-y-3 lg:space-y-4">
         {sortedCategories.map((category) => {
           const categoryDocs = documentsByCategory[category];
           const isExpanded = expandedCategories.has(category);
@@ -119,7 +119,7 @@ export default function DocumentsByCategory({
               {/* Header da categoria */}
               <button
                 onClick={() => toggleCategory(category)}
-                className="w-full flex items-center justify-between p-5 lg:p-4 hover:opacity-80 transition-opacity min-h-[64px] lg:min-h-0"
+                className="w-full flex items-center justify-between p-4 lg:p-4 hover:opacity-80 transition-opacity min-h-[56px] lg:min-h-0"
               >
                 <div className="flex items-center gap-3">
                   <span className="text-2xl lg:text-2xl">{config.icon}</span>
@@ -137,13 +137,12 @@ export default function DocumentsByCategory({
                 </div>
               </button>
 
-              {/* Lista de documentos (colapsável) */}
-              {isExpanded && (
-                <div className="border-t-2 border-gray-200">
-                  {categoryDocs.map((doc, index) => (
+              {/* Lista de documentos - sempre mostra preview dos primeiros 2 */}
+              <div className="border-t-2 border-gray-200">
+                {(isExpanded ? categoryDocs : categoryDocs.slice(0, 2)).map((doc, index) => (
                     <div
                       key={doc.id}
-                      className={`p-5 lg:p-4 hover:bg-white/50 transition-colors ${
+                      className={`p-3 lg:p-4 hover:bg-white/50 transition-colors ${
                         index < categoryDocs.length - 1 ? 'border-b border-gray-200' : ''
                       }`}
                     >
@@ -152,22 +151,22 @@ export default function DocumentsByCategory({
                         <div className="flex-1 min-w-0">
                           <button
                             onClick={() => onDocumentClick(doc)}
-                            className="text-left w-full group min-h-[48px] flex items-start"
+                            className="text-left w-full group min-h-[44px] lg:min-h-[48px] flex items-start"
                           >
-                            <div className="flex items-start gap-3 w-full">
-                              <div className="w-10 h-10 lg:w-8 lg:h-8 bg-gray-700 rounded-lg flex items-center justify-center flex-shrink-0 mt-1">
+                            <div className="flex items-start gap-2 lg:gap-3 w-full">
+                              <div className="w-8 h-8 lg:w-8 lg:h-8 bg-gray-700 rounded-lg flex items-center justify-center flex-shrink-0 mt-0.5">
                                 {doc.type === 'video' ? (
-                                  <Video className="w-5 h-5 lg:w-4 lg:h-4 text-white" />
+                                  <Video className="w-4 h-4 lg:w-4 lg:h-4 text-white" />
                                 ) : (
-                                  <FileText className="w-5 h-5 lg:w-4 lg:h-4 text-white" />
+                                  <FileText className="w-4 h-4 lg:w-4 lg:h-4 text-white" />
                                 )}
                               </div>
                               <div className="flex-1">
-                                <h4 className="text-base lg:text-base font-bold text-gray-900 group-hover:text-blue-600 transition-colors line-clamp-2">
+                                <h4 className="text-sm lg:text-base font-bold text-gray-900 group-hover:text-blue-600 transition-colors line-clamp-2">
                                   {doc.title}
                                 </h4>
                                 {doc.description && (
-                                  <p className="text-sm lg:text-sm text-gray-600 mt-1 line-clamp-2">
+                                  <p className="text-xs lg:text-sm text-gray-600 mt-0.5 lg:mt-1 line-clamp-2">
                                     {truncateDescription(doc.description)}
                                   </p>
                                 )}
@@ -182,20 +181,32 @@ export default function DocumentsByCategory({
                             e.stopPropagation();
                             toggleFavorite(doc.id, courseId);
                           }}
-                          className={`p-3 lg:p-2 rounded-lg transition-colors flex-shrink-0 min-h-[48px] min-w-[48px] lg:min-h-0 lg:min-w-0 flex items-center justify-center ${
+                          className={`p-2 lg:p-2 rounded-lg transition-colors flex-shrink-0 min-h-[40px] min-w-[40px] lg:min-h-0 lg:min-w-0 flex items-center justify-center ${
                             isFavorite(doc.id)
                               ? 'text-red-600 bg-red-100 hover:bg-red-200'
                               : 'text-gray-400 hover:text-red-600 hover:bg-red-50'
                           }`}
                           title={isFavorite(doc.id) ? 'Remover dos favoritos' : 'Adicionar aos favoritos'}
                         >
-                          <Heart className={`w-6 h-6 lg:w-5 lg:h-5 ${isFavorite(doc.id) ? 'fill-current' : ''}`} />
+                          <Heart className={`w-5 h-5 lg:w-5 lg:h-5 ${isFavorite(doc.id) ? 'fill-current' : ''}`} />
                         </button>
                       </div>
                     </div>
                   ))}
-                </div>
-              )}
+
+                {/* Indicador de mais documentos */}
+                {!isExpanded && categoryDocs.length > 2 && (
+                  <div className="p-4 bg-gradient-to-r from-gray-50 to-gray-100 border-t border-gray-200">
+                    <button
+                      onClick={() => toggleCategory(category)}
+                      className="w-full text-center text-sm font-medium text-blue-600 hover:text-blue-800 flex items-center justify-center gap-2"
+                    >
+                      <span>Ver mais {categoryDocs.length - 2} {categoryDocs.length - 2 === 1 ? 'documento' : 'documentos'}</span>
+                      <ChevronDown className="w-4 h-4" />
+                    </button>
+                  </div>
+                )}
+              </div>
             </div>
           );
         })}
