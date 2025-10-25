@@ -1,6 +1,7 @@
 'use client';
 
 import { Download, FileText, BookOpen, Library } from 'lucide-react';
+import { LucideIcon } from 'lucide-react';
 
 interface Document {
   id: string;
@@ -9,6 +10,16 @@ interface Document {
   category: string;
   type: string;
   url?: string;
+}
+
+interface MaterialItem {
+  doc: Document;
+  icon: LucideIcon;
+  title: string;
+  description: string;
+  color: string;
+  borderColor: string;
+  bgColor: string;
 }
 
 interface HighlightedMaterialsProps {
@@ -32,7 +43,7 @@ export default function HighlightedMaterials({
     return null;
   }
 
-  const materials = [
+  const materials: MaterialItem[] = [
     conteudoProgramatico && {
       doc: conteudoProgramatico,
       icon: FileText,
@@ -60,7 +71,7 @@ export default function HighlightedMaterials({
       borderColor: 'border-green-300',
       bgColor: 'bg-green-600',
     },
-  ].filter(Boolean);
+  ].filter((item): item is MaterialItem => Boolean(item));
 
   return (
     <div className="bg-gradient-to-br from-amber-50 to-orange-50 rounded-2xl shadow-lg p-4 lg:p-8 mb-6 border-2 border-amber-200">
@@ -71,7 +82,7 @@ export default function HighlightedMaterials({
 
       {/* Mobile: Lista compacta */}
       <div className="lg:hidden space-y-2">
-        {materials.map((material: any) => {
+        {materials.map((material: MaterialItem) => {
           const Icon = material.icon;
           return (
             <div
