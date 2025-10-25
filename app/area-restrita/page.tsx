@@ -229,13 +229,43 @@ export default function AreaRestritaPage() {
     isEnrolled: enrolledCourseIds.includes(course.id),
   }));
 
-  // Curso selecionado atual
-  const selectedCourse = courses.find(c => c.id === selectedCourseId);
-  const isSelectedCourseEnrolled = selectedCourse ? enrolledCourseIds.includes(selectedCourse.id) : false;
-  const selectedCourseDocuments = selectedCourseId && isSelectedCourseEnrolled ? (courseDocuments[selectedCourseId] || []) : [];
-  const selectedCourseVideos = selectedCourseId && isSelectedCourseEnrolled ? (courseVideos[selectedCourseId] || []) : [];
-  const selectedCourseSites = selectedCourseId && isSelectedCourseEnrolled ? (courseSites[selectedCourseId] || []) : [];
-  const selectedEnrollment = userEnrollments.find(e => e.courseId === selectedCourseId);
+  // Curso selecionado atual (usando useMemo para evitar problemas de hooks)
+  const selectedCourse = useMemo(
+    () => courses.find(c => c.id === selectedCourseId),
+    [selectedCourseId]
+  );
+
+  const isSelectedCourseEnrolled = useMemo(
+    () => selectedCourse ? enrolledCourseIds.includes(selectedCourse.id) : false,
+    [selectedCourse, enrolledCourseIds]
+  );
+
+  const selectedCourseDocuments = useMemo(
+    () => selectedCourseId && isSelectedCourseEnrolled ? (courseDocuments[selectedCourseId] || []) : [],
+    [selectedCourseId, isSelectedCourseEnrolled, courseDocuments]
+  );
+
+  const selectedCourseVideos = useMemo(
+    () => selectedCourseId && isSelectedCourseEnrolled ? (courseVideos[selectedCourseId] || []) : [],
+    [selectedCourseId, isSelectedCourseEnrolled, courseVideos]
+  );
+
+  const selectedCourseSites = useMemo(
+    () => selectedCourseId && isSelectedCourseEnrolled ? (courseSites[selectedCourseId] || []) : [],
+    [selectedCourseId, isSelectedCourseEnrolled, courseSites]
+  );
+
+  const selectedEnrollment = useMemo(
+    () => userEnrollments.find(e => e.courseId === selectedCourseId),
+    [userEnrollments, selectedCourseId]
+  );
+
+  // Lista de cursos disponíveis para os filtros
+  const availableCourses = useMemo(() => {
+    return courses
+      .filter(c => enrolledCourseIds.includes(c.id))
+      .map(c => ({ id: c.id, title: c.title }));
+  }, [enrolledCourseIds]);
 
   // Documentos filtrados pela busca
   const searchableDocuments = useMemo(() => {
@@ -260,13 +290,6 @@ export default function AreaRestritaPage() {
       favoriteIds
     );
   }, [searchableDocuments, search.searchTerm, search.filters, search.isSearchActive, favoriteIds, selectedCourseDocuments]);
-
-  // Lista de cursos disponíveis para os filtros
-  const availableCourses = useMemo(() => {
-    return courses
-      .filter(c => enrolledCourseIds.includes(c.id))
-      .map(c => ({ id: c.id, title: c.title }));
-  }, [enrolledCourseIds]);
 
   // Contagem de documentos por curso
   const documentCounts = Object.keys(courseDocuments).reduce((acc, courseId) => {
