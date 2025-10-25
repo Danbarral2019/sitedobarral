@@ -261,44 +261,47 @@ export default function AreaRestritaPage() {
         />
 
         {/* Conteúdo Principal */}
-        <div className="flex-1 p-4 lg:p-8 lg:ml-80">
+        <div className="flex-1 p-6 lg:p-8 lg:ml-80">
           <div className="max-w-5xl mx-auto">
             {/* Header com info do usuário */}
-            <div className="bg-white rounded-2xl shadow-lg p-6 mb-8 border-2 border-gray-200">
-              <div className="flex justify-between items-start flex-wrap gap-4">
+            <div className="bg-white rounded-2xl shadow-lg p-6 lg:p-6 mb-8 border-2 border-gray-200">
+              <div className="flex flex-col lg:flex-row lg:justify-between lg:items-start gap-6">
+                {/* Informações do usuário */}
                 <div className="flex items-start gap-4">
                   <div className="w-16 h-16 bg-gradient-to-br from-green-500 to-green-700 rounded-full flex items-center justify-center shadow-lg flex-shrink-0">
                     <CheckCircle className="w-8 h-8 text-white" />
                   </div>
-                  <div>
-                    <h2 className="text-2xl font-bold text-gray-900 mb-1">Bem-vindo, {user.name}</h2>
-                    <p className="text-gray-700 font-medium">
+                  <div className="flex-1">
+                    <h2 className="text-xl lg:text-2xl font-bold text-gray-900 mb-1">Bem-vindo, {user.name}</h2>
+                    <p className="text-base lg:text-lg text-gray-700 font-medium">
                       {enrolledCourseIds.length} {enrolledCourseIds.length === 1 ? 'curso' : 'cursos'} matriculado{enrolledCourseIds.length !== 1 ? 's' : ''}
                     </p>
-                    <p className="text-sm text-gray-600 mt-1">{user.email}</p>
+                    <p className="text-sm lg:text-sm text-gray-600 mt-1">{user.email}</p>
                   </div>
                 </div>
-                <div className="flex items-center gap-3">
+
+                {/* Botões de ação - empilhados no mobile, horizontal no desktop */}
+                <div className="flex flex-col sm:flex-row lg:items-center gap-2 sm:gap-3 w-full sm:w-auto">
                   <a
                     href="/area-restrita/favoritos"
-                    className="flex items-center gap-2 px-4 py-2 text-gray-700 hover:text-pink-600 hover:bg-pink-50 rounded-lg transition-colors font-medium"
+                    className="flex items-center justify-center gap-2 px-4 py-3 lg:py-2 text-gray-700 hover:text-pink-600 hover:bg-pink-50 rounded-lg transition-colors font-medium text-base"
                   >
-                    <Heart className="w-4 h-4" />
-                    Favoritos
+                    <Heart className="w-5 h-5 lg:w-4 lg:h-4" />
+                    <span>Favoritos</span>
                   </a>
                   <a
                     href="/area-restrita/historico"
-                    className="flex items-center gap-2 px-4 py-2 text-gray-700 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors font-medium"
+                    className="flex items-center justify-center gap-2 px-4 py-3 lg:py-2 text-gray-700 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors font-medium text-base"
                   >
-                    <Clock className="w-4 h-4" />
-                    Histórico
+                    <Clock className="w-5 h-5 lg:w-4 lg:h-4" />
+                    <span>Histórico</span>
                   </a>
                   <button
                     onClick={handleLogout}
-                    className="flex items-center gap-2 px-4 py-2 text-gray-700 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors font-medium"
+                    className="flex items-center justify-center gap-2 px-4 py-3 lg:py-2 text-gray-700 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors font-medium text-base"
                   >
-                    <LogOut className="w-4 h-4" />
-                    Sair
+                    <LogOut className="w-5 h-5 lg:w-4 lg:h-4" />
+                    <span>Sair</span>
                   </button>
                 </div>
               </div>
@@ -313,27 +316,27 @@ export default function AreaRestritaPage() {
                     <EnrollmentStatusBanner courseId={selectedCourse.id} />
 
                     {/* Informações do Curso */}
-                    <div className="bg-white rounded-2xl shadow-lg p-8 mb-6 border-2 border-gray-200">
-                      <div className="flex items-center justify-between mb-4 flex-wrap gap-4">
+                    <div className="bg-white rounded-2xl shadow-lg p-6 lg:p-8 mb-6 border-2 border-gray-200">
+                      <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between mb-4 gap-4">
                         <div className="inline-block">
-                          <h1 className="text-3xl font-bold mb-2 text-gray-900">{selectedCourse.title}</h1>
-                          <div className="h-1 w-32 bg-gradient-to-r from-blue-600 to-purple-600 rounded-full"></div>
+                          <h1 className="text-xl lg:text-3xl font-bold mb-2 text-gray-900">{selectedCourse.title}</h1>
+                          <div className="h-1 w-24 lg:w-32 bg-gradient-to-r from-blue-600 to-purple-600 rounded-full"></div>
                         </div>
                         {selectedEnrollment?.turma && (
-                          <div className="bg-blue-50 px-4 py-2 rounded-lg border border-blue-200">
-                            <p className="text-sm text-blue-900 font-medium flex items-center gap-2">
+                          <div className="bg-blue-50 px-4 py-2 rounded-lg border border-blue-200 self-start lg:self-auto">
+                            <p className="text-sm lg:text-sm text-blue-900 font-medium flex items-center gap-2">
                               <GraduationCap className="w-4 h-4" />
                               Turma: {selectedEnrollment.turma}
                             </p>
                           </div>
                         )}
                       </div>
-                      <p className="text-gray-700 text-lg leading-relaxed mb-4">
+                      <p className="text-base lg:text-lg text-gray-700 leading-relaxed mb-4">
                         {selectedCourse.description}
                       </p>
                       <div className="flex items-center gap-2 text-gray-600">
-                        <Clock className="w-4 h-4" />
-                        <span className="text-sm font-medium">Duração: {selectedCourse.duration}</span>
+                        <Clock className="w-5 h-5 lg:w-4 lg:h-4" />
+                        <span className="text-sm lg:text-sm font-medium">Duração: {selectedCourse.duration}</span>
                       </div>
                     </div>
 
@@ -365,35 +368,35 @@ export default function AreaRestritaPage() {
                     <RecommendedSites sites={selectedCourseSites} />
                   </div>
                 ) : (
-                  <div className="bg-blue-50 border-2 border-blue-200 rounded-xl p-8 text-center">
-                    <p className="text-blue-800 font-medium">
+                  <div className="bg-blue-50 border-2 border-blue-200 rounded-xl p-6 lg:p-8 text-center">
+                    <p className="text-base lg:text-lg text-blue-800 font-medium">
                       Selecione um curso na barra lateral para ver os materiais
                     </p>
                   </div>
                 )}
 
                 {/* Aviso Importante */}
-                <div className="bg-gradient-to-r from-orange-50 to-red-50 border-l-4 border-orange-500 p-6 rounded-r-xl mt-8">
-                  <h3 className="text-lg font-bold mb-2 text-orange-900">Importante</h3>
-                  <p className="text-orange-800 font-medium">
+                <div className="bg-gradient-to-r from-orange-50 to-red-50 border-l-4 border-orange-500 p-6 lg:p-6 rounded-r-xl mt-8">
+                  <h3 className="text-base lg:text-lg font-bold mb-2 text-orange-900">Importante</h3>
+                  <p className="text-sm lg:text-base text-orange-800 font-medium leading-relaxed">
                     Este material é de uso exclusivo dos alunos matriculados. O compartilhamento não autorizado pode resultar na suspensão do acesso.
                   </p>
                 </div>
               </>
             ) : (
               /* Usuário sem matrícula */
-              <div className="bg-white rounded-2xl shadow-lg p-8 border-2 border-gray-200 text-center">
+              <div className="bg-white rounded-2xl shadow-lg p-6 lg:p-8 border-2 border-gray-200 text-center">
                 <div className="w-20 h-20 bg-gradient-to-br from-blue-600 to-purple-600 rounded-full flex items-center justify-center mx-auto mb-4 shadow-lg">
                   <GraduationCap className="w-10 h-10 text-white" />
                 </div>
-                <h2 className="text-2xl font-bold text-gray-900 mb-3">Nenhum Curso Matriculado</h2>
-                <p className="text-gray-700 mb-6">
+                <h2 className="text-xl lg:text-2xl font-bold text-gray-900 mb-3">Nenhum Curso Matriculado</h2>
+                <p className="text-base lg:text-lg text-gray-700 mb-6 leading-relaxed">
                   Você ainda não está matriculado em nenhum curso. Entre em contato com o professor para receber seu QR Code de acesso.
                 </p>
                 {user.role === 'admin' && (
                   <a
                     href="/admin"
-                    className="inline-flex items-center gap-2 bg-gradient-to-r from-blue-600 to-purple-600 text-white px-6 py-3 rounded-xl font-bold hover:from-blue-700 hover:to-purple-700 transition-all shadow-lg"
+                    className="inline-flex items-center gap-2 bg-gradient-to-r from-blue-600 to-purple-600 text-white px-6 py-3 lg:py-3 rounded-xl font-bold hover:from-blue-700 hover:to-purple-700 transition-all shadow-lg text-base"
                   >
                     Acessar Painel Admin
                   </a>

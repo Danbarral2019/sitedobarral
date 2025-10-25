@@ -39,10 +39,20 @@ export default function CoursesSidebar({
       {/* Botão de toggle (mobile) */}
       <button
         onClick={toggleSidebar}
-        className="fixed top-4 left-4 z-50 lg:hidden bg-blue-600 text-white p-3 rounded-xl shadow-lg hover:bg-blue-700 transition-colors"
+        className="fixed top-4 left-4 z-50 lg:hidden bg-gradient-to-r from-blue-600 to-purple-600 text-white px-4 py-3 rounded-xl shadow-xl hover:from-blue-700 hover:to-purple-700 transition-all flex items-center gap-2 min-h-[52px]"
         aria-label="Menu de cursos"
       >
-        {isOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+        {isOpen ? (
+          <>
+            <X className="w-6 h-6" />
+            <span className="font-bold text-sm">Fechar</span>
+          </>
+        ) : (
+          <>
+            <Menu className="w-6 h-6" />
+            <span className="font-bold text-sm">Cursos</span>
+          </>
+        )}
       </button>
 
       {/* Overlay (mobile) */}
@@ -55,7 +65,7 @@ export default function CoursesSidebar({
 
       {/* Sidebar */}
       <aside
-        className={`fixed top-0 left-0 h-full bg-white border-r-2 border-gray-200 shadow-xl z-40 transition-transform duration-300 overflow-y-auto ${
+        className={`fixed top-0 left-0 h-full bg-white border-r-2 border-gray-200 shadow-xl z-40 transition-transform duration-300 overflow-y-auto w-[85vw] max-w-sm ${
           isOpen ? 'translate-x-0' : '-translate-x-full'
         } lg:translate-x-0 lg:sticky lg:top-4 lg:h-[calc(100vh-2rem)] lg:w-80`}
       >
@@ -89,7 +99,7 @@ export default function CoursesSidebar({
                   <button
                     key={course.id}
                     onClick={() => handleCourseClick(course)}
-                    className={`w-full text-left p-4 rounded-xl border-2 transition-all ${
+                    className={`w-full text-left p-4 lg:p-4 rounded-xl border-2 transition-all min-h-[80px] lg:min-h-0 ${
                       !isEnrolled
                         ? 'bg-gray-50 border-gray-300 opacity-75 hover:opacity-100 hover:border-gray-400'
                         : isSelected
@@ -101,9 +111,9 @@ export default function CoursesSidebar({
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2 mb-2">
                           {!isEnrolled && (
-                            <Lock className="w-4 h-4 text-gray-500 flex-shrink-0" />
+                            <Lock className="w-4 h-4 lg:w-4 lg:h-4 text-gray-500 flex-shrink-0" />
                           )}
-                          <h3 className={`font-bold text-sm line-clamp-2 ${
+                          <h3 className={`font-bold text-sm lg:text-sm line-clamp-2 ${
                             !isEnrolled
                               ? 'text-gray-600'
                               : isSelected
@@ -115,7 +125,7 @@ export default function CoursesSidebar({
                         </div>
                         <div className="flex items-center gap-2">
                           {isEnrolled ? (
-                            <span className={`text-xs font-medium px-2 py-1 rounded-full ${
+                            <span className={`text-xs lg:text-xs font-medium px-2 py-1 rounded-full ${
                               isSelected
                                 ? 'bg-blue-200 text-blue-800'
                                 : 'bg-gray-100 text-gray-700'
@@ -123,7 +133,7 @@ export default function CoursesSidebar({
                               {docCount} {docCount === 1 ? 'material' : 'materiais'}
                             </span>
                           ) : (
-                            <span className="text-xs font-medium px-2 py-1 rounded-full bg-orange-100 text-orange-700">
+                            <span className="text-xs lg:text-xs font-medium px-2 py-1 rounded-full bg-orange-100 text-orange-700">
                               Curso bloqueado
                             </span>
                           )}
@@ -136,7 +146,7 @@ export default function CoursesSidebar({
                           ? 'text-blue-600'
                           : 'text-gray-400'
                       }`}>
-                        <ChevronRight className="w-5 h-5" />
+                        <ChevronRight className="w-5 h-5 lg:w-5 lg:h-5" />
                       </div>
                     </div>
                   </button>
