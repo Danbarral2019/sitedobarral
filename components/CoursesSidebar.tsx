@@ -36,39 +36,8 @@ export default function CoursesSidebar({
 
   return (
     <>
-      {/* Botão de toggle (mobile) */}
-      <button
-        onClick={toggleSidebar}
-        className="fixed top-4 left-4 z-50 lg:hidden bg-gradient-to-r from-blue-600 to-purple-600 text-white px-4 py-3 rounded-xl shadow-xl hover:from-blue-700 hover:to-purple-700 transition-all flex items-center gap-2 min-h-[52px]"
-        aria-label="Menu de cursos"
-      >
-        {isOpen ? (
-          <>
-            <X className="w-6 h-6" />
-            <span className="font-bold text-sm">Fechar</span>
-          </>
-        ) : (
-          <>
-            <Menu className="w-6 h-6" />
-            <span className="font-bold text-sm">Cursos</span>
-          </>
-        )}
-      </button>
-
-      {/* Overlay (mobile) */}
-      {isOpen && (
-        <div
-          className="fixed inset-0 bg-black/50 z-30 lg:hidden"
-          onClick={toggleSidebar}
-        />
-      )}
-
-      {/* Sidebar */}
-      <aside
-        className={`fixed top-0 left-0 h-full bg-white border-r-2 border-gray-200 shadow-xl z-40 transition-transform duration-300 overflow-y-auto w-[85vw] max-w-sm ${
-          isOpen ? 'translate-x-0' : '-translate-x-full'
-        } lg:translate-x-0 lg:sticky lg:top-4 lg:h-[calc(100vh-2rem)] lg:w-80`}
-      >
+      {/* Sidebar - apenas desktop agora */}
+      <aside className="hidden lg:block lg:sticky lg:top-4 lg:h-[calc(100vh-2rem)] lg:w-80 bg-white border-r-2 border-gray-200 shadow-xl overflow-y-auto">
         {/* Header da Sidebar */}
         <div className="sticky top-0 bg-gradient-to-r from-blue-600 to-purple-600 text-white p-6 z-10">
           <div className="flex items-center gap-3">

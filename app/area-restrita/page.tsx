@@ -261,51 +261,118 @@ export default function AreaRestritaPage() {
         />
 
         {/* Conteúdo Principal */}
-        <div className="flex-1 p-6 lg:p-8 lg:ml-80">
+        <div className="flex-1 p-4 pb-20 lg:p-8 lg:pb-8 lg:ml-80">
           <div className="max-w-5xl mx-auto">
-            {/* Header com info do usuário */}
-            <div className="bg-white rounded-2xl shadow-lg p-6 lg:p-6 mb-8 border-2 border-gray-200">
-              <div className="flex flex-col lg:flex-row lg:justify-between lg:items-start gap-6">
+            {/* Header com info do usuário - Compacto no mobile */}
+            <div className="bg-white rounded-2xl shadow-lg p-3 lg:p-6 mb-4 lg:mb-8 border-2 border-gray-200">
+              {/* Mobile: Header ultra-compacto */}
+              <div className="lg:hidden flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 bg-gradient-to-br from-green-500 to-green-700 rounded-full flex items-center justify-center shadow-md">
+                    <span className="text-white font-bold text-sm">
+                      {user.name.charAt(0).toUpperCase()}
+                    </span>
+                  </div>
+                  <div>
+                    <h2 className="text-sm font-bold text-gray-900">
+                      Olá, {user.name.split(' ')[0]}
+                    </h2>
+                    <p className="text-xs text-gray-600">
+                      {enrolledCourseIds.length} {enrolledCourseIds.length === 1 ? 'curso' : 'cursos'}
+                    </p>
+                  </div>
+                </div>
+                <CheckCircle className="w-6 h-6 text-green-600" />
+              </div>
+
+              {/* Desktop: Header completo original */}
+              <div className="hidden lg:flex lg:flex-row lg:justify-between lg:items-start gap-6">
                 {/* Informações do usuário */}
                 <div className="flex items-start gap-4">
                   <div className="w-16 h-16 bg-gradient-to-br from-green-500 to-green-700 rounded-full flex items-center justify-center shadow-lg flex-shrink-0">
                     <CheckCircle className="w-8 h-8 text-white" />
                   </div>
                   <div className="flex-1">
-                    <h2 className="text-xl lg:text-2xl font-bold text-gray-900 mb-1">Bem-vindo, {user.name}</h2>
-                    <p className="text-base lg:text-lg text-gray-700 font-medium">
+                    <h2 className="text-2xl font-bold text-gray-900 mb-1">Bem-vindo, {user.name}</h2>
+                    <p className="text-lg text-gray-700 font-medium">
                       {enrolledCourseIds.length} {enrolledCourseIds.length === 1 ? 'curso' : 'cursos'} matriculado{enrolledCourseIds.length !== 1 ? 's' : ''}
                     </p>
-                    <p className="text-sm lg:text-sm text-gray-600 mt-1">{user.email}</p>
+                    <p className="text-sm text-gray-600 mt-1">{user.email}</p>
                   </div>
                 </div>
 
-                {/* Botões de ação - empilhados no mobile, horizontal no desktop */}
-                <div className="flex flex-col sm:flex-row lg:items-center gap-2 sm:gap-3 w-full sm:w-auto">
+                {/* Botões de ação - apenas desktop */}
+                <div className="flex items-center gap-3">
                   <a
                     href="/area-restrita/favoritos"
-                    className="flex items-center justify-center gap-2 px-4 py-3 lg:py-2 text-gray-700 hover:text-pink-600 hover:bg-pink-50 rounded-lg transition-colors font-medium text-base"
+                    className="flex items-center gap-2 px-4 py-2 text-gray-700 hover:text-pink-600 hover:bg-pink-50 rounded-lg transition-colors font-medium"
                   >
-                    <Heart className="w-5 h-5 lg:w-4 lg:h-4" />
+                    <Heart className="w-4 h-4" />
                     <span>Favoritos</span>
                   </a>
                   <a
                     href="/area-restrita/historico"
-                    className="flex items-center justify-center gap-2 px-4 py-3 lg:py-2 text-gray-700 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors font-medium text-base"
+                    className="flex items-center gap-2 px-4 py-2 text-gray-700 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors font-medium"
                   >
-                    <Clock className="w-5 h-5 lg:w-4 lg:h-4" />
+                    <Clock className="w-4 h-4" />
                     <span>Histórico</span>
                   </a>
                   <button
                     onClick={handleLogout}
-                    className="flex items-center justify-center gap-2 px-4 py-3 lg:py-2 text-gray-700 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors font-medium text-base"
+                    className="flex items-center gap-2 px-4 py-2 text-gray-700 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors font-medium"
                   >
-                    <LogOut className="w-5 h-5 lg:w-4 lg:h-4" />
+                    <LogOut className="w-4 h-4" />
                     <span>Sair</span>
                   </button>
                 </div>
               </div>
             </div>
+
+            {/* Tabs de Cursos - apenas mobile */}
+            {enrolledCourseIds.length > 0 && (
+              <div className="lg:hidden mb-4">
+                <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide snap-x snap-mandatory">
+                  {allCoursesWithEnrollment.filter(c => c.isEnrolled).map((course) => {
+                    const isSelected = selectedCourseId === course.id;
+                    const docCount = documentCounts[course.id] || 0;
+
+                    return (
+                      <button
+                        key={course.id}
+                        onClick={() => setSelectedCourseId(course.id)}
+                        className={`flex-shrink-0 snap-start px-4 py-3 rounded-xl border-2 transition-all min-w-[160px] ${
+                          isSelected
+                            ? 'bg-gradient-to-r from-blue-600 to-purple-600 border-blue-600 text-white shadow-lg'
+                            : 'bg-white border-gray-300 text-gray-700 hover:border-blue-400'
+                        }`}
+                      >
+                        <div className="text-left">
+                          <h3 className={`font-bold text-xs line-clamp-2 mb-1 ${
+                            isSelected ? 'text-white' : 'text-gray-900'
+                          }`}>
+                            {course.title}
+                          </h3>
+                          <p className={`text-xs ${
+                            isSelected ? 'text-blue-100' : 'text-gray-500'
+                          }`}>
+                            {docCount} {docCount === 1 ? 'material' : 'materiais'}
+                          </p>
+                        </div>
+                      </button>
+                    );
+                  })}
+                </div>
+                <style jsx>{`
+                  .scrollbar-hide::-webkit-scrollbar {
+                    display: none;
+                  }
+                  .scrollbar-hide {
+                    -ms-overflow-style: none;
+                    scrollbar-width: none;
+                  }
+                `}</style>
+              </div>
+            )}
 
             {/* Conteúdo do Curso Selecionado */}
             {enrolledCourseIds.length > 0 ? (
@@ -316,27 +383,27 @@ export default function AreaRestritaPage() {
                     <EnrollmentStatusBanner courseId={selectedCourse.id} />
 
                     {/* Informações do Curso */}
-                    <div className="bg-white rounded-2xl shadow-lg p-6 lg:p-8 mb-6 border-2 border-gray-200">
-                      <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between mb-4 gap-4">
+                    <div className="bg-white rounded-2xl shadow-lg p-4 lg:p-8 mb-4 lg:mb-6 border-2 border-gray-200">
+                      <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between mb-3 lg:mb-4 gap-3 lg:gap-4">
                         <div className="inline-block">
-                          <h1 className="text-xl lg:text-3xl font-bold mb-2 text-gray-900">{selectedCourse.title}</h1>
-                          <div className="h-1 w-24 lg:w-32 bg-gradient-to-r from-blue-600 to-purple-600 rounded-full"></div>
+                          <h1 className="text-base lg:text-3xl font-bold mb-1 lg:mb-2 text-gray-900 line-clamp-2 lg:line-clamp-none">{selectedCourse.title}</h1>
+                          <div className="h-1 w-16 lg:w-32 bg-gradient-to-r from-blue-600 to-purple-600 rounded-full"></div>
                         </div>
                         {selectedEnrollment?.turma && (
-                          <div className="bg-blue-50 px-4 py-2 rounded-lg border border-blue-200 self-start lg:self-auto">
-                            <p className="text-sm lg:text-sm text-blue-900 font-medium flex items-center gap-2">
-                              <GraduationCap className="w-4 h-4" />
+                          <div className="bg-blue-50 px-3 py-1.5 lg:px-4 lg:py-2 rounded-lg border border-blue-200 self-start lg:self-auto">
+                            <p className="text-xs lg:text-sm text-blue-900 font-medium flex items-center gap-2">
+                              <GraduationCap className="w-3.5 h-3.5 lg:w-4 lg:h-4" />
                               Turma: {selectedEnrollment.turma}
                             </p>
                           </div>
                         )}
                       </div>
-                      <p className="text-base lg:text-lg text-gray-700 leading-relaxed mb-4">
+                      <p className="text-sm lg:text-lg text-gray-700 leading-relaxed mb-3 lg:mb-4">
                         {selectedCourse.description}
                       </p>
                       <div className="flex items-center gap-2 text-gray-600">
-                        <Clock className="w-5 h-5 lg:w-4 lg:h-4" />
-                        <span className="text-sm lg:text-sm font-medium">Duração: {selectedCourse.duration}</span>
+                        <Clock className="w-4 h-4 lg:w-4 lg:h-4" />
+                        <span className="text-xs lg:text-sm font-medium">Duração: {selectedCourse.duration}</span>
                       </div>
                     </div>
 
@@ -418,6 +485,40 @@ export default function AreaRestritaPage() {
           onView={selectedDocument.type === 'link' ? () => handleView(selectedDocument, selectedCourse.id) : undefined}
         />
       )}
+
+      {/* Bottom Navigation - apenas mobile */}
+      <nav className="lg:hidden fixed bottom-0 left-0 right-0 bg-white border-t-2 border-gray-200 shadow-2xl z-50 pb-safe">
+        <div className="flex items-center justify-around h-16">
+          <a
+            href="/area-restrita"
+            className="flex flex-col items-center justify-center flex-1 h-full text-blue-600 hover:bg-blue-50 transition-colors"
+          >
+            <GraduationCap className="w-6 h-6 mb-1" />
+            <span className="text-xs font-medium">Início</span>
+          </a>
+          <a
+            href="/area-restrita/favoritos"
+            className="flex flex-col items-center justify-center flex-1 h-full text-gray-600 hover:text-pink-600 hover:bg-pink-50 transition-colors"
+          >
+            <Heart className="w-6 h-6 mb-1" />
+            <span className="text-xs font-medium">Favoritos</span>
+          </a>
+          <a
+            href="/area-restrita/historico"
+            className="flex flex-col items-center justify-center flex-1 h-full text-gray-600 hover:text-blue-600 hover:bg-blue-50 transition-colors"
+          >
+            <Clock className="w-6 h-6 mb-1" />
+            <span className="text-xs font-medium">Histórico</span>
+          </a>
+          <button
+            onClick={handleLogout}
+            className="flex flex-col items-center justify-center flex-1 h-full text-gray-600 hover:text-red-600 hover:bg-red-50 transition-colors"
+          >
+            <LogOut className="w-6 h-6 mb-1" />
+            <span className="text-xs font-medium">Sair</span>
+          </button>
+        </div>
+      </nav>
     </main>
   );
 }
