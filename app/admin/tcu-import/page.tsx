@@ -25,6 +25,14 @@ interface ImportStats {
   avgScore: number;
 }
 
+interface ImportResult {
+  stats: {
+    documentosCriados: number;
+    documentosPulados: number;
+    erros: number;
+  };
+}
+
 const courseNames: Record<string, string> = {
   '1': 'Nova Lei de Licitações',
   '2': 'Planejamento das Contratações',
@@ -45,7 +53,7 @@ export default function TCUImportPage() {
   const [stats, setStats] = useState<ImportStats | null>(null);
   const [novosCount, setNovosCount] = useState(0);
   const [existentesCount, setExistentesCount] = useState(0);
-  const [result, setResult] = useState<any>(null);
+  const [result, setResult] = useState<ImportResult | null>(null);
 
   // Configurações
   const [quantidade, setQuantidade] = useState(100);

@@ -40,6 +40,22 @@ export interface TCUFetchOptions {
   onlyRelevant?: boolean;       // Filtrar apenas relevantes (padrão: true)
 }
 
+interface TCUApiItem {
+  key?: string;
+  tipo?: string;
+  numeroAcordao?: string;
+  anoAcordao?: string;
+  titulo?: string;
+  sumario?: string;
+  colegiado?: string;
+  relator?: string;
+  dataSessao?: string;
+  situacao?: string;
+  urlArquivo?: string;
+  urlArquivoPDF?: string;
+  urlAcordao?: string;
+}
+
 /**
  * Busca acórdãos do webservice do TCU
  */
@@ -111,7 +127,7 @@ export async function fetchAcordaosTCU(options: TCUFetchOptions = {}): Promise<A
 /**
  * Processa um acórdão bruto da API do TCU
  */
-function processAcordao(item: any): AcordaoTCU {
+function processAcordao(item: TCUApiItem): AcordaoTCU {
   // Extrair número e ano
   const numeroAcordao = item.numeroAcordao || '';
   const anoAcordao = item.anoAcordao || '';
