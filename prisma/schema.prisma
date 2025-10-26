@@ -38,8 +38,9 @@ model Document {
   type        String   // pdf, doc, link, video
   url         String
   category    String   // apostila, acordao, parecer, edital, artigo, outro
-  courseId    String
+  courseId    String?  // NULL se isCommon=true (disponível para todos os cursos)
   isPublic    Boolean  @default(false)
+  isCommon    Boolean  @default(false) // Se true, documento aparece em todos os cursos
   tags        String?  // JSON array como string
   leiArticles String?  // JSON array com números de artigos da Lei 14.133/2021
   size        Int?
@@ -53,6 +54,7 @@ model Document {
   @@index([uploadedAt])
   @@index([notifiedAt])
   @@index([courseId, notifiedAt])
+  @@index([isCommon]) // Índice para buscar documentos comuns rapidamente
 }
 
 // Usuários (admin e estudantes)
