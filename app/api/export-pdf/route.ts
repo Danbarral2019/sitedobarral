@@ -167,44 +167,41 @@ export async function POST(request: NextRequest) {
 
     currentY += 10;
 
-    // Organiza documentos por categoria
-    const byCategory: Record<string, Array<(typeof documents)[number]>> = {};
-    documents.forEach(doc => {
-      if (!byCategory[doc.category]) {
-        byCategory[doc.category] = [];
-      }
-      byCategory[doc.category].push(doc);
-    });
-
-    // Mapeamento de nomes de categorias
     const categoryNames: Record<string, string> = {
-      'apostila': 'Apostilas e Material Didatico',
-      'acordao': 'Acordaos',
-      'parecer': 'Pareceres Juridicos',
-      'edital': 'Editais',
-      'artigo': 'Artigos e Doutrinas',
+      apostila: 'Apostilas e Material Didatico',
+      acordao: 'Acordaos',
+      parecer: 'Pareceres Juridicos',
+      edital: 'Editais',
+      artigo: 'Artigos e Doutrinas',
       'orientacao-normativa': 'Orientacoes Normativas',
-      'outro': 'Outros Documentos',
+      outro: 'Outros Documentos',
     };
 
-    for (const [category, docs] of Object.entries(byCategory)) {
-      // Verifica se precisa de nova página
+    const byCategory = new Map<string, typeof documents>();
+    for (const doc of documents) {
+      const cat = doc.category;
+      if (!byCategory.has(cat)) {
+        byCategory.set(cat, []);
+      }
+      byCategory.get(cat)!.push(doc);
+    }
+
+    for (const [category, docs] of byCategory) {
       if (currentY > pageHeight - 60) {
         pdf.addPage();
         addWatermark();
         currentY = margin;
       }
 
-      // Categoria
       pdf.setFontSize(11);
       pdf.setFont('helvetica', 'bold');
       pdf.setTextColor(0, 102, 204);
-      pdf.text(`${categoryNames[category] || category}`, margin, currentY);
+      pdf.text(categoryNames[category] || category, margin, currentY);
       currentY += 8;
 
-      // Documentos da categoria
-      docs.forEach((doc, index) => {
-        // Verifica se precisa de nova página
+      for (let i = 0; i < docs.length; i++) {
+        const doc = docs[i];
+
         if (currentY > pageHeight - 40) {
           pdf.addPage();
           addWatermark();
@@ -214,7 +211,7 @@ export async function POST(request: NextRequest) {
         pdf.setFontSize(10);
         pdf.setFont('helvetica', 'bold');
         pdf.setTextColor(40, 40, 40);
-        pdf.text(`${index + 1}. ${doc.title}`, margin + 3, currentY);
+        pdf.text((i + 1) + '. ' + doc.title, margin + 3, currentY);
         currentY += 6;
 
         if (doc.description) {
@@ -222,30 +219,29 @@ export async function POST(request: NextRequest) {
           pdf.setFont('helvetica', 'normal');
           pdf.setTextColor(80, 80, 80);
           const descLines = pdf.splitTextToSize(doc.description, maxLineWidth - 6);
-          pdf.text(descLines.slice(0, 3), margin + 6, currentY); // Max 3 linhas
+          pdf.text(descLines.slice(0, 3), margin + 6, currentY);
           currentY += (Math.min(descLines.length, 3) * 4) + 2;
         }
 
-        // Tags se existirem
         if (doc.tags) {
           try {
             const tags = JSON.parse(doc.tags);
             if (Array.isArray(tags) && tags.length > 0) {
               pdf.setFontSize(8);
               pdf.setTextColor(100, 100, 100);
-              pdf.text(`Tags: ${tags.slice(0, 5).join(', ')}`, margin + 6, currentY);
+              pdf.text('Tags: ' + tags.slice(0, 5).join(', '), margin + 6, currentY);
               currentY += 5;
             }
-          } catch {
-            // Ignora erro de parse
+          } catch (e) {
+            // ignore
           }
         }
 
         currentY += 3;
-      });
+      }
 
       currentY += 5;
-    });
+    }
 
     // Ultima pagina - Informacoes finais
     pdf.addPage();
