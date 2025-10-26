@@ -2,11 +2,6 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
-
-// Redirecionar para analytics
-if (typeof window !== 'undefined') {
-  window.location.href = '/admin/analytics';
-}
 import Image from 'next/image';
 import {
   QrCode, Plus, Loader2, Download, Calendar,
