@@ -13,7 +13,7 @@ interface AdminLayoutProps {
 
 export default function AdminLayout({ children }: AdminLayoutProps) {
   const [isCollapsed, setIsCollapsed] = useState(false);
-  const [unreadCounts, setUnreadCounts] = useState({ contatos: 0, depoimentos: 0 });
+  const [unreadCounts, setUnreadCounts] = useState({ contatos: 0, depoimentos: 0, documentos: 0 });
   const pathname = usePathname();
 
   const isActive = (path: string) => pathname === path;
@@ -22,9 +22,10 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
   useEffect(() => {
     const loadCounts = async () => {
       try {
-        const [contatosRes, depoimentosRes] = await Promise.all([
+        const [contatosRes, depoimentosRes, documentosRes] = await Promise.all([
           fetch('/api/admin/contatos?unreadOnly=true'),
           fetch('/api/admin/depoimentos?status=pending'),
+          fetch('/api/admin/documents/unreviewed-count'),
         ]);
 
         if (contatosRes.ok) {
@@ -35,6 +36,11 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
         if (depoimentosRes.ok) {
           const depoimentosData = await depoimentosRes.json();
           setUnreadCounts(prev => ({ ...prev, depoimentos: depoimentosData.total || 0 }));
+        }
+
+        if (documentosRes.ok) {
+          const documentosData = await documentosRes.json();
+          setUnreadCounts(prev => ({ ...prev, documentos: documentosData.count || 0 }));
         }
       } catch (error) {
         console.error('Erro ao carregar contadores:', error);
@@ -109,6 +115,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
         </svg>
       ),
+      badge: unreadCounts.documentos,
     },
     {
       path: '/admin/importar',

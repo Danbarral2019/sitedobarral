@@ -41,7 +41,7 @@ export const GET = withAdminAuth(async (request: NextRequest, { params }: { para
 /**
  * PUT: Atualiza um documento
  */
-export const PUT = withAdminAuth(async (request: NextRequest, { params }: { params: { id: string } }) => {
+export const PUT = withAdminAuth(async (request: NextRequest, { params }: { params: { id: string } }, context?: { user?: { email?: string } }) => {
   try {
     const { id } = params;
     const body = await request.json();
@@ -58,6 +58,9 @@ export const PUT = withAdminAuth(async (request: NextRequest, { params }: { para
       alternativeUrls, // Links/arquivos adicionais
       courseId,
       isCommon,
+      // Feedback de IA/ML (Fase 3D)
+      feedbackRelevance,
+      feedbackReasoning,
     } = body;
 
     // Verifica se documento existe
@@ -72,7 +75,18 @@ export const PUT = withAdminAuth(async (request: NextRequest, { params }: { para
       );
     }
 
-    // Atualiza documento
+    // Prepara dados de feedback se fornecidos
+    const feedbackData: any = {};
+    if (feedbackRelevance !== undefined) {
+      feedbackData.feedbackRelevance = feedbackRelevance;
+      feedbackData.feedbackGivenAt = new Date();
+      feedbackData.feedbackGivenBy = context?.user?.email || 'admin';
+    }
+    if (feedbackReasoning !== undefined) {
+      feedbackData.feedbackReasoning = feedbackReasoning;
+    }
+
+    // Atualiza documento e marca como revisado
     const updated = await prisma.document.update({
       where: { id },
       data: {
@@ -87,6 +101,11 @@ export const PUT = withAdminAuth(async (request: NextRequest, { params }: { para
         alternativeUrls: alternativeUrls !== undefined ? alternativeUrls : existing.alternativeUrls,
         courseId: courseId !== undefined ? courseId : existing.courseId,
         isCommon: isCommon !== undefined ? isCommon : existing.isCommon,
+        // Marca como revisado quando editado por um admin
+        reviewed: true,
+        reviewedAt: new Date(),
+        // Feedback de IA/ML (Fase 3D)
+        ...feedbackData,
       },
     });
 

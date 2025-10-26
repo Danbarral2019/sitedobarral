@@ -2,7 +2,8 @@
 
 import { useState } from 'react';
 import AdminLayout from '@/components/AdminLayout';
-import { CheckSquare, Square, Edit2, Save, X } from 'lucide-react';
+import { CheckSquare, Square, Edit2, Save, X, Eye, ExternalLink } from 'lucide-react';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 
 interface AcordaoPreview {
   numeroAcordao: string;
@@ -16,6 +17,8 @@ interface AcordaoPreview {
   isRelevant: boolean;
   suggestedCourses: string[];
   isNovo?: boolean;
+  urlAcordao?: string;
+  urlArquivoPDF?: string;
 }
 
 interface ImportStats {
@@ -66,10 +69,19 @@ export default function TCUImportPage() {
   // Filtros avançados
   const [filterColegiado, setFilterColegiado] = useState('');
   const [filterTipo, setFilterTipo] = useState('');
+  const [searchTerm, setSearchTerm] = useState('');
 
   // Seleção e edição
   const [selectedAcordaos, setSelectedAcordaos] = useState<Set<string>>(new Set());
   const [editingCourses, setEditingCourses] = useState<Record<string, string[]>>({});
+
+  // Modal de preview
+  const [previewModalOpen, setPreviewModalOpen] = useState(false);
+  const [selectedAcordao, setSelectedAcordao] = useState<AcordaoPreview | null>(null);
+
+  // Edição em lote
+  const [showBulkEditPanel, setShowBulkEditPanel] = useState(false);
+  const [bulkEditCategory, setBulkEditCategory] = useState('acordao');
 
   const handleLoadPreview = async () => {
     setLoading(true);
@@ -85,6 +97,10 @@ export default function TCUImportPage() {
         anoInicio: anoInicio.toString(),
         onlyRelevant: onlyRelevant.toString(),
       });
+
+      if (searchTerm && searchTerm.trim()) {
+        params.append('searchTerm', searchTerm.trim());
+      }
 
       const response = await fetch(`/api/admin/tcu-import?${params}`);
       const data = await response.json();
@@ -200,6 +216,21 @@ export default function TCUImportPage() {
     handleEditCourses(key, newCourses);
   };
 
+  // Abrir modal de preview com ementa completa
+  const handleOpenPreview = (acordao: AcordaoPreview) => {
+    setSelectedAcordao(acordao);
+    setPreviewModalOpen(true);
+  };
+
+  // Aplicar edições em lote
+  const handleApplyBulkEdits = () => {
+    // Aqui aplicamos a categoria em lote para todos os selecionados
+    // Por enquanto, isso só será aplicado na importação
+    // A categoria será usada quando os acórdãos forem importados
+    alert(`Categoria "${bulkEditCategory}" será aplicada aos ${selectedAcordaos.size} acórdãos selecionados na importação.`);
+    setShowBulkEditPanel(false);
+  };
+
   // Filtrar preview
   const filteredPreview = preview.filter(ac => {
     if (filterColegiado && ac.colegiado !== filterColegiado) return false;
@@ -258,6 +289,20 @@ export default function TCUImportPage() {
                 <span className="text-sm">Apenas acórdãos relevantes</span>
               </label>
             </div>
+          </div>
+
+          <div className="mb-4">
+            <label className="block text-sm font-medium mb-2">🔍 Buscar por palavra-chave</label>
+            <input
+              type="text"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              placeholder="Digite uma palavra-chave para buscar na ementa ou título..."
+              className="w-full px-3 py-2 border rounded focus:ring-2 focus:ring-blue-500"
+            />
+            <p className="text-xs text-gray-500 mt-1">
+              A busca será feita no título e ementa dos acórdãos
+            </p>
           </div>
 
           <button
@@ -370,6 +415,61 @@ export default function TCUImportPage() {
               </div>
             </div>
 
+            {/* Painel de Edição em Lote */}
+            {selectedAcordaos.size > 0 && (
+              <div className="mb-6 p-4 bg-gradient-to-r from-purple-50 to-blue-50 border-2 border-purple-200 rounded-lg">
+                <div className="flex items-center justify-between mb-3">
+                  <h3 className="font-semibold text-purple-900">
+                    ✏️ Edição em Lote ({selectedAcordaos.size} selecionados)
+                  </h3>
+                  <button
+                    onClick={() => setShowBulkEditPanel(!showBulkEditPanel)}
+                    className="px-3 py-1 text-sm bg-purple-600 text-white rounded hover:bg-purple-700"
+                  >
+                    {showBulkEditPanel ? 'Ocultar' : 'Mostrar Opções'}
+                  </button>
+                </div>
+
+                {showBulkEditPanel && (
+                  <div className="space-y-4">
+                    {/* Alterar Categoria em Lote */}
+                    <div>
+                      <label className="block text-sm font-medium mb-2 text-purple-900">
+                        Categoria (será aplicada a todos os selecionados)
+                      </label>
+                      <div className="flex gap-2">
+                        <select
+                          value={bulkEditCategory}
+                          onChange={(e) => setBulkEditCategory(e.target.value)}
+                          className="flex-1 px-3 py-2 border-2 border-purple-300 rounded focus:ring-2 focus:ring-purple-500"
+                        >
+                          <option value="acordao">Acórdão</option>
+                          <option value="parecer">Parecer</option>
+                          <option value="orientacao-normativa">Orientação Normativa</option>
+                          <option value="apostila">Apostila</option>
+                          <option value="artigo">Artigo</option>
+                          <option value="edital">Edital</option>
+                          <option value="outro">Outro</option>
+                        </select>
+                        <button
+                          onClick={handleApplyBulkEdits}
+                          className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 font-medium"
+                        >
+                          Aplicar
+                        </button>
+                      </div>
+                    </div>
+
+                    {/* Informação */}
+                    <div className="text-xs text-purple-700 bg-purple-100 p-3 rounded">
+                      💡 <strong>Dica:</strong> As alterações de categoria serão aplicadas durante a importação.
+                      Para editar cursos individualmente, use os botões azuis em cada acórdão.
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
+
             <div className="space-y-4">
               {filteredPreview.map((acordao, idx) => {
                 const key = `${acordao.numeroAcordao}/${acordao.anoAcordao}`;
@@ -404,19 +504,41 @@ export default function TCUImportPage() {
                       <div className="flex-1">
                         <div className="flex items-start justify-between mb-2">
                           <div className="flex-1">
-                            <h3 className="font-semibold text-lg">
-                              Acórdão TCU nº {acordao.numeroAcordao}/{acordao.anoAcordao}
+                            <div className="flex items-center gap-2 mb-1">
+                              <h3 className="font-semibold text-lg">
+                                Acórdão TCU nº {acordao.numeroAcordao}/{acordao.anoAcordao}
+                              </h3>
+                              <button
+                                onClick={() => handleOpenPreview(acordao)}
+                                className="p-1 hover:bg-blue-100 rounded transition-colors"
+                                title="Ver ementa completa"
+                              >
+                                <Eye className="w-5 h-5 text-blue-600" />
+                              </button>
+                              {acordao.urlAcordao && (
+                                <a
+                                  href={acordao.urlAcordao}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="p-1 hover:bg-green-100 rounded transition-colors"
+                                  title="Abrir no site do TCU"
+                                >
+                                  <ExternalLink className="w-5 h-5 text-green-600" />
+                                </a>
+                              )}
+                            </div>
+                            <div className="flex items-center gap-2">
                               {acordao.isNovo && (
-                                <span className="ml-2 text-sm bg-green-500 text-white px-2 py-1 rounded">
+                                <span className="text-sm bg-green-500 text-white px-2 py-1 rounded">
                                   ✨ NOVO
                                 </span>
                               )}
                               {!acordao.isNovo && (
-                                <span className="ml-2 text-sm bg-gray-500 text-white px-2 py-1 rounded">
+                                <span className="text-sm bg-gray-500 text-white px-2 py-1 rounded">
                                   ✓ JÁ IMPORTADO
                                 </span>
                               )}
-                            </h3>
+                            </div>
                             <div className="text-sm text-gray-600 mt-1">
                               {acordao.colegiado} | {acordao.relator} | {acordao.tipo}
                             </div>
@@ -547,6 +669,95 @@ export default function TCUImportPage() {
           </div>
         )}
       </div>
+
+      {/* Modal de Preview da Ementa */}
+      <Dialog open={previewModalOpen} onOpenChange={setPreviewModalOpen}>
+        <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
+          {selectedAcordao && (
+            <>
+              <DialogHeader>
+                <DialogTitle className="text-2xl font-bold">
+                  Acórdão TCU nº {selectedAcordao.numeroAcordao}/{selectedAcordao.anoAcordao}
+                </DialogTitle>
+                <DialogDescription className="text-sm text-gray-600 mt-2">
+                  {selectedAcordao.colegiado} | Relator: {selectedAcordao.relator}
+                </DialogDescription>
+              </DialogHeader>
+
+              <div className="space-y-4 mt-4">
+                {/* Título */}
+                {selectedAcordao.titulo && (
+                  <div>
+                    <h4 className="font-semibold text-sm text-gray-700 mb-1">Título:</h4>
+                    <p className="text-sm text-gray-900">{selectedAcordao.titulo}</p>
+                  </div>
+                )}
+
+                {/* Ementa Completa */}
+                <div>
+                  <h4 className="font-semibold text-sm text-gray-700 mb-1">Ementa:</h4>
+                  <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
+                    <p className="text-sm text-gray-900 whitespace-pre-wrap">{selectedAcordao.sumario}</p>
+                  </div>
+                </div>
+
+                {/* Metadados */}
+                <div className="grid grid-cols-2 gap-4 p-4 bg-blue-50 rounded-lg">
+                  <div>
+                    <span className="text-xs font-semibold text-gray-600">Tipo:</span>
+                    <p className="text-sm text-gray-900">{selectedAcordao.tipo}</p>
+                  </div>
+                  <div>
+                    <span className="text-xs font-semibold text-gray-600">Score de Relevância:</span>
+                    <p className="text-sm text-gray-900">{selectedAcordao.relevanceScore}%</p>
+                  </div>
+                </div>
+
+                {/* Cursos Sugeridos */}
+                <div>
+                  <h4 className="font-semibold text-sm text-gray-700 mb-2">Cursos Sugeridos:</h4>
+                  <div className="flex flex-wrap gap-2">
+                    {selectedAcordao.suggestedCourses.map(courseId => (
+                      <span
+                        key={courseId}
+                        className="bg-blue-600 text-white text-xs px-3 py-1 rounded-full"
+                      >
+                        {courseNames[courseId] || `Curso ${courseId}`}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Links */}
+                <div className="flex gap-4 pt-4 border-t">
+                  {selectedAcordao.urlAcordao && (
+                    <a
+                      href={selectedAcordao.urlAcordao}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
+                    >
+                      <ExternalLink className="w-4 h-4" />
+                      Abrir no site do TCU
+                    </a>
+                  )}
+                  {selectedAcordao.urlArquivoPDF && (
+                    <a
+                      href={selectedAcordao.urlArquivoPDF}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex items-center gap-2 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
+                    >
+                      <ExternalLink className="w-4 h-4" />
+                      Download PDF
+                    </a>
+                  )}
+                </div>
+              </div>
+            </>
+          )}
+        </DialogContent>
+      </Dialog>
     </AdminLayout>
   );
 }

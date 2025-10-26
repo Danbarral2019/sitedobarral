@@ -50,6 +50,16 @@ model Document {
   uploadedAt      DateTime @default(now())
   updatedAt       DateTime @updatedAt
   notifiedAt      DateTime? // Data em que os alunos foram notificados sobre este documento
+  reviewed        Boolean  @default(false) // Se o documento já foi revisado por um humano
+  reviewedAt      DateTime? // Data em que o documento foi revisado
+
+  // Sistema de Feedback de IA/ML (Fase 3D)
+  aiClassification    String?   // JSON com classificação da IA (category, courses, tags, confidence, reasoning)
+  feedbackRelevance   String?   // 'relevant' | 'irrelevant' | 'partially-relevant' (feedback do admin)
+  feedbackReasoning   String?   // Explicação do admin sobre a relevância
+  feedbackGivenAt     DateTime? // Data do feedback
+  feedbackGivenBy     String?   // Email do admin que deu o feedback
+  aiSuggestedArticles String?   // JSON array com artigos da Lei 14.133 sugeridos pela IA
 
   @@index([courseId])
   @@index([category])
@@ -59,6 +69,9 @@ model Document {
   @@index([courseId, notifiedAt])
   @@index([isCommon]) // Índice para buscar documentos comuns rapidamente
   @@index([category, onNumber, onYear]) // Índice para ordenação numérica de ONs
+  @@index([reviewed]) // Índice para buscar documentos não revisados
+  @@index([reviewed, uploadedAt]) // Índice para ordenar documentos não revisados por data
+  @@index([feedbackRelevance]) // Índice para filtrar por feedback
 }
 
 // Usuários (admin e estudantes)

@@ -331,6 +331,7 @@ export interface EnhancedClassificationResult {
   confidence: number;
   source: 'basic' | 'claude' | 'hybrid'; // Origem da classificação
   reasoning?: string; // Explicação (quando Claude usado)
+  suggestedArticles?: number[]; // Artigos da Lei 14.133/2021 (quando Claude usado)
 }
 
 /**
@@ -403,6 +404,7 @@ export async function classifyDocumentEnhanced(
       confidence: claudeResult.confidence,
       source: 'claude',
       reasoning: claudeResult.reasoning,
+      suggestedArticles: claudeResult.suggestedArticles,
     };
 
   } catch (error) {

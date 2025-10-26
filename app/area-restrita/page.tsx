@@ -17,6 +17,7 @@ import CourseVideos from '@/components/CourseVideos';
 import RecommendedSites from '@/components/RecommendedSites';
 import SearchBar from '@/components/SearchBar';
 import SearchFilters from '@/components/SearchFilters';
+import PDFExportPanel from '@/components/PDFExportPanel';
 
 interface DocumentType {
   id: string;
@@ -531,6 +532,13 @@ export default function AreaRestritaPage() {
           onView={selectedDocument.type === 'link' ? () => handleView(selectedDocument, selectedCourse.id) : undefined}
         />
       )}
+
+      {/* Painel de Exportação PDF - Fase 3C */}
+      <PDFExportPanel
+        documents={selectedCourseDocuments}
+        userName={user.name}
+        userEmail={user.email}
+      />
 
       {/* Bottom Navigation - apenas mobile */}
       <nav className="lg:hidden fixed bottom-0 left-0 right-0 bg-white border-t-2 border-gray-200 shadow-2xl z-50 pb-safe">
