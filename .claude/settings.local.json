@@ -44,7 +44,10 @@
       "Bash(node scripts/check-on-distribution.js:*)",
       "Bash(npx prisma migrate dev:*)",
       "Bash(node scripts/migrate-ons-to-common.js:*)",
-      "Bash(node scripts/test-common-documents.js:*)"
+      "Bash(node scripts/test-common-documents.js:*)",
+      "Bash(node scripts/analyze-multiple-fundamentacoes.js:*)",
+      "Bash(node scripts/consolidate-multiple-fundamentacoes.js:*)",
+      "Bash(node scripts/fix-dou-links.js:*)"
     ],
     "deny": [],
     "ask": []
