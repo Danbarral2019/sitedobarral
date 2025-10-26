@@ -11,12 +11,12 @@ export const GET = withAdminAuth(async (request: NextRequest) => {
     const { searchParams } = new URL(request.url);
     const unreadOnly = searchParams.get('unreadOnly') === 'true';
 
-    const where = unreadOnly ? { read: false } : {};
+    const where = unreadOnly ? { isRead: false } : {};
 
     const contacts = await prisma.contactForm.findMany({
       where,
       orderBy: {
-        submittedAt: 'desc',
+        createdAt: 'desc',
       },
     });
 
@@ -40,18 +40,18 @@ export const GET = withAdminAuth(async (request: NextRequest) => {
  */
 export const PATCH = withAdminAuth(async (request: NextRequest) => {
   try {
-    const { id, read } = await request.json();
+    const { id, isRead } = await request.json();
 
-    if (!id || typeof read !== 'boolean') {
+    if (!id || typeof isRead !== 'boolean') {
       return NextResponse.json(
-        { error: 'ID e read são obrigatórios' },
+        { error: 'ID e isRead são obrigatórios' },
         { status: 400 }
       );
     }
 
     const contact = await prisma.contactForm.update({
       where: { id },
-      data: { read },
+      data: { isRead },
     });
 
     return NextResponse.json({
