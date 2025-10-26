@@ -381,19 +381,11 @@ export function convertOrientacoesToDocuments(
   }> = [];
 
   for (const on of orientacoes) {
-    // Se não tem nenhum link de fundamentação, usa link do DOU ou link para a página da AGU
+    // IMPORTANTE: Não cria documentos sem links de fundamentação (PDFs)
+    // Os links do DOU (in.gov.br) estão quebrados, então só usamos PDFs válidos
     if (on.fundamentacaoLinks.length === 0) {
-      const fallbackUrl = on.linkDOU || `https://www.gov.br/agu/pt-br/composicao/cgu/cgu/onsagu#on-${on.numeroCompleto.replace('/', '-')}`;
-
-      documents.push({
-        title: `${on.numero} - ${on.titulo}`,
-        description: on.descricao || `Orientação Normativa da AGU nº ${on.numeroCompleto}`,
-        category: 'orientacao-normativa',
-        url: fallbackUrl,
-        tags: on.tags,
-        isPublic: true,
-      });
-      continue;
+      console.log(`[AGU Scraper] ⚠️ Pulando ${on.numero} - sem links de fundamentação (PDF)`);
+      continue; // Pula ONs sem PDFs
     }
 
     // Se tem apenas 1 link de fundamentação, cria 1 documento
@@ -434,17 +426,19 @@ export function convertOrientacoesToDocuments(
 export function generateOrientacoesExcel(orientacoes: OrientacaoNormativa[]): string[][] {
   const headers = ['Titulo', 'Descricao', 'Categoria', 'Curso', 'Publico', 'Tags', 'Artigos', 'URL', 'Arquivo'];
 
-  const rows = orientacoes.map(on => [
-    `${on.numero} - ${on.titulo}`,
-    on.descricao || `Orientação Normativa da AGU nº ${on.numeroCompleto}`,
-    'orientacao-normativa',
-    'TODOS', // Adiciona a todos os cursos
-    'Sim',
-    on.tags.join(', '),
-    '', // Artigos (vazio)
-    on.linkFundamentacao || on.linkDOU || '',
-    '', // Arquivo (vazio - é link externo)
-  ]);
+  const rows = orientacoes
+    .filter(on => on.fundamentacaoLinks.length > 0) // Só inclui ONs com PDFs
+    .map(on => [
+      `${on.numero} - ${on.titulo}`,
+      on.descricao || `Orientação Normativa da AGU nº ${on.numeroCompleto}`,
+      'orientacao-normativa',
+      'TODOS', // Adiciona a todos os cursos
+      'Sim',
+      on.tags.join(', '),
+      '', // Artigos (vazio)
+      on.linkFundamentacao || '', // Usa apenas link de fundamentação (PDF)
+      '', // Arquivo (vazio - é link externo)
+    ]);
 
   return [headers, ...rows];
 }
