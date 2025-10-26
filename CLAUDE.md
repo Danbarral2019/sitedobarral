@@ -400,6 +400,10 @@ See `prisma/schema.prisma` for complete schema with indexes and constraints.
 
 **Cron Job Endpoints:**
 - `GET /api/enrollment/check-expiration` - Check and notify expiring enrollments (requires CRON_SECRET header)
+- `GET /api/cron/import-documents` - Auto import documents from scrapers (TCU, AGU) weekly (requires CRON_SECRET header)
+- `GET /api/cron/monthly-newsletter` - Send monthly newsletter with new documents (requires CRON_SECRET header)
+
+See `AUTOMACAO_CRON_JOBS.md` for detailed documentation on automation system.
 
 ### Rate Limiting & Security
 
