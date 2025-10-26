@@ -310,7 +310,5 @@ export const GET = withAdminAuth(async () => {
       { error: 'Erro ao buscar métricas' },
       { status: 500 }
     );
-  } finally {
-    await prisma.$disconnect();
   }
 });

@@ -1,11 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
+import { withAdminAuth } from '@/lib/api-middleware';
 
 /**
  * GET /api/admin/contatos
  * Lista mensagens de contato (com filtro por lidas/não lidas)
  */
-export async function GET(request: NextRequest) {
+export const GET = withAdminAuth(async (request: NextRequest) => {
   try {
     const { searchParams } = new URL(request.url);
     const unreadOnly = searchParams.get('unreadOnly') === 'true';
@@ -31,13 +32,13 @@ export async function GET(request: NextRequest) {
       { status: 500 }
     );
   }
-}
+});
 
 /**
  * PATCH /api/admin/contatos
  * Marca mensagem como lida/não lida
  */
-export async function PATCH(request: NextRequest) {
+export const PATCH = withAdminAuth(async (request: NextRequest) => {
   try {
     const { id, read } = await request.json();
 
@@ -64,13 +65,13 @@ export async function PATCH(request: NextRequest) {
       { status: 500 }
     );
   }
-}
+});
 
 /**
  * DELETE /api/admin/contatos
  * Deleta uma mensagem de contato
  */
-export async function DELETE(request: NextRequest) {
+export const DELETE = withAdminAuth(async (request: NextRequest) => {
   try {
     const { id } = await request.json();
 
@@ -96,4 +97,4 @@ export async function DELETE(request: NextRequest) {
       { status: 500 }
     );
   }
-}
+});
