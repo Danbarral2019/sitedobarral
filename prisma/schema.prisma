@@ -32,21 +32,22 @@ model QRCode {
 
 // Documentos dos cursos
 model Document {
-  id          String   @id @default(uuid())
-  title       String
-  description String?
-  type        String   // pdf, doc, link, video
-  url         String
-  category    String   // apostila, acordao, parecer, edital, artigo, outro
-  courseId    String?  // NULL se isCommon=true (disponível para todos os cursos)
-  isPublic    Boolean  @default(false)
-  isCommon    Boolean  @default(false) // Se true, documento aparece em todos os cursos
-  tags        String?  // JSON array como string
-  leiArticles String?  // JSON array com números de artigos da Lei 14.133/2021
-  size        Int?
-  uploadedAt  DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-  notifiedAt  DateTime? // Data em que os alunos foram notificados sobre este documento
+  id              String   @id @default(uuid())
+  title           String
+  description     String?
+  type            String   // pdf, doc, link, video
+  url             String   // URL principal do documento
+  alternativeUrls String?  // JSON array com URLs alternativas (ex: múltiplas fundamentações)
+  category        String   // apostila, acordao, parecer, edital, artigo, outro
+  courseId        String?  // NULL se isCommon=true (disponível para todos os cursos)
+  isPublic        Boolean  @default(false)
+  isCommon        Boolean  @default(false) // Se true, documento aparece em todos os cursos
+  tags            String?  // JSON array como string
+  leiArticles     String?  // JSON array com números de artigos da Lei 14.133/2021
+  size            Int?
+  uploadedAt      DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  notifiedAt      DateTime? // Data em que os alunos foram notificados sobre este documento
 
   @@index([courseId])
   @@index([category])
