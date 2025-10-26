@@ -2,12 +2,23 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
+## 🆕 ÚLTIMAS ATUALIZAÇÕES (2025-01-26)
+
+**Fase 3 TCU Scraper Implementada:**
+- ✅ Exportação PDF com marca d'água (`/api/export-pdf`)
+- ✅ Sistema de feedback IA/ML para classificação
+- ✅ 4 Cron Jobs automatizados (importação, newsletter, notificações)
+- ✅ **Conversor Excel do TCU** - `npm run convert-tcu` (GAME CHANGER!)
+
+**Veja:** `SESSAO_2025-01-26_FASE_3_TCU_SCRAPER.md` para detalhes completos
+
 ## ⚠️ CRITICAL REMINDERS
 
 1. **Working Directory:** ALWAYS run commands from `projeto do site no claude/site-prof-barral/` (NOT the repository root)
 2. **Course IDs:** Database uses numeric IDs (`'1'`, `'2'`, etc.), URLs use slugs (`nova-lei-licitacoes`). See `COURSE_IDS_REFERENCE.md`
 3. **Documents:** NEVER access `course.restrictedDocuments` - always fetch from database via `/api/documents`
 4. **React Hooks:** ALL hooks must be called BEFORE any early returns (see Troubleshooting section)
+5. **Prisma Engine:** Se der "Engine not connected", matar todos processos Node.js e rodar `npx prisma generate`
 
 ## Project Overview
 
