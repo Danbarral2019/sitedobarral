@@ -47,7 +47,20 @@
       "Bash(node scripts/test-common-documents.js:*)",
       "Bash(node scripts/analyze-multiple-fundamentacoes.js:*)",
       "Bash(node scripts/consolidate-multiple-fundamentacoes.js:*)",
-      "Bash(node scripts/fix-dou-links.js:*)"
+      "Bash(node scripts/fix-dou-links.js:*)",
+      "Bash(node scripts/check-on-formatting.js:*)",
+      "Bash(node scripts/standardize-ons.js:*)",
+      "Bash(node scripts/verify-on-standardization.js:*)",
+      "Bash(node -p:*)",
+      "Bash(node scripts/prisma-push.js:*)",
+      "Bash(node scripts/populate-on-numbers.js:*)",
+      "Bash(node scripts/test-numeric-sorting.js:*)",
+      "Bash(node scripts/fix-sapiens-and-dou-links.js:*)",
+      "Bash(node scripts/test-tcu-scraper.js:*)",
+      "Bash(node scripts/list-documents.js:*)",
+      "Bash(node scripts/delete-fake-documents.js:*)",
+      "Bash(git log:*)",
+      "Bash(node:*)"
     ],
     "deny": [],
     "ask": []

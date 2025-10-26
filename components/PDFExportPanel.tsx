@@ -109,7 +109,7 @@ export default function PDFExportPanel({ documents, userName, userEmail }: PDFEx
               Exportar Documentos para PDF
             </h3>
             <p className="text-sm text-gray-600 mt-1">
-              Selecione os documentos que deseja compilar em um único PDF com marca d'água
+              Selecione os documentos que deseja compilar em um único PDF com marca d&apos;água
             </p>
           </div>
           <button
@@ -222,7 +222,7 @@ export default function PDFExportPanel({ documents, userName, userEmail }: PDFEx
       <div className="p-3 bg-gray-50 border-t text-xs text-gray-600 flex items-center gap-2">
         <span className="font-semibold">ℹ️ Informação:</span>
         <span>
-          O PDF gerado incluirá marca d'água com <strong>{userName}</strong> ({userEmail}) e data de exportação
+          O PDF gerado incluirá marca d&apos;água com <strong>{userName}</strong> ({userEmail}) e data de exportação
         </span>
       </div>
     </div>

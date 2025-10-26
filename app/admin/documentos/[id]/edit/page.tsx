@@ -75,7 +75,7 @@ export default function EditDocumentPage() {
   // Feedback de IA/ML (Fase 3D)
   const [feedbackRelevance, setFeedbackRelevance] = useState<string>('');
   const [feedbackReasoning, setFeedbackReasoning] = useState<string>('');
-  const [aiClassification, setAiClassification] = useState<any | null>(null);
+  const [aiClassification, setAiClassification] = useState<Record<string, unknown> | null>(null);
   const [aiSuggestedArticles, setAiSuggestedArticles] = useState<number[]>([]);
 
   // Carregar documento

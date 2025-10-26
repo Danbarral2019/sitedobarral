@@ -76,7 +76,7 @@ export const PUT = withAdminAuth(async (request: NextRequest, { params }: { para
     }
 
     // Prepara dados de feedback se fornecidos
-    const feedbackData: any = {};
+    const feedbackData: Record<string, unknown> = {};
     if (feedbackRelevance !== undefined) {
       feedbackData.feedbackRelevance = feedbackRelevance;
       feedbackData.feedbackGivenAt = new Date();
