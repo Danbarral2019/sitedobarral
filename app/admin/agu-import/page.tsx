@@ -16,15 +16,21 @@ interface OrientacaoPreview {
   versaoHistorica?: string;     // Indica se é uma versão histórica
 }
 
+interface ImportResult {
+  success: boolean;
+  message: string;
+  imported: number;
+  total: number;
+}
+
 export default function AGUImportPage() {
-  const router = useRouter();
   const { success, error: errorToast } = useToast();
 
   const [isLoading, setIsLoading] = useState(false);
   const [isImporting, setIsImporting] = useState(false);
   const [preview, setPreview] = useState<OrientacaoPreview[]>([]);
   const [totalFound, setTotalFound] = useState(0);
-  const [importResult, setImportResult] = useState<any>(null);
+  const [importResult, setImportResult] = useState<ImportResult | null>(null);
 
   const handlePreview = async () => {
     setIsLoading(true);
@@ -364,7 +370,7 @@ export default function AGUImportPage() {
                   <div className="mt-4 p-3 bg-blue-100 rounded-lg">
                     <p className="text-xs text-blue-900">
                       <strong>Nota:</strong> As orientações são importadas como <strong>links externos</strong> para o site da AGU.
-                      Cada orientação será marcada com a categoria <strong>"Orientação Normativa"</strong> e estará disponível
+                      Cada orientação será marcada com a categoria <strong>&quot;Orientação Normativa&quot;</strong> e estará disponível
                       para todos os alunos em todos os cursos.
                     </p>
                   </div>

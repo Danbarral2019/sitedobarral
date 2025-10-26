@@ -50,7 +50,6 @@ export function calculateSimilarityScore(
         score += commonArticles.length * 20;
 
         if (commonArticles.length === 1) {
-          const article = LEI_14133_ARTIGOS[commonArticles[0]];
           reasons.push(`Trata do mesmo artigo (Art. ${commonArticles[0]})`);
         } else if (commonArticles.length <= 3) {
           reasons.push(`Aborda ${commonArticles.length} artigos em comum (${commonArticles.join(', ')})`);
@@ -58,7 +57,7 @@ export function calculateSimilarityScore(
           reasons.push(`Compartilha ${commonArticles.length} artigos da Lei`);
         }
       }
-    } catch (error) {
+    } catch {
       // Ignora erros de parse
     }
   }
@@ -93,7 +92,7 @@ export function calculateSimilarityScore(
           reasons.push(`${commonTags.length} tags em comum`);
         }
       }
-    } catch (error) {
+    } catch {
       // Ignora erros de parse
     }
   }

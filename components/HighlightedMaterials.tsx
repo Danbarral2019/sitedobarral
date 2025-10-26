@@ -30,7 +30,6 @@ interface HighlightedMaterialsProps {
 
 export default function HighlightedMaterials({
   documents,
-  courseId,
   onDownload,
 }: HighlightedMaterialsProps) {
   // Filtrar documentos destacados

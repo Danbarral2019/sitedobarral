@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import AdminLayout from '@/components/AdminLayout';
 import { Star, Check, X, Edit2, Trash2, Clock, CheckCircle, XCircle, Loader2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
@@ -35,11 +35,7 @@ export default function DepoimentosPage() {
   const [editForm, setEditForm] = useState<Partial<Testimonial>>({});
   const { success: successToast, error: errorToast } = useToast();
 
-  useEffect(() => {
-    loadTestimonials();
-  }, [filter]);
-
-  const loadTestimonials = async () => {
+  const loadTestimonials = useCallback(async () => {
     setLoading(true);
     try {
       const response = await fetch(`/api/admin/testimonials?status=${filter}`);
@@ -57,7 +53,11 @@ export default function DepoimentosPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [filter, errorToast]);
+
+  useEffect(() => {
+    loadTestimonials();
+  }, [loadTestimonials]);
 
   const handleApprove = async (id: string) => {
     console.log('[Depoimentos] Aprovando depoimento:', id);

@@ -21,7 +21,10 @@
       "Bash(git restore --staged .claude/settings.local.json)",
       "Bash(npm run lint)",
       "WebSearch",
-      "WebFetch(domain:mailchimp.com)"
+      "WebFetch(domain:mailchimp.com)",
+      "Bash(npx tsx:*)",
+      "WebFetch(domain:www.gov.br)",
+      "Bash(cat:*)"
     ],
     "deny": [],
     "ask": []

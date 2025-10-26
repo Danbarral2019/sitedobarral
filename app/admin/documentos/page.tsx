@@ -22,6 +22,13 @@ import DocumentAnalyzer from '@/components/DocumentAnalyzer';
 
 type DocumentCategory = 'apostila' | 'acordao' | 'parecer' | 'edital' | 'artigo' | 'orientacao-normativa' | 'outro';
 
+interface UploadResponse {
+  success: boolean;
+  isAllCourses?: boolean;
+  count?: number;
+  error?: string;
+}
+
 interface Document {
   id: string;
   title: string;
@@ -346,7 +353,7 @@ export default function DocumentosPage() {
       formDataToSend.append('leiArticles', JSON.stringify(formData.leiArticles));
 
       // Usar XMLHttpRequest para rastrear progresso
-      const uploadResponse = await new Promise<any>((resolve, reject) => {
+      const uploadResponse = await new Promise<UploadResponse>((resolve, reject) => {
         const xhr = new XMLHttpRequest();
 
         xhr.upload.addEventListener('progress', (event) => {
