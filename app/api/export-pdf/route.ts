@@ -168,7 +168,7 @@ export async function POST(request: NextRequest) {
     currentY += 10;
 
     // Organiza documentos por categoria
-    const byCategory: Record<string, typeof documents> = {};
+    const byCategory: Record<string, Array<(typeof documents)[number]>> = {};
     documents.forEach(doc => {
       if (!byCategory[doc.category]) {
         byCategory[doc.category] = [];
