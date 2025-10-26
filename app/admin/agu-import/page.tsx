@@ -208,7 +208,7 @@ export default function AGUImportPage() {
                 </div>
               </div>
 
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+              <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
                 <div className="bg-white rounded-lg p-4">
                   <div className="text-2xl font-bold text-gray-900">
                     {importResult.stats.orientacoesEncontradas}
@@ -226,6 +226,12 @@ export default function AGUImportPage() {
                     {importResult.stats.documentosCriados}
                   </div>
                   <div className="text-sm text-gray-600">Documentos criados</div>
+                </div>
+                <div className="bg-white rounded-lg p-4">
+                  <div className="text-2xl font-bold text-yellow-600">
+                    {importResult.stats.documentosDuplicados || 0}
+                  </div>
+                  <div className="text-sm text-gray-600">Duplicados (pulados)</div>
                 </div>
                 <div className="bg-white rounded-lg p-4">
                   <div className="text-2xl font-bold text-red-600">

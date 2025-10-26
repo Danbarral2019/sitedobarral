@@ -30,8 +30,6 @@ export async function GET(request: NextRequest) {
       { error: 'Erro ao carregar contatos' },
       { status: 500 }
     );
-  } finally {
-    await prisma.$disconnect();
   }
 }
 
@@ -65,8 +63,6 @@ export async function PATCH(request: NextRequest) {
       { error: 'Erro ao atualizar contato' },
       { status: 500 }
     );
-  } finally {
-    await prisma.$disconnect();
   }
 }
 
@@ -99,7 +95,5 @@ export async function DELETE(request: NextRequest) {
       { error: 'Erro ao deletar contato' },
       { status: 500 }
     );
-  } finally {
-    await prisma.$disconnect();
   }
 }
