@@ -45,6 +45,8 @@ model Document {
   tags            String?  // JSON array como string
   leiArticles     String?  // JSON array com números de artigos da Lei 14.133/2021
   size            Int?
+  onNumber        Int?     // Número da ON (para ordenação numérica de Orientações Normativas)
+  onYear          Int?     // Ano da ON (para ordenação numérica de Orientações Normativas)
   uploadedAt      DateTime @default(now())
   updatedAt       DateTime @updatedAt
   notifiedAt      DateTime? // Data em que os alunos foram notificados sobre este documento
@@ -56,6 +58,7 @@ model Document {
   @@index([notifiedAt])
   @@index([courseId, notifiedAt])
   @@index([isCommon]) // Índice para buscar documentos comuns rapidamente
+  @@index([category, onNumber, onYear]) // Índice para ordenação numérica de ONs
 }
 
 // Usuários (admin e estudantes)
