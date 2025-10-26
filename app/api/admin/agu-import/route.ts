@@ -3,6 +3,7 @@ import { withAdminAuth } from '@/lib/api-middleware';
 import { scrapeOrientacoesAGU, convertOrientacoesToDocuments } from '@/lib/agu-scraper';
 import { addDocument } from '@/lib/documents';
 import { courses } from '@/data/courses';
+import { prisma } from '@/lib/prisma';
 
 /**
  * GET: Busca orientações da AGU (preview)
@@ -65,6 +66,7 @@ export const POST = withAdminAuth(async (request: NextRequest) => {
     // 4. Importa cada orientação para cada curso (em lotes para não sobrecarregar)
     let successCount = 0;
     let errorCount = 0;
+    let skippedCount = 0;
     const createdDocuments = [];
 
     const BATCH_SIZE = 50; // Processa 50 documentos por vez
@@ -74,6 +76,24 @@ export const POST = withAdminAuth(async (request: NextRequest) => {
     for (const doc of documents) {
       for (const courseId of targetCourses) {
         try {
+          // Verificar se documento já existe (por título e curso, ou por URL e curso)
+          const existing = await prisma.document.findFirst({
+            where: {
+              courseId,
+              OR: [
+                { title: doc.title },
+                { url: doc.url }
+              ]
+            }
+          });
+
+          if (existing) {
+            console.log(`[AGU Import] Documento já existe: ${doc.title} (curso: ${courseId})`);
+            skippedCount++;
+            totalOperations++;
+            continue; // Pula para o próximo
+          }
+
           const created = await addDocument(
             courseId,
             doc.title,
@@ -103,7 +123,7 @@ export const POST = withAdminAuth(async (request: NextRequest) => {
       }
     }
 
-    console.log(`[AGU Import] Importação concluída: ${successCount} sucesso, ${errorCount} erros`);
+    console.log(`[AGU Import] Importação concluída: ${successCount} criados, ${skippedCount} duplicados (pulados), ${errorCount} erros`);
 
     return NextResponse.json({
       success: true,
@@ -112,6 +132,7 @@ export const POST = withAdminAuth(async (request: NextRequest) => {
         orientacoesEncontradas: orientacoes.length,
         cursosAlvo: targetCourses.length,
         documentosCriados: successCount,
+        documentosDuplicados: skippedCount,
         erros: errorCount,
       },
       documents: createdDocuments.slice(0, 5), // Retorna primeiros 5 como exemplo
