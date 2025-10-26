@@ -339,3 +339,36 @@ model CourseVideo {
   @@index([isActive])
   @@index([courseId, isActive, displayOrder])
 }
+
+// Analytics de análises automáticas de documentos
+model DocumentAnalysis {
+  id                String   @id @default(uuid())
+  documentId        String?  // ID do documento criado (null se ainda não criado)
+  documentTitle     String   // Título do documento analisado
+  documentType      String?  // Tipo de arquivo (pdf, docx, etc.)
+
+  // Dados da análise
+  textLength        Int      // Quantidade de texto analisado
+  pageCount         Int?     // Número de páginas (se PDF)
+  citationsFound    Int      @default(0) // Artigos citados explicitamente
+  keywordsMatched   Int      @default(0) // Palavras-chave encontradas
+
+  // Sugestões geradas
+  suggestedArticles String   // JSON array com artigos sugeridos
+  totalSuggestions  Int      @default(0) // Total de sugestões geradas
+
+  // Resultados (o que o usuário aceitou)
+  acceptedArticles  String?  // JSON array com artigos aceitos
+  acceptedCount     Int      @default(0) // Quantos foram aceitos
+
+  // Métricas calculadas
+  precision         Float?   // % de sugestões aceitas (precision)
+
+  // Metadados
+  createdAt         DateTime @default(now())
+  userId            String?  // Quem fez a análise (opcional)
+
+  @@index([createdAt])
+  @@index([documentId])
+  @@index([userId])
+}

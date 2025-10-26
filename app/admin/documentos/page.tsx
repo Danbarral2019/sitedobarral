@@ -18,6 +18,7 @@ import { Pagination } from '@/components/ui/pagination';
 import { MultiFileDropzone } from '@/components/ui/multi-file-dropzone';
 import AdminLayout from '@/components/AdminLayout';
 import LeiArticleSelector from '@/components/LeiArticleSelector';
+import DocumentAnalyzer from '@/components/DocumentAnalyzer';
 
 type DocumentCategory = 'apostila' | 'acordao' | 'parecer' | 'edital' | 'artigo' | 'outro';
 
@@ -628,7 +629,21 @@ export default function DocumentosPage() {
                     </label>
                   </div>
 
-                  {/* Seletor de Artigos da Lei 14.133/2021 */}
+                  {/* Análise Automática de Artigos */}
+                  {uploadMode === 'single' && (
+                    <div>
+                      <DocumentAnalyzer
+                        title={formData.title}
+                        description={formData.description}
+                        file={selectedFile}
+                        currentSelectedArticles={formData.leiArticles}
+                        onApplySuggestions={(articles) => setFormData({ ...formData, leiArticles: articles })}
+                        disabled={!formData.title}
+                      />
+                    </div>
+                  )}
+
+                  {/* Seletor Manual de Artigos da Lei 14.133/2021 */}
                   <div>
                     <LeiArticleSelector
                       selectedArticles={formData.leiArticles}
