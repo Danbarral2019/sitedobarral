@@ -1,11 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { prisma } from '@/lib/prisma';
 import { generateToken } from '@/lib/auth';
 import { cookies } from 'next/headers';
 import bcrypt from 'bcryptjs';
 import { rateLimiters } from '@/lib/rate-limit';
-import { PrismaClient } from '@prisma/client';
 
-const prisma = new PrismaClient();
 
 export async function POST(request: NextRequest) {
   // Rate limiting: 5 tentativas de login admin por minuto

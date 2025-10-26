@@ -1,9 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { prisma } from '@/lib/prisma';
 import { withAdminAuth } from '@/lib/api-middleware';
-import { PrismaClient } from '@prisma/client';
 import { syncSubscribers, isMailChimpConfigured } from '@/lib/mailchimp';
 
-const prisma = new PrismaClient();
 
 /**
  * POST /api/admin/newsletter/sync
