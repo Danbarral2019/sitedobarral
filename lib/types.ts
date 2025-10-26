@@ -19,7 +19,7 @@ export interface Document {
   description?: string;
   type: 'pdf' | 'doc' | 'link' | 'video';
   url: string;
-  category: 'apostila' | 'acordao' | 'parecer' | 'edital' | 'artigo' | 'outro';
+  category: 'apostila' | 'acordao' | 'parecer' | 'edital' | 'artigo' | 'orientacao-normativa' | 'outro';
   courseId: string;
   isPublic: boolean;
   tags: string[];

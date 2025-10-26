@@ -1,7 +1,10 @@
 /**
  * Sistema de Classificação Automática de Documentos
- * Baseado nas regras SQL de map_keywords_subtema
+ * - Análise Básica: Regras baseadas em palavras-chave
+ * - Análise Avançada: Claude AI (quando baixa confiança)
  */
+
+import { classifyWithClaude, isClaudeAvailable } from './claude-classifier';
 
 interface ClassificationRule {
   pattern: string[];        // Palavras-chave (separadas por ; no SQL)
@@ -240,7 +243,7 @@ export function autoClassifyDocument(
 export function suggestCategory(
   title: string,
   description: string = ''
-): 'apostila' | 'acordao' | 'parecer' | 'edital' | 'artigo' | 'outro' {
+): 'apostila' | 'acordao' | 'parecer' | 'edital' | 'artigo' | 'orientacao-normativa' | 'outro' {
   const text = normalizeText(`${title} ${description}`);
 
   if (text.includes('acordao') || text.includes('acórdão')) {
@@ -248,6 +251,9 @@ export function suggestCategory(
   }
   if (text.includes('parecer')) {
     return 'parecer';
+  }
+  if (text.includes('orientacao normativa') || text.includes('orientação normativa') || text.includes('on agu') || text.includes('on/agu')) {
+    return 'orientacao-normativa';
   }
   if (text.includes('edital')) {
     return 'edital';
@@ -312,4 +318,124 @@ export function bulkClassify(
       confidence: classification.confidence
     };
   });
+}
+
+// ============================================================================
+// INTEGRAÇÃO COM CLAUDE AI (ANÁLISE AVANÇADA)
+// ============================================================================
+
+export interface EnhancedClassificationResult {
+  courseSlugs: string[]; // Múltiplos cursos possíveis
+  category: 'apostila' | 'acordao' | 'parecer' | 'edital' | 'artigo' | 'orientacao-normativa' | 'outro';
+  tags: string[];
+  confidence: number;
+  source: 'basic' | 'claude' | 'hybrid'; // Origem da classificação
+  reasoning?: string; // Explicação (quando Claude usado)
+}
+
+/**
+ * Classifica documento com análise em 2 camadas:
+ * 1. Análise Básica (regras de palavras-chave)
+ * 2. Análise Avançada com Claude (se confiança baixa)
+ *
+ * @param title Título do documento
+ * @param description Descrição do documento (opcional)
+ * @param forceBasic Se true, força uso apenas da análise básica
+ */
+export async function classifyDocumentEnhanced(
+  title: string,
+  description: string = '',
+  forceBasic: boolean = false
+): Promise<EnhancedClassificationResult> {
+
+  // 1. ANÁLISE BÁSICA (sempre executada primeiro)
+  const basicClassification = autoClassifyDocument(title, description);
+  const basicCategory = suggestCategory(title, description);
+  const basicTags = extractTags(title, description);
+
+  // Limiar de confiança para acionar Claude
+  const CONFIDENCE_THRESHOLD = 50;
+  const needsClaudeAnalysis =
+    !forceBasic &&
+    isClaudeAvailable() &&
+    basicClassification.confidence < CONFIDENCE_THRESHOLD;
+
+  // Se confiança é alta OU Claude não disponível, retorna análise básica
+  if (!needsClaudeAnalysis) {
+    return {
+      courseSlugs: [basicClassification.courseSlug],
+      category: basicCategory,
+      tags: basicTags,
+      confidence: basicClassification.confidence,
+      source: 'basic',
+    };
+  }
+
+  // 2. ANÁLISE AVANÇADA COM CLAUDE
+  console.log(`[Enhanced Classifier] Baixa confiança (${basicClassification.confidence}%). Acionando Claude...`);
+
+  try {
+    const claudeResult = await classifyWithClaude(title, description);
+
+    if (!claudeResult) {
+      // Claude falhou, retorna análise básica
+      return {
+        courseSlugs: [basicClassification.courseSlug],
+        category: basicCategory,
+        tags: basicTags,
+        confidence: basicClassification.confidence,
+        source: 'basic',
+      };
+    }
+
+    // 3. COMBINA RESULTADOS (híbrido)
+    // Usa resultado do Claude mas adiciona tags básicas se relevantes
+    const combinedTags = Array.from(
+      new Set([...claudeResult.tags, ...basicTags])
+    ).slice(0, 10); // Máximo 10 tags
+
+    return {
+      courseSlugs: claudeResult.courseSlugs.length > 0
+        ? claudeResult.courseSlugs
+        : [basicClassification.courseSlug], // Fallback
+      category: claudeResult.category,
+      tags: combinedTags,
+      confidence: claudeResult.confidence,
+      source: 'claude',
+      reasoning: claudeResult.reasoning,
+    };
+
+  } catch (error) {
+    console.error('[Enhanced Classifier] Erro ao usar Claude. Retornando análise básica:', error);
+
+    // Em caso de erro, retorna análise básica
+    return {
+      courseSlugs: [basicClassification.courseSlug],
+      category: basicCategory,
+      tags: basicTags,
+      confidence: basicClassification.confidence,
+      source: 'basic',
+    };
+  }
+}
+
+/**
+ * Versão síncrona para compatibilidade com código existente
+ * Usa apenas análise básica (sem Claude)
+ */
+export function classifyDocumentSync(
+  title: string,
+  description: string = ''
+): EnhancedClassificationResult {
+  const classification = autoClassifyDocument(title, description);
+  const category = suggestCategory(title, description);
+  const tags = extractTags(title, description);
+
+  return {
+    courseSlugs: [classification.courseSlug],
+    category,
+    tags,
+    confidence: classification.confidence,
+    source: 'basic',
+  };
 }

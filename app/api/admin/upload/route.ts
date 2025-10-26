@@ -4,6 +4,7 @@ import { addDocument } from '@/lib/documents';
 import { writeFile, mkdir } from 'fs/promises';
 import { join } from 'path';
 import { randomBytes } from 'crypto';
+import { courses } from '@/data/courses';
 
 export const POST = withAdminAuth(async (request: NextRequest) => {
   try {
@@ -36,42 +37,57 @@ export const POST = withAdminAuth(async (request: NextRequest) => {
       fileType = 'doc';
     }
 
+    // Verifica se é para todos os cursos
+    const isAllCourses = courseId.toUpperCase() === 'TODOS' || courseId === '*';
+    const targetCourses = isAllCourses
+      ? courses.map(c => c.id)
+      : [courseId];
+
+    const createdDocuments = [];
+
     // Gera nome único para o arquivo
     const uniqueId = randomBytes(8).toString('hex');
     const fileName = `${uniqueId}-${file.name}`;
 
-    // Define o caminho de upload
-    const uploadDir = join(process.cwd(), 'public', 'uploads', courseId);
-    const filePath = join(uploadDir, fileName);
+    for (const targetCourseId of targetCourses) {
+      // Define o caminho de upload
+      const uploadDir = join(process.cwd(), 'public', 'uploads', targetCourseId);
+      const filePath = join(uploadDir, fileName);
 
-    // Cria o diretório se não existir
-    await mkdir(uploadDir, { recursive: true });
+      // Cria o diretório se não existir
+      await mkdir(uploadDir, { recursive: true });
 
-    // Salva o arquivo
-    const bytes = await file.arrayBuffer();
-    const buffer = Buffer.from(bytes);
-    await writeFile(filePath, buffer);
+      // Salva o arquivo
+      const bytes = await file.arrayBuffer();
+      const buffer = Buffer.from(bytes);
+      await writeFile(filePath, buffer);
 
-    // URL relativa do arquivo
-    const fileUrl = `/uploads/${courseId}/${fileName}`;
+      // URL relativa do arquivo
+      const fileUrl = `/uploads/${targetCourseId}/${fileName}`;
 
-    // Adiciona documento ao sistema
-    const document = await addDocument(
-      courseId,
-      title,
-      description || '',
-      fileType,
-      category as "apostila" | "acordao" | "parecer" | "edital" | "artigo" | "outro",
-      isPublic,
-      fileUrl,
-      file.size,
-      tags ? tags.split(',').map(t => t.trim()) : [],
-      leiArticles ? JSON.parse(leiArticles) : []
-    );
+      // Adiciona documento ao sistema
+      const document = await addDocument(
+        targetCourseId,
+        title,
+        description || '',
+        fileType,
+        category as "apostila" | "acordao" | "parecer" | "edital" | "artigo" | "orientacao-normativa" | "outro",
+        isPublic,
+        fileUrl,
+        file.size,
+        tags ? tags.split(',').map(t => t.trim()) : [],
+        leiArticles ? JSON.parse(leiArticles) : []
+      );
+
+      createdDocuments.push(document);
+    }
 
     return NextResponse.json({
       success: true,
-      document,
+      document: createdDocuments[0], // Primeiro documento para compatibilidade
+      documents: createdDocuments, // Todos os documentos criados
+      count: createdDocuments.length,
+      isAllCourses,
     });
   } catch (error) {
     console.error('Erro ao fazer upload:', error);

@@ -20,7 +20,7 @@ export interface ExcelDocumentRow {
 export interface ProcessedDocument {
   title: string;
   description: string;
-  category: 'apostila' | 'acordao' | 'parecer' | 'edital' | 'artigo' | 'outro';
+  category: 'apostila' | 'acordao' | 'parecer' | 'edital' | 'artigo' | 'orientacao-normativa' | 'outro';
   courseId?: string;
   courseSlug?: string;
   // Múltiplos cursos
@@ -147,7 +147,7 @@ function processRow(
   let category: ProcessedDocument['category'] = 'outro';
   if (row.categoria) {
     const normalizedCategory = row.categoria.toLowerCase().trim();
-    const validCategories = ['apostila', 'acordao', 'parecer', 'edital', 'artigo', 'outro'];
+    const validCategories = ['apostila', 'acordao', 'parecer', 'edital', 'artigo', 'orientacao-normativa', 'outro'];
     if (validCategories.includes(normalizedCategory)) {
       category = normalizedCategory as ProcessedDocument['category'];
     } else {

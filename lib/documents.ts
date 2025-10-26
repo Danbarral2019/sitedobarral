@@ -10,7 +10,7 @@ export async function addDocument(
   title: string,
   description: string,
   type: 'pdf' | 'doc' | 'link' | 'video',
-  category: 'apostila' | 'acordao' | 'parecer' | 'edital' | 'artigo' | 'outro',
+  category: 'apostila' | 'acordao' | 'parecer' | 'edital' | 'artigo' | 'orientacao-normativa' | 'outro',
   isPublic: boolean,
   url: string,
   size?: number,
