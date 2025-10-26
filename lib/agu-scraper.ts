@@ -1,5 +1,5 @@
 /**
- * Scraper para Orientações Normativas da AGU - VERSÃO MELHORADA
+ * Scraper para Orientações Normativas da AGU - VERSÃO MELHORADA v3
  * Extrai documentos de https://www.gov.br/agu/pt-br/composicao/cgu/cgu/onsagu
  *
  * MELHORIAS v2:
@@ -7,12 +7,20 @@
  * - Extrai múltiplos PDFs de fundamentação por ON
  * - Suporta versões históricas (redações originais e atualizadas)
  * - Validação robusta de URLs antes da criação
+ *
+ * MELHORIAS v3 (2025-10-26):
+ * - Título padronizado: "Orientação Normativa AGU nº XX/XXXX"
+ * - Campos numéricos onNumber e onYear para ordenação correta
+ * - Múltiplas fundamentações usando alternativeUrls (não duplica documentos)
+ * - Conformidade com padrão estabelecido no banco de dados
  */
 
 export interface OrientacaoNormativa {
   numero: string;           // Ex: "ON 1/2009"
   ano: string;              // Ex: "2009"
   numeroCompleto: string;   // Ex: "001/2009"
+  onNumber: number;         // Número para ordenação (1, 2, 101, etc)
+  onYear: number;           // Ano para ordenação (2009, 2024, etc)
   titulo: string;           // Enunciado completo
   descricao: string;        // Descrição extraída
   linkDOU?: string;         // Link para publicação no DOU
@@ -177,10 +185,16 @@ function extractOrientacaoFromBlock(numero: string, ano: string, block: string):
   // Extrai tags relevantes
   const tags = extractTags(block, numeroDisplay);
 
+  // Converte número e ano para inteiros (para ordenação numérica)
+  const onNumber = parseInt(numero);
+  const onYear = parseInt(ano);
+
   return {
     numero: numeroDisplay,
     ano,
     numeroCompleto,
+    onNumber,
+    onYear,
     titulo: titulo || `Orientação Normativa ${numeroDisplay}`,
     descricao,
     linkDOU,
@@ -359,7 +373,10 @@ function extractTags(content: string, numero: string): string[] {
 
 /**
  * Converte Orientações para formato de documento para importação
- * VERSÃO MELHORADA: Cria múltiplos documentos quando há vários links de fundamentação
+ * VERSÃO v3 (2025-10-26):
+ * - Título padronizado: "Orientação Normativa AGU nº XX/XXXX"
+ * - Múltiplas fundamentações via alternativeUrls (NÃO duplica documentos)
+ * - Inclui onNumber e onYear para ordenação numérica
  */
 export function convertOrientacoesToDocuments(
   orientacoes: OrientacaoNormativa[]
@@ -368,16 +385,22 @@ export function convertOrientacoesToDocuments(
   description: string;
   category: string;
   url: string;
+  alternativeUrls?: string;
   tags: string[];
   isPublic: boolean;
+  onNumber: number;
+  onYear: number;
 }> {
   const documents: Array<{
     title: string;
     description: string;
     category: string;
     url: string;
+    alternativeUrls?: string;
     tags: string[];
     isPublic: boolean;
+    onNumber: number;
+    onYear: number;
   }> = [];
 
   for (const on of orientacoes) {
@@ -388,32 +411,27 @@ export function convertOrientacoesToDocuments(
       continue; // Pula ONs sem PDFs
     }
 
-    // Se tem apenas 1 link de fundamentação, cria 1 documento
-    if (on.fundamentacaoLinks.length === 1) {
-      documents.push({
-        title: `${on.numero} - ${on.titulo}`,
-        description: on.descricao || `Orientação Normativa da AGU nº ${on.numeroCompleto}`,
-        category: 'orientacao-normativa',
-        url: on.fundamentacaoLinks[0],
-        tags: on.tags,
-        isPublic: true,
-      });
-      continue;
-    }
+    // Título padronizado: "Orientação Normativa AGU nº XX/XXXX"
+    const title = `Orientação Normativa AGU nº ${on.onNumber}/${on.onYear}`;
 
-    // Se tem múltiplos links de fundamentação, cria documento para cada um
-    on.fundamentacaoLinks.forEach((link, index) => {
-      const suffix = index === 0 ? '' : ` (Fundamentação ${index + 1})`;
-      const versionSuffix = on.versaoHistorica ? ` - ${on.versaoHistorica}` : '';
+    // URL principal: primeiro link de fundamentação
+    const mainUrl = on.fundamentacaoLinks[0];
 
-      documents.push({
-        title: `${on.numero}${suffix}${versionSuffix} - ${on.titulo}`,
-        description: on.descricao || `Orientação Normativa da AGU nº ${on.numeroCompleto}`,
-        category: 'orientacao-normativa',
-        url: link,
-        tags: [...on.tags, index === 0 ? 'Fundamentação Principal' : `Fundamentação ${index + 1}`],
-        isPublic: true,
-      });
+    // URLs alternativas: demais links (se houver)
+    const alternativeUrls = on.fundamentacaoLinks.length > 1
+      ? JSON.stringify(on.fundamentacaoLinks.slice(1))
+      : undefined;
+
+    documents.push({
+      title,
+      description: on.descricao || `Orientação Normativa da AGU nº ${on.numeroCompleto}`,
+      category: 'orientacao-normativa',
+      url: mainUrl,
+      alternativeUrls,
+      tags: on.tags,
+      isPublic: true,
+      onNumber: on.onNumber,
+      onYear: on.onYear,
     });
   }
 
@@ -422,6 +440,7 @@ export function convertOrientacoesToDocuments(
 
 /**
  * Gera planilha Excel com as orientações para revisão manual
+ * VERSÃO v3 (2025-10-26): Usa título padronizado
  */
 export function generateOrientacoesExcel(orientacoes: OrientacaoNormativa[]): string[][] {
   const headers = ['Titulo', 'Descricao', 'Categoria', 'Curso', 'Publico', 'Tags', 'Artigos', 'URL', 'Arquivo'];
@@ -429,7 +448,7 @@ export function generateOrientacoesExcel(orientacoes: OrientacaoNormativa[]): st
   const rows = orientacoes
     .filter(on => on.fundamentacaoLinks.length > 0) // Só inclui ONs com PDFs
     .map(on => [
-      `${on.numero} - ${on.titulo}`,
+      `Orientação Normativa AGU nº ${on.onNumber}/${on.onYear}`, // Título padronizado
       on.descricao || `Orientação Normativa da AGU nº ${on.numeroCompleto}`,
       'orientacao-normativa',
       'TODOS', // Adiciona a todos os cursos

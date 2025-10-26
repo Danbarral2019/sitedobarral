@@ -198,7 +198,10 @@ export const POST = withAdminAuth(async (request: NextRequest) => {
             doc.url,
             undefined, // size (não aplicável para links)
             doc.tags,
-            [] // leiArticles (vazio)
+            [], // leiArticles (vazio)
+            doc.alternativeUrls, // URLs alternativas para múltiplas fundamentações
+            doc.onNumber, // Número da ON (para ordenação numérica)
+            doc.onYear // Ano da ON (para ordenação numérica)
           );
 
           createdDocuments.push(created);
