@@ -41,6 +41,8 @@ interface Document {
   leiArticles?: string; // JSON array de números de artigos
   size?: number;
   uploadedAt: string;
+  reviewed?: boolean; // Se foi revisado por um humano
+  reviewedAt?: string; // Data da revisão
 }
 
 export default function DocumentosPage() {
@@ -945,7 +947,7 @@ export default function DocumentosPage() {
                               </button>
 
                               <div className="flex-1">
-                              <div className="flex items-center gap-2 mb-1">
+                              <div className="flex items-center gap-2 mb-1 flex-wrap">
                                 <h3 className="font-bold text-gray-900">{doc.title}</h3>
                                 {doc.isPublic ? (
                                   <span className="px-2 py-1 bg-green-100 text-green-800 text-xs font-bold rounded-full flex items-center gap-1">
@@ -956,6 +958,16 @@ export default function DocumentosPage() {
                                   <span className="px-2 py-1 bg-orange-100 text-orange-800 text-xs font-bold rounded-full flex items-center gap-1">
                                     <EyeOff className="w-3 h-3" />
                                     Restrito
+                                  </span>
+                                )}
+                                {/* Badge de status de revisão */}
+                                {doc.reviewed ? (
+                                  <span className="px-2 py-1 bg-blue-100 text-blue-800 text-xs font-bold rounded-full">
+                                    Revisado
+                                  </span>
+                                ) : (
+                                  <span className="px-2 py-1 bg-yellow-100 text-yellow-800 text-xs font-bold rounded-full animate-pulse">
+                                    Novo
                                   </span>
                                 )}
                               </div>

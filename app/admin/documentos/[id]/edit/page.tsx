@@ -25,6 +25,13 @@ interface Document {
   alternativeUrls: string | null;
   size?: number;
   uploadedAt: string;
+  // Feedback de IA/ML
+  aiClassification?: string | null;
+  feedbackRelevance?: string | null;
+  feedbackReasoning?: string | null;
+  feedbackGivenAt?: string | null;
+  feedbackGivenBy?: string | null;
+  aiSuggestedArticles?: string | null;
 }
 
 interface AlternativeUrl {
@@ -65,6 +72,12 @@ export default function EditDocumentPage() {
   const [uploadingFile, setUploadingFile] = useState(false);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
 
+  // Feedback de IA/ML (Fase 3D)
+  const [feedbackRelevance, setFeedbackRelevance] = useState<string>('');
+  const [feedbackReasoning, setFeedbackReasoning] = useState<string>('');
+  const [aiClassification, setAiClassification] = useState<any | null>(null);
+  const [aiSuggestedArticles, setAiSuggestedArticles] = useState<number[]>([]);
+
   // Carregar documento
   useEffect(() => {
     loadDocument();
@@ -100,6 +113,28 @@ export default function EditDocumentPage() {
           setAlternativeUrls(Array.isArray(parsed) ? parsed : []);
         } catch {
           setAlternativeUrls([]);
+        }
+      }
+
+      // Parse feedback fields (Fase 3D)
+      setFeedbackRelevance(data.feedbackRelevance || '');
+      setFeedbackReasoning(data.feedbackReasoning || '');
+
+      if (data.aiClassification) {
+        try {
+          const parsed = JSON.parse(data.aiClassification);
+          setAiClassification(parsed);
+        } catch {
+          setAiClassification(null);
+        }
+      }
+
+      if (data.aiSuggestedArticles) {
+        try {
+          const parsed = JSON.parse(data.aiSuggestedArticles);
+          setAiSuggestedArticles(Array.isArray(parsed) ? parsed : []);
+        } catch {
+          setAiSuggestedArticles([]);
         }
       }
     } catch (error) {
@@ -168,6 +203,9 @@ export default function EditDocumentPage() {
           tags,
           leiArticles,
           alternativeUrls: alternativeUrls.length > 0 ? JSON.stringify(alternativeUrls) : null,
+          // Feedback de IA/ML (Fase 3D)
+          feedbackRelevance: feedbackRelevance || null,
+          feedbackReasoning: feedbackReasoning || null,
         }),
       });
 
@@ -524,6 +562,92 @@ export default function EditDocumentPage() {
                 <Plus className="w-4 h-4" />
                 Adicionar Referência
               </button>
+            </div>
+          </div>
+
+          {/* Sistema de Feedback de IA/ML (Fase 3D) */}
+          <div className="border-t pt-6">
+            <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
+              <span className="text-2xl">🤖</span>
+              Sistema de Feedback para IA/ML
+            </h3>
+
+            {/* Mostrar classificação da IA se existir */}
+            {aiClassification && (
+              <div className="mb-4 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                <h4 className="font-semibold text-blue-900 mb-2">Classificação Automática (IA):</h4>
+                <div className="text-sm space-y-1">
+                  <p><strong>Cursos sugeridos:</strong> {aiClassification.courseSlugs?.join(', ') || 'N/A'}</p>
+                  <p><strong>Categoria:</strong> {aiClassification.category || 'N/A'}</p>
+                  <p><strong>Confiança:</strong> {aiClassification.confidence}%</p>
+                  {aiClassification.reasoning && (
+                    <p className="mt-2 text-gray-700"><strong>Raciocínio:</strong> {aiClassification.reasoning}</p>
+                  )}
+                </div>
+              </div>
+            )}
+
+            {/* Mostrar artigos sugeridos pela IA */}
+            {aiSuggestedArticles && aiSuggestedArticles.length > 0 && (
+              <div className="mb-4 p-4 bg-purple-50 border border-purple-200 rounded-lg">
+                <h4 className="font-semibold text-purple-900 mb-2">Artigos Lei 14.133 Sugeridos pela IA:</h4>
+                <div className="flex flex-wrap gap-2">
+                  {aiSuggestedArticles.map((art) => (
+                    <span
+                      key={art}
+                      className="px-3 py-1 bg-purple-200 text-purple-900 rounded-full text-sm font-medium"
+                    >
+                      Art. {art}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Formulário de Feedback */}
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium mb-2">
+                  Relevância do Documento para o Repositório
+                </label>
+                <select
+                  value={feedbackRelevance}
+                  onChange={(e) => setFeedbackRelevance(e.target.value)}
+                  className="w-full px-4 py-2 border rounded focus:ring-2 focus:ring-blue-500"
+                >
+                  <option value="">Selecione uma opção</option>
+                  <option value="relevant">✅ Relevante - Documento adequado ao repositório</option>
+                  <option value="partially-relevant">⚠️ Parcialmente Relevante - Pode ser útil mas não é ideal</option>
+                  <option value="irrelevant">❌ Irrelevante - Não deve estar no repositório</option>
+                </select>
+                <p className="text-xs text-gray-500 mt-1">
+                  Essa informação será usada para treinar a IA a identificar documentos relevantes automaticamente
+                </p>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium mb-2">
+                  Explicação / Raciocínio (Por que é ou não relevante?)
+                </label>
+                <textarea
+                  value={feedbackReasoning}
+                  onChange={(e) => setFeedbackReasoning(e.target.value)}
+                  rows={4}
+                  className="w-full px-4 py-2 border rounded focus:ring-2 focus:ring-blue-500"
+                  placeholder="Explique por que este documento é relevante ou irrelevante para o repositório. Exemplo: 'Este acórdão trata especificamente de dispensa de licitação prevista no art. 75, sendo altamente relevante para o curso de Contratação Direta' ou 'Este documento é sobre aposentadoria de servidor, tema não relacionado a licitações e contratos'"
+                />
+                <p className="text-xs text-gray-500 mt-1">
+                  Quanto mais detalhada sua explicação, melhor a IA aprenderá a classificar documentos futuros
+                </p>
+              </div>
+
+              {document.feedbackGivenAt && (
+                <div className="p-3 bg-green-50 border border-green-200 rounded text-sm">
+                  <strong className="text-green-900">Feedback anterior dado em:</strong>{' '}
+                  {new Date(document.feedbackGivenAt).toLocaleString('pt-BR')}
+                  {document.feedbackGivenBy && ` por ${document.feedbackGivenBy}`}
+                </div>
+              )}
             </div>
           </div>
 

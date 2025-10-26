@@ -15,8 +15,9 @@ export const GET = withAdminAuth(async (request: NextRequest) => {
     const anoInicio = searchParams.get('anoInicio') ? parseInt(searchParams.get('anoInicio')!) : undefined;
     const anoFim = searchParams.get('anoFim') ? parseInt(searchParams.get('anoFim')!) : undefined;
     const onlyRelevant = searchParams.get('onlyRelevant') !== 'false'; // true por padrão
+    const searchTerm = searchParams.get('searchTerm') || undefined;
 
-    console.log('[TCU Import API] Buscando preview...', { inicio, quantidade, anoInicio, anoFim, onlyRelevant });
+    console.log('[TCU Import API] Buscando preview...', { inicio, quantidade, anoInicio, anoFim, onlyRelevant, searchTerm });
 
     // 1. Busca acórdãos do TCU
     const acordaos = await fetchAcordaosTCU({
@@ -25,6 +26,7 @@ export const GET = withAdminAuth(async (request: NextRequest) => {
       anoInicio,
       anoFim,
       onlyRelevant,
+      searchTerm,
     });
 
     console.log(`[TCU Import API] ${acordaos.length} acórdãos encontrados`);
@@ -108,6 +110,7 @@ export const POST = withAdminAuth(async (request: NextRequest) => {
       onlyRelevant = true,
       mode = 'incremental', // 'incremental' | 'completo'
       selectedAcordaos, // Array de acórdãos selecionados com edições
+      searchTerm, // Busca por palavra-chave
     } = body;
 
     console.log(`[TCU Import API] Iniciando importação no modo: ${mode}...`);
@@ -127,6 +130,7 @@ export const POST = withAdminAuth(async (request: NextRequest) => {
         anoInicio,
         anoFim,
         onlyRelevant,
+        searchTerm,
       });
 
       console.log(`[TCU Import API] ${acordaos.length} acórdãos encontrados`);

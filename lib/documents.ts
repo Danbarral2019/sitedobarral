@@ -83,6 +83,8 @@ export async function listDocuments(): Promise<Document[]> {
           leiArticles: doc.leiArticles ? JSON.parse(doc.leiArticles) : [],
           uploadedAt: doc.uploadedAt,
           size: doc.size || undefined,
+          reviewed: doc.reviewed || false,
+          reviewedAt: doc.reviewedAt || undefined,
         };
       } catch (error) {
         console.error('[listDocuments] Erro ao mapear documento:', doc.id, error);

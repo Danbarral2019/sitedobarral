@@ -38,6 +38,7 @@ export interface TCUFetchOptions {
   anoInicio?: number;           // Filtro por ano inicial
   anoFim?: number;              // Filtro por ano final
   onlyRelevant?: boolean;       // Filtrar apenas relevantes (padrão: true)
+  searchTerm?: string;          // Busca por palavra-chave na ementa/título
 }
 
 interface TCUApiItem {
@@ -65,12 +66,13 @@ export async function fetchAcordaosTCU(options: TCUFetchOptions = {}): Promise<A
     quantidade = 100,
     anoInicio,
     anoFim,
-    onlyRelevant = true
+    onlyRelevant = true,
+    searchTerm
   } = options;
 
   try {
     console.log('[TCU Scraper] Iniciando busca de acórdãos...');
-    console.log('[TCU Scraper] Parâmetros:', { inicio, quantidade, anoInicio, anoFim, onlyRelevant });
+    console.log('[TCU Scraper] Parâmetros:', { inicio, quantidade, anoInicio, anoFim, onlyRelevant, searchTerm });
 
     // Construir URL com parâmetros
     const params = new URLSearchParams({
@@ -110,13 +112,26 @@ export async function fetchAcordaosTCU(options: TCUFetchOptions = {}): Promise<A
     console.log(`[TCU Scraper] ${acordaos.length} acórdãos processados`);
 
     // Filtrar apenas relevantes se solicitado
+    let filtered = onlyRelevant ? acordaos.filter(ac => ac.isRelevant) : acordaos;
+
     if (onlyRelevant) {
-      const relevant = acordaos.filter(ac => ac.isRelevant);
-      console.log(`[TCU Scraper] ${relevant.length} acórdãos relevantes (${Math.round(relevant.length / acordaos.length * 100)}%)`);
-      return relevant;
+      console.log(`[TCU Scraper] ${filtered.length} acórdãos relevantes (${Math.round(filtered.length / acordaos.length * 100)}%)`);
     }
 
-    return acordaos;
+    // Filtrar por palavra-chave se fornecida
+    if (searchTerm && searchTerm.trim()) {
+      const term = searchTerm.toLowerCase().trim();
+      const beforeSearch = filtered.length;
+
+      filtered = filtered.filter(ac => {
+        const textToSearch = `${ac.titulo} ${ac.sumario}`.toLowerCase();
+        return textToSearch.includes(term);
+      });
+
+      console.log(`[TCU Scraper] Filtro de busca "${searchTerm}": ${filtered.length}/${beforeSearch} acórdãos encontrados`);
+    }
+
+    return filtered;
 
   } catch (error) {
     console.error('[TCU Scraper] Erro ao buscar acórdãos:', error);
