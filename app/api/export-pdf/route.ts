@@ -151,7 +151,7 @@ export async function POST(request: NextRequest) {
     pdf.setFontSize(9);
     pdf.setTextColor(102, 77, 3); // Marrom
     pdf.setFont('helvetica', 'bold');
-    pdf.text('⚠️ ATENÇÃO:', margin + 3, 137);
+    pdf.text('ATENCAO:', margin + 3, 137);
     pdf.setFont('helvetica', 'normal');
     const avisoText = 'Este documento foi gerado exclusivamente para o aluno identificado acima. É proibida a distribuição, reprodução ou compartilhamento sem autorização prévia.';
     const avisoLines = pdf.splitTextToSize(avisoText, maxLineWidth - 6);
@@ -199,7 +199,7 @@ export async function POST(request: NextRequest) {
       pdf.setFontSize(11);
       pdf.setFont('helvetica', 'bold');
       pdf.setTextColor(0, 102, 204);
-      pdf.text(`📁 ${categoryNames[category] || category}`, margin, currentY);
+      pdf.text(`${categoryNames[category] || category}`, margin, currentY);
       currentY += 8;
 
       // Documentos da categoria
@@ -268,7 +268,7 @@ https://www.profdanielbarral.com.br/area-restrita
 Dúvidas ou suporte:
 Email: contato@profdanielbarral.com.br
 
-© ${new Date().getFullYear()} Prof. Daniel Barral - Todos os direitos reservados.`;
+(c) ${new Date().getFullYear()} Prof. Daniel Barral - Todos os direitos reservados.`;
 
     const infoLines = pdf.splitTextToSize(infoText, maxLineWidth);
     pdf.text(infoLines, margin, 50);
