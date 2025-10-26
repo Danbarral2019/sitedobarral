@@ -64,10 +64,14 @@ export async function GET(request: NextRequest) {
       });
     }
 
+    console.log('[Batch-Data] Iniciando busca paralela para cursos:', courseIds);
+
     // Busca paralela de todos os dados necessários
-    const [documents, videos, siteToCourse] = await Promise.all([
-      // 1. Buscar todos os documentos dos cursos em uma única query
-      prisma.document.findMany({
+    let documents, videos, siteToCourse;
+
+    try {
+      console.log('[Batch-Data] Buscando documentos...');
+      documents = await prisma.document.findMany({
         where: {
           courseId: { in: courseIds },
         },
@@ -89,10 +93,11 @@ export async function GET(request: NextRequest) {
           uploadedAt: true,
           updatedAt: true,
         },
-      }),
+      });
+      console.log('[Batch-Data] Documentos encontrados:', documents.length);
 
-      // 2. Buscar todos os vídeos dos cursos
-      prisma.courseVideo.findMany({
+      console.log('[Batch-Data] Buscando vídeos...');
+      videos = await prisma.courseVideo.findMany({
         where: {
           courseId: { in: courseIds },
           isActive: true,
@@ -111,10 +116,11 @@ export async function GET(request: NextRequest) {
           thumbnailUrl: true,
           displayOrder: true,
         },
-      }),
+      });
+      console.log('[Batch-Data] Vídeos encontrados:', videos.length);
 
-      // 3. Buscar sites recomendados dos cursos
-      prisma.siteToCourse.findMany({
+      console.log('[Batch-Data] Buscando sites recomendados...');
+      siteToCourse = await prisma.siteToCourse.findMany({
         where: {
           courseId: { in: courseIds },
         },
@@ -136,8 +142,20 @@ export async function GET(request: NextRequest) {
             },
           },
         },
-      }),
-    ]);
+      });
+      console.log('[Batch-Data] Sites encontrados:', siteToCourse.length);
+    } catch (error) {
+      console.error('[Batch-Data] Erro ao buscar dados do Prisma:', error);
+      console.error('[Batch-Data] Stack trace:', error instanceof Error ? error.stack : 'N/A');
+      return NextResponse.json(
+        {
+          error: 'Erro ao buscar dados do banco de dados',
+          details: error instanceof Error ? error.message : 'Erro desconhecido',
+          courseIds
+        },
+        { status: 500 }
+      );
+    }
 
     // Agrupar resultados por courseId para fácil acesso no frontend
     const groupedDocuments: Record<string, typeof documents> = {};
@@ -171,6 +189,9 @@ export async function GET(request: NextRequest) {
         groupedSites[stc.courseId].push(stc.site);
       }
     });
+
+    console.log('[Batch-Data] Agrupamento concluído. Docs por curso:',
+      Object.entries(groupedDocuments).map(([id, docs]) => `${id}:${docs.length}`).join(', '));
 
     return NextResponse.json({
       success: true,
