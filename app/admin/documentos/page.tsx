@@ -20,7 +20,7 @@ import AdminLayout from '@/components/AdminLayout';
 import LeiArticleSelector from '@/components/LeiArticleSelector';
 import DocumentAnalyzer from '@/components/DocumentAnalyzer';
 
-type DocumentCategory = 'apostila' | 'acordao' | 'parecer' | 'edital' | 'artigo' | 'outro';
+type DocumentCategory = 'apostila' | 'acordao' | 'parecer' | 'edital' | 'artigo' | 'orientacao-normativa' | 'outro';
 
 interface Document {
   id: string;
@@ -186,7 +186,9 @@ export default function DocumentosPage() {
 
     setIsUploading(true);
     let successCount = 0;
+    let totalDocsCreated = 0;
     let errorCount = 0;
+    const isUploadingToAllCourses = formData.courseId.toUpperCase() === 'TODOS' || formData.courseId === '*';
 
     for (const file of multipleFiles) {
       try {
@@ -206,7 +208,9 @@ export default function DocumentosPage() {
         });
 
         if (response.ok) {
+          const data = await response.json();
           successCount++;
+          totalDocsCreated += data.count || 1;
         } else {
           errorCount++;
         }
@@ -220,10 +224,17 @@ export default function DocumentosPage() {
     loadDocuments();
 
     if (successCount > 0) {
-      success(
-        `${successCount} arquivo${successCount !== 1 ? 's' : ''} enviado${successCount !== 1 ? 's' : ''}!`,
-        errorCount > 0 ? `${errorCount} falharam` : 'Upload completo'
-      );
+      if (isUploadingToAllCourses) {
+        success(
+          `${successCount} arquivo${successCount !== 1 ? 's' : ''} enviado${successCount !== 1 ? 's' : ''}!`,
+          `${totalDocsCreated} documento${totalDocsCreated !== 1 ? 's' : ''} criado${totalDocsCreated !== 1 ? 's' : ''} em todos os cursos${errorCount > 0 ? ` (${errorCount} falharam)` : ''}`
+        );
+      } else {
+        success(
+          `${successCount} arquivo${successCount !== 1 ? 's' : ''} enviado${successCount !== 1 ? 's' : ''}!`,
+          errorCount > 0 ? `${errorCount} falharam` : 'Upload completo'
+        );
+      }
     } else {
       errorToast('Erro no upload', 'Não foi possível enviar os arquivos');
     }
@@ -335,7 +346,7 @@ export default function DocumentosPage() {
       formDataToSend.append('leiArticles', JSON.stringify(formData.leiArticles));
 
       // Usar XMLHttpRequest para rastrear progresso
-      await new Promise((resolve, reject) => {
+      const uploadResponse = await new Promise<any>((resolve, reject) => {
         const xhr = new XMLHttpRequest();
 
         xhr.upload.addEventListener('progress', (event) => {
@@ -347,7 +358,8 @@ export default function DocumentosPage() {
 
         xhr.addEventListener('load', () => {
           if (xhr.status === 200) {
-            resolve(JSON.parse(xhr.responseText));
+            const response = JSON.parse(xhr.responseText);
+            resolve(response);
           } else {
             const data = JSON.parse(xhr.responseText);
             reject(new Error(data.error || 'Erro no upload'));
@@ -362,7 +374,15 @@ export default function DocumentosPage() {
         xhr.send(formDataToSend);
       });
 
-      success('Upload realizado!', `O documento "${formData.title}" foi enviado com sucesso.`);
+      // Mensagem de sucesso personalizada
+      if (uploadResponse.isAllCourses) {
+        success(
+          'Upload realizado para todos os cursos!',
+          `O documento "${formData.title}" foi adicionado a ${uploadResponse.count} curso${uploadResponse.count !== 1 ? 's' : ''}.`
+        );
+      } else {
+        success('Upload realizado!', `O documento "${formData.title}" foi enviado com sucesso.`);
+      }
 
       setFormData({
         courseId: '',
@@ -538,6 +558,10 @@ export default function DocumentosPage() {
                       className="w-full px-3 py-2 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-600 text-gray-900"
                     >
                       <option value="">Selecione um curso</option>
+                      <option value="TODOS" className="font-bold bg-gradient-to-r from-blue-50 to-purple-50">
+                        ⭐ TODOS OS CURSOS ({courses.length} cursos)
+                      </option>
+                      <option disabled>──────────────────────</option>
                       {courses.map((course) => (
                         <option key={course.id} value={course.id}>
                           {course.title}
@@ -586,6 +610,7 @@ export default function DocumentosPage() {
                       <option value="apostila">Apostila</option>
                       <option value="acordao">Acórdão</option>
                       <option value="parecer">Parecer</option>
+                      <option value="orientacao-normativa">Orientação Normativa (AGU)</option>
                       <option value="edital">Edital</option>
                       <option value="artigo">Artigo</option>
                       <option value="outro">Outro</option>
@@ -738,6 +763,7 @@ export default function DocumentosPage() {
                           <option value="apostila">Apostila</option>
                           <option value="acordao">Acórdão</option>
                           <option value="parecer">Parecer</option>
+                          <option value="orientacao-normativa">Orientação Normativa (AGU)</option>
                           <option value="edital">Edital</option>
                           <option value="artigo">Artigo</option>
                           <option value="outro">Outro</option>
@@ -800,6 +826,7 @@ export default function DocumentosPage() {
                       <option value="apostila">Apostila</option>
                       <option value="acordao">Acórdão</option>
                       <option value="parecer">Parecer</option>
+                      <option value="orientacao-normativa">Orientação Normativa (AGU)</option>
                       <option value="edital">Edital</option>
                       <option value="artigo">Artigo</option>
                       <option value="outro">Outro</option>
