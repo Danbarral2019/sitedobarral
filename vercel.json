@@ -5,16 +5,8 @@
       "schedule": "0 9 * * *"
     },
     {
-      "path": "/api/cron/notify-new-documents",
-      "schedule": "0 9 * * *"
-    },
-    {
       "path": "/api/cron/import-documents",
       "schedule": "0 2 * * 2"
-    },
-    {
-      "path": "/api/cron/monthly-newsletter",
-      "schedule": "0 9 1 * *"
     }
   ]
 }
