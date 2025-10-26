@@ -41,6 +41,8 @@ interface ArticleRecommendation {
 
 type RecommendationType = 'document' | 'blog-post' | 'article';
 
+type RecommendationData = DocumentRecommendation | BlogPostRecommendation | ArticleRecommendation;
+
 interface RecommendationsPanelProps {
   type: RecommendationType;
   sourceId: string;
@@ -56,7 +58,7 @@ export default function RecommendationsPanel({
   maxItems = 5,
   variant = 'detailed'
 }: RecommendationsPanelProps) {
-  const [recommendations, setRecommendations] = useState<any[]>([]);
+  const [recommendations, setRecommendations] = useState<RecommendationData[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 

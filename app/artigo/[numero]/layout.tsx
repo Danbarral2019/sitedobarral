@@ -79,41 +79,9 @@ export async function generateMetadata({
 
 export default function ArtigoLayout({
   children,
-  params,
 }: {
   children: React.ReactNode;
   params: Promise<{ numero: string }>;
 }) {
-  return (
-    <>
-      {children}
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{
-          __html: JSON.stringify({
-            '@context': 'https://schema.org',
-            '@type': 'LegalDocument',
-            name: `Artigo ${params} - Lei 14.133/2021`,
-            description: LEI_14133_ARTIGOS[params as any]?.ementa,
-            url: `https://profbarral.com.br/artigo/${params}`,
-            inLanguage: 'pt-BR',
-            isPartOf: {
-              '@type': 'Legislation',
-              name: 'Lei 14.133/2021',
-              legislationIdentifier: 'Lei 14.133/2021',
-              legislationJurisdiction: {
-                '@type': 'Country',
-                name: 'Brasil',
-              },
-            },
-            publisher: {
-              '@type': 'Person',
-              name: 'Prof. Daniel Barral',
-              jobTitle: 'Professor de Direito Administrativo',
-            },
-          }),
-        }}
-      />
-    </>
-  );
+  return <>{children}</>;
 }

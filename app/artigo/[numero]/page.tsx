@@ -5,7 +5,6 @@ import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { Loader2, FileText, BookOpen, ArrowLeft, ExternalLink } from 'lucide-react';
 import { LEI_14133_ARTIGOS, LeiArticle } from '@/data/lei-14133-artigos';
-import LeiArticleBadge from '@/components/LeiArticleBadge';
 
 interface Document {
   id: string;
