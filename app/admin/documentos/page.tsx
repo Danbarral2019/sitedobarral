@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import {
   Upload, FileText, Loader2, Trash2,
   Eye, EyeOff, File, Search, Filter, X,
-  Download, FolderUp, CheckSquare, Square
+  Download, FolderUp, CheckSquare, Square, Edit2
 } from 'lucide-react';
 import { courses } from '@/data/courses';
 import { useToast } from '@/hooks/use-toast';
@@ -972,6 +972,13 @@ export default function DocumentosPage() {
                                 title="Visualizar"
                               >
                                 <Search className="w-5 h-5" />
+                              </button>
+                              <button
+                                onClick={() => router.push(`/admin/documentos/${doc.id}/edit`)}
+                                className="text-green-600 hover:text-green-700 hover:bg-green-50 p-2 rounded-lg transition-colors"
+                                title="Editar"
+                              >
+                                <Edit2 className="w-5 h-5" />
                               </button>
                               <button
                                 onClick={() => handleDeleteClick(doc.id)}
