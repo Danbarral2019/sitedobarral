@@ -8,6 +8,123 @@ O sistema permite importar automaticamente todas as Orientações Normativas dis
 
 **Fonte oficial:** https://www.gov.br/agu/pt-br/composicao/cgu/cgu/onsagu
 
+---
+
+## ⚡ PADRÃO ATUAL v3 (2025-10-26)
+
+### 🎯 Requisitos Obrigatórios para Novas ONs
+
+**IMPORTANTE:** Todas as novas importações DEVEM seguir este padrão padronizado estabelecido em 2025-10-26.
+
+#### 1. Título Padronizado ✅
+
+**Formato obrigatório:**
+```
+Orientação Normativa AGU nº XX/XXXX
+```
+
+**Exemplos:**
+- ✅ `Orientação Normativa AGU nº 1/2009`
+- ✅ `Orientação Normativa AGU nº 101/2025`
+- ❌ `ON 1/2009` (formato antigo, NÃO usar)
+- ❌ `Orientação Normativa 1/2009` (falta "AGU nº")
+
+#### 2. Campos Numéricos para Ordenação ✅
+
+**Obrigatórios:**
+```typescript
+{
+  onNumber: 101,   // Número da ON (inteiro)
+  onYear: 2025,    // Ano da ON (inteiro)
+}
+```
+
+**Motivo:** Garante ordenação numérica correta (ON 101, 100, 99... 2, 1) ao invés de alfabética.
+
+#### 3. Múltiplas Fundamentações ✅
+
+**REGRA CRÍTICA:** Quando uma ON possui múltiplos PDFs de fundamentação, **NÃO** criar documentos duplicados.
+
+**✅ Correto:**
+```javascript
+{
+  title: "Orientação Normativa AGU nº 26/2009",
+  url: "https://.../fundamentacao1.pdf",
+  alternativeUrls: JSON.stringify([
+    "https://.../fundamentacao2.pdf",
+    "https://.../fundamentacao3.pdf"
+  ]),
+  onNumber: 26,
+  onYear: 2009
+}
+// → 1 único registro no banco com 3 URLs
+```
+
+**❌ Incorreto (não fazer):**
+```javascript
+// NÃO criar 3 registros separados:
+{ title: "ON 26/2009 (Fundamentação 1)", url: "..." }
+{ title: "ON 26/2009 (Fundamentação 2)", url: "..." }
+{ title: "ON 26/2009 (Fundamentação 3)", url: "..." }
+```
+
+#### 4. Documentos Comuns (isCommon) ✅
+
+**Todas as ONs devem usar:**
+```javascript
+{
+  isCommon: true,    // Disponível para TODOS os cursos
+  courseId: null,    // NULL quando isCommon=true
+  isPublic: true     // Público para todos
+}
+```
+
+#### 5. Ordenação Numérica ✅
+
+**Sempre ordenar por:**
+```sql
+ORDER BY onNumber DESC, onYear DESC, title DESC
+```
+
+**Resultado esperado:**
+```
+ON 101/2025
+ON 100/2025
+ON 99/2025
+...
+ON 2/2009
+ON 1/2009
+```
+
+### 📊 Estado Atual do Banco (2025-10-26)
+
+- **Total de ONs:** 96 únicas
+- **ONs com múltiplas fundamentações:** 19
+- **Duplicatas removidas:** 14
+- **Títulos padronizados:** 100%
+- **Ordenação:** Numérica decrescente ✅
+
+### 🔧 Scripts de Verificação
+
+```bash
+# Verificar padronização
+node scripts/verify-on-standardization.js
+
+# Testar ordenação numérica
+node scripts/test-numeric-sorting.js
+
+# Verificar duplicatas
+node scripts/check-on-formatting.js
+
+# Padronizar ONs (se necessário)
+node scripts/standardize-ons.js
+
+# Popular campos numéricos
+node scripts/populate-on-numbers.js
+```
+
+---
+
 ## ✨ Funcionalidades Implementadas
 
 ### 1. **Nova Categoria de Documento**

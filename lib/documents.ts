@@ -15,7 +15,10 @@ export async function addDocument(
   url: string,
   size?: number,
   tags: string[] = [],
-  leiArticles: string[] = []
+  leiArticles: string[] = [],
+  alternativeUrls?: string, // JSON string com URLs alternativas
+  onNumber?: number, // Número da ON (para ordenação)
+  onYear?: number // Ano da ON (para ordenação)
 ): Promise<Document> {
   const dbDocument = await prisma.document.create({
     data: {
@@ -29,6 +32,9 @@ export async function addDocument(
       size: size || null,
       tags: JSON.stringify(tags),
       leiArticles: JSON.stringify(leiArticles),
+      alternativeUrls: alternativeUrls || null,
+      onNumber: onNumber || null,
+      onYear: onYear || null,
     },
   });
 
