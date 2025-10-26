@@ -83,7 +83,9 @@ export async function GET(request: NextRequest) {
           ],
         },
         orderBy: [
-          { uploadedAt: 'desc' },
+          { onNumber: 'desc' },  // Ordem decrescente por número (ON 101, 100, ..., 2, 1)
+          { onYear: 'desc' },    // Desempate por ano mais recente
+          { title: 'desc' },     // Fallback para documentos sem onNumber
         ],
         select: {
           id: true,
@@ -98,6 +100,8 @@ export async function GET(request: NextRequest) {
           tags: true,
           leiArticles: true,
           size: true,
+          onNumber: true, // Número da ON (para ordenação)
+          onYear: true,   // Ano da ON (para ordenação)
           uploadedAt: true,
           updatedAt: true,
         },
