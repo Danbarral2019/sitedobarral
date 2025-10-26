@@ -247,7 +247,7 @@ export async function POST(request: NextRequest) {
       currentY += 5;
     });
 
-    // Última página - Informações finais
+    // Ultima pagina - Informacoes finais
     pdf.addPage();
     addWatermark();
 
