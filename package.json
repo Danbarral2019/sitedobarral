@@ -8,7 +8,8 @@
     "vercel-build": "prisma generate && prisma db push --accept-data-loss && node scripts/populate-on-numbers.js && next build --turbopack",
     "start": "next start",
     "lint": "eslint",
-    "postinstall": "prisma generate"
+    "postinstall": "prisma generate",
+    "convert-tcu": "node scripts/convert-tcu-excel.js"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.67.0",
