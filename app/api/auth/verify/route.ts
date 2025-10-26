@@ -1,6 +1,7 @@
 import { getCurrentUser } from '@/lib/auth';
 import { NextResponse } from 'next/server';
 import { checkAccessStatus } from '@/lib/enrollment-utils';
+import { prisma } from '@/lib/prisma';
 
 
 export async function GET() {
