@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import AdminLayout from '@/components/AdminLayout';
+import { CheckSquare, Square, Edit2, Save, X } from 'lucide-react';
 
 interface AcordaoPreview {
   numeroAcordao: string;
@@ -10,6 +11,7 @@ interface AcordaoPreview {
   sumario: string;
   colegiado: string;
   relator: string;
+  tipo: string;
   relevanceScore: number;
   isRelevant: boolean;
   suggestedCourses: string[];
@@ -61,11 +63,21 @@ export default function TCUImportPage() {
   const [onlyRelevant, setOnlyRelevant] = useState(true);
   const [mode, setMode] = useState<'incremental' | 'completo'>('incremental');
 
+  // Filtros avançados
+  const [filterColegiado, setFilterColegiado] = useState('');
+  const [filterTipo, setFilterTipo] = useState('');
+
+  // Seleção e edição
+  const [selectedAcordaos, setSelectedAcordaos] = useState<Set<string>>(new Set());
+  const [editingCourses, setEditingCourses] = useState<Record<string, string[]>>({});
+
   const handleLoadPreview = async () => {
     setLoading(true);
     setPreview([]);
     setStats(null);
     setResult(null);
+    setSelectedAcordaos(new Set());
+    setEditingCourses({});
 
     try {
       const params = new URLSearchParams({
@@ -85,6 +97,12 @@ export default function TCUImportPage() {
       setStats(data.stats);
       setNovosCount(data.novos || 0);
       setExistentesCount(data.existentes || 0);
+
+      // Selecionar automaticamente todos os novos
+      const novosKeys = (data.preview || [])
+        .filter((ac: AcordaoPreview) => ac.isNovo)
+        .map((ac: AcordaoPreview) => `${ac.numeroAcordao}/${ac.anoAcordao}`);
+      setSelectedAcordaos(new Set(novosKeys));
     } catch (error) {
       alert(`Erro: ${error instanceof Error ? error.message : 'Erro desconhecido'}`);
     } finally {
@@ -93,7 +111,13 @@ export default function TCUImportPage() {
   };
 
   const handleImport = async () => {
-    if (!confirm(`Deseja importar ${novosCount} novos acórdãos?`)) {
+    const selectedCount = selectedAcordaos.size;
+    if (selectedCount === 0) {
+      alert('Selecione pelo menos um acórdão para importar');
+      return;
+    }
+
+    if (!confirm(`Deseja importar ${selectedCount} acórdão${selectedCount !== 1 ? 's' : ''}?`)) {
       return;
     }
 
@@ -101,6 +125,17 @@ export default function TCUImportPage() {
     setResult(null);
 
     try {
+      // Aplicar edições de cursos
+      const selectedWithEdits = preview
+        .filter(ac => selectedAcordaos.has(`${ac.numeroAcordao}/${ac.anoAcordao}`))
+        .map(ac => {
+          const key = `${ac.numeroAcordao}/${ac.anoAcordao}`;
+          return {
+            ...ac,
+            suggestedCourses: editingCourses[key] || ac.suggestedCourses,
+          };
+        });
+
       const response = await fetch('/api/admin/tcu-import', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -109,6 +144,7 @@ export default function TCUImportPage() {
           anoInicio,
           onlyRelevant,
           mode,
+          selectedAcordaos: selectedWithEdits, // Enviar apenas os selecionados com edições
         }),
       });
 
@@ -130,9 +166,54 @@ export default function TCUImportPage() {
     }
   };
 
+  const toggleSelection = (key: string) => {
+    const newSet = new Set(selectedAcordaos);
+    if (newSet.has(key)) {
+      newSet.delete(key);
+    } else {
+      newSet.add(key);
+    }
+    setSelectedAcordaos(newSet);
+  };
+
+  const toggleSelectAll = () => {
+    if (selectedAcordaos.size === filteredPreview.length) {
+      setSelectedAcordaos(new Set());
+    } else {
+      const allKeys = filteredPreview.map(ac => `${ac.numeroAcordao}/${ac.anoAcordao}`);
+      setSelectedAcordaos(new Set(allKeys));
+    }
+  };
+
+  const handleEditCourses = (key: string, courses: string[]) => {
+    setEditingCourses({
+      ...editingCourses,
+      [key]: courses,
+    });
+  };
+
+  const toggleCourseInEdit = (key: string, courseId: string) => {
+    const current = editingCourses[key] || preview.find(ac => `${ac.numeroAcordao}/${ac.anoAcordao}` === key)?.suggestedCourses || [];
+    const newCourses = current.includes(courseId)
+      ? current.filter(c => c !== courseId)
+      : [...current, courseId];
+    handleEditCourses(key, newCourses);
+  };
+
+  // Filtrar preview
+  const filteredPreview = preview.filter(ac => {
+    if (filterColegiado && ac.colegiado !== filterColegiado) return false;
+    if (filterTipo && ac.tipo !== filterTipo) return false;
+    return true;
+  });
+
+  // Extrair valores únicos para filtros
+  const colegiadosUnicos = [...new Set(preview.map(ac => ac.colegiado))].filter(Boolean);
+  const tiposUnicos = [...new Set(preview.map(ac => ac.tipo))].filter(Boolean);
+
   return (
     <AdminLayout>
-      <div className="max-w-6xl mx-auto">
+      <div className="max-w-6xl mx-auto p-6">
         <h1 className="text-3xl font-bold mb-6">🏛️ Importação de Acórdãos do TCU</h1>
 
         {/* Configurações */}
@@ -174,7 +255,7 @@ export default function TCUImportPage() {
                   onChange={(e) => setOnlyRelevant(e.target.checked)}
                   className="mr-2"
                 />
-                <span className="text-sm">Apenas acórdãos relevantes (licitações/contratos)</span>
+                <span className="text-sm">Apenas acórdãos relevantes</span>
               </label>
             </div>
           </div>
@@ -234,68 +315,167 @@ export default function TCUImportPage() {
           </div>
         )}
 
-        {/* Preview */}
+        {/* Filtros Avançados e Preview */}
         {preview.length > 0 && (
           <div className="bg-white rounded-lg shadow p-6 mb-6">
-            <h2 className="text-xl font-semibold mb-4">👀 Preview (primeiros 10)</h2>
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-xl font-semibold">👀 Preview ({filteredPreview.length})</h2>
+
+              <button
+                onClick={toggleSelectAll}
+                className="flex items-center gap-2 px-4 py-2 bg-gray-100 rounded hover:bg-gray-200"
+              >
+                {selectedAcordaos.size === filteredPreview.length ? (
+                  <>
+                    <CheckSquare className="w-5 h-5 text-blue-600" />
+                    Desmarcar Todos
+                  </>
+                ) : (
+                  <>
+                    <Square className="w-5 h-5" />
+                    Selecionar Todos
+                  </>
+                )}
+              </button>
+            </div>
+
+            {/* Filtros Avançados */}
+            <div className="grid grid-cols-2 gap-4 mb-4 p-4 bg-gray-50 rounded">
+              <div>
+                <label className="block text-sm font-medium mb-2">Filtrar por Colegiado</label>
+                <select
+                  value={filterColegiado}
+                  onChange={(e) => setFilterColegiado(e.target.value)}
+                  className="w-full px-3 py-2 border rounded"
+                >
+                  <option value="">Todos</option>
+                  {colegiadosUnicos.map(col => (
+                    <option key={col} value={col}>{col}</option>
+                  ))}
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium mb-2">Filtrar por Tipo</label>
+                <select
+                  value={filterTipo}
+                  onChange={(e) => setFilterTipo(e.target.value)}
+                  className="w-full px-3 py-2 border rounded"
+                >
+                  <option value="">Todos</option>
+                  {tiposUnicos.map(tipo => (
+                    <option key={tipo} value={tipo}>{tipo}</option>
+                  ))}
+                </select>
+              </div>
+            </div>
 
             <div className="space-y-4">
-              {preview.map((acordao, idx) => (
-                <div
-                  key={idx}
-                  className={`border rounded-lg p-4 ${
-                    acordao.isNovo ? 'border-green-400 bg-green-50' : 'border-gray-300 bg-gray-50'
-                  }`}
-                >
-                  <div className="flex items-start justify-between mb-2">
-                    <div className="flex-1">
-                      <h3 className="font-semibold text-lg">
-                        Acórdão TCU nº {acordao.numeroAcordao}/{acordao.anoAcordao}
-                        {acordao.isNovo && (
-                          <span className="ml-2 text-sm bg-green-500 text-white px-2 py-1 rounded">
-                            ✨ NOVO
-                          </span>
-                        )}
-                        {!acordao.isNovo && (
-                          <span className="ml-2 text-sm bg-gray-500 text-white px-2 py-1 rounded">
-                            ✓ JÁ IMPORTADO
-                          </span>
-                        )}
-                      </h3>
-                      <div className="text-sm text-gray-600">
-                        {acordao.colegiado} | {acordao.relator}
-                      </div>
-                    </div>
+              {filteredPreview.map((acordao, idx) => {
+                const key = `${acordao.numeroAcordao}/${acordao.anoAcordao}`;
+                const isSelected = selectedAcordaos.has(key);
+                const currentCourses = editingCourses[key] || acordao.suggestedCourses;
 
-                    <div className="text-right">
-                      <div className="text-sm font-semibold text-blue-600">
-                        Score: {acordao.relevanceScore}%
-                      </div>
-                    </div>
-                  </div>
-
-                  <p className="text-sm text-gray-700 mb-2 line-clamp-2">{acordao.sumario}</p>
-
-                  <div className="flex flex-wrap gap-2">
-                    {acordao.suggestedCourses.map((courseId) => (
-                      <span
-                        key={courseId}
-                        className="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded"
+                return (
+                  <div
+                    key={idx}
+                    className={`border rounded-lg p-4 ${
+                      isSelected
+                        ? 'border-blue-500 bg-blue-50'
+                        : acordao.isNovo
+                        ? 'border-green-400 bg-green-50'
+                        : 'border-gray-300 bg-gray-50'
+                    }`}
+                  >
+                    <div className="flex items-start gap-4">
+                      {/* Checkbox de seleção */}
+                      <button
+                        onClick={() => toggleSelection(key)}
+                        className="mt-1"
+                        disabled={!acordao.isNovo}
                       >
-                        📚 {courseNames[courseId] || `Curso ${courseId}`}
-                      </span>
-                    ))}
+                        {isSelected ? (
+                          <CheckSquare className="w-6 h-6 text-blue-600" />
+                        ) : (
+                          <Square className="w-6 h-6 text-gray-400" />
+                        )}
+                      </button>
+
+                      <div className="flex-1">
+                        <div className="flex items-start justify-between mb-2">
+                          <div className="flex-1">
+                            <h3 className="font-semibold text-lg">
+                              Acórdão TCU nº {acordao.numeroAcordao}/{acordao.anoAcordao}
+                              {acordao.isNovo && (
+                                <span className="ml-2 text-sm bg-green-500 text-white px-2 py-1 rounded">
+                                  ✨ NOVO
+                                </span>
+                              )}
+                              {!acordao.isNovo && (
+                                <span className="ml-2 text-sm bg-gray-500 text-white px-2 py-1 rounded">
+                                  ✓ JÁ IMPORTADO
+                                </span>
+                              )}
+                            </h3>
+                            <div className="text-sm text-gray-600 mt-1">
+                              {acordao.colegiado} | {acordao.relator} | {acordao.tipo}
+                            </div>
+                          </div>
+
+                          <div className="text-right">
+                            <div className="text-sm font-semibold text-blue-600">
+                              Score: {acordao.relevanceScore}%
+                            </div>
+                          </div>
+                        </div>
+
+                        <p className="text-sm text-gray-700 mb-3 line-clamp-2">{acordao.sumario}</p>
+
+                        {/* Edição de Cursos */}
+                        <div>
+                          <div className="flex items-center gap-2 mb-2">
+                            <Edit2 className="w-4 h-4 text-gray-500" />
+                            <span className="text-sm font-medium">Cursos:</span>
+                          </div>
+                          <div className="flex flex-wrap gap-2">
+                            {Object.entries(courseNames).map(([id, name]) => {
+                              const isActive = currentCourses.includes(id);
+                              return (
+                                <button
+                                  key={id}
+                                  onClick={() => toggleCourseInEdit(key, id)}
+                                  disabled={!acordao.isNovo}
+                                  className={`text-xs px-3 py-1 rounded-full transition-colors ${
+                                    isActive
+                                      ? 'bg-blue-600 text-white'
+                                      : 'bg-gray-200 text-gray-600 hover:bg-gray-300'
+                                  } disabled:opacity-50 disabled:cursor-not-allowed`}
+                                >
+                                  {isActive ? '✓ ' : ''}{name}
+                                </button>
+                              );
+                            })}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
                   </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           </div>
         )}
 
         {/* Importação */}
-        {novosCount > 0 && (
+        {selectedAcordaos.size > 0 && (
           <div className="bg-white rounded-lg shadow p-6 mb-6">
-            <h2 className="text-xl font-semibold mb-4">3. Importar</h2>
+            <h2 className="text-xl font-semibold mb-4">3. Importar Selecionados</h2>
+
+            <div className="mb-4 p-4 bg-blue-50 rounded">
+              <p className="text-sm font-medium">
+                {selectedAcordaos.size} acórdão{selectedAcordaos.size !== 1 ? 's' : ''} selecionado{selectedAcordaos.size !== 1 ? 's' : ''} para importação
+              </p>
+            </div>
 
             <div className="mb-4">
               <label className="block text-sm font-medium mb-2">Modo de Importação</label>
@@ -318,19 +498,27 @@ export default function TCUImportPage() {
                     onChange={(e) => setMode(e.target.value as 'completo')}
                     className="mr-2"
                   />
-                  <span>Completo (todos do período)</span>
+                  <span>Completo (todos selecionados)</span>
                 </label>
               </div>
             </div>
 
             <button
               onClick={handleImport}
-              disabled={importing || novosCount === 0}
-              className="w-full bg-green-600 text-white py-3 rounded hover:bg-green-700 disabled:bg-gray-400"
+              disabled={importing}
+              className="w-full bg-green-600 text-white py-3 rounded hover:bg-green-700 disabled:bg-gray-400 flex items-center justify-center gap-2"
             >
-              {importing
-                ? 'Importando...'
-                : `✅ Importar ${novosCount} acórdão${novosCount !== 1 ? 'ãos' : 'ão'} novo${novosCount !== 1 ? 's' : ''}`}
+              {importing ? (
+                <>
+                  <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
+                  Importando...
+                </>
+              ) : (
+                <>
+                  <Save className="w-5 h-5" />
+                  Importar {selectedAcordaos.size} Acórdão{selectedAcordaos.size !== 1 ? 's' : ''}
+                </>
+              )}
             </button>
           </div>
         )}
