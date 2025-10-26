@@ -14,6 +14,7 @@ interface OrientacaoPreview {
   linkFundamentacao?: string;
   fundamentacaoLinks: string[]; // Array de todos os links de fundamentação
   versaoHistorica?: string;     // Indica se é uma versão histórica
+  isNova?: boolean;             // Indica se é uma ON nova (não importada ainda)
 }
 
 interface ImportResult {
@@ -30,7 +31,10 @@ export default function AGUImportPage() {
   const [isImporting, setIsImporting] = useState(false);
   const [preview, setPreview] = useState<OrientacaoPreview[]>([]);
   const [totalFound, setTotalFound] = useState(0);
+  const [novasCount, setNovasCount] = useState(0);
+  const [existentesCount, setExistentesCount] = useState(0);
   const [importResult, setImportResult] = useState<ImportResult | null>(null);
+  const [importMode, setImportMode] = useState<'incremental' | 'completo' | 'atualizar'>('incremental');
 
   const handlePreview = async () => {
     setIsLoading(true);
@@ -46,12 +50,15 @@ export default function AGUImportPage() {
 
       const data = await response.json();
 
-      setPreview(data.orientacoes || []);
+      setPreview(data.preview || data.orientacoes || []);
       setTotalFound(data.total || 0);
+      setNovasCount(data.novas || 0);
+      setExistentesCount(data.existentes || 0);
 
+      const novasMsg = data.novas > 0 ? ` (${data.novas} novas, ${data.existentes} já importadas)` : '';
       success(
         'Preview carregado!',
-        `${data.total} Orientações Normativas encontradas no site da AGU`
+        `${data.total} Orientações Normativas encontradas no site da AGU${novasMsg}`
       );
     } catch (error) {
       console.error('Erro ao buscar preview:', error);
@@ -65,7 +72,15 @@ export default function AGUImportPage() {
   };
 
   const handleImport = async () => {
-    if (!confirm(`Confirma a importação de ${totalFound} Orientações Normativas para TODOS OS CURSOS?`)) {
+    const modeLabels = {
+      incremental: `importar ${novasCount} novas ONs`,
+      completo: `processar todas as ${totalFound} ONs`,
+      atualizar: `atualizar ${existentesCount} ONs existentes + importar ${novasCount} novas`
+    };
+
+    const confirmMsg = `Confirma ${modeLabels[importMode]} para TODOS OS 10 CURSOS?\n\nModo: ${importMode.toUpperCase()}`;
+
+    if (!confirm(confirmMsg)) {
       return;
     }
 
@@ -79,6 +94,7 @@ export default function AGUImportPage() {
         body: JSON.stringify({
           addToAllCourses: true,
           makePublic: true,
+          mode: importMode,
         }),
       });
 
@@ -173,7 +189,62 @@ export default function AGUImportPage() {
                 </div>
                 <div>
                   <h3 className="text-lg font-bold text-gray-900">2. Importar para o Sistema</h3>
-                  <p className="text-sm text-gray-600">Adiciona a todos os 10 cursos</p>
+                  <p className="text-sm text-gray-600">Escolha o modo de importação</p>
+                </div>
+              </div>
+
+              {/* Seleção de Modo */}
+              <div className="mb-4 bg-gray-50 rounded-lg p-4">
+                <label className="text-sm font-semibold text-gray-700 mb-2 block">Modo de Importação:</label>
+                <div className="space-y-2">
+                  <label className="flex items-start gap-3 cursor-pointer">
+                    <input
+                      type="radio"
+                      name="importMode"
+                      value="incremental"
+                      checked={importMode === 'incremental'}
+                      onChange={(e) => setImportMode(e.target.value as 'incremental')}
+                      className="mt-1"
+                    />
+                    <div>
+                      <div className="font-medium text-gray-900">
+                        ✨ Incremental (Recomendado) {novasCount > 0 && <span className="text-green-600">- {novasCount} novas</span>}
+                      </div>
+                      <div className="text-xs text-gray-600">Importa apenas orientações novas, ignora as já existentes</div>
+                    </div>
+                  </label>
+                  <label className="flex items-start gap-3 cursor-pointer">
+                    <input
+                      type="radio"
+                      name="importMode"
+                      value="atualizar"
+                      checked={importMode === 'atualizar'}
+                      onChange={(e) => setImportMode(e.target.value as 'atualizar')}
+                      className="mt-1"
+                    />
+                    <div>
+                      <div className="font-medium text-gray-900">
+                        🔄 Atualizar {existentesCount > 0 && <span className="text-blue-600">- {existentesCount} docs</span>}
+                      </div>
+                      <div className="text-xs text-gray-600">Atualiza dados das ONs existentes + importa novas</div>
+                    </div>
+                  </label>
+                  <label className="flex items-start gap-3 cursor-pointer">
+                    <input
+                      type="radio"
+                      name="importMode"
+                      value="completo"
+                      checked={importMode === 'completo'}
+                      onChange={(e) => setImportMode(e.target.value as 'completo')}
+                      className="mt-1"
+                    />
+                    <div>
+                      <div className="font-medium text-gray-900">
+                        ⚠️ Completo (Forçar) {totalFound > 0 && <span className="text-orange-600">- {totalFound} docs</span>}
+                      </div>
+                      <div className="text-xs text-gray-600">Processa tudo, pula duplicatas (use para debug)</div>
+                    </div>
+                  </label>
                 </div>
               </div>
 
@@ -208,12 +279,12 @@ export default function AGUImportPage() {
                 </div>
               </div>
 
-              <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
+              <div className="grid grid-cols-2 md:grid-cols-6 gap-3">
                 <div className="bg-white rounded-lg p-4">
                   <div className="text-2xl font-bold text-gray-900">
                     {importResult.stats.orientacoesEncontradas}
                   </div>
-                  <div className="text-sm text-gray-600">Orientações encontradas</div>
+                  <div className="text-sm text-gray-600">ONs encontradas</div>
                 </div>
                 <div className="bg-white rounded-lg p-4">
                   <div className="text-2xl font-bold text-gray-900">
@@ -225,19 +296,25 @@ export default function AGUImportPage() {
                   <div className="text-2xl font-bold text-green-600">
                     {importResult.stats.documentosCriados}
                   </div>
-                  <div className="text-sm text-gray-600">Documentos criados</div>
+                  <div className="text-sm text-gray-600">✅ Criados</div>
                 </div>
                 <div className="bg-white rounded-lg p-4">
-                  <div className="text-2xl font-bold text-yellow-600">
-                    {importResult.stats.documentosDuplicados || 0}
+                  <div className="text-2xl font-bold text-blue-600">
+                    {importResult.stats.documentosAtualizados || 0}
                   </div>
-                  <div className="text-sm text-gray-600">Duplicados (pulados)</div>
+                  <div className="text-sm text-gray-600">🔄 Atualizados</div>
+                </div>
+                <div className="bg-white rounded-lg p-4">
+                  <div className="text-2xl font-bold text-gray-500">
+                    {importResult.stats.documentosPulados || importResult.stats.documentosDuplicados || 0}
+                  </div>
+                  <div className="text-sm text-gray-600">⏭️ Pulados</div>
                 </div>
                 <div className="bg-white rounded-lg p-4">
                   <div className="text-2xl font-bold text-red-600">
                     {importResult.stats.erros}
                   </div>
-                  <div className="text-sm text-gray-600">Erros</div>
+                  <div className="text-sm text-gray-600">❌ Erros</div>
                 </div>
               </div>
             </div>
@@ -268,10 +345,19 @@ export default function AGUImportPage() {
                   >
                     <div className="flex justify-between items-start mb-2">
                       <div className="flex-1">
-                        <div className="flex items-center gap-2">
+                        <div className="flex items-center gap-2 flex-wrap">
                           <h4 className="font-bold text-gray-900">{on.numero}</h4>
+                          {on.isNova !== undefined && (
+                            <span className={`px-2 py-0.5 text-xs font-bold rounded-full ${
+                              on.isNova
+                                ? 'bg-green-100 text-green-800 border border-green-300'
+                                : 'bg-gray-100 text-gray-600 border border-gray-300'
+                            }`}>
+                              {on.isNova ? '✨ NOVA' : '✓ JÁ IMPORTADA'}
+                            </span>
+                          )}
                           {on.versaoHistorica && (
-                            <span className="px-2 py-0.5 bg-orange-100 text-orange-800 text-xs font-bold rounded-full">
+                            <span className="px-2 py-0.5 bg-orange-100 text-orange-800 text-xs font-bold rounded-full border border-orange-300">
                               {on.versaoHistorica}
                             </span>
                           )}
