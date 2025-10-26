@@ -60,7 +60,8 @@
       "Bash(node scripts/list-documents.js:*)",
       "Bash(node scripts/delete-fake-documents.js:*)",
       "Bash(git log:*)",
-      "Bash(node:*)"
+      "Bash(node:*)",
+      "Bash(curl:*)"
     ],
     "deny": [],
     "ask": []
