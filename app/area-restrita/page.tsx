@@ -175,7 +175,16 @@ export default function AreaRestritaPage() {
   );
 
   const selectedCourseDocuments = useMemo(
-    () => selectedCourseId && isSelectedCourseEnrolled ? (courseDocuments[selectedCourseId] || []) : [],
+    () => {
+      const docs = selectedCourseId && isSelectedCourseEnrolled ? (courseDocuments[selectedCourseId] || []) : [];
+      console.log(`[DEBUG] selectedCourseId: ${selectedCourseId}, isEnrolled: ${isSelectedCourseEnrolled}, docs: ${docs.length}`);
+      if (docs.length > 0) {
+        const onDocs = docs.filter(d => d.category === 'orientacao-normativa');
+        console.log(`[DEBUG] ONs encontradas: ${onDocs.length}`);
+        console.log('[DEBUG] Primeira ON:', docs.find(d => d.category === 'orientacao-normativa')?.title);
+      }
+      return docs;
+    },
     [selectedCourseId, isSelectedCourseEnrolled, courseDocuments]
   );
 

@@ -24,6 +24,7 @@ interface DocumentsByCategoryProps {
 const categoryConfig: Record<string, { icon: string; color: string; label: string }> = {
   'acordao': { icon: '⚖️', color: 'blue', label: 'Acórdãos' },
   'parecer': { icon: '📝', color: 'green', label: 'Pareceres' },
+  'orientacao-normativa': { icon: '📋', color: 'indigo', label: 'Orientações Normativas' },
   'artigo': { icon: '📑', color: 'purple', label: 'Artigos' },
   'edital': { icon: '📰', color: 'orange', label: 'Editais' },
   'apostila': { icon: '📖', color: 'indigo', label: 'Apostilas' },
