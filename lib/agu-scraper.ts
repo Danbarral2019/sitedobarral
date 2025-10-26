@@ -234,6 +234,8 @@ function extractDescription(block: string, titulo: string): string {
  * - [Fundamentação](URL)
  * - Fundamentação ([1](URL1), [2](URL2))
  * - Links diretos para PDF
+ *
+ * IMPORTANTE: Exclui links do Sapiens (restrito) e DOU (quebrados)
  */
 function extractFundamentacaoLinks(block: string): string[] {
   const links = new Set<string>();
@@ -242,26 +244,35 @@ function extractFundamentacaoLinks(block: string): string[] {
   const fundamentacaoPattern = /\[Fundamentação\]\(([^)]+)\)/gi;
   let match;
   while ((match = fundamentacaoPattern.exec(block)) !== null) {
-    links.add(normalizeUrl(match[1]));
+    const url = normalizeUrl(match[1]);
+    if (!isProblematicUrl(url)) {
+      links.add(url);
+    }
   }
 
   // Padrão 2: Links numerados - Fundamentação ([1](URL1), [2](URL2))
   const numberedPattern = /Fundamentação\s*\([^)]*\[(\d+)\]\(([^)]+)\)[^)]*\)/gi;
   while ((match = numberedPattern.exec(block)) !== null) {
-    links.add(normalizeUrl(match[2]));
+    const url = normalizeUrl(match[2]);
+    if (!isProblematicUrl(url)) {
+      links.add(url);
+    }
   }
 
   // Padrão 3: Links diretos para PDFs do AGU
   const pdfPattern = /href="([^"]*fundamentacao[^"]*\.pdf[^"]*)"/gi;
   while ((match = pdfPattern.exec(block)) !== null) {
-    links.add(normalizeUrl(match[1]));
+    const url = normalizeUrl(match[1]);
+    if (!isProblematicUrl(url)) {
+      links.add(url);
+    }
   }
 
-  // Padrão 4: Links para sistema SAPIENS
-  const sapiensPattern = /sapiens\.agu\.gov\.br[^"\s]*/gi;
-  while ((match = sapiensPattern.exec(block)) !== null) {
-    links.add(normalizeUrl(match[0]));
-  }
+  // Padrão 4: NÃO adiciona mais links do Sapiens (comentado para referência)
+  // const sapiensPattern = /sapiens\.agu\.gov\.br[^"\s]*/gi;
+  // while ((match = sapiensPattern.exec(block)) !== null) {
+  //   links.add(normalizeUrl(match[0]));
+  // }
 
   return Array.from(links).filter(isValidUrl);
 }
@@ -338,6 +349,19 @@ function isValidUrl(url: string): boolean {
 }
 
 /**
+ * Verifica se uma URL é problemática (Sapiens restrito ou DOU quebrado)
+ */
+function isProblematicUrl(url: string): boolean {
+  const problematicPatterns = [
+    'sapiens.agu.gov.br',      // Sistema restrito a membros da AGU
+    'in.gov.br',                // Diário Oficial (links quebrados)
+    'imprensa.nacional',        // Diário Oficial (links quebrados)
+  ];
+
+  return problematicPatterns.some(pattern => url.includes(pattern));
+}
+
+/**
  * Extrai tags relevantes do conteúdo
  */
 function extractTags(content: string, numero: string): string[] {
@@ -404,27 +428,34 @@ export function convertOrientacoesToDocuments(
   }> = [];
 
   for (const on of orientacoes) {
-    // IMPORTANTE: Não cria documentos sem links de fundamentação (PDFs)
-    // Os links do DOU (in.gov.br) estão quebrados, então só usamos PDFs válidos
-    if (on.fundamentacaoLinks.length === 0) {
-      console.log(`[AGU Scraper] ⚠️ Pulando ${on.numero} - sem links de fundamentação (PDF)`);
-      continue; // Pula ONs sem PDFs
-    }
-
     // Título padronizado: "Orientação Normativa AGU nº XX/XXXX"
     const title = `Orientação Normativa AGU nº ${on.onNumber}/${on.onYear}`;
 
-    // URL principal: primeiro link de fundamentação
-    const mainUrl = on.fundamentacaoLinks[0];
+    // Se não há links de fundamentação válidos, usa página oficial das ONs
+    const linkOficial = 'https://www.gov.br/agu/pt-br/composicao/cgu/cgu/onsagu';
 
-    // URLs alternativas: demais links (se houver)
-    const alternativeUrls = on.fundamentacaoLinks.length > 1
-      ? JSON.stringify(on.fundamentacaoLinks.slice(1))
-      : undefined;
+    let mainUrl: string;
+    let alternativeUrls: string | undefined;
+    let description = on.descricao || `Orientação Normativa da AGU nº ${on.numeroCompleto}`;
+
+    if (on.fundamentacaoLinks.length === 0) {
+      // Sem links de fundamentação: usa página oficial
+      console.log(`[AGU Scraper] ⚠️ ${on.numero} - sem links de fundamentação, usando página oficial`);
+      mainUrl = linkOficial;
+      description += '\n\n⚠️ Nota: Link de fundamentação não disponível. Acesse a página oficial das Orientações Normativas da AGU para mais informações.';
+    } else {
+      // Com links de fundamentação: usa o primeiro como principal
+      mainUrl = on.fundamentacaoLinks[0];
+
+      // URLs alternativas: demais links (se houver)
+      alternativeUrls = on.fundamentacaoLinks.length > 1
+        ? JSON.stringify(on.fundamentacaoLinks.slice(1))
+        : undefined;
+    }
 
     documents.push({
       title,
-      description: on.descricao || `Orientação Normativa da AGU nº ${on.numeroCompleto}`,
+      description,
       category: 'orientacao-normativa',
       url: mainUrl,
       alternativeUrls,
