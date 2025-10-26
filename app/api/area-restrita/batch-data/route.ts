@@ -72,11 +72,15 @@ export async function GET(request: NextRequest) {
     let siteToCourse = [];
 
     // Buscar documentos (essencial - deve funcionar)
+    // Inclui documentos específicos do curso E documentos comuns (isCommon=true)
     try {
       console.log('[Batch-Data] Buscando documentos...');
       documents = await prisma.document.findMany({
         where: {
-          courseId: { in: courseIds },
+          OR: [
+            { courseId: { in: courseIds } }, // Específicos do curso
+            { isCommon: true },               // Comuns a todos os cursos
+          ],
         },
         orderBy: [
           { uploadedAt: 'desc' },
@@ -90,6 +94,7 @@ export async function GET(request: NextRequest) {
           category: true,
           courseId: true,
           isPublic: true,
+          isCommon: true, // Incluir campo isCommon na resposta
           tags: true,
           leiArticles: true,
           size: true,
@@ -98,6 +103,7 @@ export async function GET(request: NextRequest) {
         },
       });
       console.log('[Batch-Data] Documentos encontrados:', documents.length);
+      console.log('[Batch-Data] Documentos comuns:', documents.filter(d => d.isCommon).length);
     } catch (error) {
       console.error('[Batch-Data] ERRO ao buscar documentos:', error);
       // Relança erro pois documentos são essenciais
@@ -179,7 +185,13 @@ export async function GET(request: NextRequest) {
 
     // Agrupar documentos
     documents.forEach(doc => {
-      if (doc.courseId && groupedDocuments[doc.courseId]) {
+      if (doc.isCommon) {
+        // Documento comum: adicionar a TODOS os cursos
+        courseIds.forEach(courseId => {
+          groupedDocuments[courseId].push(doc);
+        });
+      } else if (doc.courseId && groupedDocuments[doc.courseId]) {
+        // Documento específico: adicionar apenas ao curso correspondente
         groupedDocuments[doc.courseId].push(doc);
       }
     });

@@ -49,3 +49,5 @@ next-env.d.ts
 
 /lib/generated/prisma
 *.db
+
+.vercel
