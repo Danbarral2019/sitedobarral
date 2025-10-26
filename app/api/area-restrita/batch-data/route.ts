@@ -66,9 +66,12 @@ export async function GET(request: NextRequest) {
 
     console.log('[Batch-Data] Iniciando busca paralela para cursos:', courseIds);
 
-    // Busca paralela de todos os dados necessários
-    let documents, videos, siteToCourse;
+    // Busca dados necessários (com fallback para arrays vazios em caso de erro)
+    let documents = [];
+    let videos = [];
+    let siteToCourse = [];
 
+    // Buscar documentos (essencial - deve funcionar)
     try {
       console.log('[Batch-Data] Buscando documentos...');
       documents = await prisma.document.findMany({
@@ -95,7 +98,14 @@ export async function GET(request: NextRequest) {
         },
       });
       console.log('[Batch-Data] Documentos encontrados:', documents.length);
+    } catch (error) {
+      console.error('[Batch-Data] ERRO ao buscar documentos:', error);
+      // Relança erro pois documentos são essenciais
+      throw error;
+    }
 
+    // Buscar vídeos (opcional - pode falhar sem quebrar tudo)
+    try {
       console.log('[Batch-Data] Buscando vídeos...');
       videos = await prisma.courseVideo.findMany({
         where: {
@@ -118,7 +128,13 @@ export async function GET(request: NextRequest) {
         },
       });
       console.log('[Batch-Data] Vídeos encontrados:', videos.length);
+    } catch (error) {
+      console.error('[Batch-Data] AVISO: Erro ao buscar vídeos (continuando sem vídeos):', error);
+      videos = []; // Continua sem vídeos
+    }
 
+    // Buscar sites recomendados (opcional - pode falhar sem quebrar tudo)
+    try {
       console.log('[Batch-Data] Buscando sites recomendados...');
       siteToCourse = await prisma.siteToCourse.findMany({
         where: {
@@ -145,16 +161,8 @@ export async function GET(request: NextRequest) {
       });
       console.log('[Batch-Data] Sites encontrados:', siteToCourse.length);
     } catch (error) {
-      console.error('[Batch-Data] Erro ao buscar dados do Prisma:', error);
-      console.error('[Batch-Data] Stack trace:', error instanceof Error ? error.stack : 'N/A');
-      return NextResponse.json(
-        {
-          error: 'Erro ao buscar dados do banco de dados',
-          details: error instanceof Error ? error.message : 'Erro desconhecido',
-          courseIds
-        },
-        { status: 500 }
-      );
+      console.error('[Batch-Data] AVISO: Erro ao buscar sites (continuando sem sites):', error);
+      siteToCourse = []; // Continua sem sites
     }
 
     // Agrupar resultados por courseId para fácil acesso no frontend
