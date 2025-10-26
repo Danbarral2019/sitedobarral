@@ -106,24 +106,34 @@ export const POST = withAdminAuth(async (request: NextRequest) => {
       anoInicio,
       anoFim,
       onlyRelevant = true,
-      mode = 'incremental' // 'incremental' | 'completo'
+      mode = 'incremental', // 'incremental' | 'completo'
+      selectedAcordaos, // Array de acórdãos selecionados com edições
     } = body;
 
     console.log(`[TCU Import API] Iniciando importação no modo: ${mode}...`);
 
-    // 1. Busca acórdãos do TCU
-    const acordaos = await fetchAcordaosTCU({
-      inicio,
-      quantidade,
-      anoInicio,
-      anoFim,
-      onlyRelevant,
-    });
+    let documents;
 
-    console.log(`[TCU Import API] ${acordaos.length} acórdãos encontrados`);
+    // Se selectedAcordaos foi enviado (Fase 2), usar apenas esses
+    if (selectedAcordaos && Array.isArray(selectedAcordaos) && selectedAcordaos.length > 0) {
+      console.log(`[TCU Import API] Importando ${selectedAcordaos.length} acórdãos selecionados`);
+      documents = convertAcordaosToDocuments(selectedAcordaos);
+    } else {
+      // Comportamento legacy (buscar do TCU)
+      console.log('[TCU Import API] Buscando acórdãos do TCU...');
+      const acordaos = await fetchAcordaosTCU({
+        inicio,
+        quantidade,
+        anoInicio,
+        anoFim,
+        onlyRelevant,
+      });
 
-    // 2. Converte para documentos
-    const documents = convertAcordaosToDocuments(acordaos);
+      console.log(`[TCU Import API] ${acordaos.length} acórdãos encontrados`);
+
+      // 2. Converte para documentos
+      documents = convertAcordaosToDocuments(acordaos);
+    }
 
     if (documents.length === 0) {
       return NextResponse.json({
