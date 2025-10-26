@@ -117,7 +117,7 @@ export async function POST(request: NextRequest) {
     pdf.setFontSize(16);
     pdf.setTextColor(60, 60, 60);
     pdf.setFont('helvetica', 'normal');
-    pdf.text('Licitações e Contratos Públicos', pageWidth / 2, 60, { align: 'center' });
+    pdf.text('Licitacoes e Contratos Publicos', pageWidth / 2, 60, { align: 'center' });
 
     // Linha separadora
     pdf.setDrawColor(0, 51, 102);
@@ -153,7 +153,7 @@ export async function POST(request: NextRequest) {
     pdf.setFont('helvetica', 'bold');
     pdf.text('ATENCAO:', margin + 3, 137);
     pdf.setFont('helvetica', 'normal');
-    const avisoText = 'Este documento foi gerado exclusivamente para o aluno identificado acima. É proibida a distribuição, reprodução ou compartilhamento sem autorização prévia.';
+    const avisoText = 'Este documento foi gerado exclusivamente para o aluno identificado acima. E proibida a distribuicao, reproducao ou compartilhamento sem autorizacao previa.';
     const avisoLines = pdf.splitTextToSize(avisoText, maxLineWidth - 6);
     pdf.text(avisoLines, margin + 3, 143);
 
@@ -178,12 +178,12 @@ export async function POST(request: NextRequest) {
 
     // Mapeamento de nomes de categorias
     const categoryNames: Record<string, string> = {
-      'apostila': 'Apostilas e Material Didático',
-      'acordao': 'Acórdãos',
-      'parecer': 'Pareceres Jurídicos',
+      'apostila': 'Apostilas e Material Didatico',
+      'acordao': 'Acordaos',
+      'parecer': 'Pareceres Juridicos',
       'edital': 'Editais',
       'artigo': 'Artigos e Doutrinas',
-      'orientacao-normativa': 'Orientações Normativas',
+      'orientacao-normativa': 'Orientacoes Normativas',
       'outro': 'Outros Documentos',
     };
 
@@ -254,7 +254,7 @@ export async function POST(request: NextRequest) {
     pdf.setFontSize(14);
     pdf.setFont('helvetica', 'bold');
     pdf.setTextColor(0, 51, 102);
-    pdf.text('Informações Adicionais', margin, 40);
+    pdf.text('Informacoes Adicionais', margin, 40);
 
     pdf.setFontSize(10);
     pdf.setFont('helvetica', 'normal');
