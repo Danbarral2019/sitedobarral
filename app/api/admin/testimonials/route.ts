@@ -1,8 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { PrismaClient } from '@prisma/client';
+import { prisma } from '@/lib/prisma';
 import { withAdminAuth } from '@/lib/api-middleware';
 
-const prisma = new PrismaClient();
 
 /**
  * GET /api/admin/testimonials

@@ -1,9 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { PrismaClient } from '@prisma/client';
+import { prisma } from '@/lib/prisma';
 import { rateLimiters } from '@/lib/rate-limit';
 import { sendContactNotification } from '@/lib/email';
 
-const prisma = new PrismaClient();
 
 // POST - Enviar mensagem de contato
 export async function POST(request: NextRequest) {

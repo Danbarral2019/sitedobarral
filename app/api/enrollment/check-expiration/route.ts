@@ -1,9 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { PrismaClient } from '@prisma/client';
+import { prisma } from '@/lib/prisma';
 import { sendExpirationNotification } from '@/lib/email';
 import { shouldSendExpirationNotification } from '@/lib/enrollment-utils';
 
-const prisma = new PrismaClient();
 
 /**
  * API para verificar matrículas próximas da expiração e enviar notificações

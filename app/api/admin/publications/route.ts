@@ -1,8 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { prisma } from '@/lib/prisma';
 import { withAdminAuth } from '@/lib/api-middleware';
-import { PrismaClient } from '@prisma/client';
 
-const prisma = new PrismaClient();
 
 // GET - Lista todas as publicações
 export const GET = withAdminAuth(async (request: NextRequest) => {

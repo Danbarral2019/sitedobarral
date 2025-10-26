@@ -77,6 +77,12 @@ model User {
 
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
+
+  // Índices para otimização de queries
+  @@index([role])                    // Para filtrar admins/students
+  @@index([email, role])             // Para queries de autenticação
+  @@index([emailVerified])           // Para filtrar usuários verificados
+  @@index([createdAt])               // Para ordenação por data
 }
 
 // Matrícula de aluno em curso (via QR Code)
@@ -95,6 +101,14 @@ model Enrollment {
   notificationSentAt  DateTime? // Data em que notificação de expiração foi enviada
 
   @@unique([userId, courseId])
+
+  // Índices para otimização de queries
+  @@index([userId])                                      // Para buscar matrículas por usuário
+  @@index([courseId])                                    // Para buscar matrículas por curso
+  @@index([userId, courseId, isLifetime])                // Para verificações de acesso
+  @@index([expiresAt, isLifetime, notificationSentAt])   // Para cron job de notificações
+  @@index([isLifetime])                                  // Para estatísticas de upgrades
+  @@index([enrolledAt])                                  // Para ordenação por data
 }
 
 // Log de acessos (para auditoria)

@@ -1,9 +1,7 @@
 import { getCurrentUser } from '@/lib/auth';
-import { PrismaClient } from '@prisma/client';
 import { NextResponse } from 'next/server';
 import { checkAccessStatus } from '@/lib/enrollment-utils';
 
-const prisma = new PrismaClient();
 
 export async function GET() {
   try {

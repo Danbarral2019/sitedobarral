@@ -1,8 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { PrismaClient } from '@prisma/client';
+import { prisma } from '@/lib/prisma';
 import { withAdminAuth } from '@/lib/api-middleware';
 
-const prisma = new PrismaClient();
 
 /**
  * GET /api/admin/analytics
@@ -79,27 +78,30 @@ export const GET = withAdminAuth(async (_request: NextRequest) => {
         take: 10,
       });
 
-      // Buscar detalhes dos documentos mais acessados
-      topDocumentsWithDetails = await Promise.all(
-        topDocuments.map(async (item) => {
-          if (!item.documentId) return null;
+      // Buscar detalhes dos documentos mais acessados (OTIMIZADO - 1 query em vez de N)
+      const documentIds = topDocuments
+        .map(item => item.documentId)
+        .filter((id): id is string => id !== null);
 
-          const document = await prisma.document.findUnique({
-            where: { id: item.documentId },
-            select: {
-              id: true,
-              title: true,
-              type: true,
-              category: true,
-            },
-          });
+      const documents = await prisma.document.findMany({
+        where: { id: { in: documentIds } },
+        select: {
+          id: true,
+          title: true,
+          type: true,
+          category: true,
+        },
+      });
 
-          return document ? {
-            ...document,
-            accessCount: item._count.id,
-          } : null;
-        })
-      );
+      // Mapear resultados de volta
+      topDocumentsWithDetails = topDocuments.map(item => {
+        if (!item.documentId) return null;
+        const document = documents.find(d => d.id === item.documentId);
+        return document ? {
+          ...document,
+          accessCount: item._count.id,
+        } : null;
+      });
     } catch (error) {
       console.error('Erro ao buscar documentos mais acessados:', error);
     }
@@ -180,25 +182,29 @@ export const GET = withAdminAuth(async (_request: NextRequest) => {
         take: 10,
       });
 
-      topUsersWithDetails = await Promise.all(
-        topUsers.map(async (item) => {
-          if (!item.userId) return null;
+      // Buscar detalhes dos usuários mais ativos (OTIMIZADO - 1 query em vez de N)
+      const userIds = topUsers
+        .map(item => item.userId)
+        .filter((id): id is string => id !== null);
 
-          const user = await prisma.user.findUnique({
-            where: { id: item.userId },
-            select: {
-              id: true,
-              name: true,
-              email: true,
-            },
-          });
+      const users = await prisma.user.findMany({
+        where: { id: { in: userIds } },
+        select: {
+          id: true,
+          name: true,
+          email: true,
+        },
+      });
 
-          return user ? {
-            ...user,
-            accessCount: item._count.id,
-          } : null;
-        })
-      );
+      // Mapear resultados de volta
+      topUsersWithDetails = topUsers.map(item => {
+        if (!item.userId) return null;
+        const user = users.find(u => u.id === item.userId);
+        return user ? {
+          ...user,
+          accessCount: item._count.id,
+        } : null;
+      });
     } catch (error) {
       console.error('Erro ao buscar usuários mais ativos:', error);
     }

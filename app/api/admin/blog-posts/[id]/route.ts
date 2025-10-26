@@ -1,9 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { prisma } from '@/lib/prisma';
 import { withAdminAuth } from '@/lib/api-middleware';
-import { PrismaClient } from '@prisma/client';
 import { publishToSocialMedia } from '@/lib/social-publisher';
 
-const prisma = new PrismaClient();
 
 // GET - Busca um post específico
 export const GET = withAdminAuth(async (
