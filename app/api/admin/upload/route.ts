@@ -15,6 +15,7 @@ export const POST = withAdminAuth(async (request: NextRequest) => {
     const category = formData.get('category') as string;
     const isPublic = formData.get('isPublic') === 'true';
     const tags = formData.get('tags') as string;
+    const leiArticles = formData.get('leiArticles') as string;
 
     if (!file || !courseId || !title || !category) {
       return NextResponse.json(
@@ -64,7 +65,8 @@ export const POST = withAdminAuth(async (request: NextRequest) => {
       isPublic,
       fileUrl,
       file.size,
-      tags ? tags.split(',').map(t => t.trim()) : []
+      tags ? tags.split(',').map(t => t.trim()) : [],
+      leiArticles ? JSON.parse(leiArticles) : []
     );
 
     return NextResponse.json({

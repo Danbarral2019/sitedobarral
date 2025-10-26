@@ -1,7 +1,8 @@
 'use client';
 
-import { X, Trash2 } from 'lucide-react';
+import { X, Trash2, FileText } from 'lucide-react';
 import { SearchFilters as SearchFiltersType } from '@/hooks/use-search';
+import { ARTIGOS_POPULARES, LEI_14133_ARTIGOS } from '@/data/lei-14133-artigos';
 
 interface Course {
   id: string;
@@ -81,6 +82,13 @@ export default function SearchFilters({
       ? filters.types.filter(t => t !== type)
       : [...filters.types, type];
     onUpdateFilters({ types: newTypes });
+  };
+
+  const toggleArticle = (articleNumber: string) => {
+    const newArticles = filters.leiArticles.includes(articleNumber)
+      ? filters.leiArticles.filter(a => a !== articleNumber)
+      : [...filters.leiArticles, articleNumber];
+    onUpdateFilters({ leiArticles: newArticles });
   };
 
   return (
@@ -188,6 +196,106 @@ export default function SearchFilters({
                   <span className="text-sm text-gray-900">{type.label}</span>
                 </label>
               ))}
+            </div>
+          </div>
+
+          {/* Filtro por Artigos da Lei 14.133/2021 */}
+          <div>
+            <h3 className="text-sm font-bold text-gray-900 mb-3 flex items-center gap-2">
+              <FileText className="w-4 h-4 text-orange-600" />
+              Lei 14.133/2021 ({filters.leiArticles.length} selecionados)
+            </h3>
+            <p className="text-xs text-gray-600 mb-3">
+              Filtre documentos relacionados a artigos específicos da Lei 14.133/2021
+            </p>
+
+            {/* Artigos Populares */}
+            <div className="mb-4">
+              <p className="text-xs font-semibold text-gray-700 mb-2">📌 Artigos Populares</p>
+              <div className="flex flex-wrap gap-2">
+                {ARTIGOS_POPULARES.map(articleNum => {
+                  const article = LEI_14133_ARTIGOS[articleNum];
+                  const isSelected = filters.leiArticles.includes(articleNum);
+                  return (
+                    <button
+                      key={articleNum}
+                      onClick={() => toggleArticle(articleNum)}
+                      className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
+                        isSelected
+                          ? 'bg-orange-600 text-white shadow-md'
+                          : 'bg-orange-50 text-orange-700 hover:bg-orange-100'
+                      }`}
+                      title={article?.ementa}
+                    >
+                      Art. {articleNum}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* Artigos Selecionados (não populares) */}
+            {filters.leiArticles.filter(a => !ARTIGOS_POPULARES.includes(a)).length > 0 && (
+              <div className="mb-3 pb-3 border-b border-gray-200">
+                <p className="text-xs font-semibold text-gray-700 mb-2">Outros Artigos Selecionados</p>
+                <div className="flex flex-wrap gap-2">
+                  {filters.leiArticles
+                    .filter(a => !ARTIGOS_POPULARES.includes(a))
+                    .map(articleNum => {
+                      const article = LEI_14133_ARTIGOS[articleNum];
+                      return (
+                        <button
+                          key={articleNum}
+                          onClick={() => toggleArticle(articleNum)}
+                          className="px-3 py-1.5 bg-orange-600 text-white rounded-lg text-xs font-medium shadow-md hover:bg-orange-700 transition-all"
+                          title={article?.ementa}
+                        >
+                          Art. {articleNum} ✕
+                        </button>
+                      );
+                    })}
+                </div>
+              </div>
+            )}
+
+            {/* Input para adicionar artigo específico */}
+            <div>
+              <p className="text-xs font-semibold text-gray-700 mb-2">Adicionar Artigo Específico</p>
+              <div className="flex gap-2">
+                <input
+                  type="number"
+                  min="1"
+                  max="193"
+                  placeholder="Nº do artigo (1-193)"
+                  className="flex-1 px-3 py-2 text-sm border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-600"
+                  onKeyPress={(e) => {
+                    if (e.key === 'Enter') {
+                      const input = e.target as HTMLInputElement;
+                      const num = input.value.trim();
+                      if (num && LEI_14133_ARTIGOS[num] && !filters.leiArticles.includes(num)) {
+                        toggleArticle(num);
+                        input.value = '';
+                      }
+                    }
+                  }}
+                />
+                <button
+                  onClick={(e) => {
+                    const input = e.currentTarget.previousElementSibling as HTMLInputElement;
+                    const num = input.value.trim();
+                    if (num && LEI_14133_ARTIGOS[num] && !filters.leiArticles.includes(num)) {
+                      toggleArticle(num);
+                      input.value = '';
+                    }
+                  }}
+                  className="px-4 py-2 bg-orange-600 text-white rounded-lg text-xs font-bold hover:bg-orange-700 transition-colors"
+                >
+                  + Add
+                </button>
+              </div>
+              <p className="text-xs text-gray-500 mt-1">
+                Digite o número e pressione Enter ou clique em &quot;+ Add&quot;
+              </p>
             </div>
           </div>
 

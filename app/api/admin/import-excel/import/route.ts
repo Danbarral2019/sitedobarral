@@ -72,7 +72,8 @@ export const POST = withAdminAuth(async (request: NextRequest) => {
               doc.isPublic,
               url,
               undefined, // size (será null)
-              doc.tags
+              doc.tags,
+              doc.leiArticles
             );
           }
           results.imported += doc.courseIds.length;
@@ -87,7 +88,8 @@ export const POST = withAdminAuth(async (request: NextRequest) => {
             doc.isPublic,
             url,
             undefined, // size (será null)
-            doc.tags
+            doc.tags,
+            doc.leiArticles
           );
           results.imported++;
         }

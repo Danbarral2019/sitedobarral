@@ -23,6 +23,7 @@ export interface Document {
   courseId: string;
   isPublic: boolean;
   tags: string[];
+  leiArticles: string[]; // Números dos artigos da Lei 14.133/2021
   uploadedAt: Date;
   size?: number;
 }

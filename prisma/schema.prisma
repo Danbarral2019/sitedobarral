@@ -41,6 +41,7 @@ model Document {
   courseId    String
   isPublic    Boolean  @default(false)
   tags        String?  // JSON array como string
+  leiArticles String?  // JSON array com números de artigos da Lei 14.133/2021
   size        Int?
   uploadedAt  DateTime @default(now())
   updatedAt   DateTime @updatedAt
@@ -139,6 +140,7 @@ model BlogPost {
   publishedAt        DateTime
   isPublished        Boolean            @default(false)
   tags               String?            // JSON array como string
+  leiArticles        String?            // JSON array com números de artigos da Lei 14.133/2021
   autoPublishSocial  Boolean            @default(true) // Publicar automaticamente nas redes sociais
   socialMediaImage   String?            // URL da imagem gerada para OG/redes sociais
   createdAt          DateTime           @default(now())
@@ -196,6 +198,9 @@ model Publication {
   // Campos para notícias/eventos
   eventDate   DateTime? // Data do evento
   location    String?   // Local do evento
+
+  // Catalogação por artigos da Lei 14.133/2021
+  leiArticles String?   // JSON array com números de artigos da Lei 14.133/2021
 
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt

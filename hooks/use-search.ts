@@ -10,6 +10,7 @@ export type DocumentType = {
   category: string;
   courseId?: string;
   tags?: string;
+  leiArticles?: string; // JSON array com números de artigos da Lei 14.133/2021
   uploadedAt?: string;
   url?: string;
 };
@@ -18,6 +19,7 @@ export type SearchFilters = {
   courseIds: string[];
   categories: string[];
   types: string[];
+  leiArticles: string[]; // Números de artigos da Lei 14.133/2021
   dateRange: 'all' | '7days' | '30days' | '90days' | 'custom';
   customDateStart?: Date;
   customDateEnd?: Date;
@@ -31,6 +33,7 @@ const DEFAULT_FILTERS: SearchFilters = {
   courseIds: [],
   categories: [],
   types: [],
+  leiArticles: [],
   dateRange: 'all',
   favoritesOnly: false,
   sortBy: 'relevance',
@@ -65,6 +68,7 @@ export function useSearch() {
     if (filters.courseIds.length > 0) count++;
     if (filters.categories.length > 0) count++;
     if (filters.types.length > 0) count++;
+    if (filters.leiArticles.length > 0) count++;
     if (filters.dateRange !== 'all') count++;
     if (filters.favoritesOnly) count++;
     if (filters.sortBy !== 'relevance') count++;

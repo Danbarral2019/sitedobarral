@@ -17,6 +17,7 @@ import { DocumentCardSkeleton } from '@/components/ui/skeleton';
 import { Pagination } from '@/components/ui/pagination';
 import { MultiFileDropzone } from '@/components/ui/multi-file-dropzone';
 import AdminLayout from '@/components/AdminLayout';
+import LeiArticleSelector from '@/components/LeiArticleSelector';
 
 type DocumentCategory = 'apostila' | 'acordao' | 'parecer' | 'edital' | 'artigo' | 'outro';
 
@@ -29,6 +30,7 @@ interface Document {
   category: string;
   courseId: string;
   isPublic: boolean;
+  leiArticles?: string; // JSON array de números de artigos
   size?: number;
   uploadedAt: string;
 }
@@ -72,6 +74,7 @@ export default function DocumentosPage() {
     category: DocumentCategory;
     isPublic: boolean;
     tags: string;
+    leiArticles: string[];
   }>({
     courseId: '',
     title: '',
@@ -79,6 +82,7 @@ export default function DocumentosPage() {
     category: 'apostila',
     isPublic: false,
     tags: '',
+    leiArticles: [],
   });
 
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
@@ -193,6 +197,7 @@ export default function DocumentosPage() {
         formDataToSend.append('category', formData.category);
         formDataToSend.append('isPublic', formData.isPublic.toString());
         formDataToSend.append('tags', formData.tags);
+        formDataToSend.append('leiArticles', JSON.stringify(formData.leiArticles));
 
         const response = await fetch('/api/admin/upload', {
           method: 'POST',
@@ -326,6 +331,7 @@ export default function DocumentosPage() {
       formDataToSend.append('category', formData.category);
       formDataToSend.append('isPublic', formData.isPublic.toString());
       formDataToSend.append('tags', formData.tags);
+      formDataToSend.append('leiArticles', JSON.stringify(formData.leiArticles));
 
       // Usar XMLHttpRequest para rastrear progresso
       await new Promise((resolve, reject) => {
@@ -364,6 +370,7 @@ export default function DocumentosPage() {
         category: 'apostila',
         isPublic: false,
         tags: '',
+        leiArticles: [],
       });
       setSelectedFile(null);
 
@@ -619,6 +626,16 @@ export default function DocumentosPage() {
                     <label htmlFor="isPublic" className="text-sm font-medium text-gray-900">
                       Documento público (visível sem QR Code)
                     </label>
+                  </div>
+
+                  {/* Seletor de Artigos da Lei 14.133/2021 */}
+                  <div>
+                    <LeiArticleSelector
+                      selectedArticles={formData.leiArticles}
+                      onChange={(articles) => setFormData({ ...formData, leiArticles: articles })}
+                      maxArticles={5}
+                      showPopularArticles={true}
+                    />
                   </div>
 
                   {isUploading && (

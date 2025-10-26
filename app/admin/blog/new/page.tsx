@@ -7,6 +7,7 @@ import dynamic from 'next/dynamic';
 import { Loader2, Save, ArrowLeft, Plus, X } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import AdminLayout from '@/components/AdminLayout';
+import LeiArticleSelector from '@/components/LeiArticleSelector';
 
 // Lazy load do editor Markdown (150KB+ economia)
 const MarkdownEditor = dynamic(() => import('@/components/MarkdownEditor'), {
@@ -35,6 +36,7 @@ export default function NewBlogPostPage() {
   });
   const [tags, setTags] = useState<string[]>([]);
   const [tagInput, setTagInput] = useState('');
+  const [leiArticles, setLeiArticles] = useState<string[]>([]);
 
   const verifyAdmin = useCallback(async () => {
     try {
@@ -102,6 +104,7 @@ export default function NewBlogPostPage() {
         body: JSON.stringify({
           ...formData,
           tags: tags.length > 0 ? tags : null,
+          leiArticles: leiArticles.length > 0 ? leiArticles : null,
         }),
       });
 
@@ -276,6 +279,17 @@ export default function NewBlogPostPage() {
                     ))}
                   </div>
                 )}
+              </div>
+
+              {/* Seletor de Artigos da Lei 14.133/2021 */}
+              <div>
+                <LeiArticleSelector
+                  selectedArticles={leiArticles}
+                  onChange={setLeiArticles}
+                  maxArticles={10}
+                  label="Artigos da Lei 14.133/2021 relacionados ao post"
+                  showPopularArticles={true}
+                />
               </div>
 
               <div className="space-y-3">
