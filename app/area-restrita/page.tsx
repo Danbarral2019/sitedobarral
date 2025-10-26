@@ -200,26 +200,9 @@ export default function AreaRestritaPage() {
     await logout();
   };
 
-  // Loading state
-  if (isLoading) {
-    return (
-      <main className="min-h-screen flex items-center justify-center">
-        <div className="text-center">
-          <Loader2 className="w-12 h-12 animate-spin text-blue-600 mx-auto mb-4" />
-          <p className="text-gray-700 font-medium">Verificando acesso...</p>
-        </div>
-      </main>
-    );
-  }
-
-  // Not authenticated
-  if (!user) {
-    return null;
-  }
-
-  // Pega os cursos que o usuário está matriculado
-  const userEnrollments = user.enrollments || [];
-  const enrolledCourseIds = user.role === 'admin'
+  // Computed values - MUST be before early returns to follow Rules of Hooks
+  const userEnrollments = user?.enrollments || [];
+  const enrolledCourseIds = user?.role === 'admin'
     ? courses.map(c => c.id)
     : userEnrollments.map(e => e.courseId);
 
@@ -307,6 +290,23 @@ export default function AreaRestritaPage() {
       setSelectedCourseId(courseId);
     }
   };
+
+  // Loading state - AFTER all hooks
+  if (isLoading) {
+    return (
+      <main className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <Loader2 className="w-12 h-12 animate-spin text-blue-600 mx-auto mb-4" />
+          <p className="text-gray-700 font-medium">Verificando acesso...</p>
+        </div>
+      </main>
+    );
+  }
+
+  // Not authenticated - AFTER all hooks
+  if (!user) {
+    return null;
+  }
 
   return (
     <main className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">

@@ -1,4 +1,5 @@
 import { DocumentType, SearchFilters } from '@/hooks/use-search';
+import { LEI_14133_ARTIGOS } from '@/data/lei-14133-artigos';
 
 /**
  * Remove acentos de uma string para busca case-insensitive
@@ -30,6 +31,25 @@ export function matchesSearchTerm(doc: DocumentType, searchTerm: string): boolea
   // Busca em categoria
   if (normalizeText(doc.category).includes(normalizedTerm)) return true;
 
+  // Busca em artigos da Lei 14.133/2021
+  if (doc.leiArticles) {
+    try {
+      const docArticles: string[] = JSON.parse(doc.leiArticles);
+      // Busca no número do artigo (ex: "artigo 72", "art 72", "72")
+      if (normalizedTerm.match(/\d+/)) {
+        const searchNumber = normalizedTerm.match(/\d+/)?.[0];
+        if (searchNumber && docArticles.includes(searchNumber)) return true;
+      }
+      // Busca na ementa dos artigos
+      for (const articleNum of docArticles) {
+        const article = LEI_14133_ARTIGOS[articleNum];
+        if (article && normalizeText(article.ementa).includes(normalizedTerm)) return true;
+      }
+    } catch (error) {
+      // Ignora erros de parse
+    }
+  }
+
   return false;
 }
 
@@ -54,6 +74,23 @@ export function matchesFilters(
   // Filtro por tipo
   if (filters.types.length > 0) {
     if (!filters.types.includes(doc.type)) return false;
+  }
+
+  // Filtro por artigos da Lei 14.133/2021
+  if (filters.leiArticles.length > 0) {
+    if (!doc.leiArticles) return false;
+
+    try {
+      const docArticles: string[] = JSON.parse(doc.leiArticles);
+      // Verifica se o documento tem pelo menos um dos artigos selecionados
+      const hasMatchingArticle = filters.leiArticles.some(filterArticle =>
+        docArticles.includes(filterArticle)
+      );
+      if (!hasMatchingArticle) return false;
+    } catch (error) {
+      // Se não conseguir fazer parse, o documento não passa no filtro
+      return false;
+    }
   }
 
   // Filtro por data
@@ -112,6 +149,29 @@ export function calculateRelevanceScore(doc: DocumentType, searchTerm: string): 
   if (doc.tags) {
     const tagsMatches = (normalizeText(doc.tags).match(new RegExp(normalizedTerm, 'g')) || []).length;
     score += tagsMatches * 5;
+  }
+
+  // Pontuação por match em artigos da Lei 14.133/2021
+  if (doc.leiArticles) {
+    try {
+      const docArticles: string[] = JSON.parse(doc.leiArticles);
+      // Bonus se buscar por número de artigo e encontrar match
+      if (normalizedTerm.match(/\d+/)) {
+        const searchNumber = normalizedTerm.match(/\d+/)?.[0];
+        if (searchNumber && docArticles.includes(searchNumber)) {
+          score += 15; // Boost forte para match exato de artigo
+        }
+      }
+      // Bonus por match na ementa dos artigos
+      for (const articleNum of docArticles) {
+        const article = LEI_14133_ARTIGOS[articleNum];
+        if (article && normalizeText(article.ementa).includes(normalizedTerm)) {
+          score += 3;
+        }
+      }
+    } catch (error) {
+      // Ignora erros de parse
+    }
   }
 
   // Bonus se o termo aparece no início do título

@@ -12,6 +12,7 @@ export interface ExcelDocumentRow {
   curso?: string;
   publico?: string;
   tags?: string;
+  artigos?: string; // Números de artigos da Lei 14.133/2021 separados por vírgula
   url?: string;
   arquivo?: string;
 }
@@ -29,6 +30,7 @@ export interface ProcessedDocument {
   isAllCourses: boolean;
   isPublic: boolean;
   tags: string[];
+  leiArticles: string[]; // Números de artigos da Lei 14.133/2021
   url?: string;
   fileName?: string;
   // Classificação automática
@@ -250,6 +252,24 @@ function processRow(
     }
   }
 
+  // Artigos da Lei 14.133/2021: processa números separados por vírgula
+  let leiArticles: string[] = [];
+  if (row.artigos && row.artigos.trim() !== '') {
+    // Remove espaços e split por vírgula ou ponto e vírgula
+    leiArticles = row.artigos
+      .split(/[,;]/)
+      .map(num => num.trim())
+      .filter(num => {
+        // Valida se é um número válido (1-193)
+        const articleNum = parseInt(num);
+        if (isNaN(articleNum) || articleNum < 1 || articleNum > 193) {
+          warnings.push(`Linha ${rowIndex}: Artigo "${num}" inválido (deve ser entre 1 e 193)`);
+          return false;
+        }
+        return true;
+      });
+  }
+
   // Público: padrão é false (restrito)
   let isPublic = false;
   if (row.publico) {
@@ -277,6 +297,7 @@ function processRow(
     isAllCourses,
     isPublic,
     tags,
+    leiArticles,
     url,
     fileName,
     autoClassified,
@@ -328,7 +349,7 @@ export async function processExcelFile(
 
     // Converte para JSON
     const rows: ExcelDocumentRow[] = XLSX.utils.sheet_to_json(worksheet, {
-      header: ['titulo', 'descricao', 'categoria', 'curso', 'publico', 'tags', 'url', 'arquivo'],
+      header: ['titulo', 'descricao', 'categoria', 'curso', 'publico', 'tags', 'artigos', 'url', 'arquivo'],
       range: 1 // Pula a primeira linha (headers)
     });
 
@@ -387,6 +408,7 @@ export function generateExcelTemplate(): Buffer {
     'Curso',
     'Publico',
     'Tags',
+    'Artigos',
     'URL',
     'Arquivo'
   ];
@@ -399,6 +421,7 @@ export function generateExcelTemplate(): Buffer {
       Curso: 'contratacao-direta',
       Publico: 'Não',
       Tags: 'TCU, dispensa, valor',
+      Artigos: '72, 74, 75',
       URL: '',
       Arquivo: 'acordao_1234_2023.pdf'
     },
@@ -409,6 +432,7 @@ export function generateExcelTemplate(): Buffer {
       Curso: 'nova-lei-licitacoes',
       Publico: 'Sim',
       Tags: 'AGU, registro de preços, Lei 14.133',
+      Artigos: '81, 82, 83, 84',
       URL: 'https://exemplo.com/parecer.pdf',
       Arquivo: ''
     },
@@ -419,6 +443,7 @@ export function generateExcelTemplate(): Buffer {
       Curso: 'TODOS',
       Publico: 'Sim',
       Tags: 'Lei 14.133, legislação, comentários',
+      Artigos: '6, 29, 30, 155',
       URL: '',
       Arquivo: 'lei_14133_comentada.pdf'
     },
@@ -429,6 +454,7 @@ export function generateExcelTemplate(): Buffer {
       Curso: 'gestao-fiscalizacao-contratos, planejamento-contratacoes',
       Publico: 'Não',
       Tags: 'TCU, fiscalização, planejamento',
+      Artigos: '22, 115, 116, 117',
       URL: '',
       Arquivo: 'acordao_5678_2023.pdf'
     }
@@ -445,6 +471,7 @@ export function generateExcelTemplate(): Buffer {
     { wch: 30 }, // Curso
     { wch: 8 },  // Publico
     { wch: 30 }, // Tags
+    { wch: 20 }, // Artigos
     { wch: 40 }, // URL
     { wch: 30 }  // Arquivo
   ];

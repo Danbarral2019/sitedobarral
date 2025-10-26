@@ -42,7 +42,7 @@ export const PUT = withAdminAuth(async (
   try {
     const { id } = await context.params;
     const data = await request.json();
-    const { title, slug, excerpt, content, author, publishedAt, isPublished, autoPublishSocial, tags } = data;
+    const { title, slug, excerpt, content, author, publishedAt, isPublished, autoPublishSocial, tags, leiArticles } = data;
 
     // Verificar se o post existe
     const existingPost = await prisma.blogPost.findUnique({
@@ -82,6 +82,7 @@ export const PUT = withAdminAuth(async (
         ...(typeof isPublished === 'boolean' && { isPublished }),
         ...(typeof autoPublishSocial === 'boolean' && { autoPublishSocial }),
         ...(tags !== undefined && { tags: tags ? JSON.stringify(tags) : null }),
+        ...(leiArticles !== undefined && { leiArticles: leiArticles ? JSON.stringify(leiArticles) : null }),
       },
     });
 

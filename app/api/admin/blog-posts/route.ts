@@ -44,7 +44,7 @@ export const GET = withAdminAuth(async (request: NextRequest) => {
 export const POST = withAdminAuth(async (request: NextRequest) => {
   try {
     const data = await request.json();
-    const { title, slug, excerpt, content, author, publishedAt, isPublished, autoPublishSocial, tags } = data;
+    const { title, slug, excerpt, content, author, publishedAt, isPublished, autoPublishSocial, tags, leiArticles } = data;
 
     if (!title || !slug || !excerpt || !content || !author) {
       return NextResponse.json(
@@ -76,6 +76,7 @@ export const POST = withAdminAuth(async (request: NextRequest) => {
         isPublished: isPublished ?? false,
         autoPublishSocial: autoPublishSocial ?? true,
         tags: tags ? JSON.stringify(tags) : null,
+        leiArticles: leiArticles ? JSON.stringify(leiArticles) : null,
       },
     });
 

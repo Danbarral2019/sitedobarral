@@ -14,7 +14,8 @@ export async function addDocument(
   isPublic: boolean,
   url: string,
   size?: number,
-  tags: string[] = []
+  tags: string[] = [],
+  leiArticles: string[] = []
 ): Promise<Document> {
   const dbDocument = await prisma.document.create({
     data: {
@@ -27,6 +28,7 @@ export async function addDocument(
       url,
       size: size || null,
       tags: JSON.stringify(tags),
+      leiArticles: JSON.stringify(leiArticles),
     },
   });
 
@@ -40,6 +42,7 @@ export async function addDocument(
     courseId: dbDocument.courseId,
     isPublic: dbDocument.isPublic,
     tags: dbDocument.tags ? JSON.parse(dbDocument.tags) : [],
+    leiArticles: dbDocument.leiArticles ? JSON.parse(dbDocument.leiArticles) : [],
     uploadedAt: dbDocument.uploadedAt,
     size: dbDocument.size || undefined,
   };
@@ -71,6 +74,7 @@ export async function listDocuments(): Promise<Document[]> {
           courseId: doc.courseId,
           isPublic: doc.isPublic,
           tags: doc.tags ? JSON.parse(doc.tags) : [],
+          leiArticles: doc.leiArticles ? JSON.parse(doc.leiArticles) : [],
           uploadedAt: doc.uploadedAt,
           size: doc.size || undefined,
         };
@@ -109,6 +113,7 @@ export async function getDocumentsByCourse(courseId: string): Promise<{
     courseId: doc.courseId,
     isPublic: doc.isPublic,
     tags: doc.tags ? JSON.parse(doc.tags) : [],
+    leiArticles: doc.leiArticles ? JSON.parse(doc.leiArticles) : [],
     uploadedAt: doc.uploadedAt,
     size: doc.size || undefined,
   });
@@ -141,6 +146,7 @@ export async function getDocumentById(id: string): Promise<Document | null> {
     courseId: doc.courseId,
     isPublic: doc.isPublic,
     tags: doc.tags ? JSON.parse(doc.tags) : [],
+    leiArticles: doc.leiArticles ? JSON.parse(doc.leiArticles) : [],
     uploadedAt: doc.uploadedAt,
     size: doc.size || undefined,
   };
@@ -178,6 +184,7 @@ export async function updateDocument(
     if (updates.url !== undefined) data.url = updates.url;
     if (updates.size !== undefined) data.size = updates.size || null;
     if (updates.tags !== undefined) data.tags = JSON.stringify(updates.tags);
+    if (updates.leiArticles !== undefined) data.leiArticles = JSON.stringify(updates.leiArticles);
 
     const doc = await prisma.document.update({
       where: { id },
@@ -194,6 +201,7 @@ export async function updateDocument(
       courseId: doc.courseId,
       isPublic: doc.isPublic,
       tags: doc.tags ? JSON.parse(doc.tags) : [],
+      leiArticles: doc.leiArticles ? JSON.parse(doc.leiArticles) : [],
       uploadedAt: doc.uploadedAt,
       size: doc.size || undefined,
     };
