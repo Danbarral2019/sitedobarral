@@ -107,7 +107,7 @@ export default function AreaRestritaPage() {
     }
   }, [isLoading, user, router]);
 
-  // Buscar documentos, vídeos e sites dos cursos matriculados
+  // Buscar documentos, vídeos e sites dos cursos matriculados (BATCH - 1 request)
   useEffect(() => {
     const fetchCourseData = async () => {
       if (!user) return;
@@ -117,79 +117,30 @@ export default function AreaRestritaPage() {
         ? courses.map(c => c.id)
         : userEnrollments.map(e => e.courseId);
 
-      // Buscar documentos
-      const docsPromises = enrolledCourseIds.map(async (courseId) => {
-        try {
-          const response = await fetch(`/api/documents?courseId=${courseId}`);
-          if (response.ok) {
-            const data = await response.json();
-            return { courseId, documents: data.documents || [] };
+      if (enrolledCourseIds.length === 0) return;
+
+      try {
+        // OTIMIZAÇÃO: Batch request - reduz 15+ requests para 1 único request
+        const courseIdsParam = enrolledCourseIds.join(',');
+        const response = await fetch(`/api/area-restrita/batch-data?courseIds=${courseIdsParam}`);
+
+        if (response.ok) {
+          const data = await response.json();
+
+          // Atualizar estados com dados já agrupados por courseId
+          setCourseDocuments(data.data.documents || {});
+          setCourseVideos(data.data.videos || {});
+          setCourseSites(data.data.sites || {});
+
+          // Selecionar primeiro curso automaticamente
+          if (enrolledCourseIds.length > 0 && !selectedCourseId) {
+            setSelectedCourseId(enrolledCourseIds[0]);
           }
-        } catch (error) {
-          console.error(`Erro ao buscar documentos do curso ${courseId}:`, error);
+        } else {
+          console.error('Erro ao buscar dados batch:', response.statusText);
         }
-        return { courseId, documents: [] };
-      });
-
-      // Buscar vídeos
-      const videosPromises = enrolledCourseIds.map(async (courseId) => {
-        try {
-          const response = await fetch(`/api/course-videos?courseId=${courseId}`);
-          if (response.ok) {
-            const data = await response.json();
-            return { courseId, videos: data.videos || [] };
-          }
-        } catch (error) {
-          console.error(`Erro ao buscar vídeos do curso ${courseId}:`, error);
-        }
-        return { courseId, videos: [] };
-      });
-
-      // Buscar sites
-      const sitesPromises = enrolledCourseIds.map(async (courseId) => {
-        try {
-          const response = await fetch(`/api/recommended-sites?courseId=${courseId}`);
-          if (response.ok) {
-            const data = await response.json();
-            return { courseId, sites: data.sites || [] };
-          }
-        } catch (error) {
-          console.error(`Erro ao buscar sites do curso ${courseId}:`, error);
-        }
-        return { courseId, sites: [] };
-      });
-
-      // Aguardar todas as requisições
-      const [docsResults, videosResults, sitesResults] = await Promise.all([
-        Promise.all(docsPromises),
-        Promise.all(videosPromises),
-        Promise.all(sitesPromises),
-      ]);
-
-      // Mapear documentos
-      const docsMap: Record<string, DocumentType[]> = {};
-      docsResults.forEach(({ courseId, documents }) => {
-        docsMap[courseId] = documents as DocumentType[];
-      });
-      setCourseDocuments(docsMap);
-
-      // Mapear vídeos
-      const videosMap: Record<string, VideoType[]> = {};
-      videosResults.forEach(({ courseId, videos }) => {
-        videosMap[courseId] = videos as VideoType[];
-      });
-      setCourseVideos(videosMap);
-
-      // Mapear sites
-      const sitesMap: Record<string, SiteType[]> = {};
-      sitesResults.forEach(({ courseId, sites }) => {
-        sitesMap[courseId] = sites as SiteType[];
-      });
-      setCourseSites(sitesMap);
-
-      // Selecionar primeiro curso automaticamente
-      if (enrolledCourseIds.length > 0 && !selectedCourseId) {
-        setSelectedCourseId(enrolledCourseIds[0]);
+      } catch (error) {
+        console.error('Erro ao buscar dados da área restrita:', error);
       }
     };
 
