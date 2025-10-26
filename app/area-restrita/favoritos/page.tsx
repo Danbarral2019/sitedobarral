@@ -132,7 +132,7 @@ export default function FavoritosPage() {
   };
 
   // Download documento
-  const handleDownload = async (doc: Document, courseId: string) => {
+  const handleDownload = async (doc: Document) => {
     try {
       const response = await fetch(`/api/documents/${doc.id}/download`);
       if (response.ok) {
@@ -281,7 +281,7 @@ export default function FavoritosPage() {
                             <div className="flex items-center gap-2 flex-shrink-0">
                               {fav.document.type === 'pdf' && (
                                 <button
-                                  onClick={() => handleDownload(fav.document!, group.courseId)}
+                                  onClick={() => handleDownload(fav.document!)}
                                   className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
                                   title="Baixar documento"
                                 >

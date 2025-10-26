@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import AdminLayout from '@/components/AdminLayout';
 import { Mail, Calendar, Users, UserX, RefreshCw, Loader2, CheckCircle } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
@@ -30,11 +30,7 @@ export default function NewsletterPage() {
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const { success: successToast, error: errorToast } = useToast();
 
-  useEffect(() => {
-    loadSubscribers();
-  }, [filter]);
-
-  const loadSubscribers = async () => {
+  const loadSubscribers = useCallback(async () => {
     setLoading(true);
     try {
       const isActiveParam = filter === 'all' ? '' : `?isActive=${filter === 'active' ? 'true' : 'false'}`;
@@ -53,7 +49,11 @@ export default function NewsletterPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [filter, errorToast]);
+
+  useEffect(() => {
+    loadSubscribers();
+  }, [loadSubscribers]);
 
   const calculateStats = (subs: Subscriber[]) => {
     // Se estiver filtrado, buscar todos para calcular stats corretos

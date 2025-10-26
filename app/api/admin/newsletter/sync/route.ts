@@ -1,5 +1,4 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { prisma } from '@/lib/prisma';
+import { NextResponse } from 'next/server';
 import { withAdminAuth } from '@/lib/api-middleware';
 import { syncSubscribers, isMailChimpConfigured } from '@/lib/mailchimp';
 
@@ -8,7 +7,7 @@ import { syncSubscribers, isMailChimpConfigured } from '@/lib/mailchimp';
  * POST /api/admin/newsletter/sync
  * Sincroniza todos os inscritos ativos do banco de dados local com o MailChimp
  */
-export const POST = withAdminAuth(async (_request: NextRequest) => {
+export const POST = withAdminAuth(async () => {
   try {
     // Verificar se MailChimp está configurado
     if (!isMailChimpConfigured()) {

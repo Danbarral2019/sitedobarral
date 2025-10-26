@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import AdminLayout from '@/components/AdminLayout';
 import { Mail, Phone, Calendar, Trash2, Check, X, Loader2, MessageCircle } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
@@ -29,11 +29,7 @@ export default function ContatosPage() {
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const { success: successToast, error: errorToast } = useToast();
 
-  useEffect(() => {
-    loadContacts();
-  }, [filter]);
-
-  const loadContacts = async () => {
+  const loadContacts = useCallback(async () => {
     setLoading(true);
     try {
       const response = await fetch(`/api/contact?isRead=${filter}`);
@@ -53,7 +49,11 @@ export default function ContatosPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [filter, errorToast]);
+
+  useEffect(() => {
+    loadContacts();
+  }, [loadContacts]);
 
   const handleMarkAsRead = async (id: string, isRead: boolean) => {
     try {

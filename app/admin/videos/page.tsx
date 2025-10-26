@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import AdminLayout from '@/components/AdminLayout';
 import { Plus, Trash2, Youtube, ExternalLink } from 'lucide-react';
 import { courses } from '@/data/courses';
@@ -28,11 +28,7 @@ export default function VideosAdminPage() {
     youtubeUrl: '',
   });
 
-  useEffect(() => {
-    loadVideos();
-  }, [selectedCourse]);
-
-  const loadVideos = async () => {
+  const loadVideos = useCallback(async () => {
     try {
       const response = await fetch(`/api/course-videos?courseId=${selectedCourse}`);
       if (response.ok) {
@@ -44,7 +40,11 @@ export default function VideosAdminPage() {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [selectedCourse]);
+
+  useEffect(() => {
+    loadVideos();
+  }, [loadVideos]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

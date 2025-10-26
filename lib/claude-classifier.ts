@@ -188,9 +188,10 @@ function parseClaudeResponse(responseText: string): ClaudeClassificationResult {
  * Valida categoria
  */
 function validateCategory(category: string): 'apostila' | 'acordao' | 'parecer' | 'edital' | 'artigo' | 'orientacao-normativa' | 'outro' {
-  const validCategories = ['apostila', 'acordao', 'parecer', 'edital', 'artigo', 'orientacao-normativa', 'outro'];
-  return validCategories.includes(category)
-    ? category as any
+  const validCategories = ['apostila', 'acordao', 'parecer', 'edital', 'artigo', 'orientacao-normativa', 'outro'] as const;
+  type ValidCategory = typeof validCategories[number];
+  return validCategories.includes(category as ValidCategory)
+    ? (category as ValidCategory)
     : 'outro';
 }
 

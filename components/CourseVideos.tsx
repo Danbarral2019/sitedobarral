@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Play, Youtube, ExternalLink, Maximize2 } from 'lucide-react';
+import { Play, Youtube, ExternalLink } from 'lucide-react';
 
 interface CourseVideo {
   id: string;

@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { withAdminAuth } from '@/lib/api-middleware';
 
@@ -7,7 +7,7 @@ import { withAdminAuth } from '@/lib/api-middleware';
  * GET /api/admin/analytics
  * Retorna métricas agregadas para o dashboard do admin
  */
-export const GET = withAdminAuth(async (_request: NextRequest) => {
+export const GET = withAdminAuth(async () => {
   try {
     // 1. Estatísticas de Usuários
     const totalUsers = await prisma.user.count();

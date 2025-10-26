@@ -45,7 +45,7 @@ export function matchesSearchTerm(doc: DocumentType, searchTerm: string): boolea
         const article = LEI_14133_ARTIGOS[articleNum];
         if (article && normalizeText(article.ementa).includes(normalizedTerm)) return true;
       }
-    } catch (error) {
+    } catch {
       // Ignora erros de parse
     }
   }
@@ -87,7 +87,7 @@ export function matchesFilters(
         docArticles.includes(filterArticle)
       );
       if (!hasMatchingArticle) return false;
-    } catch (error) {
+    } catch {
       // Se não conseguir fazer parse, o documento não passa no filtro
       return false;
     }
@@ -169,7 +169,7 @@ export function calculateRelevanceScore(doc: DocumentType, searchTerm: string): 
           score += 3;
         }
       }
-    } catch (error) {
+    } catch {
       // Ignora erros de parse
     }
   }
