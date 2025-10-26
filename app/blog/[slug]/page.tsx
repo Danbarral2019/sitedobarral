@@ -1,12 +1,11 @@
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
 import { ArrowLeft, Calendar, Clock, User, Tag } from 'lucide-react';
-import { PrismaClient, BlogPost } from '@prisma/client';
+import { BlogPost } from '@prisma/client';
+import { prisma } from '@/lib/prisma';
 import MarkdownContent from '@/components/MarkdownContent';
 import ShareButtons from '@/components/ShareButtons';
 import type { Metadata } from 'next';
-
-const prisma = new PrismaClient();
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
   const { slug } = await params;

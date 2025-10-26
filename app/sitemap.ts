@@ -1,8 +1,6 @@
 import { MetadataRoute } from 'next';
-import { PrismaClient } from '@prisma/client';
+import { prisma } from '@/lib/prisma';
 import { courses } from '@/data/courses';
-
-const prisma = new PrismaClient();
 const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || 'https://profdanielbarral.com';
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
