@@ -26,6 +26,7 @@ export interface TCUClassificationResult {
   categoria: string; // Sempre "acordao"
   cursos: string[]; // IDs dos cursos (1, 2, 3, etc)
   tags: string[];
+  artigos: string[]; // Artigos da Lei 14.133/2021 mencionados
 
   // Confiança e raciocínio
   confianca: number; // 0-100
@@ -78,11 +79,12 @@ export async function classifyTCUAcordao(
 
     console.log(`[TCU Classifier] Enviando para Claude API (${prompt.length} chars)...`);
 
-    // Chama a API do Claude
+    // Chama a API do Claude com timeout maior
     const response = await anthropic.messages.create({
       model: 'claude-3-5-sonnet-20241022',
-      max_tokens: 2000,
+      max_tokens: 1500, // Reduzido de 2000 para resposta mais rápida
       temperature: 0.3, // Baixa temperatura para respostas mais consistentes
+      timeout: 60000, // 60 segundos de timeout
       messages: [
         {
           role: 'user',
@@ -172,8 +174,9 @@ Analise o acórdão e forneça a classificação no formato JSON abaixo:
   "descricao": "Descrição expandida que adicione contexto ao enunciado (máx 300 chars)",
   "cursos": ["1", "3"],
   "tags": ["tag1", "tag2", "tag3"],
+  "artigos": ["6", "11", "72"],
   "confianca": 85,
-  "raciocinio": "Explicação breve de por que escolheu esses cursos e tags"
+  "raciocinio": "Explicação breve de por que escolheu esses cursos, tags e artigos"
 }
 \`\`\`
 
@@ -194,9 +197,19 @@ Analise o acórdão e forneça a classificação no formato JSON abaixo:
 4. **Tags:** Extraia 3-8 tags relevantes (substantivos ou expressões-chave).
    Exemplos: "crédito-orçamentário", "lei-14133", "contrato-administrativo"
 
-5. **Confiança:** 0-100, baseado em quão clara é a relação com os cursos.
+5. **Artigos:** Liste os artigos da Lei 14.133/2021 mencionados ou relacionados.
+   - Extraia do campo "Legislação" ou do enunciado
+   - Use apenas números (ex: ["6", "11", "72"])
+   - Se não houver menção explícita, infira pelos temas:
+     * Planejamento → arts. 6-12, 18-24
+     * Licitação → arts. 25-88
+     * Contratos → arts. 89-154
+     * Sanções → arts. 155-163
+   - Máximo 5 artigos mais relevantes
 
-6. **Raciocínio:** 1-2 frases explicando a escolha.
+6. **Confiança:** 0-100, baseado em quão clara é a relação com os cursos.
+
+7. **Raciocínio:** 1-2 frases explicando a escolha dos cursos, tags e artigos.
 
 **IMPORTANTE:** Retorne APENAS o JSON, sem texto adicional antes ou depois.`;
 }
@@ -225,6 +238,11 @@ function parseClassificationResponse(
       throw new Error('Resposta da IA está faltando campos obrigatórios');
     }
 
+    // Artigos é opcional, mas deve ser array se existir
+    const artigos = Array.isArray(parsed.artigos)
+      ? parsed.artigos.filter((a: unknown) => typeof a === 'string')
+      : [];
+
     return {
       success: true,
       numeroAcordao,
@@ -233,6 +251,7 @@ function parseClassificationResponse(
       categoria: 'acordao',
       cursos: parsed.cursos.filter((c: unknown) => typeof c === 'string'),
       tags: parsed.tags.filter((t: unknown) => typeof t === 'string'),
+      artigos,
       confianca: Math.min(100, Math.max(0, parsed.confianca || 70)),
       raciocinio: parsed.raciocinio || 'Classificação baseada em análise contextual',
     };
@@ -290,6 +309,13 @@ function classifyWithRules(input: TCUClassificationInput): TCUClassificationResu
   // Descrição: enunciado completo
   const descricao = planilha.enunciado;
 
+  // Extrai artigos mencionados na legislação
+  const artigos: string[] = [];
+  const artigosMatch = planilha.legislacao.matchAll(/art(?:igo)?s?\.?\s*(\d+)/gi);
+  for (const match of artigosMatch) {
+    artigos.push(match[1]);
+  }
+
   return {
     success: true,
     numeroAcordao: planilha.acordao,
@@ -298,6 +324,7 @@ function classifyWithRules(input: TCUClassificationInput): TCUClassificationResu
     categoria: 'acordao',
     cursos: cursosMatch,
     tags,
+    artigos: artigos.slice(0, 5), // Máximo 5 artigos
     confianca: 60, // Baixa confiança (classificação por regras)
     raciocinio: 'Classificação automática baseada em palavras-chave (IA não disponível)',
   };

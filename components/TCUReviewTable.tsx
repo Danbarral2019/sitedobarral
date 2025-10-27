@@ -42,6 +42,7 @@ interface TCUReviewDocument {
     categoria: string;
     cursos: string[];
     tags: string[];
+    artigos: string[];
     confianca: number;
     raciocinio: string;
     error?: string;
@@ -57,6 +58,8 @@ interface TCUReviewTableProps {
     category: string;
     courses: string[];
     tags: string[];
+    artigos: string[];
+    url: string;
   }) => void;
   onSkip: (rowIndex: number) => void;
   onReprocess: (rowIndex: number) => Promise<void>;
@@ -79,7 +82,10 @@ export default function TCUReviewTable({
   const [editedCategory, setEditedCategory] = useState(currentDoc?.classification?.categoria || currentDoc?.category || 'acordao');
   const [editedCourses, setEditedCourses] = useState<string[]>(currentDoc?.classification?.cursos || []);
   const [editedTags, setEditedTags] = useState(currentDoc?.classification?.tags || []);
+  const [editedArtigos, setEditedArtigos] = useState<string[]>(currentDoc?.classification?.artigos || []);
+  const [editedUrl, setEditedUrl] = useState(currentDoc?.enrichment?.linkPDF || '');
   const [newTag, setNewTag] = useState('');
+  const [newArtigo, setNewArtigo] = useState('');
 
   // Atualiza estado quando documento muda
   const loadDocument = (doc: TCUReviewDocument) => {
@@ -88,7 +94,10 @@ export default function TCUReviewTable({
     setEditedCategory(doc?.classification?.categoria || doc?.category || 'acordao');
     setEditedCourses(doc?.classification?.cursos || []);
     setEditedTags(doc?.classification?.tags || []);
+    setEditedArtigos(doc?.classification?.artigos || []);
+    setEditedUrl(doc?.enrichment?.linkPDF || '');
     setNewTag('');
+    setNewArtigo('');
   };
 
   const handlePrevious = () => {
@@ -114,6 +123,8 @@ export default function TCUReviewTable({
       category: editedCategory,
       courses: editedCourses,
       tags: editedTags,
+      artigos: editedArtigos,
+      url: editedUrl,
     });
 
     // Vai para o próximo documento
@@ -159,6 +170,23 @@ export default function TCUReviewTable({
 
   const removeTag = (tag: string) => {
     setEditedTags(editedTags.filter(t => t !== tag));
+  };
+
+  const addArtigo = () => {
+    const artigoNum = newArtigo.trim();
+    if (artigoNum && !editedArtigos.includes(artigoNum)) {
+      // Valida se é um número
+      if (/^\d+$/.test(artigoNum)) {
+        setEditedArtigos([...editedArtigos, artigoNum]);
+        setNewArtigo('');
+      } else {
+        alert('Digite apenas o número do artigo (ex: 6, 11, 72)');
+      }
+    }
+  };
+
+  const removeArtigo = (artigo: string) => {
+    setEditedArtigos(editedArtigos.filter(a => a !== artigo));
   };
 
   if (!currentDoc) {
@@ -343,6 +371,14 @@ export default function TCUReviewTable({
                   <span className="font-medium">Raciocínio:</span>
                   <p className="text-gray-700 italic">{currentDoc.classification.raciocinio}</p>
                 </div>
+                {currentDoc.classification.artigos && currentDoc.classification.artigos.length > 0 && (
+                  <div>
+                    <span className="font-medium">Artigos da Lei 14.133/2021 sugeridos:</span>
+                    <p className="text-gray-700">
+                      {currentDoc.classification.artigos.map(a => `art. ${a}`).join(', ')}
+                    </p>
+                  </div>
+                )}
               </div>
             )}
 
@@ -384,6 +420,24 @@ export default function TCUReviewTable({
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                   placeholder="Descrição expandida do documento"
                 />
+              </div>
+
+              {/* Link/PDF do Inteiro Teor */}
+              <div>
+                <label className="block text-sm font-medium mb-1">
+                  Link/PDF do Inteiro Teor
+                  <span className="text-xs text-gray-500 ml-2">(opcional)</span>
+                </label>
+                <input
+                  type="url"
+                  value={editedUrl}
+                  onChange={(e) => setEditedUrl(e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  placeholder="https://exemplo.com/acordao.pdf"
+                />
+                <p className="text-xs text-gray-500 mt-1">
+                  💡 Link para acessar o documento completo (PDF ou página web)
+                </p>
               </div>
 
               {/* Categoria */}
@@ -459,6 +513,51 @@ export default function TCUReviewTable({
                     </span>
                   ))}
                 </div>
+              </div>
+
+              {/* Artigos da Lei 14.133/2021 */}
+              <div>
+                <label className="block text-sm font-medium mb-2">
+                  Artigos da Lei 14.133/2021
+                  <span className="text-xs text-gray-500 ml-2">(para Lei Comentada)</span>
+                </label>
+                <div className="flex gap-2 mb-2">
+                  <input
+                    type="text"
+                    value={newArtigo}
+                    onChange={(e) => setNewArtigo(e.target.value)}
+                    onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), addArtigo())}
+                    className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-green-500 focus:border-green-500"
+                    placeholder="Digite o número do artigo (ex: 6, 11, 72)"
+                  />
+                  <button
+                    onClick={addArtigo}
+                    type="button"
+                    className="px-3 py-1.5 text-sm bg-green-600 text-white rounded-md hover:bg-green-700"
+                  >
+                    Adicionar
+                  </button>
+                </div>
+                <div className="flex flex-wrap gap-2">
+                  {editedArtigos.sort((a, b) => parseInt(a) - parseInt(b)).map((artigo) => (
+                    <span
+                      key={artigo}
+                      className="inline-flex items-center gap-1 px-2 py-1 bg-green-100 text-green-800 rounded-md text-sm font-medium"
+                    >
+                      art. {artigo}
+                      <button
+                        onClick={() => removeArtigo(artigo)}
+                        className="hover:text-green-600"
+                        type="button"
+                      >
+                        ×
+                      </button>
+                    </span>
+                  ))}
+                </div>
+                <p className="text-xs text-gray-500 mt-1">
+                  💡 Estes artigos serão usados na futura Lei 14.133/2021 Comentada
+                </p>
               </div>
             </div>
           </div>

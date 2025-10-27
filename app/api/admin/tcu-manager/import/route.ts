@@ -9,6 +9,7 @@ interface DocumentToImport {
   category: string;
   course: string; // Comma-separated course slugs
   tags: string; // Comma-separated tags
+  leiArticles?: string; // Comma-separated article numbers from Lei 14.133/2021
   publico: string; // 'SIM' ou 'NAO'
   url: string;
   arquivo: string;
@@ -110,6 +111,11 @@ export const POST = withAdminAuth(async (request: NextRequest) => {
           ? doc.tags.split(',').map(t => t.trim()).filter(Boolean)
           : [];
 
+        // Processa artigos da Lei 14.133/2021
+        const leiArticlesArray = doc.leiArticles
+          ? doc.leiArticles.split(',').map(a => a.trim()).filter(Boolean)
+          : [];
+
         // Define campos
         const isPublic = doc.publico?.toUpperCase() === 'SIM';
         const url = doc.url || '#';
@@ -166,7 +172,10 @@ export const POST = withAdminAuth(async (request: NextRequest) => {
               courseId,
               isPublic,
               tags: JSON.stringify(tagsArray),
-              leiArticles: JSON.stringify([]), // Pode ser preenchido depois
+              leiArticles: JSON.stringify(leiArticlesArray), // Artigos da Lei 14.133/2021
+              aiSuggestedArticles: doc.classification?.success
+                ? JSON.stringify(leiArticlesArray)
+                : undefined, // Salva sugestões da IA
               reviewed: true, // TCU docs já revisados
               ...tcuFields,
               ...enrichmentFields,

@@ -4,6 +4,26 @@ import { ensureConnection } from '@/lib/prisma';
 import * as xlsx from 'xlsx';
 
 /**
+ * Remove códigos HTML e tags de links dos textos da planilha TCU
+ * Exemplos:
+ *   '<a href="..." target="_blank">Acórdão 1.519/2017</a>' → 'Acórdão 1.519/2017'
+ *   '<a href="...">Lei 8.666/1993</a>' → 'Lei 8.666/1993'
+ */
+function cleanHtmlTags(text: string): string {
+  if (!text) return '';
+
+  return text
+    // Remove tags <a> mas mantém o texto interno
+    .replace(/<a[^>]*>(.*?)<\/a>/gi, '$1')
+    // Remove outras tags HTML se houver
+    .replace(/<[^>]+>/g, '')
+    // Remove múltiplos espaços
+    .replace(/\s+/g, ' ')
+    // Remove espaços no início e fim
+    .trim();
+}
+
+/**
  * Extrai número e ano do acórdão do título
  * Exemplos: "AC-0516/25-P" → { numero: "0516", ano: "2025" }
  *           "Acórdão 516/2025" → { numero: "0516", ano: "2025" }
@@ -144,24 +164,28 @@ export const POST = withAdminAuth(async (request: NextRequest) => {
         // === EXTRAI TODAS AS 10 COLUNAS DA PLANILHA TCU ===
 
         // 1. Enunciado (texto principal - resumo do acórdão)
-        const enunciado = (
+        const enunciadoRaw = (
           row['Enunciado'] || row['enunciado'] || row['ENUNCIADO'] || ''
         ) as string;
+        const enunciado = cleanHtmlTags(enunciadoRaw);
 
         // 2. Área temática
-        const area = (
+        const areaRaw = (
           row['Área'] || row['Area'] || row['area'] || row['ÁREA'] || row['AREA'] || ''
         ) as string;
+        const area = cleanHtmlTags(areaRaw);
 
         // 3. Tema
-        const tema = (
+        const temaRaw = (
           row['Tema'] || row['tema'] || row['TEMA'] || ''
         ) as string;
+        const tema = cleanHtmlTags(temaRaw);
 
         // 4. Subtema
-        const subtema = (
+        const subtemaRaw = (
           row['Subtema'] || row['subtema'] || row['SUBTEMA'] || ''
         ) as string;
+        const subtema = cleanHtmlTags(subtemaRaw);
 
         // 5. Data do julgamento
         const dataStr = (
@@ -182,33 +206,38 @@ export const POST = withAdminAuth(async (request: NextRequest) => {
         }
 
         // 6. Número do Acórdão (identificador principal)
-        const acordao = (
+        const acordaoRaw = (
           row['Acórdão'] || row['Acordao'] || row['acordao'] || row['ACÓRDÃO'] || row['ACORDAO'] || ''
         ) as string;
+        const acordao = cleanHtmlTags(acordaoRaw);
 
         // 7. Autor da tese
-        const autorTese = (
+        const autorTeseRaw = (
           row['Autor da tese'] || row['autor da tese'] || row['AUTOR DA TESE'] ||
           row['Autor'] || row['autor'] || ''
         ) as string;
+        const autorTese = cleanHtmlTags(autorTeseRaw);
 
         // 8. Legislação citada
-        const legislacao = (
+        const legislacaoRaw = (
           row['Legislação'] || row['Legislacao'] || row['legislacao'] ||
           row['LEGISLAÇÃO'] || row['LEGISLACAO'] || ''
         ) as string;
+        const legislacao = cleanHtmlTags(legislacaoRaw);
 
         // 9. Outros indexadores (tags)
-        const outrosIndexadores = (
+        const outrosIndexadoresRaw = (
           row['Outros indexadores'] || row['outros indexadores'] || row['OUTROS INDEXADORES'] ||
           row['Indexadores'] || row['indexadores'] || ''
         ) as string;
+        const outrosIndexadores = cleanHtmlTags(outrosIndexadoresRaw);
 
         // 10. Tipo do processo
-        const tipoProcesso = (
+        const tipoProcessoRaw = (
           row['Tipo do processo'] || row['tipo do processo'] || row['TIPO DO PROCESSO'] ||
           row['Tipo'] || row['tipo'] || ''
         ) as string;
+        const tipoProcesso = cleanHtmlTags(tipoProcessoRaw);
 
         // === PREPARA DADOS PARA O DOCUMENTO ===
 
