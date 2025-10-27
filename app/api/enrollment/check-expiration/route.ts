@@ -110,6 +110,7 @@ export async function POST(request: NextRequest) {
       { error: 'Erro ao verificar expirações' },
       { status: 500 }
     );
+  }
 }
 
 /**

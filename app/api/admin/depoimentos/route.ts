@@ -70,6 +70,7 @@ export async function PATCH(request: NextRequest) {
       { error: 'Erro ao atualizar depoimento' },
       { status: 500 }
     );
+  }
 }
 
 /**
@@ -101,4 +102,5 @@ export async function DELETE(request: NextRequest) {
       { error: 'Erro ao deletar depoimento' },
       { status: 500 }
     );
+  }
 }
