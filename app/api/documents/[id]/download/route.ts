@@ -123,6 +123,7 @@ export async function GET(
       { error: 'Erro ao processar download' },
       { status: 500 }
     );
+  }
 }
 
 /**

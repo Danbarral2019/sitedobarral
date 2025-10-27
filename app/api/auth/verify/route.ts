@@ -69,4 +69,5 @@ export async function GET() {
       { authenticated: false, error: 'Erro ao verificar acesso' },
       { status: 500 }
     );
+  }
 }
