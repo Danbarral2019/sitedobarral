@@ -81,6 +81,7 @@ interface ClassificationResult {
   categoria: string;
   cursos: string[];
   tags: string[];
+  artigos: string[];
   confianca: number;
   raciocinio: string;
   error?: string;
@@ -100,6 +101,8 @@ interface ReviewDocument {
   editedCategory?: string;
   editedCourses?: string[];
   editedTags?: string[];
+  editedArtigos?: string[];
+  editedUrl?: string;
   approved?: boolean;
   skipped?: boolean;
 }
@@ -345,6 +348,8 @@ export default function TCUManagerPage() {
     category: string;
     courses: string[];
     tags: string[];
+    artigos: string[];
+    url: string;
   }) => {
     setReviewDocuments(prev => {
       const updated = [...prev];
@@ -355,6 +360,8 @@ export default function TCUManagerPage() {
         updated[index].editedCategory = editedData.category;
         updated[index].editedCourses = editedData.courses;
         updated[index].editedTags = editedData.tags;
+        updated[index].editedArtigos = editedData.artigos;
+        updated[index].editedUrl = editedData.url;
         updated[index].approved = true;
       }
       return updated;
@@ -521,8 +528,9 @@ export default function TCUManagerPage() {
             category: doc.editedCategory || doc.category,
             course: courseSlugs, // Slugs dos cursos (não IDs!)
             tags: (doc.editedTags || []).join(','),
+            leiArticles: (doc.editedArtigos || []).join(','), // Artigos da Lei 14.133/2021
             publico: 'SIM', // TCU acórdãos são públicos
-            url: doc.enrichment?.linkPDF || '#',
+            url: doc.editedUrl || doc.enrichment?.linkPDF || '#', // Usa URL editado ou do enrichment
             arquivo: '',
             isDuplicate: false,
             // Dados enriquecidos

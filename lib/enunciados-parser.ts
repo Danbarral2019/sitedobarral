@@ -6,7 +6,7 @@
  * - Cada enunciado contém texto completo até o próximo enunciado
  */
 
-import pdf from 'pdf-parse';
+import * as pdfParse from 'pdf-parse';
 
 export interface Enunciado {
   numero: number;
@@ -39,7 +39,7 @@ export async function parseEnunciadosPDF(
     console.log(`[Enunciados Parser] Processando: ${nomeArquivo}`);
 
     // Parse do PDF
-    const data = await pdf(pdfBuffer);
+    const data = await pdfParse(pdfBuffer);
     const textoCompleto = data.text;
 
     console.log(`[Enunciados Parser] PDF possui ${data.numpages} páginas, ${textoCompleto.length} caracteres`);
