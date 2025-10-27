@@ -13,6 +13,37 @@ interface DocumentToImport {
   url: string;
   arquivo: string;
   isDuplicate?: boolean;
+
+  // TCU enriched data (optional)
+  tcuData?: {
+    enunciado: string;
+    area: string;
+    tema: string;
+    subtema: string;
+    data: string;
+    dataJulgamento?: Date;
+    acordao: string;
+    autorTese: string;
+    legislacao: string;
+    outrosIndexadores: string;
+    tipoProcesso: string;
+  };
+  enrichment?: {
+    success: boolean;
+    ementaCompleta?: string;
+    textoCompleto?: string;
+    linkPDF?: string;
+    metadados?: {
+      relator?: string;
+      dataSessao?: string;
+      orgaoJulgador?: string;
+    };
+  };
+  classification?: {
+    success: boolean;
+    confianca: number;
+    raciocinio: string;
+  };
 }
 
 /**
@@ -92,6 +123,37 @@ export const POST = withAdminAuth(async (request: NextRequest) => {
           else if (['mp4', 'avi', 'mov'].includes(ext || '')) type = 'video';
         }
 
+        // Prepara dados TCU se disponíveis
+        const tcuFields = doc.tcuData ? {
+          tcuNumeroAcordao: doc.tcuData.acordao,
+          tcuAutorTese: doc.tcuData.autorTese,
+          tcuArea: doc.tcuData.area,
+          tcuTema: doc.tcuData.tema,
+          tcuSubtema: doc.tcuData.subtema,
+          tcuLegislacao: doc.tcuData.legislacao,
+          tcuIndexadores: doc.tcuData.outrosIndexadores,
+          tcuTipoProcesso: doc.tcuData.tipoProcesso,
+          tcuDataJulgamento: doc.tcuData.dataJulgamento,
+        } : {};
+
+        const enrichmentFields = doc.enrichment?.success ? {
+          tcuLinkPDF: doc.enrichment.linkPDF,
+          tcuEmentaCompleta: doc.enrichment.ementaCompleta,
+          tcuTextoCompleto: doc.enrichment.textoCompleto,
+          tcuRelator: doc.enrichment.metadados?.relator,
+          tcuOrgaoJulgador: doc.enrichment.metadados?.orgaoJulgador,
+          tcuEnriquecidoEm: new Date(),
+          tcuEnriquecimentoStatus: 'success',
+        } : doc.enrichment ? {
+          tcuEnriquecimentoStatus: 'failed',
+          tcuEnriquecimentoErro: 'Enriquecimento falhou',
+        } : {};
+
+        const classificationFields = doc.classification?.success ? {
+          tcuClassificadoEm: new Date(),
+          tcuRevisadoPorAdmin: true, // Foi revisado no wizard
+        } : {};
+
         // Cria documento para cada curso
         for (const courseId of courseIds) {
           await prisma.document.create({
@@ -99,13 +161,16 @@ export const POST = withAdminAuth(async (request: NextRequest) => {
               title: doc.title,
               description: doc.description || '',
               type,
-              url,
+              url: doc.enrichment?.linkPDF || url, // Usa PDF do TCU se disponível
               category: doc.category,
               courseId,
               isPublic,
               tags: JSON.stringify(tagsArray),
               leiArticles: JSON.stringify([]), // Pode ser preenchido depois
-              reviewed: false,
+              reviewed: true, // TCU docs já revisados
+              ...tcuFields,
+              ...enrichmentFields,
+              ...classificationFields,
             },
           });
         }

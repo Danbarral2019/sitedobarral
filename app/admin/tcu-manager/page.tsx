@@ -4,10 +4,11 @@ import { useState } from 'react';
 import AdminLayout from '@/components/AdminLayout';
 import {
   Upload, FileSpreadsheet, Download, CheckCircle, AlertCircle,
-  Loader2, ArrowRight, FileText, AlertTriangle, RefreshCw
+  Loader2, ArrowRight, FileText, AlertTriangle, RefreshCw, Sparkles
 } from 'lucide-react';
+import TCUReviewTable from '@/components/TCUReviewTable';
 
-type Step = 1 | 2 | 3;
+type Step = 1 | 2 | 2.5 | 3;
 type SourceType = 'tcu' | 'custom' | null;
 
 interface ValidationResult {
@@ -33,7 +34,65 @@ interface ValidationResult {
     warnings: string[];
     rowIndex: number;
     rawData: Record<string, unknown>;
+    tcuData?: {
+      enunciado: string;
+      area: string;
+      tema: string;
+      subtema: string;
+      data: string;
+      acordao: string;
+      autorTese: string;
+      legislacao: string;
+      outrosIndexadores: string;
+      tipoProcesso: string;
+    };
   }>;
+}
+
+interface EnrichmentResult {
+  success: boolean;
+  numeroAcordao: string;
+  ementaCompleta?: string;
+  textoCompleto?: string;
+  linkPDF?: string;
+  metadados?: {
+    relator?: string;
+    dataSessao?: string;
+    orgaoJulgador?: string;
+    processo?: string;
+  };
+  error?: string;
+}
+
+interface ClassificationResult {
+  success: boolean;
+  numeroAcordao: string;
+  titulo: string;
+  descricao: string;
+  categoria: string;
+  cursos: string[];
+  tags: string[];
+  confianca: number;
+  raciocinio: string;
+  error?: string;
+}
+
+interface ReviewDocument {
+  rowIndex: number;
+  title: string;
+  description: string;
+  category: string;
+  tcuData: NonNullable<ValidationResult['documents'][0]['tcuData']>;
+  enrichment?: EnrichmentResult;
+  classification?: ClassificationResult;
+  // User edits
+  editedTitle?: string;
+  editedDescription?: string;
+  editedCategory?: string;
+  editedCourses?: string[];
+  editedTags?: string[];
+  approved?: boolean;
+  skipped?: boolean;
 }
 
 interface ImportResult {
@@ -58,6 +117,13 @@ export default function TCUManagerPage() {
   // Etapa 2: Validação e Detecção de Duplicatas
   const [isValidating, setIsValidating] = useState(false);
   const [validationResult, setValidationResult] = useState<ValidationResult | null>(null);
+
+  // Etapa 2.5: Revisão, Enriquecimento e Classificação
+  const [reviewDocuments, setReviewDocuments] = useState<ReviewDocument[]>([]);
+  const [isEnriching, setIsEnriching] = useState(false);
+  const [isClassifying, setIsClassifying] = useState(false);
+  const [enrichmentProgress, setEnrichmentProgress] = useState({ current: 0, total: 0 });
+  const [classificationProgress, setClassificationProgress] = useState({ current: 0, total: 0 });
 
   // Etapa 3: Importação
   const [isImporting, setIsImporting] = useState(false);
@@ -145,6 +211,178 @@ export default function TCUManagerPage() {
 
   // === ETAPA 2: VALIDAÇÃO ===
 
+  const handleProceedToReview = async () => {
+    if (!validationResult || sourceType !== 'tcu') {
+      // Se não for TCU, pula direto para importação
+      setCurrentStep(3);
+      return;
+    }
+
+    // Prepara documentos para revisão (somente válidos e não-duplicados com tcuData)
+    const docsToReview: ReviewDocument[] = validationResult.documents
+      .filter(doc => doc.isValid && !doc.isDuplicate && doc.tcuData)
+      .map(doc => ({
+        rowIndex: doc.rowIndex,
+        title: doc.title,
+        description: doc.description,
+        category: doc.category,
+        tcuData: doc.tcuData!,
+      }));
+
+    setReviewDocuments(docsToReview);
+    setCurrentStep(2.5);
+
+    // Inicia enriquecimento e classificação automaticamente
+    await handleEnrichAndClassify(docsToReview);
+  };
+
+  const handleEnrichAndClassify = async (docs: ReviewDocument[]) => {
+    if (docs.length === 0) return;
+
+    // Etapa 1: Enriquecimento
+    try {
+      setIsEnriching(true);
+      setEnrichmentProgress({ current: 0, total: docs.length });
+
+      const response = await fetch('/api/admin/tcu-manager/enrich', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          documents: docs.map(doc => ({
+            tcuData: doc.tcuData,
+            rowIndex: doc.rowIndex,
+          })),
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Erro no enriquecimento');
+      }
+
+      const enrichData = await response.json();
+
+      // Atualiza documentos com enriquecimento
+      setReviewDocuments(prev => {
+        const updated = [...prev];
+        enrichData.results.forEach((result: { rowIndex: number; enrichment: EnrichmentResult }) => {
+          const index = updated.findIndex(d => d.rowIndex === result.rowIndex);
+          if (index !== -1) {
+            updated[index].enrichment = result.enrichment;
+          }
+        });
+        return updated;
+      });
+
+      setEnrichmentProgress({ current: docs.length, total: docs.length });
+
+    } catch (err) {
+      console.error('Erro no enriquecimento:', err);
+      setError('Erro ao enriquecer documentos. Continuando sem enriquecimento.');
+    } finally {
+      setIsEnriching(false);
+    }
+
+    // Etapa 2: Classificação IA
+    try {
+      setIsClassifying(true);
+      setClassificationProgress({ current: 0, total: docs.length });
+
+      // Pega documentos atualizados com enrichment
+      const docsWithEnrichment = reviewDocuments.length > 0 ? reviewDocuments : docs;
+
+      const response = await fetch('/api/admin/tcu-manager/classify', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          documents: docsWithEnrichment.map(doc => ({
+            tcuData: doc.tcuData,
+            enrichment: doc.enrichment,
+            rowIndex: doc.rowIndex,
+          })),
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Erro na classificação');
+      }
+
+      const classifyData = await response.json();
+
+      // Atualiza documentos com classificação
+      setReviewDocuments(prev => {
+        const updated = [...prev];
+        classifyData.results.forEach((result: { rowIndex: number; classification: ClassificationResult }) => {
+          const index = updated.findIndex(d => d.rowIndex === result.rowIndex);
+          if (index !== -1) {
+            updated[index].classification = result.classification;
+          }
+        });
+        return updated;
+      });
+
+      setClassificationProgress({ current: docs.length, total: docs.length });
+
+    } catch (err) {
+      console.error('Erro na classificação:', err);
+      setError('Erro ao classificar documentos. Você pode editar manualmente.');
+    } finally {
+      setIsClassifying(false);
+    }
+  };
+
+  const handleApproveDocument = (rowIndex: number, editedData: {
+    title: string;
+    description: string;
+    category: string;
+    courses: string[];
+    tags: string[];
+  }) => {
+    setReviewDocuments(prev => {
+      const updated = [...prev];
+      const index = updated.findIndex(d => d.rowIndex === rowIndex);
+      if (index !== -1) {
+        updated[index].editedTitle = editedData.title;
+        updated[index].editedDescription = editedData.description;
+        updated[index].editedCategory = editedData.category;
+        updated[index].editedCourses = editedData.courses;
+        updated[index].editedTags = editedData.tags;
+        updated[index].approved = true;
+      }
+      return updated;
+    });
+  };
+
+  const handleSkipDocument = (rowIndex: number) => {
+    setReviewDocuments(prev => {
+      const updated = [...prev];
+      const index = updated.findIndex(d => d.rowIndex === rowIndex);
+      if (index !== -1) {
+        updated[index].skipped = true;
+      }
+      return updated;
+    });
+  };
+
+  const handleReprocessDocument = async (rowIndex: number) => {
+    const doc = reviewDocuments.find(d => d.rowIndex === rowIndex);
+    if (!doc) return;
+
+    await handleEnrichAndClassify([doc]);
+  };
+
+  const handleProceedToImport = async () => {
+    // Filtra somente documentos aprovados
+    const approvedDocs = reviewDocuments.filter(d => d.approved);
+
+    if (approvedDocs.length === 0) {
+      setError('Nenhum documento foi aprovado para importação');
+      return;
+    }
+
+    // Executa a importação
+    await handleImportFromReview();
+  };
+
   const handleDownloadForEdit = async () => {
     if (!validationResult) return;
 
@@ -204,6 +442,12 @@ export default function TCUManagerPage() {
   // === ETAPA 3: IMPORTAÇÃO ===
 
   const handleImport = async () => {
+    // Se veio da revisão, usa reviewDocuments
+    if (reviewDocuments.length > 0) {
+      return handleImportFromReview();
+    }
+
+    // Senão, usa validationResult (fluxo antigo para planilhas custom)
     if (!validationResult) return;
 
     try {
@@ -227,6 +471,54 @@ export default function TCUManagerPage() {
             isDuplicate: doc.isDuplicate,
           };
         });
+
+      const response = await fetch('/api/admin/tcu-manager/import', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ documents: documentsToImport }),
+      });
+
+      if (!response.ok) {
+        const data = await response.json();
+        throw new Error(data.error || 'Erro ao importar');
+      }
+
+      const data = await response.json();
+      setImportResult(data.results);
+      setCurrentStep(3);
+
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Erro desconhecido');
+    } finally {
+      setIsImporting(false);
+    }
+  };
+
+  const handleImportFromReview = async () => {
+    try {
+      setIsImporting(true);
+      setError(null);
+
+      // Prepara documentos aprovados com TODOS os dados enriquecidos
+      const documentsToImport = reviewDocuments
+        .filter(doc => doc.approved)
+        .map(doc => ({
+          title: doc.editedTitle || doc.title,
+          description: doc.editedDescription || doc.description,
+          category: doc.editedCategory || doc.category,
+          course: (doc.editedCourses || []).join(','), // IDs dos cursos
+          tags: (doc.editedTags || []).join(','),
+          publico: 'SIM', // TCU acórdãos são públicos
+          url: doc.enrichment?.linkPDF || '#',
+          arquivo: '',
+          isDuplicate: false,
+          // Dados enriquecidos
+          tcuData: doc.tcuData,
+          enrichment: doc.enrichment,
+          classification: doc.classification,
+        }));
+
+      console.log('[TCU Manager] Importando documentos enriquecidos:', documentsToImport.length);
 
       const response = await fetch('/api/admin/tcu-manager/import', {
         method: 'POST',
@@ -277,31 +569,35 @@ export default function TCUManagerPage() {
         </div>
 
         {/* Progress Steps */}
-        <div className="mb-8 flex items-center justify-center">
-          {[1, 2, 3].map((step) => (
-            <div key={step} className="flex items-center">
-              <div className={`flex items-center gap-2 px-4 py-2 rounded-lg ${
+        <div className="mb-8 flex items-center justify-center overflow-x-auto">
+          {[1, 2, 2.5, 3].map((step, index) => (
+            <div key={step} className="flex items-center flex-shrink-0">
+              <div className={`flex items-center gap-2 px-3 py-2 rounded-lg ${
                 currentStep === step
                   ? 'bg-blue-100 text-blue-800 font-bold'
                   : currentStep > step
                   ? 'bg-green-100 text-green-800'
                   : 'bg-gray-100 text-gray-600'
               }`}>
-                <div className={`w-8 h-8 rounded-full flex items-center justify-center ${
+                <div className={`w-8 h-8 rounded-full flex items-center justify-center text-xs ${
                   currentStep === step
                     ? 'bg-blue-600 text-white'
                     : currentStep > step
                     ? 'bg-green-600 text-white'
                     : 'bg-gray-300 text-gray-600'
                 }`}>
-                  {currentStep > step ? <CheckCircle className="w-5 h-5" /> : step}
+                  {currentStep > step ? <CheckCircle className="w-4 h-4" /> :
+                   step === 2.5 ? <Sparkles className="w-4 h-4" /> : Math.floor(step)}
                 </div>
-                <span className="hidden sm:inline">
-                  {step === 1 ? 'Upload' : step === 2 ? 'Revisão' : 'Importação'}
+                <span className="hidden sm:inline text-sm">
+                  {step === 1 ? 'Upload' :
+                   step === 2 ? 'Validação' :
+                   step === 2.5 ? 'Revisão IA' :
+                   'Importação'}
                 </span>
               </div>
-              {step < 3 && (
-                <div className="w-12 h-1 bg-gray-300 mx-2" />
+              {index < 3 && (
+                <div className="w-8 h-1 bg-gray-300 mx-1" />
               )}
             </div>
           ))}
@@ -503,24 +799,127 @@ export default function TCUManagerPage() {
                 <Download className="w-5 h-5" />
                 Baixar para Editar
               </button>
-              <button
-                onClick={handleImport}
-                disabled={isImporting || validationResult.stats.new === 0}
-                className="flex-1 px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center justify-center gap-2 font-medium"
-              >
-                {isImporting ? (
-                  <>
-                    <Loader2 className="w-5 h-5 animate-spin" />
-                    Importando...
-                  </>
-                ) : (
-                  <>
-                    Importar {validationResult.stats.new} Novos
-                    <ArrowRight className="w-5 h-5" />
-                  </>
-                )}
-              </button>
+              {sourceType === 'tcu' ? (
+                <button
+                  onClick={handleProceedToReview}
+                  disabled={validationResult.stats.new === 0}
+                  className="flex-1 px-6 py-3 bg-purple-600 text-white rounded-lg hover:bg-purple-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center justify-center gap-2 font-medium"
+                >
+                  <Sparkles className="w-5 h-5" />
+                  Revisar com IA ({validationResult.stats.new} docs)
+                  <ArrowRight className="w-5 h-5" />
+                </button>
+              ) : (
+                <button
+                  onClick={handleImport}
+                  disabled={isImporting || validationResult.stats.new === 0}
+                  className="flex-1 px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center justify-center gap-2 font-medium"
+                >
+                  {isImporting ? (
+                    <>
+                      <Loader2 className="w-5 h-5 animate-spin" />
+                      Importando...
+                    </>
+                  ) : (
+                    <>
+                      Importar {validationResult.stats.new} Novos
+                      <ArrowRight className="w-5 h-5" />
+                    </>
+                  )}
+                </button>
+              )}
             </div>
+          </div>
+        )}
+
+        {/* ETAPA 2.5: REVISÃO COM IA */}
+        {currentStep === 2.5 && (
+          <div className="space-y-6">
+            {/* Progress Banner */}
+            {(isEnriching || isClassifying) && (
+              <div className="bg-purple-50 border-l-4 border-purple-500 rounded-r-lg p-4">
+                <div className="flex items-center gap-3">
+                  <Loader2 className="w-5 h-5 text-purple-600 animate-spin flex-shrink-0" />
+                  <div className="flex-1">
+                    {isEnriching && (
+                      <>
+                        <p className="font-bold text-purple-900">
+                          Enriquecendo documentos... ({enrichmentProgress.current}/{enrichmentProgress.total})
+                        </p>
+                        <p className="text-sm text-purple-800">
+                          Buscando dados adicionais no site do TCU
+                        </p>
+                      </>
+                    )}
+                    {isClassifying && !isEnriching && (
+                      <>
+                        <p className="font-bold text-purple-900">
+                          Classificando com IA... ({classificationProgress.current}/{classificationProgress.total})
+                        </p>
+                        <p className="text-sm text-purple-800">
+                          Analisando contexto e sugerindo cursos/tags
+                        </p>
+                      </>
+                    )}
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Review Table */}
+            {!isEnriching && !isClassifying && reviewDocuments.length > 0 && (
+              <div className="bg-white rounded-xl shadow-lg p-6">
+                <h2 className="text-xl font-bold text-gray-900 mb-6">
+                  Revisar e Editar Classificações
+                </h2>
+
+                <TCUReviewTable
+                  documents={reviewDocuments}
+                  availableCourses={[
+                    { id: '1', nome: 'Nova Lei de Licitações (Lei 14.133/2021)' },
+                    { id: '2', nome: 'Planejamento das Contratações Públicas' },
+                    { id: '3', nome: 'Gestão e Fiscalização de Contratos' },
+                    { id: '4', nome: 'Processo Administrativo Sancionador' },
+                    { id: '5', nome: 'Inovação nas Contratações Públicas' },
+                    { id: '6', nome: 'Terceirização e Formação de Preços' },
+                    { id: '7', nome: 'Assessoramento Jurídico na Nova Lei' },
+                    { id: '8', nome: 'Revisão, Reajuste e Repactuação' },
+                    { id: '9', nome: 'Alterações Contratuais' },
+                    { id: '10', nome: 'Contratação Direta' },
+                  ]}
+                  onApprove={handleApproveDocument}
+                  onSkip={handleSkipDocument}
+                  onReprocess={handleReprocessDocument}
+                />
+              </div>
+            )}
+
+            {/* Action Buttons */}
+            {!isEnriching && !isClassifying && reviewDocuments.length > 0 && (
+              <div className="bg-white rounded-xl shadow-lg p-6 flex gap-3">
+                <button
+                  onClick={() => setCurrentStep(2)}
+                  className="px-6 py-3 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300 transition-colors font-medium"
+                >
+                  ← Voltar para Validação
+                </button>
+
+                <div className="flex-1 text-center py-3">
+                  <p className="text-sm text-gray-600">
+                    {reviewDocuments.filter(d => d.approved).length} de {reviewDocuments.length} documentos aprovados
+                  </p>
+                </div>
+
+                <button
+                  onClick={handleProceedToImport}
+                  disabled={reviewDocuments.filter(d => d.approved).length === 0}
+                  className="px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center gap-2 font-medium"
+                >
+                  Importar Aprovados
+                  <ArrowRight className="w-5 h-5" />
+                </button>
+              </div>
+            )}
           </div>
         )}
 
