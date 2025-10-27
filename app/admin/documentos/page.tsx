@@ -21,7 +21,7 @@ import LeiArticleSelector from '@/components/LeiArticleSelector';
 import DocumentAnalyzer from '@/components/DocumentAnalyzer';
 import BatchClassifyPanel from '@/components/BatchClassifyPanel';
 
-type DocumentCategory = 'apostila' | 'acordao' | 'parecer' | 'edital' | 'artigo' | 'orientacao-normativa' | 'outro';
+type DocumentCategory = 'apostila' | 'acordao' | 'parecer' | 'edital' | 'artigo' | 'orientacao-normativa' | 'enunciados' | 'outro';
 
 interface UploadResponse {
   success: boolean;
@@ -44,6 +44,8 @@ interface Document {
   uploadedAt: string;
   reviewed?: boolean; // Se foi revisado por um humano
   reviewedAt?: string; // Data da revisão
+  entityType?: string; // Entidade do enunciado (IBDA, INCP, CJF)
+  enunciadoNumber?: string; // Número do enunciado
 }
 
 export default function DocumentosPage() {
@@ -66,6 +68,7 @@ export default function DocumentosPage() {
   const [filterCategory, setFilterCategory] = useState('');
   const [filterType, setFilterType] = useState('');
   const [filterVisibility, setFilterVisibility] = useState('');
+  const [filterEntity, setFilterEntity] = useState('');
 
   // Paginação
   const [currentPage, setCurrentPage] = useState(1);
@@ -87,6 +90,8 @@ export default function DocumentosPage() {
     isPublic: boolean;
     tags: string;
     leiArticles: string[];
+    entityType?: string;
+    enunciadoNumber?: string;
   }>({
     courseId: '',
     title: '',
@@ -95,6 +100,8 @@ export default function DocumentosPage() {
     isPublic: false,
     tags: '',
     leiArticles: [],
+    entityType: undefined,
+    enunciadoNumber: undefined,
   });
 
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
@@ -220,6 +227,16 @@ export default function DocumentosPage() {
         formDataToSend.append('isPublic', formData.isPublic.toString());
         formDataToSend.append('tags', formData.tags);
         formDataToSend.append('leiArticles', JSON.stringify(formData.leiArticles));
+
+        // Campos específicos para enunciados
+        if (formData.category === 'enunciados') {
+          if (formData.entityType) {
+            formDataToSend.append('entityType', formData.entityType);
+          }
+          if (formData.enunciadoNumber) {
+            formDataToSend.append('enunciadoNumber', formData.enunciadoNumber);
+          }
+        }
 
         const response = await fetch('/api/admin/upload', {
           method: 'POST',
@@ -393,6 +410,16 @@ export default function DocumentosPage() {
       formDataToSend.append('tags', formData.tags);
       formDataToSend.append('leiArticles', JSON.stringify(formData.leiArticles));
 
+      // Campos específicos para enunciados
+      if (formData.category === 'enunciados') {
+        if (formData.entityType) {
+          formDataToSend.append('entityType', formData.entityType);
+        }
+        if (formData.enunciadoNumber) {
+          formDataToSend.append('enunciadoNumber', formData.enunciadoNumber);
+        }
+      }
+
       // Usar XMLHttpRequest para rastrear progresso
       const uploadResponse = await new Promise<UploadResponse>((resolve, reject) => {
         const xhr = new XMLHttpRequest();
@@ -470,6 +497,7 @@ export default function DocumentosPage() {
     setFilterCategory('');
     setFilterType('');
     setFilterVisibility('');
+    setFilterEntity('');
     setCurrentPage(1);
   };
 
@@ -494,10 +522,13 @@ export default function DocumentosPage() {
       (filterVisibility === 'public' && doc.isPublic) ||
       (filterVisibility === 'private' && !doc.isPublic);
 
-    return matchesSearch && matchesCourse && matchesCategory && matchesType && matchesVisibility;
+    // Filtro por entidade (para enunciados)
+    const matchesEntity = !filterEntity || doc.entityType === filterEntity;
+
+    return matchesSearch && matchesCourse && matchesCategory && matchesType && matchesVisibility && matchesEntity;
   });
 
-  const activeFiltersCount = [filterCourse, filterCategory, filterType, filterVisibility].filter(Boolean).length;
+  const activeFiltersCount = [filterCourse, filterCategory, filterType, filterVisibility, filterEntity].filter(Boolean).length;
 
   // Calcular paginação
   const totalPages = Math.ceil(filteredDocuments.length / itemsPerPage);
@@ -659,11 +690,50 @@ export default function DocumentosPage() {
                       <option value="acordao">Acórdão</option>
                       <option value="parecer">Parecer</option>
                       <option value="orientacao-normativa">Orientação Normativa (AGU)</option>
+                      <option value="enunciados">Enunciados</option>
                       <option value="edital">Edital</option>
                       <option value="artigo">Artigo</option>
                       <option value="outro">Outro</option>
                     </select>
                   </div>
+
+                  {/* Campos específicos para Enunciados */}
+                  {formData.category === 'enunciados' && (
+                    <>
+                      <div>
+                        <label className="block text-sm font-semibold text-gray-900 mb-2">
+                          Entidade *
+                        </label>
+                        <select
+                          value={formData.entityType || ''}
+                          onChange={(e) => setFormData({ ...formData, entityType: e.target.value })}
+                          required
+                          className="w-full px-3 py-2 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-600 text-gray-900"
+                        >
+                          <option value="">Selecione a entidade</option>
+                          <option value="IBDA">IBDA - Instituto Brasileiro de Direito Administrativo</option>
+                          <option value="INCP">INCP - Instituto Nacional da Contratação Pública</option>
+                          <option value="CJF">CJF - Conselho da Justiça Federal</option>
+                        </select>
+                      </div>
+
+                      <div>
+                        <label className="block text-sm font-semibold text-gray-900 mb-2">
+                          Número do Enunciado (Opcional)
+                        </label>
+                        <input
+                          type="text"
+                          value={formData.enunciadoNumber || ''}
+                          onChange={(e) => setFormData({ ...formData, enunciadoNumber: e.target.value })}
+                          placeholder="Ex: 123, 123/2024, ou deixe em branco"
+                          className="w-full px-3 py-2 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-600 text-gray-900"
+                        />
+                        <p className="text-xs text-gray-600 mt-1">
+                          Formato flexível: pode ser apenas número, número/ano, ou texto livre
+                        </p>
+                      </div>
+                    </>
+                  )}
 
                   <div>
                     <label className="block text-sm font-semibold text-gray-900 mb-2">
@@ -877,6 +947,7 @@ export default function DocumentosPage() {
                       <option value="acordao">Acórdão</option>
                       <option value="parecer">Parecer</option>
                       <option value="orientacao-normativa">Orientação Normativa (AGU)</option>
+                      <option value="enunciados">Enunciados</option>
                       <option value="edital">Edital</option>
                       <option value="artigo">Artigo</option>
                       <option value="outro">Outro</option>
@@ -904,6 +975,22 @@ export default function DocumentosPage() {
                       <option value="private">Restrito</option>
                     </select>
                   </div>
+
+                  {/* Filtro adicional: Entidade (somente quando categoria=enunciados) */}
+                  {filterCategory === 'enunciados' && (
+                    <div className="mt-3">
+                      <select
+                        value={filterEntity}
+                        onChange={(e) => setFilterEntity(e.target.value)}
+                        className="w-full px-3 py-2 border-2 border-blue-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-600 text-gray-900 text-sm bg-blue-50"
+                      >
+                        <option value="">Todas as entidades</option>
+                        <option value="IBDA">IBDA - Instituto Brasileiro de Direito Administrativo</option>
+                        <option value="INCP">INCP - Instituto Nacional da Contratação Pública</option>
+                        <option value="CJF">CJF - Conselho da Justiça Federal</option>
+                      </select>
+                    </div>
+                  )}
 
                   {/* Indicador de filtros ativos */}
                   {(activeFiltersCount > 0 || searchTerm) && (

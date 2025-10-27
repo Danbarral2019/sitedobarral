@@ -67,6 +67,10 @@ model Document {
   summaryGeneratedAt  DateTime? // Data de geração do resumo
   summaryEditedByAdmin Boolean @default(false) // Se o resumo foi editado manualmente pelo admin
 
+  // Sistema de Enunciados (IBDA, INCP, CJF)
+  entityType          String?   // Entidade responsável: "IBDA", "INCP", "CJF" (apenas para categoria="enunciados")
+  enunciadoNumber     String?   // Número do enunciado (formato flexível: "123", "123/2024", ou texto livre)
+
   @@index([courseId])
   @@index([category])
   @@index([courseId, isPublic])
@@ -80,6 +84,8 @@ model Document {
   @@index([feedbackRelevance]) // Índice para filtrar por feedback
   @@index([summary]) // Índice para buscar documentos com/sem resumo
   @@index([summaryGeneratedAt]) // Índice para ordenar por data de geração de resumo
+  @@index([entityType]) // Índice para filtrar enunciados por entidade
+  @@index([category, entityType]) // Índice composto para filtrar enunciados
 }
 
 // Usuários (admin e estudantes)

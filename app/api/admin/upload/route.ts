@@ -17,6 +17,8 @@ export const POST = withAdminAuth(async (request: NextRequest) => {
     const isPublic = formData.get('isPublic') === 'true';
     const tags = formData.get('tags') as string;
     const leiArticles = formData.get('leiArticles') as string;
+    const entityType = formData.get('entityType') as string | null;
+    const enunciadoNumber = formData.get('enunciadoNumber') as string | null;
 
     if (!file || !courseId || !title || !category) {
       return NextResponse.json(
@@ -71,12 +73,17 @@ export const POST = withAdminAuth(async (request: NextRequest) => {
         title,
         description || '',
         fileType,
-        category as "apostila" | "acordao" | "parecer" | "edital" | "artigo" | "orientacao-normativa" | "outro",
+        category as "apostila" | "acordao" | "parecer" | "edital" | "artigo" | "orientacao-normativa" | "enunciados" | "outro",
         isPublic,
         fileUrl,
         file.size,
         tags ? tags.split(',').map(t => t.trim()) : [],
-        leiArticles ? JSON.parse(leiArticles) : []
+        leiArticles ? JSON.parse(leiArticles) : [],
+        undefined, // alternativeUrls
+        undefined, // onNumber
+        undefined, // onYear
+        entityType || undefined, // entityType para enunciados
+        enunciadoNumber || undefined // enunciadoNumber para enunciados
       );
 
       createdDocuments.push(document);

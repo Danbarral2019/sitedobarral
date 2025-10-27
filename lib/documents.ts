@@ -10,7 +10,7 @@ export async function addDocument(
   title: string,
   description: string,
   type: 'pdf' | 'doc' | 'link' | 'video',
-  category: 'apostila' | 'acordao' | 'parecer' | 'edital' | 'artigo' | 'orientacao-normativa' | 'outro',
+  category: 'apostila' | 'acordao' | 'parecer' | 'edital' | 'artigo' | 'orientacao-normativa' | 'enunciados' | 'outro',
   isPublic: boolean,
   url: string,
   size?: number,
@@ -18,7 +18,9 @@ export async function addDocument(
   leiArticles: string[] = [],
   alternativeUrls?: string, // JSON string com URLs alternativas
   onNumber?: number, // Número da ON (para ordenação)
-  onYear?: number // Ano da ON (para ordenação)
+  onYear?: number, // Ano da ON (para ordenação)
+  entityType?: string, // Entidade do enunciado (IBDA, INCP, CJF)
+  enunciadoNumber?: string // Número do enunciado (formato flexível)
 ): Promise<Document> {
   const dbDocument = await prisma.document.create({
     data: {
@@ -35,6 +37,8 @@ export async function addDocument(
       alternativeUrls: alternativeUrls || null,
       onNumber: onNumber || null,
       onYear: onYear || null,
+      entityType: entityType || null,
+      enunciadoNumber: enunciadoNumber || null,
     },
   });
 
