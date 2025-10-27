@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import {
   Upload, FileText, Loader2, Trash2,
   Eye, EyeOff, File, Search, Filter, X,
-  Download, FolderUp, CheckSquare, Square, Edit2, StickyNote
+  Download, FolderUp, CheckSquare, Square, Edit2, StickyNote, Info
 } from 'lucide-react';
 import { courses } from '@/data/courses';
 import { useToast } from '@/hooks/use-toast';
