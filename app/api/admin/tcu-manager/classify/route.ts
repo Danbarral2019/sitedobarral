@@ -57,7 +57,7 @@ export const POST = withAdminAuth(async (request: NextRequest) => {
     // Classifica em lote com progresso
     let processedCount = 0;
     const classificationResults = await classifyTCUAcordaosBatch(inputs, {
-      delayMs: 2000, // 2 segundos entre requisições (API do Claude tem rate limit)
+      delayMs: 500, // 0.5 segundos entre requisições (lotes pequenos = menos risco de rate limit)
       onProgress: (current, total, result) => {
         processedCount = current;
         console.log(`[TCU Classify API] Progresso: ${current}/${total} (${Math.round(current / total * 100)}%)`);

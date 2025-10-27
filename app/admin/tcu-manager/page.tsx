@@ -254,42 +254,55 @@ export default function TCUManagerPage() {
     // Pulando enriquecimento - vai direto para classificação
     console.log('[TCU Manager] Pulando enriquecimento, indo direto para classificação IA');
 
-    // Classificação IA
+    // Classificação IA em lotes pequenos (3 por vez para evitar timeout de 10s do Vercel)
     try {
       setIsClassifying(true);
       setClassificationProgress({ current: 0, total: docs.length });
 
-      const response = await fetch('/api/admin/tcu-manager/classify', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          documents: docs.map(doc => ({
-            tcuData: doc.tcuData,
-            enrichment: doc.enrichment, // Pode ser undefined, tudo bem
-            rowIndex: doc.rowIndex,
-          })),
-        }),
-      });
+      const BATCH_SIZE = 3; // 3 documentos por requisição (evita timeout)
+      let processedCount = 0;
 
-      if (!response.ok) {
-        throw new Error('Erro na classificação');
+      // Processa em lotes
+      for (let i = 0; i < docs.length; i += BATCH_SIZE) {
+        const batch = docs.slice(i, i + BATCH_SIZE);
+        console.log(`[TCU Manager] Classificando lote ${Math.floor(i / BATCH_SIZE) + 1}/${Math.ceil(docs.length / BATCH_SIZE)} (${batch.length} docs)`);
+
+        const response = await fetch('/api/admin/tcu-manager/classify', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            documents: batch.map(doc => ({
+              tcuData: doc.tcuData,
+              enrichment: doc.enrichment,
+              rowIndex: doc.rowIndex,
+            })),
+          }),
+        });
+
+        if (!response.ok) {
+          console.error(`Erro no lote ${i}-${i + batch.length}`);
+          continue; // Pula para próximo lote
+        }
+
+        const classifyData = await response.json();
+
+        // Atualiza documentos com classificação
+        setReviewDocuments(prev => {
+          const updated = [...prev];
+          classifyData.results.forEach((result: { rowIndex: number; classification: ClassificationResult }) => {
+            const index = updated.findIndex(d => d.rowIndex === result.rowIndex);
+            if (index !== -1) {
+              updated[index].classification = result.classification;
+            }
+          });
+          return updated;
+        });
+
+        processedCount += batch.length;
+        setClassificationProgress({ current: processedCount, total: docs.length });
       }
 
-      const classifyData = await response.json();
-
-      // Atualiza documentos com classificação
-      setReviewDocuments(prev => {
-        const updated = [...prev];
-        classifyData.results.forEach((result: { rowIndex: number; classification: ClassificationResult }) => {
-          const index = updated.findIndex(d => d.rowIndex === result.rowIndex);
-          if (index !== -1) {
-            updated[index].classification = result.classification;
-          }
-        });
-        return updated;
-      });
-
-      setClassificationProgress({ current: docs.length, total: docs.length });
+      console.log(`[TCU Manager] ✅ Classificação concluída: ${processedCount}/${docs.length}`);
 
     } catch (err) {
       console.error('Erro na classificação:', err);
