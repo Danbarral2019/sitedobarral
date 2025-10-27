@@ -1,7 +1,6 @@
 'use client';
 
 import { useState } from 'react';
-import { Button } from '@/components/ui/button';
 import { ChevronLeft, ChevronRight, Check, X, RefreshCw, Loader2 } from 'lucide-react';
 
 interface TCUReviewDocument {
@@ -196,24 +195,22 @@ export default function TCUReviewTable({
         </div>
 
         <div className="flex gap-2">
-          <Button
+          <button
             onClick={handlePrevious}
             disabled={currentIndex === 0}
-            variant="outline"
-            size="sm"
+            className="px-3 py-1.5 text-sm border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1"
           >
-            <ChevronLeft className="h-4 w-4 mr-1" />
+            <ChevronLeft className="h-4 w-4" />
             Anterior
-          </Button>
-          <Button
+          </button>
+          <button
             onClick={handleNext}
             disabled={currentIndex === documents.length - 1}
-            variant="outline"
-            size="sm"
+            className="px-3 py-1.5 text-sm border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1"
           >
             Próximo
-            <ChevronRight className="h-4 w-4 ml-1" />
-          </Button>
+            <ChevronRight className="h-4 w-4" />
+          </button>
         </div>
       </div>
 
@@ -437,9 +434,13 @@ export default function TCUReviewTable({
                     className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                     placeholder="Digite uma tag e pressione Enter"
                   />
-                  <Button onClick={addTag} size="sm" type="button">
+                  <button
+                    onClick={addTag}
+                    type="button"
+                    className="px-3 py-1.5 text-sm bg-blue-600 text-white rounded-md hover:bg-blue-700"
+                  >
                     Adicionar
-                  </Button>
+                  </button>
                 </div>
                 <div className="flex flex-wrap gap-2">
                   {editedTags.map((tag) => (
@@ -464,34 +465,32 @@ export default function TCUReviewTable({
 
           {/* Ações */}
           <div className="flex gap-3">
-            <Button
+            <button
               onClick={handleSkip}
-              variant="outline"
-              className="flex-1"
+              className="flex-1 px-4 py-2 border border-gray-300 rounded-md hover:bg-gray-50 flex items-center justify-center gap-2"
             >
-              <X className="h-4 w-4 mr-2" />
+              <X className="h-4 w-4" />
               Pular
-            </Button>
-            <Button
+            </button>
+            <button
               onClick={handleReprocess}
-              variant="outline"
-              className="flex-1"
               disabled={isReprocessing}
+              className="flex-1 px-4 py-2 border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
             >
               {isReprocessing ? (
-                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                <Loader2 className="h-4 w-4 animate-spin" />
               ) : (
-                <RefreshCw className="h-4 w-4 mr-2" />
+                <RefreshCw className="h-4 w-4" />
               )}
               Reprocessar
-            </Button>
-            <Button
+            </button>
+            <button
               onClick={handleApprove}
-              className="flex-1 bg-green-600 hover:bg-green-700"
+              className="flex-1 px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 flex items-center justify-center gap-2"
             >
-              <Check className="h-4 w-4 mr-2" />
+              <Check className="h-4 w-4" />
               Aprovar e Próximo
-            </Button>
+            </button>
           </div>
         </div>
       </div>
