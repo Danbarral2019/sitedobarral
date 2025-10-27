@@ -73,7 +73,8 @@
       "Bash(cscript:*)",
       "Bash(npm uninstall:*)",
       "Bash(test:*)",
-      "Bash(echo $ANTHROPIC_API_KEY)"
+      "Bash(echo $ANTHROPIC_API_KEY)",
+      "Read(//c/Users/Administrador/Downloads/**)"
     ],
     "deny": [],
     "ask": []
