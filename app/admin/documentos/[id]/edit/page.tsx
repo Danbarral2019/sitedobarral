@@ -8,7 +8,7 @@ import { ArrowLeft, Save, Trash2, Plus, X, Upload, ExternalLink } from 'lucide-r
 import LeiArticleSelector from '@/components/LeiArticleSelector';
 import SummaryGenerator from '@/components/SummaryGenerator';
 
-type DocumentCategory = 'apostila' | 'acordao' | 'parecer' | 'edital' | 'artigo' | 'orientacao-normativa' | 'outro';
+type DocumentCategory = 'apostila' | 'acordao' | 'parecer' | 'edital' | 'artigo' | 'orientacao-normativa' | 'enunciados' | 'outro';
 type DocumentType = 'pdf' | 'doc' | 'link' | 'video';
 
 interface Document {
@@ -38,6 +38,9 @@ interface Document {
   summaryHighlights?: string | null;
   summaryGeneratedAt?: string | null;
   summaryEditedByAdmin?: boolean;
+  // Enunciados
+  entityType?: string | null;
+  enunciadoNumber?: string | null;
 }
 
 interface AlternativeUrl {
@@ -86,6 +89,10 @@ export default function EditDocumentPage() {
 
   // Resumo Automático (IA)
   const [summary, setSummary] = useState<string>('');
+
+  // Enunciados
+  const [entityType, setEntityType] = useState<string>('');
+  const [enunciadoNumber, setEnunciadoNumber] = useState<string>('');
 
   // Carregar documento
   useEffect(() => {
@@ -149,6 +156,10 @@ export default function EditDocumentPage() {
 
       // Carrega resumo
       setSummary(data.summary || '');
+
+      // Carrega campos de enunciados
+      setEntityType(data.entityType || '');
+      setEnunciadoNumber(data.enunciadoNumber || '');
     } catch (error) {
       console.error('Erro ao carregar documento:', error);
       alert('Erro ao carregar documento');
@@ -221,6 +232,9 @@ export default function EditDocumentPage() {
           // Resumo Automático com IA
           summary: summary || null,
           summaryEditedByAdmin: document?.summary !== summary && !!summary,
+          // Enunciados
+          entityType: category === 'enunciados' ? (entityType || null) : null,
+          enunciadoNumber: category === 'enunciados' ? (enunciadoNumber || null) : null,
         }),
       });
 
@@ -411,10 +425,49 @@ export default function EditDocumentPage() {
                 <option value="edital">Edital</option>
                 <option value="artigo">Artigo</option>
                 <option value="orientacao-normativa">Orientação Normativa</option>
+                <option value="enunciados">Enunciados</option>
                 <option value="outro">Outro</option>
               </select>
             </div>
           </div>
+
+          {/* Campos específicos para Enunciados */}
+          {category === 'enunciados' && (
+            <div className="grid grid-cols-2 gap-4 p-4 bg-blue-50 border-2 border-blue-200 rounded-lg">
+              <div>
+                <label className="block text-sm font-medium mb-2">
+                  Entidade *
+                </label>
+                <select
+                  value={entityType}
+                  onChange={(e) => setEntityType(e.target.value)}
+                  className="w-full px-4 py-2 border rounded"
+                  required
+                >
+                  <option value="">Selecione a entidade</option>
+                  <option value="IBDA">IBDA - Instituto Brasileiro de Direito Administrativo</option>
+                  <option value="INCP">INCP - Instituto Nacional da Contratação Pública</option>
+                  <option value="CJF">CJF - Conselho da Justiça Federal</option>
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium mb-2">
+                  Número do Enunciado (Opcional)
+                </label>
+                <input
+                  type="text"
+                  value={enunciadoNumber}
+                  onChange={(e) => setEnunciadoNumber(e.target.value)}
+                  placeholder="Ex: 123, 123/2024, ou deixe em branco"
+                  className="w-full px-4 py-2 border rounded"
+                />
+                <p className="text-xs text-gray-600 mt-1">
+                  Formato flexível: pode ser apenas número, número/ano, ou texto livre
+                </p>
+              </div>
+            </div>
+          )}
 
           {/* Curso */}
           <div>

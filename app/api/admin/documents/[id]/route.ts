@@ -64,6 +64,9 @@ export const PUT = withAdminAuth(async (request: NextRequest, { params }: { para
       // Resumo Automático com IA
       summary,
       summaryEditedByAdmin,
+      // Enunciados
+      entityType,
+      enunciadoNumber,
     } = body;
 
     // Verifica se documento existe
@@ -112,6 +115,9 @@ export const PUT = withAdminAuth(async (request: NextRequest, { params }: { para
         // Resumo Automático com IA
         summary: summary !== undefined ? summary : existing.summary,
         summaryEditedByAdmin: summaryEditedByAdmin !== undefined ? summaryEditedByAdmin : existing.summaryEditedByAdmin,
+        // Enunciados
+        entityType: entityType !== undefined ? entityType : existing.entityType,
+        enunciadoNumber: enunciadoNumber !== undefined ? enunciadoNumber : existing.enunciadoNumber,
       },
     });
 
