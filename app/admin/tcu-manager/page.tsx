@@ -4,7 +4,7 @@ import { useState } from 'react';
 import AdminLayout from '@/components/AdminLayout';
 import {
   Upload, FileSpreadsheet, Download, CheckCircle, AlertCircle,
-  Loader2, ArrowRight, Info, FileText, AlertTriangle, RefreshCw
+  Loader2, ArrowRight, FileText, AlertTriangle, RefreshCw
 } from 'lucide-react';
 
 type Step = 1 | 2 | 3;
@@ -53,7 +53,7 @@ export default function TCUManagerPage() {
 
   // Etapa 1: Upload e Conversão
   const [isConverting, setIsConverting] = useState(false);
-  const [convertedData, setConvertedData] = useState<any>(null);
+  const [convertedData, setConvertedData] = useState<Record<string, unknown> | null>(null);
 
   // Etapa 2: Validação e Detecção de Duplicatas
   const [isValidating, setIsValidating] = useState(false);

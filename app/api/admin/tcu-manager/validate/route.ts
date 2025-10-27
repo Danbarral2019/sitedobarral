@@ -22,7 +22,7 @@ function extractAcordaoInfo(title: string): { numero: string; ano: string } | nu
   for (const pattern of patterns) {
     const match = title.match(pattern);
     if (match) {
-      let numero = match[1].padStart(4, '0'); // Normaliza para 4 dígitos
+      const numero = match[1].padStart(4, '0'); // Normaliza para 4 dígitos
       let ano = match[2];
 
       // Normaliza ano para 4 dígitos (25 → 2025)

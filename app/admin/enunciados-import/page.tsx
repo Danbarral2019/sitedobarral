@@ -242,7 +242,7 @@ export default function EnunciadosImportPage() {
             </li>
             <li className="flex gap-2">
               <span className="font-bold text-blue-600">2.</span>
-              <span>Escolha o curso ou "TODOS OS CURSOS"</span>
+              <span>Escolha o curso ou &quot;TODOS OS CURSOS&quot;</span>
             </li>
             <li className="flex gap-2">
               <span className="font-bold text-blue-600">3.</span>
