@@ -425,3 +425,269 @@ export function generateImportStats(acordaos: AcordaoTCU[]): {
 
   return stats;
 }
+
+// ==========================================
+// ENRIQUECIMENTO DE ACÓRDÃOS DA PLANILHA TCU
+// ==========================================
+
+/**
+ * Interface para dados enriquecidos de um acórdão (da planilha TCU)
+ */
+export interface TCUEnrichmentResult {
+  success: boolean;
+  numeroAcordao: string;
+  ementaCompleta?: string;
+  textoCompleto?: string;
+  linkPDF?: string;
+  metadados?: {
+    relator?: string;
+    dataSessao?: string;
+    orgaoJulgador?: string;
+    processo?: string;
+  };
+  error?: string;
+}
+
+/**
+ * Interface para dados da planilha TCU (entrada)
+ */
+export interface TCUPlanilhaData {
+  enunciado: string;
+  area: string;
+  tema: string;
+  subtema: string;
+  acordao: string;
+  autorTese: string;
+  legislacao: string;
+  outrosIndexadores: string;
+  tipoProcesso: string;
+  data?: string;
+}
+
+/**
+ * Enriquece um acórdão da planilha TCU buscando dados adicionais
+ *
+ * Esta função tenta buscar dados complementares que NÃO estão na planilha:
+ * - Ementa completa (se for maior que o enunciado)
+ * - Texto integral do acórdão
+ * - Link do PDF oficial
+ * - Metadados adicionais
+ */
+export async function enrichTCUAcordao(
+  planilhaData: TCUPlanilhaData
+): Promise<TCUEnrichmentResult> {
+  const startTime = Date.now();
+  const { acordao, enunciado } = planilhaData;
+
+  console.log(`[TCU Enrichment] Enriquecendo acórdão: ${acordao}`);
+
+  try {
+    // ESTRATÉGIA 1: Tentar buscar na API de dados abertos primeiro (mais rápido e confiável)
+    const apiResult = await tryEnrichFromAPI(acordao);
+
+    if (apiResult.success) {
+      const elapsedTime = Date.now() - startTime;
+      console.log(`[TCU Enrichment] Sucesso via API em ${elapsedTime}ms`);
+      return apiResult;
+    }
+
+    // ESTRATÉGIA 2: Se API falhou, tentar scraping do site (mais lento mas pode ter mais dados)
+    console.log(`[TCU Enrichment] API falhou, tentando scraping do site...`);
+    const scrapeResult = await tryEnrichFromWebsite(acordao, enunciado);
+
+    const elapsedTime = Date.now() - startTime;
+
+    if (scrapeResult.success) {
+      console.log(`[TCU Enrichment] Sucesso via scraping em ${elapsedTime}ms`);
+    } else {
+      console.log(`[TCU Enrichment] Falha em todas as estratégias (${elapsedTime}ms)`);
+    }
+
+    return scrapeResult;
+
+  } catch (error) {
+    const elapsedTime = Date.now() - startTime;
+    console.error(`[TCU Enrichment] Erro após ${elapsedTime}ms:`, error);
+
+    return {
+      success: false,
+      numeroAcordao: acordao,
+      error: error instanceof Error ? error.message : String(error),
+    };
+  }
+}
+
+/**
+ * Tenta enriquecer usando a API de dados abertos do TCU
+ */
+async function tryEnrichFromAPI(numeroAcordao: string): Promise<TCUEnrichmentResult> {
+  try {
+    // Extrai número e ano do acórdão (ex: "AC-1106/24-P" → numero: 1106, ano: 2024)
+    const match = numeroAcordao.match(/(\d+)\/(\d{2,4})/);
+    if (!match) {
+      return {
+        success: false,
+        numeroAcordao,
+        error: 'Formato de número do acórdão inválido',
+      };
+    }
+
+    const [, numero, ano] = match;
+    let anoCompleto = ano;
+    if (ano.length === 2) {
+      const anoNum = parseInt(ano);
+      anoCompleto = anoNum >= 0 && anoNum <= 50 ? `20${ano}` : `19${ano}`;
+    }
+
+    // Busca na API de dados abertos
+    const anoInt = parseInt(anoCompleto);
+    const acordaos = await fetchAcordaosTCU({
+      anoInicio: anoInt,
+      anoFim: anoInt,
+      quantidade: 500,
+      onlyRelevant: false, // Buscar todos
+    });
+
+    // Procura o acórdão específico
+    const found = acordaos.find(ac =>
+      ac.numeroAcordao === numero && ac.anoAcordao === anoCompleto
+    );
+
+    if (!found) {
+      return {
+        success: false,
+        numeroAcordao,
+        error: 'Acórdão não encontrado na API',
+      };
+    }
+
+    // Retorna dados da API
+    return {
+      success: true,
+      numeroAcordao,
+      ementaCompleta: found.sumario || undefined,
+      textoCompleto: undefined, // API não tem texto completo
+      linkPDF: found.urlArquivoPDF || found.urlArquivo || undefined,
+      metadados: {
+        relator: found.relator || undefined,
+        dataSessao: found.dataSessao || undefined,
+        orgaoJulgador: found.colegiado || undefined,
+      },
+    };
+
+  } catch (error) {
+    console.error('[TCU Enrichment] Erro na API:', error);
+    return {
+      success: false,
+      numeroAcordao,
+      error: 'Erro ao buscar na API: ' + (error instanceof Error ? error.message : String(error)),
+    };
+  }
+}
+
+/**
+ * Tenta enriquecer fazendo scraping do site de jurisprudência do TCU
+ *
+ * NOTA IMPORTANTE: Esta função faz scraping e pode quebrar se o site mudar.
+ * Use como fallback quando a API não retornar dados suficientes.
+ */
+async function tryEnrichFromWebsite(
+  numeroAcordao: string,
+  enunciadoExistente: string
+): Promise<TCUEnrichmentResult> {
+  try {
+    // Por enquanto, retorna que não conseguiu buscar do site
+    // Isso evita erros e permite que o sistema funcione só com dados da planilha
+    // TODO: Implementar scraping real do site quando necessário
+
+    console.log(`[TCU Enrichment] Scraping do site não implementado ainda`);
+
+    return {
+      success: false,
+      numeroAcordao,
+      error: 'Scraping do site ainda não implementado. Use dados da planilha.',
+    };
+
+    /*
+    // CÓDIGO PLACEHOLDER PARA FUTURO SCRAPING DO SITE:
+
+    const searchURL = `https://pesquisa.apps.tcu.gov.br/pesquisa/jurisprudencia-selecionada`;
+
+    // TODO: Implementar busca e extração real do site
+    // 1. Montar URL de busca com número do acórdão
+    // 2. Fazer requisição HTTP
+    // 3. Parsear HTML com cheerio
+    // 4. Extrair: ementa completa, texto integral, PDF, metadados
+    // 5. Retornar resultado estruturado
+
+    */
+
+  } catch (error) {
+    console.error('[TCU Enrichment] Erro no scraping:', error);
+    return {
+      success: false,
+      numeroAcordao,
+      error: 'Erro no scraping: ' + (error instanceof Error ? error.message : String(error)),
+    };
+  }
+}
+
+/**
+ * Enriquece múltiplos acórdãos em lote com rate limiting
+ */
+export async function enrichTCUAcordaosBatch(
+  planilhaDataList: TCUPlanilhaData[],
+  options: {
+    delayMs?: number; // Delay entre requisições (default: 1000ms)
+    maxConcurrent?: number; // Máximo de requisições simultâneas (default: 3)
+    onProgress?: (current: number, total: number, result: TCUEnrichmentResult) => void;
+  } = {}
+): Promise<TCUEnrichmentResult[]> {
+  const {
+    delayMs = 1000,
+    maxConcurrent = 3,
+    onProgress,
+  } = options;
+
+  const results: TCUEnrichmentResult[] = [];
+  const chunks: TCUPlanilhaData[][] = [];
+
+  // Divide em chunks para processar concorrentemente
+  for (let i = 0; i < planilhaDataList.length; i += maxConcurrent) {
+    chunks.push(planilhaDataList.slice(i, i + maxConcurrent));
+  }
+
+  console.log(`[TCU Enrichment Batch] Processando ${planilhaDataList.length} acórdãos em ${chunks.length} lotes`);
+
+  for (const chunk of chunks) {
+    // Processa chunk em paralelo
+    const chunkResults = await Promise.all(
+      chunk.map(async (data, idx) => {
+        // Delay progressivo dentro do chunk
+        if (idx > 0) {
+          await new Promise(resolve => setTimeout(resolve, delayMs * idx));
+        }
+        return enrichTCUAcordao(data);
+      })
+    );
+
+    results.push(...chunkResults);
+
+    // Callback de progresso
+    if (onProgress) {
+      for (const result of chunkResults) {
+        onProgress(results.length, planilhaDataList.length, result);
+      }
+    }
+
+    // Delay entre chunks
+    if (chunks.indexOf(chunk) < chunks.length - 1) {
+      await new Promise(resolve => setTimeout(resolve, delayMs));
+    }
+  }
+
+  const successCount = results.filter(r => r.success).length;
+  console.log(`[TCU Enrichment Batch] Concluído: ${successCount}/${results.length} sucessos (${Math.round(successCount / results.length * 100)}%)`);
+
+  return results;
+}
