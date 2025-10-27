@@ -108,7 +108,7 @@ export async function POST(request: NextRequest) {
       },
       { status: 201 }
     );
-  } catch {
+  } catch (error) {
     console.error('Erro ao processar contato:', error);
     return NextResponse.json(
       { error: 'Erro ao enviar mensagem. Tente novamente.' },
