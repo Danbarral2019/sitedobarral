@@ -40,7 +40,7 @@ export default function BatchClassifyPanel({
   const [useAI, setUseAI] = useState(true);
   const [autoApply, setAutoApply] = useState(false);
   const [classifications, setClassifications] = useState<Classification[]>([]);
-  const [stats, setStats] = useState<any>(null);
+  const [stats, setStats] = useState<{ total: number; analyzed: number; highConfidence: number; lowConfidence: number } | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [selectedForApply, setSelectedForApply] = useState<Set<string>>(new Set());
 
