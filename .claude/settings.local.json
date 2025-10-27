@@ -71,7 +71,8 @@
       "Bash(where:*)",
       "Bash(cscript //Nologo scriptsconvert-xls-excel.vbs \"C:\\Users\\Administrador\\Downloads\\pesquisaExportada (4).xls\")",
       "Bash(cscript:*)",
-      "Bash(npm uninstall:*)"
+      "Bash(npm uninstall:*)",
+      "Bash(test:*)"
     ],
     "deny": [],
     "ask": []
