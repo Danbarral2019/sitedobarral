@@ -75,7 +75,4 @@ export async function POST(request: NextRequest) {
       { error: 'Erro ao processar solicitação' },
       { status: 500 }
     );
-  } finally {
-    await prisma.$disconnect();
-  }
 }

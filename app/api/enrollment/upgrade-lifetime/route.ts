@@ -113,7 +113,4 @@ export async function POST(request: NextRequest) {
       { error: 'Erro ao processar upgrade' },
       { status: 500 }
     );
-  } finally {
-    await prisma.$disconnect();
-  }
 }

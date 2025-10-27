@@ -44,9 +44,6 @@ export const GET = withAdminAuth(async (request: NextRequest) => {
       { error: 'Erro ao carregar depoimentos' },
       { status: 500 }
     );
-  } finally {
-    await prisma.$disconnect();
-  }
 });
 
 /**
@@ -131,9 +128,6 @@ export const PATCH = withAdminAuth(async (request: NextRequest) => {
       { error: 'Erro ao atualizar depoimento' },
       { status: 500 }
     );
-  } finally {
-    await prisma.$disconnect();
-  }
 });
 
 /**
@@ -166,7 +160,4 @@ export const DELETE = withAdminAuth(async (request: NextRequest) => {
       { error: 'Erro ao deletar depoimento' },
       { status: 500 }
     );
-  } finally {
-    await prisma.$disconnect();
-  }
 });

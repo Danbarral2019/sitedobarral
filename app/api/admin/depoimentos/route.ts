@@ -30,9 +30,6 @@ export async function GET(request: NextRequest) {
       { error: 'Erro ao carregar depoimentos' },
       { status: 500 }
     );
-  } finally {
-    await prisma.$disconnect();
-  }
 }
 
 /**
@@ -72,9 +69,6 @@ export async function PATCH(request: NextRequest) {
       { error: 'Erro ao atualizar depoimento' },
       { status: 500 }
     );
-  } finally {
-    await prisma.$disconnect();
-  }
 }
 
 /**
@@ -106,7 +100,4 @@ export async function DELETE(request: NextRequest) {
       { error: 'Erro ao deletar depoimento' },
       { status: 500 }
     );
-  } finally {
-    await prisma.$disconnect();
-  }
 }
