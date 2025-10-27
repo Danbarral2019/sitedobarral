@@ -22,53 +22,56 @@ export default function Home() {
     <main>
       <section className="text-white py-20 relative overflow-hidden" style={{background: 'linear-gradient(to bottom, #1e293b 0%, #334155 100%)'}}>
         <div className="container mx-auto px-4">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center max-w-7xl mx-auto">
-            {/* Coluna Esquerda - Conteúdo */}
-            <div className="text-center lg:text-left">
-              <h1 className="text-4xl md:text-5xl font-bold mb-6">
-                Prof. Daniel Barral
-              </h1>
-              <p className="text-xl md:text-2xl mb-4">
-                Professor | Mestre em Direito Público
-              </p>
-              <p className="text-lg mb-8 text-blue-100">
-                Especialista em Licitações e Contratos Administrativos
-              </p>
-              <p className="text-lg mb-10 max-w-2xl mx-auto lg:mx-0 text-gray-100">
-                Repositório especializado de materiais jurídicos em Direito Administrativo,
-                com foco em fortalecer seu conhecimento e aprimorar suas atividades funcionais.
-              </p>
-              <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
-                <Link
-                  href="/cursos"
-                  className="bg-white text-gray-900 px-8 py-3 rounded-lg font-semibold hover:bg-gray-50 transition-colors inline-flex items-center justify-center gap-2"
-                >
-                  <BookOpen className="w-5 h-5" />
-                  Explorar Cursos
-                </Link>
-                <Link
-                  href="/validar-acesso"
-                  className="bg-blue-600 text-white px-8 py-3 rounded-lg font-semibold hover:bg-blue-700 transition-colors inline-flex items-center justify-center gap-2 border border-blue-500"
-                >
-                  Área do Aluno
-                  <ArrowRight className="w-5 h-5 text-white" />
-                </Link>
+          <div className="relative max-w-7xl mx-auto">
+            {/* Layout com foto à direita */}
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-0 items-center">
+              {/* Conteúdo à esquerda - ocupa 8 colunas e sobrepõe a foto */}
+              <div className="lg:col-span-8 relative z-10 text-center lg:text-left">
+                <div className="bg-gradient-to-r from-slate-800/95 via-slate-800/90 to-transparent lg:py-12 lg:pl-8 lg:pr-16 rounded-2xl lg:backdrop-blur-sm">
+                  <h1 className="text-4xl md:text-5xl font-bold mb-6">
+                    Prof. Daniel Barral
+                  </h1>
+                  <p className="text-xl md:text-2xl mb-4">
+                    Professor | Mestre em Direito Público
+                  </p>
+                  <p className="text-lg mb-8 text-blue-100">
+                    Especialista em Licitações e Contratos Administrativos
+                  </p>
+                  <p className="text-lg mb-10 max-w-2xl mx-auto lg:mx-0 text-gray-100">
+                    Repositório especializado de materiais jurídicos em Direito Administrativo,
+                    com foco em fortalecer seu conhecimento e aprimorar suas atividades funcionais.
+                  </p>
+                  <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
+                    <Link
+                      href="/cursos"
+                      className="bg-white text-gray-900 px-8 py-3 rounded-lg font-semibold hover:bg-gray-50 transition-colors inline-flex items-center justify-center gap-2"
+                    >
+                      <BookOpen className="w-5 h-5" />
+                      Explorar Cursos
+                    </Link>
+                    <Link
+                      href="/validar-acesso"
+                      className="bg-blue-600 text-white px-8 py-3 rounded-lg font-semibold hover:bg-blue-700 transition-colors inline-flex items-center justify-center gap-2 border border-blue-500"
+                    >
+                      Área do Aluno
+                      <ArrowRight className="w-5 h-5 text-white" />
+                    </Link>
+                  </div>
+                </div>
               </div>
-            </div>
 
-            {/* Coluna Direita - Foto */}
-            <div className="relative hidden lg:block">
-              <div className="relative w-full h-[500px] rounded-2xl overflow-hidden shadow-2xl border-4 border-white/10">
-                <Image
-                  src="/images/professor/banner-home.jpg"
-                  alt="Prof. Daniel Barral"
-                  fill
-                  className="object-cover"
-                  priority
-                  sizes="(max-width: 1024px) 100vw, 50vw"
-                />
-                {/* Overlay sutil para melhor contraste */}
-                <div className="absolute inset-0 bg-gradient-to-t from-slate-900/20 to-transparent"></div>
+              {/* Foto à direita - ocupa 5 colunas e fica atrás do conteúdo */}
+              <div className="lg:col-span-5 relative lg:absolute lg:right-0 lg:top-1/2 lg:-translate-y-1/2 lg:w-[55%] hidden lg:block">
+                <div className="relative h-[600px] w-full rounded-2xl overflow-hidden shadow-2xl">
+                  <Image
+                    src="/images/professor/banner-home.jpg"
+                    alt="Prof. Daniel Barral"
+                    fill
+                    className="object-cover object-[40%_center]"
+                    priority
+                    sizes="55vw"
+                  />
+                </div>
               </div>
             </div>
           </div>
