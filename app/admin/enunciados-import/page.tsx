@@ -1,90 +1,11 @@
 'use client';
 
-import { useState } from 'react';
 import AdminLayout from '@/components/AdminLayout';
 import {
-  Upload, FileText, Loader2, CheckCircle, AlertCircle, ArrowRight
+  FileText, AlertCircle
 } from 'lucide-react';
 
-interface Enunciado {
-  numero: number;
-  titulo: string;
-  texto: string;
-  fonte: string;
-  metadados?: {
-    numeroPropostaPublica?: string;
-    artigos?: string[];
-    keywords?: string[];
-  };
-  classification?: {
-    success: boolean;
-    titulo: string;
-    descricao: string;
-    categoria: string;
-    cursos: string[];
-    tags: string[];
-    confianca: number;
-    raciocinio: string;
-  };
-}
-
-interface ParseResult {
-  success: boolean;
-  fonte: string;
-  totalEnunciados: number;
-  enunciados: Enunciado[];
-}
-
 export default function EnunciadosImportPage() {
-  const [selectedFile, setSelectedFile] = useState<File | null>(null);
-  const [isParsing, setIsParsing] = useState(false);
-  const [parseResult, setParseResult] = useState<ParseResult | null>(null);
-  const [error, setError] = useState<string | null>(null);
-
-  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      if (file.type !== 'application/pdf') {
-        setError('Apenas arquivos PDF são suportados');
-        return;
-      }
-      setSelectedFile(file);
-      setError(null);
-      setParseResult(null);
-    }
-  };
-
-  const handleParsePDF = async () => {
-    if (!selectedFile) return;
-
-    try {
-      setIsParsing(true);
-      setError(null);
-
-      const formData = new FormData();
-      formData.append('file', selectedFile);
-      formData.append('autoClassify', 'true'); // Classifica automaticamente
-
-      const response = await fetch('/api/admin/enunciados-import/parse', {
-        method: 'POST',
-        body: formData,
-      });
-
-      if (!response.ok) {
-        const data = await response.json();
-        throw new Error(data.error || 'Erro ao processar PDF');
-      }
-
-      const data = await response.json();
-      setParseResult(data);
-
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Erro desconhecido');
-    } finally {
-      setIsParsing(false);
-    }
-  };
-
   return (
     <AdminLayout>
       <div className="max-w-4xl mx-auto p-6">
@@ -95,192 +16,84 @@ export default function EnunciadosImportPage() {
             Importar Enunciados
           </h1>
           <p className="text-gray-600 mt-2">
-            Faça upload de enunciados em PDF de IBDA, INCP ou CJF
+            Funcionalidade em desenvolvimento
           </p>
         </div>
 
-        {/* Form */}
-        <form onSubmit={handleSubmit} className="bg-white rounded-xl shadow-lg p-8 space-y-6">
-          {/* Entidade */}
-          <div>
-            <label className="block text-sm font-bold text-gray-900 mb-2">
-              Entidade *
-            </label>
-            <select
-              value={entityType}
-              onChange={(e) => setEntityType(e.target.value)}
-              required
-              className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-600 text-gray-900"
-            >
-              <option value="">Selecione a entidade</option>
-              <option value="IBDA">IBDA - Instituto Brasileiro de Direito Administrativo</option>
-              <option value="INCP">INCP - Instituto Nacional da Contratação Pública</option>
-              <option value="CJF">CJF - Conselho da Justiça Federal</option>
-            </select>
-          </div>
-
-          {/* Curso */}
-          <div>
-            <label className="block text-sm font-bold text-gray-900 mb-2">
-              Curso *
-            </label>
-            <select
-              value={courseId}
-              onChange={(e) => setCourseId(e.target.value)}
-              required
-              className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-600 text-gray-900"
-            >
-              <option value="">Selecione o curso</option>
-              <option value="TODOS" className="font-bold bg-blue-50">
-                ⭐ TODOS OS CURSOS ({courses.length} cursos)
-              </option>
-              <option disabled>──────────────────────</option>
-              {courses.map((course) => (
-                <option key={course.id} value={course.id}>
-                  {course.title}
-                </option>
-              ))}
-            </select>
-          </div>
-
-          {/* File Upload */}
-          <div>
-            <label className="block text-sm font-bold text-gray-900 mb-2">
-              Arquivo PDF *
-            </label>
-            <div className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center hover:border-blue-500 transition-colors">
-              <input
-                type="file"
-                accept=".pdf"
-                onChange={handleFileChange}
-                className="hidden"
-                id="file-upload"
-              />
-              <label
-                htmlFor="file-upload"
-                className="cursor-pointer flex flex-col items-center gap-3"
-              >
-                <Upload className="w-12 h-12 text-gray-400" />
-                {file ? (
-                  <div className="text-center">
-                    <p className="text-lg font-medium text-gray-900">{file.name}</p>
-                    <p className="text-sm text-gray-600">
-                      {(file.size / 1024).toFixed(2)} KB
-                    </p>
-                    <p className="text-xs text-blue-600 mt-2">Clique para escolher outro arquivo</p>
-                  </div>
-                ) : (
-                  <div className="text-center">
-                    <p className="text-lg font-medium text-gray-900">
-                      Clique para selecionar arquivo PDF
-                    </p>
-                    <p className="text-sm text-gray-600">
-                      Enunciados compilados em PDF
-                    </p>
-                  </div>
-                )}
-              </label>
-            </div>
-          </div>
-
-          {/* Submit Button */}
-          <button
-            type="submit"
-            disabled={isProcessing || !file || !entityType || !courseId}
-            className="w-full px-8 py-4 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center justify-center gap-2 text-lg font-bold shadow-lg"
-          >
-            {isProcessing ? (
-              <>
-                <Loader2 className="w-6 h-6 animate-spin" />
-                Processando...
-              </>
-            ) : (
-              <>
-                <Upload className="w-6 h-6" />
-                Importar Enunciado
-              </>
-            )}
-          </button>
-        </form>
-
-        {/* Error */}
-        {error && (
-          <div className="mt-6 p-4 bg-red-50 border-l-4 border-red-500 rounded-r-lg">
-            <div className="flex gap-3">
-              <AlertCircle className="w-5 h-5 text-red-600 flex-shrink-0" />
-              <div>
-                <p className="font-bold text-red-900">Erro ao importar</p>
-                <p className="text-sm text-red-800">{error}</p>
+        {/* Under Construction Notice */}
+        <div className="bg-yellow-50 border-l-4 border-yellow-500 rounded-r-lg p-6">
+          <div className="flex gap-3">
+            <AlertCircle className="w-6 h-6 text-yellow-600 flex-shrink-0" />
+            <div>
+              <h3 className="font-bold text-yellow-900 text-lg mb-2">
+                Funcionalidade em Desenvolvimento
+              </h3>
+              <p className="text-yellow-800 mb-4">
+                O sistema de importação de enunciados (IBDA, INCP, CJF) está sendo desenvolvido e estará disponível em breve.
+              </p>
+              <div className="bg-white rounded-lg p-4 mt-4">
+                <h4 className="font-semibold text-gray-900 mb-2">Recursos Planejados:</h4>
+                <ul className="space-y-2 text-sm text-gray-700">
+                  <li className="flex gap-2">
+                    <span className="text-blue-600">•</span>
+                    <span>Upload de PDFs com múltiplos enunciados</span>
+                  </li>
+                  <li className="flex gap-2">
+                    <span className="text-blue-600">•</span>
+                    <span>Extração automática de enunciados individuais</span>
+                  </li>
+                  <li className="flex gap-2">
+                    <span className="text-blue-600">•</span>
+                    <span>Classificação inteligente por IA</span>
+                  </li>
+                  <li className="flex gap-2">
+                    <span className="text-blue-600">•</span>
+                    <span>Revisão antes da importação</span>
+                  </li>
+                  <li className="flex gap-2">
+                    <span className="text-blue-600">•</span>
+                    <span>Importação em lote para o banco de dados</span>
+                  </li>
+                </ul>
               </div>
             </div>
           </div>
-        )}
+        </div>
 
-        {/* Success */}
-        {success && documentId && (
-          <div className="mt-6 bg-green-50 rounded-xl shadow-lg p-8 border-2 border-green-200">
-            <div className="flex items-center gap-3 mb-6">
-              <CheckCircle className="w-8 h-8 text-green-600" />
-              <div>
-                <h2 className="text-xl font-bold text-green-900">Enunciado importado!</h2>
-                <p className="text-green-700">O documento foi criado com sucesso</p>
-              </div>
-            </div>
-
-            {/* Action Buttons */}
-            <div className="flex flex-col gap-3">
-              <a
-                href={`/admin/documentos/${documentId}/edit`}
-                className="px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors flex items-center justify-center gap-2 text-lg font-medium shadow-lg"
-              >
-                <ArrowRight className="w-5 h-5" />
-                Editar Documento
-              </a>
-
-              <a
-                href="/admin/documentos"
-                className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center justify-center gap-2 text-lg font-medium shadow-lg"
-              >
-                <FileText className="w-5 h-5" />
-                Ver Todos os Documentos
-              </a>
-            </div>
-          </div>
-        )}
-
-        {/* Instructions */}
+        {/* Documentation Reference */}
         <div className="mt-8 bg-gray-50 rounded-lg p-6">
-          <h3 className="text-lg font-bold text-gray-900 mb-3">📚 Como usar</h3>
-          <ol className="space-y-2 text-sm text-gray-700">
+          <h3 className="text-lg font-bold text-gray-900 mb-3">📚 Documentação</h3>
+          <p className="text-sm text-gray-700 mb-3">
+            Para mais informações sobre o sistema de importação de enunciados, consulte:
+          </p>
+          <ul className="space-y-2 text-sm text-gray-600">
             <li className="flex gap-2">
-              <span className="font-bold text-blue-600">1.</span>
-              <span>Selecione a entidade (IBDA, INCP ou CJF)</span>
+              <span className="text-blue-600">•</span>
+              <span><code className="bg-gray-200 px-2 py-1 rounded">ENUNCIADOS_PARSER_STATUS.md</code> - Status da implementação</span>
             </li>
             <li className="flex gap-2">
-              <span className="font-bold text-blue-600">2.</span>
-              <span>Escolha o curso ou &quot;TODOS OS CURSOS&quot;</span>
+              <span className="text-blue-600">•</span>
+              <span><code className="bg-gray-200 px-2 py-1 rounded">lib/enunciados-parser.ts</code> - Parser de PDFs</span>
             </li>
             <li className="flex gap-2">
-              <span className="font-bold text-blue-600">3.</span>
-              <span>Faça upload do PDF com os enunciados</span>
+              <span className="text-blue-600">•</span>
+              <span><code className="bg-gray-200 px-2 py-1 rounded">app/api/admin/enunciados-import/parse/route.ts</code> - API de processamento</span>
             </li>
-            <li className="flex gap-2">
-              <span className="font-bold text-blue-600">4.</span>
-              <span>O sistema irá processar e criar o documento automaticamente</span>
-            </li>
-            <li className="flex gap-2">
-              <span className="font-bold text-blue-600">5.</span>
-              <span>Após a importação, você pode editar o documento para ajustar detalhes</span>
-            </li>
-          </ol>
+          </ul>
+        </div>
 
-          <div className="mt-4 p-3 bg-blue-100 rounded border border-blue-200">
-            <p className="text-xs text-blue-900">
-              <strong>💡 Dica:</strong> Após a importação, o sistema tentará classificar automaticamente
-              o enunciado por curso e artigos da Lei 14.133/2021 usando IA. Você pode revisar e ajustar
-              essas classificações na página de edição.
-            </p>
-          </div>
+        {/* Temporary Alternative */}
+        <div className="mt-8 bg-blue-50 rounded-lg p-6">
+          <h3 className="text-lg font-bold text-blue-900 mb-3">💡 Alternativa Temporária</h3>
+          <p className="text-sm text-blue-800 mb-3">
+            Enquanto esta funcionalidade não está disponível, você pode importar enunciados individualmente através de:
+          </p>
+          <a
+            href="/admin/documentos"
+            className="inline-block px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium"
+          >
+            Gerenciar Documentos →
+          </a>
         </div>
       </div>
     </AdminLayout>
