@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import AdminLayout from '@/components/AdminLayout';
-import { CheckSquare, Square, Edit2, Save, X, Eye, ExternalLink } from 'lucide-react';
+import { CheckSquare, Square, Edit2, Save, Eye, ExternalLink } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 
 interface AcordaoPreview {
@@ -604,7 +604,7 @@ export default function TCUImportPage() {
                                 className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-600"
                               />
                               <p className="text-xs text-gray-500 mt-1">
-                                Se deixar em branco, será usado: "{acordao.sumario.substring(0, 80)}..."
+                                Se deixar em branco, será usado: &quot;{acordao.sumario.substring(0, 80)}...&quot;
                               </p>
                             </div>
 

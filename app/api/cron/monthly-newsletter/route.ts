@@ -2,8 +2,6 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { Resend } from 'resend';
 
-const resend = new Resend(process.env.RESEND_API_KEY);
-
 /**
  * Cron Job: Newsletter Mensal de Documentos Novos
  *
@@ -99,7 +97,10 @@ export async function GET(request: NextRequest) {
     // 5. Gera HTML da newsletter
     const newsletterHtml = generateNewsletterHtml(documentsByCategory, newDocuments.length);
 
-    // 6. Envia email para todos os inscritos (em lote)
+    // 6. Inicializa Resend
+    const resend = new Resend(process.env.RESEND_API_KEY);
+
+    // 7. Envia email para todos os inscritos (em lote)
     const emailPromises = subscribers.map((subscriber) =>
       resend.emails.send({
         from: process.env.EMAIL_FROM || 'newsletter@profdanielbarral.com.br',
@@ -116,7 +117,7 @@ export async function GET(request: NextRequest) {
 
     console.log(`[Cron Newsletter] Emails enviados: ${successCount} sucesso, ${errorCount} erro`);
 
-    // 7. Log de erros se houver
+    // 8. Log de erros se houver
     results.forEach((result, index) => {
       if (result.status === 'rejected') {
         console.error(`[Cron Newsletter] Erro ao enviar para ${subscribers[index].email}:`, result.reason);
