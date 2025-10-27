@@ -64,8 +64,11 @@ export async function classifyTCUAcordao(
 
   try {
     // Verifica se a API key está configurada
-    if (!process.env.ANTHROPIC_API_KEY) {
-      console.warn('[TCU Classifier] ANTHROPIC_API_KEY não configurada. Usando classificação baseada em regras.');
+    const apiKey = process.env.ANTHROPIC_API_KEY;
+    console.log('[TCU Classifier] Verificando API key:', apiKey ? `Presente (${apiKey.substring(0, 15)}...)` : 'AUSENTE');
+
+    if (!apiKey) {
+      console.warn('[TCU Classifier] ⚠️ ANTHROPIC_API_KEY não configurada. Usando classificação baseada em regras.');
       return classifyWithRules(input);
     }
 

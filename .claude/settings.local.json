@@ -72,7 +72,8 @@
       "Bash(cscript //Nologo scriptsconvert-xls-excel.vbs \"C:\\Users\\Administrador\\Downloads\\pesquisaExportada (4).xls\")",
       "Bash(cscript:*)",
       "Bash(npm uninstall:*)",
-      "Bash(test:*)"
+      "Bash(test:*)",
+      "Bash(echo $ANTHROPIC_API_KEY)"
     ],
     "deny": [],
     "ask": []
