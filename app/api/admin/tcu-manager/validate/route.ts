@@ -141,38 +141,106 @@ export const POST = withAdminAuth(async (request: NextRequest) => {
     // Processa e valida cada linha
     const processedDocuments = await Promise.all(
       data.map(async (row, index) => {
-        // Busca título em várias possibilidades
-        const titulo = (
-          row['Titulo'] || row['titulo'] || row['Título'] ||
-          row['Title'] || row['TITULO'] || row['TÍTULO'] ||
-          row['Assunto'] || row['assunto'] || row['ASSUNTO'] ||
-          row['Tema'] || row['tema'] || row['TEMA'] ||
-          ''
+        // === EXTRAI TODAS AS 10 COLUNAS DA PLANILHA TCU ===
+
+        // 1. Enunciado (texto principal - resumo do acórdão)
+        const enunciado = (
+          row['Enunciado'] || row['enunciado'] || row['ENUNCIADO'] || ''
         ) as string;
 
-        const descricao = (
-          row['Descricao'] || row['descricao'] || row['Descrição'] ||
-          row['Description'] || row['DESCRICAO'] || row['DESCRIÇÃO'] ||
-          row['Ementa'] || row['ementa'] || row['EMENTA'] ||
-          ''
+        // 2. Área temática
+        const area = (
+          row['Área'] || row['Area'] || row['area'] || row['ÁREA'] || row['AREA'] || ''
         ) as string;
 
-        const categoria = (
-          (row['Categoria'] || row['categoria'] || row['CATEGORIA'] || 'acordao') as string
-        ).toLowerCase();
+        // 3. Tema
+        const tema = (
+          row['Tema'] || row['tema'] || row['TEMA'] || ''
+        ) as string;
+
+        // 4. Subtema
+        const subtema = (
+          row['Subtema'] || row['subtema'] || row['SUBTEMA'] || ''
+        ) as string;
+
+        // 5. Data do julgamento
+        const dataStr = (
+          row['Data'] || row['data'] || row['DATA'] || ''
+        ) as string;
+
+        let dataJulgamento: Date | null = null;
+        if (dataStr) {
+          try {
+            // Tenta parsear data (formato esperado: DD/MM/YYYY)
+            const [dia, mes, ano] = dataStr.split('/');
+            if (dia && mes && ano) {
+              dataJulgamento = new Date(parseInt(ano), parseInt(mes) - 1, parseInt(dia));
+            }
+          } catch (err) {
+            console.warn(`[TCU Validate] Erro ao parsear data: ${dataStr}`);
+          }
+        }
+
+        // 6. Número do Acórdão (identificador principal)
+        const acordao = (
+          row['Acórdão'] || row['Acordao'] || row['acordao'] || row['ACÓRDÃO'] || row['ACORDAO'] || ''
+        ) as string;
+
+        // 7. Autor da tese
+        const autorTese = (
+          row['Autor da tese'] || row['autor da tese'] || row['AUTOR DA TESE'] ||
+          row['Autor'] || row['autor'] || ''
+        ) as string;
+
+        // 8. Legislação citada
+        const legislacao = (
+          row['Legislação'] || row['Legislacao'] || row['legislacao'] ||
+          row['LEGISLAÇÃO'] || row['LEGISLACAO'] || ''
+        ) as string;
+
+        // 9. Outros indexadores (tags)
+        const outrosIndexadores = (
+          row['Outros indexadores'] || row['outros indexadores'] || row['OUTROS INDEXADORES'] ||
+          row['Indexadores'] || row['indexadores'] || ''
+        ) as string;
+
+        // 10. Tipo do processo
+        const tipoProcesso = (
+          row['Tipo do processo'] || row['tipo do processo'] || row['TIPO DO PROCESSO'] ||
+          row['Tipo'] || row['tipo'] || ''
+        ) as string;
+
+        // === PREPARA DADOS PARA O DOCUMENTO ===
+
+        // Título: combina número do acórdão com início do enunciado
+        const titulo = acordao || enunciado.substring(0, 100) + (enunciado.length > 100 ? '...' : '');
+
+        // Descrição: usa o enunciado completo
+        const descricao = enunciado;
+
+        // Categoria: sempre 'acordao' para documentos do TCU
+        const categoria = 'acordao';
 
         const errors: string[] = [];
         const warnings: string[] = [];
 
-        // Validações básicas
-        if (!titulo || titulo.trim().length === 0) {
-          errors.push('Título obrigatório (colunas verificadas: Titulo, Assunto, Tema)');
+        // === VALIDAÇÕES BÁSICAS ===
+
+        // Validação 1: Enunciado é obrigatório (informação principal)
+        if (!enunciado || enunciado.trim().length === 0) {
+          errors.push('Enunciado obrigatório (campo principal do resumo do acórdão)');
         }
 
-        // Detecta duplicatas apenas para acórdãos
+        // Validação 2: Número do acórdão é obrigatório (identificador)
+        if (!acordao || acordao.trim().length === 0) {
+          errors.push('Número do acórdão obrigatório (campo "Acórdão")');
+        }
+
+        // === DETECÇÃO DE DUPLICATAS ===
         let duplicate = null;
-        if (categoria === 'acordao' && titulo) {
-          duplicate = await findDuplicates(prisma, titulo);
+        if (categoria === 'acordao' && acordao) {
+          // Busca por número do acórdão (mais preciso)
+          duplicate = await findDuplicates(prisma, acordao);
 
           if (duplicate) {
             warnings.push(
@@ -195,7 +263,21 @@ export const POST = withAdminAuth(async (request: NextRequest) => {
           errors,
           warnings,
           rowIndex: index,
-          rawData: row,
+          rawData: row, // Dados originais completos da planilha
+          // Dados estruturados da planilha TCU (todas as 10 colunas)
+          tcuData: {
+            enunciado,
+            area,
+            tema,
+            subtema,
+            data: dataStr,
+            dataJulgamento,
+            acordao,
+            autorTese,
+            legislacao,
+            outrosIndexadores,
+            tipoProcesso,
+          },
         };
       })
     );
