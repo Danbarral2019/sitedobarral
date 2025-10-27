@@ -79,6 +79,7 @@ export default function DocumentosPage() {
 
   // Bulk operations
   const [uploadMode, setUploadMode] = useState<'single' | 'bulk'>('single');
+  const [creationMode, setCreationMode] = useState<'file' | 'manual'>('file'); // Novo: modo de criação
   const [multipleFiles, setMultipleFiles] = useState<File[]>([]);
   const [selectedDocuments, setSelectedDocuments] = useState<Set<string>>(new Set());
   const [bulkAction, setBulkAction] = useState('');
@@ -95,6 +96,10 @@ export default function DocumentosPage() {
     leiArticles: string[];
     entityType?: string;
     enunciadoNumber?: string;
+    documentType?: 'enunciado' | 'sumula';
+    institution?: 'IBDA' | 'INCP' | 'CJF' | 'outro';
+    textContent?: string;
+    notes?: string;
   }>({
     courseId: '',
     title: '',
@@ -105,6 +110,10 @@ export default function DocumentosPage() {
     leiArticles: [],
     entityType: undefined,
     enunciadoNumber: undefined,
+    documentType: 'enunciado',
+    institution: 'IBDA',
+    textContent: '',
+    notes: '',
   });
 
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
@@ -391,6 +400,70 @@ export default function DocumentosPage() {
     success('Exportação concluída!', `${docsToExport.length} documentos exportados em ${format.toUpperCase()}`);
   };
 
+  // Nova função para criar documento manual (sem arquivo)
+  const handleManualCreate = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    if (!formData.title || !formData.courseId) {
+      errorToast('Campos obrigatórios', 'Título e Curso são obrigatórios.');
+      return;
+    }
+
+    setIsUploading(true);
+
+    try {
+      const response = await fetch('/api/admin/documents/create-manual', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          courseId: formData.courseId,
+          title: formData.title,
+          description: formData.description,
+          category: formData.category,
+          isPublic: formData.isPublic,
+          tags: formData.tags,
+          leiArticles: formData.leiArticles,
+          documentType: formData.documentType,
+          institution: formData.institution,
+          textContent: formData.textContent,
+          notes: formData.notes,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Erro ao criar documento');
+      }
+
+      success('Documento criado!', `O documento "${formData.title}" foi criado com sucesso.`);
+
+      // Reset form
+      setFormData({
+        courseId: '',
+        title: '',
+        description: '',
+        category: 'apostila',
+        isPublic: false,
+        tags: '',
+        leiArticles: [],
+        entityType: undefined,
+        enunciadoNumber: undefined,
+        documentType: 'enunciado',
+        institution: 'IBDA',
+        textContent: '',
+        notes: '',
+      });
+
+      loadDocuments();
+    } catch (error) {
+      console.error('[Manual Create] Erro:', error);
+      errorToast('Erro', error instanceof Error ? error.message : 'Erro ao criar documento');
+    } finally {
+      setIsUploading(false);
+    }
+  };
+
   const handleUpload = async (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -628,7 +701,35 @@ export default function DocumentosPage() {
                   </button>
                 </div>
 
-                <form onSubmit={uploadMode === 'single' ? handleUpload : (e) => { e.preventDefault(); handleBulkUpload(); }} className="space-y-4">
+                {/* Botões: Com Arquivo / Manual */}
+                <div className="flex gap-2 p-1 bg-gray-100 rounded-lg">
+                  <button
+                    type="button"
+                    onClick={() => setCreationMode('file')}
+                    className={`flex-1 px-3 py-2 rounded-lg font-medium text-sm transition-all ${
+                      creationMode === 'file'
+                        ? 'bg-white text-blue-600 shadow'
+                        : 'text-gray-600 hover:text-gray-900'
+                    }`}
+                  >
+                    <Upload className="w-4 h-4 inline mr-1" />
+                    Com Arquivo
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setCreationMode('manual')}
+                    className={`flex-1 px-3 py-2 rounded-lg font-medium text-sm transition-all ${
+                      creationMode === 'manual'
+                        ? 'bg-white text-green-600 shadow'
+                        : 'text-gray-600 hover:text-gray-900'
+                    }`}
+                  >
+                    <FileText className="w-4 h-4 inline mr-1" />
+                    Manual
+                  </button>
+                </div>
+
+                <form onSubmit={creationMode === 'manual' ? handleManualCreate : (uploadMode === 'single' ? handleUpload : (e) => { e.preventDefault(); handleBulkUpload(); })} className="space-y-4">
                   <div>
                     <label className="block text-sm font-semibold text-gray-900 mb-2">
                       Curso *
@@ -738,29 +839,101 @@ export default function DocumentosPage() {
                     </>
                   )}
 
-                  <div>
-                    <label className="block text-sm font-semibold text-gray-900 mb-2">
-                      Arquivo{uploadMode === 'bulk' ? 's' : ''} *
-                    </label>
-                    {uploadMode === 'single' ? (
-                      <FileDropzone
-                        onFileSelect={handleFileSelect}
-                        selectedFile={selectedFile}
-                        onFileRemove={handleFileRemove}
-                        accept=".pdf,.doc,.docx,.mp4,.avi,.mov"
-                        maxSize={100}
-                      />
-                    ) : (
-                      <MultiFileDropzone
-                        onFilesSelect={handleMultipleFilesSelect}
-                        selectedFiles={multipleFiles}
-                        onFileRemove={handleMultipleFileRemove}
-                        accept=".pdf,.doc,.docx,.mp4,.avi,.mov"
-                        maxSize={100}
-                        maxFiles={10}
-                      />
-                    )}
-                  </div>
+                  {/* Seção de arquivo OU campos manuais */}
+                  {creationMode === 'file' ? (
+                    <div>
+                      <label className="block text-sm font-semibold text-gray-900 mb-2">
+                        Arquivo{uploadMode === 'bulk' ? 's' : ''} *
+                      </label>
+                      {uploadMode === 'single' ? (
+                        <FileDropzone
+                          onFileSelect={handleFileSelect}
+                          selectedFile={selectedFile}
+                          onFileRemove={handleFileRemove}
+                          accept=".pdf,.doc,.docx,.mp4,.avi,.mov"
+                          maxSize={100}
+                        />
+                      ) : (
+                        <MultiFileDropzone
+                          onFilesSelect={handleMultipleFilesSelect}
+                          selectedFiles={multipleFiles}
+                          onFileRemove={handleMultipleFileRemove}
+                          accept=".pdf,.doc,.docx,.mp4,.avi,.mov"
+                          maxSize={100}
+                          maxFiles={10}
+                        />
+                      )}
+                    </div>
+                  ) : (
+                    /* Campos específicos para criação manual */
+                    <div className="space-y-4 border-2 border-dashed border-green-300 rounded-lg p-4 bg-green-50">
+                      <div className="flex items-center gap-2 mb-2">
+                        <FileText className="w-5 h-5 text-green-600" />
+                        <h3 className="font-semibold text-green-900">Criação Manual de Enunciado/Súmula</h3>
+                      </div>
+
+                      <div className="grid grid-cols-2 gap-4">
+                        <div>
+                          <label className="block text-sm font-semibold text-gray-900 mb-2">
+                            Tipo *
+                          </label>
+                          <select
+                            value={formData.documentType}
+                            onChange={(e) => setFormData({ ...formData, documentType: e.target.value as 'enunciado' | 'sumula' })}
+                            required
+                            className="w-full px-3 py-2 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-600 text-gray-900"
+                          >
+                            <option value="enunciado">Enunciado</option>
+                            <option value="sumula">Súmula</option>
+                          </select>
+                        </div>
+
+                        <div>
+                          <label className="block text-sm font-semibold text-gray-900 mb-2">
+                            Instituição *
+                          </label>
+                          <select
+                            value={formData.institution}
+                            onChange={(e) => setFormData({ ...formData, institution: e.target.value as 'IBDA' | 'INCP' | 'CJF' | 'outro' })}
+                            required
+                            className="w-full px-3 py-2 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-600 text-gray-900"
+                          >
+                            <option value="IBDA">IBDA</option>
+                            <option value="INCP">INCP</option>
+                            <option value="CJF">CJF</option>
+                            <option value="outro">Outro</option>
+                          </select>
+                        </div>
+                      </div>
+
+                      <div>
+                        <label className="block text-sm font-semibold text-gray-900 mb-2">
+                          Texto do {formData.documentType || 'Enunciado'} *
+                        </label>
+                        <textarea
+                          value={formData.textContent}
+                          onChange={(e) => setFormData({ ...formData, textContent: e.target.value })}
+                          required
+                          placeholder="Digite o texto completo do enunciado ou súmula..."
+                          rows={6}
+                          className="w-full px-3 py-2 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-600 text-gray-900"
+                        />
+                      </div>
+
+                      <div>
+                        <label className="block text-sm font-semibold text-gray-900 mb-2">
+                          Observações
+                        </label>
+                        <textarea
+                          value={formData.notes}
+                          onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
+                          placeholder="Observações adicionais, contexto, referências..."
+                          rows={3}
+                          className="w-full px-3 py-2 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-600 text-gray-900"
+                        />
+                      </div>
+                    </div>
+                  )}
 
                   <div className="flex items-center gap-2">
                     <input
