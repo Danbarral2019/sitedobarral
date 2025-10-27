@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import AdminLayout from '@/components/AdminLayout';
 import {
-  Upload, FileText, Loader2, CheckCircle, AlertCircle, FileCheck
+  Upload, FileText, Loader2, CheckCircle, AlertCircle, ArrowRight
 } from 'lucide-react';
 
 interface Enunciado {
