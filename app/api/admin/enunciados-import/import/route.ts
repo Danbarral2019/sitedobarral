@@ -27,6 +27,12 @@ interface EnunciadoToImport {
   fonte: string;
   metadados: EnunciadoMetadata;
   classification?: EnunciadoClassification;
+  // Campos editados pelo usuário
+  editedTitle?: string;
+  editedDescription?: string;
+  editedCourses?: string[];
+  editedTags?: string[];
+  editedCategory?: string;
 }
 
 /**
@@ -57,13 +63,13 @@ export const POST = withAdminAuth(async (request: NextRequest) => {
     // Importa cada enunciado
     for (const enunciado of enunciados) {
       try {
-        // Usar dados da classificação se disponíveis, senão usar padrões
+        // Priorizar campos editados, depois classificação, depois padrões
         const classification = enunciado.classification;
-        const title = classification?.titulo || `${fonte} - Enunciado ${enunciado.numero}`;
-        const description = classification?.descricao || enunciado.texto.substring(0, 200);
-        const category = classification?.categoria || 'enunciado';
-        const courseIds = classification?.cursos || ['1']; // Default: Nova Lei de Licitações
-        const tags = classification?.tags || [];
+        const title = enunciado.editedTitle || classification?.titulo || `${fonte} - Enunciado ${enunciado.numero}`;
+        const description = enunciado.editedDescription || classification?.descricao || enunciado.texto.substring(0, 200);
+        const category = enunciado.editedCategory || classification?.categoria || 'enunciado';
+        const courseIds = enunciado.editedCourses || classification?.cursos || ['1']; // Default: Nova Lei de Licitações
+        const tags = enunciado.editedTags || classification?.tags || [];
         const artigos = classification?.artigos || enunciado.metadados.artigos || [];
 
         // Combina tags com artigos e keywords
@@ -77,6 +83,14 @@ export const POST = withAdminAuth(async (request: NextRequest) => {
         // Remove duplicatas
         const uniqueTags = [...new Set(allTags)];
 
+        // Monta as notas com informações adicionais
+        const notes = [
+          `Fonte: ${fonte}`,
+          `Número: ${enunciado.numero}`,
+          enunciado.metadados.numeroPropostaPublica ? `Proposta Pública: ${enunciado.metadados.numeroPropostaPublica}` : '',
+          `Texto Completo:\n${enunciado.texto}`,
+        ].filter(Boolean).join('\n\n');
+
         // Cria documento no banco
         const document = await prisma.document.create({
           data: {
@@ -88,6 +102,7 @@ export const POST = withAdminAuth(async (request: NextRequest) => {
             isPublic: false, // Enunciados geralmente são restritos
             tags: JSON.stringify(uniqueTags),
             courseId: courseIds[0], // Usa o primeiro curso
+            notes,
             uploadedAt: new Date(),
           },
         });
@@ -104,6 +119,7 @@ export const POST = withAdminAuth(async (request: NextRequest) => {
               isPublic: false,
               tags: JSON.stringify(uniqueTags),
               courseId: courseIds[i],
+              notes,
               uploadedAt: new Date(),
             },
           });
