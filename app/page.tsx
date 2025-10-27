@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import Image from 'next/image';
 import dynamic from 'next/dynamic';
 import { ArrowRight, BookOpen, Users, Award, FileText, Star } from 'lucide-react';
 import { courses } from '@/data/courses';
@@ -19,37 +20,56 @@ export default function Home() {
 
   return (
     <main>
-      <section className="text-white py-20" style={{background: 'linear-gradient(to bottom, #1e293b 0%, #334155 100%)'}}>
+      <section className="text-white py-20 relative overflow-hidden" style={{background: 'linear-gradient(to bottom, #1e293b 0%, #334155 100%)'}}>
         <div className="container mx-auto px-4">
-          <div className="max-w-4xl mx-auto text-center">
-            <h1 className="text-4xl md:text-5xl font-bold mb-6">
-              Prof. Daniel Barral
-            </h1>
-            <p className="text-xl md:text-2xl mb-4">
-              Professor | Mestre em Direito Público
-            </p>
-            <p className="text-lg mb-8 text-blue-100">
-              Especialista em Licitações e Contratos Administrativos
-            </p>
-            <p className="text-lg mb-10 max-w-2xl mx-auto text-gray-100">
-              Repositório especializado de materiais jurídicos em Direito Administrativo,
-              com foco em fortalecer seu conhecimento e aprimorar suas atividades funcionais.
-            </p>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Link
-                href="/cursos"
-                className="bg-white text-gray-900 px-8 py-3 rounded-lg font-semibold hover:bg-gray-50 transition-colors inline-flex items-center justify-center gap-2"
-              >
-                <BookOpen className="w-5 h-5" />
-                Explorar Cursos
-              </Link>
-              <Link
-                href="/validar-acesso"
-                className="bg-blue-600 text-white px-8 py-3 rounded-lg font-semibold hover:bg-blue-700 transition-colors inline-flex items-center justify-center gap-2 border border-blue-500"
-              >
-                Área do Aluno
-                <ArrowRight className="w-5 h-5 text-white" />
-              </Link>
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center max-w-7xl mx-auto">
+            {/* Coluna Esquerda - Conteúdo */}
+            <div className="text-center lg:text-left">
+              <h1 className="text-4xl md:text-5xl font-bold mb-6">
+                Prof. Daniel Barral
+              </h1>
+              <p className="text-xl md:text-2xl mb-4">
+                Professor | Mestre em Direito Público
+              </p>
+              <p className="text-lg mb-8 text-blue-100">
+                Especialista em Licitações e Contratos Administrativos
+              </p>
+              <p className="text-lg mb-10 max-w-2xl mx-auto lg:mx-0 text-gray-100">
+                Repositório especializado de materiais jurídicos em Direito Administrativo,
+                com foco em fortalecer seu conhecimento e aprimorar suas atividades funcionais.
+              </p>
+              <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
+                <Link
+                  href="/cursos"
+                  className="bg-white text-gray-900 px-8 py-3 rounded-lg font-semibold hover:bg-gray-50 transition-colors inline-flex items-center justify-center gap-2"
+                >
+                  <BookOpen className="w-5 h-5" />
+                  Explorar Cursos
+                </Link>
+                <Link
+                  href="/validar-acesso"
+                  className="bg-blue-600 text-white px-8 py-3 rounded-lg font-semibold hover:bg-blue-700 transition-colors inline-flex items-center justify-center gap-2 border border-blue-500"
+                >
+                  Área do Aluno
+                  <ArrowRight className="w-5 h-5 text-white" />
+                </Link>
+              </div>
+            </div>
+
+            {/* Coluna Direita - Foto */}
+            <div className="relative hidden lg:block">
+              <div className="relative w-full h-[500px] rounded-2xl overflow-hidden shadow-2xl border-4 border-white/10">
+                <Image
+                  src="/images/professor/banner-home.jpg"
+                  alt="Prof. Daniel Barral"
+                  fill
+                  className="object-cover"
+                  priority
+                  sizes="(max-width: 1024px) 100vw, 50vw"
+                />
+                {/* Overlay sutil para melhor contraste */}
+                <div className="absolute inset-0 bg-gradient-to-t from-slate-900/20 to-transparent"></div>
+              </div>
             </div>
           </div>
         </div>
