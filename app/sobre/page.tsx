@@ -54,10 +54,11 @@ export default function SobrePage() {
               <div className="relative group">
                 <div className="w-64 h-64 relative rounded-2xl overflow-hidden ring-4 ring-blue-100 group-hover:ring-blue-300 transition-all">
                   <Image
-                    src="/prof-daniel-barral.jpg"
+                    src="/images/professor/sobre.jpg"
                     alt="Prof. Daniel Barral"
                     fill
                     className="object-cover"
+                    priority
                   />
                 </div>
                 <div className="absolute -bottom-3 -right-3 w-16 h-16 bg-gradient-to-br from-blue-500 to-blue-600 rounded-full flex items-center justify-center shadow-lg">
