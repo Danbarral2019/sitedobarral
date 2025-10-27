@@ -189,6 +189,7 @@ export async function PATCH(request: NextRequest) {
       { error: 'Erro ao atualizar contato' },
       { status: 500 }
     );
+  }
 }
 
 // DELETE - Deletar contato (admin apenas)
@@ -224,4 +225,5 @@ export async function DELETE(request: NextRequest) {
       { error: 'Erro ao deletar contato' },
       { status: 500 }
     );
+  }
 }
