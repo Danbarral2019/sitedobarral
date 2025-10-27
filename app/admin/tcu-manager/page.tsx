@@ -7,9 +7,18 @@ import {
   Loader2, ArrowRight, FileText, AlertTriangle, RefreshCw, Sparkles
 } from 'lucide-react';
 import TCUReviewTable from '@/components/TCUReviewTable';
+import { courses } from '@/data/courses';
 
 type Step = 1 | 2 | 2.5 | 3;
 type SourceType = 'tcu' | 'custom' | null;
+
+// Helper: converte IDs de cursos para slugs
+const courseIdsToSlugs = (courseIds: string[]): string => {
+  const slugs = courseIds
+    .map(id => courses.find(c => c.id === id)?.slug)
+    .filter(Boolean);
+  return slugs.join(',');
+};
 
 interface ValidationResult {
   stats: {
@@ -502,23 +511,29 @@ export default function TCUManagerPage() {
       // Prepara documentos aprovados com TODOS os dados enriquecidos
       const documentsToImport = reviewDocuments
         .filter(doc => doc.approved)
-        .map(doc => ({
-          title: doc.editedTitle || doc.title,
-          description: doc.editedDescription || doc.description,
-          category: doc.editedCategory || doc.category,
-          course: (doc.editedCourses || []).join(','), // IDs dos cursos
-          tags: (doc.editedTags || []).join(','),
-          publico: 'SIM', // TCU acórdãos são públicos
-          url: doc.enrichment?.linkPDF || '#',
-          arquivo: '',
-          isDuplicate: false,
-          // Dados enriquecidos
-          tcuData: doc.tcuData,
-          enrichment: doc.enrichment,
-          classification: doc.classification,
-        }));
+        .map(doc => {
+          const courseIds = doc.editedCourses || [];
+          const courseSlugs = courseIdsToSlugs(courseIds); // Converte IDs para slugs
+
+          return {
+            title: doc.editedTitle || doc.title,
+            description: doc.editedDescription || doc.description,
+            category: doc.editedCategory || doc.category,
+            course: courseSlugs, // Slugs dos cursos (não IDs!)
+            tags: (doc.editedTags || []).join(','),
+            publico: 'SIM', // TCU acórdãos são públicos
+            url: doc.enrichment?.linkPDF || '#',
+            arquivo: '',
+            isDuplicate: false,
+            // Dados enriquecidos
+            tcuData: doc.tcuData,
+            enrichment: doc.enrichment,
+            classification: doc.classification,
+          };
+        });
 
       console.log('[TCU Manager] Importando documentos enriquecidos:', documentsToImport.length);
+      console.log('[TCU Manager] Exemplo de curso:', documentsToImport[0]?.course);
 
       const response = await fetch('/api/admin/tcu-manager/import', {
         method: 'POST',
