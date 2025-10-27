@@ -479,31 +479,25 @@ export async function enrichTCUAcordao(
   const startTime = Date.now();
   const { acordao, enunciado } = planilhaData;
 
-  console.log(`[TCU Enrichment] Enriquecendo acórdão: ${acordao}`);
+  console.log(`[TCU Enrichment] Tentando buscar dados adicionais: ${acordao}`);
 
   try {
-    // ESTRATÉGIA 1: Tentar buscar na API de dados abertos primeiro (mais rápido e confiável)
+    // Tenta buscar na API de dados abertos do TCU
     const apiResult = await tryEnrichFromAPI(acordao);
-
-    if (apiResult.success) {
-      const elapsedTime = Date.now() - startTime;
-      console.log(`[TCU Enrichment] Sucesso via API em ${elapsedTime}ms`);
-      return apiResult;
-    }
-
-    // ESTRATÉGIA 2: Se API falhou, tentar scraping do site (mais lento mas pode ter mais dados)
-    console.log(`[TCU Enrichment] API falhou, tentando scraping do site...`);
-    const scrapeResult = await tryEnrichFromWebsite(acordao, enunciado);
 
     const elapsedTime = Date.now() - startTime;
 
-    if (scrapeResult.success) {
-      console.log(`[TCU Enrichment] Sucesso via scraping em ${elapsedTime}ms`);
+    if (apiResult.success) {
+      console.log(`[TCU Enrichment] ✓ Dados encontrados na API em ${elapsedTime}ms`);
+      return apiResult;
     } else {
-      console.log(`[TCU Enrichment] Falha em todas as estratégias (${elapsedTime}ms)`);
+      console.log(`[TCU Enrichment] ℹ Acórdão não encontrado na API (${elapsedTime}ms)`);
+      return {
+        success: false,
+        numeroAcordao: acordao,
+        error: 'Acórdão não encontrado na API de dados abertos. Use o campo de link para adicionar manualmente.',
+      };
     }
-
-    return scrapeResult;
 
   } catch (error) {
     const elapsedTime = Date.now() - startTime;
@@ -512,7 +506,7 @@ export async function enrichTCUAcordao(
     return {
       success: false,
       numeroAcordao: acordao,
-      error: error instanceof Error ? error.message : String(error),
+      error: 'Erro ao buscar dados. Use o campo de link para adicionar manualmente.',
     };
   }
 }
