@@ -2,70 +2,86 @@
 
 import { useState } from 'react';
 import AdminLayout from '@/components/AdminLayout';
-import { Upload, FileText, AlertCircle, Loader2, CheckCircle, ArrowRight } from 'lucide-react';
-import { courses } from '@/data/courses';
+import {
+  Upload, FileText, Loader2, CheckCircle, AlertCircle, FileCheck
+} from 'lucide-react';
+
+interface Enunciado {
+  numero: number;
+  titulo: string;
+  texto: string;
+  fonte: string;
+  metadados?: {
+    numeroPropostaPublica?: string;
+    artigos?: string[];
+    keywords?: string[];
+  };
+  classification?: {
+    success: boolean;
+    titulo: string;
+    descricao: string;
+    categoria: string;
+    cursos: string[];
+    tags: string[];
+    confianca: number;
+    raciocinio: string;
+  };
+}
+
+interface ParseResult {
+  success: boolean;
+  fonte: string;
+  totalEnunciados: number;
+  enunciados: Enunciado[];
+}
 
 export default function EnunciadosImportPage() {
-  const [file, setFile] = useState<File | null>(null);
-  const [entityType, setEntityType] = useState<string>('');
-  const [courseId, setCourseId] = useState<string>('');
-  const [isProcessing, setIsProcessing] = useState(false);
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [isParsing, setIsParsing] = useState(false);
+  const [parseResult, setParseResult] = useState<ParseResult | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const [success, setSuccess] = useState<boolean>(false);
-  const [documentId, setDocumentId] = useState<string | null>(null);
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const selectedFile = e.target.files?.[0];
-    if (selectedFile) {
-      setFile(selectedFile);
+  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      if (file.type !== 'application/pdf') {
+        setError('Apenas arquivos PDF são suportados');
+        return;
+      }
+      setSelectedFile(file);
       setError(null);
-      setSuccess(false);
+      setParseResult(null);
     }
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-
-    if (!file || !entityType || !courseId) {
-      setError('Por favor, preencha todos os campos obrigatórios');
-      return;
-    }
-
-    setIsProcessing(true);
-    setError(null);
-    setSuccess(false);
+  const handleParsePDF = async () => {
+    if (!selectedFile) return;
 
     try {
-      const formData = new FormData();
-      formData.append('file', file);
-      formData.append('entityType', entityType);
-      formData.append('courseId', courseId);
+      setIsParsing(true);
+      setError(null);
 
-      const response = await fetch('/api/admin/enunciados/import', {
+      const formData = new FormData();
+      formData.append('file', selectedFile);
+      formData.append('autoClassify', 'true'); // Classifica automaticamente
+
+      const response = await fetch('/api/admin/enunciados-import/parse', {
         method: 'POST',
         body: formData,
       });
 
       if (!response.ok) {
         const data = await response.json();
-        throw new Error(data.error || 'Erro ao processar enunciado');
+        throw new Error(data.error || 'Erro ao processar PDF');
       }
 
       const data = await response.json();
-      setDocumentId(data.documentId);
-      setSuccess(true);
+      setParseResult(data);
 
-      // Limpa o formulário
-      setFile(null);
-      setEntityType('');
-      setCourseId('');
-
-      alert('✅ Enunciado importado com sucesso! Você pode editar os detalhes agora.');
     } catch (err) {
-      console.error('Erro ao importar:', err);
       setError(err instanceof Error ? err.message : 'Erro desconhecido');
     } finally {
-      setIsProcessing(false);
+      setIsParsing(false);
     }
   };
 
