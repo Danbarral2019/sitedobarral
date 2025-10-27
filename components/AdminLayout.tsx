@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { usePathname } from 'next/navigation';
 import Link from 'next/link';
 import {
-  QrCode, FileSpreadsheet, ChevronLeft, ChevronRight, BarChart3, Mail, MessageSquare, Send, GraduationCap, Youtube, Globe
+  QrCode, ChevronLeft, ChevronRight, BarChart3, Mail, MessageSquare, Send, GraduationCap, Youtube, Globe
 } from 'lucide-react';
 
 interface AdminLayoutProps {

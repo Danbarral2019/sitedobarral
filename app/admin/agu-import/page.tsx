@@ -1,7 +1,6 @@
 'use client';
 
 import { useState } from 'react';
-import { useRouter } from 'next/navigation';
 import { Download, Upload, Loader2, CheckCircle, AlertCircle, FileText, ExternalLink } from 'lucide-react';
 import AdminLayout from '@/components/AdminLayout';
 import { useToast } from '@/hooks/use-toast';
