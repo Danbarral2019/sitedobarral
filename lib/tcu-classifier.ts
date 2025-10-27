@@ -65,16 +65,24 @@ export async function classifyTCUAcordao(
   try {
     // Verifica se a API key está configurada
     const apiKey = process.env.ANTHROPIC_API_KEY;
-    console.log('[TCU Classifier] Verificando API key:', apiKey ? `Presente (${apiKey.substring(0, 15)}...)` : 'AUSENTE');
+    console.log('[TCU Classifier] 🔍 Ambiente:', {
+      nodeEnv: process.env.NODE_ENV,
+      hasApiKey: !!apiKey,
+      apiKeyPrefix: apiKey ? apiKey.substring(0, 15) : 'N/A',
+      runtime: typeof window === 'undefined' ? 'Server' : 'Client'
+    });
 
     if (!apiKey) {
       console.warn('[TCU Classifier] ⚠️ ANTHROPIC_API_KEY não configurada. Usando classificação baseada em regras.');
+      console.warn('[TCU Classifier] 💡 Verifique se a variável está configurada no Vercel (Environment Variables)');
       return classifyWithRules(input);
     }
 
+    console.log('[TCU Classifier] ✅ API key válida, iniciando cliente Anthropic...');
+
     // Inicializa cliente Anthropic
     const anthropic = new Anthropic({
-      apiKey: process.env.ANTHROPIC_API_KEY,
+      apiKey: apiKey,
     });
 
     // Constrói o prompt com TODOS os dados disponíveis
