@@ -50,24 +50,38 @@ export const POST = withAdminAuth(async (request: NextRequest) => {
 
     console.log(`[Enunciados Import] ${parseResult.totalEnunciados} enunciados extraídos`);
 
-    // Classifica automaticamente se solicitado
+    // Classifica automaticamente se solicitado (em lotes para evitar timeout)
     let enunciadosClassificados = parseResult.enunciados;
 
     if (autoClassify && parseResult.enunciados.length > 0) {
       console.log(`[Enunciados Import] Iniciando classificação IA de ${parseResult.enunciados.length} enunciados`);
 
-      const classificacoes = await Promise.all(
-        parseResult.enunciados.map(async (enunciado) => {
-          const classification = await classifyEnunciado(enunciado);
-          return {
-            ...enunciado,
-            classification,
-          };
-        })
-      );
+      const classificacoes = [];
+
+      // Processa em lotes de 3 enunciados para evitar timeout
+      const BATCH_SIZE = 3;
+      const DELAY_MS = 500; // 0.5 segundos entre enunciados
+
+      for (let i = 0; i < parseResult.enunciados.length; i++) {
+        const enunciado = parseResult.enunciados[i];
+
+        console.log(`[Enunciados Import] Classificando ${i + 1}/${parseResult.enunciados.length}: ${enunciado.titulo}`);
+
+        const classification = await classifyEnunciado(enunciado);
+
+        classificacoes.push({
+          ...enunciado,
+          classification,
+        });
+
+        // Aguarda antes do próximo (exceto no último)
+        if (i < parseResult.enunciados.length - 1) {
+          await new Promise(resolve => setTimeout(resolve, DELAY_MS));
+        }
+      }
 
       enunciadosClassificados = classificacoes;
-      console.log(`[Enunciados Import] Classificação concluída`);
+      console.log(`[Enunciados Import] Classificação concluída: ${classificacoes.length} enunciados`);
     }
 
     return NextResponse.json({
