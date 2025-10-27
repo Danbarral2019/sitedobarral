@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { withAdminAuth } from '@/lib/api-middleware';
-import { ensureConnection } from '@/lib/prisma';
+import { prisma } from '@/lib/prisma';
 import * as xlsx from 'xlsx';
+import type { PrismaClient } from '@prisma/client';
 
 /**
  * Remove códigos HTML e tags de links dos textos da planilha TCU
@@ -61,7 +62,7 @@ function extractAcordaoInfo(title: string): { numero: string; ano: string } | nu
 /**
  * Busca duplicatas no banco de dados
  */
-async function findDuplicates(prisma: Awaited<ReturnType<typeof ensureConnection>>, titulo: string) {
+async function findDuplicates(prisma: PrismaClient, titulo: string) {
   const info = extractAcordaoInfo(titulo);
 
   if (!info) {
@@ -104,8 +105,6 @@ async function findDuplicates(prisma: Awaited<ReturnType<typeof ensureConnection
  */
 export const POST = withAdminAuth(async (request: NextRequest) => {
   try {
-    const prisma = await ensureConnection();
-
     const formData = await request.formData();
     const file = formData.get('file') as File;
     const sourceType = formData.get('sourceType') as string || 'tcu'; // 'tcu' ou 'custom'

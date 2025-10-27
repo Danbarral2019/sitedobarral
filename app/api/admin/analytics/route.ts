@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { ensureConnection } from '@/lib/prisma';
+import { prisma } from '@/lib/prisma';
 import { withAdminAuth } from '@/lib/api-middleware';
 
 
@@ -9,8 +9,6 @@ import { withAdminAuth } from '@/lib/api-middleware';
  */
 export const GET = withAdminAuth(async () => {
   try {
-    // Ensure Prisma is connected before any query
-    const prisma = await ensureConnection();
 
     // 1. Estatísticas de Usuários
     const totalUsers = await prisma.user.count();

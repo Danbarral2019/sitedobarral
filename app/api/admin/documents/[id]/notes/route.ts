@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { withAdminAuth } from '@/lib/api-middleware';
-import { ensureConnection } from '@/lib/prisma';
+import { prisma } from '@/lib/prisma';
 
 /**
  * GET /api/admin/documents/[id]/notes
@@ -11,7 +11,6 @@ export const GET = withAdminAuth(async (
   { params }: { params: Promise<{ id: string }> }
 ) => {
   try {
-    const prisma = await ensureConnection();
     const { id } = await params;
 
     const document = await prisma.document.findUnique({
@@ -84,7 +83,6 @@ export const PUT = withAdminAuth(async (
   { params }: { params: Promise<{ id: string }> }
 ) => {
   try {
-    const prisma = await ensureConnection();
     const { id } = await params;
 
     const body = await request.json();
@@ -166,7 +164,6 @@ export const DELETE = withAdminAuth(async (
   { params }: { params: Promise<{ id: string }> }
 ) => {
   try {
-    const prisma = await ensureConnection();
     const { id } = await params;
 
     await prisma.document.update({

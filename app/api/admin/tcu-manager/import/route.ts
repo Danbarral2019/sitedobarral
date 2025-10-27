@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { withAdminAuth } from '@/lib/api-middleware';
-import { ensureConnection } from '@/lib/prisma';
+import { prisma } from '@/lib/prisma';
 import { courses } from '@/data/courses';
 
 interface DocumentToImport {
@@ -53,8 +53,6 @@ interface DocumentToImport {
  */
 export const POST = withAdminAuth(async (request: NextRequest) => {
   try {
-    const prisma = await ensureConnection();
-
     const body = await request.json();
     const { documents } = body as { documents: DocumentToImport[] };
 
