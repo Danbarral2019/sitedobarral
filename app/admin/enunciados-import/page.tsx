@@ -171,7 +171,7 @@ export default function EnunciadosImportPage() {
   };
 
   // Salvar edições de um enunciado
-  const saveEdit = (numero: number) => {
+  const saveEdit = () => {
     setEditingEnunciado(null);
   };
 
@@ -268,6 +268,7 @@ export default function EnunciadosImportPage() {
 
             {selectedFile && (
               <button
+                type="button"
                 onClick={handleExtract}
                 disabled={isProcessing}
                 className="mt-6 w-full px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors flex items-center justify-center gap-2"
@@ -315,6 +316,7 @@ export default function EnunciadosImportPage() {
             {/* Selection Controls */}
             <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 flex justify-between items-center">
               <button
+                type="button"
                 onClick={toggleSelectAll}
                 className="text-sm text-blue-600 hover:text-blue-800 font-medium"
               >
@@ -324,6 +326,7 @@ export default function EnunciadosImportPage() {
               </button>
 
               <button
+                type="button"
                 onClick={handleImport}
                 disabled={isImporting || selectedEnunciados.size === 0}
                 className="px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors flex items-center gap-2"
@@ -361,9 +364,11 @@ export default function EnunciadosImportPage() {
                       <div className="flex items-start gap-3">
                         <input
                           type="checkbox"
+                          id={`enunciado-checkbox-${enunciado.numero}`}
                           checked={isSelected}
                           onChange={() => toggleEnunciado(enunciado.numero)}
                           className="mt-1 w-5 h-5 text-blue-600 rounded"
+                          aria-label={`Selecionar enunciado ${enunciado.numero}`}
                         />
 
                         <div className="flex-1">
@@ -371,10 +376,11 @@ export default function EnunciadosImportPage() {
                             // Modo de Edição
                             <div className="space-y-3">
                               <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">
+                                <label htmlFor={`title-${enunciado.numero}`} className="block text-sm font-medium text-gray-700 mb-1">
                                   Título
                                 </label>
                                 <input
+                                  id={`title-${enunciado.numero}`}
                                   type="text"
                                   value={enunciado.editedTitle || enunciado.classification?.titulo || enunciado.titulo}
                                   onChange={(e) => updateEnunciado(enunciado.numero, { editedTitle: e.target.value })}
@@ -382,10 +388,11 @@ export default function EnunciadosImportPage() {
                                 />
                               </div>
                               <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">
+                                <label htmlFor={`description-${enunciado.numero}`} className="block text-sm font-medium text-gray-700 mb-1">
                                   Descrição
                                 </label>
                                 <textarea
+                                  id={`description-${enunciado.numero}`}
                                   value={enunciado.editedDescription || enunciado.classification?.descricao || enunciado.texto.substring(0, 200)}
                                   onChange={(e) => updateEnunciado(enunciado.numero, { editedDescription: e.target.value })}
                                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
@@ -393,10 +400,11 @@ export default function EnunciadosImportPage() {
                                 />
                               </div>
                               <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">
+                                <label htmlFor={`category-${enunciado.numero}`} className="block text-sm font-medium text-gray-700 mb-1">
                                   Categoria
                                 </label>
                                 <select
+                                  id={`category-${enunciado.numero}`}
                                   value={enunciado.editedCategory || enunciado.classification?.categoria || 'enunciado'}
                                   onChange={(e) => updateEnunciado(enunciado.numero, { editedCategory: e.target.value })}
                                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
@@ -409,10 +417,11 @@ export default function EnunciadosImportPage() {
                                 </select>
                               </div>
                               <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">
+                                <label htmlFor={`courses-${enunciado.numero}`} className="block text-sm font-medium text-gray-700 mb-1">
                                   Cursos (segure Ctrl para múltipla seleção)
                                 </label>
                                 <select
+                                  id={`courses-${enunciado.numero}`}
                                   multiple
                                   value={enunciado.editedCourses || enunciado.classification?.cursos || ['1']}
                                   onChange={(e) => {
@@ -431,13 +440,15 @@ export default function EnunciadosImportPage() {
                               </div>
                               <div className="flex gap-2">
                                 <button
-                                  onClick={() => saveEdit(enunciado.numero)}
+                                  type="button"
+                                  onClick={saveEdit}
                                   className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 flex items-center gap-2"
                                 >
                                   <Save className="w-4 h-4" />
                                   Salvar
                                 </button>
                                 <button
+                                  type="button"
                                   onClick={cancelEdit}
                                   className="px-4 py-2 bg-gray-300 text-gray-700 rounded-lg hover:bg-gray-400"
                                 >
@@ -480,16 +491,20 @@ export default function EnunciadosImportPage() {
                         {!isEditing && (
                           <div className="flex gap-2">
                             <button
+                              type="button"
                               onClick={() => setEditingEnunciado(enunciado.numero)}
                               className="text-blue-600 hover:text-blue-800 p-2"
                               title="Editar"
+                              aria-label="Editar enunciado"
                             >
                               <Edit className="w-5 h-5" />
                             </button>
                             <button
+                              type="button"
                               onClick={() => setExpandedEnunciado(isExpanded ? null : enunciado.numero)}
                               className="text-blue-600 hover:text-blue-800 p-2"
                               title="Ver detalhes"
+                              aria-label={isExpanded ? "Ocultar detalhes" : "Ver detalhes"}
                             >
                               {isExpanded ? <X className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
                             </button>

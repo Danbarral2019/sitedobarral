@@ -75,7 +75,8 @@
       "Bash(test:*)",
       "Bash(echo $ANTHROPIC_API_KEY)",
       "Read(//c/Users/Administrador/Downloads/**)",
-      "Bash(find:*)"
+      "Bash(find:*)",
+      "mcp__ide__getDiagnostics"
     ],
     "deny": [],
     "ask": []
