@@ -22,7 +22,7 @@ import DocumentAnalyzer from '@/components/DocumentAnalyzer';
 import BatchClassifyPanel from '@/components/BatchClassifyPanel';
 import DocumentNotesEditor from '@/components/DocumentNotesEditor';
 
-type DocumentCategory = 'apostila' | 'acordao' | 'parecer' | 'edital' | 'artigo' | 'orientacao-normativa' | 'enunciados' | 'outro';
+type DocumentCategory = 'apostila' | 'acordao' | 'parecer' | 'edital' | 'artigo' | 'orientacao-normativa' | 'enunciados' | 'sumula' | 'outro';
 
 interface UploadResponse {
   success: boolean;
@@ -96,8 +96,6 @@ export default function DocumentosPage() {
     leiArticles: string[];
     entityType?: string;
     enunciadoNumber?: string;
-    documentType?: 'enunciado' | 'sumula';
-    institution?: 'IBDA' | 'INCP' | 'CJF' | 'outro';
     textContent?: string;
     notes?: string;
   }>({
@@ -110,8 +108,6 @@ export default function DocumentosPage() {
     leiArticles: [],
     entityType: undefined,
     enunciadoNumber: undefined,
-    documentType: 'enunciado',
-    institution: 'IBDA',
     textContent: '',
     notes: '',
   });
@@ -240,8 +236,8 @@ export default function DocumentosPage() {
         formDataToSend.append('tags', formData.tags);
         formDataToSend.append('leiArticles', JSON.stringify(formData.leiArticles));
 
-        // Campos específicos para enunciados
-        if (formData.category === 'enunciados') {
+        // Campos específicos para enunciados e súmulas
+        if (formData.category === 'enunciados' || formData.category === 'sumula') {
           if (formData.entityType) {
             formDataToSend.append('entityType', formData.entityType);
           }
@@ -423,8 +419,8 @@ export default function DocumentosPage() {
           isPublic: formData.isPublic,
           tags: formData.tags,
           leiArticles: formData.leiArticles,
-          documentType: formData.documentType,
-          institution: formData.institution,
+          entityType: formData.entityType,
+          enunciadoNumber: formData.enunciadoNumber,
           textContent: formData.textContent,
           notes: formData.notes,
         }),
@@ -449,8 +445,6 @@ export default function DocumentosPage() {
         leiArticles: [],
         entityType: undefined,
         enunciadoNumber: undefined,
-        documentType: 'enunciado',
-        institution: 'IBDA',
         textContent: '',
         notes: '',
       });
@@ -486,8 +480,8 @@ export default function DocumentosPage() {
       formDataToSend.append('tags', formData.tags);
       formDataToSend.append('leiArticles', JSON.stringify(formData.leiArticles));
 
-      // Campos específicos para enunciados
-      if (formData.category === 'enunciados') {
+      // Campos específicos para enunciados e súmulas
+      if (formData.category === 'enunciados' || formData.category === 'sumula') {
         if (formData.entityType) {
           formDataToSend.append('entityType', formData.entityType);
         }
@@ -795,14 +789,15 @@ export default function DocumentosPage() {
                       <option value="parecer">Parecer</option>
                       <option value="orientacao-normativa">Orientação Normativa (AGU)</option>
                       <option value="enunciados">Enunciados</option>
+                      <option value="sumula">Súmula</option>
                       <option value="edital">Edital</option>
                       <option value="artigo">Artigo</option>
                       <option value="outro">Outro</option>
                     </select>
                   </div>
 
-                  {/* Campos específicos para Enunciados */}
-                  {formData.category === 'enunciados' && (
+                  {/* Campos específicos para Enunciados e Súmulas */}
+                  {(formData.category === 'enunciados' || formData.category === 'sumula') && (
                     <>
                       <div>
                         <label className="block text-sm font-semibold text-gray-900 mb-2">
@@ -823,7 +818,7 @@ export default function DocumentosPage() {
 
                       <div>
                         <label className="block text-sm font-semibold text-gray-900 mb-2">
-                          Número do Enunciado (Opcional)
+                          Número (Opcional)
                         </label>
                         <input
                           type="text"
@@ -869,52 +864,18 @@ export default function DocumentosPage() {
                     <div className="space-y-4 border-2 border-dashed border-green-300 rounded-lg p-4 bg-green-50">
                       <div className="flex items-center gap-2 mb-2">
                         <FileText className="w-5 h-5 text-green-600" />
-                        <h3 className="font-semibold text-green-900">Criação Manual de Enunciado/Súmula</h3>
-                      </div>
-
-                      <div className="grid grid-cols-2 gap-4">
-                        <div>
-                          <label className="block text-sm font-semibold text-gray-900 mb-2">
-                            Tipo *
-                          </label>
-                          <select
-                            value={formData.documentType}
-                            onChange={(e) => setFormData({ ...formData, documentType: e.target.value as 'enunciado' | 'sumula' })}
-                            required
-                            className="w-full px-3 py-2 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-600 text-gray-900"
-                          >
-                            <option value="enunciado">Enunciado</option>
-                            <option value="sumula">Súmula</option>
-                          </select>
-                        </div>
-
-                        <div>
-                          <label className="block text-sm font-semibold text-gray-900 mb-2">
-                            Instituição *
-                          </label>
-                          <select
-                            value={formData.institution}
-                            onChange={(e) => setFormData({ ...formData, institution: e.target.value as 'IBDA' | 'INCP' | 'CJF' | 'outro' })}
-                            required
-                            className="w-full px-3 py-2 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-600 text-gray-900"
-                          >
-                            <option value="IBDA">IBDA</option>
-                            <option value="INCP">INCP</option>
-                            <option value="CJF">CJF</option>
-                            <option value="outro">Outro</option>
-                          </select>
-                        </div>
+                        <h3 className="font-semibold text-green-900">Criação Manual (sem arquivo)</h3>
                       </div>
 
                       <div>
                         <label className="block text-sm font-semibold text-gray-900 mb-2">
-                          Texto do {formData.documentType || 'Enunciado'} *
+                          Texto Completo *
                         </label>
                         <textarea
                           value={formData.textContent}
                           onChange={(e) => setFormData({ ...formData, textContent: e.target.value })}
                           required
-                          placeholder="Digite o texto completo do enunciado ou súmula..."
+                          placeholder="Digite o texto completo do documento..."
                           rows={6}
                           className="w-full px-3 py-2 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-600 text-gray-900"
                         />
@@ -922,7 +883,7 @@ export default function DocumentosPage() {
 
                       <div>
                         <label className="block text-sm font-semibold text-gray-900 mb-2">
-                          Observações
+                          Observações Adicionais
                         </label>
                         <textarea
                           value={formData.notes}
@@ -932,6 +893,14 @@ export default function DocumentosPage() {
                           className="w-full px-3 py-2 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-600 text-gray-900"
                         />
                       </div>
+
+                      <p className="text-xs text-gray-600 flex items-start gap-1">
+                        <Info className="w-3 h-3 mt-0.5 flex-shrink-0" />
+                        <span>
+                          Use os campos acima (Categoria, Entidade, Número) para informações estruturadas.
+                          O texto completo e observações serão salvos no campo de notas do documento.
+                        </span>
+                      </p>
                     </div>
                   )}
 

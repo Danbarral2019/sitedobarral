@@ -18,8 +18,8 @@ export const POST = withAdminAuth(async (request: NextRequest) => {
       isPublic,
       tags,
       leiArticles,
-      documentType, // 'enunciado' ou 'sumula'
-      institution, // 'IBDA', 'INCP', 'CJF', 'outro'
+      entityType,
+      enunciadoNumber,
       textContent,
       notes,
     } = body;
@@ -42,14 +42,15 @@ export const POST = withAdminAuth(async (request: NextRequest) => {
     console.log('[Create Manual] Criando documento:', {
       courseId,
       title,
-      documentType,
-      institution,
+      category,
+      entityType,
+      enunciadoNumber,
     });
 
     // Montar notas com informações estruturadas
     const notesContent = [
-      `Tipo: ${documentType === 'sumula' ? 'Súmula' : 'Enunciado'}`,
-      `Instituição: ${institution}`,
+      entityType ? `Instituição: ${entityType}` : null,
+      enunciadoNumber ? `Número: ${enunciadoNumber}` : null,
       ``,
       `Texto Completo:`,
       textContent,
@@ -63,15 +64,16 @@ export const POST = withAdminAuth(async (request: NextRequest) => {
       data: {
         title,
         description: description || textContent.substring(0, 200),
-        type: 'link', // Enunciados/súmulas são tipo 'link'
+        type: 'link', // Documentos manuais são tipo 'link'
         url: '', // Sem URL, conteúdo está nas notes
-        category: category || 'enunciados',
+        category: category || 'apostila',
         courseId,
         isPublic: isPublic || false,
-        tags: tags || JSON.stringify([institution.toLowerCase(), documentType]),
+        tags: tags || JSON.stringify([entityType?.toLowerCase(), category].filter(Boolean)),
         leiArticles: leiArticles ? JSON.stringify(leiArticles) : null,
         notes: notesContent,
-        entityType: institution,
+        entityType: entityType || null,
+        enunciadoNumber: enunciadoNumber || null,
         uploadedAt: new Date(),
       },
     });
