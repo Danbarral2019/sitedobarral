@@ -65,7 +65,13 @@
       "Bash(netstat:*)",
       "Bash(findstr:*)",
       "Bash(if exist .next rmdir /s /q .next)",
-      "Bash(timeout:*)"
+      "Bash(timeout:*)",
+      "Bash(npx xlsx:*)",
+      "Bash(python scripts/convert-xls-to-xlsx.py:*)",
+      "Bash(where:*)",
+      "Bash(cscript //Nologo scriptsconvert-xls-excel.vbs \"C:\\Users\\Administrador\\Downloads\\pesquisaExportada (4).xls\")",
+      "Bash(cscript:*)",
+      "Bash(npm uninstall:*)"
     ],
     "deny": [],
     "ask": []

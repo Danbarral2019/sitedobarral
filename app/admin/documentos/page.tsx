@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import {
   Upload, FileText, Loader2, Trash2,
   Eye, EyeOff, File, Search, Filter, X,
-  Download, FolderUp, CheckSquare, Square, Edit2
+  Download, FolderUp, CheckSquare, Square, Edit2, StickyNote
 } from 'lucide-react';
 import { courses } from '@/data/courses';
 import { useToast } from '@/hooks/use-toast';
@@ -20,6 +20,7 @@ import AdminLayout from '@/components/AdminLayout';
 import LeiArticleSelector from '@/components/LeiArticleSelector';
 import DocumentAnalyzer from '@/components/DocumentAnalyzer';
 import BatchClassifyPanel from '@/components/BatchClassifyPanel';
+import DocumentNotesEditor from '@/components/DocumentNotesEditor';
 
 type DocumentCategory = 'apostila' | 'acordao' | 'parecer' | 'edital' | 'artigo' | 'orientacao-normativa' | 'enunciados' | 'outro';
 
@@ -61,6 +62,8 @@ export default function DocumentosPage() {
   const [documentToDelete, setDocumentToDelete] = useState<string | null>(null);
   const [previewOpen, setPreviewOpen] = useState(false);
   const [documentToPreview, setDocumentToPreview] = useState<Document | null>(null);
+  const [notesEditorOpen, setNotesEditorOpen] = useState(false);
+  const [documentToEditNotes, setDocumentToEditNotes] = useState<Document | null>(null);
 
   // Filtros e busca
   const [searchTerm, setSearchTerm] = useState('');
@@ -1126,6 +1129,17 @@ export default function DocumentosPage() {
                                     Novo
                                   </span>
                                 )}
+                                {/* Badge de entidade (para enunciados) */}
+                                {doc.category === 'enunciados' && doc.entityType && (
+                                  <span className={`px-2 py-1 text-xs font-bold rounded-full ${
+                                    doc.entityType === 'IBDA' ? 'bg-purple-100 text-purple-800' :
+                                    doc.entityType === 'INCP' ? 'bg-indigo-100 text-indigo-800' :
+                                    doc.entityType === 'CJF' ? 'bg-cyan-100 text-cyan-800' :
+                                    'bg-gray-100 text-gray-800'
+                                  }`}>
+                                    {doc.entityType}
+                                  </span>
+                                )}
                               </div>
                               <p className="text-sm text-gray-700 font-medium">{course?.title}</p>
                               {doc.description && (
@@ -1140,6 +1154,16 @@ export default function DocumentosPage() {
                                 title="Visualizar"
                               >
                                 <Search className="w-5 h-5" />
+                              </button>
+                              <button
+                                onClick={() => {
+                                  setDocumentToEditNotes(doc);
+                                  setNotesEditorOpen(true);
+                                }}
+                                className="text-purple-600 hover:text-purple-700 hover:bg-purple-50 p-2 rounded-lg transition-colors"
+                                title="Observações"
+                              >
+                                <StickyNote className="w-5 h-5" />
                               </button>
                               <button
                                 onClick={() => router.push(`/admin/documentos/${doc.id}/edit`)}
@@ -1223,6 +1247,21 @@ export default function DocumentosPage() {
         variant="danger"
         isLoading={isDeleting}
       />
+
+      {/* Editor de Observações */}
+      {notesEditorOpen && documentToEditNotes && (
+        <DocumentNotesEditor
+          documentId={documentToEditNotes.id}
+          documentTitle={documentToEditNotes.title}
+          onClose={() => {
+            setNotesEditorOpen(false);
+            setDocumentToEditNotes(null);
+          }}
+          onSaved={() => {
+            loadDocuments(); // Recarrega a lista de documentos
+          }}
+        />
+      )}
     </AdminLayout>
   );
 }

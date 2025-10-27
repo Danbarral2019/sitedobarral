@@ -28,6 +28,13 @@ interface AnalyticsData {
     public: number;
     private: number;
   };
+  enunciados: {
+    total: number;
+    byEntity: Array<{
+      entityType: string;
+      count: number;
+    }>;
+  };
   topDocuments: Array<{
     id: string;
     title: string;
@@ -271,6 +278,41 @@ export default function AnalyticsDashboard() {
             <div className="text-2xl font-bold text-gray-900">{data.newsletter.total}</div>
           </div>
         </div>
+
+        {/* Card de Enunciados */}
+        {data.enunciados && data.enunciados.total > 0 && (
+          <div className="mb-8">
+            <div className="bg-white rounded-xl p-6 shadow-md border-2 border-indigo-200">
+              <div className="flex items-center gap-3 mb-4">
+                <div className="w-10 h-10 bg-indigo-100 rounded-lg flex items-center justify-center">
+                  <FileText className="w-5 h-5 text-indigo-600" />
+                </div>
+                <div>
+                  <h3 className="font-bold text-gray-900">Enunciados</h3>
+                  <p className="text-sm text-gray-600">Distribuição por entidade</p>
+                </div>
+              </div>
+              <div className="flex items-center gap-6">
+                <div className="text-3xl font-bold text-indigo-600">{data.enunciados.total}</div>
+                <div className="flex gap-3 flex-wrap">
+                  {data.enunciados.byEntity.map((entity) => (
+                    <span
+                      key={entity.entityType}
+                      className={`px-3 py-1 text-sm font-bold rounded-full ${
+                        entity.entityType === 'IBDA' ? 'bg-purple-100 text-purple-800' :
+                        entity.entityType === 'INCP' ? 'bg-indigo-100 text-indigo-800' :
+                        entity.entityType === 'CJF' ? 'bg-cyan-100 text-cyan-800' :
+                        'bg-gray-100 text-gray-800'
+                      }`}
+                    >
+                      {entity.entityType}: {entity.count}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* Seções de Listas */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">

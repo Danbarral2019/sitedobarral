@@ -71,6 +71,16 @@ model Document {
   entityType          String?   // Entidade responsável: "IBDA", "INCP", "CJF" (apenas para categoria="enunciados")
   enunciadoNumber     String?   // Número do enunciado (formato flexível: "123", "123/2024", ou texto livre)
 
+  // Sistema de Observações Estruturadas (para acórdãos e outros documentos)
+  adminNotes          String?   // Observações privadas do admin (não visíveis aos alunos)
+  publicNotes         String?   // Observações públicas (visíveis aos alunos)
+  notesImportance     String?   // 'baixa' | 'media' | 'alta' | 'critica'
+  notesRelatedDocs    String?   // JSON array com IDs de documentos relacionados
+  notesPracticalUse   String?   // Aplicação prática do documento
+  notesKeyPoints      String?   // Pontos-chave para destacar
+  notesUpdatedAt      DateTime? // Data da última atualização das observações
+  notesUpdatedBy      String?   // Email do admin que atualizou
+
   @@index([courseId])
   @@index([category])
   @@index([courseId, isPublic])
@@ -86,6 +96,9 @@ model Document {
   @@index([summaryGeneratedAt]) // Índice para ordenar por data de geração de resumo
   @@index([entityType]) // Índice para filtrar enunciados por entidade
   @@index([category, entityType]) // Índice composto para filtrar enunciados
+  @@index([title]) // Índice para busca rápida por título/número do acórdão (detecção de duplicatas)
+  @@index([category, title]) // Índice composto para busca de acórdãos específicos
+  @@index([notesImportance]) // Índice para filtrar por importância das observações
 }
 
 // Usuários (admin e estudantes)

@@ -58,6 +58,7 @@
     "dotenv": "^17.2.3",
     "eslint": "^9",
     "eslint-config-next": "15.5.2",
+    "read-excel-file": "^6.0.1",
     "tailwindcss": "^4",
     "tsx": "^4.20.6",
     "typescript": "^5"
