@@ -200,11 +200,14 @@ export const POST = withAdminAuth(async (request: NextRequest) => {
             continue;
           }
 
+          // Usa descrição customizada se fornecida, senão usa a original
+          const finalDescription = doc.customDescription || doc.description;
+
           // Cria documento
           const created = await addDocument(
             courseId,
             doc.title,
-            doc.description,
+            finalDescription,
             doc.type as 'pdf' | 'link',
             'acordao',
             true, // isPublic
@@ -214,7 +217,10 @@ export const POST = withAdminAuth(async (request: NextRequest) => {
             [], // leiArticles
             undefined, // alternativeUrls
             doc.acordaoNumero, // onNumber
-            doc.acordaoAno // onYear
+            doc.acordaoAno, // onYear
+            undefined, // entityType
+            undefined, // enunciadoNumber
+            doc.notes || undefined // notes
           );
 
           createdDocuments.push(created);

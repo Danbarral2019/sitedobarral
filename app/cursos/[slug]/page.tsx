@@ -231,7 +231,7 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ s
                 <div className="flex flex-wrap gap-4 mt-8">
                   <div className="bg-white/20 backdrop-blur-sm rounded-xl px-6 py-3 flex items-center gap-3">
                     <FileText className="w-5 h-5 text-white" />
-                    <span className="text-white font-semibold">{course.bibliography.length} Referências</span>
+                    <span className="text-white font-semibold">Material Completo</span>
                   </div>
                   <div className="bg-white/20 backdrop-blur-sm rounded-xl px-6 py-3 flex items-center gap-3">
                     <Clock className="w-5 h-5 text-white" />
@@ -320,22 +320,51 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ s
                   <div className="flex-1">
                     <h2 className="text-3xl font-bold text-gray-900">Bibliografia Recomendada</h2>
                     <p className="text-sm text-gray-600 mt-1">
-                      Material de referência sempre disponível publicamente
+                      Material de referência disponível em PDF para alunos matriculados
                     </p>
                   </div>
                 </div>
 
                 <div className={`${color.bg} p-6 rounded-xl border-l-4 ${color.border}`}>
-                  <ul className="space-y-4">
-                    {course.bibliography.map((item, index) => (
-                      <li key={index} className="flex items-start gap-3 group">
-                        <div className={`w-8 h-8 bg-gradient-to-br ${color.gradient} rounded-lg flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform`}>
-                          <span className="text-white text-sm font-bold">{index + 1}</span>
-                        </div>
-                        <span className="text-gray-800 leading-relaxed pt-1">{item}</span>
-                      </li>
-                    ))}
-                  </ul>
+                  <div className="flex items-start gap-4">
+                    <FileText className={`w-12 h-12 ${color.text} flex-shrink-0`} />
+                    <div>
+                      <h3 className="font-bold text-gray-900 text-lg mb-2">
+                        Bibliografia Completa em PDF
+                      </h3>
+                      <p className="text-gray-700 leading-relaxed mb-4">
+                        O material bibliográfico completo deste curso está disponível em formato PDF
+                        para download na área restrita dos alunos matriculados, incluindo:
+                      </p>
+                      <ul className="space-y-2 text-sm text-gray-700">
+                        <li className="flex items-center gap-2">
+                          <div className={`w-1.5 h-1.5 rounded-full bg-gradient-to-r ${color.gradient}`}></div>
+                          <span>Livros e doutrinas de referência</span>
+                        </li>
+                        <li className="flex items-center gap-2">
+                          <div className={`w-1.5 h-1.5 rounded-full bg-gradient-to-r ${color.gradient}`}></div>
+                          <span>Manuais e guias práticos</span>
+                        </li>
+                        <li className="flex items-center gap-2">
+                          <div className={`w-1.5 h-1.5 rounded-full bg-gradient-to-r ${color.gradient}`}></div>
+                          <span>Publicações técnicas especializadas</span>
+                        </li>
+                        <li className="flex items-center gap-2">
+                          <div className={`w-1.5 h-1.5 rounded-full bg-gradient-to-r ${color.gradient}`}></div>
+                          <span>Orientações normativas e legislação</span>
+                        </li>
+                      </ul>
+                      <div className="mt-6 pt-4 border-t border-gray-300">
+                        <Link
+                          href="/login"
+                          className={`inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r ${color.gradient} text-white rounded-xl font-semibold hover:shadow-lg transition-all`}
+                        >
+                          <Lock className="w-4 h-4" />
+                          Acessar Área Restrita
+                        </Link>
+                      </div>
+                    </div>
+                  </div>
                 </div>
               </div>
 
