@@ -90,9 +90,9 @@ export async function classifyTCUAcordao(
 
     console.log(`[TCU Classifier] Enviando para Claude API (${prompt.length} chars)...`);
 
-    // Chama a API do Claude
+    // Chama a API do Claude (usando modelo mais recente)
     const response = await anthropic.messages.create({
-      model: 'claude-3-5-sonnet-20241022',
+      model: 'claude-3-5-sonnet-20250219',
       max_tokens: 1500, // Reduzido para resposta mais rápida
       temperature: 0.3, // Baixa temperatura para respostas mais consistentes
       messages: [

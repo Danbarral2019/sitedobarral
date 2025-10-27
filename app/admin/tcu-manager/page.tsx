@@ -251,64 +251,21 @@ export default function TCUManagerPage() {
   const handleEnrichAndClassify = async (docs: ReviewDocument[]) => {
     if (docs.length === 0) return;
 
-    // Etapa 1: Enriquecimento
-    try {
-      setIsEnriching(true);
-      setEnrichmentProgress({ current: 0, total: docs.length });
+    // Pulando enriquecimento - vai direto para classificação
+    console.log('[TCU Manager] Pulando enriquecimento, indo direto para classificação IA');
 
-      const response = await fetch('/api/admin/tcu-manager/enrich', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          documents: docs.map(doc => ({
-            tcuData: doc.tcuData,
-            rowIndex: doc.rowIndex,
-          })),
-        }),
-      });
-
-      if (!response.ok) {
-        throw new Error('Erro no enriquecimento');
-      }
-
-      const enrichData = await response.json();
-
-      // Atualiza documentos com enriquecimento
-      setReviewDocuments(prev => {
-        const updated = [...prev];
-        enrichData.results.forEach((result: { rowIndex: number; enrichment: EnrichmentResult }) => {
-          const index = updated.findIndex(d => d.rowIndex === result.rowIndex);
-          if (index !== -1) {
-            updated[index].enrichment = result.enrichment;
-          }
-        });
-        return updated;
-      });
-
-      setEnrichmentProgress({ current: docs.length, total: docs.length });
-
-    } catch (err) {
-      console.error('Erro no enriquecimento:', err);
-      setError('Erro ao enriquecer documentos. Continuando sem enriquecimento.');
-    } finally {
-      setIsEnriching(false);
-    }
-
-    // Etapa 2: Classificação IA
+    // Classificação IA
     try {
       setIsClassifying(true);
       setClassificationProgress({ current: 0, total: docs.length });
-
-      // Pega documentos atualizados com enrichment
-      const docsWithEnrichment = reviewDocuments.length > 0 ? reviewDocuments : docs;
 
       const response = await fetch('/api/admin/tcu-manager/classify', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          documents: docsWithEnrichment.map(doc => ({
+          documents: docs.map(doc => ({
             tcuData: doc.tcuData,
-            enrichment: doc.enrichment,
+            enrichment: doc.enrichment, // Pode ser undefined, tudo bem
             rowIndex: doc.rowIndex,
           })),
         }),
