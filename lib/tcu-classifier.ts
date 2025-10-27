@@ -90,12 +90,11 @@ export async function classifyTCUAcordao(
 
     console.log(`[TCU Classifier] Enviando para Claude API (${prompt.length} chars)...`);
 
-    // Chama a API do Claude com timeout curto
+    // Chama a API do Claude
     const response = await anthropic.messages.create({
       model: 'claude-3-5-sonnet-20241022',
       max_tokens: 1500, // Reduzido para resposta mais rápida
       temperature: 0.3, // Baixa temperatura para respostas mais consistentes
-      timeout: 15000, // 15 segundos de timeout (reduzido de 60s)
       messages: [
         {
           role: 'user',
