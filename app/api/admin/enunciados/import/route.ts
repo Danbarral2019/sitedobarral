@@ -106,6 +106,51 @@ export const POST = withAdminAuth(async (request: NextRequest) => {
       createdDocuments.push(document);
     }
 
+    // Análise automática com IA para sugerir artigos da Lei 14.133
+    // (Apenas para o primeiro documento se houver múltiplos)
+    try {
+      const analyzeFormData = new FormData();
+      analyzeFormData.append('file', file);
+
+      const analyzeResponse = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'}/api/admin/analyze-document`, {
+        method: 'POST',
+        body: analyzeFormData,
+      });
+
+      if (analyzeResponse.ok) {
+        const analyzeData = await analyzeResponse.json();
+
+        if (analyzeData.success && analyzeData.suggestions && analyzeData.suggestions.length > 0) {
+          // Pega artigos com alta confiança (score >= 8 ou confidence = 'high')
+          const highConfidenceArticles = analyzeData.suggestions
+            .filter((s: { confidence: string; score: number }) =>
+              s.confidence === 'high' || s.score >= 8
+            )
+            .map((s: { articleNumber: string }) => s.articleNumber);
+
+          // Atualiza TODOS os documentos criados com os artigos sugeridos
+          if (highConfidenceArticles.length > 0) {
+            await Promise.all(
+              createdDocuments.map(doc =>
+                prisma.document.update({
+                  where: { id: doc.id },
+                  data: {
+                    leiArticles: JSON.stringify(highConfidenceArticles),
+                    aiSuggestedArticles: JSON.stringify(analyzeData.suggestions),
+                  },
+                })
+              )
+            );
+
+            console.log(`[Enunciados Import] ${highConfidenceArticles.length} artigos da Lei 14.133 sugeridos pela IA`);
+          }
+        }
+      }
+    } catch (error) {
+      // Não falha a importação se a análise falhar
+      console.error('[Enunciados Import] Erro ao analisar documento com IA:', error);
+    }
+
     console.log(`[Enunciados Import] ${createdDocuments.length} documento(s) criado(s) com sucesso`);
 
     return NextResponse.json({

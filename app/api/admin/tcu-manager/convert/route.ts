@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { withAdminAuth } from '@/lib/api-middleware';
 import * as xlsx from 'xlsx';
 
-// Mapeamento inteligente de Area/Tema para Cursos
+// Reutiliza a lógica do conversor TCU existente
 const CURSO_MAPPING: Record<string, string> = {
   'licitacao|licitacoes|pregao|edital|modalidade|registro de precos': 'nova-lei-licitacoes',
   'planejamento|etp|estudo tecnico|termo de referencia|projeto basico|analise de riscos': 'planejamento-contratacoes',
@@ -16,22 +16,6 @@ const CURSO_MAPPING: Record<string, string> = {
   'dispensa|inexigibilidade|contratacao direta|emergencia|notoria especializacao': 'contratacao-direta',
 };
 
-const CURSO_NAMES: Record<string, string> = {
-  'nova-lei-licitacoes': 'Nova Lei de Licitacoes',
-  'planejamento-contratacoes': 'Planejamento das Contratacoes',
-  'gestao-fiscalizacao-contratos': 'Gestao e Fiscalizacao de Contratos',
-  'processo-sancionador': 'Processo Sancionador',
-  'inovacao-contratacoes': 'Inovacao nas Contratacoes',
-  'terceirizacao-formacao-precos': 'Tercerizacao e Formacao de Precos',
-  'assessoramento-juridico': 'Assessoramento Juridico',
-  'revisao-reajuste-repactuacao': 'Revisao, Reajuste e Repactuacao',
-  'alteracoes-contratuais': 'Alteracoes Contratuais',
-  'contratacao-direta': 'Contratacao Direta',
-};
-
-/**
- * Identifica cursos relevantes baseado em area, tema e subtema
- */
 function identificarCursos(area: string, tema: string, subtema: string, enunciado: string): string[] {
   const cursos = new Set<string>();
   const textoCompleto = [area, tema, subtema, enunciado]
@@ -39,7 +23,7 @@ function identificarCursos(area: string, tema: string, subtema: string, enunciad
     .join(' ')
     .toLowerCase()
     .normalize('NFD')
-    .replace(/[\u0300-\u036f]/g, ''); // Remove acentos
+    .replace(/[\u0300-\u036f]/g, '');
 
   for (const [keywords, curso] of Object.entries(CURSO_MAPPING)) {
     const patterns = keywords.split('|');
@@ -51,7 +35,6 @@ function identificarCursos(area: string, tema: string, subtema: string, enunciad
     }
   }
 
-  // Se não encontrou nenhum curso, adiciona o padrão
   if (cursos.size === 0) {
     cursos.add('nova-lei-licitacoes');
   }
@@ -59,9 +42,6 @@ function identificarCursos(area: string, tema: string, subtema: string, enunciad
   return Array.from(cursos);
 }
 
-/**
- * Gera tags a partir dos metadados
- */
 function gerarTags(
   area: string,
   tema: string,
@@ -71,58 +51,39 @@ function gerarTags(
   outrosIndexadores: string
 ): string[] {
   const tags = new Set<string>();
-
-  // Sempre adiciona TCU
   tags.add('TCU');
   tags.add('Acordao');
 
-  // Adiciona area, tema, subtema
   if (area) tags.add(area.trim());
   if (tema) tags.add(tema.trim());
   if (subtema) tags.add(subtema.trim());
+  if (autorTese) tags.add(autorTese.trim());
 
-  // Adiciona autor da tese
-  if (autorTese) {
-    tags.add(autorTese.trim());
-  }
-
-  // Adiciona legislacao
   if (legislacao) {
-    const leis = legislacao.split(/[,;]/);
-    leis.forEach(lei => {
+    legislacao.split(/[,;]/).forEach(lei => {
       const leiTrim = lei.trim();
       if (leiTrim) tags.add(leiTrim);
     });
   }
 
-  // Adiciona outros indexadores
   if (outrosIndexadores) {
-    const indexadores = outrosIndexadores.split(/[,;]/);
-    indexadores.forEach(idx => {
+    outrosIndexadores.split(/[,;]/).forEach(idx => {
       const idxTrim = idx.trim();
       if (idxTrim) tags.add(idxTrim);
     });
   }
 
-  return Array.from(tags).slice(0, 15); // Máximo 15 tags
+  return Array.from(tags).slice(0, 15);
 }
 
-/**
- * Constroi URL do acordao no site do TCU
- */
 function construirUrlTCU(acordao: string): string {
-  const match = acordao.match(/(\d+)\/(\d{4})/);
-  if (!match) {
-    return '';
-  }
+  const match = acordao.match(/(\d+)\/(\d{2,4})/);
+  if (!match) return '';
 
   const [, numero, ano] = match;
   return `https://pesquisa.apps.tcu.gov.br/#/documento/acordao-completo/*/NUMACORDAO%253A${numero}%2520ANOACORDAO%253A${ano}`;
 }
 
-/**
- * Formata data do TCU
- */
 function formatarData(dataStr: string): string {
   if (!dataStr) return '';
 
@@ -135,9 +96,6 @@ function formatarData(dataStr: string): string {
   return dataStr;
 }
 
-/**
- * Converte linha do Excel do TCU
- */
 function converterLinha(row: Record<string, unknown>, index: number) {
   const enunciado = (row['Enunciado'] || row['enunciado'] || '') as string;
   const area = (row['Area'] || row['area'] || row['Área'] || '') as string;
@@ -150,19 +108,12 @@ function converterLinha(row: Record<string, unknown>, index: number) {
   const outrosIndexadores = (row['Outros indexadores'] || row['outros indexadores'] || '') as string;
   const tipoProcesso = (row['Tipo do processo'] || row['tipo do processo'] || '') as string;
 
-  // Identifica cursos relevantes
   const cursos = identificarCursos(area, tema, subtema, enunciado);
-
-  // Gera tags
   const tags = gerarTags(area, tema, subtema, autorTese, legislacao, outrosIndexadores);
-
-  // Constroi URL
   const url = construirUrlTCU(acordao);
 
-  // Formata titulo
   const titulo = acordao || `Acordao ${index + 1}`;
 
-  // Formata descricao
   let descricao = enunciado;
   if (tipoProcesso) {
     descricao += `\n\nTipo: ${tipoProcesso}`;
@@ -186,12 +137,11 @@ function converterLinha(row: Record<string, unknown>, index: number) {
 }
 
 /**
- * POST /api/admin/convert-tcu
- * Converte Excel do TCU para formato do sistema
+ * POST /api/admin/tcu-manager/convert
+ * Converte Excel do TCU para formato do sistema (retorna JSON em vez de arquivo)
  */
 export const POST = withAdminAuth(async (request: NextRequest) => {
   try {
-    // Pega o arquivo do form data
     const formData = await request.formData();
     const file = formData.get('file') as File;
 
@@ -202,49 +152,31 @@ export const POST = withAdminAuth(async (request: NextRequest) => {
       );
     }
 
-    console.log('[Convert TCU] Processando arquivo:', file.name);
+    console.log('[TCU Manager Convert] Processando arquivo:', file.name);
 
-    // Converte file para buffer
     const arrayBuffer = await file.arrayBuffer();
     const buffer = Buffer.from(arrayBuffer);
 
-    // Lê o Excel com configuração para arquivos antigos (.xls)
-    let workbook;
-    try {
-      // Tenta ler com suporte a arquivos .xls antigos (CFB)
-      workbook = xlsx.read(buffer, {
-        type: 'buffer',
-        cellDates: true,
-        cellNF: false,
-        cellText: false,
-      });
-    } catch (error) {
-      console.error('[Convert TCU] Erro ao ler arquivo:', error);
-      return NextResponse.json(
-        {
-          error: 'Erro ao ler arquivo. Por favor, converta o arquivo .xls para .xlsx no Excel/LibreOffice antes de importar.',
-          details: error instanceof Error ? error.message : String(error)
-        },
-        { status: 400 }
-      );
-    }
+    const workbook = xlsx.read(buffer, {
+      type: 'buffer',
+      cellDates: true,
+    });
+
     const sheetName = workbook.SheetNames[0];
     const worksheet = workbook.Sheets[sheetName];
 
-    // Converte para JSON
     let data = xlsx.utils.sheet_to_json(worksheet) as Record<string, unknown>[];
 
-    console.log(`[Convert TCU] Total de linhas: ${data.length}`);
-
-    // Limpar nomes de colunas (trim) e normalizar
+    // Limpar nomes de colunas (trim)
     data = data.map(row => {
       const cleanedRow: Record<string, unknown> = {};
       Object.entries(row).forEach(([key, value]) => {
-        const cleanKey = key.trim(); // Remove espaços extras
-        cleanedRow[cleanKey] = value;
+        cleanedRow[key.trim()] = value;
       });
       return cleanedRow;
     });
+
+    console.log(`[TCU Manager Convert] Total de linhas: ${data.length}`);
 
     if (data.length === 0) {
       return NextResponse.json(
@@ -253,10 +185,8 @@ export const POST = withAdminAuth(async (request: NextRequest) => {
       );
     }
 
-    // Converte linhas
     const linhasConvertidas = data.map((row, index) => converterLinha(row, index));
 
-    // Estatísticas
     const stats = {
       total: linhasConvertidas.length,
       porCurso: {} as Record<string, number>,
@@ -271,70 +201,21 @@ export const POST = withAdminAuth(async (request: NextRequest) => {
       });
     });
 
-    // Cria novo workbook
-    const newWorkbook = xlsx.utils.book_new();
+    console.log('[TCU Manager Convert] Conversão concluída. Stats:', stats);
 
-    // Aba 1: Instruções
-    const instrucoes = [
-      ['INSTRUCOES PARA IMPORTACAO'],
-      [''],
-      ['Este arquivo foi gerado automaticamente a partir do Excel do TCU.'],
-      [''],
-      ['PROXIMOS PASSOS:'],
-      ['1. Baixe este arquivo'],
-      ['2. Revise os dados na aba "Dados"'],
-      ['3. Importe em /admin/importar'],
-      [''],
-      ['COLUNAS:'],
-      ['- Titulo: Numero do acordao'],
-      ['- Descricao: Enunciado da tese'],
-      ['- Categoria: Sempre "acordao"'],
-      ['- Curso: Cursos identificados automaticamente'],
-      ['- Tags: Tags geradas dos metadados'],
-      ['- Publico: SIM (acordaos sao publicos)'],
-      ['- URL: Link para o acordao no site do TCU'],
-    ];
-    const wsInstrucoes = xlsx.utils.aoa_to_sheet(instrucoes);
-    xlsx.utils.book_append_sheet(newWorkbook, wsInstrucoes, 'Instrucoes');
-
-    // Aba 2: Dados
-    const wsDados = xlsx.utils.json_to_sheet(linhasConvertidas);
-    xlsx.utils.book_append_sheet(newWorkbook, wsDados, 'Dados');
-
-    // Aba 3: Estatísticas
-    const estatisticas = [
-      ['ESTATISTICAS DA CONVERSAO'],
-      [''],
-      ['Total de acordaos:', stats.total],
-      ['Com URL:', stats.comUrl],
-      ['Sem URL:', stats.semUrl],
-      [''],
-      ['DISTRIBUICAO POR CURSO:'],
-      ...Object.entries(stats.porCurso)
-        .sort((a, b) => b[1] - a[1])
-        .map(([curso, count]) => [CURSO_NAMES[curso] || curso, count]),
-    ];
-    const wsStats = xlsx.utils.aoa_to_sheet(estatisticas);
-    xlsx.utils.book_append_sheet(newWorkbook, wsStats, 'Estatisticas');
-
-    // Gera buffer do Excel convertido
-    const outputBuffer = xlsx.write(newWorkbook, { type: 'buffer', bookType: 'xlsx' });
-
-    console.log('[Convert TCU] Conversão concluída. Stats:', stats);
-
-    // Retorna o arquivo Excel
-    return new NextResponse(outputBuffer, {
-      status: 200,
-      headers: {
-        'Content-Type': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-        'Content-Disposition': `attachment; filename="TCU_Convertido_${new Date().toISOString().split('T')[0]}.xlsx"`,
-      },
+    return NextResponse.json({
+      success: true,
+      stats,
+      documents: linhasConvertidas,
     });
 
   } catch (error) {
-    console.error('[Convert TCU] Erro:', error);
+    console.error('[TCU Manager Convert] Erro:', error);
     return NextResponse.json(
-      { error: 'Erro ao converter arquivo. Verifique se o formato está correto.' },
+      {
+        error: 'Erro ao converter arquivo',
+        details: error instanceof Error ? error.message : String(error)
+      },
       { status: 500 }
     );
   }

@@ -50,6 +50,22 @@ export const GET = withAdminAuth(async () => {
       where: { isPublic: false },
     });
 
+    // 3.1. Estatísticas de Enunciados
+    const totalEnunciados = await prisma.document.count({
+      where: { category: 'enunciados' },
+    });
+
+    const enunciadosByEntity = await prisma.document.groupBy({
+      by: ['entityType'],
+      where: {
+        category: 'enunciados',
+        entityType: { not: null },
+      },
+      _count: {
+        id: true,
+      },
+    });
+
     // 4. Documentos mais acessados (últimos 30 dias)
     const thirtyDaysAgo = new Date();
     thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
@@ -304,6 +320,13 @@ export const GET = withAdminAuth(async () => {
         newsletter: {
           total: totalNewsletterSubscribers,
           active: activeNewsletterSubscribers,
+        },
+        enunciados: {
+          total: totalEnunciados,
+          byEntity: enunciadosByEntity.map(item => ({
+            entityType: item.entityType || 'Unknown',
+            count: item._count.id,
+          })),
         },
       },
     });
