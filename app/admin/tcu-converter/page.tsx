@@ -8,11 +8,6 @@ export default function TCUConverterPage() {
   const [file, setFile] = useState<File | null>(null);
   const [isConverting, setIsConverting] = useState(false);
   const [convertedFile, setConvertedFile] = useState<Blob | null>(null);
-  const [stats, setStats] = useState<{
-    total: number;
-    comUrl: number;
-    semUrl: number;
-  } | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -20,7 +15,6 @@ export default function TCUConverterPage() {
     if (selectedFile) {
       setFile(selectedFile);
       setConvertedFile(null);
-      setStats(null);
       setError(null);
     }
   };
@@ -51,14 +45,6 @@ export default function TCUConverterPage() {
       // Pega o blob do arquivo convertido
       const blob = await response.blob();
       setConvertedFile(blob);
-
-      // Estimativa de stats (já que o arquivo já foi gerado)
-      // Em uma implementação real, poderíamos retornar stats no header ou fazer 2 requests
-      setStats({
-        total: 0, // Não temos essa info no blob
-        comUrl: 0,
-        semUrl: 0,
-      });
 
       alert('✅ Conversão concluída com sucesso!');
     } catch (err) {
@@ -218,7 +204,7 @@ export default function TCUConverterPage() {
               </p>
               <ol className="mt-2 text-sm text-gray-600 space-y-1 list-decimal list-inside">
                 <li>Baixe o arquivo convertido</li>
-                <li>Revise os dados na aba "Dados" (opcional)</li>
+                <li>Revise os dados na aba &quot;Dados&quot; (opcional)</li>
                 <li>Vá para /admin/importar</li>
                 <li>Faça upload do arquivo convertido</li>
                 <li>Valide e importe os documentos</li>
@@ -241,7 +227,7 @@ export default function TCUConverterPage() {
             </li>
             <li className="flex gap-2">
               <span className="font-bold text-blue-600">3.</span>
-              <span>Clique em "Converter Arquivo"</span>
+              <span>Clique em &quot;Converter Arquivo&quot;</span>
             </li>
             <li className="flex gap-2">
               <span className="font-bold text-blue-600">4.</span>
