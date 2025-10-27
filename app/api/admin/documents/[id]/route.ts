@@ -151,7 +151,7 @@ export const PATCH = withAdminAuth(async (request: NextRequest, { params }: { pa
     }
 
     // Campos permitidos para atualização parcial
-    const allowedFields: Record<string, any> = {};
+    const allowedFields: Record<string, unknown> = {};
 
     if (body.courseId !== undefined) allowedFields.courseId = body.courseId;
     if (body.category !== undefined) allowedFields.category = body.category;
