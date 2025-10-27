@@ -145,9 +145,60 @@ export default function TCUManagerPage() {
 
   // === ETAPA 2: VALIDAÇÃO ===
 
-  const handleDownloadForEdit = () => {
-    // TODO: Implementar download do Excel com dados validados para edição manual
-    alert('Funcionalidade de download para edição será implementada');
+  const handleDownloadForEdit = async () => {
+    if (!validationResult) return;
+
+    try {
+      // Importa xlsx dinamicamente
+      const XLSX = await import('xlsx');
+
+      // Prepara dados para o Excel
+      const excelData = validationResult.documents.map((doc, index) => {
+        const raw = doc.rawData as Record<string, unknown>;
+
+        return {
+          '#': index + 1,
+          'Status': doc.isDuplicate ? '🔄 DUPLICATA' : doc.isValid ? '✅ VÁLIDO' : '❌ INVÁLIDO',
+          'Titulo': doc.title || raw['Titulo'] || raw['titulo'] || raw['Assunto'] || '',
+          'Descricao': doc.description || raw['Descricao'] || raw['descricao'] || raw['Ementa'] || '',
+          'Categoria': doc.category || raw['Categoria'] || 'acordao',
+          'Curso': raw['Curso'] || raw['curso'] || '',
+          'Tags': raw['Tags'] || raw['tags'] || '',
+          'Publico': raw['Publico'] || raw['publico'] || 'SIM',
+          'URL': raw['URL'] || raw['url'] || '',
+          'Arquivo': raw['Arquivo'] || raw['arquivo'] || '',
+          'Avisos': [...doc.errors, ...doc.warnings].join('; '),
+        };
+      });
+
+      // Cria workbook
+      const ws = XLSX.utils.json_to_sheet(excelData);
+      const wb = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(wb, ws, 'Validação');
+
+      // Ajusta largura das colunas
+      const colWidths = [
+        { wch: 5 },   // #
+        { wch: 15 },  // Status
+        { wch: 60 },  // Titulo
+        { wch: 80 },  // Descricao
+        { wch: 15 },  // Categoria
+        { wch: 30 },  // Curso
+        { wch: 30 },  // Tags
+        { wch: 10 },  // Publico
+        { wch: 50 },  // URL
+        { wch: 30 },  // Arquivo
+        { wch: 50 },  // Avisos
+      ];
+      ws['!cols'] = colWidths;
+
+      // Faz download
+      XLSX.writeFile(wb, `tcu-validacao-${new Date().toISOString().split('T')[0]}.xlsx`);
+
+    } catch (err) {
+      console.error('Erro ao gerar Excel:', err);
+      alert('Erro ao gerar arquivo para download');
+    }
   };
 
   // === ETAPA 3: IMPORTAÇÃO ===
@@ -162,17 +213,20 @@ export default function TCUManagerPage() {
       // Prepara documentos para importação (somente os válidos e não-duplicados)
       const documentsToImport = validationResult.documents
         .filter(doc => doc.isValid)
-        .map(doc => ({
-          title: doc.rawData['Titulo'] || doc.rawData['titulo'] || doc.title,
-          description: doc.rawData['Descricao'] || doc.rawData['descricao'] || doc.description,
-          category: doc.rawData['Categoria'] || doc.rawData['categoria'] || doc.category,
-          course: doc.rawData['Curso'] || doc.rawData['curso'] || '',
-          tags: doc.rawData['Tags'] || doc.rawData['tags'] || '',
-          publico: doc.rawData['Publico'] || doc.rawData['publico'] || 'SIM',
-          url: doc.rawData['URL'] || doc.rawData['url'] || '',
-          arquivo: doc.rawData['Arquivo'] || doc.rawData['arquivo'] || '',
-          isDuplicate: doc.isDuplicate,
-        }));
+        .map(doc => {
+          const raw = doc.rawData as Record<string, unknown>;
+          return {
+            title: doc.title || raw['Titulo'] || raw['titulo'] || raw['Assunto'] || '',
+            description: doc.description || raw['Descricao'] || raw['descricao'] || raw['Ementa'] || '',
+            category: doc.category || raw['Categoria'] || raw['categoria'] || 'acordao',
+            course: raw['Curso'] || raw['curso'] || '',
+            tags: raw['Tags'] || raw['tags'] || '',
+            publico: raw['Publico'] || raw['publico'] || 'SIM',
+            url: raw['URL'] || raw['url'] || '',
+            arquivo: raw['Arquivo'] || raw['arquivo'] || '',
+            isDuplicate: doc.isDuplicate,
+          };
+        });
 
       const response = await fetch('/api/admin/tcu-manager/import', {
         method: 'POST',

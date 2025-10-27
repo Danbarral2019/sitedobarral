@@ -133,19 +133,40 @@ export const POST = withAdminAuth(async (request: NextRequest) => {
       );
     }
 
+    // Detecta nomes de colunas da planilha
+    const firstRow = data[0];
+    const columns = Object.keys(firstRow);
+    console.log('[TCU Manager Validate] Colunas detectadas:', columns);
+
     // Processa e valida cada linha
     const processedDocuments = await Promise.all(
       data.map(async (row, index) => {
-        const titulo = (row['Titulo'] || row['titulo'] || row['Título'] || '') as string;
-        const descricao = (row['Descricao'] || row['descricao'] || row['Descrição'] || '') as string;
-        const categoria = ((row['Categoria'] || row['categoria'] || 'acordao') as string).toLowerCase();
+        // Busca título em várias possibilidades
+        const titulo = (
+          row['Titulo'] || row['titulo'] || row['Título'] ||
+          row['Title'] || row['TITULO'] || row['TÍTULO'] ||
+          row['Assunto'] || row['assunto'] || row['ASSUNTO'] ||
+          row['Tema'] || row['tema'] || row['TEMA'] ||
+          ''
+        ) as string;
+
+        const descricao = (
+          row['Descricao'] || row['descricao'] || row['Descrição'] ||
+          row['Description'] || row['DESCRICAO'] || row['DESCRIÇÃO'] ||
+          row['Ementa'] || row['ementa'] || row['EMENTA'] ||
+          ''
+        ) as string;
+
+        const categoria = (
+          (row['Categoria'] || row['categoria'] || row['CATEGORIA'] || 'acordao') as string
+        ).toLowerCase();
 
         const errors: string[] = [];
         const warnings: string[] = [];
 
         // Validações básicas
-        if (!titulo) {
-          errors.push('Título obrigatório');
+        if (!titulo || titulo.trim().length === 0) {
+          errors.push('Título obrigatório (colunas verificadas: Titulo, Assunto, Tema)');
         }
 
         // Detecta duplicatas apenas para acórdãos
