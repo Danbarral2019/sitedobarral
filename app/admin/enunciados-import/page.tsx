@@ -95,8 +95,23 @@ export default function EnunciadosImportPage() {
       });
 
       if (!response.ok) {
-        const data = await response.json();
-        throw new Error(data.error || 'Erro ao processar PDF');
+        const contentType = response.headers.get('content-type');
+        let errorMessage = `Erro ${response.status}: ${response.statusText}`;
+
+        if (contentType?.includes('application/json')) {
+          try {
+            const data = await response.json();
+            errorMessage = data.error || errorMessage;
+          } catch {
+            // Se não conseguir parsear JSON, usa mensagem padrão
+          }
+        } else {
+          // Se não for JSON, pode ser HTML de erro
+          const text = await response.text();
+          console.error('[Enunciados Import] Resposta não-JSON:', text);
+        }
+
+        throw new Error(errorMessage);
       }
 
       const data: ParseResult = await response.json();
