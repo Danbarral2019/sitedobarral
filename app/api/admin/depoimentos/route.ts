@@ -30,6 +30,7 @@ export async function GET(request: NextRequest) {
       { error: 'Erro ao carregar depoimentos' },
       { status: 500 }
     );
+  }
 }
 
 /**

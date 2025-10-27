@@ -153,6 +153,7 @@ export async function GET(request: NextRequest) {
       { error: 'Erro ao carregar contatos' },
       { status: 500 }
     );
+  }
 }
 
 // PATCH - Marcar contato como lido/não lido (admin apenas)
