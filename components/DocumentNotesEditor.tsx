@@ -176,7 +176,7 @@ export default function DocumentNotesEditor({
                 <button
                   key={value}
                   type="button"
-                  onClick={() => setFormData({ ...formData, notesImportance: value as any })}
+                  onClick={() => setFormData({ ...formData, notesImportance: value as 'baixa' | 'media' | 'alta' | 'critica' })}
                   className={`px-4 py-2 rounded-lg font-medium transition-all ${
                     formData.notesImportance === value
                       ? `${color} ring-2 ring-offset-2 ${value === 'baixa' ? 'ring-gray-400' : value === 'media' ? 'ring-blue-400' : value === 'alta' ? 'ring-orange-400' : 'ring-red-400'}`
