@@ -19,6 +19,7 @@ import { MultiFileDropzone } from '@/components/ui/multi-file-dropzone';
 import AdminLayout from '@/components/AdminLayout';
 import LeiArticleSelector from '@/components/LeiArticleSelector';
 import DocumentAnalyzer from '@/components/DocumentAnalyzer';
+import BatchClassifyPanel from '@/components/BatchClassifyPanel';
 
 type DocumentCategory = 'apostila' | 'acordao' | 'parecer' | 'edital' | 'artigo' | 'orientacao-normativa' | 'outro';
 
@@ -76,6 +77,7 @@ export default function DocumentosPage() {
   const [selectedDocuments, setSelectedDocuments] = useState<Set<string>>(new Set());
   const [bulkAction, setBulkAction] = useState('');
   const [bulkCategory, setBulkCategory] = useState('');
+  const [showClassifyPanel, setShowClassifyPanel] = useState(false);
 
   const [formData, setFormData] = useState<{
     courseId: string;
@@ -252,6 +254,12 @@ export default function DocumentosPage() {
   const handleBulkAction = async () => {
     if (selectedDocuments.size === 0) {
       errorToast('Nenhum documento selecionado', 'Selecione ao menos um documento');
+      return;
+    }
+
+    if (bulkAction === 'classify') {
+      setShowClassifyPanel(true);
+      setBulkAction('');
       return;
     }
 
@@ -758,6 +766,7 @@ export default function DocumentosPage() {
                         className="px-3 py-1.5 border-2 border-blue-300 rounded-lg text-sm font-medium text-gray-900 focus:ring-2 focus:ring-blue-500"
                       >
                         <option value="">Selecione uma ação</option>
+                        <option value="classify">🤖 Classificar Automaticamente (IA)</option>
                         <option value="delete">Deletar selecionados</option>
                         <option value="changeCategory">Alterar categoria</option>
                       </select>
@@ -1043,6 +1052,18 @@ export default function DocumentosPage() {
         onOpenChange={setPreviewOpen}
         document={documentToPreview}
       />
+
+      {/* Painel de Classificação Automática */}
+      {showClassifyPanel && (
+        <BatchClassifyPanel
+          selectedDocuments={selectedDocuments}
+          onClose={() => setShowClassifyPanel(false)}
+          onSuccess={() => {
+            loadDocuments();
+            setSelectedDocuments(new Set());
+          }}
+        />
+      )}
 
       <AlertDialog
         open={deleteDialogOpen}

@@ -61,6 +61,9 @@ export const PUT = withAdminAuth(async (request: NextRequest, { params }: { para
       // Feedback de IA/ML (Fase 3D)
       feedbackRelevance,
       feedbackReasoning,
+      // Resumo Automático com IA
+      summary,
+      summaryEditedByAdmin,
     } = body;
 
     // Verifica se documento existe
@@ -106,6 +109,9 @@ export const PUT = withAdminAuth(async (request: NextRequest, { params }: { para
         reviewedAt: new Date(),
         // Feedback de IA/ML (Fase 3D)
         ...feedbackData,
+        // Resumo Automático com IA
+        summary: summary !== undefined ? summary : existing.summary,
+        summaryEditedByAdmin: summaryEditedByAdmin !== undefined ? summaryEditedByAdmin : existing.summaryEditedByAdmin,
       },
     });
 
@@ -117,6 +123,59 @@ export const PUT = withAdminAuth(async (request: NextRequest, { params }: { para
     });
   } catch (error) {
     console.error('[PUT Document] Erro:', error);
+    return NextResponse.json(
+      { error: 'Erro ao atualizar documento' },
+      { status: 500 }
+    );
+  }
+});
+
+/**
+ * PATCH: Atualização parcial de um documento (para classificação em lote)
+ */
+export const PATCH = withAdminAuth(async (request: NextRequest, { params }: { params: { id: string } }) => {
+  try {
+    const { id } = params;
+    const body = await request.json();
+
+    // Verifica se documento existe
+    const existing = await prisma.document.findUnique({
+      where: { id },
+    });
+
+    if (!existing) {
+      return NextResponse.json(
+        { error: 'Documento não encontrado' },
+        { status: 404 }
+      );
+    }
+
+    // Campos permitidos para atualização parcial
+    const allowedFields: Record<string, any> = {};
+
+    if (body.courseId !== undefined) allowedFields.courseId = body.courseId;
+    if (body.category !== undefined) allowedFields.category = body.category;
+    if (body.tags !== undefined) allowedFields.tags = body.tags;
+    if (body.isPublic !== undefined) allowedFields.isPublic = body.isPublic;
+    if (body.reviewed !== undefined) {
+      allowedFields.reviewed = body.reviewed;
+      if (body.reviewed === true) {
+        allowedFields.reviewedAt = new Date();
+      }
+    }
+
+    // Atualiza documento
+    const updated = await prisma.document.update({
+      where: { id },
+      data: allowedFields,
+    });
+
+    return NextResponse.json({
+      success: true,
+      document: updated,
+    });
+  } catch (error) {
+    console.error('[PATCH Document] Erro:', error);
     return NextResponse.json(
       { error: 'Erro ao atualizar documento' },
       { status: 500 }

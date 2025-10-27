@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { FileDown, X, Loader2, CheckSquare, Square } from 'lucide-react';
+import { FileDown, X, Loader2, CheckSquare, Square, Heart } from 'lucide-react';
 
 interface Document {
   id: string;
@@ -15,9 +15,10 @@ interface PDFExportPanelProps {
   documents: Document[];
   userName: string;
   userEmail: string;
+  favoriteIds?: string[];
 }
 
-export default function PDFExportPanel({ documents, userName, userEmail }: PDFExportPanelProps) {
+export default function PDFExportPanel({ documents, userName, userEmail, favoriteIds = [] }: PDFExportPanelProps) {
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [isExporting, setIsExporting] = useState(false);
   const [showPanel, setShowPanel] = useState(false);
@@ -37,6 +38,21 @@ export default function PDFExportPanel({ documents, userName, userEmail }: PDFEx
       setSelectedIds(new Set());
     } else {
       setSelectedIds(new Set(documents.map(d => d.id)));
+    }
+  };
+
+  const selectOnlyFavorites = () => {
+    const validFavorites = favoriteIds.filter(id =>
+      documents.some(doc => doc.id === id)
+    );
+    setSelectedIds(new Set(validFavorites));
+  };
+
+  // Quando o painel é aberto, inicializar com favoritos se houver
+  const handleOpenPanel = () => {
+    setShowPanel(true);
+    if (favoriteIds.length > 0 && selectedIds.size === 0) {
+      selectOnlyFavorites();
     }
   };
 
@@ -88,7 +104,7 @@ export default function PDFExportPanel({ documents, userName, userEmail }: PDFEx
   if (!showPanel) {
     return (
       <button
-        onClick={() => setShowPanel(true)}
+        onClick={handleOpenPanel}
         className="fixed bottom-6 right-6 bg-blue-600 text-white px-6 py-3 rounded-full shadow-lg hover:bg-blue-700 transition-all flex items-center gap-2 z-50"
         title="Exportar documentos para PDF"
       >
@@ -143,6 +159,16 @@ export default function PDFExportPanel({ documents, userName, userEmail }: PDFEx
                 </>
               )}
             </button>
+            {favoriteIds.length > 0 && (
+              <button
+                onClick={selectOnlyFavorites}
+                className="text-sm text-red-600 hover:text-red-700 font-medium flex items-center gap-1"
+                title={`Selecionar apenas favoritos (${favoriteIds.length})`}
+              >
+                <Heart className="w-4 h-4 fill-current" />
+                Apenas Favoritos ({favoriteIds.length})
+              </button>
+            )}
           </div>
 
           <button
@@ -170,6 +196,7 @@ export default function PDFExportPanel({ documents, userName, userEmail }: PDFEx
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
           {documents.map((doc) => {
             const isSelected = selectedIds.has(doc.id);
+            const isFavorite = favoriteIds.includes(doc.id);
 
             return (
               <div
@@ -190,9 +217,14 @@ export default function PDFExportPanel({ documents, userName, userEmail }: PDFEx
                     )}
                   </div>
                   <div className="flex-1 min-w-0">
-                    <h4 className="font-medium text-sm text-gray-900 line-clamp-2">
-                      {doc.title}
-                    </h4>
+                    <div className="flex items-start justify-between gap-2">
+                      <h4 className="font-medium text-sm text-gray-900 line-clamp-2 flex-1">
+                        {doc.title}
+                      </h4>
+                      {isFavorite && (
+                        <Heart className="w-4 h-4 text-red-600 fill-current flex-shrink-0" title="Favorito" />
+                      )}
+                    </div>
                     {doc.description && (
                       <p className="text-xs text-gray-600 mt-1 line-clamp-2">
                         {doc.description}

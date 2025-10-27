@@ -6,6 +6,7 @@ import AdminLayout from '@/components/AdminLayout';
 import { courses } from '@/data/courses';
 import { ArrowLeft, Save, Trash2, Plus, X, Upload, ExternalLink } from 'lucide-react';
 import LeiArticleSelector from '@/components/LeiArticleSelector';
+import SummaryGenerator from '@/components/SummaryGenerator';
 
 type DocumentCategory = 'apostila' | 'acordao' | 'parecer' | 'edital' | 'artigo' | 'orientacao-normativa' | 'outro';
 type DocumentType = 'pdf' | 'doc' | 'link' | 'video';
@@ -32,6 +33,11 @@ interface Document {
   feedbackGivenAt?: string | null;
   feedbackGivenBy?: string | null;
   aiSuggestedArticles?: string | null;
+  // Resumo Automático
+  summary?: string | null;
+  summaryHighlights?: string | null;
+  summaryGeneratedAt?: string | null;
+  summaryEditedByAdmin?: boolean;
 }
 
 interface AlternativeUrl {
@@ -77,6 +83,9 @@ export default function EditDocumentPage() {
   const [feedbackReasoning, setFeedbackReasoning] = useState<string>('');
   const [aiClassification, setAiClassification] = useState<Record<string, unknown> | null>(null);
   const [aiSuggestedArticles, setAiSuggestedArticles] = useState<number[]>([]);
+
+  // Resumo Automático (IA)
+  const [summary, setSummary] = useState<string>('');
 
   // Carregar documento
   useEffect(() => {
@@ -137,6 +146,9 @@ export default function EditDocumentPage() {
           setAiSuggestedArticles([]);
         }
       }
+
+      // Carrega resumo
+      setSummary(data.summary || '');
     } catch (error) {
       console.error('Erro ao carregar documento:', error);
       alert('Erro ao carregar documento');
@@ -206,6 +218,9 @@ export default function EditDocumentPage() {
           // Feedback de IA/ML (Fase 3D)
           feedbackRelevance: feedbackRelevance || null,
           feedbackReasoning: feedbackReasoning || null,
+          // Resumo Automático com IA
+          summary: summary || null,
+          summaryEditedByAdmin: document?.summary !== summary && !!summary,
         }),
       });
 
@@ -488,6 +503,16 @@ export default function EditDocumentPage() {
             <LeiArticleSelector
               selectedArticles={leiArticles}
               onChange={setLeiArticles}
+            />
+          </div>
+
+          {/* Gerador de Resumo Automático com IA */}
+          <div className="border-t pt-6">
+            <SummaryGenerator
+              documentId={documentId}
+              documentTitle={title}
+              currentSummary={summary}
+              onSummaryGenerated={(newSummary) => setSummary(newSummary)}
             />
           </div>
 

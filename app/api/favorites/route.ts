@@ -6,7 +6,7 @@ import { verifyToken } from '@/lib/auth';
 // GET /api/favorites - Listar favoritos do usuário
 export async function GET(request: NextRequest) {
   try {
-    const token = request.cookies.get('token')?.value;
+    const token = request.cookies.get('auth-token')?.value || request.cookies.get('auth_token')?.value;
 
     if (!token) {
       return NextResponse.json({ error: 'Não autorizado' }, { status: 401 });
@@ -40,7 +40,7 @@ export async function GET(request: NextRequest) {
 // POST /api/favorites - Adicionar favorito
 export async function POST(request: NextRequest) {
   try {
-    const token = request.cookies.get('token')?.value;
+    const token = request.cookies.get('auth-token')?.value || request.cookies.get('auth_token')?.value;
 
     if (!token) {
       return NextResponse.json({ error: 'Não autorizado' }, { status: 401 });
@@ -94,7 +94,7 @@ export async function POST(request: NextRequest) {
 // DELETE /api/favorites - Remover favorito
 export async function DELETE(request: NextRequest) {
   try {
-    const token = request.cookies.get('token')?.value;
+    const token = request.cookies.get('auth-token')?.value || request.cookies.get('auth_token')?.value;
 
     if (!token) {
       return NextResponse.json({ error: 'Não autorizado' }, { status: 401 });

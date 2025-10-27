@@ -74,8 +74,12 @@ export function useFavorites(courseId?: string) {
     }
   }, [isFavorite]);
 
+  // Lista de IDs de documentos favoritos (útil para exportação PDF)
+  const favoriteIds = favorites.map(fav => fav.documentId);
+
   return {
     favorites,
+    favoriteIds,
     isLoading,
     isFavorite,
     toggleFavorite,

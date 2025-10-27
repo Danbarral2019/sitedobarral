@@ -1,13 +1,28 @@
 'use client';
 
 import Link from 'next/link';
-import { useState, memo } from 'react';
+import { useState, memo, useEffect, useRef } from 'react';
 import { Menu, X, ChevronDown, BookOpen, User, FileText, Mail, Home, LogIn, Award } from 'lucide-react';
 import { courses } from '@/data/courses';
 
 export const Header = memo(function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isCoursesOpen, setIsCoursesOpen] = useState(false);
+  const coursesDropdownRef = useRef<HTMLDivElement>(null);
+
+  // Fecha dropdown quando clicar fora
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (coursesDropdownRef.current && !coursesDropdownRef.current.contains(event.target as Node)) {
+        setIsCoursesOpen(false);
+      }
+    };
+
+    if (isCoursesOpen) {
+      document.addEventListener('mousedown', handleClickOutside);
+      return () => document.removeEventListener('mousedown', handleClickOutside);
+    }
+  }, [isCoursesOpen]);
 
   return (
     <header className="bg-white shadow-md">
@@ -40,7 +55,7 @@ export const Header = memo(function Header() {
               <span>Sobre</span>
             </Link>
 
-            <div className="relative">
+            <div className="relative" ref={coursesDropdownRef}>
               <button
                 onClick={() => setIsCoursesOpen(!isCoursesOpen)}
                 className="flex items-center space-x-1 text-gray-700 hover:text-primary-600 transition-colors"
@@ -51,7 +66,7 @@ export const Header = memo(function Header() {
               </button>
 
               {isCoursesOpen && (
-                <div className="absolute top-full left-0 mt-2 w-80 bg-white rounded-lg shadow-xl py-2 max-h-96 overflow-y-auto">
+                <div className="absolute top-full left-0 mt-2 w-80 bg-white rounded-lg shadow-xl py-2 max-h-96 overflow-y-auto z-[9999] border border-gray-200">
                   <Link
                     href="/cursos"
                     className="block px-4 py-2 text-sm font-semibold text-gray-900 hover:bg-primary-50 hover:text-primary-600"

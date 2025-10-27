@@ -61,7 +61,11 @@
       "Bash(node scripts/delete-fake-documents.js:*)",
       "Bash(git log:*)",
       "Bash(node:*)",
-      "Bash(curl:*)"
+      "Bash(curl:*)",
+      "Bash(netstat:*)",
+      "Bash(findstr:*)",
+      "Bash(if exist .next rmdir /s /q .next)",
+      "Bash(timeout:*)"
     ],
     "deny": [],
     "ask": []
