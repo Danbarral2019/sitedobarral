@@ -189,6 +189,14 @@ export default function DocumentosPage() {
     }
   };
 
+  const selectAllDocuments = () => {
+    setSelectedDocuments(new Set(filteredDocuments.map(doc => doc.id)));
+  };
+
+  const deselectAllDocuments = () => {
+    setSelectedDocuments(new Set());
+  };
+
   const handleBulkUpload = async () => {
     if (multipleFiles.length === 0 || !formData.courseId) {
       errorToast('Dados incompletos', 'Selecione os arquivos e o curso');
@@ -290,6 +298,29 @@ export default function DocumentosPage() {
       // TODO: Implementar mudança de categoria via API
       success('Categoria alterada!', `${selectedDocuments.size} documentos atualizados`);
       setSelectedDocuments(new Set());
+    } else if (bulkAction === 'markReviewed') {
+      setIsDeleting(true); // Reusa o loading
+      try {
+        const reviewPromises = Array.from(selectedDocuments).map(id =>
+          fetch(`/api/admin/documents/${id}`, {
+            method: 'PATCH',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ reviewed: true }),
+          })
+        );
+
+        await Promise.all(reviewPromises);
+        success(
+          `${selectedDocuments.size} documento${selectedDocuments.size !== 1 ? 's' : ''} marcado${selectedDocuments.size !== 1 ? 's' : ''} como revisado!`,
+          'Documentos atualizados com sucesso'
+        );
+        setSelectedDocuments(new Set());
+        loadDocuments();
+      } catch {
+        errorToast('Erro ao marcar', 'Não foi possível atualizar os documentos');
+      } finally {
+        setIsDeleting(false);
+      }
     }
 
     setBulkAction('');
@@ -767,6 +798,7 @@ export default function DocumentosPage() {
                       >
                         <option value="">Selecione uma ação</option>
                         <option value="classify">🤖 Classificar Automaticamente (IA)</option>
+                        <option value="markReviewed">✅ Marcar como Revisado</option>
                         <option value="delete">Deletar selecionados</option>
                         <option value="changeCategory">Alterar categoria</option>
                       </select>
@@ -894,17 +926,45 @@ export default function DocumentosPage() {
 
                   {/* Selecionar Todos */}
                   {paginatedDocuments.length > 0 && (
-                    <button
-                      onClick={toggleSelectAll}
-                      className="flex items-center gap-2 text-sm font-medium text-gray-700 hover:text-gray-900 transition-colors"
-                    >
-                      {selectedDocuments.size === paginatedDocuments.length ? (
-                        <CheckSquare className="w-5 h-5 text-blue-600" />
-                      ) : (
-                        <Square className="w-5 h-5" />
+                    <div className="flex flex-wrap items-center gap-3">
+                      <button
+                        onClick={toggleSelectAll}
+                        className="flex items-center gap-2 text-sm font-medium text-gray-700 hover:text-gray-900 transition-colors"
+                      >
+                        {selectedDocuments.size === paginatedDocuments.length ? (
+                          <CheckSquare className="w-5 h-5 text-blue-600" />
+                        ) : (
+                          <Square className="w-5 h-5" />
+                        )}
+                        Selecionar página ({paginatedDocuments.length})
+                      </button>
+
+                      {filteredDocuments.length > paginatedDocuments.length && (
+                        <>
+                          <span className="text-gray-400">|</span>
+                          <button
+                            onClick={selectAllDocuments}
+                            className="flex items-center gap-2 text-sm font-medium text-blue-600 hover:text-blue-700 transition-colors"
+                          >
+                            <CheckSquare className="w-5 h-5" />
+                            Selecionar TODOS ({filteredDocuments.length})
+                          </button>
+                        </>
                       )}
-                      Selecionar todos ({paginatedDocuments.length})
-                    </button>
+
+                      {selectedDocuments.size > 0 && (
+                        <>
+                          <span className="text-gray-400">|</span>
+                          <button
+                            onClick={deselectAllDocuments}
+                            className="flex items-center gap-2 text-sm font-medium text-red-600 hover:text-red-700 transition-colors"
+                          >
+                            <Square className="w-5 h-5" />
+                            Desselecionar todos
+                          </button>
+                        </>
+                      )}
+                    </div>
                   )}
                 </div>
 
