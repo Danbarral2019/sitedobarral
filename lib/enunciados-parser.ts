@@ -1,12 +1,13 @@
 /**
- * Parser de Enunciados de PDFs (IBDA, INCP, etc.)
+ * Parser de Enunciados de PDFs e DOCX (IBDA, INCP, etc.)
  *
- * Extrai enunciados individuais de arquivos PDF que seguem o padrão:
+ * Extrai enunciados individuais de arquivos PDF ou DOCX que seguem o padrão:
  * - "ENUNCIADO 1", "ENUNCIADO 2", etc.
  * - Cada enunciado contém texto completo até o próximo enunciado
  */
 
 import * as pdfParse from 'pdf-parse';
+import mammoth from 'mammoth';
 
 export interface Enunciado {
   numero: number;
@@ -29,20 +30,39 @@ export interface ParseResult {
 }
 
 /**
- * Extrai todos os enunciados de um buffer PDF
+ * Extrai texto de arquivo DOCX
+ */
+async function extractTextFromDOCX(buffer: Buffer): Promise<string> {
+  const result = await mammoth.extractRawText({ buffer });
+  return result.value;
+}
+
+/**
+ * Extrai todos os enunciados de um buffer PDF ou DOCX
  */
 export async function parseEnunciadosPDF(
-  pdfBuffer: Buffer,
+  fileBuffer: Buffer,
   nomeArquivo: string
 ): Promise<ParseResult> {
   try {
     console.log(`[Enunciados Parser] Processando: ${nomeArquivo}`);
 
-    // Parse do PDF
-    const data = await pdfParse(pdfBuffer);
-    const textoCompleto = data.text;
+    // Detecta tipo de arquivo pela extensão
+    const isDOCX = nomeArquivo.toLowerCase().endsWith('.docx');
+    let textoCompleto: string;
+    let numPages = 0;
 
-    console.log(`[Enunciados Parser] PDF possui ${data.numpages} páginas, ${textoCompleto.length} caracteres`);
+    if (isDOCX) {
+      // Processa DOCX
+      textoCompleto = await extractTextFromDOCX(fileBuffer);
+      console.log(`[Enunciados Parser] DOCX possui ${textoCompleto.length} caracteres`);
+    } else {
+      // Processa PDF
+      const data = await pdfParse(fileBuffer);
+      textoCompleto = data.text;
+      numPages = data.numpages;
+      console.log(`[Enunciados Parser] PDF possui ${numPages} páginas, ${textoCompleto.length} caracteres`);
+    }
 
     // Divide o texto em enunciados usando regex
     // Padrão: "ENUNCIADO" seguido de número (1, 2, 3, etc.)

@@ -61,8 +61,13 @@ export default function EnunciadosImportPage() {
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
-      if (file.type !== 'application/pdf') {
-        setError('Por favor, selecione um arquivo PDF');
+      const validTypes = [
+        'application/pdf',
+        'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+      ];
+
+      if (!validTypes.includes(file.type)) {
+        setError('Por favor, selecione um arquivo PDF ou DOCX');
         return;
       }
       setSelectedFile(file);
@@ -182,31 +187,31 @@ export default function EnunciadosImportPage() {
             Importar Enunciados
           </h1>
           <p className="text-gray-600 mt-2">
-            Extraia e importe enunciados de PDFs (IBDA, INCP, CJF)
+            Extraia e importe enunciados de PDFs ou DOCX (IBDA, INCP, CJF)
           </p>
         </div>
 
         {/* Upload Section */}
         {!parseResult && (
           <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-            <h2 className="text-xl font-bold text-gray-900 mb-4">1. Selecione o PDF</h2>
+            <h2 className="text-xl font-bold text-gray-900 mb-4">1. Selecione o Arquivo (PDF ou DOCX)</h2>
 
             <div className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center">
               <Upload className="w-12 h-12 text-gray-400 mx-auto mb-4" />
 
               <input
                 type="file"
-                accept=".pdf"
+                accept=".pdf,.docx"
                 onChange={handleFileChange}
                 className="hidden"
-                id="pdf-upload"
+                id="file-upload"
               />
 
               <label
-                htmlFor="pdf-upload"
+                htmlFor="file-upload"
                 className="cursor-pointer inline-block px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
               >
-                Escolher PDF
+                Escolher PDF ou DOCX
               </label>
 
               {selectedFile && (
