@@ -11,7 +11,10 @@ import {
   Eye,
   X,
   Check,
+  Edit,
+  Save,
 } from 'lucide-react';
+import { courses } from '@/data/courses';
 
 interface EnunciadoMetadata {
   numeroPropostaPublica?: string;
@@ -38,6 +41,12 @@ interface EnunciadoExtracted {
   fonte: string;
   metadados: EnunciadoMetadata;
   classification?: EnunciadoClassification;
+  // Campos editáveis
+  editedTitle?: string;
+  editedDescription?: string;
+  editedCourses?: string[];
+  editedTags?: string[];
+  editedCategory?: string;
 }
 
 interface ParseResult {
@@ -56,6 +65,8 @@ export default function EnunciadosImportPage() {
   const [selectedEnunciados, setSelectedEnunciados] = useState<Set<number>>(new Set());
   const [expandedEnunciado, setExpandedEnunciado] = useState<number | null>(null);
   const [isImporting, setIsImporting] = useState(false);
+  const [editingEnunciado, setEditingEnunciado] = useState<number | null>(null);
+  const [enunciados, setEnunciados] = useState<EnunciadoExtracted[]>([]);
 
   // Upload de arquivo
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -116,6 +127,7 @@ export default function EnunciadosImportPage() {
 
       const data: ParseResult = await response.json();
       setParseResult(data);
+      setEnunciados(data.enunciados);
 
       // Seleciona todos por padrão
       const allNumbers = new Set(data.enunciados.map(e => e.numero));
@@ -151,6 +163,23 @@ export default function EnunciadosImportPage() {
     }
   };
 
+  // Atualizar enunciado editado
+  const updateEnunciado = (numero: number, updates: Partial<EnunciadoExtracted>) => {
+    setEnunciados(prev =>
+      prev.map(e => (e.numero === numero ? { ...e, ...updates } : e))
+    );
+  };
+
+  // Salvar edições de um enunciado
+  const saveEdit = (numero: number) => {
+    setEditingEnunciado(null);
+  };
+
+  // Cancelar edição
+  const cancelEdit = () => {
+    setEditingEnunciado(null);
+  };
+
   // Importar enunciados selecionados
   const handleImport = async () => {
     if (!parseResult || selectedEnunciados.size === 0) return;
@@ -159,7 +188,7 @@ export default function EnunciadosImportPage() {
     setError('');
 
     try {
-      const enunciadosToImport = parseResult.enunciados.filter(e =>
+      const enunciadosToImport = enunciados.filter(e =>
         selectedEnunciados.has(e.numero)
       );
 
@@ -178,11 +207,12 @@ export default function EnunciadosImportPage() {
       }
 
       const data = await response.json();
-      alert(`✅ ${data.imported} enunciados importados com sucesso!`);
+      alert(`✅ ${data.imported} enunciados importados com sucesso!${data.failed > 0 ? `\n⚠️ ${data.failed} falharam` : ''}`);
 
       // Reset
       setSelectedFile(null);
       setParseResult(null);
+      setEnunciados([]);
       setSelectedEnunciados(new Set());
 
     } catch (err) {
@@ -314,9 +344,10 @@ export default function EnunciadosImportPage() {
 
             {/* Enunciados List */}
             <div className="space-y-4">
-              {parseResult.enunciados.map((enunciado) => {
+              {enunciados.map((enunciado) => {
                 const isSelected = selectedEnunciados.has(enunciado.numero);
                 const isExpanded = expandedEnunciado === enunciado.numero;
+                const isEditing = editingEnunciado === enunciado.numero;
 
                 return (
                   <div
@@ -336,39 +367,134 @@ export default function EnunciadosImportPage() {
                         />
 
                         <div className="flex-1">
-                          <h3 className="font-bold text-gray-900">
-                            {enunciado.classification?.titulo || enunciado.titulo}
-                          </h3>
-                          <p className="text-sm text-gray-600 mt-1">
-                            {enunciado.classification?.descricao || enunciado.texto.substring(0, 150) + '...'}
-                          </p>
+                          {isEditing ? (
+                            // Modo de Edição
+                            <div className="space-y-3">
+                              <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">
+                                  Título
+                                </label>
+                                <input
+                                  type="text"
+                                  value={enunciado.editedTitle || enunciado.classification?.titulo || enunciado.titulo}
+                                  onChange={(e) => updateEnunciado(enunciado.numero, { editedTitle: e.target.value })}
+                                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                                />
+                              </div>
+                              <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">
+                                  Descrição
+                                </label>
+                                <textarea
+                                  value={enunciado.editedDescription || enunciado.classification?.descricao || enunciado.texto.substring(0, 200)}
+                                  onChange={(e) => updateEnunciado(enunciado.numero, { editedDescription: e.target.value })}
+                                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                                  rows={3}
+                                />
+                              </div>
+                              <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">
+                                  Categoria
+                                </label>
+                                <select
+                                  value={enunciado.editedCategory || enunciado.classification?.categoria || 'enunciado'}
+                                  onChange={(e) => updateEnunciado(enunciado.numero, { editedCategory: e.target.value })}
+                                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                                >
+                                  <option value="enunciado">Enunciado</option>
+                                  <option value="apostila">Apostila</option>
+                                  <option value="acordao">Acórdão</option>
+                                  <option value="parecer">Parecer</option>
+                                  <option value="legislacao">Legislação</option>
+                                </select>
+                              </div>
+                              <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">
+                                  Cursos (segure Ctrl para múltipla seleção)
+                                </label>
+                                <select
+                                  multiple
+                                  value={enunciado.editedCourses || enunciado.classification?.cursos || ['1']}
+                                  onChange={(e) => {
+                                    const selected = Array.from(e.target.selectedOptions, option => option.value);
+                                    updateEnunciado(enunciado.numero, { editedCourses: selected });
+                                  }}
+                                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                                  size={5}
+                                >
+                                  {courses.map(course => (
+                                    <option key={course.id} value={course.id}>
+                                      {course.title}
+                                    </option>
+                                  ))}
+                                </select>
+                              </div>
+                              <div className="flex gap-2">
+                                <button
+                                  onClick={() => saveEdit(enunciado.numero)}
+                                  className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 flex items-center gap-2"
+                                >
+                                  <Save className="w-4 h-4" />
+                                  Salvar
+                                </button>
+                                <button
+                                  onClick={cancelEdit}
+                                  className="px-4 py-2 bg-gray-300 text-gray-700 rounded-lg hover:bg-gray-400"
+                                >
+                                  Cancelar
+                                </button>
+                              </div>
+                            </div>
+                          ) : (
+                            // Modo de Visualização
+                            <>
+                              <h3 className="font-bold text-gray-900">
+                                {enunciado.editedTitle || enunciado.classification?.titulo || enunciado.titulo}
+                              </h3>
+                              <p className="text-sm text-gray-600 mt-1">
+                                {enunciado.editedDescription || enunciado.classification?.descricao || enunciado.texto.substring(0, 150) + '...'}
+                              </p>
 
-                          {/* Metadados */}
-                          <div className="mt-3 flex flex-wrap gap-2">
-                            {enunciado.classification && (
-                              <>
-                                <span className="px-2 py-1 bg-purple-100 text-purple-800 text-xs rounded-full">
-                                  {enunciado.classification.categoria}
-                                </span>
-                                <span className="px-2 py-1 bg-blue-100 text-blue-800 text-xs rounded-full">
-                                  Confiança: {enunciado.classification.confianca}%
-                                </span>
-                              </>
-                            )}
-                            {enunciado.metadados.artigos.length > 0 && (
-                              <span className="px-2 py-1 bg-green-100 text-green-800 text-xs rounded-full">
-                                Arts. {enunciado.metadados.artigos.join(', ')}
-                              </span>
-                            )}
-                          </div>
+                              {/* Metadados */}
+                              <div className="mt-3 flex flex-wrap gap-2">
+                                {enunciado.classification && (
+                                  <>
+                                    <span className="px-2 py-1 bg-purple-100 text-purple-800 text-xs rounded-full">
+                                      {enunciado.editedCategory || enunciado.classification.categoria}
+                                    </span>
+                                    <span className="px-2 py-1 bg-blue-100 text-blue-800 text-xs rounded-full">
+                                      Confiança: {enunciado.classification.confianca}%
+                                    </span>
+                                  </>
+                                )}
+                                {enunciado.metadados.artigos.length > 0 && (
+                                  <span className="px-2 py-1 bg-green-100 text-green-800 text-xs rounded-full">
+                                    Arts. {enunciado.metadados.artigos.join(', ')}
+                                  </span>
+                                )}
+                              </div>
+                            </>
+                          )}
                         </div>
 
-                        <button
-                          onClick={() => setExpandedEnunciado(isExpanded ? null : enunciado.numero)}
-                          className="text-blue-600 hover:text-blue-800 p-2"
-                        >
-                          {isExpanded ? <X className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
-                        </button>
+                        {!isEditing && (
+                          <div className="flex gap-2">
+                            <button
+                              onClick={() => setEditingEnunciado(enunciado.numero)}
+                              className="text-blue-600 hover:text-blue-800 p-2"
+                              title="Editar"
+                            >
+                              <Edit className="w-5 h-5" />
+                            </button>
+                            <button
+                              onClick={() => setExpandedEnunciado(isExpanded ? null : enunciado.numero)}
+                              className="text-blue-600 hover:text-blue-800 p-2"
+                              title="Ver detalhes"
+                            >
+                              {isExpanded ? <X className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                            </button>
+                          </div>
+                        )}
                       </div>
 
                       {/* Expanded Content */}
