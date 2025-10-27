@@ -538,6 +538,7 @@ export default function AreaRestritaPage() {
         documents={selectedCourseDocuments}
         userName={user.name}
         userEmail={user.email}
+        favoriteIds={favoriteIds}
       />
 
       {/* Bottom Navigation - apenas mobile */}

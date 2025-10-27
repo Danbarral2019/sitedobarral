@@ -61,6 +61,12 @@ model Document {
   feedbackGivenBy     String?   // Email do admin que deu o feedback
   aiSuggestedArticles String?   // JSON array com artigos da Lei 14.133 sugeridos pela IA
 
+  // Sistema de Resumos Automáticos (IA)
+  summary             String?   // Resumo executivo gerado pela IA
+  summaryHighlights   String?   // JSON array com destaques principais
+  summaryGeneratedAt  DateTime? // Data de geração do resumo
+  summaryEditedByAdmin Boolean @default(false) // Se o resumo foi editado manualmente pelo admin
+
   @@index([courseId])
   @@index([category])
   @@index([courseId, isPublic])
@@ -72,6 +78,8 @@ model Document {
   @@index([reviewed]) // Índice para buscar documentos não revisados
   @@index([reviewed, uploadedAt]) // Índice para ordenar documentos não revisados por data
   @@index([feedbackRelevance]) // Índice para filtrar por feedback
+  @@index([summary]) // Índice para buscar documentos com/sem resumo
+  @@index([summaryGeneratedAt]) // Índice para ordenar por data de geração de resumo
 }
 
 // Usuários (admin e estudantes)

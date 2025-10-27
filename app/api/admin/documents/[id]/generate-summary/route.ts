@@ -1,0 +1,148 @@
+import { NextRequest, NextResponse } from 'next/server';
+import { prisma } from '@/lib/prisma';
+import { withAdminAuth } from '@/lib/api-middleware';
+import { generateDocumentSummary, isSummaryServiceAvailable } from '@/lib/summary-generator';
+
+/**
+ * POST /api/admin/documents/[id]/generate-summary
+ * Gera resumo automatizado de um documento usando Claude AI
+ */
+export const POST = withAdminAuth(async (
+  request: NextRequest,
+  { params }: { params: { id: string } }
+) => {
+  try {
+    const { id } = params;
+
+    // Verifica se serviço de IA está disponível
+    if (!isSummaryServiceAvailable()) {
+      return NextResponse.json(
+        { error: 'Serviço de IA não configurado. Configure ANTHROPIC_API_KEY no .env.local' },
+        { status: 503 }
+      );
+    }
+
+    // Busca documento
+    const document = await prisma.document.findUnique({
+      where: { id },
+      select: {
+        id: true,
+        title: true,
+        description: true,
+        category: true,
+        summary: true,
+        summaryGeneratedAt: true,
+      },
+    });
+
+    if (!document) {
+      return NextResponse.json(
+        { error: 'Documento não encontrado' },
+        { status: 404 }
+      );
+    }
+
+    // Gera resumo com Claude
+    console.log(`[Generate Summary] Gerando resumo para documento: ${document.title}`);
+
+    const summaryResult = await generateDocumentSummary(
+      document.title,
+      document.description || undefined,
+      undefined, // fullText - TODO: extrair de PDF se necessário
+      document.category
+    );
+
+    if (!summaryResult) {
+      return NextResponse.json(
+        { error: 'Erro ao gerar resumo. Tente novamente mais tarde.' },
+        { status: 500 }
+      );
+    }
+
+    // Salva resumo no banco
+    const updated = await prisma.document.update({
+      where: { id },
+      data: {
+        summary: summaryResult.summary,
+        summaryHighlights: JSON.stringify(summaryResult.highlights),
+        summaryGeneratedAt: new Date(),
+        summaryEditedByAdmin: false,
+        // Atualiza tags e artigos se confiança for alta
+        ...(summaryResult.confidence >= 70 && {
+          tags: summaryResult.tags.join(', '),
+          leiArticles: JSON.stringify(summaryResult.leiArticles),
+        }),
+      },
+    });
+
+    console.log(`[Generate Summary] Resumo salvo com sucesso. Confiança: ${summaryResult.confidence}%`);
+
+    return NextResponse.json({
+      success: true,
+      summary: {
+        ...summaryResult,
+        generatedAt: updated.summaryGeneratedAt,
+      },
+      document: {
+        id: updated.id,
+        title: updated.title,
+        summary: updated.summary,
+      },
+    });
+
+  } catch (error) {
+    console.error('[Generate Summary] Erro:', error);
+    return NextResponse.json(
+      { error: 'Erro ao gerar resumo do documento' },
+      { status: 500 }
+    );
+  }
+});
+
+/**
+ * DELETE /api/admin/documents/[id]/generate-summary
+ * Remove resumo gerado automaticamente
+ */
+export const DELETE = withAdminAuth(async (
+  request: NextRequest,
+  { params }: { params: { id: string } }
+) => {
+  try {
+    const { id } = params;
+
+    // Atualiza documento removendo resumo
+    const updated = await prisma.document.update({
+      where: { id },
+      data: {
+        summary: null,
+        summaryHighlights: null,
+        summaryGeneratedAt: null,
+        summaryEditedByAdmin: false,
+      },
+    });
+
+    return NextResponse.json({
+      success: true,
+      message: 'Resumo removido com sucesso',
+      document: {
+        id: updated.id,
+        title: updated.title,
+      },
+    });
+
+  } catch (error) {
+    console.error('[Delete Summary] Erro:', error);
+
+    if (error instanceof Error && error.message.includes('Record to update not found')) {
+      return NextResponse.json(
+        { error: 'Documento não encontrado' },
+        { status: 404 }
+      );
+    }
+
+    return NextResponse.json(
+      { error: 'Erro ao remover resumo' },
+      { status: 500 }
+    );
+  }
+});
