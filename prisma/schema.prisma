@@ -81,6 +81,29 @@ model Document {
   notesUpdatedAt      DateTime? // Data da última atualização das observações
   notesUpdatedBy      String?   // Email do admin que atualizou
 
+  // Sistema de Dados TCU (importação enriquecida de acórdãos)
+  tcuNumeroAcordao    String?   // Número do acórdão (ex: AC-1106/24-P)
+  tcuAutorTese        String?   // Autor da tese (ex: AUGUSTO SHERMAN)
+  tcuArea             String?   // Área temática (ex: Contrato Administrativo)
+  tcuTema             String?   // Tema específico (ex: Formalização do contrato)
+  tcuSubtema          String?   // Subtema (ex: Cláusula obrigatória)
+  tcuLegislacao       String?   @db.Text // Legislação citada (pode ser longa)
+  tcuIndexadores      String?   // Indexadores/tags originais da planilha TCU
+  tcuTipoProcesso     String?   // Tipo do processo (ex: CONSULTA)
+  tcuDataJulgamento   DateTime? // Data do julgamento do acórdão
+  tcuLinkPDF          String?   // Link oficial do PDF no site do TCU
+  tcuEmentaCompleta   String?   @db.Text // Ementa oficial completa (pode ser longa)
+  tcuTextoCompleto    String?   @db.Text // Texto integral do acórdão (pode ser muito longo)
+  tcuRelator          String?   // Nome do relator
+  tcuOrgaoJulgador    String?   // Órgão julgador (Plenário, 1ª Câmara, etc)
+
+  // Metadados de processamento TCU
+  tcuEnriquecidoEm    DateTime? // Data do enriquecimento automático via scraper
+  tcuEnriquecimentoStatus String? // 'success' | 'failed' | 'pending'
+  tcuEnriquecimentoErro String? // Mensagem de erro caso o enriquecimento falhe
+  tcuClassificadoEm   DateTime? // Data da classificação pela IA
+  tcuRevisadoPorAdmin Boolean @default(false) // Se o documento foi revisado manualmente pelo admin após enriquecimento
+
   @@index([courseId])
   @@index([category])
   @@index([courseId, isPublic])
@@ -99,6 +122,11 @@ model Document {
   @@index([title]) // Índice para busca rápida por título/número do acórdão (detecção de duplicatas)
   @@index([category, title]) // Índice composto para busca de acórdãos específicos
   @@index([notesImportance]) // Índice para filtrar por importância das observações
+  @@index([tcuNumeroAcordao]) // Índice para buscar acórdãos pelo número
+  @@index([tcuAutorTese]) // Índice para filtrar por autor da tese
+  @@index([tcuArea, tcuTema]) // Índice composto para buscar por área e tema
+  @@index([tcuEnriquecimentoStatus]) // Índice para filtrar documentos por status de enriquecimento
+  @@index([tcuRevisadoPorAdmin]) // Índice para filtrar documentos revisados após enriquecimento
 }
 
 // Usuários (admin e estudantes)
