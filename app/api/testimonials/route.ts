@@ -36,7 +36,4 @@ export async function GET() {
       { error: 'Erro ao carregar depoimentos' },
       { status: 500 }
     );
-  } finally {
-    await prisma.$disconnect();
-  }
 }

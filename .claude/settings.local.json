@@ -74,7 +74,8 @@
       "Bash(npm uninstall:*)",
       "Bash(test:*)",
       "Bash(echo $ANTHROPIC_API_KEY)",
-      "Read(//c/Users/Administrador/Downloads/**)"
+      "Read(//c/Users/Administrador/Downloads/**)",
+      "Bash(find:*)"
     ],
     "deny": [],
     "ask": []
