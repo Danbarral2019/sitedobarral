@@ -19,14 +19,20 @@ export const POST = withAdminAuth(async (request: NextRequest) => {
       );
     }
 
-    if (file.type !== 'application/pdf') {
+    // Aceita PDF e DOCX
+    const validTypes = [
+      'application/pdf',
+      'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+    ];
+
+    if (!validTypes.includes(file.type)) {
       return NextResponse.json(
-        { error: 'Apenas arquivos PDF são suportados' },
+        { error: 'Apenas arquivos PDF e DOCX são suportados' },
         { status: 400 }
       );
     }
 
-    console.log(`[Enunciados Import] Processando PDF: ${file.name}, tamanho: ${file.size} bytes`);
+    console.log(`[Enunciados Import] Processando arquivo: ${file.name}, tamanho: ${file.size} bytes, tipo: ${file.type}`);
 
     // Converte File para Buffer
     const arrayBuffer = await file.arrayBuffer();
