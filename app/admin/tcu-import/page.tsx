@@ -74,6 +74,8 @@ export default function TCUImportPage() {
   // Seleção e edição
   const [selectedAcordaos, setSelectedAcordaos] = useState<Set<string>>(new Set());
   const [editingCourses, setEditingCourses] = useState<Record<string, string[]>>({});
+  const [editingNotes, setEditingNotes] = useState<Record<string, string>>({});
+  const [editingDescriptions, setEditingDescriptions] = useState<Record<string, string>>({});
 
   // Modal de preview
   const [previewModalOpen, setPreviewModalOpen] = useState(false);
@@ -141,7 +143,7 @@ export default function TCUImportPage() {
     setResult(null);
 
     try {
-      // Aplicar edições de cursos
+      // Aplicar edições de cursos, descrições e observações
       const selectedWithEdits = preview
         .filter(ac => selectedAcordaos.has(`${ac.numeroAcordao}/${ac.anoAcordao}`))
         .map(ac => {
@@ -149,6 +151,8 @@ export default function TCUImportPage() {
           return {
             ...ac,
             suggestedCourses: editingCourses[key] || ac.suggestedCourses,
+            customDescription: editingDescriptions[key] || undefined,
+            notes: editingNotes[key] || undefined,
           };
         });
 
@@ -554,7 +558,7 @@ export default function TCUImportPage() {
                         <p className="text-sm text-gray-700 mb-3 line-clamp-2">{acordao.sumario}</p>
 
                         {/* Edição de Cursos */}
-                        <div>
+                        <div className="mb-4">
                           <div className="flex items-center gap-2 mb-2">
                             <Edit2 className="w-4 h-4 text-gray-500" />
                             <span className="text-sm font-medium">Cursos:</span>
@@ -579,6 +583,53 @@ export default function TCUImportPage() {
                             })}
                           </div>
                         </div>
+
+                        {/* Campos de Edição - Descrição e Observações */}
+                        {acordao.isNovo && (
+                          <div className="space-y-3 border-t border-gray-200 pt-4 mt-4">
+                            {/* Campo de Descrição Customizada */}
+                            <div>
+                              <label className="flex items-center gap-2 text-xs font-semibold text-gray-700 mb-1">
+                                <Edit2 className="w-3 h-3" />
+                                Descrição Customizada (opcional)
+                              </label>
+                              <textarea
+                                value={editingDescriptions[key] || ''}
+                                onChange={(e) => setEditingDescriptions({
+                                  ...editingDescriptions,
+                                  [key]: e.target.value
+                                })}
+                                placeholder="Deixe em branco para usar o sumário original ou edite para customizar..."
+                                rows={2}
+                                className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-600"
+                              />
+                              <p className="text-xs text-gray-500 mt-1">
+                                Se deixar em branco, será usado: "{acordao.sumario.substring(0, 80)}..."
+                              </p>
+                            </div>
+
+                            {/* Campo de Observações/Comentários */}
+                            <div>
+                              <label className="flex items-center gap-2 text-xs font-semibold text-gray-700 mb-1">
+                                <Edit2 className="w-3 h-3" />
+                                Observações/Comentários
+                              </label>
+                              <textarea
+                                value={editingNotes[key] || ''}
+                                onChange={(e) => setEditingNotes({
+                                  ...editingNotes,
+                                  [key]: e.target.value
+                                })}
+                                placeholder="Adicione observações, contexto, trechos importantes, análise..."
+                                rows={3}
+                                className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-600"
+                              />
+                              <p className="text-xs text-gray-500 mt-1">
+                                💡 Adicione comentários que ajudem os alunos a entender a relevância deste acórdão
+                              </p>
+                            </div>
+                          </div>
+                        )}
                       </div>
                     </div>
                   </div>

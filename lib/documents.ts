@@ -20,7 +20,8 @@ export async function addDocument(
   onNumber?: number, // Número da ON (para ordenação)
   onYear?: number, // Ano da ON (para ordenação)
   entityType?: string, // Entidade do enunciado (IBDA, INCP, CJF)
-  enunciadoNumber?: string // Número do enunciado (formato flexível)
+  enunciadoNumber?: string, // Número do enunciado (formato flexível)
+  notes?: string // Observações/comentários do documento
 ): Promise<Document> {
   const dbDocument = await prisma.document.create({
     data: {
@@ -39,6 +40,7 @@ export async function addDocument(
       onYear: onYear || null,
       entityType: entityType || null,
       enunciadoNumber: enunciadoNumber || null,
+      notes: notes || null,
     },
   });
 
