@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect } from 'react';
 import AdminLayout from '@/components/AdminLayout';
 import { Star, Check, X, Edit2, Trash2, Clock, CheckCircle, XCircle, Loader2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
@@ -33,31 +33,32 @@ export default function DepoimentosPage() {
   const [loading, setLoading] = useState(true);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editForm, setEditForm] = useState<Partial<Testimonial>>({});
+  const [reloadTrigger, setReloadTrigger] = useState(0); // ✅ Trigger para forçar reload
   const { success: successToast, error: errorToast } = useToast();
 
-  const loadTestimonials = useCallback(async () => {
-    setLoading(true);
-    try {
-      const response = await fetch(`/api/admin/testimonials?status=${filter}`);
-      const data = await response.json();
-
-      if (data.success) {
-        setTestimonials(data.testimonials);
-        setStats(data.stats);
-      } else {
-        errorToast('Erro ao carregar depoimentos');
-      }
-    } catch (error) {
-      console.error('Erro ao carregar depoimentos:', error);
-      errorToast('Erro ao carregar depoimentos');
-    } finally {
-      setLoading(false);
-    }
-  }, [filter, errorToast]);
-
   useEffect(() => {
+    const loadTestimonials = async () => {
+      setLoading(true);
+      try {
+        const response = await fetch(`/api/admin/testimonials?status=${filter}`);
+        const data = await response.json();
+
+        if (data.success) {
+          setTestimonials(data.testimonials);
+          setStats(data.stats);
+        } else {
+          errorToast('Erro ao carregar depoimentos');
+        }
+      } catch (error) {
+        console.error('Erro ao carregar depoimentos:', error);
+        errorToast('Erro ao carregar depoimentos');
+      } finally {
+        setLoading(false);
+      }
+    };
+
     loadTestimonials();
-  }, [loadTestimonials]);
+  }, [filter, reloadTrigger]); // ✅ Apenas filter e reloadTrigger como dependências
 
   const handleApprove = async (id: string) => {
     console.log('[Depoimentos] Aprovando depoimento:', id);
@@ -74,7 +75,7 @@ export default function DepoimentosPage() {
 
       if (data.success) {
         successToast('Depoimento aprovado!');
-        loadTestimonials();
+        setReloadTrigger(prev => prev + 1); // ✅ Trigger reload
       } else {
         errorToast(data.error || 'Erro ao aprovar');
       }
@@ -103,7 +104,7 @@ export default function DepoimentosPage() {
 
       if (data.success) {
         successToast('Depoimento rejeitado');
-        loadTestimonials();
+        setReloadTrigger(prev => prev + 1); // ✅ Trigger reload
       } else {
         errorToast(data.error || 'Erro ao rejeitar');
       }
@@ -125,7 +126,7 @@ export default function DepoimentosPage() {
 
       if (data.success) {
         successToast('Depoimento deletado');
-        loadTestimonials();
+        setReloadTrigger(prev => prev + 1); // ✅ Trigger reload
       } else {
         errorToast(data.error || 'Erro ao deletar');
       }
@@ -162,7 +163,7 @@ export default function DepoimentosPage() {
       if (data.success) {
         successToast('Depoimento atualizado!');
         setEditingId(null);
-        loadTestimonials();
+        setReloadTrigger(prev => prev + 1); // ✅ Trigger reload
       } else {
         errorToast(data.error || 'Erro ao atualizar');
       }

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect } from 'react';
 import AdminLayout from '@/components/AdminLayout';
 import { Mail, Calendar, Users, UserX, RefreshCw, Loader2, CheckCircle } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
@@ -28,56 +28,53 @@ export default function NewsletterPage() {
   const [loading, setLoading] = useState(true);
   const [syncing, setSyncing] = useState(false);
   const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [reloadTrigger, setReloadTrigger] = useState(0); // ✅ Trigger para forçar reload
   const { success: successToast, error: errorToast } = useToast();
 
-  const calculateStats = useCallback((subs: Subscriber[]) => {
-    // Se estiver filtrado, buscar todos para calcular stats corretos
-    if (filter !== 'all') {
-      fetch('/api/newsletter')
-        .then(res => res.json())
-        .then(data => {
-          if (data.subscribers) {
-            const allSubs = data.subscribers;
+  useEffect(() => {
+    const loadSubscribers = async () => {
+      setLoading(true);
+      try {
+        const isActiveParam = filter === 'all' ? '' : `?isActive=${filter === 'active' ? 'true' : 'false'}`;
+        const response = await fetch(`/api/newsletter${isActiveParam}`);
+        const data = await response.json();
+
+        if (data.subscribers) {
+          setSubscribers(data.subscribers);
+
+          // Calcular stats
+          if (filter !== 'all') {
+            // Buscar todos para stats corretos
+            const allResponse = await fetch('/api/newsletter');
+            const allData = await allResponse.json();
+            if (allData.subscribers) {
+              const allSubs = allData.subscribers;
+              setStats({
+                total: allSubs.length,
+                active: allSubs.filter((s: Subscriber) => s.isActive).length,
+                inactive: allSubs.filter((s: Subscriber) => !s.isActive).length,
+              });
+            }
+          } else {
             setStats({
-              total: allSubs.length,
-              active: allSubs.filter((s: Subscriber) => s.isActive).length,
-              inactive: allSubs.filter((s: Subscriber) => !s.isActive).length,
+              total: data.subscribers.length,
+              active: data.subscribers.filter((s: Subscriber) => s.isActive).length,
+              inactive: data.subscribers.filter((s: Subscriber) => !s.isActive).length,
             });
           }
-        });
-    } else {
-      setStats({
-        total: subs.length,
-        active: subs.filter(s => s.isActive).length,
-        inactive: subs.filter(s => !s.isActive).length,
-      });
-    }
-  }, [filter]);
-
-  const loadSubscribers = useCallback(async () => {
-    setLoading(true);
-    try {
-      const isActiveParam = filter === 'all' ? '' : `?isActive=${filter === 'active' ? 'true' : 'false'}`;
-      const response = await fetch(`/api/newsletter${isActiveParam}`);
-      const data = await response.json();
-
-      if (data.subscribers) {
-        setSubscribers(data.subscribers);
-        calculateStats(data.subscribers);
-      } else {
+        } else {
+          errorToast('Erro ao carregar inscritos');
+        }
+      } catch (error) {
+        console.error('Erro ao carregar inscritos:', error);
         errorToast('Erro ao carregar inscritos');
+      } finally {
+        setLoading(false);
       }
-    } catch (error) {
-      console.error('Erro ao carregar inscritos:', error);
-      errorToast('Erro ao carregar inscritos');
-    } finally {
-      setLoading(false);
-    }
-  }, [filter, errorToast, calculateStats]);
+    };
 
-  useEffect(() => {
     loadSubscribers();
-  }, [loadSubscribers]);
+  }, [filter, reloadTrigger]); // ✅ Apenas filter e reloadTrigger como dependências
 
   const syncWithMailChimp = async () => {
     setSyncing(true);
@@ -120,7 +117,7 @@ export default function NewsletterPage() {
       }
 
       successToast('Inscrito excluído com sucesso');
-      loadSubscribers(); // Recarregar lista
+      setReloadTrigger(prev => prev + 1); // ✅ Trigger reload
     } catch (error) {
       console.error('Erro ao excluir:', error);
       errorToast('Erro ao excluir inscrito');

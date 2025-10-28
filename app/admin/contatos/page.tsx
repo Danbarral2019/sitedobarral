@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect } from 'react';
 import AdminLayout from '@/components/AdminLayout';
 import { Mail, Phone, Calendar, Trash2, Check, X, Loader2, MessageCircle } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
@@ -27,33 +27,34 @@ export default function ContatosPage() {
   const [filter, setFilter] = useState<'all' | 'true' | 'false'>('false'); // false = não lidos
   const [loading, setLoading] = useState(true);
   const [expandedId, setExpandedId] = useState<string | null>(null);
+  const [reloadTrigger, setReloadTrigger] = useState(0); // ✅ Trigger para forçar reload
   const { success: successToast, error: errorToast } = useToast();
 
-  const loadContacts = useCallback(async () => {
-    setLoading(true);
-    try {
-      const response = await fetch(`/api/contact?isRead=${filter}`);
-      const data = await response.json();
-
-      if (data.contacts) {
-        setContacts(data.contacts);
-        if (data.stats) {
-          setStats(data.stats);
-        }
-      } else {
-        errorToast('Erro ao carregar contatos');
-      }
-    } catch (error) {
-      console.error('Erro ao carregar contatos:', error);
-      errorToast('Erro ao carregar contatos');
-    } finally {
-      setLoading(false);
-    }
-  }, [filter, errorToast]);
-
   useEffect(() => {
+    const loadContacts = async () => {
+      setLoading(true);
+      try {
+        const response = await fetch(`/api/contact?isRead=${filter}`);
+        const data = await response.json();
+
+        if (data.contacts) {
+          setContacts(data.contacts);
+          if (data.stats) {
+            setStats(data.stats);
+          }
+        } else {
+          errorToast('Erro ao carregar contatos');
+        }
+      } catch (error) {
+        console.error('Erro ao carregar contatos:', error);
+        errorToast('Erro ao carregar contatos');
+      } finally {
+        setLoading(false);
+      }
+    };
+
     loadContacts();
-  }, [loadContacts]);
+  }, [filter, reloadTrigger]); // ✅ Apenas filter e reloadTrigger como dependências
 
   const handleMarkAsRead = async (id: string, isRead: boolean) => {
     try {
@@ -67,7 +68,7 @@ export default function ContatosPage() {
 
       if (data.success) {
         successToast(isRead ? 'Marcado como lido' : 'Marcado como não lido');
-        loadContacts();
+        setReloadTrigger(prev => prev + 1); // ✅ Trigger reload
       } else {
         errorToast(data.error || 'Erro ao atualizar');
       }
@@ -89,7 +90,7 @@ export default function ContatosPage() {
 
       if (data.success) {
         successToast('Mensagem deletada');
-        loadContacts();
+        setReloadTrigger(prev => prev + 1); // ✅ Trigger reload
       } else {
         errorToast(data.error || 'Erro ao deletar');
       }

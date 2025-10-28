@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import AdminLayout from '@/components/AdminLayout';
 import {
@@ -81,47 +81,41 @@ export default function AnalyticsDashboard() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState('');
 
-  const verifyAdmin = useCallback(async () => {
-    try {
-      const response = await fetch('/api/auth/verify');
-      if (!response.ok) {
-        router.push('/validar-acesso');
-        return;
-      }
-      const data = await response.json();
-      if (data.user.role !== 'admin') {
-        router.push('/area-restrita');
-        return;
-      }
-    } catch (error) {
-      console.error('Erro ao verificar admin:', error);
-      router.push('/validar-acesso');
-    }
-  }, [router]);
-
-  const loadAnalytics = useCallback(async () => {
-    try {
-      setIsLoading(true);
-      const response = await fetch('/api/admin/analytics');
-
-      if (!response.ok) {
-        throw new Error('Erro ao carregar analytics');
-      }
-
-      const result = await response.json();
-      setData(result.data);
-    } catch (err) {
-      console.error('Erro:', err);
-      setError('Erro ao carregar métricas');
-    } finally {
-      setIsLoading(false);
-    }
-  }, []);
-
   useEffect(() => {
-    verifyAdmin();
-    loadAnalytics();
-  }, [verifyAdmin, loadAnalytics]);
+    const verifyAdminAndLoad = async () => {
+      try {
+        // Verificar admin
+        const authResponse = await fetch('/api/auth/verify');
+        if (!authResponse.ok) {
+          router.push('/validar-acesso');
+          return;
+        }
+        const authData = await authResponse.json();
+        if (authData.user.role !== 'admin') {
+          router.push('/area-restrita');
+          return;
+        }
+
+        // Carregar analytics
+        setIsLoading(true);
+        const response = await fetch('/api/admin/analytics');
+
+        if (!response.ok) {
+          throw new Error('Erro ao carregar analytics');
+        }
+
+        const result = await response.json();
+        setData(result.data);
+      } catch (err) {
+        console.error('Erro:', err);
+        setError('Erro ao carregar métricas');
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    verifyAdminAndLoad();
+  }, []); // ✅ Array vazio = executa apenas uma vez
 
   if (isLoading) {
     return (
