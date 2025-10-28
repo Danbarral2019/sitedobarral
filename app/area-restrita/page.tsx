@@ -153,7 +153,7 @@ export default function AreaRestritaPage() {
   };
 
   // Computed values - MUST be before early returns to follow Rules of Hooks
-  const userEnrollments = user?.enrollments || [];
+  const userEnrollments = useMemo(() => user?.enrollments || [], [user?.enrollments]);
   const enrolledCourseIds = user?.role === 'admin'
     ? courses.map(c => c.id)
     : userEnrollments.map(e => e.courseId);

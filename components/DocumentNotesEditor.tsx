@@ -40,35 +40,35 @@ export default function DocumentNotesEditor({
 
   // Carrega dados existentes
   useEffect(() => {
+    const loadNotes = async () => {
+      try {
+        setIsLoading(true);
+        const response = await fetch(`/api/admin/documents/${documentId}/notes`);
+
+        if (!response.ok) {
+          throw new Error('Erro ao carregar observações');
+        }
+
+        const data = await response.json();
+        const doc = data.document;
+
+        setFormData({
+          adminNotes: doc.adminNotes || '',
+          publicNotes: doc.publicNotes || '',
+          notesImportance: doc.notesImportance || undefined,
+          notesRelatedDocs: doc.notesRelatedDocs ? JSON.parse(doc.notesRelatedDocs) : [],
+          notesPracticalUse: doc.notesPracticalUse || '',
+          notesKeyPoints: doc.notesKeyPoints || '',
+        });
+      } catch (err) {
+        setError(err instanceof Error ? err.message : 'Erro ao carregar');
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
     loadNotes();
   }, [documentId]);
-
-  const loadNotes = async () => {
-    try {
-      setIsLoading(true);
-      const response = await fetch(`/api/admin/documents/${documentId}/notes`);
-
-      if (!response.ok) {
-        throw new Error('Erro ao carregar observações');
-      }
-
-      const data = await response.json();
-      const doc = data.document;
-
-      setFormData({
-        adminNotes: doc.adminNotes || '',
-        publicNotes: doc.publicNotes || '',
-        notesImportance: doc.notesImportance || undefined,
-        notesRelatedDocs: doc.notesRelatedDocs ? JSON.parse(doc.notesRelatedDocs) : [],
-        notesPracticalUse: doc.notesPracticalUse || '',
-        notesKeyPoints: doc.notesKeyPoints || '',
-      });
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Erro ao carregar');
-    } finally {
-      setIsLoading(false);
-    }
-  };
 
   const handleSave = async () => {
     try {

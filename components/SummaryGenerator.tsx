@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Sparkles, Loader2, Check, X, RefreshCw, Edit2, Eye } from 'lucide-react';
+import { Sparkles, Loader2, Check, X, RefreshCw, Eye } from 'lucide-react';
 
 interface SummaryGeneratorProps {
   documentId: string;
@@ -22,7 +22,6 @@ interface GeneratedSummary {
 
 export default function SummaryGenerator({
   documentId,
-  documentTitle,
   currentSummary,
   onSummaryGenerated,
 }: SummaryGeneratorProps) {

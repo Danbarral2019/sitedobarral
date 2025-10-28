@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState, useCallback } from 'react';
+import Image from 'next/image';
 import AdminLayout from '@/components/AdminLayout';
 import { Plus, Trash2, Youtube, ExternalLink } from 'lucide-react';
 import { courses } from '@/data/courses';
@@ -197,10 +198,13 @@ export default function VideosAdminPage() {
             <div className="divide-y divide-gray-200">
               {videos.map((video) => (
                 <div key={video.id} className="p-6 flex items-start gap-4">
-                  <img
+                  <Image
                     src={video.thumbnailUrl || `https://img.youtube.com/vi/${video.youtubeId}/mqdefault.jpg`}
                     alt={video.title}
+                    width={160}
+                    height={96}
                     className="w-40 h-24 object-cover rounded-lg"
+                    unoptimized
                   />
                   <div className="flex-1">
                     <h3 className="font-bold text-gray-900 mb-1">{video.title}</h3>

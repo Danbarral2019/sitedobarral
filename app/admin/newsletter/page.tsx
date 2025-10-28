@@ -30,32 +30,7 @@ export default function NewsletterPage() {
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const { success: successToast, error: errorToast } = useToast();
 
-  const loadSubscribers = useCallback(async () => {
-    setLoading(true);
-    try {
-      const isActiveParam = filter === 'all' ? '' : `?isActive=${filter === 'active' ? 'true' : 'false'}`;
-      const response = await fetch(`/api/newsletter${isActiveParam}`);
-      const data = await response.json();
-
-      if (data.subscribers) {
-        setSubscribers(data.subscribers);
-        calculateStats(data.subscribers);
-      } else {
-        errorToast('Erro ao carregar inscritos');
-      }
-    } catch (error) {
-      console.error('Erro ao carregar inscritos:', error);
-      errorToast('Erro ao carregar inscritos');
-    } finally {
-      setLoading(false);
-    }
-  }, [filter, errorToast]);
-
-  useEffect(() => {
-    loadSubscribers();
-  }, [loadSubscribers]);
-
-  const calculateStats = (subs: Subscriber[]) => {
+  const calculateStats = useCallback((subs: Subscriber[]) => {
     // Se estiver filtrado, buscar todos para calcular stats corretos
     if (filter !== 'all') {
       fetch('/api/newsletter')
@@ -77,7 +52,32 @@ export default function NewsletterPage() {
         inactive: subs.filter(s => !s.isActive).length,
       });
     }
-  };
+  }, [filter]);
+
+  const loadSubscribers = useCallback(async () => {
+    setLoading(true);
+    try {
+      const isActiveParam = filter === 'all' ? '' : `?isActive=${filter === 'active' ? 'true' : 'false'}`;
+      const response = await fetch(`/api/newsletter${isActiveParam}`);
+      const data = await response.json();
+
+      if (data.subscribers) {
+        setSubscribers(data.subscribers);
+        calculateStats(data.subscribers);
+      } else {
+        errorToast('Erro ao carregar inscritos');
+      }
+    } catch (error) {
+      console.error('Erro ao carregar inscritos:', error);
+      errorToast('Erro ao carregar inscritos');
+    } finally {
+      setLoading(false);
+    }
+  }, [filter, errorToast, calculateStats]);
+
+  useEffect(() => {
+    loadSubscribers();
+  }, [loadSubscribers]);
 
   const syncWithMailChimp = async () => {
     setSyncing(true);

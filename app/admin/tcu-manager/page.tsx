@@ -124,7 +124,6 @@ export default function TCUManagerPage() {
 
   // Etapa 1: Upload e Conversão
   const [isConverting, setIsConverting] = useState(false);
-  const [convertedData, setConvertedData] = useState<Record<string, unknown> | null>(null);
 
   // Etapa 2: Validação e Detecção de Duplicatas
   const [isValidating, setIsValidating] = useState(false);
@@ -132,9 +131,7 @@ export default function TCUManagerPage() {
 
   // Etapa 2.5: Revisão, Enriquecimento e Classificação
   const [reviewDocuments, setReviewDocuments] = useState<ReviewDocument[]>([]);
-  const [isEnriching, setIsEnriching] = useState(false);
   const [isClassifying, setIsClassifying] = useState(false);
-  const [enrichmentProgress, setEnrichmentProgress] = useState({ current: 0, total: 0 });
   const [classificationProgress, setClassificationProgress] = useState({ current: 0, total: 0 });
 
   // Etapa 3: Importação
@@ -173,8 +170,7 @@ export default function TCUManagerPage() {
         throw new Error(data.error || 'Erro ao converter');
       }
 
-      const data = await response.json();
-      setConvertedData(data);
+      await response.json();
 
       // Agora valida automaticamente
       await validateDocuments(selectedFile, 'tcu');
@@ -829,38 +825,24 @@ export default function TCUManagerPage() {
         {currentStep === 2.5 && (
           <div className="space-y-6">
             {/* Progress Banner */}
-            {(isEnriching || isClassifying) && (
+            {isClassifying && (
               <div className="bg-purple-50 border-l-4 border-purple-500 rounded-r-lg p-4">
                 <div className="flex items-center gap-3">
                   <Loader2 className="w-5 h-5 text-purple-600 animate-spin flex-shrink-0" />
                   <div className="flex-1">
-                    {isEnriching && (
-                      <>
-                        <p className="font-bold text-purple-900">
-                          Enriquecendo documentos... ({enrichmentProgress.current}/{enrichmentProgress.total})
-                        </p>
-                        <p className="text-sm text-purple-800">
-                          Buscando dados adicionais no site do TCU
-                        </p>
-                      </>
-                    )}
-                    {isClassifying && !isEnriching && (
-                      <>
-                        <p className="font-bold text-purple-900">
-                          Classificando com IA... ({classificationProgress.current}/{classificationProgress.total})
-                        </p>
-                        <p className="text-sm text-purple-800">
-                          Analisando contexto e sugerindo cursos/tags
-                        </p>
-                      </>
-                    )}
+                    <p className="font-bold text-purple-900">
+                      Classificando com IA... ({classificationProgress.current}/{classificationProgress.total})
+                    </p>
+                    <p className="text-sm text-purple-800">
+                      Analisando contexto e sugerindo cursos/tags
+                    </p>
                   </div>
                 </div>
               </div>
             )}
 
             {/* Review Table */}
-            {!isEnriching && !isClassifying && reviewDocuments.length > 0 && (
+            {!isClassifying && reviewDocuments.length > 0 && (
               <div className="bg-white rounded-xl shadow-lg p-6">
                 <h2 className="text-xl font-bold text-gray-900 mb-6">
                   Revisar e Editar Classificações
@@ -888,7 +870,7 @@ export default function TCUManagerPage() {
             )}
 
             {/* Action Buttons */}
-            {!isEnriching && !isClassifying && reviewDocuments.length > 0 && (
+            {!isClassifying && reviewDocuments.length > 0 && (
               <div className="bg-white rounded-xl shadow-lg p-6 flex gap-3">
                 <button
                   onClick={() => setCurrentStep(2)}

@@ -106,14 +106,14 @@ export default function WordUploader({ onUploadComplete, onError }: WordUploader
     if (droppedFile) {
       processFile(droppedFile);
     }
-  }, []);
+  }, [processFile]);
 
   const handleFileSelect = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     const selectedFile = e.target.files?.[0];
     if (selectedFile) {
       processFile(selectedFile);
     }
-  }, []);
+  }, [processFile]);
 
   const handleRemoveFile = () => {
     setFile(null);
