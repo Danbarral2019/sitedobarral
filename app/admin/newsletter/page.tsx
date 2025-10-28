@@ -63,11 +63,10 @@ export default function NewsletterPage() {
             });
           }
         } else {
-          errorToast('Erro ao carregar inscritos');
+          console.error('Erro ao carregar inscritos: resposta sem subscribers');
         }
       } catch (error) {
         console.error('Erro ao carregar inscritos:', error);
-        errorToast('Erro ao carregar inscritos');
       } finally {
         setLoading(false);
       }
