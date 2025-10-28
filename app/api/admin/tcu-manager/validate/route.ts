@@ -199,7 +199,7 @@ export const POST = withAdminAuth(async (request: NextRequest) => {
             if (dia && mes && ano) {
               dataJulgamento = new Date(parseInt(ano), parseInt(mes) - 1, parseInt(dia));
             }
-          } catch (err) {
+          } catch {
             console.warn(`[TCU Validate] Erro ao parsear data: ${dataStr}`);
           }
         }

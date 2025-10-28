@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import AdminLayout from '@/components/AdminLayout';
 import { courses } from '@/data/courses';
-import { ArrowLeft, Save, Trash2, Plus, X, Upload, ExternalLink } from 'lucide-react';
+import { ArrowLeft, Save, Trash2, Plus, X, ExternalLink } from 'lucide-react';
 import LeiArticleSelector from '@/components/LeiArticleSelector';
 import SummaryGenerator from '@/components/SummaryGenerator';
 
@@ -78,7 +78,6 @@ export default function EditDocumentPage() {
   const [newAltType, setNewAltType] = useState<'pdf' | 'link'>('pdf');
 
   // Upload de novo arquivo
-  const [uploadingFile, setUploadingFile] = useState(false);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
 
   // Feedback de IA/ML (Fase 3D)
@@ -96,78 +95,78 @@ export default function EditDocumentPage() {
 
   // Carregar documento
   useEffect(() => {
+    const loadDocument = async () => {
+      try {
+        setLoading(true);
+        const response = await fetch(`/api/admin/documents/${documentId}`);
+
+        if (!response.ok) {
+          throw new Error('Documento não encontrado');
+        }
+
+        const data: Document = await response.json();
+
+        setDocument(data);
+        setTitle(data.title);
+        setDescription(data.description || '');
+        setUrl(data.url);
+        setType(data.type);
+        setCategory(data.category);
+        setCourseId(data.courseId || '');
+        setIsPublic(data.isPublic);
+        setIsCommon(data.isCommon);
+        setTags(data.tags || []);
+        setLeiArticles(data.leiArticles || []);
+
+        // Parse alternativeUrls
+        if (data.alternativeUrls) {
+          try {
+            const parsed = JSON.parse(data.alternativeUrls);
+            setAlternativeUrls(Array.isArray(parsed) ? parsed : []);
+          } catch {
+            setAlternativeUrls([]);
+          }
+        }
+
+        // Parse feedback fields (Fase 3D)
+        setFeedbackRelevance(data.feedbackRelevance || '');
+        setFeedbackReasoning(data.feedbackReasoning || '');
+
+        if (data.aiClassification) {
+          try {
+            const parsed = JSON.parse(data.aiClassification);
+            setAiClassification(parsed);
+          } catch {
+            setAiClassification(null);
+          }
+        }
+
+        if (data.aiSuggestedArticles) {
+          try {
+            const parsed = JSON.parse(data.aiSuggestedArticles);
+            setAiSuggestedArticles(Array.isArray(parsed) ? parsed : []);
+          } catch {
+            setAiSuggestedArticles([]);
+          }
+        }
+
+        // Carrega resumo
+        setSummary(data.summary || '');
+
+        // Carrega campos de enunciados
+        setEntityType(data.entityType || '');
+        setEnunciadoNumber(data.enunciadoNumber || '');
+      } catch (error) {
+        console.error('Erro ao carregar documento:', error);
+        alert('Erro ao carregar documento');
+        router.push('/admin/documentos');
+      } finally {
+        setLoading(false);
+      }
+    };
+
     loadDocument();
-  }, [documentId]);
-
-  const loadDocument = async () => {
-    try {
-      setLoading(true);
-      const response = await fetch(`/api/admin/documents/${documentId}`);
-
-      if (!response.ok) {
-        throw new Error('Documento não encontrado');
-      }
-
-      const data: Document = await response.json();
-
-      setDocument(data);
-      setTitle(data.title);
-      setDescription(data.description || '');
-      setUrl(data.url);
-      setType(data.type);
-      setCategory(data.category);
-      setCourseId(data.courseId || '');
-      setIsPublic(data.isPublic);
-      setIsCommon(data.isCommon);
-      setTags(data.tags || []);
-      setLeiArticles(data.leiArticles || []);
-
-      // Parse alternativeUrls
-      if (data.alternativeUrls) {
-        try {
-          const parsed = JSON.parse(data.alternativeUrls);
-          setAlternativeUrls(Array.isArray(parsed) ? parsed : []);
-        } catch {
-          setAlternativeUrls([]);
-        }
-      }
-
-      // Parse feedback fields (Fase 3D)
-      setFeedbackRelevance(data.feedbackRelevance || '');
-      setFeedbackReasoning(data.feedbackReasoning || '');
-
-      if (data.aiClassification) {
-        try {
-          const parsed = JSON.parse(data.aiClassification);
-          setAiClassification(parsed);
-        } catch {
-          setAiClassification(null);
-        }
-      }
-
-      if (data.aiSuggestedArticles) {
-        try {
-          const parsed = JSON.parse(data.aiSuggestedArticles);
-          setAiSuggestedArticles(Array.isArray(parsed) ? parsed : []);
-        } catch {
-          setAiSuggestedArticles([]);
-        }
-      }
-
-      // Carrega resumo
-      setSummary(data.summary || '');
-
-      // Carrega campos de enunciados
-      setEntityType(data.entityType || '');
-      setEnunciadoNumber(data.enunciadoNumber || '');
-    } catch (error) {
-      console.error('Erro ao carregar documento:', error);
-      alert('Erro ao carregar documento');
-      router.push('/admin/documentos');
-    } finally {
-      setLoading(false);
-    }
-  };
+  }, [documentId, router]);
 
   const handleSave = async () => {
     if (!title.trim()) {
