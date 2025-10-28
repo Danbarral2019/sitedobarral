@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import Image from 'next/image';
 import { Play, Youtube, ExternalLink } from 'lucide-react';
 
 interface CourseVideo {
@@ -72,10 +73,13 @@ export default function CourseVideos({ videos, displayMode = 'thumbnails' }: Cou
               >
                 {/* Thumbnail */}
                 <div className="relative aspect-video bg-gradient-to-br from-gray-200 to-gray-300 overflow-hidden">
-                  <img
+                  <Image
                     src={getThumbnailUrl(video)}
                     alt={video.title}
+                    width={640}
+                    height={360}
                     className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                    unoptimized
                   />
                   {/* Overlay com ícone de play */}
                   <div className="absolute inset-0 bg-black/40 group-hover:bg-black/50 transition-colors flex items-center justify-center">

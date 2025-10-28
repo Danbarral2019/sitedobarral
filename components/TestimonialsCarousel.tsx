@@ -54,20 +54,20 @@ export default function TestimonialsCarousel() {
     loadApprovedTestimonials();
   }, []);
 
-  // Autoplay
-  useEffect(() => {
-    if (!isAutoPlaying) return;
-
-    const interval = setInterval(() => {
-      goToNext();
-    }, 5000); // Muda a cada 5 segundos
-
-    return () => clearInterval(interval);
-  }, [currentIndex, isAutoPlaying]);
-
   const goToNext = () => {
     setCurrentIndex((prev) => (prev + 1) % testimonials.length);
   };
+
+  // Autoplay
+  useEffect(() => {
+    if (!isAutoPlaying || testimonials.length === 0) return;
+
+    const interval = setInterval(() => {
+      setCurrentIndex((prev) => (prev + 1) % testimonials.length);
+    }, 5000); // Muda a cada 5 segundos
+
+    return () => clearInterval(interval);
+  }, [currentIndex, isAutoPlaying, testimonials.length]);
 
   const goToPrevious = () => {
     setCurrentIndex((prev) => (prev - 1 + testimonials.length) % testimonials.length);
