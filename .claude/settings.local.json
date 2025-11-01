@@ -76,7 +76,13 @@
       "Bash(echo $ANTHROPIC_API_KEY)",
       "Read(//c/Users/Administrador/Downloads/**)",
       "Bash(find:*)",
-      "mcp__ide__getDiagnostics"
+      "mcp__ide__getDiagnostics",
+      "Bash(copy \"f:\\OneDrive - AGU\\Daniel Barral-20251027T160939Z-1-001\\Daniel Barral\\utilizáveis\\24102025 --13.jpg\" \"C:\\Projeto de site do Barral\\projeto do site no claude\\site-prof-barral\\public\\images\\professor\\banner-home.jpg\")",
+      "Bash(git reset:*)",
+      "Bash(git fetch:*)",
+      "Bash(git pull:*)",
+      "Bash(git checkout:*)",
+      "Bash(npx docx:*)"
     ],
     "deny": [],
     "ask": []
