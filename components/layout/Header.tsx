@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { useState, memo, useEffect, useRef } from 'react';
-import { Menu, X, ChevronDown, BookOpen, User, FileText, Mail, Home, LogIn, Award } from 'lucide-react';
+import { Menu, X, ChevronDown, BookOpen, User, FileText, Mail, Home, LogIn, Award, Library, HelpCircle } from 'lucide-react';
 import { courses } from '@/data/courses';
 
 export const Header = memo(function Header() {
@@ -106,6 +106,22 @@ export const Header = memo(function Header() {
             </Link>
 
             <Link
+              href="/glossario"
+              className="flex items-center space-x-1 text-gray-700 hover:text-primary-600 transition-colors"
+            >
+              <Library className="w-4 h-4" />
+              <span>Glossário</span>
+            </Link>
+
+            <Link
+              href="/faq"
+              className="flex items-center space-x-1 text-gray-700 hover:text-primary-600 transition-colors"
+            >
+              <HelpCircle className="w-4 h-4" />
+              <span>FAQ</span>
+            </Link>
+
+            <Link
               href="/contato"
               className="flex items-center space-x-1 text-gray-700 hover:text-primary-600 transition-colors"
             >
@@ -166,6 +182,20 @@ export const Header = memo(function Header() {
               onClick={() => setIsMenuOpen(false)}
             >
               Publicações
+            </Link>
+            <Link
+              href="/glossario"
+              className="block py-2 text-gray-700 hover:text-primary-600"
+              onClick={() => setIsMenuOpen(false)}
+            >
+              Glossário
+            </Link>
+            <Link
+              href="/faq"
+              className="block py-2 text-gray-700 hover:text-primary-600"
+              onClick={() => setIsMenuOpen(false)}
+            >
+              FAQ
             </Link>
             <Link
               href="/contato"

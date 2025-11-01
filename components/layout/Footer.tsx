@@ -33,6 +33,16 @@ export const Footer = memo(function Footer() {
                 </Link>
               </li>
               <li>
+                <Link href="/glossario" className="text-sm hover:text-primary-400 transition-colors">
+                  Glossário
+                </Link>
+              </li>
+              <li>
+                <Link href="/faq" className="text-sm hover:text-primary-400 transition-colors">
+                  Perguntas Frequentes
+                </Link>
+              </li>
+              <li>
                 <Link href="/contato" className="text-sm hover:text-primary-400 transition-colors">
                   Contato
                 </Link>
