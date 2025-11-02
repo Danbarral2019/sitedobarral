@@ -48,6 +48,8 @@ model Document {
   size            Int?
   onNumber        Int?     // Número da ON (para ordenação numérica de Orientações Normativas)
   onYear          Int?     // Ano da ON (para ordenação numérica de Orientações Normativas)
+  acordaoNumero   Int?     // Número do Acórdão TCU (para ordenação numérica de Acórdãos)
+  acordaoAno      Int?     // Ano do Acórdão TCU (para ordenação numérica de Acórdãos)
   uploadedAt      DateTime @default(now())
   updatedAt       DateTime @updatedAt
   notifiedAt      DateTime? // Data em que os alunos foram notificados sobre este documento
@@ -120,6 +122,7 @@ model Document {
   @@index([courseId, notifiedAt])
   @@index([isCommon]) // Índice para buscar documentos comuns rapidamente
   @@index([category, onNumber, onYear]) // Índice para ordenação numérica de ONs
+  @@index([category, acordaoNumero, acordaoAno]) // Índice para ordenação numérica de Acórdãos TCU
   @@index([reviewed]) // Índice para buscar documentos não revisados
   @@index([reviewed, uploadedAt]) // Índice para ordenar documentos não revisados por data
   @@index([feedbackRelevance]) // Índice para filtrar por feedback

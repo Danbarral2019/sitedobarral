@@ -63,21 +63,20 @@ function convertToDocumentData(acordao: AcordaoTCU): Partial<Prisma.DocumentCrea
     ...temas,
   ]);
 
-  // Cursos sugeridos
-  const cursosIds = JSON.stringify(acordao.suggestedCourses);
+  // Curso sugerido (apenas o primeiro por enquanto - multi-curso será implementado depois)
+  const courseId = acordao.suggestedCourses.length > 0 ? acordao.suggestedCourses[0] : null;
 
   // Sempre público (acórdãos do TCU são públicos)
   const isPublic = true;
 
   // Campos específicos TCU
-  const tcuNumeroAcordao = acordao.numeroAcordao;
-  const tcuAnoAcordao = acordao.anoAcordao;
-  const tcuColegiado = acordao.colegiado || null;
+  // tcuNumeroAcordao deve conter o número completo (ex: "AC-2553/2025-P")
+  const tcuNumeroAcordao = `${acordao.numeroAcordao}/${acordao.anoAcordao}`;
+  const tcuOrgaoJulgador = acordao.colegiado || null;
   const tcuRelator = acordao.relator || null;
   const tcuDataSessao = acordao.dataSessao || null;
-  const tcuSituacao = acordao.situacao || null;
 
-  // Campos numéricos para ordenação
+  // Campos numéricos para ordenação (usam campos separados acordaoNumero e acordaoAno)
   const acordaoNumero = acordao.acordaoNumero;
   const acordaoAno = acordao.acordaoAno;
 
@@ -88,17 +87,13 @@ function convertToDocumentData(acordao: AcordaoTCU): Partial<Prisma.DocumentCrea
     category,
     type,
     tags,
-    cursosIds,
+    courseId, // Primeiro curso sugerido
     isPublic,
     tcuNumeroAcordao,
-    tcuAnoAcordao,
-    tcuColegiado,
+    tcuOrgaoJulgador,
     tcuRelator,
-    tcuDataSessao,
-    tcuSituacao,
     acordaoNumero,
     acordaoAno,
-    // courseId não definido aqui - será adicionado pela relação de cursos
   };
 }
 

@@ -8,7 +8,7 @@
  * 4. Versionamento histórico
  */
 
-import { fetchTCUAcordaos } from '@/lib/tcu-scraper';
+import { fetchAcordaosTCU } from '@/lib/tcu-scraper';
 import { importTCUAcordaosWithVersioning } from '@/lib/tcu-module';
 import { prisma } from '@/lib/prisma';
 
@@ -20,7 +20,7 @@ async function main() {
     // PASSO 1: Fetch dos acórdãos via API do TCU
     console.log('\n📡 PASSO 1: Buscando acórdãos do TCU via API...\n');
 
-    const acordaos = await fetchTCUAcordaos({
+    const acordaos = await fetchAcordaosTCU({
       quantidade: 10, // Apenas 10 para teste
       anoInicio: 2024,
       onlyRelevant: true, // Apenas relevantes
@@ -128,14 +128,15 @@ async function main() {
       where: {
         category: 'acordao',
         tcuNumeroAcordao: { not: null },
-        tcuAnoAcordao: { not: null }
+        acordaoNumero: { not: null },
+        acordaoAno: { not: null }
       }
     });
 
     const acordaosWithCursos = await prisma.document.count({
       where: {
         category: 'acordao',
-        cursosIds: { not: null }
+        courseId: { not: null }
       }
     });
 
@@ -150,20 +151,19 @@ async function main() {
     const docsWithCourses = await prisma.document.findMany({
       where: {
         category: 'acordao',
-        cursosIds: { not: null }
+        courseId: { not: null }
       },
       select: {
         title: true,
-        cursosIds: true
+        courseId: true
       },
       take: 5
     });
 
     console.log(`   Exemplos de sugestões de cursos:`);
     for (const doc of docsWithCourses) {
-      const cursos = JSON.parse(doc.cursosIds || '[]');
       console.log(`\n   ${doc.title}`);
-      console.log(`   Cursos: ${cursos.join(', ')}`);
+      console.log(`   Curso sugerido: ${doc.courseId}`);
     }
 
     // RESUMO FINAL

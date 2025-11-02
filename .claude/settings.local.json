@@ -100,7 +100,12 @@
       "mcp__playwright__browser_tabs",
       "mcp__playwright__browser_evaluate",
       "mcp__playwright__browser_close",
-      "mcp__playwright__browser_wait_for"
+      "mcp__playwright__browser_wait_for",
+      "WebFetch(domain:gestaogovbr.github.io)",
+      "Bash(if [ -f .env.local ])",
+      "Bash(then echo \"exists\")",
+      "Bash(else echo \"not exists\")",
+      "Bash(export DATABASE_URL:*)"
     ],
     "deny": [],
     "ask": []
