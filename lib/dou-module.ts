@@ -1,17 +1,19 @@
 /**
  * DOU Module - Processamento e Importação de Documentos do DOU
  *
- * Processa resultados do Querido Diário API e importa documentos
+ * Processa resultados da API Oficial do DOU (Imprensa Nacional) e importa documentos
  * relevantes para o banco de dados com versionamento automático.
  *
  * Integra com:
- * - lib/querido-diario.ts (busca de publicações)
+ * - lib/dou-api.ts (API oficial da Imprensa Nacional)
+ * - lib/querido-diario.ts (API alternativa para diários municipais)
  * - lib/shared-keywords.ts (análise de relevância)
  * - lib/agu-modules/versioning.ts (versionamento automático)
  */
 
 import type { Document, Prisma } from '@prisma/client';
 import type { QueridoDiarioGazette } from './querido-diario';
+import type { DOUSearchResult } from './dou-api';
 import { findOrCreateWithVersioning } from './agu-modules/versioning';
 import { KEYWORDS_RELEVANCIA, detectTemas, CURSOS_KEYWORDS } from './shared-keywords';
 import { extractDOUInfo } from './agu-modules/helpers';
@@ -339,6 +341,210 @@ export async function importDOUDocuments(
 
     // Delay para não sobrecarregar o banco
     if (i < gazettes.length - 1) {
+      await new Promise(resolve => setTimeout(resolve, 100));
+    }
+  }
+
+  console.log(`\\n[DOU Module] Importação concluída!`);
+  console.log(`  ✅ Novos: ${result.novos}`);
+  console.log(`  🔄 Atualizados: ${result.atualizados}`);
+  console.log(`  ⏭️  Sem mudanças: ${result.semMudancas}`);
+  console.log(`  ❌ Erros: ${result.erros}`);
+
+  return result;
+}
+
+/**
+ * Converte resultado da API oficial do DOU para formato Document do Prisma
+ */
+function convertDOUResultToDocumentData(
+  result: DOUSearchResult,
+  relevanceScore: number,
+  temas: string[],
+  suggestedCourses: string[]
+): Partial<Prisma.DocumentCreateInput> {
+  // Remove tags HTML do título
+  const title = result.title.replace(/<[^>]*>/g, '').trim();
+
+  // Descrição (abstract já vem sem HTML)
+  const description = result.abstract || `Publicação do DOU - ${result.section} - ${result.date}`;
+
+  // URL do documento
+  const url = result.href;
+
+  // Categoria baseada no conteúdo
+  const category = detectCategoryDOU(title, description);
+
+  // Type: sempre 'link' (URLs externas)
+  const type = 'link';
+
+  // Tags baseadas nos temas detectados
+  const tags = JSON.stringify([
+    'DOU',
+    result.section.toUpperCase(),
+    ...result.hierarchyList.slice(0, 3), // Primeiros 3 níveis da hierarquia
+    ...temas,
+  ]);
+
+  // Curso sugerido (apenas o primeiro por enquanto - multi-curso será implementado depois)
+  const courseId = suggestedCourses.length > 0 ? suggestedCourses[0] : null;
+
+  // Sempre público (publicações do DOU são públicas)
+  const isPublic = true;
+
+  // Extrai informações adicionais do DOU
+  const douInfo = extractDOUInfo(`${title} ${description} ${url}`);
+
+  // Data de publicação (formato DD/MM/YYYY para Date)
+  const [day, month, year] = result.date.split('/');
+  const douData = new Date(`${year}-${month}-${day}`);
+
+  return {
+    title,
+    description,
+    url,
+    category,
+    type,
+    tags,
+    courseId,
+    isPublic,
+    // Dados do DOU
+    douUrl: url,
+    douData,
+    douSecao: result.section,
+    douPagina: douInfo?.douPagina || undefined,
+    douEdicao: undefined, // API oficial não retorna número de edição
+  };
+}
+
+/**
+ * Importa um documento da API oficial do DOU com versionamento
+ */
+export async function importDOUResultOfficial(
+  result: DOUSearchResult
+): Promise<{
+  success: boolean;
+  document?: Document;
+  isNew?: boolean;
+  hasChanges?: boolean;
+  error?: string;
+}> {
+  try {
+    // Remove tags HTML do título
+    const title = result.title.replace(/<[^>]*>/g, '').trim();
+    const content = result.abstract;
+
+    // Análise de relevância
+    const { isRelevant, score, temas } = analyzeRelevanceDOU(title, content);
+
+    if (!isRelevant) {
+      return {
+        success: false,
+        error: `Documento não relevante (score: ${score})`,
+      };
+    }
+
+    // Sugestão de cursos
+    const suggestedCourses = suggestCoursesDOU(title, content);
+
+    // Converte para formato Document
+    const documentData = convertDOUResultToDocumentData(
+      result,
+      score,
+      temas,
+      suggestedCourses
+    );
+
+    // Usar o sistema de versionamento (busca por título único)
+    const versioningResult = await findOrCreateWithVersioning(
+      { title: documentData.title! },
+      documentData,
+      'scraper-dou-oficial'
+    );
+
+    return {
+      success: true,
+      document: versioningResult.document,
+      isNew: versioningResult.isNew,
+      hasChanges: versioningResult.hasChanges,
+    };
+  } catch (error) {
+    console.error(`[DOU Module] Erro ao importar documento ${result.title}:`, error);
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : 'Erro desconhecido',
+    };
+  }
+}
+
+/**
+ * Importa múltiplos documentos da API oficial do DOU com versionamento
+ *
+ * Processa em lote e retorna estatísticas detalhadas
+ */
+export async function importDOUResultsOfficial(
+  results: DOUSearchResult[]
+): Promise<DOUImportResult> {
+  console.log(`\\n[DOU Module] Iniciando importação de ${results.length} publicações DOU (API Oficial) com versionamento...\\n`);
+
+  const result: DOUImportResult = {
+    total: 0,
+    novos: 0,
+    atualizados: 0,
+    semMudancas: 0,
+    erros: 0,
+    detalhes: [],
+  };
+
+  for (let i = 0; i < results.length; i++) {
+    const douResult = results[i];
+    result.total++;
+
+    // Remove HTML do título para exibição
+    const titulo = douResult.title.replace(/<[^>]*>/g, '').trim().slice(0, 100);
+
+    console.log(`[${i + 1}/${results.length}] Processando: ${titulo}...`);
+
+    const saveResult = await importDOUResultOfficial(douResult);
+
+    if (saveResult.success) {
+      if (saveResult.isNew) {
+        console.log(`  ✅ Novo documento criado`);
+        result.novos++;
+        result.detalhes.push({
+          titulo,
+          status: 'novo',
+          hasChanges: true,
+        });
+      } else if (saveResult.hasChanges) {
+        console.log(`  🔄 Documento atualizado`);
+        result.atualizados++;
+        result.detalhes.push({
+          titulo,
+          status: 'atualizado',
+          hasChanges: true,
+        });
+      } else {
+        console.log(`  ⏭️  Sem mudanças`);
+        result.semMudancas++;
+        result.detalhes.push({
+          titulo,
+          status: 'sem_mudanca',
+          hasChanges: false,
+        });
+      }
+    } else {
+      console.log(`  ❌ Erro: ${saveResult.error}`);
+      result.erros++;
+      result.detalhes.push({
+        titulo,
+        status: 'erro',
+        error: saveResult.error,
+      });
+    }
+
+    // Delay para não sobrecarregar o banco
+    if (i < results.length - 1) {
       await new Promise(resolve => setTimeout(resolve, 100));
     }
   }

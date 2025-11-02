@@ -2,7 +2,10 @@
  * Cron Job: Importação Diária de Documentos do DOU
  *
  * Endpoint chamado diariamente pelo Vercel Cron para buscar
- * e importar documentos relevantes do Diário Oficial da União.
+ * e importar documentos relevantes do Diário Oficial da União (DOU federal).
+ *
+ * Usa a API oficial da Imprensa Nacional (http://www.in.gov.br/consulta/-/buscar/dou)
+ * para buscar publicações federais relevantes.
  *
  * Configuração no vercel.json:
  * {
@@ -16,8 +19,8 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server';
-import { searchLastDays } from '@/lib/querido-diario';
-import { importDOUDocuments, analyzeRelevanceDOU } from '@/lib/dou-module';
+import { searchLastWeek, searchLastMonth } from '@/lib/dou-api';
+import { importDOUResultsOfficial, analyzeRelevanceDOU } from '@/lib/dou-module';
 
 export const runtime = 'nodejs';
 export const maxDuration = 300; // 5 minutos (máximo para Vercel Pro)
@@ -43,17 +46,21 @@ export async function GET(request: NextRequest) {
 
     // Parâmetros da query string
     const { searchParams } = new URL(request.url);
-    const days = parseInt(searchParams.get('days') || '7'); // Padrão: últimos 7 dias
-    const limit = parseInt(searchParams.get('limit') || '50'); // Padrão: 50 documentos
+    const period = searchParams.get('period') || 'week'; // week ou month
+    const maxResults = parseInt(searchParams.get('limit') || '100'); // Padrão: 100 documentos
 
-    console.log(`[Cron DOU] Buscando publicações dos últimos ${days} dias (limite: ${limit})`);
+    console.log(`[Cron DOU] Buscando publicações (período: ${period}, limite: ${maxResults})`);
 
-    // PASSO 1: Buscar publicações no Querido Diário
-    const gazettes = await searchLastDays(days, limit);
+    // PASSO 1: Buscar publicações na API oficial do DOU
+    const searchTerm = 'licitação OR pregão OR dispensa OR contrato OR contratação';
 
-    console.log(`[Cron DOU] ✅ ${gazettes.length} publicações encontradas`);
+    const results = period === 'month'
+      ? await searchLastMonth(searchTerm, undefined, maxResults)
+      : await searchLastWeek(searchTerm, undefined, maxResults);
 
-    if (gazettes.length === 0) {
+    console.log(`[Cron DOU] ✅ ${results.length} publicações encontradas`);
+
+    if (results.length === 0) {
       return NextResponse.json({
         success: true,
         message: 'Nenhuma publicação encontrada',
@@ -69,30 +76,26 @@ export async function GET(request: NextRequest) {
     }
 
     // PASSO 2: Filtrar por relevância (pré-filtro para economizar processamento)
-    const relevantGazettes = gazettes.filter(gazette => {
-      // Verificar se tem excerpts
-      if (!gazette.excerpts || gazette.excerpts.length === 0) {
-        return false;
-      }
+    const relevantResults = results.filter(result => {
+      // Remove HTML do título
+      const title = result.title.replace(/<[^>]*>/g, '').trim();
 
-      // Analisar relevância do primeiro excerpt
-      const firstExcerpt = gazette.excerpts[0];
       const { isRelevant } = analyzeRelevanceDOU(
-        firstExcerpt.highlight || '',
-        firstExcerpt.excerpt || ''
+        title,
+        result.abstract || ''
       );
 
       return isRelevant;
     });
 
-    console.log(`[Cron DOU] 📊 ${relevantGazettes.length} publicações relevantes (${Math.round((relevantGazettes.length / gazettes.length) * 100)}%)`);
+    console.log(`[Cron DOU] 📊 ${relevantResults.length} publicações relevantes (${Math.round((relevantResults.length / results.length) * 100)}%)`);
 
-    if (relevantGazettes.length === 0) {
+    if (relevantResults.length === 0) {
       return NextResponse.json({
         success: true,
         message: 'Nenhuma publicação relevante encontrada',
         stats: {
-          buscados: gazettes.length,
+          buscados: results.length,
           relevantes: 0,
           novos: 0,
           atualizados: 0,
@@ -103,7 +106,7 @@ export async function GET(request: NextRequest) {
     }
 
     // PASSO 3: Importar com versionamento
-    const importResult = await importDOUDocuments(relevantGazettes);
+    const importResult = await importDOUResultsOfficial(relevantResults);
 
     console.log('[Cron DOU] ✅ Importação concluída!');
     console.log(`[Cron DOU] Novos: ${importResult.novos}, Atualizados: ${importResult.atualizados}, Sem mudanças: ${importResult.semMudancas}, Erros: ${importResult.erros}`);
@@ -113,8 +116,8 @@ export async function GET(request: NextRequest) {
       success: true,
       message: `Importação concluída: ${importResult.novos} novos, ${importResult.atualizados} atualizados`,
       stats: {
-        buscados: gazettes.length,
-        relevantes: relevantGazettes.length,
+        buscados: results.length,
+        relevantes: relevantResults.length,
         novos: importResult.novos,
         atualizados: importResult.atualizados,
         semMudancas: importResult.semMudancas,
