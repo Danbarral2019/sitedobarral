@@ -44,6 +44,7 @@ model Document {
   isCommon        Boolean  @default(false) // Se true, documento aparece em todos os cursos
   tags            String?  // JSON array como string
   leiArticles     String?  // JSON array com números de artigos da Lei 14.133/2021
+  content         String?  @db.Text // Conteúdo/trechos relevantes do documento para busca textual
   size            Int?
   onNumber        Int?     // Número da ON (para ordenação numérica de Orientações Normativas)
   onYear          Int?     // Ano da ON (para ordenação numérica de Orientações Normativas)
@@ -445,4 +446,102 @@ model DocumentAnalysis {
   @@index([createdAt])
   @@index([documentId])
   @@index([userId])
+}
+
+// Glossário de Termos Técnicos
+model GlossaryTerm {
+  id          String   @id @default(uuid())
+
+  // Identificação
+  term        String   @unique // Ex: "Pregão Eletrônico"
+  slug        String   @unique // Ex: "pregao-eletronico"
+
+  // Conteúdo
+  definition  String   @db.Text // Definição completa
+  shortDef    String?  // Definição curta para tooltips
+
+  // Categorização
+  category    String?  // Ex: "Modalidade", "Fase", "Documento", "Legislação"
+
+  // Relacionamentos (JSON arrays)
+  relatedTerms String? // IDs de termos relacionados
+  leiArticles  String? // Artigos da Lei 14.133/2021
+  relatedDocs  String? // IDs de documentos relacionados
+
+  // Referências externas
+  externalUrl  String? // Link para legislação oficial
+
+  // Analytics
+  viewCount    Int      @default(0)
+
+  // Visibilidade
+  isPublic     Boolean  @default(true)
+
+  // Auditoria
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  createdBy    String?  // Email do admin
+
+  @@index([term])
+  @@index([slug])
+  @@index([category])
+  @@index([isPublic])
+}
+
+// Perguntas Frequentes (FAQ)
+model FAQ {
+  id          String   @id @default(uuid())
+
+  // Conteúdo
+  question    String   // Pergunta
+  answer      String   @db.Text // Resposta (suporta markdown)
+
+  // Categorização
+  category    String   // Ex: "Acesso ao Site", "Documentos", "Certificados", "Cursos"
+
+  // Ordem e destaque
+  displayOrder Int     @default(0)
+  isPinned     Boolean @default(false) // Perguntas destacadas no topo
+
+  // Visibilidade
+  isPublished  Boolean @default(true)
+
+  // Analytics
+  viewCount    Int     @default(0)
+  helpfulCount Int     @default(0)
+  notHelpfulCount Int  @default(0)
+
+  // Relacionamentos (JSON arrays)
+  relatedFAQs  String? // IDs de FAQs relacionadas
+  relatedDocs  String? // IDs de documentos
+  keywords     String? // Palavras-chave para busca
+
+  // Auditoria
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  createdBy    String?  // Email do admin
+
+  @@index([category])
+  @@index([isPublished])
+  @@index([displayOrder])
+  @@index([isPinned])
+}
+
+// Feedback de FAQ
+model FAQFeedback {
+  id          String   @id @default(uuid())
+  faqId       String
+
+  wasHelpful  Boolean  // true = útil, false = não útil
+  comment     String?  // Feedback opcional do usuário
+
+  // Identificação do usuário
+  userEmail   String?  // Se logado
+  ip          String?  // IP do usuário
+
+  createdAt   DateTime @default(now())
+
+  @@index([faqId])
+  @@index([wasHelpful])
+  @@index([createdAt])
 }

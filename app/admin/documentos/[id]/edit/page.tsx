@@ -61,6 +61,7 @@ export default function EditDocumentPage() {
   // Form state
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
+  const [content, setContent] = useState('');
   const [url, setUrl] = useState('');
   const [type, setType] = useState<DocumentType>('pdf');
   const [category, setCategory] = useState<DocumentCategory>('apostila');
@@ -109,6 +110,7 @@ export default function EditDocumentPage() {
         setDocument(data);
         setTitle(data.title);
         setDescription(data.description || '');
+        setContent((data as Document & { content?: string }).content || '');
         setUrl(data.url);
         setType(data.type);
         setCategory(data.category);
@@ -216,6 +218,7 @@ export default function EditDocumentPage() {
         body: JSON.stringify({
           title,
           description,
+          content: content || null,
           url: finalUrl,
           type,
           category,
@@ -361,6 +364,23 @@ export default function EditDocumentPage() {
               className="w-full px-4 py-2 border rounded focus:ring-2 focus:ring-blue-500"
               placeholder="Descrição detalhada do documento"
             />
+          </div>
+
+          {/* Conteúdo para Busca (NOVO!) */}
+          <div className="bg-blue-50 border-2 border-blue-200 rounded-lg p-4">
+            <label className="block text-sm font-medium mb-2">
+              🔍 Conteúdo para Busca Textual (Opcional)
+            </label>
+            <textarea
+              value={content}
+              onChange={(e) => setContent(e.target.value)}
+              rows={6}
+              className="w-full px-4 py-2 border rounded focus:ring-2 focus:ring-blue-500"
+              placeholder="Cole trechos relevantes do documento aqui para permitir busca por conteúdo. Ex: parágrafos importantes, trechos de decisões, citações, etc."
+            />
+            <p className="text-xs text-gray-600 mt-2">
+              💡 <strong>Dica:</strong> Copie e cole trechos relevantes do PDF/DOC aqui. Os alunos poderão encontrar este documento buscando por essas palavras-chave, mesmo que não estejam no título ou descrição.
+            </p>
           </div>
 
           {/* URL Principal ou Upload */}

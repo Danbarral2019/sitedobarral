@@ -49,6 +49,7 @@ export const PUT = withAdminAuth(async (request: NextRequest, { params }: { para
     const {
       title,
       description,
+      content, // Conteúdo para busca textual
       url,
       type,
       category,
@@ -98,6 +99,7 @@ export const PUT = withAdminAuth(async (request: NextRequest, { params }: { para
       data: {
         title: title || existing.title,
         description: description !== undefined ? description : existing.description,
+        content: content !== undefined ? content : existing.content, // Conteúdo para busca textual
         url: url || existing.url,
         type: type || existing.type,
         category: category || existing.category,

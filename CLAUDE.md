@@ -2,15 +2,22 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
-## 🆕 ÚLTIMAS ATUALIZAÇÕES (2025-01-26)
+## 🆕 ÚLTIMAS ATUALIZAÇÕES (2025-10-27)
 
-**Fase 3 TCU Scraper Implementada:**
+**Fase 3 TCU Scraper + IA Implementada:**
 - ✅ Exportação PDF com marca d'água (`/api/export-pdf`)
-- ✅ Sistema de feedback IA/ML para classificação
-- ✅ 4 Cron Jobs automatizados (importação, newsletter, notificações)
+- ✅ Sistema de feedback IA/ML para classificação automática
+- ✅ Sistema de resumos automáticos com Claude AI (`/api/admin/generate-summary`)
+- ✅ 4 Cron Jobs automatizados (importação TCU/AGU, newsletter, notificações)
 - ✅ **Conversor Excel do TCU** - `npm run convert-tcu` (GAME CHANGER!)
+- ✅ **TCU Manager Unificado** - Interface admin para gerenciar documentos TCU
+- ✅ Sistema de enunciados (IBDA, INCP, CJF) e observações estruturadas
 
-**Veja:** `SESSAO_2025-01-26_FASE_3_TCU_SCRAPER.md` para detalhes completos
+**Sessões recentes:**
+- `SESSAO_2025-10-27_TCU_MANAGER_UNIFICADO.md` - Interface de gerenciamento TCU
+- `SESSAO_2025-10-27_MELHORIA_IMPORTACAO_TCU.md` - Melhorias na importação
+- `SESSAO_2025-01-27_RESUMOS_AUTOMATICOS_IA.md` - Sistema de resumos com IA
+- `SESSAO_2025-01-26_FASE_3_TCU_SCRAPER.md` - Fase 3 completa
 
 ## ⚠️ CRITICAL REMINDERS
 
@@ -46,7 +53,14 @@ npm run dev          # Start dev server with Turbopack at localhost:3000
 npm run build        # Production build with Turbopack
 npm start            # Start production server
 npm run lint         # Run ESLint
+npm run convert-tcu  # Convert TCU Excel (.xls) to .xlsx format
 ```
+
+### Production Build (Vercel)
+```bash
+npm run vercel-build # Complete build: Prisma generate + db push + populate ON numbers + build
+```
+This script runs automatically on Vercel and includes database setup steps.
 
 ### Database
 ```bash
@@ -222,6 +236,31 @@ projeto do site no claude/site-prof-barral/
    - Supports ratings (1-5 stars)
    - Can be linked to contact form or authenticated users
 
+13. **RecommendedSite & SiteToCourse** - Recommended legal sites
+   - Many-to-many relationship with courses
+   - Automatic favicon fetching
+   - Shared across multiple courses
+
+14. **CourseVideo** - YouTube videos by course
+   - Embeddable video links per course
+   - Automatic thumbnail generation
+   - Display order management
+
+15. **DocumentAnalysis** - AI/ML analytics
+   - Tracks AI classification performance
+   - Measures precision and suggestions acceptance
+   - Used for ML improvements
+
+**Important Document Fields (Fase 3-4):**
+- `isCommon` - Document appears in ALL courses (category filtering still applies)
+- `onNumber`, `onYear` - Numeric sorting for Orientações Normativas (ONs)
+- `tcuNumeroAcordao`, `tcuArea`, `tcuTema`, etc. - TCU enrichment fields
+- `aiClassification` - JSON with AI classification results
+- `feedbackRelevance`, `feedbackReasoning` - Admin feedback for ML
+- `summary`, `summaryHighlights` - AI-generated summaries
+- `entityType`, `enunciadoNumber` - Enunciados system (IBDA, INCP, CJF)
+- `adminNotes`, `publicNotes` - Structured observations system
+
 See `prisma/schema.prisma` for complete schema with indexes and constraints.
 
 ### Authentication System
@@ -297,6 +336,10 @@ See `prisma/schema.prisma` for complete schema with indexes and constraints.
 - Dashboard: QR code generation/management (list, create, delete, update)
 - Documents: upload individual files or bulk via Excel import
 - Excel Import: download template, validate, import with auto-classification
+- TCU Manager: unified interface for TCU documents at `/admin/documentos-tcu`
+  - Enrichment via web scraping
+  - AI-powered summaries and classification
+  - Bulk operations and feedback system
 - Blog: create/edit/delete posts with markdown editor
 - Publications: CRUD for books/articles/news with type-specific fields
 - Social Media: auto-publish blog posts to Instagram and LinkedIn (at `/admin/redes-sociais`)
@@ -414,6 +457,11 @@ See `prisma/schema.prisma` for complete schema with indexes and constraints.
 - `GET /api/cron/import-documents` - Auto import documents from scrapers (TCU, AGU) weekly (requires CRON_SECRET header)
 - `GET /api/cron/monthly-newsletter` - Send monthly newsletter with new documents (requires CRON_SECRET header)
 
+**AI/ML Endpoints (Fase 4):**
+- `POST /api/admin/generate-summary` - Generate AI summary for document (requires documentId)
+- `POST /api/admin/classify-documents` - Batch classify documents with AI feedback
+- `POST /api/admin/enrich-tcu-document` - Enrich TCU document via web scraping
+
 See `AUTOMACAO_CRON_JOBS.md` for detailed documentation on automation system.
 
 ### Rate Limiting & Security
@@ -485,6 +533,7 @@ const documents = await prisma.document.findMany({
 - `CRON_SECRET` - Protect cron job endpoints (generate random string)
 
 **Optional (for full functionality):**
+- `ANTHROPIC_API_KEY` - Claude AI for document summaries and advanced classification (Fase 4)
 - `MAILCHIMP_API_KEY`, `MAILCHIMP_SERVER_PREFIX`, `MAILCHIMP_AUDIENCE_ID` - Newsletter integration
 - `INSTAGRAM_ACCESS_TOKEN`, `INSTAGRAM_BUSINESS_ACCOUNT_ID` - Instagram auto-posting
 - `LINKEDIN_ACCESS_TOKEN`, `LINKEDIN_PERSON_URN` - LinkedIn auto-posting
@@ -622,11 +671,11 @@ Reference these files in the project for detailed info:
 - Full authentication system (QR code + email/password)
 - Admin panel with QR code management
 - Document upload (individual + Excel bulk import)
-- Auto-classification for documents
-- Multi-course document support
+- Auto-classification for documents with AI feedback system
+- Multi-course document support (one document, multiple courses)
 - Enrollment system with expiration tracking
 - Email notifications (welcome, verification, expiration warnings)
-- Protected download system
+- Protected download system with PDF watermarks
 - Access logging and audit trail
 - Blog and publications CRUD
 - Newsletter integration (MailChimp)
@@ -637,6 +686,12 @@ Reference these files in the project for detailed info:
 - Favorites/bookmarks for documents
 - Responsive design
 - Lifetime access upgrade flow
+- **TCU document scraper** with enrichment via AJAX
+- **AI-powered summaries** (Claude API integration)
+- **Classification feedback system** for ML improvements
+- **Enunciados system** (IBDA, INCP, CJF)
+- **Structured observations** for documents
+- **TCU Manager** unified admin interface
 
 **🚧 In Progress / Planned:**
 - Payment integration for lifetime upgrades (currently manual)
@@ -655,6 +710,11 @@ npx prisma generate
 
 # Check database schema
 npx prisma studio
+
+# Prisma engine not connected error (Windows)
+# Kill all Node.js processes and regenerate
+taskkill /F /IM node.exe
+npx prisma generate
 ```
 
 ### Email Not Sending
@@ -675,6 +735,21 @@ npx prisma studio
 3. Verify MIME type validation
 4. For Excel import, ensure files match names in spreadsheet
 
+### TCU Excel Conversion Issues
+```bash
+# Old .xls files from TCU need conversion to .xlsx
+npm run convert-tcu
+
+# Manual conversion (Windows with Excel installed)
+# The script uses COM automation to convert via Excel
+```
+
+### AI Features Not Working
+1. Verify `ANTHROPIC_API_KEY` in `.env.local` (optional, for summaries)
+2. Check API quota/billing at https://console.anthropic.com
+3. AI is used as fallback - basic features work without it
+4. Error logs appear in document's `aiClassification` field
+
 ### Build Errors
 ```bash
 # Clear Next.js cache
@@ -683,6 +758,12 @@ npm run build
 
 # Regenerate Prisma client
 npx prisma generate
+
+# Full clean rebuild
+rm -rf .next node_modules
+npm install
+npx prisma generate
+npm run build
 ```
 
 ### React Hooks Errors (Error #310, #301, etc.)
@@ -768,7 +849,36 @@ const { documents } = await response.json();
 - **Excel Import:** Heavily-used feature - maintain backward compatibility with existing templates
 - **Multi-course Documents:** One document can belong to multiple courses (comma-separated in Excel import)
 
-## Recent Critical Fixes
+## Recent Critical Fixes & Features
+
+### 2025-10-27: TCU Manager Unificado
+**Feature:** Unified admin interface for managing TCU documents
+- Single page with tabs for all TCU operations
+- Enrichment via web scraping (AJAX calls to TCU website)
+- AI-powered summaries and classification
+- Bulk operations and quality control
+**Session:** `SESSAO_2025-10-27_TCU_MANAGER_UNIFICADO.md`
+
+### 2025-10-27: Improved TCU Import
+**Improvements:** Enhanced Excel import handling for TCU documents
+- Better field mapping (tcuArea, tcuTema, tcuSubtema)
+- Automatic duplicate detection by title
+- Enrichment status tracking
+**Session:** `SESSAO_2025-10-27_MELHORIA_IMPORTACAO_TCU.md`
+
+### 2025-01-27: AI-Powered Summaries
+**Feature:** Automatic document summarization using Claude AI
+- Executive summaries for all documents
+- Key highlights extraction
+- Manual editing support for admin
+**Session:** `SESSAO_2025-01-27_RESUMOS_AUTOMATICOS_IA.md`
+
+### 2025-01-26: Classification Feedback System
+**Feature:** IA/ML feedback loop for document classification
+- Admin can rate AI classification accuracy
+- Improves future classifications via learning
+- Detailed reasoning tracking
+**Session:** `SESSAO_2025-01-26_CLASSIFICACAO_LOTE_IA.md`
 
 ### 2025-01-22: Área Restrita Document Loading
 **Issue:** Area restrita showing "Erro na Área Restrita" - documents not loading
@@ -782,7 +892,7 @@ const { documents } = await response.json();
 - Fixed React Hooks order in `app/area-restrita/page.tsx`
 - Fixed document fetching in favorites and history pages
 
-**Commit:** `e6f31fb` - See `SESSAO_2025-01-22_CORRECAO_AREA_RESTRITA.md` for complete details
+**Session:** `SESSAO_2025-01-22_CORRECAO_AREA_RESTRITA.md`
 
 **Test credentials:**
 - Email: `aluno@teste.com`

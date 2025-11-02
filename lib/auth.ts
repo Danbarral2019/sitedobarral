@@ -1,5 +1,6 @@
 import { jwtVerify, SignJWT } from 'jose';
 import { cookies } from 'next/headers';
+import { NextRequest } from 'next/server';
 
 // Tipos para o payload do JWT
 export interface AuthPayload {
@@ -8,6 +9,12 @@ export interface AuthPayload {
   role: 'admin' | 'student';
   validUntil?: string;
   turma?: string;
+}
+
+// Tipo para resultado de verificação de autenticação
+export interface AuthResult {
+  valid: boolean;
+  user?: AuthPayload;
 }
 
 // Chave secreta para assinar tokens (deve estar no .env)
@@ -142,4 +149,34 @@ export async function createAuthSession(payload: AuthPayload): Promise<string> {
 export async function destroyAuthSession(): Promise<void> {
   const cookieStore = await cookies();
   cookieStore.delete('auth-token');
+}
+
+/**
+ * Verifica autenticação a partir de um NextRequest
+ * Usado em rotas API que precisam verificar auth manualmente
+ */
+export async function verifyAuth(request: NextRequest): Promise<AuthResult> {
+  try {
+    // Obter token do cookie
+    const token = request.cookies.get('auth-token')?.value;
+
+    if (!token) {
+      return { valid: false };
+    }
+
+    // Verificar token
+    const user = await verifyToken(token);
+
+    if (!user) {
+      return { valid: false };
+    }
+
+    return {
+      valid: true,
+      user,
+    };
+  } catch (error) {
+    console.error('Erro ao verificar autenticação:', error);
+    return { valid: false };
+  }
 }
