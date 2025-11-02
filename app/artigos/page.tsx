@@ -166,40 +166,54 @@ export default function ArtigosIndexPage() {
 
         {/* Grupos Temáticos */}
         <div className="bg-white rounded-2xl shadow-lg border-2 border-gray-200 p-6 mb-8">
-          <div className="flex items-center gap-2 mb-4">
-            <BookOpen className="w-6 h-6 text-purple-600" />
-            <h2 className="text-2xl font-bold text-gray-900">
-              📂 Grupos Temáticos da Lei
-            </h2>
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center gap-2">
+              <BookOpen className="w-6 h-6 text-purple-600" />
+              <h2 className="text-2xl font-bold text-gray-900">
+                📂 Grupos Temáticos da Lei
+              </h2>
+            </div>
+            <span className="text-sm text-gray-600">
+              {LEI_14133_GRUPOS.length} grupos disponíveis
+            </span>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-            {GRUPOS_POPULARES.map(groupId => {
-              const group = getGroupById(groupId);
-              if (!group) return null;
+          <p className="text-sm text-gray-700 mb-4">
+            Navegue pela lei de forma temática, agrupando artigos relacionados por assunto
+          </p>
 
-              const isSelected = selectedGroup === groupId;
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+            {LEI_14133_GRUPOS.map(group => {
+              const isSelected = selectedGroup === group.id;
+              const isPopular = GRUPOS_POPULARES.includes(group.id);
 
               return (
                 <button
-                  key={groupId}
-                  onClick={() => setSelectedGroup(isSelected ? null : groupId)}
+                  key={group.id}
+                  onClick={() => setSelectedGroup(isSelected ? null : group.id)}
                   className={`text-left p-4 rounded-lg border-2 transition-all ${
                     isSelected
-                      ? 'border-blue-600 bg-blue-50'
+                      ? 'border-blue-600 bg-blue-50 shadow-md'
                       : 'border-gray-200 hover:border-blue-300 hover:bg-gray-50'
                   }`}
                 >
                   <div className="flex items-start gap-3">
                     <span className="text-3xl flex-shrink-0">{group.icon}</span>
                     <div className="flex-1 min-w-0">
-                      <h3 className="font-bold text-gray-900 mb-1">
-                        {group.title}
-                      </h3>
+                      <div className="flex items-center gap-2 mb-1">
+                        <h3 className="font-bold text-gray-900">
+                          {group.title}
+                        </h3>
+                        {isPopular && (
+                          <span className="px-1.5 py-0.5 bg-orange-100 text-orange-700 text-[10px] font-bold rounded">
+                            ⭐
+                          </span>
+                        )}
+                      </div>
                       <p className="text-xs text-gray-600 line-clamp-2 mb-2">
                         {group.description}
                       </p>
-                      <p className="text-xs text-gray-500">
+                      <p className="text-xs text-gray-500 font-medium">
                         {group.articles.length} artigos
                       </p>
                     </div>

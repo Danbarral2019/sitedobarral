@@ -21,6 +21,7 @@ import PDFExportPanel from '@/components/PDFExportPanel';
 import { GlossarySearchResults } from '@/components/GlossarySearchResults';
 import { ArticleAutocomplete } from '@/components/ArticleAutocomplete';
 import { TopArticlesWidget } from '@/components/TopArticlesWidget';
+import { ArticleTreeNavigator } from '@/components/ArticleTreeNavigator';
 
 interface DocumentType {
   id: string;
@@ -501,6 +502,17 @@ export default function AreaRestritaPage() {
                             search.updateFilters({
                               leiArticles: [articleNum]
                             });
+                          }}
+                        />
+                      </div>
+                    )}
+
+                    {/* Navegador da Estrutura da Lei - Apenas sem busca ativa */}
+                    {!search.isSearchActive && (
+                      <div className="mb-6">
+                        <ArticleTreeNavigator
+                          onArticleClick={(articleNum) => {
+                            router.push(`/artigo/${articleNum}`);
                           }}
                         />
                       </div>
