@@ -82,11 +82,6 @@ export default function NewGlossaryTermPage() {
     setIsLoading(true);
 
     try {
-      const tagsArray = formData.tags
-        .split(',')
-        .map(tag => tag.trim())
-        .filter(tag => tag.length > 0);
-
       const response = await fetch('/api/admin/glossary', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -94,12 +89,11 @@ export default function NewGlossaryTermPage() {
           term: formData.term,
           slug: formData.slug,
           shortDef: formData.shortDef || undefined,
-          longDef: formData.longDef,
+          definition: formData.longDef, // API espera "definition", não "longDef"
           category: formData.category,
-          legalBasis: formData.legalBasis || undefined,
-          order: formData.order,
-          isPublished: formData.isPublished,
-          tags: tagsArray,
+          externalUrl: formData.legalBasis || undefined, // legalBasis vira externalUrl
+          isPublic: formData.isPublished, // API espera "isPublic", não "isPublished"
+          // Campos order e tags não existem no schema atual
         }),
       });
 
