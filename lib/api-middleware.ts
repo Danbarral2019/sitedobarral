@@ -54,3 +54,28 @@ export function withAuth(handler: ApiHandler): ApiHandler {
     return handler(request, context);
   };
 }
+
+/**
+ * Helper function para verificar admin em APIs
+ * Retorna { error: true, response } se não for admin
+ * Retorna { error: false, user } se for admin
+ */
+export async function verifyAdmin(request: NextRequest): Promise<
+  | { error: true; response: NextResponse; user?: never }
+  | { error: false; response?: never; user: any }
+> {
+  const { getCurrentUser } = await import('./auth');
+  const user = await getCurrentUser();
+
+  if (!user || user.role !== 'admin') {
+    return {
+      error: true,
+      response: NextResponse.json(
+        { error: 'Acesso negado. Apenas administradores.' },
+        { status: 403 }
+      )
+    };
+  }
+
+  return { error: false, user };
+}

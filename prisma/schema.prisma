@@ -207,15 +207,20 @@ model AccessLog {
 
 // Favoritos dos usuários
 model Favorite {
-  id         String   @id @default(uuid())
-  userId     String
-  documentId String
-  courseId   String   // Para facilitar filtros por curso
-  createdAt  DateTime @default(now())
+  id                 String   @id @default(uuid())
+  userId             String
 
-  @@unique([userId, documentId])
+  // Suporta dois tipos de favoritos: documentos OU atos normativos
+  documentId         String?  // ID do documento (se for documento)
+  legislativeActId   String?  // ID do ato normativo (se for ato)
+
+  courseId           String?  // Para facilitar filtros por curso (apenas para documentos)
+  createdAt          DateTime @default(now())
+
+  @@unique([userId, documentId, legislativeActId])
   @@index([userId])
   @@index([courseId])
+  @@index([legislativeActId])
 }
 
 // Posts do Blog
@@ -486,6 +491,59 @@ model GlossaryTerm {
   @@index([slug])
   @@index([category])
   @@index([isPublic])
+}
+
+// Atos Normativos (Decretos, Portarias, INs, etc.)
+model LegislativeAct {
+  id          String   @id @default(uuid())
+
+  // Identificação do ato
+  type        String   // "decreto" | "portaria" | "in" | "ordem-servico" | "lei" | "medida-provisoria"
+  number      String   // "10.024" (número do ato)
+  year        Int      // 2019 (ano do ato)
+  fullNumber  String   @unique // "Decreto 10.024/2019" (identificador completo único)
+
+  // Conteúdo
+  title       String   // Título oficial do ato
+  ementa      String   @db.Text // Ementa oficial
+  summary     String?  @db.Text // Resumo didático para alunos
+
+  // Metadados estruturais
+  issuer      String   // "Presidência" | "MGI" | "SEGES" | "AGU" | "TCU" (órgão emissor)
+  publishDate DateTime // Data de publicação oficial
+  effectiveDate DateTime? // Data de vigência (pode ser diferente da publicação)
+
+  // Hierarquia normativa (1=mais alta, 5=mais baixa)
+  hierarchyLevel Int // 1=Lei, 2=Decreto, 3=Portaria, 4=IN, 5=Ordem de Serviço
+
+  // Relacionamento com Lei 14.133/2021
+  leiArticles String? // JSON array com números de artigos regulamentados (ex: ["75", "76"])
+
+  // Recursos e documentos
+  officialUrl String? // Link para Planalto/DOU
+  pdfUrl      String? // Link para PDF do ato
+  content     String? @db.Text // Texto completo do ato (opcional)
+
+  // Analytics
+  viewCount   Int     @default(0)
+
+  // Notificações
+  notifiedAt  DateTime? // Data em que alunos foram notificados sobre este ato
+
+  // Auditoria
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  createdBy   String?  // Email do admin
+
+  // Índices para otimização
+  @@index([type])
+  @@index([issuer])
+  @@index([year])
+  @@index([hierarchyLevel])
+  @@index([publishDate])
+  @@index([type, issuer])
+  @@index([year, type])
+  @@index([notifiedAt])
 }
 
 // Perguntas Frequentes (FAQ)

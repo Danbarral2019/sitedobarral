@@ -83,7 +83,8 @@
       "Bash(git pull:*)",
       "Bash(git checkout:*)",
       "Bash(npx docx:*)",
-      "Bash(git merge:*)"
+      "Bash(git merge:*)",
+      "Bash(nul)"
     ],
     "deny": [],
     "ask": []
