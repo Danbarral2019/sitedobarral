@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { useState, memo, useEffect, useRef } from 'react';
-import { Menu, X, ChevronDown, BookOpen, User, FileText, Mail, Home, LogIn, Award, Library, HelpCircle, Gavel, Scale } from 'lucide-react';
+import { Menu, X, ChevronDown, BookOpen, User, FileText, Mail, Home, LogIn, Award, Library, HelpCircle, Gavel, Scale, Search } from 'lucide-react';
 import { courses } from '@/data/courses';
 
 export const Header = memo(function Header() {
@@ -47,12 +47,20 @@ export const Header = memo(function Header() {
               <span>Início</span>
             </Link>
 
-            <Link 
-              href="/sobre" 
+            <Link
+              href="/sobre"
               className="flex items-center space-x-1 text-gray-700 hover:text-primary-600 transition-colors"
             >
               <User className="w-4 h-4" />
               <span>Sobre</span>
+            </Link>
+
+            <Link
+              href="/busca"
+              className="flex items-center space-x-1 text-gray-700 hover:text-primary-600 transition-colors"
+            >
+              <Search className="w-4 h-4" />
+              <span>Busca</span>
             </Link>
 
             <div className="relative" ref={coursesDropdownRef}>
@@ -177,6 +185,13 @@ export const Header = memo(function Header() {
               onClick={() => setIsMenuOpen(false)}
             >
               Sobre o Professor
+            </Link>
+            <Link
+              href="/busca"
+              className="block py-2 text-gray-700 hover:text-primary-600"
+              onClick={() => setIsMenuOpen(false)}
+            >
+              Busca Integrada
             </Link>
             <Link
               href="/cursos"

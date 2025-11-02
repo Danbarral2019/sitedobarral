@@ -1,8 +1,6 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Header } from '@/components/layout/Header';
-import { Footer } from '@/components/layout/Footer';
 import {
   Search, Filter, Scale, Calendar, Building, ChevronDown,
   ChevronUp, ExternalLink, Download, BookOpen, Eye,
@@ -128,10 +126,7 @@ export default function LegislacaoPage() {
   const hasActiveFilters = typeFilter || issuerFilter || yearFilter || searchTerm;
 
   return (
-    <div className="min-h-screen flex flex-col bg-gradient-to-b from-gray-50 to-white">
-      <Header />
-
-      <main className="flex-grow">
+    <main className="min-h-screen bg-gradient-to-b from-gray-50 to-white">
         {/* Hero Section */}
         <section className="bg-gradient-to-r from-blue-600 to-indigo-700 text-white py-16">
           <div className="container mx-auto px-4 max-w-6xl">
@@ -478,9 +473,6 @@ export default function LegislacaoPage() {
             </>
           )}
         </section>
-      </main>
-
-      <Footer />
-    </div>
+    </main>
   );
 }
