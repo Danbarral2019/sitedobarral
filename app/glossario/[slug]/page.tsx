@@ -1,7 +1,7 @@
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
 import ReactMarkdown from 'react-markdown';
-import { BookOpen, Home, ChevronRight, ExternalLink, Eye, FileText, Tag } from 'lucide-react';
+import { Home, ChevronRight, Eye, FileText, Tag } from 'lucide-react';
 
 interface RelatedDocument {
   id: string;
@@ -92,14 +92,16 @@ export default async function TermPage({ params }: { params: { slug: string } })
           </div>
 
           {/* Definition */}
-          <div className="prose max-w-none mt-6">
-            <ReactMarkdown>{term.definition}</ReactMarkdown>
+          <div className="mt-6">
+            <div className="prose prose-lg max-w-none prose-headings:text-gray-900 prose-p:text-gray-700 prose-p:text-justify prose-p:leading-relaxed prose-p:mb-4 prose-strong:text-gray-900 prose-strong:font-semibold prose-ul:my-4 prose-li:text-gray-700 prose-li:my-2">
+              <ReactMarkdown>{term.definition}</ReactMarkdown>
+            </div>
           </div>
         </div>
 
         {/* Lei Articles */}
         {term.leiArticles && term.leiArticles.length > 0 && (
-          <div className="bg-white rounded-lg shadow-sm border p-6 mb-6">
+          <div className="bg-white rounded-lg shadow-sm border p-8 mb-6">
             <h2 className="text-xl font-bold text-gray-900 mb-4 flex items-center gap-2">
               <FileText className="h-5 w-5 text-blue-600" />
               Artigos Relacionados da Lei 14.133/2021
@@ -114,24 +116,6 @@ export default async function TermPage({ params }: { params: { slug: string } })
                 </span>
               ))}
             </div>
-          </div>
-        )}
-
-        {/* External Link */}
-        {term.externalUrl && (
-          <div className="bg-blue-50 border border-blue-200 rounded-lg p-6 mb-6">
-            <h3 className="text-lg font-semibold text-blue-900 mb-2">
-              Referência Externa
-            </h3>
-            <a
-              href={term.externalUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center gap-2 text-blue-600 hover:text-blue-800 font-medium"
-            >
-              Consultar legislação oficial
-              <ExternalLink className="h-4 w-4" />
-            </a>
           </div>
         )}
 

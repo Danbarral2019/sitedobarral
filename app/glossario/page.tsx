@@ -170,7 +170,7 @@ export default function GlossarioPage() {
               {activeCategory && ` na categoria "${activeCategory}"`}
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="bg-white rounded-xl shadow-sm border border-gray-200 divide-y divide-gray-200">
               {filteredTerms.map((term) => (
                 <GlossaryTermCard key={term.id} term={term} />
               ))}
