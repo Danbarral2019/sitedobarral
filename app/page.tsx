@@ -1,8 +1,7 @@
 import Link from 'next/link';
 import Image from 'next/image';
 import dynamic from 'next/dynamic';
-import { ArrowRight, BookOpen, Users, Award, FileText, Star } from 'lucide-react';
-import { courses } from '@/data/courses';
+import { ArrowRight, BookOpen, Users, Award, FileText, Star, Scale, Gavel } from 'lucide-react';
 import NewsletterForm from '@/components/NewsletterForm';
 
 // Lazy load do carrossel de depoimentos (otimização de performance)
@@ -16,8 +15,6 @@ const TestimonialsCarousel = dynamic(() => import('@/components/TestimonialsCaro
 });
 
 export default function Home() {
-  const featuredCourses = courses.slice(0, 3);
-
   return (
     <main>
       <section className="text-white py-20 relative overflow-hidden" style={{background: 'linear-gradient(to bottom, #1e293b 0%, #334155 100%)'}}>
@@ -121,46 +118,122 @@ export default function Home() {
         </div>
       </section>
 
-      <section className="py-16 bg-white">
+      <section className="py-16 bg-gradient-to-b from-white to-gray-50">
         <div className="container mx-auto px-4">
           <div className="text-center mb-12">
             <div className="inline-block">
-              <h2 className="text-4xl font-bold text-gray-900 mb-2">Cursos em Destaque</h2>
+              <div className="flex items-center justify-center gap-3 mb-4">
+                <Scale className="w-10 h-10 text-blue-600" />
+                <h2 className="text-4xl font-bold text-gray-900">Legislação em Destaque</h2>
+              </div>
               <div className="h-1 w-32 bg-gradient-to-r from-blue-500 to-blue-600 rounded-full mx-auto"></div>
+              <p className="text-gray-600 mt-4 text-lg max-w-2xl mx-auto">
+                Acesse a legislação completa organizada por temas, com navegação intuitiva e conteúdo sempre atualizado
+              </p>
             </div>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {featuredCourses.map((course, index) => (
-              <div key={course.id} className="bg-white border-2 border-gray-200 rounded-xl overflow-hidden hover:border-blue-500 hover:shadow-2xl transition-all duration-300 group">
-                <div className="h-2 bg-gradient-to-r from-blue-500 to-blue-600"></div>
-                <div className="p-6">
-                  <div className="flex items-center gap-2 mb-4">
-                    <div className="w-10 h-10 bg-blue-50 rounded-lg flex items-center justify-center">
-                      <BookOpen className="w-5 h-5 text-blue-600" />
-                    </div>
-                    <span className="text-sm font-semibold text-blue-700 bg-blue-50 px-3 py-1 rounded-full">
-                      Curso {String(index + 1).padStart(2, '0')}
-                    </span>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-5xl mx-auto">
+            {/* Card Lei 14.133/2021 */}
+            <div className="group relative bg-white border-2 border-gray-200 rounded-2xl overflow-hidden hover:border-blue-500 hover:shadow-2xl transition-all duration-300">
+              <div className="absolute top-0 left-0 right-0 h-3 bg-gradient-to-r from-blue-600 to-blue-700"></div>
+              <div className="p-8">
+                <div className="flex items-center gap-3 mb-6">
+                  <div className="w-16 h-16 bg-gradient-to-br from-blue-600 to-blue-700 rounded-2xl flex items-center justify-center shadow-lg">
+                    <Gavel className="w-9 h-9 text-white" />
                   </div>
-                  <h3 className="text-xl font-bold mb-3 text-gray-900 group-hover:text-blue-600 transition-colors">{course.title}</h3>
-                  <p className="text-gray-700 mb-6 leading-relaxed">{course.shortDescription}</p>
-                  <Link
-                    href={`/cursos/${course.slug}`}
-                    className="text-blue-600 font-bold hover:text-blue-700 inline-flex items-center gap-2 group-hover:gap-3 transition-all"
-                  >
-                    Saiba mais
-                    <ArrowRight className="w-5 h-5" />
-                  </Link>
+                  <div>
+                    <div className="text-sm font-bold text-blue-700 bg-blue-50 px-3 py-1 rounded-full inline-block mb-1">
+                      Lei Federal
+                    </div>
+                    <h3 className="text-2xl font-bold text-gray-900">Lei 14.133/2021</h3>
+                  </div>
                 </div>
+
+                <p className="text-gray-700 mb-6 leading-relaxed text-lg">
+                  Navegue pelos <strong>193 artigos</strong> da Lei de Licitações e Contratos Administrativos, organizados por capítulos com navegação em árvore interativa.
+                </p>
+
+                <div className="space-y-3 mb-8">
+                  <div className="flex items-center gap-2 text-gray-600">
+                    <div className="w-2 h-2 bg-blue-600 rounded-full"></div>
+                    <span>Estrutura completa por capítulos e seções</span>
+                  </div>
+                  <div className="flex items-center gap-2 text-gray-600">
+                    <div className="w-2 h-2 bg-blue-600 rounded-full"></div>
+                    <span>Navegação hierárquica intuitiva</span>
+                  </div>
+                  <div className="flex items-center gap-2 text-gray-600">
+                    <div className="w-2 h-2 bg-blue-600 rounded-full"></div>
+                    <span>Links para documentos relacionados</span>
+                  </div>
+                </div>
+
+                <Link
+                  href="/artigos"
+                  className="w-full bg-gradient-to-r from-blue-600 to-blue-700 text-white px-6 py-4 rounded-xl font-bold hover:from-blue-700 hover:to-blue-800 transition-all inline-flex items-center justify-center gap-2 shadow-lg hover:shadow-xl group-hover:gap-3"
+                >
+                  Explorar 193 Artigos
+                  <ArrowRight className="w-5 h-5" />
+                </Link>
               </div>
-            ))}
+            </div>
+
+            {/* Card Atos Normativos */}
+            <div className="group relative bg-white border-2 border-gray-200 rounded-2xl overflow-hidden hover:border-indigo-500 hover:shadow-2xl transition-all duration-300">
+              <div className="absolute top-0 left-0 right-0 h-3 bg-gradient-to-r from-indigo-600 to-purple-600"></div>
+              <div className="p-8">
+                <div className="flex items-center gap-3 mb-6">
+                  <div className="w-16 h-16 bg-gradient-to-br from-indigo-600 to-purple-600 rounded-2xl flex items-center justify-center shadow-lg">
+                    <Scale className="w-9 h-9 text-white" />
+                  </div>
+                  <div>
+                    <div className="text-sm font-bold text-indigo-700 bg-indigo-50 px-3 py-1 rounded-full inline-block mb-1">
+                      Legislação Complementar
+                    </div>
+                    <h3 className="text-2xl font-bold text-gray-900">Atos Normativos</h3>
+                  </div>
+                </div>
+
+                <p className="text-gray-700 mb-6 leading-relaxed text-lg">
+                  Acesse <strong>decretos, portarias e instruções normativas</strong> que regulamentam a Lei 14.133/2021, com filtros por tipo, órgão e ano.
+                </p>
+
+                <div className="space-y-3 mb-8">
+                  <div className="flex items-center gap-2 text-gray-600">
+                    <div className="w-2 h-2 bg-indigo-600 rounded-full"></div>
+                    <span>Decretos regulamentadores</span>
+                  </div>
+                  <div className="flex items-center gap-2 text-gray-600">
+                    <div className="w-2 h-2 bg-indigo-600 rounded-full"></div>
+                    <span>Portarias e Instruções Normativas</span>
+                  </div>
+                  <div className="flex items-center gap-2 text-gray-600">
+                    <div className="w-2 h-2 bg-indigo-600 rounded-full"></div>
+                    <span>Busca avançada por palavra-chave</span>
+                  </div>
+                </div>
+
+                <Link
+                  href="/legislacao"
+                  className="w-full bg-gradient-to-r from-indigo-600 to-purple-600 text-white px-6 py-4 rounded-xl font-bold hover:from-indigo-700 hover:to-purple-700 transition-all inline-flex items-center justify-center gap-2 shadow-lg hover:shadow-xl group-hover:gap-3"
+                >
+                  Ver Atos Normativos
+                  <ArrowRight className="w-5 h-5" />
+                </Link>
+              </div>
+            </div>
           </div>
-          <div className="text-center mt-12">
+
+          {/* Link para ver todos os cursos (movido para baixo) */}
+          <div className="text-center mt-12 pt-8 border-t-2 border-gray-200">
+            <p className="text-gray-600 mb-4 text-lg">Interessado nos cursos especializados?</p>
             <Link
               href="/cursos"
-              className="bg-blue-600 text-white px-10 py-4 rounded-xl font-bold hover:bg-blue-700 transition-all inline-flex items-center gap-2 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
+              className="bg-white border-2 border-blue-600 text-blue-600 px-8 py-3 rounded-xl font-bold hover:bg-blue-600 hover:text-white transition-all inline-flex items-center gap-2"
             >
-              Ver todos os cursos
+              <BookOpen className="w-5 h-5" />
+              Ver Todos os Cursos
               <ArrowRight className="w-5 h-5" />
             </Link>
           </div>
