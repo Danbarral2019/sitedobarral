@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import AdminLayout from '@/components/AdminLayout';
 import {
   CheckCircle, XCircle, ExternalLink, Calendar, Tag,
@@ -37,7 +37,7 @@ export default function DocumentosPendentesPage() {
   const [filterPeriod, setFilterPeriod] = useState('all'); // all, today, week, month
 
   // Carregar documentos pendentes
-  const loadPendingDocuments = async () => {
+  const loadPendingDocuments = useCallback(async () => {
     setIsLoading(true);
     try {
       const params = new URLSearchParams();
@@ -58,11 +58,11 @@ export default function DocumentosPendentesPage() {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [filterCategory, filterPeriod, errorToast]);
 
   useEffect(() => {
     loadPendingDocuments();
-  }, [filterCategory, filterPeriod, loadPendingDocuments]);
+  }, [loadPendingDocuments]);
 
   // Selecionar/desselecionar documento
   function toggleSelection(id: string) {
