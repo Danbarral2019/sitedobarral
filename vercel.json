@@ -15,6 +15,10 @@
     {
       "path": "/api/cron/monthly-newsletter",
       "schedule": "0 9 1 * *"
+    },
+    {
+      "path": "/api/cron/import-dou",
+      "schedule": "0 10 * * *"
     }
   ]
 }

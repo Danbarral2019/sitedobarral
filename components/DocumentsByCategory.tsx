@@ -27,12 +27,18 @@ const categoryConfig: Record<string, { icon: string; color: string; label: strin
   'acordao': { icon: '⚖️', color: 'blue', label: 'Acórdãos' },
   'parecer': { icon: '📝', color: 'green', label: 'Pareceres' },
   'orientacao-normativa': { icon: '📋', color: 'indigo', label: 'Orientações Normativas' },
+  'instrucao-normativa': { icon: '📄', color: 'indigo', label: 'Instruções Normativas' },
+  'portaria': { icon: '📜', color: 'emerald', label: 'Portarias' },
+  'decreto': { icon: '📋', color: 'blue', label: 'Decretos' },
+  'lei': { icon: '⚖️', color: 'purple', label: 'Leis' },
+  'resolucao': { icon: '📜', color: 'cyan', label: 'Resoluções' },
   'artigo': { icon: '📑', color: 'purple', label: 'Artigos' },
   'edital': { icon: '📰', color: 'orange', label: 'Editais' },
   'apostila': { icon: '📖', color: 'indigo', label: 'Apostilas' },
   'link': { icon: '🔗', color: 'cyan', label: 'Links' },
   'video': { icon: '🎥', color: 'red', label: 'Vídeos' },
-  'outro': { icon: '📄', color: 'gray', label: 'Outros' },
+  'outros': { icon: '📄', color: 'gray', label: 'Outros' },
+  'outro': { icon: '📄', color: 'gray', label: 'Outros' }, // Fallback para singular
 };
 
 export default function DocumentsByCategory({
