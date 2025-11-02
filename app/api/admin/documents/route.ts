@@ -2,11 +2,18 @@ import { NextRequest, NextResponse } from 'next/server';
 import { withAdminAuth } from '@/lib/api-middleware';
 import { listDocuments, deleteDocument } from '@/lib/documents';
 
-// GET - Lista todos os documentos
-export const GET = withAdminAuth(async () => {
+// GET - Lista todos os documentos (com filtros opcionais)
+export const GET = withAdminAuth(async (request: NextRequest) => {
   try {
     console.log('[API] Iniciando listagem de documentos...');
-    const documents = await listDocuments();
+
+    // Extrair filtros da query string
+    const { searchParams } = new URL(request.url);
+    const reviewed = searchParams.get('reviewed');
+    const category = searchParams.get('category');
+    const period = searchParams.get('period');
+
+    const documents = await listDocuments({ reviewed, category, period });
     console.log('[API] Documentos carregados:', documents.length);
 
     return NextResponse.json({ documents });

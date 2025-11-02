@@ -63,12 +63,55 @@ export async function addDocument(
 }
 
 /**
- * Lista todos os documentos
+ * Lista todos os documentos (com filtros opcionais)
  */
-export async function listDocuments(): Promise<Document[]> {
+export async function listDocuments(filters?: {
+  reviewed?: string | null;
+  category?: string | null;
+  period?: string | null;
+}): Promise<Document[]> {
   try {
-    console.log('[listDocuments] Buscando documentos no banco...');
+    console.log('[listDocuments] Buscando documentos no banco com filtros:', filters);
+
+    // Construir where clause baseado nos filtros
+    const where: any = {};
+
+    // Filtro de revisão
+    if (filters?.reviewed !== undefined && filters.reviewed !== null) {
+      where.reviewed = filters.reviewed === 'true';
+    }
+
+    // Filtro de categoria
+    if (filters?.category) {
+      where.category = filters.category;
+    }
+
+    // Filtro de período (data de upload)
+    if (filters?.period && filters.period !== 'all') {
+      const now = new Date();
+      let dateFrom: Date;
+
+      switch (filters.period) {
+        case 'today':
+          dateFrom = new Date(now.setHours(0, 0, 0, 0));
+          break;
+        case 'week':
+          dateFrom = new Date(now.setDate(now.getDate() - 7));
+          break;
+        case 'month':
+          dateFrom = new Date(now.setMonth(now.getMonth() - 1));
+          break;
+        default:
+          dateFrom = new Date(0); // All time
+      }
+
+      where.uploadedAt = {
+        gte: dateFrom,
+      };
+    }
+
     const dbDocuments = await prisma.document.findMany({
+      where,
       orderBy: {
         uploadedAt: 'desc',
       },
