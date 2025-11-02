@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { usePathname } from 'next/navigation';
 import Link from 'next/link';
 import {
-  QrCode, ChevronLeft, ChevronRight, BarChart3, Mail, MessageSquare, Send, GraduationCap, Youtube, Globe, HelpCircle, BookOpen
+  QrCode, ChevronLeft, ChevronRight, BarChart3, Mail, MessageSquare, Send, GraduationCap, Youtube, Globe, HelpCircle, BookOpen, Menu, X
 } from 'lucide-react';
 
 interface AdminLayoutProps {
@@ -13,6 +13,7 @@ interface AdminLayoutProps {
 
 export default function AdminLayout({ children }: AdminLayoutProps) {
   const [isCollapsed, setIsCollapsed] = useState(false);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [unreadCounts, setUnreadCounts] = useState({ contatos: 0, depoimentos: 0, documentos: 0 });
   const pathname = usePathname();
 
@@ -174,11 +175,35 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
 
   return (
     <div className="flex min-h-screen bg-gray-50">
+      {/* Mobile Menu Button */}
+      <button
+        onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+        className="lg:hidden fixed top-4 left-4 z-50 p-3 bg-white rounded-lg shadow-lg border-2 border-gray-200 hover:bg-gray-50 transition-colors"
+        aria-label="Toggle menu"
+      >
+        {isMobileMenuOpen ? (
+          <X className="w-6 h-6 text-gray-900" />
+        ) : (
+          <Menu className="w-6 h-6 text-gray-900" />
+        )}
+      </button>
+
+      {/* Mobile Overlay */}
+      {isMobileMenuOpen && (
+        <div
+          className="lg:hidden fixed inset-0 bg-black bg-opacity-50 z-30"
+          onClick={() => setIsMobileMenuOpen(false)}
+        />
+      )}
+
       {/* Sidebar */}
       <aside
-        className={`${
-          isCollapsed ? 'w-20' : 'w-64'
-        } bg-white border-r border-gray-200 fixed h-full overflow-y-auto transition-all duration-300 z-40`}
+        className={`
+          ${isCollapsed ? 'w-20' : 'w-64'}
+          bg-white border-r border-gray-200 fixed h-full transition-all duration-300 z-40
+          lg:translate-x-0
+          ${isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full'}
+        `}
       >
         {/* Header */}
         <div className="p-4 border-b border-gray-200 flex items-center justify-between flex-shrink-0">
@@ -190,7 +215,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
           )}
           <button
             onClick={() => setIsCollapsed(!isCollapsed)}
-            className="p-2 rounded-lg hover:bg-gray-100 transition-colors ml-auto"
+            className="p-2 rounded-lg hover:bg-gray-100 transition-colors ml-auto hidden lg:block"
             title={isCollapsed ? 'Expandir menu' : 'Recolher menu'}
           >
             {isCollapsed ? (
@@ -201,17 +226,18 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
           </button>
         </div>
 
-        {/* Navigation */}
-        <nav className="p-3 flex-1 overflow-y-auto">
+        {/* Navigation - SCROLL ADICIONADO */}
+        <nav className="p-3 flex-1 overflow-y-auto max-h-[calc(100vh-180px)]">
           <div className="space-y-0.5">
             {menuItems.map((item) => {
               const Icon = item.icon;
               const active = isActive(item.path);
 
               return (
-                            <Link
+                <Link
                   key={item.path}
                   href={item.path}
+                  onClick={() => setIsMobileMenuOpen(false)}
                   className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
                     active
                       ? 'bg-blue-50 text-blue-700 font-semibold'
@@ -243,6 +269,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
               href="/area-restrita"
               target="_blank"
               rel="noopener noreferrer"
+              onClick={() => setIsMobileMenuOpen(false)}
               className="flex items-center gap-3 px-4 py-3 rounded-lg text-blue-700 hover:bg-blue-50 font-medium transition-colors"
               title={isCollapsed ? 'Área do Aluno (abre em nova aba)' : ''}
             >
@@ -258,6 +285,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
             </Link>
             <Link
               href="/"
+              onClick={() => setIsMobileMenuOpen(false)}
               className="flex items-center gap-3 px-4 py-3 rounded-lg text-gray-700 hover:bg-gray-100 font-medium transition-colors"
               title={isCollapsed ? 'Voltar ao Site' : ''}
             >
