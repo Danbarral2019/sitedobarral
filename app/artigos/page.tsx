@@ -1,13 +1,58 @@
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import Link from 'next/link';
-import { Search, FileText, BookOpen, ArrowRight } from 'lucide-react';
+import { Search, FileText, BookOpen, ArrowRight, TrendingUp, X } from 'lucide-react';
 import { LEI_14133_ARTIGOS, ARTIGOS_POPULARES, searchLeiArticles } from '@/data/lei-14133-artigos';
+import { LEI_14133_GRUPOS, GRUPOS_POPULARES, getGroupById } from '@/data/lei-14133-grupos';
+import { getArticleIcon, formatArticleNumber, getArticleBadgeClasses } from '@/lib/article-utils';
+import { ArticleTreeNavigator } from '@/components/ArticleTreeNavigator';
+
+interface ArticleStats {
+  numero: string;
+  documentCount: number;
+  viewCount: number;
+}
 
 export default function ArtigosIndexPage() {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCapitulo, setSelectedCapitulo] = useState<string>('');
+  const [selectedGroup, setSelectedGroup] = useState<string | null>(null);
+  const [stats, setStats] = useState<ArticleStats[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  // Buscar estatísticas dos artigos
+  useEffect(() => {
+    const fetchStats = async () => {
+      try {
+        const response = await fetch('/api/analytics/top-articles?limit=193');
+        if (response.ok) {
+          const data = await response.json();
+          setStats(data.articles || []);
+        }
+      } catch (error) {
+        console.error('Erro ao buscar estatísticas:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchStats();
+  }, []);
+
+  // Mapa de estatísticas
+  const statsMap = useMemo(() => {
+    const map: Record<string, ArticleStats> = {};
+    stats.forEach(stat => {
+      map[stat.numero] = stat;
+    });
+    return map;
+  }, [stats]);
+
+  // Top 10 para mapa de calor
+  const topArticles = useMemo(() => {
+    return stats.slice(0, 10);
+  }, [stats]);
 
   // Extrai capítulos únicos
   const capitulos = useMemo(() => {
@@ -22,9 +67,19 @@ export default function ArtigosIndexPage() {
   const filteredArticles = useMemo(() => {
     let articles = Object.values(LEI_14133_ARTIGOS);
 
+    // Filtro por grupo temático
+    if (selectedGroup) {
+      const group = getGroupById(selectedGroup);
+      if (group) {
+        articles = articles.filter(art => group.articles.includes(art.numero));
+      }
+    }
+
     // Filtro por busca
     if (searchTerm.trim()) {
-      articles = searchLeiArticles(searchTerm);
+      const searchResults = searchLeiArticles(searchTerm);
+      const searchNumeros = new Set(searchResults.map(a => a.numero));
+      articles = articles.filter(art => searchNumeros.has(art.numero));
     }
 
     // Filtro por capítulo
@@ -33,7 +88,7 @@ export default function ArtigosIndexPage() {
     }
 
     return articles.sort((a, b) => parseInt(a.numero) - parseInt(b.numero));
-  }, [searchTerm, selectedCapitulo]);
+  }, [searchTerm, selectedCapitulo, selectedGroup]);
 
   return (
     <main className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
@@ -71,6 +126,108 @@ export default function ArtigosIndexPage() {
 
       {/* Conteúdo */}
       <div className="max-w-7xl mx-auto px-4 py-12">
+        {/* Mapa de Calor - Top 10 */}
+        {!loading && topArticles.length > 0 && (
+          <div className="bg-white rounded-2xl shadow-lg border-2 border-gray-200 p-6 mb-8">
+            <div className="flex items-center gap-2 mb-4">
+              <TrendingUp className="w-6 h-6 text-orange-600" />
+              <h2 className="text-2xl font-bold text-gray-900">
+                🔥 Mapa de Calor - Artigos Mais Consultados
+              </h2>
+            </div>
+
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 lg:grid-cols-10 gap-3">
+              {topArticles.map((stat, index) => {
+                const intensity = Math.min(100, (stat.viewCount / topArticles[0].viewCount) * 100);
+                const bgColor = intensity > 75 ? 'from-red-500 to-red-600' :
+                               intensity > 50 ? 'from-orange-500 to-orange-600' :
+                               intensity > 25 ? 'from-yellow-500 to-yellow-600' : 'from-green-500 to-green-600';
+
+                return (
+                  <Link
+                    key={stat.numero}
+                    href={`/artigo/${stat.numero}`}
+                    className={`bg-gradient-to-br ${bgColor} text-white rounded-lg p-3 hover:scale-105 transition-transform shadow-lg`}
+                    title={`${formatArticleNumber(stat.numero)} - ${stat.documentCount} docs, ${stat.viewCount} views`}
+                  >
+                    <div className="text-center">
+                      <div className="text-2xl mb-1">{getArticleIcon(stat.numero)}</div>
+                      <div className="font-bold text-sm">{formatArticleNumber(stat.numero)}</div>
+                      <div className="text-[10px] opacity-90 mt-1">
+                        {stat.documentCount} docs
+                      </div>
+                    </div>
+                  </Link>
+                );
+              })}
+            </div>
+          </div>
+        )}
+
+        {/* Grupos Temáticos */}
+        <div className="bg-white rounded-2xl shadow-lg border-2 border-gray-200 p-6 mb-8">
+          <div className="flex items-center gap-2 mb-4">
+            <BookOpen className="w-6 h-6 text-purple-600" />
+            <h2 className="text-2xl font-bold text-gray-900">
+              📂 Grupos Temáticos da Lei
+            </h2>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+            {GRUPOS_POPULARES.map(groupId => {
+              const group = getGroupById(groupId);
+              if (!group) return null;
+
+              const isSelected = selectedGroup === groupId;
+
+              return (
+                <button
+                  key={groupId}
+                  onClick={() => setSelectedGroup(isSelected ? null : groupId)}
+                  className={`text-left p-4 rounded-lg border-2 transition-all ${
+                    isSelected
+                      ? 'border-blue-600 bg-blue-50'
+                      : 'border-gray-200 hover:border-blue-300 hover:bg-gray-50'
+                  }`}
+                >
+                  <div className="flex items-start gap-3">
+                    <span className="text-3xl flex-shrink-0">{group.icon}</span>
+                    <div className="flex-1 min-w-0">
+                      <h3 className="font-bold text-gray-900 mb-1">
+                        {group.title}
+                      </h3>
+                      <p className="text-xs text-gray-600 line-clamp-2 mb-2">
+                        {group.description}
+                      </p>
+                      <p className="text-xs text-gray-500">
+                        {group.articles.length} artigos
+                      </p>
+                    </div>
+                  </div>
+                </button>
+              );
+            })}
+          </div>
+
+          {selectedGroup && (
+            <button
+              onClick={() => setSelectedGroup(null)}
+              className="mt-4 flex items-center gap-2 text-sm text-blue-600 hover:text-blue-800 font-medium"
+            >
+              <X className="w-4 h-4" />
+              Limpar filtro de grupo ({getGroupById(selectedGroup)?.title})
+            </button>
+          )}
+        </div>
+
+        {/* Navegador em Árvore */}
+        <div className="mb-8">
+          <ArticleTreeNavigator
+            stats={statsMap}
+            onArticleClick={(num) => console.log('Clicked article:', num)}
+          />
+        </div>
+
         {/* Artigos Populares */}
         <div className="mb-12">
           <h2 className="text-3xl font-bold text-gray-900 mb-6 flex items-center gap-3">
@@ -137,16 +294,18 @@ export default function ArtigosIndexPage() {
           </div>
 
           {/* Resumo dos filtros */}
-          {(searchTerm || selectedCapitulo) && (
+          {(searchTerm || selectedCapitulo || selectedGroup) && (
             <div className="mt-4 pt-4 border-t border-gray-200">
               <div className="flex items-center justify-between">
                 <span className="text-sm text-gray-600">
                   Mostrando {filteredArticles.length} de 193 artigos
+                  {selectedGroup && ` no grupo "${getGroupById(selectedGroup)?.title}"`}
                 </span>
                 <button
                   onClick={() => {
                     setSearchTerm('');
                     setSelectedCapitulo('');
+                    setSelectedGroup(null);
                   }}
                   className="text-sm text-blue-600 hover:text-blue-800 font-medium"
                 >
@@ -172,6 +331,7 @@ export default function ArtigosIndexPage() {
                 onClick={() => {
                   setSearchTerm('');
                   setSelectedCapitulo('');
+                  setSelectedGroup(null);
                 }}
                 className="mt-4 px-6 py-2 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 transition-colors"
               >
@@ -182,6 +342,9 @@ export default function ArtigosIndexPage() {
             <div className="grid gap-4">
               {filteredArticles.map(article => {
                 const isPopular = ARTIGOS_POPULARES.includes(article.numero);
+                const stat = statsMap[article.numero];
+                const badgeClasses = getArticleBadgeClasses(article.numero, false);
+
                 return (
                   <Link
                     key={article.numero}
@@ -189,33 +352,47 @@ export default function ArtigosIndexPage() {
                     className="group block p-5 bg-gray-50 rounded-xl hover:bg-blue-50 transition-all border-2 border-transparent hover:border-blue-300"
                   >
                     <div className="flex items-start gap-4">
-                      <div className={`flex-shrink-0 w-20 h-20 rounded-lg flex items-center justify-center text-2xl font-bold ${
-                        isPopular
-                          ? 'bg-gradient-to-br from-orange-500 to-amber-500 text-white'
-                          : 'bg-blue-100 text-blue-700'
-                      }`}>
-                        {article.numero}
+                      <div className="flex-shrink-0">
+                        <div className={`w-20 h-20 rounded-lg flex flex-col items-center justify-center ${
+                          isPopular
+                            ? 'bg-gradient-to-br from-orange-500 to-amber-500 text-white'
+                            : 'bg-blue-100 text-blue-700'
+                        }`}>
+                          <div className="text-xl mb-1">{getArticleIcon(article.numero)}</div>
+                          <div className="text-sm font-bold">{article.numero}</div>
+                        </div>
                       </div>
                       <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-2 mb-2">
-                          <h3 className="text-lg font-bold text-gray-900 group-hover:text-blue-700 transition-colors">
-                            Artigo {article.numero}
-                          </h3>
+                        <div className="flex items-center gap-2 mb-2 flex-wrap">
+                          <span className={badgeClasses}>
+                            {formatArticleNumber(article.numero)}
+                          </span>
                           {isPopular && (
                             <span className="px-2 py-0.5 bg-orange-100 text-orange-700 text-xs font-bold rounded-full">
                               ⭐ Popular
                             </span>
+                          )}
+                          {stat && (stat.documentCount > 0 || stat.viewCount > 0) && (
+                            <div className="flex items-center gap-3 text-xs text-gray-600">
+                              {stat.documentCount > 0 && (
+                                <span className="flex items-center gap-1">
+                                  📄 {stat.documentCount} docs
+                                </span>
+                              )}
+                              {stat.viewCount > 0 && (
+                                <span className="flex items-center gap-1">
+                                  👁️ {stat.viewCount} views
+                                </span>
+                              )}
+                            </div>
                           )}
                         </div>
                         <p className="text-gray-700 mb-2 leading-relaxed">
                           {article.ementa}
                         </p>
                         <div className="flex flex-wrap gap-2 text-xs">
-                          <span className="px-2 py-1 bg-purple-100 text-purple-700 rounded font-medium">
-                            {article.capitulo}
-                          </span>
                           {article.secao && (
-                            <span className="px-2 py-1 bg-blue-100 text-blue-700 rounded font-medium">
+                            <span className="px-2 py-1 bg-indigo-100 text-indigo-700 rounded font-medium">
                               {article.secao}
                             </span>
                           )}

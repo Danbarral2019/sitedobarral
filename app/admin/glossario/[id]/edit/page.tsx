@@ -16,6 +16,8 @@ interface GlossaryTerm {
   longDef: string;
   category: string;
   legalBasis?: string;
+  leiArticles?: string;
+  relatedTerms?: string;
   order: number;
   isPublished: boolean;
   tags: string[];
@@ -39,6 +41,8 @@ export default function EditGlossaryTermPage() {
     longDef: '',
     category: 'conceitos-gerais',
     legalBasis: '',
+    leiArticles: '',
+    relatedTerms: '',
     order: 0,
     isPublished: false,
     tags: '',
@@ -55,6 +59,27 @@ export default function EditGlossaryTermPage() {
       if (response.ok) {
         const data = await response.json();
         setTerm(data.term);
+        // Parse JSON arrays to comma-separated strings for form display
+        const parseLeiArticles = (str?: string) => {
+          if (!str) return '';
+          try {
+            const arr = JSON.parse(str);
+            return Array.isArray(arr) ? arr.join(', ') : '';
+          } catch {
+            return '';
+          }
+        };
+
+        const parseRelatedTerms = (str?: string) => {
+          if (!str) return '';
+          try {
+            const arr = JSON.parse(str);
+            return Array.isArray(arr) ? arr.join(', ') : '';
+          } catch {
+            return '';
+          }
+        };
+
         setFormData({
           term: data.term.term,
           slug: data.term.slug,
@@ -62,6 +87,8 @@ export default function EditGlossaryTermPage() {
           longDef: data.term.longDef,
           category: data.term.category,
           legalBasis: data.term.legalBasis || '',
+          leiArticles: parseLeiArticles(data.term.leiArticles),
+          relatedTerms: parseRelatedTerms(data.term.relatedTerms),
           order: data.term.order,
           isPublished: data.term.isPublished,
           tags: data.term.tags?.join(', ') || '',
@@ -136,6 +163,15 @@ export default function EditGlossaryTermPage() {
     setIsSaving(true);
 
     try {
+      // Convert comma-separated strings to JSON arrays
+      const leiArticlesArray = formData.leiArticles
+        ? JSON.stringify(formData.leiArticles.split(',').map(s => s.trim()).filter(Boolean))
+        : undefined;
+
+      const relatedTermsArray = formData.relatedTerms
+        ? JSON.stringify(formData.relatedTerms.split(',').map(s => s.trim()).filter(Boolean))
+        : undefined;
+
       const response = await fetch(`/api/admin/glossary/${termId}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
@@ -147,6 +183,8 @@ export default function EditGlossaryTermPage() {
           category: formData.category,
           externalUrl: formData.legalBasis || undefined, // legalBasis vira externalUrl
           isPublic: formData.isPublished, // API espera "isPublic", não "isPublished"
+          leiArticles: leiArticlesArray,
+          relatedTerms: relatedTermsArray,
           // Campos order e tags não existem no schema atual
         }),
       });
@@ -390,6 +428,40 @@ export default function EditGlossaryTermPage() {
                 placeholder="Ex: Art. 75, Lei 14.133/2021"
                 className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
               />
+            </label>
+
+            <label className="block mt-4">
+              <div className="flex items-center gap-2 mb-2">
+                <Scale className="w-5 h-5 text-blue-700" />
+                <span className="text-sm font-bold text-gray-900">Artigos da Lei 14.133/2021</span>
+              </div>
+              <input
+                type="text"
+                value={formData.leiArticles}
+                onChange={(e) => setFormData({ ...formData, leiArticles: e.target.value })}
+                placeholder="Ex: 75, 76, 77 (números separados por vírgula)"
+                className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+              />
+              <p className="mt-1 text-xs text-gray-600">
+                Artigos relacionados que aparecerão como badges clicáveis
+              </p>
+            </label>
+
+            <label className="block mt-4">
+              <div className="flex items-center gap-2 mb-2">
+                <BookOpen className="w-5 h-5 text-purple-700" />
+                <span className="text-sm font-bold text-gray-900">Termos Correlatos</span>
+              </div>
+              <input
+                type="text"
+                value={formData.relatedTerms}
+                onChange={(e) => setFormData({ ...formData, relatedTerms: e.target.value })}
+                placeholder="Ex: pregao-eletronico, dispensa-licitacao (slugs separados por vírgula)"
+                className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+              />
+              <p className="mt-1 text-xs text-gray-600">
+                Slugs de outros termos do glossário que são relacionados
+              </p>
             </label>
 
             <label className="block mt-4">

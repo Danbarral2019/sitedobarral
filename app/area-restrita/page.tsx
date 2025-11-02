@@ -19,6 +19,8 @@ import SearchBar from '@/components/SearchBar';
 import SearchFilters from '@/components/SearchFilters';
 import PDFExportPanel from '@/components/PDFExportPanel';
 import { GlossarySearchResults } from '@/components/GlossarySearchResults';
+import { ArticleAutocomplete } from '@/components/ArticleAutocomplete';
+import { TopArticlesWidget } from '@/components/TopArticlesWidget';
 
 interface DocumentType {
   id: string;
@@ -424,17 +426,36 @@ export default function AreaRestritaPage() {
 
             {/* Barra de Busca - Topo Fixo */}
             {enrolledCourseIds.length > 0 && (
-              <SearchBar
-                value={search.searchTerm}
-                onChange={search.setSearchTerm}
-                onClear={search.clearSearch}
-                scope={search.scope}
-                onScopeToggle={search.toggleScope}
-                onFiltersClick={() => search.setIsFiltersOpen(true)}
-                activeFiltersCount={search.activeFiltersCount}
-                resultsCount={search.isSearchActive ? filteredDocuments.length : undefined}
-                currentCourseName={selectedCourse?.title}
-              />
+              <>
+                <SearchBar
+                  value={search.searchTerm}
+                  onChange={search.setSearchTerm}
+                  onClear={search.clearSearch}
+                  scope={search.scope}
+                  onScopeToggle={search.toggleScope}
+                  onFiltersClick={() => search.setIsFiltersOpen(true)}
+                  activeFiltersCount={search.activeFiltersCount}
+                  resultsCount={search.isSearchActive ? filteredDocuments.length : undefined}
+                  currentCourseName={selectedCourse?.title}
+                />
+
+                {/* Filtro de Artigos da Lei 14.133 */}
+                <div className="mb-6">
+                  <ArticleAutocomplete
+                    selectedArticles={search.filters.leiArticles}
+                    onSelect={(articleNum) => {
+                      search.updateFilters({
+                        leiArticles: [...search.filters.leiArticles, articleNum]
+                      });
+                    }}
+                    onRemove={(articleNum) => {
+                      search.updateFilters({
+                        leiArticles: search.filters.leiArticles.filter(a => a !== articleNum)
+                      });
+                    }}
+                  />
+                </div>
+              </>
             )}
 
             {/* Conteúdo do Curso Selecionado */}
@@ -469,6 +490,21 @@ export default function AreaRestritaPage() {
                         <span className="text-xs lg:text-sm font-medium">Duração: {selectedCourse.duration}</span>
                       </div>
                     </div>
+
+                    {/* Top 10 Artigos Mais Consultados - Apenas sem busca ativa */}
+                    {!search.isSearchActive && (
+                      <div className="mb-6">
+                        <TopArticlesWidget
+                          limit={10}
+                          showStats={true}
+                          onArticleClick={(articleNum) => {
+                            search.updateFilters({
+                              leiArticles: [articleNum]
+                            });
+                          }}
+                        />
+                      </div>
+                    )}
 
                     {/* Materiais Destacados (Apostila, Conteúdo, Bibliografia) - Apenas sem busca ativa */}
                     {!search.isSearchActive && (

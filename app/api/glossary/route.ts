@@ -34,9 +34,12 @@ export async function GET(request: NextRequest) {
           id: true,
           term: true,
           slug: true,
+          definition: true,
           shortDef: true,
           category: true,
           viewCount: true,
+          leiArticles: true,
+          relatedTerms: true,
         },
         orderBy: {
           term: 'asc',

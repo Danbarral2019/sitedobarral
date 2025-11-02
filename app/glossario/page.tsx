@@ -11,9 +11,12 @@ interface GlossaryTerm {
   id: string;
   term: string;
   slug: string;
+  definition: string;
   shortDef?: string | null;
   category?: string | null;
   viewCount: number;
+  leiArticles?: string | null;
+  relatedTerms?: string | null;
 }
 
 export default function GlossarioPage() {
@@ -24,6 +27,7 @@ export default function GlossarioPage() {
   const [searchQuery, setSearchQuery] = useState('');
   const [activeLetter, setActiveLetter] = useState<string | null>(null);
   const [activeCategory, setActiveCategory] = useState<string | null>(null);
+  const [expandedTermId, setExpandedTermId] = useState<string | null>(null);
 
   // Buscar todos os termos ao carregar
   useEffect(() => {
@@ -172,7 +176,12 @@ export default function GlossarioPage() {
 
             <div className="bg-white rounded-xl shadow-sm border border-gray-200 divide-y divide-gray-200">
               {filteredTerms.map((term) => (
-                <GlossaryTermCard key={term.id} term={term} />
+                <GlossaryTermCard
+                  key={term.id}
+                  term={term}
+                  isExpanded={expandedTermId === term.id}
+                  onToggle={() => setExpandedTermId(expandedTermId === term.id ? null : term.id)}
+                />
               ))}
             </div>
           </>

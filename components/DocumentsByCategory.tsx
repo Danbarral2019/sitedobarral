@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { ChevronDown, ChevronUp, FileText, Video, Heart } from 'lucide-react';
+import { ArticleBadges } from './ArticleBadges';
 
 interface Document {
   id: string;
@@ -10,6 +11,7 @@ interface Document {
   category: string;
   type: string;
   url?: string;
+  leiArticles?: string | null;
 }
 
 interface DocumentsByCategoryProps {
@@ -170,6 +172,19 @@ export default function DocumentsByCategory({
                                   <p className="text-xs lg:text-sm text-gray-600 mt-0.5 lg:mt-1 line-clamp-2">
                                     {truncateDescription(doc.description)}
                                   </p>
+                                )}
+                                {/* Badges de artigos da Lei 14.133 */}
+                                {doc.leiArticles && (
+                                  <div className="mt-2">
+                                    <ArticleBadges
+                                      leiArticles={doc.leiArticles}
+                                      maxVisible={3}
+                                      onArticleClick={(articleNum) => {
+                                        // Click na badge abre o documento - não precisa ação extra
+                                        console.log('Artigo clicado:', articleNum);
+                                      }}
+                                    />
+                                  </div>
                                 )}
                               </div>
                             </div>
