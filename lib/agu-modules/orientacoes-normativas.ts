@@ -16,6 +16,7 @@ import {
   truncate,
   extractTags,
   sleep,
+  extractDOUInfo,
 } from './helpers';
 import { findOrCreateWithVersioning } from './versioning';
 
@@ -108,6 +109,9 @@ export async function scrapeOrientacoesNormativas(
         ? onRaw.fundamentacaoLinks.slice(1)
         : undefined;
 
+      // Extrai informações do DOU se houver link
+      const douInfo = onRaw.linkDOU ? extractDOUInfo(onRaw.linkDOU) : null;
+
       const documento: AGUDocument = {
         tipo: 'orientacao-normativa',
         numero: onRaw.numero,
@@ -124,6 +128,12 @@ export async function scrapeOrientacoesNormativas(
         temas,
         cursosIds,
         versaoHistorica: onRaw.versaoHistorica,
+        // Dados do DOU (se disponíveis)
+        douUrl: douInfo?.douUrl,
+        douData: douInfo?.douData,
+        douSecao: douInfo?.douSecao,
+        douPagina: douInfo?.douPagina,
+        douEdicao: douInfo?.douEdicao,
       };
 
       documentos.push(documento);
@@ -397,6 +407,13 @@ function convertToDocumentData(aguDoc: AGUDocument) {
     // URLs alternativas
     alternativeUrls: aguDoc.urlsAlternativas ? JSON.stringify(aguDoc.urlsAlternativas) : undefined,
 
+    // Dados do DOU (Diário Oficial da União)
+    douUrl: aguDoc.douUrl || undefined,
+    douData: aguDoc.douData ? parseDateBR(aguDoc.douData) : undefined,
+    douSecao: aguDoc.douSecao || undefined,
+    douPagina: aguDoc.douPagina || undefined,
+    douEdicao: aguDoc.douEdicao || undefined,
+
     // Análise de IA
     aiClassification: JSON.stringify({
       category: 'orientacao-normativa',
@@ -409,6 +426,17 @@ function convertToDocumentData(aguDoc: AGUDocument) {
     // Conteúdo adicional
     content: aguDoc.descricao,
   };
+}
+
+/**
+ * Converte data brasileira (DD/MM/YYYY) para objeto Date
+ */
+function parseDateBR(dataBR: string): Date | undefined {
+  const match = dataBR.match(/(\d{1,2})\/(\d{1,2})\/(\d{4})/);
+  if (!match) return undefined;
+
+  const [, dia, mes, ano] = match;
+  return new Date(`${ano}-${mes.padStart(2, '0')}-${dia.padStart(2, '0')}`);
 }
 
 /**
