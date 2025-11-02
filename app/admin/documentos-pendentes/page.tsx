@@ -3,8 +3,8 @@
 import { useState, useEffect } from 'react';
 import AdminLayout from '@/components/AdminLayout';
 import {
-  CheckCircle, XCircle, Eye, ExternalLink, Calendar, Tag,
-  Filter, Search, Loader2, FileText, AlertCircle, Download
+  CheckCircle, XCircle, ExternalLink, Calendar, Tag,
+  Search, Loader2, FileText, AlertCircle
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
@@ -37,11 +37,7 @@ export default function DocumentosPendentesPage() {
   const [filterPeriod, setFilterPeriod] = useState('all'); // all, today, week, month
 
   // Carregar documentos pendentes
-  useEffect(() => {
-    loadPendingDocuments();
-  }, [filterCategory, filterPeriod]);
-
-  async function loadPendingDocuments() {
+  const loadPendingDocuments = async () => {
     setIsLoading(true);
     try {
       const params = new URLSearchParams();
@@ -62,7 +58,11 @@ export default function DocumentosPendentesPage() {
     } finally {
       setIsLoading(false);
     }
-  }
+  };
+
+  useEffect(() => {
+    loadPendingDocuments();
+  }, [filterCategory, filterPeriod, loadPendingDocuments]);
 
   // Selecionar/desselecionar documento
   function toggleSelection(id: string) {

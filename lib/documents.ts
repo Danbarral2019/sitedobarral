@@ -74,7 +74,11 @@ export async function listDocuments(filters?: {
     console.log('[listDocuments] Buscando documentos no banco com filtros:', filters);
 
     // Construir where clause baseado nos filtros
-    const where: any = {};
+    const where: {
+      reviewed?: boolean;
+      category?: string;
+      uploadedAt?: { gte: Date };
+    } = {};
 
     // Filtro de revisão
     if (filters?.reviewed !== undefined && filters.reviewed !== null) {
