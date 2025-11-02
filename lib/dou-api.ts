@@ -49,11 +49,13 @@ export interface DOUSearchResult {
   title: string;
   href: string;
   abstract: string;
-  date: string;
+  date: string; // DD/MM/YYYY
   id: string;
   hierarchyList: string[];
   hierarchyStr: string;
   artType: string;
+  score?: number; // Score para paginação
+  displayDate?: number; // Timestamp para paginação
 }
 
 /**
@@ -175,12 +177,16 @@ export class DOUClient {
           const lastItem = allResults[allResults.length - 1];
 
           const paginatedParams = new URLSearchParams(urlParams);
-          paginatedParams.set('id', lastItem.id);
-          paginatedParams.set('displayDate', lastItem.date);
-          paginatedParams.set('newPage', String(pageNum + 1));
+          paginatedParams.set('delta', '20'); // Items por página
           paginatedParams.set('currentPage', String(pageNum));
+          paginatedParams.set('newPage', String(pageNum + 1));
+          paginatedParams.set('score', String(lastItem.score || 0));
+          paginatedParams.set('id', lastItem.id);
+          paginatedParams.set('displayDate', String(lastItem.displayDate || dateToTimestamp(lastItem.date)));
 
           const paginatedUrl = `${this.baseUrl}?${paginatedParams.toString()}`;
+
+          console.log(`[DOU API] 🔗 URL paginação: ${paginatedUrl.substring(0, 150)}...`);
 
           const pageResponse = await fetch(paginatedUrl, {
             headers: {
@@ -239,6 +245,8 @@ export class DOUClient {
             hierarchyList: content.hierarchyList,
             hierarchyStr: content.hierarchyStr,
             artType: content.artType,
+            score: content.score || 0,
+            displayDate: dateToTimestamp(content.pubDate),
           };
 
           allResults.push(item);
@@ -355,4 +363,13 @@ function formatDateDDMMYYYY(date: Date): string {
   const month = String(date.getMonth() + 1).padStart(2, '0');
   const year = date.getFullYear();
   return `${day}-${month}-${year}`;
+}
+
+/**
+ * Converter data DD/MM/YYYY para timestamp em milissegundos
+ */
+function dateToTimestamp(dateStr: string): number {
+  const [day, month, year] = dateStr.split('/');
+  const date = new Date(`${year}-${month}-${day}`);
+  return date.getTime();
 }
