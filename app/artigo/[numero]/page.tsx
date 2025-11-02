@@ -446,7 +446,6 @@ export default function ArtigoPage() {
               </div>
             </div>
           </div>
-          </>
         )}
       </div>
     </main>
