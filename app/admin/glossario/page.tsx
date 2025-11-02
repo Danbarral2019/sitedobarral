@@ -12,14 +12,12 @@ interface GlossaryTerm {
   id: string;
   term: string;
   slug: string;
-  shortDef?: string;
-  longDef: string;
-  category: string;
-  legalBasis?: string;
-  order: number;
-  isPublished: boolean;
-  tags: string[];
-  views: number;
+  shortDef?: string | null;
+  definition: string;
+  category?: string | null;
+  externalUrl?: string | null;
+  isPublic: boolean;
+  viewCount: number;
   createdAt: string;
   updatedAt: string;
 }
@@ -81,8 +79,7 @@ export default function GlossarioAdminPage() {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          ...termData,
-          isPublished: !termData.isPublished,
+          isPublic: !termData.isPublic,
         }),
       });
 
@@ -99,10 +96,10 @@ export default function GlossarioAdminPage() {
 
   const filteredTerms = terms.filter(term => {
     const matchesSearch = term.term.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         term.longDef.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         term.definition.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          (term.shortDef && term.shortDef.toLowerCase().includes(searchTerm.toLowerCase()));
     const matchesCategory = selectedCategory === 'all' || term.category === selectedCategory;
-    const matchesPublished = !showPublishedOnly || term.isPublished;
+    const matchesPublished = !showPublishedOnly || term.isPublic;
 
     return matchesSearch && matchesCategory && matchesPublished;
   });
@@ -291,48 +288,32 @@ export default function GlossarioAdminPage() {
 
                     {/* Definição (preview) */}
                     <p className="text-gray-600 mb-3 line-clamp-2">
-                      {term.longDef.substring(0, 150)}...
+                      {term.definition.substring(0, 150)}...
                     </p>
 
                     {/* Meta info */}
                     <div className="flex flex-wrap items-center gap-3">
-                      <span className={`px-3 py-1 text-xs font-bold rounded-full ${getCategoryColor(term.category)}`}>
-                        {term.category}
-                      </span>
+                      {term.category && (
+                        <span className={`px-3 py-1 text-xs font-bold rounded-full ${getCategoryColor(term.category)}`}>
+                          {term.category}
+                        </span>
+                      )}
 
                       <span className="flex items-center gap-1 text-sm text-gray-600">
                         <Eye className="w-4 h-4" />
-                        {term.views} visualizações
+                        {term.viewCount} visualizações
                       </span>
 
-                      {term.legalBasis && (
+                      {term.externalUrl && (
                         <span className="flex items-center gap-1 text-sm text-orange-600">
                           <Scale className="w-4 h-4" />
-                          {term.legalBasis}
+                          {term.externalUrl}
                         </span>
                       )}
 
                       <span className="text-sm text-gray-500">
                         /{term.slug}
                       </span>
-
-                      {term.tags && term.tags.length > 0 && (
-                        <div className="flex items-center gap-1">
-                          {term.tags.slice(0, 3).map((tag, idx) => (
-                            <span
-                              key={idx}
-                              className="px-2 py-1 text-xs bg-gray-100 text-gray-700 rounded"
-                            >
-                              #{tag}
-                            </span>
-                          ))}
-                          {term.tags.length > 3 && (
-                            <span className="text-xs text-gray-500">
-                              +{term.tags.length - 3}
-                            </span>
-                          )}
-                        </div>
-                      )}
                     </div>
                   </div>
 
@@ -341,13 +322,13 @@ export default function GlossarioAdminPage() {
                     <button
                       onClick={() => handleTogglePublish(term)}
                       className={`p-2 rounded-lg transition-colors ${
-                        term.isPublished
+                        term.isPublic
                           ? 'bg-green-100 text-green-600 hover:bg-green-200'
                           : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
                       }`}
-                      title={term.isPublished ? 'Despublicar' : 'Publicar'}
+                      title={term.isPublic ? 'Despublicar' : 'Publicar'}
                     >
-                      {term.isPublished ? <Eye className="w-5 h-5" /> : <EyeOff className="w-5 h-5" />}
+                      {term.isPublic ? <Eye className="w-5 h-5" /> : <EyeOff className="w-5 h-5" />}
                     </button>
 
                     <button
