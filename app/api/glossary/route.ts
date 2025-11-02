@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 
+import { Prisma } from '@prisma/client';
 // GET /api/glossary - Listar todos os termos (com filtros opcionais)
 export async function GET(request: NextRequest) {
   try {
@@ -11,7 +12,7 @@ export async function GET(request: NextRequest) {
     const offset = parseInt(searchParams.get('offset') || '0');
 
     // Construir filtros
-    const where: any = {
+    const where: Prisma.GlossaryTermWhereInput = {
       isPublic: true,
     };
 

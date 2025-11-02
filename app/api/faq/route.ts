@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 
+import { Prisma } from '@prisma/client';
 // GET /api/faq - Listar todas as FAQs publicadas
 export async function GET(request: NextRequest) {
   try {
@@ -8,7 +9,7 @@ export async function GET(request: NextRequest) {
     const category = searchParams.get('category');
 
     // Construir filtros
-    const where: any = {
+    const where: Prisma.FAQWhereInput = {
       isPublished: true,
     };
 

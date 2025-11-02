@@ -53,7 +53,7 @@ export async function PUT(
     }
 
     // Preparar dados para atualização
-    const data: any = {};
+    const data: Prisma.GlossaryTermUpdateInput = {};
 
     if (term !== undefined) {
       data.term = term.trim();

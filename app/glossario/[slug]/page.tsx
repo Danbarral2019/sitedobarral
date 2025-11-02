@@ -3,6 +3,21 @@ import Link from 'next/link';
 import ReactMarkdown from 'react-markdown';
 import { BookOpen, Home, ChevronRight, ExternalLink, Eye, FileText, Tag } from 'lucide-react';
 
+interface RelatedDocument {
+  id: string;
+  title: string;
+  description?: string;
+  type: string;
+  category: string;
+}
+
+interface RelatedTerm {
+  id: string;
+  term: string;
+  slug: string;
+  shortDef?: string;
+}
+
 async function getTermBySlug(slug: string) {
   try {
     const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000';
@@ -127,7 +142,7 @@ export default async function TermPage({ params }: { params: { slug: string } })
               Documentos Relacionados
             </h2>
             <div className="space-y-3">
-              {term.relatedDocuments.map((doc: any) => (
+              {term.relatedDocuments.map((doc: RelatedDocument) => (
                 <div
                   key={doc.id}
                   className="p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors"
@@ -153,7 +168,7 @@ export default async function TermPage({ params }: { params: { slug: string } })
               Termos Relacionados
             </h2>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {term.relatedTerms.map((relatedTerm: any) => (
+              {term.relatedTerms.map((relatedTerm: RelatedTerm) => (
                 <Link
                   key={relatedTerm.id}
                   href={`/glossario/${relatedTerm.slug}`}

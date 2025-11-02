@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { verifyAuth } from '@/lib/auth';
+import { Prisma } from '@prisma/client';
 
 // GET /api/admin/faq - Listar todas as FAQs (incluindo não publicadas)
 export async function GET(request: NextRequest) {
@@ -16,7 +17,7 @@ export async function GET(request: NextRequest) {
     const isPublished = searchParams.get('isPublished');
 
     // Construir filtros
-    const where: any = {};
+    const where: Prisma.FAQWhereInput = {};
 
     if (category) {
       where.category = category;
@@ -87,14 +88,14 @@ export async function POST(request: NextRequest) {
     }
 
     // Preparar dados
-    const data: any = {
+    const data: Prisma.FAQCreateInput = {
       question: question.trim(),
       answer: answer.trim(),
       category: category.trim(),
       displayOrder,
       isPinned,
       isPublished,
-      createdBy: authResult.user.email,
+      createdBy: authResult.user?.email,
     };
 
     // Adicionar relacionamentos como JSON (se fornecidos)

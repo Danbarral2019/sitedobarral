@@ -41,7 +41,7 @@ export async function PUT(
     }
 
     // Preparar dados para atualização
-    const data: any = {};
+    const data: Prisma.FAQUpdateInput = {};
 
     if (question !== undefined) {
       data.question = question.trim();

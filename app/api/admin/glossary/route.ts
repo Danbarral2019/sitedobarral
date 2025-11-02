@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { verifyAuth } from '@/lib/auth';
+import { Prisma } from '@prisma/client';
 
 // Função helper para gerar slug
 function generateSlug(term: string): string {
@@ -30,7 +31,7 @@ export async function GET(request: NextRequest) {
     const offset = parseInt(searchParams.get('offset') || '0');
 
     // Construir filtros
-    const where: any = {};
+    const where: Prisma.GlossaryTermWhereInput = {};
 
     if (category) {
       where.category = category;
@@ -126,7 +127,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Preparar dados para salvar
-    const data: any = {
+    const data: Prisma.GlossaryTermCreateInput = {
       term: term.trim(),
       slug,
       definition: definition.trim(),
