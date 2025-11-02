@@ -1,458 +1,279 @@
 'use client';
 
-import { useState, useMemo, useEffect } from 'react';
+import { useState, useMemo } from 'react';
 import Link from 'next/link';
-import { Search, FileText, BookOpen, ArrowRight, TrendingUp, X } from 'lucide-react';
-import { LEI_14133_ARTIGOS, ARTIGOS_POPULARES, searchLeiArticles } from '@/data/lei-14133-artigos';
-import { LEI_14133_GRUPOS, GRUPOS_POPULARES, getGroupById } from '@/data/lei-14133-grupos';
-import { getArticleIcon, formatArticleNumber, getArticleBadgeClasses } from '@/lib/article-utils';
+import { Search, BookOpen, ArrowRight, FileText, X, List, FolderTree } from 'lucide-react';
+import { LEI_14133_ARTIGOS, searchLeiArticles } from '@/data/lei-14133-artigos';
+import { LEI_14133_GRUPOS, getGroupById } from '@/data/lei-14133-grupos';
+import { formatArticleNumber } from '@/lib/article-utils';
 import { ArticleTreeNavigator } from '@/components/ArticleTreeNavigator';
 
-interface ArticleStats {
-  numero: string;
-  documentCount: number;
-  viewCount: number;
-}
+type NavigationMode = 'articles' | 'groups';
 
 export default function ArtigosIndexPage() {
   const [searchTerm, setSearchTerm] = useState('');
-  const [selectedCapitulo, setSelectedCapitulo] = useState<string>('');
+  const [mode, setMode] = useState<NavigationMode>('articles');
   const [selectedGroup, setSelectedGroup] = useState<string | null>(null);
-  const [stats, setStats] = useState<ArticleStats[]>([]);
-  const [loading, setLoading] = useState(true);
 
-  // Buscar estatísticas dos artigos
-  useEffect(() => {
-    const fetchStats = async () => {
-      try {
-        const response = await fetch('/api/analytics/top-articles?limit=193');
-        if (response.ok) {
-          const data = await response.json();
-          setStats(data.articles || []);
-        }
-      } catch (error) {
-        console.error('Erro ao buscar estatísticas:', error);
-      } finally {
-        setLoading(false);
-      }
-    };
+  // Busca de artigos
+  const searchResults = useMemo(() => {
+    if (!searchTerm.trim()) return [];
+    return searchLeiArticles(searchTerm);
+  }, [searchTerm]);
 
-    fetchStats();
-  }, []);
-
-  // Mapa de estatísticas
-  const statsMap = useMemo(() => {
-    const map: Record<string, ArticleStats> = {};
-    stats.forEach(stat => {
-      map[stat.numero] = stat;
-    });
-    return map;
-  }, [stats]);
-
-  // Top 10 para mapa de calor
-  const topArticles = useMemo(() => {
-    return stats.slice(0, 10);
-  }, [stats]);
-
-  // Extrai capítulos únicos
-  const capitulos = useMemo(() => {
-    const caps = new Set<string>();
-    Object.values(LEI_14133_ARTIGOS).forEach(art => {
-      caps.add(art.capitulo);
-    });
-    return Array.from(caps).sort();
-  }, []);
-
-  // Filtra artigos
-  const filteredArticles = useMemo(() => {
-    let articles = Object.values(LEI_14133_ARTIGOS);
-
-    // Filtro por grupo temático
-    if (selectedGroup) {
-      const group = getGroupById(selectedGroup);
-      if (group) {
-        articles = articles.filter(art => group.articles.includes(art.numero));
-      }
-    }
-
-    // Filtro por busca
-    if (searchTerm.trim()) {
-      const searchResults = searchLeiArticles(searchTerm);
-      const searchNumeros = new Set(searchResults.map(a => a.numero));
-      articles = articles.filter(art => searchNumeros.has(art.numero));
-    }
-
-    // Filtro por capítulo
-    if (selectedCapitulo) {
-      articles = articles.filter(art => art.capitulo === selectedCapitulo);
-    }
-
-    return articles.sort((a, b) => parseInt(a.numero) - parseInt(b.numero));
-  }, [searchTerm, selectedCapitulo, selectedGroup]);
+  const hasSearch = searchTerm.trim().length > 0;
 
   return (
-    <main className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
-      {/* Header */}
-      <div className="bg-gradient-to-r from-blue-600 to-purple-600 text-white py-16">
-        <div className="max-w-7xl mx-auto px-4">
-          <div className="flex items-start gap-4 mb-6">
-            <BookOpen className="w-16 h-16 flex-shrink-0" />
-            <div>
-              <h1 className="text-5xl font-bold mb-4">
-                Lei 14.133/2021
-              </h1>
-              <p className="text-2xl text-white/90 mb-2">
-                Nova Lei de Licitações e Contratos Administrativos
-              </p>
-              <p className="text-lg text-white/80">
-                Explore todos os 193 artigos com materiais relacionados
-              </p>
+    <main className="min-h-screen bg-gray-50">
+      {/* Header Simplificado */}
+      <div className="bg-gradient-to-r from-blue-600 to-indigo-700 text-white py-12">
+        <div className="max-w-6xl mx-auto px-4">
+          <div className="flex items-center gap-4 mb-6">
+            <div className="w-16 h-16 bg-white/20 backdrop-blur rounded-2xl flex items-center justify-center">
+              <BookOpen className="w-10 h-10" />
             </div>
+            <div>
+              <h1 className="text-4xl font-bold mb-2">Lei 14.133/2021</h1>
+              <p className="text-xl text-blue-100">Nova Lei de Licitações e Contratos</p>
+            </div>
+          </div>
+
+          {/* Campo de Pesquisa Principal */}
+          <div className="relative max-w-3xl">
+            <Search className="absolute left-5 top-1/2 -translate-y-1/2 w-6 h-6 text-gray-400" />
+            <input
+              type="text"
+              placeholder="Pesquisar por número do artigo, palavra-chave ou tema..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="w-full pl-14 pr-12 py-5 text-lg text-gray-900 bg-white rounded-2xl border-2 border-transparent focus:border-white focus:ring-4 focus:ring-white/30 shadow-xl"
+            />
+            {searchTerm && (
+              <button
+                onClick={() => setSearchTerm('')}
+                className="absolute right-4 top-1/2 -translate-y-1/2 p-2 text-gray-400 hover:text-gray-600 transition-colors"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            )}
           </div>
 
           {/* Link para lei completa */}
-          <a
-            href="https://www.planalto.gov.br/ccivil_03/_ato2019-2022/2021/lei/l14133.htm"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-flex items-center gap-2 px-6 py-3 bg-white/20 backdrop-blur-sm text-white rounded-xl font-bold hover:bg-white/30 transition-all"
-          >
-            <FileText className="w-5 h-5" />
-            Ver Lei Completa no Planalto
-            <ArrowRight className="w-4 h-4" />
-          </a>
+          <div className="mt-6">
+            <a
+              href="https://www.planalto.gov.br/ccivil_03/_ato2019-2022/2021/lei/l14133.htm"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-2 px-5 py-2.5 bg-white/20 backdrop-blur text-white rounded-lg font-semibold hover:bg-white/30 transition-all text-sm"
+            >
+              <FileText className="w-4 h-4" />
+              Ver Lei Completa no Planalto
+              <ArrowRight className="w-4 h-4" />
+            </a>
+          </div>
         </div>
       </div>
 
-      {/* Conteúdo */}
-      <div className="max-w-7xl mx-auto px-4 py-12">
-        {/* Mapa de Calor - Top 10 */}
-        {!loading && topArticles.length > 0 && (
-          <div className="bg-white rounded-2xl shadow-lg border-2 border-gray-200 p-6 mb-8">
-            <div className="flex items-center gap-2 mb-4">
-              <TrendingUp className="w-6 h-6 text-orange-600" />
+      <div className="max-w-6xl mx-auto px-4 py-8">
+        {/* Resultados de Busca */}
+        {hasSearch ? (
+          <div className="bg-white rounded-2xl shadow-lg border-2 border-gray-200 p-8">
+            <div className="flex items-center justify-between mb-6">
               <h2 className="text-2xl font-bold text-gray-900">
-                🔥 Mapa de Calor - Artigos Mais Consultados
+                Resultados da Busca
               </h2>
+              <span className="text-sm text-gray-600">
+                {searchResults.length} {searchResults.length === 1 ? 'resultado' : 'resultados'}
+              </span>
             </div>
 
-            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 lg:grid-cols-10 gap-3">
-              {topArticles.map((stat, index) => {
-                const intensity = Math.min(100, (stat.viewCount / topArticles[0].viewCount) * 100);
-                const bgColor = intensity > 75 ? 'from-red-500 to-red-600' :
-                               intensity > 50 ? 'from-orange-500 to-orange-600' :
-                               intensity > 25 ? 'from-yellow-500 to-yellow-600' : 'from-green-500 to-green-600';
-
-                return (
-                  <Link
-                    key={stat.numero}
-                    href={`/artigo/${stat.numero}`}
-                    className={`bg-gradient-to-br ${bgColor} text-white rounded-lg p-3 hover:scale-105 transition-transform shadow-lg`}
-                    title={`${formatArticleNumber(stat.numero)} - ${stat.documentCount} docs, ${stat.viewCount} views`}
-                  >
-                    <div className="text-center">
-                      <div className="text-2xl mb-1">{getArticleIcon(stat.numero)}</div>
-                      <div className="font-bold text-sm">{formatArticleNumber(stat.numero)}</div>
-                      <div className="text-[10px] opacity-90 mt-1">
-                        {stat.documentCount} docs
-                      </div>
-                    </div>
-                  </Link>
-                );
-              })}
-            </div>
-          </div>
-        )}
-
-        {/* Grupos Temáticos */}
-        <div className="bg-white rounded-2xl shadow-lg border-2 border-gray-200 p-6 mb-8">
-          <div className="flex items-center justify-between mb-4">
-            <div className="flex items-center gap-2">
-              <BookOpen className="w-6 h-6 text-purple-600" />
-              <h2 className="text-2xl font-bold text-gray-900">
-                📂 Grupos Temáticos da Lei
-              </h2>
-            </div>
-            <span className="text-sm text-gray-600">
-              {LEI_14133_GRUPOS.length} grupos disponíveis
-            </span>
-          </div>
-
-          <p className="text-sm text-gray-700 mb-4">
-            Navegue pela lei de forma temática, agrupando artigos relacionados por assunto
-          </p>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-            {LEI_14133_GRUPOS.map(group => {
-              const isSelected = selectedGroup === group.id;
-              const isPopular = GRUPOS_POPULARES.includes(group.id);
-
-              return (
-                <button
-                  key={group.id}
-                  onClick={() => setSelectedGroup(isSelected ? null : group.id)}
-                  className={`text-left p-4 rounded-lg border-2 transition-all ${
-                    isSelected
-                      ? 'border-blue-600 bg-blue-50 shadow-md'
-                      : 'border-gray-200 hover:border-blue-300 hover:bg-gray-50'
-                  }`}
-                >
-                  <div className="flex items-start gap-3">
-                    <span className="text-3xl flex-shrink-0">{group.icon}</span>
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2 mb-1">
-                        <h3 className="font-bold text-gray-900">
-                          {group.title}
-                        </h3>
-                        {isPopular && (
-                          <span className="px-1.5 py-0.5 bg-orange-100 text-orange-700 text-[10px] font-bold rounded">
-                            ⭐
-                          </span>
-                        )}
-                      </div>
-                      <p className="text-xs text-gray-600 line-clamp-2 mb-2">
-                        {group.description}
-                      </p>
-                      <p className="text-xs text-gray-500 font-medium">
-                        {group.articles.length} artigos
-                      </p>
-                    </div>
-                  </div>
-                </button>
-              );
-            })}
-          </div>
-
-          {selectedGroup && (
-            <button
-              onClick={() => setSelectedGroup(null)}
-              className="mt-4 flex items-center gap-2 text-sm text-blue-600 hover:text-blue-800 font-medium"
-            >
-              <X className="w-4 h-4" />
-              Limpar filtro de grupo ({getGroupById(selectedGroup)?.title})
-            </button>
-          )}
-        </div>
-
-        {/* Navegador em Árvore */}
-        <div className="mb-8">
-          <ArticleTreeNavigator
-            stats={statsMap}
-            onArticleClick={(num) => console.log('Clicked article:', num)}
-          />
-        </div>
-
-        {/* Artigos Populares */}
-        <div className="mb-12">
-          <h2 className="text-3xl font-bold text-gray-900 mb-6 flex items-center gap-3">
-            <span className="text-4xl">⭐</span>
-            Artigos Mais Consultados
-          </h2>
-          <div className="grid md:grid-cols-3 lg:grid-cols-5 gap-4">
-            {ARTIGOS_POPULARES.map(numero => {
-              const article = LEI_14133_ARTIGOS[numero];
-              return (
-                <Link
-                  key={numero}
-                  href={`/artigo/${numero}`}
-                  className="group bg-white rounded-xl shadow-md hover:shadow-xl transition-all p-6 border-2 border-orange-200 hover:border-orange-400"
-                >
-                  <div className="text-3xl font-bold text-orange-600 mb-2">
-                    Art. {numero}
-                  </div>
-                  <p className="text-sm text-gray-600 line-clamp-3 group-hover:text-gray-900 transition-colors">
-                    {article.ementa}
-                  </p>
-                </Link>
-              );
-            })}
-          </div>
-        </div>
-
-        {/* Filtros */}
-        <div className="bg-white rounded-2xl shadow-lg p-6 mb-8 border-2 border-gray-200">
-          <div className="grid md:grid-cols-2 gap-4">
-            {/* Busca */}
-            <div>
-              <label className="block text-sm font-bold text-gray-900 mb-2">
-                🔍 Buscar Artigos
-              </label>
-              <div className="relative">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
-                <input
-                  type="text"
-                  placeholder="Digite número ou palavra-chave..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="w-full pl-10 pr-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-600 text-gray-900"
-                />
+            {searchResults.length === 0 ? (
+              <div className="text-center py-12">
+                <Search className="w-16 h-16 text-gray-300 mx-auto mb-4" />
+                <p className="text-gray-600 text-lg mb-2">Nenhum artigo encontrado</p>
+                <p className="text-gray-500">Tente usar outros termos de busca</p>
               </div>
-            </div>
-
-            {/* Filtro por Capítulo */}
-            <div>
-              <label className="block text-sm font-bold text-gray-900 mb-2">
-                📚 Filtrar por Capítulo
-              </label>
-              <select
-                value={selectedCapitulo}
-                onChange={(e) => setSelectedCapitulo(e.target.value)}
-                className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-600 text-gray-900"
-              >
-                <option value="">Todos os Capítulos</option>
-                {capitulos.map(cap => (
-                  <option key={cap} value={cap}>{cap}</option>
-                ))}
-              </select>
-            </div>
-          </div>
-
-          {/* Resumo dos filtros */}
-          {(searchTerm || selectedCapitulo || selectedGroup) && (
-            <div className="mt-4 pt-4 border-t border-gray-200">
-              <div className="flex items-center justify-between">
-                <span className="text-sm text-gray-600">
-                  Mostrando {filteredArticles.length} de 193 artigos
-                  {selectedGroup && ` no grupo "${getGroupById(selectedGroup)?.title}"`}
-                </span>
-                <button
-                  onClick={() => {
-                    setSearchTerm('');
-                    setSelectedCapitulo('');
-                    setSelectedGroup(null);
-                  }}
-                  className="text-sm text-blue-600 hover:text-blue-800 font-medium"
-                >
-                  Limpar Filtros
-                </button>
-              </div>
-            </div>
-          )}
-        </div>
-
-        {/* Lista de Artigos */}
-        <div className="bg-white rounded-2xl shadow-lg p-6 border-2 border-gray-200">
-          <h2 className="text-2xl font-bold text-gray-900 mb-6">
-            📋 Todos os Artigos ({filteredArticles.length})
-          </h2>
-
-          {filteredArticles.length === 0 ? (
-            <div className="text-center py-12">
-              <p className="text-gray-600 text-lg">
-                Nenhum artigo encontrado com os filtros selecionados.
-              </p>
-              <button
-                onClick={() => {
-                  setSearchTerm('');
-                  setSelectedCapitulo('');
-                  setSelectedGroup(null);
-                }}
-                className="mt-4 px-6 py-2 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 transition-colors"
-              >
-                Limpar Filtros
-              </button>
-            </div>
-          ) : (
-            <div className="grid gap-4">
-              {filteredArticles.map(article => {
-                const isPopular = ARTIGOS_POPULARES.includes(article.numero);
-                const stat = statsMap[article.numero];
-                const badgeClasses = getArticleBadgeClasses(article.numero, false);
-
-                return (
+            ) : (
+              <div className="space-y-4">
+                {searchResults.map(article => (
                   <Link
                     key={article.numero}
                     href={`/artigo/${article.numero}`}
-                    className="group block p-5 bg-gray-50 rounded-xl hover:bg-blue-50 transition-all border-2 border-transparent hover:border-blue-300"
+                    className="block p-6 bg-gray-50 rounded-xl border-2 border-gray-200 hover:border-blue-500 hover:bg-blue-50 transition-all group"
                   >
                     <div className="flex items-start gap-4">
-                      <div className="flex-shrink-0">
-                        <div className={`w-20 h-20 rounded-lg flex flex-col items-center justify-center ${
-                          isPopular
-                            ? 'bg-gradient-to-br from-orange-500 to-amber-500 text-white'
-                            : 'bg-blue-100 text-blue-700'
-                        }`}>
-                          <div className="text-xl mb-1">{getArticleIcon(article.numero)}</div>
-                          <div className="text-sm font-bold">{article.numero}</div>
-                        </div>
+                      <div className="flex-shrink-0 w-16 h-16 bg-blue-100 rounded-lg flex items-center justify-center text-blue-700 font-bold text-lg group-hover:bg-blue-200 transition-colors">
+                        {formatArticleNumber(article.numero)}
                       </div>
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-2 mb-2 flex-wrap">
-                          <span className={badgeClasses}>
-                            {formatArticleNumber(article.numero)}
-                          </span>
-                          {isPopular && (
-                            <span className="px-2 py-0.5 bg-orange-100 text-orange-700 text-xs font-bold rounded-full">
-                              ⭐ Popular
-                            </span>
-                          )}
-                          {stat && (stat.documentCount > 0 || stat.viewCount > 0) && (
-                            <div className="flex items-center gap-3 text-xs text-gray-600">
-                              {stat.documentCount > 0 && (
-                                <span className="flex items-center gap-1">
-                                  📄 {stat.documentCount} docs
-                                </span>
-                              )}
-                              {stat.viewCount > 0 && (
-                                <span className="flex items-center gap-1">
-                                  👁️ {stat.viewCount} views
-                                </span>
-                              )}
-                            </div>
-                          )}
-                        </div>
-                        <p className="text-gray-700 mb-2 leading-relaxed">
+                      <div className="flex-1">
+                        <div className="text-sm text-gray-600 mb-1">{article.capitulo}</div>
+                        <h3 className="text-lg font-bold text-gray-900 mb-2 group-hover:text-blue-700 transition-colors">
+                          {article.titulo}
+                        </h3>
+                        <p className="text-gray-700 leading-relaxed line-clamp-2">
                           {article.ementa}
                         </p>
-                        <div className="flex flex-wrap gap-2 text-xs">
-                          {article.secao && (
-                            <span className="px-2 py-1 bg-indigo-100 text-indigo-700 rounded font-medium">
-                              {article.secao}
-                            </span>
-                          )}
-                        </div>
                       </div>
-                      <ArrowRight className="w-6 h-6 text-gray-400 group-hover:text-blue-600 transition-colors flex-shrink-0" />
+                      <ArrowRight className="w-5 h-5 text-gray-400 group-hover:text-blue-600 group-hover:translate-x-1 transition-all flex-shrink-0 mt-2" />
                     </div>
                   </Link>
-                );
-              })}
+                ))}
+              </div>
+            )}
+          </div>
+        ) : (
+          <>
+            {/* Tabs de Navegação */}
+            <div className="flex items-center gap-4 mb-6 bg-white rounded-xl p-2 shadow-md border-2 border-gray-200">
+              <button
+                onClick={() => setMode('articles')}
+                className={`flex-1 flex items-center justify-center gap-2 px-6 py-3 rounded-lg font-bold transition-all ${
+                  mode === 'articles'
+                    ? 'bg-blue-600 text-white shadow-lg'
+                    : 'text-gray-700 hover:bg-gray-100'
+                }`}
+              >
+                <FolderTree className="w-5 h-5" />
+                Navegar por Artigos
+              </button>
+              <button
+                onClick={() => setMode('groups')}
+                className={`flex-1 flex items-center justify-center gap-2 px-6 py-3 rounded-lg font-bold transition-all ${
+                  mode === 'groups'
+                    ? 'bg-indigo-600 text-white shadow-lg'
+                    : 'text-gray-700 hover:bg-gray-100'
+                }`}
+              >
+                <List className="w-5 h-5" />
+                Navegar por Grupos Temáticos
+              </button>
             </div>
-          )}
-        </div>
 
-        {/* CTA Section */}
-        <div className="mt-12 grid md:grid-cols-2 gap-6">
-          <div className="bg-gradient-to-br from-orange-600 to-amber-600 rounded-2xl shadow-lg p-8 text-white">
-            <h3 className="text-2xl font-bold mb-3">
-              Aprofunde seus conhecimentos
-            </h3>
-            <p className="text-white/90 mb-6">
-              Conheça nossos cursos especializados em Lei 14.133/2021 e contratos administrativos
-            </p>
-            <Link
-              href="/cursos"
-              className="inline-block px-6 py-3 bg-white text-orange-600 rounded-xl font-bold hover:bg-orange-50 transition-colors shadow-md"
-            >
-              Ver Cursos Disponíveis
-            </Link>
-          </div>
+            {/* Conteúdo baseado no modo */}
+            {mode === 'articles' ? (
+              <div className="bg-white rounded-2xl shadow-lg border-2 border-gray-200 p-8">
+                <div className="mb-6">
+                  <h2 className="text-2xl font-bold text-gray-900 mb-2">
+                    Estrutura da Lei por Capítulos
+                  </h2>
+                  <p className="text-gray-600">
+                    Navegue pela estrutura hierárquica completa dos 193 artigos
+                  </p>
+                </div>
 
-          <div className="bg-gradient-to-br from-blue-600 to-purple-600 rounded-2xl shadow-lg p-8 text-white">
-            <h3 className="text-2xl font-bold mb-3">
-              Acesse conteúdo exclusivo
-            </h3>
-            <p className="text-white/90 mb-6">
-              Materiais complementares, apostilas e pareceres sobre os artigos da lei
-            </p>
-            <Link
-              href="/area-restrita"
-              className="inline-block px-6 py-3 bg-white text-blue-600 rounded-xl font-bold hover:bg-blue-50 transition-colors shadow-md"
-            >
-              Área Restrita
-            </Link>
-          </div>
-        </div>
+                <ArticleTreeNavigator />
+              </div>
+            ) : (
+              <div className="bg-white rounded-2xl shadow-lg border-2 border-gray-200 p-8">
+                <div className="mb-6">
+                  <h2 className="text-2xl font-bold text-gray-900 mb-2">
+                    Grupos Temáticos
+                  </h2>
+                  <p className="text-gray-600">
+                    {LEI_14133_GRUPOS.length} grupos organizados por assunto
+                  </p>
+                </div>
+
+                {selectedGroup ? (
+                  // Visualização de grupo selecionado
+                  (() => {
+                    const group = getGroupById(selectedGroup);
+                    if (!group) return null;
+
+                    return (
+                      <div>
+                        <button
+                          onClick={() => setSelectedGroup(null)}
+                          className="flex items-center gap-2 text-blue-600 hover:text-blue-700 font-semibold mb-6"
+                        >
+                          <ArrowRight className="w-5 h-5 rotate-180" />
+                          Voltar para todos os grupos
+                        </button>
+
+                        <div className="bg-gradient-to-r from-indigo-50 to-purple-50 rounded-xl p-6 mb-6 border-2 border-indigo-200">
+                          <div className="flex items-start gap-4">
+                            <div className="w-12 h-12 bg-indigo-600 rounded-xl flex items-center justify-center text-white text-2xl flex-shrink-0">
+                              {group.emoji}
+                            </div>
+                            <div className="flex-1">
+                              <h3 className="text-2xl font-bold text-gray-900 mb-2">
+                                {group.name}
+                              </h3>
+                              <p className="text-gray-700 leading-relaxed">
+                                {group.description}
+                              </p>
+                              <div className="mt-3 text-sm text-gray-600">
+                                <strong>{group.articles.length}</strong> artigos neste grupo
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+
+                        <div className="space-y-3">
+                          {group.articles.map(numero => {
+                            const article = LEI_14133_ARTIGOS[numero];
+                            if (!article) return null;
+
+                            return (
+                              <Link
+                                key={numero}
+                                href={`/artigo/${numero}`}
+                                className="block p-5 bg-gray-50 rounded-xl border-2 border-gray-200 hover:border-indigo-500 hover:bg-indigo-50 transition-all group"
+                              >
+                                <div className="flex items-start gap-4">
+                                  <div className="flex-shrink-0 w-14 h-14 bg-indigo-100 rounded-lg flex items-center justify-center text-indigo-700 font-bold group-hover:bg-indigo-200 transition-colors">
+                                    {formatArticleNumber(numero)}
+                                  </div>
+                                  <div className="flex-1">
+                                    <h4 className="font-bold text-gray-900 mb-1 group-hover:text-indigo-700 transition-colors">
+                                      {article.titulo}
+                                    </h4>
+                                    <p className="text-sm text-gray-600 line-clamp-2">
+                                      {article.ementa}
+                                    </p>
+                                  </div>
+                                  <ArrowRight className="w-5 h-5 text-gray-400 group-hover:text-indigo-600 group-hover:translate-x-1 transition-all flex-shrink-0 mt-2" />
+                                </div>
+                              </Link>
+                            );
+                          })}
+                        </div>
+                      </div>
+                    );
+                  })()
+                ) : (
+                  // Grid de grupos
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    {LEI_14133_GRUPOS.map(group => (
+                      <button
+                        key={group.id}
+                        onClick={() => setSelectedGroup(group.id)}
+                        className="text-left p-6 bg-gray-50 rounded-xl border-2 border-gray-200 hover:border-indigo-500 hover:bg-indigo-50 hover:shadow-lg transition-all group"
+                      >
+                        <div className="flex items-start gap-4 mb-3">
+                          <div className="w-12 h-12 bg-indigo-100 rounded-xl flex items-center justify-center text-2xl group-hover:bg-indigo-200 transition-colors flex-shrink-0">
+                            {group.emoji}
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <h3 className="font-bold text-gray-900 mb-1 group-hover:text-indigo-700 transition-colors">
+                              {group.name}
+                            </h3>
+                            <p className="text-sm text-gray-600">
+                              {group.articles.length} artigos
+                            </p>
+                          </div>
+                        </div>
+                        <p className="text-sm text-gray-700 line-clamp-2 leading-relaxed">
+                          {group.description}
+                        </p>
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
+          </>
+        )}
       </div>
     </main>
   );
