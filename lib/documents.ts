@@ -21,12 +21,14 @@ export async function addDocument(
   onYear?: number, // Ano da ON (para ordenação)
   entityType?: string, // Entidade do enunciado (IBDA, INCP, CJF)
   enunciadoNumber?: string, // Número do enunciado (formato flexível)
-  notes?: string // Observações/comentários do documento
+  notes?: string, // Observações/comentários do documento
+  content?: string // Conteúdo/trechos relevantes para busca textual
 ): Promise<Document> {
   const dbDocument = await prisma.document.create({
     data: {
       title,
       description: description || null,
+      content: content || null,
       type,
       category,
       courseId,

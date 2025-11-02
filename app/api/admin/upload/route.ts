@@ -13,6 +13,7 @@ export const POST = withAdminAuth(async (request: NextRequest) => {
     const courseId = formData.get('courseId') as string;
     const title = formData.get('title') as string;
     const description = formData.get('description') as string;
+    const content = formData.get('content') as string | null;
     const category = formData.get('category') as string;
     const isPublic = formData.get('isPublic') === 'true';
     const tags = formData.get('tags') as string;
@@ -83,7 +84,9 @@ export const POST = withAdminAuth(async (request: NextRequest) => {
         undefined, // onNumber
         undefined, // onYear
         entityType || undefined, // entityType para enunciados
-        enunciadoNumber || undefined // enunciadoNumber para enunciados
+        enunciadoNumber || undefined, // enunciadoNumber para enunciados
+        undefined, // notes
+        content || undefined // content para busca textual
       );
 
       createdDocuments.push(document);
