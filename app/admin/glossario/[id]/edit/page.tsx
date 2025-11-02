@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import AdminLayout from '@/components/AdminLayout';
 import {
-  Save, X, Eye, BookOpen, Grid, ArrowUpDown,
+  Save, X, Eye, BookOpen, Grid,
   AlertCircle, Scale, Link as LinkIcon, Loader2, BarChart3
 } from 'lucide-react';
 
@@ -18,7 +18,6 @@ interface GlossaryTerm {
   legalBasis?: string;
   leiArticles?: string;
   relatedTerms?: string;
-  order: number;
   isPublished: boolean;
   tags: string[];
   views: number;
@@ -42,7 +41,6 @@ export default function EditGlossaryTermPage() {
     category: 'conceitos-gerais',
     leiArticles: '',
     relatedTerms: '',
-    order: 0,
     isPublished: false,
   });
 
@@ -394,19 +392,6 @@ export default function EditGlossaryTermPage() {
                     <option key={cat.value} value={cat.value}>{cat.label}</option>
                   ))}
                 </select>
-              </label>
-
-              <label className="block">
-                <div className="flex items-center gap-2 mb-2">
-                  <ArrowUpDown className="w-5 h-5 text-gray-700" />
-                  <span className="text-sm font-bold text-gray-900">Ordem</span>
-                </div>
-                <input
-                  type="number"
-                  value={formData.order}
-                  onChange={(e) => setFormData({ ...formData, order: parseInt(e.target.value) || 0 })}
-                  className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-                />
               </label>
             </div>
 
