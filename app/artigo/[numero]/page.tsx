@@ -3,9 +3,10 @@
 import { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { Loader2, FileText, BookOpen, ArrowLeft, ExternalLink } from 'lucide-react';
+import { Loader2, FileText, BookOpen, ArrowLeft, ExternalLink, BarChart3, Clock, TrendingUp, Users } from 'lucide-react';
 import { LEI_14133_ARTIGOS, LeiArticle } from '@/data/lei-14133-artigos';
 import { ArticleRelationshipGraph } from '@/components/ArticleRelationshipGraph';
+import { ArticleBadges } from '@/components/ArticleBadges';
 
 interface Document {
   id: string;
@@ -16,6 +17,8 @@ interface Document {
   courseId: string;
   isPublic: boolean;
   url?: string;
+  uploadedAt?: string;
+  leiArticles?: string | null;
 }
 
 interface BlogPost {
@@ -134,7 +137,84 @@ export default function ArtigoPage() {
             <Loader2 className="w-8 h-8 animate-spin text-blue-600" />
           </div>
         ) : (
-          <div className="grid lg:grid-cols-3 gap-8">
+          <>
+            {/* Seção de Estatísticas */}
+            <div className="mb-8 grid grid-cols-2 md:grid-cols-4 gap-4">
+              {/* Total de Documentos */}
+              <div className="bg-white rounded-xl shadow-md p-4 border-2 border-blue-200">
+                <div className="flex items-center gap-3">
+                  <div className="p-2 bg-blue-100 rounded-lg">
+                    <FileText className="w-5 h-5 text-blue-600" />
+                  </div>
+                  <div>
+                    <div className="text-2xl font-bold text-gray-900">
+                      {relatedDocuments.length}
+                    </div>
+                    <div className="text-xs text-gray-600">
+                      {relatedDocuments.length === 1 ? 'Documento' : 'Documentos'}
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Posts do Blog */}
+              <div className="bg-white rounded-xl shadow-md p-4 border-2 border-purple-200">
+                <div className="flex items-center gap-3">
+                  <div className="p-2 bg-purple-100 rounded-lg">
+                    <BookOpen className="w-5 h-5 text-purple-600" />
+                  </div>
+                  <div>
+                    <div className="text-2xl font-bold text-gray-900">
+                      {relatedPosts.length}
+                    </div>
+                    <div className="text-xs text-gray-600">
+                      {relatedPosts.length === 1 ? 'Post' : 'Posts'}
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Documentos Públicos */}
+              <div className="bg-white rounded-xl shadow-md p-4 border-2 border-green-200">
+                <div className="flex items-center gap-3">
+                  <div className="p-2 bg-green-100 rounded-lg">
+                    <Users className="w-5 h-5 text-green-600" />
+                  </div>
+                  <div>
+                    <div className="text-2xl font-bold text-gray-900">
+                      {publicDocuments.length}
+                    </div>
+                    <div className="text-xs text-gray-600">
+                      {publicDocuments.length === 1 ? 'Público' : 'Públicos'}
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Última Atualização */}
+              <div className="bg-white rounded-xl shadow-md p-4 border-2 border-orange-200">
+                <div className="flex items-center gap-3">
+                  <div className="p-2 bg-orange-100 rounded-lg">
+                    <Clock className="w-5 h-5 text-orange-600" />
+                  </div>
+                  <div>
+                    <div className="text-sm font-bold text-gray-900">
+                      {relatedDocuments.length > 0 && relatedDocuments[0].uploadedAt
+                        ? new Date(relatedDocuments[0].uploadedAt).toLocaleDateString('pt-BR', {
+                            day: '2-digit',
+                            month: 'short'
+                          })
+                        : 'N/A'}
+                    </div>
+                    <div className="text-xs text-gray-600">
+                      Atualização
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div className="grid lg:grid-cols-3 gap-8">
             {/* Coluna Principal */}
             <div className="lg:col-span-2 space-y-8">
               {/* Link para texto completo */}
@@ -196,8 +276,9 @@ export default function ArtigoPage() {
               {/* Documentos Públicos */}
               {publicDocuments.length > 0 && (
                 <div className="bg-white rounded-2xl shadow-lg p-6 border-2 border-gray-200">
-                  <h2 className="text-2xl font-bold text-gray-900 mb-6">
-                    📄 Documentos Públicos ({publicDocuments.length})
+                  <h2 className="text-2xl font-bold text-gray-900 mb-6 flex items-center gap-2">
+                    <FileText className="w-6 h-6 text-green-600" />
+                    Documentos Públicos ({publicDocuments.length})
                   </h2>
                   <div className="space-y-3">
                     {publicDocuments.map((doc) => (
@@ -205,21 +286,38 @@ export default function ArtigoPage() {
                         key={doc.id}
                         className="p-4 bg-gray-50 rounded-lg border-2 border-gray-200 hover:border-green-300 transition-colors"
                       >
-                        <h3 className="font-bold text-gray-900 mb-1">
-                          {doc.title}
-                        </h3>
+                        <div className="flex items-start justify-between gap-3 mb-2">
+                          <h3 className="font-bold text-gray-900 flex-1">
+                            {doc.title}
+                          </h3>
+                          <span className="px-2 py-1 bg-green-100 text-green-800 rounded font-medium text-xs flex-shrink-0">
+                            Público
+                          </span>
+                        </div>
+
                         {doc.description && (
-                          <p className="text-sm text-gray-600 mb-2">
+                          <p className="text-sm text-gray-600 mb-3">
                             {doc.description}
                           </p>
                         )}
-                        <div className="flex items-center gap-2 text-xs text-gray-500">
-                          <span className="px-2 py-1 bg-green-100 text-green-800 rounded font-medium">
-                            Público
-                          </span>
-                          <span className="px-2 py-1 bg-gray-200 text-gray-700 rounded font-medium">
+
+                        <div className="flex flex-wrap items-center gap-2">
+                          <span className="px-2 py-1 bg-gray-200 text-gray-700 rounded font-medium text-xs">
                             {doc.category}
                           </span>
+
+                          {doc.leiArticles && (
+                            <div className="flex-1">
+                              <ArticleBadges
+                                leiArticles={doc.leiArticles}
+                                maxVisible={3}
+                                primaryArticle={numero}
+                                onArticleClick={(articleNum) => {
+                                  router.push(`/artigo/${articleNum}`);
+                                }}
+                              />
+                            </div>
+                          )}
                         </div>
                       </div>
                     ))}
@@ -227,39 +325,91 @@ export default function ArtigoPage() {
                 </div>
               )}
 
-              {/* Documentos Restritos */}
+              {/* Documentos Restritos - CTA Melhorado */}
               {restrictedDocuments.length > 0 && (
-                <div className="bg-white rounded-2xl shadow-lg p-6 border-2 border-blue-200">
-                  <h2 className="text-2xl font-bold text-gray-900 mb-4">
-                    🔒 Documentos Exclusivos ({restrictedDocuments.length})
-                  </h2>
-                  <p className="text-gray-600 mb-4">
-                    Acesse a área restrita para visualizar materiais exclusivos relacionados a este artigo.
-                  </p>
-                  <Link
-                    href="/area-restrita"
-                    className="inline-flex items-center gap-2 px-6 py-3 bg-blue-600 text-white rounded-xl font-bold hover:bg-blue-700 transition-all shadow-md"
-                  >
-                    Acessar Área Restrita
-                  </Link>
+                <div className="bg-gradient-to-br from-blue-600 to-purple-600 rounded-2xl shadow-xl p-8 text-white">
+                  <div className="flex items-start gap-4 mb-4">
+                    <div className="p-3 bg-white/20 backdrop-blur-sm rounded-xl">
+                      <FileText className="w-8 h-8" />
+                    </div>
+                    <div>
+                      <h2 className="text-2xl font-bold mb-2">
+                        {restrictedDocuments.length} {restrictedDocuments.length === 1 ? 'Documento Exclusivo' : 'Documentos Exclusivos'}
+                      </h2>
+                      <p className="text-white/90 text-sm">
+                        Material adicional disponível para alunos matriculados
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* Preview dos tipos de documentos restritos */}
+                  <div className="mb-6 flex flex-wrap gap-2">
+                    {[...new Set(restrictedDocuments.map(d => d.category))].slice(0, 4).map((category) => (
+                      <span key={category} className="px-3 py-1 bg-white/20 backdrop-blur-sm rounded-full text-xs font-medium">
+                        {category}
+                      </span>
+                    ))}
+                    {[...new Set(restrictedDocuments.map(d => d.category))].length > 4 && (
+                      <span className="px-3 py-1 bg-white/20 backdrop-blur-sm rounded-full text-xs font-medium">
+                        +{[...new Set(restrictedDocuments.map(d => d.category))].length - 4} mais
+                      </span>
+                    )}
+                  </div>
+
+                  <div className="flex flex-col sm:flex-row gap-3">
+                    <Link
+                      href="/area-restrita"
+                      className="flex-1 text-center px-6 py-3 bg-white text-blue-600 rounded-xl font-bold hover:bg-blue-50 transition-all shadow-lg"
+                    >
+                      Acessar Área Restrita
+                    </Link>
+                    <Link
+                      href="/cursos"
+                      className="flex-1 text-center px-6 py-3 bg-white/20 backdrop-blur-sm text-white rounded-xl font-bold hover:bg-white/30 transition-all border-2 border-white/30"
+                    >
+                      Conhecer Cursos
+                    </Link>
+                  </div>
                 </div>
               )}
 
               {/* Mensagem se não houver conteúdo */}
               {relatedPosts.length === 0 && relatedDocuments.length === 0 && (
-                <div className="bg-yellow-50 rounded-2xl shadow-lg p-8 border-2 border-yellow-200 text-center">
-                  <p className="text-gray-700 text-lg">
-                    Ainda não há conteúdo específico catalogado para este artigo.
-                  </p>
-                  <p className="text-gray-600 mt-2">
-                    Navegue pelos nossos cursos e materiais para encontrar conteúdo relacionado.
-                  </p>
-                  <Link
-                    href="/cursos"
-                    className="inline-block mt-4 px-6 py-3 bg-yellow-600 text-white rounded-xl font-bold hover:bg-yellow-700 transition-all"
-                  >
-                    Ver Cursos
-                  </Link>
+                <div className="bg-gradient-to-br from-yellow-50 to-orange-50 rounded-2xl shadow-lg p-8 border-2 border-yellow-200">
+                  <div className="text-center mb-6">
+                    <div className="inline-flex p-4 bg-yellow-100 rounded-full mb-4">
+                      <TrendingUp className="w-8 h-8 text-yellow-600" />
+                    </div>
+                    <h3 className="text-2xl font-bold text-gray-900 mb-2">
+                      Conteúdo em Desenvolvimento
+                    </h3>
+                    <p className="text-gray-700 text-lg mb-2">
+                      Ainda não há conteúdo específico catalogado para este artigo.
+                    </p>
+                    <p className="text-gray-600">
+                      Estamos constantemente atualizando nosso acervo com novos materiais.
+                    </p>
+                  </div>
+
+                  <div className="grid sm:grid-cols-2 gap-4">
+                    <Link
+                      href="/cursos"
+                      className="flex flex-col items-center p-4 bg-white rounded-xl hover:shadow-md transition-all border-2 border-transparent hover:border-yellow-300"
+                    >
+                      <BookOpen className="w-6 h-6 text-yellow-600 mb-2" />
+                      <span className="font-bold text-gray-900">Ver Cursos</span>
+                      <span className="text-xs text-gray-600 mt-1">Explore nossos cursos especializados</span>
+                    </Link>
+
+                    <Link
+                      href="/area-restrita"
+                      className="flex flex-col items-center p-4 bg-white rounded-xl hover:shadow-md transition-all border-2 border-transparent hover:border-blue-300"
+                    >
+                      <FileText className="w-6 h-6 text-blue-600 mb-2" />
+                      <span className="font-bold text-gray-900">Área Restrita</span>
+                      <span className="text-xs text-gray-600 mt-1">Acesse materiais exclusivos</span>
+                    </Link>
+                  </div>
                 </div>
               )}
             </div>
@@ -300,39 +450,75 @@ export default function ArtigoPage() {
                 </div>
               </div>
 
-              {/* CTA Cursos */}
-              <div className="bg-gradient-to-br from-orange-600 to-amber-600 rounded-2xl shadow-lg p-6 text-white">
-                <h3 className="text-xl font-bold mb-3">
-                  Aprofunde seus conhecimentos
-                </h3>
-                <p className="text-white/90 mb-4 text-sm">
-                  Conheça nossos cursos especializados em Lei 14.133/2021
-                </p>
-                <Link
-                  href="/cursos"
-                  className="block w-full text-center px-4 py-2 bg-white text-orange-600 rounded-lg font-bold hover:bg-orange-50 transition-colors"
-                >
-                  Ver Cursos
-                </Link>
+              {/* CTA Cursos - Melhorado */}
+              <div className="bg-gradient-to-br from-orange-600 to-amber-600 rounded-2xl shadow-lg p-6 text-white relative overflow-hidden">
+                <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -mr-16 -mt-16"></div>
+                <div className="absolute bottom-0 left-0 w-24 h-24 bg-white/10 rounded-full -ml-12 -mb-12"></div>
+
+                <div className="relative">
+                  <div className="flex items-center gap-3 mb-3">
+                    <div className="p-2 bg-white/20 backdrop-blur-sm rounded-lg">
+                      <BookOpen className="w-5 h-5" />
+                    </div>
+                    <h3 className="text-xl font-bold">
+                      Aprofunde seus conhecimentos
+                    </h3>
+                  </div>
+                  <p className="text-white/90 mb-4 text-sm">
+                    Cursos especializados em Lei 14.133/2021 com materiais exclusivos e certificado
+                  </p>
+                  <Link
+                    href="/cursos"
+                    className="block w-full text-center px-4 py-3 bg-white text-orange-600 rounded-lg font-bold hover:bg-orange-50 transition-all shadow-md hover:shadow-lg"
+                  >
+                    Ver Cursos Disponíveis
+                  </Link>
+                </div>
               </div>
 
-              {/* CTA Newsletter */}
-              <div className="bg-blue-50 rounded-2xl shadow-lg p-6 border-2 border-blue-200">
+              {/* CTA Newsletter - Melhorado */}
+              <div className="bg-gradient-to-br from-blue-600 to-purple-600 rounded-2xl shadow-lg p-6 text-white relative overflow-hidden">
+                <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -mr-16 -mt-16"></div>
+
+                <div className="relative">
+                  <div className="flex items-center gap-3 mb-3">
+                    <div className="p-2 bg-white/20 backdrop-blur-sm rounded-lg">
+                      <BarChart3 className="w-5 h-5" />
+                    </div>
+                    <h3 className="text-lg font-bold">
+                      Fique Atualizado
+                    </h3>
+                  </div>
+                  <p className="text-white/90 mb-4 text-sm">
+                    Newsletter semanal com novos conteúdos, jurisprudência e análises sobre a Lei 14.133/2021
+                  </p>
+                  <Link
+                    href="/#newsletter"
+                    className="block w-full text-center px-4 py-3 bg-white text-blue-600 rounded-lg font-bold hover:bg-blue-50 transition-all shadow-md hover:shadow-lg"
+                  >
+                    Assinar Newsletter Grátis
+                  </Link>
+                </div>
+              </div>
+
+              {/* CTA Contato */}
+              <div className="bg-gray-50 rounded-2xl shadow-lg p-6 border-2 border-gray-200">
                 <h3 className="text-lg font-bold text-gray-900 mb-3">
-                  📬 Fique Atualizado
+                  Dúvidas sobre este artigo?
                 </h3>
                 <p className="text-gray-700 mb-4 text-sm">
-                  Receba novos conteúdos e atualizações sobre a Lei 14.133/2021
+                  Entre em contato para consultorias e esclarecimentos jurídicos
                 </p>
                 <Link
-                  href="/#newsletter"
-                  className="block w-full text-center px-4 py-2 bg-blue-600 text-white rounded-lg font-bold hover:bg-blue-700 transition-colors"
+                  href="/contato"
+                  className="block w-full text-center px-4 py-3 bg-gray-900 text-white rounded-lg font-bold hover:bg-gray-800 transition-colors"
                 >
-                  Assinar Newsletter
+                  Falar com o Professor
                 </Link>
               </div>
             </div>
           </div>
+          </>
         )}
       </div>
     </main>
