@@ -9,6 +9,17 @@ import {
 } from '../agu-types';
 
 /**
+ * Informações extraídas de uma URL do DOU
+ */
+export interface DOUInfo {
+  douUrl: string;
+  douData?: string;
+  douSecao?: string;
+  douPagina?: string;
+  douEdicao?: string;
+}
+
+/**
  * Analisa a relevância de um documento para licitações/contratos
  */
 export function analyzeRelevancia(
@@ -288,4 +299,95 @@ export function generateScreenshotPath(tipo: string): string {
   const timestamp = Date.now();
   const date = new Date().toISOString().split('T')[0];
   return `public/debug/agu-${tipo}-${date}-${timestamp}.png`;
+}
+
+/**
+ * Extrai informações do DOU a partir de uma URL ou texto
+ *
+ * Exemplos de URLs do DOU:
+ * - https://www.in.gov.br/web/dou/-/orientacao-normativa-n-50-de-25-de-outubro-de-2024-589384562
+ * - https://www.in.gov.br/en/web/dou/-/parecer-n-123/2024
+ *
+ * @param douUrlOrText URL do DOU ou texto contendo o link
+ * @returns Informações extraídas do DOU
+ */
+export function extractDOUInfo(douUrlOrText: string): DOUInfo | null {
+  if (!douUrlOrText) {
+    return null;
+  }
+
+  // Procura por URL do DOU no texto
+  const douUrlMatch = douUrlOrText.match(/https?:\/\/(www\.)?in\.gov\.br[^\s"]*/);
+
+  if (!douUrlMatch) {
+    return null;
+  }
+
+  const douUrl = douUrlMatch[0];
+
+  // Tenta extrair data da URL ou do texto ao redor
+  // Formato comum: DD-MM-YYYY ou DD/MM/YYYY ou "de DD de MMMM de YYYY"
+  let douData: string | undefined;
+
+  const datePatterns = [
+    /(\d{1,2})[-\/](\d{1,2})[-\/](\d{4})/,                     // DD-MM-YYYY ou DD/MM/YYYY
+    /de\s+(\d{1,2})\s+de\s+\w+\s+de\s+(\d{4})/i,             // de DD de MMMM de YYYY
+    /(\d{4})[-\/](\d{1,2})[-\/](\d{1,2})/                     // YYYY-MM-DD ou YYYY/MM/DD
+  ];
+
+  for (const pattern of datePatterns) {
+    const match = douUrlOrText.match(pattern);
+    if (match) {
+      if (pattern === datePatterns[0]) {
+        // DD-MM-YYYY ou DD/MM/YYYY
+        douData = `${match[1].padStart(2, '0')}/${match[2].padStart(2, '0')}/${match[3]}`;
+      } else if (pattern === datePatterns[1]) {
+        // de DD de MMMM de YYYY
+        douData = `${match[1].padStart(2, '0')}/${match[2]}`;
+      } else if (pattern === datePatterns[2]) {
+        // YYYY-MM-DD
+        douData = `${match[3].padStart(2, '0')}/${match[2].padStart(2, '0')}/${match[1]}`;
+      }
+      break;
+    }
+  }
+
+  // Tenta extrair seção do DOU
+  let douSecao: string | undefined;
+  const secaoMatch = douUrlOrText.match(/se[çc][ãa]o\s*(\d)/i) ||
+                     douUrlOrText.match(/secao\s*(\d)/i);
+  if (secaoMatch) {
+    douSecao = secaoMatch[1];
+  }
+
+  // Tenta extrair página
+  let douPagina: string | undefined;
+  const paginaMatch = douUrlOrText.match(/p[áa]gina\s*(\d+)/i) ||
+                      douUrlOrText.match(/p[aá]g\.\s*(\d+)/i);
+  if (paginaMatch) {
+    douPagina = paginaMatch[1];
+  }
+
+  // Tenta extrair edição
+  let douEdicao: string | undefined;
+  const edicaoMatch = douUrlOrText.match(/edi[çc][ãa]o\s*n?[ºo°]?\s*(\d+)/i) ||
+                      douUrlOrText.match(/ed\.\s*(\d+)/i);
+  if (edicaoMatch) {
+    douEdicao = edicaoMatch[1];
+  }
+
+  return {
+    douUrl,
+    douData,
+    douSecao,
+    douPagina,
+    douEdicao
+  };
+}
+
+/**
+ * Verifica se uma URL é do DOU (Diário Oficial da União)
+ */
+export function isDOUUrl(url: string): boolean {
+  return /https?:\/\/(www\.)?in\.gov\.br/i.test(url);
 }

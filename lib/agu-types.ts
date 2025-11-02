@@ -112,6 +112,13 @@ export interface AGUDocument {
 
   /** Se é uma versão histórica/revogada */
   versaoHistorica?: string;
+
+  /** Sistema de Links DOU (Diário Oficial da União) */
+  douUrl?: string;        // URL da publicação no DOU
+  douData?: string;       // Data de publicação no DOU (formato: DD/MM/YYYY)
+  douSecao?: string;      // Seção do DOU (1, 2, 3)
+  douPagina?: string;     // Página no DOU
+  douEdicao?: string;     // Edição/número do DOU
 }
 
 /**

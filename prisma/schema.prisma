@@ -72,6 +72,13 @@ model Document {
   entityType          String?   // Entidade responsável: "IBDA", "INCP", "CJF" (apenas para categoria="enunciados")
   enunciadoNumber     String?   // Número do enunciado (formato flexível: "123", "123/2024", ou texto livre)
 
+  // Sistema de Links DOU (Diário Oficial da União)
+  douUrl              String?   // URL da publicação no DOU (Diário Oficial da União)
+  douData             DateTime? // Data de publicação no DOU
+  douSecao            String?   // Seção do DOU (1, 2, 3)
+  douPagina           String?   // Página no DOU
+  douEdicao           String?   // Edição/número do DOU
+
   // Sistema de Observações Estruturadas (para acórdãos e outros documentos)
   adminNotes          String?   // Observações privadas do admin (não visíveis aos alunos)
   publicNotes         String?   // Observações públicas (visíveis aos alunos)
@@ -128,6 +135,9 @@ model Document {
   @@index([tcuArea, tcuTema]) // Índice composto para buscar por área e tema
   @@index([tcuEnriquecimentoStatus]) // Índice para filtrar documentos por status de enriquecimento
   @@index([tcuRevisadoPorAdmin]) // Índice para filtrar documentos revisados após enriquecimento
+  @@index([douData]) // Índice para ordenar por data de publicação no DOU
+  @@index([douSecao]) // Índice para filtrar por seção do DOU
+  @@index([category, douData]) // Índice composto para buscar documentos por categoria e data DOU
 
   // Relacionamento com versões históricas
   versions DocumentVersion[]
