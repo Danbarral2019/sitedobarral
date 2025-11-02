@@ -42,6 +42,7 @@
     "qrcode": "^1.5.4",
     "react": "19.1.0",
     "react-dom": "19.1.0",
+    "react-force-graph-2d": "^1.29.0",
     "react-hook-form": "^7.62.0",
     "react-markdown": "^10.1.0",
     "remark-gfm": "^4.0.1",

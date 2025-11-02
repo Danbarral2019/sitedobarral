@@ -5,6 +5,7 @@ import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { Loader2, FileText, BookOpen, ArrowLeft, ExternalLink } from 'lucide-react';
 import { LEI_14133_ARTIGOS, LeiArticle } from '@/data/lei-14133-artigos';
+import { ArticleRelationshipGraph } from '@/components/ArticleRelationshipGraph';
 
 interface Document {
   id: string;
@@ -155,6 +156,14 @@ export default function ArtigoPage() {
                   Ver Lei Completa
                 </a>
               </div>
+
+              {/* Grafo de Relacionamentos */}
+              <ArticleRelationshipGraph
+                articleNumber={numero}
+                onArticleClick={(articleNum) => {
+                  router.push(`/artigo/${articleNum}`);
+                }}
+              />
 
               {/* Posts do Blog Relacionados */}
               {relatedPosts.length > 0 && (
