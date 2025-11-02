@@ -118,7 +118,12 @@
       "WebFetch(domain:docs.queridodiario.ok.org.br)",
       "mcp__playwright__browser_type",
       "Bash(pkill:*)",
-      "WebFetch(domain:raw.githubusercontent.com)"
+      "WebFetch(domain:raw.githubusercontent.com)",
+      "mcp__playwright__browser_snapshot",
+      "WebFetch(domain:legis.senado.leg.br)",
+      "WebFetch(domain:www2.camara.leg.br)",
+      "Bash(then grep \"DATABASE_URL\" .env.local)",
+      "Bash(awk:*)"
     ],
     "deny": [],
     "ask": []

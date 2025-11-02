@@ -699,3 +699,77 @@ model ArticleQuestion {
   @@index([isPlaceholder])
   @@index([createdAt])
 }
+
+// Staging de documentos DOU para aprovação manual
+model DOUStagingDocument {
+  id String @id @default(uuid())
+
+  // Dados da API DOU
+  douId        String  @unique // ID do DOU (classPK)
+  title        String
+  abstract     String  @db.Text
+  url          String
+  section      String // do1, do2, do3, doe
+  publishDate  String // DD/MM/YYYY
+  hierarchyStr String? @db.Text
+
+  // Dados enriquecidos (scraping)
+  fullContent String? @db.Text
+  edition     String?
+  page        String?
+  organ       String? @db.Text
+
+  // Classificação automática
+  category         String // fonte_agu, ato_normativo, acordao_tcu, etc
+  approvalStatus   String // auto_approved, pending, auto_rejected, manually_approved, manually_rejected
+  confidence       Int // 0-100
+  reasoning        String @db.Text // JSON array de strings
+  isRelevant       Boolean
+  requiresReview   Boolean
+
+  // Aprovação manual
+  reviewedBy   String? // ID do admin que revisou
+  reviewedAt   DateTime?
+  adminNotes   String? @db.Text
+  finalDecision String? // approved ou rejected
+
+  // Importação
+  imported      Boolean @default(false)
+  importedAt    DateTime?
+  documentId    String? // ID do Document criado após importação
+
+  // Controle
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([approvalStatus])
+  @@index([category])
+  @@index([requiresReview])
+  @@index([imported])
+  @@index([publishDate])
+  @@index([createdAt])
+  @@index([reviewedAt])
+}
+
+// Filtros personalizados salvos para DOU
+model DOUSavedFilter {
+  id          String   @id @default(uuid())
+  name        String   // Nome do filtro (ex: "AGU Última Semana", "TCU Alto Impacto")
+  description String?  // Descrição opcional
+
+  // Configuração do filtro (JSON)
+  filterConfig String  @db.Text // JSON com todos os parâmetros do filtro
+
+  // Controle
+  createdBy   String   // ID do usuário que criou
+  isPublic    Boolean  @default(false) // Se true, todos os admins podem usar
+  usageCount  Int      @default(0) // Contador de uso
+  lastUsedAt  DateTime?
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([createdBy])
+  @@index([isPublic])
+  @@index([lastUsedAt])
+}

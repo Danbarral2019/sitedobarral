@@ -53,11 +53,42 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
     return () => clearInterval(interval);
   }, []);
 
-  // Menus em ORDEM ALFABÉTICA
+  // Menus ORGANIZADOS POR CATEGORIA
   const menuItems = [
+    // === JURISPRUDÊNCIA ===
+    { divider: true, label: '📚 Jurisprudência' },
+    {
+      path: '/admin/tcu-manager',
+      label: 'TCU Manager ⭐',
+      icon: (props: Record<string, unknown>) => (
+        <svg {...props} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
+        </svg>
+      ),
+    },
+    {
+      path: '/admin/tcu-import',
+      label: '└─ Importação',
+      icon: (props: Record<string, unknown>) => (
+        <svg {...props} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 6l3 1m0 0l-3 9a5.002 5.002 0 006.001 0M6 7l3 9M6 7l6-2m6 2l3-1m-3 1l-3 9a5.002 5.002 0 006.001 0M18 7l3 9m-3-9l-6-2m0-2v2m0 16V5m0 16H9m3 0h3" />
+        </svg>
+      ),
+      indent: true,
+    },
+    {
+      path: '/admin/tcu-converter',
+      label: '└─ Conversor Excel',
+      icon: (props: Record<string, unknown>) => (
+        <svg {...props} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" />
+        </svg>
+      ),
+      indent: true,
+    },
     {
       path: '/admin/agu-import',
-      label: 'AGU - Importação Multi-Tipo 📄',
+      label: 'AGU Manager 📄',
       icon: (props: Record<string, unknown>) => (
         <svg {...props} fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
@@ -66,48 +97,17 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
     },
     {
       path: '/admin/scraper-agu',
-      label: 'AGU - Scraper Web (Playwright) 🤖',
+      label: '└─ Scraper Web',
       icon: (props: Record<string, unknown>) => (
         <svg {...props} fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
         </svg>
       ),
+      indent: true,
     },
     {
-      path: '/admin/analytics',
-      label: 'Analytics',
-      icon: BarChart3,
-    },
-    {
-      path: '/admin/analytics-documentos',
-      label: 'Analytics - Catalogação',
-      icon: (props: Record<string, unknown>) => (
-        <svg {...props} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-        </svg>
-      ),
-    },
-    {
-      path: '/admin/assistente-social',
-      label: 'Assistente Social (IA) 💬',
-      icon: (props: Record<string, unknown>) => (
-        <svg {...props} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" />
-        </svg>
-      ),
-    },
-    {
-      path: '/admin/tcu-converter',
-      label: 'TCU - Conversor Excel (XLS → XLSX)',
-      icon: (props: Record<string, unknown>) => (
-        <svg {...props} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" />
-        </svg>
-      ),
-    },
-    {
-      path: '/admin/tcu-import',
-      label: 'TCU - Importação (Scraper)',
+      path: '/admin/legislacao',
+      label: 'Legislação (Lei 14.133) ⚖️',
       icon: (props: Record<string, unknown>) => (
         <svg {...props} fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 6l3 1m0 0l-3 9a5.002 5.002 0 006.001 0M6 7l3 9M6 7l6-2m6 2l3-1m-3 1l-3 9a5.002 5.002 0 006.001 0M18 7l3 9m-3-9l-6-2m0-2v2m0 16V5m0 16H9m3 0h3" />
@@ -115,14 +115,48 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
       ),
     },
     {
-      path: '/admin/tcu-manager',
-      label: 'TCU - Manager Unificado ⭐',
+      path: '/admin/dou-filtros',
+      label: 'DOU Filtros 🔍',
       icon: (props: Record<string, unknown>) => (
         <svg {...props} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
         </svg>
       ),
     },
+
+    // === DOCUMENTOS ===
+    { divider: true, label: '📁 Documentos' },
+    {
+      path: '/admin/documentos',
+      label: 'Gerenciar Documentos',
+      icon: (props: Record<string, unknown>) => (
+        <svg {...props} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
+        </svg>
+      ),
+      badge: unreadCounts.documentos,
+    },
+
+    // === ANALYTICS ===
+    { divider: true, label: '📊 Analytics' },
+    {
+      path: '/admin/analytics',
+      label: 'Analytics Geral',
+      icon: BarChart3,
+    },
+    {
+      path: '/admin/analytics-documentos',
+      label: '└─ Catalogação',
+      icon: (props: Record<string, unknown>) => (
+        <svg {...props} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+        </svg>
+      ),
+      indent: true,
+    },
+
+    // === CONTEÚDO ===
+    { divider: true, label: '✍️ Conteúdo' },
     {
       path: '/admin/blog',
       label: 'Blog',
@@ -131,6 +165,43 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
         </svg>
       ),
+    },
+    {
+      path: '/admin/publicacoes',
+      label: 'Publicações',
+      icon: (props: Record<string, unknown>) => (
+        <svg {...props} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+        </svg>
+      ),
+    },
+    {
+      path: '/admin/faq',
+      label: 'FAQ',
+      icon: HelpCircle,
+    },
+    {
+      path: '/admin/glossario',
+      label: 'Glossário',
+      icon: BookOpen,
+    },
+    {
+      path: '/admin/videos',
+      label: 'Vídeos YouTube',
+      icon: Youtube,
+    },
+    {
+      path: '/admin/sites',
+      label: 'Sites Recomendados',
+      icon: Globe,
+    },
+
+    // === GESTÃO ===
+    { divider: true, label: '⚙️ Gestão' },
+    {
+      path: '/admin',
+      label: 'QR Codes',
+      icon: QrCode,
     },
     {
       path: '/admin/contatos',
@@ -145,76 +216,18 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
       badge: unreadCounts.depoimentos,
     },
     {
-      path: '/admin/documentos',
-      label: 'Documentos',
-      icon: (props: Record<string, unknown>) => (
-        <svg {...props} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
-        </svg>
-      ),
-      badge: unreadCounts.documentos,
-    },
-    {
-      path: '/admin/dou-filtros',
-      label: 'DOU - Filtros Avançados 🔍',
-      icon: (props: Record<string, unknown>) => (
-        <svg {...props} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
-        </svg>
-      ),
-    },
-    {
-      path: '/admin/faq',
-      label: 'FAQ',
-      icon: HelpCircle,
-    },
-    {
-      path: '/admin/glossario',
-      label: 'Glossário',
-      icon: BookOpen,
-    },
-    // {
-    //   path: '/admin/importar',
-    //   label: 'Importar Excel (Legado)',
-    //   icon: FileSpreadsheet,
-    // },
-    {
-      path: '/admin/legislacao',
-      label: 'Legislação (Lei 14.133) ⚖️',
-      icon: (props: Record<string, unknown>) => (
-        <svg {...props} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 6l3 1m0 0l-3 9a5.002 5.002 0 006.001 0M6 7l3 9M6 7l6-2m6 2l3-1m-3 1l-3 9a5.002 5.002 0 006.001 0M18 7l3 9m-3-9l-6-2m0-2v2m0 16V5m0 16H9m3 0h3" />
-        </svg>
-      ),
-    },
-    {
       path: '/admin/newsletter',
       label: 'Newsletter',
       icon: Send,
     },
     {
-      path: '/admin/publicacoes',
-      label: 'Publicações',
+      path: '/admin/assistente-social',
+      label: 'Assistente Social 🤖',
       icon: (props: Record<string, unknown>) => (
         <svg {...props} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
         </svg>
       ),
-    },
-    {
-      path: '/admin',
-      label: 'QR Codes',
-      icon: QrCode,
-    },
-    {
-      path: '/admin/sites',
-      label: 'Sites Recomendados',
-      icon: Globe,
-    },
-    {
-      path: '/admin/videos',
-      label: 'Vídeos YouTube',
-      icon: Youtube,
     },
   ];
 
@@ -274,7 +287,27 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
         {/* Navigation - SCROLL ADICIONADO */}
         <nav className="p-3 flex-1 overflow-y-auto max-h-[calc(100vh-180px)]">
           <div className="space-y-0.5">
-            {menuItems.map((item) => {
+            {menuItems.map((item, index) => {
+              // Render divider
+              if (item.divider) {
+                return (
+                  <div
+                    key={`divider-${index}`}
+                    className={`${index > 0 ? 'mt-4 pt-3 border-t border-gray-200' : ''}`}
+                  >
+                    {!isCollapsed && (
+                      <div className="px-3 pb-2 text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                        {item.label}
+                      </div>
+                    )}
+                    {isCollapsed && (
+                      <div className="h-px bg-gray-200 my-2" />
+                    )}
+                  </div>
+                );
+              }
+
+              // Render menu item
               const Icon = item.icon;
               const active = isActive(item.path);
 
@@ -284,6 +317,8 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
                   href={item.path}
                   onClick={() => setIsMobileMenuOpen(false)}
                   className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
+                    item.indent ? 'ml-4' : ''
+                  } ${
                     active
                       ? 'bg-blue-50 text-blue-700 font-semibold'
                       : 'text-gray-700 hover:bg-gray-100'
