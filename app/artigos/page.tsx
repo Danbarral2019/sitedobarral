@@ -2,11 +2,10 @@
 
 import { useState, useMemo } from 'react';
 import Link from 'next/link';
-import { Search, BookOpen, ArrowRight, FileText, X, List, FolderTree } from 'lucide-react';
+import { Search, BookOpen, ArrowRight, FileText, X, List, Hash } from 'lucide-react';
 import { LEI_14133_ARTIGOS, searchLeiArticles } from '@/data/lei-14133-artigos';
 import { LEI_14133_GRUPOS, getGroupById } from '@/data/lei-14133-grupos';
 import { formatArticleNumber } from '@/lib/article-utils';
-import { ArticleTreeNavigator } from '@/components/ArticleTreeNavigator';
 
 type NavigationMode = 'articles' | 'groups';
 
@@ -14,12 +13,31 @@ export default function ArtigosIndexPage() {
   const [searchTerm, setSearchTerm] = useState('');
   const [mode, setMode] = useState<NavigationMode>('articles');
   const [selectedGroup, setSelectedGroup] = useState<string | null>(null);
+  const [articleSearch, setArticleSearch] = useState('');
 
-  // Busca de artigos
+  // Busca de artigos (global - no topo)
   const searchResults = useMemo(() => {
     if (!searchTerm.trim()) return [];
     return searchLeiArticles(searchTerm);
   }, [searchTerm]);
+
+  // Lista filtrada de artigos (na aba Artigos)
+  const filteredArticles = useMemo(() => {
+    const allArticles = Object.values(LEI_14133_ARTIGOS);
+
+    if (!articleSearch.trim()) {
+      // Retorna todos os 193 artigos
+      return allArticles.sort((a, b) => parseInt(a.numero) - parseInt(b.numero));
+    }
+
+    // Filtra por número ou título
+    const search = articleSearch.toLowerCase();
+    return allArticles.filter(art =>
+      art.numero.includes(search) ||
+      art.titulo.toLowerCase().includes(search) ||
+      art.ementa.toLowerCase().includes(search)
+    ).sort((a, b) => parseInt(a.numero) - parseInt(b.numero));
+  }, [articleSearch]);
 
   const hasSearch = searchTerm.trim().length > 0;
 
@@ -133,8 +151,8 @@ export default function ArtigosIndexPage() {
                     : 'text-gray-700 hover:bg-gray-100'
                 }`}
               >
-                <FolderTree className="w-5 h-5" />
-                Navegar por Artigos
+                <Hash className="w-5 h-5" />
+                Buscar por Artigos
               </button>
               <button
                 onClick={() => setMode('groups')}
@@ -153,15 +171,61 @@ export default function ArtigosIndexPage() {
             {mode === 'articles' ? (
               <div className="bg-white rounded-2xl shadow-lg border-2 border-gray-200 p-8">
                 <div className="mb-6">
-                  <h2 className="text-2xl font-bold text-gray-900 mb-2">
-                    Estrutura da Lei por Capítulos
+                  <h2 className="text-2xl font-bold text-gray-900 mb-4">
+                    Todos os 193 Artigos da Lei
                   </h2>
-                  <p className="text-gray-600">
-                    Navegue pela estrutura hierárquica completa dos 193 artigos
+
+                  {/* Campo de busca de artigos */}
+                  <div className="relative">
+                    <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+                    <input
+                      type="text"
+                      placeholder="Buscar por número, título ou palavra-chave..."
+                      value={articleSearch}
+                      onChange={(e) => setArticleSearch(e.target.value)}
+                      className="w-full pl-12 pr-12 py-3 border-2 border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    />
+                    {articleSearch && (
+                      <button
+                        onClick={() => setArticleSearch('')}
+                        className="absolute right-4 top-1/2 -translate-y-1/2 p-1 text-gray-400 hover:text-gray-600"
+                      >
+                        <X className="w-5 h-5" />
+                      </button>
+                    )}
+                  </div>
+
+                  <p className="text-sm text-gray-600 mt-3">
+                    {filteredArticles.length} {filteredArticles.length === 1 ? 'artigo encontrado' : 'artigos encontrados'}
                   </p>
                 </div>
 
-                <ArticleTreeNavigator />
+                {/* Lista de artigos */}
+                <div className="space-y-2 max-h-[600px] overflow-y-auto pr-2">
+                  {filteredArticles.map(article => (
+                    <Link
+                      key={article.numero}
+                      href={`/artigo/${article.numero}`}
+                      className="block p-4 bg-gray-50 rounded-lg border-2 border-gray-200 hover:border-blue-500 hover:bg-blue-50 transition-all group"
+                    >
+                      <div className="flex items-start gap-4">
+                        <div className="flex-shrink-0 w-16 h-16 bg-blue-100 rounded-lg flex items-center justify-center text-blue-700 font-bold text-lg group-hover:bg-blue-600 group-hover:text-white transition-colors">
+                          {formatArticleNumber(article.numero)}
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <div className="text-xs text-gray-500 mb-1">{article.capitulo}</div>
+                          <h3 className="font-bold text-gray-900 mb-1 group-hover:text-blue-700 transition-colors">
+                            {article.titulo}
+                          </h3>
+                          <p className="text-sm text-gray-600 line-clamp-2">
+                            {article.ementa}
+                          </p>
+                        </div>
+                        <ArrowRight className="w-5 h-5 text-gray-400 group-hover:text-blue-600 group-hover:translate-x-1 transition-all flex-shrink-0 mt-2" />
+                      </div>
+                    </Link>
+                  ))}
+                </div>
               </div>
             ) : (
               <div className="bg-white rounded-2xl shadow-lg border-2 border-gray-200 p-8">
@@ -192,12 +256,12 @@ export default function ArtigosIndexPage() {
 
                         <div className="bg-gradient-to-r from-indigo-50 to-purple-50 rounded-xl p-6 mb-6 border-2 border-indigo-200">
                           <div className="flex items-start gap-4">
-                            <div className="w-12 h-12 bg-indigo-600 rounded-xl flex items-center justify-center text-white text-2xl flex-shrink-0">
-                              {group.emoji}
+                            <div className="w-12 h-12 bg-indigo-600 rounded-xl flex items-center justify-center text-2xl flex-shrink-0">
+                              {group.icon}
                             </div>
                             <div className="flex-1">
                               <h3 className="text-2xl font-bold text-gray-900 mb-2">
-                                {group.name}
+                                {group.title}
                               </h3>
                               <p className="text-gray-700 leading-relaxed">
                                 {group.description}
@@ -252,11 +316,11 @@ export default function ArtigosIndexPage() {
                       >
                         <div className="flex items-start gap-4 mb-3">
                           <div className="w-12 h-12 bg-indigo-100 rounded-xl flex items-center justify-center text-2xl group-hover:bg-indigo-200 transition-colors flex-shrink-0">
-                            {group.emoji}
+                            {group.icon}
                           </div>
                           <div className="flex-1 min-w-0">
                             <h3 className="font-bold text-gray-900 mb-1 group-hover:text-indigo-700 transition-colors">
-                              {group.name}
+                              {group.title}
                             </h3>
                             <p className="text-sm text-gray-600">
                               {group.articles.length} artigos
