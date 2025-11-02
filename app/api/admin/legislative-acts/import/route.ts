@@ -27,7 +27,7 @@ export async function POST(request: NextRequest) {
 
     const results = {
       success: 0,
-      errors: [] as Array<{ row: number; error: string; data: any }>,
+      errors: [] as Array<{ row: number; error: string; data: Record<string, unknown> }>,
       skipped: 0
     };
 
@@ -139,12 +139,12 @@ export async function POST(request: NextRequest) {
 
         results.success++;
 
-      } catch (error: any) {
+      } catch (error: unknown) {
         console.error(`Erro na linha ${i + 1}:`, error);
         results.errors.push({
           row: i + 1,
-          error: error.message || 'Erro desconhecido',
-          data: row
+          error: error instanceof Error ? error.message : 'Erro desconhecido',
+          data: row as Record<string, unknown>
         });
       }
     }

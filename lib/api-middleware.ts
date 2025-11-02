@@ -62,7 +62,7 @@ export function withAuth(handler: ApiHandler): ApiHandler {
  */
 export async function verifyAdmin(request: NextRequest): Promise<
   | { error: true; response: NextResponse; user?: never }
-  | { error: false; response?: never; user: any }
+  | { error: false; response?: never; user: import('./auth').AuthPayload }
 > {
   const { getCurrentUser } = await import('./auth');
   const user = await getCurrentUser();

@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { Loader2, FileText, BookOpen, ArrowLeft, ExternalLink, BarChart3, Clock, TrendingUp, Users } from 'lucide-react';
+import { Loader2, FileText, BookOpen, ArrowLeft, BarChart3, TrendingUp } from 'lucide-react';
 import { LEI_14133_ARTIGOS, LeiArticle } from '@/data/lei-14133-artigos';
 import { ArticleRelationshipGraph } from '@/components/ArticleRelationshipGraph';
 import { ArticleBadges } from '@/components/ArticleBadges';
@@ -104,13 +104,38 @@ export default function ArtigoPage() {
             <FileText className="w-12 h-12 flex-shrink-0" />
             <div>
               <h1 className="text-4xl font-bold mb-2">
-                Artigo {article.numero}
+                Artigo {article.numero}{parseInt(article.numero) <= 9 ? 'º' : ''}
               </h1>
               <p className="text-xl text-white/90 mb-4">
-                Lei 14.133/2021 - Nova Lei de Licitações e Contratos
+                <a
+                  href="https://www.planalto.gov.br/ccivil_03/_ato2019-2022/2021/lei/l14133.htm"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="hover:underline hover:text-white transition-all"
+                >
+                  Lei de Licitações e Contratos Administrativos
+                </a>
               </p>
+
+              {/* Título e Capítulo */}
+              {(article.titulo || article.capituloCompleto) && (
+                <div className="mb-4 space-y-2">
+                  {article.titulo && (
+                    <p className="text-lg font-bold text-white/95">
+                      {article.titulo}
+                    </p>
+                  )}
+                  {article.capituloCompleto && (
+                    <p className="text-lg font-bold text-white/95">
+                      {article.capituloCompleto}
+                    </p>
+                  )}
+                </div>
+              )}
+
+              {/* Texto oficial do artigo */}
               <div className="bg-white/20 backdrop-blur-sm rounded-lg p-4">
-                <p className="text-lg leading-relaxed">
+                <p className="text-lg leading-relaxed whitespace-pre-line">
                   {article.ementa}
                 </p>
               </div>
@@ -137,106 +162,9 @@ export default function ArtigoPage() {
             <Loader2 className="w-8 h-8 animate-spin text-blue-600" />
           </div>
         ) : (
-          <>
-            {/* Seção de Estatísticas */}
-            <div className="mb-8 grid grid-cols-2 md:grid-cols-4 gap-4">
-              {/* Total de Documentos */}
-              <div className="bg-white rounded-xl shadow-md p-4 border-2 border-blue-200">
-                <div className="flex items-center gap-3">
-                  <div className="p-2 bg-blue-100 rounded-lg">
-                    <FileText className="w-5 h-5 text-blue-600" />
-                  </div>
-                  <div>
-                    <div className="text-2xl font-bold text-gray-900">
-                      {relatedDocuments.length}
-                    </div>
-                    <div className="text-xs text-gray-600">
-                      {relatedDocuments.length === 1 ? 'Documento' : 'Documentos'}
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              {/* Posts do Blog */}
-              <div className="bg-white rounded-xl shadow-md p-4 border-2 border-purple-200">
-                <div className="flex items-center gap-3">
-                  <div className="p-2 bg-purple-100 rounded-lg">
-                    <BookOpen className="w-5 h-5 text-purple-600" />
-                  </div>
-                  <div>
-                    <div className="text-2xl font-bold text-gray-900">
-                      {relatedPosts.length}
-                    </div>
-                    <div className="text-xs text-gray-600">
-                      {relatedPosts.length === 1 ? 'Post' : 'Posts'}
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              {/* Documentos Públicos */}
-              <div className="bg-white rounded-xl shadow-md p-4 border-2 border-green-200">
-                <div className="flex items-center gap-3">
-                  <div className="p-2 bg-green-100 rounded-lg">
-                    <Users className="w-5 h-5 text-green-600" />
-                  </div>
-                  <div>
-                    <div className="text-2xl font-bold text-gray-900">
-                      {publicDocuments.length}
-                    </div>
-                    <div className="text-xs text-gray-600">
-                      {publicDocuments.length === 1 ? 'Público' : 'Públicos'}
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              {/* Última Atualização */}
-              <div className="bg-white rounded-xl shadow-md p-4 border-2 border-orange-200">
-                <div className="flex items-center gap-3">
-                  <div className="p-2 bg-orange-100 rounded-lg">
-                    <Clock className="w-5 h-5 text-orange-600" />
-                  </div>
-                  <div>
-                    <div className="text-sm font-bold text-gray-900">
-                      {relatedDocuments.length > 0 && relatedDocuments[0].uploadedAt
-                        ? new Date(relatedDocuments[0].uploadedAt).toLocaleDateString('pt-BR', {
-                            day: '2-digit',
-                            month: 'short'
-                          })
-                        : 'N/A'}
-                    </div>
-                    <div className="text-xs text-gray-600">
-                      Atualização
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <div className="grid lg:grid-cols-3 gap-8">
+          <div className="grid lg:grid-cols-3 gap-8">
             {/* Coluna Principal */}
             <div className="lg:col-span-2 space-y-8">
-              {/* Link para texto completo */}
-              <div className="bg-white rounded-2xl shadow-lg p-6 border-2 border-orange-200">
-                <h2 className="text-xl font-bold text-gray-900 mb-4 flex items-center gap-2">
-                  <BookOpen className="w-6 h-6 text-orange-600" />
-                  Texto Completo da Lei
-                </h2>
-                <p className="text-gray-700 mb-4">
-                  Consulte o texto integral do artigo {article.numero} no site oficial do Planalto.
-                </p>
-                <a
-                  href="https://www.planalto.gov.br/ccivil_03/_ato2019-2022/2021/lei/l14133.htm"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex items-center gap-2 px-6 py-3 bg-orange-600 text-white rounded-xl font-bold hover:bg-orange-700 transition-all shadow-md"
-                >
-                  <ExternalLink className="w-5 h-5" />
-                  Ver Lei Completa
-                </a>
-              </div>
-
               {/* Grafo de Relacionamentos */}
               <ArticleRelationshipGraph
                 articleNumber={numero}

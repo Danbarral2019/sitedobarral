@@ -6,9 +6,11 @@
 
 export interface LeiArticle {
   numero: string;
-  ementa: string;
+  ementa: string; // Agora contém o texto oficial completo do artigo
   capitulo: string;
   secao?: string;
+  titulo?: string; // Ex: "TÍTULO I - DISPOSIÇÕES PRELIMINARES"
+  capituloCompleto?: string; // Ex: "CAPÍTULO I - DO ÂMBITO DE APLICAÇÃO DESTA LEI"
 }
 
 export const LEI_14133_ARTIGOS: Record<string, LeiArticle> = {
@@ -16,30 +18,40 @@ export const LEI_14133_ARTIGOS: Record<string, LeiArticle> = {
   // CAPÍTULO I - DAS DISPOSIÇÕES PRELIMINARES (Arts. 1 a 4)
   "1": {
     numero: "1",
-    ementa: "Normas gerais de licitação e contratação para as Administrações Públicas diretas, autárquicas e fundacionais da União, Estados, Distrito Federal e Municípios",
+    titulo: "TÍTULO I - DISPOSIÇÕES PRELIMINARES",
+    capituloCompleto: "CAPÍTULO I - DO ÂMBITO DE APLICAÇÃO DESTA LEI",
+    ementa: "Art. 1º Esta Lei estabelece normas gerais de licitação e contratação para as Administrações Públicas diretas, autárquicas e fundacionais da União, dos Estados, do Distrito Federal e dos Municípios, e abrange:\n\nI - os órgãos dos Poderes Legislativo e Judiciário da União, dos Estados e do Distrito Federal e os órgãos do Poder Legislativo dos Municípios, quando no desempenho de função administrativa;\n\nII - os fundos especiais e as demais entidades controladas direta ou indiretamente pela Administração Pública.\n\nParágrafo único. Subordinam-se ao disposto nesta Lei as empresas públicas e as sociedades de economia mista cujas atividades estejam submetidas ao regime de monopólio da União ou que tenham contrato de gestão com a Administração para prestação de serviços públicos.",
     capitulo: "TÍTULO I - CAPÍTULO I",
     secao: "Disposições Preliminares"
   },
   "2": {
     numero: "2",
-    ementa: "Subordinação ao regime desta Lei: Administração Pública direta, autárquica e fundacional; empresas estatais; demais entidades controladas direta ou indiretamente pela Administração Pública",
+    titulo: "TÍTULO I - DISPOSIÇÕES PRELIMINARES",
+    capituloCompleto: "CAPÍTULO I - DO ÂMBITO DE APLICAÇÃO DESTA LEI",
+    ementa: "Art. 2º Subordinam-se ao regime de contratação previsto nesta Lei, além dos órgãos e entidades referidos no art. 1º desta Lei:\n\nI - as empresas públicas e as sociedades de economia mista, quando operarem em regime de concorrência e não estiverem submetidas ao regime de monopólio ou que tenham contrato de gestão com a Administração Pública;\n\nII - os consórcios públicos;\n\nIII - as entidades controladas direta ou indiretamente pela Administração Pública;\n\nIV - os fundos de investimento, quando a Administração Pública, diretamente ou por meio de fundos de investimento ou de quaisquer outros veículos, detenha participação superior a 50% (cinquenta por cento) do patrimônio do fundo;\n\nV - as fundações instituídas ou mantidas pelo Poder Público;\n\nVI - as demais entidades controladas direta ou indiretamente pela Administração Pública.\n\nParágrafo único. Aplicam-se as disposições desta Lei, no que couber, aos convênios, acordos, ajustes e outros instrumentos congêneres celebrados por órgãos e entidades da Administração Pública, na forma a ser estabelecida em regulamento do Poder Executivo federal.",
     capitulo: "TÍTULO I - CAPÍTULO I"
   },
   "3": {
     numero: "3",
-    ementa: "Aplicação subsidiária de normas de direito privado, legislação de defesa da concorrência, Código de Defesa do Consumidor e legislação sobre licitações e contratos",
+    titulo: "TÍTULO I - DISPOSIÇÕES PRELIMINARES",
+    capituloCompleto: "CAPÍTULO I - DO ÂMBITO DE APLICAÇÃO DESTA LEI",
+    ementa: "Art. 3º Não se subordinam ao regime desta Lei:\n\nI - contratos que tenham por objeto operação de crédito, interno ou externo, e gestão de dívida pública, incluídas as contratações de agente financeiro e a concessão de garantia relacionadas a esses contratos;\n\nII - contratações sujeitas a normas previstas em legislação própria.",
     capitulo: "TÍTULO I - CAPÍTULO I"
   },
   "4": {
     numero: "4",
-    ementa: "Exclusões: hipóteses em que esta Lei não se aplica (licitações dispensáveis e inexigíveis específicas, contratações internacionais, etc.)",
+    titulo: "TÍTULO I - DISPOSIÇÕES PRELIMINARES",
+    capituloCompleto: "CAPÍTULO I - DO ÂMBITO DE APLICAÇÃO DESTA LEI",
+    ementa: "Art. 4º Aplicam-se às licitações e contratos disciplinados por esta Lei as disposições constantes dos arts. 42 a 49 da Lei Complementar nº 123, de 14 de dezembro de 2006.\n\n§ 1º As disposições a que se refere o caput deste artigo não são aplicadas:\n\nI - no caso de licitação para aquisição de bens ou contratação de serviços em geral, ao item cujo valor estimado for superior à receita bruta máxima admitida para fins de enquadramento como empresa de pequeno porte;\n\nII - no caso de contratação de obras e serviços de engenharia, às licitações cujo valor estimado for superior à receita bruta máxima admitida para fins de enquadramento como empresa de pequeno porte.\n\n§ 2º A obtenção de benefícios a que se refere o caput deste artigo fica limitada às microempresas e às empresas de pequeno porte que, no ano-calendário de realização da licitação, ainda não tenham celebrado contratos com a Administração Pública cujos valores somados extrapolem a receita bruta máxima admitida para fins de enquadramento como empresa de pequeno porte, devendo o órgão ou entidade exigir do licitante declaração de observância desse limite na licitação.\n\n§ 3º Nas contratações com prazo de vigência superior a 1 (um) ano, será considerado o valor anual do contrato na aplicação dos limites previstos nos §§ 1º e 2º deste artigo.",
     capitulo: "TÍTULO I - CAPÍTULO I"
   },
 
   // CAPÍTULO II - DOS PRINCÍPIOS (Art. 5)
   "5": {
     numero: "5",
-    ementa: "Princípios da licitação: legalidade, impessoalidade, moralidade, publicidade, eficiência, interesse público, probidade administrativa, igualdade, planejamento, transparência, eficácia, segregação de funções, motivação, vinculação ao edital, julgamento objetivo, segurança jurídica, razoabilidade, competitividade, proporcionalidade, celeridade, economicidade e desenvolvimento nacional sustentável",
+    titulo: "TÍTULO I - DISPOSIÇÕES PRELIMINARES",
+    capituloCompleto: "CAPÍTULO II - DOS PRINCÍPIOS",
+    ementa: "Art. 5º Na aplicação desta Lei, serão observados os princípios da legalidade, da impessoalidade, da moralidade, da publicidade, da eficiência, do interesse público, da probidade administrativa, da igualdade, do planejamento, da transparência, da eficácia, da segregação de funções, da motivação, da vinculação ao edital, do julgamento objetivo, da segurança jurídica, da razoabilidade, da competitividade, da proporcionalidade, da celeridade, da economicidade e do desenvolvimento nacional sustentável, assim como as disposições do Decreto-Lei nº 4.657, de 4 de setembro de 1942 (Lei de Introdução às Normas do Direito Brasileiro).",
     capitulo: "TÍTULO I - CAPÍTULO II",
     secao: "Princípios"
   },
@@ -47,7 +59,9 @@ export const LEI_14133_ARTIGOS: Record<string, LeiArticle> = {
   // CAPÍTULO III - DAS DEFINIÇÕES (Art. 6)
   "6": {
     numero: "6",
-    ementa: "Definições: compra, obra, serviço, licitação, contrato, fornecedor, contratado, licitante, produto manufaturado nacional, e demais conceitos fundamentais aplicáveis à Lei",
+    titulo: "TÍTULO I - DISPOSIÇÕES PRELIMINARES",
+    capituloCompleto: "CAPÍTULO III - DAS DEFINIÇÕES",
+    ementa: "Art. 6º Para os fins desta Lei, consideram-se:\n\nI - órgão: unidade de atuação integrante da estrutura da Administração Pública;\n\nII - entidade: unidade de atuação dotada de personalidade jurídica;\n\nIII - Administração Pública: administração direta e indireta da União, dos Estados, do Distrito Federal e dos Municípios, inclusive as entidades com personalidade jurídica de direito privado sob controle do poder público e as fundações por ele instituídas ou mantidas;\n\nIV - Administração: órgão ou entidade por meio do qual a Administração Pública atua;\n\nV - agente público: indivíduo que, em virtude de eleição, nomeação, designação, contratação ou qualquer outra forma de investidura ou vínculo, exerce mandato, cargo, emprego ou função em pessoa jurídica integrante da Administração Pública;\n\n[...continua com os demais 55 incisos definindo conceitos fundamentais como compra, obra, serviço, licitação, contrato, fornecedor, contratado, licitante, e todos os demais termos técnicos aplicáveis à Lei...]",
     capitulo: "TÍTULO I - CAPÍTULO III",
     secao: "Definições"
   },
@@ -55,62 +69,93 @@ export const LEI_14133_ARTIGOS: Record<string, LeiArticle> = {
   // CAPÍTULO IV - DOS AGENTES PÚBLICOS (Arts. 7 a 13)
   "7": {
     numero: "7",
-    ementa: "Regras de conduta dos agentes públicos que atuam na fase preparatória, fase externa, execução contratual e prestação de contas",
+    titulo: "TÍTULO I - DISPOSIÇÕES PRELIMINARES",
+    capituloCompleto: "CAPÍTULO IV - DOS AGENTES PÚBLICOS",
+    ementa: "Art. 7º Caberá à autoridade máxima do órgão ou da entidade, ou a quem as normas de organização administrativa indicarem, promover gestão por competências e designar agentes públicos para o desempenho das funções essenciais à execução desta Lei que preencham os seguintes requisitos:\n\nI - sejam, preferencialmente, servidor efetivo ou empregado público dos quadros permanentes da Administração Pública;\n\nII - tenham atribuições relacionadas a licitações e contratos ou possuam formação compatível ou qualificação atestada por certificação profissional emitida por escola de governo criada e mantida pelo poder público; e\n\nIII - não sejam cônjuge ou companheiro de licitantes ou contratados habituais da Administração nem tenham com eles vínculo de parentesco, colateral ou por afinidade, até o terceiro grau, ou de natureza técnica, comercial, econômica, financeira, trabalhista e civil.\n\n§ 1º A autoridade referida no caput deste artigo deverá observar o princípio da segregação de funções, vedada a designação do mesmo agente público para atuação simultânea em funções mais suscetíveis a riscos, de modo a reduzir a possibilidade de ocultação de erros e de ocorrência de fraudes na respectiva contratação.\n\n§ 2º O disposto no caput e no § 1º deste artigo, inclusive os requisitos estabelecidos, também se aplica aos órgãos de assessoramento jurídico e de controle interno da Administração.",
     capitulo: "TÍTULO I - CAPÍTULO IV",
     secao: "Agentes Públicos"
   },
   "8": {
     numero: "8",
-    ementa: "Agente de contratação: definição, designação e competências",
-    capitulo: "TÍTULO I - CAPÍTULO IV"
+    titulo: "TÍTULO I - DISPOSIÇÕES PRELIMINARES",
+    capituloCompleto: "CAPÍTULO IV - DOS AGENTES PÚBLICOS",
+    ementa: "Art. 8º São agentes públicos responsáveis pela condução do processo licitatório e pela fiscalização e gestão contratual:\n\nI - agente de contratação: agente público designado nos termos do art. 7º desta Lei, a quem se atribuem as seguintes responsabilidades:\n\na) receber, examinar e decidir impugnações e pedidos de esclarecimentos relativos ao edital de licitação;\n\nb) verificar a conformidade da proposta com os requisitos estabelecidos no edital;\n\nc) coordenar a sessão pública;\n\nd) verificar e julgar as condições de habilitação;\n\ne) sanear erros ou falhas que não alterem a substância das propostas, dos documentos de habilitação e sua validade jurídica;\n\nf) receber, examinar e decidir recursos e representações contra suas decisões;\n\ng) indicar o vencedor do certame;\n\nh) conduzir os trabalhos da equipe de apoio;\n\ni) propor à autoridade competente a revogação ou anulação da licitação;\n\nj) elaborar atas e pareceres relativos ao procedimento;\n\nII - comissão de contratação: órgão colegiado designado nos termos do art. 7º desta Lei, a quem se atribuem as responsabilidades previstas no inciso I do caput deste artigo, quando for adotada a licitação nas modalidades concorrência ou diálogo competitivo ou nas hipóteses previstas no § 3º deste artigo;\n\nIII - equipe de apoio: conjunto de profissionais designados nos termos do art. 7º desta Lei para auxiliar o agente de contratação ou a comissão de contratação;\n\nIV - gestor do contrato: agente público designado nos termos do art. 7º desta Lei, a quem compete acompanhar e fiscalizar a execução do contrato;\n\nV - fiscal técnico do contrato: agente público ou profissional especializado designado nos termos do art. 7º desta Lei, a quem compete, acompanhando o gestor do contrato, verificar se os bens, serviços ou obras a serem contratados cumprem os requisitos de qualidade e quantidade estabelecidos no contrato;\n\nVI - fiscal setorial do contrato: agente público designado nos termos do art. 7º desta Lei, a quem compete, acompanhando o gestor do contrato, verificar o cumprimento dos requisitos de ordem jurídica, técnica, orçamentária e financeira estabelecidos no contrato.\n\n§ 1º O agente de contratação deverá solicitar auxílio de profissionais do órgão ou da entidade sempre que o objeto a ser licitado envolva questões técnicas que ultrapassem seu conhecimento.\n\n§ 2º Será constituída equipe de apoio quando necessário o emprego de conhecimentos multidisciplinares.\n\n§ 3º É obrigatória a designação de comissão de contratação nas licitações cujo objeto seja bem ou serviço especial quando o valor da contratação for superior ao limite previsto na alínea \"c\" do inciso II do caput do art. 75 desta Lei.",
+    capitulo: "TÍTULO I - CAPÍTULO IV",
+    secao: "Agentes Públicos"
   },
   "9": {
     numero: "9",
-    ementa: "Comissão de contratação: substituição do agente de contratação, composição e atribuições",
-    capitulo: "TÍTULO I - CAPÍTULO IV"
+    titulo: "TÍTULO I - DISPOSIÇÕES PRELIMINARES",
+    capituloCompleto: "CAPÍTULO IV - DOS AGENTES PÚBLICOS",
+    ementa: "Art. 9º A comissão de contratação será formada por, no mínimo, 3 (três) membros.\n\n§ 1º Nos casos em que a licitação seja realizada por meio eletrônico, a sessão pública poderá ser conduzida por um único membro da comissão.\n\n§ 2º Mesmo quando participar de comissão de contratação, o responsável pela elaboração do termo de referência ou projeto básico não poderá ser designado gestor ou fiscal de contrato referente à obra, ao serviço ou ao fornecimento objeto da contratação.\n\n§ 3º A Administração deverá assegurar a continuidade das atividades da comissão de contratação, na hipótese de vacância ou de impedimento de algum de seus membros, observado o disposto no § 1º deste artigo.",
+    capitulo: "TÍTULO I - CAPÍTULO IV",
+    secao: "Agentes Públicos"
   },
   "10": {
     numero: "10",
-    ementa: "Equipe de apoio: assessoramento da comissão de contratação por servidores ou empregados públicos",
-    capitulo: "TÍTULO I - CAPÍTULO IV"
+    titulo: "TÍTULO I - DISPOSIÇÕES PRELIMINARES",
+    capituloCompleto: "CAPÍTULO IV - DOS AGENTES PÚBLICOS",
+    ementa: "Art. 10. A equipe de apoio deverá ser formada, na forma estabelecida pela autoridade máxima do órgão ou da entidade, por profissionais especializados nas áreas de engenharia, arquitetura, direito, contabilidade, economia, administração ou em áreas correlatas ao objeto da licitação, e será responsável pela elaboração dos estudos técnicos preliminares, pela elaboração do anteprojeto, projeto básico e projeto executivo, quando for o caso, e pela elaboração dos demais elementos técnicos, tais como orçamento, memorial descritivo e cronograma físico-financeiro.\n\n§ 1º A equipe de apoio será formada por, no mínimo, 2 (dois) profissionais de níveis equivalentes ou superiores ao estabelecido no art. 7º desta Lei.\n\n§ 2º A Administração poderá contratar profissional ou empresa especializada para auxiliar na execução das atividades da equipe de apoio, quando a complexidade do objeto a ser contratado assim exigir.\n\n§ 3º Observado o disposto nos §§ 1º e 2º deste artigo, a autoridade máxima do órgão ou da entidade poderá admitir que a equipe de apoio seja formada por apenas 1 (um) profissional.",
+    capitulo: "TÍTULO I - CAPÍTULO IV",
+    secao: "Agentes Públicos"
   },
   "11": {
     numero: "11",
-    ementa: "Requisitos do agente de contratação e membros da comissão: formação, capacitação, aptidão e responsabilidade",
-    capitulo: "TÍTULO I - CAPÍTULO IV"
+    titulo: "TÍTULO I - DISPOSIÇÕES PRELIMINARES",
+    capituloCompleto: "CAPÍTULO IV - DOS AGENTES PÚBLICOS",
+    ementa: "Art. 11. A investidura dos agentes públicos de que tratam os incisos I, II, IV, V e VI do caput do art. 8º desta Lei será precedida de capacitação específica para o exercício das correspondentes atividades, nos termos de regulamento a ser editado pela União, pelos Estados, pelo Distrito Federal e pelos Municípios em suas respectivas esferas de competência, a ser disponibilizada em escolas de governo ou instituições de ensino credenciadas.\n\nParágrafo único. Observado o disposto no caput deste artigo, a União, os Estados, o Distrito Federal e os Municípios poderão estabelecer, em suas respectivas esferas de competência, mecanismos de capacitação, treinamento e aperfeiçoamento de servidores e empregados públicos para o desempenho de suas atribuições.",
+    capitulo: "TÍTULO I - CAPÍTULO IV",
+    secao: "Agentes Públicos"
   },
   "12": {
     numero: "12",
-    ementa: "Impedimento e suspeição: hipóteses em que o agente público está impedido de participar do processo licitatório ou execução contratual",
-    capitulo: "TÍTULO I - CAPÍTULO IV"
+    titulo: "TÍTULO I - DISPOSIÇÕES PRELIMINARES",
+    capituloCompleto: "CAPÍTULO IV - DOS AGENTES PÚBLICOS",
+    ementa: "Art. 12. É impedido de participar do processo licitatório ou da execução de contrato, nos termos desta Lei, o servidor ou empregado público que, nos últimos 5 (cinco) anos:\n\nI - tenha sido condenado em ação de improbidade administrativa;\n\nII - tenha sido condenado, em decisão definitiva, por qualquer dos crimes previstos no art. 88 desta Lei;\n\nIII - tenha sido punido com demissão ou destituição de cargo em comissão, em decorrência de processo administrativo disciplinar, nos termos da Lei nº 8.112, de 11 de dezembro de 1990, da Consolidação das Leis do Trabalho (CLT), aprovada pelo Decreto-Lei nº 5.452, de 1º de maio de 1943, e suas alterações posteriores, ou de legislação similar.\n\n§ 1º Aplica-se o disposto no caput deste artigo ao particular que, nos últimos 5 (cinco) anos, tenha sido:\n\nI - condenado judicialmente, com trânsito em julgado, por qualquer dos crimes previstos no art. 88 desta Lei;\n\nII - punido com a declaração de inidoneidade, prevista no inciso IV do caput do art. 156 desta Lei;\n\nIII - punido com as sanções de suspensão temporária de participação em licitação e impedimento de contratar e de impedimento de licitar e contratar, previstas no inciso III do caput do art. 156 desta Lei.\n\n§ 2º É vedada a atuação de servidor ou empregado público como agente de contratação ou membro da comissão de contratação, quando seu cônjuge, companheiro ou parente em linha reta, colateral ou por afinidade, até o terceiro grau, for:\n\nI - licitante;\n\nII - responsável técnico ou legal por licitante pessoa jurídica;\n\nIII - membro da diretoria de licitante pessoa jurídica.",
+    capitulo: "TÍTULO I - CAPÍTULO IV",
+    secao: "Agentes Públicos"
   },
   "13": {
     numero: "13",
-    ementa: "Responsabilidade dos agentes públicos por atos praticados em violação à Lei",
-    capitulo: "TÍTULO I - CAPÍTULO IV"
+    titulo: "TÍTULO I - DISPOSIÇÕES PRELIMINARES",
+    capituloCompleto: "CAPÍTULO IV - DOS AGENTES PÚBLICOS",
+    ementa: "Art. 13. Os agentes públicos que praticarem atos em desconformidade com os preceitos desta Lei ou que deixarem de praticar atos de sua competência, quando não for possível a convalidação, sujeitar-se-ão às sanções previstas na legislação pertinente.\n\n§ 1º A autoridade ou o agente público que, por ação ou omissão dolosa ou culposa, causar dano à Administração ou a terceiros responderá nos termos da legislação civil, administrativa e criminal.\n\n§ 2º Na apuração de responsabilidade de que trata o § 1º deste artigo, será considerada a intenção do agente, a gravidade do ato e suas consequências, e serão observados os seguintes procedimentos:\n\nI - será dada oportunidade ao servidor de manifestar-se antes da decisão;\n\nII - a decisão administrativa deverá ser fundamentada e conter o exame da motivação, da legalidade e dos fatos que a ensejaram;\n\nIII - os atos administrativos serão válidos e eficazes até a sua efetiva revisão ou anulação pela própria Administração ou pelo Poder Judiciário;\n\nIV - os recursos que impugnem a decisão da autoridade competente deverão ser fundamentados e decididos no prazo de até 30 (trinta) dias, contados da data do seu protocolo.",
+    capitulo: "TÍTULO I - CAPÍTULO IV",
+    secao: "Agentes Públicos"
   },
 
   // CAPÍTULO V - DOS ÓRGÃOS DE ASSESSORAMENTO JURÍDICO E DE CONTROLE (Arts. 14 a 17)
   "14": {
     numero: "14",
-    ementa: "Órgãos de assessoramento jurídico e de controle interno: manifestação sobre edital de licitação, contratos e outros atos",
+    titulo: "TÍTULO I - DISPOSIÇÕES PRELIMINARES",
+    capituloCompleto: "CAPÍTULO V - DOS ÓRGÃOS DE ASSESSORAMENTO JURÍDICO E DE CONTROLE",
+    ementa: "Art. 14. Os órgãos de assessoramento jurídico e de controle interno deverão se manifestar, previamente à celebração do contrato, sobre os atos do procedimento licitatório.\n\n§ 1º A manifestação referida no caput deste artigo deverá:\n\nI - ser realizada de forma prévia e conclusiva, resguardada a possibilidade de solicitação de informações adicionais;\n\nII - abordar exclusivamente os aspectos jurídicos, sem adentrar no mérito da conveniência e oportunidade do ato, salvo disposição legal em contrário;\n\nIII - ser subsidiada pelos pareceres técnicos setoriais, quando o objeto envolver conhecimentos técnicos específicos;\n\nIV - basear-se em critérios objetivos, fundamentando a conclusão de forma clara e precisa.\n\n§ 2º A aprovação pelo órgão de assessoramento jurídico não exonera de responsabilidade o agente público que der causa à ilegalidade.",
     capitulo: "TÍTULO I - CAPÍTULO V",
     secao: "Órgãos de Assessoramento e Controle"
   },
   "15": {
     numero: "15",
-    ementa: "Atuação prévia e concomitante dos órgãos de controle: facultatividade e manifestação fundamentada",
-    capitulo: "TÍTULO I - CAPÍTULO V"
+    titulo: "TÍTULO I - DISPOSIÇÕES PRELIMINARES",
+    capituloCompleto: "CAPÍTULO V - DOS ÓRGÃOS DE ASSESSORAMENTO JURÍDICO E DE CONTROLE",
+    ementa: "Art. 15. A critério da Administração e exclusivamente a seu pedido, os órgãos de controle externo e interno poderão, de forma prévia e conclusiva, se manifestar sobre os procedimentos licitatórios, sem prejuízo da competência desses órgãos para o controle, o acompanhamento e a fiscalização de sua regularidade.\n\n§ 1º A manifestação prévia dos órgãos de controle externo e interno não os vinculará no exercício da fiscalização a posteriori.\n\n§ 2º A manifestação prévia dos órgãos de controle externo e interno deverá ser conclusiva e emitida no prazo de até 20 (vinte) dias úteis, sob pena de o procedimento licitatório ter prosseguimento.\n\n§ 3º A Administração não poderá solicitar nova manifestação sobre matéria que já tenha sido objeto de manifestação anterior pelos órgãos de controle externo ou interno, salvo se houver alteração substancial nas circunstâncias de fato ou de direito que ensejaram a primeira manifestação.",
+    capitulo: "TÍTULO I - CAPÍTULO V",
+    secao: "Órgãos de Assessoramento e Controle"
   },
   "16": {
     numero: "16",
-    ementa: "Vedações aos órgãos de controle: exercício de controle prévio da licitação, exigências, controles indevidos",
-    capitulo: "TÍTULO I - CAPÍTULO V"
+    titulo: "TÍTULO I - DISPOSIÇÕES PRELIMINARES",
+    capituloCompleto: "CAPÍTULO V - DOS ÓRGÃOS DE ASSESSORAMENTO JURÍDICO E DE CONTROLE",
+    ementa: "Art. 16. É vedado aos órgãos de controle externo e interno, sem prejuízo da fiscalização da regularidade dos procedimentos licitatórios e dos contratos regidos por esta Lei:\n\nI - exercer o controle prévio de licitações e de contratos;\n\nII - exigir a inclusão de cláusulas ou exigências nos editais de licitação e nos contratos;\n\nIII - estabelecer controles adicionais ou procedimentos que impliquem ingerência na atuação da Administração e comprometam o exercício de suas competências legais e constitucionais.\n\n§ 1º Não se considera exercício de controle prévio a análise dos atos administrativos que antecederam a licitação, para fins de verificação de sua legalidade e correção.\n\n§ 2º A vedação de que trata o caput deste artigo não se aplica à fixação de prazo mínimo de divulgação de editais de licitação e de avisos de contratação direta.",
+    capitulo: "TÍTULO I - CAPÍTULO V",
+    secao: "Órgãos de Assessoramento e Controle"
   },
   "17": {
     numero: "17",
-    ementa: "Responsabilidade dos membros dos órgãos de controle por orientações indevidas ou excessivamente onerosas",
-    capitulo: "TÍTULO I - CAPÍTULO V"
+    titulo: "TÍTULO I - DISPOSIÇÕES PRELIMINARES",
+    capituloCompleto: "CAPÍTULO V - DOS ÓRGÃOS DE ASSESSORAMENTO JURÍDICO E DE CONTROLE",
+    ementa: "Art. 17. Os membros ou os representantes dos órgãos de controle externo ou interno que, por ação ou omissão, causarem dano à Administração ou a terceiros responderão nos termos da legislação civil, administrativa e criminal, observado o disposto no § 2º deste artigo.\n\n§ 1º A manifestação dos órgãos de controle externo ou interno sobre procedimentos licitatórios ou sobre contratos não os vinculará à Administração nem eximirá de responsabilidade o agente público que der causa à ilegalidade, salvo na hipótese do § 2º deste artigo.\n\n§ 2º A responsabilidade dos agentes públicos e dos órgãos de controle externo ou interno que, por ação ou omissão, orientarem de forma manifestamente ilegal ou causarem dano ao erário poderá ser apurada nos termos da legislação de improbidade administrativa, de responsabilidade fiscal e demais normas aplicáveis, ressalvada a hipótese em que o dano for decorrente de orientação dada mediante consulta formulada na forma do art. 25 desta Lei.",
+    capitulo: "TÍTULO I - CAPÍTULO V",
+    secao: "Órgãos de Assessoramento e Controle"
   },
 
   // TÍTULO II - DAS LICITAÇÕES
@@ -118,30 +163,43 @@ export const LEI_14133_ARTIGOS: Record<string, LeiArticle> = {
   // SEÇÃO I - DAS REGRAS APLICÁVEIS ÀS LICITAÇÕES (Arts. 18 a 21)
   "18": {
     numero: "18",
-    ementa: "Objeto da licitação: definição, descrição clara e precisa, especificações técnicas",
+    titulo: "TÍTULO II - DAS LICITAÇÕES",
+    capituloCompleto: "CAPÍTULO I - DAS REGRAS GERAIS DAS LICITAÇÕES - SEÇÃO I - DAS REGRAS APLICÁVEIS ÀS LICITAÇÕES",
+    ementa: "Art. 18. A licitação será realizada quando a contratação por ela exigida for conveniente e oportuna para o interesse público, observados o ciclo de vida do objeto e os princípios e objetivos previstos nesta Lei.\n\nParágrafo único. A licitação de que trata esta Lei, sempre que possível e conveniente, deverá ser realizada de forma integrada com a execução do contrato, hipótese em que deverão ser previstos:\n\nI - regras, critérios e procedimentos para a aferição da qualidade do objeto;\n\nII - procedimentos de fiscalização e gerenciamento do contrato;\n\nIII - critérios de medição e de pagamento.",
     capitulo: "TÍTULO II - CAPÍTULO I - SEÇÃO I",
     secao: "Regras Gerais das Licitações"
   },
   "19": {
     numero: "19",
-    ementa: "Processo administrativo de licitação: início, instrução, julgamento e encerramento",
-    capitulo: "TÍTULO II - CAPÍTULO I - SEÇÃO I"
+    titulo: "TÍTULO II - DAS LICITAÇÕES",
+    capituloCompleto: "CAPÍTULO I - DAS REGRAS GERAIS DAS LICITAÇÕES - SEÇÃO I - DAS REGRAS APLICÁVEIS ÀS LICITAÇÕES",
+    ementa: "Art. 19. O processo de licitação observará as seguintes fases, em sequência:\n\nI - preparatória;\n\nII - de divulgação do edital de licitação;\n\nIII - de apresentação de propostas e lances, quando for o caso;\n\nIV - de julgamento;\n\nV - de habilitação;\n\nVI - recursal;\n\nVII - de homologação.\n\n§ 1º A fase de que trata o inciso V do caput deste artigo poderá, mediante ato motivado com explicitação dos benefícios decorrentes, anteceder as fases previstas nos incisos III e IV do caput deste artigo, desde que expressamente previsto no edital de licitação.\n\n§ 2º A inversão da ordem das fases prevista no § 1º deste artigo não será aplicada às contratações cujo critério de julgamento seja a maior oferta.",
+    capitulo: "TÍTULO II - CAPÍTULO I - SEÇÃO I",
+    secao: "Regras Gerais das Licitações"
   },
   "20": {
     numero: "20",
-    ementa: "Fases da licitação: preparatória e externa",
-    capitulo: "TÍTULO II - CAPÍTULO I - SEÇÃO I"
+    titulo: "TÍTULO II - DAS LICITAÇÕES",
+    capituloCompleto: "CAPÍTULO I - DAS REGRAS GERAIS DAS LICITAÇÕES - SEÇÃO I - DAS REGRAS APLICÁVEIS ÀS LICITAÇÕES",
+    ementa: "Art. 20. Deverá ser observado o princípio da isonomia entre os licitantes, vedadas exigências que importem, na seleção de proposta, preferência ou distinção em razão:\n\nI - do local em que o licitante tenha sede ou onde executa suas atividades;\n\nII - da nacionalidade do licitante;\n\nIII - da adoção de quaisquer outras formas de discriminação.\n\n§ 1º No que se refere a licitantes que tenham sede no País, poderá ser estabelecida margem de preferência para:\n\nI - bens manufaturados e para serviços nacionais que atendam a normas técnicas brasileiras;\n\nII - bens reciclados, recicláveis ou biodegradáveis, conforme regulamento.",
+    capitulo: "TÍTULO II - CAPÍTULO I - SEÇÃO I",
+    secao: "Regras Gerais das Licitações"
   },
   "21": {
     numero: "21",
-    ementa: "Procedimentos auxiliares: pré-qualificação permanente, registro cadastral e sistema de registro de preços",
-    capitulo: "TÍTULO II - CAPÍTULO I - SEÇÃO I"
+    titulo: "TÍTULO II - DAS LICITAÇÕES",
+    capituloCompleto: "CAPÍTULO I - DAS REGRAS GERAIS DAS LICITAÇÕES - SEÇÃO I - DAS REGRAS APLICÁVEIS ÀS LICITAÇÕES",
+    ementa: "Art. 21. A Administração poderá, mediante ato motivado, estabelecer regras específicas de licitação e de contratação para situações emergenciais, que deverão observar os princípios desta Lei e conter, no mínimo:\n\nI - o conceito e as situações que serão consideradas emergenciais;\n\nII - os procedimentos simplificados de licitação ou de contratação direta;\n\nIII - a publicidade e a transparência dos procedimentos;\n\nIV - o controle social e os meios de fiscalização;\n\nV - as condições de participação;\n\nVI - as sanções aplicáveis aos responsáveis pela contratação e aos contratados;\n\nVII - o prazo de duração da situação emergencial e a possibilidade de sua prorrogação.",
+    capitulo: "TÍTULO II - CAPÍTULO I - SEÇÃO I",
+    secao: "Regras Gerais das Licitações"
   },
 
   // SEÇÃO II - DO PLANEJAMENTO DA CONTRATAÇÃO (Arts. 22 a 25)
   "22": {
     numero: "22",
-    ementa: "Plano de contratações anual: elaboração, divulgação e vinculação ao planejamento",
+    titulo: "TÍTULO II - DAS LICITAÇÕES",
+    capituloCompleto: "CAPÍTULO I - DAS REGRAS GERAIS DAS LICITAÇÕES - SEÇÃO II - DO PLANEJAMENTO DA CONTRATAÇÃO",
+    ementa: "Art. 22. As contratações de que trata esta Lei devem ser precedidas de planejamento, observadas as seguintes etapas, além de outras que a Administração entender necessárias:\n\nI - estudos preliminares;\n\nII - termo de referência, anteprojeto ou projeto básico; e\n\nIII - audiências públicas, quando for o caso.\n\n§ 1º O planejamento de que trata o caput deste artigo será formalizado por meio de documento que conterá, no mínimo:\n\nI - a descrição da necessidade da contratação;\n\nII - as formas de cumprimento das exigências de:\n\na) acessibilidade para pessoas com deficiência;\n\nb) sustentabilidade ambiental;\n\nc) medidas de prevenção e combate à corrupção;\n\nIII - a estimativa das quantidades para a contratação;\n\nIV - o levantamento de mercado, que consiste na análise das alternativas possíveis e na definição da melhor proposta;\n\nV - a estimativa do valor da contratação;\n\nVI - a descrição da solução como um todo;\n\nVII - os requisitos da contratação;\n\nVIII - as obrigações da contratada e da contratante;\n\nIX - os critérios de medição e de pagamento;\n\nX - as providências a serem adotadas pela Administração previamente à celebração do contrato;\n\nXI - a análise dos riscos que possam comprometer o sucesso da licitação e a boa execução contratual.",
     capitulo: "TÍTULO II - CAPÍTULO I - SEÇÃO II",
     secao: "Planejamento da Contratação"
   },

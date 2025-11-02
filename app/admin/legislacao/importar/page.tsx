@@ -11,7 +11,12 @@ import {
 export default function ImportarLegislacaoPage() {
   const router = useRouter();
   const [isProcessing, setIsProcessing] = useState(false);
-  const [results, setResults] = useState<any>(null);
+  const [results, setResults] = useState<{
+    success: number;
+    failed: number;
+    errors: string[];
+    errorDetails?: Array<{ row: number; error: string; data?: Record<string, unknown> }>;
+  } | null>(null);
   const [csvData, setCsvData] = useState<string[][]>([]);
   const [fileName, setFileName] = useState('');
 
@@ -269,7 +274,7 @@ export default function ImportarLegislacaoPage() {
                 </h3>
 
                 <div className="space-y-3 max-h-96 overflow-y-auto">
-                  {results.errorDetails.map((err: any, idx: number) => (
+                  {results.errorDetails?.map((err, idx: number) => (
                     <div key={idx} className="p-4 bg-red-50 border border-red-200 rounded-lg">
                       <div className="flex items-start gap-2">
                         <AlertCircle className="w-5 h-5 text-red-600 flex-shrink-0 mt-0.5" />

@@ -69,7 +69,7 @@ export async function PUT(
     }
 
     // Construir dados de atualização
-    const updateData: any = {};
+    const updateData: Record<string, unknown> = {};
 
     if (body.type !== undefined) updateData.type = body.type;
     if (body.number !== undefined) updateData.number = body.number;
@@ -102,11 +102,11 @@ export async function PUT(
       act
     });
 
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Erro ao atualizar ato normativo:', error);
 
     // Erro de unique constraint (fullNumber duplicado)
-    if (error.code === 'P2002') {
+    if (error && typeof error === 'object' && 'code' in error && error.code === 'P2002') {
       return NextResponse.json(
         { error: 'Já existe outro ato normativo com este número/ano' },
         { status: 409 }

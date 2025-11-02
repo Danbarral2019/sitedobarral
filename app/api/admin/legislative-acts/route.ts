@@ -28,7 +28,7 @@ export async function GET(request: NextRequest) {
     const skip = (page - 1) * limit;
 
     // Construir where clause
-    const where: any = {};
+    const where: Record<string, unknown> = {};
 
     if (type) {
       where.type = type;
@@ -178,11 +178,11 @@ export async function POST(request: NextRequest) {
       act
     }, { status: 201 });
 
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Erro ao criar ato normativo:', error);
 
     // Erro de unique constraint (fullNumber duplicado)
-    if (error.code === 'P2002') {
+    if (error && typeof error === 'object' && 'code' in error && error.code === 'P2002') {
       return NextResponse.json(
         { error: 'Já existe um ato normativo com este número/ano' },
         { status: 409 }
