@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { usePathname } from 'next/navigation';
 import Link from 'next/link';
 import {
-  QrCode, ChevronLeft, ChevronRight, BarChart3, Mail, MessageSquare, Send, GraduationCap, Youtube, Globe
+  QrCode, ChevronLeft, ChevronRight, BarChart3, Mail, MessageSquare, Send, GraduationCap, Youtube, Globe, HelpCircle, BookOpen
 } from 'lucide-react';
 
 interface AdminLayoutProps {
@@ -125,6 +125,16 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
         </svg>
       ),
       badge: unreadCounts.documentos,
+    },
+    {
+      path: '/admin/faq',
+      label: 'FAQ',
+      icon: HelpCircle,
+    },
+    {
+      path: '/admin/glossario',
+      label: 'Glossário',
+      icon: BookOpen,
     },
     // {
     //   path: '/admin/importar',
