@@ -1,15 +1,19 @@
 /**
- * Scraper para Acórdãos do TCU - Versão 1.0
+ * Scraper para Acórdãos do TCU - Versão 2.0
  * Extrai acórdãos do webservice de dados abertos do TCU
  *
  * Endpoint: https://dados-abertos.apps.tcu.gov.br/api/acordao/recupera-acordaos
  *
- * PADRÃO v3 (2025-10-26):
+ * PADRÃO v2 (2025-11-02):
+ * - Keywords unificadas com AGU (lib/shared-keywords.ts)
+ * - Sistema de versionamento integrado (tcu-module.ts)
  * - Filtro de relevância obrigatório (só licitações/contratos)
  * - Multi-curso (1 acórdão → vários cursos)
  * - Campos numéricos para ordenação
  * - Conformidade com padrão do banco de dados
  */
+
+import { analyzeRelevanceTCU, suggestCoursesTCU } from './tcu-module';
 
 export interface AcordaoTCU {
   key: string;                  // ID único no TCU
@@ -153,11 +157,11 @@ function processAcordao(item: TCUApiItem): AcordaoTCU {
   const titulo = item.titulo || '';
   const sumario = item.sumario || '';
 
-  // Análise de relevância
-  const { isRelevant, score } = analyzeRelevance(titulo, sumario);
+  // Análise de relevância usando keywords unificadas
+  const { isRelevant, score } = analyzeRelevanceTCU(titulo, sumario);
 
-  // Sugestão de cursos (apenas se relevante)
-  const suggestedCourses = isRelevant ? suggestCourses(titulo, sumario) : [];
+  // Sugestão de cursos usando keywords unificadas (apenas se relevante)
+  const suggestedCourses = isRelevant ? suggestCoursesTCU(titulo, sumario) : [];
 
   return {
     key: item.key || '',
@@ -179,130 +183,6 @@ function processAcordao(item: TCUApiItem): AcordaoTCU {
     relevanceScore: score,
     suggestedCourses,
   };
-}
-
-/**
- * Analisa se um acórdão é relevante para licitações/contratos
- */
-function analyzeRelevance(titulo: string, sumario: string): { isRelevant: boolean; score: number } {
-  const text = `${titulo} ${sumario}`.toLowerCase();
-
-  // Palavras-chave de alta relevância (peso 10)
-  const highRelevanceKeywords = [
-    'licitação', 'licitacao', 'pregão', 'pregao', 'tomada de preços',
-    'concorrência', 'concorrencia', 'registro de preços', 'edital',
-    'lei 14.133', 'lei 8.666', 'dispensa', 'inexigibilidade',
-    'contrato', 'contratação', 'contratacao',
-  ];
-
-  // Palavras-chave de média relevância (peso 5)
-  const mediumRelevanceKeywords = [
-    'gestão contratual', 'fiscalização', 'fiscalizacao',
-    'sanção', 'sancao', 'penalidade', 'multa', 'impedimento',
-    'planejamento', 'estudo técnico preliminar', 'termo de referência',
-    'terceirização', 'tercerizacao', 'mão de obra',
-    'alteração contratual', 'reajuste', 'repactuação',
-  ];
-
-  // Palavras-chave de exclusão (reduz score)
-  const exclusionKeywords = [
-    'aposentadoria', 'pensão', 'pensao', 'férias', 'ferias',
-    'gratificação', 'gratificacao', 'adicional', 'ressarcimento',
-    'diária', 'diaria', 'passagem', 'viagem',
-  ];
-
-  let score = 0;
-
-  // Conta high relevance
-  for (const keyword of highRelevanceKeywords) {
-    if (text.includes(keyword)) {
-      score += 10;
-    }
-  }
-
-  // Conta medium relevance
-  for (const keyword of mediumRelevanceKeywords) {
-    if (text.includes(keyword)) {
-      score += 5;
-    }
-  }
-
-  // Desconta exclusions
-  for (const keyword of exclusionKeywords) {
-    if (text.includes(keyword)) {
-      score -= 15;
-    }
-  }
-
-  // Normaliza score para 0-100
-  score = Math.max(0, Math.min(100, score));
-
-  // Considera relevante se score >= 10
-  const isRelevant = score >= 10;
-
-  return { isRelevant, score };
-}
-
-/**
- * Sugere cursos para um acórdão baseado no conteúdo
- */
-function suggestCourses(titulo: string, sumario: string): string[] {
-  const text = `${titulo} ${sumario}`.toLowerCase();
-  const courses = new Set<string>();
-
-  // Mapeamento de palavras-chave → cursos
-  const courseKeywords: Record<string, string[]> = {
-    '1': [ // Nova Lei de Licitações
-      'lei 14.133', 'lei 14133', 'pregão eletrônico', 'pregao eletronico',
-      'sistema de registro de preços', 'srp', 'nova lei',
-    ],
-    '2': [ // Planejamento das Contratações
-      'planejamento', 'estudo técnico preliminar', 'etp', 'dfd',
-      'termo de referência', 'projeto básico', 'análise de risco',
-    ],
-    '3': [ // Gestão e Fiscalização de Contratos
-      'gestão contratual', 'gestao contratual', 'fiscalização',
-      'fiscalizacao', 'acompanhamento contratual', 'recebimento',
-    ],
-    '4': [ // Processo Sancionador
-      'sanção', 'sancao', 'penalidade', 'multa', 'impedimento',
-      'declaração de inidoneidade', 'processo administrativo sancionador',
-    ],
-    '6': [ // Terceirização e Formação de Preços
-      'terceirização', 'tercerizacao', 'mão de obra', 'mao de obra',
-      'dedicação exclusiva', 'formação de preços', 'planilha de custos',
-      'bdi', 'encargos sociais',
-    ],
-    '8': [ // Revisão, Reajuste e Repactuação
-      'reajuste', 'repactuação', 'repactuacao', 'equilíbrio econômico',
-      'equilibrio economico', 'revisão contratual', 'revisao contratual',
-    ],
-    '9': [ // Alterações Contratuais
-      'alteração contratual', 'alteracao contratual', 'aditivo',
-      'prorrogação', 'prorrogacao', 'acréscimo', 'acrescimo', 'supressão',
-    ],
-    '10': [ // Contratação Direta
-      'dispensa', 'inexigibilidade', 'contratação direta', 'contratacao direta',
-      'emergência', 'emergencia', 'notório saber', 'notorio saber',
-    ],
-  };
-
-  // Para cada curso, verifica se alguma palavra-chave está presente
-  for (const [courseId, keywords] of Object.entries(courseKeywords)) {
-    for (const keyword of keywords) {
-      if (text.includes(keyword)) {
-        courses.add(courseId);
-        break; // Já encontrou match, próximo curso
-      }
-    }
-  }
-
-  // Se não encontrou nenhum curso específico mas é relevante, adiciona curso 1 (mais genérico)
-  if (courses.size === 0) {
-    courses.add('1'); // Nova Lei de Licitações como padrão
-  }
-
-  return Array.from(courses);
 }
 
 /**
