@@ -80,8 +80,8 @@ export function analyzeRelevanceDOU(
   // Normalizar score (0-100)
   score = Math.max(0, Math.min(100, score));
 
-  // Threshold: score >= 15 = relevante (mais restritivo que AGU/TCU)
-  const isRelevant = score >= 15;
+  // Threshold: score >= 10 = relevante (moderado, similar ao AGU/TCU)
+  const isRelevant = score >= 10;
 
   // Detectar temas
   const temas = detectTemas(text);

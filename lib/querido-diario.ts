@@ -41,7 +41,7 @@ export interface QueridoDiarioSearchParams {
   keywords: string[]; // Palavras-chave para busca
   since?: string; // Data inicial (YYYY-MM-DD)
   until?: string; // Data final (YYYY-MM-DD)
-  territoryId?: string; // ID do território (padrão: "BR" = Brasil/DOU)
+  territoryId?: string | string[]; // ID do território (padrão: capitais brasileiras)
   page?: number; // Página (padrão: 1)
   pageSize?: number; // Itens por página (padrão: 10, max: 100)
 }
@@ -55,9 +55,26 @@ export interface QueridoDiarioResponse {
 }
 
 /**
+ * IDs das principais capitais brasileiras para busca
+ * (Querido Diário indexa diários municipais, não o DOU federal)
+ */
+const CAPITAIS_IBGE = [
+  '3550308', // São Paulo - SP
+  '3304557', // Rio de Janeiro - RJ
+  '5300108', // Brasília - DF
+  '2927408', // Salvador - BA
+  '4106902', // Curitiba - PR
+  '3106200', // Belo Horizonte - MG
+  '2304400', // Fortaleza - CE
+  '1302603', // Manaus - AM
+  '2611606', // Recife - PE
+  '4314902', // Porto Alegre - RS
+];
+
+/**
  * Cliente para busca no Querido Diário
  *
- * Por padrão, busca apenas no DOU (territorio "BR")
+ * Por padrão, busca em capitais brasileiras (Querido Diário indexa diários municipais)
  */
 export class QueridoDiarioClient {
   private baseUrl = 'https://api.queridodiario.ok.org.br/api/gazettes';
@@ -73,7 +90,7 @@ export class QueridoDiarioClient {
       keywords,
       since,
       until,
-      territoryId = 'BR', // Padrão: DOU (Brasil federal)
+      territoryId = CAPITAIS_IBGE, // Padrão: capitais brasileiras
       page = 1,
       pageSize = 10
     } = params;
@@ -81,10 +98,13 @@ export class QueridoDiarioClient {
     // Monta query string com OR entre keywords
     const querystring = keywords.map(k => encodeURIComponent(k)).join(' OR ');
 
+    // Monta territoryIds (pode ser string ou array)
+    const territoryIds = Array.isArray(territoryId) ? territoryId.join(',') : territoryId;
+
     // Monta URL da API
     const url = new URL(this.baseUrl);
     url.searchParams.set('querystring', querystring);
-    url.searchParams.set('territory_ids', territoryId);
+    url.searchParams.set('territory_ids', territoryIds);
     url.searchParams.set('page', page.toString());
     url.searchParams.set('page_size', Math.min(pageSize, 100).toString());
 
@@ -128,6 +148,8 @@ export class QueridoDiarioClient {
    * Usa automaticamente as keywords de alta e média relevância
    * definidas no sistema unificado.
    *
+   * Busca em múltiplas capitais brasileiras sequencialmente.
+   *
    * @param since Data inicial (YYYY-MM-DD)
    * @param until Data final (YYYY-MM-DD, opcional)
    * @param limit Máximo de resultados (padrão: 50)
@@ -143,35 +165,44 @@ export class QueridoDiarioClient {
       .slice(0, 20); // Limitar a 20 keywords principais
 
     console.log(`[Querido Diário] Buscando com ${keywords.length} keywords de alta relevância`);
+    console.log(`[Querido Diário] Buscando em ${CAPITAIS_IBGE.length} capitais...`);
 
     const results: QueridoDiarioGazette[] = [];
-    let page = 1;
-    const pageSize = 100; // Máximo permitido pela API
 
-    while (results.length < limit) {
-      const response = await this.search({
-        keywords,
-        since,
-        until,
-        page,
-        pageSize,
-      });
+    // Buscar em cada capital sequencialmente (a API não suporta múltiplos territórios bem)
+    for (const capital of CAPITAIS_IBGE) {
+      if (results.length >= limit) break;
 
-      if (response.gazettes.length === 0) {
-        break; // Não há mais resultados
-      }
+      let page = 1;
+      const pageSize = 100; // Máximo permitido pela API
 
-      results.push(...response.gazettes);
-      page++;
+      while (results.length < limit) {
+        const response = await this.search({
+          keywords,
+          since,
+          until,
+          territoryId: capital, // Buscar apenas nesta capital
+          page,
+          pageSize,
+        });
 
-      // Sleep para evitar rate limiting
-      await new Promise(resolve => setTimeout(resolve, 500));
+        if (response.gazettes.length === 0) {
+          break; // Não há mais resultados nesta capital
+        }
 
-      if (results.length >= limit) {
-        break;
+        results.push(...response.gazettes);
+        page++;
+
+        // Sleep para evitar rate limiting
+        await new Promise(resolve => setTimeout(resolve, 500));
+
+        if (results.length >= limit) {
+          break;
+        }
       }
     }
 
+    console.log(`[Querido Diário] ✅ Total de ${results.length} publicações encontradas`);
     return results.slice(0, limit);
   }
 
@@ -252,16 +283,23 @@ export const queridoDiarioClient = new QueridoDiarioClient();
 /**
  * Função helper para buscar publicações dos últimos N dias
  *
+ * NOTA: A API Querido Diário pode não estar atualizada até hoje.
+ * Usa como referência a data mais recente conhecida (2025-02-07).
+ *
  * @param days Número de dias para trás
  * @param limit Máximo de resultados
  */
 export async function searchLastDays(days: number, limit: number = 50): Promise<QueridoDiarioGazette[]> {
-  const today = new Date();
-  const since = new Date(today);
+  // Data mais recente conhecida na API (atualizar periodicamente)
+  const latestKnownDate = new Date('2025-02-07');
+
+  const since = new Date(latestKnownDate);
   since.setDate(since.getDate() - days);
 
   const sinceStr = since.toISOString().split('T')[0];
-  const untilStr = today.toISOString().split('T')[0];
+  const untilStr = latestKnownDate.toISOString().split('T')[0];
+
+  console.log(`[Querido Diário] Buscando de ${sinceStr} até ${untilStr} (últimos ${days} dias a partir de ${untilStr})`);
 
   return await queridoDiarioClient.searchRelevant(sinceStr, untilStr, limit);
 }
