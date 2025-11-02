@@ -16,11 +16,8 @@ import {
   truncate,
   extractTags,
   sleep,
-  generateScreenshotPath,
 } from './helpers';
 import { findOrCreateWithVersioning } from './versioning';
-import { analyzeRelevance } from './relevance';
-import { prisma } from '@/lib/prisma';
 
 /**
  * Interface para dados brutos de uma ON extraída do HTML
@@ -239,7 +236,6 @@ function parseOrientacoesFromHTML(html: string): OrientacaoNormativaRaw[] {
  * Extrai informações de uma ON a partir do seu bloco
  */
 function extractOrientacaoFromBlock(numero: string, ano: string, block: string): OrientacaoNormativaRaw {
-  const numeroCompleto = `${numero.padStart(3, '0')}/${ano}`;
   const numeroDisplay = `ON ${parseInt(numero)}/${ano}`;
 
   // Extrai título/enunciado
@@ -422,7 +418,7 @@ export async function saveOrientacaoNormativaWithVersioning(
   aguDoc: AGUDocument
 ): Promise<{
   success: boolean;
-  document?: any;
+  document?: Document;
   isNew?: boolean;
   hasChanges?: boolean;
   error?: string;

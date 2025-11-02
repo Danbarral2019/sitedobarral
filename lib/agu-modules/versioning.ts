@@ -6,7 +6,7 @@
  */
 
 import { prisma } from '@/lib/prisma';
-import type { Document } from '@prisma/client';
+import type { Document, Prisma } from '@prisma/client';
 
 export interface ChangeDetectionResult {
   hasChanges: boolean;
@@ -275,7 +275,7 @@ export async function findOrCreateWithVersioning(
   // Se não existe, criar novo
   if (!existingDoc) {
     const doc = await prisma.document.create({
-      data: newData as any
+      data: newData as Prisma.DocumentCreateInput
     });
 
     // Criar primeira versão
@@ -297,7 +297,7 @@ export async function findOrCreateWithVersioning(
     // Atualizar documento
     const updatedDoc = await prisma.document.update({
       where: { id: existingDoc.id },
-      data: newData as any
+      data: newData as Prisma.DocumentUpdateInput
     });
 
     // Salvar nova versão

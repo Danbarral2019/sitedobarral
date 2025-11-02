@@ -3,7 +3,6 @@
  */
 
 import {
-  AGUDocument,
   KEYWORDS_RELEVANCIA,
   TEMAS_MAP,
   CURSOS_KEYWORDS,
