@@ -85,7 +85,22 @@
       "Bash(npx docx:*)",
       "Bash(git merge:*)",
       "Bash(nul)",
-      "WebFetch(domain:www.planalto.gov.br)"
+      "WebFetch(domain:www.planalto.gov.br)",
+      "Bash(if [ ! -d \"/c/Users/Administrador/.claude\" ])",
+      "Bash(then mkdir -p \"/c/Users/Administrador/.claude\")",
+      "Bash(fi)",
+      "WebFetch(domain:github.com)",
+      "Bash(npx:*)",
+      "Bash(claude mcp list:*)",
+      "Bash(claude mcp add:*)",
+      "Bash(claude mcp remove:*)",
+      "WebFetch(domain:cgu.agu.gov.br)",
+      "mcp__playwright__browser_navigate",
+      "mcp__playwright__browser_click",
+      "mcp__playwright__browser_tabs",
+      "mcp__playwright__browser_evaluate",
+      "mcp__playwright__browser_close",
+      "mcp__playwright__browser_wait_for"
     ],
     "deny": [],
     "ask": []

@@ -128,6 +128,49 @@ model Document {
   @@index([tcuArea, tcuTema]) // Índice composto para buscar por área e tema
   @@index([tcuEnriquecimentoStatus]) // Índice para filtrar documentos por status de enriquecimento
   @@index([tcuRevisadoPorAdmin]) // Índice para filtrar documentos revisados após enriquecimento
+
+  // Relacionamento com versões históricas
+  versions DocumentVersion[]
+}
+
+// Histórico de versões de documentos (para rastreamento de mudanças)
+model DocumentVersion {
+  id              String   @id @default(uuid())
+  documentId      String
+  document        Document @relation(fields: [documentId], references: [id], onDelete: Cascade)
+
+  // Versão do documento
+  versionNumber   Int      // 1, 2, 3, etc
+
+  // Snapshot dos dados nesta versão
+  title           String
+  description     String   @db.Text
+  url             String
+  urlPDF          String?
+  category        String
+  tags            String   // JSON array as string
+
+  // Campos específicos AGU
+  onNumber        Int?
+  onYear          Int?
+  alternativeUrls String?  @db.Text // JSON array
+
+  // Metadados de mudança
+  changeType      String   // 'created' | 'updated' | 'minor_update' | 'major_update'
+  changesSummary  String?  @db.Text // Resumo das mudanças desta versão
+  changeDetails   String?  @db.Text // JSON com diff detalhado
+
+  // Rastreamento
+  detectedAt      DateTime @default(now())
+  detectedBy      String?  // 'scraper' | 'admin' | email do admin
+
+  // Flags
+  isCurrentVersion Boolean @default(false) // Se é a versão atual
+
+  @@index([documentId])
+  @@index([documentId, versionNumber])
+  @@index([detectedAt])
+  @@index([isCurrentVersion])
 }
 
 // Usuários (admin e estudantes)

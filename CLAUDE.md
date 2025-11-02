@@ -2,7 +2,24 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
-## 🆕 ÚLTIMAS ATUALIZAÇÕES (2025-10-27)
+## 🆕 ÚLTIMAS ATUALIZAÇÕES (2025-11-02)
+
+**🚀 MCP Servers Instalados e Ativos:**
+- ✅ **Playwright MCP** - Automação de navegador, testes E2E, web scraping
+- ✅ **PostgreSQL MCP** - Queries SQL diretas no banco Neon, análise de dados
+- ✅ **GitHub MCP** - Gerenciamento automatizado de issues, PRs e repositório
+- 📖 Ver `MCP_SETUP.md` para guia completo de instalação e uso
+
+**🎯 AGU Scraper v4 - Plataforma Completa (NOVO!):**
+- ✅ **Scraper unificado** para 6 tipos de documentos AGU (Fase 1 implementada)
+- ✅ **Orientações Normativas** - 97 ONs com análise inteligente de relevância + VERSIONAMENTO
+- ✅ **Pareceres Vinculantes** - Scraping real via Playwright MCP (10/215 extraídos)
+- ✅ **DECOR/CONUNI** - Scraping real via Playwright MCP (10/1,637 extraídos)
+- ✅ **Sistema de Versionamento** - Detecção automática de mudanças com histórico completo
+- ✅ **Análise automática** - Sistema de pontuação e sugestão de cursos
+- ✅ **Playwright MCP Integrado** - Navegação real em páginas dinâmicas e iframes
+- 🚧 **Súmulas AGU** - Estrutura pronta (aguarda implementação MCP)
+- 📖 Ver `AGU_SCRAPER_V4.md` e `SESSAO_2025-11-02_AGU_VERSIONAMENTO_E_PLAYWRIGHT.md` para documentação completa
 
 **Fase 3 TCU Scraper + IA Implementada:**
 - ✅ Exportação PDF com marca d'água (`/api/export-pdf`)
@@ -14,6 +31,10 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - ✅ Sistema de enunciados (IBDA, INCP, CJF) e observações estruturadas
 
 **Sessões recentes:**
+- `SESSAO_2025-11-02_AGU_VERSIONAMENTO_E_PLAYWRIGHT.md` - Versionamento + Playwright MCP (2025-11-02) ⭐ NOVO!
+- `RESUMO_FINAL_AGU_SCRAPER_COMPLETO.md` - Resumo completo do AGU Scraper v4 ⭐ NOVO!
+- `AGU_SCRAPER_V4.md` - Plataforma completa de scraping AGU (2025-11-02)
+- `MCP_SETUP.md` - Configuração completa dos MCP servers (2025-11-02)
 - `SESSAO_2025-10-27_TCU_MANAGER_UNIFICADO.md` - Interface de gerenciamento TCU
 - `SESSAO_2025-10-27_MELHORIA_IMPORTACAO_TCU.md` - Melhorias na importação
 - `SESSAO_2025-01-27_RESUMOS_AUTOMATICOS_IA.md` - Sistema de resumos com IA
@@ -34,7 +55,7 @@ Professional website for Prof. Daniel Barral, specialist in Administrative Law f
 **Tech Stack:**
 - **Framework:** Next.js 15.5.2 with App Router
 - **Language:** TypeScript 5
-- **Database:** Prisma ORM with SQLite (dev) / PostgreSQL (production)
+- **Database:** Prisma ORM with SQLite (dev) / PostgreSQL (production via Neon)
 - **Styling:** Tailwind CSS 4
 - **UI Components:** Radix UI primitives (Dialog, Toast, Dropdown Menu)
 - **Authentication:** JWT tokens (jose library) + bcryptjs for password hashing
@@ -44,6 +65,7 @@ Professional website for Prof. Daniel Barral, specialist in Administrative Law f
 - **Form Handling:** React Hook Form with Zod validation
 - **Video Player:** Video.js
 - **File Processing:** xlsx (Excel import/export), qrcode generation
+- **MCP Servers:** Playwright (browser automation), PostgreSQL (direct DB queries), GitHub (repo management)
 
 ## Common Commands
 
@@ -70,6 +92,19 @@ npx prisma studio          # Open database GUI at localhost:5555
 npx prisma db push --force-reset  # Reset database (CAUTION: deletes all data)
 ```
 
+### MCP Servers Management
+```bash
+claude mcp list            # List all installed MCP servers and connection status
+claude mcp add <name>      # Add new MCP server (see MCP_SETUP.md for examples)
+claude mcp remove <name>   # Remove MCP server
+claude mcp get <name>      # Get details of specific MCP server
+```
+
+**Installed MCPs:**
+- `playwright` - Browser automation and E2E testing (scope: user)
+- `postgresql` - Direct database queries and management (scope: local)
+- `github` - GitHub repository management and automation (scope: user)
+
 ### Admin Setup
 ```bash
 # Create admin user (first time)
@@ -93,6 +128,28 @@ node scripts/migrate-blog-posts.js
 # Seed sample publications data
 node scripts/seed-publications.js
 ```
+
+### AGU Scraper Scripts ⭐ NOVO!
+```bash
+# Test document versioning system (7 scenarios)
+npx tsx scripts/test-versioning.ts
+
+# Test ONs import with automatic versioning
+npx tsx scripts/test-ons-with-versioning.ts
+
+# Import Pareceres Vinculantes with versioning
+npx tsx scripts/import-pareceres-vinculantes.ts
+
+# Test complete AGU scraper v4
+npx tsx scripts/test-agu-scraper-v4.ts
+
+# Test individual modules
+npx tsx scripts/test-pareceres.ts
+npx tsx scripts/test-decor.ts
+npx tsx scripts/test-sumulas.ts
+```
+
+**Note**: AGU scrapers require Playwright MCP to be active for real browser automation. Use `claude mcp list` to verify.
 
 ### Test Credentials
 
@@ -162,7 +219,19 @@ projeto do site no claude/site-prof-barral/
 │   ├── api-middleware.ts         # Common API middleware (auth, CORS)
 │   ├── excel-processor.ts        # Excel import processing
 │   ├── auto-classifier.ts        # Auto-classification for document categories
-│   └── enrollment-utils.ts       # Enrollment status checks
+│   ├── enrollment-utils.ts       # Enrollment status checks
+│   ├── agu-scraper-v4.ts         # AGU Scraper v4 orchestrator ⭐ NOVO!
+│   ├── agu-types.ts              # AGU type definitions
+│   └── agu-modules/              # AGU scraping modules ⭐ NOVO!
+│       ├── versioning.ts         # Document versioning and change detection
+│       ├── relevance.ts          # Relevance analysis and course suggestion
+│       ├── helpers.ts            # Shared scraping utilities
+│       ├── orientacoes-normativas.ts  # ONs scraper with versioning
+│       ├── pareceres-scraper.ts  # Pareceres Vinculantes scraper (Playwright MCP)
+│       ├── pareceres-vinculantes.ts   # Pareceres orchestrator
+│       ├── decor-scraper.ts      # DECOR/CONUNI scraper (Playwright MCP)
+│       ├── pareceres-conuni.ts   # CONUNI orchestrator
+│       └── sumulas.ts            # Súmulas AGU scraper (em desenvolvimento)
 ├── hooks/                        # Custom React hooks
 ├── types/                        # TypeScript type declarations
 ├── data/
@@ -174,7 +243,14 @@ projeto do site no claude/site-prof-barral/
 ├── scripts/                      # Utility scripts
 │   ├── create-admin.js           # Create admin user
 │   ├── migrate-blog-posts.js    # Migrate blog posts to DB
-│   └── seed-publications.js     # Seed sample publications
+│   ├── seed-publications.js     # Seed sample publications
+│   ├── test-versioning.ts       # Test document versioning system ⭐ NOVO!
+│   ├── test-ons-with-versioning.ts  # Test ONs import with versioning ⭐ NOVO!
+│   ├── import-pareceres-vinculantes.ts  # Import Pareceres with versioning ⭐ NOVO!
+│   ├── test-agu-scraper-v4.ts   # Test AGU scraper v4
+│   ├── test-pareceres.ts        # Test Pareceres scraping
+│   ├── test-decor.ts            # Test DECOR scraping
+│   └── test-sumulas.ts          # Test Súmulas scraping
 ├── public/
 │   └── uploads/                  # Uploaded files storage (local dev)
 ├── middleware.ts                 # Next.js middleware (route protection)
@@ -251,6 +327,15 @@ projeto do site no claude/site-prof-barral/
    - Measures precision and suggestions acceptance
    - Used for ML improvements
 
+16. **DocumentVersion** - Historical versioning system ⭐ NOVO!
+   - Complete change tracking with diff detection
+   - Fields: versionNumber, changeType, changesSummary, changeDetails
+   - Change types: 'created', 'minor_update', 'updated', 'major_update', 'no_change'
+   - Significance scoring (0-100) based on field importance
+   - Full document snapshots at each version
+   - Enables rollback, audit trail, and change notifications
+   - Used by AGU scrapers for automatic update detection
+
 **Important Document Fields (Fase 3-4):**
 - `isCommon` - Document appears in ALL courses (category filtering still applies)
 - `onNumber`, `onYear` - Numeric sorting for Orientações Normativas (ONs)
@@ -260,6 +345,14 @@ projeto do site no claude/site-prof-barral/
 - `summary`, `summaryHighlights` - AI-generated summaries
 - `entityType`, `enunciadoNumber` - Enunciados system (IBDA, INCP, CJF)
 - `adminNotes`, `publicNotes` - Structured observations system
+- `alternativeUrls` - JSON array with alternative/historical URLs
+
+**Document Versioning System (NOVO!):**
+- Automatic change detection when documents are re-imported
+- Field-level significance scoring: Critical (40pts), Important (20pts), Minor (5pts)
+- Historical snapshots of all fields at each version
+- Query version history: `document.versions` relation
+- See `lib/agu-modules/versioning.ts` for implementation
 
 See `prisma/schema.prisma` for complete schema with indexes and constraints.
 
@@ -659,6 +752,13 @@ Reference these files in the project for detailed info:
 - **`STATUS_PROJETO.md`** - Current project status and feature tracking
 - **`RESUMO_SESSAO_REDES_SOCIAIS.md`** - Social media integration session summary
 
+### AGU Scraper v4 Documentation ⭐ NOVO!
+- **`AGU_SCRAPER_V4.md`** - Documentação completa da plataforma de scraping AGU
+- **`SESSAO_2025-11-02_AGU_VERSIONAMENTO_E_PLAYWRIGHT.md`** - Versionamento + Playwright MCP (sessão completa)
+- **`RESUMO_FINAL_AGU_SCRAPER_COMPLETO.md`** - Resumo técnico com estatísticas e guias de uso
+- **`test-playwright-scraping.md`** - Guia passo a passo para scraping com Playwright MCP
+- **`agu-pareceres-extraidos.json`** - Dados extraídos dos Pareceres Vinculantes (10/215)
+
 ### Other
 - **`README.md`** - Standard Next.js readme
 - **`prd_daniel_barral.md`** (repo root) - Original Product Requirements Document
@@ -692,8 +792,23 @@ Reference these files in the project for detailed info:
 - **Enunciados system** (IBDA, INCP, CJF)
 - **Structured observations** for documents
 - **TCU Manager** unified admin interface
+- **AGU Scraper v4** - Plataforma completa de scraping AGU ⭐ NOVO!
+  - Sistema de versionamento automático com detecção de mudanças
+  - Orientações Normativas (97 ONs) com versionamento integrado
+  - Pareceres Vinculantes via Playwright MCP (10/215 extraídos)
+  - DECOR/CONUNI via Playwright MCP (10/1,637 extraídos)
+  - Análise inteligente de relevância e sugestão de cursos
+  - Histórico completo de versões de documentos
+  - Sistema de significance scoring (0-100) para mudanças
 
 **🚧 In Progress / Planned:**
+- **AGU Scraper v4 - Fase 2:**
+  - Extrair todos os 215 Pareceres Vinculantes (faltam 205)
+  - Extrair todos os 1,637 DECOR (faltam 1,627)
+  - Implementar Súmulas AGU scraping
+  - Criar cron job semanal para atualização automática
+  - Interface admin para visualizar histórico de versões
+  - Sistema de notificações para documentos atualizados
 - Payment integration for lifetime upgrades (currently manual)
 - Advanced document search (full-text)
 - Analytics dashboard for admin
@@ -749,6 +864,54 @@ npm run convert-tcu
 2. Check API quota/billing at https://console.anthropic.com
 3. AI is used as fallback - basic features work without it
 4. Error logs appear in document's `aiClassification` field
+
+### AGU Scraper Issues ⭐ NOVO!
+
+**Playwright MCP Not Working:**
+```bash
+# Verify MCP is installed and active
+claude mcp list
+
+# Should show:
+# playwright - status: active
+
+# If not active, reinstall:
+claude mcp add playwright
+```
+
+**Cross-origin iframe access blocked:**
+- Navigate directly to iframe URL instead of parent page
+- Example: `https://siscon.agu.gov.br/consultivo/vinculantes/` instead of gov.br wrapper
+
+**Versionamento not detecting changes:**
+```typescript
+// Verify unique identifier is correct
+// For ONs: use onNumber + onYear
+// For Pareceres: use title (numeroCompleto)
+
+// Check if document exists:
+const existing = await prisma.document.findFirst({
+  where: { onNumber: 1, onYear: 2024 }
+});
+```
+
+**Empty extraction results:**
+- Check if page uses dynamic loading (wait longer)
+- Verify selectors in browser console first
+- Use `mcp__playwright__browser_snapshot` to debug
+- Try multiple extraction strategies (table, list, accordion)
+
+**Test scripts:**
+```bash
+# Test versionamento system
+npx tsx scripts/test-versioning.ts
+
+# Test ONs import with versioning
+npx tsx scripts/test-ons-with-versioning.ts
+
+# Test Pareceres import
+npx tsx scripts/import-pareceres-vinculantes.ts
+```
 
 ### Build Errors
 ```bash
@@ -850,6 +1013,53 @@ const { documents } = await response.json();
 - **Multi-course Documents:** One document can belong to multiple courses (comma-separated in Excel import)
 
 ## Recent Critical Fixes & Features
+
+### 2025-11-02: AGU Scraper v4 + Sistema de Versionamento ⭐ NOVO!
+**Feature:** Plataforma completa de scraping AGU com versionamento automático de mudanças
+
+**Componentes Implementados:**
+1. **Sistema de Versionamento** (`lib/agu-modules/versioning.ts`)
+   - Detecção automática de mudanças com diff campo a campo
+   - Significance scoring (0-100): Critical (40pts), Important (20pts), Minor (5pts)
+   - Change types: created, minor_update, updated, major_update, no_change
+   - Histórico completo de versões com snapshots
+   - 7 cenários de teste validados
+
+2. **Playwright MCP Integration**
+   - Pareceres Vinculantes: 10/215 extraídos (via iframe direto)
+   - DECOR/CONUNI: 10/1,637 extraídos (múltiplas estratégias)
+   - Cross-origin iframe resolution
+   - Dynamic content handling
+
+3. **Orientações Normativas com Versionamento**
+   - Integração completa do sistema de versioning nas ONs
+   - Import script com detecção automática de mudanças
+   - Funções: `saveOrientacaoNormativaWithVersioning()`, `importOrientacoesNormativasWithVersioning()`
+
+4. **Análise de Relevância**
+   - Sistema de pontuação (0-100) baseado em keywords
+   - Sugestão automática de cursos relevantes
+   - Extração de temas e tags
+
+**Arquivos Criados/Modificados:**
+- `lib/agu-modules/versioning.ts` (235 linhas) - Sistema de versionamento
+- `lib/agu-modules/pareceres-scraper.ts` (243 linhas) - Scraper de Pareceres
+- `lib/agu-modules/decor-scraper.ts` (343 linhas) - Scraper de DECOR
+- `lib/agu-modules/orientacoes-normativas.ts` - Atualizado com versionamento
+- `scripts/test-versioning.ts` (177 linhas) - 7 testes de versionamento
+- `scripts/test-ons-with-versioning.ts` - Teste completo de importação
+- `scripts/import-pareceres-vinculantes.ts` (215 linhas) - Import com versionamento
+
+**Estatísticas:**
+- 1,503 linhas de código TypeScript
+- 9 arquivos criados/modificados
+- 100% dos testes de versionamento passando
+- 10 Pareceres Vinculantes extraídos via MCP
+- 10 DECOR manifestações extraídas via MCP
+
+**Sessões:**
+- `SESSAO_2025-11-02_AGU_VERSIONAMENTO_E_PLAYWRIGHT.md` - Documentação completa
+- `RESUMO_FINAL_AGU_SCRAPER_COMPLETO.md` - Resumo técnico detalhado
 
 ### 2025-10-27: TCU Manager Unificado
 **Feature:** Unified admin interface for managing TCU documents

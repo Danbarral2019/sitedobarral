@@ -4,19 +4,45 @@ import { scrapeAGU, convertAGUDocumentsToImport } from '@/lib/agu-scraper-v4';
 import { addDocument } from '@/lib/documents';
 import { courses } from '@/data/courses';
 import { prisma } from '@/lib/prisma';
+import type { AGUDocumentType } from '@/lib/agu-types';
 
 /**
- * GET: Busca orientações da AGU usando AGU Scraper v4 (preview com detecção de novas)
+ * GET: Busca documentos da AGU usando AGU Scraper v4 (preview com detecção de novas)
+ *
+ * Query params:
+ * - tipos: Tipos de documentos separados por vírgula (ex: "orientacao-normativa,sumula")
+ * - anoInicio: Ano inicial (ex: 2020)
+ * - anoFim: Ano final (opcional)
+ * - filtroRelevancia: "true" ou "false" (default: true)
  */
-export const GET = withAdminAuth(async () => {
+export const GET = withAdminAuth(async (request: NextRequest) => {
   try {
-    console.log('[AGU Import v4] Iniciando scraping...');
+    const { searchParams } = new URL(request.url);
+
+    // Parse parâmetros
+    const tiposParam = searchParams.get('tipos') || 'orientacao-normativa';
+    const tipos = tiposParam.split(',').map(t => t.trim()) as AGUDocumentType[];
+
+    const anoInicio = searchParams.get('anoInicio')
+      ? parseInt(searchParams.get('anoInicio')!)
+      : 2020;
+
+    const anoFim = searchParams.get('anoFim')
+      ? parseInt(searchParams.get('anoFim')!)
+      : undefined;
+
+    const filtroRelevancia = searchParams.get('filtroRelevancia') !== 'false';
+
+    console.log('[AGU Scrape v4] Iniciando scraping...');
+    console.log(`[AGU Scrape v4] Tipos: ${tipos.join(', ')}`);
+    console.log(`[AGU Scrape v4] Período: ${anoInicio}-${anoFim || 'atual'}`);
 
     // Usa AGU Scraper v4 - muito mais robusto!
     const result = await scrapeAGU({
-      tipos: ['orientacao-normativa'],
-      anoInicio: 2020, // Apenas ONs de 2020+
-      filtroRelevancia: true, // Apenas relevantes para licitações/contratos
+      tipos,
+      anoInicio,
+      anoFim,
+      filtroRelevancia,
     });
 
     if (!result.success) {
@@ -24,8 +50,8 @@ export const GET = withAdminAuth(async () => {
     }
 
     const documentos = result.results.flatMap(r => r.documentos);
-    console.log(`[AGU Import v4] ${documentos.length} orientações relevantes encontradas (2020+)`);
-    console.log(`[AGU Import v4] Taxa de relevância: ${result.stats.taxaRelevancia.toFixed(1)}%`);
+    console.log(`[AGU Scrape v4] ${documentos.length} documentos relevantes encontrados`);
+    console.log(`[AGU Scrape v4] Taxa de relevância: ${result.stats.taxaRelevancia.toFixed(1)}%`);
 
     // Converte para formato de importação
     const documents = convertAGUDocumentsToImport(documentos);
@@ -33,7 +59,9 @@ export const GET = withAdminAuth(async () => {
     // Verifica quais documentos já existem no banco
     const existingUrls = await prisma.document.findMany({
       where: {
-        category: 'orientacao-normativa',
+        category: {
+          in: tipos,
+        },
         url: {
           in: documents.map(d => d.url)
         }
@@ -52,17 +80,20 @@ export const GET = withAdminAuth(async () => {
     const novas = documentos.filter(doc => !existingUrlSet.has(doc.url));
     const existentes = documentos.filter(doc => existingUrlSet.has(doc.url));
 
-    console.log(`[AGU Import v4] ${novas.length} novas, ${existentes.length} já existentes`);
+    console.log(`[AGU Scrape v4] ${novas.length} novas, ${existentes.length} já existentes`);
 
     // Formata preview para o frontend
-    const preview = documentos.slice(0, 10).map(doc => ({
+    const preview = documentos.slice(0, 20).map(doc => ({
+      tipo: doc.tipo,
       numero: doc.numero || 'N/A',
       titulo: doc.titulo,
       descricao: doc.descricao,
       tags: doc.tags,
-      linkFundamentacao: doc.urlPDF || doc.url,
-      fundamentacaoLinks: doc.urlsAlternativas || [doc.url],
+      url: doc.url,
+      urlPDF: doc.urlPDF,
       versaoHistorica: doc.versaoHistorica,
+      relevanciaScore: doc.relevanciaScore,
+      cursosIds: doc.cursosIds,
       isNova: !existingUrlSet.has(doc.url),
     }));
 
@@ -71,18 +102,17 @@ export const GET = withAdminAuth(async () => {
       total: documentos.length,
       novas: novas.length,
       existentes: existentes.length,
-      orientacoes: documentos.slice(0, 10),
-      preview,
+      documentos: preview,
       stats: {
         ...result.stats,
         tempoExecucao: `${(result.executionTime / 1000).toFixed(2)}s`,
       },
     });
   } catch (error) {
-    console.error('[AGU Import v4] Erro ao buscar orientações:', error);
+    console.error('[AGU Scrape v4] Erro ao buscar documentos:', error);
     return NextResponse.json(
       {
-        error: 'Erro ao buscar orientações da AGU',
+        error: 'Erro ao buscar documentos da AGU',
         details: error instanceof Error ? error.message : 'Erro desconhecido'
       },
       { status: 500 }
@@ -91,29 +121,46 @@ export const GET = withAdminAuth(async () => {
 });
 
 /**
- * POST: Importa orientações da AGU usando AGU Scraper v4
+ * POST: Importa documentos da AGU usando AGU Scraper v4
+ *
+ * Body:
+ * {
+ *   tipos: string[],
+ *   anoInicio?: number,
+ *   anoFim?: number,
+ *   filtroRelevancia?: boolean,
+ *   addToAllCourses?: boolean,
+ *   makePublic?: boolean,
+ *   mode?: 'incremental' | 'completo' | 'atualizar'
+ * }
  *
  * Modos de importação:
- * - incremental (padrão): Importa apenas ONs novas
+ * - incremental (padrão): Importa apenas documentos novos
  * - completo: Reimporta tudo (ignora duplicatas existentes)
- * - atualizar: Atualiza dados de ONs existentes
+ * - atualizar: Atualiza dados de documentos existentes
  */
 export const POST = withAdminAuth(async (request: NextRequest) => {
   try {
     const body = await request.json();
     const {
+      tipos = ['orientacao-normativa'],
+      anoInicio = 2020,
+      anoFim,
+      filtroRelevancia = true,
       addToAllCourses = true,
       makePublic = true,
       mode = 'incremental' // 'incremental' | 'completo' | 'atualizar'
     } = body;
 
     console.log(`[AGU Import v4] Iniciando importação no modo: ${mode}...`);
+    console.log(`[AGU Import v4] Tipos: ${tipos.join(', ')}`);
 
     // 1. Faz scraping usando AGU Scraper v4
     const result = await scrapeAGU({
-      tipos: ['orientacao-normativa'],
-      anoInicio: 2020,
-      filtroRelevancia: true,
+      tipos: tipos as AGUDocumentType[],
+      anoInicio,
+      anoFim,
+      filtroRelevancia,
     });
 
     if (!result.success) {
@@ -121,7 +168,7 @@ export const POST = withAdminAuth(async (request: NextRequest) => {
     }
 
     const documentos = result.results.flatMap(r => r.documentos);
-    console.log(`[AGU Import v4] ${documentos.length} orientações relevantes encontradas`);
+    console.log(`[AGU Import v4] ${documentos.length} documentos relevantes encontrados`);
     console.log(`[AGU Import v4] Score médio: ${result.stats.scoreMedio.toFixed(1)}/100`);
 
     // 2. Converte para formato de importação
@@ -142,13 +189,16 @@ export const POST = withAdminAuth(async (request: NextRequest) => {
     // 4. Busca documentos existentes de uma vez (otimização)
     const existingDocs = await prisma.document.findMany({
       where: {
-        category: 'orientacao-normativa',
+        category: {
+          in: tipos,
+        },
       },
       select: {
         url: true,
         title: true,
         courseId: true,
         id: true,
+        category: true,
       }
     });
 
@@ -162,7 +212,7 @@ export const POST = withAdminAuth(async (request: NextRequest) => {
       existingByUrlAndCourse.get(key)!.add(doc.courseId);
     }
 
-    // 5. Importa cada orientação para cada curso (em lotes para não sobrecarregar)
+    // 5. Importa cada documento para cada curso (em lotes para não sobrecarregar)
     let successCount = 0;
     let errorCount = 0;
     let skippedCount = 0;
@@ -217,13 +267,13 @@ export const POST = withAdminAuth(async (request: NextRequest) => {
             doc.title,
             doc.description,
             'link', // Tipo: link (pois são URLs externas)
-            'orientacao-normativa',
+            doc.category,
             makePublic,
             doc.url,
             undefined, // size (não aplicável para links)
             doc.tags,
             [], // leiArticles (vazio)
-            doc.alternativeUrls, // URLs alternativas para múltiplas fundamentações
+            doc.alternativeUrls, // URLs alternativas para múltiplas fundamentações (ONs)
             doc.onNumber, // Número da ON (para ordenação numérica)
             doc.onYear // Ano da ON (para ordenação numérica)
           );
@@ -246,13 +296,14 @@ export const POST = withAdminAuth(async (request: NextRequest) => {
 
     console.log(`[AGU Import v4] Importação concluída (${mode}): ${successCount} criados, ${updatedCount} atualizados, ${skippedCount} pulados, ${errorCount} erros`);
     console.log(`[AGU Import v4] Distribuição por curso:`, result.stats.porCurso);
+    console.log(`[AGU Import v4] Distribuição por tipo:`, result.stats.porTipo);
 
     return NextResponse.json({
       success: true,
       message: `Importação v4 concluída no modo ${mode}`,
       mode,
       stats: {
-        orientacoesEncontradas: documentos.length,
+        documentosEncontrados: documentos.length,
         cursosAlvo: targetCourses.length,
         documentosCriados: successCount,
         documentosAtualizados: updatedCount,
@@ -261,6 +312,7 @@ export const POST = withAdminAuth(async (request: NextRequest) => {
         totalProcessado: totalOperations,
         relevanciaMedia: result.stats.scoreMedio.toFixed(1),
         tempoExecucao: `${(result.executionTime / 1000).toFixed(2)}s`,
+        porTipo: result.stats.porTipo,
       },
       documents: createdDocuments.slice(0, 5), // Retorna primeiros 5 como exemplo
     });
@@ -269,7 +321,7 @@ export const POST = withAdminAuth(async (request: NextRequest) => {
     console.error('[AGU Import v4] Erro na importação:', error);
     return NextResponse.json(
       {
-        error: 'Erro ao importar orientações da AGU (v4)',
+        error: 'Erro ao importar documentos da AGU (v4)',
         details: error instanceof Error ? error.message : 'Erro desconhecido'
       },
       { status: 500 }

@@ -130,7 +130,7 @@ export default function ScraperAGUPage() {
   };
 
   const handleImport = async () => {
-    if (!window.confirm(`Confirma importação no modo "${mode}"?\n\n${previewData?.novas} novos documentos serão importados.`)) {
+    if (!window.confirm(`Confirma importação no modo "${mode}"?\n\n${previewData.novas} novos documentos serão importados.`)) {
       return;
     }
 
