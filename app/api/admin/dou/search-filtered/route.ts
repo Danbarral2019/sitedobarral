@@ -50,7 +50,7 @@ export async function POST(request: Request) {
       const params: DOUSearchParams = {
         searchTerm: searchTerm || 'licitação',
         sections: sections.length > 0 ? sections : undefined,
-        period: 'personalizado' as any,
+        period: 'personalizado' as 'hoje' | 'semana' | 'mes' | 'personalizado',
         publishFrom: new Date(dateFrom).toLocaleDateString('pt-BR').split('/').reverse().join('-'),
         publishTo: new Date(dateTo).toLocaleDateString('pt-BR').split('/').reverse().join('-'),
         maxResults: maxResults || 100,

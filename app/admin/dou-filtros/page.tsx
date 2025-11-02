@@ -283,7 +283,7 @@ export default function DOUFiltrosPage() {
                 </label>
                 <select
                   value={filters.datePreset}
-                  onChange={(e) => setFilters({ ...filters, datePreset: e.target.value as any })}
+                  onChange={(e) => setFilters({ ...filters, datePreset: e.target.value as DateRangePreset | 'custom' })}
                   className="w-full px-3 py-2 border rounded-lg"
                 >
                   {datePresets.map((preset) => (
