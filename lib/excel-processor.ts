@@ -8,6 +8,7 @@ import { autoClassifyDocument, suggestCategory, extractTags } from './auto-class
 export interface ExcelDocumentRow {
   titulo: string;
   descricao?: string;
+  conteudo?: string; // Conteúdo/trechos relevantes para busca textual
   categoria?: string;
   curso?: string;
   publico?: string;
@@ -20,6 +21,7 @@ export interface ExcelDocumentRow {
 export interface ProcessedDocument {
   title: string;
   description: string;
+  content?: string; // Conteúdo/trechos relevantes para busca textual
   category: 'apostila' | 'acordao' | 'parecer' | 'edital' | 'artigo' | 'orientacao-normativa' | 'outro';
   courseId?: string;
   courseSlug?: string;
@@ -142,6 +144,7 @@ function processRow(
 
   const title = row.titulo?.trim() || '';
   const description = row.descricao?.trim() || '';
+  const content = row.conteudo?.trim() || '';
 
   // Categoria: usa sugerida ou auto-classifica
   let category: ProcessedDocument['category'] = 'outro';
@@ -288,6 +291,7 @@ function processRow(
   return {
     title,
     description,
+    content: content || undefined,
     category,
     courseId,
     courseSlug,

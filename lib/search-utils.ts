@@ -25,6 +25,9 @@ export function matchesSearchTerm(doc: DocumentType, searchTerm: string): boolea
   // Busca em descrição
   if (doc.description && normalizeText(doc.description).includes(normalizedTerm)) return true;
 
+  // Busca em conteúdo (NOVO!)
+  if (doc.content && normalizeText(doc.content).includes(normalizedTerm)) return true;
+
   // Busca em tags
   if (doc.tags && normalizeText(doc.tags).includes(normalizedTerm)) return true;
 
@@ -143,6 +146,12 @@ export function calculateRelevanceScore(doc: DocumentType, searchTerm: string): 
   if (doc.description) {
     const descMatches = (normalizeText(doc.description).match(new RegExp(normalizedTerm, 'g')) || []).length;
     score += descMatches * 3;
+  }
+
+  // Pontuação por match no conteúdo (NOVO! - peso médio)
+  if (doc.content) {
+    const contentMatches = (normalizeText(doc.content).match(new RegExp(normalizedTerm, 'g')) || []).length;
+    score += contentMatches * 4;
   }
 
   // Pontuação por match nas tags

@@ -6,6 +6,7 @@ export type DocumentType = {
   id: string;
   title: string;
   description?: string;
+  content?: string; // Conteúdo/trechos relevantes para busca textual
   type: string;
   category: string;
   courseId?: string;

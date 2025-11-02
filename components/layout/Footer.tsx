@@ -91,26 +91,29 @@ export const Footer = memo(function Footer() {
           <div>
             <h4 className="text-white font-semibold mb-4">Redes Sociais</h4>
             <div className="flex space-x-4 mb-6">
-              <a 
-                href="https://instagram.com" 
-                target="_blank" 
+              <a
+                href="https://instagram.com/danbarral"
+                target="_blank"
                 rel="noopener noreferrer"
+                aria-label="Instagram do Prof. Daniel Barral"
                 className="w-10 h-10 bg-gray-800 rounded-lg flex items-center justify-center hover:bg-primary-600 transition-colors"
               >
                 <Instagram className="w-5 h-5" />
               </a>
-              <a 
-                href="https://youtube.com" 
-                target="_blank" 
+              <a
+                href="https://www.youtube.com/@danbarral"
+                target="_blank"
                 rel="noopener noreferrer"
+                aria-label="YouTube do Prof. Daniel Barral"
                 className="w-10 h-10 bg-gray-800 rounded-lg flex items-center justify-center hover:bg-primary-600 transition-colors"
               >
                 <Youtube className="w-5 h-5" />
               </a>
-              <a 
-                href="https://linkedin.com" 
-                target="_blank" 
+              <a
+                href="https://www.linkedin.com/in/daniel-de-andrade-oliveira-barral-b5110870/"
+                target="_blank"
                 rel="noopener noreferrer"
+                aria-label="LinkedIn do Prof. Daniel Barral"
                 className="w-10 h-10 bg-gray-800 rounded-lg flex items-center justify-center hover:bg-primary-600 transition-colors"
               >
                 <Linkedin className="w-5 h-5" />

@@ -44,6 +44,7 @@ model Document {
   isCommon        Boolean  @default(false) // Se true, documento aparece em todos os cursos
   tags            String?  // JSON array como string
   leiArticles     String?  // JSON array com números de artigos da Lei 14.133/2021
+  content         String?  @db.Text // Conteúdo/trechos relevantes do documento para busca textual
   size            Int?
   onNumber        Int?     // Número da ON (para ordenação numérica de Orientações Normativas)
   onYear          Int?     // Ano da ON (para ordenação numérica de Orientações Normativas)
