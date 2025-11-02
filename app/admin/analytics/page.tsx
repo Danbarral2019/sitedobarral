@@ -79,6 +79,8 @@ export default function AnalyticsDashboard() {
   const router = useRouter();
   const [data, setData] = useState<AnalyticsData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [isLoadingCharts, setIsLoadingCharts] = useState(false);
+  const [isLoadingTopContent, setIsLoadingTopContent] = useState(false);
   const [error, setError] = useState('');
 
   useEffect(() => {
@@ -96,26 +98,73 @@ export default function AnalyticsDashboard() {
           return;
         }
 
-        // Carregar analytics
+        // FASE 1: Carregar apenas summary (rápido)
         setIsLoading(true);
-        const response = await fetch('/api/admin/analytics');
+        const summaryResponse = await fetch('/api/admin/analytics/summary');
 
-        if (!response.ok) {
-          throw new Error('Erro ao carregar analytics');
+        if (!summaryResponse.ok) {
+          throw new Error('Erro ao carregar métricas');
         }
 
-        const result = await response.json();
-        setData(result.data);
+        const summaryData = await summaryResponse.json();
+
+        // Inicializar data com summary
+        setData({
+          ...summaryData,
+          enunciados: {
+            total: summaryData.enunciados.total,
+            byEntity: [],
+          },
+          topDocuments: [],
+          topCourses: [],
+          topUsers: [],
+          accessByDay: [],
+          actionStats: [],
+        });
+
+        setIsLoading(false);
+
+        // FASE 2: Carregar gráficos (após 300ms)
+        setTimeout(async () => {
+          setIsLoadingCharts(true);
+          try {
+            const chartsResponse = await fetch('/api/admin/analytics/charts');
+            if (chartsResponse.ok) {
+              const chartsData = await chartsResponse.json();
+              setData(prev => prev ? { ...prev, ...chartsData } : null);
+            }
+          } catch (err) {
+            console.error('Erro ao carregar gráficos:', err);
+          } finally {
+            setIsLoadingCharts(false);
+          }
+        }, 300);
+
+        // FASE 3: Carregar top content (após 600ms)
+        setTimeout(async () => {
+          setIsLoadingTopContent(true);
+          try {
+            const topContentResponse = await fetch('/api/admin/analytics/top-content');
+            if (topContentResponse.ok) {
+              const topContentData = await topContentResponse.json();
+              setData(prev => prev ? { ...prev, ...topContentData } : null);
+            }
+          } catch (err) {
+            console.error('Erro ao carregar top content:', err);
+          } finally {
+            setIsLoadingTopContent(false);
+          }
+        }, 600);
+
       } catch (err) {
         console.error('Erro:', err);
         setError('Erro ao carregar métricas');
-      } finally {
         setIsLoading(false);
       }
     };
 
     verifyAdminAndLoad();
-  }, []); // ✅ Array vazio = executa apenas uma vez
+  }, [router]); // ✅ Dependência: router
 
   if (isLoading) {
     return (
@@ -315,10 +364,17 @@ export default function AnalyticsDashboard() {
             <div className="flex items-center gap-3 mb-6">
               <TrendingUp className="w-6 h-6 text-blue-600" />
               <h2 className="text-xl font-bold text-gray-900">Documentos Mais Acessados</h2>
+              {isLoadingTopContent && (
+                <Loader2 className="w-5 h-5 animate-spin text-blue-600 ml-auto" />
+              )}
             </div>
 
             <div className="space-y-3">
-              {data.topDocuments.length === 0 ? (
+              {isLoadingTopContent ? (
+                <div className="flex items-center justify-center py-8">
+                  <Loader2 className="w-6 h-6 animate-spin text-gray-400" />
+                </div>
+              ) : data.topDocuments.length === 0 ? (
                 <p className="text-gray-600 text-sm">Nenhum acesso registrado nos últimos 30 dias</p>
               ) : (
                 data.topDocuments.slice(0, 5).map((doc, index) => (
@@ -345,10 +401,17 @@ export default function AnalyticsDashboard() {
             <div className="flex items-center gap-3 mb-6">
               <GraduationCap className="w-6 h-6 text-green-600" />
               <h2 className="text-xl font-bold text-gray-900">Cursos Mais Acessados</h2>
+              {isLoadingTopContent && (
+                <Loader2 className="w-5 h-5 animate-spin text-green-600 ml-auto" />
+              )}
             </div>
 
             <div className="space-y-3">
-              {data.topCourses.length === 0 ? (
+              {isLoadingTopContent ? (
+                <div className="flex items-center justify-center py-8">
+                  <Loader2 className="w-6 h-6 animate-spin text-gray-400" />
+                </div>
+              ) : data.topCourses.length === 0 ? (
                 <p className="text-gray-600 text-sm">Nenhum acesso registrado nos últimos 30 dias</p>
               ) : (
                 data.topCourses.slice(0, 5).map((course, index) => (
@@ -375,10 +438,17 @@ export default function AnalyticsDashboard() {
             <div className="flex items-center gap-3 mb-6">
               <Users className="w-6 h-6 text-purple-600" />
               <h2 className="text-xl font-bold text-gray-900">Usuários Mais Ativos</h2>
+              {isLoadingTopContent && (
+                <Loader2 className="w-5 h-5 animate-spin text-purple-600 ml-auto" />
+              )}
             </div>
 
             <div className="space-y-3">
-              {data.topUsers.length === 0 ? (
+              {isLoadingTopContent ? (
+                <div className="flex items-center justify-center py-8">
+                  <Loader2 className="w-6 h-6 animate-spin text-gray-400" />
+                </div>
+              ) : data.topUsers.length === 0 ? (
                 <p className="text-gray-600 text-sm">Nenhum acesso registrado nos últimos 30 dias</p>
               ) : (
                 data.topUsers.slice(0, 5).map((user, index) => (
@@ -405,21 +475,30 @@ export default function AnalyticsDashboard() {
             <div className="flex items-center gap-3 mb-6">
               <Activity className="w-6 h-6 text-orange-600" />
               <h2 className="text-xl font-bold text-gray-900">Ações por Tipo (30 dias)</h2>
+              {isLoadingCharts && (
+                <Loader2 className="w-5 h-5 animate-spin text-orange-600 ml-auto" />
+              )}
             </div>
 
             <div className="space-y-3">
-              {data.actionStats.map((stat) => (
-                <div key={stat.action} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-                  <div className="flex items-center gap-3">
-                    {stat.action === 'download' && <Download className="w-5 h-5 text-orange-600" />}
-                    {stat.action === 'view' && <Eye className="w-5 h-5 text-blue-600" />}
-                    {stat.action === 'login' && <Users className="w-5 h-5 text-green-600" />}
-                    {stat.action === 'access' && <Activity className="w-5 h-5 text-purple-600" />}
-                    <span className="font-semibold text-gray-900">{translateAction(stat.action)}</span>
-                  </div>
-                  <span className="text-lg font-bold text-gray-900">{stat.count}</span>
+              {isLoadingCharts ? (
+                <div className="flex items-center justify-center py-8">
+                  <Loader2 className="w-6 h-6 animate-spin text-gray-400" />
                 </div>
-              ))}
+              ) : (
+                data.actionStats.map((stat) => (
+                  <div key={stat.action} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                    <div className="flex items-center gap-3">
+                      {stat.action === 'download' && <Download className="w-5 h-5 text-orange-600" />}
+                      {stat.action === 'view' && <Eye className="w-5 h-5 text-blue-600" />}
+                      {stat.action === 'login' && <Users className="w-5 h-5 text-green-600" />}
+                      {stat.action === 'access' && <Activity className="w-5 h-5 text-purple-600" />}
+                      <span className="font-semibold text-gray-900">{translateAction(stat.action)}</span>
+                    </div>
+                    <span className="text-lg font-bold text-gray-900">{stat.count}</span>
+                  </div>
+                ))
+              )}
             </div>
           </div>
         </div>
@@ -429,33 +508,42 @@ export default function AnalyticsDashboard() {
           <div className="flex items-center gap-3 mb-6">
             <Calendar className="w-6 h-6 text-indigo-600" />
             <h2 className="text-xl font-bold text-gray-900">Acessos por Dia (Últimos 30 dias)</h2>
+            {isLoadingCharts && (
+              <Loader2 className="w-5 h-5 animate-spin text-indigo-600 ml-auto" />
+            )}
           </div>
 
           <div className="overflow-x-auto">
-            <div className="flex items-end gap-2 min-w-max h-64">
-              {data.accessByDay.length === 0 ? (
-                <p className="text-gray-600 text-sm">Nenhum acesso registrado</p>
-              ) : (
-                data.accessByDay.map((day) => {
-                  const maxCount = Math.max(...data.accessByDay.map(d => d.count));
-                  const height = (day.count / maxCount) * 100;
+            {isLoadingCharts ? (
+              <div className="flex items-center justify-center h-64">
+                <Loader2 className="w-8 h-8 animate-spin text-gray-400" />
+              </div>
+            ) : (
+              <div className="flex items-end gap-2 min-w-max h-64">
+                {data.accessByDay.length === 0 ? (
+                  <p className="text-gray-600 text-sm">Nenhum acesso registrado</p>
+                ) : (
+                  data.accessByDay.map((day) => {
+                    const maxCount = Math.max(...data.accessByDay.map(d => d.count));
+                    const height = (day.count / maxCount) * 100;
 
-                  return (
-                    <div key={day.date} className="flex flex-col items-center gap-2 flex-1 min-w-[40px]">
-                      <div className="text-xs font-semibold text-gray-900">{day.count}</div>
-                      <div
-                        className="w-full bg-gradient-to-t from-indigo-600 to-indigo-400 rounded-t-lg transition-all hover:from-indigo-700 hover:to-indigo-500"
-                        style={{ height: `${height}%` }}
-                        title={`${day.date}: ${day.count} acessos`}
-                      ></div>
-                      <div className="text-xs text-gray-600 rotate-45 origin-top-left whitespace-nowrap">
-                        {new Date(day.date).toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' })}
+                    return (
+                      <div key={day.date} className="flex flex-col items-center gap-2 flex-1 min-w-[40px]">
+                        <div className="text-xs font-semibold text-gray-900">{day.count}</div>
+                        <div
+                          className="w-full bg-gradient-to-t from-indigo-600 to-indigo-400 rounded-t-lg transition-all hover:from-indigo-700 hover:to-indigo-500"
+                          style={{ height: `${height}%` }}
+                          title={`${day.date}: ${day.count} acessos`}
+                        ></div>
+                        <div className="text-xs text-gray-600 rotate-45 origin-top-left whitespace-nowrap">
+                          {new Date(day.date).toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' })}
+                        </div>
                       </div>
-                    </div>
-                  );
-                })
-              )}
-            </div>
+                    );
+                  })
+                )}
+              </div>
+            )}
           </div>
         </div>
       </div>

@@ -46,8 +46,10 @@ export default function AdminPage() {
     maxUses: '',
   });
 
-  // Paginação
+  // Paginação (agora server-side)
   const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [totalQRCodes, setTotalQRCodes] = useState(0);
   const itemsPerPage = 6;
 
   const [formData, setFormData] = useState({
@@ -80,18 +82,25 @@ export default function AdminPage() {
     }
   }, [router]);
 
-  const loadQRCodes = useCallback(async () => {
+  const loadQRCodes = useCallback(async (page = 1) => {
     setIsLoadingQRs(true);
     try {
-      const response = await fetch('/api/admin/list-qr');
+      const response = await fetch(`/api/admin/list-qr?page=${page}&limit=${itemsPerPage}`);
       const data = await response.json();
       setQrCodes(data.qrCodes || []);
+
+      // Atualizar paginação com dados do servidor
+      if (data.pagination) {
+        setCurrentPage(data.pagination.page);
+        setTotalPages(data.pagination.totalPages);
+        setTotalQRCodes(data.pagination.total);
+      }
     } catch (error) {
       console.error('Erro ao carregar QR Codes:', error);
     } finally {
       setIsLoadingQRs(false);
     }
-  }, []);
+  }, [itemsPerPage]);
 
   useEffect(() => {
     verifyAdmin();
@@ -283,11 +292,8 @@ export default function AdminPage() {
     }
   };
 
-  // Calcular paginação
-  const totalPages = Math.ceil(qrCodes.length / itemsPerPage);
-  const startIndex = (currentPage - 1) * itemsPerPage;
-  const endIndex = startIndex + itemsPerPage;
-  const paginatedQRCodes = qrCodes.slice(startIndex, endIndex);
+  // Paginação agora é server-side, então qrCodes já vem paginado
+  const paginatedQRCodes = qrCodes; // Já vem paginado do servidor!
 
   if (isLoading) {
     return (
@@ -585,9 +591,9 @@ export default function AdminPage() {
                     <Pagination
                       currentPage={currentPage}
                       totalPages={totalPages}
-                      onPageChange={setCurrentPage}
+                      onPageChange={(page) => loadQRCodes(page)}
                       itemsPerPage={itemsPerPage}
-                      totalItems={qrCodes.length}
+                      totalItems={totalQRCodes}
                     />
                   </>
                 )}
