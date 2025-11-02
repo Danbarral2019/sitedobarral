@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import AdminLayout from '@/components/AdminLayout';
 import {
-  Save, X, Eye, BookOpen, Tag, Grid, ArrowUpDown,
+  Save, X, Eye, BookOpen, Grid, ArrowUpDown,
   AlertCircle, Scale, Link as LinkIcon
 } from 'lucide-react';
 
@@ -19,12 +19,10 @@ export default function NewGlossaryTermPage() {
     shortDef: '',
     longDef: '',
     category: 'conceitos-gerais',
-    legalBasis: '',
     leiArticles: '',
     relatedTerms: '',
     order: 0,
     isPublished: false,
-    tags: '',
   });
 
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -102,11 +100,9 @@ export default function NewGlossaryTermPage() {
           shortDef: formData.shortDef || undefined,
           definition: formData.longDef, // API espera "definition", não "longDef"
           category: formData.category,
-          externalUrl: formData.legalBasis || undefined, // legalBasis vira externalUrl
           isPublic: formData.isPublished, // API espera "isPublic", não "isPublished"
           leiArticles: leiArticlesArray,
-          relatedTerms: relatedTermsArray,
-          // Campos order e tags não existem no schema atual
+          relatedTerms: relatedTermsArray
         }),
       });
 
@@ -314,20 +310,6 @@ export default function NewGlossaryTermPage() {
 
             <label className="block mt-4">
               <div className="flex items-center gap-2 mb-2">
-                <Scale className="w-5 h-5 text-gray-700" />
-                <span className="text-sm font-bold text-gray-900">Base Legal</span>
-              </div>
-              <input
-                type="text"
-                value={formData.legalBasis}
-                onChange={(e) => setFormData({ ...formData, legalBasis: e.target.value })}
-                placeholder="Ex: Art. 75, Lei 14.133/2021"
-                className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-              />
-            </label>
-
-            <label className="block mt-4">
-              <div className="flex items-center gap-2 mb-2">
                 <Scale className="w-5 h-5 text-blue-700" />
                 <span className="text-sm font-bold text-gray-900">Artigos da Lei 14.133/2021</span>
               </div>
@@ -358,20 +340,6 @@ export default function NewGlossaryTermPage() {
               <p className="mt-1 text-xs text-gray-600">
                 Slugs de outros termos do glossário que são relacionados
               </p>
-            </label>
-
-            <label className="block mt-4">
-              <div className="flex items-center gap-2 mb-2">
-                <Tag className="w-5 h-5 text-gray-700" />
-                <span className="text-sm font-bold text-gray-900">Tags</span>
-              </div>
-              <input
-                type="text"
-                value={formData.tags}
-                onChange={(e) => setFormData({ ...formData, tags: e.target.value })}
-                placeholder="lei-14133, contratacao-direta (separadas por vírgula)"
-                className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-              />
             </label>
 
             <label className="flex items-center gap-3 mt-4 p-4 bg-gray-50 rounded-lg cursor-pointer hover:bg-gray-100 transition-colors">
