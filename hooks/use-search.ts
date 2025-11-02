@@ -16,6 +16,16 @@ export type DocumentType = {
   url?: string;
 };
 
+export type GlossaryTermType = {
+  id: string;
+  term: string;
+  slug: string;
+  definition: string;
+  shortDef?: string | null;
+  category?: string | null;
+  viewCount: number;
+};
+
 export type SearchFilters = {
   courseIds: string[];
   categories: string[];

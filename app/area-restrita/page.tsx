@@ -6,7 +6,7 @@ import { Loader2, LogOut, Clock, GraduationCap, CheckCircle, Heart } from 'lucid
 import { courses } from '@/data/courses';
 import { useAuth } from '@/hooks/use-auth';
 import { useFavorites } from '@/hooks/use-favorites';
-import { useSearch } from '@/hooks/use-search';
+import { useSearch, type GlossaryTermType } from '@/hooks/use-search';
 import { searchAndFilterDocuments } from '@/lib/search-utils';
 import EnrollmentStatusBanner from '@/components/EnrollmentStatusBanner';
 import CoursesSidebar from '@/components/CoursesSidebar';
@@ -18,6 +18,7 @@ import RecommendedSites from '@/components/RecommendedSites';
 import SearchBar from '@/components/SearchBar';
 import SearchFilters from '@/components/SearchFilters';
 import PDFExportPanel from '@/components/PDFExportPanel';
+import { GlossarySearchResults } from '@/components/GlossarySearchResults';
 
 interface DocumentType {
   id: string;
@@ -68,6 +69,9 @@ export default function AreaRestritaPage() {
   // Modal de detalhes
   const [selectedDocument, setSelectedDocument] = useState<DocumentType | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+
+  // Estado dos termos de glossário encontrados na busca
+  const [glossaryResults, setGlossaryResults] = useState<GlossaryTermType[]>([]);
 
   // Função para registrar acesso
   const logAccess = async (action: string, courseId: string, documentId?: string) => {
@@ -234,6 +238,30 @@ export default function AreaRestritaPage() {
       favoriteIds
     );
   }, [searchableDocuments, search.searchTerm, search.filters, search.isSearchActive, favoriteIds, selectedCourseDocuments]);
+
+  // Buscar termos do glossário quando há termo de busca
+  useEffect(() => {
+    const fetchGlossaryResults = async () => {
+      if (!search.searchTerm || search.searchTerm.length < 2) {
+        setGlossaryResults([]);
+        return;
+      }
+
+      try {
+        const response = await fetch(
+          `/api/area-restrita/search-all?q=${encodeURIComponent(search.searchTerm)}&courseId=${selectedCourseId || 'all'}`
+        );
+        if (response.ok) {
+          const data = await response.json();
+          setGlossaryResults(data.glossaryTerms || []);
+        }
+      } catch (error) {
+        console.error('Erro ao buscar glossário:', error);
+      }
+    };
+
+    fetchGlossaryResults();
+  }, [search.searchTerm, selectedCourseId]);
 
   // Contagem de documentos por curso
   const documentCounts = Object.keys(courseDocuments).reduce((acc, courseId) => {
@@ -448,6 +476,14 @@ export default function AreaRestritaPage() {
                         documents={selectedCourseDocuments}
                         courseId={selectedCourse.id}
                         onDownload={(doc) => handleDownload(doc, selectedCourse.id)}
+                      />
+                    )}
+
+                    {/* Resultados do Glossário - Apenas quando há busca ativa */}
+                    {search.isSearchActive && glossaryResults.length > 0 && (
+                      <GlossarySearchResults
+                        terms={glossaryResults}
+                        searchQuery={search.searchTerm}
                       />
                     )}
 
