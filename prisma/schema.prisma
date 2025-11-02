@@ -545,3 +545,43 @@ model FAQFeedback {
   @@index([wasHelpful])
   @@index([createdAt])
 }
+
+// Perguntas sobre Artigos da Lei (IA Assistente - Fase 3)
+// Armazena histórico de perguntas para analytics e futuro treinamento
+model ArticleQuestion {
+  id              String   @id @default(uuid())
+  articleNumber   String   // Número do artigo (ex: "75")
+
+  // Pergunta do usuário
+  question        String   @db.Text
+
+  // Contexto usado para responder (IDs de documentos relevantes)
+  contextDocIds   String?  // JSON array com IDs de documentos
+
+  // Resposta (vazio até IA ser ativada)
+  answer          String?  @db.Text
+  aiProvider      String?  // "anthropic-claude" | "openai" | null (quando ativado)
+
+  // Conversa (para manter contexto entre mensagens)
+  conversationId  String?
+
+  // Analytics
+  wasHelpful      Boolean? // Feedback do usuário
+  feedbackComment String?
+
+  // Identificação do usuário
+  userId          String?
+  userEmail       String?
+  ip              String?
+
+  // Controle
+  isPlaceholder   Boolean  @default(true) // true = IA não ativa ainda
+  createdAt       DateTime @default(now())
+  respondedAt     DateTime? // Quando a IA responder (futuro)
+
+  @@index([articleNumber])
+  @@index([conversationId])
+  @@index([userId])
+  @@index([isPlaceholder])
+  @@index([createdAt])
+}
