@@ -1,0 +1,307 @@
+/**
+ * Script para atualizar data/lei-14133-artigos.ts com texto oficial do Planalto
+ * Mantém a estrutura existente e apenas atualiza o campo 'ementa' de cada artigo
+ */
+
+import * as fs from 'fs';
+import * as path from 'path';
+
+interface ArtigoExtraido {
+  numero: string;
+  texto: string;
+}
+
+/**
+ * Baixa o HTML completo da lei do Planalto
+ */
+async function downloadLeiHTML(): Promise<string> {
+  console.log('📥 Baixando HTML da Lei 14.133/2021 do Planalto...\n');
+
+  const url = 'https://www.planalto.gov.br/ccivil_03/_ato2019-2022/2021/lei/l14133.htm';
+
+  try {
+    const response = await fetch(url, {
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
+        'Accept-Charset': 'utf-8, iso-8859-1',
+      },
+    });
+
+    if (!response.ok) {
+      throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+    }
+
+    // Ler como buffer e decodificar como Windows-1252
+    const buffer = await response.arrayBuffer();
+    const decoder = new TextDecoder('windows-1252');
+    const html = decoder.decode(buffer);
+    console.log(`✅ HTML baixado (${(html.length / 1024).toFixed(2)} KB)\n`);
+
+    return html;
+  } catch (error) {
+    console.error('❌ Erro ao baixar HTML:', error);
+    throw error;
+  }
+}
+
+/**
+ * Extrai todos os artigos do HTML (VERSÃO 2.0 - MAIS ROBUSTA)
+ */
+function extractArticlesFromHTML(html: string): ArtigoExtraido[] {
+  console.log('🔍 Extraindo artigos do HTML...\n');
+
+  const artigos: ArtigoExtraido[] = [];
+
+  // Normalizar encoding - CORRIGIDO
+  let textoNormalizado = html
+    .replace(/\r\n/g, '\n')
+    .replace(/\t/g, ' ')
+    .replace(/�/g, 'º')   // Símbolo grau
+    .replace(/ç/g, 'ç')   // c cedilha
+    .replace(/ã/g, 'ã')   // a til
+    .replace(/õ/g, 'õ')   // o til
+    .replace(/á/g, 'á')   // a agudo
+    .replace(/é/g, 'é')   // e agudo
+    .replace(/í/g, 'í')   // i agudo
+    .replace(/ó/g, 'ó')   // o agudo
+    .replace(/ú/g, 'ú')   // u agudo
+    .replace(/â/g, 'â')   // a circunflexo
+    .replace(/ê/g, 'ê')   // e circunflexo
+    .replace(/ô/g, 'ô')   // o circunflexo
+    .replace(/à/g, 'à')   // a grave
+    .replace(/ü/g, 'ü');  // u trema
+
+  // Remover tags HTML mas preservar estrutura de parágrafos
+  textoNormalizado = textoNormalizado
+    .replace(/<script[^>]*>[\s\S]*?<\/script>/gi, '')
+    .replace(/<style[^>]*>[\s\S]*?<\/style>/gi, '')
+    .replace(/<br\s*\/?>/gi, '\n')
+    .replace(/<\/p>/gi, '\n\n')
+    .replace(/<p[^>]*>/gi, '\n\n')
+    .replace(/<[^>]+>/g, ' ')
+    .replace(/&nbsp;/g, ' ')
+    .replace(/&quot;/g, '"')
+    .replace(/&amp;/g, '&')
+    .replace(/&lt;/g, '<')
+    .replace(/&gt;/g, '>')
+    .trim();
+
+  // NOVA ESTRATÉGIA: Extrair usando múltiplos passes
+  // Pass 1: Encontrar todos os marcadores "Art. X"
+  const regexMarcadores = /Art\.\s+(\d+)[ºº°]?/gi;
+  const marcadores: Array<{ pos: number; numero: string }> = [];
+
+  let match;
+  while ((match = regexMarcadores.exec(textoNormalizado)) !== null) {
+    const numero = parseInt(match[1]);
+    if (numero >= 1 && numero <= 193) {
+      marcadores.push({
+        pos: match.index,
+        numero: match[1]
+      });
+    }
+  }
+
+  console.log(`📍 Encontrados ${marcadores.length} marcadores de artigos\n`);
+
+  // Pass 2: Extrair texto entre cada marcador
+  for (let i = 0; i < marcadores.length; i++) {
+    const inicioTexto = marcadores[i].pos;
+    const fimTexto = i < marcadores.length - 1
+      ? marcadores[i + 1].pos
+      : textoNormalizado.length;
+
+    let textoArtigo = textoNormalizado.substring(inicioTexto, fimTexto).trim();
+
+    // Remover o marcador "Art. Xº" do início
+    textoArtigo = textoArtigo.replace(/^Art\.\s+\d+[ºº°]?\s*/i, '').trim();
+
+    // Limpar textos estruturais que não fazem parte do artigo
+    // MAS preservar conteúdo de citações de outras leis
+    textoArtigo = textoArtigo
+      .replace(/^\s*(TÍTULO|CAPÍTULO|SEÇÃO|SUBSEÇÃO|Seção|Subseção)\s+[IVX]+[^\n]*$/gm, '')
+      .replace(/^\s*(TÍTULO|CAPÍTULO|SEÇÃO|SUBSEÇÃO|Seção|Subseção)\s+\d+[^\n]*$/gm, '')
+      .replace(/\n{3,}/g, '\n\n')  // Limpar múltiplas quebras de linha
+      .trim();
+
+    // Validar tamanho mínimo (5 chars para incluir artigos VETADOS)
+    if (textoArtigo.length > 5) {
+      // Limpar espaços múltiplos
+      textoArtigo = textoArtigo
+        .replace(/\s+/g, ' ')
+        .replace(/\s+\./g, '.')
+        .replace(/\s+,/g, ',')
+        .replace(/\s+;/g, ';')
+        .replace(/\s+:/g, ':')
+        .replace(/\s+\)/g, ')')
+        .replace(/\(\s+/g, '(')
+        .trim();
+
+      // Formatar com quebras de linha para incisos e parágrafos
+      textoArtigo = textoArtigo
+        .replace(/\s+(§\s*\d+[ºº°]?[\s-]+)/g, '\n\n$1')
+        .replace(/\s+(I\s*[-–—]\s*)/g, '\n\nI - ')
+        .replace(/\s+(II\s*[-–—]\s*)/g, '\n\nII - ')
+        .replace(/\s+(III\s*[-–—]\s*)/g, '\n\nIII - ')
+        .replace(/\s+(IV\s*[-–—]\s*)/g, '\n\nIV - ')
+        .replace(/\s+(V\s*[-–—]\s*)/g, '\n\nV - ')
+        .replace(/\s+(VI\s*[-–—]\s*)/g, '\n\nVI - ')
+        .replace(/\s+(VII\s*[-–—]\s*)/g, '\n\nVII - ')
+        .replace(/\s+(VIII\s*[-–—]\s*)/g, '\n\nVIII - ')
+        .replace(/\s+(IX\s*[-–—]\s*)/g, '\n\nIX - ')
+        .replace(/\s+(X\s*[-–—]\s*)/g, '\n\nX - ')
+        .replace(/\s+(XI\s*[-–—]\s*)/g, '\n\nXI - ')
+        .replace(/\s+(XII\s*[-–—]\s*)/g, '\n\nXII - ')
+        .replace(/\s+(a\))/gi, '\n\na)')
+        .replace(/\s+(b\))/gi, '\n\nb)')
+        .replace(/\s+(c\))/gi, '\n\nc)')
+        .replace(/\s+(d\))/gi, '\n\nd)')
+        .replace(/\s+(e\))/gi, '\n\ne)')
+        .replace(/\s+(f\))/gi, '\n\nf)')
+        .trim();
+
+      artigos.push({
+        numero: marcadores[i].numero,
+        texto: `Art. ${marcadores[i].numero}º ${textoArtigo}`,
+      });
+    }
+  }
+
+  // Remover duplicatas (mantém primeira ocorrência)
+  const artigosUnicos = artigos.filter((artigo, index, self) =>
+    index === self.findIndex(a => a.numero === artigo.numero)
+  );
+
+  // Ordenar por número
+  artigosUnicos.sort((a, b) => parseInt(a.numero) - parseInt(b.numero));
+
+  console.log(`✅ ${artigosUnicos.length} artigos extraídos\n`);
+
+  return artigosUnicos;
+}
+
+/**
+ * Atualiza o arquivo data/lei-14133-artigos.ts
+ */
+async function updateDataFile(artigos: ArtigoExtraido[]) {
+  console.log('📝 Atualizando arquivo data/lei-14133-artigos.ts...\n');
+
+  const filePath = path.join(__dirname, '..', 'data', 'lei-14133-artigos.ts');
+
+  // Ler arquivo existente
+  let fileContent = fs.readFileSync(filePath, 'utf-8');
+
+  let atualizados = 0;
+  let naoEncontrados = 0;
+
+  // Para cada artigo extraído, atualizar o campo 'ementa'
+  for (const artigo of artigos) {
+    const numero = artigo.numero;
+
+    // Buscar o artigo no arquivo (formato: "numero": { )
+    const regex = new RegExp(`"${numero}":\\s*\\{[\\s\\S]*?ementa:\\s*"[\\s\\S]*?"`, 'g');
+
+    if (fileContent.match(regex)) {
+      // Escapar caracteres especiais para JSON
+      const textoEscapado = artigo.texto
+        .replace(/\\/g, '\\\\')
+        .replace(/"/g, '\\"')
+        .replace(/\n/g, '\\n');
+
+      // Substituir ementa
+      const newContent = fileContent.replace(
+        new RegExp(`("${numero}":\\s*\\{[\\s\\S]*?ementa:\\s*)"[\\s\\S]*?"`, 'g'),
+        `$1"${textoEscapado}"`
+      );
+
+      if (newContent !== fileContent) {
+        fileContent = newContent;
+        console.log(`✅ Art. ${numero}º atualizado`);
+        atualizados++;
+      }
+    } else {
+      console.log(`⚠️  Art. ${numero}º não encontrado no arquivo`);
+      naoEncontrados++;
+    }
+  }
+
+  // Salvar arquivo atualizado
+  fs.writeFileSync(filePath, fileContent, 'utf-8');
+
+  console.log('\n' + '='.repeat(70));
+  console.log('📊 RESUMO DA ATUALIZAÇÃO');
+  console.log('='.repeat(70));
+  console.log(`✅ Artigos atualizados:     ${atualizados}`);
+  console.log(`⚠️  Artigos não encontrados: ${naoEncontrados}`);
+  console.log(`📝 Total processado:        ${artigos.length}`);
+  console.log('='.repeat(70));
+
+  return { atualizados, naoEncontrados };
+}
+
+/**
+ * Função principal
+ */
+async function main() {
+  console.clear();
+  console.log('🚀 ATUALIZAÇÃO LEI 14.133/2021 - ARQUIVO DE DADOS');
+  console.log('='.repeat(70));
+  console.log('Fonte: https://www.planalto.gov.br');
+  console.log('Destino: data/lei-14133-artigos.ts');
+  console.log('='.repeat(70));
+  console.log();
+
+  try {
+    // 1. Baixar HTML
+    const html = await downloadLeiHTML();
+
+    // 2. Extrair artigos
+    const artigos = extractArticlesFromHTML(html);
+
+    if (artigos.length === 0) {
+      console.error('❌ Nenhum artigo foi extraído!');
+      process.exit(1);
+    }
+
+    console.log('📄 PREVIEW DOS PRIMEIROS 3 ARTIGOS:');
+    console.log('-'.repeat(70));
+    artigos.slice(0, 3).forEach(art => {
+      console.log(`\nArt. ${art.numero}º:`);
+      console.log(art.texto.substring(0, 200) + '...\n');
+    });
+    console.log('-'.repeat(70) + '\n');
+
+    // 3. Atualizar arquivo
+    const result = await updateDataFile(artigos);
+
+    // 4. Resultado final
+    console.log();
+    if (result.naoEncontrados === 0) {
+      console.log('🎉 SUCESSO! Todos os artigos foram atualizados.');
+      console.log('\n📝 Próximo passo: Verificar o arquivo data/lei-14133-artigos.ts');
+      console.log('💡 Dica: Use git diff para ver as alterações');
+    } else {
+      console.log(`⚠️  ${result.naoEncontrados} artigos não foram encontrados no arquivo.`);
+      console.log('💡 Esses artigos podem precisar ser adicionados manualmente.');
+    }
+
+  } catch (error) {
+    console.error('\n❌ ERRO FATAL:', error);
+    process.exit(1);
+  }
+}
+
+// Executar
+if (require.main === module) {
+  main()
+    .then(() => {
+      console.log('\n✅ Script finalizado\n');
+      process.exit(0);
+    })
+    .catch((error) => {
+      console.error('\n❌ Erro:', error);
+      process.exit(1);
+    });
+}
+
+export { downloadLeiHTML, extractArticlesFromHTML, updateDataFile };
