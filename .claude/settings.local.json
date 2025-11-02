@@ -112,7 +112,13 @@
       "Bash(else echo \".env.local não encontrado\")",
       "Bash(echo \"curl -X GET http://localhost:3000/api/cron/import-dou?days=7 \\\"\necho \" -H \"\"x-cron-secret: FAaMGJNrzh4EX0YoGCGqMnKtfkmT/RqR59d4G5ZvT+g=\"\"\"\necho \"\"\necho \"Execute esse comando em outro terminal enquanto 'npm run dev' estiver rodando. \")",
       "Bash(export DATABASE_URL=\"postgresql://neondb_owner:npg_mEcuFQLdxGxc@ep-still-meadow-a5oxwyee.us-east-2.aws.neon.tech/neondb?sslmode=require\":*)",
-      "Bash(/tmp/gazette.json)"
+      "Bash(/tmp/gazette.json)",
+      "WebFetch(domain:queridodiario.ok.org.br)",
+      "WebFetch(domain:api.queridodiario.ok.org.br)",
+      "WebFetch(domain:docs.queridodiario.ok.org.br)",
+      "mcp__playwright__browser_type",
+      "Bash(pkill:*)",
+      "WebFetch(domain:raw.githubusercontent.com)"
     ],
     "deny": [],
     "ask": []

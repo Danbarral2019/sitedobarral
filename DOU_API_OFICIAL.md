@@ -165,6 +165,26 @@ const results = await searchLastWeek(
 console.log(`Encontrados: ${results.length} documentos`);
 ```
 
+### Enriquecer com Scraping (TypeScript)
+```typescript
+import { searchLastWeek } from '@/lib/dou-api';
+import { scrapeURL, scrapeURLs } from '@/lib/dou-scraper';
+
+// OPÇÃO 1: Scrape de URL única
+const content = await scrapeURL('http://www.in.gov.br/web/dou/-/...');
+console.log(`Conteúdo: ${content.conteudo}`);
+console.log(`Edição: ${content.edicao}, Seção: ${content.secao}, Página: ${content.pagina}`);
+
+// OPÇÃO 2: Scrape de múltiplas URLs (com rate limiting)
+const results = await searchLastWeek('licitação', undefined, 10);
+const urls = results.map(r => r.href);
+const enrichedData = await scrapeURLs(urls, 2000); // 2s de delay
+
+enrichedData.forEach((content, url) => {
+  console.log(`${url}: ${content.caracteres} caracteres`);
+});
+```
+
 ### Importar para o Banco
 ```typescript
 import { searchLastWeek } from '@/lib/dou-api';
@@ -248,10 +268,12 @@ Baseado em keywords específicas por curso:
    - ✅ Descobertos parâmetros: `delta`, `score`, `displayDate`
    - ✅ Testado com sucesso: 50+ resultados em múltiplas páginas
 
-2. **Enriquecer Dados**
-   - Buscar conteúdo completo via scraping da URL
-   - Extrair metadados adicionais (órgão, legislação citada)
-   - OCR de PDFs quando disponíveis
+2. ✅ **~~Enriquecer Dados~~** - CONCLUÍDO (2025-11-02)
+   - ✅ Scraper com Playwright para conteúdo completo (`lib/dou-scraper.ts`)
+   - ✅ Extração de: texto completo, edição, seção, página, órgão
+   - ✅ Suporte a scraping individual ou batch com rate limiting
+   - ✅ Testado: 100% de taxa de sucesso, ~1.000 chars/documento
+   - ⏭️ OCR de PDFs quando disponíveis (futuro)
 
 3. **Melhorar Filtros**
    - Permitir busca por seção específica (DO1, DO2, DO3)
