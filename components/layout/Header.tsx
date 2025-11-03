@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { useState, memo, useEffect, useRef } from 'react';
-import { Menu, X, ChevronDown, BookOpen, User, FileText, Mail, Home, LogIn, Award, Library, HelpCircle, Gavel, Scale, Search } from 'lucide-react';
+import { Menu, X, ChevronDown, BookOpen, User, FileText, Mail, Home, LogIn, Award, Library, HelpCircle, Search } from 'lucide-react';
 import { courses } from '@/data/courses';
 
 export const Header = memo(function Header() {
@@ -98,22 +98,6 @@ export const Header = memo(function Header() {
             </div>
 
             <Link
-              href="/artigos"
-              className="flex items-center space-x-1 text-gray-700 hover:text-primary-600 transition-colors"
-            >
-              <Gavel className="w-4 h-4" />
-              <span>Lei 14.133</span>
-            </Link>
-
-            <Link
-              href="/legislacao"
-              className="flex items-center space-x-1 text-gray-700 hover:text-primary-600 transition-colors"
-            >
-              <Scale className="w-4 h-4" />
-              <span>Atos Normativos</span>
-            </Link>
-
-            <Link
               href="/blog"
               className="flex items-center space-x-1 text-gray-700 hover:text-primary-600 transition-colors"
             >
@@ -199,20 +183,6 @@ export const Header = memo(function Header() {
               onClick={() => setIsMenuOpen(false)}
             >
               Cursos
-            </Link>
-            <Link
-              href="/artigos"
-              className="block py-2 text-gray-700 hover:text-primary-600"
-              onClick={() => setIsMenuOpen(false)}
-            >
-              Lei 14.133/2021
-            </Link>
-            <Link
-              href="/legislacao"
-              className="block py-2 text-gray-700 hover:text-primary-600"
-              onClick={() => setIsMenuOpen(false)}
-            >
-              Atos Normativos
             </Link>
             <Link
               href="/blog"
