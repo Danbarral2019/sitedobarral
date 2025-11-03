@@ -15,6 +15,7 @@ interface SearchResults {
       titulo: string;
       ementa: string;
       capitulo: string;
+      excerpts?: string[]; // Trechos relevantes com termos destacados
     }>;
     acts: Array<{
       id: string;
@@ -221,16 +222,33 @@ export default function BuscaIntegradaPage() {
                       href={`/artigo/${article.numero}`}
                       className="block p-5 bg-blue-50 rounded-xl border-2 border-blue-200 hover:border-blue-500 hover:bg-blue-100 transition-all group"
                     >
-                      <div className="flex items-start gap-4">
-                        <div className="flex-shrink-0 w-14 h-14 bg-blue-600 rounded-lg flex items-center justify-center text-white font-bold">
+                      <div className="flex items-start gap-3">
+                        {/* Badge compacto com número do artigo */}
+                        <div className="flex-shrink-0 px-3 py-1 bg-blue-600 rounded-md text-white text-xs font-bold">
                           Art. {article.numero}
                         </div>
                         <div className="flex-1">
                           <div className="text-xs text-blue-600 mb-1">{article.capitulo}</div>
-                          <h3 className="font-bold text-gray-900 mb-1 group-hover:text-blue-700 transition-colors">
-                            {article.titulo}
-                          </h3>
-                          <p className="text-sm text-gray-600 line-clamp-2">{article.ementa}</p>
+
+                          {/* Trechos relevantes com destaque */}
+                          {article.excerpts && article.excerpts.length > 0 ? (
+                            <div className="space-y-2">
+                              {article.excerpts.map((excerpt, idx) => (
+                                <p
+                                  key={idx}
+                                  className="text-sm text-gray-700 leading-relaxed"
+                                  dangerouslySetInnerHTML={{
+                                    __html: excerpt.replace(
+                                      /<mark>/g,
+                                      '<mark class="bg-yellow-200 font-semibold px-1 rounded">'
+                                    )
+                                  }}
+                                />
+                              ))}
+                            </div>
+                          ) : (
+                            <p className="text-sm text-gray-600 line-clamp-2">{article.ementa}</p>
+                          )}
                         </div>
                         <ArrowRight className="w-5 h-5 text-gray-400 group-hover:text-blue-600 group-hover:translate-x-1 transition-all flex-shrink-0" />
                       </div>

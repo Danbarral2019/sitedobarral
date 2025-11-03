@@ -123,7 +123,16 @@
       "WebFetch(domain:legis.senado.leg.br)",
       "WebFetch(domain:www2.camara.leg.br)",
       "Bash(then grep \"DATABASE_URL\" .env.local)",
-      "Bash(awk:*)"
+      "Bash(awk:*)",
+      "Bash(then grep -E \"NEXT_PUBLIC_BASE_URL|VERCEL_URL|DATABASE_URL\" .env.local)",
+      "Bash(if [ -f vercel.json ])",
+      "Bash(then cat vercel.json)",
+      "Bash(else echo \"vercel.json não encontrado\")",
+      "Bash(else echo \"CRON_SECRET não encontrado\")",
+      "Bash(./test-dou-import.bat)",
+      "Bash(then grep -E \"NEXT_PUBLIC_BASE_URL|VERCEL_URL\" .env.local)",
+      "Bash(else echo \"Variáveis não encontradas\")",
+      "WebFetch(domain:www.profdanielbarral.com)"
     ],
     "deny": [],
     "ask": []

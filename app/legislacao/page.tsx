@@ -73,6 +73,24 @@ export default function LegislacaoPage() {
     fetchActs();
   }, [page, typeFilter, issuerFilter, yearFilter, searchTerm]);
 
+  // Expandir automaticamente ato baseado no hash da URL
+  useEffect(() => {
+    const hash = window.location.hash.substring(1); // Remove o '#'
+    if (hash && acts.length > 0) {
+      const actExists = acts.find(act => act.id === hash);
+      if (actExists) {
+        setExpandedAct(hash);
+        // Aguardar um pouco para garantir que o elemento foi renderizado
+        setTimeout(() => {
+          const element = document.getElementById(hash);
+          if (element) {
+            element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          }
+        }, 300);
+      }
+    }
+  }, [acts]);
+
   const fetchActs = async () => {
     setIsLoading(true);
     try {
@@ -300,6 +318,7 @@ export default function LegislacaoPage() {
                 {acts.map(act => (
                   <article
                     key={act.id}
+                    id={act.id}
                     className="bg-white border-2 border-gray-200 rounded-xl overflow-hidden hover:border-blue-300 hover:shadow-lg transition-all"
                   >
                     {/* Header do Card */}

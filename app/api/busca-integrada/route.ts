@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { searchLeiArticles } from '@/data/lei-14133-artigos';
+import { searchLeiArticlesWithExcerpts } from '@/data/lei-14133-artigos';
 import { prisma } from '@/lib/prisma';
 import { verifyAuth } from '@/lib/auth';
 
@@ -26,8 +26,8 @@ export async function GET(request: NextRequest) {
       ? authResult.user.courseId
       : null;
 
-    // 1. Buscar artigos da Lei 14.133
-    const articles = searchLeiArticles(query).slice(0, 10); // Limitar a 10 resultados
+    // 1. Buscar artigos da Lei 14.133 com trechos relevantes
+    const articles = searchLeiArticlesWithExcerpts(query).slice(0, 10); // Limitar a 10 resultados
 
     // 2. Buscar atos normativos
     const acts = await prisma.legislativeAct.findMany({
@@ -88,6 +88,7 @@ export async function GET(request: NextRequest) {
           titulo: art.titulo,
           ementa: art.ementa,
           capitulo: art.capitulo,
+          excerpts: art.excerpts, // Trechos relevantes com destaque
         })),
         acts: acts.map(act => ({
           id: act.id,

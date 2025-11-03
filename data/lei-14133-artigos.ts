@@ -1188,3 +1188,81 @@ export function formatArticleNumber(numero: string): string {
 export function formatArticleTitle(article: LeiArticle): string {
   return `${formatArticleNumber(article.numero)} - ${article.ementa}`;
 }
+
+// Interface para resultado de busca com trechos relevantes
+export interface LeiArticleSearchResult extends LeiArticle {
+  excerpts: string[]; // Trechos do texto onde o termo aparece
+}
+
+/**
+ * Extrai trechos relevantes do texto onde o termo de busca aparece
+ * @param text Texto completo do artigo
+ * @param searchTerm Termo de busca
+ * @param contextChars Número de caracteres antes e depois do termo (padrão: 100)
+ * @returns Array de trechos com o termo destacado entre <mark> e </mark>
+ */
+export function extractRelevantExcerpts(
+  text: string,
+  searchTerm: string,
+  contextChars: number = 100
+): string[] {
+  const term = searchTerm.toLowerCase();
+  const lowerText = text.toLowerCase();
+  const excerpts: string[] = [];
+
+  // Encontrar todas as ocorrências do termo
+  let index = lowerText.indexOf(term);
+  const maxExcerpts = 3; // Limitar a 3 trechos por artigo
+
+  while (index !== -1 && excerpts.length < maxExcerpts) {
+    // Calcular posições de início e fim do trecho
+    const start = Math.max(0, index - contextChars);
+    const end = Math.min(text.length, index + term.length + contextChars);
+
+    // Extrair o trecho
+    let excerpt = text.substring(start, end);
+
+    // Adicionar "..." se não começar no início
+    if (start > 0) {
+      excerpt = '...' + excerpt;
+    }
+
+    // Adicionar "..." se não terminar no final
+    if (end < text.length) {
+      excerpt = excerpt + '...';
+    }
+
+    // Destacar o termo com <mark>
+    const termRegex = new RegExp(`(${searchTerm})`, 'gi');
+    excerpt = excerpt.replace(termRegex, '<mark>$1</mark>');
+
+    excerpts.push(excerpt);
+
+    // Procurar próxima ocorrência
+    index = lowerText.indexOf(term, index + 1);
+  }
+
+  return excerpts;
+}
+
+/**
+ * Busca artigos e retorna com trechos relevantes destacados
+ * @param searchTerm Termo de busca
+ * @returns Array de artigos com excerpts
+ */
+export function searchLeiArticlesWithExcerpts(searchTerm: string): LeiArticleSearchResult[] {
+  const term = searchTerm.toLowerCase();
+
+  return Object.values(LEI_14133_ARTIGOS)
+    .filter(
+      art =>
+        art.numero.includes(term) ||
+        art.ementa.toLowerCase().includes(term) ||
+        art.capitulo.toLowerCase().includes(term) ||
+        art.secao?.toLowerCase().includes(term)
+    )
+    .map(art => ({
+      ...art,
+      excerpts: extractRelevantExcerpts(art.ementa, searchTerm)
+    }));
+}
