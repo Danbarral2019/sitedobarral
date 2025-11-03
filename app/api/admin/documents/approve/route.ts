@@ -15,16 +15,22 @@ import { prisma } from '@/lib/prisma';
 
 export async function POST(request: NextRequest) {
   try {
+    console.log('[Aprovação] Iniciando processo de aprovação/rejeição');
+
     // Verificar autenticação admin
     const authResult = await verifyAuth(request);
     if (!authResult.isValid || authResult.payload?.role !== 'admin') {
+      console.error('[Aprovação] Autenticação falhou:', { isValid: authResult.isValid, role: authResult.payload?.role });
       return NextResponse.json({ error: 'Não autorizado' }, { status: 401 });
     }
 
     const body = await request.json();
     const { documentIds, action } = body; // action: 'approve' | 'reject'
 
+    console.log('[Aprovação] Request:', { documentIds: documentIds?.length, action });
+
     if (!documentIds || !Array.isArray(documentIds) || documentIds.length === 0) {
+      console.error('[Aprovação] IDs inválidos:', documentIds);
       return NextResponse.json(
         { error: 'IDs de documentos não fornecidos' },
         { status: 400 }
@@ -32,6 +38,7 @@ export async function POST(request: NextRequest) {
     }
 
     if (action !== 'approve' && action !== 'reject') {
+      console.error('[Aprovação] Ação inválida:', action);
       return NextResponse.json(
         { error: 'Ação inválida. Use "approve" ou "reject"' },
         { status: 400 }
@@ -41,6 +48,7 @@ export async function POST(request: NextRequest) {
     // Atualizar documentos
     const isPublic = action === 'approve';
 
+    console.log('[Aprovação] Atualizando documentos no banco...');
     const result = await prisma.document.updateMany({
       where: {
         id: {
@@ -54,7 +62,7 @@ export async function POST(request: NextRequest) {
       },
     });
 
-    console.log(`[Aprovação] ${result.count} documentos ${action === 'approve' ? 'aprovados' : 'rejeitados'}`);
+    console.log(`[Aprovação] ✅ Sucesso: ${result.count} documentos ${action === 'approve' ? 'aprovados' : 'rejeitados'}`);
 
     return NextResponse.json({
       success: true,
@@ -64,11 +72,12 @@ export async function POST(request: NextRequest) {
     });
 
   } catch (error) {
-    console.error('[Aprovação] Erro:', error);
+    console.error('[Aprovação] ❌ Erro fatal:', error);
+    console.error('[Aprovação] Stack:', error instanceof Error ? error.stack : 'N/A');
     return NextResponse.json(
       {
         success: false,
-        error: error instanceof Error ? error.message : 'Erro desconhecido',
+        error: error instanceof Error ? error.message : 'Erro desconhecido ao processar aprovação',
       },
       { status: 500 }
     );

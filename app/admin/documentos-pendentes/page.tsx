@@ -141,9 +141,12 @@ export default function DocumentosPendentesPage() {
         }),
       });
 
-      if (!res.ok) throw new Error('Erro ao aprovar');
-
       const data = await res.json();
+
+      if (!res.ok) {
+        throw new Error(data.error || `Erro HTTP ${res.status}`);
+      }
+
       toast({
         title: 'Sucesso!',
         description: `${data.count} documento(s) aprovado(s)`,
@@ -155,6 +158,7 @@ export default function DocumentosPendentesPage() {
       clearSelection();
 
     } catch (err) {
+      console.error('[handleApprove] Erro:', err);
       toast({
         title: 'Erro ao aprovar',
         description: err instanceof Error ? err.message : 'Erro desconhecido',
@@ -187,9 +191,12 @@ export default function DocumentosPendentesPage() {
         }),
       });
 
-      if (!res.ok) throw new Error('Erro ao rejeitar');
-
       const data = await res.json();
+
+      if (!res.ok) {
+        throw new Error(data.error || `Erro HTTP ${res.status}`);
+      }
+
       toast({
         title: 'Rejeitado',
         description: `${data.count} documento(s) rejeitado(s)`,
@@ -201,6 +208,7 @@ export default function DocumentosPendentesPage() {
       clearSelection();
 
     } catch (err) {
+      console.error('[handleReject] Erro:', err);
       toast({
         title: 'Erro ao rejeitar',
         description: err instanceof Error ? err.message : 'Erro desconhecido',
