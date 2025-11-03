@@ -14,7 +14,7 @@ export async function POST(request: Request) {
   try {
     // Verificar autenticação admin
     const authResult = await verifyAuth(request);
-    if (!authResult.isValid || authResult.payload?.role !== 'admin') {
+    if (!authResult.valid || authResult.user?.role !== 'admin') {
       return NextResponse.json({ error: 'Não autorizado' }, { status: 401 });
     }
 

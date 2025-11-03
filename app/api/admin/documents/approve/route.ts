@@ -19,8 +19,8 @@ export async function POST(request: NextRequest) {
 
     // Verificar autenticação admin
     const authResult = await verifyAuth(request);
-    if (!authResult.isValid || authResult.payload?.role !== 'admin') {
-      console.error('[Aprovação] Autenticação falhou:', { isValid: authResult.isValid, role: authResult.payload?.role });
+    if (!authResult.valid || authResult.user?.role !== 'admin') {
+      console.error('[Aprovação] Autenticação falhou:', { valid: authResult.valid, role: authResult.user?.role });
       return NextResponse.json({ error: 'Não autorizado' }, { status: 401 });
     }
 

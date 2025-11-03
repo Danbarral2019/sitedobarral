@@ -21,10 +21,10 @@ export async function GET(request: NextRequest) {
 
     // Verificar se usuário está autenticado
     const authResult = await verifyAuth(request);
-    const isAuthenticated = authResult.isValid;
-    const userEnrollments = isAuthenticated && authResult.payload?.enrollments
-      ? authResult.payload.enrollments.map((e: { courseId: string }) => e.courseId)
-      : [];
+    const isAuthenticated = authResult.valid;
+    const userCourseId = isAuthenticated && authResult.user?.courseId
+      ? authResult.user.courseId
+      : null;
 
     // 1. Buscar artigos da Lei 14.133
     const articles = searchLeiArticles(query).slice(0, 10); // Limitar a 10 resultados
@@ -63,7 +63,7 @@ export async function GET(request: NextRequest) {
     // Processar documentos para indicar se são acessíveis
     const processedDocuments = documents.map(doc => {
       const isPublic = doc.isPublic;
-      const hasAccess = isPublic || userEnrollments.includes(doc.courseId);
+      const hasAccess = isPublic || (userCourseId && doc.courseId === userCourseId) || authResult.user?.role === 'admin';
 
       return {
         id: doc.id,
