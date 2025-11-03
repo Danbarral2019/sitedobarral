@@ -200,29 +200,16 @@ export default function ArtigosIndexPage() {
                   </p>
                 </div>
 
-                {/* Lista de artigos */}
-                <div className="space-y-2 max-h-[600px] overflow-y-auto pr-2">
+                {/* Grid compacto de artigos */}
+                <div className="grid grid-cols-6 sm:grid-cols-8 md:grid-cols-10 lg:grid-cols-12 xl:grid-cols-12 gap-2">
                   {filteredArticles.map(article => (
                     <Link
                       key={article.numero}
                       href={`/artigo/${article.numero}`}
-                      className="block p-4 bg-gray-50 rounded-lg border-2 border-gray-200 hover:border-blue-500 hover:bg-blue-50 transition-all group"
+                      className="aspect-square bg-blue-100 hover:bg-blue-600 rounded-lg flex items-center justify-center font-bold text-blue-700 hover:text-white transition-all hover:scale-105 hover:shadow-md"
+                      title={`Artigo ${article.numero}: ${article.titulo}`}
                     >
-                      <div className="flex items-start gap-4">
-                        <div className="flex-shrink-0 w-16 h-16 bg-blue-100 rounded-lg flex items-center justify-center text-blue-700 font-bold text-lg group-hover:bg-blue-600 group-hover:text-white transition-colors">
-                          {formatArticleNumber(article.numero)}
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <div className="text-xs text-gray-500 mb-1">{article.capitulo}</div>
-                          <h3 className="font-bold text-gray-900 mb-1 group-hover:text-blue-700 transition-colors">
-                            {article.titulo}
-                          </h3>
-                          <p className="text-sm text-gray-600 line-clamp-2">
-                            {article.ementa}
-                          </p>
-                        </div>
-                        <ArrowRight className="w-5 h-5 text-gray-400 group-hover:text-blue-600 group-hover:translate-x-1 transition-all flex-shrink-0 mt-2" />
-                      </div>
+                      <span className="text-sm sm:text-base">{article.numero}</span>
                     </Link>
                   ))}
                 </div>
