@@ -57,7 +57,7 @@ interface PendingDocument {
 }
 
 export default function DocumentosPendentesPage() {
-  const { success, error: errorToast } = useToast();
+  const { toast } = useToast();
   const [documents, setDocuments] = useState<PendingDocument[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
@@ -83,14 +83,15 @@ export default function DocumentosPendentesPage() {
       const data = await res.json();
       setDocuments(data.documents || []);
     } catch (err) {
-      errorToast({
+      toast({
         title: 'Erro ao carregar',
         description: err instanceof Error ? err.message : 'Erro desconhecido',
+        variant: 'error',
       });
     } finally {
       setIsLoading(false);
     }
-  }, [filterCategory, filterPeriod, errorToast]);
+  }, [filterCategory, filterPeriod, toast]);
 
   useEffect(() => {
     loadPendingDocuments();
@@ -121,9 +122,10 @@ export default function DocumentosPendentesPage() {
   // Aprovar documentos
   async function handleApprove(ids: string[]) {
     if (ids.length === 0) {
-      errorToast({
+      toast({
         title: 'Erro',
         description: 'Selecione ao menos um documento',
+        variant: 'error',
       });
       return;
     }
@@ -142,9 +144,10 @@ export default function DocumentosPendentesPage() {
       if (!res.ok) throw new Error('Erro ao aprovar');
 
       const data = await res.json();
-      success({
+      toast({
         title: 'Sucesso!',
         description: `${data.count} documento(s) aprovado(s)`,
+        variant: 'success',
       });
 
       // Recarregar lista
@@ -152,9 +155,10 @@ export default function DocumentosPendentesPage() {
       clearSelection();
 
     } catch (err) {
-      errorToast({
+      toast({
         title: 'Erro ao aprovar',
         description: err instanceof Error ? err.message : 'Erro desconhecido',
+        variant: 'error',
       });
     } finally {
       setIsProcessing(false);
@@ -164,9 +168,10 @@ export default function DocumentosPendentesPage() {
   // Rejeitar documentos
   async function handleReject(ids: string[]) {
     if (ids.length === 0) {
-      errorToast({
+      toast({
         title: 'Erro',
         description: 'Selecione ao menos um documento',
+        variant: 'error',
       });
       return;
     }
@@ -185,9 +190,10 @@ export default function DocumentosPendentesPage() {
       if (!res.ok) throw new Error('Erro ao rejeitar');
 
       const data = await res.json();
-      success({
+      toast({
         title: 'Rejeitado',
         description: `${data.count} documento(s) rejeitado(s)`,
+        variant: 'success',
       });
 
       // Recarregar lista
@@ -195,9 +201,10 @@ export default function DocumentosPendentesPage() {
       clearSelection();
 
     } catch (err) {
-      errorToast({
+      toast({
         title: 'Erro ao rejeitar',
         description: err instanceof Error ? err.message : 'Erro desconhecido',
+        variant: 'error',
       });
     } finally {
       setIsProcessing(false);
