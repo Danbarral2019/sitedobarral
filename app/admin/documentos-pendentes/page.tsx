@@ -17,23 +17,30 @@ import { useToast } from '@/hooks/use-toast';
  * - null/undefined -> []
  */
 function safeParseArray(value: string | null | undefined | unknown): string[] {
+  // Verificação de valores vazios/nulos
   if (!value) return [];
 
   // Se já é um array, retorna direto
   if (Array.isArray(value)) return value;
 
-  // Se não é string, retorna vazio com warning
-  if (typeof value !== 'string') {
-    console.warn('[safeParseArray] Received non-string value:', typeof value, value);
+  // Converte para string se não for
+  const stringValue = typeof value === 'string' ? value : String(value);
+
+  // Verifica se é string vazia após conversão
+  if (!stringValue || stringValue === 'null' || stringValue === 'undefined') {
     return [];
   }
 
+  // Tenta parsear como JSON
   try {
-    const parsed = JSON.parse(value);
-    return Array.isArray(parsed) ? parsed : [];
+    const parsed = JSON.parse(stringValue);
+    if (Array.isArray(parsed)) {
+      return parsed.filter(item => item != null && item !== '');
+    }
+    return [];
   } catch {
     // Se falhar, trata como CSV
-    return value
+    return stringValue
       .split(',')
       .map(item => item.trim())
       .filter(item => item.length > 0);
