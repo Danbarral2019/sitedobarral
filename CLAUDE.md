@@ -4,7 +4,7 @@ Guia rápido para Claude Code ao trabalhar neste repositório.
 
 ## ⚠️ CRITICAL REMINDERS
 
-1. **Working Directory:** SEMPRE rodar comandos de `projeto do site no claude/site-prof-barral/`
+1. **Working Directory:** SEMPRE rodar comandos de `C:\Projeto de site do Barral\projeto do site no claude\site-prof-barral\`
 2. **Course IDs:** Database usa IDs numéricos (`'1'`, `'2'`), URLs usam slugs. Ver `COURSE_IDS_REFERENCE.md`
 3. **Documents:** NUNCA acessar `course.restrictedDocuments` - buscar via `/api/documents`
 4. **React Hooks:** Todos hooks ANTES de early returns
@@ -14,7 +14,7 @@ Guia rápido para Claude Code ao trabalhar neste repositório.
 
 Site profissional do Prof. Daniel Barral especializado em Direito Administrativo, Licitações e Contratos. Repositório de materiais jurídicos com acesso público e área restrita via QR code.
 
-**Tech Stack:** Next.js 15.5.2 (App Router) • TypeScript 5 • Prisma ORM • PostgreSQL (Neon) • Tailwind CSS 4 • Radix UI • JWT Auth • Resend Email • MailChimp • Playwright/PostgreSQL/GitHub MCP
+**Tech Stack:** Next.js 15.5.2 (App Router) • React 19.1.0 • TypeScript 5 • Prisma ORM • PostgreSQL (Neon) • Tailwind CSS 4 • Radix UI • JWT Auth • Resend Email • MailChimp • Playwright/PostgreSQL/GitHub MCP
 
 ## Quick Commands
 
@@ -35,6 +35,9 @@ claude mcp list                # List MCPs (playwright, postgresql, github)
 npx tsx scripts/test-versioning.ts
 npx tsx scripts/import-pareceres-vinculantes.ts
 npm run convert-tcu            # Convert TCU Excel files
+
+# Migration Scripts
+export DATABASE_URL="<your-db-url>" && npx tsx scripts/fix-csv-tags.ts  # Convert CSV tags to JSON
 ```
 
 **Test Credentials:**
@@ -48,17 +51,21 @@ npm run convert-tcu            # Convert TCU Excel files
 - `lib/` - Core utilities (auth, email, scrapers, versioning)
 - `lib/agu-modules/` - AGU scrapers (ONs, Pareceres, DECOR, Súmulas)
 - `components/` - React components
-- `prisma/schema.prisma` - Database schema (16 models)
+- `prisma/schema.prisma` - Database schema (24 models)
 - `scripts/` - Admin/import/scraping scripts
 
-**Key Models:**
+**Key Models (24 total):**
 - `User` - Admin/student accounts
 - `Enrollment` - Course access (1 year expiration, lifetime upgrade)
 - `QRCode` - Enrollment codes
 - `Document` - PDFs/links/videos with versioning
-- `DocumentVersion` - Change tracking (⭐ NOVO!)
-- `BlogPost`, `Publication`, `Testimonial`
+- `DocumentVersion` - Change tracking
+- `BlogPost`, `Publication`, `Testimonial`, `ContactForm`
+- `FAQ`, `FAQFeedback`, `GlossaryTerm`, `LegislativeAct`
+- `CourseVideo`, `SocialMediaPost`, `RecommendedSite`, `SiteToCourse`
 - `AccessLog` - Audit trail
+- `NewsletterSubscriber`, `Favorite`, `ArticleQuestion`
+- `DocumentAnalysis`, `DOUStagingDocument`, `DOUSavedFilter`
 
 **Auth Flows:**
 1. QR Code → Registration → Enrollment (1 year)
@@ -69,7 +76,7 @@ npm run convert-tcu            # Convert TCU Excel files
 - Private: requires valid enrollment
 - Bibliography: SEMPRE público
 
-## Recent Features (2025-11-02)
+## Recent Features (2025-11-03)
 
 **🚀 AGU Scraper v4:**
 - ✅ Sistema de versionamento automático com detecção de mudanças
@@ -83,6 +90,13 @@ npm run convert-tcu            # Convert TCU Excel files
 - ✅ Interface admin unificada
 - ✅ Web scraping + AI summaries
 - ✅ Excel converter (`npm run convert-tcu`)
+
+**Parse Seguro de Tags (2025-11-03):**
+- ✅ Função `safeParseArray()` suporta CSV e JSON
+- ✅ Aplicado em `lib/documents.ts`, `app/admin/documentos-pendentes/page.tsx`, `app/api/admin/documents/[id]/route.ts`
+- ✅ Script de migração `scripts/fix-csv-tags.ts` para conversão CSV→JSON
+- ✅ Fix: campo `notes` → `adminNotes` no schema
+- ✅ Fix: hydration mismatch no Header com `isMounted`
 
 ## Critical Technical Rules
 
@@ -175,6 +189,22 @@ npx prisma generate
 npm run build
 ```
 
+**Tags Parse Errors:**
+```typescript
+// Se encontrar erros de JSON.parse() em tags/leiArticles
+// Use a função safeParseArray() que suporta CSV e JSON
+import { safeParseArray } from './safe-parse';
+
+// Antes (pode falhar com CSV)
+const tags = JSON.parse(doc.tags);
+
+// Depois (funciona com CSV e JSON)
+const tags = safeParseArray(doc.tags);
+
+// Para migrar dados existentes CSV→JSON:
+export DATABASE_URL="..." && npx tsx scripts/fix-csv-tags.ts
+```
+
 ## Documentation Files
 
 **Setup:**
@@ -187,6 +217,11 @@ npm run build
 - `RESUMO_FINAL_AGU_SCRAPER_COMPLETO.md` - AGU resumo técnico
 - `IMPORTACAO_EXCEL.md` - Excel import guide
 - `AUTOMACAO_CRON_JOBS.md` - Cron jobs
+
+**Scripts:**
+- `scripts/fix-csv-tags.ts` - Migração CSV→JSON para tags/leiArticles
+- `scripts/create-admin.js` - Criar usuário admin
+- `scripts/convert-tcu-excel.js` - Converter TCU Excel→JSON
 
 **Deploy:**
 - `DEPLOY_VERCEL.md` - Vercel deployment
@@ -207,7 +242,7 @@ Ver código para endpoints completos.
 
 ## Development Status
 
-**✅ Completed:** Auth, QR codes, document management, Excel import, blog, publications, newsletter, social media, TCU/AGU scrapers, versioning system, AI summaries
+**✅ Completed:** Auth, QR codes, document management, Excel import, blog, publications, newsletter, social media, TCU/AGU scrapers, versioning system, AI summaries, safe tag parsing (CSV/JSON)
 
 **🚧 In Progress:** DOU classifier, complete AGU extraction (205 Pareceres + 1,627 DECOR), admin versioning UI
 
@@ -230,7 +265,7 @@ Ver código para endpoints completos.
 
 **First Time Setup:**
 ```bash
-cd "projeto do site no claude/site-prof-barral"
+cd "C:\Projeto de site do Barral\projeto do site no claude\site-prof-barral"
 npm install
 cp .env.example .env.local  # Edit with your values
 npx prisma generate && npx prisma db push
