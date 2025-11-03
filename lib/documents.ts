@@ -132,7 +132,7 @@ export async function listDocuments(filters?: {
           type: doc.type as 'pdf' | 'doc' | 'link' | 'video',
           url: doc.url,
           category: doc.category as 'apostila' | 'acordao' | 'parecer' | 'edital' | 'artigo' | 'outro',
-          courseId: doc.courseId,
+          courseId: doc.courseId || '',
           isPublic: doc.isPublic,
           tags: doc.tags ? JSON.parse(doc.tags) : [],
           leiArticles: doc.leiArticles ? JSON.parse(doc.leiArticles) : [],
@@ -140,6 +140,10 @@ export async function listDocuments(filters?: {
           size: doc.size || undefined,
           reviewed: doc.reviewed || false,
           reviewedAt: doc.reviewedAt || undefined,
+          entityType: doc.entityType || undefined,
+          enunciadoNumber: doc.enunciadoNumber || undefined,
+          onNumber: doc.onNumber || undefined,
+          onYear: doc.onYear || undefined,
         };
       } catch (error) {
         console.error('[listDocuments] Erro ao mapear documento:', doc.id, error);
