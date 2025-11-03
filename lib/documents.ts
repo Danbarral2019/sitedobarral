@@ -3,6 +3,39 @@ import { prisma } from './prisma';
 import { Document as PrismaDocument } from '@prisma/client';
 
 /**
+ * Parse seguro de tags/leiArticles que pode estar em formato JSON ou CSV
+ * Aceita:
+ * - JSON válido: '["tag1","tag2"]' -> ["tag1","tag2"]
+ * - CSV: 'tag1,tag2' -> ["tag1","tag2"]
+ * - Array já parseado: ["tag1","tag2"] -> ["tag1","tag2"]
+ * - null/undefined -> []
+ */
+function safeParseArray(value: string | null | undefined | unknown): string[] {
+  if (!value) return [];
+
+  // Se já é um array, retorna direto
+  if (Array.isArray(value)) return value;
+
+  // Se não é string, retorna vazio com warning
+  if (typeof value !== 'string') {
+    console.warn('[safeParseArray] Received non-string value:', typeof value, value);
+    return [];
+  }
+
+  // Tenta parse como JSON primeiro
+  try {
+    const parsed = JSON.parse(value);
+    return Array.isArray(parsed) ? parsed : [];
+  } catch {
+    // Se falhar, trata como CSV
+    return value
+      .split(',')
+      .map(item => item.trim())
+      .filter(item => item.length > 0);
+  }
+}
+
+/**
  * Adiciona um novo documento
  */
 export async function addDocument(
@@ -42,7 +75,7 @@ export async function addDocument(
       onYear: onYear || null,
       entityType: entityType || null,
       enunciadoNumber: enunciadoNumber || null,
-      notes: notes || null,
+      adminNotes: notes || null, // Campo correto no schema
     },
   });
 
@@ -55,8 +88,8 @@ export async function addDocument(
     category: dbDocument.category as 'apostila' | 'acordao' | 'parecer' | 'edital' | 'artigo' | 'outro',
     courseId: dbDocument.courseId,
     isPublic: dbDocument.isPublic,
-    tags: dbDocument.tags ? JSON.parse(dbDocument.tags) : [],
-    leiArticles: dbDocument.leiArticles ? JSON.parse(dbDocument.leiArticles) : [],
+    tags: safeParseArray(dbDocument.tags),
+    leiArticles: safeParseArray(dbDocument.leiArticles),
     uploadedAt: dbDocument.uploadedAt,
     size: dbDocument.size || undefined,
   };
@@ -134,8 +167,8 @@ export async function listDocuments(filters?: {
           category: doc.category as 'apostila' | 'acordao' | 'parecer' | 'edital' | 'artigo' | 'outro',
           courseId: doc.courseId || '',
           isPublic: doc.isPublic,
-          tags: doc.tags ? JSON.parse(doc.tags) : [],
-          leiArticles: doc.leiArticles ? JSON.parse(doc.leiArticles) : [],
+          tags: safeParseArray(doc.tags),
+          leiArticles: safeParseArray(doc.leiArticles),
           uploadedAt: doc.uploadedAt,
           size: doc.size || undefined,
           reviewed: doc.reviewed || false,
@@ -179,8 +212,8 @@ export async function getDocumentsByCourse(courseId: string): Promise<{
     category: doc.category as 'apostila' | 'acordao' | 'parecer' | 'edital' | 'artigo' | 'outro',
     courseId: doc.courseId,
     isPublic: doc.isPublic,
-    tags: doc.tags ? JSON.parse(doc.tags) : [],
-    leiArticles: doc.leiArticles ? JSON.parse(doc.leiArticles) : [],
+    tags: safeParseArray(doc.tags),
+    leiArticles: safeParseArray(doc.leiArticles),
     uploadedAt: doc.uploadedAt,
     size: doc.size || undefined,
   });
@@ -212,8 +245,8 @@ export async function getDocumentById(id: string): Promise<Document | null> {
     category: doc.category as 'apostila' | 'acordao' | 'parecer' | 'edital' | 'artigo' | 'outro',
     courseId: doc.courseId,
     isPublic: doc.isPublic,
-    tags: doc.tags ? JSON.parse(doc.tags) : [],
-    leiArticles: doc.leiArticles ? JSON.parse(doc.leiArticles) : [],
+    tags: safeParseArray(doc.tags),
+    leiArticles: safeParseArray(doc.leiArticles),
     uploadedAt: doc.uploadedAt,
     size: doc.size || undefined,
   };
@@ -267,8 +300,8 @@ export async function updateDocument(
       category: doc.category as 'apostila' | 'acordao' | 'parecer' | 'edital' | 'artigo' | 'outro',
       courseId: doc.courseId,
       isPublic: doc.isPublic,
-      tags: doc.tags ? JSON.parse(doc.tags) : [],
-      leiArticles: doc.leiArticles ? JSON.parse(doc.leiArticles) : [],
+      tags: safeParseArray(doc.tags),
+      leiArticles: safeParseArray(doc.leiArticles),
       uploadedAt: doc.uploadedAt,
       size: doc.size || undefined,
     };

@@ -8,6 +8,38 @@ import {
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
+/**
+ * Parse seguro de tags que pode estar em formato JSON ou CSV
+ * Aceita:
+ * - JSON válido: '["tag1","tag2"]' -> ["tag1","tag2"]
+ * - CSV: 'tag1,tag2' -> ["tag1","tag2"]
+ * - Array já parseado: ["tag1","tag2"] -> ["tag1","tag2"]
+ * - null/undefined -> []
+ */
+function safeParseArray(value: string | null | undefined | unknown): string[] {
+  if (!value) return [];
+
+  // Se já é um array, retorna direto
+  if (Array.isArray(value)) return value;
+
+  // Se não é string, retorna vazio com warning
+  if (typeof value !== 'string') {
+    console.warn('[safeParseArray] Received non-string value:', typeof value, value);
+    return [];
+  }
+
+  try {
+    const parsed = JSON.parse(value);
+    return Array.isArray(parsed) ? parsed : [];
+  } catch {
+    // Se falhar, trata como CSV
+    return value
+      .split(',')
+      .map(item => item.trim())
+      .filter(item => item.length > 0);
+  }
+}
+
 interface PendingDocument {
   id: string;
   title: string;
@@ -467,7 +499,7 @@ export default function DocumentosPendentesPage() {
                         {doc.category}
                       </span>
 
-                      {doc.tags && JSON.parse(doc.tags).slice(0, 3).map((tag: string, idx: number) => (
+                      {doc.tags && safeParseArray(doc.tags).slice(0, 3).map((tag: string, idx: number) => (
                         <span
                           key={idx}
                           className="px-3 py-1 bg-gray-100 text-gray-600 text-xs rounded-full"

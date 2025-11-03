@@ -8,7 +8,13 @@ import { courses } from '@/data/courses';
 export const Header = memo(function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isCoursesOpen, setIsCoursesOpen] = useState(false);
+  const [isMounted, setIsMounted] = useState(false);
   const coursesDropdownRef = useRef<HTMLDivElement>(null);
+
+  // Evita hydration mismatch
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
 
   // Fecha dropdown quando clicar fora
   useEffect(() => {
@@ -63,7 +69,7 @@ export const Header = memo(function Header() {
               <span>Busca</span>
             </Link>
 
-            <div className="relative" ref={coursesDropdownRef}>
+            <div className="relative" ref={coursesDropdownRef} suppressHydrationWarning>
               <button
                 onClick={() => setIsCoursesOpen(!isCoursesOpen)}
                 className="flex items-center space-x-1 text-gray-700 hover:text-primary-600 transition-colors"
@@ -73,7 +79,7 @@ export const Header = memo(function Header() {
                 <ChevronDown className={`w-4 h-4 transition-transform ${isCoursesOpen ? 'rotate-180' : ''}`} />
               </button>
 
-              {isCoursesOpen && (
+              {isMounted && isCoursesOpen && (
                 <div className="absolute top-full left-0 mt-2 w-80 bg-white rounded-lg shadow-xl py-2 max-h-96 overflow-y-auto z-[9999] border border-gray-200">
                   <Link
                     href="/cursos"
