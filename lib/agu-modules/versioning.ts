@@ -257,8 +257,8 @@ export async function findOrCreateWithVersioning(
     existingDoc = await prisma.document.findFirst({
       where: {
         onNumber: uniqueIdentifier.onNumber,
-        onYear: uniqueIdentifier.onYear,
-        category: 'on'
+        onYear: uniqueIdentifier.onYear
+        // Removido filtro de category - onNumber + onYear já é único
       }
     });
   } else {
