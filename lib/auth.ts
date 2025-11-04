@@ -1,15 +1,21 @@
 import { jwtVerify, SignJWT } from 'jose';
 import { cookies } from 'next/headers';
 import { NextRequest } from 'next/server';
+import { z } from 'zod';
 
-// Tipos para o payload do JWT
-export interface AuthPayload {
-  userId: string;
-  courseId?: string;
-  role: 'admin' | 'student';
-  validUntil?: string;
-  turma?: string;
-}
+// Schema Zod para validação runtime do payload JWT
+export const AuthPayloadSchema = z.object({
+  userId: z.string().min(1, 'userId é obrigatório'),
+  courseId: z.string().optional(),
+  role: z.enum(['admin', 'student'], {
+    errorMap: () => ({ message: 'role deve ser "admin" ou "student"' })
+  }),
+  validUntil: z.string().datetime().optional(),
+  turma: z.string().optional(),
+});
+
+// Tipos para o payload do JWT (inferido do schema Zod)
+export type AuthPayload = z.infer<typeof AuthPayloadSchema>;
 
 // Tipo para resultado de verificação de autenticação
 export interface AuthResult {
@@ -32,17 +38,34 @@ const getSecretKey = () => {
 export async function generateToken(payload: AuthPayload): Promise<string> {
   const secret = getSecretKey();
 
+  // Validar payload com Zod
+  const validationResult = AuthPayloadSchema.safeParse(payload);
+  if (!validationResult.success) {
+    console.error('Payload JWT inválido:', validationResult.error);
+    throw new Error(`Payload JWT inválido: ${validationResult.error.message}`);
+  }
+
   // Calcula tempo de expiração
   let expirationTime: string | number = '7d'; // 7 dias por padrão
 
   if (payload.validUntil) {
     // Se validUntil é uma data ISO, converte para timestamp em segundos
     const validUntilDate = new Date(payload.validUntil);
+
+    // Validar se a data é válida
+    if (isNaN(validUntilDate.getTime())) {
+      throw new Error('validUntil contém data inválida');
+    }
+
     const now = new Date();
     const secondsUntilExpiration = Math.floor((validUntilDate.getTime() - now.getTime()) / 1000);
 
     if (secondsUntilExpiration > 0) {
       expirationTime = `${secondsUntilExpiration}s`;
+    } else {
+      // ✅ FIX CRÍTICO: Se validUntil já passou, token expira imediatamente
+      // Não deve gerar token válido por 7 dias para acesso expirado!
+      expirationTime = '0s';
     }
   }
 
@@ -63,13 +86,15 @@ export async function verifyToken(token: string): Promise<AuthPayload | null> {
     const secret = getSecretKey();
     const { payload } = await jwtVerify(token, secret);
 
-    return {
-      userId: payload.userId as string,
-      courseId: payload.courseId as string | undefined,
-      role: payload.role as 'admin' | 'student',
-      validUntil: payload.validUntil as string | undefined,
-      turma: payload.turma as string | undefined,
-    };
+    // ✅ VALIDAÇÃO RUNTIME com Zod (remove type assertions inseguros)
+    const validationResult = AuthPayloadSchema.safeParse(payload);
+
+    if (!validationResult.success) {
+      console.error('Token JWT com payload inválido:', validationResult.error);
+      return null;
+    }
+
+    return validationResult.data;
   } catch (error) {
     console.error('Erro ao verificar token:', error);
     return null;
@@ -132,11 +157,27 @@ export async function createAuthSession(payload: AuthPayload): Promise<string> {
   const token = await generateToken(payload);
   const cookieStore = await cookies();
 
+  // ✅ SINCRONIZADO: Cookie e JWT expiram ao mesmo tempo (7 dias ou validUntil)
+  let cookieMaxAge = 7 * 24 * 60 * 60; // 7 dias por padrão (igual ao JWT)
+
+  if (payload.validUntil) {
+    const validUntilDate = new Date(payload.validUntil);
+    const now = new Date();
+    const secondsUntilExpiration = Math.floor((validUntilDate.getTime() - now.getTime()) / 1000);
+
+    if (secondsUntilExpiration > 0) {
+      cookieMaxAge = secondsUntilExpiration;
+    } else {
+      // Se já expirou, cookie expira imediatamente
+      cookieMaxAge = 0;
+    }
+  }
+
   cookieStore.set('auth-token', token, {
     httpOnly: true,
     secure: process.env.NODE_ENV === 'production',
     sameSite: 'lax',
-    maxAge: 30 * 24 * 60 * 60, // 30 dias
+    maxAge: cookieMaxAge,
     path: '/',
   });
 

@@ -1,17 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
-import jwt from 'jsonwebtoken';
+import { verifyToken } from '@/lib/auth';
 import { readFile } from 'fs/promises';
 import { join } from 'path';
 import { checkAccessStatus } from '@/lib/enrollment-utils';
-
-const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key-change-in-production';
-
-interface JWTPayload {
-  userId: string;
-  email: string;
-  role: string;
-}
 
 export async function GET(
   request: NextRequest,
@@ -20,7 +12,7 @@ export async function GET(
   try {
     const { id } = await params;
 
-    // Obter token do cookie
+    // ✅ Obter e verificar token usando função centralizada
     const token = request.cookies.get('auth-token')?.value;
 
     if (!token) {
@@ -30,11 +22,10 @@ export async function GET(
       );
     }
 
-    // Verificar e decodificar token
-    let decoded: JWTPayload;
-    try {
-      decoded = jwt.verify(token, JWT_SECRET) as JWTPayload;
-    } catch {
+    // ✅ Verificar token (com validação Zod)
+    const authPayload = await verifyToken(token);
+
+    if (!authPayload) {
       return NextResponse.json(
         { error: 'Token inválido ou expirado' },
         { status: 401 }
@@ -60,7 +51,7 @@ export async function GET(
 
     // Para documentos restritos, verificar acesso do usuário
     const user = await prisma.user.findUnique({
-      where: { id: decoded.userId },
+      where: { id: authPayload.userId },
       include: {
         enrollments: {
           where: { courseId: document.courseId }

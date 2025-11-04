@@ -1,21 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
-import jwt from 'jsonwebtoken';
-
-const JWT_SECRET = process.env.JWT_SECRET;
-
-if (!JWT_SECRET) {
-  throw new Error('JWT_SECRET environment variable is required');
-}
-
-interface JWTPayload {
-  userId: string;
-  role: string;
-}
+import { verifyToken } from '@/lib/auth';
 
 export async function GET(request: NextRequest) {
   try {
-    // Obter token do cookie
+    // ✅ Obter e verificar token usando função centralizada
     const token = request.cookies.get('auth-token')?.value;
 
     if (!token) {
@@ -25,12 +14,19 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    // Verificar token
-    const decoded = jwt.verify(token, JWT_SECRET) as JWTPayload;
+    // ✅ Usar verifyToken do lib/auth.ts (com validação Zod)
+    const authPayload = await verifyToken(token);
+
+    if (!authPayload) {
+      return NextResponse.json(
+        { error: 'Token inválido ou expirado' },
+        { status: 401 }
+      );
+    }
 
     // Buscar usuário com matrículas
     const user = await prisma.user.findUnique({
-      where: { id: decoded.userId },
+      where: { id: authPayload.userId },
       include: { enrollments: true },
     });
 
