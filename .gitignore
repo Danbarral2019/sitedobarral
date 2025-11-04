@@ -52,3 +52,13 @@ next-env.d.ts
 
 .vercel
 nul
+
+# Scripts de configuração com chaves/secrets (NUNCA COMMITAR)
+*-definitivo.ps1
+*-definit*.ps1
+configurar-*-key*.ps1
+configurar-api*.ps1
+setup-keys.*
+config-secrets.*
+*-secret.ps1
+*-keys.ps1
