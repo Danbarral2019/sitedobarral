@@ -1,0 +1,279 @@
+/**
+ * Configuração da lista de Atos Normativos
+ * Usa o padrão genérico ResourceList (Fase 7)
+ */
+
+import Link from 'next/link';
+import { Eye, Edit, Trash2, Scale, Calendar, Building, ExternalLink, FileText, Download } from 'lucide-react';
+import { createListConfig } from '@/components/admin/ResourceListContainer';
+import { AdminListConfig, FilterConfig } from '@/lib/types/admin-list';
+import { LegislativeAct, deleteLegislativeAct } from '@/lib/legislacao';
+
+// Helper functions
+const TYPE_LABELS: Record<string, string> = {
+  'decreto': 'Decreto',
+  'portaria': 'Portaria',
+  'in': 'IN',
+  'ordem-servico': 'Ordem de Serviço',
+  'lei': 'Lei',
+  'medida-provisoria': 'Medida Provisória'
+};
+
+const TYPE_COLORS: Record<string, string> = {
+  'decreto': 'bg-blue-100 text-blue-800',
+  'portaria': 'bg-green-100 text-green-800',
+  'in': 'bg-purple-100 text-purple-800',
+  'ordem-servico': 'bg-yellow-100 text-yellow-800',
+  'lei': 'bg-red-100 text-red-800',
+  'medida-provisoria': 'bg-orange-100 text-orange-800'
+};
+
+function getTypeLabel(type: string): string {
+  return TYPE_LABELS[type] || type;
+}
+
+function getTypeColor(type: string): string {
+  return TYPE_COLORS[type] || 'bg-gray-100 text-gray-800';
+}
+
+interface LegislacaoConfigProps {
+  types: string[];
+  issuers: string[];
+  years: number[];
+}
+
+export function createLegislacaoConfig({
+  types,
+  issuers,
+  years
+}: LegislacaoConfigProps): AdminListConfig<LegislativeAct> {
+  // Build filters dynamically
+  const filters: FilterConfig[] = [
+    {
+      id: 'type',
+      label: 'Tipo',
+      type: 'select',
+      options: [
+        { value: '', label: 'Todos' },
+        ...types.map(t => ({ value: t, label: getTypeLabel(t) }))
+      ],
+    },
+    {
+      id: 'issuer',
+      label: 'Emissor',
+      type: 'select',
+      options: [
+        { value: '', label: 'Todos' },
+        ...issuers.map(i => ({ value: i, label: i }))
+      ],
+    },
+    {
+      id: 'year',
+      label: 'Ano',
+      type: 'select',
+      options: [
+        { value: '', label: 'Todos' },
+        ...years.map(y => ({ value: y.toString(), label: y.toString() }))
+      ],
+    },
+  ];
+
+  return createListConfig<LegislativeAct>({
+    title: 'Atos Normativos',
+    description: 'Leis, decretos, portarias e instruções normativas',
+
+    // Busca
+    showSearch: true,
+    searchPlaceholder: 'Buscar por título, número ou ementa...',
+
+    // Estatísticas
+    showStats: true,
+    getStats: (items) => [
+      {
+        label: 'Total',
+        value: items.length,
+        icon: Scale,
+        color: 'bg-blue-100 text-blue-600',
+      },
+      {
+        label: 'Com PDF',
+        value: items.filter((a) => a.pdfUrl).length,
+        icon: FileText,
+        color: 'bg-green-100 text-green-600',
+      },
+      {
+        label: 'Com Link Oficial',
+        value: items.filter((a) => a.officialUrl).length,
+        icon: ExternalLink,
+        color: 'bg-purple-100 text-purple-600',
+      },
+      {
+        label: 'Visualizações',
+        value: items.reduce((acc, a) => acc + a.viewCount, 0),
+        icon: Eye,
+        color: 'bg-indigo-100 text-indigo-600',
+      },
+    ],
+
+    // Filtros dinâmicos
+    filters,
+
+    // Colunas
+    columns: [
+      {
+        id: 'type',
+        label: 'Tipo',
+        render: (act) => (
+          <span className={`px-3 py-1 rounded-full text-xs font-bold ${getTypeColor(act.type)}`}>
+            {getTypeLabel(act.type)}
+          </span>
+        ),
+      },
+      {
+        id: 'fullNumber',
+        label: 'Número',
+        render: (act) => (
+          <div>
+            <p className="font-semibold text-gray-900">{act.fullNumber}</p>
+            <p className="text-xs text-gray-500 flex items-center gap-1 mt-1">
+              <Calendar className="w-3 h-3" />
+              {new Date(act.publishDate).toLocaleDateString('pt-BR')}
+            </p>
+          </div>
+        ),
+      },
+      {
+        id: 'title',
+        label: 'Título',
+        render: (act) => (
+          <div>
+            <p className="font-medium text-gray-900 line-clamp-1">{act.title}</p>
+            <p className="text-sm text-gray-600 line-clamp-1">{act.ementa.substring(0, 80)}...</p>
+          </div>
+        ),
+      },
+      {
+        id: 'issuer',
+        label: 'Emissor',
+        render: (act) => (
+          <p className="text-sm text-gray-700 flex items-center gap-1">
+            <Building className="w-4 h-4" />
+            {act.issuer}
+          </p>
+        ),
+      },
+      {
+        id: 'viewCount',
+        label: 'Visualizações',
+        render: (act) => (
+          <p className="text-sm text-gray-700 flex items-center gap-1">
+            <Eye className="w-4 h-4" />
+            {act.viewCount}
+          </p>
+        ),
+      },
+    ],
+
+    // Ações individuais
+    rowActions: [
+      {
+        id: 'view-public',
+        label: 'Ver no site',
+        icon: Eye,
+        color: 'text-blue-600',
+        action: (act) => {
+          window.open(`/legislacao/${act.id}`, '_blank', 'noopener,noreferrer');
+        },
+      },
+      {
+        id: 'view-official',
+        label: 'Ver link oficial',
+        icon: ExternalLink,
+        color: 'text-purple-600',
+        action: (act) => {
+          if (act.officialUrl) {
+            window.open(act.officialUrl, '_blank', 'noopener,noreferrer');
+          }
+        },
+        show: (act) => !!act.officialUrl,
+      },
+      {
+        id: 'download',
+        label: 'Baixar PDF',
+        icon: Download,
+        color: 'text-green-600',
+        action: (act) => {
+          if (act.pdfUrl) {
+            window.open(act.pdfUrl, '_blank', 'noopener,noreferrer');
+          }
+        },
+        show: (act) => !!act.pdfUrl,
+      },
+      {
+        id: 'edit',
+        label: 'Editar',
+        icon: Edit,
+        color: 'text-orange-600',
+        action: (act) => {
+          window.location.href = `/admin/legislacao/${act.id}/edit`;
+        },
+      },
+      {
+        id: 'delete',
+        label: 'Deletar',
+        icon: Trash2,
+        color: 'text-red-600',
+        action: async (act) => {
+          if (!confirm(`Tem certeza que deseja deletar "${act.fullNumber}"?`)) {
+            return;
+          }
+          await deleteLegislativeAct(act.id);
+        },
+      },
+    ],
+
+    // Estado vazio
+    emptyMessage: 'Nenhum ato normativo encontrado',
+    emptyIcon: Scale,
+
+    // Paginação
+    defaultPageSize: 20,
+    pageSizeOptions: [10, 20, 50, 100],
+  });
+}
+
+/**
+ * Header customizado com botões de ação
+ */
+export function LegislacaoHeader() {
+  return (
+    <div className="mb-8">
+      <div className="flex justify-between items-start">
+        <div>
+          <h1 className="text-3xl font-bold text-gray-900 mb-2">Atos Normativos</h1>
+          <p className="text-gray-600">Leis, decretos, portarias e instruções normativas</p>
+        </div>
+        <div className="flex items-center gap-3">
+          <Link
+            href="/admin/legislacao/importar"
+            className="bg-gradient-to-r from-green-600 to-emerald-600 text-white px-6 py-3 rounded-xl font-bold hover:from-green-700 hover:to-emerald-700 transition-all shadow-lg flex items-center gap-2"
+          >
+            <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+              <path d="M14 2H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V8l-6-6zm-1 13H7v-2h6v2zm3-4H7v-2h9v2zm0-4H7V5h9v2z" />
+            </svg>
+            Importar Excel
+          </Link>
+          <Link
+            href="/admin/legislacao/new"
+            className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-6 py-3 rounded-xl font-bold hover:from-blue-700 hover:to-indigo-700 transition-all shadow-lg flex items-center gap-2"
+          >
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+            </svg>
+            Novo Ato
+          </Link>
+        </div>
+      </div>
+    </div>
+  );
+}
