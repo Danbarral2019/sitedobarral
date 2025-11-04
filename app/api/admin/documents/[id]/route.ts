@@ -1,39 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { withAdminAuth } from '@/lib/api-middleware';
 import { prisma } from '@/lib/prisma';
-
-/**
- * Parse seguro de tags/leiArticles que pode estar em formato JSON ou CSV
- * Aceita:
- * - JSON válido: '["tag1","tag2"]' -> ["tag1","tag2"]
- * - CSV: 'tag1,tag2' -> ["tag1","tag2"]
- * - Array já parseado: ["tag1","tag2"] -> ["tag1","tag2"]
- * - null/undefined -> []
- */
-function safeParseArray(value: string | null | undefined | unknown): string[] {
-  if (!value) return [];
-
-  // Se já é um array, retorna direto
-  if (Array.isArray(value)) return value;
-
-  // Se não é string, retorna vazio com warning
-  if (typeof value !== 'string') {
-    console.warn('[safeParseArray] Received non-string value:', typeof value, value);
-    return [];
-  }
-
-  // Tenta parse como JSON primeiro
-  try {
-    const parsed = JSON.parse(value);
-    return Array.isArray(parsed) ? parsed : [];
-  } catch {
-    // Se falhar, trata como CSV
-    return value
-      .split(',')
-      .map(item => item.trim())
-      .filter(item => item.length > 0);
-  }
-}
+import { safeParseArray } from '@/lib/utils';
 
 /**
  * GET: Busca um documento por ID
