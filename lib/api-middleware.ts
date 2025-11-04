@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { isAdmin } from './auth';
+import { rateLimiters } from './rate-limit';
 
 /**
  * Tipo para funções de handler de API
@@ -8,6 +9,8 @@ type ApiHandler = (request: NextRequest, context?: Record<string, unknown>) => P
 
 /**
  * Middleware que protege rotas de API para admin apenas
+ * ✅ Inclui rate limiting automático (30 req/min)
+ *
  * Uso:
  *
  * export const GET = withAdminAuth(async (request, context) => {
@@ -18,6 +21,16 @@ type ApiHandler = (request: NextRequest, context?: Record<string, unknown>) => P
  */
 export function withAdminAuth(handler: ApiHandler): ApiHandler {
   return async (request: NextRequest, context?: Record<string, unknown>) => {
+    // ✅ Rate limiting ANTES de autenticação (previne ataques)
+    try {
+      await rateLimiters.api.check(request, 30); // 30 requests/minuto para admin
+    } catch {
+      return NextResponse.json(
+        { error: 'Muitas requisições. Aguarde alguns instantes.' },
+        { status: 429 }
+      );
+    }
+
     const { getCurrentUser } = await import('./auth');
     const user = await getCurrentUser();
 
@@ -35,6 +48,8 @@ export function withAdminAuth(handler: ApiHandler): ApiHandler {
 
 /**
  * Middleware que protege rotas de API para usuários autenticados
+ * ✅ Inclui rate limiting automático (60 req/min)
+ *
  * Uso:
  *
  * export const GET = withAuth(async (request, context) => {
@@ -45,6 +60,16 @@ export function withAdminAuth(handler: ApiHandler): ApiHandler {
  */
 export function withAuth(handler: ApiHandler): ApiHandler {
   return async (request: NextRequest, context?: Record<string, unknown>) => {
+    // ✅ Rate limiting (mais permissivo para usuários autenticados)
+    try {
+      await rateLimiters.api.check(request, 60); // 60 requests/minuto
+    } catch {
+      return NextResponse.json(
+        { error: 'Muitas requisições. Aguarde alguns instantes.' },
+        { status: 429 }
+      );
+    }
+
     const { getCurrentUser } = await import('./auth');
     const user = await getCurrentUser();
 

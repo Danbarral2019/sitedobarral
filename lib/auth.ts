@@ -2,6 +2,7 @@ import { jwtVerify, SignJWT } from 'jose';
 import { cookies } from 'next/headers';
 import { NextRequest } from 'next/server';
 import { z } from 'zod';
+import { authLogger } from './logger';
 
 // Schema Zod para validação runtime do payload JWT
 export const AuthPayloadSchema = z.object({
@@ -41,7 +42,7 @@ export async function generateToken(payload: AuthPayload): Promise<string> {
   // Validar payload com Zod
   const validationResult = AuthPayloadSchema.safeParse(payload);
   if (!validationResult.success) {
-    console.error('Payload JWT inválido:', validationResult.error);
+    authLogger.error({ err: validationResult.error, payload }, 'Payload JWT inválido');
     throw new Error(`Payload JWT inválido: ${validationResult.error.message}`);
   }
 
@@ -90,13 +91,13 @@ export async function verifyToken(token: string): Promise<AuthPayload | null> {
     const validationResult = AuthPayloadSchema.safeParse(payload);
 
     if (!validationResult.success) {
-      console.error('Token JWT com payload inválido:', validationResult.error);
+      authLogger.warn({ err: validationResult.error }, 'Token JWT com payload inválido');
       return null;
     }
 
     return validationResult.data;
   } catch (error) {
-    console.error('Erro ao verificar token:', error);
+    authLogger.debug({ err: error }, 'Erro ao verificar token JWT');
     return null;
   }
 }
@@ -217,7 +218,7 @@ export async function verifyAuth(request: NextRequest): Promise<AuthResult> {
       user,
     };
   } catch (error) {
-    console.error('Erro ao verificar autenticação:', error);
+    authLogger.error({ err: error }, 'Erro ao verificar autenticação');
     return { valid: false };
   }
 }

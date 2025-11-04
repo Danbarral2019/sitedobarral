@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 import { jwtVerify } from 'jose';
+import { authLogger } from '@/lib/logger';
 
 // Rotas que requerem autenticação
 const protectedRoutes = ['/area-restrita'];
@@ -16,7 +17,9 @@ async function verifyAuth(token: string) {
     const secret = new TextEncoder().encode(process.env.JWT_SECRET);
     const { payload } = await jwtVerify(token, secret);
     return payload;
-  } catch {
+  } catch (error) {
+    // ✅ Log estruturado para debugging (campos sensíveis são redacted automaticamente)
+    authLogger.debug({ err: error }, 'Falha ao verificar token JWT');
     return null;
   }
 }
@@ -33,13 +36,13 @@ export async function middleware(request: NextRequest) {
     return NextResponse.next();
   }
 
-  // Verifica se é uma rota protegida
+  // ✅ Verifica se é uma rota protegida (match exato ou subpath)
   const isProtectedRoute = protectedRoutes.some(route =>
-    pathname.startsWith(route)
+    pathname === route || pathname.startsWith(route + '/')
   );
 
   const isAdminRoute = adminRoutes.some(route =>
-    pathname.startsWith(route)
+    pathname === route || pathname.startsWith(route + '/')
   );
 
   if (isProtectedRoute || isAdminRoute) {
