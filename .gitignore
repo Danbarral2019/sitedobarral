@@ -37,6 +37,12 @@ yarn-error.log*
 # IMPORTANTE: .env.example DEVE ser commitado (é o template)
 !.env.example
 
+# Claude Code MCP settings com chaves API (NUNCA COMMITAR)
+.claude/settings.local.json
+.claude/*.local.json
+*settings.local.json
+*.local.json
+
 # vercel
 .vercel
 
