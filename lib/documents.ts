@@ -277,3 +277,195 @@ export async function updateDocument(
     return null;
   }
 }
+
+/**
+ * Busca documentos pendentes de aprovação (server-side para Fase 7)
+ * Filtros aplicados no servidor para melhor performance
+ */
+export async function fetchPendingDocuments(filters: {
+  category?: string;
+  period?: string;
+}): Promise<{
+  id: string;
+  title: string;
+  description: string | null;
+  category: string;
+  type: string;
+  url: string;
+  uploadedAt: Date;
+  douData?: string | null;
+  douSecao?: string | null;
+  douOrgao?: string | null;
+  douEdicao?: string | null;
+  tags?: string | null;
+  courseId?: string;
+}[]> {
+  // Construir where clause
+  const where: Record<string, unknown> = {
+    reviewed: false, // Apenas não revisados
+  };
+
+  // Filtro de categoria
+  if (filters.category) {
+    where.category = filters.category;
+  }
+
+  // Filtro de período
+  if (filters.period && filters.period !== 'all') {
+    const now = new Date();
+    let startDate: Date;
+
+    switch (filters.period) {
+      case 'today':
+        startDate = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+        break;
+      case 'week':
+        startDate = new Date(now);
+        startDate.setDate(now.getDate() - 7);
+        break;
+      case 'month':
+        startDate = new Date(now);
+        startDate.setDate(now.getDate() - 30);
+        break;
+      default:
+        startDate = new Date(0); // Início dos tempos
+    }
+
+    where.uploadedAt = {
+      gte: startDate,
+    };
+  }
+
+  // Buscar documentos
+  const documents = await prisma.document.findMany({
+    where,
+    orderBy: {
+      uploadedAt: 'desc', // Mais recentes primeiro
+    },
+    select: {
+      id: true,
+      title: true,
+      description: true,
+      category: true,
+      type: true,
+      url: true,
+      uploadedAt: true,
+      douData: true,
+      douSecao: true,
+      douOrgao: true,
+      douEdicao: true,
+      tags: true,
+      courseId: true,
+    },
+  });
+
+  return documents;
+}
+
+/**
+ * Busca documentos pendentes com paginação (formato PaginatedResult para ResourceList)
+ * Versão genérica para uso com ResourceListContainer
+ */
+export async function fetchPendingDocumentsPaginated(params: {
+  category?: string;
+  period?: string;
+  page?: string;
+  pageSize?: string;
+}): Promise<{
+  items: {
+    id: string;
+    title: string;
+    description: string | null;
+    category: string;
+    type: string;
+    url: string;
+    uploadedAt: Date;
+    douData?: string | null;
+    douSecao?: string | null;
+    douOrgao?: string | null;
+    douEdicao?: string | null;
+    tags?: string | null;
+    courseId?: string;
+  }[];
+  total: number;
+  page: number;
+  pageSize: number;
+  totalPages: number;
+}> {
+  // Parse pagination
+  const page = parseInt(params.page || '1');
+  const pageSize = parseInt(params.pageSize || '50');
+  const skip = (page - 1) * pageSize;
+
+  // Construir where clause
+  const where: Record<string, unknown> = {
+    reviewed: false, // Apenas não revisados
+  };
+
+  // Filtro de categoria
+  if (params.category) {
+    where.category = params.category;
+  }
+
+  // Filtro de período
+  if (params.period && params.period !== 'all') {
+    const now = new Date();
+    let startDate: Date;
+
+    switch (params.period) {
+      case 'today':
+        startDate = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+        break;
+      case 'week':
+        startDate = new Date(now);
+        startDate.setDate(now.getDate() - 7);
+        break;
+      case 'month':
+        startDate = new Date(now);
+        startDate.setDate(now.getDate() - 30);
+        break;
+      default:
+        startDate = new Date(0);
+    }
+
+    where.uploadedAt = {
+      gte: startDate,
+    };
+  }
+
+  // Buscar total e documentos em paralelo
+  const [total, documents] = await Promise.all([
+    prisma.document.count({ where }),
+    prisma.document.findMany({
+      where,
+      skip,
+      take: pageSize,
+      orderBy: {
+        uploadedAt: 'desc',
+      },
+      select: {
+        id: true,
+        title: true,
+        description: true,
+        category: true,
+        type: true,
+        url: true,
+        uploadedAt: true,
+        douData: true,
+        douSecao: true,
+        douOrgao: true,
+        douEdicao: true,
+        tags: true,
+        courseId: true,
+      },
+    }),
+  ]);
+
+  return {
+    items: documents,
+    total,
+    page,
+    pageSize,
+    totalPages: Math.ceil(total / pageSize),
+  };
+}
