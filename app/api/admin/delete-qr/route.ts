@@ -1,6 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { withAdminAuth } from '@/lib/api-middleware';
 import { deleteQRCode } from '@/lib/qrcode';
+import { handleApiError } from '@/lib/errors/error-handler';
+import { ValidationError, NotFoundError } from '@/lib/errors/api-error';
+import { apiLogger } from '@/lib/logger';
 
 export const DELETE = withAdminAuth(async (request: NextRequest) => {
   try {
@@ -8,30 +11,24 @@ export const DELETE = withAdminAuth(async (request: NextRequest) => {
     const code = searchParams.get('code');
 
     if (!code) {
-      return NextResponse.json(
-        { error: 'Código do QR Code não fornecido' },
-        { status: 400 }
-      );
+      apiLogger.warn('DELETE QR Code: code parameter missing');
+      throw new ValidationError('Código do QR Code não fornecido');
     }
 
     const success = await deleteQRCode(code);
 
     if (!success) {
-      return NextResponse.json(
-        { error: 'QR Code não encontrado ou erro ao deletar' },
-        { status: 404 }
-      );
+      apiLogger.warn({ code }, 'QR Code not found or failed to delete');
+      throw new NotFoundError('QR Code');
     }
+
+    apiLogger.info({ code }, 'QR Code deleted successfully');
 
     return NextResponse.json({
       success: true,
       message: 'QR Code deletado com sucesso',
     });
   } catch (error) {
-    console.error('Erro ao deletar QR Code:', error);
-    return NextResponse.json(
-      { error: 'Erro ao deletar QR Code' },
-      { status: 500 }
-    );
+    return handleApiError(error);
   }
 });

@@ -2,6 +2,9 @@ import { NextRequest, NextResponse } from 'next/server';
 import { withAdminAuth } from '@/lib/api-middleware';
 import { prisma } from '@/lib/prisma';
 import { safeParseArray } from '@/lib/utils';
+import { handleApiError } from '@/lib/errors/error-handler';
+import { NotFoundError } from '@/lib/errors/api-error';
+import { apiLogger } from '@/lib/logger';
 
 /**
  * GET: Busca um documento por ID
@@ -15,10 +18,8 @@ export const GET = withAdminAuth(async (request: NextRequest, { params }: { para
     });
 
     if (!document) {
-      return NextResponse.json(
-        { error: 'Documento não encontrado' },
-        { status: 404 }
-      );
+      apiLogger.warn({ documentId: id }, 'Document not found');
+      throw new NotFoundError('Documento');
     }
 
     // Parse JSON fields with safe parsing (handles both JSON and CSV formats)
@@ -31,11 +32,7 @@ export const GET = withAdminAuth(async (request: NextRequest, { params }: { para
 
     return NextResponse.json(parsedDocument);
   } catch (error) {
-    console.error('[GET Document] Erro:', error);
-    return NextResponse.json(
-      { error: 'Erro ao buscar documento' },
-      { status: 500 }
-    );
+    return handleApiError(error);
   }
 });
 
@@ -77,10 +74,8 @@ export const PUT = withAdminAuth(async (request: NextRequest, { params }: { para
     });
 
     if (!existing) {
-      return NextResponse.json(
-        { error: 'Documento não encontrado' },
-        { status: 404 }
-      );
+      apiLogger.warn({ documentId: id }, 'Document not found for update/patch');
+      throw new NotFoundError('Documento');
     }
 
     // Prepara dados de feedback se fornecidos
@@ -124,18 +119,14 @@ export const PUT = withAdminAuth(async (request: NextRequest, { params }: { para
       },
     });
 
-    console.log(`[PUT Document] Documento ${id} atualizado com sucesso`);
+    apiLogger.info({ documentId: id }, 'Document updated successfully');
 
     return NextResponse.json({
       success: true,
       document: updated,
     });
   } catch (error) {
-    console.error('[PUT Document] Erro:', error);
-    return NextResponse.json(
-      { error: 'Erro ao atualizar documento' },
-      { status: 500 }
-    );
+    return handleApiError(error);
   }
 });
 
@@ -153,10 +144,8 @@ export const PATCH = withAdminAuth(async (request: NextRequest, { params }: { pa
     });
 
     if (!existing) {
-      return NextResponse.json(
-        { error: 'Documento não encontrado' },
-        { status: 404 }
-      );
+      apiLogger.warn({ documentId: id }, 'Document not found for update/patch');
+      throw new NotFoundError('Documento');
     }
 
     // Campos permitidos para atualização parcial
@@ -184,11 +173,7 @@ export const PATCH = withAdminAuth(async (request: NextRequest, { params }: { pa
       document: updated,
     });
   } catch (error) {
-    console.error('[PATCH Document] Erro:', error);
-    return NextResponse.json(
-      { error: 'Erro ao atualizar documento' },
-      { status: 500 }
-    );
+    return handleApiError(error);
   }
 });
 
@@ -205,10 +190,8 @@ export const DELETE = withAdminAuth(async (request: NextRequest, { params }: { p
     });
 
     if (!existing) {
-      return NextResponse.json(
-        { error: 'Documento não encontrado' },
-        { status: 404 }
-      );
+      apiLogger.warn({ documentId: id }, 'Document not found for deletion');
+      throw new NotFoundError('Documento');
     }
 
     // Deleta
@@ -216,17 +199,13 @@ export const DELETE = withAdminAuth(async (request: NextRequest, { params }: { p
       where: { id },
     });
 
-    console.log(`[DELETE Document] Documento ${id} deletado com sucesso`);
+    apiLogger.info({ documentId: id, title: existing.title }, 'Document deleted successfully');
 
     return NextResponse.json({
       success: true,
       message: 'Documento deletado com sucesso',
     });
   } catch (error) {
-    console.error('[DELETE Document] Erro:', error);
-    return NextResponse.json(
-      { error: 'Erro ao deletar documento' },
-      { status: 500 }
-    );
+    return handleApiError(error);
   }
 });

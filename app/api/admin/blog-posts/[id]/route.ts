@@ -2,7 +2,9 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { withAdminAuth } from '@/lib/api-middleware';
 import { publishToSocialMedia } from '@/lib/social-publisher';
-
+import { handleApiError } from '@/lib/errors/error-handler';
+import { NotFoundError, ConflictError } from '@/lib/errors/api-error';
+import { apiLogger } from '@/lib/logger';
 
 // GET - Busca um post específico
 export const GET = withAdminAuth(async (
@@ -17,19 +19,13 @@ export const GET = withAdminAuth(async (
     });
 
     if (!post) {
-      return NextResponse.json(
-        { error: 'Post não encontrado' },
-        { status: 404 }
-      );
+      apiLogger.warn({ postId: id }, 'Blog post not found');
+      throw new NotFoundError('Post');
     }
 
     return NextResponse.json({ post });
   } catch (error) {
-    console.error('Erro ao buscar post:', error);
-    return NextResponse.json(
-      { error: 'Erro ao buscar post' },
-      { status: 500 }
-    );
+    return handleApiError(error);
   }
 });
 
@@ -49,10 +45,8 @@ export const PUT = withAdminAuth(async (
     });
 
     if (!existingPost) {
-      return NextResponse.json(
-        { error: 'Post não encontrado' },
-        { status: 404 }
-      );
+      apiLogger.warn({ postId: id }, 'Blog post not found for update');
+      throw new NotFoundError('Post');
     }
 
     // Se o slug mudou, verificar se já existe outro post com o novo slug
@@ -62,10 +56,8 @@ export const PUT = withAdminAuth(async (
       });
 
       if (slugExists) {
-        return NextResponse.json(
-          { error: 'Já existe um post com este slug' },
-          { status: 400 }
-        );
+        apiLogger.warn({ slug, postId: id }, 'Slug conflict on blog post update');
+        throw new ConflictError('Já existe um post com este slug');
       }
     }
 
@@ -91,25 +83,23 @@ export const PUT = withAdminAuth(async (
     const shouldAutoPublish = autoPublishSocial ?? existingPost.autoPublishSocial;
 
     if (!wasPublished && isNowPublished && shouldAutoPublish) {
-      console.log(`[BlogPost] Publicando post ${post.id} nas redes sociais...`);
+      apiLogger.info({ postId: post.id }, 'Publishing blog post to social media');
 
       // Publicar em background (não bloqueia a resposta)
       publishToSocialMedia(post.id)
         .then((result) => {
-          console.log('[BlogPost] Resultado publicação social:', result);
+          apiLogger.info({ postId: post.id, result }, 'Social media publish successful');
         })
-        .catch((error) => {
-          console.error('[BlogPost] Erro ao publicar nas redes sociais:', error);
+        .catch((socialError) => {
+          apiLogger.error({ err: socialError, postId: post.id }, 'Failed to publish to social media');
         });
     }
 
+    apiLogger.info({ postId: post.id }, 'Blog post updated successfully');
+
     return NextResponse.json({ post });
   } catch (error) {
-    console.error('Erro ao atualizar post:', error);
-    return NextResponse.json(
-      { error: 'Erro ao atualizar post' },
-      { status: 500 }
-    );
+    return handleApiError(error);
   }
 });
 
@@ -126,22 +116,18 @@ export const DELETE = withAdminAuth(async (
     });
 
     if (!post) {
-      return NextResponse.json(
-        { error: 'Post não encontrado' },
-        { status: 404 }
-      );
+      apiLogger.warn({ postId: id }, 'Blog post not found for deletion');
+      throw new NotFoundError('Post');
     }
 
     await prisma.blogPost.delete({
       where: { id }
     });
 
+    apiLogger.info({ postId: id, title: post.title }, 'Blog post deleted successfully');
+
     return NextResponse.json({ success: true });
   } catch (error) {
-    console.error('Erro ao deletar post:', error);
-    return NextResponse.json(
-      { error: 'Erro ao deletar post' },
-      { status: 500 }
-    );
+    return handleApiError(error);
   }
 });
