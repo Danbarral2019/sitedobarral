@@ -4,6 +4,9 @@ import { verifyToken } from '@/lib/auth';
 import { readFile } from 'fs/promises';
 import { join } from 'path';
 import { checkAccessStatus } from '@/lib/enrollment-utils';
+import { handleApiError } from '@/lib/errors/error-handler';
+import { AuthenticationError, AuthorizationError, NotFoundError } from '@/lib/errors/api-error';
+import { apiLogger } from '@/lib/logger';
 
 export async function GET(
   request: NextRequest,
@@ -16,20 +19,14 @@ export async function GET(
     const token = request.cookies.get('auth-token')?.value;
 
     if (!token) {
-      return NextResponse.json(
-        { error: 'Não autenticado' },
-        { status: 401 }
-      );
+      throw new AuthenticationError();
     }
 
     // ✅ Verificar token (com validação Zod)
     const authPayload = await verifyToken(token);
 
     if (!authPayload) {
-      return NextResponse.json(
-        { error: 'Token inválido ou expirado' },
-        { status: 401 }
-      );
+      throw new AuthenticationError('Token inválido ou expirado');
     }
 
     // Buscar documento no banco
@@ -38,10 +35,8 @@ export async function GET(
     });
 
     if (!document) {
-      return NextResponse.json(
-        { error: 'Documento não encontrado' },
-        { status: 404 }
-      );
+      apiLogger.warn({ documentId: id }, 'Document not found for download');
+      throw new NotFoundError('Documento');
     }
 
     // Se o documento for público, permitir download sem verificações adicionais
@@ -60,10 +55,8 @@ export async function GET(
     });
 
     if (!user) {
-      return NextResponse.json(
-        { error: 'Usuário não encontrado' },
-        { status: 404 }
-      );
+      apiLogger.warn({ userId: authPayload.userId }, 'User not found for download');
+      throw new NotFoundError('Usuário');
     }
 
     // Admins têm acesso a tudo
@@ -74,20 +67,19 @@ export async function GET(
     // Verificar se o usuário tem matrícula no curso do documento
     const enrollment = user.enrollments[0];
     if (!enrollment) {
-      return NextResponse.json(
-        { error: 'Você não está matriculado neste curso' },
-        { status: 403 }
-      );
+      apiLogger.warn({ userId: user.id, courseId: document.courseId }, 'User not enrolled in course');
+      throw new AuthorizationError('Você não está matriculado neste curso');
     }
 
     // Verificar se o acesso ainda está válido
     const accessStatus = checkAccessStatus(enrollment);
 
     if (!accessStatus.hasAccess || accessStatus.isExpired) {
-      return NextResponse.json(
-        { error: 'Seu acesso a este curso expirou' },
-        { status: 403 }
+      apiLogger.warn(
+        { userId: user.id, courseId: document.courseId, expiresAt: enrollment.expiresAt },
+        'User access expired'
       );
+      throw new AuthorizationError('Seu acesso a este curso expirou');
     }
 
     // Registrar log de download
@@ -102,18 +94,15 @@ export async function GET(
         },
       });
     } catch (logError) {
-      console.error('Erro ao registrar log:', logError);
+      apiLogger.error({ err: logError, userId: user.id }, 'Failed to create download log');
     }
+
+    apiLogger.info({ userId: user.id, documentId: document.id }, 'Document download successful');
 
     // Permitir download
     return await downloadFile(document);
-
   } catch (error) {
-    console.error('Download error:', error);
-    return NextResponse.json(
-      { error: 'Erro ao processar download' },
-      { status: 500 }
-    );
+    return handleApiError(error);
   }
 }
 
@@ -149,11 +138,8 @@ async function downloadFile(document: Record<string, unknown>): Promise<NextResp
       },
     });
   } catch (fileError) {
-    console.error('Erro ao ler arquivo:', fileError);
-    return NextResponse.json(
-      { error: 'Arquivo não encontrado no servidor' },
-      { status: 404 }
-    );
+    apiLogger.error({ err: fileError, documentUrl: document.url }, 'Failed to read file');
+    throw new NotFoundError('Arquivo no servidor');
   }
 }
 

@@ -1,5 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
+import { handleApiError } from '@/lib/errors/error-handler';
+import { NotFoundError } from '@/lib/errors/api-error';
+import { apiLogger } from '@/lib/logger';
 
 export async function GET(
   request: NextRequest,
@@ -13,18 +16,12 @@ export async function GET(
     });
 
     if (!document) {
-      return NextResponse.json(
-        { error: 'Documento não encontrado' },
-        { status: 404 }
-      );
+      apiLogger.warn({ documentId }, 'Document not found');
+      throw new NotFoundError('Documento');
     }
 
     return NextResponse.json({ document });
   } catch (error) {
-    console.error('Erro ao buscar documento:', error);
-    return NextResponse.json(
-      { error: 'Erro ao buscar documento' },
-      { status: 500 }
-    );
+    return handleApiError(error);
   }
 }

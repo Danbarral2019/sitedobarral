@@ -3,6 +3,9 @@ import { prisma } from '@/lib/prisma';
 import { verifyToken } from '@/lib/auth';
 import { validateQueryParams } from '@/lib/validation-helper';
 import { DocumentQuerySchema } from '@/lib/validation-schemas';
+import { handleApiError } from '@/lib/errors/error-handler';
+import { AuthenticationError, AuthorizationError, NotFoundError } from '@/lib/errors/api-error';
+import { apiLogger } from '@/lib/logger';
 
 export async function GET(request: NextRequest) {
   try {
@@ -10,20 +13,14 @@ export async function GET(request: NextRequest) {
     const token = request.cookies.get('auth-token')?.value;
 
     if (!token) {
-      return NextResponse.json(
-        { error: 'Não autenticado' },
-        { status: 401 }
-      );
+      throw new AuthenticationError();
     }
 
     // ✅ Usar verifyToken do lib/auth.ts (com validação Zod)
     const authPayload = await verifyToken(token);
 
     if (!authPayload) {
-      return NextResponse.json(
-        { error: 'Token inválido ou expirado' },
-        { status: 401 }
-      );
+      throw new AuthenticationError('Token inválido ou expirado');
     }
 
     // Buscar usuário com matrículas
@@ -33,10 +30,8 @@ export async function GET(request: NextRequest) {
     });
 
     if (!user) {
-      return NextResponse.json(
-        { error: 'Usuário não encontrado' },
-        { status: 404 }
-      );
+      apiLogger.warn({ userId: authPayload.userId }, 'User not found in documents API');
+      throw new NotFoundError('Usuário');
     }
 
     // ✅ Validar query params com Zod
@@ -67,10 +62,11 @@ export async function GET(request: NextRequest) {
     );
 
     if (!isEnrolled) {
-      return NextResponse.json(
-        { error: 'Você não está matriculado neste curso ou seu acesso expirou' },
-        { status: 403 }
+      apiLogger.warn(
+        { userId: user.id, courseId },
+        'Access denied: user not enrolled or enrollment expired'
       );
+      throw new AuthorizationError('Você não está matriculado neste curso ou seu acesso expirou');
     }
 
     // Buscar documentos do curso (públicos + restritos já que está matriculado)
@@ -79,12 +75,10 @@ export async function GET(request: NextRequest) {
       orderBy: { uploadedAt: 'desc' },
     });
 
+    apiLogger.info({ userId: user.id, courseId, count: documents.length }, 'Documents fetched successfully');
+
     return NextResponse.json({ documents });
   } catch (error) {
-    console.error('Erro ao buscar documentos:', error);
-    return NextResponse.json(
-      { error: 'Erro ao buscar documentos' },
-      { status: 500 }
-    );
+    return handleApiError(error);
   }
 }

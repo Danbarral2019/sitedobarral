@@ -60,7 +60,7 @@ export function handleApiError(error: unknown, includeStackTrace = false): NextR
     };
 
     if (includeStackTrace && process.env.NODE_ENV === 'development') {
-      (response as any).stack = error.stack;
+      (response as ErrorResponse & { stack?: string }).stack = error.stack;
     }
 
     return NextResponse.json(response, { status: error.statusCode });
@@ -289,10 +289,10 @@ function handlePrismaError(
  * });
  * ```
  */
-export function withErrorHandler<T extends (...args: any[]) => Promise<NextResponse>>(
+export function withErrorHandler<T extends (...args: unknown[]) => Promise<NextResponse>>(
   handler: T
 ): T {
-  return (async (...args: any[]) => {
+  return (async (...args: unknown[]) => {
     try {
       return await handler(...args);
     } catch (error) {

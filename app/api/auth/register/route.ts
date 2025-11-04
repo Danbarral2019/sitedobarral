@@ -6,16 +6,16 @@ import { sendVerificationEmail } from '@/lib/email';
 import { rateLimiters } from '@/lib/rate-limit';
 import { validateRequest } from '@/lib/validation-helper';
 import { RegisterSchema } from '@/lib/validation-schemas';
+import { handleApiError } from '@/lib/errors/error-handler';
+import { ConflictError, RateLimitError } from '@/lib/errors/api-error';
+import { authLogger } from '@/lib/logger';
 
 export async function POST(request: NextRequest) {
   // Rate limiting: 10 cadastros por minuto por IP
   try {
     await rateLimiters.forms.check(request, 10);
   } catch {
-    return NextResponse.json(
-      { error: 'Muitas tentativas de cadastro. Por favor, aguarde alguns instantes.' },
-      { status: 429 }
-    );
+    throw new RateLimitError('Muitas tentativas de cadastro. Por favor, aguarde alguns instantes.');
   }
 
   try {
@@ -34,10 +34,8 @@ export async function POST(request: NextRequest) {
     });
 
     if (existingUser) {
-      return NextResponse.json(
-        { error: 'Este email já está cadastrado' },
-        { status: 400 }
-      );
+      authLogger.warn({ email }, 'Registration attempt: email already exists');
+      throw new ConflictError('Este email já está cadastrado');
     }
 
     // Criar hash da senha
@@ -80,12 +78,12 @@ export async function POST(request: NextRequest) {
           });
 
           if (existingEnrollment) {
-            console.log('Usuário já possui matrícula com este QR Code');
+            authLogger.info({ userId: user.id, qrCodeId }, 'User already has enrollment with this QR Code');
             // Não criar duplicata, mas não falhar o registro
           } else {
             // Verificar se ainda há vagas disponíveis
             if (qrCode.maxUses && qrCode.usedCount >= qrCode.maxUses) {
-              console.error('QR Code atingiu limite de usos');
+              authLogger.warn({ qrCodeId, maxUses: qrCode.maxUses }, 'QR Code reached max uses limit');
               // Não criar enrollment mas não falhar o registro
             } else {
               // ✅ PRAZO INDIVIDUALIZADO: 1 ano a partir da data de REGISTRO do aluno
@@ -109,12 +107,15 @@ export async function POST(request: NextRequest) {
                 data: { usedCount: { increment: 1 } },
               });
 
-              console.log(`Enrollment criado para ${user.email}. Expira em: ${expirationDate.toISOString()}`);
+              authLogger.info(
+                { userId: user.id, email: user.email, expiresAt: expirationDate },
+                'Enrollment created successfully'
+              );
             }
           }
         }
       } catch (enrollmentError) {
-        console.error('Erro ao criar enrollment:', enrollmentError);
+        authLogger.error({ err: enrollmentError, userId: user.id }, 'Failed to create enrollment');
         // Não falhar o registro se erro na matrícula
       }
     }
@@ -127,7 +128,7 @@ export async function POST(request: NextRequest) {
     );
 
     if (!emailSent) {
-      console.error('Falha ao enviar email de verificação');
+      authLogger.error({ userId: user.id, email: user.email }, 'Failed to send verification email');
     }
 
     // Registrar log de acesso
@@ -143,8 +144,10 @@ export async function POST(request: NextRequest) {
         },
       });
     } catch (logError) {
-      console.error('Erro ao registrar log:', logError);
+      authLogger.error({ err: logError, userId: user.id }, 'Failed to create access log');
     }
+
+    authLogger.info({ userId: user.id, email: user.email }, 'User registration successful');
 
     return NextResponse.json(
       {
@@ -158,11 +161,7 @@ export async function POST(request: NextRequest) {
       },
       { status: 201 }
     );
-  } catch {
-    console.error('Registration error:', error);
-    return NextResponse.json(
-      { error: 'Erro ao processar cadastro' },
-      { status: 500 }
-    );
+  } catch (error) {
+    return handleApiError(error);
   }
 }
