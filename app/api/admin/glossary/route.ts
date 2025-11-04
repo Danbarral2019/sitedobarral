@@ -27,8 +27,11 @@ export async function GET(request: NextRequest) {
     const searchParams = request.nextUrl.searchParams;
     const category = searchParams.get('category');
     const isPublic = searchParams.get('isPublic');
-    const limit = parseInt(searchParams.get('limit') || '100');
-    const offset = parseInt(searchParams.get('offset') || '0');
+
+    // ✅ Paginação padronizada
+    const page = Math.max(1, parseInt(searchParams.get('page') || '1'));
+    const pageSize = Math.min(100, Math.max(1, parseInt(searchParams.get('pageSize') || '50')));
+    const skip = (page - 1) * pageSize;
 
     // Construir filtros
     const where: Prisma.GlossaryTermWhereInput = {};
@@ -41,34 +44,37 @@ export async function GET(request: NextRequest) {
       where.isPublic = isPublic === 'true';
     }
 
-    // Buscar termos
-    const [terms, total] = await Promise.all([
+    // ✅ Buscar termos com LIMITE e contar em paralelo
+    const [terms, total, allTerms] = await Promise.all([
       prisma.glossaryTerm.findMany({
         where,
         orderBy: {
           term: 'asc',
         },
-        take: limit,
-        skip: offset,
+        take: pageSize,
+        skip,
       }),
       prisma.glossaryTerm.count({ where }),
+      // Buscar todas as categorias (apenas campo category)
+      prisma.glossaryTerm.findMany({
+        select: { category: true },
+      }),
     ]);
 
-    // Buscar todas as categorias
-    const allTerms = await prisma.glossaryTerm.findMany({
-      select: { category: true },
-    });
     const categories = [...new Set(allTerms.map((t) => t.category).filter(Boolean))].sort();
 
     return NextResponse.json({
+      success: true,
       terms,
-      total,
-      categories,
       pagination: {
-        limit,
-        offset,
-        hasMore: offset + limit < total,
+        page,
+        pageSize,
+        total,
+        totalPages: Math.ceil(total / pageSize),
+        hasNext: skip + pageSize < total,
+        hasPrev: page > 1,
       },
+      categories,
     });
   } catch (error) {
     console.error('Error fetching glossary terms (admin):', error);

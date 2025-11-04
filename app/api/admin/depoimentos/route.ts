@@ -4,25 +4,50 @@ import { prisma } from '@/lib/prisma';
 /**
  * GET /api/admin/depoimentos
  * Lista depoimentos (com filtro por status)
+ *
+ * ✅ COM PAGINAÇÃO para performance
+ *
+ * Query params:
+ * - status: string (approved/rejected/pending)
+ * - page: number (padrão: 1)
+ * - pageSize: number (padrão: 50, máx: 100)
  */
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
     const status = searchParams.get('status');
 
+    // ✅ Paginação
+    const page = Math.max(1, parseInt(searchParams.get('page') || '1'));
+    const pageSize = Math.min(100, Math.max(1, parseInt(searchParams.get('pageSize') || '50')));
+    const skip = (page - 1) * pageSize;
+
     const where = status ? { status } : {};
 
-    const testimonials = await prisma.testimonial.findMany({
-      where,
-      orderBy: {
-        createdAt: 'desc',
-      },
-    });
+    // ✅ Buscar com LIMITE
+    const [testimonials, total] = await Promise.all([
+      prisma.testimonial.findMany({
+        where,
+        orderBy: {
+          createdAt: 'desc',
+        },
+        take: pageSize,
+        skip,
+      }),
+      prisma.testimonial.count({ where }),
+    ]);
 
     return NextResponse.json({
       success: true,
       testimonials,
-      count: testimonials.length,
+      pagination: {
+        page,
+        pageSize,
+        total,
+        totalPages: Math.ceil(total / pageSize),
+        hasNext: skip + pageSize < total,
+        hasPrev: page > 1,
+      },
     });
   } catch (error) {
     console.error('Erro ao buscar depoimentos:', error);

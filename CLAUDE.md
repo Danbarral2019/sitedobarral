@@ -324,3 +324,4 @@ npm run dev
 **Mais detalhes:** Ver arquivos de documentação listados acima.
 
 - primeiro confirme que a chave api esta configurada  e memorize essa resposta
+- memorize o ponto em que paramos na auditoria para continuarmos depois

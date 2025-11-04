@@ -5,25 +5,50 @@ import { withAdminAuth } from '@/lib/api-middleware';
 /**
  * GET /api/admin/contatos
  * Lista mensagens de contato (com filtro por lidas/não lidas)
+ *
+ * ✅ COM PAGINAÇÃO para performance com muitos contatos
+ *
+ * Query params:
+ * - unreadOnly: boolean (filtrar apenas não lidas)
+ * - page: number (padrão: 1)
+ * - pageSize: number (padrão: 50, máx: 100)
  */
 export const GET = withAdminAuth(async (request: NextRequest) => {
   try {
     const { searchParams } = new URL(request.url);
     const unreadOnly = searchParams.get('unreadOnly') === 'true';
 
+    // ✅ Paginação
+    const page = Math.max(1, parseInt(searchParams.get('page') || '1'));
+    const pageSize = Math.min(100, Math.max(1, parseInt(searchParams.get('pageSize') || '50')));
+    const skip = (page - 1) * pageSize;
+
     const where = unreadOnly ? { isRead: false } : {};
 
-    const contacts = await prisma.contactForm.findMany({
-      where,
-      orderBy: {
-        createdAt: 'desc',
-      },
-    });
+    // ✅ Buscar com LIMITE (evita carregar milhares de contatos)
+    const [contacts, total] = await Promise.all([
+      prisma.contactForm.findMany({
+        where,
+        orderBy: {
+          createdAt: 'desc',
+        },
+        take: pageSize,
+        skip,
+      }),
+      prisma.contactForm.count({ where }),
+    ]);
 
     return NextResponse.json({
       success: true,
       contacts,
-      count: contacts.length,
+      pagination: {
+        page,
+        pageSize,
+        total,
+        totalPages: Math.ceil(total / pageSize),
+        hasNext: skip + pageSize < total,
+        hasPrev: page > 1,
+      },
     });
   } catch (error) {
     console.error('Erro ao buscar contatos:', error);

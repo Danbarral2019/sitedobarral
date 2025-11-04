@@ -16,6 +16,11 @@ export async function GET(request: NextRequest) {
     const category = searchParams.get('category');
     const isPublished = searchParams.get('isPublished');
 
+    // ✅ Paginação
+    const page = Math.max(1, parseInt(searchParams.get('page') || '1'));
+    const pageSize = Math.min(100, Math.max(1, parseInt(searchParams.get('pageSize') || '50')));
+    const skip = (page - 1) * pageSize;
+
     // Construir filtros
     const where: Prisma.FAQWhereInput = {};
 
@@ -27,25 +32,38 @@ export async function GET(request: NextRequest) {
       where.isPublished = isPublished === 'true';
     }
 
-    // Buscar FAQs
-    const faqs = await prisma.fAQ.findMany({
-      where,
-      orderBy: [
-        { isPinned: 'desc' },
-        { displayOrder: 'asc' },
-        { createdAt: 'desc' },
-      ],
-    });
+    // ✅ Buscar FAQs com LIMITE e contar em paralelo
+    const [faqs, total, allFaqs] = await Promise.all([
+      prisma.fAQ.findMany({
+        where,
+        orderBy: [
+          { isPinned: 'desc' },
+          { displayOrder: 'asc' },
+          { createdAt: 'desc' },
+        ],
+        take: pageSize,
+        skip,
+      }),
+      prisma.fAQ.count({ where }),
+      // Buscar todas as categorias (apenas campo category)
+      prisma.fAQ.findMany({
+        select: { category: true },
+      }),
+    ]);
 
-    // Buscar todas as categorias
-    const allFaqs = await prisma.fAQ.findMany({
-      select: { category: true },
-    });
     const categories = [...new Set(allFaqs.map((f) => f.category))].sort();
 
     return NextResponse.json({
+      success: true,
       faqs,
-      total: faqs.length,
+      pagination: {
+        page,
+        pageSize,
+        total,
+        totalPages: Math.ceil(total / pageSize),
+        hasNext: skip + pageSize < total,
+        hasPrev: page > 1,
+      },
       categories,
     });
   } catch (error) {
