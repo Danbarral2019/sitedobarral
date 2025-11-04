@@ -3,6 +3,8 @@ import { prisma } from '@/lib/prisma';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import { rateLimiters } from '@/lib/rate-limit';
+import { validateRequest } from '@/lib/validation-helper';
+import { LoginSchema } from '@/lib/validation-schemas';
 
 const JWT_SECRET = process.env.JWT_SECRET;
 
@@ -22,15 +24,14 @@ export async function POST(request: NextRequest) {
   }
 
   try {
-    const body = await request.json();
-    const { email, password } = body;
+    // ✅ Validação com Zod
+    const validation = await validateRequest(request, LoginSchema);
 
-    if (!email || !password) {
-      return NextResponse.json(
-        { error: 'Email e senha são obrigatórios' },
-        { status: 400 }
-      );
+    if (validation.error) {
+      return validation.error;
     }
+
+    const { email, password } = validation.data;
 
     // Buscar usuário
     const user = await prisma.user.findUnique({

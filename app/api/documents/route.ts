@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { verifyToken } from '@/lib/auth';
+import { validateQueryParams } from '@/lib/validation-helper';
+import { DocumentQuerySchema } from '@/lib/validation-schemas';
 
 export async function GET(request: NextRequest) {
   try {
@@ -37,16 +39,15 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    // Obter courseId do query
+    // ✅ Validar query params com Zod
     const { searchParams } = new URL(request.url);
-    const courseId = searchParams.get('courseId');
+    const validation = validateQueryParams(searchParams, DocumentQuerySchema);
 
-    if (!courseId) {
-      return NextResponse.json(
-        { error: 'courseId é obrigatório' },
-        { status: 400 }
-      );
+    if (validation.error) {
+      return validation.error;
     }
+
+    const { courseId } = validation.data;
 
     // Se for admin, pode ver todos os documentos
     if (user.role === 'admin') {

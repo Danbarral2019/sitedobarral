@@ -4,6 +4,8 @@ import bcrypt from 'bcryptjs';
 import crypto from 'crypto';
 import { sendVerificationEmail } from '@/lib/email';
 import { rateLimiters } from '@/lib/rate-limit';
+import { validateRequest } from '@/lib/validation-helper';
+import { RegisterSchema } from '@/lib/validation-schemas';
 
 export async function POST(request: NextRequest) {
   // Rate limiting: 10 cadastros por minuto por IP
@@ -17,33 +19,14 @@ export async function POST(request: NextRequest) {
   }
 
   try {
-    const body = await request.json();
-    const { email, name, password, courseId, qrCodeId } = body;
+    // ✅ Validação com Zod
+    const validation = await validateRequest(request, RegisterSchema);
 
-    // Validações básicas
-    if (!email || !name || !password) {
-      return NextResponse.json(
-        { error: 'Email, nome e senha são obrigatórios' },
-        { status: 400 }
-      );
+    if (validation.error) {
+      return validation.error;
     }
 
-    // Validar formato do email
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(email)) {
-      return NextResponse.json(
-        { error: 'Email inválido' },
-        { status: 400 }
-      );
-    }
-
-    // Validar senha (mínimo 6 caracteres)
-    if (password.length < 6) {
-      return NextResponse.json(
-        { error: 'A senha deve ter pelo menos 6 caracteres' },
-        { status: 400 }
-      );
-    }
+    const { email, name, password, qrCodeId } = validation.data;
 
     // Verificar se o email já está cadastrado
     const existingUser = await prisma.user.findUnique({
