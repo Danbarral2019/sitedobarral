@@ -10,23 +10,26 @@ type ApiHandler = (request: NextRequest, context?: Record<string, unknown>) => P
  * Middleware que protege rotas de API para admin apenas
  * Uso:
  *
- * export const GET = withAdminAuth(async (request) => {
+ * export const GET = withAdminAuth(async (request, context) => {
  *   // Código que só admin pode acessar
+ *   // context.user contém dados do admin autenticado
  *   return NextResponse.json({ data: 'secret' });
  * });
  */
 export function withAdminAuth(handler: ApiHandler): ApiHandler {
   return async (request: NextRequest, context?: Record<string, unknown>) => {
-    const admin = await isAdmin();
+    const { getCurrentUser } = await import('./auth');
+    const user = await getCurrentUser();
 
-    if (!admin) {
+    if (!user || user.role !== 'admin') {
       return NextResponse.json(
         { error: 'Acesso negado. Apenas administradores.' },
         { status: 403 }
       );
     }
 
-    return handler(request, context);
+    // Passa o usuário autenticado no context para o handler
+    return handler(request, { ...context, user });
   };
 }
 
@@ -34,8 +37,9 @@ export function withAdminAuth(handler: ApiHandler): ApiHandler {
  * Middleware que protege rotas de API para usuários autenticados
  * Uso:
  *
- * export const GET = withAuth(async (request) => {
+ * export const GET = withAuth(async (request, context) => {
  *   // Código que qualquer usuário autenticado pode acessar
+ *   // context.user contém dados do usuário autenticado
  *   return NextResponse.json({ data: 'content' });
  * });
  */
@@ -51,7 +55,8 @@ export function withAuth(handler: ApiHandler): ApiHandler {
       );
     }
 
-    return handler(request, context);
+    // Passa o usuário autenticado no context para o handler
+    return handler(request, { ...context, user });
   };
 }
 

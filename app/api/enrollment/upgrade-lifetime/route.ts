@@ -13,7 +13,7 @@ interface JWTPayload {
 export async function POST(request: NextRequest) {
   try {
     // Obter token do cookie
-    const token = request.cookies.get('auth_token')?.value;
+    const token = request.cookies.get('auth-token')?.value;
 
     if (!token) {
       return NextResponse.json(

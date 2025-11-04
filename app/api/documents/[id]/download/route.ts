@@ -21,7 +21,7 @@ export async function GET(
     const { id } = await params;
 
     // Obter token do cookie
-    const token = request.cookies.get('auth_token')?.value;
+    const token = request.cookies.get('auth-token')?.value;
 
     if (!token) {
       return NextResponse.json(

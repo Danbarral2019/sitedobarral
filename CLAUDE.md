@@ -14,7 +14,7 @@ Guia rápido para Claude Code ao trabalhar neste repositório.
 
 Site profissional do Prof. Daniel Barral especializado em Direito Administrativo, Licitações e Contratos. Repositório de materiais jurídicos com acesso público e área restrita via QR code.
 
-**Tech Stack:** Next.js 15.5.2 (App Router) • React 19.1.0 • TypeScript 5 • Prisma ORM • PostgreSQL (Neon) • Tailwind CSS 4 • Radix UI • JWT Auth • Resend Email • MailChimp • Playwright/PostgreSQL/GitHub MCP
+**Tech Stack:** Next.js 15.5.2 (App Router) • React 19.1.0 • TypeScript 5 • Prisma ORM • PostgreSQL (Neon) • Tailwind CSS 4 • Radix UI • JWT Auth • Resend Email • MailChimp • Playwright/PostgreSQL/GitHub/Gemini MCP
 
 ## Quick Commands
 
@@ -29,7 +29,7 @@ npx prisma studio              # Database GUI
 node scripts/create-admin.js email@example.com senha "Nome"
 
 # MCP
-claude mcp list                # List MCPs (playwright, postgresql, github)
+claude mcp list                # List MCPs (playwright, postgresql, github, gemini)
 
 # AGU/TCU Scrapers
 npx tsx scripts/test-versioning.ts
@@ -45,6 +45,7 @@ export DATABASE_URL="<your-db-url>" && npx tsx scripts/fix-csv-tags.ts  # Conver
 - Student: `aluno@teste.com` / `aluno123` (Nova Lei de Licitações)
 - Admin: criar via `node scripts/create-admin.js`
 
+
 ## Architecture Quick Reference
 
 **Structure:**
@@ -57,6 +58,7 @@ export DATABASE_URL="<your-db-url>" && npx tsx scripts/fix-csv-tags.ts  # Conver
 - `scripts/` - Admin/import/scraping scripts
 
 **Key Models (24 total):**
+
 
 - `User` - Admin/student accounts
 - `Enrollment` - Course access (1 year expiration, lifetime upgrade)
@@ -72,6 +74,7 @@ export DATABASE_URL="<your-db-url>" && npx tsx scripts/fix-csv-tags.ts  # Conver
 
 **Auth Flows:**
 
+
 1. QR Code → Registration → Enrollment (1 year)
 2. Email/Password → Login → JWT cookie
 
@@ -80,6 +83,7 @@ export DATABASE_URL="<your-db-url>" && npx tsx scripts/fix-csv-tags.ts  # Conver
 - Public: `isPublic=true`
 - Private: requires valid enrollment
 - Bibliography: SEMPRE público
+
 
 ## Recent Features (2025-11-03)
 
@@ -94,17 +98,30 @@ export DATABASE_URL="<your-db-url>" && npx tsx scripts/fix-csv-tags.ts  # Conver
 
 **TCU Manager:**
 
+
 - ✅ Interface admin unificada
 - ✅ Web scraping + AI summaries
 - ✅ Excel converter (`npm run convert-tcu`)
 
 **Parse Seguro de Tags (2025-11-03):**
 
+
 - ✅ Função `safeParseArray()` suporta CSV e JSON
 - ✅ Aplicado em `lib/documents.ts`, `app/admin/documentos-pendentes/page.tsx`, `app/api/admin/documents/[id]/route.ts`
 - ✅ Script de migração `scripts/fix-csv-tags.ts` para conversão CSV→JSON
 - ✅ Fix: campo `notes` → `adminNotes` no schema
 - ✅ Fix: hydration mismatch no Header com `isMounted`
+
+**MCP Gemini (2025-11-04):**
+
+
+- ✅ MCP server customizado para integração Claude ↔ Gemini
+- ✅ Usa SDK oficial `@google/generative-ai`
+- ✅ 5 tools: query, code_review, compare_approaches, brainstorm, collaborate
+- ✅ Permite colaboração entre IAs (segunda opinião, revisão, comparação)
+- 📖 Ver `mcp-server-gemini/README.md` e `QUICKSTART.md`
+- 🔑 Requer `GEMINI_API_KEY` configurada (<https://aistudio.google.com>)
+
 
 ## Critical Technical Rules
 
@@ -154,6 +171,7 @@ const { documents } = await response.json();
 
 **Email:**
 
+
 - `RESEND_API_KEY`, `EMAIL_FROM`
 
 **Optional:**
@@ -164,6 +182,7 @@ const { documents } = await response.json();
 - `CRON_SECRET` - Cron job protection
 
 Ver `.env.example` e `SETUP.md`.
+
 
 ## Common Issues & Solutions
 
@@ -232,6 +251,7 @@ export DATABASE_URL="..." && npx tsx scripts/fix-csv-tags.ts
 
 **Features:**
 
+
 - `AGU_SCRAPER_V4.md` - AGU scraping platform
 - `RESUMO_FINAL_AGU_SCRAPER_COMPLETO.md` - AGU resumo técnico
 - `IMPORTACAO_EXCEL.md` - Excel import guide
@@ -239,11 +259,13 @@ export DATABASE_URL="..." && npx tsx scripts/fix-csv-tags.ts
 
 **Scripts:**
 
+
 - `scripts/fix-csv-tags.ts` - Migração CSV→JSON para tags/leiArticles
 - `scripts/create-admin.js` - Criar usuário admin
 - `scripts/convert-tcu-excel.js` - Converter TCU Excel→JSON
 
 **Deploy:**
+
 
 - `DEPLOY_VERCEL.md` - Vercel deployment
 
@@ -251,6 +273,7 @@ export DATABASE_URL="..." && npx tsx scripts/fix-csv-tags.ts
 
 - `COURSE_IDS_REFERENCE.md` - Course IDs vs slugs
 - `prisma/schema.prisma` - Complete database schema
+
 
 ## API Routes Summary
 
@@ -284,6 +307,7 @@ Ver código para endpoints completos.
 - Excel import: manter compatibilidade com templates
 - Multi-course docs: um documento pode pertencer a vários cursos
 
+
 ---
 
 **First Time Setup:**
@@ -298,3 +322,5 @@ npm run dev
 ```
 
 **Mais detalhes:** Ver arquivos de documentação listados acima.
+
+- primeiro confirme que a chave api esta configurada  e memorize essa resposta

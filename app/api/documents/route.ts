@@ -2,7 +2,11 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import jwt from 'jsonwebtoken';
 
-const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key-change-in-production';
+const JWT_SECRET = process.env.JWT_SECRET;
+
+if (!JWT_SECRET) {
+  throw new Error('JWT_SECRET environment variable is required');
+}
 
 interface JWTPayload {
   userId: string;
@@ -58,12 +62,16 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ documents });
     }
 
-    // Para alunos, verificar se está matriculado
-    const isEnrolled = user.enrollments.some(e => e.courseId === courseId);
+    // Para alunos, verificar se está matriculado E se o acesso não expirou
+    const now = new Date();
+    const isEnrolled = user.enrollments.some(e =>
+      e.courseId === courseId &&
+      (e.isLifetime || (e.expiresAt && e.expiresAt > now))
+    );
 
     if (!isEnrolled) {
       return NextResponse.json(
-        { error: 'Você não está matriculado neste curso' },
+        { error: 'Você não está matriculado neste curso ou seu acesso expirou' },
         { status: 403 }
       );
     }

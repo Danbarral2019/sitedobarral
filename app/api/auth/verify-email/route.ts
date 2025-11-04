@@ -78,7 +78,7 @@ export async function POST(request: NextRequest) {
     );
 
     // Definir cookie de autenticação
-    response.cookies.set('auth_token', jwtToken, {
+    response.cookies.set('auth-token', jwtToken, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'lax',
