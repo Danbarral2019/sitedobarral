@@ -112,15 +112,18 @@ export DATABASE_URL="<your-db-url>" && npx tsx scripts/fix-csv-tags.ts  # Conver
 - ✅ Fix: campo `notes` → `adminNotes` no schema
 - ✅ Fix: hydration mismatch no Header com `isMounted`
 
-**MCP Gemini (2025-11-04):**
+**MCP Gemini (2025-11-05) - v2.0.0:**
 
 
 - ✅ MCP server customizado para integração Claude ↔ Gemini
 - ✅ Usa SDK oficial `@google/generative-ai`
 - ✅ 5 tools: query, code_review, compare_approaches, brainstorm, collaborate
 - ✅ Permite colaboração entre IAs (segunda opinião, revisão, comparação)
-- 📖 Ver `mcp-server-gemini/README.md` e `QUICKSTART.md`
-- 🔑 Requer `GEMINI_API_KEY` configurada (<https://aistudio.google.com>)
+- 🌐 **Configuração Global** - Funciona em QUALQUER diretório (scope: user)
+- 📂 **Localização:** `~/.claude-mcp-servers/gemini/` (permanente)
+- 📖 Ver `~/.claude-mcp-servers/gemini/README.md` e `MIGRATION-GUIDE.md`
+- 🔑 Requer `GEMINI_API_KEY` configurada (<https://aistudio.google.com/app/apikey>)
+- ⚙️ Setup: `cd ~/.claude-mcp-servers/gemini && ./setup-global.bat` (Win) ou `./setup-global.sh` (Linux/Mac)
 
 
 ## Critical Technical Rules
