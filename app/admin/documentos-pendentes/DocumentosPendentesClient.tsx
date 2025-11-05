@@ -49,13 +49,25 @@ export default function DocumentosPendentesClient({ documents, pagination }: Pro
   const [isProcessing, setIsProcessing] = useState(false);
   const [searchTerm, setSearchTerm] = useState(''); // Filtro visual client-side
 
-  // Filtros da URL
-  const filterCategory = searchParams.get('category') || '';
-  const filterPeriod = searchParams.get('period') || 'all';
+  // ✅ FIX #6: Remover dual source of truth - usar apenas props recebidos do servidor
+  // Os valores corretos já estão em `documents` e `pagination` props
 
-  // Atualizar filtros via URL
+  // Atualizar filtros via URL (resetar page quando mudar filtros)
   const updateFilter = useCallback((key: string, value: string | null) => {
-    const query = buildSearchParams(searchParams, { [key]: value });
+    const currentParams = new URLSearchParams(Array.from(searchParams.entries()));
+
+    if (value === null || value === '') {
+      currentParams.delete(key);
+    } else {
+      currentParams.set(key, value);
+    }
+
+    // ✅ FIX #6: Reset page=1 quando mudar filtros (mas não quando mudar page)
+    if (key !== 'page' && key !== 'pageSize') {
+      currentParams.set('page', '1');
+    }
+
+    const query = currentParams.toString();
     router.replace(`${pathname}?${query}`);
   }, [router, pathname, searchParams]);
 
@@ -255,7 +267,10 @@ export default function DocumentosPendentesClient({ documents, pagination }: Pro
               <div>
                 <p className="text-sm text-gray-600">Período</p>
                 <p className="text-lg font-semibold text-gray-900">
-                  {filterPeriod === 'today' ? 'Hoje' : filterPeriod === 'week' ? 'Semana' : filterPeriod === 'month' ? 'Mês' : 'Todos'}
+                  {(() => {
+                    const period = searchParams.get('period') || 'all';
+                    return period === 'today' ? 'Hoje' : period === 'week' ? 'Semana' : period === 'month' ? 'Mês' : 'Todos';
+                  })()}
                 </p>
               </div>
             </div>
@@ -288,7 +303,7 @@ export default function DocumentosPendentesClient({ documents, pagination }: Pro
                 Categoria
               </label>
               <select
-                value={filterCategory}
+                value={searchParams.get('category') || ''}
                 onChange={(e) => updateFilter('category', e.target.value || null)}
                 className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500"
               >
@@ -310,7 +325,7 @@ export default function DocumentosPendentesClient({ documents, pagination }: Pro
                 Período
               </label>
               <select
-                value={filterPeriod}
+                value={searchParams.get('period') || 'all'}
                 onChange={(e) => updateFilter('period', e.target.value || null)}
                 className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500"
               >
@@ -543,7 +558,7 @@ export default function DocumentosPendentesClient({ documents, pagination }: Pro
                 {/* Botão Anterior */}
                 <button
                   onClick={() => updateFilter('page', String(pagination.page - 1))}
-                  disabled={pagination.page === 1}
+                  disabled={pagination.page <= 1}
                   className="px-3 py-2 border rounded-lg hover:bg-gray-50 transition disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
                   title="Página anterior"
                 >
@@ -585,7 +600,7 @@ export default function DocumentosPendentesClient({ documents, pagination }: Pro
                 {/* Botão Próximo */}
                 <button
                   onClick={() => updateFilter('page', String(pagination.page + 1))}
-                  disabled={pagination.page === pagination.totalPages}
+                  disabled={pagination.page >= pagination.totalPages}
                   className="px-3 py-2 border rounded-lg hover:bg-gray-50 transition disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
                   title="Próxima página"
                 >
