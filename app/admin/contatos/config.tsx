@@ -1,3 +1,5 @@
+'use client';
+
 /**
  * Configuração da lista de Contatos
  */

@@ -1,3 +1,5 @@
+'use client';
+
 /**
  * Configuração da lista de Blog Posts
  * Usa o padrão genérico ResourceList (Fase 7)

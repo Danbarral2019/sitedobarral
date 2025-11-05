@@ -1,3 +1,5 @@
+'use client';
+
 /**
  * Configuração da lista de Documentos Pendentes
  * Usa o padrão genérico ResourceList (Fase 7)
