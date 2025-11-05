@@ -1,9 +1,14 @@
+'use server';
+
 /**
  * Glossary Terms Data Fetching (Fase 7 - Server Components)
+ * Server Actions para operações de admin
  */
 
 import { prisma } from './prisma';
 import { PaginatedResult } from './types/admin-list';
+import { isAdmin } from './auth';
+import { revalidatePath } from 'next/cache';
 
 export interface GlossaryTerm {
   id: string;
@@ -79,12 +84,36 @@ export async function fetchGlossaryTermsPaginated(params: {
 }
 
 /**
- * Deletar termo do glossário
+ * Deletar termo do glossário (Server Action)
+ * Requer autenticação de admin
  */
-export async function deleteGlossaryTerm(id: string): Promise<void> {
-  await prisma.glossaryTerm.delete({
-    where: { id },
-  });
+export async function deleteGlossaryTerm(id: string): Promise<{ error?: string }> {
+  try {
+    // Verificação de autenticação/autorização
+    const userIsAdmin = await isAdmin();
+    if (!userIsAdmin) {
+      return { error: 'Não autorizado. Apenas administradores podem deletar termos.' };
+    }
+
+    // Validação de input
+    if (!id || typeof id !== 'string') {
+      return { error: 'ID inválido.' };
+    }
+
+    // Deletar termo
+    await prisma.glossaryTerm.delete({
+      where: { id },
+    });
+
+    // Revalidar cache
+    revalidatePath('/admin/glossario');
+    revalidatePath('/glossario');
+
+    return {};
+  } catch (error) {
+    console.error('Erro ao deletar termo do glossário:', error);
+    return { error: 'Não foi possível deletar o termo. Tente novamente.' };
+  }
 }
 
 /**

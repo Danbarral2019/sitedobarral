@@ -1,9 +1,14 @@
+'use server';
+
 /**
  * Contact Forms Data Fetching (Fase 7)
+ * Server Actions para operações de admin
  */
 
 import { prisma } from './prisma';
 import { PaginatedResult } from './types/admin-list';
+import { isAdmin } from './auth';
+import { revalidatePath } from 'next/cache';
 
 export interface ContactForm {
   id: string;
@@ -60,6 +65,32 @@ export async function fetchContactFormsPaginated(params: {
   };
 }
 
-export async function deleteContactForm(id: string): Promise<void> {
-  await prisma.contactForm.delete({ where: { id } });
+/**
+ * Deletar formulário de contato (Server Action)
+ * Requer autenticação de admin
+ */
+export async function deleteContactForm(id: string): Promise<{ error?: string }> {
+  try {
+    // Verificação de autenticação/autorização
+    const userIsAdmin = await isAdmin();
+    if (!userIsAdmin) {
+      return { error: 'Não autorizado. Apenas administradores podem deletar contatos.' };
+    }
+
+    // Validação de input
+    if (!id || typeof id !== 'string') {
+      return { error: 'ID inválido.' };
+    }
+
+    // Deletar contato
+    await prisma.contactForm.delete({ where: { id } });
+
+    // Revalidar cache
+    revalidatePath('/admin/contatos');
+
+    return {};
+  } catch (error) {
+    console.error('Erro ao deletar formulário de contato:', error);
+    return { error: 'Não foi possível deletar o contato. Tente novamente.' };
+  }
 }

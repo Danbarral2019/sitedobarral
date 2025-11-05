@@ -1,9 +1,14 @@
+'use server';
+
 /**
  * Blog Posts Data Fetching (Fase 7 - Server Components)
+ * Server Actions para operações de admin
  */
 
 import { prisma } from './prisma';
 import { PaginatedResult } from './types/admin-list';
+import { isAdmin } from './auth';
+import { revalidatePath } from 'next/cache';
 
 export interface BlogPost {
   id: string;
@@ -72,10 +77,34 @@ export async function fetchBlogPostsPaginated(params: {
 }
 
 /**
- * Deletar post do blog
+ * Deletar post do blog (Server Action)
+ * Requer autenticação de admin
  */
-export async function deleteBlogPost(id: string): Promise<void> {
-  await prisma.blogPost.delete({
-    where: { id },
-  });
+export async function deleteBlogPost(id: string): Promise<{ error?: string }> {
+  try {
+    // Verificação de autenticação/autorização
+    const userIsAdmin = await isAdmin();
+    if (!userIsAdmin) {
+      return { error: 'Não autorizado. Apenas administradores podem deletar posts.' };
+    }
+
+    // Validação de input
+    if (!id || typeof id !== 'string') {
+      return { error: 'ID inválido.' };
+    }
+
+    // Deletar post
+    await prisma.blogPost.delete({
+      where: { id },
+    });
+
+    // Revalidar cache para atualizar UI automaticamente
+    revalidatePath('/admin/blog');
+    revalidatePath('/blog');
+
+    return {};
+  } catch (error) {
+    console.error('Erro ao deletar post do blog:', error);
+    return { error: 'Não foi possível deletar o post. Tente novamente.' };
+  }
 }
