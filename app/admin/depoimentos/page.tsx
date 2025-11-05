@@ -1,10 +1,12 @@
 /**
- * Depoimentos Admin Page (Server Component - Fase 7)
+ * Depoimentos Admin Page (Server Component - Fix Serialização)
+ *
+ * Solução para problema de serialização Server/Client:
+ * - Server Component simples que delega para Client
+ * - Client Component importa e usa config com funções
  */
 
-import { ResourceListContainer } from '@/components/admin/ResourceListContainer';
-import { fetchTestimonialsPaginated } from '@/lib/depoimentos';
-import { depoimentosConfig, DepoimentosHeader } from './config';
+import { DepoimentosClient } from './DepoimentosClient';
 import AdminLayout from '@/components/AdminLayout';
 
 interface PageProps {
@@ -12,20 +14,11 @@ interface PageProps {
 }
 
 export default async function DepoimentosPage({ searchParams }: PageProps) {
+  const params = await searchParams;
+
   return (
     <AdminLayout>
-      <div className="p-8">
-        <div className="max-w-7xl mx-auto">
-          <DepoimentosHeader />
-          <div className="bg-white rounded-2xl shadow-lg border-2 border-gray-200 overflow-hidden">
-            <ResourceListContainer
-              searchParams={await searchParams}
-              fetchData={fetchTestimonialsPaginated}
-              config={depoimentosConfig}
-            />
-          </div>
-        </div>
-      </div>
+      <DepoimentosClient searchParams={params} />
     </AdminLayout>
   );
 }

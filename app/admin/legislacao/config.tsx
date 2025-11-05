@@ -1,6 +1,11 @@
+'use client';
+
 /**
  * Configuração da lista de Atos Normativos
  * Usa o padrão genérico ResourceList (Fase 7)
+ *
+ * NOTA: 'use client' aqui sinaliza que este arquivo contém lógica de cliente
+ * e deve ser usado apenas em Client Components (LegislacaoClient.tsx)
  */
 
 import { Eye, Edit, Trash2, Scale, Calendar, Building, ExternalLink, FileText, Download } from 'lucide-react';

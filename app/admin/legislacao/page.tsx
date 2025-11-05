@@ -1,19 +1,18 @@
 /**
- * Legislative Acts Admin Page (Server Component - Fase 7)
+ * Legislative Acts Admin Page (Server Component - Fix Serialização)
  *
- * Refatorado de Client → Server Component com padrão Hybrid.
- * Performance: TTI melhorado, elimina useEffect para data fetching.
+ * Solução para problema de serialização Server/Client:
+ * - Server: Busca dados serializáveis (types, issuers, years)
+ * - Client: Cria config com funções window.* (LegislacaoClient)
+ * - Nunca serializa funções entre fronteiras
  */
 
-import { ResourceListContainer } from '@/components/admin/ResourceListContainer';
 import {
-  fetchLegislativeActsPaginated,
   getLegislativeActTypes,
   getLegislativeActIssuers,
   getLegislativeActYears
 } from '@/lib/legislacao';
-import { createLegislacaoConfig } from './config';
-import { LegislacaoHeader } from './Header';
+import { LegislacaoClient } from './LegislacaoClient';
 import AdminLayout from '@/components/AdminLayout';
 
 interface PageProps {
@@ -21,33 +20,24 @@ interface PageProps {
 }
 
 export default async function LegislacaoPage({ searchParams }: PageProps) {
-  // Buscar dados em paralelo
+  // ✅ Server: Buscar apenas dados serializáveis
   const [types, issuers, years] = await Promise.all([
     getLegislativeActTypes(),
     getLegislativeActIssuers(),
     getLegislativeActYears(),
   ]);
 
-  // Criar config com filtros dinâmicos
-  const legislacaoConfig = createLegislacaoConfig({ types, issuers, years });
+  const params = await searchParams;
 
+  // ✅ Client Component cria config com funções
   return (
     <AdminLayout>
-      <div className="p-8">
-        <div className="max-w-7xl mx-auto">
-          {/* Header customizado com botões */}
-          <LegislacaoHeader />
-
-          {/* Lista genérica */}
-          <div className="bg-white rounded-2xl shadow-lg border-2 border-gray-200 overflow-hidden">
-            <ResourceListContainer
-              searchParams={await searchParams}
-              fetchData={fetchLegislativeActsPaginated}
-              config={legislacaoConfig}
-            />
-          </div>
-        </div>
-      </div>
+      <LegislacaoClient
+        types={types}
+        issuers={issuers}
+        years={years}
+        searchParams={params}
+      />
     </AdminLayout>
   );
 }

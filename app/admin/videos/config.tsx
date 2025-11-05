@@ -1,5 +1,10 @@
+'use client';
+
 /**
  * Configuração da lista de Vídeos
+ *
+ * NOTA: 'use client' aqui sinaliza que este arquivo contém lógica de cliente
+ * e deve ser usado apenas em Client Components (VideosClient.tsx)
  */
 
 import Image from 'next/image';

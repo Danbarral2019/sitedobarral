@@ -1,11 +1,13 @@
 /**
- * Videos Admin Page (Server Component - Fase 7)
+ * Videos Admin Page (Server Component - Fix Serialização)
+ *
+ * Solução para problema de serialização Server/Client:
+ * - Server: Busca dados serializáveis (courses)
+ * - Client: Cria config com funções window.* (VideosClient)
+ * - Nunca serializa funções entre fronteiras
  */
 
-import { ResourceListContainer } from '@/components/admin/ResourceListContainer';
-import { fetchCourseVideosPaginated } from '@/lib/videos';
-import { createVideosConfig } from './config';
-import { VideosHeader } from './Header';
+import { VideosClient } from './VideosClient';
 import AdminLayout from '@/components/AdminLayout';
 import { courses } from '@/data/courses';
 
@@ -14,24 +16,14 @@ interface PageProps {
 }
 
 export default async function VideosPage({ searchParams }: PageProps) {
-  const videosConfig = createVideosConfig({
-    courses: courses.map(c => ({ id: c.id, title: c.title }))
-  });
+  // ✅ Server: Preparar dados serializáveis
+  const coursesList = courses.map(c => ({ id: c.id, title: c.title }));
+  const params = await searchParams;
 
+  // ✅ Client Component cria config com funções
   return (
     <AdminLayout>
-      <div className="p-8">
-        <div className="max-w-7xl mx-auto">
-          <VideosHeader />
-          <div className="bg-white rounded-2xl shadow-lg border-2 border-gray-200 overflow-hidden">
-            <ResourceListContainer
-              searchParams={await searchParams}
-              fetchData={fetchCourseVideosPaginated}
-              config={videosConfig}
-            />
-          </div>
-        </div>
-      </div>
+      <VideosClient courses={coursesList} searchParams={params} />
     </AdminLayout>
   );
 }
