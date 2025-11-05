@@ -11,26 +11,77 @@ Permitir que Claude Code invoque o Gemini para:
 - Brainstorming criativo
 - Validação técnica
 
+## 🔒 SEGURANÇA - LEIA PRIMEIRO!
+
+**⚠️ NUNCA COMMITE SUA API KEY NO GIT!**
+
+### Proteções Implementadas:
+- ✅ Variáveis de ambiente para API keys
+- ✅ `.gitignore` configurado para bloquear arquivos de teste
+- ✅ Arquivo `.example` sem credenciais reais
+- ✅ Validação de API key no código
+
+### Boas Práticas:
+1. **SEMPRE** use variáveis de ambiente
+2. **NUNCA** hardcode API keys em código
+3. Use o arquivo `test-gemini-api.example.mjs` como template
+4. Revogue chaves imediatamente se forem expostas
+5. Configure API key ANTES de testar o servidor
+
+### Se Você Expor uma Chave Acidentalmente:
+1. ⚠️ **Revogue a chave imediatamente** em https://aistudio.google.com/app/apikey
+2. Crie uma nova chave
+3. Configure como variável de ambiente
+4. **NÃO** tente reescrever histórico do Git (chave já está comprometida)
+
 ## 📋 Pré-requisitos
 
-### 1. Instalar Gemini CLI
+### 1. Obter API Key do Gemini
 
-```bash
-npm install -g @google/generative-ai-cli
+1. Acesse: https://aistudio.google.com/app/apikey
+2. Clique em "Create API Key"
+3. Copie a chave gerada
+
+### 2. Configurar Variável de Ambiente
+
+**Windows (PowerShell):**
+```powershell
+# Permanente (requer reiniciar terminal)
+setx GEMINI_API_KEY "sua-chave-aqui"
+
+# Temporário (apenas sessão atual)
+$env:GEMINI_API_KEY = "sua-chave-aqui"
 ```
 
-### 2. Configurar API Key do Gemini
-
+**Linux/Mac (Bash/Zsh):**
 ```bash
-# Obter API key em: https://makersuite.google.com/app/apikey
-gemini config set apiKey YOUR_GEMINI_API_KEY
+# Permanente (adicione ao ~/.bashrc ou ~/.zshrc)
+export GEMINI_API_KEY="sua-chave-aqui"
+
+# Temporário (apenas sessão atual)
+export GEMINI_API_KEY="sua-chave-aqui"
 ```
 
-### 3. Testar Gemini
+**Verificar configuração:**
+```bash
+# Windows (PowerShell)
+echo $env:GEMINI_API_KEY
+
+# Linux/Mac
+echo $GEMINI_API_KEY
+```
+
+### 3. Testar API Key (Opcional)
 
 ```bash
-gemini "Hello, test message"
+# Copie o arquivo de exemplo
+cp test-gemini-api.example.mjs test-gemini-api.mjs
+
+# Execute o teste
+node test-gemini-api.mjs
 ```
+
+**⚠️ IMPORTANTE:** `test-gemini-api.mjs` está no `.gitignore` e NUNCA será commitado.
 
 ## 🚀 Instalação
 
@@ -163,11 +214,29 @@ echo '{"jsonrpc":"2.0","id":1,"method":"tools/list"}' | node build/index.js
 
 ## 🐛 Troubleshooting
 
-### Gemini CLI não encontrado
-```bash
-npm install -g @google/generative-ai-cli
-gemini config set apiKey YOUR_API_KEY
+### GEMINI_API_KEY não configurada
+
+**Erro:** `❌ GEMINI_API_KEY not set`
+
+**Solução:**
+```powershell
+# Windows
+setx GEMINI_API_KEY "sua-chave-aqui"
+# Reinicie o terminal
+
+# Linux/Mac
+export GEMINI_API_KEY="sua-chave-aqui"
 ```
+
+### API Key revogada/inválida
+
+**Erro:** `[403 Forbidden] Your API key was reported as leaked`
+
+**Solução:**
+1. Acesse https://aistudio.google.com/app/apikey
+2. Delete a chave comprometida
+3. Crie uma nova chave
+4. Configure: `setx GEMINI_API_KEY "nova-chave"`
 
 ### MCP não aparece no Claude Code
 ```bash

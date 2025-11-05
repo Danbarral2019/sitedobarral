@@ -68,3 +68,8 @@ setup-keys.*
 config-secrets.*
 *-secret.ps1
 *-keys.ps1
+
+# MCP Server - Arquivos de teste com potencial de API keys
+mcp-server-gemini/test-*.mjs
+mcp-server-gemini/*-test.mjs
+!mcp-server-gemini/*.example.*

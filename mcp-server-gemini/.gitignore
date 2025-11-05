@@ -2,3 +2,12 @@ node_modules/
 build/
 *.log
 .DS_Store
+
+# SECURITY: Never commit API keys or credentials
+test-*.mjs
+*-test.mjs
+.env*
+!*.example.*
+
+# Keep example files for documentation
+!test-gemini-api.example.mjs
