@@ -1,5 +1,6 @@
 import { fetchPendingDocumentsPaginated } from '@/lib/documents';
 import DocumentosPendentesClient from './DocumentosPendentesClient';
+import AdminLayout from '@/components/AdminLayout';
 
 interface PageProps {
   searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
@@ -48,15 +49,17 @@ export default async function DocumentosPendentesPage({ searchParams }: PageProp
 
   // Renderizar Client Component com dados e paginação
   return (
-    <DocumentosPendentesClient
-      documents={items}
-      pagination={{
-        total,
-        page: currentPage,
-        pageSize: currentPageSize,
-        totalPages,
-      }}
-    />
+    <AdminLayout>
+      <DocumentosPendentesClient
+        documents={items}
+        pagination={{
+          total,
+          page: currentPage,
+          pageSize: currentPageSize,
+          totalPages,
+        }}
+      />
+    </AdminLayout>
   );
 }
 

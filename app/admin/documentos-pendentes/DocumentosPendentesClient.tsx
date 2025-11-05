@@ -2,7 +2,6 @@
 
 import { useState, useCallback } from 'react';
 import { useRouter, usePathname, useSearchParams } from 'next/navigation';
-import AdminLayout from '@/components/AdminLayout';
 import {
   CheckCircle, XCircle, ExternalLink, Calendar, Tag,
   Search, Loader2, FileText, AlertCircle,
@@ -209,8 +208,7 @@ export default function DocumentosPendentesClient({ documents, pagination }: Pro
   const selectedCount = selectedIds.size;
 
   return (
-    <AdminLayout>
-      <div className="min-h-screen bg-gray-50 p-6">
+    <div className="min-h-screen bg-gray-50 p-6">
         {/* Header */}
         <div className="mb-6">
           <h1 className="text-3xl font-bold text-gray-900 mb-2">
@@ -629,7 +627,6 @@ export default function DocumentosPendentesClient({ documents, pagination }: Pro
             </div>
           </div>
         )}
-      </div>
-    </AdminLayout>
+    </div>
   );
 }

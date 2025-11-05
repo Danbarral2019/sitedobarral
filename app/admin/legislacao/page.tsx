@@ -12,7 +12,8 @@ import {
   getLegislativeActIssuers,
   getLegislativeActYears
 } from '@/lib/legislacao';
-import { createLegislacaoConfig, LegislacaoHeader } from './config';
+import { createLegislacaoConfig } from './config';
+import { LegislacaoHeader } from './Header';
 import AdminLayout from '@/components/AdminLayout';
 
 interface PageProps {

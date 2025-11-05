@@ -4,7 +4,8 @@
 
 import { ResourceListContainer } from '@/components/admin/ResourceListContainer';
 import { fetchCourseVideosPaginated } from '@/lib/videos';
-import { createVideosConfig, VideosHeader } from './config';
+import { createVideosConfig } from './config';
+import { VideosHeader } from './Header';
 import AdminLayout from '@/components/AdminLayout';
 import { courses } from '@/data/courses';
 
