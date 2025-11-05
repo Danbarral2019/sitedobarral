@@ -19,7 +19,6 @@ import { useSearchParams } from 'next/navigation';
 import { Search, Loader2, RefreshCw } from 'lucide-react';
 import { useAdminList } from '@/hooks/use-admin-list';
 import { Pagination } from '@/components/ui/pagination';
-import AdminLayout from '@/components/AdminLayout';
 import {
   ResourceListClientProps,
   FilterConfig,
@@ -62,13 +61,12 @@ export function ResourceListClient<T extends { id: string }>({
   const stats = config.showStats && config.getStats ? config.getStats(initialData.items) : null;
 
   return (
-    <AdminLayout>
-      <div className="min-h-screen bg-gray-50 p-6">
-        {/* Header */}
-        <div className="mb-6">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">{config.title}</h1>
-          {config.description && <p className="text-gray-600">{config.description}</p>}
-        </div>
+    <div className="min-h-screen bg-gray-50 p-6">
+      {/* Header */}
+      <div className="mb-6">
+        <h1 className="text-3xl font-bold text-gray-900 mb-2">{config.title}</h1>
+        {config.description && <p className="text-gray-600">{config.description}</p>}
+      </div>
 
         {/* Estatísticas */}
         {stats && (
@@ -326,6 +324,5 @@ export function ResourceListClient<T extends { id: string }>({
           </div>
         )}
       </div>
-    </AdminLayout>
   );
 }
