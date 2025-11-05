@@ -11,7 +11,7 @@ import Image from 'next/image';
 import { Youtube, ExternalLink, Edit, Trash2, CheckCircle, XCircle } from 'lucide-react';
 import { createListConfig } from '@/components/admin/ResourceListContainer';
 import { AdminListConfig, FilterConfig } from '@/lib/types/admin-list';
-import { CourseVideo, deleteCourseVideo } from '@/lib/videos';
+import { CourseVideo } from '@/lib/videos';
 import { courses } from '@/data/courses';
 
 interface VideosConfigProps {
@@ -154,7 +154,12 @@ export function createVideosConfig({ courses: coursesList }: VideosConfigProps):
         color: 'text-red-600',
         action: async (video) => {
           if (!confirm(`Tem certeza que deseja deletar o vídeo "${video.title}"?`)) return;
-          await deleteCourseVideo(video.id);
+          const response = await fetch(`/api/admin/videos/${video.id}`, {
+            method: 'DELETE'
+          });
+          if (!response.ok) {
+            throw new Error('Failed to delete video');
+          }
         },
       },
     ],

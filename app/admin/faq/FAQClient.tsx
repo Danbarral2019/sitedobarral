@@ -12,7 +12,7 @@ import {
   Filter, BarChart3, ThumbsUp, ThumbsDown
 } from 'lucide-react';
 import { PaginatedResult } from '@/lib/types/admin-list';
-import { FAQ, deleteFAQ, toggleFAQPublish } from '@/lib/faq';
+import { FAQ } from '@/lib/faq';
 import { buildSearchParams } from '@/lib/url-state';
 import { useToast } from '@/hooks/use-toast';
 
@@ -68,7 +68,16 @@ export function FAQClient({ initialData, categories, stats }: FAQClientProps) {
 
   const handleTogglePublish = async (faq: FAQ) => {
     try {
-      await toggleFAQPublish(faq.id, faq.isPublished);
+      const response = await fetch(`/api/admin/faq/${faq.id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ isPublished: faq.isPublished })
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to toggle publish status');
+      }
+
       success(
         'Status atualizado!',
         `FAQ ${faq.isPublished ? 'despublicada' : 'publicada'} com sucesso.`
@@ -86,7 +95,14 @@ export function FAQClient({ initialData, categories, stats }: FAQClientProps) {
     }
 
     try {
-      await deleteFAQ(faq.id);
+      const response = await fetch(`/api/admin/faq/${faq.id}`, {
+        method: 'DELETE'
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to delete FAQ');
+      }
+
       success('FAQ deletada!', 'A FAQ foi removida com sucesso.');
       router.refresh();
     } catch (error) {

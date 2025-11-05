@@ -11,7 +11,7 @@
 import { Eye, Edit, Trash2, Scale, Calendar, Building, ExternalLink, FileText, Download } from 'lucide-react';
 import { createListConfig } from '@/components/admin/ResourceListContainer';
 import { AdminListConfig, FilterConfig } from '@/lib/types/admin-list';
-import { LegislativeAct, deleteLegislativeAct } from '@/lib/legislacao';
+import { LegislativeAct } from '@/lib/legislacao';
 
 // Helper functions
 const TYPE_LABELS: Record<string, string> = {
@@ -231,7 +231,12 @@ export function createLegislacaoConfig({
           if (!confirm(`Tem certeza que deseja deletar "${act.fullNumber}"?`)) {
             return;
           }
-          await deleteLegislativeAct(act.id);
+          const response = await fetch(`/api/admin/legislacao/${act.id}`, {
+            method: 'DELETE'
+          });
+          if (!response.ok) {
+            throw new Error('Failed to delete legislative act');
+          }
         },
       },
     ],

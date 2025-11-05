@@ -8,7 +8,7 @@ import Link from 'next/link';
 import { MessageSquare, Star, Edit, Trash2, CheckCircle, XCircle, Eye, User } from 'lucide-react';
 import { createListConfig } from '@/components/admin/ResourceListContainer';
 import { AdminListConfig } from '@/lib/types/admin-list';
-import { Testimonial, deleteTestimonial } from '@/lib/depoimentos';
+import { Testimonial } from '@/lib/depoimentos';
 
 export const depoimentosConfig: AdminListConfig<Testimonial> = createListConfig<Testimonial>({
   title: 'Depoimentos',
@@ -131,7 +131,12 @@ export const depoimentosConfig: AdminListConfig<Testimonial> = createListConfig<
       color: 'text-red-600',
       action: async (testimonial) => {
         if (!confirm(`Tem certeza que deseja deletar o depoimento de "${testimonial.name}"?`)) return;
-        await deleteTestimonial(testimonial.id);
+        const response = await fetch(`/api/admin/depoimentos/${testimonial.id}`, {
+          method: 'DELETE'
+        });
+        if (!response.ok) {
+          throw new Error('Failed to delete testimonial');
+        }
       },
     },
   ],
