@@ -392,9 +392,13 @@ export async function fetchPendingDocumentsPaginated(params: {
   pageSize: number;
   totalPages: number;
 }> {
-  // Parse pagination
-  const page = parseInt(params.page || '1');
-  const pageSize = parseInt(params.pageSize || '50');
+  // Parse pagination com validação robusta (evita NaN que quebra Prisma)
+  const pageRaw = parseInt(params.page || '1', 10);
+  const pageSizeRaw = parseInt(params.pageSize || '50', 10);
+
+  // Validar e garantir valores seguros
+  const page = Math.max(1, isNaN(pageRaw) ? 1 : pageRaw);
+  const pageSize = Math.min(200, Math.max(1, isNaN(pageSizeRaw) ? 50 : pageSizeRaw));
   const skip = (page - 1) * pageSize;
 
   // Construir where clause
