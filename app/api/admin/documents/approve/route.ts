@@ -24,10 +24,14 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Não autorizado' }, { status: 401 });
     }
 
+    // ✅ FIX #5: Capturar email do admin para audit trail
+    const adminEmail = authResult.user?.email || 'unknown';
+    console.log('[Aprovação] Admin:', adminEmail);
+
     const body = await request.json();
     const { documentIds, action } = body; // action: 'approve' | 'reject'
 
-    console.log('[Aprovação] Request:', { documentIds: documentIds?.length, action });
+    console.log('[Aprovação] Request:', { documentIds: documentIds?.length, action, adminEmail });
 
     if (!documentIds || !Array.isArray(documentIds) || documentIds.length === 0) {
       console.error('[Aprovação] IDs inválidos:', documentIds);
@@ -45,22 +49,79 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Atualizar documentos
+    // ✅ FIX #5: Usar transação para garantir atomicidade (approve + audit log)
     const isPublic = action === 'approve';
+    const now = new Date();
 
-    console.log('[Aprovação] Atualizando documentos no banco...');
-    const result = await prisma.document.updateMany({
-      where: {
-        id: {
-          in: documentIds,
+    console.log('[Aprovação] Iniciando transação atômica...');
+
+    // Transação: UPDATE documents + CREATE audit logs
+    const result = await prisma.$transaction(async (tx) => {
+      // 1. Buscar documentos pendentes que serão atualizados (optimistic locking)
+      const documentsToUpdate = await tx.document.findMany({
+        where: {
+          id: { in: documentIds },
+          reviewed: false, // ✅ Optimistic locking - só processa se ainda não revisado
         },
-      },
-      data: {
-        reviewed: true,
-        reviewedAt: new Date(),
-        isPublic: isPublic,
-      },
+        select: {
+          id: true,
+          title: true,
+          courseId: true,
+        },
+      });
+
+      if (documentsToUpdate.length === 0) {
+        // Todos já foram processados
+        return { count: 0, documents: [] };
+      }
+
+      const idsToUpdate = documentsToUpdate.map(d => d.id);
+
+      // 2. Atualizar documentos atomicamente
+      await tx.document.updateMany({
+        where: {
+          id: { in: idsToUpdate },
+        },
+        data: {
+          reviewed: true,
+          reviewedAt: now,
+          reviewedBy: adminEmail, // ✅ FIX #5: Registrar quem aprovou
+          isPublic: isPublic,
+        },
+      });
+
+      // 3. Criar logs de auditoria para cada documento
+      const accessLogs = documentsToUpdate.map(doc => ({
+        userId: adminEmail,
+        documentId: doc.id,
+        courseId: doc.courseId,
+        action: action === 'approve' ? 'document_approved' : 'document_rejected',
+        ip: request.headers.get('x-forwarded-for') || request.headers.get('x-real-ip') || 'unknown',
+        userAgent: request.headers.get('user-agent') || 'unknown',
+        createdAt: now,
+      }));
+
+      await tx.accessLog.createMany({
+        data: accessLogs,
+      });
+
+      console.log(`[Aprovação] Transação: ${idsToUpdate.length} docs + ${accessLogs.length} logs criados`);
+
+      return { count: idsToUpdate.length, documents: documentsToUpdate };
     });
+
+    // Verificar se algum documento já foi processado por outro admin (race condition)
+    if (result.count < documentIds.length) {
+      const alreadyProcessed = documentIds.length - result.count;
+      console.warn(`[Aprovação] ⚠️ Conflito: ${alreadyProcessed} documento(s) já processados por outro admin`);
+
+      return NextResponse.json({
+        success: false,
+        error: `${alreadyProcessed} documento(s) já foram processados por outro administrador`,
+        processedCount: result.count,
+        conflictCount: alreadyProcessed,
+      }, { status: 409 }); // 409 Conflict
+    }
 
     console.log(`[Aprovação] ✅ Sucesso: ${result.count} documentos ${action === 'approve' ? 'aprovados' : 'rejeitados'}`);
 

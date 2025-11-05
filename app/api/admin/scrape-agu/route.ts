@@ -19,17 +19,66 @@ export const GET = withAdminAuth(async (request: NextRequest) => {
   try {
     const { searchParams } = new URL(request.url);
 
-    // Parse parâmetros
+    // Parse e validar tipos (allow-list para segurança)
+    const ALLOWED_TYPES: AGUDocumentType[] = [
+      'orientacao-normativa',
+      'parecer-vinculante',
+      'sumula',
+      'parecer-conuni',
+      'modelo',
+      'guia',
+      'nota-tecnica'
+    ];
+
     const tiposParam = searchParams.get('tipos') || 'orientacao-normativa';
-    const tipos = tiposParam.split(',').map(t => t.trim()) as AGUDocumentType[];
+    const tipos = tiposParam.split(',')
+      .map(t => t.trim())
+      .filter(t => ALLOWED_TYPES.includes(t as AGUDocumentType)) as AGUDocumentType[];
 
-    const anoInicio = searchParams.get('anoInicio')
-      ? parseInt(searchParams.get('anoInicio')!)
-      : 2020;
+    if (tipos.length === 0) {
+      console.error(`[AGU Scrape v4] ❌ Nenhum tipo válido fornecido: ${tiposParam}`);
+      return NextResponse.json(
+        { error: 'Nenhum tipo de documento válido fornecido' },
+        { status: 400 }
+      );
+    }
 
-    const anoFim = searchParams.get('anoFim')
-      ? parseInt(searchParams.get('anoFim')!)
-      : undefined;
+    // Validar anos (proteção contra DoS)
+    const currentYear = new Date().getFullYear();
+    const MIN_YEAR = 1990;
+    const MAX_YEAR_RANGE = 10; // Máximo de 10 anos por request
+
+    const anoInicioParam = searchParams.get('anoInicio');
+    const anoInicio = anoInicioParam ? parseInt(anoInicioParam, 10) : 2020;
+
+    if (isNaN(anoInicio) || anoInicio < MIN_YEAR || anoInicio > currentYear) {
+      console.error(`[AGU Scrape v4] ❌ anoInicio inválido: ${anoInicioParam}`);
+      return NextResponse.json(
+        { error: `anoInicio deve estar entre ${MIN_YEAR} e ${currentYear}` },
+        { status: 400 }
+      );
+    }
+
+    const anoFimParam = searchParams.get('anoFim');
+    const anoFim = anoFimParam ? parseInt(anoFimParam, 10) : undefined;
+
+    if (anoFim !== undefined) {
+      if (isNaN(anoFim) || anoFim > currentYear || anoFim < anoInicio) {
+        console.error(`[AGU Scrape v4] ❌ anoFim inválido: ${anoFimParam}`);
+        return NextResponse.json(
+          { error: 'anoFim inválido ou anterior a anoInicio' },
+          { status: 400 }
+        );
+      }
+
+      if (anoFim - anoInicio > MAX_YEAR_RANGE) {
+        console.error(`[AGU Scrape v4] ❌ Range muito grande: ${anoFim - anoInicio} anos`);
+        return NextResponse.json(
+          { error: `Range máximo permitido: ${MAX_YEAR_RANGE} anos (proteção DoS)` },
+          { status: 400 }
+        );
+      }
+    }
 
     const filtroRelevancia = searchParams.get('filtroRelevancia') !== 'false';
 
@@ -53,17 +102,14 @@ export const GET = withAdminAuth(async (request: NextRequest) => {
     console.log(`[AGU Scrape v4] ${documentos.length} documentos relevantes encontrados`);
     console.log(`[AGU Scrape v4] Taxa de relevância: ${result.stats.taxaRelevancia.toFixed(1)}%`);
 
-    // Converte para formato de importação
-    const documents = convertAGUDocumentsToImport(documentos);
-
-    // Verifica quais documentos já existem no banco
+    // Verifica quais documentos já existem no banco (✅ FIX: usar 'documentos' diretamente)
     const existingUrls = await prisma.document.findMany({
       where: {
         category: {
           in: tipos,
         },
         url: {
-          in: documents.map(d => d.url)
+          in: documentos.map(d => d.url) // ✅ CORRIGIDO: era 'documents', agora é 'documentos'
         }
       },
       select: {
@@ -109,12 +155,12 @@ export const GET = withAdminAuth(async (request: NextRequest) => {
       },
     });
   } catch (error) {
+    // Log detalhado no servidor (para debugging)
     console.error('[AGU Scrape v4] Erro ao buscar documentos:', error);
+
+    // Retorno genérico para o cliente (segurança - não vazar detalhes internos)
     return NextResponse.json(
-      {
-        error: 'Erro ao buscar documentos da AGU',
-        details: error instanceof Error ? error.message : 'Erro desconhecido'
-      },
+      { error: 'Erro interno ao processar scraping da AGU' },
       { status: 500 }
     );
   }

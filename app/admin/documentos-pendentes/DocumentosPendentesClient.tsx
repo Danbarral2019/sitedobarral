@@ -5,7 +5,8 @@ import { useRouter, usePathname, useSearchParams } from 'next/navigation';
 import AdminLayout from '@/components/AdminLayout';
 import {
   CheckCircle, XCircle, ExternalLink, Calendar, Tag,
-  Search, Loader2, FileText, AlertCircle
+  Search, Loader2, FileText, AlertCircle,
+  ChevronLeft, ChevronRight
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { safeParseArray } from '@/lib/utils';
@@ -29,9 +30,15 @@ interface PendingDocument {
 
 interface Props {
   documents: PendingDocument[];
+  pagination: {
+    total: number;
+    page: number;
+    pageSize: number;
+    totalPages: number;
+  };
 }
 
-export default function DocumentosPendentesClient({ documents }: Props) {
+export default function DocumentosPendentesClient({ documents, pagination }: Props) {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
@@ -211,7 +218,7 @@ export default function DocumentosPendentesClient({ documents }: Props) {
               </div>
               <div>
                 <p className="text-sm text-gray-600">Pendentes</p>
-                <p className="text-2xl font-bold text-gray-900">{documents.length}</p>
+                <p className="text-2xl font-bold text-gray-900">{pagination.total}</p>
               </div>
             </div>
           </div>
@@ -515,6 +522,96 @@ export default function DocumentosPendentesClient({ documents }: Props) {
                 </div>
               </div>
             ))}
+          </div>
+        )}
+
+        {/* Paginação */}
+        {pagination.totalPages > 1 && (
+          <div className="bg-white rounded-lg shadow p-4 mt-6">
+            <div className="flex items-center justify-between">
+              {/* Info de paginação */}
+              <div className="text-sm text-gray-600">
+                Exibindo <span className="font-semibold">{((pagination.page - 1) * pagination.pageSize) + 1}</span> a{' '}
+                <span className="font-semibold">
+                  {Math.min(pagination.page * pagination.pageSize, pagination.total)}
+                </span>{' '}
+                de <span className="font-semibold">{pagination.total}</span> documentos
+              </div>
+
+              {/* Controles de navegação */}
+              <div className="flex items-center gap-2">
+                {/* Botão Anterior */}
+                <button
+                  onClick={() => updateFilter('page', String(pagination.page - 1))}
+                  disabled={pagination.page === 1}
+                  className="px-3 py-2 border rounded-lg hover:bg-gray-50 transition disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                  title="Página anterior"
+                >
+                  <ChevronLeft className="w-4 h-4" />
+                  Anterior
+                </button>
+
+                {/* Números de página */}
+                <div className="flex gap-1">
+                  {Array.from({ length: Math.min(5, pagination.totalPages) }, (_, i) => {
+                    // Mostrar até 5 páginas com a atual no meio
+                    let pageNumber;
+                    if (pagination.totalPages <= 5) {
+                      pageNumber = i + 1;
+                    } else if (pagination.page <= 3) {
+                      pageNumber = i + 1;
+                    } else if (pagination.page >= pagination.totalPages - 2) {
+                      pageNumber = pagination.totalPages - 4 + i;
+                    } else {
+                      pageNumber = pagination.page - 2 + i;
+                    }
+
+                    return (
+                      <button
+                        key={pageNumber}
+                        onClick={() => updateFilter('page', String(pageNumber))}
+                        className={`w-10 h-10 rounded-lg transition ${
+                          pagination.page === pageNumber
+                            ? 'bg-blue-600 text-white font-semibold'
+                            : 'border hover:bg-gray-50'
+                        }`}
+                      >
+                        {pageNumber}
+                      </button>
+                    );
+                  })}
+                </div>
+
+                {/* Botão Próximo */}
+                <button
+                  onClick={() => updateFilter('page', String(pagination.page + 1))}
+                  disabled={pagination.page === pagination.totalPages}
+                  className="px-3 py-2 border rounded-lg hover:bg-gray-50 transition disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                  title="Próxima página"
+                >
+                  Próximo
+                  <ChevronRight className="w-4 h-4" />
+                </button>
+              </div>
+
+              {/* Seletor de pageSize */}
+              <div className="flex items-center gap-2">
+                <label className="text-sm text-gray-600">Itens por página:</label>
+                <select
+                  value={pagination.pageSize}
+                  onChange={(e) => {
+                    updateFilter('pageSize', e.target.value);
+                    updateFilter('page', '1'); // Reset to page 1 when changing page size
+                  }}
+                  className="px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500"
+                >
+                  <option value="25">25</option>
+                  <option value="50">50</option>
+                  <option value="100">100</option>
+                  <option value="200">200</option>
+                </select>
+              </div>
+            </div>
           </div>
         )}
       </div>

@@ -44,10 +44,36 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    // Parâmetros da query string
+    // Parâmetros da query string com validação
     const { searchParams } = new URL(request.url);
-    const period = searchParams.get('period') || 'week'; // week ou month
-    const maxResults = parseInt(searchParams.get('limit') || '100'); // Padrão: 100 documentos
+
+    // Validar período (allow-list)
+    const ALLOWED_PERIODS = ['week', 'month'] as const;
+    const periodParam = searchParams.get('period') || 'week';
+
+    if (!ALLOWED_PERIODS.includes(periodParam as typeof ALLOWED_PERIODS[number])) {
+      console.error(`[Cron DOU] ❌ Período inválido: ${periodParam}`);
+      return NextResponse.json(
+        { error: `Período inválido. Valores permitidos: ${ALLOWED_PERIODS.join(', ')}` },
+        { status: 400 }
+      );
+    }
+    const period = periodParam as typeof ALLOWED_PERIODS[number];
+
+    // Validar e limitar maxResults (proteção contra DoS)
+    const MAX_ALLOWED_RESULTS = 500;
+    const limitParam = searchParams.get('limit') || '100';
+    let maxResults = parseInt(limitParam, 10);
+
+    if (isNaN(maxResults) || maxResults <= 0) {
+      console.warn(`[Cron DOU] ⚠️ Limite inválido '${limitParam}', usando padrão 100`);
+      maxResults = 100;
+    }
+
+    maxResults = Math.min(maxResults, MAX_ALLOWED_RESULTS);
+    if (maxResults === MAX_ALLOWED_RESULTS) {
+      console.warn(`[Cron DOU] ⚠️ Limite cappado em ${MAX_ALLOWED_RESULTS} (proteção DoS)`);
+    }
 
     console.log(`[Cron DOU] Buscando publicações (período: ${period}, limite: ${maxResults})`);
 
