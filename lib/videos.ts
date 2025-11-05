@@ -1,14 +1,9 @@
-'use server';
-
 /**
  * Course Videos Data Fetching (Fase 7)
- * Server Actions para operações de admin
  */
 
 import { prisma } from './prisma';
 import { PaginatedResult } from './types/admin-list';
-import { isAdmin } from './auth';
-import { revalidatePath } from 'next/cache';
 
 export interface CourseVideo {
   id: string;
@@ -71,32 +66,6 @@ export async function fetchCourseVideosPaginated(params: {
   };
 }
 
-/**
- * Deletar vídeo do curso (Server Action)
- * Requer autenticação de admin
- */
-export async function deleteCourseVideo(id: string): Promise<{ error?: string }> {
-  try {
-    // Verificação de autenticação/autorização
-    const userIsAdmin = await isAdmin();
-    if (!userIsAdmin) {
-      return { error: 'Não autorizado. Apenas administradores podem deletar vídeos.' };
-    }
-
-    // Validação de input
-    if (!id || typeof id !== 'string') {
-      return { error: 'ID inválido.' };
-    }
-
-    // Deletar vídeo
-    await prisma.courseVideo.delete({ where: { id } });
-
-    // Revalidar cache
-    revalidatePath('/admin/videos');
-
-    return {};
-  } catch (error) {
-    console.error('Erro ao deletar vídeo:', error);
-    return { error: 'Não foi possível deletar o vídeo. Tente novamente.' };
-  }
+export async function deleteCourseVideo(id: string): Promise<void> {
+  await prisma.courseVideo.delete({ where: { id } });
 }
