@@ -454,7 +454,6 @@ export async function fetchPendingDocumentsPaginated(params: {
         uploadedAt: true,
         douData: true,
         douSecao: true,
-        douOrgao: true,
         douEdicao: true,
         tags: true,
         courseId: true,
