@@ -10,10 +10,10 @@ export interface FAQ {
   question: string;
   answer: string;
   category: string;
-  order: number;
+  displayOrder: number;
   isPublished: boolean;
   tags: string[];
-  views: number;
+  viewCount: number;
   helpfulCount: number;
   notHelpfulCount: number;
   createdAt: Date | string;
@@ -64,7 +64,7 @@ export async function fetchFAQsPaginated(params: {
       skip,
       take: pageSize,
       orderBy: {
-        order: 'asc',
+        displayOrder: 'asc',
       },
     }),
   ]);
@@ -118,7 +118,7 @@ export async function getFAQStats() {
     prisma.fAQ.count(),
     prisma.fAQ.count({ where: { isPublished: true } }),
     prisma.fAQ.aggregate({
-      _sum: { views: true },
+      _sum: { viewCount: true },
     }),
     prisma.fAQ.aggregate({
       _sum: { helpfulCount: true },
@@ -128,7 +128,7 @@ export async function getFAQStats() {
   return {
     total,
     published,
-    totalViews: totalViews._sum.views || 0,
+    totalViews: totalViews._sum.viewCount || 0,
     totalHelpful: totalHelpful._sum.helpfulCount || 0,
   };
 }

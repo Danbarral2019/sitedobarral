@@ -14,7 +14,6 @@ export interface Testimonial {
   rating: number;
   photoUrl: string | null;
   isPublished: boolean;
-  displayOrder: number;
   createdAt: Date | string;
 }
 
@@ -48,7 +47,7 @@ export async function fetchTestimonialsPaginated(params: {
       where,
       skip,
       take: pageSize,
-      orderBy: { displayOrder: 'asc' },
+      orderBy: { createdAt: 'desc' },
     }),
   ]);
 

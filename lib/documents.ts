@@ -295,7 +295,6 @@ export async function fetchPendingDocuments(filters: {
   uploadedAt: Date;
   douData?: string | null;
   douSecao?: string | null;
-  douOrgao?: string | null;
   douEdicao?: string | null;
   tags?: string | null;
   courseId?: string;
@@ -352,7 +351,6 @@ export async function fetchPendingDocuments(filters: {
       uploadedAt: true,
       douData: true,
       douSecao: true,
-      douOrgao: true,
       douEdicao: true,
       tags: true,
       courseId: true,
@@ -382,7 +380,6 @@ export async function fetchPendingDocumentsPaginated(params: {
     uploadedAt: Date;
     douData?: string | null;
     douSecao?: string | null;
-    douOrgao?: string | null;
     douEdicao?: string | null;
     tags?: string | null;
     courseId?: string;
