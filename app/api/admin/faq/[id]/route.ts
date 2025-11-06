@@ -4,14 +4,15 @@ import { deleteFAQ, toggleFAQPublish } from '@/lib/faq';
 
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const user = await verifyAuth(request);
     if (!user || user.role !== 'admin') {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
-    await deleteFAQ(params.id);
+    const { id } = await params;
+    await deleteFAQ(id);
     return NextResponse.json({ success: true });
   } catch (error) {
     console.error('Error deleting FAQ:', error);
@@ -21,16 +22,17 @@ export async function DELETE(
 
 export async function PATCH(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const user = await verifyAuth(request);
     if (!user || user.role !== 'admin') {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
+    const { id } = await params;
     const body = await request.json();
     const { isPublished } = body;
-    await toggleFAQPublish(params.id, isPublished);
+    await toggleFAQPublish(id, isPublished);
     return NextResponse.json({ success: true });
   } catch (error) {
     console.error('Error toggling FAQ publish status:', error);

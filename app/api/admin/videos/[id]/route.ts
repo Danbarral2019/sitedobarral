@@ -4,14 +4,15 @@ import { deleteCourseVideo } from '@/lib/videos';
 
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const user = await verifyAuth(request);
     if (!user || user.role !== 'admin') {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
-    await deleteCourseVideo(params.id);
+    const { id } = await params;
+    await deleteCourseVideo(id);
     return NextResponse.json({ success: true });
   } catch (error) {
     console.error('Error deleting video:', error);
