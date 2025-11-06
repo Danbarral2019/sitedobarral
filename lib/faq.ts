@@ -16,8 +16,8 @@ export interface FAQ {
   views: number;
   helpfulCount: number;
   notHelpfulCount: number;
-  createdAt: Date;
-  updatedAt: Date;
+  createdAt: Date | string;
+  updatedAt: Date | string;
 }
 
 /**

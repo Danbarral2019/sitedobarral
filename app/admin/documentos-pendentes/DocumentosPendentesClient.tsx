@@ -18,7 +18,7 @@ interface PendingDocument {
   category: string;
   type: string;
   url: string;
-  uploadedAt: Date;
+  uploadedAt: Date | string;
   douData?: string | null;
   douSecao?: string | null;
   douOrgao?: string | null;

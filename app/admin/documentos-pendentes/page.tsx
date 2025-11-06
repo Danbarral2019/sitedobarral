@@ -47,11 +47,18 @@ export default async function DocumentosPendentesPage({ searchParams }: PageProp
     pageSize: safePageSize.toString(),
   });
 
+  // ✅ Serializar Dates para evitar erro de hidratação
+  const serializedItems = items.map(doc => ({
+    ...doc,
+    uploadedAt: doc.uploadedAt.toISOString(),
+    douData: doc.douData ? new Date(doc.douData).toISOString() : null,
+  }));
+
   // Renderizar Client Component com dados e paginação
   return (
     <AdminLayout>
       <DocumentosPendentesClient
-        documents={items}
+        documents={serializedItems}
         pagination={{
           total,
           page: currentPage,

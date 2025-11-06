@@ -15,7 +15,7 @@ export interface Testimonial {
   photoUrl: string | null;
   isPublished: boolean;
   displayOrder: number;
-  createdAt: Date;
+  createdAt: Date | string;
 }
 
 export async function fetchTestimonialsPaginated(params: {

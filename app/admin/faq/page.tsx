@@ -32,9 +32,19 @@ export default async function FAQPage({ searchParams }: PageProps) {
     getFAQStats(),
   ]);
 
+  // ✅ Serializar Dates para evitar erro de hidratação
+  const serializedFaqs = {
+    ...faqs,
+    items: faqs.items.map(faq => ({
+      ...faq,
+      createdAt: faq.createdAt.toISOString(),
+      updatedAt: faq.updatedAt.toISOString(),
+    })),
+  };
+
   return (
     <AdminLayout>
-      <FAQClient initialData={faqs} categories={categories} stats={stats} />
+      <FAQClient initialData={serializedFaqs} categories={categories} stats={stats} />
     </AdminLayout>
   );
 }

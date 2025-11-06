@@ -29,10 +29,19 @@ export default async function DepoimentosPage({ searchParams }: PageProps) {
   // ✅ Server: Buscar TODOS os dados aqui
   const testimonials = await fetchTestimonialsPaginated(normalizedParams);
 
+  // ✅ Serializar Dates para evitar erro de hidratação
+  const serializedTestimonials = {
+    ...testimonials,
+    items: testimonials.items.map(t => ({
+      ...t,
+      createdAt: t.createdAt.toISOString(),
+    })),
+  };
+
   // ✅ Passar dados prontos para Client
   return (
     <AdminLayout>
-      <DepoimentosClient initialData={testimonials} />
+      <DepoimentosClient initialData={serializedTestimonials} />
     </AdminLayout>
   );
 }
