@@ -62,12 +62,12 @@ export async function GET(request: NextRequest) {
 
     // Validar e limitar maxResults (proteção contra DoS)
     const MAX_ALLOWED_RESULTS = 500;
-    const limitParam = searchParams.get('limit') || '100';
+    const limitParam = searchParams.get('limit') || '20';
     let maxResults = parseInt(limitParam, 10);
 
     if (isNaN(maxResults) || maxResults <= 0) {
-      console.warn(`[Cron DOU] ⚠️ Limite inválido '${limitParam}', usando padrão 100`);
-      maxResults = 100;
+      console.warn(`[Cron DOU] ⚠️ Limite inválido '${limitParam}', usando padrão 20`);
+      maxResults = 20;
     }
 
     maxResults = Math.min(maxResults, MAX_ALLOWED_RESULTS);
