@@ -1,29 +1,41 @@
 /**
- * Videos Admin Page (Server Component - Fix Serialização)
+ * Videos Admin Page (Server Component - Fix Correto)
  *
- * Solução para problema de serialização Server/Client:
- * - Server: Busca dados serializáveis (courses)
- * - Client: Cria config com funções window.* (VideosClient)
- * - Nunca serializa funções entre fronteiras
+ * Padrão correto:
+ * - Server Component busca TODOS os dados (including paginated list)
+ * - Passa dados prontos para Client Component
+ * - Client apenas gerencia interações (nunca data fetching)
  */
 
 import { VideosClient } from './VideosClient';
 import AdminLayout from '@/components/AdminLayout';
 import { courses } from '@/data/courses';
+import { fetchCourseVideosPaginated } from '@/lib/videos';
 
 interface PageProps {
   searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
 }
 
 export default async function VideosPage({ searchParams }: PageProps) {
-  // ✅ Server: Preparar dados serializáveis
-  const coursesList = courses.map(c => ({ id: c.id, title: c.title }));
   const params = await searchParams;
 
-  // ✅ Client Component cria config com funções
+  // Normalizar searchParams
+  const normalizedParams = {
+    page: typeof params.page === 'string' ? params.page : undefined,
+    pageSize: typeof params.pageSize === 'string' ? params.pageSize : undefined,
+    courseId: typeof params.courseId === 'string' ? params.courseId : undefined,
+    isActive: typeof params.isActive === 'string' ? params.isActive : undefined,
+    search: typeof params.search === 'string' ? params.search : undefined,
+  };
+
+  // ✅ Server: Buscar TODOS os dados aqui
+  const coursesList = courses.map(c => ({ id: c.id, title: c.title }));
+  const videos = await fetchCourseVideosPaginated(normalizedParams);
+
+  // ✅ Passar dados prontos para Client
   return (
     <AdminLayout>
-      <VideosClient courses={coursesList} searchParams={params} />
+      <VideosClient courses={coursesList} initialData={videos} />
     </AdminLayout>
   );
 }

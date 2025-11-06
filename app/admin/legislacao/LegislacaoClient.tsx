@@ -1,29 +1,29 @@
 'use client';
 
 /**
- * Legislacao Client Component (Fix de Serialização)
+ * Legislacao Client Component (Fix Correto)
  *
- * Este componente resolve o problema de serialização Server/Client:
- * - Recebe dados serializáveis do servidor (types, issuers, years)
- * - Chama a factory function NO CLIENTE
- * - O objeto config (com funções window.*) nunca precisa ser serializado
+ * Padrão correto:
+ * - Recebe dados prontos do Server Component (initialData)
+ * - Apenas gerencia interações (filtros, navegação)
+ * - NUNCA faz data fetching (sem ResourceListContainer)
  */
 
-import { ResourceListContainer } from '@/components/admin/ResourceListContainer';
-import { fetchLegislativeActsPaginated } from '@/lib/legislacao';
+import { ResourceListClient } from '@/components/admin/ResourceListClient';
+import { PaginatedResult } from '@/lib/types/admin-list';
+import { LegislativeAct } from '@/lib/legislacao';
 import { LegislacaoHeader } from './Header';
 import { createLegislacaoConfig } from './config';
 
 interface LegislacaoClientProps {
+  initialData: PaginatedResult<LegislativeAct>;
   types: string[];
   issuers: string[];
   years: number[];
-  searchParams: { [key: string]: string | string[] | undefined };
 }
 
-export function LegislacaoClient({ types, issuers, years, searchParams }: LegislacaoClientProps) {
-  // ✅ SOLUÇÃO: Factory chamada NO CLIENTE
-  // O objeto config (com funções) vive inteiramente no cliente
+export function LegislacaoClient({ initialData, types, issuers, years }: LegislacaoClientProps) {
+  // ✅ Factory chamada NO CLIENTE
   const legislacaoConfig = createLegislacaoConfig({ types, issuers, years });
 
   return (
@@ -31,9 +31,8 @@ export function LegislacaoClient({ types, issuers, years, searchParams }: Legisl
       <div className="max-w-7xl mx-auto">
         <LegislacaoHeader />
         <div className="bg-white rounded-2xl shadow-lg border-2 border-gray-200 overflow-hidden">
-          <ResourceListContainer
-            searchParams={searchParams}
-            fetchData={fetchLegislativeActsPaginated}
+          <ResourceListClient
+            initialData={initialData}
             config={legislacaoConfig}
           />
         </div>

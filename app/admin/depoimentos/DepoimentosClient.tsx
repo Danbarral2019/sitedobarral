@@ -1,33 +1,31 @@
 'use client';
 
 /**
- * Depoimentos Client Component (Fix de Serialização)
+ * Depoimentos Client Component (Fix Correto)
  *
- * Este componente resolve o problema de serialização Server/Client:
- * - O objeto config (com funções window.*) é criado e vive no cliente
- * - Nunca precisa ser serializado entre fronteiras
+ * Padrão correto:
+ * - Recebe dados prontos do Server Component (initialData)
+ * - Apenas gerencia interações (filtros, navegação)
+ * - NUNCA faz data fetching (sem ResourceListContainer)
  */
 
-import { ResourceListContainer } from '@/components/admin/ResourceListContainer';
-import { fetchTestimonialsPaginated } from '@/lib/depoimentos';
+import { ResourceListClient } from '@/components/admin/ResourceListClient';
+import { PaginatedResult } from '@/lib/types/admin-list';
+import { Testimonial } from '@prisma/client';
 import { depoimentosConfig, DepoimentosHeader } from './config';
 
 interface DepoimentosClientProps {
-  searchParams: { [key: string]: string | string[] | undefined };
+  initialData: PaginatedResult<Testimonial>;
 }
 
-export function DepoimentosClient({ searchParams }: DepoimentosClientProps) {
-  // ✅ Config já está no arquivo 'use client', mas importamos no cliente
-  // para garantir que o objeto vive inteiramente no ambiente do cliente
-
+export function DepoimentosClient({ initialData }: DepoimentosClientProps) {
   return (
     <div className="p-8">
       <div className="max-w-7xl mx-auto">
         <DepoimentosHeader />
         <div className="bg-white rounded-2xl shadow-lg border-2 border-gray-200 overflow-hidden">
-          <ResourceListContainer
-            searchParams={searchParams}
-            fetchData={fetchTestimonialsPaginated}
+          <ResourceListClient
+            initialData={initialData}
             config={depoimentosConfig}
           />
         </div>

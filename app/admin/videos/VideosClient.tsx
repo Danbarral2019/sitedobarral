@@ -1,27 +1,27 @@
 'use client';
 
 /**
- * Videos Client Component (Fix de Serialização)
+ * Videos Client Component (Fix Correto)
  *
- * Este componente resolve o problema de serialização Server/Client:
- * - Recebe dados serializáveis do servidor (courses list)
- * - Chama a factory function NO CLIENTE
- * - O objeto config (com funções window.*) nunca precisa ser serializado
+ * Padrão correto:
+ * - Recebe dados prontos do Server Component (initialData)
+ * - Apenas gerencia interações (filtros, navegação)
+ * - NUNCA faz data fetching (sem ResourceListContainer)
  */
 
-import { ResourceListContainer } from '@/components/admin/ResourceListContainer';
-import { fetchCourseVideosPaginated } from '@/lib/videos';
+import { ResourceListClient } from '@/components/admin/ResourceListClient';
+import { PaginatedResult } from '@/lib/types/admin-list';
+import { CourseVideo } from '@prisma/client';
 import { VideosHeader } from './Header';
 import { createVideosConfig } from './config';
 
 interface VideosClientProps {
   courses: Array<{ id: string; title: string }>;
-  searchParams: { [key: string]: string | string[] | undefined };
+  initialData: PaginatedResult<CourseVideo>;
 }
 
-export function VideosClient({ courses, searchParams }: VideosClientProps) {
-  // ✅ SOLUÇÃO: Factory chamada NO CLIENTE
-  // O objeto config (com funções) vive inteiramente no cliente
+export function VideosClient({ courses, initialData }: VideosClientProps) {
+  // ✅ Factory chamada NO CLIENTE
   const videosConfig = createVideosConfig({ courses });
 
   return (
@@ -29,9 +29,8 @@ export function VideosClient({ courses, searchParams }: VideosClientProps) {
       <div className="max-w-7xl mx-auto">
         <VideosHeader />
         <div className="bg-white rounded-2xl shadow-lg border-2 border-gray-200 overflow-hidden">
-          <ResourceListContainer
-            searchParams={searchParams}
-            fetchData={fetchCourseVideosPaginated}
+          <ResourceListClient
+            initialData={initialData}
             config={videosConfig}
           />
         </div>

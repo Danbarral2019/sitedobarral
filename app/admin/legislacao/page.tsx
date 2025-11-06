@@ -1,16 +1,17 @@
 /**
- * Legislative Acts Admin Page (Server Component - Fix Serialização)
+ * Legislative Acts Admin Page (Server Component - Fix)
  *
- * Solução para problema de serialização Server/Client:
- * - Server: Busca dados serializáveis (types, issuers, years)
- * - Client: Cria config com funções window.* (LegislacaoClient)
- * - Nunca serializa funções entre fronteiras
+ * Padrão correto:
+ * - Server Component busca TODOS os dados (including paginated list)
+ * - Passa dados prontos para Client Component
+ * - Client apenas gerencia interações (nunca data fetching)
  */
 
 import {
   getLegislativeActTypes,
   getLegislativeActIssuers,
-  getLegislativeActYears
+  getLegislativeActYears,
+  fetchLegislativeActsPaginated
 } from '@/lib/legislacao';
 import { LegislacaoClient } from './LegislacaoClient';
 import AdminLayout from '@/components/AdminLayout';
@@ -20,23 +21,34 @@ interface PageProps {
 }
 
 export default async function LegislacaoPage({ searchParams }: PageProps) {
-  // ✅ Server: Buscar apenas dados serializáveis
-  const [types, issuers, years] = await Promise.all([
+  const params = await searchParams;
+
+  // Normalizar searchParams
+  const normalizedParams = {
+    page: typeof params.page === 'string' ? params.page : undefined,
+    pageSize: typeof params.pageSize === 'string' ? params.pageSize : undefined,
+    type: typeof params.type === 'string' ? params.type : undefined,
+    issuer: typeof params.issuer === 'string' ? params.issuer : undefined,
+    year: typeof params.year === 'string' ? params.year : undefined,
+    search: typeof params.search === 'string' ? params.search : undefined,
+  };
+
+  // ✅ Server: Buscar TODOS os dados aqui
+  const [types, issuers, years, acts] = await Promise.all([
     getLegislativeActTypes(),
     getLegislativeActIssuers(),
     getLegislativeActYears(),
+    fetchLegislativeActsPaginated(normalizedParams),
   ]);
 
-  const params = await searchParams;
-
-  // ✅ Client Component cria config com funções
+  // ✅ Passar dados prontos para Client
   return (
     <AdminLayout>
       <LegislacaoClient
+        initialData={acts}
         types={types}
         issuers={issuers}
         years={years}
-        searchParams={params}
       />
     </AdminLayout>
   );

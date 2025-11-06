@@ -1,13 +1,15 @@
 /**
- * Depoimentos Admin Page (Server Component - Fix Serialização)
+ * Depoimentos Admin Page (Server Component - Fix Correto)
  *
- * Solução para problema de serialização Server/Client:
- * - Server Component simples que delega para Client
- * - Client Component importa e usa config com funções
+ * Padrão correto:
+ * - Server Component busca TODOS os dados (including paginated list)
+ * - Passa dados prontos para Client Component
+ * - Client apenas gerencia interações (nunca data fetching)
  */
 
 import { DepoimentosClient } from './DepoimentosClient';
 import AdminLayout from '@/components/AdminLayout';
+import { fetchTestimonialsPaginated } from '@/lib/depoimentos';
 
 interface PageProps {
   searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
@@ -16,9 +18,21 @@ interface PageProps {
 export default async function DepoimentosPage({ searchParams }: PageProps) {
   const params = await searchParams;
 
+  // Normalizar searchParams
+  const normalizedParams = {
+    page: typeof params.page === 'string' ? params.page : undefined,
+    pageSize: typeof params.pageSize === 'string' ? params.pageSize : undefined,
+    isPublished: typeof params.isPublished === 'string' ? params.isPublished : undefined,
+    search: typeof params.search === 'string' ? params.search : undefined,
+  };
+
+  // ✅ Server: Buscar TODOS os dados aqui
+  const testimonials = await fetchTestimonialsPaginated(normalizedParams);
+
+  // ✅ Passar dados prontos para Client
   return (
     <AdminLayout>
-      <DepoimentosClient searchParams={params} />
+      <DepoimentosClient initialData={testimonials} />
     </AdminLayout>
   );
 }
