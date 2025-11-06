@@ -51,7 +51,7 @@ export default async function DocumentosPendentesPage({ searchParams }: PageProp
   const serializedItems = items.map(doc => ({
     ...doc,
     uploadedAt: doc.uploadedAt.toISOString(),
-    douData: doc.douData ? new Date(doc.douData).toISOString() : null,
+    douData: doc.douData ? doc.douData.toISOString() : null,
   }));
 
   // Renderizar Client Component com dados e paginação
