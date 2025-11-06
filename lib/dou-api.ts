@@ -8,7 +8,7 @@
  * do Diário Oficial da União federal.
  */
 
-import { JSDOM } from 'jsdom';
+import * as cheerio from 'cheerio';
 
 /**
  * Seções do DOU
@@ -145,18 +145,17 @@ export class DOUClient {
 
       const html = await response.text();
 
-      // Parse HTML
-      const dom = new JSDOM(html);
-      const document = dom.window.document;
+      // Parse HTML com cheerio (mais leve e compatível com serverless)
+      const $ = cheerio.load(html);
 
       // Verificar paginação
-      const lastPageBtn = document.querySelector('button#lastPage');
-      const secondPageBtn = document.querySelector('button[id="2btn"]');
+      const lastPageBtn = $('button#lastPage');
+      const secondPageBtn = $('button[id="2btn"]');
 
       let numberPages = 1;
-      if (lastPageBtn) {
-        numberPages = parseInt(lastPageBtn.textContent?.trim() || '1');
-      } else if (secondPageBtn) {
+      if (lastPageBtn.length > 0) {
+        numberPages = parseInt(lastPageBtn.text().trim() || '1');
+      } else if (secondPageBtn.length > 0) {
         numberPages = 2;
       }
 
@@ -198,19 +197,17 @@ export class DOUClient {
         }
 
         // Extrair JSON embutido no script tag
-        const pageDom = new JSDOM(pageHtml);
-        const scriptTag = pageDom.window.document.querySelector(
-          'script#_br_com_seatecnologia_in_buscadou_BuscaDouPortlet_params'
-        );
+        const $page = cheerio.load(pageHtml);
+        const scriptTag = $page('script#_br_com_seatecnologia_in_buscadou_BuscaDouPortlet_params');
 
-        if (!scriptTag || !scriptTag.textContent) {
+        if (scriptTag.length === 0 || !scriptTag.html()) {
           console.warn(`[DOU API] ⚠️  Nenhum script tag na página ${pageNum + 1}`);
           continue;
         }
 
         let jsonData, searchResults;
         try {
-          jsonData = JSON.parse(scriptTag.textContent);
+          jsonData = JSON.parse(scriptTag.html() || '{}');
           searchResults = jsonData.jsonArray;
         } catch (error) {
           console.error(`[DOU API] ❌ Erro ao parsear JSON da página ${pageNum + 1}:`, error);
