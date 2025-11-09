@@ -5,6 +5,8 @@ import AdminLayout from '@/components/AdminLayout';
 import {
   DateRangePreset,
 } from '@/lib/dou-classifier';
+import { DOUDocumentModal, DOUDocument } from '@/components/DOUDocumentModal';
+import { useToast } from '@/hooks/use-toast';
 
 interface FilterConfig {
   // Filtros básicos
@@ -35,6 +37,8 @@ interface SearchResult {
   status: string;
   confidence: number;
   hierarchyStr: string;
+  abstract: string;
+  href: string;
 }
 
 interface SearchResponse {
@@ -89,6 +93,13 @@ export default function DOUFiltrosPage() {
   // Tab state for filtering by status
   const [selectedTab, setSelectedTab] = useState<'all' | 'pending' | 'approved' | 'rejected'>('pending');
   const [isPendingLoading, setIsPendingLoading] = useState(false);
+
+  // Modal state
+  const [selectedDocument, setSelectedDocument] = useState<DOUDocument | null>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
+  // Toast for feedback
+  const { toast } = useToast();
 
   // Seções disponíveis
   const sections = [
@@ -165,6 +176,109 @@ export default function DOUFiltrosPage() {
       maxResults: 50,
     });
     setSearchResponse(null);
+  };
+
+  const handleViewDetails = (result: SearchResult) => {
+    const doc: DOUDocument = {
+      title: result.title,
+      abstract: result.abstract,
+      url: result.href,
+      section: result.section,
+      publishDate: result.date,
+      category: result.category,
+      confidence: result.confidence,
+      hierarchyStr: result.hierarchyStr,
+      approvalStatus: result.status,
+    };
+    setSelectedDocument(doc);
+    setIsModalOpen(true);
+  };
+
+  const handleApproveDocument = async (courseIds: string[], adminNotes?: string) => {
+    if (!selectedDocument) return;
+
+    try {
+      const response = await fetch('/api/admin/dou/approve', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          documentId: selectedDocument.id, // Será undefined para busca filtrada
+          action: 'approve',
+          courseIds,
+          adminNotes,
+        }),
+      });
+
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.error || 'Erro ao aprovar documento');
+      }
+
+      const data = await response.json();
+
+      toast({
+        title: 'Documento Aprovado! ✅',
+        description: `${selectedDocument.title.substring(0, 60)}... foi incorporado ao acervo.`,
+        variant: 'default',
+      });
+
+      setIsModalOpen(false);
+      setSelectedDocument(null);
+
+      // Recarregar busca
+      if (searchResponse) {
+        handleSearch();
+      }
+    } catch (error) {
+      console.error('Erro ao aprovar:', error);
+      toast({
+        title: 'Erro ao Aprovar',
+        description: error instanceof Error ? error.message : 'Erro desconhecido',
+        variant: 'destructive',
+      });
+    }
+  };
+
+  const handleRejectDocument = async (reason?: string) => {
+    if (!selectedDocument) return;
+
+    try {
+      const response = await fetch('/api/admin/dou/approve', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          documentId: selectedDocument.id,
+          action: 'reject',
+          adminNotes: reason,
+        }),
+      });
+
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.error || 'Erro ao rejeitar documento');
+      }
+
+      toast({
+        title: 'Documento Rejeitado',
+        description: 'O documento foi marcado como rejeitado.',
+        variant: 'default',
+      });
+
+      setIsModalOpen(false);
+      setSelectedDocument(null);
+
+      // Recarregar busca
+      if (searchResponse) {
+        handleSearch();
+      }
+    } catch (error) {
+      console.error('Erro ao rejeitar:', error);
+      toast({
+        title: 'Erro ao Rejeitar',
+        description: error instanceof Error ? error.message : 'Erro desconhecido',
+        variant: 'destructive',
+      });
+    }
   };
 
   return (
@@ -581,28 +695,37 @@ export default function DOUFiltrosPage() {
                             </div>
                           </div>
 
-                          <div className="flex items-center gap-2 text-xs">
-                            <span
-                              className={`px-2 py-1 rounded ${
-                                result.status === 'auto_approved'
-                                  ? 'bg-green-100 text-green-800'
+                          <div className="flex items-center justify-between gap-2">
+                            <div className="flex items-center gap-2 text-xs">
+                              <span
+                                className={`px-2 py-1 rounded ${
+                                  result.status === 'auto_approved'
+                                    ? 'bg-green-100 text-green-800'
+                                    : result.status === 'pending'
+                                    ? 'bg-yellow-100 text-yellow-800'
+                                    : 'bg-red-100 text-red-800'
+                                }`}
+                              >
+                                {result.status === 'auto_approved'
+                                  ? '✅ Auto-aprovado'
                                   : result.status === 'pending'
-                                  ? 'bg-yellow-100 text-yellow-800'
-                                  : 'bg-red-100 text-red-800'
-                              }`}
+                                  ? '⏳ Revisão'
+                                  : '❌ Rejeitado'}
+                              </span>
+                              <span className="bg-gray-100 text-gray-800 px-2 py-1 rounded">
+                                {result.category}
+                              </span>
+                              <span className="bg-purple-100 text-purple-800 px-2 py-1 rounded">
+                                Confiança: {result.confidence}%
+                              </span>
+                            </div>
+
+                            <button
+                              onClick={() => handleViewDetails(result)}
+                              className="inline-flex items-center gap-1 px-3 py-1.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-xs font-medium"
                             >
-                              {result.status === 'auto_approved'
-                                ? '✅ Auto-aprovado'
-                                : result.status === 'pending'
-                                ? '⏳ Revisão'
-                                : '❌ Rejeitado'}
-                            </span>
-                            <span className="bg-gray-100 text-gray-800 px-2 py-1 rounded">
-                              {result.category}
-                            </span>
-                            <span className="bg-purple-100 text-purple-800 px-2 py-1 rounded">
-                              Confiança: {result.confidence}%
-                            </span>
+                              📄 Ver Detalhes
+                            </button>
                           </div>
                         </div>
                         ))}
@@ -626,6 +749,17 @@ export default function DOUFiltrosPage() {
           </div>
         </div>
       </div>
+
+      {/* Modal de Visualização e Aprovação */}
+      {selectedDocument && (
+        <DOUDocumentModal
+          isOpen={isModalOpen}
+          onClose={() => setIsModalOpen(false)}
+          document={selectedDocument}
+          onApprove={handleApproveDocument}
+          onReject={handleRejectDocument}
+        />
+      )}
     </AdminLayout>
   );
 }
