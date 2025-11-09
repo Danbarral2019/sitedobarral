@@ -90,9 +90,13 @@ export default function DOUFiltrosPage() {
   // Pending documents state
   const [pendingDocs, setPendingDocs] = useState<PendingDocument[]>([]);
 
+  // Auto-approved documents state (documentos auto-aprovados aguardando validação)
+  const [autoApprovedDocs, setAutoApprovedDocs] = useState<PendingDocument[]>([]);
+
   // Tab state for filtering by status
   const [selectedTab, setSelectedTab] = useState<'all' | 'pending' | 'approved' | 'rejected'>('pending');
   const [isPendingLoading, setIsPendingLoading] = useState(false);
+  const [isAutoApprovedLoading, setIsAutoApprovedLoading] = useState(false);
 
   // Modal state
   const [selectedDocument, setSelectedDocument] = useState<DOUDocument | null>(null);
@@ -119,7 +123,7 @@ export default function DOUFiltrosPage() {
     { value: 'custom', label: 'Personalizado' },
   ];
 
-  // Fetch pending documents on mount
+  // Fetch pending and auto-approved documents on mount
   useEffect(() => {
     const fetchPendingDocs = async () => {
       setIsPendingLoading(true);
@@ -136,7 +140,23 @@ export default function DOUFiltrosPage() {
       }
     };
 
+    const fetchAutoApprovedDocs = async () => {
+      setIsAutoApprovedLoading(true);
+      try {
+        const response = await fetch('/api/admin/dou/auto-approved');
+        if (response.ok) {
+          const data = await response.json();
+          setAutoApprovedDocs(data.documents || []);
+        }
+      } catch (err) {
+        console.error('Failed to fetch auto-approved documents:', err);
+      } finally {
+        setIsAutoApprovedLoading(false);
+      }
+    };
+
     fetchPendingDocs();
+    fetchAutoApprovedDocs();
   }, []);
 
   const handleSearch = async () => {
@@ -258,6 +278,16 @@ export default function DOUFiltrosPage() {
       setIsModalOpen(false);
       setSelectedDocument(null);
 
+      // Recarregar listas de auto-aprovados e pendentes
+      const fetchAutoApproved = async () => {
+        const response = await fetch('/api/admin/dou/auto-approved');
+        if (response.ok) {
+          const data = await response.json();
+          setAutoApprovedDocs(data.documents || []);
+        }
+      };
+      fetchAutoApproved();
+
       // Recarregar busca
       if (searchResponse) {
         handleSearch();
@@ -300,6 +330,16 @@ export default function DOUFiltrosPage() {
       setIsModalOpen(false);
       setSelectedDocument(null);
 
+      // Recarregar listas de auto-aprovados e pendentes
+      const fetchAutoApproved = async () => {
+        const response = await fetch('/api/admin/dou/auto-approved');
+        if (response.ok) {
+          const data = await response.json();
+          setAutoApprovedDocs(data.documents || []);
+        }
+      };
+      fetchAutoApproved();
+
       // Recarregar busca
       if (searchResponse) {
         handleSearch();
@@ -312,6 +352,26 @@ export default function DOUFiltrosPage() {
         variant: 'destructive',
       });
     }
+  };
+
+  // Handler para visualizar documentos auto-aprovados
+  const handleViewAutoApprovedDoc = (doc: PendingDocument) => {
+    // Montar objeto DOUDocument compatível com o modal
+    const douDocument: DOUDocument = {
+      id: doc.id,
+      title: doc.title,
+      abstract: '', // PendingDocument não tem abstract, será carregado do DB pelo modal se necessário
+      url: '', // Será buscado do DB
+      section: doc.section,
+      publishDate: doc.publishDate,
+      category: doc.category,
+      confidence: doc.confidence,
+      hierarchyStr: doc.hierarchyStr,
+      approvalStatus: doc.approvalStatus,
+    };
+
+    setSelectedDocument(douDocument);
+    setIsModalOpen(true);
   };
 
   return (
@@ -511,6 +571,81 @@ export default function DOUFiltrosPage() {
                 ❌ {error}
               </div>
             )}
+
+            {/* Seção de Documentos Auto-Aprovados */}
+            {isAutoApprovedLoading ? (
+              <div className="bg-white rounded-lg shadow-md p-6 mb-6">
+                <div className="text-center py-8 text-gray-500">
+                  <div className="animate-spin text-4xl mb-2">✅</div>
+                  <p>Carregando documentos auto-aprovados...</p>
+                </div>
+              </div>
+            ) : autoApprovedDocs.length > 0 ? (
+              <div className="bg-green-50 border-2 border-green-400 rounded-lg shadow-md p-6 mb-6">
+                <div className="flex items-center justify-between mb-4">
+                  <h2 className="text-xl font-bold text-green-900">
+                    ✅ Documentos Auto-Aprovados - Validação Necessária
+                  </h2>
+                  <span className="bg-green-200 text-green-900 px-3 py-1 rounded-full text-sm font-bold">
+                    {autoApprovedDocs.length} {autoApprovedDocs.length === 1 ? 'documento' : 'documentos'}
+                  </span>
+                </div>
+                <p className="text-sm text-green-800 mb-4">
+                  🤖 Documentos classificados como alta relevância pelo sistema automático.
+                  <strong> Revise e valide</strong> para incorporar ao acervo.
+                </p>
+
+                <div className="space-y-3 max-h-96 overflow-y-auto">
+                  {autoApprovedDocs.map((doc) => (
+                    <div
+                      key={doc.id}
+                      className="bg-white border border-green-200 rounded-lg p-4 hover:shadow-md transition-shadow cursor-pointer"
+                      onClick={() => handleViewAutoApprovedDoc(doc)}
+                    >
+                      <div className="flex items-start justify-between mb-2">
+                        <div className="flex-1">
+                          <div className="flex items-center gap-2 mb-1">
+                            <span className="bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded uppercase font-bold">
+                              {doc.section}
+                            </span>
+                            <span className="text-xs text-gray-500">
+                              {doc.publishDate}
+                            </span>
+                          </div>
+                          <h3
+                            className="font-medium text-sm mb-1 text-gray-900"
+                            dangerouslySetInnerHTML={{
+                              __html: doc.title.substring(0, 150) + (doc.title.length > 150 ? '...' : ''),
+                            }}
+                          />
+                          {doc.hierarchyStr && (
+                            <div className="text-xs text-gray-600">{doc.hierarchyStr}</div>
+                          )}
+                        </div>
+                      </div>
+
+                      <div className="flex items-center gap-2 text-xs flex-wrap">
+                        <span className="bg-green-100 text-green-900 px-2 py-1 rounded font-bold">
+                          🤖 Auto-aprovado
+                        </span>
+                        <span className="bg-gray-100 text-gray-800 px-2 py-1 rounded font-medium">
+                          {doc.category}
+                        </span>
+                        <span className="bg-purple-100 text-purple-800 px-2 py-1 rounded font-medium">
+                          ⭐ {doc.confidence}% confiança
+                        </span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+
+                <div className="mt-4 pt-4 border-t border-green-200">
+                  <p className="text-xs text-green-800">
+                    💡 <strong>Dica:</strong> Clique em um documento para revisar os detalhes e aprovar/rejeitar.
+                  </p>
+                </div>
+              </div>
+            ) : null}
 
             {/* Seção de Documentos Pendentes */}
             {isPendingLoading ? (
