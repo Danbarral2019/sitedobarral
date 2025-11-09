@@ -15,7 +15,7 @@ import {
   Copy,
   RefreshCw
 } from 'lucide-react';
-import { LEI_14133_ARTIGOS, LeiArticle } from '@/data/lei-14133-artigos';
+import { LEI_14133_ARTIGOS as LEI_14133_ARTIGOS_FALLBACK, LeiArticle } from '@/data/lei-14133-artigos';
 
 export default function EditArtigoPage() {
   const params = useParams();
@@ -32,22 +32,63 @@ export default function EditArtigoPage() {
   const [formData, setFormData] = useState<LeiArticle | null>(null);
   const [originalData, setOriginalData] = useState<LeiArticle | null>(null);
 
+  // Buscar artigo do banco de dados ao montar componente
   useEffect(() => {
-    if (!numero || !LEI_14133_ARTIGOS[numero]) {
+    if (!numero) {
       router.push('/admin/lei-14133');
       return;
     }
 
-    const article = LEI_14133_ARTIGOS[numero];
-    setFormData(article);
-    setOriginalData(article);
+    async function fetchArticle() {
+      setIsLoading(true);
+      try {
+        const response = await fetch('/api/lei-14133/artigos');
+        if (response.ok) {
+          const data = await response.json();
+          if (data.success && data.artigos && data.artigos[numero]) {
+            const article = data.artigos[numero];
+            setFormData(article);
+            setOriginalData(article);
+            return;
+          }
+        }
+
+        // Fallback para arquivo se API falhar ou artigo não existir
+        const fallbackArticle = LEI_14133_ARTIGOS_FALLBACK[numero];
+        if (fallbackArticle) {
+          setFormData(fallbackArticle);
+          setOriginalData(fallbackArticle);
+        } else {
+          // Artigo não existe nem no banco nem no arquivo
+          router.push('/admin/lei-14133');
+        }
+      } catch (error) {
+        console.error('Erro ao buscar artigo:', error);
+
+        // Fallback para arquivo em caso de erro
+        const fallbackArticle = LEI_14133_ARTIGOS_FALLBACK[numero];
+        if (fallbackArticle) {
+          setFormData(fallbackArticle);
+          setOriginalData(fallbackArticle);
+        } else {
+          router.push('/admin/lei-14133');
+        }
+      } finally {
+        setIsLoading(false);
+      }
+    }
+
+    fetchArticle();
   }, [numero, router]);
 
-  if (!formData) {
+  if (!formData || isLoading) {
     return (
       <AdminLayout>
         <div className="flex items-center justify-center min-h-screen">
-          <RefreshCw className="w-8 h-8 animate-spin text-blue-600" />
+          <div className="text-center">
+            <RefreshCw className="w-12 h-12 animate-spin text-blue-600 mx-auto mb-4" />
+            <p className="text-gray-600">Carregando artigo {numero} do banco de dados...</p>
+          </div>
         </div>
       </AdminLayout>
     );
