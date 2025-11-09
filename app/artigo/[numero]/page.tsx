@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { Loader2, FileText, BookOpen, ArrowLeft, BarChart3, TrendingUp } from 'lucide-react';
-import { LEI_14133_ARTIGOS, LeiArticle } from '@/data/lei-14133-artigos';
+import { LEI_14133_ARTIGOS as LEI_14133_ARTIGOS_FALLBACK, LeiArticle } from '@/data/lei-14133-artigos';
 import { ArticleRelationshipGraph } from '@/components/ArticleRelationshipGraph';
 import { ArticleBadges } from '@/components/ArticleBadges';
 
@@ -35,23 +35,43 @@ export default function ArtigoPage() {
   const router = useRouter();
   const numero = params?.numero as string;
 
+  const [artigos, setArtigos] = useState<Record<string, LeiArticle>>(LEI_14133_ARTIGOS_FALLBACK);
   const [article, setArticle] = useState<LeiArticle | null>(null);
   const [relatedDocuments, setRelatedDocuments] = useState<Document[]>([]);
   const [relatedPosts, setRelatedPosts] = useState<BlogPost[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
+  // Buscar artigos do banco de dados ao montar componente
+  useEffect(() => {
+    async function fetchArtigos() {
+      try {
+        const response = await fetch('/api/lei-14133/artigos');
+        if (response.ok) {
+          const data = await response.json();
+          if (data.success && data.artigos) {
+            setArtigos(data.artigos);
+          }
+        }
+      } catch (error) {
+        console.error('Erro ao buscar artigos:', error);
+        // Mantém fallback em caso de erro
+      }
+    }
+    fetchArtigos();
+  }, []);
+
   useEffect(() => {
     // Valida e carrega o artigo
-    if (!numero || !LEI_14133_ARTIGOS[numero]) {
+    if (!numero || !artigos[numero]) {
       router.push('/');
       return;
     }
 
-    setArticle(LEI_14133_ARTIGOS[numero]);
+    setArticle(artigos[numero]);
 
     // Carrega documentos e posts relacionados
     loadRelatedContent(numero);
-  }, [numero, router]);
+  }, [numero, artigos, router]);
 
   const loadRelatedContent = async (articleNumber: string) => {
     setIsLoading(true);
@@ -351,7 +371,7 @@ export default function ArtigoPage() {
                 </h3>
                 <div className="space-y-2">
                   {/* Artigo anterior */}
-                  {parseInt(numero) > 1 && LEI_14133_ARTIGOS[String(parseInt(numero) - 1)] && (
+                  {parseInt(numero) > 1 && artigos[String(parseInt(numero) - 1)] && (
                     <Link
                       href={`/artigo/${parseInt(numero) - 1}`}
                       className="block p-3 bg-gray-50 rounded-lg hover:bg-blue-50 transition-colors"
@@ -364,7 +384,7 @@ export default function ArtigoPage() {
                   )}
 
                   {/* Artigo seguinte */}
-                  {parseInt(numero) < 193 && LEI_14133_ARTIGOS[String(parseInt(numero) + 1)] && (
+                  {parseInt(numero) < 193 && artigos[String(parseInt(numero) + 1)] && (
                     <Link
                       href={`/artigo/${parseInt(numero) + 1}`}
                       className="block p-3 bg-gray-50 rounded-lg hover:bg-blue-50 transition-colors"
