@@ -35,51 +35,60 @@ export async function PUT(
     // Ler arquivo atual
     const fileContent = readFileSync(filePath, 'utf-8');
 
-    // Escapar caracteres especiais para uso em regex e replacement string
-    const escapeRegex = (str: string) => str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-    const escapeReplacement = (str: string) => str.replace(/\$/g, '$$$$');
+    // Escapar aspas e caracteres especiais no conteúdo
+    const escapeForTypeScript = (str: string) => {
+      if (!str) return '';
+      return str
+        .replace(/\\/g, '\\\\')      // Escapar backslashes
+        .replace(/"/g, '\\"')         // Escapar aspas duplas
+        .replace(/\n/g, '\\n')        // Converter quebras de linha
+        .replace(/\r/g, '');          // Remover carriage returns
+    };
 
-    // Encontrar o bloco do artigo específico usando regex
-    // Padrão: "numero": { ... },
-    const articlePattern = new RegExp(
-      `("${escapeRegex(numero)}":\\s*\\{[^}]*?ementa:\\s*")([^"]*(?:\\\\.[^"]*)*)(")`,
-      'gs'
-    );
+    // Construir novo bloco do artigo
+    const newArticleBlock = `"${numero}": {
+    numero: "${numero}",
+    titulo: "${escapeForTypeScript(body.titulo || '')}",
+    capituloCompleto: "${escapeForTypeScript(body.capituloCompleto || '')}",
+    ementa: "${escapeForTypeScript(body.ementa)}",
+    capitulo: "${escapeForTypeScript(body.capitulo || '')}"${
+      body.secao ? `,\n    secao: "${escapeForTypeScript(body.secao)}"` : ''
+    }
+  }`;
 
-    // Verificar se o artigo existe
-    if (!articlePattern.test(fileContent)) {
+    // Encontrar o artigo usando parsing manual mais robusto
+    const startPattern = `"${numero}": {`;
+    const startIndex = fileContent.indexOf(startPattern);
+
+    if (startIndex === -1) {
       return NextResponse.json(
         { error: `Artigo ${numero} não encontrado no arquivo` },
         { status: 404 }
       );
     }
 
-    // Reset lastIndex após test()
-    articlePattern.lastIndex = 0;
+    // Encontrar o fim do objeto do artigo
+    // Procurar pelo padrão: },\n  "próximo número": ou };\n no final
+    let endIndex = startIndex + startPattern.length;
+    let braceCount = 1; // Já temos uma chave aberta
 
-    // Preparar novo conteúdo (escapar caracteres especiais)
-    const newEmenta = body.ementa
-      .replace(/\\/g, '\\\\')      // Escapar backslashes
-      .replace(/"/g, '\\"')         // Escapar aspas
-      .replace(/\n/g, '\\n')        // Converter quebras de linha para \\n
-      .replace(/\r/g, '');          // Remover carriage returns
-
-    // Construir novo bloco do artigo
-    const newArticleBlock = `"${numero}": {
-    numero: "${numero}",
-    titulo: "${body.titulo?.replace(/"/g, '\\"') || ''}",
-    capituloCompleto: "${body.capituloCompleto?.replace(/"/g, '\\"') || ''}",
-    ementa: "${newEmenta}",
-    capitulo: "${body.capitulo?.replace(/"/g, '\\"') || ''}",${
-      body.secao ? `\n    secao: "${body.secao.replace(/"/g, '\\"')}"` : ''
+    while (endIndex < fileContent.length && braceCount > 0) {
+      const char = fileContent[endIndex];
+      if (char === '{') braceCount++;
+      if (char === '}') braceCount--;
+      endIndex++;
     }
-  }`;
 
-    // Substituir o bloco antigo pelo novo
-    const updatedContent = fileContent.replace(
-      new RegExp(`"${escapeRegex(numero)}":\\s*\\{[^}]*\\}`, 's'),
-      newArticleBlock
-    );
+    if (braceCount !== 0) {
+      return NextResponse.json(
+        { error: 'Erro ao parsear estrutura do artigo' },
+        { status: 500 }
+      );
+    }
+
+    // Extrair e substituir o bloco do artigo
+    const oldArticleBlock = fileContent.substring(startIndex, endIndex);
+    const updatedContent = fileContent.replace(oldArticleBlock, newArticleBlock);
 
     // Verificar se houve mudança
     if (updatedContent === fileContent) {
