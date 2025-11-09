@@ -178,20 +178,53 @@ export default function DOUFiltrosPage() {
     setSearchResponse(null);
   };
 
-  const handleViewDetails = (result: SearchResult) => {
-    const doc: DOUDocument = {
-      title: result.title,
-      abstract: result.abstract,
-      url: result.href,
-      section: result.section,
-      publishDate: result.date,
-      category: result.category,
-      confidence: result.confidence,
-      hierarchyStr: result.hierarchyStr,
-      approvalStatus: result.status,
-    };
-    setSelectedDocument(doc);
-    setIsModalOpen(true);
+  const handleViewDetails = async (result: SearchResult) => {
+    try {
+      // Salvar documento no staging antes de abrir modal
+      const response = await fetch('/api/admin/dou/save-staging', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          title: result.title,
+          abstract: result.abstract,
+          url: result.href,
+          section: result.section,
+          publishDate: result.date,
+          category: result.category,
+          confidence: result.confidence,
+          hierarchyStr: result.hierarchyStr,
+          approvalStatus: result.status,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Erro ao salvar documento temporário');
+      }
+
+      const { id } = await response.json();
+
+      // Criar DOUDocument com ID do staging
+      const doc: DOUDocument = {
+        id, // ID do DOUStagingDocument
+        title: result.title,
+        abstract: result.abstract,
+        url: result.href,
+        section: result.section,
+        publishDate: result.date,
+        category: result.category,
+        confidence: result.confidence,
+        hierarchyStr: result.hierarchyStr,
+        approvalStatus: result.status,
+      };
+      setSelectedDocument(doc);
+      setIsModalOpen(true);
+    } catch (error) {
+      toast({
+        title: 'Erro ao abrir detalhes',
+        description: error instanceof Error ? error.message : 'Erro desconhecido',
+        variant: 'destructive',
+      });
+    }
   };
 
   const handleApproveDocument = async (courseIds: string[], adminNotes?: string) => {
