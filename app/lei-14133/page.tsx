@@ -1,0 +1,253 @@
+'use client';
+
+import { useState } from 'react';
+import Link from 'next/link';
+import {
+  BookOpen, Home, ChevronRight, ArrowRight,
+  Scale, FileText, Search
+} from 'lucide-react';
+import { LEI_14133_GRUPOS, ArticleGroup, getArticleGroups } from '@/data/lei-14133-grupos';
+import { LEI_14133_ARTIGOS } from '@/data/lei-14133-artigos';
+
+// Função auxiliar para converter ID de grupo em emoji
+const getGroupEmoji = (icon: string) => icon;
+
+// Cores Tailwind por grupo
+const COLOR_CLASSES: Record<string, { bg: string; border: string; text: string; hover: string }> = {
+  blue: { bg: 'bg-blue-50', border: 'border-blue-200', text: 'text-blue-700', hover: 'hover:border-blue-400' },
+  yellow: { bg: 'bg-yellow-50', border: 'border-yellow-200', text: 'text-yellow-700', hover: 'hover:border-yellow-400' },
+  green: { bg: 'bg-green-50', border: 'border-green-200', text: 'text-green-700', hover: 'hover:border-green-400' },
+  indigo: { bg: 'bg-indigo-50', border: 'border-indigo-200', text: 'text-indigo-700', hover: 'hover:border-indigo-400' },
+  purple: { bg: 'bg-purple-50', border: 'border-purple-200', text: 'text-purple-700', hover: 'hover:border-purple-400' },
+  cyan: { bg: 'bg-cyan-50', border: 'border-cyan-200', text: 'text-cyan-700', hover: 'hover:border-cyan-400' },
+  emerald: { bg: 'bg-emerald-50', border: 'border-emerald-200', text: 'text-emerald-700', hover: 'hover:border-emerald-400' },
+  orange: { bg: 'bg-orange-50', border: 'border-orange-200', text: 'text-orange-700', hover: 'hover:border-orange-400' },
+  amber: { bg: 'bg-amber-50', border: 'border-amber-200', text: 'text-amber-700', hover: 'hover:border-amber-400' },
+  red: { bg: 'bg-red-50', border: 'border-red-200', text: 'text-red-700', hover: 'hover:border-red-400' },
+  teal: { bg: 'bg-teal-50', border: 'border-teal-200', text: 'text-teal-700', hover: 'hover:border-teal-400' },
+  gray: { bg: 'bg-gray-50', border: 'border-gray-200', text: 'text-gray-700', hover: 'hover:border-gray-400' },
+};
+
+export default function Lei14133Page() {
+  const [selectedGroup, setSelectedGroup] = useState<string | null>(null);
+  const [searchTerm, setSearchTerm] = useState('');
+
+  const selectedGroupData = selectedGroup
+    ? LEI_14133_GRUPOS.find(g => g.id === selectedGroup)
+    : null;
+
+  // Filtrar artigos se houver busca
+  const filteredGroups = searchTerm.trim().length >= 2
+    ? LEI_14133_GRUPOS.filter(group => {
+        const term = searchTerm.toLowerCase();
+        return (
+          group.title.toLowerCase().includes(term) ||
+          group.description.toLowerCase().includes(term) ||
+          group.articles.some(articleNum => {
+            const article = LEI_14133_ARTIGOS[articleNum];
+            return article && (
+              article.numero.includes(term) ||
+              article.ementa.toLowerCase().includes(term)
+            );
+          })
+        );
+      })
+    : LEI_14133_GRUPOS;
+
+  return (
+    <main className="min-h-screen bg-gray-50">
+      {/* Header */}
+      <div className="bg-gradient-to-r from-blue-600 to-indigo-700 text-white py-12">
+        <div className="max-w-7xl mx-auto px-4">
+          {/* Breadcrumbs */}
+          <div className="flex items-center gap-2 text-sm text-blue-100 mb-4">
+            <Link href="/" className="hover:text-white transition-colors flex items-center gap-1">
+              <Home className="w-4 h-4" />
+              Início
+            </Link>
+            <ChevronRight className="w-4 h-4" />
+            <span className="text-white font-medium">Lei 14.133/2021</span>
+          </div>
+
+          <div className="flex items-center gap-4 mb-6">
+            <div className="w-16 h-16 bg-white/20 backdrop-blur rounded-2xl flex items-center justify-center">
+              <Scale className="w-10 h-10" />
+            </div>
+            <div>
+              <h1 className="text-4xl font-bold mb-2">Lei 14.133/2021</h1>
+              <p className="text-xl text-blue-100">
+                Nova Lei de Licitações - Navegação por Temas
+              </p>
+            </div>
+          </div>
+
+          {/* Search Bar */}
+          <div className="relative max-w-2xl">
+            <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+            <input
+              type="text"
+              placeholder="Buscar tema ou artigo..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="w-full pl-12 pr-4 py-3 text-gray-900 bg-white rounded-xl border-2 border-transparent focus:border-white focus:ring-4 focus:ring-white/30 shadow-lg"
+            />
+          </div>
+        </div>
+      </div>
+
+      {/* Content */}
+      <div className="max-w-7xl mx-auto px-4 py-12">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          {/* Sidebar - Grupos Temáticos */}
+          <div className="lg:col-span-1">
+            <div className="bg-white rounded-2xl shadow-lg border-2 border-gray-200 p-6 sticky top-4">
+              <div className="flex items-center gap-2 mb-6">
+                <BookOpen className="w-6 h-6 text-blue-600" />
+                <h2 className="text-xl font-bold text-gray-900">
+                  Grupos Temáticos
+                </h2>
+              </div>
+
+              <div className="space-y-2 max-h-[70vh] overflow-y-auto">
+                {filteredGroups.map((group) => {
+                  const colors = COLOR_CLASSES[group.color] || COLOR_CLASSES.gray;
+                  const isSelected = selectedGroup === group.id;
+
+                  return (
+                    <button
+                      key={group.id}
+                      onClick={() => setSelectedGroup(group.id === selectedGroup ? null : group.id)}
+                      className={`w-full text-left p-4 rounded-xl border-2 transition-all ${
+                        isSelected
+                          ? `${colors.bg} ${colors.border} ${colors.text} shadow-md`
+                          : `bg-white border-gray-200 text-gray-700 ${colors.hover}`
+                      }`}
+                    >
+                      <div className="flex items-start gap-3">
+                        <div className="text-2xl flex-shrink-0">
+                          {getGroupEmoji(group.icon)}
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <h3 className="font-bold text-sm mb-1 line-clamp-2">
+                            {group.title}
+                          </h3>
+                          <p className="text-xs opacity-80 line-clamp-2">
+                            {group.description}
+                          </p>
+                          <div className="mt-2">
+                            <span className="text-xs font-medium px-2 py-1 bg-white/50 rounded">
+                              {group.articles.length} {group.articles.length === 1 ? 'artigo' : 'artigos'}
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                    </button>
+                  );
+                })}
+              </div>
+
+              {filteredGroups.length === 0 && (
+                <div className="text-center py-8 text-gray-500">
+                  <Search className="w-12 h-12 mx-auto mb-2 opacity-50" />
+                  <p className="text-sm">Nenhum grupo encontrado</p>
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Main Content - Artigos do Grupo Selecionado */}
+          <div className="lg:col-span-2">
+            {selectedGroupData ? (
+              <div className="bg-white rounded-2xl shadow-lg border-2 border-gray-200 p-8">
+                <div className="mb-6">
+                  <div className="flex items-center gap-3 mb-4">
+                    <span className="text-4xl">
+                      {getGroupEmoji(selectedGroupData.icon)}
+                    </span>
+                    <div className="flex-1">
+                      <h2 className="text-2xl font-bold text-gray-900">
+                        {selectedGroupData.title}
+                      </h2>
+                      <p className="text-gray-600">
+                        {selectedGroupData.description}
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center gap-4 text-sm text-gray-600">
+                    <span className="flex items-center gap-1">
+                      <FileText className="w-4 h-4" />
+                      {selectedGroupData.articles.length} {selectedGroupData.articles.length === 1 ? 'artigo' : 'artigos'}
+                    </span>
+                  </div>
+                </div>
+
+                <div className="space-y-4">
+                  {selectedGroupData.articles.map((articleNum) => {
+                    const article = LEI_14133_ARTIGOS[articleNum];
+                    if (!article) return null;
+
+                    const colors = COLOR_CLASSES[selectedGroupData.color] || COLOR_CLASSES.gray;
+
+                    return (
+                      <Link
+                        key={articleNum}
+                        href={`/artigo/${articleNum}`}
+                        className={`block p-5 rounded-xl border-2 ${colors.border} ${colors.bg} ${colors.hover} hover:shadow-md transition-all group`}
+                      >
+                        <div className="flex items-start gap-4">
+                          <div className={`flex-shrink-0 px-3 py-1 ${colors.text} bg-white rounded-lg text-sm font-bold border-2 ${colors.border}`}>
+                            Art. {article.numero}
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            {article.capituloCompleto && (
+                              <p className="text-xs text-gray-500 mb-1">
+                                {article.capituloCompleto}
+                              </p>
+                            )}
+                            <p className="text-sm text-gray-700 line-clamp-3">
+                              {article.ementa.substring(0, 200)}...
+                            </p>
+                          </div>
+                          <ArrowRight className={`w-5 h-5 ${colors.text} opacity-0 group-hover:opacity-100 group-hover:translate-x-1 transition-all flex-shrink-0`} />
+                        </div>
+                      </Link>
+                    );
+                  })}
+                </div>
+              </div>
+            ) : (
+              <div className="bg-white rounded-2xl shadow-lg border-2 border-gray-200 p-12 text-center">
+                <Scale className="w-20 h-20 text-gray-300 mx-auto mb-6" />
+                <h2 className="text-2xl font-bold text-gray-900 mb-4">
+                  Selecione um Grupo Temático
+                </h2>
+                <p className="text-gray-600 mb-8 max-w-md mx-auto">
+                  Escolha um dos grupos temáticos ao lado para visualizar os artigos organizados por tema.
+                </p>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 max-w-2xl mx-auto">
+                  <div className="p-6 bg-blue-50 rounded-xl border-2 border-blue-200">
+                    <div className="text-3xl mb-2">📋</div>
+                    <h3 className="font-bold text-gray-900 mb-1">Navegação Temática</h3>
+                    <p className="text-sm text-gray-600">
+                      21 grupos organizados por assunto
+                    </p>
+                  </div>
+
+                  <div className="p-6 bg-indigo-50 rounded-xl border-2 border-indigo-200">
+                    <div className="text-3xl mb-2">⚖️</div>
+                    <h3 className="font-bold text-gray-900 mb-1">193 Artigos</h3>
+                    <p className="text-sm text-gray-600">
+                      Texto completo da lei
+                    </p>
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+    </main>
+  );
+}

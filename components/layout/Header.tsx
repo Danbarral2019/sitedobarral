@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { useState, memo, useEffect, useRef } from 'react';
-import { Menu, X, ChevronDown, BookOpen, User, FileText, Mail, Home, LogIn, Award, Search } from 'lucide-react';
+import { Menu, X, ChevronDown, BookOpen, User, FileText, Mail, Home, LogIn, Award, Search, Scale } from 'lucide-react';
 import { courses } from '@/data/courses';
 
 export const Header = memo(function Header() {
@@ -67,6 +67,14 @@ export const Header = memo(function Header() {
             >
               <Search className="w-4 h-4" />
               <span>Busca</span>
+            </Link>
+
+            <Link
+              href="/lei-14133"
+              className="flex items-center space-x-1 text-gray-700 hover:text-primary-600 transition-colors"
+            >
+              <Scale className="w-4 h-4" />
+              <span>Lei 14.133</span>
             </Link>
 
             <div className="relative" ref={coursesDropdownRef} suppressHydrationWarning>
@@ -166,6 +174,13 @@ export const Header = memo(function Header() {
               onClick={() => setIsMenuOpen(false)}
             >
               Busca Integrada
+            </Link>
+            <Link
+              href="/lei-14133"
+              className="block py-2 text-gray-700 hover:text-primary-600"
+              onClick={() => setIsMenuOpen(false)}
+            >
+              Lei 14.133
             </Link>
             <Link
               href="/cursos"
