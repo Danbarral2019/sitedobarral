@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import {
   BookOpen, Home, ChevronRight,
@@ -8,8 +8,17 @@ import {
   ChevronsDown, ChevronsUp
 } from 'lucide-react';
 import { LEI_14133_GRUPOS } from '@/data/lei-14133-grupos';
-import { LEI_14133_ARTIGOS } from '@/data/lei-14133-artigos';
+import { LEI_14133_ARTIGOS as LEI_14133_ARTIGOS_FALLBACK } from '@/data/lei-14133-artigos';
 import { CollapsibleArticle } from '@/components/CollapsibleArticle';
+
+type LeiArticle = {
+  numero: string;
+  ementa: string;
+  capitulo: string;
+  secao?: string;
+  titulo?: string;
+  capituloCompleto?: string;
+};
 
 // Função auxiliar para converter ID de grupo em emoji
 const getGroupEmoji = (icon: string) => icon;
@@ -34,6 +43,29 @@ export default function Lei14133Page() {
   const [selectedGroup, setSelectedGroup] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [expandAll, setExpandAll] = useState(false);
+  const [artigos, setArtigos] = useState<Record<string, LeiArticle>>(LEI_14133_ARTIGOS_FALLBACK);
+  const [isLoadingArtigos, setIsLoadingArtigos] = useState(true);
+
+  // Buscar artigos do banco de dados ao montar componente
+  useEffect(() => {
+    async function fetchArtigos() {
+      try {
+        const response = await fetch('/api/lei-14133/artigos');
+        if (response.ok) {
+          const data = await response.json();
+          if (data.success && data.artigos) {
+            setArtigos(data.artigos);
+          }
+        }
+      } catch (error) {
+        console.error('Erro ao buscar artigos:', error);
+        // Mantém fallback em caso de erro
+      } finally {
+        setIsLoadingArtigos(false);
+      }
+    }
+    fetchArtigos();
+  }, []);
 
   const selectedGroupData = selectedGroup
     ? LEI_14133_GRUPOS.find(g => g.id === selectedGroup)
@@ -47,7 +79,7 @@ export default function Lei14133Page() {
           group.title.toLowerCase().includes(term) ||
           group.description.toLowerCase().includes(term) ||
           group.articles.some(articleNum => {
-            const article = LEI_14133_ARTIGOS[articleNum];
+            const article = artigos[articleNum];
             return article && (
               article.numero.includes(term) ||
               article.ementa.toLowerCase().includes(term)
@@ -205,7 +237,7 @@ export default function Lei14133Page() {
 
                 <div className="space-y-3" key={expandAll ? 'expanded' : 'collapsed'}>
                   {selectedGroupData.articles.map((articleNum) => {
-                    const article = LEI_14133_ARTIGOS[articleNum];
+                    const article = artigos[articleNum];
                     if (!article) return null;
 
                     const colors = COLOR_CLASSES[selectedGroupData.color] || COLOR_CLASSES.gray;
