@@ -9,7 +9,7 @@ Guia rápido para Claude Code ao trabalhar neste repositório.
 3. **Documents:** NUNCA acessar `course.restrictedDocuments` - buscar via `/api/documents`
 4. **React Hooks:** Todos hooks ANTES de early returns
 5. **Prisma Engine:** Se der erro, matar Node.js e rodar `npx prisma generate`
-6. **Lei 14.133 Data:** 193 artigos editados MANUALMENTE - SEMPRE executar `node scripts/backup-lei-14133.js` antes de mudanças no model LeiArticle
+6. **Lei 14.133 Data:** 195 artigos (193 editados MANUALMENTE + Art. 184-A + Art. 194) - SEMPRE executar `node scripts/backup-lei-14133.js` antes de mudanças no model LeiArticle
 
 ## Project Overview
 

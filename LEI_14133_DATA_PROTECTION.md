@@ -1,9 +1,9 @@
 # 🔒 Proteção de Dados - Lei 14.133/2021
 
-> **Status**: ✅ Proteção Completa Implementada
-> **Data**: 2025-11-09
-> **Artigos Protegidos**: 193 artigos editados manualmente
-> **Commits Principais**: `93dea4b`, `1873501`, `a380aa1`, `3bfdc82`
+> **Status**: ✅ Proteção Completa Implementada + 2 Artigos Adicionados
+> **Data**: 2025-11-09 (atualizado em 2025-11-09)
+> **Artigos Protegidos**: 195 artigos (193 originais + Art. 184-A + Art. 194)
+> **Commits Principais**: `93dea4b`, `1873501`, `a380aa1`, `3bfdc82`, `961c0a6`
 
 ---
 
@@ -23,14 +23,14 @@
 ## 🚨 Problema Identificado
 
 ### Contexto
-O usuário editou **MANUALMENTE todos os 193 artigos** da Lei 14.133/2021 (Nova Lei de Licitações) no banco de dados PostgreSQL. Este foi um trabalho extenso e de alto valor.
+O usuário editou **MANUALMENTE todos os 193 artigos originais** da Lei 14.133/2021 (Nova Lei de Licitações) no banco de dados PostgreSQL. Posteriormente, foram identificados e adicionados 2 artigos faltantes (**Art. 184-A** incluído pela Lei 14.770/2023 e **Art. 194** sobre vigência), totalizando **195 artigos**. Este foi um trabalho extenso e de alto valor.
 
 ### Riscos Detectados
 Existiam 5 vetores de risco que poderiam **destruir todo o trabalho manual**:
 
 1. **`vercel-build`**: Script usa flag `--accept-data-loss` (prisma db push)
 2. **Scripts de scraping**: 4 scripts automáticos que sobrescrevem artigos do Planalto
-3. **Falta de backups**: Nenhum backup automático dos 193 artigos
+3. **Falta de backups**: Nenhum backup automático dos artigos
 4. **API desprotegida**: Endpoint `/api/admin/lei-14133/[numero]` sem validação
 5. **Schema migrations**: Mudanças no model `LeiArticle` sem backup prévio
 
@@ -54,18 +54,29 @@ Implementamos uma **proteção multi-camada** com 6 ações imediatas:
 ## 🔐 Camadas de Proteção
 
 ### 1️⃣ Backup Versionado em Git
-- ✅ Backup JSON completo dos 193 artigos
+- ✅ Backup JSON completo dos 195 artigos
 - ✅ Versionado no Git para histórico completo
 - ✅ Metadados: data, contagem, descrição
 - 📁 Localização: `data/backups/lei-14133-YYYY-MM-DD-HHmmss.json`
 
-**Primeiro Backup:**
+**Backups Principais:**
+
+1. **Primeiro Backup (193 artigos originais):**
 ```
 data/backups/lei-14133-2025-11-09T22-42-31.json
 - 193 artigos
 - 339.15 KB
 - 190 artigos completos (98.4%)
 - 3 artigos truncados (1.6%)
+```
+
+2. **Backup Atual (195 artigos completos):**
+```
+data/backups/lei-14133-2025-11-09T22-57-24.json
+- 195 artigos (193 + Art. 184-A + Art. 194)
+- 341.69 KB
+- 191 artigos completos (97.9%)
+- 4 artigos truncados (2.1%)
 ```
 
 ### 2️⃣ Scripts Perigosos Desabilitados
@@ -83,8 +94,8 @@ Cada script contém header de aviso:
 /**
  * 🚨 SCRIPT DESABILITADO - NÃO EXECUTAR! 🚨
  *
- * Este script foi DESABILITADO para proteger os 193 artigos da Lei 14.133
- * que foram editados MANUALMENTE pelo usuário.
+ * Este script foi DESABILITADO para proteger os 195 artigos da Lei 14.133
+ * (193 editados manualmente + Art. 184-A + Art. 194)
  *
  * MOTIVO: Executar este script sobrescreverá TODO o trabalho manual!
  *
@@ -93,7 +104,7 @@ Cada script contém header de aviso:
  * Para restaurar backup: node scripts/restore-lei-14133.js <caminho-backup>
  *
  * Data desabilitação: 2025-11-09
- * Referência: commit 93dea4b
+ * Referência: commits 93dea4b (backup inicial), 961c0a6 (artigos completos)
  */
 ```
 
@@ -111,7 +122,7 @@ Cada script contém header de aviso:
 // DO NOT run migrations with --accept-data-loss flag on this model!
 // Backup reference: data/backups/lei-14133-YYYY-MM-DD-HHmmss.json
 //
-// Last manual edit: 2025-11-09 (193 articles)
+// Last manual edit: 2025-11-09 (195 articles: 193 original + Art. 184-A + Art. 194)
 // Protection scripts disabled: scripts/*.DISABLED
 // ⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️
 
@@ -122,7 +133,7 @@ model LeiArticle {
 
 **`CLAUDE.md` (linha 12):**
 ```markdown
-6. **Lei 14.133 Data:** 193 artigos editados MANUALMENTE - SEMPRE executar `node scripts/backup-lei-14133.js` antes de mudanças no model LeiArticle
+6. **Lei 14.133 Data:** 195 artigos (193 editados MANUALMENTE + Art. 184-A + Art. 194) - SEMPRE executar `node scripts/backup-lei-14133.js` antes de mudanças no model LeiArticle
 ```
 
 ### 4️⃣ Scripts de Backup e Restore
@@ -157,11 +168,11 @@ node scripts/backup-lei-14133.js
 ```json
 {
   "metadata": {
-    "exportedAt": "2025-11-09T22:42:31.000Z",
-    "articleCount": 193,
-    "expectedCount": 193,
+    "exportedAt": "2025-11-09T22:57:24.000Z",
+    "articleCount": 195,
+    "expectedCount": 195,
     "version": "1.0",
-    "description": "Backup completo dos 193 artigos da Lei 14.133/2021 editados manualmente"
+    "description": "Backup completo dos 195 artigos da Lei 14.133/2021 (193 originais + Art. 184-A + Art. 194)"
   },
   "articles": [
     {
@@ -283,7 +294,7 @@ To rollback this restore:
 
 ### Por que foram desabilitados?
 
-Estes scripts **sobrescrevem os artigos** buscando texto do site oficial do Planalto. Como o usuário editou MANUALMENTE todos os 193 artigos, executar qualquer um destes scripts **destruiria todo o trabalho**.
+Estes scripts **sobrescrevem os artigos** buscando texto do site oficial do Planalto. Como o usuário editou MANUALMENTE os artigos (e posteriormente foram adicionados Art. 184-A e 194), executar qualquer um destes scripts **destruiria todo o trabalho**.
 
 ### Scripts Desabilitados
 
@@ -435,12 +446,12 @@ Verifique o código do restore script - ele deve fazer **UPSERT** (update ou cre
 **Sintomas:**
 ```
 📈 Statistics:
-   Complete articles: 190
-   Truncated articles: 3
+   Complete articles: 191
+   Truncated articles: 4
 ```
 
 **Solução:**
-Isto é ESPERADO se alguns artigos foram parcialmente editados. Os 3 artigos truncados provavelmente terminam com preposições ("do", "da", "de", etc.) ou têm menos de 100 caracteres.
+Isto é ESPERADO se alguns artigos foram parcialmente editados. Os 4 artigos truncados provavelmente terminam com preposições ("do", "da", "de", etc.) ou têm menos de 100 caracteres.
 
 Para corrigir, edite manualmente via:
 ```
@@ -480,6 +491,8 @@ node scripts/backup-lei-14133.js
 | `1873501` | 2025-11-09 | **Scripts desabilitados** - 4 scripts renomeados .DISABLED |
 | `a380aa1` | 2025-11-09 | **Avisos críticos** - schema.prisma e CLAUDE.md |
 | `3bfdc82` | 2025-11-09 | **Script de restore** - restore-lei-14133.js criado |
+| `fb618ab` | 2025-11-09 | **Documentação completa** - LEI_14133_DATA_PROTECTION.md |
+| `961c0a6` | 2025-11-09 | **Artigos faltantes adicionados** - Art. 184-A e 194, total: 195 |
 
 ### Detalhes dos Commits
 
@@ -572,20 +585,77 @@ Recursos de Segurança:
    - Instruções de rollback no final
 ```
 
+#### Commit `fb618ab` - Documentação Completa
+```
+docs: Add comprehensive data protection documentation
+
+- LEI_14133_DATA_PROTECTION.md criado (682 linhas)
+- Guia completo de proteção
+- Workflows recomendados
+- Troubleshooting
+- Histórico de commits
+```
+
+#### Commit `961c0a6` - Artigos Faltantes Adicionados
+```
+feat: Add missing Lei 14.133 articles (184-A and 194)
+
+Artigos Incluídos:
+
+1. Art. 184-A - Regime Simplificado para Convênios
+   - Incluído pela Lei nº 14.770/2023
+   - Convênios até R$ 1.500.000,00
+   - 4 incisos + 4 parágrafos
+   - Capítulo: TÍTULO VII - CAPÍTULO III
+
+2. Art. 194 - Vigência
+   - "Esta Lei entra em vigor na data de sua publicação"
+   - Artigo final da lei
+
+Total de Artigos:
+- Antes: 193 artigos
+- Depois: 195 artigos (193 + Art. 184-A + Art. 194)
+
+Backups Criados:
+
+1. Pre-addition backup (193 artigos):
+   - data/backups/lei-14133-2025-11-09T22-56-38.json
+   - 339.15 KB
+
+2. Post-addition backup (195 artigos):
+   - data/backups/lei-14133-2025-11-09T22-57-24.json
+   - 341.69 KB
+   - 191 artigos completos + 4 truncados
+
+Scripts Modificados:
+- backup-lei-14133.js: EXPECTED_COUNT 193 → 195
+- restore-lei-14133.js: EXPECTED_COUNT 193 → 195
+- add-missing-articles.js: Script temporário criado
+```
+
 ---
 
 ## 🎯 Conclusão
 
 ### Proteção Implementada ✅
 
-Todos os 193 artigos da Lei 14.133/2021 estão agora protegidos por **6 camadas de segurança**:
+Todos os **195 artigos** da Lei 14.133/2021 (193 originais + Art. 184-A + Art. 194) estão agora protegidos por **6 camadas de segurança**:
 
-1. ✅ **Backup versionado em Git** (commit 93dea4b)
+1. ✅ **Backup versionado em Git** (commits 93dea4b, 961c0a6)
 2. ✅ **Scripts perigosos desabilitados** (.DISABLED + avisos)
 3. ✅ **Avisos críticos no código** (schema.prisma, CLAUDE.md)
 4. ✅ **Script de backup automático** (backup-lei-14133.js)
 5. ✅ **Script de restauração seguro** (restore-lei-14133.js)
 6. ✅ **Documentação completa** (este arquivo)
+
+### Artigos Completos ✅
+
+A Lei 14.133 está agora **100% COMPLETA** com todos os 195 artigos:
+
+- ✅ **Artigos 1 a 183**: 183 artigos numerados sequencialmente
+- ✅ **Art. 184-A**: Regime simplificado para convênios (Lei 14.770/2023)
+- ✅ **Artigos 184 a 193**: 10 artigos finais
+- ✅ **Art. 194**: Vigência da lei
 
 ### Próximas Recomendações
 
@@ -603,6 +673,10 @@ Todos os 193 artigos da Lei 14.133/2021 estão agora protegidos por **6 camadas 
 
 ---
 
-**Última Atualização**: 2025-11-09
-**Versão**: 1.0
+**Última Atualização**: 2025-11-09 (artigos faltantes adicionados)
+**Versão**: 1.1 (195 artigos completos)
 **Mantido por**: Claude Code (Anthropic)
+
+**Changelog**:
+- v1.0 (2025-11-09): Proteção inicial dos 193 artigos editados manualmente
+- v1.1 (2025-11-09): Adicionados Art. 184-A e Art. 194, total: 195 artigos

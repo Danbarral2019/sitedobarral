@@ -776,7 +776,7 @@ model DOUSavedFilter {
 }
 
 // ⚠️⚠️⚠️ CRITICAL DATA PROTECTION WARNING ⚠️⚠️⚠️
-// This model contains 193 manually edited articles by the user.
+// This model contains 195 articles (193 manually edited + Art. 184-A + Art. 194).
 //
 // BEFORE ANY SCHEMA CHANGES TO THIS MODEL:
 // 1. Run backup: node scripts/backup-lei-14133.js
@@ -786,12 +786,12 @@ model DOUSavedFilter {
 // DO NOT run migrations with --accept-data-loss flag on this model!
 // Backup reference: data/backups/lei-14133-YYYY-MM-DD-HHmmss.json
 //
-// Last manual edit: 2025-11-09 (193 articles)
+// Last manual edit: 2025-11-09 (195 articles: 193 original + Art. 184-A + Art. 194)
 // Protection scripts disabled: scripts/*.DISABLED
 // ⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️
 
 // Artigos da Lei 14.133/2021 - Nova Lei de Licitações
-// Armazena os 193 artigos para permitir edição via admin
+// Armazena os 195 artigos (193 + Art. 184-A + Art. 194) para permitir edição via admin
 model LeiArticle {
   id               String   @id @default(uuid())
   numero           String   @unique // "1", "2", "3", etc.
