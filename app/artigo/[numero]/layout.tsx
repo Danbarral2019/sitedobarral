@@ -1,5 +1,6 @@
 import { Metadata } from 'next';
-import { LEI_14133_ARTIGOS } from '@/data/lei-14133-artigos';
+import { prisma } from '@/lib/prisma';
+import { LEI_14133_ARTIGOS as LEI_14133_ARTIGOS_FALLBACK } from '@/data/lei-14133-artigos';
 
 export async function generateMetadata({
   params,
@@ -7,7 +8,31 @@ export async function generateMetadata({
   params: Promise<{ numero: string }>;
 }): Promise<Metadata> {
   const { numero } = await params;
-  const article = LEI_14133_ARTIGOS[numero];
+
+  // Buscar artigo do banco de dados
+  let article = null;
+  try {
+    const dbArticle = await prisma.leiArticle.findUnique({
+      where: { numero },
+    });
+    if (dbArticle) {
+      article = {
+        numero: dbArticle.numero,
+        ementa: dbArticle.ementa,
+        capitulo: dbArticle.capitulo,
+        secao: dbArticle.secao || undefined,
+        titulo: dbArticle.titulo || undefined,
+        capituloCompleto: dbArticle.capituloCompleto || undefined,
+      };
+    }
+  } catch (error) {
+    console.error('Error fetching article for metadata:', error);
+  }
+
+  // Fallback para arquivo se banco falhar
+  if (!article) {
+    article = LEI_14133_ARTIGOS_FALLBACK[numero];
+  }
 
   if (!article) {
     return {

@@ -1,29 +1,66 @@
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import Link from 'next/link';
 import { Search, BookOpen, ArrowRight, FileText, X, List, Hash } from 'lucide-react';
-import { LEI_14133_ARTIGOS, searchLeiArticles } from '@/data/lei-14133-artigos';
+import { LEI_14133_ARTIGOS as LEI_14133_ARTIGOS_FALLBACK, searchLeiArticles as searchLeiArticlesFallback, LeiArticle } from '@/data/lei-14133-artigos';
 import { LEI_14133_GRUPOS, getGroupById } from '@/data/lei-14133-grupos';
 import { formatArticleNumber } from '@/lib/article-utils';
 
 type NavigationMode = 'articles' | 'groups';
 
+// Função de busca que funciona com o estado de artigos
+function searchArticles(artigos: Record<string, LeiArticle>, searchTerm: string) {
+  const allArticles = Object.values(artigos);
+  const term = searchTerm.toLowerCase();
+
+  return allArticles
+    .filter(article =>
+      article.numero.toLowerCase().includes(term) ||
+      article.ementa.toLowerCase().includes(term) ||
+      article.titulo?.toLowerCase().includes(term) ||
+      article.capitulo.toLowerCase().includes(term) ||
+      article.secao?.toLowerCase().includes(term)
+    )
+    .sort((a, b) => parseInt(a.numero) - parseInt(b.numero))
+    .slice(0, 50); // Limita a 50 resultados
+}
+
 export default function ArtigosIndexPage() {
+  const [artigos, setArtigos] = useState<Record<string, LeiArticle>>(LEI_14133_ARTIGOS_FALLBACK);
   const [searchTerm, setSearchTerm] = useState('');
   const [mode, setMode] = useState<NavigationMode>('articles');
   const [selectedGroup, setSelectedGroup] = useState<string | null>(null);
   const [articleSearch, setArticleSearch] = useState('');
 
+  // Buscar artigos do banco de dados ao montar componente
+  useEffect(() => {
+    async function fetchArtigos() {
+      try {
+        const response = await fetch('/api/lei-14133/artigos');
+        if (response.ok) {
+          const data = await response.json();
+          if (data.success && data.artigos) {
+            setArtigos(data.artigos);
+          }
+        }
+      } catch (error) {
+        console.error('Erro ao buscar artigos:', error);
+        // Mantém fallback em caso de erro
+      }
+    }
+    fetchArtigos();
+  }, []);
+
   // Busca de artigos (global - no topo)
   const searchResults = useMemo(() => {
     if (!searchTerm.trim()) return [];
-    return searchLeiArticles(searchTerm);
-  }, [searchTerm]);
+    return searchArticles(artigos, searchTerm);
+  }, [searchTerm, artigos]);
 
   // Lista filtrada de artigos (na aba Artigos)
   const filteredArticles = useMemo(() => {
-    const allArticles = Object.values(LEI_14133_ARTIGOS);
+    const allArticles = Object.values(artigos);
 
     if (!articleSearch.trim()) {
       // Retorna todos os 193 artigos
@@ -262,7 +299,7 @@ export default function ArtigosIndexPage() {
 
                         <div className="space-y-3">
                           {group.articles.map(numero => {
-                            const article = LEI_14133_ARTIGOS[numero];
+                            const article = artigos[numero];
                             if (!article) return null;
 
                             return (
