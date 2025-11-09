@@ -775,6 +775,21 @@ model DOUSavedFilter {
   @@index([lastUsedAt])
 }
 
+// ⚠️⚠️⚠️ CRITICAL DATA PROTECTION WARNING ⚠️⚠️⚠️
+// This model contains 193 manually edited articles by the user.
+//
+// BEFORE ANY SCHEMA CHANGES TO THIS MODEL:
+// 1. Run backup: node scripts/backup-lei-14133.js
+// 2. Commit backup to Git
+// 3. Test restore: node scripts/restore-lei-14133.js <backup-file>
+//
+// DO NOT run migrations with --accept-data-loss flag on this model!
+// Backup reference: data/backups/lei-14133-YYYY-MM-DD-HHmmss.json
+//
+// Last manual edit: 2025-11-09 (193 articles)
+// Protection scripts disabled: scripts/*.DISABLED
+// ⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️
+
 // Artigos da Lei 14.133/2021 - Nova Lei de Licitações
 // Armazena os 193 artigos para permitir edição via admin
 model LeiArticle {
