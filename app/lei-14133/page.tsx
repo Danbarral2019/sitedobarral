@@ -3,11 +3,13 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import {
-  BookOpen, Home, ChevronRight, ArrowRight,
-  Scale, FileText, Search
+  BookOpen, Home, ChevronRight,
+  Scale, FileText, Search,
+  ChevronsDown, ChevronsUp
 } from 'lucide-react';
-import { LEI_14133_GRUPOS, ArticleGroup, getArticleGroups } from '@/data/lei-14133-grupos';
+import { LEI_14133_GRUPOS } from '@/data/lei-14133-grupos';
 import { LEI_14133_ARTIGOS } from '@/data/lei-14133-artigos';
+import { CollapsibleArticle } from '@/components/CollapsibleArticle';
 
 // Função auxiliar para converter ID de grupo em emoji
 const getGroupEmoji = (icon: string) => icon;
@@ -31,6 +33,7 @@ const COLOR_CLASSES: Record<string, { bg: string; border: string; text: string; 
 export default function Lei14133Page() {
   const [selectedGroup, setSelectedGroup] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
+  const [expandAll, setExpandAll] = useState(false);
 
   const selectedGroupData = selectedGroup
     ? LEI_14133_GRUPOS.find(g => g.id === selectedGroup)
@@ -174,15 +177,33 @@ export default function Lei14133Page() {
                     </div>
                   </div>
 
-                  <div className="flex items-center gap-4 text-sm text-gray-600">
-                    <span className="flex items-center gap-1">
+                  <div className="flex items-center justify-between flex-wrap gap-4">
+                    <span className="flex items-center gap-1 text-sm text-gray-600">
                       <FileText className="w-4 h-4" />
                       {selectedGroupData.articles.length} {selectedGroupData.articles.length === 1 ? 'artigo' : 'artigos'}
                     </span>
+
+                    {/* Botões Expandir/Colapsar Todos */}
+                    <div className="flex items-center gap-2">
+                      <button
+                        onClick={() => setExpandAll(true)}
+                        className="inline-flex items-center gap-2 px-3 py-2 bg-blue-100 text-blue-700 rounded-lg hover:bg-blue-200 transition-colors text-sm font-medium"
+                      >
+                        <ChevronsDown className="w-4 h-4" />
+                        Expandir Todos
+                      </button>
+                      <button
+                        onClick={() => setExpandAll(false)}
+                        className="inline-flex items-center gap-2 px-3 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors text-sm font-medium"
+                      >
+                        <ChevronsUp className="w-4 h-4" />
+                        Colapsar Todos
+                      </button>
+                    </div>
                   </div>
                 </div>
 
-                <div className="space-y-4">
+                <div className="space-y-3" key={expandAll ? 'expanded' : 'collapsed'}>
                   {selectedGroupData.articles.map((articleNum) => {
                     const article = LEI_14133_ARTIGOS[articleNum];
                     if (!article) return null;
@@ -190,28 +211,13 @@ export default function Lei14133Page() {
                     const colors = COLOR_CLASSES[selectedGroupData.color] || COLOR_CLASSES.gray;
 
                     return (
-                      <Link
+                      <CollapsibleArticle
                         key={articleNum}
-                        href={`/artigo/${articleNum}`}
-                        className={`block p-5 rounded-xl border-2 ${colors.border} ${colors.bg} ${colors.hover} hover:shadow-md transition-all group`}
-                      >
-                        <div className="flex items-start gap-4">
-                          <div className={`flex-shrink-0 px-3 py-1 ${colors.text} bg-white rounded-lg text-sm font-bold border-2 ${colors.border}`}>
-                            Art. {article.numero}
-                          </div>
-                          <div className="flex-1 min-w-0">
-                            {article.capituloCompleto && (
-                              <p className="text-xs text-gray-500 mb-1">
-                                {article.capituloCompleto}
-                              </p>
-                            )}
-                            <p className="text-sm text-gray-700 line-clamp-3">
-                              {article.ementa.substring(0, 200)}...
-                            </p>
-                          </div>
-                          <ArrowRight className={`w-5 h-5 ${colors.text} opacity-0 group-hover:opacity-100 group-hover:translate-x-1 transition-all flex-shrink-0`} />
-                        </div>
-                      </Link>
+                        articleNum={articleNum}
+                        article={article}
+                        colors={colors}
+                        defaultExpanded={expandAll}
+                      />
                     );
                   })}
                 </div>
