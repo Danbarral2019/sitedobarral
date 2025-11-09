@@ -59,11 +59,14 @@ const CATEGORY_LABELS: Record<string, string> = {
   'outro': 'Outro'
 };
 
+type TabType = 'all' | 'lei' | 'acts' | 'docs' | 'glossary';
+
 export default function BuscaIntegradaPage() {
   const [searchTerm, setSearchTerm] = useState('');
   const [debouncedSearch, setDebouncedSearch] = useState('');
   const [results, setResults] = useState<SearchResults | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [activeTab, setActiveTab] = useState<TabType>('all');
 
   // Debounce search term
   useEffect(() => {
@@ -107,6 +110,23 @@ export default function BuscaIntegradaPage() {
       results.results.documents.length
     );
   }, [results]);
+
+  // Tab counts
+  const tabCounts = useMemo(() => {
+    if (!results) return { lei: 0, acts: 0, docs: 0, glossary: 0 };
+    return {
+      lei: results.results.articles.length,
+      acts: results.results.acts.length,
+      docs: results.results.documents.length,
+      glossary: results.results.glossaryTerms.length,
+    };
+  }, [results]);
+
+  // Filter functions for tabs
+  const shouldShowSection = (section: TabType): boolean => {
+    if (activeTab === 'all') return true;
+    return activeTab === section;
+  };
 
   const hasSearch = debouncedSearch.trim().length >= 2;
 
@@ -165,6 +185,82 @@ export default function BuscaIntegradaPage() {
         </div>
       </div>
 
+      {/* Tabs - Only show when there are results */}
+      {hasSearch && results && totalResults > 0 && (
+        <div className="bg-white border-b-2 border-gray-200 sticky top-0 z-10 shadow-sm">
+          <div className="max-w-6xl mx-auto px-4">
+            <div className="flex items-center gap-1 overflow-x-auto">
+              <button
+                onClick={() => setActiveTab('all')}
+                className={`px-6 py-4 font-semibold text-sm whitespace-nowrap transition-colors border-b-4 ${
+                  activeTab === 'all'
+                    ? 'border-blue-600 text-blue-600'
+                    : 'border-transparent text-gray-600 hover:text-gray-900 hover:border-gray-300'
+                }`}
+              >
+                Todos ({totalResults})
+              </button>
+
+              {tabCounts.glossary > 0 && (
+                <button
+                  onClick={() => setActiveTab('glossary')}
+                  className={`px-6 py-4 font-semibold text-sm whitespace-nowrap transition-colors border-b-4 flex items-center gap-2 ${
+                    activeTab === 'glossary'
+                      ? 'border-green-600 text-green-600'
+                      : 'border-transparent text-gray-600 hover:text-gray-900 hover:border-gray-300'
+                  }`}
+                >
+                  <BookOpen className="w-4 h-4" />
+                  Glossário ({tabCounts.glossary})
+                </button>
+              )}
+
+              {tabCounts.lei > 0 && (
+                <button
+                  onClick={() => setActiveTab('lei')}
+                  className={`px-6 py-4 font-semibold text-sm whitespace-nowrap transition-colors border-b-4 flex items-center gap-2 ${
+                    activeTab === 'lei'
+                      ? 'border-blue-600 text-blue-600'
+                      : 'border-transparent text-gray-600 hover:text-gray-900 hover:border-gray-300'
+                  }`}
+                >
+                  <Gavel className="w-4 h-4" />
+                  Lei 14.133 ({tabCounts.lei})
+                </button>
+              )}
+
+              {tabCounts.acts > 0 && (
+                <button
+                  onClick={() => setActiveTab('acts')}
+                  className={`px-6 py-4 font-semibold text-sm whitespace-nowrap transition-colors border-b-4 flex items-center gap-2 ${
+                    activeTab === 'acts'
+                      ? 'border-indigo-600 text-indigo-600'
+                      : 'border-transparent text-gray-600 hover:text-gray-900 hover:border-gray-300'
+                  }`}
+                >
+                  <Scale className="w-4 h-4" />
+                  Atos Normativos ({tabCounts.acts})
+                </button>
+              )}
+
+              {tabCounts.docs > 0 && (
+                <button
+                  onClick={() => setActiveTab('docs')}
+                  className={`px-6 py-4 font-semibold text-sm whitespace-nowrap transition-colors border-b-4 flex items-center gap-2 ${
+                    activeTab === 'docs'
+                      ? 'border-purple-600 text-purple-600'
+                      : 'border-transparent text-gray-600 hover:text-gray-900 hover:border-gray-300'
+                  }`}
+                >
+                  <FileText className="w-4 h-4" />
+                  Documentos ({tabCounts.docs})
+                </button>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Conteúdo */}
       <div className="max-w-6xl mx-auto px-4 py-12">
         {!hasSearch ? (
@@ -210,7 +306,7 @@ export default function BuscaIntegradaPage() {
         ) : results && (
           <div className="space-y-8">
             {/* Glossário - Prioridade máxima */}
-            {results.results.glossaryTerms.length > 0 && (
+            {results.results.glossaryTerms.length > 0 && shouldShowSection('glossary') && (
               <section className="bg-white rounded-2xl shadow-lg border-2 border-green-200 p-8">
                 <div className="flex items-center gap-3 mb-6">
                   <BookOpen className="w-8 h-8 text-green-600" />
@@ -248,7 +344,7 @@ export default function BuscaIntegradaPage() {
             )}
 
             {/* Artigos da Lei 14.133 */}
-            {results.results.articles.length > 0 && (
+            {results.results.articles.length > 0 && shouldShowSection('lei') && (
               <section className="bg-white rounded-2xl shadow-lg border-2 border-gray-200 p-8">
                 <div className="flex items-center gap-3 mb-6">
                   <Gavel className="w-8 h-8 text-blue-600" />
@@ -304,7 +400,7 @@ export default function BuscaIntegradaPage() {
             )}
 
             {/* Atos Normativos */}
-            {results.results.acts.length > 0 && (
+            {results.results.acts.length > 0 && shouldShowSection('acts') && (
               <section className="bg-white rounded-2xl shadow-lg border-2 border-gray-200 p-8">
                 <div className="flex items-center gap-3 mb-6">
                   <Scale className="w-8 h-8 text-indigo-600" />
@@ -346,7 +442,7 @@ export default function BuscaIntegradaPage() {
             )}
 
             {/* Documentos */}
-            {results.results.documents.length > 0 && (
+            {results.results.documents.length > 0 && shouldShowSection('docs') && (
               <section className="bg-white rounded-2xl shadow-lg border-2 border-gray-200 p-8">
                 <div className="flex items-center gap-3 mb-6">
                   <FileText className="w-8 h-8 text-purple-600" />
