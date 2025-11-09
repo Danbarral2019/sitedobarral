@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
-import { Loader2, LogOut, Clock, GraduationCap, CheckCircle, Heart } from 'lucide-react';
+import { Loader2, LogOut, Clock, GraduationCap, CheckCircle, Heart, FileText, Scale, BookOpen, Video, Globe } from 'lucide-react';
 import { courses } from '@/data/courses';
 import { useAuth } from '@/hooks/use-auth';
 import { useFavorites } from '@/hooks/use-favorites';
@@ -75,6 +75,9 @@ export default function AreaRestritaPage() {
 
   // Estado dos termos de glossário encontrados na busca
   const [glossaryResults, setGlossaryResults] = useState<GlossaryTermType[]>([]);
+
+  // Estado da tab ativa (para navegação por seções)
+  const [activeTab, setActiveTab] = useState<'documentos' | 'lei' | 'glossario' | 'videos' | 'sites'>('documentos');
 
   // Função para registrar acesso
   const logAccess = async (action: string, courseId: string, documentId?: string) => {
@@ -492,8 +495,110 @@ export default function AreaRestritaPage() {
                       </div>
                     </div>
 
-                    {/* Top 10 Artigos Mais Consultados - Apenas sem busca ativa */}
+                    {/* Tabs de Navegação - Apenas sem busca ativa */}
                     {!search.isSearchActive && (
+                      <div className="bg-white rounded-2xl shadow-lg border-2 border-gray-200 mb-6 overflow-hidden">
+                        <div className="flex overflow-x-auto scrollbar-hide">
+                          <button
+                            onClick={() => setActiveTab('documentos')}
+                            className={`flex items-center gap-2 px-6 py-4 font-semibold text-sm whitespace-nowrap transition-colors border-b-4 min-w-fit ${
+                              activeTab === 'documentos'
+                                ? 'border-blue-600 text-blue-600 bg-blue-50'
+                                : 'border-transparent text-gray-600 hover:text-gray-900 hover:bg-gray-50'
+                            }`}
+                          >
+                            <FileText className="w-4 h-4" />
+                            Documentos
+                            <span className={`px-2 py-0.5 rounded-full text-xs ${
+                              activeTab === 'documentos' ? 'bg-blue-200 text-blue-800' : 'bg-gray-200 text-gray-600'
+                            }`}>
+                              {selectedCourseDocuments.length}
+                            </span>
+                          </button>
+
+                          <button
+                            onClick={() => setActiveTab('lei')}
+                            className={`flex items-center gap-2 px-6 py-4 font-semibold text-sm whitespace-nowrap transition-colors border-b-4 min-w-fit ${
+                              activeTab === 'lei'
+                                ? 'border-indigo-600 text-indigo-600 bg-indigo-50'
+                                : 'border-transparent text-gray-600 hover:text-gray-900 hover:bg-gray-50'
+                            }`}
+                          >
+                            <Scale className="w-4 h-4" />
+                            Lei 14.133
+                          </button>
+
+                          {glossaryResults.length > 0 && (
+                            <button
+                              onClick={() => setActiveTab('glossario')}
+                              className={`flex items-center gap-2 px-6 py-4 font-semibold text-sm whitespace-nowrap transition-colors border-b-4 min-w-fit ${
+                                activeTab === 'glossario'
+                                  ? 'border-green-600 text-green-600 bg-green-50'
+                                  : 'border-transparent text-gray-600 hover:text-gray-900 hover:bg-gray-50'
+                              }`}
+                            >
+                              <BookOpen className="w-4 h-4" />
+                              Glossário
+                              <span className={`px-2 py-0.5 rounded-full text-xs ${
+                                activeTab === 'glossario' ? 'bg-green-200 text-green-800' : 'bg-gray-200 text-gray-600'
+                              }`}>
+                                {glossaryResults.length}
+                              </span>
+                            </button>
+                          )}
+
+                          {selectedCourseVideos.length > 0 && (
+                            <button
+                              onClick={() => setActiveTab('videos')}
+                              className={`flex items-center gap-2 px-6 py-4 font-semibold text-sm whitespace-nowrap transition-colors border-b-4 min-w-fit ${
+                                activeTab === 'videos'
+                                  ? 'border-purple-600 text-purple-600 bg-purple-50'
+                                  : 'border-transparent text-gray-600 hover:text-gray-900 hover:bg-gray-50'
+                              }`}
+                            >
+                              <Video className="w-4 h-4" />
+                              Vídeos
+                              <span className={`px-2 py-0.5 rounded-full text-xs ${
+                                activeTab === 'videos' ? 'bg-purple-200 text-purple-800' : 'bg-gray-200 text-gray-600'
+                              }`}>
+                                {selectedCourseVideos.length}
+                              </span>
+                            </button>
+                          )}
+
+                          {selectedCourseSites.length > 0 && (
+                            <button
+                              onClick={() => setActiveTab('sites')}
+                              className={`flex items-center gap-2 px-6 py-4 font-semibold text-sm whitespace-nowrap transition-colors border-b-4 min-w-fit ${
+                                activeTab === 'sites'
+                                  ? 'border-teal-600 text-teal-600 bg-teal-50'
+                                  : 'border-transparent text-gray-600 hover:text-gray-900 hover:bg-gray-50'
+                              }`}
+                            >
+                              <Globe className="w-4 h-4" />
+                              Sites Recomendados
+                              <span className={`px-2 py-0.5 rounded-full text-xs ${
+                                activeTab === 'sites' ? 'bg-teal-200 text-teal-800' : 'bg-gray-200 text-gray-600'
+                              }`}>
+                                {selectedCourseSites.length}
+                              </span>
+                            </button>
+                          )}
+                        </div>
+                        <style jsx>{`
+                          .scrollbar-hide::-webkit-scrollbar {
+                            display: none;
+                          }
+                          .scrollbar-hide {
+                            -ms-overflow-style: none;
+                            scrollbar-width: none;
+                          }
+                        `}</style>
+                      </div>
+                    )}
+
+                    {/* Top 10 Artigos Mais Consultados - Tab Lei */}
+                    {!search.isSearchActive && activeTab === 'lei' && (
                       <div className="mb-6">
                         <TopArticlesWidget
                           limit={10}
@@ -507,8 +612,8 @@ export default function AreaRestritaPage() {
                       </div>
                     )}
 
-                    {/* Navegador da Estrutura da Lei - Apenas sem busca ativa */}
-                    {!search.isSearchActive && (
+                    {/* Navegador da Estrutura da Lei - Tab Lei */}
+                    {!search.isSearchActive && activeTab === 'lei' && (
                       <div className="mb-6">
                         <ArticleTreeNavigator
                           onArticleClick={(articleNum) => {
@@ -518,8 +623,8 @@ export default function AreaRestritaPage() {
                       </div>
                     )}
 
-                    {/* Materiais Destacados (Apostila, Conteúdo, Bibliografia) - Apenas sem busca ativa */}
-                    {!search.isSearchActive && (
+                    {/* Materiais Destacados (Apostila, Conteúdo, Bibliografia) - Tab Documentos */}
+                    {!search.isSearchActive && activeTab === 'documentos' && (
                       <HighlightedMaterials
                         documents={selectedCourseDocuments}
                         courseId={selectedCourse.id}
@@ -535,25 +640,37 @@ export default function AreaRestritaPage() {
                       />
                     )}
 
-                    {/* Documentos Agrupados por Categoria - Usa documentos filtrados */}
-                    <DocumentsByCategory
-                      documents={filteredDocuments}
-                      courseId={selectedCourse.id}
-                      onDocumentClick={handleDocumentClick}
-                      isFavorite={isFavorite}
-                      toggleFavorite={toggleFavorite}
-                    />
+                    {/* Glossário - Tab Glossário */}
+                    {!search.isSearchActive && activeTab === 'glossario' && glossaryResults.length > 0 && (
+                      <GlossarySearchResults
+                        terms={glossaryResults}
+                        searchQuery={search.searchTerm}
+                      />
+                    )}
 
-                    {/* Vídeos do YouTube (se houver) - Aparece ANTES dos sites */}
-                    {selectedCourseVideos.length > 0 && (
+                    {/* Documentos Agrupados por Categoria - Tab Documentos ou quando há busca */}
+                    {(search.isSearchActive || activeTab === 'documentos') && (
+                      <DocumentsByCategory
+                        documents={filteredDocuments}
+                        courseId={selectedCourse.id}
+                        onDocumentClick={handleDocumentClick}
+                        isFavorite={isFavorite}
+                        toggleFavorite={toggleFavorite}
+                      />
+                    )}
+
+                    {/* Vídeos do YouTube - Tab Vídeos */}
+                    {!search.isSearchActive && activeTab === 'videos' && selectedCourseVideos.length > 0 && (
                       <CourseVideos
                         videos={selectedCourseVideos}
                         displayMode="thumbnails"
                       />
                     )}
 
-                    {/* Sites de Interesse (sempre por último) */}
-                    <RecommendedSites sites={selectedCourseSites} />
+                    {/* Sites de Interesse - Tab Sites */}
+                    {!search.isSearchActive && activeTab === 'sites' && (
+                      <RecommendedSites sites={selectedCourseSites} />
+                    )}
                   </div>
                 ) : (
                   <div className="bg-blue-50 border-2 border-blue-200 rounded-xl p-6 lg:p-8 text-center">
