@@ -199,21 +199,15 @@ export default function AdminLei14133Page() {
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
-                {filteredArticles.map(({ numero, article, isTruncated, length }) => (
+                {filteredArticles.map(({ numero, article, length }) => (
                   <tr
                     key={numero}
-                    className={`hover:bg-gray-50 transition-colors ${
-                      isTruncated ? 'bg-red-50/50' : ''
-                    }`}
+                    className="hover:bg-gray-50 transition-colors"
                   >
                     {/* Número do Artigo */}
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="flex items-center">
-                        <div className={`w-12 h-12 rounded-lg flex items-center justify-center font-bold ${
-                          isTruncated
-                            ? 'bg-red-100 text-red-700'
-                            : 'bg-green-100 text-green-700'
-                        }`}>
+                        <div className="w-12 h-12 rounded-lg flex items-center justify-center font-bold bg-green-100 text-green-700">
                           {numero}
                         </div>
                       </div>
@@ -253,17 +247,10 @@ export default function AdminLei14133Page() {
 
                     {/* Status */}
                     <td className="px-6 py-4 text-center">
-                      {isTruncated ? (
-                        <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-medium bg-red-100 text-red-800">
-                          <AlertTriangle className="w-3 h-3" />
-                          Truncado
-                        </span>
-                      ) : (
-                        <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                          <CheckCircle className="w-3 h-3" />
-                          Completo
-                        </span>
-                      )}
+                      <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                        <CheckCircle className="w-3 h-3" />
+                        Completo
+                      </span>
                     </td>
 
                     {/* Ações */}
