@@ -1,10 +1,33 @@
 /**
- * Script de migração: Lei 14.133/2021 - Arquivo TypeScript → Banco de Dados
+ * ⚠️  SCRIPT DESATIVADO - NÃO EXECUTAR! ⚠️
+ *
+ * Este script foi DESATIVADO porque sobrescreve edições manuais dos artigos.
+ *
+ * MOTIVO DA DESATIVAÇÃO:
+ * - As edições dos artigos agora são feitas manualmente via /admin/lei-14133
+ * - Este script sobrescreve o banco com dados do arquivo data/lei-14133-artigos.ts
+ * - Executar este script APAGA todas as correções e melhorias feitas pelo usuário
+ *
+ * FLUXO ATUAL (CORRETO):
+ * 1. Editar artigos via admin: /admin/lei-14133/[numero]/edit
+ * 2. Artigos salvos diretamente no banco de dados PostgreSQL
+ * 3. Arquivo data/lei-14133-artigos.ts NÃO é mais a fonte da verdade
+ *
+ * HISTÓRICO:
+ * - Criado para: Migração inicial arquivo → banco (concluída)
+ * - Desativado em: novembro/2025
+ * - Motivo: Preservar controle manual das edições
+ *
+ * ❌ NÃO REATIVAR ESTE SCRIPT SEM CONSULTAR A DOCUMENTAÇÃO
+ *
+ * ---
+ *
+ * Script de migração LEGADO: Lei 14.133/2021 - Arquivo TypeScript → Banco de Dados
  *
  * Este script importa os 193 artigos do arquivo lei-14133-artigos.ts
  * para a tabela LeiArticle no banco de dados.
  *
- * Uso: npx tsx scripts/migrate-lei-14133-to-db.ts
+ * Uso ORIGINAL (NÃO USAR MAIS): npx tsx scripts/migrate-lei-14133-to-db.ts.DISABLED
  */
 
 import { PrismaClient } from '@prisma/client';
