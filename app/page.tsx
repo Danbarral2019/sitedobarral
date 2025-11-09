@@ -175,24 +175,11 @@ export default function Home() {
                 </Link>
               </div>
             </div>
-
-            {/* Link para ver todos os cursos */}
-            <div className="text-center mt-12 pt-8 border-t-2 border-gray-200">
-              <p className="text-gray-600 mb-4 text-lg">Interessado nos cursos especializados?</p>
-              <Link
-                href="/cursos"
-                className="bg-white border-2 border-blue-600 text-blue-600 px-8 py-3 rounded-xl font-bold hover:bg-blue-600 hover:text-white transition-all inline-flex items-center gap-2"
-              >
-                <BookOpen className="w-5 h-5" />
-                Ver Todos os Cursos
-                <ArrowRight className="w-5 h-5" />
-              </Link>
-            </div>
           </div>
         </div>
       </section>
 
-      <section className="py-16 bg-gradient-to-b from-blue-50 to-white">
+      <section className="py-16 bg-gradient-to-b from-white to-blue-50">
         <div className="container mx-auto px-4">
           <div className="max-w-5xl mx-auto">
             <div className="text-center mb-12">
@@ -239,6 +226,19 @@ export default function Home() {
                   </p>
                 </div>
               </div>
+            </div>
+
+            {/* Link para ver todos os cursos */}
+            <div className="text-center mt-12 pt-8 border-t-2 border-gray-200">
+              <p className="text-gray-600 mb-4 text-lg">Interessado nos cursos especializados?</p>
+              <Link
+                href="/cursos"
+                className="bg-white border-2 border-blue-600 text-blue-600 px-8 py-3 rounded-xl font-bold hover:bg-blue-600 hover:text-white transition-all inline-flex items-center gap-2"
+              >
+                <BookOpen className="w-5 h-5" />
+                Ver Todos os Cursos
+                <ArrowRight className="w-5 h-5" />
+              </Link>
             </div>
           </div>
         </div>
