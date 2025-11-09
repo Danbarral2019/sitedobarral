@@ -85,6 +85,9 @@ export default function DOUFiltrosPage() {
 
   // Pending documents state
   const [pendingDocs, setPendingDocs] = useState<PendingDocument[]>([]);
+
+  // Tab state for filtering by status
+  const [selectedTab, setSelectedTab] = useState<'all' | 'pending' | 'approved' | 'rejected'>('pending');
   const [isPendingLoading, setIsPendingLoading] = useState(false);
 
   // Seções disponíveis
@@ -507,20 +510,55 @@ export default function DOUFiltrosPage() {
                   </div>
                 </div>
 
-                {/* Lista de Documentos */}
+                {/* Lista de Documentos com Abas por Status */}
                 <div className="bg-white rounded-lg shadow-md p-6">
-                  <h2 className="text-xl font-bold mb-4">
+                  <h2 className="text-xl font-bold mb-2">
                     📄 Documentos Encontrados ({searchResponse.results.length})
                   </h2>
+                  <p className="text-sm text-gray-600 mb-4">
+                    Ordenados por: ⏳ Revisão → ✅ Auto-aprovados → ❌ Rejeitados
+                  </p>
 
-                  {searchResponse.results.length === 0 ? (
-                    <div className="text-center py-12 text-gray-500">
-                      <div className="text-4xl mb-2">🔍</div>
-                      <p>Nenhum documento encontrado com os filtros selecionados</p>
-                    </div>
-                  ) : (
-                    <div className="space-y-4">
-                      {searchResponse.results.map((result, index) => (
+                  {/* Abas de Status */}
+                  <div className="flex gap-2 mb-6 border-b border-gray-200">
+                    {[
+                      { key: 'pending' as const, label: '⏳ Revisão', count: searchResponse.results.filter(r => r.status === 'pending').length },
+                      { key: 'approved' as const, label: '✅ Auto-aprovados', count: searchResponse.results.filter(r => r.status === 'auto_approved').length },
+                      { key: 'rejected' as const, label: '❌ Rejeitados', count: searchResponse.results.filter(r => r.status === 'auto_rejected').length },
+                      { key: 'all' as const, label: '📋 Todos', count: searchResponse.results.length },
+                    ].map(tab => (
+                      <button
+                        key={tab.key}
+                        onClick={() => setSelectedTab(tab.key)}
+                        className={`px-4 py-2 font-medium transition-colors border-b-2 ${
+                          selectedTab === tab.key
+                            ? 'border-blue-600 text-blue-600'
+                            : 'border-transparent text-gray-600 hover:text-gray-900'
+                        }`}
+                      >
+                        {tab.label} ({tab.count})
+                      </button>
+                    ))}
+                  </div>
+
+                  {(() => {
+                    const filteredResults = selectedTab === 'all'
+                      ? searchResponse.results
+                      : searchResponse.results.filter(r => {
+                          if (selectedTab === 'pending') return r.status === 'pending';
+                          if (selectedTab === 'approved') return r.status === 'auto_approved';
+                          if (selectedTab === 'rejected') return r.status === 'auto_rejected';
+                          return true;
+                        });
+
+                    return filteredResults.length === 0 ? (
+                      <div className="text-center py-12 text-gray-500">
+                        <div className="text-4xl mb-2">🔍</div>
+                        <p>Nenhum documento encontrado nesta categoria</p>
+                      </div>
+                    ) : (
+                      <div className="space-y-4">
+                        {filteredResults.map((result, index) => (
                         <div
                           key={index}
                           className="border rounded-lg p-4 hover:bg-gray-50 transition-colors"
@@ -567,9 +605,10 @@ export default function DOUFiltrosPage() {
                             </span>
                           </div>
                         </div>
-                      ))}
-                    </div>
-                  )}
+                        ))}
+                      </div>
+                    );
+                  })()}
                 </div>
               </>
             )}

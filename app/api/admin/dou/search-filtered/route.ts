@@ -158,6 +158,14 @@ export async function POST(request: Request) {
 
     console.log(`[DOU Search Filtered] ${filteredResults.length} documentos após filtros`);
 
+    // Diagnóstico: breakdown de status ANTES do sorting
+    const statusBreakdownBefore = filteredResults.reduce((acc, result) => {
+      const status = classifications.get(result)!.status;
+      acc[status] = (acc[status] || 0) + 1;
+      return acc;
+    }, {} as Record<string, number>);
+    console.log('[DOU Search Filtered] 📊 Breakdown ANTES do sorting:', statusBreakdownBefore);
+
     // Calcular estatísticas de filtros
     const filterStats = DOUClassifier.getFilterStats(
       results.length,
@@ -186,6 +194,13 @@ export async function POST(request: Request) {
 
       // Terceiro: ordenar por data (mais recente primeiro)
       return new Date(b.date).getTime() - new Date(a.date).getTime();
+    });
+
+    // Diagnóstico: primeiros 10 documentos DEPOIS do sorting
+    console.log('[DOU Search Filtered] 🔝 Primeiros 10 DEPOIS do sorting:');
+    filteredResults.slice(0, 10).forEach((result, i) => {
+      const classification = classifications.get(result)!;
+      console.log(`  ${i + 1}. [${classification.status.toUpperCase()}] ${result.title.substring(0, 60)}...`);
     });
 
     // PASSO 5: Formatar resultados para o frontend
