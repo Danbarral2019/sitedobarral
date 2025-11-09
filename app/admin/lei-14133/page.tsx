@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import AdminLayout from '@/components/AdminLayout';
 import Link from 'next/link';
 import {
@@ -10,17 +10,41 @@ import {
   Search,
   Filter,
   FileText,
-  ChevronRight
+  ChevronRight,
+  Loader2
 } from 'lucide-react';
-import { LEI_14133_ARTIGOS, LeiArticle } from '@/data/lei-14133-artigos';
+import { LEI_14133_ARTIGOS as LEI_14133_ARTIGOS_FALLBACK, LeiArticle } from '@/data/lei-14133-artigos';
 
 export default function AdminLei14133Page() {
+  const [artigos, setArtigos] = useState<Record<string, LeiArticle>>(LEI_14133_ARTIGOS_FALLBACK);
+  const [isLoadingArtigos, setIsLoadingArtigos] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [filterStatus, setFilterStatus] = useState<'all' | 'truncated' | 'complete'>('all');
 
+  // Buscar artigos do banco de dados ao montar componente
+  useEffect(() => {
+    async function fetchArtigos() {
+      try {
+        const response = await fetch('/api/lei-14133/artigos');
+        if (response.ok) {
+          const data = await response.json();
+          if (data.success && data.artigos) {
+            setArtigos(data.artigos);
+          }
+        }
+      } catch (error) {
+        console.error('Erro ao buscar artigos:', error);
+        // Mantém fallback em caso de erro
+      } finally {
+        setIsLoadingArtigos(false);
+      }
+    }
+    fetchArtigos();
+  }, []);
+
   // Verificar quais artigos estão truncados
   const articlesWithStatus = useMemo(() => {
-    return Object.entries(LEI_14133_ARTIGOS).map(([numero, article]) => {
+    return Object.entries(artigos).map(([numero, article]) => {
       const ementa = article.ementa || '';
       // Verifica se termina de forma suspeita (meio de frase)
       const suspicious = /\s(do|da|de|dos|das|no|na|nos|nas|ao|à|aos|às|com|por|para|pelo|pela|que|se|e|ou)\s*$/i.test(ementa);
@@ -33,7 +57,7 @@ export default function AdminLei14133Page() {
         length: ementa.length
       };
     }).sort((a, b) => parseInt(a.numero) - parseInt(b.numero));
-  }, []);
+  }, [artigos]);
 
   // Filtrar artigos
   const filteredArticles = useMemo(() => {
@@ -69,6 +93,20 @@ export default function AdminLei14133Page() {
 
     return { total, truncated, complete, percentage };
   }, [articlesWithStatus]);
+
+  // Loading state
+  if (isLoadingArtigos) {
+    return (
+      <AdminLayout>
+        <div className="flex items-center justify-center min-h-screen">
+          <div className="text-center">
+            <Loader2 className="w-12 h-12 animate-spin text-blue-600 mx-auto mb-4" />
+            <p className="text-gray-600">Carregando artigos do banco de dados...</p>
+          </div>
+        </div>
+      </AdminLayout>
+    );
+  }
 
   return (
     <AdminLayout>
