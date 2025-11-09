@@ -40,6 +40,7 @@ export default function ArtigoPage() {
   const [relatedDocuments, setRelatedDocuments] = useState<Document[]>([]);
   const [relatedPosts, setRelatedPosts] = useState<BlogPost[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [isContentExpanded, setIsContentExpanded] = useState(false);
 
   // Buscar artigos do banco de dados ao montar componente
   useEffect(() => {
@@ -113,11 +114,11 @@ export default function ArtigoPage() {
       <div className="bg-gradient-to-r from-blue-600 to-purple-600 text-white py-12">
         <div className="max-w-6xl mx-auto px-4">
           <Link
-            href="/"
+            href="/lei-14133"
             className="inline-flex items-center gap-2 text-white/90 hover:text-white mb-6 transition-colors"
           >
             <ArrowLeft className="w-4 h-4" />
-            Voltar para Início
+            Voltar para Lei 14.133
           </Link>
 
           <div className="flex items-start gap-4">
@@ -156,8 +157,19 @@ export default function ArtigoPage() {
               {/* Texto oficial do artigo */}
               <div className="bg-white/20 backdrop-blur-sm rounded-lg p-4">
                 <p className="text-lg leading-relaxed whitespace-pre-line">
-                  {article.ementa}
+                  {article.ementa.length > 800 && !isContentExpanded
+                    ? article.ementa.substring(0, 400) + '...'
+                    : article.ementa
+                  }
                 </p>
+                {article.ementa.length > 800 && (
+                  <button
+                    onClick={() => setIsContentExpanded(!isContentExpanded)}
+                    className="mt-3 text-white/90 hover:text-white font-medium text-sm underline"
+                  >
+                    {isContentExpanded ? '← Ler Menos' : 'Ler Mais →'}
+                  </button>
+                )}
               </div>
             </div>
           </div>

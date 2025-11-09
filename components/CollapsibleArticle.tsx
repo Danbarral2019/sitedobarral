@@ -50,10 +50,13 @@ export function CollapsibleArticle({
       {/* Header - Sempre visível */}
       <div className="p-5">
         <div className="flex items-start gap-4">
-          {/* Número do Artigo */}
-          <div className={`flex-shrink-0 px-3 py-1 ${colors.text} bg-white rounded-lg text-sm font-bold border-2 ${colors.border}`}>
+          {/* Número do Artigo - Clicável */}
+          <Link
+            href={`/artigo/${articleNum}`}
+            className={`flex-shrink-0 px-3 py-1 ${colors.text} bg-white rounded-lg text-sm font-bold border-2 ${colors.border} hover:shadow-md hover:scale-105 transition-all cursor-pointer`}
+          >
             Art. {article.numero}
-          </div>
+          </Link>
 
           {/* Conteúdo */}
           <div className="flex-1 min-w-0">
