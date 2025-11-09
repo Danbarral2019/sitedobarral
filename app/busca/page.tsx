@@ -4,7 +4,7 @@ import { useState, useEffect, useMemo } from 'react';
 import Link from 'next/link';
 import {
   Search, Gavel, Scale, FileText, Lock, ArrowRight,
-  X, Loader2, AlertCircle
+  X, Loader2, AlertCircle, BookOpen
 } from 'lucide-react';
 
 interface SearchResults {
