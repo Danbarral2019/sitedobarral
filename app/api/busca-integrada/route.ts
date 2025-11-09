@@ -12,6 +12,7 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({
         query: query || '',
         results: {
+          glossaryTerms: [],
           articles: [],
           acts: [],
           documents: []
@@ -26,10 +27,24 @@ export async function GET(request: NextRequest) {
       ? authResult.user.courseId
       : null;
 
-    // 1. Buscar artigos da Lei 14.133 com trechos relevantes
+    // 1. Buscar termos do glossário (prioridade máxima)
+    const glossaryTerms = await prisma.glossaryTerm.findMany({
+      where: {
+        OR: [
+          { term: { contains: query, mode: 'insensitive' } },
+          { definition: { contains: query, mode: 'insensitive' } },
+        ]
+      },
+      take: 5,
+      orderBy: {
+        term: 'asc'
+      }
+    });
+
+    // 2. Buscar artigos da Lei 14.133 com trechos relevantes
     const articles = searchLeiArticlesWithExcerpts(query).slice(0, 10); // Limitar a 10 resultados
 
-    // 2. Buscar atos normativos
+    // 3. Buscar atos normativos
     const acts = await prisma.legislativeAct.findMany({
       where: {
         OR: [
@@ -45,7 +60,7 @@ export async function GET(request: NextRequest) {
       }
     });
 
-    // 3. Buscar documentos
+    // 4. Buscar documentos
     const documents = await prisma.document.findMany({
       where: {
         OR: [
@@ -83,6 +98,12 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({
       query,
       results: {
+        glossaryTerms: glossaryTerms.map(term => ({
+          id: term.id,
+          term: term.term,
+          definition: term.definition,
+          category: term.category,
+        })),
         articles: articles.map(art => ({
           numero: art.numero,
           titulo: art.titulo,

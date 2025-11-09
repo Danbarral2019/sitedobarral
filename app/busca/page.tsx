@@ -10,6 +10,12 @@ import {
 interface SearchResults {
   query: string;
   results: {
+    glossaryTerms: Array<{
+      id: string;
+      term: string;
+      definition: string;
+      category: string | null;
+    }>;
     articles: Array<{
       numero: string;
       titulo: string;
@@ -95,6 +101,7 @@ export default function BuscaIntegradaPage() {
   const totalResults = useMemo(() => {
     if (!results) return 0;
     return (
+      results.results.glossaryTerms.length +
       results.results.articles.length +
       results.results.acts.length +
       results.results.documents.length
@@ -115,7 +122,7 @@ export default function BuscaIntegradaPage() {
             <div>
               <h1 className="text-4xl font-bold mb-2">Busca Integrada</h1>
               <p className="text-xl text-blue-100">
-                Pesquise em artigos, atos normativos e documentos
+                Pesquise em glossário, artigos, atos normativos e documentos
               </p>
             </div>
           </div>
@@ -202,6 +209,44 @@ export default function BuscaIntegradaPage() {
           </div>
         ) : results && (
           <div className="space-y-8">
+            {/* Glossário - Prioridade máxima */}
+            {results.results.glossaryTerms.length > 0 && (
+              <section className="bg-white rounded-2xl shadow-lg border-2 border-green-200 p-8">
+                <div className="flex items-center gap-3 mb-6">
+                  <BookOpen className="w-8 h-8 text-green-600" />
+                  <h2 className="text-2xl font-bold text-gray-900">
+                    Glossário
+                  </h2>
+                  <span className="ml-auto px-3 py-1 bg-green-100 text-green-700 rounded-full text-sm font-bold">
+                    {results.results.glossaryTerms.length} {results.results.glossaryTerms.length === 1 ? 'termo' : 'termos'}
+                  </span>
+                </div>
+
+                <div className="space-y-3">
+                  {results.results.glossaryTerms.map(term => (
+                    <div
+                      key={term.id}
+                      className="p-5 bg-green-50 rounded-xl border-2 border-green-200"
+                    >
+                      <h3 className="font-bold text-lg text-gray-900 mb-2">
+                        {term.term}
+                      </h3>
+                      <p className="text-sm text-gray-700 leading-relaxed">
+                        {term.definition}
+                      </p>
+                      {term.category && (
+                        <div className="mt-2">
+                          <span className="text-xs px-2 py-1 bg-green-100 text-green-700 rounded-full">
+                            {term.category}
+                          </span>
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              </section>
+            )}
+
             {/* Artigos da Lei 14.133 */}
             {results.results.articles.length > 0 && (
               <section className="bg-white rounded-2xl shadow-lg border-2 border-gray-200 p-8">
