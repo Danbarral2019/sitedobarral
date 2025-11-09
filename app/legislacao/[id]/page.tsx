@@ -80,6 +80,11 @@ export default async function LegislativeActPage({ params }: PageProps) {
   const typeLabel = TYPE_LABELS[act.type] || act.type.toUpperCase();
   const typeColor = TYPE_COLORS[act.type] || 'bg-gray-100 text-gray-800 border-gray-300';
 
+  // Parse leiArticles JSON string to array
+  const leiArticlesArray: string[] = act.leiArticles
+    ? (typeof act.leiArticles === 'string' ? JSON.parse(act.leiArticles) : act.leiArticles)
+    : [];
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50">
       <div className="max-w-5xl mx-auto px-4 py-8">
@@ -226,13 +231,13 @@ export default async function LegislativeActPage({ params }: PageProps) {
         )}
 
         {/* Artigos Relacionados da Lei 14.133 */}
-        {act.leiArticles && act.leiArticles.length > 0 && (
+        {leiArticlesArray.length > 0 && (
           <div className="bg-amber-50 border-l-4 border-amber-600 rounded-xl shadow-md p-6 mt-6">
             <h3 className="text-lg font-bold text-amber-900 mb-3">
               🔗 Artigos Relacionados da Lei 14.133/2021
             </h3>
             <div className="flex flex-wrap gap-2">
-              {act.leiArticles.map((articleNum) => (
+              {leiArticlesArray.map((articleNum) => (
                 <Link
                   key={articleNum}
                   href={`/artigos?numero=${articleNum}`}
