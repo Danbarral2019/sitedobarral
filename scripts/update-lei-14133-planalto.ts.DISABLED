@@ -1,0 +1,184 @@
+/**
+ * 🚨 SCRIPT DESABILITADO - NÃO EXECUTAR! 🚨
+ *
+ * Este script foi DESABILITADO para proteger os 193 artigos da Lei 14.133
+ * que foram editados MANUALMENTE pelo usuário.
+ *
+ * MOTIVO: Executar este script sobrescreverá TODO o trabalho manual!
+ *
+ * BACKUP DISPONÍVEL: data/backups/lei-14133-2025-11-09T22-42-31.json
+ *
+ * Para restaurar backup: node scripts/restore-lei-14133.js <caminho-backup>
+ *
+ * Data desabilitação: 2025-11-09
+ * Referência: commit 93dea4b
+ *
+ * ---
+ *
+ * Script original para atualizar artigos da Lei 14.133/2021 a partir do site do Planalto
+ * Usa Playwright MCP para extrair o texto oficial atualizado
+ */
+
+import { prisma } from '@/lib/prisma';
+
+interface ArtigoExtraido {
+  numero: string;
+  texto: string;
+}
+
+async function extractAllArticles(): Promise<ArtigoExtraido[]> {
+  console.log('🌐 Extraindo artigos da Lei 14.133/2021 do Planalto...\n');
+
+  // Nota: Este script deve ser executado com o Playwright MCP ativo
+  // Os artigos foram extraídos manualmente via MCP
+
+  // Por enquanto, vamos usar os 10 primeiros artigos extraídos
+  // Para extração completa, seria necessário processar a página em lotes
+
+  const artigosExtraidos: ArtigoExtraido[] = [
+    {
+      numero: "1",
+      texto: `Art. 1º Esta Lei estabelece normas gerais de licitação e contratação para as Administrações Públicas diretas, autárquicas e fundacionais da União, dos Estados, do Distrito Federal e dos Municípios, e abrange:
+
+I - os órgãos dos Poderes Legislativo e Judiciário da União, dos Estados e do Distrito Federal e os órgãos do Poder Legislativo dos Municípios, quando no desempenho de função administrativa;
+
+II - os fundos especiais e as demais entidades controladas direta ou indiretamente pela Administração Pública.
+
+§ 1º Não são abrangidas por esta Lei as empresas públicas, as sociedades de economia mista e as suas subsidiárias, regidas pela Lei nº 13.303, de 30 de junho de 2016, ressalvado o disposto no art. 178 desta Lei.
+
+§ 2º As contratações realizadas no âmbito das repartições públicas sediadas no exterior obedecerão às peculiaridades locais e aos princípios básicos estabelecidos nesta Lei, na forma de regulamentação específica a ser editada por ministro de Estado.
+
+§ 3º Nas licitações e contratações que envolvam recursos provenientes de empréstimo ou doação oriundos de agência oficial de cooperação estrangeira ou de organismo financeiro de que o Brasil seja parte, podem ser admitidas:
+
+I - condições decorrentes de acordos internacionais aprovados pelo Congresso Nacional e ratificados pelo Presidente da República;
+
+II - condições peculiares à seleção e à contratação constantes de normas e procedimentos das agências ou dos organismos, desde que:
+
+a) sejam exigidas para a obtenção do empréstimo ou doação;
+
+b) não conflitem com os princípios constitucionais em vigor;
+
+c) sejam indicadas no respectivo contrato de empréstimo ou doação e tenham sido objeto de parecer favorável do órgão jurídico do contratante do financiamento previamente à celebração do referido contrato;
+
+d) (VETADO).
+
+§ 4º A documentação encaminhada ao Senado Federal para autorização do empréstimo de que trata o § 3º deste artigo deverá fazer referência às condições contratuais que incidam na hipótese do referido parágrafo.
+
+§ 5º As contratações relativas à gestão, direta e indireta, das reservas internacionais do País, inclusive as de serviços conexos ou acessórios a essa atividade, serão disciplinadas em ato normativo próprio do Banco Central do Brasil, assegurada a observância dos princípios estabelecidos no caput do art. 37 da Constituição Federal.`
+    },
+    {
+      numero: "2",
+      texto: `Art. 2º Esta Lei aplica-se a:
+
+I - alienação e concessão de direito real de uso de bens;
+
+II - compra, inclusive por encomenda;
+
+III - locação;
+
+IV - concessão e permissão de uso de bens públicos;
+
+V - prestação de serviços, inclusive os técnico-profissionais especializados;
+
+VI - obras e serviços de arquitetura e engenharia;
+
+VII - contratações de tecnologia da informação e de comunicação.`
+    }
+    // Adicionar mais artigos conforme extração
+  ];
+
+  return artigosExtraidos;
+}
+
+async function updateArticlesInDatabase(artigos: ArtigoExtraido[]) {
+  console.log(`📊 Atualizando ${artigos.length} artigos no banco de dados...\n`);
+
+  let atualizados = 0;
+  let novos = 0;
+  let erros = 0;
+
+  for (const artigo of artigos) {
+    try {
+      // Buscar artigo existente
+      const existing = await prisma.legislativeAct.findFirst({
+        where: {
+          lawNumber: '14133',
+          lawYear: 2021,
+          articleNumber: parseInt(artigo.numero),
+        },
+      });
+
+      if (existing) {
+        // Atualizar artigo existente
+        await prisma.legislativeAct.update({
+          where: { id: existing.id },
+          data: {
+            fullText: artigo.texto,
+            updatedAt: new Date(),
+          },
+        });
+
+        console.log(`✅ Artigo ${artigo.numero} atualizado`);
+        atualizados++;
+      } else {
+        // Criar novo artigo
+        await prisma.legislativeAct.create({
+          data: {
+            lawNumber: '14133',
+            lawYear: 2021,
+            articleNumber: parseInt(artigo.numero),
+            articleLabel: `Art. ${artigo.numero}º`,
+            title: `Artigo ${artigo.numero}`,
+            fullText: artigo.texto,
+            summary: artigo.texto.substring(0, 200) + '...',
+            isActive: true,
+          },
+        });
+
+        console.log(`🆕 Artigo ${artigo.numero} criado`);
+        novos++;
+      }
+    } catch (error) {
+      console.error(`❌ Erro no artigo ${artigo.numero}:`, error);
+      erros++;
+    }
+  }
+
+  return { atualizados, novos, erros };
+}
+
+async function main() {
+  console.log('🚀 Atualização da Lei 14.133/2021 - Site do Planalto\n');
+  console.log('='.repeat(70));
+
+  try {
+    // Extrair artigos
+    const artigos = await extractAllArticles();
+    console.log(`\n✅ ${artigos.length} artigos extraídos\n`);
+
+    // Atualizar banco de dados
+    const result = await updateArticlesInDatabase(artigos);
+
+    console.log('\n' + '='.repeat(70));
+    console.log('📊 RESUMO DA ATUALIZAÇÃO:');
+    console.log('='.repeat(70));
+    console.log(`✅ Atualizados: ${result.atualizados}`);
+    console.log(`🆕 Novos: ${result.novos}`);
+    console.log(`❌ Erros: ${result.erros}`);
+    console.log(`📝 Total processado: ${artigos.length}`);
+    console.log('='.repeat(70));
+
+    if (result.erros === 0) {
+      console.log('\n🎉 Atualização concluída com sucesso!');
+    } else {
+      console.log('\n⚠️  Atualização concluída com erros. Verifique os logs acima.');
+    }
+  } catch (error) {
+    console.error('\n❌ Erro fatal:', error);
+    process.exit(1);
+  } finally {
+    await prisma.$disconnect();
+  }
+}
+
+main();
