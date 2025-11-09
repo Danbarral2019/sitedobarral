@@ -1,12 +1,9 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import AdminLayout from '@/components/AdminLayout';
 import {
-  DOUDocumentCategory,
-  ApprovalStatus,
   DateRangePreset,
-  RELEVANT_ORGAOS,
 } from '@/lib/dou-classifier';
 
 interface FilterConfig {
@@ -14,18 +11,12 @@ interface FilterConfig {
   searchTerm: string;
   sections: string[];
 
-  // Filtros por órgão
-  selectedOrgaos: string[];
-  customOrgao: string;
-
   // Filtros por data
   datePreset: DateRangePreset | 'custom';
   dateFrom: string;
   dateTo: string;
 
-  // Filtros por classificação
-  categories: DOUDocumentCategory[];
-  statuses: ApprovalStatus[];
+  // Filtros por confiança
   minConfidence: number;
 
   // Filtros por keywords
@@ -64,17 +55,24 @@ interface SearchResponse {
   };
 }
 
+interface PendingDocument {
+  id: string;
+  section: string;
+  title: string;
+  publishDate: string;
+  category: string;
+  confidence: number;
+  hierarchyStr: string;
+  approvalStatus: string;
+}
+
 export default function DOUFiltrosPage() {
   const [filters, setFilters] = useState<FilterConfig>({
     searchTerm: 'licitação OR pregão',
     sections: [],
-    selectedOrgaos: [],
-    customOrgao: '',
     datePreset: DateRangePreset.ULTIMA_SEMANA,
     dateFrom: '',
     dateTo: '',
-    categories: [],
-    statuses: [],
     minConfidence: 0,
     includeKeywords: '',
     excludeKeywords: '',
@@ -85,38 +83,16 @@ export default function DOUFiltrosPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  // Pending documents state
+  const [pendingDocs, setPendingDocs] = useState<PendingDocument[]>([]);
+  const [isPendingLoading, setIsPendingLoading] = useState(false);
+
   // Seções disponíveis
   const sections = [
     { value: 'do1', label: 'Seção 1 - Leis e Decretos' },
     { value: 'do2', label: 'Seção 2 - Atos de Pessoal' },
     { value: 'do3', label: 'Seção 3 - Contratos e Licitações' },
     { value: 'doe', label: 'Edições Extra' },
-  ];
-
-  // Órgãos relevantes
-  const orgaos = [
-    { value: 'agu', label: 'AGU - Advocacia-Geral da União', keywords: RELEVANT_ORGAOS.AGU },
-    { value: 'tcu', label: 'TCU - Tribunal de Contas da União', keywords: RELEVANT_ORGAOS.TCU },
-    { value: 'cgu', label: 'CGU - Controladoria-Geral da União', keywords: RELEVANT_ORGAOS.CGU },
-    { value: 'mgi', label: 'MGI - Ministério da Gestão', keywords: RELEVANT_ORGAOS.MGI },
-    { value: 'presidencia', label: 'Presidência da República', keywords: RELEVANT_ORGAOS.PRESIDENCIA },
-  ];
-
-  // Categorias de documentos
-  const categoriesOptions = [
-    { value: DOUDocumentCategory.FONTE_AGU, label: '✅ Fonte AGU (sempre relevante)' },
-    { value: DOUDocumentCategory.ATO_NORMATIVO, label: '✅ Ato Normativo (leis, decretos)' },
-    { value: DOUDocumentCategory.SUMULA, label: '✅ Súmula' },
-    { value: DOUDocumentCategory.ACORDAO_TCU, label: '⏳ Acórdão TCU (revisão manual)' },
-    { value: DOUDocumentCategory.PARECER_ORGAO, label: '⏳ Parecer de Órgão' },
-    { value: DOUDocumentCategory.RESOLUCAO, label: '⏳ Resolução' },
-  ];
-
-  // Status de aprovação
-  const statusOptions = [
-    { value: ApprovalStatus.AUTO_APPROVED, label: '✅ Auto-aprovado' },
-    { value: ApprovalStatus.PENDING, label: '⏳ Aguardando revisão' },
-    { value: ApprovalStatus.AUTO_REJECTED, label: '❌ Auto-rejeitado' },
   ];
 
   // Presets de data
@@ -128,6 +104,26 @@ export default function DOUFiltrosPage() {
     { value: DateRangePreset.ULTIMOS_3_MESES, label: 'Últimos 3 meses' },
     { value: 'custom', label: 'Personalizado' },
   ];
+
+  // Fetch pending documents on mount
+  useEffect(() => {
+    const fetchPendingDocs = async () => {
+      setIsPendingLoading(true);
+      try {
+        const response = await fetch('/api/admin/dou/pending');
+        if (response.ok) {
+          const data = await response.json();
+          setPendingDocs(data.documents || []);
+        }
+      } catch (err) {
+        console.error('Failed to fetch pending documents:', err);
+      } finally {
+        setIsPendingLoading(false);
+      }
+    };
+
+    fetchPendingDocs();
+  }, []);
 
   const handleSearch = async () => {
     setIsLoading(true);
@@ -157,13 +153,9 @@ export default function DOUFiltrosPage() {
     setFilters({
       searchTerm: 'licitação OR pregão',
       sections: [],
-      selectedOrgaos: [],
-      customOrgao: '',
       datePreset: DateRangePreset.ULTIMA_SEMANA,
       dateFrom: '',
       dateTo: '',
-      categories: [],
-      statuses: [],
       minConfidence: 0,
       includeKeywords: '',
       excludeKeywords: '',
@@ -235,47 +227,6 @@ export default function DOUFiltrosPage() {
                 </div>
               </div>
 
-              {/* Órgãos */}
-              <div className="mb-4">
-                <label className="block text-sm font-medium mb-2">
-                  Órgãos/Ministérios
-                </label>
-                <div className="space-y-2">
-                  {orgaos.map((orgao) => (
-                    <label key={orgao.value} className="flex items-center">
-                      <input
-                        type="checkbox"
-                        checked={filters.selectedOrgaos.includes(orgao.value)}
-                        onChange={(e) => {
-                          if (e.target.checked) {
-                            setFilters({
-                              ...filters,
-                              selectedOrgaos: [...filters.selectedOrgaos, orgao.value],
-                            });
-                          } else {
-                            setFilters({
-                              ...filters,
-                              selectedOrgaos: filters.selectedOrgaos.filter(
-                                (o) => o !== orgao.value
-                              ),
-                            });
-                          }
-                        }}
-                        className="mr-2"
-                      />
-                      <span className="text-sm">{orgao.label}</span>
-                    </label>
-                  ))}
-                </div>
-                <input
-                  type="text"
-                  value={filters.customOrgao}
-                  onChange={(e) => setFilters({ ...filters, customOrgao: e.target.value })}
-                  className="w-full px-3 py-2 border rounded-lg mt-2"
-                  placeholder="Órgão customizado..."
-                />
-              </div>
-
               {/* Data */}
               <div className="mb-4">
                 <label className="block text-sm font-medium mb-2">
@@ -313,70 +264,6 @@ export default function DOUFiltrosPage() {
                 )}
               </div>
 
-              {/* Categorias */}
-              <div className="mb-4">
-                <label className="block text-sm font-medium mb-2">
-                  Categorias
-                </label>
-                <div className="space-y-2 max-h-40 overflow-y-auto">
-                  {categoriesOptions.map((cat) => (
-                    <label key={cat.value} className="flex items-center">
-                      <input
-                        type="checkbox"
-                        checked={filters.categories.includes(cat.value)}
-                        onChange={(e) => {
-                          if (e.target.checked) {
-                            setFilters({
-                              ...filters,
-                              categories: [...filters.categories, cat.value],
-                            });
-                          } else {
-                            setFilters({
-                              ...filters,
-                              categories: filters.categories.filter((c) => c !== cat.value),
-                            });
-                          }
-                        }}
-                        className="mr-2"
-                      />
-                      <span className="text-xs">{cat.label}</span>
-                    </label>
-                  ))}
-                </div>
-              </div>
-
-              {/* Status */}
-              <div className="mb-4">
-                <label className="block text-sm font-medium mb-2">
-                  Status de Aprovação
-                </label>
-                <div className="space-y-2">
-                  {statusOptions.map((status) => (
-                    <label key={status.value} className="flex items-center">
-                      <input
-                        type="checkbox"
-                        checked={filters.statuses.includes(status.value)}
-                        onChange={(e) => {
-                          if (e.target.checked) {
-                            setFilters({
-                              ...filters,
-                              statuses: [...filters.statuses, status.value],
-                            });
-                          } else {
-                            setFilters({
-                              ...filters,
-                              statuses: filters.statuses.filter((s) => s !== status.value),
-                            });
-                          }
-                        }}
-                        className="mr-2"
-                      />
-                      <span className="text-sm">{status.label}</span>
-                    </label>
-                  ))}
-                </div>
-              </div>
-
               {/* Confiança Mínima */}
               <div className="mb-4">
                 <label className="block text-sm font-medium mb-2">
@@ -393,11 +280,15 @@ export default function DOUFiltrosPage() {
                   }
                   className="w-full"
                 />
-                <div className="flex justify-between text-xs text-gray-500">
+                <div className="flex justify-between text-xs text-gray-500 mb-2">
                   <span>0%</span>
                   <span>50%</span>
                   <span>100%</span>
                 </div>
+                <p className="text-xs text-gray-600 bg-blue-50 p-2 rounded border border-blue-200">
+                  💡 <strong>Confiança</strong> indica o quão certo o sistema de IA está sobre a classificação do documento.
+                  Use valores maiores (70-100%) para ver apenas documentos com alta certeza de relevância.
+                </p>
               </div>
 
               {/* Keywords */}
@@ -470,6 +361,83 @@ export default function DOUFiltrosPage() {
                 ❌ {error}
               </div>
             )}
+
+            {/* Seção de Documentos Pendentes */}
+            {isPendingLoading ? (
+              <div className="bg-white rounded-lg shadow-md p-6 mb-6">
+                <div className="text-center py-8 text-gray-500">
+                  <div className="animate-spin text-4xl mb-2">⏳</div>
+                  <p>Carregando documentos pendentes...</p>
+                </div>
+              </div>
+            ) : pendingDocs.length > 0 ? (
+              <div className="bg-yellow-50 border-2 border-yellow-300 rounded-lg shadow-md p-6 mb-6">
+                <div className="flex items-center justify-between mb-4">
+                  <h2 className="text-xl font-bold text-yellow-900">
+                    ⏳ Documentos Pendentes de Revisão
+                  </h2>
+                  <span className="bg-yellow-200 text-yellow-900 px-3 py-1 rounded-full text-sm font-bold">
+                    {pendingDocs.length} {pendingDocs.length === 1 ? 'documento' : 'documentos'}
+                  </span>
+                </div>
+                <p className="text-sm text-yellow-800 mb-4">
+                  📋 Estes documentos foram classificados como potencialmente relevantes e aguardam aprovação manual.
+                </p>
+
+                <div className="space-y-3 max-h-96 overflow-y-auto">
+                  {pendingDocs.map((doc) => (
+                    <div
+                      key={doc.id}
+                      className="bg-white border border-yellow-200 rounded-lg p-4 hover:shadow-md transition-shadow"
+                    >
+                      <div className="flex items-start justify-between mb-2">
+                        <div className="flex-1">
+                          <div className="flex items-center gap-2 mb-1">
+                            <span className="bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded uppercase font-bold">
+                              {doc.section}
+                            </span>
+                            <span className="text-xs text-gray-500">
+                              {new Date(doc.publishDate).toLocaleDateString('pt-BR')}
+                            </span>
+                          </div>
+                          <h3
+                            className="font-medium text-sm mb-1 text-gray-900"
+                            dangerouslySetInnerHTML={{
+                              __html: doc.title.substring(0, 150) + (doc.title.length > 150 ? '...' : ''),
+                            }}
+                          />
+                          {doc.hierarchyStr && (
+                            <div className="text-xs text-gray-600">{doc.hierarchyStr}</div>
+                          )}
+                        </div>
+                      </div>
+
+                      <div className="flex items-center gap-2 text-xs">
+                        <span className="bg-yellow-100 text-yellow-800 px-2 py-1 rounded font-medium">
+                          ⏳ Aguardando revisão
+                        </span>
+                        <span className="bg-gray-100 text-gray-800 px-2 py-1 rounded">
+                          {doc.category}
+                        </span>
+                        <span className="bg-purple-100 text-purple-800 px-2 py-1 rounded">
+                          Confiança: {doc.confidence}%
+                        </span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+
+                <div className="mt-4 pt-4 border-t border-yellow-200">
+                  <p className="text-xs text-yellow-800">
+                    💡 <strong>Dica:</strong> Acesse a página de{' '}
+                    <a href="/admin/documentos-pendentes" className="underline hover:text-yellow-900">
+                      Documentos Pendentes
+                    </a>{' '}
+                    para aprovar ou rejeitar estes documentos.
+                  </p>
+                </div>
+              </div>
+            ) : null}
 
             {searchResponse && (
               <>
