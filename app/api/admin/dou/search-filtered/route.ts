@@ -165,7 +165,30 @@ export async function POST(request: Request) {
       advancedFilters
     );
 
-    // PASSO 4: Formatar resultados para o frontend
+    // PASSO 4: Ordenar por prioridade (pending > auto_approved > auto_rejected)
+    const statusPriority: Record<string, number> = {
+      pending: 1,           // Revisão - PRIORIDADE MÁXIMA
+      auto_approved: 2,     // Auto-aprovados
+      auto_rejected: 3,     // Rejeitados - PRIORIDADE MÍNIMA
+    };
+
+    filteredResults.sort((a, b) => {
+      const classA = classifications.get(a)!;
+      const classB = classifications.get(b)!;
+
+      // Primeiro: ordenar por status (prioridade)
+      const priorityDiff = statusPriority[classA.status] - statusPriority[classB.status];
+      if (priorityDiff !== 0) return priorityDiff;
+
+      // Segundo: ordenar por confiança (maior primeiro)
+      const confidenceDiff = classB.confidence - classA.confidence;
+      if (confidenceDiff !== 0) return confidenceDiff;
+
+      // Terceiro: ordenar por data (mais recente primeiro)
+      return new Date(b.date).getTime() - new Date(a.date).getTime();
+    });
+
+    // PASSO 5: Formatar resultados para o frontend
     const formattedResults = filteredResults.map((result) => {
       const classification = classifications.get(result)!;
       return {
