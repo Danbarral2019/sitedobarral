@@ -1,11 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { verifyAuth } from '@/lib/auth';
-import { writeFileSync, readFileSync } from 'fs';
-import { join } from 'path';
+import { prisma } from '@/lib/prisma';
 
 /**
  * PUT /api/admin/lei-14133/[numero]
- * Atualiza um artigo da Lei 14.133/2021 no arquivo TypeScript
+ * Atualiza um artigo da Lei 14.133/2021 no banco de dados
  */
 export async function PUT(
   request: NextRequest,
@@ -29,103 +28,50 @@ export async function PUT(
       );
     }
 
-    // Caminho do arquivo
-    const filePath = join(process.cwd(), 'data', 'lei-14133-artigos.ts');
+    // Verificar se artigo existe
+    const artigoExistente = await prisma.leiArticle.findUnique({
+      where: { numero },
+    });
 
-    // Ler arquivo atual
-    const fileContent = readFileSync(filePath, 'utf-8');
-
-    // NÃO re-escapar - usar JSON.stringify para escapar corretamente
-    // JSON.stringify já escapa aspas, quebras de linha, etc.
-    const formatForTypeScript = (str: string) => {
-      if (!str) return '';
-      // JSON.stringify escapa tudo corretamente, mas adiciona aspas extras
-      // Então removemos as aspas externas
-      const escaped = JSON.stringify(str);
-      return escaped.substring(1, escaped.length - 1);
-    };
-
-    // Construir novo bloco do artigo
-    const newArticleBlock = `"${numero}": {
-    numero: "${numero}",
-    titulo: "${formatForTypeScript(body.titulo || '')}",
-    capituloCompleto: "${formatForTypeScript(body.capituloCompleto || '')}",
-    ementa: "${formatForTypeScript(body.ementa)}",
-    capitulo: "${formatForTypeScript(body.capitulo || '')}"${
-      body.secao ? `,\n    secao: "${formatForTypeScript(body.secao)}"` : ''
-    }
-  }`;
-
-    // Encontrar o artigo usando parsing manual mais robusto
-    const startPattern = `"${numero}": {`;
-    const startIndex = fileContent.indexOf(startPattern);
-
-    if (startIndex === -1) {
+    if (!artigoExistente) {
       return NextResponse.json(
-        { error: `Artigo ${numero} não encontrado no arquivo` },
+        { error: `Artigo ${numero} não encontrado no banco de dados` },
         { status: 404 }
       );
     }
 
-    // Encontrar o fim do objeto do artigo
-    // Procurar pelo padrão: },\n  "próximo número": ou };\n no final
-    let endIndex = startIndex + startPattern.length;
-    let braceCount = 1; // Já temos uma chave aberta
-
-    while (endIndex < fileContent.length && braceCount > 0) {
-      const char = fileContent[endIndex];
-      if (char === '{') braceCount++;
-      if (char === '}') braceCount--;
-      endIndex++;
-    }
-
-    if (braceCount !== 0) {
-      return NextResponse.json(
-        { error: 'Erro ao parsear estrutura do artigo' },
-        { status: 500 }
-      );
-    }
-
-    // Extrair e substituir o bloco do artigo
-    const oldArticleBlock = fileContent.substring(startIndex, endIndex);
-    const updatedContent = fileContent.replace(oldArticleBlock, newArticleBlock);
-
-    // Verificar se houve mudança
-    if (updatedContent === fileContent) {
-      return NextResponse.json(
-        { error: 'Nenhuma mudança foi feita no arquivo' },
-        { status: 400 }
-      );
-    }
-
-    // Salvar arquivo atualizado
-    writeFileSync(filePath, updatedContent, 'utf-8');
+    // Atualizar artigo no banco de dados
+    const artigoAtualizado = await prisma.leiArticle.update({
+      where: { numero },
+      data: {
+        titulo: body.titulo || null,
+        capituloCompleto: body.capituloCompleto || null,
+        ementa: body.ementa,
+        capitulo: body.capitulo || artigoExistente.capitulo,
+        secao: body.secao || null,
+      },
+    });
 
     return NextResponse.json({
       success: true,
       message: `Artigo ${numero} atualizado com sucesso`,
       updated: {
-        numero,
-        title: body.titulo || '',
-        characterCount: body.ementa.length
+        numero: artigoAtualizado.numero,
+        title: artigoAtualizado.titulo || '',
+        characterCount: artigoAtualizado.ementa.length,
+        updatedAt: artigoAtualizado.updatedAt,
       }
     });
   } catch (error) {
     console.error('[Lei 14.133 Edit] Error details:', {
-      numero,
+      numero: params.numero,
       errorMessage: error instanceof Error ? error.message : 'Erro desconhecido',
       errorStack: error instanceof Error ? error.stack : undefined,
-      bodyReceived: {
-        titulo: body.titulo,
-        capitulo: body.capitulo,
-        ementaLength: body.ementa?.length || 0,
-      }
     });
     return NextResponse.json(
       {
         error: 'Erro ao atualizar artigo',
         details: error instanceof Error ? error.message : 'Erro desconhecido',
-        stack: error instanceof Error ? error.stack : undefined,
       },
       { status: 500 }
     );
@@ -148,10 +94,12 @@ export async function GET(
 
     const { numero } = params;
 
-    // Importar dinamicamente o artigo
-    const { LEI_14133_ARTIGOS } = await import('@/data/lei-14133-artigos');
+    // Buscar artigo no banco de dados
+    const artigo = await prisma.leiArticle.findUnique({
+      where: { numero },
+    });
 
-    if (!LEI_14133_ARTIGOS[numero]) {
+    if (!artigo) {
       return NextResponse.json(
         { error: `Artigo ${numero} não encontrado` },
         { status: 404 }
@@ -160,7 +108,14 @@ export async function GET(
 
     return NextResponse.json({
       success: true,
-      article: LEI_14133_ARTIGOS[numero],
+      article: {
+        numero: artigo.numero,
+        titulo: artigo.titulo || undefined,
+        capituloCompleto: artigo.capituloCompleto || undefined,
+        ementa: artigo.ementa,
+        capitulo: artigo.capitulo,
+        secao: artigo.secao || undefined,
+      },
     });
   } catch (error) {
     console.error('[Lei 14.133 Get] Error:', error);

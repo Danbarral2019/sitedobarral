@@ -774,3 +774,21 @@ model DOUSavedFilter {
   @@index([isPublic])
   @@index([lastUsedAt])
 }
+
+// Artigos da Lei 14.133/2021 - Nova Lei de Licitações
+// Armazena os 193 artigos para permitir edição via admin
+model LeiArticle {
+  id               String   @id @default(uuid())
+  numero           String   @unique // "1", "2", "3", etc.
+  titulo           String?  // "TÍTULO I - DISPOSIÇÕES PRELIMINARES"
+  capituloCompleto String?  // "CAPÍTULO I - DO ÂMBITO DE APLICAÇÃO DESTA LEI"
+  ementa           String   @db.Text // Texto completo do artigo
+  capitulo         String   // "TÍTULO I - CAPÍTULO I"
+  secao            String?  // "Disposições Preliminares"
+
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  @@index([numero])
+  @@index([capitulo])
+}
