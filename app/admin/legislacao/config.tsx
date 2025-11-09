@@ -157,6 +157,67 @@ export function createLegislacaoConfig({
         ),
       },
       {
+        id: 'actions',
+        label: 'Ações',
+        render: (act) => (
+          <div className="flex flex-wrap gap-1">
+            {/* Ver no site */}
+            <button
+              onClick={() => window.open(`/legislacao/${act.id}`, '_blank', 'noopener,noreferrer')}
+              className="p-1.5 text-blue-600 hover:bg-blue-50 rounded transition-colors"
+              title="Ver no site"
+            >
+              <Eye className="w-4 h-4" />
+            </button>
+
+            {/* Ver link oficial (condicional) */}
+            {act.officialUrl && (
+              <button
+                onClick={() => window.open(act.officialUrl, '_blank', 'noopener,noreferrer')}
+                className="p-1.5 text-purple-600 hover:bg-purple-50 rounded transition-colors"
+                title="Ver link oficial"
+              >
+                <ExternalLink className="w-4 h-4" />
+              </button>
+            )}
+
+            {/* Baixar PDF (condicional) */}
+            {act.pdfUrl && (
+              <button
+                onClick={() => window.open(act.pdfUrl, '_blank', 'noopener,noreferrer')}
+                className="p-1.5 text-green-600 hover:bg-green-50 rounded transition-colors"
+                title="Baixar PDF"
+              >
+                <Download className="w-4 h-4" />
+              </button>
+            )}
+
+            {/* Editar */}
+            <button
+              onClick={() => { window.location.href = `/admin/legislacao/${act.id}/edit`; }}
+              className="p-1.5 text-orange-600 hover:bg-orange-50 rounded transition-colors"
+              title="Editar"
+            >
+              <Edit className="w-4 h-4" />
+            </button>
+
+            {/* Deletar */}
+            <button
+              onClick={async () => {
+                if (!confirm(`Tem certeza que deseja deletar "${act.fullNumber}"?`)) return;
+                const response = await fetch(`/api/admin/legislacao/${act.id}`, { method: 'DELETE' });
+                if (!response.ok) throw new Error('Failed to delete');
+                window.location.reload();
+              }}
+              className="p-1.5 text-red-600 hover:bg-red-50 rounded transition-colors"
+              title="Deletar"
+            >
+              <Trash2 className="w-4 h-4" />
+            </button>
+          </div>
+        ),
+      },
+      {
         id: 'issuer',
         label: 'Emissor',
         render: (act) => (
