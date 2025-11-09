@@ -43,15 +43,15 @@ const DOCUMENT_TYPES: DocumentTypeInfo[] = [
     name: 'Pareceres Vinculantes',
     url: 'https://www.gov.br/agu/pt-br/composicao/cgu/cgu/pareceresvinculantes',
     status: 'playwright',
-    description: 'Requer Playwright MCP (JavaScript dinâmico)',
+    description: '⚙️ Execução Manual via Claude Code - Requer MCP Playwright (site com JavaScript dinâmico). Instruções: Abra o chat do Claude Code e digite: "Extrair pareceres vinculantes AGU usando Playwright MCP"',
     needsPlaywright: true,
   },
   {
     id: 'parecer-conuni',
-    name: 'Pareceres CONUNI (DECOR)',
+    name: 'Pareceres DECOR/CONUNI',
     url: 'https://cgu.agu.gov.br/decor/',
     status: 'playwright',
-    description: 'Requer Playwright MCP (JavaScript dinâmico)',
+    description: '⚙️ Execução Manual via Claude Code - Requer MCP Playwright (site com JavaScript dinâmico). Instruções: Abra o chat do Claude Code e digite: "Extrair pareceres DECOR usando Playwright MCP"',
     needsPlaywright: true,
   },
 ];
@@ -288,25 +288,44 @@ export default function ScraperAGUPage() {
           </div>
         </div>
 
-        {/* Alerta Playwright */}
+        {/* Alerta Playwright - Execução Manual */}
         {selectedNeedsPlaywright && (
-          <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-6">
+          <div className="bg-blue-50 border-2 border-blue-300 rounded-lg p-5 mb-6">
             <div className="flex items-start">
-              <span className="text-2xl mr-3">🎭</span>
+              <span className="text-3xl mr-4">⚙️</span>
               <div className="flex-1">
-                <h3 className="font-semibold text-yellow-800 mb-2">
-                  Playwright MCP Necessário
+                <h3 className="font-bold text-blue-900 mb-2 text-lg">
+                  ⚙️ Execução Manual via Claude Code
                 </h3>
-                <p className="text-sm text-yellow-700 mb-2">
-                  Você selecionou tipos que requerem Playwright MCP para scraping completo
-                  (Pareceres Vinculantes e/ou DECOR).
+                <p className="text-sm text-blue-800 mb-3">
+                  Você selecionou <strong>Pareceres Vinculantes e/ou DECOR</strong> que requerem execução manual via <strong>Playwright MCP</strong> (sites com JavaScript dinâmico).
                 </p>
-                <p className="text-sm text-yellow-700 mb-3">
-                  O sistema tentará usar fallback HTTP, mas provavelmente não encontrará documentos.
-                  Para resultados completos, use Playwright MCP via Claude Code CLI.
-                </p>
-                <div className="bg-yellow-100 p-3 rounded text-xs font-mono text-yellow-900">
-                  &quot;Use Playwright MCP para fazer scraping da página AGU selecionada e extrair documentos&quot;
+
+                <div className="bg-white border border-blue-200 rounded-lg p-4 mb-3">
+                  <h4 className="font-semibold text-blue-900 mb-2 flex items-center gap-2">
+                    <span>📋</span> Como executar:
+                  </h4>
+                  <ol className="text-sm text-blue-800 space-y-2 list-decimal list-inside">
+                    <li>Abra o <strong>chat do Claude Code</strong> (terminal CLI)</li>
+                    <li>Digite um dos comandos abaixo:</li>
+                  </ol>
+
+                  <div className="mt-3 space-y-2">
+                    <div className="bg-gray-100 p-3 rounded text-xs font-mono text-gray-900 border border-gray-300">
+                      <div className="text-gray-600 mb-1">Para Pareceres Vinculantes:</div>
+                      &quot;Extrair pareceres vinculantes AGU usando Playwright MCP&quot;
+                    </div>
+                    <div className="bg-gray-100 p-3 rounded text-xs font-mono text-gray-900 border border-gray-300">
+                      <div className="text-gray-600 mb-1">Para Pareceres DECOR:</div>
+                      &quot;Extrair pareceres DECOR usando Playwright MCP&quot;
+                    </div>
+                  </div>
+                </div>
+
+                <div className="bg-amber-50 border border-amber-200 rounded-lg p-3">
+                  <p className="text-xs text-amber-800">
+                    <strong>⚠️ Nota:</strong> O botão &quot;Buscar Documentos&quot; abaixo <strong>NÃO funcionará</strong> para esses tipos (tentará HTTP fallback sem sucesso). Use o Claude Code conforme instruções acima.
+                  </p>
                 </div>
               </div>
             </div>
