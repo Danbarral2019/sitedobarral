@@ -35,24 +35,24 @@ export async function PUT(
     // Ler arquivo atual
     const fileContent = readFileSync(filePath, 'utf-8');
 
-    // Escapar aspas e caracteres especiais no conteúdo
-    const escapeForTypeScript = (str: string) => {
+    // NÃO re-escapar - usar JSON.stringify para escapar corretamente
+    // JSON.stringify já escapa aspas, quebras de linha, etc.
+    const formatForTypeScript = (str: string) => {
       if (!str) return '';
-      return str
-        .replace(/\\/g, '\\\\')      // Escapar backslashes
-        .replace(/"/g, '\\"')         // Escapar aspas duplas
-        .replace(/\n/g, '\\n')        // Converter quebras de linha
-        .replace(/\r/g, '');          // Remover carriage returns
+      // JSON.stringify escapa tudo corretamente, mas adiciona aspas extras
+      // Então removemos as aspas externas
+      const escaped = JSON.stringify(str);
+      return escaped.substring(1, escaped.length - 1);
     };
 
     // Construir novo bloco do artigo
     const newArticleBlock = `"${numero}": {
     numero: "${numero}",
-    titulo: "${escapeForTypeScript(body.titulo || '')}",
-    capituloCompleto: "${escapeForTypeScript(body.capituloCompleto || '')}",
-    ementa: "${escapeForTypeScript(body.ementa)}",
-    capitulo: "${escapeForTypeScript(body.capitulo || '')}"${
-      body.secao ? `,\n    secao: "${escapeForTypeScript(body.secao)}"` : ''
+    titulo: "${formatForTypeScript(body.titulo || '')}",
+    capituloCompleto: "${formatForTypeScript(body.capituloCompleto || '')}",
+    ementa: "${formatForTypeScript(body.ementa)}",
+    capitulo: "${formatForTypeScript(body.capitulo || '')}"${
+      body.secao ? `,\n    secao: "${formatForTypeScript(body.secao)}"` : ''
     }
   }`;
 
@@ -111,11 +111,21 @@ export async function PUT(
       }
     });
   } catch (error) {
-    console.error('[Lei 14.133 Edit] Error:', error);
+    console.error('[Lei 14.133 Edit] Error details:', {
+      numero,
+      errorMessage: error instanceof Error ? error.message : 'Erro desconhecido',
+      errorStack: error instanceof Error ? error.stack : undefined,
+      bodyReceived: {
+        titulo: body.titulo,
+        capitulo: body.capitulo,
+        ementaLength: body.ementa?.length || 0,
+      }
+    });
     return NextResponse.json(
       {
         error: 'Erro ao atualizar artigo',
         details: error instanceof Error ? error.message : 'Erro desconhecido',
+        stack: error instanceof Error ? error.stack : undefined,
       },
       { status: 500 }
     );
