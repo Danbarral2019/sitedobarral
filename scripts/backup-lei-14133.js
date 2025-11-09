@@ -21,7 +21,7 @@ const path = require('path');
 
 const prisma = new PrismaClient();
 const BACKUP_DIR = path.join(process.cwd(), 'data', 'backups');
-const EXPECTED_COUNT = 193;
+const EXPECTED_COUNT = 195; // 193 artigos originais + Art. 184-A + Art. 194
 
 async function main() {
   console.log('🔒 Lei 14.133 Backup Script');
@@ -46,7 +46,7 @@ async function main() {
     // 3. Validate count
     if (articles.length !== EXPECTED_COUNT) {
       console.warn('');
-      console.warn('⚠️  WARNING: Expected 193 articles but found ' + articles.length);
+      console.warn('⚠️  WARNING: Expected 195 articles but found ' + articles.length);
       console.warn('   This may indicate data loss!');
       console.warn('');
     }
@@ -63,7 +63,7 @@ async function main() {
         articleCount: articles.length,
         expectedCount: EXPECTED_COUNT,
         version: '1.0',
-        description: 'Backup completo dos 193 artigos da Lei 14.133/2021 editados manualmente'
+        description: 'Backup completo dos 195 artigos da Lei 14.133/2021 (193 originais + Art. 184-A + Art. 194)'
       },
       articles: articles.map(article => ({
         numero: article.numero,

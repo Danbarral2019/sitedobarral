@@ -25,7 +25,7 @@ const path = require('path');
 const readline = require('readline');
 
 const prisma = new PrismaClient();
-const EXPECTED_COUNT = 193;
+const EXPECTED_COUNT = 195; // 193 artigos originais + Art. 184-A + Art. 194
 
 // Parse command line arguments
 const args = process.argv.slice(2);
@@ -66,10 +66,10 @@ function loadBackup(filepath) {
   console.log('   Description:', backup.metadata.description);
   console.log('');
 
-  // Warn if article count doesn't match
-  if (backup.metadata.articleCount !== EXPECTED_COUNT) {
+  // Warn if article count doesn't match (allow 193 for old backups or 195 for new ones)
+  if (backup.metadata.articleCount !== EXPECTED_COUNT && backup.metadata.articleCount !== 193) {
     console.warn('⚠️  WARNING: Backup contains ' + backup.metadata.articleCount + ' articles');
-    console.warn('   Expected: ' + EXPECTED_COUNT + ' articles');
+    console.warn('   Expected: ' + EXPECTED_COUNT + ' articles (or 193 for older backups)');
     console.warn('   This may indicate an incomplete backup!');
     console.warn('');
   }
