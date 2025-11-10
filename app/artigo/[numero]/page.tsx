@@ -14,11 +14,16 @@ interface Document {
   description?: string;
   type: string;
   category: string;
-  courseId: string;
+  courseId: string | null;
   isPublic: boolean;
   url?: string;
   uploadedAt?: string;
   leiArticles?: string | null;
+  sourceType?: 'document' | 'legislative-act';
+  // Campos específicos de atos legislativos
+  fullNumber?: string;
+  issuer?: string;
+  ementa?: string;
 }
 
 interface BlogPost {
@@ -241,46 +246,93 @@ export default function ArtigoPage() {
                     Documentos Públicos ({publicDocuments.length})
                   </h2>
                   <div className="space-y-3">
-                    {publicDocuments.map((doc) => (
-                      <div
-                        key={doc.id}
-                        className="p-4 bg-gray-50 rounded-lg border-2 border-gray-200 hover:border-green-300 transition-colors"
-                      >
-                        <div className="flex items-start justify-between gap-3 mb-2">
-                          <h3 className="font-bold text-gray-900 flex-1">
-                            {doc.title}
-                          </h3>
-                          <span className="px-2 py-1 bg-green-100 text-green-800 rounded font-medium text-xs flex-shrink-0">
-                            Público
-                          </span>
-                        </div>
+                    {publicDocuments.map((doc) => {
+                      const isLegislativeAct = doc.sourceType === 'legislative-act';
 
-                        {doc.description && (
-                          <p className="text-sm text-gray-600 mb-3">
-                            {doc.description}
-                          </p>
-                        )}
-
-                        <div className="flex flex-wrap items-center gap-2">
-                          <span className="px-2 py-1 bg-gray-200 text-gray-700 rounded font-medium text-xs">
-                            {doc.category}
-                          </span>
-
-                          {doc.leiArticles && (
+                      return (
+                        <div
+                          key={doc.id}
+                          className={`p-4 rounded-lg border-2 transition-all ${
+                            isLegislativeAct
+                              ? 'bg-gradient-to-br from-blue-50 to-purple-50 border-blue-300 hover:border-blue-400 hover:shadow-md'
+                              : 'bg-gray-50 border-gray-200 hover:border-green-300'
+                          }`}
+                        >
+                          <div className="flex items-start justify-between gap-3 mb-2">
                             <div className="flex-1">
-                              <ArticleBadges
-                                leiArticles={doc.leiArticles}
-                                maxVisible={3}
-                                primaryArticle={numero}
-                                onArticleClick={(articleNum) => {
-                                  router.push(`/artigo/${articleNum}`);
-                                }}
-                              />
+                              {isLegislativeAct && doc.url ? (
+                                <Link
+                                  href={doc.url}
+                                  className="font-bold text-blue-700 hover:text-blue-900 hover:underline text-lg"
+                                >
+                                  {doc.title}
+                                </Link>
+                              ) : (
+                                <h3 className="font-bold text-gray-900">
+                                  {doc.title}
+                                </h3>
+                              )}
+
+                              {isLegislativeAct && doc.issuer && (
+                                <p className="text-xs text-gray-600 mt-1">
+                                  {doc.issuer}
+                                </p>
+                              )}
+                            </div>
+                            <span className={`px-2 py-1 rounded font-medium text-xs flex-shrink-0 ${
+                              isLegislativeAct
+                                ? 'bg-blue-100 text-blue-800 border border-blue-300'
+                                : 'bg-green-100 text-green-800'
+                            }`}>
+                              {isLegislativeAct ? 'Legislação' : 'Público'}
+                            </span>
+                          </div>
+
+                          {doc.description && (
+                            <p className="text-sm text-gray-600 mb-3">
+                              {doc.description}
+                            </p>
+                          )}
+
+                          <div className="flex flex-wrap items-center gap-2">
+                            <span className={`px-2 py-1 rounded font-medium text-xs ${
+                              isLegislativeAct
+                                ? 'bg-purple-100 text-purple-800 border border-purple-300'
+                                : 'bg-gray-200 text-gray-700'
+                            }`}>
+                              {doc.category}
+                            </span>
+
+                            {doc.leiArticles && (
+                              <div className="flex-1">
+                                <ArticleBadges
+                                  leiArticles={doc.leiArticles}
+                                  maxVisible={3}
+                                  primaryArticle={numero}
+                                  onArticleClick={(articleNum) => {
+                                    router.push(`/artigo/${articleNum}`);
+                                  }}
+                                />
+                              </div>
+                            )}
+                          </div>
+
+                          {isLegislativeAct && doc.url && (
+                            <div className="mt-3 pt-3 border-t border-blue-200">
+                              <Link
+                                href={doc.url}
+                                className="inline-flex items-center gap-2 text-sm font-medium text-blue-600 hover:text-blue-800 hover:underline"
+                              >
+                                Ver texto completo
+                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                                </svg>
+                              </Link>
                             </div>
                           )}
                         </div>
-                      </div>
-                    ))}
+                      );
+                    })}
                   </div>
                 </div>
               )}
