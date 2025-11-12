@@ -389,6 +389,60 @@ export default function AreaRestritaPage() {
               </div>
             </div>
 
+            {/* Banner Assistente IA - Destaque Principal */}
+            {enrolledCourseIds.length > 0 && (
+              <div className="mb-6">
+                <div className="relative overflow-hidden bg-gradient-to-br from-purple-600 via-blue-600 to-indigo-700 rounded-3xl shadow-2xl border-2 border-purple-400">
+                  {/* Efeito de brilho de fundo */}
+                  <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent animate-pulse"></div>
+
+                  <div className="relative p-6 lg:p-8">
+                    <div className="flex flex-col lg:flex-row items-center gap-6">
+                      {/* Ícone animado */}
+                      <div className="flex-shrink-0">
+                        <div className="relative">
+                          <div className="absolute inset-0 bg-white/30 rounded-2xl blur-xl animate-pulse"></div>
+                          <div className="relative bg-white/20 backdrop-blur-sm p-5 rounded-2xl border-2 border-white/40">
+                            <Bot className="w-16 h-16 lg:w-20 lg:h-20 text-white" />
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Conteúdo */}
+                      <div className="flex-1 text-center lg:text-left">
+                        <h2 className="text-2xl lg:text-4xl font-bold text-white mb-2 lg:mb-3">
+                          Assistente IA com Busca Semântica
+                        </h2>
+                        <p className="text-base lg:text-lg text-white/90 mb-4 lg:mb-5 max-w-2xl">
+                          Faça perguntas em linguagem natural sobre seus documentos e receba respostas contextualizadas
+                          com citações de fontes. Powered by Google Gemini.
+                        </p>
+
+                        {/* CTA Button */}
+                        <a
+                          href="/area-restrita/assistente"
+                          className="inline-flex items-center gap-3 bg-white text-purple-700 px-8 py-4 rounded-xl font-bold text-lg shadow-xl hover:shadow-2xl hover:scale-105 transition-all duration-200 group"
+                        >
+                          <Bot className="w-6 h-6 group-hover:rotate-12 transition-transform" />
+                          Abrir Assistente IA
+                          <svg className="w-5 h-5 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                          </svg>
+                        </a>
+                      </div>
+
+                      {/* Badge de Destaque */}
+                      <div className="hidden lg:block">
+                        <div className="bg-white/20 backdrop-blur-sm px-4 py-2 rounded-full border-2 border-white/40">
+                          <p className="text-white font-bold text-sm whitespace-nowrap">✨ Nova Funcionalidade</p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+
             {/* Tabs de Cursos - apenas mobile */}
             {enrolledCourseIds.length > 0 && (
               <div className="lg:hidden mb-4">
@@ -435,38 +489,50 @@ export default function AreaRestritaPage() {
               </div>
             )}
 
-            {/* Barra de Busca - Topo Fixo */}
+            {/* Busca Tradicional (Secundária) */}
             {enrolledCourseIds.length > 0 && (
-              <>
-                <SearchBar
-                  value={search.searchTerm}
-                  onChange={search.setSearchTerm}
-                  onClear={search.clearSearch}
-                  scope={search.scope}
-                  onScopeToggle={search.toggleScope}
-                  onFiltersClick={() => search.setIsFiltersOpen(true)}
-                  activeFiltersCount={search.activeFiltersCount}
-                  resultsCount={search.isSearchActive ? filteredDocuments.length : undefined}
-                  currentCourseName={selectedCourse?.title}
-                />
+              <div className="mb-6">
+                <details className="bg-gray-50 border-2 border-gray-200 rounded-xl overflow-hidden">
+                  <summary className="px-6 py-4 cursor-pointer hover:bg-gray-100 transition-colors flex items-center justify-between font-semibold text-gray-700">
+                    <span className="flex items-center gap-2">
+                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                      </svg>
+                      Busca Tradicional por Documentos
+                    </span>
+                    <span className="text-sm text-gray-500">(Opcional - clique para expandir)</span>
+                  </summary>
 
-                {/* Filtro de Artigos da Lei 14.133 */}
-                <div className="mb-6">
-                  <ArticleAutocomplete
-                    selectedArticles={search.filters.leiArticles}
-                    onSelect={(articleNum) => {
-                      search.updateFilters({
-                        leiArticles: [...search.filters.leiArticles, articleNum]
-                      });
-                    }}
-                    onRemove={(articleNum) => {
-                      search.updateFilters({
-                        leiArticles: search.filters.leiArticles.filter(a => a !== articleNum)
-                      });
-                    }}
-                  />
-                </div>
-              </>
+                  <div className="p-6 pt-4 space-y-4 border-t border-gray-200">
+                    <SearchBar
+                      value={search.searchTerm}
+                      onChange={search.setSearchTerm}
+                      onClear={search.clearSearch}
+                      scope={search.scope}
+                      onScopeToggle={search.toggleScope}
+                      onFiltersClick={() => search.setIsFiltersOpen(true)}
+                      activeFiltersCount={search.activeFiltersCount}
+                      resultsCount={search.isSearchActive ? filteredDocuments.length : undefined}
+                      currentCourseName={selectedCourse?.title}
+                    />
+
+                    {/* Filtro de Artigos da Lei 14.133 */}
+                    <ArticleAutocomplete
+                      selectedArticles={search.filters.leiArticles}
+                      onSelect={(articleNum) => {
+                        search.updateFilters({
+                          leiArticles: [...search.filters.leiArticles, articleNum]
+                        });
+                      }}
+                      onRemove={(articleNum) => {
+                        search.updateFilters({
+                          leiArticles: search.filters.leiArticles.filter(a => a !== articleNum)
+                        });
+                      }}
+                    />
+                  </div>
+                </details>
+              </div>
             )}
 
             {/* Conteúdo do Curso Selecionado */}
