@@ -115,6 +115,18 @@ model Document {
   tcuClassificadoEm   DateTime? // Data da classificação pela IA
   tcuRevisadoPorAdmin Boolean @default(false) // Se o documento foi revisado manualmente pelo admin após enriquecimento
 
+  // Cloudflare R2 Storage (Fase 8)
+  r2Key               String?   // Chave do arquivo no R2 (ex: "documents/1/uuid-filename.pdf")
+  r2UploadedAt        DateTime? // Data de upload para R2
+  r2MigratedFrom      String?   // Path original no filesystem (para auditoria de migração)
+
+  // Google Gemini File Search (Fase 8)
+  geminiIndexed       Boolean   @default(false) // Se o documento foi indexado no Gemini
+  geminiFileId        String?   // ID do arquivo no Gemini File API
+  geminiLastIndexed   DateTime? // Última vez que foi reindexado
+  geminiIndexError    String?   // Mensagem de erro de indexação (se houver)
+  geminiStoreId       String?   // ID do corpus/store no Gemini
+
   @@index([courseId])
   @@index([category])
   @@index([courseId, isPublic])
@@ -142,6 +154,10 @@ model Document {
   @@index([douData]) // Índice para ordenar por data de publicação no DOU
   @@index([douSecao]) // Índice para filtrar por seção do DOU
   @@index([category, douData]) // Índice composto para buscar documentos por categoria e data DOU
+  @@index([r2Key]) // Índice para buscar por chave R2
+  @@index([geminiIndexed]) // Índice para filtrar documentos indexados/não indexados
+  @@index([geminiFileId]) // Índice para buscar por Gemini File ID
+  @@index([geminiStoreId]) // Índice para agrupar por store do Gemini
 
   // Relacionamento com versões históricas
   versions DocumentVersion[]
@@ -806,4 +822,79 @@ model LeiArticle {
 
   @@index([numero])
   @@index([capitulo])
+}
+
+// Fila de Indexação (Background Jobs para Gemini)
+// Processa uploads e reindexações de forma assíncrona
+model IndexJob {
+  id            String   @id @default(uuid())
+
+  // Tipo de conteúdo a indexar
+  entityType    String   // 'document' | 'glossary' | 'lei-article' | 'blog-post'
+  entityId      String   // ID da entidade (Document, GlossaryTerm, LeiArticle, BlogPost)
+
+  // Status do job
+  status        String   @default("pending") // 'pending' | 'processing' | 'completed' | 'failed'
+  priority      Int      @default(0) // Maior = mais prioritário (0-10)
+
+  // Dados para indexação
+  r2Key         String?  // Chave R2 do arquivo (para documents)
+  textContent   String?  @db.Text // Conteúdo textual já extraído (para otimização)
+  metadata      String?  @db.Text // Metadados adicionais em JSON
+
+  // Controle de reprocessamento
+  attempts      Int      @default(0)
+  maxAttempts   Int      @default(3)
+  lastError     String?  @db.Text
+
+  // Store/corpus do Gemini
+  geminiStoreId String?  // ID do store onde indexar
+
+  // Timestamps
+  createdAt     DateTime @default(now())
+  processedAt   DateTime? // Quando foi processado
+  scheduledFor  DateTime? // Para agendamento futuro (opcional)
+
+  @@index([status])
+  @@index([priority, status])
+  @@index([entityType, entityId])
+  @@index([createdAt])
+  @@index([scheduledFor])
+  @@index([geminiStoreId])
+}
+
+// Stores/Corpus do Gemini
+// Gerencia diferentes corpora para organização do conteúdo
+model GeminiStore {
+  id              String   @id @default(uuid())
+
+  // Identificação
+  name            String   @unique // 'main-documents' | 'glossary' | 'lei-14133' | 'blog'
+  displayName     String   // Nome amigável
+  description     String?  // Descrição do propósito
+
+  // Gemini API
+  geminiCorpusId  String?  @unique // ID do corpus no Gemini
+  geminiApiKey    String?  // Chave API específica (se necessário)
+
+  // Configuração
+  isActive        Boolean  @default(true)
+  autoIndex       Boolean  @default(true) // Indexar automaticamente novos conteúdos
+  maxDocuments    Int?     // Limite de documentos (plano Gemini)
+
+  // Estatísticas
+  documentsCount  Int      @default(0)
+  lastIndexedAt   DateTime?
+  totalIndexJobs  Int      @default(0) // Total de jobs processados
+
+  // Metadados
+  config          String?  @db.Text // Configurações específicas em JSON
+
+  // Timestamps
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@index([name])
+  @@index([isActive])
+  @@index([autoIndex])
 }

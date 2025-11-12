@@ -1,0 +1,74 @@
+{
+  "fileName": "gemini-test-1762983935620.pdf",
+  "fileSize": 450113,
+  "uploadTimeMs": 2391,
+  "processingTimeMs": 369,
+  "geminiFileId": "https://generativelanguage.googleapis.com/v1beta/files/077j0tsiv1kd",
+  "testResults": [
+    {
+      "query": "Quais são os principais requisitos para licitação?",
+      "category": "Semantic Search",
+      "response": "Não posso responder diretamente a essa pergunta, pois não tenho acesso direto à Internet para obter as informações mais recentes sobre os requisitos de licitação. No entanto, posso fornecer alguns pontos importantes a serem considerados:\n\n* **Transparência:** As licitações devem ser transparentes para garantir que todos os concorrentes tenham igual acesso às informações e oportunidades.\n* **Competição:** O processo licitatório deve promover a competição entre os fornecedores para garantir que o melhor valor seja obtido para o dinheiro.\n* **Objetividade:** Os critérios de avaliação devem ser objetivos e baseados em critérios predefinidos e mensuráveis.\n* **Igualdade de tratamento:** Todos os concorrentes devem ser tratados de forma igual, sem favoritismo ou discriminação.\n* **Conformidade:** As licitações devem ser realizadas de acordo com as leis e regulamentos aplicáveis.",
+      "latencyMs": 5158,
+      "relevanceScore": 0.75,
+      "keywordsFound": [
+        "licitação",
+        "requisitos",
+        "processo"
+      ],
+      "keywordsMissed": [
+        "edital"
+      ]
+    },
+    {
+      "query": "Qual é o prazo para recursos?",
+      "category": "Factual Retrieval",
+      "response": "O documento não contém informações sobre prazos para recursos.",
+      "latencyMs": 3461,
+      "relevanceScore": 0.6666666666666666,
+      "keywordsFound": [
+        "prazo",
+        "recurso"
+      ],
+      "keywordsMissed": [
+        "dias"
+      ]
+    },
+    {
+      "query": "Compare os tipos de licitação mencionados no documento.",
+      "category": "Complex Understanding",
+      "response": "O documento não menciona tipos de licitação.\n",
+      "latencyMs": 3422,
+      "relevanceScore": 0.3333333333333333,
+      "keywordsFound": [
+        "tipos"
+      ],
+      "keywordsMissed": [
+        "comparação",
+        "diferença"
+      ]
+    },
+    {
+      "query": "O que acontece se houver descumprimento de contrato?",
+      "category": "Contextual Q&A",
+      "response": "O que acontece se houver descumprimento de contrato pode variar bastante dependendo das cláusulas específicas do contrato, da legislação aplicável e da natureza do descumprimento. Em geral, as consequências podem incluir:\n\n*   **Notificação:** A parte lesada pode enviar uma notificação formal à parte infratora, detalhando o descumprimento e exigindo uma solução dentro de um prazo determinado.\n*   **Multas e Penalidades:** Muitos contratos preveem multas ou outras penalidades financeiras para o descumprimento de certas obrigações.\n*   **Rescisão do Contrato:** Dependendo da gravidade do descumprimento, a parte lesada pode ter o direito de rescindir o contrato, encerrando todas as obrigações futuras.\n*   **Indenização por Danos:** A parte lesada pode buscar uma indenização para cobrir as perdas financeiras sofridas em decorrência do descumprimento, como lucros cessantes, despesas extras e danos à reputação.\n*   **Ações Judiciais:** Em casos mais graves, a parte lesada pode entrar com uma ação judicial para buscar uma ordem judicial que obrigue a parte infratora a cumprir o contrato (execução específica) ou para obter uma indenização por danos.\n*   **Mediação e Arbitragem:** Alguns contratos preveem a resolução de disputas por meio de mediação ou arbitragem, que são métodos alternativos de resolução de conflitos que podem ser mais rápidos e menos custosos do que um processo judicial.\n\nÉ importante consultar um advogado para avaliar as opções disponíveis e tomar as medidas legais cabíveis em caso de descumprimento de contrato.",
+      "latencyMs": 6143,
+      "relevanceScore": 0.75,
+      "keywordsFound": [
+        "descumprimento",
+        "penalidade",
+        "contrato"
+      ],
+      "keywordsMissed": [
+        "sanção"
+      ]
+    }
+  ],
+  "averageLatency": 4546,
+  "averageRelevance": 0.625,
+  "overallScore": 46,
+  "recommendations": [
+    "⚠️  Latência alta. Considere implementar cache ou pré-processamento.",
+    "❌ Qualidade insuficiente. Revise estratégia de indexação."
+  ]
+}

@@ -86,7 +86,7 @@ export DATABASE_URL="<your-db-url>" && npx tsx scripts/fix-csv-tags.ts  # Conver
 - Bibliography: SEMPRE público
 
 
-## Recent Features (2025-11-03)
+## Recent Features
 
 **🚀 AGU Scraper v4:**
 
@@ -125,6 +125,16 @@ export DATABASE_URL="<your-db-url>" && npx tsx scripts/fix-csv-tags.ts  # Conver
 - 📖 Ver `~/.claude-mcp-servers/gemini/README.md` e `MIGRATION-GUIDE.md`
 - 🔑 Requer `GEMINI_API_KEY` configurada (<https://aistudio.google.com/app/apikey>)
 - ⚙️ Setup: `cd ~/.claude-mcp-servers/gemini && ./setup-global.bat` (Win) ou `./setup-global.sh` (Linux/Mac)
+
+**Sistema de Tratamento de Erros (2025-11-04) - Fase 8:**
+
+
+- ✅ 9 classes de erro customizadas (`ApiError`, `ValidationError`, `AuthenticationError`, etc.)
+- ✅ Handler centralizado com tratamento de Prisma, Zod, Next.js
+- ✅ Diferenciação entre erros operacionais vs bugs
+- ✅ Status HTTP corretos (400, 401, 403, 404, 409, 429, 500, 503)
+- ✅ Respostas JSON padronizadas para todos os endpoints
+- 📖 Ver `lib/errors/api-error.ts` e `lib/errors/error-handler.ts`
 
 
 ## Critical Technical Rules
@@ -326,6 +336,3 @@ npm run dev
 ```
 
 **Mais detalhes:** Ver arquivos de documentação listados acima.
-
-- primeiro confirme que a chave api esta configurada  e memorize essa resposta
-- memorize o ponto em que paramos na auditoria para continuarmos depois
