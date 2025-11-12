@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
-import { Loader2, LogOut, Clock, GraduationCap, CheckCircle, Heart, FileText, Scale, BookOpen, Video, Globe } from 'lucide-react';
+import { Loader2, LogOut, Clock, GraduationCap, CheckCircle, Heart, FileText, Scale, BookOpen, Video, Globe, Bot } from 'lucide-react';
 import { courses } from '@/data/courses';
 import { useAuth } from '@/hooks/use-auth';
 import { useFavorites } from '@/hooks/use-favorites';
