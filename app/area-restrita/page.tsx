@@ -358,6 +358,13 @@ export default function AreaRestritaPage() {
                 {/* Botões de ação - apenas desktop */}
                 <div className="flex items-center gap-3">
                   <a
+                    href="/area-restrita/assistente"
+                    className="flex items-center gap-2 px-4 py-2 text-gray-700 hover:text-purple-600 hover:bg-purple-50 rounded-lg transition-colors font-medium"
+                  >
+                    <Bot className="w-4 h-4" />
+                    <span>Assistente IA</span>
+                  </a>
+                  <a
                     href="/area-restrita/favoritos"
                     className="flex items-center gap-2 px-4 py-2 text-gray-700 hover:text-pink-600 hover:bg-pink-50 rounded-lg transition-colors font-medium"
                   >
@@ -753,18 +760,18 @@ export default function AreaRestritaPage() {
             <span className="text-xs font-medium">Início</span>
           </a>
           <a
+            href="/area-restrita/assistente"
+            className="flex flex-col items-center justify-center flex-1 h-full text-gray-600 hover:text-purple-600 hover:bg-purple-50 transition-colors"
+          >
+            <Bot className="w-6 h-6 mb-1" />
+            <span className="text-xs font-medium">IA</span>
+          </a>
+          <a
             href="/area-restrita/favoritos"
             className="flex flex-col items-center justify-center flex-1 h-full text-gray-600 hover:text-pink-600 hover:bg-pink-50 transition-colors"
           >
             <Heart className="w-6 h-6 mb-1" />
             <span className="text-xs font-medium">Favoritos</span>
-          </a>
-          <a
-            href="/area-restrita/historico"
-            className="flex flex-col items-center justify-center flex-1 h-full text-gray-600 hover:text-blue-600 hover:bg-blue-50 transition-colors"
-          >
-            <Clock className="w-6 h-6 mb-1" />
-            <span className="text-xs font-medium">Histórico</span>
           </a>
           <button
             onClick={handleLogout}
