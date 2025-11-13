@@ -37,9 +37,9 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // 3. Recebe IDs dos documentos
+    // 3. Recebe IDs dos documentos e contexto
     const body = await request.json();
-    const { documentIds } = body;
+    const { documentIds, mode = 'custom', searchContext } = body;
 
     if (!Array.isArray(documentIds) || documentIds.length === 0) {
       return NextResponse.json(
@@ -123,41 +123,97 @@ export async function POST(request: NextRequest) {
     pdf.setLineWidth(0.5);
     pdf.line(margin, 70, pageWidth - margin, 70);
 
-    // Informações do aluno
+    // Título do documento (varia por modo)
     pdf.setFontSize(14);
     pdf.setFont('helvetica', 'bold');
-    pdf.text('Documentos Selecionados', margin, 90);
+    const documentTitle = mode === 'search'
+      ? 'Relatorio de Pesquisa'
+      : mode === 'favorites'
+      ? 'Documentos Favoritos'
+      : 'Documentos Selecionados';
+    pdf.text(documentTitle, margin, 90);
 
+    // Informações do aluno
     pdf.setFontSize(11);
     pdf.setFont('helvetica', 'normal');
     pdf.setTextColor(80, 80, 80);
     pdf.text(`Aluno: ${user.name}`, margin, 100);
     pdf.text(`Email: ${user.email}`, margin, 107);
-    pdf.text(`Data de Exportação: ${new Date().toLocaleDateString('pt-BR', {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit',
-    })}`, margin, 114);
-    pdf.text(`Total de Documentos: ${documents.length}`, margin, 121);
+
+    let currentInfoY = 114;
+
+    // Se for busca, mostra informações da pesquisa
+    if (mode === 'search' && searchContext) {
+      pdf.setFont('helvetica', 'bold');
+      pdf.text('Pesquisa Realizada:', margin, currentInfoY);
+      currentInfoY += 7;
+
+      pdf.setFont('helvetica', 'normal');
+      const queryLines = pdf.splitTextToSize(`"${searchContext.query}"`, maxLineWidth);
+      pdf.text(queryLines, margin + 5, currentInfoY);
+      currentInfoY += (queryLines.length * 5) + 5;
+
+      const searchDate = new Date(searchContext.timestamp).toLocaleDateString('pt-BR', {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit',
+      });
+      pdf.text(`Data da Pesquisa: ${searchDate}`, margin, currentInfoY);
+      currentInfoY += 7;
+
+      const searchTypeLabel = searchContext.searchType === 'ai' ? 'Busca Semantica com IA' : 'Busca Local';
+      pdf.text(`Tipo de Busca: ${searchTypeLabel}`, margin, currentInfoY);
+      currentInfoY += 7;
+
+      // Se houver resposta da IA, adicionar em box destacado
+      if (searchContext.aiResponse) {
+        pdf.setFillColor(240, 235, 255); // Roxo muito claro
+        pdf.setDrawColor(147, 51, 234); // Roxo
+        const aiBoxHeight = 35;
+        pdf.rect(margin, currentInfoY, maxLineWidth, aiBoxHeight, 'FD');
+
+        pdf.setFontSize(9);
+        pdf.setTextColor(76, 29, 149); // Roxo escuro
+        pdf.setFont('helvetica', 'bold');
+        pdf.text('ANALISE DA IA:', margin + 3, currentInfoY + 5);
+        pdf.setFont('helvetica', 'normal');
+        const aiLines = pdf.splitTextToSize(searchContext.aiResponse, maxLineWidth - 6);
+        pdf.text(aiLines.slice(0, 4), margin + 3, currentInfoY + 10);
+        currentInfoY += aiBoxHeight + 5;
+      }
+    } else {
+      pdf.text(`Data de Exportação: ${new Date().toLocaleDateString('pt-BR', {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit',
+      })}`, margin, currentInfoY);
+      currentInfoY += 7;
+    }
+
+    pdf.text(`Total de Documentos: ${documents.length}`, margin, currentInfoY);
+    currentInfoY += 10;
 
     // Box de aviso
     pdf.setFillColor(255, 243, 205); // Amarelo claro
     pdf.setDrawColor(255, 193, 7); // Amarelo
-    pdf.rect(margin, 130, maxLineWidth, 25, 'FD');
+    pdf.rect(margin, currentInfoY, maxLineWidth, 25, 'FD');
 
     pdf.setFontSize(9);
     pdf.setTextColor(102, 77, 3); // Marrom
     pdf.setFont('helvetica', 'bold');
-    pdf.text('ATENCAO:', margin + 3, 137);
+    pdf.text('ATENCAO:', margin + 3, currentInfoY + 7);
     pdf.setFont('helvetica', 'normal');
     const avisoText = 'Este documento foi gerado exclusivamente para o aluno identificado acima. E proibida a distribuicao, reproducao ou compartilhamento sem autorizacao previa.';
     const avisoLines = pdf.splitTextToSize(avisoText, maxLineWidth - 6);
-    pdf.text(avisoLines, margin + 3, 143);
+    pdf.text(avisoLines, margin + 3, currentInfoY + 13);
+    currentInfoY += 30;
 
     // Lista de documentos
-    let currentY = 170;
+    let currentY = currentInfoY + 10;
 
     pdf.setFontSize(12);
     pdf.setFont('helvetica', 'bold');
@@ -234,6 +290,18 @@ export async function POST(request: NextRequest) {
           } catch {
             // ignore
           }
+        }
+
+        // Se for busca e houver score de relevância, mostrar
+        if (mode === 'search' && searchContext?.relevanceScores && searchContext.relevanceScores[doc.id]) {
+          const relevance = searchContext.relevanceScores[doc.id];
+          const relevancePercent = Math.round(relevance * 100);
+          pdf.setFontSize(8);
+          pdf.setTextColor(147, 51, 234); // Roxo
+          pdf.setFont('helvetica', 'bold');
+          pdf.text(`Relevancia: ${relevancePercent}%`, margin + 6, currentY);
+          pdf.setFont('helvetica', 'normal');
+          currentY += 5;
         }
 
         currentY += 3;

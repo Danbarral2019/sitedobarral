@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
-import { Loader2, LogOut, Clock, GraduationCap, CheckCircle, Heart, FileText, Scale, BookOpen, Video, Globe, Bot } from 'lucide-react';
+import { Loader2, LogOut, Clock, GraduationCap, CheckCircle, Heart, FileText, Scale, BookOpen, Video, Globe } from 'lucide-react';
 import { courses } from '@/data/courses';
 import { useAuth } from '@/hooks/use-auth';
 import { useFavorites } from '@/hooks/use-favorites';
@@ -15,13 +15,13 @@ import DocumentsByCategory from '@/components/DocumentsByCategory';
 import DocumentDetailModal from '@/components/DocumentDetailModal';
 import CourseVideos from '@/components/CourseVideos';
 import RecommendedSites from '@/components/RecommendedSites';
-import SearchBar from '@/components/SearchBar';
+import UnifiedSearch from '@/components/UnifiedSearch';
 import SearchFilters from '@/components/SearchFilters';
 import PDFExportPanel from '@/components/PDFExportPanel';
 import { GlossarySearchResults } from '@/components/GlossarySearchResults';
-import { ArticleAutocomplete } from '@/components/ArticleAutocomplete';
 import { TopArticlesWidget } from '@/components/TopArticlesWidget';
 import { ArticleTreeNavigator } from '@/components/ArticleTreeNavigator';
+import { SearchProvider } from '@/contexts/SearchContext';
 
 interface DocumentType {
   id: string;
@@ -304,7 +304,8 @@ export default function AreaRestritaPage() {
   }
 
   return (
-    <main className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
+    <SearchProvider>
+      <main className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
       <div className="flex">
         {/* Sidebar de Cursos */}
         <CoursesSidebar
@@ -357,13 +358,6 @@ export default function AreaRestritaPage() {
 
                 {/* Botões de ação - apenas desktop */}
                 <div className="flex items-center gap-3">
-                  <a
-                    href="/area-restrita/assistente"
-                    className="flex items-center gap-2 px-4 py-2 text-gray-700 hover:text-purple-600 hover:bg-purple-50 rounded-lg transition-colors font-medium"
-                  >
-                    <Bot className="w-4 h-4" />
-                    <span>Assistente IA</span>
-                  </a>
                   <a
                     href="/area-restrita/favoritos"
                     className="flex items-center gap-2 px-4 py-2 text-gray-700 hover:text-pink-600 hover:bg-pink-50 rounded-lg transition-colors font-medium"
@@ -466,77 +460,24 @@ export default function AreaRestritaPage() {
                       </p>
                     </div>
 
-                    {/* Busca Tradicional (Secundária) */}
+                    {/* Busca Híbrida Unificada */}
                     <div className="mb-6">
-                      <details className="bg-white border-2 border-gray-200 rounded-xl shadow-sm overflow-hidden">
-                        <summary className="px-6 py-4 cursor-pointer hover:bg-gray-50 transition-colors flex items-center gap-2 font-semibold text-gray-700">
-                          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                          </svg>
-                          Busca
-                        </summary>
-
-                        <div className="p-6 pt-4 border-t border-gray-200">
-                          {/* Campo de busca único */}
-                          <SearchBar
-                            value={search.searchTerm}
-                            onChange={search.setSearchTerm}
-                            onClear={search.clearSearch}
-                            scope={search.scope}
-                            onScopeToggle={search.toggleScope}
-                            onFiltersClick={() => search.setIsFiltersOpen(true)}
-                            activeFiltersCount={search.activeFiltersCount}
-                            resultsCount={search.isSearchActive ? filteredDocuments.length : undefined}
-                            currentCourseName={selectedCourse?.title}
-                          />
-
-                          {/* Nota: Filtros de artigos acessíveis via botão "Filtros" acima */}
-                        </div>
-                      </details>
-                    </div>
-
-                    {/* Banner Assistente IA - Compacto */}
-                    <div className="mb-6">
-                      <div className="relative overflow-hidden bg-gradient-to-r from-blue-600 to-cyan-600 rounded-xl shadow-lg border-2 border-blue-300">
-                        <div className="relative p-4 lg:p-5">
-                          <div className="flex items-center gap-4">
-                            {/* Ícone */}
-                            <div className="flex-shrink-0">
-                              <div className="bg-white/20 backdrop-blur-sm p-3 rounded-lg">
-                                <Bot className="w-8 h-8 text-white" />
-                              </div>
-                            </div>
-
-                            {/* Conteúdo */}
-                            <div className="flex-1">
-                              <h3 className="text-lg lg:text-xl font-bold text-white mb-1">
-                                Assistente IA com Busca Semântica
-                              </h3>
-                              <p className="text-sm text-white/90 mb-3">
-                                Faça perguntas sobre seus documentos e receba respostas com citações
-                              </p>
-                            </div>
-
-                            {/* Botão CTA */}
-                            <a
-                              href="/area-restrita/assistente"
-                              className="hidden lg:flex items-center gap-2 bg-white text-blue-700 px-5 py-2.5 rounded-lg font-semibold text-sm shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-200 group"
-                            >
-                              <Bot className="w-4 h-4 group-hover:rotate-12 transition-transform" />
-                              Abrir Assistente
-                            </a>
-                          </div>
-
-                          {/* Botão Mobile (full width) */}
-                          <a
-                            href="/area-restrita/assistente"
-                            className="lg:hidden mt-3 flex items-center justify-center gap-2 bg-white text-blue-700 px-5 py-3 rounded-lg font-semibold text-sm shadow-lg"
-                          >
-                            <Bot className="w-4 h-4" />
-                            Abrir Assistente IA
-                          </a>
-                        </div>
-                      </div>
+                      <UnifiedSearch
+                        value={search.searchTerm}
+                        onChange={search.setSearchTerm}
+                        onClear={search.clearSearch}
+                        scope={search.scope}
+                        onScopeToggle={search.toggleScope}
+                        onFiltersClick={() => search.setIsFiltersOpen(true)}
+                        activeFiltersCount={search.activeFiltersCount}
+                        resultsCount={search.isSearchActive ? filteredDocuments.length : undefined}
+                        currentCourseName={selectedCourse?.title}
+                        allDocuments={searchableDocuments.map(doc => ({
+                          ...doc,
+                          courseIds: [selectedCourseId || '']
+                        }))}
+                        currentCourseId={selectedCourseId || undefined}
+                      />
                     </div>
 
                     {/* Tabs de Navegação - Apenas sem busca ativa */}
@@ -797,13 +738,6 @@ export default function AreaRestritaPage() {
             <span className="text-xs font-medium">Início</span>
           </a>
           <a
-            href="/area-restrita/assistente"
-            className="flex flex-col items-center justify-center flex-1 h-full text-gray-600 hover:text-purple-600 hover:bg-purple-50 transition-colors"
-          >
-            <Bot className="w-6 h-6 mb-1" />
-            <span className="text-xs font-medium">IA</span>
-          </a>
-          <a
             href="/area-restrita/favoritos"
             className="flex flex-col items-center justify-center flex-1 h-full text-gray-600 hover:text-pink-600 hover:bg-pink-50 transition-colors"
           >
@@ -820,5 +754,6 @@ export default function AreaRestritaPage() {
         </div>
       </nav>
     </main>
+    </SearchProvider>
   );
 }
