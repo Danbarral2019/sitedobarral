@@ -389,58 +389,9 @@ export default function AreaRestritaPage() {
               </div>
             </div>
 
-            {/* Banner Assistente IA - Destaque Principal */}
-            {enrolledCourseIds.length > 0 && (
-              <div className="mb-6">
-                <div className="relative overflow-hidden bg-gradient-to-br from-purple-600 via-blue-600 to-indigo-700 rounded-3xl shadow-2xl border-2 border-purple-400">
-                  {/* Efeito de brilho de fundo */}
-                  <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent animate-pulse"></div>
-
-                  <div className="relative p-6 lg:p-8">
-                    <div className="flex flex-col lg:flex-row items-center gap-6">
-                      {/* Ícone animado */}
-                      <div className="flex-shrink-0">
-                        <div className="relative">
-                          <div className="absolute inset-0 bg-white/30 rounded-2xl blur-xl animate-pulse"></div>
-                          <div className="relative bg-white/20 backdrop-blur-sm p-5 rounded-2xl border-2 border-white/40">
-                            <Bot className="w-16 h-16 lg:w-20 lg:h-20 text-white" />
-                          </div>
-                        </div>
-                      </div>
-
-                      {/* Conteúdo */}
-                      <div className="flex-1 text-center lg:text-left">
-                        <h2 className="text-2xl lg:text-4xl font-bold text-white mb-2 lg:mb-3">
-                          Assistente IA com Busca Semântica
-                        </h2>
-                        <p className="text-base lg:text-lg text-white/90 mb-4 lg:mb-5 max-w-2xl">
-                          Faça perguntas em linguagem natural sobre seus documentos e receba respostas contextualizadas
-                          com citações de fontes. Powered by Google Gemini.
-                        </p>
-
-                        {/* CTA Button */}
-                        <a
-                          href="/area-restrita/assistente"
-                          className="inline-flex items-center gap-3 bg-white text-purple-700 px-8 py-4 rounded-xl font-bold text-lg shadow-xl hover:shadow-2xl hover:scale-105 transition-all duration-200 group"
-                        >
-                          <Bot className="w-6 h-6 group-hover:rotate-12 transition-transform" />
-                          Abrir Assistente IA
-                          <svg className="w-5 h-5 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
-                          </svg>
-                        </a>
-                      </div>
-
-                      {/* Badge de Destaque */}
-                      <div className="hidden lg:block">
-                        <div className="bg-white/20 backdrop-blur-sm px-4 py-2 rounded-full border-2 border-white/40">
-                          <p className="text-white font-bold text-sm whitespace-nowrap">✨ Nova Funcionalidade</p>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
+            {/* Banner de Status do Acesso */}
+            {selectedCourse && isSelectedCourseEnrolled && (
+              <EnrollmentStatusBanner courseId={selectedCourse.id} />
             )}
 
             {/* Tabs de Cursos - apenas mobile */}
@@ -489,60 +440,11 @@ export default function AreaRestritaPage() {
               </div>
             )}
 
-            {/* Busca Tradicional (Secundária) */}
-            {enrolledCourseIds.length > 0 && (
-              <div className="mb-6">
-                <details className="bg-gray-50 border-2 border-gray-200 rounded-xl overflow-hidden">
-                  <summary className="px-6 py-4 cursor-pointer hover:bg-gray-100 transition-colors flex items-center justify-between font-semibold text-gray-700">
-                    <span className="flex items-center gap-2">
-                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                      </svg>
-                      Busca Tradicional por Documentos
-                    </span>
-                    <span className="text-sm text-gray-500">(Opcional - clique para expandir)</span>
-                  </summary>
-
-                  <div className="p-6 pt-4 space-y-4 border-t border-gray-200">
-                    <SearchBar
-                      value={search.searchTerm}
-                      onChange={search.setSearchTerm}
-                      onClear={search.clearSearch}
-                      scope={search.scope}
-                      onScopeToggle={search.toggleScope}
-                      onFiltersClick={() => search.setIsFiltersOpen(true)}
-                      activeFiltersCount={search.activeFiltersCount}
-                      resultsCount={search.isSearchActive ? filteredDocuments.length : undefined}
-                      currentCourseName={selectedCourse?.title}
-                    />
-
-                    {/* Filtro de Artigos da Lei 14.133 */}
-                    <ArticleAutocomplete
-                      selectedArticles={search.filters.leiArticles}
-                      onSelect={(articleNum) => {
-                        search.updateFilters({
-                          leiArticles: [...search.filters.leiArticles, articleNum]
-                        });
-                      }}
-                      onRemove={(articleNum) => {
-                        search.updateFilters({
-                          leiArticles: search.filters.leiArticles.filter(a => a !== articleNum)
-                        });
-                      }}
-                    />
-                  </div>
-                </details>
-              </div>
-            )}
-
             {/* Conteúdo do Curso Selecionado */}
             {enrolledCourseIds.length > 0 ? (
               <>
                 {selectedCourse && isSelectedCourseEnrolled ? (
                   <div>
-                    {/* Banner de Status */}
-                    <EnrollmentStatusBanner courseId={selectedCourse.id} />
-
                     {/* Informações do Curso */}
                     <div className="bg-white rounded-2xl shadow-lg p-4 lg:p-8 mb-4 lg:mb-6 border-2 border-gray-200">
                       <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between mb-3 lg:mb-4 gap-3 lg:gap-4">
@@ -559,12 +461,81 @@ export default function AreaRestritaPage() {
                           </div>
                         )}
                       </div>
-                      <p className="text-sm lg:text-lg text-gray-700 leading-relaxed mb-3 lg:mb-4">
+                      <p className="text-sm lg:text-lg text-gray-700 leading-relaxed">
                         {selectedCourse.description}
                       </p>
-                      <div className="flex items-center gap-2 text-gray-600">
-                        <Clock className="w-4 h-4 lg:w-4 lg:h-4" />
-                        <span className="text-xs lg:text-sm font-medium">Duração: {selectedCourse.duration}</span>
+                    </div>
+
+                    {/* Busca Tradicional (Secundária) */}
+                    <div className="mb-6">
+                      <details className="bg-white border-2 border-gray-200 rounded-xl shadow-sm overflow-hidden">
+                        <summary className="px-6 py-4 cursor-pointer hover:bg-gray-50 transition-colors flex items-center gap-2 font-semibold text-gray-700">
+                          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                          </svg>
+                          Busca
+                        </summary>
+
+                        <div className="p-6 pt-4 border-t border-gray-200">
+                          {/* Campo de busca único */}
+                          <SearchBar
+                            value={search.searchTerm}
+                            onChange={search.setSearchTerm}
+                            onClear={search.clearSearch}
+                            scope={search.scope}
+                            onScopeToggle={search.toggleScope}
+                            onFiltersClick={() => search.setIsFiltersOpen(true)}
+                            activeFiltersCount={search.activeFiltersCount}
+                            resultsCount={search.isSearchActive ? filteredDocuments.length : undefined}
+                            currentCourseName={selectedCourse?.title}
+                          />
+
+                          {/* Nota: Filtros de artigos acessíveis via botão "Filtros" acima */}
+                        </div>
+                      </details>
+                    </div>
+
+                    {/* Banner Assistente IA - Compacto */}
+                    <div className="mb-6">
+                      <div className="relative overflow-hidden bg-gradient-to-r from-blue-600 to-cyan-600 rounded-xl shadow-lg border-2 border-blue-300">
+                        <div className="relative p-4 lg:p-5">
+                          <div className="flex items-center gap-4">
+                            {/* Ícone */}
+                            <div className="flex-shrink-0">
+                              <div className="bg-white/20 backdrop-blur-sm p-3 rounded-lg">
+                                <Bot className="w-8 h-8 text-white" />
+                              </div>
+                            </div>
+
+                            {/* Conteúdo */}
+                            <div className="flex-1">
+                              <h3 className="text-lg lg:text-xl font-bold text-white mb-1">
+                                Assistente IA com Busca Semântica
+                              </h3>
+                              <p className="text-sm text-white/90 mb-3">
+                                Faça perguntas sobre seus documentos e receba respostas com citações
+                              </p>
+                            </div>
+
+                            {/* Botão CTA */}
+                            <a
+                              href="/area-restrita/assistente"
+                              className="hidden lg:flex items-center gap-2 bg-white text-blue-700 px-5 py-2.5 rounded-lg font-semibold text-sm shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-200 group"
+                            >
+                              <Bot className="w-4 h-4 group-hover:rotate-12 transition-transform" />
+                              Abrir Assistente
+                            </a>
+                          </div>
+
+                          {/* Botão Mobile (full width) */}
+                          <a
+                            href="/area-restrita/assistente"
+                            className="lg:hidden mt-3 flex items-center justify-center gap-2 bg-white text-blue-700 px-5 py-3 rounded-lg font-semibold text-sm shadow-lg"
+                          >
+                            <Bot className="w-4 h-4" />
+                            Abrir Assistente IA
+                          </a>
+                        </div>
                       </div>
                     </div>
 

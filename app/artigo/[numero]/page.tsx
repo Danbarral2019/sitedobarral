@@ -502,7 +502,7 @@ export default function ArtigoPage() {
                     </h3>
                   </div>
                   <p className="text-white/90 mb-4 text-sm">
-                    Newsletter semanal com novos conteúdos, jurisprudência e análises sobre a Lei 14.133/2021
+                    Newsletter mensal com novos conteúdos, jurisprudência e análises sobre a Lei 14.133/2021
                   </p>
                   <Link
                     href="/#newsletter"
@@ -511,22 +511,6 @@ export default function ArtigoPage() {
                     Assinar Newsletter Grátis
                   </Link>
                 </div>
-              </div>
-
-              {/* CTA Contato */}
-              <div className="bg-gray-50 rounded-2xl shadow-lg p-6 border-2 border-gray-200">
-                <h3 className="text-lg font-bold text-gray-900 mb-3">
-                  Dúvidas sobre este artigo?
-                </h3>
-                <p className="text-gray-700 mb-4 text-sm">
-                  Entre em contato para consultorias e esclarecimentos jurídicos
-                </p>
-                <Link
-                  href="/contato"
-                  className="block w-full text-center px-4 py-3 bg-gray-900 text-white rounded-lg font-bold hover:bg-gray-800 transition-colors"
-                >
-                  Falar com o Professor
-                </Link>
               </div>
             </div>
           </div>

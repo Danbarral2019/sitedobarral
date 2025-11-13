@@ -1,6 +1,6 @@
 # CLAUDE.md
 
-Guia rápido para Claude Code ao trabalhar neste repositório.
+This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
 ## ⚠️ CRITICAL REMINDERS
 
@@ -88,53 +88,47 @@ export DATABASE_URL="<your-db-url>" && npx tsx scripts/fix-csv-tags.ts  # Conver
 
 ## Recent Features
 
-**🚀 AGU Scraper v4:**
+**🤖 Chat RAG com Busca Semântica (2025-11-12):**
+- ✅ Interface de chat com busca semântica via Google Gemini
+- ✅ Endpoint `/api/documents/query` com caching inteligente
+- ✅ Componente `ChatInterface` reutilizável
+- ✅ Página `/area-restrita/assistente` para alunos
+- ✅ Banner promocional destacado na área restrita
+- ✅ Histórico de conversas com localStorage
+- ✅ Sugestões de perguntas contextuais
+- ✅ Citações de fontes com relevância percentual
+- 📖 Ver `components/ChatInterface.tsx` e `app/area-restrita/assistente/page.tsx`
 
+**Sistema de Tratamento de Erros (2025-11-04) - Fase 8:**
+- ✅ 9 classes de erro customizadas (`ApiError`, `ValidationError`, `AuthenticationError`, etc.)
+- ✅ Handler centralizado com tratamento de Prisma, Zod, JWT
+- ✅ `ErrorBoundary` React component para erros de renderização
+- ✅ Status HTTP semânticos (400, 401, 403, 404, 409, 429, 500, 503)
+- ✅ Logging estruturado com Pino (apiLogger, authLogger)
+- ✅ 8+ rotas refatoradas com novo padrão
+- 📖 Ver `lib/errors/api-error.ts`, `lib/errors/error-handler.ts`, `components/ErrorBoundary.tsx`
+
+**MCP Gemini (2025-11-05) - v2.0.0:**
+- ✅ MCP server customizado para integração Claude ↔ Gemini
+- ✅ 5 tools: query, code_review, compare_approaches, brainstorm, collaborate
+- ✅ Configuração global em `~/.claude-mcp-servers/gemini/`
+- 🔑 Requer `GEMINI_API_KEY` (<https://aistudio.google.com/app/apikey>)
+- 📖 Ver `~/.claude-mcp-servers/gemini/README.md`
+
+**🚀 AGU Scraper v4:**
 - ✅ Sistema de versionamento automático com detecção de mudanças
 - ✅ 97 Orientações Normativas com análise de relevância
-- ✅ 10/215 Pareceres Vinculantes (Playwright MCP)
-- ✅ 10/1,637 DECOR/CONUNI (Playwright MCP)
 - ✅ Significance scoring (0-100) para mudanças
 - 📖 Ver `AGU_SCRAPER_V4.md` e `RESUMO_FINAL_AGU_SCRAPER_COMPLETO.md`
 
 **TCU Manager:**
-
-
 - ✅ Interface admin unificada
 - ✅ Web scraping + AI summaries
 - ✅ Excel converter (`npm run convert-tcu`)
 
-**Parse Seguro de Tags (2025-11-03):**
-
-
+**Parse Seguro de Tags:**
 - ✅ Função `safeParseArray()` suporta CSV e JSON
-- ✅ Aplicado em `lib/documents.ts`, `app/admin/documentos-pendentes/page.tsx`, `app/api/admin/documents/[id]/route.ts`
 - ✅ Script de migração `scripts/fix-csv-tags.ts` para conversão CSV→JSON
-- ✅ Fix: campo `notes` → `adminNotes` no schema
-- ✅ Fix: hydration mismatch no Header com `isMounted`
-
-**MCP Gemini (2025-11-05) - v2.0.0:**
-
-
-- ✅ MCP server customizado para integração Claude ↔ Gemini
-- ✅ Usa SDK oficial `@google/generative-ai`
-- ✅ 5 tools: query, code_review, compare_approaches, brainstorm, collaborate
-- ✅ Permite colaboração entre IAs (segunda opinião, revisão, comparação)
-- 🌐 **Configuração Global** - Funciona em QUALQUER diretório (scope: user)
-- 📂 **Localização:** `~/.claude-mcp-servers/gemini/` (permanente)
-- 📖 Ver `~/.claude-mcp-servers/gemini/README.md` e `MIGRATION-GUIDE.md`
-- 🔑 Requer `GEMINI_API_KEY` configurada (<https://aistudio.google.com/app/apikey>)
-- ⚙️ Setup: `cd ~/.claude-mcp-servers/gemini && ./setup-global.bat` (Win) ou `./setup-global.sh` (Linux/Mac)
-
-**Sistema de Tratamento de Erros (2025-11-04) - Fase 8:**
-
-
-- ✅ 9 classes de erro customizadas (`ApiError`, `ValidationError`, `AuthenticationError`, etc.)
-- ✅ Handler centralizado com tratamento de Prisma, Zod, Next.js
-- ✅ Diferenciação entre erros operacionais vs bugs
-- ✅ Status HTTP corretos (400, 401, 403, 404, 409, 429, 500, 503)
-- ✅ Respostas JSON padronizadas para todos os endpoints
-- 📖 Ver `lib/errors/api-error.ts` e `lib/errors/error-handler.ts`
 
 
 ## Critical Technical Rules
@@ -175,6 +169,37 @@ const response = await fetch(`/api/documents?courseId=${courseId}`);
 const { documents } = await response.json();
 ```
 
+### Error Handling Pattern (Fase 8)
+
+```typescript
+// ✅ CORRECT - New standardized pattern
+import { handleApiError } from '@/lib/errors/error-handler';
+import { NotFoundError, ConflictError } from '@/lib/errors/api-error';
+import { apiLogger } from '@/lib/logger';
+
+export async function GET(request: NextRequest) {
+  try {
+    const resource = await prisma.resource.findUnique({ where: { id } });
+
+    if (!resource) {
+      apiLogger.warn({ resourceId: id }, 'Resource not found');
+      throw new NotFoundError('Resource');
+    }
+
+    apiLogger.info({ resourceId: id }, 'Resource fetched successfully');
+    return NextResponse.json({ resource });
+  } catch (error) {
+    return handleApiError(error);
+  }
+}
+```
+
+**Key points:**
+- Throw semantic errors (`NotFoundError`, `ValidationError`, etc.) instead of returning `NextResponse.json`
+- Use `apiLogger` for structured logging with context
+- Single `catch` block with `handleApiError()` for all routes
+- Status codes are automatic (404, 400, 401, 403, 409, 429, 500, 503)
+
 ## Environment Variables
 
 **Required:**
@@ -191,11 +216,16 @@ const { documents } = await response.json();
 **Optional:**
 
 - `ANTHROPIC_API_KEY` - AI summaries
+- `GEMINI_API_KEY` - Chat RAG e busca semântica
 - `MAILCHIMP_*` - Newsletter
 - `INSTAGRAM_*`, `LINKEDIN_*` - Social media
 - `CRON_SECRET` - Cron job protection
 
 Ver `.env.example` e `SETUP.md`.
+
+**Chat RAG:**
+- Gemini API key configurada via MCP server global (`~/.claude-mcp-servers/gemini/`)
+- Verificar: `claude mcp list` deve mostrar "gemini: ✓ Connected"
 
 
 ## Common Issues & Solutions
@@ -255,6 +285,43 @@ const tags = safeParseArray(doc.tags);
 export DATABASE_URL="..." && npx tsx scripts/fix-csv-tags.ts
 ```
 
+**Chat RAG Issues:**
+
+```bash
+# Gemini API não conectada
+claude mcp list  # Verificar se "gemini: ✓ Connected"
+
+# Se não conectado, verificar API key
+echo $GEMINI_API_KEY  # Linux/Mac
+echo %GEMINI_API_KEY%  # Windows
+
+# Reinstalar MCP Gemini se necessário
+cd ~/.claude-mcp-servers/gemini
+./setup-global.bat  # Windows
+./setup-global.sh   # Linux/Mac
+```
+
+**React Hydration Errors:**
+
+```typescript
+// ❌ WRONG - Causes hydration mismatch
+function Header() {
+  return <div>{new Date().toISOString()}</div>;
+}
+
+// ✅ CORRECT - Use client-side mounting flag
+function Header() {
+  const [isMounted, setIsMounted] = useState(false);
+
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
+
+  if (!isMounted) return null;
+  return <div>{new Date().toISOString()}</div>;
+}
+```
+
 ## Documentation Files
 
 **Setup:**
@@ -288,10 +355,20 @@ export DATABASE_URL="..." && npx tsx scripts/fix-csv-tags.ts
 - `COURSE_IDS_REFERENCE.md` - Course IDs vs slugs
 - `prisma/schema.prisma` - Complete database schema
 
+**Auditoria:**
+
+- `AUDITORIA_CHECKPOINT_FASE_8_FINAL.md` - Status Fase 8 (Error Handling)
+- `AUDITORIA_FASES_8-11_PLANO.md` - Roadmap Fases 8-11
+
 
 ## API Routes Summary
 
-**Public:** `/api/auth/*`, `/api/documents`, `/api/newsletter`, `/api/contact`
+**Public:**
+- `/api/auth/*` - Login, register, logout
+- `/api/documents` - Document queries (requires auth)
+- `/api/documents/query` - Semantic search with Gemini (NEW)
+- `/api/newsletter` - Newsletter subscription
+- `/api/contact` - Contact form
 
 **Admin:** `/api/admin/*` (QR codes, documents, blog, publications, analytics)
 
@@ -301,16 +378,52 @@ Ver código para endpoints completos.
 
 ## Development Status
 
-**✅ Completed:** Auth, QR codes, document management, Excel import, blog, publications, newsletter, social media, TCU/AGU scrapers, versioning system, AI summaries, safe tag parsing (CSV/JSON)
+**✅ Completed:**
+- Auth (JWT, QR codes, enrollment system)
+- Document management (versioning, Excel import, safe parsing)
+- Blog, publications, newsletter, social media
+- TCU/AGU scrapers with AI summaries
+- Error handling system (Fase 8 - 97% audit complete)
+- Chat RAG with semantic search (Gemini)
 
-**🚧 In Progress:** DOU classifier, complete AGU extraction (205 Pareceres + 1,627 DECOR), admin versioning UI
+**🚧 In Progress:**
+- DOU classifier
+- Complete AGU extraction (205 Pareceres + 1,627 DECOR)
+- Admin versioning UI
 
-**Planned:** Payment integration, full-text search, PWA
+**📋 Planned (Fases 9-11):**
+- Fase 9: Automated testing (Vitest, 80%+ coverage)
+- Fase 10: Redis caching (+70% performance)
+- Fase 11: Monitoring (Sentry, Vercel Analytics)
+- Payment integration, full-text search, PWA
+
+## Important Architecture Patterns
+
+### Chat RAG Flow
+1. User query → `/api/documents/query` POST
+2. API calls Gemini with user query + document context
+3. Gemini returns structured response with relevance scores
+4. Response cached with query hash (60s TTL)
+5. Frontend displays sources with citations
+
+### Error Handling Flow (Established in Fase 8)
+1. Route handler throws semantic error (`NotFoundError`, `ValidationError`, etc.)
+2. `handleApiError()` catches and classifies error type
+3. Prisma/Zod/JWT errors automatically mapped to correct HTTP status
+4. Structured logging with context (apiLogger, authLogger)
+5. Client receives standardized JSON response
+
+### Document Versioning
+- Each document update creates a `DocumentVersion` record
+- Significance scoring (0-100) determines notification priority
+- Change detection compares fields (title, content, url, etc.)
+- Admin can review changes before publishing to students
 
 ## Notes for Future Claude Instances
 
 - Este é um site em PRODUÇÃO - cuidado com mudanças
 - Sempre testar fluxos de autenticação após alterações
+- Usar padrão de error handling estabelecido (Fase 8) em todas novas rotas
 - Atualizar este CLAUDE.md quando adicionar features
 - Manter tom formal e profissional (contexto jurídico)
 
@@ -320,6 +433,7 @@ Ver código para endpoints completos.
 - Enrollment expiration: lógica crítica (notificações, renovações)
 - Excel import: manter compatibilidade com templates
 - Multi-course docs: um documento pode pertencer a vários cursos
+- Chat queries limitadas a documentos do curso ativo do usuário
 
 
 ---
