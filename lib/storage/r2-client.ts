@@ -42,20 +42,34 @@ const R2_SECRET_ACCESS_KEY = process.env.R2_SECRET_ACCESS_KEY!;
 const R2_BUCKET_NAME = process.env.R2_BUCKET_NAME!;
 const R2_PUBLIC_URL = process.env.R2_PUBLIC_URL; // Optional
 
-// Validate required environment variables
-if (!R2_ACCOUNT_ID || !R2_ACCESS_KEY_ID || !R2_SECRET_ACCESS_KEY || !R2_BUCKET_NAME) {
-  throw new Error('Missing R2 environment variables. Check .env.local for R2_ACCOUNT_ID, R2_ACCESS_KEY_ID, R2_SECRET_ACCESS_KEY, and R2_BUCKET_NAME');
+// Validate required environment variables (only when actually used, not during import)
+const hasR2Config = Boolean(R2_ACCOUNT_ID && R2_ACCESS_KEY_ID && R2_SECRET_ACCESS_KEY && R2_BUCKET_NAME);
+
+function validateR2Config() {
+  if (!hasR2Config) {
+    throw new Error('Missing R2 environment variables. Check .env.local for R2_ACCOUNT_ID, R2_ACCESS_KEY_ID, R2_SECRET_ACCESS_KEY, and R2_BUCKET_NAME');
+  }
 }
 
-// S3 Client configured for R2
-const r2Client = new S3Client({
-  region: 'auto',
-  endpoint: `https://${R2_ACCOUNT_ID}.r2.cloudflarestorage.com`,
-  credentials: {
-    accessKeyId: R2_ACCESS_KEY_ID,
-    secretAccessKey: R2_SECRET_ACCESS_KEY,
-  },
-});
+// S3 Client configured for R2 (lazy-initialized)
+let r2Client: S3Client | null = null;
+
+function getR2Client(): S3Client {
+  validateR2Config();
+
+  if (!r2Client) {
+    r2Client = new S3Client({
+      region: 'auto',
+      endpoint: `https://${R2_ACCOUNT_ID}.r2.cloudflarestorage.com`,
+      credentials: {
+        accessKeyId: R2_ACCESS_KEY_ID!,
+        secretAccessKey: R2_SECRET_ACCESS_KEY!,
+      },
+    });
+  }
+
+  return r2Client;
+}
 
 // ===========================
 // Types
@@ -100,7 +114,7 @@ export async function uploadToR2(
     Metadata: metadata,
   });
 
-  await r2Client.send(command);
+  await getR2Client().send(command);
 
   return {
     key,
@@ -164,7 +178,7 @@ export async function getSignedR2Url(
     ? new PutObjectCommand({ Bucket: R2_BUCKET_NAME, Key: key })
     : new GetObjectCommand({ Bucket: R2_BUCKET_NAME, Key: key });
 
-  return await getSignedUrl(r2Client, command, { expiresIn });
+  return await getSignedUrl(getR2Client(), command, { expiresIn });
 }
 
 /**
@@ -187,7 +201,7 @@ export async function generatePresignedUploadUrl(
     ContentType: contentType,
   });
 
-  return await getSignedUrl(r2Client, command, { expiresIn });
+  return await getSignedUrl(getR2Client(), command, { expiresIn });
 }
 
 // ===========================
@@ -205,7 +219,7 @@ export async function downloadFromR2(key: string): Promise<Buffer> {
     Key: key,
   });
 
-  const response = await r2Client.send(command);
+  const response = await getR2Client().send(command);
 
   if (!response.Body) {
     throw new Error(`File not found: ${key}`);
@@ -231,7 +245,7 @@ export async function fileExistsInR2(key: string): Promise<boolean> {
       Bucket: R2_BUCKET_NAME,
       Key: key,
     });
-    await r2Client.send(command);
+    await getR2Client().send(command);
     return true;
   } catch (error: any) {
     if (error.name === 'NotFound') {
@@ -255,7 +269,7 @@ export async function deleteFromR2(key: string): Promise<void> {
     Key: key,
   });
 
-  await r2Client.send(command);
+  await getR2Client().send(command);
 }
 
 /**
@@ -286,7 +300,7 @@ export async function listR2Files(
     MaxKeys: maxKeys,
   });
 
-  const response = await r2Client.send(command);
+  const response = await getR2Client().send(command);
   return response.Contents?.map(item => item.Key!) || [];
 }
 
@@ -303,7 +317,7 @@ export async function listR2FilesWithMetadata(
     MaxKeys: maxKeys,
   });
 
-  const response = await r2Client.send(command);
+  const response = await getR2Client().send(command);
 
   return response.Contents?.map(item => ({
     key: item.Key!,
@@ -332,7 +346,7 @@ export async function copyR2File(
     Key: destinationKey,
   });
 
-  await r2Client.send(command);
+  await getR2Client().send(command);
 }
 
 /**
