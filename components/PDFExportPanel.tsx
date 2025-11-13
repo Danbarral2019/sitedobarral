@@ -29,6 +29,52 @@ export default function PDFExportPanel({ documents, userName, userEmail, favorit
 
   const { searchState } = useSearchContext();
 
+  // Helper functions (defined before useEffect that use them)
+  const getCurrentModeDocuments = (): Document[] => {
+    if (mode === 'search') {
+      // Return documents from search results
+      return searchState.results.map(result => ({
+        id: result.id,
+        title: result.title,
+        description: result.description,
+        category: result.category,
+        url: result.url,
+      }));
+    } else if (mode === 'favorites') {
+      // Return only favorite documents
+      return documents.filter(doc => favoriteIds.includes(doc.id));
+    } else {
+      // Custom mode: all documents
+      return documents;
+    }
+  };
+
+  const selectOnlyFavorites = useCallback(() => {
+    const validFavorites = favoriteIds.filter(id =>
+      documents.some(doc => doc.id === id)
+    );
+    setSelectedIds(new Set(validFavorites));
+  }, [favoriteIds, documents]);
+
+  const toggleSelection = (id: string) => {
+    const newSelected = new Set(selectedIds);
+    if (newSelected.has(id)) {
+      newSelected.delete(id);
+    } else {
+      newSelected.add(id);
+    }
+    setSelectedIds(newSelected);
+  };
+
+  const toggleAll = () => {
+    const currentDocuments = getCurrentModeDocuments();
+    if (selectedIds.size === currentDocuments.length) {
+      setSelectedIds(new Set());
+    } else {
+      setSelectedIds(new Set(currentDocuments.map(d => d.id)));
+    }
+  };
+
   // Determine initial mode when panel opens
   useEffect(() => {
     if (showPanel) {
@@ -58,51 +104,6 @@ export default function PDFExportPanel({ documents, userName, userEmail, favorit
     }
     // For custom mode, keep current selection
   }, [mode, showPanel, searchState.results, selectOnlyFavorites]);
-
-  const toggleSelection = (id: string) => {
-    const newSelected = new Set(selectedIds);
-    if (newSelected.has(id)) {
-      newSelected.delete(id);
-    } else {
-      newSelected.add(id);
-    }
-    setSelectedIds(newSelected);
-  };
-
-  const toggleAll = () => {
-    const currentDocuments = getCurrentModeDocuments();
-    if (selectedIds.size === currentDocuments.length) {
-      setSelectedIds(new Set());
-    } else {
-      setSelectedIds(new Set(currentDocuments.map(d => d.id)));
-    }
-  };
-
-  const selectOnlyFavorites = useCallback(() => {
-    const validFavorites = favoriteIds.filter(id =>
-      documents.some(doc => doc.id === id)
-    );
-    setSelectedIds(new Set(validFavorites));
-  }, [favoriteIds, documents]);
-
-  const getCurrentModeDocuments = (): Document[] => {
-    if (mode === 'search') {
-      // Return documents from search results
-      return searchState.results.map(result => ({
-        id: result.id,
-        title: result.title,
-        description: result.description,
-        category: result.category,
-        url: result.url,
-      }));
-    } else if (mode === 'favorites') {
-      // Return only favorite documents
-      return documents.filter(doc => favoriteIds.includes(doc.id));
-    } else {
-      // Custom mode: all documents
-      return documents;
-    }
-  };
 
   const handleOpenPanel = () => {
     setShowPanel(true);
