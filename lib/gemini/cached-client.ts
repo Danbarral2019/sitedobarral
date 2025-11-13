@@ -15,12 +15,31 @@ import { withCache, CacheKeys, CACHE_TTL } from '../cache/redis-client';
 
 const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
 
-if (!GEMINI_API_KEY) {
-  throw new Error('GEMINI_API_KEY not configured');
+// Lazy-loaded clients (validated on first use)
+let genAI: GoogleGenerativeAI | null = null;
+let fileManager: GoogleAIFileManager | null = null;
+
+function validateGeminiConfig() {
+  if (!GEMINI_API_KEY) {
+    throw new Error('GEMINI_API_KEY not configured');
+  }
 }
 
-const genAI = new GoogleGenerativeAI(GEMINI_API_KEY);
-const fileManager = new GoogleAIFileManager(GEMINI_API_KEY);
+function getGenAI(): GoogleGenerativeAI {
+  validateGeminiConfig();
+  if (!genAI) {
+    genAI = new GoogleGenerativeAI(GEMINI_API_KEY!);
+  }
+  return genAI;
+}
+
+function getFileManager(): GoogleAIFileManager {
+  validateGeminiConfig();
+  if (!fileManager) {
+    fileManager = new GoogleAIFileManager(GEMINI_API_KEY!);
+  }
+  return fileManager;
+}
 
 // ===========================
 // Types
@@ -76,7 +95,7 @@ export async function queryGeminiWithFile(
       cacheKey,
       async () => {
         // Execute actual Gemini query
-        const geminiModel = genAI.getGenerativeModel({
+        const geminiModel = getGenAI().getGenerativeModel({
           model,
           generationConfig: {
             temperature,
@@ -187,7 +206,7 @@ export async function queryGeminiText(
     const cached = await withCache(
       cacheKey,
       async () => {
-        const geminiModel = genAI.getGenerativeModel({
+        const geminiModel = getGenAI().getGenerativeModel({
           model,
           generationConfig: {
             temperature,
@@ -269,7 +288,7 @@ export async function uploadFileToGemini(
   fileUri: string;
   fileName: string;
 }> {
-  const uploadResult = await fileManager.uploadFile(filePath, {
+  const uploadResult = await getFileManager().uploadFile(filePath, {
     mimeType: 'application/pdf',
     displayName: displayName,
   });
@@ -284,14 +303,14 @@ export async function uploadFileToGemini(
  * Delete file from Gemini
  */
 export async function deleteFileFromGemini(fileName: string): Promise<void> {
-  await fileManager.deleteFile(fileName);
+  await getFileManager().deleteFile(fileName);
 }
 
 /**
  * Get file status from Gemini
  */
 export async function getFileStatus(fileName: string) {
-  return await fileManager.getFile(fileName);
+  return await getFileManager().getFile(fileName);
 }
 
 // ===========================
