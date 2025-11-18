@@ -41,8 +41,8 @@ export default function CursoBloqueadoContent() {
           name: user?.name || '',
           email: user?.email || '',
           phone: '',
-          courseInterest: `${course?.title} - ${formData.interesse === 'proxima-turma' ? 'Próxima turma' : 'Curso in company'}`,
-          message: formData.mensagem || `Interesse em: ${course?.title}\nTipo: ${formData.interesse === 'proxima-turma' ? 'Participar de próxima turma' : 'Curso in company'}`,
+          courseInterest: `${course?.title} - ${formData.interesse === 'proxima-turma' ? 'Próxima turma' : 'Cursos de curta duração'}`,
+          message: formData.mensagem || `Interesse em: ${course?.title}\nTipo: ${formData.interesse === 'proxima-turma' ? 'Participar de próxima turma' : 'Cursos de curta duração'}`,
         }),
       });
 
@@ -137,7 +137,7 @@ export default function CursoBloqueadoContent() {
                 <div className="bg-gradient-to-br from-blue-50 to-purple-50 p-6 rounded-xl border-2 border-blue-200">
                   <h3 className="text-xl font-bold text-gray-900 mb-4">Demonstrar Interesse</h3>
                   <p className="text-gray-700 mb-6">
-                    Preencha o formulário abaixo e entraremos em contato para informar sobre novas turmas ou organizar um curso in company.
+                    Preencha o formulário abaixo e entraremos em contato para informar sobre novas turmas ou organizar cursos de curta duração.
                   </p>
 
                   {/* Tipo de interesse */}
@@ -176,7 +176,7 @@ export default function CursoBloqueadoContent() {
                         <div className="flex items-center gap-2">
                           <Building className="w-5 h-5 text-purple-600" />
                           <div>
-                            <p className="font-bold text-gray-900">Solicitar curso in company</p>
+                            <p className="font-bold text-gray-900">Solicitar cursos de curta duração</p>
                             <p className="text-sm text-gray-600">Curso exclusivo para sua organização</p>
                           </div>
                         </div>

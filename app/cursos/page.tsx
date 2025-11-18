@@ -14,7 +14,7 @@ export const metadata: Metadata = {
     'nova lei licitações',
     'lei 14.133/2021',
     'cursos presenciais',
-    'cursos in company',
+    'cursos de curta duração',
     'TCU',
     'AGU',
   ],
@@ -59,7 +59,7 @@ export default function CursosPage() {
               <div>
                 <h2 className="text-2xl font-bold mb-3 text-blue-900">Como acessar o material exclusivo?</h2>
                 <p className="text-blue-900 text-lg leading-relaxed">
-                  Ao participar de nossos cursos presenciais abertos ou in company,
+                  Ao participar de nossos cursos presenciais abertos ou de curta duração,
                   você receberá um QR Code exclusivo para acessar todo o material complementar
                   do curso, incluindo apostilas, acórdãos do TCU, pareceres da AGU e muito mais.
                 </p>
@@ -134,7 +134,7 @@ export default function CursosPage() {
               </h2>
               <p className="text-white text-xl mb-8 max-w-2xl mx-auto leading-relaxed opacity-95">
                 Entre em contato para saber sobre as próximas turmas ou
-                solicitar um curso in company para sua instituição.
+                solicitar cursos de curta duração para sua instituição.
               </p>
               <Link
                 href="/contato"

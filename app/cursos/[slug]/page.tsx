@@ -508,11 +508,11 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ s
                 </Link>
               </div>
 
-              {/* Card - Curso In Company */}
+              {/* Card - Cursos de Curta Duração */}
               <div className={`${color.bg} rounded-2xl p-6 border-2 ${color.border}`}>
                 <div className="flex items-center gap-3 mb-4">
                   <Award className={`w-8 h-8 ${color.text}`} />
-                  <h3 className="text-xl font-bold text-gray-900">Curso In Company</h3>
+                  <h3 className="text-xl font-bold text-gray-900">Cursos de Curta Duração</h3>
                 </div>
                 <p className="text-gray-800 mb-4 leading-relaxed">
                   Podemos levar este curso para sua instituição com conteúdo personalizado e adaptado às necessidades específicas

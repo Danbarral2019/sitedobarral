@@ -167,7 +167,7 @@ export default function ContatoPage() {
                               {course.title}
                             </option>
                           ))}
-                          <option value="in-company">Curso In Company</option>
+                          <option value="curta-duracao">Cursos de Curta Duração</option>
                           <option value="depoimento">⭐ Depoimento/Elogio</option>
                           <option value="outros">Outros</option>
                         </select>
@@ -310,10 +310,10 @@ export default function ContatoPage() {
                 <div className="relative p-6 rounded-2xl">
                   <div className="inline-block mb-3">
                     <div className="bg-white/20 backdrop-blur-sm px-3 py-1.5 rounded-full">
-                      <span className="text-white font-semibold text-sm">🎯 Treinamento In Company</span>
+                      <span className="text-white font-semibold text-sm">🎯 Cursos de Curta Duração</span>
                     </div>
                   </div>
-                  <h3 className="text-2xl font-bold mb-3 text-white">Cursos In Company</h3>
+                  <h3 className="text-2xl font-bold mb-3 text-white">Cursos de Curta Duração</h3>
                   <p className="text-base text-white mb-4 leading-relaxed">
                     Levamos nossos cursos para sua instituição com conteúdo personalizado
                     para as necessidades específicas da sua equipe.
