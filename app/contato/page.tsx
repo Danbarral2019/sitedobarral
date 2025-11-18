@@ -303,30 +303,6 @@ export default function ContatoPage() {
                   </a>
                 </div>
               </div>
-
-              <div className="relative overflow-hidden">
-                <div className="absolute inset-0 bg-gradient-to-br from-blue-800 via-blue-700 to-blue-600 opacity-95"></div>
-                <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9IiNmZmYiIGZpbGwtb3BhY2l0eT0iMC4wNSI+PHBhdGggZD0iTTM2IDE0YzMuMzE0IDAgNiAyLjY4NiA2IDZzLTIuNjg2IDYtNiA2LTYtMi42ODYtNi02IDIuNjg2LTYgNi02ek0yNCAzOGMzLjMxNCAwIDYgMi42ODYgNiA2cy0yLjY4NiA2LTYgNi02LTIuNjg2LTYtNiAyLjY4Ni02IDYtNnoiLz48L2c+PC9nPjwvc3ZnPg==')] opacity-20"></div>
-                <div className="relative p-6 rounded-2xl">
-                  <div className="inline-block mb-3">
-                    <div className="bg-white/20 backdrop-blur-sm px-3 py-1.5 rounded-full">
-                      <span className="text-white font-semibold text-sm">🎯 Cursos de Curta Duração</span>
-                    </div>
-                  </div>
-                  <h3 className="text-2xl font-bold mb-3 text-white">Cursos de Curta Duração</h3>
-                  <p className="text-base text-white mb-4 leading-relaxed">
-                    Levamos nossos cursos para sua instituição com conteúdo personalizado
-                    para as necessidades específicas da sua equipe.
-                  </p>
-                  <p className="text-base text-white font-semibold">
-                    Solicite uma proposta através do formulário ao lado.
-                  </p>
-                  <div className="mt-4 flex items-center gap-2 text-white">
-                    <CheckCircle className="w-5 h-5" />
-                    <span className="font-medium">Conteúdo Customizado</span>
-                  </div>
-                </div>
-              </div>
             </div>
           </div>
         </div>
