@@ -207,9 +207,9 @@ export default function Home() {
                   </div>
                 </div>
                 <div>
-                  <h3 className="text-2xl font-bold mb-2 text-gray-900">Participe dos Cursos Presenciais</h3>
+                  <h3 className="text-2xl font-bold mb-2 text-gray-900">Participe dos Cursos</h3>
                   <p className="text-gray-700 text-lg leading-relaxed">
-                    Inscreva-se nos cursos presenciais abertos ou de curta duração
+                    Inscreva-se nos cursos de curta duração
                   </p>
                 </div>
               </div>
