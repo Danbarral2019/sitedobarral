@@ -21,6 +21,7 @@ import LeiArticleSelector from '@/components/LeiArticleSelector';
 import DocumentAnalyzer from '@/components/DocumentAnalyzer';
 import BatchClassifyPanel from '@/components/BatchClassifyPanel';
 import DocumentNotesEditor from '@/components/DocumentNotesEditor';
+import LeiCoverageDashboard from '@/components/admin/LeiCoverageDashboard';
 
 type DocumentCategory = 'apostila' | 'acordao' | 'parecer' | 'edital' | 'artigo' | 'orientacao-normativa' | 'enunciados' | 'sumula' | 'outro';
 
@@ -655,6 +656,9 @@ export default function DocumentosPage() {
             <h2 className="text-3xl font-bold text-gray-900 mb-2">Gerenciar Documentos</h2>
             <p className="text-gray-600">Faça upload e gerencie materiais dos cursos</p>
           </div>
+
+          {/* Dashboard de Cobertura da Lei 14.133 */}
+          <LeiCoverageDashboard />
 
           <div className="grid lg:grid-cols-3 gap-8">
             {/* Formulário de Upload */}
