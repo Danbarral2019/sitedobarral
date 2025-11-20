@@ -39,7 +39,7 @@ export interface DOUDocument {
 interface DOUDocumentModalProps {
   isOpen: boolean;
   onClose: () => void;
-  document: DOUDocument;
+  document: DOUDocument | null;
   onApprove: (courseIds: string[], adminNotes?: string) => Promise<void>;
   onReject: (reason?: string) => Promise<void>;
 }
@@ -56,6 +56,11 @@ export function DOUDocumentModal({
   const [isApproving, setIsApproving] = useState(false);
   const [isRejecting, setIsRejecting] = useState(false);
   const [showFullContent, setShowFullContent] = useState(false);
+
+  // Guard: Não renderizar se documento for inválido
+  if (!document || !isOpen) {
+    return null;
+  }
 
   const handleApprove = async () => {
     if (selectedCourses.length === 0) {
