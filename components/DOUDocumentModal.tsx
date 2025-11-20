@@ -42,6 +42,8 @@ interface DOUDocumentModalProps {
   document: DOUDocument;
   onApprove: (courseIds: string[], adminNotes?: string) => Promise<void>;
   onReject: (reason?: string) => Promise<void>;
+  isRejecting: boolean;
+  isApproving: boolean;
 }
 
 export function DOUDocumentModal({
@@ -50,11 +52,11 @@ export function DOUDocumentModal({
   document,
   onApprove,
   onReject,
+  isRejecting,
+  isApproving,
 }: DOUDocumentModalProps) {
   const [selectedCourses, setSelectedCourses] = useState<string[]>([]);
   const [adminNotes, setAdminNotes] = useState('');
-  const [isApproving, setIsApproving] = useState(false);
-  const [isRejecting, setIsRejecting] = useState(false);
   const [showFullContent, setShowFullContent] = useState(false);
 
   const handleApprove = async () => {
@@ -63,17 +65,12 @@ export function DOUDocumentModal({
       return;
     }
 
-    setIsApproving(true);
-    try {
-      await onApprove(selectedCourses, adminNotes.trim() || undefined);
-      // Reset form
-      setSelectedCourses([]);
-      setAdminNotes('');
-    } catch (error) {
-      console.error('Erro ao aprovar:', error);
-    } finally {
-      setIsApproving(false);
-    }
+    // Delegar completamente para o pai - ele gerencia estado e erros
+    await onApprove(selectedCourses, adminNotes.trim() || undefined);
+
+    // Reset form local apenas (se o componente ainda estiver montado, ok; se não, sem problema)
+    setSelectedCourses([]);
+    setAdminNotes('');
   };
 
   const handleReject = async () => {
@@ -81,15 +78,11 @@ export function DOUDocumentModal({
       return;
     }
 
-    setIsRejecting(true);
-    try {
-      await onReject(adminNotes.trim() || undefined);
-      setAdminNotes('');
-    } catch (error) {
-      console.error('Erro ao rejeitar:', error);
-    } finally {
-      setIsRejecting(false);
-    }
+    // Delegar completamente para o pai - ele gerencia estado e erros
+    await onReject(adminNotes.trim() || undefined);
+
+    // Reset form local
+    setAdminNotes('');
   };
 
   const toggleCourse = (courseId: string) => {

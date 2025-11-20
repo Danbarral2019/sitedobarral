@@ -101,6 +101,7 @@ export default function DOUFiltrosPage() {
   // Modal state
   const [selectedDocument, setSelectedDocument] = useState<DOUDocument | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   // Toast for feedback
   const { toast } = useToast();
@@ -250,6 +251,7 @@ export default function DOUFiltrosPage() {
   const handleApproveDocument = async (courseIds: string[], adminNotes?: string) => {
     if (!selectedDocument) return;
 
+    setIsSubmitting(true);
     try {
       const response = await fetch('/api/admin/dou/approve', {
         method: 'POST',
@@ -303,12 +305,16 @@ export default function DOUFiltrosPage() {
       // Fechar modal e limpar estado mesmo em caso de erro
       setIsModalOpen(false);
       setSelectedDocument(null);
+    } finally {
+      // Este setState acontece no pai, que nunca é desmontado
+      setIsSubmitting(false);
     }
   };
 
   const handleRejectDocument = async (reason?: string) => {
     if (!selectedDocument) return;
 
+    setIsSubmitting(true);
     try {
       const response = await fetch('/api/admin/dou/approve', {
         method: 'POST',
@@ -359,6 +365,9 @@ export default function DOUFiltrosPage() {
       // Fechar modal e limpar estado mesmo em caso de erro
       setIsModalOpen(false);
       setSelectedDocument(null);
+    } finally {
+      // Este setState acontece no pai, que nunca é desmontado
+      setIsSubmitting(false);
     }
   };
 
@@ -934,6 +943,8 @@ export default function DOUFiltrosPage() {
           document={selectedDocument}
           onApprove={handleApproveDocument}
           onReject={handleRejectDocument}
+          isRejecting={isSubmitting}
+          isApproving={isSubmitting}
         />
       )}
     </AdminLayout>
