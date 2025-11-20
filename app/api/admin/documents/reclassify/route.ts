@@ -7,8 +7,19 @@ import { withAdminAuth } from '@/lib/api-middleware';
 
 export const POST = withAdminAuth(async (request: NextRequest, context?: Record<string, unknown>) => {
   try {
+    console.log('[RECLASSIFY DEBUG] Context recebido:', context);
+    console.log('[RECLASSIFY DEBUG] User:', context?.user);
+
     const user = context?.user as { id: string; email: string; role: string } | undefined;
+
+    if (!user) {
+      console.error('[RECLASSIFY ERROR] User não encontrado no context!');
+      throw new AuthenticationError('Usuário não autenticado no contexto da rota');
+    }
+
     const body = await request.json();
+    console.log('[RECLASSIFY DEBUG] Body recebido:', body);
+
     const { documentIds, action, courseId, isCommon } = body;
 
     // Validações
@@ -104,6 +115,12 @@ export const POST = withAdminAuth(async (request: NextRequest, context?: Record<
     });
 
   } catch (error) {
+    console.error('=== [RECLASSIFY POST] ERRO CAPTURADO ===');
+    console.error('Erro completo:', error);
+    console.error('Tipo do erro:', error instanceof Error ? error.constructor.name : typeof error);
+    console.error('Mensagem:', error instanceof Error ? error.message : String(error));
+    console.error('Stack trace:', error instanceof Error ? error.stack : 'N/A');
+    console.error('======================================');
     return handleApiError(error);
   }
 });
@@ -186,6 +203,12 @@ export const GET = withAdminAuth(async (request: NextRequest, context?: Record<s
     });
 
   } catch (error) {
+    console.error('=== [RECLASSIFY GET] ERRO CAPTURADO ===');
+    console.error('Erro completo:', error);
+    console.error('Tipo do erro:', error instanceof Error ? error.constructor.name : typeof error);
+    console.error('Mensagem:', error instanceof Error ? error.message : String(error));
+    console.error('Stack trace:', error instanceof Error ? error.stack : 'N/A');
+    console.error('======================================');
     return handleApiError(error);
   }
 });

@@ -32,6 +32,12 @@ export const GET = withAdminAuth(async (request: NextRequest, { params }: { para
 
     return NextResponse.json(parsedDocument);
   } catch (error) {
+    console.error('=== [DOCUMENT ROUTE] ERRO CAPTURADO ===');
+    console.error('Erro completo:', error);
+    console.error('Tipo do erro:', error instanceof Error ? error.constructor.name : typeof error);
+    console.error('Mensagem:', error instanceof Error ? error.message : String(error));
+    console.error('Stack trace:', error instanceof Error ? error.stack : 'N/A');
+    console.error('======================================');
     return handleApiError(error);
   }
 });
@@ -41,8 +47,12 @@ export const GET = withAdminAuth(async (request: NextRequest, { params }: { para
  */
 export const PUT = withAdminAuth(async (request: NextRequest, { params }: { params: { id: string } }, context?: { user?: { email?: string } }) => {
   try {
+    console.log('[DOCUMENT PUT DEBUG] Context recebido:', context);
+    console.log('[DOCUMENT PUT DEBUG] Params:', params);
+
     const { id } = params;
     const body = await request.json();
+    console.log('[DOCUMENT PUT DEBUG] Body recebido (primeiras 500 chars):', JSON.stringify(body).substring(0, 500));
 
     const {
       title,
@@ -126,6 +136,12 @@ export const PUT = withAdminAuth(async (request: NextRequest, { params }: { para
       document: updated,
     });
   } catch (error) {
+    console.error('=== [DOCUMENT ROUTE] ERRO CAPTURADO ===');
+    console.error('Erro completo:', error);
+    console.error('Tipo do erro:', error instanceof Error ? error.constructor.name : typeof error);
+    console.error('Mensagem:', error instanceof Error ? error.message : String(error));
+    console.error('Stack trace:', error instanceof Error ? error.stack : 'N/A');
+    console.error('======================================');
     return handleApiError(error);
   }
 });
@@ -173,6 +189,12 @@ export const PATCH = withAdminAuth(async (request: NextRequest, { params }: { pa
       document: updated,
     });
   } catch (error) {
+    console.error('=== [DOCUMENT ROUTE] ERRO CAPTURADO ===');
+    console.error('Erro completo:', error);
+    console.error('Tipo do erro:', error instanceof Error ? error.constructor.name : typeof error);
+    console.error('Mensagem:', error instanceof Error ? error.message : String(error));
+    console.error('Stack trace:', error instanceof Error ? error.stack : 'N/A');
+    console.error('======================================');
     return handleApiError(error);
   }
 });
@@ -206,6 +228,12 @@ export const DELETE = withAdminAuth(async (request: NextRequest, { params }: { p
       message: 'Documento deletado com sucesso',
     });
   } catch (error) {
+    console.error('=== [DOCUMENT ROUTE] ERRO CAPTURADO ===');
+    console.error('Erro completo:', error);
+    console.error('Tipo do erro:', error instanceof Error ? error.constructor.name : typeof error);
+    console.error('Mensagem:', error instanceof Error ? error.message : String(error));
+    console.error('Stack trace:', error instanceof Error ? error.stack : 'N/A');
+    console.error('======================================');
     return handleApiError(error);
   }
 });
