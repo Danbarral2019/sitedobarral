@@ -249,7 +249,7 @@ export default function DOUFiltrosPage() {
       toast({
         title: 'Erro ao abrir detalhes',
         description: error instanceof Error ? error.message : 'Erro desconhecido',
-        variant: 'destructive',
+        variant: 'error',
       });
     }
   };
@@ -280,7 +280,7 @@ export default function DOUFiltrosPage() {
       toast({
         title: 'Documento Aprovado! ✅',
         description: `${selectedDocument.title.substring(0, 60)}... foi incorporado ao acervo.`,
-        variant: 'default',
+        variant: 'success',
       });
 
       setIsModalOpen(false);
@@ -305,7 +305,7 @@ export default function DOUFiltrosPage() {
       toast({
         title: 'Erro ao Aprovar',
         description: error instanceof Error ? error.message : 'Erro desconhecido',
-        variant: 'destructive',
+        variant: 'error',
       });
 
       // Fechar modal e limpar estado mesmo em caso de erro
@@ -340,7 +340,7 @@ export default function DOUFiltrosPage() {
       toast({
         title: 'Documento Rejeitado',
         description: 'O documento foi marcado como rejeitado.',
-        variant: 'default',
+        variant: 'info',
       });
 
       setIsModalOpen(false);
@@ -365,7 +365,7 @@ export default function DOUFiltrosPage() {
       toast({
         title: 'Erro ao Rejeitar',
         description: error instanceof Error ? error.message : 'Erro desconhecido',
-        variant: 'destructive',
+        variant: 'error',
       });
 
       // Fechar modal e limpar estado mesmo em caso de erro

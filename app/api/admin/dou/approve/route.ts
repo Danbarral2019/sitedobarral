@@ -256,14 +256,7 @@ async function handleApproval(
         data: {
           userId: adminEmail,
           action: 'dou_approve_document',
-          resourceType: 'document',
-          resourceId: newDoc.id,
-          details: JSON.stringify({
-            stagingDocId: stagingDoc.id,
-            courseIds,
-            category: documentCategory,
-            douSection: stagingDoc.section,
-          }),
+          documentId: newDoc.id,
         },
       });
 
@@ -315,13 +308,6 @@ async function handleRejection(
       data: {
         userId: adminEmail,
         action: 'dou_reject_document',
-        resourceType: 'dou_staging',
-        resourceId: stagingDoc.id,
-        details: JSON.stringify({
-          category: stagingDoc.category,
-          douSection: stagingDoc.section,
-          reason: adminNotes || 'Sem observações',
-        }),
       },
     });
 

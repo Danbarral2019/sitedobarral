@@ -17,7 +17,8 @@ export function Toaster() {
   return (
     <ToastProvider>
       {toasts.map(({ id, title, description, variant = 'info', ...props }) => {
-        const Icon = ToastIcons[variant];
+        // Fallback para ícone padrão se variant não existir
+        const Icon = ToastIcons[variant as keyof typeof ToastIcons] || ToastIcons.info;
 
         return (
           <Toast key={id} variant={variant} {...props}>
