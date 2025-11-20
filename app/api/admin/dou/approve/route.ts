@@ -17,8 +17,17 @@ interface DOUStagingDoc {
   edition: string | null;
   category: string;
   confidence: number;
-  reasoning: string | null;
+  reasoning: string;
   approvalStatus: string;
+  isRelevant: boolean;
+  requiresReview: boolean;
+  reviewedBy: string | null;
+  reviewedAt: Date | null;
+  adminNotes: string | null;
+  finalDecision: string | null;
+  imported: boolean;
+  importedAt: Date | null;
+  documentId: string | null;
 }
 
 /**
@@ -107,10 +116,17 @@ export async function POST(request: NextRequest) {
 
   } catch (error) {
     console.error('[DOU Approve] Error:', error);
+
+    // Log completo do erro para debug
+    if (error && typeof error === 'object') {
+      console.error('[DOU Approve] Error details:', JSON.stringify(error, null, 2));
+    }
+
     return NextResponse.json(
       {
         error: 'Erro ao processar aprovação/rejeição',
         details: error instanceof Error ? error.message : 'Erro desconhecido',
+        debugInfo: process.env.NODE_ENV === 'development' ? error : undefined,
       },
       { status: 500 }
     );
@@ -239,6 +255,12 @@ async function handleApproval(
 
   } catch (error) {
     console.error('[DOU Approve] Approval error:', error);
+
+    // Log completo do erro
+    if (error && typeof error === 'object') {
+      console.error('[DOU Approve] Approval error details:', JSON.stringify(error, null, 2));
+    }
+
     throw error;
   }
 }
@@ -287,6 +309,12 @@ async function handleRejection(
 
   } catch (error) {
     console.error('[DOU Approve] Rejection error:', error);
+
+    // Log completo do erro
+    if (error && typeof error === 'object') {
+      console.error('[DOU Approve] Rejection error details:', JSON.stringify(error, null, 2));
+    }
+
     throw error;
   }
 }
