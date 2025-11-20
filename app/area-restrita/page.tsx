@@ -9,6 +9,7 @@ import { useFavorites } from '@/hooks/use-favorites';
 import { useSearch, type GlossaryTermType } from '@/hooks/use-search';
 import { searchAndFilterDocuments } from '@/lib/search-utils';
 import EnrollmentStatusBanner from '@/components/EnrollmentStatusBanner';
+import LeiExplorerWidget from '@/components/LeiExplorerWidget';
 import CoursesSidebar from '@/components/CoursesSidebar';
 import HighlightedMaterials from '@/components/HighlightedMaterials';
 import DocumentsByCategory from '@/components/DocumentsByCategory';
@@ -386,6 +387,13 @@ export default function AreaRestritaPage() {
             {/* Banner de Status do Acesso */}
             {selectedCourse && isSelectedCourseEnrolled && (
               <EnrollmentStatusBanner courseId={selectedCourse.id} />
+            )}
+
+            {/* Widget Lei 14.133 Comentada */}
+            {!search.isSearchActive && selectedCourse && isSelectedCourseEnrolled && (
+              <div className="mb-6">
+                <LeiExplorerWidget />
+              </div>
             )}
 
             {/* Tabs de Cursos - apenas mobile */}

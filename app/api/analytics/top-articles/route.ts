@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getTopArticles } from '@/lib/article-utils';
+import { getTopArticles, getDocumentCountByArticle } from '@/lib/article-utils';
+import { prisma } from '@/lib/prisma';
 
 export async function GET(request: NextRequest) {
   try {
@@ -9,12 +10,31 @@ export async function GET(request: NextRequest) {
     // Valida limit
     const validLimit = Math.min(Math.max(limit, 1), 50); // Entre 1 e 50
 
-    const articles = await getTopArticles(validLimit);
+    // Buscar top artigos
+    const articlesData = await getTopArticles(validLimit);
+
+    // Formatar para o widget
+    const topArticles = articlesData.map(item => ({
+      numero: item.numero,
+      ementa: item.article.ementa.substring(0, 100) + (item.article.ementa.length > 100 ? '...' : ''),
+      titulo: item.article.titulo || '',
+      documentCount: item.documentCount,
+      viewCount: item.viewCount,
+    }));
+
+    // Stats gerais
+    const totalArticles = await prisma.leiArticle.count();
+
+    const docCounts = await getDocumentCountByArticle();
+    const totalDocuments = Object.values(docCounts).reduce((sum, count) => sum + count, 0);
+    const articlesWithDocs = Object.keys(docCounts).length;
+    const coveragePercent = Math.round((articlesWithDocs / totalArticles) * 100);
 
     return NextResponse.json({
-      articles,
-      total: articles.length,
-      limit: validLimit,
+      topArticles,
+      totalArticles,
+      totalDocuments,
+      coveragePercent,
     });
   } catch (error) {
     console.error('Erro ao buscar top artigos:', error);
