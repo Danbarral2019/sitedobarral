@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import {
   Upload, FileText, Loader2, Trash2,
   Eye, EyeOff, File, Search, Filter, X,
-  Download, FolderUp, CheckSquare, Square, Edit2, StickyNote, Info
+  Download, FolderUp, CheckSquare, Square, Edit2, Info
 } from 'lucide-react';
 import { courses } from '@/data/courses';
 import { useToast } from '@/hooks/use-toast';
@@ -20,7 +20,6 @@ import AdminLayout from '@/components/AdminLayout';
 import LeiArticleSelector from '@/components/LeiArticleSelector';
 import DocumentAnalyzer from '@/components/DocumentAnalyzer';
 import BatchClassifyPanel from '@/components/BatchClassifyPanel';
-import DocumentNotesEditor from '@/components/DocumentNotesEditor';
 import LeiCoverageDashboard from '@/components/admin/LeiCoverageDashboard';
 
 type DocumentCategory = 'apostila' | 'acordao' | 'parecer' | 'edital' | 'artigo' | 'orientacao-normativa' | 'enunciados' | 'sumula' | 'outro';
@@ -63,8 +62,6 @@ export default function DocumentosPage() {
   const [documentToDelete, setDocumentToDelete] = useState<string | null>(null);
   const [previewOpen, setPreviewOpen] = useState(false);
   const [documentToPreview, setDocumentToPreview] = useState<Document | null>(null);
-  const [notesEditorOpen, setNotesEditorOpen] = useState(false);
-  const [documentToEditNotes, setDocumentToEditNotes] = useState<Document | null>(null);
 
   // Filtros e busca
   const [searchTerm, setSearchTerm] = useState('');
@@ -1302,16 +1299,6 @@ export default function DocumentosPage() {
                                 <Search className="w-5 h-5" />
                               </button>
                               <button
-                                onClick={() => {
-                                  setDocumentToEditNotes(doc);
-                                  setNotesEditorOpen(true);
-                                }}
-                                className="text-purple-600 hover:text-purple-700 hover:bg-purple-50 p-2 rounded-lg transition-colors"
-                                title="Observações"
-                              >
-                                <StickyNote className="w-5 h-5" />
-                              </button>
-                              <button
                                 onClick={() => router.push(`/admin/documentos/${doc.id}/edit`)}
                                 className="text-green-600 hover:text-green-700 hover:bg-green-50 p-2 rounded-lg transition-colors"
                                 title="Editar"
@@ -1393,21 +1380,6 @@ export default function DocumentosPage() {
         variant="danger"
         isLoading={isDeleting}
       />
-
-      {/* Editor de Observações */}
-      {notesEditorOpen && documentToEditNotes && (
-        <DocumentNotesEditor
-          documentId={documentToEditNotes.id}
-          documentTitle={documentToEditNotes.title}
-          onClose={() => {
-            setNotesEditorOpen(false);
-            setDocumentToEditNotes(null);
-          }}
-          onSaved={() => {
-            loadDocuments(); // Recarrega a lista de documentos
-          }}
-        />
-      )}
     </AdminLayout>
   );
 }
