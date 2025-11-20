@@ -92,6 +92,8 @@ export async function POST(request: NextRequest) {
         hierarchyStr,
         approvalStatus,
         reasoning: JSON.stringify([]), // Vazio por padrão
+        isRelevant: approvalStatus === 'auto_approved' || approvalStatus === 'pending',
+        requiresReview: approvalStatus === 'pending',
         imported: false,
         createdAt: new Date(),
       },
