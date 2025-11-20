@@ -57,11 +57,6 @@ export function DOUDocumentModal({
   const [isRejecting, setIsRejecting] = useState(false);
   const [showFullContent, setShowFullContent] = useState(false);
 
-  // Guard: Não renderizar se documento for inválido
-  if (!document || !isOpen) {
-    return null;
-  }
-
   const handleApprove = async () => {
     if (selectedCourses.length === 0) {
       alert('Selecione pelo menos um curso para vincular o documento');
@@ -132,6 +127,11 @@ export function DOUDocumentModal({
         return null;
     }
   };
+
+  // Não renderizar Dialog se documento for null
+  if (!document) {
+    return null;
+  }
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
