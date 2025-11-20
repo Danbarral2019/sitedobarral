@@ -62,9 +62,9 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // 4. Verificar se documento já existe (por URL)
-    const existing = await prisma.dOUStagingDocument.findFirst({
-      where: { url },
+    // 4. Verificar se documento já existe (por douId, que é unique)
+    const existing = await prisma.dOUStagingDocument.findUnique({
+      where: { douId: url },
     });
 
     if (existing) {
@@ -106,10 +106,17 @@ export async function POST(request: NextRequest) {
 
   } catch (error) {
     console.error('[DOU Save Staging] Error:', error);
+
+    // Log completo do erro para debug
+    if (error && typeof error === 'object') {
+      console.error('[DOU Save Staging] Error details:', JSON.stringify(error, null, 2));
+    }
+
     return NextResponse.json(
       {
         error: 'Erro ao salvar documento temporário',
         details: error instanceof Error ? error.message : 'Erro desconhecido',
+        debugInfo: process.env.NODE_ENV === 'development' ? error : undefined,
       },
       { status: 500 }
     );
