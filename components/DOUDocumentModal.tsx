@@ -39,7 +39,7 @@ export interface DOUDocument {
 interface DOUDocumentModalProps {
   isOpen: boolean;
   onClose: () => void;
-  document: DOUDocument | null;
+  document: DOUDocument;
   onApprove: (courseIds: string[], adminNotes?: string) => Promise<void>;
   onReject: (reason?: string) => Promise<void>;
 }
@@ -127,11 +127,6 @@ export function DOUDocumentModal({
         return null;
     }
   };
-
-  // Não renderizar Dialog se documento for null
-  if (!document) {
-    return null;
-  }
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>

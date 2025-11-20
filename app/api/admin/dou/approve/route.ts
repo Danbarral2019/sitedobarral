@@ -83,19 +83,35 @@ export async function POST(request: NextRequest) {
     }
 
     // 4. Buscar documento no staging
+    console.log('[DOU Approve] Buscando documento:', documentId);
+
     const stagingDoc = await prisma.dOUStagingDocument.findUnique({
       where: { id: documentId },
     });
 
+    console.log('[DOU Approve] Documento encontrado:', {
+      id: stagingDoc?.id,
+      approvalStatus: stagingDoc?.approvalStatus,
+      finalDecision: stagingDoc?.finalDecision,
+      imported: stagingDoc?.imported,
+    });
+
     if (!stagingDoc) {
+      console.warn('[DOU Approve] Documento não encontrado:', documentId);
       return NextResponse.json(
-        { error: 'Documento não encontrado' },
+        { error: 'Documento não encontrado no staging. Pode ter sido removido ou já processado.' },
         { status: 404 }
       );
     }
 
     // 5. Verificar se já foi aprovado/rejeitado
     if (stagingDoc.finalDecision) {
+      console.warn('[DOU Approve] Documento já processado:', {
+        id: documentId,
+        finalDecision: stagingDoc.finalDecision,
+        reviewedAt: stagingDoc.reviewedAt,
+      });
+
       return NextResponse.json(
         {
           error: `Documento já foi ${stagingDoc.finalDecision === 'approved' ? 'aprovado' : 'rejeitado'} anteriormente`,
@@ -115,17 +131,25 @@ export async function POST(request: NextRequest) {
     }
 
   } catch (error) {
-    console.error('[DOU Approve] Error:', error);
+    console.error('[DOU Approve] ERRO CRÍTICO:', error);
 
-    // Log completo do erro para debug
+    // Log detalhado do erro
+    if (error instanceof Error) {
+      console.error('[DOU Approve] Error name:', error.name);
+      console.error('[DOU Approve] Error message:', error.message);
+      console.error('[DOU Approve] Error stack:', error.stack);
+    }
+
+    // Log do erro completo como objeto
     if (error && typeof error === 'object') {
-      console.error('[DOU Approve] Error details:', JSON.stringify(error, null, 2));
+      console.error('[DOU Approve] Error object:', JSON.stringify(error, Object.getOwnPropertyNames(error), 2));
     }
 
     return NextResponse.json(
       {
         error: 'Erro ao processar aprovação/rejeição',
         details: error instanceof Error ? error.message : 'Erro desconhecido',
+        errorType: error instanceof Error ? error.name : typeof error,
         debugInfo: process.env.NODE_ENV === 'development' ? error : undefined,
       },
       { status: 500 }
