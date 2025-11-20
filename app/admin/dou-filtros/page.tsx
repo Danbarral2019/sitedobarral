@@ -942,7 +942,7 @@ export default function DOUFiltrosPage() {
       </div>
 
       {/* Modal de Visualização e Aprovação */}
-      {isMounted && selectedDocument && (
+      {isMounted && selectedDocument && isModalOpen && (
         <DOUDocumentModal
           isOpen={isModalOpen}
           onClose={() => setIsModalOpen(false)}
