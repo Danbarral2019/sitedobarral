@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { verifyAuth } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
-import { safeParseArray } from '@/lib/safe-parse';
+import { safeParseArray } from '@/lib/utils';
 
 /**
  * GET /api/admin/analytics/lei-cobertura
