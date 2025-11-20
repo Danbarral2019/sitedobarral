@@ -102,9 +102,15 @@ export default function DOUFiltrosPage() {
   const [selectedDocument, setSelectedDocument] = useState<DOUDocument | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isMounted, setIsMounted] = useState(false);
 
   // Toast for feedback
   const { toast } = useToast();
+
+  // Garantir que modal só renderiza no cliente (evitar hydration mismatch)
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
 
   // Seções disponíveis
   const sections = [
@@ -936,7 +942,7 @@ export default function DOUFiltrosPage() {
       </div>
 
       {/* Modal de Visualização e Aprovação */}
-      {selectedDocument && (
+      {isMounted && selectedDocument && (
         <DOUDocumentModal
           isOpen={isModalOpen}
           onClose={() => setIsModalOpen(false)}
