@@ -21,28 +21,45 @@ type ApiHandler = (request: NextRequest, context?: Record<string, unknown>) => P
  */
 export function withAdminAuth(handler: ApiHandler): ApiHandler {
   return async (request: NextRequest, context?: Record<string, unknown>) => {
-    // ✅ Rate limiting ANTES de autenticação (previne ataques)
     try {
-      await rateLimiters.api.check(request, 30); // 30 requests/minuto para admin
-    } catch {
+      // ✅ Rate limiting ANTES de autenticação (previne ataques)
+      try {
+        await rateLimiters.api.check(request, 30); // 30 requests/minuto para admin
+      } catch {
+        return NextResponse.json(
+          { error: 'Muitas requisições. Aguarde alguns instantes.' },
+          { status: 429 }
+        );
+      }
+
+      const { getCurrentUser } = await import('./auth');
+      const user = await getCurrentUser();
+
+      if (!user || user.role !== 'admin') {
+        return NextResponse.json(
+          { error: 'Acesso negado. Apenas administradores.' },
+          { status: 403 }
+        );
+      }
+
+      // Passa o usuário autenticado no context para o handler
+      return handler(request, { ...context, user });
+    } catch (error) {
+      // Captura qualquer erro não tratado na autenticação
+      console.error('=== [withAdminAuth MIDDLEWARE] ERRO CAPTURADO ===');
+      console.error('URL:', request.url);
+      console.error('Method:', request.method);
+      console.error('Erro completo:', error);
+      console.error('Tipo do erro:', error instanceof Error ? error.constructor.name : typeof error);
+      console.error('Mensagem:', error instanceof Error ? error.message : String(error));
+      console.error('Stack trace:', error instanceof Error ? error.stack : 'N/A');
+      console.error('======================================');
+
       return NextResponse.json(
-        { error: 'Muitas requisições. Aguarde alguns instantes.' },
-        { status: 429 }
+        { error: 'Erro de autenticação interna' },
+        { status: 500 }
       );
     }
-
-    const { getCurrentUser } = await import('./auth');
-    const user = await getCurrentUser();
-
-    if (!user || user.role !== 'admin') {
-      return NextResponse.json(
-        { error: 'Acesso negado. Apenas administradores.' },
-        { status: 403 }
-      );
-    }
-
-    // Passa o usuário autenticado no context para o handler
-    return handler(request, { ...context, user });
   };
 }
 
@@ -60,28 +77,45 @@ export function withAdminAuth(handler: ApiHandler): ApiHandler {
  */
 export function withAuth(handler: ApiHandler): ApiHandler {
   return async (request: NextRequest, context?: Record<string, unknown>) => {
-    // ✅ Rate limiting (mais permissivo para usuários autenticados)
     try {
-      await rateLimiters.api.check(request, 60); // 60 requests/minuto
-    } catch {
+      // ✅ Rate limiting (mais permissivo para usuários autenticados)
+      try {
+        await rateLimiters.api.check(request, 60); // 60 requests/minuto
+      } catch {
+        return NextResponse.json(
+          { error: 'Muitas requisições. Aguarde alguns instantes.' },
+          { status: 429 }
+        );
+      }
+
+      const { getCurrentUser } = await import('./auth');
+      const user = await getCurrentUser();
+
+      if (!user) {
+        return NextResponse.json(
+          { error: 'Não autenticado. Faça login.' },
+          { status: 401 }
+        );
+      }
+
+      // Passa o usuário autenticado no context para o handler
+      return handler(request, { ...context, user });
+    } catch (error) {
+      // Captura qualquer erro não tratado na autenticação
+      console.error('=== [withAuth MIDDLEWARE] ERRO CAPTURADO ===');
+      console.error('URL:', request.url);
+      console.error('Method:', request.method);
+      console.error('Erro completo:', error);
+      console.error('Tipo do erro:', error instanceof Error ? error.constructor.name : typeof error);
+      console.error('Mensagem:', error instanceof Error ? error.message : String(error));
+      console.error('Stack trace:', error instanceof Error ? error.stack : 'N/A');
+      console.error('======================================');
+
       return NextResponse.json(
-        { error: 'Muitas requisições. Aguarde alguns instantes.' },
-        { status: 429 }
+        { error: 'Erro de autenticação interna' },
+        { status: 500 }
       );
     }
-
-    const { getCurrentUser } = await import('./auth');
-    const user = await getCurrentUser();
-
-    if (!user) {
-      return NextResponse.json(
-        { error: 'Não autenticado. Faça login.' },
-        { status: 401 }
-      );
-    }
-
-    // Passa o usuário autenticado no context para o handler
-    return handler(request, { ...context, user });
   };
 }
 
