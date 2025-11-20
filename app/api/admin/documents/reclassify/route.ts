@@ -1,31 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { cookies } from 'next/headers';
-import { verifyToken } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
 import { handleApiError } from '@/lib/errors/error-handler';
-import { AuthenticationError, AuthorizationError, ValidationError, NotFoundError } from '@/lib/errors/api-error';
+import { ValidationError, NotFoundError } from '@/lib/errors/api-error';
 import { apiLogger } from '@/lib/logger';
+import { withAdminAuth } from '@/lib/api-middleware';
 
-export async function POST(request: NextRequest) {
+export const POST = withAdminAuth(async (request: NextRequest, context?: Record<string, unknown>) => {
   try {
-    // Verificar autenticação
-    const cookieStore = await cookies();
-    const token = cookieStore.get('auth-token');
-
-    if (!token) {
-      throw new AuthenticationError();
-    }
-
-    const user = await verifyToken(token.value);
-    if (!user) {
-      throw new AuthenticationError();
-    }
-
-    // Verificar se é admin
-    if (user.role !== 'admin') {
-      throw new AuthorizationError();
-    }
-
+    const user = context?.user as { id: string; email: string; role: string } | undefined;
     const body = await request.json();
     const { documentIds, action, courseId, isCommon } = body;
 
@@ -43,7 +25,7 @@ export async function POST(request: NextRequest) {
     }
 
     apiLogger.info({
-      userId: user.id,
+      userId: user?.id,
       action,
       documentCount: documentIds.length,
       courseId,
@@ -108,7 +90,7 @@ export async function POST(request: NextRequest) {
     });
 
     apiLogger.info({
-      userId: user.id,
+      userId: user?.id,
       updatedCount: result.count,
       action,
       courseId,
@@ -124,29 +106,12 @@ export async function POST(request: NextRequest) {
   } catch (error) {
     return handleApiError(error);
   }
-}
+});
 
 // GET - Listar documentos com filtros para reclassificação
-export async function GET(request: NextRequest) {
+export const GET = withAdminAuth(async (request: NextRequest, context?: Record<string, unknown>) => {
   try {
-    // Verificar autenticação
-    const cookieStore = await cookies();
-    const token = cookieStore.get('auth-token');
-
-    if (!token) {
-      throw new AuthenticationError();
-    }
-
-    const user = await verifyToken(token.value);
-    if (!user) {
-      throw new AuthenticationError();
-    }
-
-    // Verificar se é admin
-    if (user.role !== 'admin') {
-      throw new AuthorizationError();
-    }
-
+    const user = context?.user as { id: string; email: string; role: string } | undefined;
     const { searchParams } = new URL(request.url);
     const category = searchParams.get('category');
     const courseId = searchParams.get('courseId');
@@ -178,7 +143,7 @@ export async function GET(request: NextRequest) {
     }
 
     apiLogger.info({
-      userId: user.id,
+      userId: user?.id,
       filters: { category, courseId, isCommon, search }
     }, 'Listando documentos para reclassificação');
 
@@ -209,7 +174,7 @@ export async function GET(request: NextRequest) {
     const total = await prisma.document.count({ where });
 
     apiLogger.info({
-      userId: user.id,
+      userId: user?.id,
       count: documents.length,
       total
     }, 'Documentos listados para reclassificação');
@@ -223,4 +188,4 @@ export async function GET(request: NextRequest) {
   } catch (error) {
     return handleApiError(error);
   }
-}
+});
