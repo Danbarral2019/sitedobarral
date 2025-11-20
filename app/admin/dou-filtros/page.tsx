@@ -299,6 +299,10 @@ export default function DOUFiltrosPage() {
         description: error instanceof Error ? error.message : 'Erro desconhecido',
         variant: 'destructive',
       });
+
+      // Fechar modal e limpar estado mesmo em caso de erro
+      setIsModalOpen(false);
+      setSelectedDocument(null);
     }
   };
 
@@ -351,6 +355,10 @@ export default function DOUFiltrosPage() {
         description: error instanceof Error ? error.message : 'Erro desconhecido',
         variant: 'destructive',
       });
+
+      // Fechar modal e limpar estado mesmo em caso de erro
+      setIsModalOpen(false);
+      setSelectedDocument(null);
     }
   };
 
