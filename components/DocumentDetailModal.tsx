@@ -133,8 +133,8 @@ export default function DocumentDetailModal({
 
   // Close on Escape key
   useEffect(() => {
-    // Guard against SSR - document only exists on client
-    if (typeof document === 'undefined') return;
+    // Guard against SSR - use window.document to avoid variable shadowing
+    if (typeof window === 'undefined' || !window.document) return;
 
     const handleEscape = (e: KeyboardEvent) => {
       if (e.key === 'Escape') {
@@ -142,8 +142,8 @@ export default function DocumentDetailModal({
       }
     };
 
-    document.addEventListener('keydown', handleEscape);
-    return () => document.removeEventListener('keydown', handleEscape);
+    window.document.addEventListener('keydown', handleEscape);
+    return () => window.document.removeEventListener('keydown', handleEscape);
   }, [onClose]);
 
   // Loading state
