@@ -29,7 +29,7 @@ export async function GET(request: NextRequest) {
 
     console.log('[Lei Articles API] Buscando artigos da Lei 14.133...');
 
-    // 2. Buscar todos os artigos
+    // 2. Buscar todos os artigos (sem ordenação - faremos manualmente)
     const allArticles = await prisma.leiArticle.findMany({
       select: {
         id: true,
@@ -42,10 +42,34 @@ export async function GET(request: NextRequest) {
         createdAt: true,
         updatedAt: true,
       },
-      orderBy: [
-        { numero: 'asc' },
-      ],
     });
+
+    // Função para ordenação numérica correta
+    // Ex: "1", "2", "10", "96", "100", "184-A"
+    const sortArticlesNumerically = (a: { numero: string }, b: { numero: string }) => {
+      // Extrair parte numérica e sufixo
+      const extractParts = (num: string) => {
+        const match = num.match(/^(\d+)(.*)$/);
+        if (match) {
+          return { numeric: parseInt(match[1], 10), suffix: match[2] || '' };
+        }
+        return { numeric: 0, suffix: num };
+      };
+
+      const partsA = extractParts(a.numero);
+      const partsB = extractParts(b.numero);
+
+      // Primeiro comparar numericamente
+      if (partsA.numeric !== partsB.numeric) {
+        return partsA.numeric - partsB.numeric;
+      }
+
+      // Se números iguais, comparar sufixo alfabeticamente
+      return partsA.suffix.localeCompare(partsB.suffix);
+    };
+
+    // Ordenar artigos numericamente
+    allArticles.sort(sortArticlesNumerically);
 
     // 3. Buscar todos os documentos com leiArticles
     const documentsWithArticles = await prisma.document.findMany({
@@ -131,6 +155,13 @@ export async function GET(request: NextRequest) {
       }
 
       hierarchy[titulo].capitulos[capituloKey].artigos.push(art);
+    });
+
+    // Ordenar artigos dentro de cada capítulo numericamente
+    Object.values(hierarchy).forEach((titulo) => {
+      Object.values(titulo.capitulos).forEach((capitulo) => {
+        capitulo.artigos.sort(sortArticlesNumerically);
+      });
     });
 
     console.log(
