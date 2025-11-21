@@ -20,7 +20,8 @@ export async function GET(
       throw new NotFoundError('Documento');
     }
 
-    return NextResponse.json({ document });
+    apiLogger.info({ documentId }, 'Document fetched successfully');
+    return NextResponse.json(document);
   } catch (error) {
     return handleApiError(error);
   }
