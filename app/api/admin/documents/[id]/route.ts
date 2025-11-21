@@ -75,6 +75,12 @@ export const PUT = withAdminAuth(async (request: NextRequest, context: { params:
       // Enunciados
       entityType,
       enunciadoNumber,
+      // Observações (mapeadas dos campos do frontend)
+      keyPoints,      // Frontend envia keyPoints → mapeamos para notesKeyPoints
+      practicalUse,   // Frontend envia practicalUse → mapeamos para notesPracticalUse
+      importance,     // Frontend envia importance → mapeamos para notesImportance
+      adminNotes,
+      publicNotes,
     } = body;
 
     // Verifica se documento existe
@@ -111,8 +117,10 @@ export const PUT = withAdminAuth(async (request: NextRequest, context: { params:
         isPublic: isPublic !== undefined ? isPublic : existing.isPublic,
         tags: tags ? JSON.stringify(tags) : existing.tags,
         leiArticles: leiArticles ? JSON.stringify(leiArticles) : existing.leiArticles,
-        alternativeUrls: alternativeUrls !== undefined ? alternativeUrls : existing.alternativeUrls,
-        courseId: courseId !== undefined ? courseId : existing.courseId,
+        alternativeUrls: alternativeUrls !== undefined
+          ? (Array.isArray(alternativeUrls) ? JSON.stringify(alternativeUrls) : alternativeUrls)
+          : existing.alternativeUrls,
+        courseId: courseId !== undefined ? (courseId === '' ? null : courseId) : existing.courseId,
         isCommon: isCommon !== undefined ? isCommon : existing.isCommon,
         // Marca como revisado quando editado por um admin
         reviewed: true,
@@ -123,8 +131,16 @@ export const PUT = withAdminAuth(async (request: NextRequest, context: { params:
         summary: summary !== undefined ? summary : existing.summary,
         summaryEditedByAdmin: summaryEditedByAdmin !== undefined ? summaryEditedByAdmin : existing.summaryEditedByAdmin,
         // Enunciados
-        entityType: entityType !== undefined ? entityType : existing.entityType,
-        enunciadoNumber: enunciadoNumber !== undefined ? enunciadoNumber : existing.enunciadoNumber,
+        entityType: entityType !== undefined ? (entityType === '' ? null : entityType) : existing.entityType,
+        enunciadoNumber: enunciadoNumber !== undefined ? (enunciadoNumber === '' ? null : enunciadoNumber) : existing.enunciadoNumber,
+        // Observações (mapeadas para os nomes corretos do schema)
+        notesKeyPoints: keyPoints !== undefined ? (keyPoints === '' ? null : keyPoints) : existing.notesKeyPoints,
+        notesPracticalUse: practicalUse !== undefined ? (practicalUse === '' ? null : practicalUse) : existing.notesPracticalUse,
+        notesImportance: importance !== undefined ? (importance === '' ? null : importance) : existing.notesImportance,
+        adminNotes: adminNotes !== undefined ? (adminNotes === '' ? null : adminNotes) : existing.adminNotes,
+        publicNotes: publicNotes !== undefined ? (publicNotes === '' ? null : publicNotes) : existing.publicNotes,
+        notesUpdatedAt: new Date(),
+        notesUpdatedBy: context.user?.email || 'admin',
       },
     });
 
