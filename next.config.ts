@@ -1,6 +1,9 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  // Source maps TEMPORARIAMENTE para debug
+  productionBrowserSourceMaps: true,
+
   typescript: {
     // TODO: Fix remaining TypeScript errors (OG route params, form types)
     ignoreBuildErrors: true,
