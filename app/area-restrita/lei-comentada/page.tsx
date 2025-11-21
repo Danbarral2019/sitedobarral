@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef, useMemo, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
+import dynamic from 'next/dynamic';
 import {
   ChevronRight,
   ChevronDown,
@@ -16,9 +17,18 @@ import {
   TrendingUp,
   CheckCircle
 } from 'lucide-react';
-import DocumentDetailModal from '@/components/DocumentDetailModal';
 import { useAuth } from '@/hooks/use-auth';
 import { useFavorites } from '@/hooks/use-favorites';
+
+// Dynamic import para evitar hydration mismatch
+const DocumentDetailModal = dynamic(() => import('@/components/DocumentDetailModal'), {
+  ssr: false,
+  loading: () => (
+    <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center">
+      <Loader2 className="w-12 h-12 animate-spin text-blue-600" />
+    </div>
+  ),
+});
 
 interface LeiArticle {
   id: string;
