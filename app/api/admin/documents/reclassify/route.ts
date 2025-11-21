@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { handleApiError } from '@/lib/errors/error-handler';
-import { ValidationError, NotFoundError } from '@/lib/errors/api-error';
+import { ValidationError, NotFoundError, AuthenticationError } from '@/lib/errors/api-error';
 import { apiLogger } from '@/lib/logger';
 import { withAdminAuth } from '@/lib/api-middleware';
 
