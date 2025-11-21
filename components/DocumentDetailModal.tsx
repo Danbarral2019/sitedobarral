@@ -422,7 +422,7 @@ export default function DocumentDetailModal({
               </a>
             ) : (
               <a
-                href={`/api/documents/${document.id}/download`}
+                href={`/api/documents/${documentId}/download`}
                 onClick={handleDownload}
                 className="flex-1 bg-gradient-to-r from-blue-600 to-indigo-700 text-white px-6 py-3 rounded-xl font-bold hover:from-blue-700 hover:to-indigo-800 transition-all flex items-center justify-center gap-2 shadow-lg"
               >
