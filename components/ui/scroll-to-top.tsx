@@ -7,6 +7,9 @@ export function ScrollToTop() {
   const [isVisible, setIsVisible] = useState(false);
 
   useEffect(() => {
+    // Guard against SSR - window only exists on client
+    if (typeof window === 'undefined') return;
+
     const toggleVisibility = () => {
       // Mostrar o botão quando rolar mais de 300px
       if (window.scrollY > 300) {
@@ -24,6 +27,9 @@ export function ScrollToTop() {
   }, []);
 
   const scrollToTop = () => {
+    // Guard against SSR
+    if (typeof window === 'undefined') return;
+
     window.scrollTo({
       top: 0,
       behavior: 'smooth',
