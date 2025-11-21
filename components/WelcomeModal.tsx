@@ -20,6 +20,9 @@ export default function WelcomeModal() {
   const [shouldShow, setShouldShow] = useState(false);
 
   useEffect(() => {
+    // Guard against SSR
+    if (typeof window === 'undefined') return;
+
     // Verificar se deve mostrar o modal
     const hasVisited = localStorage.getItem(STORAGE_KEY);
     const isAdminRoute = window.location.pathname.startsWith('/admin');
@@ -36,7 +39,9 @@ export default function WelcomeModal() {
 
   const handleClose = () => {
     setIsOpen(false);
-    localStorage.setItem(STORAGE_KEY, 'true');
+    if (typeof window !== 'undefined') {
+      localStorage.setItem(STORAGE_KEY, 'true');
+    }
   };
 
   const handleExplore = () => {
