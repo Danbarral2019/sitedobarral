@@ -3,9 +3,9 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev --turbopack",
-    "build": "next build --turbopack",
-    "vercel-build": "prisma generate && prisma db push --accept-data-loss && node scripts/populate-on-numbers.js && next build --turbopack",
+    "dev": "next dev",
+    "build": "next build",
+    "vercel-build": "prisma generate && prisma db push --accept-data-loss && node scripts/populate-on-numbers.js && next build",
     "start": "next start",
     "lint": "eslint",
     "postinstall": "prisma generate",
