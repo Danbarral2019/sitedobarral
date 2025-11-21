@@ -243,6 +243,8 @@ function LeiComentadaContent() {
   };
 
   const handleDocumentClick = (documentId: string) => {
+    console.log('[DEBUG] handleDocumentClick chamado com documentId:', documentId);
+    console.log('[DEBUG] selectedArticle.documents:', selectedArticle?.documents);
     setSelectedDocumentId(documentId);
     setIsModalOpen(true);
   };
