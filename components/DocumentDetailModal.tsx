@@ -54,6 +54,8 @@ export default function DocumentDetailModal({
   isFavorite = false,
   onToggleFavorite,
 }: DocumentDetailModalProps) {
+  console.log('[DocumentDetailModal] Rendered with documentId:', documentId);
+
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [document, setDocument] = useState<DocumentData | null>(null);
@@ -62,10 +64,13 @@ export default function DocumentDetailModal({
   useEffect(() => {
     const fetchDocument = async () => {
       try {
+        console.log('[DocumentDetailModal] useEffect - Fetching with documentId:', documentId);
         setLoading(true);
         setError(null);
 
-        const response = await fetch(`/api/documents/${documentId}`);
+        const url = `/api/documents/${documentId}`;
+        console.log('[DocumentDetailModal] Fetch URL:', url);
+        const response = await fetch(url);
 
         if (!response.ok) {
           throw new Error('Documento não encontrado');
