@@ -40,6 +40,9 @@ export function ArticleAutocomplete({
 
   // Fecha dropdown ao clicar fora
   useEffect(() => {
+    // Guard against SSR
+    if (typeof window === 'undefined') return;
+
     const handleClickOutside = (event: MouseEvent) => {
       if (
         dropdownRef.current &&

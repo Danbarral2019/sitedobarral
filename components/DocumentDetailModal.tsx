@@ -133,6 +133,9 @@ export default function DocumentDetailModal({
 
   // Close on Escape key
   useEffect(() => {
+    // Guard against SSR - document only exists on client
+    if (typeof window === 'undefined') return;
+
     const handleEscape = (e: KeyboardEvent) => {
       if (e.key === 'Escape') {
         onClose();

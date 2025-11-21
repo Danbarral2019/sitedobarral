@@ -54,6 +54,9 @@ export default function LeiArticleSelector({
 
   // Fechar dropdown ao clicar fora
   useEffect(() => {
+    // Guard against SSR
+    if (typeof window === 'undefined') return;
+
     function handleClickOutside(event: MouseEvent) {
       if (
         dropdownRef.current &&

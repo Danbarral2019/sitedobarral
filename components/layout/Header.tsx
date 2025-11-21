@@ -18,6 +18,9 @@ export const Header = memo(function Header() {
 
   // Fecha dropdown quando clicar fora
   useEffect(() => {
+    // Guard against SSR
+    if (typeof window === 'undefined') return;
+
     const handleClickOutside = (event: MouseEvent) => {
       if (coursesDropdownRef.current && !coursesDropdownRef.current.contains(event.target as Node)) {
         setIsCoursesOpen(false);
