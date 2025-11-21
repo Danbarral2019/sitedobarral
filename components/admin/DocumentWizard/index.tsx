@@ -74,46 +74,6 @@ export default function DocumentWizard({ documentId, initialData }: DocumentWiza
     setIsSaving(true);
 
     try {
-      // Preparar dados para API
-      const formData = new FormData();
-
-      // Step 1 - Basic Info
-      formData.append('title', formState.title);
-      formData.append('description', formState.description);
-      formData.append('category', formState.category);
-      formData.append('courseId', formState.courseId);
-      formData.append('isPublic', String(formState.isPublic));
-      formData.append('isCommon', String(formState.isCommon));
-      formData.append('type', formState.type);
-
-      if (formState.selectedFile) {
-        formData.append('file', formState.selectedFile);
-      } else if (formState.url) {
-        formData.append('url', formState.url);
-      }
-
-      if (formState.category === 'enunciados') {
-        formData.append('entityType', formState.entityType || '');
-        formData.append('enunciadoNumber', formState.enunciadoNumber || '');
-      }
-
-      // Step 2 - Lei Articles & Tags
-      formData.append('leiArticles', JSON.stringify(formState.leiArticles));
-      formData.append('tags', JSON.stringify(formState.tags));
-
-      // Step 3 - Educational Content
-      formData.append('summary', formState.summary);
-      formData.append('keyPoints', formState.keyPoints);
-      formData.append('practicalUse', formState.practicalUse);
-      formData.append('publicNotes', formState.publicNotes);
-
-      // Step 4 - Finalization
-      if (formState.importance) {
-        formData.append('importance', formState.importance);
-      }
-      formData.append('adminNotes', formState.adminNotes);
-      formData.append('alternativeUrls', JSON.stringify(formState.alternativeUrls));
-
       // Determinar endpoint (criar ou atualizar)
       const endpoint = documentId
         ? `/api/admin/documents/${documentId}`
@@ -121,9 +81,91 @@ export default function DocumentWizard({ documentId, initialData }: DocumentWiza
 
       const method = documentId ? 'PUT' : 'POST';
 
+      let requestBody: FormData | string;
+      let requestHeaders: HeadersInit = {};
+
+      // EDIÇÃO (PUT): Usar JSON (não suporta upload de arquivo na edição)
+      if (documentId) {
+        const payload = {
+          // Step 1 - Basic Info
+          title: formState.title,
+          description: formState.description,
+          category: formState.category,
+          courseId: formState.courseId,
+          isPublic: formState.isPublic,
+          isCommon: formState.isCommon,
+          type: formState.type,
+          url: formState.url || '',
+          entityType: formState.category === 'enunciados' ? formState.entityType : '',
+          enunciadoNumber: formState.category === 'enunciados' ? formState.enunciadoNumber : '',
+
+          // Step 2 - Lei Articles & Tags
+          leiArticles: formState.leiArticles,
+          tags: formState.tags,
+
+          // Step 3 - Educational Content
+          summary: formState.summary,
+          keyPoints: formState.keyPoints,
+          practicalUse: formState.practicalUse,
+          publicNotes: formState.publicNotes,
+
+          // Step 4 - Finalization
+          importance: formState.importance || '',
+          adminNotes: formState.adminNotes,
+          alternativeUrls: formState.alternativeUrls,
+        };
+
+        requestBody = JSON.stringify(payload);
+        requestHeaders = { 'Content-Type': 'application/json' };
+      }
+      // CRIAÇÃO (POST): Usar FormData (suporta upload de arquivo)
+      else {
+        const formData = new FormData();
+
+        // Step 1 - Basic Info
+        formData.append('title', formState.title);
+        formData.append('description', formState.description);
+        formData.append('category', formState.category);
+        formData.append('courseId', formState.courseId);
+        formData.append('isPublic', String(formState.isPublic));
+        formData.append('isCommon', String(formState.isCommon));
+        formData.append('type', formState.type);
+
+        if (formState.selectedFile) {
+          formData.append('file', formState.selectedFile);
+        } else if (formState.url) {
+          formData.append('url', formState.url);
+        }
+
+        if (formState.category === 'enunciados') {
+          formData.append('entityType', formState.entityType || '');
+          formData.append('enunciadoNumber', formState.enunciadoNumber || '');
+        }
+
+        // Step 2 - Lei Articles & Tags
+        formData.append('leiArticles', JSON.stringify(formState.leiArticles));
+        formData.append('tags', JSON.stringify(formState.tags));
+
+        // Step 3 - Educational Content
+        formData.append('summary', formState.summary);
+        formData.append('keyPoints', formState.keyPoints);
+        formData.append('practicalUse', formState.practicalUse);
+        formData.append('publicNotes', formState.publicNotes);
+
+        // Step 4 - Finalization
+        if (formState.importance) {
+          formData.append('importance', formState.importance);
+        }
+        formData.append('adminNotes', formState.adminNotes);
+        formData.append('alternativeUrls', JSON.stringify(formState.alternativeUrls));
+
+        requestBody = formData;
+      }
+
       const response = await fetch(endpoint, {
         method,
-        body: formData,
+        headers: requestHeaders,
+        body: requestBody,
       });
 
       if (!response.ok) {

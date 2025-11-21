@@ -9,9 +9,9 @@ import { apiLogger } from '@/lib/logger';
 /**
  * GET: Busca um documento por ID
  */
-export const GET = withAdminAuth(async (request: NextRequest, { params }: { params: { id: string } }) => {
+export const GET = withAdminAuth(async (request: NextRequest, context: { params: Promise<{ id: string }>; user?: { id: string; email: string; role: string } }) => {
   try {
-    const { id } = params;
+    const { id } = await context.params;
 
     const document = await prisma.document.findUnique({
       where: { id },
@@ -45,12 +45,11 @@ export const GET = withAdminAuth(async (request: NextRequest, { params }: { para
 /**
  * PUT: Atualiza um documento
  */
-export const PUT = withAdminAuth(async (request: NextRequest, { params }: { params: { id: string } }, context?: { user?: { email?: string } }) => {
+export const PUT = withAdminAuth(async (request: NextRequest, context: { params: Promise<{ id: string }>; user?: { id: string; email: string; role: string } }) => {
   try {
     console.log('[DOCUMENT PUT DEBUG] Context recebido:', context);
-    console.log('[DOCUMENT PUT DEBUG] Params:', params);
-
-    const { id } = params;
+    const { id } = await context.params;
+    console.log('[DOCUMENT PUT DEBUG] Document ID:', id);
     const body = await request.json();
     console.log('[DOCUMENT PUT DEBUG] Body recebido (primeiras 500 chars):', JSON.stringify(body).substring(0, 500));
 
@@ -93,7 +92,7 @@ export const PUT = withAdminAuth(async (request: NextRequest, { params }: { para
     if (feedbackRelevance !== undefined) {
       feedbackData.feedbackRelevance = feedbackRelevance;
       feedbackData.feedbackGivenAt = new Date();
-      feedbackData.feedbackGivenBy = context?.user?.email || 'admin';
+      feedbackData.feedbackGivenBy = context.user?.email || 'admin';
     }
     if (feedbackReasoning !== undefined) {
       feedbackData.feedbackReasoning = feedbackReasoning;
@@ -149,9 +148,9 @@ export const PUT = withAdminAuth(async (request: NextRequest, { params }: { para
 /**
  * PATCH: Atualização parcial de um documento (para classificação em lote)
  */
-export const PATCH = withAdminAuth(async (request: NextRequest, { params }: { params: { id: string } }) => {
+export const PATCH = withAdminAuth(async (request: NextRequest, context: { params: Promise<{ id: string }>; user?: { id: string; email: string; role: string } }) => {
   try {
-    const { id } = params;
+    const { id } = await context.params;
     const body = await request.json();
 
     // Verifica se documento existe
@@ -202,9 +201,9 @@ export const PATCH = withAdminAuth(async (request: NextRequest, { params }: { pa
 /**
  * DELETE: Deleta um documento
  */
-export const DELETE = withAdminAuth(async (request: NextRequest, { params }: { params: { id: string } }) => {
+export const DELETE = withAdminAuth(async (request: NextRequest, context: { params: Promise<{ id: string }>; user?: { id: string; email: string; role: string } }) => {
   try {
-    const { id } = params;
+    const { id } = await context.params;
 
     // Verifica se existe
     const existing = await prisma.document.findUnique({
