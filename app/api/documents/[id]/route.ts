@@ -6,10 +6,10 @@ import { apiLogger } from '@/lib/logger';
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  context: { params: Promise<{ id: string }> }
 ) {
   try {
-    const documentId = params.id;
+    const { id: documentId } = await context.params;
 
     const document = await prisma.document.findUnique({
       where: { id: documentId },
