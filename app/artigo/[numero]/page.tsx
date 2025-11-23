@@ -7,6 +7,7 @@ import { Loader2, FileText, BookOpen, ArrowLeft, BarChart3, TrendingUp } from 'l
 import { LEI_14133_ARTIGOS as LEI_14133_ARTIGOS_FALLBACK, LeiArticle } from '@/data/lei-14133-artigos';
 import { ArticleRelationshipGraph } from '@/components/ArticleRelationshipGraph';
 import { ArticleBadges } from '@/components/ArticleBadges';
+import ArticleChatInterface from '@/components/ArticleChatInterface';
 
 interface Document {
   id: string;
@@ -202,7 +203,13 @@ export default function ArtigoPage() {
           <div className="grid lg:grid-cols-3 gap-8">
             {/* Coluna Principal */}
             <div className="lg:col-span-2 space-y-8">
-              {/* Grafo de Relacionamentos */}
+              {/* Chat com IA */}
+              <ArticleChatInterface
+                articleNumber={numero}
+                articleTitle={article.titulo}
+              />
+
+              {/* Artigos Relacionados */}
               <ArticleRelationshipGraph
                 articleNumber={numero}
                 onArticleClick={(articleNum) => {
@@ -238,101 +245,119 @@ export default function ArtigoPage() {
                 </div>
               )}
 
-              {/* Documentos Públicos */}
+              {/* Preview de Documentos - Área Pública */}
               {publicDocuments.length > 0 && (
-                <div className="bg-white rounded-2xl shadow-lg p-6 border-2 border-gray-200">
-                  <h2 className="text-2xl font-bold text-gray-900 mb-6 flex items-center gap-2">
-                    <FileText className="w-6 h-6 text-green-600" />
-                    Documentos Públicos ({publicDocuments.length})
-                  </h2>
-                  <div className="space-y-3">
-                    {publicDocuments.map((doc) => {
-                      const isLegislativeAct = doc.sourceType === 'legislative-act';
+                <div className="bg-gradient-to-br from-blue-600 to-purple-600 rounded-2xl shadow-xl p-8 text-white">
+                  <div className="flex items-start gap-4 mb-6">
+                    <div className="p-3 bg-white/20 backdrop-blur-sm rounded-xl">
+                      <FileText className="w-8 h-8" />
+                    </div>
+                    <div>
+                      <h2 className="text-3xl font-bold mb-2">
+                        {publicDocuments.length} Documentos Indexados
+                      </h2>
+                      <p className="text-white/90 text-lg">
+                        Análises, pareceres e orientações sobre este artigo
+                      </p>
+                    </div>
+                  </div>
 
-                      return (
+                  {/* Preview das Categorias */}
+                  <div className="mb-6 grid grid-cols-2 md:grid-cols-4 gap-3">
+                    {(() => {
+                      const categories = {};
+                      publicDocuments.forEach(doc => {
+                        categories[doc.category] = (categories[doc.category] || 0) + 1;
+                      });
+
+                      // Mapear nomes das categorias
+                      const categoryNames: Record<string, string> = {
+                        'orientacao-normativa': 'Orientações Normativas',
+                        'parecer-vinculante': 'Pareceres Vinculantes',
+                        'decor': 'DECOR',
+                        'acordao': 'Acórdãos',
+                        'outro': 'Outros',
+                      };
+
+                      return Object.entries(categories).map(([cat, count]) => (
+                        <div key={cat} className="bg-white/20 backdrop-blur-sm rounded-lg p-3 text-center">
+                          <div className="text-2xl font-bold">{count}</div>
+                          <div className="text-xs text-white/90">{categoryNames[cat] || cat}</div>
+                        </div>
+                      ));
+                    })()}
+                  </div>
+
+                  {/* Preview dos primeiros 3 documentos */}
+                  <div className="space-y-3 mb-6">
+                    {(() => {
+                      // Mapear nomes das categorias
+                      const categoryNames: Record<string, string> = {
+                        'orientacao-normativa': 'Orientação Normativa',
+                        'parecer-vinculante': 'Parecer Vinculante',
+                        'decor': 'DECOR',
+                        'acordao': 'Acórdão',
+                        'outro': 'Outro',
+                      };
+
+                      return publicDocuments.slice(0, 3).map((doc) => (
                         <div
                           key={doc.id}
-                          className={`p-4 rounded-lg border-2 transition-all ${
-                            isLegislativeAct
-                              ? 'bg-gradient-to-br from-blue-50 to-purple-50 border-blue-300 hover:border-blue-400 hover:shadow-md'
-                              : 'bg-gray-50 border-gray-200 hover:border-green-300'
-                          }`}
+                          className="bg-white/10 backdrop-blur-sm border border-white/20 rounded-lg p-4"
                         >
-                          <div className="flex items-start justify-between gap-3 mb-2">
+                          <div className="flex items-start justify-between gap-3">
                             <div className="flex-1">
-                              {isLegislativeAct && doc.url ? (
-                                <Link
-                                  href={doc.url}
-                                  className="font-bold text-blue-700 hover:text-blue-900 hover:underline text-lg"
-                                >
-                                  {doc.title}
-                                </Link>
-                              ) : (
-                                <h3 className="font-bold text-gray-900">
-                                  {doc.title}
-                                </h3>
-                              )}
-
-                              {isLegislativeAct && doc.issuer && (
-                                <p className="text-xs text-gray-600 mt-1">
-                                  {doc.issuer}
+                              <div className="flex items-center gap-2 mb-1">
+                                <span className="px-2 py-0.5 bg-white/20 rounded text-xs font-medium">
+                                  {categoryNames[doc.category] || doc.category}
+                                </span>
+                              </div>
+                              <h3 className="font-bold text-white line-clamp-1">
+                                {doc.title}
+                              </h3>
+                              {doc.description && (
+                                <p className="text-sm text-white/80 line-clamp-2 mt-1">
+                                  {doc.description}
                                 </p>
                               )}
                             </div>
-                            <span className={`px-2 py-1 rounded font-medium text-xs flex-shrink-0 ${
-                              isLegislativeAct
-                                ? 'bg-blue-100 text-blue-800 border border-blue-300'
-                                : 'bg-green-100 text-green-800'
-                            }`}>
-                              {isLegislativeAct ? 'Legislação' : 'Público'}
-                            </span>
-                          </div>
-
-                          {doc.description && (
-                            <p className="text-sm text-gray-600 mb-3">
-                              {doc.description}
-                            </p>
-                          )}
-
-                          <div className="flex flex-wrap items-center gap-2">
-                            <span className={`px-2 py-1 rounded font-medium text-xs ${
-                              isLegislativeAct
-                                ? 'bg-purple-100 text-purple-800 border border-purple-300'
-                                : 'bg-gray-200 text-gray-700'
-                            }`}>
-                              {doc.category}
-                            </span>
-
-                            {doc.leiArticles && (
-                              <div className="flex-1">
-                                <ArticleBadges
-                                  leiArticles={doc.leiArticles}
-                                  maxVisible={3}
-                                  primaryArticle={numero}
-                                  onArticleClick={(articleNum) => {
-                                    router.push(`/artigo/${articleNum}`);
-                                  }}
-                                />
-                              </div>
-                            )}
-                          </div>
-
-                          {isLegislativeAct && doc.url && (
-                            <div className="mt-3 pt-3 border-t border-blue-200">
-                              <Link
-                                href={doc.url}
-                                className="inline-flex items-center gap-2 text-sm font-medium text-blue-600 hover:text-blue-800 hover:underline"
-                              >
-                                Ver texto completo
-                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                                </svg>
-                              </Link>
+                            <div className="flex-shrink-0 w-8 h-8 bg-white/20 rounded-lg flex items-center justify-center">
+                              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                              </svg>
                             </div>
-                          )}
+                          </div>
                         </div>
-                      );
-                    })}
+                      ));
+                    })()}
+                    {publicDocuments.length > 3 && (
+                      <div className="text-center py-2">
+                        <span className="text-white/80 text-sm font-medium">
+                          + {publicDocuments.length - 3} documentos adicionais
+                        </span>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* CTA */}
+                  <div className="pt-6 border-t border-white/20">
+                    <p className="text-center text-white/90 mb-4 text-sm">
+                      🔒 Acesse a <strong>análise completa, PDFs e conteúdo exclusivo</strong> de todos os documentos
+                    </p>
+                    <div className="flex flex-col sm:flex-row gap-3">
+                      <Link
+                        href="/area-restrita"
+                        className="flex-1 text-center px-6 py-3 bg-white text-blue-600 rounded-xl font-bold hover:bg-blue-50 transition-all shadow-lg"
+                      >
+                        Entrar na Área Restrita
+                      </Link>
+                      <Link
+                        href="/cursos"
+                        className="flex-1 text-center px-6 py-3 bg-white/20 backdrop-blur-sm text-white rounded-xl font-bold hover:bg-white/30 transition-all border-2 border-white/30"
+                      >
+                        Conhecer Cursos
+                      </Link>
+                    </div>
                   </div>
                 </div>
               )}
