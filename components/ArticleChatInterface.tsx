@@ -1,8 +1,9 @@
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
-import { Sparkles, Loader2, MessageSquare, FileText, RefreshCw, AlertCircle, ThumbsUp, ThumbsDown, History } from 'lucide-react';
+import { Sparkles, Loader2, MessageSquare, FileText, RefreshCw, AlertCircle, ThumbsUp, ThumbsDown, History, Lightbulb } from 'lucide-react';
 import ArticleChatHistory from './ArticleChatHistory';
+import { getSuggestedQuestions } from '@/data/lei-14133-suggested-questions';
 
 interface Source {
   id: string;
@@ -42,6 +43,9 @@ export default function ArticleChatInterface({
 
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const answerRef = useRef<HTMLDivElement>(null);
+
+  // Buscar sugestões de perguntas para este artigo
+  const suggestedQuestions = getSuggestedQuestions(articleNumber);
 
   // Carregar conversationId do localStorage ao montar
   useEffect(() => {
@@ -192,6 +196,14 @@ export default function ArticleChatInterface({
     setError(null);
   };
 
+  const handleSuggestionClick = (suggestion: string) => {
+    setQuestion(suggestion);
+    setError(null);
+    if (textareaRef.current) {
+      textareaRef.current.focus();
+    }
+  };
+
   return (
     <div className="bg-gradient-to-br from-purple-50 to-blue-50 rounded-2xl shadow-lg border-2 border-purple-200 overflow-hidden">
       {/* Header */}
@@ -221,6 +233,28 @@ export default function ArticleChatInterface({
 
       {/* Content */}
       <div className="p-6 space-y-4">
+        {/* Suggested Questions */}
+        {!answer && !isLoading && suggestedQuestions.length > 0 && (
+          <div className="mb-6">
+            <div className="flex items-center gap-2 mb-3">
+              <Lightbulb className="w-5 h-5 text-amber-600" />
+              <h4 className="font-semibold text-gray-900">Perguntas Sugeridas</h4>
+            </div>
+            <div className="flex flex-wrap gap-2">
+              {suggestedQuestions.map((suggestion, index) => (
+                <button
+                  key={index}
+                  onClick={() => handleSuggestionClick(suggestion)}
+                  disabled={isLoading}
+                  className="px-4 py-2 bg-white border-2 border-purple-200 text-gray-700 rounded-lg hover:border-purple-400 hover:bg-purple-50 transition-all text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed text-left"
+                >
+                  {suggestion}
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
+
         {/* Input Area */}
         {!answer && (
           <div className="space-y-3">
