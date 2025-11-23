@@ -40,6 +40,7 @@ interface LeiArticle {
     id: string;
     title: string;
     isPublic: boolean;
+    category: string | null;
   }[];
 }
 
@@ -342,7 +343,10 @@ function LeiComentadaContent() {
   const [expandedTitulos, setExpandedTitulos] = useState<Set<string>>(new Set());
   const [expandedCapitulos, setExpandedCapitulos] = useState<Set<string>>(new Set());
 
-  // Accordion de documentos
+  // Accordion de categorias de documentos
+  const [expandedCategories, setExpandedCategories] = useState<Set<string>>(new Set());
+
+  // Accordion de documentos individuais
   const [expandedDocumentId, setExpandedDocumentId] = useState<string | null>(null);
 
   // Refs para scroll automático
@@ -499,6 +503,18 @@ function LeiComentadaContent() {
 
     // Atualizar URL
     router.push(`/area-restrita/lei-comentada?artigo=${article.numero}`, { scroll: false });
+  };
+
+  const toggleCategoryExpanded = (category: string) => {
+    setExpandedCategories(prev => {
+      const next = new Set(prev);
+      if (next.has(category)) {
+        next.delete(category);
+      } else {
+        next.add(category);
+      }
+      return next;
+    });
   };
 
   const toggleDocumentExpanded = (documentId: string) => {
@@ -773,40 +789,106 @@ function LeiComentadaContent() {
                   </div>
                 </div>
 
-                {/* Documentos */}
+                {/* Documentos Agrupados por Categoria */}
                 {selectedArticle.documentCount > 0 ? (
                   <div className="bg-white rounded-lg shadow-md p-6">
                     <h3 className="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
                       <FileText className="w-5 h-5 text-blue-600" />
                       Documentos Relacionados ({selectedArticle.documentCount})
                     </h3>
-                    <div className="space-y-2">
-                      {selectedArticle.documents.map((doc) => {
-                        const isExpanded = expandedDocumentId === doc.id;
-                        return (
-                          <div key={doc.id} className="border border-gray-200 rounded-lg overflow-hidden">
-                            <button
-                              onClick={() => toggleDocumentExpanded(doc.id)}
-                              className="w-full flex items-center gap-3 p-4 bg-gray-50 hover:bg-blue-50 transition-colors text-left"
-                            >
-                              {isExpanded ? (
-                                <ChevronDown className="w-5 h-5 text-blue-600 flex-shrink-0" />
-                              ) : (
-                                <ChevronRight className="w-5 h-5 text-gray-400 flex-shrink-0" />
-                              )}
-                              <FileText className="w-5 h-5 text-blue-600 flex-shrink-0" />
-                              <span className="flex-1 text-gray-900 font-medium">{doc.title}</span>
-                              {doc.isPublic && (
-                                <span className="px-2 py-1 bg-green-100 text-green-700 text-xs font-medium rounded">
-                                  Público
-                                </span>
-                              )}
-                            </button>
+                    <div className="space-y-3">
+                      {(() => {
+                        // Agrupar documentos por categoria
+                        const docsByCategory: Record<string, typeof selectedArticle.documents> = {};
+                        selectedArticle.documents.forEach((doc) => {
+                          const category = doc.category || 'outro';
+                          if (!docsByCategory[category]) {
+                            docsByCategory[category] = [];
+                          }
+                          docsByCategory[category].push(doc);
+                        });
 
-                            {isExpanded && <DocumentDetails documentId={doc.id} />}
-                          </div>
-                        );
-                      })}
+                        // Mapear nome das categorias para exibição
+                        const categoryNames: Record<string, string> = {
+                          'orientacao-normativa': 'Orientações Normativas AGU',
+                          'parecer-vinculante': 'Pareceres Vinculantes AGU',
+                          'decor': 'Decisões do DECOR (CGU)',
+                          'acordao': 'Acórdãos',
+                          'outro': 'Outros Documentos',
+                        };
+
+                        // Ordenar categorias (ON > Pareceres > DECOR > Acórdãos > Outros)
+                        const categoryOrder = ['orientacao-normativa', 'parecer-vinculante', 'decor', 'acordao', 'outro'];
+                        const sortedCategories = Object.keys(docsByCategory).sort((a, b) => {
+                          const indexA = categoryOrder.indexOf(a);
+                          const indexB = categoryOrder.indexOf(b);
+                          // Se não encontrar na lista, coloca no final
+                          return (indexA === -1 ? 999 : indexA) - (indexB === -1 ? 999 : indexB);
+                        });
+
+                        return sortedCategories.map((category) => {
+                          const docs = docsByCategory[category];
+                          const isCategoryExpanded = expandedCategories.has(category);
+
+                          return (
+                            <div key={category} className="border-2 border-gray-200 rounded-lg overflow-hidden">
+                              {/* Header do Accordion de Categoria */}
+                              <button
+                                onClick={() => toggleCategoryExpanded(category)}
+                                className="w-full flex items-center gap-3 p-4 bg-gradient-to-r from-blue-50 to-purple-50 hover:from-blue-100 hover:to-purple-100 transition-colors text-left"
+                              >
+                                {isCategoryExpanded ? (
+                                  <ChevronDown className="w-6 h-6 text-blue-600 flex-shrink-0" />
+                                ) : (
+                                  <ChevronRight className="w-6 h-6 text-gray-400 flex-shrink-0" />
+                                )}
+                                <FileText className="w-6 h-6 text-blue-600 flex-shrink-0" />
+                                <div className="flex-1">
+                                  <h4 className="font-bold text-gray-900">{categoryNames[category] || category}</h4>
+                                  <p className="text-xs text-gray-600">{docs.length} {docs.length === 1 ? 'documento' : 'documentos'}</p>
+                                </div>
+                                <div className="px-3 py-1 bg-blue-600 text-white rounded-full text-sm font-bold">
+                                  {docs.length}
+                                </div>
+                              </button>
+
+                              {/* Lista de Documentos da Categoria */}
+                              {isCategoryExpanded && (
+                                <div className="bg-white border-t-2 border-gray-200">
+                                  <div className="p-3 space-y-2">
+                                    {docs.map((doc) => {
+                                      const isDocExpanded = expandedDocumentId === doc.id;
+                                      return (
+                                        <div key={doc.id} className="border border-gray-200 rounded-lg overflow-hidden">
+                                          <button
+                                            onClick={() => toggleDocumentExpanded(doc.id)}
+                                            className="w-full flex items-center gap-3 p-3 bg-gray-50 hover:bg-blue-50 transition-colors text-left"
+                                          >
+                                            {isDocExpanded ? (
+                                              <ChevronDown className="w-4 h-4 text-blue-600 flex-shrink-0" />
+                                            ) : (
+                                              <ChevronRight className="w-4 h-4 text-gray-400 flex-shrink-0" />
+                                            )}
+                                            <FileText className="w-4 h-4 text-blue-600 flex-shrink-0" />
+                                            <span className="flex-1 text-gray-900 text-sm font-medium line-clamp-1">{doc.title}</span>
+                                            {doc.isPublic && (
+                                              <span className="px-2 py-0.5 bg-green-100 text-green-700 text-xs font-medium rounded">
+                                                Público
+                                              </span>
+                                            )}
+                                          </button>
+
+                                          {isDocExpanded && <DocumentDetails documentId={doc.id} />}
+                                        </div>
+                                      );
+                                    })}
+                                  </div>
+                                </div>
+                              )}
+                            </div>
+                          );
+                        });
+                      })()}
                     </div>
                   </div>
                 ) : (

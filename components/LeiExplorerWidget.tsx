@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Scale, FileText, TrendingUp, ChevronRight, Loader2, AlertTriangle } from 'lucide-react';
+import { Scale, FileText, TrendingUp, ChevronRight, Loader2, AlertTriangle, MessageSquare, Sparkles } from 'lucide-react';
 import Link from 'next/link';
 
 interface TopArticle {
@@ -107,6 +107,33 @@ export default function LeiExplorerWidget() {
 
       {/* Content */}
       <div className="p-6">
+        {/* NEW Features Banner */}
+        <div className="mb-6 p-4 bg-gradient-to-r from-purple-50 to-blue-50 border-2 border-purple-300 rounded-lg">
+          <div className="flex items-start gap-3">
+            <div className="flex-shrink-0 p-2 bg-purple-600 rounded-lg">
+              <Sparkles className="w-5 h-5 text-white" />
+            </div>
+            <div className="flex-1">
+              <div className="flex items-center gap-2 mb-2">
+                <h4 className="font-bold text-purple-900">Novidades!</h4>
+                <span className="px-2 py-0.5 bg-purple-600 text-white text-xs font-bold rounded-full">
+                  NOVO
+                </span>
+              </div>
+              <ul className="space-y-2 text-sm text-gray-700">
+                <li className="flex items-center gap-2">
+                  <MessageSquare className="w-4 h-4 text-purple-600 flex-shrink-0" />
+                  <span><strong>Chat com IA:</strong> Faça perguntas sobre qualquer artigo da Lei 14.133</span>
+                </li>
+                <li className="flex items-center gap-2">
+                  <Scale className="w-4 h-4 text-purple-600 flex-shrink-0" />
+                  <span><strong>Busca Unificada:</strong> Busque em documentos E artigos simultaneamente</span>
+                </li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
         {/* Top Articles */}
         <div className="mb-6">
           <div className="flex items-center gap-2 mb-4">
@@ -136,9 +163,13 @@ export default function LeiExplorerWidget() {
 
                 {/* Article Info */}
                 <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2 mb-1">
+                  <div className="flex items-center gap-2 mb-1 flex-wrap">
                     <span className="px-3 py-1 bg-blue-600 text-white text-xs font-bold rounded-full">
                       Art. {article.numero}
+                    </span>
+                    <span className="px-2 py-0.5 bg-purple-100 text-purple-700 text-xs font-medium rounded-full flex items-center gap-1 border border-purple-300">
+                      <MessageSquare className="w-3 h-3" />
+                      Chat IA
                     </span>
                     {article.titulo && (
                       <span className="text-xs text-gray-600 truncate">{article.titulo}</span>

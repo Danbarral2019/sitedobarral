@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { randomUUID } from 'crypto';
+import { queryGeminiText } from '@/lib/gemini/cached-client';
+import { LEI_14133_ARTIGOS } from '@/data/lei-14133-artigos';
 
 interface ChatRequest {
   question: string;
@@ -10,10 +12,10 @@ interface ChatRequest {
 // POST /api/artigos/[numero]/chat - IA Assistente (Placeholder para futura ativação)
 export async function POST(
   request: NextRequest,
-  { params }: { params: { numero: string } }
+  { params }: { params: Promise<{ numero: string }> }
 ) {
   try {
-    const articleNumber = params.numero;
+    const { numero: articleNumber } = await params;
     const body = await request.json() as ChatRequest;
 
     if (!articleNumber) {
@@ -89,20 +91,81 @@ export async function POST(
       },
     });
 
-    // PLACEHOLDER: Resposta genérica até IA ser ativada
-    const placeholderAnswer = `Esta funcionalidade estará disponível em breve!
+    // Buscar artigo da Lei 14.133
+    const article = LEI_14133_ARTIGOS[articleNumber];
 
-Quando ativada, nosso assistente de IA poderá responder perguntas sobre o Artigo ${articleNumber} baseado em ${relevantDocs.length} documentos relacionados.
+    if (!article) {
+      return NextResponse.json(
+        { error: `Artigo ${articleNumber} não encontrado` },
+        { status: 404 }
+      );
+    }
 
-**Sua pergunta foi registrada:**
-"${body.question}"
+    // Construir contexto rico para o Gemini
+    const docsContext = relevantDocs.length > 0
+      ? relevantDocs.map((doc, i) => `
+**Documento ${i + 1}: ${doc.title}**
+Categoria: ${doc.category}
+${doc.summary ? `Resumo: ${doc.summary}` : doc.description ? `Descrição: ${doc.description}` : ''}
+`).join('\n')
+      : 'Nenhum documento adicional disponível.';
 
-**Documentos relacionados encontrados:**
-${relevantDocs.map((doc, i) => `${i + 1}. ${doc.title} (${doc.category})`).join('\n')}
+    const prompt = `Você é um assistente especializado em Licitações e Contratos Públicos, especificamente na Lei nº 14.133/2021 (Nova Lei de Licitações).
 
-Aguarde a ativação do plano premium para obter respostas personalizadas!`;
+**CONTEXTO DO ARTIGO:**
+Artigo ${articleNumber} da Lei 14.133/2021
+${article.titulo ? `Título: ${article.titulo}` : ''}
+${article.capituloCompleto ? `Capítulo: ${article.capituloCompleto}` : ''}
+${article.secao ? `Seção: ${article.secao}` : ''}
 
-    // Preparar fontes (documentos que seriam usados pela IA)
+**TEXTO COMPLETO DO ARTIGO:**
+${article.ementa}
+
+**DOCUMENTOS RELACIONADOS DISPONÍVEIS:**
+${docsContext}
+
+**PERGUNTA DO USUÁRIO:**
+${body.question}
+
+**INSTRUÇÕES:**
+1. Responda de forma clara, objetiva e técnica
+2. Base sua resposta PRIMARIAMENTE no texto do artigo fornecido
+3. Use os documentos relacionados como contexto adicional quando relevante
+4. Se a pergunta não puder ser respondida com as informações disponíveis, seja honesto sobre isso
+5. Cite especificamente as fontes quando usar informações dos documentos
+6. Use linguagem técnica jurídica apropriada, mas mantenha clareza
+7. Se aplicável, mencione implicações práticas ou pontos de atenção
+
+Responda agora:`;
+
+    // Consultar Gemini com caching
+    console.log(`🤖 Gemini Query for Article ${articleNumber}...`);
+    const geminiResult = await queryGeminiText(prompt, {
+      model: 'gemini-2.0-flash-exp',
+      temperature: 0.7,
+      maxOutputTokens: 2048,
+      useCache: true,
+      cacheTTL: 3600, // 1 hora
+    });
+
+    const answer = geminiResult.response;
+
+    // Atualizar pergunta com a resposta
+    await prisma.articleQuestion.update({
+      where: { id: questionRecord.id },
+      data: {
+        answer,
+        isPlaceholder: false,
+        aiProvider: 'gemini',
+        geminiModel: 'gemini-2.0-flash-exp',
+        geminiTokens: geminiResult.tokens ? geminiResult.tokens.total : null,
+        geminiLatency: geminiResult.latency,
+        geminiCached: geminiResult.cached,
+        respondedAt: new Date(),
+      },
+    });
+
+    // Preparar fontes para resposta
     const sources = relevantDocs.map(doc => ({
       id: doc.id,
       title: doc.title,
@@ -110,16 +173,24 @@ Aguarde a ativação do plano premium para obter respostas personalizadas!`;
       excerpt: doc.summary || doc.description || 'Sem resumo disponível',
     }));
 
+    console.log(`✅ Gemini response generated (${geminiResult.latency}ms, cached: ${geminiResult.cached})`);
+
     return NextResponse.json({
       conversationId,
       questionId: questionRecord.id,
-      answer: placeholderAnswer,
+      answer,
       sources,
-      isPlaceholder: true, // Indica que é resposta placeholder
+      isPlaceholder: false,
       meta: {
         articleNumber,
+        articleTitle: article.titulo,
         relevantDocsCount: relevantDocs.length,
-        message: 'IA não ativada. Esta é uma resposta placeholder.',
+        gemini: {
+          model: 'gemini-2.0-flash-exp',
+          cached: geminiResult.cached,
+          latency: geminiResult.latency,
+          tokens: geminiResult.tokens,
+        },
       },
     });
 
@@ -135,10 +206,10 @@ Aguarde a ativação do plano premium para obter respostas personalizadas!`;
 // GET /api/artigos/[numero]/chat?conversationId=XXX - Obter histórico de conversa
 export async function GET(
   request: NextRequest,
-  { params }: { params: { numero: string } }
+  { params }: { params: Promise<{ numero: string }> }
 ) {
   try {
-    const articleNumber = params.numero;
+    const { numero: articleNumber } = await params;
     const searchParams = request.nextUrl.searchParams;
     const conversationId = searchParams.get('conversationId');
 

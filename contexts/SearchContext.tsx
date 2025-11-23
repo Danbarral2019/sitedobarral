@@ -6,24 +6,42 @@ import { createContext, useContext, useState, useCallback, ReactNode } from 'rea
 // Types
 // ===========================
 
-export interface DocumentSearchResult {
+// Base interface for all search results
+interface BaseSearchResult {
   id: string;
   title: string;
   description?: string;
-  type: string;
   url?: string;
+  resultType: 'document' | 'article';
+}
+
+// Document-specific fields
+export interface DocumentSearchResult extends BaseSearchResult {
+  resultType: 'document';
+  type: string; // pdf, doc, link, video
   category: string;
   uploadedAt?: string;
   tags?: string;
   courseIds?: string[];
 }
 
+// Article-specific fields (Lei 14.133)
+export interface ArticleSearchResult extends BaseSearchResult {
+  resultType: 'article';
+  numero: string;
+  capitulo: string;
+  secao?: string;
+}
+
+// Union type for all search results
+export type UnifiedSearchResult = DocumentSearchResult | ArticleSearchResult;
+
 export type SearchType = 'local' | 'ai' | null;
 
 export interface SearchState {
   query: string;
   timestamp: Date | null;
-  results: DocumentSearchResult[];
+  results: UnifiedSearchResult[];
   searchType: SearchType;
   aiResponse: string | null;
   relevanceScores: Record<string, number>;
@@ -32,10 +50,10 @@ export interface SearchState {
 
 interface SearchContextValue {
   searchState: SearchState;
-  setLocalSearch: (query: string, results: DocumentSearchResult[]) => void;
+  setLocalSearch: (query: string, results: UnifiedSearchResult[]) => void;
   setAISearch: (
     query: string,
-    results: DocumentSearchResult[],
+    results: UnifiedSearchResult[],
     aiResponse: string,
     relevanceScores: Record<string, number>
   ) => void;
@@ -66,7 +84,7 @@ const initialState: SearchState = {
 export function SearchProvider({ children }: { children: ReactNode }) {
   const [searchState, setSearchState] = useState<SearchState>(initialState);
 
-  const setLocalSearch = useCallback((query: string, results: DocumentSearchResult[]) => {
+  const setLocalSearch = useCallback((query: string, results: UnifiedSearchResult[]) => {
     setSearchState({
       query,
       timestamp: new Date(),
@@ -81,7 +99,7 @@ export function SearchProvider({ children }: { children: ReactNode }) {
   const setAISearch = useCallback(
     (
       query: string,
-      results: DocumentSearchResult[],
+      results: UnifiedSearchResult[],
       aiResponse: string,
       relevanceScores: Record<string, number>
     ) => {

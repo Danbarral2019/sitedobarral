@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import {
   ChevronDown,
@@ -8,9 +8,11 @@ import {
   ExternalLink,
   AlertTriangle,
   FileText,
-  List
+  List,
+  Loader2
 } from 'lucide-react';
 import { LeiArticle } from '@/data/lei-14133-artigos';
+import { ArticleContentSections } from '@/components/ArticleContentSections';
 
 interface CollapsibleArticleProps {
   articleNum: string;
@@ -24,6 +26,13 @@ interface CollapsibleArticleProps {
   defaultExpanded?: boolean;
 }
 
+interface RelatedDocument {
+  id: string;
+  title: string;
+  isPublic: boolean;
+  category: string | null;
+}
+
 export function CollapsibleArticle({
   articleNum,
   article,
@@ -31,6 +40,35 @@ export function CollapsibleArticle({
   defaultExpanded = false
 }: CollapsibleArticleProps) {
   const [isExpanded, setIsExpanded] = useState(defaultExpanded);
+  const [relatedDocs, setRelatedDocs] = useState<RelatedDocument[]>([]);
+  const [isLoadingDocs, setIsLoadingDocs] = useState(false);
+  const [docsLoaded, setDocsLoaded] = useState(false);
+
+  // Buscar documentos relacionados quando expandir pela primeira vez
+  useEffect(() => {
+    if (isExpanded && !docsLoaded) {
+      fetchRelatedDocuments();
+    }
+  }, [isExpanded]);
+
+  async function fetchRelatedDocuments() {
+    setIsLoadingDocs(true);
+    try {
+      const response = await fetch(`/api/lei-14133/articles?withDocuments=true`);
+      if (response.ok) {
+        const data = await response.json();
+        const articleData = data.articles.find((a: any) => a.numero === articleNum);
+        if (articleData && articleData.documents) {
+          setRelatedDocs(articleData.documents);
+        }
+        setDocsLoaded(true);
+      }
+    } catch (error) {
+      console.error('Erro ao buscar documentos relacionados:', error);
+    } finally {
+      setIsLoadingDocs(false);
+    }
+  }
 
   // Verificar se está truncado
   const ementa = article.ementa || '';
@@ -122,16 +160,37 @@ export function CollapsibleArticle({
           </button>
         </div>
 
-        {/* Ações (quando expandido) */}
+        {/* Documentos Relacionados e Ações (quando expandido) */}
         {isExpanded && (
-          <div className="mt-4 pt-4 border-t border-gray-200 flex items-center gap-2">
-            <Link
-              href={`/artigo/${articleNum}`}
-              className="inline-flex items-center gap-2 px-4 py-2 bg-white border-2 border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors text-sm font-medium"
-            >
-              <ExternalLink className="w-4 h-4" />
-              Ver Página Completa
-            </Link>
+          <div className="mt-4 pt-4 border-t border-gray-200 space-y-4">
+            {/* Loading State */}
+            {isLoadingDocs && (
+              <div className="flex items-center justify-center py-8">
+                <Loader2 className="w-6 h-6 text-gray-400 animate-spin" />
+                <span className="ml-2 text-sm text-gray-500">Carregando documentos relacionados...</span>
+              </div>
+            )}
+
+            {/* Documentos Relacionados */}
+            {!isLoadingDocs && docsLoaded && (
+              <ArticleContentSections articleNum={articleNum} documents={relatedDocs} />
+            )}
+
+            {/* Ações */}
+            <div className="flex items-center gap-2 pt-4">
+              <Link
+                href={`/artigo/${articleNum}`}
+                className="inline-flex items-center gap-2 px-4 py-2 bg-white border-2 border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors text-sm font-medium"
+              >
+                <ExternalLink className="w-4 h-4" />
+                Ver Página Completa
+              </Link>
+              {relatedDocs.length > 0 && (
+                <span className="text-xs text-gray-500 ml-auto">
+                  {relatedDocs.length} {relatedDocs.length === 1 ? 'documento relacionado' : 'documentos relacionados'}
+                </span>
+              )}
+            </div>
           </div>
         )}
       </div>

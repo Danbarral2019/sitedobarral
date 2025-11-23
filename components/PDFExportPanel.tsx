@@ -32,14 +32,16 @@ export default function PDFExportPanel({ documents, userName, userEmail, favorit
   // Helper functions (defined before useEffect that use them)
   const getCurrentModeDocuments = (): Document[] => {
     if (mode === 'search') {
-      // Return documents from search results
-      return searchState.results.map(result => ({
-        id: result.id,
-        title: result.title,
-        description: result.description,
-        category: result.category,
-        url: result.url,
-      }));
+      // Return ONLY documents from search results (filter out articles)
+      return searchState.results
+        .filter(result => result.resultType === 'document')
+        .map(result => ({
+          id: result.id,
+          title: result.title,
+          description: result.description,
+          category: result.resultType === 'document' ? result.category : 'outro',
+          url: result.url,
+        }));
     } else if (mode === 'favorites') {
       // Return only favorite documents
       return documents.filter(doc => favoriteIds.includes(doc.id));

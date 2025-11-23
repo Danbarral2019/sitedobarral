@@ -691,7 +691,13 @@ model ArticleQuestion {
 
   // Resposta (vazio até IA ser ativada)
   answer          String?  @db.Text
-  aiProvider      String?  // "anthropic-claude" | "openai" | null (quando ativado)
+  aiProvider      String?  // "anthropic-claude" | "openai" | "gemini" | null
+
+  // Metadados do Gemini (quando gemini usado)
+  geminiModel     String?  // Modelo usado (ex: "gemini-2.0-flash-exp")
+  geminiTokens    Int?     // Total de tokens usados
+  geminiLatency   Int?     // Latência em ms
+  geminiCached    Boolean? // Se resposta veio do cache
 
   // Conversa (para manter contexto entre mensagens)
   conversationId  String?

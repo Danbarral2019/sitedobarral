@@ -1,9 +1,9 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
-import { Search, X, SlidersHorizontal, Loader2, Sparkles, AlertCircle } from 'lucide-react';
+import { Search, X, SlidersHorizontal, Loader2, Sparkles, AlertCircle, FileText, Scale } from 'lucide-react';
 import { SearchScope } from '@/hooks/use-search';
-import { useSearchContext, type DocumentSearchResult } from '@/contexts/SearchContext';
+import { useSearchContext, type DocumentSearchResult, type UnifiedSearchResult } from '@/contexts/SearchContext';
 
 interface UnifiedSearchProps {
   // Local search props
@@ -84,68 +84,73 @@ export default function UnifiedSearch({
     setAiError(null);
 
     try {
-      const response = await fetch('/api/documents/query', {
+      const response = await fetch('/api/search/unified', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           query: value,
           filters: {
             courseId: scope === 'current' ? currentCourseId : undefined,
+            resultType: 'all', // Search both documents and articles
           },
           maxResults: 10,
-          includeContent: true,
-          useCache: true,
         }),
       });
 
       if (!response.ok) {
         const error = await response.json();
-        throw new Error(error.message || 'Erro ao buscar com IA');
+        throw new Error(error.error || 'Erro ao buscar');
       }
 
       const data = await response.json();
 
-      interface ApiResult {
-        documentId: string;
-        title: string;
-        excerpt: string;
-        category: string;
-        url?: string;
-        uploadedAt?: string;
-        tags?: string[];
-        courseIds?: string[];
-        relevance: number;
-        geminiResponse: string;
-      }
-
-      // Map API results to our document format
-      const aiResults: DocumentSearchResult[] = data.results.map((result: ApiResult) => ({
-        id: result.documentId,
-        title: result.title,
-        description: result.excerpt,
-        category: result.category,
-        url: result.url,
-        uploadedAt: result.uploadedAt,
-        tags: result.tags?.join(', '),
-        courseIds: result.courseIds,
-        type: 'document', // Default type
-      }));
+      // Map API results to unified search result format
+      const aiResults: UnifiedSearchResult[] = data.results.map((result: any) => {
+        if (result.resultType === 'article') {
+          // Article result
+          return {
+            resultType: 'article' as const,
+            id: result.id,
+            title: result.title,
+            description: result.description,
+            url: result.url,
+            numero: result.numero,
+            capitulo: result.capitulo,
+            secao: result.secao,
+          };
+        } else {
+          // Document result
+          return {
+            resultType: 'document' as const,
+            id: result.id,
+            title: result.title,
+            description: result.description,
+            type: 'document',
+            category: result.category,
+            url: result.url,
+            uploadedAt: result.uploadedAt,
+            tags: result.tags?.join(', '),
+            courseIds: result.courseIds,
+          };
+        }
+      });
 
       // Build relevance scores map
       const relevanceScores: Record<string, number> = {};
-      data.results.forEach((result: ApiResult) => {
-        relevanceScores[result.documentId] = result.relevance;
+      data.results.forEach((result: any) => {
+        relevanceScores[result.id] = result.relevance;
       });
 
-      // Get AI response (use first result's geminiResponse or create summary)
+      // Get AI response summary
+      const breakdown = data.breakdown;
       const aiResponse = data.results.length > 0
-        ? `Encontrei ${data.results.length} documento(s) relevante(s) para sua consulta. ${data.results[0].geminiResponse}`
-        : 'Não encontrei documentos específicos para sua consulta.';
+        ? `Encontrei ${data.results.length} resultado(s): ${breakdown.documents} documento(s) e ${breakdown.articles} artigo(s) da Lei 14.133/2021.`
+        : 'Não encontrei resultados para sua consulta.';
 
       setAISearch(value, aiResults, aiResponse, relevanceScores);
     } catch (error) {
-      console.error('AI search error:', error);
-      setAiError(error instanceof Error ? error.message : 'Erro ao buscar com IA');
+      console.error('Unified search error:', error);
+      setAiError(error instanceof Error ? error.message : 'Erro ao buscar');
       setLoading(false);
     }
   };
