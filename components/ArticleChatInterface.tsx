@@ -1,9 +1,10 @@
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
-import { Sparkles, Loader2, MessageSquare, FileText, RefreshCw, AlertCircle, ThumbsUp, ThumbsDown, History, Lightbulb } from 'lucide-react';
+import { Sparkles, Loader2, MessageSquare, FileText, RefreshCw, AlertCircle, ThumbsUp, ThumbsDown, History, Lightbulb, FileDown } from 'lucide-react';
 import ArticleChatHistory from './ArticleChatHistory';
 import { getSuggestedQuestions } from '@/data/lei-14133-suggested-questions';
+import { exportCurrentConversation } from '@/lib/pdf-generator';
 
 interface Source {
   id: string;
@@ -204,6 +205,18 @@ export default function ArticleChatInterface({
     }
   };
 
+  const handleExportPDF = () => {
+    if (!question.trim() || !answer) return;
+
+    exportCurrentConversation(
+      articleNumber,
+      question,
+      answer,
+      articleTitle || `Artigo ${articleNumber} da Lei 14.133/2021`,
+      undefined // userName - será 'Usuário' por padrão
+    );
+  };
+
   return (
     <div className="bg-gradient-to-br from-purple-50 to-blue-50 rounded-2xl shadow-lg border-2 border-purple-200 overflow-hidden">
       {/* Header */}
@@ -386,6 +399,18 @@ export default function ArticleChatInterface({
                     ✓ Obrigado pelo feedback!
                   </span>
                 )}
+              </div>
+
+              {/* Export PDF Button */}
+              <div className="flex justify-end mt-4">
+                <button
+                  onClick={handleExportPDF}
+                  className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-purple-600 to-blue-600 text-white rounded-lg hover:from-purple-700 hover:to-blue-700 transition-all shadow-md hover:shadow-lg text-sm font-medium"
+                  aria-label="Exportar conversa como PDF"
+                >
+                  <FileDown className="w-4 h-4" />
+                  Exportar Conversa
+                </button>
               </div>
             </div>
 

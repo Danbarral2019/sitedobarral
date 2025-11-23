@@ -38,7 +38,7 @@
     "html2canvas": "^1.4.1",
     "jose": "^6.1.0",
     "jsonwebtoken": "^9.0.2",
-    "jspdf": "^3.0.3",
+    "jspdf": "^3.0.4",
     "lucide-react": "^0.542.0",
     "mammoth": "^1.11.0",
     "next": "15.5.2",

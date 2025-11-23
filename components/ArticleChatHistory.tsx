@@ -1,7 +1,8 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { History, X, MessageSquare, Calendar, ThumbsUp, ThumbsDown, Loader2 } from 'lucide-react';
+import { History, X, MessageSquare, Calendar, ThumbsUp, ThumbsDown, Loader2, FileDown } from 'lucide-react';
+import { generateConversationPDF } from '@/lib/pdf-generator';
 
 interface HistoryMessage {
   id: string;
@@ -125,6 +126,23 @@ export default function ArticleChatHistory({
     setExpandedMessageId(expandedMessageId === messageId ? null : messageId);
   };
 
+  const handleExportPDF = () => {
+    if (messages.length === 0) return;
+
+    generateConversationPDF({
+      articleNumber,
+      articleTitle: `Artigo ${articleNumber} da Lei 14.133/2021`,
+      messages: messages.map((msg) => ({
+        question: msg.question,
+        answer: msg.answer,
+        createdAt: msg.createdAt,
+        wasHelpful: msg.wasHelpful,
+      })),
+      userName: messages[0]?.user?.name || 'Usuário',
+      userEmail: messages[0]?.user?.email,
+    });
+  };
+
   if (!isOpen) return null;
 
   const groupedMessages = groupMessagesByDate(messages);
@@ -146,13 +164,25 @@ export default function ArticleChatHistory({
                 </p>
               </div>
             </div>
-            <button
-              onClick={onClose}
-              className="p-2 hover:bg-white/20 rounded-lg transition-colors"
-              aria-label="Fechar histórico"
-            >
-              <X className="w-6 h-6" />
-            </button>
+            <div className="flex items-center gap-2">
+              {messages.length > 0 && (
+                <button
+                  onClick={handleExportPDF}
+                  className="flex items-center gap-2 px-4 py-2 bg-white/20 hover:bg-white/30 backdrop-blur-sm rounded-lg transition-colors text-sm font-medium"
+                  aria-label="Exportar PDF"
+                >
+                  <FileDown className="w-4 h-4" />
+                  <span className="hidden sm:inline">Exportar PDF</span>
+                </button>
+              )}
+              <button
+                onClick={onClose}
+                className="p-2 hover:bg-white/20 rounded-lg transition-colors"
+                aria-label="Fechar histórico"
+              >
+                <X className="w-6 h-6" />
+              </button>
+            </div>
           </div>
         </div>
 
