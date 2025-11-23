@@ -38,13 +38,18 @@ export async function POST(
     // Buscar documentos relevantes para contexto futuro da IA
     const relevantDocs = await prisma.document.findMany({
       where: {
-        leiArticles: {
-          contains: articleNumber,
-        },
-        // Priorizar documentos públicos ou com summary
-        OR: [
-          { isPublic: true },
-          { summary: { not: null } },
+        AND: [
+          {
+            leiArticles: {
+              contains: articleNumber,
+            },
+          },
+          {
+            OR: [
+              { isPublic: true },
+              { summary: { not: null } },
+            ],
+          },
         ],
       },
       select: {
