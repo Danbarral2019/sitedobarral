@@ -61,7 +61,7 @@ export function generateConversationPDF(options: PDFExportOptions): void {
   };
 
   // === HEADER ===
-  doc.setFillColor(128, 90, 213); // Purple-600
+  doc.setFillColor(37, 99, 235); // Blue-600
   doc.rect(0, 0, pageWidth, 40, 'F');
 
   doc.setTextColor(255, 255, 255);
@@ -83,10 +83,10 @@ export function generateConversationPDF(options: PDFExportOptions): void {
   yPosition = 50;
 
   // === INFO BOX ===
-  doc.setFillColor(245, 243, 255); // Purple-50
+  doc.setFillColor(239, 246, 255); // Blue-50
   doc.rect(margin, yPosition, contentWidth, 35, 'F');
 
-  doc.setDrawColor(128, 90, 213);
+  doc.setDrawColor(37, 99, 235); // Blue-600
   doc.setLineWidth(0.5);
   doc.rect(margin, yPosition, contentWidth, 35);
 
@@ -133,13 +133,6 @@ export function generateConversationPDF(options: PDFExportOptions): void {
   yPosition += 15;
 
   // === CONVERSAS ===
-  doc.setTextColor(0, 0, 0);
-  doc.setFontSize(16);
-  doc.setFont('helvetica', 'bold');
-  checkNewPage(10);
-  doc.text('Conversas', margin, yPosition);
-  yPosition += 10;
-
   messages.forEach((message, index) => {
     const messageHeight = 60; // Espaço estimado por mensagem
     checkNewPage(messageHeight);
@@ -184,7 +177,7 @@ export function generateConversationPDF(options: PDFExportOptions): void {
       checkNewPage(30);
 
       doc.setFillColor(252, 252, 253); // White/Gray-50
-      doc.setDrawColor(196, 181, 253); // Purple-300
+      doc.setDrawColor(147, 197, 253); // Blue-300
       doc.setLineWidth(0.4);
 
       const answerY = yPosition;
@@ -195,7 +188,7 @@ export function generateConversationPDF(options: PDFExportOptions): void {
 
       doc.setFontSize(10);
       doc.setFont('helvetica', 'bold');
-      doc.setTextColor(109, 40, 217); // Purple-700
+      doc.setTextColor(29, 78, 216); // Blue-700
       doc.text('Resposta da IA:', margin + 3, answerY + 5);
 
       // Badge de feedback
@@ -252,7 +245,7 @@ export function generateConversationPDF(options: PDFExportOptions): void {
   yPosition += 8;
   doc.setFont('helvetica', 'normal');
   doc.setFontSize(10);
-  doc.setTextColor(128, 90, 213); // Purple-600
+  doc.setTextColor(37, 99, 235); // Blue-600
   doc.text('www.profdanielbarral.com', margin, yPosition);
 
   // Adiciona marca d'água na última página
