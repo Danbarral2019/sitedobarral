@@ -26,6 +26,7 @@ import { useAuth } from '@/hooks/use-auth';
 import { useFavorites } from '@/hooks/use-favorites';
 import { safeParseArray } from '@/lib/utils';
 import Link from 'next/link';
+import ArticleChatInterface from '@/components/ArticleChatInterface';
 
 interface LeiArticle {
   id: string;
@@ -788,6 +789,12 @@ function LeiComentadaContent() {
                     <p className="text-gray-800 whitespace-pre-wrap">{selectedArticle.ementa}</p>
                   </div>
                 </div>
+
+                {/* Chat com IA */}
+                <ArticleChatInterface
+                  articleNumber={selectedArticle.numero}
+                  articleTitle={selectedArticle.titulo || undefined}
+                />
 
                 {/* Documentos Agrupados por Categoria */}
                 {selectedArticle.documentCount > 0 ? (

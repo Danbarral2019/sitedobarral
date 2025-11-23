@@ -7,7 +7,6 @@ import { Loader2, FileText, BookOpen, ArrowLeft, BarChart3, TrendingUp } from 'l
 import { LEI_14133_ARTIGOS as LEI_14133_ARTIGOS_FALLBACK, LeiArticle } from '@/data/lei-14133-artigos';
 import { ArticleRelationshipGraph } from '@/components/ArticleRelationshipGraph';
 import { ArticleBadges } from '@/components/ArticleBadges';
-import ArticleChatInterface from '@/components/ArticleChatInterface';
 
 interface Document {
   id: string;
@@ -203,12 +202,6 @@ export default function ArtigoPage() {
           <div className="grid lg:grid-cols-3 gap-8">
             {/* Coluna Principal */}
             <div className="lg:col-span-2 space-y-8">
-              {/* Chat com IA */}
-              <ArticleChatInterface
-                articleNumber={numero}
-                articleTitle={article.titulo}
-              />
-
               {/* Artigos Relacionados */}
               <ArticleRelationshipGraph
                 articleNumber={numero}
