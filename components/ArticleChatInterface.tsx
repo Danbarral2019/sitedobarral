@@ -1,13 +1,23 @@
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
-import { Sparkles, Loader2, MessageSquare, FileText, RefreshCw, AlertCircle, ThumbsUp, ThumbsDown } from 'lucide-react';
+import { Sparkles, Loader2, MessageSquare, FileText, RefreshCw, AlertCircle, ThumbsUp, ThumbsDown, History } from 'lucide-react';
+import ArticleChatHistory from './ArticleChatHistory';
 
 interface Source {
   id: string;
   title: string;
   category: string;
   excerpt: string;
+}
+
+interface HistoryMessage {
+  id: string;
+  question: string;
+  answer: string | null;
+  wasHelpful: boolean | null;
+  createdAt: string;
+  conversationId: string;
 }
 
 interface ArticleChatInterfaceProps {
@@ -28,6 +38,7 @@ export default function ArticleChatInterface({
   const [questionId, setQuestionId] = useState<string | null>(null);
   const [feedback, setFeedback] = useState<boolean | null>(null);
   const [feedbackSubmitted, setFeedbackSubmitted] = useState(false);
+  const [isHistoryOpen, setIsHistoryOpen] = useState(false);
 
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const answerRef = useRef<HTMLDivElement>(null);
@@ -171,20 +182,40 @@ export default function ArticleChatInterface({
     }
   };
 
+  const handleRestoreMessage = (message: HistoryMessage) => {
+    setQuestion(message.question);
+    setAnswer(message.answer);
+    setSources([]); // Sources não estão no histórico por enquanto
+    setQuestionId(message.id);
+    setFeedback(message.wasHelpful);
+    setFeedbackSubmitted(message.wasHelpful !== null);
+    setError(null);
+  };
+
   return (
     <div className="bg-gradient-to-br from-purple-50 to-blue-50 rounded-2xl shadow-lg border-2 border-purple-200 overflow-hidden">
       {/* Header */}
       <div className="bg-gradient-to-r from-purple-600 to-blue-600 text-white p-6">
-        <div className="flex items-center gap-3 mb-2">
-          <div className="p-2 bg-white/20 backdrop-blur-sm rounded-lg">
-            <Sparkles className="w-6 h-6" />
+        <div className="flex items-center justify-between gap-3 mb-2">
+          <div className="flex items-center gap-3">
+            <div className="p-2 bg-white/20 backdrop-blur-sm rounded-lg">
+              <Sparkles className="w-6 h-6" />
+            </div>
+            <div>
+              <h3 className="text-2xl font-bold">Pergunte à IA</h3>
+              <p className="text-white/90 text-sm">
+                {articleTitle ? articleTitle : `Artigo ${articleNumber} da Lei 14.133/2021`}
+              </p>
+            </div>
           </div>
-          <div>
-            <h3 className="text-2xl font-bold">Pergunte à IA</h3>
-            <p className="text-white/90 text-sm">
-              {articleTitle ? articleTitle : `Artigo ${articleNumber} da Lei 14.133/2021`}
-            </p>
-          </div>
+          <button
+            onClick={() => setIsHistoryOpen(true)}
+            className="flex items-center gap-2 px-4 py-2 bg-white/20 hover:bg-white/30 backdrop-blur-sm rounded-lg transition-colors text-sm font-medium"
+            aria-label="Ver histórico de conversas"
+          >
+            <History className="w-4 h-4" />
+            <span className="hidden sm:inline">Histórico</span>
+          </button>
         </div>
       </div>
 
@@ -383,6 +414,15 @@ export default function ArticleChatInterface({
           </div>
         )}
       </div>
+
+      {/* History Modal */}
+      <ArticleChatHistory
+        articleNumber={articleNumber}
+        conversationId={conversationId}
+        isOpen={isHistoryOpen}
+        onClose={() => setIsHistoryOpen(false)}
+        onRestoreMessage={handleRestoreMessage}
+      />
     </div>
   );
 }
