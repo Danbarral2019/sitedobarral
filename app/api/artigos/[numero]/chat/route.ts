@@ -9,13 +9,20 @@ interface ChatRequest {
   conversationId?: string;
 }
 
-// POST /api/artigos/[numero]/chat - IA Assistente (Placeholder para futura ativação)
+type RouteContext = {
+  params: {
+    numero: string;
+  };
+};
+
+// POST /api/artigos/[numero]/chat - IA Assistente
 export async function POST(
   request: NextRequest,
-  { params }: { params: Promise<{ numero: string }> }
+  { params }: RouteContext
 ) {
   try {
-    const { numero: articleNumber } = await params;
+    const articleNumber = params.numero;
+    console.log(`[Chat API] Iniciando processamento para artigo: ${articleNumber}`);
     const body = await request.json() as ChatRequest;
 
     if (!articleNumber) {
@@ -211,10 +218,10 @@ Responda agora:`;
 // GET /api/artigos/[numero]/chat?conversationId=XXX - Obter histórico de conversa
 export async function GET(
   request: NextRequest,
-  { params }: { params: Promise<{ numero: string }> }
+  { params }: RouteContext
 ) {
   try {
-    const { numero: articleNumber } = await params;
+    const articleNumber = params.numero;
     const searchParams = request.nextUrl.searchParams;
     const conversationId = searchParams.get('conversationId');
 
