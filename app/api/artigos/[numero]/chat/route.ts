@@ -211,9 +211,16 @@ Responda agora:`;
     });
 
   } catch (error) {
-    console.error('Erro no chat:', error);
+    console.error('[Chat API] ERRO DETALHADO:', error);
+    console.error('[Chat API] Error name:', error instanceof Error ? error.name : 'Unknown');
+    console.error('[Chat API] Error message:', error instanceof Error ? error.message : String(error));
+    console.error('[Chat API] Error stack:', error instanceof Error ? error.stack : 'No stack');
     return NextResponse.json(
-      { error: 'Erro ao processar pergunta' },
+      {
+        error: 'Erro ao processar pergunta',
+        details: error instanceof Error ? error.message : String(error),
+        name: error instanceof Error ? error.name : 'Unknown'
+      },
       { status: 500 }
     );
   }
@@ -274,9 +281,13 @@ export async function GET(
     });
 
   } catch (error) {
-    console.error('Erro ao buscar histórico:', error);
+    console.error('[Chat API GET] ERRO DETALHADO:', error);
+    console.error('[Chat API GET] Error message:', error instanceof Error ? error.message : String(error));
     return NextResponse.json(
-      { error: 'Erro ao buscar histórico de conversa' },
+      {
+        error: 'Erro ao buscar histórico de conversa',
+        details: error instanceof Error ? error.message : String(error)
+      },
       { status: 500 }
     );
   }
