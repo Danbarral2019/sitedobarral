@@ -10,7 +10,9 @@ interface ChatRequest {
 }
 
 type RouteContext = {
-  params: {
+  params: Promise<{
+    numero: string;
+  }> | {
     numero: string;
   };
 };
@@ -18,10 +20,12 @@ type RouteContext = {
 // POST /api/artigos/[numero]/chat - IA Assistente
 export async function POST(
   request: NextRequest,
-  { params }: RouteContext
+  context: RouteContext
 ) {
   try {
-    const articleNumber = params.numero;
+    // Handle both Promise and non-Promise params (Next.js 15 inconsistency)
+    const resolvedParams = await Promise.resolve(context.params);
+    const articleNumber = resolvedParams.numero;
     console.log(`[Chat API] Iniciando processamento para artigo: ${articleNumber}`);
     const body = await request.json() as ChatRequest;
 
@@ -218,10 +222,12 @@ Responda agora:`;
 // GET /api/artigos/[numero]/chat?conversationId=XXX - Obter histórico de conversa
 export async function GET(
   request: NextRequest,
-  { params }: RouteContext
+  context: RouteContext
 ) {
   try {
-    const articleNumber = params.numero;
+    // Handle both Promise and non-Promise params (Next.js 15 inconsistency)
+    const resolvedParams = await Promise.resolve(context.params);
+    const articleNumber = resolvedParams.numero;
     const searchParams = request.nextUrl.searchParams;
     const conversationId = searchParams.get('conversationId');
 
