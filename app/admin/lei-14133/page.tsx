@@ -9,7 +9,8 @@ import {
   Search,
   FileText,
   ChevronRight,
-  Loader2
+  Loader2,
+  BarChart3
 } from 'lucide-react';
 import { LEI_14133_ARTIGOS as LEI_14133_ARTIGOS_FALLBACK, LeiArticle } from '@/data/lei-14133-artigos';
 
@@ -102,10 +103,21 @@ export default function AdminLei14133Page() {
       <div className="max-w-7xl mx-auto">
         {/* Header */}
         <div className="mb-8">
-          <h1 className="text-3xl font-bold mb-2">Lei 14.133/2021 - Editor de Artigos</h1>
-          <p className="text-gray-600">
-            Gerencie e edite os 195 artigos da Nova Lei de Licitações (193 originais + Art. 184-A + Art. 194)
-          </p>
+          <div className="flex items-start justify-between gap-4 mb-4">
+            <div>
+              <h1 className="text-3xl font-bold mb-2">Lei 14.133/2021 - Editor de Artigos</h1>
+              <p className="text-gray-600">
+                Gerencie e edite os 195 artigos da Nova Lei de Licitações (193 originais + Art. 184-A + Art. 194)
+              </p>
+            </div>
+            <Link
+              href="/admin/lei-14133/analytics"
+              className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-purple-600 to-blue-600 text-white rounded-lg hover:from-purple-700 hover:to-blue-700 transition-all shadow-md hover:shadow-lg font-semibold whitespace-nowrap"
+            >
+              <BarChart3 className="w-5 h-5" />
+              Ver Analytics
+            </Link>
+          </div>
         </div>
 
         {/* Estatísticas */}
