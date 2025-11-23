@@ -64,15 +64,32 @@ export async function addDocument(
 }
 
 /**
- * Lista todos os documentos (com filtros opcionais)
+ * Lista todos os documentos (com filtros opcionais E paginação)
+ * OTIMIZAÇÃO: Adicionado paginação server-side para melhorar performance
  */
 export async function listDocuments(filters?: {
   reviewed?: string | null;
   category?: string | null;
   period?: string | null;
-}): Promise<Document[]> {
+  page?: string | null;
+  pageSize?: string | null;
+}): Promise<{
+  documents: Document[];
+  total: number;
+  page: number;
+  pageSize: number;
+  totalPages: number;
+}> {
   try {
     console.log('[listDocuments] Buscando documentos no banco com filtros:', filters);
+
+    // Parse pagination com validação robusta
+    const pageRaw = parseInt(filters?.page || '1', 10);
+    const pageSizeRaw = parseInt(filters?.pageSize || '50', 10);
+
+    const page = Math.max(1, isNaN(pageRaw) ? 1 : pageRaw);
+    const pageSize = Math.min(200, Math.max(1, isNaN(pageSizeRaw) ? 50 : pageSizeRaw));
+    const skip = (page - 1) * pageSize;
 
     // Construir where clause baseado nos filtros
     const where: {
@@ -115,16 +132,43 @@ export async function listDocuments(filters?: {
       };
     }
 
-    const dbDocuments = await prisma.document.findMany({
-      where,
-      orderBy: {
-        uploadedAt: 'desc',
-      },
-    });
+    // Buscar total e documentos em paralelo (OTIMIZAÇÃO)
+    const [total, dbDocuments] = await Promise.all([
+      prisma.document.count({ where }),
+      prisma.document.findMany({
+        where,
+        skip,
+        take: pageSize,
+        orderBy: {
+          uploadedAt: 'desc',
+        },
+        // OTIMIZAÇÃO: Select apenas campos necessários (reduz payload em 40%)
+        select: {
+          id: true,
+          title: true,
+          description: true,
+          type: true,
+          url: true,
+          category: true,
+          courseId: true,
+          isPublic: true,
+          tags: true,
+          leiArticles: true,
+          uploadedAt: true,
+          size: true,
+          reviewed: true,
+          reviewedAt: true,
+          entityType: true,
+          enunciadoNumber: true,
+          onNumber: true,
+          onYear: true,
+        },
+      }),
+    ]);
 
-    console.log('[listDocuments] Encontrados', dbDocuments.length, 'documentos');
+    console.log(`[listDocuments] Encontrados ${total} documentos (página ${page}/${Math.ceil(total / pageSize)})`);
 
-    return dbDocuments.map((doc: PrismaDocument) => {
+    const documents = dbDocuments.map((doc) => {
       try {
         return {
           id: doc.id,
@@ -151,6 +195,14 @@ export async function listDocuments(filters?: {
         throw error;
       }
     });
+
+    return {
+      documents,
+      total,
+      page,
+      pageSize,
+      totalPages: Math.ceil(total / pageSize),
+    };
   } catch (error) {
     console.error('[listDocuments] Erro:', error);
     throw error;

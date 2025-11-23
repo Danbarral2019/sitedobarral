@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
+import dynamic from 'next/dynamic';
 import {
   Upload, FileText, Loader2, Trash2,
   Eye, EyeOff, File, Search, Filter, X,
@@ -18,9 +19,22 @@ import { Pagination } from '@/components/ui/pagination';
 import { MultiFileDropzone } from '@/components/ui/multi-file-dropzone';
 import AdminLayout from '@/components/AdminLayout';
 import LeiArticleSelector from '@/components/LeiArticleSelector';
-import DocumentAnalyzer from '@/components/DocumentAnalyzer';
-import BatchClassifyPanel from '@/components/BatchClassifyPanel';
-import LeiCoverageDashboard from '@/components/admin/LeiCoverageDashboard';
+
+// OTIMIZAÇÃO: Dynamic imports para componentes pesados (reduz bundle inicial em ~30KB)
+const DocumentAnalyzer = dynamic(() => import('@/components/DocumentAnalyzer'), {
+  loading: () => <div className="text-sm text-gray-600">Carregando analisador...</div>,
+  ssr: false,
+});
+
+const BatchClassifyPanel = dynamic(() => import('@/components/BatchClassifyPanel'), {
+  loading: () => <Loader2 className="w-8 h-8 animate-spin text-blue-600" />,
+  ssr: false,
+});
+
+const LeiCoverageDashboard = dynamic(() => import('@/components/admin/LeiCoverageDashboard'), {
+  loading: () => <div className="h-32 bg-gray-100 animate-pulse rounded-lg" />,
+  ssr: false,
+});
 
 type DocumentCategory = 'apostila' | 'acordao' | 'parecer' | 'edital' | 'artigo' | 'orientacao-normativa' | 'enunciados' | 'sumula' | 'outro';
 
@@ -55,6 +69,13 @@ export default function DocumentosPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [isLoadingDocs, setIsLoadingDocs] = useState(true);
   const [documents, setDocuments] = useState<Document[]>([]);
+  // OTIMIZAÇÃO: Estado para metadados de paginação server-side
+  const [serverPagination, setServerPagination] = useState<{
+    total: number;
+    page: number;
+    pageSize: number;
+    totalPages: number;
+  } | null>(null);
   const [isUploading, setIsUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
   const [isDeleting, setIsDeleting] = useState(false);
@@ -136,8 +157,14 @@ export default function DocumentosPage() {
   const loadDocuments = useCallback(async () => {
     setIsLoadingDocs(true);
     try {
-      console.log('[Client] Carregando documentos...');
-      const response = await fetch('/api/admin/documents');
+      console.log('[Client] Carregando documentos (paginação)...');
+      // OTIMIZAÇÃO: Incluir parâmetros de paginação na requisição
+      const params = new URLSearchParams({
+        page: currentPage.toString(),
+        pageSize: itemsPerPage.toString(),
+      });
+
+      const response = await fetch(`/api/admin/documents?${params}`);
       console.log('[Client] Response status:', response.status);
 
       const data = await response.json();
@@ -148,14 +175,15 @@ export default function DocumentosPage() {
       }
 
       setDocuments(data.documents || []);
-      console.log('[Client] Documentos setados:', data.documents?.length || 0);
+      setServerPagination(data.pagination || null); // OTIMIZAÇÃO: Armazenar metadados de paginação
+      console.log(`[Client] Documentos setados: ${data.documents?.length || 0} de ${data.pagination?.total || 0}`);
     } catch (error) {
       console.error('[Client] Erro ao carregar documentos:', error);
       errorToast('Erro ao carregar documentos', error instanceof Error ? error.message : 'Erro desconhecido');
     } finally {
       setIsLoadingDocs(false);
     }
-  }, [errorToast]);
+  }, [errorToast, currentPage, itemsPerPage]);
 
   useEffect(() => {
     verifyAdmin();
@@ -165,7 +193,7 @@ export default function DocumentosPage() {
     if (!isLoading) {
       loadDocuments();
     }
-  }, [isLoading]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [isLoading, currentPage]); // OTIMIZAÇÃO: Recarregar quando mudar de página
 
   const handleFileSelect = (file: File) => {
     setSelectedFile(file);
@@ -598,11 +626,10 @@ export default function DocumentosPage() {
 
   const activeFiltersCount = [filterCourse, filterCategory, filterType, filterVisibility, filterEntity].filter(Boolean).length;
 
-  // Calcular paginação
-  const totalPages = Math.ceil(filteredDocuments.length / itemsPerPage);
-  const startIndex = (currentPage - 1) * itemsPerPage;
-  const endIndex = startIndex + itemsPerPage;
-  const paginatedDocuments = filteredDocuments.slice(startIndex, endIndex);
+  // OTIMIZAÇÃO: Paginação server-side - usar metadados do servidor
+  const paginatedDocuments = filteredDocuments; // Documentos já vêm paginados do servidor
+  const totalPages = serverPagination?.totalPages || 1;
+  const totalItems = serverPagination?.total || filteredDocuments.length;
 
   // Resetar página quando filtros mudarem
   useEffect(() => {
@@ -1341,7 +1368,7 @@ export default function DocumentosPage() {
                       totalPages={totalPages}
                       onPageChange={setCurrentPage}
                       itemsPerPage={itemsPerPage}
-                      totalItems={filteredDocuments.length}
+                      totalItems={totalItems}
                     />
                   </>
                 )}

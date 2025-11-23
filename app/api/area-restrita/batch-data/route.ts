@@ -99,11 +99,10 @@ export async function GET(request: NextRequest) {
           isCommon: true, // Incluir campo isCommon na resposta
           tags: true,
           leiArticles: true,
-          size: true,
+          // OTIMIZAÇÃO: Removidos size e updatedAt (não usados na lista inicial)
           onNumber: true, // Número da ON (para ordenação)
           onYear: true,   // Ano da ON (para ordenação)
           uploadedAt: true,
-          updatedAt: true,
         },
       });
       console.log('[Batch-Data] Documentos encontrados:', documents.length);

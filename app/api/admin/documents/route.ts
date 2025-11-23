@@ -2,21 +2,33 @@ import { NextRequest, NextResponse } from 'next/server';
 import { withAdminAuth } from '@/lib/api-middleware';
 import { listDocuments, deleteDocument } from '@/lib/documents';
 
-// GET - Lista todos os documentos (com filtros opcionais)
+// GET - Lista todos os documentos (com filtros opcionais E paginação)
+// OTIMIZAÇÃO: Adicionado suporte a paginação server-side
 export const GET = withAdminAuth(async (request: NextRequest) => {
   try {
     console.log('[API] Iniciando listagem de documentos...');
 
-    // Extrair filtros da query string
+    // Extrair filtros E paginação da query string
     const { searchParams } = new URL(request.url);
     const reviewed = searchParams.get('reviewed');
     const category = searchParams.get('category');
     const period = searchParams.get('period');
+    const page = searchParams.get('page') || '1';
+    const pageSize = searchParams.get('pageSize') || '50';
 
-    const documents = await listDocuments({ reviewed, category, period });
-    console.log('[API] Documentos carregados:', documents.length);
+    const result = await listDocuments({ reviewed, category, period, page, pageSize });
+    console.log(`[API] Documentos carregados: ${result.documents.length} de ${result.total} (página ${result.page}/${result.totalPages})`);
 
-    return NextResponse.json({ documents });
+    // Retornar documentos + metadados de paginação
+    return NextResponse.json({
+      documents: result.documents,
+      pagination: {
+        total: result.total,
+        page: result.page,
+        pageSize: result.pageSize,
+        totalPages: result.totalPages,
+      }
+    });
   } catch (error) {
     console.error('[API] Erro ao listar documentos:', error);
     console.error('[API] Stack:', error instanceof Error ? error.stack : 'N/A');
