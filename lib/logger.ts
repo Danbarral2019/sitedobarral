@@ -41,16 +41,17 @@ export const logger = pino({
   },
 
   // ✅ Formatação legível em desenvolvimento, JSON em produção
-  transport: process.env.NODE_ENV === 'development'
-    ? {
-        target: 'pino-pretty',
-        options: {
-          colorize: true,
-          translateTime: 'SYS:HH:MM:ss',
-          ignore: 'pid,hostname',
-        },
-      }
-    : undefined,
+  // TEMP: Disabled pino-pretty transport due to worker thread crashes in Next.js dev
+  // transport: process.env.NODE_ENV === 'development'
+  //   ? {
+  //       target: 'pino-pretty',
+  //       options: {
+  //         colorize: true,
+  //         translateTime: 'SYS:HH:MM:ss',
+  //         ignore: 'pid,hostname',
+  //       },
+  //     }
+  //   : undefined,
 
   // ✅ Adicionar timestamp em produção
   timestamp: pino.stdTimeFunctions.isoTime,

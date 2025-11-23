@@ -1,0 +1,839 @@
+{
+  "timestamp": "2025-11-23T13:35:11.099Z",
+  "executeMode": true,
+  "limit": null,
+  "categoryFilter": "orientacao-normativa",
+  "stats": {
+    "totalDocuments": 63,
+    "successfullyIndexed": 61,
+    "failed": 2,
+    "successRate": "96.8%",
+    "totalArticlesFound": 277,
+    "avgArticlesPerDoc": "4.40",
+    "avgConfidence": "56.6%",
+    "topArticles": [
+      {
+        "article": "92",
+        "count": 31
+      },
+      {
+        "article": "6",
+        "count": 27
+      },
+      {
+        "article": "115",
+        "count": 18
+      },
+      {
+        "article": "117",
+        "count": 11
+      },
+      {
+        "article": "75",
+        "count": 10
+      },
+      {
+        "article": "72",
+        "count": 9
+      },
+      {
+        "article": "141",
+        "count": 9
+      },
+      {
+        "article": "137",
+        "count": 9
+      },
+      {
+        "article": "147",
+        "count": 8
+      },
+      {
+        "article": "142",
+        "count": 8
+      }
+    ]
+  },
+  "results": [
+    {
+      "documentId": "845a2f3e-752e-4aff-8804-a061a767d6ac",
+      "articlesCount": 5,
+      "articles": [
+        "72",
+        "6",
+        "17",
+        "23",
+        "155"
+      ],
+      "confidence": 60,
+      "reasoning": "Documento relacionado à inexigibilidade de licitação e à razoabilidade dos preços nas contratações públicas, temas abordados em diversos artigos da Lei 14.133/2021."
+    },
+    {
+      "documentId": "077ddcde-9a51-4207-8caa-6c81c8709ffb",
+      "articlesCount": 2,
+      "articles": [
+        "74",
+        "75"
+      ],
+      "confidence": 60,
+      "reasoning": "Documento relacionado à inexigibilidade e dispensa de licitação por exclusividade."
+    },
+    {
+      "documentId": "f75a2ae5-135d-4a56-9acb-4b934019e929",
+      "articlesCount": 4,
+      "articles": [
+        "74",
+        "6",
+        "72",
+        "191"
+      ],
+      "confidence": 50,
+      "reasoning": "Documento relacionado à contratação direta, com possíveis implicações nos princípios e planejamento da contratação."
+    },
+    {
+      "documentId": "f0cd3dbc-b569-447c-872e-c8b641560e3d",
+      "articlesCount": 4,
+      "articles": [
+        "75",
+        "6",
+        "141",
+        "1"
+      ],
+      "confidence": 70,
+      "reasoning": "Documento relacionado à dispensa de licitação para empresas públicas e sociedades de economia mista, com menção explícita ao art. 75 da Lei 14.133/2021."
+    },
+    {
+      "documentId": "2ddf27d4-32dd-4e69-b4ed-4d32e8f5fed4",
+      "articlesCount": 3,
+      "articles": [
+        "72",
+        "75",
+        "90"
+      ],
+      "confidence": 43,
+      "reasoning": "Documento relacionado à dispensa de licitação em casos de licitação fracassada ou deserta, com possíveis implicações nos artigos 72 e 75 da Lei 14.133/2021."
+    },
+    {
+      "documentId": "f4495142-1194-49a0-becb-06314e0c64ba",
+      "articlesCount": 4,
+      "articles": [
+        "75",
+        "147",
+        "148",
+        "155"
+      ],
+      "confidence": 70,
+      "reasoning": "Documento relacionado à contratação direta por emergência e responsabilização por má gestão, com menção explícita ao art. 75."
+    },
+    {
+      "documentId": "bf3fe9d4-3db3-4f93-8939-119c0b200399",
+      "articlesCount": 3,
+      "articles": [
+        "6",
+        "24",
+        "188"
+      ],
+      "confidence": 55,
+      "reasoning": "Documento relacionado à definição do valor da contratação para fins de licitação e dispensa, e licitações exclusivas para ME/EPP."
+    },
+    {
+      "documentId": "6adbec88-561a-41d9-bff3-2aa4e9b1074b",
+      "articlesCount": 5,
+      "articles": [
+        "96",
+        "147",
+        "115",
+        "6",
+        "140"
+      ],
+      "confidence": 60,
+      "reasoning": "Documento relacionado à regularidade fiscal e trabalhista em contratações diretas, fiscalização e pagamentos, com possível relação com definições e alterações contratuais."
+    },
+    {
+      "documentId": "8238008b-f8bf-4334-879e-9b04ef0ded33",
+      "articlesCount": 5,
+      "articles": [
+        "6",
+        "72",
+        "115",
+        "117",
+        "141"
+      ],
+      "confidence": 60,
+      "reasoning": "Documento relacionado ao conceito de serviço e sua aplicação na Lei 14.133/2021, com possíveis implicações na execução e alteração contratual."
+    },
+    {
+      "documentId": "e45b374f-05a9-4d64-a6d5-5ba4e3d085f5",
+      "articlesCount": 6,
+      "articles": [
+        "46",
+        "47",
+        "48",
+        "49",
+        "4",
+        "6"
+      ],
+      "confidence": 65,
+      "reasoning": "Documento relacionado ao tratamento favorecido a microempresas e empresas de pequeno porte em licitações, conforme previsto na Lei 14.133/2021."
+    },
+    {
+      "documentId": "fb692f07-7d8c-4076-a118-2256db4cb957",
+      "articlesCount": 4,
+      "articles": [
+        "142",
+        "92",
+        "115",
+        "6"
+      ],
+      "confidence": 60,
+      "reasoning": "Documento relacionado a contratos de locação e sua duração, com possíveis implicações nos artigos da Lei 14.133/2021 que tratam de alocação de riscos, execução contratual e critérios de julgamento."
+    },
+    {
+      "documentId": "c456890d-46ce-4c0c-836c-6e9fe3d7ecb4",
+      "articlesCount": 5,
+      "articles": [
+        "40",
+        "6",
+        "41",
+        "92",
+        "115"
+      ],
+      "confidence": 60,
+      "reasoning": "Documento relacionado à definição de critérios de aceitabilidade de preços em licitações e contratos de obras e serviços de engenharia, conforme a Lei 14.133/2021."
+    },
+    {
+      "documentId": "7c9b43d2-04d2-4262-a2b0-212f1ee51b83",
+      "articlesCount": 4,
+      "articles": [
+        "147",
+        "137",
+        "103",
+        "144"
+      ],
+      "confidence": 60,
+      "reasoning": "Documento relacionado à indenização por despesas sem cobertura contratual e apuração de responsabilidade, temas abordados em diversos artigos da Lei 14.133/2021."
+    },
+    {
+      "documentId": "19af474c-e098-4ce0-ae1b-2bfaa34e5460",
+      "articlesCount": 5,
+      "articles": [
+        "111",
+        "92",
+        "107",
+        "117",
+        "137"
+      ],
+      "confidence": 60,
+      "reasoning": "Documento relacionado à prorrogação e extinção de contratos administrativos, com artigos da Lei 14.133/2021 relacionados à alteração, execução, extinção, fiscalização e irregularidades contratuais."
+    },
+    {
+      "documentId": "9add63a3-6d13-4955-aa4c-69715cc1f194",
+      "articlesCount": 4,
+      "articles": [
+        "72",
+        "92",
+        "117",
+        "6"
+      ],
+      "confidence": 60,
+      "reasoning": "Documento relacionado à formalização, execução e aditamento de contratos e convênios, com foco na organização processual."
+    },
+    {
+      "documentId": "425a5e6b-a3bd-46eb-bc06-474ccb80c816",
+      "articlesCount": 4,
+      "articles": [
+        "115",
+        "92",
+        "111",
+        "117"
+      ],
+      "confidence": 60,
+      "reasoning": "Documento relacionado à vigência de contratos de serviço contínuo, com implicações na duração, execução e alterações contratuais sob a Lei 14.133/2021."
+    },
+    {
+      "documentId": "398f5b9e-ae0a-41d1-9110-07387dec2b4f",
+      "articlesCount": 4,
+      "articles": [
+        "191",
+        "96",
+        "103",
+        "137"
+      ],
+      "confidence": 60,
+      "reasoning": "Documento relacionado à revogação de normas e temas contratuais."
+    },
+    {
+      "documentId": "8931f97a-afed-47fa-bf0f-d92f7ae52eee",
+      "articlesCount": 3,
+      "articles": [
+        "140",
+        "92",
+        "137"
+      ],
+      "confidence": 55,
+      "reasoning": "Documento relacionado à execução e gestão contratual, com possível impacto em alterações e extinção de contratos."
+    },
+    {
+      "documentId": "9ede9ff3-c85c-46af-91aa-d997b53facde",
+      "articlesCount": 6,
+      "articles": [
+        "94",
+        "115",
+        "116",
+        "117",
+        "118",
+        "119"
+      ],
+      "confidence": 53,
+      "reasoning": "Documento relacionado à gestão e documentação de contratos, com possível relação com diversos artigos da Lei 14.133/2021 que tratam da execução, fiscalização, alteração e extinção contratual."
+    },
+    {
+      "documentId": "8a32814f-8cfa-47a3-8425-793b74a5a405",
+      "articlesCount": 5,
+      "articles": [
+        "81",
+        "82",
+        "87",
+        "92",
+        "137"
+      ],
+      "confidence": 60,
+      "reasoning": "Documento relacionado a chamamentos públicos e parcerias com OSCIPs, com artigos da Lei 14.133 relacionados à seleção de parceiros, formalização e execução contratual."
+    },
+    {
+      "documentId": "a911cf3a-1c0e-43b8-a065-2aa79c67affe",
+      "articlesCount": 5,
+      "articles": [
+        "92",
+        "93",
+        "141",
+        "99",
+        "142"
+      ],
+      "confidence": 60,
+      "reasoning": "Documento relacionado à vigência de contratos e empenho de despesas, temas abordados em diversos artigos da Lei 14.133/2021."
+    },
+    {
+      "documentId": "bff09f46-27ec-4e06-866d-756d1d6faae5",
+      "articlesCount": 4,
+      "articles": [
+        "111",
+        "117",
+        "92",
+        "142"
+      ],
+      "confidence": 60,
+      "reasoning": "Documento relacionado à duração e prorrogação de contratos de serviços continuados, temas abordados na Lei 14.133/2021."
+    },
+    {
+      "documentId": "4521d3e4-48e9-41b7-8422-6f399837ca7b",
+      "articlesCount": 5,
+      "articles": [
+        "141",
+        "96",
+        "97",
+        "98",
+        "115"
+      ],
+      "confidence": 60,
+      "reasoning": "Documento relacionado ao pagamento antecipado e garantias contratuais, temas abordados na Lei 14.133/2021."
+    },
+    {
+      "documentId": "31322172-a52e-406d-a488-4b1b624ac470",
+      "articlesCount": 4,
+      "articles": [
+        "111",
+        "115",
+        "92",
+        "142"
+      ],
+      "confidence": 60,
+      "reasoning": "Documento relacionado à duração e gestão de contratos, especialmente aqueles com vigência por prazo indeterminado, à luz da Lei 14.133/2021."
+    },
+    {
+      "documentId": "a5fdfc98-58f7-4b1b-b8fc-ecc4a832aa30",
+      "articlesCount": 7,
+      "articles": [
+        "92",
+        "93",
+        "99",
+        "111",
+        "115",
+        "116",
+        "141"
+      ],
+      "confidence": 60,
+      "reasoning": "Documento relacionado à execução orçamentária de contratos administrativos com duração plurianual, impactando diversos aspectos da Lei 14.133/2021."
+    },
+    {
+      "documentId": "30c92cd0-c1a3-40a9-844c-2565517c1e7a",
+      "articlesCount": 4,
+      "articles": [
+        "1",
+        "6",
+        "140",
+        "141"
+      ],
+      "confidence": 30,
+      "reasoning": "Documento da AGU sobre recurso extraordinário relacionado a pensão especial, com relação tangencial à Lei 14.133/2021, principalmente em seus aspectos gerais e relacionados a contratos administrativos."
+    },
+    {
+      "documentId": "863c8d60-7be9-452c-bd14-74525de27f52",
+      "articlesCount": 0,
+      "articles": [],
+      "confidence": 10,
+      "reasoning": "O documento trata de restituição de taxa de matrícula em cursos de graduação, um tema que não se relaciona diretamente com a Lei 14.133/2021, que trata de licitações e contratos administrativos."
+    },
+    {
+      "documentId": "6d939dcd-26cd-4ff2-8ac0-17b3a5db944f",
+      "articlesCount": 6,
+      "articles": [
+        "144",
+        "156",
+        "146",
+        "147",
+        "117",
+        "148"
+      ],
+      "confidence": 60,
+      "reasoning": "Documento relacionado à competência para aplicação de sanções administrativas em contratos, com foco na Lei 14.133/2021."
+    },
+    {
+      "documentId": "3397e6ab-41d1-4662-8a15-1bbff4c59330",
+      "articlesCount": 4,
+      "articles": [
+        "141",
+        "75",
+        "151",
+        "169"
+      ],
+      "confidence": 60,
+      "reasoning": "Documento relacionado à necessidade de manifestação jurídica em contratações diretas e de pequeno valor, impactando artigos sobre dispensa de licitação e controle da legalidade."
+    },
+    {
+      "documentId": "af47dcea-48e9-403d-89f6-034102155233",
+      "articlesCount": 4,
+      "articles": [
+        "92",
+        "6",
+        "155",
+        "137"
+      ],
+      "confidence": 50,
+      "reasoning": "Documento relacionado a convênios com entidades privadas sem fins lucrativos e possíveis implicações na Lei 14.133/2021."
+    },
+    {
+      "documentId": "6918dc1c-3e2c-4c68-bc8e-603739157aec",
+      "articlesCount": 6,
+      "articles": [
+        "106",
+        "107",
+        "92",
+        "93",
+        "115",
+        "116"
+      ],
+      "confidence": 60,
+      "reasoning": "Documento relacionado à vigência de convênios e sua relação com a Lei 14.133/2021, especialmente os artigos 106 e 107."
+    },
+    {
+      "documentId": "c6adeb74-3045-45b4-9159-68556196783c",
+      "articlesCount": 4,
+      "articles": [
+        "92",
+        "94",
+        "147",
+        "155"
+      ],
+      "confidence": 55,
+      "reasoning": "Documento relacionado à publicação de extratos de convênios, sua eficácia e responsabilização administrativa, temas abordados na Lei 14.133/2021."
+    },
+    {
+      "documentId": "7aaf6501-6e03-4c55-b177-2d24065d0e97",
+      "articlesCount": 6,
+      "articles": [
+        "19",
+        "24",
+        "18",
+        "6",
+        "92",
+        "115"
+      ],
+      "confidence": 60,
+      "reasoning": "Documento relacionado à elaboração do projeto básico/termo de referência e prazos em licitações e contratos administrativos."
+    },
+    {
+      "documentId": "97c257fc-8942-4464-b2a1-3b72cc21fe31",
+      "articlesCount": 4,
+      "articles": [
+        "96",
+        "97",
+        "98",
+        "99"
+      ],
+      "confidence": 60,
+      "reasoning": "Documento relacionado a garantias contratuais, com foco nos artigos 96 a 99 da Lei 14.133/2021."
+    },
+    {
+      "documentId": "5ba6f3f0-b77f-4485-bd84-17a702552cb2",
+      "articlesCount": 7,
+      "articles": [
+        "99",
+        "115",
+        "116",
+        "92",
+        "93",
+        "146",
+        "147"
+      ],
+      "confidence": 55,
+      "reasoning": "Documento relacionado a convênios e alocação de créditos orçamentários, com possível relação com a execução e fiscalização contratual."
+    },
+    {
+      "documentId": "e6c2d479-f3c2-4591-ba42-a53e4e172fdb",
+      "articlesCount": 3,
+      "articles": [
+        "6",
+        "11",
+        "92"
+      ],
+      "confidence": 40,
+      "reasoning": "Documento relacionado à atuação de autoridades de segurança pública, com possíveis relações tangenciais com alguns artigos da Lei 14.133/2021."
+    },
+    {
+      "documentId": "78ee2f5e-9121-4308-b8a5-d826228c5359",
+      "articlesCount": 3,
+      "articles": [
+        "98",
+        "147",
+        "151"
+      ],
+      "confidence": 37,
+      "reasoning": "Documento tangencialmente relacionado a conflitos de interesse e sua possível influência em licitações e contratos, especialmente em relação a impedimentos e meios alternativos de resolução de disputas."
+    },
+    {
+      "documentId": "8beef6c6-4bfc-4435-bac9-f5098e030c57",
+      "articlesCount": 4,
+      "articles": [
+        "74",
+        "75",
+        "72",
+        "6"
+      ],
+      "confidence": 60,
+      "reasoning": "Documento relacionado à contratação direta de imóveis, com possível relação com os artigos da Lei 14.133/2021 que tratam da inexigibilidade de licitação, planejamento e princípios gerais."
+    },
+    {
+      "documentId": "c1d9216f-3264-4b4e-9a47-10f55a45ad7e",
+      "articlesCount": 4,
+      "articles": [
+        "6",
+        "18",
+        "29",
+        "33"
+      ],
+      "confidence": 54,
+      "reasoning": "Documento relacionado ao uso do pregão para serviços de engenharia comuns, o que envolve a definição do objeto e o planejamento da licitação."
+    },
+    {
+      "documentId": "7ca2064b-0003-43fb-aa9d-295b569dd99f",
+      "articlesCount": 5,
+      "articles": [
+        "117",
+        "92",
+        "100",
+        "144",
+        "91"
+      ],
+      "confidence": 60,
+      "reasoning": "Documento relacionado à execução de contrato por filial, alteração contratual, habilitação e fiscalização, temas abordados na Lei 14.133/2021."
+    },
+    {
+      "documentId": "a3e7d09e-b314-4d03-af12-32f7552176cc",
+      "articlesCount": 5,
+      "articles": [
+        "106",
+        "92",
+        "115",
+        "117",
+        "142"
+      ],
+      "confidence": 60,
+      "reasoning": "Documento relacionado à prorrogação e execução de contratos administrativos sob a Lei 14.133/2021."
+    },
+    {
+      "documentId": "9d2aed90-9a09-48ab-876d-2c8a124a6c1b",
+      "articlesCount": 5,
+      "articles": [
+        "82",
+        "83",
+        "8",
+        "17",
+        "94"
+      ],
+      "confidence": 62,
+      "reasoning": "Documento relacionado ao sistema de registro de preços e ao controle de legalidade em licitações e contratos."
+    },
+    {
+      "documentId": "7f6702bc-f01c-40ec-8d83-b0deb52bd3d4",
+      "articlesCount": 4,
+      "articles": [
+        "92",
+        "115",
+        "6",
+        "40"
+      ],
+      "confidence": 63,
+      "reasoning": "Documento relacionado à formação de preços em licitações e à alocação de riscos contratuais, com possível impacto nos princípios da licitação."
+    },
+    {
+      "documentId": "c79afcbc-04ba-4c56-bc52-41bb9a1c1e73",
+      "articlesCount": 6,
+      "articles": [
+        "1",
+        "6",
+        "186",
+        "187",
+        "115",
+        "141"
+      ],
+      "confidence": 50,
+      "reasoning": "Documento relacionado à aplicação da Lei 14.133/2021 a empresas públicas e sociedades de economia mista em convênios e contratos de repasse."
+    },
+    {
+      "documentId": "51cc9729-9cca-45cc-bfeb-699b5ba3f6d8",
+      "articlesCount": 3,
+      "articles": [
+        "92",
+        "6",
+        "137"
+      ],
+      "confidence": 53,
+      "reasoning": "Documento relacionado ao reequilíbrio econômico-financeiro de contratos administrativos sob a perspectiva da Lei 14.133/2021."
+    },
+    {
+      "documentId": "d552adc8-fe08-4db0-b3d4-9f3d94f6cf86",
+      "articlesCount": 5,
+      "articles": [
+        "115",
+        "92",
+        "135",
+        "23",
+        "6"
+      ],
+      "confidence": 70,
+      "reasoning": "Documento relacionado à pesquisa de preços em contratos administrativos de serviços contínuos, impactando diversos artigos da Lei 14.133/2021 relacionados ao planejamento, julgamento e formalização de contratos."
+    },
+    {
+      "documentId": "4579ecd5-ec65-4016-a641-062d5d076e41",
+      "articlesCount": 6,
+      "articles": [
+        "74",
+        "6",
+        "72",
+        "75",
+        "94",
+        "95"
+      ],
+      "confidence": 50,
+      "reasoning": "Documento relacionado à contratação direta e princípios da Lei 14.133."
+    },
+    {
+      "documentId": "e71e373b-5c3b-4ebb-9f1f-c6ab393a55fb",
+      "articlesCount": 0,
+      "articles": [],
+      "confidence": 10,
+      "reasoning": "O documento trata do uso do sistema Sapiens e não possui relação direta com a Lei 14.133/2021."
+    },
+    {
+      "documentId": "e31bc0c2-bc6a-4b7b-81c3-264dec3bb60f",
+      "articlesCount": 4,
+      "articles": [
+        "75",
+        "74",
+        "6",
+        "150"
+      ],
+      "confidence": 80,
+      "reasoning": "O documento trata da dispensa de manifestação jurídica em contratações diretas de pequeno valor, com base nos artigos 74 e 75 da Lei 14.133/2021, e tangencialmente relacionado à atuação da assessoria jurídica (art. 150) e definições (art. 6)."
+    },
+    {
+      "documentId": "3b3f9900-201d-4922-aed3-7b85eea5f966",
+      "articlesCount": 5,
+      "articles": [
+        "142",
+        "143",
+        "91",
+        "137",
+        "140"
+      ],
+      "confidence": 60,
+      "reasoning": "Documento relacionado à rescisão contratual sob a égide da Lei 8.666/93 e seus reflexos na aplicação da Lei 14.133/21, especialmente no que tange à possibilidade de aproveitamento do remanescente da obra, serviço ou fornecimento."
+    },
+    {
+      "documentId": "c0373388-419b-44de-8ded-1a111e144713",
+      "articlesCount": 5,
+      "articles": [
+        "156",
+        "14.133",
+        "155",
+        "142",
+        "163"
+      ],
+      "confidence": 65,
+      "reasoning": "Documento relacionado à aplicação da Lei 14.133/2021 e ao regime de sanções em contratos administrativos, com foco na aplicação da lei no tempo."
+    },
+    {
+      "documentId": "1037e397-9ff4-435b-bf5f-7515c5a421de",
+      "articlesCount": 3,
+      "articles": [
+        "75",
+        "92",
+        "117"
+      ],
+      "confidence": 60,
+      "reasoning": "Documento possivelmente relacionado a garantias e execução contratual."
+    },
+    {
+      "documentId": "5be44859-6b18-4aff-ae83-750de540a523",
+      "articlesCount": 5,
+      "articles": [
+        "96",
+        "14.133",
+        "97",
+        "55",
+        "92"
+      ],
+      "confidence": 70,
+      "reasoning": "Documento relacionado ao pagamento antecipado em contratos administrativos regidos pela Lei nº 14.133/2021, com menção à lei e artigos relacionados a garantias e condições contratuais."
+    },
+    {
+      "documentId": "b1db68da-f471-4de4-8711-713486697cb2",
+      "articlesCount": 2,
+      "articles": [
+        "6",
+        "7"
+      ],
+      "confidence": 40,
+      "reasoning": "Documento relacionado aos princípios da administração pública e objetivos da licitação."
+    },
+    {
+      "documentId": "ed6b7bd5-36b6-4a4f-a3fd-937e34934607",
+      "articlesCount": 5,
+      "articles": [
+        "106",
+        "107",
+        "6",
+        "91",
+        "92"
+      ],
+      "confidence": 62,
+      "reasoning": "Documento relacionado à vigência de contratos de locação e sua relação com os limites estabelecidos na Lei 14.133/2021."
+    },
+    {
+      "documentId": "8e751eb3-33f8-40eb-8a1a-9315e0a74c04",
+      "articlesCount": 4,
+      "articles": [
+        "111",
+        "92",
+        "100",
+        "91"
+      ],
+      "confidence": 60,
+      "reasoning": "Documento relacionado à vigência, alterações e prorrogações de contratos administrativos sob a Lei 14.133/2021."
+    },
+    {
+      "documentId": "dd99f1ec-5387-46bd-8cbb-4507bb010f1a",
+      "articlesCount": 5,
+      "articles": [
+        "107",
+        "92",
+        "111",
+        "117",
+        "142"
+      ],
+      "confidence": 70,
+      "reasoning": "Documento relacionado à prorrogação de contratos de serviços e fornecimentos continuados, com menção explícita ao art. 107 da Lei 14.133/2021 e artigos relacionados."
+    },
+    {
+      "documentId": "128194ec-7be1-4933-b440-1efff6b2ce06",
+      "articlesCount": 7,
+      "articles": [
+        "115",
+        "116",
+        "121",
+        "92",
+        "126",
+        "6",
+        "141"
+      ],
+      "confidence": 62,
+      "reasoning": "Documento relacionado à vigência, créditos orçamentários e vantagem na manutenção de contratos de serviço contínuo ou fornecimento sob a Lei 14.133/2021."
+    },
+    {
+      "documentId": "6f80e9f5-d84c-4394-a502-3346d78c0726",
+      "articlesCount": 6,
+      "articles": [
+        "107",
+        "92",
+        "6",
+        "72",
+        "75",
+        "115"
+      ],
+      "confidence": 60,
+      "reasoning": "Documento relacionado à prorrogação de contratos administrativos de serviços e fornecimentos contínuos, com menção explícita ao art. 107 e relação com outros artigos sobre duração, fase preparatória e definições."
+    },
+    {
+      "documentId": "be8fabca-569b-4d05-9c45-dc00b6a86208",
+      "articlesCount": 5,
+      "articles": [
+        "106",
+        "137",
+        "138",
+        "139",
+        "92"
+      ],
+      "confidence": 60,
+      "reasoning": "Documento relacionado à extinção antecipada de contratos, com menção explícita ao art. 106 e artigos relacionados à extinção e suas consequências."
+    },
+    {
+      "documentId": "3441faa6-c697-4ce2-8005-b54f188f83be",
+      "articlesCount": 5,
+      "articles": [
+        "1",
+        "72",
+        "74",
+        "155",
+        "156"
+      ],
+      "confidence": 60,
+      "reasoning": "Documento relacionado à dispensa e inexigibilidade de licitação, e à necessidade de manifestação jurídica."
+    },
+    {
+      "documentId": "846e290c-1d31-42ac-9388-ba9dfd2deccf",
+      "articlesCount": 5,
+      "articles": [
+        "6",
+        "29",
+        "34",
+        "92",
+        "145"
+      ],
+      "confidence": 50,
+      "reasoning": "Documento relacionado a modalidades de licitação, critérios de julgamento e uso de bens públicos."
+    },
+    {
+      "documentId": "0d84af61-aefe-44da-9b8d-14f4471b9129",
+      "articlesCount": 3,
+      "articles": [
+        "147",
+        "149",
+        "155"
+      ],
+      "confidence": 55,
+      "reasoning": "Documento relacionado à prescrição, tomada de contas especial e responsabilização no âmbito da Lei 14.133/2021."
+    }
+  ],
+  "errors": []
+}

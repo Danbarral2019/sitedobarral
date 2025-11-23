@@ -24,10 +24,10 @@ interface TimelineStats {
 // GET /api/artigos/[numero]/timeline - Timeline cronológica de documentos
 export async function GET(
   request: NextRequest,
-  { params }: { params: { numero: string } }
+  { params }: { params: Promise<{ numero: string }> }
 ) {
   try {
-    const articleNumber = params.numero;
+    const { numero: articleNumber } = await params;
     const searchParams = request.nextUrl.searchParams;
 
     // Filtros opcionais

@@ -17,17 +17,15 @@ import { safeParseArray } from '@/lib/utils';
  */
 export async function GET(request: NextRequest) {
   try {
-    // 1. Verificar autenticação (alunos ou admin)
+    // 1. Verificar autenticação (opcional - permite acesso público)
     const authResult = await verifyAuth(request);
-    if (!authResult.valid) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
+    const isAuthenticated = authResult.valid;
 
     const { searchParams } = new URL(request.url);
     const withDocumentsOnly = searchParams.get('withDocuments') === 'true';
     const tituloFilter = searchParams.get('titulo');
 
-    console.log('[Lei Articles API] Buscando artigos da Lei 14.133...');
+    console.log(`[Lei Articles API] Buscando artigos (autenticado: ${isAuthenticated})...`);
 
     // 2. Buscar todos os artigos (sem ordenação - faremos manualmente)
     const allArticles = await prisma.leiArticle.findMany({
@@ -71,24 +69,27 @@ export async function GET(request: NextRequest) {
     // Ordenar artigos numericamente
     allArticles.sort(sortArticlesNumerically);
 
-    // 3. Buscar todos os documentos com leiArticles
+    // 3. Buscar todos os documentos com leiArticles (filtrando por público se não autenticado)
     const documentsWithArticles = await prisma.document.findMany({
       where: {
         leiArticles: {
           not: null,
         },
+        // Se não autenticado, mostrar apenas documentos públicos
+        ...(!isAuthenticated && { isPublic: true }),
       },
       select: {
         id: true,
         title: true,
         leiArticles: true,
         isPublic: true,
+        category: true,
       },
     });
 
-    // 4. Contar documentos por artigo
+    // 4. Contar documentos por artigo e agrupar por categoria
     const articleDocumentCount: Record<string, number> = {};
-    const articleDocuments: Record<string, { id: string; title: string; isPublic: boolean }[]> = {};
+    const articleDocuments: Record<string, { id: string; title: string; isPublic: boolean; category: string | null }[]> = {};
 
     documentsWithArticles.forEach((doc) => {
       const articles = safeParseArray(doc.leiArticles);
@@ -104,6 +105,7 @@ export async function GET(request: NextRequest) {
           id: doc.id,
           title: doc.title,
           isPublic: doc.isPublic,
+          category: doc.category,
         });
       });
     });

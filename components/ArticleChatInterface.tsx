@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
-import { Sparkles, Loader2, MessageSquare, FileText, RefreshCw, AlertCircle } from 'lucide-react';
+import { Sparkles, Loader2, MessageSquare, FileText, RefreshCw, AlertCircle, ThumbsUp, ThumbsDown } from 'lucide-react';
 
 interface Source {
   id: string;
@@ -25,6 +25,9 @@ export default function ArticleChatInterface({
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [conversationId, setConversationId] = useState<string | null>(null);
+  const [questionId, setQuestionId] = useState<string | null>(null);
+  const [feedback, setFeedback] = useState<boolean | null>(null);
+  const [feedbackSubmitted, setFeedbackSubmitted] = useState(false);
 
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const answerRef = useRef<HTMLDivElement>(null);
@@ -101,6 +104,9 @@ export default function ArticleChatInterface({
 
       setAnswer(data.answer);
       setSources(data.sources || []);
+      setQuestionId(data.questionId);
+      setFeedback(null);
+      setFeedbackSubmitted(false);
     } catch (err) {
       if (err instanceof Error) {
         if (err.name === 'AbortError') {
@@ -117,11 +123,41 @@ export default function ArticleChatInterface({
     }
   };
 
+  const submitFeedback = async (wasHelpful: boolean) => {
+    if (!questionId) return;
+
+    try {
+      setFeedback(wasHelpful);
+      setFeedbackSubmitted(true);
+
+      const response = await fetch(`/api/artigos/${articleNumber}/chat/${questionId}/feedback`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ wasHelpful }),
+      });
+
+      if (!response.ok) {
+        console.error('Erro ao enviar feedback');
+        setFeedbackSubmitted(false);
+      } else {
+        console.log(`✅ Feedback enviado: ${wasHelpful ? 'Positivo' : 'Negativo'}`);
+      }
+    } catch (error) {
+      console.error('Erro ao enviar feedback:', error);
+      setFeedbackSubmitted(false);
+    }
+  };
+
   const handleNewQuestion = () => {
     setQuestion('');
     setAnswer(null);
     setSources([]);
     setError(null);
+    setQuestionId(null);
+    setFeedback(null);
+    setFeedbackSubmitted(false);
     if (textareaRef.current) {
       textareaRef.current.focus();
     }
@@ -245,6 +281,46 @@ export default function ArticleChatInterface({
                 <div className="text-gray-800 leading-relaxed whitespace-pre-wrap">
                   {answer}
                 </div>
+              </div>
+
+              {/* Feedback Buttons */}
+              <div className="flex items-center gap-4 mt-6 pt-4 border-t border-purple-200">
+                <span className="text-sm text-gray-700 font-medium">Esta resposta foi útil?</span>
+                <button
+                  onClick={() => submitFeedback(true)}
+                  disabled={feedbackSubmitted}
+                  className="p-2 rounded-lg hover:bg-green-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                  title="Resposta útil"
+                  aria-label="Marcar como útil"
+                >
+                  <ThumbsUp
+                    className={`w-5 h-5 ${
+                      feedback === true
+                        ? 'text-green-600 fill-current'
+                        : 'text-gray-400'
+                    }`}
+                  />
+                </button>
+                <button
+                  onClick={() => submitFeedback(false)}
+                  disabled={feedbackSubmitted}
+                  className="p-2 rounded-lg hover:bg-red-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                  title="Resposta não útil"
+                  aria-label="Marcar como não útil"
+                >
+                  <ThumbsDown
+                    className={`w-5 h-5 ${
+                      feedback === false
+                        ? 'text-red-600 fill-current'
+                        : 'text-gray-400'
+                    }`}
+                  />
+                </button>
+                {feedbackSubmitted && (
+                  <span className="text-sm text-green-600 font-medium animate-fade-in">
+                    ✓ Obrigado pelo feedback!
+                  </span>
+                )}
               </div>
             </div>
 

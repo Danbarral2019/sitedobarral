@@ -33,8 +33,8 @@ export async function GET(
         orderBy: [
           { isPublic: 'desc' }, // Públicos primeiro
           { uploadedAt: 'desc' }
-        ],
-        take: 50 // Limita a 50 documentos
+        ]
+        // Removido limite de 50 para mostrar todos os documentos
       }),
 
       // 2. Busca atos legislativos (Decretos, Portarias, etc.) que regulamentam este artigo
@@ -46,8 +46,8 @@ export async function GET(
         },
         orderBy: [
           { publishDate: 'desc' }
-        ],
-        take: 50
+        ]
+        // Removido limite para mostrar todos os atos
       })
     ]);
 

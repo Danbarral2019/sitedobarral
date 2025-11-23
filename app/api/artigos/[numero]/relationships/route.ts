@@ -11,10 +11,10 @@ interface ArticleRelationship {
 // GET /api/artigos/[numero]/relationships - Obter artigos relacionados por co-ocorrência
 export async function GET(
   request: NextRequest,
-  { params }: { params: { numero: string } }
+  { params }: { params: Promise<{ numero: string }> }
 ) {
   try {
-    const articleNumber = params.numero;
+    const { numero: articleNumber } = await params;
 
     if (!articleNumber) {
       return NextResponse.json(

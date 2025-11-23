@@ -219,12 +219,19 @@ export class DOUClassifier {
     // Avisos
     'aviso de licitação',
     'aviso de licitacao',
+    'aviso de inexigibilidade',
+    'aviso de dispensa',
+    'aviso de alteração',
+    'aviso de alteracao',
     'aviso de',
 
     // Contratos e extratos
     'extrato de contrato',
     'extrato de termo',
     'extrato de aditivo',
+    'extrato de apostilamento',
+    'extrato de convênio',
+    'extrato de convenio',
     'contrato n',
     'contrato nº',
     'termo aditivo',
@@ -235,6 +242,24 @@ export class DOUClassifier {
     'ata de registro de precos',
     'registro de preços',
     'registro de precos',
+
+    // Publicações genéricas de órgãos
+    'uasg',
+    'cafin',
+    'resultado de julgamento',
+    'homologação',
+    'homologacao',
+    'adjudicação',
+    'adjudicacao',
+    'retificação de',
+    'retificacao de',
+
+    // Portarias genéricas de RH/administrativas (não confundir com portarias normativas)
+    'designar servidor',
+    'nomear servidor',
+    'exonerar servidor',
+    'portaria de pessoal',
+    'portaria administrativa',
   ];
 
   /**

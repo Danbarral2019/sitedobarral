@@ -1,39 +1,13 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
-import dynamic from 'next/dynamic';
-import { Loader2, Network, Info } from 'lucide-react';
+import { useEffect, useState } from 'react';
+import { Loader2, Network, Info, ArrowRight } from 'lucide-react';
 import { LEI_14133_ARTIGOS } from '@/data/lei-14133-artigos';
-
-// Importação dinâmica para evitar SSR issues
-const ForceGraph2D = dynamic(() => import('react-force-graph-2d'), {
-  ssr: false,
-});
 
 interface ArticleRelationship {
   articleNumber: string;
   strength: number;
   sharedDocuments: number;
-}
-
-interface GraphNode {
-  id: string;
-  name: string;
-  val: number; // Tamanho do nó
-  color: string;
-  isCurrent?: boolean;
-}
-
-interface GraphLink {
-  source: string;
-  target: string;
-  value: number; // Espessura da linha
-  strength: number;
-}
-
-interface GraphData {
-  nodes: GraphNode[];
-  links: GraphLink[];
 }
 
 interface ArticleRelationshipGraphProps {
@@ -45,10 +19,9 @@ export function ArticleRelationshipGraph({
   articleNumber,
   onArticleClick,
 }: ArticleRelationshipGraphProps) {
-  const [graphData, setGraphData] = useState<GraphData | null>(null);
+  const [relationships, setRelationships] = useState<ArticleRelationship[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const graphRef = useRef<unknown>(null);
 
   const loadRelationships = async () => {
     setIsLoading(true);
@@ -64,66 +37,26 @@ export function ArticleRelationshipGraph({
       const data = await response.json();
 
       if (!data.relationships || data.relationships.length === 0) {
-        setGraphData(null);
+        setRelationships([]);
         return;
       }
 
-      // Construir dados do grafo
-      const nodes: GraphNode[] = [];
-      const links: GraphLink[] = [];
+      // Pegar os top 12 relacionamentos mais fortes
+      const topRelationships = data.relationships
+        .sort((a: ArticleRelationship, b: ArticleRelationship) => b.strength - a.strength)
+        .slice(0, 12);
 
-      // Nó central (artigo atual)
-      nodes.push({
-        id: articleNumber,
-        name: `Art. ${articleNumber}`,
-        val: 30, // Nó maior
-        color: '#3b82f6', // Azul
-        isCurrent: true,
+      setRelationships(topRelationships);
+
+      console.log('✅ Relacionamentos Carregados (v3.0 - Lista Rápida):', {
+        total: topRelationships.length,
+        artigos: topRelationships.map((r: ArticleRelationship) => `Art. ${r.articleNumber} (${r.strength}%)`).join(', ')
       });
-
-      // Nós relacionados
-      data.relationships.forEach((rel: ArticleRelationship) => {
-        // Cor baseada na força do relacionamento
-        const color = getColorByStrength(rel.strength);
-
-        // Tamanho baseado no número de documentos compartilhados
-        const size = Math.max(10, Math.min(25, 10 + rel.sharedDocuments * 2));
-
-        nodes.push({
-          id: rel.articleNumber,
-          name: `Art. ${rel.articleNumber}`,
-          val: size,
-          color,
-        });
-
-        // Link entre o artigo atual e o relacionado
-        links.push({
-          source: articleNumber,
-          target: rel.articleNumber,
-          value: rel.strength / 10, // Espessura da linha (0-10)
-          strength: rel.strength,
-        });
-      });
-
-      setGraphData({ nodes, links });
     } catch (err) {
       console.error('Erro ao carregar relacionamentos:', err);
       setError('Não foi possível carregar o mapa de relacionamentos');
     } finally {
       setIsLoading(false);
-    }
-  };
-
-  const getColorByStrength = (strength: number): string => {
-    if (strength >= 75) return '#ef4444'; // Vermelho - relacionamento muito forte
-    if (strength >= 50) return '#f97316'; // Laranja - relacionamento forte
-    if (strength >= 25) return '#eab308'; // Amarelo - relacionamento moderado
-    return '#22c55e'; // Verde - relacionamento fraco
-  };
-
-  const handleNodeClick = (node: GraphNode) => {
-    if (!node.isCurrent && onArticleClick) {
-      onArticleClick(node.id);
     }
   };
 
@@ -153,7 +86,7 @@ export function ArticleRelationshipGraph({
     );
   }
 
-  if (!graphData || graphData.nodes.length <= 1) {
+  if (relationships.length === 0) {
     return (
       <div className="bg-white rounded-xl border-2 border-gray-200 p-8">
         <div className="flex items-center justify-center text-gray-500">
@@ -164,66 +97,83 @@ export function ArticleRelationshipGraph({
     );
   }
 
+  const getColorByStrength = (strength: number): string => {
+    if (strength >= 75) return 'bg-red-500 text-red-100';
+    if (strength >= 50) return 'bg-orange-500 text-orange-100';
+    if (strength >= 25) return 'bg-yellow-500 text-yellow-100';
+    return 'bg-green-500 text-green-100';
+  };
+
+  const getBadgeColor = (strength: number): string => {
+    if (strength >= 75) return 'bg-red-100 text-red-700 border-red-300';
+    if (strength >= 50) return 'bg-orange-100 text-orange-700 border-orange-300';
+    if (strength >= 25) return 'bg-yellow-100 text-yellow-700 border-yellow-300';
+    return 'bg-green-100 text-green-700 border-green-300';
+  };
+
   return (
     <div className="bg-white rounded-xl border-2 border-gray-200 overflow-hidden">
       {/* Header */}
       <div className="px-6 py-4 border-b border-gray-200 bg-gradient-to-r from-blue-50 to-purple-50">
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 bg-blue-600 rounded-lg flex items-center justify-center">
-            <Network className="w-6 h-6 text-white" />
+        <div className="flex items-center justify-between gap-3">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 bg-blue-600 rounded-lg flex items-center justify-center">
+              <Network className="w-6 h-6 text-white" />
+            </div>
+            <div>
+              <h3 className="text-lg font-bold text-gray-900">
+                Artigos Relacionados
+              </h3>
+              <p className="text-sm text-gray-600">
+                Top {relationships.length} artigos mais citados juntos
+              </p>
+            </div>
           </div>
-          <div>
-            <h3 className="text-lg font-bold text-gray-900">
-              Mapa de Relacionamentos
-            </h3>
-            <p className="text-sm text-gray-600">
-              Artigos frequentemente citados juntos em documentos
-            </p>
+          <div className="px-3 py-1 bg-green-100 border border-green-300 rounded-full">
+            <span className="text-xs font-bold text-green-700">v3.0 - Rápido</span>
           </div>
         </div>
       </div>
 
-      {/* Grafo */}
-      <div className="relative" style={{ height: '500px' }}>
-        <ForceGraph2D
-          ref={graphRef}
-          graphData={graphData}
-          nodeLabel={(node: GraphNode) => {
-            const article = LEI_14133_ARTIGOS[node.id];
-            return `${node.name}\n${article?.ementa || ''}`;
-          }}
-          nodeCanvasObject={(node: GraphNode, ctx: CanvasRenderingContext2D, globalScale: number) => {
-            const label = node.name;
-            const fontSize = 12 / globalScale;
-            ctx.font = `${fontSize}px Sans-Serif`;
+      {/* Lista de Artigos Relacionados */}
+      <div className="p-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+          {relationships.map((rel) => {
+            const article = LEI_14133_ARTIGOS[rel.articleNumber];
+            return (
+              <button
+                key={rel.articleNumber}
+                onClick={() => onArticleClick && onArticleClick(rel.articleNumber)}
+                className="flex items-center gap-3 p-4 bg-gray-50 hover:bg-blue-50 border-2 border-gray-200 hover:border-blue-300 rounded-lg transition-all text-left group"
+              >
+                {/* Indicador de Força */}
+                <div className={`flex-shrink-0 w-12 h-12 ${getColorByStrength(rel.strength)} rounded-lg flex flex-col items-center justify-center font-bold`}>
+                  <div className="text-lg">{rel.strength}%</div>
+                </div>
 
-            // Desenhar círculo
-            ctx.beginPath();
-            ctx.arc(node.x, node.y, node.val, 0, 2 * Math.PI, false);
-            ctx.fillStyle = node.color;
-            ctx.fill();
+                {/* Informações do Artigo */}
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2 mb-1">
+                    <h4 className="font-bold text-gray-900 text-base">
+                      Art. {rel.articleNumber}
+                    </h4>
+                    <span className={`px-2 py-0.5 rounded text-xs font-medium border ${getBadgeColor(rel.strength)}`}>
+                      {rel.sharedDocuments} {rel.sharedDocuments === 1 ? 'doc' : 'docs'}
+                    </span>
+                  </div>
+                  {article && (
+                    <p className="text-xs text-gray-600 line-clamp-2">
+                      {article.ementa}
+                    </p>
+                  )}
+                </div>
 
-            // Desenhar borda para nó atual
-            if (node.isCurrent) {
-              ctx.strokeStyle = '#1d4ed8';
-              ctx.lineWidth = 3 / globalScale;
-              ctx.stroke();
-            }
-
-            // Desenhar texto
-            ctx.textAlign = 'center';
-            ctx.textBaseline = 'middle';
-            ctx.fillStyle = '#ffffff';
-            ctx.fillText(label, node.x, node.y);
-          }}
-          linkWidth={(link: GraphLink) => link.value}
-          linkColor={() => '#cbd5e1'}
-          linkDirectionalParticles={2}
-          linkDirectionalParticleWidth={2}
-          onNodeClick={handleNodeClick}
-          cooldownTicks={100}
-          d3VelocityDecay={0.3}
-        />
+                {/* Ícone de Navegação */}
+                <ArrowRight className="w-5 h-5 text-gray-400 group-hover:text-blue-600 flex-shrink-0 transition-colors" />
+              </button>
+            );
+          })}
+        </div>
       </div>
 
       {/* Legenda */}
@@ -253,10 +203,7 @@ export function ArticleRelationshipGraph({
 
           <div>
             <p className="text-xs text-gray-600">
-              <span className="font-semibold">{graphData.nodes.length - 1}</span> artigos relacionados
-            </p>
-            <p className="text-xs text-gray-500">
-              Clique em um artigo para navegar
+              💡 Clique em um artigo para navegar
             </p>
           </div>
         </div>

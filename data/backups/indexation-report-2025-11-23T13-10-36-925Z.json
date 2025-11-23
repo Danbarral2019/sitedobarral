@@ -1,0 +1,48 @@
+{
+  "timestamp": "2025-11-23T13:10:41.714Z",
+  "executeMode": false,
+  "limit": "1",
+  "categoryFilter": null,
+  "stats": {
+    "totalDocuments": 1,
+    "successfullyIndexed": 1,
+    "failed": 0,
+    "successRate": "100.0%",
+    "totalArticlesFound": 4,
+    "avgArticlesPerDoc": "4.00",
+    "avgConfidence": "50.0%",
+    "topArticles": [
+      {
+        "article": "72",
+        "count": 1
+      },
+      {
+        "article": "75",
+        "count": 1
+      },
+      {
+        "article": "17",
+        "count": 1
+      },
+      {
+        "article": "191",
+        "count": 1
+      }
+    ]
+  },
+  "results": [
+    {
+      "documentId": "4988f86f-1334-4b58-84e3-768edacfcb58",
+      "articlesCount": 4,
+      "articles": [
+        "72",
+        "75",
+        "17",
+        "191"
+      ],
+      "confidence": 50,
+      "reasoning": "Documento relacionado à necessidade de parecer jurídico em casos de dispensa de licitação, com possíveis conexões com o controle da legalidade, garantias contratuais e princípios gerais da licitação na Lei 14.133/2021."
+    }
+  ],
+  "errors": []
+}

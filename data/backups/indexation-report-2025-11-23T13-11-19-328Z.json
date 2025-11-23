@@ -1,0 +1,121 @@
+{
+  "timestamp": "2025-11-23T13:11:37.719Z",
+  "executeMode": false,
+  "limit": "5",
+  "categoryFilter": null,
+  "stats": {
+    "totalDocuments": 5,
+    "successfullyIndexed": 5,
+    "failed": 0,
+    "successRate": "100.0%",
+    "totalArticlesFound": 21,
+    "avgArticlesPerDoc": "4.20",
+    "avgConfidence": "58.0%",
+    "topArticles": [
+      {
+        "article": "137",
+        "count": 3
+      },
+      {
+        "article": "92",
+        "count": 3
+      },
+      {
+        "article": "72",
+        "count": 1
+      },
+      {
+        "article": "75",
+        "count": 1
+      },
+      {
+        "article": "17",
+        "count": 1
+      },
+      {
+        "article": "62",
+        "count": 1
+      },
+      {
+        "article": "63",
+        "count": 1
+      },
+      {
+        "article": "11",
+        "count": 1
+      },
+      {
+        "article": "12",
+        "count": 1
+      },
+      {
+        "article": "10",
+        "count": 1
+      }
+    ]
+  },
+  "results": [
+    {
+      "documentId": "4988f86f-1334-4b58-84e3-768edacfcb58",
+      "articlesCount": 3,
+      "articles": [
+        "72",
+        "75",
+        "17"
+      ],
+      "confidence": 60,
+      "reasoning": "Documento relacionado à necessidade de parecer jurídico em casos de dispensa de licitação, com possíveis implicações nos artigos 72, 75 e 17 da Lei 14.133/2021."
+    },
+    {
+      "documentId": "6d2e7226-0cd8-43f8-9974-b7dcc14c3c98",
+      "articlesCount": 4,
+      "articles": [
+        "62",
+        "63",
+        "11",
+        "12"
+      ],
+      "confidence": 60,
+      "reasoning": "Documento relacionado à fase de habilitação em licitações e à exigência de certificados, com implicações para os princípios e requisitos da Lei 14.133/2021."
+    },
+    {
+      "documentId": "9a2fd849-d6c4-47bc-a042-c76658df1c68",
+      "articlesCount": 4,
+      "articles": [
+        "10",
+        "137",
+        "124",
+        "92"
+      ],
+      "confidence": 50,
+      "reasoning": "Documento relacionado ao reequilíbrio econômico-financeiro de contratos administrativos sob a égide da Lei 14.133/2021."
+    },
+    {
+      "documentId": "7b650f70-c6fa-4b76-8a65-496ef79ef1e9",
+      "articlesCount": 5,
+      "articles": [
+        "142",
+        "92",
+        "100",
+        "137",
+        "144"
+      ],
+      "confidence": 60,
+      "reasoning": "Documento relacionado à prorrogação de contratos de arrendamento, análise de viabilidade e revisão de valores, temas abordados na Lei 14.133/2021."
+    },
+    {
+      "documentId": "fa8794d5-c597-415c-9544-7943971b2933",
+      "articlesCount": 5,
+      "articles": [
+        "92",
+        "141",
+        "137",
+        "115",
+        "103"
+      ],
+      "confidence": 60,
+      "reasoning": "Documento relacionado à execução contratual, aditivos, sanções e pagamentos na Nova Lei de Licitações."
+    }
+  ],
+  "errors": []
+}
