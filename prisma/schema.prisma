@@ -600,6 +600,14 @@ model LegislativeAct {
   // Analytics
   viewCount   Int     @default(0)
 
+  // Scraping e atualização automática
+  contentHash       String?   // Hash MD5 para detectar mudanças no texto
+  lastScrapedAt     DateTime? // Última tentativa de scraping
+  scrapeStatus      String?   // 'success' | 'failed' | 'pending' | 'unchanged'
+  scrapeError       String?   @db.Text // Mensagem de erro (se falhou)
+  changeDetectedAt  DateTime? // Quando uma mudança foi detectada
+  notifyOnChange    Boolean   @default(true) // Notificar admin sobre mudanças
+
   // Notificações
   notifiedAt  DateTime? // Data em que alunos foram notificados sobre este ato
 
@@ -617,6 +625,8 @@ model LegislativeAct {
   @@index([type, issuer])
   @@index([year, type])
   @@index([notifiedAt])
+  @@index([lastScrapedAt])
+  @@index([scrapeStatus])
 }
 
 // Perguntas Frequentes (FAQ)

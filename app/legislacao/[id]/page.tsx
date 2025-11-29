@@ -10,8 +10,10 @@ import {
   Download,
   FileText,
   ArrowLeft,
-  Eye
+  Eye,
+  BookOpen
 } from 'lucide-react';
+import MarkdownContent from '@/components/MarkdownContent';
 
 interface PageProps {
   params: Promise<{ id: string }>;
@@ -194,16 +196,19 @@ export default async function LegislativeActPage({ params }: PageProps) {
           </div>
         </div>
 
-        {/* Resumo (se existir) */}
+        {/* Resumo Didático (se existir) */}
         {act.summary && (
-          <div className="bg-blue-50 border-l-4 border-blue-600 rounded-xl shadow-md p-6 mb-6">
-            <h3 className="text-lg font-bold text-blue-900 mb-3">
-              📝 Resumo
-            </h3>
-            <div className="prose prose-blue max-w-none">
-              <p className="text-blue-800 leading-relaxed whitespace-pre-wrap">
-                {act.summary}
-              </p>
+          <div className="bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 rounded-xl shadow-lg overflow-hidden mb-6">
+            {/* Header destacado */}
+            <div className="bg-gradient-to-r from-blue-600 to-indigo-600 px-6 py-4">
+              <h3 className="flex items-center gap-3 text-lg font-bold text-white">
+                <BookOpen className="w-6 h-6" />
+                Resumo Didático
+              </h3>
+            </div>
+            {/* Conteúdo com Markdown */}
+            <div className="p-6">
+              <MarkdownContent content={act.summary} />
             </div>
           </div>
         )}

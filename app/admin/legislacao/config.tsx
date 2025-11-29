@@ -8,7 +8,7 @@
  * e deve ser usado apenas em Client Components (LegislacaoClient.tsx)
  */
 
-import { Eye, Edit, Trash2, Scale, Calendar, Building, ExternalLink, FileText, Download } from 'lucide-react';
+import { Eye, Edit, Trash2, Scale, Calendar, ExternalLink, FileText, Download } from 'lucide-react';
 import { createListConfig } from '@/components/admin/ResourceListContainer';
 import { AdminListConfig, FilterConfig } from '@/lib/types/admin-list';
 import { LegislativeAct } from '@/lib/legislacao';
@@ -154,77 +154,6 @@ export function createLegislacaoConfig({
             <p className="font-medium text-gray-900 line-clamp-1">{act.title}</p>
             <p className="text-sm text-gray-600 line-clamp-1">{act.ementa.substring(0, 80)}...</p>
           </div>
-        ),
-      },
-      {
-        id: 'actions',
-        label: 'Ações',
-        render: (act) => (
-          <div className="flex flex-wrap gap-1">
-            {/* Ver no site */}
-            <button
-              onClick={() => window.open(`/legislacao/${act.id}`, '_blank', 'noopener,noreferrer')}
-              className="p-1.5 text-blue-600 hover:bg-blue-50 rounded transition-colors"
-              title="Ver no site"
-            >
-              <Eye className="w-4 h-4" />
-            </button>
-
-            {/* Ver link oficial (condicional) */}
-            {act.officialUrl && (
-              <button
-                onClick={() => window.open(act.officialUrl, '_blank', 'noopener,noreferrer')}
-                className="p-1.5 text-purple-600 hover:bg-purple-50 rounded transition-colors"
-                title="Ver link oficial"
-              >
-                <ExternalLink className="w-4 h-4" />
-              </button>
-            )}
-
-            {/* Baixar PDF (condicional) */}
-            {act.pdfUrl && (
-              <button
-                onClick={() => window.open(act.pdfUrl, '_blank', 'noopener,noreferrer')}
-                className="p-1.5 text-green-600 hover:bg-green-50 rounded transition-colors"
-                title="Baixar PDF"
-              >
-                <Download className="w-4 h-4" />
-              </button>
-            )}
-
-            {/* Editar */}
-            <button
-              onClick={() => { window.location.href = `/admin/legislacao/${act.id}/edit`; }}
-              className="p-1.5 text-orange-600 hover:bg-orange-50 rounded transition-colors"
-              title="Editar"
-            >
-              <Edit className="w-4 h-4" />
-            </button>
-
-            {/* Deletar */}
-            <button
-              onClick={async () => {
-                if (!confirm(`Tem certeza que deseja deletar "${act.fullNumber}"?`)) return;
-                const response = await fetch(`/api/admin/legislacao/${act.id}`, { method: 'DELETE' });
-                if (!response.ok) throw new Error('Failed to delete');
-                window.location.reload();
-              }}
-              className="p-1.5 text-red-600 hover:bg-red-50 rounded transition-colors"
-              title="Deletar"
-            >
-              <Trash2 className="w-4 h-4" />
-            </button>
-          </div>
-        ),
-      },
-      {
-        id: 'issuer',
-        label: 'Emissor',
-        render: (act) => (
-          <p className="text-sm text-gray-700 flex items-center gap-1">
-            <Building className="w-4 h-4" />
-            {act.issuer}
-          </p>
         ),
       },
       {

@@ -3,9 +3,11 @@
 import { useState, useEffect } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import AdminLayout from '@/components/AdminLayout';
+import MarkdownContent from '@/components/MarkdownContent';
 import {
   Save, X, Scale, Calendar, Building, FileText,
-  Link as LinkIcon, AlertCircle
+  Link as LinkIcon, AlertCircle, Bold, List, Heading2, Eye,
+  RefreshCw, CheckCircle, XCircle, Clock
 } from 'lucide-react';
 
 const TYPE_OPTIONS = [
@@ -33,6 +35,21 @@ export default function EditLegislativeActPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [isFetching, setIsFetching] = useState(true);
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const [showPreview, setShowPreview] = useState(false);
+
+  // Estado para atualização de conteúdo
+  const [isUpdating, setIsUpdating] = useState(false);
+  const [updateResult, setUpdateResult] = useState<{
+    success: boolean;
+    message: string;
+    changed?: boolean;
+    changeSummary?: string;
+  } | null>(null);
+  const [scrapeStatus, setScrapeStatus] = useState<{
+    lastScrapedAt?: string;
+    status?: string;
+    error?: string;
+  } | null>(null);
 
   const [formData, setFormData] = useState({
     type: 'decreto',
@@ -52,6 +69,7 @@ export default function EditLegislativeActPage() {
 
   useEffect(() => {
     fetchAct();
+    fetchScrapeStatus();
   }, [id]);
 
   const fetchAct = async () => {
@@ -100,6 +118,71 @@ export default function EditLegislativeActPage() {
       router.push('/admin/legislacao');
     } finally {
       setIsFetching(false);
+    }
+  };
+
+  // Buscar status de scraping
+  const fetchScrapeStatus = async () => {
+    try {
+      const response = await fetch(`/api/admin/legislative-acts/${id}/update-content`);
+      if (response.ok) {
+        const data = await response.json();
+        setScrapeStatus(data.scraping);
+      }
+    } catch (error) {
+      console.error('Erro ao buscar status:', error);
+    }
+  };
+
+  // Atualizar conteúdo da URL oficial
+  const handleUpdateContent = async () => {
+    if (!formData.officialUrl) {
+      setUpdateResult({
+        success: false,
+        message: 'Preencha a URL Oficial antes de verificar atualizações',
+      });
+      return;
+    }
+
+    setIsUpdating(true);
+    setUpdateResult(null);
+
+    try {
+      const response = await fetch(`/api/admin/legislative-acts/${id}/update-content`, {
+        method: 'POST',
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        setUpdateResult({
+          success: true,
+          message: data.message,
+          changed: data.changed,
+          changeSummary: data.data?.changeSummary,
+        });
+
+        // Se houve mudança, atualizar o campo de conteúdo
+        if (data.changed && data.data?.contentLength) {
+          // Recarregar os dados do ato para pegar o novo conteúdo
+          fetchAct();
+        }
+
+        // Atualizar status de scraping
+        fetchScrapeStatus();
+      } else {
+        setUpdateResult({
+          success: false,
+          message: data.error || 'Erro ao verificar atualizações',
+        });
+      }
+    } catch (error) {
+      setUpdateResult({
+        success: false,
+        message: error instanceof Error ? error.message : 'Erro de conexão',
+      });
+    } finally {
+      setIsUpdating(false);
     }
   };
 
@@ -274,15 +357,106 @@ export default function EditLegislativeActPage() {
               />
             </label>
 
-            <label className="block">
-              <span className="text-sm font-bold text-gray-900 mb-2 block">Resumo Didático</span>
-              <textarea
-                value={formData.summary}
-                onChange={(e) => setFormData({ ...formData, summary: e.target.value })}
-                rows={3}
-                className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              />
-            </label>
+            {/* Resumo Didático com Markdown */}
+            <div className="block">
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-sm font-bold text-gray-900">Resumo Didático (suporta Markdown)</span>
+                <button
+                  type="button"
+                  onClick={() => setShowPreview(!showPreview)}
+                  className={`flex items-center gap-2 px-3 py-1.5 text-sm rounded-lg transition-colors ${
+                    showPreview
+                      ? 'bg-blue-600 text-white'
+                      : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                  }`}
+                >
+                  <Eye className="w-4 h-4" />
+                  {showPreview ? 'Ocultar Preview' : 'Ver Preview'}
+                </button>
+              </div>
+
+              {/* Toolbar de formatação */}
+              <div className="flex items-center gap-1 mb-2 p-2 bg-gray-100 rounded-t-lg border-2 border-b-0 border-gray-300">
+                <button
+                  type="button"
+                  onClick={() => {
+                    const textarea = document.getElementById('summary-textarea') as HTMLTextAreaElement;
+                    const start = textarea.selectionStart;
+                    const end = textarea.selectionEnd;
+                    const text = formData.summary;
+                    const selectedText = text.substring(start, end);
+                    const newText = text.substring(0, start) + '**' + selectedText + '**' + text.substring(end);
+                    setFormData({ ...formData, summary: newText });
+                    setTimeout(() => {
+                      textarea.focus();
+                      textarea.setSelectionRange(start + 2, end + 2);
+                    }, 0);
+                  }}
+                  className="p-2 hover:bg-gray-200 rounded transition-colors"
+                  title="Negrito (selecione o texto primeiro)"
+                >
+                  <Bold className="w-4 h-4" />
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    const textarea = document.getElementById('summary-textarea') as HTMLTextAreaElement;
+                    const start = textarea.selectionStart;
+                    const text = formData.summary;
+                    const lineStart = text.lastIndexOf('\n', start - 1) + 1;
+                    const newText = text.substring(0, lineStart) + '- ' + text.substring(lineStart);
+                    setFormData({ ...formData, summary: newText });
+                    setTimeout(() => textarea.focus(), 0);
+                  }}
+                  className="p-2 hover:bg-gray-200 rounded transition-colors"
+                  title="Adicionar item de lista"
+                >
+                  <List className="w-4 h-4" />
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    const textarea = document.getElementById('summary-textarea') as HTMLTextAreaElement;
+                    const start = textarea.selectionStart;
+                    const text = formData.summary;
+                    const lineStart = text.lastIndexOf('\n', start - 1) + 1;
+                    const newText = text.substring(0, lineStart) + '## ' + text.substring(lineStart);
+                    setFormData({ ...formData, summary: newText });
+                    setTimeout(() => textarea.focus(), 0);
+                  }}
+                  className="p-2 hover:bg-gray-200 rounded transition-colors"
+                  title="Adicionar título"
+                >
+                  <Heading2 className="w-4 h-4" />
+                </button>
+                <span className="ml-2 text-xs text-gray-500">
+                  Use **texto** para negrito, - para listas, ## para títulos
+                </span>
+              </div>
+
+              <div className={`grid gap-4 ${showPreview ? 'grid-cols-2' : 'grid-cols-1'}`}>
+                {/* Editor */}
+                <textarea
+                  id="summary-textarea"
+                  value={formData.summary}
+                  onChange={(e) => setFormData({ ...formData, summary: e.target.value })}
+                  rows={8}
+                  placeholder="Digite o resumo didático usando Markdown...&#10;&#10;Exemplo:&#10;## Pontos Principais&#10;- Item 1&#10;- Item 2&#10;&#10;**Texto em negrito** para destaque."
+                  className="w-full px-4 py-3 border-2 border-gray-300 rounded-b-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent font-mono text-sm"
+                />
+
+                {/* Preview */}
+                {showPreview && (
+                  <div className="border-2 border-gray-300 rounded-lg p-4 bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 overflow-auto max-h-64">
+                    {formData.summary ? (
+                      <MarkdownContent content={formData.summary} />
+                    ) : (
+                      <p className="text-gray-400 italic">O preview aparecerá aqui...</p>
+                    )}
+                  </div>
+                )}
+              </div>
+            </div>
           </div>
 
           {/* Metadados */}
@@ -389,6 +563,123 @@ export default function EditLegislativeActPage() {
                 className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent font-mono text-sm"
               />
             </label>
+          </div>
+
+          {/* Atualização de Conteúdo */}
+          <div className="bg-gradient-to-r from-purple-50 to-indigo-50 rounded-xl border-2 border-purple-200 p-6">
+            <h3 className="text-lg font-bold text-purple-900 mb-4 flex items-center gap-2">
+              <RefreshCw className="w-5 h-5" />
+              Atualização Automática de Conteúdo
+            </h3>
+
+            <p className="text-sm text-purple-800 mb-4">
+              Verifique e atualize automaticamente o texto legal a partir da URL oficial.
+              O sistema detecta alterações comparando com a versão anterior.
+            </p>
+
+            {/* Status de Scraping */}
+            {scrapeStatus && (
+              <div className="mb-4 p-3 bg-white/80 rounded-lg border border-purple-200">
+                <div className="flex items-center gap-4 text-sm">
+                  <div className="flex items-center gap-2">
+                    <Clock className="w-4 h-4 text-gray-500" />
+                    <span className="text-gray-600">Última verificação:</span>
+                    <span className="font-medium">
+                      {scrapeStatus.lastScrapedAt
+                        ? new Date(scrapeStatus.lastScrapedAt).toLocaleString('pt-BR')
+                        : 'Nunca verificado'}
+                    </span>
+                  </div>
+                  {scrapeStatus.status && (
+                    <div className="flex items-center gap-2">
+                      {scrapeStatus.status === 'success' && (
+                        <span className="px-2 py-0.5 bg-green-100 text-green-800 rounded text-xs font-medium">
+                          Atualizado
+                        </span>
+                      )}
+                      {scrapeStatus.status === 'unchanged' && (
+                        <span className="px-2 py-0.5 bg-gray-100 text-gray-800 rounded text-xs font-medium">
+                          Sem alterações
+                        </span>
+                      )}
+                      {scrapeStatus.status === 'failed' && (
+                        <span className="px-2 py-0.5 bg-red-100 text-red-800 rounded text-xs font-medium">
+                          Falhou
+                        </span>
+                      )}
+                    </div>
+                  )}
+                </div>
+                {scrapeStatus.error && (
+                  <p className="mt-2 text-xs text-red-600">{scrapeStatus.error}</p>
+                )}
+              </div>
+            )}
+
+            {/* Resultado da Atualização */}
+            {updateResult && (
+              <div className={`mb-4 p-4 rounded-lg border ${
+                updateResult.success
+                  ? updateResult.changed
+                    ? 'bg-green-50 border-green-200'
+                    : 'bg-blue-50 border-blue-200'
+                  : 'bg-red-50 border-red-200'
+              }`}>
+                <div className="flex items-start gap-3">
+                  {updateResult.success ? (
+                    updateResult.changed ? (
+                      <CheckCircle className="w-5 h-5 text-green-600 flex-shrink-0 mt-0.5" />
+                    ) : (
+                      <CheckCircle className="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5" />
+                    )
+                  ) : (
+                    <XCircle className="w-5 h-5 text-red-600 flex-shrink-0 mt-0.5" />
+                  )}
+                  <div>
+                    <p className={`font-medium ${
+                      updateResult.success
+                        ? updateResult.changed ? 'text-green-800' : 'text-blue-800'
+                        : 'text-red-800'
+                    }`}>
+                      {updateResult.message}
+                    </p>
+                    {updateResult.changeSummary && (
+                      <p className="text-sm text-green-700 mt-1">{updateResult.changeSummary}</p>
+                    )}
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Botão de Atualização */}
+            <button
+              type="button"
+              onClick={handleUpdateContent}
+              disabled={isUpdating || !formData.officialUrl}
+              className={`flex items-center gap-2 px-5 py-3 rounded-lg font-semibold transition-all ${
+                formData.officialUrl
+                  ? 'bg-purple-600 text-white hover:bg-purple-700 disabled:bg-purple-400'
+                  : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+              }`}
+            >
+              {isUpdating ? (
+                <>
+                  <RefreshCw className="w-5 h-5 animate-spin" />
+                  Verificando...
+                </>
+              ) : (
+                <>
+                  <RefreshCw className="w-5 h-5" />
+                  Verificar Atualizações
+                </>
+              )}
+            </button>
+
+            {!formData.officialUrl && (
+              <p className="mt-2 text-xs text-gray-500">
+                Preencha a URL Oficial acima para habilitar a verificação automática.
+              </p>
+            )}
           </div>
 
           {/* Botões */}

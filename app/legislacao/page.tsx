@@ -6,6 +6,7 @@ import {
   ChevronUp, ExternalLink, Download, BookOpen, Eye,
   X, FileText
 } from 'lucide-react';
+import MarkdownContent from '@/components/MarkdownContent';
 
 interface LegislativeAct {
   id: string;
@@ -404,14 +405,18 @@ export default function LegislacaoPage() {
                     {expandedAct === act.id && (
                       <div className="border-t-2 border-gray-200 bg-gray-50 p-6">
                         {act.summary && (
-                          <div className="mb-6 p-4 bg-blue-50 border-2 border-blue-200 rounded-lg">
-                            <div className="flex items-center gap-2 mb-2">
-                              <BookOpen className="w-5 h-5 text-blue-700" />
-                              <h3 className="text-sm font-bold text-blue-900 uppercase tracking-wide">
+                          <div className="mb-6 bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 rounded-xl overflow-hidden shadow-sm">
+                            {/* Header destacado */}
+                            <div className="bg-gradient-to-r from-blue-600 to-indigo-600 px-4 py-3">
+                              <h3 className="flex items-center gap-2 text-sm font-bold text-white uppercase tracking-wide">
+                                <BookOpen className="w-5 h-5" />
                                 Resumo Didático
                               </h3>
                             </div>
-                            <p className="text-gray-800 leading-relaxed">{act.summary}</p>
+                            {/* Conteúdo com Markdown */}
+                            <div className="p-4">
+                              <MarkdownContent content={act.summary} />
+                            </div>
                           </div>
                         )}
 
