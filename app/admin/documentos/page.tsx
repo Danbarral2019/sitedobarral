@@ -54,7 +54,7 @@ export default function DocumentosPage() {
 
   // Pagination
   const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 12; // Increased since we removed the form
+  const itemsPerPage = 50; // Larger page size with server-side filtering
 
   // Bulk operations
   const [selectedDocuments, setSelectedDocuments] = useState<Set<string>>(new Set());
@@ -109,6 +109,11 @@ export default function DocumentosPage() {
         pageSize: itemsPerPage.toString(),
       });
 
+      // Send category filter to server for proper server-side filtering
+      if (filterCategory) {
+        params.set('category', filterCategory);
+      }
+
       const response = await fetch(`/api/admin/documents?${params}`);
       const data = await response.json();
 
@@ -142,23 +147,23 @@ export default function DocumentosPage() {
       isFetchingRef.current = false;
       setIsLoadingDocs(false);
     }
-  }, [currentPage, itemsPerPage]); // Removed errorToast from dependencies
+  }, [currentPage, itemsPerPage, filterCategory]); // Server-side filters need to trigger refetch
 
   useEffect(() => {
     verifyAdmin();
   }, [verifyAdmin]);
 
-  // Reset loaded ref when page changes to allow new fetch
+  // Reset loaded ref when page or category changes to allow new fetch
   useEffect(() => {
     hasLoadedRef.current = false;
-  }, [currentPage]);
+  }, [currentPage, filterCategory]);
 
   useEffect(() => {
     if (!isLoading) {
       loadDocuments();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isLoading, currentPage]); // Don't include loadDocuments to prevent infinite loops
+  }, [isLoading, currentPage, filterCategory]); // Server-side filters trigger refetch
 
   // Completion status helper
   function getDocCompletionStatus(doc: DocumentData): 'complete' | 'warning' | 'critical' {
