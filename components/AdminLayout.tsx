@@ -117,11 +117,11 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
     // === DOCUMENTOS ===
     { divider: true, label: '📁 Documentos' },
     {
-      path: '/admin/documentos-pendentes',
-      label: 'Aprovar Documentos ⚠️',
+      path: '/admin/adicionar-documentos',
+      label: 'Adicionar Documentos ➕',
       icon: (props: Record<string, unknown>) => (
         <svg {...props} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
         </svg>
       ),
       badge: unreadCounts.documentos,
@@ -132,15 +132,6 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
       icon: (props: Record<string, unknown>) => (
         <svg {...props} fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
-        </svg>
-      ),
-    },
-    {
-      path: '/admin/reclassificar-documentos',
-      label: 'Reclassificar Documentos 🔄',
-      icon: (props: Record<string, unknown>) => (
-        <svg {...props} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
         </svg>
       ),
     },
