@@ -219,9 +219,9 @@ export function ResourceListClient<T extends { id: string }>({
           </div>
         ) : (
           <div className="bg-white rounded-lg shadow overflow-hidden">
-            <div className="overflow-x-auto">
+            <div className={`overflow-x-auto overflow-y-auto ${config.tableMaxHeight || 'max-h-[70vh]'}`}>
               <table className="min-w-full divide-y divide-gray-200">
-                <thead className="bg-gray-50">
+                <thead className="bg-gray-50 sticky top-0 z-10">
                   <tr>
                     {config.allowSelection && (
                       <th className="px-6 py-3 text-left">
@@ -239,17 +239,37 @@ export function ResourceListClient<T extends { id: string }>({
                         />
                       </th>
                     )}
-                    {config.columns.map((col) => (
-                      <th
-                        key={col.id}
-                        className={`px-6 py-3 text-${col.align || 'left'} text-xs font-medium text-gray-500 uppercase tracking-wider ${col.width || ''}`}
-                      >
-                        {col.label}
-                      </th>
-                    ))}
+                    {/* Renderizar colunas antes da última (se actionsPosition = beforeLast) */}
+                    {config.actionsPosition === 'beforeLast'
+                      ? config.columns.slice(0, -1).map((col) => (
+                          <th
+                            key={col.id}
+                            className={`px-6 py-3 text-${col.align || 'left'} text-xs font-medium text-gray-500 uppercase tracking-wider ${col.width || ''}`}
+                          >
+                            {col.label}
+                          </th>
+                        ))
+                      : config.columns.map((col) => (
+                          <th
+                            key={col.id}
+                            className={`px-6 py-3 text-${col.align || 'left'} text-xs font-medium text-gray-500 uppercase tracking-wider ${col.width || ''}`}
+                          >
+                            {col.label}
+                          </th>
+                        ))
+                    }
+                    {/* Coluna de Ações (posição configurável) */}
                     {config.rowActions && config.rowActions.length > 0 && (
                       <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
                         Ações
+                      </th>
+                    )}
+                    {/* Última coluna (se actionsPosition = beforeLast) */}
+                    {config.actionsPosition === 'beforeLast' && config.columns.length > 0 && (
+                      <th
+                        className={`px-6 py-3 text-${config.columns[config.columns.length - 1].align || 'left'} text-xs font-medium text-gray-500 uppercase tracking-wider ${config.columns[config.columns.length - 1].width || ''}`}
+                      >
+                        {config.columns[config.columns.length - 1].label}
                       </th>
                     )}
                   </tr>
@@ -272,11 +292,20 @@ export function ResourceListClient<T extends { id: string }>({
                           />
                         </td>
                       )}
-                      {config.columns.map((col) => (
-                        <td key={col.id} className={`px-6 py-4 whitespace-nowrap text-${col.align || 'left'}`}>
-                          {col.render(item)}
-                        </td>
-                      ))}
+                      {/* Renderizar células das colunas antes da última (se actionsPosition = beforeLast) */}
+                      {config.actionsPosition === 'beforeLast'
+                        ? config.columns.slice(0, -1).map((col) => (
+                            <td key={col.id} className={`px-6 py-4 whitespace-nowrap text-${col.align || 'left'}`}>
+                              {col.render(item)}
+                            </td>
+                          ))
+                        : config.columns.map((col) => (
+                            <td key={col.id} className={`px-6 py-4 whitespace-nowrap text-${col.align || 'left'}`}>
+                              {col.render(item)}
+                            </td>
+                          ))
+                      }
+                      {/* Célula de Ações (posição configurável) */}
                       {config.rowActions && config.rowActions.length > 0 && (
                         <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                           <div className="flex justify-end gap-2">
@@ -303,6 +332,12 @@ export function ResourceListClient<T extends { id: string }>({
                                 );
                               })}
                           </div>
+                        </td>
+                      )}
+                      {/* Última célula (se actionsPosition = beforeLast) */}
+                      {config.actionsPosition === 'beforeLast' && config.columns.length > 0 && (
+                        <td className={`px-6 py-4 whitespace-nowrap text-${config.columns[config.columns.length - 1].align || 'left'}`}>
+                          {config.columns[config.columns.length - 1].render(item)}
                         </td>
                       )}
                     </tr>

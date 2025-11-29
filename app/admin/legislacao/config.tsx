@@ -238,5 +238,9 @@ export function createLegislacaoConfig({
     // Paginação
     defaultPageSize: 20,
     pageSizeOptions: [10, 20, 50, 100],
+
+    // Layout da tabela
+    actionsPosition: 'beforeLast', // Ações aparecem ANTES de Visualizações
+    tableMaxHeight: 'max-h-[600px]', // Scroll vertical com altura máxima
   });
 }

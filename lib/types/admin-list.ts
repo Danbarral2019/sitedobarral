@@ -154,6 +154,10 @@ export interface AdminListConfig<T> {
   emptyMessage?: string;
   /** Ícone para estado vazio */
   emptyIcon?: LucideIcon;
+  /** Posição da coluna de ações: 'last' (padrão) ou 'beforeLast' (antes da última coluna) */
+  actionsPosition?: 'last' | 'beforeLast';
+  /** Altura máxima da tabela com scroll (ex: 'max-h-[600px]') */
+  tableMaxHeight?: string;
 }
 
 /**
