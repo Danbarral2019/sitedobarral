@@ -151,19 +151,20 @@ export default function DocumentosPage() {
       return 'critical';
     }
 
-    // Parse arrays safely
-    let tags: string[] = [];
-    let articles: string[] = [];
-    try {
-      tags = doc.tags ? JSON.parse(doc.tags) : [];
-    } catch {
-      tags = doc.tags?.split(',').filter(Boolean) || [];
-    }
-    try {
-      articles = doc.leiArticles ? JSON.parse(doc.leiArticles) : [];
-    } catch {
-      articles = doc.leiArticles?.split(',').filter(Boolean) || [];
-    }
+    // Parse arrays safely (handles both array and string formats)
+    const parseArray = (value: string | string[] | undefined | null): string[] => {
+      if (!value) return [];
+      if (Array.isArray(value)) return value;
+      try {
+        const parsed = JSON.parse(value);
+        return Array.isArray(parsed) ? parsed : [];
+      } catch {
+        return value.split(',').filter(Boolean);
+      }
+    };
+
+    const tags = parseArray(doc.tags);
+    const articles = parseArray(doc.leiArticles);
 
     if (tags.length === 0 && articles.length === 0) return 'warning';
     if (!doc.description) return 'warning';
