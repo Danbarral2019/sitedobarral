@@ -94,9 +94,31 @@ export const SUGGESTED_QUESTIONS: Record<string, string[]> = {
   ],
 
   '92': [
-    'Como funciona a alteração contratual?',
-    'Quais os limites de acréscimo?',
-    'O que é supressão contratual?',
+    'Quais são as cláusulas obrigatórias do contrato?',
+    'O que deve constar no objeto e no preço do contrato?',
+    'Como deve ser definido o prazo de vigência?',
+    'Quais garantias devem estar previstas no contrato?',
+  ],
+
+  // Alterações Contratuais
+  '124': [
+    'Quando é permitida a alteração contratual?',
+    'Quais os limites de acréscimo e supressão?',
+    'O que é alteração unilateral e bilateral?',
+    'Como funciona o reequilíbrio econômico-financeiro?',
+  ],
+
+  '125': [
+    'Quais os limites percentuais para alterações?',
+    'O limite de 25% se aplica a quais casos?',
+    'Quando o limite pode ser de 50%?',
+    'Como calcular os limites de alteração?',
+  ],
+
+  '126': [
+    'O que acontece se ultrapassar os limites de alteração?',
+    'O contratado pode recusar a alteração?',
+    'Como funciona a supressão de quantitativos?',
   ],
 
   '104': [

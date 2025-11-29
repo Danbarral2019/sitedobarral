@@ -3,6 +3,7 @@ import { prisma } from '@/lib/prisma';
 import { randomUUID } from 'crypto';
 import { queryGeminiText } from '@/lib/gemini/cached-client';
 import { LEI_14133_ARTIGOS } from '@/data/lei-14133-artigos';
+import { findRelatedArticles } from '@/data/lei-14133-cross-references';
 
 interface ChatRequest {
   question: string;
@@ -46,7 +47,7 @@ export async function POST(
     // Gerar ou usar conversationId existente
     const conversationId = body.conversationId || randomUUID();
 
-    // Buscar documentos relevantes para contexto futuro da IA
+    // Buscar documentos do artigo atual
     const relevantDocs = await prisma.document.findMany({
       where: {
         AND: [
@@ -71,12 +72,58 @@ export async function POST(
         description: true,
         leiArticles: true,
       },
-      take: 5, // Limitar para não sobrecarregar contexto
+      take: 5,
       orderBy: [
-        { summary: 'desc' }, // Priorizar docs com summary
+        { summary: 'desc' },
         { uploadedAt: 'desc' },
       ],
     });
+
+    // BUSCA CROSS-ARTICLE: Detectar se a pergunta envolve outros temas
+    const { articles: relatedArticleNumbers, topics: matchedTopics } = findRelatedArticles(body.question, articleNumber);
+    console.log(`[Chat API] Cross-reference: Tópicos detectados: ${matchedTopics.join(', ') || 'nenhum'}`);
+    console.log(`[Chat API] Cross-reference: Artigos relacionados: ${relatedArticleNumbers.join(', ') || 'nenhum'}`);
+
+    // Buscar artigos relacionados da Lei 14.133
+    const relatedArticles = relatedArticleNumbers
+      .map(num => ({ numero: num, ...LEI_14133_ARTIGOS[num] }))
+      .filter(art => art.ementa); // Filtrar apenas artigos que existem
+
+    // Buscar documentos dos artigos relacionados (se houver)
+    let crossReferenceDocs: typeof relevantDocs = [];
+    if (relatedArticleNumbers.length > 0) {
+      crossReferenceDocs = await prisma.document.findMany({
+        where: {
+          AND: [
+            {
+              OR: relatedArticleNumbers.map(num => ({
+                leiArticles: { contains: num },
+              })),
+            },
+            {
+              OR: [
+                { isPublic: true },
+                { summary: { not: null } },
+              ],
+            },
+          ],
+        },
+        select: {
+          id: true,
+          title: true,
+          category: true,
+          summary: true,
+          description: true,
+          leiArticles: true,
+        },
+        take: 3, // Limitar documentos cross-reference
+        orderBy: [
+          { summary: 'desc' },
+          { uploadedAt: 'desc' },
+        ],
+      });
+      console.log(`[Chat API] Cross-reference: ${crossReferenceDocs.length} documentos adicionais encontrados`);
+    }
 
     // Criar IDs de contexto (para futuro uso na IA)
     const contextDocIds = relevantDocs.map(d => d.id);
@@ -126,31 +173,67 @@ ${doc.summary ? `Resumo: ${doc.summary}` : doc.description ? `Descrição: ${doc
 `).join('\n')
       : 'Nenhum documento adicional disponível.';
 
+    // Construir contexto dos artigos relacionados (cross-reference)
+    let crossReferenceContext = '';
+    if (relatedArticles.length > 0) {
+      crossReferenceContext = `
+
+**ARTIGOS RELACIONADOS DA LEI 14.133/2021 (para complementar a resposta):**
+${relatedArticles.map(art => `
+---
+**Artigo ${art.numero}** ${art.titulo ? `(${art.titulo})` : ''}
+${art.capituloCompleto ? `Capítulo: ${art.capituloCompleto}` : ''}
+Texto: ${art.ementa.substring(0, 1000)}${art.ementa.length > 1000 ? '...' : ''}
+`).join('\n')}`;
+    }
+
+    // Construir contexto dos documentos cross-reference
+    let crossReferenceDocsContext = '';
+    if (crossReferenceDocs.length > 0) {
+      crossReferenceDocsContext = `
+
+**DOCUMENTOS DOS ARTIGOS RELACIONADOS:**
+${crossReferenceDocs.map((doc, i) => `
+**Documento Adicional ${i + 1}: ${doc.title}**
+Categoria: ${doc.category}
+Artigos vinculados: ${doc.leiArticles || 'N/A'}
+${doc.summary ? `Resumo: ${doc.summary}` : doc.description ? `Descrição: ${doc.description}` : ''}
+`).join('\n')}`;
+    }
+
+    // Flag para indicar se há cross-reference
+    const hasCrossReference = relatedArticles.length > 0;
+
     const prompt = `Você é um assistente especializado em Licitações e Contratos Públicos, especificamente na Lei nº 14.133/2021 (Nova Lei de Licitações).
 
-**CONTEXTO DO ARTIGO:**
+**CONTEXTO DO ARTIGO PRINCIPAL:**
 Artigo ${articleNumber} da Lei 14.133/2021
 ${article.titulo ? `Título: ${article.titulo}` : ''}
 ${article.capituloCompleto ? `Capítulo: ${article.capituloCompleto}` : ''}
 ${article.secao ? `Seção: ${article.secao}` : ''}
 
-**TEXTO COMPLETO DO ARTIGO:**
+**TEXTO COMPLETO DO ARTIGO ${articleNumber}:**
 ${article.ementa}
 
-**DOCUMENTOS RELACIONADOS DISPONÍVEIS:**
+**DOCUMENTOS RELACIONADOS AO ARTIGO ${articleNumber}:**
 ${docsContext}
+${crossReferenceContext}
+${crossReferenceDocsContext}
 
 **PERGUNTA DO USUÁRIO:**
 ${body.question}
 
 **INSTRUÇÕES:**
 1. Responda de forma clara, objetiva e técnica
-2. Base sua resposta PRIMARIAMENTE no texto do artigo fornecido
-3. Use os documentos relacionados como contexto adicional quando relevante
-4. Se a pergunta não puder ser respondida com as informações disponíveis, seja honesto sobre isso
-5. Cite especificamente as fontes quando usar informações dos documentos
-6. Use linguagem técnica jurídica apropriada, mas mantenha clareza
-7. Se aplicável, mencione implicações práticas ou pontos de atenção
+2. ${hasCrossReference
+      ? `A pergunta do usuário pode envolver temas tratados em OUTROS ARTIGOS da Lei (${matchedTopics.join(', ')}). Se for o caso, USE AS INFORMAÇÕES DOS ARTIGOS RELACIONADOS fornecidos acima para complementar sua resposta de forma completa.`
+      : 'Base sua resposta PRIMARIAMENTE no texto do artigo fornecido'}
+3. Se o artigo ${articleNumber} NÃO trata diretamente do tema perguntado, mas foram fornecidos artigos relacionados, EXPLIQUE que o tema está em outros artigos e forneça a resposta com base nos artigos relacionados
+4. Cite os números dos artigos quando usar informações deles (Ex: "Conforme o Art. 124...")
+5. Use os documentos como contexto adicional quando relevante
+6. Se a pergunta não puder ser respondida com as informações disponíveis, seja honesto sobre isso
+7. Use linguagem técnica jurídica apropriada, mas mantenha clareza
+8. Se aplicável, mencione implicações práticas ou pontos de atenção
 
 Responda agora:`;
 
@@ -181,8 +264,14 @@ Responda agora:`;
       },
     });
 
-    // Preparar fontes para resposta
-    const sources = relevantDocs.map(doc => ({
+    // Preparar fontes para resposta (incluindo docs cross-reference)
+    const allDocs = [...relevantDocs, ...crossReferenceDocs];
+    // Remover duplicados por ID
+    const uniqueDocs = allDocs.filter((doc, index, self) =>
+      index === self.findIndex(d => d.id === doc.id)
+    );
+
+    const sources = uniqueDocs.map(doc => ({
       id: doc.id,
       title: doc.title,
       category: doc.category,
@@ -190,6 +279,9 @@ Responda agora:`;
     }));
 
     console.log(`✅ Gemini response generated (${geminiResult.latency}ms, cached: ${geminiResult.cached})`);
+    if (hasCrossReference) {
+      console.log(`✅ Cross-reference: ${relatedArticles.length} artigos e ${crossReferenceDocs.length} docs adicionais incluídos`);
+    }
 
     return NextResponse.json({
       conversationId,
@@ -201,6 +293,11 @@ Responda agora:`;
         articleNumber,
         articleTitle: article.titulo,
         relevantDocsCount: relevantDocs.length,
+        crossReference: hasCrossReference ? {
+          topics: matchedTopics,
+          relatedArticles: relatedArticleNumbers,
+          additionalDocsCount: crossReferenceDocs.length,
+        } : null,
         gemini: {
           model: 'gemini-2.0-flash-exp',
           cached: geminiResult.cached,
