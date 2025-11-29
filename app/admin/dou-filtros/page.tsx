@@ -738,8 +738,8 @@ export default function DOUFiltrosPage() {
                 <div className="mt-4 pt-4 border-t border-yellow-200">
                   <p className="text-xs text-yellow-800">
                     💡 <strong>Dica:</strong> Acesse a página de{' '}
-                    <a href="/admin/documentos-pendentes" className="underline hover:text-yellow-900">
-                      Documentos Pendentes
+                    <a href="/admin/adicionar-documentos" className="underline hover:text-yellow-900">
+                      Adicionar Documentos
                     </a>{' '}
                     para aprovar ou rejeitar estes documentos.
                   </p>
