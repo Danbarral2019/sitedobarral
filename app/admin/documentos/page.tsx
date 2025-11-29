@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import dynamic from 'next/dynamic';
 import {
   FileText, Loader2, Search, Filter, X, Download,
@@ -70,6 +70,10 @@ export default function DocumentosPage() {
     critical: 0,
   });
 
+  // Ref to prevent multiple simultaneous fetches
+  const isFetchingRef = useRef(false);
+  const hasLoadedRef = useRef(false);
+
   const verifyAdmin = useCallback(async () => {
     try {
       const response = await fetch('/api/auth/verify');
@@ -91,8 +95,14 @@ export default function DocumentosPage() {
     }
   }, []);
 
-  const loadDocuments = useCallback(async () => {
+  const loadDocuments = useCallback(async (force = false) => {
+    // Prevent concurrent fetches and repeated calls on error
+    if (isFetchingRef.current) return;
+    if (hasLoadedRef.current && !force) return;
+
+    isFetchingRef.current = true;
     setIsLoadingDocs(true);
+
     try {
       const params = new URLSearchParams({
         page: currentPage.toString(),
@@ -108,6 +118,7 @@ export default function DocumentosPage() {
 
       setDocuments(data.documents || []);
       setServerPagination(data.pagination || null);
+      hasLoadedRef.current = true;
 
       // Calculate stats
       const docs = data.documents || [];
@@ -123,21 +134,31 @@ export default function DocumentosPage() {
       setStats(statsCalc);
     } catch (error) {
       console.error('Erro ao carregar documentos:', error);
-      errorToast('Erro ao carregar documentos', error instanceof Error ? error.message : 'Erro desconhecido');
+      // Only show toast once, don't retry automatically
+      if (!hasLoadedRef.current) {
+        errorToast('Erro ao carregar documentos', error instanceof Error ? error.message : 'Erro desconhecido');
+      }
     } finally {
+      isFetchingRef.current = false;
       setIsLoadingDocs(false);
     }
-  }, [errorToast, currentPage, itemsPerPage]);
+  }, [currentPage, itemsPerPage]); // Removed errorToast from dependencies
 
   useEffect(() => {
     verifyAdmin();
   }, [verifyAdmin]);
 
+  // Reset loaded ref when page changes to allow new fetch
+  useEffect(() => {
+    hasLoadedRef.current = false;
+  }, [currentPage]);
+
   useEffect(() => {
     if (!isLoading) {
       loadDocuments();
     }
-  }, [isLoading, loadDocuments, currentPage]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isLoading, currentPage]); // Don't include loadDocuments to prevent infinite loops
 
   // Completion status helper
   function getDocCompletionStatus(doc: DocumentData): 'complete' | 'warning' | 'critical' {
@@ -491,9 +512,10 @@ export default function DocumentosPage() {
 
               <div className="flex gap-2">
                 <button
-                  onClick={() => loadDocuments()}
+                  onClick={() => loadDocuments(true)}
                   className="px-3 py-2 border-2 border-gray-300 rounded-lg font-medium text-sm text-gray-700 hover:bg-gray-50 transition-colors flex items-center gap-1"
                   title="Recarregar"
+                  disabled={isLoadingDocs}
                 >
                   <RefreshCw className={`w-4 h-4 ${isLoadingDocs ? 'animate-spin' : ''}`} />
                 </button>
