@@ -1,23 +1,51 @@
 @import "tailwindcss";
 
-/* Forçar sempre tema claro - sem dark mode automático */
+/* Variaveis da marca - azul petroleo #20364e */
 :root {
   --background: #ffffff;
   --foreground: #111827;
+
+  /* Paleta brand */
+  --brand-primary: #20364e;
+  --brand-light: #3a5a73;
+  --brand-dark: #142230;
+  --brand-50: #f0f4f7;
+  --brand-100: #d9e2ea;
+  --brand-600: #20364e;
+  --brand-700: #1a2c3f;
+  --brand-800: #142230;
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --font-sans: var(--font-poppins);
+  --font-serif: var(--font-cinzel);
+
+  /* Paleta brand - azul petroleo #20364e */
+  --color-brand-50: #f0f4f7;
+  --color-brand-100: #d9e2ea;
+  --color-brand-200: #b3c5d5;
+  --color-brand-300: #8da8c0;
+  --color-brand-400: #5d8199;
+  --color-brand-500: #3a5a73;
+  --color-brand-600: #20364e;
+  --color-brand-700: #1a2c3f;
+  --color-brand-800: #142230;
+  --color-brand-900: #0e1821;
+  --color-brand-950: #080d11;
 }
 
-/* Tema claro forçado apenas no body principal */
+/* Tema claro com nova tipografia */
 body {
   background: #f9fafb;
   color: #111827;
-  font-family: Inter, Arial, Helvetica, sans-serif;
+  font-family: var(--font-poppins), Poppins, system-ui, sans-serif;
+}
+
+/* Classe utilitaria para titulos com Cinzel */
+.font-heading {
+  font-family: var(--font-cinzel), Cinzel, Georgia, serif;
 }
 
 /* Permitir que classes Tailwind sobrescrevam */

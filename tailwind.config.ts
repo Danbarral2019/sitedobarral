@@ -9,21 +9,35 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        // Azul profissional e sóbrio como cor principal
-        primary: {
-          50: '#f8fafc',
-          100: '#f1f5f9',
-          200: '#e2e8f0',
-          300: '#cbd5e1',
-          400: '#94a3b8',
-          500: '#64748b',
-          600: '#475569',
-          700: '#334155',
-          800: '#1e293b',
-          900: '#0f172a',
-          950: '#020617',
+        // Nova paleta brand - azul petroleo do manual de marca (#20364e)
+        brand: {
+          50: '#f0f4f7',
+          100: '#d9e2ea',
+          200: '#b3c5d5',
+          300: '#8da8c0',
+          400: '#5d8199',
+          500: '#3a5a73',
+          600: '#20364e', // Cor principal do manual
+          700: '#1a2c3f',
+          800: '#142230',
+          900: '#0e1821',
+          950: '#080d11',
         },
-        // Azul vibrante para destaques pontuais
+        // Manter primary como alias para brand (compatibilidade)
+        primary: {
+          50: '#f0f4f7',
+          100: '#d9e2ea',
+          200: '#b3c5d5',
+          300: '#8da8c0',
+          400: '#5d8199',
+          500: '#3a5a73',
+          600: '#20364e',
+          700: '#1a2c3f',
+          800: '#142230',
+          900: '#0e1821',
+          950: '#080d11',
+        },
+        // Azul vibrante para CTAs e destaques
         blue: {
           50: '#eff6ff',
           100: '#dbeafe',
@@ -49,7 +63,7 @@ const config: Config = {
           800: '#1f2937',
           900: '#111827',
         },
-        // Amarelo/âmbar suave para CTAs pontuais
+        // Amarelo/ambar suave para alertas
         accent: {
           50: '#fffbeb',
           100: '#fef3c7',
@@ -65,8 +79,10 @@ const config: Config = {
         secondary: '#ffffff',
       },
       fontFamily: {
-        sans: ['Inter', 'system-ui', 'sans-serif'],
-        serif: ['Merriweather', 'Georgia', 'serif'],
+        sans: ['var(--font-poppins)', 'Poppins', 'system-ui', 'sans-serif'],
+        serif: ['var(--font-cinzel)', 'Cinzel', 'Georgia', 'serif'],
+        cinzel: ['var(--font-cinzel)', 'Cinzel', 'Georgia', 'serif'],
+        poppins: ['var(--font-poppins)', 'Poppins', 'system-ui', 'sans-serif'],
       },
       spacing: {
         '18': '4.5rem',

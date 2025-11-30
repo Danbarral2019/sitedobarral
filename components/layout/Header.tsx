@@ -1,8 +1,9 @@
 'use client';
 
 import Link from 'next/link';
+import Image from 'next/image';
 import { useState, memo, useEffect, useRef } from 'react';
-import { Menu, X, ChevronDown, BookOpen, User, FileText, Mail, Home, LogIn, Award, Search, Scale } from 'lucide-react';
+import { Menu, X, ChevronDown, User, FileText, Mail, Home, LogIn, Award, BookOpen } from 'lucide-react';
 import { courses } from '@/data/courses';
 
 export const Header = memo(function Header() {
@@ -34,23 +35,33 @@ export const Header = memo(function Header() {
   }, [isCoursesOpen]);
 
   return (
-    <header className="bg-white shadow-md">
+    <header className="bg-brand-600 shadow-lg">
       <nav className="container mx-auto px-4">
-        <div className="flex justify-between items-center h-20">
-          <Link href="/" className="flex items-center space-x-2 sm:space-x-3 flex-shrink-0">
-            <div className="w-10 h-10 sm:w-12 sm:h-12 bg-primary-600 rounded-lg flex items-center justify-center flex-shrink-0">
-              <BookOpen className="w-5 h-5 sm:w-7 sm:h-7 text-white" />
+        <div className="flex justify-between items-center h-28">
+          <Link href="/" className="flex items-center space-x-3 sm:space-x-4 flex-shrink-0 group">
+            <div className="w-16 h-16 sm:w-24 sm:h-24 relative flex-shrink-0">
+              <Image
+                src="/images/logo-pena.png"
+                alt="Logo Prof. Daniel Barral"
+                fill
+                className="object-contain brightness-0 invert"
+                priority
+              />
             </div>
             <div className="min-w-0">
-              <h1 className="text-base sm:text-xl font-bold text-gray-900 truncate">Prof. Daniel Barral</h1>
-              <p className="text-xs text-gray-600 hidden sm:block">Especialista em Licitações e Contratos</p>
+              <h1 className="text-base sm:text-xl font-cinzel font-semibold text-white tracking-wide truncate group-hover:text-brand-100 transition-colors">
+                Daniel Barral
+              </h1>
+              <p className="text-xs text-brand-200 hidden sm:block font-poppins">
+                Professor de Licitações e Contratos
+              </p>
             </div>
           </Link>
 
-          <div className="hidden md:flex items-center space-x-8">
-            <Link 
-              href="/" 
-              className="flex items-center space-x-1 text-gray-700 hover:text-primary-600 transition-colors"
+          <div className="hidden md:flex items-center space-x-6 lg:space-x-8">
+            <Link
+              href="/"
+              className="flex items-center space-x-1 text-white/90 hover:text-white transition-colors font-poppins text-sm"
             >
               <Home className="w-4 h-4" />
               <span>Início</span>
@@ -58,32 +69,16 @@ export const Header = memo(function Header() {
 
             <Link
               href="/sobre"
-              className="flex items-center space-x-1 text-gray-700 hover:text-primary-600 transition-colors"
+              className="flex items-center space-x-1 text-white/90 hover:text-white transition-colors font-poppins text-sm"
             >
               <User className="w-4 h-4" />
               <span>Sobre</span>
             </Link>
 
-            <Link
-              href="/busca"
-              className="flex items-center space-x-1 text-gray-700 hover:text-primary-600 transition-colors"
-            >
-              <Search className="w-4 h-4" />
-              <span>Busca</span>
-            </Link>
-
-            <Link
-              href="/lei-14133"
-              className="flex items-center space-x-1 text-gray-700 hover:text-primary-600 transition-colors"
-            >
-              <Scale className="w-4 h-4" />
-              <span>Lei 14.133</span>
-            </Link>
-
             <div className="relative" ref={coursesDropdownRef} suppressHydrationWarning>
               <button
                 onClick={() => setIsCoursesOpen(!isCoursesOpen)}
-                className="flex items-center space-x-1 text-gray-700 hover:text-primary-600 transition-colors"
+                className="flex items-center space-x-1 text-white/90 hover:text-white transition-colors font-poppins text-sm"
               >
                 <BookOpen className="w-4 h-4" />
                 <span>Cursos</span>
@@ -94,7 +89,7 @@ export const Header = memo(function Header() {
                 <div className="absolute top-full left-0 mt-2 w-80 bg-white rounded-lg shadow-xl py-2 max-h-96 overflow-y-auto z-[9999] border border-gray-200">
                   <Link
                     href="/cursos"
-                    className="block px-4 py-2 text-sm font-semibold text-gray-900 hover:bg-primary-50 hover:text-primary-600"
+                    className="block px-4 py-2 text-sm font-semibold text-brand-600 hover:bg-brand-50 hover:text-brand-700"
                     onClick={() => setIsCoursesOpen(false)}
                   >
                     Ver todos os cursos
@@ -104,7 +99,7 @@ export const Header = memo(function Header() {
                     <Link
                       key={course.id}
                       href={`/cursos/${course.slug}`}
-                      className="block px-4 py-2 text-sm text-gray-700 hover:bg-primary-50 hover:text-primary-600"
+                      className="block px-4 py-2 text-sm text-gray-700 hover:bg-brand-50 hover:text-brand-600"
                       onClick={() => setIsCoursesOpen(false)}
                     >
                       {course.title}
@@ -116,7 +111,7 @@ export const Header = memo(function Header() {
 
             <Link
               href="/blog"
-              className="flex items-center space-x-1 text-gray-700 hover:text-primary-600 transition-colors"
+              className="flex items-center space-x-1 text-white/90 hover:text-white transition-colors font-poppins text-sm"
             >
               <FileText className="w-4 h-4" />
               <span>Blog</span>
@@ -124,7 +119,7 @@ export const Header = memo(function Header() {
 
             <Link
               href="/publicacoes"
-              className="flex items-center space-x-1 text-gray-700 hover:text-primary-600 transition-colors"
+              className="flex items-center space-x-1 text-white/90 hover:text-white transition-colors font-poppins text-sm"
             >
               <Award className="w-4 h-4" />
               <span>Publicações</span>
@@ -132,15 +127,15 @@ export const Header = memo(function Header() {
 
             <Link
               href="/contato"
-              className="flex items-center space-x-1 text-gray-700 hover:text-primary-600 transition-colors"
+              className="flex items-center space-x-1 text-white/90 hover:text-white transition-colors font-poppins text-sm"
             >
               <Mail className="w-4 h-4" />
               <span>Contato</span>
             </Link>
 
             <Link
-              href="/login"
-              className="flex items-center space-x-1 text-gray-700 hover:text-primary-600 transition-colors"
+              href="/validar-acesso"
+              className="flex items-center space-x-1 bg-white/10 hover:bg-white/20 px-4 py-2 rounded-lg text-white transition-colors font-poppins text-sm"
             >
               <LogIn className="w-4 h-4" />
               <span>Área do Aluno</span>
@@ -149,78 +144,67 @@ export const Header = memo(function Header() {
 
           <button
             onClick={() => setIsMenuOpen(!isMenuOpen)}
-            className="md:hidden p-2 flex-shrink-0"
+            className="md:hidden p-2 flex-shrink-0 text-white"
+            aria-label={isMenuOpen ? 'Fechar menu' : 'Abrir menu'}
           >
-            {isMenuOpen ? <X className="w-6 h-6 text-gray-700" /> : <Menu className="w-6 h-6 text-gray-700" />}
+            {isMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
           </button>
         </div>
 
         {isMenuOpen && (
-          <div className="md:hidden py-4 border-t">
+          <div className="md:hidden py-4 border-t border-brand-500 bg-brand-600">
             <Link
               href="/"
-              className="block py-2 text-gray-700 hover:text-primary-600"
+              className="block py-3 px-2 text-white/90 hover:text-white hover:bg-brand-500 rounded transition-colors font-poppins"
               onClick={() => setIsMenuOpen(false)}
             >
               Início
             </Link>
             <Link
               href="/sobre"
-              className="block py-2 text-gray-700 hover:text-primary-600"
+              className="block py-3 px-2 text-white/90 hover:text-white hover:bg-brand-500 rounded transition-colors font-poppins"
               onClick={() => setIsMenuOpen(false)}
             >
               Sobre o Professor
             </Link>
             <Link
-              href="/busca"
-              className="block py-2 text-gray-700 hover:text-primary-600"
-              onClick={() => setIsMenuOpen(false)}
-            >
-              Busca Integrada
-            </Link>
-            <Link
-              href="/lei-14133"
-              className="block py-2 text-gray-700 hover:text-primary-600"
-              onClick={() => setIsMenuOpen(false)}
-            >
-              Lei 14.133
-            </Link>
-            <Link
               href="/cursos"
-              className="block py-2 text-gray-700 hover:text-primary-600"
+              className="block py-3 px-2 text-white/90 hover:text-white hover:bg-brand-500 rounded transition-colors font-poppins"
               onClick={() => setIsMenuOpen(false)}
             >
               Cursos
             </Link>
             <Link
               href="/blog"
-              className="block py-2 text-gray-700 hover:text-primary-600"
+              className="block py-3 px-2 text-white/90 hover:text-white hover:bg-brand-500 rounded transition-colors font-poppins"
               onClick={() => setIsMenuOpen(false)}
             >
               Blog
             </Link>
             <Link
               href="/publicacoes"
-              className="block py-2 text-gray-700 hover:text-primary-600"
+              className="block py-3 px-2 text-white/90 hover:text-white hover:bg-brand-500 rounded transition-colors font-poppins"
               onClick={() => setIsMenuOpen(false)}
             >
               Publicações
             </Link>
             <Link
               href="/contato"
-              className="block py-2 text-gray-700 hover:text-primary-600"
+              className="block py-3 px-2 text-white/90 hover:text-white hover:bg-brand-500 rounded transition-colors font-poppins"
               onClick={() => setIsMenuOpen(false)}
             >
               Contato
             </Link>
-            <Link
-              href="/login"
-              className="flex items-center space-x-2 py-2 text-gray-700 hover:text-primary-600"
-              onClick={() => setIsMenuOpen(false)}
-            >
-              <LogIn className="w-4 h-4" />
-              <span>Área do Aluno</span>
-            </Link>
+            <div className="mt-4 pt-4 border-t border-brand-500">
+              <Link
+                href="/validar-acesso"
+                className="flex items-center justify-center space-x-2 py-3 px-4 bg-white/10 hover:bg-white/20 rounded-lg text-white transition-colors font-poppins"
+                onClick={() => setIsMenuOpen(false)}
+              >
+                <LogIn className="w-4 h-4" />
+                <span>Área do Aluno</span>
+              </Link>
+            </div>
           </div>
         )}
       </nav>

@@ -85,16 +85,16 @@ export default function FAQPage() {
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Hero Section */}
-      <div className="bg-gradient-to-r from-blue-600 to-blue-800 text-white">
+      <div className="bg-gradient-to-r from-brand-600 to-brand-800 text-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
           <div className="text-center">
             <div className="flex justify-center mb-4">
               <HelpCircle className="h-16 w-16" />
             </div>
-            <h1 className="text-4xl font-bold mb-4">
+            <h1 className="text-4xl font-bold mb-4 font-cinzel">
               Perguntas Frequentes
             </h1>
-            <p className="text-xl text-blue-100 max-w-2xl mx-auto">
+            <p className="text-xl text-brand-100 max-w-2xl mx-auto">
               Encontre respostas rápidas para as dúvidas mais comuns sobre licitações, documentos e acesso ao site
             </p>
           </div>
@@ -122,7 +122,7 @@ export default function FAQPage() {
         {/* Results */}
         {loading ? (
           <div className="flex items-center justify-center py-12">
-            <Loader2 className="h-8 w-8 animate-spin text-blue-600" />
+            <Loader2 className="h-8 w-8 animate-spin text-brand-600" />
             <span className="ml-2 text-gray-600">Carregando perguntas...</span>
           </div>
         ) : filteredFaqs.length === 0 ? (
@@ -151,16 +151,16 @@ export default function FAQPage() {
 
         {/* Help Section */}
         {!loading && (
-          <div className="mt-12 bg-blue-50 border border-blue-200 rounded-lg p-6 text-center">
-            <h3 className="text-lg font-semibold text-blue-900 mb-2">
+          <div className="mt-12 bg-brand-50 border border-brand-200 rounded-lg p-6 text-center">
+            <h3 className="text-lg font-semibold text-brand-900 mb-2">
               Não encontrou o que procura?
             </h3>
-            <p className="text-blue-800 mb-4">
+            <p className="text-brand-800 mb-4">
               Entre em contato conosco através da página de contato
             </p>
             <a
               href="/contato"
-              className="inline-flex items-center justify-center px-6 py-3 border border-transparent text-base font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 transition-colors"
+              className="inline-flex items-center justify-center px-6 py-3 border border-transparent text-base font-medium rounded-md text-white bg-brand-600 hover:bg-brand-700 transition-colors"
             >
               Fale Conosco
             </a>

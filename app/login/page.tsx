@@ -71,12 +71,12 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-white py-12 px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-gradient-to-br from-brand-50 to-white py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-md mx-auto">
         <div className="bg-white rounded-lg shadow-lg p-8">
           {/* Header */}
           <div className="text-center mb-8">
-            <h1 className="text-3xl font-bold text-gray-900 mb-2">
+            <h1 className="text-3xl font-bold text-gray-900 mb-2 font-cinzel">
               Área do Aluno
             </h1>
             <p className="text-gray-600">
@@ -86,8 +86,8 @@ export default function LoginPage() {
 
           {/* Mensagem de informação */}
           {message === 'account-exists' && (
-            <div className="mb-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
-              <p className="text-sm text-blue-800 font-medium">
+            <div className="mb-6 p-4 bg-brand-50 border border-brand-200 rounded-lg">
+              <p className="text-sm text-brand-800 font-medium">
                 Você já possui uma conta cadastrada. Faça login para acessar os materiais do curso.
               </p>
             </div>
@@ -112,7 +112,7 @@ export default function LoginPage() {
                 id="email"
                 value={formData.email}
                 onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-transparent"
                 placeholder="seu@email.com"
                 disabled={loading}
                 autoComplete="email"
@@ -129,7 +129,7 @@ export default function LoginPage() {
                 id="password"
                 value={formData.password}
                 onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-transparent"
                 placeholder="Sua senha"
                 disabled={loading}
                 autoComplete="current-password"
@@ -140,7 +140,7 @@ export default function LoginPage() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full bg-blue-600 text-white py-3 px-4 rounded-lg font-semibold hover:bg-blue-700 transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed"
+              className="w-full bg-brand-600 text-white py-3 px-4 rounded-lg font-semibold hover:bg-brand-700 transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed"
             >
               {loading ? 'Entrando...' : 'Entrar'}
             </button>
@@ -153,7 +153,7 @@ export default function LoginPage() {
                 Primeiro acesso?{' '}
                 <Link
                   href="/validar-acesso"
-                  className="text-blue-600 hover:text-blue-700 font-medium"
+                  className="text-brand-600 hover:text-brand-700 font-medium"
                 >
                   Escaneie o QR Code do seu curso
                 </Link>
@@ -165,7 +165,7 @@ export default function LoginPage() {
                 Esqueceu sua senha?{' '}
                 <Link
                   href="/esqueci-senha"
-                  className="text-blue-600 hover:text-blue-700 font-medium"
+                  className="text-brand-600 hover:text-brand-700 font-medium"
                 >
                   Redefinir senha
                 </Link>
@@ -187,7 +187,7 @@ export default function LoginPage() {
         <div className="mt-6 text-center">
           <Link
             href="/"
-            className="text-sm text-blue-600 hover:text-blue-700 font-medium"
+            className="text-sm text-brand-600 hover:text-brand-700 font-medium"
           >
             ← Voltar para o site
           </Link>

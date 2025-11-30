@@ -42,8 +42,8 @@ export default function CursosPage() {
         <div className="max-w-6xl mx-auto">
           <div className="text-center mb-12">
             <div className="inline-block">
-              <h1 className="text-5xl font-bold mb-3 text-gray-900">Cursos Especializados</h1>
-              <div className="h-1.5 w-40 bg-gradient-to-r from-blue-500 to-blue-600 rounded-full mx-auto mb-6"></div>
+              <h1 className="text-5xl font-bold mb-3 text-gray-900 font-cinzel">Cursos Especializados</h1>
+              <div className="h-1.5 w-40 bg-gradient-to-r from-brand-500 to-brand-600 rounded-full mx-auto mb-6"></div>
             </div>
             <p className="text-xl text-gray-700 max-w-3xl mx-auto leading-relaxed">
               Explore nossa biblioteca completa de cursos em Direito Administrativo,
@@ -51,14 +51,14 @@ export default function CursosPage() {
             </p>
           </div>
 
-          <div className="bg-gradient-to-r from-blue-50 to-gray-50 border-l-4 border-blue-600 p-8 mb-12 rounded-2xl shadow-md">
+          <div className="bg-gradient-to-r from-brand-50 to-gray-50 border-l-4 border-brand-600 p-8 mb-12 rounded-2xl shadow-md">
             <div className="flex items-start gap-4">
-              <div className="w-12 h-12 bg-blue-600 rounded-lg flex items-center justify-center flex-shrink-0">
+              <div className="w-12 h-12 bg-brand-600 rounded-lg flex items-center justify-center flex-shrink-0">
                 <BookOpen className="w-6 h-6 text-white" />
               </div>
               <div>
-                <h2 className="text-2xl font-bold mb-3 text-blue-900">Como acessar o material exclusivo?</h2>
-                <p className="text-blue-900 text-lg leading-relaxed">
+                <h2 className="text-2xl font-bold mb-3 text-brand-900">Como acessar o material exclusivo?</h2>
+                <p className="text-brand-900 text-lg leading-relaxed">
                   Ao participar de nossos cursos presenciais abertos ou de curta duração,
                   você receberá um QR Code exclusivo para acessar todo o material complementar
                   do curso, incluindo apostilas, acórdãos do TCU, pareceres da AGU e muito mais.
@@ -97,11 +97,11 @@ export default function CursosPage() {
 
                       <div className="grid md:grid-cols-3 gap-4 mb-6">
                         <div className={`flex items-center gap-2 text-sm font-medium ${color.bg} px-3 py-2 rounded-lg`}>
-                          <FileText className="w-5 h-5 text-blue-600" />
+                          <FileText className="w-5 h-5 text-brand-600" />
                           <span className="text-gray-900">{course.bibliography.length} Referências</span>
                         </div>
                         <div className={`flex items-center gap-2 text-sm font-medium ${color.bg} px-3 py-2 rounded-lg`}>
-                          <Clock className="w-5 h-5 text-blue-600" />
+                          <Clock className="w-5 h-5 text-brand-600" />
                           <span className="text-gray-900">Material Atualizado</span>
                         </div>
                         <div className={`flex items-center gap-2 text-sm font-medium ${color.bg} px-3 py-2 rounded-lg`}>
@@ -126,7 +126,7 @@ export default function CursosPage() {
           </div>
 
           <div className="mt-12 relative overflow-hidden">
-            <div className="absolute inset-0 bg-gradient-to-br from-blue-800 via-blue-700 to-blue-600 opacity-95"></div>
+            <div className="absolute inset-0 bg-gradient-to-br from-brand-800 via-brand-700 to-brand-600 opacity-95"></div>
             <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9IiNmZmYiIGZpbGwtb3BhY2l0eT0iMC4wNSI+PHBhdGggZD0iTTM2IDE0YzMuMzE0IDAgNiAyLjY4NiA2IDZzLTIuNjg2IDYtNiA2LTYtMi42ODYtNi02IDIuNjg2LTYgNi02ek0yNCAzOGMzLjMxNCAwIDYgMi42ODYgNiA2cy0yLjY4NiA2LTYgNi02LTIuNjg2LTYtNiAyLjY4Ni02IDYtNnoiLz48L2c+PC9nPjwvc3ZnPg==')] opacity-20"></div>
             <div className="relative p-10 md:p-12 text-center rounded-2xl">
               <h2 className="text-4xl md:text-5xl font-bold mb-4 text-white">

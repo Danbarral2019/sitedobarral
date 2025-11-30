@@ -72,8 +72,8 @@ export default async function BlogPage() {
         <div className="max-w-4xl mx-auto">
           <div className="text-center mb-12">
             <div className="inline-block">
-              <h1 className="text-5xl font-bold mb-3 text-gray-900">Blog Jurídico</h1>
-              <div className="h-1.5 w-32 bg-gradient-to-r from-blue-600 via-green-600 to-purple-600 rounded-full mx-auto mb-6"></div>
+              <h1 className="text-5xl font-bold mb-3 text-gray-900 font-cinzel">Blog Jurídico</h1>
+              <div className="h-1.5 w-32 bg-gradient-to-r from-brand-500 to-brand-600 rounded-full mx-auto mb-6"></div>
             </div>
             <p className="text-xl text-gray-800 leading-relaxed">
               Artigos, análises e comentários sobre Direito Administrativo,
@@ -105,7 +105,7 @@ export default async function BlogPage() {
                     <h2 className="text-3xl font-bold mb-3">
                       <Link
                         href={`/blog/${post.slug}`}
-                        className="text-gray-900 hover:text-blue-700 transition-colors"
+                        className="text-gray-900 hover:text-brand-700 transition-colors"
                       >
                         {post.title}
                       </Link>
@@ -128,7 +128,7 @@ export default async function BlogPage() {
 
                   <Link
                     href={`/blog/${post.slug}`}
-                    className="inline-flex items-center gap-2 text-white bg-gradient-to-r from-blue-600 to-blue-700 px-6 py-3 rounded-xl font-bold hover:from-blue-700 hover:to-blue-800 transition-all shadow-md hover:shadow-lg"
+                    className="inline-flex items-center gap-2 text-white bg-gradient-to-r from-brand-600 to-brand-700 px-6 py-3 rounded-xl font-bold hover:from-brand-700 hover:to-brand-800 transition-all shadow-md hover:shadow-lg"
                   >
                     Ler artigo completo
                     <ArrowRight className="w-5 h-5" />

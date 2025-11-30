@@ -58,10 +58,10 @@ export default function LeiExplorerWidget() {
   // Loading state
   if (loading) {
     return (
-      <div className="bg-gradient-to-br from-blue-50 to-indigo-50 border-2 border-blue-200 rounded-xl p-6 shadow-md">
+      <div className="bg-gradient-to-br from-brand-50 to-brand-100 border-2 border-brand-200 rounded-xl p-6 shadow-md">
         <div className="flex items-center justify-center gap-3">
-          <Loader2 className="w-6 h-6 animate-spin text-blue-600" />
-          <span className="text-blue-700">Carregando estatísticas da Lei 14.133...</span>
+          <Loader2 className="w-6 h-6 animate-spin text-brand-600" />
+          <span className="text-brand-700">Carregando estatísticas da Lei 14.133...</span>
         </div>
       </div>
     );
@@ -73,16 +73,16 @@ export default function LeiExplorerWidget() {
   }
 
   return (
-    <div className="bg-gradient-to-br from-blue-50 to-indigo-50 border-2 border-blue-200 rounded-xl shadow-lg overflow-hidden">
+    <div className="bg-gradient-to-br from-brand-50 to-brand-100 border-2 border-brand-200 rounded-xl shadow-lg overflow-hidden">
       {/* Header */}
-      <div className="bg-gradient-to-r from-blue-600 to-indigo-700 text-white p-6">
+      <div className="bg-gradient-to-r from-brand-600 to-brand-800 text-white p-6">
         <div className="flex items-center gap-3 mb-2">
           <div className="p-2 bg-white/20 rounded-lg">
             <Scale className="w-6 h-6" />
           </div>
           <div>
             <h2 className="text-2xl font-bold">Lei 14.133/2021 Comentada</h2>
-            <p className="text-blue-100 text-sm">
+            <p className="text-brand-100 text-sm">
               Explore a lei organizada por artigos com documentos vinculados
             </p>
           </div>
@@ -91,15 +91,15 @@ export default function LeiExplorerWidget() {
         {/* Stats Row */}
         <div className="grid grid-cols-3 gap-4 mt-4">
           <div className="bg-white/10 rounded-lg p-3 backdrop-blur-sm">
-            <p className="text-xs text-blue-100 mb-1">Artigos</p>
+            <p className="text-xs text-brand-100 mb-1">Artigos</p>
             <p className="text-2xl font-bold">{data.totalArticles}</p>
           </div>
           <div className="bg-white/10 rounded-lg p-3 backdrop-blur-sm">
-            <p className="text-xs text-blue-100 mb-1">Documentos</p>
+            <p className="text-xs text-brand-100 mb-1">Documentos</p>
             <p className="text-2xl font-bold">{data.totalDocuments}</p>
           </div>
           <div className="bg-white/10 rounded-lg p-3 backdrop-blur-sm">
-            <p className="text-xs text-blue-100 mb-1">Cobertura</p>
+            <p className="text-xs text-brand-100 mb-1">Cobertura</p>
             <p className="text-2xl font-bold">{data.coveragePercent}%</p>
           </div>
         </div>
@@ -190,7 +190,7 @@ export default function LeiExplorerWidget() {
                 </div>
 
                 {/* Arrow */}
-                <ChevronRight className="w-5 h-5 text-gray-400 group-hover:text-blue-600 flex-shrink-0 transition-colors" />
+                <ChevronRight className="w-5 h-5 text-gray-400 group-hover:text-brand-600 flex-shrink-0 transition-colors" />
               </Link>
             ))}
           </div>
@@ -199,7 +199,7 @@ export default function LeiExplorerWidget() {
         {/* CTA Button */}
         <Link
           href="/area-restrita/lei-comentada"
-          className="block w-full px-6 py-4 bg-gradient-to-r from-blue-600 to-indigo-700 text-white text-center rounded-lg hover:from-blue-700 hover:to-indigo-800 transition-all shadow-md hover:shadow-lg font-semibold flex items-center justify-center gap-2"
+          className="block w-full px-6 py-4 bg-gradient-to-r from-brand-600 to-brand-800 text-white text-center rounded-lg hover:from-blue-700 hover:to-indigo-800 transition-all shadow-md hover:shadow-lg font-semibold flex items-center justify-center gap-2"
         >
           <Scale className="w-5 h-5" />
           Explorar Lei 14.133 Completa

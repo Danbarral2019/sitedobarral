@@ -164,12 +164,12 @@ export default function EnrollmentStatusBanner({ courseId }: EnrollmentStatusBan
   const expiryDate = status.expiresAt ? new Date(status.expiresAt).toLocaleDateString('pt-BR') : '';
 
   return (
-    <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
+    <div className="bg-brand-50 border border-brand-200 rounded-lg p-4 mb-6">
       <div className="flex items-start justify-between">
         <div className="flex items-start flex-1">
           <div className="flex-shrink-0">
             <svg
-              className="w-6 h-6 text-blue-600"
+              className="w-6 h-6 text-brand-600"
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
@@ -183,13 +183,13 @@ export default function EnrollmentStatusBanner({ courseId }: EnrollmentStatusBan
             </svg>
           </div>
           <div className="ml-3 flex-1">
-            <h3 className="text-sm font-semibold text-blue-900">
+            <h3 className="text-sm font-semibold text-brand-900">
               ✓ Acesso Ativo
             </h3>
-            <p className="mt-1 text-sm text-blue-800">
+            <p className="mt-1 text-sm text-brand-800">
               Seu acesso é válido até <strong>{expiryDate}</strong> ({daysRemaining} dias restantes)
             </p>
-            <p className="mt-2 text-xs text-blue-700">
+            <p className="mt-2 text-xs text-brand-700">
               💡 Dica: Faça o upgrade para acesso vitalício e nunca se preocupe com renovação!
             </p>
           </div>
@@ -197,7 +197,7 @@ export default function EnrollmentStatusBanner({ courseId }: EnrollmentStatusBan
         <div className="ml-3 flex-shrink-0">
           <Link
             href={`/upgrade/${courseId}`}
-            className="inline-flex items-center px-3 py-1.5 border border-blue-300 text-xs font-medium rounded-md text-blue-700 bg-white hover:bg-blue-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+            className="inline-flex items-center px-3 py-1.5 border border-brand-300 text-xs font-medium rounded-md text-brand-700 bg-white hover:bg-brand-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-brand-500"
           >
             Ver Upgrade
           </Link>

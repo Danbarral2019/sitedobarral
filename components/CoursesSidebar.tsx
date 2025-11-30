@@ -36,14 +36,14 @@ export default function CoursesSidebar({
       {/* Sidebar - apenas desktop agora */}
       <aside className="hidden lg:block lg:sticky lg:top-4 lg:h-[calc(100vh-2rem)] lg:w-80 bg-white border-r-2 border-gray-200 shadow-xl overflow-y-auto">
         {/* Header da Sidebar */}
-        <div className="sticky top-0 bg-gradient-to-r from-blue-600 to-purple-600 text-white p-6 z-10">
+        <div className="sticky top-0 bg-gradient-to-r from-brand-600 to-brand-700 text-white p-6 z-10">
           <div className="flex items-center gap-3">
             <div className="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center">
               <GraduationCap className="w-7 h-7" />
             </div>
             <div>
               <h2 className="text-xl font-bold">Catálogo de Cursos</h2>
-              <p className="text-sm text-blue-100">{courses.filter(c => c.isEnrolled).length} matriculado{courses.filter(c => c.isEnrolled).length !== 1 ? 's' : ''} de {courses.length}</p>
+              <p className="text-sm text-brand-100">{courses.filter(c => c.isEnrolled).length} matriculado{courses.filter(c => c.isEnrolled).length !== 1 ? 's' : ''} de {courses.length}</p>
             </div>
           </div>
         </div>
@@ -69,8 +69,8 @@ export default function CoursesSidebar({
                       !isEnrolled
                         ? 'bg-gray-50 border-gray-300 opacity-75 hover:opacity-100 hover:border-gray-400'
                         : isSelected
-                        ? 'bg-gradient-to-r from-blue-50 to-purple-50 border-blue-400 shadow-md'
-                        : 'bg-white border-gray-200 hover:border-blue-300 hover:shadow-sm'
+                        ? 'bg-gradient-to-r from-brand-50 to-brand-100 border-brand-400 shadow-md'
+                        : 'bg-white border-gray-200 hover:border-brand-300 hover:shadow-sm'
                     }`}
                   >
                     <div className="flex items-start justify-between gap-3">
@@ -83,7 +83,7 @@ export default function CoursesSidebar({
                             !isEnrolled
                               ? 'text-gray-600'
                               : isSelected
-                              ? 'text-blue-900'
+                              ? 'text-brand-900'
                               : 'text-gray-900'
                           }`}>
                             {course.title}
@@ -93,7 +93,7 @@ export default function CoursesSidebar({
                           {isEnrolled ? (
                             <span className={`text-xs lg:text-xs font-medium px-2 py-1 rounded-full ${
                               isSelected
-                                ? 'bg-blue-200 text-blue-800'
+                                ? 'bg-brand-200 text-brand-800'
                                 : 'bg-gray-100 text-gray-700'
                             }`}>
                               {docCount} {docCount === 1 ? 'material' : 'materiais'}
@@ -109,7 +109,7 @@ export default function CoursesSidebar({
                         !isEnrolled
                           ? 'text-gray-400'
                           : isSelected
-                          ? 'text-blue-600'
+                          ? 'text-brand-600'
                           : 'text-gray-400'
                       }`}>
                         <ChevronRight className="w-5 h-5 lg:w-5 lg:h-5" />

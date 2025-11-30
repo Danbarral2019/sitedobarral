@@ -61,8 +61,8 @@ export default async function PublicacoesPage() {
           {/* Header */}
           <div className="text-center mb-16">
             <div className="inline-block">
-              <h1 className="text-5xl font-bold mb-3 text-gray-900">Publicações Acadêmicas</h1>
-              <div className="h-1.5 w-40 bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 rounded-full mx-auto mb-6"></div>
+              <h1 className="text-5xl font-bold mb-3 text-gray-900 font-cinzel">Publicações Acadêmicas</h1>
+              <div className="h-1.5 w-40 bg-gradient-to-r from-brand-500 to-brand-600 rounded-full mx-auto mb-6"></div>
             </div>
             <p className="text-xl text-gray-700 max-w-3xl mx-auto leading-relaxed">
               Livros, artigos científicos e notícias relevantes sobre Direito Administrativo
@@ -72,7 +72,7 @@ export default async function PublicacoesPage() {
           {/* Seção de Livros */}
           <section className="mb-16">
             <div className="flex items-center gap-3 mb-8">
-              <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-blue-700 rounded-xl flex items-center justify-center">
+              <div className="w-12 h-12 bg-gradient-to-br from-brand-500 to-brand-700 rounded-xl flex items-center justify-center">
                 <BookOpen className="w-7 h-7 text-white" />
               </div>
               <h2 className="text-3xl font-bold text-gray-900">Livros</h2>
@@ -85,7 +85,7 @@ export default async function PublicacoesPage() {
             ) : (
               <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {livros.map((livro: Publication) => (
-                  <div key={livro.id} className="bg-white rounded-2xl shadow-lg overflow-hidden hover:shadow-2xl transition-all group border-2 border-gray-100 hover:border-blue-500">
+                  <div key={livro.id} className="bg-white rounded-2xl shadow-lg overflow-hidden hover:shadow-2xl transition-all group border-2 border-gray-100 hover:border-brand-500">
                     {livro.coverImage && (
                       <div className="aspect-[3/4] bg-gray-200 overflow-hidden relative">
                         <Image
@@ -98,7 +98,7 @@ export default async function PublicacoesPage() {
                       </div>
                     )}
                     <div className="p-6">
-                      <h3 className="text-xl font-bold mb-2 text-gray-900 line-clamp-2 group-hover:text-blue-700 transition-colors">
+                      <h3 className="text-xl font-bold mb-2 text-gray-900 line-clamp-2 group-hover:text-brand-700 transition-colors">
                         {livro.title}
                       </h3>
                       <p className="text-sm text-gray-600 mb-2">por {livro.author}</p>

@@ -17,38 +17,39 @@ const TestimonialsCarousel = dynamic(() => import('@/components/TestimonialsCaro
 export default function Home() {
   return (
     <main>
-      <section className="text-white py-20 relative overflow-hidden" style={{background: 'linear-gradient(to bottom, #1e293b 0%, #334155 100%)'}}>
+      {/* Hero Section com nova identidade visual */}
+      <section className="text-white py-20 relative overflow-hidden bg-gradient-to-b from-brand-600 via-brand-600 to-brand-700">
         <div className="container mx-auto px-4">
           <div className="relative max-w-7xl mx-auto">
             {/* Layout com foto à direita */}
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-0 items-center">
-              {/* Conteúdo à esquerda - ocupa 8 colunas e sobrepõe a foto */}
+              {/* Conteudo a esquerda - ocupa 8 colunas e sobrepoe a foto */}
               <div className="lg:col-span-8 relative z-10 text-center lg:text-left">
-                <div className="bg-gradient-to-r from-slate-800/95 via-slate-800/90 to-transparent lg:py-12 lg:pl-8 lg:pr-16 rounded-2xl lg:backdrop-blur-sm">
-                  <h1 className="text-4xl md:text-5xl font-bold mb-6">
+                <div className="bg-gradient-to-r from-brand-700/95 via-brand-700/90 to-transparent lg:py-12 lg:pl-8 lg:pr-16 rounded-2xl lg:backdrop-blur-sm">
+                  <h1 className="text-4xl md:text-5xl font-cinzel font-semibold mb-6 tracking-wide">
                     Prof. Daniel Barral
                   </h1>
-                  <p className="text-xl md:text-2xl mb-4">
+                  <p className="text-xl md:text-2xl mb-4 font-poppins font-light">
                     Professor | Mestre em Direito Público
                   </p>
-                  <p className="text-lg mb-8 text-blue-100">
+                  <p className="text-lg mb-8 text-brand-100 font-poppins">
                     Especialista em Licitações e Contratos Administrativos
                   </p>
-                  <p className="text-lg mb-10 max-w-2xl mx-auto lg:mx-0 text-gray-100">
+                  <p className="text-lg mb-10 max-w-2xl mx-auto lg:mx-0 text-brand-100/90 font-poppins leading-relaxed">
                     Repositório especializado de materiais jurídicos em Direito Administrativo,
                     com foco em fortalecer seu conhecimento e aprimorar suas atividades funcionais.
                   </p>
                   <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
                     <Link
                       href="/cursos"
-                      className="bg-white text-gray-900 px-8 py-3 rounded-lg font-semibold hover:bg-gray-50 transition-colors inline-flex items-center justify-center gap-2"
+                      className="bg-white text-brand-700 px-8 py-3 rounded-lg font-poppins font-semibold hover:bg-brand-50 transition-colors inline-flex items-center justify-center gap-2"
                     >
                       <BookOpen className="w-5 h-5" />
                       Explorar Cursos
                     </Link>
                     <Link
                       href="/validar-acesso"
-                      className="bg-blue-600 text-white px-8 py-3 rounded-lg font-semibold hover:bg-blue-700 transition-colors inline-flex items-center justify-center gap-2 border border-blue-500"
+                      className="bg-blue-600 text-white px-8 py-3 rounded-lg font-poppins font-semibold hover:bg-blue-700 transition-colors inline-flex items-center justify-center gap-2 border border-blue-500"
                     >
                       Área do Aluno
                       <ArrowRight className="w-5 h-5 text-white" />
@@ -57,7 +58,7 @@ export default function Home() {
                 </div>
               </div>
 
-              {/* Foto à direita - ocupa 5 colunas e fica atrás do conteúdo */}
+              {/* Foto a direita - ocupa 5 colunas e fica atras do conteudo */}
               <div className="lg:col-span-5 relative lg:absolute lg:right-0 lg:top-1/2 lg:-translate-y-1/2 lg:w-[55%] hidden lg:block">
                 <div className="relative h-[600px] w-full rounded-2xl overflow-hidden shadow-2xl">
                   <Image
@@ -75,42 +76,43 @@ export default function Home() {
         </div>
       </section>
 
-      <section className="py-16 bg-gradient-to-b from-gray-50 to-white">
+      {/* Secao de Diferenciais */}
+      <section className="py-16 bg-gradient-to-b from-brand-50 to-white">
         <div className="container mx-auto px-4">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             <div className="text-center group">
               <div className="relative mb-6">
-                <div className="w-24 h-24 bg-gradient-to-br from-blue-500 to-blue-600 rounded-2xl flex items-center justify-center mx-auto shadow-lg transform group-hover:scale-110 transition-transform duration-300">
+                <div className="w-24 h-24 bg-gradient-to-br from-brand-500 to-brand-600 rounded-2xl flex items-center justify-center mx-auto shadow-lg transform group-hover:scale-110 transition-transform duration-300">
                   <Award className="w-12 h-12 text-white" />
                 </div>
-                <div className="absolute -bottom-2 left-1/2 transform -translate-x-1/2 w-16 h-1 bg-blue-500 rounded-full"></div>
+                <div className="absolute -bottom-2 left-1/2 transform -translate-x-1/2 w-16 h-1 bg-brand-500 rounded-full"></div>
               </div>
-              <h3 className="text-xl font-bold mb-3 text-gray-900">Experiência Comprovada</h3>
-              <p className="text-gray-700 leading-relaxed">
+              <h3 className="text-xl font-cinzel font-semibold mb-3 text-gray-900">Experiência Comprovada</h3>
+              <p className="text-gray-700 leading-relaxed font-poppins">
                 Anos de atuação como professor especializado em Direito Administrativo
               </p>
             </div>
             <div className="text-center group">
               <div className="relative mb-6">
-                <div className="w-24 h-24 bg-white border-4 border-blue-500 rounded-2xl flex items-center justify-center mx-auto shadow-lg transform group-hover:scale-110 transition-transform duration-300">
-                  <Users className="w-12 h-12 text-blue-600" />
+                <div className="w-24 h-24 bg-white border-4 border-brand-500 rounded-2xl flex items-center justify-center mx-auto shadow-lg transform group-hover:scale-110 transition-transform duration-300">
+                  <Users className="w-12 h-12 text-brand-600" />
                 </div>
-                <div className="absolute -bottom-2 left-1/2 transform -translate-x-1/2 w-16 h-1 bg-blue-500 rounded-full"></div>
+                <div className="absolute -bottom-2 left-1/2 transform -translate-x-1/2 w-16 h-1 bg-brand-500 rounded-full"></div>
               </div>
-              <h3 className="text-xl font-bold mb-3 text-gray-900">Conteúdo Atualizado</h3>
-              <p className="text-gray-700 leading-relaxed">
+              <h3 className="text-xl font-cinzel font-semibold mb-3 text-gray-900">Conteúdo Atualizado</h3>
+              <p className="text-gray-700 leading-relaxed font-poppins">
                 Material sempre atualizado com as últimas mudanças legislativas e jurisprudenciais
               </p>
             </div>
             <div className="text-center group">
               <div className="relative mb-6">
-                <div className="w-24 h-24 bg-gradient-to-br from-gray-600 to-gray-700 rounded-2xl flex items-center justify-center mx-auto shadow-lg transform group-hover:scale-110 transition-transform duration-300">
+                <div className="w-24 h-24 bg-gradient-to-br from-brand-600 to-brand-700 rounded-2xl flex items-center justify-center mx-auto shadow-lg transform group-hover:scale-110 transition-transform duration-300">
                   <FileText className="w-12 h-12 text-white" />
                 </div>
-                <div className="absolute -bottom-2 left-1/2 transform -translate-x-1/2 w-16 h-1 bg-gray-600 rounded-full"></div>
+                <div className="absolute -bottom-2 left-1/2 transform -translate-x-1/2 w-16 h-1 bg-brand-600 rounded-full"></div>
               </div>
-              <h3 className="text-xl font-bold mb-3 text-gray-900">Material Exclusivo</h3>
-              <p className="text-gray-700 leading-relaxed">
+              <h3 className="text-xl font-cinzel font-semibold mb-3 text-gray-900">Material Exclusivo</h3>
+              <p className="text-gray-700 leading-relaxed font-poppins">
                 Acesso a documentos e acórdãos organizados por tema
               </p>
             </div>

@@ -70,8 +70,8 @@ export default function ContatoPage() {
         <div className="max-w-6xl mx-auto">
           <div className="text-center mb-12">
             <div className="inline-block">
-              <h1 className="text-5xl font-bold mb-3 text-gray-900">Entre em Contato</h1>
-              <div className="h-1.5 w-32 bg-gradient-to-r from-blue-500 to-blue-600 rounded-full mx-auto mb-6"></div>
+              <h1 className="text-5xl font-bold mb-3 text-gray-900 font-cinzel">Entre em Contato</h1>
+              <div className="h-1.5 w-32 bg-gradient-to-r from-brand-500 to-brand-600 rounded-full mx-auto mb-6"></div>
             </div>
             <p className="text-xl text-gray-700 leading-relaxed">
               Tire suas dúvidas, solicite informações sobre cursos ou contrate palestras
@@ -80,10 +80,10 @@ export default function ContatoPage() {
 
           <div className="grid md:grid-cols-3 gap-8">
             <div className="md:col-span-2">
-              <div className="bg-white rounded-2xl shadow-lg p-8 border-2 border-gray-200 hover:border-blue-400 hover:shadow-2xl transition-all">
+              <div className="bg-white rounded-2xl shadow-lg p-8 border-2 border-gray-200 hover:border-brand-400 hover:shadow-2xl transition-all">
                 <div className="inline-block mb-6">
                   <h2 className="text-2xl font-bold mb-2 text-gray-900">Envie sua mensagem</h2>
-                  <div className="h-1 w-24 bg-gradient-to-r from-blue-500 to-blue-600 rounded-full"></div>
+                  <div className="h-1 w-24 bg-gradient-to-r from-brand-500 to-brand-600 rounded-full"></div>
                 </div>
 
                 {error && (
@@ -93,8 +93,8 @@ export default function ContatoPage() {
                 )}
 
                 {isSubmitted ? (
-                  <div className="bg-gradient-to-r from-blue-50 to-blue-100 border-2 border-blue-500 rounded-2xl p-8 text-center">
-                    <div className="w-20 h-20 bg-gradient-to-br from-blue-500 to-blue-600 rounded-full flex items-center justify-center mx-auto mb-4 shadow-lg">
+                  <div className="bg-gradient-to-r from-brand-50 to-brand-100 border-2 border-brand-500 rounded-2xl p-8 text-center">
+                    <div className="w-20 h-20 bg-gradient-to-br from-brand-500 to-brand-600 rounded-full flex items-center justify-center mx-auto mb-4 shadow-lg">
                       <CheckCircle className="w-12 h-12 text-white" />
                     </div>
                     <h3 className="text-2xl font-bold text-gray-900 mb-3">Mensagem enviada com sucesso!</h3>
@@ -198,7 +198,7 @@ export default function ContatoPage() {
                       type="submit"
                       disabled={isSubmitting}
                       aria-label="Enviar formulário de contato"
-                      className="w-full bg-gradient-to-r from-blue-600 to-blue-700 text-white px-6 py-4 rounded-xl text-lg font-bold hover:from-blue-700 hover:to-blue-800 transition-all hover:scale-105 flex items-center justify-center gap-2 shadow-lg hover:shadow-2xl disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
+                      className="w-full bg-gradient-to-r from-brand-600 to-brand-700 text-white px-6 py-4 rounded-xl text-lg font-bold hover:from-blue-700 hover:to-blue-800 transition-all hover:scale-105 flex items-center justify-center gap-2 shadow-lg hover:shadow-2xl disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
                     >
                       {isSubmitting ? (
                         <>
@@ -220,13 +220,13 @@ export default function ContatoPage() {
             <div className="md:col-span-1 space-y-6">
               {/* SEÇÃO OCULTA - Informações de Contato
                   Para reativar: remova este comentário e o de fechamento
-              <div className="bg-white rounded-2xl shadow-lg p-6 border-2 border-gray-200 hover:border-blue-400 hover:shadow-2xl transition-all">
+              <div className="bg-white rounded-2xl shadow-lg p-6 border-2 border-gray-200 hover:border-brand-400 hover:shadow-2xl transition-all">
                 <div className="inline-block mb-4">
                   <h3 className="text-lg font-bold mb-2 text-gray-900">Informações de Contato</h3>
                   <div className="h-1 w-16 bg-gradient-to-r from-blue-600 to-purple-600 rounded-full"></div>
                 </div>
                 <div className="space-y-4">
-                  <div className="flex items-start gap-3 bg-gradient-to-r from-blue-50 to-blue-100 p-3 rounded-xl border-l-4 border-blue-500">
+                  <div className="flex items-start gap-3 bg-gradient-to-r from-brand-50 to-brand-100 p-3 rounded-xl border-l-4 border-brand-500">
                     <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-blue-700 rounded-lg flex items-center justify-center flex-shrink-0">
                       <Mail className="w-5 h-5 text-white" />
                     </div>
@@ -259,10 +259,10 @@ export default function ContatoPage() {
               </div>
               FIM DA SEÇÃO OCULTA */}
 
-              <div className="bg-white rounded-2xl shadow-lg p-6 border-2 border-gray-200 hover:border-blue-400 hover:shadow-2xl transition-all">
+              <div className="bg-white rounded-2xl shadow-lg p-6 border-2 border-gray-200 hover:border-brand-400 hover:shadow-2xl transition-all">
                 <div className="inline-block mb-4">
                   <h3 className="text-lg font-bold mb-2 text-gray-900">Redes Sociais</h3>
-                  <div className="h-1 w-16 bg-gradient-to-r from-blue-500 to-blue-600 rounded-full"></div>
+                  <div className="h-1 w-16 bg-gradient-to-r from-brand-500 to-brand-600 rounded-full"></div>
                 </div>
                 <div className="space-y-3">
                   <a
@@ -294,9 +294,9 @@ export default function ContatoPage() {
                     target="_blank"
                     rel="noopener noreferrer"
                     aria-label="Visite nosso perfil no LinkedIn"
-                    className="flex items-center gap-3 bg-gradient-to-r from-blue-50 to-blue-100 p-3 rounded-xl border-l-4 border-blue-700 hover:shadow-md transition-all group"
+                    className="flex items-center gap-3 bg-gradient-to-r from-brand-50 to-brand-100 p-3 rounded-xl border-l-4 border-blue-700 hover:shadow-md transition-all group"
                   >
-                    <div className="w-10 h-10 bg-gradient-to-br from-blue-700 to-blue-800 rounded-lg flex items-center justify-center group-hover:scale-110 transition-transform">
+                    <div className="w-10 h-10 bg-gradient-to-br from-brand-700 to-brand-800 rounded-lg flex items-center justify-center group-hover:scale-110 transition-transform">
                       <Linkedin className="w-5 h-5 text-white" />
                     </div>
                     <span className="text-gray-900 font-bold">Daniel Barral</span>

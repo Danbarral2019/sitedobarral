@@ -89,8 +89,8 @@ export default function DocumentsByCategory({
 
   if (sortedCategories.length === 0) {
     return (
-      <div className="bg-blue-50 border-2 border-blue-200 rounded-xl p-6 lg:p-6 text-center">
-        <p className="text-base lg:text-lg text-blue-800 font-medium">
+      <div className="bg-brand-50 border-2 border-brand-200 rounded-xl p-6 lg:p-6 text-center">
+        <p className="text-base lg:text-lg text-brand-800 font-medium">
           Não há outros documentos disponíveis para este curso no momento.
         </p>
       </div>
@@ -110,7 +110,7 @@ export default function DocumentsByCategory({
           const isExpanded = expandedCategories.has(category);
           const config = categoryConfig[category] || categoryConfig['outro'];
           const colorClasses = {
-            blue: 'border-blue-200 bg-blue-50',
+            blue: 'border-brand-200 bg-brand-50',
             green: 'border-green-200 bg-green-50',
             purple: 'border-purple-200 bg-purple-50',
             orange: 'border-orange-200 bg-orange-50',
@@ -171,7 +171,7 @@ export default function DocumentsByCategory({
                                 )}
                               </div>
                               <div className="flex-1">
-                                <h4 className="text-sm lg:text-base font-bold text-gray-900 group-hover:text-blue-600 transition-colors line-clamp-2">
+                                <h4 className="text-sm lg:text-base font-bold text-gray-900 group-hover:text-brand-600 transition-colors line-clamp-2">
                                   {doc.title}
                                 </h4>
                                 {doc.description && (
@@ -221,7 +221,7 @@ export default function DocumentsByCategory({
                   <div className="p-4 bg-gradient-to-r from-gray-50 to-gray-100 border-t border-gray-200">
                     <button
                       onClick={() => toggleCategory(category)}
-                      className="w-full text-center text-sm font-medium text-blue-600 hover:text-blue-800 flex items-center justify-center gap-2"
+                      className="w-full text-center text-sm font-medium text-brand-600 hover:text-brand-800 flex items-center justify-center gap-2"
                     >
                       <span>Ver mais {categoryDocs.length - 2} {categoryDocs.length - 2 === 1 ? 'documento' : 'documentos'}</span>
                       <ChevronDown className="w-4 h-4" />
