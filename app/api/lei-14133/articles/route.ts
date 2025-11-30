@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { verifyAuth } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
 import { safeParseArray } from '@/lib/utils';
+import { ARTIGOS_ENUNCIADOS, ENUNCIADOS } from '@/data/enunciados';
 
 /**
  * GET /api/lei-14133/articles
@@ -150,12 +151,26 @@ export async function GET(request: NextRequest) {
       });
     });
 
-    // 5. Enriquecer artigos com contagem de documentos
-    let enrichedArticles = allArticles.map((art) => ({
-      ...art,
-      documentCount: articleDocumentCount[art.numero] || 0,
-      documents: articleDocuments[art.numero] || [],
-    }));
+    // 5. Enriquecer artigos com contagem de documentos e enunciados
+    let enrichedArticles = allArticles.map((art) => {
+      // Buscar enunciados vinculados a este artigo
+      const enunciadoIds = ARTIGOS_ENUNCIADOS[art.numero] || [];
+      const enunciados = ENUNCIADOS.filter(e => enunciadoIds.includes(e.id)).map(e => ({
+        id: e.id,
+        orgao: e.orgao,
+        numero: e.numero,
+        texto: e.texto.substring(0, 200) + (e.texto.length > 200 ? '...' : ''),
+        tema: e.tema,
+      }));
+
+      return {
+        ...art,
+        documentCount: articleDocumentCount[art.numero] || 0,
+        documents: articleDocuments[art.numero] || [],
+        enunciadoCount: enunciados.length,
+        enunciados,
+      };
+    });
 
     // 6. Aplicar filtros
     if (withDocumentsOnly) {

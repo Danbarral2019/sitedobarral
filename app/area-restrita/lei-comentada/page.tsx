@@ -22,7 +22,8 @@ import {
   ArrowLeft,
   History,
   Sparkles,
-  X
+  X,
+  MessageSquareQuote
 } from 'lucide-react';
 import { useAuth } from '@/hooks/use-auth';
 import { useFavorites } from '@/hooks/use-favorites';
@@ -30,6 +31,14 @@ import { useLegislativeActFavorites } from '@/hooks/use-legislative-act-favorite
 import { safeParseArray } from '@/lib/utils';
 import Link from 'next/link';
 import ArticleChatInterface from '@/components/ArticleChatInterface';
+
+interface EnunciadoResumo {
+  id: string;
+  orgao: 'INCP' | 'CJF' | 'IBDA';
+  numero: number;
+  texto: string;
+  tema: string;
+}
 
 interface LeiArticle {
   id: string;
@@ -47,6 +56,8 @@ interface LeiArticle {
     category: string | null;
     type?: string; // 'document' ou 'legislativeAct'
   }[];
+  enunciadoCount?: number;
+  enunciados?: EnunciadoResumo[];
 }
 
 interface HierarchyCapitulo {
@@ -85,10 +96,20 @@ interface AIDocumentResult {
   relevance: string;
 }
 
+interface AIEnunciadoResult {
+  id: string;
+  orgao: string;
+  numero: number;
+  texto: string;
+  tema: string;
+  artigosVinculados: string[];
+}
+
 interface AISearchResponse {
   query: string;
   results: AISearchResult[];
   documents: AIDocumentResult[];
+  enunciados: AIEnunciadoResult[];
   summary: string;
   isAISearch: boolean;
   cached: boolean;
@@ -908,11 +929,55 @@ function LeiComentadaContent() {
                     </>
                   )}
 
+                  {/* Resultados - Enunciados */}
+                  {aiSearchResults.enunciados && aiSearchResults.enunciados.length > 0 && (
+                    <>
+                      <h4 className="font-bold text-gray-900 text-sm flex items-center gap-2 mt-6">
+                        <MessageSquareQuote className="w-4 h-4 text-purple-600" />
+                        Enunciados Interpretativos ({aiSearchResults.enunciados.length})
+                      </h4>
+                      <div className="space-y-2">
+                        {aiSearchResults.enunciados.map((enunciado) => (
+                          <div
+                            key={enunciado.id}
+                            className="bg-white border border-gray-200 rounded-lg p-3 hover:border-purple-300 transition-all"
+                          >
+                            <div className="flex items-start gap-3">
+                              <div className="flex-shrink-0 w-8 h-8 bg-purple-100 text-purple-700 rounded-full flex items-center justify-center">
+                                <MessageSquareQuote className="w-4 h-4" />
+                              </div>
+                              <div className="flex-1 min-w-0">
+                                <div className="flex items-center gap-2 mb-1">
+                                  <span className="px-2 py-0.5 bg-purple-600 text-white text-xs font-bold rounded">
+                                    {enunciado.orgao} {enunciado.numero}
+                                  </span>
+                                  <span className="text-xs bg-purple-100 text-purple-700 px-2 py-0.5 rounded">
+                                    {enunciado.tema}
+                                  </span>
+                                </div>
+                                <p className="text-sm text-gray-700 line-clamp-3">{enunciado.texto}</p>
+                                {enunciado.artigosVinculados.length > 0 && (
+                                  <div className="mt-1 flex flex-wrap gap-1">
+                                    {enunciado.artigosVinculados.slice(0, 5).map(art => (
+                                      <span key={art} className="text-xs text-blue-600">Art. {art}</span>
+                                    ))}
+                                  </div>
+                                )}
+                              </div>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </>
+                  )}
+
                   {/* Nenhum resultado */}
-                  {aiSearchResults.results.length === 0 && (!aiSearchResults.documents || aiSearchResults.documents.length === 0) && (
+                  {aiSearchResults.results.length === 0 &&
+                   (!aiSearchResults.documents || aiSearchResults.documents.length === 0) &&
+                   (!aiSearchResults.enunciados || aiSearchResults.enunciados.length === 0) && (
                     <div className="text-center py-8">
                       <AlertCircle className="w-12 h-12 text-gray-400 mx-auto mb-3" />
-                      <p className="text-gray-600">Nenhum artigo ou documento encontrado para sua busca.</p>
+                      <p className="text-gray-600">Nenhum artigo, documento ou enunciado encontrado para sua busca.</p>
                       <p className="text-sm text-gray-500 mt-2">Tente reformular sua pergunta.</p>
                     </div>
                   )}
@@ -1236,6 +1301,37 @@ function LeiComentadaContent() {
                     </p>
                     <p className="text-sm text-amber-700">
                       Este artigo ainda não possui documentos vinculados. Estamos trabalhando para ampliar a cobertura da lei.
+                    </p>
+                  </div>
+                )}
+
+                {/* Enunciados Interpretativos */}
+                {selectedArticle.enunciados && selectedArticle.enunciados.length > 0 && (
+                  <div className="bg-white rounded-lg shadow-md p-6">
+                    <h3 className="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
+                      <MessageSquareQuote className="w-5 h-5 text-purple-600" />
+                      Enunciados Interpretativos ({selectedArticle.enunciados.length})
+                    </h3>
+                    <div className="space-y-3">
+                      {selectedArticle.enunciados.map((enunciado) => (
+                        <div
+                          key={enunciado.id}
+                          className="border-l-4 border-purple-500 bg-purple-50 p-4 rounded-r-lg"
+                        >
+                          <div className="flex items-center gap-2 mb-2">
+                            <span className="px-2 py-1 bg-purple-600 text-white text-xs font-bold rounded">
+                              {enunciado.orgao} {enunciado.numero}
+                            </span>
+                            <span className="text-xs text-purple-700 bg-purple-100 px-2 py-0.5 rounded">
+                              {enunciado.tema}
+                            </span>
+                          </div>
+                          <p className="text-gray-800 text-sm leading-relaxed">{enunciado.texto}</p>
+                        </div>
+                      ))}
+                    </div>
+                    <p className="text-xs text-gray-500 mt-4 text-center">
+                      Enunciados interpretativos aprovados pelos institutos especializados
                     </p>
                   </div>
                 )}

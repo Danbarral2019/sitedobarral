@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { LEI_14133_ARTIGOS } from '@/data/lei-14133-artigos';
 import { queryGeminiText } from '@/lib/gemini/cached-client';
 import { prisma } from '@/lib/prisma';
+import { ENUNCIADOS, buscarEnunciados } from '@/data/enunciados';
 
 interface SearchResult {
   articleNumber: string;
@@ -22,10 +23,20 @@ interface DocumentResult {
   relevance: string;
 }
 
+interface EnunciadoResult {
+  id: string;
+  orgao: string;
+  numero: number;
+  texto: string;
+  tema: string;
+  artigosVinculados: string[];
+}
+
 interface SearchResponse {
   query: string;
   results: SearchResult[];
   documents: DocumentResult[];
+  enunciados: EnunciadoResult[];
   summary: string;
   isAISearch: boolean;
   cached: boolean;
@@ -124,6 +135,7 @@ Regras:
         query: searchQuery,
         results: [],
         documents: [],
+        enunciados: [],
         summary: 'Nao foi possivel processar a busca com IA. Tente uma busca mais especifica.',
         isAISearch: false,
         cached: false,
@@ -265,13 +277,39 @@ Regras:
       index === self.findIndex(d => d.id === doc.id)
     );
 
+    // Buscar enunciados relacionados
+    const enunciadoResults: EnunciadoResult[] = [];
+
+    // 1. Buscar enunciados vinculados aos artigos encontrados
+    const enunciadosPorArtigo = ENUNCIADOS.filter(e =>
+      e.artigosVinculados.some(art => articleNumbers.includes(art))
+    );
+
+    // 2. Buscar enunciados por texto
+    const enunciadosPorTexto = buscarEnunciados(searchQuery);
+
+    // Combinar e remover duplicatas
+    const todosEnunciados = [...enunciadosPorArtigo, ...enunciadosPorTexto];
+    const uniqueEnunciados = todosEnunciados
+      .filter((e, index, self) => index === self.findIndex(en => en.id === e.id))
+      .slice(0, 5) // Limitar a 5 enunciados
+      .map(e => ({
+        id: e.id,
+        orgao: e.orgao,
+        numero: e.numero,
+        texto: e.texto.substring(0, 300) + (e.texto.length > 300 ? '...' : ''),
+        tema: e.tema,
+        artigosVinculados: e.artigosVinculados,
+      }));
+
     const latency = Date.now() - startTime;
-    console.log(`[Search API] Encontrados ${results.length} artigos e ${uniqueDocuments.length} documentos em ${latency}ms (cached: ${geminiResult.cached})`);
+    console.log(`[Search API] Encontrados ${results.length} artigos, ${uniqueDocuments.length} documentos e ${uniqueEnunciados.length} enunciados em ${latency}ms (cached: ${geminiResult.cached})`);
 
     const response: SearchResponse = {
       query: searchQuery,
       results,
       documents: uniqueDocuments,
+      enunciados: uniqueEnunciados,
       summary: parsedResponse.summary,
       isAISearch: true,
       cached: geminiResult.cached,
