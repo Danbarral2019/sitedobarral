@@ -87,10 +87,28 @@ export async function GET(request: NextRequest) {
       },
     });
 
+    // 3.1 Buscar todos os atos normativos (LegislativeAct) com leiArticles
+    const legislativeActsWithArticles = await prisma.legislativeAct.findMany({
+      where: {
+        leiArticles: {
+          not: null,
+        },
+      },
+      select: {
+        id: true,
+        fullNumber: true,
+        title: true,
+        leiArticles: true,
+        type: true,
+        officialUrl: true,
+      },
+    });
+
     // 4. Contar documentos por artigo e agrupar por categoria
     const articleDocumentCount: Record<string, number> = {};
-    const articleDocuments: Record<string, { id: string; title: string; isPublic: boolean; category: string | null }[]> = {};
+    const articleDocuments: Record<string, { id: string; title: string; isPublic: boolean; category: string | null; type?: string }[]> = {};
 
+    // Adicionar documentos
     documentsWithArticles.forEach((doc) => {
       const articles = safeParseArray(doc.leiArticles);
       articles.forEach((artNum) => {
@@ -106,6 +124,28 @@ export async function GET(request: NextRequest) {
           title: doc.title,
           isPublic: doc.isPublic,
           category: doc.category,
+          type: 'document',
+        });
+      });
+    });
+
+    // Adicionar atos normativos (sempre públicos)
+    legislativeActsWithArticles.forEach((act) => {
+      const articles = safeParseArray(act.leiArticles);
+      articles.forEach((artNum) => {
+        const artStr = String(artNum);
+        articleDocumentCount[artStr] = (articleDocumentCount[artStr] || 0) + 1;
+
+        if (!articleDocuments[artStr]) {
+          articleDocuments[artStr] = [];
+        }
+
+        articleDocuments[artStr].push({
+          id: act.id,
+          title: `${act.fullNumber} - ${act.title}`,
+          isPublic: true, // Atos normativos são sempre públicos
+          category: act.type, // decreto, in, portaria, etc.
+          type: 'legislativeAct',
         });
       });
     });
