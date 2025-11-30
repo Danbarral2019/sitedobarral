@@ -24,6 +24,7 @@ import {
 } from 'lucide-react';
 import { useAuth } from '@/hooks/use-auth';
 import { useFavorites } from '@/hooks/use-favorites';
+import { useLegislativeActFavorites } from '@/hooks/use-legislative-act-favorites';
 import { safeParseArray } from '@/lib/utils';
 import Link from 'next/link';
 import ArticleChatInterface from '@/components/ArticleChatInterface';
@@ -86,7 +87,14 @@ function DocumentDetails({ documentId, documentType = 'document' }: { documentId
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [document, setDocument] = useState<DocumentData | null>(null);
-  const { isFavorite, toggleFavorite } = useFavorites();
+
+  // Usar hook correto dependendo do tipo
+  const docFavorites = useFavorites();
+  const actFavorites = useLegislativeActFavorites();
+
+  const isLegislativeAct = documentType === 'legislativeAct';
+  const isFavorite = isLegislativeAct ? actFavorites.isFavorite : docFavorites.isFavorite;
+  const toggleFavorite = isLegislativeAct ? actFavorites.toggleFavorite : docFavorites.toggleFavorite;
 
   useEffect(() => {
     const fetchDocument = async () => {
@@ -197,7 +205,14 @@ function DocumentDetails({ documentId, documentType = 'document' }: { documentId
 
         <div className="bg-white p-3 rounded-lg shadow-sm flex items-center justify-center">
           <button
-            onClick={() => toggleFavorite(documentId)}
+            onClick={() => {
+              if (isLegislativeAct) {
+                toggleFavorite(documentId);
+              } else {
+                // Para documentos, precisa passar courseId também
+                docFavorites.toggleFavorite(documentId, document?.courseId || '');
+              }
+            }}
             className={`p-2 rounded-lg transition-colors ${
               isFavorite(documentId) ? 'bg-red-500 text-white' : 'bg-gray-200 text-gray-600 hover:bg-gray-300'
             }`}

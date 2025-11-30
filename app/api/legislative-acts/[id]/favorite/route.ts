@@ -9,7 +9,7 @@ import { verifyToken } from '@/lib/auth';
  */
 export async function POST(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     // Verificar autenticação
@@ -32,7 +32,7 @@ export async function POST(
     }
 
     const userId = payload.userId as string;
-    const actId = params.id;
+    const { id: actId } = await params;
 
     // Verificar se o ato existe
     const act = await prisma.legislativeAct.findUnique({
@@ -98,7 +98,7 @@ export async function POST(
  */
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     // Verificar autenticação
@@ -115,7 +115,7 @@ export async function GET(
     }
 
     const userId = payload.userId as string;
-    const actId = params.id;
+    const { id: actId } = await params;
 
     const favorite = await prisma.favorite.findFirst({
       where: {
