@@ -304,8 +304,8 @@ async function main() {
       // Construir campos formatados
       const tituloFormatado = `${struct.titulo} - ${struct.tituloNome}`;
 
-      // capituloCompleto agora inclui TÍTULO para evitar duplicação
-      const capituloFormatado = `${struct.titulo} - ${struct.capitulo} - ${struct.capituloNome}`;
+      // capituloCompleto é para EXIBIÇÃO (sem o TÍTULO que já aparece acima)
+      const capituloFormatado = `${struct.capitulo} - ${struct.capituloNome}`;
 
       // Campo capitulo com hierarquia completa
       let capituloHierarquia = `${struct.titulo} - ${struct.capitulo}`;
