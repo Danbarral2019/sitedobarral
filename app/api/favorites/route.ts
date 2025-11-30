@@ -54,20 +54,18 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
     const { documentId, courseId } = body;
 
-    if (!documentId || !courseId) {
+    if (!documentId) {
       return NextResponse.json(
-        { error: 'documentId e courseId são obrigatórios' },
+        { error: 'documentId é obrigatório' },
         { status: 400 }
       );
     }
 
     // Verifica se já existe
-    const existing = await prisma.favorite.findUnique({
+    const existing = await prisma.favorite.findFirst({
       where: {
-        userId_documentId: {
-          userId: decoded.userId,
-          documentId,
-        },
+        userId: decoded.userId,
+        documentId,
       },
     });
 
@@ -80,7 +78,7 @@ export async function POST(request: NextRequest) {
       data: {
         userId: decoded.userId,
         documentId,
-        courseId,
+        courseId: courseId || null,
       },
     });
 
