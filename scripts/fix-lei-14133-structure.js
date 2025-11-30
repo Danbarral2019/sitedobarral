@@ -307,14 +307,8 @@ async function main() {
       // capituloCompleto é para EXIBIÇÃO (sem o TÍTULO que já aparece acima)
       const capituloFormatado = `${struct.capitulo} - ${struct.capituloNome}`;
 
-      // Campo capitulo com hierarquia completa
-      let capituloHierarquia = `${struct.titulo} - ${struct.capitulo}`;
-      if (struct.secao) {
-        capituloHierarquia += ` - ${struct.secao}`;
-      }
-      if (struct.subsecao) {
-        capituloHierarquia += ` - ${struct.subsecao}`;
-      }
+      // Campo capitulo para agrupamento (sem seções - agrupa todo o capítulo junto)
+      const capituloHierarquia = `${struct.titulo} - ${struct.capitulo}`;
 
       // Campo secao formatado
       let secaoFormatada = null;
