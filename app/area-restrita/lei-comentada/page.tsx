@@ -17,8 +17,6 @@ import {
   CheckCircle,
   Download,
   ExternalLink,
-  Calendar,
-  Tag,
   Lightbulb,
   Heart
 } from 'lucide-react';
@@ -175,54 +173,6 @@ function DocumentDetails({ documentId, documentType = 'document' }: { documentId
 
   return (
     <div className="bg-gradient-to-br from-gray-50 to-blue-50 p-6 rounded-lg border-t border-gray-200 space-y-4">
-      {/* Metadata Grid */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-        <div className="bg-white p-3 rounded-lg shadow-sm">
-          <div className="flex items-center gap-2 text-gray-600 mb-1">
-            <Tag className="w-3 h-3" />
-            <span className="text-xs font-medium">Categoria</span>
-          </div>
-          <p className="font-bold text-gray-900 text-sm capitalize">{document.category}</p>
-        </div>
-
-        <div className="bg-white p-3 rounded-lg shadow-sm">
-          <div className="flex items-center gap-2 text-gray-600 mb-1">
-            <FileText className="w-3 h-3" />
-            <span className="text-xs font-medium">Tipo</span>
-          </div>
-          <p className="font-bold text-gray-900 text-sm uppercase">{document.type}</p>
-        </div>
-
-        <div className="bg-white p-3 rounded-lg shadow-sm">
-          <div className="flex items-center gap-2 text-gray-600 mb-1">
-            <Calendar className="w-3 h-3" />
-            <span className="text-xs font-medium">Enviado</span>
-          </div>
-          <p className="font-bold text-gray-900 text-xs">
-            {new Date(document.uploadedAt).toLocaleDateString('pt-BR')}
-          </p>
-        </div>
-
-        <div className="bg-white p-3 rounded-lg shadow-sm flex items-center justify-center">
-          <button
-            onClick={() => {
-              if (isLegislativeAct) {
-                toggleFavorite(documentId);
-              } else {
-                // Para documentos, precisa passar courseId também
-                docFavorites.toggleFavorite(documentId, document?.courseId || '');
-              }
-            }}
-            className={`p-2 rounded-lg transition-colors ${
-              isFavorite(documentId) ? 'bg-red-500 text-white' : 'bg-gray-200 text-gray-600 hover:bg-gray-300'
-            }`}
-            aria-label={isFavorite(documentId) ? 'Remover dos favoritos' : 'Adicionar aos favoritos'}
-          >
-            <Heart className={`w-4 h-4 ${isFavorite(documentId) ? 'fill-current' : ''}`} />
-          </button>
-        </div>
-      </div>
-
       {/* Summary */}
       {document.summary && (
         <div className="bg-blue-50 border-l-4 border-blue-500 p-4 rounded-r-lg">
@@ -320,16 +270,35 @@ function DocumentDetails({ documentId, documentType = 'document' }: { documentId
         </div>
       )}
 
-      {/* Action Button */}
-      <div className="pt-3 border-t border-gray-200">
-        {/* Atos normativos (decreto, in, portaria) ou links externos */}
+      {/* Action Buttons */}
+      <div className="pt-3 border-t border-gray-200 flex gap-2">
+        {/* Botão de Favoritar */}
+        <button
+          onClick={() => {
+            if (isLegislativeAct) {
+              toggleFavorite(documentId);
+            } else {
+              docFavorites.toggleFavorite(documentId, document?.courseId || '');
+            }
+          }}
+          className={`px-4 py-3 rounded-lg font-bold transition-all flex items-center justify-center gap-2 ${
+            isFavorite(documentId)
+              ? 'bg-red-500 text-white hover:bg-red-600'
+              : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+          }`}
+          aria-label={isFavorite(documentId) ? 'Remover dos favoritos' : 'Adicionar aos favoritos'}
+        >
+          <Heart className={`w-5 h-5 ${isFavorite(documentId) ? 'fill-current' : ''}`} />
+        </button>
+
+        {/* Botão Principal */}
         {document.url && (document.type === 'link' || ['decreto', 'in', 'portaria', 'lei', 'medida-provisoria'].includes(document.type || '')) ? (
           <a
             href={document.url}
             target="_blank"
             rel="noopener noreferrer"
             onClick={handleView}
-            className="w-full bg-gradient-to-r from-blue-600 to-indigo-700 text-white px-4 py-3 rounded-lg font-bold hover:from-blue-700 hover:to-indigo-800 transition-all flex items-center justify-center gap-2"
+            className="flex-1 bg-gradient-to-r from-blue-600 to-indigo-700 text-white px-4 py-3 rounded-lg font-bold hover:from-blue-700 hover:to-indigo-800 transition-all flex items-center justify-center gap-2"
           >
             <ExternalLink className="w-5 h-5" />
             Acessar Documento Oficial
@@ -340,7 +309,7 @@ function DocumentDetails({ documentId, documentType = 'document' }: { documentId
             target="_blank"
             rel="noopener noreferrer"
             onClick={handleView}
-            className="w-full bg-gradient-to-r from-blue-600 to-indigo-700 text-white px-4 py-3 rounded-lg font-bold hover:from-blue-700 hover:to-indigo-800 transition-all flex items-center justify-center gap-2"
+            className="flex-1 bg-gradient-to-r from-blue-600 to-indigo-700 text-white px-4 py-3 rounded-lg font-bold hover:from-blue-700 hover:to-indigo-800 transition-all flex items-center justify-center gap-2"
           >
             <ExternalLink className="w-5 h-5" />
             Acessar Link Externo
@@ -349,7 +318,7 @@ function DocumentDetails({ documentId, documentType = 'document' }: { documentId
           <a
             href={`/api/documents/${documentId}/download`}
             onClick={handleDownload}
-            className="w-full bg-gradient-to-r from-blue-600 to-indigo-700 text-white px-4 py-3 rounded-lg font-bold hover:from-blue-700 hover:to-indigo-800 transition-all flex items-center justify-center gap-2"
+            className="flex-1 bg-gradient-to-r from-blue-600 to-indigo-700 text-white px-4 py-3 rounded-lg font-bold hover:from-blue-700 hover:to-indigo-800 transition-all flex items-center justify-center gap-2"
           >
             <Download className="w-5 h-5" />
             Download do Arquivo
