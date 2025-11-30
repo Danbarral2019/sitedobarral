@@ -42,6 +42,7 @@ interface LeiArticle {
     title: string;
     isPublic: boolean;
     category: string | null;
+    type?: string; // 'document' ou 'legislativeAct'
   }[];
 }
 
@@ -81,7 +82,7 @@ interface DocumentData {
 }
 
 // Componente para mostrar detalhes do documento em accordion
-function DocumentDetails({ documentId }: { documentId: string }) {
+function DocumentDetails({ documentId, documentType = 'document' }: { documentId: string; documentType?: string }) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [document, setDocument] = useState<DocumentData | null>(null);
@@ -93,9 +94,16 @@ function DocumentDetails({ documentId }: { documentId: string }) {
         setLoading(true);
         setError(null);
 
-        const response = await fetch(`/api/documents/${documentId}`);
+        // Determinar qual API chamar baseado no tipo
+        const apiUrl = documentType === 'legislativeAct'
+          ? `/api/legislative-acts/${documentId}`
+          : `/api/documents/${documentId}`;
+
+        console.log(`[DocumentDetails] Buscando ${documentType}: ${apiUrl}`);
+
+        const response = await fetch(apiUrl);
         if (!response.ok) {
-          throw new Error('Documento não encontrado');
+          throw new Error(documentType === 'legislativeAct' ? 'Ato normativo não encontrado' : 'Documento não encontrado');
         }
 
         const data = await response.json();
@@ -109,7 +117,7 @@ function DocumentDetails({ documentId }: { documentId: string }) {
     };
 
     fetchDocument();
-  }, [documentId]);
+  }, [documentId, documentType]);
 
   const handleDownload = () => {
     fetch('/api/access-log', {
@@ -299,7 +307,19 @@ function DocumentDetails({ documentId }: { documentId: string }) {
 
       {/* Action Button */}
       <div className="pt-3 border-t border-gray-200">
-        {document.type === 'link' ? (
+        {/* Atos normativos (decreto, in, portaria) ou links externos */}
+        {document.url && (document.type === 'link' || ['decreto', 'in', 'portaria', 'lei', 'medida-provisoria'].includes(document.type || '')) ? (
+          <a
+            href={document.url}
+            target="_blank"
+            rel="noopener noreferrer"
+            onClick={handleView}
+            className="w-full bg-gradient-to-r from-blue-600 to-indigo-700 text-white px-4 py-3 rounded-lg font-bold hover:from-blue-700 hover:to-indigo-800 transition-all flex items-center justify-center gap-2"
+          >
+            <ExternalLink className="w-5 h-5" />
+            Acessar Documento Oficial
+          </a>
+        ) : document.url ? (
           <a
             href={document.url}
             target="_blank"
@@ -899,7 +919,7 @@ function LeiComentadaContent() {
                                             )}
                                           </button>
 
-                                          {isDocExpanded && <DocumentDetails documentId={doc.id} />}
+                                          {isDocExpanded && <DocumentDetails documentId={doc.id} documentType={doc.type} />}
                                         </div>
                                       );
                                     })}
