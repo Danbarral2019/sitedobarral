@@ -187,16 +187,7 @@ export default function AreaRestritaPage() {
   );
 
   const selectedCourseDocuments = useMemo(
-    () => {
-      const docs = selectedCourseId && isSelectedCourseEnrolled ? (courseDocuments[selectedCourseId] || []) : [];
-      console.log(`[DEBUG] selectedCourseId: ${selectedCourseId}, isEnrolled: ${isSelectedCourseEnrolled}, docs: ${docs.length}`);
-      if (docs.length > 0) {
-        const onDocs = docs.filter(d => d.category === 'orientacao-normativa');
-        console.log(`[DEBUG] ONs encontradas: ${onDocs.length}`);
-        console.log('[DEBUG] Primeira ON:', docs.find(d => d.category === 'orientacao-normativa')?.title);
-      }
-      return docs;
-    },
+    () => selectedCourseId && isSelectedCourseEnrolled ? (courseDocuments[selectedCourseId] || []) : [],
     [selectedCourseId, isSelectedCourseEnrolled, courseDocuments]
   );
 
@@ -716,14 +707,12 @@ export default function AreaRestritaPage() {
       />
 
       {/* Modal de Detalhes do Documento */}
-      {selectedDocument && selectedCourse && (
+      {isModalOpen && selectedDocument && selectedCourse && (
         <DocumentDetailModal
-          isOpen={isModalOpen}
+          documentId={selectedDocument.id}
           onClose={handleCloseModal}
-          document={selectedDocument}
-          courseTitle={selectedCourse.title}
-          onDownload={() => handleDownload(selectedDocument, selectedCourse.id)}
-          onView={selectedDocument.type === 'link' ? () => handleView(selectedDocument, selectedCourse.id) : undefined}
+          isFavorite={isFavorite(selectedDocument.id)}
+          onToggleFavorite={() => toggleFavorite(selectedDocument.id, selectedCourse.id)}
         />
       )}
 

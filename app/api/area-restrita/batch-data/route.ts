@@ -73,13 +73,22 @@ export async function GET(request: NextRequest) {
 
     // Buscar documentos (essencial - deve funcionar)
     // Inclui documentos específicos do curso E documentos comuns (isCommon=true)
+    // EXCLUI: Orientações Normativas da AGU (aparecem APENAS na Lei 14.133 Comentada)
     try {
       console.log('[Batch-Data] Buscando documentos...');
       documents = await prisma.document.findMany({
         where: {
-          OR: [
-            { courseId: { in: courseIds } }, // Específicos do curso
-            { isCommon: true },               // Comuns a todos os cursos
+          AND: [
+            {
+              OR: [
+                { courseId: { in: courseIds } }, // Específicos do curso
+                { isCommon: true },               // Comuns a todos os cursos
+              ],
+            },
+            {
+              // Excluir ONs - devem aparecer APENAS na Lei 14.133 Comentada
+              category: { not: 'orientacao-normativa' },
+            },
           ],
         },
         orderBy: [
