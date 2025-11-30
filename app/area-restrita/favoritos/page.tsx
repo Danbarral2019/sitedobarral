@@ -43,6 +43,13 @@ interface GroupedFavorites {
   favorites: FavoriteWithDocument[];
 }
 
+interface ONFavorite {
+  id: string;
+  documentId: string;
+  createdAt: string;
+  document: Document;
+}
+
 const TYPE_LABELS: Record<string, string> = {
   'decreto': 'Decreto',
   'portaria': 'Portaria',
@@ -69,10 +76,11 @@ export default function FavoritosPage() {
   const router = useRouter();
   const { user, isLoading } = useAuth();
   const [favorites, setFavorites] = useState<FavoriteWithDocument[]>([]);
+  const [onFavorites, setOnFavorites] = useState<ONFavorite[]>([]);
   const [legislativeActs, setLegislativeActs] = useState<LegislativeAct[]>([]);
   const [isLoadingFavorites, setIsLoadingFavorites] = useState(true);
   const [removingId, setRemovingId] = useState<string | null>(null);
-  const [activeTab, setActiveTab] = useState<'documents' | 'acts'>('documents');
+  const [activeTab, setActiveTab] = useState<'documents' | 'ons' | 'acts'>('documents');
 
   // Redirecionar se não autenticado
   useEffect(() => {
@@ -99,14 +107,14 @@ export default function FavoritosPage() {
           const userFavorites = favData.favorites || [];
 
           const favoritesWithDocs = await Promise.all(
-            userFavorites.map(async (fav: { id: string; documentId: string; courseId: string; createdAt: string }) => {
+            userFavorites.map(async (fav: { id: string; documentId: string; courseId: string | null; createdAt: string }) => {
               try {
                 const docFetchResponse = await fetch(`/api/documents/${fav.documentId}`);
                 if (docFetchResponse.ok) {
                   const docData = await docFetchResponse.json();
                   return {
                     ...fav,
-                    document: docData.document,
+                    document: docData.document || docData,
                   };
                 }
               } catch (error) {
@@ -120,7 +128,13 @@ export default function FavoritosPage() {
           );
 
           const validFavorites = favoritesWithDocs.filter(fav => fav.document !== null);
-          setFavorites(validFavorites);
+
+          // Separar ONs dos documentos regulares
+          const ons = validFavorites.filter(fav => fav.document?.category === 'orientacao-normativa');
+          const regularDocs = validFavorites.filter(fav => fav.document?.category !== 'orientacao-normativa');
+
+          setFavorites(regularDocs);
+          setOnFavorites(ons as ONFavorite[]);
         }
 
         // Processar atos normativos
@@ -243,7 +257,28 @@ export default function FavoritosPage() {
     return labels[category] || category;
   };
 
-  const totalFavorites = favorites.length + legislativeActs.length;
+  // Remover favorito de ON
+  const handleRemoveONFavorite = async (documentId: string) => {
+    setRemovingId(documentId);
+    try {
+      const response = await fetch(`/api/favorites?documentId=${documentId}`, {
+        method: 'DELETE',
+      });
+
+      if (response.ok) {
+        setOnFavorites(prev => prev.filter(fav => fav.documentId !== documentId));
+      } else {
+        alert('Erro ao remover favorito');
+      }
+    } catch (error) {
+      console.error('Erro ao remover favorito:', error);
+      alert('Erro ao remover favorito');
+    } finally {
+      setRemovingId(null);
+    }
+  };
+
+  const totalFavorites = favorites.length + onFavorites.length + legislativeActs.length;
 
   if (isLoading || isLoadingFavorites) {
     return (
@@ -284,7 +319,7 @@ export default function FavoritosPage() {
 
         {/* Tabs */}
         {totalFavorites > 0 && (
-          <div className="flex gap-2 mb-6">
+          <div className="flex flex-wrap gap-2 mb-6">
             <button
               onClick={() => setActiveTab('documents')}
               className={`px-4 py-2 rounded-lg font-medium transition-colors flex items-center gap-2 ${
@@ -297,10 +332,21 @@ export default function FavoritosPage() {
               Documentos ({favorites.length})
             </button>
             <button
+              onClick={() => setActiveTab('ons')}
+              className={`px-4 py-2 rounded-lg font-medium transition-colors flex items-center gap-2 ${
+                activeTab === 'ons'
+                  ? 'bg-indigo-600 text-white'
+                  : 'bg-white text-gray-700 hover:bg-gray-100 border border-gray-200'
+              }`}
+            >
+              <BookOpen className="w-4 h-4" />
+              ONs - AGU ({onFavorites.length})
+            </button>
+            <button
               onClick={() => setActiveTab('acts')}
               className={`px-4 py-2 rounded-lg font-medium transition-colors flex items-center gap-2 ${
                 activeTab === 'acts'
-                  ? 'bg-blue-600 text-white'
+                  ? 'bg-purple-600 text-white'
                   : 'bg-white text-gray-700 hover:bg-gray-100 border border-gray-200'
               }`}
             >
@@ -413,6 +459,97 @@ export default function FavoritosPage() {
                       </div>
                     </div>
                   ))
+                )}
+              </div>
+            )}
+
+            {/* Tab de Orientações Normativas - AGU */}
+            {activeTab === 'ons' && (
+              <div className="space-y-4">
+                {onFavorites.length === 0 ? (
+                  <div className="bg-white rounded-2xl shadow-lg p-8 text-center border-2 border-gray-200">
+                    <BookOpen className="w-12 h-12 text-gray-300 mx-auto mb-3" />
+                    <p className="text-gray-600">Nenhuma Orientação Normativa favoritada ainda.</p>
+                    <Link
+                      href="/area-restrita/lei-comentada"
+                      className="inline-block mt-4 text-indigo-600 hover:text-indigo-700 font-medium"
+                    >
+                      Explorar Lei 14.133 Comentada
+                    </Link>
+                  </div>
+                ) : (
+                  <div className="bg-white rounded-2xl shadow-lg border-2 border-gray-200 overflow-hidden">
+                    <div className="bg-gradient-to-r from-indigo-600 to-blue-600 text-white p-6">
+                      <h2 className="text-2xl font-bold flex items-center gap-3">
+                        <BookOpen className="w-7 h-7" />
+                        Orientações Normativas - AGU
+                      </h2>
+                      <p className="text-indigo-100 mt-1">
+                        {onFavorites.length} {onFavorites.length === 1 ? 'ON favoritada' : 'ONs favoritadas'}
+                      </p>
+                    </div>
+
+                    <div className="p-6 space-y-4">
+                      {onFavorites.map((fav) => (
+                        <div
+                          key={fav.id}
+                          className="flex items-start gap-4 p-4 bg-gradient-to-r from-gray-50 to-white border-2 border-gray-200 rounded-xl hover:border-indigo-300 hover:shadow-md transition-all"
+                        >
+                          {/* Ícone */}
+                          <div className="w-12 h-12 bg-indigo-100 rounded-lg flex items-center justify-center flex-shrink-0 text-indigo-600">
+                            <BookOpen className="w-6 h-6" />
+                          </div>
+
+                          {/* Conteúdo */}
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-start justify-between gap-4">
+                              <div className="flex-1">
+                                <span className="inline-block px-2 py-0.5 bg-indigo-100 text-indigo-800 rounded text-xs font-medium mb-1">
+                                  Orientação Normativa
+                                </span>
+                                <h3 className="font-bold text-gray-900 mb-1">{fav.document.title}</h3>
+                                {fav.document.description && (
+                                  <p className="text-sm text-gray-600 mb-2 line-clamp-2">
+                                    {fav.document.description}
+                                  </p>
+                                )}
+                                <span className="text-xs text-gray-500">
+                                  Adicionado em {new Date(fav.createdAt).toLocaleDateString('pt-BR')}
+                                </span>
+                              </div>
+
+                              {/* Ações */}
+                              <div className="flex items-center gap-2 flex-shrink-0">
+                                {fav.document.url && (
+                                  <a
+                                    href={fav.document.url}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+                                    title="Acessar documento oficial"
+                                  >
+                                    <ExternalLink className="w-5 h-5" />
+                                  </a>
+                                )}
+                                <button
+                                  onClick={() => handleRemoveONFavorite(fav.documentId)}
+                                  disabled={removingId === fav.documentId}
+                                  className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors disabled:opacity-50"
+                                  title="Remover dos favoritos"
+                                >
+                                  {removingId === fav.documentId ? (
+                                    <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-red-600"></div>
+                                  ) : (
+                                    <Trash2 className="w-5 h-5" />
+                                  )}
+                                </button>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
                 )}
               </div>
             )}
