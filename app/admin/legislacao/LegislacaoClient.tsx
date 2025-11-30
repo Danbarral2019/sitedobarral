@@ -11,7 +11,7 @@
 
 import { ResourceListClient } from '@/components/admin/ResourceListClient';
 import { PaginatedResult } from '@/lib/types/admin-list';
-import { LegislativeAct } from '@/lib/legislacao';
+import { LegislativeAct, LegislativeActStats } from '@/lib/legislacao';
 import { LegislacaoHeader } from './Header';
 import { createLegislacaoConfig } from './config';
 
@@ -20,11 +20,12 @@ interface LegislacaoClientProps {
   types: string[];
   issuers: string[];
   years: number[];
+  stats: LegislativeActStats;
 }
 
-export function LegislacaoClient({ initialData, types, issuers, years }: LegislacaoClientProps) {
-  // ✅ Factory chamada NO CLIENTE
-  const legislacaoConfig = createLegislacaoConfig({ types, issuers, years });
+export function LegislacaoClient({ initialData, types, issuers, years, stats }: LegislacaoClientProps) {
+  // ✅ Factory chamada NO CLIENTE com stats agregadas
+  const legislacaoConfig = createLegislacaoConfig({ types, issuers, years, stats });
 
   return (
     <div className="p-8">

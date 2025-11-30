@@ -11,6 +11,7 @@ import {
   getLegislativeActTypes,
   getLegislativeActIssuers,
   getLegislativeActYears,
+  getLegislativeActStats,
   fetchLegislativeActsPaginated
 } from '@/lib/legislacao';
 import { LegislacaoClient } from './LegislacaoClient';
@@ -34,11 +35,12 @@ export default async function LegislacaoPage({ searchParams }: PageProps) {
   };
 
   // ✅ Server: Buscar TODOS os dados aqui
-  const [types, issuers, years, acts] = await Promise.all([
+  const [types, issuers, years, acts, stats] = await Promise.all([
     getLegislativeActTypes(),
     getLegislativeActIssuers(),
     getLegislativeActYears(),
     fetchLegislativeActsPaginated(normalizedParams),
+    getLegislativeActStats(),
   ]);
 
   // ✅ Passar dados prontos para Client
@@ -49,6 +51,7 @@ export default async function LegislacaoPage({ searchParams }: PageProps) {
         types={types}
         issuers={issuers}
         years={years}
+        stats={stats}
       />
     </AdminLayout>
   );

@@ -139,3 +139,32 @@ export async function getLegislativeActYears(): Promise<number[]> {
 
   return years.map(y => y.year);
 }
+
+/**
+ * Estatísticas agregadas dos atos normativos
+ */
+export interface LegislativeActStats {
+  total: number;
+  withPdf: number;
+  withOfficialUrl: number;
+  totalViews: number;
+}
+
+/**
+ * Buscar estatísticas agregadas de todos os atos normativos
+ */
+export async function getLegislativeActStats(): Promise<LegislativeActStats> {
+  const [total, withPdf, withOfficialUrl, viewsResult] = await Promise.all([
+    prisma.legislativeAct.count(),
+    prisma.legislativeAct.count({ where: { pdfUrl: { not: null } } }),
+    prisma.legislativeAct.count({ where: { officialUrl: { not: null } } }),
+    prisma.legislativeAct.aggregate({ _sum: { viewCount: true } }),
+  ]);
+
+  return {
+    total,
+    withPdf,
+    withOfficialUrl,
+    totalViews: viewsResult._sum.viewCount || 0,
+  };
+}

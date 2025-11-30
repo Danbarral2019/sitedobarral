@@ -11,7 +11,7 @@
 import { Eye, Edit, Trash2, Scale, Calendar, ExternalLink, FileText, Download } from 'lucide-react';
 import { createListConfig } from '@/components/admin/ResourceListContainer';
 import { AdminListConfig, FilterConfig } from '@/lib/types/admin-list';
-import { LegislativeAct } from '@/lib/legislacao';
+import { LegislativeAct, LegislativeActStats } from '@/lib/legislacao';
 
 // Helper functions
 const TYPE_LABELS: Record<string, string> = {
@@ -44,12 +44,14 @@ interface LegislacaoConfigProps {
   types: string[];
   issuers: string[];
   years: number[];
+  stats: LegislativeActStats;
 }
 
 export function createLegislacaoConfig({
   types,
   issuers,
-  years
+  years,
+  stats
 }: LegislacaoConfigProps): AdminListConfig<LegislativeAct> {
   // Build filters dynamically
   const filters: FilterConfig[] = [
@@ -90,30 +92,30 @@ export function createLegislacaoConfig({
     showSearch: true,
     searchPlaceholder: 'Buscar por título, número ou ementa...',
 
-    // Estatísticas
+    // Estatísticas (usando valores agregados do banco, não da página)
     showStats: true,
-    getStats: (items) => [
+    getStats: () => [
       {
         label: 'Total',
-        value: items.length,
+        value: stats.total,
         icon: Scale,
         color: 'bg-blue-100 text-blue-600',
       },
       {
         label: 'Com PDF',
-        value: items.filter((a) => a.pdfUrl).length,
+        value: stats.withPdf,
         icon: FileText,
         color: 'bg-green-100 text-green-600',
       },
       {
         label: 'Com Link Oficial',
-        value: items.filter((a) => a.officialUrl).length,
+        value: stats.withOfficialUrl,
         icon: ExternalLink,
         color: 'bg-purple-100 text-purple-600',
       },
       {
         label: 'Visualizações',
-        value: items.reduce((acc, a) => acc + a.viewCount, 0),
+        value: stats.totalViews,
         icon: Eye,
         color: 'bg-indigo-100 text-indigo-600',
       },
