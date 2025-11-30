@@ -847,9 +847,9 @@ function LeiComentadaContent() {
                           'decreto': 'Decretos',
                           'portaria': 'Portarias',
                           'in': 'Instruções Normativas',
-                          'orientacao-normativa': 'Pareceres da AGU',
-                          'parecer-vinculante': 'Pareceres da AGU',
-                          'decor': 'Pareceres da AGU',
+                          'orientacao-normativa': 'Precedentes da AGU',
+                          'parecer-vinculante': 'Precedentes da AGU',
+                          'decor': 'Precedentes da AGU',
                           'acordao': 'Jurisprudência dos Tribunais de Contas',
                           'outro': 'Outros Documentos',
                         };
@@ -871,7 +871,7 @@ function LeiComentadaContent() {
                           'Decretos',
                           'Portarias',
                           'Instruções Normativas',
-                          'Pareceres da AGU',
+                          'Precedentes da AGU',
                           'Jurisprudência dos Tribunais de Contas',
                           'Outros Documentos',
                         ];
