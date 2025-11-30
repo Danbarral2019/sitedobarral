@@ -13,10 +13,10 @@ export const Footer = memo(function Footer() {
             <div className="flex items-center space-x-3 mb-4">
               <div className="w-10 h-10 relative">
                 <Image
-                  src="/images/logo-pena.png"
-                  alt="Logo"
+                  src="/brand/logo-icon.png"
+                  alt="Logo Prof. Daniel Barral"
                   fill
-                  className="object-contain brightness-0 invert opacity-80"
+                  className="object-contain opacity-90"
                 />
               </div>
               <h3 className="text-white font-cinzel font-semibold text-lg tracking-wide">

@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { usePathname } from 'next/navigation';
 import Link from 'next/link';
+import Image from 'next/image';
 import {
   QrCode, ChevronLeft, ChevronRight, BarChart3, Mail, MessageSquare, Send, GraduationCap, Youtube, Globe, HelpCircle, BookOpen, Menu, X
 } from 'lucide-react';
@@ -194,6 +195,15 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
       label: 'Sites Recomendados',
       icon: Globe,
     },
+    {
+      path: '/admin/assistente-social',
+      label: 'Publicar Redes Sociais 📱',
+      icon: (props: Record<string, unknown>) => (
+        <svg {...props} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
+        </svg>
+      ),
+    },
 
     // === GESTÃO ===
     { divider: true, label: '⚙️ Gestão' },
@@ -218,15 +228,6 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
       path: '/admin/newsletter',
       label: 'Newsletter',
       icon: Send,
-    },
-    {
-      path: '/admin/assistente-social',
-      label: 'Assistente Social 🤖',
-      icon: (props: Record<string, unknown>) => (
-        <svg {...props} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
-        </svg>
-      ),
     },
   ];
 
@@ -257,28 +258,47 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
       <aside
         className={`
           ${isCollapsed ? 'w-20' : 'w-64'}
-          bg-white border-r border-gray-200 fixed h-full transition-all duration-300 z-40
+          bg-brand-600 border-r border-brand-700 fixed h-full transition-all duration-300 z-40
           lg:translate-x-0
           ${isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full'}
         `}
       >
         {/* Header */}
-        <div className="p-4 border-b border-gray-200 flex items-center justify-between flex-shrink-0">
-          {!isCollapsed && (
-            <div>
-              <h1 className="text-lg font-bold text-gray-900">Painel Admin</h1>
-              <p className="text-xs text-gray-600 mt-0.5">Prof. Daniel Barral</p>
+        <div className="p-4 border-b border-brand-500 flex items-center justify-between flex-shrink-0">
+          {!isCollapsed ? (
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 relative flex-shrink-0">
+                <Image
+                  src="/brand/logo-icon.png"
+                  alt="Logo"
+                  fill
+                  className="object-contain"
+                />
+              </div>
+              <div>
+                <h1 className="text-base font-cinzel font-semibold text-white">Painel Admin</h1>
+                <p className="text-xs text-brand-200 mt-0.5 font-poppins">Prof. Daniel Barral</p>
+              </div>
+            </div>
+          ) : (
+            <div className="w-10 h-10 relative mx-auto">
+              <Image
+                src="/brand/logo-icon.png"
+                alt="Logo"
+                fill
+                className="object-contain"
+              />
             </div>
           )}
           <button
             onClick={() => setIsCollapsed(!isCollapsed)}
-            className="p-2 rounded-lg hover:bg-gray-100 transition-colors ml-auto hidden lg:block"
+            className="p-2 rounded-lg hover:bg-brand-500 transition-colors ml-auto hidden lg:block"
             title={isCollapsed ? 'Expandir menu' : 'Recolher menu'}
           >
             {isCollapsed ? (
-              <ChevronRight className="w-5 h-5 text-gray-600" />
+              <ChevronRight className="w-5 h-5 text-white" />
             ) : (
-              <ChevronLeft className="w-5 h-5 text-gray-600" />
+              <ChevronLeft className="w-5 h-5 text-white" />
             )}
           </button>
         </div>
@@ -292,15 +312,15 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
                 return (
                   <div
                     key={`divider-${index}`}
-                    className={`${index > 0 ? 'mt-4 pt-3 border-t border-gray-200' : ''}`}
+                    className={`${index > 0 ? 'mt-4 pt-3 border-t border-brand-500' : ''}`}
                   >
                     {!isCollapsed && (
-                      <div className="px-3 pb-2 text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                      <div className="px-3 pb-2 text-xs font-semibold text-brand-200 uppercase tracking-wider">
                         {item.label}
                       </div>
                     )}
                     {isCollapsed && (
-                      <div className="h-px bg-gray-200 my-2" />
+                      <div className="h-px bg-brand-500 my-2" />
                     )}
                   </div>
                 );
@@ -319,8 +339,8 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
                     item.indent ? 'ml-4' : ''
                   } ${
                     active
-                      ? 'bg-blue-50 text-blue-700 font-semibold'
-                      : 'text-gray-700 hover:bg-gray-100'
+                      ? 'bg-white/20 text-white font-semibold'
+                      : 'text-brand-100 hover:bg-brand-500 hover:text-white'
                   }`}
                   title={isCollapsed ? item.label : ''}
                 >
@@ -336,20 +356,20 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
                     </div>
                   )}
                   {isCollapsed && item.badge && item.badge > 0 && (
-                    <span className="absolute top-1 right-1 w-2.5 h-2.5 bg-red-500 rounded-full border-2 border-white"></span>
+                    <span className="absolute top-1 right-1 w-2.5 h-2.5 bg-red-500 rounded-full border-2 border-brand-600"></span>
                   )}
                 </Link>
               );
             })}
           </div>
 
-          <div className="mt-6 pt-6 border-t border-gray-200 space-y-1">
+          <div className="mt-6 pt-6 border-t border-brand-500 space-y-1">
             <Link
               href="/area-restrita"
               target="_blank"
               rel="noopener noreferrer"
               onClick={() => setIsMobileMenuOpen(false)}
-              className="flex items-center gap-3 px-4 py-3 rounded-lg text-blue-700 hover:bg-blue-50 font-medium transition-colors"
+              className="flex items-center gap-3 px-4 py-3 rounded-lg text-white hover:bg-brand-500 font-medium transition-colors"
               title={isCollapsed ? 'Área do Aluno (abre em nova aba)' : ''}
             >
               <GraduationCap className="w-5 h-5 flex-shrink-0" />
@@ -365,7 +385,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
             <Link
               href="/"
               onClick={() => setIsMobileMenuOpen(false)}
-              className="flex items-center gap-3 px-4 py-3 rounded-lg text-gray-700 hover:bg-gray-100 font-medium transition-colors"
+              className="flex items-center gap-3 px-4 py-3 rounded-lg text-brand-200 hover:bg-brand-500 hover:text-white font-medium transition-colors"
               title={isCollapsed ? 'Voltar ao Site' : ''}
             >
               <svg className="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">

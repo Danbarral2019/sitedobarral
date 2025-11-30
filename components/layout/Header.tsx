@@ -41,10 +41,10 @@ export const Header = memo(function Header() {
           <Link href="/" className="flex items-center space-x-3 sm:space-x-4 flex-shrink-0 group">
             <div className="w-16 h-16 sm:w-24 sm:h-24 relative flex-shrink-0">
               <Image
-                src="/images/logo-pena.png"
+                src="/brand/logo-icon.png"
                 alt="Logo Prof. Daniel Barral"
                 fill
-                className="object-contain brightness-0 invert"
+                className="object-contain"
                 priority
               />
             </div>

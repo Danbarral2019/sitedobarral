@@ -28,6 +28,11 @@ export const metadata: Metadata = {
     template: '%s | Prof. Daniel Barral',
     default: 'Prof. Daniel Barral - Especialista em Licitações e Contratos',
   },
+  icons: {
+    icon: '/brand/sublogo.png',
+    shortcut: '/brand/sublogo.png',
+    apple: '/brand/sublogo.png',
+  },
   description: "Repositório especializado de materiais jurídicos em Direito Administrativo. Cursos sobre licitações, contratos administrativos, Nova Lei 14.133/2021 e mais.",
   keywords: [
     "licitações",
