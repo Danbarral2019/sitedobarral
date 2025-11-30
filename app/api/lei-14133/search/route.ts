@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { LEI_14133_ARTIGOS } from '@/data/lei-14133-artigos';
 import { queryGeminiText } from '@/lib/gemini/cached-client';
+import { prisma } from '@/lib/prisma';
 
 interface SearchResult {
   articleNumber: string;
@@ -11,9 +12,20 @@ interface SearchResult {
   score: number; // 1-100
 }
 
+interface DocumentResult {
+  id: string;
+  title: string;
+  category: string;
+  type: string;
+  summary: string | null;
+  linkedArticles: string[];
+  relevance: string;
+}
+
 interface SearchResponse {
   query: string;
   results: SearchResult[];
+  documents: DocumentResult[];
   summary: string;
   isAISearch: boolean;
   cached: boolean;
@@ -111,6 +123,7 @@ Regras:
       return NextResponse.json({
         query: searchQuery,
         results: [],
+        documents: [],
         summary: 'Nao foi possivel processar a busca com IA. Tente uma busca mais especifica.',
         isAISearch: false,
         cached: false,
@@ -134,12 +147,131 @@ Regras:
       })
       .sort((a, b) => b.score - a.score);
 
+    // Buscar documentos relevantes no banco de dados
+    const articleNumbers = results.map(r => r.articleNumber);
+    const searchTerms = searchQuery.toLowerCase().split(/\s+/).filter(t => t.length > 2);
+
+    // Buscar documentos vinculados aos artigos OU que contenham os termos de busca
+    const documents = await prisma.document.findMany({
+      where: {
+        OR: [
+          // Documentos vinculados aos artigos encontrados
+          ...articleNumbers.map(num => ({
+            leiArticles: { contains: num }
+          })),
+          // Documentos que contenham termos de busca no título
+          ...searchTerms.map(term => ({
+            title: { contains: term, mode: 'insensitive' as const }
+          })),
+          // Documentos que contenham termos de busca no resumo
+          ...searchTerms.map(term => ({
+            summary: { contains: term, mode: 'insensitive' as const }
+          })),
+        ],
+      },
+      select: {
+        id: true,
+        title: true,
+        category: true,
+        type: true,
+        summary: true,
+        leiArticles: true,
+      },
+      take: 10,
+      orderBy: [
+        { summary: 'desc' }, // Priorizar documentos com resumo
+        { uploadedAt: 'desc' },
+      ],
+    });
+
+    // Também buscar atos normativos (LegislativeAct)
+    const legislativeActs = await prisma.legislativeAct.findMany({
+      where: {
+        OR: [
+          // Atos vinculados aos artigos encontrados
+          ...articleNumbers.map(num => ({
+            linkedArticles: { contains: num }
+          })),
+          // Atos que contenham termos de busca no título
+          ...searchTerms.map(term => ({
+            title: { contains: term, mode: 'insensitive' as const }
+          })),
+          // Atos que contenham termos de busca na ementa
+          ...searchTerms.map(term => ({
+            summary: { contains: term, mode: 'insensitive' as const }
+          })),
+        ],
+      },
+      select: {
+        id: true,
+        title: true,
+        type: true,
+        fullNumber: true,
+        summary: true,
+        linkedArticles: true,
+      },
+      take: 5,
+    });
+
+    // Formatar documentos para resposta
+    const documentResults: DocumentResult[] = [
+      ...documents.map(doc => {
+        // Determinar relevância baseada na correspondência
+        let relevance = '';
+        const leiArticles = doc.leiArticles ? doc.leiArticles.split(',').map(a => a.trim()) : [];
+        const matchedArticles = leiArticles.filter(a => articleNumbers.includes(a));
+
+        if (matchedArticles.length > 0) {
+          relevance = `Vinculado ao(s) Art. ${matchedArticles.join(', ')}`;
+        } else {
+          relevance = 'Contém termos da busca';
+        }
+
+        return {
+          id: doc.id,
+          title: doc.title,
+          category: doc.category || 'Documento',
+          type: doc.type || 'pdf',
+          summary: doc.summary ? doc.summary.substring(0, 200) + (doc.summary.length > 200 ? '...' : '') : null,
+          linkedArticles: leiArticles,
+          relevance,
+        };
+      }),
+      ...legislativeActs.map(act => {
+        const linkedArticles = act.linkedArticles ? act.linkedArticles.split(',').map(a => a.trim()) : [];
+        const matchedArticles = linkedArticles.filter(a => articleNumbers.includes(a));
+
+        let relevance = '';
+        if (matchedArticles.length > 0) {
+          relevance = `Vinculado ao(s) Art. ${matchedArticles.join(', ')}`;
+        } else {
+          relevance = 'Contém termos da busca';
+        }
+
+        return {
+          id: act.id,
+          title: `${act.fullNumber} - ${act.title}`,
+          category: act.type || 'Ato Normativo',
+          type: 'legislativeAct',
+          summary: act.summary ? act.summary.substring(0, 200) + (act.summary.length > 200 ? '...' : '') : null,
+          linkedArticles,
+          relevance,
+        };
+      }),
+    ];
+
+    // Remover duplicatas por ID
+    const uniqueDocuments = documentResults.filter((doc, index, self) =>
+      index === self.findIndex(d => d.id === doc.id)
+    );
+
     const latency = Date.now() - startTime;
-    console.log(`[Search API] Encontrados ${results.length} artigos em ${latency}ms (cached: ${geminiResult.cached})`);
+    console.log(`[Search API] Encontrados ${results.length} artigos e ${uniqueDocuments.length} documentos em ${latency}ms (cached: ${geminiResult.cached})`);
 
     const response: SearchResponse = {
       query: searchQuery,
       results,
+      documents: uniqueDocuments,
       summary: parsedResponse.summary,
       isAISearch: true,
       cached: geminiResult.cached,

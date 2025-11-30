@@ -75,9 +75,20 @@ interface AISearchResult {
   score: number;
 }
 
+interface AIDocumentResult {
+  id: string;
+  title: string;
+  category: string;
+  type: string;
+  summary: string | null;
+  linkedArticles: string[];
+  relevance: string;
+}
+
 interface AISearchResponse {
   query: string;
   results: AISearchResult[];
+  documents: AIDocumentResult[];
   summary: string;
   isAISearch: boolean;
   cached: boolean;
@@ -811,46 +822,97 @@ function LeiComentadaContent() {
                     )}
                   </div>
 
-                  {/* Resultados */}
-                  {aiSearchResults.results.length > 0 ? (
-                    <div className="space-y-3">
-                      {aiSearchResults.results.map((result, index) => (
-                        <button
-                          key={result.articleNumber}
-                          onClick={() => handleAIResultClick(result.articleNumber)}
-                          className="w-full text-left bg-white border border-gray-200 rounded-lg p-4 hover:border-purple-300 hover:shadow-md transition-all"
-                        >
-                          <div className="flex items-start gap-3">
-                            {/* Ranking */}
-                            <div className="flex-shrink-0 w-8 h-8 bg-purple-100 text-purple-700 rounded-full flex items-center justify-center font-bold text-sm">
-                              {index + 1}
-                            </div>
-                            <div className="flex-1 min-w-0">
-                              {/* Artigo e Score */}
-                              <div className="flex items-center justify-between mb-1">
-                                <span className="font-bold text-blue-600">Art. {result.articleNumber}</span>
-                                <span className="text-xs bg-purple-100 text-purple-700 px-2 py-0.5 rounded-full">
-                                  {result.score}% relevante
-                                </span>
+                  {/* Resultados - Artigos */}
+                  {aiSearchResults.results.length > 0 && (
+                    <>
+                      <h4 className="font-bold text-gray-900 text-sm flex items-center gap-2">
+                        <Scale className="w-4 h-4 text-blue-600" />
+                        Artigos Relevantes ({aiSearchResults.results.length})
+                      </h4>
+                      <div className="space-y-3">
+                        {aiSearchResults.results.map((result, index) => (
+                          <button
+                            key={result.articleNumber}
+                            onClick={() => handleAIResultClick(result.articleNumber)}
+                            className="w-full text-left bg-white border border-gray-200 rounded-lg p-4 hover:border-purple-300 hover:shadow-md transition-all"
+                          >
+                            <div className="flex items-start gap-3">
+                              {/* Ranking */}
+                              <div className="flex-shrink-0 w-8 h-8 bg-purple-100 text-purple-700 rounded-full flex items-center justify-center font-bold text-sm">
+                                {index + 1}
                               </div>
-                              {/* Capítulo */}
-                              <p className="text-xs text-gray-500 mb-2">{result.title}</p>
-                              {/* Relevância */}
-                              <div className="bg-gray-50 rounded p-2 mb-2">
-                                <p className="text-sm text-gray-700">{result.relevance}</p>
+                              <div className="flex-1 min-w-0">
+                                {/* Artigo e Score */}
+                                <div className="flex items-center justify-between mb-1">
+                                  <span className="font-bold text-blue-600">Art. {result.articleNumber}</span>
+                                  <span className="text-xs bg-purple-100 text-purple-700 px-2 py-0.5 rounded-full">
+                                    {result.score}% relevante
+                                  </span>
+                                </div>
+                                {/* Capítulo */}
+                                <p className="text-xs text-gray-500 mb-2">{result.title}</p>
+                                {/* Relevância */}
+                                <div className="bg-gray-50 rounded p-2 mb-2">
+                                  <p className="text-sm text-gray-700">{result.relevance}</p>
+                                </div>
+                                {/* Ementa resumida */}
+                                <p className="text-xs text-gray-600 line-clamp-2">{result.ementa}</p>
                               </div>
-                              {/* Ementa resumida */}
-                              <p className="text-xs text-gray-600 line-clamp-2">{result.ementa}</p>
+                              <ChevronRight className="w-5 h-5 text-gray-400 flex-shrink-0" />
                             </div>
-                            <ChevronRight className="w-5 h-5 text-gray-400 flex-shrink-0" />
-                          </div>
-                        </button>
-                      ))}
-                    </div>
-                  ) : (
+                          </button>
+                        ))}
+                      </div>
+                    </>
+                  )}
+
+                  {/* Resultados - Documentos */}
+                  {aiSearchResults.documents && aiSearchResults.documents.length > 0 && (
+                    <>
+                      <h4 className="font-bold text-gray-900 text-sm flex items-center gap-2 mt-6">
+                        <FileText className="w-4 h-4 text-green-600" />
+                        Documentos Relacionados ({aiSearchResults.documents.length})
+                      </h4>
+                      <div className="space-y-2">
+                        {aiSearchResults.documents.map((doc) => (
+                          <a
+                            key={doc.id}
+                            href={doc.type === 'legislativeAct' ? `/api/legislative-acts/${doc.id}` : `/api/documents/${doc.id}/download`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="block w-full text-left bg-white border border-gray-200 rounded-lg p-3 hover:border-green-300 hover:shadow-md transition-all"
+                          >
+                            <div className="flex items-start gap-3">
+                              <div className="flex-shrink-0 w-8 h-8 bg-green-100 text-green-700 rounded-full flex items-center justify-center">
+                                <FileText className="w-4 h-4" />
+                              </div>
+                              <div className="flex-1 min-w-0">
+                                <div className="flex items-center gap-2 mb-1">
+                                  <span className="font-medium text-gray-900 text-sm truncate">{doc.title}</span>
+                                </div>
+                                <div className="flex items-center gap-2 mb-1">
+                                  <span className="text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded">
+                                    {doc.category}
+                                  </span>
+                                  <span className="text-xs text-gray-500">{doc.relevance}</span>
+                                </div>
+                                {doc.summary && (
+                                  <p className="text-xs text-gray-600 line-clamp-2">{doc.summary}</p>
+                                )}
+                              </div>
+                              <ExternalLink className="w-4 h-4 text-gray-400 flex-shrink-0" />
+                            </div>
+                          </a>
+                        ))}
+                      </div>
+                    </>
+                  )}
+
+                  {/* Nenhum resultado */}
+                  {aiSearchResults.results.length === 0 && (!aiSearchResults.documents || aiSearchResults.documents.length === 0) && (
                     <div className="text-center py-8">
                       <AlertCircle className="w-12 h-12 text-gray-400 mx-auto mb-3" />
-                      <p className="text-gray-600">Nenhum artigo relevante encontrado para sua busca.</p>
+                      <p className="text-gray-600">Nenhum artigo ou documento encontrado para sua busca.</p>
                       <p className="text-sm text-gray-500 mt-2">Tente reformular sua pergunta.</p>
                     </div>
                   )}
