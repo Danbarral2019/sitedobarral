@@ -47,6 +47,26 @@ export async function POST(
     // Gerar ou usar conversationId existente
     const conversationId = body.conversationId || randomUUID();
 
+    // Buscar histórico da conversa se existir (para follow-up)
+    let conversationHistory: { question: string; answer: string }[] = [];
+    if (body.conversationId) {
+      const previousMessages = await prisma.articleQuestion.findMany({
+        where: {
+          conversationId: body.conversationId,
+          isPlaceholder: false, // Apenas mensagens já respondidas
+        },
+        orderBy: { createdAt: 'desc' },
+        take: 3, // Últimas 3 mensagens para contexto
+        select: {
+          question: true,
+          answer: true,
+        },
+      });
+      // Inverter para ordem cronológica
+      conversationHistory = previousMessages.reverse().filter(m => m.answer !== null) as { question: string; answer: string }[];
+      console.log(`[Chat API] Follow-up: ${conversationHistory.length} mensagens anteriores encontradas`);
+    }
+
     // Buscar documentos do artigo atual
     const relevantDocs = await prisma.document.findMany({
       where: {
@@ -204,6 +224,22 @@ ${doc.summary ? `Resumo: ${doc.summary}` : doc.description ? `Descrição: ${doc
     // Flag para indicar se há cross-reference
     const hasCrossReference = relatedArticles.length > 0;
 
+    // Flag para indicar se é um follow-up
+    const isFollowUp = conversationHistory.length > 0;
+
+    // Construir contexto da conversa anterior
+    const conversationContext = isFollowUp
+      ? `
+**CONTEXTO DA CONVERSA ANTERIOR:**
+${conversationHistory.map((msg, i) => `
+[Pergunta ${i + 1}]: ${msg.question}
+[Resposta ${i + 1}]: ${msg.answer.substring(0, 500)}${msg.answer.length > 500 ? '...' : ''}
+`).join('')}
+---
+IMPORTANTE: O usuário está dando continuidade à conversa acima. Considere o contexto das perguntas anteriores ao responder.
+`
+      : '';
+
     const prompt = `Você é um assistente especializado em Licitações e Contratos Públicos, especificamente na Lei nº 14.133/2021 (Nova Lei de Licitações).
 
 **CONTEXTO DO ARTIGO PRINCIPAL:**
@@ -219,8 +255,8 @@ ${article.ementa}
 ${docsContext}
 ${crossReferenceContext}
 ${crossReferenceDocsContext}
-
-**PERGUNTA DO USUÁRIO:**
+${conversationContext}
+**PERGUNTA${isFollowUp ? ' DE FOLLOW-UP' : ''} DO USUÁRIO:**
 ${body.question}
 
 **INSTRUÇÕES:**
@@ -234,6 +270,7 @@ ${body.question}
 6. Se a pergunta não puder ser respondida com as informações disponíveis, seja honesto sobre isso
 7. Use linguagem técnica jurídica apropriada, mas mantenha clareza
 8. Se aplicável, mencione implicações práticas ou pontos de atenção
+${isFollowUp ? `9. Esta é uma pergunta de FOLLOW-UP. O usuário está continuando a conversa anterior. Considere o contexto das perguntas e respostas anteriores ao formular sua resposta. Se a pergunta for ambígua (ex: "e no caso de...", "mas e se..."), interprete-a em relação ao tema da conversa anterior.` : ''}
 
 Responda agora:`;
 
@@ -289,10 +326,12 @@ Responda agora:`;
       answer,
       sources,
       isPlaceholder: false,
+      isFollowUp,
       meta: {
         articleNumber,
         articleTitle: article.titulo,
         relevantDocsCount: relevantDocs.length,
+        conversationLength: conversationHistory.length + 1,
         crossReference: hasCrossReference ? {
           topics: matchedTopics,
           relatedArticles: relatedArticleNumbers,

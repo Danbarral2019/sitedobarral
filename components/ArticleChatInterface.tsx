@@ -32,6 +32,7 @@ export default function ArticleChatInterface({
   articleTitle,
 }: ArticleChatInterfaceProps) {
   const [question, setQuestion] = useState('');
+  const [lastQuestion, setLastQuestion] = useState(''); // Pergunta anterior para exibir na resposta
   const [answer, setAnswer] = useState<string | null>(null);
   const [sources, setSources] = useState<Source[]>([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -118,11 +119,15 @@ export default function ArticleChatInterface({
         setConversationId(data.conversationId);
       }
 
+      // Salvar pergunta atual para exibir na resposta
+      setLastQuestion(question.trim());
       setAnswer(data.answer);
       setSources(data.sources || []);
       setQuestionId(data.questionId);
       setFeedback(null);
       setFeedbackSubmitted(false);
+      // Limpar campo de pergunta para permitir follow-up
+      setQuestion('');
     } catch (err) {
       if (err instanceof Error) {
         if (err.name === 'AbortError') {
@@ -168,12 +173,30 @@ export default function ArticleChatInterface({
 
   const handleNewQuestion = () => {
     setQuestion('');
+    setLastQuestion('');
     setAnswer(null);
     setSources([]);
     setError(null);
     setQuestionId(null);
     setFeedback(null);
     setFeedbackSubmitted(false);
+    if (textareaRef.current) {
+      textareaRef.current.focus();
+    }
+  };
+
+  const handleNewConversation = () => {
+    // Limpar tudo incluindo conversationId
+    setQuestion('');
+    setLastQuestion('');
+    setAnswer(null);
+    setSources([]);
+    setError(null);
+    setQuestionId(null);
+    setFeedback(null);
+    setFeedbackSubmitted(false);
+    setConversationId(null);
+    localStorage.removeItem(`chat_art_${articleNumber}`);
     if (textareaRef.current) {
       textareaRef.current.focus();
     }
@@ -188,9 +211,10 @@ export default function ArticleChatInterface({
   };
 
   const handleRestoreMessage = (message: HistoryMessage) => {
-    setQuestion(message.question);
+    setQuestion(''); // Limpar campo para permitir follow-up
+    setLastQuestion(message.question); // Mostrar pergunta restaurada
     setAnswer(message.answer);
-    setSources([]); // Sources não estão no histórico por enquanto
+    setSources([]); // Sources nao estao no historico por enquanto
     setQuestionId(message.id);
     setFeedback(message.wasHelpful);
     setFeedbackSubmitted(message.wasHelpful !== null);
@@ -206,14 +230,14 @@ export default function ArticleChatInterface({
   };
 
   const handleExportPDF = () => {
-    if (!question.trim() || !answer) return;
+    if (!lastQuestion.trim() || !answer) return;
 
     exportCurrentConversation(
       articleNumber,
-      question,
+      lastQuestion,
       answer,
       articleTitle || `Artigo ${articleNumber} da Lei 14.133/2021`,
-      undefined // userName - será 'Usuário' por padrão
+      undefined // userName - sera 'Usuario' por padrao
     );
   };
 
@@ -338,7 +362,7 @@ export default function ArticleChatInterface({
                 <MessageSquare className="w-5 h-5 text-gray-600 flex-shrink-0 mt-0.5" />
                 <div className="flex-1">
                   <p className="text-sm text-gray-600 font-medium mb-1">Sua pergunta:</p>
-                  <p className="text-gray-900">{question}</p>
+                  <p className="text-gray-900">{lastQuestion}</p>
                 </div>
               </div>
             </div>
@@ -452,15 +476,59 @@ export default function ArticleChatInterface({
               </div>
             )}
 
-            {/* New Question Button */}
-            <button
-              onClick={handleNewQuestion}
-              className="w-full px-6 py-3 bg-white border-2 border-purple-300 text-purple-700 rounded-lg font-semibold hover:bg-purple-50 transition-all flex items-center justify-center gap-2"
-              aria-label="Fazer nova pergunta"
-            >
-              <RefreshCw className="w-5 h-5" />
-              Fazer Nova Pergunta
-            </button>
+            {/* Follow-up Input */}
+            <div className="bg-white rounded-lg border-2 border-gray-200 p-4">
+              <div className="flex items-center gap-2 mb-3">
+                <MessageSquare className="w-5 h-5 text-purple-600" />
+                <h4 className="font-semibold text-gray-900">Continuar Conversa</h4>
+                {conversationId && (
+                  <span className="ml-auto text-xs bg-purple-100 text-purple-700 px-2 py-0.5 rounded">
+                    Modo Follow-up
+                  </span>
+                )}
+              </div>
+              <div className="relative mb-3">
+                <textarea
+                  ref={textareaRef}
+                  value={question}
+                  onChange={(e) => setQuestion(e.target.value)}
+                  onKeyDown={handleKeyDown}
+                  placeholder="Faca uma pergunta de acompanhamento... (Ex: E no caso de dispensa? Pode me explicar melhor?)"
+                  className="w-full min-h-[80px] px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-purple-500 focus:ring-2 focus:ring-purple-200 resize-y transition-all text-sm"
+                  maxLength={500}
+                  disabled={isLoading}
+                  aria-label="Campo de pergunta de follow-up"
+                />
+                <div className="absolute bottom-3 right-3 text-xs text-gray-500">
+                  {question.length}/500
+                </div>
+              </div>
+
+              <div className="flex gap-2">
+                <button
+                  onClick={handleSubmit}
+                  disabled={isLoading || !question.trim()}
+                  className="flex-1 px-4 py-2 bg-gradient-to-r from-purple-600 to-blue-600 text-white rounded-lg font-semibold hover:from-purple-700 hover:to-blue-700 disabled:from-gray-300 disabled:to-gray-400 disabled:cursor-not-allowed transition-all shadow-md hover:shadow-lg flex items-center justify-center gap-2 text-sm"
+                  aria-label="Enviar follow-up"
+                >
+                  <Sparkles className="w-4 h-4" />
+                  Perguntar
+                </button>
+                <button
+                  onClick={handleNewConversation}
+                  className="px-4 py-2 bg-white border-2 border-gray-300 text-gray-700 rounded-lg font-medium hover:bg-gray-50 transition-all flex items-center justify-center gap-2 text-sm"
+                  aria-label="Iniciar nova conversa"
+                  title="Iniciar uma nova conversa (limpa o contexto)"
+                >
+                  <RefreshCw className="w-4 h-4" />
+                  <span className="hidden sm:inline">Nova Conversa</span>
+                </button>
+              </div>
+
+              <p className="text-xs text-center text-gray-500 mt-2">
+                A IA vai considerar o contexto da conversa anterior ao responder.
+              </p>
+            </div>
           </div>
         )}
 

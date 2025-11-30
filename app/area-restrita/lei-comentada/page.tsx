@@ -18,7 +18,11 @@ import {
   Download,
   ExternalLink,
   Lightbulb,
-  Heart
+  Heart,
+  ArrowLeft,
+  History,
+  Sparkles,
+  X
 } from 'lucide-react';
 import { useAuth } from '@/hooks/use-auth';
 import { useFavorites } from '@/hooks/use-favorites';
@@ -60,6 +64,24 @@ interface ApiResponse {
   hierarchy: Record<string, HierarchyTitulo>;
   total: number;
   totalWithDocuments: number;
+}
+
+interface AISearchResult {
+  articleNumber: string;
+  title: string;
+  ementa: string;
+  capitulo: string;
+  relevance: string;
+  score: number;
+}
+
+interface AISearchResponse {
+  query: string;
+  results: AISearchResult[];
+  summary: string;
+  isAISearch: boolean;
+  cached: boolean;
+  latency: number;
 }
 
 interface DocumentData {
@@ -354,6 +376,11 @@ function LeiComentadaContent() {
   // Accordion de documentos individuais
   const [expandedDocumentId, setExpandedDocumentId] = useState<string | null>(null);
 
+  // Estados para busca com IA
+  const [isAISearching, setIsAISearching] = useState(false);
+  const [aiSearchResults, setAiSearchResults] = useState<AISearchResponse | null>(null);
+  const [showAIResults, setShowAIResults] = useState(false);
+
   // Refs para scroll automático
   const articleRefs = useRef<Record<string, HTMLDivElement | null>>({});
 
@@ -534,6 +561,60 @@ function LeiComentadaContent() {
     return { label: 'Excelente', color: 'bg-emerald-100 text-emerald-700', icon: CheckCircle };
   };
 
+  // Função de busca com IA
+  const handleAISearch = async () => {
+    if (!searchQuery.trim() || searchQuery.trim().length < 3) {
+      return;
+    }
+
+    setIsAISearching(true);
+    setShowAIResults(true);
+
+    try {
+      const response = await fetch('/api/lei-14133/search', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ query: searchQuery.trim() }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Erro na busca com IA');
+      }
+
+      const data: AISearchResponse = await response.json();
+      setAiSearchResults(data);
+    } catch (err) {
+      console.error('[Busca IA] Erro:', err);
+      setAiSearchResults(null);
+    } finally {
+      setIsAISearching(false);
+    }
+  };
+
+  // Navegar para artigo a partir da busca IA
+  const handleAIResultClick = (articleNumber: string) => {
+    const article = apiData?.articles.find(a => a.numero === articleNumber);
+    if (article) {
+      handleSelectArticle(article);
+      setShowAIResults(false);
+
+      // Expandir título e capítulo
+      if (article.titulo) {
+        setExpandedTitulos(prev => new Set([...prev, article.titulo!]));
+      }
+      const capituloKey = `${article.titulo}::${article.capitulo}`;
+      setExpandedCapitulos(prev => new Set([...prev, capituloKey]));
+
+      // Scroll para o artigo
+      setTimeout(() => {
+        const ref = articleRefs.current[articleNumber];
+        if (ref) {
+          ref.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+      }, 300);
+    }
+  };
+
   // Loading state
   if (loading) {
     return (
@@ -572,6 +653,34 @@ function LeiComentadaContent() {
       {/* Header */}
       <div className="bg-gradient-to-r from-blue-600 to-indigo-700 text-white shadow-lg">
         <div className="container mx-auto px-4 py-6">
+          {/* Navegação Superior */}
+          <div className="flex items-center justify-between mb-4">
+            <Link
+              href="/area-restrita"
+              className="flex items-center gap-2 text-white/80 hover:text-white transition-colors"
+            >
+              <ArrowLeft className="w-5 h-5" />
+              <span className="hidden sm:inline">Área Restrita</span>
+            </Link>
+            <div className="flex items-center gap-3">
+              <Link
+                href="/area-restrita/historico-ia"
+                className="flex items-center gap-2 bg-white/20 px-3 py-1.5 rounded-lg hover:bg-white/30 transition-colors"
+              >
+                <History className="w-5 h-5" />
+                <span className="hidden sm:inline">Histórico</span>
+              </Link>
+              <Link
+                href="/area-restrita/favoritos"
+                className="flex items-center gap-2 bg-white/20 px-3 py-1.5 rounded-lg hover:bg-white/30 transition-colors"
+              >
+                <Heart className="w-5 h-5" />
+                <span className="hidden sm:inline">Favoritos</span>
+              </Link>
+            </div>
+          </div>
+
+          {/* Título */}
           <div className="flex items-center gap-3 mb-4">
             <Scale className="w-8 h-8" />
             <div>
@@ -588,12 +697,36 @@ function LeiComentadaContent() {
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
               <input
                 type="text"
-                placeholder="Buscar por artigo, palavra-chave..."
+                placeholder="Pergunte algo como: 'Quando usar dispensa de licitação?' ou busque por artigo..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' && searchQuery.trim().length >= 3) {
+                    handleAISearch();
+                  }
+                }}
                 className="w-full pl-10 pr-4 py-3 rounded-lg bg-white text-gray-900 placeholder-gray-500 focus:ring-2 focus:ring-blue-300"
               />
             </div>
+            <button
+              onClick={handleAISearch}
+              disabled={isAISearching || searchQuery.trim().length < 3}
+              className={`px-4 py-3 rounded-lg flex items-center gap-2 transition-colors ${
+                isAISearching
+                  ? 'bg-purple-400 text-white cursor-wait'
+                  : searchQuery.trim().length < 3
+                  ? 'bg-purple-300 text-white cursor-not-allowed'
+                  : 'bg-purple-600 text-white hover:bg-purple-700'
+              }`}
+              title="Busca inteligente com IA"
+            >
+              {isAISearching ? (
+                <Loader2 className="w-5 h-5 animate-spin" />
+              ) : (
+                <Sparkles className="w-5 h-5" />
+              )}
+              <span className="hidden sm:inline">{isAISearching ? 'Buscando...' : 'Buscar com IA'}</span>
+            </button>
             <button
               onClick={() => setOnlyWithDocuments(!onlyWithDocuments)}
               className={`px-4 py-3 rounded-lg flex items-center gap-2 transition-colors ${
@@ -603,7 +736,7 @@ function LeiComentadaContent() {
               }`}
             >
               <Filter className="w-5 h-5" />
-              {onlyWithDocuments ? 'Mostrar Todos' : 'Apenas com Docs'}
+              <span className="hidden sm:inline">{onlyWithDocuments ? 'Mostrar Todos' : 'Apenas com Docs'}</span>
             </button>
           </div>
 
@@ -624,6 +757,122 @@ function LeiComentadaContent() {
           </div>
         </div>
       </div>
+
+      {/* Modal de Resultados da Busca com IA */}
+      {showAIResults && (
+        <div className="fixed inset-0 bg-black/50 z-50 flex items-start justify-center pt-20 px-4">
+          <div className="bg-white rounded-xl shadow-2xl w-full max-w-3xl max-h-[80vh] overflow-hidden flex flex-col">
+            {/* Header do Modal */}
+            <div className="bg-gradient-to-r from-purple-600 to-indigo-600 text-white p-4 flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <Sparkles className="w-6 h-6" />
+                <div>
+                  <h3 className="font-bold text-lg">Busca Inteligente</h3>
+                  <p className="text-sm text-purple-200">
+                    {aiSearchResults?.query ? `"${aiSearchResults.query}"` : 'Processando...'}
+                  </p>
+                </div>
+              </div>
+              <button
+                onClick={() => setShowAIResults(false)}
+                className="p-2 hover:bg-white/20 rounded-lg transition-colors"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            {/* Conteúdo do Modal */}
+            <div className="flex-1 overflow-y-auto p-4">
+              {isAISearching ? (
+                <div className="flex flex-col items-center justify-center py-12">
+                  <Loader2 className="w-12 h-12 animate-spin text-purple-600 mb-4" />
+                  <p className="text-gray-600">Analisando sua pergunta com IA...</p>
+                  <p className="text-sm text-gray-500 mt-2">Isso pode levar alguns segundos</p>
+                </div>
+              ) : aiSearchResults ? (
+                <div className="space-y-4">
+                  {/* Resumo da IA */}
+                  {aiSearchResults.summary && (
+                    <div className="bg-purple-50 border-l-4 border-purple-500 p-4 rounded-r-lg">
+                      <div className="flex items-center gap-2 mb-2">
+                        <Sparkles className="w-4 h-4 text-purple-600" />
+                        <h4 className="font-bold text-purple-900 text-sm">Resumo</h4>
+                      </div>
+                      <p className="text-gray-800 text-sm">{aiSearchResults.summary}</p>
+                    </div>
+                  )}
+
+                  {/* Meta informações */}
+                  <div className="flex items-center gap-4 text-xs text-gray-500">
+                    <span>{aiSearchResults.results.length} artigo(s) encontrado(s)</span>
+                    <span>{aiSearchResults.latency}ms</span>
+                    {aiSearchResults.cached && (
+                      <span className="bg-green-100 text-green-700 px-2 py-0.5 rounded">cache</span>
+                    )}
+                  </div>
+
+                  {/* Resultados */}
+                  {aiSearchResults.results.length > 0 ? (
+                    <div className="space-y-3">
+                      {aiSearchResults.results.map((result, index) => (
+                        <button
+                          key={result.articleNumber}
+                          onClick={() => handleAIResultClick(result.articleNumber)}
+                          className="w-full text-left bg-white border border-gray-200 rounded-lg p-4 hover:border-purple-300 hover:shadow-md transition-all"
+                        >
+                          <div className="flex items-start gap-3">
+                            {/* Ranking */}
+                            <div className="flex-shrink-0 w-8 h-8 bg-purple-100 text-purple-700 rounded-full flex items-center justify-center font-bold text-sm">
+                              {index + 1}
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              {/* Artigo e Score */}
+                              <div className="flex items-center justify-between mb-1">
+                                <span className="font-bold text-blue-600">Art. {result.articleNumber}</span>
+                                <span className="text-xs bg-purple-100 text-purple-700 px-2 py-0.5 rounded-full">
+                                  {result.score}% relevante
+                                </span>
+                              </div>
+                              {/* Capítulo */}
+                              <p className="text-xs text-gray-500 mb-2">{result.title}</p>
+                              {/* Relevância */}
+                              <div className="bg-gray-50 rounded p-2 mb-2">
+                                <p className="text-sm text-gray-700">{result.relevance}</p>
+                              </div>
+                              {/* Ementa resumida */}
+                              <p className="text-xs text-gray-600 line-clamp-2">{result.ementa}</p>
+                            </div>
+                            <ChevronRight className="w-5 h-5 text-gray-400 flex-shrink-0" />
+                          </div>
+                        </button>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="text-center py-8">
+                      <AlertCircle className="w-12 h-12 text-gray-400 mx-auto mb-3" />
+                      <p className="text-gray-600">Nenhum artigo relevante encontrado para sua busca.</p>
+                      <p className="text-sm text-gray-500 mt-2">Tente reformular sua pergunta.</p>
+                    </div>
+                  )}
+                </div>
+              ) : (
+                <div className="text-center py-8">
+                  <AlertCircle className="w-12 h-12 text-red-400 mx-auto mb-3" />
+                  <p className="text-gray-600">Erro ao processar sua busca.</p>
+                  <p className="text-sm text-gray-500 mt-2">Por favor, tente novamente.</p>
+                </div>
+              )}
+            </div>
+
+            {/* Footer do Modal */}
+            <div className="border-t border-gray-200 p-4 bg-gray-50">
+              <p className="text-xs text-gray-500 text-center">
+                Busca semântica powered by Gemini AI • Clique em um artigo para navegar
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Main Layout */}
       <div className="container mx-auto px-4 py-6">

@@ -3,65 +3,91 @@ const { PrismaClient } = require('@prisma/client');
 const prisma = new PrismaClient();
 
 async function main() {
-  // Verificar atos normativos no banco
+  // Buscar todos os atos normativos
   const acts = await prisma.legislativeAct.findMany({
-    orderBy: { fullNumber: 'asc' },
-    select: {
-      id: true,
-      fullNumber: true,
-      type: true,
-      leiArticles: true,
-      title: true
-    }
-  });
-
-  console.log('ATOS NORMATIVOS NO BANCO:', acts.length);
-  console.log('');
-
-  for (const act of acts) {
-    console.log('- ' + act.fullNumber);
-    console.log('  Tipo: ' + act.type);
-    console.log('  leiArticles: ' + (act.leiArticles || '(vazio)'));
-    console.log('  Titulo: ' + (act.title || '').substring(0, 60) + '...');
-    console.log('');
-  }
-
-  // Buscar especificamente a IN 81
-  const in81 = await prisma.legislativeAct.findFirst({
-    where: {
-      OR: [
-        { fullNumber: { contains: '81' } },
-        { number: '81' }
-      ]
-    }
-  });
-
-  console.log('\n--- IN 81 ---');
-  if (in81) {
-    console.log('Encontrada:', in81.fullNumber);
-    console.log('leiArticles:', in81.leiArticles);
-  } else {
-    console.log('NAO ENCONTRADA');
-  }
-
-  // Verificar também documentos com leiArticles
-  const docsWithLei = await prisma.document.findMany({
-    where: {
-      leiArticles: { not: null }
-    },
+    orderBy: { createdAt: 'asc' },
     select: {
       id: true,
       title: true,
-      leiArticles: true
-    },
-    take: 10
+      fullNumber: true,
+      type: true,
+      issuer: true,
+      officialUrl: true,
+      pdfUrl: true,
+      createdAt: true,
+    }
   });
 
-  console.log('\n--- DOCUMENTOS COM leiArticles (primeiros 10) ---');
-  for (const doc of docsWithLei) {
-    console.log('- ' + doc.title.substring(0, 50) + '...');
-    console.log('  leiArticles: ' + doc.leiArticles);
+  console.log('=== ATOS NORMATIVOS - AUDITORIA ===');
+  console.log('Total:', acts.length);
+  console.log('');
+
+  // Agrupar por tipo
+  const byType = {};
+  acts.forEach(act => {
+    const t = act.type || 'sem-tipo';
+    if (!byType[t]) byType[t] = [];
+    byType[t].push(act);
+  });
+
+  for (const [tipo, items] of Object.entries(byType)) {
+    console.log('\n=== ' + tipo.toUpperCase() + ' (' + items.length + ') ===');
+    items.forEach(act => {
+      const date = new Date(act.createdAt).toISOString().split('T')[0];
+      const hasUrl = (act.officialUrl || act.pdfUrl) ? 'URL_OK' : 'SEM_URL';
+      console.log(hasUrl + ' | ' + date + ' | ' + act.fullNumber);
+      console.log('     Titulo: ' + act.title.substring(0, 80));
+      if (act.officialUrl) {
+        console.log('     URL: ' + act.officialUrl);
+      }
+    });
   }
+
+  // Identificar suspeitos (sem URL)
+  console.log('\n\n=== ATOS SEM URL (POSSIVEIS ALUCINACOES) ===');
+  const semUrl = acts.filter(a => !a.officialUrl && !a.pdfUrl);
+  if (semUrl.length === 0) {
+    console.log('Nenhum ato sem URL encontrado.');
+  } else {
+    semUrl.forEach(act => {
+      const date = new Date(act.createdAt).toISOString().split('T')[0];
+      console.log('ID: ' + act.id);
+      console.log('   FullNumber: ' + act.fullNumber);
+      console.log('   Titulo: ' + act.title);
+      console.log('   Criado: ' + date);
+      console.log('');
+    });
+  }
+
+  // Identificar atos criados por scripts automaticos (antes de hoje)
+  const hoje = new Date();
+  hoje.setHours(0, 0, 0, 0);
+
+  console.log('\n=== ATOS CRIADOS HOJE (VERIFICADOS PELO USUARIO) ===');
+  const criadosHoje = acts.filter(a => new Date(a.createdAt) >= hoje);
+  if (criadosHoje.length === 0) {
+    console.log('Nenhum ato criado hoje.');
+  } else {
+    criadosHoje.forEach(act => {
+      console.log('- ' + act.fullNumber + ' - ' + act.title.substring(0, 60));
+    });
+  }
+  console.log('Total hoje:', criadosHoje.length);
+
+  console.log('\n=== ATOS CRIADOS ANTES DE HOJE ===');
+  const criadosAntes = acts.filter(a => new Date(a.createdAt) < hoje);
+  criadosAntes.forEach(act => {
+    const date = new Date(act.createdAt).toISOString().split('T')[0];
+    const hasUrl = (act.officialUrl || act.pdfUrl) ? 'URL_OK' : 'SEM_URL';
+    console.log(hasUrl + ' | ' + date + ' | ' + act.fullNumber);
+    console.log('     ID: ' + act.id);
+    console.log('     Titulo: ' + act.title.substring(0, 70));
+    if (act.officialUrl) {
+      console.log('     URL: ' + act.officialUrl);
+    }
+    console.log('');
+  });
+  console.log('Total antes de hoje:', criadosAntes.length);
 
   await prisma.$disconnect();
 }
