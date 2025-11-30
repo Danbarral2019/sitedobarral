@@ -805,43 +805,57 @@ function LeiComentadaContent() {
                     </h3>
                     <div className="space-y-3">
                       {(() => {
-                        // Agrupar documentos por categoria
-                        const docsByCategory: Record<string, typeof selectedArticle.documents> = {};
-                        selectedArticle.documents.forEach((doc) => {
-                          const category = doc.category || 'outro';
-                          if (!docsByCategory[category]) {
-                            docsByCategory[category] = [];
-                          }
-                          docsByCategory[category].push(doc);
-                        });
-
-                        // Mapear nome das categorias para exibição
-                        const categoryNames: Record<string, string> = {
-                          'orientacao-normativa': 'Orientações Normativas AGU',
-                          'parecer-vinculante': 'Pareceres Vinculantes AGU',
-                          'decor': 'Decisões do DECOR (CGU)',
-                          'acordao': 'Acórdãos',
+                        // Mapear categorias brutas para nomes de exibição
+                        const categoryDisplayNames: Record<string, string> = {
+                          'lei': 'Leis',
+                          'medida-provisoria': 'Leis',
+                          'decreto': 'Decretos',
+                          'portaria': 'Portarias',
+                          'in': 'Instruções Normativas',
+                          'orientacao-normativa': 'Pareceres da AGU',
+                          'parecer-vinculante': 'Pareceres da AGU',
+                          'decor': 'Pareceres da AGU',
+                          'acordao': 'Jurisprudência dos Tribunais de Contas',
                           'outro': 'Outros Documentos',
                         };
 
-                        // Ordenar categorias (ON > Pareceres > DECOR > Acórdãos > Outros)
-                        const categoryOrder = ['orientacao-normativa', 'parecer-vinculante', 'decor', 'acordao', 'outro'];
-                        const sortedCategories = Object.keys(docsByCategory).sort((a, b) => {
-                          const indexA = categoryOrder.indexOf(a);
-                          const indexB = categoryOrder.indexOf(b);
-                          // Se não encontrar na lista, coloca no final
+                        // Agrupar documentos pelo NOME DE EXIBIÇÃO (consolidando categorias relacionadas)
+                        const docsByDisplayName: Record<string, typeof selectedArticle.documents> = {};
+                        selectedArticle.documents.forEach((doc) => {
+                          const rawCategory = doc.category || 'outro';
+                          const displayName = categoryDisplayNames[rawCategory] || rawCategory;
+                          if (!docsByDisplayName[displayName]) {
+                            docsByDisplayName[displayName] = [];
+                          }
+                          docsByDisplayName[displayName].push(doc);
+                        });
+
+                        // Ordem de exibição das categorias consolidadas
+                        const displayOrder = [
+                          'Leis',
+                          'Decretos',
+                          'Portarias',
+                          'Instruções Normativas',
+                          'Pareceres da AGU',
+                          'Jurisprudência dos Tribunais de Contas',
+                          'Outros Documentos',
+                        ];
+
+                        const sortedDisplayNames = Object.keys(docsByDisplayName).sort((a, b) => {
+                          const indexA = displayOrder.indexOf(a);
+                          const indexB = displayOrder.indexOf(b);
                           return (indexA === -1 ? 999 : indexA) - (indexB === -1 ? 999 : indexB);
                         });
 
-                        return sortedCategories.map((category) => {
-                          const docs = docsByCategory[category];
-                          const isCategoryExpanded = expandedCategories.has(category);
+                        return sortedDisplayNames.map((displayName) => {
+                          const docs = docsByDisplayName[displayName];
+                          const isCategoryExpanded = expandedCategories.has(displayName);
 
                           return (
-                            <div key={category} className="border-2 border-gray-200 rounded-lg overflow-hidden">
+                            <div key={displayName} className="border-2 border-gray-200 rounded-lg overflow-hidden">
                               {/* Header do Accordion de Categoria */}
                               <button
-                                onClick={() => toggleCategoryExpanded(category)}
+                                onClick={() => toggleCategoryExpanded(displayName)}
                                 className="w-full flex items-center gap-3 p-4 bg-gradient-to-r from-blue-50 to-purple-50 hover:from-blue-100 hover:to-purple-100 transition-colors text-left"
                               >
                                 {isCategoryExpanded ? (
@@ -851,7 +865,7 @@ function LeiComentadaContent() {
                                 )}
                                 <FileText className="w-6 h-6 text-blue-600 flex-shrink-0" />
                                 <div className="flex-1">
-                                  <h4 className="font-bold text-gray-900">{categoryNames[category] || category}</h4>
+                                  <h4 className="font-bold text-gray-900">{displayName}</h4>
                                   <p className="text-xs text-gray-600">{docs.length} {docs.length === 1 ? 'documento' : 'documentos'}</p>
                                 </div>
                                 <div className="px-3 py-1 bg-blue-600 text-white rounded-full text-sm font-bold">
