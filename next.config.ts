@@ -1,7 +1,8 @@
 import type { NextConfig } from "next";
+import { withSentryConfig } from "@sentry/nextjs";
 
 const nextConfig: NextConfig = {
-  // Source maps TEMPORARIAMENTE para debug
+  // Source maps para Sentry (stack traces legíveis)
   productionBrowserSourceMaps: true,
 
   typescript: {
@@ -101,4 +102,27 @@ const nextConfig: NextConfig = {
   },
 };
 
-export default nextConfig;
+// Sentry configuration options
+const sentryWebpackPluginOptions = {
+  // Organization and project from environment variables
+  org: process.env.SENTRY_ORG,
+  project: process.env.SENTRY_PROJECT,
+
+  // Auth token for uploading source maps
+  authToken: process.env.SENTRY_AUTH_TOKEN,
+
+  // Only upload source maps in production
+  silent: !process.env.CI,
+
+  // Suppresses source map uploading logs during build
+  hideSourceMaps: true,
+
+  // Automatically tree-shake Sentry logger statements to reduce bundle size
+  disableLogger: true,
+
+  // Enables automatic instrumentation of Vercel Cron Monitors
+  automaticVercelMonitors: true,
+};
+
+// Wrap config with Sentry - gracefully handles missing env vars
+export default withSentryConfig(nextConfig, sentryWebpackPluginOptions);

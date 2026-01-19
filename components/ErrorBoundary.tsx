@@ -16,6 +16,7 @@
 
 import React from 'react';
 import { AlertTriangle, Home, RefreshCw } from 'lucide-react';
+import * as Sentry from '@sentry/nextjs';
 
 interface ErrorBoundaryProps {
   children: React.ReactNode;
@@ -52,10 +53,12 @@ export class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoun
       this.props.onError(error, errorInfo);
     }
 
-    // TODO: Enviar para serviço de monitoring (Sentry)
-    if (typeof window !== 'undefined' && process.env.NODE_ENV === 'production') {
-      // window.reportError?.({ error, errorInfo });
-    }
+    // Enviar para Sentry
+    Sentry.captureException(error, {
+      extra: {
+        componentStack: errorInfo.componentStack,
+      },
+    });
 
     // Atualiza estado com errorInfo
     this.setState({ errorInfo });

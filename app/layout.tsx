@@ -9,6 +9,7 @@ import { ScrollToTop } from "@/components/ui/scroll-to-top";
 import Analytics from "@/components/Analytics";
 import WelcomeModal from "@/components/WelcomeModal";
 import { SpeedInsights } from "@vercel/speed-insights/next";
+import { Analytics as VercelAnalytics } from "@vercel/analytics/react";
 
 const cinzel = Cinzel({
   subsets: ["latin"],
@@ -98,6 +99,7 @@ export default function RootLayout({
     <html lang="pt-BR">
       <body className={`${cinzel.variable} ${poppins.variable} font-sans antialiased bg-white text-gray-900`}>
         <Analytics />
+        <VercelAnalytics />
         <SpeedInsights />
         <ToastProviderWrapper>
           <div className="min-h-screen flex flex-col">

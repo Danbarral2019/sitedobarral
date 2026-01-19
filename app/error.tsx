@@ -2,6 +2,7 @@
 
 import { useEffect } from 'react';
 import Link from 'next/link';
+import * as Sentry from '@sentry/nextjs';
 
 export default function Error({
   error,
@@ -11,7 +12,8 @@ export default function Error({
   reset: () => void;
 }) {
   useEffect(() => {
-    // Log do erro para serviço de monitoramento
+    // Enviar para Sentry
+    Sentry.captureException(error);
     console.error('Root error boundary:', error);
   }, [error]);
 
