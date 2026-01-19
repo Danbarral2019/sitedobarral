@@ -122,12 +122,12 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const userEmail = authResult.user.email;
+    const userId = authResult.user.userId;
     const isAdmin = authResult.user.role === 'admin';
 
     // 2. Rate limiting (10 queries per minute for non-admins)
     if (!isAdmin) {
-      const rateLimitKey = `query-rate-limit:${userEmail}`;
+      const rateLimitKey = `query-rate-limit:${userId}`;
       const allowed = await checkRateLimit(rateLimitKey, 10, 60);
 
       if (!allowed) {
@@ -172,7 +172,7 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    console.log(`🔍 Query from ${userEmail}: "${query}"`);
+    console.log(`🔍 Query from user ${userId}: "${query}"`);
     console.log(`   Filters:`, filters);
 
     // 5. Build database query with filters
@@ -217,7 +217,7 @@ export async function POST(req: NextRequest) {
       } else {
         // Get user's enrolled course IDs
         const user = await prisma.user.findUnique({
-          where: { email: userEmail },
+          where: { id: userId },
           select: {
             enrollments: {
               where: {

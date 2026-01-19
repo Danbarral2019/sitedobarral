@@ -2,27 +2,34 @@
 
 import { useEffect, useState, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
-import { Loader2, LogOut, Clock, GraduationCap, CheckCircle, Heart, FileText, Scale, BookOpen, Video, Globe } from 'lucide-react';
+import {
+  Loader2,
+  LogOut,
+  Heart,
+  CheckCircle,
+  Clock,
+  MessageSquare,
+  ChevronRight,
+} from 'lucide-react';
+import Link from 'next/link';
 import { courses } from '@/data/courses';
 import { useAuth } from '@/hooks/use-auth';
 import { useFavorites } from '@/hooks/use-favorites';
-import { useSearch, type GlossaryTermType } from '@/hooks/use-search';
-import { searchAndFilterDocuments } from '@/lib/search-utils';
-import EnrollmentStatusBanner from '@/components/EnrollmentStatusBanner';
-import LeiExplorerWidget from '@/components/LeiExplorerWidget';
-import CoursesSidebar from '@/components/CoursesSidebar';
-import HighlightedMaterials from '@/components/HighlightedMaterials';
-import DocumentsByCategory from '@/components/DocumentsByCategory';
+import { useGlobalSearch } from '@/hooks/use-global-search';
+import { useContentTree } from '@/hooks/use-content-tree';
+import {
+  GlobalSearchBar,
+  ContentTree,
+  SearchResultsList,
+  MobileTreeDrawer,
+  MobileTreeTrigger,
+} from '@/components/area-restrita';
 import DocumentDetailModal from '@/components/DocumentDetailModal';
+import DocumentsByCategory from '@/components/DocumentsByCategory';
 import CourseVideos from '@/components/CourseVideos';
 import RecommendedSites from '@/components/RecommendedSites';
-import UnifiedSearch from '@/components/UnifiedSearch';
-import SearchFilters from '@/components/SearchFilters';
-import PDFExportPanel from '@/components/PDFExportPanel';
-import { GlossarySearchResults } from '@/components/GlossarySearchResults';
-import { TopArticlesWidget } from '@/components/TopArticlesWidget';
 import { ArticleTreeNavigator } from '@/components/ArticleTreeNavigator';
-import { SearchProvider } from '@/contexts/SearchContext';
+import type { DocumentResult } from '@/lib/types/global-search';
 
 interface DocumentType {
   id: string;
@@ -33,6 +40,8 @@ interface DocumentType {
   category: string;
   uploadedAt?: string;
   tags?: string;
+  courseId?: string;
+  isCommon?: boolean;
 }
 
 interface VideoType {
@@ -54,56 +63,161 @@ interface SiteType {
 
 export default function AreaRestritaPage() {
   const router = useRouter();
-  const { user, isLoading, logout } = useAuth();
-  const { isFavorite, toggleFavorite, favoriteIds } = useFavorites();
-  const search = useSearch();
+  const { user, isLoading: authLoading, logout } = useAuth();
+  const { isFavorite, toggleFavorite } = useFavorites();
 
-  // Estado dos documentos por curso
+  // Global search state
+  const search = useGlobalSearch();
+
+  // Content tree state
+  const contentTree = useContentTree();
+
+  // Mobile drawer state
+  const [isMobileDrawerOpen, setIsMobileDrawerOpen] = useState(false);
+
+  // Course data state (for tree navigation display)
   const [courseDocuments, setCourseDocuments] = useState<Record<string, DocumentType[]>>({});
-
-  // Estado dos vídeos por curso
   const [courseVideos, setCourseVideos] = useState<Record<string, VideoType[]>>({});
-
-  // Estado dos sites por curso
   const [courseSites, setCourseSites] = useState<Record<string, SiteType[]>>({});
+  const [isDataLoading, setIsDataLoading] = useState(true);
 
-  // Curso selecionado (inicialmente null, será o primeiro curso após carregamento)
-  const [selectedCourseId, setSelectedCourseId] = useState<string | null>(null);
-
-  // Modal de detalhes
+  // Document modal state
   const [selectedDocument, setSelectedDocument] = useState<DocumentType | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
-  // Estado dos termos de glossário encontrados na busca
-  const [glossaryResults, setGlossaryResults] = useState<GlossaryTermType[]>([]);
-
-  // Estado da tab ativa (para navegação por seções)
-  const [activeTab, setActiveTab] = useState<'documentos' | 'lei' | 'glossario' | 'videos' | 'sites'>('documentos');
-
-  // Função para registrar acesso
-  const logAccess = async (action: string, courseId: string, documentId?: string) => {
-    try {
-      await fetch('/api/access-log', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ action, courseId, documentId }),
-      });
-    } catch (error) {
-      console.error('Erro ao registrar acesso:', error);
+  // Redirect if not authenticated
+  useEffect(() => {
+    if (!authLoading && !user) {
+      router.push('/login');
     }
-  };
+  }, [authLoading, user, router]);
+
+  // Enrolled course IDs
+  const enrolledCourseIds = useMemo(() => {
+    if (!user) return [];
+    return user.role === 'admin'
+      ? courses.map((c) => c.id)
+      : (user.enrollments?.map((e) => e.courseId) || []);
+  }, [user]);
+
+  // Fetch course data for tree navigation
+  useEffect(() => {
+    const fetchCourseData = async () => {
+      if (!user || enrolledCourseIds.length === 0) {
+        setIsDataLoading(false);
+        return;
+      }
+
+      try {
+        const courseIdsParam = enrolledCourseIds.join(',');
+        const response = await fetch(`/api/area-restrita/batch-data?courseIds=${courseIdsParam}`);
+
+        if (response.ok) {
+          const data = await response.json();
+          setCourseDocuments(data.data.documents || {});
+          setCourseVideos(data.data.videos || {});
+          setCourseSites(data.data.sites || {});
+        }
+      } catch (error) {
+        console.error('Error fetching course data:', error);
+      } finally {
+        setIsDataLoading(false);
+      }
+    };
+
+    fetchCourseData();
+  }, [user, enrolledCourseIds]);
+
+  // Get current content based on tree selection
+  const currentContent = useMemo(() => {
+    if (!contentTree.selection) {
+      // No selection - show all documents from all enrolled courses
+      const allDocs = Object.values(courseDocuments).flat();
+      return {
+        type: 'documents' as const,
+        documents: allDocs,
+        videos: [] as VideoType[],
+        sites: [] as SiteType[],
+        title: 'Todos os Documentos',
+      };
+    }
+
+    const { type, courseId, category } = contentTree.selection;
+
+    switch (type) {
+      case 'document': {
+        let docs: DocumentType[] = [];
+        let title = 'Documentos';
+
+        if (courseId) {
+          docs = courseDocuments[courseId] || [];
+          const course = courses.find((c) => c.id === courseId);
+          title = course?.title || 'Curso';
+
+          if (category) {
+            docs = docs.filter((d) => d.category === category);
+            title = `${category} - ${title}`;
+          }
+        } else {
+          docs = Object.values(courseDocuments).flat();
+          if (category) {
+            docs = docs.filter((d) => d.category === category);
+            title = category;
+          }
+        }
+
+        return { type: 'documents' as const, documents: docs, videos: [], sites: [], title };
+      }
+
+      case 'lei':
+        return { type: 'lei' as const, documents: [], videos: [], sites: [], title: 'Lei 14.133/2021' };
+
+      case 'glossary':
+        return { type: 'glossary' as const, documents: [], videos: [], sites: [], title: 'Glossário' };
+
+      case 'faq':
+        return { type: 'faq' as const, documents: [], videos: [], sites: [], title: 'Perguntas Frequentes' };
+
+      case 'video': {
+        let videos: VideoType[] = [];
+        let title = 'Vídeos';
+
+        if (courseId) {
+          videos = courseVideos[courseId] || [];
+          const course = courses.find((c) => c.id === courseId);
+          title = `Vídeos - ${course?.title || 'Curso'}`;
+        } else {
+          videos = Object.values(courseVideos).flat();
+        }
+
+        return { type: 'videos' as const, documents: [], videos, sites: [], title };
+      }
+
+      case 'site': {
+        const allSites = Object.values(courseSites).flat();
+        // Remove duplicates by id
+        const uniqueSites = allSites.filter(
+          (site, index, self) => index === self.findIndex((s) => s.id === site.id)
+        );
+        return { type: 'sites' as const, documents: [], videos: [], sites: uniqueSites, title: 'Sites Recomendados' };
+      }
+
+      default:
+        return { type: 'documents' as const, documents: [], videos: [], sites: [], title: '' };
+    }
+  }, [contentTree.selection, courseDocuments, courseVideos, courseSites]);
 
   // Handlers
-  const handleDownload = (doc: DocumentType, courseId: string) => {
-    logAccess('download', courseId, doc.id);
-  };
-
-  const handleView = (doc: DocumentType, courseId: string) => {
-    logAccess('view', courseId, doc.id);
-  };
-
-  const handleDocumentClick = (doc: DocumentType) => {
-    setSelectedDocument(doc);
+  const handleDocumentClick = (doc: DocumentType | DocumentResult) => {
+    const docType: DocumentType = {
+      id: doc.id,
+      title: doc.title,
+      description: doc.description || undefined,
+      type: 'type' in doc ? doc.type : 'pdf',
+      category: doc.category,
+      url: doc.url || undefined,
+    };
+    setSelectedDocument(docType);
     setIsModalOpen(true);
   };
 
@@ -112,174 +226,23 @@ export default function AreaRestritaPage() {
     setSelectedDocument(null);
   };
 
-  // Redirecionar se não autenticado
-  useEffect(() => {
-    if (!isLoading && !user) {
-      router.push('/login');
-    }
-  }, [isLoading, user, router]);
-
-  // Buscar documentos, vídeos e sites dos cursos matriculados (BATCH - 1 request)
-  useEffect(() => {
-    const fetchCourseData = async () => {
-      if (!user) return;
-
-      const userEnrollments = user.enrollments || [];
-      const enrolledCourseIds = user.role === 'admin'
-        ? courses.map(c => c.id)
-        : userEnrollments.map(e => e.courseId);
-
-      if (enrolledCourseIds.length === 0) return;
-
-      try {
-        // OTIMIZAÇÃO: Batch request - reduz 15+ requests para 1 único request
-        const courseIdsParam = enrolledCourseIds.join(',');
-        const response = await fetch(`/api/area-restrita/batch-data?courseIds=${courseIdsParam}`);
-
-        if (response.ok) {
-          const data = await response.json();
-
-          // Atualizar estados com dados já agrupados por courseId
-          setCourseDocuments(data.data.documents || {});
-          setCourseVideos(data.data.videos || {});
-          setCourseSites(data.data.sites || {});
-
-          // Selecionar primeiro curso automaticamente
-          if (enrolledCourseIds.length > 0 && !selectedCourseId) {
-            setSelectedCourseId(enrolledCourseIds[0]);
-          }
-        } else {
-          console.error('Erro ao buscar dados batch:', response.statusText);
-        }
-      } catch (error) {
-        console.error('Erro ao buscar dados da área restrita:', error);
-      }
-    };
-
-    fetchCourseData();
-  }, [user, selectedCourseId]);
-
   const handleLogout = async () => {
     await logout();
   };
 
-  // Computed values - MUST be before early returns to follow Rules of Hooks
-  const userEnrollments = useMemo(() => user?.enrollments || [], [user?.enrollments]);
-  const enrolledCourseIds = user?.role === 'admin'
-    ? courses.map(c => c.id)
-    : userEnrollments.map(e => e.courseId);
-
-  // TODOS os cursos com flag isEnrolled
-  const allCoursesWithEnrollment = courses.map(course => ({
-    ...course,
-    isEnrolled: enrolledCourseIds.includes(course.id),
-  }));
-
-  // Curso selecionado atual (usando useMemo para evitar problemas de hooks)
-  const selectedCourse = useMemo(
-    () => courses.find(c => c.id === selectedCourseId),
-    [selectedCourseId]
-  );
-
-  const isSelectedCourseEnrolled = useMemo(
-    () => selectedCourse ? enrolledCourseIds.includes(selectedCourse.id) : false,
-    [selectedCourse, enrolledCourseIds]
-  );
-
-  const selectedCourseDocuments = useMemo(
-    () => selectedCourseId && isSelectedCourseEnrolled ? (courseDocuments[selectedCourseId] || []) : [],
-    [selectedCourseId, isSelectedCourseEnrolled, courseDocuments]
-  );
-
-  const selectedCourseVideos = useMemo(
-    () => selectedCourseId && isSelectedCourseEnrolled ? (courseVideos[selectedCourseId] || []) : [],
-    [selectedCourseId, isSelectedCourseEnrolled, courseVideos]
-  );
-
-  const selectedCourseSites = useMemo(
-    () => selectedCourseId && isSelectedCourseEnrolled ? (courseSites[selectedCourseId] || []) : [],
-    [selectedCourseId, isSelectedCourseEnrolled, courseSites]
-  );
-
-  const selectedEnrollment = useMemo(
-    () => userEnrollments.find(e => e.courseId === selectedCourseId),
-    [userEnrollments, selectedCourseId]
-  );
-
-  // Lista de cursos disponíveis para os filtros
-  const availableCourses = useMemo(() => {
-    return courses
-      .filter(c => enrolledCourseIds.includes(c.id))
-      .map(c => ({ id: c.id, title: c.title }));
-  }, [enrolledCourseIds]);
-
-  // Documentos filtrados pela busca
-  const searchableDocuments = useMemo(() => {
-    if (search.scope === 'current') {
-      // Apenas documentos do curso atual
-      return selectedCourseDocuments;
-    } else {
-      // Todos os documentos de todos os cursos matriculados
-      return Object.values(courseDocuments).flat();
-    }
-  }, [search.scope, selectedCourseDocuments, courseDocuments]);
-
-  const filteredDocuments = useMemo(() => {
-    if (!search.isSearchActive) {
-      return selectedCourseDocuments; // Sem busca ativa, mostra todos do curso atual
-    }
-
-    return searchAndFilterDocuments(
-      searchableDocuments,
-      search.searchTerm,
-      search.filters,
-      favoriteIds
-    );
-  }, [searchableDocuments, search.searchTerm, search.filters, search.isSearchActive, favoriteIds, selectedCourseDocuments]);
-
-  // Buscar termos do glossário quando há termo de busca
-  useEffect(() => {
-    const fetchGlossaryResults = async () => {
-      if (!search.searchTerm || search.searchTerm.length < 2) {
-        setGlossaryResults([]);
-        return;
-      }
-
-      try {
-        const response = await fetch(
-          `/api/area-restrita/search-all?q=${encodeURIComponent(search.searchTerm)}&courseId=${selectedCourseId || 'all'}`
-        );
-        if (response.ok) {
-          const data = await response.json();
-          setGlossaryResults(data.glossaryTerms || []);
-        }
-      } catch (error) {
-        console.error('Erro ao buscar glossário:', error);
-      }
-    };
-
-    fetchGlossaryResults();
-  }, [search.searchTerm, selectedCourseId]);
-
-  // Contagem de documentos por curso
-  const documentCounts = Object.keys(courseDocuments).reduce((acc, courseId) => {
-    acc[courseId] = courseDocuments[courseId].length;
-    return acc;
-  }, {} as Record<string, number>);
-
-  // Handler para seleção de curso (redireciona se bloqueado)
-  const handleCourseSelect = (courseId: string) => {
-    const course = allCoursesWithEnrollment.find(c => c.id === courseId);
-    if (course && !course.isEnrolled) {
-      // Redirecionar para página de curso bloqueado
-      router.push(`/area-restrita/curso-bloqueado?courseId=${courseId}`);
-    } else {
-      setSelectedCourseId(courseId);
-    }
+  const handleAIClick = () => {
+    router.push('/area-restrita/assistente');
   };
 
-  // Loading state - AFTER all hooks
-  if (isLoading) {
+  // Get selected label for mobile trigger
+  const selectedLabel = useMemo(() => {
+    if (!contentTree.selection) return undefined;
+    const node = contentTree.tree.find((n) => n.type === contentTree.selection?.type);
+    return node?.label;
+  }, [contentTree.selection, contentTree.tree]);
+
+  // Loading state
+  if (authLoading) {
     return (
       <main className="min-h-screen flex items-center justify-center">
         <div className="text-center">
@@ -290,460 +253,308 @@ export default function AreaRestritaPage() {
     );
   }
 
-  // Not authenticated - AFTER all hooks
+  // Not authenticated
   if (!user) {
     return null;
   }
 
   return (
-    <SearchProvider>
-      <main className="min-h-screen bg-gradient-to-br from-brand-50 via-white to-brand-50">
-      <div className="flex">
-        {/* Sidebar de Cursos */}
-        <CoursesSidebar
-          courses={allCoursesWithEnrollment}
-          selectedCourseId={selectedCourseId}
-          onCourseSelect={handleCourseSelect}
-          documentCounts={documentCounts}
-        />
-
-        {/* Conteúdo Principal */}
-        <div className="flex-1 p-4 pb-20 lg:p-8 lg:pb-8 lg:ml-80">
-          <div className="max-w-5xl mx-auto">
-            {/* Header com info do usuário - Compacto no mobile */}
-            <div className="bg-white rounded-2xl shadow-lg p-3 lg:p-6 mb-4 lg:mb-8 border-2 border-gray-200">
-              {/* Mobile: Header ultra-compacto */}
-              <div className="lg:hidden flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 bg-gradient-to-br from-green-500 to-green-700 rounded-full flex items-center justify-center shadow-md">
-                    <span className="text-white font-bold text-sm">
-                      {user.name.charAt(0).toUpperCase()}
-                    </span>
-                  </div>
-                  <div>
-                    <h2 className="text-sm font-bold text-gray-900">
-                      Olá, {user.name.split(' ')[0]}
-                    </h2>
-                    <p className="text-xs text-gray-600">
-                      {enrolledCourseIds.length} {enrolledCourseIds.length === 1 ? 'curso' : 'cursos'}
-                    </p>
-                  </div>
-                </div>
-                <CheckCircle className="w-6 h-6 text-green-600" />
+    <main className="min-h-screen bg-gradient-to-br from-brand-50 via-white to-brand-50">
+      {/* Header */}
+      <header className="bg-white border-b-2 border-gray-200 sticky top-0 z-30">
+        <div className="max-w-7xl mx-auto px-4 py-3 lg:py-4">
+          <div className="flex items-center justify-between">
+            {/* User Info */}
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 lg:w-12 lg:h-12 bg-gradient-to-br from-green-500 to-green-700 rounded-full flex items-center justify-center shadow-md">
+                <span className="text-white font-bold text-sm lg:text-lg">
+                  {user.name.charAt(0).toUpperCase()}
+                </span>
               </div>
-
-              {/* Desktop: Header completo original */}
-              <div className="hidden lg:flex lg:flex-row lg:justify-between lg:items-start gap-6">
-                {/* Informações do usuário */}
-                <div className="flex items-start gap-4">
-                  <div className="w-16 h-16 bg-gradient-to-br from-green-500 to-green-700 rounded-full flex items-center justify-center shadow-lg flex-shrink-0">
-                    <CheckCircle className="w-8 h-8 text-white" />
-                  </div>
-                  <div className="flex-1">
-                    <h2 className="text-2xl font-bold text-gray-900 mb-1">Bem-vindo, {user.name}</h2>
-                    <p className="text-lg text-gray-700 font-medium">
-                      {enrolledCourseIds.length} {enrolledCourseIds.length === 1 ? 'curso' : 'cursos'} matriculado{enrolledCourseIds.length !== 1 ? 's' : ''}
-                    </p>
-                    <p className="text-sm text-gray-600 mt-1">{user.email}</p>
-                  </div>
-                </div>
-
-                {/* Botões de ação - apenas desktop */}
-                <div className="flex items-center gap-3">
-                  <a
-                    href="/area-restrita/favoritos"
-                    className="flex items-center gap-2 px-4 py-2 text-gray-700 hover:text-pink-600 hover:bg-pink-50 rounded-lg transition-colors font-medium"
-                  >
-                    <Heart className="w-4 h-4" />
-                    <span>Favoritos</span>
-                  </a>
-                  <a
-                    href="/area-restrita/historico"
-                    className="flex items-center gap-2 px-4 py-2 text-gray-700 hover:text-brand-600 hover:bg-brand-50 rounded-lg transition-colors font-medium"
-                  >
-                    <Clock className="w-4 h-4" />
-                    <span>Histórico</span>
-                  </a>
-                  <button
-                    onClick={handleLogout}
-                    className="flex items-center gap-2 px-4 py-2 text-gray-700 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors font-medium"
-                  >
-                    <LogOut className="w-4 h-4" />
-                    <span>Sair</span>
-                  </button>
-                </div>
+              <div className="hidden sm:block">
+                <h2 className="text-sm lg:text-lg font-bold text-gray-900">
+                  Bem-vindo, {user.name.split(' ')[0]}
+                </h2>
+                <p className="text-xs lg:text-sm text-gray-600">
+                  {enrolledCourseIds.length} {enrolledCourseIds.length === 1 ? 'curso' : 'cursos'}
+                </p>
               </div>
+              <CheckCircle className="w-5 h-5 lg:w-6 lg:h-6 text-green-600 sm:hidden" />
             </div>
 
-            {/* Banner de Status do Acesso */}
-            {selectedCourse && isSelectedCourseEnrolled && (
-              <EnrollmentStatusBanner courseId={selectedCourse.id} />
-            )}
+            {/* Actions */}
+            <div className="flex items-center gap-2 lg:gap-3">
+              <Link
+                href="/area-restrita/favoritos"
+                className="flex items-center gap-1.5 px-3 py-2 text-gray-700 hover:text-pink-600 hover:bg-pink-50 rounded-lg transition-colors font-medium text-sm"
+              >
+                <Heart className="w-4 h-4" />
+                <span className="hidden lg:inline">Favoritos</span>
+              </Link>
+              <Link
+                href="/area-restrita/historico"
+                className="hidden lg:flex items-center gap-1.5 px-3 py-2 text-gray-700 hover:text-brand-600 hover:bg-brand-50 rounded-lg transition-colors font-medium text-sm"
+              >
+                <Clock className="w-4 h-4" />
+                <span>Histórico</span>
+              </Link>
+              <button
+                onClick={handleLogout}
+                className="flex items-center gap-1.5 px-3 py-2 text-gray-700 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors font-medium text-sm"
+              >
+                <LogOut className="w-4 h-4" />
+                <span className="hidden lg:inline">Sair</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      </header>
 
-            {/* Widget Lei 14.133 Comentada */}
-            {!search.isSearchActive && selectedCourse && isSelectedCourseEnrolled && (
-              <div className="mb-6">
-                <LeiExplorerWidget />
-              </div>
-            )}
+      {/* Main Content */}
+      <div className="max-w-7xl mx-auto px-4 py-6 lg:py-8">
+        {/* Global Search Bar */}
+        <div className="mb-6">
+          <GlobalSearchBar
+            query={search.query}
+            onQueryChange={search.setQuery}
+            onClear={search.clearSearch}
+            isLoading={search.isLoading}
+            counts={search.counts}
+            activeTypes={search.filters.types}
+            onToggleType={search.toggleType}
+            onAIClick={handleAIClick}
+            showAIButton={true}
+          />
+        </div>
 
-            {/* Tabs de Cursos - apenas mobile */}
-            {enrolledCourseIds.length > 0 && (
-              <div className="lg:hidden mb-4">
-                <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide snap-x snap-mandatory">
-                  {allCoursesWithEnrollment.filter(c => c.isEnrolled).map((course) => {
-                    const isSelected = selectedCourseId === course.id;
-                    const docCount = documentCounts[course.id] || 0;
+        {/* Mobile Tree Trigger */}
+        {!search.isSearchActive && (
+          <div className="mb-6 lg:hidden">
+            <MobileTreeTrigger
+              onClick={() => setIsMobileDrawerOpen(true)}
+              selectedLabel={selectedLabel}
+            />
+          </div>
+        )}
 
-                    return (
-                      <button
-                        key={course.id}
-                        onClick={() => setSelectedCourseId(course.id)}
-                        className={`flex-shrink-0 snap-start px-4 py-3 rounded-xl border-2 transition-all min-w-[160px] ${
-                          isSelected
-                            ? 'bg-gradient-to-r from-brand-600 to-brand-700 border-brand-600 text-white shadow-lg'
-                            : 'bg-white border-gray-300 text-gray-700 hover:border-brand-400'
-                        }`}
-                      >
-                        <div className="text-left">
-                          <h3 className={`font-bold text-xs line-clamp-2 mb-1 ${
-                            isSelected ? 'text-white' : 'text-gray-900'
-                          }`}>
-                            {course.title}
-                          </h3>
-                          <p className={`text-xs ${
-                            isSelected ? 'text-brand-100' : 'text-gray-500'
-                          }`}>
-                            {docCount} {docCount === 1 ? 'material' : 'materiais'}
-                          </p>
-                        </div>
-                      </button>
-                    );
-                  })}
-                </div>
-                <style jsx>{`
-                  .scrollbar-hide::-webkit-scrollbar {
-                    display: none;
-                  }
-                  .scrollbar-hide {
-                    -ms-overflow-style: none;
-                    scrollbar-width: none;
-                  }
-                `}</style>
-              </div>
-            )}
+        {/* Content Area */}
+        <div className="flex gap-6">
+          {/* Sidebar Tree - Desktop Only */}
+          {!search.isSearchActive && (
+            <aside className="hidden lg:block w-64 flex-shrink-0">
+              <div className="sticky top-24">
+                <ContentTree
+                  tree={contentTree.tree}
+                  isLoading={contentTree.isLoading}
+                  error={contentTree.error}
+                  selection={contentTree.selection}
+                  onSelectNode={contentTree.selectNode}
+                  expandedNodes={contentTree.expandedNodes}
+                  onToggleNode={contentTree.toggleNode}
+                />
 
-            {/* Conteúdo do Curso Selecionado */}
-            {enrolledCourseIds.length > 0 ? (
-              <>
-                {selectedCourse && isSelectedCourseEnrolled ? (
-                  <div>
-                    {/* Informações do Curso */}
-                    <div className="bg-white rounded-2xl shadow-lg p-4 lg:p-8 mb-4 lg:mb-6 border-2 border-gray-200">
-                      <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between mb-3 lg:mb-4 gap-3 lg:gap-4">
-                        <div className="inline-block">
-                          <h1 className="text-base lg:text-3xl font-bold mb-1 lg:mb-2 text-gray-900 line-clamp-2 lg:line-clamp-none">{selectedCourse.title}</h1>
-                          <div className="h-1 w-16 lg:w-32 bg-gradient-to-r from-brand-600 to-brand-700 rounded-full"></div>
-                        </div>
-                        {selectedEnrollment?.turma && (
-                          <div className="bg-brand-50 px-3 py-1.5 lg:px-4 lg:py-2 rounded-lg border border-brand-200 self-start lg:self-auto">
-                            <p className="text-xs lg:text-sm text-brand-900 font-medium flex items-center gap-2">
-                              <GraduationCap className="w-3.5 h-3.5 lg:w-4 lg:h-4" />
-                              Turma: {selectedEnrollment.turma}
-                            </p>
-                          </div>
-                        )}
-                      </div>
-                      <p className="text-sm lg:text-lg text-gray-700 leading-relaxed">
-                        {selectedCourse.description}
+                {/* AI Assistant Banner */}
+                <div className="mt-4 bg-gradient-to-br from-purple-500 to-indigo-600 rounded-2xl p-4 text-white shadow-lg">
+                  <div className="flex items-start gap-3">
+                    <MessageSquare className="w-6 h-6 flex-shrink-0 mt-0.5" />
+                    <div>
+                      <h4 className="font-bold text-sm">Assistente IA</h4>
+                      <p className="text-xs text-purple-100 mt-1">
+                        Tire dúvidas sobre licitações com IA
                       </p>
+                      <Link
+                        href="/area-restrita/assistente"
+                        className="inline-flex items-center gap-1 mt-2 text-xs font-medium text-white hover:text-purple-200 transition-colors"
+                      >
+                        Acessar
+                        <ChevronRight className="w-3 h-3" />
+                      </Link>
                     </div>
+                  </div>
+                </div>
+              </div>
+            </aside>
+          )}
 
-                    {/* Busca Híbrida Unificada */}
-                    <div className="mb-6">
-                      <UnifiedSearch
-                        value={search.searchTerm}
-                        onChange={search.setSearchTerm}
-                        onClear={search.clearSearch}
-                        scope={search.scope}
-                        onScopeToggle={search.toggleScope}
-                        onFiltersClick={() => search.setIsFiltersOpen(true)}
-                        activeFiltersCount={search.activeFiltersCount}
-                        resultsCount={search.isSearchActive ? filteredDocuments.length : undefined}
-                        currentCourseName={selectedCourse?.title}
-                        allDocuments={searchableDocuments.map(doc => ({
-                          ...doc,
-                          courseIds: [selectedCourseId || '']
-                        }))}
-                        currentCourseId={selectedCourseId || undefined}
-                      />
-                    </div>
+          {/* Main Content Area */}
+          <div className="flex-1 min-w-0">
+            {/* Search Results */}
+            {search.isSearchActive ? (
+              <SearchResultsList
+                results={search.results}
+                query={search.query}
+                isLoading={search.isLoading}
+                onDocumentClick={handleDocumentClick}
+                onArticleClick={(num) => router.push(`/artigo/${num}`)}
+                isFavorite={isFavorite}
+                onToggleFavorite={(docId) => toggleFavorite(docId, enrolledCourseIds[0] || '')}
+              />
+            ) : (
+              /* Tree Navigation Content */
+              <div>
+                {/* Section Title */}
+                {currentContent.title && (
+                  <div className="mb-4">
+                    <h2 className="text-xl lg:text-2xl font-bold text-gray-900">
+                      {currentContent.title}
+                    </h2>
+                  </div>
+                )}
 
-                    {/* Tabs de Navegação - Apenas sem busca ativa */}
-                    {!search.isSearchActive && (
-                      <div className="bg-white rounded-2xl shadow-lg border-2 border-gray-200 mb-6 overflow-hidden">
-                        <div className="flex overflow-x-auto scrollbar-hide">
-                          <button
-                            onClick={() => setActiveTab('documentos')}
-                            className={`flex items-center gap-2 px-6 py-4 font-semibold text-sm whitespace-nowrap transition-colors border-b-4 min-w-fit ${
-                              activeTab === 'documentos'
-                                ? 'border-brand-600 text-brand-600 bg-brand-50'
-                                : 'border-transparent text-gray-600 hover:text-gray-900 hover:bg-gray-50'
-                            }`}
-                          >
-                            <FileText className="w-4 h-4" />
-                            Documentos
-                            <span className={`px-2 py-0.5 rounded-full text-xs ${
-                              activeTab === 'documentos' ? 'bg-brand-200 text-brand-800' : 'bg-gray-200 text-gray-600'
-                            }`}>
-                              {selectedCourseDocuments.length}
-                            </span>
-                          </button>
-
-                          <button
-                            onClick={() => setActiveTab('lei')}
-                            className={`flex items-center gap-2 px-6 py-4 font-semibold text-sm whitespace-nowrap transition-colors border-b-4 min-w-fit ${
-                              activeTab === 'lei'
-                                ? 'border-indigo-600 text-indigo-600 bg-indigo-50'
-                                : 'border-transparent text-gray-600 hover:text-gray-900 hover:bg-gray-50'
-                            }`}
-                          >
-                            <Scale className="w-4 h-4" />
-                            Lei 14.133
-                          </button>
-
-                          {glossaryResults.length > 0 && (
-                            <button
-                              onClick={() => setActiveTab('glossario')}
-                              className={`flex items-center gap-2 px-6 py-4 font-semibold text-sm whitespace-nowrap transition-colors border-b-4 min-w-fit ${
-                                activeTab === 'glossario'
-                                  ? 'border-green-600 text-green-600 bg-green-50'
-                                  : 'border-transparent text-gray-600 hover:text-gray-900 hover:bg-gray-50'
-                              }`}
-                            >
-                              <BookOpen className="w-4 h-4" />
-                              Glossário
-                              <span className={`px-2 py-0.5 rounded-full text-xs ${
-                                activeTab === 'glossario' ? 'bg-green-200 text-green-800' : 'bg-gray-200 text-gray-600'
-                              }`}>
-                                {glossaryResults.length}
-                              </span>
-                            </button>
-                          )}
-
-                          {selectedCourseVideos.length > 0 && (
-                            <button
-                              onClick={() => setActiveTab('videos')}
-                              className={`flex items-center gap-2 px-6 py-4 font-semibold text-sm whitespace-nowrap transition-colors border-b-4 min-w-fit ${
-                                activeTab === 'videos'
-                                  ? 'border-purple-600 text-purple-600 bg-purple-50'
-                                  : 'border-transparent text-gray-600 hover:text-gray-900 hover:bg-gray-50'
-                              }`}
-                            >
-                              <Video className="w-4 h-4" />
-                              Vídeos
-                              <span className={`px-2 py-0.5 rounded-full text-xs ${
-                                activeTab === 'videos' ? 'bg-purple-200 text-purple-800' : 'bg-gray-200 text-gray-600'
-                              }`}>
-                                {selectedCourseVideos.length}
-                              </span>
-                            </button>
-                          )}
-
-                          {selectedCourseSites.length > 0 && (
-                            <button
-                              onClick={() => setActiveTab('sites')}
-                              className={`flex items-center gap-2 px-6 py-4 font-semibold text-sm whitespace-nowrap transition-colors border-b-4 min-w-fit ${
-                                activeTab === 'sites'
-                                  ? 'border-teal-600 text-teal-600 bg-teal-50'
-                                  : 'border-transparent text-gray-600 hover:text-gray-900 hover:bg-gray-50'
-                              }`}
-                            >
-                              <Globe className="w-4 h-4" />
-                              Sites Recomendados
-                              <span className={`px-2 py-0.5 rounded-full text-xs ${
-                                activeTab === 'sites' ? 'bg-teal-200 text-teal-800' : 'bg-gray-200 text-gray-600'
-                              }`}>
-                                {selectedCourseSites.length}
-                              </span>
-                            </button>
-                          )}
-                        </div>
-                        <style jsx>{`
-                          .scrollbar-hide::-webkit-scrollbar {
-                            display: none;
-                          }
-                          .scrollbar-hide {
-                            -ms-overflow-style: none;
-                            scrollbar-width: none;
-                          }
-                        `}</style>
-                      </div>
-                    )}
-
-                    {/* Top 10 Artigos Mais Consultados - Tab Lei */}
-                    {!search.isSearchActive && activeTab === 'lei' && (
-                      <div className="mb-6">
-                        <TopArticlesWidget
-                          limit={10}
-                          showStats={true}
-                          onArticleClick={(articleNum) => {
-                            search.updateFilters({
-                              leiArticles: [articleNum]
-                            });
-                          }}
-                        />
-                      </div>
-                    )}
-
-                    {/* Navegador da Estrutura da Lei - Tab Lei */}
-                    {!search.isSearchActive && activeTab === 'lei' && (
-                      <div className="mb-6">
-                        <ArticleTreeNavigator
-                          onArticleClick={(articleNum) => {
-                            router.push(`/artigo/${articleNum}`);
-                          }}
-                        />
-                      </div>
-                    )}
-
-                    {/* Materiais Destacados (Apostila, Conteúdo, Bibliografia) - Tab Documentos */}
-                    {!search.isSearchActive && activeTab === 'documentos' && (
-                      <HighlightedMaterials
-                        documents={selectedCourseDocuments}
-                        courseId={selectedCourse.id}
-                        onDownload={(doc) => handleDownload(doc, selectedCourse.id)}
-                      />
-                    )}
-
-                    {/* Resultados do Glossário - Apenas quando há busca ativa */}
-                    {search.isSearchActive && glossaryResults.length > 0 && (
-                      <GlossarySearchResults
-                        terms={glossaryResults}
-                        searchQuery={search.searchTerm}
-                      />
-                    )}
-
-                    {/* Glossário - Tab Glossário */}
-                    {!search.isSearchActive && activeTab === 'glossario' && glossaryResults.length > 0 && (
-                      <GlossarySearchResults
-                        terms={glossaryResults}
-                        searchQuery={search.searchTerm}
-                      />
-                    )}
-
-                    {/* Documentos Agrupados por Categoria - Tab Documentos ou quando há busca */}
-                    {(search.isSearchActive || activeTab === 'documentos') && (
-                      <DocumentsByCategory
-                        documents={filteredDocuments}
-                        courseId={selectedCourse.id}
-                        onDocumentClick={handleDocumentClick}
-                        isFavorite={isFavorite}
-                        toggleFavorite={toggleFavorite}
-                      />
-                    )}
-
-                    {/* Vídeos do YouTube - Tab Vídeos */}
-                    {!search.isSearchActive && activeTab === 'videos' && selectedCourseVideos.length > 0 && (
-                      <CourseVideos
-                        videos={selectedCourseVideos}
-                        displayMode="thumbnails"
-                      />
-                    )}
-
-                    {/* Sites de Interesse - Tab Sites */}
-                    {!search.isSearchActive && activeTab === 'sites' && (
-                      <RecommendedSites sites={selectedCourseSites} />
-                    )}
+                {/* Content Based on Selection */}
+                {isDataLoading ? (
+                  <div className="flex items-center justify-center py-12">
+                    <Loader2 className="w-8 h-8 animate-spin text-brand-600" />
                   </div>
                 ) : (
-                  <div className="bg-brand-50 border-2 border-brand-200 rounded-xl p-6 lg:p-8 text-center">
-                    <p className="text-base lg:text-lg text-brand-800 font-medium">
-                      Selecione um curso na barra lateral para ver os materiais
-                    </p>
-                  </div>
-                )}
+                  <>
+                    {/* Documents */}
+                    {currentContent.type === 'documents' && currentContent.documents.length > 0 && (
+                      <DocumentsByCategory
+                        documents={currentContent.documents}
+                        courseId={contentTree.selection?.courseId || enrolledCourseIds[0] || ''}
+                        onDocumentClick={handleDocumentClick}
+                        isFavorite={isFavorite}
+                        toggleFavorite={(docId) => toggleFavorite(docId, contentTree.selection?.courseId || enrolledCourseIds[0] || '')}
+                      />
+                    )}
 
-                {/* Aviso Importante */}
-                <div className="bg-gradient-to-r from-orange-50 to-red-50 border-l-4 border-orange-500 p-6 lg:p-6 rounded-r-xl mt-8">
-                  <h3 className="text-base lg:text-lg font-bold mb-2 text-orange-900">Importante</h3>
-                  <p className="text-sm lg:text-base text-orange-800 font-medium leading-relaxed">
-                    Este material é de uso exclusivo dos alunos matriculados. O compartilhamento não autorizado pode resultar na suspensão do acesso.
-                  </p>
-                </div>
-              </>
-            ) : (
-              /* Usuário sem matrícula */
-              <div className="bg-white rounded-2xl shadow-lg p-6 lg:p-8 border-2 border-gray-200 text-center">
-                <div className="w-20 h-20 bg-gradient-to-br from-brand-600 to-brand-700 rounded-full flex items-center justify-center mx-auto mb-4 shadow-lg">
-                  <GraduationCap className="w-10 h-10 text-white" />
-                </div>
-                <h2 className="text-xl lg:text-2xl font-bold text-gray-900 mb-3">Nenhum Curso Matriculado</h2>
-                <p className="text-base lg:text-lg text-gray-700 mb-6 leading-relaxed">
-                  Você ainda não está matriculado em nenhum curso. Entre em contato com o professor para receber seu QR Code de acesso.
-                </p>
-                {user.role === 'admin' && (
-                  <a
-                    href="/admin"
-                    className="inline-flex items-center gap-2 bg-gradient-to-r from-brand-600 to-brand-700 text-white px-6 py-3 lg:py-3 rounded-xl font-bold hover:from-blue-700 hover:to-purple-700 transition-all shadow-lg text-base"
-                  >
-                    Acessar Painel Admin
-                  </a>
+                    {/* Lei 14.133 */}
+                    {currentContent.type === 'lei' && (
+                      <ArticleTreeNavigator
+                        onArticleClick={(articleNum) => router.push(`/artigo/${articleNum}`)}
+                      />
+                    )}
+
+                    {/* Glossary Redirect */}
+                    {currentContent.type === 'glossary' && (
+                      <div className="bg-white rounded-2xl border-2 border-gray-200 p-8 text-center">
+                        <p className="text-gray-600 mb-4">
+                          O glossário completo está disponível na página pública.
+                        </p>
+                        <Link
+                          href="/glossario"
+                          className="inline-flex items-center gap-2 px-6 py-3 bg-green-600 text-white font-medium rounded-xl hover:bg-green-700 transition-colors"
+                        >
+                          Acessar Glossário
+                          <ChevronRight className="w-4 h-4" />
+                        </Link>
+                      </div>
+                    )}
+
+                    {/* FAQ Redirect */}
+                    {currentContent.type === 'faq' && (
+                      <div className="bg-white rounded-2xl border-2 border-gray-200 p-8 text-center">
+                        <p className="text-gray-600 mb-4">
+                          As perguntas frequentes estão disponíveis na página pública.
+                        </p>
+                        <Link
+                          href="/faq"
+                          className="inline-flex items-center gap-2 px-6 py-3 bg-purple-600 text-white font-medium rounded-xl hover:bg-purple-700 transition-colors"
+                        >
+                          Acessar FAQ
+                          <ChevronRight className="w-4 h-4" />
+                        </Link>
+                      </div>
+                    )}
+
+                    {/* Videos */}
+                    {currentContent.type === 'videos' && currentContent.videos.length > 0 && (
+                      <CourseVideos videos={currentContent.videos} displayMode="thumbnails" />
+                    )}
+
+                    {/* Sites */}
+                    {currentContent.type === 'sites' && currentContent.sites.length > 0 && (
+                      <RecommendedSites sites={currentContent.sites} />
+                    )}
+
+                    {/* Empty States */}
+                    {currentContent.type === 'documents' && currentContent.documents.length === 0 && (
+                      <div className="bg-white rounded-2xl border-2 border-gray-200 p-8 text-center">
+                        <p className="text-gray-500">Nenhum documento encontrado nesta categoria.</p>
+                      </div>
+                    )}
+
+                    {currentContent.type === 'videos' && currentContent.videos.length === 0 && (
+                      <div className="bg-white rounded-2xl border-2 border-gray-200 p-8 text-center">
+                        <p className="text-gray-500">Nenhum vídeo disponível.</p>
+                      </div>
+                    )}
+
+                    {currentContent.type === 'sites' && currentContent.sites.length === 0 && (
+                      <div className="bg-white rounded-2xl border-2 border-gray-200 p-8 text-center">
+                        <p className="text-gray-500">Nenhum site recomendado.</p>
+                      </div>
+                    )}
+                  </>
                 )}
+              </div>
+            )}
+
+            {/* Important Notice */}
+            {!search.isSearchActive && (
+              <div className="mt-8 bg-gradient-to-r from-orange-50 to-red-50 border-l-4 border-orange-500 p-4 lg:p-6 rounded-r-xl">
+                <h3 className="text-base font-bold text-orange-900 mb-1">Importante</h3>
+                <p className="text-sm text-orange-800">
+                  Este material é de uso exclusivo dos alunos matriculados. O compartilhamento não
+                  autorizado pode resultar na suspensão do acesso.
+                </p>
               </div>
             )}
           </div>
         </div>
       </div>
 
-      {/* Filtros Avançados - Drawer Lateral */}
-      <SearchFilters
-        isOpen={search.isFiltersOpen}
-        onClose={() => search.setIsFiltersOpen(false)}
-        filters={search.filters}
-        onUpdateFilters={search.updateFilters}
-        onClearFilters={search.clearFilters}
-        availableCourses={availableCourses}
+      {/* Mobile Tree Drawer */}
+      <MobileTreeDrawer
+        isOpen={isMobileDrawerOpen}
+        onClose={() => setIsMobileDrawerOpen(false)}
+        tree={contentTree.tree}
+        isLoading={contentTree.isLoading}
+        error={contentTree.error}
+        selection={contentTree.selection}
+        onSelectNode={contentTree.selectNode}
+        expandedNodes={contentTree.expandedNodes}
+        onToggleNode={contentTree.toggleNode}
       />
 
-      {/* Modal de Detalhes do Documento */}
-      {isModalOpen && selectedDocument && selectedCourse && (
+      {/* Document Detail Modal */}
+      {isModalOpen && selectedDocument && (
         <DocumentDetailModal
           documentId={selectedDocument.id}
           onClose={handleCloseModal}
           isFavorite={isFavorite(selectedDocument.id)}
-          onToggleFavorite={() => toggleFavorite(selectedDocument.id, selectedCourse.id)}
+          onToggleFavorite={() => toggleFavorite(selectedDocument.id, selectedDocument.courseId || enrolledCourseIds[0] || '')}
         />
       )}
 
-      {/* Painel de Exportação PDF - Fase 3C */}
-      <PDFExportPanel
-        documents={selectedCourseDocuments}
-        userName={user.name}
-        userEmail={user.email}
-        favoriteIds={favoriteIds}
-      />
-
-      {/* Bottom Navigation - apenas mobile */}
+      {/* Mobile Bottom Navigation */}
       <nav className="lg:hidden fixed bottom-0 left-0 right-0 bg-white border-t-2 border-gray-200 shadow-2xl z-50 pb-safe">
         <div className="flex items-center justify-around h-16">
-          <a
+          <Link
             href="/area-restrita"
-            className="flex flex-col items-center justify-center flex-1 h-full text-brand-600 hover:bg-brand-50 transition-colors"
+            className="flex flex-col items-center justify-center flex-1 h-full text-brand-600"
           >
-            <GraduationCap className="w-6 h-6 mb-1" />
+            <CheckCircle className="w-6 h-6 mb-1" />
             <span className="text-xs font-medium">Início</span>
-          </a>
-          <a
+          </Link>
+          <Link
             href="/area-restrita/favoritos"
-            className="flex flex-col items-center justify-center flex-1 h-full text-gray-600 hover:text-pink-600 hover:bg-pink-50 transition-colors"
+            className="flex flex-col items-center justify-center flex-1 h-full text-gray-600 hover:text-pink-600"
           >
             <Heart className="w-6 h-6 mb-1" />
             <span className="text-xs font-medium">Favoritos</span>
-          </a>
+          </Link>
+          <Link
+            href="/area-restrita/assistente"
+            className="flex flex-col items-center justify-center flex-1 h-full text-gray-600 hover:text-purple-600"
+          >
+            <MessageSquare className="w-6 h-6 mb-1" />
+            <span className="text-xs font-medium">IA</span>
+          </Link>
           <button
             onClick={handleLogout}
-            className="flex flex-col items-center justify-center flex-1 h-full text-gray-600 hover:text-red-600 hover:bg-red-50 transition-colors"
+            className="flex flex-col items-center justify-center flex-1 h-full text-gray-600 hover:text-red-600"
           >
             <LogOut className="w-6 h-6 mb-1" />
             <span className="text-xs font-medium">Sair</span>
@@ -751,6 +562,5 @@ export default function AreaRestritaPage() {
         </div>
       </nav>
     </main>
-    </SearchProvider>
   );
 }
