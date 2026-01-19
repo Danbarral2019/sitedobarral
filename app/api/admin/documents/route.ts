@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { withAdminAuth } from '@/lib/api-middleware';
 import { listDocuments, deleteDocument } from '@/lib/documents';
+import { CacheInvalidation } from '@/lib/cache/redis-client';
 
 // GET - Lista todos os documentos (com filtros opcionais E paginação)
 // OTIMIZAÇÃO: Adicionado suporte a paginação server-side
@@ -62,6 +63,10 @@ export const DELETE = withAdminAuth(async (request: NextRequest) => {
         { status: 404 }
       );
     }
+
+    // Invalidate caches - documents + lei articles (safe to invalidate all)
+    await CacheInvalidation.courseDocuments();
+    await CacheInvalidation.leiArticles();
 
     return NextResponse.json({ success: true });
   } catch (error) {

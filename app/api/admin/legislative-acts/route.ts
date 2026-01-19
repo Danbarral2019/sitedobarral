@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { verifyAdmin } from '@/lib/api-middleware';
+import { CacheInvalidation } from '@/lib/cache/redis-client';
 
 /**
  * GET /api/admin/legislative-acts
@@ -172,6 +173,12 @@ export async function POST(request: NextRequest) {
         createdBy: user.email
       }
     });
+
+    // Invalidate caches (legislative acts + lei articles if linked)
+    await CacheInvalidation.legislativeActs();
+    if (body.leiArticles && body.leiArticles.length > 0) {
+      await CacheInvalidation.leiArticles();
+    }
 
     return NextResponse.json({
       success: true,

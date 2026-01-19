@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { verifyAuth } from '@/lib/auth';
 import { deleteFAQ, toggleFAQPublish } from '@/lib/faq';
+import { CacheInvalidation } from '@/lib/cache/redis-client';
 
 export async function DELETE(
   request: NextRequest,
@@ -13,6 +14,8 @@ export async function DELETE(
     }
     const { id } = await params;
     await deleteFAQ(id);
+    // Invalidate FAQ cache
+    await CacheInvalidation.faq();
     return NextResponse.json({ success: true });
   } catch (error) {
     console.error('Error deleting FAQ:', error);
@@ -33,6 +36,8 @@ export async function PATCH(
     const body = await request.json();
     const { isPublished } = body;
     await toggleFAQPublish(id, isPublished);
+    // Invalidate FAQ cache
+    await CacheInvalidation.faq();
     return NextResponse.json({ success: true });
   } catch (error) {
     console.error('Error toggling FAQ publish status:', error);

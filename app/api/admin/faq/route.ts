@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { verifyAuth } from '@/lib/auth';
 import { Prisma } from '@prisma/client';
+import { CacheInvalidation } from '@/lib/cache/redis-client';
 
 // GET /api/admin/faq - Listar todas as FAQs (incluindo não publicadas)
 export async function GET(request: NextRequest) {
@@ -133,6 +134,9 @@ export async function POST(request: NextRequest) {
     const newFaq = await prisma.fAQ.create({
       data,
     });
+
+    // Invalidate FAQ cache
+    await CacheInvalidation.faq();
 
     return NextResponse.json(
       { faq: newFaq, message: 'Pergunta criada com sucesso' },

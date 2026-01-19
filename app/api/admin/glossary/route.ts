@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { verifyAuth } from '@/lib/auth';
 import { Prisma } from '@prisma/client';
+import { CacheInvalidation } from '@/lib/cache/redis-client';
 
 // Função helper para gerar slug
 function generateSlug(term: string): string {
@@ -161,6 +162,9 @@ export async function POST(request: NextRequest) {
     const newTerm = await prisma.glossaryTerm.create({
       data,
     });
+
+    // Invalidate glossary cache
+    await CacheInvalidation.glossary();
 
     return NextResponse.json(
       { term: newTerm, message: 'Termo criado com sucesso' },

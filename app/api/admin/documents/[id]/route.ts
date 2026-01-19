@@ -5,6 +5,7 @@ import { safeParseArray } from '@/lib/utils';
 import { handleApiError } from '@/lib/errors/error-handler';
 import { NotFoundError } from '@/lib/errors/api-error';
 import { apiLogger } from '@/lib/logger';
+import { CacheInvalidation } from '@/lib/cache/redis-client';
 
 /**
  * GET: Busca um documento por ID
@@ -146,6 +147,12 @@ export const PUT = withAdminAuth(async (request: NextRequest, context: { params:
 
     apiLogger.info({ documentId: id }, 'Document updated successfully');
 
+    // Invalidate caches - documents + lei articles (if leiArticles changed)
+    await CacheInvalidation.courseDocuments(updated.courseId || undefined);
+    if (leiArticles !== undefined) {
+      await CacheInvalidation.leiArticles();
+    }
+
     return NextResponse.json({
       success: true,
       document: updated,
@@ -199,6 +206,18 @@ export const PATCH = withAdminAuth(async (request: NextRequest, context: { param
       data: allowedFields,
     });
 
+    // Invalidate caches - documents (if course changed, invalidate both old and new)
+    if (body.courseId !== undefined && body.courseId !== existing.courseId) {
+      if (existing.courseId) {
+        await CacheInvalidation.courseDocuments(existing.courseId);
+      }
+      if (body.courseId) {
+        await CacheInvalidation.courseDocuments(body.courseId);
+      }
+    } else if (existing.courseId) {
+      await CacheInvalidation.courseDocuments(existing.courseId);
+    }
+
     return NextResponse.json({
       success: true,
       document: updated,
@@ -237,6 +256,15 @@ export const DELETE = withAdminAuth(async (request: NextRequest, context: { para
     });
 
     apiLogger.info({ documentId: id, title: existing.title }, 'Document deleted successfully');
+
+    // Invalidate caches - documents + lei articles
+    if (existing.courseId) {
+      await CacheInvalidation.courseDocuments(existing.courseId);
+    }
+    // If document had leiArticles, invalidate that cache too
+    if (existing.leiArticles) {
+      await CacheInvalidation.leiArticles();
+    }
 
     return NextResponse.json({
       success: true,

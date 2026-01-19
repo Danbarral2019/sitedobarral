@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { verifyAdmin } from '@/lib/api-middleware';
+import { CacheInvalidation } from '@/lib/cache/redis-client';
 
 /**
  * GET /api/admin/legislative-acts/[id]
@@ -97,6 +98,11 @@ export async function PUT(
       data: updateData
     });
 
+    // Invalidate caches (legislative acts + lei articles if leiArticles changed)
+    await CacheInvalidation.legislativeActs();
+    // Also invalidate lei articles since the linked documents may have changed
+    await CacheInvalidation.leiArticles();
+
     return NextResponse.json({
       success: true,
       act
@@ -151,6 +157,11 @@ export async function DELETE(
     await prisma.legislativeAct.delete({
       where: { id: params.id }
     });
+
+    // Invalidate caches
+    await CacheInvalidation.legislativeActs();
+    // Also invalidate lei articles since linked documents are now gone
+    await CacheInvalidation.leiArticles();
 
     return NextResponse.json({
       success: true,

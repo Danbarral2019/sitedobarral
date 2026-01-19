@@ -6,6 +6,7 @@ import { DocumentQuerySchema } from '@/lib/validation-schemas';
 import { handleApiError } from '@/lib/errors/error-handler';
 import { AuthenticationError, AuthorizationError, NotFoundError } from '@/lib/errors/api-error';
 import { apiLogger } from '@/lib/logger';
+import { withCache, CacheKeys, CACHE_TTL } from '@/lib/cache/redis-client';
 
 export async function GET(request: NextRequest) {
   try {
@@ -44,7 +45,7 @@ export async function GET(request: NextRequest) {
 
     const { courseId } = validation.data;
 
-    // Se for admin, pode ver todos os documentos
+    // Se for admin, pode ver todos os documentos (sem cache para admin)
     if (user.role === 'admin') {
       const documents = await prisma.document.findMany({
         where: { courseId },
@@ -69,15 +70,28 @@ export async function GET(request: NextRequest) {
       throw new AuthorizationError('Você não está matriculado neste curso ou seu acesso expirou');
     }
 
-    // Buscar documentos do curso (públicos + restritos já que está matriculado)
-    const documents = await prisma.document.findMany({
-      where: { courseId },
-      orderBy: { uploadedAt: 'desc' },
-    });
+    // Generate cache key for this user + course combination
+    const cacheKey = CacheKeys.courseDocuments(courseId, user.id);
 
-    apiLogger.info({ userId: user.id, courseId, count: documents.length }, 'Documents fetched successfully');
+    // Use cached result or fetch from database
+    const result = await withCache(
+      cacheKey,
+      async () => {
+        // Buscar documentos do curso (públicos + restritos já que está matriculado)
+        const documents = await prisma.document.findMany({
+          where: { courseId },
+          orderBy: { uploadedAt: 'desc' },
+        });
 
-    return NextResponse.json({ documents });
+        apiLogger.info({ userId: user.id, courseId, count: documents.length }, 'Documents fetched successfully');
+
+        return { documents };
+      },
+      CACHE_TTL.COURSE_DOCUMENTS,
+      { prefix: 'docs' }
+    );
+
+    return NextResponse.json(result);
   } catch (error) {
     return handleApiError(error);
   }

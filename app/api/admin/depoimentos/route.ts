@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
+import { CacheInvalidation } from '@/lib/cache/redis-client';
 
 /**
  * GET /api/admin/depoimentos
@@ -85,6 +86,9 @@ export async function PATCH(request: NextRequest) {
       data: { status },
     });
 
+    // Invalidate testimonials cache (status change affects public visibility)
+    await CacheInvalidation.testimonials();
+
     return NextResponse.json({
       success: true,
       testimonial,
@@ -116,6 +120,9 @@ export async function DELETE(request: NextRequest) {
     await prisma.testimonial.delete({
       where: { id },
     });
+
+    // Invalidate testimonials cache
+    await CacheInvalidation.testimonials();
 
     return NextResponse.json({
       success: true,

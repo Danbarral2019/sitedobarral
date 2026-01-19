@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { verifyAuth } from '@/lib/auth';
 import { Prisma } from '@prisma/client';
+import { CacheInvalidation } from '@/lib/cache/redis-client';
 
 // Função helper para gerar slug
 function generateSlug(term: string): string {
@@ -121,6 +122,9 @@ export async function PUT(
       data,
     });
 
+    // Invalidate glossary cache
+    await CacheInvalidation.glossary();
+
     return NextResponse.json({
       term: updatedTerm,
       message: 'Termo atualizado com sucesso',
@@ -164,6 +168,9 @@ export async function DELETE(
     await prisma.glossaryTerm.delete({
       where: { id },
     });
+
+    // Invalidate glossary cache
+    await CacheInvalidation.glossary();
 
     return NextResponse.json({
       message: 'Termo deletado com sucesso',

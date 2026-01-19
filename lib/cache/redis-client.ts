@@ -5,10 +5,12 @@
  * - Gemini API responses
  * - Document queries
  * - Rate limiting
+ * - Public API endpoints (FAQ, testimonials, glossary, etc.)
  *
  * Configuration:
  * - UPSTASH_REDIS_REST_URL
  * - UPSTASH_REDIS_REST_TOKEN
+ * - DISABLE_CACHE (optional) - Set to 'true' to disable caching globally
  */
 
 import { Redis } from '@upstash/redis';
@@ -19,6 +21,7 @@ import { Redis } from '@upstash/redis';
 
 const UPSTASH_REDIS_REST_URL = process.env.UPSTASH_REDIS_REST_URL;
 const UPSTASH_REDIS_REST_TOKEN = process.env.UPSTASH_REDIS_REST_TOKEN;
+const DISABLE_CACHE = process.env.DISABLE_CACHE === 'true';
 
 if (!UPSTASH_REDIS_REST_URL || !UPSTASH_REDIS_REST_TOKEN) {
   console.warn('⚠️  Upstash Redis not configured. Caching disabled.');
@@ -54,6 +57,28 @@ export const CACHE_TTL = {
 
   // Rate limit windows (1 minute)
   RATE_LIMIT: 60,
+
+  // ===========================
+  // Public API Cache TTLs (Fase 10)
+  // ===========================
+
+  // Lei 14.133 articles (1 hour) - Complex queries
+  LEI_ARTICLES: 60 * 60,
+
+  // FAQ list (2 hours) - Infrequent changes
+  FAQ_LIST: 60 * 60 * 2,
+
+  // Testimonials (4 hours) - Very infrequent changes
+  TESTIMONIALS: 60 * 60 * 4,
+
+  // Glossary terms (2 hours) - Moderate changes
+  GLOSSARY: 60 * 60 * 2,
+
+  // Legislative acts (2 hours) - Moderate changes
+  LEGISLATIVE_ACTS: 60 * 60 * 2,
+
+  // Course documents (1 hour) - Per user/course
+  COURSE_DOCUMENTS: 60 * 60,
 } as const;
 
 // ===========================
@@ -102,6 +127,86 @@ export const CacheKeys = {
    */
   geminiIndexed: (documentId: string): string => {
     return `gemini:indexed:${documentId}`;
+  },
+
+  // ===========================
+  // Public API Cache Keys (Fase 10)
+  // ===========================
+
+  /**
+   * Lei 14.133 articles cache key
+   * Format: lei:articles:{auth|public}:{filterHash}
+   * Separated by auth state because documents differ
+   */
+  leiArticles: (isAuth: boolean, filters?: { withDocuments?: boolean; titulo?: string }): string => {
+    const authKey = isAuth ? 'auth' : 'public';
+    const filterHash = filters ? hashString(JSON.stringify(filters)) : 'all';
+    return `lei:articles:${authKey}:${filterHash}`;
+  },
+
+  /**
+   * FAQ list cache key
+   * Format: faq:list:{category|all}
+   */
+  faqList: (category?: string | null): string => {
+    return `faq:list:${category || 'all'}`;
+  },
+
+  /**
+   * Testimonials list cache key
+   * Format: testimonials:list
+   * Single key (no filters)
+   */
+  testimonialsList: (): string => {
+    return 'testimonials:list';
+  },
+
+  /**
+   * Glossary terms cache key
+   * Format: glossary:{category}:{letter}:{offset}:{limit}
+   */
+  glossaryTerms: (params: {
+    category?: string | null;
+    letter?: string | null;
+    offset?: number;
+    limit?: number;
+  }): string => {
+    const { category, letter, offset = 0, limit = 100 } = params;
+    return `glossary:${category || 'all'}:${letter || 'all'}:${offset}:${limit}`;
+  },
+
+  /**
+   * Legislative acts cache key
+   * Format: acts:{filterHash}:{page}:{limit}
+   */
+  legislativeActs: (params: {
+    type?: string | null;
+    issuer?: string | null;
+    year?: string | null;
+    search?: string | null;
+    articleNumber?: string | null;
+    page?: number;
+    limit?: number;
+  }): string => {
+    const { type, issuer, year, search, articleNumber, page = 1, limit = 20 } = params;
+    const filterHash = hashString(JSON.stringify({ type, issuer, year, search, articleNumber }));
+    return `acts:${filterHash}:${page}:${limit}`;
+  },
+
+  /**
+   * Course documents cache key
+   * Format: docs:course:{courseId}:{userId}
+   */
+  courseDocuments: (courseId: string, userId: string): string => {
+    return `docs:course:${courseId}:${userId}`;
+  },
+
+  /**
+   * Registry key for tracking cache keys by prefix
+   * Format: registry:{prefix}
+   */
+  registry: (prefix: string): string => {
+    return `registry:${prefix}`;
   },
 } as const;
 
@@ -280,18 +385,104 @@ export async function checkRateLimit(
 }
 
 // ===========================
+// Cache Registry (Workaround for Upstash SCAN limitation)
+// ===========================
+
+/**
+ * Register a cache key in a prefix registry
+ * Allows invalidation of all keys with a given prefix without SCAN
+ */
+export async function registerCacheKey(prefix: string, fullKey: string): Promise<void> {
+  if (!redis || DISABLE_CACHE) return;
+
+  try {
+    const registryKey = CacheKeys.registry(prefix);
+    await redis.sadd(registryKey, fullKey);
+    // Registry never expires - cleaned on invalidation
+  } catch (error) {
+    console.error('Cache registry error:', error);
+  }
+}
+
+/**
+ * Get all registered keys for a prefix
+ */
+export async function getRegisteredKeys(prefix: string): Promise<string[]> {
+  if (!redis || DISABLE_CACHE) return [];
+
+  try {
+    const registryKey = CacheKeys.registry(prefix);
+    const keys = await redis.smembers(registryKey);
+    return keys as string[];
+  } catch (error) {
+    console.error('Cache registry get error:', error);
+    return [];
+  }
+}
+
+/**
+ * Invalidate all cache keys for a given prefix
+ * Uses registry to track keys (workaround for Upstash SCAN limitation)
+ */
+export async function invalidateCacheByPrefix(prefix: string): Promise<number> {
+  if (!redis || DISABLE_CACHE) return 0;
+
+  try {
+    const registryKey = CacheKeys.registry(prefix);
+    const keys = await redis.smembers(registryKey);
+
+    if (!keys || keys.length === 0) {
+      console.log(`🗑️ No keys to invalidate for prefix: ${prefix}`);
+      return 0;
+    }
+
+    // Delete all registered keys
+    const keysArray = keys as string[];
+    await Promise.all(keysArray.map(key => redis.del(key)));
+
+    // Clear the registry
+    await redis.del(registryKey);
+
+    console.log(`🗑️ Invalidated ${keysArray.length} keys for prefix: ${prefix}`);
+    return keysArray.length;
+  } catch (error) {
+    console.error('Cache invalidation error:', error);
+    return 0;
+  }
+}
+
+// ===========================
 // Cache Wrapper
 // ===========================
 
 /**
+ * Options for withCache
+ */
+export interface WithCacheOptions {
+  /** Prefix for registry (enables prefix-based invalidation) */
+  prefix?: string;
+}
+
+/**
  * Cache wrapper for expensive operations
  * Automatically caches the result and returns cached value on subsequent calls
+ *
+ * @param key - Cache key
+ * @param fn - Function to execute if cache miss
+ * @param ttl - Time to live in seconds
+ * @param options - Additional options (prefix for registry)
  */
 export async function withCache<T>(
   key: string,
   fn: () => Promise<T>,
-  ttl: number = CACHE_TTL.SEARCH_RESULTS
+  ttl: number = CACHE_TTL.SEARCH_RESULTS,
+  options?: WithCacheOptions
 ): Promise<T> {
+  // Skip cache if globally disabled or redis not configured
+  if (DISABLE_CACHE || !redis) {
+    return fn();
+  }
+
   // Try to get from cache first
   const cached = await getCache<T>(key);
   if (cached !== null) {
@@ -303,6 +494,11 @@ export async function withCache<T>(
   console.log(`❌ Cache MISS: ${key}`);
   const result = await fn();
   await setCache(key, result, ttl);
+
+  // Register key in prefix registry if specified
+  if (options?.prefix) {
+    await registerCacheKey(options.prefix, key);
+  }
 
   return result;
 }
@@ -344,6 +540,126 @@ export async function healthCheck(): Promise<{
 }
 
 // ===========================
+// Cache Invalidation Helpers (Fase 10)
+// ===========================
+
+/**
+ * Centralized cache invalidation helpers
+ * Use these in admin routes after mutations
+ */
+export const CacheInvalidation = {
+  /**
+   * Invalidate FAQ cache
+   */
+  faq: async (): Promise<number> => {
+    return invalidateCacheByPrefix('faq');
+  },
+
+  /**
+   * Invalidate testimonials cache
+   */
+  testimonials: async (): Promise<void> => {
+    await deleteCache(CacheKeys.testimonialsList());
+    console.log('🗑️ Invalidated testimonials cache');
+  },
+
+  /**
+   * Invalidate glossary cache
+   */
+  glossary: async (): Promise<number> => {
+    return invalidateCacheByPrefix('glossary');
+  },
+
+  /**
+   * Invalidate legislative acts cache
+   */
+  legislativeActs: async (): Promise<number> => {
+    return invalidateCacheByPrefix('acts');
+  },
+
+  /**
+   * Invalidate Lei 14.133 articles cache
+   */
+  leiArticles: async (): Promise<number> => {
+    return invalidateCacheByPrefix('lei');
+  },
+
+  /**
+   * Invalidate course documents cache
+   * @param courseId - Optional: invalidate only for specific course
+   */
+  courseDocuments: async (courseId?: string): Promise<number> => {
+    if (courseId) {
+      // Invalidate keys for specific course (all users)
+      // Note: This requires the registry to track course-specific keys
+      return invalidateCacheByPrefix(`docs:course:${courseId}`);
+    }
+    return invalidateCacheByPrefix('docs');
+  },
+
+  /**
+   * Invalidate all public API caches
+   * Use with caution - clears everything
+   */
+  all: async (): Promise<{ total: number; details: Record<string, number> }> => {
+    const results = await Promise.all([
+      CacheInvalidation.faq(),
+      CacheInvalidation.testimonials().then(() => 1),
+      CacheInvalidation.glossary(),
+      CacheInvalidation.legislativeActs(),
+      CacheInvalidation.leiArticles(),
+      CacheInvalidation.courseDocuments(),
+    ]);
+
+    const details = {
+      faq: results[0],
+      testimonials: results[1],
+      glossary: results[2],
+      legislativeActs: results[3],
+      leiArticles: results[4],
+      courseDocuments: results[5],
+    };
+
+    const total = results.reduce((sum, count) => sum + count, 0);
+    console.log(`🗑️ Invalidated ${total} cache entries total`);
+
+    return { total, details };
+  },
+};
+
+/**
+ * Check if caching is enabled
+ */
+export function isCacheEnabled(): boolean {
+  return !DISABLE_CACHE && redis !== null;
+}
+
+/**
+ * Get cache statistics
+ */
+export async function getCacheStats(): Promise<{
+  enabled: boolean;
+  connected: boolean;
+  registeredPrefixes: { prefix: string; count: number }[];
+}> {
+  const health = await healthCheck();
+
+  const prefixes = ['faq', 'glossary', 'acts', 'lei', 'docs'];
+  const registeredPrefixes: { prefix: string; count: number }[] = [];
+
+  for (const prefix of prefixes) {
+    const keys = await getRegisteredKeys(prefix);
+    registeredPrefixes.push({ prefix, count: keys.length });
+  }
+
+  return {
+    enabled: isCacheEnabled(),
+    connected: health.connected,
+    registeredPrefixes,
+  };
+}
+
+// ===========================
 // Export
 // ===========================
 
@@ -360,4 +676,13 @@ export default {
   healthCheck,
   CacheKeys,
   CACHE_TTL,
+  // Registry functions
+  registerCacheKey,
+  getRegisteredKeys,
+  invalidateCacheByPrefix,
+  // Invalidation helpers
+  CacheInvalidation,
+  // Utility
+  isCacheEnabled,
+  getCacheStats,
 };

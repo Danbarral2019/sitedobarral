@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { verifyAuth } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
+import { CacheInvalidation } from '@/lib/cache/redis-client';
 
 /**
  * PUT /api/admin/lei-14133/[numero]
@@ -51,6 +52,9 @@ export async function PUT(
         secao: body.secao || null,
       },
     });
+
+    // Invalidate Lei 14.133 articles cache
+    await CacheInvalidation.leiArticles();
 
     return NextResponse.json({
       success: true,
