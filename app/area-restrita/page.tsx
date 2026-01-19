@@ -31,6 +31,22 @@ import RecommendedSites from '@/components/RecommendedSites';
 import { ArticleTreeNavigator } from '@/components/ArticleTreeNavigator';
 import type { DocumentResult } from '@/lib/types/global-search';
 
+// Mapeamento de categorias para nomes amigáveis
+const CATEGORY_LABELS: Record<string, string> = {
+  'decor': 'Pareceres DECOR',
+  'parecer-vinculante': 'Pareceres Vinculantes',
+  'parecer': 'Pareceres',
+  'orientacao-normativa': 'Orientações Normativas',
+  'enunciados': 'Enunciados',
+  'acordao': 'Acórdãos TCU',
+  'sumula': 'Súmulas',
+  'outro': 'Outros',
+};
+
+function getCategoryLabel(category: string): string {
+  return CATEGORY_LABELS[category] || category.charAt(0).toUpperCase() + category.slice(1);
+}
+
 interface DocumentType {
   id: string;
   title: string;
@@ -156,13 +172,13 @@ export default function AreaRestritaPage() {
 
           if (category) {
             docs = docs.filter((d) => d.category === category);
-            title = `${category} - ${title}`;
+            title = `${getCategoryLabel(category)} - ${title}`;
           }
         } else {
           docs = Object.values(courseDocuments).flat();
           if (category) {
             docs = docs.filter((d) => d.category === category);
-            title = category;
+            title = getCategoryLabel(category);
           }
         }
 

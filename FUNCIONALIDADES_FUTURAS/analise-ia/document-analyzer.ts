@@ -4,7 +4,7 @@
  * FASE 4: Integração opcional com Claude API para análise semântica avançada
  */
 
-import { extractText, normalizeText } from './text-extractor';
+import { extractText, normalizeText } from '@/lib/text-extractor';
 import { findArticleMatches, detectArticleRanges, type ArticleMatch } from './article-matcher';
 import { findKeywordMatches, type KeywordMatch } from './keyword-mapper';
 import { getLeiArticle } from '@/data/lei-14133-artigos';

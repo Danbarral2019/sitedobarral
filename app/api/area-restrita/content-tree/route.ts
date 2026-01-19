@@ -5,6 +5,22 @@ import { courses } from '@/data/courses';
 import { LEI_14133_ARTIGOS } from '@/data/lei-14133-artigos';
 import type { ContentTreeNode, ContentTreeResponse } from '@/lib/types/global-search';
 
+// Mapeamento de categorias para nomes amigáveis
+const CATEGORY_LABELS: Record<string, string> = {
+  'decor': 'Pareceres DECOR',
+  'parecer-vinculante': 'Pareceres Vinculantes',
+  'parecer': 'Pareceres',
+  'orientacao-normativa': 'Orientações Normativas',
+  'enunciados': 'Enunciados',
+  'acordao': 'Acórdãos TCU',
+  'sumula': 'Súmulas',
+  'outro': 'Outros',
+};
+
+function getCategoryLabel(category: string): string {
+  return CATEGORY_LABELS[category] || category.charAt(0).toUpperCase() + category.slice(1);
+}
+
 export async function GET(request: NextRequest) {
   try {
     // Verify authentication
@@ -128,7 +144,7 @@ export async function GET(request: NextRequest) {
       const commonCats = Object.entries(docsByCourse['common'].categories).map(([cat, count]) => ({
         id: `doc-common-${cat}`,
         type: 'document' as const,
-        label: cat,
+        label: getCategoryLabel(cat),
         count,
         category: cat,
       }));
@@ -149,7 +165,7 @@ export async function GET(request: NextRequest) {
         const courseCats = Object.entries(docsByCourse[courseId].categories).map(([cat, count]) => ({
           id: `doc-${courseId}-${cat}`,
           type: 'document' as const,
-          label: cat,
+          label: getCategoryLabel(cat),
           count,
           courseId,
           category: cat,

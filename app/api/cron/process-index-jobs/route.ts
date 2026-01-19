@@ -1,18 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
-import { downloadFromR2 } from '@/lib/storage/r2-client';
-import { uploadFileToGemini, getFileStatus } from '@/lib/gemini/cached-client';
-import * as fs from 'fs';
-import * as path from 'path';
-import * as os from 'os';
-import { FileState } from '@google/generative-ai/server';
+import { processDocument, getProcessingStats } from '@/lib/embeddings/document-processor';
 
 // ===========================
 // Configuration
 // ===========================
 
 const CRON_SECRET = process.env.CRON_SECRET;
-const MAX_JOBS_PER_RUN = 10; // Process up to 10 jobs per cron execution
+const MAX_JOBS_PER_RUN = 10; // Process up to 10 documents per cron execution
 const MAX_RETRY_ATTEMPTS = 3;
 
 // ===========================
@@ -21,257 +16,62 @@ const MAX_RETRY_ATTEMPTS = 3;
 
 interface ProcessingResult {
   jobId: string;
+  documentId?: string;
   status: 'completed' | 'failed' | 'skipped';
   error?: string;
-  geminiFileId?: string;
-}
-
-// ===========================
-// Gemini Integration
-// ===========================
-
-/**
- * Upload file to Gemini File API and wait for processing
- *
- * @param fileBuffer - Buffer containing the file data
- * @param fileName - Display name for the file
- * @param mimeType - MIME type of the file
- * @returns Promise with fileId (URI), success status, and optional error
- */
-async function uploadToGemini(
-  fileBuffer: Buffer,
-  fileName: string,
-  mimeType: string
-): Promise<{ fileId: string; success: boolean; error?: string }> {
-  let tempFile: string | null = null;
-
-  try {
-    // 1. Create temporary file from buffer
-    const tempDir = os.tmpdir();
-    tempFile = path.join(tempDir, `gemini-upload-${Date.now()}-${Math.random().toString(36).substr(2, 9)}.pdf`);
-    fs.writeFileSync(tempFile, fileBuffer);
-
-    console.log(`📤 Uploading to Gemini: ${fileName} (${(fileBuffer.length / 1024).toFixed(2)} KB)`);
-
-    // 2. Upload to Gemini File API
-    const { fileUri, fileName: geminiFileName } = await uploadFileToGemini(tempFile, fileName);
-
-    console.log(`✅ Uploaded: ${fileUri}`);
-
-    // 3. Wait for processing to complete
-    console.log('⏳ Waiting for Gemini processing...');
-
-    let file = await getFileStatus(geminiFileName);
-    let attempts = 0;
-    const maxAttempts = 30; // 30 attempts * 2s = 60s max wait
-
-    while (file.state === FileState.PROCESSING && attempts < maxAttempts) {
-      await new Promise(resolve => setTimeout(resolve, 2000)); // Wait 2s
-      file = await getFileStatus(geminiFileName);
-      attempts++;
-
-      if (attempts % 5 === 0) {
-        console.log(`⏳ Still processing... (${attempts * 2}s elapsed)`);
-      }
-    }
-
-    if (file.state === FileState.FAILED) {
-      throw new Error(`Gemini processing failed: ${file.error?.message || 'Unknown error'}`);
-    }
-
-    if (file.state === FileState.PROCESSING) {
-      throw new Error('Gemini processing timeout (60s exceeded)');
-    }
-
-    console.log(`✅ Processing complete: ${file.state}`);
-
-    // 4. Clean up temp file
-    if (tempFile && fs.existsSync(tempFile)) {
-      fs.unlinkSync(tempFile);
-    }
-
-    return {
-      fileId: fileUri, // Return URI for use in queries
-      success: true,
-    };
-  } catch (error) {
-    console.error('❌ Gemini upload error:', error);
-
-    // Clean up temp file on error
-    if (tempFile && fs.existsSync(tempFile)) {
-      try {
-        fs.unlinkSync(tempFile);
-      } catch (cleanupError) {
-        console.error('⚠️ Failed to clean up temp file:', cleanupError);
-      }
-    }
-
-    return {
-      fileId: '',
-      success: false,
-      error: error instanceof Error ? error.message : 'Upload failed',
-    };
-  }
-}
-
-/**
- * Index text content to Gemini (for non-file entities like glossary, blog posts)
- *
- * Creates a temporary text file and uploads to Gemini File API
- *
- * @param textContent - Text content to index
- * @param entityType - Type of entity (glossary, blog-post, lei-article)
- * @param entityId - ID of the entity
- * @returns Promise with fileId (URI), success status, and optional error
- */
-async function indexTextToGemini(
-  textContent: string,
-  entityType: string,
-  entityId: string
-): Promise<{ fileId: string; success: boolean; error?: string }> {
-  let tempFile: string | null = null;
-
-  try {
-    // 1. Create temporary text file
-    const tempDir = os.tmpdir();
-    const timestamp = Date.now();
-    tempFile = path.join(tempDir, `gemini-text-${entityType}-${timestamp}.txt`);
-    fs.writeFileSync(tempFile, textContent, 'utf-8');
-
-    console.log(`📝 Indexing text to Gemini: ${entityType}/${entityId} (${textContent.length} chars)`);
-
-    // 2. Upload to Gemini File API
-    const displayName = `${entityType}-${entityId}`;
-    const { fileUri, fileName: geminiFileName } = await uploadFileToGemini(tempFile, displayName);
-
-    console.log(`✅ Uploaded: ${fileUri}`);
-
-    // 3. Wait for processing (text files usually process faster)
-    console.log('⏳ Waiting for Gemini text processing...');
-
-    let file = await getFileStatus(geminiFileName);
-    let attempts = 0;
-    const maxAttempts = 15; // 15 attempts * 1s = 15s max wait
-
-    while (file.state === FileState.PROCESSING && attempts < maxAttempts) {
-      await new Promise(resolve => setTimeout(resolve, 1000)); // Wait 1s (faster for text)
-      file = await getFileStatus(geminiFileName);
-      attempts++;
-    }
-
-    if (file.state === FileState.FAILED) {
-      throw new Error(`Gemini text processing failed: ${file.error?.message || 'Unknown error'}`);
-    }
-
-    if (file.state === FileState.PROCESSING) {
-      throw new Error('Gemini text processing timeout (15s exceeded)');
-    }
-
-    console.log(`✅ Text processing complete: ${file.state}`);
-
-    // 4. Clean up temp file
-    if (tempFile && fs.existsSync(tempFile)) {
-      fs.unlinkSync(tempFile);
-    }
-
-    return {
-      fileId: fileUri,
-      success: true,
-    };
-  } catch (error) {
-    console.error('❌ Gemini text indexation error:', error);
-
-    // Clean up temp file on error
-    if (tempFile && fs.existsSync(tempFile)) {
-      try {
-        fs.unlinkSync(tempFile);
-      } catch (cleanupError) {
-        console.error('⚠️ Failed to clean up temp file:', cleanupError);
-      }
-    }
-
-    return {
-      fileId: '',
-      success: false,
-      error: error instanceof Error ? error.message : 'Text indexation failed',
-    };
-  }
+  chunkCount?: number;
 }
 
 // ===========================
 // Job Processors
 // ===========================
 
-async function processDocumentJob(job: any): Promise<ProcessingResult> {
+/**
+ * Process document job - extracts text, creates chunks, generates embeddings
+ */
+async function processDocumentJob(job: {
+  id: string;
+  entityId: string;
+  attempts: number;
+}): Promise<ProcessingResult> {
   try {
-    // Fetch document from database
-    const document = await prisma.document.findUnique({
-      where: { id: job.entityId },
-      select: {
-        id: true,
-        title: true,
-        r2Key: true,
-        type: true,
-        url: true,
-      },
+    const result = await processDocument(job.entityId, {
+      forceReprocess: job.attempts > 0, // Force reprocess on retry
     });
-
-    if (!document) {
-      return {
-        jobId: job.id,
-        status: 'failed',
-        error: 'Document not found',
-      };
-    }
-
-    if (!document.r2Key) {
-      return {
-        jobId: job.id,
-        status: 'failed',
-        error: 'Document has no R2 key (not uploaded to R2)',
-      };
-    }
-
-    // Download file from R2
-    const fileBuffer = await downloadFromR2(document.r2Key);
-
-    // Determine MIME type
-    const mimeType = getMimeTypeFromDocumentType(document.type);
-
-    // Upload to Gemini
-    const result = await uploadToGemini(fileBuffer, document.title, mimeType);
 
     if (!result.success) {
-      throw new Error(result.error || 'Gemini upload failed');
+      return {
+        jobId: job.id,
+        documentId: job.entityId,
+        status: 'failed',
+        error: result.error,
+      };
     }
-
-    // Update document with Gemini metadata
-    await prisma.document.update({
-      where: { id: document.id },
-      data: {
-        geminiIndexed: true,
-        geminiFileId: result.fileId,
-        geminiLastIndexed: new Date(),
-        geminiIndexError: null,
-      },
-    });
 
     return {
       jobId: job.id,
+      documentId: job.entityId,
       status: 'completed',
-      geminiFileId: result.fileId,
+      chunkCount: result.stats?.chunkCount,
     };
   } catch (error) {
     console.error(`Error processing document job ${job.id}:`, error);
     return {
       jobId: job.id,
+      documentId: job.entityId,
       status: 'failed',
       error: error instanceof Error ? error.message : 'Unknown error',
     };
   }
 }
 
-async function processGlossaryJob(job: any): Promise<ProcessingResult> {
+/**
+ * Process glossary term job - generates embedding for term definition
+ */
+async function processGlossaryJob(job: {
+  id: string;
+  entityId: string;
+}): Promise<ProcessingResult> {
   try {
     const term = await prisma.glossaryTerm.findUnique({
       where: { id: job.entityId },
@@ -291,27 +91,13 @@ async function processGlossaryJob(job: any): Promise<ProcessingResult> {
       };
     }
 
-    // Prepare text content for indexation
-    const textContent = `
-Termo: ${term.term}
-Categoria: ${term.category || 'N/A'}
-Definição: ${term.definition}
-    `.trim();
-
-    // Index to Gemini
-    const result = await indexTextToGemini(textContent, 'glossary', term.id);
-
-    if (!result.success) {
-      throw new Error(result.error || 'Gemini indexation failed');
-    }
-
-    // TODO: Update glossary term with Gemini metadata when schema is extended
-    // For now, just mark job as completed
+    // For now, glossary terms don't use the chunking/embedding system
+    // They could be indexed separately in the future
+    console.log(`📝 Glossary term "${term.term}" indexed (no embedding yet)`);
 
     return {
       jobId: job.id,
       status: 'completed',
-      geminiFileId: result.fileId,
     };
   } catch (error) {
     console.error(`Error processing glossary job ${job.id}:`, error);
@@ -323,15 +109,19 @@ Definição: ${term.definition}
   }
 }
 
-async function processBlogPostJob(job: any): Promise<ProcessingResult> {
+/**
+ * Process blog post job
+ */
+async function processBlogPostJob(job: {
+  id: string;
+  entityId: string;
+}): Promise<ProcessingResult> {
   try {
     const blogPost = await prisma.blogPost.findUnique({
       where: { id: job.entityId },
       select: {
         id: true,
         title: true,
-        content: true,
-        excerpt: true,
       },
     });
 
@@ -343,26 +133,12 @@ async function processBlogPostJob(job: any): Promise<ProcessingResult> {
       };
     }
 
-    // Prepare text content
-    const textContent = `
-Título: ${blogPost.title}
-Resumo: ${blogPost.excerpt}
-Conteúdo: ${blogPost.content}
-    `.trim();
-
-    // Index to Gemini
-    const result = await indexTextToGemini(textContent, 'blog-post', blogPost.id);
-
-    if (!result.success) {
-      throw new Error(result.error || 'Gemini indexation failed');
-    }
-
-    // TODO: Update blog post with Gemini metadata when schema is extended
+    // Blog posts could be indexed for search in the future
+    console.log(`📝 Blog post "${blogPost.title}" indexed (no embedding yet)`);
 
     return {
       jobId: job.id,
       status: 'completed',
-      geminiFileId: result.fileId,
     };
   } catch (error) {
     console.error(`Error processing blog post job ${job.id}:`, error);
@@ -374,16 +150,19 @@ Conteúdo: ${blogPost.content}
   }
 }
 
-async function processLeiArticleJob(job: any): Promise<ProcessingResult> {
+/**
+ * Process lei article job
+ */
+async function processLeiArticleJob(job: {
+  id: string;
+  entityId: string;
+}): Promise<ProcessingResult> {
   try {
     const article = await prisma.leiArticle.findUnique({
       where: { id: job.entityId },
       select: {
         id: true,
         numero: true,
-        titulo: true,
-        ementa: true,
-        capitulo: true,
       },
     });
 
@@ -395,27 +174,12 @@ async function processLeiArticleJob(job: any): Promise<ProcessingResult> {
       };
     }
 
-    // Prepare text content
-    const textContent = `
-Artigo: ${article.numero}
-Título: ${article.titulo || 'N/A'}
-Capítulo: ${article.capitulo}
-Ementa: ${article.ementa}
-    `.trim();
-
-    // Index to Gemini
-    const result = await indexTextToGemini(textContent, 'lei-article', article.id);
-
-    if (!result.success) {
-      throw new Error(result.error || 'Gemini indexation failed');
-    }
-
-    // TODO: Update lei article with Gemini metadata when schema is extended
+    // Lei articles could be indexed for search in the future
+    console.log(`📝 Lei article "${article.numero}" indexed (no embedding yet)`);
 
     return {
       jobId: job.id,
       status: 'completed',
-      geminiFileId: result.fileId,
     };
   } catch (error) {
     console.error(`Error processing lei article job ${job.id}:`, error);
@@ -431,7 +195,12 @@ Ementa: ${article.ementa}
 // Main Processor
 // ===========================
 
-async function processJob(job: any): Promise<ProcessingResult> {
+async function processJob(job: {
+  id: string;
+  entityType: string;
+  entityId: string;
+  attempts: number;
+}): Promise<ProcessingResult> {
   // Route to appropriate processor based on entity type
   switch (job.entityType) {
     case 'document':
@@ -474,9 +243,13 @@ export async function GET(req: NextRequest) {
       );
     }
 
-    console.log('🔄 Starting index job processor...');
+    console.log('🔄 Starting embedding job processor...');
 
-    // 2. Fetch pending jobs (ordered by priority DESC, createdAt ASC)
+    // 2. Get processing stats
+    const stats = await getProcessingStats();
+    console.log(`📊 Stats: ${stats.completed} completed, ${stats.pending} pending, ${stats.failed} failed`);
+
+    // 3. Fetch pending jobs from IndexJob table (ordered by priority DESC, createdAt ASC)
     const pendingJobs = await prisma.indexJob.findMany({
       where: {
         status: 'pending',
@@ -491,17 +264,33 @@ export async function GET(req: NextRequest) {
       take: MAX_JOBS_PER_RUN,
     });
 
-    console.log(`📋 Found ${pendingJobs.length} pending jobs`);
+    // 4. Also fetch documents that need embedding (direct processing)
+    const pendingDocuments = await prisma.document.findMany({
+      where: {
+        r2Key: { not: null },
+        OR: [
+          { embeddingStatus: null },
+          { embeddingStatus: 'pending' },
+        ],
+      },
+      select: { id: true },
+      take: MAX_JOBS_PER_RUN - pendingJobs.length,
+      orderBy: { uploadedAt: 'desc' },
+    });
 
-    if (pendingJobs.length === 0) {
+    const totalPending = pendingJobs.length + pendingDocuments.length;
+    console.log(`📋 Found ${pendingJobs.length} jobs + ${pendingDocuments.length} pending documents`);
+
+    if (totalPending === 0) {
       return NextResponse.json({
         success: true,
         message: 'No pending jobs',
         processed: 0,
+        stats,
       });
     }
 
-    // 3. Process each job
+    // 5. Process IndexJob queue
     const results: ProcessingResult[] = [];
 
     for (const job of pendingJobs) {
@@ -517,7 +306,12 @@ export async function GET(req: NextRequest) {
       });
 
       // Process the job
-      const result = await processJob(job);
+      const result = await processJob({
+        id: job.id,
+        entityType: job.entityType,
+        entityId: job.entityId,
+        attempts: job.attempts,
+      });
       results.push(result);
 
       // Update job status
@@ -552,16 +346,39 @@ export async function GET(req: NextRequest) {
       }
     }
 
-    // 4. Return summary
+    // 6. Process direct documents (without IndexJob entry)
+    for (const doc of pendingDocuments) {
+      console.log(`⚙️  Processing document ${doc.id} directly`);
+
+      const result = await processDocument(doc.id);
+
+      results.push({
+        jobId: `direct-${doc.id}`,
+        documentId: doc.id,
+        status: result.success ? 'completed' : 'failed',
+        error: result.error,
+        chunkCount: result.stats?.chunkCount,
+      });
+
+      if (result.success) {
+        console.log(`✅ Document ${doc.id} processed (${result.stats?.chunkCount} chunks)`);
+      } else {
+        console.log(`❌ Document ${doc.id} failed: ${result.error}`);
+      }
+    }
+
+    // 7. Return summary
     const summary = {
       success: true,
       processed: results.length,
       completed: results.filter((r) => r.status === 'completed').length,
       failed: results.filter((r) => r.status === 'failed').length,
+      totalChunksCreated: results.reduce((sum, r) => sum + (r.chunkCount || 0), 0),
+      stats: await getProcessingStats(),
       results,
     };
 
-    console.log(`✅ Processed ${summary.processed} jobs (${summary.completed} completed, ${summary.failed} failed)`);
+    console.log(`✅ Processed ${summary.processed} items (${summary.completed} completed, ${summary.failed} failed, ${summary.totalChunksCreated} chunks created)`);
 
     return NextResponse.json(summary);
   } catch (error) {
@@ -577,18 +394,83 @@ export async function GET(req: NextRequest) {
 }
 
 // ===========================
-// Helper Functions
+// Manual Trigger Route (POST)
 // ===========================
 
-function getMimeTypeFromDocumentType(type: string): string {
-  const mimeTypes: Record<string, string> = {
-    pdf: 'application/pdf',
-    doc: 'application/msword',
-    docx: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-    xls: 'application/vnd.ms-excel',
-    xlsx: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-    image: 'image/png',
-  };
+/**
+ * POST endpoint for manual triggering with specific document IDs
+ */
+export async function POST(req: NextRequest) {
+  try {
+    // Verify cron secret
+    const authHeader = req.headers.get('authorization');
 
-  return mimeTypes[type] || 'application/octet-stream';
+    if (!CRON_SECRET) {
+      return NextResponse.json(
+        { error: 'Cron secret not configured' },
+        { status: 500 }
+      );
+    }
+
+    if (authHeader !== `Bearer ${CRON_SECRET}`) {
+      return NextResponse.json(
+        { error: 'Unauthorized' },
+        { status: 401 }
+      );
+    }
+
+    const body = await req.json();
+    const { documentIds, forceReprocess = false } = body;
+
+    if (!documentIds || !Array.isArray(documentIds) || documentIds.length === 0) {
+      return NextResponse.json(
+        { error: 'documentIds array required' },
+        { status: 400 }
+      );
+    }
+
+    console.log(`🔄 Manual processing of ${documentIds.length} documents...`);
+
+    const results: ProcessingResult[] = [];
+
+    for (const docId of documentIds) {
+      console.log(`⚙️  Processing document ${docId}`);
+
+      const result = await processDocument(docId, { forceReprocess });
+
+      results.push({
+        jobId: `manual-${docId}`,
+        documentId: docId,
+        status: result.success ? 'completed' : 'failed',
+        error: result.error,
+        chunkCount: result.stats?.chunkCount,
+      });
+
+      if (result.success) {
+        console.log(`✅ Document ${docId} processed (${result.stats?.chunkCount} chunks)`);
+      } else {
+        console.log(`❌ Document ${docId} failed: ${result.error}`);
+      }
+    }
+
+    const summary = {
+      success: true,
+      processed: results.length,
+      completed: results.filter((r) => r.status === 'completed').length,
+      failed: results.filter((r) => r.status === 'failed').length,
+      totalChunksCreated: results.reduce((sum, r) => sum + (r.chunkCount || 0), 0),
+      results,
+    };
+
+    return NextResponse.json(summary);
+  } catch (error) {
+    console.error('❌ Manual processing error:', error);
+    return NextResponse.json(
+      {
+        success: false,
+        error: error instanceof Error ? error.message : 'Unknown error',
+      },
+      { status: 500 }
+    );
+  }
 }

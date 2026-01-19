@@ -2,11 +2,10 @@
  * Cached Gemini Client
  *
  * Wraps Gemini API calls with Redis caching layer
- * Reduces latency from ~4.5s to ~100ms for cached queries
+ * Used for text synthesis (answers based on semantic search context)
  */
 
 import { GoogleGenerativeAI } from '@google/generative-ai';
-import { GoogleAIFileManager } from '@google/generative-ai/server';
 import { withCache, CacheKeys, CACHE_TTL } from '../cache/redis-client';
 
 // ===========================
@@ -15,9 +14,8 @@ import { withCache, CacheKeys, CACHE_TTL } from '../cache/redis-client';
 
 const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
 
-// Lazy-loaded clients (validated on first use)
+// Lazy-loaded client (validated on first use)
 let genAI: GoogleGenerativeAI | null = null;
-let fileManager: GoogleAIFileManager | null = null;
 
 function validateGeminiConfig() {
   if (!GEMINI_API_KEY) {
@@ -31,14 +29,6 @@ function getGenAI(): GoogleGenerativeAI {
     genAI = new GoogleGenerativeAI(GEMINI_API_KEY!);
   }
   return genAI;
-}
-
-function getFileManager(): GoogleAIFileManager {
-  validateGeminiConfig();
-  if (!fileManager) {
-    fileManager = new GoogleAIFileManager(GEMINI_API_KEY!);
-  }
-  return fileManager;
 }
 
 // ===========================
@@ -65,125 +55,12 @@ export interface GeminiQueryResult {
 }
 
 // ===========================
-// Cached Query Functions
+// Main Query Function
 // ===========================
 
 /**
- * Query Gemini with a file and text prompt (with caching)
- */
-export async function queryGeminiWithFile(
-  fileUri: string,
-  query: string,
-  options: GeminiQueryOptions = {}
-): Promise<GeminiQueryResult> {
-  const {
-    model = 'gemini-2.0-flash-exp',
-    temperature = 0.7,
-    maxOutputTokens = 2048,
-    useCache = true,
-    cacheTTL = CACHE_TTL.GEMINI_QUERY,
-  } = options;
-
-  const startTime = Date.now();
-
-  // Generate cache key
-  const cacheKey = CacheKeys.geminiQuery(fileUri, query);
-
-  // Try to use cache if enabled
-  if (useCache) {
-    const cached = await withCache(
-      cacheKey,
-      async () => {
-        // Execute actual Gemini query
-        const geminiModel = getGenAI().getGenerativeModel({
-          model,
-          generationConfig: {
-            temperature,
-            maxOutputTokens,
-          },
-        });
-
-        const result = await geminiModel.generateContent([
-          {
-            fileData: {
-              mimeType: 'application/pdf',
-              fileUri: fileUri,
-            },
-          },
-          { text: query },
-        ]);
-
-        const response = result.response.text();
-
-        // Extract token usage if available
-        const usageMetadata = result.response.usageMetadata;
-        const tokens = usageMetadata
-          ? {
-              prompt: usageMetadata.promptTokenCount || 0,
-              completion: usageMetadata.candidatesTokenCount || 0,
-              total: usageMetadata.totalTokenCount || 0,
-            }
-          : undefined;
-
-        return {
-          response,
-          tokens,
-        };
-      },
-      cacheTTL
-    );
-
-    const latency = Date.now() - startTime;
-
-    return {
-      response: cached.response,
-      cached: latency < 500, // If faster than 500ms, likely cached
-      latency,
-      tokens: cached.tokens,
-    };
-  }
-
-  // No cache: direct query
-  const geminiModel = genAI.getGenerativeModel({
-    model,
-    generationConfig: {
-      temperature,
-      maxOutputTokens,
-    },
-  });
-
-  const result = await geminiModel.generateContent([
-    {
-      fileData: {
-        mimeType: 'application/pdf',
-        fileUri: fileUri,
-      },
-    },
-    { text: query },
-  ]);
-
-  const response = result.response.text();
-  const latency = Date.now() - startTime;
-
-  const usageMetadata = result.response.usageMetadata;
-  const tokens = usageMetadata
-    ? {
-        prompt: usageMetadata.promptTokenCount || 0,
-        completion: usageMetadata.candidatesTokenCount || 0,
-        total: usageMetadata.totalTokenCount || 0,
-      }
-    : undefined;
-
-  return {
-    response,
-    cached: false,
-    latency,
-    tokens,
-  };
-}
-
-/**
- * Query Gemini with text only (no file)
+ * Query Gemini with text prompt (with caching)
+ * Used for synthesizing answers based on semantic search context
  */
 export async function queryGeminiText(
   query: string,
@@ -199,7 +76,7 @@ export async function queryGeminiText(
 
   const startTime = Date.now();
 
-  // Generate cache key (use 'text' as fileUri placeholder)
+  // Generate cache key
   const cacheKey = CacheKeys.geminiQuery('text', query);
 
   if (useCache) {
@@ -238,14 +115,14 @@ export async function queryGeminiText(
 
     return {
       response: cached.response,
-      cached: latency < 500,
+      cached: latency < 500, // If faster than 500ms, likely cached
       latency,
       tokens: cached.tokens,
     };
   }
 
-  // No cache
-  const geminiModel = genAI.getGenerativeModel({
+  // No cache: direct query
+  const geminiModel = getGenAI().getGenerativeModel({
     model,
     generationConfig: {
       temperature,
@@ -275,95 +152,9 @@ export async function queryGeminiText(
 }
 
 // ===========================
-// File Management
-// ===========================
-
-/**
- * Upload file to Gemini (not cached - file operations are stateful)
- */
-export async function uploadFileToGemini(
-  filePath: string,
-  displayName?: string
-): Promise<{
-  fileUri: string;
-  fileName: string;
-}> {
-  const uploadResult = await getFileManager().uploadFile(filePath, {
-    mimeType: 'application/pdf',
-    displayName: displayName,
-  });
-
-  return {
-    fileUri: uploadResult.file.uri,
-    fileName: uploadResult.file.name,
-  };
-}
-
-/**
- * Delete file from Gemini
- */
-export async function deleteFileFromGemini(fileName: string): Promise<void> {
-  await getFileManager().deleteFile(fileName);
-}
-
-/**
- * Get file status from Gemini
- */
-export async function getFileStatus(fileName: string) {
-  return await getFileManager().getFile(fileName);
-}
-
-// ===========================
-// Batch Operations
-// ===========================
-
-/**
- * Query multiple files with the same question (parallel with caching)
- */
-export async function queryMultipleFiles(
-  fileUris: string[],
-  query: string,
-  options: GeminiQueryOptions = {}
-): Promise<GeminiQueryResult[]> {
-  const promises = fileUris.map((fileUri) =>
-    queryGeminiWithFile(fileUri, query, options)
-  );
-
-  return await Promise.all(promises);
-}
-
-// ===========================
-// Utility Functions
-// ===========================
-
-/**
- * Warm up cache for common queries
- */
-export async function warmupCache(
-  fileUri: string,
-  commonQueries: string[]
-): Promise<void> {
-  console.log(`🔥 Warming up cache for ${commonQueries.length} queries...`);
-
-  const promises = commonQueries.map((query) =>
-    queryGeminiWithFile(fileUri, query, { useCache: true })
-  );
-
-  await Promise.all(promises);
-
-  console.log('✅ Cache warmup completed');
-}
-
-// ===========================
 // Export
 // ===========================
 
 export default {
-  queryGeminiWithFile,
   queryGeminiText,
-  uploadFileToGemini,
-  deleteFileFromGemini,
-  getFileStatus,
-  queryMultipleFiles,
-  warmupCache,
 };

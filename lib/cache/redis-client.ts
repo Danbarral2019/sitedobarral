@@ -79,6 +79,19 @@ export const CACHE_TTL = {
 
   // Course documents (1 hour) - Per user/course
   COURSE_DOCUMENTS: 60 * 60,
+
+  // ===========================
+  // Embeddings/Vector Search TTLs
+  // ===========================
+
+  // Vector search results (15 minutes) - Per query
+  VECTOR_SEARCH: 60 * 15,
+
+  // Query embeddings (1 hour) - Cached query vectors
+  QUERY_EMBEDDING: 60 * 60,
+
+  // Synthesized answers (1 hour) - LLM responses
+  SYNTHESIZED_ANSWER: 60 * 60,
 } as const;
 
 // ===========================
@@ -207,6 +220,53 @@ export const CacheKeys = {
    */
   registry: (prefix: string): string => {
     return `registry:${prefix}`;
+  },
+
+  // ===========================
+  // Embeddings/Vector Search Keys
+  // ===========================
+
+  /**
+   * Vector search results cache key
+   * Format: vector-search:{queryHash}:{courseId}:{category}:{limit}:{threshold}
+   */
+  vectorSearch: (params: {
+    query: string;
+    courseId?: string;
+    category?: string;
+    limit?: number;
+    threshold?: number;
+  }): string => {
+    const { query, courseId, category, limit = 5, threshold = 0.5 } = params;
+    const queryHash = hashString(query);
+    return `vector-search:${queryHash}:${courseId || 'all'}:${category || 'all'}:${limit}:${threshold}`;
+  },
+
+  /**
+   * Query embedding cache key
+   * Format: query-embedding:{queryHash}
+   */
+  queryEmbedding: (query: string): string => {
+    const queryHash = hashString(query);
+    return `query-embedding:${queryHash}`;
+  },
+
+  /**
+   * Synthesized answer cache key
+   * Format: synth-answer:{queryHash}:{contextHash}
+   */
+  synthesizedAnswer: (query: string, contextIds: string[]): string => {
+    const queryHash = hashString(query);
+    const contextHash = hashString(contextIds.sort().join(','));
+    return `synth-answer:${queryHash}:${contextHash}`;
+  },
+
+  /**
+   * Document embedding status cache key
+   * Format: embed-status:{documentId}
+   */
+  embeddingStatus: (documentId: string): string => {
+    return `embed-status:${documentId}`;
   },
 } as const;
 
@@ -598,6 +658,27 @@ export const CacheInvalidation = {
   },
 
   /**
+   * Invalidate vector search cache
+   */
+  vectorSearch: async (): Promise<number> => {
+    return invalidateCacheByPrefix('vector-search');
+  },
+
+  /**
+   * Invalidate query embeddings cache
+   */
+  queryEmbeddings: async (): Promise<number> => {
+    return invalidateCacheByPrefix('query-embedding');
+  },
+
+  /**
+   * Invalidate synthesized answers cache
+   */
+  synthesizedAnswers: async (): Promise<number> => {
+    return invalidateCacheByPrefix('synth-answer');
+  },
+
+  /**
    * Invalidate all public API caches
    * Use with caution - clears everything
    */
@@ -609,6 +690,9 @@ export const CacheInvalidation = {
       CacheInvalidation.legislativeActs(),
       CacheInvalidation.leiArticles(),
       CacheInvalidation.courseDocuments(),
+      CacheInvalidation.vectorSearch(),
+      CacheInvalidation.queryEmbeddings(),
+      CacheInvalidation.synthesizedAnswers(),
     ]);
 
     const details = {
@@ -618,6 +702,9 @@ export const CacheInvalidation = {
       legislativeActs: results[3],
       leiArticles: results[4],
       courseDocuments: results[5],
+      vectorSearch: results[6],
+      queryEmbeddings: results[7],
+      synthesizedAnswers: results[8],
     };
 
     const total = results.reduce((sum, count) => sum + count, 0);

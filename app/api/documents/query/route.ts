@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { verifyAuth } from '@/lib/auth';
-import { queryGeminiWithFile, queryMultipleFiles } from '@/lib/gemini/cached-client';
+import { semanticSearch, buildContextForLLM, formatSources } from '@/lib/embeddings/vector-search';
+import { queryGeminiText } from '@/lib/gemini/cached-client';
 import { checkRateLimit } from '@/lib/cache/redis-client';
 
 // ===========================
@@ -46,62 +47,7 @@ interface QueryResponse {
   latency: number;
   query: string;
   error?: string;
-}
-
-// ===========================
-// Helper Functions
-// ===========================
-
-/**
- * Calculate relevance score based on Gemini response quality
- * Simple heuristic: longer responses = more relevant
- */
-function calculateRelevance(response: string, query: string): number {
-  const responseLength = response.length;
-  const queryWords = query.toLowerCase().split(' ');
-
-  // Check how many query words appear in response
-  const matchingWords = queryWords.filter(word =>
-    response.toLowerCase().includes(word)
-  ).length;
-
-  const wordMatchScore = matchingWords / queryWords.length;
-  const lengthScore = Math.min(responseLength / 500, 1); // Cap at 500 chars
-
-  // Combined score (weighted average)
-  return (wordMatchScore * 0.7 + lengthScore * 0.3);
-}
-
-/**
- * Generate excerpt from Gemini response
- */
-function generateExcerpt(response: string, maxLength: number = 200): string {
-  if (response.length <= maxLength) {
-    return response;
-  }
-
-  // Try to cut at sentence boundary
-  const truncated = response.substring(0, maxLength);
-  const lastPeriod = truncated.lastIndexOf('.');
-
-  if (lastPeriod > maxLength * 0.7) {
-    return truncated.substring(0, lastPeriod + 1);
-  }
-
-  return truncated + '...';
-}
-
-/**
- * Parse tags from JSON or CSV format
- */
-function parseTags(tagsField: string | null): string[] {
-  if (!tagsField) return [];
-
-  try {
-    return JSON.parse(tagsField);
-  } catch {
-    return tagsField.split(',').map(t => t.trim());
-  }
+  synthesizedAnswer?: string;
 }
 
 // ===========================
@@ -128,9 +74,9 @@ export async function POST(req: NextRequest) {
     // 2. Rate limiting (10 queries per minute for non-admins)
     if (!isAdmin) {
       const rateLimitKey = `query-rate-limit:${userId}`;
-      const allowed = await checkRateLimit(rateLimitKey, 10, 60);
+      const rateLimitResult = await checkRateLimit(rateLimitKey, 10, 60);
 
-      if (!allowed) {
+      if (!rateLimitResult.allowed) {
         return NextResponse.json(
           {
             success: false,
@@ -147,7 +93,6 @@ export async function POST(req: NextRequest) {
       query,
       filters = {},
       maxResults = 5,
-      includeContent = false,
       useCache = true,
     } = body;
 
@@ -175,171 +120,156 @@ export async function POST(req: NextRequest) {
     console.log(`🔍 Query from user ${userId}: "${query}"`);
     console.log(`   Filters:`, filters);
 
-    // 5. Build database query with filters
-    const whereClause: any = {
-      geminiIndexed: true,
-      geminiFileId: { not: null },
-    };
+    // 5. Determine course access for non-admins
+    let allowedCourseId: string | undefined;
 
-    // Apply filters
-    if (filters.courseId) {
-      whereClause.OR = [
-        { courseId: filters.courseId },
-        { isCommon: true }, // Common documents are available to all courses
-      ];
-    }
-
-    if (filters.category) {
-      whereClause.category = filters.category;
-    }
-
-    if (filters.dateFrom || filters.dateTo) {
-      whereClause.uploadedAt = {};
-      if (filters.dateFrom) {
-        whereClause.uploadedAt.gte = new Date(filters.dateFrom);
-      }
-      if (filters.dateTo) {
-        whereClause.uploadedAt.lte = new Date(filters.dateTo);
-      }
-    }
-
-    if (filters.tags && filters.tags.length > 0) {
-      // Tags stored as JSON array - use Prisma JSON filter
-      whereClause.tags = {
-        array_contains: filters.tags,
-      };
-    }
-
-    // Public/private filter (non-admins can only see public or their enrolled courses)
     if (!isAdmin) {
-      if (filters.isPublic !== undefined) {
-        whereClause.isPublic = filters.isPublic;
-      } else {
-        // Get user's enrolled course IDs
-        const user = await prisma.user.findUnique({
-          where: { id: userId },
-          select: {
-            enrollments: {
-              where: {
-                expiresAt: {
-                  gte: new Date(), // Not expired
-                },
-              },
-              select: {
-                courseId: true,
-              },
+      // Get user's enrolled course IDs
+      const user = await prisma.user.findUnique({
+        where: { id: userId },
+        select: {
+          enrollments: {
+            where: {
+              OR: [
+                { expiresAt: { gte: new Date() } },
+                { isLifetime: true },
+              ],
+            },
+            select: {
+              courseId: true,
             },
           },
-        });
+        },
+      });
 
-        const enrolledCourseIds = user?.enrollments.map(e => e.courseId) || [];
+      const enrolledCourseIds = user?.enrollments.map(e => e.courseId) || [];
 
-        // Default: show public documents + documents from enrolled courses + common documents
-        whereClause.OR = [
-          { isPublic: true },
-          { isCommon: true },
-          ...(enrolledCourseIds.length > 0
-            ? [{ courseId: { in: enrolledCourseIds } }]
-            : []),
-        ];
+      // If filter specifies a course, verify access
+      if (filters.courseId) {
+        if (!enrolledCourseIds.includes(filters.courseId)) {
+          return NextResponse.json(
+            { success: false, error: 'Not enrolled in this course' },
+            { status: 403 }
+          );
+        }
+        allowedCourseId = filters.courseId;
+      } else if (enrolledCourseIds.length > 0) {
+        // Default to first enrolled course if no filter
+        allowedCourseId = enrolledCourseIds[0];
       }
+    } else {
+      // Admin can access any course
+      allowedCourseId = filters.courseId;
     }
 
-    // 6. Fetch documents from database
-    const documents = await prisma.document.findMany({
-      where: whereClause,
-      select: {
-        id: true,
-        title: true,
-        category: true,
-        geminiFileId: true,
-        url: true,
-        uploadedAt: true,
-        tags: true,
-        courseId: true,
-        isCommon: true,
-      },
-      orderBy: { uploadedAt: 'desc' },
-      take: maxResults * 2, // Fetch more to allow for filtering by relevance
+    // 6. Perform semantic search using embeddings
+    const searchResponse = await semanticSearch(query, {
+      courseId: allowedCourseId,
+      category: filters.category,
+      limit: maxResults,
+      threshold: 0.5, // Minimum 50% similarity
+      useCache,
+      includeChunkContent: true,
     });
 
-    console.log(`   📄 Found ${documents.length} indexed documents`);
+    console.log(`   📄 Found ${searchResponse.results.length} relevant documents`);
 
-    if (documents.length === 0) {
+    if (searchResponse.results.length === 0) {
       return NextResponse.json<QueryResponse>({
         success: true,
         results: [],
         totalDocuments: 0,
-        cached: false,
+        cached: searchResponse.cached,
         latency: Date.now() - startTime,
         query,
       });
     }
 
-    // 7. Query Gemini for each document
-    const geminiQueries = documents.map(doc => ({
-      documentId: doc.id,
-      fileId: doc.geminiFileId!,
-      title: doc.title,
-      category: doc.category,
-      url: doc.url,
-      uploadedAt: doc.uploadedAt,
-      tags: parseTags(doc.tags),
-      courseId: doc.courseId,
-      isCommon: doc.isCommon,
-    }));
+    // 7. Build context and synthesize answer with Gemini
+    const context = buildContextForLLM(searchResponse.results, 6000);
 
-    console.log(`   🤖 Querying ${geminiQueries.length} documents via Gemini...`);
+    const synthesisPrompt = `
+Voce e um assistente especializado em Licitacoes e Contratos Administrativos (Lei 14.133/2021).
+Com base nos documentos abaixo, responda a pergunta do usuario de forma clara e precisa.
 
-    const geminiResults = await queryMultipleFiles(
-      geminiQueries.map(q => q.fileId),
-      query,
-      { useCache }
-    );
+DOCUMENTOS RELEVANTES:
+${context}
 
-    // 8. Process results and calculate relevance
-    const results: DocumentResult[] = geminiQueries
-      .map((doc, index) => {
-        const geminiResult = geminiResults[index];
+PERGUNTA DO USUARIO:
+${query}
 
-        // Build courseIds array (single courseId or empty if isCommon)
-        const courseIds = doc.isCommon
+INSTRUCOES:
+1. Responda baseado APENAS nos documentos fornecidos
+2. Cite as fontes quando relevante (ex: "Conforme o Acordao X...")
+3. Se os documentos nao contiverem informacao suficiente, diga isso
+4. Use linguagem tecnica juridica apropriada
+5. Seja conciso mas completo
+
+RESPOSTA:`;
+
+    let synthesizedAnswer: string | undefined;
+
+    try {
+      const geminiResult = await queryGeminiText(synthesisPrompt, {
+        temperature: 0.3, // Lower for more factual responses
+        maxOutputTokens: 1024,
+        useCache,
+      });
+      synthesizedAnswer = geminiResult.response;
+    } catch (error) {
+      console.error('Error synthesizing answer:', error);
+      // Continue without synthesized answer
+    }
+
+    // 8. Format results for response
+    const results: DocumentResult[] = await Promise.all(
+      searchResponse.results.map(async (result) => {
+        // Fetch additional document details
+        const doc = await prisma.document.findUnique({
+          where: { id: result.documentId },
+          select: {
+            uploadedAt: true,
+            tags: true,
+            courseId: true,
+            isCommon: true,
+          },
+        });
+
+        // Build courseIds array
+        const courseIds = result.isCommon
           ? [] // Common documents don't have specific courseId
-          : doc.courseId
-          ? [doc.courseId]
+          : result.courseId
+          ? [result.courseId]
           : [];
 
         return {
-          documentId: doc.documentId,
-          title: doc.title,
-          category: doc.category,
-          geminiResponse: geminiResult.response,
-          relevance: calculateRelevance(geminiResult.response, query),
-          excerpt: generateExcerpt(geminiResult.response),
-          url: doc.url || undefined,
-          uploadedAt: doc.uploadedAt.toISOString(),
-          tags: doc.tags.length > 0 ? doc.tags : undefined,
+          documentId: result.documentId,
+          title: result.documentTitle,
+          category: result.category,
+          geminiResponse: result.chunkContent, // Most relevant chunk
+          relevance: result.similarity,
+          excerpt: generateExcerpt(result.chunkContent),
+          url: result.url,
+          uploadedAt: doc?.uploadedAt?.toISOString() || new Date().toISOString(),
+          tags: result.tags,
           courseIds: courseIds.length > 0 ? courseIds : undefined,
         };
       })
-      .sort((a, b) => b.relevance - a.relevance) // Sort by relevance
-      .slice(0, maxResults); // Take top N results
-
-    // 9. Check if any result was cached
-    const anyCached = geminiResults.some(r => r.cached);
+    );
 
     const latency = Date.now() - startTime;
 
-    console.log(`   ✅ Returned ${results.length} results (latency: ${latency}ms, cached: ${anyCached})`);
+    console.log(`   ✅ Returned ${results.length} results (latency: ${latency}ms, cached: ${searchResponse.cached})`);
 
-    // 10. Return response
+    // 9. Return response
     return NextResponse.json<QueryResponse>({
       success: true,
       results,
-      totalDocuments: documents.length,
-      cached: anyCached,
+      totalDocuments: searchResponse.totalFound,
+      cached: searchResponse.cached,
       latency,
       query,
+      synthesizedAnswer,
     });
 
   } catch (error) {
@@ -358,4 +288,27 @@ export async function POST(req: NextRequest) {
       { status: 500 }
     );
   }
+}
+
+// ===========================
+// Helper Functions
+// ===========================
+
+/**
+ * Generate excerpt from chunk content
+ */
+function generateExcerpt(content: string, maxLength: number = 200): string {
+  if (content.length <= maxLength) {
+    return content;
+  }
+
+  // Try to cut at sentence boundary
+  const truncated = content.substring(0, maxLength);
+  const lastPeriod = truncated.lastIndexOf('.');
+
+  if (lastPeriod > maxLength * 0.7) {
+    return truncated.substring(0, lastPeriod + 1);
+  }
+
+  return truncated + '...';
 }
