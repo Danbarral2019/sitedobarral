@@ -72,7 +72,7 @@ export function handleApiError(error: unknown, includeStackTrace = false): NextR
       {
         error: 'Dados inválidos',
         code: 'VALIDATION_ERROR',
-        details: error.errors.map((e) => ({
+        details: error.issues.map((e) => ({
           field: e.path.join('.'),
           message: e.message,
           code: e.code,

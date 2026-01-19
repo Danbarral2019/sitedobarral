@@ -20,14 +20,14 @@ if (!JWT_SECRET) {
 }
 
 export async function POST(request: NextRequest) {
-  // Rate limiting: 5 tentativas de login por minuto
   try {
-    await rateLimiters.auth.check(request, 5);
-  } catch {
-    throw new RateLimitError('Muitas tentativas de login. Tente novamente em alguns instantes.');
-  }
+    // Rate limiting: 5 tentativas de login por minuto
+    try {
+      await rateLimiters.auth.check(request, 5);
+    } catch {
+      throw new RateLimitError('Muitas tentativas de login. Tente novamente em alguns instantes.');
+    }
 
-  try {
     // ✅ Validação com Zod
     const validation = await validateRequest(request, LoginSchema);
 

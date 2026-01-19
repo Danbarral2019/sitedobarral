@@ -18,7 +18,8 @@ export async function validateRequest<T>(
 
     if (!validationResult.success) {
       // Formatar erros do Zod de forma amigável
-      const errors = validationResult.error.errors.map(err => ({
+      // Zod v4 usa .issues em vez de .errors
+      const errors = validationResult.error.issues.map(err => ({
         field: err.path.join('.'),
         message: err.message,
       }));
@@ -78,8 +79,8 @@ export function validateQueryParams<T>(
     const validationResult = schema.safeParse(params);
 
     if (!validationResult.success) {
-      // Formatar erros do Zod
-      const errors = validationResult.error.errors.map(err => ({
+      // Formatar erros do Zod (Zod v4 usa .issues)
+      const errors = validationResult.error.issues.map(err => ({
         field: err.path.join('.'),
         message: err.message,
       }));
@@ -118,7 +119,8 @@ export function validateQueryParams<T>(
 export function formatZodError(error: ZodError): Record<string, string> {
   const formatted: Record<string, string> = {};
 
-  error.errors.forEach(err => {
+  // Zod v4 usa .issues em vez de .errors
+  error.issues.forEach(err => {
     const field = err.path.join('.');
     formatted[field] = err.message;
   });
