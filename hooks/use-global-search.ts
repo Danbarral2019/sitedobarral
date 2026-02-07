@@ -58,7 +58,7 @@ interface UseGlobalSearchReturn {
 }
 
 const DEFAULT_FILTERS: GlobalSearchFilters = {
-  types: ['document', 'lei', 'glossary', 'faq', 'video', 'site'],
+  types: ['document', 'lei', 'glossary', 'faq', 'video', 'site', 'legislative-act'],
   courseIds: [],
   categories: [],
   dateRange: 'all',
@@ -71,6 +71,7 @@ const DEFAULT_COUNTS: GlobalSearchResponse['counts'] = {
   faq: 0,
   video: 0,
   site: 0,
+  'legislative-act': 0,
   total: 0,
 };
 

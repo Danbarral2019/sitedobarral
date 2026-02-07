@@ -22,10 +22,20 @@ interface DocumentsByCategoryProps {
   toggleFavorite: (docId: string, courseId: string) => void;
 }
 
+// Categorias que devem ser agrupadas sob "Pareceres"
+const PARECER_CATEGORIES = ['parecer', 'parecer-vinculante', 'decor'];
+
+// Labels de subtipo para badges de pareceres
+const PARECER_SUBTYPE_LABELS: Record<string, string | null> = {
+  'parecer': null, // parecer comum — sem badge
+  'parecer-vinculante': 'Vinculante',
+  'decor': 'DECOR',
+};
+
 // Mapeamento de categorias para ícones e cores
 const categoryConfig: Record<string, { icon: string; color: string; label: string }> = {
   'acordao': { icon: '⚖️', color: 'blue', label: 'Acórdãos' },
-  'parecer': { icon: '📝', color: 'green', label: 'Pareceres' },
+  'pareceres': { icon: '📝', color: 'green', label: 'Pareceres' },
   'orientacao-normativa': { icon: '📋', color: 'indigo', label: 'Orientações Normativas' },
   'instrucao-normativa': { icon: '📄', color: 'indigo', label: 'Instruções Normativas' },
   'portaria': { icon: '📜', color: 'emerald', label: 'Portarias' },
@@ -52,16 +62,21 @@ export default function DocumentsByCategory({
   const [expandedCategories, setExpandedCategories] = useState<Set<string>>(new Set());
 
   // Agrupar documentos por categoria (excluindo materiais destacados)
+  // Pareceres (parecer, parecer-vinculante, decor) são agrupados sob "pareceres"
   const documentsByCategory = documents.reduce((acc, doc) => {
     // Pular materiais destacados
     if (['apostila', 'conteudo-programatico', 'bibliografia'].includes(doc.category)) {
       return acc;
     }
 
-    if (!acc[doc.category]) {
-      acc[doc.category] = [];
+    const displayCategory = PARECER_CATEGORIES.includes(doc.category)
+      ? 'pareceres'
+      : doc.category;
+
+    if (!acc[displayCategory]) {
+      acc[displayCategory] = [];
     }
-    acc[doc.category].push(doc);
+    acc[displayCategory].push(doc);
     return acc;
   }, {} as Record<string, Document[]>);
 
@@ -171,9 +186,20 @@ export default function DocumentsByCategory({
                                 )}
                               </div>
                               <div className="flex-1">
-                                <h4 className="text-sm lg:text-base font-bold text-gray-900 group-hover:text-brand-600 transition-colors line-clamp-2">
-                                  {doc.title}
-                                </h4>
+                                <div className="flex items-start gap-2">
+                                  <h4 className="text-sm lg:text-base font-bold text-gray-900 group-hover:text-brand-600 transition-colors line-clamp-2">
+                                    {doc.title}
+                                  </h4>
+                                  {PARECER_SUBTYPE_LABELS[doc.category] && (
+                                    <span className={`flex-shrink-0 mt-0.5 px-2 py-0.5 rounded-full text-xs font-semibold ${
+                                      doc.category === 'decor'
+                                        ? 'bg-amber-100 text-amber-800'
+                                        : 'bg-emerald-100 text-emerald-800'
+                                    }`}>
+                                      {PARECER_SUBTYPE_LABELS[doc.category]}
+                                    </span>
+                                  )}
+                                </div>
                                 {doc.description && (
                                   <p className="text-xs lg:text-sm text-gray-600 mt-0.5 lg:mt-1 line-clamp-2">
                                     {truncateDescription(doc.description)}

@@ -5,7 +5,8 @@ import Link from 'next/link';
 import {
   BookOpen, Home, ChevronRight,
   Scale, FileText, Search,
-  ChevronsDown, ChevronsUp
+  ChevronsDown, ChevronsUp,
+  Gavel, ExternalLink, Loader2,
 } from 'lucide-react';
 import { LEI_14133_GRUPOS } from '@/data/lei-14133-grupos';
 import { LEI_14133_ARTIGOS as LEI_14133_ARTIGOS_FALLBACK } from '@/data/lei-14133-artigos';
@@ -18,6 +19,21 @@ type LeiArticle = {
   secao?: string;
   titulo?: string;
   capituloCompleto?: string;
+};
+
+type LegislativeAct = {
+  id: string;
+  type: string;
+  fullNumber: string;
+  title: string;
+  ementa: string;
+  summary?: string | null;
+  issuer: string;
+  publishDate: string;
+  hierarchyLevel: number;
+  leiArticles: string[];
+  officialUrl?: string | null;
+  pdfUrl?: string | null;
 };
 
 // Função auxiliar para converter ID de grupo em emoji
@@ -45,6 +61,9 @@ export default function Lei14133Page() {
   const [expandAll, setExpandAll] = useState(false);
   const [artigos, setArtigos] = useState<Record<string, LeiArticle>>(LEI_14133_ARTIGOS_FALLBACK);
   const [isLoadingArtigos, setIsLoadingArtigos] = useState(true);
+  const [showAtosNormativos, setShowAtosNormativos] = useState(false);
+  const [legislativeActs, setLegislativeActs] = useState<LegislativeAct[]>([]);
+  const [isLoadingActs, setIsLoadingActs] = useState(false);
 
   // Buscar artigos do banco de dados ao montar componente
   useEffect(() => {
@@ -59,12 +78,30 @@ export default function Lei14133Page() {
         }
       } catch (error) {
         console.error('Erro ao buscar artigos:', error);
-        // Mantém fallback em caso de erro
       } finally {
         setIsLoadingArtigos(false);
       }
     }
     fetchArtigos();
+  }, []);
+
+  // Buscar atos normativos ao montar componente
+  useEffect(() => {
+    async function fetchLegislativeActs() {
+      setIsLoadingActs(true);
+      try {
+        const response = await fetch('/api/legislative-acts?limit=100');
+        if (response.ok) {
+          const data = await response.json();
+          setLegislativeActs(data.acts || []);
+        }
+      } catch (error) {
+        console.error('Erro ao buscar atos normativos:', error);
+      } finally {
+        setIsLoadingActs(false);
+      }
+    }
+    fetchLegislativeActs();
   }, []);
 
   const selectedGroupData = selectedGroup
@@ -151,7 +188,10 @@ export default function Lei14133Page() {
                   return (
                     <button
                       key={group.id}
-                      onClick={() => setSelectedGroup(group.id === selectedGroup ? null : group.id)}
+                      onClick={() => {
+                        setSelectedGroup(group.id === selectedGroup ? null : group.id);
+                        setShowAtosNormativos(false);
+                      }}
                       className={`w-full text-left p-4 rounded-xl border-2 transition-all ${
                         isSelected
                           ? `${colors.bg} ${colors.border} ${colors.text} shadow-md`
@@ -187,12 +227,145 @@ export default function Lei14133Page() {
                   <p className="text-sm">Nenhum grupo encontrado</p>
                 </div>
               )}
+
+              {/* Botão Atos Normativos */}
+              {legislativeActs.length > 0 && (
+                <div className="mt-4 pt-4 border-t-2 border-gray-200">
+                  <button
+                    onClick={() => {
+                      setShowAtosNormativos(!showAtosNormativos);
+                      if (!showAtosNormativos) setSelectedGroup(null);
+                    }}
+                    className={`w-full text-left p-4 rounded-xl border-2 transition-all ${
+                      showAtosNormativos
+                        ? 'bg-amber-50 border-amber-200 text-amber-700 shadow-md'
+                        : 'bg-white border-gray-200 text-gray-700 hover:border-amber-400'
+                    }`}
+                  >
+                    <div className="flex items-start gap-3">
+                      <Gavel className="w-6 h-6 flex-shrink-0 mt-0.5" />
+                      <div className="flex-1 min-w-0">
+                        <h3 className="font-bold text-sm mb-1">
+                          Atos Normativos Infralegais
+                        </h3>
+                        <p className="text-xs opacity-80">
+                          Decretos, portarias e instruções normativas
+                        </p>
+                        <div className="mt-2">
+                          <span className="text-xs font-medium px-2 py-1 bg-white/50 rounded">
+                            {legislativeActs.length} {legislativeActs.length === 1 ? 'ato' : 'atos'}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  </button>
+                </div>
+              )}
             </div>
           </div>
 
           {/* Main Content - Artigos do Grupo Selecionado */}
           <div className="lg:col-span-2">
-            {selectedGroupData ? (
+            {showAtosNormativos ? (
+              <div className="bg-white rounded-2xl shadow-lg border-2 border-gray-200 p-8">
+                <div className="mb-6">
+                  <div className="flex items-center gap-3 mb-4">
+                    <Gavel className="w-10 h-10 text-amber-600" />
+                    <div className="flex-1">
+                      <h2 className="text-2xl font-bold text-gray-900">
+                        Atos Normativos Infralegais
+                      </h2>
+                      <p className="text-gray-600">
+                        Decretos, portarias e instruções normativas que regulamentam a Lei 14.133/2021
+                      </p>
+                    </div>
+                  </div>
+                  <span className="flex items-center gap-1 text-sm text-gray-600">
+                    <FileText className="w-4 h-4" />
+                    {legislativeActs.length} {legislativeActs.length === 1 ? 'ato normativo' : 'atos normativos'}
+                  </span>
+                </div>
+
+                {isLoadingActs ? (
+                  <div className="flex items-center justify-center py-12">
+                    <Loader2 className="w-8 h-8 animate-spin text-amber-600" />
+                  </div>
+                ) : (
+                  <div className="space-y-4">
+                    {legislativeActs.map((act) => {
+                      const typeLabels: Record<string, string> = {
+                        decreto: 'Decreto',
+                        portaria: 'Portaria',
+                        in: 'Instrução Normativa',
+                        'ordem-servico': 'Ordem de Serviço',
+                        lei: 'Lei',
+                        'medida-provisoria': 'Medida Provisória',
+                      };
+
+                      return (
+                        <div
+                          key={act.id}
+                          className="border-2 border-gray-200 rounded-xl p-5 hover:border-amber-300 transition-all"
+                        >
+                          <div className="flex items-start justify-between gap-4">
+                            <div className="flex-1 min-w-0">
+                              <h3 className="font-bold text-gray-900 text-lg">
+                                {act.fullNumber}
+                              </h3>
+                              <p className="text-sm text-gray-600 mt-1">
+                                {act.title}
+                              </p>
+                              <p className="text-sm text-gray-500 mt-2 line-clamp-3">
+                                {act.ementa}
+                              </p>
+
+                              <div className="flex items-center gap-2 mt-3 flex-wrap">
+                                <span className="px-2.5 py-1 rounded-full text-xs font-semibold bg-amber-100 text-amber-800">
+                                  {typeLabels[act.type] || act.type}
+                                </span>
+                                <span className="px-2.5 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-700">
+                                  {act.issuer}
+                                </span>
+                                {act.leiArticles && act.leiArticles.length > 0 && (
+                                  <span className="px-2.5 py-1 rounded-full text-xs font-medium bg-indigo-50 text-indigo-700">
+                                    Art. {act.leiArticles.slice(0, 5).join(', ')}{act.leiArticles.length > 5 ? '...' : ''}
+                                  </span>
+                                )}
+                              </div>
+                            </div>
+
+                            <div className="flex flex-col gap-2 flex-shrink-0">
+                              {act.officialUrl && (
+                                <a
+                                  href={act.officialUrl}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="inline-flex items-center gap-1.5 px-3 py-2 text-xs font-medium text-amber-700 bg-amber-50 rounded-lg hover:bg-amber-100 transition-colors"
+                                >
+                                  <ExternalLink className="w-3.5 h-3.5" />
+                                  Texto oficial
+                                </a>
+                              )}
+                              {act.pdfUrl && (
+                                <a
+                                  href={act.pdfUrl}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="inline-flex items-center gap-1.5 px-3 py-2 text-xs font-medium text-gray-700 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors"
+                                >
+                                  <FileText className="w-3.5 h-3.5" />
+                                  PDF
+                                </a>
+                              )}
+                            </div>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
+            ) : selectedGroupData ? (
               <div className="bg-white rounded-2xl shadow-lg border-2 border-gray-200 p-8">
                 <div className="mb-6">
                   <div className="flex items-center gap-3 mb-4">

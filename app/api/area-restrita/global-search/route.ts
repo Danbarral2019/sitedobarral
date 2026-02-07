@@ -13,6 +13,7 @@ import type {
   FAQResult,
   VideoResult,
   SiteResult,
+  LegislativeActResult,
 } from '@/lib/types/global-search';
 
 // Helper to get course name by ID
@@ -59,7 +60,7 @@ export async function GET(request: NextRequest) {
     // Parse types filter
     const requestedTypes: ContentType[] = typesParam
       ? (typesParam.split(',') as ContentType[])
-      : ['document', 'lei', 'glossary', 'faq', 'video', 'site'];
+      : ['document', 'lei', 'glossary', 'faq', 'video', 'site', 'legislative-act'];
 
     // Empty query - return empty results
     if (!query || query.length < 2) {
@@ -73,6 +74,7 @@ export async function GET(request: NextRequest) {
           faq: 0,
           video: 0,
           site: 0,
+          'legislative-act': 0,
           total: 0,
         },
         hasMore: false,
@@ -87,6 +89,7 @@ export async function GET(request: NextRequest) {
       faq: 0,
       video: 0,
       site: 0,
+      'legislative-act': 0,
       total: 0,
     };
 
@@ -368,6 +371,64 @@ export async function GET(request: NextRequest) {
       );
     }
 
+    // 7. Search Legislative Acts
+    if (requestedTypes.includes('legislative-act')) {
+      searchPromises.push(
+        (async () => {
+          const acts = await prisma.legislativeAct.findMany({
+            where: {
+              OR: [
+                { title: { contains: query, mode: 'insensitive' } },
+                { ementa: { contains: query, mode: 'insensitive' } },
+                { fullNumber: { contains: query, mode: 'insensitive' } },
+              ],
+            },
+            select: {
+              id: true,
+              type: true,
+              fullNumber: true,
+              title: true,
+              ementa: true,
+              summary: true,
+              issuer: true,
+              publishDate: true,
+              hierarchyLevel: true,
+              leiArticles: true,
+              officialUrl: true,
+              pdfUrl: true,
+            },
+            orderBy: [
+              { hierarchyLevel: 'asc' },
+              { year: 'desc' },
+            ],
+            take: limit,
+          });
+
+          counts['legislative-act'] = acts.length;
+
+          acts.forEach((act) => {
+            results.push({
+              type: 'legislative-act',
+              data: {
+                id: act.id,
+                type: act.type,
+                fullNumber: act.fullNumber,
+                title: act.title,
+                ementa: act.ementa,
+                summary: act.summary,
+                issuer: act.issuer,
+                publishDate: act.publishDate.toISOString(),
+                hierarchyLevel: act.hierarchyLevel,
+                leiArticles: act.leiArticles ? JSON.parse(act.leiArticles) : [],
+                officialUrl: act.officialUrl,
+                pdfUrl: act.pdfUrl,
+              } as LegislativeActResult,
+            });
+          });
+        })()
+      );
+    }
+
     // Wait for all searches to complete
     await Promise.all(searchPromises);
 
@@ -378,16 +439,18 @@ export async function GET(request: NextRequest) {
       counts.glossary +
       counts.faq +
       counts.video +
-      counts.site;
+      counts.site +
+      counts['legislative-act'];
 
     // Sort results by type priority: glossary first (exact matches), then documents, lei, faq, video, site
     const typePriority: Record<ContentType, number> = {
       glossary: 1,
       document: 2,
       lei: 3,
-      faq: 4,
-      video: 5,
-      site: 6,
+      'legislative-act': 4,
+      faq: 5,
+      video: 6,
+      site: 7,
     };
 
     results.sort((a, b) => typePriority[a.type] - typePriority[b.type]);

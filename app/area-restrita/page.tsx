@@ -31,11 +31,12 @@ import RecommendedSites from '@/components/RecommendedSites';
 import { ArticleTreeNavigator } from '@/components/ArticleTreeNavigator';
 import type { DocumentResult } from '@/lib/types/global-search';
 
+// Categorias que devem ser agrupadas sob "Pareceres"
+const PARECER_CATEGORIES = ['parecer', 'parecer-vinculante', 'decor'];
+
 // Mapeamento de categorias para nomes amigáveis
 const CATEGORY_LABELS: Record<string, string> = {
-  'decor': 'Pareceres DECOR',
-  'parecer-vinculante': 'Pareceres Vinculantes',
-  'parecer': 'Pareceres',
+  'pareceres': 'Pareceres',
   'orientacao-normativa': 'Orientações Normativas',
   'enunciados': 'Enunciados',
   'acordao': 'Acórdãos TCU',
@@ -171,13 +172,21 @@ export default function AreaRestritaPage() {
           title = course?.title || 'Curso';
 
           if (category) {
-            docs = docs.filter((d) => d.category === category);
+            if (category === 'pareceres') {
+              docs = docs.filter((d) => PARECER_CATEGORIES.includes(d.category));
+            } else {
+              docs = docs.filter((d) => d.category === category);
+            }
             title = `${getCategoryLabel(category)} - ${title}`;
           }
         } else {
           docs = Object.values(courseDocuments).flat();
           if (category) {
-            docs = docs.filter((d) => d.category === category);
+            if (category === 'pareceres') {
+              docs = docs.filter((d) => PARECER_CATEGORIES.includes(d.category));
+            } else {
+              docs = docs.filter((d) => d.category === category);
+            }
             title = getCategoryLabel(category);
           }
         }
@@ -187,6 +196,9 @@ export default function AreaRestritaPage() {
 
       case 'lei':
         return { type: 'lei' as const, documents: [], videos: [], sites: [], title: 'Lei 14.133/2021' };
+
+      case 'legislative-act':
+        return { type: 'legislative-act' as const, documents: [], videos: [], sites: [], title: 'Atos Normativos Infralegais' };
 
       case 'glossary':
         return { type: 'glossary' as const, documents: [], videos: [], sites: [], title: 'Glossário' };
@@ -442,6 +454,22 @@ export default function AreaRestritaPage() {
                       <ArticleTreeNavigator
                         onArticleClick={(articleNum) => router.push(`/artigo/${articleNum}`)}
                       />
+                    )}
+
+                    {/* Atos Normativos - redirect to Lei 14.133 page */}
+                    {currentContent.type === 'legislative-act' && (
+                      <div className="bg-white rounded-2xl border-2 border-gray-200 p-8 text-center">
+                        <p className="text-gray-600 mb-4">
+                          Os atos normativos infralegais estão disponíveis na página da Lei 14.133.
+                        </p>
+                        <Link
+                          href="/lei-14133"
+                          className="inline-flex items-center gap-2 px-6 py-3 bg-amber-600 text-white font-medium rounded-xl hover:bg-amber-700 transition-colors"
+                        >
+                          Acessar Atos Normativos
+                          <ChevronRight className="w-4 h-4" />
+                        </Link>
+                      </div>
                     )}
 
                     {/* Glossary Redirect */}

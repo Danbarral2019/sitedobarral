@@ -1,7 +1,7 @@
 // Types for Global Search functionality in Area Restrita
 
 // Content type categories with their respective colors and icons
-export type ContentType = 'document' | 'lei' | 'glossary' | 'faq' | 'video' | 'site';
+export type ContentType = 'document' | 'lei' | 'glossary' | 'faq' | 'video' | 'site' | 'legislative-act';
 
 export const CONTENT_TYPE_CONFIG: Record<ContentType, {
   label: string;
@@ -58,6 +58,14 @@ export const CONTENT_TYPE_CONFIG: Record<ContentType, {
     bgColor: 'bg-teal-50',
     borderColor: 'border-teal-200',
     icon: 'Globe',
+  },
+  'legislative-act': {
+    label: 'Ato Normativo',
+    labelPlural: 'Atos Normativos',
+    color: 'text-amber-600',
+    bgColor: 'bg-amber-50',
+    borderColor: 'border-amber-200',
+    icon: 'Gavel',
   },
 };
 
@@ -121,10 +129,25 @@ export interface SiteResult {
   category?: string | null;
 }
 
+export interface LegislativeActResult {
+  id: string;
+  type: string;
+  fullNumber: string;
+  title: string;
+  ementa: string;
+  summary?: string | null;
+  issuer: string;
+  publishDate: string;
+  hierarchyLevel: number;
+  leiArticles: string[];
+  officialUrl?: string | null;
+  pdfUrl?: string | null;
+}
+
 // Unified search result item
 export interface SearchResultItem {
   type: ContentType;
-  data: DocumentResult | LeiArticleResult | GlossaryResult | FAQResult | VideoResult | SiteResult;
+  data: DocumentResult | LeiArticleResult | GlossaryResult | FAQResult | VideoResult | SiteResult | LegislativeActResult;
 }
 
 // Global search response
@@ -138,6 +161,7 @@ export interface GlobalSearchResponse {
     faq: number;
     video: number;
     site: number;
+    'legislative-act': number;
     total: number;
   };
   hasMore: boolean;

@@ -13,6 +13,7 @@ import {
   Globe,
   Sparkles,
   SlidersHorizontal,
+  Gavel,
 } from 'lucide-react';
 import type { ContentType, GlobalSearchResponse } from '@/lib/types/global-search';
 import { CONTENT_TYPE_CONFIG } from '@/lib/types/global-search';
@@ -40,6 +41,7 @@ const TYPE_ICONS: Record<ContentType, typeof FileText> = {
   faq: HelpCircle,
   video: Video,
   site: Globe,
+  'legislative-act': Gavel,
 };
 
 export function GlobalSearchBar({

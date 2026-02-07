@@ -3,13 +3,14 @@ import { prisma } from '@/lib/prisma';
 import { verifyToken } from '@/lib/auth';
 import { courses } from '@/data/courses';
 import { LEI_14133_ARTIGOS } from '@/data/lei-14133-artigos';
-import type { ContentTreeNode, ContentTreeResponse } from '@/lib/types/global-search';
+import type { ContentType, ContentTreeNode, ContentTreeResponse } from '@/lib/types/global-search';
+
+// Categorias que devem ser agrupadas sob "Pareceres"
+const PARECER_CATEGORIES = ['parecer', 'parecer-vinculante', 'decor'];
 
 // Mapeamento de categorias para nomes amigáveis
 const CATEGORY_LABELS: Record<string, string> = {
-  'decor': 'Pareceres DECOR',
-  'parecer-vinculante': 'Pareceres Vinculantes',
-  'parecer': 'Pareceres',
+  'pareceres': 'Pareceres',
   'orientacao-normativa': 'Orientações Normativas',
   'enunciados': 'Enunciados',
   'acordao': 'Acórdãos TCU',
@@ -62,6 +63,7 @@ export async function GET(request: NextRequest) {
       faqCount,
       videosByCourseCounts,
       sitesCount,
+      legislativeActsCount,
     ] = await Promise.all([
       // 1. Documents grouped by course and category
       prisma.document.groupBy({
@@ -117,6 +119,9 @@ export async function GET(request: NextRequest) {
           },
         });
       })(),
+
+      // 7. Legislative Acts count
+      prisma.legislativeAct.count(),
     ]);
 
     // Build Documents tree node
@@ -132,8 +137,12 @@ export async function GET(request: NextRequest) {
         docsByCourse[courseId] = { count: 0, categories: {} };
       }
       docsByCourse[courseId].count += group._count.id;
-      docsByCourse[courseId].categories[group.category] =
-        (docsByCourse[courseId].categories[group.category] || 0) + group._count.id;
+      // Mesclar parecer, parecer-vinculante e decor sob "pareceres"
+      const displayCategory = PARECER_CATEGORIES.includes(group.category)
+        ? 'pareceres'
+        : group.category;
+      docsByCourse[courseId].categories[displayCategory] =
+        (docsByCourse[courseId].categories[displayCategory] || 0) + group._count.id;
     });
 
     // Build document children (by course)
@@ -190,13 +199,23 @@ export async function GET(request: NextRequest) {
       children: documentChildren,
     });
 
-    // Build Lei 14.133 tree node
-    totalCount += leiArticlesCount;
+    // Build Lei 14.133 tree node (with Atos Normativos as child)
+    const leiChildren: ContentTreeNode[] = [];
+    if (legislativeActsCount > 0) {
+      leiChildren.push({
+        id: 'legislative-acts',
+        type: 'legislative-act' as ContentType,
+        label: 'Atos Normativos Infralegais',
+        count: legislativeActsCount,
+      });
+    }
+    totalCount += leiArticlesCount + legislativeActsCount;
     tree.push({
       id: 'lei',
       type: 'lei',
       label: 'Lei 14.133',
-      count: leiArticlesCount,
+      count: leiArticlesCount + legislativeActsCount,
+      children: leiChildren.length > 0 ? leiChildren : undefined,
     });
 
     // Build Glossary tree node
