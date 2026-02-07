@@ -42,6 +42,30 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       changeFrequency: 'monthly',
       priority: 0.7,
     },
+    {
+      url: `${BASE_URL}/lei-14133`,
+      lastModified: new Date(),
+      changeFrequency: 'weekly',
+      priority: 0.9,
+    },
+    {
+      url: `${BASE_URL}/legislacao`,
+      lastModified: new Date(),
+      changeFrequency: 'weekly',
+      priority: 0.8,
+    },
+    {
+      url: `${BASE_URL}/glossario`,
+      lastModified: new Date(),
+      changeFrequency: 'monthly',
+      priority: 0.7,
+    },
+    {
+      url: `${BASE_URL}/faq`,
+      lastModified: new Date(),
+      changeFrequency: 'monthly',
+      priority: 0.6,
+    },
   ];
 
   // Páginas de cursos (estáticas)
@@ -73,5 +97,22 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   // Publicações não têm páginas individuais, apenas listagem em /publicacoes
   // A página de listagem já está incluída em staticPages
 
-  return [...staticPages, ...coursesPages, ...blogPages];
+  // Artigos da Lei 14.133 (dinâmicos)
+  let articlePages: MetadataRoute.Sitemap = [];
+  try {
+    const articles = await prisma.leiArticle.findMany({
+      select: { numero: true, updatedAt: true },
+    });
+
+    articlePages = articles.map((article) => ({
+      url: `${BASE_URL}/artigo/${article.numero}`,
+      lastModified: article.updatedAt,
+      changeFrequency: 'monthly',
+      priority: 0.7,
+    }));
+  } catch (error) {
+    console.error('Erro ao gerar sitemap dos artigos:', error);
+  }
+
+  return [...staticPages, ...coursesPages, ...blogPages, ...articlePages];
 }

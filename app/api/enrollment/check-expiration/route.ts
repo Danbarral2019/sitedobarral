@@ -41,8 +41,14 @@ export async function POST(request: NextRequest) {
         notificationSentAt: null,
       },
       include: {
-        user: true,
+        user: {
+          select: {
+            email: true,
+            name: true,
+          },
+        },
       },
+      take: 100,
     });
 
     const results = {

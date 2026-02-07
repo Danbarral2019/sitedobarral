@@ -310,21 +310,21 @@ export default function AreaRestritaPage() {
             <div className="flex items-center gap-2 lg:gap-3">
               <Link
                 href="/area-restrita/favoritos"
-                className="flex items-center gap-1.5 px-3 py-2 text-gray-700 hover:text-pink-600 hover:bg-pink-50 rounded-lg transition-colors font-medium text-sm"
+                className="flex items-center gap-1.5 px-3 py-2 text-gray-700 hover:text-pink-600 hover:bg-pink-50 rounded-lg transition-colors font-medium text-sm focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
               >
                 <Heart className="w-4 h-4" />
                 <span className="hidden lg:inline">Favoritos</span>
               </Link>
               <Link
                 href="/area-restrita/historico"
-                className="hidden lg:flex items-center gap-1.5 px-3 py-2 text-gray-700 hover:text-brand-600 hover:bg-brand-50 rounded-lg transition-colors font-medium text-sm"
+                className="hidden lg:flex items-center gap-1.5 px-3 py-2 text-gray-700 hover:text-brand-600 hover:bg-brand-50 rounded-lg transition-colors font-medium text-sm focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
               >
                 <Clock className="w-4 h-4" />
                 <span>Histórico</span>
               </Link>
               <button
                 onClick={handleLogout}
-                className="flex items-center gap-1.5 px-3 py-2 text-gray-700 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors font-medium text-sm"
+                className="flex items-center gap-1.5 px-3 py-2 text-gray-700 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors font-medium text-sm focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
               >
                 <LogOut className="w-4 h-4" />
                 <span className="hidden lg:inline">Sair</span>
@@ -579,28 +579,28 @@ export default function AreaRestritaPage() {
         <div className="flex items-center justify-around h-16">
           <Link
             href="/area-restrita"
-            className="flex flex-col items-center justify-center flex-1 h-full text-brand-600"
+            className="flex flex-col items-center justify-center flex-1 h-full text-brand-600 focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
           >
             <CheckCircle className="w-6 h-6 mb-1" />
             <span className="text-xs font-medium">Início</span>
           </Link>
           <Link
             href="/area-restrita/favoritos"
-            className="flex flex-col items-center justify-center flex-1 h-full text-gray-600 hover:text-pink-600"
+            className="flex flex-col items-center justify-center flex-1 h-full text-gray-600 hover:text-pink-600 focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
           >
             <Heart className="w-6 h-6 mb-1" />
             <span className="text-xs font-medium">Favoritos</span>
           </Link>
           <Link
             href="/area-restrita/assistente"
-            className="flex flex-col items-center justify-center flex-1 h-full text-gray-600 hover:text-purple-600"
+            className="flex flex-col items-center justify-center flex-1 h-full text-gray-600 hover:text-purple-600 focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
           >
             <MessageSquare className="w-6 h-6 mb-1" />
             <span className="text-xs font-medium">IA</span>
           </Link>
           <button
             onClick={handleLogout}
-            className="flex flex-col items-center justify-center flex-1 h-full text-gray-600 hover:text-red-600"
+            className="flex flex-col items-center justify-center flex-1 h-full text-gray-600 hover:text-red-600 focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
           >
             <LogOut className="w-6 h-6 mb-1" />
             <span className="text-xs font-medium">Sair</span>

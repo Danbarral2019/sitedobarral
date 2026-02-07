@@ -66,6 +66,7 @@ export const metadata: Metadata = {
     siteName: "Prof. Daniel Barral",
     locale: "pt_BR",
     type: "website",
+    images: [{ url: '/og-image.jpg', width: 1200, height: 630, alt: 'Prof. Daniel Barral' }],
   },
   twitter: {
     card: "summary_large_image",
@@ -83,6 +84,9 @@ export const metadata: Metadata = {
       'max-image-preview': 'large',
       'max-snippet': -1,
     },
+  },
+  alternates: {
+    canonical: '/',
   },
   verification: {
     // google: 'seu-codigo-verificacao-google',

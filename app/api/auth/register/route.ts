@@ -81,8 +81,15 @@ export async function POST(request: NextRequest) {
             authLogger.info({ userId: user.id, qrCodeId }, 'User already has enrollment with this QR Code');
             // Não criar duplicata, mas não falhar o registro
           } else {
-            // Verificar se ainda há vagas disponíveis
-            if (qrCode.maxUses && qrCode.usedCount >= qrCode.maxUses) {
+            // Incremento atômico do usedCount com verificação de limite (previne race condition)
+            const updated = await prisma.$executeRaw`
+              UPDATE "QRCode"
+              SET "usedCount" = "usedCount" + 1, "updatedAt" = NOW()
+              WHERE code = ${qrCodeId}
+              AND ("maxUses" IS NULL OR "usedCount" < "maxUses")
+            `;
+
+            if (updated === 0) {
               authLogger.warn({ qrCodeId, maxUses: qrCode.maxUses }, 'QR Code reached max uses limit');
               // Não criar enrollment mas não falhar o registro
             } else {
@@ -99,12 +106,6 @@ export async function POST(request: NextRequest) {
                   qrCodeId: qrCode.id,
                   expiresAt: expirationDate,
                 },
-              });
-
-              // Incrementar contador de uso do QR Code
-              await prisma.qRCode.update({
-                where: { code: qrCodeId },
-                data: { usedCount: { increment: 1 } },
               });
 
               authLogger.info(

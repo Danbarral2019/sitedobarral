@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { verifyToken } from '@/lib/auth';
 import { readFile } from 'fs/promises';
-import { join } from 'path';
+import { join, resolve } from 'path';
 import { checkAccessStatus } from '@/lib/enrollment-utils';
 import { handleApiError } from '@/lib/errors/error-handler';
 import { AuthenticationError, AuthorizationError, NotFoundError } from '@/lib/errors/api-error';
@@ -119,6 +119,11 @@ async function downloadFile(document: Record<string, unknown>): Promise<NextResp
   try {
     const uploadsDir = join(process.cwd(), 'public', 'uploads');
     const filePath = join(uploadsDir, document.url);
+
+    // Validação de path traversal
+    if (!resolve(filePath).startsWith(resolve(uploadsDir))) {
+      throw new AuthorizationError('Acesso negado ao arquivo');
+    }
 
     // Ler arquivo
     const fileBuffer = await readFile(filePath);

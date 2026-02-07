@@ -4,6 +4,12 @@ import { randomUUID } from 'crypto';
 import { queryGeminiText } from '@/lib/gemini/cached-client';
 import { LEI_14133_ARTIGOS } from '@/data/lei-14133-artigos';
 import { findRelatedArticles } from '@/data/lei-14133-cross-references';
+import { rateLimit } from '@/lib/rate-limit';
+import { RateLimitError, ValidationError, NotFoundError } from '@/lib/errors/api-error';
+import { handleApiError } from '@/lib/errors/error-handler';
+import { apiLogger } from '@/lib/logger';
+
+const geminiLimiter = rateLimit({ interval: 60000 });
 
 interface ChatRequest {
   question: string;
@@ -24,24 +30,24 @@ export async function POST(
   context: RouteContext
 ) {
   try {
+    try {
+      await geminiLimiter.check(request, 5);
+    } catch {
+      throw new RateLimitError();
+    }
+
     // Handle both Promise and non-Promise params (Next.js 15 inconsistency)
     const resolvedParams = await Promise.resolve(context.params);
     const articleNumber = resolvedParams.numero;
-    console.log(`[Chat API] Iniciando processamento para artigo: ${articleNumber}`);
+    apiLogger.info({ articleNumber }, 'Chat API processing started');
     const body = await request.json() as ChatRequest;
 
     if (!articleNumber) {
-      return NextResponse.json(
-        { error: 'Número do artigo é obrigatório' },
-        { status: 400 }
-      );
+      throw new ValidationError('Numero do artigo e obrigatorio');
     }
 
     if (!body.question || body.question.trim().length === 0) {
-      return NextResponse.json(
-        { error: 'Pergunta é obrigatória' },
-        { status: 400 }
-      );
+      throw new ValidationError('Pergunta e obrigatoria');
     }
 
     // Gerar ou usar conversationId existente
@@ -64,7 +70,7 @@ export async function POST(
       });
       // Inverter para ordem cronológica
       conversationHistory = previousMessages.reverse().filter(m => m.answer !== null) as { question: string; answer: string }[];
-      console.log(`[Chat API] Follow-up: ${conversationHistory.length} mensagens anteriores encontradas`);
+      apiLogger.debug({ conversationId: body.conversationId, historyCount: conversationHistory.length }, 'Follow-up conversation history loaded');
     }
 
     // Buscar documentos do artigo atual
@@ -101,8 +107,7 @@ export async function POST(
 
     // BUSCA CROSS-ARTICLE: Detectar se a pergunta envolve outros temas
     const { articles: relatedArticleNumbers, topics: matchedTopics } = findRelatedArticles(body.question, articleNumber);
-    console.log(`[Chat API] Cross-reference: Tópicos detectados: ${matchedTopics.join(', ') || 'nenhum'}`);
-    console.log(`[Chat API] Cross-reference: Artigos relacionados: ${relatedArticleNumbers.join(', ') || 'nenhum'}`);
+    apiLogger.debug({ topics: matchedTopics, relatedArticles: relatedArticleNumbers }, 'Cross-reference analysis');
 
     // Buscar artigos relacionados da Lei 14.133
     const relatedArticles = relatedArticleNumbers
@@ -142,7 +147,7 @@ export async function POST(
           { uploadedAt: 'desc' },
         ],
       });
-      console.log(`[Chat API] Cross-reference: ${crossReferenceDocs.length} documentos adicionais encontrados`);
+      apiLogger.debug({ crossRefDocsCount: crossReferenceDocs.length }, 'Cross-reference documents found');
     }
 
     // Criar IDs de contexto (para futuro uso na IA)
@@ -178,10 +183,7 @@ export async function POST(
     const article = LEI_14133_ARTIGOS[articleNumber];
 
     if (!article) {
-      return NextResponse.json(
-        { error: `Artigo ${articleNumber} não encontrado` },
-        { status: 404 }
-      );
+      throw new NotFoundError(`Artigo ${articleNumber}`);
     }
 
     // Construir contexto rico para o Gemini
@@ -275,7 +277,7 @@ ${isFollowUp ? `9. Esta é uma pergunta de FOLLOW-UP. O usuário está continuan
 Responda agora:`;
 
     // Consultar Gemini com caching
-    console.log(`🤖 Gemini Query for Article ${articleNumber}...`);
+    apiLogger.info({ articleNumber }, 'Querying Gemini for article chat');
     const geminiResult = await queryGeminiText(prompt, {
       model: 'gemini-2.0-flash',
       temperature: 0.7,
@@ -303,10 +305,13 @@ Responda agora:`;
 
     // Preparar fontes para resposta (incluindo docs cross-reference)
     const allDocs = [...relevantDocs, ...crossReferenceDocs];
-    // Remover duplicados por ID
-    const uniqueDocs = allDocs.filter((doc, index, self) =>
-      index === self.findIndex(d => d.id === doc.id)
-    );
+    // Remover duplicados por ID (O(n) com Set)
+    const seenIds = new Set<string>();
+    const uniqueDocs = allDocs.filter(doc => {
+      if (seenIds.has(doc.id)) return false;
+      seenIds.add(doc.id);
+      return true;
+    });
 
     const sources = uniqueDocs.map(doc => ({
       id: doc.id,
@@ -315,10 +320,7 @@ Responda agora:`;
       excerpt: doc.summary || doc.description || 'Sem resumo disponível',
     }));
 
-    console.log(`✅ Gemini response generated (${geminiResult.latency}ms, cached: ${geminiResult.cached})`);
-    if (hasCrossReference) {
-      console.log(`✅ Cross-reference: ${relatedArticles.length} artigos e ${crossReferenceDocs.length} docs adicionais incluídos`);
-    }
+    apiLogger.info({ articleNumber, latency: geminiResult.latency, cached: geminiResult.cached, crossRefArticles: relatedArticles.length, crossRefDocs: crossReferenceDocs.length }, 'Gemini response generated');
 
     return NextResponse.json({
       conversationId,
@@ -347,18 +349,7 @@ Responda agora:`;
     });
 
   } catch (error) {
-    console.error('[Chat API] ERRO DETALHADO:', error);
-    console.error('[Chat API] Error name:', error instanceof Error ? error.name : 'Unknown');
-    console.error('[Chat API] Error message:', error instanceof Error ? error.message : String(error));
-    console.error('[Chat API] Error stack:', error instanceof Error ? error.stack : 'No stack');
-    return NextResponse.json(
-      {
-        error: 'Erro ao processar pergunta',
-        details: error instanceof Error ? error.message : String(error),
-        name: error instanceof Error ? error.name : 'Unknown'
-      },
-      { status: 500 }
-    );
+    return handleApiError(error);
   }
 }
 
@@ -375,10 +366,7 @@ export async function GET(
     const conversationId = searchParams.get('conversationId');
 
     if (!conversationId) {
-      return NextResponse.json(
-        { error: 'conversationId é obrigatório' },
-        { status: 400 }
-      );
+      throw new ValidationError('conversationId e obrigatorio');
     }
 
     // Buscar todas as perguntas desta conversa
@@ -417,14 +405,6 @@ export async function GET(
     });
 
   } catch (error) {
-    console.error('[Chat API GET] ERRO DETALHADO:', error);
-    console.error('[Chat API GET] Error message:', error instanceof Error ? error.message : String(error));
-    return NextResponse.json(
-      {
-        error: 'Erro ao buscar histórico de conversa',
-        details: error instanceof Error ? error.message : String(error)
-      },
-      { status: 500 }
-    );
+    return handleApiError(error);
   }
 }

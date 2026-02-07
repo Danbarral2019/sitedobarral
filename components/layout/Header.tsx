@@ -61,7 +61,7 @@ export const Header = memo(function Header() {
           <div className="hidden md:flex items-center space-x-6 lg:space-x-8">
             <Link
               href="/"
-              className="flex items-center space-x-1 text-white/90 hover:text-white transition-colors font-poppins text-sm"
+              className="flex items-center space-x-1 text-white/90 hover:text-white transition-colors font-poppins text-sm focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-brand-600 rounded"
             >
               <Home className="w-4 h-4" />
               <span>Início</span>
@@ -69,7 +69,7 @@ export const Header = memo(function Header() {
 
             <Link
               href="/sobre"
-              className="flex items-center space-x-1 text-white/90 hover:text-white transition-colors font-poppins text-sm"
+              className="flex items-center space-x-1 text-white/90 hover:text-white transition-colors font-poppins text-sm focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-brand-600 rounded"
             >
               <User className="w-4 h-4" />
               <span>Sobre</span>
@@ -78,7 +78,9 @@ export const Header = memo(function Header() {
             <div className="relative" ref={coursesDropdownRef} suppressHydrationWarning>
               <button
                 onClick={() => setIsCoursesOpen(!isCoursesOpen)}
-                className="flex items-center space-x-1 text-white/90 hover:text-white transition-colors font-poppins text-sm"
+                aria-expanded={isCoursesOpen}
+                aria-haspopup="true"
+                className="flex items-center space-x-1 text-white/90 hover:text-white transition-colors font-poppins text-sm focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-brand-600 rounded"
               >
                 <BookOpen className="w-4 h-4" />
                 <span>Cursos</span>
@@ -111,7 +113,7 @@ export const Header = memo(function Header() {
 
             <Link
               href="/blog"
-              className="flex items-center space-x-1 text-white/90 hover:text-white transition-colors font-poppins text-sm"
+              className="flex items-center space-x-1 text-white/90 hover:text-white transition-colors font-poppins text-sm focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-brand-600 rounded"
             >
               <FileText className="w-4 h-4" />
               <span>Blog</span>
@@ -119,7 +121,7 @@ export const Header = memo(function Header() {
 
             <Link
               href="/publicacoes"
-              className="flex items-center space-x-1 text-white/90 hover:text-white transition-colors font-poppins text-sm"
+              className="flex items-center space-x-1 text-white/90 hover:text-white transition-colors font-poppins text-sm focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-brand-600 rounded"
             >
               <Award className="w-4 h-4" />
               <span>Publicações</span>
@@ -127,7 +129,7 @@ export const Header = memo(function Header() {
 
             <Link
               href="/contato"
-              className="flex items-center space-x-1 text-white/90 hover:text-white transition-colors font-poppins text-sm"
+              className="flex items-center space-x-1 text-white/90 hover:text-white transition-colors font-poppins text-sm focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-brand-600 rounded"
             >
               <Mail className="w-4 h-4" />
               <span>Contato</span>
@@ -135,7 +137,7 @@ export const Header = memo(function Header() {
 
             <Link
               href="/validar-acesso"
-              className="flex items-center space-x-1 bg-white/10 hover:bg-white/20 px-4 py-2 rounded-lg text-white transition-colors font-poppins text-sm"
+              className="flex items-center space-x-1 bg-white/10 hover:bg-white/20 px-4 py-2 rounded-lg text-white transition-colors font-poppins text-sm focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-brand-600"
             >
               <LogIn className="w-4 h-4" />
               <span>Área do Aluno</span>

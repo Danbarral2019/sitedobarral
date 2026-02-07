@@ -24,6 +24,8 @@ export default function FAQPage() {
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [activeCategory, setActiveCategory] = useState<string | null>(null);
+  const [isSearching, setIsSearching] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   // Buscar todas as FAQs ao carregar
   useEffect(() => {
@@ -33,13 +35,15 @@ export default function FAQPage() {
   const fetchFAQs = async () => {
     try {
       setLoading(true);
+      setError(null);
       const response = await fetch('/api/faq');
       const data = await response.json();
       setFaqs(data.faqs || []);
       setFilteredFaqs(data.faqs || []);
       setCategories(data.categories || []);
-    } catch (error) {
-      console.error('Erro ao buscar FAQs:', error);
+    } catch (err) {
+      console.error('Erro ao buscar FAQs:', err);
+      setError('Erro ao carregar perguntas. Tente recarregar a página.');
     } finally {
       setLoading(false);
     }
@@ -56,11 +60,16 @@ export default function FAQPage() {
     }
 
     try {
+      setIsSearching(true);
+      setError(null);
       const response = await fetch(`/api/faq/search?q=${encodeURIComponent(query)}`);
       const data = await response.json();
       setFilteredFaqs(data.faqs || []);
-    } catch (error) {
-      console.error('Erro ao buscar:', error);
+    } catch (err) {
+      console.error('Erro ao buscar:', err);
+      setError('Erro ao realizar a busca. Tente novamente.');
+    } finally {
+      setIsSearching(false);
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [faqs, activeCategory]);
@@ -117,6 +126,21 @@ export default function FAQPage() {
               activeCategory={activeCategory}
               onCategoryChange={handleCategoryChange}
             />
+          </div>
+        )}
+
+        {/* Error Message */}
+        {error && (
+          <div role="alert" className="bg-red-50 border-2 border-red-500 rounded-lg p-4 mb-6">
+            <p className="text-red-800 font-medium">{error}</p>
+          </div>
+        )}
+
+        {/* Search Loading Indicator */}
+        {isSearching && (
+          <div className="flex items-center justify-center py-4 mb-4">
+            <Loader2 className="h-5 w-5 animate-spin text-brand-600" />
+            <span className="ml-2 text-gray-600 text-sm">Buscando...</span>
           </div>
         )}
 

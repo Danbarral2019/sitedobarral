@@ -87,13 +87,13 @@ export default function ContatoPage() {
                 </div>
 
                 {error && (
-                  <div className="bg-red-50 border-2 border-red-500 rounded-xl p-4 mb-6">
+                  <div role="alert" className="bg-red-50 border-2 border-red-500 rounded-xl p-4 mb-6">
                     <p className="text-red-800 font-medium">{error}</p>
                   </div>
                 )}
 
                 {isSubmitted ? (
-                  <div className="bg-gradient-to-r from-brand-50 to-brand-100 border-2 border-brand-500 rounded-2xl p-8 text-center">
+                  <div role="alert" className="bg-gradient-to-r from-brand-50 to-brand-100 border-2 border-brand-500 rounded-2xl p-8 text-center">
                     <div className="w-20 h-20 bg-gradient-to-br from-brand-500 to-brand-600 rounded-full flex items-center justify-center mx-auto mb-4 shadow-lg">
                       <CheckCircle className="w-12 h-12 text-white" />
                     </div>
@@ -105,7 +105,7 @@ export default function ContatoPage() {
                     <div className="grid md:grid-cols-2 gap-6">
                       <div>
                         <label htmlFor="name" className="block text-sm font-semibold text-gray-900 mb-2">
-                          Nome completo *
+                          Nome completo <span className="text-red-500">*</span>
                         </label>
                         <input
                           type="text"
@@ -120,7 +120,7 @@ export default function ContatoPage() {
 
                       <div>
                         <label htmlFor="email" className="block text-sm font-semibold text-gray-900 mb-2">
-                          E-mail *
+                          E-mail <span className="text-red-500">*</span>
                         </label>
                         <input
                           type="email"
@@ -176,7 +176,7 @@ export default function ContatoPage() {
 
                     <div>
                       <label htmlFor="message" className="block text-sm font-semibold text-gray-900 mb-2">
-                        {formData.courseInterest === 'depoimento' ? 'Seu Depoimento *' : 'Mensagem *'}
+                        {formData.courseInterest === 'depoimento' ? 'Seu Depoimento' : 'Mensagem'} <span className="text-red-500">*</span>
                       </label>
                       <textarea
                         id="message"

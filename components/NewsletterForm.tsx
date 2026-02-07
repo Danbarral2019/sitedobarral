@@ -91,11 +91,13 @@ export default function NewsletterForm({
     return (
       <form onSubmit={handleSubmit} className={`flex flex-col sm:flex-row gap-4 ${className}`}>
         {error && (
-          <div className="w-full bg-red-50 border-2 border-red-500 rounded-lg p-3">
+          <div role="alert" className="w-full bg-red-50 border-2 border-red-500 rounded-lg p-3">
             <p className="text-red-800 text-sm font-medium">{error}</p>
           </div>
         )}
+        <label htmlFor="newsletter-email-inline" className="sr-only">Email para newsletter</label>
         <input
+          id="newsletter-email-inline"
           type="email"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
@@ -128,14 +130,16 @@ export default function NewsletterForm({
   return (
     <div className={className}>
       {error && (
-        <div className="bg-red-50 border-2 border-red-500 rounded-lg p-3 mb-4">
+        <div role="alert" className="bg-red-50 border-2 border-red-500 rounded-lg p-3 mb-4">
           <p className="text-red-800 text-sm font-medium">{error}</p>
         </div>
       )}
 
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>
+          <label htmlFor="newsletter-email" className="sr-only">Email para newsletter</label>
           <input
+            id="newsletter-email"
             type="email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
@@ -147,7 +151,9 @@ export default function NewsletterForm({
         </div>
 
         <div>
+          <label htmlFor="newsletter-name" className="sr-only">Nome (opcional)</label>
           <input
+            id="newsletter-name"
             type="text"
             value={name}
             onChange={(e) => setName(e.target.value)}

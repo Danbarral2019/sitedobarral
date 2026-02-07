@@ -5,9 +5,20 @@ import { writeFile, mkdir } from 'fs/promises';
 import { join } from 'path';
 import { randomBytes } from 'crypto';
 import { courses } from '@/data/courses';
+import { rateLimit } from '@/lib/rate-limit';
+import { RateLimitError } from '@/lib/errors/api-error';
+import { handleApiError } from '@/lib/errors/error-handler';
+
+const uploadLimiter = rateLimit({ interval: 60000 });
 
 export const POST = withAdminAuth(async (request: NextRequest) => {
   try {
+    try {
+      await uploadLimiter.check(request, 10);
+    } catch {
+      throw new RateLimitError();
+    }
+
     const formData = await request.formData();
     const file = formData.get('file') as File;
     const courseId = formData.get('courseId') as string;
@@ -100,6 +111,9 @@ export const POST = withAdminAuth(async (request: NextRequest) => {
       isAllCourses,
     });
   } catch (error) {
+    if (error instanceof RateLimitError) {
+      return handleApiError(error);
+    }
     console.error('Erro ao fazer upload:', error);
     return NextResponse.json(
       { error: 'Erro ao fazer upload do arquivo' },

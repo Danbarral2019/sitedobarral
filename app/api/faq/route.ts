@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { withCache, CacheKeys, CACHE_TTL } from '@/lib/cache/redis-client';
+import { handleApiError } from '@/lib/errors/error-handler';
 
 import { Prisma } from '@prisma/client';
 
@@ -49,13 +50,14 @@ export async function GET(request: NextRequest) {
           ],
         });
 
-        // Buscar todas as categorias disponíveis
-        const allFaqs = await prisma.fAQ.findMany({
-          where: { isPublished: true },
-          select: { category: true },
-        });
-
-        const categories = [...new Set(allFaqs.map((f) => f.category))].sort();
+        // Extrair categorias: se filtrado por categoria, precisamos buscar todas;
+        // se sem filtro, extraímos do resultado já obtido (evita query adicional)
+        const categories = category
+          ? [...new Set((await prisma.fAQ.findMany({
+              where: { isPublished: true },
+              select: { category: true },
+            })).map((f) => f.category))].sort()
+          : [...new Set(faqs.map((f) => f.category))].sort();
 
         return {
           faqs,
@@ -69,10 +71,6 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json(result);
   } catch (error) {
-    console.error('Error fetching FAQs:', error);
-    return NextResponse.json(
-      { error: 'Erro ao buscar perguntas frequentes' },
-      { status: 500 }
-    );
+    return handleApiError(error);
   }
 }

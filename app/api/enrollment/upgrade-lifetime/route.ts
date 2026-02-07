@@ -1,71 +1,43 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
-import jwt from 'jsonwebtoken';
-
-const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key-change-in-production';
-
-interface JWTPayload {
-  userId: string;
-  email: string;
-  role: string;
-}
+import { verifyAuth } from '@/lib/auth';
+import { handleApiError } from '@/lib/errors/error-handler';
+import { AuthenticationError, ValidationError, NotFoundError } from '@/lib/errors/api-error';
+import { apiLogger } from '@/lib/logger';
 
 export async function POST(request: NextRequest) {
   try {
-    // Obter token do cookie
-    const token = request.cookies.get('auth-token')?.value;
+    // Verificar autenticação usando função centralizada
+    const auth = await verifyAuth(request);
 
-    if (!token) {
-      return NextResponse.json(
-        { error: 'Não autenticado' },
-        { status: 401 }
-      );
-    }
-
-    // Verificar e decodificar token
-    let decoded: JWTPayload;
-    try {
-      decoded = jwt.verify(token, JWT_SECRET) as JWTPayload;
-    } catch {
-      return NextResponse.json(
-        { error: 'Token inválido ou expirado' },
-        { status: 401 }
-      );
+    if (!auth.valid || !auth.user) {
+      throw new AuthenticationError();
     }
 
     const body = await request.json();
     const { courseId, price } = body;
 
     if (!courseId) {
-      return NextResponse.json(
-        { error: 'ID do curso é obrigatório' },
-        { status: 400 }
-      );
+      throw new ValidationError('ID do curso é obrigatório');
     }
 
     // Buscar enrollment existente
     const enrollment = await prisma.enrollment.findUnique({
       where: {
         userId_courseId: {
-          userId: decoded.userId,
+          userId: auth.user.userId,
           courseId,
         },
       },
     });
 
     if (!enrollment) {
-      return NextResponse.json(
-        { error: 'Matrícula não encontrada' },
-        { status: 404 }
-      );
+      throw new NotFoundError('Matrícula');
     }
 
     // Verificar se já é vitalício
     if (enrollment.isLifetime) {
-      return NextResponse.json(
-        { error: 'Você já tem acesso vitalício a este curso' },
-        { status: 400 }
-      );
+      throw new ValidationError('Você já tem acesso vitalício a este curso');
     }
 
     // Atualizar enrollment para vitalício
@@ -83,7 +55,7 @@ export async function POST(request: NextRequest) {
     try {
       await prisma.accessLog.create({
         data: {
-          userId: decoded.userId,
+          userId: auth.user.userId,
           courseId,
           action: 'upgrade_lifetime',
           ip: request.headers.get('x-forwarded-for') || request.headers.get('x-real-ip') || null,
@@ -91,8 +63,10 @@ export async function POST(request: NextRequest) {
         },
       });
     } catch (logError) {
-      console.error('Erro ao registrar log:', logError);
+      apiLogger.error({ err: logError, userId: auth.user.userId }, 'Erro ao registrar log de upgrade');
     }
+
+    apiLogger.info({ userId: auth.user.userId, courseId }, 'Lifetime upgrade successful');
 
     return NextResponse.json(
       {
@@ -108,10 +82,6 @@ export async function POST(request: NextRequest) {
       { status: 200 }
     );
   } catch (error) {
-    console.error('Upgrade error:', error);
-    return NextResponse.json(
-      { error: 'Erro ao processar upgrade' },
-      { status: 500 }
-    );
+    return handleApiError(error);
   }
 }

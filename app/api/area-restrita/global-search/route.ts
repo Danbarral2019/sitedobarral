@@ -37,10 +37,17 @@ export async function GET(request: NextRequest) {
 
     const isAdmin = authPayload.role === 'admin';
 
-    // Fetch user with enrollments from database
+    // Fetch user with enrollments from database (select only needed fields)
     const user = await prisma.user.findUnique({
       where: { id: authPayload.userId },
-      include: { enrollments: true },
+      select: {
+        id: true,
+        enrollments: {
+          select: {
+            courseId: true,
+          },
+        },
+      },
     });
 
     if (!user) {

@@ -2,6 +2,10 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { rateLimiters } from '@/lib/rate-limit';
 import { sendContactNotification } from '@/lib/email';
+import { verifyAuth } from '@/lib/auth';
+import { handleApiError } from '@/lib/errors/error-handler';
+import { AuthenticationError, AuthorizationError, ValidationError } from '@/lib/errors/api-error';
+import { apiLogger } from '@/lib/logger';
 
 
 // POST - Enviar mensagem de contato
@@ -21,19 +25,13 @@ export async function POST(request: NextRequest) {
 
     // Validações básicas
     if (!name || !email || !message) {
-      return NextResponse.json(
-        { error: 'Nome, e-mail e mensagem são obrigatórios' },
-        { status: 400 }
-      );
+      throw new ValidationError('Nome, e-mail e mensagem são obrigatórios');
     }
 
     // Validação de e-mail
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(email)) {
-      return NextResponse.json(
-        { error: 'E-mail inválido' },
-        { status: 400 }
-      );
+      throw new ValidationError('E-mail inválido');
     }
 
     // Salvar no banco de dados
@@ -78,7 +76,7 @@ export async function POST(request: NextRequest) {
           },
         });
       } catch (error) {
-        console.error('Erro ao criar testimonial:', error);
+        apiLogger.error({ err: error, contactId: contact.id }, 'Erro ao criar testimonial');
         // Não propaga o erro - o contato já foi salvo
       }
     }
@@ -94,7 +92,7 @@ export async function POST(request: NextRequest) {
       },
       contact.id
     ).catch((error) => {
-      console.error('Erro ao enviar notificação de contato:', error);
+      apiLogger.error({ err: error, contactId: contact.id }, 'Erro ao enviar notificacao de contato');
       // Não propaga o erro - o contato já foi salvo com sucesso
     });
 
@@ -109,26 +107,26 @@ export async function POST(request: NextRequest) {
       { status: 201 }
     );
   } catch (error) {
-    console.error('Erro ao processar contato:', error);
-    return NextResponse.json(
-      { error: 'Erro ao enviar mensagem. Tente novamente.' },
-      { status: 500 }
-    );
+    return handleApiError(error);
   }
 }
 
 // GET - Listar contatos (admin apenas)
 export async function GET(request: NextRequest) {
   try {
-    // Verificar autenticação admin
-    const token = request.cookies.get('auth-token')?.value;
-    if (!token) {
-      return NextResponse.json({ error: 'Não autorizado' }, { status: 401 });
+    // Verificar autenticação e autorização admin
+    const auth = await verifyAuth(request);
+    if (!auth.valid || !auth.user) {
+      throw new AuthenticationError();
+    }
+    if (auth.user.role !== 'admin') {
+      throw new AuthorizationError();
     }
 
     const { searchParams } = new URL(request.url);
     const isRead = searchParams.get('isRead');
-    const limit = parseInt(searchParams.get('limit') || '100');
+    const limitParam = parseInt(searchParams.get('limit') || '50');
+    const limit = Math.max(1, Math.min(100, isNaN(limitParam) ? 50 : limitParam));
 
     const where: Record<string, unknown> = {};
     if (isRead !== null && isRead !== 'all') {
@@ -148,30 +146,26 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json({ contacts, stats });
   } catch (error) {
-    console.error('Erro ao listar contatos:', error);
-    return NextResponse.json(
-      { error: 'Erro ao carregar contatos' },
-      { status: 500 }
-    );
+    return handleApiError(error);
   }
 }
 
 // PATCH - Marcar contato como lido/não lido (admin apenas)
 export async function PATCH(request: NextRequest) {
   try {
-    // Verificar autenticação admin
-    const token = request.cookies.get('auth-token')?.value;
-    if (!token) {
-      return NextResponse.json({ error: 'Não autorizado' }, { status: 401 });
+    // Verificar autenticação e autorização admin
+    const auth = await verifyAuth(request);
+    if (!auth.valid || !auth.user) {
+      throw new AuthenticationError();
+    }
+    if (auth.user.role !== 'admin') {
+      throw new AuthorizationError();
     }
 
     const { id, isRead } = await request.json();
 
     if (!id) {
-      return NextResponse.json(
-        { error: 'ID do contato é obrigatório' },
-        { status: 400 }
-      );
+      throw new ValidationError('ID do contato é obrigatório');
     }
 
     const contact = await prisma.contactForm.update({
@@ -184,46 +178,40 @@ export async function PATCH(request: NextRequest) {
       contact,
     });
   } catch (error) {
-    console.error('Erro ao atualizar contato:', error);
-    return NextResponse.json(
-      { error: 'Erro ao atualizar contato' },
-      { status: 500 }
-    );
+    return handleApiError(error);
   }
 }
 
 // DELETE - Deletar contato (admin apenas)
 export async function DELETE(request: NextRequest) {
   try {
-    // Verificar autenticação admin
-    const token = request.cookies.get('auth-token')?.value;
-    if (!token) {
-      return NextResponse.json({ error: 'Não autorizado' }, { status: 401 });
+    // Verificar autenticação e autorização admin
+    const auth = await verifyAuth(request);
+    if (!auth.valid || !auth.user) {
+      throw new AuthenticationError();
+    }
+    if (auth.user.role !== 'admin') {
+      throw new AuthorizationError();
     }
 
     const { searchParams } = new URL(request.url);
     const id = searchParams.get('id');
 
     if (!id) {
-      return NextResponse.json(
-        { error: 'ID do contato é obrigatório' },
-        { status: 400 }
-      );
+      throw new ValidationError('ID do contato é obrigatório');
     }
 
     await prisma.contactForm.delete({
       where: { id },
     });
 
+    apiLogger.info({ contactId: id, adminUserId: auth.user.userId }, 'Contact deleted');
+
     return NextResponse.json({
       success: true,
       message: 'Contato deletado com sucesso',
     });
   } catch (error) {
-    console.error('Erro ao deletar contato:', error);
-    return NextResponse.json(
-      { error: 'Erro ao deletar contato' },
-      { status: 500 }
-    );
+    return handleApiError(error);
   }
 }

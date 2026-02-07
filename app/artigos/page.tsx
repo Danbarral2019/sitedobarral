@@ -32,6 +32,7 @@ export default function ArtigosIndexPage() {
   const [mode, setMode] = useState<NavigationMode>('articles');
   const [selectedGroup, setSelectedGroup] = useState<string | null>(null);
   const [articleSearch, setArticleSearch] = useState('');
+  const [fetchError, setFetchError] = useState<string | null>(null);
 
   // Buscar artigos do banco de dados ao montar componente
   useEffect(() => {
@@ -42,11 +43,14 @@ export default function ArtigosIndexPage() {
           const data = await response.json();
           if (data.success && data.artigos) {
             setArtigos(data.artigos);
+            setFetchError(null);
           }
+        } else {
+          setFetchError('Não foi possível carregar os artigos do servidor. Exibindo dados locais.');
         }
       } catch (error) {
         console.error('Erro ao buscar artigos:', error);
-        // Mantém fallback em caso de erro
+        setFetchError('Não foi possível carregar os artigos do servidor. Exibindo dados locais.');
       }
     }
     fetchArtigos();
@@ -130,6 +134,13 @@ export default function ArtigosIndexPage() {
       </div>
 
       <div className="max-w-6xl mx-auto px-4 py-8">
+        {/* Error State */}
+        {fetchError && (
+          <div role="alert" className="bg-amber-50 border-2 border-amber-400 rounded-lg p-4 mb-6">
+            <p className="text-amber-800 font-medium">{fetchError}</p>
+          </div>
+        )}
+
         {/* Resultados de Busca */}
         {hasSearch ? (
           <div className="bg-white rounded-2xl shadow-lg border-2 border-gray-200 p-8">

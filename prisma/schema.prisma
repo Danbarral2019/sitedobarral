@@ -127,6 +127,7 @@ model Document {
   @@index([notifiedAt])
   @@index([courseId, notifiedAt])
   @@index([isCommon]) // Índice para buscar documentos comuns rapidamente
+  @@index([isCommon, isPublic]) // Índice composto para filtrar documentos comuns e públicos
   @@index([category, onNumber, onYear]) // Índice para ordenação numérica de ONs
   @@index([category, acordaoNumero, acordaoAno]) // Índice para ordenação numérica de Acórdãos TCU
   @@index([reviewed]) // Índice para buscar documentos não revisados
@@ -162,6 +163,9 @@ model Document {
 
   // Relacionamento com chunks (embeddings)
   chunks DocumentChunk[]
+
+  // Relacionamento com favoritos
+  favorites Favorite[]
 
   @@index([embeddingStatus]) // Índice para buscar documentos por status de embedding
 }
@@ -275,6 +279,7 @@ model Enrollment {
   @@index([userId])                                      // Para buscar matrículas por usuário
   @@index([courseId])                                    // Para buscar matrículas por curso
   @@index([userId, courseId, isLifetime])                // Para verificações de acesso
+  @@index([expiresAt, isLifetime])                        // Para queries de expiração
   @@index([expiresAt, isLifetime, notificationSentAt])   // Para cron job de notificações
   @@index([isLifetime])                                  // Para estatísticas de upgrades
   @@index([enrolledAt])                                  // Para ordenação por data
@@ -306,7 +311,9 @@ model Favorite {
 
   // Suporta dois tipos de favoritos: documentos OU atos normativos
   documentId         String?  // ID do documento (se for documento)
+  document           Document? @relation(fields: [documentId], references: [id], onDelete: SetNull)
   legislativeActId   String?  // ID do ato normativo (se for ato)
+  legislativeAct     LegislativeAct? @relation(fields: [legislativeActId], references: [id], onDelete: SetNull)
 
   courseId           String?  // Para facilitar filtros por curso (apenas para documentos)
   createdAt          DateTime @default(now())
@@ -637,6 +644,9 @@ model LegislativeAct {
   updatedAt   DateTime @updatedAt
   createdBy   String?  // Email do admin
 
+  // Relacionamento com favoritos
+  favorites Favorite[]
+
   // Índices para otimização
   @@index([type])
   @@index([issuer])
@@ -678,6 +688,9 @@ model FAQ {
   relatedDocs  String? // IDs de documentos
   keywords     String? // Palavras-chave para busca
 
+  // Relacionamento com feedbacks
+  feedbacks FAQFeedback[]
+
   // Auditoria
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
@@ -693,6 +706,7 @@ model FAQ {
 model FAQFeedback {
   id          String   @id @default(uuid())
   faqId       String
+  faq         FAQ      @relation(fields: [faqId], references: [id], onDelete: Cascade)
 
   wasHelpful  Boolean  // true = útil, false = não útil
   comment     String?  // Feedback opcional do usuário

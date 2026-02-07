@@ -3,6 +3,12 @@ import { LEI_14133_ARTIGOS } from '@/data/lei-14133-artigos';
 import { queryGeminiText } from '@/lib/gemini/cached-client';
 import { prisma } from '@/lib/prisma';
 import { ENUNCIADOS, buscarEnunciados } from '@/data/enunciados';
+import { rateLimit } from '@/lib/rate-limit';
+import { RateLimitError, ValidationError } from '@/lib/errors/api-error';
+import { handleApiError } from '@/lib/errors/error-handler';
+import { apiLogger } from '@/lib/logger';
+
+const geminiLimiter = rateLimit({ interval: 60000 });
 
 interface SearchResult {
   articleNumber: string;
@@ -63,14 +69,17 @@ export async function POST(request: NextRequest) {
   const startTime = Date.now();
 
   try {
+    try {
+      await geminiLimiter.check(request, 5);
+    } catch {
+      throw new RateLimitError();
+    }
+
     const body = await request.json();
     const { query } = body;
 
     if (!query || query.trim().length < 3) {
-      return NextResponse.json(
-        { error: 'Query deve ter pelo menos 3 caracteres' },
-        { status: 400 }
-      );
+      throw new ValidationError('Query deve ter pelo menos 3 caracteres');
     }
 
     const searchQuery = query.trim();
@@ -105,7 +114,7 @@ Regras:
 - Ordene por relevancia (maior score primeiro)
 - Seja preciso - nao inclua artigos que nao sao relevantes`;
 
-    console.log(`[Search API] Buscando: "${searchQuery}"`);
+    apiLogger.info({ query: searchQuery }, 'Lei 14133 search initiated');
 
     const geminiResult = await queryGeminiText(prompt, {
       model: 'gemini-2.0-flash',
@@ -127,8 +136,7 @@ Regras:
 
       parsedResponse = JSON.parse(cleanResponse);
     } catch (parseError) {
-      console.error('[Search API] Erro ao parsear resposta:', parseError);
-      console.log('[Search API] Resposta bruta:', geminiResult.response);
+      apiLogger.error({ err: parseError, rawResponse: geminiResult.response }, 'Erro ao parsear resposta Gemini');
 
       // Fallback: busca simples por texto
       return NextResponse.json({
@@ -272,10 +280,13 @@ Regras:
       }),
     ];
 
-    // Remover duplicatas por ID
-    const uniqueDocuments = documentResults.filter((doc, index, self) =>
-      index === self.findIndex(d => d.id === doc.id)
-    );
+    // Remover duplicatas por ID (O(n) com Set)
+    const seenDocIds = new Set<string>();
+    const uniqueDocuments = documentResults.filter(doc => {
+      if (seenDocIds.has(doc.id)) return false;
+      seenDocIds.add(doc.id);
+      return true;
+    });
 
     // Buscar enunciados relacionados
     // 1. Buscar enunciados vinculados aos artigos encontrados
@@ -286,10 +297,15 @@ Regras:
     // 2. Buscar enunciados por texto
     const enunciadosPorTexto = buscarEnunciados(searchQuery);
 
-    // Combinar e remover duplicatas
+    // Combinar e remover duplicatas (O(n) com Set)
     const todosEnunciados = [...enunciadosPorArtigo, ...enunciadosPorTexto];
+    const seenEnunciadoIds = new Set<string>();
     const uniqueEnunciados = todosEnunciados
-      .filter((e, index, self) => index === self.findIndex(en => en.id === e.id))
+      .filter(e => {
+        if (seenEnunciadoIds.has(e.id)) return false;
+        seenEnunciadoIds.add(e.id);
+        return true;
+      })
       .slice(0, 5) // Limitar a 5 enunciados
       .map(e => ({
         id: e.id,
@@ -301,7 +317,7 @@ Regras:
       }));
 
     const latency = Date.now() - startTime;
-    console.log(`[Search API] Encontrados ${results.length} artigos, ${uniqueDocuments.length} documentos e ${uniqueEnunciados.length} enunciados em ${latency}ms (cached: ${geminiResult.cached})`);
+    apiLogger.info({ resultsCount: results.length, docsCount: uniqueDocuments.length, enunciadosCount: uniqueEnunciados.length, latency, cached: geminiResult.cached }, 'Lei 14133 search completed');
 
     const response: SearchResponse = {
       query: searchQuery,
@@ -317,10 +333,6 @@ Regras:
     return NextResponse.json(response);
 
   } catch (error) {
-    console.error('[Search API] Erro:', error);
-    return NextResponse.json(
-      { error: 'Erro ao processar busca' },
-      { status: 500 }
-    );
+    return handleApiError(error);
   }
 }
