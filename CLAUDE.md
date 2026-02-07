@@ -37,6 +37,11 @@ npx tsx scripts/test-versioning.ts
 npx tsx scripts/import-pareceres-vinculantes.ts
 npm run convert-tcu            # Convert TCU Excel files
 
+# Embeddings/pgvector
+npx tsx scripts/migrate-to-embeddings.ts              # Indexar docs pendentes
+npx tsx scripts/migrate-to-embeddings.ts --dry-run    # Simular sem alterar
+npx tsx scripts/migrate-to-embeddings.ts --force      # Reprocessar todos
+
 # Migration Scripts
 export DATABASE_URL="<your-db-url>" && npx tsx scripts/fix-csv-tags.ts  # Convert CSV tags to JSON
 ```
@@ -87,6 +92,14 @@ export DATABASE_URL="<your-db-url>" && npx tsx scripts/fix-csv-tags.ts  # Conver
 
 
 ## Recent Features
+
+**📦 Indexação Completa de Documentos no pgvector (2026-02-07):**
+- ✅ 428/429 documentos indexados com embeddings no pgvector (1.598 chunks)
+- ✅ Pipeline adaptado para documentos sem R2 (usa `content`/`description` como fallback)
+- ✅ DECOR (171), Enunciados (129), ONs (96), Pareceres Vinculantes (20), Acórdãos (8) indexados
+- ✅ Categoria `decor` adicionada ao chunker de documentos legais
+- ⚠️ 1 doc não indexável: ON AGU nº 41/2014 (descrição < 50 chars)
+- 📖 Ver `lib/embeddings/document-processor.ts`, `scripts/migrate-to-embeddings.ts`
 
 **🔍 Busca Global com IA Integrada (2026-02-07):**
 - ✅ Busca textual (300ms) + busca semântica IA (1.5s) em paralelo no campo de busca global
@@ -355,6 +368,7 @@ function Header() {
 
 
 - `scripts/fix-csv-tags.ts` - Migração CSV→JSON para tags/leiArticles
+- `scripts/migrate-to-embeddings.ts` - Indexar documentos no pgvector (embeddings)
 - `scripts/create-admin.js` - Criar usuário admin
 - `scripts/convert-tcu-excel.js` - Converter TCU Excel→JSON
 
@@ -399,10 +413,10 @@ Ver código para endpoints completos.
 - Error handling system (Fase 8 - 97% audit complete)
 - Chat RAG with semantic search (Gemini)
 - Busca global com IA integrada (busca textual + semântica em paralelo)
+- Indexação pgvector completa: 428/429 docs, 1.598 chunks (DECOR, ONs, enunciados, pareceres vinculantes, acórdãos)
 
 **🚧 In Progress:**
 - DOU classifier
-- Complete AGU extraction (205 Pareceres + 1,627 DECOR)
 - Admin versioning UI
 
 **📋 Planned (Fases 9-11):**
@@ -434,6 +448,17 @@ Ver código para endpoints completos.
 3. Prisma/Zod/JWT errors automatically mapped to correct HTTP status
 4. Structured logging with context (apiLogger, authLogger)
 5. Client receives standardized JSON response
+
+### Embeddings/pgvector Pipeline
+1. `processDocument()` busca doc no banco com `r2Key`, `content`, `description`
+2. Se tem `r2Key`: download R2 → extração de texto → normalização
+3. Se não tem `r2Key`: usa `content` ou `description` como fallback (mín. 50 chars)
+4. Texto é dividido em chunks (chunker legal para decor/parecer/on, genérico para outros)
+5. Embeddings gerados via Gemini `text-embedding-004` (768 dimensões, batch de 100)
+6. Chunks + embeddings salvos na tabela `DocumentChunk` com `vector(768)`
+7. Script: `npx tsx scripts/migrate-to-embeddings.ts` (flags: `--dry-run`, `--limit N`, `--force`, `--concurrency N`)
+8. Stats: 428/429 docs indexados, 1.598 chunks, 1 falha (ON 41/2014 — texto insuficiente)
+- 📖 Ver `lib/embeddings/document-processor.ts`, `lib/embeddings/gemini-embeddings.ts`, `lib/embeddings/text-chunker.ts`
 
 ### Document Versioning
 - Each document update creates a `DocumentVersion` record
