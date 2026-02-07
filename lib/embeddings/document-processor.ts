@@ -60,6 +60,8 @@ export async function processDocument(
         category: true,
         embeddingStatus: true,
         extractedText: true,
+        content: true,
+        description: true,
       },
     });
 
@@ -85,61 +87,79 @@ export async function processDocument(
       };
     }
 
-    // 3. Verifica se tem arquivo no R2
-    if (!document.r2Key) {
-      await updateDocumentStatus(documentId, 'failed', 'No R2 key (file not uploaded)');
-      return {
-        success: false,
-        documentId,
-        error: 'Document has no R2 key',
-      };
-    }
-
-    // 4. Marca como processando
+    // 3. Marca como processando
     await updateDocumentStatus(documentId, 'processing');
 
-    // 5. Download do arquivo do R2
-    console.log(`📥 Downloading ${document.title} from R2...`);
-    let fileBuffer: Buffer;
-    try {
-      fileBuffer = await downloadFromR2(document.r2Key);
-    } catch (error) {
-      await updateDocumentStatus(documentId, 'failed', 'Failed to download from R2');
-      return {
-        success: false,
-        documentId,
-        error: 'Failed to download from R2',
-      };
-    }
-
-    // 6. Extrai texto do documento
-    console.log(`📄 Extracting text from ${document.type}...`);
-    const mimeType = getMimeType(document.type);
     let extractedText = document.extractedText;
 
-    // Se nao tem texto extraido ou forcando reprocessamento
-    if (!extractedText || options.forceReprocess) {
-      const extraction = await extractTextWithFallback(fileBuffer, mimeType);
-
-      if (!extraction.success) {
-        await updateDocumentStatus(documentId, 'failed', extraction.error);
+    if (document.r2Key) {
+      // 4a. Download do arquivo do R2
+      console.log(`📥 Downloading ${document.title} from R2...`);
+      let fileBuffer: Buffer;
+      try {
+        fileBuffer = await downloadFromR2(document.r2Key);
+      } catch (error) {
+        await updateDocumentStatus(documentId, 'failed', 'Failed to download from R2');
         return {
           success: false,
           documentId,
-          error: extraction.error,
+          error: 'Failed to download from R2',
         };
       }
 
-      extractedText = normalizeText(extraction.text);
+      // 5a. Extrai texto do documento
+      console.log(`📄 Extracting text from ${document.type}...`);
+      const mimeType = getMimeType(document.type);
 
-      // Salva texto extraido
-      await prisma.document.update({
-        where: { id: documentId },
-        data: {
-          extractedText,
-          textExtractedAt: new Date(),
-        },
-      });
+      if (!extractedText || options.forceReprocess) {
+        const extraction = await extractTextWithFallback(fileBuffer, mimeType);
+
+        if (!extraction.success) {
+          await updateDocumentStatus(documentId, 'failed', extraction.error);
+          return {
+            success: false,
+            documentId,
+            error: extraction.error,
+          };
+        }
+
+        extractedText = normalizeText(extraction.text);
+
+        await prisma.document.update({
+          where: { id: documentId },
+          data: {
+            extractedText,
+            textExtractedAt: new Date(),
+          },
+        });
+      }
+    } else {
+      // 4b. Sem R2 — usar texto já disponível (content, description, etc.)
+      if (!extractedText || options.forceReprocess) {
+        const fallbackText = document.content || document.description || '';
+        if (fallbackText.length < 50) {
+          await updateDocumentStatus(documentId, 'failed', 'No R2 key and no text content available');
+          return {
+            success: false,
+            documentId,
+            error: 'No R2 key and no text content available',
+          };
+        }
+
+        // Prefixar com título para contexto
+        const titlePrefix = document.title ? `${document.title}\n\n` : '';
+        extractedText = normalizeText(titlePrefix + fallbackText);
+
+        await prisma.document.update({
+          where: { id: documentId },
+          data: {
+            extractedText,
+            textExtractedAt: new Date(),
+          },
+        });
+
+        console.log(`📝 Using existing text content (${extractedText.length} chars) for ${document.title}`);
+      }
     }
 
     // 7. Cria chunks do texto
@@ -258,12 +278,20 @@ export async function processPendingDocuments(
 ): Promise<ProcessingResult[]> {
   const pendingDocs = await prisma.document.findMany({
     where: {
-      r2Key: { not: null },
+      // Documentos com R2 OU com conteúdo textual
       OR: [
-        { embeddingStatus: null },
-        { embeddingStatus: 'pending' },
-        { embeddingStatus: 'failed' },
+        { r2Key: { not: null } },
+        { content: { not: null } },
+        { description: { not: null } },
+        { extractedText: { not: null } },
       ],
+      AND: {
+        OR: [
+          { embeddingStatus: null },
+          { embeddingStatus: 'pending' },
+          { embeddingStatus: 'failed' },
+        ],
+      },
     },
     select: { id: true },
     take: limit,
@@ -389,6 +417,7 @@ function createChunksForDocument(
     case 'orientacao-normativa':
     case 'parecer':
     case 'parecer-vinculante':
+    case 'decor':
     case 'lei':
     case 'decreto':
     case 'portaria':
@@ -472,7 +501,14 @@ export async function getProcessingStats(): Promise<{
   const [statusCounts, chunkCount] = await Promise.all([
     prisma.document.groupBy({
       by: ['embeddingStatus'],
-      where: { r2Key: { not: null } },
+      where: {
+        OR: [
+          { r2Key: { not: null } },
+          { content: { not: null } },
+          { description: { not: null } },
+          { extractedText: { not: null } },
+        ],
+      },
       _count: true,
     }),
     prisma.$queryRaw<[{ count: bigint }]>`SELECT COUNT(*) as count FROM "DocumentChunk"`,

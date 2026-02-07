@@ -78,15 +78,23 @@ async function migrateToEmbeddings(options: MigrationOptions = {}) {
     console.log('📋 Step 2: Finding documents to process...');
 
     const whereClause: any = {
-      r2Key: { not: null },
+      // Documentos com R2 OU com conteúdo textual
+      OR: [
+        { r2Key: { not: null } },
+        { content: { not: null } },
+        { description: { not: null } },
+        { extractedText: { not: null } },
+      ],
     };
 
     if (!forceReprocess) {
-      whereClause.OR = [
-        { embeddingStatus: null },
-        { embeddingStatus: 'pending' },
-        { embeddingStatus: 'failed' },
-      ];
+      whereClause.AND = {
+        OR: [
+          { embeddingStatus: null },
+          { embeddingStatus: 'pending' },
+          { embeddingStatus: 'failed' },
+        ],
+      };
     }
 
     const documents = await prisma.document.findMany({
