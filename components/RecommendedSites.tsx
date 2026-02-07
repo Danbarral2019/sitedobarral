@@ -20,16 +20,6 @@ export default function RecommendedSites({ sites }: RecommendedSitesProps) {
     return null; // Não renderiza nada se não houver sites
   }
 
-  // Função para obter o domínio limpo da URL
-  const getDomain = (url: string): string => {
-    try {
-      const urlObj = new URL(url);
-      return urlObj.hostname.replace('www.', '');
-    } catch {
-      return url;
-    }
-  };
-
   return (
     <div className="bg-white rounded-2xl shadow-lg p-8 border-2 border-gray-200 mt-6">
       <div className="mb-6">

@@ -39,7 +39,7 @@ export async function POST(
       if (authResult.valid && authResult.user) {
         userEmail = authResult.user.email;
       }
-    } catch (e) {
+    } catch {
       // Ignorar erro de autenticação - feedback pode ser anônimo
     }
 

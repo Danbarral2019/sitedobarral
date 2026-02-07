@@ -43,14 +43,19 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
 }
 
 export async function generateStaticParams() {
-  const posts = await prisma.blogPost.findMany({
-    where: { isPublished: true },
-    select: { slug: true }
-  });
+  try {
+    const posts = await prisma.blogPost.findMany({
+      where: { isPublished: true },
+      select: { slug: true }
+    });
 
-  return posts.map((post: { slug: string }) => ({
-    slug: post.slug,
-  }));
+    return posts.map((post: { slug: string }) => ({
+      slug: post.slug,
+    }));
+  } catch {
+    // Database unavailable (e.g. CI build) — pages will be generated on demand via ISR
+    return [];
+  }
 }
 
 // Revalidar a cada 1 hora

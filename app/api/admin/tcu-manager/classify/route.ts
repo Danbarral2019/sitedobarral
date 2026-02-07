@@ -3,7 +3,6 @@ import { withAdminAuth } from '@/lib/api-middleware';
 import {
   classifyTCUAcordaosBatch,
   type TCUClassificationInput,
-  type TCUClassificationResult,
 } from '@/lib/tcu-classifier';
 
 /**
@@ -55,11 +54,9 @@ export const POST = withAdminAuth(async (request: NextRequest) => {
     const rowIndexes: number[] = documents.map(doc => doc.rowIndex);
 
     // Classifica em lote com progresso
-    let processedCount = 0;
     const classificationResults = await classifyTCUAcordaosBatch(inputs, {
       delayMs: 500, // 0.5 segundos entre requisições (lotes pequenos = menos risco de rate limit)
-      onProgress: (current, total, result) => {
-        processedCount = current;
+      onProgress: (current, total) => {
         console.log(`[TCU Classify API] Progresso: ${current}/${total} (${Math.round(current / total * 100)}%)`);
       },
     });

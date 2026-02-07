@@ -114,7 +114,6 @@ export async function POST(req: NextRequest) {
     const fileId = randomUUID();
     const courseId = body.courseId || 'general';
     const sanitizedFileName = sanitizeFileName(body.fileName);
-    const fileExtension = body.fileName.split('.').pop()?.toLowerCase() || 'bin';
     const r2Key = `documents/${courseId}/${fileId}-${sanitizedFileName}`;
 
     // 4. Generate presigned URL

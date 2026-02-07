@@ -219,7 +219,7 @@ export default function DocumentDetailModal({
                   <div className="flex flex-wrap items-center gap-2 text-sm text-blue-100">
                     <Scale className="w-4 h-4" />
                     <span>Lei 14.133/2021</span>
-                    {leiArticles.slice(0, 3).map((artNum, index) => (
+                    {leiArticles.slice(0, 3).map((artNum) => (
                       <div key={artNum} className="flex items-center gap-2">
                         <ChevronRight className="w-3 h-3" />
                         <Link

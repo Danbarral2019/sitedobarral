@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import {
   BarChart3,
@@ -8,7 +8,6 @@ import {
   Users,
   MessageSquare,
   ThumbsUp,
-  ThumbsDown,
   Clock,
   Zap,
   Download,
@@ -77,11 +76,7 @@ export default function Lei14133AnalyticsPage() {
   const [error, setError] = useState<string | null>(null);
   const [selectedPeriod, setSelectedPeriod] = useState('30');
 
-  useEffect(() => {
-    fetchAnalytics();
-  }, [selectedPeriod]);
-
-  const fetchAnalytics = async () => {
+  const fetchAnalytics = useCallback(async () => {
     setIsLoading(true);
     setError(null);
 
@@ -106,7 +101,11 @@ export default function Lei14133AnalyticsPage() {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [selectedPeriod, router]);
+
+  useEffect(() => {
+    fetchAnalytics();
+  }, [fetchAnalytics]);
 
   const exportCSV = () => {
     if (!data) return;

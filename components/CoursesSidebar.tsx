@@ -1,6 +1,5 @@
 'use client';
 
-import { useState } from 'react';
 import { ChevronRight, GraduationCap, Lock } from 'lucide-react';
 
 interface Course {
@@ -23,12 +22,9 @@ export default function CoursesSidebar({
   onCourseSelect,
   documentCounts,
 }: CoursesSidebarProps) {
-  const [isOpen, setIsOpen] = useState(false);
-
   // Selecionar curso e fechar sidebar em mobile
   const handleCourseClick = (course: Course) => {
     onCourseSelect(course.id);
-    setIsOpen(false);
   };
 
   return (

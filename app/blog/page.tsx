@@ -40,7 +40,12 @@ export const revalidate = 3600;
 
 export default async function BlogPage() {
   // Usa query cacheada para melhor performance
-  const posts = await getCachedPublishedBlogPosts();
+  let posts: Awaited<ReturnType<typeof getCachedPublishedBlogPosts>> = [];
+  try {
+    posts = await getCachedPublishedBlogPosts();
+  } catch {
+    // Database unavailable (e.g. CI build)
+  }
 
   const publishedPosts = posts.map((post: BlogPost) => ({
     ...post,

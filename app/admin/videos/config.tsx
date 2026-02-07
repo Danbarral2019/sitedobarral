@@ -12,7 +12,7 @@ import { Youtube, ExternalLink, Edit, Trash2, CheckCircle, XCircle } from 'lucid
 import { createListConfig } from '@/components/admin/ResourceListContainer';
 import { AdminListConfig, FilterConfig } from '@/lib/types/admin-list';
 import { CourseVideo } from '@/lib/videos';
-import { courses } from '@/data/courses';
+
 
 interface VideosConfigProps {
   courses: Array<{ id: string; title: string }>;

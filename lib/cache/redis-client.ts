@@ -120,7 +120,7 @@ export const CacheKeys = {
    * Search results cache key
    * Format: search:{queryHash}:{filters}
    */
-  searchResults: (query: string, filters?: Record<string, any>): string => {
+  searchResults: (query: string, filters?: Record<string, unknown>): string => {
     const queryHash = hashString(query);
     const filterHash = filters ? hashString(JSON.stringify(filters)) : 'none';
     return `search:${queryHash}:${filterHash}`;
@@ -339,6 +339,7 @@ export async function deleteCache(key: string): Promise<void> {
 /**
  * Delete multiple keys by pattern
  */
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 export async function deleteCachePattern(pattern: string): Promise<void> {
   if (!redis) return;
 
@@ -750,7 +751,7 @@ export async function getCacheStats(): Promise<{
 // Export
 // ===========================
 
-export default {
+const cacheClient = {
   redis,
   getCache,
   setCache,
@@ -773,3 +774,4 @@ export default {
   isCacheEnabled,
   getCacheStats,
 };
+export default cacheClient;

@@ -59,7 +59,7 @@ export default function DocumentosPage() {
   // Bulk operations
   const [selectedDocuments, setSelectedDocuments] = useState<Set<string>>(new Set());
   const [bulkAction, setBulkAction] = useState('');
-  const [bulkCategory, setBulkCategory] = useState('');
+  const [, setBulkCategory] = useState('');
   const [showClassifyPanel, setShowClassifyPanel] = useState(false);
 
   // Stats
@@ -147,7 +147,7 @@ export default function DocumentosPage() {
       isFetchingRef.current = false;
       setIsLoadingDocs(false);
     }
-  }, [currentPage, itemsPerPage, filterCategory]); // Server-side filters need to trigger refetch
+  }, [currentPage, itemsPerPage, filterCategory, errorToast]); // Server-side filters need to trigger refetch
 
   useEffect(() => {
     verifyAdmin();

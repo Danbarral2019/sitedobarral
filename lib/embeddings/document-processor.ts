@@ -8,7 +8,7 @@ import { prisma } from '@/lib/prisma';
 import { downloadFromR2 } from '@/lib/storage/r2-client';
 import { extractText, normalizeText } from '@/lib/text-extractor';
 import { chunkText, chunkLegalDocument, chunkTCUDocument, TextChunk } from './text-chunker';
-import { generateBatchEmbeddings, embeddingToSql, EMBEDDING_CONFIG } from './gemini-embeddings';
+import { generateBatchEmbeddings, embeddingToSql } from './gemini-embeddings';
 
 // ===========================
 // Types
@@ -98,7 +98,7 @@ export async function processDocument(
       let fileBuffer: Buffer;
       try {
         fileBuffer = await downloadFromR2(document.r2Key);
-      } catch (error) {
+      } catch {
         await updateDocumentStatus(documentId, 'failed', 'Failed to download from R2');
         return {
           success: false,
@@ -551,9 +551,10 @@ export async function getProcessingStats(): Promise<{
 // Export
 // ===========================
 
-export default {
+const documentProcessor = {
   processDocument,
   processDocuments,
   processPendingDocuments,
   getProcessingStats,
 };
+export default documentProcessor;

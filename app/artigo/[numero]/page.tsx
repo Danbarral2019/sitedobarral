@@ -6,7 +6,7 @@ import Link from 'next/link';
 import { Loader2, FileText, BookOpen, ArrowLeft, BarChart3, TrendingUp } from 'lucide-react';
 import { LEI_14133_ARTIGOS as LEI_14133_ARTIGOS_FALLBACK, LeiArticle } from '@/data/lei-14133-artigos';
 import { ArticleRelationshipGraph } from '@/components/ArticleRelationshipGraph';
-import { ArticleBadges } from '@/components/ArticleBadges';
+
 
 interface Document {
   id: string;

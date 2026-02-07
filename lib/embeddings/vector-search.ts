@@ -6,7 +6,7 @@
 
 import { prisma } from '@/lib/prisma';
 import { generateQueryEmbedding, embeddingToSql } from './gemini-embeddings';
-import { withCache, CacheKeys, CACHE_TTL } from '@/lib/cache/redis-client';
+import { withCache, CACHE_TTL } from '@/lib/cache/redis-client';
 
 // ===========================
 // Types
@@ -65,6 +65,7 @@ export async function semanticSearch(
     limit = 5,
     threshold = 0.5,
     useCache = true,
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     includeChunkContent = true,
   } = options;
 
@@ -376,7 +377,7 @@ function safeParseArray(value: string | null): string[] {
 // Export
 // ===========================
 
-export default {
+const vectorSearch = {
   semanticSearch,
   findRelatedDocuments,
   searchByLeiArticle,
@@ -384,3 +385,4 @@ export default {
   buildContextForLLM,
   formatSources,
 };
+export default vectorSearch;

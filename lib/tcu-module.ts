@@ -12,6 +12,7 @@
  * - Estatísticas de importação
  */
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { prisma } from '@/lib/prisma';
 import type { Document, Prisma } from '@prisma/client';
 import { findOrCreateWithVersioning } from './agu-modules/versioning';
@@ -74,6 +75,7 @@ function convertToDocumentData(acordao: AcordaoTCU): Partial<Prisma.DocumentCrea
   const tcuNumeroAcordao = `${acordao.numeroAcordao}/${acordao.anoAcordao}`;
   const tcuOrgaoJulgador = acordao.colegiado || null;
   const tcuRelator = acordao.relator || null;
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const tcuDataSessao = acordao.dataSessao || null;
 
   // Campos numéricos para ordenação (usam campos separados acordaoNumero e acordaoAno)

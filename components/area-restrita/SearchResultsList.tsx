@@ -13,7 +13,6 @@ import {
   ChevronDown,
   ChevronUp,
   Heart,
-  Download,
   Play,
   Sparkles,
   AlertCircle,
@@ -362,6 +361,7 @@ function VideoResultCard({ video, query }: { video: VideoResult; query: string }
         {/* Thumbnail */}
         <div className="relative w-32 h-20 bg-gray-100 flex-shrink-0">
           {video.thumbnailUrl ? (
+            // eslint-disable-next-line @next/next/no-img-element
             <img
               src={video.thumbnailUrl}
               alt={video.title}
@@ -407,6 +407,7 @@ function SiteResultCard({ site, query }: { site: SiteResult; query: string }) {
       <div className="flex items-start gap-3">
         <div className="p-2 rounded-lg bg-teal-50 text-teal-600 flex-shrink-0">
           {site.faviconUrl ? (
+            // eslint-disable-next-line @next/next/no-img-element
             <img src={site.faviconUrl} alt="" className="w-5 h-5 rounded" />
           ) : (
             <Globe className="w-5 h-5" />
@@ -587,7 +588,7 @@ export function SearchResultsList({
 
               {/* Results Grid */}
               <div className="grid gap-3">
-                {items.map((item, index) => {
+                {items.map((item) => {
                   switch (item.type) {
                     case 'document':
                       const doc = item.data as DocumentResult;

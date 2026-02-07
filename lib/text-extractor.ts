@@ -331,7 +331,7 @@ export function extractMainContent(text: string): string {
 // Export
 // ===========================
 
-export default {
+const textExtractor = {
   extractText,
   extractTextFromPDF,
   extractTextFromDOCX,
@@ -342,3 +342,4 @@ export default {
   removeHeadersFooters,
   extractMainContent,
 };
+export default textExtractor;

@@ -148,12 +148,6 @@ export default function BatchClassifyPanel({
     return course?.title || courseId;
   };
 
-  const getConfidenceColor = (confidence: number): string => {
-    if (confidence >= 80) return 'text-green-600';
-    if (confidence >= 60) return 'text-yellow-600';
-    return 'text-red-600';
-  };
-
   const getConfidenceBadge = (confidence: number): string => {
     if (confidence >= 80) return 'bg-green-100 text-green-800';
     if (confidence >= 60) return 'bg-yellow-100 text-yellow-800';

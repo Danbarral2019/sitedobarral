@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useCallback, useEffect } from 'react';
-import type { ContentTreeNode, ContentTreeResponse, TreeSelection, ContentType } from '@/lib/types/global-search';
+import type { ContentTreeNode, ContentTreeResponse, TreeSelection } from '@/lib/types/global-search';
 
 interface UseContentTreeReturn {
   // State

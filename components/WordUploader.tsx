@@ -25,8 +25,8 @@ export default function WordUploader({ onUploadComplete, onError }: WordUploader
   const [file, setFile] = useState<File | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
 
-  const validateFile = (file: File): boolean => {
-    // Aceitar .doc e .docx
+  const processFile = useCallback(async (file: File) => {
+    // Validate file
     const validTypes = [
       'application/vnd.openxmlformats-officedocument.wordprocessingml.document', // .docx
       'application/msword', // .doc
@@ -35,22 +35,13 @@ export default function WordUploader({ onUploadComplete, onError }: WordUploader
     if (!validTypes.includes(file.type) && !file.name.endsWith('.docx') && !file.name.endsWith('.doc')) {
       errorToast('Arquivo inválido', 'Por favor, envie apenas arquivos Word (.doc ou .docx)');
       if (onError) onError('Arquivo inválido');
-      return false;
+      return;
     }
 
-    // Limite de 10MB
     const maxSize = 10 * 1024 * 1024;
     if (file.size > maxSize) {
       errorToast('Arquivo muito grande', 'O arquivo deve ter no máximo 10MB');
       if (onError) onError('Arquivo muito grande');
-      return false;
-    }
-
-    return true;
-  };
-
-  const processFile = async (file: File) => {
-    if (!validateFile(file)) {
       return;
     }
 
@@ -83,7 +74,7 @@ export default function WordUploader({ onUploadComplete, onError }: WordUploader
     } finally {
       setIsProcessing(false);
     }
-  };
+  }, [onUploadComplete, onError, errorToast, success]);
 
   const handleDragOver = useCallback((e: React.DragEvent) => {
     e.preventDefault();

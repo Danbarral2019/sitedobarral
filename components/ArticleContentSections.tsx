@@ -85,7 +85,7 @@ const CATEGORY_CONFIG = {
 /**
  * Componente que agrupa e exibe documentos relacionados por categoria
  */
-export function ArticleContentSections({ articleNum, documents }: ArticleContentSectionsProps) {
+export function ArticleContentSections({ documents }: ArticleContentSectionsProps) {
   // Agrupar documentos por categoria
   const groupedDocuments = documents.reduce((acc, doc) => {
     const category = doc.category || 'default';

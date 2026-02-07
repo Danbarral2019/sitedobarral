@@ -66,6 +66,7 @@ export default function GlossarioPage() {
     } catch (error) {
       console.error('Erro ao buscar:', error);
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [terms, activeLetter, activeCategory]);
 
   // Aplicar filtros (letra e categoria)

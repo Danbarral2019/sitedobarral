@@ -37,10 +37,15 @@ export const metadata: Metadata = {
 export const revalidate = 3600;
 
 export default async function PublicacoesPage() {
-  const publications = await prisma.publication.findMany({
-    where: { isPublished: true },
-    orderBy: { publishedAt: 'desc' }
-  });
+  let publications: Publication[] = [];
+  try {
+    publications = await prisma.publication.findMany({
+      where: { isPublished: true },
+      orderBy: { publishedAt: 'desc' }
+    });
+  } catch {
+    // Database unavailable (e.g. CI build)
+  }
 
   const livros = publications.filter((p: Publication) => p.type === 'livro');
   const artigos = publications.filter((p: Publication) => p.type === 'artigo');

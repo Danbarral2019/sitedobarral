@@ -62,6 +62,7 @@ export default function FAQPage() {
     } catch (error) {
       console.error('Erro ao buscar:', error);
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [faqs, activeCategory]);
 
   // Aplicar filtro de categoria

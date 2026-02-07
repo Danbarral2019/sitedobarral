@@ -5,7 +5,7 @@
  */
 
 import Link from 'next/link';
-import { MessageSquare, Star, Edit, Trash2, CheckCircle, XCircle, Eye, User } from 'lucide-react';
+import { MessageSquare, Star, Edit, Trash2, CheckCircle, XCircle, User } from 'lucide-react';
 import { createListConfig } from '@/components/admin/ResourceListContainer';
 import { AdminListConfig } from '@/lib/types/admin-list';
 import { Testimonial } from '@/lib/depoimentos';
@@ -59,6 +59,7 @@ export const depoimentosConfig: AdminListConfig<Testimonial> = createListConfig<
       render: (testimonial) => (
         <div className="flex items-center gap-3">
           {testimonial.photoUrl ? (
+            /* eslint-disable-next-line @next/next/no-img-element -- external user avatar URL */
             <img src={testimonial.photoUrl} alt="" className="w-10 h-10 rounded-full" />
           ) : (
             <div className="w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center">

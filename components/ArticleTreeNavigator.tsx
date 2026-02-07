@@ -99,7 +99,6 @@ export function ArticleTreeNavigator({ stats = {}, onArticleClick }: ArticleTree
 
   const renderNode = (node: TreeNode, level: number = 0): JSX.Element => {
     const isExpanded = expandedNodes.has(node.id);
-    const hasChildren = node.children && node.children.length > 0;
     const hasArticles = node.articles && node.articles.length > 0;
     const totalDocs = hasArticles ? getTotalDocs(node.articles) : 0;
 

@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { cookies } from 'next/headers';
 import { verifyToken } from '@/lib/auth';
@@ -7,7 +7,7 @@ import { verifyToken } from '@/lib/auth';
  * GET /api/favorites/legislative-acts
  * Lista os atos normativos favoritos do usuário autenticado
  */
-export async function GET(request: NextRequest) {
+export async function GET() {
   try {
     // Verificar autenticação
     const cookieStore = await cookies();

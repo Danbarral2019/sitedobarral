@@ -19,6 +19,7 @@ interface PDFExportOptions {
  * Gera PDF formatado de uma conversa sobre Lei 14.133
  */
 export function generateConversationPDF(options: PDFExportOptions): void {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const { articleNumber, articleTitle, messages, userName, userEmail } = options;
 
   const doc = new jsPDF({
@@ -133,7 +134,7 @@ export function generateConversationPDF(options: PDFExportOptions): void {
   yPosition += 15;
 
   // === CONVERSAS ===
-  messages.forEach((message, index) => {
+  messages.forEach((message) => {
     const messageHeight = 60; // Espaço estimado por mensagem
     checkNewPage(messageHeight);
 

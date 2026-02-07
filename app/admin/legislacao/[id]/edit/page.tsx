@@ -1,12 +1,12 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import AdminLayout from '@/components/AdminLayout';
 import MarkdownContent from '@/components/MarkdownContent';
 import {
   Save, X, Scale, Calendar, Building, FileText,
-  Link as LinkIcon, AlertCircle, Bold, List, Heading2, Eye,
+  Link as LinkIcon, Bold, List, Heading2, Eye,
   RefreshCw, CheckCircle, XCircle, Clock
 } from 'lucide-react';
 
@@ -67,12 +67,7 @@ export default function EditLegislativeActPage() {
     content: ''
   });
 
-  useEffect(() => {
-    fetchAct();
-    fetchScrapeStatus();
-  }, [id]);
-
-  const fetchAct = async () => {
+  const fetchAct = useCallback(async () => {
     try {
       const response = await fetch(`/api/admin/legislative-acts/${id}`);
       if (!response.ok) throw new Error('Erro ao carregar ato');
@@ -119,10 +114,10 @@ export default function EditLegislativeActPage() {
     } finally {
       setIsFetching(false);
     }
-  };
+  }, [id, router]);
 
   // Buscar status de scraping
-  const fetchScrapeStatus = async () => {
+  const fetchScrapeStatus = useCallback(async () => {
     try {
       const response = await fetch(`/api/admin/legislative-acts/${id}/update-content`);
       if (response.ok) {
@@ -132,7 +127,12 @@ export default function EditLegislativeActPage() {
     } catch (error) {
       console.error('Erro ao buscar status:', error);
     }
-  };
+  }, [id]);
+
+  useEffect(() => {
+    fetchAct();
+    fetchScrapeStatus();
+  }, [fetchAct, fetchScrapeStatus]);
 
   // Atualizar conteúdo da URL oficial
   const handleUpdateContent = async () => {

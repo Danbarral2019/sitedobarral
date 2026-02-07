@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
-import { Search, X, SlidersHorizontal, Loader2, Sparkles, AlertCircle, FileText, Scale } from 'lucide-react';
+import { Search, X, SlidersHorizontal, Loader2, Sparkles, AlertCircle } from 'lucide-react';
 import { SearchScope } from '@/hooks/use-search';
 import { useSearchContext, type DocumentSearchResult, type UnifiedSearchResult } from '@/contexts/SearchContext';
 
@@ -105,7 +105,7 @@ export default function UnifiedSearch({
       const data = await response.json();
 
       // Map API results to unified search result format
-      const aiResults: UnifiedSearchResult[] = data.results.map((result: any) => {
+      const aiResults: UnifiedSearchResult[] = data.results.map((result: { resultType: string; id: string; title: string; description?: string; url?: string; numero?: string; relevance: number; category?: string }) => {
         if (result.resultType === 'article') {
           // Article result
           return {
@@ -137,7 +137,7 @@ export default function UnifiedSearch({
 
       // Build relevance scores map
       const relevanceScores: Record<string, number> = {};
-      data.results.forEach((result: any) => {
+      data.results.forEach((result: { id: string; relevance: number }) => {
         relevanceScores[result.id] = result.relevance;
       });
 

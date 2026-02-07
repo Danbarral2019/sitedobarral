@@ -43,6 +43,7 @@ const CATEGORIES = [
 ];
 
 // Artigos importantes da Lei 14.133/2021 para sugestão
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const LEI_14133_KEY_ARTICLES = {
   // Planejamento e estudos técnicos
   planejamento: [6, 7, 8, 9, 10, 11, 12, 13, 14, 18, 19, 20, 21, 22, 23, 24],

@@ -120,7 +120,7 @@ Regras:
 
     try {
       // Limpar a resposta (remover markdown se houver)
-      let cleanResponse = geminiResult.response
+      const cleanResponse = geminiResult.response
         .replace(/```json\n?/g, '')
         .replace(/```\n?/g, '')
         .trim();
@@ -278,8 +278,6 @@ Regras:
     );
 
     // Buscar enunciados relacionados
-    const enunciadoResults: EnunciadoResult[] = [];
-
     // 1. Buscar enunciados vinculados aos artigos encontrados
     const enunciadosPorArtigo = ENUNCIADOS.filter(e =>
       e.artigosVinculados.some(art => articleNumbers.includes(art))

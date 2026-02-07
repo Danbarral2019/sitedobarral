@@ -4,7 +4,7 @@
  * Configuração da lista de Contatos
  */
 
-import { Mail, Trash2, Calendar, User, MessageSquare, CheckCircle, Clock, XCircle } from 'lucide-react';
+import { Mail, Trash2, Calendar, User, CheckCircle, Clock } from 'lucide-react';
 import { createListConfig } from '@/components/admin/ResourceListContainer';
 import { AdminListConfig } from '@/lib/types/admin-list';
 import { ContactForm, deleteContactForm } from '@/lib/contatos';

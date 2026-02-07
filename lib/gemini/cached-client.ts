@@ -155,6 +155,7 @@ export async function queryGeminiText(
 // Export
 // ===========================
 
-export default {
+const geminiClient = {
   queryGeminiText,
 };
+export default geminiClient;

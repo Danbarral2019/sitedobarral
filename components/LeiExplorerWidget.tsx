@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Scale, FileText, TrendingUp, ChevronRight, Loader2, AlertTriangle, MessageSquare, Sparkles } from 'lucide-react';
+import { Scale, FileText, TrendingUp, ChevronRight, Loader2, MessageSquare, Sparkles } from 'lucide-react';
 import Link from 'next/link';
 
 interface TopArticle {
@@ -23,7 +23,7 @@ export default function LeiExplorerWidget() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [data, setData] = useState<WidgetData | null>(null);
-  const [dismissed, setDismissed] = useState(false);
+  const [dismissed] = useState(false);
 
   useEffect(() => {
     const fetchData = async () => {

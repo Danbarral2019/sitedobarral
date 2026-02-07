@@ -411,7 +411,7 @@ export function chunkTCUDocument(
 // Export
 // ===========================
 
-export default {
+const textChunker = {
   chunkText,
   chunkLegalDocument,
   chunkTCUDocument,
@@ -419,3 +419,4 @@ export default {
   estimateTokens,
   DEFAULT_OPTIONS,
 };
+export default textChunker;

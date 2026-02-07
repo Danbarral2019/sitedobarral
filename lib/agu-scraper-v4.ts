@@ -159,6 +159,7 @@ export async function scrapeAGU(config: AGUScraperConfig): Promise<{
 /**
  * MÓDULO: Modelos de Licitações e Contratos
  */
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 async function scrapeModelos(config: AGUScraperConfig): Promise<AGUScraperResult> {
   const startTime = Date.now();
   const documentos: AGUDocument[] = [];
@@ -199,6 +200,7 @@ async function scrapeModelos(config: AGUScraperConfig): Promise<AGUScraperResult
 /**
  * MÓDULO: Guias e Manuais
  */
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 async function scrapeGuias(config: AGUScraperConfig): Promise<AGUScraperResult> {
   const startTime = Date.now();
   const documentos: AGUDocument[] = [];
@@ -239,6 +241,7 @@ async function scrapeGuias(config: AGUScraperConfig): Promise<AGUScraperResult> 
 /**
  * MÓDULO: Notas Técnicas
  */
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 async function scrapeNotasTecnicas(config: AGUScraperConfig): Promise<AGUScraperResult> {
   const startTime = Date.now();
   const documentos: AGUDocument[] = [];

@@ -66,7 +66,7 @@ export default function ChatInterface({
       try {
         const parsed = JSON.parse(savedHistory);
         setMessages(
-          parsed.map((msg: any) => ({
+          parsed.map((msg: { timestamp: string }) => ({
             ...msg,
             timestamp: new Date(msg.timestamp),
           }))
@@ -144,7 +144,7 @@ export default function ChatInterface({
       } else {
         assistantContent = `Encontrei ${data.results.length} documento(s) relevante(s):\n\n`;
 
-        data.results.forEach((result: any, index: number) => {
+        data.results.forEach((result: { title: string; relevance: number; excerpt: string }, index: number) => {
           const relevancePercent = Math.round(result.relevance * 100);
           assistantContent += `**${index + 1}. ${result.title}** (${relevancePercent}% relevante)\n`;
           assistantContent += `${result.excerpt}\n\n`;
@@ -160,7 +160,7 @@ export default function ChatInterface({
         id: (Date.now() + 1).toString(),
         role: 'assistant',
         content: assistantContent,
-        sources: data.results.map((r: any) => ({
+        sources: data.results.map((r: { documentId: string; title: string; category: string; relevance: number; excerpt: string; url?: string }) => ({
           documentId: r.documentId,
           title: r.title,
           category: r.category,
@@ -268,7 +268,7 @@ export default function ChatInterface({
                     <p className="text-xs font-semibold text-gray-600">
                       📚 Fontes consultadas:
                     </p>
-                    {message.sources.map((source, index) => (
+                    {message.sources.map((source) => (
                       <div
                         key={source.documentId}
                         className="text-xs bg-white rounded p-2"

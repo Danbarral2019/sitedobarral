@@ -43,7 +43,7 @@ export const POST = withAdminAuth(async (request: NextRequest, context?: Record<
       isCommon
     }, 'Reclassificando documentos');
 
-    let updateData: any = {};
+    let updateData: Record<string, unknown> = {};
     let updateMessage = '';
 
     switch (action) {
@@ -136,7 +136,7 @@ export const GET = withAdminAuth(async (request: NextRequest, context?: Record<s
     const search = searchParams.get('search');
 
     // Construir filtros
-    const where: any = {};
+    const where: Record<string, unknown> = {};
 
     if (category && category !== 'all') {
       where.category = category;

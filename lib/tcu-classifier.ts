@@ -58,6 +58,7 @@ export async function classifyTCUAcordao(
   input: TCUClassificationInput
 ): Promise<TCUClassificationResult> {
   const startTime = Date.now();
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const { planilha, enrichment } = input;
 
   console.log(`[TCU Classifier] Classificando acórdão: ${planilha.acordao}`);

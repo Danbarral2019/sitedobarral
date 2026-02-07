@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import AdminLayout from '@/components/AdminLayout';
 import {
@@ -51,11 +51,7 @@ export default function EditFAQPage() {
     { value: 'geral', label: 'Geral' },
   ];
 
-  useEffect(() => {
-    loadFAQ();
-  }, [faqId]);
-
-  const loadFAQ = async () => {
+  const loadFAQ = useCallback(async () => {
     setIsLoading(true);
     try {
       const response = await fetch(`/api/admin/faq/${faqId}`);
@@ -81,7 +77,11 @@ export default function EditFAQPage() {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [faqId, router]);
+
+  useEffect(() => {
+    loadFAQ();
+  }, [loadFAQ]);
 
   const validate = () => {
     const newErrors: Record<string, string> = {};

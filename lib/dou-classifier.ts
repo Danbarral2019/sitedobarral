@@ -522,7 +522,7 @@ export class DOUClassifier {
         try {
           const regex = new RegExp(orgaoPattern, 'i');
           if (!regex.test(hierarchyText)) return false;
-        } catch (error) {
+        } catch {
           console.warn('Invalid regex pattern:', orgaoPattern);
         }
       }

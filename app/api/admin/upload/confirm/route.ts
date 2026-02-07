@@ -126,8 +126,8 @@ export async function POST(req: NextRequest) {
       return NextResponse.json(
         {
           error: 'Erro ao criar documento no banco de dados',
-          details: (error as any).message,
-          code: (error as any).code,
+          details: (error as { message?: string }).message,
+          code: (error as { code?: string }).code,
         },
         { status: 500 }
       );

@@ -7,7 +7,7 @@ import {
   Upload, FileText, Loader2, Plus,
   CheckCircle, XCircle, ExternalLink, Calendar, Tag,
   Search, AlertCircle, Clock, Eye, EyeOff,
-  ChevronLeft, ChevronRight, FolderUp, Info, ChevronDown, ChevronUp
+  ChevronLeft, ChevronRight, FolderUp, ChevronDown, ChevronUp
 } from 'lucide-react';
 import { courses } from '@/data/courses';
 import { useToast } from '@/hooks/use-toast';
@@ -15,7 +15,6 @@ import { FileDropzone } from '@/components/ui/file-dropzone';
 import { Progress } from '@/components/ui/progress';
 import { MultiFileDropzone } from '@/components/ui/multi-file-dropzone';
 import LeiArticleSelector from '@/components/LeiArticleSelector';
-import { safeParseArray } from '@/lib/utils';
 
 // Dynamic imports
 const DocumentAnalyzer = dynamic(() => import('@/components/DocumentAnalyzer'), {

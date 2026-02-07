@@ -3,7 +3,6 @@ import { withAdminAuth } from '@/lib/api-middleware';
 import {
   enrichTCUAcordaosBatch,
   type TCUPlanilhaData,
-  type TCUEnrichmentResult,
 } from '@/lib/tcu-scraper';
 
 /**
@@ -49,12 +48,10 @@ export const POST = withAdminAuth(async (request: NextRequest) => {
     const rowIndexes: number[] = documents.map(doc => doc.rowIndex);
 
     // Enriquece em lote com progresso
-    let processedCount = 0;
     const enrichmentResults = await enrichTCUAcordaosBatch(planilhaDataList, {
       delayMs: 1000, // 1 segundo entre requisições
       maxConcurrent: 3, // Máximo 3 requisições simultâneas
-      onProgress: (current, total, result) => {
-        processedCount = current;
+      onProgress: (current, total) => {
         console.log(`[TCU Enrich API] Progresso: ${current}/${total} (${Math.round(current / total * 100)}%)`);
       },
     });

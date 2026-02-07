@@ -149,7 +149,7 @@ export class LeiIndexer {
 
       // Filtrar por confiança mínima
       const filteredArticles = parsedResponse.articles
-        .filter((a: any) => a.confidence >= opts.minConfidence)
+        .filter((a: { confidence: number }) => a.confidence >= opts.minConfidence)
         .slice(0, opts.maxArticles);
 
       return {
@@ -219,6 +219,7 @@ export class LeiIndexer {
   /**
    * Chama Gemini via MCP (integração real)
    */
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   private static async callGeminiMCP(prompt: string, model: string): Promise<string> {
     // PLACEHOLDER: Esta função será substituída pela chamada real ao MCP Gemini
     // Por enquanto, retorna um resultado mockado para testes

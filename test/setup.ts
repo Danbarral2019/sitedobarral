@@ -86,6 +86,6 @@ vi.mock('@/lib/prisma', () => ({
 
 // Declaração de tipos para TypeScript reconhecer os matchers do jest-dom
 declare module 'vitest' {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-empty-object-type
   interface Assertion<T = any> extends jest.Matchers<void, T> {}
 }

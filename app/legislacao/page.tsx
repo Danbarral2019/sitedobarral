@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import {
   Search, Filter, Scale, Calendar, Building, ChevronDown,
   ChevronUp, ExternalLink, Download, BookOpen, Eye,
@@ -70,10 +70,6 @@ export default function LegislacaoPage() {
   const [expandedAct, setExpandedAct] = useState<string | null>(null);
   const [showFilters, setShowFilters] = useState(false);
 
-  useEffect(() => {
-    fetchActs();
-  }, [page, typeFilter, issuerFilter, yearFilter, searchTerm]);
-
   // Expandir automaticamente ato baseado no hash da URL
   useEffect(() => {
     const hash = window.location.hash.substring(1); // Remove o '#'
@@ -92,7 +88,7 @@ export default function LegislacaoPage() {
     }
   }, [acts]);
 
-  const fetchActs = async () => {
+  const fetchActs = useCallback(async () => {
     setIsLoading(true);
     try {
       const params = new URLSearchParams();
@@ -120,7 +116,11 @@ export default function LegislacaoPage() {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [page, limit, typeFilter, issuerFilter, yearFilter, searchTerm]);
+
+  useEffect(() => {
+    fetchActs();
+  }, [fetchActs]);
 
   const toggleExpand = (actId: string) => {
     setExpandedAct(expandedAct === actId ? null : actId);

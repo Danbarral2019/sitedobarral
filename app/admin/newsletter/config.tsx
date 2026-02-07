@@ -4,7 +4,7 @@
  * Configuração da lista de Newsletter
  */
 
-import { Mail, Trash2, Calendar, CheckCircle, Clock, XCircle, Users } from 'lucide-react';
+import { Mail, Trash2, Calendar, CheckCircle, XCircle, Users } from 'lucide-react';
 import { createListConfig } from '@/components/admin/ResourceListContainer';
 import { AdminListConfig } from '@/lib/types/admin-list';
 import { NewsletterSubscriber, deleteNewsletterSubscriber } from '@/lib/newsletter';

@@ -31,7 +31,7 @@ export async function GET(
     const conversationId = searchParams.get('conversationId');
 
     // Buscar histórico
-    const where: any = {
+    const where: Record<string, unknown> = {
       articleNumber,
       userId: authResult.userId,
       isPlaceholder: false, // Apenas perguntas com respostas reais

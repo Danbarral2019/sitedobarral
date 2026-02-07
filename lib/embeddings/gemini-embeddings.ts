@@ -228,7 +228,7 @@ export const EMBEDDING_CONFIG = {
 // Export
 // ===========================
 
-export default {
+const geminiEmbeddings = {
   generateEmbedding,
   generateBatchEmbeddings,
   generateQueryEmbedding,
@@ -237,3 +237,4 @@ export default {
   sqlToEmbedding,
   EMBEDDING_CONFIG,
 };
+export default geminiEmbeddings;

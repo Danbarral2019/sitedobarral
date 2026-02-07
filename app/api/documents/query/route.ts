@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { verifyAuth } from '@/lib/auth';
-import { semanticSearch, buildContextForLLM, formatSources } from '@/lib/embeddings/vector-search';
+import { semanticSearch, buildContextForLLM } from '@/lib/embeddings/vector-search';
 import { queryGeminiText } from '@/lib/gemini/cached-client';
 import { checkRateLimit } from '@/lib/cache/redis-client';
 

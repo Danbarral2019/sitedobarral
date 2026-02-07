@@ -23,7 +23,7 @@ export async function POST(request: NextRequest) {
     // Verifica JWT
     const { payload } = await jwtVerify(token, JWT_SECRET);
     const userId = payload.userId as string;
-    const userEmail = payload.email as string;
+    const _userEmail = payload.email as string;
 
     // 2. Busca informações do usuário
     const user = await prisma.user.findUnique({
@@ -232,7 +232,7 @@ export async function POST(request: NextRequest) {
               pdf.text('Tags: ' + tags.slice(0, 5).join(', '), margin + 6, currentY);
               currentY += 5;
             }
-          } catch (e) {
+          } catch {
             // ignore
           }
         }

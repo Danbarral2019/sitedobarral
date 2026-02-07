@@ -13,10 +13,12 @@
 // Load environment variables if not in production
 if (process.env.NODE_ENV !== 'production' && !process.env.R2_ACCOUNT_ID) {
   try {
+    /* eslint-disable @typescript-eslint/no-require-imports -- dynamic conditional loading at runtime */
     const dotenv = require('dotenv');
     const path = require('path');
+    /* eslint-enable @typescript-eslint/no-require-imports */
     dotenv.config({ path: path.resolve(process.cwd(), '.env.local') });
-  } catch (error) {
+  } catch {
     // dotenv not available, environment variables must be set externally
   }
 }
@@ -227,7 +229,7 @@ export async function downloadFromR2(key: string): Promise<Buffer> {
 
   // Convert stream to buffer
   const chunks: Uint8Array[] = [];
-  for await (const chunk of response.Body as any) {
+  for await (const chunk of response.Body as AsyncIterable<Uint8Array>) {
     chunks.push(chunk);
   }
 
@@ -247,8 +249,8 @@ export async function fileExistsInR2(key: string): Promise<boolean> {
     });
     await getR2Client().send(command);
     return true;
-  } catch (error: any) {
-    if (error.name === 'NotFound') {
+  } catch (error: unknown) {
+    if (error instanceof Error && error.name === 'NotFound') {
       return false;
     }
     throw error;
@@ -420,7 +422,7 @@ export function getMimeType(extension: string): string {
 // Export
 // ===========================
 
-export default {
+const r2Module = {
   // Upload
   uploadToR2,
   uploadFileFromPath,
@@ -451,3 +453,4 @@ export default {
   getFileExtension,
   getMimeType,
 };
+export default r2Module;

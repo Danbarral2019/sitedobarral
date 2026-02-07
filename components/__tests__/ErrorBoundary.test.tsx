@@ -11,13 +11,7 @@ import { ErrorBoundary, SectionErrorBoundary } from '../ErrorBoundary';
 // Mock console.error para não poluir output
 const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
 
-// Componente que lança erro para testes
-function ThrowError({ shouldThrow }: { shouldThrow: boolean }) {
-  if (shouldThrow) {
-    throw new Error('Test error message');
-  }
-  return <div>No error</div>;
-}
+
 
 // Componente com erro no render
 function BrokenComponent() {

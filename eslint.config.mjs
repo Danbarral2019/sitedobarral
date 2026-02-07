@@ -18,6 +18,9 @@ const eslintConfig = [
       "out/**",
       "build/**",
       "next-env.d.ts",
+      "scripts/**",
+      "FUNCIONALIDADES_FUTURAS/**",
+      "test-static-image.js",
     ],
   },
 ];

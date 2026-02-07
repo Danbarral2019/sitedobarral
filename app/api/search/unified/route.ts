@@ -172,7 +172,7 @@ export async function POST(req: NextRequest) {
     let documentResults: DocumentSearchResult[] = [];
 
     if (shouldSearchDocuments) {
-      const documentWhere: any = {};
+      const documentWhere: Record<string, unknown> = {};
 
       // Apply filters
       if (filters.courseId) {

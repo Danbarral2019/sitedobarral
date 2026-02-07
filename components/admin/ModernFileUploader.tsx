@@ -60,6 +60,7 @@ export function ModernFileUploader({
   maxFiles = 10,
   onUploadComplete,
   onUploadStart,
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   uploadEndpoint = '/api/admin/upload',
   autoUpload = false,
 }: ModernFileUploaderProps) {
@@ -488,6 +489,7 @@ export function ModernFileUploader({
                   {/* Preview or Icon */}
                   <div className="flex-shrink-0">
                     {uploadFile.preview ? (
+                      // eslint-disable-next-line @next/next/no-img-element
                       <img
                         src={uploadFile.preview}
                         alt={uploadFile.file.name}

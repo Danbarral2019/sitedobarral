@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { History, X, MessageSquare, Calendar, ThumbsUp, ThumbsDown, Loader2, FileDown } from 'lucide-react';
 import { generateConversationPDF } from '@/lib/pdf-generator';
 
@@ -33,13 +33,7 @@ export default function ArticleChatHistory({
   const [error, setError] = useState<string | null>(null);
   const [expandedMessageId, setExpandedMessageId] = useState<string | null>(null);
 
-  useEffect(() => {
-    if (isOpen) {
-      fetchHistory();
-    }
-  }, [isOpen, conversationId]);
-
-  const fetchHistory = async () => {
+  const fetchHistory = useCallback(async () => {
     setIsLoading(true);
     setError(null);
 
@@ -62,8 +56,10 @@ export default function ArticleChatHistory({
       } else if (data.conversations) {
         // Flatten all conversations
         const allMessages: HistoryMessage[] = [];
-        Object.values(data.conversations).forEach((conv: any) => {
-          allMessages.push(...conv);
+        Object.values(data.conversations).forEach((conv: unknown) => {
+          if (Array.isArray(conv)) {
+            allMessages.push(...conv);
+          }
         });
         // Sort by date descending
         allMessages.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
@@ -77,7 +73,13 @@ export default function ArticleChatHistory({
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [articleNumber, conversationId]);
+
+  useEffect(() => {
+    if (isOpen) {
+      fetchHistory();
+    }
+  }, [isOpen, conversationId, fetchHistory]);
 
   const groupMessagesByDate = (messages: HistoryMessage[]) => {
     const groups: Record<string, HistoryMessage[]> = {};

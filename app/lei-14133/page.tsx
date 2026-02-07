@@ -60,7 +60,7 @@ export default function Lei14133Page() {
   const [searchTerm, setSearchTerm] = useState('');
   const [expandAll, setExpandAll] = useState(false);
   const [artigos, setArtigos] = useState<Record<string, LeiArticle>>(LEI_14133_ARTIGOS_FALLBACK);
-  const [isLoadingArtigos, setIsLoadingArtigos] = useState(true);
+  const [, setIsLoadingArtigos] = useState(true);
   const [showAtosNormativos, setShowAtosNormativos] = useState(false);
   const [legislativeActs, setLegislativeActs] = useState<LegislativeAct[]>([]);
   const [isLoadingActs, setIsLoadingActs] = useState(false);

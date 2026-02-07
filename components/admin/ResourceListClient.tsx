@@ -21,10 +21,6 @@ import { useAdminList } from '@/hooks/use-admin-list';
 import { Pagination } from '@/components/ui/pagination';
 import {
   ResourceListClientProps,
-  FilterConfig,
-  ColumnConfig,
-  BatchAction,
-  RowAction,
 } from '@/lib/types/admin-list';
 
 export function ResourceListClient<T extends { id: string }>({

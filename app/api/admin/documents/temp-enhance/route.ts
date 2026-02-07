@@ -17,7 +17,7 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json();
-    const { title, description, category, leiArticles } = body;
+    const { title, description, category } = body;
 
     if (!title) {
       return NextResponse.json(

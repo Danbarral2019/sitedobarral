@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import AdminLayout from '@/components/AdminLayout';
 import {
@@ -44,11 +44,7 @@ export default function EditGlossaryTermPage() {
     isPublished: false,
   });
 
-  useEffect(() => {
-    loadTerm();
-  }, [termId]);
-
-  const loadTerm = async () => {
+  const loadTerm = useCallback(async () => {
     setIsLoading(true);
     try {
       const response = await fetch(`/api/admin/glossary/${termId}`);
@@ -98,7 +94,11 @@ export default function EditGlossaryTermPage() {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [termId, router]);
+
+  useEffect(() => {
+    loadTerm();
+  }, [loadTerm]);
 
   const [errors, setErrors] = useState<Record<string, string>>({});
 

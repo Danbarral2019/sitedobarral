@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { DocumentFormState } from './types';
 import Step1BasicInfo from './Step1BasicInfo';
@@ -173,7 +173,7 @@ export default function DocumentWizard({ documentId, initialData }: DocumentWiza
         throw new Error(errorData.error || 'Erro ao salvar documento');
       }
 
-      const data = await response.json();
+      await response.json();
 
       // Sucesso!
       alert(

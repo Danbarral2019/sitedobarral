@@ -357,6 +357,7 @@ export async function enrichTCUAcordao(
   planilhaData: TCUPlanilhaData
 ): Promise<TCUEnrichmentResult> {
   const startTime = Date.now();
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const { acordao, enunciado } = planilhaData;
 
   console.log(`[TCU Enrichment] Tentando buscar dados adicionais: ${acordao}`);
@@ -465,10 +466,12 @@ async function tryEnrichFromAPI(numeroAcordao: string): Promise<TCUEnrichmentRes
  * NOTA IMPORTANTE: Esta função faz scraping e pode quebrar se o site mudar.
  * Use como fallback quando a API não retornar dados suficientes.
  */
+/* eslint-disable @typescript-eslint/no-unused-vars */
 async function tryEnrichFromWebsite(
   numeroAcordao: string,
   enunciadoExistente: string
 ): Promise<TCUEnrichmentResult> {
+/* eslint-enable @typescript-eslint/no-unused-vars */
   try {
     // Por enquanto, retorna que não conseguiu buscar do site
     // Isso evita erros e permite que o sistema funcione só com dados da planilha

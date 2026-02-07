@@ -387,8 +387,8 @@ function DocumentDetails({ documentId, documentType = 'document' }: { documentId
 function LeiComentadaContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const { user } = useAuth();
-  const { isFavorite, toggleFavorite } = useFavorites();
+  useAuth();
+  useFavorites();
 
   // Estado da API
   const [loading, setLoading] = useState(true);
@@ -1076,8 +1076,6 @@ function LeiComentadaContent() {
                                   {isCapituloExpanded && (
                                     <div className="ml-4 mt-1 space-y-1">
                                       {capituloData.artigos.map((article) => {
-                                        const status = getArticleStatus(article.documentCount);
-                                        const StatusIcon = status.icon;
                                         const isSelected = selectedArticle?.numero === article.numero;
 
                                         return (

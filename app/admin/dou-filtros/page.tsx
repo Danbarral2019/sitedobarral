@@ -275,7 +275,7 @@ export default function DOUFiltrosPage() {
         throw new Error(error.error || 'Erro ao aprovar documento');
       }
 
-      const data = await response.json();
+      await response.json();
 
       toast({
         title: 'Documento Aprovado! ✅',

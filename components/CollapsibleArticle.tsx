@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
 import {
   ChevronDown,
@@ -44,20 +44,13 @@ export function CollapsibleArticle({
   const [isLoadingDocs, setIsLoadingDocs] = useState(false);
   const [docsLoaded, setDocsLoaded] = useState(false);
 
-  // Buscar documentos relacionados quando expandir pela primeira vez
-  useEffect(() => {
-    if (isExpanded && !docsLoaded) {
-      fetchRelatedDocuments();
-    }
-  }, [isExpanded]);
-
-  async function fetchRelatedDocuments() {
+  const fetchRelatedDocuments = useCallback(async () => {
     setIsLoadingDocs(true);
     try {
       const response = await fetch(`/api/lei-14133/articles?withDocuments=true`);
       if (response.ok) {
         const data = await response.json();
-        const articleData = data.articles.find((a: any) => a.numero === articleNum);
+        const articleData = data.articles.find((a: { numero: string; documents?: unknown[] }) => a.numero === articleNum);
         if (articleData && articleData.documents) {
           setRelatedDocs(articleData.documents);
         }
@@ -68,7 +61,14 @@ export function CollapsibleArticle({
     } finally {
       setIsLoadingDocs(false);
     }
-  }
+  }, [articleNum]);
+
+  // Buscar documentos relacionados quando expandir pela primeira vez
+  useEffect(() => {
+    if (isExpanded && !docsLoaded) {
+      fetchRelatedDocuments();
+    }
+  }, [isExpanded, docsLoaded, fetchRelatedDocuments]);
 
   // Verificar se está truncado
   const ementa = article.ementa || '';

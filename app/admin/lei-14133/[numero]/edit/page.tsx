@@ -123,7 +123,7 @@ export default function EditArtigoPage() {
         throw new Error('Erro ao salvar artigo');
       }
 
-      const data = await response.json();
+      await response.json();
       setSuccessMessage('Artigo salvo com sucesso! Recarregue a página para ver as mudanças aplicadas.');
       setOriginalData(formData);
 

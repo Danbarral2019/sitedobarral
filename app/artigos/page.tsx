@@ -3,7 +3,7 @@
 import { useState, useMemo, useEffect } from 'react';
 import Link from 'next/link';
 import { Search, BookOpen, ArrowRight, FileText, X, List, Hash } from 'lucide-react';
-import { LEI_14133_ARTIGOS as LEI_14133_ARTIGOS_FALLBACK, searchLeiArticles as searchLeiArticlesFallback, LeiArticle } from '@/data/lei-14133-artigos';
+import { LEI_14133_ARTIGOS as LEI_14133_ARTIGOS_FALLBACK, LeiArticle } from '@/data/lei-14133-artigos';
 import { LEI_14133_GRUPOS, getGroupById } from '@/data/lei-14133-grupos';
 import { formatArticleNumber } from '@/lib/article-utils';
 
@@ -74,7 +74,7 @@ export default function ArtigosIndexPage() {
       art.titulo.toLowerCase().includes(search) ||
       art.ementa.toLowerCase().includes(search)
     ).sort((a, b) => parseInt(a.numero) - parseInt(b.numero));
-  }, [articleSearch]);
+  }, [articleSearch, artigos]);
 
   const hasSearch = searchTerm.trim().length > 0;
 

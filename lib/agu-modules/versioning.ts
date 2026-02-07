@@ -39,7 +39,8 @@ export async function detectChanges(
   // Campos importantes (média importância)
   const importantFields = ['description', 'category', 'tags', 'alternativeUrls'];
 
-  // Campos menores (baixa importância)
+  // Campos menores (baixa importância) - usado na classificação de significância
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const minorFields = ['content'];
 
   // Comparar cada campo

@@ -1,5 +1,4 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { isAdmin } from './auth';
 import { rateLimiters } from './rate-limit';
 
 /**
@@ -124,6 +123,7 @@ export function withAuth(handler: ApiHandler): ApiHandler {
  * Retorna { error: true, response } se não for admin
  * Retorna { error: false, user } se for admin
  */
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 export async function verifyAdmin(request: NextRequest): Promise<
   | { error: true; response: NextResponse; user?: never }
   | { error: false; response?: never; user: import('./auth').AuthPayload }
