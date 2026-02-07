@@ -108,7 +108,7 @@ Regras:
     console.log(`[Search API] Buscando: "${searchQuery}"`);
 
     const geminiResult = await queryGeminiText(prompt, {
-      model: 'gemini-2.0-flash-exp',
+      model: 'gemini-2.0-flash',
       temperature: 0.3, // Baixa para respostas mais precisas
       maxOutputTokens: 1024,
       useCache: true,

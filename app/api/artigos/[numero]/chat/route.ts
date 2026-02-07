@@ -277,7 +277,7 @@ Responda agora:`;
     // Consultar Gemini com caching
     console.log(`🤖 Gemini Query for Article ${articleNumber}...`);
     const geminiResult = await queryGeminiText(prompt, {
-      model: 'gemini-2.0-flash-exp',
+      model: 'gemini-2.0-flash',
       temperature: 0.7,
       maxOutputTokens: 2048,
       useCache: true,
@@ -293,7 +293,7 @@ Responda agora:`;
         answer,
         isPlaceholder: false,
         aiProvider: 'gemini',
-        geminiModel: 'gemini-2.0-flash-exp',
+        geminiModel: 'gemini-2.0-flash',
         geminiTokens: geminiResult.tokens ? geminiResult.tokens.total : null,
         geminiLatency: geminiResult.latency,
         geminiCached: geminiResult.cached,
@@ -338,7 +338,7 @@ Responda agora:`;
           additionalDocsCount: crossReferenceDocs.length,
         } : null,
         gemini: {
-          model: 'gemini-2.0-flash-exp',
+          model: 'gemini-2.0-flash',
           cached: geminiResult.cached,
           latency: geminiResult.latency,
           tokens: geminiResult.tokens,
