@@ -26,6 +26,7 @@ import {
 } from '@/components/area-restrita';
 import DocumentDetailModal from '@/components/DocumentDetailModal';
 import DocumentsByCategory from '@/components/DocumentsByCategory';
+import HighlightedMaterials from '@/components/HighlightedMaterials';
 import CourseVideos from '@/components/CourseVideos';
 import RecommendedSites from '@/components/RecommendedSites';
 import { ArticleTreeNavigator } from '@/components/ArticleTreeNavigator';
@@ -193,6 +194,29 @@ export default function AreaRestritaPage() {
         }
 
         return { type: 'documents' as const, documents: docs, videos: [], sites: [], title };
+      }
+
+      case 'course-material': {
+        let docs: DocumentType[] = [];
+        let title = 'Materiais do Curso';
+
+        if (courseId) {
+          docs = courseDocuments[courseId] || [];
+          const course = courses.find((c) => c.id === courseId);
+          title = `Materiais - ${course?.title || 'Curso'}`;
+          if (category) {
+            docs = docs.filter((d) => d.category === category);
+          }
+        } else {
+          docs = Object.values(courseDocuments).flat();
+        }
+
+        // Filter to only course material categories
+        docs = docs.filter((d) =>
+          ['apostila', 'conteudo-programatico', 'bibliografia'].includes(d.category)
+        );
+
+        return { type: 'course-material' as const, documents: docs, videos: [], sites: [], title };
       }
 
       case 'lei':
@@ -448,6 +472,21 @@ export default function AreaRestritaPage() {
                         isFavorite={isFavorite}
                         toggleFavorite={(docId) => toggleFavorite(docId, contentTree.selection?.courseId || enrolledCourseIds[0] || '')}
                       />
+                    )}
+
+                    {/* Course Materials */}
+                    {currentContent.type === 'course-material' && currentContent.documents.length > 0 && (
+                      <HighlightedMaterials
+                        documents={currentContent.documents}
+                        courseId={contentTree.selection?.courseId || enrolledCourseIds[0] || ''}
+                        onDownload={handleDocumentClick}
+                      />
+                    )}
+
+                    {currentContent.type === 'course-material' && currentContent.documents.length === 0 && (
+                      <div className="bg-white rounded-2xl border-2 border-gray-200 p-8 text-center">
+                        <p className="text-gray-500">Nenhum material do curso disponível.</p>
+                      </div>
                     )}
 
                     {/* Lei 14.133 */}

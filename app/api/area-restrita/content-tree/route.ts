@@ -8,6 +8,15 @@ import type { ContentType, ContentTreeNode, ContentTreeResponse } from '@/lib/ty
 // Categorias que devem ser agrupadas sob "Pareceres"
 const PARECER_CATEGORIES = ['parecer', 'parecer-vinculante', 'decor'];
 
+// Categorias de materiais do curso (excluídas da árvore de documentos)
+const COURSE_MATERIAL_CATEGORIES = ['apostila', 'conteudo-programatico', 'bibliografia'];
+
+const COURSE_MATERIAL_LABELS: Record<string, string> = {
+  'apostila': 'Apostila',
+  'conteudo-programatico': 'Conteúdo Programático',
+  'bibliografia': 'Bibliografia',
+};
+
 // Mapeamento de categorias para nomes amigáveis
 const CATEGORY_LABELS: Record<string, string> = {
   'pareceres': 'Pareceres',
@@ -124,72 +133,166 @@ export async function GET(request: NextRequest) {
       prisma.legislativeAct.count(),
     ]);
 
-    // Build Documents tree node
-    const docsTotal = documentsByCourseCounts.reduce((sum, g) => sum + g._count.id, 0);
-    totalCount += docsTotal;
+    // Separate course materials from regular documents
+    const materialCounts = documentsByCourseCounts.filter(g =>
+      COURSE_MATERIAL_CATEGORIES.includes(g.category)
+    );
+    const regularDocCounts = documentsByCourseCounts.filter(g =>
+      !COURSE_MATERIAL_CATEGORIES.includes(g.category)
+    );
 
-    // Group documents by course
-    const docsByCourse: Record<string, { count: number; categories: Record<string, number> }> = {};
+    // === Build "Materiais do Curso" tree node ===
+    const materialsTotal = materialCounts.reduce((sum, g) => sum + g._count.id, 0);
+    totalCount += materialsTotal;
 
-    documentsByCourseCounts.forEach((group) => {
-      const courseId = group.courseId || 'common';
-      if (!docsByCourse[courseId]) {
-        docsByCourse[courseId] = { count: 0, categories: {} };
-      }
-      docsByCourse[courseId].count += group._count.id;
-      // Mesclar parecer, parecer-vinculante e decor sob "pareceres"
-      const displayCategory = PARECER_CATEGORIES.includes(group.category)
-        ? 'pareceres'
-        : group.category;
-      docsByCourse[courseId].categories[displayCategory] =
-        (docsByCourse[courseId].categories[displayCategory] || 0) + group._count.id;
-    });
+    if (materialsTotal > 0) {
+      // Group materials: merge common (courseId=null) into each enrolled course
+      const materialsByCourse: Record<string, Record<string, number>> = {};
+      const commonMaterials: Record<string, number> = {};
 
-    // Build document children (by course)
-    const documentChildren: ContentTreeNode[] = [];
-
-    // Add common documents if any
-    if (docsByCourse['common']) {
-      const commonCats = Object.entries(docsByCourse['common'].categories).map(([cat, count]) => ({
-        id: `doc-common-${cat}`,
-        type: 'document' as const,
-        label: getCategoryLabel(cat),
-        count,
-        category: cat,
-      }));
-
-      documentChildren.push({
-        id: 'doc-common',
-        type: 'document',
-        label: 'Materiais Gerais',
-        count: docsByCourse['common'].count,
-        children: commonCats,
+      materialCounts.forEach((group) => {
+        if (!group.courseId) {
+          commonMaterials[group.category] = (commonMaterials[group.category] || 0) + group._count.id;
+        } else {
+          if (!materialsByCourse[group.courseId]) materialsByCourse[group.courseId] = {};
+          materialsByCourse[group.courseId][group.category] =
+            (materialsByCourse[group.courseId][group.category] || 0) + group._count.id;
+        }
       });
-    }
 
-    // Add course-specific documents
-    enrolledCourseIds.forEach((courseId) => {
-      if (docsByCourse[courseId]) {
-        const course = courses.find(c => c.id === courseId);
-        const courseCats = Object.entries(docsByCourse[courseId].categories).map(([cat, count]) => ({
-          id: `doc-${courseId}-${cat}`,
-          type: 'document' as const,
-          label: getCategoryLabel(cat),
+      // Merge common materials into each enrolled course
+      enrolledCourseIds.forEach((cId) => {
+        if (!materialsByCourse[cId]) materialsByCourse[cId] = {};
+        Object.entries(commonMaterials).forEach(([cat, count]) => {
+          materialsByCourse[cId][cat] = (materialsByCourse[cId][cat] || 0) + count;
+        });
+      });
+
+      const buildMaterialCategoryNodes = (courseId: string | undefined, cats: Record<string, number>): ContentTreeNode[] =>
+        Object.entries(cats).map(([cat, count]) => ({
+          id: courseId ? `mat-${courseId}-${cat}` : `mat-${cat}`,
+          type: 'course-material' as ContentType,
+          label: COURSE_MATERIAL_LABELS[cat] || cat,
           count,
           courseId,
           category: cat,
         }));
 
-        documentChildren.push({
-          id: `doc-${courseId}`,
-          type: 'document',
-          label: course?.title || 'Curso',
-          count: docsByCourse[courseId].count,
-          courseId,
-          children: courseCats,
-        });
+      let materialChildren: ContentTreeNode[] | undefined;
+
+      if (enrolledCourseIds.length === 1) {
+        // Single course: categories directly under "Materiais do Curso"
+        const cId = enrolledCourseIds[0];
+        const cats = materialsByCourse[cId] || {};
+        materialChildren = buildMaterialCategoryNodes(cId, cats);
+      } else {
+        // Multiple courses: group by course
+        materialChildren = enrolledCourseIds
+          .filter((cId) => materialsByCourse[cId] && Object.keys(materialsByCourse[cId]).length > 0)
+          .map((cId) => {
+            const course = courses.find(c => c.id === cId);
+            const cats = materialsByCourse[cId];
+            const courseTotal = Object.values(cats).reduce((s, n) => s + n, 0);
+            return {
+              id: `mat-${cId}`,
+              type: 'course-material' as ContentType,
+              label: course?.title || 'Curso',
+              count: courseTotal,
+              courseId: cId,
+              children: buildMaterialCategoryNodes(cId, cats),
+            };
+          });
+      }
+
+      tree.push({
+        id: 'course-materials',
+        type: 'course-material' as ContentType,
+        label: 'Materiais do Curso',
+        count: materialsTotal,
+        children: materialChildren && materialChildren.length > 0 ? materialChildren : undefined,
+      });
+    }
+
+    // === Build Documents tree node (excluding course materials) ===
+    const docsTotal = regularDocCounts.reduce((sum, g) => sum + g._count.id, 0);
+    totalCount += docsTotal;
+
+    // Group documents by course, merging common into each enrolled course
+    const docsByCourse: Record<string, { count: number; categories: Record<string, number> }> = {};
+    const commonDocCategories: Record<string, number> = {};
+
+    regularDocCounts.forEach((group) => {
+      const displayCategory = PARECER_CATEGORIES.includes(group.category)
+        ? 'pareceres'
+        : group.category;
+
+      if (!group.courseId) {
+        // Common document: accumulate separately for merging
+        commonDocCategories[displayCategory] = (commonDocCategories[displayCategory] || 0) + group._count.id;
+      } else {
+        if (!docsByCourse[group.courseId]) {
+          docsByCourse[group.courseId] = { count: 0, categories: {} };
+        }
+        docsByCourse[group.courseId].count += group._count.id;
+        docsByCourse[group.courseId].categories[displayCategory] =
+          (docsByCourse[group.courseId].categories[displayCategory] || 0) + group._count.id;
       }
     });
+
+    // Merge common documents into each enrolled course
+    enrolledCourseIds.forEach((courseId) => {
+      if (!docsByCourse[courseId]) {
+        docsByCourse[courseId] = { count: 0, categories: {} };
+      }
+      Object.entries(commonDocCategories).forEach(([cat, count]) => {
+        docsByCourse[courseId].count += count;
+        docsByCourse[courseId].categories[cat] = (docsByCourse[courseId].categories[cat] || 0) + count;
+      });
+    });
+
+    // Build document children
+    const documentChildren: ContentTreeNode[] = [];
+
+    if (enrolledCourseIds.length === 1) {
+      // Single course: categories directly under "Documentos"
+      const courseId = enrolledCourseIds[0];
+      if (docsByCourse[courseId]) {
+        Object.entries(docsByCourse[courseId].categories).map(([cat, count]) => {
+          documentChildren.push({
+            id: `doc-${courseId}-${cat}`,
+            type: 'document' as const,
+            label: getCategoryLabel(cat),
+            count,
+            courseId,
+            category: cat,
+          });
+        });
+      }
+    } else {
+      // Multiple courses: group by course
+      enrolledCourseIds.forEach((courseId) => {
+        if (docsByCourse[courseId] && docsByCourse[courseId].count > 0) {
+          const course = courses.find(c => c.id === courseId);
+          const courseCats = Object.entries(docsByCourse[courseId].categories).map(([cat, count]) => ({
+            id: `doc-${courseId}-${cat}`,
+            type: 'document' as const,
+            label: getCategoryLabel(cat),
+            count,
+            courseId,
+            category: cat,
+          }));
+
+          documentChildren.push({
+            id: `doc-${courseId}`,
+            type: 'document',
+            label: course?.title || 'Curso',
+            count: docsByCourse[courseId].count,
+            courseId,
+            children: courseCats,
+          });
+        }
+      });
+    }
 
     tree.push({
       id: 'documents',

@@ -1,7 +1,7 @@
 // Types for Global Search functionality in Area Restrita
 
 // Content type categories with their respective colors and icons
-export type ContentType = 'document' | 'lei' | 'glossary' | 'faq' | 'video' | 'site' | 'legislative-act';
+export type ContentType = 'document' | 'course-material' | 'lei' | 'glossary' | 'faq' | 'video' | 'site' | 'legislative-act';
 
 export const CONTENT_TYPE_CONFIG: Record<ContentType, {
   label: string;
@@ -18,6 +18,14 @@ export const CONTENT_TYPE_CONFIG: Record<ContentType, {
     bgColor: 'bg-brand-50',
     borderColor: 'border-brand-200',
     icon: 'FileText',
+  },
+  'course-material': {
+    label: 'Material do Curso',
+    labelPlural: 'Materiais do Curso',
+    color: 'text-amber-600',
+    bgColor: 'bg-amber-50',
+    borderColor: 'border-amber-200',
+    icon: 'BookOpen',
   },
   lei: {
     label: 'Lei 14.133',
