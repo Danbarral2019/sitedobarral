@@ -29,6 +29,7 @@ import DocumentsByCategory from '@/components/DocumentsByCategory';
 import CourseVideos from '@/components/CourseVideos';
 import RecommendedSites from '@/components/RecommendedSites';
 import { ArticleTreeNavigator } from '@/components/ArticleTreeNavigator';
+import LegislativeActsPanel from '@/components/LegislativeActsPanel';
 import type { DocumentResult } from '@/lib/types/global-search';
 
 // Categorias que devem ser agrupadas sob "Pareceres"
@@ -456,20 +457,9 @@ export default function AreaRestritaPage() {
                       />
                     )}
 
-                    {/* Atos Normativos - redirect to Lei 14.133 page */}
+                    {/* Atos Normativos Infralegais */}
                     {currentContent.type === 'legislative-act' && (
-                      <div className="bg-white rounded-2xl border-2 border-gray-200 p-8 text-center">
-                        <p className="text-gray-600 mb-4">
-                          Os atos normativos infralegais estão disponíveis na página da Lei 14.133.
-                        </p>
-                        <Link
-                          href="/lei-14133"
-                          className="inline-flex items-center gap-2 px-6 py-3 bg-amber-600 text-white font-medium rounded-xl hover:bg-amber-700 transition-colors"
-                        >
-                          Acessar Atos Normativos
-                          <ChevronRight className="w-4 h-4" />
-                        </Link>
-                      </div>
+                      <LegislativeActsPanel />
                     )}
 
                     {/* Glossary Redirect */}
