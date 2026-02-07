@@ -69,10 +69,9 @@ export async function POST(req: NextRequest) {
     }
 
     const userId = authResult.user.userId;
-    const isAdmin = authResult.user.role === 'admin';
 
     // 2. Rate limiting (10 queries per minute for non-admins)
-    if (!isAdmin) {
+    if (authResult.user.role !== 'admin') {
       const rateLimitKey = `query-rate-limit:${userId}`;
       const rateLimitResult = await checkRateLimit(rateLimitKey, 10, 60);
 
@@ -120,51 +119,9 @@ export async function POST(req: NextRequest) {
     console.log(`🔍 Query from user ${userId}: "${query}"`);
     console.log(`   Filters:`, filters);
 
-    // 5. Determine course access for non-admins
-    let allowedCourseId: string | undefined;
-
-    if (!isAdmin) {
-      // Get user's enrolled course IDs
-      const user = await prisma.user.findUnique({
-        where: { id: userId },
-        select: {
-          enrollments: {
-            where: {
-              OR: [
-                { expiresAt: { gte: new Date() } },
-                { isLifetime: true },
-              ],
-            },
-            select: {
-              courseId: true,
-            },
-          },
-        },
-      });
-
-      const enrolledCourseIds = user?.enrollments.map(e => e.courseId) || [];
-
-      // If filter specifies a course, verify access
-      if (filters.courseId) {
-        if (!enrolledCourseIds.includes(filters.courseId)) {
-          return NextResponse.json(
-            { success: false, error: 'Not enrolled in this course' },
-            { status: 403 }
-          );
-        }
-        allowedCourseId = filters.courseId;
-      } else if (enrolledCourseIds.length > 0) {
-        // Default to first enrolled course if no filter
-        allowedCourseId = enrolledCourseIds[0];
-      }
-    } else {
-      // Admin can access any course
-      allowedCourseId = filters.courseId;
-    }
-
-    // 6. Perform semantic search using embeddings
+    // 5. Perform semantic search using embeddings
+    // Todos os documentos indexados ficam visiveis para qualquer usuario autenticado
     const searchResponse = await semanticSearch(query, {
-      courseId: allowedCourseId,
       category: filters.category,
       limit: maxResults,
       threshold: 0.5, // Minimum 50% similarity
