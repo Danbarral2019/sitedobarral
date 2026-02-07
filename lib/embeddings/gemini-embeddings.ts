@@ -1,21 +1,21 @@
 /**
  * Gemini Embeddings Client
  *
- * Wrapper para o modelo text-embedding-004 da Google
+ * Wrapper para o modelo gemini-embedding-001 da Google
  * Free tier: 1500 req/min
  *
  * Documentacao: https://ai.google.dev/gemini-api/docs/embeddings
  */
 
-import { GoogleGenerativeAI } from '@google/generative-ai';
+import { GoogleGenerativeAI, type EmbedContentRequest, type BatchEmbedContentsRequest } from '@google/generative-ai';
 
 // ===========================
 // Configuration
 // ===========================
 
 const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
-const EMBEDDING_MODEL = 'text-embedding-004';
-const EMBEDDING_DIMENSION = 768; // Dimensao do text-embedding-004
+const EMBEDDING_MODEL = 'gemini-embedding-001';
+const EMBEDDING_DIMENSION = 768; // Nosso banco usa vector(768); gemini-embedding-001 default é 3072
 
 // Lazy-loaded client
 let genAI: GoogleGenerativeAI | null = null;
@@ -64,7 +64,13 @@ export async function generateEmbedding(text: string): Promise<EmbeddingResult> 
 
   const model = getGenAI().getGenerativeModel({ model: EMBEDDING_MODEL });
 
-  const result = await model.embedContent(text);
+  // outputDimensionality não está nos tipos do SDK mas a API aceita o campo
+  const request = {
+    content: { parts: [{ text }], role: 'user' as const },
+    outputDimensionality: EMBEDDING_DIMENSION,
+  } as EmbedContentRequest;
+
+  const result = await model.embedContent(request);
   const embedding = result.embedding.values;
 
   return {
@@ -110,12 +116,15 @@ export async function generateBatchEmbeddings(
   for (let i = 0; i < validTexts.length; i += BATCH_SIZE) {
     const batch = validTexts.slice(i, i + BATCH_SIZE);
 
-    // Usa batchEmbedContents para eficiencia
-    const result = await model.batchEmbedContents({
+    // outputDimensionality não está nos tipos do SDK mas a API aceita o campo
+    const batchRequest = {
       requests: batch.map(text => ({
-        content: { parts: [{ text }], role: 'user' },
+        content: { parts: [{ text }], role: 'user' as const },
+        outputDimensionality: EMBEDDING_DIMENSION,
       })),
-    });
+    } as BatchEmbedContentsRequest;
+
+    const result = await model.batchEmbedContents(batchRequest);
 
     const batchEmbeddings = result.embeddings.map(e => e.values);
     allEmbeddings.push(...batchEmbeddings);
