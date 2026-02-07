@@ -26,8 +26,10 @@ interface GlobalSearchBarProps {
   activeTypes: ContentType[];
   onToggleType: (type: ContentType) => void;
   onFiltersClick?: () => void;
-  onAIClick?: () => void;
-  showAIButton?: boolean;
+  aiEnabled: boolean;
+  onAIToggle: () => void;
+  isAiLoading: boolean;
+  onSubmit: () => void;
   placeholder?: string;
 }
 
@@ -49,8 +51,10 @@ export function GlobalSearchBar({
   activeTypes,
   onToggleType,
   onFiltersClick,
-  onAIClick,
-  showAIButton = true,
+  aiEnabled,
+  onAIToggle,
+  isAiLoading,
+  onSubmit,
   placeholder = 'Buscar em todo o acervo...',
 }: GlobalSearchBarProps) {
   const inputRef = useRef<HTMLInputElement>(null);
@@ -84,6 +88,13 @@ export function GlobalSearchBar({
     return () => document.removeEventListener('keydown', handleKeyDown);
   }, [query, onClear]);
 
+  const handleInputKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      onSubmit();
+    }
+  };
+
   const hasResults = counts.total > 0;
 
   return (
@@ -105,6 +116,7 @@ export function GlobalSearchBar({
           type="text"
           value={query}
           onChange={(e) => onQueryChange(e.target.value)}
+          onKeyDown={handleInputKeyDown}
           placeholder={placeholder}
           className="flex-1 text-base outline-none placeholder:text-gray-400 text-gray-900"
         />
@@ -122,16 +134,23 @@ export function GlobalSearchBar({
             </button>
           )}
 
-          {/* AI Button */}
-          {showAIButton && onAIClick && (
-            <button
-              onClick={onAIClick}
-              className="flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium text-purple-700 bg-purple-50 hover:bg-purple-100 rounded-lg transition-colors border border-purple-200"
-            >
+          {/* AI Toggle Button */}
+          <button
+            onClick={onAIToggle}
+            className={`flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium rounded-lg transition-colors border ${
+              aiEnabled
+                ? 'text-purple-700 bg-purple-50 hover:bg-purple-100 border-purple-200'
+                : 'text-gray-400 bg-gray-50 hover:bg-gray-100 border-gray-200'
+            }`}
+            title={aiEnabled ? 'Desativar busca com IA' : 'Ativar busca com IA'}
+          >
+            {isAiLoading ? (
+              <Loader2 className="w-4 h-4 animate-spin" />
+            ) : (
               <Sparkles className="w-4 h-4" />
-              <span className="hidden sm:inline">IA</span>
-            </button>
-          )}
+            )}
+            <span className="hidden sm:inline">IA</span>
+          </button>
 
           {/* Filters Button */}
           {onFiltersClick && (

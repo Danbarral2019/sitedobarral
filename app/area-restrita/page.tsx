@@ -246,10 +246,6 @@ export default function AreaRestritaPage() {
     await logout();
   };
 
-  const handleAIClick = () => {
-    router.push('/area-restrita/assistente');
-  };
-
   // Get selected label for mobile trigger
   const selectedLabel = useMemo(() => {
     if (!contentTree.selection) return undefined;
@@ -338,8 +334,10 @@ export default function AreaRestritaPage() {
             counts={search.counts}
             activeTypes={search.filters.types}
             onToggleType={search.toggleType}
-            onAIClick={handleAIClick}
-            showAIButton={true}
+            aiEnabled={search.aiEnabled}
+            onAIToggle={() => search.setAiEnabled(!search.aiEnabled)}
+            isAiLoading={search.isAiLoading}
+            onSubmit={search.triggerAISearch}
           />
         </div>
 
@@ -404,6 +402,10 @@ export default function AreaRestritaPage() {
                 onArticleClick={(num) => router.push(`/artigo/${num}`)}
                 isFavorite={isFavorite}
                 onToggleFavorite={(docId) => toggleFavorite(docId, enrolledCourseIds[0] || '')}
+                aiAnswer={search.aiAnswer}
+                aiSources={search.aiSources}
+                isAiLoading={search.isAiLoading}
+                aiError={search.aiError}
               />
             ) : (
               /* Tree Navigation Content */

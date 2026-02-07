@@ -15,6 +15,8 @@ import {
   Heart,
   Download,
   Play,
+  Sparkles,
+  AlertCircle,
 } from 'lucide-react';
 import type {
   SearchResultItem,
@@ -27,6 +29,7 @@ import type {
   SiteResult,
 } from '@/lib/types/global-search';
 import { CONTENT_TYPE_CONFIG } from '@/lib/types/global-search';
+import type { AISource } from '@/hooks/use-global-search';
 
 interface SearchResultsListProps {
   results: SearchResultItem[];
@@ -36,6 +39,10 @@ interface SearchResultsListProps {
   onArticleClick?: (articleNum: string) => void;
   isFavorite?: (docId: string) => boolean;
   onToggleFavorite?: (docId: string) => void;
+  aiAnswer?: string | null;
+  aiSources?: AISource[];
+  isAiLoading?: boolean;
+  aiError?: string | null;
 }
 
 const TYPE_ICONS: Record<ContentType, typeof FileText> = {
@@ -62,6 +69,97 @@ function highlightText(text: string, query: string): React.ReactNode {
     ) : (
       part
     )
+  );
+}
+
+// AI Answer Card
+function AIAnswerCard({
+  answer,
+  sources,
+  isLoading,
+  error,
+}: {
+  answer?: string | null;
+  sources?: AISource[];
+  isLoading?: boolean;
+  error?: string | null;
+}) {
+  const [isExpanded, setIsExpanded] = useState(false);
+
+  // Loading state
+  if (isLoading) {
+    return (
+      <div className="bg-gradient-to-r from-purple-50 to-indigo-50 rounded-2xl border border-purple-200 p-5 animate-pulse">
+        <div className="flex items-center gap-2 mb-3">
+          <div className="w-5 h-5 rounded bg-purple-200" />
+          <div className="h-4 bg-purple-200 rounded w-24" />
+        </div>
+        <div className="space-y-2">
+          <div className="h-3 bg-purple-100 rounded w-full" />
+          <div className="h-3 bg-purple-100 rounded w-5/6" />
+          <div className="h-3 bg-purple-100 rounded w-4/6" />
+        </div>
+      </div>
+    );
+  }
+
+  // Error state
+  if (error) {
+    return (
+      <div className="bg-red-50 rounded-2xl border border-red-200 p-5">
+        <div className="flex items-center gap-2 text-red-700">
+          <AlertCircle className="w-5 h-5 flex-shrink-0" />
+          <span className="text-sm font-medium">{error}</span>
+        </div>
+      </div>
+    );
+  }
+
+  // No answer
+  if (!answer) return null;
+
+  return (
+    <div className="bg-gradient-to-r from-purple-50 to-indigo-50 rounded-2xl border border-purple-200 p-5 shadow-sm">
+      {/* Header */}
+      <div className="flex items-center gap-2 mb-3">
+        <Sparkles className="w-5 h-5 text-purple-600" />
+        <h3 className="font-bold text-purple-900 text-sm">Análise IA</h3>
+      </div>
+
+      {/* Answer text */}
+      <div className="text-sm text-gray-800 leading-relaxed">
+        <p className={isExpanded ? '' : 'line-clamp-6'}>{answer}</p>
+        {answer.length > 400 && (
+          <button
+            onClick={() => setIsExpanded(!isExpanded)}
+            className="mt-2 text-purple-600 hover:text-purple-800 text-xs font-medium transition-colors"
+          >
+            {isExpanded ? 'Ver menos' : 'Ver mais'}
+          </button>
+        )}
+      </div>
+
+      {/* Sources */}
+      {sources && sources.length > 0 && (
+        <div className="mt-4 pt-3 border-t border-purple-200/50">
+          <p className="text-xs font-medium text-purple-700 mb-2">Fontes consultadas:</p>
+          <div className="flex flex-wrap gap-2">
+            {sources.map((source) => (
+              <span
+                key={source.documentId}
+                className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-white/70 border border-purple-200 rounded-lg text-xs text-purple-800"
+                title={source.excerpt}
+              >
+                <span className="truncate max-w-[180px]">{source.title}</span>
+                <span className="text-purple-500 font-medium">
+                  {Math.round(source.relevance * 100)}%
+                </span>
+              </span>
+            ))}
+          </div>
+        </div>
+      )}
+    </div>
   );
 }
 
@@ -340,8 +438,14 @@ export function SearchResultsList({
   onArticleClick,
   isFavorite,
   onToggleFavorite,
+  aiAnswer,
+  aiSources,
+  isAiLoading,
+  aiError,
 }: SearchResultsListProps) {
-  if (isLoading) {
+  const showAiCard = isAiLoading || aiError || aiAnswer;
+
+  if (isLoading && !showAiCard) {
     return (
       <div className="space-y-4">
         {[1, 2, 3].map((i) => (
@@ -359,7 +463,7 @@ export function SearchResultsList({
     );
   }
 
-  if (results.length === 0) {
+  if (results.length === 0 && !showAiCard) {
     return null;
   }
 
@@ -377,6 +481,34 @@ export function SearchResultsList({
 
   return (
     <div className="space-y-6">
+      {/* AI Answer Card - appears above results */}
+      {showAiCard && (
+        <AIAnswerCard
+          answer={aiAnswer}
+          sources={aiSources}
+          isLoading={isAiLoading}
+          error={aiError}
+        />
+      )}
+
+      {/* Loading skeleton for traditional results */}
+      {isLoading && results.length === 0 && (
+        <div className="space-y-4">
+          {[1, 2, 3].map((i) => (
+            <div key={i} className="bg-white rounded-xl border border-gray-200 p-4 animate-pulse">
+              <div className="flex items-start gap-3">
+                <div className="w-9 h-9 rounded-lg bg-gray-200" />
+                <div className="flex-1">
+                  <div className="h-4 bg-gray-200 rounded w-3/4 mb-2" />
+                  <div className="h-3 bg-gray-200 rounded w-1/2" />
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* Grouped traditional results */}
       {(Object.entries(groupedResults) as [ContentType, SearchResultItem[]][]).map(
         ([type, items]) => {
           const config = CONTENT_TYPE_CONFIG[type];

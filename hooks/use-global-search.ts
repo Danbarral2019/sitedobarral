@@ -8,8 +8,18 @@ import type {
   SearchResultItem,
 } from '@/lib/types/global-search';
 
+export interface AISource {
+  documentId: string;
+  title: string;
+  category: string;
+  relevance: number;
+  excerpt: string;
+  url?: string;
+}
+
 interface UseGlobalSearchOptions {
   debounceMs?: number;
+  aiDebounceMs?: number;
   minQueryLength?: number;
   initialFilters?: Partial<GlobalSearchFilters>;
 }
@@ -23,6 +33,14 @@ interface UseGlobalSearchReturn {
   error: string | null;
   isSearchActive: boolean;
 
+  // AI State
+  aiAnswer: string | null;
+  aiSources: AISource[];
+  isAiLoading: boolean;
+  aiError: string | null;
+  aiEnabled: boolean;
+  setAiEnabled: (enabled: boolean) => void;
+
   // Filters
   filters: GlobalSearchFilters;
   updateFilters: (newFilters: Partial<GlobalSearchFilters>) => void;
@@ -32,6 +50,7 @@ interface UseGlobalSearchReturn {
   setQuery: (query: string) => void;
   search: (query: string) => Promise<void>;
   clearSearch: () => void;
+  triggerAISearch: () => void;
 
   // Type toggles
   toggleType: (type: ContentType) => void;
@@ -56,7 +75,7 @@ const DEFAULT_COUNTS: GlobalSearchResponse['counts'] = {
 };
 
 export function useGlobalSearch(options: UseGlobalSearchOptions = {}): UseGlobalSearchReturn {
-  const { debounceMs = 300, minQueryLength = 2, initialFilters = {} } = options;
+  const { debounceMs = 300, aiDebounceMs = 1500, minQueryLength = 2, initialFilters = {} } = options;
 
   // State
   const [query, setQueryState] = useState('');
@@ -69,12 +88,99 @@ export function useGlobalSearch(options: UseGlobalSearchOptions = {}): UseGlobal
     ...initialFilters,
   });
 
+  // AI State
+  const [aiAnswer, setAiAnswer] = useState<string | null>(null);
+  const [aiSources, setAiSources] = useState<AISource[]>([]);
+  const [isAiLoading, setIsAiLoading] = useState(false);
+  const [aiError, setAiError] = useState<string | null>(null);
+  const [aiEnabled, setAiEnabled] = useState(true);
+
   // Refs
   const abortControllerRef = useRef<AbortController | null>(null);
   const debounceTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const aiAbortControllerRef = useRef<AbortController | null>(null);
+  const aiDebounceTimerRef = useRef<NodeJS.Timeout | null>(null);
 
   // Computed
   const isSearchActive = query.length >= minQueryLength;
+
+  // AI Search function
+  const searchAI = useCallback(
+    async (searchQuery: string) => {
+      // Cancel previous AI request
+      if (aiAbortControllerRef.current) {
+        aiAbortControllerRef.current.abort();
+      }
+
+      if (searchQuery.length < minQueryLength) {
+        setAiAnswer(null);
+        setAiSources([]);
+        setIsAiLoading(false);
+        return;
+      }
+
+      setIsAiLoading(true);
+      setAiError(null);
+
+      const controller = new AbortController();
+      aiAbortControllerRef.current = controller;
+
+      try {
+        const response = await fetch('/api/documents/query', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            query: searchQuery,
+            maxResults: 5,
+            useCache: true,
+          }),
+          signal: controller.signal,
+        });
+
+        if (response.status === 429) {
+          if (!controller.signal.aborted) {
+            setAiError('Limite de consultas atingido. Aguarde um momento e tente novamente.');
+            setAiAnswer(null);
+            setAiSources([]);
+          }
+          return;
+        }
+
+        if (!response.ok) {
+          throw new Error('Falha na busca com IA');
+        }
+
+        const data = await response.json();
+
+        if (!controller.signal.aborted) {
+          setAiAnswer(data.synthesizedAnswer || null);
+          setAiSources(
+            (data.results || []).map((r: AISource) => ({
+              documentId: r.documentId,
+              title: r.title,
+              category: r.category,
+              relevance: r.relevance,
+              excerpt: r.excerpt,
+              url: r.url,
+            }))
+          );
+        }
+      } catch (err) {
+        if (err instanceof Error && err.name !== 'AbortError') {
+          if (!controller.signal.aborted) {
+            setAiError(err.message);
+            setAiAnswer(null);
+            setAiSources([]);
+          }
+        }
+      } finally {
+        if (!controller.signal.aborted) {
+          setIsAiLoading(false);
+        }
+      }
+    },
+    [minQueryLength]
+  );
 
   // Search function
   const search = useCallback(
@@ -134,14 +240,30 @@ export function useGlobalSearch(options: UseGlobalSearchOptions = {}): UseGlobal
     [filters.types, minQueryLength]
   );
 
+  // Trigger AI search immediately (e.g. on Enter)
+  const triggerAISearch = useCallback(() => {
+    if (!aiEnabled || query.length < minQueryLength) return;
+
+    // Cancel pending AI debounce
+    if (aiDebounceTimerRef.current) {
+      clearTimeout(aiDebounceTimerRef.current);
+      aiDebounceTimerRef.current = null;
+    }
+
+    searchAI(query);
+  }, [aiEnabled, query, minQueryLength, searchAI]);
+
   // Debounced query change
   const setQuery = useCallback(
     (newQuery: string) => {
       setQueryState(newQuery);
 
-      // Clear previous debounce timer
+      // Clear previous debounce timers
       if (debounceTimerRef.current) {
         clearTimeout(debounceTimerRef.current);
+      }
+      if (aiDebounceTimerRef.current) {
+        clearTimeout(aiDebounceTimerRef.current);
       }
 
       // If query is empty, clear results immediately
@@ -149,6 +271,13 @@ export function useGlobalSearch(options: UseGlobalSearchOptions = {}): UseGlobal
         setResults([]);
         setCounts(DEFAULT_COUNTS);
         setIsLoading(false);
+        setAiAnswer(null);
+        setAiSources([]);
+        setIsAiLoading(false);
+        setAiError(null);
+        if (aiAbortControllerRef.current) {
+          aiAbortControllerRef.current.abort();
+        }
         return;
       }
 
@@ -157,12 +286,20 @@ export function useGlobalSearch(options: UseGlobalSearchOptions = {}): UseGlobal
         setIsLoading(true);
       }
 
-      // Debounce the search
+      // Debounce the text search (300ms)
       debounceTimerRef.current = setTimeout(() => {
         search(newQuery);
       }, debounceMs);
+
+      // Debounce the AI search (1500ms)
+      if (aiEnabled && newQuery.length >= minQueryLength) {
+        setIsAiLoading(true);
+        aiDebounceTimerRef.current = setTimeout(() => {
+          searchAI(newQuery);
+        }, aiDebounceMs);
+      }
     },
-    [debounceMs, minQueryLength, search]
+    [debounceMs, aiDebounceMs, minQueryLength, search, searchAI, aiEnabled]
   );
 
   // Clear search
@@ -173,11 +310,21 @@ export function useGlobalSearch(options: UseGlobalSearchOptions = {}): UseGlobal
     if (abortControllerRef.current) {
       abortControllerRef.current.abort();
     }
+    if (aiDebounceTimerRef.current) {
+      clearTimeout(aiDebounceTimerRef.current);
+    }
+    if (aiAbortControllerRef.current) {
+      aiAbortControllerRef.current.abort();
+    }
     setQueryState('');
     setResults([]);
     setCounts(DEFAULT_COUNTS);
     setError(null);
     setIsLoading(false);
+    setAiAnswer(null);
+    setAiSources([]);
+    setAiError(null);
+    setIsAiLoading(false);
   }, []);
 
   // Filter management
@@ -238,6 +385,12 @@ export function useGlobalSearch(options: UseGlobalSearchOptions = {}): UseGlobal
       if (abortControllerRef.current) {
         abortControllerRef.current.abort();
       }
+      if (aiDebounceTimerRef.current) {
+        clearTimeout(aiDebounceTimerRef.current);
+      }
+      if (aiAbortControllerRef.current) {
+        aiAbortControllerRef.current.abort();
+      }
     };
   }, []);
 
@@ -250,6 +403,14 @@ export function useGlobalSearch(options: UseGlobalSearchOptions = {}): UseGlobal
     error,
     isSearchActive,
 
+    // AI State
+    aiAnswer,
+    aiSources,
+    isAiLoading,
+    aiError,
+    aiEnabled,
+    setAiEnabled,
+
     // Filters
     filters,
     updateFilters,
@@ -259,6 +420,7 @@ export function useGlobalSearch(options: UseGlobalSearchOptions = {}): UseGlobal
     setQuery,
     search,
     clearSearch,
+    triggerAISearch,
 
     // Type toggles
     toggleType,
