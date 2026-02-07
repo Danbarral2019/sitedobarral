@@ -105,13 +105,14 @@ export async function GET(request: NextRequest) {
           category: true,
           courseId: true,
           isPublic: true,
-          isCommon: true, // Incluir campo isCommon na resposta
+          isCommon: true,
           tags: true,
           leiArticles: true,
-          // OTIMIZAÇÃO: Removidos size e updatedAt (não usados na lista inicial)
-          onNumber: true, // Número da ON (para ordenação)
-          onYear: true,   // Ano da ON (para ordenação)
+          onNumber: true,
+          onYear: true,
           uploadedAt: true,
+          acordaoNumero: true,
+          acordaoAno: true,
         },
       });
       console.log('[Batch-Data] Documentos encontrados:', documents.length);
@@ -157,15 +158,13 @@ export async function GET(request: NextRequest) {
       siteToCourse = await prisma.siteToCourse.findMany({
         where: {
           courseId: { in: courseIds },
+          site: { isActive: true },
         },
         orderBy: [
           { displayOrder: 'asc' },
         ],
         include: {
           site: {
-            where: {
-              isActive: true,
-            },
             select: {
               id: true,
               title: true,
@@ -195,8 +194,15 @@ export async function GET(request: NextRequest) {
       groupedSites[courseId] = [];
     });
 
+    // Otimizar payload: truncar description e remover tags (não usados na listagem)
+    const truncatedDocs = documents.map(doc => ({
+      ...doc,
+      description: doc.description ? doc.description.substring(0, 120) : null,
+      tags: undefined, // Removido da listagem (economiza ~1 MB com 2k+ docs)
+    }));
+
     // Agrupar documentos
-    documents.forEach(doc => {
+    truncatedDocs.forEach(doc => {
       if (doc.isCommon) {
         // Documento comum: adicionar a TODOS os cursos
         courseIds.forEach(courseId => {
