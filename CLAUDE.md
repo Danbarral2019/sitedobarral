@@ -88,12 +88,20 @@ export DATABASE_URL="<your-db-url>" && npx tsx scripts/fix-csv-tags.ts  # Conver
 
 ## Recent Features
 
+**🔍 Busca Global com IA Integrada (2026-02-07):**
+- ✅ Busca textual (300ms) + busca semântica IA (1.5s) em paralelo no campo de busca global
+- ✅ Card "Análise IA" com resposta sintetizada aparece acima dos resultados tradicionais
+- ✅ Toggle para ativar/desativar busca IA (botão Sparkles roxo/cinza)
+- ✅ Enter dispara busca IA imediatamente (cancela debounce de 1.5s)
+- ✅ Tratamento de rate limit (429) com mensagem amigável
+- ✅ Fontes com badges de relevância percentual no card IA
+- 📖 Ver `hooks/use-global-search.ts`, `components/area-restrita/GlobalSearchBar.tsx`, `components/area-restrita/SearchResultsList.tsx`
+
 **🤖 Chat RAG com Busca Semântica (2025-11-12):**
 - ✅ Interface de chat com busca semântica via Google Gemini
 - ✅ Endpoint `/api/documents/query` com caching inteligente
 - ✅ Componente `ChatInterface` reutilizável
-- ✅ Página `/area-restrita/assistente` para alunos
-- ✅ Banner promocional destacado na área restrita
+- ✅ Página `/area-restrita/assistente` para alunos (chat completo)
 - ✅ Histórico de conversas com localStorage
 - ✅ Sugestões de perguntas contextuais
 - ✅ Citações de fontes com relevância percentual
@@ -285,7 +293,7 @@ const tags = safeParseArray(doc.tags);
 export DATABASE_URL="..." && npx tsx scripts/fix-csv-tags.ts
 ```
 
-**Chat RAG Issues:**
+**Chat RAG / Gemini Issues:**
 
 ```bash
 # Gemini API não conectada
@@ -300,6 +308,11 @@ cd ~/.claude-mcp-servers/gemini
 ./setup-global.bat  # Windows
 ./setup-global.sh   # Linux/Mac
 ```
+
+**Modelo Gemini descontinuado:**
+- ⚠️ `gemini-2.0-flash-exp` foi removido pela Google (404 Not Found)
+- ✅ Usar `gemini-2.0-flash` (modelo estável de produção)
+- Arquivos afetados: `lib/gemini/cached-client.ts`, `lib/gemini-helper.js`, `lib/text-extractor.ts`, `lib/embeddings/document-processor.ts`, `app/api/artigos/[numero]/chat/route.ts`, `app/api/lei-14133/search/route.ts`
 
 **React Hydration Errors:**
 
@@ -385,6 +398,7 @@ Ver código para endpoints completos.
 - TCU/AGU scrapers with AI summaries
 - Error handling system (Fase 8 - 97% audit complete)
 - Chat RAG with semantic search (Gemini)
+- Busca global com IA integrada (busca textual + semântica em paralelo)
 
 **🚧 In Progress:**
 - DOU classifier
@@ -399,9 +413,17 @@ Ver código para endpoints completos.
 
 ## Important Architecture Patterns
 
-### Chat RAG Flow
+### Busca Global com IA (Composição no Frontend)
+1. Usuário digita no campo de busca
+2. 300ms debounce → `GET /api/area-restrita/global-search` → resultados tradicionais imediatos
+3. 1500ms debounce (ou Enter) → `POST /api/documents/query` → card "Análise IA" acima dos resultados
+4. Hook `useGlobalSearch` gerencia ambas as buscas em paralelo com AbortController
+5. Toggle IA no `GlobalSearchBar` permite desativar busca semântica
+6. `AIAnswerCard` no `SearchResultsList` exibe loading/erro/resposta com fontes
+
+### Chat RAG Flow (Página Assistente)
 1. User query → `/api/documents/query` POST
-2. API calls Gemini with user query + document context
+2. API calls Gemini (`gemini-2.0-flash`) with user query + document context
 3. Gemini returns structured response with relevance scores
 4. Response cached with query hash (60s TTL)
 5. Frontend displays sources with citations
