@@ -36,6 +36,7 @@ interface GlobalSearchBarProps {
 
 const TYPE_ICONS: Record<ContentType, typeof FileText> = {
   document: FileText,
+  'course-material': BookOpen,
   lei: Scale,
   glossary: BookOpen,
   faq: HelpCircle,
