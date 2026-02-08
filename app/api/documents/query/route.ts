@@ -2,8 +2,18 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { verifyAuth } from '@/lib/auth';
 import { semanticSearch, buildContextForLLM } from '@/lib/embeddings/vector-search';
+import type { SearchResult } from '@/lib/embeddings/vector-search';
 import { queryGeminiText } from '@/lib/gemini/cached-client';
 import { checkRateLimit } from '@/lib/cache/redis-client';
+import {
+  extractCitedArticles,
+  buildLeiContext,
+  findRelatedActs,
+  buildLayeredContext,
+  formatActsContext,
+  buildLegalSources,
+  type LegalSource,
+} from '@/lib/legal-context';
 
 // ===========================
 // Types
@@ -18,12 +28,18 @@ interface QueryFilters {
   isPublic?: boolean;
 }
 
+interface ConversationMessage {
+  role: 'user' | 'assistant';
+  content: string;
+}
+
 interface QueryRequest {
   query: string;
   filters?: QueryFilters;
   maxResults?: number;
   includeContent?: boolean;
   useCache?: boolean;
+  conversationHistory?: ConversationMessage[];
 }
 
 interface DocumentResult {
@@ -48,6 +64,7 @@ interface QueryResponse {
   query: string;
   error?: string;
   synthesizedAnswer?: string;
+  legalSources?: LegalSource[];
 }
 
 // ===========================
@@ -93,6 +110,7 @@ export async function POST(req: NextRequest) {
       filters = {},
       maxResults = 5,
       useCache = true,
+      conversationHistory,
     } = body;
 
     // 4. Validate query
@@ -120,11 +138,11 @@ export async function POST(req: NextRequest) {
     console.log(`   Filters:`, filters);
 
     // 5. Perform semantic search using embeddings
-    // Todos os documentos indexados ficam visiveis para qualquer usuario autenticado
+    // Busca mais resultados para compensar separação por tipo
     const searchResponse = await semanticSearch(query, {
       category: filters.category,
-      limit: maxResults,
-      threshold: 0.5, // Minimum 50% similarity
+      limit: Math.max(maxResults, 10),
+      threshold: 0.45,
       useCache,
       includeChunkContent: true,
     });
@@ -142,25 +160,74 @@ export async function POST(req: NextRequest) {
       });
     }
 
-    // 7. Build context and synthesize answer with Gemini
-    const context = buildContextForLLM(searchResponse.results, 6000);
+    // 6. Separate results by type
+    const leiResults = searchResponse.results.filter(r => r.category === 'lei-artigo');
+    const actResults = searchResponse.results.filter(r => r.category === 'ato-normativo');
+    const docResults = searchResponse.results.filter(
+      r => !['lei-artigo', 'ato-normativo'].includes(r.category)
+    );
 
-    const synthesisPrompt = `
-Voce e um assistente especializado em Licitacoes e Contratos Administrativos (Lei 14.133/2021).
-Com base nos documentos abaixo, responda a pergunta do usuario de forma clara e precisa.
+    console.log(`   📜 Lei: ${leiResults.length}, Atos: ${actResults.length}, Docs: ${docResults.length}`);
 
-DOCUMENTOS RELEVANTES:
-${context}
+    // 7. Enrich: extract cited articles from docs and find missing ones
+    const citedArticles = extractCitedArticles(
+      docResults as Array<SearchResult & { leiArticles?: string | null }>
+    );
+    const leiResultArticleNums = leiResults.map(r => {
+      const match = r.documentTitle.match(/Art\.\s*(\d+[\w-]*)/);
+      return match ? match[1] : '';
+    }).filter(Boolean);
 
-PERGUNTA DO USUARIO:
+    const missingArticles = citedArticles.filter(
+      n => !leiResultArticleNums.includes(n)
+    );
+
+    // Build lei context from semantic results + extra cited articles
+    const semanticLeiContext = buildContextForLLM(leiResults, 2000);
+    const extraLeiContext = buildLeiContext(missingArticles, 1500);
+    const fullLeiContext = [semanticLeiContext, extraLeiContext].filter(Boolean).join('\n\n');
+
+    // 8. Find related legislative acts not already in results
+    const alreadyFoundActTitles = actResults.map(r => r.documentTitle);
+    const allCitedArticles = [...new Set([...citedArticles, ...leiResultArticleNums])];
+    const extraActs = await findRelatedActs(allCitedArticles, alreadyFoundActTitles, 3);
+
+    // Build acts context
+    const semanticActsContext = buildContextForLLM(actResults, 1500);
+    const extraActsFormatted = formatActsContext(extraActs, 1000);
+    const fullActsContext = [semanticActsContext, extraActsFormatted].filter(Boolean).join('\n\n');
+
+    // Build docs context
+    const docsContext = buildContextForLLM(docResults, 3000);
+
+    // 9. Build layered context
+    const fullContext = buildLayeredContext(fullLeiContext, fullActsContext, docsContext, 8000);
+
+    // 10. Build conversation history context
+    let historyContext = '';
+    if (conversationHistory && conversationHistory.length > 0) {
+      const recentHistory = conversationHistory.slice(-5);
+      historyContext = '\nHISTÓRICO DA CONVERSA:\n' +
+        recentHistory.map(m =>
+          `${m.role === 'user' ? 'USUÁRIO' : 'ASSISTENTE'}: ${m.content.slice(0, 300)}`
+        ).join('\n') + '\n';
+    }
+
+    // 11. Synthesize answer with enhanced prompt
+    const synthesisPrompt = `Você é um assistente especializado em Licitações e Contratos Administrativos (Lei 14.133/2021).
+
+${fullContext}
+${historyContext}
+PERGUNTA DO USUÁRIO:
 ${query}
 
-INSTRUCOES:
-1. Responda baseado APENAS nos documentos fornecidos
-2. Cite as fontes quando relevante (ex: "Conforme o Acordao X...")
-3. Se os documentos nao contiverem informacao suficiente, diga isso
-4. Use linguagem tecnica juridica apropriada
+INSTRUÇÕES:
+1. Comece pela fundamentação legal (artigos da Lei 14.133/2021) quando houver preceitos legais relevantes
+2. Cite atos normativos regulamentadores quando relevantes
+3. Reforce com jurisprudência e documentos técnicos
+4. Use linguagem técnica jurídica e cite fontes com precisão (ex: "Conforme o Art. 75 da Lei 14.133...", "O Decreto nº X regulamenta...")
 5. Seja conciso mas completo
+6. Se os documentos não contiverem informação suficiente, diga isso
 
 RESPOSTA:`;
 
@@ -168,20 +235,30 @@ RESPOSTA:`;
 
     try {
       const geminiResult = await queryGeminiText(synthesisPrompt, {
-        temperature: 0.3, // Lower for more factual responses
+        temperature: 0.3,
         maxOutputTokens: 1024,
         useCache,
       });
       synthesizedAnswer = geminiResult.response;
     } catch (error) {
       console.error('Error synthesizing answer:', error);
-      // Continue without synthesized answer
     }
 
-    // 8. Format results for response
+    // 12. Build legal sources for response
+    const allLeiArticleNums = [...new Set([...leiResultArticleNums, ...missingArticles])];
+    const allActsForSources = [
+      ...actResults.map(r => ({ title: r.documentTitle, url: r.url || '' })),
+      ...extraActs.map(a => ({ title: a.title, url: a.url })),
+    ];
+    const legalSources = buildLegalSources(allLeiArticleNums, allActsForSources);
+
+    // 13. Format results for response (only docs, not lei/acts which go in legalSources)
+    const allDisplayResults = [...docResults, ...leiResults, ...actResults]
+      .sort((a, b) => b.similarity - a.similarity)
+      .slice(0, maxResults);
+
     const results: DocumentResult[] = await Promise.all(
-      searchResponse.results.map(async (result) => {
-        // Fetch additional document details
+      allDisplayResults.map(async (result) => {
         const doc = await prisma.document.findUnique({
           where: { id: result.documentId },
           select: {
@@ -192,9 +269,8 @@ RESPOSTA:`;
           },
         });
 
-        // Build courseIds array
         const courseIds = result.isCommon
-          ? [] // Common documents don't have specific courseId
+          ? []
           : result.courseId
           ? [result.courseId]
           : [];
@@ -203,7 +279,7 @@ RESPOSTA:`;
           documentId: result.documentId,
           title: result.documentTitle,
           category: result.category,
-          geminiResponse: result.chunkContent, // Most relevant chunk
+          geminiResponse: result.chunkContent,
           relevance: result.similarity,
           excerpt: generateExcerpt(result.chunkContent),
           url: result.url,
@@ -216,9 +292,9 @@ RESPOSTA:`;
 
     const latency = Date.now() - startTime;
 
-    console.log(`   ✅ Returned ${results.length} results (latency: ${latency}ms, cached: ${searchResponse.cached})`);
+    console.log(`   ✅ Returned ${results.length} results + ${legalSources.length} legal sources (latency: ${latency}ms)`);
 
-    // 9. Return response
+    // 14. Return response
     return NextResponse.json<QueryResponse>({
       success: true,
       results,
@@ -227,6 +303,7 @@ RESPOSTA:`;
       latency,
       query,
       synthesizedAnswer,
+      legalSources: legalSources.length > 0 ? legalSources : undefined,
     });
 
   } catch (error) {
@@ -259,7 +336,6 @@ function generateExcerpt(content: string, maxLength: number = 200): string {
     return content;
   }
 
-  // Try to cut at sentence boundary
   const truncated = content.substring(0, maxLength);
   const lastPeriod = truncated.lastIndexOf('.');
 

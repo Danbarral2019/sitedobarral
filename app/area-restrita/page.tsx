@@ -446,8 +446,10 @@ export default function AreaRestritaPage() {
                 onToggleFavorite={(docId) => toggleFavorite(docId, enrolledCourseIds[0] || '')}
                 aiAnswer={search.aiAnswer}
                 aiSources={search.aiSources}
+                aiLegalSources={search.aiLegalSources}
                 isAiLoading={search.isAiLoading}
                 aiError={search.aiError}
+                onFollowUp={search.sendFollowUp}
               />
             ) : (
               /* Tree Navigation Content */

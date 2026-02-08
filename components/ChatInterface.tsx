@@ -1,17 +1,26 @@
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
-import { Send, Loader2, Sparkles, FileText, AlertCircle } from 'lucide-react';
+import Link from 'next/link';
+import { Send, Loader2, Sparkles, FileText, AlertCircle, Scale, Gavel, ExternalLink } from 'lucide-react';
 
 // ===========================
 // Types
 // ===========================
+
+interface LegalSourceItem {
+  type: 'lei-article' | 'legislative-act';
+  title: string;
+  url: string;
+  articleNumber?: string;
+}
 
 interface Message {
   id: string;
   role: 'user' | 'assistant';
   content: string;
   sources?: DocumentSource[];
+  legalSources?: LegalSourceItem[];
   timestamp: Date;
 }
 
@@ -108,10 +117,18 @@ export default function ChatInterface({
     setIsLoading(true);
 
     try {
+      // Build conversation history from recent messages
+      const recentMessages = [...messages, userMessage].slice(-10);
+      const conversationHistory = recentMessages.map(m => ({
+        role: m.role,
+        content: m.content,
+      }));
+
       console.log('[ChatInterface] Calling API with:', {
         query,
         filters: courseId ? { courseId } : {},
         maxResults,
+        historyLength: conversationHistory.length,
       });
 
       // Call API
@@ -123,6 +140,7 @@ export default function ChatInterface({
           filters: courseId ? { courseId } : {},
           maxResults,
           useCache: true,
+          conversationHistory,
         }),
       });
 
@@ -135,10 +153,12 @@ export default function ChatInterface({
 
       const data = await response.json();
 
-      // Build assistant response
+      // Build assistant response — prefer synthesized answer from Gemini
       let assistantContent = '';
 
-      if (data.results.length === 0) {
+      if (data.synthesizedAnswer) {
+        assistantContent = data.synthesizedAnswer;
+      } else if (data.results.length === 0) {
         assistantContent =
           'Não encontrei documentos relevantes para sua pergunta. Tente reformular ou fazer uma pergunta mais específica.';
       } else {
@@ -149,10 +169,6 @@ export default function ChatInterface({
           assistantContent += `**${index + 1}. ${result.title}** (${relevancePercent}% relevante)\n`;
           assistantContent += `${result.excerpt}\n\n`;
         });
-
-        if (data.cached) {
-          assistantContent += '\n_Resposta do cache (instantânea)_';
-        }
       }
 
       // Add assistant message
@@ -168,6 +184,7 @@ export default function ChatInterface({
           excerpt: r.excerpt,
           url: r.url,
         })),
+        legalSources: data.legalSources || undefined,
         timestamp: new Date(),
       };
 
@@ -262,17 +279,56 @@ export default function ChatInterface({
               >
                 <div className="whitespace-pre-wrap">{message.content}</div>
 
-                {/* Sources */}
-                {message.sources && message.sources.length > 0 && (
-                  <div className="mt-4 pt-4 border-t border-gray-300 space-y-2">
-                    <p className="text-xs font-semibold text-gray-600">
-                      📚 Fontes consultadas:
+                {/* Legal Sources */}
+                {message.legalSources && message.legalSources.length > 0 && (
+                  <div className="mt-4 pt-3 border-t border-gray-300 space-y-1">
+                    <p className="text-xs font-semibold text-gray-600 mb-1.5">
+                      Fundamentação legal:
                     </p>
-                    {message.sources.map((source) => (
-                      <div
-                        key={source.documentId}
-                        className="text-xs bg-white rounded p-2"
-                      >
+                    <div className="flex flex-wrap gap-1.5">
+                      {message.legalSources.map((ls) => {
+                        const IconComp = ls.type === 'lei-article' ? Scale : Gavel;
+                        const isExternal = ls.url.startsWith('http');
+
+                        if (isExternal) {
+                          return (
+                            <a
+                              key={ls.title}
+                              href={ls.url}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="inline-flex items-center gap-1 px-2 py-0.5 bg-indigo-50 border border-indigo-200 rounded text-xs text-indigo-800 hover:bg-indigo-100 transition-colors"
+                            >
+                              <IconComp className="w-3 h-3" />
+                              <span className="truncate max-w-[180px]">{ls.title}</span>
+                              <ExternalLink className="w-3 h-3 text-indigo-400" />
+                            </a>
+                          );
+                        }
+
+                        return (
+                          <Link
+                            key={ls.title}
+                            href={ls.url}
+                            className="inline-flex items-center gap-1 px-2 py-0.5 bg-indigo-50 border border-indigo-200 rounded text-xs text-indigo-800 hover:bg-indigo-100 transition-colors"
+                          >
+                            <IconComp className="w-3 h-3" />
+                            <span className="truncate max-w-[180px]">{ls.title}</span>
+                          </Link>
+                        );
+                      })}
+                    </div>
+                  </div>
+                )}
+
+                {/* Document Sources */}
+                {message.sources && message.sources.length > 0 && (
+                  <div className="mt-3 pt-3 border-t border-gray-300 space-y-2">
+                    <p className="text-xs font-semibold text-gray-600">
+                      Fontes consultadas:
+                    </p>
+                    {message.sources.map((source) => {
+                      const sourceContent = (
                         <div className="flex items-start gap-2">
                           <FileText className="w-4 h-4 text-gray-500 flex-shrink-0 mt-0.5" />
                           <div className="flex-1">
@@ -289,8 +345,43 @@ export default function ChatInterface({
                             </p>
                           </div>
                         </div>
-                      </div>
-                    ))}
+                      );
+
+                      if (source.url) {
+                        const isExternal = source.url.startsWith('http');
+                        if (isExternal) {
+                          return (
+                            <a
+                              key={source.documentId}
+                              href={source.url}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="block text-xs bg-white rounded p-2 hover:bg-gray-50 transition-colors cursor-pointer"
+                            >
+                              {sourceContent}
+                            </a>
+                          );
+                        }
+                        return (
+                          <Link
+                            key={source.documentId}
+                            href={source.url}
+                            className="block text-xs bg-white rounded p-2 hover:bg-gray-50 transition-colors cursor-pointer"
+                          >
+                            {sourceContent}
+                          </Link>
+                        );
+                      }
+
+                      return (
+                        <div
+                          key={source.documentId}
+                          className="text-xs bg-white rounded p-2"
+                        >
+                          {sourceContent}
+                        </div>
+                      );
+                    })}
                   </div>
                 )}
 

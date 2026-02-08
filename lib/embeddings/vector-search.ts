@@ -23,6 +23,7 @@ export interface SearchResult {
   courseId?: string;
   isCommon: boolean;
   tags?: string[];
+  leiArticles?: string | null;
 }
 
 export interface SearchOptions {
@@ -157,6 +158,7 @@ async function performSearch(
     course_id: string | null;
     is_common: boolean;
     tags: string | null;
+    lei_articles: string | null;
   }>>(`
     SELECT
       d.id as document_id,
@@ -168,7 +170,8 @@ async function performSearch(
       d.url,
       d."courseId" as course_id,
       d."isCommon" as is_common,
-      d.tags
+      d.tags,
+      d."leiArticles" as lei_articles
     FROM "DocumentChunk" c
     JOIN "Document" d ON c."documentId" = d.id
     WHERE ${whereClause}
@@ -195,6 +198,7 @@ async function performSearch(
         courseId: row.course_id || undefined,
         isCommon: row.is_common,
         tags: row.tags ? safeParseArray(row.tags) : undefined,
+        leiArticles: row.lei_articles,
       });
     }
   }

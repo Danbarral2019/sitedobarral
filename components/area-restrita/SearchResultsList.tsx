@@ -28,7 +28,7 @@ import type {
   LegislativeActResult,
 } from '@/lib/types/global-search';
 import { CONTENT_TYPE_CONFIG } from '@/lib/types/global-search';
-import type { AISource } from '@/hooks/use-global-search';
+import type { AISource, LegalSource } from '@/hooks/use-global-search';
 
 interface SearchResultsListProps {
   results: SearchResultItem[];
@@ -40,12 +40,15 @@ interface SearchResultsListProps {
   onToggleFavorite?: (docId: string) => void;
   aiAnswer?: string | null;
   aiSources?: AISource[];
+  aiLegalSources?: LegalSource[];
   isAiLoading?: boolean;
   aiError?: string | null;
+  onFollowUp?: (query: string) => void;
 }
 
 const TYPE_ICONS: Record<ContentType, typeof FileText> = {
   document: FileText,
+  'course-material': FileText,
   lei: Scale,
   glossary: BookOpen,
   video: Video,
@@ -71,19 +74,45 @@ function highlightText(text: string, query: string): React.ReactNode {
   );
 }
 
+// Source icon by type
+function SourceIcon({ category }: { category: string }) {
+  switch (category) {
+    case 'lei-artigo':
+      return <Scale className="w-3 h-3" />;
+    case 'ato-normativo':
+      return <Gavel className="w-3 h-3" />;
+    default:
+      return <FileText className="w-3 h-3" />;
+  }
+}
+
 // AI Answer Card
 function AIAnswerCard({
   answer,
   sources,
+  legalSources,
   isLoading,
   error,
+  onFollowUp,
 }: {
   answer?: string | null;
   sources?: AISource[];
+  legalSources?: LegalSource[];
   isLoading?: boolean;
   error?: string | null;
+  onFollowUp?: (query: string) => void;
 }) {
   const [isExpanded, setIsExpanded] = useState(false);
+  const [followUpInput, setFollowUpInput] = useState('');
+
+  const handleFollowUpSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    const q = followUpInput.trim();
+    if (q && onFollowUp) {
+      onFollowUp(q);
+      setFollowUpInput('');
+    }
+  };
 
   // Loading state
   if (isLoading) {
@@ -138,25 +167,126 @@ function AIAnswerCard({
         )}
       </div>
 
-      {/* Sources */}
-      {sources && sources.length > 0 && (
+      {/* Legal Sources */}
+      {legalSources && legalSources.length > 0 && (
         <div className="mt-4 pt-3 border-t border-purple-200/50">
-          <p className="text-xs font-medium text-purple-700 mb-2">Fontes consultadas:</p>
+          <p className="text-xs font-medium text-purple-700 mb-2">Fundamentação legal:</p>
           <div className="flex flex-wrap gap-2">
-            {sources.map((source) => (
-              <span
-                key={source.documentId}
-                className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-white/70 border border-purple-200 rounded-lg text-xs text-purple-800"
-                title={source.excerpt}
-              >
-                <span className="truncate max-w-[180px]">{source.title}</span>
-                <span className="text-purple-500 font-medium">
-                  {Math.round(source.relevance * 100)}%
-                </span>
-              </span>
-            ))}
+            {legalSources.map((source) => {
+              const isExternal = source.url.startsWith('http');
+              const IconComp = source.type === 'lei-article' ? Scale : Gavel;
+
+              if (isExternal) {
+                return (
+                  <a
+                    key={source.title}
+                    href={source.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-white/70 border border-indigo-200 rounded-lg text-xs text-indigo-800 hover:bg-indigo-50 hover:border-indigo-300 transition-colors cursor-pointer"
+                    title={source.title}
+                  >
+                    <IconComp className="w-3 h-3 flex-shrink-0" />
+                    <span className="truncate max-w-[200px]">{source.title}</span>
+                    <ExternalLink className="w-3 h-3 flex-shrink-0 text-indigo-400" />
+                  </a>
+                );
+              }
+
+              return (
+                <Link
+                  key={source.title}
+                  href={source.url}
+                  className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-white/70 border border-indigo-200 rounded-lg text-xs text-indigo-800 hover:bg-indigo-50 hover:border-indigo-300 transition-colors cursor-pointer"
+                  title={source.title}
+                >
+                  <IconComp className="w-3 h-3 flex-shrink-0" />
+                  <span className="truncate max-w-[200px]">{source.title}</span>
+                </Link>
+              );
+            })}
           </div>
         </div>
+      )}
+
+      {/* Document Sources */}
+      {sources && sources.length > 0 && (
+        <div className="mt-3 pt-3 border-t border-purple-200/50">
+          <p className="text-xs font-medium text-purple-700 mb-2">Fontes consultadas:</p>
+          <div className="flex flex-wrap gap-2">
+            {sources.map((source) => {
+              const content = (
+                <>
+                  <SourceIcon category={source.category} />
+                  <span className="truncate max-w-[180px]">{source.title}</span>
+                  <span className="text-purple-500 font-medium">
+                    {Math.round(source.relevance * 100)}%
+                  </span>
+                </>
+              );
+
+              if (source.url) {
+                const isExternal = source.url.startsWith('http');
+                if (isExternal) {
+                  return (
+                    <a
+                      key={source.documentId}
+                      href={source.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-white/70 border border-purple-200 rounded-lg text-xs text-purple-800 hover:bg-purple-50 hover:border-purple-300 transition-colors cursor-pointer"
+                      title={source.excerpt}
+                    >
+                      {content}
+                    </a>
+                  );
+                }
+                return (
+                  <Link
+                    key={source.documentId}
+                    href={source.url}
+                    className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-white/70 border border-purple-200 rounded-lg text-xs text-purple-800 hover:bg-purple-50 hover:border-purple-300 transition-colors cursor-pointer"
+                    title={source.excerpt}
+                  >
+                    {content}
+                  </Link>
+                );
+              }
+
+              return (
+                <span
+                  key={source.documentId}
+                  className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-white/70 border border-purple-200 rounded-lg text-xs text-purple-800"
+                  title={source.excerpt}
+                >
+                  {content}
+                </span>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
+      {/* Follow-up input */}
+      {onFollowUp && (
+        <form onSubmit={handleFollowUpSubmit} className="mt-4 pt-3 border-t border-purple-200/50">
+          <div className="flex gap-2">
+            <input
+              type="text"
+              value={followUpInput}
+              onChange={(e) => setFollowUpInput(e.target.value)}
+              placeholder="Refinar pergunta..."
+              className="flex-1 px-3 py-1.5 text-xs border border-purple-200 rounded-lg bg-white/70 focus:outline-none focus:ring-1 focus:ring-purple-400 placeholder:text-purple-400"
+            />
+            <button
+              type="submit"
+              disabled={!followUpInput.trim()}
+              className="px-3 py-1.5 text-xs font-medium text-white bg-purple-600 rounded-lg hover:bg-purple-700 disabled:bg-purple-300 disabled:cursor-not-allowed transition-colors"
+            >
+              Enviar
+            </button>
+          </div>
+        </form>
       )}
     </div>
   );
@@ -462,8 +592,10 @@ export function SearchResultsList({
   onToggleFavorite,
   aiAnswer,
   aiSources,
+  aiLegalSources,
   isAiLoading,
   aiError,
+  onFollowUp,
 }: SearchResultsListProps) {
   const showAiCard = isAiLoading || aiError || aiAnswer;
 
@@ -508,8 +640,10 @@ export function SearchResultsList({
         <AIAnswerCard
           answer={aiAnswer}
           sources={aiSources}
+          legalSources={aiLegalSources}
           isLoading={isAiLoading}
           error={aiError}
+          onFollowUp={onFollowUp}
         />
       )}
 

@@ -8,6 +8,13 @@ import type {
   SearchResultItem,
 } from '@/lib/types/global-search';
 
+export interface LegalSource {
+  type: 'lei-article' | 'legislative-act';
+  title: string;
+  url: string;
+  articleNumber?: string;
+}
+
 export interface AISource {
   documentId: string;
   title: string;
@@ -15,6 +22,11 @@ export interface AISource {
   relevance: number;
   excerpt: string;
   url?: string;
+}
+
+interface ConversationMessage {
+  role: 'user' | 'assistant';
+  content: string;
 }
 
 interface UseGlobalSearchOptions {
@@ -36,10 +48,15 @@ interface UseGlobalSearchReturn {
   // AI State
   aiAnswer: string | null;
   aiSources: AISource[];
+  aiLegalSources: LegalSource[];
   isAiLoading: boolean;
   aiError: string | null;
   aiEnabled: boolean;
   setAiEnabled: (enabled: boolean) => void;
+
+  // Conversation
+  aiConversationHistory: ConversationMessage[];
+  sendFollowUp: (followUpQuery: string) => void;
 
   // Filters
   filters: GlobalSearchFilters;
@@ -91,9 +108,11 @@ export function useGlobalSearch(options: UseGlobalSearchOptions = {}): UseGlobal
   // AI State
   const [aiAnswer, setAiAnswer] = useState<string | null>(null);
   const [aiSources, setAiSources] = useState<AISource[]>([]);
+  const [aiLegalSources, setAiLegalSources] = useState<LegalSource[]>([]);
   const [isAiLoading, setIsAiLoading] = useState(false);
   const [aiError, setAiError] = useState<string | null>(null);
   const [aiEnabled, setAiEnabled] = useState(true);
+  const [aiConversationHistory, setAiConversationHistory] = useState<ConversationMessage[]>([]);
 
   // Refs
   const abortControllerRef = useRef<AbortController | null>(null);
@@ -106,7 +125,7 @@ export function useGlobalSearch(options: UseGlobalSearchOptions = {}): UseGlobal
 
   // AI Search function
   const searchAI = useCallback(
-    async (searchQuery: string) => {
+    async (searchQuery: string, history?: ConversationMessage[]) => {
       // Cancel previous AI request
       if (aiAbortControllerRef.current) {
         aiAbortControllerRef.current.abort();
@@ -115,6 +134,7 @@ export function useGlobalSearch(options: UseGlobalSearchOptions = {}): UseGlobal
       if (searchQuery.length < minQueryLength) {
         setAiAnswer(null);
         setAiSources([]);
+        setAiLegalSources([]);
         setIsAiLoading(false);
         return;
       }
@@ -126,14 +146,22 @@ export function useGlobalSearch(options: UseGlobalSearchOptions = {}): UseGlobal
       aiAbortControllerRef.current = controller;
 
       try {
+        const requestBody: Record<string, unknown> = {
+          query: searchQuery,
+          maxResults: 5,
+          useCache: true,
+        };
+
+        // Include conversation history if provided
+        const historyToSend = history || aiConversationHistory;
+        if (historyToSend.length > 0) {
+          requestBody.conversationHistory = historyToSend.slice(-5);
+        }
+
         const response = await fetch('/api/documents/query', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            query: searchQuery,
-            maxResults: 5,
-            useCache: true,
-          }),
+          body: JSON.stringify(requestBody),
           signal: controller.signal,
         });
 
@@ -142,6 +170,7 @@ export function useGlobalSearch(options: UseGlobalSearchOptions = {}): UseGlobal
             setAiError('Limite de consultas atingido. Aguarde um momento e tente novamente.');
             setAiAnswer(null);
             setAiSources([]);
+            setAiLegalSources([]);
           }
           return;
         }
@@ -153,7 +182,8 @@ export function useGlobalSearch(options: UseGlobalSearchOptions = {}): UseGlobal
         const data = await response.json();
 
         if (!controller.signal.aborted) {
-          setAiAnswer(data.synthesizedAnswer || null);
+          const answer = data.synthesizedAnswer || null;
+          setAiAnswer(answer);
           setAiSources(
             (data.results || []).map((r: AISource) => ({
               documentId: r.documentId,
@@ -164,6 +194,16 @@ export function useGlobalSearch(options: UseGlobalSearchOptions = {}): UseGlobal
               url: r.url,
             }))
           );
+          setAiLegalSources(data.legalSources || []);
+
+          // Update conversation history
+          if (answer) {
+            setAiConversationHistory(prev => [
+              ...prev,
+              { role: 'user' as const, content: searchQuery },
+              { role: 'assistant' as const, content: answer },
+            ]);
+          }
         }
       } catch (err) {
         if (err instanceof Error && err.name !== 'AbortError') {
@@ -171,6 +211,7 @@ export function useGlobalSearch(options: UseGlobalSearchOptions = {}): UseGlobal
             setAiError(err.message);
             setAiAnswer(null);
             setAiSources([]);
+            setAiLegalSources([]);
           }
         }
       } finally {
@@ -179,7 +220,7 @@ export function useGlobalSearch(options: UseGlobalSearchOptions = {}): UseGlobal
         }
       }
     },
-    [minQueryLength]
+    [minQueryLength, aiConversationHistory]
   );
 
   // Search function
@@ -253,6 +294,15 @@ export function useGlobalSearch(options: UseGlobalSearchOptions = {}): UseGlobal
     searchAI(query);
   }, [aiEnabled, query, minQueryLength, searchAI]);
 
+  // Send a follow-up question using conversation history
+  const sendFollowUp = useCallback(
+    (followUpQuery: string) => {
+      if (!aiEnabled || followUpQuery.length < minQueryLength) return;
+      searchAI(followUpQuery);
+    },
+    [aiEnabled, minQueryLength, searchAI]
+  );
+
   // Debounced query change
   const setQuery = useCallback(
     (newQuery: string) => {
@@ -273,8 +323,10 @@ export function useGlobalSearch(options: UseGlobalSearchOptions = {}): UseGlobal
         setIsLoading(false);
         setAiAnswer(null);
         setAiSources([]);
+        setAiLegalSources([]);
         setIsAiLoading(false);
         setAiError(null);
+        setAiConversationHistory([]);
         if (aiAbortControllerRef.current) {
           aiAbortControllerRef.current.abort();
         }
@@ -323,8 +375,10 @@ export function useGlobalSearch(options: UseGlobalSearchOptions = {}): UseGlobal
     setIsLoading(false);
     setAiAnswer(null);
     setAiSources([]);
+    setAiLegalSources([]);
     setAiError(null);
     setIsAiLoading(false);
+    setAiConversationHistory([]);
   }, []);
 
   // Filter management
@@ -406,10 +460,15 @@ export function useGlobalSearch(options: UseGlobalSearchOptions = {}): UseGlobal
     // AI State
     aiAnswer,
     aiSources,
+    aiLegalSources,
     isAiLoading,
     aiError,
     aiEnabled,
     setAiEnabled,
+
+    // Conversation
+    aiConversationHistory,
+    sendFollowUp,
 
     // Filters
     filters,
