@@ -172,7 +172,7 @@ export function GlobalSearchBar({
       <div className="flex items-center gap-2 px-4 pb-4 overflow-x-auto scrollbar-hide">
         {(Object.keys(CONTENT_TYPE_CONFIG) as ContentType[]).map((type) => {
           const config = CONTENT_TYPE_CONFIG[type];
-          const Icon = TYPE_ICONS[type];
+          const Icon = TYPE_ICONS[type] || FileText;
           const isActive = activeTypes.includes(type);
           const count = counts[type];
 
