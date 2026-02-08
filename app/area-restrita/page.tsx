@@ -436,7 +436,7 @@ export default function AreaRestritaPage() {
                 query={search.query}
                 isLoading={search.isLoading}
                 onDocumentClick={handleDocumentClick}
-                onArticleClick={(num) => router.push(`/artigo/${num}`)}
+                onArticleClick={(num) => router.push(`/area-restrita/artigo/${num}`)}
                 isFavorite={isFavorite}
                 onToggleFavorite={(docId) => toggleFavorite(docId, enrolledCourseIds[0] || '')}
                 aiAnswer={search.aiAnswer}
@@ -492,7 +492,8 @@ export default function AreaRestritaPage() {
                     {/* Lei 14.133 */}
                     {currentContent.type === 'lei' && (
                       <ArticleTreeNavigator
-                        onArticleClick={(articleNum) => router.push(`/artigo/${articleNum}`)}
+                        basePath="/area-restrita/artigo"
+                        onArticleClick={(articleNum) => router.push(`/area-restrita/artigo/${articleNum}`)}
                       />
                     )}
 

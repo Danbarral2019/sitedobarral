@@ -242,7 +242,7 @@ function LeiArticleResultCard({
 }) {
   return (
     <Link
-      href={`/artigo/${article.numero}`}
+      href={`/area-restrita/artigo/${article.numero}`}
       onClick={onClick}
       className="block bg-white rounded-xl border border-gray-200 p-4 hover:border-indigo-300 hover:shadow-md transition-all group"
     >

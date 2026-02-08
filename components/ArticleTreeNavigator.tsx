@@ -24,9 +24,10 @@ interface ArticleStats {
 interface ArticleTreeNavigatorProps {
   stats?: ArticleStats;
   onArticleClick?: (articleNum: string) => void;
+  basePath?: string;
 }
 
-export function ArticleTreeNavigator({ stats = {}, onArticleClick }: ArticleTreeNavigatorProps) {
+export function ArticleTreeNavigator({ stats = {}, onArticleClick, basePath = '/artigo' }: ArticleTreeNavigatorProps) {
   const [expandedNodes, setExpandedNodes] = useState<Set<string>>(new Set());
 
   // Construir árvore hierárquica
@@ -167,7 +168,7 @@ export function ArticleTreeNavigator({ stats = {}, onArticleClick }: ArticleTree
                 return (
                   <Link
                     key={articleNum}
-                    href={`/artigo/${articleNum}`}
+                    href={`${basePath}/${articleNum}`}
                     onClick={() => onArticleClick?.(articleNum)}
                     className="block p-2 hover:bg-blue-50 rounded-lg transition-colors group"
                   >
