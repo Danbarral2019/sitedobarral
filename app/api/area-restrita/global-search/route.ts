@@ -10,7 +10,6 @@ import type {
   DocumentResult,
   LeiArticleResult,
   GlossaryResult,
-  FAQResult,
   VideoResult,
   SiteResult,
   LegislativeActResult,
@@ -67,7 +66,7 @@ export async function GET(request: NextRequest) {
     // Parse types filter
     const requestedTypes: ContentType[] = typesParam
       ? (typesParam.split(',') as ContentType[])
-      : ['document', 'lei', 'glossary', 'faq', 'video', 'site', 'legislative-act'];
+      : ['document', 'lei', 'glossary', 'video', 'site', 'legislative-act'];
 
     // Empty query - return empty results
     if (!query || query.length < 2) {
@@ -93,7 +92,6 @@ export async function GET(request: NextRequest) {
       document: 0,
       lei: 0,
       glossary: 0,
-      faq: 0,
       video: 0,
       site: 0,
       'legislative-act': 0,
@@ -235,47 +233,7 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    // 4. Search FAQs
-    if (requestedTypes.includes('faq')) {
-      searchPromises.push(
-        (async () => {
-          const faqs = await prisma.fAQ.findMany({
-            where: {
-              isPublished: true,
-              OR: [
-                { question: { contains: query, mode: 'insensitive' } },
-                { answer: { contains: query, mode: 'insensitive' } },
-                { keywords: { contains: query, mode: 'insensitive' } },
-              ],
-            },
-            select: {
-              id: true,
-              question: true,
-              answer: true,
-              category: true,
-            },
-            orderBy: [{ isPinned: 'desc' }, { displayOrder: 'asc' }],
-            take: limit,
-          });
-
-          counts.faq = faqs.length;
-
-          faqs.forEach((faq) => {
-            results.push({
-              type: 'faq',
-              data: {
-                id: faq.id,
-                question: faq.question,
-                answer: faq.answer,
-                category: faq.category,
-              } as FAQResult,
-            });
-          });
-        })()
-      );
-    }
-
-    // 5. Search Videos
+    // 4. Search Videos
     if (requestedTypes.includes('video')) {
       searchPromises.push(
         (async () => {
@@ -322,7 +280,7 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    // 6. Search Recommended Sites
+    // 5. Search Recommended Sites
     if (requestedTypes.includes('site')) {
       searchPromises.push(
         (async () => {
@@ -378,7 +336,7 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    // 7. Search Legislative Acts
+    // 6. Search Legislative Acts
     if (requestedTypes.includes('legislative-act')) {
       searchPromises.push(
         (async () => {
@@ -444,7 +402,6 @@ export async function GET(request: NextRequest) {
       counts.document +
       counts.lei +
       counts.glossary +
-      counts.faq +
       counts.video +
       counts.site +
       counts['legislative-act'];
@@ -455,9 +412,8 @@ export async function GET(request: NextRequest) {
       document: 2,
       lei: 3,
       'legislative-act': 4,
-      faq: 5,
-      video: 6,
-      site: 7,
+      video: 5,
+      site: 6,
     };
 
     results.sort((a, b) => typePriority[a.type] - typePriority[b.type]);

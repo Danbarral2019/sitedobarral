@@ -1,7 +1,7 @@
 // Types for Global Search functionality in Area Restrita
 
 // Content type categories with their respective colors and icons
-export type ContentType = 'document' | 'course-material' | 'lei' | 'glossary' | 'faq' | 'video' | 'site' | 'legislative-act';
+export type ContentType = 'document' | 'course-material' | 'lei' | 'glossary' | 'video' | 'site' | 'legislative-act';
 
 export const CONTENT_TYPE_CONFIG: Record<ContentType, {
   label: string;
@@ -13,7 +13,7 @@ export const CONTENT_TYPE_CONFIG: Record<ContentType, {
 }> = {
   document: {
     label: 'Documento',
-    labelPlural: 'Documentos',
+    labelPlural: 'Base de Conhecimento',
     color: 'text-brand-600',
     bgColor: 'bg-brand-50',
     borderColor: 'border-brand-200',
@@ -42,14 +42,6 @@ export const CONTENT_TYPE_CONFIG: Record<ContentType, {
     bgColor: 'bg-green-50',
     borderColor: 'border-green-200',
     icon: 'BookOpen',
-  },
-  faq: {
-    label: 'FAQ',
-    labelPlural: 'FAQs',
-    color: 'text-purple-600',
-    bgColor: 'bg-purple-50',
-    borderColor: 'border-purple-200',
-    icon: 'HelpCircle',
   },
   video: {
     label: 'Vídeo',
@@ -110,13 +102,6 @@ export interface GlossaryResult {
   category?: string | null;
 }
 
-export interface FAQResult {
-  id: string;
-  question: string;
-  answer: string;
-  category: string;
-}
-
 export interface VideoResult {
   id: string;
   title: string;
@@ -155,7 +140,7 @@ export interface LegislativeActResult {
 // Unified search result item
 export interface SearchResultItem {
   type: ContentType;
-  data: DocumentResult | LeiArticleResult | GlossaryResult | FAQResult | VideoResult | SiteResult | LegislativeActResult;
+  data: DocumentResult | LeiArticleResult | GlossaryResult | VideoResult | SiteResult | LegislativeActResult;
 }
 
 // Global search response
@@ -166,7 +151,6 @@ export interface GlobalSearchResponse {
     document: number;
     lei: number;
     glossary: number;
-    faq: number;
     video: number;
     site: number;
     'legislative-act': number;

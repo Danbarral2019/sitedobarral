@@ -26,7 +26,7 @@ import {
 } from '@/components/area-restrita';
 import DocumentDetailModal from '@/components/DocumentDetailModal';
 import DocumentsByCategory from '@/components/DocumentsByCategory';
-import HighlightedMaterials from '@/components/HighlightedMaterials';
+import CourseArea from '@/components/area-restrita/CourseArea';
 import CourseVideos from '@/components/CourseVideos';
 import RecommendedSites from '@/components/RecommendedSites';
 import { ArticleTreeNavigator } from '@/components/ArticleTreeNavigator';
@@ -157,7 +157,7 @@ export default function AreaRestritaPage() {
         documents: allDocs,
         videos: [] as VideoType[],
         sites: [] as SiteType[],
-        title: 'Todos os Documentos',
+        title: 'Base de Conhecimento',
       };
     }
 
@@ -166,7 +166,7 @@ export default function AreaRestritaPage() {
     switch (type) {
       case 'document': {
         let docs: DocumentType[] = [];
-        let title = 'Documentos';
+        let title = 'Base de Conhecimento';
 
         if (courseId) {
           docs = courseDocuments[courseId] || [];
@@ -213,7 +213,7 @@ export default function AreaRestritaPage() {
 
         // Filter to only course material categories
         docs = docs.filter((d) =>
-          ['apostila', 'conteudo-programatico', 'bibliografia'].includes(d.category)
+          ['apostila', 'conteudo-programatico', 'bibliografia', 'material-complementar'].includes(d.category)
         );
 
         return { type: 'course-material' as const, documents: docs, videos: [], sites: [], title };
@@ -227,9 +227,6 @@ export default function AreaRestritaPage() {
 
       case 'glossary':
         return { type: 'glossary' as const, documents: [], videos: [], sites: [], title: 'Glossário' };
-
-      case 'faq':
-        return { type: 'faq' as const, documents: [], videos: [], sites: [], title: 'Perguntas Frequentes' };
 
       case 'video': {
         let videos: VideoType[] = [];
@@ -463,6 +460,15 @@ export default function AreaRestritaPage() {
                   </div>
                 ) : (
                   <>
+                    {/* Course Area Highlight (home/no selection) */}
+                    {currentContent.type === 'documents' && !contentTree.selection && (
+                      <CourseArea
+                        documents={courseDocuments}
+                        enrolledCourseIds={enrolledCourseIds}
+                        onDocumentClick={handleDocumentClick}
+                      />
+                    )}
+
                     {/* Documents */}
                     {currentContent.type === 'documents' && currentContent.documents.length > 0 && (
                       <DocumentsByCategory
@@ -476,10 +482,10 @@ export default function AreaRestritaPage() {
 
                     {/* Course Materials */}
                     {currentContent.type === 'course-material' && currentContent.documents.length > 0 && (
-                      <HighlightedMaterials
-                        documents={currentContent.documents}
-                        courseId={contentTree.selection?.courseId || enrolledCourseIds[0] || ''}
-                        onDownload={handleDocumentClick}
+                      <CourseArea
+                        documents={courseDocuments}
+                        enrolledCourseIds={enrolledCourseIds}
+                        onDocumentClick={handleDocumentClick}
                       />
                     )}
 
@@ -513,22 +519,6 @@ export default function AreaRestritaPage() {
                           className="inline-flex items-center gap-2 px-6 py-3 bg-green-600 text-white font-medium rounded-xl hover:bg-green-700 transition-colors"
                         >
                           Acessar Glossário
-                          <ChevronRight className="w-4 h-4" />
-                        </Link>
-                      </div>
-                    )}
-
-                    {/* FAQ Redirect */}
-                    {currentContent.type === 'faq' && (
-                      <div className="bg-white rounded-2xl border-2 border-gray-200 p-8 text-center">
-                        <p className="text-gray-600 mb-4">
-                          As perguntas frequentes estão disponíveis na página pública.
-                        </p>
-                        <Link
-                          href="/faq"
-                          className="inline-flex items-center gap-2 px-6 py-3 bg-purple-600 text-white font-medium rounded-xl hover:bg-purple-700 transition-colors"
-                        >
-                          Acessar FAQ
                           <ChevronRight className="w-4 h-4" />
                         </Link>
                       </div>

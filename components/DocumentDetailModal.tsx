@@ -223,7 +223,7 @@ export default function DocumentDetailModal({
                       <div key={artNum} className="flex items-center gap-2">
                         <ChevronRight className="w-3 h-3" />
                         <Link
-                          href={`/area-restrita/lei-comentada?artigo=${artNum}`}
+                          href={`/area-restrita/artigo/${artNum}`}
                           onClick={onClose}
                           className="hover:text-white underline transition-colors"
                         >
@@ -395,7 +395,7 @@ export default function DocumentDetailModal({
                 {leiArticles.map((artNum) => (
                   <Link
                     key={artNum}
-                    href={`/area-restrita/lei-comentada?artigo=${artNum}`}
+                    href={`/area-restrita/artigo/${artNum}`}
                     onClick={onClose}
                     className="px-3 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700 transition-colors flex items-center gap-1"
                   >

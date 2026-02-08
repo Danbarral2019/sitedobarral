@@ -9,12 +9,13 @@ import type { ContentType, ContentTreeNode, ContentTreeResponse } from '@/lib/ty
 const PARECER_CATEGORIES = ['parecer', 'parecer-vinculante', 'decor'];
 
 // Categorias de materiais do curso (excluídas da árvore de documentos)
-const COURSE_MATERIAL_CATEGORIES = ['apostila', 'conteudo-programatico', 'bibliografia'];
+const COURSE_MATERIAL_CATEGORIES = ['apostila', 'conteudo-programatico', 'bibliografia', 'material-complementar'];
 
 const COURSE_MATERIAL_LABELS: Record<string, string> = {
   'apostila': 'Apostila',
   'conteudo-programatico': 'Conteúdo Programático',
   'bibliografia': 'Bibliografia',
+  'material-complementar': 'Material Complementar',
 };
 
 // Mapeamento de categorias para nomes amigáveis
@@ -69,7 +70,6 @@ export async function GET(request: NextRequest) {
       documentsByCourseCounts,
       leiArticlesCount,
       glossaryCount,
-      faqCount,
       videosByCourseCounts,
       sitesCount,
       legislativeActsCount,
@@ -97,12 +97,7 @@ export async function GET(request: NextRequest) {
         where: { isPublic: true },
       }),
 
-      // 4. FAQ count
-      prisma.fAQ.count({
-        where: { isPublished: true },
-      }),
-
-      // 5. Videos grouped by course
+      // 4. Videos grouped by course
       prisma.courseVideo.groupBy({
         by: ['courseId'],
         where: {
@@ -112,7 +107,7 @@ export async function GET(request: NextRequest) {
         _count: { id: true },
       }),
 
-      // 6. Sites count (linked to enrolled courses)
+      // 5. Sites count (linked to enrolled courses)
       (async () => {
         const siteToCourses = await prisma.siteToCourse.findMany({
           where: {
@@ -129,7 +124,7 @@ export async function GET(request: NextRequest) {
         });
       })(),
 
-      // 7. Legislative Acts count
+      // 6. Legislative Acts count
       prisma.legislativeAct.count(),
     ]);
 
@@ -294,15 +289,7 @@ export async function GET(request: NextRequest) {
       });
     }
 
-    tree.push({
-      id: 'documents',
-      type: 'document',
-      label: 'Documentos',
-      count: docsTotal,
-      children: documentChildren,
-    });
-
-    // Build Lei 14.133 tree node (with Atos Normativos as child)
+    // Build Lei 14.133 node (as child of Base de Conhecimento)
     const leiChildren: ContentTreeNode[] = [];
     if (legislativeActsCount > 0) {
       leiChildren.push({
@@ -313,12 +300,24 @@ export async function GET(request: NextRequest) {
       });
     }
     totalCount += leiArticlesCount + legislativeActsCount;
-    tree.push({
+
+    const leiNode: ContentTreeNode = {
       id: 'lei',
       type: 'lei',
-      label: 'Lei 14.133',
+      label: 'Lei 14.133 Comentada',
       count: leiArticlesCount + legislativeActsCount,
       children: leiChildren.length > 0 ? leiChildren : undefined,
+    };
+
+    // Add Lei 14.133 as sub-node of Base de Conhecimento
+    documentChildren.push(leiNode);
+
+    tree.push({
+      id: 'documents',
+      type: 'document',
+      label: 'Base de Conhecimento',
+      count: docsTotal + leiArticlesCount + legislativeActsCount,
+      children: documentChildren,
     });
 
     // Build Glossary tree node
@@ -328,15 +327,6 @@ export async function GET(request: NextRequest) {
       type: 'glossary',
       label: 'Glossário',
       count: glossaryCount,
-    });
-
-    // Build FAQ tree node
-    totalCount += faqCount;
-    tree.push({
-      id: 'faq',
-      type: 'faq',
-      label: 'FAQs',
-      count: faqCount,
     });
 
     // Build Videos tree node
