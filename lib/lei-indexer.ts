@@ -217,25 +217,52 @@ export class LeiIndexer {
   }
 
   /**
-   * Chama Gemini via MCP (integração real)
+   * Chama Gemini API REST e retorna a resposta como string JSON
    */
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   private static async callGeminiMCP(prompt: string, model: string): Promise<string> {
-    // PLACEHOLDER: Esta função será substituída pela chamada real ao MCP Gemini
-    // Por enquanto, retorna um resultado mockado para testes
+    const apiKey = process.env.GEMINI_API_KEY;
+    if (!apiKey) {
+      throw new Error('GEMINI_API_KEY não configurada no ambiente');
+    }
 
-    // Tentar usar MCP Gemini se disponível
-    // const result = await mcp_gemini_query({ prompt, model });
-    // return result.response;
+    const apiModel = model || 'gemini-2.0-flash';
+    const url = `https://generativelanguage.googleapis.com/v1beta/models/${apiModel}:generateContent?key=${apiKey}`;
 
-    // Fallback: mock response para desenvolvimento
-    console.log('[LeiIndexer] MOCK MODE - Usando resposta simulada');
-
-    return JSON.stringify({
-      articles: [],
-      overallConfidence: 0,
-      summary: 'Indexação automática não configurada - aguardando implementação MCP',
+    const response = await fetch(url, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        contents: [{ parts: [{ text: prompt }] }],
+        generationConfig: {
+          temperature: 0.2,
+          topK: 40,
+          topP: 0.95,
+          maxOutputTokens: 2048,
+        },
+      }),
     });
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      throw new Error(`Gemini API error (${response.status}): ${errorText}`);
+    }
+
+    const data = await response.json();
+
+    if (data.candidates?.[0]?.content?.parts?.[0]?.text) {
+      let text = data.candidates[0].content.parts[0].text.trim();
+
+      // Remover markdown code blocks se presentes
+      if (text.includes('```json')) {
+        text = text.split('```json')[1].split('```')[0].trim();
+      } else if (text.includes('```')) {
+        text = text.split('```')[1].split('```')[0].trim();
+      }
+
+      return text;
+    }
+
+    throw new Error('Resposta inválida do Gemini: ' + JSON.stringify(data));
   }
 
   /**
