@@ -47,6 +47,8 @@ const categoryConfig: Record<string, { icon: string; color: string; label: strin
   'apostila': { icon: '📖', color: 'indigo', label: 'Apostilas' },
   'link': { icon: '🔗', color: 'cyan', label: 'Links' },
   'video': { icon: '🎥', color: 'red', label: 'Vídeos' },
+  'enunciados': { icon: '📋', color: 'purple', label: 'Enunciados' },
+  'sumula': { icon: '⚖️', color: 'indigo', label: 'Súmulas' },
   'outros': { icon: '📄', color: 'gray', label: 'Outros' },
   'outro': { icon: '📄', color: 'gray', label: 'Outros' }, // Fallback para singular
 };

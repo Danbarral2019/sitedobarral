@@ -64,6 +64,7 @@ export default function ArtigoAreaRestritaPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [isContentExpanded, setIsContentExpanded] = useState(false);
   const [selectedDocId, setSelectedDocId] = useState<string | null>(null);
+  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
 
   // Redirect if not authenticated
   useEffect(() => {
@@ -259,8 +260,23 @@ export default function ArtigoAreaRestritaPage() {
                     Clique para ver detalhes completos e acessar o documento
                   </p>
 
+                  {selectedCategory && (
+                    <div className="mb-4 flex items-center gap-2">
+                      <span className="px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-sm font-semibold">
+                        {CATEGORY_LABELS[selectedCategory] || selectedCategory}
+                      </span>
+                      <button
+                        onClick={() => setSelectedCategory(null)}
+                        className="text-xs text-gray-500 hover:text-gray-700"
+                      >
+                        Limpar filtro
+                      </button>
+                    </div>
+                  )}
+
                   <div className="space-y-6">
                     {Object.entries(docsByCategory)
+                      .filter(([category]) => !selectedCategory || category === selectedCategory)
                       .sort((a, b) => b[1].length - a[1].length)
                       .map(([category, docs]) => (
                         <div key={category}>
@@ -374,11 +390,27 @@ export default function ArtigoAreaRestritaPage() {
                     <span className="text-sm text-gray-600">Posts</span>
                     <span className="font-bold text-gray-900">{relatedPosts.length}</span>
                   </div>
+                  {selectedCategory && (
+                    <button
+                      onClick={() => setSelectedCategory(null)}
+                      className="w-full text-xs text-blue-600 hover:text-blue-800 font-medium text-left mb-1"
+                    >
+                      Mostrar todos
+                    </button>
+                  )}
                   {Object.entries(docsByCategory).map(([cat, docs]) => (
-                    <div key={cat} className="flex items-center justify-between text-sm">
-                      <span className="text-gray-500">{CATEGORY_LABELS[cat] || cat}</span>
-                      <span className="text-gray-700">{docs.length}</span>
-                    </div>
+                    <button
+                      key={cat}
+                      onClick={() => setSelectedCategory(selectedCategory === cat ? null : cat)}
+                      className={`w-full flex items-center justify-between text-sm p-2 rounded-lg transition-colors ${
+                        selectedCategory === cat
+                          ? 'bg-blue-100 text-blue-800 font-semibold'
+                          : 'hover:bg-gray-50 text-gray-500'
+                      }`}
+                    >
+                      <span>{CATEGORY_LABELS[cat] || cat}</span>
+                      <span className={`${selectedCategory === cat ? 'text-blue-700' : 'text-gray-700'}`}>{docs.length}</span>
+                    </button>
                   ))}
                 </div>
               </div>

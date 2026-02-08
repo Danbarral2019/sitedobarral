@@ -3,7 +3,8 @@ import { redirect } from 'next/navigation';
 import { verifyToken } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
 import ChatInterface from '@/components/ChatInterface';
-import { Sparkles, BookOpen, MessageSquare, Zap } from 'lucide-react';
+import Link from 'next/link';
+import { ArrowLeft, Sparkles, BookOpen, MessageSquare, Zap } from 'lucide-react';
 
 export const metadata = {
   title: 'Assistente Inteligente - Prof. Daniel Barral',
@@ -73,6 +74,13 @@ export default async function AssistentePage() {
       <div className="container mx-auto px-4 py-8">
         {/* Header */}
         <div className="max-w-5xl mx-auto mb-8">
+          <Link
+            href="/area-restrita"
+            className="inline-flex items-center gap-2 text-blue-600 hover:text-blue-800 mb-4 transition-colors text-sm font-medium"
+          >
+            <ArrowLeft className="w-4 h-4" />
+            Voltar para Área Restrita
+          </Link>
           <div className="bg-white rounded-2xl shadow-lg p-8 border border-blue-100">
             <div className="flex items-start gap-4">
               <div className="p-3 bg-gradient-to-br from-blue-500 to-purple-600 rounded-xl">
