@@ -10,6 +10,7 @@ import {
   Clock,
   MessageSquare,
   ChevronRight,
+  Home,
 } from 'lucide-react';
 import Link from 'next/link';
 import { courses } from '@/data/courses';
@@ -312,6 +313,13 @@ export default function AreaRestritaPage() {
           <div className="flex items-center justify-between">
             {/* User Info */}
             <div className="flex items-center gap-3">
+              <button
+                onClick={() => contentTree.clearSelection()}
+                className="p-2 rounded-lg text-brand-600 hover:bg-brand-50 transition-colors"
+                title="Voltar ao Início"
+              >
+                <Home className="w-5 h-5 lg:w-6 lg:h-6" />
+              </button>
               <div className="w-10 h-10 lg:w-12 lg:h-12 bg-gradient-to-br from-green-500 to-green-700 rounded-full flex items-center justify-center shadow-md">
                 <span className="text-white font-bold text-sm lg:text-lg">
                   {user.name.charAt(0).toUpperCase()}

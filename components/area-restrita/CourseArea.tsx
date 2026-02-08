@@ -7,7 +7,7 @@ import {
   Library,
   Download,
   ChevronDown,
-  ChevronRight,
+  ChevronUp,
   GraduationCap,
   Paperclip,
 } from 'lucide-react';
@@ -33,46 +33,61 @@ interface CourseAreaProps {
 const CATEGORY_CONFIG: Record<string, {
   label: string;
   icon: typeof FileText;
-  color: string;
-  borderColor: string;
-  bgColor: string;
   gradient: string;
+  iconBg: string;
+  iconText: string;
+  badgeBg: string;
+  badgeText: string;
 }> = {
   'apostila': {
     label: 'Apostilas',
     icon: BookOpen,
-    color: 'text-purple-600',
-    borderColor: 'border-purple-200',
-    bgColor: 'bg-purple-50',
-    gradient: 'from-purple-500 to-purple-700',
+    gradient: 'from-purple-500/10 via-purple-400/5 to-transparent',
+    iconBg: 'bg-purple-100',
+    iconText: 'text-purple-600',
+    badgeBg: 'bg-purple-100',
+    badgeText: 'text-purple-700',
   },
   'conteudo-programatico': {
-    label: 'Conteúdo Programático',
+    label: 'Conteudo Programatico',
     icon: FileText,
-    color: 'text-blue-600',
-    borderColor: 'border-blue-200',
-    bgColor: 'bg-blue-50',
-    gradient: 'from-blue-500 to-blue-700',
+    gradient: 'from-blue-500/10 via-blue-400/5 to-transparent',
+    iconBg: 'bg-blue-100',
+    iconText: 'text-blue-600',
+    badgeBg: 'bg-blue-100',
+    badgeText: 'text-blue-700',
   },
   'bibliografia': {
     label: 'Bibliografia',
     icon: Library,
-    color: 'text-green-600',
-    borderColor: 'border-green-200',
-    bgColor: 'bg-green-50',
-    gradient: 'from-green-500 to-green-700',
+    gradient: 'from-green-500/10 via-green-400/5 to-transparent',
+    iconBg: 'bg-green-100',
+    iconText: 'text-green-600',
+    badgeBg: 'bg-green-100',
+    badgeText: 'text-green-700',
   },
   'material-complementar': {
     label: 'Material Complementar',
     icon: Paperclip,
-    color: 'text-orange-600',
-    borderColor: 'border-orange-200',
-    bgColor: 'bg-orange-50',
-    gradient: 'from-orange-500 to-orange-700',
+    gradient: 'from-orange-500/10 via-orange-400/5 to-transparent',
+    iconBg: 'bg-orange-100',
+    iconText: 'text-orange-600',
+    badgeBg: 'bg-orange-100',
+    badgeText: 'text-orange-700',
   },
 };
 
 const COURSE_MATERIAL_CATEGORIES = ['apostila', 'conteudo-programatico', 'bibliografia', 'material-complementar'];
+
+const defaultCategoryConfig = {
+  label: 'Outros',
+  icon: FileText,
+  gradient: 'from-gray-500/10 via-gray-400/5 to-transparent',
+  iconBg: 'bg-gray-100',
+  iconText: 'text-gray-600',
+  badgeBg: 'bg-gray-100',
+  badgeText: 'text-gray-700',
+};
 
 function CategorySection({
   category,
@@ -86,56 +101,55 @@ function CategorySection({
   defaultExpanded?: boolean;
 }) {
   const [isExpanded, setIsExpanded] = useState(defaultExpanded);
-  const config = CATEGORY_CONFIG[category] || {
-    label: category,
-    icon: FileText,
-    color: 'text-gray-600',
-    borderColor: 'border-gray-200',
-    bgColor: 'bg-gray-50',
-    gradient: 'from-gray-500 to-gray-700',
-  };
+  const config = CATEGORY_CONFIG[category] || defaultCategoryConfig;
   const Icon = config.icon;
 
   return (
-    <div className="mb-4">
+    <div className="bg-white rounded-2xl shadow-md border border-gray-100 overflow-hidden transition-shadow hover:shadow-lg">
+      {/* Category Header */}
       <button
         onClick={() => setIsExpanded(!isExpanded)}
-        className="w-full flex items-center gap-2 py-2 px-3 rounded-lg hover:bg-gray-50 transition-colors group"
+        className={`w-full flex items-center justify-between p-4 bg-gradient-to-r ${config.gradient} hover:opacity-90 transition-opacity`}
       >
-        {isExpanded ? (
-          <ChevronDown className="w-4 h-4 text-gray-400" />
-        ) : (
-          <ChevronRight className="w-4 h-4 text-gray-400" />
-        )}
-        <div className={`p-1.5 rounded-lg ${config.bgColor}`}>
-          <Icon className={`w-4 h-4 ${config.color}`} />
+        <div className="flex items-center gap-3">
+          <div className={`w-10 h-10 ${config.iconBg} ${config.iconText} rounded-lg flex items-center justify-center`}>
+            <Icon className="w-5 h-5" />
+          </div>
+          <h3 className="font-bold text-gray-900 text-sm lg:text-base">{config.label}</h3>
+          <span className={`${config.badgeBg} ${config.badgeText} px-2.5 py-0.5 rounded-full text-xs font-bold`}>
+            {docs.length}
+          </span>
         </div>
-        <span className="font-semibold text-gray-900 text-sm">{config.label}</span>
-        <span className="ml-auto px-2 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-600">
-          {docs.length}
-        </span>
+        <div className="text-gray-400">
+          {isExpanded ? (
+            <ChevronUp className="w-5 h-5" />
+          ) : (
+            <ChevronDown className="w-5 h-5" />
+          )}
+        </div>
       </button>
 
+      {/* Documents */}
       {isExpanded && (
-        <div className="grid gap-2 mt-2 ml-8">
+        <div className="p-3 lg:p-4 space-y-2.5">
           {docs.map((doc) => (
             <button
               key={doc.id}
               onClick={() => onDocumentClick(doc)}
-              className={`w-full text-left bg-white rounded-xl p-3 border ${config.borderColor} hover:shadow-md transition-all group/card flex items-center gap-3`}
+              className="w-full text-left bg-gray-50 hover:bg-white rounded-xl p-3 lg:p-4 border border-gray-100 hover:border-blue-200 hover:shadow-sm transition-all group flex items-center gap-3"
             >
-              <div className={`w-10 h-10 bg-gradient-to-br ${config.gradient} rounded-lg flex items-center justify-center flex-shrink-0`}>
-                <Icon className="w-5 h-5 text-white" />
+              <div className={`w-9 h-9 ${config.iconBg} rounded-lg flex items-center justify-center flex-shrink-0`}>
+                <Icon className={`w-4 h-4 ${config.iconText}`} />
               </div>
               <div className="flex-1 min-w-0">
-                <h4 className="font-medium text-sm text-gray-900 line-clamp-1 group-hover/card:text-brand-600 transition-colors">
+                <h4 className="font-semibold text-sm text-gray-900 line-clamp-1 group-hover:text-blue-600 transition-colors">
                   {doc.title}
                 </h4>
                 {doc.description && (
                   <p className="text-xs text-gray-500 line-clamp-1 mt-0.5">{doc.description}</p>
                 )}
               </div>
-              <Download className="w-4 h-4 text-gray-300 group-hover/card:text-brand-600 flex-shrink-0 transition-colors" />
+              <Download className="w-4 h-4 text-gray-300 group-hover:text-blue-600 flex-shrink-0 transition-colors" />
             </button>
           ))}
         </div>
@@ -153,7 +167,6 @@ export default function CourseArea({
     enrolledCourseIds.length === 1 ? enrolledCourseIds[0] : null
   );
 
-  // Get course materials grouped by course
   const coursesMaterials = useMemo(() => {
     const result: Record<string, { course: typeof courses[0]; docs: Document[] }> = {};
 
@@ -162,14 +175,12 @@ export default function CourseArea({
       if (!course) return;
 
       const courseDocs = documents[courseId] || [];
-      // Also include common documents (no courseId)
       const commonDocs = Object.values(documents)
         .flat()
         .filter((d) => d.isCommon && COURSE_MATERIAL_CATEGORIES.includes(d.category));
 
       const allDocs = [...courseDocs, ...commonDocs]
         .filter((d) => COURSE_MATERIAL_CATEGORIES.includes(d.category))
-        // Deduplicate by id
         .filter((doc, idx, self) => idx === self.findIndex((d) => d.id === doc.id));
 
       if (allDocs.length > 0) {
@@ -189,7 +200,6 @@ export default function CourseArea({
     return null;
   }
 
-  // Group docs by category
   const docsByCategory = COURSE_MATERIAL_CATEGORIES
     .map((cat) => ({
       category: cat,
@@ -200,69 +210,56 @@ export default function CourseArea({
   const totalDocs = activeCourse.docs.length;
 
   return (
-    <div className="bg-gradient-to-br from-amber-50 to-orange-50 rounded-2xl shadow-lg border-2 border-amber-200 mb-6 overflow-hidden">
-      {/* Header */}
-      <div className="p-4 lg:p-6 pb-0 lg:pb-0">
-        <div className="flex items-center gap-3 mb-1">
-          <div className="p-2 bg-gradient-to-br from-amber-500 to-orange-600 rounded-xl shadow-md">
-            <GraduationCap className="w-5 h-5 lg:w-6 lg:h-6 text-white" />
-          </div>
-          <div>
-            <h2 className="text-base lg:text-xl font-bold text-gray-900">Seu Curso</h2>
-            <p className="text-xs lg:text-sm text-gray-600">
-              {activeCourse.course.title}
-            </p>
-          </div>
-          <span className="ml-auto px-3 py-1 rounded-full text-xs font-semibold bg-amber-100 text-amber-800">
-            {totalDocs} {totalDocs === 1 ? 'material' : 'materiais'}
-          </span>
+    <div className="mb-6 space-y-4">
+      {/* Course Header */}
+      <div className="flex items-center gap-3">
+        <div className="p-2 bg-gradient-to-br from-amber-500 to-orange-600 rounded-xl shadow-md">
+          <GraduationCap className="w-5 h-5 lg:w-6 lg:h-6 text-white" />
         </div>
+        <div>
+          <h2 className="text-lg lg:text-xl font-bold text-gray-900">Seu Curso</h2>
+          <p className="text-sm text-gray-500">
+            {activeCourse.course.title}
+          </p>
+        </div>
+        <span className="ml-auto px-3 py-1 rounded-full text-xs font-bold bg-amber-100 text-amber-800">
+          {totalDocs} {totalDocs === 1 ? 'material' : 'materiais'}
+        </span>
       </div>
 
       {/* Course Selector (multi-curso) */}
       {hasMultipleCourses && (
-        <div className="px-4 lg:px-6 pt-3">
-          <div className="flex gap-2 overflow-x-auto pb-2">
-            {courseIds.map((courseId) => {
-              const courseMat = coursesMaterials[courseId];
-              const isActive = courseId === activeCourseId;
-              return (
-                <button
-                  key={courseId}
-                  onClick={() => setSelectedCourseId(courseId)}
-                  className={`flex-shrink-0 px-4 py-2 rounded-xl text-sm font-medium transition-all border ${
-                    isActive
-                      ? 'bg-white border-amber-400 text-amber-900 shadow-sm'
-                      : 'bg-amber-50/50 border-amber-200 text-amber-700 hover:bg-white hover:border-amber-300'
-                  }`}
-                >
-                  <span className="line-clamp-1">{courseMat.course.title.split('(')[0].trim()}</span>
-                  <span className="text-xs opacity-70 ml-1">{courseMat.docs.length}</span>
-                </button>
-              );
-            })}
-          </div>
+        <div className="flex gap-2 overflow-x-auto pb-1">
+          {courseIds.map((courseId) => {
+            const courseMat = coursesMaterials[courseId];
+            const isActive = courseId === activeCourseId;
+            return (
+              <button
+                key={courseId}
+                onClick={() => setSelectedCourseId(courseId)}
+                className={`flex-shrink-0 px-4 py-2 rounded-xl text-sm font-medium transition-all border ${
+                  isActive
+                    ? 'bg-white border-amber-400 text-amber-900 shadow-sm'
+                    : 'bg-amber-50/50 border-amber-200 text-amber-700 hover:bg-white hover:border-amber-300'
+                }`}
+              >
+                <span className="line-clamp-1">{courseMat.course.title.split('(')[0].trim()}</span>
+                <span className="text-xs opacity-70 ml-1">{courseMat.docs.length}</span>
+              </button>
+            );
+          })}
         </div>
       )}
 
-      {/* Materials by Category */}
-      <div className="p-4 lg:p-6 pt-3 lg:pt-4">
-        {docsByCategory.map((group) => (
-          <CategorySection
-            key={group.category}
-            category={group.category}
-            docs={group.docs}
-            onDocumentClick={onDocumentClick}
-          />
-        ))}
-      </div>
-
-      {/* Tip */}
-      <div className="mx-4 lg:mx-6 mb-4 lg:mb-6 p-3 bg-amber-100 border border-amber-300 rounded-lg">
-        <p className="text-xs lg:text-sm text-amber-900 font-medium leading-relaxed">
-          Clique nos materiais para visualizar detalhes e fazer o download.
-        </p>
-      </div>
+      {/* Materials by Category - same card style as DocumentsByCategory */}
+      {docsByCategory.map((group) => (
+        <CategorySection
+          key={group.category}
+          category={group.category}
+          docs={group.docs}
+          onDocumentClick={onDocumentClick}
+        />
+      ))}
     </div>
   );
 }

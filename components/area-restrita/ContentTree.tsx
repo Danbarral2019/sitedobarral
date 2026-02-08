@@ -50,7 +50,7 @@ function TreeNodeComponent({
   expandedNodes: Set<string>;
   onToggleNode: (nodeId: string) => void;
 }) {
-  const config = CONTENT_TYPE_CONFIG[node.type];
+  const config = CONTENT_TYPE_CONFIG[node.type] || CONTENT_TYPE_CONFIG['document'];
   const Icon = TYPE_ICONS[node.type] || FileText;
   const hasChildren = node.children && node.children.length > 0;
   const isExpanded = expandedNodes.has(node.id);

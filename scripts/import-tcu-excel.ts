@@ -159,9 +159,18 @@ function gerarTags(
 }
 
 /** Constrói URL de pesquisa do TCU */
-function construirUrlTCU(numero: number | null, ano: number | null): string {
+function construirUrlTCU(numero: number | null, ano: number | null, colegiado?: string | null): string {
   if (!numero || !ano) return '';
-  return `https://pesquisa.apps.tcu.gov.br/#/documento/acordao-completo/*/NUMACORDAO%253A${numero}%2520ANOACORDAO%253A${ano}`;
+  const col = mapearColegiado(colegiado || 'Plenário');
+  return `https://pesquisa.apps.tcu.gov.br/doc/acordao-completo/${numero}/${ano}/${encodeURIComponent(col)}`;
+}
+
+/** Mapeia código de colegiado para nome completo usado na URL do TCU */
+function mapearColegiado(colegiado: string): string {
+  const c = colegiado.trim();
+  if (/1[ªa]\s*c/i.test(c) || c === 'Primeira Câmara') return 'Primeira Câmara';
+  if (/2[ªa]\s*c/i.test(c) || c === 'Segunda Câmara') return 'Segunda Câmara';
+  return 'Plenário';
 }
 
 /** Parseia data no formato DD/MM/YYYY ou serial do Excel */
@@ -357,7 +366,7 @@ async function main() {
       const titulo = gerarTitulo(parsed.numero, parsed.ano, tema, subtema);
 
       // Construir URL
-      const url = construirUrlTCU(parsed.numero, parsed.ano);
+      const url = construirUrlTCU(parsed.numero, parsed.ano, parsed.colegiado);
 
       // Parsear data de julgamento
       const dataJulgamento = parsearData(dataJulg);
@@ -367,7 +376,7 @@ async function main() {
         description: descricaoLimpa,
         category: 'acordao',
         type: 'link',
-        url: url || `https://pesquisa.apps.tcu.gov.br/#/documento/acordao-completo/${acordao}`,
+        url: url || `https://pesquisa.apps.tcu.gov.br/pesquisa/acordao-completo`,
         courseId,
         isCommon,
         isPublic: false,

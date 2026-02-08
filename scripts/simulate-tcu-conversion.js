@@ -80,7 +80,7 @@ function construirUrlTCU(acordao) {
   if (!match) return '';
 
   const [, numero, ano] = match;
-  return `https://pesquisa.apps.tcu.gov.br/#/documento/acordao-completo/*/NUMACORDAO%253A${numero}%2520ANOACORDAO%253A${ano}`;
+  return `https://pesquisa.apps.tcu.gov.br/doc/acordao-completo/${numero}/${ano}/${encodeURIComponent('Plenário')}`;
 }
 
 try {

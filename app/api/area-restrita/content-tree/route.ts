@@ -309,8 +309,8 @@ export async function GET(request: NextRequest) {
       children: leiChildren.length > 0 ? leiChildren : undefined,
     };
 
-    // Add Lei 14.133 as sub-node of Base de Conhecimento
-    documentChildren.push(leiNode);
+    // Add Lei 14.133 as FIRST sub-node of Base de Conhecimento
+    documentChildren.unshift(leiNode);
 
     tree.push({
       id: 'documents',

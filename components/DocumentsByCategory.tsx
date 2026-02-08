@@ -1,7 +1,24 @@
 'use client';
 
 import { useState } from 'react';
-import { ChevronDown, ChevronUp, FileText, Video, Heart } from 'lucide-react';
+import {
+  ChevronDown,
+  ChevronUp,
+  FileText,
+  Video,
+  Heart,
+  Scale,
+  FileEdit,
+  ClipboardList,
+  ScrollText,
+  BookOpen,
+  Link2,
+  Tv,
+  FileCheck,
+  Gavel,
+  Landmark,
+  File,
+} from 'lucide-react';
 import { ArticleBadges } from './ArticleBadges';
 
 interface Document {
@@ -27,31 +44,213 @@ const PARECER_CATEGORIES = ['parecer', 'parecer-vinculante', 'decor'];
 
 // Labels de subtipo para badges de pareceres
 const PARECER_SUBTYPE_LABELS: Record<string, string | null> = {
-  'parecer': null, // parecer comum — sem badge
+  'parecer': null,
   'parecer-vinculante': 'Vinculante',
   'decor': 'DECOR',
 };
 
-// Mapeamento de categorias para ícones e cores
-const categoryConfig: Record<string, { icon: string; color: string; label: string }> = {
-  'acordao': { icon: '⚖️', color: 'blue', label: 'Acórdãos' },
-  'pareceres': { icon: '📝', color: 'green', label: 'Pareceres' },
-  'orientacao-normativa': { icon: '📋', color: 'indigo', label: 'Orientações Normativas' },
-  'instrucao-normativa': { icon: '📄', color: 'indigo', label: 'Instruções Normativas' },
-  'portaria': { icon: '📜', color: 'emerald', label: 'Portarias' },
-  'decreto': { icon: '📋', color: 'blue', label: 'Decretos' },
-  'lei': { icon: '⚖️', color: 'purple', label: 'Leis' },
-  'resolucao': { icon: '📜', color: 'cyan', label: 'Resoluções' },
-  'artigo': { icon: '📑', color: 'purple', label: 'Artigos' },
-  'edital': { icon: '📰', color: 'orange', label: 'Editais' },
-  'apostila': { icon: '📖', color: 'indigo', label: 'Apostilas' },
-  'link': { icon: '🔗', color: 'cyan', label: 'Links' },
-  'video': { icon: '🎥', color: 'red', label: 'Vídeos' },
-  'enunciados': { icon: '📋', color: 'purple', label: 'Enunciados' },
-  'sumula': { icon: '⚖️', color: 'indigo', label: 'Súmulas' },
-  'outros': { icon: '📄', color: 'gray', label: 'Outros' },
-  'outro': { icon: '📄', color: 'gray', label: 'Outros' }, // Fallback para singular
+// Mapeamento de categorias para ícones Lucide, cores e labels
+const categoryConfig: Record<string, {
+  icon: typeof Scale;
+  color: string;
+  label: string;
+  gradient: string;
+  iconBg: string;
+  iconText: string;
+  badgeBg: string;
+  badgeText: string;
+  docIconBg: string;
+}> = {
+  'acordao': {
+    icon: Scale,
+    color: 'blue',
+    label: 'Acordãos',
+    gradient: 'from-blue-500/10 via-blue-400/5 to-transparent',
+    iconBg: 'bg-blue-100',
+    iconText: 'text-blue-600',
+    badgeBg: 'bg-blue-100',
+    badgeText: 'text-blue-700',
+    docIconBg: 'bg-blue-600',
+  },
+  'pareceres': {
+    icon: FileEdit,
+    color: 'green',
+    label: 'Pareceres',
+    gradient: 'from-green-500/10 via-green-400/5 to-transparent',
+    iconBg: 'bg-green-100',
+    iconText: 'text-green-600',
+    badgeBg: 'bg-green-100',
+    badgeText: 'text-green-700',
+    docIconBg: 'bg-green-600',
+  },
+  'orientacao-normativa': {
+    icon: ClipboardList,
+    color: 'indigo',
+    label: 'Orientações Normativas',
+    gradient: 'from-indigo-500/10 via-indigo-400/5 to-transparent',
+    iconBg: 'bg-indigo-100',
+    iconText: 'text-indigo-600',
+    badgeBg: 'bg-indigo-100',
+    badgeText: 'text-indigo-700',
+    docIconBg: 'bg-indigo-600',
+  },
+  'instrucao-normativa': {
+    icon: FileCheck,
+    color: 'indigo',
+    label: 'Instruções Normativas',
+    gradient: 'from-indigo-500/10 via-indigo-400/5 to-transparent',
+    iconBg: 'bg-indigo-100',
+    iconText: 'text-indigo-600',
+    badgeBg: 'bg-indigo-100',
+    badgeText: 'text-indigo-700',
+    docIconBg: 'bg-indigo-600',
+  },
+  'portaria': {
+    icon: ScrollText,
+    color: 'emerald',
+    label: 'Portarias',
+    gradient: 'from-emerald-500/10 via-emerald-400/5 to-transparent',
+    iconBg: 'bg-emerald-100',
+    iconText: 'text-emerald-600',
+    badgeBg: 'bg-emerald-100',
+    badgeText: 'text-emerald-700',
+    docIconBg: 'bg-emerald-600',
+  },
+  'decreto': {
+    icon: Landmark,
+    color: 'blue',
+    label: 'Decretos',
+    gradient: 'from-blue-500/10 via-blue-400/5 to-transparent',
+    iconBg: 'bg-blue-100',
+    iconText: 'text-blue-600',
+    badgeBg: 'bg-blue-100',
+    badgeText: 'text-blue-700',
+    docIconBg: 'bg-blue-600',
+  },
+  'lei': {
+    icon: Gavel,
+    color: 'purple',
+    label: 'Leis',
+    gradient: 'from-purple-500/10 via-purple-400/5 to-transparent',
+    iconBg: 'bg-purple-100',
+    iconText: 'text-purple-600',
+    badgeBg: 'bg-purple-100',
+    badgeText: 'text-purple-700',
+    docIconBg: 'bg-purple-600',
+  },
+  'resolucao': {
+    icon: ScrollText,
+    color: 'cyan',
+    label: 'Resoluções',
+    gradient: 'from-cyan-500/10 via-cyan-400/5 to-transparent',
+    iconBg: 'bg-cyan-100',
+    iconText: 'text-cyan-600',
+    badgeBg: 'bg-cyan-100',
+    badgeText: 'text-cyan-700',
+    docIconBg: 'bg-cyan-600',
+  },
+  'artigo': {
+    icon: BookOpen,
+    color: 'purple',
+    label: 'Artigos',
+    gradient: 'from-purple-500/10 via-purple-400/5 to-transparent',
+    iconBg: 'bg-purple-100',
+    iconText: 'text-purple-600',
+    badgeBg: 'bg-purple-100',
+    badgeText: 'text-purple-700',
+    docIconBg: 'bg-purple-600',
+  },
+  'edital': {
+    icon: FileText,
+    color: 'orange',
+    label: 'Editais',
+    gradient: 'from-orange-500/10 via-orange-400/5 to-transparent',
+    iconBg: 'bg-orange-100',
+    iconText: 'text-orange-600',
+    badgeBg: 'bg-orange-100',
+    badgeText: 'text-orange-700',
+    docIconBg: 'bg-orange-600',
+  },
+  'apostila': {
+    icon: BookOpen,
+    color: 'indigo',
+    label: 'Apostilas',
+    gradient: 'from-indigo-500/10 via-indigo-400/5 to-transparent',
+    iconBg: 'bg-indigo-100',
+    iconText: 'text-indigo-600',
+    badgeBg: 'bg-indigo-100',
+    badgeText: 'text-indigo-700',
+    docIconBg: 'bg-indigo-600',
+  },
+  'link': {
+    icon: Link2,
+    color: 'cyan',
+    label: 'Links',
+    gradient: 'from-cyan-500/10 via-cyan-400/5 to-transparent',
+    iconBg: 'bg-cyan-100',
+    iconText: 'text-cyan-600',
+    badgeBg: 'bg-cyan-100',
+    badgeText: 'text-cyan-700',
+    docIconBg: 'bg-cyan-600',
+  },
+  'video': {
+    icon: Tv,
+    color: 'red',
+    label: 'Vídeos',
+    gradient: 'from-red-500/10 via-red-400/5 to-transparent',
+    iconBg: 'bg-red-100',
+    iconText: 'text-red-600',
+    badgeBg: 'bg-red-100',
+    badgeText: 'text-red-700',
+    docIconBg: 'bg-red-600',
+  },
+  'enunciados': {
+    icon: ClipboardList,
+    color: 'purple',
+    label: 'Enunciados',
+    gradient: 'from-purple-500/10 via-purple-400/5 to-transparent',
+    iconBg: 'bg-purple-100',
+    iconText: 'text-purple-600',
+    badgeBg: 'bg-purple-100',
+    badgeText: 'text-purple-700',
+    docIconBg: 'bg-purple-600',
+  },
+  'sumula': {
+    icon: Scale,
+    color: 'indigo',
+    label: 'Súmulas',
+    gradient: 'from-indigo-500/10 via-indigo-400/5 to-transparent',
+    iconBg: 'bg-indigo-100',
+    iconText: 'text-indigo-600',
+    badgeBg: 'bg-indigo-100',
+    badgeText: 'text-indigo-700',
+    docIconBg: 'bg-indigo-600',
+  },
+  'outros': {
+    icon: File,
+    color: 'gray',
+    label: 'Outros',
+    gradient: 'from-gray-500/10 via-gray-400/5 to-transparent',
+    iconBg: 'bg-gray-100',
+    iconText: 'text-gray-600',
+    badgeBg: 'bg-gray-100',
+    badgeText: 'text-gray-700',
+    docIconBg: 'bg-gray-600',
+  },
+  'outro': {
+    icon: File,
+    color: 'gray',
+    label: 'Outros',
+    gradient: 'from-gray-500/10 via-gray-400/5 to-transparent',
+    iconBg: 'bg-gray-100',
+    iconText: 'text-gray-600',
+    badgeBg: 'bg-gray-100',
+    badgeText: 'text-gray-700',
+    docIconBg: 'bg-gray-600',
+  },
 };
+
+const defaultConfig = categoryConfig['outro'];
 
 export default function DocumentsByCategory({
   documents,
@@ -60,13 +259,10 @@ export default function DocumentsByCategory({
   isFavorite,
   toggleFavorite,
 }: DocumentsByCategoryProps) {
-  // Estado de expansão por categoria
   const [expandedCategories, setExpandedCategories] = useState<Set<string>>(new Set());
 
   // Agrupar documentos por categoria (excluindo materiais destacados)
-  // Pareceres (parecer, parecer-vinculante, decor) são agrupados sob "pareceres"
   const documentsByCategory = documents.reduce((acc, doc) => {
-    // Pular materiais destacados
     if (['apostila', 'conteudo-programatico', 'bibliografia'].includes(doc.category)) {
       return acc;
     }
@@ -82,10 +278,8 @@ export default function DocumentsByCategory({
     return acc;
   }, {} as Record<string, Document[]>);
 
-  // Ordenar categorias alfabeticamente
   const sortedCategories = Object.keys(documentsByCategory).sort();
 
-  // Toggle de expansão
   const toggleCategory = (category: string) => {
     setExpandedCategories(prev => {
       const newSet = new Set(prev);
@@ -98,8 +292,7 @@ export default function DocumentsByCategory({
     });
   };
 
-  // Truncar descrição
-  const truncateDescription = (text: string, maxLength: number = 80): string => {
+  const truncateDescription = (text: string, maxLength: number = 100): string => {
     if (text.length <= maxLength) return text;
     return text.substring(0, maxLength).trim() + '...';
   };
@@ -115,159 +308,153 @@ export default function DocumentsByCategory({
   }
 
   return (
-    <div className="bg-white rounded-2xl shadow-lg p-4 lg:p-8 border-2 border-gray-200">
-      <div className="mb-4 lg:mb-6">
-        <h2 className="text-base lg:text-2xl font-bold text-gray-900 mb-1 lg:mb-2">📚 Materiais por Categoria</h2>
-        <p className="text-sm lg:text-base text-gray-600">Clique em um documento para ver detalhes completos</p>
+    <div className="space-y-4 lg:space-y-5">
+      {/* Header */}
+      <div className="mb-2">
+        <h2 className="text-lg lg:text-2xl font-bold text-gray-900">Materiais por Categoria</h2>
+        <p className="text-sm text-gray-500 mt-1">Clique em um documento para ver detalhes completos</p>
       </div>
 
-      <div className="space-y-3 lg:space-y-4">
-        {sortedCategories.map((category) => {
-          const categoryDocs = documentsByCategory[category];
-          const isExpanded = expandedCategories.has(category);
-          const config = categoryConfig[category] || categoryConfig['outro'];
-          const colorClasses = {
-            blue: 'border-brand-200 bg-brand-50',
-            green: 'border-green-200 bg-green-50',
-            purple: 'border-purple-200 bg-purple-50',
-            orange: 'border-orange-200 bg-orange-50',
-            indigo: 'border-indigo-200 bg-indigo-50',
-            cyan: 'border-cyan-200 bg-cyan-50',
-            red: 'border-red-200 bg-red-50',
-            gray: 'border-gray-200 bg-gray-50',
-          };
+      {/* Cards por categoria */}
+      {sortedCategories.map((category) => {
+        const categoryDocs = documentsByCategory[category];
+        const isExpanded = expandedCategories.has(category);
+        const config = categoryConfig[category] || defaultConfig;
+        const IconComponent = config.icon;
 
-          return (
-            <div
-              key={category}
-              className={`border-2 rounded-xl overflow-hidden transition-all ${colorClasses[config.color as keyof typeof colorClasses]}`}
+        return (
+          <div
+            key={category}
+            className="bg-white rounded-2xl shadow-md border border-gray-100 overflow-hidden transition-shadow hover:shadow-lg"
+          >
+            {/* Header da categoria com gradiente */}
+            <button
+              onClick={() => toggleCategory(category)}
+              className={`w-full flex items-center justify-between p-4 lg:p-5 bg-gradient-to-r ${config.gradient} hover:opacity-90 transition-opacity`}
             >
-              {/* Header da categoria */}
-              <button
-                onClick={() => toggleCategory(category)}
-                className="w-full flex items-center justify-between p-4 lg:p-4 hover:opacity-80 transition-opacity min-h-[56px] lg:min-h-0"
-              >
-                <div className="flex items-center gap-3">
-                  <span className="text-2xl lg:text-2xl">{config.icon}</span>
-                  <div className="text-left">
-                    <h3 className="text-base lg:text-lg font-bold text-gray-900">{config.label}</h3>
-                    <p className="text-sm lg:text-sm text-gray-600">{categoryDocs.length} documento{categoryDocs.length !== 1 ? 's' : ''}</p>
-                  </div>
+              <div className="flex items-center gap-3 lg:gap-4">
+                <div className={`w-10 h-10 lg:w-11 lg:h-11 ${config.iconBg} ${config.iconText} rounded-lg flex items-center justify-center`}>
+                  <IconComponent className="w-5 h-5 lg:w-6 lg:h-6" />
                 </div>
-                <div className="text-gray-600">
-                  {isExpanded ? (
-                    <ChevronUp className="w-6 h-6 lg:w-6 lg:h-6" />
-                  ) : (
-                    <ChevronDown className="w-6 h-6 lg:w-6 lg:h-6" />
-                  )}
+                <div className="text-left">
+                  <h3 className="text-base lg:text-lg font-bold text-gray-900">{config.label}</h3>
                 </div>
-              </button>
-
-              {/* Lista de documentos - sempre mostra preview dos primeiros 2 */}
-              <div className="border-t-2 border-gray-200">
-                {(isExpanded ? categoryDocs : categoryDocs.slice(0, 2)).map((doc, index) => (
-                    <div
-                      key={doc.id}
-                      className={`p-3 lg:p-4 hover:bg-white/50 transition-colors ${
-                        index < categoryDocs.length - 1 ? 'border-b border-gray-200' : ''
-                      }`}
-                    >
-                      <div className="flex items-start justify-between gap-4">
-                        {/* Conteúdo do documento */}
-                        <div className="flex-1 min-w-0">
-                          <button
-                            onClick={() => onDocumentClick(doc)}
-                            className="text-left w-full group min-h-[44px] lg:min-h-[48px] flex items-start"
-                          >
-                            <div className="flex items-start gap-2 lg:gap-3 w-full">
-                              <div className="w-8 h-8 lg:w-8 lg:h-8 bg-gray-700 rounded-lg flex items-center justify-center flex-shrink-0 mt-0.5">
-                                {doc.type === 'video' ? (
-                                  <Video className="w-4 h-4 lg:w-4 lg:h-4 text-white" />
-                                ) : (
-                                  <FileText className="w-4 h-4 lg:w-4 lg:h-4 text-white" />
-                                )}
-                              </div>
-                              <div className="flex-1">
-                                <div className="flex items-start gap-2">
-                                  <h4 className="text-sm lg:text-base font-bold text-gray-900 group-hover:text-brand-600 transition-colors line-clamp-2">
-                                    {doc.title}
-                                  </h4>
-                                  {PARECER_SUBTYPE_LABELS[doc.category] && (
-                                    <span className={`flex-shrink-0 mt-0.5 px-2 py-0.5 rounded-full text-xs font-semibold ${
-                                      doc.category === 'decor'
-                                        ? 'bg-amber-100 text-amber-800'
-                                        : 'bg-emerald-100 text-emerald-800'
-                                    }`}>
-                                      {PARECER_SUBTYPE_LABELS[doc.category]}
-                                    </span>
-                                  )}
-                                </div>
-                                {doc.description && (
-                                  <p className="text-xs lg:text-sm text-gray-600 mt-0.5 lg:mt-1 line-clamp-2">
-                                    {truncateDescription(doc.description)}
-                                  </p>
-                                )}
-                                {/* Badges de artigos da Lei 14.133 */}
-                                {doc.leiArticles && (
-                                  <div className="mt-2">
-                                    <ArticleBadges
-                                      leiArticles={doc.leiArticles}
-                                      maxVisible={3}
-                                      onArticleClick={(articleNum) => {
-                                        // Click na badge abre o documento - não precisa ação extra
-                                        console.log('Artigo clicado:', articleNum);
-                                      }}
-                                    />
-                                  </div>
-                                )}
-                              </div>
-                            </div>
-                          </button>
-                        </div>
-
-                        {/* Botão de favoritar */}
-                        <button
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            toggleFavorite(doc.id, courseId);
-                          }}
-                          className={`p-2 lg:p-2 rounded-lg transition-colors flex-shrink-0 min-h-[40px] min-w-[40px] lg:min-h-0 lg:min-w-0 flex items-center justify-center ${
-                            isFavorite(doc.id)
-                              ? 'text-red-600 bg-red-100 hover:bg-red-200'
-                              : 'text-gray-400 hover:text-red-600 hover:bg-red-50'
-                          }`}
-                          title={isFavorite(doc.id) ? 'Remover dos favoritos' : 'Adicionar aos favoritos'}
-                        >
-                          <Heart className={`w-5 h-5 lg:w-5 lg:h-5 ${isFavorite(doc.id) ? 'fill-current' : ''}`} />
-                        </button>
-                      </div>
-                    </div>
-                  ))}
-
-                {/* Indicador de mais documentos */}
-                {!isExpanded && categoryDocs.length > 2 && (
-                  <div className="p-4 bg-gradient-to-r from-gray-50 to-gray-100 border-t border-gray-200">
-                    <button
-                      onClick={() => toggleCategory(category)}
-                      className="w-full text-center text-sm font-medium text-brand-600 hover:text-brand-800 flex items-center justify-center gap-2"
-                    >
-                      <span>Ver mais {categoryDocs.length - 2} {categoryDocs.length - 2 === 1 ? 'documento' : 'documentos'}</span>
-                      <ChevronDown className="w-4 h-4" />
-                    </button>
-                  </div>
+                <span className={`${config.badgeBg} ${config.badgeText} px-2.5 py-0.5 rounded-full text-xs font-bold`}>
+                  {categoryDocs.length}
+                </span>
+              </div>
+              <div className="text-gray-400">
+                {isExpanded ? (
+                  <ChevronUp className="w-5 h-5" />
+                ) : (
+                  <ChevronDown className="w-5 h-5" />
                 )}
               </div>
-            </div>
-          );
-        })}
-      </div>
+            </button>
 
-      {/* Dica */}
-      <div className="mt-6 p-4 lg:p-4 bg-gray-50 border border-gray-200 rounded-lg">
-        <p className="text-sm lg:text-sm text-gray-700 leading-relaxed">
-          💡 <strong>Dica:</strong> Clique em qualquer documento para ver a descrição completa e fazer o download.
-        </p>
-      </div>
+            {/* Lista de documentos como mini-cards */}
+            <div className="p-3 lg:p-4 space-y-3">
+              {(isExpanded ? categoryDocs : categoryDocs.slice(0, 2)).map((doc) => (
+                <div
+                  key={doc.id}
+                  className="bg-gray-50 hover:bg-white rounded-xl p-3 lg:p-4 border border-gray-100 hover:border-blue-200 hover:shadow-sm transition-all"
+                >
+                  <div className="flex items-start justify-between gap-3">
+                    {/* Conteúdo do documento */}
+                    <div
+                      className="flex-1 min-w-0 cursor-pointer group"
+                      onClick={() => onDocumentClick(doc)}
+                      role="button"
+                      tabIndex={0}
+                      onKeyDown={(e) => { if (e.key === 'Enter') onDocumentClick(doc); }}
+                    >
+                      <div className="flex items-start gap-2.5 lg:gap-3 w-full">
+                        <div className={`w-8 h-8 ${config.docIconBg} rounded-lg flex items-center justify-center flex-shrink-0 mt-0.5`}>
+                          {doc.type === 'video' ? (
+                            <Video className="w-4 h-4 text-white" />
+                          ) : (
+                            <FileText className="w-4 h-4 text-white" />
+                          )}
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-start gap-2">
+                            <h4 className="text-sm lg:text-base font-semibold text-gray-900 group-hover:text-blue-600 transition-colors line-clamp-2">
+                              {doc.title}
+                            </h4>
+                            {PARECER_SUBTYPE_LABELS[doc.category] && (
+                              <span className={`flex-shrink-0 mt-0.5 px-2 py-0.5 rounded-full text-xs font-semibold ${
+                                doc.category === 'decor'
+                                  ? 'bg-amber-100 text-amber-800'
+                                  : 'bg-emerald-100 text-emerald-800'
+                              }`}>
+                                {PARECER_SUBTYPE_LABELS[doc.category]}
+                              </span>
+                            )}
+                          </div>
+                          {doc.description && (
+                            <p className="text-xs lg:text-sm text-gray-500 mt-1 line-clamp-2">
+                              {truncateDescription(doc.description)}
+                            </p>
+                          )}
+                          {doc.leiArticles && (
+                            <div className="mt-2">
+                              <ArticleBadges
+                                leiArticles={doc.leiArticles}
+                                maxVisible={3}
+                                onArticleClick={(articleNum) => {
+                                  console.log('Artigo clicado:', articleNum);
+                                }}
+                              />
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Botão de favoritar */}
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        toggleFavorite(doc.id, courseId);
+                      }}
+                      className={`p-2 rounded-lg transition-colors flex-shrink-0 min-h-[40px] min-w-[40px] lg:min-h-0 lg:min-w-0 flex items-center justify-center ${
+                        isFavorite(doc.id)
+                          ? 'text-red-600 bg-red-100 hover:bg-red-200'
+                          : 'text-gray-300 hover:text-red-600 hover:bg-red-50'
+                      }`}
+                      title={isFavorite(doc.id) ? 'Remover dos favoritos' : 'Adicionar aos favoritos'}
+                    >
+                      <Heart className={`w-4 h-4 lg:w-5 lg:h-5 ${isFavorite(doc.id) ? 'fill-current' : ''}`} />
+                    </button>
+                  </div>
+                </div>
+              ))}
+
+              {/* Botão "Ver mais" redesenhado */}
+              {!isExpanded && categoryDocs.length > 2 && (
+                <button
+                  onClick={() => toggleCategory(category)}
+                  className="w-full py-3 border-2 border-dashed border-gray-200 hover:border-blue-300 rounded-xl text-sm font-medium text-gray-500 hover:text-blue-600 hover:bg-blue-50/50 flex items-center justify-center gap-2 transition-all"
+                >
+                  <span>Ver mais {categoryDocs.length - 2} {categoryDocs.length - 2 === 1 ? 'documento' : 'documentos'}</span>
+                  <ChevronDown className="w-4 h-4" />
+                </button>
+              )}
+
+              {/* Botão para colapsar */}
+              {isExpanded && categoryDocs.length > 2 && (
+                <button
+                  onClick={() => toggleCategory(category)}
+                  className="w-full py-2 text-sm font-medium text-gray-400 hover:text-gray-600 flex items-center justify-center gap-1 transition-colors"
+                >
+                  <ChevronUp className="w-4 h-4" />
+                  <span>Mostrar menos</span>
+                </button>
+              )}
+            </div>
+          </div>
+        );
+      })}
     </div>
   );
 }

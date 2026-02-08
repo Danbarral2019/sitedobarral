@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { Loader2, FileText, ArrowLeft, ExternalLink, Heart } from 'lucide-react';
+import { Loader2, FileText, ArrowLeft, ExternalLink, Heart, Filter, X } from 'lucide-react';
 import { LEI_14133_ARTIGOS as LEI_14133_ARTIGOS_FALLBACK, LeiArticle } from '@/data/lei-14133-artigos';
 import { ArticleRelationshipGraph } from '@/components/ArticleRelationshipGraph';
 import { useAuth } from '@/hooks/use-auth';
@@ -218,16 +218,44 @@ export default function ArtigoAreaRestritaPage() {
           <div className="grid lg:grid-cols-3 gap-8">
             {/* Main Column */}
             <div className="lg:col-span-2 space-y-6">
-              {/* Artigos Relacionados Graph */}
-              <ArticleRelationshipGraph
-                articleNumber={numero}
-                onArticleClick={(articleNum) => {
-                  router.push(`/area-restrita/artigo/${articleNum}`);
-                }}
-              />
+              {/* Banner de filtro ativo */}
+              {selectedCategory && (
+                <div className="bg-gradient-to-r from-blue-50 to-indigo-50 border-2 border-blue-200 rounded-xl p-4 flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <div className="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center">
+                      <Filter className="w-4 h-4 text-blue-600" />
+                    </div>
+                    <div>
+                      <span className="text-sm font-semibold text-blue-900">
+                        Filtrando por: {CATEGORY_LABELS[selectedCategory] || selectedCategory}
+                      </span>
+                      <span className="ml-2 px-2 py-0.5 bg-blue-100 text-blue-700 rounded-full text-xs font-bold">
+                        {docsByCategory[selectedCategory]?.length || 0} documento{(docsByCategory[selectedCategory]?.length || 0) !== 1 ? 's' : ''}
+                      </span>
+                    </div>
+                  </div>
+                  <button
+                    onClick={() => setSelectedCategory(null)}
+                    className="flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium text-blue-700 hover:bg-blue-100 rounded-lg transition-colors"
+                  >
+                    <X className="w-4 h-4" />
+                    Limpar filtro
+                  </button>
+                </div>
+              )}
 
-              {/* Blog Posts */}
-              {relatedPosts.length > 0 && (
+              {/* Artigos Relacionados Graph - oculto quando filtro ativo */}
+              {!selectedCategory && (
+                <ArticleRelationshipGraph
+                  articleNumber={numero}
+                  onArticleClick={(articleNum) => {
+                    router.push(`/area-restrita/artigo/${articleNum}`);
+                  }}
+                />
+              )}
+
+              {/* Blog Posts - ocultos quando filtro ativo */}
+              {!selectedCategory && relatedPosts.length > 0 && (
                 <div className="bg-white rounded-2xl shadow-lg p-6 border-2 border-gray-200">
                   <h2 className="text-xl font-bold text-gray-900 mb-4">
                     Posts Relacionados ({relatedPosts.length})
@@ -254,25 +282,11 @@ export default function ArtigoAreaRestritaPage() {
               {relatedDocuments.length > 0 ? (
                 <div className="bg-white rounded-2xl shadow-lg p-6 border-2 border-gray-200">
                   <h2 className="text-xl font-bold text-gray-900 mb-2">
-                    Documentos Vinculados ({relatedDocuments.length})
+                    Documentos Vinculados ({selectedCategory ? (docsByCategory[selectedCategory]?.length || 0) : relatedDocuments.length})
                   </h2>
                   <p className="text-sm text-gray-600 mb-6">
                     Clique para ver detalhes completos e acessar o documento
                   </p>
-
-                  {selectedCategory && (
-                    <div className="mb-4 flex items-center gap-2">
-                      <span className="px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-sm font-semibold">
-                        {CATEGORY_LABELS[selectedCategory] || selectedCategory}
-                      </span>
-                      <button
-                        onClick={() => setSelectedCategory(null)}
-                        className="text-xs text-gray-500 hover:text-gray-700"
-                      >
-                        Limpar filtro
-                      </button>
-                    </div>
-                  )}
 
                   <div className="space-y-6">
                     {Object.entries(docsByCategory)

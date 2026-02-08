@@ -155,9 +155,8 @@ function construirUrlTCU(acordao) {
 
   const [, numero, ano] = match;
 
-  // URL padrao do TCU para acordaos
-  // Formato: https://pesquisa.apps.tcu.gov.br/#/documento/acordao-completo/*/NUMACORDAO%253A{numero}%2520ANOACORDAO%253A{ano}
-  return `https://pesquisa.apps.tcu.gov.br/#/documento/acordao-completo/*/NUMACORDAO%253A${numero}%2520ANOACORDAO%253A${ano}`;
+  // URL do TCU (formato novo, desde ~2025)
+  return `https://pesquisa.apps.tcu.gov.br/doc/acordao-completo/${numero}/${ano}/${encodeURIComponent('Plenário')}`;
 }
 
 /**
