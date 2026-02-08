@@ -28,6 +28,7 @@ interface ContentTreeProps {
 
 const TYPE_ICONS: Record<ContentType, typeof FileText> = {
   document: FileText,
+  'course-material': BookOpen,
   lei: Scale,
   glossary: BookOpen,
   faq: HelpCircle,
@@ -52,7 +53,7 @@ function TreeNodeComponent({
   onToggleNode: (nodeId: string) => void;
 }) {
   const config = CONTENT_TYPE_CONFIG[node.type];
-  const Icon = TYPE_ICONS[node.type];
+  const Icon = TYPE_ICONS[node.type] || FileText;
   const hasChildren = node.children && node.children.length > 0;
   const isExpanded = expandedNodes.has(node.id);
   const isSelected =
