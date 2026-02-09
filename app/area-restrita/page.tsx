@@ -24,6 +24,7 @@ import {
   SearchResultsList,
   MobileTreeDrawer,
   MobileTreeTrigger,
+  PdfExportBar,
 } from '@/components/area-restrita';
 import DocumentDetailModal from '@/components/DocumentDetailModal';
 import DocumentsByCategory from '@/components/DocumentsByCategory';
@@ -104,6 +105,10 @@ export default function AreaRestritaPage() {
   // Document modal state
   const [selectedDocument, setSelectedDocument] = useState<DocumentType | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+
+  // PDF export selection state
+  const [selectedDocIds, setSelectedDocIds] = useState<Set<string>>(new Set());
+  const [isExporting, setIsExporting] = useState(false);
 
   // Redirect if not authenticated
   useEffect(() => {
@@ -281,6 +286,71 @@ export default function AreaRestritaPage() {
     await logout();
   };
 
+  // PDF export handlers
+  const toggleDocSelect = (id: string) => {
+    setSelectedDocIds(prev => {
+      const next = new Set(prev);
+      if (next.has(id)) {
+        next.delete(id);
+      } else {
+        next.add(id);
+      }
+      return next;
+    });
+  };
+
+  const documentResults = useMemo(() => {
+    return search.results
+      .filter(r => r.type === 'document')
+      .map(r => r.data as DocumentResult);
+  }, [search.results]);
+
+  const selectAllDocs = () => {
+    setSelectedDocIds(new Set(documentResults.map(d => d.id)));
+  };
+
+  const clearDocSelection = () => setSelectedDocIds(new Set());
+
+  const handleExportPdf = async () => {
+    if (selectedDocIds.size === 0) return;
+    setIsExporting(true);
+    try {
+      const res = await fetch('/api/export-pdf', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          documentIds: Array.from(selectedDocIds),
+          mode: 'search',
+          searchContext: {
+            query: search.query,
+            aiResponse: search.aiAnswer || undefined,
+            searchType: search.aiAnswer ? 'ai' : 'local',
+            timestamp: new Date().toISOString(),
+          },
+        }),
+      });
+      if (!res.ok) throw new Error('Erro ao gerar PDF');
+      const blob = await res.blob();
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `documentos-${new Date().toISOString().split('T')[0]}.pdf`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error('Erro ao exportar PDF:', error);
+    } finally {
+      setIsExporting(false);
+    }
+  };
+
+  // Clear selection when search changes
+  useEffect(() => {
+    setSelectedDocIds(new Set());
+  }, [search.query]);
+
   // Get selected label for mobile trigger
   const selectedLabel = useMemo(() => {
     if (!contentTree.selection) return undefined;
@@ -450,6 +520,8 @@ export default function AreaRestritaPage() {
                 isAiLoading={search.isAiLoading}
                 aiError={search.aiError}
                 onFollowUp={search.sendFollowUp}
+                selectedIds={selectedDocIds}
+                onToggleSelect={toggleDocSelect}
               />
             ) : (
               /* Tree Navigation Content */
@@ -601,6 +673,18 @@ export default function AreaRestritaPage() {
           onClose={handleCloseModal}
           isFavorite={isFavorite(selectedDocument.id)}
           onToggleFavorite={() => toggleFavorite(selectedDocument.id, selectedDocument.courseId || enrolledCourseIds[0] || '')}
+        />
+      )}
+
+      {/* PDF Export Bar */}
+      {search.isSearchActive && documentResults.length > 0 && (
+        <PdfExportBar
+          selectedCount={selectedDocIds.size}
+          totalDocumentCount={documentResults.length}
+          onSelectAll={selectAllDocs}
+          onClearSelection={clearDocSelection}
+          onExport={handleExportPdf}
+          isExporting={isExporting}
         />
       )}
 

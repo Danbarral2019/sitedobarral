@@ -16,6 +16,8 @@ import {
   Sparkles,
   AlertCircle,
   Gavel,
+  CheckSquare,
+  Square,
 } from 'lucide-react';
 import type {
   SearchResultItem,
@@ -44,6 +46,8 @@ interface SearchResultsListProps {
   isAiLoading?: boolean;
   aiError?: string | null;
   onFollowUp?: (query: string) => void;
+  selectedIds?: Set<string>;
+  onToggleSelect?: (id: string) => void;
 }
 
 const TYPE_ICONS: Record<ContentType, typeof FileText> = {
@@ -299,19 +303,48 @@ function DocumentResultCard({
   onClick,
   isFavorite,
   onToggleFavorite,
+  isSelected,
+  onToggleSelect,
 }: {
   doc: DocumentResult;
   query: string;
   onClick?: () => void;
   isFavorite?: boolean;
   onToggleFavorite?: () => void;
+  isSelected?: boolean;
+  onToggleSelect?: () => void;
 }) {
   return (
     <div
       onClick={onClick}
-      className="bg-white rounded-xl border border-gray-200 p-4 hover:border-brand-300 hover:shadow-md transition-all cursor-pointer group"
+      className={`bg-white rounded-xl border p-4 hover:shadow-md transition-all cursor-pointer group ${
+        isSelected
+          ? 'border-brand-400 bg-brand-50/30 ring-1 ring-brand-300'
+          : 'border-gray-200 hover:border-brand-300'
+      }`}
     >
       <div className="flex items-start gap-3">
+        {/* Checkbox */}
+        {onToggleSelect && (
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              onToggleSelect();
+            }}
+            className={`p-1 rounded transition-colors flex-shrink-0 mt-0.5 ${
+              isSelected
+                ? 'text-brand-600'
+                : 'text-gray-300 hover:text-brand-500'
+            }`}
+            title={isSelected ? 'Desmarcar' : 'Selecionar para PDF'}
+          >
+            {isSelected ? (
+              <CheckSquare className="w-5 h-5" />
+            ) : (
+              <Square className="w-5 h-5" />
+            )}
+          </button>
+        )}
         <div className="p-2 rounded-lg bg-brand-50 text-brand-600 flex-shrink-0">
           <FileText className="w-5 h-5" />
         </div>
@@ -596,6 +629,8 @@ export function SearchResultsList({
   isAiLoading,
   aiError,
   onFollowUp,
+  selectedIds,
+  onToggleSelect,
 }: SearchResultsListProps) {
   const showAiCard = isAiLoading || aiError || aiAnswer;
 
@@ -695,6 +730,8 @@ export function SearchResultsList({
                           onClick={() => onDocumentClick?.(doc)}
                           isFavorite={isFavorite?.(doc.id)}
                           onToggleFavorite={() => onToggleFavorite?.(doc.id)}
+                          isSelected={selectedIds?.has(doc.id)}
+                          onToggleSelect={onToggleSelect ? () => onToggleSelect(doc.id) : undefined}
                         />
                       );
                     case 'lei':
