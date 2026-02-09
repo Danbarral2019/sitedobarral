@@ -50,6 +50,43 @@ const CATEGORY_LABELS: Record<string, string> = {
   'outro': 'Outro',
 };
 
+const CATEGORY_TIER: Record<string, number> = {
+  // Tier 1 — Materiais do professor
+  'apostila': 1, 'conteudo-programatico': 1, 'outro': 1,
+  'bibliografia': 1, 'sumula': 1, 'parecer': 1,
+  // Tier 2 — Enunciados e ONs
+  'enunciados': 2, 'orientacao-normativa': 2,
+  // Tier 3 — Acórdãos e manuais
+  'acordao': 3, 'manual-tcu': 3,
+  // Tier 4 — DECOR e pareceres vinculantes
+  'decor': 4, 'parecer-vinculante': 4,
+  // Tier 5 — Atos legislativos
+  'legislative-act': 5,
+};
+
+function getTier(category: string): number {
+  return CATEGORY_TIER[category] ?? 10;
+}
+
+function getTierCardStyle(tier: number): string {
+  if (tier === 1) return 'bg-brand-50/40 hover:bg-brand-50 border-brand-200/50 hover:border-brand-300';
+  if (tier === 2) return 'bg-indigo-50/30 hover:bg-indigo-50 border-indigo-200/50 hover:border-indigo-300';
+  return 'bg-gray-50 hover:bg-blue-50 border-transparent hover:border-blue-200';
+}
+
+function getTierBadgeStyle(tier: number): string {
+  if (tier === 1) return 'bg-brand-100 text-brand-800 font-semibold';
+  if (tier === 2) return 'bg-indigo-100 text-indigo-700';
+  return 'bg-blue-100 text-blue-700';
+}
+
+function getTierSidebarStyle(tier: number, isSelected: boolean): string {
+  if (!isSelected) return 'hover:bg-gray-50 text-gray-500';
+  if (tier === 1) return 'bg-brand-100 text-brand-800 font-semibold';
+  if (tier === 2) return 'bg-indigo-100 text-indigo-800 font-semibold';
+  return 'bg-blue-100 text-blue-800 font-semibold';
+}
+
 export default function ArtigoAreaRestritaPage() {
   const params = useParams();
   const router = useRouter();
@@ -291,11 +328,18 @@ export default function ArtigoAreaRestritaPage() {
                   <div className="space-y-6">
                     {Object.entries(docsByCategory)
                       .filter(([category]) => !selectedCategory || category === selectedCategory)
-                      .sort((a, b) => b[1].length - a[1].length)
-                      .map(([category, docs]) => (
+                      .sort((a, b) => {
+                        const tierA = getTier(a[0]);
+                        const tierB = getTier(b[0]);
+                        if (tierA !== tierB) return tierA - tierB;
+                        return b[1].length - a[1].length;
+                      })
+                      .map(([category, docs]) => {
+                        const tier = getTier(category);
+                        return (
                         <div key={category}>
                           <h3 className="text-sm font-bold text-gray-700 mb-2 flex items-center gap-2">
-                            <span className="px-2 py-0.5 bg-blue-100 text-blue-700 rounded text-xs">
+                            <span className={`px-2 py-0.5 rounded text-xs ${getTierBadgeStyle(tier)}`}>
                               {CATEGORY_LABELS[category] || category}
                             </span>
                             <span className="text-gray-400 font-normal">{docs.length}</span>
@@ -311,7 +355,7 @@ export default function ArtigoAreaRestritaPage() {
                                     setSelectedDocId(doc.id);
                                   }
                                 }}
-                                className="w-full text-left p-3 bg-gray-50 rounded-lg hover:bg-blue-50 transition-colors border border-transparent hover:border-blue-200 group"
+                                className={`w-full text-left p-3 rounded-lg transition-colors border group ${getTierCardStyle(tier)}`}
                               >
                                 <div className="flex items-start justify-between gap-3">
                                   <div className="flex-1 min-w-0">
@@ -349,7 +393,8 @@ export default function ArtigoAreaRestritaPage() {
                             ))}
                           </div>
                         </div>
-                      ))}
+                        );
+                      })}
                   </div>
                 </div>
               ) : (
@@ -412,18 +457,23 @@ export default function ArtigoAreaRestritaPage() {
                       Mostrar todos
                     </button>
                   )}
-                  {Object.entries(docsByCategory).map(([cat, docs]) => (
+                  {Object.entries(docsByCategory)
+                    .sort((a, b) => {
+                      const tierA = getTier(a[0]);
+                      const tierB = getTier(b[0]);
+                      if (tierA !== tierB) return tierA - tierB;
+                      return b[1].length - a[1].length;
+                    })
+                    .map(([cat, docs]) => (
                     <button
                       key={cat}
                       onClick={() => setSelectedCategory(selectedCategory === cat ? null : cat)}
                       className={`w-full flex items-center justify-between text-sm p-2 rounded-lg transition-colors ${
-                        selectedCategory === cat
-                          ? 'bg-blue-100 text-blue-800 font-semibold'
-                          : 'hover:bg-gray-50 text-gray-500'
+                        getTierSidebarStyle(getTier(cat), selectedCategory === cat)
                       }`}
                     >
                       <span>{CATEGORY_LABELS[cat] || cat}</span>
-                      <span className={`${selectedCategory === cat ? 'text-blue-700' : 'text-gray-700'}`}>{docs.length}</span>
+                      <span className={`${selectedCategory === cat ? 'font-bold' : 'text-gray-700'}`}>{docs.length}</span>
                     </button>
                   ))}
                 </div>
