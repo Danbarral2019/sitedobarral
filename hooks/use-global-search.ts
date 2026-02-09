@@ -148,7 +148,7 @@ export function useGlobalSearch(options: UseGlobalSearchOptions = {}): UseGlobal
       try {
         const requestBody: Record<string, unknown> = {
           query: searchQuery,
-          maxResults: 20,
+          maxResults: 30,
           useCache: true,
         };
 

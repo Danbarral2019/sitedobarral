@@ -216,10 +216,11 @@ function AIAnswerCard({
         </div>
         <button
           onClick={handleDownloadPDF}
-          className="p-1.5 rounded-lg text-purple-500 hover:text-purple-700 hover:bg-purple-100 transition-colors"
-          title="Baixar como PDF"
+          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium text-purple-700 bg-purple-100 hover:bg-purple-200 transition-colors"
+          title="Baixar resposta como PDF"
         >
-          <Download className="w-4 h-4" />
+          <Download className="w-3.5 h-3.5" />
+          Baixar PDF
         </button>
       </div>
 

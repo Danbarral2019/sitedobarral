@@ -124,11 +124,11 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    if (maxResults < 1 || maxResults > 20) {
+    if (maxResults < 1 || maxResults > 40) {
       return NextResponse.json(
         {
           success: false,
-          error: 'maxResults must be between 1 and 20'
+          error: 'maxResults must be between 1 and 40'
         },
         { status: 400 }
       );
@@ -141,7 +141,7 @@ export async function POST(req: NextRequest) {
     // Busca mais resultados para garantir diversidade de categorias
     const searchResponse = await semanticSearch(query, {
       category: filters.category,
-      limit: Math.max(maxResults * 4, 40),
+      limit: Math.max(maxResults * 5, 60),
       threshold: 0.40,
       useCache,
       includeChunkContent: true,
@@ -170,7 +170,7 @@ export async function POST(req: NextRequest) {
     let complementaryResults: SearchResult[] = [];
     if (citedArticlesFromSemantic.length > 0) {
       // Use exact JSON match: '"23"' matches ["23","75"] but not ["123","456"]
-      const exactArticleMatches = citedArticlesFromSemantic.slice(0, 8).map(art => ({
+      const exactArticleMatches = citedArticlesFromSemantic.slice(0, 12).map(art => ({
         leiArticles: { contains: `"${art}"` },
       }));
 
@@ -216,10 +216,10 @@ export async function POST(req: NextRequest) {
         return { doc, score: Math.min(score, 0.70) };
       });
 
-      // Sort by score descending, take top 15
+      // Sort by score descending, take top results (scaled with maxResults)
       scoredDocs.sort((a, b) => b.score - a.score);
 
-      complementaryResults = scoredDocs.slice(0, 15).map(({ doc, score }) => ({
+      complementaryResults = scoredDocs.slice(0, Math.ceil(maxResults / 2)).map(({ doc, score }) => ({
         documentId: doc.id,
         documentTitle: doc.title,
         category: doc.category,
@@ -278,10 +278,10 @@ export async function POST(req: NextRequest) {
     const fullActsContext = [semanticActsContext, extraActsFormatted].filter(Boolean).join('\n\n');
 
     // Build docs context (increased to fit more diverse results)
-    const docsContext = buildContextForLLM(docResults, 4000);
+    const docsContext = buildContextForLLM(docResults, 6000);
 
     // 9. Build layered context
-    const fullContext = buildLayeredContext(fullLeiContext, fullActsContext, docsContext, 10000);
+    const fullContext = buildLayeredContext(fullLeiContext, fullActsContext, docsContext, 15000);
 
     // 10. Build conversation history context
     let historyContext = '';
@@ -294,7 +294,7 @@ export async function POST(req: NextRequest) {
     }
 
     // 11. Build legal sources and display results BEFORE prompt (needed for source listing)
-    const allLeiArticleNums = [...new Set([...leiResultArticleNums, ...missingArticles])].slice(0, 10);
+    const allLeiArticleNums = [...new Set([...leiResultArticleNums, ...missingArticles])].slice(0, 15);
     const allActsForSources = [
       ...actResults.map(r => ({ title: r.documentTitle, url: r.url || '' })),
       ...extraActs.map(a => ({ title: a.title, url: a.url })),
@@ -342,7 +342,7 @@ RESPOSTA:`;
     try {
       const geminiResult = await queryGeminiText(synthesisPrompt, {
         temperature: 0.3,
-        maxOutputTokens: 1500,
+        maxOutputTokens: 2000,
         useCache,
       });
       synthesizedAnswer = geminiResult.response;
