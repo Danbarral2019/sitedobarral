@@ -1,442 +1,346 @@
 import jsPDF from 'jspdf';
 
-// ===========================
-// Brand Palette (azul petróleo #20364e)
-// ===========================
-const BRAND = {
-  950: [8, 13, 17],
-  900: [14, 24, 33],
-  800: [20, 34, 48],
-  700: [26, 44, 63],
-  600: [32, 54, 78],    // principal
-  500: [58, 90, 115],
-  400: [93, 129, 153],
-  300: [141, 168, 192],
-  200: [179, 197, 213],
-  100: [217, 226, 234],
-  50: [240, 244, 247],
-} as const;
+// ═══════════════════════════════════════════════════════
+// Paleta — Azul Petróleo (#20364e)  ·  Site do Barral
+// ═══════════════════════════════════════════════════════
 
-const ACCENT = {
-  green: [22, 163, 74],    // para tags positivas
-  amber: [217, 119, 6],    // para avisos
-  red: [220, 38, 38],      // para erros
+const C = {
+  navy:     [32, 54, 78]   as const,  // #20364e  — cor principal do site
+  dark:     [20, 34, 50]   as const,  // header bg escuro
+  mid:      [55, 85, 112]  as const,  // texto destaque
+  light:    [100, 130, 155] as const, // texto secundário
+  muted:    [160, 178, 195] as const, // texto sutil
+  rule:     [200, 212, 222] as const, // linhas/bordas
+  bg:       [243, 246, 249] as const, // fundo de cards
+  white:    [255, 255, 255] as const,
+  text:     [35, 40, 50]   as const,  // texto corpo
+  textSoft: [80, 90, 105]  as const,  // texto corpo leve
+  amber:    [180, 120, 20]  as const, // aviso
+  amberBg:  [255, 248, 235] as const,
 } as const;
 
 type RGB = readonly [number, number, number];
 
-// ===========================
-// Shared PDF Utilities
-// ===========================
+// ═══════════════════════════════════════════════════════
+// PDFBuilder — motor reutilizável
+// ═══════════════════════════════════════════════════════
 
 class PDFBuilder {
   doc: jsPDF;
-  pageWidth: number;
-  pageHeight: number;
-  margin: number;
-  contentWidth: number;
-  yPosition: number;
-  pageNumber: number;
+  pw: number;       // page width
+  ph: number;       // page height
+  ml: number;       // margin left
+  mr: number;       // margin right
+  cw: number;       // content width
+  y: number;        // current y
+  page: number;
   userName?: string;
 
   constructor(userName?: string) {
     this.doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
-    this.pageWidth = this.doc.internal.pageSize.getWidth();
-    this.pageHeight = this.doc.internal.pageSize.getHeight();
-    this.margin = 20;
-    this.contentWidth = this.pageWidth - 2 * this.margin;
-    this.yPosition = this.margin;
-    this.pageNumber = 1;
+    this.pw = this.doc.internal.pageSize.getWidth();   // 210
+    this.ph = this.doc.internal.pageSize.getHeight();   // 297
+    this.ml = 22;
+    this.mr = 22;
+    this.cw = this.pw - this.ml - this.mr;  // 166
+    this.y = this.ml;
+    this.page = 1;
     this.userName = userName;
   }
 
-  wrap(text: string, maxWidth?: number): string[] {
-    return this.doc.splitTextToSize(text, maxWidth || this.contentWidth);
+  // --- helpers ---
+  color(c: RGB) { this.doc.setTextColor(c[0], c[1], c[2]); }
+  fill(c: RGB)  { this.doc.setFillColor(c[0], c[1], c[2]); }
+  draw(c: RGB)  { this.doc.setDrawColor(c[0], c[1], c[2]); }
+  font(style: 'normal' | 'bold' | 'italic' | 'bolditalic', size: number) {
+    this.doc.setFont('helvetica', style);
+    this.doc.setFontSize(size);
+  }
+  wrap(text: string, maxW?: number): string[] {
+    return this.doc.splitTextToSize(text, maxW ?? this.cw);
+  }
+  /** Trunca texto para caber em maxW no font/size atuais, adicionando "..." */
+  truncate(text: string, maxW: number): string {
+    if (this.doc.getTextWidth(text) <= maxW) return text;
+    let t = text;
+    while (t.length > 10 && this.doc.getTextWidth(t + '...') > maxW) {
+      t = t.slice(0, -1);
+    }
+    return t + '...';
   }
 
-  setColor(rgb: RGB) {
-    this.doc.setTextColor(rgb[0], rgb[1], rgb[2]);
+  needsPage(space: number) {
+    return this.y + space > this.ph - 20;
   }
-
-  setFill(rgb: RGB) {
-    this.doc.setFillColor(rgb[0], rgb[1], rgb[2]);
-  }
-
-  setDraw(rgb: RGB) {
-    this.doc.setDrawColor(rgb[0], rgb[1], rgb[2]);
-  }
-
-  checkNewPage(requiredSpace: number) {
-    if (this.yPosition + requiredSpace > this.pageHeight - 22) {
+  newPageIfNeeded(space: number) {
+    if (this.needsPage(space)) {
       this.doc.addPage();
-      this.pageNumber++;
-      this.yPosition = this.margin;
+      this.page++;
+      this.y = this.ml;
     }
   }
 
-  addFooterToAllPages() {
-    const total = this.doc.getNumberOfPages();
-    for (let p = 1; p <= total; p++) {
+  // --- Footer em todas as páginas ---
+  addFooters() {
+    const n = this.doc.getNumberOfPages();
+    for (let p = 1; p <= n; p++) {
       this.doc.setPage(p);
-      this.drawFooter(p, total);
+      const fy = this.ph - 14;
+
+      // Linha
+      this.draw(C.rule);
+      this.doc.setLineWidth(0.3);
+      this.doc.line(this.ml, fy, this.pw - this.mr, fy);
+
+      // Esquerda: branding
+      this.font('normal', 7);
+      this.color(C.muted);
+      this.doc.text('Prof. Daniel Barral  ·  profdanielbarral.com.br', this.ml, fy + 4);
+
+      // Direita: paginação
+      this.doc.text(`${p} / ${n}`, this.pw - this.mr, fy + 4, { align: 'right' });
+
+      // Watermark do usuário
+      if (this.userName) {
+        this.font('normal', 6);
+        this.color(C.rule);
+        this.doc.text(`Gerado para ${this.userName}`, this.pw / 2, fy + 8, { align: 'center' });
+      }
     }
   }
 
-  private drawFooter(page: number, total: number) {
-    const y = this.pageHeight - 15;
-
-    // Linha separadora
-    this.setDraw(BRAND[200]);
-    this.doc.setLineWidth(0.3);
-    this.doc.line(this.margin, y - 3, this.pageWidth - this.margin, y - 3);
-
-    // Esquerda: branding
-    this.doc.setFontSize(7);
-    this.doc.setFont('helvetica', 'normal');
-    this.setColor(BRAND[400]);
-    this.doc.text('Prof. Daniel Barral  |  profdanielbarral.com.br', this.margin, y);
-
-    // Direita: paginação
-    this.doc.text(`${page} / ${total}`, this.pageWidth - this.margin, y, { align: 'right' });
-
-    // Watermark do usuário
-    if (this.userName) {
-      this.doc.setFontSize(6);
-      this.setColor(BRAND[200]);
-      this.doc.text(
-        `Gerado para ${this.userName}`,
-        this.pageWidth / 2,
-        this.pageHeight - 8,
-        { align: 'center' }
-      );
-    }
-  }
-
-  // === HEADER UNIVERSAL ===
-  drawHeader(subtitle: string) {
+  // ═══════════════════════════════════════════════════
+  // HEADER — faixa azul petróleo limpa
+  // ═══════════════════════════════════════════════════
+  drawHeader(docType: string, dateStr: string) {
     // Faixa principal
-    this.setFill(BRAND[700]);
-    this.doc.rect(0, 0, this.pageWidth, 34, 'F');
+    this.fill(C.dark);
+    this.doc.rect(0, 0, this.pw, 30, 'F');
 
-    // Faixa accent
-    this.setFill(BRAND[500]);
-    this.doc.rect(0, 34, this.pageWidth, 1.5, 'F');
+    // Accent stripe
+    this.fill(C.navy);
+    this.doc.rect(0, 30, this.pw, 1.2, 'F');
 
-    // Detalhe decorativo lateral
-    this.setFill(BRAND[400]);
-    this.doc.rect(0, 0, 4, 35.5, 'F');
-
-    // Logo/Título
+    // Título
     this.doc.setTextColor(255, 255, 255);
-    this.doc.setFontSize(18);
-    this.doc.setFont('helvetica', 'bold');
-    this.doc.text('PROF. DANIEL BARRAL', this.pageWidth / 2, 14, { align: 'center' });
+    this.font('bold', 15);
+    this.doc.text('PROF. DANIEL BARRAL', this.pw / 2, 12, { align: 'center' });
 
     // Subtítulo institucional
-    this.doc.setFontSize(9);
-    this.doc.setFont('helvetica', 'normal');
-    this.setColor(BRAND[200]);
-    this.doc.text('Direito Administrativo  •  Licitações e Contratos  •  Lei 14.133/2021', this.pageWidth / 2, 22, {
-      align: 'center',
-    });
+    this.font('normal', 8);
+    this.doc.setTextColor(C.muted[0], C.muted[1], C.muted[2]);
+    this.doc.text('Direito Administrativo  ·  Licitações e Contratos  ·  Lei 14.133/2021', this.pw / 2, 19, { align: 'center' });
 
-    // Subtítulo do documento
-    this.doc.setFontSize(8);
-    this.setColor(BRAND[300]);
-    this.doc.text(subtitle, this.pageWidth / 2, 30, { align: 'center' });
+    // Tipo de documento + data
+    this.font('normal', 7.5);
+    this.doc.setTextColor(C.light[0], C.light[1], C.light[2]);
+    this.doc.text(`${docType}  ·  ${dateStr}`, this.pw / 2, 26, { align: 'center' });
 
-    this.yPosition = 44;
+    this.y = 40;
   }
 
-  // === SECTION LABEL ===
-  drawSectionLabel(label: string, color: RGB = BRAND[600]) {
-    this.doc.setFontSize(7.5);
-    this.doc.setFont('helvetica', 'bold');
-    this.setColor(color);
-    this.doc.text(label.toUpperCase(), this.margin, this.yPosition);
+  // ═══════════════════════════════════════════════════
+  // SECTION LABEL — linha curta + label
+  // ═══════════════════════════════════════════════════
+  sectionLabel(label: string) {
+    this.newPageIfNeeded(14);
+    this.font('bold', 8);
+    this.color(C.navy);
+    this.doc.text(label.toUpperCase(), this.ml, this.y);
 
-    this.yPosition += 2;
-    this.setDraw(color);
+    const labelW = Math.min(this.doc.getTextWidth(label.toUpperCase()) + 2, 35);
+    this.y += 1.5;
+
+    // Linha accent
+    this.draw(C.navy);
     this.doc.setLineWidth(0.6);
-    this.doc.line(this.margin, this.yPosition, this.margin + 30, this.yPosition);
+    this.doc.line(this.ml, this.y, this.ml + labelW, this.y);
 
     // Linha fina estendida
     this.doc.setLineWidth(0.15);
-    this.setDraw(BRAND[200]);
-    this.doc.line(this.margin + 30, this.yPosition, this.pageWidth - this.margin, this.yPosition);
+    this.draw(C.rule);
+    this.doc.line(this.ml + labelW, this.y, this.pw - this.mr, this.y);
 
-    this.yPosition += 5;
+    this.y += 5;
   }
 
-  // === CARD BOX (fundo + barra lateral) ===
-  drawCard(
-    content: () => number,
-    options: { barColor?: RGB; bgColor?: RGB; barWidth?: number } = {}
-  ) {
-    const { barColor = BRAND[600], bgColor = BRAND[50], barWidth = 3 } = options;
-    const startY = this.yPosition;
+  // ═══════════════════════════════════════════════════
+  // CARD — fundo + barra lateral esquerda
+  // ═══════════════════════════════════════════════════
+  card(text: string, options: { fontSize?: number; barColor?: RGB; textColor?: RGB } = {}) {
+    const { fontSize = 10.5, barColor = C.navy, textColor = C.text } = options;
+    this.font('normal', fontSize);
+    const innerW = this.cw - 14;
+    const lines = this.wrap(text, innerW);
+    const lh = fontSize * 0.48;
+    const h = lines.length * lh + 7;
 
-    // Calcular altura do conteúdo
-    const height = content();
+    this.newPageIfNeeded(h + 4);
 
-    // Desenhar fundo e barra (retroativamente)
-    // jsPDF não suporta z-order, então desenhamos primeiro
-    // Vamos usar uma abordagem diferente: pré-calcular
-    this.setFill(bgColor);
-    this.doc.roundedRect(this.margin, startY, this.contentWidth, height, 2, 2, 'F');
-    this.setFill(barColor);
-    this.doc.rect(this.margin, startY, barWidth, height, 'F');
-  }
+    // Fundo
+    this.fill(C.bg);
+    this.doc.roundedRect(this.ml, this.y, this.cw, h, 1.5, 1.5, 'F');
 
-  // === RENDER MARKDOWN-LIKE TEXT ===
-  renderFormattedText(text: string, fontSize: number = 9.5) {
-    // Parse simples de markdown: bullets, numeração, parágrafos
-    const paragraphs = text.split('\n');
-    const innerMargin = this.margin + 2;
-    const innerWidth = this.contentWidth - 4;
-
-    paragraphs.forEach((para) => {
-      const trimmed = para.trim();
-      if (!trimmed) {
-        this.yPosition += 2;
-        return;
-      }
-
-      this.checkNewPage(6);
-
-      // Detectar bullet points
-      const bulletMatch = trimmed.match(/^[-•]\s+(.*)/);
-      const numberedMatch = trimmed.match(/^(\d+)[.)]\s+(.*)/);
-
-      if (bulletMatch) {
-        const bulletText = bulletMatch[1].replace(/\*\*/g, '');
-        const lines = this.wrap(bulletText, innerWidth - 8);
-
-        this.doc.setFontSize(fontSize);
-        this.doc.setFont('helvetica', 'normal');
-        this.setColor(BRAND[700]);
-
-        // Bullet dot
-        this.setFill(BRAND[500]);
-        this.doc.circle(innerMargin + 2, this.yPosition - 1, 0.8, 'F');
-
-        lines.forEach((line, i) => {
-          this.checkNewPage(5);
-          this.doc.text(line, innerMargin + 6, this.yPosition);
-          this.yPosition += 4.5;
-        });
-      } else if (numberedMatch) {
-        const numText = numberedMatch[2].replace(/\*\*/g, '');
-        const numLabel = `${numberedMatch[1]}.`;
-        const lines = this.wrap(numText, innerWidth - 10);
-
-        this.doc.setFontSize(fontSize);
-        this.doc.setFont('helvetica', 'bold');
-        this.setColor(BRAND[600]);
-        this.doc.text(numLabel, innerMargin + 1, this.yPosition);
-
-        this.doc.setFont('helvetica', 'normal');
-        this.setColor(BRAND[700]);
-        lines.forEach((line) => {
-          this.checkNewPage(5);
-          this.doc.text(line, innerMargin + 7, this.yPosition);
-          this.yPosition += 4.5;
-        });
-      } else {
-        // Parágrafo normal — renderizar com negrito inline
-        const cleanText = trimmed.replace(/\*\*/g, '');
-        const lines = this.wrap(cleanText, innerWidth);
-
-        this.doc.setFontSize(fontSize);
-        this.doc.setFont('helvetica', 'normal');
-        this.setColor([40, 40, 45]);
-        lines.forEach((line) => {
-          this.checkNewPage(5);
-          this.doc.text(line, innerMargin, this.yPosition);
-          this.yPosition += 4.5;
-        });
-      }
-    });
-  }
-
-  // === DISCLAIMER ===
-  drawDisclaimer() {
-    this.checkNewPage(30);
-    this.yPosition += 4;
-
-    // Caixa de aviso
-    const disclaimerText =
-      'Este documento foi gerado automaticamente pelo sistema de Consulta IA do Prof. Daniel Barral. ' +
-      'As respostas são geradas por Inteligência Artificial e podem conter imprecisões. ' +
-      'Esta pesquisa foi realizada exclusivamente para fins acadêmicos e educacionais, não devendo ' +
-      'este documento ser utilizado para instruir processos administrativos ou requerimentos a ' +
-      'qualquer órgão público. Sempre consulte a legislação oficial e fontes primárias.';
-
-    const lines = this.wrap(disclaimerText, this.contentWidth - 12);
-    const boxHeight = lines.length * 3.5 + 10;
-
-    this.setFill(BRAND[50]);
-    this.doc.roundedRect(this.margin, this.yPosition, this.contentWidth, boxHeight, 2, 2, 'F');
-
-    // Barra lateral amber
-    this.doc.setFillColor(ACCENT.amber[0], ACCENT.amber[1], ACCENT.amber[2]);
-    this.doc.rect(this.margin, this.yPosition, 3, boxHeight, 'F');
-
-    // Label
-    this.doc.setFontSize(7);
-    this.doc.setFont('helvetica', 'bold');
-    this.doc.setTextColor(ACCENT.amber[0], ACCENT.amber[1], ACCENT.amber[2]);
-    this.doc.text('AVISO', this.margin + 6, this.yPosition + 5);
+    // Barra lateral
+    this.fill(barColor);
+    this.doc.rect(this.ml, this.y, 3, h, 'F');
 
     // Texto
-    this.doc.setFontSize(7);
-    this.doc.setFont('helvetica', 'italic');
-    this.setColor(BRAND[400]);
-    let dY = this.yPosition + 10;
-    lines.forEach((line) => {
-      this.doc.text(line, this.margin + 6, dY);
-      dY += 3.5;
-    });
+    this.color(textColor);
+    let ty = this.y + 4.5;
+    for (const line of lines) {
+      this.doc.text(line, this.ml + 8, ty);
+      ty += lh;
+    }
 
-    this.yPosition += boxHeight + 6;
+    this.y += h + 5;
+  }
+
+  // ═══════════════════════════════════════════════════
+  // RENDER MARKDOWN — parágrafos, bullets, subtítulos
+  // ═══════════════════════════════════════════════════
+  renderMarkdown(text: string, baseFontSize: number = 9.5) {
+    const lines = text.split('\n');
+    const innerW = this.cw - 4;
+    const lh = baseFontSize * 0.46;
+
+    for (let i = 0; i < lines.length; i++) {
+      const raw = lines[i];
+      const trimmed = raw.trim();
+
+      // Linha vazia → espaço
+      if (!trimmed) {
+        this.y += 2.5;
+        continue;
+      }
+
+      this.newPageIfNeeded(6);
+
+      // Detectar bullet (- ou * no início)
+      const bulletMatch = trimmed.match(/^[-*•]\s+(.*)/);
+      if (bulletMatch) {
+        const bulletText = bulletMatch[1].replace(/\*\*/g, '');
+        this.font('normal', baseFontSize);
+        const wrapped = this.wrap(bulletText, innerW - 8);
+        this.color(C.text);
+
+        // Bolinha do bullet
+        this.fill(C.mid);
+        this.doc.circle(this.ml + 3.5, this.y - 0.8, 0.7, 'F');
+
+        for (const wl of wrapped) {
+          this.newPageIfNeeded(5);
+          this.doc.text(wl, this.ml + 7, this.y);
+          this.y += lh;
+        }
+        this.y += 1;
+        continue;
+      }
+
+      // Detectar item numerado
+      const numMatch = trimmed.match(/^(\d+)[.)]\s+(.*)/);
+      if (numMatch) {
+        const numText = numMatch[2].replace(/\*\*/g, '');
+        this.font('bold', baseFontSize);
+        this.color(C.navy);
+        this.doc.text(`${numMatch[1]}.`, this.ml + 2, this.y);
+
+        this.font('normal', baseFontSize);
+        this.color(C.text);
+        const wrapped = this.wrap(numText, innerW - 10);
+        for (const wl of wrapped) {
+          this.newPageIfNeeded(5);
+          this.doc.text(wl, this.ml + 8, this.y);
+          this.y += lh;
+        }
+        this.y += 1;
+        continue;
+      }
+
+      // Detectar subtítulo (linha curta sem ponto final, sem bullet)
+      const isSubtitle = trimmed.length < 65 && !trimmed.endsWith('.') && !trimmed.endsWith(':') && !trimmed.startsWith('(');
+      const isLabelLine = trimmed.endsWith(':') && trimmed.length < 60;
+
+      if (isSubtitle || isLabelLine) {
+        this.y += 2;
+        this.newPageIfNeeded(8);
+        this.font('bold', baseFontSize + 0.5);
+        this.color(C.navy);
+        const clean = trimmed.replace(/\*\*/g, '');
+        const wrapped = this.wrap(clean, innerW);
+        for (const wl of wrapped) {
+          this.doc.text(wl, this.ml + 1, this.y);
+          this.y += lh + 0.5;
+        }
+        this.y += 1.5;
+        continue;
+      }
+
+      // Parágrafo normal
+      const clean = trimmed.replace(/\*\*/g, '');
+      this.font('normal', baseFontSize);
+      this.color(C.text);
+      const wrapped = this.wrap(clean, innerW);
+      for (const wl of wrapped) {
+        this.newPageIfNeeded(5);
+        this.doc.text(wl, this.ml + 1, this.y);
+        this.y += lh;
+      }
+      this.y += 1;
+    }
+  }
+
+  // ═══════════════════════════════════════════════════
+  // DISCLAIMER — box aviso legal
+  // ═══════════════════════════════════════════════════
+  drawDisclaimer() {
+    this.newPageIfNeeded(28);
+    this.y += 6;
+
+    const disclaimerText =
+      'Este documento foi gerado automaticamente pelo sistema de Consulta IA do Prof. Daniel Barral. ' +
+      'As respostas são baseadas em Inteligência Artificial e podem conter imprecisões. ' +
+      'Esta pesquisa foi realizada exclusivamente para fins acadêmicos e educacionais, não devendo ' +
+      'ser utilizada para instruir processos administrativos ou requerimentos a órgãos públicos. ' +
+      'Sempre consulte a legislação oficial e fontes primárias.';
+
+    this.font('italic', 7);
+    const textLines = this.wrap(disclaimerText, this.cw - 14);
+    const boxH = textLines.length * 3.2 + 10;
+
+    this.fill(C.amberBg);
+    this.doc.roundedRect(this.ml, this.y, this.cw, boxH, 1.5, 1.5, 'F');
+
+    // Barra amber
+    this.fill(C.amber);
+    this.doc.rect(this.ml, this.y, 2.5, boxH, 'F');
+
+    // Label
+    this.font('bold', 6.5);
+    this.doc.setTextColor(C.amber[0], C.amber[1], C.amber[2]);
+    this.doc.text('AVISO', this.ml + 6, this.y + 4.5);
+
+    // Texto
+    this.font('italic', 7);
+    this.color(C.light);
+    let dy = this.y + 9;
+    for (const line of textLines) {
+      this.doc.text(line, this.ml + 6, dy);
+      dy += 3.2;
+    }
+
+    this.y += boxH + 4;
   }
 
   save(fileName: string) {
-    this.addFooterToAllPages();
+    this.addFooters();
     this.doc.save(fileName);
   }
 }
 
-// ===========================
-// Conversation PDF (Article Chat)
-// ===========================
-
-interface ConversationMessage {
-  question: string;
-  answer: string | null;
-  createdAt: string;
-  wasHelpful: boolean | null;
-}
-
-interface PDFExportOptions {
-  articleNumber: string;
-  articleTitle?: string;
-  messages: ConversationMessage[];
-  userName?: string;
-  userEmail?: string;
-}
-
-export function generateConversationPDF(options: PDFExportOptions): void {
-  const { articleNumber, articleTitle, messages, userName } = options;
-
-  const pdf = new PDFBuilder(userName);
-
-  const dateStr = new Date().toLocaleDateString('pt-BR', {
-    day: '2-digit',
-    month: 'long',
-    year: 'numeric',
-  });
-
-  // Header
-  pdf.drawHeader(`Chat IA  •  Artigo ${articleNumber}  •  ${dateStr}`);
-
-  // Info box do artigo
-  const titleText = articleTitle || `Artigo ${articleNumber} da Lei 14.133/2021`;
-  const titleLines = pdf.wrap(titleText, pdf.contentWidth - 16);
-  const infoBoxHeight = titleLines.length * 5 + 14;
-
-  pdf.setFill(BRAND[50]);
-  pdf.doc.roundedRect(pdf.margin, pdf.yPosition, pdf.contentWidth, infoBoxHeight, 2, 2, 'F');
-  pdf.setFill(BRAND[600]);
-  pdf.doc.rect(pdf.margin, pdf.yPosition, 3, infoBoxHeight, 'F');
-
-  pdf.doc.setFontSize(7.5);
-  pdf.doc.setFont('helvetica', 'bold');
-  pdf.setColor(BRAND[500]);
-  pdf.doc.text(`ARTIGO ${articleNumber}  •  LEI 14.133/2021`, pdf.margin + 7, pdf.yPosition + 5);
-
-  pdf.doc.setFontSize(10);
-  pdf.doc.setFont('helvetica', 'normal');
-  pdf.setColor(BRAND[700]);
-  let tY = pdf.yPosition + 11;
-  titleLines.forEach((line) => {
-    pdf.doc.text(line, pdf.margin + 7, tY);
-    tY += 5;
-  });
-
-  pdf.yPosition += infoBoxHeight + 10;
-
-  // Conversas
-  messages.forEach((message, msgIdx) => {
-    pdf.checkNewPage(25);
-
-    // Label da pergunta
-    if (messages.length > 1) {
-      pdf.drawSectionLabel(`Pergunta ${msgIdx + 1}`);
-    } else {
-      pdf.drawSectionLabel('Pergunta');
-    }
-
-    // Box da pergunta
-    const questionLines = pdf.wrap(message.question, pdf.contentWidth - 16);
-    const qBoxHeight = questionLines.length * 5 + 8;
-
-    pdf.setFill(BRAND[50]);
-    pdf.doc.roundedRect(pdf.margin, pdf.yPosition, pdf.contentWidth, qBoxHeight, 2, 2, 'F');
-    pdf.setFill(BRAND[600]);
-    pdf.doc.rect(pdf.margin, pdf.yPosition, 3, qBoxHeight, 'F');
-
-    pdf.doc.setFontSize(10);
-    pdf.doc.setFont('helvetica', 'normal');
-    pdf.setColor(BRAND[700]);
-    let qY = pdf.yPosition + 5.5;
-    questionLines.forEach((line) => {
-      pdf.doc.text(line, pdf.margin + 7, qY);
-      qY += 5;
-    });
-
-    // Data
-    const msgDate = new Date(message.createdAt).toLocaleString('pt-BR', {
-      day: '2-digit',
-      month: 'short',
-      hour: '2-digit',
-      minute: '2-digit',
-    });
-    pdf.doc.setFontSize(6.5);
-    pdf.setColor(BRAND[300]);
-    pdf.doc.text(msgDate, pdf.pageWidth - pdf.margin - 4, pdf.yPosition + 5.5, { align: 'right' });
-
-    pdf.yPosition += qBoxHeight + 6;
-
-    // Resposta
-    if (message.answer) {
-      pdf.checkNewPage(15);
-      pdf.drawSectionLabel('Resposta IA', BRAND[500]);
-
-      // Feedback badge
-      if (message.wasHelpful !== null) {
-        const fbText = message.wasHelpful ? '✓ Útil' : '✗ Não útil';
-        const fbColor = message.wasHelpful ? ACCENT.green : ACCENT.red;
-        pdf.doc.setFontSize(7);
-        pdf.doc.setTextColor(fbColor[0], fbColor[1], fbColor[2]);
-        pdf.doc.text(fbText, pdf.pageWidth - pdf.margin, pdf.yPosition - 7, { align: 'right' });
-      }
-
-      pdf.renderFormattedText(message.answer);
-      pdf.yPosition += 6;
-    }
-  });
-
-  // Disclaimer
-  pdf.drawDisclaimer();
-
-  // Save
-  pdf.save(`Lei14133_Art${articleNumber}_Conversa_${new Date().toISOString().split('T')[0]}.pdf`);
-}
-
-// ===========================
-// Search Result PDF Export
-// ===========================
+// ═══════════════════════════════════════════════════════
+// generateSearchResultPDF — Consulta IA
+// ═══════════════════════════════════════════════════════
 
 interface SearchResultPDFSource {
   title: string;
@@ -472,170 +376,256 @@ export function generateSearchResultPDF(options: SearchResultPDFOptions): void {
     minute: '2-digit',
   });
 
-  // Header
-  pdf.drawHeader(`Consulta IA  •  ${dateStr}`);
+  // ── HEADER ──
+  pdf.drawHeader('Consulta IA', dateStr);
 
-  // === PERGUNTA ===
-  pdf.drawSectionLabel('Consulta');
+  // ── CONSULTA ──
+  pdf.sectionLabel('Consulta');
+  pdf.card(query, { barColor: C.navy, textColor: C.text });
+  pdf.y += 2;
 
-  const questionLines = pdf.wrap(query, pdf.contentWidth - 16);
-  const qBoxHeight = questionLines.length * 5.5 + 8;
+  // ── RESPOSTA IA ──
+  pdf.sectionLabel('Análise');
+  pdf.renderMarkdown(answer);
+  pdf.y += 6;
 
-  pdf.setFill(BRAND[50]);
-  pdf.doc.roundedRect(pdf.margin, pdf.yPosition, pdf.contentWidth, qBoxHeight, 2, 2, 'F');
-  pdf.setFill(BRAND[600]);
-  pdf.doc.rect(pdf.margin, pdf.yPosition, 3, qBoxHeight, 'F');
-
-  pdf.doc.setFontSize(10.5);
-  pdf.doc.setFont('helvetica', 'normal');
-  pdf.setColor(BRAND[700]);
-  let qY = pdf.yPosition + 5.5;
-  questionLines.forEach((line) => {
-    pdf.doc.text(line, pdf.margin + 7, qY);
-    qY += 5.5;
-  });
-
-  pdf.yPosition += qBoxHeight + 10;
-
-  // === RESPOSTA IA ===
-  pdf.checkNewPage(20);
-  pdf.drawSectionLabel('Análise IA', BRAND[500]);
-
-  pdf.renderFormattedText(answer);
-  pdf.yPosition += 8;
-
-  // === FUNDAMENTAÇÃO LEGAL ===
+  // ── FUNDAMENTAÇÃO LEGAL ──
   if (legalSources && legalSources.length > 0) {
-    pdf.checkNewPage(20);
-    pdf.drawSectionLabel('Fundamentação Legal', BRAND[600]);
+    pdf.newPageIfNeeded(20);
+    pdf.sectionLabel('Fundamentação Legal');
 
-    legalSources.forEach((source) => {
-      pdf.checkNewPage(10);
+    // Separar artigos da lei vs outros
+    const leiArtigos = legalSources.filter(s => s.type === 'lei-artigo');
+    const outrosLegal = legalSources.filter(s => s.type !== 'lei-artigo');
 
-      const typeLabel = source.type === 'lei-artigo' ? '⚖' : '📋';
-      const titleLines = pdf.wrap(source.title, pdf.contentWidth - 14);
+    // Artigos em grid compacto (3 colunas)
+    if (leiArtigos.length > 0) {
+      const colW = (pdf.cw - 4) / 3;
+      const rows = Math.ceil(leiArtigos.length / 3);
+      const gridH = rows * 6 + 6;
 
-      // Cada fonte como mini-card
-      const itemHeight = titleLines.length * 4 + 5;
-      pdf.setFill(BRAND[50]);
-      pdf.doc.roundedRect(pdf.margin + 1, pdf.yPosition, pdf.contentWidth - 2, itemHeight, 1.5, 1.5, 'F');
+      pdf.newPageIfNeeded(gridH + 4);
+      pdf.fill(C.bg);
+      pdf.doc.roundedRect(pdf.ml, pdf.y, pdf.cw, gridH, 1.5, 1.5, 'F');
 
-      pdf.doc.setFontSize(8.5);
-      pdf.doc.setFont('helvetica', 'normal');
-      pdf.setColor(BRAND[700]);
+      pdf.font('normal', 8.5);
+      pdf.color(C.navy);
 
-      let lY = pdf.yPosition + 4;
-      titleLines.forEach((line, i) => {
-        pdf.doc.text(i === 0 ? `${typeLabel}  ${line}` : `     ${line}`, pdf.margin + 4, lY);
-        lY += 4;
-      });
+      let gy = pdf.y + 4.5;
+      for (let r = 0; r < rows; r++) {
+        for (let c = 0; c < 3; c++) {
+          const idx = r * 3 + c;
+          if (idx >= leiArtigos.length) break;
+          const x = pdf.ml + 4 + c * colW;
+          pdf.doc.text(leiArtigos[idx].title, x, gy);
+        }
+        gy += 6;
+      }
 
-      pdf.yPosition += itemHeight + 2;
-    });
+      pdf.y += gridH + 3;
+    }
 
-    pdf.yPosition += 4;
+    // Outros atos normativos em lista compacta
+    if (outrosLegal.length > 0) {
+      pdf.font('normal', 8);
+      pdf.color(C.textSoft);
+
+      for (const src of outrosLegal) {
+        pdf.newPageIfNeeded(6);
+        const displayTitle = pdf.truncate(src.title, pdf.cw - 8);
+        pdf.doc.text(`·  ${displayTitle}`, pdf.ml + 2, pdf.y);
+        pdf.y += 4.5;
+      }
+    }
+
+    pdf.y += 5;
   }
 
-  // === FONTES CONSULTADAS ===
+  // ── FONTES CONSULTADAS ──
   if (sources && sources.length > 0) {
-    pdf.checkNewPage(20);
-    pdf.drawSectionLabel('Fontes Consultadas');
+    pdf.newPageIfNeeded(16);
+    pdf.sectionLabel('Fontes Consultadas');
 
-    sources.forEach((source, idx) => {
-      pdf.checkNewPage(12);
+    const catLabel = (cat: string): string => {
+      const m: Record<string, string> = {
+        acordao: 'Acórdão TCU',
+        'manual-tcu': 'Manual TCU',
+        enunciados: 'Enunciado',
+        'orientacao-normativa': 'ON AGU',
+        parecer: 'Parecer',
+        'parecer-vinculante': 'Parecer Vinc.',
+        decor: 'DECOR',
+        apostila: 'Apostila',
+        'lei-artigo': 'Lei 14.133',
+        'ato-normativo': 'Ato Normativo',
+      };
+      return m[cat] || cat;
+    };
 
-      const catLabel = getCategoryLabel(source.category);
-      const sourceTitle = `${idx + 1}. ${source.title}`;
-      const titleLines = pdf.wrap(sourceTitle, pdf.contentWidth - 6);
+    // Largura reservada para a tag de categoria à direita
+    const tagMaxW = 28;
+    const titleMaxW = pdf.cw - tagMaxW - 12;
 
-      pdf.doc.setFontSize(8.5);
-      pdf.doc.setFont('helvetica', 'normal');
-      pdf.setColor(BRAND[700]);
+    for (let i = 0; i < sources.length; i++) {
+      pdf.newPageIfNeeded(9);
 
-      titleLines.forEach((line) => {
-        pdf.checkNewPage(5);
-        pdf.doc.text(line, pdf.margin + 3, pdf.yPosition);
-        pdf.yPosition += 4;
-      });
+      const src = sources[i];
+      const num = `${i + 1}.`;
+      const cat = catLabel(src.category);
 
-      // Categoria tag
-      pdf.doc.setFontSize(6.5);
-      pdf.doc.setFont('helvetica', 'italic');
-      pdf.setColor(BRAND[400]);
-      pdf.doc.text(catLabel, pdf.margin + 3, pdf.yPosition);
-      pdf.yPosition += 5;
-    });
+      // Número
+      pdf.font('bold', 8);
+      pdf.color(C.mid);
+      pdf.doc.text(num, pdf.ml + 1, pdf.y);
 
-    pdf.yPosition += 4;
+      // Título — wrap em no máximo 2 linhas
+      pdf.font('normal', 8);
+      pdf.color(C.text);
+      const titleLines = pdf.wrap(src.title, titleMaxW);
+
+      // Se mais de 2 linhas, truncar a segunda
+      const displayLines = titleLines.slice(0, 2);
+      if (titleLines.length > 2) {
+        let last = displayLines[1];
+        if (last.length > 3) last = last.slice(0, -3) + '...';
+        displayLines[1] = last;
+      }
+
+      const tx = pdf.ml + 8;
+      for (let li = 0; li < displayLines.length; li++) {
+        pdf.doc.text(displayLines[li], tx, pdf.y + li * 3.8);
+      }
+
+      // Tag categoria — na primeira linha, alinhada à direita
+      pdf.font('italic', 6.5);
+      pdf.color(C.muted);
+      pdf.doc.text(cat, pdf.pw - pdf.mr, pdf.y, { align: 'right' });
+
+      pdf.y += displayLines.length * 3.8 + 2.5;
+    }
+
+    pdf.y += 4;
   }
 
-  // === REFINAMENTOS (Follow-ups) ===
+  // ── REFINAMENTOS (Follow-ups) ──
   if (conversationHistory && conversationHistory.length > 2) {
-    pdf.checkNewPage(20);
-    pdf.drawSectionLabel('Refinamentos');
+    pdf.newPageIfNeeded(16);
+    pdf.sectionLabel('Refinamentos');
 
     for (let i = 2; i < conversationHistory.length; i++) {
       const msg = conversationHistory[i];
 
       if (msg.role === 'user') {
-        pdf.checkNewPage(15);
-
-        const fqLines = pdf.wrap(msg.content, pdf.contentWidth - 16);
-        const fqHeight = fqLines.length * 5 + 8;
-
-        pdf.setFill(BRAND[50]);
-        pdf.doc.roundedRect(pdf.margin, pdf.yPosition, pdf.contentWidth, fqHeight, 2, 2, 'F');
-        pdf.setFill(BRAND[500]);
-        pdf.doc.rect(pdf.margin, pdf.yPosition, 3, fqHeight, 'F');
-
-        pdf.doc.setFontSize(9.5);
-        pdf.doc.setFont('helvetica', 'normal');
-        pdf.setColor(BRAND[700]);
-        let fqY = pdf.yPosition + 5;
-        fqLines.forEach((line) => {
-          pdf.doc.text(line, pdf.margin + 7, fqY);
-          fqY += 5;
-        });
-
-        pdf.yPosition += fqHeight + 5;
+        pdf.newPageIfNeeded(12);
+        pdf.card(msg.content, { fontSize: 9.5, barColor: C.mid, textColor: C.text });
       } else if (msg.role === 'assistant') {
-        pdf.checkNewPage(10);
-        pdf.renderFormattedText(msg.content, 9);
-        pdf.yPosition += 6;
+        pdf.newPageIfNeeded(10);
+        pdf.renderMarkdown(msg.content, 9);
+        pdf.y += 5;
       }
     }
   }
+
+  // ── DISCLAIMER ──
+  pdf.drawDisclaimer();
+
+  // ── SALVAR ──
+  pdf.save(`ConsultaIA_${new Date().toISOString().split('T')[0]}.pdf`);
+}
+
+// ═══════════════════════════════════════════════════════
+// generateConversationPDF — Chat do Artigo
+// ═══════════════════════════════════════════════════════
+
+interface ConversationMessage {
+  question: string;
+  answer: string | null;
+  createdAt: string;
+  wasHelpful: boolean | null;
+}
+
+interface PDFExportOptions {
+  articleNumber: string;
+  articleTitle?: string;
+  messages: ConversationMessage[];
+  userName?: string;
+  userEmail?: string;
+}
+
+export function generateConversationPDF(options: PDFExportOptions): void {
+  const { articleNumber, articleTitle, messages, userName } = options;
+  const pdf = new PDFBuilder(userName);
+
+  const dateStr = new Date().toLocaleDateString('pt-BR', {
+    day: '2-digit',
+    month: 'long',
+    year: 'numeric',
+  });
+
+  // Header
+  pdf.drawHeader(`Chat IA  ·  Artigo ${articleNumber}`, dateStr);
+
+  // Info box do artigo
+  const titleText = articleTitle || `Artigo ${articleNumber} da Lei 14.133/2021`;
+  pdf.sectionLabel(`Artigo ${articleNumber}  ·  Lei 14.133/2021`);
+  pdf.card(titleText, { barColor: C.navy, textColor: C.navy });
+  pdf.y += 4;
+
+  // Conversas
+  messages.forEach((message, msgIdx) => {
+    pdf.newPageIfNeeded(20);
+
+    // Label da pergunta
+    if (messages.length > 1) {
+      pdf.sectionLabel(`Pergunta ${msgIdx + 1}`);
+    } else {
+      pdf.sectionLabel('Pergunta');
+    }
+
+    // Box da pergunta
+    pdf.card(message.question, { barColor: C.navy });
+
+    // Data
+    const msgDate = new Date(message.createdAt).toLocaleString('pt-BR', {
+      day: '2-digit',
+      month: 'short',
+      hour: '2-digit',
+      minute: '2-digit',
+    });
+    pdf.font('normal', 6.5);
+    pdf.color(C.muted);
+    pdf.doc.text(msgDate, pdf.pw - pdf.mr, pdf.y - 3, { align: 'right' });
+
+    // Resposta
+    if (message.answer) {
+      pdf.newPageIfNeeded(12);
+      pdf.sectionLabel('Resposta IA');
+
+      // Feedback badge
+      if (message.wasHelpful !== null) {
+        const fbText = message.wasHelpful ? 'Util' : 'Nao util';
+        const fbColor: RGB = message.wasHelpful ? [22, 163, 74] : [220, 38, 38];
+        pdf.font('bold', 7);
+        pdf.doc.setTextColor(fbColor[0], fbColor[1], fbColor[2]);
+        pdf.doc.text(fbText, pdf.pw - pdf.mr, pdf.y - 7, { align: 'right' });
+      }
+
+      pdf.renderMarkdown(message.answer);
+      pdf.y += 6;
+    }
+  });
 
   // Disclaimer
   pdf.drawDisclaimer();
 
   // Save
-  pdf.save(`ConsultaIA_${new Date().toISOString().split('T')[0]}.pdf`);
+  pdf.save(`Lei14133_Art${articleNumber}_Conversa_${new Date().toISOString().split('T')[0]}.pdf`);
 }
 
-// ===========================
-// Helpers
-// ===========================
+// ═══════════════════════════════════════════════════════
+// exportCurrentConversation — wrapper de conveniência
+// ═══════════════════════════════════════════════════════
 
-function getCategoryLabel(category: string): string {
-  const labels: Record<string, string> = {
-    acordao: 'Acórdão TCU',
-    'manual-tcu': 'Manual TCU',
-    enunciados: 'Enunciado',
-    'orientacao-normativa': 'Orientação Normativa',
-    parecer: 'Parecer',
-    'parecer-vinculante': 'Parecer Vinculante',
-    decor: 'DECOR',
-    apostila: 'Apostila',
-    'lei-artigo': 'Lei 14.133/2021',
-    'ato-normativo': 'Ato Normativo',
-  };
-  return labels[category] || category;
-}
-
-/**
- * Exporta uma única conversa (pergunta/resposta atual)
- */
 export function exportCurrentConversation(
   articleNumber: string,
   question: string,
