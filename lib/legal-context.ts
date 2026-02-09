@@ -42,7 +42,7 @@ export function extractCitedArticles(results: Array<SearchResult & { leiArticles
     }
 
     for (const art of articles) {
-      articleSet.add(art);
+      articleSet.add(String(art));
     }
   }
 
