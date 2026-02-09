@@ -25,6 +25,7 @@ import {
   MobileTreeDrawer,
   MobileTreeTrigger,
   PdfExportBar,
+  SearchHistoryPanel,
 } from '@/components/area-restrita';
 import DocumentDetailModal from '@/components/DocumentDetailModal';
 import DocumentsByCategory from '@/components/DocumentsByCategory';
@@ -101,6 +102,9 @@ export default function AreaRestritaPage() {
   const [courseVideos, setCourseVideos] = useState<Record<string, VideoType[]>>({});
   const [courseSites, setCourseSites] = useState<Record<string, SiteType[]>>({});
   const [isDataLoading, setIsDataLoading] = useState(true);
+
+  // Search history visibility
+  const [isSearchFocused, setIsSearchFocused] = useState(false);
 
   // Document modal state
   const [selectedDocument, setSelectedDocument] = useState<DocumentType | null>(null);
@@ -438,19 +442,42 @@ export default function AreaRestritaPage() {
       <div className="max-w-7xl mx-auto px-4 py-6 lg:py-8">
         {/* Global Search Bar */}
         <div className="mb-6">
-          <GlobalSearchBar
-            query={search.query}
-            onQueryChange={search.setQuery}
-            onClear={search.clearSearch}
-            isLoading={search.isLoading}
-            counts={search.counts}
-            activeTypes={search.filters.types}
-            onToggleType={search.toggleType}
-            aiEnabled={search.aiEnabled}
-            onAIToggle={() => search.setAiEnabled(!search.aiEnabled)}
-            isAiLoading={search.isAiLoading}
-            onSubmit={search.triggerAISearch}
-          />
+          <div
+            onFocus={() => setIsSearchFocused(true)}
+            onBlur={(e) => {
+              // Only hide if focus leaves the search area entirely
+              if (!e.currentTarget.contains(e.relatedTarget as Node)) {
+                setTimeout(() => setIsSearchFocused(false), 200);
+              }
+            }}
+          >
+            <GlobalSearchBar
+              query={search.query}
+              onQueryChange={search.setQuery}
+              onClear={search.clearSearch}
+              isLoading={search.isLoading}
+              counts={search.counts}
+              activeTypes={search.filters.types}
+              onToggleType={search.toggleType}
+              aiEnabled={search.aiEnabled}
+              onAIToggle={() => search.setAiEnabled(!search.aiEnabled)}
+              isAiLoading={search.isAiLoading}
+              onSubmit={search.triggerAISearch}
+            />
+            {/* Search History - shown when focused and no active search */}
+            {!search.isSearchActive && (
+              <div className="mt-2">
+                <SearchHistoryPanel
+                  isVisible={isSearchFocused}
+                  onSelectQuery={(q) => {
+                    search.setQuery(q);
+                    search.triggerAISearch();
+                    setIsSearchFocused(false);
+                  }}
+                />
+              </div>
+            )}
+          </div>
         </div>
 
         {/* Mobile Tree Trigger */}
@@ -522,6 +549,10 @@ export default function AreaRestritaPage() {
                 onFollowUp={search.sendFollowUp}
                 selectedIds={selectedDocIds}
                 onToggleSelect={toggleDocSelect}
+                onAskAIAboutDoc={(docTitle) => {
+                  search.sendFollowUp(`Sobre o documento "${docTitle}": ${search.query}`);
+                }}
+                aiConversationHistory={search.aiConversationHistory}
               />
             ) : (
               /* Tree Navigation Content */

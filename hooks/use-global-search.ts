@@ -148,7 +148,7 @@ export function useGlobalSearch(options: UseGlobalSearchOptions = {}): UseGlobal
       try {
         const requestBody: Record<string, unknown> = {
           query: searchQuery,
-          maxResults: 5,
+          maxResults: 20,
           useCache: true,
         };
 
@@ -203,6 +203,22 @@ export function useGlobalSearch(options: UseGlobalSearchOptions = {}): UseGlobal
               { role: 'user' as const, content: searchQuery },
               { role: 'assistant' as const, content: answer },
             ]);
+
+            // Save to search history (fire-and-forget)
+            fetch('/api/area-restrita/search-history', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                query: searchQuery,
+                aiAnswer: answer,
+                sources: (data.results || []).map((r: AISource) => ({
+                  title: r.title,
+                  category: r.category,
+                  url: r.url,
+                })),
+                legalSources: data.legalSources || [],
+              }),
+            }).catch(() => {}); // Silently ignore errors
           }
         }
       } catch (err) {

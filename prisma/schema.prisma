@@ -875,6 +875,20 @@ model LeiArticle {
   @@index([capitulo])
 }
 
+// Histórico de Pesquisas IA (para alunos retomarem consultas)
+model SearchHistory {
+  id           String   @id @default(uuid())
+  userId       String
+  query        String
+  aiAnswer     String?  @db.Text
+  sources      String?  // JSON: [{title, category, url}]
+  legalSources String?  // JSON: [{type, title, url}]
+  createdAt    DateTime @default(now())
+
+  @@index([userId, createdAt])
+  @@index([userId])
+}
+
 // Fila de Indexação (Background Jobs para Embeddings)
 // Processa geração de embeddings de forma assíncrona
 model IndexJob {

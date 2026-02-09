@@ -26,10 +26,14 @@ export interface LegalSource {
 
 /**
  * Extrai números de artigos da Lei 14.133 citados nos documentos retornados
- * pelo pgvector (campo leiArticles dos docs)
+ * pelo pgvector (campo leiArticles dos docs).
+ * Prioriza artigos citados por mais documentos (frequência) e limita o total.
  */
-export function extractCitedArticles(results: Array<SearchResult & { leiArticles?: string | null }>): string[] {
-  const articleSet = new Set<string>();
+export function extractCitedArticles(
+  results: Array<SearchResult & { leiArticles?: string | null }>,
+  maxArticles: number = 8
+): string[] {
+  const articleCounts = new Map<string, number>();
 
   for (const result of results) {
     if (!result.leiArticles) continue;
@@ -42,15 +46,22 @@ export function extractCitedArticles(results: Array<SearchResult & { leiArticles
     }
 
     for (const art of articles) {
-      articleSet.add(String(art));
+      const key = String(art);
+      articleCounts.set(key, (articleCounts.get(key) || 0) + 1);
     }
   }
 
-  return Array.from(articleSet).sort((a, b) => {
-    const numA = parseInt(a.replace(/[^0-9]/g, '')) || 0;
-    const numB = parseInt(b.replace(/[^0-9]/g, '')) || 0;
-    return numA - numB;
-  });
+  return Array.from(articleCounts.entries())
+    .sort((a, b) => {
+      // Mais frequente primeiro
+      if (b[1] !== a[1]) return b[1] - a[1];
+      // Desempate: número do artigo crescente
+      const numA = parseInt(a[0].replace(/[^0-9]/g, '')) || 0;
+      const numB = parseInt(b[0].replace(/[^0-9]/g, '')) || 0;
+      return numA - numB;
+    })
+    .slice(0, maxArticles)
+    .map(([art]) => art);
 }
 
 // ===========================

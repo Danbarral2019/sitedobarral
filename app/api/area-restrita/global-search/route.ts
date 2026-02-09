@@ -61,7 +61,7 @@ export async function GET(request: NextRequest) {
     const searchParams = request.nextUrl.searchParams;
     const query = searchParams.get('q')?.trim() || '';
     const typesParam = searchParams.get('types'); // comma-separated types to search
-    const limit = Math.min(parseInt(searchParams.get('limit') || '20'), 50);
+    const limit = Math.min(parseInt(searchParams.get('limit') || '500'), 500);
 
     // Parse types filter
     const requestedTypes: ContentType[] = typesParam
@@ -123,6 +123,8 @@ export async function GET(request: NextRequest) {
                       : []),
                   ],
                 },
+                // Excluir categorias que já possuem tipos dedicados (lei e legislative-act)
+                { category: { notIn: ['lei-artigo', 'ato-normativo'] } },
               ],
             },
             select: {
@@ -336,16 +338,24 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    // 6. Search Legislative Acts
+    // 6. Search Legislative Acts (text match + summary)
     if (requestedTypes.includes('legislative-act')) {
       searchPromises.push(
         (async () => {
+          // Split query into individual words for broader matching
+          const queryWords = query.split(/\s+/).filter(w => w.length >= 3);
+
           const acts = await prisma.legislativeAct.findMany({
             where: {
               OR: [
                 { title: { contains: query, mode: 'insensitive' } },
                 { ementa: { contains: query, mode: 'insensitive' } },
                 { fullNumber: { contains: query, mode: 'insensitive' } },
+                { summary: { contains: query, mode: 'insensitive' } },
+                // Also search individual words in ementa for broader coverage
+                ...queryWords.map(word => ({
+                  ementa: { contains: word, mode: 'insensitive' as const },
+                })),
               ],
             },
             select: {
@@ -406,17 +416,49 @@ export async function GET(request: NextRequest) {
       counts.site +
       counts['legislative-act'];
 
-    // Sort results by type priority: glossary first (exact matches), then documents, lei, faq, video, site
-    const typePriority: Record<ContentType, number> = {
+    // Sort results by type priority, then sub-sort documents by category priority
+    const typePriority: Record<string, number> = {
       glossary: 1,
-      document: 2,
-      lei: 3,
+      'course-material': 2,
+      document: 3,
       'legislative-act': 4,
-      video: 5,
-      site: 6,
+      lei: 5,
+      video: 6,
+      site: 7,
     };
 
-    results.sort((a, b) => typePriority[a.type] - typePriority[b.type]);
+    // Category priority within the 'document' type
+    const docCategoryPriority: Record<string, number> = {
+      'apostila': 1,
+      'conteudo-programatico': 1,
+      'outro': 2,
+      'bibliografia': 2,
+      'enunciados': 3,
+      'orientacao-normativa': 3,
+      'lei-artigo': 4,
+      'ato-normativo': 4,
+      'acordao': 5,
+      'manual-tcu': 5,
+      'decor': 6,
+      'parecer-vinculante': 6,
+      'sumula': 7,
+      'parecer': 7,
+    };
+
+    results.sort((a, b) => {
+      const typeA = typePriority[a.type] ?? 10;
+      const typeB = typePriority[b.type] ?? 10;
+      if (typeA !== typeB) return typeA - typeB;
+
+      // Sub-sort documents by category
+      if (a.type === 'document' && b.type === 'document') {
+        const catA = docCategoryPriority[(a.data as { category: string }).category] ?? 10;
+        const catB = docCategoryPriority[(b.data as { category: string }).category] ?? 10;
+        return catA - catB;
+      }
+
+      return 0;
+    });
 
     return NextResponse.json({
       query,

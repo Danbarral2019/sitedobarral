@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { Fragment, useState } from 'react';
 import Link from 'next/link';
 import {
   FileText,
@@ -18,6 +18,7 @@ import {
   Gavel,
   CheckSquare,
   Square,
+  Download,
 } from 'lucide-react';
 import type {
   SearchResultItem,
@@ -48,6 +49,8 @@ interface SearchResultsListProps {
   onFollowUp?: (query: string) => void;
   selectedIds?: Set<string>;
   onToggleSelect?: (id: string) => void;
+  onAskAIAboutDoc?: (docTitle: string) => void;
+  aiConversationHistory?: { role: 'user' | 'assistant'; content: string }[];
 }
 
 const TYPE_ICONS: Record<ContentType, typeof FileText> = {
@@ -85,9 +88,46 @@ function SourceIcon({ category }: { category: string }) {
       return <Scale className="w-3 h-3" />;
     case 'ato-normativo':
       return <Gavel className="w-3 h-3" />;
+    case 'acordao':
+      return <Gavel className="w-3 h-3" />;
+    case 'manual-tcu':
+      return <BookOpen className="w-3 h-3" />;
+    case 'apostila':
+    case 'conteudo-programatico':
+    case 'outro':
+      return <BookOpen className="w-3 h-3" />;
+    case 'enunciados':
+      return <Scale className="w-3 h-3" />;
+    case 'orientacao-normativa':
+      return <Gavel className="w-3 h-3" />;
+    case 'decor':
+    case 'parecer-vinculante':
+      return <FileText className="w-3 h-3" />;
     default:
       return <FileText className="w-3 h-3" />;
   }
+}
+
+// Format markdown-like text in AI answer (bold, bullet points)
+function formatLine(text: string): React.ReactNode {
+  // Check if line is a bullet point
+  const bulletMatch = text.match(/^(\s*)[*\-]\s+(.*)/);
+  const content = bulletMatch ? bulletMatch[2] : text;
+  const isBullet = !!bulletMatch;
+
+  // Format bold (**text**)
+  const parts = content.split(/(\*\*[^*]+\*\*)/g);
+  const formatted = parts.map((part, i) => {
+    if (part.startsWith('**') && part.endsWith('**')) {
+      return <strong key={i}>{part.slice(2, -2)}</strong>;
+    }
+    return part;
+  });
+
+  if (isBullet) {
+    return <span className="flex gap-1.5 ml-2"><span className="text-purple-400">&#8226;</span><span>{formatted}</span></span>;
+  }
+  return formatted;
 }
 
 // AI Answer Card
@@ -98,6 +138,8 @@ function AIAnswerCard({
   isLoading,
   error,
   onFollowUp,
+  query,
+  conversationHistory,
 }: {
   answer?: string | null;
   sources?: AISource[];
@@ -105,9 +147,23 @@ function AIAnswerCard({
   isLoading?: boolean;
   error?: string | null;
   onFollowUp?: (query: string) => void;
+  query?: string;
+  conversationHistory?: { role: 'user' | 'assistant'; content: string }[];
 }) {
   const [isExpanded, setIsExpanded] = useState(false);
   const [followUpInput, setFollowUpInput] = useState('');
+
+  const handleDownloadPDF = async () => {
+    if (!answer || !query) return;
+    const { generateSearchResultPDF } = await import('@/lib/pdf-generator');
+    generateSearchResultPDF({
+      query,
+      answer,
+      sources: sources?.map(s => ({ title: s.title, category: s.category, url: s.url })),
+      legalSources: legalSources?.map(s => ({ type: s.type, title: s.title, url: s.url })),
+      conversationHistory,
+    });
+  };
 
   const handleFollowUpSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -153,14 +209,34 @@ function AIAnswerCard({
   return (
     <div className="bg-gradient-to-r from-purple-50 to-indigo-50 rounded-2xl border border-purple-200 p-5 shadow-sm">
       {/* Header */}
-      <div className="flex items-center gap-2 mb-3">
-        <Sparkles className="w-5 h-5 text-purple-600" />
-        <h3 className="font-bold text-purple-900 text-sm">Análise IA</h3>
+      <div className="flex items-center justify-between mb-3">
+        <div className="flex items-center gap-2">
+          <Sparkles className="w-5 h-5 text-purple-600" />
+          <h3 className="font-bold text-purple-900 text-sm">Análise IA</h3>
+        </div>
+        <button
+          onClick={handleDownloadPDF}
+          className="p-1.5 rounded-lg text-purple-500 hover:text-purple-700 hover:bg-purple-100 transition-colors"
+          title="Baixar como PDF"
+        >
+          <Download className="w-4 h-4" />
+        </button>
       </div>
 
       {/* Answer text */}
       <div className="text-sm text-gray-800 leading-relaxed">
-        <p className={isExpanded ? '' : 'line-clamp-6'}>{answer}</p>
+        <div className={isExpanded ? '' : 'line-clamp-6'}>
+          {answer.split('\n\n').map((paragraph, i) => (
+            <p key={i} className="mb-3 last:mb-0">
+              {paragraph.split('\n').map((line, j) => (
+                <Fragment key={j}>
+                  {j > 0 && <br />}
+                  {formatLine(line)}
+                </Fragment>
+              ))}
+            </p>
+          ))}
+        </div>
         {answer.length > 400 && (
           <button
             onClick={() => setIsExpanded(!isExpanded)}
@@ -271,9 +347,17 @@ function AIAnswerCard({
         </div>
       )}
 
+      {/* Disclaimer */}
+      <div className="mt-3 pt-3 border-t border-purple-200/50">
+        <p className="text-[10px] text-purple-500/70 leading-relaxed">
+          <AlertCircle className="w-3 h-3 inline-block mr-1 -mt-0.5" />
+          Esta resposta foi gerada por Inteligencia Artificial e pode conter imprecisoes. E responsabilidade do aluno consultar as fontes originais para verificacao da correcao das informacoes apresentadas.
+        </p>
+      </div>
+
       {/* Follow-up input */}
       {onFollowUp && (
-        <form onSubmit={handleFollowUpSubmit} className="mt-4 pt-3 border-t border-purple-200/50">
+        <form onSubmit={handleFollowUpSubmit} className="mt-3 pt-3 border-t border-purple-200/50">
           <div className="flex gap-2">
             <input
               type="text"
@@ -305,6 +389,7 @@ function DocumentResultCard({
   onToggleFavorite,
   isSelected,
   onToggleSelect,
+  onAskAI,
 }: {
   doc: DocumentResult;
   query: string;
@@ -313,6 +398,7 @@ function DocumentResultCard({
   onToggleFavorite?: () => void;
   isSelected?: boolean;
   onToggleSelect?: () => void;
+  onAskAI?: (docTitle: string) => void;
 }) {
   return (
     <div
@@ -382,6 +468,19 @@ function DocumentResultCard({
               <span className="px-2 py-0.5 rounded-full text-xs font-medium bg-brand-50 text-brand-700">
                 {doc.courseName}
               </span>
+            )}
+            {onAskAI && (
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onAskAI(doc.title);
+                }}
+                className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-purple-50 text-purple-700 hover:bg-purple-100 transition-colors"
+                title="Perguntar à IA sobre este documento"
+              >
+                <Sparkles className="w-3 h-3" />
+                Perguntar à IA
+              </button>
             )}
           </div>
         </div>
@@ -631,6 +730,8 @@ export function SearchResultsList({
   onFollowUp,
   selectedIds,
   onToggleSelect,
+  onAskAIAboutDoc,
+  aiConversationHistory,
 }: SearchResultsListProps) {
   const showAiCard = isAiLoading || aiError || aiAnswer;
 
@@ -679,7 +780,139 @@ export function SearchResultsList({
           isLoading={isAiLoading}
           error={aiError}
           onFollowUp={onFollowUp}
+          query={query}
+          conversationHistory={aiConversationHistory}
         />
+      )}
+
+      {/* AI Recommended Sources - semantic results as clickable cards */}
+      {aiSources && aiSources.length > 0 && !isAiLoading && aiAnswer && (
+        <div>
+          <div className="flex items-center gap-2 mb-3">
+            <Sparkles className="w-4 h-4 text-purple-500" />
+            <h3 className="font-bold text-gray-900 text-sm">Fontes recomendadas pela IA</h3>
+            <span className="px-2 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-700">
+              {aiSources.length}
+            </span>
+          </div>
+          <div className="grid gap-2">
+            {aiSources.map((source) => {
+              const categoryLabels: Record<string, string> = {
+                'acordao': 'Acórdão TCU',
+                'manual-tcu': 'Manual TCU',
+                'enunciados': 'Enunciado',
+                'parecer-vinculante': 'Parecer Vinculante',
+                'orientacao-normativa': 'ON AGU',
+                'decor': 'DECOR',
+                'lei-artigo': 'Lei 14.133',
+                'ato-normativo': 'Ato Normativo',
+                'apostila': 'Material do Curso',
+                'conteudo-programatico': 'Material do Curso',
+                'outro': 'Material do Curso',
+                'bibliografia': 'Bibliografia',
+              };
+              const label = categoryLabels[source.category] || source.category;
+
+              // Tier 1: Professor's materials get highlighted styling
+              const isProfessorMaterial = ['apostila', 'conteudo-programatico', 'outro', 'bibliografia', 'sumula', 'parecer'].includes(source.category);
+              // Tier 2: Enunciados and ONs get subtle emphasis
+              const isHighPriority = ['enunciados', 'orientacao-normativa'].includes(source.category);
+
+              const borderClass = isProfessorMaterial
+                ? 'border-brand-300 bg-brand-50/30 ring-1 ring-brand-200'
+                : isHighPriority
+                ? 'border-indigo-200 bg-indigo-50/20'
+                : 'border-gray-200';
+              const hoverClass = isProfessorMaterial
+                ? 'hover:border-brand-400 hover:shadow-md'
+                : 'hover:border-purple-300 hover:shadow-sm';
+              const iconBg = isProfessorMaterial
+                ? 'bg-brand-100 text-brand-700'
+                : isHighPriority
+                ? 'bg-indigo-50 text-indigo-600'
+                : 'bg-purple-50 text-purple-600';
+              const labelClass = isProfessorMaterial
+                ? 'bg-brand-100 text-brand-800 font-semibold'
+                : isHighPriority
+                ? 'bg-indigo-100 text-indigo-700'
+                : 'bg-gray-100 text-gray-600';
+
+              const cardContent = (
+                <div className="flex items-start gap-3">
+                  <div className={`p-1.5 rounded-lg flex-shrink-0 ${iconBg}`}>
+                    <SourceIcon category={source.category} />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <h4 className={`text-sm font-medium line-clamp-1 transition-colors ${isProfessorMaterial ? 'text-brand-900 group-hover:text-brand-700' : 'text-gray-900 group-hover:text-purple-700'}`}>
+                      {source.title}
+                    </h4>
+                    {source.excerpt && (
+                      <p className="text-xs text-gray-500 mt-0.5 line-clamp-1">{source.excerpt}</p>
+                    )}
+                  </div>
+                  <div className="flex items-center gap-2 flex-shrink-0">
+                    <span className={`px-2 py-0.5 rounded-full text-[10px] font-medium ${labelClass}`}>
+                      {label}
+                    </span>
+                    <span className="text-xs font-medium text-purple-600">
+                      {Math.round(source.relevance * 100)}%
+                    </span>
+                    {onAskAIAboutDoc && (
+                      <button
+                        onClick={(e) => {
+                          e.preventDefault();
+                          e.stopPropagation();
+                          onAskAIAboutDoc(source.title);
+                        }}
+                        className="p-1 rounded-full bg-purple-50 text-purple-500 hover:bg-purple-100 hover:text-purple-700 transition-colors opacity-0 group-hover:opacity-100"
+                        title="Perguntar à IA sobre este documento"
+                      >
+                        <Sparkles className="w-3 h-3" />
+                      </button>
+                    )}
+                  </div>
+                </div>
+              );
+
+              const cardClassName = `block rounded-xl border px-4 py-3 transition-all group cursor-pointer ${borderClass} ${hoverClass}`;
+
+              if (source.url) {
+                const isExternal = source.url.startsWith('http');
+                if (isExternal) {
+                  return (
+                    <a
+                      key={source.documentId}
+                      href={source.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className={cardClassName}
+                    >
+                      {cardContent}
+                    </a>
+                  );
+                }
+                return (
+                  <Link
+                    key={source.documentId}
+                    href={source.url}
+                    className={cardClassName}
+                  >
+                    {cardContent}
+                  </Link>
+                );
+              }
+
+              return (
+                <div
+                  key={source.documentId}
+                  className={`rounded-xl border px-4 py-3 group ${borderClass}`}
+                >
+                  {cardContent}
+                </div>
+              );
+            })}
+          </div>
+        </div>
       )}
 
       {/* Loading skeleton for traditional results */}
@@ -699,11 +932,58 @@ export function SearchResultsList({
         </div>
       )}
 
-      {/* Grouped traditional results */}
-      {(Object.entries(groupedResults) as [ContentType, SearchResultItem[]][]).map(
-        ([type, items]) => {
+      {/* Section divider between AI sources and traditional results */}
+      {showAiCard && Object.keys(groupedResults).length > 0 && (
+        <div className="flex items-center gap-3 pt-2">
+          <div className="flex-1 h-px bg-gray-200" />
+          <span className="text-xs font-medium text-gray-500 uppercase tracking-wider">
+            Resultados textuais ({results.length})
+          </span>
+          <div className="flex-1 h-px bg-gray-200" />
+        </div>
+      )}
+
+      {/* Grouped traditional results — ordered by priority */}
+      {(Object.entries(groupedResults) as [ContentType, SearchResultItem[]][])
+        .sort(([a], [b]) => {
+          const TYPE_PRIORITY: Record<string, number> = {
+            'course-material': 1,
+            'document': 2,
+            'legislative-act': 3,
+            'lei': 4,
+            'glossary': 5,
+            'video': 6,
+            'site': 7,
+          };
+          return (TYPE_PRIORITY[a] ?? 10) - (TYPE_PRIORITY[b] ?? 10);
+        })
+        .map(
+        ([type, rawItems]) => {
           const config = CONTENT_TYPE_CONFIG[type];
           const Icon = TYPE_ICONS[type];
+
+          // Sub-sort documents by category priority
+          const items = type === 'document' ? [...rawItems].sort((a, b) => {
+            const CAT_PRIORITY: Record<string, number> = {
+              'apostila': 1,
+              'conteudo-programatico': 1,
+              'outro': 2,
+              'bibliografia': 2,
+              'enunciados': 3,
+              'orientacao-normativa': 3,
+              'lei-artigo': 4,
+              'ato-normativo': 4,
+              'acordao': 5,
+              'manual-tcu': 5,
+              'decor': 6,
+              'parecer-vinculante': 6,
+              'sumula': 7,
+              'parecer': 7,
+            };
+            const catA = (a.data as DocumentResult).category || '';
+            const catB = (b.data as DocumentResult).category || '';
+            return (CAT_PRIORITY[catA] ?? 10) - (CAT_PRIORITY[catB] ?? 10);
+          }) : rawItems;
 
           return (
             <div key={type}>
@@ -732,6 +1012,7 @@ export function SearchResultsList({
                           onToggleFavorite={() => onToggleFavorite?.(doc.id)}
                           isSelected={selectedIds?.has(doc.id)}
                           onToggleSelect={onToggleSelect ? () => onToggleSelect(doc.id) : undefined}
+                          onAskAI={onAskAIAboutDoc}
                         />
                       );
                     case 'lei':
