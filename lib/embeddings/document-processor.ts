@@ -421,6 +421,7 @@ function createChunksForDocument(
     case 'lei':
     case 'decreto':
     case 'portaria':
+    case 'manual-tcu':
       return chunkLegalDocument(text, chunkOptions);
 
     default:
