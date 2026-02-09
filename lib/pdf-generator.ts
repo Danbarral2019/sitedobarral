@@ -1,5 +1,316 @@
 import jsPDF from 'jspdf';
 
+// ===========================
+// Brand Palette (azul petróleo #20364e)
+// ===========================
+const BRAND = {
+  950: [8, 13, 17],
+  900: [14, 24, 33],
+  800: [20, 34, 48],
+  700: [26, 44, 63],
+  600: [32, 54, 78],    // principal
+  500: [58, 90, 115],
+  400: [93, 129, 153],
+  300: [141, 168, 192],
+  200: [179, 197, 213],
+  100: [217, 226, 234],
+  50: [240, 244, 247],
+} as const;
+
+const ACCENT = {
+  green: [22, 163, 74],    // para tags positivas
+  amber: [217, 119, 6],    // para avisos
+  red: [220, 38, 38],      // para erros
+} as const;
+
+type RGB = readonly [number, number, number];
+
+// ===========================
+// Shared PDF Utilities
+// ===========================
+
+class PDFBuilder {
+  doc: jsPDF;
+  pageWidth: number;
+  pageHeight: number;
+  margin: number;
+  contentWidth: number;
+  yPosition: number;
+  pageNumber: number;
+  userName?: string;
+
+  constructor(userName?: string) {
+    this.doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
+    this.pageWidth = this.doc.internal.pageSize.getWidth();
+    this.pageHeight = this.doc.internal.pageSize.getHeight();
+    this.margin = 20;
+    this.contentWidth = this.pageWidth - 2 * this.margin;
+    this.yPosition = this.margin;
+    this.pageNumber = 1;
+    this.userName = userName;
+  }
+
+  wrap(text: string, maxWidth?: number): string[] {
+    return this.doc.splitTextToSize(text, maxWidth || this.contentWidth);
+  }
+
+  setColor(rgb: RGB) {
+    this.doc.setTextColor(rgb[0], rgb[1], rgb[2]);
+  }
+
+  setFill(rgb: RGB) {
+    this.doc.setFillColor(rgb[0], rgb[1], rgb[2]);
+  }
+
+  setDraw(rgb: RGB) {
+    this.doc.setDrawColor(rgb[0], rgb[1], rgb[2]);
+  }
+
+  checkNewPage(requiredSpace: number) {
+    if (this.yPosition + requiredSpace > this.pageHeight - 22) {
+      this.doc.addPage();
+      this.pageNumber++;
+      this.yPosition = this.margin;
+    }
+  }
+
+  addFooterToAllPages() {
+    const total = this.doc.getNumberOfPages();
+    for (let p = 1; p <= total; p++) {
+      this.doc.setPage(p);
+      this.drawFooter(p, total);
+    }
+  }
+
+  private drawFooter(page: number, total: number) {
+    const y = this.pageHeight - 15;
+
+    // Linha separadora
+    this.setDraw(BRAND[200]);
+    this.doc.setLineWidth(0.3);
+    this.doc.line(this.margin, y - 3, this.pageWidth - this.margin, y - 3);
+
+    // Esquerda: branding
+    this.doc.setFontSize(7);
+    this.doc.setFont('helvetica', 'normal');
+    this.setColor(BRAND[400]);
+    this.doc.text('Prof. Daniel Barral  |  profdanielbarral.com.br', this.margin, y);
+
+    // Direita: paginação
+    this.doc.text(`${page} / ${total}`, this.pageWidth - this.margin, y, { align: 'right' });
+
+    // Watermark do usuário
+    if (this.userName) {
+      this.doc.setFontSize(6);
+      this.setColor(BRAND[200]);
+      this.doc.text(
+        `Gerado para ${this.userName}`,
+        this.pageWidth / 2,
+        this.pageHeight - 8,
+        { align: 'center' }
+      );
+    }
+  }
+
+  // === HEADER UNIVERSAL ===
+  drawHeader(subtitle: string) {
+    // Faixa principal
+    this.setFill(BRAND[700]);
+    this.doc.rect(0, 0, this.pageWidth, 34, 'F');
+
+    // Faixa accent
+    this.setFill(BRAND[500]);
+    this.doc.rect(0, 34, this.pageWidth, 1.5, 'F');
+
+    // Detalhe decorativo lateral
+    this.setFill(BRAND[400]);
+    this.doc.rect(0, 0, 4, 35.5, 'F');
+
+    // Logo/Título
+    this.doc.setTextColor(255, 255, 255);
+    this.doc.setFontSize(18);
+    this.doc.setFont('helvetica', 'bold');
+    this.doc.text('PROF. DANIEL BARRAL', this.pageWidth / 2, 14, { align: 'center' });
+
+    // Subtítulo institucional
+    this.doc.setFontSize(9);
+    this.doc.setFont('helvetica', 'normal');
+    this.setColor(BRAND[200]);
+    this.doc.text('Direito Administrativo  •  Licitações e Contratos  •  Lei 14.133/2021', this.pageWidth / 2, 22, {
+      align: 'center',
+    });
+
+    // Subtítulo do documento
+    this.doc.setFontSize(8);
+    this.setColor(BRAND[300]);
+    this.doc.text(subtitle, this.pageWidth / 2, 30, { align: 'center' });
+
+    this.yPosition = 44;
+  }
+
+  // === SECTION LABEL ===
+  drawSectionLabel(label: string, color: RGB = BRAND[600]) {
+    this.doc.setFontSize(7.5);
+    this.doc.setFont('helvetica', 'bold');
+    this.setColor(color);
+    this.doc.text(label.toUpperCase(), this.margin, this.yPosition);
+
+    this.yPosition += 2;
+    this.setDraw(color);
+    this.doc.setLineWidth(0.6);
+    this.doc.line(this.margin, this.yPosition, this.margin + 30, this.yPosition);
+
+    // Linha fina estendida
+    this.doc.setLineWidth(0.15);
+    this.setDraw(BRAND[200]);
+    this.doc.line(this.margin + 30, this.yPosition, this.pageWidth - this.margin, this.yPosition);
+
+    this.yPosition += 5;
+  }
+
+  // === CARD BOX (fundo + barra lateral) ===
+  drawCard(
+    content: () => number,
+    options: { barColor?: RGB; bgColor?: RGB; barWidth?: number } = {}
+  ) {
+    const { barColor = BRAND[600], bgColor = BRAND[50], barWidth = 3 } = options;
+    const startY = this.yPosition;
+
+    // Calcular altura do conteúdo
+    const height = content();
+
+    // Desenhar fundo e barra (retroativamente)
+    // jsPDF não suporta z-order, então desenhamos primeiro
+    // Vamos usar uma abordagem diferente: pré-calcular
+    this.setFill(bgColor);
+    this.doc.roundedRect(this.margin, startY, this.contentWidth, height, 2, 2, 'F');
+    this.setFill(barColor);
+    this.doc.rect(this.margin, startY, barWidth, height, 'F');
+  }
+
+  // === RENDER MARKDOWN-LIKE TEXT ===
+  renderFormattedText(text: string, fontSize: number = 9.5) {
+    // Parse simples de markdown: bullets, numeração, parágrafos
+    const paragraphs = text.split('\n');
+    const innerMargin = this.margin + 2;
+    const innerWidth = this.contentWidth - 4;
+
+    paragraphs.forEach((para) => {
+      const trimmed = para.trim();
+      if (!trimmed) {
+        this.yPosition += 2;
+        return;
+      }
+
+      this.checkNewPage(6);
+
+      // Detectar bullet points
+      const bulletMatch = trimmed.match(/^[-•]\s+(.*)/);
+      const numberedMatch = trimmed.match(/^(\d+)[.)]\s+(.*)/);
+
+      if (bulletMatch) {
+        const bulletText = bulletMatch[1].replace(/\*\*/g, '');
+        const lines = this.wrap(bulletText, innerWidth - 8);
+
+        this.doc.setFontSize(fontSize);
+        this.doc.setFont('helvetica', 'normal');
+        this.setColor(BRAND[700]);
+
+        // Bullet dot
+        this.setFill(BRAND[500]);
+        this.doc.circle(innerMargin + 2, this.yPosition - 1, 0.8, 'F');
+
+        lines.forEach((line, i) => {
+          this.checkNewPage(5);
+          this.doc.text(line, innerMargin + 6, this.yPosition);
+          this.yPosition += 4.5;
+        });
+      } else if (numberedMatch) {
+        const numText = numberedMatch[2].replace(/\*\*/g, '');
+        const numLabel = `${numberedMatch[1]}.`;
+        const lines = this.wrap(numText, innerWidth - 10);
+
+        this.doc.setFontSize(fontSize);
+        this.doc.setFont('helvetica', 'bold');
+        this.setColor(BRAND[600]);
+        this.doc.text(numLabel, innerMargin + 1, this.yPosition);
+
+        this.doc.setFont('helvetica', 'normal');
+        this.setColor(BRAND[700]);
+        lines.forEach((line) => {
+          this.checkNewPage(5);
+          this.doc.text(line, innerMargin + 7, this.yPosition);
+          this.yPosition += 4.5;
+        });
+      } else {
+        // Parágrafo normal — renderizar com negrito inline
+        const cleanText = trimmed.replace(/\*\*/g, '');
+        const lines = this.wrap(cleanText, innerWidth);
+
+        this.doc.setFontSize(fontSize);
+        this.doc.setFont('helvetica', 'normal');
+        this.setColor([40, 40, 45]);
+        lines.forEach((line) => {
+          this.checkNewPage(5);
+          this.doc.text(line, innerMargin, this.yPosition);
+          this.yPosition += 4.5;
+        });
+      }
+    });
+  }
+
+  // === DISCLAIMER ===
+  drawDisclaimer() {
+    this.checkNewPage(30);
+    this.yPosition += 4;
+
+    // Caixa de aviso
+    const disclaimerText =
+      'Este documento foi gerado automaticamente pelo sistema de Consulta IA do Prof. Daniel Barral. ' +
+      'As respostas são geradas por Inteligência Artificial e podem conter imprecisões. ' +
+      'Esta pesquisa foi realizada exclusivamente para fins acadêmicos e educacionais, não devendo ' +
+      'este documento ser utilizado para instruir processos administrativos ou requerimentos a ' +
+      'qualquer órgão público. Sempre consulte a legislação oficial e fontes primárias.';
+
+    const lines = this.wrap(disclaimerText, this.contentWidth - 12);
+    const boxHeight = lines.length * 3.5 + 10;
+
+    this.setFill(BRAND[50]);
+    this.doc.roundedRect(this.margin, this.yPosition, this.contentWidth, boxHeight, 2, 2, 'F');
+
+    // Barra lateral amber
+    this.doc.setFillColor(ACCENT.amber[0], ACCENT.amber[1], ACCENT.amber[2]);
+    this.doc.rect(this.margin, this.yPosition, 3, boxHeight, 'F');
+
+    // Label
+    this.doc.setFontSize(7);
+    this.doc.setFont('helvetica', 'bold');
+    this.doc.setTextColor(ACCENT.amber[0], ACCENT.amber[1], ACCENT.amber[2]);
+    this.doc.text('AVISO', this.margin + 6, this.yPosition + 5);
+
+    // Texto
+    this.doc.setFontSize(7);
+    this.doc.setFont('helvetica', 'italic');
+    this.setColor(BRAND[400]);
+    let dY = this.yPosition + 10;
+    lines.forEach((line) => {
+      this.doc.text(line, this.margin + 6, dY);
+      dY += 3.5;
+    });
+
+    this.yPosition += boxHeight + 6;
+  }
+
+  save(fileName: string) {
+    this.addFooterToAllPages();
+    this.doc.save(fileName);
+  }
+}
+
+// ===========================
+// Conversation PDF (Article Chat)
+// ===========================
+
 interface ConversationMessage {
   question: string;
   answer: string | null;
@@ -15,246 +326,112 @@ interface PDFExportOptions {
   userEmail?: string;
 }
 
-/**
- * Gera PDF formatado de uma conversa sobre Lei 14.133
- */
 export function generateConversationPDF(options: PDFExportOptions): void {
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const { articleNumber, articleTitle, messages, userName, userEmail } = options;
+  const { articleNumber, articleTitle, messages, userName } = options;
 
-  const doc = new jsPDF({
-    orientation: 'portrait',
-    unit: 'mm',
-    format: 'a4',
+  const pdf = new PDFBuilder(userName);
+
+  const dateStr = new Date().toLocaleDateString('pt-BR', {
+    day: '2-digit',
+    month: 'long',
+    year: 'numeric',
   });
 
-  const pageWidth = doc.internal.pageSize.getWidth();
-  const pageHeight = doc.internal.pageSize.getHeight();
-  const margin = 20;
-  const contentWidth = pageWidth - 2 * margin;
-  let yPosition = margin;
+  // Header
+  pdf.drawHeader(`Chat IA  •  Artigo ${articleNumber}  •  ${dateStr}`);
 
-  // Helper para quebrar texto
-  const wrapText = (text: string, maxWidth: number): string[] => {
-    return doc.splitTextToSize(text, maxWidth);
-  };
+  // Info box do artigo
+  const titleText = articleTitle || `Artigo ${articleNumber} da Lei 14.133/2021`;
+  const titleLines = pdf.wrap(titleText, pdf.contentWidth - 16);
+  const infoBoxHeight = titleLines.length * 5 + 14;
 
-  // Helper para adicionar nova página se necessário
-  const checkNewPage = (requiredSpace: number) => {
-    if (yPosition + requiredSpace > pageHeight - margin) {
-      doc.addPage();
-      yPosition = margin;
-      addWatermark(); // Adiciona marca d'água em cada página
+  pdf.setFill(BRAND[50]);
+  pdf.doc.roundedRect(pdf.margin, pdf.yPosition, pdf.contentWidth, infoBoxHeight, 2, 2, 'F');
+  pdf.setFill(BRAND[600]);
+  pdf.doc.rect(pdf.margin, pdf.yPosition, 3, infoBoxHeight, 'F');
+
+  pdf.doc.setFontSize(7.5);
+  pdf.doc.setFont('helvetica', 'bold');
+  pdf.setColor(BRAND[500]);
+  pdf.doc.text(`ARTIGO ${articleNumber}  •  LEI 14.133/2021`, pdf.margin + 7, pdf.yPosition + 5);
+
+  pdf.doc.setFontSize(10);
+  pdf.doc.setFont('helvetica', 'normal');
+  pdf.setColor(BRAND[700]);
+  let tY = pdf.yPosition + 11;
+  titleLines.forEach((line) => {
+    pdf.doc.text(line, pdf.margin + 7, tY);
+    tY += 5;
+  });
+
+  pdf.yPosition += infoBoxHeight + 10;
+
+  // Conversas
+  messages.forEach((message, msgIdx) => {
+    pdf.checkNewPage(25);
+
+    // Label da pergunta
+    if (messages.length > 1) {
+      pdf.drawSectionLabel(`Pergunta ${msgIdx + 1}`);
+    } else {
+      pdf.drawSectionLabel('Pergunta');
     }
-  };
-
-  // Marca d'água em cada página
-  const addWatermark = () => {
-    doc.setFontSize(10);
-    doc.setTextColor(200, 200, 200);
-    doc.text(
-      `Gerado por ${userName || 'Usuário'} - Prof. Daniel Barral`,
-      pageWidth / 2,
-      pageHeight - 10,
-      { align: 'center' }
-    );
-    doc.setTextColor(0, 0, 0); // Reset cor
-  };
-
-  // === HEADER ===
-  doc.setFillColor(37, 99, 235); // Blue-600
-  doc.rect(0, 0, pageWidth, 40, 'F');
-
-  doc.setTextColor(255, 255, 255);
-  doc.setFontSize(24);
-  doc.setFont('helvetica', 'bold');
-  doc.text('Prof. Daniel Barral', pageWidth / 2, 15, { align: 'center' });
-
-  doc.setFontSize(14);
-  doc.setFont('helvetica', 'normal');
-  doc.text('Especialista em Licitações e Contratos', pageWidth / 2, 23, {
-    align: 'center',
-  });
-
-  doc.setFontSize(12);
-  doc.text('Conversa sobre Lei 14.133/2021', pageWidth / 2, 32, {
-    align: 'center',
-  });
-
-  yPosition = 50;
-
-  // === INFO BOX ===
-  doc.setFillColor(239, 246, 255); // Blue-50
-  doc.rect(margin, yPosition, contentWidth, 35, 'F');
-
-  doc.setDrawColor(37, 99, 235); // Blue-600
-  doc.setLineWidth(0.5);
-  doc.rect(margin, yPosition, contentWidth, 35);
-
-  doc.setTextColor(0, 0, 0);
-  doc.setFontSize(11);
-  doc.setFont('helvetica', 'bold');
-
-  yPosition += 8;
-  doc.text(`Artigo: ${articleNumber}`, margin + 5, yPosition);
-
-  yPosition += 6;
-  doc.setFont('helvetica', 'normal');
-  if (articleTitle) {
-    const titleLines = wrapText(articleTitle, contentWidth - 10);
-    titleLines.forEach((line) => {
-      doc.text(line, margin + 5, yPosition);
-      yPosition += 5;
-    });
-  } else {
-    doc.text(`Artigo ${articleNumber} da Lei 14.133/2021`, margin + 5, yPosition);
-    yPosition += 5;
-  }
-
-  yPosition += 2;
-  doc.setFontSize(9);
-  doc.setTextColor(100, 100, 100);
-  doc.text(
-    `Data: ${new Date().toLocaleDateString('pt-BR', {
-      day: '2-digit',
-      month: 'long',
-      year: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit',
-    })}`,
-    margin + 5,
-    yPosition
-  );
-
-  if (userName) {
-    yPosition += 4;
-    doc.text(`Usuário: ${userName}`, margin + 5, yPosition);
-  }
-
-  yPosition += 15;
-
-  // === CONVERSAS ===
-  messages.forEach((message) => {
-    const messageHeight = 60; // Espaço estimado por mensagem
-    checkNewPage(messageHeight);
 
     // Box da pergunta
-    doc.setFillColor(249, 250, 251); // Gray-50
-    doc.setDrawColor(229, 231, 235); // Gray-200
-    doc.setLineWidth(0.3);
+    const questionLines = pdf.wrap(message.question, pdf.contentWidth - 16);
+    const qBoxHeight = questionLines.length * 5 + 8;
 
-    const questionY = yPosition;
-    doc.rect(margin, questionY, contentWidth, 15, 'FD');
+    pdf.setFill(BRAND[50]);
+    pdf.doc.roundedRect(pdf.margin, pdf.yPosition, pdf.contentWidth, qBoxHeight, 2, 2, 'F');
+    pdf.setFill(BRAND[600]);
+    pdf.doc.rect(pdf.margin, pdf.yPosition, 3, qBoxHeight, 'F');
 
-    doc.setFontSize(10);
-    doc.setFont('helvetica', 'bold');
-    doc.setTextColor(75, 85, 99); // Gray-600
-    doc.text('Pergunta:', margin + 3, questionY + 5);
+    pdf.doc.setFontSize(10);
+    pdf.doc.setFont('helvetica', 'normal');
+    pdf.setColor(BRAND[700]);
+    let qY = pdf.yPosition + 5.5;
+    questionLines.forEach((line) => {
+      pdf.doc.text(line, pdf.margin + 7, qY);
+      qY += 5;
+    });
 
-    doc.setFontSize(9);
-    doc.setTextColor(156, 163, 175); // Gray-400
-    const dateStr = new Date(message.createdAt).toLocaleString('pt-BR', {
+    // Data
+    const msgDate = new Date(message.createdAt).toLocaleString('pt-BR', {
       day: '2-digit',
       month: 'short',
       hour: '2-digit',
       minute: '2-digit',
     });
-    doc.text(dateStr, contentWidth + margin - 3, questionY + 5, { align: 'right' });
+    pdf.doc.setFontSize(6.5);
+    pdf.setColor(BRAND[300]);
+    pdf.doc.text(msgDate, pdf.pageWidth - pdf.margin - 4, pdf.yPosition + 5.5, { align: 'right' });
 
-    doc.setFontSize(10);
-    doc.setFont('helvetica', 'normal');
-    doc.setTextColor(0, 0, 0);
-    const questionLines = wrapText(message.question, contentWidth - 6);
-    let qY = questionY + 10;
-    questionLines.forEach((line) => {
-      doc.text(line, margin + 3, qY);
-      qY += 4;
-    });
+    pdf.yPosition += qBoxHeight + 6;
 
-    yPosition = qY + 3;
-
-    // Box da resposta
+    // Resposta
     if (message.answer) {
-      checkNewPage(30);
+      pdf.checkNewPage(15);
+      pdf.drawSectionLabel('Resposta IA', BRAND[500]);
 
-      doc.setFillColor(252, 252, 253); // White/Gray-50
-      doc.setDrawColor(147, 197, 253); // Blue-300
-      doc.setLineWidth(0.4);
-
-      const answerY = yPosition;
-      const answerLines = wrapText(message.answer, contentWidth - 6);
-      const answerHeight = Math.max(15, answerLines.length * 4 + 10);
-
-      doc.rect(margin, answerY, contentWidth, answerHeight, 'FD');
-
-      doc.setFontSize(10);
-      doc.setFont('helvetica', 'bold');
-      doc.setTextColor(29, 78, 216); // Blue-700
-      doc.text('Resposta da IA:', margin + 3, answerY + 5);
-
-      // Badge de feedback
+      // Feedback badge
       if (message.wasHelpful !== null) {
-        const feedbackText = message.wasHelpful ? '👍 Útil' : '👎 Não útil';
-        const feedbackColor = message.wasHelpful ? [34, 197, 94] : [239, 68, 68]; // Green-500 / Red-500
-        doc.setFontSize(8);
-        doc.setTextColor(feedbackColor[0], feedbackColor[1], feedbackColor[2]);
-        doc.text(feedbackText, contentWidth + margin - 3, answerY + 5, { align: 'right' });
+        const fbText = message.wasHelpful ? '✓ Útil' : '✗ Não útil';
+        const fbColor = message.wasHelpful ? ACCENT.green : ACCENT.red;
+        pdf.doc.setFontSize(7);
+        pdf.doc.setTextColor(fbColor[0], fbColor[1], fbColor[2]);
+        pdf.doc.text(fbText, pdf.pageWidth - pdf.margin, pdf.yPosition - 7, { align: 'right' });
       }
 
-      doc.setFontSize(9);
-      doc.setFont('helvetica', 'normal');
-      doc.setTextColor(55, 65, 81); // Gray-700
-      let aY = answerY + 10;
-      answerLines.forEach((line) => {
-        checkNewPage(5);
-        doc.text(line, margin + 3, aY);
-        aY += 4;
-      });
-
-      yPosition = aY + 5;
+      pdf.renderFormattedText(message.answer);
+      pdf.yPosition += 6;
     }
-
-    yPosition += 5; // Espaço entre mensagens
   });
 
-  // === FOOTER INFO ===
-  checkNewPage(30);
-  yPosition += 10;
+  // Disclaimer
+  pdf.drawDisclaimer();
 
-  doc.setDrawColor(229, 231, 235);
-  doc.setLineWidth(0.3);
-  doc.line(margin, yPosition, contentWidth + margin, yPosition);
-  yPosition += 8;
-
-  doc.setFontSize(9);
-  doc.setTextColor(107, 114, 128); // Gray-500
-  doc.setFont('helvetica', 'italic');
-  doc.text(
-    'Este documento foi gerado automaticamente pelo sistema de Chat IA do Prof. Daniel Barral.',
-    margin,
-    yPosition
-  );
-  yPosition += 5;
-  doc.text(
-    'As respostas são geradas por Inteligência Artificial e podem conter imprecisões.',
-    margin,
-    yPosition
-  );
-  yPosition += 5;
-  doc.text('Sempre consulte a legislação oficial e documentos fonte para informações precisas.', margin, yPosition);
-
-  yPosition += 8;
-  doc.setFont('helvetica', 'normal');
-  doc.setFontSize(10);
-  doc.setTextColor(37, 99, 235); // Blue-600
-  doc.text('www.profdanielbarral.com', margin, yPosition);
-
-  // Adiciona marca d'água na última página
-  addWatermark();
-
-  // Download do PDF
-  const fileName = `Lei14133_Art${articleNumber}_Conversa_${new Date().toISOString().split('T')[0]}.pdf`;
-  doc.save(fileName);
+  // Save
+  pdf.save(`Lei14133_Art${articleNumber}_Conversa_${new Date().toISOString().split('T')[0]}.pdf`);
 }
 
 // ===========================
@@ -282,279 +459,163 @@ interface SearchResultPDFOptions {
   conversationHistory?: { role: 'user' | 'assistant'; content: string }[];
 }
 
-/**
- * Gera PDF formatado de uma consulta IA (busca global)
- */
 export function generateSearchResultPDF(options: SearchResultPDFOptions): void {
   const { query, answer, sources, legalSources, userName, conversationHistory } = options;
 
-  const doc = new jsPDF({
-    orientation: 'portrait',
-    unit: 'mm',
-    format: 'a4',
+  const pdf = new PDFBuilder(userName);
+
+  const dateStr = new Date().toLocaleDateString('pt-BR', {
+    day: '2-digit',
+    month: 'long',
+    year: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
   });
 
-  const pageWidth = doc.internal.pageSize.getWidth();
-  const pageHeight = doc.internal.pageSize.getHeight();
-  const margin = 20;
-  const contentWidth = pageWidth - 2 * margin;
-  let yPosition = margin;
-
-  const wrapText = (text: string, maxWidth: number): string[] => {
-    return doc.splitTextToSize(text, maxWidth);
-  };
-
-  const checkNewPage = (requiredSpace: number) => {
-    if (yPosition + requiredSpace > pageHeight - margin) {
-      doc.addPage();
-      yPosition = margin;
-      addWatermark();
-    }
-  };
-
-  const addWatermark = () => {
-    doc.setFontSize(10);
-    doc.setTextColor(200, 200, 200);
-    doc.text(
-      `Gerado por ${userName || 'Usuário'} - Prof. Daniel Barral`,
-      pageWidth / 2,
-      pageHeight - 10,
-      { align: 'center' }
-    );
-    doc.setTextColor(0, 0, 0);
-  };
-
-  // === HEADER ===
-  doc.setFillColor(88, 28, 135); // Purple-800
-  doc.rect(0, 0, pageWidth, 40, 'F');
-
-  doc.setTextColor(255, 255, 255);
-  doc.setFontSize(22);
-  doc.setFont('helvetica', 'bold');
-  doc.text('Consulta IA', pageWidth / 2, 14, { align: 'center' });
-
-  doc.setFontSize(13);
-  doc.setFont('helvetica', 'normal');
-  doc.text('Prof. Daniel Barral', pageWidth / 2, 22, { align: 'center' });
-
-  doc.setFontSize(11);
-  doc.text('Licitações e Contratos - Lei 14.133/2021', pageWidth / 2, 30, { align: 'center' });
-
-  doc.setFontSize(9);
-  doc.text(
-    `Gerado em ${new Date().toLocaleDateString('pt-BR', { day: '2-digit', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' })}`,
-    pageWidth / 2,
-    37,
-    { align: 'center' }
-  );
-
-  yPosition = 50;
+  // Header
+  pdf.drawHeader(`Consulta IA  •  ${dateStr}`);
 
   // === PERGUNTA ===
-  doc.setFillColor(243, 232, 255); // Purple-100
-  doc.setDrawColor(147, 51, 234); // Purple-600
-  doc.setLineWidth(0.5);
+  pdf.drawSectionLabel('Consulta');
 
-  const questionLines = wrapText(query, contentWidth - 10);
-  const questionBoxHeight = Math.max(16, questionLines.length * 5 + 14);
-  doc.rect(margin, yPosition, contentWidth, questionBoxHeight, 'FD');
+  const questionLines = pdf.wrap(query, pdf.contentWidth - 16);
+  const qBoxHeight = questionLines.length * 5.5 + 8;
 
-  doc.setFontSize(10);
-  doc.setFont('helvetica', 'bold');
-  doc.setTextColor(88, 28, 135); // Purple-800
-  doc.text('Pergunta:', margin + 5, yPosition + 6);
+  pdf.setFill(BRAND[50]);
+  pdf.doc.roundedRect(pdf.margin, pdf.yPosition, pdf.contentWidth, qBoxHeight, 2, 2, 'F');
+  pdf.setFill(BRAND[600]);
+  pdf.doc.rect(pdf.margin, pdf.yPosition, 3, qBoxHeight, 'F');
 
-  doc.setFontSize(10);
-  doc.setFont('helvetica', 'normal');
-  doc.setTextColor(0, 0, 0);
-  let qY = yPosition + 12;
+  pdf.doc.setFontSize(10.5);
+  pdf.doc.setFont('helvetica', 'normal');
+  pdf.setColor(BRAND[700]);
+  let qY = pdf.yPosition + 5.5;
   questionLines.forEach((line) => {
-    doc.text(line, margin + 5, qY);
-    qY += 5;
+    pdf.doc.text(line, pdf.margin + 7, qY);
+    qY += 5.5;
   });
 
-  yPosition = yPosition + questionBoxHeight + 8;
+  pdf.yPosition += qBoxHeight + 10;
 
   // === RESPOSTA IA ===
-  checkNewPage(30);
+  pdf.checkNewPage(20);
+  pdf.drawSectionLabel('Análise IA', BRAND[500]);
 
-  doc.setFontSize(11);
-  doc.setFont('helvetica', 'bold');
-  doc.setTextColor(88, 28, 135);
-  doc.text('Resposta da IA:', margin, yPosition);
-  yPosition += 6;
-
-  doc.setDrawColor(147, 51, 234);
-  doc.setLineWidth(0.3);
-  doc.line(margin, yPosition, margin + contentWidth, yPosition);
-  yPosition += 5;
-
-  // Strip markdown bold markers for PDF
-  const cleanAnswer = answer.replace(/\*\*/g, '');
-  const answerLines = wrapText(cleanAnswer, contentWidth);
-
-  doc.setFontSize(9);
-  doc.setFont('helvetica', 'normal');
-  doc.setTextColor(55, 65, 81); // Gray-700
-  answerLines.forEach((line) => {
-    checkNewPage(5);
-    doc.text(line, margin, yPosition);
-    yPosition += 4;
-  });
-
-  yPosition += 8;
+  pdf.renderFormattedText(answer);
+  pdf.yPosition += 8;
 
   // === FUNDAMENTAÇÃO LEGAL ===
   if (legalSources && legalSources.length > 0) {
-    checkNewPage(20);
-
-    doc.setFontSize(10);
-    doc.setFont('helvetica', 'bold');
-    doc.setTextColor(29, 78, 216); // Blue-700
-    doc.text('Fundamentação Legal:', margin, yPosition);
-    yPosition += 6;
-
-    doc.setFontSize(9);
-    doc.setFont('helvetica', 'normal');
-    doc.setTextColor(55, 65, 81);
+    pdf.checkNewPage(20);
+    pdf.drawSectionLabel('Fundamentação Legal', BRAND[600]);
 
     legalSources.forEach((source) => {
-      checkNewPage(6);
-      doc.text(`• ${source.title}`, margin + 3, yPosition);
-      yPosition += 4.5;
+      pdf.checkNewPage(10);
+
+      const typeLabel = source.type === 'lei-artigo' ? '⚖' : '📋';
+      const titleLines = pdf.wrap(source.title, pdf.contentWidth - 14);
+
+      // Cada fonte como mini-card
+      const itemHeight = titleLines.length * 4 + 5;
+      pdf.setFill(BRAND[50]);
+      pdf.doc.roundedRect(pdf.margin + 1, pdf.yPosition, pdf.contentWidth - 2, itemHeight, 1.5, 1.5, 'F');
+
+      pdf.doc.setFontSize(8.5);
+      pdf.doc.setFont('helvetica', 'normal');
+      pdf.setColor(BRAND[700]);
+
+      let lY = pdf.yPosition + 4;
+      titleLines.forEach((line, i) => {
+        pdf.doc.text(i === 0 ? `${typeLabel}  ${line}` : `     ${line}`, pdf.margin + 4, lY);
+        lY += 4;
+      });
+
+      pdf.yPosition += itemHeight + 2;
     });
 
-    yPosition += 5;
+    pdf.yPosition += 4;
   }
 
   // === FONTES CONSULTADAS ===
   if (sources && sources.length > 0) {
-    checkNewPage(20);
+    pdf.checkNewPage(20);
+    pdf.drawSectionLabel('Fontes Consultadas');
 
-    doc.setFontSize(10);
-    doc.setFont('helvetica', 'bold');
-    doc.setTextColor(88, 28, 135);
-    doc.text('Fontes Consultadas:', margin, yPosition);
-    yPosition += 6;
+    sources.forEach((source, idx) => {
+      pdf.checkNewPage(12);
 
-    doc.setFontSize(8);
-    doc.setFont('helvetica', 'normal');
-    doc.setTextColor(75, 85, 99);
+      const catLabel = getCategoryLabel(source.category);
+      const sourceTitle = `${idx + 1}. ${source.title}`;
+      const titleLines = pdf.wrap(sourceTitle, pdf.contentWidth - 6);
 
-    sources.forEach((source) => {
-      checkNewPage(6);
-      const categoryLabel = getCategoryLabel(source.category);
-      doc.text(`• ${source.title} (${categoryLabel})`, margin + 3, yPosition);
-      yPosition += 4.5;
+      pdf.doc.setFontSize(8.5);
+      pdf.doc.setFont('helvetica', 'normal');
+      pdf.setColor(BRAND[700]);
+
+      titleLines.forEach((line) => {
+        pdf.checkNewPage(5);
+        pdf.doc.text(line, pdf.margin + 3, pdf.yPosition);
+        pdf.yPosition += 4;
+      });
+
+      // Categoria tag
+      pdf.doc.setFontSize(6.5);
+      pdf.doc.setFont('helvetica', 'italic');
+      pdf.setColor(BRAND[400]);
+      pdf.doc.text(catLabel, pdf.margin + 3, pdf.yPosition);
+      pdf.yPosition += 5;
     });
 
-    yPosition += 5;
+    pdf.yPosition += 4;
   }
 
   // === REFINAMENTOS (Follow-ups) ===
-  // conversationHistory: [user, assistant, user, assistant, ...]
-  // O primeiro par (user+assistant) é a pergunta original já exibida acima.
-  // Exibir pares a partir do índice 2.
   if (conversationHistory && conversationHistory.length > 2) {
-    checkNewPage(20);
-
-    doc.setFontSize(11);
-    doc.setFont('helvetica', 'bold');
-    doc.setTextColor(88, 28, 135);
-    doc.text('Refinamentos:', margin, yPosition);
-    yPosition += 6;
-
-    doc.setDrawColor(147, 51, 234);
-    doc.setLineWidth(0.3);
-    doc.line(margin, yPosition, margin + contentWidth, yPosition);
-    yPosition += 6;
+    pdf.checkNewPage(20);
+    pdf.drawSectionLabel('Refinamentos');
 
     for (let i = 2; i < conversationHistory.length; i++) {
       const msg = conversationHistory[i];
 
       if (msg.role === 'user') {
-        checkNewPage(20);
-        // Box da pergunta de refinamento
-        doc.setFillColor(243, 232, 255); // Purple-100
-        doc.setDrawColor(147, 51, 234);
-        doc.setLineWidth(0.4);
+        pdf.checkNewPage(15);
 
-        const fqLines = wrapText(msg.content, contentWidth - 10);
-        const fqBoxHeight = Math.max(12, fqLines.length * 5 + 10);
-        doc.rect(margin, yPosition, contentWidth, fqBoxHeight, 'FD');
+        const fqLines = pdf.wrap(msg.content, pdf.contentWidth - 16);
+        const fqHeight = fqLines.length * 5 + 8;
 
-        doc.setFontSize(9);
-        doc.setFont('helvetica', 'bold');
-        doc.setTextColor(88, 28, 135);
-        doc.text('Refinamento:', margin + 5, yPosition + 5);
+        pdf.setFill(BRAND[50]);
+        pdf.doc.roundedRect(pdf.margin, pdf.yPosition, pdf.contentWidth, fqHeight, 2, 2, 'F');
+        pdf.setFill(BRAND[500]);
+        pdf.doc.rect(pdf.margin, pdf.yPosition, 3, fqHeight, 'F');
 
-        doc.setFont('helvetica', 'normal');
-        doc.setTextColor(0, 0, 0);
-        let fqY = yPosition + 10;
+        pdf.doc.setFontSize(9.5);
+        pdf.doc.setFont('helvetica', 'normal');
+        pdf.setColor(BRAND[700]);
+        let fqY = pdf.yPosition + 5;
         fqLines.forEach((line) => {
-          doc.text(line, margin + 5, fqY);
+          pdf.doc.text(line, pdf.margin + 7, fqY);
           fqY += 5;
         });
 
-        yPosition = yPosition + fqBoxHeight + 4;
+        pdf.yPosition += fqHeight + 5;
       } else if (msg.role === 'assistant') {
-        checkNewPage(15);
-        // Resposta do refinamento
-        const cleanFollowUp = msg.content.replace(/\*\*/g, '');
-        const faLines = wrapText(cleanFollowUp, contentWidth);
-
-        doc.setFontSize(9);
-        doc.setFont('helvetica', 'normal');
-        doc.setTextColor(55, 65, 81);
-        faLines.forEach((line) => {
-          checkNewPage(5);
-          doc.text(line, margin, yPosition);
-          yPosition += 4;
-        });
-
-        yPosition += 6;
+        pdf.checkNewPage(10);
+        pdf.renderFormattedText(msg.content, 9);
+        pdf.yPosition += 6;
       }
     }
   }
 
-  // === FOOTER ===
-  checkNewPage(40);
-  yPosition += 5;
+  // Disclaimer
+  pdf.drawDisclaimer();
 
-  doc.setDrawColor(229, 231, 235);
-  doc.setLineWidth(0.3);
-  doc.line(margin, yPosition, contentWidth + margin, yPosition);
-  yPosition += 8;
-
-  doc.setFontSize(8);
-  doc.setTextColor(107, 114, 128);
-  doc.setFont('helvetica', 'italic');
-
-  const disclaimerLines = wrapText(
-    'Este documento foi gerado automaticamente pelo sistema de Consulta IA do Prof. Daniel Barral. ' +
-    'As respostas sao geradas por Inteligencia Artificial e podem conter imprecisoes. ' +
-    'Esta pesquisa foi realizada exclusivamente para fins academicos e educacionais, nao devendo ' +
-    'este documento ser utilizado para instruir processos administrativos ou requerimentos a ' +
-    'qualquer orgao publico. Sempre consulte a legislacao oficial e fontes primarias.',
-    contentWidth
-  );
-  disclaimerLines.forEach((line) => {
-    checkNewPage(5);
-    doc.text(line, margin, yPosition);
-    yPosition += 4;
-  });
-
-  yPosition += 8;
-  doc.setFont('helvetica', 'normal');
-  doc.setFontSize(10);
-  doc.setTextColor(88, 28, 135);
-  doc.text('www.profdanielbarral.com', margin, yPosition);
-
-  addWatermark();
-
-  const fileName = `ConsultaIA_${new Date().toISOString().split('T')[0]}.pdf`;
-  doc.save(fileName);
+  // Save
+  pdf.save(`ConsultaIA_${new Date().toISOString().split('T')[0]}.pdf`);
 }
+
+// ===========================
+// Helpers
+// ===========================
 
 function getCategoryLabel(category: string): string {
   const labels: Record<string, string> = {
@@ -566,6 +627,8 @@ function getCategoryLabel(category: string): string {
     'parecer-vinculante': 'Parecer Vinculante',
     decor: 'DECOR',
     apostila: 'Apostila',
+    'lei-artigo': 'Lei 14.133/2021',
+    'ato-normativo': 'Ato Normativo',
   };
   return labels[category] || category;
 }

@@ -8,9 +8,11 @@ import {
   Heart,
   CheckCircle,
   Clock,
-  MessageSquare,
   ChevronRight,
   Home,
+  Scale,
+  Search,
+  ArrowRight,
 } from 'lucide-react';
 import Link from 'next/link';
 import { courses } from '@/data/courses';
@@ -105,6 +107,9 @@ export default function AreaRestritaPage() {
 
   // Search history visibility
   const [isSearchFocused, setIsSearchFocused] = useState(false);
+
+  // Lei 14.133 quick nav
+  const [articleInput, setArticleInput] = useState('');
 
   // Document modal state
   const [selectedDocument, setSelectedDocument] = useState<DocumentType | null>(null);
@@ -388,7 +393,11 @@ export default function AreaRestritaPage() {
             {/* User Info */}
             <div className="flex items-center gap-3">
               <button
-                onClick={() => contentTree.clearSelection()}
+                onClick={() => {
+                  contentTree.clearSelection();
+                  search.clearSearch();
+                  window.scrollTo({ top: 0, behavior: 'smooth' });
+                }}
                 className="p-2 rounded-lg text-brand-600 hover:bg-brand-50 transition-colors"
                 title="Voltar ao Início"
               >
@@ -506,25 +515,6 @@ export default function AreaRestritaPage() {
                   onToggleNode={contentTree.toggleNode}
                 />
 
-                {/* AI Assistant Banner */}
-                <div className="mt-4 bg-gradient-to-br from-purple-500 to-indigo-600 rounded-2xl p-4 text-white shadow-lg">
-                  <div className="flex items-start gap-3">
-                    <MessageSquare className="w-6 h-6 flex-shrink-0 mt-0.5" />
-                    <div>
-                      <h4 className="font-bold text-sm">Assistente IA</h4>
-                      <p className="text-xs text-purple-100 mt-1">
-                        Tire dúvidas sobre licitações com IA
-                      </p>
-                      <Link
-                        href="/area-restrita/assistente"
-                        className="inline-flex items-center gap-1 mt-2 text-xs font-medium text-white hover:text-purple-200 transition-colors"
-                      >
-                        Acessar
-                        <ChevronRight className="w-3 h-3" />
-                      </Link>
-                    </div>
-                  </div>
-                </div>
               </div>
             </aside>
           )}
@@ -573,6 +563,91 @@ export default function AreaRestritaPage() {
                   </div>
                 ) : (
                   <>
+                    {/* Lei 14.133 Highlight Card (home/no selection) */}
+                    {currentContent.type === 'documents' && !contentTree.selection && (
+                      <div className="mb-6 bg-gradient-to-br from-brand-600 to-brand-700 rounded-2xl p-5 lg:p-6 text-white shadow-lg overflow-hidden relative">
+                        {/* Background decoration */}
+                        <div className="absolute top-0 right-0 w-48 h-48 opacity-10">
+                          <Scale className="w-full h-full" />
+                        </div>
+
+                        <div className="relative z-10">
+                          <div className="flex items-center gap-3 mb-3">
+                            <div className="p-2 bg-white/20 rounded-xl">
+                              <Scale className="w-5 h-5 lg:w-6 lg:h-6" />
+                            </div>
+                            <div>
+                              <h2 className="text-lg lg:text-xl font-bold">Lei 14.133/2021 Comentada</h2>
+                              <p className="text-sm text-brand-100">195 artigos comentados com jurisprudência vinculada</p>
+                            </div>
+                          </div>
+
+                          {/* Quick nav + explore */}
+                          <div className="flex flex-col sm:flex-row gap-3 mb-4">
+                            <form
+                              onSubmit={(e) => {
+                                e.preventDefault();
+                                const num = articleInput.trim();
+                                if (num && /^\d+$/.test(num)) {
+                                  router.push(`/area-restrita/artigo/${num}`);
+                                }
+                              }}
+                              className="flex-1 flex gap-2"
+                            >
+                              <div className="relative flex-1">
+                                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-brand-300" />
+                                <input
+                                  type="text"
+                                  inputMode="numeric"
+                                  pattern="[0-9]*"
+                                  placeholder="Ir para Art. ..."
+                                  value={articleInput}
+                                  onChange={(e) => setArticleInput(e.target.value.replace(/\D/g, ''))}
+                                  className="w-full pl-9 pr-3 py-2.5 bg-white/15 border border-white/20 rounded-xl text-white placeholder-brand-200 text-sm focus:outline-none focus:ring-2 focus:ring-white/40 focus:bg-white/20"
+                                />
+                              </div>
+                              <button
+                                type="submit"
+                                disabled={!articleInput.trim()}
+                                className="px-4 py-2.5 bg-white text-brand-700 font-bold text-sm rounded-xl hover:bg-brand-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1.5"
+                              >
+                                <ArrowRight className="w-4 h-4" />
+                              </button>
+                            </form>
+                            <button
+                              onClick={() => contentTree.selectNode({ id: 'lei', type: 'lei', label: 'Lei 14.133/2021', count: 195 })}
+                              className="px-4 py-2.5 bg-white/15 border border-white/25 text-white font-semibold text-sm rounded-xl hover:bg-white/25 transition-colors flex items-center gap-2 justify-center"
+                            >
+                              Explorar por Temas
+                              <ChevronRight className="w-4 h-4" />
+                            </button>
+                          </div>
+
+                          {/* Popular themes chips */}
+                          <div className="flex flex-wrap gap-2">
+                            {[
+                              { label: 'Definições', article: '6' },
+                              { label: 'Planejamento', article: '18' },
+                              { label: 'Modalidades', article: '28' },
+                              { label: 'Contratação Direta', article: '72' },
+                              { label: 'Contratos', article: '89' },
+                              { label: 'Sanções', article: '155' },
+                            ].map((theme) => (
+                              <button
+                                key={theme.label}
+                                onClick={() => {
+                                  contentTree.selectNode({ id: 'lei', type: 'lei', label: 'Lei 14.133/2021', count: 195 });
+                                }}
+                                className="px-3 py-1.5 bg-white/10 hover:bg-white/20 border border-white/15 rounded-lg text-xs font-medium text-brand-100 hover:text-white transition-colors"
+                              >
+                                {theme.label}
+                              </button>
+                            ))}
+                          </div>
+                        </div>
+                      </div>
+                    )}
+
                     {/* Course Area Highlight (home/no selection) */}
                     {currentContent.type === 'documents' && !contentTree.selection && (
                       <CourseArea
@@ -735,13 +810,6 @@ export default function AreaRestritaPage() {
           >
             <Heart className="w-6 h-6 mb-1" />
             <span className="text-xs font-medium">Favoritos</span>
-          </Link>
-          <Link
-            href="/area-restrita/assistente"
-            className="flex flex-col items-center justify-center flex-1 h-full text-gray-600 hover:text-purple-600 focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
-          >
-            <MessageSquare className="w-6 h-6 mb-1" />
-            <span className="text-xs font-medium">IA</span>
           </Link>
           <button
             onClick={handleLogout}
