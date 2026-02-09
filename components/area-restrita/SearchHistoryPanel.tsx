@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
-import { Clock, Trash2, Search, Sparkles, ChevronRight } from 'lucide-react';
+import { Clock, Trash2, Search, Sparkles, ChevronRight, ChevronDown } from 'lucide-react';
 
 interface SearchHistoryEntry {
   id: string;
@@ -13,11 +13,14 @@ interface SearchHistoryEntry {
 interface SearchHistoryPanelProps {
   onSelectQuery: (query: string) => void;
   isVisible: boolean;
+  collapsed?: boolean;
+  onToggle?: () => void;
 }
 
-export function SearchHistoryPanel({ onSelectQuery, isVisible }: SearchHistoryPanelProps) {
+export function SearchHistoryPanel({ onSelectQuery, isVisible, collapsed = false, onToggle }: SearchHistoryPanelProps) {
   const [history, setHistory] = useState<SearchHistoryEntry[]>([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [hasFetched, setHasFetched] = useState(false);
 
   const fetchHistory = useCallback(async () => {
     setIsLoading(true);
@@ -31,14 +34,22 @@ export function SearchHistoryPanel({ onSelectQuery, isVisible }: SearchHistoryPa
       // Silently ignore
     } finally {
       setIsLoading(false);
+      setHasFetched(true);
     }
   }, []);
 
   useEffect(() => {
-    if (isVisible) {
+    if (isVisible && !hasFetched) {
       fetchHistory();
     }
-  }, [isVisible, fetchHistory]);
+  }, [isVisible, hasFetched, fetchHistory]);
+
+  // Refetch when expanding
+  useEffect(() => {
+    if (isVisible && !collapsed) {
+      fetchHistory();
+    }
+  }, [isVisible, collapsed, fetchHistory]);
 
   const handleDelete = async (id: string, e: React.MouseEvent) => {
     e.stopPropagation();
@@ -50,7 +61,7 @@ export function SearchHistoryPanel({ onSelectQuery, isVisible }: SearchHistoryPa
     }
   };
 
-  if (!isVisible || history.length === 0) return null;
+  if (!isVisible || (hasFetched && history.length === 0)) return null;
 
   const formatDate = (dateStr: string) => {
     const date = new Date(dateStr);
@@ -67,13 +78,34 @@ export function SearchHistoryPanel({ onSelectQuery, isVisible }: SearchHistoryPa
     return date.toLocaleDateString('pt-BR', { day: '2-digit', month: 'short' });
   };
 
-  return (
-    <div className="bg-white rounded-2xl border border-gray-200 shadow-lg overflow-hidden">
-      {/* Header */}
-      <div className="flex items-center gap-2 px-4 py-3 border-b border-gray-100 bg-gray-50">
-        <Clock className="w-4 h-4 text-gray-500" />
-        <span className="text-sm font-medium text-gray-700">Pesquisas recentes</span>
+  // Collapsed mode: just a small toggle button
+  if (collapsed) {
+    return (
+      <div className="mt-2">
+        <button
+          onClick={onToggle}
+          className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
+        >
+          <Clock className="w-3.5 h-3.5" />
+          <span>Pesquisas recentes</span>
+          <ChevronDown className="w-3 h-3" />
+        </button>
       </div>
+    );
+  }
+
+  // Expanded mode
+  return (
+    <div className="mt-2 bg-white rounded-2xl border border-gray-200 shadow-lg overflow-hidden">
+      {/* Header with collapse button */}
+      <button
+        onClick={onToggle}
+        className="w-full flex items-center gap-2 px-4 py-2.5 border-b border-gray-100 bg-gray-50 hover:bg-gray-100 transition-colors"
+      >
+        <Clock className="w-4 h-4 text-gray-500" />
+        <span className="text-sm font-medium text-gray-700 flex-1 text-left">Pesquisas recentes</span>
+        <ChevronDown className="w-4 h-4 text-gray-400 rotate-180" />
+      </button>
 
       {/* List */}
       {isLoading ? (
@@ -89,7 +121,7 @@ export function SearchHistoryPanel({ onSelectQuery, isVisible }: SearchHistoryPa
           ))}
         </div>
       ) : (
-        <div className="max-h-80 overflow-y-auto">
+        <div className="max-h-64 overflow-y-auto">
           {history.map((entry) => (
             <div
               key={entry.id}
@@ -97,7 +129,7 @@ export function SearchHistoryPanel({ onSelectQuery, isVisible }: SearchHistoryPa
               tabIndex={0}
               onClick={() => onSelectQuery(entry.query)}
               onKeyDown={(e) => { if (e.key === 'Enter') onSelectQuery(entry.query); }}
-              className="w-full flex items-start gap-3 px-4 py-3 hover:bg-purple-50 transition-colors text-left group border-b border-gray-50 last:border-b-0 cursor-pointer"
+              className="w-full flex items-start gap-3 px-4 py-2.5 hover:bg-purple-50 transition-colors text-left group border-b border-gray-50 last:border-b-0 cursor-pointer"
             >
               {entry.aiAnswer ? (
                 <Sparkles className="w-4 h-4 text-purple-400 flex-shrink-0 mt-0.5" />

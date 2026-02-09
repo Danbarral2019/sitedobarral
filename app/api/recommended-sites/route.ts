@@ -21,14 +21,12 @@ export async function GET(request: NextRequest) {
       include: {
         site: true,
       },
-      orderBy: {
-        displayOrder: 'asc',
-      },
     });
 
-    // Filtrar apenas sites ativos e mapear para o formato esperado
+    // Filtrar apenas sites ativos, ordenar por displayOrder do site
     const sites = sitesToCourses
       .filter(stc => stc.site.isActive)
+      .sort((a, b) => a.site.displayOrder - b.site.displayOrder)
       .map(stc => ({
         id: stc.site.id,
         title: stc.site.title,

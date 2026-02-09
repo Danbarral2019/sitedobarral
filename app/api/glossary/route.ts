@@ -67,8 +67,44 @@ export async function GET(request: NextRequest) {
 
         const categories = [...new Set(allTerms.map((t) => t.category).filter(Boolean))].sort();
 
+        // Resolver relatedTerms: IDs → { id, term, slug }
+        const allRelatedIds = new Set<string>();
+        for (const t of terms) {
+          if (t.relatedTerms) {
+            try {
+              const ids = JSON.parse(t.relatedTerms);
+              if (Array.isArray(ids)) ids.forEach((id: string) => allRelatedIds.add(id));
+            } catch { /* ignore */ }
+          }
+        }
+
+        let relatedMap = new Map<string, { id: string; term: string; slug: string }>();
+        if (allRelatedIds.size > 0) {
+          const relatedRecords = await prisma.glossaryTerm.findMany({
+            where: { id: { in: [...allRelatedIds] } },
+            select: { id: true, term: true, slug: true },
+          });
+          relatedMap = new Map(relatedRecords.map(r => [r.id, r]));
+        }
+
+        // Enriquecer terms com relatedTerms resolvidos
+        const enrichedTerms = terms.map(t => {
+          let resolvedRelated: { id: string; term: string; slug: string }[] = [];
+          if (t.relatedTerms) {
+            try {
+              const ids = JSON.parse(t.relatedTerms);
+              if (Array.isArray(ids)) {
+                resolvedRelated = ids
+                  .map((id: string) => relatedMap.get(id))
+                  .filter(Boolean) as { id: string; term: string; slug: string }[];
+              }
+            } catch { /* ignore */ }
+          }
+          return { ...t, resolvedRelatedTerms: resolvedRelated };
+        });
+
         return {
-          terms,
+          terms: enrichedTerms,
           total,
           categories,
           pagination: {

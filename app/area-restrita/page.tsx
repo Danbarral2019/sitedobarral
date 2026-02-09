@@ -36,6 +36,7 @@ import CourseVideos from '@/components/CourseVideos';
 import RecommendedSites from '@/components/RecommendedSites';
 import { ArticleTreeNavigator } from '@/components/ArticleTreeNavigator';
 import LegislativeActsPanel from '@/components/LegislativeActsPanel';
+import { GlossaryPanel } from '@/components/glossary/GlossaryPanel';
 import type { DocumentResult } from '@/lib/types/global-search';
 
 // Categorias que devem ser agrupadas sob "Pareceres"
@@ -451,42 +452,32 @@ export default function AreaRestritaPage() {
       <div className="max-w-7xl mx-auto px-4 py-6 lg:py-8">
         {/* Global Search Bar */}
         <div className="mb-6">
-          <div
-            onFocus={() => setIsSearchFocused(true)}
-            onBlur={(e) => {
-              // Only hide if focus leaves the search area entirely
-              if (!e.currentTarget.contains(e.relatedTarget as Node)) {
-                setTimeout(() => setIsSearchFocused(false), 200);
-              }
-            }}
-          >
-            <GlobalSearchBar
-              query={search.query}
-              onQueryChange={search.setQuery}
-              onClear={search.clearSearch}
-              isLoading={search.isLoading}
-              counts={search.counts}
-              activeTypes={search.filters.types}
-              onToggleType={search.toggleType}
-              aiEnabled={search.aiEnabled}
-              onAIToggle={() => search.setAiEnabled(!search.aiEnabled)}
-              isAiLoading={search.isAiLoading}
-              onSubmit={search.triggerAISearch}
+          <GlobalSearchBar
+            query={search.query}
+            onQueryChange={search.setQuery}
+            onClear={search.clearSearch}
+            isLoading={search.isLoading}
+            counts={search.counts}
+            activeTypes={search.filters.types}
+            onToggleType={search.toggleType}
+            aiEnabled={search.aiEnabled}
+            onAIToggle={() => search.setAiEnabled(!search.aiEnabled)}
+            isAiLoading={search.isAiLoading}
+            onSubmit={search.triggerAISearch}
+          />
+          {/* Search History - collapsible below search bar */}
+          {!search.isSearchActive && (
+            <SearchHistoryPanel
+              isVisible={true}
+              collapsed={!isSearchFocused}
+              onToggle={() => setIsSearchFocused((v) => !v)}
+              onSelectQuery={(q) => {
+                search.setQuery(q);
+                search.triggerAISearch();
+                setIsSearchFocused(false);
+              }}
             />
-            {/* Search History - shown when focused and no active search */}
-            {!search.isSearchActive && (
-              <div className="mt-2">
-                <SearchHistoryPanel
-                  isVisible={isSearchFocused}
-                  onSelectQuery={(q) => {
-                    search.setQuery(q);
-                    search.triggerAISearch();
-                    setIsSearchFocused(false);
-                  }}
-                />
-              </div>
-            )}
-          </div>
+          )}
         </div>
 
         {/* Mobile Tree Trigger */}
@@ -503,7 +494,7 @@ export default function AreaRestritaPage() {
         <div className="flex gap-6">
           {/* Sidebar Tree - Desktop Only */}
           {!search.isSearchActive && (
-            <aside className="hidden lg:block w-64 flex-shrink-0">
+            <aside className="hidden lg:block w-72 flex-shrink-0">
               <div className="sticky top-24">
                 <ContentTree
                   tree={contentTree.tree}
@@ -565,25 +556,25 @@ export default function AreaRestritaPage() {
                   <>
                     {/* Lei 14.133 Highlight Card (home/no selection) */}
                     {currentContent.type === 'documents' && !contentTree.selection && (
-                      <div className="mb-6 bg-gradient-to-br from-brand-600 to-brand-700 rounded-2xl p-5 lg:p-6 text-white shadow-lg overflow-hidden relative">
+                      <div className="mb-6 bg-gradient-to-br from-brand-600 to-brand-700 rounded-2xl p-4 text-white shadow-lg overflow-hidden relative">
                         {/* Background decoration */}
-                        <div className="absolute top-0 right-0 w-48 h-48 opacity-10">
+                        <div className="absolute top-0 right-0 w-32 h-32 opacity-10">
                           <Scale className="w-full h-full" />
                         </div>
 
                         <div className="relative z-10">
-                          <div className="flex items-center gap-3 mb-3">
-                            <div className="p-2 bg-white/20 rounded-xl">
-                              <Scale className="w-5 h-5 lg:w-6 lg:h-6" />
+                          {/* Single-row layout: icon + title + input + button */}
+                          <div className="flex flex-col sm:flex-row sm:items-center gap-3">
+                            <div className="flex items-center gap-3 flex-shrink-0">
+                              <div className="p-2 bg-white/20 rounded-xl">
+                                <Scale className="w-5 h-5" />
+                              </div>
+                              <div className="sm:mr-2">
+                                <h2 className="text-base lg:text-lg font-bold leading-tight">Lei 14.133/2021 Comentada</h2>
+                                <p className="text-xs text-brand-200">195 artigos com jurisprudência</p>
+                              </div>
                             </div>
-                            <div>
-                              <h2 className="text-lg lg:text-xl font-bold">Lei 14.133/2021 Comentada</h2>
-                              <p className="text-sm text-brand-100">195 artigos comentados com jurisprudência vinculada</p>
-                            </div>
-                          </div>
 
-                          {/* Quick nav + explore */}
-                          <div className="flex flex-col sm:flex-row gap-3 mb-4">
                             <form
                               onSubmit={(e) => {
                                 e.preventDefault();
@@ -603,46 +594,25 @@ export default function AreaRestritaPage() {
                                   placeholder="Ir para Art. ..."
                                   value={articleInput}
                                   onChange={(e) => setArticleInput(e.target.value.replace(/\D/g, ''))}
-                                  className="w-full pl-9 pr-3 py-2.5 bg-white/15 border border-white/20 rounded-xl text-white placeholder-brand-200 text-sm focus:outline-none focus:ring-2 focus:ring-white/40 focus:bg-white/20"
+                                  className="w-full pl-9 pr-3 py-2 bg-white/15 border border-white/20 rounded-xl text-white placeholder-brand-200 text-sm focus:outline-none focus:ring-2 focus:ring-white/40 focus:bg-white/20"
                                 />
                               </div>
                               <button
                                 type="submit"
                                 disabled={!articleInput.trim()}
-                                className="px-4 py-2.5 bg-white text-brand-700 font-bold text-sm rounded-xl hover:bg-brand-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1.5"
+                                className="px-3 py-2 bg-white text-brand-700 font-bold text-sm rounded-xl hover:bg-brand-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1.5"
                               >
                                 <ArrowRight className="w-4 h-4" />
                               </button>
                             </form>
+
                             <button
                               onClick={() => contentTree.selectNode({ id: 'lei', type: 'lei', label: 'Lei 14.133/2021', count: 195 })}
-                              className="px-4 py-2.5 bg-white/15 border border-white/25 text-white font-semibold text-sm rounded-xl hover:bg-white/25 transition-colors flex items-center gap-2 justify-center"
+                              className="flex-shrink-0 px-4 py-2 bg-white/15 border border-white/25 text-white font-semibold text-sm rounded-xl hover:bg-white/25 transition-colors flex items-center gap-2 justify-center"
                             >
                               Explorar por Temas
                               <ChevronRight className="w-4 h-4" />
                             </button>
-                          </div>
-
-                          {/* Popular themes chips */}
-                          <div className="flex flex-wrap gap-2">
-                            {[
-                              { label: 'Definições', article: '6' },
-                              { label: 'Planejamento', article: '18' },
-                              { label: 'Modalidades', article: '28' },
-                              { label: 'Contratação Direta', article: '72' },
-                              { label: 'Contratos', article: '89' },
-                              { label: 'Sanções', article: '155' },
-                            ].map((theme) => (
-                              <button
-                                key={theme.label}
-                                onClick={() => {
-                                  contentTree.selectNode({ id: 'lei', type: 'lei', label: 'Lei 14.133/2021', count: 195 });
-                                }}
-                                className="px-3 py-1.5 bg-white/10 hover:bg-white/20 border border-white/15 rounded-lg text-xs font-medium text-brand-100 hover:text-white transition-colors"
-                              >
-                                {theme.label}
-                              </button>
-                            ))}
                           </div>
                         </div>
                       </div>
@@ -658,7 +628,7 @@ export default function AreaRestritaPage() {
                     )}
 
                     {/* Documents */}
-                    {currentContent.type === 'documents' && currentContent.documents.length > 0 && (
+                    {currentContent.type === 'documents' && currentContent.documents.length > 0 && contentTree.selection && (
                       <DocumentsByCategory
                         documents={currentContent.documents}
                         courseId={contentTree.selection?.courseId || enrolledCourseIds[0] || ''}
@@ -696,20 +666,9 @@ export default function AreaRestritaPage() {
                       <LegislativeActsPanel />
                     )}
 
-                    {/* Glossary Redirect */}
+                    {/* Glossário Inline */}
                     {currentContent.type === 'glossary' && (
-                      <div className="bg-white rounded-2xl border-2 border-gray-200 p-8 text-center">
-                        <p className="text-gray-600 mb-4">
-                          O glossário completo está disponível na página pública.
-                        </p>
-                        <Link
-                          href="/glossario"
-                          className="inline-flex items-center gap-2 px-6 py-3 bg-green-600 text-white font-medium rounded-xl hover:bg-green-700 transition-colors"
-                        >
-                          Acessar Glossário
-                          <ChevronRight className="w-4 h-4" />
-                        </Link>
-                      </div>
+                      <GlossaryPanel articleBasePath="/area-restrita/artigo" />
                     )}
 
                     {/* Videos */}
@@ -723,7 +682,7 @@ export default function AreaRestritaPage() {
                     )}
 
                     {/* Empty States */}
-                    {currentContent.type === 'documents' && currentContent.documents.length === 0 && (
+                    {currentContent.type === 'documents' && currentContent.documents.length === 0 && contentTree.selection && (
                       <div className="bg-white rounded-2xl border-2 border-gray-200 p-8 text-center">
                         <p className="text-gray-500">Nenhum documento encontrado nesta categoria.</p>
                       </div>

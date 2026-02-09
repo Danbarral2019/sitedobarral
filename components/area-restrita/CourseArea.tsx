@@ -9,6 +9,7 @@ import {
   GraduationCap,
   ChevronRight,
   ChevronDown,
+  FileText,
 } from 'lucide-react';
 import { courses } from '@/data/courses';
 
@@ -36,10 +37,12 @@ const TRAIL_STEPS = [
     title: 'Seu Roteiro',
     subtitle: 'O que você vai aprender',
     icon: Map,
+    color: '#4f46e5', // brand/indigo
     gradient: 'from-brand-500 to-brand-700',
     bgLight: 'bg-brand-50',
     textColor: 'text-brand-600',
     borderColor: 'border-brand-200',
+    ringColor: 'ring-brand-300',
   },
   {
     id: 'apostila',
@@ -47,10 +50,12 @@ const TRAIL_STEPS = [
     title: 'Material Principal',
     subtitle: 'O conteúdo central do curso',
     icon: BookOpen,
+    color: '#2563eb', // blue
     gradient: 'from-blue-500 to-blue-700',
     bgLight: 'bg-blue-50',
     textColor: 'text-blue-600',
     borderColor: 'border-blue-200',
+    ringColor: 'ring-blue-300',
   },
   {
     id: 'material-complementar',
@@ -58,10 +63,12 @@ const TRAIL_STEPS = [
     title: 'Aprofundamento',
     subtitle: 'Materiais extras para ir além',
     icon: Layers,
+    color: '#d97706', // amber
     gradient: 'from-amber-500 to-orange-600',
     bgLight: 'bg-amber-50',
     textColor: 'text-amber-600',
     borderColor: 'border-amber-200',
+    ringColor: 'ring-amber-300',
   },
   {
     id: 'bibliografia',
@@ -69,14 +76,28 @@ const TRAIL_STEPS = [
     title: 'Referências',
     subtitle: 'Fontes e livros recomendados',
     icon: Library,
+    color: '#059669', // green
     gradient: 'from-green-500 to-emerald-600',
     bgLight: 'bg-green-50',
     textColor: 'text-green-600',
     borderColor: 'border-green-200',
+    ringColor: 'ring-green-300',
   },
 ];
 
 const COURSE_MATERIAL_CATEGORIES = TRAIL_STEPS.map((s) => s.category);
+
+// Map document type to friendly label
+function getDocTypeLabel(type: string): string {
+  const map: Record<string, string> = {
+    pdf: 'PDF',
+    link: 'Link',
+    video: 'Vídeo',
+    slide: 'Slides',
+    doc: 'Documento',
+  };
+  return map[type] || type.toUpperCase();
+}
 
 export default function CourseArea({
   documents,
@@ -125,6 +146,9 @@ export default function CourseArea({
     );
   }, [activeCourse]);
 
+  // Total materials count
+  const totalMaterials = activeCourse?.docs.length || 0;
+
   // Auto-expand if only one step has docs
   useEffect(() => {
     if (visibleSteps.length === 1) {
@@ -149,23 +173,10 @@ export default function CourseArea({
   const expandedDocs = expandedStepData ? getDocsForStep(expandedStepData.category) : [];
 
   return (
-    <div className="mb-6 space-y-5">
-      {/* Header */}
-      <div className="flex items-center gap-3">
-        <div className="p-2.5 bg-gradient-to-br from-brand-500 to-brand-700 rounded-xl shadow-md">
-          <GraduationCap className="w-5 h-5 lg:w-6 lg:h-6 text-white" />
-        </div>
-        <div>
-          <h2 className="text-lg lg:text-xl font-bold text-gray-900">
-            Trilha de Capacitação
-          </h2>
-          <p className="text-sm text-gray-500">{activeCourse.course.title}</p>
-        </div>
-      </div>
-
+    <div className="mb-6 space-y-4">
       {/* Course Selector (multi-course) */}
       {hasMultipleCourses && (
-        <div className="flex gap-2 overflow-x-auto pb-1">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           {courseIds.map((courseId) => {
             const courseMat = coursesMaterials[courseId];
             const isActive = courseId === activeCourseId;
@@ -173,31 +184,68 @@ export default function CourseArea({
               <button
                 key={courseId}
                 onClick={() => setSelectedCourseId(courseId)}
-                className={`flex-shrink-0 px-4 py-2 rounded-xl text-sm font-medium transition-all border ${
+                className={`text-left p-4 rounded-xl border-2 transition-all ${
                   isActive
-                    ? 'bg-white border-brand-400 text-brand-900 shadow-sm'
-                    : 'bg-brand-50/50 border-brand-200 text-brand-700 hover:bg-white hover:border-brand-300'
+                    ? 'border-brand-500 bg-brand-50/30 shadow-md'
+                    : 'border-gray-100 bg-white hover:border-brand-300 hover:shadow-sm'
                 }`}
               >
-                <span className="line-clamp-1">
-                  {courseMat.course.title.split('(')[0].trim()}
-                </span>
-                <span className="text-xs opacity-70 ml-1">{courseMat.docs.length}</span>
+                <div className="flex items-center gap-3">
+                  <div className={`p-2 rounded-lg ${isActive ? 'bg-brand-100' : 'bg-gray-100'}`}>
+                    <GraduationCap className={`w-5 h-5 ${isActive ? 'text-brand-600' : 'text-gray-500'}`} />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <h3 className={`text-sm font-bold line-clamp-1 ${isActive ? 'text-brand-900' : 'text-gray-800'}`}>
+                      {courseMat.course.title.split('(')[0].trim()}
+                    </h3>
+                    <p className="text-xs text-gray-500 line-clamp-1 mt-0.5">
+                      {courseMat.course.shortDescription}
+                    </p>
+                    <span className={`inline-block text-xs font-semibold mt-1 ${isActive ? 'text-brand-600' : 'text-gray-400'}`}>
+                      {courseMat.docs.length} {courseMat.docs.length === 1 ? 'material' : 'materiais'}
+                    </span>
+                  </div>
+                </div>
               </button>
             );
           })}
         </div>
       )}
 
-      {/* Desktop Trail (lg+) */}
+      {/* Course Header */}
+      <div className="bg-white rounded-2xl border border-gray-200 p-5 lg:p-6">
+        <div className="flex items-start gap-4">
+          <div className="p-3 bg-gradient-to-br from-brand-500 to-brand-700 rounded-xl shadow-md flex-shrink-0">
+            <GraduationCap className="w-6 h-6 lg:w-7 lg:h-7 text-white" />
+          </div>
+          <div className="flex-1 min-w-0">
+            <h2 className="text-lg lg:text-xl font-bold text-gray-900 leading-tight">
+              {activeCourse.course.title.split('(')[0].trim()}
+            </h2>
+            <p className="text-sm text-gray-500 mt-1 line-clamp-2">
+              {activeCourse.course.shortDescription}
+            </p>
+            <div className="flex items-center gap-4 mt-3">
+              <span className="text-xs font-semibold text-brand-600 bg-brand-50 px-2.5 py-1 rounded-full">
+                {totalMaterials} {totalMaterials === 1 ? 'material disponível' : 'materiais disponíveis'}
+              </span>
+              <span className="text-xs font-semibold text-gray-500 bg-gray-100 px-2.5 py-1 rounded-full">
+                {visibleSteps.length} {visibleSteps.length === 1 ? 'etapa' : 'etapas'}
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Desktop Steps as Cards (lg+) */}
       <div className="hidden lg:block">
-        {/* Trail Row */}
-        <div className="relative flex items-start justify-center gap-0">
-          {/* Connecting line */}
+        {/* Step Cards Row */}
+        <div className="relative flex items-stretch gap-0">
+          {/* Connecting line behind cards */}
           {visibleSteps.length > 1 && (
-            <div className="absolute top-8 left-0 right-0 flex items-center justify-center pointer-events-none">
+            <div className="absolute top-1/2 left-0 right-0 -translate-y-1/2 flex items-center justify-center pointer-events-none z-0">
               <div
-                className="h-1 rounded-full bg-gradient-to-r from-brand-200 via-blue-200 to-green-200"
+                className="h-0.5 bg-gradient-to-r from-brand-200 via-blue-200 to-green-200"
                 style={{
                   width: `${((visibleSteps.length - 1) / visibleSteps.length) * 100}%`,
                 }}
@@ -213,67 +261,96 @@ export default function CourseArea({
             return (
               <div
                 key={step.id}
-                className="relative flex flex-col items-center flex-1 cursor-pointer group"
-                onClick={() => handleStepClick(step.id)}
+                className="relative flex-1 px-1.5 z-10"
               >
-                {/* Circle */}
                 <div
-                  className={`relative z-10 w-16 h-16 rounded-full bg-gradient-to-br ${step.gradient} flex items-center justify-center shadow-lg transition-all duration-200 ${
+                  onClick={() => handleStepClick(step.id)}
+                  className={`bg-white rounded-xl border p-4 cursor-pointer transition-all duration-200 h-full flex flex-col items-center text-center ${
                     isExpanded
-                      ? 'ring-4 ring-offset-2 ring-brand-300 scale-110'
-                      : 'group-hover:scale-105 group-hover:shadow-xl'
+                      ? `border-gray-300 shadow-lg ring-2 ${step.ringColor} ring-offset-1 scale-[1.02]`
+                      : 'border-gray-100 hover:border-gray-200 hover:shadow-md'
                   }`}
                 >
-                  <Icon className="w-7 h-7 text-white" />
                   {/* Step number badge */}
-                  <div className="absolute -top-1 -right-1 w-6 h-6 bg-white rounded-full shadow-md flex items-center justify-center">
-                    <span className="text-xs font-bold text-gray-700">{index + 1}</span>
+                  <div className={`w-7 h-7 rounded-full flex items-center justify-center mb-2 text-xs font-bold ${
+                    isExpanded ? `bg-gradient-to-br ${step.gradient} text-white` : 'bg-gray-100 text-gray-500'
+                  }`}>
+                    {index + 1}
                   </div>
-                </div>
 
-                {/* Title + Subtitle */}
-                <div className="mt-3 text-center">
-                  <p
+                  {/* Icon */}
+                  <div
+                    className={`w-12 h-12 rounded-xl bg-gradient-to-br ${step.gradient} flex items-center justify-center shadow-md mb-3`}
+                  >
+                    <Icon className="w-6 h-6 text-white" />
+                  </div>
+
+                  {/* Title */}
+                  <h3
                     className={`text-sm font-bold transition-colors ${
-                      isExpanded ? step.textColor : 'text-gray-800 group-hover:text-gray-900'
+                      isExpanded ? step.textColor : 'text-gray-800'
                     }`}
                   >
                     {step.title}
-                  </p>
+                  </h3>
                   <p className="text-xs text-gray-400 mt-0.5">{step.subtitle}</p>
-                  <p className={`text-xs font-semibold mt-1 ${step.textColor}`}>
+
+                  {/* Count badge */}
+                  <span className={`mt-2 text-xs font-semibold px-2 py-0.5 rounded-full ${step.bgLight} ${step.textColor}`}>
                     {docs.length} {docs.length === 1 ? 'material' : 'materiais'}
-                  </p>
+                  </span>
+
+                  {/* Bottom colored border indicator */}
+                  <div
+                    className={`mt-auto pt-3 w-full border-t-2 transition-colors ${
+                      isExpanded ? step.borderColor : 'border-transparent'
+                    }`}
+                    style={isExpanded ? { borderColor: step.color } : undefined}
+                  />
                 </div>
 
                 {/* Triangle indicator when expanded */}
                 {isExpanded && (
-                  <div className="mt-3 w-0 h-0 border-l-[10px] border-l-transparent border-r-[10px] border-r-transparent border-b-[10px] border-b-gray-100" />
+                  <div className="flex justify-center mt-1">
+                    <div
+                      className="w-0 h-0 border-l-[10px] border-l-transparent border-r-[10px] border-r-transparent border-b-[10px]"
+                      style={{ borderBottomColor: step.color + '15' }}
+                    />
+                  </div>
                 )}
               </div>
             );
           })}
         </div>
 
-        {/* Expanded Panel (full width below trail) */}
+        {/* Expanded Materials Panel (full width below cards) */}
         {expandedStepData && expandedDocs.length > 0 && (
           <div
-            className={`mt-2 rounded-2xl border ${expandedStepData.borderColor} ${expandedStepData.bgLight} p-5 transition-all`}
+            className="mt-2 rounded-2xl border p-5 transition-all"
+            style={{
+              backgroundColor: expandedStepData.color + '08',
+              borderColor: expandedStepData.color + '30',
+            }}
           >
             <div className="flex items-center gap-2 mb-4">
               <expandedStepData.icon
-                className={`w-5 h-5 ${expandedStepData.textColor}`}
+                className="w-5 h-5"
+                style={{ color: expandedStepData.color }}
               />
-              <h3 className={`font-bold ${expandedStepData.textColor}`}>
+              <h3 className="font-bold" style={{ color: expandedStepData.color }}>
                 {expandedStepData.title}
               </h3>
               <span
-                className={`${expandedStepData.bgLight} ${expandedStepData.textColor} border ${expandedStepData.borderColor} px-2 py-0.5 rounded-full text-xs font-bold`}
+                className="px-2 py-0.5 rounded-full text-xs font-bold"
+                style={{
+                  backgroundColor: expandedStepData.color + '15',
+                  color: expandedStepData.color,
+                }}
               >
                 {expandedDocs.length}
               </span>
             </div>
-            <div className="grid grid-cols-1 xl:grid-cols-2 gap-2.5">
+            <div className="grid grid-cols-1 xl:grid-cols-2 gap-3">
               {expandedDocs.map((doc) => (
                 <button
                   key={doc.id}
@@ -281,12 +358,14 @@ export default function CourseArea({
                     e.stopPropagation();
                     onDocumentClick(doc);
                   }}
-                  className="w-full text-left bg-white hover:bg-gray-50 rounded-xl p-3.5 border border-gray-100 hover:border-gray-200 hover:shadow-sm transition-all group/card flex items-center gap-3"
+                  className="w-full text-left bg-white hover:bg-gray-50 rounded-xl p-4 border border-gray-100 hover:border-gray-200 hover:shadow-sm transition-all group/card flex items-center gap-3"
+                  style={{ borderLeftWidth: '3px', borderLeftColor: expandedStepData.color }}
                 >
                   <div
-                    className={`w-9 h-9 rounded-lg bg-gradient-to-br ${expandedStepData.gradient} flex items-center justify-center flex-shrink-0`}
+                    className="w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0"
+                    style={{ backgroundColor: expandedStepData.color + '12' }}
                   >
-                    <expandedStepData.icon className="w-4 h-4 text-white" />
+                    <FileText className="w-5 h-5" style={{ color: expandedStepData.color }} />
                   </div>
                   <div className="flex-1 min-w-0">
                     <h4 className="font-semibold text-sm text-gray-900 line-clamp-1 group-hover/card:text-brand-600 transition-colors">
@@ -297,6 +376,11 @@ export default function CourseArea({
                         {doc.description}
                       </p>
                     )}
+                    <div className="flex items-center gap-2 mt-1">
+                      <span className="text-[10px] font-semibold uppercase tracking-wider px-1.5 py-0.5 rounded bg-gray-100 text-gray-500">
+                        {getDocTypeLabel(doc.type)}
+                      </span>
+                    </div>
                   </div>
                   <ChevronRight className="w-4 h-4 text-gray-300 group-hover/card:text-brand-500 flex-shrink-0 transition-colors" />
                 </button>
@@ -306,7 +390,7 @@ export default function CourseArea({
         )}
       </div>
 
-      {/* Mobile Trail (< lg) */}
+      {/* Mobile Steps as Timeline Cards (< lg) */}
       <div className="lg:hidden space-y-0">
         {visibleSteps.map((step, index) => {
           const Icon = step.icon;
@@ -316,20 +400,23 @@ export default function CourseArea({
 
           return (
             <div key={step.id} className="relative">
-              {/* Dashed vertical line connecting steps */}
+              {/* Vertical connector line */}
               {!isLast && (
-                <div className="absolute left-6 top-12 bottom-0 w-px border-l-2 border-dashed border-gray-200 z-0" />
+                <div className="absolute left-6 top-14 bottom-0 w-px border-l-2 border-dashed border-gray-200 z-0" />
               )}
 
-              {/* Step row */}
-              <button
+              {/* Step card */}
+              <div
                 onClick={() => handleStepClick(step.id)}
-                className="relative z-10 w-full flex items-center gap-3 py-3 text-left"
+                role="button"
+                tabIndex={0}
+                onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') handleStepClick(step.id); }}
+                className={`relative z-10 flex items-center gap-3 py-3 cursor-pointer`}
               >
-                {/* Circle */}
+                {/* Circle with number */}
                 <div
                   className={`relative w-12 h-12 rounded-full bg-gradient-to-br ${step.gradient} flex items-center justify-center shadow-md flex-shrink-0 transition-all ${
-                    isExpanded ? 'ring-3 ring-offset-1 ring-brand-300' : ''
+                    isExpanded ? `ring-3 ring-offset-1 ${step.ringColor}` : ''
                   }`}
                 >
                   <Icon className="w-5 h-5 text-white" />
@@ -338,7 +425,7 @@ export default function CourseArea({
                   </div>
                 </div>
 
-                {/* Text */}
+                {/* Text + count */}
                 <div className="flex-1 min-w-0">
                   <p
                     className={`text-sm font-bold ${
@@ -348,9 +435,9 @@ export default function CourseArea({
                     {step.title}
                   </p>
                   <p className="text-xs text-gray-400">{step.subtitle}</p>
-                  <p className={`text-xs font-semibold mt-0.5 ${step.textColor}`}>
+                  <span className={`inline-block text-xs font-semibold mt-0.5 px-2 py-0.5 rounded-full ${step.bgLight} ${step.textColor}`}>
                     {docs.length} {docs.length === 1 ? 'material' : 'materiais'}
-                  </p>
+                  </span>
                 </div>
 
                 {/* Expand indicator */}
@@ -359,21 +446,26 @@ export default function CourseArea({
                     isExpanded ? 'rotate-180' : ''
                   }`}
                 />
-              </button>
+              </div>
 
-              {/* Expanded documents (inline, pushes content down) */}
+              {/* Expanded documents */}
               {isExpanded && docs.length > 0 && (
                 <div className="relative z-10 ml-6 pl-6 pb-3 space-y-2">
                   {docs.map((doc) => (
                     <button
                       key={doc.id}
-                      onClick={() => onDocumentClick(doc)}
-                      className={`w-full text-left ${step.bgLight} rounded-xl p-3 border ${step.borderColor} hover:shadow-sm transition-all group/card flex items-center gap-3`}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        onDocumentClick(doc);
+                      }}
+                      className="w-full text-left bg-white rounded-xl p-3.5 border border-gray-100 hover:shadow-sm transition-all group/card flex items-center gap-3"
+                      style={{ borderLeftWidth: '3px', borderLeftColor: step.color }}
                     >
                       <div
-                        className={`w-8 h-8 rounded-lg bg-gradient-to-br ${step.gradient} flex items-center justify-center flex-shrink-0`}
+                        className="w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0"
+                        style={{ backgroundColor: step.color + '12' }}
                       >
-                        <Icon className="w-3.5 h-3.5 text-white" />
+                        <FileText className="w-4 h-4" style={{ color: step.color }} />
                       </div>
                       <div className="flex-1 min-w-0">
                         <h4 className="font-semibold text-sm text-gray-900 line-clamp-1 group-hover/card:text-brand-600 transition-colors">
@@ -384,6 +476,9 @@ export default function CourseArea({
                             {doc.description}
                           </p>
                         )}
+                        <span className="text-[10px] font-semibold uppercase tracking-wider px-1.5 py-0.5 rounded bg-gray-100 text-gray-500 mt-1 inline-block">
+                          {getDocTypeLabel(doc.type)}
+                        </span>
                       </div>
                       <ChevronRight className="w-4 h-4 text-gray-300 group-hover/card:text-brand-500 flex-shrink-0 transition-colors" />
                     </button>

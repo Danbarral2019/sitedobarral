@@ -1,9 +1,14 @@
 'use client';
 
-import Link from 'next/link';
 import { Eye, ChevronDown, ChevronUp, BookOpen, Scale } from 'lucide-react';
 import { ArticleBadges } from '../ArticleBadges';
 import ReactMarkdown from 'react-markdown';
+
+interface ResolvedRelatedTerm {
+  id: string;
+  term: string;
+  slug: string;
+}
 
 interface GlossaryTermCardProps {
   term: {
@@ -16,24 +21,17 @@ interface GlossaryTermCardProps {
     viewCount: number;
     leiArticles?: string | null;
     relatedTerms?: string | null;
+    resolvedRelatedTerms?: ResolvedRelatedTerm[];
   };
   isExpanded: boolean;
   onToggle: () => void;
+  onTermClick?: (slug: string) => void;
+  articleBasePath?: string; // '/artigo' (público) ou '/area-restrita/artigo' (logado)
 }
 
-export function GlossaryTermCard({ term, isExpanded, onToggle }: GlossaryTermCardProps) {
-  // Parse relatedTerms (JSON array de slugs)
-  const parseRelatedTerms = (): string[] => {
-    if (!term.relatedTerms) return [];
-    try {
-      const parsed = JSON.parse(term.relatedTerms);
-      return Array.isArray(parsed) ? parsed : [];
-    } catch {
-      return [];
-    }
-  };
-
-  const relatedTerms = parseRelatedTerms();
+export function GlossaryTermCard({ term, isExpanded, onToggle, onTermClick, articleBasePath = '/artigo' }: GlossaryTermCardProps) {
+  // Use resolved related terms from API if available, fallback to raw parse
+  const relatedTerms: ResolvedRelatedTerm[] = term.resolvedRelatedTerms || [];
 
   // Melhorar formatação do texto automaticamente
   const formatDefinition = (text: string): string => {
@@ -128,8 +126,7 @@ export function GlossaryTermCard({ term, isExpanded, onToggle }: GlossaryTermCar
                 leiArticles={term.leiArticles}
                 maxVisible={10}
                 onArticleClick={(articleNum) => {
-                  // Navega para a página do artigo
-                  window.location.href = `/artigo/${articleNum}`;
+                  window.location.href = `${articleBasePath}/${articleNum}`;
                 }}
               />
             </div>
@@ -145,21 +142,21 @@ export function GlossaryTermCard({ term, isExpanded, onToggle }: GlossaryTermCar
                 </h4>
               </div>
               <div className="flex flex-wrap gap-2">
-                {relatedTerms.map((slug) => (
-                  <Link
-                    key={slug}
-                    href={`/glossario?termo=${slug}`}
+                {relatedTerms.map((related) => (
+                  <button
+                    key={related.id}
                     onClick={(e) => {
                       e.stopPropagation();
-                      // Recarregar a página com o termo selecionado
-                      window.location.href = `/glossario?termo=${slug}`;
+                      if (onTermClick) {
+                        onTermClick(related.slug);
+                      } else {
+                        window.location.href = `/glossario/${related.slug}`;
+                      }
                     }}
-                    className="inline-flex items-center px-3 py-1.5 rounded-full text-sm font-medium bg-purple-100 text-purple-800 hover:bg-purple-200 transition-colors"
+                    className="inline-flex items-center px-3 py-1.5 rounded-full text-sm font-medium bg-purple-100 text-purple-800 hover:bg-purple-200 transition-colors cursor-pointer"
                   >
-                    {slug.split('-').map(word =>
-                      word.charAt(0).toUpperCase() + word.slice(1)
-                    ).join(' ')}
-                  </Link>
+                    {related.term}
+                  </button>
                 ))}
               </div>
             </div>

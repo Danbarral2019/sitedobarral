@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { analyzeRelevanceTCU, suggestCoursesTCU } from '@/lib/tcu-module';
+import { LeiIndexer } from '@/lib/lei-indexer';
 
 /**
  * Cron Job: Sincronização automática de acórdãos do TCU
@@ -8,16 +9,18 @@ import { analyzeRelevanceTCU, suggestCoursesTCU } from '@/lib/tcu-module';
  * Busca os 500 acórdãos mais recentes da API de dados abertos do TCU,
  * filtra os relevantes para licitações/contratos, e importa apenas os novos.
  *
- * Estratégia:
- * - A API retorna os acórdãos mais recentes primeiro (página 0 = mais recentes)
- * - Filtra por relevância usando o módulo tcu-module (keywords de licitações/contratos)
- * - Deduplica pelo par (acordaoNumero, acordaoAno) no banco
- * - Importa com campos TCU preenchidos (ementa, relator, colegiado, etc.)
- * - Marca embeddings como 'pending' para indexação automática pelo cron de index-jobs
+ * Pipeline completo pós-importação:
+ * 1. Importa acórdãos novos da API do TCU
+ * 2. Gera resumos executivos via Gemini AI (summary + description)
+ * 3. Indexa artigos da Lei 14.133 relacionados via Gemini (leiArticles)
+ * 4. Marca embeddings como 'pending' para indexação automática pelo cron de index-jobs
  *
  * Segurança: Requer CRON_SECRET ou Authorization header
  * Agendamento: Diário às 6h (vercel.json)
  */
+
+// Permitir até 300s para importação + enriquecimento
+export const maxDuration = 300;
 
 const TCU_API_URL = 'https://dados-abertos.apps.tcu.gov.br/api/acordao/recupera-acordaos';
 const PAGE_SIZE = 500;
@@ -60,6 +63,168 @@ function parseDateTCU(dataSessao: string | undefined): Date | null {
     return isNaN(date.getTime()) ? null : date;
   }
   return null;
+}
+
+// --- Enriquecimento via Gemini ---
+
+const GEMINI_MODEL = 'gemini-2.0-flash';
+const ENRICHMENT_DELAY_MS = 800; // Delay entre chamadas Gemini
+
+function safeParseArray(value: string | null): string[] {
+  if (!value) return [];
+  try {
+    const parsed = JSON.parse(value);
+    return Array.isArray(parsed) ? parsed : [];
+  } catch {
+    return value.split(',').map(s => s.trim()).filter(Boolean);
+  }
+}
+
+function buildSummaryPrompt(doc: {
+  title: string;
+  description: string | null;
+  tcuEmentaCompleta: string | null;
+  tcuArea: string | null;
+  tcuTema: string | null;
+  tcuSubtema: string | null;
+  leiArticles: string | null;
+}): string {
+  const artigos = safeParseArray(doc.leiArticles);
+  const artigosStr = artigos.length > 0
+    ? `Artigos da Lei 14.133/2021 vinculados: ${artigos.map((a: string) => `Art. ${a}`).join(', ')}`
+    : 'Nenhum artigo da Lei 14.133 vinculado especificamente.';
+
+  return `Você é um especialista em Direito Administrativo, Licitações e Contratos.
+
+TAREFA: Gerar um resumo executivo de 2-3 frases para o acórdão do TCU abaixo.
+
+REGRAS:
+1. O resumo deve explicar a decisão em linguagem acessível (para servidores públicos, não juristas)
+2. Deve conectar claramente a decisão com a prática de licitações e contratos públicos
+3. Se houver artigos da Lei 14.133/2021 vinculados, mencione-os brevemente
+4. Máximo 3 frases. Seja direto e prático
+5. NÃO repita o número do acórdão no resumo
+6. Use voz ativa e evite jargão desnecessário
+7. Retorne APENAS o resumo, sem preâmbulos
+
+DADOS DO ACÓRDÃO:
+- Título: ${doc.title}
+- Área: ${doc.tcuArea || 'N/A'}
+- Tema: ${doc.tcuTema || 'N/A'}
+- Subtema: ${doc.tcuSubtema || 'N/A'}
+- ${artigosStr}
+
+Enunciado/Tese:
+${doc.description || 'N/A'}
+
+${doc.tcuEmentaCompleta ? `Ementa completa:\n${doc.tcuEmentaCompleta.slice(0, 2000)}` : ''}
+
+RESUMO EXECUTIVO:`;
+}
+
+async function callGemini(prompt: string): Promise<string> {
+  const apiKey = process.env.GEMINI_API_KEY;
+  if (!apiKey) throw new Error('GEMINI_API_KEY não configurada');
+
+  const url = `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent?key=${apiKey}`;
+
+  const response = await fetch(url, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      contents: [{ parts: [{ text: prompt }] }],
+      generationConfig: { temperature: 0.3, maxOutputTokens: 512 },
+    }),
+  });
+
+  if (!response.ok) {
+    const errorText = await response.text();
+    throw new Error(`Gemini API error (${response.status}): ${errorText.slice(0, 200)}`);
+  }
+
+  const data = await response.json();
+  if (data.candidates?.[0]?.content?.parts?.[0]?.text) {
+    return data.candidates[0].content.parts[0].text.trim();
+  }
+  throw new Error('Resposta do Gemini sem texto');
+}
+
+async function enrichNewDocuments(docIds: string[]): Promise<{
+  summaries: number;
+  leiIndexed: number;
+  enrichErrors: number;
+}> {
+  if (docIds.length === 0 || !process.env.GEMINI_API_KEY) {
+    return { summaries: 0, leiIndexed: 0, enrichErrors: 0 };
+  }
+
+  console.log(`[Sync TCU] Enriquecendo ${docIds.length} novos acórdãos...`);
+
+  const docs = await prisma.document.findMany({
+    where: { id: { in: docIds } },
+    select: {
+      id: true,
+      title: true,
+      description: true,
+      content: true,
+      category: true,
+      tags: true,
+      tcuEmentaCompleta: true,
+      tcuArea: true,
+      tcuTema: true,
+      tcuSubtema: true,
+      leiArticles: true,
+    },
+  });
+
+  let summaries = 0;
+  let leiIndexed = 0;
+  let enrichErrors = 0;
+
+  for (const doc of docs) {
+    // Fase 1: Indexar artigos da Lei 14.133 (roda primeiro para que o resumo possa citá-los)
+    try {
+      const analysis = await LeiIndexer.analyzeDocument(doc, { minConfidence: 40 });
+      if (analysis.articles.length > 0) {
+        const articles = LeiIndexer.resultToLeiArticles(analysis);
+        await prisma.document.update({
+          where: { id: doc.id },
+          data: { leiArticles: JSON.stringify(articles) },
+        });
+        leiIndexed++;
+        // Atualizar leiArticles local para o prompt do resumo
+        doc.leiArticles = JSON.stringify(articles);
+      }
+      await new Promise(resolve => setTimeout(resolve, ENRICHMENT_DELAY_MS));
+    } catch (err) {
+      enrichErrors++;
+      console.error(`[Sync TCU] Erro Lei-index ${doc.title}:`, err instanceof Error ? err.message : err);
+    }
+
+    // Fase 2: Gerar resumo executivo via Gemini
+    try {
+      const prompt = buildSummaryPrompt(doc);
+      const summary = await callGemini(prompt);
+
+      await prisma.document.update({
+        where: { id: doc.id },
+        data: {
+          summary,
+          description: summary,
+          summaryGeneratedAt: new Date(),
+          embeddingStatus: 'pending', // Re-indexar com nova descrição
+        },
+      });
+      summaries++;
+      await new Promise(resolve => setTimeout(resolve, ENRICHMENT_DELAY_MS));
+    } catch (err) {
+      enrichErrors++;
+      console.error(`[Sync TCU] Erro resumo ${doc.title}:`, err instanceof Error ? err.message : err);
+    }
+  }
+
+  console.log(`[Sync TCU] Enriquecimento: ${summaries} resumos, ${leiIndexed} Lei-indexed, ${enrichErrors} erros`);
+  return { summaries, leiIndexed, enrichErrors };
 }
 
 export async function GET(request: NextRequest) {
@@ -131,6 +296,7 @@ export async function GET(request: NextRequest) {
     // 5. Importar novos acórdãos
     let imported = 0;
     let errors = 0;
+    const newDocIds: string[] = [];
 
     for (const item of newItems) {
       try {
@@ -157,7 +323,7 @@ export async function GET(request: NextRequest) {
         // Parsear data do julgamento
         const dataJulgamento = parseDateTCU(item.dataSessao);
 
-        await prisma.document.create({
+        const created = await prisma.document.create({
           data: {
             title,
             description: sumario || titulo || '',
@@ -183,6 +349,7 @@ export async function GET(request: NextRequest) {
           },
         });
 
+        newDocIds.push(created.id);
         imported++;
       } catch (err) {
         errors++;
@@ -190,6 +357,9 @@ export async function GET(request: NextRequest) {
           err instanceof Error ? err.message : err);
       }
     }
+
+    // 6. Enriquecer novos acórdãos (resumo Gemini + indexação Lei 14.133)
+    const enrichment = await enrichNewDocuments(newDocIds);
 
     const elapsed = Math.round((Date.now() - startTime) / 1000);
 
@@ -201,6 +371,7 @@ export async function GET(request: NextRequest) {
       newFound: newItems.length,
       imported,
       errors,
+      enrichment,
       elapsed: `${elapsed}s`,
     };
 
@@ -208,7 +379,7 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json({
       success: true,
-      message: `Sincronização TCU: ${imported} novos acórdãos importados`,
+      message: `Sincronização TCU: ${imported} importados, ${enrichment.summaries} resumos, ${enrichment.leiIndexed} Lei-indexed`,
       ...result,
     });
 
