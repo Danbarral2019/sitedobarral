@@ -31,6 +31,7 @@ interface RecentBlogPost {
 
 interface DocumentUpdate {
   id: string;
+  documentId: string;
   changeType: string;
   changesSummary?: string | null;
   detectedAt: string;
@@ -87,7 +88,11 @@ function getCategoryLabel(category: string): string {
   return labels[category] || 'Documento';
 }
 
-export default function NovidadesSection() {
+interface NovidadesSectionProps {
+  onDocumentClick?: (documentId: string) => void;
+}
+
+export default function NovidadesSection({ onDocumentClick }: NovidadesSectionProps) {
   const [data, setData] = useState<NovidadesData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isExpanded, setIsExpanded] = useState(false);
@@ -130,6 +135,7 @@ export default function NovidadesSection() {
     subtitle?: string;
     date: string;
     href?: string;
+    documentId?: string;
   }> = [];
 
   for (const doc of data.recentDocuments.slice(0, isExpanded ? 8 : 3)) {
@@ -139,6 +145,7 @@ export default function NovidadesSection() {
       title: doc.title,
       subtitle: getCategoryLabel(doc.category),
       date: doc.uploadedAt,
+      documentId: doc.id,
     });
   }
 
@@ -160,6 +167,7 @@ export default function NovidadesSection() {
       title: upd.documentTitle,
       subtitle: upd.changesSummary || `${upd.changeType === 'new' ? 'Nova versao' : 'Atualizado'}`,
       date: upd.detectedAt,
+      documentId: upd.documentId,
     });
   }
 
@@ -228,13 +236,15 @@ export default function NovidadesSection() {
                 ? 'text-amber-500 bg-amber-50'
                 : 'text-brand-500 bg-brand-50';
 
+            const isClickable = !!(item.href || item.documentId);
+
             const content = (
-              <div className="flex items-center gap-3 px-4 py-2.5 hover:bg-gray-50 transition-colors group cursor-pointer">
+              <div className={`flex items-center gap-3 px-4 py-2.5 transition-colors group ${isClickable ? 'hover:bg-gray-50 cursor-pointer' : ''}`}>
                 <div className={`p-1.5 rounded-lg flex-shrink-0 ${colorClass}`}>
                   <IconComp className="w-3.5 h-3.5" />
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium text-gray-800 truncate group-hover:text-brand-600 transition-colors">
+                  <p className={`text-sm font-medium text-gray-800 truncate ${isClickable ? 'group-hover:text-brand-600' : ''} transition-colors`}>
                     {item.title}
                   </p>
                   {item.subtitle && (
@@ -244,19 +254,35 @@ export default function NovidadesSection() {
                 <span className="text-[10px] text-gray-400 flex-shrink-0 whitespace-nowrap">
                   {getRelativeDate(item.date)}
                 </span>
-                {item.href && (
+                {isClickable && (
                   <ChevronRight className="w-3.5 h-3.5 text-gray-300 flex-shrink-0" />
                 )}
               </div>
             );
 
-            return item.href ? (
-              <Link key={item.id} href={item.href}>
-                {content}
-              </Link>
-            ) : (
-              <div key={item.id}>{content}</div>
-            );
+            if (item.href) {
+              return (
+                <Link key={item.id} href={item.href}>
+                  {content}
+                </Link>
+              );
+            }
+
+            if (item.documentId && onDocumentClick) {
+              return (
+                <div
+                  key={item.id}
+                  role="button"
+                  tabIndex={0}
+                  onClick={() => onDocumentClick(item.documentId!)}
+                  onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onDocumentClick(item.documentId!); } }}
+                >
+                  {content}
+                </div>
+              );
+            }
+
+            return <div key={item.id}>{content}</div>;
           })}
         </div>
       )}

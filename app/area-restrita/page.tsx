@@ -33,6 +33,7 @@ import DocumentDetailModal from '@/components/DocumentDetailModal';
 import DocumentsByCategory from '@/components/DocumentsByCategory';
 import CourseArea from '@/components/area-restrita/CourseArea';
 import NovidadesSection from '@/components/area-restrita/NovidadesSection';
+import OnboardingGuide from '@/components/area-restrita/OnboardingGuide';
 import CourseVideos from '@/components/CourseVideos';
 import RecommendedSites from '@/components/RecommendedSites';
 import { ArticleTreeNavigator } from '@/components/ArticleTreeNavigator';
@@ -557,6 +558,11 @@ export default function AreaRestritaPage() {
                   </div>
                 ) : (
                   <>
+                    {/* Onboarding Guide (first visit only) */}
+                    {currentContent.type === 'documents' && !contentTree.selection && (
+                      <OnboardingGuide />
+                    )}
+
                     {/* Lei 14.133 Highlight Card (home/no selection) */}
                     {currentContent.type === 'documents' && !contentTree.selection && (
                       <div className="mb-6 bg-gradient-to-br from-brand-600 to-brand-700 rounded-2xl p-4 text-white shadow-lg overflow-hidden relative">
@@ -623,7 +629,12 @@ export default function AreaRestritaPage() {
 
                     {/* Novidades Section (home/no selection) */}
                     {currentContent.type === 'documents' && !contentTree.selection && (
-                      <NovidadesSection />
+                      <NovidadesSection
+                        onDocumentClick={(docId) => {
+                          setSelectedDocument({ id: docId, title: '', type: 'pdf', category: '', url: '' });
+                          setIsModalOpen(true);
+                        }}
+                      />
                     )}
 
                     {/* Course Area Highlight (home/no selection) */}

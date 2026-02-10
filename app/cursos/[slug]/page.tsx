@@ -3,9 +3,11 @@ import Link from 'next/link';
 import {
   ArrowLeft, BookOpen, Lock, FileText,
   QrCode, CheckCircle, Users,
-  Clock, Award, Target, Lightbulb, Star
+  Clock, Award, Target, Lightbulb, Star,
+  PlayCircle, Layers
 } from 'lucide-react';
 import { courses } from '@/data/courses';
+import { prisma } from '@/lib/prisma';
 import CourseEnrollmentInfo from '@/components/CourseEnrollmentInfo';
 
 export async function generateStaticParams() {
@@ -151,6 +153,8 @@ const getCourseColor = (courseId: string) => {
   return colorMap[courseId] || colorMap['1'];
 };
 
+export const revalidate = 3600; // ISR: revalida a cada 1h
+
 export default async function CourseDetailPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
   const course = courses.find((c) => c.slug === slug);
@@ -161,6 +165,24 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ s
 
   const color = getCourseColor(course.id);
   const courseNumber = String(course.id).padStart(2, '0');
+
+  // Fetch published modules with lesson count for preview
+  const modules = await prisma.module.findMany({
+    where: { courseId: course.id, isPublished: true },
+    orderBy: { displayOrder: 'asc' },
+    select: {
+      id: true,
+      title: true,
+      displayOrder: true,
+      _count: {
+        select: {
+          lessons: {
+            where: { isPublished: true },
+          },
+        },
+      },
+    },
+  });
 
   // Schema.org JSON-LD para SEO
   const courseSchema = {
@@ -228,6 +250,14 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ s
 
                 {/* Stats */}
                 <div className="flex flex-wrap gap-4 mt-8">
+                  {modules.length > 0 && (
+                    <div className="bg-white/20 backdrop-blur-sm rounded-xl px-6 py-3 flex items-center gap-3">
+                      <Layers className="w-5 h-5 text-white" />
+                      <span className="text-white font-semibold">
+                        {modules.length} {modules.length === 1 ? 'Modulo' : 'Modulos'} · {modules.reduce((s, m) => s + m._count.lessons, 0)} Aulas
+                      </span>
+                    </div>
+                  )}
                   <div className="bg-white/20 backdrop-blur-sm rounded-xl px-6 py-3 flex items-center gap-3">
                     <FileText className="w-5 h-5 text-white" />
                     <span className="text-white font-semibold">Material Completo</span>
@@ -309,6 +339,54 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ s
                   </div>
                 </div>
               </div>
+
+              {/* Conteúdo Programático (Preview de Módulos) */}
+              {modules.length > 0 && (
+                <div className={`bg-white rounded-2xl shadow-lg p-8 border-2 ${color.border} hover:shadow-xl transition-shadow`}>
+                  <div className="flex items-center gap-3 mb-6">
+                    <div className={`w-12 h-12 bg-gradient-to-br ${color.gradient} rounded-xl flex items-center justify-center`}>
+                      <Layers className="w-6 h-6 text-white" />
+                    </div>
+                    <div>
+                      <h2 className="text-3xl font-bold text-gray-900">Conteudo Programatico</h2>
+                      <p className="text-sm text-gray-600 mt-1">
+                        {modules.length} {modules.length === 1 ? 'modulo' : 'modulos'} com{' '}
+                        {modules.reduce((sum, m) => sum + m._count.lessons, 0)} aulas estruturadas
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="space-y-3">
+                    {modules.map((mod, index) => (
+                      <div
+                        key={mod.id}
+                        className={`${color.bg} rounded-xl p-4 flex items-center gap-4 border border-white`}
+                      >
+                        <div className={`w-10 h-10 bg-gradient-to-br ${color.gradient} rounded-lg flex items-center justify-center flex-shrink-0`}>
+                          <span className="text-white font-bold text-sm">{index + 1}</span>
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <h3 className="font-semibold text-gray-900 truncate">{mod.title}</h3>
+                          <div className="flex items-center gap-2 mt-1">
+                            <PlayCircle className={`w-3.5 h-3.5 ${color.text}`} />
+                            <span className="text-xs text-gray-600">
+                              {mod._count.lessons} {mod._count.lessons === 1 ? 'aula' : 'aulas'}
+                            </span>
+                          </div>
+                        </div>
+                        <Lock className="w-4 h-4 text-gray-300 flex-shrink-0" />
+                      </div>
+                    ))}
+                  </div>
+
+                  <div className="mt-6 pt-4 border-t border-gray-200">
+                    <div className="flex items-center gap-2 text-sm text-gray-500">
+                      <Lock className="w-4 h-4" />
+                      <span>Conteudo completo disponivel para alunos matriculados</span>
+                    </div>
+                  </div>
+                </div>
+              )}
 
               {/* Bibliografia Recomendada */}
               <div className="bg-white rounded-2xl shadow-lg p-8 border-2 border-gray-200 hover:shadow-xl transition-shadow">

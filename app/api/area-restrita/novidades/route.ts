@@ -97,6 +97,7 @@ async function handler() {
     recentBlogPosts,
     documentUpdates: documentUpdates.map((v) => ({
       id: v.id,
+      documentId: v.document.id,
       changeType: v.changeType,
       changesSummary: v.changesSummary,
       detectedAt: v.detectedAt,
