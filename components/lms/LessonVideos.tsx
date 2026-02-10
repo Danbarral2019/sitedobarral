@@ -47,6 +47,7 @@ export default function LessonVideos({ videos }: LessonVideosProps) {
                     onClick={() => setActiveVideoId(video.id)}
                     className="absolute inset-0 w-full h-full group cursor-pointer"
                   >
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img
                       src={thumbnailUrl}
                       alt={video.title}

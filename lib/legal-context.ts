@@ -145,7 +145,7 @@ export async function findRelatedActs(
   return matched
     .sort((a, b) => b.matchCount - a.matchCount)
     .slice(0, limit)
-    .map(({ matchCount: _, ...rest }) => rest);
+    .map(({ matchCount: _matchCount, ...rest }) => rest);
 }
 
 // ===========================

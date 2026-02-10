@@ -24,7 +24,7 @@ interface CertificateCardProps {
   courseSlug: string;
 }
 
-export default function CertificateCard({ courseId, courseSlug }: CertificateCardProps) {
+export default function CertificateCard({ courseId }: CertificateCardProps) {
   const [data, setData] = useState<EligibilityData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isGenerating, setIsGenerating] = useState(false);
@@ -45,7 +45,7 @@ export default function CertificateCard({ courseId, courseSlug }: CertificateCar
         method: 'POST',
       });
       if (res.ok) {
-        const result = await res.json();
+        await res.json();
         // Re-fetch full eligibility to get certificate details
         const eligRes = await fetch(`/api/area-restrita/courses/${courseId}/certificate`);
         if (eligRes.ok) {

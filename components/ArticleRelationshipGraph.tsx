@@ -228,6 +228,7 @@ export function ArticleRelationshipGraph({
 
   // Draw orbital rings in the background
   const onRenderFramePre = useCallback(
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     (ctx: CanvasRenderingContext2D, _globalScale: number) => {
       // Determine which rings are used
       const hasInner = graphData.nodes.some(n => n.ring === 1);
@@ -271,7 +272,7 @@ export function ArticleRelationshipGraph({
 
   // Canvas custom node renderer
   const nodeCanvasObject = useCallback(
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unused-vars
     (node: any, ctx: CanvasRenderingContext2D, _globalScale: number) => {
       const x = node.x ?? 0;
       const y = node.y ?? 0;

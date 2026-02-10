@@ -236,6 +236,7 @@ export function useGlobalSearch(options: UseGlobalSearchOptions = {}): UseGlobal
         }
       }
     },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [minQueryLength]
   );
 

@@ -19,7 +19,7 @@ export async function GET(
 
     const { id } = await params;
 
-    const module = await prisma.module.findUnique({
+    const foundModule = await prisma.module.findUnique({
       where: { id },
       include: {
         lessons: {
@@ -28,12 +28,12 @@ export async function GET(
       },
     });
 
-    if (!module) {
+    if (!foundModule) {
       throw new NotFoundError('Módulo');
     }
 
     apiLogger.info({ moduleId: id }, 'Module fetched');
-    return NextResponse.json({ module });
+    return NextResponse.json({ module: foundModule });
   } catch (error) {
     return handleApiError(error);
   }
@@ -59,7 +59,7 @@ export async function PUT(
       throw new NotFoundError('Módulo');
     }
 
-    const module = await prisma.module.update({
+    const updatedModule = await prisma.module.update({
       where: { id },
       data,
       include: {
@@ -68,7 +68,7 @@ export async function PUT(
     });
 
     apiLogger.info({ moduleId: id }, 'Module updated');
-    return NextResponse.json({ module });
+    return NextResponse.json({ module: updatedModule });
   } catch (error) {
     return handleApiError(error);
   }

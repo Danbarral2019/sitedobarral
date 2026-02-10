@@ -183,7 +183,7 @@ export async function GET(request: NextRequest) {
     }
 
     // Fetch module counts for courses with LMS structure
-    let moduleData: Record<string, { moduleCount: number; lessonCount: number }> = {};
+    const moduleData: Record<string, { moduleCount: number; lessonCount: number }> = {};
     try {
       const modulesWithCounts = await prisma.module.findMany({
         where: { courseId: { in: courseIds }, isPublished: true },

@@ -357,6 +357,7 @@ export async function scrapeManualPage(
   // Process all paragraphs, tables, blockquotes, and lists
   $content.find('p, table, figure.wp-block-table, blockquote, ul, ol').each(function () {
     const $el = $(this);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const tagName = (this as any).name?.toLowerCase();
 
     // Skip elements inside a figure (the table inside figure is processed via figure)

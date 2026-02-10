@@ -151,7 +151,7 @@ async function getCourseAnalytics(
   courseId: string,
   now: Date,
   thirtyDaysAgo: Date,
-  sevenDaysAgo: Date
+  _sevenDaysAgo: Date
 ) {
   // Active enrollments for this course
   const enrollments = await prisma.enrollment.findMany({

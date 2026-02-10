@@ -15,10 +15,10 @@ export const POST = withAdminAuth(async (request: NextRequest) => {
     const data = CreateLessonSchema.parse(body);
 
     // Verificar se o módulo existe
-    const module = await prisma.module.findUnique({
+    const parentModule = await prisma.module.findUnique({
       where: { id: data.moduleId },
     });
-    if (!module) {
+    if (!parentModule) {
       throw new NotFoundError('Módulo');
     }
 
