@@ -167,22 +167,28 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ s
   const courseNumber = String(course.id).padStart(2, '0');
 
   // Fetch published modules with lesson count for preview
-  const modules = await prisma.module.findMany({
-    where: { courseId: course.id, isPublished: true },
-    orderBy: { displayOrder: 'asc' },
-    select: {
-      id: true,
-      title: true,
-      displayOrder: true,
-      _count: {
-        select: {
-          lessons: {
-            where: { isPublished: true },
+  // Wrapped in try/catch for environments without DB (CI build)
+  let modules: { id: string; title: string; displayOrder: number; _count: { lessons: number } }[] = [];
+  try {
+    modules = await prisma.module.findMany({
+      where: { courseId: course.id, isPublished: true },
+      orderBy: { displayOrder: 'asc' },
+      select: {
+        id: true,
+        title: true,
+        displayOrder: true,
+        _count: {
+          select: {
+            lessons: {
+              where: { isPublished: true },
+            },
           },
         },
       },
-    },
-  });
+    });
+  } catch {
+    // DB unavailable (e.g. CI build) — render without modules
+  }
 
   // Schema.org JSON-LD para SEO
   const courseSchema = {
