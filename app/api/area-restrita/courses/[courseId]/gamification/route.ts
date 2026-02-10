@@ -6,10 +6,10 @@ export const GET = withAuth(async (
   request: NextRequest,
   context?: Record<string, unknown>
 ) => {
-  const user = context?.user as { id: string };
+  const user = context?.user as { userId: string };
   const { courseId } = await (context as { params: Promise<{ courseId: string }> }).params;
 
-  const data = await getUserGamificationData(user.id, courseId);
+  const data = await getUserGamificationData(user.userId, courseId);
 
   return NextResponse.json(data);
 });

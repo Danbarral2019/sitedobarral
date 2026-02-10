@@ -12,7 +12,7 @@ export const GET = withAuth(async (
   context?: Record<string, unknown>
 ) => {
   try {
-    const user = context?.user as { id: string };
+    const user = context?.user as { userId: string };
     const { lessonId } = await (context as { params: Promise<{ lessonId: string }> }).params;
 
     const quiz = await prisma.quiz.findUnique({
@@ -31,7 +31,7 @@ export const GET = withAuth(async (
 
     // Contar tentativas do usuário
     const userAttempts = await prisma.quizAttempt.count({
-      where: { quizId: quiz.id, userId: user.id },
+      where: { quizId: quiz.id, userId: user.userId },
     });
 
     // Verificar se atingiu o limite de tentativas

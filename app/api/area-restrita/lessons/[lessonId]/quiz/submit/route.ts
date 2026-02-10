@@ -14,7 +14,7 @@ export const POST = withAuth(async (
   context?: Record<string, unknown>
 ) => {
   try {
-    const user = context?.user as { id: string };
+    const user = context?.user as { userId: string };
     const { lessonId } = await (context as { params: Promise<{ lessonId: string }> }).params;
     const body = await request.json();
     const data = SubmitQuizAttemptSchema.parse(body);
@@ -32,7 +32,7 @@ export const POST = withAuth(async (
     // Verificar maxAttempts
     if (quiz.maxAttempts) {
       const attemptCount = await prisma.quizAttempt.count({
-        where: { quizId: quiz.id, userId: user.id },
+        where: { quizId: quiz.id, userId: user.userId },
       });
       if (attemptCount >= quiz.maxAttempts) {
         return NextResponse.json(
@@ -82,7 +82,7 @@ export const POST = withAuth(async (
     const attempt = await prisma.quizAttempt.create({
       data: {
         quizId: quiz.id,
-        userId: user.id,
+        userId: user.userId,
         answers: JSON.stringify(data.answers),
         score,
         totalPoints: earnedPoints,
@@ -95,13 +95,13 @@ export const POST = withAuth(async (
     });
 
     apiLogger.info(
-      { attemptId: attempt.id, quizId: quiz.id, userId: user.id, score, passed },
+      { attemptId: attempt.id, quizId: quiz.id, userId: user.userId, score, passed },
       'Quiz attempt submitted'
     );
 
     // Se passou, verificar elegibilidade para certificado (fire-and-forget)
     if (passed) {
-      checkCertificateEligibilityAsync(user.id, quiz, lessonId).catch(() => {});
+      checkCertificateEligibilityAsync(user.userId, quiz, lessonId).catch(() => {});
 
       // Gamification: quiz pass
       import('@/lib/gamification').then(({ addXp, checkAndAwardBadges, updateStreak, XP_VALUES }) => {
@@ -112,12 +112,12 @@ export const POST = withAuth(async (
         }).then(lesson => {
           if (!lesson) return;
           const courseId = lesson.module.courseId;
-          addXp(user.id, courseId, XP_VALUES.PASS_QUIZ).catch(() => {});
+          addXp(user.userId, courseId, XP_VALUES.PASS_QUIZ).catch(() => {});
           if (score === 100) {
-            addXp(user.id, courseId, XP_VALUES.PERFECT_QUIZ).catch(() => {});
+            addXp(user.userId, courseId, XP_VALUES.PERFECT_QUIZ).catch(() => {});
           }
-          updateStreak(user.id, courseId).catch(() => {});
-          checkAndAwardBadges(user.id, courseId, 'quiz_pass').catch(() => {});
+          updateStreak(user.userId, courseId).catch(() => {});
+          checkAndAwardBadges(user.userId, courseId, 'quiz_pass').catch(() => {});
         }).catch(() => {});
       }).catch(() => {});
     }

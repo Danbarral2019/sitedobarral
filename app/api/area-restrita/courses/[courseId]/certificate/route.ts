@@ -14,10 +14,10 @@ export const GET = withAuth(async (
   context?: Record<string, unknown>
 ) => {
   try {
-    const user = context?.user as { id: string };
+    const user = context?.user as { userId: string };
     const { courseId } = await (context as { params: Promise<{ courseId: string }> }).params;
 
-    const eligibility = await checkCertificateEligibility(user.id, courseId);
+    const eligibility = await checkCertificateEligibility(user.userId, courseId);
 
     return NextResponse.json({
       ...eligibility,
@@ -36,11 +36,11 @@ export const POST = withAuth(async (
   context?: Record<string, unknown>
 ) => {
   try {
-    const user = context?.user as { id: string };
+    const user = context?.user as { userId: string };
     const { courseId } = await (context as { params: Promise<{ courseId: string }> }).params;
 
     // Verificar elegibilidade primeiro
-    const eligibility = await checkCertificateEligibility(user.id, courseId);
+    const eligibility = await checkCertificateEligibility(user.userId, courseId);
     if (!eligibility.eligible) {
       return NextResponse.json(
         {
@@ -51,7 +51,7 @@ export const POST = withAuth(async (
       );
     }
 
-    const result = await issueCertificate(user.id, courseId);
+    const result = await issueCertificate(user.userId, courseId);
     if (!result.certificate) {
       return NextResponse.json(
         { error: 'Erro ao gerar certificado.' },

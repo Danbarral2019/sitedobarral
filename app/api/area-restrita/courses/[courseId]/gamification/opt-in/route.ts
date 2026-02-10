@@ -6,15 +6,15 @@ export const PATCH = withAuth(async (
   request: NextRequest,
   context?: Record<string, unknown>
 ) => {
-  const user = context?.user as { id: string };
+  const user = context?.user as { userId: string };
   const { courseId } = await (context as { params: Promise<{ courseId: string }> }).params;
 
   const body = await request.json();
   const showOnLeaderboard = Boolean(body.showOnLeaderboard);
 
   const streak = await prisma.userStreak.upsert({
-    where: { userId_courseId: { userId: user.id, courseId } },
-    create: { userId: user.id, courseId, showOnLeaderboard },
+    where: { userId_courseId: { userId: user.userId, courseId } },
+    create: { userId: user.userId, courseId, showOnLeaderboard },
     update: { showOnLeaderboard },
   });
 

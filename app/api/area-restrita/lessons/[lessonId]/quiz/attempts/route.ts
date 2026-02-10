@@ -12,7 +12,7 @@ export const GET = withAuth(async (
   context?: Record<string, unknown>
 ) => {
   try {
-    const user = context?.user as { id: string };
+    const user = context?.user as { userId: string };
     const { lessonId } = await (context as { params: Promise<{ lessonId: string }> }).params;
 
     const quiz = await prisma.quiz.findUnique({
@@ -26,7 +26,7 @@ export const GET = withAuth(async (
     const attempts = await prisma.quizAttempt.findMany({
       where: {
         quizId: quiz.id,
-        userId: user.id,
+        userId: user.userId,
       },
       orderBy: { createdAt: 'desc' },
       select: {

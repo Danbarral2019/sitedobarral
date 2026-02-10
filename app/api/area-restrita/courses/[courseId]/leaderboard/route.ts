@@ -7,7 +7,7 @@ export const GET = withAuth(async (
   request: NextRequest,
   context?: Record<string, unknown>
 ) => {
-  const user = context?.user as { id: string };
+  const user = context?.user as { userId: string };
   const { courseId } = await (context as { params: Promise<{ courseId: string }> }).params;
 
   // Top 20 by XP (opt-in only)
@@ -44,7 +44,7 @@ export const GET = withAuth(async (
     xp: s.totalXp,
     streak: s.currentStreak,
     badgeCount: badgeCountMap.get(s.userId) || 0,
-    isCurrentUser: s.userId === user.id,
+    isCurrentUser: s.userId === user.userId,
   }));
 
   // Find current user's position if not in top 20
@@ -52,7 +52,7 @@ export const GET = withAuth(async (
   const isInTop = leaderboard.some(l => l.isCurrentUser);
   if (!isInTop) {
     const userStreak = await prisma.userStreak.findUnique({
-      where: { userId_courseId: { userId: user.id, courseId } },
+      where: { userId_courseId: { userId: user.userId, courseId } },
     });
     if (userStreak) {
       const ahead = await prisma.userStreak.count({
