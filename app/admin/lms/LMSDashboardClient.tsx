@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { GraduationCap, BookOpen, Layers, ChevronRight, Loader2 } from 'lucide-react';
+import { GraduationCap, BookOpen, Layers, ChevronRight, Loader2, BarChart3 } from 'lucide-react';
 import { courses } from '@/data/courses';
 import AdminLayout from '@/components/AdminLayout';
 
@@ -104,6 +104,14 @@ export default function LMSDashboardClient() {
               Gerencie os modulos e licoes de cada curso
             </p>
           </div>
+
+          <Link
+            href="/admin/lms/analytics"
+            className="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-purple-600 to-blue-600 text-white rounded-lg hover:from-purple-700 hover:to-blue-700 transition-all text-sm font-medium shadow-sm"
+          >
+            <BarChart3 className="w-4 h-4" />
+            Analytics LMS
+          </Link>
 
           {/* Summary stats */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">

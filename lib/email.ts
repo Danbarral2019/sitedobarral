@@ -677,6 +677,254 @@ Você está recebendo este email porque está matriculado no curso ${courseTitle
 }
 
 /**
+ * Envia email de boas-vindas ao curso (LMS)
+ */
+export async function sendCourseWelcomeEmail(
+  email: string,
+  name: string,
+  courseTitle: string,
+  courseSlug: string
+): Promise<boolean> {
+  const courseUrl = `${process.env.NEXT_PUBLIC_BASE_URL}/area-restrita/curso/${courseSlug}`;
+
+  const html = `
+    <!DOCTYPE html>
+    <html>
+      <head>
+        <style>
+          body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+          .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+          .header { background: linear-gradient(135deg, #2563eb 0%, #9333ea 100%); color: white; padding: 30px; text-align: center; border-radius: 10px 10px 0 0; }
+          .content { background: #f9fafb; padding: 30px; border-radius: 0 0 10px 10px; }
+          .button { display: inline-block; background: linear-gradient(135deg, #2563eb 0%, #9333ea 100%); color: white; padding: 15px 30px; text-decoration: none; border-radius: 8px; font-weight: bold; margin: 20px 0; }
+          .footer { text-align: center; margin-top: 30px; color: #666; font-size: 14px; }
+          .tips { background: white; padding: 20px; border-radius: 8px; margin: 20px 0; border: 2px solid #e5e7eb; }
+          .tip-item { margin: 8px 0; }
+          .check { color: #10b981; margin-right: 8px; font-weight: bold; }
+        </style>
+      </head>
+      <body>
+        <div class="container">
+          <div class="header">
+            <h1>Bem-vindo(a) ao Curso!</h1>
+          </div>
+          <div class="content">
+            <p>Ola ${name},</p>
+            <p>Que bom que voce iniciou seus estudos no curso <strong>${courseTitle}</strong>!</p>
+
+            <div class="tips">
+              <h3 style="margin-top: 0;">Dicas para aproveitar ao maximo:</h3>
+              <div class="tip-item"><span class="check">&#10003;</span> Siga os modulos na ordem — cada um prepara para o proximo</div>
+              <div class="tip-item"><span class="check">&#10003;</span> Consulte os documentos de apoio em cada aula</div>
+              <div class="tip-item"><span class="check">&#10003;</span> Use o assistente de IA para tirar duvidas</div>
+              <div class="tip-item"><span class="check">&#10003;</span> Responda os quizzes para testar seu conhecimento</div>
+            </div>
+
+            <div style="text-align: center;">
+              <a href="${courseUrl}" class="button">Continuar Estudando</a>
+            </div>
+
+            <p>Bons estudos!<br><strong>Equipe Prof. Daniel Barral</strong></p>
+          </div>
+          <div class="footer">
+            <p>Este e um email automatico, por favor nao responda.</p>
+            <p>&copy; ${new Date().getFullYear()} Prof. Daniel Barral - Todos os direitos reservados</p>
+          </div>
+        </div>
+      </body>
+    </html>
+  `;
+
+  const text = `
+Bem-vindo(a) ao Curso!
+
+Ola ${name},
+
+Que bom que voce iniciou seus estudos no curso: ${courseTitle}!
+
+Dicas para aproveitar ao maximo:
+- Siga os modulos na ordem
+- Consulte os documentos de apoio
+- Use o assistente de IA para duvidas
+- Responda os quizzes
+
+Continuar estudando: ${courseUrl}
+
+Bons estudos!
+Equipe Prof. Daniel Barral
+  `;
+
+  return (await sendEmail({
+    to: email,
+    subject: `Bem-vindo(a) ao curso: ${courseTitle}`,
+    html,
+    text,
+  })).success;
+}
+
+/**
+ * Envia email de conclusao de modulo (LMS)
+ */
+export async function sendModuleCompletionEmail(
+  email: string,
+  name: string,
+  courseTitle: string,
+  moduleTitle: string,
+  courseSlug: string
+): Promise<boolean> {
+  const courseUrl = `${process.env.NEXT_PUBLIC_BASE_URL}/area-restrita/curso/${courseSlug}`;
+
+  const html = `
+    <!DOCTYPE html>
+    <html>
+      <head>
+        <style>
+          body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+          .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+          .header { background: linear-gradient(135deg, #059669 0%, #10b981 100%); color: white; padding: 30px; text-align: center; border-radius: 10px 10px 0 0; }
+          .content { background: #f9fafb; padding: 30px; border-radius: 0 0 10px 10px; }
+          .button { display: inline-block; background: linear-gradient(135deg, #059669 0%, #10b981 100%); color: white; padding: 15px 30px; text-decoration: none; border-radius: 8px; font-weight: bold; margin: 20px 0; }
+          .footer { text-align: center; margin-top: 30px; color: #666; font-size: 14px; }
+          .achievement { background: white; border: 2px solid #059669; padding: 20px; border-radius: 8px; text-align: center; margin: 20px 0; }
+        </style>
+      </head>
+      <body>
+        <div class="container">
+          <div class="header">
+            <h1>Modulo Concluido!</h1>
+          </div>
+          <div class="content">
+            <p>Ola ${name},</p>
+
+            <div class="achievement">
+              <p style="margin: 0 0 10px 0; font-size: 14px; color: #666;">Voce concluiu com sucesso:</p>
+              <h2 style="margin: 0; color: #059669;">${moduleTitle}</h2>
+              <p style="margin: 10px 0 0; font-size: 14px; color: #666;">do curso <strong>${courseTitle}</strong></p>
+            </div>
+
+            <p>Continue assim! Cada modulo concluido te aproxima mais do certificado de conclusao do curso.</p>
+
+            <div style="text-align: center;">
+              <a href="${courseUrl}" class="button">Continuar para o Proximo Modulo</a>
+            </div>
+
+            <p>Bons estudos!<br><strong>Equipe Prof. Daniel Barral</strong></p>
+          </div>
+          <div class="footer">
+            <p>Este e um email automatico, por favor nao responda.</p>
+            <p>&copy; ${new Date().getFullYear()} Prof. Daniel Barral - Todos os direitos reservados</p>
+          </div>
+        </div>
+      </body>
+    </html>
+  `;
+
+  const text = `
+Modulo Concluido!
+
+Ola ${name},
+
+Voce concluiu com sucesso o modulo: ${moduleTitle}
+do curso: ${courseTitle}
+
+Continue assim! Cada modulo concluido te aproxima mais do certificado.
+
+Continuar estudando: ${courseUrl}
+
+Bons estudos!
+Equipe Prof. Daniel Barral
+  `;
+
+  return (await sendEmail({
+    to: email,
+    subject: `Modulo concluido: ${moduleTitle} - ${courseTitle}`,
+    html,
+    text,
+  })).success;
+}
+
+/**
+ * Envia email de lembrete de inatividade (LMS)
+ */
+export async function sendInactivityReminderEmail(
+  email: string,
+  name: string,
+  courseTitle: string,
+  courseSlug: string,
+  daysSinceAccess: number
+): Promise<boolean> {
+  const courseUrl = `${process.env.NEXT_PUBLIC_BASE_URL}/area-restrita/curso/${courseSlug}`;
+
+  const html = `
+    <!DOCTYPE html>
+    <html>
+      <head>
+        <style>
+          body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+          .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+          .header { background: linear-gradient(135deg, #f59e0b 0%, #ea580c 100%); color: white; padding: 30px; text-align: center; border-radius: 10px 10px 0 0; }
+          .content { background: #f9fafb; padding: 30px; border-radius: 0 0 10px 10px; }
+          .button { display: inline-block; background: linear-gradient(135deg, #f59e0b 0%, #ea580c 100%); color: white; padding: 15px 30px; text-decoration: none; border-radius: 8px; font-weight: bold; margin: 20px 0; }
+          .footer { text-align: center; margin-top: 30px; color: #666; font-size: 14px; }
+          .reminder-box { background: #fffbeb; border-left: 4px solid #f59e0b; padding: 20px; margin: 20px 0; border-radius: 8px; }
+        </style>
+      </head>
+      <body>
+        <div class="container">
+          <div class="header">
+            <h1>Sentimos sua falta!</h1>
+          </div>
+          <div class="content">
+            <p>Ola ${name},</p>
+
+            <div class="reminder-box">
+              <p style="margin: 0;">Faz <strong>${daysSinceAccess} dias</strong> que voce nao acessa o curso <strong>${courseTitle}</strong>.</p>
+            </div>
+
+            <p>A constancia e fundamental para o aprendizado. Que tal reservar alguns minutos hoje para retomar seus estudos?</p>
+            <p>Seu progresso esta salvo e voce pode continuar de onde parou.</p>
+
+            <div style="text-align: center;">
+              <a href="${courseUrl}" class="button">Retomar Estudos</a>
+            </div>
+
+            <p>Estamos torcendo por voce!<br><strong>Equipe Prof. Daniel Barral</strong></p>
+          </div>
+          <div class="footer">
+            <p>Este e um email automatico, por favor nao responda.</p>
+            <p>&copy; ${new Date().getFullYear()} Prof. Daniel Barral - Todos os direitos reservados</p>
+          </div>
+        </div>
+      </body>
+    </html>
+  `;
+
+  const text = `
+Sentimos sua falta!
+
+Ola ${name},
+
+Faz ${daysSinceAccess} dias que voce nao acessa o curso: ${courseTitle}.
+
+A constancia e fundamental para o aprendizado. Que tal reservar alguns minutos hoje para retomar seus estudos?
+
+Seu progresso esta salvo e voce pode continuar de onde parou.
+
+Retomar estudos: ${courseUrl}
+
+Estamos torcendo por voce!
+Equipe Prof. Daniel Barral
+  `;
+
+  return (await sendEmail({
+    to: email,
+    subject: `Sentimos sua falta - ${courseTitle}`,
+    html,
+    text,
+  })).success;
+}
+
+/**
  * Envia notificação de certificado ao aluno
  */
 export async function sendCertificateNotification(

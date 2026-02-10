@@ -5,6 +5,8 @@ import { AuthenticationError, AuthorizationError, NotFoundError } from '@/lib/er
 import { apiLogger } from '@/lib/logger';
 import { prisma } from '@/lib/prisma';
 import { UpdateLessonProgressSchema } from '@/lib/validation-schemas';
+import { sendCourseWelcomeEmail, sendModuleCompletionEmail } from '@/lib/email';
+import { courses } from '@/data/courses';
 
 export async function POST(
   request: NextRequest,
@@ -116,6 +118,46 @@ export async function POST(
     });
 
     apiLogger.info({ lessonId, userId: user.id, status: progress.status }, 'Lesson progress updated');
+
+    // Fire-and-forget: email notifications
+    const courseId = lesson.module.courseId;
+    const userId = user.id;
+    const courseData = courses.find(c => c.id === courseId);
+
+    if (courseData) {
+      // Welcome email: first progress in this course
+      if (!existing) {
+        const count = await prisma.lessonProgress.count({
+          where: { userId, lesson: { module: { courseId } } },
+        });
+        if (count === 1) {
+          sendCourseWelcomeEmail(user.email, user.name, courseData.title, courseData.slug).catch(err =>
+            console.error('[lms-notification] Welcome email error:', err)
+          );
+        }
+      }
+
+      // Module completion email: all lessons in module completed
+      if (data.status === 'completed' && lesson.moduleId) {
+        const totalInModule = await prisma.lesson.count({
+          where: { moduleId: lesson.moduleId, isPublished: true },
+        });
+        const completedInModule = await prisma.lessonProgress.count({
+          where: { userId, status: 'completed', lesson: { moduleId: lesson.moduleId } },
+        });
+        if (completedInModule >= totalInModule && totalInModule > 0) {
+          const mod = await prisma.module.findUnique({
+            where: { id: lesson.moduleId },
+            select: { title: true },
+          });
+          if (mod) {
+            sendModuleCompletionEmail(user.email, user.name, courseData.title, mod.title, courseData.slug).catch(err =>
+              console.error('[lms-notification] Module completion email error:', err)
+            );
+          }
+        }
+      }
+    }
 
     return NextResponse.json({
       progress: {
