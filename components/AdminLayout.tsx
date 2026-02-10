@@ -18,7 +18,10 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
   const [unreadCounts, setUnreadCounts] = useState({ contatos: 0, depoimentos: 0, documentos: 0 });
   const pathname = usePathname();
 
-  const isActive = (path: string) => pathname === path;
+  const isActive = (path: string) => {
+    if (path === '/admin/lms') return pathname === path || pathname.startsWith('/admin/lms/');
+    return pathname === path;
+  };
 
   // Buscar contadores de notificações
   useEffect(() => {
@@ -153,6 +156,14 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
         </svg>
       ),
       indent: true,
+    },
+
+    // === LMS ===
+    { divider: true, label: '🎓 LMS' },
+    {
+      path: '/admin/lms',
+      label: 'Cursos (LMS)',
+      icon: GraduationCap,
     },
 
     // === CONTEÚDO ===

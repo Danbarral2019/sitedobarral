@@ -182,6 +182,23 @@ export async function GET(request: NextRequest) {
       siteToCourse = []; // Continua sem sites
     }
 
+    // Fetch module counts for courses with LMS structure
+    let moduleData: Record<string, { moduleCount: number; lessonCount: number }> = {};
+    try {
+      const modulesWithCounts = await prisma.module.findMany({
+        where: { courseId: { in: courseIds }, isPublished: true },
+        select: { courseId: true, _count: { select: { lessons: true } } },
+      });
+      modulesWithCounts.forEach(m => {
+        if (!moduleData[m.courseId]) moduleData[m.courseId] = { moduleCount: 0, lessonCount: 0 };
+        moduleData[m.courseId].moduleCount++;
+        moduleData[m.courseId].lessonCount += m._count.lessons;
+      });
+      console.log('[Batch-Data] Module data:', Object.entries(moduleData).map(([id, d]) => `${id}:${d.moduleCount}m/${d.lessonCount}l`).join(', '));
+    } catch (error) {
+      console.error('[Batch-Data] Warning: could not fetch module counts:', error);
+    }
+
     // Agrupar resultados por courseId para fácil acesso no frontend
     const groupedDocuments: Record<string, typeof documents> = {};
     const groupedVideos: Record<string, typeof videos> = {};
@@ -237,6 +254,7 @@ export async function GET(request: NextRequest) {
         documents: groupedDocuments,
         videos: groupedVideos,
         sites: groupedSites,
+        modules: moduleData,
       },
     });
 

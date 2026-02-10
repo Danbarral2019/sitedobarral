@@ -9,7 +9,7 @@ import { CacheInvalidation } from '@/lib/cache/redis-client';
  */
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     // Verificar se é admin
@@ -18,8 +18,10 @@ export async function GET(
       return adminCheck.response;
     }
 
+    const { id } = await params;
+
     const act = await prisma.legislativeAct.findUnique({
-      where: { id: params.id }
+      where: { id }
     });
 
     if (!act) {
@@ -46,7 +48,7 @@ export async function GET(
  */
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     // Verificar se é admin
@@ -55,11 +57,12 @@ export async function PUT(
       return adminCheck.response;
     }
 
+    const { id } = await params;
     const body = await request.json();
 
     // Verificar se o ato existe
     const existing = await prisma.legislativeAct.findUnique({
-      where: { id: params.id }
+      where: { id }
     });
 
     if (!existing) {
@@ -94,7 +97,7 @@ export async function PUT(
 
     // Atualizar ato normativo
     const act = await prisma.legislativeAct.update({
-      where: { id: params.id },
+      where: { id },
       data: updateData
     });
 
@@ -132,7 +135,7 @@ export async function PUT(
  */
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     // Verificar se é admin
@@ -141,9 +144,11 @@ export async function DELETE(
       return adminCheck.response;
     }
 
+    const { id } = await params;
+
     // Verificar se o ato existe
     const existing = await prisma.legislativeAct.findUnique({
-      where: { id: params.id }
+      where: { id }
     });
 
     if (!existing) {
@@ -155,7 +160,7 @@ export async function DELETE(
 
     // Excluir ato normativo
     await prisma.legislativeAct.delete({
-      where: { id: params.id }
+      where: { id }
     });
 
     // Invalidate caches

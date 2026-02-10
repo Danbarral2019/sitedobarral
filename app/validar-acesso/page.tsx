@@ -42,11 +42,13 @@ async function validateQRCodeServer(code: string) {
 export default async function ValidarAcessoPage({
   searchParams,
 }: {
-  searchParams: { code?: string; error?: string };
+  searchParams: Promise<{ code?: string; error?: string }>;
 }) {
+  const resolvedSearchParams = await searchParams;
+
   // Se veio com código na URL, valida no servidor
-  if (searchParams.code) {
-    const result = await validateQRCodeServer(searchParams.code);
+  if (resolvedSearchParams.code) {
+    const result = await validateQRCodeServer(resolvedSearchParams.code);
 
     if (result) {
       // QR válido - redireciona para registro/login
@@ -59,9 +61,9 @@ export default async function ValidarAcessoPage({
   }
 
   // Prepara mensagem de erro se houver
-  const initialError = searchParams.error === 'expired'
+  const initialError = resolvedSearchParams.error === 'expired'
     ? 'Sua sessão expirou. Por favor, valide novamente seu código.'
-    : searchParams.code
+    : resolvedSearchParams.code
     ? 'Código inválido ou expirado'
     : '';
 

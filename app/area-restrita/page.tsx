@@ -104,6 +104,7 @@ export default function AreaRestritaPage() {
   const [courseDocuments, setCourseDocuments] = useState<Record<string, DocumentType[]>>({});
   const [courseVideos, setCourseVideos] = useState<Record<string, VideoType[]>>({});
   const [courseSites, setCourseSites] = useState<Record<string, SiteType[]>>({});
+  const [modulesData, setModulesData] = useState<Record<string, { moduleCount: number; lessonCount: number }>>({});
   const [isDataLoading, setIsDataLoading] = useState(true);
 
   // Search history visibility
@@ -152,6 +153,7 @@ export default function AreaRestritaPage() {
           setCourseDocuments(data.data.documents || {});
           setCourseVideos(data.data.videos || {});
           setCourseSites(data.data.sites || {});
+          setModulesData(data.data.modules || {});
         }
       } catch (error) {
         console.error('Error fetching course data:', error);
@@ -624,6 +626,7 @@ export default function AreaRestritaPage() {
                         documents={courseDocuments}
                         enrolledCourseIds={enrolledCourseIds}
                         onDocumentClick={handleDocumentClick}
+                        modulesData={modulesData}
                       />
                     )}
 
@@ -644,6 +647,7 @@ export default function AreaRestritaPage() {
                         documents={courseDocuments}
                         enrolledCourseIds={enrolledCourseIds}
                         onDocumentClick={handleDocumentClick}
+                        modulesData={modulesData}
                       />
                     )}
 

@@ -20,16 +20,16 @@ import { enhanceDocumentWithAI } from '@/lib/ai/document-enhancer';
  */
 export async function POST(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id: documentId } = await params;
+
     // 1. Verificar autenticação admin
     const authResult = await verifyAuth(request);
     if (!authResult.valid || authResult.user?.role !== 'admin') {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
-
-    const documentId = params.id;
 
     // 2. Buscar documento
     const document = await prisma.document.findUnique({

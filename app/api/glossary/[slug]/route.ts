@@ -4,10 +4,10 @@ import { prisma } from '@/lib/prisma';
 // GET /api/glossary/[slug] - Obter termo específico por slug
 export async function GET(
   request: NextRequest,
-  { params }: { params: { slug: string } }
+  { params }: { params: Promise<{ slug: string }> }
 ) {
   try {
-    const { slug } = params;
+    const { slug } = await params;
 
     const term = await prisma.glossaryTerm.findUnique({
       where: { slug },

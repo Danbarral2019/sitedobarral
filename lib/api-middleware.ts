@@ -3,8 +3,11 @@ import { rateLimiters } from './rate-limit';
 
 /**
  * Tipo para funções de handler de API
+ * Usa `any` para context para compatibilidade com Next.js 15 RouteContext
+ * (o middleware apenas repassa o context, não inspeciona sua estrutura)
  */
-type ApiHandler = (request: NextRequest, context?: Record<string, unknown>) => Promise<NextResponse>;
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+type ApiHandler = (request: NextRequest, context?: any) => Promise<NextResponse>;
 
 /**
  * Middleware que protege rotas de API para admin apenas

@@ -167,6 +167,9 @@ model Document {
   // Relacionamento com favoritos
   favorites Favorite[]
 
+  // Relacionamento com lições (LMS)
+  lessonDocuments LessonDocument[]
+
   @@index([embeddingStatus]) // Índice para buscar documentos por status de embedding
 }
 
@@ -515,6 +518,9 @@ model CourseVideo {
   isActive      Boolean  @default(true)
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
+
+  // Relacionamento com lições (LMS)
+  lessonVideos LessonVideo[]
 
   @@index([courseId])
   @@index([isActive])
@@ -922,4 +928,137 @@ model IndexJob {
   @@index([entityType, entityId])
   @@index([createdAt])
   @@index([scheduledFor])
+}
+
+// ============================================================================
+// LMS — Módulos e Lições
+// ============================================================================
+
+// Módulo: subdivisão de um curso
+model Module {
+  id           String   @id @default(uuid())
+  courseId      String
+  title        String
+  description  String?  @db.Text
+  displayOrder Int      @default(0)
+  isPublished  Boolean  @default(false)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  lessons Lesson[]
+
+  @@index([courseId])
+  @@index([courseId, displayOrder])
+}
+
+// Lição: unidade de aprendizagem dentro de um módulo
+model Lesson {
+  id               String   @id @default(uuid())
+  moduleId         String
+  module           Module   @relation(fields: [moduleId], references: [id], onDelete: Cascade)
+  title            String
+  slug             String
+  description      String?  @db.Text
+  content          String?  @db.Text
+  displayOrder     Int      @default(0)
+  isPublished      Boolean  @default(false)
+  estimatedMinutes Int?
+
+  // Campos IA
+  aiSummary   String? @db.Text
+  aiKeyPoints String? // JSON array
+  leiArticles String? // JSON array com números de artigos da Lei 14.133/2021
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  documents LessonDocument[]
+  videos    LessonVideo[]
+  progress  LessonProgress[]
+  comments  LessonComment[]
+
+  @@unique([moduleId, slug])
+  @@index([moduleId])
+  @@index([moduleId, displayOrder])
+}
+
+// Junction: Lesson ↔ Document
+model LessonDocument {
+  id          String   @id @default(uuid())
+  lessonId    String
+  lesson      Lesson   @relation(fields: [lessonId], references: [id], onDelete: Cascade)
+  documentId  String
+  document    Document @relation(fields: [documentId], references: [id], onDelete: Cascade)
+  displayOrder Int     @default(0)
+  isRequired  Boolean  @default(false)
+  note        String?
+  createdAt   DateTime @default(now())
+
+  @@unique([lessonId, documentId])
+  @@index([lessonId])
+  @@index([documentId])
+}
+
+// Junction: Lesson ↔ Vídeo
+model LessonVideo {
+  id            String       @id @default(uuid())
+  lessonId      String
+  lesson        Lesson       @relation(fields: [lessonId], references: [id], onDelete: Cascade)
+  courseVideoId String?
+  courseVideo   CourseVideo?  @relation(fields: [courseVideoId], references: [id], onDelete: SetNull)
+  title         String
+  youtubeUrl    String
+  youtubeId     String
+  description   String?
+  displayOrder  Int          @default(0)
+  isRequired    Boolean      @default(false)
+  createdAt     DateTime     @default(now())
+
+  @@index([lessonId])
+  @@index([courseVideoId])
+}
+
+// Progresso do aluno por lição
+model LessonProgress {
+  id               String    @id @default(uuid())
+  userId           String
+  lessonId         String
+  lesson           Lesson    @relation(fields: [lessonId], references: [id], onDelete: Cascade)
+  status           String    @default("not_started") // not_started | in_progress | completed
+  startedAt        DateTime?
+  completedAt      DateTime?
+  lastAccessedAt   DateTime?
+  timeSpentSeconds Int       @default(0)
+  contentRead      Boolean   @default(false)
+  videosWatched    String?   // JSON array de videoIds
+  documentsViewed  String?   // JSON array de documentIds
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+
+  @@unique([userId, lessonId])
+  @@index([userId])
+  @@index([lessonId])
+  @@index([userId, status])
+}
+
+// Discussão por lição (threaded)
+model LessonComment {
+  id        String   @id @default(uuid())
+  lessonId  String
+  lesson    Lesson   @relation(fields: [lessonId], references: [id], onDelete: Cascade)
+  userId    String
+  parentId  String?
+  parent    LessonComment?  @relation("CommentReplies", fields: [parentId], references: [id], onDelete: Cascade)
+  replies   LessonComment[] @relation("CommentReplies")
+  content   String   @db.Text
+  isEdited  Boolean  @default(false)
+  isPinned  Boolean  @default(false)
+  isDeleted Boolean  @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([lessonId])
+  @@index([userId])
+  @@index([parentId])
+  @@index([lessonId, isPinned])
 }

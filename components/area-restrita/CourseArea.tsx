@@ -10,7 +10,9 @@ import {
   ChevronRight,
   ChevronDown,
   FileText,
+  PlayCircle,
 } from 'lucide-react';
+import Link from 'next/link';
 import { courses } from '@/data/courses';
 
 interface Document {
@@ -28,6 +30,7 @@ interface CourseAreaProps {
   documents: Record<string, Document[]>;
   enrolledCourseIds: string[];
   onDocumentClick: (doc: Document) => void;
+  modulesData?: Record<string, { moduleCount: number; lessonCount: number }>;
 }
 
 const TRAIL_STEPS = [
@@ -103,6 +106,7 @@ export default function CourseArea({
   documents,
   enrolledCourseIds,
   onDocumentClick,
+  modulesData,
 }: CourseAreaProps) {
   const [selectedCourseId, setSelectedCourseId] = useState<string | null>(
     enrolledCourseIds.length === 1 ? enrolledCourseIds[0] : null
@@ -236,6 +240,37 @@ export default function CourseArea({
           </div>
         </div>
       </div>
+
+      {/* LMS Module Banner */}
+      {modulesData && modulesData[activeCourseId]?.moduleCount > 0 && (
+        <div className="bg-gradient-to-r from-brand-50 to-purple-50 border border-brand-200 rounded-2xl p-5">
+          <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4">
+            <div className="flex items-center gap-3 flex-1 min-w-0">
+              <div className="p-2.5 bg-brand-100 rounded-xl flex-shrink-0">
+                <PlayCircle className="w-5 h-5 text-brand-600" />
+              </div>
+              <div className="min-w-0">
+                <p className="text-sm font-bold text-brand-900">
+                  Este curso tem {modulesData[activeCourseId].moduleCount}{' '}
+                  {modulesData[activeCourseId].moduleCount === 1 ? 'modulo' : 'modulos'}{' '}
+                  com {modulesData[activeCourseId].lessonCount}{' '}
+                  {modulesData[activeCourseId].lessonCount === 1 ? 'aula estruturada' : 'aulas estruturadas'}
+                </p>
+                <p className="text-xs text-brand-600 mt-0.5">
+                  Acesse as aulas com conteudo, videos, materiais e discussao
+                </p>
+              </div>
+            </div>
+            <Link
+              href={`/area-restrita/curso/${activeCourse.course.slug}`}
+              className="flex items-center justify-center gap-2 px-5 py-2.5 bg-brand-600 text-white rounded-xl font-semibold text-sm hover:bg-brand-700 transition-colors flex-shrink-0"
+            >
+              Entrar no Curso
+              <ChevronRight className="w-4 h-4" />
+            </Link>
+          </div>
+        </div>
+      )}
 
       {/* Desktop Steps as Cards (lg+) */}
       <div className="hidden lg:block">

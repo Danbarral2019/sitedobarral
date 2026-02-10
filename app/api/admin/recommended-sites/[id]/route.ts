@@ -4,9 +4,10 @@ import { verifyToken } from '@/lib/auth';
 
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params;
     const token = request.cookies.get('auth-token')?.value;
     if (!token) {
       return NextResponse.json({ error: 'Não autorizado' }, { status: 401 });
@@ -18,7 +19,7 @@ export async function DELETE(
     }
 
     await prisma.recommendedSite.delete({
-      where: { id: params.id },
+      where: { id },
     });
 
     return NextResponse.json({ message: 'Site removido com sucesso' });

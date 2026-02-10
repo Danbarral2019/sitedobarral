@@ -1,18 +1,18 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, use } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/hooks/use-auth';
 import Link from 'next/link';
 
 interface PageProps {
-  params: {
+  params: Promise<{
     courseId: string;
-  };
+  }>;
 }
 
 export default function UpgradePage({ params }: PageProps) {
-  const { courseId } = params;
+  const { courseId } = use(params);
   const router = useRouter();
   const { user, isLoading, getEnrollmentStatus } = useAuth();
 

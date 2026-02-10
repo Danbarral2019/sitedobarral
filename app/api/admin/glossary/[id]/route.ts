@@ -19,7 +19,7 @@ function generateSlug(term: string): string {
 // PUT /api/admin/glossary/[id] - Atualizar termo
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     // Verificar autenticação
@@ -28,7 +28,7 @@ export async function PUT(
       return NextResponse.json({ error: 'Não autorizado' }, { status: 401 });
     }
 
-    const { id } = params;
+    const { id } = await params;
     const body = await request.json();
     const {
       term,
@@ -141,7 +141,7 @@ export async function PUT(
 // DELETE /api/admin/glossary/[id] - Deletar termo
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     // Verificar autenticação
@@ -150,7 +150,7 @@ export async function DELETE(
       return NextResponse.json({ error: 'Não autorizado' }, { status: 401 });
     }
 
-    const { id } = params;
+    const { id } = await params;
 
     // Verificar se termo existe
     const existing = await prisma.glossaryTerm.findUnique({

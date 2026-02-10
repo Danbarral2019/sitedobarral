@@ -37,8 +37,9 @@ async function getTermBySlug(slug: string) {
   }
 }
 
-export default async function TermPage({ params }: { params: { slug: string } }) {
-  const term = await getTermBySlug(params.slug);
+export default async function TermPage({ params }: { params: Promise<{ slug: string }> }) {
+  const { slug } = await params;
+  const term = await getTermBySlug(slug);
 
   if (!term) {
     notFound();

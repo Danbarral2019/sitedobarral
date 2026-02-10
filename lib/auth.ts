@@ -9,8 +9,10 @@ export const AuthPayloadSchema = z.object({
   userId: z.string().min(1, 'userId é obrigatório'),
   courseId: z.string().optional(),
   role: z.enum(['admin', 'student'], {
-    errorMap: () => ({ message: 'role deve ser "admin" ou "student"' })
+    error: 'role deve ser "admin" ou "student"'
   }),
+  email: z.string().optional(),
+  name: z.string().optional(),
   validUntil: z.string().datetime().optional(),
   turma: z.string().optional(),
 });

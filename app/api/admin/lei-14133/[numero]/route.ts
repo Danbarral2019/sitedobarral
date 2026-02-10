@@ -9,16 +9,15 @@ import { CacheInvalidation } from '@/lib/cache/redis-client';
  */
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { numero: string } }
+  { params }: { params: Promise<{ numero: string }> }
 ) {
+  const { numero } = await params;
   try {
     // Verificar autenticação admin
     const authResult = await verifyAuth(request);
     if (!authResult.valid || authResult.user?.role !== 'admin') {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
-
-    const { numero } = params;
     const body = await request.json();
 
     // Validar dados
@@ -68,7 +67,7 @@ export async function PUT(
     });
   } catch (error) {
     console.error('[Lei 14.133 Edit] Error details:', {
-      numero: params.numero,
+      numero,
       errorMessage: error instanceof Error ? error.message : 'Erro desconhecido',
       errorStack: error instanceof Error ? error.stack : undefined,
     });
@@ -88,7 +87,7 @@ export async function PUT(
  */
 export async function GET(
   request: NextRequest,
-  { params }: { params: { numero: string } }
+  { params }: { params: Promise<{ numero: string }> }
 ) {
   try {
     const authResult = await verifyAuth(request);
@@ -96,7 +95,7 @@ export async function GET(
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const { numero } = params;
+    const { numero } = await params;
 
     // Buscar artigo no banco de dados
     const artigo = await prisma.leiArticle.findUnique({

@@ -16,18 +16,10 @@ interface ChatRequest {
   conversationId?: string;
 }
 
-type RouteContext = {
-  params: Promise<{
-    numero: string;
-  }> | {
-    numero: string;
-  };
-};
-
 // POST /api/artigos/[numero]/chat - IA Assistente
 export async function POST(
   request: NextRequest,
-  context: RouteContext
+  { params }: { params: Promise<{ numero: string }> }
 ) {
   try {
     try {
@@ -36,9 +28,8 @@ export async function POST(
       throw new RateLimitError();
     }
 
-    // Handle both Promise and non-Promise params (Next.js 15 inconsistency)
-    const resolvedParams = await Promise.resolve(context.params);
-    const articleNumber = resolvedParams.numero;
+    const { numero } = await params;
+    const articleNumber = numero;
     apiLogger.info({ articleNumber }, 'Chat API processing started');
     const body = await request.json() as ChatRequest;
 
@@ -356,12 +347,11 @@ Responda agora:`;
 // GET /api/artigos/[numero]/chat?conversationId=XXX - Obter histórico de conversa
 export async function GET(
   request: NextRequest,
-  context: RouteContext
+  { params }: { params: Promise<{ numero: string }> }
 ) {
   try {
-    // Handle both Promise and non-Promise params (Next.js 15 inconsistency)
-    const resolvedParams = await Promise.resolve(context.params);
-    const articleNumber = resolvedParams.numero;
+    const { numero } = await params;
+    const articleNumber = numero;
     const searchParams = request.nextUrl.searchParams;
     const conversationId = searchParams.get('conversationId');
 

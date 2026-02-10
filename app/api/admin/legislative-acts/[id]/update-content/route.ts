@@ -4,10 +4,6 @@ import { verifyToken } from '@/lib/auth';
 import { scrapeUrl, canScrapeUrl } from '@/lib/legislative-scrapers';
 import { hasHashChanged, generateChangeSummary } from '@/lib/legislative-scrapers/change-detector';
 
-type RouteContext = {
-  params: Promise<{ id: string }> | { id: string };
-};
-
 /**
  * POST /api/admin/legislative-acts/[id]/update-content
  *
@@ -18,7 +14,7 @@ type RouteContext = {
  */
 export async function POST(
   request: NextRequest,
-  context: RouteContext
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     // Verificar autenticação admin
@@ -38,9 +34,7 @@ export async function POST(
       );
     }
 
-    // Resolver params
-    const resolvedParams = await Promise.resolve(context.params);
-    const { id } = resolvedParams;
+    const { id } = await params;
 
     // Buscar o ato normativo
     const act = await prisma.legislativeAct.findUnique({
@@ -178,7 +172,7 @@ export async function POST(
  */
 export async function GET(
   request: NextRequest,
-  context: RouteContext
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     // Verificar autenticação admin
@@ -198,9 +192,7 @@ export async function GET(
       );
     }
 
-    // Resolver params
-    const resolvedParams = await Promise.resolve(context.params);
-    const { id } = resolvedParams;
+    const { id } = await params;
 
     const act = await prisma.legislativeAct.findUnique({
       where: { id },
