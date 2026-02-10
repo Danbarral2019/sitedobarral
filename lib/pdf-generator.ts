@@ -792,6 +792,215 @@ export async function generateCertificatePDF(options: CertificatePDFOptions): Pr
 }
 
 // ═══════════════════════════════════════════════════════
+// generateProgressReportPDF — Relatório LMS
+// ═══════════════════════════════════════════════════════
+
+interface ProgressReportFunnel {
+  enrolled: number;
+  started: number;
+  completedAll: number;
+  certified: number;
+}
+
+interface ProgressReportModule {
+  title: string;
+  avgCompletion: number;
+  totalLessons: number;
+}
+
+interface ProgressReportQuiz {
+  lessonTitle: string;
+  passRate: number;
+  avgScore: number;
+  totalAttempts: number;
+}
+
+interface ProgressReportStudent {
+  name: string;
+  email: string;
+  completionPct: number;
+  lastAccess: string | null;
+  avgQuizScore: number | null;
+  status: 'active' | 'at_risk' | 'inactive';
+}
+
+export function generateProgressReportPDF(
+  courseTitle: string,
+  funnel: ProgressReportFunnel,
+  moduleProgress: ProgressReportModule[],
+  quizStats: ProgressReportQuiz[],
+  students: ProgressReportStudent[]
+): void {
+  const pdf = new PDFBuilder();
+
+  const dateStr = new Date().toLocaleDateString('pt-BR', {
+    day: '2-digit',
+    month: 'long',
+    year: 'numeric',
+  });
+
+  // Header
+  pdf.drawHeader(`Relatorio LMS`, dateStr);
+
+  // Course title
+  pdf.sectionLabel('Curso');
+  pdf.card(courseTitle, { barColor: C.navy, textColor: C.navy });
+  pdf.y += 2;
+
+  // Funnel
+  pdf.sectionLabel('Funil de Conversao');
+
+  const funnelItems = [
+    { label: 'Matriculados', value: funnel.enrolled },
+    { label: 'Iniciaram', value: funnel.started },
+    { label: 'Concluiram 100%', value: funnel.completedAll },
+    { label: 'Certificados', value: funnel.certified },
+  ];
+
+  for (const item of funnelItems) {
+    const pct = funnel.enrolled > 0 ? Math.round((item.value / funnel.enrolled) * 100) : 0;
+    pdf.font('normal', 9.5);
+    pdf.color(C.text);
+    pdf.newPageIfNeeded(6);
+
+    // Bar background
+    const barW = pdf.cw - 60;
+    const barH = 5;
+    pdf.fill(C.bg);
+    pdf.doc.roundedRect(pdf.ml + 55, pdf.y - 3.5, barW, barH, 1, 1, 'F');
+
+    // Bar fill
+    const fillW = (pct / 100) * barW;
+    if (fillW > 0) {
+      pdf.fill(C.navy);
+      pdf.doc.roundedRect(pdf.ml + 55, pdf.y - 3.5, Math.max(fillW, 2), barH, 1, 1, 'F');
+    }
+
+    // Label
+    pdf.font('normal', 8.5);
+    pdf.color(C.text);
+    pdf.doc.text(item.label, pdf.ml + 1, pdf.y);
+
+    // Value
+    pdf.font('bold', 8.5);
+    pdf.color(C.navy);
+    pdf.doc.text(`${item.value} (${pct}%)`, pdf.pw - pdf.mr, pdf.y, { align: 'right' });
+
+    pdf.y += 8;
+  }
+
+  pdf.y += 4;
+
+  // Module Progress
+  if (moduleProgress.length > 0) {
+    pdf.sectionLabel('Progresso por Modulo');
+
+    for (const mod of moduleProgress) {
+      pdf.font('normal', 8.5);
+      pdf.color(C.text);
+      pdf.newPageIfNeeded(8);
+      pdf.doc.text(pdf.truncate(mod.title, pdf.cw - 35), pdf.ml + 1, pdf.y);
+
+      pdf.font('bold', 8.5);
+      pdf.color(C.navy);
+      pdf.doc.text(`${mod.avgCompletion}%`, pdf.pw - pdf.mr, pdf.y, { align: 'right' });
+
+      pdf.y += 3;
+
+      // Progress bar
+      const barW = pdf.cw;
+      pdf.fill(C.bg);
+      pdf.doc.roundedRect(pdf.ml, pdf.y, barW, 3, 1, 1, 'F');
+      if (mod.avgCompletion > 0) {
+        pdf.fill(C.mid);
+        pdf.doc.roundedRect(pdf.ml, pdf.y, (mod.avgCompletion / 100) * barW, 3, 1, 1, 'F');
+      }
+
+      pdf.y += 7;
+    }
+
+    pdf.y += 3;
+  }
+
+  // Quiz Stats
+  if (quizStats.length > 0) {
+    pdf.sectionLabel('Quizzes');
+
+    // Table header
+    const cols = [pdf.ml + 1, pdf.ml + 85, pdf.ml + 110, pdf.ml + 135];
+    pdf.font('bold', 7.5);
+    pdf.color(C.mid);
+    pdf.newPageIfNeeded(10);
+    pdf.doc.text('Aula', cols[0], pdf.y);
+    pdf.doc.text('Media', cols[1], pdf.y);
+    pdf.doc.text('Aprov.', cols[2], pdf.y);
+    pdf.doc.text('Tent.', cols[3], pdf.y);
+    pdf.y += 2;
+    pdf.draw(C.rule);
+    pdf.doc.setLineWidth(0.3);
+    pdf.doc.line(pdf.ml, pdf.y, pdf.pw - pdf.mr, pdf.y);
+    pdf.y += 4;
+
+    for (const q of quizStats) {
+      pdf.newPageIfNeeded(6);
+      pdf.font('normal', 8);
+      pdf.color(C.text);
+      pdf.doc.text(pdf.truncate(q.lessonTitle, 80), cols[0], pdf.y);
+      pdf.doc.text(`${q.avgScore}%`, cols[1], pdf.y);
+      pdf.color(q.passRate < 60 ? C.amber : C.text);
+      pdf.doc.text(`${q.passRate}%`, cols[2], pdf.y);
+      pdf.color(C.text);
+      pdf.doc.text(`${q.totalAttempts}`, cols[3], pdf.y);
+      pdf.y += 5;
+    }
+
+    pdf.y += 4;
+  }
+
+  // Students Table
+  if (students.length > 0) {
+    pdf.sectionLabel(`Alunos (${students.length})`);
+
+    // Table header
+    pdf.font('bold', 7);
+    pdf.color(C.mid);
+    pdf.newPageIfNeeded(10);
+    pdf.doc.text('Nome', pdf.ml + 1, pdf.y);
+    pdf.doc.text('Prog.', pdf.ml + 72, pdf.y);
+    pdf.doc.text('Ult. Ativ.', pdf.ml + 95, pdf.y);
+    pdf.doc.text('Quiz', pdf.ml + 125, pdf.y);
+    pdf.doc.text('Status', pdf.ml + 145, pdf.y);
+    pdf.y += 2;
+    pdf.draw(C.rule);
+    pdf.doc.setLineWidth(0.3);
+    pdf.doc.line(pdf.ml, pdf.y, pdf.pw - pdf.mr, pdf.y);
+    pdf.y += 4;
+
+    for (const s of students) {
+      pdf.newPageIfNeeded(6);
+      pdf.font('normal', 7.5);
+      pdf.color(C.text);
+      pdf.doc.text(pdf.truncate(s.name, 65), pdf.ml + 1, pdf.y);
+      pdf.doc.text(`${s.completionPct}%`, pdf.ml + 72, pdf.y);
+      pdf.doc.text(
+        s.lastAccess ? new Date(s.lastAccess).toLocaleDateString('pt-BR') : '--',
+        pdf.ml + 95,
+        pdf.y
+      );
+      pdf.doc.text(s.avgQuizScore !== null ? `${s.avgQuizScore}%` : '--', pdf.ml + 125, pdf.y);
+
+      const statusLabel = s.status === 'active' ? 'Ativo' : s.status === 'at_risk' ? 'Em risco' : 'Inativo';
+      pdf.color(s.status === 'active' ? C.mid : s.status === 'at_risk' ? C.amber : C.light);
+      pdf.doc.text(statusLabel, pdf.ml + 145, pdf.y);
+
+      pdf.y += 5;
+    }
+  }
+
+  pdf.save(`Relatorio_LMS_${new Date().toISOString().split('T')[0]}.pdf`);
+}
+
+// ═══════════════════════════════════════════════════════
 // exportCurrentConversation — wrapper de conveniência
 // ═══════════════════════════════════════════════════════
 

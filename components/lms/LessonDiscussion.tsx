@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
-import { MessageSquare, Send, Pin, Reply, Loader2 } from 'lucide-react';
+import { MessageSquare, Send, Pin, Reply, Loader2, Star } from 'lucide-react';
 
 interface Comment {
   id: string;
@@ -11,6 +11,7 @@ interface Comment {
   isEdited: boolean;
   isPinned: boolean;
   isDeleted: boolean;
+  isBestAnswer: boolean;
   createdAt: string;
   updatedAt: string;
   replies: Comment[];
@@ -18,6 +19,7 @@ interface Comment {
 
 interface LessonDiscussionProps {
   lessonId: string;
+  isAdmin?: boolean;
 }
 
 function timeAgo(dateStr: string): string {
@@ -41,14 +43,18 @@ function CommentItem({
   comment,
   isReply,
   onReply,
+  isAdmin,
+  onToggleBestAnswer,
 }: {
   comment: Comment;
   isReply?: boolean;
   onReply: (parentId: string) => void;
+  isAdmin?: boolean;
+  onToggleBestAnswer?: (commentId: string) => void;
 }) {
   return (
     <div className={`${isReply ? 'ml-8 border-l-2 border-gray-100 pl-4' : ''}`}>
-      <div className="py-3">
+      <div className={`py-3 ${comment.isBestAnswer ? 'bg-amber-50/50 -mx-2 px-2 rounded-lg border border-amber-200' : ''}`}>
         <div className="flex items-center gap-2 mb-1">
           <div className="w-7 h-7 rounded-full bg-gradient-to-br from-brand-400 to-brand-600 flex items-center justify-center flex-shrink-0">
             <span className="text-white text-xs font-bold">
@@ -58,6 +64,12 @@ function CommentItem({
           <span className="text-sm font-semibold text-gray-900">{comment.userName}</span>
           <span className="text-xs text-gray-400">{timeAgo(comment.createdAt)}</span>
           {comment.isPinned && <Pin className="w-3 h-3 text-amber-500" />}
+          {comment.isBestAnswer && (
+            <span className="inline-flex items-center gap-0.5 text-[10px] font-bold text-amber-700 bg-amber-100 px-1.5 py-0.5 rounded-full">
+              <Star className="w-3 h-3 fill-amber-500 text-amber-500" />
+              Melhor Resposta
+            </span>
+          )}
           {comment.isEdited && <span className="text-[10px] text-gray-300">(editado)</span>}
         </div>
         {comment.isDeleted ? (
@@ -65,21 +77,38 @@ function CommentItem({
         ) : (
           <p className="text-sm text-gray-700 leading-relaxed ml-9">{comment.content}</p>
         )}
-        {!comment.isDeleted && !isReply && (
-          <button
-            onClick={() => onReply(comment.id)}
-            className="ml-9 mt-1 text-xs text-gray-400 hover:text-brand-600 flex items-center gap-1 transition-colors"
-          >
-            <Reply className="w-3 h-3" />
-            Responder
-          </button>
+        {!comment.isDeleted && (
+          <div className="ml-9 mt-1 flex items-center gap-3">
+            {!isReply && (
+              <button
+                onClick={() => onReply(comment.id)}
+                className="text-xs text-gray-400 hover:text-brand-600 flex items-center gap-1 transition-colors"
+              >
+                <Reply className="w-3 h-3" />
+                Responder
+              </button>
+            )}
+            {isAdmin && onToggleBestAnswer && (
+              <button
+                onClick={() => onToggleBestAnswer(comment.id)}
+                className={`text-xs flex items-center gap-1 transition-colors ${
+                  comment.isBestAnswer
+                    ? 'text-amber-600 hover:text-amber-700'
+                    : 'text-gray-400 hover:text-amber-600'
+                }`}
+              >
+                <Star className={`w-3 h-3 ${comment.isBestAnswer ? 'fill-amber-500' : ''}`} />
+                {comment.isBestAnswer ? 'Remover destaque' : 'Melhor Resposta'}
+              </button>
+            )}
+          </div>
         )}
       </div>
     </div>
   );
 }
 
-export default function LessonDiscussion({ lessonId }: LessonDiscussionProps) {
+export default function LessonDiscussion({ lessonId, isAdmin }: LessonDiscussionProps) {
   const [comments, setComments] = useState<Comment[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [newComment, setNewComment] = useState('');
@@ -124,6 +153,19 @@ export default function LessonDiscussion({ lessonId }: LessonDiscussionProps) {
       console.error('Error posting comment:', error);
     } finally {
       setIsSubmitting(false);
+    }
+  };
+
+  const toggleBestAnswer = async (commentId: string) => {
+    try {
+      const res = await fetch(`/api/admin/comments/${commentId}/best-answer`, {
+        method: 'PATCH',
+      });
+      if (res.ok) {
+        await fetchComments();
+      }
+    } catch (error) {
+      console.error('Error toggling best answer:', error);
     }
   };
 
@@ -190,6 +232,8 @@ export default function LessonDiscussion({ lessonId }: LessonDiscussionProps) {
                   setReplyTo(replyTo === parentId ? null : parentId);
                   setReplyText('');
                 }}
+                isAdmin={isAdmin}
+                onToggleBestAnswer={toggleBestAnswer}
               />
               {/* Reply form */}
               {replyTo === comment.id && (
@@ -226,6 +270,8 @@ export default function LessonDiscussion({ lessonId }: LessonDiscussionProps) {
                   comment={reply}
                   isReply
                   onReply={() => {}}
+                  isAdmin={isAdmin}
+                  onToggleBestAnswer={toggleBestAnswer}
                 />
               ))}
             </div>

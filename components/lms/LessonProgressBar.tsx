@@ -5,6 +5,8 @@ interface LessonProgressBarProps {
   completedLessons: number;
 }
 
+const MILESTONES = [25, 50, 75, 100];
+
 export default function LessonProgressBar({
   totalLessons,
   completedLessons,
@@ -19,11 +21,32 @@ export default function LessonProgressBar({
         <span className="font-medium">Progresso</span>
         <span className="font-semibold text-gray-700">{percentage}%</span>
       </div>
-      <div className="w-full h-2 bg-gray-100 rounded-full overflow-hidden">
+      <div className="relative w-full h-2 bg-gray-100 rounded-full overflow-visible">
         <div
           className="h-full bg-gradient-to-r from-green-400 to-green-600 rounded-full transition-all duration-500"
           style={{ width: `${percentage}%` }}
         />
+        {/* Milestone markers */}
+        {MILESTONES.map(m => {
+          if (m === 100) return null; // Skip 100% marker
+          const reached = percentage >= m;
+          return (
+            <div
+              key={m}
+              className="absolute top-1/2 -translate-y-1/2"
+              style={{ left: `${m}%` }}
+            >
+              <div
+                className={`w-2.5 h-2.5 rounded-full border-2 -ml-[5px] transition-colors ${
+                  reached
+                    ? 'bg-green-500 border-green-600'
+                    : 'bg-white border-gray-300'
+                }`}
+                title={`${m}%`}
+              />
+            </div>
+          );
+        })}
       </div>
       <p className="text-[11px] text-gray-400 mt-1">
         {completedLessons}/{totalLessons} {totalLessons === 1 ? 'licao concluida' : 'licoes concluidas'}

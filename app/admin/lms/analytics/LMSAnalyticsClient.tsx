@@ -8,7 +8,7 @@ import { courses } from '@/data/courses';
 import {
   BarChart3, Users, GraduationCap, Award, CheckCircle,
   Loader2, AlertCircle, ArrowLeft, Calendar, AlertTriangle,
-  ChevronDown,
+  ChevronDown, Download, FileText, Lightbulb, Search, MessageSquareWarning,
 } from 'lucide-react';
 
 interface GlobalData {
@@ -386,13 +386,50 @@ function ActivityChart({ data }: { data: Array<{ date: string; count: number }> 
 function CourseView({ data }: { data: CourseData }) {
   const { funnel, moduleProgress, quizStats, students, activityChart } = data;
   const course = courses.find(c => c.id === data.courseId);
+  const courseTitle = course?.title || data.courseId;
+
+  const exportCSV = () => {
+    const header = 'Nome,Email,Progresso%,Ultima Atividade,Nota Quiz,Status\n';
+    const rows = students.map(s => {
+      const lastAccess = s.lastAccess ? new Date(s.lastAccess).toLocaleDateString('pt-BR') : '';
+      const quiz = s.avgQuizScore !== null ? `${s.avgQuizScore}%` : '';
+      const statusLabel = s.status === 'active' ? 'Ativo' : s.status === 'at_risk' ? 'Em risco' : 'Inativo';
+      return `"${s.name}","${s.email}",${s.completionPct}%,"${lastAccess}","${quiz}","${statusLabel}"`;
+    }).join('\n');
+
+    const blob = new Blob([header + rows], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `Alunos_${courseTitle.replace(/[^a-zA-Z0-9]/g, '_')}_${new Date().toISOString().split('T')[0]}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
+  const exportPDF = async () => {
+    const { generateProgressReportPDF } = await import('@/lib/pdf-generator');
+    generateProgressReportPDF(
+      courseTitle,
+      funnel,
+      moduleProgress.map(m => ({ title: m.title, avgCompletion: m.avgCompletion, totalLessons: m.totalLessons })),
+      quizStats.map(q => ({ lessonTitle: q.lessonTitle, passRate: q.passRate, avgScore: q.avgScore, totalAttempts: q.totalAttempts })),
+      students.map(s => ({
+        name: s.name,
+        email: s.email,
+        completionPct: s.completionPct,
+        lastAccess: s.lastAccess,
+        avgQuizScore: s.avgQuizScore,
+        status: s.status,
+      }))
+    );
+  };
 
   return (
     <>
       {/* Funnel */}
       <div className="bg-white rounded-xl shadow-md border-2 border-gray-200 p-6 mb-6">
         <h2 className="text-xl font-bold text-gray-900 mb-4">
-          Funil — {course?.title || data.courseId}
+          Funil — {courseTitle}
         </h2>
         <div className="space-y-3">
           <FunnelBar label="Matriculados" value={funnel.enrolled} max={funnel.enrolled} color="bg-blue-500" />
@@ -470,14 +507,37 @@ function CourseView({ data }: { data: CourseData }) {
         </div>
       </div>
 
+      {/* Insights Panel */}
+      <InsightsPanel courseId={data.courseId} />
+
       {/* Activity chart */}
       <ActivityChart data={activityChart} />
 
       {/* Students table */}
       <div className="bg-white rounded-xl shadow-md border-2 border-gray-200 p-6 mt-6">
-        <h2 className="text-lg font-bold text-gray-900 mb-4">
-          Alunos ({students.length})
-        </h2>
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="text-lg font-bold text-gray-900">
+            Alunos ({students.length})
+          </h2>
+          {students.length > 0 && (
+            <div className="flex items-center gap-2">
+              <button
+                onClick={exportCSV}
+                className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors"
+              >
+                <Download className="w-3.5 h-3.5" />
+                CSV
+              </button>
+              <button
+                onClick={exportPDF}
+                className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors"
+              >
+                <FileText className="w-3.5 h-3.5" />
+                PDF
+              </button>
+            </div>
+          )}
+        </div>
         {students.length === 0 ? (
           <p className="text-gray-500 text-sm">Nenhum aluno matriculado</p>
         ) : (
@@ -512,10 +572,10 @@ function CourseView({ data }: { data: CourseData }) {
                     <td className="py-2.5 px-2 text-center text-xs text-gray-600">
                       {s.lastAccess
                         ? new Date(s.lastAccess).toLocaleDateString('pt-BR')
-                        : '—'}
+                        : '\u2014'}
                     </td>
                     <td className="py-2.5 px-2 text-center text-sm font-medium">
-                      {s.avgQuizScore !== null ? `${s.avgQuizScore}%` : '—'}
+                      {s.avgQuizScore !== null ? `${s.avgQuizScore}%` : '\u2014'}
                     </td>
                     <td className="py-2.5 pl-2 text-center">
                       <StatusBadge daysSince={s.daysSinceAccess ?? 999} />
@@ -528,6 +588,106 @@ function CourseView({ data }: { data: CourseData }) {
         )}
       </div>
     </>
+  );
+}
+
+// --- Insights Panel ---
+
+interface InsightsData {
+  frequentQueries: Array<{ query: string; count: number }>;
+  quizAlerts: Array<{ lessonTitle: string; passRate: number; avgScore: number; totalAttempts: number }>;
+  suggestions: string[];
+}
+
+function InsightsPanel({ courseId }: { courseId: string }) {
+  const [data, setData] = useState<InsightsData | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    fetch(`/api/admin/lms/insights?courseId=${courseId}`)
+      .then(r => r.ok ? r.json() : null)
+      .then(d => setData(d))
+      .catch(() => {})
+      .finally(() => setIsLoading(false));
+  }, [courseId]);
+
+  if (isLoading) return null;
+  if (!data) return null;
+
+  const hasContent = data.frequentQueries.length > 0 || data.quizAlerts.length > 0 || data.suggestions.length > 0;
+  if (!hasContent) return null;
+
+  return (
+    <div className="bg-gradient-to-br from-amber-50 to-orange-50 rounded-xl border-2 border-amber-200 p-6 mb-6">
+      <h2 className="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
+        <Lightbulb className="w-5 h-5 text-amber-600" />
+        Insights IA
+      </h2>
+
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+        {/* Frequent queries */}
+        {data.frequentQueries.length > 0 && (
+          <div className="bg-white rounded-lg p-4 shadow-sm">
+            <h3 className="text-sm font-semibold text-gray-700 mb-3 flex items-center gap-1.5">
+              <Search className="w-4 h-4 text-blue-500" />
+              Perguntas Frequentes
+            </h3>
+            <div className="space-y-2">
+              {data.frequentQueries.slice(0, 5).map((q, i) => (
+                <div key={i} className="flex items-center justify-between text-sm">
+                  <span className="text-gray-700 truncate mr-2">{q.query}</span>
+                  <span className="text-xs font-bold text-blue-600 bg-blue-50 px-2 py-0.5 rounded-full flex-shrink-0">
+                    {q.count}x
+                  </span>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Quiz alerts */}
+        {data.quizAlerts.length > 0 && (
+          <div className="bg-white rounded-lg p-4 shadow-sm">
+            <h3 className="text-sm font-semibold text-gray-700 mb-3 flex items-center gap-1.5">
+              <MessageSquareWarning className="w-4 h-4 text-red-500" />
+              Alertas de Quiz
+            </h3>
+            <div className="space-y-2">
+              {data.quizAlerts.map((q, i) => (
+                <div key={i} className="text-sm">
+                  <p className="text-gray-700 truncate">{q.lessonTitle}</p>
+                  <div className="flex items-center gap-2 mt-0.5">
+                    <span className="text-xs font-bold text-red-600 bg-red-50 px-2 py-0.5 rounded-full">
+                      {q.passRate}% aprov.
+                    </span>
+                    <span className="text-xs text-gray-500">
+                      media {q.avgScore}% ({q.totalAttempts} tent.)
+                    </span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Suggestions */}
+        {data.suggestions.length > 0 && (
+          <div className="bg-white rounded-lg p-4 shadow-sm">
+            <h3 className="text-sm font-semibold text-gray-700 mb-3 flex items-center gap-1.5">
+              <Lightbulb className="w-4 h-4 text-amber-500" />
+              Sugestoes
+            </h3>
+            <div className="space-y-2">
+              {data.suggestions.map((s, i) => (
+                <p key={i} className="text-sm text-gray-600 leading-relaxed">
+                  {s}
+                </p>
+              ))}
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
   );
 }
 

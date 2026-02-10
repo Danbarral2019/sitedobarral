@@ -213,6 +213,32 @@ export default function CourseLandingPage({
                 totalLessons={totalLessons}
                 completedLessons={completedLessons}
               />
+
+              {/* Milestone badges */}
+              {(() => {
+                const pct = Math.round((completedLessons / totalLessons) * 100);
+                const milestones = [
+                  { threshold: 25, label: '25%', emoji: '\u{1F31F}' },
+                  { threshold: 50, label: '50%', emoji: '\u{1F525}' },
+                  { threshold: 75, label: '75%', emoji: '\u26A1' },
+                  { threshold: 100, label: '100%', emoji: '\u{1F3C6}' },
+                ];
+                const reached = milestones.filter(m => pct >= m.threshold);
+                if (reached.length === 0) return null;
+                return (
+                  <div className="flex items-center gap-2 mt-3 px-4">
+                    {reached.map(m => (
+                      <span
+                        key={m.threshold}
+                        className="inline-flex items-center gap-1 text-xs font-semibold bg-amber-50 text-amber-700 border border-amber-200 px-2 py-1 rounded-full animate-[scale-in_0.3s_ease-out]"
+                      >
+                        <span>{m.emoji}</span>
+                        {m.label}
+                      </span>
+                    ))}
+                  </div>
+                );
+              })()}
             </div>
           )}
 

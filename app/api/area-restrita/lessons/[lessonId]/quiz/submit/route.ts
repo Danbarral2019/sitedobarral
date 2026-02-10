@@ -102,6 +102,24 @@ export const POST = withAuth(async (
     // Se passou, verificar elegibilidade para certificado (fire-and-forget)
     if (passed) {
       checkCertificateEligibilityAsync(user.id, quiz, lessonId).catch(() => {});
+
+      // Gamification: quiz pass
+      import('@/lib/gamification').then(({ addXp, checkAndAwardBadges, updateStreak, XP_VALUES }) => {
+        // Determine courseId
+        prisma.lesson.findUnique({
+          where: { id: lessonId },
+          include: { module: { select: { courseId: true } } },
+        }).then(lesson => {
+          if (!lesson) return;
+          const courseId = lesson.module.courseId;
+          addXp(user.id, courseId, XP_VALUES.PASS_QUIZ).catch(() => {});
+          if (score === 100) {
+            addXp(user.id, courseId, XP_VALUES.PERFECT_QUIZ).catch(() => {});
+          }
+          updateStreak(user.id, courseId).catch(() => {});
+          checkAndAwardBadges(user.id, courseId, 'quiz_pass').catch(() => {});
+        }).catch(() => {});
+      }).catch(() => {});
     }
 
     return NextResponse.json({

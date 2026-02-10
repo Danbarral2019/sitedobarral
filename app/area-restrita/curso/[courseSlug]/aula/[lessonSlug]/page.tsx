@@ -23,6 +23,7 @@ import LessonAIAssistant from '@/components/lms/LessonAIAssistant';
 import LessonDiscussion from '@/components/lms/LessonDiscussion';
 import MarkCompleteButton from '@/components/lms/MarkCompleteButton';
 import QuizPlayer from '@/components/lms/QuizPlayer';
+import GamificationSidebar from '@/components/lms/GamificationSidebar';
 
 interface LessonData {
   id: string;
@@ -110,6 +111,7 @@ export default function LessonPage({
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [isAdmin, setIsAdmin] = useState(false);
 
   const courseId = useMemo(() => getIdFromSlug(courseSlug), [courseSlug]);
   const course = useMemo(() => getCourseBySlug(courseSlug), [courseSlug]);
@@ -172,6 +174,12 @@ export default function LessonPage({
         setLesson(lessonData.lesson);
         setProgress(lessonData.progress);
         setNavigation(lessonData.navigation);
+
+        // Check if admin
+        fetch('/api/auth/verify')
+          .then(r => r.ok ? r.json() : null)
+          .then(d => { if (d?.user?.role === 'admin') setIsAdmin(true); })
+          .catch(() => {});
 
         // Mark as in_progress if not started
         if (!lessonData.progress || lessonData.progress.status === 'not_started') {
@@ -291,13 +299,16 @@ export default function LessonPage({
 
       <div className="max-w-7xl mx-auto flex">
         {/* Desktop Sidebar */}
-        <aside className="hidden lg:block w-[280px] flex-shrink-0 p-4 sticky top-[57px] h-[calc(100vh-57px)] overflow-hidden">
+        <aside className="hidden lg:block w-[280px] flex-shrink-0 p-4 sticky top-[57px] h-[calc(100vh-57px)] overflow-y-auto">
           <ModuleSidebar
             modules={modules}
             currentLessonId={lesson.id}
             courseSlug={courseSlug}
             courseTitle={courseTitle.split('(')[0].trim()}
           />
+          <div className="mt-4">
+            <GamificationSidebar courseId={lesson.module.courseId} />
+          </div>
         </aside>
 
         {/* Mobile Sidebar Overlay */}
@@ -390,7 +401,7 @@ export default function LessonPage({
 
           {/* Discussion */}
           <div className="bg-white rounded-2xl border border-gray-200 p-6 mb-6">
-            <LessonDiscussion lessonId={lesson.id} />
+            <LessonDiscussion lessonId={lesson.id} isAdmin={isAdmin} />
           </div>
 
           {/* Prev/Next Navigation */}

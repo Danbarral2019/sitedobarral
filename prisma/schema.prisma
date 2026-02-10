@@ -1058,9 +1058,10 @@ model LessonComment {
   content   String   @db.Text
   isEdited  Boolean  @default(false)
   isPinned  Boolean  @default(false)
-  isDeleted Boolean  @default(false)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  isDeleted    Boolean  @default(false)
+  isBestAnswer Boolean  @default(false)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
 
   @@index([lessonId])
   @@index([userId])
@@ -1149,4 +1150,40 @@ model Certificate {
   @@index([userId])
   @@index([courseId])
   @@index([certificateNumber])
+}
+
+// ============================================================================
+// LMS — Gamificação (Fase 4)
+// ============================================================================
+
+// Badges conquistados pelos alunos
+model Badge {
+  id        String   @id @default(uuid())
+  userId    String
+  courseId   String?
+  type      String   // first_lesson, first_quiz, module_complete, course_complete, streak_7, streak_30, contributor, best_answer
+  metadata  String?  // JSON: {moduleName, quizTitle, etc}
+  awardedAt DateTime @default(now())
+
+  @@unique([userId, type, courseId])
+  @@index([userId])
+  @@index([courseId])
+}
+
+// Streak e XP do aluno por curso
+model UserStreak {
+  id                String   @id @default(uuid())
+  userId            String
+  courseId           String
+  currentStreak     Int      @default(0)
+  longestStreak     Int      @default(0)
+  lastActivityDate  String?  // YYYY-MM-DD (evita timezone issues)
+  totalXp           Int      @default(0)
+  showOnLeaderboard Boolean  @default(true)
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  @@unique([userId, courseId])
+  @@index([courseId, totalXp])
+  @@index([courseId, showOnLeaderboard])
 }

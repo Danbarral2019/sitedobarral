@@ -39,7 +39,7 @@ export async function GET(
     // Fetch top-level comments with replies
     const comments = await prisma.lessonComment.findMany({
       where: { lessonId, parentId: null },
-      orderBy: [{ isPinned: 'desc' }, { createdAt: 'asc' }],
+      orderBy: [{ isPinned: 'desc' }, { isBestAnswer: 'desc' }, { createdAt: 'asc' }],
       include: {
         replies: {
           orderBy: { createdAt: 'asc' },
@@ -71,6 +71,7 @@ export async function GET(
       isEdited: c.isEdited,
       isPinned: c.isPinned,
       isDeleted: c.isDeleted,
+      isBestAnswer: c.isBestAnswer,
       createdAt: c.createdAt,
       updatedAt: c.updatedAt,
     });
@@ -143,6 +144,14 @@ export async function POST(
 
     apiLogger.info({ lessonId, commentId: comment.id, userId: user.id }, 'Lesson comment created');
 
+    // Fire-and-forget: gamification
+    const courseId = lesson.module.courseId;
+    import('@/lib/gamification').then(({ addXp, updateStreak, checkAndAwardBadges, XP_VALUES }) => {
+      addXp(user.id, courseId, XP_VALUES.POST_COMMENT).catch(() => {});
+      updateStreak(user.id, courseId).catch(() => {});
+      checkAndAwardBadges(user.id, courseId, 'comment').catch(() => {});
+    }).catch(() => {});
+
     return NextResponse.json({
       comment: {
         id: comment.id,
@@ -153,6 +162,7 @@ export async function POST(
         isEdited: comment.isEdited,
         isPinned: comment.isPinned,
         isDeleted: comment.isDeleted,
+        isBestAnswer: comment.isBestAnswer,
         createdAt: comment.createdAt,
         updatedAt: comment.updatedAt,
       },

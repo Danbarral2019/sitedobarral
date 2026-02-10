@@ -6,6 +6,7 @@ import { apiLogger } from '@/lib/logger';
 import { prisma } from '@/lib/prisma';
 import { UpdateLessonProgressSchema } from '@/lib/validation-schemas';
 import { sendCourseWelcomeEmail, sendModuleCompletionEmail } from '@/lib/email';
+import { addXp, updateStreak, checkAndAwardBadges, XP_VALUES } from '@/lib/gamification';
 import { courses } from '@/data/courses';
 
 export async function POST(
@@ -155,8 +156,23 @@ export async function POST(
               console.error('[lms-notification] Module completion email error:', err)
             );
           }
+
+          // Gamification: module complete
+          addXp(userId, courseId, XP_VALUES.COMPLETE_MODULE).catch(() => {});
+          checkAndAwardBadges(userId, courseId, 'module_complete').catch(() => {});
         }
       }
+    }
+
+    // Fire-and-forget: Gamification triggers
+    if (data.status === 'completed') {
+      const gamifCourseId = lesson.module.courseId;
+      addXp(user.id, gamifCourseId, XP_VALUES.COMPLETE_LESSON).catch(() => {});
+      updateStreak(user.id, gamifCourseId).catch(() => {});
+      checkAndAwardBadges(user.id, gamifCourseId, 'lesson_complete').catch(() => {});
+    } else if (!existing) {
+      // First interaction — at least update streak
+      updateStreak(user.id, lesson.module.courseId).catch(() => {});
     }
 
     return NextResponse.json({
