@@ -236,7 +236,7 @@ export function useGlobalSearch(options: UseGlobalSearchOptions = {}): UseGlobal
         }
       }
     },
-    [minQueryLength, aiConversationHistory]
+    [minQueryLength]
   );
 
   // Search function

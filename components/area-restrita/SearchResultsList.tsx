@@ -177,7 +177,7 @@ function AIAnswerCard({
   // Loading state
   if (isLoading) {
     return (
-      <div className="bg-gradient-to-r from-purple-50 to-indigo-50 rounded-2xl border border-purple-200 p-5 animate-pulse">
+      <div className="bg-gradient-to-r from-purple-50 to-indigo-50 rounded-2xl border border-purple-200 p-5 animate-pulse" aria-live="polite" aria-busy="true" role="status">
         <div className="flex items-center gap-2 mb-3">
           <div className="w-5 h-5 rounded bg-purple-200" />
           <div className="h-4 bg-purple-200 rounded w-24" />

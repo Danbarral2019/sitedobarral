@@ -13,7 +13,13 @@ export interface EmailOptions {
   text?: string;
 }
 
-export async function sendEmail(options: EmailOptions): Promise<boolean> {
+export interface SendEmailResult {
+  success: boolean;
+  error?: string;
+  retryable?: boolean;
+}
+
+export async function sendEmail(options: EmailOptions): Promise<SendEmailResult> {
   const { to, subject, html, text } = options;
 
   // Em desenvolvimento, apenas loga no console
@@ -24,37 +30,49 @@ export async function sendEmail(options: EmailOptions): Promise<boolean> {
     console.log(`Conteúdo HTML:\n${html.substring(0, 200)}...`);
     if (text) console.log(`Conteúdo Texto:\n${text.substring(0, 200)}...`);
     console.log('===== FIM DO EMAIL =====\n');
-    return true;
+    return { success: true };
   }
 
   // Em produção ou desenvolvimento com RESEND_API_KEY configurado
   if (process.env.RESEND_API_KEY) {
-    try {
-      const resend = new Resend(process.env.RESEND_API_KEY);
+    const resend = new Resend(process.env.RESEND_API_KEY);
+    const fromEmail = process.env.EMAIL_FROM || 'noreply@profbarral.com.br';
+    const maxRetries = 2;
 
-      const fromEmail = process.env.EMAIL_FROM || 'noreply@profbarral.com.br';
+    for (let attempt = 0; attempt <= maxRetries; attempt++) {
+      try {
+        const result = await resend.emails.send({
+          from: fromEmail,
+          to,
+          subject,
+          html,
+          text: text || undefined,
+        });
 
-      const result = await resend.emails.send({
-        from: fromEmail,
-        to,
-        subject,
-        html,
-        text: text || undefined,
-      });
+        console.log('Email enviado com sucesso:', { to, subject, id: result.data?.id });
+        return { success: true };
+      } catch (error) {
+        const errorMessage = error instanceof Error ? error.message : String(error);
+        const isRetryable = errorMessage.includes('rate') ||
+          errorMessage.includes('timeout') ||
+          errorMessage.includes('5') || // 5xx errors
+          errorMessage.includes('ECONNRESET');
 
-      console.log('✅ Email enviado com sucesso:', { to, subject, id: result.data?.id });
-      return true;
-    } catch (error) {
-      console.error('❌ Erro ao enviar email:', error);
-      return false;
+        if (isRetryable && attempt < maxRetries) {
+          console.warn(`Email retry ${attempt + 1}/${maxRetries} para ${to}:`, errorMessage);
+          await new Promise(r => setTimeout(r, 1000 * (attempt + 1))); // Backoff
+          continue;
+        }
+
+        console.error('Erro ao enviar email:', { to, subject, error: errorMessage, attempt });
+        return { success: false, error: errorMessage, retryable: isRetryable };
+      }
     }
   }
 
   // Fallback se não tiver API key configurada
-  console.warn('⚠️ RESEND_API_KEY não configurado - Email não enviado');
-  console.log(`📧 Email que seria enviado para: ${to}`);
-  console.log(`📧 Assunto: ${subject}`);
-  return false;
+  console.warn('RESEND_API_KEY não configurado - Email não enviado');
+  return { success: false, error: 'RESEND_API_KEY não configurado', retryable: false };
 }
 
 /**
@@ -132,12 +150,13 @@ Atenciosamente,
 Equipe Prof. Daniel Barral
   `;
 
-  return sendEmail({
+  const result = await sendEmail({
     to: email,
     subject: 'Confirme seu email - Prof. Daniel Barral',
     html,
     text,
   });
+  return result.success;
 }
 
 /**
@@ -217,12 +236,12 @@ Atenciosamente,
 Equipe Prof. Daniel Barral
   `;
 
-  return sendEmail({
+  return (await sendEmail({
     to: email,
     subject: 'Recuperação de Senha - Prof. Daniel Barral',
     html,
     text,
-  });
+  })).success;
 }
 
 /**
@@ -366,12 +385,12 @@ Atenciosamente,
 Equipe Prof. Daniel Barral
   `;
 
-  return sendEmail({
+  return (await sendEmail({
     to: email,
     subject: `⏰ Seu acesso expira em ${remainingMessage} - Prof. Daniel Barral`,
     html,
     text,
-  });
+  })).success;
 }
 
 /**
@@ -484,12 +503,12 @@ ID: ${contactId}
 Recebida em: ${new Date().toLocaleString('pt-BR')}
   `;
 
-  return sendEmail({
+  return (await sendEmail({
     to: adminEmail,
     subject: isTestimonial ? '⭐ Novo Depoimento para Moderação' : '📧 Nova Mensagem de Contato',
     html,
     text,
-  });
+  })).success;
 }
 
 /**
@@ -649,10 +668,10 @@ Equipe Prof. Daniel Barral
 Você está recebendo este email porque está matriculado no curso ${courseTitle}.
   `;
 
-  return sendEmail({
+  return (await sendEmail({
     to: email,
     subject: `📚 ${documentCount} ${documentCount === 1 ? 'novo material disponível' : 'novos materiais disponíveis'} - ${courseTitle}`,
     html,
     text,
-  });
+  })).success;
 }

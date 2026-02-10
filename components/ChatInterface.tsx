@@ -62,6 +62,7 @@ export default function ChatInterface({
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const abortControllerRef = useRef<AbortController | null>(null);
 
   // Auto-scroll to bottom when new messages arrive
   useEffect(() => {
@@ -113,6 +114,13 @@ export default function ChatInterface({
       timestamp: new Date(),
     };
 
+    // Cancel previous request if still in flight
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort();
+    }
+    const controller = new AbortController();
+    abortControllerRef.current = controller;
+
     setMessages((prev) => [...prev, userMessage]);
     setIsLoading(true);
 
@@ -142,6 +150,7 @@ export default function ChatInterface({
           useCache: true,
           conversationHistory,
         }),
+        signal: controller.signal,
       });
 
       console.log('[ChatInterface] API response status:', response.status);
@@ -191,6 +200,9 @@ export default function ChatInterface({
       setMessages((prev) => [...prev, assistantMessage]);
       console.log('[ChatInterface] Success! Added assistant message');
     } catch (err) {
+      if (err instanceof Error && err.name === 'AbortError') {
+        return; // Request was cancelled, ignore
+      }
       console.error('[ChatInterface] Error:', err);
       setError(err instanceof Error ? err.message : 'Erro ao processar sua pergunta');
 
@@ -198,14 +210,15 @@ export default function ChatInterface({
       const errorMessage: Message = {
         id: (Date.now() + 1).toString(),
         role: 'assistant',
-        content: '❌ Desculpe, ocorreu um erro ao processar sua pergunta. Tente novamente.',
+        content: 'Desculpe, ocorreu um erro ao processar sua pergunta. Tente novamente.',
         timestamp: new Date(),
       };
 
       setMessages((prev) => [...prev, errorMessage]);
     } finally {
-      console.log('[ChatInterface] Request completed, isLoading = false');
-      setIsLoading(false);
+      if (!controller.signal.aborted) {
+        setIsLoading(false);
+      }
     }
   };
 
@@ -397,13 +410,16 @@ export default function ChatInterface({
         )}
 
         {/* Loading indicator */}
-        {isLoading && (
-          <div className="flex justify-start">
-            <div className="bg-gray-100 rounded-lg p-4">
-              <Loader2 className="w-5 h-5 animate-spin text-gray-600" />
+        <div aria-live="polite" aria-atomic="true">
+          {isLoading && (
+            <div className="flex justify-start">
+              <div className="bg-gray-100 rounded-lg p-4">
+                <Loader2 className="w-5 h-5 animate-spin text-gray-600" aria-label="Processando sua pergunta" />
+                <span className="sr-only">Processando sua pergunta...</span>
+              </div>
             </div>
-          </div>
-        )}
+          )}
+        </div>
 
         {/* Error display */}
         {error && (

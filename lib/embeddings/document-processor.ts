@@ -73,22 +73,35 @@ export async function processDocument(
       };
     }
 
-    // 2. Verifica se precisa processar
-    if (!options.forceReprocess && document.embeddingStatus === 'completed') {
-      console.log(`⏭️ Document ${documentId} already processed, skipping`);
-      return {
-        success: true,
-        documentId,
-        stats: {
-          textLength: document.extractedText?.length || 0,
-          chunkCount: 0,
-          processingTime: Date.now() - startTime,
+    // 2. Atomically claim processing slot (prevents race condition)
+    if (!options.forceReprocess) {
+      const claimed = await prisma.document.updateMany({
+        where: {
+          id: documentId,
+          embeddingStatus: { notIn: ['processing', 'completed'] },
         },
-      };
-    }
+        data: {
+          embeddingStatus: 'processing',
+          embeddingError: null,
+        },
+      });
 
-    // 3. Marca como processando
-    await updateDocumentStatus(documentId, 'processing');
+      if (claimed.count === 0) {
+        console.log(`⏭️ Document ${documentId} already processed or in progress, skipping`);
+        return {
+          success: true,
+          documentId,
+          stats: {
+            textLength: document.extractedText?.length || 0,
+            chunkCount: 0,
+            processingTime: Date.now() - startTime,
+          },
+        };
+      }
+    } else {
+      // Force reprocess: just mark as processing
+      await updateDocumentStatus(documentId, 'processing');
+    }
 
     let extractedText = document.extractedText;
 

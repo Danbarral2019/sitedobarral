@@ -38,41 +38,50 @@ export function useFavorites(courseId?: string) {
     return favorites.some(fav => fav.documentId === documentId);
   }, [favorites]);
 
+  const [isToggling, setIsToggling] = useState(false);
+
   const toggleFavorite = useCallback(async (documentId: string, courseId: string) => {
+    if (isToggling) return { success: false };
+    setIsToggling(true);
+
     const isCurrentlyFavorite = isFavorite(documentId);
+    // Optimistic update
+    const previousFavorites = [...favorites];
+    if (isCurrentlyFavorite) {
+      setFavorites(prev => prev.filter(fav => fav.documentId !== documentId));
+    }
 
     try {
       if (isCurrentlyFavorite) {
-        // Remover favorito
         const response = await fetch(`/api/favorites?documentId=${documentId}`, {
           method: 'DELETE',
         });
-
-        if (response.ok) {
-          setFavorites(prev => prev.filter(fav => fav.documentId !== documentId));
-          return { success: true, action: 'removed' };
+        if (!response.ok) {
+          setFavorites(previousFavorites); // Rollback
+          return { success: false };
         }
+        return { success: true, action: 'removed' };
       } else {
-        // Adicionar favorito
         const response = await fetch('/api/favorites', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ documentId, courseId }),
         });
-
         if (response.ok) {
           const data = await response.json();
           setFavorites(prev => [...prev, data.favorite]);
           return { success: true, action: 'added' };
         }
+        return { success: false };
       }
-
-      return { success: false };
     } catch (error) {
       console.error('Erro ao alternar favorito:', error);
+      setFavorites(previousFavorites); // Rollback on error
       return { success: false };
+    } finally {
+      setIsToggling(false);
     }
-  }, [isFavorite]);
+  }, [isFavorite, isToggling, favorites]);
 
   // Lista de IDs de documentos favoritos (útil para exportação PDF)
   const favoriteIds = favorites.map(fav => fav.documentId);

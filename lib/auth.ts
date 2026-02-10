@@ -66,9 +66,7 @@ export async function generateToken(payload: AuthPayload): Promise<string> {
     if (secondsUntilExpiration > 0) {
       expirationTime = `${secondsUntilExpiration}s`;
     } else {
-      // ✅ FIX CRÍTICO: Se validUntil já passou, token expira imediatamente
-      // Não deve gerar token válido por 7 dias para acesso expirado!
-      expirationTime = '0s';
+      throw new Error('Acesso expirado: validUntil está no passado');
     }
   }
 
@@ -171,7 +169,7 @@ export async function createAuthSession(payload: AuthPayload): Promise<string> {
     if (secondsUntilExpiration > 0) {
       cookieMaxAge = secondsUntilExpiration;
     } else {
-      // Se já expirou, cookie expira imediatamente
+      // generateToken já rejeita validUntil no passado, mas previne caso chegue aqui
       cookieMaxAge = 0;
     }
   }
@@ -179,7 +177,7 @@ export async function createAuthSession(payload: AuthPayload): Promise<string> {
   cookieStore.set('auth-token', token, {
     httpOnly: true,
     secure: process.env.NODE_ENV === 'production',
-    sameSite: 'lax',
+    sameSite: 'strict',
     maxAge: cookieMaxAge,
     path: '/',
   });

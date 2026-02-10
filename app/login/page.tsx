@@ -23,8 +23,15 @@ export default function LoginPage() {
     setError('');
 
     // Validações básicas
-    if (!formData.email || !formData.password) {
+    if (!formData.email.trim() || !formData.password) {
       setError('Email e senha são obrigatórios');
+      return;
+    }
+
+    // Validação de formato de email
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(formData.email.trim())) {
+      setError('Formato de email inválido');
       return;
     }
 

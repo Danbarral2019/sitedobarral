@@ -67,7 +67,7 @@ export default function TestimonialsCarousel() {
     }, 5000); // Muda a cada 5 segundos
 
     return () => clearInterval(interval);
-  }, [currentIndex, isAutoPlaying, testimonials.length]);
+  }, [isAutoPlaying, testimonials.length]);
 
   const goToPrevious = () => {
     setCurrentIndex((prev) => (prev - 1 + testimonials.length) % testimonials.length);

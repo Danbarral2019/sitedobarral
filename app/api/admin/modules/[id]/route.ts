@@ -1,23 +1,21 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { handleApiError } from '@/lib/errors/error-handler';
-import { NotFoundError, AuthorizationError } from '@/lib/errors/api-error';
+import { NotFoundError } from '@/lib/errors/api-error';
 import { apiLogger } from '@/lib/logger';
 import { UpdateModuleSchema } from '@/lib/validation-schemas';
+import { verifyAdmin } from '@/lib/api-middleware';
 
 /**
  * GET: Busca um módulo por ID com lições
  */
 export async function GET(
-  _request: NextRequest,
+  request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const { getCurrentUser } = await import('@/lib/auth');
-    const user = await getCurrentUser();
-    if (!user || user.role !== 'admin') {
-      throw new AuthorizationError();
-    }
+    const auth = await verifyAdmin(request);
+    if (auth.error) return auth.response;
 
     const { id } = await params;
 
@@ -49,11 +47,8 @@ export async function PUT(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const { getCurrentUser } = await import('@/lib/auth');
-    const user = await getCurrentUser();
-    if (!user || user.role !== 'admin') {
-      throw new AuthorizationError();
-    }
+    const auth = await verifyAdmin(request);
+    if (auth.error) return auth.response;
 
     const { id } = await params;
     const body = await request.json();
@@ -83,15 +78,12 @@ export async function PUT(
  * DELETE: Remove um módulo (cascade para lições)
  */
 export async function DELETE(
-  _request: NextRequest,
+  request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const { getCurrentUser } = await import('@/lib/auth');
-    const user = await getCurrentUser();
-    if (!user || user.role !== 'admin') {
-      throw new AuthorizationError();
-    }
+    const auth = await verifyAdmin(request);
+    if (auth.error) return auth.response;
 
     const { id } = await params;
 

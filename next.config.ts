@@ -2,8 +2,8 @@ import type { NextConfig } from "next";
 import { withSentryConfig } from "@sentry/nextjs";
 
 const nextConfig: NextConfig = {
-  // Source maps para Sentry (stack traces legíveis)
-  productionBrowserSourceMaps: true,
+  // Source maps apenas server-side (Sentry via hideSourceMaps, não expõe no browser)
+  productionBrowserSourceMaps: false,
 
   typescript: {
     // TODO: Fix remaining TypeScript errors (OG route params, form types)
@@ -59,6 +59,10 @@ const nextConfig: NextConfig = {
           {
             key: 'Referrer-Policy',
             value: 'origin-when-cross-origin'
+          },
+          {
+            key: 'Content-Security-Policy',
+            value: "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://vercel.live https://va.vercel-scripts.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com data:; img-src 'self' data: blob: https:; connect-src 'self' https: wss:; frame-src 'self' https://www.youtube.com https://vercel.live; media-src 'self' https:; object-src 'none'; base-uri 'self'; form-action 'self'"
           },
         ],
       },

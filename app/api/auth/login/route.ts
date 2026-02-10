@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import bcrypt from 'bcryptjs';
-import jwt from 'jsonwebtoken';
+import { generateToken } from '@/lib/auth';
 import { rateLimiters } from '@/lib/rate-limit';
 import { validateRequest } from '@/lib/validation-helper';
 import { LoginSchema } from '@/lib/validation-schemas';
@@ -12,12 +12,6 @@ import {
   RateLimitError,
 } from '@/lib/errors/api-error';
 import { authLogger } from '@/lib/logger';
-
-const JWT_SECRET = process.env.JWT_SECRET;
-
-if (!JWT_SECRET) {
-  throw new Error('JWT_SECRET environment variable is required');
-}
 
 export async function POST(request: NextRequest) {
   try {
@@ -77,16 +71,14 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Gerar JWT token
-    const token = jwt.sign(
-      {
-        userId: user.id,
-        email: user.email,
-        role: user.role,
-      },
-      JWT_SECRET,
-      { expiresIn: '30d' } // Token válido por 30 dias
-    );
+    // Gerar JWT token via lib/auth (unificado com jose)
+    const thirtyDaysFromNow = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString();
+    const token = await generateToken({
+      userId: user.id,
+      email: user.email,
+      role: user.role as 'admin' | 'student',
+      validUntil: thirtyDaysFromNow,
+    });
 
     // Registrar log de acesso
     try {
@@ -124,7 +116,7 @@ export async function POST(request: NextRequest) {
     response.cookies.set('auth-token', token, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
-      sameSite: 'lax',
+      sameSite: 'strict',
       maxAge: 60 * 60 * 24 * 30, // 30 dias
       path: '/',
     });
