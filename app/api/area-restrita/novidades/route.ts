@@ -1,0 +1,112 @@
+import { NextResponse } from 'next/server';
+import { prisma } from '@/lib/prisma';
+import { withAuth } from '@/lib/api-middleware';
+
+const FOURTEEN_DAYS_AGO = 14 * 24 * 60 * 60 * 1000;
+const THIRTY_DAYS_AGO = 30 * 24 * 60 * 60 * 1000;
+
+async function handler() {
+  const fourteenDaysAgo = new Date(Date.now() - FOURTEEN_DAYS_AGO);
+  const thirtyDaysAgo = new Date(Date.now() - THIRTY_DAYS_AGO);
+
+  const [recentDocuments, recentBlogPosts, documentUpdates] = await Promise.all([
+    // Recent documents added (last 14 days)
+    prisma.document.findMany({
+      where: {
+        uploadedAt: { gte: fourteenDaysAgo },
+        isPublic: false,
+      },
+      select: {
+        id: true,
+        title: true,
+        category: true,
+        type: true,
+        uploadedAt: true,
+      },
+      orderBy: { uploadedAt: 'desc' },
+      take: 8,
+    }),
+
+    // Recent blog posts (last 30 days)
+    prisma.blogPost.findMany({
+      where: {
+        isPublished: true,
+        publishedAt: { gte: thirtyDaysAgo },
+      },
+      select: {
+        id: true,
+        title: true,
+        slug: true,
+        excerpt: true,
+        publishedAt: true,
+      },
+      orderBy: { publishedAt: 'desc' },
+      take: 3,
+    }),
+
+    // Recent document updates/versions (last 14 days)
+    prisma.documentVersion.findMany({
+      where: {
+        detectedAt: { gte: fourteenDaysAgo },
+      },
+      select: {
+        id: true,
+        changeType: true,
+        changesSummary: true,
+        detectedAt: true,
+        document: {
+          select: {
+            id: true,
+            title: true,
+            category: true,
+          },
+        },
+      },
+      orderBy: { detectedAt: 'desc' },
+      take: 5,
+    }),
+  ]);
+
+  // Platform updates (static for now, easy to maintain)
+  const platformUpdates = [
+    {
+      id: 'gamification',
+      title: 'Sistema de Gamificacao',
+      description: 'Ganhe XP, badges e acompanhe seu streak de estudos',
+      date: '2026-02-10',
+      type: 'feature' as const,
+    },
+    {
+      id: 'quizzes',
+      title: 'Quizzes e Certificados',
+      description: 'Teste seus conhecimentos e obtenha certificados de conclusao',
+      date: '2026-02-10',
+      type: 'feature' as const,
+    },
+    {
+      id: 'ai-assistant',
+      title: 'Assistente IA nas Aulas',
+      description: 'Tire duvidas sobre o conteudo da aula com inteligencia artificial',
+      date: '2026-02-10',
+      type: 'feature' as const,
+    },
+  ];
+
+  return NextResponse.json({
+    recentDocuments,
+    recentBlogPosts,
+    documentUpdates: documentUpdates.map((v) => ({
+      id: v.id,
+      changeType: v.changeType,
+      changesSummary: v.changesSummary,
+      detectedAt: v.detectedAt,
+      documentTitle: v.document.title,
+      documentCategory: v.document.category,
+    })),
+    platformUpdates,
+  }, {
+    headers: { 'Cache-Control': 'private, max-age=300' },
+  });
+}
+
+export const GET = withAuth(handler);

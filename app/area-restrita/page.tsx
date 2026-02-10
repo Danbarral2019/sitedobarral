@@ -32,6 +32,7 @@ import {
 import DocumentDetailModal from '@/components/DocumentDetailModal';
 import DocumentsByCategory from '@/components/DocumentsByCategory';
 import CourseArea from '@/components/area-restrita/CourseArea';
+import NovidadesSection from '@/components/area-restrita/NovidadesSection';
 import CourseVideos from '@/components/CourseVideos';
 import RecommendedSites from '@/components/RecommendedSites';
 import { ArticleTreeNavigator } from '@/components/ArticleTreeNavigator';
@@ -618,6 +619,11 @@ export default function AreaRestritaPage() {
                           </div>
                         </div>
                       </div>
+                    )}
+
+                    {/* Novidades Section (home/no selection) */}
+                    {currentContent.type === 'documents' && !contentTree.selection && (
+                      <NovidadesSection />
                     )}
 
                     {/* Course Area Highlight (home/no selection) */}

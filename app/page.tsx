@@ -1,8 +1,13 @@
 import Link from 'next/link';
 import Image from 'next/image';
 import dynamic from 'next/dynamic';
+import { Suspense } from 'react';
 import { ArrowRight, BookOpen, Users, Award, FileText, Star, Search } from 'lucide-react';
 import NewsletterForm from '@/components/NewsletterForm';
+import HomeNovidadesSection from '@/components/HomeNovidadesSection';
+
+// Revalidate every 1 hour so novidades section stays fresh
+export const revalidate = 3600;
 
 // Lazy load do carrossel de depoimentos (otimização de performance)
 const TestimonialsCarousel = dynamic(() => import('@/components/TestimonialsCarousel'), {
@@ -274,6 +279,11 @@ export default function Home() {
           </div>
         </div>
       </section>
+
+      {/* Novidades Section */}
+      <Suspense fallback={null}>
+        <HomeNovidadesSection />
+      </Suspense>
 
       <section className="py-16 bg-gradient-to-b from-gray-50 to-white">
         <div className="container mx-auto px-4">
