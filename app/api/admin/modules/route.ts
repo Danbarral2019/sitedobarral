@@ -80,7 +80,7 @@ export const POST = withAdminAuth(async (request: NextRequest) => {
       displayOrder = (maxOrder._max.displayOrder ?? -1) + 1;
     }
 
-    const module = await prisma.module.create({
+    const createdModule = await prisma.module.create({
       data: {
         courseId: data.courseId,
         title: data.title,
@@ -93,8 +93,8 @@ export const POST = withAdminAuth(async (request: NextRequest) => {
       },
     });
 
-    apiLogger.info({ moduleId: module.id, courseId: data.courseId }, 'Module created');
-    return NextResponse.json({ module }, { status: 201 });
+    apiLogger.info({ moduleId: createdModule.id, courseId: data.courseId }, 'Module created');
+    return NextResponse.json({ module: createdModule }, { status: 201 });
   } catch (error) {
     return handleApiError(error);
   }

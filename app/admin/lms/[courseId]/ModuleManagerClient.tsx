@@ -4,7 +4,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import {
-  GraduationCap, BookOpen, Layers, ChevronRight, ChevronDown, ChevronUp,
+  BookOpen, Layers, ChevronRight, ChevronDown,
   Plus, Trash2, Save, Eye, EyeOff, Loader2, X, ArrowUp, ArrowDown, Pencil, Clock, ClipboardCheck
 } from 'lucide-react';
 import { getCourseById } from '@/lib/courses';

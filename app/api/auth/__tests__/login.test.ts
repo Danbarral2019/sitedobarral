@@ -49,10 +49,8 @@ vi.mock('bcryptjs', () => ({
   },
 }));
 
-vi.mock('jsonwebtoken', () => ({
-  default: {
-    sign: vi.fn().mockReturnValue('mock.jwt.token'),
-  },
+vi.mock('@/lib/auth', () => ({
+  generateToken: vi.fn().mockResolvedValue('mock.jwt.token'),
 }));
 
 // Import after mocks

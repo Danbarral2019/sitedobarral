@@ -8,7 +8,6 @@ import {
   ChevronLeft,
   ChevronRight,
   Clock,
-  BookOpen,
   Menu,
   X,
 } from 'lucide-react';

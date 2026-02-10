@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { verifyToken } from '@/lib/auth';
 import { handleApiError } from '@/lib/errors/error-handler';
-import { AuthenticationError, AuthorizationError, NotFoundError } from '@/lib/errors/api-error';
+import { AuthenticationError, AuthorizationError } from '@/lib/errors/api-error';
 import { apiLogger } from '@/lib/logger';
 import { prisma } from '@/lib/prisma';
 

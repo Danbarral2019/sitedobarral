@@ -4,8 +4,8 @@ import { useState, useEffect, useCallback, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import {
-  GraduationCap, BookOpen, FileText, Play, Settings, Plus, Trash2, Save,
-  Link as LinkIcon, Unlink, Eye, EyeOff, Loader2, ChevronRight, X, Search, ClipboardCheck
+  BookOpen, FileText, Play, Settings, Plus, Trash2, Save,
+  Link as LinkIcon, Unlink, Eye, EyeOff, Loader2, ChevronRight, Search, ClipboardCheck
 } from 'lucide-react';
 import { getCourseById } from '@/lib/courses';
 import AdminLayout from '@/components/AdminLayout';
@@ -634,6 +634,7 @@ export default function LessonEditorClient({ courseId, lessonId }: { courseId: s
                     .sort((a, b) => a.displayOrder - b.displayOrder)
                     .map(video => (
                     <div key={video.id} className="flex items-center gap-4 p-3 bg-gray-50 rounded-lg border border-gray-100">
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
                       <img
                         src={`https://img.youtube.com/vi/${video.youtubeId}/mqdefault.jpg`}
                         alt={video.title}
@@ -671,6 +672,7 @@ export default function LessonEditorClient({ courseId, lessonId }: { courseId: s
                       />
                       {videoUrl && extractYoutubeId(videoUrl) && (
                         <div className="mt-2">
+                          {/* eslint-disable-next-line @next/next/no-img-element */}
                           <img
                             src={`https://img.youtube.com/vi/${extractYoutubeId(videoUrl)}/mqdefault.jpg`}
                             alt="Thumbnail"

@@ -69,7 +69,7 @@ describe('Email Module', () => {
       it('deve simular envio em desenvolvimento', async () => {
         const result = await sendEmail(emailOptions);
 
-        expect(result).toBe(true);
+        expect(result.success).toBe(true);
         expect(consoleSpy.log).toHaveBeenCalled();
         expect(mockSend).not.toHaveBeenCalled();
       });
@@ -96,7 +96,7 @@ describe('Email Module', () => {
 
         const result = await sendEmail(emailOptions);
 
-        expect(result).toBe(true);
+        expect(result.success).toBe(true);
         expect(mockSend).toHaveBeenCalledWith({
           from: 'sender@test.com',
           to: emailOptions.to,
@@ -124,7 +124,7 @@ describe('Email Module', () => {
 
         const result = await sendEmail(emailOptions);
 
-        expect(result).toBe(false);
+        expect(result.success).toBe(false);
         expect(consoleSpy.error).toHaveBeenCalled();
       });
 
@@ -155,7 +155,7 @@ describe('Email Module', () => {
       it('deve retornar false e logar aviso', async () => {
         const result = await sendEmail(emailOptions);
 
-        expect(result).toBe(false);
+        expect(result.success).toBe(false);
         expect(consoleSpy.warn).toHaveBeenCalled();
         const warnCalls = consoleSpy.warn.mock.calls.flat().join(' ');
         expect(warnCalls).toContain('RESEND_API_KEY');
