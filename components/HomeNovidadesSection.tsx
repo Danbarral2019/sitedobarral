@@ -41,36 +41,43 @@ function getCategoryLabel(category: string): string {
 export default async function HomeNovidadesSection() {
   const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
 
-  const [recentDocs, blogPosts] = await Promise.all([
-    prisma.document.findMany({
-      where: {
-        uploadedAt: { gte: thirtyDaysAgo },
-        isPublic: true,
-      },
-      select: {
-        id: true,
-        title: true,
-        category: true,
-        uploadedAt: true,
-      },
-      orderBy: { uploadedAt: 'desc' },
-      take: 4,
-    }),
-    prisma.blogPost.findMany({
-      where: {
-        isPublished: true,
-      },
-      select: {
-        id: true,
-        title: true,
-        slug: true,
-        excerpt: true,
-        publishedAt: true,
-      },
-      orderBy: { publishedAt: 'desc' },
-      take: 3,
-    }),
-  ]);
+  let recentDocs: { id: string; title: string; category: string; uploadedAt: Date | null }[] = [];
+  let blogPosts: { id: string; title: string; slug: string; excerpt: string | null; publishedAt: Date | null }[] = [];
+
+  try {
+    [recentDocs, blogPosts] = await Promise.all([
+      prisma.document.findMany({
+        where: {
+          uploadedAt: { gte: thirtyDaysAgo },
+          isPublic: true,
+        },
+        select: {
+          id: true,
+          title: true,
+          category: true,
+          uploadedAt: true,
+        },
+        orderBy: { uploadedAt: 'desc' },
+        take: 4,
+      }),
+      prisma.blogPost.findMany({
+        where: {
+          isPublished: true,
+        },
+        select: {
+          id: true,
+          title: true,
+          slug: true,
+          excerpt: true,
+          publishedAt: true,
+        },
+        orderBy: { publishedAt: 'desc' },
+        take: 3,
+      }),
+    ]);
+  } catch {
+    // DB unavailable (e.g. CI build) — render nothing
+  }
 
   const hasContent = recentDocs.length > 0 || blogPosts.length > 0;
   if (!hasContent) return null;
