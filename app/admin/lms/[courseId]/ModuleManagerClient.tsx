@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import {
   GraduationCap, BookOpen, Layers, ChevronRight, ChevronDown, ChevronUp,
-  Plus, Trash2, Save, Eye, EyeOff, Loader2, X, ArrowUp, ArrowDown, Pencil, Clock
+  Plus, Trash2, Save, Eye, EyeOff, Loader2, X, ArrowUp, ArrowDown, Pencil, Clock, ClipboardCheck
 } from 'lucide-react';
 import { getCourseById } from '@/lib/courses';
 import AdminLayout from '@/components/AdminLayout';
@@ -18,6 +18,7 @@ interface LessonData {
   displayOrder: number;
   isPublished: boolean;
   estimatedMinutes: number | null;
+  hasQuiz?: boolean;
 }
 
 interface ModuleData {
@@ -480,6 +481,12 @@ export default function ModuleManagerClient({ courseId }: { courseId: string }) 
                                       <span className="flex items-center gap-0.5 text-xs text-gray-400">
                                         <Clock className="w-3 h-3" />
                                         {lesson.estimatedMinutes}min
+                                      </span>
+                                    )}
+                                    {lesson.hasQuiz && (
+                                      <span className="flex items-center gap-0.5 text-xs text-purple-600 bg-purple-50 px-1.5 py-0.5 rounded">
+                                        <ClipboardCheck className="w-3 h-3" />
+                                        Quiz
                                       </span>
                                     )}
                                   </div>

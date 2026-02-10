@@ -623,6 +623,175 @@ export function generateConversationPDF(options: PDFExportOptions): void {
 }
 
 // ═══════════════════════════════════════════════════════
+// generateCertificatePDF — Certificado de Conclusão
+// ═══════════════════════════════════════════════════════
+
+interface CertificatePDFOptions {
+  studentName: string;
+  courseTitle: string;
+  estimatedHours: number | null;
+  certificateNumber: string;
+  issuedAt: Date;
+  verificationUrl: string;
+}
+
+export async function generateCertificatePDF(options: CertificatePDFOptions): Promise<ArrayBuffer> {
+  const {
+    studentName,
+    courseTitle,
+    estimatedHours,
+    certificateNumber,
+    issuedAt,
+    verificationUrl,
+  } = options;
+
+  const doc = new jsPDF({ orientation: 'landscape', unit: 'mm', format: 'a4' });
+  const pw = doc.internal.pageSize.getWidth();   // 297
+  const ph = doc.internal.pageSize.getHeight();  // 210
+
+  // ── MOLDURA EXTERNA ──
+  doc.setDrawColor(C.navy[0], C.navy[1], C.navy[2]);
+  doc.setLineWidth(2);
+  doc.rect(8, 8, pw - 16, ph - 16);
+
+  // Moldura interna decorativa
+  doc.setLineWidth(0.5);
+  doc.rect(12, 12, pw - 24, ph - 24);
+
+  // Linha dourada decorativa
+  doc.setDrawColor(180, 150, 80);
+  doc.setLineWidth(0.3);
+  doc.rect(14, 14, pw - 28, ph - 28);
+
+  // ── HEADER ──
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(12);
+  doc.setTextColor(C.navy[0], C.navy[1], C.navy[2]);
+  doc.text('PROF. DANIEL BARRAL', pw / 2, 30, { align: 'center' });
+
+  doc.setFont('helvetica', 'normal');
+  doc.setFontSize(8);
+  doc.setTextColor(C.light[0], C.light[1], C.light[2]);
+  doc.text('Direito Administrativo  ·  Licitações e Contratos  ·  Lei 14.133/2021', pw / 2, 36, { align: 'center' });
+
+  // Linha decorativa
+  doc.setDrawColor(C.navy[0], C.navy[1], C.navy[2]);
+  doc.setLineWidth(0.8);
+  doc.line(pw / 2 - 60, 40, pw / 2 + 60, 40);
+
+  // ── TÍTULO ──
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(28);
+  doc.setTextColor(C.navy[0], C.navy[1], C.navy[2]);
+  doc.text('CERTIFICADO DE CONCLUSÃO', pw / 2, 58, { align: 'center' });
+
+  // ── CORPO ──
+  doc.setFont('helvetica', 'normal');
+  doc.setFontSize(12);
+  doc.setTextColor(C.text[0], C.text[1], C.text[2]);
+  doc.text('Certificamos que', pw / 2, 76, { align: 'center' });
+
+  // Nome do aluno (destaque)
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(22);
+  doc.setTextColor(C.navy[0], C.navy[1], C.navy[2]);
+  doc.text(studentName, pw / 2, 90, { align: 'center' });
+
+  // Linha sob o nome
+  const nameW = doc.getTextWidth(studentName);
+  doc.setDrawColor(180, 150, 80);
+  doc.setLineWidth(0.4);
+  doc.line(pw / 2 - nameW / 2 - 5, 93, pw / 2 + nameW / 2 + 5, 93);
+
+  // Descrição do curso
+  doc.setFont('helvetica', 'normal');
+  doc.setFontSize(12);
+  doc.setTextColor(C.text[0], C.text[1], C.text[2]);
+  doc.text('concluiu com aproveitamento o curso', pw / 2, 104, { align: 'center' });
+
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(16);
+  doc.setTextColor(C.mid[0], C.mid[1], C.mid[2]);
+
+  // Wrap do título do curso se necessário
+  const titleLines = doc.splitTextToSize(courseTitle, pw - 80);
+  let ty = 116;
+  for (const line of titleLines) {
+    doc.text(line, pw / 2, ty, { align: 'center' });
+    ty += 8;
+  }
+
+  // Carga horária
+  if (estimatedHours && estimatedHours > 0) {
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(11);
+    doc.setTextColor(C.textSoft[0], C.textSoft[1], C.textSoft[2]);
+    doc.text(`com carga horária estimada de ${estimatedHours} hora${estimatedHours > 1 ? 's' : ''}`, pw / 2, ty + 4, { align: 'center' });
+    ty += 10;
+  }
+
+  // Data de emissão
+  const dateStr = issuedAt.toLocaleDateString('pt-BR', {
+    day: '2-digit',
+    month: 'long',
+    year: 'numeric',
+  });
+  doc.setFont('helvetica', 'normal');
+  doc.setFontSize(10);
+  doc.setTextColor(C.textSoft[0], C.textSoft[1], C.textSoft[2]);
+  doc.text(`Emitido em ${dateStr}`, pw / 2, ty + 8, { align: 'center' });
+
+  // ── ASSINATURA ──
+  const signY = 162;
+  doc.setDrawColor(C.navy[0], C.navy[1], C.navy[2]);
+  doc.setLineWidth(0.5);
+  doc.line(pw / 2 - 45, signY, pw / 2 + 45, signY);
+
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(10);
+  doc.setTextColor(C.navy[0], C.navy[1], C.navy[2]);
+  doc.text('Prof. Daniel Barral', pw / 2, signY + 5, { align: 'center' });
+
+  doc.setFont('helvetica', 'normal');
+  doc.setFontSize(8);
+  doc.setTextColor(C.light[0], C.light[1], C.light[2]);
+  doc.text('Instrutor', pw / 2, signY + 10, { align: 'center' });
+
+  // ── RODAPÉ: Número + QR Code ──
+  doc.setFont('helvetica', 'normal');
+  doc.setFontSize(7.5);
+  doc.setTextColor(C.muted[0], C.muted[1], C.muted[2]);
+  doc.text(`Certificado nº ${certificateNumber}`, 24, ph - 22);
+  doc.text('Verifique a autenticidade em:', 24, ph - 18);
+
+  doc.setFont('helvetica', 'normal');
+  doc.setFontSize(6.5);
+  doc.setTextColor(C.mid[0], C.mid[1], C.mid[2]);
+  doc.text(verificationUrl, 24, ph - 14);
+
+  // QR Code (posição inferior direita)
+  try {
+    const QRCode = (await import('qrcode')).default;
+    const qrDataUrl = await QRCode.toDataURL(verificationUrl, {
+      width: 120,
+      margin: 1,
+      color: { dark: '#20364e', light: '#ffffff' },
+    });
+    doc.addImage(qrDataUrl, 'PNG', pw - 48, ph - 42, 26, 26);
+  } catch {
+    // Fallback: texto se QR falhar
+    doc.setFontSize(6);
+    doc.text('[QR Code]', pw - 35, ph - 20, { align: 'center' });
+  }
+
+  doc.setFontSize(6);
+  doc.setTextColor(C.muted[0], C.muted[1], C.muted[2]);
+  doc.text('profdanielbarral.com.br', pw / 2, ph - 12, { align: 'center' });
+
+  return doc.output('arraybuffer');
+}
+
+// ═══════════════════════════════════════════════════════
 // exportCurrentConversation — wrapper de conveniência
 // ═══════════════════════════════════════════════════════
 

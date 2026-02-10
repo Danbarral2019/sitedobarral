@@ -25,12 +25,38 @@ export const GET = withAdminAuth(async (request: NextRequest) => {
       where: { courseId },
       orderBy: { displayOrder: 'asc' },
       include: {
-        _count: { select: { lessons: true } },
+        lessons: {
+          orderBy: { displayOrder: 'asc' },
+          select: {
+            id: true,
+            title: true,
+            slug: true,
+            description: true,
+            displayOrder: true,
+            isPublished: true,
+            estimatedMinutes: true,
+            quiz: { select: { id: true } },
+          },
+        },
       },
     });
 
+    const modulesResponse = modules.map(mod => ({
+      ...mod,
+      lessons: mod.lessons.map(l => ({
+        id: l.id,
+        title: l.title,
+        slug: l.slug,
+        description: l.description,
+        displayOrder: l.displayOrder,
+        isPublished: l.isPublished,
+        estimatedMinutes: l.estimatedMinutes,
+        hasQuiz: !!l.quiz,
+      })),
+    }));
+
     apiLogger.info({ courseId, count: modules.length }, 'Modules listed');
-    return NextResponse.json({ modules });
+    return NextResponse.json({ modules: modulesResponse });
   } catch (error) {
     return handleApiError(error);
   }

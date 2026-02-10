@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import {
   GraduationCap, BookOpen, FileText, Play, Settings, Plus, Trash2, Save,
-  Link as LinkIcon, Unlink, Eye, EyeOff, Loader2, ChevronRight, X, Search
+  Link as LinkIcon, Unlink, Eye, EyeOff, Loader2, ChevronRight, X, Search, ClipboardCheck
 } from 'lucide-react';
 import { getCourseById } from '@/lib/courses';
 import AdminLayout from '@/components/AdminLayout';
@@ -367,6 +367,8 @@ export default function LessonEditorClient({ courseId, lessonId }: { courseId: s
     { id: 'configuracoes', label: 'Configuracoes', icon: Settings },
   ];
 
+  const quizLink = `/admin/lms/${courseId}/lessons/${lessonId}/quiz`;
+
   const categoryLabel = (cat: string) => {
     const map: Record<string, string> = {
       apostila: 'Apostila', acordao: 'Acordao', parecer: 'Parecer',
@@ -429,6 +431,14 @@ export default function LessonEditorClient({ courseId, lessonId }: { courseId: s
                 </button>
               );
             })}
+            {/* Quiz link (external page) */}
+            <Link
+              href={quizLink}
+              className="flex items-center gap-2 px-4 py-3 text-sm font-medium border-b-2 border-transparent text-purple-600 hover:text-purple-700 hover:border-purple-300 transition-colors"
+            >
+              <ClipboardCheck className="w-4 h-4" />
+              Quiz
+            </Link>
           </div>
 
           {/* Save message */}

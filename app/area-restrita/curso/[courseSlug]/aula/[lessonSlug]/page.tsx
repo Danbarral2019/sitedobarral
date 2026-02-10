@@ -22,6 +22,7 @@ import LessonVideos from '@/components/lms/LessonVideos';
 import LessonAIAssistant from '@/components/lms/LessonAIAssistant';
 import LessonDiscussion from '@/components/lms/LessonDiscussion';
 import MarkCompleteButton from '@/components/lms/MarkCompleteButton';
+import QuizPlayer from '@/components/lms/QuizPlayer';
 
 interface LessonData {
   id: string;
@@ -372,6 +373,11 @@ export default function LessonPage({
               <LessonDocuments documents={lesson.documents} />
             </div>
           )}
+
+          {/* Quiz */}
+          <div className="mb-6">
+            <QuizPlayer lessonId={lesson.id} />
+          </div>
 
           {/* AI Assistant */}
           <div className="mb-6">

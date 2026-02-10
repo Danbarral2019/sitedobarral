@@ -963,6 +963,7 @@ model Lesson {
   displayOrder     Int      @default(0)
   isPublished      Boolean  @default(false)
   estimatedMinutes Int?
+  requiresQuizPass Boolean  @default(false)
 
   // Campos IA
   aiSummary   String? @db.Text
@@ -976,6 +977,7 @@ model Lesson {
   videos    LessonVideo[]
   progress  LessonProgress[]
   comments  LessonComment[]
+  quiz      Quiz?
 
   @@unique([moduleId, slug])
   @@index([moduleId])
@@ -1061,4 +1063,87 @@ model LessonComment {
   @@index([userId])
   @@index([parentId])
   @@index([lessonId, isPinned])
+}
+
+// ============================================================================
+// LMS — Quizzes e Certificados (Fase 2)
+// ============================================================================
+
+// Quiz vinculado a uma lição (1:1, opcional)
+model Quiz {
+  id                String   @id @default(uuid())
+  lessonId          String   @unique
+  lesson            Lesson   @relation(fields: [lessonId], references: [id], onDelete: Cascade)
+  title             String
+  description       String?  @db.Text
+  passingScore      Int      @default(60) // Nota mínima (0-100)
+  maxAttempts       Int?     // null = ilimitado
+  timeLimitMinutes  Int?     // null = sem tempo limite
+  shuffleQuestions  Boolean  @default(false)
+  isPublished       Boolean  @default(false)
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  questions QuizQuestion[]
+  attempts  QuizAttempt[]
+
+  @@index([lessonId])
+}
+
+// Pergunta de quiz
+model QuizQuestion {
+  id           String   @id @default(uuid())
+  quizId       String
+  quiz         Quiz     @relation(fields: [quizId], references: [id], onDelete: Cascade)
+  type         String   // multiple_choice | true_false
+  text         String   @db.Text
+  options      String   @db.Text // JSON array: [{id, text, isCorrect}]
+  explanation  String?  @db.Text
+  displayOrder Int      @default(0)
+  points       Int      @default(1)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@index([quizId])
+  @@index([quizId, displayOrder])
+}
+
+// Tentativa de quiz do aluno
+model QuizAttempt {
+  id               String    @id @default(uuid())
+  quizId           String
+  quiz             Quiz      @relation(fields: [quizId], references: [id], onDelete: Cascade)
+  userId           String
+  answers          String    @db.Text // JSON: [{questionId, selectedOptionId}]
+  score            Float     // 0-100
+  totalPoints      Int
+  maxPoints        Int
+  passed           Boolean
+  startedAt        DateTime  @default(now())
+  completedAt      DateTime?
+  timeSpentSeconds Int?
+  createdAt        DateTime  @default(now())
+
+  @@index([quizId])
+  @@index([userId])
+  @@index([quizId, userId])
+}
+
+// Certificado de conclusão de curso
+model Certificate {
+  id                String    @id @default(uuid())
+  userId            String
+  courseId           String
+  certificateNumber String    @unique // BARRAL-{ANO}-{SEQUENCIA}
+  studentName       String
+  courseTitle        String
+  estimatedHours    Int?
+  issuedAt          DateTime  @default(now())
+  emailSentAt       DateTime?
+  createdAt         DateTime  @default(now())
+
+  @@unique([userId, courseId])
+  @@index([userId])
+  @@index([courseId])
+  @@index([certificateNumber])
 }

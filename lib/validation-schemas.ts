@@ -279,6 +279,64 @@ export const ReorderSchema = z.object({
 });
 
 // ============================================================================
+// LMS — QUIZZES
+// ============================================================================
+
+export const CreateQuizSchema = z.object({
+  lessonId: z.string().min(1, 'ID da lição é obrigatório'),
+  title: z.string().min(1, 'Título é obrigatório').max(255, 'Título muito longo'),
+  description: z.string().max(2000, 'Descrição muito longa').optional(),
+  passingScore: z.number().int().min(0).max(100).optional(),
+  maxAttempts: z.number().int().min(1).max(100).nullable().optional(),
+  timeLimitMinutes: z.number().int().min(1).max(600).nullable().optional(),
+  shuffleQuestions: z.boolean().optional(),
+  isPublished: z.boolean().optional(),
+});
+
+export const UpdateQuizSchema = z.object({
+  title: z.string().min(1).max(255).optional(),
+  description: z.string().max(2000).nullable().optional(),
+  passingScore: z.number().int().min(0).max(100).optional(),
+  maxAttempts: z.number().int().min(1).max(100).nullable().optional(),
+  timeLimitMinutes: z.number().int().min(1).max(600).nullable().optional(),
+  shuffleQuestions: z.boolean().optional(),
+  isPublished: z.boolean().optional(),
+});
+
+const QuizOptionSchema = z.object({
+  id: z.string().min(1),
+  text: z.string().min(1, 'Texto da opção é obrigatório'),
+  isCorrect: z.boolean(),
+});
+
+export const CreateQuizQuestionSchema = z.object({
+  type: z.enum(['multiple_choice', 'true_false']),
+  text: z.string().min(1, 'Texto da pergunta é obrigatório').max(5000),
+  options: z.array(QuizOptionSchema).min(2, 'Mínimo de 2 opções'),
+  explanation: z.string().max(5000).optional(),
+  displayOrder: z.number().int().min(0).optional(),
+  points: z.number().int().min(1).max(100).optional(),
+});
+
+export const UpdateQuizQuestionSchema = z.object({
+  type: z.enum(['multiple_choice', 'true_false']).optional(),
+  text: z.string().min(1).max(5000).optional(),
+  options: z.array(QuizOptionSchema).min(2).optional(),
+  explanation: z.string().max(5000).nullable().optional(),
+  displayOrder: z.number().int().min(0).optional(),
+  points: z.number().int().min(1).max(100).optional(),
+});
+
+export const SubmitQuizAttemptSchema = z.object({
+  answers: z.array(z.object({
+    questionId: z.string().min(1),
+    selectedOptionId: z.string().min(1),
+  })),
+  startedAt: z.string().datetime().optional(),
+  timeSpentSeconds: z.number().int().min(0).optional(),
+});
+
+// ============================================================================
 // TIPOS INFERIDOS (para TypeScript)
 // ============================================================================
 
@@ -306,3 +364,10 @@ export type CreateLessonCommentInput = z.infer<typeof CreateLessonCommentSchema>
 export type LinkLessonDocumentInput = z.infer<typeof LinkLessonDocumentSchema>;
 export type LinkLessonVideoInput = z.infer<typeof LinkLessonVideoSchema>;
 export type ReorderInput = z.infer<typeof ReorderSchema>;
+
+// Quiz types
+export type CreateQuizInput = z.infer<typeof CreateQuizSchema>;
+export type UpdateQuizInput = z.infer<typeof UpdateQuizSchema>;
+export type CreateQuizQuestionInput = z.infer<typeof CreateQuizQuestionSchema>;
+export type UpdateQuizQuestionInput = z.infer<typeof UpdateQuizQuestionSchema>;
+export type SubmitQuizAttemptInput = z.infer<typeof SubmitQuizAttemptSchema>;

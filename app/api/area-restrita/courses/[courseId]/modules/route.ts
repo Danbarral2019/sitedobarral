@@ -42,6 +42,10 @@ export async function GET(
             slug: true,
             estimatedMinutes: true,
             displayOrder: true,
+            requiresQuizPass: true,
+            quiz: {
+              select: { id: true, isPublished: true },
+            },
           },
         },
       },
@@ -67,7 +71,22 @@ export async function GET(
       progressRecords.map((p) => [p.lessonId, p])
     );
 
-    // Build response with progress attached to each lesson
+    // Fetch quiz pass status for published quizzes
+    const allPublishedQuizzes = modules.flatMap((m) =>
+      m.lessons.filter((l) => l.quiz?.isPublished).map((l) => l.quiz!)
+    );
+    const quizIds = allPublishedQuizzes.map((q) => q.id);
+    let passedQuizIds = new Set<string>();
+    if (quizIds.length > 0) {
+      const passedAttempts = await prisma.quizAttempt.findMany({
+        where: { userId: user.id, quizId: { in: quizIds }, passed: true },
+        distinct: ['quizId'],
+        select: { quizId: true },
+      });
+      passedQuizIds = new Set(passedAttempts.map((a) => a.quizId));
+    }
+
+    // Build response with progress and quiz status
     const modulesWithProgress = modules.map((mod) => ({
       id: mod.id,
       title: mod.title,
@@ -75,8 +94,17 @@ export async function GET(
       displayOrder: mod.displayOrder,
       lessons: mod.lessons.map((lesson) => {
         const progress = progressMap.get(lesson.id);
+        const hasQuiz = !!(lesson.quiz?.isPublished);
+        const quizPassed = hasQuiz ? passedQuizIds.has(lesson.quiz!.id) : false;
         return {
-          ...lesson,
+          id: lesson.id,
+          title: lesson.title,
+          slug: lesson.slug,
+          estimatedMinutes: lesson.estimatedMinutes,
+          displayOrder: lesson.displayOrder,
+          requiresQuizPass: lesson.requiresQuizPass,
+          hasQuiz,
+          quizPassed,
           progress: progress
             ? { status: progress.status, completedAt: progress.completedAt }
             : null,

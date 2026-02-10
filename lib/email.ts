@@ -675,3 +675,87 @@ Você está recebendo este email porque está matriculado no curso ${courseTitle
     text,
   })).success;
 }
+
+/**
+ * Envia notificação de certificado ao aluno
+ */
+export async function sendCertificateNotification(
+  email: string,
+  name: string,
+  courseTitle: string,
+  certificateNumber: string,
+  verificationUrl: string
+): Promise<boolean> {
+  const downloadUrl = `${process.env.NEXT_PUBLIC_BASE_URL}/area-restrita/curso/certificado/${certificateNumber}`;
+
+  const html = `
+    <!DOCTYPE html>
+    <html>
+      <head>
+        <style>
+          body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+          .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+          .header { background: linear-gradient(135deg, #059669 0%, #10b981 100%); color: white; padding: 30px; text-align: center; border-radius: 10px 10px 0 0; }
+          .content { background: #f9fafb; padding: 30px; border-radius: 0 0 10px 10px; }
+          .button { display: inline-block; background: linear-gradient(135deg, #059669 0%, #10b981 100%); color: white; padding: 15px 30px; text-decoration: none; border-radius: 8px; font-weight: bold; margin: 20px 0; }
+          .footer { text-align: center; margin-top: 30px; color: #666; font-size: 14px; }
+          .cert-box { background: white; border: 2px solid #059669; padding: 20px; border-radius: 8px; text-align: center; margin: 20px 0; }
+          .cert-number { font-size: 18px; font-weight: bold; color: #059669; letter-spacing: 2px; }
+        </style>
+      </head>
+      <body>
+        <div class="container">
+          <div class="header">
+            <h1>Parabens, ${name}!</h1>
+          </div>
+          <div class="content">
+            <p>Temos o prazer de informar que voce concluiu com sucesso o curso:</p>
+            <h2 style="color: #1f2937; text-align: center;">${courseTitle}</h2>
+
+            <div class="cert-box">
+              <p style="margin: 0 0 10px 0; color: #666;">Seu certificado:</p>
+              <div class="cert-number">${certificateNumber}</div>
+            </div>
+
+            <div style="text-align: center;">
+              <a href="${downloadUrl}" class="button">Baixar Certificado em PDF</a>
+            </div>
+
+            <p style="text-align: center; font-size: 14px; color: #666;">
+              Verifique a autenticidade em:<br>
+              <a href="${verificationUrl}" style="color: #059669;">${verificationUrl}</a>
+            </p>
+
+            <hr style="border: none; border-top: 1px solid #e5e7eb; margin: 30px 0;">
+
+            <p>Atenciosamente,<br><strong>Equipe Prof. Daniel Barral</strong></p>
+          </div>
+          <div class="footer">
+            <p>&copy; ${new Date().getFullYear()} Prof. Daniel Barral - Todos os direitos reservados</p>
+          </div>
+        </div>
+      </body>
+    </html>
+  `;
+
+  const text = `
+Parabens, ${name}!
+
+Voce concluiu com sucesso o curso: ${courseTitle}
+
+Seu certificado: ${certificateNumber}
+
+Baixar certificado: ${downloadUrl}
+Verificar autenticidade: ${verificationUrl}
+
+Atenciosamente,
+Equipe Prof. Daniel Barral
+  `;
+
+  return (await sendEmail({
+    to: email,
+    subject: `Certificado de Conclusao - ${courseTitle}`,
+    html,
+    text,
+  })).success;
+}

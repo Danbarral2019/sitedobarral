@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
-import { ChevronDown, ChevronRight, BookOpen, CheckCircle, Play } from 'lucide-react';
+import { ChevronDown, ChevronRight, BookOpen, CheckCircle, Play, Lock } from 'lucide-react';
 import LessonProgressBar from './LessonProgressBar';
 
 interface LessonItem {
@@ -10,6 +10,9 @@ interface LessonItem {
   title: string;
   slug: string;
   estimatedMinutes?: number | null;
+  requiresQuizPass?: boolean;
+  hasQuiz?: boolean;
+  quizPassed?: boolean;
   progress: { status: string; completedAt?: string | null } | null;
 }
 
@@ -102,9 +105,33 @@ export default function ModuleSidebar({
               {/* Lessons */}
               {isExpanded && (
                 <div className="pb-2">
-                  {mod.lessons.map((lesson) => {
+                  {mod.lessons.map((lesson, lessonIdx) => {
                     const isCurrent = lesson.id === currentLessonId;
                     const isCompleted = lesson.progress?.status === 'completed';
+
+                    // Check if locked: requiresQuizPass and previous lesson quiz not passed
+                    let isLocked = false;
+                    if (lesson.requiresQuizPass && lessonIdx > 0) {
+                      const prevLesson = mod.lessons[lessonIdx - 1];
+                      if (prevLesson?.hasQuiz && !prevLesson.quizPassed) {
+                        isLocked = true;
+                      }
+                    }
+
+                    if (isLocked) {
+                      return (
+                        <div
+                          key={lesson.id}
+                          className="flex items-center gap-2.5 px-4 py-2 mx-2 rounded-lg opacity-50 cursor-not-allowed"
+                          title="Complete o questionario da aula anterior para desbloquear"
+                        >
+                          <Lock className="w-4 h-4 text-gray-400 flex-shrink-0" />
+                          <span className="text-xs leading-snug line-clamp-2 text-gray-400">
+                            {lesson.title}
+                          </span>
+                        </div>
+                      );
+                    }
 
                     return (
                       <Link
@@ -139,6 +166,17 @@ export default function ModuleSidebar({
                         >
                           {lesson.title}
                         </span>
+
+                        {/* Quiz badge */}
+                        {lesson.hasQuiz && (
+                          <span className={`ml-auto text-[10px] px-1.5 py-0.5 rounded-full flex-shrink-0 ${
+                            lesson.quizPassed
+                              ? 'bg-green-100 text-green-600'
+                              : 'bg-purple-100 text-purple-600'
+                          }`}>
+                            Q
+                          </span>
+                        )}
                       </Link>
                     );
                   })}
