@@ -14,7 +14,7 @@ async function handler() {
     prisma.document.findMany({
       where: {
         uploadedAt: { gte: fourteenDaysAgo },
-        isPublic: false,
+        reviewed: true,
       },
       select: {
         id: true,
