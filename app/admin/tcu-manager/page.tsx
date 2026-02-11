@@ -4,8 +4,9 @@ import { useState } from 'react';
 import AdminLayout from '@/components/AdminLayout';
 import {
   Upload, FileSpreadsheet, Download, CheckCircle, AlertCircle,
-  Loader2, ArrowRight, FileText, AlertTriangle, RefreshCw, Sparkles
+  Loader2, ArrowRight, FileText, AlertTriangle, RefreshCw, Sparkles, Star
 } from 'lucide-react';
+import Link from 'next/link';
 import TCUReviewTable from '@/components/TCUReviewTable';
 import { courses } from '@/data/courses';
 
@@ -556,6 +557,19 @@ export default function TCUManagerPage() {
             Importe, converta e gerencie acórdãos com detecção automática de duplicatas
           </p>
         </div>
+
+        {/* Cross-link para Destaques TCU */}
+        <Link
+          href="/admin/tcu-highlights"
+          className="mb-6 flex items-center gap-3 p-4 bg-purple-50 border border-purple-200 rounded-lg hover:bg-purple-100 transition-colors"
+        >
+          <Star className="w-5 h-5 text-purple-600 flex-shrink-0" />
+          <div className="flex-1">
+            <span className="font-semibold text-purple-900">Destaques TCU</span>
+            <span className="text-sm text-purple-600 ml-2">Acórdãos com potencial editorial identificados pela IA</span>
+          </div>
+          <ArrowRight className="w-4 h-4 text-purple-400" />
+        </Link>
 
         {/* Progress Steps */}
         <div className="mb-8 flex items-center justify-center overflow-x-auto">
