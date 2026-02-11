@@ -5,9 +5,10 @@ import { useRouter, usePathname, useSearchParams } from 'next/navigation';
 import dynamic from 'next/dynamic';
 import {
   Upload, FileText, Loader2, Plus,
-  CheckCircle, XCircle, ExternalLink, Calendar, Tag,
-  Search, AlertCircle, Clock, Eye, EyeOff,
-  ChevronLeft, ChevronRight, FolderUp, ChevronDown, ChevronUp
+  ExternalLink, Calendar, Tag,
+  Search, Clock, Eye, EyeOff,
+  ChevronLeft, ChevronRight, FolderUp, ChevronDown, ChevronUp,
+  Sparkles, RefreshCw
 } from 'lucide-react';
 import { courses } from '@/data/courses';
 import { useToast } from '@/hooks/use-toast';
@@ -24,7 +25,7 @@ const DocumentAnalyzer = dynamic(() => import('@/components/DocumentAnalyzer'), 
 
 type DocumentCategory = 'apostila' | 'acordao' | 'parecer' | 'edital' | 'artigo' | 'orientacao-normativa' | 'enunciados' | 'sumula' | 'outro';
 
-interface PendingDocument {
+interface AutoImportDocument {
   id: string;
   title: string;
   description: string | null;
@@ -32,12 +33,9 @@ interface PendingDocument {
   type: string;
   url: string;
   uploadedAt: string;
-  douData?: string | null;
-  douSecao?: string | null;
-  douOrgao?: string | null;
-  douEdicao?: string | null;
-  tags?: string | null;
-  courseId?: string;
+  summary?: string | null;
+  tcuNumeroAcordao?: string | null;
+  reviewedBy?: string | null;
 }
 
 interface RecentUpload {
@@ -52,8 +50,8 @@ interface RecentUpload {
 }
 
 interface Props {
-  pendingDocuments: PendingDocument[];
-  pendingPagination: {
+  autoImports: AutoImportDocument[];
+  autoImportsPagination: {
     total: number;
     page: number;
     pageSize: number;
@@ -63,8 +61,8 @@ interface Props {
 }
 
 export default function AdicionarDocumentosClient({
-  pendingDocuments,
-  pendingPagination,
+  autoImports,
+  autoImportsPagination,
   recentUploads,
 }: Props) {
   const router = useRouter();
@@ -103,19 +101,17 @@ export default function AdicionarDocumentosClient({
     leiArticles: [],
   });
 
-  // DOU staging state
-  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
-  const [isProcessing, setIsProcessing] = useState(false);
+  // Search state
   const [searchTerm, setSearchTerm] = useState('');
 
   // Section collapse state
   const [sectionsCollapsed, setSectionsCollapsed] = useState({
     upload: false,
-    staging: false,
+    autoImports: false,
     recent: true,
   });
 
-  const toggleSection = (section: 'upload' | 'staging' | 'recent') => {
+  const toggleSection = (section: 'upload' | 'autoImports' | 'recent') => {
     setSectionsCollapsed(prev => ({ ...prev, [section]: !prev[section] }));
   };
 
@@ -139,24 +135,14 @@ export default function AdicionarDocumentosClient({
   const handleMultipleFilesSelect = (files: File[]) => setMultipleFiles([...multipleFiles, ...files]);
   const handleMultipleFileRemove = (index: number) => setMultipleFiles(multipleFiles.filter((_, i) => i !== index));
 
-  // Filter pending docs
-  const filteredPendingDocs = searchTerm
-    ? pendingDocuments.filter(doc =>
+  // Filter auto-import docs
+  const filteredAutoImports = searchTerm
+    ? autoImports.filter(doc =>
         doc.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        doc.description?.toLowerCase().includes(searchTerm.toLowerCase())
+        doc.description?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        doc.tcuNumeroAcordao?.includes(searchTerm)
       )
-    : pendingDocuments;
-
-  // Selection handlers
-  const toggleSelection = (id: string) => {
-    const newSet = new Set(selectedIds);
-    if (newSet.has(id)) newSet.delete(id);
-    else newSet.add(id);
-    setSelectedIds(newSet);
-  };
-
-  const selectAll = () => setSelectedIds(new Set(filteredPendingDocs.map(d => d.id)));
-  const clearSelection = () => setSelectedIds(new Set());
+    : autoImports;
 
   // Upload handlers
   const handleUpload = async (e: React.FormEvent) => {
@@ -298,49 +284,6 @@ export default function AdicionarDocumentosClient({
     setSelectedFile(null);
   };
 
-  // DOU staging handlers
-  const handleApprove = async (ids: string[]) => {
-    if (ids.length === 0) return;
-    setIsProcessing(true);
-    try {
-      const res = await fetch('/api/admin/documents/approve', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ documentIds: ids, action: 'approve' }),
-      });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error);
-      toast({ title: 'Aprovado!', description: `${data.count} documento(s) aprovado(s)`, variant: 'success' });
-      router.refresh();
-      clearSelection();
-    } catch (err) {
-      toast({ title: 'Erro', description: err instanceof Error ? err.message : 'Erro', variant: 'error' });
-    } finally {
-      setIsProcessing(false);
-    }
-  };
-
-  const handleReject = async (ids: string[]) => {
-    if (ids.length === 0) return;
-    setIsProcessing(true);
-    try {
-      const res = await fetch('/api/admin/documents/approve', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ documentIds: ids, action: 'reject' }),
-      });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error);
-      toast({ title: 'Rejeitado', description: `${data.count} documento(s) rejeitado(s)`, variant: 'success' });
-      router.refresh();
-      clearSelection();
-    } catch (err) {
-      toast({ title: 'Erro', description: err instanceof Error ? err.message : 'Erro', variant: 'error' });
-    } finally {
-      setIsProcessing(false);
-    }
-  };
-
   const getCourseTitle = (courseId: string) => {
     if (!courseId) return 'Comum';
     const course = courses.find(c => c.id === courseId);
@@ -349,528 +292,470 @@ export default function AdicionarDocumentosClient({
 
   return (
     <div className="min-h-screen bg-gray-50 p-6">
-      {/* Header */}
-      <div className="mb-6">
-        <h1 className="text-3xl font-bold text-gray-900 mb-2">Adicionar Documentos</h1>
-        <p className="text-gray-600">Upload de arquivos, criacao manual e aprovacao de documentos importados</p>
-      </div>
+      <div className="max-w-6xl mx-auto">
+        {/* Header */}
+        <div className="mb-6">
+          <h1 className="text-3xl font-bold text-gray-900 mb-2">Central de Documentos</h1>
+          <p className="text-gray-600">Upload de arquivos, criação manual e monitoramento de importações automáticas</p>
+        </div>
 
-      {/* Stats */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-        <div className="bg-white p-4 rounded-lg shadow">
-          <div className="flex items-center gap-3">
-            <div className="p-2 bg-yellow-100 rounded-lg">
-              <AlertCircle className="w-6 h-6 text-yellow-600" />
+        {/* Stats */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+          <div className="bg-white p-4 rounded-lg shadow">
+            <div className="flex items-center gap-3">
+              <div className="p-2 bg-indigo-100 rounded-lg">
+                <RefreshCw className="w-6 h-6 text-indigo-600" />
+              </div>
+              <div>
+                <p className="text-sm text-gray-600">Importados Automaticamente (7d)</p>
+                <p className="text-2xl font-bold text-gray-900">{autoImportsPagination.total}</p>
+              </div>
             </div>
-            <div>
-              <p className="text-sm text-gray-600">Aguardando Aprovacao</p>
-              <p className="text-2xl font-bold text-gray-900">{pendingPagination.total}</p>
+          </div>
+
+          <div className="bg-white p-4 rounded-lg shadow">
+            <div className="flex items-center gap-3">
+              <div className="p-2 bg-green-100 rounded-lg">
+                <Upload className="w-6 h-6 text-green-600" />
+              </div>
+              <div>
+                <p className="text-sm text-gray-600">Uploads Recentes (24h)</p>
+                <p className="text-2xl font-bold text-gray-900">{recentUploads.length}</p>
+              </div>
             </div>
           </div>
         </div>
 
-        <div className="bg-white p-4 rounded-lg shadow">
-          <div className="flex items-center gap-3">
-            <div className="p-2 bg-green-100 rounded-lg">
-              <CheckCircle className="w-6 h-6 text-green-600" />
+        {/* SECTION 1: Upload Form */}
+        <div className="bg-white rounded-xl shadow-lg mb-6 overflow-hidden">
+          <button
+            onClick={() => toggleSection('upload')}
+            className="w-full px-6 py-4 flex items-center justify-between bg-gradient-to-r from-blue-600 to-purple-600 text-white"
+          >
+            <div className="flex items-center gap-3">
+              <Upload className="w-6 h-6" />
+              <span className="text-lg font-bold">Upload de Documentos</span>
             </div>
-            <div>
-              <p className="text-sm text-gray-600">Uploads Recentes (24h)</p>
-              <p className="text-2xl font-bold text-gray-900">{recentUploads.length}</p>
-            </div>
-          </div>
-        </div>
+            {sectionsCollapsed.upload ? <ChevronDown className="w-5 h-5" /> : <ChevronUp className="w-5 h-5" />}
+          </button>
 
-        <div className="bg-white p-4 rounded-lg shadow">
-          <div className="flex items-center gap-3">
-            <div className="p-2 bg-blue-100 rounded-lg">
-              <FileText className="w-6 h-6 text-blue-600" />
-            </div>
-            <div>
-              <p className="text-sm text-gray-600">Selecionados</p>
-              <p className="text-2xl font-bold text-gray-900">{selectedIds.size}</p>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* SECTION 1: Upload Form */}
-      <div className="bg-white rounded-xl shadow-lg mb-6 overflow-hidden">
-        <button
-          onClick={() => toggleSection('upload')}
-          className="w-full px-6 py-4 flex items-center justify-between bg-gradient-to-r from-blue-600 to-purple-600 text-white"
-        >
-          <div className="flex items-center gap-3">
-            <Upload className="w-6 h-6" />
-            <span className="text-lg font-bold">Upload de Documentos</span>
-          </div>
-          {sectionsCollapsed.upload ? <ChevronDown className="w-5 h-5" /> : <ChevronUp className="w-5 h-5" />}
-        </button>
-
-        {!sectionsCollapsed.upload && (
-          <div className="p-6">
-            {/* Mode toggles */}
-            <div className="grid grid-cols-2 gap-4 mb-6">
-              <div className="flex gap-2 p-1 bg-gray-100 rounded-lg">
-                <button
-                  type="button"
-                  onClick={() => setUploadMode('single')}
-                  className={`flex-1 px-3 py-2 rounded-lg font-medium text-sm transition-all ${
-                    uploadMode === 'single' ? 'bg-white text-blue-600 shadow' : 'text-gray-600'
-                  }`}
-                >
-                  <Upload className="w-4 h-4 inline mr-1" /> Individual
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setUploadMode('bulk')}
-                  className={`flex-1 px-3 py-2 rounded-lg font-medium text-sm transition-all ${
-                    uploadMode === 'bulk' ? 'bg-white text-purple-600 shadow' : 'text-gray-600'
-                  }`}
-                >
-                  <FolderUp className="w-4 h-4 inline mr-1" /> Em Lote
-                </button>
-              </div>
-
-              <div className="flex gap-2 p-1 bg-gray-100 rounded-lg">
-                <button
-                  type="button"
-                  onClick={() => setCreationMode('file')}
-                  className={`flex-1 px-3 py-2 rounded-lg font-medium text-sm transition-all ${
-                    creationMode === 'file' ? 'bg-white text-blue-600 shadow' : 'text-gray-600'
-                  }`}
-                >
-                  <Upload className="w-4 h-4 inline mr-1" /> Com Arquivo
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setCreationMode('manual')}
-                  className={`flex-1 px-3 py-2 rounded-lg font-medium text-sm transition-all ${
-                    creationMode === 'manual' ? 'bg-white text-green-600 shadow' : 'text-gray-600'
-                  }`}
-                >
-                  <FileText className="w-4 h-4 inline mr-1" /> Manual
-                </button>
-              </div>
-            </div>
-
-            <form onSubmit={creationMode === 'manual' ? handleManualCreate : (uploadMode === 'single' ? handleUpload : (e) => { e.preventDefault(); handleBulkUpload(); })}>
-              <div className="grid md:grid-cols-2 gap-6">
-                {/* Left column: metadata */}
-                <div className="space-y-4">
-                  <div>
-                    <label className="block text-sm font-semibold text-gray-900 mb-2">Curso *</label>
-                    <select
-                      value={formData.courseId}
-                      onChange={(e) => setFormData({ ...formData, courseId: e.target.value })}
-                      required
-                      className="w-full px-3 py-2 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
-                    >
-                      <option value="">Selecione um curso</option>
-                      <option value="TODOS" className="font-bold">TODOS OS CURSOS ({courses.length} cursos)</option>
-                      <option disabled>────────────────────</option>
-                      {courses.map((course) => (
-                        <option key={course.id} value={course.id}>{course.title}</option>
-                      ))}
-                    </select>
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-semibold text-gray-900 mb-2">Titulo *</label>
-                    <input
-                      type="text"
-                      value={formData.title}
-                      onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                      required
-                      placeholder="Ex: Apostila Completa"
-                      className="w-full px-3 py-2 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-semibold text-gray-900 mb-2">Descricao</label>
-                    <textarea
-                      value={formData.description}
-                      onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                      rows={2}
-                      placeholder="Descricao do documento..."
-                      className="w-full px-3 py-2 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-semibold text-gray-900 mb-2">Categoria *</label>
-                    <select
-                      value={formData.category}
-                      onChange={(e) => setFormData({ ...formData, category: e.target.value as DocumentCategory })}
-                      required
-                      className="w-full px-3 py-2 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
-                    >
-                      <option value="apostila">Apostila</option>
-                      <option value="acordao">Acordao</option>
-                      <option value="parecer">Parecer</option>
-                      <option value="orientacao-normativa">Orientacao Normativa (AGU)</option>
-                      <option value="enunciados">Enunciados</option>
-                      <option value="sumula">Sumula</option>
-                      <option value="edital">Edital</option>
-                      <option value="artigo">Artigo</option>
-                      <option value="outro">Outro</option>
-                    </select>
-                  </div>
-
-                  {/* Entity fields for enunciados */}
-                  {(formData.category === 'enunciados' || formData.category === 'sumula') && (
-                    <>
-                      <div>
-                        <label className="block text-sm font-semibold text-gray-900 mb-2">Entidade *</label>
-                        <select
-                          value={formData.entityType || ''}
-                          onChange={(e) => setFormData({ ...formData, entityType: e.target.value })}
-                          required
-                          className="w-full px-3 py-2 border-2 border-gray-300 rounded-lg"
-                        >
-                          <option value="">Selecione a entidade</option>
-                          <option value="IBDA">IBDA</option>
-                          <option value="INCP">INCP</option>
-                          <option value="CJF">CJF</option>
-                        </select>
-                      </div>
-                      <div>
-                        <label className="block text-sm font-semibold text-gray-900 mb-2">Numero</label>
-                        <input
-                          type="text"
-                          value={formData.enunciadoNumber || ''}
-                          onChange={(e) => setFormData({ ...formData, enunciadoNumber: e.target.value })}
-                          placeholder="Ex: 123"
-                          className="w-full px-3 py-2 border-2 border-gray-300 rounded-lg"
-                        />
-                      </div>
-                    </>
-                  )}
-
-                  <div className="flex items-center gap-2">
-                    <input
-                      type="checkbox"
-                      id="isPublic"
-                      checked={formData.isPublic}
-                      onChange={(e) => setFormData({ ...formData, isPublic: e.target.checked })}
-                      className="w-4 h-4 text-blue-600 rounded"
-                    />
-                    <label htmlFor="isPublic" className="text-sm font-medium text-gray-900">
-                      Documento publico (visivel sem QR Code)
-                    </label>
-                  </div>
-                </div>
-
-                {/* Right column: file/manual + articles */}
-                <div className="space-y-4">
-                  {creationMode === 'file' ? (
-                    <div>
-                      <label className="block text-sm font-semibold text-gray-900 mb-2">
-                        Arquivo{uploadMode === 'bulk' ? 's' : ''} *
-                      </label>
-                      {uploadMode === 'single' ? (
-                        <FileDropzone
-                          onFileSelect={handleFileSelect}
-                          selectedFile={selectedFile}
-                          onFileRemove={handleFileRemove}
-                          accept=".pdf,.doc,.docx,.mp4,.avi,.mov"
-                          maxSize={100}
-                        />
-                      ) : (
-                        <MultiFileDropzone
-                          onFilesSelect={handleMultipleFilesSelect}
-                          selectedFiles={multipleFiles}
-                          onFileRemove={handleMultipleFileRemove}
-                          accept=".pdf,.doc,.docx,.mp4,.avi,.mov"
-                          maxSize={100}
-                          maxFiles={10}
-                        />
-                      )}
-                    </div>
-                  ) : (
-                    <div className="border-2 border-dashed border-green-300 rounded-lg p-4 bg-green-50">
-                      <div className="flex items-center gap-2 mb-3">
-                        <FileText className="w-5 h-5 text-green-600" />
-                        <h3 className="font-semibold text-green-900">Criacao Manual</h3>
-                      </div>
-                      <textarea
-                        value={formData.textContent}
-                        onChange={(e) => setFormData({ ...formData, textContent: e.target.value })}
-                        required
-                        placeholder="Digite o texto completo..."
-                        rows={4}
-                        className="w-full px-3 py-2 border-2 border-gray-300 rounded-lg"
-                      />
-                      <textarea
-                        value={formData.notes}
-                        onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
-                        placeholder="Observacoes adicionais..."
-                        rows={2}
-                        className="w-full px-3 py-2 border-2 border-gray-300 rounded-lg mt-2"
-                      />
-                    </div>
-                  )}
-
-                  {uploadMode === 'single' && (
-                    <DocumentAnalyzer
-                      title={formData.title}
-                      description={formData.description}
-                      file={selectedFile}
-                      currentSelectedArticles={formData.leiArticles}
-                      onApplySuggestions={(articles) => setFormData({ ...formData, leiArticles: articles })}
-                      disabled={!formData.title}
-                    />
-                  )}
-
-                  <LeiArticleSelector
-                    selectedArticles={formData.leiArticles}
-                    onChange={(articles) => setFormData({ ...formData, leiArticles: articles })}
-                    maxArticles={5}
-                    showPopularArticles={true}
-                  />
-                </div>
-              </div>
-
-              {isUploading && <Progress value={uploadProgress} className="mt-4" />}
-
-              <button
-                type="submit"
-                disabled={isUploading}
-                className="mt-6 w-full bg-gradient-to-r from-blue-600 to-purple-600 text-white px-6 py-3 rounded-xl font-bold hover:from-blue-700 hover:to-purple-700 transition-all shadow-lg flex items-center justify-center gap-2 disabled:opacity-50"
-              >
-                {isUploading ? (
-                  <><Loader2 className="w-5 h-5 animate-spin" /> Enviando...</>
-                ) : (
-                  <><Plus className="w-5 h-5" /> {creationMode === 'manual' ? 'Criar Documento' : 'Fazer Upload'}</>
-                )}
-              </button>
-            </form>
-          </div>
-        )}
-      </div>
-
-      {/* SECTION 2: DOU Staging */}
-      <div className="bg-white rounded-xl shadow-lg mb-6 overflow-hidden">
-        <button
-          onClick={() => toggleSection('staging')}
-          className="w-full px-6 py-4 flex items-center justify-between bg-gradient-to-r from-yellow-500 to-orange-500 text-white"
-        >
-          <div className="flex items-center gap-3">
-            <AlertCircle className="w-6 h-6" />
-            <span className="text-lg font-bold">Documentos DOU Aguardando Aprovacao</span>
-            {pendingPagination.total > 0 && (
-              <span className="px-2 py-1 bg-white/20 rounded-full text-sm">{pendingPagination.total}</span>
-            )}
-          </div>
-          {sectionsCollapsed.staging ? <ChevronDown className="w-5 h-5" /> : <ChevronUp className="w-5 h-5" />}
-        </button>
-
-        {!sectionsCollapsed.staging && (
-          <div className="p-6">
-            {/* Filters */}
-            <div className="flex flex-wrap gap-4 mb-4">
-              <div className="flex-1 min-w-[200px]">
-                <div className="relative">
-                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
-                  <input
-                    type="text"
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                    placeholder="Buscar..."
-                    className="w-full pl-10 pr-4 py-2 border rounded-lg"
-                  />
-                </div>
-              </div>
-              <select
-                value={searchParams.get('category') || ''}
-                onChange={(e) => updateFilter('category', e.target.value || null)}
-                className="px-3 py-2 border rounded-lg"
-              >
-                <option value="">Todas categorias</option>
-                <option value="portaria">Portaria</option>
-                <option value="decreto">Decreto</option>
-                <option value="acordao">Acordao</option>
-              </select>
-            </div>
-
-            {/* Batch actions */}
-            {selectedIds.size > 0 && (
-              <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
-                <div className="flex items-center justify-between">
-                  <span className="font-semibold text-blue-900">{selectedIds.size} selecionado(s)</span>
-                  <div className="flex gap-2">
-                    <button onClick={clearSelection} className="px-3 py-1 text-blue-700 hover:bg-blue-100 rounded">
-                      Limpar
-                    </button>
-                    <button
-                      onClick={() => handleReject(Array.from(selectedIds))}
-                      disabled={isProcessing}
-                      className="px-3 py-1 bg-red-600 text-white rounded hover:bg-red-700 disabled:opacity-50"
-                    >
-                      <XCircle className="w-4 h-4 inline mr-1" /> Rejeitar
-                    </button>
-                    <button
-                      onClick={() => handleApprove(Array.from(selectedIds))}
-                      disabled={isProcessing}
-                      className="px-3 py-1 bg-green-600 text-white rounded hover:bg-green-700 disabled:opacity-50"
-                    >
-                      <CheckCircle className="w-4 h-4 inline mr-1" /> Aprovar
-                    </button>
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {/* Select all */}
-            <div className="flex justify-between items-center mb-4">
-              <button onClick={selectAll} className="text-blue-600 hover:text-blue-800 text-sm font-medium">
-                Selecionar Todos ({filteredPendingDocs.length})
-              </button>
-            </div>
-
-            {/* List */}
-            {filteredPendingDocs.length === 0 ? (
-              <div className="text-center py-8 text-gray-500">
-                <CheckCircle className="w-12 h-12 mx-auto mb-2 text-green-300" />
-                <p>Nenhum documento pendente</p>
-              </div>
-            ) : (
-              <div className="space-y-3 max-h-[400px] overflow-y-auto">
-                {filteredPendingDocs.map((doc) => (
-                  <div
-                    key={doc.id}
-                    className={`p-4 rounded-lg border-2 transition ${
-                      selectedIds.has(doc.id) ? 'border-blue-500 bg-blue-50' : 'border-gray-200 hover:border-gray-300'
+          {!sectionsCollapsed.upload && (
+            <div className="p-6">
+              {/* Mode toggles */}
+              <div className="grid grid-cols-2 gap-4 mb-6">
+                <div className="flex gap-2 p-1 bg-gray-100 rounded-lg">
+                  <button
+                    type="button"
+                    onClick={() => setUploadMode('single')}
+                    className={`flex-1 px-3 py-2 rounded-lg font-medium text-sm transition-all ${
+                      uploadMode === 'single' ? 'bg-white text-blue-600 shadow' : 'text-gray-600'
                     }`}
                   >
-                    <div className="flex items-start gap-3">
-                      <input
-                        type="checkbox"
-                        checked={selectedIds.has(doc.id)}
-                        onChange={() => toggleSelection(doc.id)}
-                        className="mt-1 w-5 h-5 text-blue-600 rounded"
-                      />
-                      <div className="flex-1 min-w-0">
-                        <h4 className="font-semibold text-gray-900 truncate">{doc.title}</h4>
-                        {doc.description && <p className="text-sm text-gray-600 truncate">{doc.description}</p>}
-                        <div className="flex flex-wrap gap-2 mt-2">
-                          <span className="px-2 py-1 bg-green-100 text-green-700 text-xs rounded-full flex items-center gap-1">
-                            <Tag className="w-3 h-3" /> {doc.category}
-                          </span>
-                          {doc.douData && (
-                            <span className="px-2 py-1 bg-purple-100 text-purple-700 text-xs rounded-full flex items-center gap-1">
-                              <Calendar className="w-3 h-3" /> {new Date(doc.douData).toLocaleDateString('pt-BR')}
-                            </span>
-                          )}
-                          {doc.douOrgao && (
-                            <span className="px-2 py-1 bg-gray-100 text-gray-700 text-xs rounded-full">{doc.douOrgao}</span>
-                          )}
-                        </div>
-                      </div>
-                      <div className="flex gap-1">
-                        <a href={doc.url} target="_blank" rel="noopener noreferrer" className="p-2 text-blue-600 hover:bg-blue-50 rounded">
-                          <ExternalLink className="w-4 h-4" />
-                        </a>
-                        <button
-                          onClick={() => handleApprove([doc.id])}
-                          disabled={isProcessing}
-                          className="p-2 text-green-600 hover:bg-green-50 rounded disabled:opacity-50"
-                        >
-                          <CheckCircle className="w-4 h-4" />
-                        </button>
-                        <button
-                          onClick={() => handleReject([doc.id])}
-                          disabled={isProcessing}
-                          className="p-2 text-red-600 hover:bg-red-50 rounded disabled:opacity-50"
-                        >
-                          <XCircle className="w-4 h-4" />
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
-
-            {/* Pagination */}
-            {pendingPagination.totalPages > 1 && (
-              <div className="flex items-center justify-between mt-4 pt-4 border-t">
-                <span className="text-sm text-gray-600">
-                  Pagina {pendingPagination.page} de {pendingPagination.totalPages}
-                </span>
-                <div className="flex gap-2">
-                  <button
-                    onClick={() => updateFilter('page', String(pendingPagination.page - 1))}
-                    disabled={pendingPagination.page <= 1}
-                    className="px-3 py-1 border rounded disabled:opacity-50"
-                  >
-                    <ChevronLeft className="w-4 h-4" />
+                    <Upload className="w-4 h-4 inline mr-1" /> Individual
                   </button>
                   <button
-                    onClick={() => updateFilter('page', String(pendingPagination.page + 1))}
-                    disabled={pendingPagination.page >= pendingPagination.totalPages}
-                    className="px-3 py-1 border rounded disabled:opacity-50"
+                    type="button"
+                    onClick={() => setUploadMode('bulk')}
+                    className={`flex-1 px-3 py-2 rounded-lg font-medium text-sm transition-all ${
+                      uploadMode === 'bulk' ? 'bg-white text-purple-600 shadow' : 'text-gray-600'
+                    }`}
                   >
-                    <ChevronRight className="w-4 h-4" />
+                    <FolderUp className="w-4 h-4 inline mr-1" /> Em Lote
+                  </button>
+                </div>
+
+                <div className="flex gap-2 p-1 bg-gray-100 rounded-lg">
+                  <button
+                    type="button"
+                    onClick={() => setCreationMode('file')}
+                    className={`flex-1 px-3 py-2 rounded-lg font-medium text-sm transition-all ${
+                      creationMode === 'file' ? 'bg-white text-blue-600 shadow' : 'text-gray-600'
+                    }`}
+                  >
+                    <Upload className="w-4 h-4 inline mr-1" /> Com Arquivo
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setCreationMode('manual')}
+                    className={`flex-1 px-3 py-2 rounded-lg font-medium text-sm transition-all ${
+                      creationMode === 'manual' ? 'bg-white text-green-600 shadow' : 'text-gray-600'
+                    }`}
+                  >
+                    <FileText className="w-4 h-4 inline mr-1" /> Manual
                   </button>
                 </div>
               </div>
-            )}
-          </div>
-        )}
-      </div>
 
-      {/* SECTION 3: Recent Uploads */}
-      <div className="bg-white rounded-xl shadow-lg overflow-hidden">
-        <button
-          onClick={() => toggleSection('recent')}
-          className="w-full px-6 py-4 flex items-center justify-between bg-gradient-to-r from-green-500 to-teal-500 text-white"
-        >
-          <div className="flex items-center gap-3">
-            <Clock className="w-6 h-6" />
-            <span className="text-lg font-bold">Uploads Recentes (24h)</span>
-            <span className="px-2 py-1 bg-white/20 rounded-full text-sm">{recentUploads.length}</span>
-          </div>
-          {sectionsCollapsed.recent ? <ChevronDown className="w-5 h-5" /> : <ChevronUp className="w-5 h-5" />}
-        </button>
-
-        {!sectionsCollapsed.recent && (
-          <div className="p-6">
-            {recentUploads.length === 0 ? (
-              <div className="text-center py-8 text-gray-500">
-                <FileText className="w-12 h-12 mx-auto mb-2 text-gray-300" />
-                <p>Nenhum upload nas ultimas 24 horas</p>
-              </div>
-            ) : (
-              <div className="space-y-2">
-                {recentUploads.map((doc) => (
-                  <div key={doc.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-                    <div className="flex items-center gap-3">
-                      <FileText className="w-5 h-5 text-gray-400" />
-                      <div>
-                        <p className="font-medium text-gray-900">{doc.title}</p>
-                        <p className="text-xs text-gray-500">
-                          {doc.category} | {doc.isCommon ? 'Comum' : getCourseTitle(doc.courseId)}
-                        </p>
-                      </div>
+              <form onSubmit={creationMode === 'manual' ? handleManualCreate : (uploadMode === 'single' ? handleUpload : (e) => { e.preventDefault(); handleBulkUpload(); })}>
+                <div className="grid md:grid-cols-2 gap-6">
+                  {/* Left column: metadata */}
+                  <div className="space-y-4">
+                    <div>
+                      <label className="block text-sm font-semibold text-gray-900 mb-2">Curso *</label>
+                      <select
+                        value={formData.courseId}
+                        onChange={(e) => setFormData({ ...formData, courseId: e.target.value })}
+                        required
+                        className="w-full px-3 py-2 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                      >
+                        <option value="">Selecione um curso</option>
+                        <option value="TODOS" className="font-bold">TODOS OS CURSOS ({courses.length} cursos)</option>
+                        <option disabled>────────────────────</option>
+                        {courses.map((course) => (
+                          <option key={course.id} value={course.id}>{course.title}</option>
+                        ))}
+                      </select>
                     </div>
+
+                    <div>
+                      <label className="block text-sm font-semibold text-gray-900 mb-2">Titulo *</label>
+                      <input
+                        type="text"
+                        value={formData.title}
+                        onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+                        required
+                        placeholder="Ex: Apostila Completa"
+                        className="w-full px-3 py-2 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-semibold text-gray-900 mb-2">Descricao</label>
+                      <textarea
+                        value={formData.description}
+                        onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                        rows={2}
+                        placeholder="Descricao do documento..."
+                        className="w-full px-3 py-2 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-semibold text-gray-900 mb-2">Categoria *</label>
+                      <select
+                        value={formData.category}
+                        onChange={(e) => setFormData({ ...formData, category: e.target.value as DocumentCategory })}
+                        required
+                        className="w-full px-3 py-2 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                      >
+                        <option value="apostila">Apostila</option>
+                        <option value="acordao">Acordao</option>
+                        <option value="parecer">Parecer</option>
+                        <option value="orientacao-normativa">Orientacao Normativa (AGU)</option>
+                        <option value="enunciados">Enunciados</option>
+                        <option value="sumula">Sumula</option>
+                        <option value="edital">Edital</option>
+                        <option value="artigo">Artigo</option>
+                        <option value="outro">Outro</option>
+                      </select>
+                    </div>
+
+                    {/* Entity fields for enunciados */}
+                    {(formData.category === 'enunciados' || formData.category === 'sumula') && (
+                      <>
+                        <div>
+                          <label className="block text-sm font-semibold text-gray-900 mb-2">Entidade *</label>
+                          <select
+                            value={formData.entityType || ''}
+                            onChange={(e) => setFormData({ ...formData, entityType: e.target.value })}
+                            required
+                            className="w-full px-3 py-2 border-2 border-gray-300 rounded-lg"
+                          >
+                            <option value="">Selecione a entidade</option>
+                            <option value="IBDA">IBDA</option>
+                            <option value="INCP">INCP</option>
+                            <option value="CJF">CJF</option>
+                          </select>
+                        </div>
+                        <div>
+                          <label className="block text-sm font-semibold text-gray-900 mb-2">Numero</label>
+                          <input
+                            type="text"
+                            value={formData.enunciadoNumber || ''}
+                            onChange={(e) => setFormData({ ...formData, enunciadoNumber: e.target.value })}
+                            placeholder="Ex: 123"
+                            className="w-full px-3 py-2 border-2 border-gray-300 rounded-lg"
+                          />
+                        </div>
+                      </>
+                    )}
+
                     <div className="flex items-center gap-2">
-                      {doc.isPublic ? (
-                        <Eye className="w-4 h-4 text-green-500" />
-                      ) : (
-                        <EyeOff className="w-4 h-4 text-orange-500" />
-                      )}
-                      <span className="text-xs text-gray-500">
-                        {new Date(doc.uploadedAt).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}
-                      </span>
+                      <input
+                        type="checkbox"
+                        id="isPublic"
+                        checked={formData.isPublic}
+                        onChange={(e) => setFormData({ ...formData, isPublic: e.target.checked })}
+                        className="w-4 h-4 text-blue-600 rounded"
+                      />
+                      <label htmlFor="isPublic" className="text-sm font-medium text-gray-900">
+                        Documento publico (visivel sem QR Code)
+                      </label>
                     </div>
                   </div>
-                ))}
+
+                  {/* Right column: file/manual + articles */}
+                  <div className="space-y-4">
+                    {creationMode === 'file' ? (
+                      <div>
+                        <label className="block text-sm font-semibold text-gray-900 mb-2">
+                          Arquivo{uploadMode === 'bulk' ? 's' : ''} *
+                        </label>
+                        {uploadMode === 'single' ? (
+                          <FileDropzone
+                            onFileSelect={handleFileSelect}
+                            selectedFile={selectedFile}
+                            onFileRemove={handleFileRemove}
+                            accept=".pdf,.doc,.docx,.mp4,.avi,.mov"
+                            maxSize={100}
+                          />
+                        ) : (
+                          <MultiFileDropzone
+                            onFilesSelect={handleMultipleFilesSelect}
+                            selectedFiles={multipleFiles}
+                            onFileRemove={handleMultipleFileRemove}
+                            accept=".pdf,.doc,.docx,.mp4,.avi,.mov"
+                            maxSize={100}
+                            maxFiles={10}
+                          />
+                        )}
+                      </div>
+                    ) : (
+                      <div className="border-2 border-dashed border-green-300 rounded-lg p-4 bg-green-50">
+                        <div className="flex items-center gap-2 mb-3">
+                          <FileText className="w-5 h-5 text-green-600" />
+                          <h3 className="font-semibold text-green-900">Criacao Manual</h3>
+                        </div>
+                        <textarea
+                          value={formData.textContent}
+                          onChange={(e) => setFormData({ ...formData, textContent: e.target.value })}
+                          required
+                          placeholder="Digite o texto completo..."
+                          rows={4}
+                          className="w-full px-3 py-2 border-2 border-gray-300 rounded-lg"
+                        />
+                        <textarea
+                          value={formData.notes}
+                          onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
+                          placeholder="Observacoes adicionais..."
+                          rows={2}
+                          className="w-full px-3 py-2 border-2 border-gray-300 rounded-lg mt-2"
+                        />
+                      </div>
+                    )}
+
+                    {uploadMode === 'single' && (
+                      <DocumentAnalyzer
+                        title={formData.title}
+                        description={formData.description}
+                        file={selectedFile}
+                        currentSelectedArticles={formData.leiArticles}
+                        onApplySuggestions={(articles) => setFormData({ ...formData, leiArticles: articles })}
+                        disabled={!formData.title}
+                      />
+                    )}
+
+                    <LeiArticleSelector
+                      selectedArticles={formData.leiArticles}
+                      onChange={(articles) => setFormData({ ...formData, leiArticles: articles })}
+                      maxArticles={5}
+                      showPopularArticles={true}
+                    />
+                  </div>
+                </div>
+
+                {isUploading && <Progress value={uploadProgress} className="mt-4" />}
+
+                <button
+                  type="submit"
+                  disabled={isUploading}
+                  className="mt-6 w-full bg-gradient-to-r from-blue-600 to-purple-600 text-white px-6 py-3 rounded-xl font-bold hover:from-blue-700 hover:to-purple-700 transition-all shadow-lg flex items-center justify-center gap-2 disabled:opacity-50"
+                >
+                  {isUploading ? (
+                    <><Loader2 className="w-5 h-5 animate-spin" /> Enviando...</>
+                  ) : (
+                    <><Plus className="w-5 h-5" /> {creationMode === 'manual' ? 'Criar Documento' : 'Fazer Upload'}</>
+                  )}
+                </button>
+              </form>
+            </div>
+          )}
+        </div>
+
+        {/* SECTION 2: Auto Imports */}
+        <div className="bg-white rounded-xl shadow-lg mb-6 overflow-hidden">
+          <button
+            onClick={() => toggleSection('autoImports')}
+            className="w-full px-6 py-4 flex items-center justify-between bg-gradient-to-r from-blue-500 to-indigo-600 text-white"
+          >
+            <div className="flex items-center gap-3">
+              <RefreshCw className="w-6 h-6" />
+              <span className="text-lg font-bold">Importações Automáticas Recentes (7 dias)</span>
+              {autoImportsPagination.total > 0 && (
+                <span className="px-2 py-1 bg-white/20 rounded-full text-sm">{autoImportsPagination.total}</span>
+              )}
+            </div>
+            {sectionsCollapsed.autoImports ? <ChevronDown className="w-5 h-5" /> : <ChevronUp className="w-5 h-5" />}
+          </button>
+
+          {!sectionsCollapsed.autoImports && (
+            <div className="p-6">
+              {/* Search */}
+              <div className="flex flex-wrap gap-4 mb-4">
+                <div className="flex-1 min-w-[200px]">
+                  <div className="relative">
+                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+                    <input
+                      type="text"
+                      value={searchTerm}
+                      onChange={(e) => setSearchTerm(e.target.value)}
+                      placeholder="Buscar por titulo ou numero..."
+                      className="w-full pl-10 pr-4 py-2 border rounded-lg"
+                    />
+                  </div>
+                </div>
+                <select
+                  value={searchParams.get('category') || ''}
+                  onChange={(e) => updateFilter('category', e.target.value || null)}
+                  className="px-3 py-2 border rounded-lg"
+                >
+                  <option value="">Todas categorias</option>
+                  <option value="acordao">Acórdão TCU</option>
+                </select>
               </div>
-            )}
-          </div>
-        )}
+
+              {/* List */}
+              {filteredAutoImports.length === 0 ? (
+                <div className="text-center py-8 text-gray-500">
+                  <RefreshCw className="w-12 h-12 mx-auto mb-2 text-gray-300" />
+                  <p>Nenhuma importação automática nos últimos 7 dias</p>
+                </div>
+              ) : (
+                <div className="space-y-3 max-h-[400px] overflow-y-auto">
+                  {filteredAutoImports.map((doc) => (
+                    <div
+                      key={doc.id}
+                      className="p-4 rounded-lg border-2 border-gray-200 hover:border-indigo-300 transition"
+                    >
+                      <div className="flex items-start gap-3">
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-2">
+                            <h4 className="font-semibold text-gray-900 truncate">{doc.title}</h4>
+                            {doc.tcuNumeroAcordao && (
+                              <span className="px-2 py-0.5 bg-indigo-100 text-indigo-700 text-xs rounded-full font-mono flex-shrink-0">
+                                {doc.tcuNumeroAcordao}
+                              </span>
+                            )}
+                          </div>
+                          {doc.description && <p className="text-sm text-gray-600 truncate mt-1">{doc.description}</p>}
+                          <div className="flex flex-wrap gap-2 mt-2">
+                            <span className="px-2 py-1 bg-green-100 text-green-700 text-xs rounded-full flex items-center gap-1">
+                              <Tag className="w-3 h-3" /> {doc.category}
+                            </span>
+                            <span className="px-2 py-1 bg-gray-100 text-gray-600 text-xs rounded-full flex items-center gap-1">
+                              <Calendar className="w-3 h-3" /> {new Date(doc.uploadedAt).toLocaleDateString('pt-BR')}
+                            </span>
+                            {doc.summary && (
+                              <span className="px-2 py-1 bg-purple-100 text-purple-700 text-xs rounded-full flex items-center gap-1">
+                                <Sparkles className="w-3 h-3" /> Resumo IA
+                              </span>
+                            )}
+                          </div>
+                        </div>
+                        <a
+                          href={doc.url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="p-2 text-blue-600 hover:bg-blue-50 rounded flex-shrink-0"
+                          title="Abrir documento"
+                        >
+                          <ExternalLink className="w-4 h-4" />
+                        </a>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              {/* Pagination */}
+              {autoImportsPagination.totalPages > 1 && (
+                <div className="flex items-center justify-between mt-4 pt-4 border-t">
+                  <span className="text-sm text-gray-600">
+                    Página {autoImportsPagination.page} de {autoImportsPagination.totalPages}
+                  </span>
+                  <div className="flex gap-2">
+                    <button
+                      onClick={() => updateFilter('page', String(autoImportsPagination.page - 1))}
+                      disabled={autoImportsPagination.page <= 1}
+                      className="px-3 py-1 border rounded disabled:opacity-50"
+                    >
+                      <ChevronLeft className="w-4 h-4" />
+                    </button>
+                    <button
+                      onClick={() => updateFilter('page', String(autoImportsPagination.page + 1))}
+                      disabled={autoImportsPagination.page >= autoImportsPagination.totalPages}
+                      className="px-3 py-1 border rounded disabled:opacity-50"
+                    >
+                      <ChevronRight className="w-4 h-4" />
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+
+        {/* SECTION 3: Recent Uploads */}
+        <div className="bg-white rounded-xl shadow-lg overflow-hidden">
+          <button
+            onClick={() => toggleSection('recent')}
+            className="w-full px-6 py-4 flex items-center justify-between bg-gradient-to-r from-green-500 to-teal-500 text-white"
+          >
+            <div className="flex items-center gap-3">
+              <Clock className="w-6 h-6" />
+              <span className="text-lg font-bold">Uploads Recentes (24h)</span>
+              <span className="px-2 py-1 bg-white/20 rounded-full text-sm">{recentUploads.length}</span>
+            </div>
+            {sectionsCollapsed.recent ? <ChevronDown className="w-5 h-5" /> : <ChevronUp className="w-5 h-5" />}
+          </button>
+
+          {!sectionsCollapsed.recent && (
+            <div className="p-6">
+              {recentUploads.length === 0 ? (
+                <div className="text-center py-8 text-gray-500">
+                  <FileText className="w-12 h-12 mx-auto mb-2 text-gray-300" />
+                  <p>Nenhum upload nas ultimas 24 horas</p>
+                </div>
+              ) : (
+                <div className="space-y-2">
+                  {recentUploads.map((doc) => (
+                    <div key={doc.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                      <div className="flex items-center gap-3">
+                        <FileText className="w-5 h-5 text-gray-400" />
+                        <div>
+                          <p className="font-medium text-gray-900">{doc.title}</p>
+                          <p className="text-xs text-gray-500">
+                            {doc.category} | {doc.isCommon ? 'Comum' : getCourseTitle(doc.courseId)}
+                          </p>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        {doc.isPublic ? (
+                          <Eye className="w-4 h-4 text-green-500" />
+                        ) : (
+                          <EyeOff className="w-4 h-4 text-orange-500" />
+                        )}
+                        <span className="text-xs text-gray-500">
+                          {new Date(doc.uploadedAt).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}
+                        </span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );

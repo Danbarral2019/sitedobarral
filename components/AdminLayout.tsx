@@ -5,7 +5,7 @@ import { usePathname } from 'next/navigation';
 import Link from 'next/link';
 import Image from 'next/image';
 import {
-  QrCode, ChevronLeft, ChevronRight, BarChart3, Mail, MessageSquare, Send, GraduationCap, Youtube, Globe, BookOpen, Menu, X, Star
+  QrCode, ChevronLeft, ChevronRight, BarChart3, Mail, MessageSquare, Send, GraduationCap, Youtube, Globe, BookOpen, Menu, X
 } from 'lucide-react';
 
 interface AdminLayoutProps {
@@ -30,7 +30,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
         const [contatosRes, depoimentosRes, documentosRes, tcuHighlightsRes] = await Promise.all([
           fetch('/api/admin/contatos?unreadOnly=true'),
           fetch('/api/admin/depoimentos?status=pending'),
-          fetch('/api/admin/documents/unreviewed-count'),
+          fetch('/api/admin/documents/recent-auto-imports-count'),
           fetch('/api/admin/tcu-highlights?countOnly=true'),
         ]);
 
@@ -75,17 +75,11 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
         </svg>
       ),
-    },
-    {
-      path: '/admin/tcu-highlights',
-      label: 'Destaques TCU',
-      icon: Star,
       badge: unreadCounts.tcuHighlights,
-      indent: true,
     },
     {
       path: '/admin/agu-import',
-      label: 'AGU Manager 📄',
+      label: 'AGU Manager',
       icon: (props: Record<string, unknown>) => (
         <svg {...props} fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
@@ -93,18 +87,8 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
       ),
     },
     {
-      path: '/admin/scraper-agu',
-      label: '└─ Scraper Web',
-      icon: (props: Record<string, unknown>) => (
-        <svg {...props} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
-        </svg>
-      ),
-      indent: true,
-    },
-    {
       path: '/admin/legislacao',
-      label: 'Legislação (Lei 14.133) ⚖️',
+      label: 'Legislação',
       icon: (props: Record<string, unknown>) => (
         <svg {...props} fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 6l3 1m0 0l-3 9a5.002 5.002 0 006.001 0M6 7l3 9M6 7l6-2m6 2l3-1m-3 1l-3 9a5.002 5.002 0 006.001 0M18 7l3 9m-3-9l-6-2m0-2v2m0 16V5m0 16H9m3 0h3" />
@@ -112,18 +96,8 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
       ),
     },
     {
-      path: '/admin/lei-14133',
-      label: '└─ Editor Lei 14.133 📝',
-      icon: (props: Record<string, unknown>) => (
-        <svg {...props} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-        </svg>
-      ),
-      indent: true,
-    },
-    {
       path: '/admin/dou-filtros',
-      label: 'DOU Filtros 🔍',
+      label: 'DOU Filtros',
       icon: (props: Record<string, unknown>) => (
         <svg {...props} fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
@@ -135,7 +109,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
     { divider: true, label: '📁 Documentos' },
     {
       path: '/admin/adicionar-documentos',
-      label: 'Adicionar Documentos ➕',
+      label: 'Central de Documentos',
       icon: (props: Record<string, unknown>) => (
         <svg {...props} fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
@@ -162,20 +136,19 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
     },
     {
       path: '/admin/analytics-documentos',
-      label: '└─ Catalogação',
+      label: 'Catalogação',
       icon: (props: Record<string, unknown>) => (
         <svg {...props} fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
         </svg>
       ),
-      indent: true,
     },
 
     // === LMS ===
     { divider: true, label: '🎓 LMS' },
     {
       path: '/admin/lms',
-      label: 'Cursos (LMS)',
+      label: 'Cursos',
       icon: GraduationCap,
     },
 
@@ -216,7 +189,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
     },
     {
       path: '/admin/assistente-social',
-      label: 'Publicar Redes Sociais 📱',
+      label: 'Redes Sociais',
       icon: (props: Record<string, unknown>) => (
         <svg {...props} fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
@@ -277,7 +250,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
       <aside
         className={`
           ${isCollapsed ? 'w-20' : 'w-64'}
-          bg-brand-600 border-r border-brand-700 fixed h-full transition-all duration-300 z-40
+          bg-brand-600 border-r border-brand-700 fixed top-0 left-0 h-full transition-all duration-300 z-40
           lg:translate-x-0
           ${isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full'}
         `}

@@ -1,4 +1,3 @@
-import { fetchPendingDocumentsPaginated } from '@/lib/documents';
 import { prisma } from '@/lib/prisma';
 import AdicionarDocumentosClient from './AdicionarDocumentosClient';
 import AdminLayout from '@/components/AdminLayout';
@@ -12,34 +11,57 @@ const getSearchParam = (param: string | string[] | undefined): string | undefine
 };
 
 /**
- * Adicionar Documentos - Central de entrada de documentos
+ * Central de Documentos
  *
  * Combina:
  * 1. Upload de documentos (individual/lote)
  * 2. Criação manual (links/texto)
- * 3. Staging DOU (docs aguardando aprovação)
+ * 3. Importações automáticas recentes (últimos 7 dias)
  * 4. Uploads recentes (últimas 24h)
  */
 export default async function AdicionarDocumentosPage({ searchParams }: PageProps) {
   const params = await searchParams;
 
-  // Extrair filtros para DOU staging
   const category = getSearchParam(params.category);
-  const period = getSearchParam(params.period) || 'all';
   const pageRaw = parseInt(getSearchParam(params.page) || '1', 10);
   const pageSizeRaw = parseInt(getSearchParam(params.pageSize) || '20', 10);
 
   const safePage = Math.max(1, isNaN(pageRaw) ? 1 : pageRaw);
   const safePageSize = Math.min(100, Math.max(1, isNaN(pageSizeRaw) ? 20 : pageSizeRaw));
 
-  // Buscar documentos pendentes (DOU staging)
-  const { items: pendingDocs, total: pendingTotal, page: currentPage, pageSize: currentPageSize, totalPages } =
-    await fetchPendingDocumentsPaginated({
-      category: category || undefined,
-      period: period || undefined,
-      page: safePage.toString(),
-      pageSize: safePageSize.toString(),
-    });
+  // Buscar documentos auto-importados nos últimos 7 dias
+  const sevenDaysAgo = new Date();
+  sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+
+  const autoImportWhere = {
+    reviewedBy: { in: ['auto-sync-tcu', 'auto-migration'] },
+    reviewedAt: { gte: sevenDaysAgo },
+    ...(category ? { category } : {}),
+  };
+
+  const [autoImports, autoImportsTotal] = await Promise.all([
+    prisma.document.findMany({
+      where: autoImportWhere,
+      select: {
+        id: true,
+        title: true,
+        description: true,
+        category: true,
+        type: true,
+        url: true,
+        uploadedAt: true,
+        summary: true,
+        tcuNumeroAcordao: true,
+        reviewedBy: true,
+      },
+      orderBy: { uploadedAt: 'desc' },
+      skip: (safePage - 1) * safePageSize,
+      take: safePageSize,
+    }),
+    prisma.document.count({ where: autoImportWhere }),
+  ]);
+
+  const totalPages = Math.ceil(autoImportsTotal / safePageSize);
 
   // Buscar uploads recentes (últimas 24h)
   const oneDayAgo = new Date();
@@ -47,8 +69,12 @@ export default async function AdicionarDocumentosPage({ searchParams }: PageProp
 
   const recentUploads = await prisma.document.findMany({
     where: {
-      reviewed: true, // Já aprovados
+      reviewed: true,
       uploadedAt: { gte: oneDayAgo },
+      OR: [
+        { reviewedBy: null },
+        { reviewedBy: { notIn: ['auto-sync-tcu', 'auto-migration'] } },
+      ],
     },
     select: {
       id: true,
@@ -65,10 +91,9 @@ export default async function AdicionarDocumentosPage({ searchParams }: PageProp
   });
 
   // Serializar datas
-  const serializedPendingDocs = pendingDocs.map(doc => ({
+  const serializedAutoImports = autoImports.map(doc => ({
     ...doc,
     uploadedAt: doc.uploadedAt.toISOString(),
-    douData: doc.douData ? doc.douData.toISOString() : null,
   }));
 
   const serializedRecentUploads = recentUploads.map(doc => ({
@@ -79,11 +104,11 @@ export default async function AdicionarDocumentosPage({ searchParams }: PageProp
   return (
     <AdminLayout>
       <AdicionarDocumentosClient
-        pendingDocuments={serializedPendingDocs}
-        pendingPagination={{
-          total: pendingTotal,
-          page: currentPage,
-          pageSize: currentPageSize,
+        autoImports={serializedAutoImports}
+        autoImportsPagination={{
+          total: autoImportsTotal,
+          page: safePage,
+          pageSize: safePageSize,
           totalPages,
         }}
         recentUploads={serializedRecentUploads}
@@ -93,6 +118,6 @@ export default async function AdicionarDocumentosPage({ searchParams }: PageProp
 }
 
 export const metadata = {
-  title: 'Adicionar Documentos | Admin',
-  description: 'Upload e criação de documentos para os cursos',
+  title: 'Central de Documentos | Admin',
+  description: 'Upload, criação e monitoramento de documentos',
 };
