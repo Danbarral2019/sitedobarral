@@ -170,6 +170,9 @@ model Document {
   // Relacionamento com lições (LMS)
   lessonDocuments LessonDocument[]
 
+  // Relacionamento com destaques TCU
+  highlights TcuHighlight[]
+
   @@index([embeddingStatus]) // Índice para buscar documentos por status de embedding
 }
 
@@ -1186,4 +1189,36 @@ model UserStreak {
   @@unique([userId, courseId])
   @@index([courseId, totalXp])
   @@index([courseId, showOnLeaderboard])
+}
+
+// Destaques TCU - Acórdãos com potencial editorial identificados pela IA
+model TcuHighlight {
+  id                  String    @id @default(uuid())
+  documentId          String
+  document            Document  @relation(fields: [documentId], references: [id], onDelete: Cascade)
+
+  // Scores
+  keywordScore        Int       // Score original do analyzeRelevanceTCU
+  aiArticleWorthiness Int       // Score geral 0-100 da IA
+
+  // Análise IA
+  aiThesisSummary     String    @db.Text  // Tese principal em linguagem acessível
+  aiWhyImportant      String    @db.Text  // Por que merece destaque
+  aiArticleAngle      String    @db.Text  // Sugestão de ângulo editorial
+  aiLeiConnections    String?             // JSON: [{article, connection}]
+
+  // Workflow admin
+  status              String    @default("pending") // pending | dismissed | will_write | written
+  adminNotes          String?   @db.Text
+  blogPostId          String?   // Link ao post criado
+
+  // Notificação
+  emailSentAt         DateTime?
+
+  createdAt           DateTime  @default(now())
+  updatedAt           DateTime  @updatedAt
+
+  @@index([status])
+  @@index([status, createdAt])
+  @@index([documentId])
 }

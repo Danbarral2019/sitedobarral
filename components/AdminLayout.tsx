@@ -5,7 +5,7 @@ import { usePathname } from 'next/navigation';
 import Link from 'next/link';
 import Image from 'next/image';
 import {
-  QrCode, ChevronLeft, ChevronRight, BarChart3, Mail, MessageSquare, Send, GraduationCap, Youtube, Globe, BookOpen, Menu, X
+  QrCode, ChevronLeft, ChevronRight, BarChart3, Mail, MessageSquare, Send, GraduationCap, Youtube, Globe, BookOpen, Menu, X, Star
 } from 'lucide-react';
 
 interface AdminLayoutProps {
@@ -15,7 +15,7 @@ interface AdminLayoutProps {
 export default function AdminLayout({ children }: AdminLayoutProps) {
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const [unreadCounts, setUnreadCounts] = useState({ contatos: 0, depoimentos: 0, documentos: 0 });
+  const [unreadCounts, setUnreadCounts] = useState({ contatos: 0, depoimentos: 0, documentos: 0, tcuHighlights: 0 });
   const pathname = usePathname();
 
   const isActive = (path: string) => {
@@ -27,10 +27,11 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
   useEffect(() => {
     const loadCounts = async () => {
       try {
-        const [contatosRes, depoimentosRes, documentosRes] = await Promise.all([
+        const [contatosRes, depoimentosRes, documentosRes, tcuHighlightsRes] = await Promise.all([
           fetch('/api/admin/contatos?unreadOnly=true'),
           fetch('/api/admin/depoimentos?status=pending'),
           fetch('/api/admin/documents/unreviewed-count'),
+          fetch('/api/admin/tcu-highlights?countOnly=true'),
         ]);
 
         if (contatosRes.ok) {
@@ -46,6 +47,11 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
         if (documentosRes.ok) {
           const documentosData = await documentosRes.json();
           setUnreadCounts(prev => ({ ...prev, documentos: documentosData.count || 0 }));
+        }
+
+        if (tcuHighlightsRes.ok) {
+          const tcuData = await tcuHighlightsRes.json();
+          setUnreadCounts(prev => ({ ...prev, tcuHighlights: tcuData.count || 0 }));
         }
       } catch (error) {
         console.error('Erro ao carregar contadores:', error);
@@ -69,6 +75,13 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
         </svg>
       ),
+    },
+    {
+      path: '/admin/tcu-highlights',
+      label: 'Destaques TCU',
+      icon: Star,
+      badge: unreadCounts.tcuHighlights,
+      indent: true,
     },
     {
       path: '/admin/agu-import',

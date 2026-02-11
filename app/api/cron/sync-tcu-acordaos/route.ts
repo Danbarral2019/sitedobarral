@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { analyzeRelevanceTCU, suggestCoursesTCU } from '@/lib/tcu-module';
 import { LeiIndexer } from '@/lib/lei-indexer';
+import { identifyAndAlertHighlights } from '@/lib/tcu-highlight-analyzer';
 
 /**
  * Cron Job: Sincronização automática de acórdãos do TCU
@@ -361,6 +362,16 @@ export async function GET(request: NextRequest) {
     // 6. Enriquecer novos acórdãos (resumo Gemini + indexação Lei 14.133)
     const enrichment = await enrichNewDocuments(newDocIds);
 
+    // 7. Identificar acórdãos com potencial editorial
+    let highlightCount = 0;
+    if (newDocIds.length > 0) {
+      try {
+        highlightCount = await identifyAndAlertHighlights(newDocIds);
+      } catch (err) {
+        console.error('[Sync TCU] Erro na fase de highlights:', err);
+      }
+    }
+
     const elapsed = Math.round((Date.now() - startTime) / 1000);
 
     const result = {
@@ -372,6 +383,7 @@ export async function GET(request: NextRequest) {
       imported,
       errors,
       enrichment,
+      highlights: highlightCount,
       elapsed: `${elapsed}s`,
     };
 
