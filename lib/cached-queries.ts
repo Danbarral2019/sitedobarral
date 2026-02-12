@@ -133,3 +133,10 @@ export const getCachedLeiArticleCount = cache(async () => {
 export const getCachedGlossaryTermCount = cache(async () => {
   return await prisma.glossaryTerm.count();
 });
+
+/**
+ * Conta total de atos normativos (cached)
+ */
+export const getCachedLegislativeActCount = cache(async () => {
+  return await prisma.legislativeAct.count();
+});

@@ -88,6 +88,11 @@ export const Footer = memo(function Footer() {
                 </Link>
               </li>
               <li>
+                <Link href="/legislacao" className="text-sm text-brand-200 hover:text-white transition-colors">
+                  Legislação
+                </Link>
+              </li>
+              <li>
                 <Link href="/glossario" className="text-sm text-brand-200 hover:text-white transition-colors">
                   Glossário
                 </Link>

@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import Image from 'next/image';
 import { useState, memo, useEffect, useRef } from 'react';
-import { Menu, X, ChevronDown, User, FileText, Mail, Home, LogIn, Award, BookOpen } from 'lucide-react';
+import { Menu, X, ChevronDown, User, FileText, Mail, Home, LogIn, Award, BookOpen, Scale } from 'lucide-react';
 import { courses } from '@/data/courses';
 
 export const Header = memo(function Header() {
@@ -112,6 +112,14 @@ export const Header = memo(function Header() {
             </div>
 
             <Link
+              href="/legislacao"
+              className="flex items-center space-x-1 text-white/90 hover:text-white transition-colors font-poppins text-sm focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-brand-600 rounded"
+            >
+              <Scale className="w-4 h-4" />
+              <span>Legislação</span>
+            </Link>
+
+            <Link
               href="/blog"
               className="flex items-center space-x-1 text-white/90 hover:text-white transition-colors font-poppins text-sm focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-brand-600 rounded"
             >
@@ -175,6 +183,13 @@ export const Header = memo(function Header() {
               onClick={() => setIsMenuOpen(false)}
             >
               Cursos
+            </Link>
+            <Link
+              href="/legislacao"
+              className="block py-3 px-2 text-white/90 hover:text-white hover:bg-brand-500 rounded transition-colors font-poppins"
+              onClick={() => setIsMenuOpen(false)}
+            >
+              Legislação
             </Link>
             <Link
               href="/blog"

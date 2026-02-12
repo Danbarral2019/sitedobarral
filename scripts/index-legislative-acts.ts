@@ -47,10 +47,10 @@ async function main() {
       continue;
     }
 
-    // Conteúdo = ementa do ato
-    const content = act.ementa || '';
+    // Conteúdo = inteiro teor (se disponível via scraping) ou ementa
+    const content = act.content || act.ementa || '';
     if (content.length < 30) {
-      console.log(`   ⚠️  ${title}: ementa muito curta (${content.length} chars), pulando`);
+      console.log(`   ⚠️  ${title}: conteúdo muito curto (${content.length} chars), pulando`);
       skipped++;
       continue;
     }

@@ -6,6 +6,7 @@ import {
   ChevronUp, ExternalLink, Download, BookOpen, Eye,
   X, FileText, Lightbulb, Globe
 } from 'lucide-react';
+import Link from 'next/link';
 import MarkdownContent from '@/components/MarkdownContent';
 import { TEMAS_LICITACOES, getThemeLabel } from '@/data/temas-licitacoes';
 
@@ -570,15 +571,23 @@ export default function LegislacaoPage() {
                               </span>
                             )}
                             {act.fullNumber && (
-                              <span className="text-lg font-mono font-bold text-gray-900">
+                              <Link
+                                href={`/legislacao/${act.id}`}
+                                className="text-lg font-mono font-bold text-gray-900 hover:text-blue-700 transition-colors"
+                              >
                                 {act.fullNumber}
-                              </span>
+                              </Link>
                             )}
                           </div>
 
                           {/* Título */}
                           <h2 className="text-2xl font-bold text-gray-900 mb-2 leading-tight">
-                            {act.title}
+                            <Link
+                              href={`/legislacao/${act.id}`}
+                              className="hover:text-blue-700 transition-colors"
+                            >
+                              {act.title}
+                            </Link>
                           </h2>
 
                           {/* Ementa */}
