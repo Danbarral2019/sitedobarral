@@ -29,6 +29,29 @@ const CONCRETE_ACT_PATTERNS = [
   'empresa:', 'contratada:', 'contratante:',
   'valor global:', 'valor total:', 'valor mensal:',
   'extrato de', 'aviso de', 'resultado de julgamento',
+
+  // Editais e avisos de licitação (títulos)
+  'edital complementar', 'edital progesp', 'edital progepe',
+  'edital de convocação', 'edital de seleção', 'edital de chamamento',
+  'edital de credenciamento', 'edital de concurso',
+  'avisos de licitação', 'aviso de licitação', 'aviso de dispensa',
+  'aviso de inexigibilidade',
+  'extrato prévio', 'extrato de doação', 'extrato de contrato',
+  'extrato de termo', 'extrato de aditivo',
+
+  // Atos administrativos concretos (título)
+  'acordo de cooperação', 'termo de cooperação',
+  'ata de registro de preço', 'registro de preço',
+];
+
+/**
+ * Regex de título que indicam ato concreto (prioridade sobre classificação)
+ */
+const CONCRETE_TITLE_PATTERNS = [
+  /^edital\b/i,
+  /^aviso\b/i,
+  /^extratos?\b/i,
+  /^retifica[çc][ãa]o\b/i,
 ];
 
 /**
@@ -78,8 +101,14 @@ export type AtoType = 'decreto' | 'portaria' | 'in' | 'on' | 'lei' | 'mp' | null
  */
 export function isAtoNormativoGeral(title: string, abstract: string): NormativeClassification {
   const text = `${title} ${abstract}`.toLowerCase();
+  const titleTrimmed = title.replace(/<[^>]*>/g, '').trim();
 
-  // Verificar filtro negativo primeiro (atos concretos)
+  // Verificar título concreto primeiro (editais, avisos, extratos)
+  if (CONCRETE_TITLE_PATTERNS.some(p => p.test(titleTrimmed))) {
+    return 'concreto';
+  }
+
+  // Verificar filtro negativo (atos concretos no texto)
   const hasConcrete = CONCRETE_ACT_PATTERNS.some(p => text.includes(p));
   const hasGeneral = GENERAL_ACT_INDICATORS.some(p => text.includes(p));
 
