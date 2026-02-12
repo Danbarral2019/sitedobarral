@@ -78,8 +78,8 @@ export async function GET(request: NextRequest) {
             category: 'acordao',
             isPublic: false, // Privado ate admin revisar
             reviewed: false, // Marca como nao revisado
-            courseId: '1', // Nova Lei de Licitacoes (padrao)
-            isCommon: false,
+            courseId: '2', // Planejamento das Contratacoes (padrao)
+            isCommon: true,
             tags: JSON.stringify([
               'TCU',
               'Acordao',
@@ -139,8 +139,8 @@ export async function GET(request: NextRequest) {
             category: 'orientacao-normativa',
             isPublic: false, // Privado ate admin revisar
             reviewed: false, // Marca como nao revisado
-            courseId: '1', // Nova Lei de Licitacoes (padrao)
-            isCommon: false,
+            courseId: '2', // Planejamento das Contratacoes (padrao)
+            isCommon: true,
             tags: JSON.stringify([
               'AGU',
               'Orientacao Normativa',

@@ -80,7 +80,7 @@ export const POST = withAdminAuth(async (request: NextRequest) => {
         } else {
           // Curso único - comportamento original
           await addDocument(
-            doc.courseId || '1',
+            doc.courseId || '2',
             doc.title,
             doc.description,
             fileType,

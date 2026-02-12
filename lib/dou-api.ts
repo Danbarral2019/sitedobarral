@@ -76,8 +76,57 @@ export interface DOUSearchParams {
  * Cliente para busca na API oficial do DOU
  */
 export class DOUClient {
-  private baseUrl = 'http://www.in.gov.br/consulta/-/buscar/dou';
-  private webBaseUrl = 'http://www.in.gov.br/web/dou/-/';
+  private baseUrl = 'https://www.in.gov.br/consulta/-/buscar/dou';
+  private webBaseUrl = 'https://www.in.gov.br/web/dou/-/';
+  private maxRetries = 3;
+  private timeoutMs = 30000;
+
+  /**
+   * Fetch com retry e timeout
+   */
+  private async fetchWithRetry(url: string, retries = this.maxRetries): Promise<Response> {
+    for (let attempt = 1; attempt <= retries; attempt++) {
+      const controller = new AbortController();
+      const timeout = setTimeout(() => controller.abort(), this.timeoutMs);
+
+      try {
+        const response = await fetch(url, {
+          headers: {
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
+          },
+          signal: controller.signal,
+        });
+
+        clearTimeout(timeout);
+
+        if (!response.ok) {
+          if (attempt < retries && response.status >= 500) {
+            const delay = Math.min(1000 * Math.pow(2, attempt - 1), 8000);
+            console.warn(`[DOU API] Tentativa ${attempt}/${retries} falhou (HTTP ${response.status}), aguardando ${delay}ms...`);
+            await new Promise(resolve => setTimeout(resolve, delay));
+            continue;
+          }
+          throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+        }
+
+        return response;
+      } catch (error) {
+        clearTimeout(timeout);
+
+        if (error instanceof DOMException && error.name === 'AbortError') {
+          console.warn(`[DOU API] Timeout na tentativa ${attempt}/${retries}`);
+        }
+
+        if (attempt >= retries) throw error;
+
+        const delay = Math.min(1000 * Math.pow(2, attempt - 1), 8000);
+        console.warn(`[DOU API] Tentativa ${attempt}/${retries} falhou, aguardando ${delay}ms...`);
+        await new Promise(resolve => setTimeout(resolve, delay));
+      }
+    }
+
+    throw new Error('Todas as tentativas falharam');
+  }
 
   /**
    * Constrói query string para busca
@@ -132,17 +181,8 @@ export class DOUClient {
     console.log(`[DOU API] URL: ${url}`);
 
     try {
-      // Fazer requisição
-      const response = await fetch(url, {
-        headers: {
-          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
-        },
-      });
-
-      if (!response.ok) {
-        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-      }
-
+      // Fazer requisição com retry e timeout
+      const response = await this.fetchWithRetry(url);
       const html = await response.text();
 
       // Parse HTML com cheerio (mais leve e compatível com serverless)
@@ -187,11 +227,7 @@ export class DOUClient {
 
           console.log(`[DOU API] 🔗 URL paginação: ${paginatedUrl.substring(0, 150)}...`);
 
-          const pageResponse = await fetch(paginatedUrl, {
-            headers: {
-              'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
-            },
-          });
+          const pageResponse = await this.fetchWithRetry(paginatedUrl);
 
           pageHtml = await pageResponse.text();
         }
@@ -232,18 +268,22 @@ export class DOUClient {
 
         // Processar resultados
         for (const content of searchResults) {
+          // Validar campos obrigatórios antes de acessar
+          if (!content || typeof content !== 'object') continue;
+
+          const pubDate = content.pubDate || '';
           const item: DOUSearchResult = {
-            section: content.pubName.toLowerCase(),
-            title: content.title,
-            href: this.webBaseUrl + content.urlTitle,
-            abstract: content.content,
-            date: content.pubDate,
-            id: content.classPK,
-            hierarchyList: content.hierarchyList,
-            hierarchyStr: content.hierarchyStr,
-            artType: content.artType,
+            section: (content.pubName || 'do1').toLowerCase(),
+            title: content.title || '',
+            href: content.urlTitle ? this.webBaseUrl + content.urlTitle : '',
+            abstract: content.content || '',
+            date: pubDate,
+            id: content.classPK || '',
+            hierarchyList: Array.isArray(content.hierarchyList) ? content.hierarchyList : [],
+            hierarchyStr: content.hierarchyStr || '',
+            artType: content.artType || '',
             score: content.score || 0,
-            displayDate: dateToTimestamp(content.pubDate),
+            displayDate: pubDate ? dateToTimestamp(pubDate) : Date.now(),
           };
 
           allResults.push(item);

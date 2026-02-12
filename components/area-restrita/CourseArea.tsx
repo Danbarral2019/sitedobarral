@@ -216,64 +216,66 @@ export default function CourseArea({
         </div>
       )}
 
-      {/* Course Header */}
-      <div className="bg-white rounded-2xl border border-gray-200 p-5 lg:p-6">
-        <div className="flex items-start gap-4">
-          <div className="p-3 bg-gradient-to-br from-brand-500 to-brand-700 rounded-xl shadow-md flex-shrink-0">
-            <GraduationCap className="w-6 h-6 lg:w-7 lg:h-7 text-white" />
-          </div>
-          <div className="flex-1 min-w-0">
-            <h2 className="text-lg lg:text-xl font-bold text-gray-900 leading-tight">
-              {activeCourse.course.title.split('(')[0].trim()}
-            </h2>
-            <p className="text-sm text-gray-500 mt-1 line-clamp-2">
-              {activeCourse.course.shortDescription}
-            </p>
-            <div className="flex items-center gap-4 mt-3">
-              <span className="text-xs font-semibold text-brand-600 bg-brand-50 px-2.5 py-1 rounded-full">
-                {totalMaterials} {totalMaterials === 1 ? 'material disponível' : 'materiais disponíveis'}
-              </span>
-              <span className="text-xs font-semibold text-gray-500 bg-gray-100 px-2.5 py-1 rounded-full">
-                {visibleSteps.length} {visibleSteps.length === 1 ? 'etapa' : 'etapas'}
-              </span>
+      {/* Unified Course Card */}
+      <div className="bg-white rounded-2xl border border-gray-200 overflow-hidden">
+        {/* Course Header */}
+        <div className="p-5 lg:p-6">
+          <div className="flex items-start gap-4">
+            <div className="p-3 bg-gradient-to-br from-brand-500 to-brand-700 rounded-xl shadow-md flex-shrink-0">
+              <GraduationCap className="w-6 h-6 lg:w-7 lg:h-7 text-white" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <h2 className="text-lg lg:text-xl font-bold text-gray-900 leading-tight">
+                {activeCourse.course.title.split('(')[0].trim()}
+              </h2>
+              <p className="text-sm text-gray-500 mt-1 line-clamp-2">
+                {activeCourse.course.shortDescription}
+              </p>
+              <div className="flex flex-wrap items-center gap-2 mt-3">
+                <span className="text-xs font-semibold text-brand-600 bg-brand-50 px-2.5 py-1 rounded-full">
+                  {totalMaterials} {totalMaterials === 1 ? 'material disponível' : 'materiais disponíveis'}
+                </span>
+                <span className="text-xs font-semibold text-gray-500 bg-gray-100 px-2.5 py-1 rounded-full">
+                  {visibleSteps.length} {visibleSteps.length === 1 ? 'etapa' : 'etapas'}
+                </span>
+              </div>
             </div>
           </div>
         </div>
-      </div>
 
-      {/* LMS Module Banner */}
-      {modulesData && modulesData[activeCourseId]?.moduleCount > 0 && (
-        <div className="bg-gradient-to-r from-brand-50 to-purple-50 border border-brand-200 rounded-2xl p-5">
-          <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4">
-            <div className="flex items-center gap-3 flex-1 min-w-0">
-              <div className="p-2.5 bg-brand-100 rounded-xl flex-shrink-0">
-                <PlayCircle className="w-5 h-5 text-brand-600" />
+        {/* LMS Module Banner */}
+        {modulesData && modulesData[activeCourseId]?.moduleCount > 0 && (
+          <div className="px-5 py-4 bg-gradient-to-r from-brand-50/50 to-purple-50/50 border-t border-gray-100">
+            <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4">
+              <div className="flex items-center gap-3 flex-1 min-w-0">
+                <div className="p-2 bg-brand-100 rounded-lg flex-shrink-0">
+                  <PlayCircle className="w-4 h-4 text-brand-600" />
+                </div>
+                <div className="min-w-0">
+                  <p className="text-sm font-semibold text-brand-900">
+                    {modulesData[activeCourseId].moduleCount}{' '}
+                    {modulesData[activeCourseId].moduleCount === 1 ? 'módulo' : 'módulos'}{' '}
+                    com {modulesData[activeCourseId].lessonCount}{' '}
+                    {modulesData[activeCourseId].lessonCount === 1 ? 'aula estruturada' : 'aulas estruturadas'}
+                  </p>
+                </div>
               </div>
-              <div className="min-w-0">
-                <p className="text-sm font-bold text-brand-900">
-                  Este curso tem {modulesData[activeCourseId].moduleCount}{' '}
-                  {modulesData[activeCourseId].moduleCount === 1 ? 'modulo' : 'modulos'}{' '}
-                  com {modulesData[activeCourseId].lessonCount}{' '}
-                  {modulesData[activeCourseId].lessonCount === 1 ? 'aula estruturada' : 'aulas estruturadas'}
-                </p>
-                <p className="text-xs text-brand-600 mt-0.5">
-                  Acesse as aulas com conteudo, videos, materiais e discussao
-                </p>
-              </div>
+              <Link
+                href={`/area-restrita/curso/${activeCourse.course.slug}`}
+                className="flex items-center justify-center gap-2 px-5 py-2.5 bg-brand-600 text-white rounded-xl font-semibold text-sm hover:bg-brand-700 transition-colors flex-shrink-0"
+              >
+                Entrar no Curso
+                <ChevronRight className="w-4 h-4" />
+              </Link>
             </div>
-            <Link
-              href={`/area-restrita/curso/${activeCourse.course.slug}`}
-              className="flex items-center justify-center gap-2 px-5 py-2.5 bg-brand-600 text-white rounded-xl font-semibold text-sm hover:bg-brand-700 transition-colors flex-shrink-0"
-            >
-              Entrar no Curso
-              <ChevronRight className="w-4 h-4" />
-            </Link>
           </div>
-        </div>
-      )}
+        )}
 
-      {/* Desktop Steps as Cards (lg+) */}
-      <div className="hidden lg:block">
+        {/* Trail Steps */}
+        <div className="p-5 border-t border-gray-100">
+
+        {/* Desktop Steps as Cards (lg+) */}
+        <div className="hidden lg:block">
         {/* Step Cards Row */}
         <div className="relative flex items-stretch gap-0">
           {/* Connecting line behind cards */}
@@ -524,6 +526,8 @@ export default function CourseArea({
           );
         })}
       </div>
+      </div>{/* close trail steps wrapper */}
+      </div>{/* close unified course card */}
     </div>
   );
 }

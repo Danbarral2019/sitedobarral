@@ -150,7 +150,7 @@ const getCourseColor = (courseId: string) => {
     },
   };
 
-  return colorMap[courseId] || colorMap['1'];
+  return colorMap[courseId] || colorMap['2'];
 };
 
 export const revalidate = 3600; // ISR: revalida a cada 1h

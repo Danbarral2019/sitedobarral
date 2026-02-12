@@ -58,7 +58,7 @@ export async function POST(request: NextRequest) {
 
     // 2. Parse do body
     const body = await request.json();
-    const { documentId, action, courseIds, adminNotes } = body;
+    const { documentId, action, courseIds, adminNotes, importAs } = body;
 
     // 3. Validações básicas
     if (!documentId || typeof documentId !== 'string') {
@@ -123,9 +123,13 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // Validar importAs (se fornecido)
+    const validImportAs = ['ato_normativo', 'boa_pratica'];
+    const importType = importAs && validImportAs.includes(importAs) ? importAs : 'ato_normativo';
+
     // 6. Executar aprovação ou rejeição
     if (action === 'approve') {
-      return await handleApproval(stagingDoc, courseIds, adminEmail, adminNotes);
+      return await handleApproval(stagingDoc, courseIds, adminEmail, adminNotes, importType);
     } else {
       return await handleRejection(stagingDoc, adminEmail, adminNotes);
     }
@@ -164,19 +168,29 @@ async function handleApproval(
   stagingDoc: DOUStagingDoc,
   courseIds: string[],
   adminEmail: string,
-  adminNotes?: string
+  adminNotes?: string,
+  importAs: string = 'ato_normativo'
 ) {
   try {
-    // Mapear categoria DOU para categoria Document
-    const categoryMap: Record<string, string> = {
-      'fonte_agu': 'parecer',
-      'ato_normativo': 'legislacao',
-      'acordao_tcu': 'acordao',
-      'sumula': 'sumula',
-      'outros': 'outro',
-    };
+    // Mapear categoria baseado na escolha do admin
+    let documentCategory: string;
+    let tags: string[];
 
-    const documentCategory = categoryMap[stagingDoc.category] || 'outro';
+    if (importAs === 'boa_pratica') {
+      documentCategory = 'boa_pratica';
+      tags = ['boas_praticas'];
+    } else {
+      // Mapear categoria DOU para categoria Document
+      const categoryMap: Record<string, string> = {
+        'fonte_agu': 'parecer',
+        'ato_normativo': 'legislacao',
+        'acordao_tcu': 'acordao',
+        'sumula': 'sumula',
+        'outros': 'outro',
+      };
+      documentCategory = categoryMap[stagingDoc.category] || 'outro';
+      tags = [];
+    }
 
     // Verificar duplicatas (mesmo douUrl já existe?)
     const existingDoc = await prisma.document.findFirst({
@@ -215,7 +229,7 @@ async function handleApproval(
           category: documentCategory,
           courseId: courseIds[0] || null, // Primeiro curso (principal)
           isPublic: false, // Admin decide depois
-          tags: JSON.stringify([]),
+          tags: JSON.stringify(tags),
           leiArticles: JSON.stringify([]),
           content: stagingDoc.fullContent || stagingDoc.abstract,
           douUrl: stagingDoc.url,

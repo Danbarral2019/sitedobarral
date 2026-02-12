@@ -38,7 +38,7 @@ const licitacaoRules: ClassificationRule[] = [
     type: 'plain',
     scope: 'titulo',
     priority: 30,
-    courseSlug: 'nova-lei-licitacoes',
+    courseSlug: 'planejamento-contratacoes',
     observation: 'Menções a pregão no título'
   },
   {
@@ -46,7 +46,7 @@ const licitacaoRules: ClassificationRule[] = [
     type: 'plain',
     scope: 'ambos',
     priority: 40,
-    courseSlug: 'nova-lei-licitacoes',
+    courseSlug: 'planejamento-contratacoes',
     observation: 'Edital de licitação'
   },
   {
@@ -54,7 +54,7 @@ const licitacaoRules: ClassificationRule[] = [
     type: 'plain',
     scope: 'ambos',
     priority: 40,
-    courseSlug: 'nova-lei-licitacoes',
+    courseSlug: 'planejamento-contratacoes',
     observation: 'Registro de preços'
   },
   {
@@ -86,7 +86,7 @@ const licitacaoRules: ClassificationRule[] = [
     type: 'plain',
     scope: 'ambos',
     priority: 60,
-    courseSlug: 'nova-lei-licitacoes',
+    courseSlug: 'planejamento-contratacoes',
     observation: 'Homologação'
   },
   {
@@ -94,7 +94,7 @@ const licitacaoRules: ClassificationRule[] = [
     type: 'plain',
     scope: 'ambos',
     priority: 70,
-    courseSlug: 'nova-lei-licitacoes',
+    courseSlug: 'planejamento-contratacoes',
     observation: 'Comissão/Pregoeiro'
   },
   {
@@ -110,7 +110,7 @@ const licitacaoRules: ClassificationRule[] = [
     type: 'plain',
     scope: 'ambos',
     priority: 60,
-    courseSlug: 'nova-lei-licitacoes',
+    courseSlug: 'planejamento-contratacoes',
     observation: 'Revogação'
   },
   {
@@ -150,8 +150,8 @@ const licitacaoRules: ClassificationRule[] = [
     type: 'plain',
     scope: 'ambos',
     priority: 55,
-    courseSlug: 'inovacao-contratacoes',
-    observation: 'Inovação nas contratações'
+    courseSlug: 'contratacao-direta',
+    observation: 'Inovação nas contratações (redirecionado)'
   },
   {
     pattern: ['licitação'],
@@ -223,7 +223,7 @@ export function autoClassifyDocument(
       const confidence = Math.max(10, 100 - rule.priority);
 
       return {
-        courseSlug: rule.courseSlug || 'nova-lei-licitacoes', // Fallback
+        courseSlug: rule.courseSlug || 'planejamento-contratacoes', // Fallback
         confidence,
         matchedRule: rule
       };
@@ -232,7 +232,7 @@ export function autoClassifyDocument(
 
   // Se nenhuma regra corresponder, usa curso padrão
   return {
-    courseSlug: 'nova-lei-licitacoes',
+    courseSlug: 'planejamento-contratacoes',
     confidence: 5, // Baixa confiança
   };
 }

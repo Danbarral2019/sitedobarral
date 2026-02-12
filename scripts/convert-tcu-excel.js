@@ -28,7 +28,7 @@ const fs = require('fs');
 // Mapeamento inteligente de Area/Tema para Cursos
 const CURSO_MAPPING = {
   // Lei 14.133 e licitacoes em geral
-  'licitacao|licitacoes|pregao|edital|modalidade|registro de precos': 'nova-lei-licitacoes',
+  'licitacao|licitacoes|pregao|edital|modalidade|registro de precos': 'planejamento-contratacoes',
 
   // Planejamento
   'planejamento|etp|estudo tecnico|termo de referencia|projeto basico|analise de riscos': 'planejamento-contratacoes',
@@ -40,10 +40,10 @@ const CURSO_MAPPING = {
   'sancao|penalidade|multa|advertencia|impedimento|suspensao|declaracao de inidoneidade': 'processo-sancionador',
 
   // Inovacao
-  'inovacao|startup|dialogo competitivo|pmi|encomenda tecnologica': 'inovacao-contratacoes',
+  'inovacao|startup|dialogo competitivo|pmi|encomenda tecnologica': 'contratacao-direta',
 
   // Tercerizacao e precos
-  'tercerizacao|mao de obra|planilha de custos|formacao de precos|encargos': 'terceirizacao-formacao-precos',
+  'tercerizacao|mao de obra|planilha de custos|formacao de precos|encargos': 'gestao-fiscalizacao-contratos',
 
   // Assessoramento juridico
   'parecer juridico|assessoria juridica|procuradoria|agu|consultivo': 'assessoramento-juridico',
@@ -60,12 +60,9 @@ const CURSO_MAPPING = {
 
 // Nomes dos cursos para referencia
 const CURSO_NAMES = {
-  'nova-lei-licitacoes': 'Nova Lei de Licitacoes',
   'planejamento-contratacoes': 'Planejamento das Contratacoes',
   'gestao-fiscalizacao-contratos': 'Gestao e Fiscalizacao de Contratos',
   'processo-sancionador': 'Processo Sancionador',
-  'inovacao-contratacoes': 'Inovacao nas Contratacoes',
-  'terceirizacao-formacao-precos': 'Tercerizacao e Formacao de Precos',
   'assessoramento-juridico': 'Assessoramento Juridico',
   'revisao-reajuste-repactuacao': 'Revisao, Reajuste e Repactuacao',
   'alteracoes-contratuais': 'Alteracoes Contratuais',
@@ -96,7 +93,7 @@ function identificarCursos(area, tema, subtema, enunciado) {
 
   // Se nao encontrou nenhum curso, adiciona o padrao
   if (cursos.size === 0) {
-    cursos.add('nova-lei-licitacoes');
+    cursos.add('planejamento-contratacoes');
   }
 
   return Array.from(cursos);

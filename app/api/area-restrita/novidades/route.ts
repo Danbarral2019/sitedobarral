@@ -9,12 +9,14 @@ async function handler() {
   const fourteenDaysAgo = new Date(Date.now() - FOURTEEN_DAYS_AGO);
   const thirtyDaysAgo = new Date(Date.now() - THIRTY_DAYS_AGO);
 
-  const [recentDocuments, recentBlogPosts, documentUpdates] = await Promise.all([
-    // Recent documents added (last 14 days)
+  const [recentNonManualDocs, recentManualDocs, recentBlogPosts, documentUpdates] = await Promise.all([
+    // Recent documents excluding manual-tcu (which floods the feed with ~165 sections per sync)
     prisma.document.findMany({
       where: {
         uploadedAt: { gte: fourteenDaysAgo },
         reviewed: true,
+        isPublic: true,
+        NOT: { category: 'manual-tcu' },
       },
       select: {
         id: true,
@@ -24,7 +26,25 @@ async function handler() {
         uploadedAt: true,
       },
       orderBy: { uploadedAt: 'desc' },
-      take: 8,
+      take: 15,
+    }),
+    // Manual TCU sections (limited to avoid flooding)
+    prisma.document.findMany({
+      where: {
+        uploadedAt: { gte: fourteenDaysAgo },
+        reviewed: true,
+        isPublic: true,
+        category: 'manual-tcu',
+      },
+      select: {
+        id: true,
+        title: true,
+        category: true,
+        type: true,
+        uploadedAt: true,
+      },
+      orderBy: { uploadedAt: 'desc' },
+      take: 3,
     }),
 
     // Recent blog posts (last 30 days)
@@ -91,6 +111,10 @@ async function handler() {
       type: 'feature' as const,
     },
   ];
+
+  // Merge and sort by date
+  const recentDocuments = [...recentNonManualDocs, ...recentManualDocs]
+    .sort((a, b) => new Date(b.uploadedAt).getTime() - new Date(a.uploadedAt).getTime());
 
   return NextResponse.json({
     recentDocuments,

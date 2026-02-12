@@ -52,7 +52,7 @@ async function testClaudeClassifier() {
     {
       title: 'Edital de Pregão Eletrônico 001/2024',
       description: 'Pregão eletrônico para registro de preços de materiais de escritório.',
-      expectedCourse: 'nova-lei-licitacoes',
+      expectedCourse: 'planejamento-contratacoes',
       expectedCategory: 'edital'
     },
     {

@@ -374,9 +374,9 @@ async function main() {
             isActive: true,
           },
         });
-        // Associate with all courses (course "1" at minimum)
+        // Associate with all courses (course "2" at minimum)
         await prisma.siteToCourse.create({
-          data: { siteId: site.id, courseId: '1' },
+          data: { siteId: site.id, courseId: '2' },
         });
       }
       createdCount++;

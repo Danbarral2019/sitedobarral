@@ -90,7 +90,7 @@ describe('POST /api/auth/login', () => {
     enrollments: [
       {
         id: 'enroll-1',
-        courseId: '1',
+        courseId: '2',
         validUntil: new Date(Date.now() + 86400000),
       },
     ],

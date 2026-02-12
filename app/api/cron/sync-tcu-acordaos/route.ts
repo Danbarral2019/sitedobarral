@@ -315,7 +315,7 @@ export async function GET(request: NextRequest) {
 
         // Sugerir cursos
         const courses = suggestCoursesTCU(titulo, sumario);
-        const mainCourse = courses[0] || '1';
+        const mainCourse = courses[0] || '2';
         const isCommon = courses.length > 1;
 
         // Tags baseadas no colegiado e ano

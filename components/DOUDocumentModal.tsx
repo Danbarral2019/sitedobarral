@@ -40,7 +40,7 @@ interface DOUDocumentModalProps {
   isOpen: boolean;
   onClose: () => void;
   document: DOUDocument;
-  onApprove: (courseIds: string[], adminNotes?: string) => Promise<void>;
+  onApprove: (courseIds: string[], adminNotes?: string, importAs?: string) => Promise<void>;
   onReject: (reason?: string) => Promise<void>;
   isRejecting: boolean;
   isApproving: boolean;
@@ -57,6 +57,7 @@ export function DOUDocumentModal({
 }: DOUDocumentModalProps) {
   const [selectedCourses, setSelectedCourses] = useState<string[]>([]);
   const [adminNotes, setAdminNotes] = useState('');
+  const [importAs, setImportAs] = useState<'ato_normativo' | 'boa_pratica'>('ato_normativo');
   const [showFullContent, setShowFullContent] = useState(false);
 
   const handleApprove = async () => {
@@ -66,11 +67,12 @@ export function DOUDocumentModal({
     }
 
     // Delegar completamente para o pai - ele gerencia estado e erros
-    await onApprove(selectedCourses, adminNotes.trim() || undefined);
+    await onApprove(selectedCourses, adminNotes.trim() || undefined, importAs);
 
     // Reset form local apenas (se o componente ainda estiver montado, ok; se não, sem problema)
     setSelectedCourses([]);
     setAdminNotes('');
+    setImportAs('ato_normativo');
   };
 
   const handleReject = async () => {
@@ -221,6 +223,41 @@ export function DOUDocumentModal({
 
         {/* Formulário de Aprovação */}
         <div className="space-y-4 border-t pt-4">
+          {/* Tipo de Importação */}
+          <div>
+            <label className="block text-sm font-bold mb-2">
+              Importar como:
+            </label>
+            <div className="flex gap-4">
+              <label className="flex items-center gap-2 p-3 border rounded-lg cursor-pointer hover:bg-blue-50 transition-colors has-[:checked]:border-blue-500 has-[:checked]:bg-blue-50">
+                <input
+                  type="radio"
+                  name="importAs"
+                  value="ato_normativo"
+                  checked={importAs === 'ato_normativo'}
+                  onChange={() => setImportAs('ato_normativo')}
+                />
+                <div>
+                  <span className="text-sm font-medium">Ato Normativo</span>
+                  <p className="text-xs text-gray-500">Base geral de legislacao</p>
+                </div>
+              </label>
+              <label className="flex items-center gap-2 p-3 border rounded-lg cursor-pointer hover:bg-green-50 transition-colors has-[:checked]:border-green-500 has-[:checked]:bg-green-50">
+                <input
+                  type="radio"
+                  name="importAs"
+                  value="boa_pratica"
+                  checked={importAs === 'boa_pratica'}
+                  onChange={() => setImportAs('boa_pratica')}
+                />
+                <div>
+                  <span className="text-sm font-medium">Boa Pratica</span>
+                  <p className="text-xs text-gray-500">Referencia/inspiracao de outros orgaos</p>
+                </div>
+              </label>
+            </div>
+          </div>
+
           <div>
             <label className="block text-sm font-bold mb-2">
               Vincular aos cursos: *

@@ -127,14 +127,26 @@ export async function GET(request: NextRequest) {
         // Remove HTML do título
         const cleanTitle = result.title.replace(/<[^>]*>/g, '').trim();
 
-        // Verificar duplicatas (por URL)
+        // Verificar duplicatas (por URL no staging)
         const existingDoc = await prisma.dOUStagingDocument.findFirst({
           where: { url: result.href }
         });
 
         if (existingDoc) {
           duplicados++;
-          console.log(`[Cron DOU Staging] ⏭️  Duplicado: ${cleanTitle.substring(0, 60)}...`);
+          console.log(`[Cron DOU Staging] Duplicado (staging): ${cleanTitle.substring(0, 60)}...`);
+          continue;
+        }
+
+        // Verificar se já foi importado como Document (pelo sync-dou-atos-normativos)
+        const existingDocument = await prisma.document.findFirst({
+          where: { douUrl: result.href },
+          select: { id: true },
+        });
+
+        if (existingDocument) {
+          duplicados++;
+          console.log(`[Cron DOU Staging] Já importado como Document: ${cleanTitle.substring(0, 60)}...`);
           continue;
         }
 

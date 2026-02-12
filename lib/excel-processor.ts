@@ -91,12 +91,9 @@ function validateExcelStructure(worksheet: XLSX.WorkSheet): {
  */
 function getCourseIdFromSlug(slug: string): string | undefined {
   const courseMap: Record<string, string> = {
-    'nova-lei-licitacoes': '1',
     'planejamento-contratacoes': '2',
     'gestao-fiscalizacao-contratos': '3',
     'processo-administrativo-sancionador': '4',
-    'inovacao-contratacoes': '5',
-    'terceirizacao-precos': '6',
     'assessoramento-juridico': '7',
     'revisao-reajuste-repactuacao': '8',
     'alteracoes-contratuais': '9',
@@ -111,12 +108,9 @@ function getCourseIdFromSlug(slug: string): string | undefined {
  */
 function getAllCourses(): Array<{ id: string; slug: string }> {
   return [
-    { id: '1', slug: 'nova-lei-licitacoes' },
     { id: '2', slug: 'planejamento-contratacoes' },
     { id: '3', slug: 'gestao-fiscalizacao-contratos' },
     { id: '4', slug: 'processo-administrativo-sancionador' },
-    { id: '5', slug: 'inovacao-contratacoes' },
-    { id: '6', slug: 'terceirizacao-precos' },
     { id: '7', slug: 'assessoramento-juridico' },
     { id: '8', slug: 'revisao-reajuste-repactuacao' },
     { id: '9', slug: 'alteracoes-contratuais' },
@@ -213,7 +207,7 @@ function processRow(
         warnings.push(`Linha ${rowIndex}: Nenhum curso válido encontrado em "${courseInput}", usando classificação automática`);
         const classification = autoClassifyDocument(title, description);
         courseSlug = classification.courseSlug;
-        courseId = getCourseIdFromSlug(courseSlug) || '1';
+        courseId = getCourseIdFromSlug(courseSlug) || '2';
         autoClassified = true;
         confidence = classification.confidence;
         suggestedCourse = courseSlug;
@@ -229,7 +223,7 @@ function processRow(
         warnings.push(`Linha ${rowIndex}: Curso "${row.curso}" não encontrado, usando classificação automática`);
         const classification = autoClassifyDocument(title, description);
         courseSlug = classification.courseSlug;
-        courseId = getCourseIdFromSlug(courseSlug) || '1';
+        courseId = getCourseIdFromSlug(courseSlug) || '2';
         autoClassified = true;
         confidence = classification.confidence;
         suggestedCourse = courseSlug;
@@ -238,7 +232,7 @@ function processRow(
   } else {
     const classification = autoClassifyDocument(title, description);
     courseSlug = classification.courseSlug;
-    courseId = getCourseIdFromSlug(courseSlug) || '1';
+    courseId = getCourseIdFromSlug(courseSlug) || '2';
     autoClassified = true;
     confidence = classification.confidence;
     suggestedCourse = courseSlug;
@@ -433,7 +427,7 @@ export function generateExcelTemplate(): Buffer {
       Titulo: 'Parecer AGU sobre Registro de Preços',
       Descricao: 'Orientações sobre sistema de registro de preços na nova lei',
       Categoria: 'parecer',
-      Curso: 'nova-lei-licitacoes',
+      Curso: 'planejamento-contratacoes',
       Publico: 'Sim',
       Tags: 'AGU, registro de preços, Lei 14.133',
       Artigos: '81, 82, 83, 84',

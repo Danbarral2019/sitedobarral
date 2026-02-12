@@ -20,13 +20,10 @@ function getClaudeClient(): Anthropic | null {
 
 // Cursos disponíveis para o Claude sugerir
 const AVAILABLE_COURSES = [
-  { id: '1', slug: 'nova-lei-licitacoes', title: 'Nova Lei de Licitações (Lei 14.133/2021)', keywords: 'lei 14.133, licitação, pregão, edital, registro de preços, modalidades licitatórias' },
-  { id: '2', slug: 'planejamento-contratacoes', title: 'Planejamento das Contratações Públicas', keywords: 'planejamento, PCA, ETP, termo de referência, projeto básico, estudo técnico preliminar' },
+  { id: '2', slug: 'planejamento-contratacoes', title: 'Planejamento das Contratações Públicas', keywords: 'planejamento, PCA, ETP, termo de referência, projeto básico, estudo técnico preliminar, licitação, pregão, edital, registro de preços, modalidades licitatórias' },
   { id: '3', slug: 'gestao-fiscalizacao-contratos', title: 'Gestão e Fiscalização de Contratos', keywords: 'gestão contratual, fiscalização, acompanhamento, medição, pagamento, gestor, fiscal' },
   { id: '4', slug: 'processo-sancionador', title: 'Processo Administrativo Sancionador', keywords: 'sanção, penalidade, PAD, processo administrativo, infrações, multa, advertência, impedimento' },
-  { id: '5', slug: 'inovacao-contratacoes', title: 'Inovação nas Contratações Públicas', keywords: 'inovação, startup, diálogo competitivo, PMI, tecnologia, soluções inovadoras, marketplace' },
-  { id: '6', slug: 'terceirizacao-formacao-precos', title: 'Terceirização e Formação de Preços', keywords: 'terceirização, planilha de custos, formação de preços, mão de obra, encargos trabalhistas' },
-  { id: '7', slug: 'assessoramento-juridico', title: 'Assessoramento Jurídico', keywords: 'parecer jurídico, assessoria jurídica, consultoria, atuação consultiva, AGU, procuradoria' },
+  { id: '7', slug: 'assessoramento-juridico', title: 'Assessoramento Jurídico em Licitações', keywords: 'parecer jurídico, assessoria jurídica, consultoria, atuação consultiva, AGU, procuradoria' },
   { id: '8', slug: 'revisao-reajuste-repactuacao', title: 'Revisão, Reajuste e Repactuação', keywords: 'reequilíbrio econômico-financeiro, reajuste, repactuação, revisão contratual, álea extraordinária' },
   { id: '9', slug: 'alteracoes-contratuais', title: 'Alterações Contratuais', keywords: 'aditivo contratual, alteração contratual, acréscimo, supressão, prorrogação' },
   { id: '10', slug: 'contratacao-direta', title: 'Contratação Direta', keywords: 'dispensa de licitação, inexigibilidade, contratação direta, art. 75, emergência, notória especialização' },
@@ -295,7 +292,7 @@ function parseClaudeResponse(responseText: string): ClaudeClassificationResult {
 
     // Retorna resultado padrão em caso de erro
     return {
-      courseSlugs: ['nova-lei-licitacoes'], // Fallback
+      courseSlugs: ['planejamento-contratacoes'], // Fallback
       category: 'outro',
       tags: [],
       confidence: 20,

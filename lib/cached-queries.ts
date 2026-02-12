@@ -108,3 +108,28 @@ export const getCachedPublishedPostCount = cache(async () => {
     where: { isPublished: true },
   });
 });
+
+/**
+ * Conta documentos agrupados por categoria (cached)
+ */
+export const getCachedDocumentCountByCategory = cache(async () => {
+  const counts = await prisma.document.groupBy({
+    by: ['category'],
+    _count: { id: true },
+  });
+  return Object.fromEntries(counts.map(c => [c.category, c._count.id]));
+});
+
+/**
+ * Conta total de artigos da Lei 14.133 (cached)
+ */
+export const getCachedLeiArticleCount = cache(async () => {
+  return await prisma.leiArticle.count();
+});
+
+/**
+ * Conta total de termos no glossario (cached)
+ */
+export const getCachedGlossaryTermCount = cache(async () => {
+  return await prisma.glossaryTerm.count();
+});

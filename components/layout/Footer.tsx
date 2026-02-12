@@ -108,10 +108,10 @@ export const Footer = memo(function Footer() {
             <ul className="space-y-2 font-poppins">
               <li>
                 <Link
-                  href="/cursos/nova-lei-licitacoes"
+                  href="/cursos/planejamento-contratacoes"
                   className="text-sm text-brand-200 hover:text-white transition-colors"
                 >
-                  Nova Lei de Licitações
+                  Planejamento de Contratações
                 </Link>
               </li>
               <li>

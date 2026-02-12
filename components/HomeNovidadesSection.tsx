@@ -22,6 +22,9 @@ function getCategoryColor(category: string): string {
     'orientacao-normativa': 'bg-purple-100 text-purple-700',
     enunciados: 'bg-amber-100 text-amber-700',
     decor: 'bg-indigo-100 text-indigo-700',
+    'parecer-vinculante': 'bg-rose-100 text-rose-700',
+    'ato-normativo': 'bg-teal-100 text-teal-700',
+    apostila: 'bg-cyan-100 text-cyan-700',
   };
   return colors[category] || 'bg-gray-100 text-gray-700';
 }
@@ -34,6 +37,8 @@ function getCategoryLabel(category: string): string {
     enunciados: 'Enunciado',
     decor: 'DECOR',
     'parecer-vinculante': 'Parecer',
+    'ato-normativo': 'Ato Normativo',
+    apostila: 'Apostila',
   };
   return labels[category] || 'Documento';
 }
@@ -58,7 +63,7 @@ export default async function HomeNovidadesSection() {
           uploadedAt: true,
         },
         orderBy: { uploadedAt: 'desc' },
-        take: 4,
+        take: 8,
       }),
       prisma.blogPost.findMany({
         where: {
@@ -92,10 +97,10 @@ export default async function HomeNovidadesSection() {
             <p className="text-gray-500 mt-3">Ultimas atualizacoes de conteudo e materiais</p>
           </div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            {/* Blog posts */}
+          <div className="grid grid-cols-1 lg:grid-cols-5 gap-8">
+            {/* Blog posts — coluna maior */}
             {blogPosts.length > 0 && (
-              <div>
+              <div className="lg:col-span-2">
                 <h3 className="text-sm font-bold text-gray-500 uppercase tracking-wider mb-4">
                   Blog
                 </h3>
@@ -104,15 +109,15 @@ export default async function HomeNovidadesSection() {
                     <Link
                       key={post.id}
                       href={`/blog/${post.slug}`}
-                      className="block bg-white rounded-xl border border-gray-200 p-4 hover:border-indigo-300 hover:shadow-md transition-all group"
+                      className="block bg-white rounded-xl border border-gray-200 p-5 hover:border-indigo-300 hover:shadow-md transition-all group"
                     >
                       <p className="text-base font-semibold text-gray-900 group-hover:text-indigo-600 transition-colors line-clamp-2">
                         {post.title}
                       </p>
                       {post.excerpt && (
-                        <p className="text-sm text-gray-500 mt-1 line-clamp-2">{post.excerpt}</p>
+                        <p className="text-sm text-gray-500 mt-2 line-clamp-2">{post.excerpt}</p>
                       )}
-                      <div className="flex items-center justify-between mt-2">
+                      <div className="flex items-center justify-between mt-3">
                         <span className="text-xs text-gray-400">
                           {post.publishedAt
                             ? getRelativeDate(new Date(post.publishedAt))
@@ -125,20 +130,29 @@ export default async function HomeNovidadesSection() {
                     </Link>
                   ))}
                 </div>
+                <div className="mt-4">
+                  <Link
+                    href="/blog"
+                    className="inline-flex items-center gap-1 text-sm font-semibold text-indigo-600 hover:text-indigo-700 transition-colors"
+                  >
+                    Ver todos no Blog
+                    <ArrowRight className="w-3.5 h-3.5" />
+                  </Link>
+                </div>
               </div>
             )}
 
-            {/* Recent documents */}
+            {/* Recent documents — lista compacta */}
             {recentDocs.length > 0 && (
-              <div>
+              <div className={blogPosts.length > 0 ? 'lg:col-span-3' : 'lg:col-span-5'}>
                 <h3 className="text-sm font-bold text-gray-500 uppercase tracking-wider mb-4">
                   Conteudo Recente
                 </h3>
-                <div className="space-y-3">
+                <div className="space-y-2">
                   {recentDocs.map((doc) => (
                     <div
                       key={doc.id}
-                      className="bg-white rounded-xl border border-gray-200 p-4 flex items-center gap-3"
+                      className="bg-white rounded-lg border border-gray-200 px-4 py-3 flex items-center gap-3"
                     >
                       <span
                         className={`text-[10px] font-bold px-2 py-0.5 rounded-full flex-shrink-0 ${getCategoryColor(doc.category)}`}
@@ -156,19 +170,17 @@ export default async function HomeNovidadesSection() {
                     </div>
                   ))}
                 </div>
+                <div className="mt-4">
+                  <Link
+                    href="/validar-acesso"
+                    className="inline-flex items-center gap-1 text-sm font-semibold text-indigo-600 hover:text-indigo-700 transition-colors"
+                  >
+                    Acessar Base de Conhecimento
+                    <ArrowRight className="w-3.5 h-3.5" />
+                  </Link>
+                </div>
               </div>
             )}
-          </div>
-
-          {/* CTA */}
-          <div className="text-center mt-8">
-            <Link
-              href="/validar-acesso"
-              className="inline-flex items-center gap-2 text-indigo-600 font-semibold hover:text-indigo-700 transition-colors text-sm"
-            >
-              Acesse a area restrita para ver todo o conteudo
-              <ArrowRight className="w-4 h-4" />
-            </Link>
           </div>
         </div>
       </div>

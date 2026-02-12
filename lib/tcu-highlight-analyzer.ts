@@ -21,8 +21,8 @@ const GEMINI_MODEL = 'gemini-2.0-flash';
 const ANALYSIS_DELAY_MS = 800;
 const MAX_CANDIDATES = 15;
 const MAX_HIGHLIGHTS = 5;
-const MIN_KEYWORD_SCORE = 40;
-const MIN_AI_SCORE = 70;
+const MIN_KEYWORD_SCORE = 20;
+const MIN_AI_SCORE = 60;
 
 interface HighlightAnalysis {
   noveltyScore: number;
@@ -190,6 +190,7 @@ export async function identifyAndAlertHighlights(newDocIds: string[]): Promise<n
   const candidates: Array<{ doc: typeof docs[0]; keywordScore: number }> = [];
   for (const doc of docs) {
     const { score } = analyzeRelevanceTCU(doc.title, doc.description || '');
+    console.log(`[TCU Highlights] ${doc.title}: keyword score = ${score} (threshold = ${MIN_KEYWORD_SCORE})`);
     if (score >= MIN_KEYWORD_SCORE) {
       candidates.push({ doc, keywordScore: score });
     }
@@ -199,9 +200,10 @@ export async function identifyAndAlertHighlights(newDocIds: string[]): Promise<n
   candidates.sort((a, b) => b.keywordScore - a.keywordScore);
   const topCandidates = candidates.slice(0, MAX_CANDIDATES);
 
-  console.log(`[TCU Highlights] ${candidates.length} candidatos com score >= ${MIN_KEYWORD_SCORE}, analisando top ${topCandidates.length}`);
+  console.log(`[TCU Highlights] ${candidates.length}/${docs.length} candidatos com score >= ${MIN_KEYWORD_SCORE}, analisando top ${topCandidates.length}`);
 
   if (topCandidates.length === 0) {
+    console.log('[TCU Highlights] Nenhum candidato passou o pre-filtro. Encerrando.');
     return 0;
   }
 
@@ -217,8 +219,13 @@ export async function identifyAndAlertHighlights(newDocIds: string[]): Promise<n
       const prompt = buildHighlightPrompt(doc);
       const analysis = await callGeminiForHighlight(prompt);
 
-      if (analysis && analysis.articleWorthiness >= MIN_AI_SCORE) {
-        analyzed.push({ doc, keywordScore, analysis });
+      if (analysis) {
+        console.log(`[TCU Highlights] ${doc.title}: IA worthiness = ${analysis.articleWorthiness} (threshold = ${MIN_AI_SCORE})`);
+        if (analysis.articleWorthiness >= MIN_AI_SCORE) {
+          analyzed.push({ doc, keywordScore, analysis });
+        }
+      } else {
+        console.log(`[TCU Highlights] ${doc.title}: Gemini retornou null`);
       }
 
       await new Promise(resolve => setTimeout(resolve, ANALYSIS_DELAY_MS));

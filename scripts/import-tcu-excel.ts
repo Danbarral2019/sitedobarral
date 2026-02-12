@@ -21,12 +21,9 @@ const prisma = new PrismaClient();
 // ─── Mapeamento de curso (slug → ID numérico) ───────────────────────────────
 
 const SLUG_TO_ID: Record<string, string> = {
-  'nova-lei-licitacoes': '1',
   'planejamento-contratacoes': '2',
   'gestao-fiscalizacao-contratos': '3',
   'processo-sancionador': '4',
-  'inovacao-contratacoes': '5',
-  'terceirizacao-formacao-precos': '6',
   'assessoramento-juridico': '7',
   'revisao-reajuste-repactuacao': '8',
   'alteracoes-contratuais': '9',
@@ -35,12 +32,12 @@ const SLUG_TO_ID: Record<string, string> = {
 
 // Keywords → slug do curso (reutilizado de convert-tcu-excel.js)
 const CURSO_MAPPING: Record<string, string> = {
-  'licitacao|licitacoes|pregao|edital|modalidade|registro de precos': 'nova-lei-licitacoes',
+  'licitacao|licitacoes|pregao|edital|modalidade|registro de precos': 'planejamento-contratacoes',
   'planejamento|etp|estudo tecnico|termo de referencia|projeto basico|analise de riscos': 'planejamento-contratacoes',
   'gestao contratual|fiscalizacao|acompanhamento|medicao|recebimento|gestor|fiscal': 'gestao-fiscalizacao-contratos',
   'sancao|penalidade|multa|advertencia|impedimento|suspensao|declaracao de inidoneidade': 'processo-sancionador',
-  'inovacao|startup|dialogo competitivo|pmi|encomenda tecnologica': 'inovacao-contratacoes',
-  'tercerizacao|mao de obra|planilha de custos|formacao de precos|encargos': 'terceirizacao-formacao-precos',
+  'inovacao|startup|dialogo competitivo|pmi|encomenda tecnologica': 'contratacao-direta',
+  'tercerizacao|mao de obra|planilha de custos|formacao de precos|encargos': 'gestao-fiscalizacao-contratos',
   'parecer juridico|assessoria juridica|procuradoria|agu|consultivo': 'assessoramento-juridico',
   'reajuste|repactuacao|revisao|reequilibrio economico|alea': 'revisao-reajuste-repactuacao',
   'aditivo|acrescimo|supressao|prorrogacao|alteracao contratual': 'alteracoes-contratuais',

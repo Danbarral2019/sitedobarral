@@ -11,12 +11,12 @@ console.log('=== SIMULAÇÃO DE CONVERSÃO TCU ===\n');
 
 // Mapeamento de cursos (mesmo do conversor real)
 const CURSO_MAPPING = {
-  'licitacao|licitacoes|pregao|edital|modalidade|registro de precos': 'nova-lei-licitacoes',
+  'licitacao|licitacoes|pregao|edital|modalidade|registro de precos': 'planejamento-contratacoes',
   'planejamento|etp|estudo tecnico|termo de referencia|projeto basico|analise de riscos': 'planejamento-contratacoes',
   'gestao contratual|fiscalizacao|acompanhamento|medicao|recebimento|gestor|fiscal': 'gestao-fiscalizacao-contratos',
   'sancao|penalidade|multa|advertencia|impedimento|suspensao|declaracao de inidoneidade': 'processo-sancionador',
-  'inovacao|startup|dialogo competitivo|pmi|encomenda tecnologica': 'inovacao-contratacoes',
-  'tercerizacao|mao de obra|planilha de custos|formacao de precos|encargos': 'terceirizacao-formacao-precos',
+  'inovacao|startup|dialogo competitivo|pmi|encomenda tecnologica': 'contratacao-direta',
+  'tercerizacao|mao de obra|planilha de custos|formacao de precos|encargos': 'gestao-fiscalizacao-contratos',
   'parecer juridico|assessoria juridica|procuradoria|agu|consultivo': 'assessoramento-juridico',
   'reajuste|repactuacao|revisao|reequilibrio economico|alea': 'revisao-reajuste-repactuacao',
   'aditivo|acrescimo|supressao|prorrogacao|alteracao contratual': 'alteracoes-contratuais',
@@ -43,7 +43,7 @@ function identificarCursos(area, tema, subtema, enunciado) {
   }
 
   if (cursos.size === 0) {
-    cursos.add('nova-lei-licitacoes');
+    cursos.add('planejamento-contratacoes');
   }
 
   return Array.from(cursos);

@@ -1222,3 +1222,24 @@ model TcuHighlight {
   @@index([status, createdAt])
   @@index([documentId])
 }
+
+// Notas de alteração em artigos da Lei 14.133/2021
+// Criadas automaticamente quando um novo ato (DOU) altera/regulamenta um artigo
+model LeiArticleNote {
+  id              String   @id @default(uuid())
+  articleNumber   String   // "75", "184-A"
+  type            String   // 'alteracao' | 'regulamentacao' | 'revogacao' | 'comentario'
+  title           String   // "Alterado pelo Decreto 11.878/2024"
+  description     String?  @db.Text
+  sourceDocId     String?  // FK para Document (ato que gerou a nota)
+  sourceLegActId  String?  // FK para LegislativeAct
+  detectedBy      String   // 'auto-sync-dou' | admin email
+  isPublic        Boolean  @default(false) // Visível aos alunos?
+  adminReviewed   Boolean  @default(false)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@index([articleNumber])
+  @@index([type])
+  @@index([adminReviewed])
+}

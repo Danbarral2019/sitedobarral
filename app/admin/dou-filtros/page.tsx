@@ -254,7 +254,7 @@ export default function DOUFiltrosPage() {
     }
   };
 
-  const handleApproveDocument = async (courseIds: string[], adminNotes?: string) => {
+  const handleApproveDocument = async (courseIds: string[], adminNotes?: string, importAs?: string) => {
     if (!selectedDocument) return;
 
     setIsSubmitting(true);
@@ -263,10 +263,11 @@ export default function DOUFiltrosPage() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          documentId: selectedDocument.id, // Será undefined para busca filtrada
+          documentId: selectedDocument.id,
           action: 'approve',
           courseIds,
           adminNotes,
+          importAs: importAs || 'ato_normativo',
         }),
       });
 
