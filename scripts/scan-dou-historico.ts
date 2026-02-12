@@ -63,6 +63,25 @@ interface ScanResult {
   autoApprove: boolean;
   status: 'already_indexed' | 'gap' | 'alteration';
   modification?: ReturnType<typeof detectModifications>;
+  organ?: string;
+  hierarchyStr?: string;
+}
+
+/**
+ * Extrai o órgão emissor do título ou hierarchyStr do DOU
+ */
+function extractIssuerOrg(title: string, hierarchyStr: string): string {
+  // Tentar extrair do hierarchyStr (ex: "Ministério da Gestão > SEGES")
+  if (hierarchyStr) {
+    const parts = hierarchyStr.split('>').map(s => s.trim()).filter(Boolean);
+    if (parts.length > 0) return parts[0];
+  }
+  // Tentar extrair do título
+  const match = title.match(/(?:IN|Portaria|Resolução|Instrução Normativa)\s+([A-ZÀ-Ú][A-ZÀ-Ú\s/]+?)(?:\s+(?:nº|Nº|N[ºo°]|n\.)|\s+\d)/i);
+  if (match) return match[1].trim();
+  if (/^DECRETO\b/i.test(title)) return 'Presidência da República';
+  if (/^LEI\b/i.test(title)) return 'Congresso Nacional';
+  return '';
 }
 
 const SEARCH_TERMS = [
@@ -181,6 +200,8 @@ async function scanMonth(yearMonth: string): Promise<ScanResult[]> {
       autoApprove,
       status,
       modification: modification || undefined,
+      organ: result.hierarchyStr || '',
+      hierarchyStr: result.hierarchyStr || '',
     });
   }
 
@@ -239,44 +260,30 @@ async function main() {
               parsedDate = new Date(year, m - 1, day);
             } catch { /* ignore */ }
 
-            if (gap.autoApprove) {
-              await prisma.document.create({
-                data: {
-                  title: gap.title,
-                  description: '',
-                  type: 'link',
-                  url: gap.url,
-                  category: 'legislacao',
-                  isPublic: true,
-                  tags: JSON.stringify(['ato_normativo', gap.atoType || 'outro'].filter(Boolean)),
-                  content: '',
-                  douUrl: gap.url,
-                  douData: parsedDate,
-                  reviewed: true,
-                  reviewedAt: new Date(),
-                  reviewedBy: 'scan-historico-dou',
-                  embeddingStatus: 'pending',
-                },
-              });
-            } else {
-              await prisma.dOUStagingDocument.create({
-                data: {
-                  douId: gap.url,
-                  title: gap.title,
-                  abstract: '',
-                  url: gap.url,
-                  section: 'do1',
-                  publishDate: gap.date || '',
-                  category: 'ato_normativo',
-                  approvalStatus: 'pending',
-                  confidence: 60,
-                  reasoning: JSON.stringify(['Identificado pelo scan histórico']),
-                  isRelevant: true,
-                  requiresReview: true,
-                  imported: false,
-                },
-              });
-            }
+            const issuerOrg = extractIssuerOrg(gap.title, gap.hierarchyStr || '');
+
+            // Importar tudo como boa_pratica (aprovado automaticamente)
+            await prisma.document.create({
+              data: {
+                title: gap.title,
+                description: `${gap.atoType || 'Ato normativo'} publicado no DOU em ${gap.date || 'data não informada'}`,
+                type: 'link',
+                url: gap.url,
+                category: 'boa_pratica',
+                isPublic: true,
+                isCommon: true,
+                tags: JSON.stringify(['boa_pratica', gap.atoType || 'outro'].filter(Boolean)),
+                content: '',
+                douUrl: gap.url,
+                douData: parsedDate,
+                issuerOrg: issuerOrg || null,
+                esfera: 'federal',
+                reviewed: true,
+                reviewedAt: new Date(),
+                reviewedBy: 'scan-historico-dou',
+                embeddingStatus: 'pending',
+              },
+            });
             totalImported++;
           } catch (error) {
             // Pode ser duplicata
@@ -287,7 +294,7 @@ async function main() {
           }
 
           // Rate limiting
-          await new Promise(resolve => setTimeout(resolve, 300));
+          await new Promise(resolve => setTimeout(resolve, 100));
         }
       }
 

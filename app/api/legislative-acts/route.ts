@@ -274,7 +274,7 @@ async function fetchBoasPraticas(params: BoasPraticasParams) {
     url: doc.url,
   }));
 
-  // Buscar facets para boas práticas
+  // Buscar facets para boas práticas (usa select mínimo para performance)
   const allBoasPraticas = await prisma.document.findMany({
     where: { category: 'boa_pratica', isPublic: true, reviewed: true },
     select: { issuerOrg: true, esfera: true, douData: true },
@@ -285,8 +285,10 @@ async function fetchBoasPraticas(params: BoasPraticasParams) {
   const yearCounts = new Map<number, number>();
 
   for (const bp of allBoasPraticas) {
-    const iss = bp.issuerOrg || 'Não informado';
-    issuerCounts.set(iss, (issuerCounts.get(iss) || 0) + 1);
+    // Usar apenas o órgão de primeiro nível para o filtro (antes do primeiro /)
+    const fullOrg = bp.issuerOrg || 'Não informado';
+    const topLevelOrg = fullOrg.split('/')[0].trim();
+    issuerCounts.set(topLevelOrg, (issuerCounts.get(topLevelOrg) || 0) + 1);
 
     const esf = bp.esfera || 'federal';
     esferaCounts.set(esf, (esferaCounts.get(esf) || 0) + 1);
