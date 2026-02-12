@@ -138,9 +138,14 @@ async function scanMonth(yearMonth: string): Promise<ScanResult[]> {
     const atoType = detectAtoType(result.title);
     const autoApprove = normativeClass === 'geral' && shouldAutoApprove(result.title, result.hierarchyStr, atoType);
 
-    // Verificar se já existe
+    // Verificar se já existe (por douUrl, staging, OU título no LegislativeAct/Document)
     const existingDoc = await prisma.document.findFirst({
-      where: { douUrl: url },
+      where: {
+        OR: [
+          { douUrl: url },
+          { title: { contains: result.title.substring(0, 80), mode: 'insensitive' } },
+        ],
+      },
       select: { id: true },
     });
 
@@ -149,11 +154,22 @@ async function scanMonth(yearMonth: string): Promise<ScanResult[]> {
       select: { id: true },
     });
 
+    // Também verificar LegislativeAct por título/fullNumber
+    const existingAct = await prisma.legislativeAct.findFirst({
+      where: {
+        OR: [
+          { title: { contains: result.title.substring(0, 80), mode: 'insensitive' } },
+          { fullNumber: { contains: result.title.substring(0, 40), mode: 'insensitive' } },
+        ],
+      },
+      select: { id: true },
+    });
+
     // Detectar alterações
     const modification = detectModifications(result.title, result.abstract);
 
     let status: ScanResult['status'] = 'gap';
-    if (existingDoc || existingStaging) status = 'already_indexed';
+    if (existingDoc || existingStaging || existingAct) status = 'already_indexed';
     if (modification) status = 'alteration';
 
     scanResults.push({

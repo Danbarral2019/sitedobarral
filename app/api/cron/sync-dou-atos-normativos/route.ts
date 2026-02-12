@@ -144,9 +144,14 @@ export async function GET(request: NextRequest) {
           continue;
         }
 
-        // 4c. Deduplicar
+        // 4c. Deduplicar (por douUrl, staging, OU título no LegislativeAct/Document)
         const existingDoc = await prisma.document.findFirst({
-          where: { douUrl: result.href },
+          where: {
+            OR: [
+              { douUrl: result.href },
+              { title: { equals: cleanTitle, mode: 'insensitive' } },
+            ],
+          },
         });
         if (existingDoc) {
           stats.duplicados++;
@@ -157,6 +162,15 @@ export async function GET(request: NextRequest) {
           where: { url: result.href },
         });
         if (existingStaging) {
+          stats.duplicados++;
+          continue;
+        }
+
+        // Verificar LegislativeAct por título
+        const existingLegAct = await prisma.legislativeAct.findFirst({
+          where: { title: { equals: cleanTitle, mode: 'insensitive' } },
+        });
+        if (existingLegAct) {
           stats.duplicados++;
           continue;
         }
