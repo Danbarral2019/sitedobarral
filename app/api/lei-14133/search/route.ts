@@ -188,6 +188,7 @@ Regras:
             summary: { contains: term, mode: 'insensitive' as const }
           })),
         ],
+        category: { notIn: ['boa_pratica'] },
       },
       select: {
         id: true,

@@ -7,6 +7,7 @@ import {
   Save, X, Scale, Calendar, Building, FileText,
   Link as LinkIcon, AlertCircle
 } from 'lucide-react';
+import { TEMAS_LICITACOES } from '@/data/temas-licitacoes';
 
 const TYPE_OPTIONS = [
   { value: 'decreto', label: 'Decreto' },
@@ -43,7 +44,9 @@ export default function NewLegislativeActPage() {
     leiArticles: '',
     officialUrl: '',
     pdfUrl: '',
-    content: ''
+    content: '',
+    esfera: 'federal' as string,
+    themes: [] as string[],
   });
 
   const validate = () => {
@@ -97,7 +100,9 @@ export default function NewLegislativeActPage() {
           leiArticles: leiArticlesArray,
           officialUrl: formData.officialUrl || undefined,
           pdfUrl: formData.pdfUrl || undefined,
-          content: formData.content || undefined
+          content: formData.content || undefined,
+          esfera: formData.esfera,
+          themes: formData.themes.length > 0 ? formData.themes : undefined,
         })
       });
 
@@ -299,6 +304,48 @@ export default function NewLegislativeActPage() {
                   Números separados por vírgula (artigos regulamentados)
                 </p>
               </label>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+              <div>
+                <span className="text-sm font-bold text-gray-900 mb-2 block">Esfera</span>
+                <div className="flex gap-4">
+                  <label className="flex items-center gap-2 p-3 border-2 rounded-lg cursor-pointer hover:bg-blue-50 transition-colors has-[:checked]:border-blue-500 has-[:checked]:bg-blue-50">
+                    <input type="radio" name="esfera" value="federal" checked={formData.esfera === 'federal'} onChange={() => setFormData({ ...formData, esfera: 'federal' })} />
+                    <span className="text-sm font-medium">Federal</span>
+                  </label>
+                  <label className="flex items-center gap-2 p-3 border-2 rounded-lg cursor-pointer hover:bg-blue-50 transition-colors has-[:checked]:border-blue-500 has-[:checked]:bg-blue-50">
+                    <input type="radio" name="esfera" value="estadual" checked={formData.esfera === 'estadual'} onChange={() => setFormData({ ...formData, esfera: 'estadual' })} />
+                    <span className="text-sm font-medium">Estadual</span>
+                  </label>
+                </div>
+              </div>
+            </div>
+
+            <div className="mb-4">
+              <span className="text-sm font-bold text-gray-900 mb-2 block">Temas</span>
+              <div className="flex flex-wrap gap-2">
+                {TEMAS_LICITACOES.map((tema) => (
+                  <button
+                    key={tema.value}
+                    type="button"
+                    onClick={() => setFormData(prev => ({
+                      ...prev,
+                      themes: prev.themes.includes(tema.value)
+                        ? prev.themes.filter(t => t !== tema.value)
+                        : [...prev.themes, tema.value]
+                    }))}
+                    className={`px-3 py-1.5 text-xs rounded-full border-2 transition-colors ${
+                      formData.themes.includes(tema.value)
+                        ? 'bg-blue-600 text-white border-blue-600'
+                        : 'bg-white text-gray-700 border-gray-300 hover:border-blue-400'
+                    }`}
+                  >
+                    {tema.label}
+                  </button>
+                ))}
+              </div>
+              <p className="mt-1 text-xs text-gray-600">Clique para selecionar/desselecionar temas</p>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">

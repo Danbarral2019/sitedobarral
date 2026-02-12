@@ -75,6 +75,11 @@ model Document {
   entityType          String?   // Entidade responsável: "IBDA", "INCP", "CJF" (apenas para categoria="enunciados")
   enunciadoNumber     String?   // Número do enunciado (formato flexível: "123", "123/2024", ou texto livre)
 
+  // Classificação para boas práticas e filtros avançados
+  issuerOrg           String?   // Órgão emissor (para boa_pratica: "TCE-SP", "CGE-MG", etc.)
+  esfera              String?   // "federal" | "estadual"
+  themes              String?   // JSON array: ["planejamento","contratos"]
+
   // Sistema de Links DOU (Diário Oficial da União)
   douUrl              String?   // URL da publicação no DOU (Diário Oficial da União)
   douData             DateTime? // Data de publicação no DOU
@@ -637,6 +642,10 @@ model LegislativeAct {
   pdfUrl      String? // Link para PDF do ato
   content     String? @db.Text // Texto completo do ato (opcional)
 
+  // Classificação e filtros avançados
+  esfera      String  @default("federal")  // "federal" | "estadual"
+  themes      String?                       // JSON array: ["planejamento","contratos"]
+
   // Analytics
   viewCount   Int     @default(0)
 
@@ -667,6 +676,7 @@ model LegislativeAct {
   @@index([publishDate])
   @@index([type, issuer])
   @@index([year, type])
+  @@index([esfera])
   @@index([notifiedAt])
   @@index([lastScrapedAt])
   @@index([scrapeStatus])

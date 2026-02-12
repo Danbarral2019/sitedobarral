@@ -124,7 +124,7 @@ export async function GET(request: NextRequest) {
                   ],
                 },
                 // Excluir categorias que já possuem tipos dedicados (lei e legislative-act)
-                { category: { notIn: ['lei-artigo', 'ato-normativo'] } },
+                { category: { notIn: ['lei-artigo', 'ato-normativo', 'boa_pratica'] } },
               ],
             },
             select: {

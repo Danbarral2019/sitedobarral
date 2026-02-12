@@ -29,6 +29,7 @@ export interface SearchResult {
 export interface SearchOptions {
   courseId?: string;      // Filtrar por curso
   category?: string;      // Filtrar por categoria
+  excludeCategories?: string[];  // Categories to exclude from results
   limit?: number;         // Numero maximo de resultados (default: 5)
   threshold?: number;     // Similaridade minima (0-1, default: 0.5)
   useCache?: boolean;     // Usar cache (default: true)
@@ -82,7 +83,7 @@ export async function semanticSearch(
   }
 
   // Cache key baseado na query e opcoes
-  const cacheKey = `vector-search:${hashQuery(query)}:${courseId || 'all'}:${category || 'all'}:${limit}:${threshold}`;
+  const cacheKey = `vector-search:${hashQuery(query)}:${courseId || 'all'}:${category || 'all'}:${limit}:${threshold}:${(options.excludeCategories || []).join(',')}`;
 
   // Tenta usar cache
   if (useCache) {
@@ -142,6 +143,12 @@ async function performSearch(
 
   if (category) {
     whereClause += ` AND d."category" = '${category}'`;
+  }
+
+  const excludeCategories = options.excludeCategories || [];
+  if (excludeCategories.length > 0) {
+    const escaped = excludeCategories.map(c => `'${c.replace(/'/g, "''")}'`).join(', ');
+    whereClause += ` AND d."category" NOT IN (${escaped})`;
   }
 
   // 3. Executa busca vetorial com pgvector

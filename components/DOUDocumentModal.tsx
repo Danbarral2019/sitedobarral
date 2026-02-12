@@ -10,6 +10,7 @@ import {
   DialogFooter,
 } from '@/components/ui/dialog';
 import { courses } from '@/data/courses';
+import { TEMAS_LICITACOES } from '@/data/temas-licitacoes';
 import {
   ExternalLink,
   CheckCircle,
@@ -40,7 +41,7 @@ interface DOUDocumentModalProps {
   isOpen: boolean;
   onClose: () => void;
   document: DOUDocument;
-  onApprove: (courseIds: string[], adminNotes?: string, importAs?: string) => Promise<void>;
+  onApprove: (courseIds: string[], adminNotes?: string, importAs?: string, metadata?: { issuerOrg?: string; esfera?: string; themes?: string[] }) => Promise<void>;
   onReject: (reason?: string) => Promise<void>;
   isRejecting: boolean;
   isApproving: boolean;
@@ -58,6 +59,9 @@ export function DOUDocumentModal({
   const [selectedCourses, setSelectedCourses] = useState<string[]>([]);
   const [adminNotes, setAdminNotes] = useState('');
   const [importAs, setImportAs] = useState<'ato_normativo' | 'boa_pratica'>('ato_normativo');
+  const [issuerOrg, setIssuerOrg] = useState('');
+  const [esfera, setEsfera] = useState<'federal' | 'estadual'>('federal');
+  const [selectedThemes, setSelectedThemes] = useState<string[]>([]);
   const [showFullContent, setShowFullContent] = useState(false);
 
   const handleApprove = async () => {
@@ -65,14 +69,22 @@ export function DOUDocumentModal({
       alert('Selecione pelo menos um curso para vincular o documento');
       return;
     }
+    const metadata = importAs === 'boa_pratica' ? {
+      issuerOrg: issuerOrg.trim() || undefined,
+      esfera,
+      themes: selectedThemes.length > 0 ? selectedThemes : undefined,
+    } : undefined;
 
     // Delegar completamente para o pai - ele gerencia estado e erros
-    await onApprove(selectedCourses, adminNotes.trim() || undefined, importAs);
+    await onApprove(selectedCourses, adminNotes.trim() || undefined, importAs, metadata);
 
     // Reset form local apenas (se o componente ainda estiver montado, ok; se não, sem problema)
     setSelectedCourses([]);
     setAdminNotes('');
     setImportAs('ato_normativo');
+    setIssuerOrg('');
+    setEsfera('federal');
+    setSelectedThemes([]);
   };
 
   const handleReject = async () => {
@@ -257,6 +269,65 @@ export function DOUDocumentModal({
               </label>
             </div>
           </div>
+
+          {importAs === 'boa_pratica' && (
+            <div className="space-y-4 p-4 bg-green-50 rounded-lg border border-green-200">
+              <h4 className="text-sm font-bold text-green-800">Metadados da Boa Pratica</h4>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Orgao de Origem
+                </label>
+                <input
+                  type="text"
+                  value={issuerOrg}
+                  onChange={(e) => setIssuerOrg(e.target.value)}
+                  placeholder="Ex: TCE-SP, CGE-MG, TCU..."
+                  className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent text-sm"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Esfera
+                </label>
+                <div className="flex gap-3">
+                  <label className="flex items-center gap-2">
+                    <input type="radio" name="esfera" value="federal" checked={esfera === 'federal'} onChange={() => setEsfera('federal')} />
+                    <span className="text-sm">Federal</span>
+                  </label>
+                  <label className="flex items-center gap-2">
+                    <input type="radio" name="esfera" value="estadual" checked={esfera === 'estadual'} onChange={() => setEsfera('estadual')} />
+                    <span className="text-sm">Estadual</span>
+                  </label>
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Temas
+                </label>
+                <div className="flex flex-wrap gap-2">
+                  {TEMAS_LICITACOES.map((tema) => (
+                    <button
+                      key={tema.value}
+                      type="button"
+                      onClick={() => setSelectedThemes(prev =>
+                        prev.includes(tema.value) ? prev.filter(t => t !== tema.value) : [...prev, tema.value]
+                      )}
+                      className={`px-3 py-1 text-xs rounded-full border transition-colors ${
+                        selectedThemes.includes(tema.value)
+                          ? 'bg-green-600 text-white border-green-600'
+                          : 'bg-white text-gray-700 border-gray-300 hover:border-green-400'
+                      }`}
+                    >
+                      {tema.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </div>
+          )}
 
           <div>
             <label className="block text-sm font-bold mb-2">

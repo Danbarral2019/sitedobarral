@@ -58,7 +58,7 @@ export async function POST(request: NextRequest) {
 
     // 2. Parse do body
     const body = await request.json();
-    const { documentId, action, courseIds, adminNotes, importAs } = body;
+    const { documentId, action, courseIds, adminNotes, importAs, metadata } = body;
 
     // 3. Validações básicas
     if (!documentId || typeof documentId !== 'string') {
@@ -129,7 +129,7 @@ export async function POST(request: NextRequest) {
 
     // 6. Executar aprovação ou rejeição
     if (action === 'approve') {
-      return await handleApproval(stagingDoc, courseIds, adminEmail, adminNotes, importType);
+      return await handleApproval(stagingDoc, courseIds, adminEmail, adminNotes, importType, metadata);
     } else {
       return await handleRejection(stagingDoc, adminEmail, adminNotes);
     }
@@ -169,7 +169,8 @@ async function handleApproval(
   courseIds: string[],
   adminEmail: string,
   adminNotes?: string,
-  importAs: string = 'ato_normativo'
+  importAs: string = 'ato_normativo',
+  metadata?: { issuerOrg?: string; esfera?: string; themes?: string[] }
 ) {
   try {
     // Mapear categoria baseado na escolha do admin
@@ -241,6 +242,9 @@ async function handleApproval(
           reviewedAt: new Date(),
           reviewedBy: adminEmail,
           adminNotes: adminNotes || null,
+          issuerOrg: metadata?.issuerOrg || null,
+          esfera: metadata?.esfera || 'federal',
+          themes: metadata?.themes ? JSON.stringify(metadata.themes) : null,
           aiClassification: JSON.stringify({
             category: stagingDoc.category,
             confidence: stagingDoc.confidence,

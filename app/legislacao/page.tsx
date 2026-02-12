@@ -4,36 +4,43 @@ import { useState, useEffect, useCallback } from 'react';
 import {
   Search, Filter, Scale, Calendar, Building, ChevronDown,
   ChevronUp, ExternalLink, Download, BookOpen, Eye,
-  X, FileText
+  X, FileText, Lightbulb, Globe
 } from 'lucide-react';
 import MarkdownContent from '@/components/MarkdownContent';
+import { TEMAS_LICITACOES, getThemeLabel } from '@/data/temas-licitacoes';
 
 interface LegislativeAct {
   id: string;
   type: string;
-  number: string;
-  year: number;
-  fullNumber: string;
+  number?: string;
+  year?: number;
+  fullNumber?: string;
   title: string;
   ementa: string;
-  summary: string | null;
+  summary?: string | null;
   issuer: string;
   publishDate: string;
-  effectiveDate: string | null;
-  hierarchyLevel: number;
+  effectiveDate?: string | null;
+  hierarchyLevel?: number;
   leiArticles: string[];
   officialUrl: string | null;
-  pdfUrl: string | null;
-  viewCount: number;
+  pdfUrl?: string | null;
+  viewCount?: number;
+  esfera?: string;
+  themes?: string[];
+  url?: string;
 }
+
+type TabType = 'atos' | 'boas-praticas';
 
 const TYPE_LABELS: Record<string, string> = {
   'decreto': 'Decreto',
   'portaria': 'Portaria',
   'in': 'IN',
-  'ordem-servico': 'Ordem de Serviço',
+  'ordem-servico': 'Ordem de Servico',
   'lei': 'Lei',
-  'medida-provisoria': 'Medida Provisória'
+  'medida-provisoria': 'Medida Provisoria',
+  'boa_pratica': 'Boa Pratica',
 };
 
 const TYPE_COLORS: Record<string, string> = {
@@ -42,23 +49,36 @@ const TYPE_COLORS: Record<string, string> = {
   'in': 'bg-purple-100 text-purple-800 border-purple-300',
   'ordem-servico': 'bg-yellow-100 text-yellow-800 border-yellow-300',
   'lei': 'bg-red-100 text-red-800 border-red-300',
-  'medida-provisoria': 'bg-orange-100 text-orange-800 border-orange-300'
+  'medida-provisoria': 'bg-orange-100 text-orange-800 border-orange-300',
+  'boa_pratica': 'bg-emerald-100 text-emerald-800 border-emerald-300',
+};
+
+const ESFERA_LABELS: Record<string, string> = {
+  'federal': 'Federal',
+  'estadual': 'Estadual',
 };
 
 export default function LegislacaoPage() {
   const [acts, setActs] = useState<LegislativeAct[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
+  // Abas
+  const [activeTab, setActiveTab] = useState<TabType>('atos');
+  const [tabCounts, setTabCounts] = useState({ atos: 0, boasPraticas: 0 });
+
   // Filtros disponíveis
   const [availableTypes, setAvailableTypes] = useState<Array<{ type: string; count: number }>>([]);
   const [availableIssuers, setAvailableIssuers] = useState<Array<{ issuer: string; count: number }>>([]);
   const [availableYears, setAvailableYears] = useState<Array<{ year: number; count: number }>>([]);
+  const [availableEsferas, setAvailableEsferas] = useState<Array<{ esfera: string; count: number }>>([]);
 
   // Filtros ativos
   const [searchTerm, setSearchTerm] = useState('');
   const [typeFilter, setTypeFilter] = useState('');
   const [issuerFilter, setIssuerFilter] = useState('');
   const [yearFilter, setYearFilter] = useState('');
+  const [esferaFilter, setEsferaFilter] = useState('');
+  const [themeFilter, setThemeFilter] = useState('');
 
   // Paginação
   const [page, setPage] = useState(1);
@@ -72,12 +92,11 @@ export default function LegislacaoPage() {
 
   // Expandir automaticamente ato baseado no hash da URL
   useEffect(() => {
-    const hash = window.location.hash.substring(1); // Remove o '#'
+    const hash = window.location.hash.substring(1);
     if (hash && acts.length > 0) {
       const actExists = acts.find(act => act.id === hash);
       if (actExists) {
         setExpandedAct(hash);
-        // Aguardar um pouco para garantir que o elemento foi renderizado
         setTimeout(() => {
           const element = document.getElementById(hash);
           if (element) {
@@ -88,16 +107,42 @@ export default function LegislacaoPage() {
     }
   }, [acts]);
 
+  // Buscar contagens das abas
+  useEffect(() => {
+    const fetchCounts = async () => {
+      try {
+        const [atosRes, bpRes] = await Promise.all([
+          fetch('/api/legislative-acts?tab=atos&limit=1'),
+          fetch('/api/legislative-acts?tab=boas-praticas&limit=1'),
+        ]);
+        if (atosRes.ok) {
+          const data = await atosRes.json();
+          setTabCounts(prev => ({ ...prev, atos: data.pagination.total }));
+        }
+        if (bpRes.ok) {
+          const data = await bpRes.json();
+          setTabCounts(prev => ({ ...prev, boasPraticas: data.pagination.total }));
+        }
+      } catch {
+        // Silently fail
+      }
+    };
+    fetchCounts();
+  }, []);
+
   const fetchActs = useCallback(async () => {
     setIsLoading(true);
     try {
       const params = new URLSearchParams();
+      params.set('tab', activeTab);
       params.set('page', page.toString());
       params.set('limit', limit.toString());
       if (typeFilter) params.set('type', typeFilter);
       if (issuerFilter) params.set('issuer', issuerFilter);
       if (yearFilter) params.set('year', yearFilter);
       if (searchTerm) params.set('search', searchTerm);
+      if (esferaFilter) params.set('esfera', esferaFilter);
+      if (themeFilter) params.set('theme', themeFilter);
 
       const response = await fetch(`/api/legislative-acts?${params}`);
       if (!response.ok) throw new Error('Erro ao carregar atos');
@@ -107,16 +152,16 @@ export default function LegislacaoPage() {
       setTotal(data.pagination.total);
       setTotalPages(data.pagination.pages);
 
-      // Atualizar filtros disponíveis
       setAvailableTypes(data.filters.types || []);
       setAvailableIssuers(data.filters.issuers || []);
       setAvailableYears(data.filters.years || []);
+      setAvailableEsferas(data.filters.esferas || []);
     } catch (error) {
       console.error('Erro ao carregar atos:', error);
     } finally {
       setIsLoading(false);
     }
-  }, [page, limit, typeFilter, issuerFilter, yearFilter, searchTerm]);
+  }, [page, limit, typeFilter, issuerFilter, yearFilter, searchTerm, activeTab, esferaFilter, themeFilter]);
 
   useEffect(() => {
     fetchActs();
@@ -139,36 +184,94 @@ export default function LegislacaoPage() {
     setIssuerFilter('');
     setYearFilter('');
     setSearchTerm('');
+    setEsferaFilter('');
+    setThemeFilter('');
     setPage(1);
   };
 
-  const hasActiveFilters = typeFilter || issuerFilter || yearFilter || searchTerm;
+  const switchTab = (tab: TabType) => {
+    setActiveTab(tab);
+    setPage(1);
+    setTypeFilter('');
+    setIssuerFilter('');
+    setYearFilter('');
+    setEsferaFilter('');
+    setThemeFilter('');
+    setSearchTerm('');
+    setExpandedAct(null);
+  };
+
+  const hasActiveFilters = typeFilter || issuerFilter || yearFilter || searchTerm || esferaFilter || themeFilter;
+  const isBoasPraticas = activeTab === 'boas-praticas';
 
   return (
     <main className="min-h-screen bg-gradient-to-b from-gray-50 to-white">
         {/* Hero Section */}
-        <section className="bg-gradient-to-r from-blue-600 to-indigo-700 text-white py-16">
+        <section className={`bg-gradient-to-r ${isBoasPraticas ? 'from-emerald-600 to-teal-700' : 'from-blue-600 to-indigo-700'} text-white py-16 transition-colors duration-300`}>
           <div className="container mx-auto px-4 max-w-6xl">
             <div className="flex items-center gap-4 mb-4">
               <div className="w-16 h-16 bg-white/20 backdrop-blur rounded-2xl flex items-center justify-center">
-                <Scale className="w-10 h-10 text-white" />
+                {isBoasPraticas ? <Lightbulb className="w-10 h-10 text-white" /> : <Scale className="w-10 h-10 text-white" />}
               </div>
               <div>
-                <h1 className="text-4xl md:text-5xl font-bold mb-2">Atos Normativos</h1>
-                <p className="text-xl text-blue-100">
-                  Legislação Relacionada à Lei 14.133/2021
+                <h1 className="text-4xl md:text-5xl font-bold mb-2">
+                  {isBoasPraticas ? 'Boas Praticas' : 'Atos Normativos'}
+                </h1>
+                <p className={`text-xl ${isBoasPraticas ? 'text-emerald-100' : 'text-blue-100'}`}>
+                  {isBoasPraticas
+                    ? 'Referências de outros órgãos para licitações e contratos'
+                    : 'Legislação Relacionada à Lei 14.133/2021'}
                 </p>
               </div>
             </div>
-            <p className="text-lg text-blue-100 max-w-3xl">
-              Explore decretos, portarias, instruções normativas e demais atos que regulamentam
-              a Lei de Licitações e Contratos Administrativos.
+            <p className={`text-lg ${isBoasPraticas ? 'text-emerald-100' : 'text-blue-100'} max-w-3xl`}>
+              {isBoasPraticas
+                ? 'Explore atos normativos de órgãos federais e estaduais que servem como referência e inspiração para suas contratações.'
+                : 'Explore decretos, portarias, instruções normativas e demais atos que regulamentam a Lei de Licitações e Contratos Administrativos.'}
             </p>
           </div>
         </section>
 
+        {/* Abas */}
+        <section className="container mx-auto px-4 max-w-6xl -mt-6">
+          <div className="flex gap-2">
+            <button
+              onClick={() => switchTab('atos')}
+              className={`flex items-center gap-2 px-6 py-3 rounded-t-xl font-bold text-sm transition-colors ${
+                activeTab === 'atos'
+                  ? 'bg-white text-blue-700 border-2 border-b-0 border-gray-200 shadow-sm'
+                  : 'bg-white/70 text-gray-600 hover:text-blue-700 hover:bg-white/90 border-2 border-transparent'
+              }`}
+            >
+              <Scale className="w-4 h-4" />
+              Atos Normativos
+              <span className={`px-2 py-0.5 rounded-full text-xs ${
+                activeTab === 'atos' ? 'bg-blue-100 text-blue-700' : 'bg-gray-100 text-gray-600'
+              }`}>
+                {tabCounts.atos}
+              </span>
+            </button>
+            <button
+              onClick={() => switchTab('boas-praticas')}
+              className={`flex items-center gap-2 px-6 py-3 rounded-t-xl font-bold text-sm transition-colors ${
+                activeTab === 'boas-praticas'
+                  ? 'bg-white text-emerald-700 border-2 border-b-0 border-gray-200 shadow-sm'
+                  : 'bg-white/70 text-gray-600 hover:text-emerald-700 hover:bg-white/90 border-2 border-transparent'
+              }`}
+            >
+              <Lightbulb className="w-4 h-4" />
+              Boas Praticas
+              <span className={`px-2 py-0.5 rounded-full text-xs ${
+                activeTab === 'boas-praticas' ? 'bg-emerald-100 text-emerald-700' : 'bg-gray-100 text-gray-600'
+              }`}>
+                {tabCounts.boasPraticas}
+              </span>
+            </button>
+          </div>
+        </section>
+
         {/* Conteúdo Principal */}
-        <section className="container mx-auto px-4 max-w-6xl py-12">
+        <section className="container mx-auto px-4 max-w-6xl py-8">
           {/* Toolbar de Busca e Filtros */}
           <div className="mb-8">
             <div className="flex flex-col md:flex-row gap-4 mb-4">
@@ -177,7 +280,9 @@ export default function LegislacaoPage() {
                 <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
                 <input
                   type="text"
-                  placeholder="Buscar por número, título ou assunto..."
+                  placeholder={isBoasPraticas
+                    ? 'Buscar por título ou descrição...'
+                    : 'Buscar por número, título ou assunto...'}
                   value={searchTerm}
                   onChange={(e) => {
                     setSearchTerm(e.target.value);
@@ -203,47 +308,81 @@ export default function LegislacaoPage() {
 
             {/* Painel de Filtros */}
             {showFilters && (
-              <div className="bg-white border-2 border-gray-200 rounded-xl p-6 shadow-sm">
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  {/* Filtro por Tipo */}
-                  <div>
-                    <label className="block text-sm font-bold text-gray-700 mb-2">
-                      Tipo de Ato
-                    </label>
-                    <select
-                      value={typeFilter}
-                      onChange={(e) => {
-                        setTypeFilter(e.target.value);
-                        setPage(1);
-                      }}
-                      className="w-full px-4 py-2 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
-                    >
-                      <option value="">Todos ({total})</option>
-                      {availableTypes.map(({ type, count }) => (
-                        <option key={type} value={type}>
-                          {TYPE_LABELS[type] || type} ({count})
-                        </option>
-                      ))}
-                    </select>
-                  </div>
+              <div className="bg-white border-2 border-gray-200 rounded-xl p-6 shadow-sm space-y-4">
+                {/* Linha de dropdowns */}
+                <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                  {/* Filtro por Tipo (apenas atos) */}
+                  {!isBoasPraticas && (
+                    <div>
+                      <label className="block text-sm font-bold text-gray-700 mb-2">
+                        Tipo de Ato
+                      </label>
+                      <select
+                        value={typeFilter}
+                        onChange={(e) => { setTypeFilter(e.target.value); setPage(1); }}
+                        className="w-full px-4 py-2 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                      >
+                        <option value="">Todos</option>
+                        {availableTypes.map(({ type, count }) => (
+                          <option key={type} value={type}>
+                            {TYPE_LABELS[type] || type} ({count})
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                  )}
 
                   {/* Filtro por Órgão */}
                   <div>
                     <label className="block text-sm font-bold text-gray-700 mb-2">
-                      Órgão Emissor
+                      {isBoasPraticas ? 'Orgao de Origem' : 'Orgao Emissor'}
+                    </label>
+                    {isBoasPraticas ? (
+                      <input
+                        type="text"
+                        value={issuerFilter}
+                        onChange={(e) => { setIssuerFilter(e.target.value); setPage(1); }}
+                        placeholder="Ex: TCE-SP, CGE-MG..."
+                        className="w-full px-4 py-2 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                        list="issuers-list"
+                      />
+                    ) : (
+                      <select
+                        value={issuerFilter}
+                        onChange={(e) => { setIssuerFilter(e.target.value); setPage(1); }}
+                        className="w-full px-4 py-2 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                      >
+                        <option value="">Todos</option>
+                        {availableIssuers.map(({ issuer, count }) => (
+                          <option key={issuer} value={issuer}>
+                            {issuer} ({count})
+                          </option>
+                        ))}
+                      </select>
+                    )}
+                    {isBoasPraticas && availableIssuers.length > 0 && (
+                      <datalist id="issuers-list">
+                        {availableIssuers.map(({ issuer }) => (
+                          <option key={issuer} value={issuer} />
+                        ))}
+                      </datalist>
+                    )}
+                  </div>
+
+                  {/* Filtro por Esfera */}
+                  <div>
+                    <label className="block text-sm font-bold text-gray-700 mb-2">
+                      Esfera
                     </label>
                     <select
-                      value={issuerFilter}
-                      onChange={(e) => {
-                        setIssuerFilter(e.target.value);
-                        setPage(1);
-                      }}
+                      value={esferaFilter}
+                      onChange={(e) => { setEsferaFilter(e.target.value); setPage(1); }}
                       className="w-full px-4 py-2 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
                     >
-                      <option value="">Todos</option>
-                      {availableIssuers.map(({ issuer, count }) => (
-                        <option key={issuer} value={issuer}>
-                          {issuer} ({count})
+                      <option value="">Todas</option>
+                      {availableEsferas.map(({ esfera, count }) => (
+                        <option key={esfera} value={esfera}>
+                          {ESFERA_LABELS[esfera] || esfera} ({count})
                         </option>
                       ))}
                     </select>
@@ -256,10 +395,7 @@ export default function LegislacaoPage() {
                     </label>
                     <select
                       value={yearFilter}
-                      onChange={(e) => {
-                        setYearFilter(e.target.value);
-                        setPage(1);
-                      }}
+                      onChange={(e) => { setYearFilter(e.target.value); setPage(1); }}
                       className="w-full px-4 py-2 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
                     >
                       <option value="">Todos</option>
@@ -272,10 +408,37 @@ export default function LegislacaoPage() {
                   </div>
                 </div>
 
+                {/* Temas como chips */}
+                <div>
+                  <label className="block text-sm font-bold text-gray-700 mb-2">
+                    Temas
+                  </label>
+                  <div className="flex flex-wrap gap-2">
+                    {TEMAS_LICITACOES.map((tema) => (
+                      <button
+                        key={tema.value}
+                        onClick={() => {
+                          setThemeFilter(themeFilter === tema.value ? '' : tema.value);
+                          setPage(1);
+                        }}
+                        className={`px-3 py-1.5 text-xs rounded-full border-2 transition-colors font-medium ${
+                          themeFilter === tema.value
+                            ? isBoasPraticas
+                              ? 'bg-emerald-600 text-white border-emerald-600'
+                              : 'bg-blue-600 text-white border-blue-600'
+                            : 'bg-white text-gray-700 border-gray-300 hover:border-gray-400'
+                        }`}
+                      >
+                        {tema.label}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
                 {hasActiveFilters && (
                   <button
                     onClick={clearFilters}
-                    className="mt-4 flex items-center gap-2 px-4 py-2 text-sm text-gray-700 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors"
+                    className="flex items-center gap-2 px-4 py-2 text-sm text-gray-700 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors"
                   >
                     <X className="w-4 h-4" />
                     Limpar todos os filtros
@@ -283,23 +446,88 @@ export default function LegislacaoPage() {
                 )}
               </div>
             )}
+
+            {/* Chips de filtros ativos */}
+            {hasActiveFilters && (
+              <div className="flex flex-wrap items-center gap-2 mt-4">
+                <span className="text-sm font-semibold text-gray-600">Filtros:</span>
+                {esferaFilter && (
+                  <span className="inline-flex items-center gap-1 px-3 py-1 bg-blue-50 text-blue-700 rounded-full text-sm border border-blue-200">
+                    {ESFERA_LABELS[esferaFilter] || esferaFilter}
+                    <button onClick={() => { setEsferaFilter(''); setPage(1); }}><X className="w-3 h-3" /></button>
+                  </span>
+                )}
+                {typeFilter && (
+                  <span className="inline-flex items-center gap-1 px-3 py-1 bg-purple-50 text-purple-700 rounded-full text-sm border border-purple-200">
+                    {TYPE_LABELS[typeFilter] || typeFilter}
+                    <button onClick={() => { setTypeFilter(''); setPage(1); }}><X className="w-3 h-3" /></button>
+                  </span>
+                )}
+                {issuerFilter && (
+                  <span className="inline-flex items-center gap-1 px-3 py-1 bg-green-50 text-green-700 rounded-full text-sm border border-green-200">
+                    {issuerFilter}
+                    <button onClick={() => { setIssuerFilter(''); setPage(1); }}><X className="w-3 h-3" /></button>
+                  </span>
+                )}
+                {yearFilter && (
+                  <span className="inline-flex items-center gap-1 px-3 py-1 bg-orange-50 text-orange-700 rounded-full text-sm border border-orange-200">
+                    {yearFilter}
+                    <button onClick={() => { setYearFilter(''); setPage(1); }}><X className="w-3 h-3" /></button>
+                  </span>
+                )}
+                {themeFilter && (
+                  <span className="inline-flex items-center gap-1 px-3 py-1 bg-indigo-50 text-indigo-700 rounded-full text-sm border border-indigo-200">
+                    {getThemeLabel(themeFilter)}
+                    <button onClick={() => { setThemeFilter(''); setPage(1); }}><X className="w-3 h-3" /></button>
+                  </span>
+                )}
+                {searchTerm && (
+                  <span className="inline-flex items-center gap-1 px-3 py-1 bg-gray-100 text-gray-700 rounded-full text-sm border border-gray-200">
+                    &quot;{searchTerm}&quot;
+                    <button onClick={() => { setSearchTerm(''); setPage(1); }}><X className="w-3 h-3" /></button>
+                  </span>
+                )}
+                <button
+                  onClick={clearFilters}
+                  className="text-sm text-gray-500 hover:text-red-600 underline ml-2"
+                >
+                  Limpar todos
+                </button>
+              </div>
+            )}
           </div>
 
           {/* Lista de Atos */}
           {isLoading ? (
             <div className="text-center py-16">
-              <div className="inline-block w-12 h-12 border-4 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
-              <p className="mt-4 text-gray-600 text-lg">Carregando legislação...</p>
+              <div className={`inline-block w-12 h-12 border-4 ${isBoasPraticas ? 'border-emerald-600' : 'border-blue-600'} border-t-transparent rounded-full animate-spin`}></div>
+              <p className="mt-4 text-gray-600 text-lg">
+                {isBoasPraticas ? 'Carregando boas práticas...' : 'Carregando legislação...'}
+              </p>
             </div>
           ) : acts.length === 0 ? (
             <div className="text-center py-16 bg-gray-50 rounded-xl border-2 border-gray-200">
-              <FileText className="w-16 h-16 text-gray-400 mx-auto mb-4" />
-              <h3 className="text-xl font-bold text-gray-900 mb-2">Nenhum ato encontrado</h3>
-              <p className="text-gray-600">
-                {hasActiveFilters
-                  ? 'Tente ajustar os filtros ou fazer uma nova busca.'
-                  : 'Não há atos normativos cadastrados no momento.'}
-              </p>
+              {isBoasPraticas ? (
+                <>
+                  <Lightbulb className="w-16 h-16 text-gray-400 mx-auto mb-4" />
+                  <h3 className="text-xl font-bold text-gray-900 mb-2">Nenhuma boa prática encontrada</h3>
+                  <p className="text-gray-600 max-w-md mx-auto">
+                    {hasActiveFilters
+                      ? 'Tente ajustar os filtros ou fazer uma nova busca.'
+                      : 'Boas práticas são atos normativos de outros órgãos que servem como referência. Novos documentos são adicionados regularmente via DOU.'}
+                  </p>
+                </>
+              ) : (
+                <>
+                  <FileText className="w-16 h-16 text-gray-400 mx-auto mb-4" />
+                  <h3 className="text-xl font-bold text-gray-900 mb-2">Nenhum ato encontrado</h3>
+                  <p className="text-gray-600">
+                    {hasActiveFilters
+                      ? 'Tente ajustar os filtros ou fazer uma nova busca.'
+                      : 'Não há atos normativos cadastrados no momento.'}
+                  </p>
+                </>
+              )}
             </div>
           ) : (
             <>
@@ -307,20 +535,24 @@ export default function LegislacaoPage() {
               <div className="mb-6 flex items-center justify-between">
                 <p className="text-gray-600">
                   Mostrando <span className="font-semibold">{acts.length}</span> de{' '}
-                  <span className="font-semibold">{total}</span> atos normativos
+                  <span className="font-semibold">{total}</span> {isBoasPraticas ? 'boas práticas' : 'atos normativos'}
                 </p>
                 <p className="text-sm text-gray-500">
                   Página {page} de {totalPages}
                 </p>
               </div>
 
-              {/* Cards de Atos */}
+              {/* Cards */}
               <div className="space-y-4">
                 {acts.map(act => (
                   <article
                     key={act.id}
                     id={act.id}
-                    className="bg-white border-2 border-gray-200 rounded-xl overflow-hidden hover:border-blue-300 hover:shadow-lg transition-all"
+                    className={`bg-white border-2 rounded-xl overflow-hidden transition-all ${
+                      isBoasPraticas
+                        ? 'border-gray-200 hover:border-emerald-300 hover:shadow-lg'
+                        : 'border-gray-200 hover:border-blue-300 hover:shadow-lg'
+                    }`}
                   >
                     {/* Header do Card */}
                     <div className="p-6">
@@ -331,9 +563,17 @@ export default function LegislacaoPage() {
                             <span className={`px-3 py-1 text-sm font-bold rounded-lg border-2 ${TYPE_COLORS[act.type] || 'bg-gray-100 text-gray-800 border-gray-300'}`}>
                               {TYPE_LABELS[act.type] || act.type}
                             </span>
-                            <span className="text-lg font-mono font-bold text-gray-900">
-                              {act.fullNumber}
-                            </span>
+                            {act.esfera && (
+                              <span className="px-2 py-0.5 text-xs font-semibold rounded border flex items-center gap-1 bg-gray-100 text-gray-700 border-gray-300">
+                                <Globe className="w-3 h-3" />
+                                {ESFERA_LABELS[act.esfera] || act.esfera}
+                              </span>
+                            )}
+                            {act.fullNumber && (
+                              <span className="text-lg font-mono font-bold text-gray-900">
+                                {act.fullNumber}
+                              </span>
+                            )}
                           </div>
 
                           {/* Título */}
@@ -356,11 +596,31 @@ export default function LegislacaoPage() {
                               <Calendar className="w-4 h-4" />
                               {formatDate(act.publishDate)}
                             </div>
-                            <div className="flex items-center gap-1.5">
-                              <Eye className="w-4 h-4" />
-                              {act.viewCount} visualizações
-                            </div>
+                            {act.viewCount !== undefined && (
+                              <div className="flex items-center gap-1.5">
+                                <Eye className="w-4 h-4" />
+                                {act.viewCount} visualizações
+                              </div>
+                            )}
                           </div>
+
+                          {/* Temas mini-pills */}
+                          {act.themes && act.themes.length > 0 && (
+                            <div className="flex flex-wrap gap-1.5 mt-3">
+                              {act.themes.map(t => (
+                                <span
+                                  key={t}
+                                  className={`px-2 py-0.5 text-xs rounded-full ${
+                                    isBoasPraticas
+                                      ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
+                                      : 'bg-indigo-50 text-indigo-700 border border-indigo-200'
+                                  }`}
+                                >
+                                  {getThemeLabel(t)}
+                                </span>
+                              ))}
+                            </div>
+                          )}
                         </div>
 
                         {/* Botão Expandir */}
@@ -405,15 +665,21 @@ export default function LegislacaoPage() {
                     {expandedAct === act.id && (
                       <div className="border-t-2 border-gray-200 bg-gray-50 p-6">
                         {act.summary && (
-                          <div className="mb-6 bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 rounded-xl overflow-hidden shadow-sm">
-                            {/* Header destacado */}
-                            <div className="bg-gradient-to-r from-blue-600 to-indigo-600 px-4 py-3">
+                          <div className={`mb-6 rounded-xl overflow-hidden shadow-sm ${
+                            isBoasPraticas
+                              ? 'bg-gradient-to-br from-emerald-50 via-teal-50 to-green-50'
+                              : 'bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50'
+                          }`}>
+                            <div className={`px-4 py-3 ${
+                              isBoasPraticas
+                                ? 'bg-gradient-to-r from-emerald-600 to-teal-600'
+                                : 'bg-gradient-to-r from-blue-600 to-indigo-600'
+                            }`}>
                               <h3 className="flex items-center gap-2 text-sm font-bold text-white uppercase tracking-wide">
                                 <BookOpen className="w-5 h-5" />
                                 Resumo Didático
                               </h3>
                             </div>
-                            {/* Conteúdo com Markdown */}
                             <div className="p-4">
                               <MarkdownContent content={act.summary} />
                             </div>
@@ -446,10 +712,14 @@ export default function LegislacaoPage() {
                               href={act.officialUrl}
                               target="_blank"
                               rel="noopener noreferrer"
-                              className="flex items-center gap-2 px-4 py-2.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-semibold"
+                              className={`flex items-center gap-2 px-4 py-2.5 text-white rounded-lg transition-colors font-semibold ${
+                                isBoasPraticas
+                                  ? 'bg-emerald-600 hover:bg-emerald-700'
+                                  : 'bg-blue-600 hover:bg-blue-700'
+                              }`}
                             >
                               <ExternalLink className="w-5 h-5" />
-                              Ver Texto Oficial
+                              {isBoasPraticas ? 'Ver Fonte Original' : 'Ver Texto Oficial'}
                             </a>
                           )}
                           {act.pdfUrl && (
