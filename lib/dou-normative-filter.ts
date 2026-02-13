@@ -17,6 +17,9 @@ const CONCRETE_ACT_PATTERNS = [
   // Atos de pessoal
   'designar', 'nomear', 'exonerar', 'dispensar servidor', 'substituir',
   'delegar competência', 'delegar competencia',
+  'conceder pensão', 'conceder aposentadoria', 'pensão civil',
+  'aposentar', 'dispensar a pedido',
+  'autorizar o afastamento', 'licença para tratar',
 
   // Atos de gestão concreta
   'fiscal de contrato', 'gestor de contrato', 'pregoeiro',
@@ -26,6 +29,7 @@ const CONCRETE_ACT_PATTERNS = [
   // Identificadores de atos individuais
   'processo nº', 'processo n°', 'uasg',
   'cnpj', 'cpf nº',
+  'matrícula siape', 'matricula siape',
   'empresa:', 'contratada:', 'contratante:',
   'valor global:', 'valor total:', 'valor mensal:',
   'extrato de', 'aviso de', 'resultado de julgamento',
@@ -52,6 +56,15 @@ const CONCRETE_TITLE_PATTERNS = [
   /^aviso\b/i,
   /^extratos?\b/i,
   /^retifica[çc][ãa]o\b/i,
+  /^despacho\b/i,
+  /^ata\s+n[ºo°]/i,
+  /^autoriza[çc][ãa]o\b/i,
+  /^portarias\s+de\s+\d/i,
+  /^ato\s+declarat[óo]rio/i,
+  /^alvar[áa]\b/i,
+  /^adendo\b/i,
+  /^aditamento\b/i,
+  /^decis[ãa]o\s+de\b/i,
 ];
 
 /**
@@ -157,6 +170,30 @@ export function shouldAutoApprove(
   }
 
   return false;
+}
+
+/**
+ * Keywords de licitações/contratações para filtro de relevância temática
+ */
+const PROCUREMENT_KEYWORDS = [
+  'licitação', 'licitações', 'licitar', 'licitatório',
+  'contratação', 'contratações', 'contratar',
+  'pregão', 'pregões', 'pregão eletrônico',
+  'dispensa de licitação', 'inexigibilidade',
+  'registro de preços', 'ata de registro',
+  'lei 14.133', 'lei nº 14.133', 'lei 14133',
+  'sanção administrativa', 'processo sancionador',
+  'planejamento da contratação', 'fase preparatória',
+  'gestão de contratos', 'fiscalização de contratos',
+  'compras públicas', 'compras governamentais',
+];
+
+/**
+ * Verifica se o conteúdo é relacionado a licitações/contratações públicas
+ */
+export function isProcurementRelated(title: string, abstract: string): boolean {
+  const text = `${title} ${abstract}`.toLowerCase();
+  return PROCUREMENT_KEYWORDS.some(k => text.includes(k));
 }
 
 /**

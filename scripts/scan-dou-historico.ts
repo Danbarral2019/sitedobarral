@@ -22,7 +22,7 @@
 import { PrismaClient } from '@prisma/client';
 import { DOUClient, DOUSection, DOUPeriod, DOUField } from '../lib/dou-api';
 import { DOUClassifier, DOUDocumentCategory } from '../lib/dou-classifier';
-import { isAtoNormativoGeral, detectAtoType, shouldAutoApprove } from '../lib/dou-normative-filter';
+import { isAtoNormativoGeral, detectAtoType, shouldAutoApprove, isProcurementRelated } from '../lib/dou-normative-filter';
 import { detectModifications } from '../lib/dou-change-detector';
 
 const prisma = new PrismaClient();
@@ -85,9 +85,10 @@ function extractIssuerOrg(title: string, hierarchyStr: string): string {
 }
 
 const SEARCH_TERMS = [
-  'lei 14.133 OR lei 14133',
-  'decreto licitação OR contratação pública',
+  'regulamenta lei 14.133',
+  'regulamenta licitação contratação',
   'instrução normativa SEGES OR instrução normativa MGI',
+  'portaria regulamenta contratação OR portaria regulamenta licitação',
 ];
 
 const RELEVANT_CATEGORIES = new Set<string>([
@@ -150,9 +151,18 @@ async function scanMonth(yearMonth: string): Promise<ScanResult[]> {
     const classification = DOUClassifier.classify(result.title, result.abstract);
     if (!RELEVANT_CATEGORIES.has(classification.category)) continue;
 
-    // Filtro normativo
+    // Filtro normativo — só importar gerais ou ambíguos de órgãos centrais com tema de procurement
     const normativeClass = isAtoNormativoGeral(result.title, result.abstract);
     if (normativeClass === 'concreto') continue;
+
+    // Rejeitar ambíguos, exceto se for de órgão central de compras ou tiver tema de procurement
+    if (normativeClass === 'ambiguo') {
+      const orgLower = (result.hierarchyStr || '').toLowerCase();
+      const isCentralOrg = ['seges', 'mgi', 'compras', 'cgu', 'agu', 'tcu',
+        'ministério da gestão', 'secretaria de gestão'].some(o => orgLower.includes(o));
+      const hasProcurement = isProcurementRelated(result.title, result.abstract);
+      if (!isCentralOrg && !hasProcurement) continue;
+    }
 
     const atoType = detectAtoType(result.title);
     const autoApprove = normativeClass === 'geral' && shouldAutoApprove(result.title, result.hierarchyStr, atoType);
