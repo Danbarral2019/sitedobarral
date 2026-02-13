@@ -4,7 +4,7 @@ import { useState, useEffect, useCallback } from 'react';
 import {
   Search, Filter, Scale, Calendar, Building, ChevronDown,
   ChevronUp, ExternalLink, Download, BookOpen, Eye,
-  X, FileText, Lightbulb, Globe
+  X, FileText, Globe
 } from 'lucide-react';
 import Link from 'next/link';
 import MarkdownContent from '@/components/MarkdownContent';
@@ -41,7 +41,7 @@ const TYPE_LABELS: Record<string, string> = {
   'ordem-servico': 'Ordem de Servico',
   'lei': 'Lei',
   'medida-provisoria': 'Medida Provisoria',
-  'boa_pratica': 'Boa Pratica',
+  'boa_pratica': 'Outro Ato Normativo',
 };
 
 const TYPE_COLORS: Record<string, string> = {
@@ -212,22 +212,22 @@ export default function LegislacaoPage() {
           <div className="container mx-auto px-4 max-w-6xl">
             <div className="flex items-center gap-4 mb-4">
               <div className="w-16 h-16 bg-white/20 backdrop-blur rounded-2xl flex items-center justify-center">
-                {isBoasPraticas ? <Lightbulb className="w-10 h-10 text-white" /> : <Scale className="w-10 h-10 text-white" />}
+                {isBoasPraticas ? <FileText className="w-10 h-10 text-white" /> : <Scale className="w-10 h-10 text-white" />}
               </div>
               <div>
                 <h1 className="text-4xl md:text-5xl font-bold mb-2">
-                  {isBoasPraticas ? 'Boas Praticas' : 'Atos Normativos'}
+                  {isBoasPraticas ? 'Outros Atos Normativos' : 'Atos Normativos'}
                 </h1>
                 <p className={`text-xl ${isBoasPraticas ? 'text-emerald-100' : 'text-blue-100'}`}>
                   {isBoasPraticas
-                    ? 'Referências de outros órgãos para licitações e contratos'
+                    ? 'Outros atos normativos relacionados a licitações e contratos'
                     : 'Legislação Relacionada à Lei 14.133/2021'}
                 </p>
               </div>
             </div>
             <p className={`text-lg ${isBoasPraticas ? 'text-emerald-100' : 'text-blue-100'} max-w-3xl`}>
               {isBoasPraticas
-                ? 'Explore atos normativos de órgãos federais e estaduais que servem como referência e inspiração para suas contratações.'
+                ? 'Explore outros atos normativos de órgãos federais e estaduais relacionados a licitações e contratos administrativos.'
                 : 'Explore decretos, portarias, instruções normativas e demais atos que regulamentam a Lei de Licitações e Contratos Administrativos.'}
             </p>
           </div>
@@ -260,8 +260,8 @@ export default function LegislacaoPage() {
                   : 'bg-white/70 text-gray-600 hover:text-emerald-700 hover:bg-white/90 border-2 border-transparent'
               }`}
             >
-              <Lightbulb className="w-4 h-4" />
-              Boas Praticas
+              <FileText className="w-4 h-4" />
+              Outros Atos Normativos
               <span className={`px-2 py-0.5 rounded-full text-xs ${
                 activeTab === 'boas-praticas' ? 'bg-emerald-100 text-emerald-700' : 'bg-gray-100 text-gray-600'
               }`}>
@@ -503,19 +503,19 @@ export default function LegislacaoPage() {
             <div className="text-center py-16">
               <div className={`inline-block w-12 h-12 border-4 ${isBoasPraticas ? 'border-emerald-600' : 'border-blue-600'} border-t-transparent rounded-full animate-spin`}></div>
               <p className="mt-4 text-gray-600 text-lg">
-                {isBoasPraticas ? 'Carregando boas práticas...' : 'Carregando legislação...'}
+                {isBoasPraticas ? 'Carregando outros atos normativos...' : 'Carregando legislação...'}
               </p>
             </div>
           ) : acts.length === 0 ? (
             <div className="text-center py-16 bg-gray-50 rounded-xl border-2 border-gray-200">
               {isBoasPraticas ? (
                 <>
-                  <Lightbulb className="w-16 h-16 text-gray-400 mx-auto mb-4" />
-                  <h3 className="text-xl font-bold text-gray-900 mb-2">Nenhuma boa prática encontrada</h3>
+                  <FileText className="w-16 h-16 text-gray-400 mx-auto mb-4" />
+                  <h3 className="text-xl font-bold text-gray-900 mb-2">Nenhum ato normativo encontrado</h3>
                   <p className="text-gray-600 max-w-md mx-auto">
                     {hasActiveFilters
                       ? 'Tente ajustar os filtros ou fazer uma nova busca.'
-                      : 'Boas práticas são atos normativos de outros órgãos que servem como referência. Novos documentos são adicionados regularmente via DOU.'}
+                      : 'Outros atos normativos de órgãos federais e estaduais são adicionados regularmente.'}
                   </p>
                 </>
               ) : (
@@ -536,7 +536,7 @@ export default function LegislacaoPage() {
               <div className="mb-6 flex items-center justify-between">
                 <p className="text-gray-600">
                   Mostrando <span className="font-semibold">{acts.length}</span> de{' '}
-                  <span className="font-semibold">{total}</span> {isBoasPraticas ? 'boas práticas' : 'atos normativos'}
+                  <span className="font-semibold">{total}</span> {isBoasPraticas ? 'outros atos normativos' : 'atos normativos'}
                 </p>
                 <p className="text-sm text-gray-500">
                   Página {page} de {totalPages}

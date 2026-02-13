@@ -306,13 +306,19 @@ function AIAnswerCard({
                 </>
               );
 
-              if (source.url) {
-                const isExternal = source.url.startsWith('http');
+              // Use internal link for pareceres vinculantes and enunciados
+              const useInternalLink = ['parecer-vinculante', 'enunciados'].includes(source.category);
+              const effectiveUrl = useInternalLink
+                ? `/documento/${source.documentId}`
+                : source.url;
+
+              if (effectiveUrl) {
+                const isExternal = effectiveUrl.startsWith('http');
                 if (isExternal) {
                   return (
                     <a
                       key={source.documentId}
-                      href={source.url}
+                      href={effectiveUrl}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-white/70 border border-purple-200 rounded-lg text-xs text-purple-800 hover:bg-purple-50 hover:border-purple-300 transition-colors cursor-pointer"
@@ -325,7 +331,7 @@ function AIAnswerCard({
                 return (
                   <Link
                     key={source.documentId}
-                    href={source.url}
+                    href={effectiveUrl}
                     className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-white/70 border border-purple-200 rounded-lg text-xs text-purple-800 hover:bg-purple-50 hover:border-purple-300 transition-colors cursor-pointer"
                     title={source.excerpt}
                   >
@@ -877,13 +883,19 @@ export function SearchResultsList({
 
               const cardClassName = `block rounded-xl border px-4 py-3 transition-all group cursor-pointer ${borderClass} ${hoverClass}`;
 
-              if (source.url) {
-                const isExternal = source.url.startsWith('http');
+              // Use internal link for pareceres vinculantes and enunciados
+              const useInternalLink = ['parecer-vinculante', 'enunciados'].includes(source.category);
+              const effectiveUrl = useInternalLink
+                ? `/documento/${source.documentId}`
+                : source.url;
+
+              if (effectiveUrl) {
+                const isExternal = effectiveUrl.startsWith('http');
                 if (isExternal) {
                   return (
                     <a
                       key={source.documentId}
-                      href={source.url}
+                      href={effectiveUrl}
                       target="_blank"
                       rel="noopener noreferrer"
                       className={cardClassName}
@@ -895,7 +907,7 @@ export function SearchResultsList({
                 return (
                   <Link
                     key={source.documentId}
-                    href={source.url}
+                    href={effectiveUrl}
                     className={cardClassName}
                   >
                     {cardContent}

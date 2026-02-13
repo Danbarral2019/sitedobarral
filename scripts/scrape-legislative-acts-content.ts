@@ -181,6 +181,17 @@ async function fetchWithRetry(url: string, retries = 3): Promise<string | null> 
         return null;
       }
 
+      // Detect charset from Content-Type header
+      const charset = contentType.match(/charset=([^\s;]+)/i)?.[1]?.toLowerCase();
+      const isLatin1 = charset === 'iso-8859-1' || charset === 'latin1' || charset === 'latin-1';
+      const isGovBrSite = url.includes('planalto.gov.br') || url.includes('.gov.br');
+
+      // Use ISO-8859-1 decoder for Latin-1 encoded pages (common on gov.br)
+      if (isLatin1 || (!charset && isGovBrSite)) {
+        const buffer = await response.arrayBuffer();
+        return new TextDecoder('iso-8859-1').decode(buffer);
+      }
+
       return await response.text();
     } catch (error) {
       const errMsg = error instanceof Error ? error.message : 'Erro desconhecido';

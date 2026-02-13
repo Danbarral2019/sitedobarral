@@ -2,7 +2,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import dynamic from 'next/dynamic';
 import { Suspense } from 'react';
-import { ArrowRight, BookOpen, Star, Scale, BookMarked, FileCheck, Landmark, GraduationCap, ScrollText, Library, Gavel, FileText } from 'lucide-react';
+import { ArrowRight, BookOpen, Star, Scale, BookMarked, FileCheck, Landmark, GraduationCap, ScrollText, Gavel, FileText } from 'lucide-react';
 import NewsletterForm from '@/components/NewsletterForm';
 import HomeNovidadesSection from '@/components/HomeNovidadesSection';
 import {
@@ -76,11 +76,6 @@ export default async function Home() {
       href: '/legislacao',
     },
     {
-      label: 'Secoes do Manual TCU',
-      count: categoryCounts['manual-tcu'] || 0,
-      icon: Library,
-    },
-    {
       label: 'Termos no Glossario',
       count: glossaryCount,
       icon: Landmark,
@@ -125,7 +120,7 @@ export default async function Home() {
                       Explorar Cursos
                     </Link>
                     <Link
-                      href="/validar-acesso"
+                      href="/login"
                       className="bg-blue-600 text-white px-8 py-3 rounded-lg font-poppins font-semibold hover:bg-blue-700 transition-colors inline-flex items-center justify-center gap-2 border border-blue-500"
                     >
                       Area do Aluno

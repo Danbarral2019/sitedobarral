@@ -77,7 +77,7 @@ export default async function HomeNovidadesSection() {
           publishedAt: true,
         },
         orderBy: { publishedAt: 'desc' },
-        take: 3,
+        take: 4,
       }),
     ]);
   } catch {
@@ -100,22 +100,28 @@ export default async function HomeNovidadesSection() {
           <div className="grid grid-cols-1 lg:grid-cols-5 gap-8">
             {/* Blog posts — coluna maior */}
             {blogPosts.length > 0 && (
-              <div className="lg:col-span-2">
+              <div className="lg:col-span-3">
                 <h3 className="text-sm font-bold text-gray-500 uppercase tracking-wider mb-4">
                   Blog
                 </h3>
-                <div className="space-y-3">
-                  {blogPosts.map((post) => (
+                <div className="space-y-4">
+                  {blogPosts.map((post, index) => (
                     <Link
                       key={post.id}
                       href={`/blog/${post.slug}`}
-                      className="block bg-white rounded-xl border border-gray-200 p-5 hover:border-indigo-300 hover:shadow-md transition-all group"
+                      className={`block bg-white rounded-xl border border-gray-200 hover:border-indigo-300 hover:shadow-md transition-all group ${
+                        index === 0 ? 'p-6' : 'p-5'
+                      }`}
                     >
-                      <p className="text-base font-semibold text-gray-900 group-hover:text-indigo-600 transition-colors line-clamp-2">
+                      <p className={`font-semibold text-gray-900 group-hover:text-indigo-600 transition-colors line-clamp-2 ${
+                        index === 0 ? 'text-lg' : 'text-base'
+                      }`}>
                         {post.title}
                       </p>
                       {post.excerpt && (
-                        <p className="text-sm text-gray-500 mt-2 line-clamp-2">{post.excerpt}</p>
+                        <p className={`text-gray-500 mt-2 ${
+                          index === 0 ? 'text-sm line-clamp-3' : 'text-sm line-clamp-2'
+                        }`}>{post.excerpt}</p>
                       )}
                       <div className="flex items-center justify-between mt-3">
                         <span className="text-xs text-gray-400">
@@ -144,7 +150,7 @@ export default async function HomeNovidadesSection() {
 
             {/* Recent documents — lista compacta */}
             {recentDocs.length > 0 && (
-              <div className={blogPosts.length > 0 ? 'lg:col-span-3' : 'lg:col-span-5'}>
+              <div className={blogPosts.length > 0 ? 'lg:col-span-2' : 'lg:col-span-5'}>
                 <h3 className="text-sm font-bold text-gray-500 uppercase tracking-wider mb-4">
                   Conteudo Recente
                 </h3>

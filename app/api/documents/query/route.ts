@@ -141,7 +141,7 @@ export async function POST(req: NextRequest) {
     // Busca mais resultados para garantir diversidade de categorias
     const searchResponse = await semanticSearch(query, {
       category: filters.category,
-      excludeCategories: ['boa_pratica'],
+      excludeCategories: ['boa_pratica', 'parecer-vinculante'],
       limit: Math.max(maxResults * 5, 60),
       threshold: 0.40,
       useCache,

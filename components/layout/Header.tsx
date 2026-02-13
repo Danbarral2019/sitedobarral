@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import Image from 'next/image';
 import { useState, memo, useEffect, useRef } from 'react';
-import { Menu, X, ChevronDown, User, FileText, Mail, Home, LogIn, Award, BookOpen, Scale } from 'lucide-react';
+import { Menu, X, ChevronDown, User, FileText, Mail, Home, LogIn, BookOpen, Scale } from 'lucide-react';
 import { courses } from '@/data/courses';
 
 export const Header = memo(function Header() {
@@ -128,14 +128,6 @@ export const Header = memo(function Header() {
             </Link>
 
             <Link
-              href="/publicacoes"
-              className="flex items-center space-x-1 text-white/90 hover:text-white transition-colors font-poppins text-sm focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-brand-600 rounded"
-            >
-              <Award className="w-4 h-4" />
-              <span>Publicações</span>
-            </Link>
-
-            <Link
               href="/contato"
               className="flex items-center space-x-1 text-white/90 hover:text-white transition-colors font-poppins text-sm focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-brand-600 rounded"
             >
@@ -144,7 +136,7 @@ export const Header = memo(function Header() {
             </Link>
 
             <Link
-              href="/validar-acesso"
+              href="/login"
               className="flex items-center space-x-1 bg-white/10 hover:bg-white/20 px-4 py-2 rounded-lg text-white transition-colors font-poppins text-sm focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-brand-600"
             >
               <LogIn className="w-4 h-4" />
@@ -199,13 +191,6 @@ export const Header = memo(function Header() {
               Blog
             </Link>
             <Link
-              href="/publicacoes"
-              className="block py-3 px-2 text-white/90 hover:text-white hover:bg-brand-500 rounded transition-colors font-poppins"
-              onClick={() => setIsMenuOpen(false)}
-            >
-              Publicações
-            </Link>
-            <Link
               href="/contato"
               className="block py-3 px-2 text-white/90 hover:text-white hover:bg-brand-500 rounded transition-colors font-poppins"
               onClick={() => setIsMenuOpen(false)}
@@ -214,7 +199,7 @@ export const Header = memo(function Header() {
             </Link>
             <div className="mt-4 pt-4 border-t border-brand-500">
               <Link
-                href="/validar-acesso"
+                href="/login"
                 className="flex items-center justify-center space-x-2 py-3 px-4 bg-white/10 hover:bg-white/20 rounded-lg text-white transition-colors font-poppins"
                 onClick={() => setIsMenuOpen(false)}
               >

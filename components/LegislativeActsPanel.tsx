@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import {
   Gavel, FileText, ExternalLink, Loader2, Search, X,
-  Scale, Lightbulb, Globe, Filter, ChevronDown, ChevronUp,
+  Scale, Globe, Filter, ChevronDown, ChevronUp,
   Building, Calendar, BookOpen, Download,
 } from 'lucide-react';
 import Link from 'next/link';
@@ -37,7 +37,7 @@ const TYPE_LABELS: Record<string, string> = {
   'ordem-servico': 'Ordem de Serviço',
   lei: 'Lei',
   'medida-provisoria': 'Medida Provisória',
-  boa_pratica: 'Boa Prática',
+  boa_pratica: 'Outro Ato Normativo',
 };
 
 const TYPE_COLORS: Record<string, string> = {
@@ -180,16 +180,16 @@ export default function LegislativeActsPanel() {
       <div className="p-6 pb-0">
         <div className="flex items-center gap-3 mb-4">
           {isBoasPraticas
-            ? <Lightbulb className="w-8 h-8 text-emerald-600" />
+            ? <FileText className="w-8 h-8 text-emerald-600" />
             : <Gavel className="w-8 h-8 text-amber-600" />
           }
           <div className="flex-1">
             <h2 className="text-xl font-bold text-gray-900">
-              {isBoasPraticas ? 'Boas Práticas' : 'Atos Normativos Infralegais'}
+              {isBoasPraticas ? 'Outros Atos Normativos' : 'Atos Normativos Infralegais'}
             </h2>
             <p className="text-sm text-gray-600">
               {isBoasPraticas
-                ? 'Referências de outros órgãos para licitações e contratos'
+                ? 'Outros atos normativos relacionados a licitações e contratos'
                 : 'Decretos, portarias e instruções normativas que regulamentam a Lei 14.133/2021'}
             </p>
           </div>
@@ -221,8 +221,8 @@ export default function LegislativeActsPanel() {
                 : 'text-gray-500 border-transparent hover:text-emerald-600'
             }`}
           >
-            <Lightbulb className="w-4 h-4" />
-            Boas Práticas
+            <FileText className="w-4 h-4" />
+            Outros Atos Normativos
             <span className={`px-1.5 py-0.5 rounded-full text-xs ${
               activeTab === 'boas-praticas' ? 'bg-emerald-100 text-emerald-700' : 'bg-gray-100 text-gray-500'
             }`}>
@@ -452,7 +452,7 @@ export default function LegislativeActsPanel() {
             <span className="flex items-center gap-1 text-sm text-gray-600">
               <FileText className="w-4 h-4" />
               {total} {isBoasPraticas
-                ? (total === 1 ? 'boa prática' : 'boas práticas')
+                ? (total === 1 ? 'outro ato normativo' : 'outros atos normativos')
                 : (total === 1 ? 'ato normativo' : 'atos normativos')}
               {hasActiveFilters && ' encontrado(s)'}
             </span>
@@ -474,12 +474,12 @@ export default function LegislativeActsPanel() {
           <div className="text-center py-12">
             {isBoasPraticas ? (
               <>
-                <Lightbulb className="w-12 h-12 text-gray-300 mx-auto mb-3" />
-                <p className="text-gray-500 font-medium">Nenhuma boa prática encontrada</p>
+                <FileText className="w-12 h-12 text-gray-300 mx-auto mb-3" />
+                <p className="text-gray-500 font-medium">Nenhum ato normativo encontrado</p>
                 <p className="text-sm text-gray-400 mt-1 max-w-sm mx-auto">
                   {hasActiveFilters
                     ? 'Tente ajustar os filtros ou busca.'
-                    : 'Boas práticas são atos de outros órgãos que servem como referência. Novos documentos são adicionados regularmente.'}
+                    : 'Outros atos normativos de órgãos federais e estaduais são adicionados regularmente.'}
                 </p>
               </>
             ) : (
