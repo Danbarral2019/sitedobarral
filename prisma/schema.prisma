@@ -638,9 +638,10 @@ model LegislativeAct {
   leiArticles String? // JSON array com números de artigos regulamentados (ex: ["75", "76"])
 
   // Recursos e documentos
-  officialUrl String? // Link para Planalto/DOU
-  pdfUrl      String? // Link para PDF do ato
-  content     String? @db.Text // Texto completo do ato (opcional)
+  officialUrl  String? // Link para Planalto/DOU
+  pdfUrl       String? // Link para PDF do ato
+  content      String? @db.Text // Texto completo do ato (opcional)
+  annexesJson  String? @db.Text // JSON array: [{"name":"Anexo I","url":"https://...","type":"pdf"}]
 
   // Classificação e filtros avançados
   esfera      String  @default("federal")  // "federal" | "estadual"

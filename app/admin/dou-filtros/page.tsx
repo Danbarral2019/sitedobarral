@@ -68,6 +68,9 @@ interface PendingDocument {
   confidence: number;
   hierarchyStr: string;
   approvalStatus: string;
+  url?: string;
+  abstract?: string;
+  fullContent?: string;
 }
 
 export default function DOUFiltrosPage() {
@@ -384,8 +387,8 @@ export default function DOUFiltrosPage() {
     const douDocument: DOUDocument = {
       id: doc.id,
       title: doc.title,
-      abstract: '', // PendingDocument não tem abstract, será carregado do DB pelo modal se necessário
-      url: '', // Será buscado do DB
+      abstract: doc.abstract || '',
+      url: doc.url || '',
       section: doc.section,
       publishDate: doc.publishDate,
       category: doc.category,

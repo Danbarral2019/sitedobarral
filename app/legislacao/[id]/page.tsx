@@ -9,6 +9,7 @@ import {
   ExternalLink,
   Download,
   FileText,
+  FileDown,
   ArrowLeft,
   Eye,
   BookOpen
@@ -17,6 +18,22 @@ import MarkdownContent from '@/components/MarkdownContent';
 
 interface PageProps {
   params: Promise<{ id: string }>;
+}
+
+interface Annex {
+  name: string;
+  url: string;
+  type: string;
+}
+
+function normalizeContent(text: string): string {
+  return text
+    .split('\n')
+    .map(line => line.trim())
+    .join('\n')
+    .replace(/\n[ \t]+\n/g, '\n\n')
+    .replace(/\n{3,}/g, '\n\n')
+    .trim();
 }
 
 async function getLegislativeAct(id: string) {
@@ -89,7 +106,7 @@ export default async function LegislativeActPage({ params }: PageProps) {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50">
-      <div className="max-w-5xl mx-auto px-4 py-8">
+      <div className="max-w-6xl mx-auto px-4 py-8">
         {/* Back Button */}
         <Link
           href="/legislacao"
@@ -226,12 +243,57 @@ export default async function LegislativeActPage({ params }: PageProps) {
                   whiteSpace: 'pre-wrap',
                   fontFamily: 'Georgia, serif',
                   fontSize: '16px',
-                  lineHeight: '1.8'
+                  lineHeight: '1.8',
+                  textAlign: 'justify'
                 }}
               >
-                {act.content}
+                {normalizeContent(act.content)}
               </div>
             </div>
+
+            {/* Anexos */}
+            {(() => {
+              let annexes: Annex[] = [];
+              try {
+                if (act.annexesJson) {
+                  annexes = JSON.parse(act.annexesJson);
+                }
+              } catch { /* ignore invalid JSON */ }
+
+              if (annexes.length === 0) return null;
+
+              return (
+                <div className="mt-8 pt-6 border-t border-gray-200">
+                  <h4 className="text-base font-bold text-gray-900 mb-4 flex items-center gap-2">
+                    <Download className="w-5 h-5 text-blue-600" />
+                    Anexos
+                  </h4>
+                  <div className="space-y-2">
+                    {annexes.map((annex, i) => (
+                      <a
+                        key={i}
+                        href={annex.url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex items-center gap-3 p-3 rounded-lg border border-gray-200 hover:bg-gray-50 hover:border-blue-300 transition-colors group"
+                      >
+                        {annex.type === 'pdf' ? (
+                          <FileDown className="w-5 h-5 text-red-500 flex-shrink-0" />
+                        ) : (
+                          <FileText className="w-5 h-5 text-blue-500 flex-shrink-0" />
+                        )}
+                        <span className="flex-1 text-sm text-gray-700 group-hover:text-blue-700">
+                          {annex.name}
+                        </span>
+                        <span className="text-xs text-gray-400 uppercase font-medium">
+                          {annex.type}
+                        </span>
+                      </a>
+                    ))}
+                  </div>
+                </div>
+              );
+            })()}
           </div>
         )}
 

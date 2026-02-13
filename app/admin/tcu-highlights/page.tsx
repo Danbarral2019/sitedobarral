@@ -1,7 +1,8 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
-import { Star, ChevronDown, ChevronUp, ExternalLink, X, Pencil, Eye } from 'lucide-react';
+import { useRouter } from 'next/navigation';
+import { Star, ChevronDown, ChevronUp, ExternalLink, X, Pencil, Eye, PenLine } from 'lucide-react';
 
 interface TcuHighlightDoc {
   id: string;
@@ -67,6 +68,7 @@ const TABS = [
 ];
 
 export default function TcuHighlightsPage() {
+  const router = useRouter();
   const [highlights, setHighlights] = useState<TcuHighlight[]>([]);
   const [stats, setStats] = useState<Stats>({ pending: 0, dismissed: 0, willWrite: 0, written: 0 });
   const [loading, setLoading] = useState(true);
@@ -387,6 +389,24 @@ export default function TcuHighlightsPage() {
                           className="flex items-center gap-1.5 px-3 py-1.5 text-sm bg-yellow-100 text-yellow-700 rounded-md hover:bg-yellow-200"
                         >
                           Restaurar
+                        </button>
+                      )}
+                      {(h.status === 'will_write') && !h.blogPostId && (
+                        <button
+                          onClick={() => router.push(`/admin/blog/new?fromHighlight=${h.id}`)}
+                          className="flex items-center gap-1.5 px-3 py-1.5 text-sm bg-orange-100 text-orange-700 rounded-md hover:bg-orange-200"
+                        >
+                          <PenLine className="w-3.5 h-3.5" />
+                          Criar Post no Blog
+                        </button>
+                      )}
+                      {h.blogPostId && (
+                        <button
+                          onClick={() => router.push(`/admin/blog/${h.blogPostId}`)}
+                          className="flex items-center gap-1.5 px-3 py-1.5 text-sm bg-green-100 text-green-700 rounded-md hover:bg-green-200"
+                        >
+                          <Eye className="w-3.5 h-3.5" />
+                          Ver Post
                         </button>
                       )}
                       <a

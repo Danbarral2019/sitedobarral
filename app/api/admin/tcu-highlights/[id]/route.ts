@@ -3,6 +3,49 @@ import { prisma } from '@/lib/prisma';
 import { verifyAdmin } from '@/lib/api-middleware';
 
 /**
+ * GET /api/admin/tcu-highlights/[id]
+ * Busca highlight individual com dados do documento/acordao
+ */
+export async function GET(
+  request: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  const auth = await verifyAdmin(request);
+  if (auth.error) return auth.response;
+
+  const { id } = await params;
+
+  const highlight = await prisma.tcuHighlight.findUnique({
+    where: { id },
+    include: {
+      document: {
+        select: {
+          id: true,
+          title: true,
+          url: true,
+          description: true,
+          acordaoNumero: true,
+          acordaoAno: true,
+          tcuRelator: true,
+          tcuOrgaoJulgador: true,
+          tcuDataJulgamento: true,
+          tcuArea: true,
+          tcuTema: true,
+          tcuSubtema: true,
+          leiArticles: true,
+        },
+      },
+    },
+  });
+
+  if (!highlight) {
+    return NextResponse.json({ error: 'Destaque não encontrado' }, { status: 404 });
+  }
+
+  return NextResponse.json({ highlight });
+}
+
+/**
  * PATCH /api/admin/tcu-highlights/[id]
  * Atualiza status e notas de um destaque TCU
  */

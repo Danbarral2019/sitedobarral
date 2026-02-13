@@ -68,6 +68,7 @@ function stripHtml(html: string): string {
     // Normaliza whitespace
     .replace(/\r\n/g, '\n')
     .replace(/[ \t]+/g, ' ')
+    .replace(/\n[ \t]+\n/g, '\n\n') // Remove linhas com apenas espaços
     .replace(/\n{3,}/g, '\n\n')
     .trim();
 }
@@ -129,6 +130,63 @@ function extractGovBr(html: string): string {
   }
 
   return stripHtml(html);
+}
+
+interface Annex {
+  name: string;
+  url: string;
+  type: string;
+}
+
+/**
+ * Extrai links de anexos (PDF, DOCX, etc) do HTML
+ */
+function extractAnnexes(html: string, baseUrl: string): Annex[] {
+  const annexes: Annex[] = [];
+  const seen = new Set<string>();
+
+  // Regex para encontrar links de download
+  const linkRegex = /<a[^>]+href=["']([^"']+\.(?:pdf|docx?|xlsx?|odt|ods|zip|rar))["'][^>]*>([\s\S]*?)<\/a>/gi;
+  let match;
+
+  while ((match = linkRegex.exec(html)) !== null) {
+    let href = match[1];
+    const linkText = match[2].replace(/<[^>]+>/g, '').trim();
+
+    // Resolver URLs relativas
+    if (href.startsWith('/')) {
+      try {
+        const urlObj = new URL(baseUrl);
+        href = `${urlObj.protocol}//${urlObj.host}${href}`;
+      } catch {
+        continue;
+      }
+    } else if (!href.startsWith('http')) {
+      try {
+        href = new URL(href, baseUrl).toString();
+      } catch {
+        continue;
+      }
+    }
+
+    // Determinar tipo pelo extension
+    const ext = href.match(/\.(pdf|docx?|xlsx?|odt|ods|zip|rar)$/i)?.[1]?.toLowerCase() || 'pdf';
+
+    // Deduplica por URL
+    if (seen.has(href)) continue;
+    seen.add(href);
+
+    // Usar texto do link como nome, ou fallback para o filename
+    const fileName = decodeURIComponent(href.split('/').pop() || 'anexo');
+    const name = linkText || fileName;
+
+    // Filtrar links genéricos que não são anexos (como "Baixar página")
+    if (name.length < 3) continue;
+
+    annexes.push({ name, url: href, type: ext });
+  }
+
+  return annexes;
 }
 
 /**
@@ -285,6 +343,9 @@ async function main() {
       continue;
     }
 
+    // Extrair anexos (PDFs, DOCX, etc)
+    const annexes = extractAnnexes(html, url);
+
     // Check hash para detectar mudanças
     const hash = md5(content);
     if (act.contentHash === hash && !FORCE) {
@@ -294,6 +355,7 @@ async function main() {
         data: {
           scrapeStatus: 'unchanged',
           lastScrapedAt: new Date(),
+          ...(annexes.length > 0 ? { annexesJson: JSON.stringify(annexes) } : {}),
         },
       });
       unchanged++;
@@ -301,7 +363,7 @@ async function main() {
       continue;
     }
 
-    // Salvar conteúdo
+    // Salvar conteúdo e anexos
     await prisma.legislativeAct.update({
       where: { id: act.id },
       data: {
@@ -309,10 +371,11 @@ async function main() {
         contentHash: hash,
         scrapeStatus: 'success',
         lastScrapedAt: new Date(),
+        ...(annexes.length > 0 ? { annexesJson: JSON.stringify(annexes) } : {}),
       },
     });
 
-    console.log(`    OK: ${content.length} chars (hash: ${hash.substring(0, 8)}...)`);
+    console.log(`    OK: ${content.length} chars (hash: ${hash.substring(0, 8)}...)${annexes.length > 0 ? ` + ${annexes.length} anexo(s)` : ''}`);
     success++;
 
     await sleep(DELAY_MS);

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import AdminLayout from '@/components/AdminLayout';
 
 type AGUDocumentType =
@@ -56,13 +56,33 @@ const DOCUMENT_TYPES: DocumentTypeInfo[] = [
   },
 ];
 
+interface AGUStats {
+  counts: Array<{ category: string; label: string; count: number }>;
+  totalDocuments: number;
+  lastImport: {
+    date: string;
+    category: string;
+    title: string;
+  } | null;
+}
+
 export default function ScraperAGUPage() {
+  const [aguStats, setAguStats] = useState<AGUStats | null>(null);
+  const [statsLoading, setStatsLoading] = useState(true);
   const [selectedTypes, setSelectedTypes] = useState<AGUDocumentType[]>(['orientacao-normativa']);
   const [anoInicio, setAnoInicio] = useState(2020);
   const [filtroRelevancia, setFiltroRelevancia] = useState(true);
   const [mode, setMode] = useState<'incremental' | 'completo' | 'atualizar'>('incremental');
   const [isLoading, setIsLoading] = useState(false);
   const [isPreviewing, setIsPreviewing] = useState(false);
+
+  useEffect(() => {
+    fetch('/api/admin/agu-stats')
+      .then(res => res.ok ? res.json() : null)
+      .then(data => setAguStats(data))
+      .catch(() => {})
+      .finally(() => setStatsLoading(false));
+  }, []);
   const [previewData, setPreviewData] = useState<{
     total: number;
     novas: number;
@@ -179,6 +199,37 @@ export default function ScraperAGUPage() {
           <p className="text-gray-600">
             Sistema unificado de scraping para documentos da AGU relacionados a licitações e contratos
           </p>
+        </div>
+
+        {/* Estatisticas do Acervo AGU */}
+        <div className="bg-white rounded-lg shadow-md p-6 mb-6">
+          <h2 className="text-xl font-semibold mb-4">Acervo AGU no Banco de Dados</h2>
+          {statsLoading ? (
+            <p className="text-sm text-gray-500">Carregando estatisticas...</p>
+          ) : aguStats ? (
+            <>
+              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3 mb-4">
+                {aguStats.counts.map(item => (
+                  <div key={item.category} className="bg-gray-50 p-3 rounded text-center">
+                    <div className="text-2xl font-bold text-blue-600">{item.count}</div>
+                    <div className="text-xs text-gray-600">{item.label}</div>
+                  </div>
+                ))}
+                <div className="bg-blue-50 p-3 rounded text-center">
+                  <div className="text-2xl font-bold text-blue-800">{aguStats.totalDocuments}</div>
+                  <div className="text-xs text-gray-600">Total AGU</div>
+                </div>
+              </div>
+              {aguStats.lastImport && (
+                <p className="text-xs text-gray-500">
+                  Ultima importacao: {new Date(aguStats.lastImport.date).toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' })}
+                  {' '}&mdash; {aguStats.lastImport.title}
+                </p>
+              )}
+            </>
+          ) : (
+            <p className="text-sm text-gray-500">Nao foi possivel carregar estatisticas.</p>
+          )}
         </div>
 
         {/* Seleção de Tipos */}

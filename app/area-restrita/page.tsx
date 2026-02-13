@@ -13,6 +13,10 @@ import {
   Scale,
   Search,
   ArrowRight,
+  FileText,
+  BookOpen,
+  List,
+  Book,
 } from 'lucide-react';
 import Link from 'next/link';
 import { courses } from '@/data/courses';
@@ -57,6 +61,23 @@ const CATEGORY_LABELS: Record<string, string> = {
 function getCategoryLabel(category: string): string {
   return CATEGORY_LABELS[category] || category.charAt(0).toUpperCase() + category.slice(1);
 }
+
+// Configuração das categorias para o grid da Base de Conhecimento
+const KNOWLEDGE_BASE_CATEGORIES = [
+  { category: 'acordao', label: 'Acordaos TCU', icon: Scale, color: 'blue' },
+  { category: 'pareceres', label: 'Pareceres', icon: FileText, color: 'purple', matchCategories: PARECER_CATEGORIES },
+  { category: 'orientacao-normativa', label: 'Orientacoes Normativas', icon: BookOpen, color: 'green' },
+  { category: 'enunciados', label: 'Enunciados', icon: List, color: 'amber' },
+  { category: 'manual_tcu', label: 'Manual do TCU', icon: Book, color: 'teal' },
+] as const;
+
+const CATEGORY_COLORS: Record<string, { bg: string; border: string; iconBg: string; text: string; hover: string }> = {
+  blue: { bg: 'bg-blue-50', border: 'border-blue-200', iconBg: 'bg-blue-100', text: 'text-blue-700', hover: 'hover:border-blue-400 hover:shadow-md' },
+  purple: { bg: 'bg-purple-50', border: 'border-purple-200', iconBg: 'bg-purple-100', text: 'text-purple-700', hover: 'hover:border-purple-400 hover:shadow-md' },
+  green: { bg: 'bg-green-50', border: 'border-green-200', iconBg: 'bg-green-100', text: 'text-green-700', hover: 'hover:border-green-400 hover:shadow-md' },
+  amber: { bg: 'bg-amber-50', border: 'border-amber-200', iconBg: 'bg-amber-100', text: 'text-amber-700', hover: 'hover:border-amber-400 hover:shadow-md' },
+  teal: { bg: 'bg-teal-50', border: 'border-teal-200', iconBg: 'bg-teal-100', text: 'text-teal-700', hover: 'hover:border-teal-400 hover:shadow-md' },
+};
 
 interface DocumentType {
   id: string;
@@ -647,8 +668,66 @@ export default function AreaRestritaPage() {
                       />
                     )}
 
-                    {/* Documents */}
-                    {currentContent.type === 'documents' && currentContent.documents.length > 0 && contentTree.selection && (
+                    {/* Sites Recomendados (home/no selection) */}
+                    {currentContent.type === 'documents' && !contentTree.selection && (() => {
+                      const allSites = Object.values(courseSites).flat();
+                      const uniqueSites = allSites.filter(
+                        (site, index, self) => index === self.findIndex((s) => s.id === site.id)
+                      );
+                      if (uniqueSites.length === 0) return null;
+                      return (
+                        <div className="mt-6">
+                          <RecommendedSites sites={uniqueSites} />
+                        </div>
+                      );
+                    })()}
+
+                    {/* Documents - category grid when no subcategory selected */}
+                    {currentContent.type === 'documents' && contentTree.selection && !contentTree.selection.category && (() => {
+                      const allDocs = Object.values(courseDocuments).flat();
+                      const categoriesWithCounts = KNOWLEDGE_BASE_CATEGORIES.map((cat) => {
+                        const count = cat.matchCategories
+                          ? allDocs.filter((d) => cat.matchCategories.includes(d.category)).length
+                          : allDocs.filter((d) => d.category === cat.category).length;
+                        return { ...cat, count };
+                      }).filter((cat) => cat.count > 0);
+
+                      if (categoriesWithCounts.length === 0) {
+                        return (
+                          <div className="bg-white rounded-2xl border-2 border-gray-200 p-8 text-center">
+                            <p className="text-gray-500">Nenhum documento encontrado na base de conhecimento.</p>
+                          </div>
+                        );
+                      }
+
+                      return (
+                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                          {categoriesWithCounts.map((cat) => {
+                            const colors = CATEGORY_COLORS[cat.color] || CATEGORY_COLORS.blue;
+                            const Icon = cat.icon;
+                            return (
+                              <button
+                                key={cat.category}
+                                onClick={() => contentTree.setSelection({
+                                  type: 'document',
+                                  category: cat.category,
+                                })}
+                                className={`${colors.bg} border-2 ${colors.border} ${colors.hover} rounded-xl p-5 text-left transition-all cursor-pointer group`}
+                              >
+                                <div className={`inline-flex p-2.5 ${colors.iconBg} rounded-lg mb-3`}>
+                                  <Icon className={`w-5 h-5 ${colors.text}`} />
+                                </div>
+                                <h3 className={`font-bold ${colors.text} text-sm mb-1`}>{cat.label}</h3>
+                                <p className="text-xs text-gray-500">{cat.count} {cat.count === 1 ? 'documento' : 'documentos'}</p>
+                              </button>
+                            );
+                          })}
+                        </div>
+                      );
+                    })()}
+
+                    {/* Documents - filtered list when subcategory selected */}
+                    {currentContent.type === 'documents' && currentContent.documents.length > 0 && contentTree.selection && contentTree.selection.category && (
                       <DocumentsByCategory
                         documents={currentContent.documents}
                         courseId={contentTree.selection?.courseId || enrolledCourseIds[0] || ''}
@@ -703,7 +782,7 @@ export default function AreaRestritaPage() {
                     )}
 
                     {/* Empty States */}
-                    {currentContent.type === 'documents' && currentContent.documents.length === 0 && contentTree.selection && (
+                    {currentContent.type === 'documents' && currentContent.documents.length === 0 && contentTree.selection && contentTree.selection.category && (
                       <div className="bg-white rounded-2xl border-2 border-gray-200 p-8 text-center">
                         <p className="text-gray-500">Nenhum documento encontrado nesta categoria.</p>
                       </div>

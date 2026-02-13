@@ -222,15 +222,22 @@ export function DOUDocumentModal({
           )}
 
           {/* Link para Fonte Oficial */}
-          <a
-            href={document.url}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-flex items-center gap-2 px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors text-sm font-medium"
-          >
-            <ExternalLink className="w-4 h-4" />
-            Ver na Fonte Oficial (DOU)
-          </a>
+          {document.url ? (
+            <a
+              href={document.url}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-2 px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors text-sm font-medium"
+            >
+              <ExternalLink className="w-4 h-4" />
+              Ver na Fonte Oficial (DOU)
+            </a>
+          ) : (
+            <span className="inline-flex items-center gap-2 px-4 py-2 bg-gray-50 text-gray-400 rounded-lg text-sm">
+              <ExternalLink className="w-4 h-4" />
+              Link da fonte indisponivel
+            </span>
+          )}
         </div>
 
         {/* Formulário de Aprovação */}

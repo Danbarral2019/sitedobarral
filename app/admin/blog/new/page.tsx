@@ -1,7 +1,7 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
-import { useRouter } from 'next/navigation';
+import { useState, useEffect, useCallback, Suspense } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import dynamic from 'next/dynamic';
 import { Loader2, Save, ArrowLeft, Plus, X } from 'lucide-react';
@@ -19,11 +19,14 @@ const MarkdownEditor = dynamic(() => import('@/components/MarkdownEditor'), {
   ssr: false
 });
 
-export default function NewBlogPostPage() {
+function NewBlogPostPageInner() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const fromHighlightId = searchParams.get('fromHighlight');
   const { success, error: errorToast } = useToast();
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
+  const [highlightId, setHighlightId] = useState<string | null>(fromHighlightId);
   const [formData, setFormData] = useState({
     title: '',
     slug: '',
@@ -64,6 +67,101 @@ export default function NewBlogPostPage() {
   useEffect(() => {
     verifyAdmin();
   }, [verifyAdmin]);
+
+  // Pre-preencher a partir de TCU Highlight
+  useEffect(() => {
+    if (!fromHighlightId) return;
+
+    const fetchHighlight = async () => {
+      try {
+        const res = await fetch(`/api/admin/tcu-highlights/${fromHighlightId}`);
+        if (!res.ok) return;
+        const data = await res.json();
+        const h = data.highlight;
+        const doc = h.document;
+
+        const numero = doc.acordaoNumero || '';
+        const ano = doc.acordaoAno || '';
+        const title = `Analise: Acordao ${numero}/${ano} do TCU — ${doc.title}`;
+
+        // Montar conexoes com a lei
+        let leiConnectionsText = '';
+        if (h.aiLeiConnections) {
+          try {
+            const connections = JSON.parse(h.aiLeiConnections);
+            if (Array.isArray(connections) && connections.length > 0) {
+              leiConnectionsText = connections
+                .map((c: { article: string; connection: string }) => `- **Art. ${c.article}:** ${c.connection}`)
+                .join('\n');
+            }
+          } catch { /* ignore */ }
+        }
+
+        const contentParts = [
+          '## Resumo da Decisao',
+          '',
+          h.aiThesisSummary || '',
+          '',
+          '## Por que e Importante',
+          '',
+          h.aiWhyImportant || '',
+          '',
+        ];
+
+        if (leiConnectionsText) {
+          contentParts.push(
+            '## Conexoes com a Lei 14.133',
+            '',
+            leiConnectionsText,
+            '',
+          );
+        }
+
+        contentParts.push(
+          '## Angulo de Analise',
+          '',
+          h.aiArticleAngle || '',
+        );
+
+        const content = contentParts.join('\n');
+
+        const slug = title
+          .toLowerCase()
+          .normalize('NFD')
+          .replace(/[\u0300-\u036f]/g, '')
+          .replace(/[^a-z0-9]+/g, '-')
+          .replace(/^-+|-+$/g, '');
+
+        setFormData(prev => ({
+          ...prev,
+          title,
+          slug,
+          excerpt: h.aiThesisSummary || '',
+          content,
+        }));
+
+        // Tags
+        const newTags = ['TCU', 'Acordao'];
+        if (doc.tcuArea) newTags.push(doc.tcuArea);
+        if (doc.tcuTema) newTags.push(doc.tcuTema);
+        setTags(newTags);
+
+        // Lei Articles do documento
+        if (doc.leiArticles) {
+          try {
+            const articles = JSON.parse(doc.leiArticles);
+            if (Array.isArray(articles)) {
+              setLeiArticles(articles.map(String));
+            }
+          } catch { /* ignore */ }
+        }
+      } catch (err) {
+        console.error('Erro ao carregar highlight:', err);
+      }
+    };
+
+    fetchHighlight();
+  }, [fromHighlightId]);
 
   const generateSlug = (title: string) => {
     return title
@@ -114,6 +212,19 @@ export default function NewBlogPostPage() {
         throw new Error(data.error || 'Erro ao criar post');
       }
 
+      // Se veio de um highlight TCU, atualizar status para 'written' e vincular blogPostId
+      if (highlightId && data.post?.id) {
+        try {
+          await fetch(`/api/admin/tcu-highlights/${highlightId}`, {
+            method: 'PATCH',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ status: 'written', blogPostId: data.post.id }),
+          });
+        } catch (err) {
+          console.error('Erro ao atualizar highlight:', err);
+        }
+      }
+
       success('Post criado!', 'O post foi criado com sucesso.');
       router.push('/admin/blog');
     } catch (error) {
@@ -150,6 +261,14 @@ export default function NewBlogPostPage() {
             <h1 className="text-3xl font-bold text-gray-900 mb-2">Novo Post</h1>
             <p className="text-gray-600">Crie um novo post para o blog</p>
           </div>
+
+          {fromHighlightId && (
+            <div className="mb-6 p-4 bg-purple-50 border border-purple-200 rounded-lg">
+              <p className="text-sm text-purple-800 font-medium">
+                Pre-preenchido a partir de Destaque TCU. Revise e edite o conteudo antes de publicar.
+              </p>
+            </div>
+          )}
 
           <div className="bg-white rounded-2xl shadow-lg p-8 border-2 border-gray-200">
             <form onSubmit={handleSubmit} className="space-y-6">
@@ -355,5 +474,17 @@ export default function NewBlogPostPage() {
         </div>
       </div>
     </AdminLayout>
+  );
+}
+
+export default function NewBlogPostPage() {
+  return (
+    <Suspense fallback={
+      <main className="min-h-screen flex items-center justify-center">
+        <Loader2 className="w-12 h-12 animate-spin text-blue-600" />
+      </main>
+    }>
+      <NewBlogPostPageInner />
+    </Suspense>
   );
 }
