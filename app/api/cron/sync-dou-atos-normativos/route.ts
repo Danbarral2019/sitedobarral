@@ -24,7 +24,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { searchLastWeek } from '@/lib/dou-api';
 import { DOUClassifier, DOUDocumentCategory } from '@/lib/dou-classifier';
-import { isAtoNormativoGeral, shouldAutoApprove, detectAtoType } from '@/lib/dou-normative-filter';
+import { isAtoNormativoGeral, shouldAutoApprove, detectAtoType, isProcurementRelated } from '@/lib/dou-normative-filter';
 import { detectModifications } from '@/lib/dou-change-detector';
 import { LeiIndexer } from '@/lib/lei-indexer';
 import { prisma } from '@/lib/prisma';
@@ -140,6 +140,12 @@ export async function GET(request: NextRequest) {
         // 4b. Filtro de ato normativo geral vs concreto
         const normativeType = isAtoNormativoGeral(cleanTitle, result.abstract);
         if (normativeType === 'concreto') {
+          stats.filtradosPorConcreto++;
+          continue;
+        }
+
+        // 4b2. Filtro obrigatório: só importar se o título tem keywords de licitações
+        if (!isProcurementRelated(cleanTitle)) {
           stats.filtradosPorConcreto++;
           continue;
         }

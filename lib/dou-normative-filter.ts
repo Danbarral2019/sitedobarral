@@ -173,27 +173,33 @@ export function shouldAutoApprove(
 }
 
 /**
- * Keywords de licitações/contratações para filtro de relevância temática
+ * Keywords de licitações/contratações para filtro de relevância temática.
+ * Usadas para verificar se um ato regulamenta diretamente a Lei 14.133.
+ * Verificação apenas no TÍTULO — o abstract/ementa é muito permissivo
+ * (milhares de atos citam "lei 14.133" no texto sem regulamentá-la).
  */
 const PROCUREMENT_KEYWORDS = [
-  'licitação', 'licitações', 'licitar', 'licitatório',
+  'licitação', 'licitações', 'licitar', 'licitatório', 'licitatória',
   'contratação', 'contratações', 'contratar',
   'pregão', 'pregões', 'pregão eletrônico',
   'dispensa de licitação', 'inexigibilidade',
   'registro de preços', 'ata de registro',
-  'lei 14.133', 'lei nº 14.133', 'lei 14133',
-  'sanção administrativa', 'processo sancionador',
+  'lei 14.133', 'lei nº 14.133', 'lei 14133', '14.133/2021',
+  'sanção administrativa', 'processo sancionador', 'sanções administrativas',
   'planejamento da contratação', 'fase preparatória',
   'gestão de contratos', 'fiscalização de contratos',
   'compras públicas', 'compras governamentais',
+  'seges', // Secretaria de Gestão — órgão central de compras
 ];
 
 /**
- * Verifica se o conteúdo é relacionado a licitações/contratações públicas
+ * Verifica se o TÍTULO indica relação direta com licitações/contratações.
+ * NÃO usa o abstract — atos que apenas citam a lei 14.133 no texto
+ * (doações, pensões, etc.) devem ser rejeitados.
  */
-export function isProcurementRelated(title: string, abstract: string): boolean {
-  const text = `${title} ${abstract}`.toLowerCase();
-  return PROCUREMENT_KEYWORDS.some(k => text.includes(k));
+export function isProcurementRelated(title: string): boolean {
+  const titleLower = title.toLowerCase();
+  return PROCUREMENT_KEYWORDS.some(k => titleLower.includes(k));
 }
 
 /**

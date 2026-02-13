@@ -151,18 +151,14 @@ async function scanMonth(yearMonth: string): Promise<ScanResult[]> {
     const classification = DOUClassifier.classify(result.title, result.abstract);
     if (!RELEVANT_CATEGORIES.has(classification.category)) continue;
 
-    // Filtro normativo — só importar gerais ou ambíguos de órgãos centrais com tema de procurement
+    // Filtro normativo — rejeitar atos concretos
     const normativeClass = isAtoNormativoGeral(result.title, result.abstract);
     if (normativeClass === 'concreto') continue;
 
-    // Rejeitar ambíguos, exceto se for de órgão central de compras ou tiver tema de procurement
-    if (normativeClass === 'ambiguo') {
-      const orgLower = (result.hierarchyStr || '').toLowerCase();
-      const isCentralOrg = ['seges', 'mgi', 'compras', 'cgu', 'agu', 'tcu',
-        'ministério da gestão', 'secretaria de gestão'].some(o => orgLower.includes(o));
-      const hasProcurement = isProcurementRelated(result.title, result.abstract);
-      if (!isCentralOrg && !hasProcurement) continue;
-    }
+    // Filtro obrigatório: só importar se o TÍTULO contém keywords de licitações.
+    // INs do BCB (Pix), RNs da ANS (saúde), portarias da SPU (patrimônio) etc.
+    // citam a lei 14.133 no texto mas NÃO a regulamentam.
+    if (!isProcurementRelated(result.title)) continue;
 
     const atoType = detectAtoType(result.title);
     const autoApprove = normativeClass === 'geral' && shouldAutoApprove(result.title, result.hierarchyStr, atoType);
