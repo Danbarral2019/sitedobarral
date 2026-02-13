@@ -77,11 +77,27 @@ const NORMATIVE_TYPE_PREFIXES = [
   /^orienta[çc][ãa]o\s+normativa\b/i,
 ];
 
-// --- Fase 1D: Órgãos centrais de compras (manter ambíguos desses órgãos) ---
-const CENTRAL_PROCUREMENT_ORGS = [
-  'seges', 'mgi', 'compras', 'cgu', 'agu', 'tcu',
-  'ministério da gestão', 'secretaria de gestão',
+// --- Filtro obrigatório: keywords de licitações/contratações ---
+// Todo documento precisa ter pelo menos uma dessas keywords no título para ficar
+const PROCUREMENT_TITLE_KEYWORDS = [
+  'licitação', 'licitações', 'licitar', 'licitatório', 'licitatória',
+  'contratação', 'contratações', 'contratar',
+  'pregão', 'pregões', 'pregão eletrônico',
+  'dispensa de licitação', 'inexigibilidade',
+  'registro de preços', 'ata de registro',
+  'lei 14.133', 'lei nº 14.133', 'lei 14133', '14.133/2021',
+  'sanção administrativa', 'processo sancionador', 'sanções administrativas',
+  'planejamento da contratação', 'fase preparatória',
+  'gestão de contratos', 'fiscalização de contratos',
+  'compras públicas', 'compras governamentais',
+  'gestão e inovação em serviços públicos', // MGI — órgão central de compras
+  'seges', // Secretaria de Gestão
 ];
+
+function isProcurementRelevant(title: string): boolean {
+  const titleLower = title.toLowerCase();
+  return PROCUREMENT_TITLE_KEYWORDS.some(k => titleLower.includes(k));
+}
 
 type CleanupAction = 'remove' | 'keep';
 type CleanupReason =
@@ -89,9 +105,9 @@ type CleanupReason =
   | 'concrete_content_pattern'
   | 'designar_nome_proprio'
   | 'ambiguous_no_indicators'
-  | 'normative_type'
-  | 'general_indicators'
-  | 'central_org_ambiguous';
+  | 'not_procurement_related'
+  | 'procurement_relevant'
+  | 'general_indicators';
 
 interface CleanupResult {
   id: string;
@@ -104,43 +120,30 @@ function classifyDocument(title: string, issuerOrg: string | null): { action: Cl
   const titleLower = title.toLowerCase().trim();
   const titleClean = title.replace(/<[^>]*>/g, '').trim();
 
-  // 1A. Título com prefixo concreto → REMOVER
+  // 1. Título com prefixo concreto → REMOVER (sempre)
   if (CONCRETE_TITLE_PREFIXES.some(p => p.test(titleClean))) {
     return { action: 'remove', reason: 'concrete_title_prefix' };
   }
 
-  // 1C (antes de 1B). Tipos inerentemente normativos → MANTER
-  if (NORMATIVE_TYPE_PREFIXES.some(p => p.test(titleClean))) {
-    return { action: 'keep', reason: 'normative_type' };
-  }
-
-  // 1B. Padrões concretos no título → REMOVER
+  // 2. Padrões concretos no título → REMOVER
   if (CONCRETE_CONTENT_PATTERNS.some(p => titleLower.includes(p))) {
-    // Mas se também tiver indicador geral, manter
-    if (GENERAL_INDICATORS.some(g => titleLower.includes(g))) {
-      return { action: 'keep', reason: 'general_indicators' };
-    }
     return { action: 'remove', reason: 'concrete_content_pattern' };
   }
 
-  // "designar" seguido de nome próprio → REMOVER
+  // 3. "designar" seguido de nome próprio → REMOVER
   if (DESIGNAR_NOME_REGEX.test(title)) {
     return { action: 'remove', reason: 'designar_nome_proprio' };
   }
 
-  // 1C. Indicadores gerais no título → MANTER
-  if (GENERAL_INDICATORS.some(g => titleLower.includes(g))) {
-    return { action: 'keep', reason: 'general_indicators' };
+  // 4. FILTRO OBRIGATÓRIO: relevância para licitações/contratações
+  //    INs do BCB sobre Pix, RNs da ANS sobre saúde, portarias da SPU sobre
+  //    patrimônio — nenhuma regulamenta a Lei 14.133
+  if (!isProcurementRelevant(title)) {
+    return { action: 'remove', reason: 'not_procurement_related' };
   }
 
-  // 1D. Ambíguos — verificar órgão central
-  const orgLower = (issuerOrg || '').toLowerCase();
-  if (CENTRAL_PROCUREMENT_ORGS.some(o => orgLower.includes(o))) {
-    return { action: 'keep', reason: 'central_org_ambiguous' };
-  }
-
-  // Sem indicadores claros → REMOVER (maioria são atos concretos)
-  return { action: 'remove', reason: 'ambiguous_no_indicators' };
+  // 5. Passou no filtro de relevância → MANTER
+  return { action: 'keep', reason: 'procurement_relevant' };
 }
 
 async function main() {
