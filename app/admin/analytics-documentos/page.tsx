@@ -2,30 +2,70 @@
 
 import { useState, useEffect } from 'react';
 import AdminLayout from '@/components/AdminLayout';
-import { BarChart3, TrendingUp, Target, Sparkles, FileText, Hash, Tag, Loader2, AlertCircle } from 'lucide-react';
+import {
+  BarChart3,
+  FileText,
+  Hash,
+  Scale,
+  Loader2,
+  AlertCircle,
+  Database,
+  Layers,
+  TrendingUp,
+  BookOpen
+} from 'lucide-react';
 
 interface AnalyticsStats {
-  totalAnalyses: number;
-  avgPrecision: number;
-  avgSuggestions: number;
-  avgAccepted: number;
-  totalCitations: number;
-  totalKeywords: number;
-  mostSuggestedArticles: Array<{ article: string; count: number }>;
-  mostAcceptedArticles: Array<{ article: string; count: number }>;
+  totalAnalyzed: number;
+  totalArticleRefs: number;
+  avgArticlesPerDoc: number;
+  uniqueArticles: number;
+  topArticles: Array<{ article: string; count: number }>;
+  byCategory: Array<{ category: string; count: number }>;
+  bySource: Array<{ source: string; count: number }>;
 }
 
 interface RecentAnalysis {
   id: string;
-  documentTitle: string;
-  documentType: string | null;
-  totalSuggestions: number;
-  acceptedCount: number;
-  precision: number | null;
-  citationsFound: number;
-  keywordsMatched: number;
-  createdAt: string;
+  title: string;
+  source: string;
+  category: string;
+  articleCount: number;
+  articles: string[];
+  updatedAt: string;
 }
+
+const SOURCE_LABELS: Record<string, string> = {
+  Document: 'Documentos',
+  LegislativeAct: 'Atos Legislativos',
+  DOUStaging: 'DOU Staging',
+};
+
+const SOURCE_COLORS: Record<string, string> = {
+  Document: 'bg-blue-100 text-blue-700',
+  LegislativeAct: 'bg-purple-100 text-purple-700',
+  DOUStaging: 'bg-amber-100 text-amber-700',
+};
+
+const CATEGORY_LABELS: Record<string, string> = {
+  acordao: 'Acórdãos TCU',
+  parecer: 'Pareceres',
+  on: 'Orientações Normativas',
+  enunciado: 'Enunciados',
+  decreto: 'Decretos',
+  portaria: 'Portarias',
+  in: 'Instruções Normativas',
+  lei: 'Leis',
+  legislacao: 'Legislação',
+  'ordem-servico': 'Ordens de Serviço',
+  'medida-provisoria': 'Medidas Provisórias',
+  dou: 'DOU',
+  apostila: 'Apostilas',
+  artigo: 'Artigos',
+  outro: 'Outros',
+  decor: 'DECOR',
+  manual: 'Manuais',
+};
 
 export default function AnalyticsDocumentosPage() {
   const [stats, setStats] = useState<AnalyticsStats | null>(null);
@@ -99,215 +139,211 @@ export default function AnalyticsDocumentosPage() {
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-gray-900 mb-2 flex items-center gap-2">
             <BarChart3 className="w-8 h-8 text-blue-600" />
-            Analytics - Análise Automática de Documentos
+            Analytics — Indexação de Artigos da Lei 14.133
           </h1>
           <p className="text-gray-600">
-            Desempenho do sistema de sugestão automática de artigos da Lei 14.133/2021
+            Visão geral da indexação automática de artigos da Lei 14.133/2021 em documentos, atos legislativos e DOU
           </p>
         </div>
 
         {/* Overview Cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-          {/* Total Analyses */}
           <div className="bg-white rounded-lg shadow-md p-6 border-l-4 border-blue-500">
             <div className="flex items-center justify-between mb-2">
-              <span className="text-gray-600 text-sm font-medium">Total de Análises</span>
+              <span className="text-gray-600 text-sm font-medium">Docs Indexados</span>
               <FileText className="w-5 h-5 text-blue-500" />
             </div>
-            <p className="text-3xl font-bold text-gray-900">{stats.totalAnalyses}</p>
-            <p className="text-xs text-gray-500 mt-1">documentos analisados</p>
+            <p className="text-3xl font-bold text-gray-900">{stats.totalAnalyzed}</p>
+            <p className="text-xs text-gray-500 mt-1">com artigos da Lei 14.133</p>
           </div>
 
-          {/* Average Precision */}
           <div className="bg-white rounded-lg shadow-md p-6 border-l-4 border-green-500">
             <div className="flex items-center justify-between mb-2">
-              <span className="text-gray-600 text-sm font-medium">Precisão Média</span>
-              <Target className="w-5 h-5 text-green-500" />
+              <span className="text-gray-600 text-sm font-medium">Referências Totais</span>
+              <Hash className="w-5 h-5 text-green-500" />
             </div>
-            <p className="text-3xl font-bold text-gray-900">
-              {stats.avgPrecision ? `${stats.avgPrecision.toFixed(1)}%` : 'N/A'}
-            </p>
-            <p className="text-xs text-gray-500 mt-1">sugestões aceitas</p>
+            <p className="text-3xl font-bold text-gray-900">{stats.totalArticleRefs}</p>
+            <p className="text-xs text-gray-500 mt-1">artigos vinculados</p>
           </div>
 
-          {/* Average Suggestions */}
           <div className="bg-white rounded-lg shadow-md p-6 border-l-4 border-purple-500">
             <div className="flex items-center justify-between mb-2">
-              <span className="text-gray-600 text-sm font-medium">Sugestões Média</span>
-              <Sparkles className="w-5 h-5 text-purple-500" />
+              <span className="text-gray-600 text-sm font-medium">Artigos Distintos</span>
+              <Scale className="w-5 h-5 text-purple-500" />
             </div>
-            <p className="text-3xl font-bold text-gray-900">
-              {stats.avgSuggestions ? stats.avgSuggestions.toFixed(1) : '0'}
-            </p>
-            <p className="text-xs text-gray-500 mt-1">artigos por análise</p>
+            <p className="text-3xl font-bold text-gray-900">{stats.uniqueArticles}</p>
+            <p className="text-xs text-gray-500 mt-1">de 195 artigos da Lei</p>
           </div>
 
-          {/* Average Accepted */}
           <div className="bg-white rounded-lg shadow-md p-6 border-l-4 border-orange-500">
             <div className="flex items-center justify-between mb-2">
-              <span className="text-gray-600 text-sm font-medium">Aceites Média</span>
+              <span className="text-gray-600 text-sm font-medium">Média por Doc</span>
               <TrendingUp className="w-5 h-5 text-orange-500" />
             </div>
-            <p className="text-3xl font-bold text-gray-900">
-              {stats.avgAccepted ? stats.avgAccepted.toFixed(1) : '0'}
-            </p>
-            <p className="text-xs text-gray-500 mt-1">artigos aceitos</p>
+            <p className="text-3xl font-bold text-gray-900">{stats.avgArticlesPerDoc}</p>
+            <p className="text-xs text-gray-500 mt-1">artigos por documento</p>
           </div>
         </div>
 
-        {/* Additional Stats */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+        {/* Source and Category Breakdown */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+          {/* By Source */}
           <div className="bg-white rounded-lg shadow-md p-6">
             <div className="flex items-center gap-2 mb-4">
-              <Hash className="w-5 h-5 text-blue-600" />
-              <h2 className="text-lg font-semibold text-gray-900">Citações Detectadas</h2>
+              <Database className="w-5 h-5 text-blue-600" />
+              <h2 className="text-lg font-semibold text-gray-900">Por Fonte</h2>
             </div>
-            <p className="text-4xl font-bold text-blue-600">{stats.totalCitations}</p>
-            <p className="text-sm text-gray-500 mt-1">referências diretas a artigos encontradas</p>
+            <div className="space-y-3">
+              {stats.bySource.map(({ source, count }) => (
+                <div key={source} className="flex items-center justify-between">
+                  <span className={`px-3 py-1 rounded-full text-sm font-medium ${SOURCE_COLORS[source] || 'bg-gray-100 text-gray-700'}`}>
+                    {SOURCE_LABELS[source] || source}
+                  </span>
+                  <div className="flex items-center gap-3">
+                    <div className="w-32 bg-gray-200 rounded-full h-2">
+                      <div
+                        className="bg-blue-600 h-2 rounded-full"
+                        style={{
+                          width: `${Math.min((count / stats.totalAnalyzed) * 100, 100)}%`,
+                        }}
+                      />
+                    </div>
+                    <span className="text-sm font-semibold text-gray-600 w-12 text-right">{count}</span>
+                  </div>
+                </div>
+              ))}
+            </div>
           </div>
 
+          {/* By Category */}
           <div className="bg-white rounded-lg shadow-md p-6">
             <div className="flex items-center gap-2 mb-4">
-              <Tag className="w-5 h-5 text-purple-600" />
-              <h2 className="text-lg font-semibold text-gray-900">Palavras-Chave Encontradas</h2>
+              <Layers className="w-5 h-5 text-purple-600" />
+              <h2 className="text-lg font-semibold text-gray-900">Por Categoria</h2>
             </div>
-            <p className="text-4xl font-bold text-purple-600">{stats.totalKeywords}</p>
-            <p className="text-sm text-gray-500 mt-1">termos jurídicos identificados</p>
+            <div className="space-y-2">
+              {stats.byCategory.slice(0, 10).map(({ category, count }) => (
+                <div key={category} className="flex items-center justify-between">
+                  <span className="text-sm text-gray-700">
+                    {CATEGORY_LABELS[category] || category}
+                  </span>
+                  <div className="flex items-center gap-3">
+                    <div className="w-32 bg-gray-200 rounded-full h-2">
+                      <div
+                        className="bg-purple-600 h-2 rounded-full"
+                        style={{
+                          width: `${Math.min((count / stats.byCategory[0].count) * 100, 100)}%`,
+                        }}
+                      />
+                    </div>
+                    <span className="text-sm font-semibold text-gray-600 w-12 text-right">{count}</span>
+                  </div>
+                </div>
+              ))}
+            </div>
           </div>
         </div>
 
         {/* Top Articles */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-          {/* Most Suggested */}
-          <div className="bg-white rounded-lg shadow-md p-6">
-            <h2 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
-              <Sparkles className="w-5 h-5 text-blue-600" />
-              Artigos Mais Sugeridos (Top 10)
+        <div className="bg-white rounded-lg shadow-md p-6 mb-8">
+          <div className="flex items-center gap-2 mb-4">
+            <BookOpen className="w-5 h-5 text-blue-600" />
+            <h2 className="text-lg font-semibold text-gray-900">
+              Artigos Mais Referenciados (Top 20)
             </h2>
-            {stats.mostSuggestedArticles.length > 0 ? (
-              <div className="space-y-3">
-                {stats.mostSuggestedArticles.map((item, idx) => (
-                  <div key={item.article} className="flex items-center gap-3">
-                    <span className="flex-shrink-0 w-6 h-6 rounded-full bg-blue-100 text-blue-600 text-xs font-bold flex items-center justify-center">
-                      {idx + 1}
-                    </span>
-                    <div className="flex-1 flex items-center justify-between">
-                      <span className="font-medium text-gray-900">Art. {item.article}º</span>
-                      <div className="flex items-center gap-2">
-                        <div className="w-32 bg-gray-200 rounded-full h-2">
-                          <div
-                            className="bg-blue-600 h-2 rounded-full"
-                            style={{
-                              width: `${Math.min((item.count / stats.mostSuggestedArticles[0].count) * 100, 100)}%`
-                            }}
-                          />
-                        </div>
-                        <span className="text-sm font-semibold text-gray-600 w-8 text-right">{item.count}</span>
+          </div>
+          {stats.topArticles.length > 0 ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+              {stats.topArticles.map((item, idx) => (
+                <div key={item.article} className="flex items-center gap-3">
+                  <span className="flex-shrink-0 w-7 h-7 rounded-full bg-blue-100 text-blue-600 text-xs font-bold flex items-center justify-center">
+                    {idx + 1}
+                  </span>
+                  <div className="flex-1 flex items-center justify-between">
+                    <span className="font-medium text-gray-900">Art. {item.article}</span>
+                    <div className="flex items-center gap-2">
+                      <div className="w-24 bg-gray-200 rounded-full h-2">
+                        <div
+                          className="bg-blue-600 h-2 rounded-full"
+                          style={{
+                            width: `${Math.min((item.count / stats.topArticles[0].count) * 100, 100)}%`,
+                          }}
+                        />
                       </div>
+                      <span className="text-sm font-semibold text-gray-600 w-8 text-right">
+                        {item.count}
+                      </span>
                     </div>
                   </div>
-                ))}
-              </div>
-            ) : (
-              <p className="text-gray-500 text-sm text-center py-8">Nenhum dado disponível</p>
-            )}
-          </div>
-
-          {/* Most Accepted */}
-          <div className="bg-white rounded-lg shadow-md p-6">
-            <h2 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
-              <TrendingUp className="w-5 h-5 text-green-600" />
-              Artigos Mais Aceitos (Top 10)
-            </h2>
-            {stats.mostAcceptedArticles.length > 0 ? (
-              <div className="space-y-3">
-                {stats.mostAcceptedArticles.map((item, idx) => (
-                  <div key={item.article} className="flex items-center gap-3">
-                    <span className="flex-shrink-0 w-6 h-6 rounded-full bg-green-100 text-green-600 text-xs font-bold flex items-center justify-center">
-                      {idx + 1}
-                    </span>
-                    <div className="flex-1 flex items-center justify-between">
-                      <span className="font-medium text-gray-900">Art. {item.article}º</span>
-                      <div className="flex items-center gap-2">
-                        <div className="w-32 bg-gray-200 rounded-full h-2">
-                          <div
-                            className="bg-green-600 h-2 rounded-full"
-                            style={{
-                              width: `${Math.min((item.count / stats.mostAcceptedArticles[0].count) * 100, 100)}%`
-                            }}
-                          />
-                        </div>
-                        <span className="text-sm font-semibold text-gray-600 w-8 text-right">{item.count}</span>
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            ) : (
-              <p className="text-gray-500 text-sm text-center py-8">Nenhum dado disponível</p>
-            )}
-          </div>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <p className="text-gray-500 text-sm text-center py-8">Nenhum dado disponível</p>
+          )}
         </div>
 
         {/* Recent Analyses Table */}
         <div className="bg-white rounded-lg shadow-md p-6">
-          <h2 className="text-lg font-semibold text-gray-900 mb-4">Análises Recentes</h2>
+          <h2 className="text-lg font-semibold text-gray-900 mb-4">
+            Documentos Indexados Recentemente
+          </h2>
           {recentAnalyses.length > 0 ? (
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
                 <thead>
                   <tr className="border-b border-gray-200 text-left">
                     <th className="py-3 px-4 font-semibold text-gray-700">Documento</th>
-                    <th className="py-3 px-4 font-semibold text-gray-700">Tipo</th>
-                    <th className="py-3 px-4 font-semibold text-gray-700 text-center">Sugestões</th>
-                    <th className="py-3 px-4 font-semibold text-gray-700 text-center">Aceites</th>
-                    <th className="py-3 px-4 font-semibold text-gray-700 text-center">Precisão</th>
-                    <th className="py-3 px-4 font-semibold text-gray-700 text-center">Citações</th>
-                    <th className="py-3 px-4 font-semibold text-gray-700 text-center">Keywords</th>
+                    <th className="py-3 px-4 font-semibold text-gray-700">Fonte</th>
+                    <th className="py-3 px-4 font-semibold text-gray-700">Categoria</th>
+                    <th className="py-3 px-4 font-semibold text-gray-700 text-center">Artigos</th>
+                    <th className="py-3 px-4 font-semibold text-gray-700">Principais</th>
                     <th className="py-3 px-4 font-semibold text-gray-700">Data</th>
                   </tr>
                 </thead>
                 <tbody>
                   {recentAnalyses.map((analysis) => (
-                    <tr key={analysis.id} className="border-b border-gray-100 hover:bg-gray-50">
+                    <tr key={`${analysis.source}-${analysis.id}`} className="border-b border-gray-100 hover:bg-gray-50">
                       <td className="py-3 px-4">
-                        <span className="font-medium text-gray-900">{analysis.documentTitle}</span>
+                        <span className="font-medium text-gray-900 line-clamp-1">
+                          {analysis.title}
+                        </span>
+                      </td>
+                      <td className="py-3 px-4">
+                        <span className={`text-xs px-2 py-1 rounded-full font-medium ${SOURCE_COLORS[analysis.source] || 'bg-gray-100 text-gray-700'}`}>
+                          {SOURCE_LABELS[analysis.source] || analysis.source}
+                        </span>
                       </td>
                       <td className="py-3 px-4">
                         <span className="text-xs bg-gray-100 text-gray-600 px-2 py-1 rounded">
-                          {analysis.documentType || 'N/A'}
+                          {CATEGORY_LABELS[analysis.category] || analysis.category}
                         </span>
                       </td>
                       <td className="py-3 px-4 text-center">
-                        <span className="font-semibold text-purple-600">{analysis.totalSuggestions}</span>
+                        <span className="font-semibold text-blue-600">{analysis.articleCount}</span>
                       </td>
-                      <td className="py-3 px-4 text-center">
-                        <span className="font-semibold text-green-600">{analysis.acceptedCount}</span>
-                      </td>
-                      <td className="py-3 px-4 text-center">
-                        {analysis.precision !== null ? (
-                          <span className={`font-semibold ${
-                            analysis.precision >= 70 ? 'text-green-600' :
-                            analysis.precision >= 40 ? 'text-yellow-600' :
-                            'text-red-600'
-                          }`}>
-                            {analysis.precision.toFixed(0)}%
-                          </span>
-                        ) : (
-                          <span className="text-gray-400">-</span>
-                        )}
-                      </td>
-                      <td className="py-3 px-4 text-center">
-                        <span className="text-gray-700">{analysis.citationsFound}</span>
-                      </td>
-                      <td className="py-3 px-4 text-center">
-                        <span className="text-gray-700">{analysis.keywordsMatched}</span>
+                      <td className="py-3 px-4">
+                        <div className="flex flex-wrap gap-1">
+                          {analysis.articles.map((art) => (
+                            <span
+                              key={art}
+                              className="text-xs bg-blue-50 text-blue-700 px-1.5 py-0.5 rounded"
+                            >
+                              {art}
+                            </span>
+                          ))}
+                          {analysis.articleCount > 5 && (
+                            <span className="text-xs text-gray-400">
+                              +{analysis.articleCount - 5}
+                            </span>
+                          )}
+                        </div>
                       </td>
                       <td className="py-3 px-4 text-gray-600">
-                        {new Date(analysis.createdAt).toLocaleDateString('pt-BR', {
+                        {new Date(analysis.updatedAt).toLocaleDateString('pt-BR', {
                           day: '2-digit',
                           month: '2-digit',
-                          year: 'numeric'
+                          year: 'numeric',
                         })}
                       </td>
                     </tr>
@@ -319,17 +355,6 @@ export default function AnalyticsDocumentosPage() {
             <p className="text-gray-500 text-sm text-center py-8">Nenhuma análise encontrada</p>
           )}
         </div>
-
-        {/* Footer Info */}
-        {stats.totalAnalyses === 0 && (
-          <div className="mt-8 bg-blue-50 border border-blue-200 rounded-lg p-6">
-            <p className="text-blue-900 font-medium mb-2">Sistema Pronto para Uso</p>
-            <p className="text-blue-700 text-sm">
-              O sistema de analytics está configurado e pronto. As estatísticas aparecerão aqui assim que você começar a usar
-              a funcionalidade de análise automática no cadastro de documentos.
-            </p>
-          </div>
-        )}
       </div>
     </AdminLayout>
   );
