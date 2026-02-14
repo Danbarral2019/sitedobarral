@@ -15,6 +15,7 @@ import {
   BookOpen
 } from 'lucide-react';
 import MarkdownContent from '@/components/MarkdownContent';
+import { normalizeTextContent } from '@/lib/utils';
 
 interface PageProps {
   params: Promise<{ id: string }>;
@@ -24,16 +25,6 @@ interface Annex {
   name: string;
   url: string;
   type: string;
-}
-
-function normalizeContent(text: string): string {
-  return text
-    .split('\n')
-    .map(line => line.trim())
-    .join('\n')
-    .replace(/\n[ \t]+\n/g, '\n\n')
-    .replace(/\n{3,}/g, '\n\n')
-    .trim();
 }
 
 async function getLegislativeAct(id: string) {
@@ -206,10 +197,10 @@ export default async function LegislativeActPage({ params }: PageProps) {
             <FileText className="w-5 h-5 text-blue-600" />
             Ementa
           </h3>
-          <div className="prose prose-slate max-w-none">
-            <p className="text-gray-700 leading-relaxed whitespace-pre-wrap">
-              {act.ementa}
-            </p>
+          <div className="prose prose-slate max-w-none prose-p:text-gray-700 prose-p:leading-relaxed prose-p:text-justify prose-p:mb-3">
+            {normalizeTextContent(act.ementa).map((p, i) => (
+              <p key={i}>{p}</p>
+            ))}
           </div>
         </div>
 
@@ -236,19 +227,17 @@ export default async function LegislativeActPage({ params }: PageProps) {
             <h3 className="text-lg font-bold text-gray-900 mb-6">
               Texto Integral
             </h3>
-            <div className="prose prose-slate max-w-none">
-              <div
-                className="text-gray-700 leading-relaxed"
-                style={{
-                  whiteSpace: 'pre-wrap',
-                  fontFamily: 'Georgia, serif',
-                  fontSize: '16px',
-                  lineHeight: '1.8',
-                  textAlign: 'justify'
-                }}
-              >
-                {normalizeContent(act.content)}
-              </div>
+            <div
+              className="prose prose-slate max-w-none prose-p:text-gray-700 prose-p:leading-relaxed prose-p:text-justify prose-p:mb-4"
+              style={{
+                fontFamily: 'Georgia, "Times New Roman", serif',
+                fontSize: '16px',
+                lineHeight: '1.8',
+              }}
+            >
+              {normalizeTextContent(act.content).map((paragraph, i) => (
+                <p key={i}>{paragraph}</p>
+              ))}
             </div>
 
             {/* Anexos */}

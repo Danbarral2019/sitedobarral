@@ -141,6 +141,44 @@ export function slugify(text: string): string {
  * searchDebounced('termo'); // Só executa se não houver novas chamadas em 500ms
  * ```
  */
+/**
+ * Normaliza texto scrapeado para exibição em parágrafos.
+ *
+ * Junta linhas que fazem parte do mesmo parágrafo (separadas por apenas
+ * 1 newline — artefatos de scraping HTML) e preserva parágrafos reais
+ * (separados por 2+ newlines ou linha em branco).
+ *
+ * @param text - Texto bruto (possivelmente scrapeado com quebras artificiais)
+ * @returns Array de parágrafos prontos para renderizar em <p> tags
+ *
+ * @example
+ * ```typescript
+ * normalizeTextContent("Linha 1\nLinha 2\n\nParagrafo 2")
+ * // → ["Linha 1 Linha 2", "Paragrafo 2"]
+ * ```
+ */
+export function normalizeTextContent(text: string): string[] {
+  const lines = text.split('\n').map(line => line.trim());
+  const paragraphs: string[] = [];
+  let current: string[] = [];
+
+  for (const line of lines) {
+    if (line === '') {
+      if (current.length > 0) {
+        paragraphs.push(current.join(' '));
+        current = [];
+      }
+    } else {
+      current.push(line);
+    }
+  }
+  if (current.length > 0) {
+    paragraphs.push(current.join(' '));
+  }
+
+  return paragraphs;
+}
+
 export function debounce<T extends (...args: unknown[]) => unknown>(
   func: T,
   wait: number = 300

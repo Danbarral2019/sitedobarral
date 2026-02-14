@@ -28,7 +28,7 @@ import {
 import { useAuth } from '@/hooks/use-auth';
 import { useFavorites } from '@/hooks/use-favorites';
 import { useLegislativeActFavorites } from '@/hooks/use-legislative-act-favorites';
-import { safeParseArray } from '@/lib/utils';
+import { safeParseArray, normalizeTextContent } from '@/lib/utils';
 import Link from 'next/link';
 import ArticleChatInterface from '@/components/ArticleChatInterface';
 
@@ -234,7 +234,11 @@ function DocumentDetails({ documentId, documentType = 'document' }: { documentId
             <BookOpen className="w-4 h-4 text-blue-600" />
             <h4 className="font-bold text-blue-900 text-sm">Resumo</h4>
           </div>
-          <p className="text-gray-800 text-sm leading-relaxed whitespace-pre-wrap">{document.summary}</p>
+          <div className="space-y-2">
+            {normalizeTextContent(document.summary).map((p, i) => (
+              <p key={i} className="text-gray-800 text-sm leading-relaxed">{p}</p>
+            ))}
+          </div>
         </div>
       )}
 
@@ -265,7 +269,11 @@ function DocumentDetails({ documentId, documentType = 'document' }: { documentId
             <Lightbulb className="w-4 h-4 text-green-600" />
             <h4 className="font-bold text-green-900 text-sm">Aplicação Prática</h4>
           </div>
-          <p className="text-gray-800 text-sm leading-relaxed whitespace-pre-wrap">{document.practicalUse}</p>
+          <div className="space-y-2">
+            {normalizeTextContent(document.practicalUse).map((p, i) => (
+              <p key={i} className="text-gray-800 text-sm leading-relaxed">{p}</p>
+            ))}
+          </div>
         </div>
       )}
 
@@ -276,7 +284,11 @@ function DocumentDetails({ documentId, documentType = 'document' }: { documentId
             <BookOpen className="w-4 h-4 text-amber-600" />
             <h4 className="font-bold text-amber-900 text-sm">Observações do Prof. Barral</h4>
           </div>
-          <p className="text-gray-800 text-sm leading-relaxed italic whitespace-pre-wrap">{document.publicNotes}</p>
+          <div className="space-y-2">
+            {normalizeTextContent(document.publicNotes).map((p, i) => (
+              <p key={i} className="text-gray-800 text-sm leading-relaxed italic">{p}</p>
+            ))}
+          </div>
         </div>
       )}
 
@@ -1164,7 +1176,11 @@ function LeiComentadaContent() {
                   </div>
 
                   <div className="prose max-w-none">
-                    <p className="text-gray-800 whitespace-pre-wrap">{selectedArticle.ementa}</p>
+                    <div className="space-y-2">
+                      {normalizeTextContent(selectedArticle.ementa).map((p, i) => (
+                        <p key={i} className="text-gray-800">{p}</p>
+                      ))}
+                    </div>
                   </div>
                 </div>
 

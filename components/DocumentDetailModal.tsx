@@ -24,7 +24,7 @@ import {
   Shield,
 } from 'lucide-react';
 import Link from 'next/link';
-import { safeParseArray } from '@/lib/utils';
+import { safeParseArray, normalizeTextContent } from '@/lib/utils';
 
 interface DocumentDetailModalProps {
   documentId: string;
@@ -545,7 +545,11 @@ export default function DocumentDetailModal({
                 </div>
                 <h3 className="text-lg font-bold text-blue-900">Resumo</h3>
               </div>
-              <p className="text-gray-800 leading-relaxed whitespace-pre-wrap">{document.summary}</p>
+              <div className="text-gray-800 leading-relaxed space-y-2">
+                {normalizeTextContent(document.summary).map((p, i) => (
+                  <p key={i}>{p}</p>
+                ))}
+              </div>
             </div>
           )}
 
@@ -580,7 +584,11 @@ export default function DocumentDetailModal({
                 </div>
                 <h3 className="text-lg font-bold text-green-900">Aplicacao Pratica</h3>
               </div>
-              <p className="text-gray-800 leading-relaxed whitespace-pre-wrap">{document.practicalUse}</p>
+              <div className="text-gray-800 leading-relaxed space-y-2">
+                {normalizeTextContent(document.practicalUse).map((p, i) => (
+                  <p key={i}>{p}</p>
+                ))}
+              </div>
             </div>
           )}
 
@@ -593,7 +601,11 @@ export default function DocumentDetailModal({
                 </div>
                 <h3 className="text-lg font-bold text-amber-900">Observacoes do Prof. Barral</h3>
               </div>
-              <p className="text-gray-800 leading-relaxed italic whitespace-pre-wrap">{document.publicNotes}</p>
+              <div className="text-gray-800 leading-relaxed italic space-y-2">
+                {normalizeTextContent(document.publicNotes).map((p, i) => (
+                  <p key={i}>{p}</p>
+                ))}
+              </div>
             </div>
           )}
 

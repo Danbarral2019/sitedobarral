@@ -15,7 +15,7 @@ interface AdminLayoutProps {
 export default function AdminLayout({ children }: AdminLayoutProps) {
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const [unreadCounts, setUnreadCounts] = useState({ contatos: 0, depoimentos: 0, documentos: 0, tcuHighlights: 0 });
+  const [unreadCounts, setUnreadCounts] = useState({ contatos: 0, depoimentos: 0, documentos: 0, tcuHighlights: 0, douPending: 0 });
   const pathname = usePathname();
 
   const isActive = (path: string) => {
@@ -27,11 +27,13 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
   useEffect(() => {
     const loadCounts = async () => {
       try {
-        const [contatosRes, depoimentosRes, documentosRes, tcuHighlightsRes] = await Promise.all([
+        const [contatosRes, depoimentosRes, documentosRes, tcuHighlightsRes, douPendingRes, douAutoApprovedRes] = await Promise.all([
           fetch('/api/admin/contatos?unreadOnly=true'),
           fetch('/api/admin/depoimentos?status=pending'),
           fetch('/api/admin/documents/recent-auto-imports-count'),
           fetch('/api/admin/tcu-highlights?countOnly=true'),
+          fetch('/api/admin/dou/pending'),
+          fetch('/api/admin/dou/auto-approved'),
         ]);
 
         if (contatosRes.ok) {
@@ -53,6 +55,17 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
           const tcuData = await tcuHighlightsRes.json();
           setUnreadCounts(prev => ({ ...prev, tcuHighlights: tcuData.count || 0 }));
         }
+
+        let douTotal = 0;
+        if (douPendingRes.ok) {
+          const douPendingData = await douPendingRes.json();
+          douTotal += douPendingData.count || 0;
+        }
+        if (douAutoApprovedRes.ok) {
+          const douAutoData = await douAutoApprovedRes.json();
+          douTotal += douAutoData.count || 0;
+        }
+        setUnreadCounts(prev => ({ ...prev, douPending: douTotal }));
       } catch (error) {
         console.error('Erro ao carregar contadores:', error);
       }
@@ -103,6 +116,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
         </svg>
       ),
+      badge: unreadCounts.douPending,
     },
 
     // === DOCUMENTOS ===
