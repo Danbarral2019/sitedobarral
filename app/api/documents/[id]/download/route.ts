@@ -111,14 +111,20 @@ export async function GET(
  */
 async function downloadFile(document: Record<string, unknown>): Promise<NextResponse> {
   // Se for link externo, redirecionar
-  if (document.type === 'link' && document.url.startsWith('http')) {
-    return NextResponse.redirect(document.url);
+  const docUrl = document.url as string;
+  const docDouUrl = document.douUrl as string | null;
+  if (document.type === 'link' && docUrl.startsWith('http')) {
+    // If the URL points to Sapiens (AGU internal system), prefer douUrl if available
+    const isSapiens = docUrl.toLowerCase().includes('sapiens.agu.gov.br') ||
+      docUrl.toLowerCase().includes('supersapiens.agu.gov.br');
+    const redirectUrl = isSapiens && docDouUrl ? docDouUrl : docUrl;
+    return NextResponse.redirect(redirectUrl);
   }
 
   // Se for arquivo local, ler e retornar
   try {
     const uploadsDir = join(process.cwd(), 'public', 'uploads');
-    const filePath = join(uploadsDir, document.url);
+    const filePath = join(uploadsDir, docUrl);
 
     // Validação de path traversal
     if (!resolve(filePath).startsWith(resolve(uploadsDir))) {
@@ -132,18 +138,18 @@ async function downloadFile(document: Record<string, unknown>): Promise<NextResp
     const uint8Array = new Uint8Array(fileBuffer);
 
     // Determinar tipo de conteúdo baseado na extensão
-    const contentType = getContentType(document.url);
+    const contentType = getContentType(docUrl);
 
     // Retornar arquivo com headers apropriados
     return new NextResponse(uint8Array, {
       headers: {
         'Content-Type': contentType,
-        'Content-Disposition': `attachment; filename="${encodeURIComponent(document.title || 'documento')}"`,
+        'Content-Disposition': `attachment; filename="${encodeURIComponent((document.title as string) || 'documento')}"`,
         'Content-Length': fileBuffer.length.toString(),
       },
     });
   } catch (fileError) {
-    apiLogger.error({ err: fileError, documentUrl: document.url }, 'Failed to read file');
+    apiLogger.error({ err: fileError, documentUrl: docUrl }, 'Failed to read file');
     throw new NotFoundError('Arquivo no servidor');
   }
 }

@@ -73,6 +73,7 @@ export async function GET(request: NextRequest) {
       videosByCourseCounts,
       sitesCount,
       legislativeActsCount,
+      modulesCountByCourse,
     ] = await Promise.all([
       // 1. Documents grouped by course and category
       prisma.document.groupBy({
@@ -126,6 +127,16 @@ export async function GET(request: NextRequest) {
 
       // 6. Legislative Acts count
       prisma.legislativeAct.count(),
+
+      // 7. LMS modules count by course
+      prisma.module.groupBy({
+        by: ['courseId'],
+        where: {
+          courseId: { in: enrolledCourseIds },
+          isPublished: true,
+        },
+        _count: { id: true },
+      }),
     ]);
 
     // Separate course materials from regular documents
@@ -140,7 +151,16 @@ export async function GET(request: NextRequest) {
     const materialsTotal = materialCounts.reduce((sum, g) => sum + g._count.id, 0);
     totalCount += materialsTotal;
 
-    if (materialsTotal > 0) {
+    // Build a map of courseId -> module count for quick lookup
+    const lmsModuleCountMap: Record<string, number> = {};
+    modulesCountByCourse.forEach((g) => {
+      lmsModuleCountMap[g.courseId] = g._count.id;
+    });
+
+    // Check if any enrolled course has LMS modules
+    const hasAnyLmsModules = enrolledCourseIds.some((cId) => (lmsModuleCountMap[cId] || 0) > 0);
+
+    if (enrolledCourseIds.length > 0) {
       // Group materials: merge common (courseId=null) into each enrolled course
       const materialsByCourse: Record<string, Record<string, number>> = {};
       const commonMaterials: Record<string, number> = {};
@@ -181,20 +201,19 @@ export async function GET(request: NextRequest) {
         const cats = materialsByCourse[cId] || {};
         materialChildren = buildMaterialCategoryNodes(cId, cats);
       } else {
-        // Multiple courses: group by course
+        // Multiple courses: group by course (include ALL enrolled courses)
         materialChildren = enrolledCourseIds
-          .filter((cId) => materialsByCourse[cId] && Object.keys(materialsByCourse[cId]).length > 0)
           .map((cId) => {
             const course = courses.find(c => c.id === cId);
-            const cats = materialsByCourse[cId];
+            const cats = materialsByCourse[cId] || {};
             const courseTotal = Object.values(cats).reduce((s, n) => s + n, 0);
             return {
               id: `mat-${cId}`,
               type: 'course-material' as ContentType,
               label: course?.title || 'Curso',
-              count: courseTotal,
+              count: courseTotal || (lmsModuleCountMap[cId] || 0),
               courseId: cId,
-              children: buildMaterialCategoryNodes(cId, cats),
+              children: Object.keys(cats).length > 0 ? buildMaterialCategoryNodes(cId, cats) : undefined,
             };
           });
       }
@@ -212,82 +231,30 @@ export async function GET(request: NextRequest) {
     const docsTotal = regularDocCounts.reduce((sum, g) => sum + g._count.id, 0);
     totalCount += docsTotal;
 
-    // Group documents by course, merging common into each enrolled course
-    const docsByCourse: Record<string, { count: number; categories: Record<string, number> }> = {};
-    const commonDocCategories: Record<string, number> = {};
+    // Aggregate all document categories (no course grouping in Base de Conhecimento)
+    // Course documents appear ONLY under "Materiais do Curso", not here
+    const aggregatedCategories: Record<string, number> = {};
 
     regularDocCounts.forEach((group) => {
       const displayCategory = PARECER_CATEGORIES.includes(group.category)
         ? 'pareceres'
         : group.category;
 
-      if (!group.courseId) {
-        // Common document: accumulate separately for merging
-        commonDocCategories[displayCategory] = (commonDocCategories[displayCategory] || 0) + group._count.id;
-      } else {
-        if (!docsByCourse[group.courseId]) {
-          docsByCourse[group.courseId] = { count: 0, categories: {} };
-        }
-        docsByCourse[group.courseId].count += group._count.id;
-        docsByCourse[group.courseId].categories[displayCategory] =
-          (docsByCourse[group.courseId].categories[displayCategory] || 0) + group._count.id;
-      }
+      aggregatedCategories[displayCategory] = (aggregatedCategories[displayCategory] || 0) + group._count.id;
     });
 
-    // Merge common documents into each enrolled course
-    enrolledCourseIds.forEach((courseId) => {
-      if (!docsByCourse[courseId]) {
-        docsByCourse[courseId] = { count: 0, categories: {} };
-      }
-      Object.entries(commonDocCategories).forEach(([cat, count]) => {
-        docsByCourse[courseId].count += count;
-        docsByCourse[courseId].categories[cat] = (docsByCourse[courseId].categories[cat] || 0) + count;
-      });
-    });
-
-    // Build document children
+    // Build document children - flat list of categories (no course grouping)
     const documentChildren: ContentTreeNode[] = [];
 
-    if (enrolledCourseIds.length === 1) {
-      // Single course: categories directly under "Documentos"
-      const courseId = enrolledCourseIds[0];
-      if (docsByCourse[courseId]) {
-        Object.entries(docsByCourse[courseId].categories).map(([cat, count]) => {
-          documentChildren.push({
-            id: `doc-${courseId}-${cat}`,
-            type: 'document' as const,
-            label: getCategoryLabel(cat),
-            count,
-            courseId,
-            category: cat,
-          });
-        });
-      }
-    } else {
-      // Multiple courses: group by course
-      enrolledCourseIds.forEach((courseId) => {
-        if (docsByCourse[courseId] && docsByCourse[courseId].count > 0) {
-          const course = courses.find(c => c.id === courseId);
-          const courseCats = Object.entries(docsByCourse[courseId].categories).map(([cat, count]) => ({
-            id: `doc-${courseId}-${cat}`,
-            type: 'document' as const,
-            label: getCategoryLabel(cat),
-            count,
-            courseId,
-            category: cat,
-          }));
-
-          documentChildren.push({
-            id: `doc-${courseId}`,
-            type: 'document',
-            label: course?.title || 'Curso',
-            count: docsByCourse[courseId].count,
-            courseId,
-            children: courseCats,
-          });
-        }
+    Object.entries(aggregatedCategories).forEach(([cat, count]) => {
+      documentChildren.push({
+        id: `doc-${cat}`,
+        type: 'document' as const,
+        label: getCategoryLabel(cat),
+        count,
+        category: cat,
       });
-    }
+    });
 
     // Build Lei 14.133 node (as child of Base de Conhecimento)
     const leiChildren: ContentTreeNode[] = [];

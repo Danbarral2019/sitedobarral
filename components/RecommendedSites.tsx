@@ -13,6 +13,7 @@ interface RecommendedSite {
 
 interface RecommendedSitesProps {
   sites: RecommendedSite[];
+  compact?: boolean;
 }
 
 // Category display config with icons and colors
@@ -43,7 +44,7 @@ const CATEGORY_ORDER = [
 
 const DEFAULT_CONFIG = { icon: Globe, label: 'Outros', color: 'text-gray-600', bg: 'bg-gray-50', border: 'border-gray-200' };
 
-export default function RecommendedSites({ sites }: RecommendedSitesProps) {
+export default function RecommendedSites({ sites, compact }: RecommendedSitesProps) {
   if (!sites || sites.length === 0) {
     return null;
   }
@@ -67,12 +68,26 @@ export default function RecommendedSites({ sites }: RecommendedSitesProps) {
     <div className="space-y-6">
       {/* Header */}
       <div className="flex items-center gap-3">
-        <div className="p-2.5 bg-gradient-to-br from-blue-500 to-blue-700 rounded-xl shadow-md">
-          <Globe className="w-5 h-5 lg:w-6 lg:h-6 text-white" />
-        </div>
-        <div>
-          <h2 className="text-lg lg:text-xl font-bold text-gray-900">Sites de Interesse</h2>
-          <p className="text-sm text-gray-500">{sites.length} referências complementares para seus estudos</p>
+        {!compact && (
+          <div className="p-2.5 bg-gradient-to-br from-blue-500 to-blue-700 rounded-xl shadow-md">
+            <Globe className="w-5 h-5 lg:w-6 lg:h-6 text-white" />
+          </div>
+        )}
+        <div className="flex items-center gap-2 flex-1">
+          {compact && <Globe className="w-4 h-4 text-blue-500 flex-shrink-0" />}
+          <div>
+            <h2 className={compact ? 'text-sm font-bold text-gray-800' : 'text-lg lg:text-xl font-bold text-gray-900'}>
+              Sites de Interesse
+            </h2>
+            {!compact && (
+              <p className="text-sm text-gray-500">{sites.length} referências complementares para seus estudos</p>
+            )}
+          </div>
+          {compact && (
+            <span className="text-xs font-semibold text-blue-600 bg-blue-50 px-2 py-0.5 rounded-full">
+              {sites.length}
+            </span>
+          )}
         </div>
       </div>
 

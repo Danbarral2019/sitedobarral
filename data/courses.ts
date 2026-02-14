@@ -2,6 +2,28 @@ import { Course } from '@/lib/types';
 
 export const courses: Course[] = [
   {
+    id: '1',
+    slug: 'nova-lei-licitacoes',
+    title: 'Nova Lei de Licitações e Contratos',
+    shortDescription: 'Curso completo sobre a Lei nº 14.133/2021 - Nova Lei de Licitações e Contratos Administrativos.',
+    description: `
+      Curso abrangente sobre a Nova Lei de Licitações e Contratos Administrativos (Lei nº 14.133/2021),
+      abordando desde os princípios fundamentais até os procedimentos específicos de cada modalidade
+      licitatória, incluindo pregão, concorrência, diálogo competitivo e demais inovações legislativas.
+    `,
+    bibliography: [
+      'BRASIL. Lei nº 14.133/2021 - Nova Lei de Licitações e Contratos Administrativos.',
+      'JUSTEN FILHO, Marçal. Comentários à Lei de Licitações e Contratações Administrativas. São Paulo: Thomson Reuters, 2024.',
+      'NIEBUHR, Joel de Menezes. Nova Lei de Licitações e Contratos Administrativos. Curitiba: Zênite, 2024.',
+      'TCU. Licitações e Contratos: Orientações e Jurisprudência do TCU. Brasília: TCU, 2024.',
+    ],
+    publicDocuments: [],
+    restrictedDocuments: [],
+    order: 0,
+    createdAt: new Date('2024-01-01'),
+    updatedAt: new Date('2024-01-01'),
+  },
+  {
     id: '2',
     slug: 'planejamento-contratacoes',
     title: 'Planejamento das Contratações Públicas',

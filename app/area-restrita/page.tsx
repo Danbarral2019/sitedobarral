@@ -107,6 +107,7 @@ interface SiteType {
   description: string;
   url: string;
   faviconUrl?: string | null;
+  category?: string | null;
 }
 
 export default function AreaRestritaPage() {
@@ -223,7 +224,13 @@ export default function AreaRestritaPage() {
             title = `${getCategoryLabel(category)} - ${title}`;
           }
         } else {
-          docs = Object.values(courseDocuments).flat();
+          // Deduplicate documents across courses (common docs appear in multiple groups)
+          const seen = new Set<string>();
+          docs = Object.values(courseDocuments).flat().filter((d) => {
+            if (seen.has(d.id)) return false;
+            seen.add(d.id);
+            return true;
+          });
           if (category) {
             if (category === 'pareceres') {
               docs = docs.filter((d) => PARECER_CATEGORIES.includes(d.category));
@@ -665,22 +672,9 @@ export default function AreaRestritaPage() {
                         enrolledCourseIds={enrolledCourseIds}
                         onDocumentClick={handleDocumentClick}
                         modulesData={modulesData}
+                        sites={courseSites}
                       />
                     )}
-
-                    {/* Sites Recomendados (home/no selection) */}
-                    {currentContent.type === 'documents' && !contentTree.selection && (() => {
-                      const allSites = Object.values(courseSites).flat();
-                      const uniqueSites = allSites.filter(
-                        (site, index, self) => index === self.findIndex((s) => s.id === site.id)
-                      );
-                      if (uniqueSites.length === 0) return null;
-                      return (
-                        <div className="mt-6">
-                          <RecommendedSites sites={uniqueSites} />
-                        </div>
-                      );
-                    })()}
 
                     {/* Documents - category grid when no subcategory selected */}
                     {currentContent.type === 'documents' && contentTree.selection && !contentTree.selection.category && (() => {
