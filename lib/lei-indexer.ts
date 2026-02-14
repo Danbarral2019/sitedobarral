@@ -86,6 +86,7 @@ INSTRUÇÕES:
    - Se o documento mencionar "Lei 14.133" genérica sem artigo específico, identifique os temas e artigos relacionados
    - Artigos "184-A" e outros com letras devem ser retornados como "184-A" (com hífen)
    - Máximo de {{MAX_ARTICLES}} artigos
+   - REGRA ESPECIAL para Art. 6º: O Art. 6º contém DEFINIÇÕES genéricas (licitação, contratação direta, obra, serviço, etc.) cujos institutos são regulados por artigos específicos da lei. NÃO inclua o Art. 6º a menos que o documento cite EXPRESSAMENTE "art. 6" ou "artigo 6" da Lei 14.133. Se o documento apenas trata de um conceito definido no Art. 6º (ex: "contratação direta"), indexe pelos artigos que regulam esse instituto (ex: Arts. 72-75), NÃO pelo Art. 6º.
 
 FORMATO DE RESPOSTA (JSON):
 {
@@ -148,8 +149,13 @@ export class LeiIndexer {
       const parsedResponse = JSON.parse(geminiResponse);
 
       // Filtrar por confiança mínima
+      // Regra especial: Art. 6 só entra se tiver menção explícita (mentions > 0)
       const filteredArticles = parsedResponse.articles
-        .filter((a: { confidence: number }) => a.confidence >= opts.minConfidence)
+        .filter((a: { articleNumber: string; confidence: number; mentions: number }) => {
+          if (a.confidence < opts.minConfidence) return false;
+          if (a.articleNumber === '6' && (!a.mentions || a.mentions === 0)) return false;
+          return true;
+        })
         .slice(0, opts.maxArticles);
 
       return {
