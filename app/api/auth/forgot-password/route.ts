@@ -2,17 +2,21 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import crypto from 'crypto';
 import { sendPasswordResetEmail } from '@/lib/email';
+import { enforceRateLimit, getClientIp } from '@/lib/cache/rate-limit-helper';
+import { handleApiError } from '@/lib/errors/error-handler';
+import { ValidationError } from '@/lib/errors/api-error';
 
 export async function POST(request: NextRequest) {
   try {
+    // Rate limiting: 3 tentativas por minuto por IP (previne spam de emails de reset)
+    const ip = getClientIp(request);
+    await enforceRateLimit(`auth:forgot-password:${ip}`, 3, 60);
+
     const body = await request.json();
     const { email } = body;
 
     if (!email) {
-      return NextResponse.json(
-        { error: 'Email é obrigatório' },
-        { status: 400 }
-      );
+      throw new ValidationError('Email é obrigatório');
     }
 
     // Buscar usuário
@@ -62,10 +66,6 @@ export async function POST(request: NextRequest) {
       { status: 200 }
     );
   } catch (error) {
-    console.error('Forgot password error:', error);
-    return NextResponse.json(
-      { error: 'Erro ao processar solicitação' },
-      { status: 500 }
-    );
+    return handleApiError(error);
   }
 }

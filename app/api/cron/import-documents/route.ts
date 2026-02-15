@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { fetchAcordaosTCU, type AcordaoTCU } from '@/lib/tcu-scraper';
 import { scrapeOrientacoesAGU, type OrientacaoNormativa } from '@/lib/agu-scraper';
+import { verifyCronAuth } from '@/lib/cron-auth';
 
 /**
  * Cron Job: Importacao Automatica de Documentos
@@ -10,20 +11,14 @@ import { scrapeOrientacoesAGU, type OrientacaoNormativa } from '@/lib/agu-scrape
  * - TCU: Acordaos relacionados a licitacoes
  * - AGU: Orientacoes Normativas
  *
- * Seguranca: Requer CRON_SECRET no header
+ * Seguranca: Requer Authorization: Bearer <CRON_SECRET>
  * Agendamento: Configurado no vercel.json (semanal)
  */
 export async function GET(request: NextRequest) {
   try {
     // 1. Verificacao de seguranca - apenas cron jobs autorizados
-    const cronSecret = request.headers.get('x-cron-secret');
-
-    if (cronSecret !== process.env.CRON_SECRET) {
-      return NextResponse.json(
-        { error: 'Acesso nao autorizado' },
-        { status: 401 }
-      );
-    }
+    const authError = verifyCronAuth(request);
+    if (authError) return authError;
 
     console.log('[Cron Import] Iniciando importacao automatica de documentos...');
 

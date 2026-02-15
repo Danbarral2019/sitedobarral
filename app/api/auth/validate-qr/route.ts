@@ -1,16 +1,20 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { trackServerEvent } from '@/lib/monitoring/events';
+import { enforceRateLimit, getClientIp } from '@/lib/cache/rate-limit-helper';
+import { handleApiError } from '@/lib/errors/error-handler';
+import { ValidationError } from '@/lib/errors/api-error';
 
 export async function POST(request: NextRequest) {
   try {
+    // Rate limiting: 10 tentativas por minuto por IP (previne brute-force de QR codes)
+    const ip = getClientIp(request);
+    await enforceRateLimit(`qr:validate:${ip}`, 10, 60);
+
     const { code } = await request.json();
 
     if (!code) {
-      return NextResponse.json(
-        { error: 'Código QR não fornecido' },
-        { status: 400 }
-      );
+      throw new ValidationError('Código QR não fornecido');
     }
 
     // Valida o QR Code no banco de dados
@@ -61,10 +65,6 @@ export async function POST(request: NextRequest) {
       }
     });
   } catch (error) {
-    console.error('Erro ao validar QR Code:', error);
-    return NextResponse.json(
-      { error: 'Erro ao processar validação' },
-      { status: 500 }
-    );
+    return handleApiError(error);
   }
 }

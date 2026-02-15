@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { scrapeUrl, canScrapeUrl } from '@/lib/legislative-scrapers';
 import { hasHashChanged } from '@/lib/legislative-scrapers/change-detector';
+import { verifyCronAuth } from '@/lib/cron-auth';
 
 /**
  * GET /api/cron/check-legislative-updates
@@ -17,13 +18,8 @@ import { hasHashChanged } from '@/lib/legislative-scrapers/change-detector';
 export async function GET(request: NextRequest) {
   try {
     // Verificar autenticação via CRON_SECRET
-    const authHeader = request.headers.get('authorization');
-    const cronSecret = process.env.CRON_SECRET;
-
-    if (cronSecret && authHeader !== `Bearer ${cronSecret}`) {
-      console.log('[Cron Legislative] Unauthorized access attempt');
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
+    const authError = verifyCronAuth(request);
+    if (authError) return authError;
 
     console.log('[Cron Legislative] Iniciando verificação de atualizações...');
 

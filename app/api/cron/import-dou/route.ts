@@ -32,6 +32,7 @@ import { searchLastWeek, searchLastMonth } from '@/lib/dou-api';
 import { DOUClassifier } from '@/lib/dou-classifier';
 import { scrapeContent } from '@/lib/dou-scraper';
 import { prisma } from '@/lib/prisma';
+import { verifyCronAuth } from '@/lib/cron-auth';
 
 export const runtime = 'nodejs';
 export const maxDuration = 300; // 5 minutos (maximo para Vercel Pro)
@@ -56,14 +57,8 @@ export async function GET(request: NextRequest) {
 
   try {
     // Validar secret do cron (seguranca)
-    const cronSecret = request.headers.get('x-cron-secret');
-    if (cronSecret !== process.env.CRON_SECRET) {
-      console.error('[Cron DOU Staging] Secret invalido');
-      return NextResponse.json(
-        { error: 'Unauthorized - Invalid cron secret' },
-        { status: 401 }
-      );
-    }
+    const authError = verifyCronAuth(request);
+    if (authError) return authError;
 
     // Parametros da query string com validacao
     const { searchParams } = new URL(request.url);

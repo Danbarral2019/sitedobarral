@@ -2,26 +2,20 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { sendExpirationNotification } from '@/lib/email';
 import { shouldSendExpirationNotification } from '@/lib/enrollment-utils';
+import { verifyCronAuth } from '@/lib/cron-auth';
 
 
 /**
  * API para verificar matrículas próximas da expiração e enviar notificações
  * Esta rota deve ser chamada por um cron job (pode usar Vercel Cron, GitHub Actions, etc)
  *
- * Para segurança, requer um token de autorização
+ * Segurança: Requer Authorization: Bearer <CRON_SECRET>
  */
 export async function POST(request: NextRequest) {
   try {
     // Verificar token de autorização do cron
-    const authHeader = request.headers.get('authorization');
-    const cronSecret = process.env.CRON_SECRET || 'change-this-secret-in-production';
-
-    if (authHeader !== `Bearer ${cronSecret}`) {
-      return NextResponse.json(
-        { error: 'Não autorizado' },
-        { status: 401 }
-      );
-    }
+    const authError = verifyCronAuth(request);
+    if (authError) return authError;
 
     const now = new Date();
     const threeMonthsFromNow = new Date();

@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { sendEmail } from '@/lib/email';
 import { courses } from '@/data/courses';
+import { verifyCronAuth } from '@/lib/cron-auth';
 
 /**
  * API de Cron Job para enviar newsletter sobre novos conteúdos
@@ -15,15 +16,8 @@ import { courses } from '@/data/courses';
 export async function GET(request: NextRequest) {
   try {
     // Verificar autenticação do cron (segurança)
-    const authHeader = request.headers.get('authorization');
-    const cronSecret = process.env.CRON_SECRET;
-
-    if (cronSecret && authHeader !== `Bearer ${cronSecret}`) {
-      return NextResponse.json(
-        { error: 'Unauthorized' },
-        { status: 401 }
-      );
-    }
+    const authError = verifyCronAuth(request);
+    if (authError) return authError;
 
     console.log('📰 [NEWSLETTER] Iniciando envio de newsletter semanal...');
 

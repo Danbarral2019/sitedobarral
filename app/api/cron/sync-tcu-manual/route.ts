@@ -5,6 +5,7 @@ import {
   scrapeManualPage,
   fetchManualUpdateDate,
 } from '@/lib/tcu-manual-scraper';
+import { verifyCronAuth } from '@/lib/cron-auth';
 
 /**
  * Cron Job: Sincronização mensal do Manual TCU "Licitações & Contratos"
@@ -15,7 +16,7 @@ import {
  * Quick check: compara data de atualização do manual com a armazenada.
  * Se não mudou, encerra sem processar páginas individuais.
  *
- * Segurança: Requer CRON_SECRET ou Authorization header
+ * Segurança: Requer Authorization: Bearer <CRON_SECRET>
  * Agendamento: Mensal, dia 1 às 4h UTC (vercel.json)
  */
 
@@ -30,12 +31,8 @@ export const maxDuration = 300; // 5 minutes max for Vercel
 export async function GET(request: NextRequest) {
   try {
     // 1. Auth check
-    const cronSecret = request.headers.get('x-cron-secret');
-    const authHeader = request.headers.get('authorization');
-
-    if (cronSecret !== process.env.CRON_SECRET && authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
-      return NextResponse.json({ error: 'Acesso não autorizado' }, { status: 401 });
-    }
+    const authError = verifyCronAuth(request);
+    if (authError) return authError;
 
     console.log('[Sync TCU Manual] Iniciando sincronização...');
     const startTime = Date.now();

@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { sendInactivityReminderEmail } from '@/lib/email';
 import { courses } from '@/data/courses';
+import { verifyCronAuth } from '@/lib/cron-auth';
 
 /**
  * Cron Job: Lembrete de inatividade LMS
@@ -17,10 +18,8 @@ export const maxDuration = 60;
 
 export async function GET(request: NextRequest) {
   // Auth: CRON_SECRET
-  const authHeader = request.headers.get('authorization');
-  if (authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-  }
+  const authError = verifyCronAuth(request);
+  if (authError) return authError;
 
   const now = new Date();
   const sevenDaysAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);

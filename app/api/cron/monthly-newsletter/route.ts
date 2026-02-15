@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { Resend } from 'resend';
+import { verifyCronAuth } from '@/lib/cron-auth';
 
 /**
  * Cron Job: Newsletter Mensal de Documentos Novos
@@ -10,20 +11,14 @@ import { Resend } from 'resend';
  * - Agrupados por categoria (Acórdãos, ONs, Pareceres, etc.)
  * - Links para acesso na área restrita
  *
- * Segurança: Requer CRON_SECRET no header
+ * Segurança: Requer Authorization: Bearer <CRON_SECRET>
  * Agendamento: Configurado no vercel.json (mensal - dia 1 às 9h)
  */
 export async function GET(request: NextRequest) {
   try {
     // 1. Verificação de segurança
-    const cronSecret = request.headers.get('x-cron-secret');
-
-    if (cronSecret !== process.env.CRON_SECRET) {
-      return NextResponse.json(
-        { error: 'Acesso não autorizado' },
-        { status: 401 }
-      );
-    }
+    const authError = verifyCronAuth(request);
+    if (authError) return authError;
 
     console.log('[Cron Newsletter] Iniciando envio de newsletter mensal...');
 

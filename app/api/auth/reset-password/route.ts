@@ -1,8 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import bcrypt from 'bcryptjs';
-import jwt from 'jsonwebtoken';
-const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key-change-in-production';
+import { generateToken } from '@/lib/auth';
+import { handleApiError } from '@/lib/errors/error-handler';
+import { ValidationError } from '@/lib/errors/api-error';
+import { authLogger } from '@/lib/logger';
 
 export async function POST(request: NextRequest) {
   try {
@@ -10,17 +12,11 @@ export async function POST(request: NextRequest) {
     const { token, newPassword } = body;
 
     if (!token || !newPassword) {
-      return NextResponse.json(
-        { error: 'Token e nova senha são obrigatórios' },
-        { status: 400 }
-      );
+      throw new ValidationError('Token e nova senha são obrigatórios');
     }
 
     if (newPassword.length < 6) {
-      return NextResponse.json(
-        { error: 'A senha deve ter no mínimo 6 caracteres' },
-        { status: 400 }
-      );
+      throw new ValidationError('A senha deve ter no mínimo 6 caracteres');
     }
 
     // Buscar usuário pelo token
@@ -29,18 +25,12 @@ export async function POST(request: NextRequest) {
     });
 
     if (!user) {
-      return NextResponse.json(
-        { error: 'Token inválido ou expirado' },
-        { status: 400 }
-      );
+      throw new ValidationError('Token inválido ou expirado');
     }
 
     // Verificar se o token expirou
     if (user.resetPasswordExpiry && new Date() > user.resetPasswordExpiry) {
-      return NextResponse.json(
-        { error: 'Token expirado. Solicite um novo link de redefinição.' },
-        { status: 400 }
-      );
+      throw new ValidationError('Token expirado. Solicite um novo link de redefinição.');
     }
 
     // Hash da nova senha
@@ -56,16 +46,12 @@ export async function POST(request: NextRequest) {
       },
     });
 
-    // Auto-login após redefinição
-    const jwtToken = jwt.sign(
-      {
-        userId: user.id,
-        email: user.email,
-        role: user.role,
-      },
-      JWT_SECRET,
-      { expiresIn: '30d' }
-    );
+    // Auto-login após redefinição (usa módulo auth centralizado — sem segredos hardcoded)
+    const jwtToken = await generateToken({
+      userId: user.id,
+      email: user.email,
+      role: user.role as 'admin' | 'student',
+    });
 
     // Buscar usuário atualizado com enrollments
     const updatedUser = await prisma.user.findUnique({
@@ -92,8 +78,8 @@ export async function POST(request: NextRequest) {
     response.cookies.set('auth-token', jwtToken, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
-      sameSite: 'lax',
-      maxAge: 60 * 60 * 24 * 30, // 30 dias
+      sameSite: 'strict',
+      maxAge: 7 * 24 * 60 * 60, // 7 dias (alinhado com JWT)
       path: '/',
     });
 
@@ -108,15 +94,12 @@ export async function POST(request: NextRequest) {
         },
       });
     } catch (logError) {
-      console.error('Erro ao registrar log:', logError);
+      authLogger.error({ err: logError }, 'Erro ao registrar log de reset de senha');
     }
 
+    authLogger.info({ userId: user.id }, 'Senha redefinida com sucesso');
     return response;
   } catch (error) {
-    console.error('Reset password error:', error);
-    return NextResponse.json(
-      { error: 'Erro ao redefinir senha' },
-      { status: 500 }
-    );
+    return handleApiError(error);
   }
 }

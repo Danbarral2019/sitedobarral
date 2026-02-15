@@ -1,7 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
-import jwt from 'jsonwebtoken';
-const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key-change-in-production';
+import { generateToken } from '@/lib/auth';
+import { handleApiError } from '@/lib/errors/error-handler';
+import { ValidationError } from '@/lib/errors/api-error';
+import { authLogger } from '@/lib/logger';
 
 export async function POST(request: NextRequest) {
   try {
@@ -9,10 +11,7 @@ export async function POST(request: NextRequest) {
     const { token } = body;
 
     if (!token) {
-      return NextResponse.json(
-        { error: 'Token de verificação é obrigatório' },
-        { status: 400 }
-      );
+      throw new ValidationError('Token de verificação é obrigatório');
     }
 
     // Buscar usuário pelo token
@@ -21,18 +20,12 @@ export async function POST(request: NextRequest) {
     });
 
     if (!user) {
-      return NextResponse.json(
-        { error: 'Token inválido ou expirado' },
-        { status: 400 }
-      );
+      throw new ValidationError('Token inválido ou expirado');
     }
 
     // Verificar se o token expirou
     if (user.verificationExpiry && new Date() > user.verificationExpiry) {
-      return NextResponse.json(
-        { error: 'Token expirado. Solicite um novo email de verificação.' },
-        { status: 400 }
-      );
+      throw new ValidationError('Token expirado. Solicite um novo email de verificação.');
     }
 
     // Atualizar usuário para verificado
@@ -45,16 +38,12 @@ export async function POST(request: NextRequest) {
       },
     });
 
-    // Auto-login após verificação
-    const jwtToken = jwt.sign(
-      {
-        userId: user.id,
-        email: user.email,
-        role: user.role,
-      },
-      JWT_SECRET,
-      { expiresIn: '30d' }
-    );
+    // Auto-login após verificação (usa módulo auth centralizado — sem segredos hardcoded)
+    const jwtToken = await generateToken({
+      userId: user.id,
+      email: user.email,
+      role: user.role as 'admin' | 'student',
+    });
 
     // Buscar usuário atualizado com enrollments
     const updatedUser = await prisma.user.findUnique({
@@ -81,17 +70,14 @@ export async function POST(request: NextRequest) {
     response.cookies.set('auth-token', jwtToken, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
-      sameSite: 'lax',
-      maxAge: 60 * 60 * 24 * 30,
+      sameSite: 'strict',
+      maxAge: 7 * 24 * 60 * 60, // 7 dias (alinhado com JWT)
       path: '/',
     });
 
+    authLogger.info({ userId: user.id }, 'Email verificado com sucesso');
     return response;
   } catch (error) {
-    console.error('Verify email error:', error);
-    return NextResponse.json(
-      { error: 'Erro ao verificar email' },
-      { status: 500 }
-    );
+    return handleApiError(error);
   }
 }

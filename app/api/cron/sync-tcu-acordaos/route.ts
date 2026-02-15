@@ -3,6 +3,7 @@ import { prisma } from '@/lib/prisma';
 import { analyzeRelevanceTCU, suggestCoursesTCU } from '@/lib/tcu-module';
 import { LeiIndexer } from '@/lib/lei-indexer';
 import { identifyAndAlertHighlights } from '@/lib/tcu-highlight-analyzer';
+import { verifyCronAuth } from '@/lib/cron-auth';
 
 /**
  * Cron Job: Sincronização automática de acórdãos do TCU
@@ -231,12 +232,8 @@ async function enrichNewDocuments(docIds: string[]): Promise<{
 export async function GET(request: NextRequest) {
   try {
     // 1. Verificação de segurança
-    const cronSecret = request.headers.get('x-cron-secret');
-    const authHeader = request.headers.get('authorization');
-
-    if (cronSecret !== process.env.CRON_SECRET && authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
-      return NextResponse.json({ error: 'Acesso não autorizado' }, { status: 401 });
-    }
+    const authError = verifyCronAuth(request);
+    if (authError) return authError;
 
     console.log('[Sync TCU] Iniciando sincronização de acórdãos...');
     const startTime = Date.now();

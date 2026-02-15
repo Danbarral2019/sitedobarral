@@ -29,6 +29,7 @@ import { detectModifications } from '@/lib/dou-change-detector';
 import { scrapeContent } from '@/lib/dou-scraper';
 import { LeiIndexer } from '@/lib/lei-indexer';
 import { prisma } from '@/lib/prisma';
+import { verifyCronAuth } from '@/lib/cron-auth';
 
 export const runtime = 'nodejs';
 export const maxDuration = 300;
@@ -77,10 +78,8 @@ export async function GET(request: NextRequest) {
 
   try {
     // 1. Auth
-    const cronSecret = request.headers.get('x-cron-secret');
-    if (cronSecret !== process.env.CRON_SECRET) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
+    const authError = verifyCronAuth(request);
+    if (authError) return authError;
 
     const { searchParams } = new URL(request.url);
     const dryRun = searchParams.get('dryRun') === 'true';
