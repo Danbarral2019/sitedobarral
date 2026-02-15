@@ -207,7 +207,6 @@ export async function GET(request: NextRequest) {
     console.log('[Sync TCU Manual] Resultado:', result);
 
     return NextResponse.json({
-      success: true,
       message: `Sync Manual TCU: ${created} criados, ${updated} atualizados, ${unchanged} sem mudança`,
       ...result,
     });

@@ -11,6 +11,8 @@ import {
   Loader2,
   FolderOpen,
   Gavel,
+  HelpCircle,
+  Newspaper,
 } from 'lucide-react';
 import type { ContentTreeNode, ContentType, TreeSelection } from '@/lib/types/global-search';
 import { CONTENT_TYPE_CONFIG } from '@/lib/types/global-search';
@@ -30,6 +32,8 @@ const TYPE_ICONS: Record<ContentType, typeof FileText> = {
   'course-material': BookOpen,
   lei: Scale,
   glossary: BookOpen,
+  faq: HelpCircle,
+  blog: Newspaper,
   video: Video,
   site: Globe,
   'legislative-act': Gavel,

@@ -42,12 +42,11 @@ export async function PATCH(
       where: { id: questionId },
       data: {
         wasHelpful: body.wasHelpful,
-        updatedAt: new Date(),
       },
       select: {
         id: true,
         wasHelpful: true,
-        updatedAt: true,
+        createdAt: true,
       },
     });
 
@@ -58,7 +57,7 @@ export async function PATCH(
       questionId: updated.id,
       feedback: {
         wasHelpful: updated.wasHelpful,
-        updatedAt: updated.updatedAt.toISOString(),
+        updatedAt: updated.createdAt.toISOString(),
       },
     });
 

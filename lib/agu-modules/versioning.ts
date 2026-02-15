@@ -29,7 +29,7 @@ export interface FieldChange {
  */
 export async function detectChanges(
   existingDoc: Document,
-  newData: Partial<Document>
+  newData: Partial<Prisma.DocumentCreateInput>
 ): Promise<ChangeDetectionResult> {
   const changes: FieldChange[] = [];
 
@@ -248,7 +248,7 @@ export async function saveDocumentVersion(
  */
 export async function findOrCreateWithVersioning(
   uniqueIdentifier: { onNumber: number; onYear: number } | { title: string },
-  newData: Partial<Document>,
+  newData: Partial<Prisma.DocumentCreateInput>,
   detectedBy: string = 'scraper'
 ): Promise<{ document: Document; isNew: boolean; hasChanges: boolean }> {
   // Buscar documento existente

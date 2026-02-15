@@ -163,14 +163,8 @@ export default async function Home() {
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
               {acervoCounts.map((item) => {
                 const Icon = item.icon;
-                const Wrapper = item.href ? Link : 'div';
-                const wrapperProps = item.href ? { href: item.href } : {};
-                return (
-                  <Wrapper
-                    key={item.label}
-                    {...wrapperProps as Record<string, string>}
-                    className={`bg-white/10 backdrop-blur-sm rounded-xl p-5 text-center border border-white/10 hover:bg-white/15 transition-colors ${item.href ? 'cursor-pointer hover:border-white/30 hover:scale-[1.02] transition-all' : ''}`}
-                  >
+                const content = (
+                  <>
                     <Icon className="w-7 h-7 mx-auto mb-3 text-brand-200" />
                     <p className="text-3xl md:text-4xl font-bold text-white mb-1">
                       {item.count > 0 ? item.count.toLocaleString('pt-BR') : '--'}
@@ -178,7 +172,24 @@ export default async function Home() {
                     <p className="text-sm text-brand-200 font-poppins leading-tight">
                       {item.label}
                     </p>
-                  </Wrapper>
+                  </>
+                );
+                const baseClassName = `bg-white/10 backdrop-blur-sm rounded-xl p-5 text-center border border-white/10 hover:bg-white/15 transition-colors ${item.href ? 'cursor-pointer hover:border-white/30 hover:scale-[1.02] transition-all' : ''}`;
+                return item.href ? (
+                  <Link
+                    key={item.label}
+                    href={item.href}
+                    className={baseClassName}
+                  >
+                    {content}
+                  </Link>
+                ) : (
+                  <div
+                    key={item.label}
+                    className={baseClassName}
+                  >
+                    {content}
+                  </div>
                 );
               })}
             </div>

@@ -64,13 +64,19 @@ function getCategoryLabel(category: string): string {
 }
 
 // Configuração das categorias para o grid da Base de Conhecimento
-const KNOWLEDGE_BASE_CATEGORIES = [
+const KNOWLEDGE_BASE_CATEGORIES: Array<{
+  category: string;
+  label: string;
+  icon: typeof Scale;
+  color: string;
+  matchCategories?: readonly string[];
+}> = [
   { category: 'acordao', label: 'Acordaos TCU', icon: Scale, color: 'blue' },
   { category: 'pareceres', label: 'Pareceres', icon: FileText, color: 'purple', matchCategories: PARECER_CATEGORIES },
   { category: 'orientacao-normativa', label: 'Orientacoes Normativas', icon: BookOpen, color: 'green' },
   { category: 'enunciados', label: 'Enunciados', icon: List, color: 'amber' },
   { category: 'manual_tcu', label: 'Manual do TCU', icon: Book, color: 'teal' },
-] as const;
+];
 
 const CATEGORY_COLORS: Record<string, { bg: string; border: string; iconBg: string; text: string; hover: string }> = {
   blue: { bg: 'bg-blue-50', border: 'border-blue-200', iconBg: 'bg-blue-100', text: 'text-blue-700', hover: 'hover:border-blue-400 hover:shadow-md' },
@@ -706,8 +712,9 @@ export default function AreaRestritaPage() {
                     {currentContent.type === 'documents' && contentTree.selection && !contentTree.selection.category && (() => {
                       const allDocs = Object.values(courseDocuments).flat();
                       const categoriesWithCounts = KNOWLEDGE_BASE_CATEGORIES.map((cat) => {
-                        const count = cat.matchCategories
-                          ? allDocs.filter((d) => cat.matchCategories.includes(d.category)).length
+                        const mc = cat.matchCategories;
+                        const count = mc
+                          ? allDocs.filter((d) => mc.includes(d.category)).length
                           : allDocs.filter((d) => d.category === cat.category).length;
                         return { ...cat, count };
                       }).filter((cat) => cat.count > 0);

@@ -47,11 +47,13 @@ export async function GET(request: NextRequest) {
       // Filtra apenas documentos que ainda nao existem no banco
       const newAcordaos: AcordaoTCU[] = [];
       for (const acordao of tcuAcordaos) {
+        const acordaoUrl = acordao.urlArquivoPDF || acordao.urlArquivo || acordao.urlAcordao || '';
+        const acordaoTitle = `Acórdão TCU nº ${acordao.numeroAcordao}/${acordao.anoAcordao}`;
         const exists = await prisma.document.findFirst({
           where: {
             OR: [
-              { url: acordao.url },
-              { title: acordao.numero },
+              { url: acordaoUrl },
+              { title: acordaoTitle },
             ],
           },
         });
@@ -64,11 +66,13 @@ export async function GET(request: NextRequest) {
       // Importa automaticamente documentos novos
       // Nota: Documentos ficam como "nao revisados" para admin aprovar depois
       for (const acordao of newAcordaos) {
+        const importUrl = acordao.urlArquivoPDF || acordao.urlArquivo || acordao.urlAcordao || '';
+        const importTitle = `Acórdão TCU nº ${acordao.numeroAcordao}/${acordao.anoAcordao}`;
         await prisma.document.create({
           data: {
-            title: acordao.numero,
-            description: acordao.ementa || acordao.resumo || '',
-            url: acordao.url,
+            title: importTitle,
+            description: acordao.sumario || '',
+            url: importUrl,
             type: 'link',
             category: 'acordao',
             isPublic: false, // Privado ate admin revisar
@@ -85,7 +89,7 @@ export async function GET(request: NextRequest) {
               source: 'tcu-scraper',
               colegiado: acordao.colegiado,
               relator: acordao.relator,
-              dataPublicacao: acordao.dataPublicacao,
+              dataPublicacao: acordao.dataSessao,
             }),
           },
         });
@@ -112,7 +116,7 @@ export async function GET(request: NextRequest) {
         const exists = await prisma.document.findFirst({
           where: {
             OR: [
-              { url: on.pdfUrl },
+              { url: on.linkFundamentacao },
               { title: on.numero },
             ],
           },
@@ -128,8 +132,8 @@ export async function GET(request: NextRequest) {
         await prisma.document.create({
           data: {
             title: on.numero,
-            description: on.ementa || '',
-            url: on.pdfUrl,
+            description: on.descricao || '',
+            url: on.linkFundamentacao || '',
             type: 'pdf',
             category: 'orientacao-normativa',
             isPublic: false, // Privado ate admin revisar
@@ -139,12 +143,12 @@ export async function GET(request: NextRequest) {
             tags: JSON.stringify([
               'AGU',
               'Orientacao Normativa',
-              on.orgao || 'AGU',
+              'AGU',
             ]),
             aiClassification: JSON.stringify({
               source: 'agu-scraper',
-              orgao: on.orgao,
-              data: on.data,
+              orgao: 'AGU',
+              data: on.ano,
               onNumber: on.onNumber,
               onYear: on.onYear,
             }),

@@ -11,7 +11,7 @@
 
 import { ResourceListClient } from '@/components/admin/ResourceListClient';
 import { PaginatedResult } from '@/lib/types/admin-list';
-import { Testimonial } from '@prisma/client';
+import { Testimonial } from '@/lib/depoimentos';
 import { depoimentosConfig, DepoimentosHeader } from './config';
 
 interface DepoimentosClientProps {

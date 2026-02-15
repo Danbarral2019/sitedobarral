@@ -33,7 +33,7 @@ export async function GET(request: NextRequest) {
       id: doc.id,
       section: doc.section,
       title: doc.title,
-      publishDate: doc.publishDate.toISOString(),
+      publishDate: doc.publishDate,
       category: doc.category,
       confidence: doc.confidence,
       hierarchyStr: doc.hierarchyStr || '',

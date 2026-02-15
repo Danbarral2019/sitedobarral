@@ -2,6 +2,7 @@
  * Verifica quais artigos foram extraídos e quais estão faltando
  */
 
+// @ts-expect-error Module was renamed to .DISABLED to prevent accidental execution
 import { downloadLeiHTML, extractArticlesFromHTML } from './update-lei-14133-data-file';
 
 async function main() {
@@ -13,7 +14,7 @@ async function main() {
   const artigos = extractArticlesFromHTML(html);
 
   // Análise
-  const numerosExtraidos = artigos.map(a => parseInt(a.numero)).sort((a, b) => a - b);
+  const numerosExtraidos = artigos.map((a: { numero: string }) => parseInt(a.numero)).sort((a: number, b: number) => a - b);
   const todoNumeros = Array.from({ length: 193 }, (_, i) => i + 1);
   const faltando = todoNumeros.filter(n => !numerosExtraidos.includes(n));
 

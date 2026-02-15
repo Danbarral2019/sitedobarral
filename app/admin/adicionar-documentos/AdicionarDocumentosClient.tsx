@@ -43,7 +43,7 @@ interface RecentUpload {
   title: string;
   category: string;
   type: string;
-  courseId: string;
+  courseId: string | null;
   isPublic: boolean;
   uploadedAt: string;
   isCommon: boolean;
@@ -735,7 +735,7 @@ export default function AdicionarDocumentosClient({
                         <div>
                           <p className="font-medium text-gray-900">{doc.title}</p>
                           <p className="text-xs text-gray-500">
-                            {doc.category} | {doc.isCommon ? 'Comum' : getCourseTitle(doc.courseId)}
+                            {doc.category} | {doc.isCommon ? 'Comum' : getCourseTitle(doc.courseId || '')}
                           </p>
                         </div>
                       </div>

@@ -11,7 +11,7 @@ export const GET = withAdminAuth(async () => {
     const fileBuffer = await fs.readFile(templatePath);
 
     // Retornar como download
-    return new NextResponse(fileBuffer, {
+    return new NextResponse(new Uint8Array(fileBuffer), {
       headers: {
         'Content-Type': 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
         'Content-Disposition': 'attachment; filename="template-artigo-blog.docx"',

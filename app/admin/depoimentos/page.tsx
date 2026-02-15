@@ -34,14 +34,14 @@ export default async function DepoimentosPage({ searchParams }: PageProps) {
     ...testimonials,
     items: testimonials.items.map(t => ({
       ...t,
-      createdAt: t.createdAt.toISOString(),
+      createdAt: t.createdAt instanceof Date ? t.createdAt.toISOString() : String(t.createdAt),
     })),
   };
 
   // ✅ Passar dados prontos para Client
   return (
     <AdminLayout>
-      <DepoimentosClient initialData={serializedTestimonials} />
+      <DepoimentosClient initialData={serializedTestimonials as typeof testimonials} />
     </AdminLayout>
   );
 }

@@ -64,7 +64,7 @@ const periodLabels: Record<keyof GroupedQuestions, string> = {
 
 export default function HistoricoIAPage() {
   const router = useRouter();
-  const { user, loading: authLoading } = useAuth();
+  const { user, isLoading: authLoading } = useAuth();
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [data, setData] = useState<ApiResponse['data'] | null>(null);

@@ -222,7 +222,7 @@ export default function PDFExportPanel({ documents, userName, userEmail, favorit
                         {doc.title}
                       </h4>
                       {isFavorite && (
-                        <Heart className="w-4 h-4 text-red-600 fill-current flex-shrink-0" title="Favorito" />
+                        <Heart className="w-4 h-4 text-red-600 fill-current flex-shrink-0" aria-label="Favorito" />
                       )}
                     </div>
                     {doc.description && (

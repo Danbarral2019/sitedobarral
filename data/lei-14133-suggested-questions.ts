@@ -21,6 +21,9 @@ export const SUGGESTED_QUESTIONS: Record<string, string[]> = {
     'Quem são os agentes públicos responsáveis?',
     'Quais as responsabilidades do ordenador de despesas?',
     'O que é o agente de contratação?',
+    'Como incluir critérios de sustentabilidade?',
+    'O que são contratações sustentáveis?',
+    'Quais exigências ambientais posso fazer?',
   ],
 
   '12': [
@@ -34,6 +37,9 @@ export const SUGGESTED_QUESTIONS: Record<string, string[]> = {
     'Quais são as modalidades de licitação?',
     'Quando usar cada modalidade?',
     'O que mudou nas modalidades?',
+    'O que é o Plano de Contratações Anual?',
+    'Como elaborar o PCA?',
+    'Quando publicar o plano?',
   ],
 
   '28': [
@@ -46,6 +52,9 @@ export const SUGGESTED_QUESTIONS: Record<string, string[]> = {
     'O que é o pregão eletrônico?',
     'Como funciona o lance na disputa?',
     'Quais as vantagens do pregão?',
+    'O que é o diálogo competitivo?',
+    'Quando usar esta modalidade?',
+    'Como funciona a fase de diálogo?',
   ],
 
   // Critérios de Julgamento
@@ -91,6 +100,9 @@ export const SUGGESTED_QUESTIONS: Record<string, string[]> = {
     'Quais garantias podem ser exigidas?',
     'Qual o percentual da garantia?',
     'Quando a garantia é liberada?',
+    'O que é dispensa de licitação?',
+    'Quais os valores para dispensa?',
+    'Como justificar a dispensa?',
   ],
 
   '92': [
@@ -153,30 +165,10 @@ export const SUGGESTED_QUESTIONS: Record<string, string[]> = {
     'Quais os requisitos?',
   ],
 
-  '75': [
-    'O que é dispensa de licitação?',
-    'Quais os valores para dispensa?',
-    'Como justificar a dispensa?',
-  ],
-
-  // Planejamento
-  '18': [
-    'O que é o Plano de Contratações Anual?',
-    'Como elaborar o PCA?',
-    'Quando publicar o plano?',
-  ],
-
   '19': [
     'O que deve conter o estudo técnico?',
     'Como justificar a contratação?',
     'Quais riscos devem ser analisados?',
-  ],
-
-  // Sustentabilidade
-  '11': [
-    'Como incluir critérios de sustentabilidade?',
-    'O que são contratações sustentáveis?',
-    'Quais exigências ambientais posso fazer?',
   ],
 
   // Controle
@@ -229,13 +221,6 @@ export const SUGGESTED_QUESTIONS: Record<string, string[]> = {
     'Como fazer carona (adesão) na ata?',
     'Quais os limites de adesão?',
     'Precisa de autorização?',
-  ],
-
-  // Diálogo Competitivo
-  '32': [
-    'O que é o diálogo competitivo?',
-    'Quando usar esta modalidade?',
-    'Como funciona a fase de diálogo?',
   ],
 
   // Concurso

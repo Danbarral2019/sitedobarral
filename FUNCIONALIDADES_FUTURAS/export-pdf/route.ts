@@ -81,7 +81,7 @@ export async function POST(request: NextRequest) {
     // Função para adicionar marca d'água em todas as páginas
     const addWatermark = () => {
       pdf.saveGraphicsState();
-      pdf.setGState(new pdf.GState({ opacity: 0.1 }));
+      pdf.setGState(new (pdf.GState as any)({ opacity: 0.1 }));
       pdf.setFontSize(60);
       pdf.setTextColor(100, 100, 100);
       pdf.text(

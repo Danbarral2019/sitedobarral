@@ -68,8 +68,27 @@ export async function GET(request: NextRequest) {
 
     // Busca dados necessários (com fallback para arrays vazios em caso de erro)
     let documents = [];
-    let videos = [];
-    let siteToCourse = [];
+    let videos: {
+      id: string;
+      courseId: string;
+      title: string;
+      description: string | null;
+      youtubeUrl: string;
+      youtubeId: string | null;
+      thumbnailUrl: string | null;
+      displayOrder: number;
+    }[] = [];
+    let siteToCourse: {
+      courseId: string;
+      site: {
+        id: string;
+        title: string;
+        description: string | null;
+        url: string;
+        faviconUrl: string | null;
+        category: string | null;
+      };
+    }[] = [];
 
     // Buscar documentos (essencial - deve funcionar)
     // Inclui documentos específicos do curso E documentos comuns (isCommon=true)
@@ -215,7 +234,7 @@ export async function GET(request: NextRequest) {
     const truncatedDocs = documents.map(doc => ({
       ...doc,
       description: doc.description ? doc.description.substring(0, 120) : null,
-      tags: undefined, // Removido da listagem (economiza ~1 MB com 2k+ docs)
+      tags: null as string | null, // Removido da listagem (economiza ~1 MB com 2k+ docs)
     }));
 
     // Agrupar documentos

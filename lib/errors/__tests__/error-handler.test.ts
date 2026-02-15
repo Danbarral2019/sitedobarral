@@ -103,10 +103,9 @@ describe('error-handler', () => {
       const issues: ZodIssue[] = [{
         code: 'invalid_type',
         expected: 'string',
-        received: 'number',
         path: ['email'],
         message: 'Expected string, received number',
-      }];
+      } as ZodIssue];
       const zodError = new ZodError(issues);
 
       const response = handleApiError(zodError);
@@ -122,8 +121,8 @@ describe('error-handler', () => {
 
     it('deve formatar múltiplos issues do Zod', async () => {
       const issues: ZodIssue[] = [
-        { code: 'invalid_type', expected: 'string', received: 'undefined', path: ['name'], message: 'Required' },
-        { code: 'invalid_type', expected: 'string', received: 'number', path: ['email'], message: 'Not a string' },
+        { code: 'invalid_type', expected: 'string', path: ['name'], message: 'Required' } as ZodIssue,
+        { code: 'invalid_type', expected: 'string', path: ['email'], message: 'Not a string' } as ZodIssue,
       ];
       const zodError = new ZodError(issues);
 

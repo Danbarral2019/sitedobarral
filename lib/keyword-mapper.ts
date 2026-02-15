@@ -338,9 +338,6 @@ const KEYWORD_TO_ARTICLES: Record<string, Array<{ articles: string[], score: num
   ],
 
   // Recursos e soluções alternativas
-  'mediação': [
-    { articles: ['147'], score: 10, reason: 'Documento trata de mediação de conflitos' }
-  ],
   'conciliação': [
     { articles: ['147'], score: 10, reason: 'Documento trata de conciliação' }
   ],
@@ -382,9 +379,6 @@ const KEYWORD_TO_ARTICLES: Record<string, Array<{ articles: string[], score: num
   ],
   'homologação': [
     { articles: ['63'], score: 10, reason: 'Documento trata de homologação' }
-  ],
-  'proposta': [
-    { articles: ['47', '48', '51', '52', '53'], score: 7, reason: 'Documento trata de propostas' }
   ],
   'desclassificação': [
     { articles: ['53'], score: 10, reason: 'Documento trata de desclassificação de propostas' }
@@ -642,9 +636,6 @@ const KEYWORD_TO_ARTICLES: Record<string, Array<{ articles: string[], score: num
   ],
   'transição': [
     { articles: ['182', '183', '184'], score: 8, reason: 'Documento trata de normas transitórias' }
-  ],
-  'revogação': [
-    { articles: ['192'], score: 9, reason: 'Documento trata de leis revogadas' }
   ],
 };
 

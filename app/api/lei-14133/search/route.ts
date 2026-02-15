@@ -169,7 +169,7 @@ Regras:
 
     // Buscar documentos relevantes no banco de dados
     const articleNumbers = results.map(r => r.articleNumber);
-    const searchTerms = searchQuery.toLowerCase().split(/\s+/).filter(t => t.length > 2);
+    const searchTerms = searchQuery.toLowerCase().split(/\s+/).filter((t: string) => t.length > 2);
 
     // Buscar documentos vinculados aos artigos OU que contenham os termos de busca
     const documents = await prisma.document.findMany({
@@ -180,11 +180,11 @@ Regras:
             leiArticles: { contains: num }
           })),
           // Documentos que contenham termos de busca no título
-          ...searchTerms.map(term => ({
+          ...searchTerms.map((term: string) => ({
             title: { contains: term, mode: 'insensitive' as const }
           })),
           // Documentos que contenham termos de busca no resumo
-          ...searchTerms.map(term => ({
+          ...searchTerms.map((term: string) => ({
             summary: { contains: term, mode: 'insensitive' as const }
           })),
         ],
@@ -211,14 +211,14 @@ Regras:
         OR: [
           // Atos vinculados aos artigos encontrados
           ...articleNumbers.map(num => ({
-            linkedArticles: { contains: num }
+            leiArticles: { contains: num }
           })),
           // Atos que contenham termos de busca no título
-          ...searchTerms.map(term => ({
+          ...searchTerms.map((term: string) => ({
             title: { contains: term, mode: 'insensitive' as const }
           })),
           // Atos que contenham termos de busca na ementa
-          ...searchTerms.map(term => ({
+          ...searchTerms.map((term: string) => ({
             summary: { contains: term, mode: 'insensitive' as const }
           })),
         ],
@@ -229,7 +229,7 @@ Regras:
         type: true,
         fullNumber: true,
         summary: true,
-        linkedArticles: true,
+        leiArticles: true,
       },
       take: 5,
     });
@@ -259,8 +259,8 @@ Regras:
         };
       }),
       ...legislativeActs.map(act => {
-        const linkedArticles = act.linkedArticles ? act.linkedArticles.split(',').map(a => a.trim()) : [];
-        const matchedArticles = linkedArticles.filter(a => articleNumbers.includes(a));
+        const linkedArticles = act.leiArticles ? act.leiArticles.split(',').map((a: string) => a.trim()) : [];
+        const matchedArticles = linkedArticles.filter((a: string) => articleNumbers.includes(a));
 
         let relevance = '';
         if (matchedArticles.length > 0) {

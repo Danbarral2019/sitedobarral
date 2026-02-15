@@ -349,6 +349,8 @@ export function ResourceListClient<T extends { id: string }>({
                   currentPage={initialData.page}
                   totalPages={initialData.totalPages}
                   onPageChange={goToPage}
+                  itemsPerPage={initialData.pageSize}
+                  totalItems={initialData.total}
                 />
               </div>
             )}

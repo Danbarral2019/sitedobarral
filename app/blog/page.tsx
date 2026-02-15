@@ -1,6 +1,5 @@
 import Link from 'next/link';
 import { Calendar, Clock, ArrowRight } from 'lucide-react';
-import { BlogPost } from '@prisma/client';
 import type { Metadata } from 'next';
 import { getCachedPublishedBlogPosts } from '@/lib/cached-queries';
 import { getBlogPostBorderColor, getBlogPostTagColor } from '@/lib/course-colors';
@@ -49,7 +48,7 @@ export default async function BlogPage() {
     // Database unavailable (e.g. CI build)
   }
 
-  const publishedPosts = posts.map((post: BlogPost) => ({
+  const publishedPosts = posts.map((post) => ({
     ...post,
     publishedAt: new Date(post.publishedAt),
     tags: safeParseArray(post.tags)
@@ -89,7 +88,7 @@ export default async function BlogPage() {
           </div>
 
           <div className="space-y-8">
-            {publishedPosts.map((post: BlogPost & { tags: string[] }, index: number) => {
+            {publishedPosts.map((post, index: number) => {
               const borderColor = getBlogPostBorderColor(index);
 
               return (
@@ -125,7 +124,7 @@ export default async function BlogPage() {
                     </div>
                     <div className="flex items-center gap-1">
                       <Clock className="w-4 h-4" />
-                      <span>{calculateReadTime(post.content)}</span>
+                      <span>{calculateReadTime(post.excerpt)}</span>
                     </div>
                   </div>
 

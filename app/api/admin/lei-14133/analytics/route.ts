@@ -9,7 +9,7 @@ export async function GET(request: NextRequest) {
   try {
     // Verificar autenticação admin
     const authResult = await verifyAuth(request);
-    if (!authResult.valid || authResult.role !== 'admin') {
+    if (!authResult.valid || authResult.user?.role !== 'admin') {
       return NextResponse.json(
         { error: 'Acesso negado' },
         { status: 403 }
@@ -107,12 +107,8 @@ export async function GET(request: NextRequest) {
         createdAt: true,
         geminiLatency: true,
         geminiCached: true,
-        user: {
-          select: {
-            name: true,
-            email: true,
-          },
-        },
+        userId: true,
+        userEmail: true,
       },
       orderBy: {
         createdAt: 'desc',
@@ -194,10 +190,10 @@ export async function GET(request: NextRequest) {
     // Buscar dados dos usuários
     const topUsersWithDetails = await Promise.all(
       topUsers.map(async (u) => {
-        const user = await prisma.user.findUnique({
+        const user = u.userId ? await prisma.user.findUnique({
           where: { id: u.userId },
           select: { name: true, email: true },
-        });
+        }) : null;
         return {
           userId: u.userId,
           name: user?.name || 'Usuário Desconhecido',
@@ -263,8 +259,8 @@ export async function GET(request: NextRequest) {
         latency: q.geminiLatency,
         cached: q.geminiCached,
         user: {
-          name: q.user?.name || 'Anônimo',
-          email: q.user?.email || '',
+          name: q.userEmail || 'Anônimo',
+          email: q.userEmail || '',
         },
       })),
       questionsByDay,

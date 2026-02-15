@@ -219,8 +219,7 @@ export default function DocumentAnalyzer({
       {/* Dialog de Sugestões */}
       <Dialog
         open={dialogOpen}
-        onClose={() => setDialogOpen(false)}
-        title="Sugestões de Artigos da Lei 14.133/2021"
+        onOpenChange={(open) => { if (!open) setDialogOpen(false); }}
       >
         <div className="space-y-4">
           {suggestions.length === 0 ? (

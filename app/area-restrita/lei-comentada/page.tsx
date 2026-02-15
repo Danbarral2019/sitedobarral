@@ -342,7 +342,7 @@ function DocumentDetails({ documentId, documentType = 'document' }: { documentId
         <button
           onClick={() => {
             if (isLegislativeAct) {
-              toggleFavorite(documentId);
+              actFavorites.toggleFavorite(documentId);
             } else {
               docFavorites.toggleFavorite(documentId, document?.courseId || '');
             }
@@ -426,7 +426,7 @@ function LeiComentadaContent() {
   const [showAIResults, setShowAIResults] = useState(false);
 
   // Refs para scroll automático
-  const articleRefs = useRef<Record<string, HTMLDivElement | null>>({});
+  const articleRefs = useRef<Record<string, HTMLElement | null>>({});
 
   // 1. Carregar dados da API
   useEffect(() => {

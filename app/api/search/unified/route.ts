@@ -187,13 +187,14 @@ export async function POST(req: NextRequest) {
       }
 
       if (filters.dateFrom || filters.dateTo) {
-        documentWhere.uploadedAt = {};
+        const uploadedAtFilter: Record<string, Date> = {};
         if (filters.dateFrom) {
-          documentWhere.uploadedAt.gte = new Date(filters.dateFrom);
+          uploadedAtFilter.gte = new Date(filters.dateFrom);
         }
         if (filters.dateTo) {
-          documentWhere.uploadedAt.lte = new Date(filters.dateTo);
+          uploadedAtFilter.lte = new Date(filters.dateTo);
         }
+        documentWhere.uploadedAt = uploadedAtFilter;
       }
 
       // Public/private filter (non-admins can only see public or their enrolled courses)

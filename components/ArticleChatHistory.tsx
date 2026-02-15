@@ -11,6 +11,7 @@ interface HistoryMessage {
   wasHelpful: boolean | null;
   createdAt: string;
   conversationId: string;
+  user?: { name?: string; email?: string };
 }
 
 interface ArticleChatHistoryProps {

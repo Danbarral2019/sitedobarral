@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { withAdminAuth } from '@/lib/api-middleware';
 import { syncSubscribers, isMailChimpConfigured } from '@/lib/mailchimp';
+import { prisma } from '@/lib/prisma';
 
 
 /**

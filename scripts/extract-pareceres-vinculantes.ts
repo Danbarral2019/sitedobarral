@@ -169,7 +169,8 @@ function filterRelevantPareceres(pareceres: ParecerVinculante[], minScore: numbe
 }
 
 // Export para uso no script de importação
-export { ParecerVinculante, processExtractedPareceres, filterRelevantPareceres, analyzeRelevanceForLicitacoes };
+export type { ParecerVinculante };
+export { processExtractedPareceres, filterRelevantPareceres, analyzeRelevanceForLicitacoes };
 
 /**
  * INSTRUÇÕES PARA CLAUDE CODE:

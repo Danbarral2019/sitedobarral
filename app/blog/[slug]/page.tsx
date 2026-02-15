@@ -1,7 +1,6 @@
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
 import { ArrowLeft, Calendar, Clock, User, Tag } from 'lucide-react';
-import { BlogPost } from '@prisma/client';
 import { prisma } from '@/lib/prisma';
 import MarkdownContent from '@/components/MarkdownContent';
 import ShareButtons from '@/components/ShareButtons';
@@ -108,11 +107,11 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
   });
 
   const relatedPosts = relatedPostsData
-    .map((p: BlogPost) => ({
+    .map((p) => ({
       ...p,
       tags: safeParseArray(p.tags)
     }))
-    .filter((p: BlogPost & { tags: string[] }) => p.tags.some((tag: string) => post.tags.includes(tag)))
+    .filter((p) => p.tags.some((tag: string) => post.tags.includes(tag)))
     .slice(0, 3);
 
   return (
@@ -211,7 +210,7 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
             <div className="mt-12">
               <h2 className="text-2xl font-bold mb-6">Artigos Relacionados</h2>
               <div className="grid md:grid-cols-3 gap-6">
-                {relatedPosts.map((relatedPost: BlogPost & { tags: string[] }) => (
+                {relatedPosts.map((relatedPost) => (
                   <Link
                     key={relatedPost.id}
                     href={`/blog/${relatedPost.slug}`}

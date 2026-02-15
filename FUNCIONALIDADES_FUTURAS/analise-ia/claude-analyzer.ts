@@ -171,6 +171,7 @@ export async function analyzeWithClaude(
           sources: [
             {
               type: 'ai' as const,
+              reason: s.reason,
               details: s.reason
             }
           ]

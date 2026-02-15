@@ -87,9 +87,6 @@ export async function POST(req: NextRequest) {
         // R2 metadata (Fase 8)
         r2Key: body.r2Key,
         r2UploadedAt: new Date(),
-
-        // Gemini indexation (initially not indexed)
-        geminiIndexed: false,
       },
     });
 

@@ -16,6 +16,7 @@ interface RelatedTerm {
   term: string;
   slug: string;
   shortDef?: string;
+  category?: string;
 }
 
 async function getTermBySlug(slug: string) {

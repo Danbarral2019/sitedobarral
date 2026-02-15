@@ -4,6 +4,8 @@
  * Testa captura de erros e renderização de fallback.
  */
 
+/// <reference types="@testing-library/jest-dom/vitest" />
+
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { ErrorBoundary, SectionErrorBoundary } from '../ErrorBoundary';
@@ -14,7 +16,7 @@ const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
 
 
 // Componente com erro no render
-function BrokenComponent() {
+function BrokenComponent(): React.ReactNode {
   throw new Error('Component render error');
 }
 

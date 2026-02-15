@@ -52,7 +52,7 @@ export async function fetchTestimonialsPaginated(params: {
   ]);
 
   return {
-    items: testimonials,
+    items: testimonials as unknown as Testimonial[],
     total,
     page,
     pageSize,

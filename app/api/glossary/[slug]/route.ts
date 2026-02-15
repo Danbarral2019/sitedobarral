@@ -40,7 +40,7 @@ export async function GET(
     const enrichedData = await withCache(
       CacheKeys.glossaryTerms({ category: slug }),
       async () => {
-        let relatedTerms: { id: string; term: string; slug: string; shortDef: string | null; category: string }[] = [];
+        let relatedTerms: { id: string; term: string; slug: string; shortDef: string | null; category: string | null }[] = [];
         if (term.relatedTerms) {
           try {
             const relatedIds = JSON.parse(term.relatedTerms);

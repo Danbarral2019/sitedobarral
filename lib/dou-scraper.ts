@@ -94,7 +94,7 @@ export async function scrapeContent(url: string): Promise<DOUEnrichedContent | n
     // Extrair paragrafos do texto principal
     const container = textoDou.length > 0 ? textoDou : $('.materia, #materia');
     const paragrafos: string[] = [];
-    container.find('p').each((_, el) => {
+    container.find('p').each((_: number, el: cheerio.Element) => {
       const text = $(el).text().trim();
       if (text && !text.includes('Este conteudo nao substitui') && !text.includes('Este conte\u00FAdo n\u00E3o substitui')) {
         paragrafos.push(text);

@@ -33,6 +33,7 @@ interface UseAuthReturn {
   isEnrolledIn: (courseId: string) => boolean;
   getEnrollmentStatus: (courseId: string) => AccessStatus | null;
   hasActiveAccess: (courseId: string) => boolean;
+  activePlan: 'premium' | 'basico' | null;
 }
 
 export function useAuth(): UseAuthReturn {

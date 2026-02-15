@@ -293,6 +293,7 @@ export const CURSOS_KEYWORDS: Record<string, string[]> = {
 export const AGU_URLS: Record<AGUDocumentType, string> = {
   'orientacao-normativa': 'https://www.gov.br/agu/pt-br/composicao/cgu/cgu/onsagu',
   'parecer-vinculante': 'https://www.gov.br/agu/pt-br/composicao/cgu/cgu/pareceresvinculantes',
+  'parecer-conuni': 'https://www.gov.br/agu/pt-br/composicao/cgu/cgu/despachos-do-consultor-geral-da-uniao-decor',
   'sumula': 'https://www.gov.br/agu/pt-br/composicao/cgu/cgu/sumula',
   'modelo': 'https://www.gov.br/agu/pt-br/assuntos-1/modelos-de-convenios-licitacoes-e-contratos/modelos-de-licitacoes-e-contratos-1',
   'guia': 'https://www.gov.br/agu/pt-br/composicao/cgu/cgu/manuais',

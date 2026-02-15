@@ -333,24 +333,22 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
               }
 
               // Render menu item
-              const Icon = item.icon;
-              const active = isActive(item.path);
+              const Icon = item.icon!;
+              const active = isActive(item.path!);
 
               return (
                 <Link
                   key={item.path}
-                  href={item.path}
+                  href={item.path!}
                   onClick={() => setIsMobileMenuOpen(false)}
                   className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
-                    item.indent ? 'ml-4' : ''
-                  } ${
                     active
                       ? 'bg-white/20 text-white font-semibold'
                       : 'text-brand-100 hover:bg-brand-500 hover:text-white'
                   }`}
                   title={isCollapsed ? item.label : ''}
                 >
-                  <Icon className="w-4 h-4 flex-shrink-0" />
+                  {Icon && <Icon className="w-4 h-4 flex-shrink-0" />}
                   {!isCollapsed && (
                     <div className="flex items-center gap-2 flex-1">
                       <span>{item.label}</span>

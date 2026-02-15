@@ -75,7 +75,7 @@ export default function ArtigosIndexPage() {
     const search = articleSearch.toLowerCase();
     return allArticles.filter(art =>
       art.numero.includes(search) ||
-      art.titulo.toLowerCase().includes(search) ||
+      art.titulo?.toLowerCase().includes(search) ||
       art.ementa.toLowerCase().includes(search)
     ).sort((a, b) => parseInt(a.numero) - parseInt(b.numero));
   }, [articleSearch, artigos]);

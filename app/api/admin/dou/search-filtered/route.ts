@@ -1,6 +1,6 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { verifyAuth } from '@/lib/auth';
-import { searchLastWeek, searchLastMonth, DOUClient, DOUSearchParams } from '@/lib/dou-api';
+import { searchLastWeek, searchLastMonth, DOUClient, DOUSearchParams, DOUPeriod } from '@/lib/dou-api';
 import {
   DOUClassifier,
   AdvancedFilters,
@@ -10,7 +10,7 @@ import {
   RELEVANT_ORGAOS,
 } from '@/lib/dou-classifier';
 
-export async function POST(request: Request) {
+export async function POST(request: NextRequest) {
   try {
     // Verificar autenticação admin
     const authResult = await verifyAuth(request);
@@ -50,7 +50,7 @@ export async function POST(request: Request) {
       const params: DOUSearchParams = {
         searchTerm: searchTerm || 'licitação',
         sections: sections.length > 0 ? sections : undefined,
-        period: 'personalizado' as 'hoje' | 'semana' | 'mes' | 'personalizado',
+        period: DOUPeriod.PERSONALIZADO,
         publishFrom: new Date(dateFrom).toLocaleDateString('pt-BR').split('/').reverse().join('-'),
         publishTo: new Date(dateTo).toLocaleDateString('pt-BR').split('/').reverse().join('-'),
         maxResults: maxResults || 100,

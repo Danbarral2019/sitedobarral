@@ -5,8 +5,8 @@
  */
 
 import { extractText, normalizeText } from '@/lib/text-extractor';
-import { findArticleMatches, detectArticleRanges, type ArticleMatch } from './article-matcher';
-import { findKeywordMatches, type KeywordMatch } from './keyword-mapper';
+import { findArticleMatches, detectArticleRanges, type ArticleMatch } from '@/lib/article-matcher';
+import { findKeywordMatches, type KeywordMatch } from '@/lib/keyword-mapper';
 import { getLeiArticle } from '@/data/lei-14133-artigos';
 import { analyzeWithClaude, shouldUseClaude } from './claude-analyzer';
 

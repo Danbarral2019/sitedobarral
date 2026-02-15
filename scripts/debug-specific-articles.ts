@@ -2,6 +2,7 @@
  * Debug de artigos específicos que não foram extraídos
  */
 
+// @ts-expect-error Module was renamed to .DISABLED to prevent accidental execution
 import { downloadLeiHTML } from './update-lei-14133-data-file';
 
 async function debugArticles(numeros: number[]) {

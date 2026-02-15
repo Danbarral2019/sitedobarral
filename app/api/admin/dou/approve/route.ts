@@ -130,9 +130,9 @@ export async function POST(request: NextRequest) {
 
     // 6. Executar aprovação ou rejeição
     if (action === 'approve') {
-      return await handleApproval(stagingDoc, courseIds, adminEmail, adminNotes, importType, metadata);
+      return await handleApproval(stagingDoc, courseIds, adminEmail || '', adminNotes, importType, metadata);
     } else {
-      return await handleRejection(stagingDoc, adminEmail, adminNotes);
+      return await handleRejection(stagingDoc, adminEmail || '', adminNotes);
     }
 
   } catch (error) {

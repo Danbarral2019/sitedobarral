@@ -8,18 +8,9 @@ export default defineConfig({
     environment: 'jsdom',
     setupFiles: ['./test/setup.ts'],
     globals: true,
-    // Usar ambiente node para testes de API, JWT, rate-limit, error-handler, DOU
-    environmentMatchGlobs: [
-      ['lib/__tests__/auth.test.ts', 'node'],
-      ['lib/__tests__/rate-limit.test.ts', 'node'],
-      ['lib/__tests__/validation-helper.test.ts', 'node'],
-      ['lib/__tests__/dou-*.test.ts', 'node'],
-      ['lib/__tests__/search-utils.test.ts', 'node'],
-      ['lib/__tests__/enrollment-utils.test.ts', 'node'],
-      ['lib/errors/__tests__/*.test.ts', 'node'],
-      ['lib/embeddings/__tests__/*.test.ts', 'node'],
-      ['app/api/**/*.test.ts', 'node'],
-    ],
+    // Em Vitest 4, environmentMatchGlobs foi removido.
+    // Testes que precisam de ambiente node devem usar o docblock:
+    // // @vitest-environment node
     coverage: {
       provider: 'v8',
       reporter: ['text', 'json', 'html'],

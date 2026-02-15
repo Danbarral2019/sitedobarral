@@ -54,7 +54,7 @@ export async function addDocument(
     type: dbDocument.type as 'pdf' | 'doc' | 'link' | 'video',
     url: dbDocument.url,
     category: dbDocument.category as 'apostila' | 'acordao' | 'parecer' | 'edital' | 'artigo' | 'outro',
-    courseId: dbDocument.courseId,
+    courseId: dbDocument.courseId ?? '',
     isPublic: dbDocument.isPublic,
     tags: safeParseArray(dbDocument.tags),
     leiArticles: safeParseArray(dbDocument.leiArticles),
@@ -232,7 +232,7 @@ export async function getDocumentsByCourse(courseId: string): Promise<{
     type: doc.type as 'pdf' | 'doc' | 'link' | 'video',
     url: doc.url,
     category: doc.category as 'apostila' | 'acordao' | 'parecer' | 'edital' | 'artigo' | 'outro',
-    courseId: doc.courseId,
+    courseId: doc.courseId ?? '',
     isPublic: doc.isPublic,
     tags: safeParseArray(doc.tags),
     leiArticles: safeParseArray(doc.leiArticles),
@@ -265,7 +265,7 @@ export async function getDocumentById(id: string): Promise<Document | null> {
     type: doc.type as 'pdf' | 'doc' | 'link' | 'video',
     url: doc.url,
     category: doc.category as 'apostila' | 'acordao' | 'parecer' | 'edital' | 'artigo' | 'outro',
-    courseId: doc.courseId,
+    courseId: doc.courseId ?? '',
     isPublic: doc.isPublic,
     tags: safeParseArray(doc.tags),
     leiArticles: safeParseArray(doc.leiArticles),
@@ -320,7 +320,7 @@ export async function updateDocument(
       type: doc.type as 'pdf' | 'doc' | 'link' | 'video',
       url: doc.url,
       category: doc.category as 'apostila' | 'acordao' | 'parecer' | 'edital' | 'artigo' | 'outro',
-      courseId: doc.courseId,
+      courseId: doc.courseId ?? '',
       isPublic: doc.isPublic,
       tags: safeParseArray(doc.tags),
       leiArticles: safeParseArray(doc.leiArticles),
@@ -411,7 +411,11 @@ export async function fetchPendingDocuments(filters: {
     },
   });
 
-  return documents;
+  return documents.map(doc => ({
+    ...doc,
+    courseId: doc.courseId ?? undefined,
+    douData: doc.douData ? doc.douData.toISOString() : null,
+  }));
 }
 
 /**
@@ -516,7 +520,11 @@ export async function fetchPendingDocumentsPaginated(params: {
   ]);
 
   return {
-    items: documents,
+    items: documents.map(doc => ({
+      ...doc,
+      courseId: doc.courseId ?? undefined,
+      douData: doc.douData ? doc.douData.toISOString() : null,
+    })),
     total,
     page,
     pageSize,

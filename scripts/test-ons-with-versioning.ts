@@ -68,7 +68,7 @@ async function main() {
 
     console.log('\n   Versões por tipo de mudança:');
     for (const stat of versionsByType) {
-      console.log(`   - ${stat.changeType}: ${stat._count._count}`);
+      console.log(`   - ${stat.changeType}: ${(stat as any)._count}`);
     }
 
     // PASSO 4: Exemplos de documentos versionados

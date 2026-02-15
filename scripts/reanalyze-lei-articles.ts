@@ -190,7 +190,7 @@ async function main() {
         category: la.type,
         tags: null,
         content: la.content,
-        description: la.ementa || la.summary,
+        description: la.ementa || la.summary || null,
         leiArticles: la.leiArticles,
         source: 'LegislativeAct',
       });
@@ -235,10 +235,10 @@ async function main() {
           {
             id: doc.id,
             title: doc.title,
-            category: doc.category,
-            tags: doc.tags,
-            content: doc.content,
-            description: doc.description,
+            category: doc.category ?? '',
+            tags: doc.tags ?? null,
+            content: doc.content ?? '',
+            description: doc.description ?? '',
           },
           {
             minConfidence: 30,

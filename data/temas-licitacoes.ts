@@ -28,7 +28,7 @@ export function getThemesForArticles(articles: string[]): TemaLicitacao[] {
   const themes = new Set<TemaLicitacao>();
   for (const art of articles) {
     for (const tema of TEMAS_LICITACOES) {
-      if (tema.articles.includes(art)) {
+      if ((tema.articles as readonly string[]).includes(art)) {
         themes.add(tema.value);
       }
     }

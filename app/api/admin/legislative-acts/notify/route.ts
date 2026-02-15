@@ -168,7 +168,7 @@ export async function POST(request: NextRequest) {
 
     // Modo de teste: envia apenas para o admin
     if (testMode) {
-      const testEmail = adminCheck.user.email;
+      const testEmail = adminCheck.user.email || '';
       const html = generateEmailHTML(adminCheck.user.name || 'Admin');
 
       const success = await sendEmail({

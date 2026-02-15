@@ -99,7 +99,7 @@ export async function POST(
 
     // Buscar artigos relacionados da Lei 14.133
     const relatedArticles = relatedArticleNumbers
-      .map(num => ({ numero: num, ...LEI_14133_ARTIGOS[num] }))
+      .map(num => ({ ...LEI_14133_ARTIGOS[num] }))
       .filter(art => art.ementa); // Filtrar apenas artigos que existem
 
     // Buscar documentos dos artigos relacionados (se houver)

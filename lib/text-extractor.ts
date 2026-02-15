@@ -39,7 +39,7 @@ export async function extractTextFromPDF(fileBuffer: Buffer): Promise<TextExtrac
     return {
       success: true,
       text: result.text || '',
-      pageCount: result.numPages,
+      pageCount: (result as unknown as { numPages?: number }).numPages,
       method: 'pdf-parse',
     };
 

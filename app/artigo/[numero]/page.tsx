@@ -258,7 +258,7 @@ export default function ArtigoPage() {
                   {/* Preview das Categorias */}
                   <div className="mb-6 grid grid-cols-2 md:grid-cols-4 gap-3">
                     {(() => {
-                      const categories = {};
+                      const categories: Record<string, number> = {};
                       publicDocuments.forEach(doc => {
                         categories[doc.category] = (categories[doc.category] || 0) + 1;
                       });
@@ -274,7 +274,7 @@ export default function ArtigoPage() {
 
                       return Object.entries(categories).map(([cat, count]) => (
                         <div key={cat} className="bg-white/20 backdrop-blur-sm rounded-lg p-3 text-center">
-                          <div className="text-2xl font-bold">{count}</div>
+                          <div className="text-2xl font-bold">{count as number}</div>
                           <div className="text-xs text-white/90">{categoryNames[cat] || cat}</div>
                         </div>
                       ));

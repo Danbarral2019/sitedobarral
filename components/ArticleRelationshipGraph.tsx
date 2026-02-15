@@ -475,12 +475,14 @@ export function ArticleRelationshipGraph({
             nodePointerAreaPaint={nodePointerAreaPaint}
             nodeLabel={nodeLabel}
             onRenderFramePre={onRenderFramePre}
-            linkColor={(link: GraphLink) => {
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            linkColor={(link: any) => {
               const str = typeof link.strength === 'number' ? link.strength : 25;
               const opacity = Math.max(0.15, str / 150);
               return `rgba(148, 163, 184, ${opacity})`;
             }}
-            linkWidth={(link: GraphLink) => {
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            linkWidth={(link: any) => {
               const str = typeof link.strength === 'number' ? link.strength : 25;
               return Math.max(0.5, str / 30);
             }}

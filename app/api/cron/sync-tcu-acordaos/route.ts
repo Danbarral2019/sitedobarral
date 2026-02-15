@@ -389,7 +389,6 @@ export async function GET(request: NextRequest) {
     console.log('[Sync TCU] Resultado:', result);
 
     return NextResponse.json({
-      success: true,
       message: `Sincronização TCU: ${imported} importados, ${enrichment.summaries} resumos, ${enrichment.leiIndexed} Lei-indexed`,
       ...result,
     });

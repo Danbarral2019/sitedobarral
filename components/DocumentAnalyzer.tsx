@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { Sparkles, Loader2, CheckCircle2, AlertCircle, Info, FileText, Hash, Tag } from 'lucide-react';
-import { Dialog } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import type { ArticleSuggestion } from '@/lib/document-analyzer';
 
 interface DocumentAnalyzerProps {
@@ -219,9 +219,12 @@ export default function DocumentAnalyzer({
       {/* Dialog de Sugestões */}
       <Dialog
         open={dialogOpen}
-        onClose={() => setDialogOpen(false)}
-        title="Sugestões de Artigos da Lei 14.133/2021"
+        onOpenChange={setDialogOpen}
       >
+        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Sugestões de Artigos da Lei 14.133/2021</DialogTitle>
+          </DialogHeader>
         <div className="space-y-4">
           {suggestions.length === 0 ? (
             <div className="text-center py-8 text-gray-500">
@@ -363,6 +366,7 @@ export default function DocumentAnalyzer({
             </>
           )}
         </div>
+        </DialogContent>
       </Dialog>
     </>
   );

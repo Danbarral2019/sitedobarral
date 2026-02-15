@@ -38,7 +38,7 @@ export const GET = withAdminAuth(async (
     }
 
     // Busca documentos relacionados se existirem
-    let relatedDocs = [];
+    let relatedDocs: { id: string; title: string; category: string }[] = [];
     if (document.notesRelatedDocs) {
       try {
         const relatedIds = JSON.parse(document.notesRelatedDocs);

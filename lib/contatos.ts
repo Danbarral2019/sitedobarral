@@ -52,7 +52,7 @@ export async function fetchContactFormsPaginated(params: {
   ]);
 
   return {
-    items: contacts,
+    items: contacts as unknown as ContactForm[],
     total,
     page,
     pageSize,

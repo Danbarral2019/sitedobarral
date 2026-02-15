@@ -4,6 +4,8 @@
  * Testa navegacao entre abas e estado.
  */
 
+/// <reference types="@testing-library/jest-dom/vitest" />
+
 import { describe, it, expect, vi } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { Tabs, TabList, Tab, TabPanel } from '../Tabs';

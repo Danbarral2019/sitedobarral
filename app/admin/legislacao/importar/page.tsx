@@ -224,7 +224,7 @@ export default function ImportarLegislacaoPage() {
             <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
               <div className="bg-blue-50 border-2 border-blue-200 rounded-lg p-4">
                 <div className="text-sm font-medium text-blue-700 mb-1">Total Processado</div>
-                <div className="text-3xl font-bold text-blue-900">{results.total}</div>
+                <div className="text-3xl font-bold text-blue-900">{results.success + results.failed}</div>
               </div>
 
               <div className="bg-green-50 border-2 border-green-200 rounded-lg p-4">
@@ -232,12 +232,12 @@ export default function ImportarLegislacaoPage() {
                   <CheckCircle className="w-4 h-4" />
                   Importados
                 </div>
-                <div className="text-3xl font-bold text-green-900">{results.imported}</div>
+                <div className="text-3xl font-bold text-green-900">{results.success}</div>
               </div>
 
               <div className="bg-yellow-50 border-2 border-yellow-200 rounded-lg p-4">
                 <div className="text-sm font-medium text-yellow-700 mb-1">Ignorados</div>
-                <div className="text-3xl font-bold text-yellow-900">{results.skipped}</div>
+                <div className="text-3xl font-bold text-yellow-900">0</div>
                 <div className="text-xs text-yellow-600">Duplicatas</div>
               </div>
 
@@ -246,12 +246,12 @@ export default function ImportarLegislacaoPage() {
                   <XCircle className="w-4 h-4" />
                   Erros
                 </div>
-                <div className="text-3xl font-bold text-red-900">{results.errors}</div>
+                <div className="text-3xl font-bold text-red-900">{results.failed}</div>
               </div>
             </div>
 
             {/* Mensagem de Sucesso */}
-            {results.imported > 0 && (
+            {results.success > 0 && (
               <div className="bg-green-50 border-2 border-green-200 rounded-xl p-6">
                 <div className="flex items-center gap-3 mb-2">
                   <CheckCircle className="w-8 h-8 text-green-600" />
@@ -260,7 +260,7 @@ export default function ImportarLegislacaoPage() {
                   </h3>
                 </div>
                 <p className="text-green-800">
-                  {results.imported} ato(s) normativo(s) foram importados para o banco de dados.
+                  {results.success} ato(s) normativo(s) foram importados para o banco de dados.
                 </p>
               </div>
             )}

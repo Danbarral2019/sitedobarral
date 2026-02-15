@@ -80,7 +80,6 @@ export default function EditGlossaryTermPage() {
           category: data.term.category,
           leiArticles: parseLeiArticles(data.term.leiArticles),
           relatedTerms: parseRelatedTerms(data.term.relatedTerms),
-          order: data.term.order,
           isPublished: data.term.isPublished,
         });
       } else {

@@ -53,8 +53,8 @@ export async function POST(request: NextRequest) {
             plan,
             courseId: courseId || null,
             status: stripeSubscription.status,
-            currentPeriodStart: new Date(stripeSubscription.current_period_start * 1000),
-            currentPeriodEnd: new Date(stripeSubscription.current_period_end * 1000),
+            currentPeriodStart: new Date(stripeSubscription.items.data[0].current_period_start * 1000),
+            currentPeriodEnd: new Date(stripeSubscription.items.data[0].current_period_end * 1000),
           },
         });
 
@@ -67,7 +67,7 @@ export async function POST(request: NextRequest) {
 
       case 'invoice.paid': {
         const invoice = event.data.object;
-        const subscriptionId = invoice.subscription as string;
+        const subscriptionId = invoice.parent?.subscription_details?.subscription as string;
 
         if (!subscriptionId) break;
 
@@ -77,8 +77,8 @@ export async function POST(request: NextRequest) {
           where: { stripeSubscriptionId: subscriptionId },
           data: {
             status: 'active',
-            currentPeriodStart: new Date(stripeSubscription.current_period_start * 1000),
-            currentPeriodEnd: new Date(stripeSubscription.current_period_end * 1000),
+            currentPeriodStart: new Date(stripeSubscription.items.data[0].current_period_start * 1000),
+            currentPeriodEnd: new Date(stripeSubscription.items.data[0].current_period_end * 1000),
           },
         });
 
@@ -88,7 +88,7 @@ export async function POST(request: NextRequest) {
 
       case 'invoice.payment_failed': {
         const invoice = event.data.object;
-        const subscriptionId = invoice.subscription as string;
+        const subscriptionId = invoice.parent?.subscription_details?.subscription as string;
 
         if (!subscriptionId) break;
 
@@ -109,8 +109,8 @@ export async function POST(request: NextRequest) {
           data: {
             status: subscription.status,
             cancelAtPeriodEnd: subscription.cancel_at_period_end,
-            currentPeriodStart: new Date(subscription.current_period_start * 1000),
-            currentPeriodEnd: new Date(subscription.current_period_end * 1000),
+            currentPeriodStart: new Date(subscription.items.data[0].current_period_start * 1000),
+            currentPeriodEnd: new Date(subscription.items.data[0].current_period_end * 1000),
           },
         });
 

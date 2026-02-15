@@ -166,7 +166,7 @@ export const POST = withAdminAuth(async (request: NextRequest) => {
       if (!existingMap.has(key)) {
         existingMap.set(key, new Set());
       }
-      existingMap.get(key)!.add(doc.courseId);
+      if (doc.courseId) existingMap.get(key)!.add(doc.courseId);
     }
 
     // 4. Importa cada acórdão para cada curso sugerido
@@ -201,7 +201,7 @@ export const POST = withAdminAuth(async (request: NextRequest) => {
           }
 
           // Usa descrição customizada se fornecida, senão usa a original
-          const finalDescription = doc.customDescription || doc.description;
+          const finalDescription = (doc as Record<string, unknown>).customDescription as string || doc.description;
 
           // Cria documento
           const created = await addDocument(
@@ -220,7 +220,7 @@ export const POST = withAdminAuth(async (request: NextRequest) => {
             doc.acordaoAno, // onYear
             undefined, // entityType
             undefined, // enunciadoNumber
-            doc.notes || undefined // notes
+            (doc as Record<string, unknown>).notes as string || undefined // notes
           );
 
           createdDocuments.push(created);
@@ -241,7 +241,7 @@ export const POST = withAdminAuth(async (request: NextRequest) => {
     }
 
     // 5. Gera estatísticas finais
-    const stats = generateImportStats(acordaos);
+    const stats = generateImportStats(selectedAcordaos || []);
 
     console.log(`[TCU Import API] Importação concluída: ${successCount} criados, ${skippedCount} pulados, ${errorCount} erros`);
 

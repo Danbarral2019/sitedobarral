@@ -5,6 +5,8 @@
  * Configura matchers do jest-dom, cleanup automático e variáveis de ambiente.
  */
 
+/// <reference types="@testing-library/jest-dom/vitest" />
+
 import { expect, afterEach, vi } from 'vitest';
 import { cleanup } from '@testing-library/react';
 import * as matchers from '@testing-library/jest-dom/matchers';
@@ -26,7 +28,7 @@ afterEach(() => {
 
 // Mock de variáveis de ambiente para testes
 process.env.JWT_SECRET = 'test-secret-key-for-jwt-signing-minimum-32-chars';
-process.env.NODE_ENV = 'test';
+(process.env as Record<string, string>).NODE_ENV = 'test';
 process.env.NEXT_PUBLIC_BASE_URL = 'http://localhost:3000';
 
 // Mock do logger para não poluir output dos testes
@@ -84,8 +86,5 @@ vi.mock('@/lib/prisma', () => ({
   },
 }));
 
-// Declaração de tipos para TypeScript reconhecer os matchers do jest-dom
-declare module 'vitest' {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-empty-object-type
-  interface Assertion<T = any> extends jest.Matchers<void, T> {}
-}
+// Tipos dos matchers do jest-dom são providos via:
+// /// <reference types="@testing-library/jest-dom/vitest" /> (no topo deste arquivo)

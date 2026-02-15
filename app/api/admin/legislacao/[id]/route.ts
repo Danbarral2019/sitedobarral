@@ -7,8 +7,8 @@ export async function DELETE(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const user = await verifyAuth(request);
-    if (!user || user.role !== 'admin') {
+    const authResult = await verifyAuth(request);
+    if (!authResult.valid || authResult.user?.role !== 'admin') {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
     const { id } = await params;

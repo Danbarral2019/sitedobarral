@@ -783,21 +783,11 @@ export default function DocumentosPage() {
         open={previewOpen}
         onOpenChange={setPreviewOpen}
         document={documentToPreview ? {
-          id: documentToPreview.id,
           title: documentToPreview.title,
           description: documentToPreview.description,
           type: documentToPreview.type,
           url: documentToPreview.url,
-          category: documentToPreview.category,
-          courseId: documentToPreview.courseId || '',
-          isPublic: documentToPreview.isPublic,
-          leiArticles: documentToPreview.leiArticles,
           size: documentToPreview.size,
-          uploadedAt: documentToPreview.uploadedAt,
-          reviewed: documentToPreview.reviewed,
-          reviewedAt: documentToPreview.reviewedAt,
-          entityType: documentToPreview.entityType,
-          enunciadoNumber: documentToPreview.enunciadoNumber,
         } : null}
       />
 

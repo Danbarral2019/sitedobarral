@@ -78,7 +78,7 @@ export const POST = withAdminAuth(async (request: NextRequest) => {
         const fileName = `${uniqueId}-${file.name}`;
 
         // Define o caminho de upload
-        const uploadDir = join(process.cwd(), 'public', 'uploads', document.courseId);
+        const uploadDir = join(process.cwd(), 'public', 'uploads', document.courseId || 'common');
         const filePath = join(uploadDir, fileName);
 
         // Cria o diretório se não existir
@@ -90,7 +90,7 @@ export const POST = withAdminAuth(async (request: NextRequest) => {
         await writeFile(filePath, buffer);
 
         // URL relativa do arquivo
-        const fileUrl = `/uploads/${document.courseId}/${fileName}`;
+        const fileUrl = `/uploads/${document.courseId || 'common'}/${fileName}`;
 
         // Atualiza o documento com a nova URL e tamanho
         await updateDocument(document.id, {

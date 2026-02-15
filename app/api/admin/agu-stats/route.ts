@@ -34,9 +34,9 @@ export const GET = withAdminAuth(async () => {
       where: {
         category: { in: aguCategories },
       },
-      orderBy: { createdAt: 'desc' },
+      orderBy: { uploadedAt: 'desc' },
       select: {
-        createdAt: true,
+        uploadedAt: true,
         category: true,
         title: true,
       },
@@ -59,7 +59,7 @@ export const GET = withAdminAuth(async () => {
       totalDocuments: counts.reduce((sum, c) => sum + c.count, 0),
       lastImport: lastImported
         ? {
-            date: lastImported.createdAt,
+            date: lastImported.uploadedAt,
             category: lastImported.category,
             title: lastImported.title,
           }

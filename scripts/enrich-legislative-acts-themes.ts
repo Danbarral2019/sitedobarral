@@ -66,7 +66,7 @@ function getThemesFromArticles(articles: string[]): string[] {
   const themes = new Set<string>();
   for (const art of articles) {
     for (const tema of TEMAS_LICITACOES) {
-      if (tema.articles.includes(art)) {
+      if ((tema.articles as readonly string[]).includes(art)) {
         themes.add(tema.value);
       }
     }

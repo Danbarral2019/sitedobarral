@@ -93,6 +93,7 @@ export async function GET(request: NextRequest) {
         console.log(`📚 [CRON] Processando ${courseDocuments.length} documento(s) do curso: ${course.title}`);
 
         // Buscar alunos matriculados neste curso
+        if (!courseId) continue; // Skip documents without courseId
         const enrollments = await prisma.enrollment.findMany({
           where: {
             courseId,

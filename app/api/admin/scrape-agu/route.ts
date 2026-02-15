@@ -255,7 +255,7 @@ export const POST = withAdminAuth(async (request: NextRequest) => {
       if (!existingByUrlAndCourse.has(key)) {
         existingByUrlAndCourse.set(key, new Set());
       }
-      existingByUrlAndCourse.get(key)!.add(doc.courseId);
+      existingByUrlAndCourse.get(key)!.add(doc.courseId || '');
     }
 
     // 5. Importa cada documento para cada curso (em lotes para não sobrecarregar)
@@ -313,7 +313,7 @@ export const POST = withAdminAuth(async (request: NextRequest) => {
             doc.title,
             doc.description,
             'link', // Tipo: link (pois são URLs externas)
-            doc.category,
+            doc.category as 'apostila' | 'acordao' | 'parecer' | 'edital' | 'artigo' | 'orientacao-normativa' | 'enunciados' | 'outro',
             makePublic,
             doc.url,
             undefined, // size (não aplicável para links)

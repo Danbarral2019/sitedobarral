@@ -202,8 +202,7 @@ export async function getUserGamificationData(userId: string, courseId: string) 
   return {
     badges: badges.map(b => ({
       id: b.id,
-      type: b.type,
-      ...(BADGE_TYPES[b.type as BadgeType] || { label: b.type, icon: '\u{1F3C6}', description: '' }),
+      ...(BADGE_TYPES[b.type as BadgeType] || { type: b.type, label: b.type, icon: '\u{1F3C6}', description: '' }),
       metadata: b.metadata ? JSON.parse(b.metadata) : null,
       awardedAt: b.awardedAt,
     })),

@@ -42,31 +42,42 @@ export async function GET() {
         });
 
         const articleViews = await prisma.accessLog.groupBy({
-          by: ['metadata'],
+          by: ['documentId'],
           where: {
-            action: 'view_article',
-            metadata: {
+            action: 'view',
+            documentId: {
               not: null,
             },
           },
           _count: {
-            id: true,
+            _all: true,
           },
         });
 
         const viewCounts: Record<string, number> = {};
 
+        // Map documentId → view count
+        const docViewMap: Record<string, number> = {};
         articleViews.forEach((log) => {
-          if (!log.metadata) return;
+          if (log.documentId) {
+            docViewMap[log.documentId] = log._count._all;
+          }
+        });
+
+        // Map views to articles via document leiArticles
+        documents.forEach((doc) => {
+          if (!doc.leiArticles) return;
+          const viewCount = docViewMap[doc.id] || 0;
+          if (viewCount === 0) return;
 
           try {
-            const metadata = JSON.parse(log.metadata);
-            if (metadata.articleNumber) {
-              const normalized = String(metadata.articleNumber);
-              viewCounts[normalized] = (viewCounts[normalized] || 0) + log._count.id;
-            }
+            const articles: string[] = JSON.parse(doc.leiArticles);
+            articles.forEach((articleNum) => {
+              const normalized = articleNum.replace(/^art\.?\s*/i, '').trim();
+              viewCounts[normalized] = (viewCounts[normalized] || 0) + viewCount;
+            });
           } catch (error) {
-            console.error('Erro ao parsear metadata:', error);
+            console.error('Erro ao parsear leiArticles para views:', doc.id, error);
           }
         });
 

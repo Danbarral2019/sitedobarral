@@ -9,7 +9,7 @@ import * as XLSX from 'xlsx';
 import { LEI_14133_GRUPOS } from '../data/lei-14133-grupos';
 
 // Preparar dados para a planilha
-const data = LEI_14133_GRUPOS.map((group, index) => ({
+const data: Record<string, string | number>[] = LEI_14133_GRUPOS.map((group, index) => ({
   'Nº': index + 1,
   'ID': group.id,
   'Título': group.title,
@@ -30,7 +30,7 @@ data.push({
   'Emoji': '📊',
   'Cor': '',
   'Artigos': '',
-  'Quantidade': data.reduce((sum, row) => sum + (row.Quantidade || 0), 0),
+  'Quantidade': data.reduce((sum: number, row) => sum + (Number(row.Quantidade) || 0), 0),
   'Primeiro': '',
   'Último': '',
   'Descrição': `${LEI_14133_GRUPOS.length} grupos temáticos totais`,

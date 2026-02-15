@@ -19,7 +19,7 @@ export const POST = withAuth(async (request: NextRequest, context?: Record<strin
     const result = CheckoutSchema.safeParse(body);
 
     if (!result.success) {
-      throw new ValidationError(result.error.errors[0]?.message || 'Dados inválidos');
+      throw new ValidationError(result.error.issues[0]?.message || 'Dados inválidos');
     }
 
     const { plan, courseId } = result.data;

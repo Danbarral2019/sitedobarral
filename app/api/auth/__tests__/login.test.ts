@@ -55,7 +55,8 @@ vi.mock('@/lib/auth', () => ({
 import { POST } from '../login/route';
 import { prisma } from '@/lib/prisma';
 import bcrypt from 'bcryptjs';
-const mockPrisma = vi.mocked(prisma);
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const mockPrisma = vi.mocked(prisma) as any;
 const mockBcrypt = vi.mocked(bcrypt);
 
 // Helper para criar NextRequest
@@ -141,7 +142,7 @@ describe('POST /api/auth/login', () => {
 
   describe('Rate Limiting', () => {
     it('deve verificar rate limit via Redis', async () => {
-      mockPrisma.user.findUnique.mockResolvedValue(null);
+      mockPrisma.user.findUnique.mockResolvedValue(null as never);
 
       const request = createRequest(validCredentials);
       await POST(request);
@@ -164,7 +165,7 @@ describe('POST /api/auth/login', () => {
 
   describe('Autenticação de Usuário', () => {
     it('deve retornar 401 quando usuário não existe', async () => {
-      mockPrisma.user.findUnique.mockResolvedValue(null);
+      mockPrisma.user.findUnique.mockResolvedValue(null as never);
 
       const request = createRequest(validCredentials);
       const response = await POST(request);
@@ -175,7 +176,7 @@ describe('POST /api/auth/login', () => {
     });
 
     it('deve buscar usuário com email em lowercase', async () => {
-      mockPrisma.user.findUnique.mockResolvedValue(null);
+      mockPrisma.user.findUnique.mockResolvedValue(null as never);
 
       const request = createRequest({
         email: 'ALUNO@TESTE.COM',
@@ -193,7 +194,7 @@ describe('POST /api/auth/login', () => {
       mockPrisma.user.findUnique.mockResolvedValue({
         ...mockStudent,
         role: 'admin',
-      });
+      } as never);
 
       const request = createRequest(validCredentials);
       const response = await POST(request);
@@ -204,7 +205,7 @@ describe('POST /api/auth/login', () => {
     });
 
     it('deve retornar 401 quando senha está incorreta', async () => {
-      mockPrisma.user.findUnique.mockResolvedValue(mockStudent);
+      mockPrisma.user.findUnique.mockResolvedValue(mockStudent as never);
       mockBcrypt.compare.mockResolvedValue(false as never);
 
       const request = createRequest(validCredentials);
@@ -219,7 +220,7 @@ describe('POST /api/auth/login', () => {
       mockPrisma.user.findUnique.mockResolvedValue({
         ...mockStudent,
         emailVerified: false,
-      });
+      } as never);
       mockBcrypt.compare.mockResolvedValue(true as never);
 
       const request = createRequest(validCredentials);
@@ -234,7 +235,7 @@ describe('POST /api/auth/login', () => {
 
   describe('Login Bem-sucedido', () => {
     beforeEach(() => {
-      mockPrisma.user.findUnique.mockResolvedValue(mockStudent);
+      mockPrisma.user.findUnique.mockResolvedValue(mockStudent as never);
       mockBcrypt.compare.mockResolvedValue(true as never);
     });
 
@@ -297,13 +298,13 @@ describe('POST /api/auth/login', () => {
   describe('Segurança', () => {
     it('deve retornar mesma mensagem para usuário inexistente e senha errada', async () => {
       // Usuário não existe
-      mockPrisma.user.findUnique.mockResolvedValue(null);
+      mockPrisma.user.findUnique.mockResolvedValue(null as never);
       const request1 = createRequest(validCredentials);
       const response1 = await POST(request1);
       const data1 = await response1.json();
 
       // Senha incorreta
-      mockPrisma.user.findUnique.mockResolvedValue(mockStudent);
+      mockPrisma.user.findUnique.mockResolvedValue(mockStudent as never);
       mockBcrypt.compare.mockResolvedValue(false as never);
       const request2 = createRequest(validCredentials);
       const response2 = await POST(request2);
@@ -314,7 +315,7 @@ describe('POST /api/auth/login', () => {
     });
 
     it('não deve expor hash de senha na resposta', async () => {
-      mockPrisma.user.findUnique.mockResolvedValue(mockStudent);
+      mockPrisma.user.findUnique.mockResolvedValue(mockStudent as never);
       mockBcrypt.compare.mockResolvedValue(true as never);
 
       const request = createRequest(validCredentials);

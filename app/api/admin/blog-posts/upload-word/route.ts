@@ -35,7 +35,8 @@ export const POST = withAdminAuth(async (request: NextRequest) => {
     const buffer = Buffer.from(arrayBuffer);
 
     // Processar com mammoth
-    const result = await mammoth.convertToMarkdown(buffer, {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const result = await (mammoth as any).convertToMarkdown(buffer, {
       styleMap: [
         // Mapear estilos do Word para Markdown
         "p[style-name='Heading 1'] => # ",

@@ -46,11 +46,14 @@ export async function GET(
     }
 
     // Para documentos restritos, verificar acesso do usuário
+    const enrollmentWhere = document.courseId
+      ? { courseId: document.courseId }
+      : { courseId: '__none__' };
     const user = await prisma.user.findUnique({
       where: { id: authPayload.userId },
       include: {
         enrollments: {
-          where: { courseId: document.courseId }
+          where: enrollmentWhere
         }
       }
     });

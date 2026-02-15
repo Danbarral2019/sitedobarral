@@ -20,7 +20,6 @@ export const GET = withAdminAuth(async (request: NextRequest) => {
       where.OR = [
         { studentName: { contains: search, mode: 'insensitive' } },
         { certificateNumber: { contains: search, mode: 'insensitive' } },
-        { user: { email: { contains: search, mode: 'insensitive' } } },
       ];
     }
 
@@ -30,9 +29,6 @@ export const GET = withAdminAuth(async (request: NextRequest) => {
         orderBy: { issuedAt: 'desc' },
         skip: (page - 1) * pageSize,
         take: pageSize,
-        include: {
-          user: { select: { email: true } },
-        },
       }),
       prisma.certificate.count({ where }),
     ]);

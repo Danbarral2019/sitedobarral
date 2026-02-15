@@ -178,7 +178,7 @@ export function GlobalSearchBar({
           const config = CONTENT_TYPE_CONFIG[type];
           const Icon = TYPE_ICONS[type] || FileText;
           const isActive = activeTypes.includes(type);
-          const count = counts[type];
+          const count = (counts as Record<string, number>)[type] ?? 0;
 
           return (
             <button

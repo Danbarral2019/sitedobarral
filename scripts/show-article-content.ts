@@ -2,6 +2,7 @@
  * Mostra conteúdo completo de artigos específicos extraídos
  */
 
+// @ts-expect-error Module was renamed to .DISABLED to prevent accidental execution
 import { downloadLeiHTML, extractArticlesFromHTML } from './update-lei-14133-data-file';
 
 async function showArticles(numeros: number[]) {
@@ -12,7 +13,7 @@ async function showArticles(numeros: number[]) {
   console.log('='.repeat(70));
 
   for (const num of numeros) {
-    const artigo = artigos.find(a => parseInt(a.numero) === num);
+    const artigo = artigos.find((a: { numero: string }) => parseInt(a.numero) === num);
 
     if (artigo) {
       console.log(`\n📌 ARTIGO ${artigo.numero}:\n`);

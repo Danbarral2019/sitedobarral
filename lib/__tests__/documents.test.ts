@@ -37,7 +37,8 @@ import {
 import { prisma } from '../prisma';
 
 // Cast para acessar os mocks
-const mockPrisma = vi.mocked(prisma);
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const mockPrisma = vi.mocked(prisma) as any;
 
 // Documento mock para testes
 const mockDocument = {

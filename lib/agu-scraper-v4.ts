@@ -58,12 +58,12 @@ export async function scrapeAGU(config: AGUScraperConfig): Promise<{
 
   // Configuração padrão
   const defaultConfig: AGUScraperConfig = {
-    tipos: config.tipos || ['orientacao-normativa'],
     filtroRelevancia: config.filtroRelevancia ?? true,
     saveScreenshots: config.saveScreenshots ?? false,
     delayMs: config.delayMs ?? 1000,
     timeout: config.timeout ?? 30000,
     ...config,
+    tipos: config.tipos || ['orientacao-normativa'],
   };
 
   // Executa scraping de cada tipo

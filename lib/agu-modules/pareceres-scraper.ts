@@ -122,17 +122,18 @@ export function convertParecerToAGUDocument(parecer: ParecerVinculanteRaw): AGUD
     tipo: 'parecer-vinculante',
     numero: parecer.numero,
     ano: parecer.ano,
-    numeroCompleto: fullNumber,
     titulo: parecer.titulo || fullNumber,
-    ementa: parecer.ementa || '',
-    urlPrincipal: parecer.urlPrincipal,
+    descricao: parecer.ementa || '',
+    url: parecer.urlPrincipal,
     urlPDF: parecer.urlPDF,
-    dataPublicacao: parecer.dataPublicacao,
+    dataPublicacao: parecer.dataPublicacao?.toISOString(),
+    tags: [],
+    temas: [],
+    isRelevante: false,
 
     // Análise de relevância
     relevanciaScore: 0, // Será calculado por analyzeRelevance()
-    cursosRelevantes: [],
-    razaoRelevancia: ''
+    cursosIds: [],
   };
 }
 

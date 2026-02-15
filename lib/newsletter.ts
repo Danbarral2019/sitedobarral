@@ -49,7 +49,7 @@ export async function fetchNewsletterSubscribersPaginated(params: {
   ]);
 
   return {
-    items: subscribers,
+    items: subscribers as unknown as NewsletterSubscriber[],
     total,
     page,
     pageSize,

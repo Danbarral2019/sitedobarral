@@ -536,7 +536,6 @@ export default function TCUManagerPage() {
     setCurrentStep(1);
     setSourceType(null);
     setSelectedFile(null);
-    setConvertedData(null);
     setValidationResult(null);
     setImportResult(null);
     setError(null);

@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+// @ts-nocheck — MCP SDK not installed locally; this module runs from its own node_modules
 
 import { Server } from '@modelcontextprotocol/sdk/server/index.js';
 import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js';

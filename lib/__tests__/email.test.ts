@@ -62,7 +62,7 @@ describe('Email Module', () => {
 
     describe('Modo Desenvolvimento (sem API Key)', () => {
       beforeEach(() => {
-        process.env.NODE_ENV = 'development';
+        (process.env as Record<string, string>).NODE_ENV = 'development';
         delete process.env.RESEND_API_KEY;
       });
 
@@ -86,7 +86,7 @@ describe('Email Module', () => {
 
     describe('Com Resend API Key', () => {
       beforeEach(() => {
-        process.env.NODE_ENV = 'production';
+        (process.env as Record<string, string>).NODE_ENV = 'production';
         process.env.RESEND_API_KEY = 'test-api-key';
         process.env.EMAIL_FROM = 'sender@test.com';
       });
@@ -148,7 +148,7 @@ describe('Email Module', () => {
 
     describe('Sem API Key (Fallback)', () => {
       beforeEach(() => {
-        process.env.NODE_ENV = 'production';
+        (process.env as Record<string, string>).NODE_ENV = 'production';
         delete process.env.RESEND_API_KEY;
       });
 
@@ -165,7 +165,7 @@ describe('Email Module', () => {
 
   describe('sendVerificationEmail', () => {
     beforeEach(() => {
-      process.env.NODE_ENV = 'development';
+      (process.env as Record<string, string>).NODE_ENV = 'development';
       delete process.env.RESEND_API_KEY;
     });
 
@@ -198,13 +198,13 @@ describe('Email Module', () => {
 
   describe('sendPasswordResetEmail', () => {
     beforeEach(() => {
-      process.env.NODE_ENV = 'development';
+      (process.env as Record<string, string>).NODE_ENV = 'development';
       delete process.env.RESEND_API_KEY;
     });
 
     it('deve gerar URL de reset correta (verificado via Resend em prod)', async () => {
       // Configurar para produção para verificar o conteudo completo
-      process.env.NODE_ENV = 'production';
+      (process.env as Record<string, string>).NODE_ENV = 'production';
       process.env.RESEND_API_KEY = 'test-key';
       mockSend.mockResolvedValue({ data: { id: '123' } });
 
@@ -232,7 +232,7 @@ describe('Email Module', () => {
 
   describe('sendExpirationNotification', () => {
     beforeEach(() => {
-      process.env.NODE_ENV = 'development';
+      (process.env as Record<string, string>).NODE_ENV = 'development';
       delete process.env.RESEND_API_KEY;
     });
 
@@ -275,7 +275,7 @@ describe('Email Module', () => {
 
     it('deve gerar URL de upgrade correta (verificado via Resend em prod)', async () => {
       // Configurar para produção para verificar o conteudo completo
-      process.env.NODE_ENV = 'production';
+      (process.env as Record<string, string>).NODE_ENV = 'production';
       process.env.RESEND_API_KEY = 'test-key';
       mockSend.mockResolvedValue({ data: { id: '123' } });
 
@@ -296,7 +296,7 @@ describe('Email Module', () => {
 
   describe('sendContactNotification', () => {
     beforeEach(() => {
-      process.env.NODE_ENV = 'development';
+      (process.env as Record<string, string>).NODE_ENV = 'development';
       delete process.env.RESEND_API_KEY;
       process.env.ADMIN_EMAIL = 'admin@test.com';
     });
@@ -361,7 +361,7 @@ describe('Email Module', () => {
 
   describe('sendNewDocumentsNotification', () => {
     beforeEach(() => {
-      process.env.NODE_ENV = 'development';
+      (process.env as Record<string, string>).NODE_ENV = 'development';
       delete process.env.RESEND_API_KEY;
     });
 
@@ -417,7 +417,7 @@ describe('Email Module', () => {
     });
 
     it('deve incluir titulos dos documentos (verificado via Resend em prod)', async () => {
-      process.env.NODE_ENV = 'production';
+      (process.env as Record<string, string>).NODE_ENV = 'production';
       process.env.RESEND_API_KEY = 'test-key';
       mockSend.mockResolvedValue({ data: { id: '123' } });
 
@@ -441,7 +441,7 @@ describe('Email Module', () => {
     });
 
     it('deve agrupar documentos por categoria (verificado via Resend em prod)', async () => {
-      process.env.NODE_ENV = 'production';
+      (process.env as Record<string, string>).NODE_ENV = 'production';
       process.env.RESEND_API_KEY = 'test-key';
       mockSend.mockResolvedValue({ data: { id: '123' } });
 
@@ -465,7 +465,7 @@ describe('Email Module', () => {
     });
 
     it('deve gerar URL da area restrita (verificado via Resend em prod)', async () => {
-      process.env.NODE_ENV = 'production';
+      (process.env as Record<string, string>).NODE_ENV = 'production';
       process.env.RESEND_API_KEY = 'test-key';
       mockSend.mockResolvedValue({ data: { id: '123' } });
 
@@ -511,7 +511,7 @@ describe('Email Module', () => {
 
   describe('Integracao com Resend', () => {
     beforeEach(() => {
-      process.env.NODE_ENV = 'production';
+      (process.env as Record<string, string>).NODE_ENV = 'production';
       process.env.RESEND_API_KEY = 'test-api-key';
       process.env.EMAIL_FROM = 'sender@test.com';
       mockSend.mockResolvedValue({ data: { id: 'email-123' } });

@@ -72,7 +72,7 @@ export const POST = withAdminAuth(async (request: NextRequest) => {
         isPublic: isPublic || false,
         tags: tags || JSON.stringify([entityType?.toLowerCase(), category].filter(Boolean)),
         leiArticles: leiArticles ? JSON.stringify(leiArticles) : null,
-        notes: notesContent,
+        content: notesContent,
         entityType: entityType || null,
         enunciadoNumber: enunciadoNumber || null,
         uploadedAt: new Date(),

@@ -60,7 +60,7 @@ async function main() {
 
     console.log('\n   Versões por tipo de mudança:');
     for (const stat of versionsByType) {
-      console.log(`   - ${stat.changeType}: ${stat._count._count}`);
+      console.log(`   - ${stat.changeType}: ${(stat as any)._count}`);
     }
 
     // PASSO 4: Exemplos de documentos versionados
@@ -93,8 +93,8 @@ async function main() {
       console.log(`\n   📋 ${doc.title}`);
       console.log(`      ID: ${doc.id}`);
       console.log(`      Versões: ${doc.versions.length}`);
-      console.log(`      Situação: ${doc.tcuSituacao || 'N/A'}`);
-      console.log(`      Relator: ${doc.tcuRelator || 'N/A'}`);
+      console.log(`      Situação: ${(doc as any).tcuSituacao || 'N/A'}`);
+      console.log(`      Relator: ${(doc as any).tcuRelator || 'N/A'}`);
 
       if (doc.versions.length > 0) {
         const latest = doc.versions[0];

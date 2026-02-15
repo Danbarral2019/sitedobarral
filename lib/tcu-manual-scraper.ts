@@ -345,8 +345,8 @@ export async function scrapeManualPage(
   $content.find('script, style, nav, .sidebar, .menu, .breadcrumb, .toggleButton').remove();
 
   // Convert footnote references to inline text [N]
-  $content.find('a[href^="#_ftn"]').each(function () {
-    const $a = $(this);
+  $content.find('a[href^="#_ftn"]').each((_, el) => {
+    const $a = $(el);
     $a.replaceWith(` [${$a.text()}]`);
   });
 
@@ -355,10 +355,10 @@ export async function scrapeManualPage(
   const contentParts: string[] = [];
 
   // Process all paragraphs, tables, blockquotes, and lists
-  $content.find('p, table, figure.wp-block-table, blockquote, ul, ol').each(function () {
-    const $el = $(this);
+  $content.find('p, table, figure.wp-block-table, blockquote, ul, ol').each((_, el) => {
+    const $el = $(el);
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const tagName = (this as any).name?.toLowerCase();
+    const tagName = (el as any).name?.toLowerCase();
 
     // Skip elements inside a figure (the table inside figure is processed via figure)
     if (tagName === 'table' && $el.parent('figure').length) return;
@@ -366,10 +366,10 @@ export async function scrapeManualPage(
     if (tagName === 'table' || tagName === 'figure') {
       // Convert table to structured text
       const rows: string[] = [];
-      $el.find('tr').each(function () {
+      $el.find('tr').each((_, row) => {
         const cells: string[] = [];
-        $(this).find('th, td').each(function () {
-          cells.push($(this).text().trim());
+        $(row).find('th, td').each((_, cell) => {
+          cells.push($(cell).text().trim());
         });
         if (cells.length > 0) {
           rows.push(cells.join(' | '));
@@ -384,8 +384,8 @@ export async function scrapeManualPage(
       // Skip nested lists (only process top-level)
       if ($el.parents('ul, ol').length > 0) return;
       const items: string[] = [];
-      $el.find('li').each(function () {
-        items.push('• ' + $(this).text().trim());
+      $el.find('li').each((_, li) => {
+        items.push('• ' + $(li).text().trim());
       });
       contentParts.push(items.join('\n'));
     } else {

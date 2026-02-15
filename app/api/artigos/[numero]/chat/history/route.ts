@@ -33,7 +33,7 @@ export async function GET(
     // Buscar histórico
     const where: Record<string, unknown> = {
       articleNumber,
-      userId: authResult.userId,
+      userId: authResult.user?.userId,
       isPlaceholder: false, // Apenas perguntas com respostas reais
     };
 

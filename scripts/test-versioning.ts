@@ -165,8 +165,8 @@ async function main() {
 
     for (const change of changeResult.changeDetails) {
       console.log(`   - ${change.field} [${change.significance}]:`);
-      console.log(`     Antes: "${change.oldValue.substring(0, 50)}..."`);
-      console.log(`     Depois: "${change.newValue.substring(0, 50)}..."`);
+      console.log(`     Antes: "${(change.oldValue ?? '').substring(0, 50)}..."`);
+      console.log(`     Depois: "${(change.newValue ?? '').substring(0, 50)}..."`);
     }
   }
 

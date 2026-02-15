@@ -159,7 +159,7 @@ export const POST = withAdminAuth(async (request: NextRequest) => {
       if (!existingByUrlAndCourse.has(key)) {
         existingByUrlAndCourse.set(key, new Set());
       }
-      existingByUrlAndCourse.get(key)!.add(doc.courseId);
+      existingByUrlAndCourse.get(key)!.add(doc.courseId || '');
     }
 
     // 5. Importa cada orientação para cada curso (em lotes para não sobrecarregar)

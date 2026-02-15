@@ -5,6 +5,7 @@
  */
 
 import type { AGUDocument, AGUScraperConfig, AGUScraperResult } from '../agu-types';
+import type { Document as PrismaDocument } from '@prisma/client';
 import {
   analyzeRelevancia,
   suggestCursos,
@@ -446,7 +447,7 @@ export async function saveOrientacaoNormativaWithVersioning(
   aguDoc: AGUDocument
 ): Promise<{
   success: boolean;
-  document?: Document;
+  document?: PrismaDocument;
   isNew?: boolean;
   hasChanges?: boolean;
   error?: string;

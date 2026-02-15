@@ -163,20 +163,21 @@ export function convertDECORToAGUDocument(decor: DECORRaw): AGUDocument {
   const fullNumber = `DECOR nº ${decor.numero}/${decor.ano}`;
 
   return {
-    tipo: 'decor',
+    tipo: 'parecer-conuni',
     numero: decor.numero,
     ano: decor.ano,
-    numeroCompleto: fullNumber,
     titulo: decor.titulo || fullNumber,
-    ementa: decor.ementa || decor.assunto || '',
-    urlPrincipal: decor.urlPrincipal,
+    descricao: decor.ementa || decor.assunto || '',
+    url: decor.urlPrincipal,
     urlPDF: decor.urlPDF,
-    dataPublicacao: decor.dataPublicacao,
+    dataPublicacao: decor.dataPublicacao?.toISOString(),
+    tags: [],
+    temas: [],
+    isRelevante: false,
 
     // Análise de relevância
     relevanciaScore: 0, // Será calculado por analyzeRelevance()
-    cursosRelevantes: [],
-    razaoRelevancia: ''
+    cursosIds: [],
   };
 }
 

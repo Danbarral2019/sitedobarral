@@ -126,14 +126,15 @@ export async function POST(request: NextRequest) {
     // Gerar fullNumber automaticamente se não fornecido
     let fullNumber = body.fullNumber;
     if (!fullNumber) {
-      const typeLabel = {
+      const typeLabelMap: Record<string, string> = {
         'decreto': 'Decreto',
         'portaria': 'Portaria',
         'in': 'IN SEGES',
         'ordem-servico': 'Ordem de Serviço',
         'lei': 'Lei',
         'medida-provisoria': 'Medida Provisória'
-      }[body.type] || body.type;
+      };
+      const typeLabel = typeLabelMap[body.type as string] || body.type;
 
       fullNumber = `${typeLabel} ${body.number}/${body.year}`;
     }
