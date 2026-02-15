@@ -57,7 +57,7 @@ const CATEGORY_LABELS: Record<string, string> = {
   'enunciados': 'Enunciados',
   'acordao': 'Acórdãos TCU',
   'sumula': 'Súmulas',
-  'manual_tcu': 'Manual do TCU',
+  'manual-tcu': 'Manual do TCU',
   'boa_pratica': 'Outros Atos Normativos',
   'ato-normativo': 'Normativos',
   'outro': 'Outros',
@@ -75,11 +75,11 @@ const KNOWLEDGE_BASE_CATEGORIES: Array<{
   color: string;
   matchCategories?: readonly string[];
 }> = [
-  { category: 'acordao', label: 'Acordaos TCU', icon: Scale, color: 'blue' },
+  { category: 'acordao', label: 'Acórdãos TCU', icon: Scale, color: 'blue' },
   { category: 'pareceres', label: 'Pareceres', icon: FileText, color: 'purple', matchCategories: PARECER_CATEGORIES },
-  { category: 'orientacao-normativa', label: 'Orientacoes Normativas', icon: BookOpen, color: 'green' },
+  { category: 'orientacao-normativa', label: 'Orientações Normativas', icon: BookOpen, color: 'green' },
   { category: 'enunciados', label: 'Enunciados', icon: List, color: 'amber' },
-  { category: 'manual_tcu', label: 'Manual do TCU', icon: Book, color: 'teal' },
+  { category: 'manual-tcu', label: 'Manual do TCU', icon: Book, color: 'teal' },
 ];
 
 const CATEGORY_COLORS: Record<string, { bg: string; border: string; iconBg: string; text: string; hover: string }> = {
@@ -767,8 +767,19 @@ export default function AreaRestritaPage() {
                       />
                     )}
 
-                    {/* Course Materials */}
-                    {currentContent.type === 'course-material' && currentContent.documents.length > 0 && (
+                    {/* Course Materials - category selected: show filtered list */}
+                    {currentContent.type === 'course-material' && contentTree.selection?.category && currentContent.documents.length > 0 && (
+                      <DocumentsByCategory
+                        documents={currentContent.documents}
+                        courseId={contentTree.selection?.courseId || enrolledCourseIds[0] || ''}
+                        onDocumentClick={handleDocumentClick}
+                        isFavorite={isFavorite}
+                        toggleFavorite={(docId) => toggleFavorite(docId, contentTree.selection?.courseId || enrolledCourseIds[0] || '')}
+                      />
+                    )}
+
+                    {/* Course Materials - no category: show full CourseArea */}
+                    {currentContent.type === 'course-material' && !contentTree.selection?.category && currentContent.documents.length > 0 && (
                       <CourseArea
                         documents={courseDocuments}
                         enrolledCourseIds={enrolledCourseIds}

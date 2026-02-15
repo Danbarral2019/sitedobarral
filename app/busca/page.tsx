@@ -57,7 +57,7 @@ const CATEGORY_LABELS: Record<string, string> = {
   'orientacao-normativa': 'Orientação Normativa',
   'enunciados': 'Enunciado',
   'outro': 'Outro',
-  'manual_tcu': 'Manual do TCU',
+  'manual-tcu': 'Manual do TCU',
   'boa_pratica': 'Outros Atos Normativos',
   'ato-normativo': 'Normativos',
 };

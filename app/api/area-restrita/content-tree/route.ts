@@ -25,7 +25,7 @@ const CATEGORY_LABELS: Record<string, string> = {
   'enunciados': 'Enunciados',
   'acordao': 'Acórdãos TCU',
   'sumula': 'Súmulas',
-  'manual_tcu': 'Manual do TCU',
+  'manual-tcu': 'Manual do TCU',
   'boa_pratica': 'Outros Atos Normativos',
   'ato-normativo': 'Normativos',
   'outro': 'Outros',

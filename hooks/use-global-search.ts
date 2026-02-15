@@ -113,7 +113,7 @@ export function useGlobalSearch(options: UseGlobalSearchOptions = {}): UseGlobal
   const [aiLegalSources, setAiLegalSources] = useState<LegalSource[]>([]);
   const [isAiLoading, setIsAiLoading] = useState(false);
   const [aiError, setAiError] = useState<string | null>(null);
-  const [aiEnabled, setAiEnabled] = useState(false);
+  const [aiEnabled, setAiEnabled] = useState(true);
   const [aiConversationHistory, setAiConversationHistory] = useState<ConversationMessage[]>([]);
 
   // Refs

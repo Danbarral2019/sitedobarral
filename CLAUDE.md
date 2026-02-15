@@ -101,7 +101,7 @@ export DATABASE_URL="<your-db-url>" && npx tsx scripts/fix-csv-tags.ts  # Conver
 - Bibliography: SEMPRE público
 
 **Subscription Plans:**
-- **Básico** (R$ 49,90/mês): acesso a 1 curso específico
+- **Básico** (R$ 49,90/mês): acesso a 1 curso específico + Assistente IA
 - **Premium** (R$ 89,90/mês): acesso a todos os 10 cursos + Assistente IA
 
 
@@ -120,7 +120,7 @@ export DATABASE_URL="<your-db-url>" && npx tsx scripts/fix-csv-tags.ts  # Conver
 
 **💳 Stripe Subscriptions — Pagamento e Assinaturas (2026-02-15):**
 - ✅ Integração Stripe com Checkout Sessions (hosted page) e Customer Portal
-- ✅ 2 planos: Básico (1 curso, R$ 49,90/mês) e Premium (todos cursos + IA, R$ 89,90/mês)
+- ✅ 2 planos: Básico (1 curso + IA, R$ 49,90/mês) e Premium (todos cursos + IA, R$ 89,90/mês)
 - ✅ Webhook handler: `checkout.session.completed`, `invoice.paid`, `invoice.payment_failed`, `customer.subscription.updated`, `customer.subscription.deleted`
 - ✅ Enrollment automático via subscription (Básico: 1 curso, Premium: todos os 10)
 - ✅ QR Code alterado de 1 ano → 1 mês de trial

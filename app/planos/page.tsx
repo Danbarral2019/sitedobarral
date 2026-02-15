@@ -111,10 +111,10 @@ export default function PlanosPage() {
                 <span className="text-gray-700">Atualizações contínuas</span>
               </li>
               <li className="flex items-start gap-3">
-                <svg className="w-5 h-5 text-gray-300 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                <svg className="w-5 h-5 text-green-500 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                 </svg>
-                <span className="text-gray-400">Assistente IA</span>
+                <span className="text-gray-700">Assistente IA com busca semântica</span>
               </li>
             </ul>
 

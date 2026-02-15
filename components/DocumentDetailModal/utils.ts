@@ -23,8 +23,8 @@ export function getCategoryLabel(category: string): string {
     'conteudo-programatico': 'Conteudo Programatico',
     'material-complementar': 'Material Complementar',
     'bibliografia': 'Bibliografia',
-    'manual_tcu': 'Manual do TCU',
-    'boa_pratica': 'Boa Pratica',
+    'manual-tcu': 'Manual do TCU',
+    'boa_pratica': 'Boa Prática',
     'outro': 'Outro',
   };
   return labels[category] || category.charAt(0).toUpperCase() + category.slice(1);

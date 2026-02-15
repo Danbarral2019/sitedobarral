@@ -174,7 +174,7 @@ export function GlobalSearchBar({
 
       {/* Type Filters Row */}
       <div className="flex items-center gap-2 px-4 pb-4 overflow-x-auto scrollbar-hide">
-        {(Object.keys(CONTENT_TYPE_CONFIG) as ContentType[]).map((type) => {
+        {(Object.keys(CONTENT_TYPE_CONFIG) as ContentType[]).filter((type) => type !== 'faq' && type !== 'site').map((type) => {
           const config = CONTENT_TYPE_CONFIG[type];
           const Icon = TYPE_ICONS[type] || FileText;
           const isActive = activeTypes.includes(type);
