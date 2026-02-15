@@ -96,7 +96,7 @@ export async function GET(request: NextRequest) {
     console.log(`[Cron DOU Staging] Buscando publicacoes (periodo: ${period}, limite: ${maxResults})`);
 
     // PASSO 1: Buscar publicacoes na API oficial do DOU
-    const searchTerm = 'licitacao OR pregao OR dispensa OR contrato OR contratacao';
+    const searchTerm = 'licitação OR pregão OR dispensa OR contrato OR contratação';
 
     const results = period === 'month'
       ? await searchLastMonth(searchTerm, undefined, maxResults)

@@ -121,12 +121,14 @@ async function main() {
 
   let gerais = 0, concretos = 0, ambiguos = 0;
   let procurementRelated = 0;
+  let procurementTitleOnly = 0;
   const normativeResults: Array<{
     title: string;
     normType: string;
     atoType: string | null;
     autoApprove: boolean;
     procurement: boolean;
+    procurementOld: boolean;
   }> = [];
 
   for (const [result, classification] of classifications.entries()) {
@@ -139,13 +141,17 @@ async function main() {
     const normType = isAtoNormativoGeral(cleanTitle, result.abstract);
     const atoType = detectAtoType(cleanTitle);
     const autoApprove = normType === 'geral' && shouldAutoApprove(cleanTitle, result.hierarchyStr, atoType);
-    const procurement = isProcurementRelated(cleanTitle);
+    // Filtro expandido: título + abstract + hierarquia
+    const procurement = isProcurementRelated(cleanTitle, result.abstract, result.hierarchyStr);
+    // Filtro antigo (só título) para comparação
+    const procurementOld = isProcurementRelated(cleanTitle);
 
     if (normType === 'geral') gerais++;
     else if (normType === 'concreto') concretos++;
     else ambiguos++;
 
     if (procurement) procurementRelated++;
+    if (procurementOld) procurementTitleOnly++;
 
     normativeResults.push({
       title: cleanTitle.substring(0, 70),
@@ -153,6 +159,7 @@ async function main() {
       atoType,
       autoApprove,
       procurement,
+      procurementOld,
     });
   }
 
@@ -160,7 +167,11 @@ async function main() {
   console.log(`  Gerais:    ${gerais}`);
   console.log(`  Concretos: ${concretos} (serao filtrados)`);
   console.log(`  Ambiguos:  ${ambiguos}`);
-  console.log(`  Relacionados a licitacoes (titulo): ${procurementRelated}`);
+  console.log(`  Relacionados a licitacoes (expandido): ${procurementRelated}`);
+  console.log(`  Relacionados a licitacoes (so titulo): ${procurementTitleOnly}`);
+  if (procurementRelated > procurementTitleOnly) {
+    console.log(`  >>> Filtro expandido recuperou +${procurementRelated - procurementTitleOnly} atos que seriam perdidos!`);
+  }
 
   if (normativeResults.length > 0) {
     console.log(`\nDetalhes dos atos normativos:`);
@@ -170,6 +181,7 @@ async function main() {
         r.atoType || 'n/a',
         r.autoApprove ? 'AUTO' : 'MANUAL',
         r.procurement ? 'LICIT' : '',
+        r.procurement && !r.procurementOld ? '+NOVO' : '',
       ].filter(Boolean).join(' | ');
       console.log(`  [${icons}] ${r.title}`);
     }
@@ -250,7 +262,8 @@ async function main() {
   API DOU:           ${results.length} resultados encontrados
   Classificacao:     ${autoApprovedDocs} auto-aprovados, ${pendingDocs} pendentes, ${stats.autoRejected} rejeitados
   Filtro normativo:  ${gerais} gerais, ${concretos} concretos, ${ambiguos} ambiguos
-  Licitacoes:        ${procurementRelated} com keywords no titulo
+  Licitacoes (expandido): ${procurementRelated} (titulo+abstract+orgao)
+  Licitacoes (so titulo): ${procurementTitleOnly} (filtro antigo)
   Alteracoes:        ${alteracoesDetectadas} detectadas
   `);
 

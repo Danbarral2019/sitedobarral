@@ -193,13 +193,44 @@ const PROCUREMENT_KEYWORDS = [
 ];
 
 /**
- * Verifica se o TÍTULO indica relação direta com licitações/contratações.
- * NÃO usa o abstract — atos que apenas citam a lei 14.133 no texto
- * (doações, pensões, etc.) devem ser rejeitados.
+ * Órgãos cujos atos normativos são automaticamente considerados
+ * relacionados a licitações/contratações (independente de keywords no título).
  */
-export function isProcurementRelated(title: string): boolean {
+const PROCUREMENT_ORGANS = [
+  'seges', 'secretaria de gestão',
+  'mgi', 'ministério da gestão',
+  'mpo', 'ministério do planejamento',
+  'agu', 'advocacia-geral da união',
+];
+
+/**
+ * Verifica se o ato é relacionado a licitações/contratações.
+ *
+ * Busca keywords no título E no abstract (ementa), além de auto-aprovar
+ * atos de órgãos centrais de compras (SEGES, MGI, MPO, AGU).
+ *
+ * O abstract é incluído porque portarias normativas frequentemente têm
+ * títulos genéricos ("PORTARIA Nº 443") mas a ementa descreve o tema.
+ */
+export function isProcurementRelated(title: string, abstract?: string, hierarchyStr?: string): boolean {
   const titleLower = title.toLowerCase();
-  return PROCUREMENT_KEYWORDS.some(k => titleLower.includes(k));
+  const abstractLower = (abstract || '').toLowerCase();
+  const text = `${titleLower} ${abstractLower}`;
+
+  // Verificar keywords no título + abstract
+  if (PROCUREMENT_KEYWORDS.some(k => text.includes(k))) {
+    return true;
+  }
+
+  // Auto-aprovar se órgão emissor é relevante para compras públicas
+  if (hierarchyStr) {
+    const hierarchyLower = hierarchyStr.toLowerCase();
+    if (PROCUREMENT_ORGANS.some(o => hierarchyLower.includes(o))) {
+      return true;
+    }
+  }
+
+  return false;
 }
 
 /**

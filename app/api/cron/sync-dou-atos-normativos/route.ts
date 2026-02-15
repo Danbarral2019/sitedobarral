@@ -26,11 +26,16 @@ import { searchLastWeek } from '@/lib/dou-api';
 import { DOUClassifier, DOUDocumentCategory } from '@/lib/dou-classifier';
 import { isAtoNormativoGeral, shouldAutoApprove, detectAtoType, isProcurementRelated } from '@/lib/dou-normative-filter';
 import { detectModifications } from '@/lib/dou-change-detector';
+import { scrapeContent } from '@/lib/dou-scraper';
 import { LeiIndexer } from '@/lib/lei-indexer';
 import { prisma } from '@/lib/prisma';
 
 export const runtime = 'nodejs';
 export const maxDuration = 300;
+
+// Limite de scrapes por execução (sync já faz 4 buscas pesadas)
+const MAX_SCRAPE_PER_RUN = 5;
+const MAX_CONTENT_CHARS = 50_000;
 
 // Termos de busca focados em atos normativos
 const SEARCH_TERMS = [
@@ -86,8 +91,10 @@ export async function GET(request: NextRequest) {
       totalBuscados: 0,
       filtradosPorClassificador: 0,
       filtradosPorConcreto: 0,
+      filtradosPorIrrelevante: 0,
       duplicados: 0,
       autoAprovados: 0,
+      enriquecidos: 0,
       enviadosParaStaging: 0,
       alteracoesDetectadas: 0,
       notasLeiCriadas: 0,
@@ -123,6 +130,9 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ success: true, message: 'Nenhum resultado encontrado', stats, dryRun });
     }
 
+    // Docs auto-aprovados para enriquecer com scraper após o loop principal
+    const docsToScrape: Array<{ id: string; url: string }> = [];
+
     // 3. Classificar com DOUClassifier
     const classifications = DOUClassifier.classifyBatch(results);
 
@@ -144,9 +154,9 @@ export async function GET(request: NextRequest) {
           continue;
         }
 
-        // 4b2. Filtro obrigatório: só importar se o título tem keywords de licitações
-        if (!isProcurementRelated(cleanTitle)) {
-          stats.filtradosPorConcreto++;
+        // 4b2. Filtro obrigatório: só importar se relacionado a licitações (título + abstract + órgão)
+        if (!isProcurementRelated(cleanTitle, result.abstract, result.hierarchyStr)) {
+          stats.filtradosPorIrrelevante++;
           continue;
         }
 
@@ -288,6 +298,15 @@ export async function GET(request: NextRequest) {
             }
           });
 
+          // Coletar doc para enriquecimento com scraper (fora da transaction)
+          const createdDoc = await prisma.document.findFirst({
+            where: { douUrl: result.href },
+            select: { id: true },
+          });
+          if (createdDoc) {
+            docsToScrape.push({ id: createdDoc.id, url: result.href });
+          }
+
           stats.autoAprovados++;
         } else {
           // --- STAGING: enviar para aprovação manual ---
@@ -383,7 +402,38 @@ export async function GET(request: NextRequest) {
       }
     }
 
-    // 6. Sincronizar staging: marcar imported=true onde URL já existe como Document
+    // 6. Enriquecer docs auto-aprovados com scraper cheerio
+    if (!dryRun && docsToScrape.length > 0) {
+      const toScrape = docsToScrape.slice(0, MAX_SCRAPE_PER_RUN);
+      console.log(`[Sync DOU Normativos] Enriquecendo ${toScrape.length} documentos com scraper...`);
+
+      for (const doc of toScrape) {
+        try {
+          const enriched = await scrapeContent(doc.url);
+          if (enriched && enriched.caracteres > 0) {
+            let content = enriched.conteudo;
+            if (content.length > MAX_CONTENT_CHARS) {
+              content = content.substring(0, MAX_CONTENT_CHARS) + `\n\n[... truncado: ${enriched.caracteres.toLocaleString('pt-BR')} caracteres no total]`;
+            }
+
+            await prisma.document.update({
+              where: { id: doc.id },
+              data: { content },
+            });
+            stats.enriquecidos++;
+          }
+
+          // Rate limiting entre scrapes
+          await new Promise(resolve => setTimeout(resolve, 1000));
+        } catch (error) {
+          console.error(`[Sync DOU Normativos] Erro ao enriquecer ${doc.id}:`, error);
+        }
+      }
+
+      console.log(`[Sync DOU Normativos] ${stats.enriquecidos}/${toScrape.length} documentos enriquecidos`);
+    }
+
+    // 7. Sincronizar staging: marcar imported=true onde URL já existe como Document
     if (!dryRun) {
       try {
         const pendingStaging = await prisma.dOUStagingDocument.findMany({
