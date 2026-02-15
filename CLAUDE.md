@@ -93,6 +93,13 @@ export DATABASE_URL="<your-db-url>" && npx tsx scripts/fix-csv-tags.ts  # Conver
 
 ## Recent Features
 
+**📊 Fase 11 — Monitoring e Observability (2026-02-15):**
+- ✅ `Sentry.captureException()` no `handleApiError()` para erros 500+ (Prisma conexão, validação, genérico)
+- ✅ `Sentry.setUser({ id, email, role })` no middleware após auth (`withAuth`, `withAdminAuth`)
+- ✅ `trackServerEvent()` via Sentry breadcrumbs em 8 rotas (login, register, download, upgrade, ai_search, qr_scan, contact, newsletter)
+- ✅ `trackClientEvent()` via Vercel Analytics em 2 componentes (GlobalSearchBar, ChatInterface)
+- 📖 Ver `lib/monitoring/events.ts`, `lib/monitoring/track-client.ts`
+
 **📦 Indexação Completa de Documentos no pgvector (2026-02-07):**
 - ✅ 428/429 documentos indexados com embeddings no pgvector (1.598 chunks)
 - ✅ Pipeline adaptado para documentos sem R2 (usa `content`/`description` como fallback)
@@ -414,15 +421,15 @@ Ver código para endpoints completos.
 - Chat RAG with semantic search (Gemini)
 - Busca global com IA integrada (busca textual + semântica em paralelo)
 - Indexação pgvector completa: 428/429 docs, 1.598 chunks (DECOR, ONs, enunciados, pareceres vinculantes, acórdãos)
+- Fase 9: Automated testing (Vitest, 577 tests, 84%+ coverage)
+- Fase 10: Redis caching extensão e padronização (+50 rotas)
+- Fase 11: Monitoring (Sentry captureException em erros 500+, setUser após auth, tracking events server/client via Vercel Analytics)
 
 **🚧 In Progress:**
 - DOU classifier
 - Admin versioning UI
 
-**📋 Planned (Fases 9-11):**
-- Fase 9: Automated testing (Vitest, 80%+ coverage)
-- Fase 10: Redis caching (+70% performance)
-- Fase 11: Monitoring (Sentry, Vercel Analytics)
+**📋 Planned:**
 - Payment integration, full-text search, PWA
 
 ## Important Architecture Patterns
