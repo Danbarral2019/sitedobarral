@@ -69,7 +69,7 @@ function TreeNodeComponent({
   const paddingLeft = level * 12 + 12;
 
   return (
-    <div>
+    <div role="treeitem" aria-expanded={hasChildren ? isExpanded : undefined} aria-selected={isSelected}>
       <button
         onClick={handleClick}
         style={{ paddingLeft }}
@@ -124,7 +124,7 @@ function TreeNodeComponent({
 
       {/* Children */}
       {hasChildren && isExpanded && (
-        <div>
+        <div role="group">
           {node.children!.map((child) => (
             <TreeNodeComponent
               key={child.id}
@@ -179,7 +179,7 @@ export function ContentTree({
       </div>
 
       {/* Tree */}
-      <div className="p-2 max-h-[calc(100vh-300px)] overflow-y-auto">
+      <div role="tree" aria-label="Navegar por tipo de conteúdo" className="p-2 max-h-[calc(100vh-300px)] overflow-y-auto">
         {tree.map((node) => (
           <TreeNodeComponent
             key={node.id}

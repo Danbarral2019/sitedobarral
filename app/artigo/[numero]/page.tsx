@@ -466,7 +466,7 @@ export default function ArtigoPage() {
                   )}
 
                   {/* Artigo seguinte */}
-                  {parseInt(numero) < 193 && artigos[String(parseInt(numero) + 1)] && (
+                  {parseInt(numero) < 194 && artigos[String(parseInt(numero) + 1)] && (
                     <Link
                       href={`/artigo/${parseInt(numero) + 1}`}
                       className="block p-3 bg-gray-50 rounded-lg hover:bg-blue-50 transition-colors"

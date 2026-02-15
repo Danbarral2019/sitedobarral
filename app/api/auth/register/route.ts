@@ -58,7 +58,8 @@ export async function POST(request: NextRequest) {
     });
 
     // Se vier de um QR Code, criar matrícula no curso
-    if (courseId && qrCodeId) {
+    let resolvedCourseId: string | null = null;
+    if (qrCodeId) {
       try {
         // Verificar se o QR Code existe e é válido
         const qrCode = await prisma.qRCode.findUnique({
@@ -66,11 +67,14 @@ export async function POST(request: NextRequest) {
         });
 
         if (qrCode && new Date() < qrCode.validUntil) {
+          resolvedCourseId = qrCode.courseId;
+          const courseId = resolvedCourseId;
+
           // Verificar se usuário já tem matrícula neste curso com este QR Code
           const existingEnrollment = await prisma.enrollment.findFirst({
             where: {
               userId: user.id,
-              courseId: courseId,
+              courseId,
               qrCodeId: qrCode.id
             }
           });
@@ -107,7 +111,7 @@ export async function POST(request: NextRequest) {
               });
 
               authLogger.info(
-                { userId: user.id, email: user.email, expiresAt: expirationDate },
+                { userId: user.id, email: user.email, courseId, expiresAt: expirationDate },
                 'Enrollment created successfully'
               );
             }
@@ -136,7 +140,7 @@ export async function POST(request: NextRequest) {
         data: {
           userId: user.id,
           qrCode: qrCodeId || null,
-          courseId: courseId || null,
+          courseId: resolvedCourseId || null,
           action: 'register',
           ip: request.headers.get('x-forwarded-for') || request.headers.get('x-real-ip') || null,
           userAgent: request.headers.get('user-agent') || null,
@@ -147,7 +151,7 @@ export async function POST(request: NextRequest) {
     }
 
     authLogger.info({ userId: user.id, email: user.email }, 'User registration successful');
-    trackServerEvent('user_register', { courseId: courseId || 'none' });
+    trackServerEvent('user_register', { courseId: resolvedCourseId || 'none' });
 
     return NextResponse.json(
       {

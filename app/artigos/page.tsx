@@ -67,7 +67,7 @@ export default function ArtigosIndexPage() {
     const allArticles = Object.values(artigos);
 
     if (!articleSearch.trim()) {
-      // Retorna todos os 193 artigos
+      // Retorna todos os 195 artigos
       return allArticles.sort((a, b) => parseInt(a.numero) - parseInt(b.numero));
     }
 
@@ -220,7 +220,7 @@ export default function ArtigosIndexPage() {
               <div className="bg-white rounded-2xl shadow-lg border-2 border-gray-200 p-8">
                 <div className="mb-6">
                   <h2 className="text-2xl font-bold text-gray-900 mb-4">
-                    Todos os 193 Artigos da Lei
+                    Todos os 195 Artigos da Lei
                   </h2>
 
                   {/* Campo de busca de artigos */}

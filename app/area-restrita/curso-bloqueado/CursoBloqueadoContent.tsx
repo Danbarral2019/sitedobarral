@@ -2,7 +2,8 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { Lock, Mail, Phone, Building, ArrowLeft, CheckCircle, AlertCircle } from 'lucide-react';
+import Link from 'next/link';
+import { Lock, Mail, Building, ArrowLeft, CheckCircle, AlertCircle, CreditCard } from 'lucide-react';
 import { courses } from '@/data/courses';
 import { useAuth } from '@/hooks/use-auth';
 
@@ -131,6 +132,28 @@ export default function CursoBloqueadoContent() {
               </div>
             )}
 
+            {/* CTA de Assinatura */}
+            <div className="mb-8 p-6 bg-gradient-to-br from-purple-50 to-blue-50 border-2 border-purple-200 rounded-xl">
+              <div className="flex items-start gap-4">
+                <div className="w-12 h-12 bg-purple-600 rounded-lg flex items-center justify-center flex-shrink-0">
+                  <CreditCard className="w-6 h-6 text-white" />
+                </div>
+                <div className="flex-1">
+                  <h3 className="text-lg font-bold text-gray-900 mb-2">Acesso imediato via assinatura</h3>
+                  <p className="text-gray-700 text-sm mb-4">
+                    Assine um de nossos planos e tenha acesso imediato a este curso e todo o material exclusivo.
+                  </p>
+                  <Link
+                    href="/planos"
+                    className="inline-flex items-center gap-2 bg-purple-600 text-white px-6 py-3 rounded-lg font-bold hover:bg-purple-700 transition-colors"
+                  >
+                    <CreditCard className="w-4 h-4" />
+                    Ver Planos de Assinatura
+                  </Link>
+                </div>
+              </div>
+            </div>
+
             {/* Formulário de interesse */}
             {submitStatus !== 'success' && (
               <form onSubmit={handleSubmit} className="space-y-6">
@@ -226,10 +249,6 @@ export default function CursoBloqueadoContent() {
                 <p className="flex items-center gap-2">
                   <Mail className="w-4 h-4 text-blue-600" />
                   <strong>Email:</strong> contato@professorbarral.com.br
-                </p>
-                <p className="flex items-center gap-2">
-                  <Phone className="w-4 h-4 text-blue-600" />
-                  <strong>WhatsApp:</strong> (XX) XXXXX-XXXX
                 </p>
               </div>
             </div>

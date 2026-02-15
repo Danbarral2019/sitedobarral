@@ -4,6 +4,7 @@ import { BlogPost } from '@prisma/client';
 import type { Metadata } from 'next';
 import { getCachedPublishedBlogPosts } from '@/lib/cached-queries';
 import { getBlogPostBorderColor, getBlogPostTagColor } from '@/lib/course-colors';
+import { safeParseArray } from '@/lib/utils';
 import NewsletterForm from '@/components/NewsletterForm';
 
 export const metadata: Metadata = {
@@ -51,7 +52,7 @@ export default async function BlogPage() {
   const publishedPosts = posts.map((post: BlogPost) => ({
     ...post,
     publishedAt: new Date(post.publishedAt),
-    tags: post.tags ? JSON.parse(post.tags) : []
+    tags: safeParseArray(post.tags)
   }));
 
   const formatDate = (date: Date) => {

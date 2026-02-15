@@ -265,8 +265,8 @@ export default function SearchFilters({
                 <input
                   type="number"
                   min="1"
-                  max="193"
-                  placeholder="Nº do artigo (1-193)"
+                  max="194"
+                  placeholder="Nº do artigo (1-194)"
                   className="flex-1 px-3 py-2 text-sm border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-600"
                   onKeyPress={(e) => {
                     if (e.key === 'Enter') {

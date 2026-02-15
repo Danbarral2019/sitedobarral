@@ -309,7 +309,7 @@ export default function Lei14133Page() {
 
                   <div className="p-6 bg-indigo-50 rounded-xl border-2 border-indigo-200">
                     <div className="text-3xl mb-2">⚖️</div>
-                    <h3 className="font-bold text-gray-900 mb-1">193 Artigos</h3>
+                    <h3 className="font-bold text-gray-900 mb-1">195 Artigos</h3>
                     <p className="text-sm text-gray-600">
                       Texto completo da lei
                     </p>

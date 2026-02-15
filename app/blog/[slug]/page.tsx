@@ -5,6 +5,7 @@ import { BlogPost } from '@prisma/client';
 import { prisma } from '@/lib/prisma';
 import MarkdownContent from '@/components/MarkdownContent';
 import ShareButtons from '@/components/ShareButtons';
+import { safeParseArray } from '@/lib/utils';
 import type { Metadata } from 'next';
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
@@ -19,7 +20,7 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
     };
   }
 
-  const tags = post.tags ? JSON.parse(post.tags) : [];
+  const tags = safeParseArray(post.tags);
 
   return {
     title: post.title,
@@ -74,7 +75,7 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
   const post = {
     ...dbPost,
     publishedAt: new Date(dbPost.publishedAt),
-    tags: dbPost.tags ? JSON.parse(dbPost.tags) : []
+    tags: safeParseArray(dbPost.tags)
   };
 
   const formatDate = (date: Date) => {
@@ -109,7 +110,7 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
   const relatedPosts = relatedPostsData
     .map((p: BlogPost) => ({
       ...p,
-      tags: p.tags ? JSON.parse(p.tags) : []
+      tags: safeParseArray(p.tags)
     }))
     .filter((p: BlogPost & { tags: string[] }) => p.tags.some((tag: string) => post.tags.includes(tag)))
     .slice(0, 3);
@@ -125,6 +126,36 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
             <ArrowLeft className="w-5 h-5" />
             Voltar para o Blog
           </Link>
+
+          <script
+            type="application/ld+json"
+            dangerouslySetInnerHTML={{
+              __html: JSON.stringify({
+                '@context': 'https://schema.org',
+                '@type': 'BlogPosting',
+                headline: post.title,
+                description: post.excerpt,
+                author: {
+                  '@type': 'Person',
+                  name: post.author,
+                  url: 'https://profbarral.com.br/sobre',
+                },
+                datePublished: post.publishedAt.toISOString(),
+                dateModified: post.updatedAt?.toISOString() || post.publishedAt.toISOString(),
+                publisher: {
+                  '@type': 'Person',
+                  name: 'Prof. Daniel Barral',
+                  url: 'https://profbarral.com.br',
+                },
+                mainEntityOfPage: {
+                  '@type': 'WebPage',
+                  '@id': `https://profbarral.com.br/blog/${post.slug}`,
+                },
+                keywords: post.tags.join(', '),
+                inLanguage: 'pt-BR',
+              }),
+            }}
+          />
 
           <article className="bg-white rounded-lg shadow-lg p-8">
             <header className="mb-8">

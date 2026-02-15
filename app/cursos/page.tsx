@@ -58,10 +58,17 @@ export default function CursosPage() {
               </div>
               <div>
                 <h2 className="text-2xl font-bold mb-3 text-brand-900">Como acessar o material exclusivo?</h2>
-                <p className="text-brand-900 text-lg leading-relaxed">
-                  Ao participar de nossos cursos presenciais abertos ou de curta duração,
-                  você receberá um QR Code exclusivo para acessar todo o material complementar
-                  do curso, incluindo apostilas, acórdãos do TCU, pareceres da AGU e muito mais.
+                <p className="text-brand-900 text-lg leading-relaxed mb-3">
+                  Ao participar de nossos cursos presenciais, você receberá um <strong>QR Code exclusivo</strong> com
+                  acesso gratuito por 1 mês ao material complementar do curso, incluindo apostilas,
+                  acórdãos do TCU, pareceres da AGU e muito mais.
+                </p>
+                <p className="text-brand-900 text-base leading-relaxed">
+                  Deseja acesso contínuo? Conheça nossos{' '}
+                  <a href="/planos" className="text-brand-600 font-semibold underline hover:text-brand-700">
+                    planos de assinatura
+                  </a>{' '}
+                  a partir de R$ {process.env.NEXT_PUBLIC_PRICE_BASICO || '49,90'}/mês.
                 </p>
               </div>
             </div>

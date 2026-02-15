@@ -278,7 +278,7 @@ export default function BuscaIntegradaPage() {
                 <div className="p-6 bg-blue-50 rounded-xl border-2 border-blue-200">
                   <Gavel className="w-12 h-12 text-blue-600 mx-auto mb-3" />
                   <h3 className="font-bold text-gray-900 mb-2">Lei 14.133/2021</h3>
-                  <p className="text-sm text-gray-600">193 artigos organizados por capítulos</p>
+                  <p className="text-sm text-gray-600">195 artigos organizados por capítulos</p>
                 </div>
 
                 <div className="p-6 bg-indigo-50 rounded-xl border-2 border-indigo-200">

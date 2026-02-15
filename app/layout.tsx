@@ -116,7 +116,7 @@ export default function RootLayout({
         <ToastProviderWrapper>
           <div className="min-h-screen flex flex-col">
             <Header />
-            <div className="flex-1">
+            <div id="main-content" className="flex-1">
               {children}
             </div>
             <Footer />

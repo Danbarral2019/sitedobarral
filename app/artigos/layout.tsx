@@ -2,7 +2,7 @@ import { Metadata } from 'next';
 
 export const metadata: Metadata = {
   title: 'Lei 14.133/2021 - Todos os Artigos | Prof. Daniel Barral',
-  description: 'Explore todos os 193 artigos da Nova Lei de Licitações e Contratos (Lei 14.133/2021) com materiais didáticos, jurisprudência e comentários do Prof. Daniel Barral.',
+  description: 'Explore todos os 195 artigos da Nova Lei de Licitações e Contratos (Lei 14.133/2021) com materiais didáticos, jurisprudência e comentários do Prof. Daniel Barral.',
   keywords: [
     'lei 14133',
     'nova lei de licitações',
@@ -16,7 +16,7 @@ export const metadata: Metadata = {
   ],
   openGraph: {
     title: 'Lei 14.133/2021 - Todos os Artigos Comentados',
-    description: 'Acesse todos os 193 artigos da Nova Lei de Licitações com análises, materiais e jurisprudência.',
+    description: 'Acesse todos os 195 artigos da Nova Lei de Licitações com análises, materiais e jurisprudência.',
     url: 'https://profbarral.com.br/artigos',
     siteName: 'Prof. Daniel Barral - Direito Administrativo',
     locale: 'pt_BR',
@@ -25,7 +25,7 @@ export const metadata: Metadata = {
   twitter: {
     card: 'summary_large_image',
     title: 'Lei 14.133/2021 - Todos os Artigos',
-    description: 'Explore todos os 193 artigos da Nova Lei de Licitações com materiais didáticos.',
+    description: 'Explore todos os 195 artigos da Nova Lei de Licitações com materiais didáticos.',
     creator: '@profbarral',
   },
   alternates: {
@@ -52,7 +52,7 @@ export default function ArtigosLayout({
             '@context': 'https://schema.org',
             '@type': 'CollectionPage',
             name: 'Lei 14.133/2021 - Todos os Artigos',
-            description: 'Coleção completa dos 193 artigos da Nova Lei de Licitações e Contratos (Lei 14.133/2021)',
+            description: 'Coleção completa dos 195 artigos da Nova Lei de Licitações e Contratos (Lei 14.133/2021)',
             url: 'https://profbarral.com.br/artigos',
             inLanguage: 'pt-BR',
             about: {

@@ -4,7 +4,7 @@ import { verifyToken } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
 import ChatInterface from '@/components/ChatInterface';
 import Link from 'next/link';
-import { ArrowLeft, Sparkles, BookOpen, MessageSquare, Zap } from 'lucide-react';
+import { ArrowLeft, Sparkles, BookOpen, MessageSquare, Zap, Lock, CreditCard } from 'lucide-react';
 
 export const metadata = {
   title: 'Assistente Inteligente - Prof. Daniel Barral',
@@ -65,9 +65,83 @@ export default async function AssistentePage() {
     redirect('/area-restrita?error=no-enrollment');
   }
 
-  // 3. Get primary course (most recent enrollment)
+  // 3. Check if user has Premium subscription (IA is Premium-only)
+  const activeSubscription = await prisma.subscription.findFirst({
+    where: {
+      userId: payload.userId,
+      status: 'active',
+    },
+  });
+
+  const hasPremium = activeSubscription?.plan === 'premium';
+
+  // 4. Get primary course (most recent enrollment)
   const primaryEnrollment = enrollments[0];
   const courseTitle = COURSE_TITLES[primaryEnrollment.courseId] || 'Curso não encontrado';
+
+  // If not Premium, show upgrade page instead of chat
+  if (!hasPremium) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
+        <div className="container mx-auto px-4 py-8">
+          <div className="max-w-3xl mx-auto">
+            <Link
+              href="/area-restrita"
+              className="inline-flex items-center gap-2 text-blue-600 hover:text-blue-800 mb-4 transition-colors text-sm font-medium"
+            >
+              <ArrowLeft className="w-4 h-4" />
+              Voltar para Área Restrita
+            </Link>
+
+            <div className="bg-white rounded-2xl shadow-lg p-8 border-2 border-purple-200 text-center">
+              <div className="w-20 h-20 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-6">
+                <Lock className="w-10 h-10 text-purple-600" />
+              </div>
+
+              <h1 className="text-3xl font-bold text-gray-900 mb-3">
+                Recurso Exclusivo Premium
+              </h1>
+
+              <p className="text-lg text-gray-600 mb-6 max-w-xl mx-auto">
+                O Assistente Inteligente com IA é um recurso exclusivo do plano <strong>Premium</strong>.
+                Faça perguntas sobre documentos, receba respostas com citações de fontes e muito mais.
+              </p>
+
+              <div className="grid md:grid-cols-3 gap-4 mb-8">
+                <div className="p-4 bg-blue-50 rounded-lg">
+                  <BookOpen className="w-6 h-6 text-blue-600 mx-auto mb-2" />
+                  <p className="text-sm font-semibold text-gray-900">Busca Semântica</p>
+                  <p className="text-xs text-gray-600 mt-1">Entende o contexto da pergunta</p>
+                </div>
+                <div className="p-4 bg-purple-50 rounded-lg">
+                  <MessageSquare className="w-6 h-6 text-purple-600 mx-auto mb-2" />
+                  <p className="text-sm font-semibold text-gray-900">Citações de Fontes</p>
+                  <p className="text-xs text-gray-600 mt-1">Referências documentais</p>
+                </div>
+                <div className="p-4 bg-green-50 rounded-lg">
+                  <Zap className="w-6 h-6 text-green-600 mx-auto mb-2" />
+                  <p className="text-sm font-semibold text-gray-900">Respostas Rápidas</p>
+                  <p className="text-xs text-gray-600 mt-1">Cache inteligente</p>
+                </div>
+              </div>
+
+              <Link
+                href="/planos"
+                className="inline-flex items-center gap-2 bg-purple-600 text-white px-8 py-4 rounded-xl font-bold hover:bg-purple-700 transition-colors shadow-lg"
+              >
+                <CreditCard className="w-5 h-5" />
+                Assinar Plano Premium
+              </Link>
+
+              <p className="text-sm text-gray-500 mt-4">
+                A partir de R$ {process.env.NEXT_PUBLIC_PRICE_PREMIUM || '89,90'}/mês
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
