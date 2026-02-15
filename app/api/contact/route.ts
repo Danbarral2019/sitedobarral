@@ -6,6 +6,7 @@ import { verifyAuth } from '@/lib/auth';
 import { handleApiError } from '@/lib/errors/error-handler';
 import { AuthenticationError, AuthorizationError, ValidationError } from '@/lib/errors/api-error';
 import { apiLogger } from '@/lib/logger';
+import { trackServerEvent } from '@/lib/monitoring/events';
 
 
 // POST - Enviar mensagem de contato
@@ -88,6 +89,8 @@ export async function POST(request: NextRequest) {
       apiLogger.error({ err: error, contactId: contact.id }, 'Erro ao enviar notificacao de contato');
       // Não propaga o erro - o contato já foi salvo com sucesso
     });
+
+    trackServerEvent('contact_form');
 
     return NextResponse.json(
       {

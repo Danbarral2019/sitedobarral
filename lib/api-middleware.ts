@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import * as Sentry from '@sentry/nextjs';
 import { enforceRateLimit, getClientIp } from '@/lib/cache/rate-limit-helper';
 import { RateLimitError } from '@/lib/errors/api-error';
 
@@ -38,6 +39,9 @@ export function withAdminAuth(handler: ApiHandler): ApiHandler {
           { status: 403 }
         );
       }
+
+      // Set Sentry user context for error tracking
+      Sentry.setUser({ id: user.userId, email: user.email, role: user.role });
 
       // Passa o usuário autenticado no context para o handler
       return handler(request, { ...context, user });
@@ -94,6 +98,9 @@ export function withAuth(handler: ApiHandler): ApiHandler {
           { status: 401 }
         );
       }
+
+      // Set Sentry user context for error tracking
+      Sentry.setUser({ id: user.userId, email: user.email, role: user.role });
 
       // Passa o usuário autenticado no context para o handler
       return handler(request, { ...context, user });

@@ -9,6 +9,7 @@ import { RegisterSchema } from '@/lib/validation-schemas';
 import { handleApiError } from '@/lib/errors/error-handler';
 import { ConflictError } from '@/lib/errors/api-error';
 import { authLogger } from '@/lib/logger';
+import { trackServerEvent } from '@/lib/monitoring/events';
 
 export async function POST(request: NextRequest) {
   try {
@@ -146,6 +147,7 @@ export async function POST(request: NextRequest) {
     }
 
     authLogger.info({ userId: user.id, email: user.email }, 'User registration successful');
+    trackServerEvent('user_register', { courseId: courseId || 'none' });
 
     return NextResponse.json(
       {

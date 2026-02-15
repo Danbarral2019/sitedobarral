@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
+import { trackServerEvent } from '@/lib/monitoring/events';
 
 export async function POST(request: NextRequest) {
   try {
@@ -42,6 +43,8 @@ export async function POST(request: NextRequest) {
         { status: 403 }
       );
     }
+
+    trackServerEvent('qr_scan', { courseId: qrCodeData.courseId });
 
     // Retorna informações do QR Code válido
     // O sistema permitirá registro de múltiplos alunos até atingir maxUses

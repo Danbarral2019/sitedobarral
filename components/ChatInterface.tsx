@@ -3,6 +3,7 @@
 import { useState, useRef, useEffect } from 'react';
 import Link from 'next/link';
 import { Send, Loader2, Sparkles, FileText, AlertCircle, Scale, Gavel, ExternalLink } from 'lucide-react';
+import { trackClientEvent } from '@/lib/monitoring/track-client';
 
 // ===========================
 // Types
@@ -103,6 +104,7 @@ export default function ChatInterface({
     }
 
     console.log('[ChatInterface] Proceeding with query:', query);
+    trackClientEvent('chat_message_sent', { query_length: query.length });
     setError(null);
     setInput('');
 

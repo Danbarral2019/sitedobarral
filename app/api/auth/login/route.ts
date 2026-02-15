@@ -11,6 +11,7 @@ import {
   AuthorizationError,
 } from '@/lib/errors/api-error';
 import { authLogger } from '@/lib/logger';
+import { trackServerEvent } from '@/lib/monitoring/events';
 
 export async function POST(request: NextRequest) {
   try {
@@ -92,6 +93,7 @@ export async function POST(request: NextRequest) {
     }
 
     authLogger.info({ userId: user.id, email: user.email }, 'Login successful');
+    trackServerEvent('user_login', { role: user.role });
 
     // Criar resposta com cookie
     const response = NextResponse.json(

@@ -16,6 +16,7 @@ import {
 } from 'lucide-react';
 import type { ContentType, GlobalSearchResponse } from '@/lib/types/global-search';
 import { CONTENT_TYPE_CONFIG } from '@/lib/types/global-search';
+import { trackClientEvent } from '@/lib/monitoring/track-client';
 
 interface GlobalSearchBarProps {
   query: string;
@@ -92,6 +93,7 @@ export function GlobalSearchBar({
   const handleInputKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Enter') {
       e.preventDefault();
+      trackClientEvent('search_performed', { query_length: query.length, ai_enabled: aiEnabled });
       onSubmit();
     }
   };

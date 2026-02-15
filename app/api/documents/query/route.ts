@@ -5,6 +5,7 @@ import { semanticSearch, buildContextForLLM } from '@/lib/embeddings/vector-sear
 import type { SearchResult } from '@/lib/embeddings/vector-search';
 import { queryGeminiText } from '@/lib/gemini/cached-client';
 import { checkRateLimit } from '@/lib/cache/redis-client';
+import { trackServerEvent } from '@/lib/monitoring/events';
 import {
   extractCitedArticles,
   buildLeiContext,
@@ -387,6 +388,7 @@ RESPOSTA:`;
     const latency = Date.now() - startTime;
 
     console.log(`   ✅ Returned ${results.length} results + ${legalSources.length} legal sources (latency: ${latency}ms)`);
+    trackServerEvent('ai_search', { resultCount: results.length });
 
     // 14. Return response
     return NextResponse.json<QueryResponse>({

@@ -4,6 +4,7 @@ import { verifyAuth } from '@/lib/auth';
 import { handleApiError } from '@/lib/errors/error-handler';
 import { AuthenticationError, ValidationError, NotFoundError } from '@/lib/errors/api-error';
 import { apiLogger } from '@/lib/logger';
+import { trackServerEvent } from '@/lib/monitoring/events';
 
 export async function POST(request: NextRequest) {
   try {
@@ -67,6 +68,7 @@ export async function POST(request: NextRequest) {
     }
 
     apiLogger.info({ userId: auth.user.userId, courseId }, 'Lifetime upgrade successful');
+    trackServerEvent('enrollment_upgrade', { courseId });
 
     return NextResponse.json(
       {

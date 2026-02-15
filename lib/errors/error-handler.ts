@@ -12,6 +12,7 @@
 import { NextResponse } from 'next/server';
 import { ZodError } from 'zod';
 import { Prisma } from '@prisma/client';
+import * as Sentry from '@sentry/nextjs';
 import { apiLogger } from '../logger';
 import { ApiError, isOperationalError } from './api-error';
 
@@ -48,6 +49,8 @@ export function handleApiError(error: unknown, includeStackTrace = false): NextR
       },
       'Unexpected API error'
     );
+    // Report unexpected errors to Sentry
+    Sentry.captureException(error);
   }
 
   // 1. ApiError customizado
@@ -135,6 +138,7 @@ export function handleApiError(error: unknown, includeStackTrace = false): NextR
   }
 
   // 5. Erro genérico (unexpected)
+  Sentry.captureException(error);
   return NextResponse.json(
     {
       error: 'Erro interno do servidor',
@@ -158,6 +162,7 @@ function handlePrismaError(
   // Prisma Validation Error (mal uso da API)
   if (error instanceof Prisma.PrismaClientValidationError) {
     apiLogger.error({ err: error }, 'Prisma validation error');
+    Sentry.captureException(error);
     return NextResponse.json(
       {
         error: 'Erro de validação no banco de dados',
@@ -225,6 +230,7 @@ function handlePrismaError(
     // P2024: Timed out fetching new connection from pool
     case 'P2024':
       apiLogger.error({ err: prismaError }, 'Database connection timeout');
+      Sentry.captureException(prismaError);
       return NextResponse.json(
         {
           error: 'Banco de dados temporariamente indisponível',
@@ -237,6 +243,7 @@ function handlePrismaError(
     // P1001: Can't reach database server
     case 'P1001':
       apiLogger.error({ err: prismaError }, 'Database unreachable');
+      Sentry.captureException(prismaError);
       return NextResponse.json(
         {
           error: 'Não foi possível conectar ao banco de dados',
@@ -249,6 +256,7 @@ function handlePrismaError(
     // P1017: Server has closed the connection
     case 'P1017':
       apiLogger.error({ err: prismaError }, 'Database connection closed');
+      Sentry.captureException(prismaError);
       return NextResponse.json(
         {
           error: 'Conexão com banco de dados perdida',
@@ -264,6 +272,7 @@ function handlePrismaError(
         { err: prismaError, code: prismaError.code },
         `Unhandled Prisma error: ${prismaError.code}`
       );
+      Sentry.captureException(prismaError);
       return NextResponse.json(
         {
           error: 'Erro no banco de dados',

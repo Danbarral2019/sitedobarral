@@ -3,6 +3,7 @@ import { enforceRateLimit, getClientIp } from '@/lib/cache/rate-limit-helper';
 import { RateLimitError } from '@/lib/errors/api-error';
 import { addSubscriber, unsubscribeSubscriber, isMailChimpConfigured } from '@/lib/mailchimp';
 import { prisma } from '@/lib/prisma';
+import { trackServerEvent } from '@/lib/monitoring/events';
 
 // POST - Cadastrar na newsletter
 export async function POST(request: NextRequest) {
@@ -102,6 +103,8 @@ export async function POST(request: NextRequest) {
         // Não falha a requisição se MailChimp falhar - email já foi salvo no BD
       }
     }
+
+    trackServerEvent('newsletter_signup');
 
     return NextResponse.json(
       {

@@ -7,6 +7,7 @@ import { checkAccessStatus } from '@/lib/enrollment-utils';
 import { handleApiError } from '@/lib/errors/error-handler';
 import { AuthenticationError, AuthorizationError, NotFoundError } from '@/lib/errors/api-error';
 import { apiLogger } from '@/lib/logger';
+import { trackServerEvent } from '@/lib/monitoring/events';
 
 export async function GET(
   request: NextRequest,
@@ -98,6 +99,7 @@ export async function GET(
     }
 
     apiLogger.info({ userId: user.id, documentId: document.id }, 'Document download successful');
+    trackServerEvent('document_download', { documentId: document.id, courseId: document.courseId as string });
 
     // Permitir download
     return await downloadFile(document);
