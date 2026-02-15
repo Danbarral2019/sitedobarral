@@ -311,5 +311,100 @@ describe('Auth Module', () => {
       const result = await verifyToken('');
       expect(result).toBeNull();
     });
+
+    it('deve retornar null quando jwtVerify retorna payload inválido', async () => {
+      const jose = await import('jose');
+      vi.mocked(jose.jwtVerify).mockResolvedValueOnce({
+        payload: { userId: '', role: 'invalid' },
+        protectedHeader: { alg: 'HS256' },
+      } as never);
+
+      const { verifyToken } = await import('../auth');
+      const result = await verifyToken('valid.token');
+      expect(result).toBeNull();
+    });
+  });
+
+  describe('generateToken — edge cases', () => {
+    it('deve gerar token com validUntil futuro', async () => {
+      const { generateToken } = await import('../auth');
+      const futureDate = new Date(Date.now() + 86400000).toISOString();
+
+      const token = await generateToken({
+        userId: 'user-123',
+        role: 'student',
+        validUntil: futureDate,
+      });
+      expect(token).toBe('mock.jwt.token');
+    });
+
+    it('deve lançar erro para validUntil no passado', async () => {
+      const { generateToken } = await import('../auth');
+      const pastDate = new Date(Date.now() - 86400000).toISOString();
+
+      await expect(generateToken({
+        userId: 'user-123',
+        role: 'student',
+        validUntil: pastDate,
+      })).rejects.toThrow('Acesso expirado');
+    });
+
+    it('deve lançar erro para validUntil com data inválida', async () => {
+      const { generateToken } = await import('../auth');
+
+      await expect(generateToken({
+        userId: 'user-123',
+        role: 'student',
+        validUntil: 'invalid-date-format' as unknown as string,
+      })).rejects.toThrow();
+    });
+
+    it('deve gerar token para admin sem courseId', async () => {
+      const { generateToken } = await import('../auth');
+
+      const token = await generateToken(adminPayload);
+      expect(token).toBe('mock.jwt.token');
+    });
+  });
+
+  describe('verifyAuth (via NextRequest mock)', () => {
+    it('deve retornar valid:false sem cookie', async () => {
+      const { verifyAuth } = await import('../auth');
+
+      const request = new Request('http://localhost:3000/api/test');
+      const nextRequest = {
+        cookies: { get: vi.fn().mockReturnValue(undefined) },
+        headers: new Headers(),
+      } as unknown as import('next/server').NextRequest;
+
+      const result = await verifyAuth(nextRequest);
+      expect(result.valid).toBe(false);
+      expect(result.user).toBeUndefined();
+    });
+
+    it('deve retornar valid:true com cookie válido', async () => {
+      const { verifyAuth } = await import('../auth');
+
+      const nextRequest = {
+        cookies: { get: vi.fn().mockReturnValue({ value: 'mock.jwt.token' }) },
+        headers: new Headers(),
+      } as unknown as import('next/server').NextRequest;
+
+      const result = await verifyAuth(nextRequest);
+      expect(result.valid).toBe(true);
+      expect(result.user?.userId).toBe('user-123');
+    });
+
+    it('deve retornar valid:false com cookie inválido', async () => {
+      const { verifyAuth } = await import('../auth');
+
+      const nextRequest = {
+        cookies: { get: vi.fn().mockReturnValue({ value: 'bad-token' }) },
+        headers: new Headers(),
+      } as unknown as import('next/server').NextRequest;
+
+      const result = await verifyAuth(nextRequest);
+      expect(result.valid).toBe(false);
+    });
   });
 });

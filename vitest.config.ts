@@ -8,9 +8,16 @@ export default defineConfig({
     environment: 'jsdom',
     setupFiles: ['./test/setup.ts'],
     globals: true,
-    // Usar ambiente node para testes de API e JWT
+    // Usar ambiente node para testes de API, JWT, rate-limit, error-handler, DOU
     environmentMatchGlobs: [
       ['lib/__tests__/auth.test.ts', 'node'],
+      ['lib/__tests__/rate-limit.test.ts', 'node'],
+      ['lib/__tests__/validation-helper.test.ts', 'node'],
+      ['lib/__tests__/dou-*.test.ts', 'node'],
+      ['lib/__tests__/search-utils.test.ts', 'node'],
+      ['lib/__tests__/enrollment-utils.test.ts', 'node'],
+      ['lib/errors/__tests__/*.test.ts', 'node'],
+      ['lib/embeddings/__tests__/*.test.ts', 'node'],
       ['app/api/**/*.test.ts', 'node'],
     ],
     coverage: {
@@ -31,9 +38,12 @@ export default defineConfig({
         // Funcionalidades futuras não testadas ainda
         'FUNCIONALIDADES_FUTURAS/',
       ],
-      // Thresholds desativados inicialmente
-      // TODO: Aumentar gradualmente conforme mais testes forem adicionados
-      // Meta futura: lines 80%, functions 80%, branches 70%, statements 80%
+      thresholds: {
+        lines: 80,
+        functions: 80,
+        branches: 70,
+        statements: 80,
+      },
     },
     // Timeout maior para testes assíncronos
     testTimeout: 10000,
