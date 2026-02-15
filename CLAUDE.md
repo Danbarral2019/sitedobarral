@@ -424,10 +424,10 @@ Ver código para endpoints completos.
 - Fase 9: Automated testing (Vitest, 577 tests, 84%+ coverage)
 - Fase 10: Redis caching extensão e padronização (+50 rotas)
 - Fase 11: Monitoring (Sentry captureException em erros 500+, setUser após auth, tracking events server/client via Vercel Analytics)
+- Admin Versioning UI: histórico de versões (timeline), diff viewer, seção collapsible na página de edição
 
 **🚧 In Progress:**
 - DOU classifier
-- Admin versioning UI
 
 **📋 Planned:**
 - Payment integration, full-text search, PWA
