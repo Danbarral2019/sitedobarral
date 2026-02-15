@@ -8,6 +8,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { ScrollToTop } from "@/components/ui/scroll-to-top";
 import Analytics from "@/components/Analytics";
 import WelcomeModal from "@/components/WelcomeModal";
+import { PWAProvider } from "@/components/PWAProvider";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import { Analytics as VercelAnalytics } from "@vercel/analytics/react";
 
@@ -29,10 +30,17 @@ export const metadata: Metadata = {
     template: '%s | Prof. Daniel Barral',
     default: 'Prof. Daniel Barral - Especialista em Licitações e Contratos',
   },
+  manifest: '/manifest.webmanifest',
+  themeColor: '#20364e',
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: 'default',
+    title: 'Prof. Barral',
+  },
   icons: {
     icon: '/brand/sublogo.png',
     shortcut: '/brand/sublogo.png',
-    apple: '/brand/sublogo.png',
+    apple: '/icons/apple-touch-icon.png',
   },
   description: "Repositório especializado de materiais jurídicos em Direito Administrativo. Cursos sobre licitações, contratos administrativos, Nova Lei 14.133/2021 e mais.",
   keywords: [
@@ -116,6 +124,7 @@ export default function RootLayout({
           <Toaster />
           <ScrollToTop />
           <WelcomeModal />
+          <PWAProvider />
         </ToastProviderWrapper>
       </body>
     </html>
