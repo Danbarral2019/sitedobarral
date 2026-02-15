@@ -178,6 +178,9 @@ model Document {
   // Relacionamento com destaques TCU
   highlights TcuHighlight[]
 
+  // Full-Text Search (gerido via triggers SQL, não pelo Prisma)
+  search_vector Unsupported("tsvector")?
+
   @@index([embeddingStatus]) // Índice para buscar documentos por status de embedding
 }
 
@@ -357,6 +360,9 @@ model BlogPost {
 
   socialMediaPosts   SocialMediaPost[]  // Relação com publicações sociais
 
+  // Full-Text Search
+  search_vector Unsupported("tsvector")?
+
   @@index([slug])
   @@index([isPublished])
   @@index([publishedAt])
@@ -497,6 +503,9 @@ model RecommendedSite {
   // Relação many-to-many com cursos
   courses     SiteToCourse[]
 
+  // Full-Text Search
+  search_vector Unsupported("tsvector")?
+
   @@index([isActive])
   @@index([displayOrder])
 }
@@ -532,6 +541,9 @@ model CourseVideo {
 
   // Relacionamento com lições (LMS)
   lessonVideos LessonVideo[]
+
+  // Full-Text Search
+  search_vector Unsupported("tsvector")?
 
   @@index([courseId])
   @@index([isActive])
@@ -605,6 +617,9 @@ model GlossaryTerm {
   updatedAt    DateTime @updatedAt
   createdBy    String?  // Email do admin
 
+  // Full-Text Search
+  search_vector Unsupported("tsvector")?
+
   @@index([term])
   @@index([slug])
   @@index([category])
@@ -669,6 +684,9 @@ model LegislativeAct {
   // Relacionamento com favoritos
   favorites Favorite[]
 
+  // Full-Text Search
+  search_vector Unsupported("tsvector")?
+
   // Índices para otimização
   @@index([type])
   @@index([issuer])
@@ -713,6 +731,9 @@ model FAQ {
 
   // Relacionamento com feedbacks
   feedbacks FAQFeedback[]
+
+  // Full-Text Search
+  search_vector Unsupported("tsvector")?
 
   // Auditoria
   createdAt    DateTime @default(now())

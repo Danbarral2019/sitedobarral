@@ -19,6 +19,8 @@ import {
   CheckSquare,
   Square,
   Download,
+  HelpCircle,
+  Newspaper,
 } from 'lucide-react';
 import type {
   SearchResultItem,
@@ -29,6 +31,8 @@ import type {
   VideoResult,
   SiteResult,
   LegislativeActResult,
+  FAQResult,
+  BlogPostResult,
 } from '@/lib/types/global-search';
 import { CONTENT_TYPE_CONFIG } from '@/lib/types/global-search';
 import type { AISource, LegalSource } from '@/hooks/use-global-search';
@@ -58,7 +62,9 @@ const TYPE_ICONS: Record<ContentType, typeof FileText> = {
   'course-material': FileText,
   lei: Scale,
   glossary: BookOpen,
+  faq: HelpCircle,
   video: Video,
+  blog: Newspaper,
   site: Globe,
   'legislative-act': Gavel,
 };
@@ -664,6 +670,72 @@ function SiteResultCard({ site, query }: { site: SiteResult; query: string }) {
   );
 }
 
+// FAQ Result Card
+function FAQResultCard({ faq, query }: { faq: FAQResult; query: string }) {
+  const [isExpanded, setIsExpanded] = useState(false);
+
+  return (
+    <div className="bg-white rounded-xl border border-gray-200 p-4 hover:border-violet-300 hover:shadow-md transition-all">
+      <div className="flex items-start gap-3">
+        <div className="p-2 rounded-lg bg-violet-50 text-violet-600 flex-shrink-0">
+          <HelpCircle className="w-5 h-5" />
+        </div>
+        <div className="flex-1 min-w-0">
+          <div className="flex items-center justify-between">
+            <h4 className="font-semibold text-gray-900 text-sm group-hover:text-violet-600 transition-colors">
+              {highlightText(faq.question, query)}
+            </h4>
+            <button
+              onClick={() => setIsExpanded(!isExpanded)}
+              className="p-1 text-gray-400 hover:text-gray-600"
+            >
+              {isExpanded ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+            </button>
+          </div>
+          <p className={`text-sm text-gray-600 mt-1 ${isExpanded ? '' : 'line-clamp-2'}`}>
+            {highlightText(faq.answer, query)}
+          </p>
+          <span className="inline-block mt-2 px-2 py-0.5 rounded-full text-xs font-medium bg-violet-50 text-violet-700">
+            {faq.category}
+          </span>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// Blog Post Result Card
+function BlogPostResultCard({ post, query }: { post: BlogPostResult; query: string }) {
+  return (
+    <Link
+      href={`/blog/${post.slug}`}
+      className="block bg-white rounded-xl border border-gray-200 p-4 hover:border-orange-300 hover:shadow-md transition-all group"
+    >
+      <div className="flex items-start gap-3">
+        <div className="p-2 rounded-lg bg-orange-50 text-orange-600 flex-shrink-0">
+          <Newspaper className="w-5 h-5" />
+        </div>
+        <div className="flex-1 min-w-0">
+          <h4 className="font-semibold text-gray-900 text-sm group-hover:text-orange-600 transition-colors">
+            {highlightText(post.title, query)}
+          </h4>
+          <p className="text-sm text-gray-600 mt-1 line-clamp-2">
+            {highlightText(post.excerpt, query)}
+          </p>
+          <div className="flex items-center gap-2 mt-2">
+            <span className="px-2 py-0.5 rounded-full text-xs font-medium bg-orange-50 text-orange-700">
+              {post.author}
+            </span>
+            <span className="text-xs text-gray-400">
+              {new Date(post.publishedAt).toLocaleDateString('pt-BR')}
+            </span>
+          </div>
+        </div>
+      </div>
+    </Link>
+  );
+}
+
 // Legislative Act Result Card
 function LegislativeActResultCard({ act, query }: { act: LegislativeActResult; query: string }) {
   const typeLabels: Record<string, string> = {
@@ -965,8 +1037,10 @@ export function SearchResultsList({
             'legislative-act': 3,
             'lei': 4,
             'glossary': 5,
-            'video': 6,
-            'site': 7,
+            'faq': 6,
+            'video': 7,
+            'blog': 8,
+            'site': 9,
           };
           return (TYPE_PRIORITY[a] ?? 10) - (TYPE_PRIORITY[b] ?? 10);
         })
@@ -1047,6 +1121,12 @@ export function SearchResultsList({
                     case 'site':
                       const site = item.data as SiteResult;
                       return <SiteResultCard key={site.id} site={site} query={query} />;
+                    case 'faq':
+                      const faq = item.data as FAQResult;
+                      return <FAQResultCard key={faq.id} faq={faq} query={query} />;
+                    case 'blog':
+                      const post = item.data as BlogPostResult;
+                      return <BlogPostResultCard key={post.id} post={post} query={query} />;
                     case 'legislative-act':
                       const act = item.data as LegislativeActResult;
                       return <LegislativeActResultCard key={act.id} act={act} query={query} />;

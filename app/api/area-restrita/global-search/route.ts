@@ -3,6 +3,18 @@ import { prisma } from '@/lib/prisma';
 import { verifyToken } from '@/lib/auth';
 import { searchLeiArticlesWithExcerpts } from '@/data/lei-14133-artigos';
 import { courses } from '@/data/courses';
+import { handleApiError } from '@/lib/errors/error-handler';
+import { AuthenticationError, NotFoundError } from '@/lib/errors/api-error';
+import { apiLogger } from '@/lib/logger';
+import {
+  searchDocuments,
+  searchGlossary,
+  searchLegislativeActs,
+  searchVideos,
+  searchSites,
+  searchBlogPosts,
+  searchFAQs,
+} from '@/lib/search/full-text-search';
 import type {
   ContentType,
   GlobalSearchResponse,
@@ -13,6 +25,8 @@ import type {
   VideoResult,
   SiteResult,
   LegislativeActResult,
+  FAQResult,
+  BlogPostResult,
 } from '@/lib/types/global-search';
 
 // Helper to get course name by ID
@@ -21,17 +35,28 @@ function getCourseName(courseId: string): string {
   return course?.title || 'Curso';
 }
 
+// Safe JSON array parser
+function safeParseArray(value: string | null): string[] {
+  if (!value) return [];
+  try {
+    const parsed = JSON.parse(value);
+    return Array.isArray(parsed) ? parsed : [];
+  } catch {
+    return value.split(',').map(s => s.trim()).filter(s => s.length > 0);
+  }
+}
+
 export async function GET(request: NextRequest) {
   try {
     // Verify authentication
     const token = request.cookies.get('auth-token')?.value;
     if (!token) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+      throw new AuthenticationError();
     }
 
     const authPayload = await verifyToken(token);
     if (!authPayload) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+      throw new AuthenticationError();
     }
 
     const isAdmin = authPayload.role === 'admin';
@@ -50,7 +75,7 @@ export async function GET(request: NextRequest) {
     });
 
     if (!user) {
-      return NextResponse.json({ error: 'User not found' }, { status: 404 });
+      throw new NotFoundError('Usuário');
     }
 
     // Get enrolled course IDs
@@ -66,7 +91,7 @@ export async function GET(request: NextRequest) {
     // Parse types filter
     const requestedTypes: ContentType[] = typesParam
       ? (typesParam.split(',') as ContentType[])
-      : ['document', 'lei', 'glossary', 'video', 'site', 'legislative-act'];
+      : ['document', 'lei', 'glossary', 'faq', 'video', 'blog', 'site', 'legislative-act'];
 
     // Empty query - return empty results
     if (!query || query.length < 2) {
@@ -79,6 +104,7 @@ export async function GET(request: NextRequest) {
           glossary: 0,
           faq: 0,
           video: 0,
+          blog: 0,
           site: 0,
           'legislative-act': 0,
           total: 0,
@@ -88,11 +114,13 @@ export async function GET(request: NextRequest) {
     }
 
     const results: SearchResultItem[] = [];
-    const counts = {
+    const counts: GlobalSearchResponse['counts'] = {
       document: 0,
       lei: 0,
       glossary: 0,
+      faq: 0,
       video: 0,
+      blog: 0,
       site: 0,
       'legislative-act': 0,
       total: 0,
@@ -101,51 +129,18 @@ export async function GET(request: NextRequest) {
     // Run searches in parallel
     const searchPromises: Promise<void>[] = [];
 
-    // 1. Search Documents
+    // 1. Search Documents (FTS)
     if (requestedTypes.includes('document')) {
       searchPromises.push(
         (async () => {
-          const documents = await prisma.document.findMany({
-            where: {
-              OR: [
-                { title: { contains: query, mode: 'insensitive' } },
-                { description: { contains: query, mode: 'insensitive' } },
-                { tags: { contains: query, mode: 'insensitive' } },
-                { content: { contains: query, mode: 'insensitive' } },
-              ],
-              AND: [
-                {
-                  OR: [
-                    { isCommon: true },
-                    { isPublic: true },
-                    ...(enrolledCourseIds.length > 0
-                      ? [{ courseId: { in: enrolledCourseIds } }]
-                      : []),
-                  ],
-                },
-                // Excluir categorias que já possuem tipos dedicados (lei e legislative-act)
-                { category: { notIn: ['lei-artigo', 'ato-normativo', 'boa_pratica'] } },
-              ],
-            },
-            select: {
-              id: true,
-              title: true,
-              description: true,
-              category: true,
-              type: true,
-              url: true,
-              courseId: true,
-              tags: true,
-              uploadedAt: true,
-              isPublic: true,
-            },
-            orderBy: { uploadedAt: 'desc' },
-            take: limit,
+          const ftsResults = await searchDocuments(query, {
+            enrolledCourseIds,
+            limit,
           });
 
-          counts.document = documents.length;
+          counts.document = ftsResults.length;
 
-          documents.forEach((doc) => {
+          ftsResults.forEach(({ data: doc }) => {
             results.push({
               type: 'document',
               data: {
@@ -155,11 +150,11 @@ export async function GET(request: NextRequest) {
                 category: doc.category,
                 type: doc.type,
                 url: doc.url,
-                courseId: doc.courseId,
-                courseName: doc.courseId ? getCourseName(doc.courseId) : undefined,
+                courseId: doc.course_id,
+                courseName: doc.course_id ? getCourseName(doc.course_id) : undefined,
                 tags: doc.tags,
-                uploadedAt: doc.uploadedAt.toISOString(),
-                isPublic: doc.isPublic,
+                uploadedAt: new Date(doc.uploaded_at).toISOString(),
+                isPublic: doc.is_public,
               } as DocumentResult,
             });
           });
@@ -167,7 +162,7 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    // 2. Search Lei 14.133 Articles
+    // 2. Search Lei 14.133 Articles (in-memory, already fast)
     if (requestedTypes.includes('lei')) {
       searchPromises.push(
         (async () => {
@@ -191,34 +186,15 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    // 3. Search Glossary Terms
+    // 3. Search Glossary Terms (FTS)
     if (requestedTypes.includes('glossary')) {
       searchPromises.push(
         (async () => {
-          const terms = await prisma.glossaryTerm.findMany({
-            where: {
-              isPublic: true,
-              OR: [
-                { term: { contains: query, mode: 'insensitive' } },
-                { definition: { contains: query, mode: 'insensitive' } },
-                { shortDef: { contains: query, mode: 'insensitive' } },
-              ],
-            },
-            select: {
-              id: true,
-              term: true,
-              slug: true,
-              definition: true,
-              shortDef: true,
-              category: true,
-            },
-            orderBy: { viewCount: 'desc' },
-            take: limit,
-          });
+          const ftsResults = await searchGlossary(query, { limit });
 
-          counts.glossary = terms.length;
+          counts.glossary = ftsResults.length;
 
-          terms.forEach((term) => {
+          ftsResults.forEach(({ data: term }) => {
             results.push({
               type: 'glossary',
               data: {
@@ -226,7 +202,7 @@ export async function GET(request: NextRequest) {
                 term: term.term,
                 slug: term.slug,
                 definition: term.definition,
-                shortDef: term.shortDef,
+                shortDef: term.short_def,
                 category: term.category,
               } as GlossaryResult,
             });
@@ -235,46 +211,52 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    // 4. Search Videos
+    // 4. Search FAQs (FTS) — NEW
+    if (requestedTypes.includes('faq')) {
+      searchPromises.push(
+        (async () => {
+          const ftsResults = await searchFAQs(query, { limit });
+
+          counts.faq = ftsResults.length;
+
+          ftsResults.forEach(({ data: faq }) => {
+            results.push({
+              type: 'faq',
+              data: {
+                id: faq.id,
+                question: faq.question,
+                answer: faq.answer,
+                category: faq.category,
+              } as FAQResult,
+            });
+          });
+        })()
+      );
+    }
+
+    // 5. Search Videos (FTS)
     if (requestedTypes.includes('video')) {
       searchPromises.push(
         (async () => {
-          const videos = await prisma.courseVideo.findMany({
-            where: {
-              isActive: true,
-              courseId: { in: enrolledCourseIds },
-              OR: [
-                { title: { contains: query, mode: 'insensitive' } },
-                { description: { contains: query, mode: 'insensitive' } },
-              ],
-            },
-            select: {
-              id: true,
-              title: true,
-              description: true,
-              youtubeUrl: true,
-              youtubeId: true,
-              thumbnailUrl: true,
-              courseId: true,
-            },
-            orderBy: { displayOrder: 'asc' },
-            take: limit,
+          const ftsResults = await searchVideos(query, {
+            enrolledCourseIds,
+            limit,
           });
 
-          counts.video = videos.length;
+          counts.video = ftsResults.length;
 
-          videos.forEach((video) => {
+          ftsResults.forEach(({ data: video }) => {
             results.push({
               type: 'video',
               data: {
                 id: video.id,
                 title: video.title,
                 description: video.description,
-                youtubeUrl: video.youtubeUrl,
-                youtubeId: video.youtubeId,
-                thumbnailUrl: video.thumbnailUrl,
-                courseId: video.courseId,
-                courseName: getCourseName(video.courseId),
+                youtubeUrl: video.youtube_url,
+                youtubeId: video.youtube_id,
+                thumbnailUrl: video.thumbnail_url,
+                courseId: video.course_id,
+                courseName: getCourseName(video.course_id),
               } as VideoResult,
             });
           });
@@ -282,7 +264,33 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    // 5. Search Recommended Sites
+    // 6. Search Blog Posts (FTS) — NEW
+    if (requestedTypes.includes('blog')) {
+      searchPromises.push(
+        (async () => {
+          const ftsResults = await searchBlogPosts(query, { limit });
+
+          counts.blog = ftsResults.length;
+
+          ftsResults.forEach(({ data: post }) => {
+            results.push({
+              type: 'blog',
+              data: {
+                id: post.id,
+                slug: post.slug,
+                title: post.title,
+                excerpt: post.excerpt,
+                author: post.author,
+                publishedAt: new Date(post.published_at).toISOString(),
+                tags: post.tags,
+              } as BlogPostResult,
+            });
+          });
+        })()
+      );
+    }
+
+    // 7. Search Recommended Sites (FTS)
     if (requestedTypes.includes('site')) {
       searchPromises.push(
         (async () => {
@@ -298,30 +306,11 @@ export async function GET(request: NextRequest) {
 
           const siteIds = [...new Set(siteToCourses.map((s) => s.siteId))];
 
-          const sites = await prisma.recommendedSite.findMany({
-            where: {
-              isActive: true,
-              id: { in: siteIds },
-              OR: [
-                { title: { contains: query, mode: 'insensitive' } },
-                { description: { contains: query, mode: 'insensitive' } },
-              ],
-            },
-            select: {
-              id: true,
-              title: true,
-              description: true,
-              url: true,
-              faviconUrl: true,
-              category: true,
-            },
-            orderBy: { displayOrder: 'asc' },
-            take: limit,
-          });
+          const ftsResults = await searchSites(query, { siteIds, limit });
 
-          counts.site = sites.length;
+          counts.site = ftsResults.length;
 
-          sites.forEach((site) => {
+          ftsResults.forEach(({ data: site }) => {
             results.push({
               type: 'site',
               data: {
@@ -329,7 +318,7 @@ export async function GET(request: NextRequest) {
                 title: site.title,
                 description: site.description,
                 url: site.url,
-                faviconUrl: site.faviconUrl,
+                faviconUrl: site.favicon_url,
                 category: site.category,
               } as SiteResult,
             });
@@ -338,65 +327,30 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    // 6. Search Legislative Acts (text match + summary)
+    // 8. Search Legislative Acts (FTS)
     if (requestedTypes.includes('legislative-act')) {
       searchPromises.push(
         (async () => {
-          // Split query into individual words for broader matching
-          const queryWords = query.split(/\s+/).filter(w => w.length >= 3);
+          const ftsResults = await searchLegislativeActs(query, { limit });
 
-          const acts = await prisma.legislativeAct.findMany({
-            where: {
-              OR: [
-                { title: { contains: query, mode: 'insensitive' } },
-                { ementa: { contains: query, mode: 'insensitive' } },
-                { fullNumber: { contains: query, mode: 'insensitive' } },
-                { summary: { contains: query, mode: 'insensitive' } },
-                // Also search individual words in ementa for broader coverage
-                ...queryWords.map(word => ({
-                  ementa: { contains: word, mode: 'insensitive' as const },
-                })),
-              ],
-            },
-            select: {
-              id: true,
-              type: true,
-              fullNumber: true,
-              title: true,
-              ementa: true,
-              summary: true,
-              issuer: true,
-              publishDate: true,
-              hierarchyLevel: true,
-              leiArticles: true,
-              officialUrl: true,
-              pdfUrl: true,
-            },
-            orderBy: [
-              { hierarchyLevel: 'asc' },
-              { year: 'desc' },
-            ],
-            take: limit,
-          });
+          counts['legislative-act'] = ftsResults.length;
 
-          counts['legislative-act'] = acts.length;
-
-          acts.forEach((act) => {
+          ftsResults.forEach(({ data: act }) => {
             results.push({
               type: 'legislative-act',
               data: {
                 id: act.id,
                 type: act.type,
-                fullNumber: act.fullNumber,
+                fullNumber: act.full_number,
                 title: act.title,
                 ementa: act.ementa,
                 summary: act.summary,
                 issuer: act.issuer,
-                publishDate: act.publishDate.toISOString(),
-                hierarchyLevel: act.hierarchyLevel,
-                leiArticles: act.leiArticles ? JSON.parse(act.leiArticles) : [],
-                officialUrl: act.officialUrl,
-                pdfUrl: act.pdfUrl,
+                publishDate: new Date(act.publish_date).toISOString(),
+                hierarchyLevel: act.hierarchy_level,
+                leiArticles: safeParseArray(act.lei_articles),
+                officialUrl: act.official_url,
+                pdfUrl: act.pdf_url,
               } as LegislativeActResult,
             });
           });
@@ -412,18 +366,22 @@ export async function GET(request: NextRequest) {
       counts.document +
       counts.lei +
       counts.glossary +
+      counts.faq +
       counts.video +
+      counts.blog +
       counts.site +
       counts['legislative-act'];
 
     // Sort results by type priority, then sub-sort documents by category priority
     const typePriority: Record<string, number> = {
       glossary: 1,
+      faq: 1.5,
       'course-material': 2,
       document: 3,
       'legislative-act': 4,
       lei: 5,
       video: 6,
+      blog: 6.5,
       site: 7,
     };
 
@@ -460,6 +418,8 @@ export async function GET(request: NextRequest) {
       return 0;
     });
 
+    apiLogger.info({ query, total: counts.total }, 'Global search completed');
+
     return NextResponse.json({
       query,
       results,
@@ -467,7 +427,6 @@ export async function GET(request: NextRequest) {
       hasMore: results.length >= limit,
     } as GlobalSearchResponse);
   } catch (error) {
-    console.error('[Global Search] Error:', error);
-    return NextResponse.json({ error: 'Search failed' }, { status: 500 });
+    return handleApiError(error);
   }
 }

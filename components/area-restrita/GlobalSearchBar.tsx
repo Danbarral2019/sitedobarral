@@ -13,6 +13,8 @@ import {
   Sparkles,
   SlidersHorizontal,
   Gavel,
+  HelpCircle,
+  Newspaper,
 } from 'lucide-react';
 import type { ContentType, GlobalSearchResponse } from '@/lib/types/global-search';
 import { CONTENT_TYPE_CONFIG } from '@/lib/types/global-search';
@@ -39,7 +41,9 @@ const TYPE_ICONS: Record<ContentType, typeof FileText> = {
   'course-material': BookOpen,
   lei: Scale,
   glossary: BookOpen,
+  faq: HelpCircle,
   video: Video,
+  blog: Newspaper,
   site: Globe,
   'legislative-act': Gavel,
 };

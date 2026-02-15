@@ -37,6 +37,11 @@ npx tsx scripts/test-versioning.ts
 npx tsx scripts/import-pareceres-vinculantes.ts
 npm run convert-tcu            # Convert TCU Excel files
 
+# Full-Text Search
+npx tsx scripts/setup-full-text-search.ts             # Setup DDL + backfill
+npx tsx scripts/setup-full-text-search.ts --verify    # Verificar status
+npx tsx scripts/setup-full-text-search.ts --dry-run   # Simular sem alterar
+
 # Embeddings/pgvector
 npx tsx scripts/migrate-to-embeddings.ts              # Indexar docs pendentes
 npx tsx scripts/migrate-to-embeddings.ts --dry-run    # Simular sem alterar
@@ -92,6 +97,17 @@ export DATABASE_URL="<your-db-url>" && npx tsx scripts/fix-csv-tags.ts  # Conver
 
 
 ## Recent Features
+
+**🔤 Full-Text Search — PostgreSQL tsvector (2026-02-15):**
+- ✅ PostgreSQL FTS com stemming português (`portuguese_unaccent`) + `unaccent` extension
+- ✅ `search_vector tsvector` + GIN index + triggers em 7 tabelas (Document, GlossaryTerm, LegislativeAct, CourseVideo, RecommendedSite, BlogPost, FAQ)
+- ✅ Pesos A/B/C (título/descrição/conteúdo) para ranking por relevância via `ts_rank`
+- ✅ `websearch_to_tsquery` — suporta AND, OR, frases entre aspas, negação com `-`
+- ✅ FAQ e BlogPost adicionados à busca global (novos tipos `faq` e `blog`)
+- ✅ ILIKE substituído por FTS na rota `/api/area-restrita/global-search`
+- ✅ Error handling migrado para `handleApiError()` (padrão Fase 8)
+- 📖 Ver `lib/search/full-text-search.ts`, `scripts/setup-full-text-search.ts`
+- 🚀 Setup: `npx tsx scripts/setup-full-text-search.ts` | Verificar: `--verify`
 
 **📊 Fase 11 — Monitoring e Observability (2026-02-15):**
 - ✅ `Sentry.captureException()` no `handleApiError()` para erros 500+ (Prisma conexão, validação, genérico)
@@ -425,12 +441,13 @@ Ver código para endpoints completos.
 - Fase 10: Redis caching extensão e padronização (+50 rotas)
 - Fase 11: Monitoring (Sentry captureException em erros 500+, setUser após auth, tracking events server/client via Vercel Analytics)
 - Admin Versioning UI: histórico de versões (timeline), diff viewer, seção collapsible na página de edição
+- Full-Text Search: PostgreSQL tsvector + GIN + stemming português em 7 tabelas, FAQ e Blog na busca global
 
 **🚧 In Progress:**
 - DOU classifier
 
 **📋 Planned:**
-- Payment integration, full-text search, PWA
+- Payment integration, PWA
 
 ## Important Architecture Patterns
 

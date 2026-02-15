@@ -1,7 +1,7 @@
 // Types for Global Search functionality in Area Restrita
 
 // Content type categories with their respective colors and icons
-export type ContentType = 'document' | 'course-material' | 'lei' | 'glossary' | 'video' | 'site' | 'legislative-act';
+export type ContentType = 'document' | 'course-material' | 'lei' | 'glossary' | 'faq' | 'video' | 'blog' | 'site' | 'legislative-act';
 
 export const CONTENT_TYPE_CONFIG: Record<ContentType, {
   label: string;
@@ -58,6 +58,22 @@ export const CONTENT_TYPE_CONFIG: Record<ContentType, {
     bgColor: 'bg-teal-50',
     borderColor: 'border-teal-200',
     icon: 'Globe',
+  },
+  faq: {
+    label: 'FAQ',
+    labelPlural: 'Perguntas Frequentes',
+    color: 'text-violet-600',
+    bgColor: 'bg-violet-50',
+    borderColor: 'border-violet-200',
+    icon: 'HelpCircle',
+  },
+  blog: {
+    label: 'Blog',
+    labelPlural: 'Blog',
+    color: 'text-orange-600',
+    bgColor: 'bg-orange-50',
+    borderColor: 'border-orange-200',
+    icon: 'Newspaper',
   },
   'legislative-act': {
     label: 'Ato Normativo',
@@ -137,10 +153,27 @@ export interface LegislativeActResult {
   pdfUrl?: string | null;
 }
 
+export interface FAQResult {
+  id: string;
+  question: string;
+  answer: string;
+  category: string;
+}
+
+export interface BlogPostResult {
+  id: string;
+  slug: string;
+  title: string;
+  excerpt: string;
+  author: string;
+  publishedAt: string;
+  tags?: string | null;
+}
+
 // Unified search result item
 export interface SearchResultItem {
   type: ContentType;
-  data: DocumentResult | LeiArticleResult | GlossaryResult | VideoResult | SiteResult | LegislativeActResult;
+  data: DocumentResult | LeiArticleResult | GlossaryResult | VideoResult | SiteResult | LegislativeActResult | FAQResult | BlogPostResult;
 }
 
 // Global search response
@@ -151,7 +184,9 @@ export interface GlobalSearchResponse {
     document: number;
     lei: number;
     glossary: number;
+    faq: number;
     video: number;
+    blog: number;
     site: number;
     'legislative-act': number;
     total: number;
