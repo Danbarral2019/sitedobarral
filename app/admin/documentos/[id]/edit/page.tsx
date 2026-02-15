@@ -5,7 +5,8 @@ import { useParams } from 'next/navigation';
 import AdminLayout from '@/components/AdminLayout';
 import DocumentWizard from '@/components/admin/DocumentWizard';
 import { DocumentFormState } from '@/components/admin/DocumentWizard/types';
-import { Loader2 } from 'lucide-react';
+import { Loader2, ChevronDown, ChevronRight, History } from 'lucide-react';
+import DocumentVersionHistory from '@/components/admin/DocumentVersionHistory';
 
 interface DocumentFromAPI {
   id: string;
@@ -37,6 +38,8 @@ export default function EditDocumentPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [initialData, setInitialData] = useState<Partial<DocumentFormState> | null>(null);
+  const [versionCount, setVersionCount] = useState<number | null>(null);
+  const [historyOpen, setHistoryOpen] = useState(false);
 
   // Carregar documento existente
   useEffect(() => {
@@ -94,6 +97,14 @@ export default function EditDocumentPage() {
         };
 
         setInitialData(wizardData);
+
+        // Buscar contagem de versões (não bloqueia o carregamento principal)
+        fetch(`/api/admin/documents/${documentId}/versions`)
+          .then((res) => (res.ok ? res.json() : null))
+          .then((data) => {
+            if (data) setVersionCount(data.versionCount);
+          })
+          .catch(() => {});
       } catch (err) {
         console.error('[Edit Document] Erro ao carregar:', err);
         setError(err instanceof Error ? err.message : 'Erro ao carregar documento');
@@ -145,6 +156,33 @@ export default function EditDocumentPage() {
             </div>
 
             <DocumentWizard documentId={documentId} initialData={initialData} />
+
+            {/* Histórico de Versões — collapsible */}
+            <div className="max-w-4xl mx-auto mt-8">
+              <button
+                onClick={() => setHistoryOpen(!historyOpen)}
+                className="flex items-center gap-2 w-full text-left px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg hover:bg-gray-100 transition-colors"
+              >
+                <History className="w-5 h-5 text-gray-500" />
+                <span className="font-medium text-gray-700">
+                  Histórico de Versões
+                  {versionCount !== null && (
+                    <span className="ml-1.5 text-sm text-gray-500">({versionCount})</span>
+                  )}
+                </span>
+                {historyOpen ? (
+                  <ChevronDown className="w-4 h-4 text-gray-400 ml-auto" />
+                ) : (
+                  <ChevronRight className="w-4 h-4 text-gray-400 ml-auto" />
+                )}
+              </button>
+
+              {historyOpen && (
+                <div className="mt-3 px-1">
+                  <DocumentVersionHistory documentId={documentId} />
+                </div>
+              )}
+            </div>
           </>
         )}
       </div>
