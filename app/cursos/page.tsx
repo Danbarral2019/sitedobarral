@@ -6,7 +6,7 @@ import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
   title: 'Cursos Especializados',
-  description: '10 cursos especializados em Direito Administrativo, Licitações e Contratos. Material atualizado com a Nova Lei 14.133/2021, jurisprudência do TCU e pareceres da AGU.',
+  description: 'Cursos especializados em Direito Administrativo, Licitações e Contratos. Material atualizado com a Nova Lei 14.133/2021, jurisprudência do TCU e pareceres da AGU.',
   keywords: [
     'cursos licitações',
     'cursos contratos administrativos',
@@ -20,7 +20,7 @@ export const metadata: Metadata = {
   ],
   openGraph: {
     title: 'Cursos Especializados | Prof. Daniel Barral',
-    description: '10 cursos especializados em Direito Administrativo, Licitações e Contratos com material exclusivo',
+    description: 'Cursos especializados em Direito Administrativo, Licitações e Contratos com material exclusivo',
     url: 'https://profdanielbarral.com/cursos',
     type: 'website',
     locale: 'pt_BR',
@@ -28,7 +28,7 @@ export const metadata: Metadata = {
   twitter: {
     card: 'summary_large_image',
     title: 'Cursos Especializados | Prof. Daniel Barral',
-    description: '10 cursos especializados em Direito Administrativo e Licitações',
+    description: 'Cursos especializados em Direito Administrativo e Licitações',
   },
   alternates: {
     canonical: '/cursos',

@@ -102,7 +102,7 @@ export DATABASE_URL="<your-db-url>" && npx tsx scripts/fix-csv-tags.ts  # Conver
 
 **Subscription Plans:**
 - **Básico** (R$ 49,90/mês): acesso a 1 curso específico + Assistente IA
-- **Premium** (R$ 89,90/mês): acesso a todos os 10 cursos + Assistente IA
+- **Premium** (R$ 89,90/mês): acesso a todos os cursos (ver `data/courses.ts`) + Assistente IA
 
 
 ## Recent Features

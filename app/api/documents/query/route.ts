@@ -135,12 +135,28 @@ export async function POST(req: NextRequest) {
       );
     }
 
+    // 4b. Enrich query with conversation context for better semantic retrieval
+    let semanticQuery = query;
+    if (conversationHistory && conversationHistory.length > 0) {
+      const previousUserQueries = conversationHistory
+        .filter(m => m.role === 'user')
+        .map(m => m.content);
+      if (previousUserQueries.length > 0) {
+        // Combine the original topic with the refinement query
+        // e.g. "diálogo competitivo" + "algum acórdão do TCU sobre esse assunto"
+        semanticQuery = `${previousUserQueries[previousUserQueries.length - 1]} ${query}`;
+      }
+    }
+
     console.log(`🔍 Query from user ${userId}: "${query}"`);
+    if (semanticQuery !== query) {
+      console.log(`   🔗 Enhanced query with context: "${semanticQuery}"`);
+    }
     console.log(`   Filters:`, filters);
 
     // 5. Perform semantic search using embeddings
     // Busca mais resultados para garantir diversidade de categorias
-    const searchResponse = await semanticSearch(query, {
+    const searchResponse = await semanticSearch(semanticQuery, {
       category: filters.category,
       excludeCategories: ['boa_pratica', 'parecer-vinculante'],
       limit: Math.max(maxResults * 5, 60),

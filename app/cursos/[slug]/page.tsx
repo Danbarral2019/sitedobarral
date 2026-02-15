@@ -623,7 +623,7 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ s
                   Explore Outros Cursos
                 </h3>
                 <p className="text-sm text-gray-700 mb-4">
-                  Temos 10 cursos especializados em Licitações e Contratos
+                  Temos {courses.length} cursos especializados em Licitações e Contratos
                 </p>
                 <Link
                   href="/cursos"

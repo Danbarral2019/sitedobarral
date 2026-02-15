@@ -121,6 +121,12 @@ export function useGlobalSearch(options: UseGlobalSearchOptions = {}): UseGlobal
   const debounceTimerRef = useRef<NodeJS.Timeout | null>(null);
   const aiAbortControllerRef = useRef<AbortController | null>(null);
   const aiDebounceTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const aiConversationHistoryRef = useRef<ConversationMessage[]>([]);
+
+  // Keep ref in sync with state
+  useEffect(() => {
+    aiConversationHistoryRef.current = aiConversationHistory;
+  }, [aiConversationHistory]);
 
   // Computed
   const isSearchActive = query.length >= minQueryLength;
@@ -154,8 +160,8 @@ export function useGlobalSearch(options: UseGlobalSearchOptions = {}): UseGlobal
           useCache: true,
         };
 
-        // Include conversation history if provided
-        const historyToSend = history || aiConversationHistory;
+        // Include conversation history if provided (use ref to avoid stale closure)
+        const historyToSend = history || aiConversationHistoryRef.current;
         if (historyToSend.length > 0) {
           requestBody.conversationHistory = historyToSend.slice(-5);
         }

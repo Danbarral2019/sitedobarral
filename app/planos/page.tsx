@@ -4,18 +4,9 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/hooks/use-auth';
 import Link from 'next/link';
+import { courses } from '@/data/courses';
 
-const COURSES = [
-  { id: '2', name: 'Planejamento das Contratações Públicas' },
-  { id: '3', name: 'Gestão e Fiscalização de Contratos' },
-  { id: '4', name: 'Processo Administrativo Sancionador' },
-  { id: '5', name: 'Inovação nas Contratações Públicas' },
-  { id: '6', name: 'Terceirização e Formação de Preços' },
-  { id: '7', name: 'Assessoramento Jurídico na Nova Lei' },
-  { id: '8', name: 'Revisão, Reajuste e Repactuação' },
-  { id: '9', name: 'Alterações Contratuais' },
-  { id: '10', name: 'Contratação Direta' },
-];
+const COURSES = courses.map(c => ({ id: c.id, name: c.title }));
 
 const PRICE_BASICO = process.env.NEXT_PUBLIC_PRICE_BASICO || '49,90';
 const PRICE_PREMIUM = process.env.NEXT_PUBLIC_PRICE_PREMIUM || '89,90';
@@ -23,7 +14,7 @@ const PRICE_PREMIUM = process.env.NEXT_PUBLIC_PRICE_PREMIUM || '89,90';
 export default function PlanosPage() {
   const router = useRouter();
   const { user, isLoading } = useAuth();
-  const [selectedCourse, setSelectedCourse] = useState('2');
+  const [selectedCourse, setSelectedCourse] = useState(COURSES[0]?.id || '2');
   const [loading, setLoading] = useState<'basico' | 'premium' | null>(null);
   const [error, setError] = useState('');
 
@@ -169,7 +160,7 @@ export default function PlanosPage() {
                 <svg className="w-5 h-5 text-green-300 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                 </svg>
-                <span className="text-white">Acesso a todos os 10 cursos</span>
+                <span className="text-white">Acesso a todos os {courses.length} cursos</span>
               </li>
               <li className="flex items-start gap-3">
                 <svg className="w-5 h-5 text-green-300 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
