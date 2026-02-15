@@ -321,7 +321,7 @@ export const ENUNCIADOS: Enunciado[] = [
     artigosVinculados: ["2", "3"],
     jornada: "III Jornada de Direito Administrativo",
     data: "2024-11-07",
-    url: "https://ibda.com.br/wp-content/uploads/2024/12/Enunciados-sobre-a-Lei-14.133-21-p1-1.pdf",
+    url: "https://ibda.com.br/jornada-2024/",
     tema: "Âmbito de Aplicação"
   },
   {
@@ -332,7 +332,7 @@ export const ENUNCIADOS: Enunciado[] = [
     artigosVinculados: ["3-I"],
     jornada: "III Jornada de Direito Administrativo",
     data: "2024-11-07",
-    url: "https://ibda.com.br/wp-content/uploads/2024/12/Enunciados-sobre-a-Lei-14.133-21-p1-1.pdf",
+    url: "https://ibda.com.br/jornada-2024/",
     tema: "Âmbito de Aplicação"
   },
   {
@@ -343,7 +343,7 @@ export const ENUNCIADOS: Enunciado[] = [
     artigosVinculados: ["5"],
     jornada: "III Jornada de Direito Administrativo",
     data: "2024-11-07",
-    url: "https://ibda.com.br/wp-content/uploads/2024/12/Enunciados-sobre-a-Lei-14.133-21-p1-1.pdf",
+    url: "https://ibda.com.br/jornada-2024/",
     tema: "Princípios"
   },
   {
@@ -354,7 +354,7 @@ export const ENUNCIADOS: Enunciado[] = [
     artigosVinculados: ["5", "155", "156"],
     jornada: "III Jornada de Direito Administrativo",
     data: "2024-11-07",
-    url: "https://ibda.com.br/wp-content/uploads/2024/12/Enunciados-sobre-a-Lei-14.133-21-p1-1.pdf",
+    url: "https://ibda.com.br/jornada-2024/",
     tema: "Sanções - Direito Intertemporal"
   },
   {
@@ -365,7 +365,7 @@ export const ENUNCIADOS: Enunciado[] = [
     artigosVinculados: ["6-XVI"],
     jornada: "III Jornada de Direito Administrativo",
     data: "2024-11-07",
-    url: "https://ibda.com.br/wp-content/uploads/2024/12/Enunciados-sobre-a-Lei-14.133-21-p1-1.pdf",
+    url: "https://ibda.com.br/jornada-2024/",
     tema: "Definições"
   },
   {
@@ -376,7 +376,7 @@ export const ENUNCIADOS: Enunciado[] = [
     artigosVinculados: ["6-XXII", "25"],
     jornada: "III Jornada de Direito Administrativo",
     data: "2024-11-07",
-    url: "https://ibda.com.br/wp-content/uploads/2024/12/Enunciados-sobre-a-Lei-14.133-21-p1-1.pdf",
+    url: "https://ibda.com.br/jornada-2024/",
     tema: "Definições"
   },
   {
@@ -387,7 +387,7 @@ export const ENUNCIADOS: Enunciado[] = [
     artigosVinculados: ["6-XXVII", "22"],
     jornada: "III Jornada de Direito Administrativo",
     data: "2024-11-07",
-    url: "https://ibda.com.br/wp-content/uploads/2024/12/Enunciados-sobre-a-Lei-14.133-21-p1-1.pdf",
+    url: "https://ibda.com.br/jornada-2024/",
     tema: "Matriz de Riscos"
   },
   {
@@ -398,7 +398,7 @@ export const ENUNCIADOS: Enunciado[] = [
     artigosVinculados: ["6-LX"],
     jornada: "III Jornada de Direito Administrativo",
     data: "2024-11-07",
-    url: "https://ibda.com.br/wp-content/uploads/2024/12/Enunciados-sobre-a-Lei-14.133-21-p1-1.pdf",
+    url: "https://ibda.com.br/jornada-2024/",
     tema: "Agentes de Contratação"
   },
   {
@@ -409,7 +409,7 @@ export const ENUNCIADOS: Enunciado[] = [
     artigosVinculados: ["7", "169"],
     jornada: "III Jornada de Direito Administrativo",
     data: "2024-11-07",
-    url: "https://ibda.com.br/wp-content/uploads/2024/12/Enunciados-sobre-a-Lei-14.133-21-p1-1.pdf",
+    url: "https://ibda.com.br/jornada-2024/",
     tema: "Segregação de Funções"
   },
   {
@@ -420,7 +420,7 @@ export const ENUNCIADOS: Enunciado[] = [
     artigosVinculados: ["7", "8"],
     jornada: "III Jornada de Direito Administrativo",
     data: "2024-11-07",
-    url: "https://ibda.com.br/wp-content/uploads/2024/12/Enunciados-sobre-a-Lei-14.133-21-p1-1.pdf",
+    url: "https://ibda.com.br/jornada-2024/",
     tema: "Agentes de Contratação"
   },
   {
@@ -431,7 +431,7 @@ export const ENUNCIADOS: Enunciado[] = [
     artigosVinculados: ["19"],
     jornada: "III Jornada de Direito Administrativo",
     data: "2024-11-07",
-    url: "https://ibda.com.br/wp-content/uploads/2024/12/Enunciados-sobre-a-Lei-14.133-21-p1-1.pdf",
+    url: "https://ibda.com.br/jornada-2024/",
     tema: "BIM - Modelagem da Informação"
   },
   {
@@ -442,7 +442,7 @@ export const ENUNCIADOS: Enunciado[] = [
     artigosVinculados: ["33", "67", "19"],
     jornada: "III Jornada de Direito Administrativo",
     data: "2024-11-07",
-    url: "https://ibda.com.br/wp-content/uploads/2024/12/Enunciados-sobre-a-Lei-14.133-21-p1-1.pdf",
+    url: "https://ibda.com.br/jornada-2024/",
     tema: "BIM - Habilitação Técnica"
   },
   {
@@ -453,7 +453,7 @@ export const ENUNCIADOS: Enunciado[] = [
     artigosVinculados: ["67", "19"],
     jornada: "III Jornada de Direito Administrativo",
     data: "2024-11-07",
-    url: "https://ibda.com.br/wp-content/uploads/2024/12/Enunciados-sobre-a-Lei-14.133-21-p1-1.pdf",
+    url: "https://ibda.com.br/jornada-2024/",
     tema: "BIM - Qualificação Técnica"
   },
   {
@@ -464,7 +464,7 @@ export const ENUNCIADOS: Enunciado[] = [
     artigosVinculados: ["33-V"],
     jornada: "III Jornada de Direito Administrativo",
     data: "2024-11-07",
-    url: "https://ibda.com.br/wp-content/uploads/2024/12/Enunciados-sobre-a-Lei-14.133-21-p1-1.pdf",
+    url: "https://ibda.com.br/jornada-2024/",
     tema: "Critério de Julgamento"
   },
   {
@@ -475,7 +475,7 @@ export const ENUNCIADOS: Enunciado[] = [
     artigosVinculados: ["33-V"],
     jornada: "III Jornada de Direito Administrativo",
     data: "2024-11-07",
-    url: "https://ibda.com.br/wp-content/uploads/2024/12/Enunciados-sobre-a-Lei-14.133-21-p1-1.pdf",
+    url: "https://ibda.com.br/jornada-2024/",
     tema: "Pregão - Critério de Julgamento"
   },
   {
@@ -486,7 +486,7 @@ export const ENUNCIADOS: Enunciado[] = [
     artigosVinculados: ["48"],
     jornada: "III Jornada de Direito Administrativo",
     data: "2024-11-07",
-    url: "https://ibda.com.br/wp-content/uploads/2024/12/Enunciados-sobre-a-Lei-14.133-21-p1-1.pdf",
+    url: "https://ibda.com.br/jornada-2024/",
     tema: "Terceirização - Remuneração Mínima"
   },
   {
@@ -497,7 +497,7 @@ export const ENUNCIADOS: Enunciado[] = [
     artigosVinculados: ["56"],
     jornada: "III Jornada de Direito Administrativo",
     data: "2024-11-07",
-    url: "https://ibda.com.br/wp-content/uploads/2024/12/Enunciados-sobre-a-Lei-14.133-21-p1-1.pdf",
+    url: "https://ibda.com.br/jornada-2024/",
     tema: "Proposta - Readequação"
   },
   {
@@ -508,7 +508,7 @@ export const ENUNCIADOS: Enunciado[] = [
     artigosVinculados: ["59"],
     jornada: "III Jornada de Direito Administrativo",
     data: "2024-11-07",
-    url: "https://ibda.com.br/wp-content/uploads/2024/12/Enunciados-sobre-a-Lei-14.133-21-p1-1.pdf",
+    url: "https://ibda.com.br/jornada-2024/",
     tema: "Proposta - Inexequibilidade"
   },
   {
@@ -519,7 +519,7 @@ export const ENUNCIADOS: Enunciado[] = [
     artigosVinculados: ["59", "96", "98"],
     jornada: "III Jornada de Direito Administrativo",
     data: "2024-11-07",
-    url: "https://ibda.com.br/wp-content/uploads/2024/12/Enunciados-sobre-a-Lei-14.133-21-p1-1.pdf",
+    url: "https://ibda.com.br/jornada-2024/",
     tema: "Garantia Adicional"
   },
   {
@@ -530,7 +530,7 @@ export const ENUNCIADOS: Enunciado[] = [
     artigosVinculados: ["60"],
     jornada: "III Jornada de Direito Administrativo",
     data: "2024-11-07",
-    url: "https://ibda.com.br/wp-content/uploads/2024/12/Enunciados-sobre-a-Lei-14.133-21-p1-1.pdf",
+    url: "https://ibda.com.br/jornada-2024/",
     tema: "Desempate"
   },
   {
@@ -541,7 +541,7 @@ export const ENUNCIADOS: Enunciado[] = [
     artigosVinculados: ["64"],
     jornada: "III Jornada de Direito Administrativo",
     data: "2024-11-07",
-    url: "https://ibda.com.br/wp-content/uploads/2024/12/Enunciados-sobre-a-Lei-14.133-21-p1-1.pdf",
+    url: "https://ibda.com.br/jornada-2024/",
     tema: "Habilitação"
   },
   {
@@ -552,7 +552,7 @@ export const ENUNCIADOS: Enunciado[] = [
     artigosVinculados: ["67-II"],
     jornada: "III Jornada de Direito Administrativo",
     data: "2024-11-07",
-    url: "https://ibda.com.br/wp-content/uploads/2024/12/Enunciados-sobre-a-Lei-14.133-21-p1-1.pdf",
+    url: "https://ibda.com.br/jornada-2024/",
     tema: "Habilitação Técnica"
   },
   {
@@ -563,7 +563,7 @@ export const ENUNCIADOS: Enunciado[] = [
     artigosVinculados: ["73"],
     jornada: "III Jornada de Direito Administrativo",
     data: "2024-11-07",
-    url: "https://ibda.com.br/wp-content/uploads/2024/12/Enunciados-sobre-a-Lei-14.133-21-p1-1.pdf",
+    url: "https://ibda.com.br/jornada-2024/",
     tema: "Responsabilidade Solidária"
   },
   {
@@ -574,7 +574,7 @@ export const ENUNCIADOS: Enunciado[] = [
     artigosVinculados: ["74", "23"],
     jornada: "III Jornada de Direito Administrativo",
     data: "2024-11-07",
-    url: "https://ibda.com.br/wp-content/uploads/2024/12/Enunciados-sobre-a-Lei-14.133-21-p1-1.pdf",
+    url: "https://ibda.com.br/jornada-2024/",
     tema: "Inexigibilidade - Pesquisa de Preços"
   },
   {
@@ -585,7 +585,7 @@ export const ENUNCIADOS: Enunciado[] = [
     artigosVinculados: ["74-V"],
     jornada: "III Jornada de Direito Administrativo",
     data: "2024-11-07",
-    url: "https://ibda.com.br/wp-content/uploads/2024/12/Enunciados-sobre-a-Lei-14.133-21-p1-1.pdf",
+    url: "https://ibda.com.br/jornada-2024/",
     tema: "Inexigibilidade - Locação de Imóvel"
   },
   {
@@ -596,7 +596,7 @@ export const ENUNCIADOS: Enunciado[] = [
     artigosVinculados: ["75-I", "75-II", "75"],
     jornada: "III Jornada de Direito Administrativo",
     data: "2024-11-07",
-    url: "https://ibda.com.br/wp-content/uploads/2024/12/Enunciados-sobre-a-Lei-14.133-21-p1-1.pdf",
+    url: "https://ibda.com.br/jornada-2024/",
     tema: "Dispensa - Limite de Valor"
   },
   {
@@ -607,7 +607,7 @@ export const ENUNCIADOS: Enunciado[] = [
     artigosVinculados: ["75-I", "75-II", "75"],
     jornada: "III Jornada de Direito Administrativo",
     data: "2024-11-07",
-    url: "https://ibda.com.br/wp-content/uploads/2024/12/Enunciados-sobre-a-Lei-14.133-21-p1-1.pdf",
+    url: "https://ibda.com.br/jornada-2024/",
     tema: "Dispensa - Divulgação"
   },
   {
@@ -618,7 +618,7 @@ export const ENUNCIADOS: Enunciado[] = [
     artigosVinculados: ["75-VIII"],
     jornada: "III Jornada de Direito Administrativo",
     data: "2024-11-07",
-    url: "https://ibda.com.br/wp-content/uploads/2024/12/Enunciados-sobre-a-Lei-14.133-21-p1-1.pdf",
+    url: "https://ibda.com.br/jornada-2024/",
     tema: "Dispensa Emergencial"
   },
   {
@@ -629,7 +629,7 @@ export const ENUNCIADOS: Enunciado[] = [
     artigosVinculados: ["79"],
     jornada: "III Jornada de Direito Administrativo",
     data: "2024-11-07",
-    url: "https://ibda.com.br/wp-content/uploads/2024/12/Enunciados-sobre-a-Lei-14.133-21-p1-1.pdf",
+    url: "https://ibda.com.br/jornada-2024/",
     tema: "Credenciamento"
   },
   {
@@ -640,7 +640,7 @@ export const ENUNCIADOS: Enunciado[] = [
     artigosVinculados: ["79"],
     jornada: "III Jornada de Direito Administrativo",
     data: "2024-11-07",
-    url: "https://ibda.com.br/wp-content/uploads/2024/12/Enunciados-sobre-a-Lei-14.133-21-p1-1.pdf",
+    url: "https://ibda.com.br/jornada-2024/",
     tema: "Credenciamento - Vigência"
   },
   {
@@ -651,7 +651,7 @@ export const ENUNCIADOS: Enunciado[] = [
     artigosVinculados: ["79", "80"],
     jornada: "III Jornada de Direito Administrativo",
     data: "2024-11-07",
-    url: "https://ibda.com.br/wp-content/uploads/2024/12/Enunciados-sobre-a-Lei-14.133-21-p1-1.pdf",
+    url: "https://ibda.com.br/jornada-2024/",
     tema: "Credenciamento - Pré-qualificação"
   },
   {
@@ -662,7 +662,7 @@ export const ENUNCIADOS: Enunciado[] = [
     artigosVinculados: ["81"],
     jornada: "III Jornada de Direito Administrativo",
     data: "2024-11-07",
-    url: "https://ibda.com.br/wp-content/uploads/2024/12/Enunciados-sobre-a-Lei-14.133-21-p1-1.pdf",
+    url: "https://ibda.com.br/jornada-2024/",
     tema: "Procedimento de Manifestação de Interesse"
   },
   {
@@ -673,7 +673,7 @@ export const ENUNCIADOS: Enunciado[] = [
     artigosVinculados: ["82"],
     jornada: "III Jornada de Direito Administrativo",
     data: "2024-11-07",
-    url: "https://ibda.com.br/wp-content/uploads/2024/12/Enunciados-sobre-a-Lei-14.133-21-p1-1.pdf",
+    url: "https://ibda.com.br/jornada-2024/",
     tema: "Registro de Preços - Atualização"
   },
   {
@@ -684,7 +684,7 @@ export const ENUNCIADOS: Enunciado[] = [
     artigosVinculados: ["86"],
     jornada: "III Jornada de Direito Administrativo",
     data: "2024-11-07",
-    url: "https://ibda.com.br/wp-content/uploads/2024/12/Enunciados-sobre-a-Lei-14.133-21-p1-1.pdf",
+    url: "https://ibda.com.br/jornada-2024/",
     tema: "Registro de Preços - Adesão"
   },
   {
@@ -695,7 +695,7 @@ export const ENUNCIADOS: Enunciado[] = [
     artigosVinculados: ["86"],
     jornada: "III Jornada de Direito Administrativo",
     data: "2024-11-07",
-    url: "https://ibda.com.br/wp-content/uploads/2024/12/Enunciados-sobre-a-Lei-14.133-21-p1-1.pdf",
+    url: "https://ibda.com.br/jornada-2024/",
     tema: "Credenciamento - Adesão"
   },
   {
@@ -706,7 +706,7 @@ export const ENUNCIADOS: Enunciado[] = [
     artigosVinculados: ["95-I", "75-I", "75-II"],
     jornada: "III Jornada de Direito Administrativo",
     data: "2024-11-07",
-    url: "https://ibda.com.br/wp-content/uploads/2024/12/Enunciados-sobre-a-Lei-14.133-21-p1-1.pdf",
+    url: "https://ibda.com.br/jornada-2024/",
     tema: "Instrumento de Contrato"
   },
   {
@@ -717,7 +717,7 @@ export const ENUNCIADOS: Enunciado[] = [
     artigosVinculados: ["95-II"],
     jornada: "III Jornada de Direito Administrativo",
     data: "2024-11-07",
-    url: "https://ibda.com.br/wp-content/uploads/2024/12/Enunciados-sobre-a-Lei-14.133-21-p1-1.pdf",
+    url: "https://ibda.com.br/jornada-2024/",
     tema: "Instrumento de Contrato - Serviços"
   },
   {
@@ -728,7 +728,7 @@ export const ENUNCIADOS: Enunciado[] = [
     artigosVinculados: ["104-I"],
     jornada: "III Jornada de Direito Administrativo",
     data: "2024-11-07",
-    url: "https://ibda.com.br/wp-content/uploads/2024/12/Enunciados-sobre-a-Lei-14.133-21-p1-1.pdf",
+    url: "https://ibda.com.br/jornada-2024/",
     tema: "Alteração Contratual Unilateral"
   },
   {
@@ -739,7 +739,7 @@ export const ENUNCIADOS: Enunciado[] = [
     artigosVinculados: ["107"],
     jornada: "III Jornada de Direito Administrativo",
     data: "2024-11-07",
-    url: "https://ibda.com.br/wp-content/uploads/2024/12/Enunciados-sobre-a-Lei-14.133-21-p1-1.pdf",
+    url: "https://ibda.com.br/jornada-2024/",
     tema: "Prorrogação Contratual"
   },
   {
@@ -750,7 +750,7 @@ export const ENUNCIADOS: Enunciado[] = [
     artigosVinculados: ["121", "143"],
     jornada: "III Jornada de Direito Administrativo",
     data: "2024-11-07",
-    url: "https://ibda.com.br/wp-content/uploads/2024/12/Enunciados-sobre-a-Lei-14.133-21-p1-1.pdf",
+    url: "https://ibda.com.br/jornada-2024/",
     tema: "Terceirização - Retenção Cautelar"
   },
   {
@@ -761,7 +761,7 @@ export const ENUNCIADOS: Enunciado[] = [
     artigosVinculados: ["123"],
     jornada: "III Jornada de Direito Administrativo",
     data: "2024-11-07",
-    url: "https://ibda.com.br/wp-content/uploads/2024/12/Enunciados-sobre-a-Lei-14.133-21-p1-1.pdf",
+    url: "https://ibda.com.br/jornada-2024/",
     tema: "Dever de Resposta"
   },
   {
@@ -772,7 +772,7 @@ export const ENUNCIADOS: Enunciado[] = [
     artigosVinculados: ["137"],
     jornada: "III Jornada de Direito Administrativo",
     data: "2024-11-07",
-    url: "https://ibda.com.br/wp-content/uploads/2024/12/Enunciados-sobre-a-Lei-14.133-21-p1-1.pdf",
+    url: "https://ibda.com.br/jornada-2024/",
     tema: "Extinção Contratual"
   },
   {
@@ -783,7 +783,7 @@ export const ENUNCIADOS: Enunciado[] = [
     artigosVinculados: ["137"],
     jornada: "III Jornada de Direito Administrativo",
     data: "2024-11-07",
-    url: "https://ibda.com.br/wp-content/uploads/2024/12/Enunciados-sobre-a-Lei-14.133-21-p1-1.pdf",
+    url: "https://ibda.com.br/jornada-2024/",
     tema: "Suspensão de Obrigações"
   },
   {
@@ -794,7 +794,7 @@ export const ENUNCIADOS: Enunciado[] = [
     artigosVinculados: ["137"],
     jornada: "III Jornada de Direito Administrativo",
     data: "2024-11-07",
-    url: "https://ibda.com.br/wp-content/uploads/2024/12/Enunciados-sobre-a-Lei-14.133-21-p1-1.pdf",
+    url: "https://ibda.com.br/jornada-2024/",
     tema: "Garantias - Processo de Apuração"
   },
   {
@@ -805,7 +805,7 @@ export const ENUNCIADOS: Enunciado[] = [
     artigosVinculados: ["147"],
     jornada: "III Jornada de Direito Administrativo",
     data: "2024-11-07",
-    url: "https://ibda.com.br/wp-content/uploads/2024/12/Enunciados-sobre-a-Lei-14.133-21-p1-1.pdf",
+    url: "https://ibda.com.br/jornada-2024/",
     tema: "Saneamento de Vícios"
   },
   {
@@ -816,7 +816,7 @@ export const ENUNCIADOS: Enunciado[] = [
     artigosVinculados: ["147", "148", "149", "150"],
     jornada: "III Jornada de Direito Administrativo",
     data: "2024-11-07",
-    url: "https://ibda.com.br/wp-content/uploads/2024/12/Enunciados-sobre-a-Lei-14.133-21-p1-1.pdf",
+    url: "https://ibda.com.br/jornada-2024/",
     tema: "Direito Intertemporal"
   },
   {
@@ -827,7 +827,7 @@ export const ENUNCIADOS: Enunciado[] = [
     artigosVinculados: ["147"],
     jornada: "III Jornada de Direito Administrativo",
     data: "2024-11-07",
-    url: "https://ibda.com.br/wp-content/uploads/2024/12/Enunciados-sobre-a-Lei-14.133-21-p1-1.pdf",
+    url: "https://ibda.com.br/jornada-2024/",
     tema: "Controle - LINDB"
   },
   {
@@ -838,7 +838,7 @@ export const ENUNCIADOS: Enunciado[] = [
     artigosVinculados: ["148"],
     jornada: "III Jornada de Direito Administrativo",
     data: "2024-11-07",
-    url: "https://ibda.com.br/wp-content/uploads/2024/12/Enunciados-sobre-a-Lei-14.133-21-p1-1.pdf",
+    url: "https://ibda.com.br/jornada-2024/",
     tema: "Vícios Insanáveis"
   },
   {
@@ -849,7 +849,7 @@ export const ENUNCIADOS: Enunciado[] = [
     artigosVinculados: ["151"],
     jornada: "III Jornada de Direito Administrativo",
     data: "2024-11-07",
-    url: "https://ibda.com.br/wp-content/uploads/2024/12/Enunciados-sobre-a-Lei-14.133-21-p1-1.pdf",
+    url: "https://ibda.com.br/jornada-2024/",
     tema: "Resolução de Disputas"
   },
   {
@@ -860,7 +860,7 @@ export const ENUNCIADOS: Enunciado[] = [
     artigosVinculados: ["151"],
     jornada: "III Jornada de Direito Administrativo",
     data: "2024-11-07",
-    url: "https://ibda.com.br/wp-content/uploads/2024/12/Enunciados-sobre-a-Lei-14.133-21-p1-1.pdf",
+    url: "https://ibda.com.br/jornada-2024/",
     tema: "Resolução de Disputas"
   },
   {
@@ -871,7 +871,7 @@ export const ENUNCIADOS: Enunciado[] = [
     artigosVinculados: ["151"],
     jornada: "III Jornada de Direito Administrativo",
     data: "2024-11-07",
-    url: "https://ibda.com.br/wp-content/uploads/2024/12/Enunciados-sobre-a-Lei-14.133-21-p1-1.pdf",
+    url: "https://ibda.com.br/jornada-2024/",
     tema: "Resolução de Disputas"
   },
   {
@@ -882,7 +882,7 @@ export const ENUNCIADOS: Enunciado[] = [
     artigosVinculados: ["156"],
     jornada: "III Jornada de Direito Administrativo",
     data: "2024-11-07",
-    url: "https://ibda.com.br/wp-content/uploads/2024/12/Enunciados-sobre-a-Lei-14.133-21-p1-1.pdf",
+    url: "https://ibda.com.br/jornada-2024/",
     tema: "Acordos Administrativos"
   },
   {
@@ -893,7 +893,7 @@ export const ENUNCIADOS: Enunciado[] = [
     artigosVinculados: ["159"],
     jornada: "III Jornada de Direito Administrativo",
     data: "2024-11-07",
-    url: "https://ibda.com.br/wp-content/uploads/2024/12/Enunciados-sobre-a-Lei-14.133-21-p1-1.pdf",
+    url: "https://ibda.com.br/jornada-2024/",
     tema: "Non Bis In Idem"
   },
   {
@@ -904,7 +904,7 @@ export const ENUNCIADOS: Enunciado[] = [
     artigosVinculados: ["163-III"],
     jornada: "III Jornada de Direito Administrativo",
     data: "2024-11-07",
-    url: "https://ibda.com.br/wp-content/uploads/2024/12/Enunciados-sobre-a-Lei-14.133-21-p1-1.pdf",
+    url: "https://ibda.com.br/jornada-2024/",
     tema: "Reabilitação"
   },
   {
@@ -915,7 +915,7 @@ export const ENUNCIADOS: Enunciado[] = [
     artigosVinculados: ["163"],
     jornada: "III Jornada de Direito Administrativo",
     data: "2024-11-07",
-    url: "https://ibda.com.br/wp-content/uploads/2024/12/Enunciados-sobre-a-Lei-14.133-21-p1-1.pdf",
+    url: "https://ibda.com.br/jornada-2024/",
     tema: "Acordos - Sanções"
   },
   {
@@ -926,7 +926,7 @@ export const ENUNCIADOS: Enunciado[] = [
     artigosVinculados: ["165"],
     jornada: "III Jornada de Direito Administrativo",
     data: "2024-11-07",
-    url: "https://ibda.com.br/wp-content/uploads/2024/12/Enunciados-sobre-a-Lei-14.133-21-p1-1.pdf",
+    url: "https://ibda.com.br/jornada-2024/",
     tema: "Recurso - Manifestação de Intenção"
   },
   {
@@ -937,7 +937,7 @@ export const ENUNCIADOS: Enunciado[] = [
     artigosVinculados: ["169-II", "169-III"],
     jornada: "III Jornada de Direito Administrativo",
     data: "2024-11-07",
-    url: "https://ibda.com.br/wp-content/uploads/2024/12/Enunciados-sobre-a-Lei-14.133-21-p1-1.pdf",
+    url: "https://ibda.com.br/jornada-2024/",
     tema: "Controle Interno"
   },
   {
@@ -948,7 +948,7 @@ export const ENUNCIADOS: Enunciado[] = [
     artigosVinculados: ["170"],
     jornada: "III Jornada de Direito Administrativo",
     data: "2024-11-07",
-    url: "https://ibda.com.br/wp-content/uploads/2024/12/Enunciados-sobre-a-Lei-14.133-21-p1-1.pdf",
+    url: "https://ibda.com.br/jornada-2024/",
     tema: "Controle Externo"
   },
   {
@@ -959,7 +959,7 @@ export const ENUNCIADOS: Enunciado[] = [
     artigosVinculados: ["170"],
     jornada: "III Jornada de Direito Administrativo",
     data: "2024-11-07",
-    url: "https://ibda.com.br/wp-content/uploads/2024/12/Enunciados-sobre-a-Lei-14.133-21-p1-1.pdf",
+    url: "https://ibda.com.br/jornada-2024/",
     tema: "Controle - Consequencialismo"
   },
   {
@@ -970,7 +970,7 @@ export const ENUNCIADOS: Enunciado[] = [
     artigosVinculados: ["170"],
     jornada: "III Jornada de Direito Administrativo",
     data: "2024-11-07",
-    url: "https://ibda.com.br/wp-content/uploads/2024/12/Enunciados-sobre-a-Lei-14.133-21-p1-1.pdf",
+    url: "https://ibda.com.br/jornada-2024/",
     tema: "Tribunais de Contas"
   },
   {
@@ -981,7 +981,7 @@ export const ENUNCIADOS: Enunciado[] = [
     artigosVinculados: ["191"],
     jornada: "III Jornada de Direito Administrativo",
     data: "2024-11-07",
-    url: "https://ibda.com.br/wp-content/uploads/2024/12/Enunciados-sobre-a-Lei-14.133-21-p1-1.pdf",
+    url: "https://ibda.com.br/jornada-2024/",
     tema: "Direito Intertemporal - Registro de Preços"
   },
 
