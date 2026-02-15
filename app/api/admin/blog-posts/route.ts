@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { withAdminAuth } from '@/lib/api-middleware';
 import { prisma } from '@/lib/prisma';
 import { publishToSocialMedia } from '@/lib/social-publisher';
+import { CacheInvalidation, withCache, CacheKeys, CACHE_TTL } from '@/lib/cache/redis-client';
 
 // GET - Lista posts do blog com paginação
 export const GET = withAdminAuth(async (request: NextRequest) => {
@@ -11,25 +12,36 @@ export const GET = withAdminAuth(async (request: NextRequest) => {
     const limit = parseInt(searchParams.get('limit') || '20');
     const skip = (page - 1) * limit;
 
-    const [posts, total] = await Promise.all([
-      prisma.blogPost.findMany({
-        orderBy: {
-          publishedAt: 'desc'
-        },
-        take: limit,
-        skip: skip,
-      }),
-      prisma.blogPost.count()
-    ]);
+    const result = await withCache(
+      CacheKeys.blogPosts(page, limit),
+      async () => {
+        const [posts, total] = await Promise.all([
+          prisma.blogPost.findMany({
+            orderBy: {
+              publishedAt: 'desc'
+            },
+            take: limit,
+            skip: skip,
+          }),
+          prisma.blogPost.count()
+        ]);
 
-    return NextResponse.json({
-      posts,
-      pagination: {
-        page,
-        limit,
-        total,
-        totalPages: Math.ceil(total / limit)
-      }
+        return {
+          posts,
+          pagination: {
+            page,
+            limit,
+            total,
+            totalPages: Math.ceil(total / limit)
+          }
+        };
+      },
+      CACHE_TTL.BLOG_POSTS,
+      { prefix: 'blog' }
+    );
+
+    return NextResponse.json(result, {
+      headers: { 'Cache-Control': 'private, max-age=60' },
     });
   } catch (error) {
     console.error('Erro ao listar posts:', error);
@@ -93,6 +105,9 @@ export const POST = withAdminAuth(async (request: NextRequest) => {
           console.error('[BlogPost] Erro ao publicar nas redes sociais:', error);
         });
     }
+
+    // Invalidate cache
+    CacheInvalidation.blogPosts().catch(console.error);
 
     return NextResponse.json({ post }, { status: 201 });
   } catch (error) {

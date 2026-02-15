@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { verifyToken } from '@/lib/auth';
+import { CacheInvalidation } from '@/lib/cache/redis-client';
 
 // POST - Adicionar vídeo
 export async function POST(request: NextRequest) {
@@ -52,6 +53,9 @@ export async function POST(request: NextRequest) {
         isActive: true,
       },
     });
+
+    // Invalidate cache
+    CacheInvalidation.courseVideos().catch(console.error);
 
     return NextResponse.json({ video }, { status: 201 });
   } catch (error) {

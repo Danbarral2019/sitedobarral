@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
-import { rateLimiters } from '@/lib/rate-limit';
+import { enforceRateLimit, getClientIp } from '@/lib/cache/rate-limit-helper';
 import { sendContactNotification } from '@/lib/email';
 import { verifyAuth } from '@/lib/auth';
 import { handleApiError } from '@/lib/errors/error-handler';
@@ -10,17 +10,10 @@ import { apiLogger } from '@/lib/logger';
 
 // POST - Enviar mensagem de contato
 export async function POST(request: NextRequest) {
-  // Rate limiting: 10 envios por minuto
   try {
-    await rateLimiters.forms.check(request, 10);
-  } catch {
-    return NextResponse.json(
-      { error: 'Você está enviando mensagens muito rapidamente. Por favor, aguarde alguns instantes.' },
-      { status: 429 }
-    );
-  }
-
-  try {
+    // Rate limiting: 10 envios por minuto (Redis)
+    const ip = getClientIp(request);
+    await enforceRateLimit(`form:contact:${ip}`, 10, 60);
     const { name, email, phone, courseInterest, message } = await request.json();
 
     // Validações básicas

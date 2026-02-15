@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { verifyAuth } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
+import { CacheInvalidation } from '@/lib/cache/redis-client';
 
 /**
  * POST /api/admin/dou/bulk-approve
@@ -84,6 +85,14 @@ export async function POST(request: NextRequest) {
     const skippedIds = documentIds.filter((id: string) => !processedIds.includes(id));
     for (const id of skippedIds) {
       details.push({ id, status: 'skipped', error: 'Documento não encontrado ou já processado' });
+    }
+
+    // Invalidate cache
+    if (processed > 0) {
+      CacheInvalidation.douStats().catch(console.error);
+      if (action === 'approve') {
+        CacheInvalidation.courseDocuments().catch(console.error);
+      }
     }
 
     return NextResponse.json({

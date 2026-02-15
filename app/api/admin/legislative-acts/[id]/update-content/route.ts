@@ -3,6 +3,7 @@ import { prisma } from '@/lib/prisma';
 import { verifyToken } from '@/lib/auth';
 import { scrapeUrl, canScrapeUrl } from '@/lib/legislative-scrapers';
 import { hasHashChanged, generateChangeSummary } from '@/lib/legislative-scrapers/change-detector';
+import { CacheInvalidation } from '@/lib/cache/redis-client';
 
 /**
  * POST /api/admin/legislative-acts/[id]/update-content
@@ -136,6 +137,11 @@ export async function POST(
     });
 
     console.log(`[Update Content] Concluído para ${act.fullNumber}: ${changed ? 'ALTERADO' : 'sem mudanças'}`);
+
+    // Invalidate cache
+    if (changed) {
+      CacheInvalidation.legislativeActs().catch(console.error);
+    }
 
     return NextResponse.json({
       success: true,

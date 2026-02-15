@@ -3,6 +3,7 @@ import { prisma } from '@/lib/prisma';
 import { verifyToken } from '@/lib/auth';
 import { classifyDocumentEnhanced, bulkClassify } from '@/lib/auto-classifier';
 import { courses } from '@/data/courses';
+import { CacheInvalidation } from '@/lib/cache/redis-client';
 
 /**
  * POST /api/admin/documents/batch-classify
@@ -175,6 +176,11 @@ export async function POST(request: NextRequest) {
         hybrid: classifications.filter(c => c.suggested.source === 'hybrid').length,
       },
     };
+
+    // Invalidate cache if any documents were auto-applied
+    if (updatedDocuments.length > 0) {
+      CacheInvalidation.courseDocuments().catch(console.error);
+    }
 
     return NextResponse.json({
       success: true,

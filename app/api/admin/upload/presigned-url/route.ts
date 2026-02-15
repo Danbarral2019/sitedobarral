@@ -3,6 +3,8 @@ import { cookies } from 'next/headers';
 import { verifyToken } from '@/lib/auth';
 import { generatePresignedUploadUrl } from '@/lib/storage/r2-client';
 import { randomUUID } from 'crypto';
+import { enforceRateLimit, getClientIp } from '@/lib/cache/rate-limit-helper';
+import { RateLimitError } from '@/lib/errors/api-error';
 
 // ===========================
 // Types
@@ -85,6 +87,10 @@ function validateFileMetadata(request: PresignedUrlRequest): {
 
 export async function POST(req: NextRequest) {
   try {
+    // Rate limiting: 10 uploads por minuto (Redis)
+    const ip = getClientIp(req);
+    await enforceRateLimit(`admin:upload:${ip}`, 10, 60);
+
     // 1. Authenticate user (admin only)
     const cookieStore = await cookies();
     const token = cookieStore.get('auth-token');
@@ -132,6 +138,12 @@ export async function POST(req: NextRequest) {
       maxFileSize: MAX_FILE_SIZE,
     });
   } catch (error) {
+    if (error instanceof RateLimitError) {
+      return NextResponse.json(
+        { error: 'Muitas requisições de upload. Aguarde alguns instantes.' },
+        { status: 429 }
+      );
+    }
     console.error('Presigned URL generation error:', error);
     return NextResponse.json(
       {

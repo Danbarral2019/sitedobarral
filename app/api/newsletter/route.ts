@@ -1,21 +1,15 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { rateLimiters } from '@/lib/rate-limit';
+import { enforceRateLimit, getClientIp } from '@/lib/cache/rate-limit-helper';
+import { RateLimitError } from '@/lib/errors/api-error';
 import { addSubscriber, unsubscribeSubscriber, isMailChimpConfigured } from '@/lib/mailchimp';
 import { prisma } from '@/lib/prisma';
 
 // POST - Cadastrar na newsletter
 export async function POST(request: NextRequest) {
-  // Rate limiting: 10 cadastros por minuto
   try {
-    await rateLimiters.forms.check(request, 10);
-  } catch {
-    return NextResponse.json(
-      { error: 'Você está enviando cadastros muito rapidamente. Por favor, aguarde alguns instantes.' },
-      { status: 429 }
-    );
-  }
-
-  try {
+    // Rate limiting: 10 cadastros por minuto (Redis)
+    const ip = getClientIp(request);
+    await enforceRateLimit(`form:newsletter:${ip}`, 10, 60);
     const { email, name, interests } = await request.json();
 
     // Validações básicas
@@ -120,6 +114,12 @@ export async function POST(request: NextRequest) {
       { status: 201 }
     );
   } catch (error) {
+    if (error instanceof RateLimitError) {
+      return NextResponse.json(
+        { error: 'Você está enviando cadastros muito rapidamente. Por favor, aguarde alguns instantes.' },
+        { status: 429 }
+      );
+    }
     console.error('Erro ao cadastrar newsletter:', error);
     return NextResponse.json(
       { error: 'Erro ao cadastrar. Tente novamente.' },

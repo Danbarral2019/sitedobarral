@@ -3,21 +3,16 @@ import { prisma } from '@/lib/prisma';
 import { generateToken } from '@/lib/auth';
 import { cookies } from 'next/headers';
 import bcrypt from 'bcryptjs';
-import { rateLimiters } from '@/lib/rate-limit';
+import { enforceRateLimit, getClientIp } from '@/lib/cache/rate-limit-helper';
+import { RateLimitError } from '@/lib/errors/api-error';
 
 
 export async function POST(request: NextRequest) {
-  // Rate limiting: 5 tentativas de login admin por minuto
   try {
-    await rateLimiters.auth.check(request, 5);
-  } catch {
-    return NextResponse.json(
-      { error: 'Muitas tentativas de login. Tente novamente em alguns instantes.' },
-      { status: 429 }
-    );
-  }
+    // Rate limiting: 5 tentativas de login admin por minuto (Redis)
+    const ip = getClientIp(request);
+    await enforceRateLimit(`auth:admin:${ip}`, 5, 60);
 
-  try {
     const { email, password } = await request.json();
 
     if (!email || !password) {
@@ -77,6 +72,12 @@ export async function POST(request: NextRequest) {
       },
     });
   } catch (error) {
+    if (error instanceof RateLimitError) {
+      return NextResponse.json(
+        { error: 'Muitas tentativas de login. Tente novamente em alguns instantes.' },
+        { status: 429 }
+      );
+    }
     console.error('Erro no login admin:', error);
     return NextResponse.json(
       { error: 'Erro ao processar login' },

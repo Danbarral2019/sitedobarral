@@ -81,6 +81,34 @@ export const CACHE_TTL = {
   COURSE_DOCUMENTS: 60 * 60,
 
   // ===========================
+  // Fase 10 Extension TTLs
+  // ===========================
+
+  // Blog posts (1 hour)
+  BLOG_POSTS: 60 * 60,
+
+  // Publications (2 hours)
+  PUBLICATIONS: 60 * 60 * 2,
+
+  // Course videos (2 hours)
+  COURSE_VIDEOS: 60 * 60 * 2,
+
+  // Recommended sites (4 hours) - Very infrequent changes
+  RECOMMENDED_SITES: 60 * 60 * 4,
+
+  // Enunciados (2 hours)
+  ENUNCIADOS: 60 * 60 * 2,
+
+  // Article details (1 hour)
+  ARTICLE_DETAILS: 60 * 60,
+
+  // Admin analytics (5 minutes)
+  ADMIN_ANALYTICS: 60 * 5,
+
+  // DOU stats (10 minutes)
+  DOU_STATS: 60 * 10,
+
+  // ===========================
   // Embeddings/Vector Search TTLs
   // ===========================
 
@@ -220,6 +248,92 @@ export const CacheKeys = {
    */
   registry: (prefix: string): string => {
     return `registry:${prefix}`;
+  },
+
+  // ===========================
+  // Fase 10 Extension Keys
+  // ===========================
+
+  /**
+   * Blog posts list cache key
+   * Format: blog:{page}:{limit}:{published}
+   */
+  blogPosts: (page?: number, limit?: number, published?: boolean): string => {
+    return `blog:${page || 1}:${limit || 20}:${published ?? 'all'}`;
+  },
+
+  /**
+   * Single blog post cache key
+   * Format: blog:post:{idOrSlug}
+   */
+  blogPost: (idOrSlug: string): string => {
+    return `blog:post:${idOrSlug}`;
+  },
+
+  /**
+   * Publications list cache key
+   * Format: pub:{type}:{page}:{limit}
+   */
+  publications: (type?: string | null, page?: number, limit?: number): string => {
+    return `pub:${type || 'all'}:${page || 1}:${limit || 20}`;
+  },
+
+  /**
+   * Course videos cache key
+   * Format: videos:{courseId}
+   */
+  courseVideos: (courseId?: string): string => {
+    return `videos:${courseId || 'all'}`;
+  },
+
+  /**
+   * Recommended sites cache key
+   * Format: sites:{courseId}
+   */
+  recommendedSites: (courseId?: string): string => {
+    return `sites:${courseId || 'all'}`;
+  },
+
+  /**
+   * Enunciados cache key
+   * Format: enunciados:{filterHash}
+   */
+  enunciados: (filters?: { artigo?: string | null; orgao?: string | null; query?: string | null }): string => {
+    const filterHash = filters ? hashString(JSON.stringify(filters)) : 'all';
+    return `enunciados:${filterHash}`;
+  },
+
+  /**
+   * Article details cache key
+   * Format: article:{numero}:{suffix}
+   */
+  articleDetails: (numero: string, suffix?: string): string => {
+    return `article:${numero}${suffix ? ':' + suffix : ''}`;
+  },
+
+  /**
+   * Article documents cache key
+   * Format: article:docs:{numero}
+   */
+  articleDocuments: (numero: string): string => {
+    return `article:docs:${numero}`;
+  },
+
+  /**
+   * Admin analytics cache key
+   * Format: analytics:{type}:{filterHash}
+   */
+  adminAnalytics: (type: string, filters?: Record<string, unknown>): string => {
+    const filterHash = filters ? hashString(JSON.stringify(filters)) : 'all';
+    return `analytics:${type}:${filterHash}`;
+  },
+
+  /**
+   * DOU stats cache key
+   * Format: dou:stats
+   */
+  douStats: (): string => {
+    return 'dou:stats';
   },
 
   // ===========================
@@ -680,6 +794,63 @@ export const CacheInvalidation = {
   },
 
   /**
+   * Invalidate blog posts cache
+   */
+  blogPosts: async (): Promise<number> => {
+    return invalidateCacheByPrefix('blog');
+  },
+
+  /**
+   * Invalidate publications cache
+   */
+  publications: async (): Promise<number> => {
+    return invalidateCacheByPrefix('pub');
+  },
+
+  /**
+   * Invalidate course videos cache
+   */
+  courseVideos: async (): Promise<number> => {
+    return invalidateCacheByPrefix('videos');
+  },
+
+  /**
+   * Invalidate recommended sites cache
+   */
+  recommendedSites: async (): Promise<number> => {
+    return invalidateCacheByPrefix('sites');
+  },
+
+  /**
+   * Invalidate enunciados cache
+   */
+  enunciados: async (): Promise<number> => {
+    return invalidateCacheByPrefix('enunciados');
+  },
+
+  /**
+   * Invalidate article details/documents cache
+   */
+  articleDetails: async (): Promise<number> => {
+    return invalidateCacheByPrefix('article');
+  },
+
+  /**
+   * Invalidate DOU stats cache
+   */
+  douStats: async (): Promise<void> => {
+    await deleteCache(CacheKeys.douStats());
+    console.log('🗑️ Invalidated DOU stats cache');
+  },
+
+  /**
+   * Invalidate admin analytics cache
+   */
+  adminAnalytics: async (): Promise<number> => {
+    return invalidateCacheByPrefix('analytics');
+  },
+
+  /**
    * Invalidate all public API caches
    * Use with caution - clears everything
    */
@@ -694,6 +865,14 @@ export const CacheInvalidation = {
       CacheInvalidation.vectorSearch(),
       CacheInvalidation.queryEmbeddings(),
       CacheInvalidation.synthesizedAnswers(),
+      CacheInvalidation.blogPosts(),
+      CacheInvalidation.publications(),
+      CacheInvalidation.courseVideos(),
+      CacheInvalidation.recommendedSites(),
+      CacheInvalidation.enunciados(),
+      CacheInvalidation.articleDetails(),
+      CacheInvalidation.douStats().then(() => 1),
+      CacheInvalidation.adminAnalytics(),
     ]);
 
     const details = {
@@ -706,6 +885,14 @@ export const CacheInvalidation = {
       vectorSearch: results[6],
       queryEmbeddings: results[7],
       synthesizedAnswers: results[8],
+      blogPosts: results[9],
+      publications: results[10],
+      courseVideos: results[11],
+      recommendedSites: results[12],
+      enunciados: results[13],
+      articleDetails: results[14],
+      douStats: results[15],
+      adminAnalytics: results[16],
     };
 
     const total = results.reduce((sum, count) => sum + count, 0);
@@ -732,7 +919,7 @@ export async function getCacheStats(): Promise<{
 }> {
   const health = await healthCheck();
 
-  const prefixes = ['faq', 'glossary', 'acts', 'lei', 'docs'];
+  const prefixes = ['faq', 'glossary', 'acts', 'lei', 'docs', 'blog', 'pub', 'videos', 'sites', 'enunciados', 'article', 'analytics', 'dou'];
   const registeredPrefixes: { prefix: string; count: number }[] = [];
 
   for (const prefix of prefixes) {

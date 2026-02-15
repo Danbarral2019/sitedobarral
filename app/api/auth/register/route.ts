@@ -3,22 +3,19 @@ import { prisma } from '@/lib/prisma';
 import bcrypt from 'bcryptjs';
 import crypto from 'crypto';
 import { sendVerificationEmail } from '@/lib/email';
-import { rateLimiters } from '@/lib/rate-limit';
+import { enforceRateLimit, getClientIp } from '@/lib/cache/rate-limit-helper';
 import { validateRequest } from '@/lib/validation-helper';
 import { RegisterSchema } from '@/lib/validation-schemas';
 import { handleApiError } from '@/lib/errors/error-handler';
-import { ConflictError, RateLimitError } from '@/lib/errors/api-error';
+import { ConflictError } from '@/lib/errors/api-error';
 import { authLogger } from '@/lib/logger';
 
 export async function POST(request: NextRequest) {
-  // Rate limiting: 10 cadastros por minuto por IP
   try {
-    await rateLimiters.forms.check(request, 10);
-  } catch {
-    throw new RateLimitError('Muitas tentativas de cadastro. Por favor, aguarde alguns instantes.');
-  }
+    // Rate limiting: 10 cadastros por minuto por IP (Redis)
+    const ip = getClientIp(request);
+    await enforceRateLimit(`auth:register:${ip}`, 10, 60);
 
-  try {
     // ✅ Validação com Zod
     const validation = await validateRequest(request, RegisterSchema);
 

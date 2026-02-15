@@ -1,9 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
+import { withCache, CacheKeys, CACHE_TTL } from '@/lib/cache/redis-client';
 
 interface TimelinePeriod {
-  period: string; // "2024-11" formato ano-mês
-  label: string; // "Novembro 2024" para display
+  period: string;
+  label: string;
   documents: {
     id: string;
     title: string;
@@ -30,8 +31,7 @@ export async function GET(
     const { numero: articleNumber } = await params;
     const searchParams = request.nextUrl.searchParams;
 
-    // Filtros opcionais
-    const period = searchParams.get('period'); // "30d" | "6m" | "1y" | "all"
+    const periodParam = searchParams.get('period');
     const category = searchParams.get('category');
 
     if (!articleNumber) {
@@ -41,127 +41,128 @@ export async function GET(
       );
     }
 
-    // Calcular data de início baseado no período
-    let dateFilter: Date | undefined;
-    const now = new Date();
+    const result = await withCache(
+      CacheKeys.articleDetails(articleNumber, `tl:${periodParam || 'all'}:${category || 'all'}`),
+      async () => {
+        let dateFilter: Date | undefined;
+        const now = new Date();
 
-    switch (period) {
-      case '30d':
-        dateFilter = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
-        break;
-      case '6m':
-        dateFilter = new Date(now.getTime() - 180 * 24 * 60 * 60 * 1000);
-        break;
-      case '1y':
-        dateFilter = new Date(now.getTime() - 365 * 24 * 60 * 60 * 1000);
-        break;
-      case 'all':
-      default:
-        dateFilter = undefined;
-    }
+        switch (periodParam) {
+          case '30d':
+            dateFilter = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+            break;
+          case '6m':
+            dateFilter = new Date(now.getTime() - 180 * 24 * 60 * 60 * 1000);
+            break;
+          case '1y':
+            dateFilter = new Date(now.getTime() - 365 * 24 * 60 * 60 * 1000);
+            break;
+          case 'all':
+          default:
+            dateFilter = undefined;
+        }
 
-    // Buscar documentos que mencionam este artigo
-    const documents = await prisma.document.findMany({
-      where: {
-        leiArticles: {
-          contains: articleNumber,
-        },
-        ...(dateFilter && {
-          uploadedAt: {
-            gte: dateFilter,
+        const documents = await prisma.document.findMany({
+          where: {
+            leiArticles: {
+              contains: articleNumber,
+            },
+            ...(dateFilter && {
+              uploadedAt: {
+                gte: dateFilter,
+              },
+            }),
+            ...(category && {
+              category: category,
+            }),
           },
-        }),
-        ...(category && {
-          category: category,
-        }),
-      },
-      select: {
-        id: true,
-        title: true,
-        category: true,
-        type: true,
-        uploadedAt: true,
-      },
-      orderBy: {
-        uploadedAt: 'desc',
-      },
-    });
-
-    if (documents.length === 0) {
-      return NextResponse.json({
-        articleNumber,
-        timeline: [],
-        stats: {
-          total: 0,
-          oldestDate: null,
-          newestDate: null,
-          categories: {},
-        },
-      });
-    }
-
-    // Agrupar por período (ano-mês)
-    const periodMap = new Map<string, TimelinePeriod>();
-    const categoryCount: { [key: string]: number } = {};
-
-    documents.forEach((doc) => {
-      const date = new Date(doc.uploadedAt);
-      const periodKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
-
-      // Criar período se não existir
-      if (!periodMap.has(periodKey)) {
-        const monthNames = [
-          'Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho',
-          'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'
-        ];
-        const monthName = monthNames[date.getMonth()];
-        const year = date.getFullYear();
-
-        periodMap.set(periodKey, {
-          period: periodKey,
-          label: `${monthName} ${year}`,
-          documents: [],
-          count: 0,
+          select: {
+            id: true,
+            title: true,
+            category: true,
+            type: true,
+            uploadedAt: true,
+          },
+          orderBy: {
+            uploadedAt: 'desc',
+          },
         });
-      }
 
-      // Adicionar documento ao período
-      const period = periodMap.get(periodKey)!;
-      period.documents.push({
-        id: doc.id,
-        title: doc.title,
-        category: doc.category,
-        type: doc.type,
-        uploadedAt: doc.uploadedAt.toISOString(),
-      });
-      period.count++;
+        if (documents.length === 0) {
+          return {
+            articleNumber,
+            timeline: [],
+            stats: {
+              total: 0,
+              oldestDate: null,
+              newestDate: null,
+              categories: {},
+            },
+          };
+        }
 
-      // Contar categorias
-      categoryCount[doc.category] = (categoryCount[doc.category] || 0) + 1;
-    });
+        const periodMap = new Map<string, TimelinePeriod>();
+        const categoryCount: { [key: string]: number } = {};
 
-    // Converter para array e ordenar por data (mais recente primeiro)
-    const timeline = Array.from(periodMap.values()).sort((a, b) => {
-      return b.period.localeCompare(a.period);
-    });
+        documents.forEach((doc) => {
+          const date = new Date(doc.uploadedAt);
+          const periodKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
 
-    // Estatísticas
-    const stats: TimelineStats = {
-      total: documents.length,
-      oldestDate: documents[documents.length - 1].uploadedAt.toISOString(),
-      newestDate: documents[0].uploadedAt.toISOString(),
-      categories: categoryCount,
-    };
+          if (!periodMap.has(periodKey)) {
+            const monthNames = [
+              'Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho',
+              'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'
+            ];
+            const monthName = monthNames[date.getMonth()];
+            const year = date.getFullYear();
 
-    return NextResponse.json({
-      articleNumber,
-      timeline,
-      stats,
-      filters: {
-        period: period || 'all',
-        category: category || null,
+            periodMap.set(periodKey, {
+              period: periodKey,
+              label: `${monthName} ${year}`,
+              documents: [],
+              count: 0,
+            });
+          }
+
+          const p = periodMap.get(periodKey)!;
+          p.documents.push({
+            id: doc.id,
+            title: doc.title,
+            category: doc.category,
+            type: doc.type,
+            uploadedAt: doc.uploadedAt.toISOString(),
+          });
+          p.count++;
+
+          categoryCount[doc.category] = (categoryCount[doc.category] || 0) + 1;
+        });
+
+        const timeline = Array.from(periodMap.values()).sort((a, b) => {
+          return b.period.localeCompare(a.period);
+        });
+
+        const stats: TimelineStats = {
+          total: documents.length,
+          oldestDate: documents[documents.length - 1].uploadedAt.toISOString(),
+          newestDate: documents[0].uploadedAt.toISOString(),
+          categories: categoryCount,
+        };
+
+        return {
+          articleNumber,
+          timeline,
+          stats,
+          filters: {
+            period: periodParam || 'all',
+            category: category || null,
+          },
+        };
       },
-    });
+      CACHE_TTL.ARTICLE_DETAILS,
+      { prefix: 'article' }
+    );
+
+    return NextResponse.json(result);
   } catch (error) {
     console.error('Erro ao buscar timeline:', error);
     return NextResponse.json(

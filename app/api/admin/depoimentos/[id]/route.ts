@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { verifyAuth } from '@/lib/auth';
 import { deleteTestimonial } from '@/lib/depoimentos';
+import { CacheInvalidation } from '@/lib/cache/redis-client';
 
 export async function DELETE(
   request: NextRequest,
@@ -13,6 +14,10 @@ export async function DELETE(
     }
     const { id } = await params;
     await deleteTestimonial(id);
+
+    // Invalidate cache
+    CacheInvalidation.testimonials().catch(console.error);
+
     return NextResponse.json({ success: true });
   } catch (error) {
     console.error('Error deleting testimonial:', error);

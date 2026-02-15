@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { withAdminAuth } from '@/lib/api-middleware';
+import { CacheInvalidation, withCache, CacheKeys, CACHE_TTL } from '@/lib/cache/redis-client';
 
 
 // GET - Lista todas as publicações
@@ -11,14 +12,22 @@ export const GET = withAdminAuth(async (request: NextRequest) => {
 
     const where = type ? { type } : {};
 
-    const publications = await prisma.publication.findMany({
-      where,
-      orderBy: {
-        publishedAt: 'desc'
-      }
-    });
+    const result = await withCache(
+      CacheKeys.publications(type),
+      async () => {
+        const publications = await prisma.publication.findMany({
+          where,
+          orderBy: {
+            publishedAt: 'desc'
+          }
+        });
+        return { publications };
+      },
+      CACHE_TTL.PUBLICATIONS,
+      { prefix: 'pub' }
+    );
 
-    return NextResponse.json({ publications });
+    return NextResponse.json(result);
   } catch (error) {
     console.error('Erro ao listar publicações:', error);
     return NextResponse.json(
@@ -82,6 +91,9 @@ export const POST = withAdminAuth(async (request: NextRequest) => {
         location: location || null,
       },
     });
+
+    // Invalidate cache
+    CacheInvalidation.publications().catch(console.error);
 
     return NextResponse.json({ publication }, { status: 201 });
   } catch (error) {

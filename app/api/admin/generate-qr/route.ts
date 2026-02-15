@@ -1,23 +1,17 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { withAdminAuth } from '@/lib/api-middleware';
 import { createQRCode } from '@/lib/qrcode';
-import { rateLimiters } from '@/lib/rate-limit';
+import { enforceRateLimit, getClientIp } from '@/lib/cache/rate-limit-helper';
+import { RateLimitError } from '@/lib/errors/api-error';
 
 // Aumenta timeout para 60 segundos (necessário para geração de QR code)
 export const maxDuration = 60;
 
 export const POST = withAdminAuth(async (request: NextRequest) => {
-  // Rate limiting: 3 gerações de QR Code por hora
   try {
-    await rateLimiters.qrcode.check(request, 3);
-  } catch {
-    return NextResponse.json(
-      { error: 'Limite de geração de QR Codes atingido. Tente novamente mais tarde.' },
-      { status: 429 }
-    );
-  }
-
-  try {
+    // Rate limiting: 3 gerações de QR Code por hora (Redis, window=3600s)
+    const ip = getClientIp(request);
+    await enforceRateLimit(`admin:qr:${ip}`, 3, 3600);
     const { courseId, turma, validDays, maxUses } = await request.json();
 
     if (!courseId || !turma || !validDays) {
@@ -46,6 +40,12 @@ export const POST = withAdminAuth(async (request: NextRequest) => {
       validUntil: validUntil.toISOString(),
     });
   } catch (error) {
+    if (error instanceof RateLimitError) {
+      return NextResponse.json(
+        { error: 'Limite de geração de QR Codes atingido. Tente novamente mais tarde.' },
+        { status: 429 }
+      );
+    }
     console.error('Erro ao gerar QR Code:', error);
     return NextResponse.json(
       { error: error instanceof Error ? error.message : 'Erro ao gerar QR Code' },

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { verifyAdmin } from '@/lib/api-middleware';
+import { CacheInvalidation } from '@/lib/cache/redis-client';
 
 /**
  * POST /api/admin/legislative-acts/import
@@ -147,6 +148,11 @@ export async function POST(request: NextRequest) {
           data: row as Record<string, unknown>
         });
       }
+    }
+
+    // Invalidate cache if any acts were imported
+    if (results.success > 0) {
+      CacheInvalidation.legislativeActs().catch(console.error);
     }
 
     return NextResponse.json({

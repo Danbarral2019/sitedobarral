@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { withAdminAuth } from '@/lib/api-middleware';
 import { prisma } from '@/lib/prisma';
+import { CacheInvalidation } from '@/lib/cache/redis-client';
 
 // GET - Busca uma publicação específica
 export const GET = withAdminAuth(async (
@@ -80,6 +81,9 @@ export const PUT = withAdminAuth(async (
       },
     });
 
+    // Invalidate cache
+    CacheInvalidation.publications().catch(console.error);
+
     return NextResponse.json({ publication });
   } catch (error) {
     console.error('Erro ao atualizar publicação:', error);
@@ -112,6 +116,9 @@ export const DELETE = withAdminAuth(async (
     await prisma.publication.delete({
       where: { id }
     });
+
+    // Invalidate cache
+    CacheInvalidation.publications().catch(console.error);
 
     return NextResponse.json({ success: true });
   } catch (error) {

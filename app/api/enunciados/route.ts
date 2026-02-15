@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { ENUNCIADOS, getEnunciadosPorArtigo, getEnunciadosPorOrgao, buscarEnunciados, ENUNCIADOS_METADATA } from '@/data/enunciados';
+import { withCache, CacheKeys, CACHE_TTL } from '@/lib/cache/redis-client';
 
 /**
  * GET /api/enunciados
@@ -16,27 +17,35 @@ export async function GET(request: NextRequest) {
     const orgao = searchParams.get('orgao') as 'INCP' | 'CJF' | 'IBDA' | null;
     const query = searchParams.get('q');
 
-    let enunciados = ENUNCIADOS;
+    const result = await withCache(
+      CacheKeys.enunciados({ artigo, orgao, query }),
+      async () => {
+        let enunciados = ENUNCIADOS;
 
-    // Filtrar por artigo
-    if (artigo) {
-      enunciados = getEnunciadosPorArtigo(artigo);
-    }
+        if (artigo) {
+          enunciados = getEnunciadosPorArtigo(artigo);
+        }
 
-    // Filtrar por órgão
-    if (orgao && ['INCP', 'CJF', 'IBDA'].includes(orgao)) {
-      enunciados = orgao ? getEnunciadosPorOrgao(orgao) : enunciados;
-    }
+        if (orgao && ['INCP', 'CJF', 'IBDA'].includes(orgao)) {
+          enunciados = orgao ? getEnunciadosPorOrgao(orgao) : enunciados;
+        }
 
-    // Busca textual
-    if (query && query.length >= 3) {
-      enunciados = buscarEnunciados(query);
-    }
+        if (query && query.length >= 3) {
+          enunciados = buscarEnunciados(query);
+        }
 
-    return NextResponse.json({
-      enunciados,
-      total: enunciados.length,
-      metadata: ENUNCIADOS_METADATA
+        return {
+          enunciados,
+          total: enunciados.length,
+          metadata: ENUNCIADOS_METADATA,
+        };
+      },
+      CACHE_TTL.ENUNCIADOS,
+      { prefix: 'enunciados' }
+    );
+
+    return NextResponse.json(result, {
+      headers: { 'Cache-Control': 'public, s-maxage=1800, stale-while-revalidate=3600' },
     });
 
   } catch (error) {

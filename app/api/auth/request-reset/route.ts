@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { randomBytes } from 'crypto';
-import { rateLimiters } from '@/lib/rate-limit';
+import { enforceRateLimit, getClientIp } from '@/lib/cache/rate-limit-helper';
+import { RateLimitError } from '@/lib/errors/api-error';
 import { sendPasswordResetEmail } from '@/lib/email';
 
 /**
@@ -9,17 +10,10 @@ import { sendPasswordResetEmail } from '@/lib/email';
  * Solicita reset de senha - gera token e salva no banco
  */
 export async function POST(request: NextRequest) {
-  // Rate limiting: 5 solicitações de reset por minuto
   try {
-    await rateLimiters.auth.check(request, 5);
-  } catch {
-    return NextResponse.json(
-      { error: 'Muitas tentativas de reset de senha. Por favor, aguarde alguns instantes.' },
-      { status: 429 }
-    );
-  }
-
-  try {
+    // Rate limiting: 5 solicitações de reset por minuto (Redis)
+    const ip = getClientIp(request);
+    await enforceRateLimit(`auth:reset:${ip}`, 5, 60);
     const { email } = await request.json();
 
     if (!email) {
@@ -76,6 +70,12 @@ export async function POST(request: NextRequest) {
       } : undefined,
     });
   } catch (error) {
+    if (error instanceof RateLimitError) {
+      return NextResponse.json(
+        { error: 'Muitas tentativas de reset de senha. Por favor, aguarde alguns instantes.' },
+        { status: 429 }
+      );
+    }
     console.error('Erro ao solicitar reset de senha:', error);
     return NextResponse.json(
       { error: 'Erro ao processar solicitação' },

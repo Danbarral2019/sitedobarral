@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { verifyAuth } from '@/lib/auth';
+import { withCache, CacheKeys, CACHE_TTL } from '@/lib/cache/redis-client';
 
 /**
  * GET /api/admin/dou/stats
@@ -13,52 +14,62 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    // Início do mês atual
-    const now = new Date();
-    const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+    const result = await withCache(
+      CacheKeys.douStats(),
+      async () => {
+        const now = new Date();
+        const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
 
-    const [
-      totalStaging,
-      pending,
-      autoApproved,
-      approvedThisMonth,
-      rejectedThisMonth,
-      importedTotal,
-    ] = await Promise.all([
-      prisma.dOUStagingDocument.count(),
-      prisma.dOUStagingDocument.count({
-        where: { approvalStatus: 'pending' },
-      }),
-      prisma.dOUStagingDocument.count({
-        where: {
-          approvalStatus: 'auto_approved',
-          imported: false,
-        },
-      }),
-      prisma.dOUStagingDocument.count({
-        where: {
-          finalDecision: 'approved',
-          reviewedAt: { gte: startOfMonth },
-        },
-      }),
-      prisma.dOUStagingDocument.count({
-        where: {
-          finalDecision: 'rejected',
-          reviewedAt: { gte: startOfMonth },
-        },
-      }),
-      prisma.dOUStagingDocument.count({
-        where: { imported: true },
-      }),
-    ]);
+        const [
+          totalStaging,
+          pending,
+          autoApproved,
+          approvedThisMonth,
+          rejectedThisMonth,
+          importedTotal,
+        ] = await Promise.all([
+          prisma.dOUStagingDocument.count(),
+          prisma.dOUStagingDocument.count({
+            where: { approvalStatus: 'pending' },
+          }),
+          prisma.dOUStagingDocument.count({
+            where: {
+              approvalStatus: 'auto_approved',
+              imported: false,
+            },
+          }),
+          prisma.dOUStagingDocument.count({
+            where: {
+              finalDecision: 'approved',
+              reviewedAt: { gte: startOfMonth },
+            },
+          }),
+          prisma.dOUStagingDocument.count({
+            where: {
+              finalDecision: 'rejected',
+              reviewedAt: { gte: startOfMonth },
+            },
+          }),
+          prisma.dOUStagingDocument.count({
+            where: { imported: true },
+          }),
+        ]);
 
-    return NextResponse.json({
-      totalStaging,
-      pending,
-      autoApproved,
-      approvedThisMonth,
-      rejectedThisMonth,
-      importedTotal,
+        return {
+          totalStaging,
+          pending,
+          autoApproved,
+          approvedThisMonth,
+          rejectedThisMonth,
+          importedTotal,
+        };
+      },
+      CACHE_TTL.DOU_STATS,
+      { prefix: 'dou' }
+    );
+
+    return NextResponse.json(result, {
+      headers: { 'Cache-Control': 'private, max-age=300' },
     });
   } catch (error) {
     console.error('[DOU Stats] Error:', error);

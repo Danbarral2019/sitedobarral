@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { verifyToken } from '@/lib/auth';
+import { CacheInvalidation } from '@/lib/cache/redis-client';
 
 export async function GET(request: NextRequest) {
   try {
@@ -73,6 +74,9 @@ export async function POST(request: NextRequest) {
         )
       );
     }
+
+    // Invalidate cache
+    CacheInvalidation.recommendedSites().catch(console.error);
 
     return NextResponse.json({ site }, { status: 201 });
   } catch (error) {

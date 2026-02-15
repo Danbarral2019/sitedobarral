@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { withAdminAuth } from '@/lib/api-middleware';
 import { prisma } from '@/lib/prisma';
+import { CacheInvalidation } from '@/lib/cache/redis-client';
 
 /**
  * POST /api/admin/documents/create-manual
@@ -79,6 +80,9 @@ export const POST = withAdminAuth(async (request: NextRequest) => {
     });
 
     console.log('[Create Manual] ✅ Documento criado:', document.id);
+
+    // Invalidate cache
+    CacheInvalidation.courseDocuments().catch(console.error);
 
     return NextResponse.json(
       {

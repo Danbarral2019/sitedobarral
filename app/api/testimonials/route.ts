@@ -43,7 +43,9 @@ export async function GET() {
       // No prefix needed - single key, direct invalidation
     );
 
-    return NextResponse.json(result);
+    return NextResponse.json(result, {
+      headers: { 'Cache-Control': 'public, s-maxage=3600, stale-while-revalidate=7200' },
+    });
   } catch (error) {
     console.error('Erro ao buscar testimonials:', error);
     return NextResponse.json(

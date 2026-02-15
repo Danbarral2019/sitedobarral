@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
+import { withCache, CacheKeys, CACHE_TTL } from '@/lib/cache/redis-client';
 
 // GET /api/glossary/[slug] - Obter termo específico por slug
 export async function GET(
@@ -11,9 +12,6 @@ export async function GET(
 
     const term = await prisma.glossaryTerm.findUnique({
       where: { slug },
-      include: {
-        // Não temos relations diretas, mas vamos buscar os relacionados depois
-      },
     });
 
     if (!term) {
@@ -38,74 +36,83 @@ export async function GET(
       })
       .catch((err) => console.error('Error updating view count:', err));
 
-    // Buscar termos relacionados (se houver)
-    let relatedTerms = [];
-    if (term.relatedTerms) {
-      try {
-        const relatedIds = JSON.parse(term.relatedTerms);
-        if (Array.isArray(relatedIds) && relatedIds.length > 0) {
-          relatedTerms = await prisma.glossaryTerm.findMany({
-            where: {
-              id: { in: relatedIds },
-              isPublic: true,
-            },
-            select: {
-              id: true,
-              term: true,
-              slug: true,
-              shortDef: true,
-              category: true,
-            },
-          });
+    // Cache the enriched term data (related terms, docs, etc.)
+    const enrichedData = await withCache(
+      CacheKeys.glossaryTerms({ category: slug }),
+      async () => {
+        let relatedTerms: { id: string; term: string; slug: string; shortDef: string | null; category: string }[] = [];
+        if (term.relatedTerms) {
+          try {
+            const relatedIds = JSON.parse(term.relatedTerms);
+            if (Array.isArray(relatedIds) && relatedIds.length > 0) {
+              relatedTerms = await prisma.glossaryTerm.findMany({
+                where: {
+                  id: { in: relatedIds },
+                  isPublic: true,
+                },
+                select: {
+                  id: true,
+                  term: true,
+                  slug: true,
+                  shortDef: true,
+                  category: true,
+                },
+              });
+            }
+          } catch (e) {
+            console.error('Error parsing relatedTerms:', e);
+          }
         }
-      } catch (e) {
-        console.error('Error parsing relatedTerms:', e);
-      }
-    }
 
-    // Buscar documentos relacionados (se houver)
-    let relatedDocuments = [];
-    if (term.relatedDocs) {
-      try {
-        const docIds = JSON.parse(term.relatedDocs);
-        if (Array.isArray(docIds) && docIds.length > 0) {
-          relatedDocuments = await prisma.document.findMany({
-            where: {
-              id: { in: docIds },
-            },
-            select: {
-              id: true,
-              title: true,
-              description: true,
-              type: true,
-              category: true,
-              courseId: true,
-            },
-            take: 10,
-          });
+        let relatedDocuments: { id: string; title: string; description: string | null; type: string; category: string; courseId: string | null }[] = [];
+        if (term.relatedDocs) {
+          try {
+            const docIds = JSON.parse(term.relatedDocs);
+            if (Array.isArray(docIds) && docIds.length > 0) {
+              relatedDocuments = await prisma.document.findMany({
+                where: {
+                  id: { in: docIds },
+                },
+                select: {
+                  id: true,
+                  title: true,
+                  description: true,
+                  type: true,
+                  category: true,
+                  courseId: true,
+                },
+                take: 10,
+              });
+            }
+          } catch (e) {
+            console.error('Error parsing relatedDocs:', e);
+          }
         }
-      } catch (e) {
-        console.error('Error parsing relatedDocs:', e);
-      }
-    }
 
-    // Parse leiArticles se houver
-    let leiArticles = [];
-    if (term.leiArticles) {
-      try {
-        leiArticles = JSON.parse(term.leiArticles);
-      } catch (e) {
-        console.error('Error parsing leiArticles:', e);
-      }
-    }
+        let leiArticles: string[] = [];
+        if (term.leiArticles) {
+          try {
+            leiArticles = JSON.parse(term.leiArticles);
+          } catch (e) {
+            console.error('Error parsing leiArticles:', e);
+          }
+        }
+
+        return { relatedTerms, relatedDocuments, leiArticles };
+      },
+      CACHE_TTL.GLOSSARY,
+      { prefix: 'glossary' }
+    );
 
     return NextResponse.json({
       term: {
         ...term,
-        relatedTerms: relatedTerms,
-        relatedDocuments: relatedDocuments,
-        leiArticles: leiArticles,
+        relatedTerms: enrichedData.relatedTerms,
+        relatedDocuments: enrichedData.relatedDocuments,
+        leiArticles: enrichedData.leiArticles,
       },
+    }, {
+      headers: { 'Cache-Control': 'public, s-maxage=3600, stale-while-revalidate=7200' },
     });
   } catch (error) {
     console.error('Error fetching glossary term:', error);

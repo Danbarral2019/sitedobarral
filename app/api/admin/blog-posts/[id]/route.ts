@@ -5,6 +5,7 @@ import { publishToSocialMedia } from '@/lib/social-publisher';
 import { handleApiError } from '@/lib/errors/error-handler';
 import { NotFoundError, ConflictError } from '@/lib/errors/api-error';
 import { apiLogger } from '@/lib/logger';
+import { CacheInvalidation } from '@/lib/cache/redis-client';
 
 // GET - Busca um post específico
 export const GET = withAdminAuth(async (
@@ -97,6 +98,9 @@ export const PUT = withAdminAuth(async (
 
     apiLogger.info({ postId: post.id }, 'Blog post updated successfully');
 
+    // Invalidate cache
+    CacheInvalidation.blogPosts().catch(console.error);
+
     return NextResponse.json({ post });
   } catch (error) {
     return handleApiError(error);
@@ -125,6 +129,9 @@ export const DELETE = withAdminAuth(async (
     });
 
     apiLogger.info({ postId: id, title: post.title }, 'Blog post deleted successfully');
+
+    // Invalidate cache
+    CacheInvalidation.blogPosts().catch(console.error);
 
     return NextResponse.json({ success: true });
   } catch (error) {

@@ -4,12 +4,10 @@ import { randomUUID } from 'crypto';
 import { queryGeminiText } from '@/lib/gemini/cached-client';
 import { LEI_14133_ARTIGOS } from '@/data/lei-14133-artigos';
 import { findRelatedArticles } from '@/data/lei-14133-cross-references';
-import { rateLimit } from '@/lib/rate-limit';
-import { RateLimitError, ValidationError, NotFoundError } from '@/lib/errors/api-error';
+import { enforceRateLimit, getClientIp } from '@/lib/cache/rate-limit-helper';
+import { ValidationError, NotFoundError } from '@/lib/errors/api-error';
 import { handleApiError } from '@/lib/errors/error-handler';
 import { apiLogger } from '@/lib/logger';
-
-const geminiLimiter = rateLimit({ interval: 60000 });
 
 interface ChatRequest {
   question: string;
@@ -22,11 +20,10 @@ export async function POST(
   { params }: { params: Promise<{ numero: string }> }
 ) {
   try {
-    try {
-      await geminiLimiter.check(request, 5);
-    } catch {
-      throw new RateLimitError();
-    }
+    // Rate limiting: 5 perguntas por minuto (Redis)
+    // Usa IP como identificador (userId não disponível nesta rota)
+    const chatIp = getClientIp(request);
+    await enforceRateLimit(`chat:${chatIp}`, 5, 60);
 
     const { numero } = await params;
     const articleNumber = numero;

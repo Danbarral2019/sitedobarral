@@ -1,41 +1,46 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getTopArticles, getDocumentCountByArticle } from '@/lib/article-utils';
 import { prisma } from '@/lib/prisma';
+import { withCache, CacheKeys, CACHE_TTL } from '@/lib/cache/redis-client';
 
 export async function GET(request: NextRequest) {
   try {
     const searchParams = request.nextUrl.searchParams;
     const limit = parseInt(searchParams.get('limit') || '10');
+    const validLimit = Math.min(Math.max(limit, 1), 50);
 
-    // Valida limit
-    const validLimit = Math.min(Math.max(limit, 1), 50); // Entre 1 e 50
+    const result = await withCache(
+      CacheKeys.adminAnalytics('top', { limit: validLimit }),
+      async () => {
+        const articlesData = await getTopArticles(validLimit);
 
-    // Buscar top artigos
-    const articlesData = await getTopArticles(validLimit);
+        const topArticles = articlesData.map(item => ({
+          numero: item.numero,
+          ementa: item.article.ementa.substring(0, 100) + (item.article.ementa.length > 100 ? '...' : ''),
+          titulo: item.article.titulo || '',
+          documentCount: item.documentCount,
+          viewCount: item.viewCount,
+        }));
 
-    // Formatar para o widget
-    const topArticles = articlesData.map(item => ({
-      numero: item.numero,
-      ementa: item.article.ementa.substring(0, 100) + (item.article.ementa.length > 100 ? '...' : ''),
-      titulo: item.article.titulo || '',
-      documentCount: item.documentCount,
-      viewCount: item.viewCount,
-    }));
+        const totalArticles = await prisma.leiArticle.count();
 
-    // Stats gerais
-    const totalArticles = await prisma.leiArticle.count();
+        const docCounts = await getDocumentCountByArticle();
+        const totalDocuments = Object.values(docCounts).reduce((sum, count) => sum + count, 0);
+        const articlesWithDocs = Object.keys(docCounts).length;
+        const coveragePercent = Math.round((articlesWithDocs / totalArticles) * 100);
 
-    const docCounts = await getDocumentCountByArticle();
-    const totalDocuments = Object.values(docCounts).reduce((sum, count) => sum + count, 0);
-    const articlesWithDocs = Object.keys(docCounts).length;
-    const coveragePercent = Math.round((articlesWithDocs / totalArticles) * 100);
+        return {
+          topArticles,
+          totalArticles,
+          totalDocuments,
+          coveragePercent,
+        };
+      },
+      CACHE_TTL.ADMIN_ANALYTICS,
+      { prefix: 'analytics' }
+    );
 
-    return NextResponse.json({
-      topArticles,
-      totalArticles,
-      totalDocuments,
-      coveragePercent,
-    });
+    return NextResponse.json(result);
   } catch (error) {
     console.error('Erro ao buscar top artigos:', error);
     return NextResponse.json(

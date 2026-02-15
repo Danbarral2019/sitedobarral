@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
+import { withCache, CacheKeys, CACHE_TTL } from '@/lib/cache/redis-client';
 
 /**
  * GET /api/artigos/[numero]/documents
@@ -21,94 +22,92 @@ export async function GET(
       );
     }
 
-    // Busca em paralelo: Documents E LegislativeActs
-    const [documents, legislativeActs] = await Promise.all([
-      // 1. Busca documentos que contêm este artigo
-      prisma.document.findMany({
-        where: {
-          leiArticles: {
-            contains: `"${numero}"`
+    const result = await withCache(
+      CacheKeys.articleDocuments(numero),
+      async () => {
+        // Busca em paralelo: Documents E LegislativeActs
+        const [documents, legislativeActs] = await Promise.all([
+          prisma.document.findMany({
+            where: {
+              leiArticles: {
+                contains: `"${numero}"`
+              }
+            },
+            orderBy: [
+              { isPublic: 'desc' },
+              { uploadedAt: 'desc' }
+            ]
+          }),
+          prisma.legislativeAct.findMany({
+            where: {
+              leiArticles: {
+                contains: `"${numero}"`
+              }
+            },
+            orderBy: [
+              { publishDate: 'desc' }
+            ]
+          })
+        ]);
+
+        const mappedDocuments = documents.map(doc => ({
+          id: doc.id,
+          title: doc.title,
+          description: doc.description,
+          type: doc.type,
+          category: doc.category,
+          courseId: doc.courseId,
+          isPublic: doc.isPublic,
+          url: doc.url,
+          uploadedAt: doc.uploadedAt,
+          leiArticles: doc.leiArticles,
+          sourceType: 'document' as const
+        }));
+
+        const mappedLegislativeActs = legislativeActs.map(act => ({
+          id: act.id,
+          title: act.fullNumber,
+          description: act.summary || act.ementa.substring(0, 200),
+          type: 'legislative-act',
+          category: act.type,
+          courseId: null,
+          isPublic: true,
+          url: `/legislacao/${act.id}`,
+          uploadedAt: act.publishDate,
+          leiArticles: act.leiArticles,
+          sourceType: 'legislative-act' as const,
+          fullNumber: act.fullNumber,
+          issuer: act.issuer,
+          ementa: act.ementa
+        }));
+
+        const allDocuments = [
+          ...mappedDocuments,
+          ...mappedLegislativeActs
+        ].sort((a, b) => {
+          if (a.isPublic !== b.isPublic) {
+            return a.isPublic ? -1 : 1;
           }
-        },
-        orderBy: [
-          { isPublic: 'desc' }, // Públicos primeiro
-          { uploadedAt: 'desc' }
-        ]
-        // Removido limite de 50 para mostrar todos os documentos
-      }),
+          const dateA = a.uploadedAt ? new Date(a.uploadedAt).getTime() : 0;
+          const dateB = b.uploadedAt ? new Date(b.uploadedAt).getTime() : 0;
+          return dateB - dateA;
+        });
 
-      // 2. Busca atos legislativos (Decretos, Portarias, etc.) que regulamentam este artigo
-      prisma.legislativeAct.findMany({
-        where: {
-          leiArticles: {
-            contains: `"${numero}"`
+        return {
+          articleNumber: numero,
+          total: allDocuments.length,
+          documents: allDocuments,
+          breakdown: {
+            regularDocuments: mappedDocuments.length,
+            legislativeActs: mappedLegislativeActs.length
           }
-        },
-        orderBy: [
-          { publishDate: 'desc' }
-        ]
-        // Removido limite para mostrar todos os atos
-      })
-    ]);
+        };
+      },
+      CACHE_TTL.ARTICLE_DETAILS,
+      { prefix: 'article' }
+    );
 
-    // Mapeia documentos para formato de resposta
-    const mappedDocuments = documents.map(doc => ({
-      id: doc.id,
-      title: doc.title,
-      description: doc.description,
-      type: doc.type,
-      category: doc.category,
-      courseId: doc.courseId,
-      isPublic: doc.isPublic,
-      url: doc.url,
-      uploadedAt: doc.uploadedAt,
-      leiArticles: doc.leiArticles,
-      sourceType: 'document' as const
-    }));
-
-    // Mapeia atos legislativos para formato de resposta (sempre públicos)
-    const mappedLegislativeActs = legislativeActs.map(act => ({
-      id: act.id,
-      title: act.fullNumber, // "Decreto 11.462/2023"
-      description: act.summary || act.ementa.substring(0, 200),
-      type: 'legislative-act',
-      category: act.type, // "decreto", "portaria", "in", etc.
-      courseId: null,
-      isPublic: true, // Atos legislativos são sempre públicos
-      url: `/legislacao/${act.id}`,
-      uploadedAt: act.publishDate,
-      leiArticles: act.leiArticles,
-      sourceType: 'legislative-act' as const,
-      // Dados adicionais específicos de atos legislativos
-      fullNumber: act.fullNumber,
-      issuer: act.issuer,
-      ementa: act.ementa
-    }));
-
-    // Combina e ordena: públicos primeiro, depois por data
-    const allDocuments = [
-      ...mappedDocuments,
-      ...mappedLegislativeActs
-    ].sort((a, b) => {
-      // Primeiro critério: públicos antes de restritos
-      if (a.isPublic !== b.isPublic) {
-        return a.isPublic ? -1 : 1;
-      }
-      // Segundo critério: mais recentes primeiro
-      const dateA = a.uploadedAt ? new Date(a.uploadedAt).getTime() : 0;
-      const dateB = b.uploadedAt ? new Date(b.uploadedAt).getTime() : 0;
-      return dateB - dateA;
-    });
-
-    return NextResponse.json({
-      articleNumber: numero,
-      total: allDocuments.length,
-      documents: allDocuments,
-      breakdown: {
-        regularDocuments: mappedDocuments.length,
-        legislativeActs: mappedLegislativeActs.length
-      }
-    });
+    return NextResponse.json(result);
   } catch (error) {
     console.error('Erro ao buscar documentos do artigo:', error);
     return NextResponse.json(

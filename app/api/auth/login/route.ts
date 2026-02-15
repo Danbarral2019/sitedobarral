@@ -2,25 +2,21 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import bcrypt from 'bcryptjs';
 import { generateToken } from '@/lib/auth';
-import { rateLimiters } from '@/lib/rate-limit';
+import { enforceRateLimit, getClientIp } from '@/lib/cache/rate-limit-helper';
 import { validateRequest } from '@/lib/validation-helper';
 import { LoginSchema } from '@/lib/validation-schemas';
 import { handleApiError } from '@/lib/errors/error-handler';
 import {
   AuthenticationError,
   AuthorizationError,
-  RateLimitError,
 } from '@/lib/errors/api-error';
 import { authLogger } from '@/lib/logger';
 
 export async function POST(request: NextRequest) {
   try {
-    // Rate limiting: 5 tentativas de login por minuto
-    try {
-      await rateLimiters.auth.check(request, 5);
-    } catch {
-      throw new RateLimitError('Muitas tentativas de login. Tente novamente em alguns instantes.');
-    }
+    // Rate limiting: 5 tentativas de login por minuto (Redis)
+    const ip = getClientIp(request);
+    await enforceRateLimit(`auth:login:${ip}`, 5, 60);
 
     // ✅ Validação com Zod
     const validation = await validateRequest(request, LoginSchema);

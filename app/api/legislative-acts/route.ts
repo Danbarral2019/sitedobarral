@@ -50,7 +50,9 @@ export async function GET(request: NextRequest) {
       { prefix: 'acts' }
     );
 
-    return NextResponse.json(result);
+    return NextResponse.json(result, {
+      headers: { 'Cache-Control': 'public, s-maxage=1800, stale-while-revalidate=3600' },
+    });
 
   } catch (error) {
     console.error('Erro ao listar atos normativos:', error);

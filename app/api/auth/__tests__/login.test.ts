@@ -23,13 +23,11 @@ vi.mock('@/lib/logger', () => ({
   },
 }));
 
-// Mock dependencies before imports
-vi.mock('@/lib/rate-limit', () => ({
-  rateLimiters: {
-    auth: {
-      check: vi.fn().mockResolvedValue(undefined),
-    },
-  },
+// Mock Redis rate limiting
+const mockEnforceRateLimit = vi.fn().mockResolvedValue(undefined);
+vi.mock('@/lib/cache/rate-limit-helper', () => ({
+  enforceRateLimit: (...args: unknown[]) => mockEnforceRateLimit(...args),
+  getClientIp: vi.fn().mockReturnValue('127.0.0.1'),
 }));
 
 vi.mock('@/lib/prisma', () => ({
@@ -57,11 +55,8 @@ vi.mock('@/lib/auth', () => ({
 import { POST } from '../login/route';
 import { prisma } from '@/lib/prisma';
 import bcrypt from 'bcryptjs';
-import { rateLimiters } from '@/lib/rate-limit';
-
 const mockPrisma = vi.mocked(prisma);
 const mockBcrypt = vi.mocked(bcrypt);
-const mockRateLimiters = vi.mocked(rateLimiters);
 
 // Helper para criar NextRequest
 function createRequest(body: Record<string, unknown>): NextRequest {
@@ -99,7 +94,7 @@ describe('POST /api/auth/login', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     // Reset rate limiter to success by default
-    mockRateLimiters.auth.check.mockResolvedValue(undefined);
+    mockEnforceRateLimit.mockResolvedValue(undefined);
   });
 
   describe('Validação de Input', () => {
@@ -145,17 +140,18 @@ describe('POST /api/auth/login', () => {
   });
 
   describe('Rate Limiting', () => {
-    it('deve verificar rate limit', async () => {
+    it('deve verificar rate limit via Redis', async () => {
       mockPrisma.user.findUnique.mockResolvedValue(null);
 
       const request = createRequest(validCredentials);
       await POST(request);
 
-      expect(mockRateLimiters.auth.check).toHaveBeenCalledWith(request, 5);
+      expect(mockEnforceRateLimit).toHaveBeenCalledWith('auth:login:127.0.0.1', 5, 60);
     });
 
     it('deve retornar 429 quando rate limit excedido', async () => {
-      mockRateLimiters.auth.check.mockRejectedValue(new Error('Rate limit exceeded'));
+      const { RateLimitError } = await import('@/lib/errors/api-error');
+      mockEnforceRateLimit.mockRejectedValue(new RateLimitError('Muitas tentativas. Tente novamente em breve.', 60));
 
       const request = createRequest(validCredentials);
       const response = await POST(request);

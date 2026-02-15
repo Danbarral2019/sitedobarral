@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { rateLimiters } from './rate-limit';
+import { enforceRateLimit, getClientIp } from '@/lib/cache/rate-limit-helper';
+import { RateLimitError } from '@/lib/errors/api-error';
 
 /**
  * Tipo para funções de handler de API
@@ -24,15 +25,9 @@ type ApiHandler = (request: NextRequest, context?: any) => Promise<NextResponse>
 export function withAdminAuth(handler: ApiHandler): ApiHandler {
   return async (request: NextRequest, context?: Record<string, unknown>) => {
     try {
-      // ✅ Rate limiting ANTES de autenticação (previne ataques)
-      try {
-        await rateLimiters.api.check(request, 30); // 30 requests/minuto para admin
-      } catch {
-        return NextResponse.json(
-          { error: 'Muitas requisições. Aguarde alguns instantes.' },
-          { status: 429 }
-        );
-      }
+      // ✅ Rate limiting ANTES de autenticação (Redis)
+      const adminIp = getClientIp(request);
+      await enforceRateLimit(`middleware:admin:${adminIp}`, 30, 60);
 
       const { getCurrentUser } = await import('./auth');
       const user = await getCurrentUser();
@@ -47,6 +42,12 @@ export function withAdminAuth(handler: ApiHandler): ApiHandler {
       // Passa o usuário autenticado no context para o handler
       return handler(request, { ...context, user });
     } catch (error) {
+      if (error instanceof RateLimitError) {
+        return NextResponse.json(
+          { error: 'Muitas requisições. Aguarde alguns instantes.' },
+          { status: 429 }
+        );
+      }
       // Captura qualquer erro não tratado na autenticação
       console.error('=== [withAdminAuth MIDDLEWARE] ERRO CAPTURADO ===');
       console.error('URL:', request.url);
@@ -80,15 +81,9 @@ export function withAdminAuth(handler: ApiHandler): ApiHandler {
 export function withAuth(handler: ApiHandler): ApiHandler {
   return async (request: NextRequest, context?: Record<string, unknown>) => {
     try {
-      // ✅ Rate limiting (mais permissivo para usuários autenticados)
-      try {
-        await rateLimiters.api.check(request, 60); // 60 requests/minuto
-      } catch {
-        return NextResponse.json(
-          { error: 'Muitas requisições. Aguarde alguns instantes.' },
-          { status: 429 }
-        );
-      }
+      // ✅ Rate limiting (mais permissivo para usuários autenticados, Redis)
+      const authIp = getClientIp(request);
+      await enforceRateLimit(`middleware:auth:${authIp}`, 60, 60);
 
       const { getCurrentUser } = await import('./auth');
       const user = await getCurrentUser();
@@ -103,6 +98,12 @@ export function withAuth(handler: ApiHandler): ApiHandler {
       // Passa o usuário autenticado no context para o handler
       return handler(request, { ...context, user });
     } catch (error) {
+      if (error instanceof RateLimitError) {
+        return NextResponse.json(
+          { error: 'Muitas requisições. Aguarde alguns instantes.' },
+          { status: 429 }
+        );
+      }
       // Captura qualquer erro não tratado na autenticação
       console.error('=== [withAuth MIDDLEWARE] ERRO CAPTURADO ===');
       console.error('URL:', request.url);

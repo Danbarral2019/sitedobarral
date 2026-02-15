@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { verifyToken } from '@/lib/auth';
+import { CacheInvalidation } from '@/lib/cache/redis-client';
 
 export async function DELETE(
   request: NextRequest,
@@ -21,6 +22,9 @@ export async function DELETE(
     await prisma.courseVideo.delete({
       where: { id },
     });
+
+    // Invalidate cache
+    CacheInvalidation.courseVideos().catch(console.error);
 
     return NextResponse.json({ message: 'Vídeo removido com sucesso' });
   } catch (error) {

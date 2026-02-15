@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
+import { withCache, CacheKeys, CACHE_TTL } from '@/lib/cache/redis-client';
 
 /**
  * GET /api/artigos/[numero]/blog-posts
@@ -21,35 +22,42 @@ export async function GET(
       );
     }
 
-    // Busca posts publicados que contêm este artigo
-    const posts = await prisma.blogPost.findMany({
-      where: {
-        isPublished: true,
-        leiArticles: {
-          contains: `"${numero}"`
-        }
-      },
-      orderBy: {
-        publishedAt: 'desc'
-      },
-      take: 20 // Limita a 20 posts
-    });
+    const result = await withCache(
+      CacheKeys.articleDetails(numero, 'blog'),
+      async () => {
+        const posts = await prisma.blogPost.findMany({
+          where: {
+            isPublished: true,
+            leiArticles: {
+              contains: `"${numero}"`
+            }
+          },
+          orderBy: {
+            publishedAt: 'desc'
+          },
+          take: 20
+        });
 
-    // Mapeia posts para formato de resposta
-    const mappedPosts = posts.map(post => ({
-      id: post.id,
-      slug: post.slug,
-      title: post.title,
-      excerpt: post.excerpt,
-      author: post.author,
-      publishedAt: post.publishedAt,
-    }));
+        const mappedPosts = posts.map(post => ({
+          id: post.id,
+          slug: post.slug,
+          title: post.title,
+          excerpt: post.excerpt,
+          author: post.author,
+          publishedAt: post.publishedAt,
+        }));
 
-    return NextResponse.json({
-      articleNumber: numero,
-      total: mappedPosts.length,
-      posts: mappedPosts
-    });
+        return {
+          articleNumber: numero,
+          total: mappedPosts.length,
+          posts: mappedPosts
+        };
+      },
+      CACHE_TTL.BLOG_POSTS,
+      { prefix: 'article' }
+    );
+
+    return NextResponse.json(result);
   } catch (error) {
     console.error('Erro ao buscar posts do artigo:', error);
     return NextResponse.json(

@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
+import { withCache, CacheKeys, CACHE_TTL } from '@/lib/cache/redis-client';
 
 export async function GET(request: NextRequest) {
   try {
@@ -13,26 +14,36 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    // Buscar vídeos do curso
-    const videos = await prisma.courseVideo.findMany({
-      where: {
-        courseId: courseId,
-        isActive: true,
+    const result = await withCache(
+      CacheKeys.courseVideos(courseId),
+      async () => {
+        const videos = await prisma.courseVideo.findMany({
+          where: {
+            courseId: courseId,
+            isActive: true,
+          },
+          orderBy: {
+            displayOrder: 'asc',
+          },
+          select: {
+            id: true,
+            title: true,
+            description: true,
+            youtubeUrl: true,
+            youtubeId: true,
+            thumbnailUrl: true,
+          },
+        });
+        return { videos };
       },
-      orderBy: {
-        displayOrder: 'asc',
-      },
-      select: {
-        id: true,
-        title: true,
-        description: true,
-        youtubeUrl: true,
-        youtubeId: true,
-        thumbnailUrl: true,
-      },
-    });
+      CACHE_TTL.COURSE_VIDEOS,
+      { prefix: 'videos' }
+    );
 
-    return NextResponse.json({ videos }, { status: 200 });
+    return NextResponse.json(result, {
+      status: 200,
+      headers: { 'Cache-Control': 'public, s-maxage=1800, stale-while-revalidate=3600' },
+    });
   } catch (error) {
     console.error('Erro ao buscar vídeos do curso:', error);
     return NextResponse.json(

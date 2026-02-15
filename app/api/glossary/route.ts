@@ -118,7 +118,9 @@ export async function GET(request: NextRequest) {
       { prefix: 'glossary' }
     );
 
-    return NextResponse.json(result);
+    return NextResponse.json(result, {
+      headers: { 'Cache-Control': 'public, s-maxage=3600, stale-while-revalidate=7200' },
+    });
   } catch (error) {
     console.error('Error fetching glossary terms:', error);
     return NextResponse.json(

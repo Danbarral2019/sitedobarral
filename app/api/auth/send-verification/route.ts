@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
-import { rateLimiters } from '@/lib/rate-limit';
+import { enforceRateLimit, getClientIp } from '@/lib/cache/rate-limit-helper';
+import { RateLimitError } from '@/lib/errors/api-error';
 import { sendVerificationEmail } from '@/lib/email';
 
 /**
@@ -8,17 +9,11 @@ import { sendVerificationEmail } from '@/lib/email';
  * Envia código de verificação de email (ou reenvia)
  */
 export async function POST(request: NextRequest) {
-  // Rate limiting: 5 envios de código de verificação por minuto
   try {
-    await rateLimiters.auth.check(request, 5);
-  } catch {
-    return NextResponse.json(
-      { error: 'Muitas tentativas de envio. Por favor, aguarde alguns instantes.' },
-      { status: 429 }
-    );
-  }
+    // Rate limiting: 5 envios de código de verificação por minuto (Redis)
+    const ip = getClientIp(request);
+    await enforceRateLimit(`auth:verify:${ip}`, 5, 60);
 
-  try {
     const { email } = await request.json();
 
     if (!email) {
@@ -83,6 +78,12 @@ export async function POST(request: NextRequest) {
       } : undefined,
     });
   } catch (error) {
+    if (error instanceof RateLimitError) {
+      return NextResponse.json(
+        { error: 'Muitas tentativas de envio. Por favor, aguarde alguns instantes.' },
+        { status: 429 }
+      );
+    }
     console.error('Erro ao enviar código de verificação:', error);
     return NextResponse.json(
       { error: 'Erro ao processar solicitação' },

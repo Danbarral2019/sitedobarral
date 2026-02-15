@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { verifyAuth } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
+import { CacheInvalidation } from '@/lib/cache/redis-client';
 
 /**
  * Type para DOUStagingDocument usado neste endpoint
@@ -281,6 +282,10 @@ async function handleApproval(
       return newDoc;
     });
 
+    // Invalidate cache
+    CacheInvalidation.douStats().catch(console.error);
+    CacheInvalidation.courseDocuments().catch(console.error);
+
     return NextResponse.json({
       success: true,
       message: 'Documento aprovado e incorporado ao acervo',
@@ -328,6 +333,9 @@ async function handleRejection(
         action: 'dou_reject_document',
       },
     });
+
+    // Invalidate cache
+    CacheInvalidation.douStats().catch(console.error);
 
     return NextResponse.json({
       success: true,

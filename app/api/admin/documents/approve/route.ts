@@ -12,6 +12,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { verifyAuth } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
+import { CacheInvalidation } from '@/lib/cache/redis-client';
 
 export async function POST(request: NextRequest) {
   try {
@@ -124,6 +125,9 @@ export async function POST(request: NextRequest) {
     }
 
     console.log(`[Aprovação] ✅ Sucesso: ${result.count} documentos ${action === 'approve' ? 'aprovados' : 'rejeitados'}`);
+
+    // Invalidate cache
+    CacheInvalidation.courseDocuments().catch(console.error);
 
     return NextResponse.json({
       success: true,
