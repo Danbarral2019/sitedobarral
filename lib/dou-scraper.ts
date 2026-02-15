@@ -1,17 +1,17 @@
 /**
- * DOU Content Scraper
+ * DOU Content Scraper (Cheerio version - serverless compatible)
  *
  * Enriquece dados da API oficial do DOU fazendo scraping
- * do conteúdo completo das publicações.
+ * do conteudo completo das publicacoes.
  *
- * Usa Playwright para navegar e extrair texto completo,
- * metadados adicionais e informações estruturadas.
+ * Usa cheerio + fetch (sem Playwright) para compatibilidade
+ * com Vercel serverless functions.
  */
 
-import { chromium, Browser, Page } from 'playwright';
+import * as cheerio from 'cheerio';
 
 /**
- * Dados enriquecidos de uma publicação DOU
+ * Dados enriquecidos de uma publicacao DOU
  */
 export interface DOUEnrichedContent {
   conteudo: string;
@@ -24,206 +24,158 @@ export interface DOUEnrichedContent {
   paragrafos: number;
 }
 
+const USER_AGENT =
+  'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36';
+
+const TIMEOUT_MS = 15000;
+const MAX_RETRIES = 2;
+
 /**
- * Cliente de scraping para páginas DOU
+ * Fetch com retry e timeout
  */
-export class DOUScraper {
-  private browser: Browser | null = null;
-  private page: Page | null = null;
-
-  /**
-   * Inicializa o navegador
-   */
-  async init() {
-    if (this.browser) return; // Já inicializado
-
-    console.log('[DOU Scraper] 🚀 Inicializando navegador Playwright...');
-
-    this.browser = await chromium.launch({
-      headless: true,
-      args: ['--no-sandbox', '--disable-setuid-sandbox'],
-    });
-
-    // Criar contexto com user agent
-    const context = await this.browser.newContext({
-      userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
-    });
-
-    this.page = await context.newPage();
-
-    console.log('[DOU Scraper] ✅ Navegador iniciado');
-  }
-
-  /**
-   * Fecha o navegador
-   */
-  async close() {
-    if (this.page) {
-      await this.page.close();
-      this.page = null;
-    }
-
-    if (this.browser) {
-      await this.browser.close();
-      this.browser = null;
-      console.log('[DOU Scraper] 🔒 Navegador fechado');
-    }
-  }
-
-  /**
-   * Extrai conteúdo completo de uma URL DOU
-   */
-  async scrapeContent(url: string): Promise<DOUEnrichedContent | null> {
-    if (!this.page) {
-      throw new Error('Navegador não inicializado. Chame init() primeiro.');
-    }
-
-    console.log(`[DOU Scraper] 📄 Extraindo: ${url.substring(0, 80)}...`);
+async function fetchWithRetry(url: string, retries = MAX_RETRIES): Promise<string> {
+  for (let attempt = 1; attempt <= retries; attempt++) {
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), TIMEOUT_MS);
 
     try {
-      // Navegar até a página
-      await this.page.goto(url, {
-        waitUntil: 'domcontentloaded',
-        timeout: 30000,
+      const response = await fetch(url, {
+        headers: { 'User-Agent': USER_AGENT },
+        signal: controller.signal,
       });
 
-      // Aguardar conteúdo carregar
-      await this.page.waitForSelector('.texto-dou', { timeout: 10000 });
+      clearTimeout(timeout);
 
-      // Extrair dados usando script no navegador
-      const dados = await this.page.evaluate(() => {
-        // A div 'texto-dou' contém o conteúdo principal
-        const textoDou = document.querySelector('.texto-dou');
-        if (!textoDou) return null;
-
-        // Pegar metadados da div 'detalhes-dou'
-        const detalhesDou = document.querySelector('.detalhes-dou');
-        const paragrafosDetalhes = detalhesDou
-          ? Array.from(detalhesDou.querySelectorAll('p'))
-          : [];
-
-        const publicacao = paragrafosDetalhes[0]?.textContent?.trim() || '';
-        const orgao = paragrafosDetalhes[1]?.textContent?.trim() || '';
-
-        // Extrair todos os parágrafos do texto principal
-        const paragrafosTexto = Array.from(textoDou.querySelectorAll('p'));
-        const conteudo = paragrafosTexto
-          .map((p) => p.textContent?.trim())
-          .filter((t) => t && !t.includes('Este conteúdo não substitui'))
-          .join('\n\n');
-
-        // Extrair edição, seção e página dos metadados
-        const edicaoMatch = publicacao.match(/Edição:\s*(\d+(?:-[A-Z])?)/);
-        const secaoMatch = publicacao.match(/Seção:\s*([^\|]+)/);
-        const paginaMatch = publicacao.match(/Página:\s*(\d+)/);
-        const dataMatch = publicacao.match(/Publicado em:\s*(\d{2}\/\d{2}\/\d{4})/);
-
-        // Limpar órgão (remover "Órgão: ")
-        const orgaoLimpo = orgao.replace(/^Órgão:\s*/i, '').trim();
-
-        return {
-          conteudo,
-          edicao: edicaoMatch ? edicaoMatch[1] : null,
-          secao: secaoMatch ? secaoMatch[1].trim() : null,
-          pagina: paginaMatch ? paginaMatch[1] : null,
-          data: dataMatch ? dataMatch[1] : null,
-          orgao: orgaoLimpo,
-          caracteres: conteudo.length,
-          paragrafos: paragrafosTexto.length,
-        };
-      });
-
-      if (!dados) {
-        console.warn(`[DOU Scraper] ⚠️  Estrutura não encontrada em: ${url}`);
-        return null;
+      if (!response.ok) {
+        if (attempt < retries && response.status >= 500) {
+          await new Promise(resolve => setTimeout(resolve, 1000 * attempt));
+          continue;
+        }
+        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
       }
 
-      console.log(`[DOU Scraper] ✅ Extraído: ${dados.caracteres} caracteres, ${dados.paragrafos} parágrafos`);
-
-      return dados;
+      return await response.text();
     } catch (error) {
-      console.error(`[DOU Scraper] ❌ Erro ao extrair ${url}:`, error);
-      return null;
+      clearTimeout(timeout);
+      if (attempt >= retries) throw error;
+      await new Promise(resolve => setTimeout(resolve, 1000 * attempt));
     }
   }
-
-  /**
-   * Extrai conteúdo de múltiplas URLs com rate limiting
-   */
-  async scrapeMultiple(
-    urls: string[],
-    delayMs: number = 2000
-  ): Promise<Map<string, DOUEnrichedContent>> {
-    const results = new Map<string, DOUEnrichedContent>();
-
-    console.log(`[DOU Scraper] 🔄 Processando ${urls.length} URLs...`);
-
-    for (let i = 0; i < urls.length; i++) {
-      const url = urls[i];
-
-      console.log(`[DOU Scraper] [${i + 1}/${urls.length}] Processando...`);
-
-      const content = await this.scrapeContent(url);
-
-      if (content) {
-        results.set(url, content);
-      }
-
-      // Rate limiting (exceto na última iteração)
-      if (i < urls.length - 1) {
-        console.log(`[DOU Scraper] ⏳ Aguardando ${delayMs}ms...`);
-        await new Promise((resolve) => setTimeout(resolve, delayMs));
-      }
-    }
-
-    console.log(`[DOU Scraper] ✅ Concluído: ${results.size}/${urls.length} sucessos`);
-
-    return results;
-  }
+  throw new Error('Todas as tentativas falharam');
 }
 
 /**
- * Instância singleton (use com cuidado - lembre de chamar close())
+ * Extrai conteudo completo de uma URL DOU usando cheerio
  */
-let scraperInstance: DOUScraper | null = null;
-
-/**
- * Helper: obter instância singleton
- */
-export function getScraperInstance(): DOUScraper {
-  if (!scraperInstance) {
-    scraperInstance = new DOUScraper();
-  }
-  return scraperInstance;
-}
-
-/**
- * Helper: scrape com gerenciamento automático do navegador
- */
-export async function scrapeURL(url: string): Promise<DOUEnrichedContent | null> {
-  const scraper = new DOUScraper();
+export async function scrapeContent(url: string): Promise<DOUEnrichedContent | null> {
+  console.log(`[DOU Scraper] Extraindo: ${url.substring(0, 80)}...`);
 
   try {
-    await scraper.init();
-    return await scraper.scrapeContent(url);
-  } finally {
-    await scraper.close();
+    const html = await fetchWithRetry(url);
+    const $ = cheerio.load(html);
+
+    // A div 'texto-dou' contem o conteudo principal
+    const textoDou = $('.texto-dou');
+    if (textoDou.length === 0) {
+      // Fallback: tentar '.materia' ou '#materia'
+      const materia = $('.materia, #materia');
+      if (materia.length === 0) {
+        console.warn(`[DOU Scraper] Estrutura nao encontrada em: ${url}`);
+        return null;
+      }
+    }
+
+    // Extrair metadados da div 'detalhes-dou'
+    const detalhesDou = $('.detalhes-dou');
+    const paragrafosDetalhes = detalhesDou.find('p');
+    const publicacao = paragrafosDetalhes.eq(0).text().trim();
+    const orgaoRaw = paragrafosDetalhes.eq(1).text().trim();
+
+    // Extrair paragrafos do texto principal
+    const container = textoDou.length > 0 ? textoDou : $('.materia, #materia');
+    const paragrafos: string[] = [];
+    container.find('p').each((_, el) => {
+      const text = $(el).text().trim();
+      if (text && !text.includes('Este conteudo nao substitui') && !text.includes('Este conte\u00FAdo n\u00E3o substitui')) {
+        paragrafos.push(text);
+      }
+    });
+
+    const conteudo = paragrafos.join('\n\n');
+
+    // Extrair edicao, secao e pagina dos metadados
+    const edicaoMatch = publicacao.match(/Edi[çc][ãa]o:\s*(\d+(?:-[A-Z])?)/i);
+    const secaoMatch = publicacao.match(/Se[çc][ãa]o:\s*([^|]+)/i);
+    const paginaMatch = publicacao.match(/P[áa]gina:\s*(\d+)/i);
+    const dataMatch = publicacao.match(/Publicado em:\s*(\d{2}\/\d{2}\/\d{4})/);
+
+    // Limpar orgao (remover "Orgao: ")
+    const orgao = orgaoRaw.replace(/^[Óó]rg[ãa]o:\s*/i, '').trim();
+
+    const result: DOUEnrichedContent = {
+      conteudo,
+      edicao: edicaoMatch ? edicaoMatch[1] : null,
+      secao: secaoMatch ? secaoMatch[1].trim() : null,
+      pagina: paginaMatch ? paginaMatch[1] : null,
+      data: dataMatch ? dataMatch[1] : null,
+      orgao,
+      caracteres: conteudo.length,
+      paragrafos: paragrafos.length,
+    };
+
+    console.log(`[DOU Scraper] Extraido: ${result.caracteres} caracteres, ${result.paragrafos} paragrafos`);
+    return result;
+  } catch (error) {
+    console.error(`[DOU Scraper] Erro ao extrair ${url}:`, error);
+    return null;
   }
 }
 
 /**
- * Helper: scrape múltiplas URLs com gerenciamento automático
+ * Extrai conteudo de multiplas URLs com rate limiting
+ */
+export async function scrapeMultiple(
+  urls: string[],
+  delayMs: number = 1500
+): Promise<Map<string, DOUEnrichedContent>> {
+  const results = new Map<string, DOUEnrichedContent>();
+
+  console.log(`[DOU Scraper] Processando ${urls.length} URLs...`);
+
+  for (let i = 0; i < urls.length; i++) {
+    const url = urls[i];
+
+    console.log(`[DOU Scraper] [${i + 1}/${urls.length}] Processando...`);
+
+    const content = await scrapeContent(url);
+
+    if (content) {
+      results.set(url, content);
+    }
+
+    // Rate limiting (exceto na ultima iteracao)
+    if (i < urls.length - 1) {
+      await new Promise(resolve => setTimeout(resolve, delayMs));
+    }
+  }
+
+  console.log(`[DOU Scraper] Concluido: ${results.size}/${urls.length} sucessos`);
+  return results;
+}
+
+/**
+ * Helper: scrape uma URL (sem gerenciamento de browser necessario)
+ */
+export async function scrapeURL(url: string): Promise<DOUEnrichedContent | null> {
+  return scrapeContent(url);
+}
+
+/**
+ * Helper: scrape multiplas URLs
  */
 export async function scrapeURLs(
   urls: string[],
-  delayMs: number = 2000
+  delayMs: number = 1500
 ): Promise<Map<string, DOUEnrichedContent>> {
-  const scraper = new DOUScraper();
-
-  try {
-    await scraper.init();
-    return await scraper.scrapeMultiple(urls, delayMs);
-  } finally {
-    await scraper.close();
-  }
+  return scrapeMultiple(urls, delayMs);
 }

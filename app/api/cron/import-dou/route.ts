@@ -1,20 +1,22 @@
 /**
- * Cron Job: Importação Diária de Documentos do DOU para Staging
+ * Cron Job: Importacao Diaria de Documentos do DOU para Staging
  *
- * Endpoint chamado diariamente pelo Vercel Cron para buscar, classificar
- * e salvar documentos relevantes do Diário Oficial da União no staging
- * para validação manual posterior.
+ * Endpoint chamado diariamente pelo Vercel Cron para buscar, classificar,
+ * enriquecer e salvar documentos relevantes do Diario Oficial da Uniao
+ * no staging para validacao manual posterior.
  *
  * FLUXO:
- * 1. Busca API oficial DOU (últimos 7 dias)
+ * 1. Busca API oficial DOU (ultimos 7 dias)
  * 2. Classifica com DOUClassifier
  * 3. Salva em DOUStagingDocument:
  *    - Auto-aprovados: approvalStatus='auto_approved', imported=false
  *    - Pendentes: approvalStatus='pending', imported=false
  *    - Auto-rejeitados: approvalStatus='auto_rejected'
- * 4. Admin valida manualmente em /admin/dou-filtros
+ * 4. Enriquece docs auto-aprovados/pendentes com scraper cheerio
+ * 5. Limpa staging antigo (rejeitados >30d, importados >90d)
+ * 6. Admin valida manualmente em /admin/dou-filtros
  *
- * Configuração no vercel.json:
+ * Configuracao no vercel.json:
  * {
  *   "crons": [{
  *     "path": "/api/cron/import-dou",
@@ -22,95 +24,105 @@
  *   }]
  * }
  *
- * Segurança: Requer header x-cron-secret com CRON_SECRET do .env
+ * Seguranca: Requer header x-cron-secret com CRON_SECRET do .env
  */
 
 import { NextRequest, NextResponse } from 'next/server';
 import { searchLastWeek, searchLastMonth } from '@/lib/dou-api';
 import { DOUClassifier } from '@/lib/dou-classifier';
+import { scrapeContent } from '@/lib/dou-scraper';
 import { prisma } from '@/lib/prisma';
 
 export const runtime = 'nodejs';
-export const maxDuration = 300; // 5 minutos (máximo para Vercel Pro)
+export const maxDuration = 300; // 5 minutos (maximo para Vercel Pro)
+
+// Limite de docs para enriquecer com scraper por execucao (evitar timeout)
+const MAX_SCRAPE_PER_RUN = 10;
+
+// Dias para limpeza
+const REJECTED_CLEANUP_DAYS = 30;
+const IMPORTED_CLEANUP_DAYS = 90;
 
 /**
  * GET /api/cron/import-dou
  *
- * Busca e classifica documentos DOU, salvando no staging para validação manual
+ * Busca e classifica documentos DOU, salvando no staging para validacao manual
  */
 export async function GET(request: NextRequest) {
-  console.log('[Cron DOU Staging] 🚀 Iniciando importação para staging...');
+  console.log('[Cron DOU Staging] Iniciando importacao para staging...');
 
   try {
-    // Validar secret do cron (segurança)
+    // Validar secret do cron (seguranca)
     const cronSecret = request.headers.get('x-cron-secret');
     if (cronSecret !== process.env.CRON_SECRET) {
-      console.error('[Cron DOU Staging] ❌ Secret inválido');
+      console.error('[Cron DOU Staging] Secret invalido');
       return NextResponse.json(
         { error: 'Unauthorized - Invalid cron secret' },
         { status: 401 }
       );
     }
 
-    // Parâmetros da query string com validação
+    // Parametros da query string com validacao
     const { searchParams } = new URL(request.url);
 
-    // Validar período (allow-list)
+    // Validar periodo (allow-list)
     const ALLOWED_PERIODS = ['week', 'month'] as const;
     const periodParam = searchParams.get('period') || 'week';
 
     if (!ALLOWED_PERIODS.includes(periodParam as typeof ALLOWED_PERIODS[number])) {
-      console.error(`[Cron DOU Staging] ❌ Período inválido: ${periodParam}`);
+      console.error(`[Cron DOU Staging] Periodo invalido: ${periodParam}`);
       return NextResponse.json(
-        { error: `Período inválido. Valores permitidos: ${ALLOWED_PERIODS.join(', ')}` },
+        { error: `Periodo invalido. Valores permitidos: ${ALLOWED_PERIODS.join(', ')}` },
         { status: 400 }
       );
     }
     const period = periodParam as typeof ALLOWED_PERIODS[number];
 
-    // Validar e limitar maxResults (proteção contra DoS)
+    // Validar e limitar maxResults (protecao contra DoS)
     const MAX_ALLOWED_RESULTS = 500;
     const limitParam = searchParams.get('limit') || '50';
     let maxResults = parseInt(limitParam, 10);
 
     if (isNaN(maxResults) || maxResults <= 0) {
-      console.warn(`[Cron DOU Staging] ⚠️ Limite inválido '${limitParam}', usando padrão 50`);
+      console.warn(`[Cron DOU Staging] Limite invalido '${limitParam}', usando padrao 50`);
       maxResults = 50;
     }
 
     maxResults = Math.min(maxResults, MAX_ALLOWED_RESULTS);
-    if (maxResults === MAX_ALLOWED_RESULTS) {
-      console.warn(`[Cron DOU Staging] ⚠️ Limite cappado em ${MAX_ALLOWED_RESULTS} (proteção DoS)`);
-    }
 
-    console.log(`[Cron DOU Staging] Buscando publicações (período: ${period}, limite: ${maxResults})`);
+    console.log(`[Cron DOU Staging] Buscando publicacoes (periodo: ${period}, limite: ${maxResults})`);
 
-    // PASSO 1: Buscar publicações na API oficial do DOU
-    const searchTerm = 'licitação OR pregão OR dispensa OR contrato OR contratação';
+    // PASSO 1: Buscar publicacoes na API oficial do DOU
+    const searchTerm = 'licitacao OR pregao OR dispensa OR contrato OR contratacao';
 
     const results = period === 'month'
       ? await searchLastMonth(searchTerm, undefined, maxResults)
       : await searchLastWeek(searchTerm, undefined, maxResults);
 
-    console.log(`[Cron DOU Staging] ✅ ${results.length} publicações encontradas`);
+    console.log(`[Cron DOU Staging] ${results.length} publicacoes encontradas`);
 
     if (results.length === 0) {
+      // Ainda executar limpeza mesmo sem novos resultados
+      const cleanup = await cleanupOldStaging();
+
       return NextResponse.json({
         success: true,
-        message: 'Nenhuma publicação encontrada',
+        message: 'Nenhuma publicacao encontrada',
         stats: {
           buscados: 0,
           autoAprovados: 0,
           pendentes: 0,
           autoRejeitados: 0,
           duplicados: 0,
+          enriquecidos: 0,
           erros: 0,
+          cleanup,
         }
       });
     }
 
     // PASSO 2: Classificar documentos com DOUClassifier
-    console.log('[Cron DOU Staging] 🤖 Classificando documentos...');
+    console.log('[Cron DOU Staging] Classificando documentos...');
     const classifications = DOUClassifier.classifyBatch(results);
 
     let autoAprovados = 0;
@@ -119,12 +131,15 @@ export async function GET(request: NextRequest) {
     let duplicados = 0;
     let erros = 0;
 
+    // IDs dos docs criados que precisam de enriquecimento
+    const docsToEnrich: Array<{ id: string; url: string }> = [];
+
     // PASSO 3: Salvar no staging (DOUStagingDocument)
-    console.log('[Cron DOU Staging] 💾 Salvando no staging...');
+    console.log('[Cron DOU Staging] Salvando no staging...');
 
     for (const [result, classification] of classifications.entries()) {
       try {
-        // Remove HTML do título
+        // Remove HTML do titulo
         const cleanTitle = result.title.replace(/<[^>]*>/g, '').trim();
 
         // Verificar duplicatas (por URL no staging)
@@ -134,11 +149,10 @@ export async function GET(request: NextRequest) {
 
         if (existingDoc) {
           duplicados++;
-          console.log(`[Cron DOU Staging] Duplicado (staging): ${cleanTitle.substring(0, 60)}...`);
           continue;
         }
 
-        // Verificar se já foi importado como Document (pelo sync-dou-atos-normativos)
+        // Verificar se ja foi importado como Document (pelo sync-dou-atos-normativos)
         const existingDocument = await prisma.document.findFirst({
           where: { douUrl: result.href },
           select: { id: true },
@@ -146,7 +160,6 @@ export async function GET(request: NextRequest) {
 
         if (existingDocument) {
           duplicados++;
-          console.log(`[Cron DOU Staging] Já importado como Document: ${cleanTitle.substring(0, 60)}...`);
           continue;
         }
 
@@ -154,9 +167,9 @@ export async function GET(request: NextRequest) {
         const publishDate = result.date || new Date().toLocaleDateString('pt-BR');
 
         // Criar documento no staging
-        await prisma.dOUStagingDocument.create({
+        const stagingDoc = await prisma.dOUStagingDocument.create({
           data: {
-            douId: result.href, // Usa URL como ID único temporário
+            douId: result.href, // Usa URL como ID unico temporario
             title: cleanTitle,
             abstract: result.abstract || '',
             url: result.href,
@@ -164,7 +177,7 @@ export async function GET(request: NextRequest) {
             publishDate: publishDate,
             hierarchyStr: result.hierarchyStr,
 
-            // Classificação automática
+            // Classificacao automatica
             category: classification.category,
             approvalStatus: classification.status,
             confidence: classification.confidence,
@@ -173,47 +186,85 @@ export async function GET(request: NextRequest) {
             requiresReview: classification.requiresReview,
 
             // Controle
-            imported: false, // Aguardando validação manual
+            imported: false,
           }
         });
 
-        // Contar por status
+        // Contar por status e coletar para enriquecimento
         if (classification.status === 'auto_approved') {
           autoAprovados++;
-          console.log(`[Cron DOU Staging] ✅ Auto-aprovado (${classification.confidence}%): ${cleanTitle.substring(0, 60)}...`);
+          docsToEnrich.push({ id: stagingDoc.id, url: result.href });
         } else if (classification.status === 'pending') {
           pendentes++;
-          console.log(`[Cron DOU Staging] ⏳ Pendente (${classification.confidence}%): ${cleanTitle.substring(0, 60)}...`);
+          docsToEnrich.push({ id: stagingDoc.id, url: result.href });
         } else if (classification.status === 'auto_rejected') {
           autoRejeitados++;
-          console.log(`[Cron DOU Staging] ❌ Auto-rejeitado: ${cleanTitle.substring(0, 60)}...`);
         }
 
       } catch (error) {
         erros++;
-        console.error(`[Cron DOU Staging] ❌ Erro ao salvar documento:`, error);
+        console.error(`[Cron DOU Staging] Erro ao salvar documento:`, error);
       }
     }
 
-    console.log('[Cron DOU Staging] ✅ Importação para staging concluída!');
-    console.log(`[Cron DOU Staging] Auto-aprovados: ${autoAprovados}, Pendentes: ${pendentes}, Auto-rejeitados: ${autoRejeitados}`);
+    // PASSO 4: Enriquecer docs com scraper cheerio (auto-aprovados + pendentes)
+    let enriquecidos = 0;
+    const toScrape = docsToEnrich.slice(0, MAX_SCRAPE_PER_RUN);
 
-    // Retornar estatísticas
+    if (toScrape.length > 0) {
+      console.log(`[Cron DOU Staging] Enriquecendo ${toScrape.length} documentos com scraper...`);
+
+      for (const doc of toScrape) {
+        try {
+          const enriched = await scrapeContent(doc.url);
+
+          if (enriched && enriched.caracteres > 0) {
+            await prisma.dOUStagingDocument.update({
+              where: { id: doc.id },
+              data: {
+                fullContent: enriched.conteudo,
+                edition: enriched.edicao,
+                page: enriched.pagina,
+                organ: enriched.orgao || undefined,
+              },
+            });
+            enriquecidos++;
+          }
+
+          // Rate limiting entre scrapes
+          await new Promise(resolve => setTimeout(resolve, 1000));
+        } catch (error) {
+          console.error(`[Cron DOU Staging] Erro ao enriquecer ${doc.id}:`, error);
+        }
+      }
+
+      console.log(`[Cron DOU Staging] ${enriquecidos}/${toScrape.length} documentos enriquecidos`);
+    }
+
+    // PASSO 5: Limpeza automatica de staging antigo
+    const cleanup = await cleanupOldStaging();
+
+    console.log('[Cron DOU Staging] Importacao para staging concluida!');
+    console.log(`[Cron DOU Staging] Auto-aprovados: ${autoAprovados}, Pendentes: ${pendentes}, Rejeitados: ${autoRejeitados}, Enriquecidos: ${enriquecidos}`);
+
+    // Retornar estatisticas
     return NextResponse.json({
       success: true,
-      message: `Staging populado: ${autoAprovados} auto-aprovados, ${pendentes} pendentes`,
+      message: `Staging populado: ${autoAprovados} auto-aprovados, ${pendentes} pendentes, ${enriquecidos} enriquecidos`,
       stats: {
         buscados: results.length,
         autoAprovados,
         pendentes,
         autoRejeitados,
         duplicados,
+        enriquecidos,
         erros,
+        cleanup,
       },
     });
 
   } catch (error) {
-    console.error('[Cron DOU Staging] ❌ Erro fatal:', error);
+    console.error('[Cron DOU Staging] Erro fatal:', error);
 
     return NextResponse.json(
       {
@@ -223,4 +274,50 @@ export async function GET(request: NextRequest) {
       { status: 500 }
     );
   }
+}
+
+/**
+ * Limpa registros antigos do staging para evitar acumulo
+ * - Auto-rejeitados com mais de 30 dias
+ * - Importados com mais de 90 dias
+ */
+async function cleanupOldStaging(): Promise<{ rejectedDeleted: number; importedDeleted: number }> {
+  let rejectedDeleted = 0;
+  let importedDeleted = 0;
+
+  try {
+    const now = new Date();
+
+    // Limpar auto-rejeitados com mais de 30 dias
+    const rejectedCutoff = new Date(now);
+    rejectedCutoff.setDate(rejectedCutoff.getDate() - REJECTED_CLEANUP_DAYS);
+
+    const rejectedResult = await prisma.dOUStagingDocument.deleteMany({
+      where: {
+        approvalStatus: 'auto_rejected',
+        createdAt: { lt: rejectedCutoff },
+      },
+    });
+    rejectedDeleted = rejectedResult.count;
+
+    // Limpar importados com mais de 90 dias
+    const importedCutoff = new Date(now);
+    importedCutoff.setDate(importedCutoff.getDate() - IMPORTED_CLEANUP_DAYS);
+
+    const importedResult = await prisma.dOUStagingDocument.deleteMany({
+      where: {
+        imported: true,
+        createdAt: { lt: importedCutoff },
+      },
+    });
+    importedDeleted = importedResult.count;
+
+    if (rejectedDeleted > 0 || importedDeleted > 0) {
+      console.log(`[Cron DOU Staging] Limpeza: ${rejectedDeleted} rejeitados (>${REJECTED_CLEANUP_DAYS}d) + ${importedDeleted} importados (>${IMPORTED_CLEANUP_DAYS}d) removidos`);
+    }
+  } catch (error) {
+    console.error('[Cron DOU Staging] Erro na limpeza:', error);
+  }
+
+  return { rejectedDeleted, importedDeleted };
 }
