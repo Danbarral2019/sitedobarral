@@ -32,6 +32,7 @@ import {
   MobileTreeDrawer,
   MobileTreeTrigger,
   PdfExportBar,
+  PDFExportPanel,
   SearchHistoryPanel,
 } from '@/components/area-restrita';
 import DocumentDetailModal from '@/components/DocumentDetailModal';
@@ -120,7 +121,7 @@ interface SiteType {
 export default function AreaRestritaPage() {
   const router = useRouter();
   const { user, isLoading: authLoading, logout, activePlan } = useAuth();
-  const { isFavorite, toggleFavorite } = useFavorites();
+  const { isFavorite, toggleFavorite, favoriteIds } = useFavorites();
 
   // Global search state
   const search = useGlobalSearch();
@@ -868,7 +869,17 @@ export default function AreaRestritaPage() {
         />
       )}
 
-      {/* PDF Export Bar */}
+      {/* PDF Export Panel - available when NOT searching */}
+      {!search.isSearchActive && (
+        <PDFExportPanel
+          documents={currentContent.documents}
+          userName={user.name}
+          userEmail={user.email}
+          favoriteIds={favoriteIds}
+        />
+      )}
+
+      {/* PDF Export Bar - available during search */}
       {search.isSearchActive && documentResults.length > 0 && (
         <PdfExportBar
           selectedCount={selectedDocIds.size}
