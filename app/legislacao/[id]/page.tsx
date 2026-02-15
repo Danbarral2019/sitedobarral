@@ -16,6 +16,7 @@ import {
 } from 'lucide-react';
 import MarkdownContent from '@/components/MarkdownContent';
 import { normalizeTextContent } from '@/lib/utils';
+import { formatLegalContent } from '@/lib/format-legal-content';
 
 interface PageProps {
   params: Promise<{ id: string }>;
@@ -222,23 +223,13 @@ export default async function LegislativeActPage({ params }: PageProps) {
         )}
 
         {/* Conteúdo Completo */}
-        {act.content && (
+        {act.content ? (
           <div className="bg-white rounded-xl shadow-lg p-8">
-            <h3 className="text-lg font-bold text-gray-900 mb-6">
+            <h3 className="flex items-center gap-2 text-lg font-bold text-gray-900 mb-6">
+              <Scale className="w-5 h-5 text-blue-600" />
               Texto Integral
             </h3>
-            <div
-              className="prose prose-slate max-w-none prose-p:text-gray-700 prose-p:leading-relaxed prose-p:text-justify prose-p:mb-4"
-              style={{
-                fontFamily: 'Georgia, "Times New Roman", serif',
-                fontSize: '16px',
-                lineHeight: '1.8',
-              }}
-            >
-              {normalizeTextContent(act.content).map((paragraph, i) => (
-                <p key={i}>{paragraph}</p>
-              ))}
-            </div>
+            <MarkdownContent content={formatLegalContent(act.content)} />
 
             {/* Anexos */}
             {(() => {
@@ -283,6 +274,34 @@ export default async function LegislativeActPage({ params }: PageProps) {
                 </div>
               );
             })()}
+          </div>
+        ) : (
+          <div className="bg-white rounded-xl shadow-lg p-8 text-center">
+            <div className="flex flex-col items-center gap-4 py-6">
+              <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center">
+                <FileText className="w-8 h-8 text-gray-400" />
+              </div>
+              <div>
+                <h3 className="text-lg font-semibold text-gray-700 mb-2">
+                  Texto integral ainda não disponível
+                </h3>
+                <p className="text-gray-500 max-w-md">
+                  O texto completo deste ato normativo ainda não foi incorporado à nossa base.
+                  {act.officialUrl && ' Você pode consultar o texto na fonte oficial.'}
+                </p>
+              </div>
+              {act.officialUrl && (
+                <a
+                  href={act.officialUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-2 px-5 py-2.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                >
+                  <ExternalLink className="w-4 h-4" />
+                  Consultar fonte oficial
+                </a>
+              )}
+            </div>
           </div>
         )}
 
