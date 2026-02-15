@@ -57,6 +57,9 @@ const CATEGORY_LABELS: Record<string, string> = {
   'enunciados': 'Enunciados',
   'acordao': 'Acórdãos TCU',
   'sumula': 'Súmulas',
+  'manual_tcu': 'Manual do TCU',
+  'boa_pratica': 'Outros Atos Normativos',
+  'ato-normativo': 'Normativos',
   'outro': 'Outros',
 };
 
@@ -705,7 +708,6 @@ export default function AreaRestritaPage() {
                         enrolledCourseIds={enrolledCourseIds}
                         onDocumentClick={handleDocumentClick}
                         modulesData={modulesData}
-                        sites={courseSites}
                       />
                     )}
 

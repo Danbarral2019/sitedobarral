@@ -6,7 +6,6 @@ import { useAuth } from '@/hooks/use-auth';
 import Link from 'next/link';
 
 const COURSES = [
-  { id: '1', name: 'Nova Lei de Licitações e Contratos' },
   { id: '2', name: 'Planejamento das Contratações Públicas' },
   { id: '3', name: 'Gestão e Fiscalização de Contratos' },
   { id: '4', name: 'Processo Administrativo Sancionador' },
@@ -24,7 +23,7 @@ const PRICE_PREMIUM = process.env.NEXT_PUBLIC_PRICE_PREMIUM || '89,90';
 export default function PlanosPage() {
   const router = useRouter();
   const { user, isLoading } = useAuth();
-  const [selectedCourse, setSelectedCourse] = useState('1');
+  const [selectedCourse, setSelectedCourse] = useState('2');
   const [loading, setLoading] = useState<'basico' | 'premium' | null>(null);
   const [error, setError] = useState('');
 

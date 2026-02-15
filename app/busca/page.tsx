@@ -4,7 +4,7 @@ import { useState, useEffect, useMemo } from 'react';
 import Link from 'next/link';
 import {
   Search, Gavel, Scale, FileText, Lock, ArrowRight,
-  X, Loader2, AlertCircle, BookOpen
+  X, Loader2, AlertCircle, BookOpen, Sparkles, Database, MessageCircle
 } from 'lucide-react';
 
 interface SearchResults {
@@ -56,7 +56,10 @@ const CATEGORY_LABELS: Record<string, string> = {
   'artigo': 'Artigo',
   'orientacao-normativa': 'Orientação Normativa',
   'enunciados': 'Enunciado',
-  'outro': 'Outro'
+  'outro': 'Outro',
+  'manual_tcu': 'Manual do TCU',
+  'boa_pratica': 'Outros Atos Normativos',
+  'ato-normativo': 'Normativos',
 };
 
 type TabType = 'all' | 'lei' | 'acts' | 'docs' | 'glossary';
@@ -541,6 +544,66 @@ export default function BuscaIntegradaPage() {
             )}
           </div>
         )}
+      </div>
+
+      {/* Seção de Preview - Recursos Exclusivos para Assinantes */}
+      <div className="bg-gradient-to-b from-gray-100 to-gray-200 py-16 mt-8">
+        <div className="max-w-6xl mx-auto px-4">
+          <div className="text-center mb-10">
+            <h2 className="text-3xl font-bold text-gray-900 mb-3">
+              Recursos exclusivos para assinantes
+            </h2>
+            <p className="text-gray-600 max-w-2xl mx-auto">
+              Potencialize sua pesquisa com ferramentas avançadas e acesso completo a toda a base de conhecimento
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
+            {/* Card: Análise com IA */}
+            <div className="bg-white rounded-2xl shadow-lg border-2 border-purple-200 p-8 hover:shadow-xl transition-shadow">
+              <div className="w-14 h-14 bg-purple-100 rounded-xl flex items-center justify-center mb-5">
+                <Sparkles className="w-8 h-8 text-purple-600" />
+              </div>
+              <h3 className="text-lg font-bold text-gray-900 mb-3">Análise com IA</h3>
+              <p className="text-sm text-gray-600 leading-relaxed">
+                Na área restrita, a IA analisa seus resultados e gera resumos contextuais automaticamente
+              </p>
+            </div>
+
+            {/* Card: Base de Conhecimento */}
+            <div className="bg-white rounded-2xl shadow-lg border-2 border-blue-200 p-8 hover:shadow-xl transition-shadow">
+              <div className="w-14 h-14 bg-blue-100 rounded-xl flex items-center justify-center mb-5">
+                <Database className="w-8 h-8 text-blue-600" />
+              </div>
+              <h3 className="text-lg font-bold text-gray-900 mb-3">Base de Conhecimento</h3>
+              <p className="text-sm text-gray-600 leading-relaxed">
+                Mais de 800 documentos organizados: Acórdãos TCU, Pareceres, Orientações Normativas, Enunciados...
+              </p>
+            </div>
+
+            {/* Card: Assistente Virtual */}
+            <div className="bg-white rounded-2xl shadow-lg border-2 border-green-200 p-8 hover:shadow-xl transition-shadow">
+              <div className="w-14 h-14 bg-green-100 rounded-xl flex items-center justify-center mb-5">
+                <MessageCircle className="w-8 h-8 text-green-600" />
+              </div>
+              <h3 className="text-lg font-bold text-gray-900 mb-3">Assistente Virtual</h3>
+              <p className="text-sm text-gray-600 leading-relaxed">
+                Tire dúvidas diretamente com nosso assistente especializado em licitações
+              </p>
+            </div>
+          </div>
+
+          {/* CTA Button */}
+          <div className="text-center">
+            <Link
+              href="/planos"
+              className="inline-flex items-center gap-3 px-8 py-4 bg-gradient-to-r from-purple-600 to-blue-600 text-white rounded-xl font-bold text-lg hover:from-purple-700 hover:to-blue-700 transition-all shadow-lg hover:shadow-xl"
+            >
+              Assine e tenha acesso completo
+              <ArrowRight className="w-5 h-5" />
+            </Link>
+          </div>
+        </div>
       </div>
     </main>
   );

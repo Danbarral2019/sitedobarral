@@ -81,7 +81,7 @@ function getDocTypeLabel(type: string): string {
   const map: Record<string, string> = {
     pdf: 'PDF',
     link: 'Link',
-    video: 'Video',
+    video: 'Vídeo',
     slide: 'Slides',
     doc: 'Documento',
   };
@@ -199,7 +199,7 @@ export default function CourseArea({
                       {docCount > 0
                         ? `${docCount} ${docCount === 1 ? 'material' : 'materiais'}`
                         : moduleCount > 0
-                          ? `${moduleCount} ${moduleCount === 1 ? 'modulo' : 'modulos'}`
+                          ? `${moduleCount} ${moduleCount === 1 ? 'módulo' : 'módulos'}`
                           : 'Em breve'}
                     </span>
                   </div>
@@ -230,7 +230,7 @@ export default function CourseArea({
                   {totalMaterials > 0 && (
                     <span className="text-xs font-semibold text-brand-600 bg-brand-50 px-2.5 py-1 rounded-full">
                       {totalMaterials}{' '}
-                      {totalMaterials === 1 ? 'material disponivel' : 'materiais disponiveis'}
+                      {totalMaterials === 1 ? 'material disponível' : 'materiais disponíveis'}
                     </span>
                   )}
                   {sectionDocs.length > 0 && (
@@ -256,7 +256,7 @@ export default function CourseArea({
                 {modulesData && modulesData[activeCourseId]?.moduleCount > 0 ? (
                   <p className="text-sm font-semibold text-brand-900">
                     {modulesData[activeCourseId].moduleCount}{' '}
-                    {modulesData[activeCourseId].moduleCount === 1 ? 'modulo' : 'modulos'} com{' '}
+                    {modulesData[activeCourseId].moduleCount === 1 ? 'módulo' : 'módulos'} com{' '}
                     {modulesData[activeCourseId].lessonCount}{' '}
                     {modulesData[activeCourseId].lessonCount === 1
                       ? 'aula estruturada'
@@ -264,7 +264,7 @@ export default function CourseArea({
                   </p>
                 ) : (
                   <p className="text-sm font-semibold text-brand-900">
-                    Acesse a pagina completa do curso
+                    Acesse a página completa do curso
                   </p>
                 )}
               </div>
@@ -355,9 +355,9 @@ export default function CourseArea({
             <div className="inline-flex p-3 bg-gray-100 rounded-full mb-3">
               <Clock className="w-6 h-6 text-gray-400" />
             </div>
-            <p className="text-sm font-medium text-gray-600">Conteudo em preparacao</p>
+            <p className="text-sm font-medium text-gray-600">Conteúdo em preparação</p>
             <p className="text-xs text-gray-400 mt-1">
-              Os materiais deste curso serao disponibilizados em breve.
+              Os materiais deste curso serão disponibilizados em breve.
             </p>
           </div>
         )}

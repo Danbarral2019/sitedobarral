@@ -381,7 +381,7 @@ export default function SobrePage() {
                 </Link>
                 <Link
                   href="/contato"
-                  className="inline-flex items-center gap-3 bg-accent-400 text-gray-900 px-10 py-5 rounded-xl text-lg font-bold hover:bg-accent-500 transition-all hover:scale-105 shadow-2xl"
+                  className="inline-flex items-center gap-3 bg-white/15 border-2 border-white/40 text-white px-10 py-5 rounded-xl text-lg font-bold hover:bg-white/25 transition-all hover:scale-105 shadow-2xl"
                   aria-label="Entre em contato conosco"
                 >
                   Entre em Contato

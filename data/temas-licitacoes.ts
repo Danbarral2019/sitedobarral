@@ -4,21 +4,21 @@
  */
 
 export const TEMAS_LICITACOES = [
-  { value: 'principios-gerais',        label: 'Principios e Disposicoes Gerais',           articles: ['1','2','3','4','5'] },
-  { value: 'agentes-governanca',       label: 'Agentes Publicos e Governanca',             articles: ['7','8','9','10','11','12','13'] },
-  { value: 'planejamento',             label: 'Planejamento da Contratacao',               articles: ['18','19','20','21','22','23','24','25','26','27','28'] },
-  { value: 'pesquisa-precos',          label: 'Pesquisa de Precos',                        articles: ['23'] },
-  { value: 'modalidades',              label: 'Modalidades de Licitacao',                  articles: ['28','29','30','31','32','33'] },
-  { value: 'pregao-eletronico',        label: 'Pregao Eletronico',                         articles: ['17','28','29'] },
+  { value: 'principios-gerais',        label: 'Princípios e Disposições Gerais',           articles: ['1','2','3','4','5'] },
+  { value: 'agentes-governanca',       label: 'Agentes Públicos e Governança',             articles: ['7','8','9','10','11','12','13'] },
+  { value: 'planejamento',             label: 'Planejamento da Contratação',               articles: ['18','19','20','21','22','23','24','25','26','27','28'] },
+  { value: 'pesquisa-precos',          label: 'Pesquisa de Preços',                        articles: ['23'] },
+  { value: 'modalidades',              label: 'Modalidades de Licitação',                  articles: ['28','29','30','31','32','33'] },
+  { value: 'pregao-eletronico',        label: 'Pregão Eletrônico',                         articles: ['17','28','29'] },
   { value: 'contratacao-direta',       label: 'Dispensa e Inexigibilidade',                articles: ['72','73','74','75','76'] },
-  { value: 'registro-precos',          label: 'Sistema de Registro de Precos',             articles: ['82','83','84','85','86'] },
+  { value: 'registro-precos',          label: 'Sistema de Registro de Preços',             articles: ['82','83','84','85','86'] },
   { value: 'contratos',                label: 'Contratos Administrativos',                 articles: ['89','90','91','92','93','94','95','96','97','98','99','100','101','102','103','104','105','106','107','108','109','110'] },
-  { value: 'gestao-fiscalizacao',      label: 'Gestao e Fiscalizacao de Contratos',        articles: ['115','116','117','118','119','120','121'] },
-  { value: 'sancoes',                  label: 'Sancoes Administrativas',                   articles: ['155','156','157','158','159','160','161','162'] },
+  { value: 'gestao-fiscalizacao',      label: 'Gestão e Fiscalização de Contratos',        articles: ['115','116','117','118','119','120','121'] },
+  { value: 'sancoes',                  label: 'Sanções Administrativas',                   articles: ['155','156','157','158','159','160','161','162'] },
   { value: 'sustentabilidade',         label: 'Sustentabilidade e Desenvolvimento',        articles: ['11','144','145','146'] },
-  { value: 'tecnologia-informacao',    label: 'Contratacoes de TI',                        articles: ['6'] },
-  { value: 'obras-engenharia',         label: 'Obras e Servicos de Engenharia',            articles: ['46','47','48','49'] },
-  { value: 'controle-transparencia',   label: 'Controle e Transparencia',                  articles: ['169','170','171','172','173'] },
+  { value: 'tecnologia-informacao',    label: 'Contratações de TI',                        articles: ['6'] },
+  { value: 'obras-engenharia',         label: 'Obras e Serviços de Engenharia',            articles: ['46','47','48','49'] },
+  { value: 'controle-transparencia',   label: 'Controle e Transparência',                  articles: ['169','170','171','172','173'] },
 ] as const;
 
 export type TemaLicitacao = typeof TEMAS_LICITACOES[number]['value'];

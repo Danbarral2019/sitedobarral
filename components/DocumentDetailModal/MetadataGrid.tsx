@@ -48,7 +48,7 @@ export default function MetadataGrid({ document }: MetadataGridProps) {
         <div className="bg-gray-50 p-3.5 rounded-lg border border-gray-200">
           <div className="flex items-center gap-2 text-gray-500 mb-1">
             <Building2 className="w-3.5 h-3.5" />
-            <span className="text-xs font-medium">Orgao</span>
+            <span className="text-xs font-medium">Órgão</span>
           </div>
           <p className="font-bold text-gray-900 text-sm">{document.issuerOrg}</p>
         </div>
@@ -80,7 +80,7 @@ export default function MetadataGrid({ document }: MetadataGridProps) {
         <div className="bg-gray-50 p-3.5 rounded-lg border border-gray-200">
           <div className="flex items-center gap-2 text-gray-500 mb-1">
             <Building2 className="w-3.5 h-3.5" />
-            <span className="text-xs font-medium">Orgao Julgador</span>
+            <span className="text-xs font-medium">Órgão Julgador</span>
           </div>
           <p className="font-bold text-gray-900 text-sm">{document.tcuOrgaoJulgador}</p>
         </div>
@@ -103,7 +103,7 @@ export default function MetadataGrid({ document }: MetadataGridProps) {
         <div className="bg-gray-50 p-3.5 rounded-lg border border-gray-200 col-span-2">
           <div className="flex items-center gap-2 text-gray-500 mb-1">
             <Hash className="w-3.5 h-3.5" />
-            <span className="text-xs font-medium">Area / Tema</span>
+            <span className="text-xs font-medium">Área / Tema</span>
           </div>
           <p className="font-bold text-gray-900 text-sm">
             {document.tcuArea}

@@ -45,7 +45,7 @@ export default async function Home() {
 
   const acervoCounts = [
     {
-      label: 'Acordaos TCU',
+      label: 'Acórdãos TCU',
       count: categoryCounts['acordao'] || 0,
       icon: Gavel,
     },
@@ -55,7 +55,7 @@ export default async function Home() {
       icon: FileCheck,
     },
     {
-      label: 'Orientacoes Normativas',
+      label: 'Orientações Normativas',
       count: categoryCounts['orientacao-normativa'] || 0,
       icon: ScrollText,
     },
@@ -76,12 +76,12 @@ export default async function Home() {
       href: '/legislacao',
     },
     {
-      label: 'Termos no Glossario',
+      label: 'Termos no Glossário',
       count: glossaryCount,
       icon: Landmark,
     },
     {
-      label: 'Cursos Disponiveis',
+      label: 'Cursos Disponíveis',
       count: courses.length,
       icon: GraduationCap,
     },
@@ -102,13 +102,13 @@ export default async function Home() {
                     Prof. Daniel Barral
                   </h1>
                   <p className="text-xl md:text-2xl mb-4 font-poppins font-light">
-                    Professor | Mestre em Direito Publico
+                    Professor | Mestre em Direito Público
                   </p>
                   <p className="text-lg mb-8 text-brand-100 font-poppins">
-                    Especialista em Licitacoes e Contratos Administrativos
+                    Especialista em Licitações e Contratos Administrativos
                   </p>
                   <p className="text-lg mb-10 max-w-2xl mx-auto lg:mx-0 text-brand-100/90 font-poppins leading-relaxed">
-                    Repositorio especializado de materiais juridicos em Direito Administrativo,
+                    Repositório especializado de materiais jurídicos em Direito Administrativo,
                     com foco em fortalecer seu conhecimento e aprimorar suas atividades funcionais.
                   </p>
                   <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
@@ -123,7 +123,7 @@ export default async function Home() {
                       href="/login"
                       className="bg-blue-600 text-white px-8 py-3 rounded-lg font-poppins font-semibold hover:bg-blue-700 transition-colors inline-flex items-center justify-center gap-2 border border-blue-500"
                     >
-                      Area do Aluno
+                      Área do Aluno
                       <ArrowRight className="w-5 h-5 text-white" />
                     </Link>
                   </div>
@@ -156,7 +156,7 @@ export default async function Home() {
                 Base de Conhecimento
               </h2>
               <p className="text-brand-200 font-poppins text-lg">
-                Mais de {totalDocuments > 0 ? totalDocuments.toLocaleString('pt-BR') : '2.000'} documentos juridicos atualizados constantemente
+                Mais de {totalDocuments > 0 ? totalDocuments.toLocaleString('pt-BR') : '2.000'} documentos jurídicos atualizados constantemente
               </p>
             </div>
 
@@ -225,7 +225,7 @@ export default async function Home() {
 
             <div className="text-center mt-10">
               <p className="text-gray-700 mb-4 text-lg">
-                Voce tambem e aluno e quer compartilhar sua experiencia?
+                Você também é aluno e quer compartilhar sua experiência?
               </p>
               <Link
                 href="/contato?motivo=depoimento"
@@ -250,7 +250,7 @@ export default async function Home() {
               <div className="relative z-10">
                 <div className="inline-block mb-4">
                   <div className="bg-white/20 backdrop-blur-sm px-4 py-2 rounded-full">
-                    <span className="text-white font-semibold text-sm">Newsletter Juridica</span>
+                    <span className="text-white font-semibold text-sm">Newsletter Jurídica</span>
                   </div>
                 </div>
 
@@ -258,8 +258,8 @@ export default async function Home() {
                   Mantenha-se Atualizado
                 </h2>
                 <p className="text-xl text-white mb-10 max-w-2xl mx-auto leading-relaxed">
-                  Cadastre-se em nossa newsletter e receba novidades sobre legislacao,
-                  jurisprudencia e novos materiais disponiveis.
+                  Cadastre-se em nossa newsletter e receba novidades sobre legislação,
+                  jurisprudência e novos materiais disponíveis.
                 </p>
 
                 <div className="max-w-xl mx-auto bg-white/10 backdrop-blur-md p-2 rounded-2xl border-2 border-white/30">
@@ -267,7 +267,7 @@ export default async function Home() {
                 </div>
 
                 <p className="text-white/80 text-sm mt-4">
-                  Sem spam · Cancele quando quiser · Conteudo exclusivo
+                  Sem spam · Cancele quando quiser · Conteúdo exclusivo
                 </p>
               </div>
             </div>
@@ -286,7 +286,7 @@ export default async function Home() {
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
               </svg>
-              Area Administrativa
+              Área Administrativa
             </Link>
           </div>
         </div>

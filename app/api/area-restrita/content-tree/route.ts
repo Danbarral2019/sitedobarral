@@ -25,8 +25,14 @@ const CATEGORY_LABELS: Record<string, string> = {
   'enunciados': 'Enunciados',
   'acordao': 'Acórdãos TCU',
   'sumula': 'Súmulas',
+  'manual_tcu': 'Manual do TCU',
+  'boa_pratica': 'Outros Atos Normativos',
+  'ato-normativo': 'Normativos',
   'outro': 'Outros',
 };
+
+// Categorias que não devem aparecer na sidebar
+const HIDDEN_CATEGORIES = ['lei-artigo'];
 
 function getCategoryLabel(category: string): string {
   return CATEGORY_LABELS[category] || category.charAt(0).toUpperCase() + category.slice(1);
@@ -61,6 +67,9 @@ export async function GET(request: NextRequest) {
     const enrolledCourseIds = isAdmin
       ? courses.map(c => c.id)
       : user.enrollments.map(e => e.courseId);
+
+    // Filter to only course IDs that exist in the courses data (exclude phantom courses like removed course 1)
+    const validCourseIds = enrolledCourseIds.filter(cId => courses.some(c => c.id === cId));
 
     const tree: ContentTreeNode[] = [];
     let totalCount = 0;
@@ -158,9 +167,9 @@ export async function GET(request: NextRequest) {
     });
 
     // Check if any enrolled course has LMS modules
-    const hasAnyLmsModules = enrolledCourseIds.some((cId) => (lmsModuleCountMap[cId] || 0) > 0);
+    const hasAnyLmsModules = validCourseIds.some((cId) => (lmsModuleCountMap[cId] || 0) > 0);
 
-    if (enrolledCourseIds.length > 0) {
+    if (validCourseIds.length > 0) {
       // Group materials: merge common (courseId=null) into each enrolled course
       const materialsByCourse: Record<string, Record<string, number>> = {};
       const commonMaterials: Record<string, number> = {};
@@ -176,7 +185,7 @@ export async function GET(request: NextRequest) {
       });
 
       // Merge common materials into each enrolled course
-      enrolledCourseIds.forEach((cId) => {
+      validCourseIds.forEach((cId) => {
         if (!materialsByCourse[cId]) materialsByCourse[cId] = {};
         Object.entries(commonMaterials).forEach(([cat, count]) => {
           materialsByCourse[cId][cat] = (materialsByCourse[cId][cat] || 0) + count;
@@ -195,14 +204,14 @@ export async function GET(request: NextRequest) {
 
       let materialChildren: ContentTreeNode[] | undefined;
 
-      if (enrolledCourseIds.length === 1) {
+      if (validCourseIds.length === 1) {
         // Single course: categories directly under "Materiais do Curso"
-        const cId = enrolledCourseIds[0];
+        const cId = validCourseIds[0];
         const cats = materialsByCourse[cId] || {};
         materialChildren = buildMaterialCategoryNodes(cId, cats);
       } else {
-        // Multiple courses: group by course (include ALL enrolled courses)
-        materialChildren = enrolledCourseIds
+        // Multiple courses: group by course (include ALL valid courses)
+        materialChildren = validCourseIds
           .map((cId) => {
             const course = courses.find(c => c.id === cId);
             const cats = materialsByCourse[cId] || {};
@@ -246,15 +255,17 @@ export async function GET(request: NextRequest) {
     // Build document children - flat list of categories (no course grouping)
     const documentChildren: ContentTreeNode[] = [];
 
-    Object.entries(aggregatedCategories).forEach(([cat, count]) => {
-      documentChildren.push({
-        id: `doc-${cat}`,
-        type: 'document' as const,
-        label: getCategoryLabel(cat),
-        count,
-        category: cat,
+    Object.entries(aggregatedCategories)
+      .filter(([cat]) => !HIDDEN_CATEGORIES.includes(cat))
+      .forEach(([cat, count]) => {
+        documentChildren.push({
+          id: `doc-${cat}`,
+          type: 'document' as const,
+          label: getCategoryLabel(cat),
+          count,
+          category: cat,
+        });
       });
-    });
 
     // Build Lei 14.133 node (as child of Base de Conhecimento)
     const leiChildren: ContentTreeNode[] = [];
