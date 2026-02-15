@@ -1,145 +1,180 @@
 /**
- * Indexação dos atos normativos (LegislativeAct) no pgvector
+ * Indexação de Atos Legislativos com Embeddings (LegislativeActChunk)
  *
- * Cria um registro Document para cada LegislativeAct no banco,
- * permitindo busca semântica junto com os demais documentos.
- * Após criar os docs, rodar migrate-to-embeddings.ts para gerar embeddings.
+ * Processa atos legislativos diretamente na tabela LegislativeActChunk
+ * (sem criar Documents intermediários), gerando embeddings para busca semântica.
  *
  * Uso:
- *   cd sitedobarral
- *   export $(grep DATABASE_URL .env.local | xargs)
  *   npx tsx scripts/index-legislative-acts.ts
  *   npx tsx scripts/index-legislative-acts.ts --dry-run
+ *   npx tsx scripts/index-legislative-acts.ts --force
+ *   npx tsx scripts/index-legislative-acts.ts --limit 10
  */
 
 import { PrismaClient } from '@prisma/client';
+import { processLegislativeAct } from '../lib/embeddings/legislative-act-processor';
 
 const prisma = new PrismaClient({ log: ['error', 'warn'] });
 
-const DRY_RUN = process.argv.includes('--dry-run');
-const FORCE = process.argv.includes('--force');
-
-async function main() {
-  console.log('⚖️  Indexação dos atos normativos (LegislativeAct)\n');
-  console.log(`   Opções: dry-run=${DRY_RUN}, force=${FORCE}`);
-
-  // Buscar todos os atos normativos
-  const acts = await prisma.legislativeAct.findMany({
-    orderBy: { publishDate: 'desc' },
-  });
-
-  console.log(`   Total de atos normativos: ${acts.length}\n`);
-
-  let created = 0;
-  let skipped = 0;
-  let errors = 0;
-
-  for (const act of acts) {
-    const title = act.fullNumber;
-
-    // Verificar duplicata
-    const existing = await prisma.document.findFirst({
-      where: { title, category: 'ato-normativo' },
-    });
-
-    if (existing && !FORCE) {
-      skipped++;
-      continue;
-    }
-
-    // Conteúdo = inteiro teor (se disponível via scraping) ou ementa
-    const content = act.content || act.ementa || '';
-    if (content.length < 30) {
-      console.log(`   ⚠️  ${title}: conteúdo muito curto (${content.length} chars), pulando`);
-      skipped++;
-      continue;
-    }
-
-    // Description: tipo + emissor + artigos vinculados
-    const descParts: string[] = [];
-    const typeLabels: Record<string, string> = {
-      decreto: 'Decreto',
-      portaria: 'Portaria',
-      in: 'Instrução Normativa',
-      'ordem-servico': 'Ordem de Serviço',
-      lei: 'Lei',
-      'medida-provisoria': 'Medida Provisória',
-    };
-    descParts.push(typeLabels[act.type] || act.type);
-    descParts.push(`Emissor: ${act.issuer}`);
-
-    // Parse leiArticles do ato
-    let leiArticles: string[] = [];
-    if (act.leiArticles) {
-      try {
-        leiArticles = JSON.parse(act.leiArticles);
-      } catch {
-        leiArticles = act.leiArticles.split(',').map(s => s.trim()).filter(Boolean);
-      }
-    }
-    if (leiArticles.length > 0) {
-      descParts.push(`Artigos da Lei 14.133: ${leiArticles.join(', ')}`);
-    }
-
-    const description = descParts.join(' — ');
-    const url = act.officialUrl || '';
-
-    if (DRY_RUN) {
-      console.log(`   [DRY RUN] Criaria: ${title} (${content.length} chars)`);
-      created++;
-      continue;
-    }
-
-    try {
-      if (existing && FORCE) {
-        await prisma.document.update({
-          where: { id: existing.id },
-          data: {
-            content,
-            description,
-            url,
-            leiArticles: leiArticles.length > 0 ? JSON.stringify(leiArticles) : null,
-            embeddingStatus: 'pending',
-          },
-        });
-      } else {
-        await prisma.document.create({
-          data: {
-            title,
-            description,
-            type: 'link',
-            url,
-            category: 'ato-normativo',
-            isCommon: true,
-            isPublic: false,
-            content,
-            leiArticles: leiArticles.length > 0 ? JSON.stringify(leiArticles) : null,
-            embeddingStatus: 'pending',
-          },
-        });
-      }
-      created++;
-    } catch (err) {
-      console.error(`   ❌ Erro ao criar ${title}:`, (err as Error).message);
-      errors++;
-    }
-  }
-
-  console.log('\n📊 Resultado:');
-  console.log(`   ✅ Criados/atualizados: ${created}`);
-  console.log(`   ⏭️  Pulados (já existiam): ${skipped}`);
-  console.log(`   ❌ Erros: ${errors}`);
-
-  if (!DRY_RUN && created > 0) {
-    console.log('\n🔔 Próximo passo: rodar embeddings');
-    console.log('   npx tsx scripts/migrate-to-embeddings.ts');
-  }
-
-  await prisma.$disconnect();
+interface Options {
+  dryRun?: boolean;
+  force?: boolean;
+  limit?: number;
 }
 
-main().catch((err) => {
-  console.error('Erro fatal:', err);
-  prisma.$disconnect();
-  process.exit(1);
-});
+async function indexLegislativeActs(options: Options = {}) {
+  const { dryRun = false, force = false, limit } = options;
+
+  console.log('🚀 Indexação de Atos Legislativos com Embeddings\n');
+  console.log('Options:', { dryRun, force, limit: limit || 'all' });
+  console.log('');
+
+  try {
+    // 1. Buscar atos pendentes
+    const whereClause: Record<string, unknown> = {};
+
+    if (!force) {
+      whereClause.OR = [
+        { embeddingStatus: null },
+        { embeddingStatus: 'pending' },
+        { embeddingStatus: 'failed' },
+      ];
+    }
+
+    const acts = await prisma.legislativeAct.findMany({
+      where: whereClause,
+      select: {
+        id: true,
+        fullNumber: true,
+        type: true,
+        content: true,
+        ementa: true,
+        summary: true,
+        embeddingStatus: true,
+      },
+      orderBy: { publishDate: 'asc' },
+      ...(limit ? { take: limit } : {}),
+    });
+
+    // Filtrar atos que têm pelo menos ementa (todos devem ter)
+    const indexable = acts.filter(a => a.ementa && a.ementa.length > 20);
+
+    console.log(`📋 Total de atos encontrados: ${acts.length}`);
+    console.log(`📋 Atos indexáveis (com ementa): ${indexable.length}`);
+
+    // Status breakdown
+    const statusCounts = acts.reduce((acc, act) => {
+      const status = act.embeddingStatus || 'null';
+      acc[status] = (acc[status] || 0) + 1;
+      return acc;
+    }, {} as Record<string, number>);
+    console.log('   Status:', statusCounts);
+
+    // Content breakdown
+    const withContent = indexable.filter(a => a.content && a.content.length > 50).length;
+    const withSummary = indexable.filter(a => !a.content && a.summary && a.summary.length > 50).length;
+    const ementaOnly = indexable.length - withContent - withSummary;
+    console.log(`   Com content: ${withContent}, com summary: ${withSummary}, só ementa: ${ementaOnly}`);
+    console.log('');
+
+    if (indexable.length === 0) {
+      console.log('✅ Nenhum ato para indexar.');
+      return;
+    }
+
+    if (dryRun) {
+      console.log('[DRY RUN] Atos que seriam indexados:');
+      indexable.forEach(act => {
+        const textLen = (act.content || act.summary || act.ementa || '').length;
+        console.log(`   - ${act.fullNumber} (${act.type}) [${act.embeddingStatus || 'pending'}] ${textLen} chars`);
+      });
+      console.log('\n[DRY RUN] Nenhuma alteração feita.');
+      return;
+    }
+
+    // 2. Processar cada ato
+    const startTime = Date.now();
+    let succeeded = 0;
+    let failed = 0;
+    let totalChunks = 0;
+
+    for (let i = 0; i < indexable.length; i++) {
+      const act = indexable[i];
+      console.log(`\n[${i + 1}/${indexable.length}] Processando ${act.fullNumber}...`);
+
+      const result = await processLegislativeAct(act.id, { forceReprocess: force });
+
+      if (result.success) {
+        succeeded++;
+        totalChunks += result.stats?.chunkCount || 0;
+      } else {
+        failed++;
+        console.log(`   ❌ Falha: ${result.error}`);
+      }
+
+      // Rate limiting: pausa entre cada ato
+      if (i < indexable.length - 1) {
+        await new Promise(resolve => setTimeout(resolve, 500));
+      }
+    }
+
+    // 3. Sumário
+    const totalTime = (Date.now() - startTime) / 1000;
+
+    console.log('\n' + '='.repeat(50));
+    console.log('📊 Sumário da Indexação');
+    console.log('='.repeat(50));
+    console.log(`Total processado: ${indexable.length}`);
+    console.log(`Sucesso: ${succeeded}`);
+    console.log(`Falha: ${failed}`);
+    console.log(`Total de chunks: ${totalChunks}`);
+    console.log(`Tempo total: ${totalTime.toFixed(1)}s`);
+
+    if (failed > 0) {
+      console.log('\n⚠️  Alguns atos falharam. Execute novamente para retentar.');
+    } else {
+      console.log('\n✅ Indexação concluída com sucesso!');
+    }
+
+  } catch (error) {
+    console.error('❌ Erro fatal:', error);
+    throw error;
+  } finally {
+    await prisma.$disconnect();
+  }
+}
+
+// Parse args
+function parseArgs(): Options {
+  const args = process.argv.slice(2);
+  const options: Options = {};
+
+  for (let i = 0; i < args.length; i++) {
+    if (args[i] === '--dry-run') options.dryRun = true;
+    else if (args[i] === '--force') options.force = true;
+    else if (args[i] === '--limit' && args[i + 1]) {
+      options.limit = parseInt(args[i + 1], 10);
+      i++;
+    } else if (args[i] === '--help' || args[i] === '-h') {
+      console.log(`
+Indexação de Atos Legislativos com Embeddings
+
+Uso:
+  npx tsx scripts/index-legislative-acts.ts [opções]
+
+Opções:
+  --dry-run   Simula sem alterar o banco
+  --force     Reprocessa todos (incluindo completed)
+  --limit N   Processa apenas os primeiros N atos
+  --help      Mostra esta mensagem
+      `);
+      process.exit(0);
+    }
+  }
+
+  return options;
+}
+
+indexLegislativeActs(parseArgs())
+  .then(() => process.exit(0))
+  .catch(() => process.exit(1));

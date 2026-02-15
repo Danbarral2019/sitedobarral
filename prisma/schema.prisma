@@ -685,8 +685,16 @@ model LegislativeAct {
   updatedAt   DateTime @updatedAt
   createdBy   String?  // Email do admin
 
+  // Sistema de Embeddings/Busca Semântica
+  embeddingStatus    String?   // pending|processing|completed|failed
+  chunkCount         Int       @default(0) // Número de chunks gerados
+  embeddedAt         DateTime? // Data em que os embeddings foram gerados
+
   // Relacionamento com favoritos
   favorites Favorite[]
+
+  // Relacionamento com chunks (embeddings)
+  chunks LegislativeActChunk[]
 
   // Full-Text Search
   search_vector Unsupported("tsvector")?
@@ -703,6 +711,25 @@ model LegislativeAct {
   @@index([notifiedAt])
   @@index([lastScrapedAt])
   @@index([scrapeStatus])
+  @@index([embeddingStatus])
+}
+
+// Chunks de atos legislativos com embeddings (Busca Semântica)
+model LegislativeActChunk {
+  id               String   @id @default(uuid())
+  legislativeActId String
+  legislativeAct   LegislativeAct @relation(fields: [legislativeActId], references: [id], onDelete: Cascade)
+
+  chunkIndex  Int      // Posição no documento (0, 1, 2...)
+  content     String   @db.Text // Conteúdo do chunk
+  charStart   Int      // Posição inicial no texto original
+  charEnd     Int      // Posição final no texto original
+  embedding   Unsupported("vector(768)") // Embedding do Gemini gemini-embedding-001
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([legislativeActId])
 }
 
 // Perguntas Frequentes (FAQ)

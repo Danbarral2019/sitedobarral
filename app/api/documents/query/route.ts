@@ -233,6 +233,7 @@ export async function POST(req: NextRequest) {
         isCommon: doc.isCommon,
         tags: doc.tags ? JSON.parse(doc.tags) : undefined,
         leiArticles: doc.leiArticles,
+        sourceType: 'document' as const,
       }));
 
       console.log(`   🔍 Complementary priority sources: ${complementaryResults.length} (from ${priorityDocs.length} candidates)`);
@@ -242,14 +243,28 @@ export async function POST(req: NextRequest) {
     const allResults = [...searchResponse.results, ...complementaryResults];
     const leiResults = allResults.filter(r => r.category === 'lei-artigo');
     const actResults = allResults.filter(r => r.category === 'ato-normativo');
+    // Semantic legislative acts from LegislativeActChunk (via UNION ALL)
+    const semanticLegActResults = allResults.filter(r => r.sourceType === 'legislative-act');
     const rawDocResults = allResults.filter(
-      r => !['lei-artigo', 'ato-normativo'].includes(r.category)
+      r => !['lei-artigo', 'ato-normativo'].includes(r.category) && r.sourceType !== 'legislative-act'
     );
 
     // Diversify doc results with priority tiers
     const docResults = diversifyResults(rawDocResults, maxResults);
 
-    console.log(`   📜 Lei: ${leiResults.length}, Atos: ${actResults.length}, Docs: ${docResults.length} (raw: ${rawDocResults.length})`);
+    // Cap semantic legislative acts: top 3 per act type to avoid flooding
+    const legActsByType = new Map<string, typeof semanticLegActResults>();
+    for (const act of semanticLegActResults) {
+      const arr = legActsByType.get(act.category) || [];
+      arr.push(act);
+      legActsByType.set(act.category, arr);
+    }
+    const cappedLegActs: typeof semanticLegActResults = [];
+    for (const [, acts] of legActsByType) {
+      cappedLegActs.push(...acts.sort((a, b) => b.similarity - a.similarity).slice(0, 3));
+    }
+
+    console.log(`   📜 Lei: ${leiResults.length}, Atos(doc): ${actResults.length}, Atos(semantic): ${cappedLegActs.length}, Docs: ${docResults.length} (raw: ${rawDocResults.length})`);
 
     // 7. Enrich: extract cited articles from docs and find missing ones
     const citedArticles = extractCitedArticles(
@@ -270,12 +285,16 @@ export async function POST(req: NextRequest) {
     const fullLeiContext = [semanticLeiContext, extraLeiContext].filter(Boolean).join('\n\n');
 
     // 8. Find related legislative acts not already in results
-    const alreadyFoundActTitles = actResults.map(r => r.documentTitle);
+    const alreadyFoundActTitles = [
+      ...actResults.map(r => r.documentTitle),
+      ...cappedLegActs.map(r => r.documentTitle),
+    ];
     const allCitedArticles = [...new Set([...citedArticles, ...leiResultArticleNums])];
     const extraActs = await findRelatedActs(allCitedArticles, alreadyFoundActTitles, 3);
 
-    // Build acts context
-    const semanticActsContext = buildContextForLLM(actResults, 1500);
+    // Build acts context (includes Document-based acts + semantic LegislativeAct acts)
+    const allActContextResults = [...actResults, ...cappedLegActs];
+    const semanticActsContext = buildContextForLLM(allActContextResults, 2000);
     const extraActsFormatted = formatActsContext(extraActs, 1000);
     const fullActsContext = [semanticActsContext, extraActsFormatted].filter(Boolean).join('\n\n');
 
@@ -299,6 +318,7 @@ export async function POST(req: NextRequest) {
     const allLeiArticleNums = [...new Set([...leiResultArticleNums, ...missingArticles])].slice(0, 15);
     const allActsForSources = [
       ...actResults.map(r => ({ title: r.documentTitle, url: r.url || '' })),
+      ...cappedLegActs.map(r => ({ title: r.documentTitle, url: r.url || '' })),
       ...extraActs.map(a => ({ title: a.title, url: a.url })),
     ];
     const legalSources = buildLegalSources(allLeiArticleNums, allActsForSources);

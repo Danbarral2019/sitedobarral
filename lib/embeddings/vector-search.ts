@@ -24,6 +24,7 @@ export interface SearchResult {
   isCommon: boolean;
   tags?: string[];
   leiArticles?: string | null;
+  sourceType: 'document' | 'legislative-act'; // Tipo de fonte
 }
 
 export interface SearchOptions {
@@ -151,7 +152,7 @@ async function performSearch(
     whereClause += ` AND d."category" NOT IN (${escaped})`;
   }
 
-  // 3. Executa busca vetorial com pgvector
+  // 3. Executa busca vetorial com pgvector (UNION ALL: DocumentChunk + LegislativeActChunk)
   // Usa <=> para distancia coseno (1 - similaridade)
   // Ordena por similaridade (menor distancia = mais similar)
   const results = await prisma.$queryRawUnsafe<Array<{
@@ -166,25 +167,53 @@ async function performSearch(
     is_common: boolean;
     tags: string | null;
     lei_articles: string | null;
+    source_type: string;
   }>>(`
-    SELECT
-      d.id as document_id,
-      d.title as document_title,
-      d.category,
-      c.content as chunk_content,
-      c."chunkIndex" as chunk_index,
-      1 - (c.embedding <=> '${embeddingStr}'::vector) as similarity,
-      d.url,
-      d."courseId" as course_id,
-      d."isCommon" as is_common,
-      d.tags,
-      d."leiArticles" as lei_articles
-    FROM "DocumentChunk" c
-    JOIN "Document" d ON c."documentId" = d.id
-    WHERE ${whereClause}
-      AND 1 - (c.embedding <=> '${embeddingStr}'::vector) >= ${threshold}
-    ORDER BY c.embedding <=> '${embeddingStr}'::vector
-    LIMIT ${limit * 2}
+    (
+      SELECT
+        d.id as document_id,
+        d.title as document_title,
+        d.category,
+        c.content as chunk_content,
+        c."chunkIndex" as chunk_index,
+        1 - (c.embedding <=> '${embeddingStr}'::vector) as similarity,
+        d.url,
+        d."courseId" as course_id,
+        d."isCommon" as is_common,
+        d.tags,
+        d."leiArticles" as lei_articles,
+        'document' as source_type
+      FROM "DocumentChunk" c
+      JOIN "Document" d ON c."documentId" = d.id
+      WHERE ${whereClause}
+        AND 1 - (c.embedding <=> '${embeddingStr}'::vector) >= ${threshold}
+      ORDER BY c.embedding <=> '${embeddingStr}'::vector
+      LIMIT ${limit * 2}
+    )
+    UNION ALL
+    (
+      SELECT
+        la.id as document_id,
+        la."fullNumber" as document_title,
+        la.type as category,
+        lc.content as chunk_content,
+        lc."chunkIndex" as chunk_index,
+        1 - (lc.embedding <=> '${embeddingStr}'::vector) as similarity,
+        la."officialUrl" as url,
+        NULL as course_id,
+        true as is_common,
+        la.themes as tags,
+        la."leiArticles" as lei_articles,
+        'legislative-act' as source_type
+      FROM "LegislativeActChunk" lc
+      JOIN "LegislativeAct" la ON lc."legislativeActId" = la.id
+      WHERE la."embeddingStatus" = 'completed'
+        AND 1 - (lc.embedding <=> '${embeddingStr}'::vector) >= ${threshold}
+      ORDER BY lc.embedding <=> '${embeddingStr}'::vector
+      LIMIT ${limit * 2}
+    )
+    ORDER BY similarity DESC
+    LIMIT ${limit * 3}
   `);
 
   // 4. Agrupa por documento (pega o chunk mais relevante de cada documento)
@@ -206,6 +235,7 @@ async function performSearch(
         isCommon: row.is_common,
         tags: row.tags ? safeParseArray(row.tags) : undefined,
         leiArticles: row.lei_articles,
+        sourceType: row.source_type as 'document' | 'legislative-act',
       });
     }
   }

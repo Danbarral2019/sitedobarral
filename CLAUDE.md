@@ -46,6 +46,9 @@ npx tsx scripts/setup-full-text-search.ts --dry-run   # Simular sem alterar
 npx tsx scripts/migrate-to-embeddings.ts              # Indexar docs pendentes
 npx tsx scripts/migrate-to-embeddings.ts --dry-run    # Simular sem alterar
 npx tsx scripts/migrate-to-embeddings.ts --force      # Reprocessar todos
+npx tsx scripts/index-legislative-acts.ts             # Indexar atos legislativos
+npx tsx scripts/index-legislative-acts.ts --dry-run   # Simular sem alterar
+npx tsx scripts/index-legislative-acts.ts --force     # Reprocessar todos
 
 # Migration Scripts
 export DATABASE_URL="<your-db-url>" && npx tsx scripts/fix-csv-tags.ts  # Convert CSV tags to JSON
@@ -103,6 +106,17 @@ export DATABASE_URL="<your-db-url>" && npx tsx scripts/fix-csv-tags.ts  # Conver
 
 
 ## Recent Features
+
+**⚖️ Embeddings Semânticos para Atos Legislativos (2026-02-15):**
+- ✅ Modelo `LegislativeActChunk` (espelha `DocumentChunk`, FK para `LegislativeAct`)
+- ✅ 53 atos legislativos indexados com embeddings (801 chunks) na tabela separada
+- ✅ Busca semântica UNION ALL: `DocumentChunk` + `LegislativeActChunk` em `performSearch()`
+- ✅ Campo `sourceType` ('document' | 'legislative-act') no `SearchResult`
+- ✅ Atos semânticos integrados no contexto do query route (legal sources + prompt)
+- ✅ Cap de 3 resultados por tipo de ato para evitar flooding
+- ✅ Processador dedicado: `lib/embeddings/legislative-act-processor.ts`
+- ✅ Script: `npx tsx scripts/index-legislative-acts.ts` (flags: `--dry-run`, `--force`, `--limit N`)
+- 📖 Ver `lib/embeddings/vector-search.ts`, `lib/embeddings/legislative-act-processor.ts`
 
 **💳 Stripe Subscriptions — Pagamento e Assinaturas (2026-02-15):**
 - ✅ Integração Stripe com Checkout Sessions (hosted page) e Customer Portal
@@ -527,11 +541,22 @@ Ver código para endpoints completos.
 2. Se tem `r2Key`: download R2 → extração de texto → normalização
 3. Se não tem `r2Key`: usa `content` ou `description` como fallback (mín. 50 chars)
 4. Texto é dividido em chunks (chunker legal para decor/parecer/on, genérico para outros)
-5. Embeddings gerados via Gemini `text-embedding-004` (768 dimensões, batch de 100)
+5. Embeddings gerados via Gemini `gemini-embedding-001` (768 dimensões, batch de 100)
 6. Chunks + embeddings salvos na tabela `DocumentChunk` com `vector(768)`
 7. Script: `npx tsx scripts/migrate-to-embeddings.ts` (flags: `--dry-run`, `--limit N`, `--force`, `--concurrency N`)
 8. Stats: 428/429 docs indexados, 1.598 chunks, 1 falha (ON 41/2014 — texto insuficiente)
 - 📖 Ver `lib/embeddings/document-processor.ts`, `lib/embeddings/gemini-embeddings.ts`, `lib/embeddings/text-chunker.ts`
+
+### Atos Legislativos — Embeddings Separados
+1. `processLegislativeAct()` busca ato, monta texto (fullNumber + ementa + content)
+2. Chunka com `chunkLegalDocument()` (1200 chars, overlap 200)
+3. Embeddings gerados via Gemini `gemini-embedding-001` (768 dimensões)
+4. Chunks salvos na tabela `LegislativeActChunk` (separada de `DocumentChunk`)
+5. Busca semântica usa UNION ALL entre `DocumentChunk` e `LegislativeActChunk`
+6. Campo `sourceType` ('document' | 'legislative-act') diferencia a origem
+7. Script: `npx tsx scripts/index-legislative-acts.ts` (flags: `--dry-run`, `--force`, `--limit N`)
+8. Stats: 53 atos indexados, 801 chunks
+- 📖 Ver `lib/embeddings/legislative-act-processor.ts`, `scripts/index-legislative-acts.ts`
 
 ### Document Versioning
 - Each document update creates a `DocumentVersion` record
