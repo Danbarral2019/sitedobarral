@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { checkAccessStatus, type AccessStatus } from '@/lib/enrollment-utils';
+import { checkAccessStatus, checkSubscriptionAccess, getActivePlan, type AccessStatus, type SubscriptionInfo } from '@/lib/enrollment-utils';
 
 interface Enrollment {
   id: string;
@@ -21,6 +21,7 @@ interface User {
   email: string;
   role: 'admin' | 'student';
   enrollments?: Enrollment[];
+  subscriptions?: SubscriptionInfo[];
 }
 
 interface UseAuthReturn {
@@ -110,9 +111,15 @@ export function useAuth(): UseAuthReturn {
   };
 
   const hasActiveAccess = (courseId: string): boolean => {
+    // Verificar enrollment (QR Code / presencial)
     const status = getEnrollmentStatus(courseId);
-    return status ? status.hasAccess : false;
+    if (status?.hasAccess) return true;
+
+    // Verificar subscription (Stripe)
+    return checkSubscriptionAccess(user?.subscriptions, courseId);
   };
+
+  const activePlan = getActivePlan(user?.subscriptions);
 
   return {
     user,
@@ -123,5 +130,6 @@ export function useAuth(): UseAuthReturn {
     isEnrolledIn,
     getEnrollmentStatus,
     hasActiveAccess,
+    activePlan,
   };
 }

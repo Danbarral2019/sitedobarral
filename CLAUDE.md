@@ -15,7 +15,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 Site profissional do Prof. Daniel Barral especializado em Direito Administrativo, Licitações e Contratos. Repositório de materiais jurídicos com acesso público e área restrita via QR code.
 
-**Tech Stack:** Next.js 15.5.2 (App Router) • React 19.1.0 • TypeScript 5 • Prisma ORM • PostgreSQL (Neon) • Tailwind CSS 4 • Radix UI • JWT Auth • Resend Email • MailChimp • Playwright/PostgreSQL/GitHub/Gemini MCP
+**Tech Stack:** Next.js 15.5.2 (App Router) • React 19.1.0 • TypeScript 5 • Prisma ORM • PostgreSQL (Neon) • Tailwind CSS 4 • Radix UI • JWT Auth • Stripe Subscriptions • Resend Email • MailChimp • Playwright/PostgreSQL/GitHub/Gemini MCP
 
 ## Quick Commands
 
@@ -65,14 +65,15 @@ export DATABASE_URL="<your-db-url>" && npx tsx scripts/fix-csv-tags.ts  # Conver
 - `lib/` - Core utilities (auth, email, scrapers, versioning)
 - `lib/agu-modules/` - AGU scrapers (ONs, Pareceres, DECOR, Súmulas)
 - `components/` - React components
-- `prisma/schema.prisma` - Database schema (24 models)
+- `prisma/schema.prisma` - Database schema (25 models)
 - `scripts/` - Admin/import/scraping scripts
 
-**Key Models (24 total):**
+**Key Models (25 total):**
 
 
-- `User` - Admin/student accounts
-- `Enrollment` - Course access (1 year expiration, lifetime upgrade)
+- `User` - Admin/student accounts (+ `stripeCustomerId`)
+- `Enrollment` - Course access (1 mês trial via QR, ou gerenciado por Subscription)
+- `Subscription` - Assinaturas Stripe (planos basico/premium, status, período)
 - `QRCode` - Enrollment codes
 - `Document` - PDFs/links/videos with versioning
 - `DocumentVersion` - Change tracking
@@ -86,17 +87,39 @@ export DATABASE_URL="<your-db-url>" && npx tsx scripts/fix-csv-tags.ts  # Conver
 **Auth Flows:**
 
 
-1. QR Code → Registration → Enrollment (1 year)
+1. QR Code → Registration → Enrollment (1 mês trial)
 2. Email/Password → Login → JWT cookie
+3. Stripe Checkout → Subscription → Enrollments (sem expiração, gerenciado pela subscription)
 
 **Document Access:**
 
 - Public: `isPublic=true`
-- Private: requires valid enrollment
+- Private: requires valid enrollment OR active subscription
 - Bibliography: SEMPRE público
+
+**Subscription Plans:**
+- **Básico** (R$ 49,90/mês): acesso a 1 curso específico
+- **Premium** (R$ 89,90/mês): acesso a todos os 10 cursos + Assistente IA
 
 
 ## Recent Features
+
+**💳 Stripe Subscriptions — Pagamento e Assinaturas (2026-02-15):**
+- ✅ Integração Stripe com Checkout Sessions (hosted page) e Customer Portal
+- ✅ 2 planos: Básico (1 curso, R$ 49,90/mês) e Premium (todos cursos + IA, R$ 89,90/mês)
+- ✅ Webhook handler: `checkout.session.completed`, `invoice.paid`, `invoice.payment_failed`, `customer.subscription.updated`, `customer.subscription.deleted`
+- ✅ Enrollment automático via subscription (Básico: 1 curso, Premium: todos os 10)
+- ✅ QR Code alterado de 1 ano → 1 mês de trial
+- ✅ `hasActiveAccess()` verifica enrollment OU subscription ativa
+- ✅ Badge de plano (Básico/Premium) + "Gerenciar Assinatura" no header da área restrita
+- ✅ Página `/planos` com cards, seletor de curso, FAQ
+- ✅ Páginas callback `/assinatura/sucesso` e `/assinatura/cancelado`
+- ✅ Upgrade page redireciona para `/planos`
+- ✅ CSP atualizado para `checkout.stripe.com`
+- ✅ Lazy initialization do Stripe client (build-safe)
+- 📖 Ver `lib/stripe.ts`, `app/api/stripe/`, `app/planos/page.tsx`
+- 🔑 Requer: `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`, `STRIPE_PRICE_BASICO`, `STRIPE_PRICE_PREMIUM`
+- 🚀 Setup: criar Products/Prices no Stripe Dashboard → configurar webhook → `npx prisma db push`
 
 **🔤 Full-Text Search — PostgreSQL tsvector (2026-02-15):**
 - ✅ PostgreSQL FTS com stemming português (`portuguese_unaccent`) + `unaccent` extension
@@ -256,6 +279,15 @@ export async function GET(request: NextRequest) {
 
 
 - `RESEND_API_KEY`, `EMAIL_FROM`
+
+**Stripe (Subscriptions):**
+
+- `STRIPE_SECRET_KEY` - Chave secreta (`sk_test_...` ou `sk_live_...`)
+- `STRIPE_WEBHOOK_SECRET` - Webhook signing secret (`whsec_...`)
+- `STRIPE_PRICE_BASICO` - Price ID do plano Básico (`price_...`)
+- `STRIPE_PRICE_PREMIUM` - Price ID do plano Premium (`price_...`)
+- `NEXT_PUBLIC_PRICE_BASICO` - Valor exibido no frontend (ex: `49,90`)
+- `NEXT_PUBLIC_PRICE_PREMIUM` - Valor exibido no frontend (ex: `89,90`)
 
 **Optional:**
 
@@ -420,6 +452,11 @@ function Header() {
 - `/api/newsletter` - Newsletter subscription
 - `/api/contact` - Contact form
 
+**Stripe:** `/api/stripe/*`
+- `POST /api/stripe/checkout` - Cria Checkout Session (withAuth, recebe `{ plan, courseId? }`)
+- `POST /api/stripe/webhook` - Webhook handler (sem auth, verificação via signature)
+- `POST /api/stripe/portal` - Cria Customer Portal session (withAuth)
+
 **Admin:** `/api/admin/*` (QR codes, documents, blog, publications, analytics)
 
 **Cron:** `/api/enrollment/check-expiration`, `/api/cron/import-documents`, `/api/cron/monthly-newsletter`
@@ -442,14 +479,26 @@ Ver código para endpoints completos.
 - Fase 11: Monitoring (Sentry captureException em erros 500+, setUser após auth, tracking events server/client via Vercel Analytics)
 - Admin Versioning UI: histórico de versões (timeline), diff viewer, seção collapsible na página de edição
 - Full-Text Search: PostgreSQL tsvector + GIN + stemming português em 7 tabelas, FAQ e Blog na busca global
+- Stripe Subscriptions: Checkout, Webhook, Portal, 2 planos (Básico/Premium), QR Code trial 1 mês
 
 **🚧 In Progress:**
 - DOU classifier
 
 **📋 Planned:**
-- Payment integration, PWA
+- PWA
 
 ## Important Architecture Patterns
+
+### Stripe Subscription Flow
+1. User → `/planos` → escolhe plano → `POST /api/stripe/checkout` → redirect para Stripe Checkout
+2. Stripe Checkout → pagamento → redirect para `/assinatura/sucesso`
+3. Stripe envia webhook `checkout.session.completed` → cria `Subscription` + `Enrollment(s)` no banco
+4. Renovação: `invoice.paid` → atualiza `currentPeriodEnd`
+5. Falha: `invoice.payment_failed` → status `past_due`
+6. Cancelamento: `customer.subscription.deleted` → status `canceled` → remove enrollments (não-presenciais)
+7. Portal: `POST /api/stripe/portal` → redirect para Stripe Customer Portal (cancelar, trocar cartão)
+8. Acesso: `hasActiveAccess()` verifica enrollment válido OU subscription `active`
+- 📖 Ver `lib/stripe.ts` (lazy init via `getStripe()`), `lib/enrollment-utils.ts` (`checkSubscriptionAccess`)
 
 ### Busca Global com IA (Composição no Frontend)
 1. Usuário digita no campo de busca
@@ -501,6 +550,11 @@ Ver código para endpoints completos.
 **Business Rules:**
 
 - Bibliografia SEMPRE pública
+- QR Code trial: 1 mês (antes era 1 ano) — enrollments existentes mantêm expiração original
+- Subscription ativa → enrollments sem `expiresAt` (gerenciado pelo Stripe)
+- Subscription cancelada → remove enrollments sem `qrCodeId` (preserva presenciais)
+- Acesso = enrollment válido OU subscription ativa (verificar ambos)
+- Stripe lazy init: `getStripe()` evita erro no build — NUNCA instanciar Stripe no top-level
 - Enrollment expiration: lógica crítica (notificações, renovações)
 - Excel import: manter compatibilidade com templates
 - Multi-course docs: um documento pode pertencer a vários cursos

@@ -17,6 +17,7 @@ import {
   BookOpen,
   List,
   Book,
+  CreditCard,
 } from 'lucide-react';
 import Link from 'next/link';
 import { courses } from '@/data/courses';
@@ -112,7 +113,7 @@ interface SiteType {
 
 export default function AreaRestritaPage() {
   const router = useRouter();
-  const { user, isLoading: authLoading, logout } = useAuth();
+  const { user, isLoading: authLoading, logout, activePlan } = useAuth();
   const { isFavorite, toggleFavorite } = useFavorites();
 
   // Global search state
@@ -454,6 +455,31 @@ export default function AreaRestritaPage() {
 
             {/* Actions */}
             <div className="flex items-center gap-2 lg:gap-3">
+              {/* Badge de plano + link de assinatura */}
+              {activePlan ? (
+                <button
+                  onClick={async () => {
+                    const res = await fetch('/api/stripe/portal', { method: 'POST' });
+                    const data = await res.json();
+                    if (data.url) window.location.href = data.url;
+                  }}
+                  className="hidden lg:flex items-center gap-1.5 px-3 py-2 text-gray-700 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors font-medium text-sm"
+                  title="Gerenciar assinatura"
+                >
+                  <CreditCard className="w-4 h-4" />
+                  <span className="px-1.5 py-0.5 text-xs font-semibold rounded bg-blue-100 text-blue-700">
+                    {activePlan === 'premium' ? 'Premium' : 'Básico'}
+                  </span>
+                </button>
+              ) : (
+                <Link
+                  href="/planos"
+                  className="hidden lg:flex items-center gap-1.5 px-3 py-2 text-gray-700 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors font-medium text-sm"
+                >
+                  <CreditCard className="w-4 h-4" />
+                  <span>Planos</span>
+                </Link>
+              )}
               <Link
                 href="/area-restrita/favoritos"
                 className="flex items-center gap-1.5 px-3 py-2 text-gray-700 hover:text-pink-600 hover:bg-pink-50 rounded-lg transition-colors font-medium text-sm focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"

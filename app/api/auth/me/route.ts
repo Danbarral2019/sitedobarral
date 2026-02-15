@@ -29,6 +29,17 @@ export async function GET(request: NextRequest) {
       where: { id: authPayload.userId },
       include: {
         enrollments: true,
+        subscriptions: {
+          where: { status: { in: ['active', 'past_due'] } },
+          select: {
+            id: true,
+            plan: true,
+            courseId: true,
+            status: true,
+            currentPeriodEnd: true,
+            cancelAtPeriodEnd: true,
+          },
+        },
       },
     });
 
@@ -46,6 +57,7 @@ export async function GET(request: NextRequest) {
         email: user.email,
         role: user.role,
         enrollments: user.enrollments,
+        subscriptions: user.subscriptions,
       },
     });
   } catch (error) {

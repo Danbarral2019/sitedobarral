@@ -91,9 +91,9 @@ export async function POST(request: NextRequest) {
               authLogger.warn({ qrCodeId, maxUses: qrCode.maxUses }, 'QR Code reached max uses limit');
               // Não criar enrollment mas não falhar o registro
             } else {
-              // ✅ PRAZO INDIVIDUALIZADO: 1 ano a partir da data de REGISTRO do aluno
+              // ✅ PRAZO INDIVIDUALIZADO: 1 mês de trial a partir da data de REGISTRO do aluno
               const expirationDate = new Date(); // Data ATUAL (momento do registro)
-              expirationDate.setFullYear(expirationDate.getFullYear() + 1);
+              expirationDate.setMonth(expirationDate.getMonth() + 1);
 
               // Criar enrollment
               await prisma.enrollment.create({

@@ -141,6 +141,51 @@ export function getAccessStatusColor(status: AccessStatus): 'success' | 'warning
 }
 
 /**
+ * Interface para subscription
+ */
+export interface SubscriptionInfo {
+  id: string;
+  plan: string; // 'basico' | 'premium'
+  courseId?: string | null;
+  status: string; // 'active' | 'canceled' | 'past_due' | 'unpaid'
+  currentPeriodEnd: Date | string;
+  cancelAtPeriodEnd: boolean;
+}
+
+/**
+ * Verifica se o usuário tem acesso via subscription
+ * Premium ativo = acesso a tudo
+ * Básico ativo + courseId match = acesso
+ */
+export function checkSubscriptionAccess(
+  subscriptions: SubscriptionInfo[] | undefined,
+  courseId: string
+): boolean {
+  if (!subscriptions || subscriptions.length === 0) return false;
+
+  return subscriptions.some((sub) => {
+    if (sub.status !== 'active') return false;
+    if (sub.plan === 'premium') return true;
+    if (sub.plan === 'basico' && sub.courseId === courseId) return true;
+    return false;
+  });
+}
+
+/**
+ * Retorna o tipo de plano ativo do usuário
+ */
+export function getActivePlan(
+  subscriptions: SubscriptionInfo[] | undefined
+): 'premium' | 'basico' | null {
+  if (!subscriptions || subscriptions.length === 0) return null;
+
+  const active = subscriptions.filter((s) => s.status === 'active');
+  if (active.some((s) => s.plan === 'premium')) return 'premium';
+  if (active.some((s) => s.plan === 'basico')) return 'basico';
+  return null;
+}
+
+/**
  * Verifica se o usuário deve receber notificação de expiração
  * (3 meses antes do vencimento)
  */
