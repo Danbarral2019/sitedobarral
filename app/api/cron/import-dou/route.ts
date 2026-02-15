@@ -39,6 +39,9 @@ export const maxDuration = 300; // 5 minutos (maximo para Vercel Pro)
 // Limite de docs para enriquecer com scraper por execucao (evitar timeout)
 const MAX_SCRAPE_PER_RUN = 10;
 
+// Limite de caracteres do fullContent no staging (50k ~ suficiente para preview/classificacao)
+const MAX_FULL_CONTENT_CHARS = 50_000;
+
 // Dias para limpeza
 const REJECTED_CLEANUP_DAYS = 30;
 const IMPORTED_CLEANUP_DAYS = 90;
@@ -219,16 +222,28 @@ export async function GET(request: NextRequest) {
           const enriched = await scrapeContent(doc.url);
 
           if (enriched && enriched.caracteres > 0) {
+            // Truncar conteudo grande para nao sobrecarregar o banco/UI
+            let content = enriched.conteudo;
+            let truncated = false;
+            if (content.length > MAX_FULL_CONTENT_CHARS) {
+              content = content.substring(0, MAX_FULL_CONTENT_CHARS) + `\n\n[... truncado: ${enriched.caracteres.toLocaleString('pt-BR')} caracteres no total]`;
+              truncated = true;
+            }
+
             await prisma.dOUStagingDocument.update({
               where: { id: doc.id },
               data: {
-                fullContent: enriched.conteudo,
+                fullContent: content,
                 edition: enriched.edicao,
                 page: enriched.pagina,
                 organ: enriched.orgao || undefined,
               },
             });
             enriquecidos++;
+
+            if (truncated) {
+              console.log(`[Cron DOU Staging] Conteudo truncado: ${enriched.caracteres.toLocaleString()} -> ${MAX_FULL_CONTENT_CHARS.toLocaleString()} chars`);
+            }
           }
 
           // Rate limiting entre scrapes
