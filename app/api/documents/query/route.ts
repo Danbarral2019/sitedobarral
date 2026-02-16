@@ -5,6 +5,7 @@ import { semanticSearch, buildContextForLLM } from '@/lib/embeddings/vector-sear
 import type { SearchResult } from '@/lib/embeddings/vector-search';
 import { hybridSearch } from '@/lib/embeddings/hybrid-search';
 import { queryGeminiText } from '@/lib/gemini/cached-client';
+import { GoogleGenerativeAI } from '@google/generative-ai';
 import { checkRateLimit, withCache, CACHE_TTL } from '@/lib/cache/redis-client';
 import { trackServerEvent } from '@/lib/monitoring/events';
 import {
@@ -43,6 +44,7 @@ interface QueryRequest {
   includeContent?: boolean;
   useCache?: boolean;
   conversationHistory?: ConversationMessage[];
+  stream?: boolean;
 }
 
 interface DocumentResult {
@@ -114,6 +116,7 @@ export async function POST(req: NextRequest) {
       maxResults = 5,
       useCache = true,
       conversationHistory,
+      stream: wantStream = false,
     } = body;
 
     // 4. Validate query
@@ -457,21 +460,8 @@ ${sourcesList || 'nenhum'}
 
 RESPOSTA:`;
 
-    let synthesizedAnswer: string | undefined;
-
-    try {
-      const geminiResult = await queryGeminiText(synthesisPrompt, {
-        temperature: 0.3,
-        maxOutputTokens: 3000,
-        useCache,
-        systemInstruction,
-      });
-      synthesizedAnswer = geminiResult.response;
-    } catch (error) {
-      console.error('Error synthesizing answer:', error);
-    }
-
-    const results: DocumentResult[] = await Promise.all(
+    // 12b. Build formatted results (needed for both streaming and non-streaming)
+    const formattedResults: DocumentResult[] = await Promise.all(
       allDisplayResults.map(async (result) => {
         const doc = await prisma.document.findUnique({
           where: { id: result.documentId },
@@ -504,15 +494,89 @@ RESPOSTA:`;
       })
     );
 
+    // 13. Streaming response (SSE)
+    if (wantStream) {
+      const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
+      if (!GEMINI_API_KEY) {
+        return NextResponse.json({ success: false, error: 'Gemini API key not configured' }, { status: 500 });
+      }
+
+      const genAI = new GoogleGenerativeAI(GEMINI_API_KEY);
+      const geminiModel = genAI.getGenerativeModel({
+        model: 'gemini-2.0-flash',
+        systemInstruction,
+        generationConfig: { temperature: 0.3, maxOutputTokens: 3000 },
+      });
+
+      const encoder = new TextEncoder();
+      const stream = new ReadableStream({
+        async start(controller) {
+          try {
+            // Send metadata first
+            const meta = JSON.stringify({
+              type: 'meta',
+              results: formattedResults,
+              legalSources: legalSources.length > 0 ? legalSources : undefined,
+              totalDocuments: searchResponse.totalFound,
+              query,
+            });
+            controller.enqueue(encoder.encode(`data: ${meta}\n\n`));
+
+            // Stream Gemini tokens
+            const streamResult = await geminiModel.generateContentStream(synthesisPrompt);
+            for await (const chunk of streamResult.stream) {
+              const text = chunk.text();
+              if (text) {
+                controller.enqueue(encoder.encode(`data: ${JSON.stringify({ type: 'token', text })}\n\n`));
+              }
+            }
+
+            controller.enqueue(encoder.encode('data: [DONE]\n\n'));
+          } catch (err) {
+            console.error('Streaming error:', err);
+            controller.enqueue(encoder.encode(`data: ${JSON.stringify({ type: 'error', message: 'Streaming failed' })}\n\n`));
+          } finally {
+            controller.close();
+          }
+        },
+      });
+
+      const latency = Date.now() - startTime;
+      console.log(`   ✅ Streaming ${formattedResults.length} results + ${legalSources.length} legal sources (latency: ${latency}ms)`);
+      trackServerEvent('ai_search', { resultCount: formattedResults.length, streaming: true });
+
+      return new Response(stream, {
+        headers: {
+          'Content-Type': 'text/event-stream',
+          'Cache-Control': 'no-cache',
+          'Connection': 'keep-alive',
+        },
+      });
+    }
+
+    // 14. Non-streaming response (JSON)
+    let synthesizedAnswer: string | undefined;
+
+    try {
+      const geminiResult = await queryGeminiText(synthesisPrompt, {
+        temperature: 0.3,
+        maxOutputTokens: 3000,
+        useCache,
+        systemInstruction,
+      });
+      synthesizedAnswer = geminiResult.response;
+    } catch (error) {
+      console.error('Error synthesizing answer:', error);
+    }
+
     const latency = Date.now() - startTime;
 
-    console.log(`   ✅ Returned ${results.length} results + ${legalSources.length} legal sources (latency: ${latency}ms)`);
-    trackServerEvent('ai_search', { resultCount: results.length });
+    console.log(`   ✅ Returned ${formattedResults.length} results + ${legalSources.length} legal sources (latency: ${latency}ms)`);
+    trackServerEvent('ai_search', { resultCount: formattedResults.length });
 
-    // 14. Return response
     return NextResponse.json<QueryResponse>({
       success: true,
-      results,
+      results: formattedResults,
       totalDocuments: searchResponse.totalFound,
       cached: searchResponse.cached,
       latency,

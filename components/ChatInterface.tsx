@@ -141,7 +141,7 @@ export default function ChatInterface({
         historyLength: conversationHistory.length,
       });
 
-      // Call API
+      // Call API with streaming
       const response = await fetch('/api/documents/query', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -151,6 +151,7 @@ export default function ChatInterface({
           maxResults,
           useCache: true,
           conversationHistory,
+          stream: true,
         }),
         signal: controller.signal,
       });
@@ -162,45 +163,75 @@ export default function ChatInterface({
         throw new Error(errorData.error || 'Erro ao buscar documentos');
       }
 
-      const data = await response.json();
-
-      // Build assistant response — prefer synthesized answer from Gemini
-      let assistantContent = '';
-
-      if (data.synthesizedAnswer) {
-        assistantContent = data.synthesizedAnswer;
-      } else if (data.results.length === 0) {
-        assistantContent =
-          'Não encontrei documentos relevantes para sua pergunta. Tente reformular ou fazer uma pergunta mais específica.';
-      } else {
-        assistantContent = `Encontrei ${data.results.length} documento(s) relevante(s):\n\n`;
-
-        data.results.forEach((result: { title: string; relevance: number; excerpt: string }, index: number) => {
-          const relevancePercent = Math.round(result.relevance * 100);
-          assistantContent += `**${index + 1}. ${result.title}** (${relevancePercent}% relevante)\n`;
-          assistantContent += `${result.excerpt}\n\n`;
-        });
-      }
-
-      // Add assistant message
+      // Create placeholder assistant message for streaming
+      const assistantId = (Date.now() + 1).toString();
       const assistantMessage: Message = {
-        id: (Date.now() + 1).toString(),
+        id: assistantId,
         role: 'assistant',
-        content: assistantContent,
-        sources: data.results.map((r: { documentId: string; title: string; category: string; relevance: number; excerpt: string; url?: string }) => ({
-          documentId: r.documentId,
-          title: r.title,
-          category: r.category,
-          relevance: r.relevance,
-          excerpt: r.excerpt,
-          url: r.url,
-        })),
-        legalSources: data.legalSources || undefined,
+        content: '',
         timestamp: new Date(),
       };
-
       setMessages((prev) => [...prev, assistantMessage]);
-      console.log('[ChatInterface] Success! Added assistant message');
+
+      // Read SSE stream
+      const reader = response.body!.getReader();
+      const decoder = new TextDecoder();
+      let buffer = '';
+      let fullContent = '';
+
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+
+        buffer += decoder.decode(value, { stream: true });
+        const lines = buffer.split('\n\n');
+        buffer = lines.pop() || '';
+
+        for (const line of lines) {
+          if (!line.startsWith('data: ')) continue;
+          const data = line.slice(6);
+          if (data === '[DONE]') break;
+
+          try {
+            const parsed = JSON.parse(data);
+            if (parsed.type === 'meta') {
+              // Update sources and legal sources
+              setMessages((prev) => prev.map(m =>
+                m.id === assistantId
+                  ? {
+                      ...m,
+                      sources: (parsed.results || []).map((r: { documentId: string; title: string; category: string; relevance: number; excerpt: string; url?: string }) => ({
+                        documentId: r.documentId,
+                        title: r.title,
+                        category: r.category,
+                        relevance: r.relevance,
+                        excerpt: r.excerpt,
+                        url: r.url,
+                      })),
+                      legalSources: parsed.legalSources || undefined,
+                    }
+                  : m
+              ));
+            } else if (parsed.type === 'token') {
+              fullContent += parsed.text;
+              setMessages((prev) => prev.map(m =>
+                m.id === assistantId ? { ...m, content: fullContent } : m
+              ));
+            }
+          } catch { /* ignore parse errors */ }
+        }
+      }
+
+      // If no content was streamed, show fallback
+      if (!fullContent) {
+        setMessages((prev) => prev.map(m =>
+          m.id === assistantId
+            ? { ...m, content: 'Não encontrei documentos relevantes para sua pergunta. Tente reformular ou fazer uma pergunta mais específica.' }
+            : m
+        ));
+      }
+
+      console.log('[ChatInterface] Streaming complete!');
     } catch (err) {
       if (err instanceof Error && err.name === 'AbortError') {
         return; // Request was cancelled, ignore

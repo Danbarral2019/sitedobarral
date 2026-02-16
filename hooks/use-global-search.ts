@@ -172,6 +172,8 @@ export function useGlobalSearch(options: UseGlobalSearchOptions = {}): UseGlobal
           requestBody.conversationHistory = historyToSend.slice(-5);
         }
 
+        requestBody.stream = true;
+
         const response = await fetch('/api/documents/query', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -193,22 +195,57 @@ export function useGlobalSearch(options: UseGlobalSearchOptions = {}): UseGlobal
           throw new Error('Falha na busca com IA');
         }
 
-        const data = await response.json();
+        // Read SSE stream
+        const reader = response.body!.getReader();
+        const decoder = new TextDecoder();
+        let buffer = '';
+        let fullAnswer = '';
+        let streamSources: AISource[] = [];
+        let streamLegalSources: LegalSource[] = [];
+
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) break;
+          if (controller.signal.aborted) break;
+
+          buffer += decoder.decode(value, { stream: true });
+          const lines = buffer.split('\n\n');
+          buffer = lines.pop() || '';
+
+          for (const line of lines) {
+            if (!line.startsWith('data: ')) continue;
+            const data = line.slice(6);
+            if (data === '[DONE]') break;
+
+            try {
+              const parsed = JSON.parse(data);
+              if (parsed.type === 'meta') {
+                streamSources = (parsed.results || []).map((r: AISource) => ({
+                  documentId: r.documentId,
+                  title: r.title,
+                  category: r.category,
+                  relevance: r.relevance,
+                  excerpt: r.excerpt,
+                  url: r.url,
+                }));
+                streamLegalSources = parsed.legalSources || [];
+                if (!controller.signal.aborted) {
+                  setAiSources(streamSources);
+                  setAiLegalSources(streamLegalSources);
+                }
+              } else if (parsed.type === 'token') {
+                fullAnswer += parsed.text;
+                if (!controller.signal.aborted) {
+                  setAiAnswer(fullAnswer);
+                }
+              }
+            } catch { /* ignore parse errors */ }
+          }
+        }
 
         if (!controller.signal.aborted) {
-          const answer = data.synthesizedAnswer || null;
+          const answer = fullAnswer || null;
           setAiAnswer(answer);
-          setAiSources(
-            (data.results || []).map((r: AISource) => ({
-              documentId: r.documentId,
-              title: r.title,
-              category: r.category,
-              relevance: r.relevance,
-              excerpt: r.excerpt,
-              url: r.url,
-            }))
-          );
-          setAiLegalSources(data.legalSources || []);
 
           // Update conversation history
           if (answer) {
@@ -225,12 +262,12 @@ export function useGlobalSearch(options: UseGlobalSearchOptions = {}): UseGlobal
               body: JSON.stringify({
                 query: searchQuery,
                 aiAnswer: answer,
-                sources: (data.results || []).map((r: AISource) => ({
+                sources: streamSources.map((r: AISource) => ({
                   title: r.title,
                   category: r.category,
                   url: r.url,
                 })),
-                legalSources: data.legalSources || [],
+                legalSources: streamLegalSources,
               }),
             }).catch(() => {}); // Silently ignore errors
           }
