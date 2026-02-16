@@ -1,8 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { verifyAuth } from '@/lib/auth';
-import { semanticSearch, multiQuerySearch, buildContextForLLM } from '@/lib/embeddings/vector-search';
+import { semanticSearch, buildContextForLLM } from '@/lib/embeddings/vector-search';
 import type { SearchResult } from '@/lib/embeddings/vector-search';
+import { hybridSearch } from '@/lib/embeddings/hybrid-search';
 import { queryGeminiText } from '@/lib/gemini/cached-client';
 import { checkRateLimit, withCache, CACHE_TTL } from '@/lib/cache/redis-client';
 import { trackServerEvent } from '@/lib/monitoring/events';
@@ -204,34 +205,17 @@ Exemplo de resposta: ["variação 1", "variação 2"]`;
       console.warn('   ⚠️ Query expansion failed:', err instanceof Error ? err.message : err);
     }
 
-    // 5a. Perform semantic search using embeddings (multi-query if expanded)
-    // Busca mais resultados para garantir diversidade de categorias
-    let searchResponse: Awaited<ReturnType<typeof semanticSearch>>;
-
-    if (expandedQueries.length > 1) {
-      const multiResults = await multiQuerySearch(expandedQueries, {
-        category: filters.category,
-        excludeCategories: ['boa_pratica'],
-        limit: Math.max(maxResults * 5, 60),
-        useCache,
-        includeChunkContent: true,
-      });
-      searchResponse = {
-        results: multiResults,
-        query: semanticQuery,
-        totalFound: multiResults.length,
-        latency: 0,
-        cached: false,
-      };
-    } else {
-      searchResponse = await semanticSearch(semanticQuery, {
-        category: filters.category,
-        excludeCategories: ['boa_pratica'],
-        limit: Math.max(maxResults * 5, 60),
-        useCache,
-        includeChunkContent: true,
-      });
-    }
+    // 5a. Hybrid search: combina busca semântica (vetor) + FTS (BM25) via RRF
+    const searchResponse = await hybridSearch({
+      query: semanticQuery,
+      expandedQueries: expandedQueries.length > 1 ? expandedQueries : undefined,
+      courseId: filters.courseId || undefined,
+      category: filters.category,
+      excludeCategories: ['boa_pratica'],
+      limit: Math.max(maxResults * 5, 60),
+      alpha: 0.6,
+      useCache,
+    });
 
     console.log(`   📄 Found ${searchResponse.results.length} relevant documents`);
 
