@@ -16,7 +16,12 @@
  *   --category=X        Filtrar por categoria específica (padrão: todas)
  */
 
+import { config } from 'dotenv';
+config({ path: '.env.local' });
+
 import { PrismaClient } from '@prisma/client';
+import * as fs from 'fs/promises';
+import * as path from 'path';
 
 const prisma = new PrismaClient({
   log: ['error'],
@@ -303,6 +308,7 @@ async function applyChanges(result: ReclassifyResult, dryRun: boolean): Promise<
           reclassifiedAt: new Date().toISOString(),
           previousArticles: result.articlesBefore,
         }),
+        embeddingStatus: 'pending',
       },
     });
   } else if (result.action === 'reclassified') {
@@ -321,6 +327,7 @@ async function applyChanges(result: ReclassifyResult, dryRun: boolean): Promise<
           articlesRemoved: result.articlesRemoved,
           articlesAdded: result.articlesAdded,
         }),
+        embeddingStatus: 'pending',
       },
     });
   }
@@ -401,6 +408,41 @@ function printReport(results: ReclassifyResult[], dryRun: boolean): void {
   console.log('\n' + '='.repeat(80));
 }
 
+// --- Salvar relatorio JSON ---
+
+async function saveJsonReport(results: ReclassifyResult[], dryRun: boolean): Promise<string> {
+  const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
+  const filename = `reclassify-pareceres-${timestamp}.json`;
+  const backupDir = path.join(process.cwd(), 'data', 'backups');
+  const filepath = path.join(backupDir, filename);
+
+  await fs.mkdir(backupDir, { recursive: true });
+
+  const cleared = results.filter(r => r.action === 'cleared');
+  const reclassified = results.filter(r => r.action === 'reclassified');
+  const unchanged = results.filter(r => r.action === 'unchanged');
+  const errors = results.filter(r => r.action === 'error');
+
+  const report = {
+    timestamp: new Date().toISOString(),
+    dryRun,
+    summary: {
+      total: results.length,
+      cleared: cleared.length,
+      reclassified: reclassified.length,
+      unchanged: unchanged.length,
+      errors: errors.length,
+      totalArticlesRemoved: results.reduce((sum, r) => sum + r.articlesRemoved.length, 0),
+      totalArticlesAdded: results.reduce((sum, r) => sum + r.articlesAdded.length, 0),
+      totalArticlesMaintained: results.reduce((sum, r) => sum + r.articlesMaintained.length, 0),
+    },
+    results,
+  };
+
+  await fs.writeFile(filepath, JSON.stringify(report, null, 2), 'utf-8');
+  return filepath;
+}
+
 // --- Main ---
 
 async function main(): Promise<void> {
@@ -475,6 +517,19 @@ async function main(): Promise<void> {
 
   // Relatorio final
   printReport(results, dryRun);
+
+  // Salvar relatorio JSON
+  const reportPath = await saveJsonReport(results, dryRun);
+  console.log(`\n[Relatorio JSON] Salvo em: ${reportPath}`);
+
+  // Instrucao pos-execucao
+  const changedCount = results.filter(r => r.action === 'cleared' || r.action === 'reclassified').length;
+  if (!dryRun && changedCount > 0) {
+    console.log(`\n${'='.repeat(80)}`);
+    console.log(`PROXIMO PASSO: Reindexar embeddings dos ${changedCount} documentos alterados:`);
+    console.log(`  npx dotenv -e .env.local -- npx tsx scripts/migrate-to-embeddings.ts`);
+    console.log('='.repeat(80));
+  }
 
   await prisma.$disconnect();
 }
