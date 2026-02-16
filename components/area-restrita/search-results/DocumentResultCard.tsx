@@ -34,10 +34,10 @@ export function DocumentResultCard({
   return (
     <div
       onClick={onClick}
-      className={`bg-[var(--bg-card)] rounded-xl border p-4 hover:shadow-md transition-all cursor-pointer group ${
+      className={`bg-white rounded-xl border p-4 hover:shadow-md transition-all cursor-pointer group ${
         isSelected
           ? 'border-brand-400 bg-brand-50/30 ring-1 ring-brand-300'
-          : 'border-[var(--border-default)] hover:border-brand-300'
+          : 'border-gray-200 hover:border-brand-300'
       }`}
     >
       <div className="flex items-start gap-3">
@@ -67,7 +67,7 @@ export function DocumentResultCard({
         </div>
         <div className="flex-1 min-w-0">
           <div className="flex items-start justify-between gap-2">
-            <h4 className="font-semibold text-[var(--text-primary)] text-sm line-clamp-2 group-hover:text-brand-600 transition-colors">
+            <h4 className="font-semibold text-gray-900 text-sm line-clamp-2 group-hover:text-brand-600 transition-colors">
               {highlightText(doc.title, query)}
             </h4>
             {onToggleFavorite && (
@@ -87,12 +87,12 @@ export function DocumentResultCard({
             )}
           </div>
           {doc.description && (
-            <p className="text-sm text-[var(--text-secondary)] mt-1 line-clamp-2">
+            <p className="text-sm text-gray-600 mt-1 line-clamp-2">
               {highlightText(doc.description, query)}
             </p>
           )}
           <div className="flex items-center gap-2 mt-2 flex-wrap">
-            <span className="px-2 py-0.5 rounded-full text-xs font-medium bg-[var(--bg-tertiary)] text-[var(--text-secondary)]">
+            <span className="px-2 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-600">
               {doc.category}
             </span>
             {doc.courseName && (

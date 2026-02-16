@@ -332,17 +332,17 @@ export default function ChatInterface({
   return (
     <div className={`flex flex-col h-full ${className}`}>
       {/* Header */}
-      <div className="flex items-center justify-between p-4 border-b border-[var(--border-default)]">
+      <div className="flex items-center justify-between p-4 border-b border-gray-200">
         <div className="flex items-center gap-2">
           <Sparkles className="w-5 h-5 text-blue-600" />
-          <h3 className="font-semibold text-[var(--text-primary)]">Assistente Inteligente</h3>
+          <h3 className="font-semibold text-gray-900">Assistente Inteligente</h3>
         </div>
         {messages.length > 0 && (
           <div className="flex items-center gap-3">
             <button
               onClick={handleExportConversationPDF}
               disabled={exportingPdf === 'conversation'}
-              className="inline-flex items-center gap-1.5 text-sm text-blue-600 hover:text-blue-800 disabled:text-[var(--text-muted)] transition-colors"
+              className="inline-flex items-center gap-1.5 text-sm text-blue-600 hover:text-blue-800 disabled:text-gray-400 transition-colors"
               title="Exportar conversa como PDF"
             >
               {exportingPdf === 'conversation' ? (
@@ -354,7 +354,7 @@ export default function ChatInterface({
             </button>
             <button
               onClick={clearHistory}
-              className="text-sm text-[var(--text-muted)] hover:text-[var(--text-secondary)] transition-colors"
+              className="text-sm text-gray-400 hover:text-gray-600 transition-colors"
             >
               Limpar histórico
             </button>
@@ -367,21 +367,21 @@ export default function ChatInterface({
         {messages.length === 0 ? (
           <div className="text-center py-12">
             <Sparkles className="w-12 h-12 text-blue-500 mx-auto mb-4" />
-            <h4 className="text-lg font-semibold text-[var(--text-primary)] mb-2">
+            <h4 className="text-lg font-semibold text-gray-900 mb-2">
               Como posso ajudar?
             </h4>
-            <p className="text-[var(--text-secondary)] mb-6">
+            <p className="text-gray-600 mb-6">
               Faça perguntas sobre os documentos e materiais do curso
             </p>
 
             {/* Suggestions */}
             <div className="max-w-2xl mx-auto space-y-2">
-              <p className="text-sm text-[var(--text-muted)] mb-3">Sugestões:</p>
+              <p className="text-sm text-gray-400 mb-3">Sugestões:</p>
               {suggestions.map((suggestion, index) => (
                 <button
                   key={index}
                   onClick={() => handleSuggestionClick(suggestion)}
-                  className="w-full text-left px-4 py-3 bg-[var(--bg-secondary)] hover:bg-[var(--bg-tertiary)] rounded-lg transition-colors text-sm text-[var(--text-secondary)]"
+                  className="w-full text-left px-4 py-3 bg-gray-50 hover:bg-gray-100 rounded-lg transition-colors text-sm text-gray-600"
                 >
                   {suggestion}
                 </button>
@@ -400,7 +400,7 @@ export default function ChatInterface({
                 className={`group/msg max-w-3xl rounded-lg p-4 ${
                   message.role === 'user'
                     ? 'bg-blue-600 text-white'
-                    : 'bg-[var(--bg-tertiary)] text-[var(--text-primary)]'
+                    : 'bg-gray-100 text-gray-900'
                 }`}
               >
                 {message.role === 'assistant' ? (
@@ -411,8 +411,8 @@ export default function ChatInterface({
 
                 {/* Legal Sources */}
                 {message.legalSources && message.legalSources.length > 0 && (
-                  <div className="mt-4 pt-3 border-t border-[var(--border-strong)] space-y-1">
-                    <p className="text-xs font-semibold text-[var(--text-secondary)] mb-1.5">
+                  <div className="mt-4 pt-3 border-t border-gray-300 space-y-1">
+                    <p className="text-xs font-semibold text-gray-600 mb-1.5">
                       Fundamentação legal:
                     </p>
                     <div className="flex flex-wrap gap-1.5">
@@ -453,24 +453,24 @@ export default function ChatInterface({
 
                 {/* Document Sources */}
                 {message.sources && message.sources.length > 0 && (
-                  <div className="mt-3 pt-3 border-t border-[var(--border-strong)] space-y-2">
-                    <p className="text-xs font-semibold text-[var(--text-secondary)]">
+                  <div className="mt-3 pt-3 border-t border-gray-300 space-y-2">
+                    <p className="text-xs font-semibold text-gray-600">
                       Fontes consultadas:
                     </p>
                     {message.sources.map((source) => {
                       const sourceContent = (
                         <div className="flex items-start gap-2">
-                          <FileText className="w-4 h-4 text-[var(--text-muted)] flex-shrink-0 mt-0.5" />
+                          <FileText className="w-4 h-4 text-gray-400 flex-shrink-0 mt-0.5" />
                           <div className="flex-1">
                             <div className="flex items-center justify-between gap-2">
-                              <span className="font-medium text-[var(--text-primary)]">
+                              <span className="font-medium text-gray-900">
                                 {source.title}
                               </span>
-                              <span className="text-[var(--text-muted)]">
+                              <span className="text-gray-400">
                                 {Math.round(source.relevance * 100)}%
                               </span>
                             </div>
-                            <p className="text-[var(--text-secondary)] text-xs mt-1">
+                            <p className="text-gray-600 text-xs mt-1">
                               {source.category}
                             </p>
                           </div>
@@ -486,7 +486,7 @@ export default function ChatInterface({
                               href={source.url}
                               target="_blank"
                               rel="noopener noreferrer"
-                              className="block text-xs bg-[var(--bg-card)] rounded p-2 hover:bg-[var(--bg-hover)] transition-colors cursor-pointer"
+                              className="block text-xs bg-white rounded p-2 hover:bg-gray-50 transition-colors cursor-pointer"
                             >
                               {sourceContent}
                             </a>
@@ -496,7 +496,7 @@ export default function ChatInterface({
                           <Link
                             key={source.documentId}
                             href={source.url}
-                            className="block text-xs bg-[var(--bg-card)] rounded p-2 hover:bg-[var(--bg-hover)] transition-colors cursor-pointer"
+                            className="block text-xs bg-white rounded p-2 hover:bg-gray-50 transition-colors cursor-pointer"
                           >
                             {sourceContent}
                           </Link>
@@ -506,7 +506,7 @@ export default function ChatInterface({
                       return (
                         <div
                           key={source.documentId}
-                          className="text-xs bg-[var(--bg-card)] rounded p-2"
+                          className="text-xs bg-white rounded p-2"
                         >
                           {sourceContent}
                         </div>
@@ -526,7 +526,7 @@ export default function ChatInterface({
                     <button
                       onClick={() => handleExportMessagePDF(message)}
                       disabled={exportingPdf === message.id}
-                      className="opacity-0 group-hover/msg:opacity-100 inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs text-[var(--text-muted)] hover:text-blue-600 hover:bg-blue-50 disabled:text-[var(--text-muted)] transition-all"
+                      className="opacity-0 group-hover/msg:opacity-100 inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs text-gray-400 hover:text-blue-600 hover:bg-blue-50 disabled:text-gray-400 transition-all"
                       title="Baixar resposta como PDF"
                     >
                       {exportingPdf === message.id ? (
@@ -547,8 +547,8 @@ export default function ChatInterface({
         <div aria-live="polite" aria-atomic="true">
           {isLoading && (
             <div className="flex justify-start">
-              <div className="bg-[var(--bg-tertiary)] rounded-lg p-4">
-                <Loader2 className="w-5 h-5 animate-spin text-[var(--text-secondary)]" aria-label="Processando sua pergunta" />
+              <div className="bg-gray-100 rounded-lg p-4">
+                <Loader2 className="w-5 h-5 animate-spin text-gray-600" aria-label="Processando sua pergunta" />
                 <span className="sr-only">Processando sua pergunta...</span>
               </div>
             </div>
@@ -569,7 +569,7 @@ export default function ChatInterface({
       </div>
 
       {/* Input Area */}
-      <div className="border-t border-[var(--border-default)] p-4">
+      <div className="border-t border-gray-200 p-4">
         <form
           onSubmit={(e) => {
             e.preventDefault();
@@ -583,7 +583,7 @@ export default function ChatInterface({
             onChange={(e) => setInput(e.target.value)}
             placeholder={placeholder}
             disabled={isLoading}
-            className="flex-1 px-4 py-3 border border-[var(--border-strong)] rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-[var(--bg-tertiary)] bg-[var(--bg-input)] text-[var(--text-primary)]"
+            className="flex-1 px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-100 bg-white text-gray-900"
           />
           <button
             type="submit"

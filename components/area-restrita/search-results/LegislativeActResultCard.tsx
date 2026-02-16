@@ -18,23 +18,23 @@ export function LegislativeActResultCard({ act, query }: LegislativeActResultCar
   };
 
   return (
-    <div className="bg-[var(--bg-card)] rounded-xl border border-[var(--border-default)] p-4 hover:border-amber-300 hover:shadow-md transition-all">
+    <div className="bg-white rounded-xl border border-gray-200 p-4 hover:border-amber-300 hover:shadow-md transition-all">
       <div className="flex items-start gap-3">
         <div className="p-2 rounded-lg bg-amber-50 text-amber-600 flex-shrink-0">
           <Gavel className="w-5 h-5" />
         </div>
         <div className="flex-1 min-w-0">
-          <h4 className="font-semibold text-[var(--text-primary)] text-sm">
+          <h4 className="font-semibold text-gray-900 text-sm">
             {highlightText(act.fullNumber, query)}
           </h4>
-          <p className="text-sm text-[var(--text-secondary)] mt-1 line-clamp-3">
+          <p className="text-sm text-gray-600 mt-1 line-clamp-3">
             {highlightText(act.ementa.slice(0, 250), query)}
           </p>
           <div className="flex items-center gap-2 mt-2 flex-wrap">
             <span className="px-2 py-0.5 rounded-full text-xs font-medium bg-amber-100 text-amber-800">
               {typeLabels[act.type] || act.type}
             </span>
-            <span className="px-2 py-0.5 rounded-full text-xs font-medium bg-[var(--bg-tertiary)] text-[var(--text-secondary)]">
+            <span className="px-2 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-600">
               {act.issuer}
             </span>
             {act.leiArticles.length > 0 && (

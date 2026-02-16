@@ -9,7 +9,6 @@ import { ScrollToTop } from "@/components/ui/scroll-to-top";
 import Analytics from "@/components/Analytics";
 import WelcomeModal from "@/components/WelcomeModal";
 import { PWAProvider } from "@/components/PWAProvider";
-import { ThemeProvider } from "@/components/ThemeProvider";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import { Analytics as VercelAnalytics } from "@vercel/analytics/react";
 
@@ -109,26 +108,24 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="pt-BR" suppressHydrationWarning>
-      <body className={`${cinzel.variable} ${poppins.variable} font-sans antialiased bg-[var(--bg-primary)] text-[var(--text-primary)]`}>
-        <ThemeProvider>
-          <Analytics />
-          <VercelAnalytics />
-          <SpeedInsights />
-          <ToastProviderWrapper>
-            <div className="min-h-screen flex flex-col">
-              <Header />
-              <div id="main-content" className="flex-1">
-                {children}
-              </div>
-              <Footer />
+    <html lang="pt-BR">
+      <body className={`${cinzel.variable} ${poppins.variable} font-sans antialiased bg-white text-gray-900`}>
+        <Analytics />
+        <VercelAnalytics />
+        <SpeedInsights />
+        <ToastProviderWrapper>
+          <div className="min-h-screen flex flex-col">
+            <Header />
+            <div id="main-content" className="flex-1">
+              {children}
             </div>
-            <Toaster />
-            <ScrollToTop />
-            <WelcomeModal />
-            <PWAProvider />
-          </ToastProviderWrapper>
-        </ThemeProvider>
+            <Footer />
+          </div>
+          <Toaster />
+          <ScrollToTop />
+          <WelcomeModal />
+          <PWAProvider />
+        </ToastProviderWrapper>
       </body>
     </html>
   );

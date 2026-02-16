@@ -80,7 +80,7 @@ function TreeNodeComponent({
         className={`w-full flex items-center gap-2 py-2 pr-3 rounded-lg transition-colors text-left group ${
           isSelected
             ? `${config.bgColor} ${config.color}`
-            : 'hover:bg-[var(--bg-hover)] text-[var(--text-secondary)]'
+            : 'hover:bg-gray-50 text-gray-700'
         }`}
       >
         {/* Expand/Collapse Icon */}
@@ -98,10 +98,10 @@ function TreeNodeComponent({
 
         {/* Icon */}
         {level === 0 ? (
-          <Icon className={`w-4 h-4 flex-shrink-0 ${isSelected ? config.color : 'text-[var(--text-muted)]'}`} />
+          <Icon className={`w-4 h-4 flex-shrink-0 ${isSelected ? config.color : 'text-gray-400'}`} />
         ) : level === 1 ? (
           <FolderOpen
-            className={`w-4 h-4 flex-shrink-0 ${isSelected ? config.color : 'text-[var(--text-muted)]'}`}
+            className={`w-4 h-4 flex-shrink-0 ${isSelected ? config.color : 'text-gray-400'}`}
           />
         ) : null}
 
@@ -109,7 +109,7 @@ function TreeNodeComponent({
         <span
           className={`flex-1 text-sm truncate ${
             isSelected ? 'font-semibold' : 'font-medium'
-          } ${level > 0 ? 'text-[var(--text-secondary)]' : ''}`}
+          } ${level > 0 ? 'text-gray-600' : ''}`}
         >
           {node.label}
         </span>
@@ -118,8 +118,8 @@ function TreeNodeComponent({
         <span
           className={`flex-shrink-0 px-2 py-0.5 rounded-full text-xs font-medium ${
             isSelected
-              ? 'bg-white/60 text-[var(--text-secondary)]'
-              : 'bg-[var(--bg-tertiary)] text-[var(--text-secondary)] group-hover:bg-[var(--bg-hover)]'
+              ? 'bg-white/60 text-gray-700'
+              : 'bg-gray-100 text-gray-600 group-hover:bg-gray-200'
           }`}
         >
           {node.count}
@@ -157,8 +157,8 @@ export function ContentTree({
 }: ContentTreeProps) {
   if (isLoading) {
     return (
-      <div className="bg-[var(--bg-card)] rounded-2xl shadow-lg border-2 border-[var(--border-default)] p-6">
-        <div className="flex items-center justify-center gap-2 text-[var(--text-muted)]">
+      <div className="bg-white rounded-2xl shadow-lg border-2 border-gray-200 p-6">
+        <div className="flex items-center justify-center gap-2 text-gray-500">
           <Loader2 className="w-5 h-5 animate-spin" />
           <span className="text-sm">Carregando...</span>
         </div>
@@ -168,18 +168,18 @@ export function ContentTree({
 
   if (error) {
     return (
-      <div className="bg-[var(--bg-card)] rounded-2xl shadow-lg border-2 border-[var(--border-default)] p-6">
+      <div className="bg-white rounded-2xl shadow-lg border-2 border-gray-200 p-6">
         <p className="text-sm text-red-600">{error}</p>
       </div>
     );
   }
 
   return (
-    <div className="bg-[var(--bg-card)] rounded-2xl shadow-lg border-2 border-[var(--border-default)]">
+    <div className="bg-white rounded-2xl shadow-lg border-2 border-gray-200">
       {/* Header */}
-      <div className="px-4 py-3 border-b border-[var(--border-default)]">
-        <h3 className="font-bold text-[var(--text-primary)] text-sm">Navegar por Tipo</h3>
-        <p className="text-xs text-[var(--text-muted)] mt-0.5">Explore o acervo completo</p>
+      <div className="px-4 py-3 border-b border-gray-100">
+        <h3 className="font-bold text-gray-900 text-sm">Navegar por Tipo</h3>
+        <p className="text-xs text-gray-500 mt-0.5">Explore o acervo completo</p>
       </div>
 
       {/* Tree */}
@@ -197,9 +197,9 @@ export function ContentTree({
       </div>
 
       {/* Legend */}
-      <div className="px-4 py-3 border-t border-[var(--border-default)] bg-[var(--bg-secondary)] rounded-b-2xl">
-        <p className="text-xs text-[var(--text-muted)] flex items-center gap-1">
-          <span className="font-medium text-[var(--text-secondary)]">Dica:</span>
+      <div className="px-4 py-3 border-t border-gray-100 bg-gray-50 rounded-b-2xl">
+        <p className="text-xs text-gray-500 flex items-center gap-1">
+          <span className="font-medium text-gray-700">Dica:</span>
           Clique nos itens para navegar
         </p>
       </div>

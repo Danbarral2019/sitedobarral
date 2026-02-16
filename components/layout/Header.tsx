@@ -6,7 +6,6 @@ import { useState, memo, useEffect, useRef } from 'react';
 import { usePathname } from 'next/navigation';
 import { Menu, X, ChevronDown, User, FileText, Mail, Home, LogIn, BookOpen, Scale, CreditCard } from 'lucide-react';
 import { courses } from '@/data/courses';
-import { ThemeToggle } from '@/components/ThemeToggle';
 
 export const Header = memo(function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -104,7 +103,7 @@ export const Header = memo(function Header() {
               </button>
 
               {isMounted && isCoursesOpen && (
-                <div className="absolute top-full left-0 mt-2 w-80 bg-[var(--bg-card)] rounded-lg shadow-xl py-2 max-h-96 overflow-y-auto z-[9999] border border-[var(--border-default)]">
+                <div className="absolute top-full left-0 mt-2 w-80 bg-white rounded-lg shadow-xl py-2 max-h-96 overflow-y-auto z-[9999] border border-gray-200">
                   <Link
                     href="/cursos"
                     className="block px-4 py-2 text-sm font-semibold text-brand-600 hover:bg-brand-50 hover:text-brand-700"
@@ -117,7 +116,7 @@ export const Header = memo(function Header() {
                     <Link
                       key={course.id}
                       href={`/cursos/${course.slug}`}
-                      className="block px-4 py-2 text-sm text-[var(--text-secondary)] hover:bg-brand-50 hover:text-brand-600"
+                      className="block px-4 py-2 text-sm text-gray-700 hover:bg-brand-50 hover:text-brand-600"
                       onClick={() => setIsCoursesOpen(false)}
                     >
                       {course.title}
@@ -163,8 +162,6 @@ export const Header = memo(function Header() {
               <span>Contato</span>
             </Link>
 
-            <ThemeToggle />
-
             <Link
               href="/login"
               className="flex items-center space-x-1 bg-white/10 hover:bg-white/20 px-4 py-2 rounded-lg text-white transition-colors font-poppins text-sm focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-brand-600"
@@ -204,7 +201,7 @@ export const Header = memo(function Header() {
                 {label}
               </Link>
             ))}
-            <div className="mt-4 pt-4 border-t border-brand-500 space-y-3">
+            <div className="mt-4 pt-4 border-t border-brand-500">
               <Link
                 href="/login"
                 className="flex items-center justify-center space-x-2 py-3 px-4 bg-white/10 hover:bg-white/20 rounded-lg text-white transition-colors font-poppins"
@@ -213,9 +210,6 @@ export const Header = memo(function Header() {
                 <LogIn className="w-4 h-4" />
                 <span>Área do Aluno</span>
               </Link>
-              <div className="flex justify-center">
-                <ThemeToggle />
-              </div>
             </div>
           </div>
         )}

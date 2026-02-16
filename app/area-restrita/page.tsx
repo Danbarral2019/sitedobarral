@@ -434,7 +434,7 @@ export default function AreaRestritaPage() {
   return (
     <main className="min-h-screen bg-gradient-to-br from-brand-50 via-white to-brand-50">
       {/* Header */}
-      <header className="bg-[var(--bg-card)] border-b-2 border-[var(--border-default)] sticky top-0 z-30">
+      <header className="bg-white border-b-2 border-gray-200 sticky top-0 z-30">
         <div className="max-w-7xl mx-auto px-4 py-3 lg:py-4">
           <div className="flex items-center justify-between">
             {/* User Info */}
@@ -456,10 +456,10 @@ export default function AreaRestritaPage() {
                 </span>
               </div>
               <div className="hidden sm:block">
-                <h2 className="text-sm lg:text-lg font-bold text-[var(--text-primary)]">
+                <h2 className="text-sm lg:text-lg font-bold text-gray-900">
                   Bem-vindo, {user.name.split(' ')[0]}
                 </h2>
-                <p className="text-xs lg:text-sm text-[var(--text-secondary)]">
+                <p className="text-xs lg:text-sm text-gray-600">
                   {enrolledCourseIds.length} {enrolledCourseIds.length === 1 ? 'curso' : 'cursos'}
                 </p>
               </div>
@@ -614,7 +614,7 @@ export default function AreaRestritaPage() {
                 {/* Section Title */}
                 {currentContent.title && (
                   <div className="mb-4">
-                    <h2 className="text-xl lg:text-2xl font-bold text-[var(--text-primary)]">
+                    <h2 className="text-xl lg:text-2xl font-bold text-gray-900">
                       {currentContent.title}
                     </h2>
                   </div>
@@ -729,7 +729,7 @@ export default function AreaRestritaPage() {
 
                       if (categoriesWithCounts.length === 0) {
                         return (
-                          <div className="bg-[var(--bg-card)] rounded-2xl border-2 border-[var(--border-default)] p-8 text-center">
+                          <div className="bg-white rounded-2xl border-2 border-gray-200 p-8 text-center">
                             <p className="text-gray-500">Nenhum documento encontrado na base de conhecimento.</p>
                           </div>
                         );
@@ -794,7 +794,7 @@ export default function AreaRestritaPage() {
                     )}
 
                     {currentContent.type === 'course-material' && currentContent.documents.length === 0 && (
-                      <div className="bg-[var(--bg-card)] rounded-2xl border-2 border-[var(--border-default)] p-8 text-center">
+                      <div className="bg-white rounded-2xl border-2 border-gray-200 p-8 text-center">
                         <p className="text-gray-500">Nenhum material do curso disponível.</p>
                       </div>
                     )}
@@ -829,19 +829,19 @@ export default function AreaRestritaPage() {
 
                     {/* Empty States */}
                     {currentContent.type === 'documents' && currentContent.documents.length === 0 && contentTree.selection && contentTree.selection.category && (
-                      <div className="bg-[var(--bg-card)] rounded-2xl border-2 border-[var(--border-default)] p-8 text-center">
+                      <div className="bg-white rounded-2xl border-2 border-gray-200 p-8 text-center">
                         <p className="text-gray-500">Nenhum documento encontrado nesta categoria.</p>
                       </div>
                     )}
 
                     {currentContent.type === 'videos' && currentContent.videos.length === 0 && (
-                      <div className="bg-[var(--bg-card)] rounded-2xl border-2 border-[var(--border-default)] p-8 text-center">
+                      <div className="bg-white rounded-2xl border-2 border-gray-200 p-8 text-center">
                         <p className="text-gray-500">Nenhum vídeo disponível.</p>
                       </div>
                     )}
 
                     {currentContent.type === 'sites' && currentContent.sites.length === 0 && (
-                      <div className="bg-[var(--bg-card)] rounded-2xl border-2 border-[var(--border-default)] p-8 text-center">
+                      <div className="bg-white rounded-2xl border-2 border-gray-200 p-8 text-center">
                         <p className="text-gray-500">Nenhum site recomendado.</p>
                       </div>
                     )}
@@ -910,7 +910,7 @@ export default function AreaRestritaPage() {
       )}
 
       {/* Mobile Bottom Navigation */}
-      <nav className="lg:hidden fixed bottom-0 left-0 right-0 bg-[var(--bg-card)] border-t-2 border-[var(--border-default)] shadow-2xl z-50 pb-safe">
+      <nav className="lg:hidden fixed bottom-0 left-0 right-0 bg-white border-t-2 border-gray-200 shadow-2xl z-50 pb-safe">
         <div className="flex items-center justify-around h-16">
           <Link
             href="/area-restrita"
