@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
-import { withCache, CacheKeys, CACHE_TTL } from '@/lib/cache/redis-client';
+import { withCache, CacheKeys, CACHE_TTL, CacheInvalidation } from '@/lib/cache/redis-client';
 
 /**
  * GET /api/legislative-acts
@@ -25,6 +25,12 @@ export async function GET(request: NextRequest) {
     const page = parseInt(searchParams.get('page') || '1');
     const limit = parseInt(searchParams.get('limit') || '20');
     const skip = (page - 1) * limit;
+
+    // Revalidação sob demanda via CRON_SECRET
+    const revalidate = searchParams.get('_revalidate');
+    if (revalidate && revalidate === process.env.CRON_SECRET) {
+      await CacheInvalidation.legislativeActs();
+    }
 
     // Generate cache key based on all filters
     const cacheKey = CacheKeys.legislativeActs({
