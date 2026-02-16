@@ -103,45 +103,48 @@ export async function findRelatedActs(
 ): Promise<Array<{ title: string; ementa: string; url: string; leiArticles: string[] }>> {
   if (articleNumbers.length === 0) return [];
 
-  // Buscar atos normativos que referenciam algum dos artigos citados
-  const acts = await prisma.legislativeAct.findMany({
-    where: {
-      leiArticles: { not: null },
-    },
-    select: {
-      fullNumber: true,
-      ementa: true,
-      officialUrl: true,
-      leiArticles: true,
-    },
-  });
+  // Filtrar no SQL: busca atos que contenham ao menos um dos artigos citados
+  const articleConditions = articleNumbers.map(art =>
+    `"leiArticles"::text LIKE '%"${art.replace(/'/g, "''")}"%'`
+  ).join(' OR ');
 
-  const matched: Array<{ title: string; ementa: string; url: string; leiArticles: string[]; matchCount: number }> = [];
+  const excludeTitles = alreadyFoundTitles.length > 0
+    ? alreadyFoundTitles.map(t => `'${t.replace(/'/g, "''")}'`).join(',')
+    : "''";
 
-  for (const act of acts) {
-    // Já encontrado na busca semântica?
-    if (alreadyFoundTitles.includes(act.fullNumber)) continue;
+  const acts = await prisma.$queryRawUnsafe<Array<{
+    full_number: string;
+    ementa: string;
+    official_url: string | null;
+    lei_articles: string | null;
+  }>>(`
+    SELECT "fullNumber" as full_number, ementa, "officialUrl" as official_url, "leiArticles" as lei_articles
+    FROM "LegislativeAct"
+    WHERE "leiArticles" IS NOT NULL
+      AND (${articleConditions})
+      AND "fullNumber" NOT IN (${excludeTitles})
+    LIMIT ${limit * 3}
+  `);
 
+  // Contar matches e ordenar por relevância
+  const matched = acts.map(act => {
     let actArticles: string[] = [];
     try {
-      actArticles = JSON.parse(act.leiArticles!);
+      actArticles = JSON.parse(act.lei_articles!);
     } catch {
-      actArticles = (act.leiArticles || '').split(',').map(s => s.trim()).filter(Boolean);
+      actArticles = (act.lei_articles || '').split(',').map(s => s.trim()).filter(Boolean);
     }
 
     const matchCount = actArticles.filter(a => articleNumbers.includes(a)).length;
-    if (matchCount > 0) {
-      matched.push({
-        title: act.fullNumber,
-        ementa: act.ementa,
-        url: act.officialUrl || '',
-        leiArticles: actArticles,
-        matchCount,
-      });
-    }
-  }
+    return {
+      title: act.full_number,
+      ementa: act.ementa,
+      url: act.official_url || '',
+      leiArticles: actArticles,
+      matchCount,
+    };
+  });
 
-  // Ordenar por número de artigos em comum (mais relevante primeiro)
   return matched
     .sort((a, b) => b.matchCount - a.matchCount)
     .slice(0, limit)

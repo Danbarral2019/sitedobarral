@@ -4,6 +4,7 @@ import { verifyAuth } from '@/lib/auth';
 import { semanticSearch, buildContextForLLM } from '@/lib/embeddings/vector-search';
 import type { SearchResult } from '@/lib/embeddings/vector-search';
 import { hybridSearch } from '@/lib/embeddings/hybrid-search';
+import { rerankResults } from '@/lib/embeddings/reranker';
 import { queryGeminiText } from '@/lib/gemini/cached-client';
 import { GoogleGenerativeAI } from '@google/generative-ai';
 import { checkRateLimit, withCache, CACHE_TTL } from '@/lib/cache/redis-client';
@@ -320,8 +321,11 @@ Exemplo de resposta: ["variação 1", "variação 2"]`;
       r => !['lei-artigo', 'ato-normativo'].includes(r.category) && r.sourceType !== 'legislative-act'
     );
 
+    // Rerank doc results for better precision (only when top results have close similarity)
+    const rerankedDocResults = await rerankResults(query, rawDocResults, Math.max(maxResults * 3, 20));
+
     // Diversify doc results with priority tiers
-    const docResults = diversifyResults(rawDocResults, maxResults);
+    const docResults = diversifyResults(rerankedDocResults, maxResults);
 
     // Cap semantic legislative acts: top 3 per act type to avoid flooding
     const legActsByType = new Map<string, typeof semanticLegActResults>();
