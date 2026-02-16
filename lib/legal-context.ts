@@ -7,6 +7,7 @@
 
 import { LEI_14133_ARTIGOS } from '@/data/lei-14133-artigos';
 import { prisma } from '@/lib/prisma';
+import { generateQueryEmbedding, embeddingToSql } from '@/lib/embeddings/gemini-embeddings';
 import type { SearchResult } from '@/lib/embeddings/vector-search';
 
 // ===========================
@@ -62,6 +63,67 @@ export function extractCitedArticles(
     })
     .slice(0, maxArticles)
     .map(([art]) => art);
+}
+
+// ===========================
+// Semantic article selection (Fase 5B)
+// ===========================
+
+/**
+ * Combina artigos citados nos documentos + artigos semanticamente relevantes à query.
+ * Busca vetorial na tabela LeiArticleEmbedding para encontrar artigos pertinentes
+ * mesmo quando nenhum documento retornado os cita.
+ *
+ * Graceful degradation: se a tabela estiver vazia, retorna apenas citados.
+ */
+export async function selectRelevantArticles(
+  query: string,
+  citedArticles: string[],
+  maxArticles: number = 10
+): Promise<string[]> {
+  // Citados nos docs (até 60% do espaço)
+  const maxCited = Math.ceil(maxArticles * 0.6);
+  const cited = citedArticles.slice(0, maxCited);
+
+  try {
+    // Verificar se a tabela tem dados (graceful degradation)
+    const countResult = await prisma.$queryRawUnsafe<Array<{ count: bigint }>>(
+      `SELECT COUNT(*) as count FROM "LeiArticleEmbedding"`
+    );
+    if (Number(countResult[0].count) === 0) {
+      return citedArticles.slice(0, maxArticles);
+    }
+
+    // Gerar embedding da query
+    const { embedding } = await generateQueryEmbedding(query);
+    const embSql = embeddingToSql(embedding);
+
+    // Busca semântica na tabela LeiArticleEmbedding
+    const semanticArticles = await prisma.$queryRawUnsafe<
+      Array<{ articleNumber: string; similarity: number }>
+    >(`
+      SELECT "articleNumber", 1 - (embedding <=> '${embSql}'::vector) as similarity
+      FROM "LeiArticleEmbedding"
+      WHERE 1 - (embedding <=> '${embSql}'::vector) >= 0.45
+      ORDER BY similarity DESC
+      LIMIT ${maxArticles}
+    `);
+
+    // Merge: citados primeiro, depois semânticos (sem duplicatas)
+    const all = [...cited];
+    for (const art of semanticArticles) {
+      if (!all.includes(art.articleNumber)) {
+        all.push(art.articleNumber);
+      }
+      if (all.length >= maxArticles) break;
+    }
+
+    return all;
+  } catch (error) {
+    // Fallback: tabela pode não existir ou outro erro
+    console.warn('⚠️ selectRelevantArticles fallback (error):', error instanceof Error ? error.message : error);
+    return citedArticles.slice(0, maxArticles);
+  }
 }
 
 // ===========================

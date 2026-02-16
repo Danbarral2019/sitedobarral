@@ -1308,6 +1308,19 @@ model Subscription {
   @@index([userId, status])
 }
 
+// Embeddings pré-computados dos artigos da Lei 14.133/2021 (Fase 5B)
+// Permite busca semântica direta contra a query do usuário
+model LeiArticleEmbedding {
+  id            String   @id @default(uuid())
+  articleNumber String   @unique
+  content       String   @db.Text
+  embedding     Unsupported("vector(768)")
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@index([articleNumber])
+}
+
 // Notas de alteração em artigos da Lei 14.133/2021
 // Criadas automaticamente quando um novo ato (DOU) altera/regulamenta um artigo
 model LeiArticleNote {

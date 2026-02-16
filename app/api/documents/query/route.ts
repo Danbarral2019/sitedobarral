@@ -11,6 +11,7 @@ import { checkRateLimit, withCache, CACHE_TTL } from '@/lib/cache/redis-client';
 import { trackServerEvent } from '@/lib/monitoring/events';
 import {
   extractCitedArticles,
+  selectRelevantArticles,
   buildLeiContext,
   findRelatedActs,
   buildLayeredContext,
@@ -341,10 +342,11 @@ Exemplo de resposta: ["variação 1", "variação 2"]`;
 
     console.log(`   📜 Lei: ${leiResults.length}, Atos(doc): ${actResults.length}, Atos(semantic): ${cappedLegActs.length}, Docs: ${docResults.length} (raw: ${rawDocResults.length})`);
 
-    // 7. Enrich: extract cited articles from docs and find missing ones
-    const citedArticles = extractCitedArticles(
+    // 7. Enrich: extract cited articles from docs + semantic article selection (Fase 5B)
+    const citedArticlesFromDocs = extractCitedArticles(
       docResults as Array<SearchResult & { leiArticles?: string | null }>
     );
+    const citedArticles = await selectRelevantArticles(query, citedArticlesFromDocs, 10);
     const leiResultArticleNums = leiResults.map(r => {
       const match = r.documentTitle.match(/Art\.\s*(\d+[\w-]*)/);
       return match ? match[1] : '';
