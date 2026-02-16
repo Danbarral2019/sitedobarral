@@ -16,7 +16,7 @@ const prisma = new PrismaClient();
 const DRY_RUN = process.argv.includes('--dry-run');
 
 interface TicAct {
-  type: 'in' | 'portaria' | 'decreto';
+  type: 'lei' | 'in' | 'portaria' | 'decreto';
   number: string;
   year: number;
   fullNumber: string;
@@ -30,6 +30,13 @@ interface TicAct {
   leiArticles: string[];
   themes: string[];
 }
+
+// Atos que já existem no banco mas precisam receber a tag 'tic'
+const EXISTING_ACTS_TO_TAG: string[] = [
+  'Decreto 11.462/2023',  // Registro de preços (arts. 82-86 Lei 14.133)
+  'Decreto 11.246/2022',  // Agentes de contratação (art. 8º Lei 14.133)
+  'Decreto 10.947/2022',  // Plano de contratações anual
+];
 
 const TIC_ACTS: TicAct[] = [
   {
@@ -182,6 +189,82 @@ const TIC_ACTS: TicAct[] = [
     leiArticles: [],
     themes: ['tic', 'agentes-governanca'],
   },
+  // === Novos atos da página gov.br (fev/2026) ===
+  {
+    type: 'lei',
+    number: '14.744',
+    year: 2023,
+    fullNumber: 'Lei 14.744/2023',
+    title: 'Serviços Postais e Comunicação Multimídia',
+    ementa: 'Dispõe sobre a prestação de serviços postais e de comunicação multimídia da administração pública federal direta e indireta.',
+    issuer: 'Presidência',
+    publishDate: '2023-11-30',
+    hierarchyLevel: 1,
+    officialUrl: 'https://www.planalto.gov.br/ccivil_03/_ato2023-2026/2023/lei/l14744.htm',
+    pdfUrl: null,
+    leiArticles: [],
+    themes: ['tic', 'contratos'],
+  },
+  {
+    type: 'decreto',
+    number: '12.124',
+    year: 2024,
+    fullNumber: 'Decreto 12.124/2024',
+    title: 'Regulamentação da Lei de Serviços Postais e Comunicação Multimídia',
+    ementa: 'Regulamenta a Lei nº 14.744, de 30 de novembro de 2023, que dispõe sobre a prestação de serviços postais e de comunicação multimídia da administração pública federal direta e indireta.',
+    issuer: 'Presidência',
+    publishDate: '2024-07-30',
+    hierarchyLevel: 2,
+    officialUrl: 'https://www.planalto.gov.br/ccivil_03/_ato2023-2026/2024/decreto/d12124.htm',
+    pdfUrl: null,
+    leiArticles: [],
+    themes: ['tic', 'contratos'],
+  },
+  {
+    type: 'in',
+    number: '86',
+    year: 2025,
+    fullNumber: 'IN SGD/MGI nº 86/2025',
+    title: 'Alteração das Regras de Aprovação de Contratações de TIC',
+    ementa: 'Altera a Instrução Normativa SGD/MGI nº 6, de 29 de março de 2023, que regulamenta os requisitos e procedimentos para aprovação de contratações ou de formação de atas de registro de preços relativos a bens e serviços de TIC no âmbito do SISP.',
+    issuer: 'SGD/MGI',
+    publishDate: '2025-07-25',
+    hierarchyLevel: 4,
+    officialUrl: 'https://www.in.gov.br/web/dou/-/instrucao-normativa-sgd/mgi-n-86-de-25-de-julho-de-2025-645137365',
+    pdfUrl: null,
+    leiArticles: ['18', '19'],
+    themes: ['tic', 'planejamento'],
+  },
+  {
+    type: 'portaria',
+    number: '6.679',
+    year: 2024,
+    fullNumber: 'Portaria SGD/MGI nº 6.679/2024',
+    title: 'Alteração do Modelo de Desenvolvimento de Software',
+    ementa: 'Altera os Anexos I e II e inclui os Anexos VII e VIII da Portaria SGD/MGI nº 750, de 20 de março de 2023, que estabelece modelo para a contratação de serviços de desenvolvimento, manutenção e sustentação de software no âmbito do SISP.',
+    issuer: 'SGD/MGI',
+    publishDate: '2024-09-17',
+    hierarchyLevel: 3,
+    officialUrl: 'https://www.gov.br/governodigital/pt-br/contratacoes-de-tic/legislacao/modelo-de-contratacao-de-servicos-de-desenvolvimento-manutencao-e-sustentacao-de-software/portaria-sgd-mgi-no-6679-de-17-de-setembro-de-2024',
+    pdfUrl: null,
+    leiArticles: ['6'],
+    themes: ['tic', 'contratos'],
+  },
+  {
+    type: 'portaria',
+    number: '6.680',
+    year: 2024,
+    fullNumber: 'Portaria SGD/MGI nº 6.680/2024',
+    title: 'Alteração do Modelo de Infraestrutura e Atendimento de TIC',
+    ementa: 'Altera a Portaria SGD/MGI nº 1.070, de 1º de junho de 2023, que estabelece modelo de contratação de serviços de operação de infraestrutura e atendimento a usuários de Tecnologia da Informação e Comunicação no âmbito do SISP.',
+    issuer: 'SGD/MGI',
+    publishDate: '2024-10-04',
+    hierarchyLevel: 3,
+    officialUrl: 'https://www.gov.br/governodigital/pt-br/contratacoes-de-tic/legislacao/modelo-de-contracao-de-servicos-de-operacao-de-infraestrutura-e-de-atendimento-a-usuarios-de-tic/portaria-sgd-mgi-no-6-680-de-4-de-outubro-de-2024',
+    pdfUrl: null,
+    leiArticles: ['6'],
+    themes: ['tic', 'contratos', 'gestao-fiscalizacao'],
+  },
 ];
 
 async function main() {
@@ -261,10 +344,43 @@ async function main() {
     }
   }
 
+  // Adicionar tag 'tic' a atos que já existem sem a tag
+  let tagged = 0;
+  for (const fullNumber of EXISTING_ACTS_TO_TAG) {
+    try {
+      const existing = await prisma.legislativeAct.findUnique({
+        where: { fullNumber },
+      });
+      if (!existing) {
+        console.log(`⚠️  Não encontrado para taggear: ${fullNumber}`);
+        continue;
+      }
+      const existingThemes: string[] = existing.themes ? JSON.parse(existing.themes) : [];
+      if (existingThemes.includes('tic')) {
+        console.log(`⏭️  Já tem tag TIC: ${fullNumber}`);
+        continue;
+      }
+      const updatedThemes = [...new Set([...existingThemes, 'tic'])];
+      if (!DRY_RUN) {
+        await prisma.legislativeAct.update({
+          where: { id: existing.id },
+          data: { themes: JSON.stringify(updatedThemes) },
+        });
+        console.log(`🏷️  Tag TIC adicionada: ${fullNumber}`);
+      } else {
+        console.log(`[DRY-RUN] Adicionaria tag TIC: ${fullNumber}`);
+      }
+      tagged++;
+    } catch (err) {
+      console.error(`❌ Erro ao taggear ${fullNumber}:`, err instanceof Error ? err.message : err);
+    }
+  }
+
   console.log(`\n${'='.repeat(60)}`);
   console.log(`  RESULTADO:`);
   console.log(`  ✅ Importados: ${imported}`);
   console.log(`  ⏭️  Já existiam: ${skipped}`);
+  console.log(`  🏷️  Taggeados: ${tagged}`);
   console.log(`  ❌ Erros: ${errors}`);
   console.log(`  Total TIC: ${TIC_ACTS.length}`);
   console.log(`${'='.repeat(60)}\n`);
