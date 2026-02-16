@@ -62,6 +62,7 @@ export async function processDocument(
         extractedText: true,
         content: true,
         description: true,
+        leiArticles: true,
       },
     });
 
@@ -177,7 +178,23 @@ export async function processDocument(
 
     // 7. Cria chunks do texto
     console.log(`✂️ Chunking text (${extractedText.length} chars)...`);
-    const chunks = createChunksForDocument(extractedText, document.category, options);
+    const rawChunks = createChunksForDocument(extractedText, document.category, options);
+
+    // 7b. Prefixar metadados nos chunks para enriquecer embeddings
+    let leiArticlesStr = '';
+    if (document.leiArticles) {
+      try {
+        const arts = JSON.parse(document.leiArticles);
+        if (Array.isArray(arts) && arts.length > 0) {
+          leiArticlesStr = arts.join(', ');
+        }
+      } catch { /* ignore */ }
+    }
+    const metaPrefix = `[${document.title} | ${document.category}${leiArticlesStr ? ` | Arts. ${leiArticlesStr}` : ''}]\n`;
+    const chunks = rawChunks.map(chunk => ({
+      ...chunk,
+      content: metaPrefix + chunk.content,
+    }));
 
     if (chunks.length === 0) {
       await updateDocumentStatus(documentId, 'failed', 'No chunks generated (text too short?)');
@@ -417,8 +434,8 @@ function createChunksForDocument(
   options: ProcessingOptions
 ): TextChunk[] {
   const chunkOptions = {
-    maxChunkSize: options.chunkSize || 1000,
-    overlapSize: options.overlapSize || 200,
+    ...(options.chunkSize ? { maxChunkSize: options.chunkSize } : {}),
+    ...(options.overlapSize ? { overlapSize: options.overlapSize } : {}),
   };
 
   // Usa chunker especializado por categoria
@@ -444,41 +461,34 @@ function createChunksForDocument(
 
 /**
  * Salva chunks com embeddings no banco usando raw SQL (pgvector)
- * Insere um chunk por vez para evitar problemas com parametros SQL
+ * Insere em batches de 50 para performance
  */
 async function saveChunksToDatabase(
   documentId: string,
   chunks: TextChunk[],
   embeddings: number[][]
 ): Promise<void> {
-  // Usa Prisma.sql para tagged template literals com tipagem correta
-  const { Prisma } = await import('@prisma/client');
+  if (chunks.length === 0) return;
 
-  for (let i = 0; i < chunks.length; i++) {
-    const chunk = chunks[i];
-    const embedding = embeddings[i];
-    const embeddingStr = embeddingToSql(embedding);
+  const BATCH_SIZE = 50;
 
-    // Insere um chunk por vez com SQL parametrizado corretamente
-    await prisma.$executeRaw`
-      INSERT INTO "DocumentChunk" (
-        id, "documentId", "chunkIndex", content, "charStart", "charEnd", embedding, "createdAt", "updatedAt"
-      ) VALUES (
-        gen_random_uuid(),
-        ${documentId},
-        ${chunk.index},
-        ${chunk.content},
-        ${chunk.charStart},
-        ${chunk.charEnd},
-        ${Prisma.raw(`'${embeddingStr}'::vector`)},
-        NOW(),
-        NOW()
-      )
-    `;
+  for (let i = 0; i < chunks.length; i += BATCH_SIZE) {
+    const batch = chunks.slice(i, i + BATCH_SIZE);
+    const batchEmbeddings = embeddings.slice(i, i + BATCH_SIZE);
 
-    // Log de progresso a cada 10 chunks
-    if ((i + 1) % 10 === 0) {
-      console.log(`  💾 Saved ${i + 1}/${chunks.length} chunks...`);
+    const values = batch.map((chunk, j) => {
+      const embStr = embeddingToSql(batchEmbeddings[j]);
+      const escapedContent = chunk.content.replace(/'/g, "''");
+      return `(gen_random_uuid(), '${documentId.replace(/'/g, "''")}', ${chunk.index}, '${escapedContent}', ${chunk.charStart}, ${chunk.charEnd}, '${embStr}'::vector, NOW(), NOW())`;
+    });
+
+    await prisma.$executeRawUnsafe(`
+      INSERT INTO "DocumentChunk" (id, "documentId", "chunkIndex", content, "charStart", "charEnd", embedding, "createdAt", "updatedAt")
+      VALUES ${values.join(',\n')}
+    `);
+
+    if (i + BATCH_SIZE < chunks.length) {
+      console.log(`  💾 Saved ${i + BATCH_SIZE}/${chunks.length} chunks...`);
     }
   }
 }

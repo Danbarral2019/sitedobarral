@@ -100,10 +100,17 @@ export async function processLegislativeAct(
 
     // 4. Chunkar com chunkLegalDocument
     console.log(`✂️ Chunking "${act.fullNumber}" (${fullText.length} chars)...`);
-    const chunks = chunkLegalDocument(fullText, {
-      maxChunkSize: 1200,
-      overlapSize: 200,
+    const rawChunks = chunkLegalDocument(fullText, {
+      maxChunkSize: 2400,
+      overlapSize: 400,
     });
+
+    // 4b. Prefixar metadados nos chunks para enriquecer embeddings
+    const metaPrefix = `[${act.fullNumber} | ${act.type}]\n`;
+    const chunks = rawChunks.map(chunk => ({
+      ...chunk,
+      content: metaPrefix + chunk.content,
+    }));
 
     if (chunks.length === 0) {
       await prisma.legislativeAct.update({
@@ -166,33 +173,30 @@ export async function processLegislativeAct(
 
 /**
  * Salva chunks com embeddings no banco usando raw SQL (pgvector)
+ * Insere em batches de 50 para performance
  */
 async function saveActChunksToDatabase(
   actId: string,
   chunks: TextChunk[],
   embeddings: number[][]
 ): Promise<void> {
-  const { Prisma } = await import('@prisma/client');
+  if (chunks.length === 0) return;
 
-  for (let i = 0; i < chunks.length; i++) {
-    const chunk = chunks[i];
-    const embedding = embeddings[i];
-    const embeddingStr = embeddingToSql(embedding);
+  const BATCH_SIZE = 50;
 
-    await prisma.$executeRaw`
-      INSERT INTO "LegislativeActChunk" (
-        id, "legislativeActId", "chunkIndex", content, "charStart", "charEnd", embedding, "createdAt", "updatedAt"
-      ) VALUES (
-        gen_random_uuid(),
-        ${actId},
-        ${chunk.index},
-        ${chunk.content},
-        ${chunk.charStart},
-        ${chunk.charEnd},
-        ${Prisma.raw(`'${embeddingStr}'::vector`)},
-        NOW(),
-        NOW()
-      )
-    `;
+  for (let i = 0; i < chunks.length; i += BATCH_SIZE) {
+    const batch = chunks.slice(i, i + BATCH_SIZE);
+    const batchEmbeddings = embeddings.slice(i, i + BATCH_SIZE);
+
+    const values = batch.map((chunk, j) => {
+      const embStr = embeddingToSql(batchEmbeddings[j]);
+      const escapedContent = chunk.content.replace(/'/g, "''");
+      return `(gen_random_uuid(), '${actId.replace(/'/g, "''")}', ${chunk.index}, '${escapedContent}', ${chunk.charStart}, ${chunk.charEnd}, '${embStr}'::vector, NOW(), NOW())`;
+    });
+
+    await prisma.$executeRawUnsafe(`
+      INSERT INTO "LegislativeActChunk" (id, "legislativeActId", "chunkIndex", content, "charStart", "charEnd", embedding, "createdAt", "updatedAt")
+      VALUES ${values.join(',\n')}
+    `);
   }
 }

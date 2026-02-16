@@ -30,8 +30,8 @@ export interface ChunkOptions {
 // ===========================
 
 const DEFAULT_OPTIONS: Required<ChunkOptions> = {
-  maxChunkSize: 1000,    // ~250 tokens
-  overlapSize: 200,      // ~50 tokens de overlap
+  maxChunkSize: 2000,    // ~500 tokens
+  overlapSize: 400,      // ~100 tokens de overlap
   minChunkSize: 100,     // Minimo de 100 chars
   preserveParagraphs: true,
   preserveSentences: true,
@@ -367,7 +367,7 @@ export function chunkLegalDocument(
   const opts = {
     ...DEFAULT_OPTIONS,
     ...options,
-    maxChunkSize: options.maxChunkSize || 1200, // Um pouco maior para contexto juridico
+    maxChunkSize: options.maxChunkSize || 2400, // Maior para preservar argumentos juridicos completos
     preserveParagraphs: true,
     preserveSentences: true,
   };
@@ -396,7 +396,7 @@ export function chunkTCUDocument(
   const opts = {
     ...DEFAULT_OPTIONS,
     ...options,
-    maxChunkSize: options.maxChunkSize || 1500, // Maior para contexto de acordaos
+    maxChunkSize: options.maxChunkSize || 3000, // Maior para contexto de acordaos
   };
 
   // Marca secoes principais do acordao
