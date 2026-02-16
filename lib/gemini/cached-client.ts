@@ -41,6 +41,7 @@ export interface GeminiQueryOptions {
   maxOutputTokens?: number;
   useCache?: boolean;
   cacheTTL?: number;
+  systemInstruction?: string;
 }
 
 export interface GeminiQueryResult {
@@ -72,6 +73,7 @@ export async function queryGeminiText(
     maxOutputTokens = 2048,
     useCache = true,
     cacheTTL = CACHE_TTL.GEMINI_QUERY,
+    systemInstruction,
   } = options;
 
   const startTime = Date.now();
@@ -85,6 +87,7 @@ export async function queryGeminiText(
       async () => {
         const geminiModel = getGenAI().getGenerativeModel({
           model,
+          ...(systemInstruction ? { systemInstruction } : {}),
           generationConfig: {
             temperature,
             maxOutputTokens,
@@ -124,6 +127,7 @@ export async function queryGeminiText(
   // No cache: direct query
   const geminiModel = getGenAI().getGenerativeModel({
     model,
+    ...(systemInstruction ? { systemInstruction } : {}),
     generationConfig: {
       temperature,
       maxOutputTokens,

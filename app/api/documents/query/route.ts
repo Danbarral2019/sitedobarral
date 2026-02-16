@@ -213,7 +213,6 @@ Exemplo de resposta: ["variação 1", "variação 2"]`;
         category: filters.category,
         excludeCategories: ['boa_pratica'],
         limit: Math.max(maxResults * 5, 60),
-        threshold: 0.40,
         useCache,
         includeChunkContent: true,
       });
@@ -229,7 +228,6 @@ Exemplo de resposta: ["variação 1", "variação 2"]`;
         category: filters.category,
         excludeCategories: ['boa_pratica'],
         limit: Math.max(maxResults * 5, 60),
-        threshold: 0.40,
         useCache,
         includeChunkContent: true,
       });
@@ -444,17 +442,7 @@ Exemplo de resposta: ["variação 1", "variação 2"]`;
     const sourcesList = allDisplayResults.map(r => `- ${r.documentTitle} (${r.category})`).join('\n');
     const articlesList = allLeiArticleNums.map(n => `Art. ${n}`).join(', ');
 
-    const synthesisPrompt = `Você é um assistente especializado em Licitações e Contratos Administrativos (Lei 14.133/2021).
-
-${fullContext}
-${historyContext}
-PERGUNTA DO USUÁRIO:
-${query}
-
-FONTES DISPONÍVEIS NO CONTEXTO:
-Artigos da Lei 14.133: ${articlesList || 'nenhum'}
-Documentos:
-${sourcesList || 'nenhum'}
+    const systemInstruction = `Você é um assistente especializado em Licitações e Contratos Administrativos (Lei 14.133/2021).
 
 INSTRUÇÕES:
 1. Responda de forma completa e estruturada, usando TODAS as fontes relevantes do contexto acima
@@ -471,7 +459,17 @@ INSTRUÇÕES:
 5. Diferencie fontes normativas VINCULANTES (lei, decreto, súmula vinculante) de fontes DOUTRINÁRIAS (apostilas, manuais) e JURISPRUDENCIAIS (acórdãos, informativos)
 6. Use linguagem técnica jurídica com citações precisas (ex: "Conforme o Art. 23 da Lei 14.133...", "O Enunciado nº 7 do INCP dispõe...")
 7. Seja completo mas organizado — use parágrafos distintos para cada aspecto
-8. Se os documentos não contiverem informação suficiente, diga isso
+8. Se os documentos não contiverem informação suficiente, diga isso`;
+
+    const synthesisPrompt = `${fullContext}
+${historyContext}
+PERGUNTA DO USUÁRIO:
+${query}
+
+FONTES DISPONÍVEIS NO CONTEXTO:
+Artigos da Lei 14.133: ${articlesList || 'nenhum'}
+Documentos:
+${sourcesList || 'nenhum'}
 
 RESPOSTA:`;
 
@@ -482,6 +480,7 @@ RESPOSTA:`;
         temperature: 0.3,
         maxOutputTokens: 3000,
         useCache,
+        systemInstruction,
       });
       synthesizedAnswer = geminiResult.response;
     } catch (error) {

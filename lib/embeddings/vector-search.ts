@@ -123,10 +123,42 @@ async function performSearch(
   options: SearchOptions
 ): Promise<Omit<SearchResponse, 'latency' | 'cached'>> {
   const {
+    limit = 5,
+    threshold: requestedThreshold,
+  } = options;
+
+  // Threshold dinâmico: tenta do mais restritivo ao mais permissivo
+  const thresholds = requestedThreshold
+    ? [requestedThreshold]
+    : [0.55, 0.45, 0.35];
+
+  for (const threshold of thresholds) {
+    const result = await executeVectorSearch(query, { ...options, threshold });
+    if (result.results.length >= Math.min(limit, 3)) {
+      return result;
+    }
+    // Se já encontrou algo com o threshold mais baixo, retorna o que tem
+    if (threshold === thresholds[thresholds.length - 1] && result.results.length > 0) {
+      return result;
+    }
+  }
+
+  // Fallback: retorna o que tiver com threshold mais baixo
+  return executeVectorSearch(query, { ...options, threshold: 0.30 });
+}
+
+/**
+ * Executa a busca vetorial com um threshold específico
+ */
+async function executeVectorSearch(
+  query: string,
+  options: SearchOptions & { threshold: number }
+): Promise<Omit<SearchResponse, 'latency' | 'cached'>> {
+  const {
     courseId,
     category,
     limit = 5,
-    threshold = 0.5,
+    threshold,
     includeChunkContent = true,
   } = options;
 
@@ -169,7 +201,7 @@ async function performSearch(
     lei_articles: string | null;
     source_type: string;
   }>>(`
-    (
+    WITH doc_scores AS (
       SELECT
         d.id as document_id,
         d.title as document_title,
@@ -186,12 +218,8 @@ async function performSearch(
       FROM "DocumentChunk" c
       JOIN "Document" d ON c."documentId" = d.id
       WHERE ${whereClause}
-        AND 1 - (c.embedding <=> '${embeddingStr}'::vector) >= ${threshold}
-      ORDER BY c.embedding <=> '${embeddingStr}'::vector
-      LIMIT ${limit * 2}
-    )
-    UNION ALL
-    (
+    ),
+    act_scores AS (
       SELECT
         la.id as document_id,
         la."fullNumber" as document_title,
@@ -208,10 +236,12 @@ async function performSearch(
       FROM "LegislativeActChunk" lc
       JOIN "LegislativeAct" la ON lc."legislativeActId" = la.id
       WHERE la."embeddingStatus" = 'completed'
-        AND 1 - (lc.embedding <=> '${embeddingStr}'::vector) >= ${threshold}
-      ORDER BY lc.embedding <=> '${embeddingStr}'::vector
-      LIMIT ${limit * 2}
     )
+    SELECT * FROM (
+      (SELECT * FROM doc_scores WHERE similarity >= ${threshold} ORDER BY similarity DESC LIMIT ${limit * 2})
+      UNION ALL
+      (SELECT * FROM act_scores WHERE similarity >= ${threshold} ORDER BY similarity DESC LIMIT ${limit * 2})
+    ) combined
     ORDER BY similarity DESC
     LIMIT ${limit * 3}
   `);
@@ -356,16 +386,26 @@ export async function multiQuerySearch(
   const allResults: SearchResult[] = [];
   const seenDocuments = new Set<string>();
 
-  for (const query of queries) {
-    const response = await semanticSearch(query, {
+  // Executa todas as queries em paralelo
+  const responses = await Promise.all(
+    queries.map(query => semanticSearch(query, {
       ...options,
-      limit: (options.limit || 5) * 2, // Busca mais para ter margem
-    });
+      limit: (options.limit || 5) * 2,
+    }))
+  );
 
+  for (const response of responses) {
     for (const result of response.results) {
       if (!seenDocuments.has(result.documentId)) {
         seenDocuments.add(result.documentId);
         allResults.push(result);
+      } else {
+        // Manter maior similaridade
+        const existing = allResults.find(r => r.documentId === result.documentId);
+        if (existing && result.similarity > existing.similarity) {
+          existing.similarity = result.similarity;
+          existing.chunkContent = result.chunkContent;
+        }
       }
     }
   }
