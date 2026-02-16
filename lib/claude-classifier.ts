@@ -36,6 +36,9 @@ const CATEGORIES = [
   { id: 'edital', description: 'Editais de licitação, avisos de licitação' },
   { id: 'artigo', description: 'Artigos doutrinários, papers acadêmicos' },
   { id: 'orientacao-normativa', description: 'Orientações Normativas da AGU (ONs)' },
+  { id: 'sumula', description: 'Súmulas do TCU' },
+  { id: 'consulta_tcu', description: 'Respostas a Consultas do TCU sobre licitações e contratos' },
+  { id: 'informativo', description: 'Informativos de Licitações e Contratos do TCU' },
   { id: 'outro', description: 'Outros tipos de documentos' },
 ];
 
@@ -74,7 +77,7 @@ const LEI_14133_KEY_ARTICLES = {
 
 export interface ClaudeClassificationResult {
   courseSlugs: string[]; // Pode sugerir múltiplos cursos
-  category: 'apostila' | 'acordao' | 'parecer' | 'edital' | 'artigo' | 'orientacao-normativa' | 'outro';
+  category: 'apostila' | 'acordao' | 'parecer' | 'edital' | 'artigo' | 'orientacao-normativa' | 'sumula' | 'consulta_tcu' | 'informativo' | 'outro';
   tags: string[];
   confidence: number;
   reasoning: string; // Explicação da classificação
@@ -305,8 +308,8 @@ function parseClaudeResponse(responseText: string): ClaudeClassificationResult {
 /**
  * Valida categoria
  */
-function validateCategory(category: string): 'apostila' | 'acordao' | 'parecer' | 'edital' | 'artigo' | 'orientacao-normativa' | 'outro' {
-  const validCategories = ['apostila', 'acordao', 'parecer', 'edital', 'artigo', 'orientacao-normativa', 'outro'] as const;
+function validateCategory(category: string): 'apostila' | 'acordao' | 'parecer' | 'edital' | 'artigo' | 'orientacao-normativa' | 'sumula' | 'consulta_tcu' | 'informativo' | 'outro' {
+  const validCategories = ['apostila', 'acordao', 'parecer', 'edital', 'artigo', 'orientacao-normativa', 'sumula', 'consulta_tcu', 'informativo', 'outro'] as const;
   type ValidCategory = typeof validCategories[number];
   return validCategories.includes(category as ValidCategory)
     ? (category as ValidCategory)

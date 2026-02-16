@@ -60,6 +60,9 @@ const CATEGORY_LABELS: Record<string, string> = {
   'manual-tcu': 'Manual do TCU',
   'boa_pratica': 'Outros Atos Normativos',
   'ato-normativo': 'Normativos',
+  'sumula': 'Súmulas TCU',
+  'consulta_tcu': 'Respostas a Consultas TCU',
+  'informativo': 'Informativos de Licitação TCU',
 };
 
 type TabType = 'all' | 'lei' | 'acts' | 'docs' | 'glossary';

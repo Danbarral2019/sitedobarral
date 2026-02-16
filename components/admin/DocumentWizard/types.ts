@@ -10,6 +10,9 @@ export type DocumentCategory =
   | 'artigo'
   | 'orientacao-normativa'
   | 'enunciados'
+  | 'sumula'
+  | 'consulta_tcu'
+  | 'informativo'
   | 'outro';
 
 export type DocumentType = 'pdf' | 'doc' | 'link' | 'video';

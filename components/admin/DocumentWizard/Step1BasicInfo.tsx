@@ -12,6 +12,9 @@ const CATEGORIES: { value: DocumentCategory; label: string }[] = [
   { value: 'artigo', label: 'Artigo' },
   { value: 'orientacao-normativa', label: 'Orientação Normativa' },
   { value: 'enunciados', label: 'Enunciados' },
+  { value: 'sumula', label: 'Súmulas TCU' },
+  { value: 'consulta_tcu', label: 'Respostas a Consultas TCU' },
+  { value: 'informativo', label: 'Informativos de Licitação TCU' },
   { value: 'outro', label: 'Outro' },
 ];
 

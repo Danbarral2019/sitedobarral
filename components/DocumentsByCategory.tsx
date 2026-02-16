@@ -18,6 +18,8 @@ import {
   Gavel,
   Landmark,
   File,
+  MessageSquare,
+  Newspaper,
 } from 'lucide-react';
 import { ArticleBadges } from './ArticleBadges';
 
@@ -29,6 +31,7 @@ interface Document {
   type: string;
   url?: string;
   leiArticles?: string | null;
+  entityType?: string;
 }
 
 interface DocumentsByCategoryProps {
@@ -47,6 +50,16 @@ const PARECER_SUBTYPE_LABELS: Record<string, string | null> = {
   'parecer': null,
   'parecer-vinculante': 'Vinculante',
   'decor': 'DECOR',
+};
+
+// Labels de órgãos para sub-agrupamento de enunciados
+const ENTITY_TYPE_LABELS: Record<string, string> = {
+  'INCP': 'INCP - Instituto Nacional de Contratações Públicas',
+  'IBDA': 'IBDA - Instituto Brasileiro de Direito Administrativo',
+  'CJF': 'CJF - Conselho da Justiça Federal',
+  'FONACON': 'FONACON - Fórum Nacional de Contas',
+  'PGE-SP': 'PGE-SP - Procuradoria Geral do Estado de São Paulo',
+  'AGE-MG': 'AGE-MG - Advocacia-Geral do Estado de Minas Gerais',
 };
 
 // Mapeamento de categorias para ícones Lucide, cores e labels
@@ -218,13 +231,35 @@ const categoryConfig: Record<string, {
   'sumula': {
     icon: Scale,
     color: 'indigo',
-    label: 'Súmulas',
+    label: 'Súmulas TCU',
     gradient: 'from-indigo-500/10 via-indigo-400/5 to-transparent',
     iconBg: 'bg-indigo-100',
     iconText: 'text-indigo-600',
     badgeBg: 'bg-indigo-100',
     badgeText: 'text-indigo-700',
     docIconBg: 'bg-indigo-600',
+  },
+  'consulta_tcu': {
+    icon: MessageSquare,
+    color: 'sky',
+    label: 'Respostas a Consultas TCU',
+    gradient: 'from-sky-500/10 via-sky-400/5 to-transparent',
+    iconBg: 'bg-sky-100',
+    iconText: 'text-sky-600',
+    badgeBg: 'bg-sky-100',
+    badgeText: 'text-sky-700',
+    docIconBg: 'bg-sky-600',
+  },
+  'informativo': {
+    icon: Newspaper,
+    color: 'orange',
+    label: 'Informativos de Licitação TCU',
+    gradient: 'from-orange-500/10 via-orange-400/5 to-transparent',
+    iconBg: 'bg-orange-100',
+    iconText: 'text-orange-600',
+    badgeBg: 'bg-orange-100',
+    badgeText: 'text-orange-700',
+    docIconBg: 'bg-orange-600',
   },
   'outros': {
     icon: File,
@@ -354,102 +389,217 @@ export default function DocumentsByCategory({
 
             {/* Lista de documentos como mini-cards */}
             <div className="p-3 lg:p-4 space-y-3">
-              {(isExpanded ? categoryDocs : categoryDocs.slice(0, 2)).map((doc) => (
-                <div
-                  key={doc.id}
-                  className="bg-gray-50 hover:bg-white rounded-xl p-3 lg:p-4 border border-gray-100 hover:border-blue-200 hover:shadow-sm transition-all"
-                >
-                  <div className="flex items-start justify-between gap-3">
-                    {/* Conteúdo do documento */}
-                    <div
-                      className="flex-1 min-w-0 cursor-pointer group"
-                      onClick={() => onDocumentClick(doc)}
-                      role="button"
-                      tabIndex={0}
-                      onKeyDown={(e) => { if (e.key === 'Enter') onDocumentClick(doc); }}
-                    >
-                      <div className="flex items-start gap-2.5 lg:gap-3 w-full">
-                        <div className={`w-8 h-8 ${config.docIconBg} rounded-lg flex items-center justify-center flex-shrink-0 mt-0.5`}>
-                          {doc.type === 'video' ? (
-                            <Video className="w-4 h-4 text-white" />
-                          ) : (
-                            <FileText className="w-4 h-4 text-white" />
-                          )}
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-start gap-2">
-                            <h4 className="text-sm lg:text-base font-semibold text-gray-900 group-hover:text-blue-600 transition-colors line-clamp-2">
-                              {doc.title}
-                            </h4>
-                            {PARECER_SUBTYPE_LABELS[doc.category] && (
-                              <span className={`flex-shrink-0 mt-0.5 px-2 py-0.5 rounded-full text-xs font-semibold ${
-                                doc.category === 'decor'
-                                  ? 'bg-amber-100 text-amber-800'
-                                  : 'bg-emerald-100 text-emerald-800'
-                              }`}>
-                                {PARECER_SUBTYPE_LABELS[doc.category]}
-                              </span>
-                            )}
+              {category === 'enunciados' ? (
+                // Sub-agrupamento por entityType para enunciados
+                (() => {
+                  const groupedByEntity: Record<string, Document[]> = {};
+                  categoryDocs.forEach((doc) => {
+                    const key = doc.entityType || '_outros';
+                    if (!groupedByEntity[key]) groupedByEntity[key] = [];
+                    groupedByEntity[key].push(doc);
+                  });
+                  const entityKeys = Object.keys(groupedByEntity).sort((a, b) => {
+                    if (a === '_outros') return 1;
+                    if (b === '_outros') return -1;
+                    return a.localeCompare(b);
+                  });
+
+                  return entityKeys.map((entityKey) => {
+                    const entityDocs = groupedByEntity[entityKey];
+                    const entityLabel = entityKey === '_outros'
+                      ? 'Outros'
+                      : ENTITY_TYPE_LABELS[entityKey] || entityKey;
+                    const entityExpandKey = `${category}-${entityKey}`;
+                    const isEntityExpanded = expandedCategories.has(entityExpandKey);
+
+                    return (
+                      <div key={entityKey} className="space-y-2">
+                        <button
+                          onClick={() => toggleCategory(entityExpandKey)}
+                          className="w-full flex items-center justify-between px-3 py-2 bg-purple-50 rounded-lg hover:bg-purple-100 transition-colors"
+                        >
+                          <div className="flex items-center gap-2">
+                            <h4 className="text-sm font-semibold text-purple-800">{entityLabel}</h4>
+                            <span className="bg-purple-200 text-purple-700 px-2 py-0.5 rounded-full text-xs font-bold">
+                              {entityDocs.length}
+                            </span>
                           </div>
-                          {doc.description && (
-                            <p className="text-xs lg:text-sm text-gray-500 mt-1 line-clamp-2">
-                              {truncateDescription(doc.description)}
-                            </p>
-                          )}
-                          {doc.leiArticles && (
-                            <div className="mt-2">
-                              <ArticleBadges
-                                leiArticles={doc.leiArticles}
-                                maxVisible={3}
-                                onArticleClick={(articleNum) => {
-                                  console.log('Artigo clicado:', articleNum);
+                          <div className="text-purple-400">
+                            {isEntityExpanded ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+                          </div>
+                        </button>
+
+                        {(isEntityExpanded ? entityDocs : entityDocs.slice(0, 2)).map((doc) => (
+                          <div
+                            key={doc.id}
+                            className="bg-gray-50 hover:bg-white rounded-xl p-3 lg:p-4 border border-gray-100 hover:border-blue-200 hover:shadow-sm transition-all"
+                          >
+                            <div className="flex items-start justify-between gap-3">
+                              <div
+                                className="flex-1 min-w-0 cursor-pointer group"
+                                onClick={() => onDocumentClick(doc)}
+                                role="button"
+                                tabIndex={0}
+                                onKeyDown={(e) => { if (e.key === 'Enter') onDocumentClick(doc); }}
+                              >
+                                <div className="flex items-start gap-2.5 lg:gap-3 w-full">
+                                  <div className={`w-8 h-8 ${config.docIconBg} rounded-lg flex items-center justify-center flex-shrink-0 mt-0.5`}>
+                                    <FileText className="w-4 h-4 text-white" />
+                                  </div>
+                                  <div className="flex-1 min-w-0">
+                                    <h4 className="text-sm lg:text-base font-semibold text-gray-900 group-hover:text-blue-600 transition-colors line-clamp-2">
+                                      {doc.title}
+                                    </h4>
+                                    {doc.description && (
+                                      <p className="text-xs lg:text-sm text-gray-500 mt-1 line-clamp-2">
+                                        {truncateDescription(doc.description)}
+                                      </p>
+                                    )}
+                                  </div>
+                                </div>
+                              </div>
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  toggleFavorite(doc.id, courseId);
                                 }}
-                              />
+                                className={`p-2 rounded-lg transition-colors flex-shrink-0 min-h-[40px] min-w-[40px] lg:min-h-0 lg:min-w-0 flex items-center justify-center ${
+                                  isFavorite(doc.id)
+                                    ? 'text-red-600 bg-red-100 hover:bg-red-200'
+                                    : 'text-gray-300 hover:text-red-600 hover:bg-red-50'
+                                }`}
+                                title={isFavorite(doc.id) ? 'Remover dos favoritos' : 'Adicionar aos favoritos'}
+                              >
+                                <Heart className={`w-4 h-4 lg:w-5 lg:h-5 ${isFavorite(doc.id) ? 'fill-current' : ''}`} />
+                              </button>
                             </div>
-                          )}
+                          </div>
+                        ))}
+
+                        {!isEntityExpanded && entityDocs.length > 2 && (
+                          <button
+                            onClick={() => toggleCategory(entityExpandKey)}
+                            className="w-full py-2 border-2 border-dashed border-gray-200 hover:border-purple-300 rounded-xl text-xs font-medium text-gray-500 hover:text-purple-600 hover:bg-purple-50/50 flex items-center justify-center gap-2 transition-all"
+                          >
+                            <span>Ver mais {entityDocs.length - 2} {entityDocs.length - 2 === 1 ? 'enunciado' : 'enunciados'}</span>
+                            <ChevronDown className="w-3 h-3" />
+                          </button>
+                        )}
+
+                        {isEntityExpanded && entityDocs.length > 2 && (
+                          <button
+                            onClick={() => toggleCategory(entityExpandKey)}
+                            className="w-full py-1.5 text-xs font-medium text-gray-400 hover:text-gray-600 flex items-center justify-center gap-1 transition-colors"
+                          >
+                            <ChevronUp className="w-3 h-3" />
+                            <span>Mostrar menos</span>
+                          </button>
+                        )}
+                      </div>
+                    );
+                  });
+                })()
+              ) : (
+                // Renderização padrão para outras categorias
+                <>
+                  {(isExpanded ? categoryDocs : categoryDocs.slice(0, 2)).map((doc) => (
+                    <div
+                      key={doc.id}
+                      className="bg-gray-50 hover:bg-white rounded-xl p-3 lg:p-4 border border-gray-100 hover:border-blue-200 hover:shadow-sm transition-all"
+                    >
+                      <div className="flex items-start justify-between gap-3">
+                        {/* Conteudo do documento */}
+                        <div
+                          className="flex-1 min-w-0 cursor-pointer group"
+                          onClick={() => onDocumentClick(doc)}
+                          role="button"
+                          tabIndex={0}
+                          onKeyDown={(e) => { if (e.key === 'Enter') onDocumentClick(doc); }}
+                        >
+                          <div className="flex items-start gap-2.5 lg:gap-3 w-full">
+                            <div className={`w-8 h-8 ${config.docIconBg} rounded-lg flex items-center justify-center flex-shrink-0 mt-0.5`}>
+                              {doc.type === 'video' ? (
+                                <Video className="w-4 h-4 text-white" />
+                              ) : (
+                                <FileText className="w-4 h-4 text-white" />
+                              )}
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <div className="flex items-start gap-2">
+                                <h4 className="text-sm lg:text-base font-semibold text-gray-900 group-hover:text-blue-600 transition-colors line-clamp-2">
+                                  {doc.title}
+                                </h4>
+                                {PARECER_SUBTYPE_LABELS[doc.category] && (
+                                  <span className={`flex-shrink-0 mt-0.5 px-2 py-0.5 rounded-full text-xs font-semibold ${
+                                    doc.category === 'decor'
+                                      ? 'bg-amber-100 text-amber-800'
+                                      : 'bg-emerald-100 text-emerald-800'
+                                  }`}>
+                                    {PARECER_SUBTYPE_LABELS[doc.category]}
+                                  </span>
+                                )}
+                              </div>
+                              {doc.description && (
+                                <p className="text-xs lg:text-sm text-gray-500 mt-1 line-clamp-2">
+                                  {truncateDescription(doc.description)}
+                                </p>
+                              )}
+                              {doc.leiArticles && (
+                                <div className="mt-2">
+                                  <ArticleBadges
+                                    leiArticles={doc.leiArticles}
+                                    maxVisible={3}
+                                    onArticleClick={(articleNum) => {
+                                      console.log('Artigo clicado:', articleNum);
+                                    }}
+                                  />
+                                </div>
+                              )}
+                            </div>
+                          </div>
                         </div>
+
+                        {/* Botao de favoritar */}
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            toggleFavorite(doc.id, courseId);
+                          }}
+                          className={`p-2 rounded-lg transition-colors flex-shrink-0 min-h-[40px] min-w-[40px] lg:min-h-0 lg:min-w-0 flex items-center justify-center ${
+                            isFavorite(doc.id)
+                              ? 'text-red-600 bg-red-100 hover:bg-red-200'
+                              : 'text-gray-300 hover:text-red-600 hover:bg-red-50'
+                          }`}
+                          title={isFavorite(doc.id) ? 'Remover dos favoritos' : 'Adicionar aos favoritos'}
+                        >
+                          <Heart className={`w-4 h-4 lg:w-5 lg:h-5 ${isFavorite(doc.id) ? 'fill-current' : ''}`} />
+                        </button>
                       </div>
                     </div>
+                  ))}
 
-                    {/* Botão de favoritar */}
+                  {/* Botao "Ver mais" redesenhado */}
+                  {!isExpanded && categoryDocs.length > 2 && (
                     <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        toggleFavorite(doc.id, courseId);
-                      }}
-                      className={`p-2 rounded-lg transition-colors flex-shrink-0 min-h-[40px] min-w-[40px] lg:min-h-0 lg:min-w-0 flex items-center justify-center ${
-                        isFavorite(doc.id)
-                          ? 'text-red-600 bg-red-100 hover:bg-red-200'
-                          : 'text-gray-300 hover:text-red-600 hover:bg-red-50'
-                      }`}
-                      title={isFavorite(doc.id) ? 'Remover dos favoritos' : 'Adicionar aos favoritos'}
+                      onClick={() => toggleCategory(category)}
+                      className="w-full py-3 border-2 border-dashed border-gray-200 hover:border-blue-300 rounded-xl text-sm font-medium text-gray-500 hover:text-blue-600 hover:bg-blue-50/50 flex items-center justify-center gap-2 transition-all"
                     >
-                      <Heart className={`w-4 h-4 lg:w-5 lg:h-5 ${isFavorite(doc.id) ? 'fill-current' : ''}`} />
+                      <span>Ver mais {categoryDocs.length - 2} {categoryDocs.length - 2 === 1 ? 'documento' : 'documentos'}</span>
+                      <ChevronDown className="w-4 h-4" />
                     </button>
-                  </div>
-                </div>
-              ))}
+                  )}
 
-              {/* Botão "Ver mais" redesenhado */}
-              {!isExpanded && categoryDocs.length > 2 && (
-                <button
-                  onClick={() => toggleCategory(category)}
-                  className="w-full py-3 border-2 border-dashed border-gray-200 hover:border-blue-300 rounded-xl text-sm font-medium text-gray-500 hover:text-blue-600 hover:bg-blue-50/50 flex items-center justify-center gap-2 transition-all"
-                >
-                  <span>Ver mais {categoryDocs.length - 2} {categoryDocs.length - 2 === 1 ? 'documento' : 'documentos'}</span>
-                  <ChevronDown className="w-4 h-4" />
-                </button>
-              )}
-
-              {/* Botão para colapsar */}
-              {isExpanded && categoryDocs.length > 2 && (
-                <button
-                  onClick={() => toggleCategory(category)}
-                  className="w-full py-2 text-sm font-medium text-gray-400 hover:text-gray-600 flex items-center justify-center gap-1 transition-colors"
-                >
-                  <ChevronUp className="w-4 h-4" />
-                  <span>Mostrar menos</span>
-                </button>
+                  {/* Botao para colapsar */}
+                  {isExpanded && categoryDocs.length > 2 && (
+                    <button
+                      onClick={() => toggleCategory(category)}
+                      className="w-full py-2 text-sm font-medium text-gray-400 hover:text-gray-600 flex items-center justify-center gap-1 transition-colors"
+                    >
+                      <ChevronUp className="w-4 h-4" />
+                      <span>Mostrar menos</span>
+                    </button>
+                  )}
+                </>
               )}
             </div>
           </div>

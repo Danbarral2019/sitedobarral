@@ -123,6 +123,7 @@ export async function GET(request: NextRequest) {
           uploadedAt: true,
           acordaoNumero: true,
           acordaoAno: true,
+          entityType: true,
         },
       });
       console.log('[Batch-Data] Documentos encontrados:', documents.length);

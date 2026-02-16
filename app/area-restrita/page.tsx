@@ -56,7 +56,9 @@ const CATEGORY_LABELS: Record<string, string> = {
   'orientacao-normativa': 'Orientações Normativas',
   'enunciados': 'Enunciados',
   'acordao': 'Acórdãos TCU',
-  'sumula': 'Súmulas',
+  'sumula': 'Súmulas TCU',
+  'consulta_tcu': 'Respostas a Consultas TCU',
+  'informativo': 'Informativos de Licitação TCU',
   'manual-tcu': 'Manual do TCU',
   'boa_pratica': 'Outros Atos Normativos',
   'ato-normativo': 'Normativos',
@@ -101,6 +103,7 @@ interface DocumentType {
   tags?: string;
   courseId?: string;
   isCommon?: boolean;
+  entityType?: string;
 }
 
 interface VideoType {

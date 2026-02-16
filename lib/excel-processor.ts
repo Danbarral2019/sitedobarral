@@ -22,7 +22,7 @@ export interface ProcessedDocument {
   title: string;
   description: string;
   content?: string; // Conteúdo/trechos relevantes para busca textual
-  category: 'apostila' | 'acordao' | 'parecer' | 'edital' | 'artigo' | 'orientacao-normativa' | 'outro';
+  category: 'apostila' | 'acordao' | 'parecer' | 'edital' | 'artigo' | 'orientacao-normativa' | 'sumula' | 'consulta_tcu' | 'informativo' | 'outro';
   courseId?: string;
   courseSlug?: string;
   // Múltiplos cursos
@@ -144,7 +144,7 @@ function processRow(
   let category: ProcessedDocument['category'] = 'outro';
   if (row.categoria) {
     const normalizedCategory = row.categoria.toLowerCase().trim();
-    const validCategories = ['apostila', 'acordao', 'parecer', 'edital', 'artigo', 'orientacao-normativa', 'outro'];
+    const validCategories = ['apostila', 'acordao', 'parecer', 'edital', 'artigo', 'orientacao-normativa', 'sumula', 'consulta_tcu', 'informativo', 'outro'];
     if (validCategories.includes(normalizedCategory)) {
       category = normalizedCategory as ProcessedDocument['category'];
     } else {

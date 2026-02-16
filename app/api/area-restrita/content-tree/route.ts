@@ -8,6 +8,16 @@ import type { ContentType, ContentTreeNode, ContentTreeResponse } from '@/lib/ty
 // Categorias que devem ser agrupadas sob "Pareceres"
 const PARECER_CATEGORIES = ['parecer', 'parecer-vinculante', 'decor'];
 
+// Labels de órgãos para sub-agrupamento de enunciados
+const ENTITY_TYPE_LABELS: Record<string, string> = {
+  'INCP': 'INCP - Instituto Nacional de Contratações Públicas',
+  'IBDA': 'IBDA - Instituto Brasileiro de Direito Administrativo',
+  'CJF': 'CJF - Conselho da Justiça Federal',
+  'FONACON': 'FONACON - Fórum Nacional de Contas',
+  'PGE-SP': 'PGE-SP - Procuradoria Geral do Estado de São Paulo',
+  'AGE-MG': 'AGE-MG - Advocacia-Geral do Estado de Minas Gerais',
+};
+
 // Categorias de materiais do curso (excluídas da árvore de documentos)
 const COURSE_MATERIAL_CATEGORIES = ['apostila', 'conteudo-programatico', 'bibliografia', 'material-complementar'];
 
@@ -24,7 +34,9 @@ const CATEGORY_LABELS: Record<string, string> = {
   'orientacao-normativa': 'Orientações Normativas',
   'enunciados': 'Enunciados',
   'acordao': 'Acórdãos TCU',
-  'sumula': 'Súmulas',
+  'sumula': 'Súmulas TCU',
+  'consulta_tcu': 'Respostas a Consultas TCU',
+  'informativo': 'Informativos de Licitação TCU',
   'manual-tcu': 'Manual do TCU',
   'boa_pratica': 'Outros Atos Normativos',
   'ato-normativo': 'Normativos',
@@ -83,6 +95,7 @@ export async function GET(request: NextRequest) {
       sitesCount,
       legislativeActsCount,
       modulesCountByCourse,
+      enunciadosByEntity,
     ] = await Promise.all([
       // 1. Documents grouped by course and category
       prisma.document.groupBy({
@@ -143,6 +156,16 @@ export async function GET(request: NextRequest) {
         where: {
           courseId: { in: enrolledCourseIds },
           isPublished: true,
+        },
+        _count: { id: true },
+      }),
+
+      // 8. Enunciados sub-grouped by entityType
+      prisma.document.groupBy({
+        by: ['entityType'],
+        where: {
+          category: 'enunciados',
+          entityType: { not: null },
         },
         _count: { id: true },
       }),
@@ -258,12 +281,25 @@ export async function GET(request: NextRequest) {
     Object.entries(aggregatedCategories)
       .filter(([cat]) => !HIDDEN_CATEGORIES.includes(cat))
       .forEach(([cat, count]) => {
+        // Para enunciados, adicionar sub-nós por entityType
+        let children: ContentTreeNode[] | undefined;
+        if (cat === 'enunciados' && enunciadosByEntity.length > 0) {
+          children = enunciadosByEntity.map((group) => ({
+            id: `doc-enunciados-${group.entityType}`,
+            type: 'document' as const,
+            label: ENTITY_TYPE_LABELS[group.entityType!] || group.entityType!,
+            count: group._count.id,
+            category: 'enunciados',
+          }));
+        }
+
         documentChildren.push({
           id: `doc-${cat}`,
           type: 'document' as const,
           label: getCategoryLabel(cat),
           count,
           category: cat,
+          children,
         });
       });
 

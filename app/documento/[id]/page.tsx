@@ -14,6 +14,9 @@ const CATEGORY_LABELS: Record<string, string> = {
   'ato-normativo': 'Ato Normativo',
   apostila: 'Apostila',
   'boa_pratica': 'Outro Ato Normativo',
+  sumula: 'Súmulas TCU',
+  consulta_tcu: 'Respostas a Consultas TCU',
+  informativo: 'Informativos de Licitação TCU',
 };
 
 const CATEGORY_COLORS: Record<string, string> = {

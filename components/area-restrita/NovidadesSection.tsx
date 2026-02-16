@@ -11,6 +11,9 @@ import {
   ChevronRight,
   Gavel,
   Loader2,
+  Scale,
+  MessageSquare,
+  Newspaper,
 } from 'lucide-react';
 
 interface RecentDocument {
@@ -57,6 +60,9 @@ interface NovidadesData {
 const CATEGORY_ICONS: Record<string, typeof FileText> = {
   acordao: Gavel,
   'manual-tcu': BookOpen,
+  sumula: Scale,
+  consulta_tcu: MessageSquare,
+  informativo: Newspaper,
   default: FileText,
 };
 
@@ -84,6 +90,9 @@ function getCategoryLabel(category: string): string {
     decor: 'DECOR',
     'lei-artigo': 'Lei 14.133',
     'ato-normativo': 'Ato Normativo',
+    sumula: 'Súmula TCU',
+    consulta_tcu: 'Consulta TCU',
+    informativo: 'Informativo TCU',
   };
   return labels[category] || 'Documento';
 }

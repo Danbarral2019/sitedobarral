@@ -25,6 +25,9 @@ function getCategoryColor(category: string): string {
     'parecer-vinculante': 'bg-rose-100 text-rose-700',
     'ato-normativo': 'bg-teal-100 text-teal-700',
     apostila: 'bg-cyan-100 text-cyan-700',
+    sumula: 'bg-indigo-100 text-indigo-700',
+    consulta_tcu: 'bg-sky-100 text-sky-700',
+    informativo: 'bg-orange-100 text-orange-700',
   };
   return colors[category] || 'bg-gray-100 text-gray-700';
 }
@@ -39,6 +42,9 @@ function getCategoryLabel(category: string): string {
     'parecer-vinculante': 'Parecer',
     'ato-normativo': 'Ato Normativo',
     apostila: 'Apostila',
+    sumula: 'Súmula TCU',
+    consulta_tcu: 'Consulta TCU',
+    informativo: 'Informativo TCU',
   };
   return labels[category] || 'Documento';
 }
