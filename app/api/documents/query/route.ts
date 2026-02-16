@@ -1,10 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { verifyAuth } from '@/lib/auth';
-import { semanticSearch, buildContextForLLM } from '@/lib/embeddings/vector-search';
+import { semanticSearch, multiQuerySearch, buildContextForLLM } from '@/lib/embeddings/vector-search';
 import type { SearchResult } from '@/lib/embeddings/vector-search';
 import { queryGeminiText } from '@/lib/gemini/cached-client';
-import { checkRateLimit } from '@/lib/cache/redis-client';
+import { checkRateLimit, withCache, CACHE_TTL } from '@/lib/cache/redis-client';
 import { trackServerEvent } from '@/lib/monitoring/events';
 import {
   extractCitedArticles,
@@ -27,6 +27,7 @@ interface QueryFilters {
   dateTo?: string;
   tags?: string[];
   isPublic?: boolean;
+  ticMode?: boolean;
 }
 
 interface ConversationMessage {
@@ -148,22 +149,91 @@ export async function POST(req: NextRequest) {
       }
     }
 
+    // 4c. TIC mode: enrich query with TIC context
+    if (filters.ticMode) {
+      semanticQuery = `No âmbito de contratações de TIC (Tecnologia da Informação e Comunicação) pela Administração Pública Federal, conforme INs e Portarias da SGD/MGI: ${semanticQuery}`;
+    }
+
     console.log(`🔍 Query from user ${userId}: "${query}"`);
     if (semanticQuery !== query) {
       console.log(`   🔗 Enhanced query with context: "${semanticQuery}"`);
     }
+    if (filters.ticMode) {
+      console.log(`   🖥️ TIC mode ativado`);
+    }
     console.log(`   Filters:`, filters);
 
-    // 5. Perform semantic search using embeddings
+    // 5. Query expansion: generate alternative queries for better recall
+    let expandedQueries: string[] = [semanticQuery];
+    try {
+      const expansionCacheKey = `query-expansion:${hashQueryStr(semanticQuery)}`;
+      const expanded = await withCache(
+        expansionCacheKey,
+        async () => {
+          const expansionPrompt = `Você é um especialista em Direito Administrativo e Licitações (Lei 14.133/2021).
+Gere 2 variações da pergunta abaixo usando sinônimos jurídicos e termos técnicos alternativos.
+Responda APENAS com um JSON array de strings, sem texto adicional.
+
+Pergunta: "${semanticQuery}"
+
+Exemplo de resposta: ["variação 1", "variação 2"]`;
+
+          const result = await queryGeminiText(expansionPrompt, {
+            temperature: 0.5,
+            maxOutputTokens: 256,
+            useCache: false,
+          });
+
+          let parsed: string[] = [];
+          try {
+            let text = result.response.trim();
+            if (text.includes('```json')) text = text.split('```json')[1].split('```')[0].trim();
+            else if (text.includes('```')) text = text.split('```')[1].split('```')[0].trim();
+            parsed = JSON.parse(text);
+          } catch { /* ignore parse errors */ }
+
+          return Array.isArray(parsed) ? parsed.slice(0, 2) : [];
+        },
+        CACHE_TTL.GEMINI_QUERY
+      );
+      if (expanded.length > 0) {
+        expandedQueries = [semanticQuery, ...expanded];
+        console.log(`   🔄 Query expansion: ${expandedQueries.length} queries`);
+      }
+    } catch (err) {
+      console.warn('   ⚠️ Query expansion failed:', err instanceof Error ? err.message : err);
+    }
+
+    // 5a. Perform semantic search using embeddings (multi-query if expanded)
     // Busca mais resultados para garantir diversidade de categorias
-    const searchResponse = await semanticSearch(semanticQuery, {
-      category: filters.category,
-      excludeCategories: ['boa_pratica', 'parecer-vinculante'],
-      limit: Math.max(maxResults * 5, 60),
-      threshold: 0.40,
-      useCache,
-      includeChunkContent: true,
-    });
+    let searchResponse: Awaited<ReturnType<typeof semanticSearch>>;
+
+    if (expandedQueries.length > 1) {
+      const multiResults = await multiQuerySearch(expandedQueries, {
+        category: filters.category,
+        excludeCategories: ['boa_pratica'],
+        limit: Math.max(maxResults * 5, 60),
+        threshold: 0.40,
+        useCache,
+        includeChunkContent: true,
+      });
+      searchResponse = {
+        results: multiResults,
+        query: semanticQuery,
+        totalFound: multiResults.length,
+        latency: 0,
+        cached: false,
+      };
+    } else {
+      searchResponse = await semanticSearch(semanticQuery, {
+        category: filters.category,
+        excludeCategories: ['boa_pratica'],
+        limit: Math.max(maxResults * 5, 60),
+        threshold: 0.40,
+        useCache,
+        includeChunkContent: true,
+      });
+    }
 
     console.log(`   📄 Found ${searchResponse.results.length} relevant documents`);
 
@@ -315,10 +385,37 @@ export async function POST(req: NextRequest) {
     const fullActsContext = [semanticActsContext, extraActsFormatted].filter(Boolean).join('\n\n');
 
     // Build docs context (increased to fit more diverse results)
-    const docsContext = buildContextForLLM(docResults, 6000);
+    const docsContext = buildContextForLLM(docResults, 10000);
 
-    // 9. Build layered context
-    const fullContext = buildLayeredContext(fullLeiContext, fullActsContext, docsContext, 15000);
+    // 8b. TIC mode: enrich acts context with TIC-specific legislative acts
+    let ticActsContext = '';
+    if (filters.ticMode) {
+      try {
+        const ticActs = await prisma.legislativeAct.findMany({
+          where: { themes: { contains: '"tic"' } },
+          select: { fullNumber: true, ementa: true, officialUrl: true, leiArticles: true },
+          orderBy: { hierarchyLevel: 'asc' },
+          take: 10,
+        });
+        if (ticActs.length > 0) {
+          ticActsContext = '\nATOS NORMATIVOS DE TIC (SGD/MGI):\n' +
+            ticActs.map(act => {
+              const arts = act.leiArticles ? JSON.parse(act.leiArticles) : [];
+              const artsStr = arts.length > 0 ? ` (Art. ${arts.join(', ')})` : '';
+              return `**${act.fullNumber}**${artsStr}\n${act.ementa}`;
+            }).join('\n\n');
+          console.log(`   🖥️ TIC context: ${ticActs.length} atos normativos adicionados ao contexto`);
+        }
+      } catch (err) {
+        console.warn('   ⚠️ TIC context enrichment failed:', err instanceof Error ? err.message : err);
+      }
+    }
+
+    // 9. Build layered context (increased from 15000 to 20000 for richer answers)
+    const combinedActsContext = ticActsContext
+      ? `${fullActsContext}\n\n${ticActsContext}`
+      : fullActsContext;
+    const fullContext = buildLayeredContext(fullLeiContext, combinedActsContext, docsContext, 20000);
 
     // 10. Build conversation history context
     let historyContext = '';
@@ -366,12 +463,15 @@ INSTRUÇÕES:
    b) Enunciados de instituições (IBDA, INCP, etc.) e Orientações Normativas da AGU — SEMPRE cite quando pertinentes, são fontes de alto valor
    c) Artigos da Lei 14.133/2021 — cite CADA artigo relevante do contexto
    d) Atos normativos regulamentadores (INs, Decretos)
-   e) Acórdãos do TCU e Manual do TCU
-   f) Pareceres da AGU (DECOR, Pareceres Vinculantes)
+   e) Acórdãos do TCU e Manual do TCU — cite com número/ano (ex: "Acórdão TCU 1234/2024 - Plenário")
+   f) Informativos e Súmulas do TCU — cite com número (ex: "Informativo TCU nº 350", "Súmula TCU nº 247")
+   g) Pareceres da AGU (DECOR, Pareceres Vinculantes)
 3. Cite enunciados, pareceres, orientações normativas e manuais do contexto — NÃO omita nenhuma fonte relevante
-4. Use linguagem técnica jurídica com citações precisas (ex: "Conforme o Art. 23 da Lei 14.133...", "O Enunciado nº 7 do INCP dispõe...")
-5. Seja completo mas organizado — use parágrafos distintos para cada aspecto
-6. Se os documentos não contiverem informação suficiente, diga isso
+4. Para enunciados, sempre indique o órgão emissor (ex: "Enunciado IBDA nº 7", "Enunciado INCP nº 12")
+5. Diferencie fontes normativas VINCULANTES (lei, decreto, súmula vinculante) de fontes DOUTRINÁRIAS (apostilas, manuais) e JURISPRUDENCIAIS (acórdãos, informativos)
+6. Use linguagem técnica jurídica com citações precisas (ex: "Conforme o Art. 23 da Lei 14.133...", "O Enunciado nº 7 do INCP dispõe...")
+7. Seja completo mas organizado — use parágrafos distintos para cada aspecto
+8. Se os documentos não contiverem informação suficiente, diga isso
 
 RESPOSTA:`;
 
@@ -380,7 +480,7 @@ RESPOSTA:`;
     try {
       const geminiResult = await queryGeminiText(synthesisPrompt, {
         temperature: 0.3,
-        maxOutputTokens: 2000,
+        maxOutputTokens: 3000,
         useCache,
       });
       synthesizedAnswer = geminiResult.response;
@@ -461,6 +561,19 @@ RESPOSTA:`;
 // ===========================
 
 /**
+ * Hash simples para cache key de query expansion
+ */
+function hashQueryStr(str: string): string {
+  let hash = 0;
+  for (let i = 0; i < str.length; i++) {
+    const char = str.charCodeAt(i);
+    hash = (hash << 5) - hash + char;
+    hash = hash & hash;
+  }
+  return Math.abs(hash).toString(36);
+}
+
+/**
  * Diversify results with priority tiers:
  * Tier 1: Professor's materials (apostila, conteudo-programatico, outro, bibliografia, sumula, parecer)
  * Tier 2: Enunciados + ONs AGU (enunciados, orientacao-normativa)
@@ -478,12 +591,14 @@ function diversifyResults(results: SearchResult[], maxResults: number): SearchRe
     'conteudo-programatico': 1,
     'outro': 1,
     'bibliografia': 1,
-    'sumula': 1,
     'parecer': 1,
     'enunciados': 2,
     'orientacao-normativa': 2,
+    'sumula': 2,
     'acordao': 3,
     'manual-tcu': 3,
+    'consulta_tcu': 3,
+    'informativo': 3,
     'decor': 4,
     'parecer-vinculante': 4,
   };

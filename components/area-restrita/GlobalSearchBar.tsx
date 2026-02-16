@@ -15,6 +15,7 @@ import {
   Gavel,
   HelpCircle,
   Newspaper,
+  Monitor,
 } from 'lucide-react';
 import type { ContentType, GlobalSearchResponse } from '@/lib/types/global-search';
 import { CONTENT_TYPE_CONFIG } from '@/lib/types/global-search';
@@ -34,6 +35,8 @@ interface GlobalSearchBarProps {
   isAiLoading: boolean;
   onSubmit: () => void;
   placeholder?: string;
+  ticMode?: boolean;
+  onTicToggle?: () => void;
 }
 
 const TYPE_ICONS: Record<ContentType, typeof FileText> = {
@@ -62,6 +65,8 @@ export function GlobalSearchBar({
   isAiLoading,
   onSubmit,
   placeholder = 'Buscar em todo o acervo...',
+  ticMode = false,
+  onTicToggle,
 }: GlobalSearchBarProps) {
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -138,6 +143,22 @@ export function GlobalSearchBar({
               aria-label="Limpar busca"
             >
               <X className="w-4 h-4" />
+            </button>
+          )}
+
+          {/* TIC Mode Toggle */}
+          {onTicToggle && (
+            <button
+              onClick={onTicToggle}
+              className={`flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium rounded-lg transition-colors border ${
+                ticMode
+                  ? 'text-cyan-700 bg-cyan-50 hover:bg-cyan-100 border-cyan-200'
+                  : 'text-gray-400 bg-gray-50 hover:bg-gray-100 border-gray-200'
+              }`}
+              title={ticMode ? 'Desativar contexto TIC' : 'Ativar busca focada em contratações de TIC'}
+            >
+              <Monitor className="w-4 h-4" />
+              <span className="hidden sm:inline">TIC</span>
             </button>
           )}
 

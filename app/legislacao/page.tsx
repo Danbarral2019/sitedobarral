@@ -4,7 +4,7 @@ import { useState, useEffect, useCallback } from 'react';
 import {
   Search, Filter, Scale, Calendar, Building, ChevronDown,
   ChevronUp, ExternalLink, Download, BookOpen, Eye,
-  X, FileText, Globe, ArrowRight
+  X, FileText, Globe, ArrowRight, Monitor
 } from 'lucide-react';
 import Link from 'next/link';
 import MarkdownContent from '@/components/MarkdownContent';
@@ -32,7 +32,7 @@ interface LegislativeAct {
   url?: string;
 }
 
-type TabType = 'atos' | 'boas-praticas';
+type TabType = 'atos' | 'boas-praticas' | 'tic';
 
 const TYPE_LABELS: Record<string, string> = {
   'decreto': 'Decreto',
@@ -65,7 +65,7 @@ export default function LegislacaoPage() {
 
   // Abas
   const [activeTab, setActiveTab] = useState<TabType>('atos');
-  const [tabCounts, setTabCounts] = useState({ atos: 0, boasPraticas: 0 });
+  const [tabCounts, setTabCounts] = useState({ atos: 0, boasPraticas: 0, tic: 0 });
 
   // Filtros disponíveis
   const [availableTypes, setAvailableTypes] = useState<Array<{ type: string; count: number }>>([]);
@@ -112,9 +112,10 @@ export default function LegislacaoPage() {
   useEffect(() => {
     const fetchCounts = async () => {
       try {
-        const [atosRes, bpRes] = await Promise.all([
+        const [atosRes, bpRes, ticRes] = await Promise.all([
           fetch('/api/legislative-acts?tab=atos&limit=1'),
           fetch('/api/legislative-acts?tab=boas-praticas&limit=1'),
+          fetch('/api/legislative-acts?tab=tic&limit=1'),
         ]);
         if (atosRes.ok) {
           const data = await atosRes.json();
@@ -123,6 +124,10 @@ export default function LegislacaoPage() {
         if (bpRes.ok) {
           const data = await bpRes.json();
           setTabCounts(prev => ({ ...prev, boasPraticas: data.pagination.total }));
+        }
+        if (ticRes.ok) {
+          const data = await ticRes.json();
+          setTabCounts(prev => ({ ...prev, tic: data.pagination.total }));
         }
       } catch {
         // Silently fail
@@ -204,29 +209,34 @@ export default function LegislacaoPage() {
 
   const hasActiveFilters = typeFilter || issuerFilter || yearFilter || searchTerm || esferaFilter || themeFilter;
   const isBoasPraticas = activeTab === 'boas-praticas';
+  const isTic = activeTab === 'tic';
 
   return (
     <main className="min-h-screen bg-gradient-to-b from-gray-50 to-white">
         {/* Hero Section */}
-        <section className={`bg-gradient-to-r ${isBoasPraticas ? 'from-emerald-600 to-teal-700' : 'from-blue-600 to-indigo-700'} text-white py-16 transition-colors duration-300`}>
+        <section className={`bg-gradient-to-r ${isTic ? 'from-cyan-600 to-blue-700' : isBoasPraticas ? 'from-emerald-600 to-teal-700' : 'from-blue-600 to-indigo-700'} text-white py-16 transition-colors duration-300`}>
           <div className="container mx-auto px-4 max-w-6xl">
             <div className="flex items-center gap-4 mb-4">
               <div className="w-16 h-16 bg-white/20 backdrop-blur rounded-2xl flex items-center justify-center">
-                {isBoasPraticas ? <FileText className="w-10 h-10 text-white" /> : <Scale className="w-10 h-10 text-white" />}
+                {isTic ? <Monitor className="w-10 h-10 text-white" /> : isBoasPraticas ? <FileText className="w-10 h-10 text-white" /> : <Scale className="w-10 h-10 text-white" />}
               </div>
               <div>
                 <h1 className="text-4xl md:text-5xl font-bold mb-2">
-                  {isBoasPraticas ? 'Outros Atos Normativos' : 'Atos Normativos'}
+                  {isTic ? 'Contratações de TIC' : isBoasPraticas ? 'Outros Atos Normativos' : 'Atos Normativos'}
                 </h1>
-                <p className={`text-xl ${isBoasPraticas ? 'text-emerald-100' : 'text-blue-100'}`}>
-                  {isBoasPraticas
+                <p className={`text-xl ${isTic ? 'text-cyan-100' : isBoasPraticas ? 'text-emerald-100' : 'text-blue-100'}`}>
+                  {isTic
+                    ? 'Atos normativos de contratação de TIC (SGD/MGI)'
+                    : isBoasPraticas
                     ? 'Outros atos normativos relacionados a licitações e contratos'
                     : 'Legislação Relacionada à Lei 14.133/2021'}
                 </p>
               </div>
             </div>
-            <p className={`text-lg ${isBoasPraticas ? 'text-emerald-100' : 'text-blue-100'} max-w-3xl`}>
-              {isBoasPraticas
+            <p className={`text-lg ${isTic ? 'text-cyan-100' : isBoasPraticas ? 'text-emerald-100' : 'text-blue-100'} max-w-3xl`}>
+              {isTic
+                ? 'Instruções Normativas, Portarias e Decretos da Secretaria de Governo Digital para contratação de soluções de Tecnologia da Informação e Comunicação.'
+                : isBoasPraticas
                 ? 'Explore outros atos normativos de órgãos federais e estaduais relacionados a licitações e contratos administrativos.'
                 : 'Explore decretos, portarias, instruções normativas e demais atos que regulamentam a Lei de Licitações e Contratos Administrativos.'}
             </p>
@@ -266,6 +276,22 @@ export default function LegislacaoPage() {
                 activeTab === 'boas-praticas' ? 'bg-emerald-100 text-emerald-700' : 'bg-gray-100 text-gray-600'
               }`}>
                 {tabCounts.boasPraticas}
+              </span>
+            </button>
+            <button
+              onClick={() => switchTab('tic')}
+              className={`flex items-center gap-2 px-6 py-3 rounded-t-xl font-bold text-sm transition-colors ${
+                activeTab === 'tic'
+                  ? 'bg-white text-cyan-700 border-2 border-b-0 border-gray-200 shadow-sm'
+                  : 'bg-white/70 text-gray-600 hover:text-cyan-700 hover:bg-white/90 border-2 border-transparent'
+              }`}
+            >
+              <Monitor className="w-4 h-4" />
+              Contratações de TIC
+              <span className={`px-2 py-0.5 rounded-full text-xs ${
+                activeTab === 'tic' ? 'bg-cyan-100 text-cyan-700' : 'bg-gray-100 text-gray-600'
+              }`}>
+                {tabCounts.tic}
               </span>
             </button>
           </div>
@@ -450,7 +476,9 @@ export default function LegislacaoPage() {
                         }}
                         className={`px-3 py-1.5 text-xs rounded-full border-2 transition-colors font-medium ${
                           themeFilter === tema.value
-                            ? isBoasPraticas
+                            ? isTic
+                              ? 'bg-cyan-600 text-white border-cyan-600'
+                              : isBoasPraticas
                               ? 'bg-emerald-600 text-white border-emerald-600'
                               : 'bg-blue-600 text-white border-blue-600'
                             : 'bg-white text-gray-700 border-gray-300 hover:border-gray-400'
@@ -527,7 +555,7 @@ export default function LegislacaoPage() {
           {/* Lista de Atos */}
           {isLoading ? (
             <div className="text-center py-16">
-              <div className={`inline-block w-12 h-12 border-4 ${isBoasPraticas ? 'border-emerald-600' : 'border-blue-600'} border-t-transparent rounded-full animate-spin`}></div>
+              <div className={`inline-block w-12 h-12 border-4 ${isTic ? 'border-cyan-600' : isBoasPraticas ? 'border-emerald-600' : 'border-blue-600'} border-t-transparent rounded-full animate-spin`}></div>
               <p className="mt-4 text-gray-600 text-lg">
                 {isBoasPraticas ? 'Carregando outros atos normativos...' : 'Carregando legislação...'}
               </p>
@@ -576,7 +604,9 @@ export default function LegislacaoPage() {
                     key={act.id}
                     id={act.id}
                     className={`bg-white border-2 rounded-xl overflow-hidden transition-all ${
-                      isBoasPraticas
+                      isTic
+                        ? 'border-gray-200 hover:border-cyan-300 hover:shadow-lg'
+                        : isBoasPraticas
                         ? 'border-gray-200 hover:border-emerald-300 hover:shadow-lg'
                         : 'border-gray-200 hover:border-blue-300 hover:shadow-lg'
                     }`}
@@ -646,7 +676,9 @@ export default function LegislacaoPage() {
                                 <span
                                   key={t}
                                   className={`px-2 py-0.5 text-xs rounded-full ${
-                                    isBoasPraticas
+                                    isTic
+                                      ? 'bg-cyan-50 text-cyan-700 border border-cyan-200'
+                                      : isBoasPraticas
                                       ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
                                       : 'bg-indigo-50 text-indigo-700 border border-indigo-200'
                                   }`}
@@ -701,12 +733,16 @@ export default function LegislacaoPage() {
                       <div className="border-t-2 border-gray-200 bg-gray-50 p-6">
                         {act.summary && (
                           <div className={`mb-6 rounded-xl overflow-hidden shadow-sm ${
-                            isBoasPraticas
+                            isTic
+                              ? 'bg-gradient-to-br from-cyan-50 via-blue-50 to-indigo-50'
+                              : isBoasPraticas
                               ? 'bg-gradient-to-br from-emerald-50 via-teal-50 to-green-50'
                               : 'bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50'
                           }`}>
                             <div className={`px-4 py-3 ${
-                              isBoasPraticas
+                              isTic
+                                ? 'bg-gradient-to-r from-cyan-600 to-blue-600'
+                                : isBoasPraticas
                                 ? 'bg-gradient-to-r from-emerald-600 to-teal-600'
                                 : 'bg-gradient-to-r from-blue-600 to-indigo-600'
                             }`}>
@@ -748,7 +784,9 @@ export default function LegislacaoPage() {
                               target="_blank"
                               rel="noopener noreferrer"
                               className={`flex items-center gap-2 px-4 py-2.5 text-white rounded-lg transition-colors font-semibold ${
-                                isBoasPraticas
+                                isTic
+                                  ? 'bg-cyan-600 hover:bg-cyan-700'
+                                  : isBoasPraticas
                                   ? 'bg-emerald-600 hover:bg-emerald-700'
                                   : 'bg-blue-600 hover:bg-blue-700'
                               }`}

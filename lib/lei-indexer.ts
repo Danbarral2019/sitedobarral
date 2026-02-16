@@ -88,6 +88,12 @@ INSTRUÇÕES:
    - Máximo de {{MAX_ARTICLES}} artigos
    - REGRA ESPECIAL para Art. 6º: O Art. 6º contém DEFINIÇÕES genéricas (licitação, contratação direta, obra, serviço, etc.) cujos institutos são regulados por artigos específicos da lei. NÃO inclua o Art. 6º a menos que o documento cite EXPRESSAMENTE "art. 6" ou "artigo 6" da Lei 14.133. Se o documento apenas trata de um conceito definido no Art. 6º (ex: "contratação direta"), indexe pelos artigos que regulam esse instituto (ex: Arts. 72-75), NÃO pelo Art. 6º.
 
+5. REGRA ESPECIAL para Pareceres e Manifestações Jurídicas:
+   - Para documentos das categorias 'parecer-vinculante', 'decor', 'parecer':
+     só indexe artigos da Lei 14.133 se o parecer tratar DIRETAMENTE de licitações ou contratos administrativos.
+   - Pareceres sobre Direito Tributário, Previdenciário, Ambiental, Trabalhista, etc. NÃO devem receber artigos da Lei 14.133.
+   - Se o parecer NÃO tratar de licitações/contratos, retorne articles: [] e overallConfidence: 0
+
 FORMATO DE RESPOSTA (JSON):
 {
   "articles": [
@@ -115,7 +121,7 @@ Responda APENAS com JSON válido, sem texto adicional.`;
  */
 export class LeiIndexer {
   private static readonly DEFAULT_OPTIONS: Required<AnalysisOptions> = {
-    minConfidence: 30,
+    minConfidence: 50,
     maxArticles: 10,
     includeReasoning: true,
     geminiModel: 'gemini-2.0-flash',
@@ -129,6 +135,12 @@ export class LeiIndexer {
     options: AnalysisOptions = {}
   ): Promise<ArticleAnalysisResult> {
     const opts = { ...this.DEFAULT_OPTIONS, ...options };
+
+    // Override: pareceres exigem confiança mínima de 60
+    const parecerCategories = ['parecer-vinculante', 'decor', 'parecer'];
+    if (parecerCategories.includes(document.category || '') && opts.minConfidence < 60) {
+      opts.minConfidence = 60;
+    }
 
     try {
       // Preparar conteúdo para análise

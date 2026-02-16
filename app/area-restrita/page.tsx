@@ -535,6 +535,8 @@ export default function AreaRestritaPage() {
             onAIToggle={() => search.setAiEnabled(!search.aiEnabled)}
             isAiLoading={search.isAiLoading}
             onSubmit={search.triggerAISearch}
+            ticMode={search.ticMode}
+            onTicToggle={() => search.setTicMode(!search.ticMode)}
           />
           {/* Search History - collapsible below search bar */}
           {!search.isSearchActive && (

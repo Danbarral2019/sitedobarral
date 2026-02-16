@@ -44,6 +44,9 @@ export async function GET(request: NextRequest) {
         if (tab === 'boas-praticas') {
           return await fetchBoasPraticas({ search, year, esfera, theme, issuer, page, limit, skip });
         }
+        if (tab === 'tic') {
+          return await fetchAtosNormativos({ type, issuer, year, search, articleNumber, esfera, theme: theme || 'tic', page, limit, skip, ticOnly: true });
+        }
         return await fetchAtosNormativos({ type, issuer, year, search, articleNumber, esfera, theme, page, limit, skip });
       },
       CACHE_TTL.LEGISLATIVE_ACTS,
@@ -78,10 +81,11 @@ interface AtosParams {
   page: number;
   limit: number;
   skip: number;
+  ticOnly?: boolean;
 }
 
 async function fetchAtosNormativos(params: AtosParams) {
-  const { type, issuer, year, search, articleNumber, esfera, theme, page, limit, skip } = params;
+  const { type, issuer, year, search, articleNumber, esfera, theme, page, limit, skip, ticOnly } = params;
 
   // Construir where clause
   const where: Record<string, unknown> = {};
@@ -151,25 +155,30 @@ async function fetchAtosNormativos(params: AtosParams) {
     themes: act.themes ? JSON.parse(act.themes) : [],
   }));
 
-  // Buscar estatísticas de filtros disponíveis
+  // Buscar estatísticas de filtros disponíveis (respeitando filtro TIC)
+  const statsWhere = ticOnly ? { themes: { contains: '"tic"' } } : {};
   const [typeStats, issuerStats, yearStats, esferaStats] = await Promise.all([
     prisma.legislativeAct.groupBy({
       by: ['type'],
+      where: statsWhere,
       _count: true,
       orderBy: { _count: { type: 'desc' } }
     }),
     prisma.legislativeAct.groupBy({
       by: ['issuer'],
+      where: statsWhere,
       _count: true,
       orderBy: { _count: { issuer: 'desc' } }
     }),
     prisma.legislativeAct.groupBy({
       by: ['year'],
+      where: statsWhere,
       _count: true,
       orderBy: { year: 'desc' }
     }),
     prisma.legislativeAct.groupBy({
       by: ['esfera'],
+      where: statsWhere,
       _count: true,
     }),
   ]);

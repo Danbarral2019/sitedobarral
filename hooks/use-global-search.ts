@@ -54,6 +54,10 @@ interface UseGlobalSearchReturn {
   aiEnabled: boolean;
   setAiEnabled: (enabled: boolean) => void;
 
+  // TIC Mode
+  ticMode: boolean;
+  setTicMode: (enabled: boolean) => void;
+
   // Conversation
   aiConversationHistory: ConversationMessage[];
   sendFollowUp: (followUpQuery: string) => void;
@@ -114,6 +118,7 @@ export function useGlobalSearch(options: UseGlobalSearchOptions = {}): UseGlobal
   const [isAiLoading, setIsAiLoading] = useState(false);
   const [aiError, setAiError] = useState<string | null>(null);
   const [aiEnabled, setAiEnabled] = useState(true);
+  const [ticMode, setTicMode] = useState(false);
   const [aiConversationHistory, setAiConversationHistory] = useState<ConversationMessage[]>([]);
 
   // Refs
@@ -158,6 +163,7 @@ export function useGlobalSearch(options: UseGlobalSearchOptions = {}): UseGlobal
           query: searchQuery,
           maxResults: 30,
           useCache: true,
+          filters: ticMode ? { ticMode: true } : undefined,
         };
 
         // Include conversation history if provided (use ref to avoid stale closure)
@@ -245,7 +251,7 @@ export function useGlobalSearch(options: UseGlobalSearchOptions = {}): UseGlobal
       }
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [minQueryLength]
+    [minQueryLength, ticMode]
   );
 
   // Search function
@@ -490,6 +496,10 @@ export function useGlobalSearch(options: UseGlobalSearchOptions = {}): UseGlobal
     aiError,
     aiEnabled,
     setAiEnabled,
+
+    // TIC Mode
+    ticMode,
+    setTicMode,
 
     // Conversation
     aiConversationHistory,

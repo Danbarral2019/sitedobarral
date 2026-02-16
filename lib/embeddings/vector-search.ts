@@ -216,28 +216,68 @@ async function performSearch(
     LIMIT ${limit * 3}
   `);
 
-  // 4. Agrupa por documento (pega o chunk mais relevante de cada documento)
-  const documentMap = new Map<string, SearchResult>();
+  // 4. Agrupa por documento com multi-chunk (até 3 chunks dos top docs)
+  const documentChunks = new Map<string, typeof results>();
 
   for (const row of results) {
     const docId = row.document_id;
+    const chunks = documentChunks.get(docId) || [];
+    chunks.push(row);
+    documentChunks.set(docId, chunks);
+  }
 
-    if (!documentMap.has(docId) || row.similarity > documentMap.get(docId)!.similarity) {
-      documentMap.set(docId, {
-        documentId: docId,
-        documentTitle: row.document_title,
-        category: row.category,
-        chunkContent: includeChunkContent ? row.chunk_content : '',
-        chunkIndex: row.chunk_index,
-        similarity: row.similarity,
-        url: row.url || undefined,
-        courseId: row.course_id || undefined,
-        isCommon: row.is_common,
-        tags: row.tags ? safeParseArray(row.tags) : undefined,
-        leiArticles: row.lei_articles,
-        sourceType: row.source_type as 'document' | 'legislative-act',
-      });
+  const documentMap = new Map<string, SearchResult>();
+
+  for (const [docId, chunks] of documentChunks) {
+    // Ordena chunks por similaridade e depois por índice (adjacência)
+    const sorted = chunks.sort((a, b) => b.similarity - a.similarity);
+    const bestChunk = sorted[0];
+
+    // Para os top-5 documentos por similaridade, concatena até 3 chunks
+    // Para os demais, usa apenas o melhor chunk
+    let combinedContent = includeChunkContent ? bestChunk.chunk_content : '';
+
+    if (includeChunkContent && sorted.length > 1) {
+      // Pega até 3 chunks, priorizando adjacentes ao melhor
+      const selectedChunks = [bestChunk];
+      const usedIndices = new Set([bestChunk.chunk_index]);
+
+      // Primeiro, tenta chunks adjacentes (index ± 1)
+      for (const chunk of sorted) {
+        if (selectedChunks.length >= 3) break;
+        if (usedIndices.has(chunk.chunk_index)) continue;
+        if (Math.abs(chunk.chunk_index - bestChunk.chunk_index) <= 1) {
+          selectedChunks.push(chunk);
+          usedIndices.add(chunk.chunk_index);
+        }
+      }
+      // Depois, completa com os mais relevantes restantes
+      for (const chunk of sorted) {
+        if (selectedChunks.length >= 3) break;
+        if (usedIndices.has(chunk.chunk_index)) continue;
+        selectedChunks.push(chunk);
+        usedIndices.add(chunk.chunk_index);
+      }
+
+      // Concatena na ordem do documento (por chunkIndex)
+      selectedChunks.sort((a, b) => a.chunk_index - b.chunk_index);
+      combinedContent = selectedChunks.map(c => c.chunk_content).join('\n\n');
     }
+
+    documentMap.set(docId, {
+      documentId: docId,
+      documentTitle: bestChunk.document_title,
+      category: bestChunk.category,
+      chunkContent: combinedContent,
+      chunkIndex: bestChunk.chunk_index,
+      similarity: bestChunk.similarity,
+      url: bestChunk.url || undefined,
+      courseId: bestChunk.course_id || undefined,
+      isCommon: bestChunk.is_common,
+      tags: bestChunk.tags ? safeParseArray(bestChunk.tags) : undefined,
+      leiArticles: bestChunk.lei_articles,
+      sourceType: bestChunk.source_type as 'document' | 'legislative-act',
+    });
   }
 
   // 5. Converte para array e limita resultados

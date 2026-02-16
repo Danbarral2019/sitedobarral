@@ -167,25 +167,25 @@ export function buildLayeredContext(
   const parts: string[] = [];
   let remaining = maxTotal;
 
-  // Camada 1: Lei (prioridade máxima, até 35% do espaço)
+  // Camada 1: Lei (prioridade máxima, até 30% do espaço)
   if (leiContext) {
-    const maxLei = Math.min(leiContext.length, Math.floor(maxTotal * 0.35));
+    const maxLei = Math.min(leiContext.length, Math.floor(maxTotal * 0.30));
     const trimmedLei = leiContext.slice(0, maxLei);
     parts.push(`PRECEITOS LEGAIS (Lei 14.133/2021):\n${trimmedLei}`);
     remaining -= trimmedLei.length + 50;
   }
 
-  // Camada 2: Atos normativos (até 25% do espaço)
+  // Camada 2: Atos normativos (até 20% do espaço)
   if (actsContext) {
-    const maxActs = Math.min(actsContext.length, Math.floor(maxTotal * 0.25));
+    const maxActs = Math.min(actsContext.length, Math.floor(maxTotal * 0.20));
     const trimmedActs = actsContext.slice(0, maxActs);
     parts.push(`ATOS NORMATIVOS REGULAMENTADORES:\n${trimmedActs}`);
     remaining -= trimmedActs.length + 50;
   }
 
-  // Camada 3: Documentos/jurisprudência (resto do espaço)
+  // Camada 3: Documentos/jurisprudência (resto do espaço, ~50%)
   if (docsContext) {
-    const trimmedDocs = docsContext.slice(0, Math.max(remaining, 1000));
+    const trimmedDocs = docsContext.slice(0, Math.max(remaining, 2000));
     parts.push(`DOCUMENTOS E JURISPRUDÊNCIA:\n${trimmedDocs}`);
   }
 

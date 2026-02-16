@@ -47,6 +47,10 @@
     {
       "path": "/api/cron/sync-dou-atos-normativos",
       "schedule": "0 8 * * *"
+    },
+    {
+      "path": "/api/cron/sync-tcu-informativos",
+      "schedule": "0 5 * * 1"
     }
   ]
 }
