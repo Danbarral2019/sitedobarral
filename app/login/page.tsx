@@ -78,15 +78,15 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-brand-50 to-white py-12 px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-gradient-to-br from-brand-50 to-[var(--bg-primary)] py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-md mx-auto">
-        <div className="bg-white rounded-lg shadow-lg p-8">
+        <div className="bg-[var(--bg-card)] rounded-lg shadow-lg p-8">
           {/* Header */}
           <div className="text-center mb-8">
-            <h1 className="text-3xl font-bold text-gray-900 mb-2 font-cinzel">
+            <h1 className="text-3xl font-bold text-[var(--text-primary)] mb-2 font-cinzel">
               Área do Aluno
             </h1>
-            <p className="text-gray-600">
+            <p className="text-[var(--text-secondary)]">
               Faça login para acessar os materiais do curso
             </p>
           </div>
@@ -111,7 +111,7 @@ export default function LoginPage() {
           <form onSubmit={handleSubmit} className="space-y-6">
             {/* Email */}
             <div>
-              <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
+              <label htmlFor="email" className="block text-sm font-medium text-[var(--text-secondary)] mb-2">
                 Email
               </label>
               <input
@@ -119,7 +119,7 @@ export default function LoginPage() {
                 id="email"
                 value={formData.email}
                 onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-transparent"
+                className="w-full px-4 py-2 border border-[var(--border-strong)] rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-transparent bg-[var(--bg-input)] text-[var(--text-primary)]"
                 placeholder="seu@email.com"
                 disabled={loading}
                 autoComplete="email"
@@ -128,7 +128,7 @@ export default function LoginPage() {
 
             {/* Senha */}
             <div>
-              <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-2">
+              <label htmlFor="password" className="block text-sm font-medium text-[var(--text-secondary)] mb-2">
                 Senha
               </label>
               <input
@@ -136,7 +136,7 @@ export default function LoginPage() {
                 id="password"
                 value={formData.password}
                 onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-transparent"
+                className="w-full px-4 py-2 border border-[var(--border-strong)] rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-transparent bg-[var(--bg-input)] text-[var(--text-primary)]"
                 placeholder="Sua senha"
                 disabled={loading}
                 autoComplete="current-password"
@@ -147,7 +147,7 @@ export default function LoginPage() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full bg-brand-600 text-white py-3 px-4 rounded-lg font-semibold hover:bg-brand-700 transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed"
+              className="w-full bg-brand-600 text-white py-3 px-4 rounded-lg font-semibold hover:bg-brand-700 transition-colors disabled:bg-[var(--text-muted)] disabled:cursor-not-allowed"
             >
               {loading ? 'Entrando...' : 'Entrar'}
             </button>
@@ -156,7 +156,7 @@ export default function LoginPage() {
           {/* Links úteis */}
           <div className="mt-6 space-y-3">
             <div className="text-center">
-              <p className="text-sm text-gray-600">
+              <p className="text-sm text-[var(--text-secondary)]">
                 Primeiro acesso?{' '}
                 <Link
                   href="/validar-acesso"
@@ -167,8 +167,8 @@ export default function LoginPage() {
               </p>
             </div>
 
-            <div className="text-center pt-3 border-t border-gray-200">
-              <p className="text-sm text-gray-600">
+            <div className="text-center pt-3 border-t border-[var(--border-default)]">
+              <p className="text-sm text-[var(--text-secondary)]">
                 Esqueceu sua senha?{' '}
                 <Link
                   href="/esqueci-senha"
@@ -183,7 +183,7 @@ export default function LoginPage() {
 
         {/* Informações adicionais */}
         <div className="mt-6 text-center">
-          <p className="text-sm text-gray-500">
+          <p className="text-sm text-[var(--text-muted)]">
             O login é vinculado ao curso que você acessou via QR Code.
             <br />
             Caso não consiga acessar, verifique com o professor.

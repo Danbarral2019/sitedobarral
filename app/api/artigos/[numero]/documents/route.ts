@@ -61,7 +61,22 @@ export async function GET(
           url: doc.url,
           uploadedAt: doc.uploadedAt,
           leiArticles: doc.leiArticles,
-          sourceType: 'document' as const
+          sourceType: 'document' as const,
+          // Campos TCU enriquecidos (para acórdãos)
+          ...(doc.category === 'acordao' ? {
+            tcuNumeroAcordao: doc.tcuNumeroAcordao,
+            tcuRelator: doc.tcuRelator,
+            tcuOrgaoJulgador: doc.tcuOrgaoJulgador,
+            tcuDataJulgamento: doc.tcuDataJulgamento,
+            tcuArea: doc.tcuArea,
+            tcuTema: doc.tcuTema,
+            summary: doc.summary,
+            summaryHighlights: doc.summaryHighlights,
+          } : {}),
+          // Campo entityType (para enunciados)
+          ...(doc.category === 'enunciados' ? {
+            entityType: doc.entityType,
+          } : {}),
         }));
 
         const mappedLegislativeActs = legislativeActs.map(act => ({

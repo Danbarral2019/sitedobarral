@@ -110,7 +110,7 @@ export function GlobalSearchBar({
   const hasResults = counts.total > 0;
 
   return (
-    <div className="bg-white rounded-2xl shadow-lg border-2 border-gray-200 overflow-hidden">
+    <div className="bg-[var(--bg-card)] rounded-2xl shadow-lg border-2 border-[var(--border-default)] overflow-hidden">
       {/* Search Input Row */}
       <div className="flex items-center gap-2 p-4">
         {/* Search Icon / Loading Indicator */}
@@ -118,7 +118,7 @@ export function GlobalSearchBar({
           {isLoading ? (
             <Loader2 className="w-5 h-5 text-brand-600 animate-spin" />
           ) : (
-            <Search className="w-5 h-5 text-gray-400" />
+            <Search className="w-5 h-5 text-[var(--text-muted)]" />
           )}
         </div>
 
@@ -130,7 +130,7 @@ export function GlobalSearchBar({
           onChange={(e) => onQueryChange(e.target.value)}
           onKeyDown={handleInputKeyDown}
           placeholder={placeholder}
-          className="flex-1 text-base outline-none placeholder:text-gray-400 text-gray-900"
+          className="flex-1 text-base outline-none placeholder:text-[var(--text-muted)] text-[var(--text-primary)] bg-transparent"
         />
 
         {/* Right side buttons */}
@@ -139,7 +139,7 @@ export function GlobalSearchBar({
           {query && (
             <button
               onClick={onClear}
-              className="p-1.5 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
+              className="p-1.5 text-[var(--text-muted)] hover:text-[var(--text-secondary)] hover:bg-[var(--bg-tertiary)] rounded-lg transition-colors"
               aria-label="Limpar busca"
             >
               <X className="w-4 h-4" />
@@ -153,7 +153,7 @@ export function GlobalSearchBar({
               className={`flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium rounded-lg transition-colors border ${
                 ticMode
                   ? 'text-cyan-700 bg-cyan-50 hover:bg-cyan-100 border-cyan-200'
-                  : 'text-gray-400 bg-gray-50 hover:bg-gray-100 border-gray-200'
+                  : 'text-[var(--text-muted)] bg-[var(--bg-secondary)] hover:bg-[var(--bg-tertiary)] border-[var(--border-default)]'
               }`}
               title={ticMode ? 'Desativar contexto TIC' : 'Ativar busca focada em contratações de TIC'}
             >
@@ -168,7 +168,7 @@ export function GlobalSearchBar({
             className={`flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium rounded-lg transition-colors border ${
               aiEnabled
                 ? 'text-purple-700 bg-purple-50 hover:bg-purple-100 border-purple-200'
-                : 'text-gray-400 bg-gray-50 hover:bg-gray-100 border-gray-200'
+                : 'text-[var(--text-muted)] bg-[var(--bg-secondary)] hover:bg-[var(--bg-tertiary)] border-[var(--border-default)]'
             }`}
             title={aiEnabled ? 'Desativar busca com IA' : 'Ativar busca com IA'}
           >
@@ -184,7 +184,7 @@ export function GlobalSearchBar({
           {onFiltersClick && (
             <button
               onClick={onFiltersClick}
-              className="flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors"
+              className="flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium text-[var(--text-secondary)] bg-[var(--bg-tertiary)] hover:bg-[var(--bg-hover)] rounded-lg transition-colors"
             >
               <SlidersHorizontal className="w-4 h-4" />
               <span className="hidden sm:inline">Filtros</span>
@@ -208,7 +208,7 @@ export function GlobalSearchBar({
               className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium transition-all whitespace-nowrap ${
                 isActive
                   ? `${config.bgColor} ${config.color} ${config.borderColor} border`
-                  : 'text-gray-500 bg-gray-50 hover:bg-gray-100 border border-transparent'
+                  : 'text-[var(--text-muted)] bg-[var(--bg-secondary)] hover:bg-[var(--bg-tertiary)] border border-transparent'
               }`}
             >
               <Icon className="w-4 h-4" />
@@ -216,7 +216,7 @@ export function GlobalSearchBar({
               {query && hasResults && (
                 <span
                   className={`ml-1 px-1.5 py-0.5 rounded-full text-xs ${
-                    isActive ? 'bg-white/50' : 'bg-gray-200'
+                    isActive ? 'bg-white/50' : 'bg-[var(--bg-tertiary)]'
                   }`}
                 >
                   {count}
@@ -229,15 +229,15 @@ export function GlobalSearchBar({
 
       {/* Results summary */}
       {query && hasResults && (
-        <div className="px-4 pb-3 text-sm text-gray-600 border-t border-gray-100 pt-3">
-          <span className="font-medium text-gray-900">{counts.total}</span> resultados encontrados
+        <div className="px-4 pb-3 text-sm text-[var(--text-secondary)] border-t border-[var(--border-default)] pt-3">
+          <span className="font-medium text-[var(--text-primary)]">{counts.total}</span> resultados encontrados
           para <span className="font-medium text-brand-600">&quot;{query}&quot;</span>
         </div>
       )}
 
       {/* No results message */}
       {query && query.length >= 2 && !isLoading && counts.total === 0 && (
-        <div className="px-4 pb-3 text-sm text-gray-500 border-t border-gray-100 pt-3">
+        <div className="px-4 pb-3 text-sm text-[var(--text-muted)] border-t border-[var(--border-default)] pt-3">
           Nenhum resultado encontrado para &quot;{query}&quot;
         </div>
       )}

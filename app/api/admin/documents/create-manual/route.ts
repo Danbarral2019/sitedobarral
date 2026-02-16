@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { withAdminAuth } from '@/lib/api-middleware';
 import { prisma } from '@/lib/prisma';
 import { CacheInvalidation } from '@/lib/cache/redis-client';
+import { sendPushToCourse } from '@/lib/push-notifications';
 
 /**
  * POST /api/admin/documents/create-manual
@@ -83,6 +84,15 @@ export const POST = withAdminAuth(async (request: NextRequest) => {
 
     // Invalidate cache
     CacheInvalidation.courseDocuments().catch(console.error);
+
+    // Fire-and-forget push notification to course students
+    if (courseId) {
+      sendPushToCourse(courseId, {
+        title: 'Novo material disponivel',
+        body: document.title,
+        url: `/area-restrita/curso/${courseId}`,
+      }).catch(console.error);
+    }
 
     return NextResponse.json(
       {

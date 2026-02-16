@@ -3,6 +3,7 @@ import { withAdminAuth } from '@/lib/api-middleware';
 import { prisma } from '@/lib/prisma';
 import { publishToSocialMedia } from '@/lib/social-publisher';
 import { CacheInvalidation, withCache, CacheKeys, CACHE_TTL } from '@/lib/cache/redis-client';
+import { broadcastPush } from '@/lib/push-notifications';
 
 // GET - Lista posts do blog com paginação
 export const GET = withAdminAuth(async (request: NextRequest) => {
@@ -108,6 +109,15 @@ export const POST = withAdminAuth(async (request: NextRequest) => {
 
     // Invalidate cache
     CacheInvalidation.blogPosts().catch(console.error);
+
+    // Fire-and-forget push notification when blog post is published
+    if (isPublished) {
+      broadcastPush({
+        title: 'Novo artigo no Blog',
+        body: post.title,
+        url: `/blog/${post.slug}`,
+      }).catch(console.error);
+    }
 
     return NextResponse.json({ post }, { status: 201 });
   } catch (error) {

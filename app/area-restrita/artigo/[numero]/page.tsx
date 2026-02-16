@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { Loader2, FileText, ArrowLeft, ExternalLink, Heart, Filter, X } from 'lucide-react';
+import { Loader2, FileText, ArrowLeft, ExternalLink, Heart, Filter, X, ChevronDown, ChevronUp, Scale, Calendar, User } from 'lucide-react';
 import { LEI_14133_ARTIGOS as LEI_14133_ARTIGOS_FALLBACK, LeiArticle } from '@/data/lei-14133-artigos';
 import { ArticleRelationshipGraph } from '@/components/ArticleRelationshipGraph';
 import { useAuth } from '@/hooks/use-auth';
@@ -25,6 +25,17 @@ interface Document {
   fullNumber?: string;
   issuer?: string;
   ementa?: string;
+  // Campos TCU enriquecidos (para acórdãos)
+  tcuNumeroAcordao?: string | null;
+  tcuRelator?: string | null;
+  tcuOrgaoJulgador?: string | null;
+  tcuDataJulgamento?: string | null;
+  tcuArea?: string | null;
+  tcuTema?: string | null;
+  summary?: string | null;
+  summaryHighlights?: string | null;
+  // Campos de enunciados
+  entityType?: string | null;
 }
 
 interface BlogPost {
@@ -102,6 +113,7 @@ export default function ArtigoAreaRestritaPage() {
   const [isContentExpanded, setIsContentExpanded] = useState(false);
   const [selectedDocId, setSelectedDocId] = useState<string | null>(null);
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
+  const [expandedSummaryId, setExpandedSummaryId] = useState<string | null>(null);
 
   // Redirect if not authenticated
   useEffect(() => {
@@ -346,50 +358,143 @@ export default function ArtigoAreaRestritaPage() {
                           </h3>
                           <div className="space-y-2">
                             {docs.map((doc) => (
-                              <button
-                                key={doc.id}
-                                onClick={() => {
-                                  if (doc.sourceType === 'legislative-act') {
-                                    router.push(`/legislacao/${doc.id}`);
-                                  } else {
-                                    setSelectedDocId(doc.id);
-                                  }
-                                }}
-                                className={`w-full text-left p-3 rounded-lg transition-colors border group ${getTierCardStyle(tier)}`}
-                              >
-                                <div className="flex items-start justify-between gap-3">
-                                  <div className="flex-1 min-w-0">
-                                    <div className="flex items-center gap-2 mb-0.5">
-                                      <h4 className="font-bold text-sm text-gray-900 group-hover:text-blue-600 truncate">
-                                        {doc.title}
-                                      </h4>
-                                      {doc.url && (
-                                        <ExternalLink className="w-3 h-3 text-gray-400 flex-shrink-0" />
+                              <div key={doc.id} className="space-y-0">
+                                <button
+                                  onClick={() => {
+                                    if (doc.sourceType === 'legislative-act') {
+                                      router.push(`/legislacao/${doc.id}`);
+                                    } else {
+                                      setSelectedDocId(doc.id);
+                                    }
+                                  }}
+                                  className={`w-full text-left p-3 rounded-lg transition-colors border group ${getTierCardStyle(tier)} ${doc.summary && expandedSummaryId === doc.id ? 'rounded-b-none border-b-0' : ''}`}
+                                >
+                                  <div className="flex items-start justify-between gap-3">
+                                    <div className="flex-1 min-w-0">
+                                      <div className="flex items-center gap-2 mb-0.5 flex-wrap">
+                                        <h4 className="font-bold text-sm text-gray-900 group-hover:text-blue-600 truncate">
+                                          {doc.tcuNumeroAcordao || doc.title}
+                                        </h4>
+                                        {doc.url && (
+                                          <ExternalLink className="w-3 h-3 text-gray-400 flex-shrink-0" />
+                                        )}
+                                        {/* Badge entityType para enunciados */}
+                                        {doc.entityType && (
+                                          <span className={`px-1.5 py-0.5 rounded text-[10px] font-bold ${
+                                            doc.entityType === 'CJF' ? 'bg-emerald-100 text-emerald-700' :
+                                            doc.entityType === 'IBDA' ? 'bg-amber-100 text-amber-700' :
+                                            doc.entityType === 'INCP' ? 'bg-violet-100 text-violet-700' :
+                                            'bg-gray-100 text-gray-700'
+                                          }`}>
+                                            {doc.entityType}
+                                          </span>
+                                        )}
+                                        {/* Badge órgão julgador TCU */}
+                                        {doc.category === 'acordao' && doc.tcuOrgaoJulgador && (
+                                          <span className="px-1.5 py-0.5 bg-gray-100 text-gray-600 rounded text-[10px]">
+                                            {doc.tcuOrgaoJulgador}
+                                          </span>
+                                        )}
+                                      </div>
+                                      {/* Metadados TCU enriquecidos para acórdãos */}
+                                      {doc.category === 'acordao' && (doc.tcuRelator || doc.tcuDataJulgamento) && (
+                                        <div className="flex flex-wrap items-center gap-x-3 gap-y-0.5 mt-0.5 text-[11px] text-gray-500">
+                                          {doc.tcuRelator && (
+                                            <span className="flex items-center gap-1">
+                                              <User className="w-3 h-3" />
+                                              Rel. {doc.tcuRelator}
+                                            </span>
+                                          )}
+                                          {doc.tcuDataJulgamento && (
+                                            <span className="flex items-center gap-1">
+                                              <Calendar className="w-3 h-3" />
+                                              {new Date(doc.tcuDataJulgamento).toLocaleDateString('pt-BR')}
+                                            </span>
+                                          )}
+                                        </div>
+                                      )}
+                                      {/* Badges de área/tema TCU */}
+                                      {doc.category === 'acordao' && (doc.tcuArea || doc.tcuTema) && (
+                                        <div className="flex flex-wrap gap-1 mt-1">
+                                          {doc.tcuArea && (
+                                            <span className="px-1.5 py-0.5 bg-gray-100 text-gray-600 rounded text-[10px]">
+                                              {doc.tcuArea}
+                                            </span>
+                                          )}
+                                          {doc.tcuTema && (
+                                            <span className="px-1.5 py-0.5 bg-gray-100 text-gray-600 rounded text-[10px]">
+                                              {doc.tcuTema}
+                                            </span>
+                                          )}
+                                        </div>
+                                      )}
+                                      {doc.description && !doc.tcuNumeroAcordao && (
+                                        <p className="text-xs text-gray-600 line-clamp-2">
+                                          {doc.description.substring(0, 150)}
+                                        </p>
                                       )}
                                     </div>
-                                    {doc.description && (
-                                      <p className="text-xs text-gray-600 line-clamp-2">
-                                        {doc.description.substring(0, 150)}
-                                      </p>
-                                    )}
+                                    <div className="flex items-center gap-1 flex-shrink-0">
+                                      {/* Botão Ver resumo */}
+                                      {doc.summary && (
+                                        <button
+                                          onClick={(e) => {
+                                            e.stopPropagation();
+                                            setExpandedSummaryId(expandedSummaryId === doc.id ? null : doc.id);
+                                          }}
+                                          className="p-1.5 rounded-lg text-gray-400 hover:text-blue-600 hover:bg-blue-50 transition-colors"
+                                          title="Ver resumo"
+                                        >
+                                          {expandedSummaryId === doc.id ? (
+                                            <ChevronUp className="w-4 h-4" />
+                                          ) : (
+                                            <ChevronDown className="w-4 h-4" />
+                                          )}
+                                        </button>
+                                      )}
+                                      {doc.sourceType !== 'legislative-act' && (
+                                        <button
+                                          onClick={(e) => {
+                                            e.stopPropagation();
+                                            toggleFavorite(doc.id, enrolledCourseId);
+                                          }}
+                                          className={`p-1.5 rounded-lg transition-colors ${
+                                            isFavorite(doc.id)
+                                              ? 'text-red-600 bg-red-100'
+                                              : 'text-gray-300 hover:text-red-600'
+                                          }`}
+                                        >
+                                          <Heart className={`w-4 h-4 ${isFavorite(doc.id) ? 'fill-current' : ''}`} />
+                                        </button>
+                                      )}
+                                    </div>
                                   </div>
-                                  {doc.sourceType !== 'legislative-act' && (
-                                    <button
-                                      onClick={(e) => {
-                                        e.stopPropagation();
-                                        toggleFavorite(doc.id, enrolledCourseId);
-                                      }}
-                                      className={`p-1.5 rounded-lg transition-colors flex-shrink-0 ${
-                                        isFavorite(doc.id)
-                                          ? 'text-red-600 bg-red-100'
-                                          : 'text-gray-300 hover:text-red-600'
-                                      }`}
-                                    >
-                                      <Heart className={`w-4 h-4 ${isFavorite(doc.id) ? 'fill-current' : ''}`} />
-                                    </button>
-                                  )}
-                                </div>
-                              </button>
+                                </button>
+                                {/* Summary expandível */}
+                                {doc.summary && expandedSummaryId === doc.id && (
+                                  <div className="px-3 pb-3 pt-2 bg-blue-50/50 border border-t-0 border-blue-200/50 rounded-b-lg text-xs text-gray-700 leading-relaxed">
+                                    <p>{doc.summary}</p>
+                                    {doc.summaryHighlights && (() => {
+                                      try {
+                                        const highlights = JSON.parse(doc.summaryHighlights) as string[];
+                                        if (highlights.length > 0) {
+                                          return (
+                                            <ul className="mt-2 space-y-1">
+                                              {highlights.map((h, i) => (
+                                                <li key={i} className="flex items-start gap-1.5">
+                                                  <span className="text-blue-500 mt-0.5 flex-shrink-0">-</span>
+                                                  <span>{h}</span>
+                                                </li>
+                                              ))}
+                                            </ul>
+                                          );
+                                        }
+                                      } catch { /* ignore parse errors */ }
+                                      return null;
+                                    })()}
+                                  </div>
+                                )}
+                              </div>
                             ))}
                           </div>
                         </div>

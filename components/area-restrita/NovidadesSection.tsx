@@ -118,8 +118,8 @@ export default function NovidadesSection({ onDocumentClick }: NovidadesSectionPr
 
   if (isLoading) {
     return (
-      <div className="mb-6 bg-white rounded-2xl border border-gray-200 p-4">
-        <div className="flex items-center gap-2 text-gray-400">
+      <div className="mb-6 bg-[var(--bg-card)] rounded-2xl border border-[var(--border-default)] p-4">
+        <div className="flex items-center gap-2 text-[var(--text-muted)]">
           <Loader2 className="w-4 h-4 animate-spin" />
           <span className="text-sm">Carregando novidades...</span>
         </div>
@@ -187,14 +187,14 @@ export default function NovidadesSection({ onDocumentClick }: NovidadesSectionPr
   const hasMore = timelineItems.length > 4;
 
   return (
-    <div className="mb-6 bg-white rounded-2xl border border-gray-200 overflow-hidden">
+    <div className="mb-6 bg-[var(--bg-card)] rounded-2xl border border-[var(--border-default)] overflow-hidden">
       {/* Header */}
-      <div className="px-4 py-3 bg-gradient-to-r from-indigo-50 to-purple-50 border-b border-gray-100 flex items-center justify-between">
+      <div className="px-4 py-3 bg-gradient-to-r from-indigo-50 to-purple-50 border-b border-[var(--border-default)] flex items-center justify-between">
         <div className="flex items-center gap-2">
           <div className="p-1.5 bg-indigo-100 rounded-lg">
             <Bell className="w-4 h-4 text-indigo-600" />
           </div>
-          <h3 className="text-sm font-bold text-gray-900">Novidades</h3>
+          <h3 className="text-sm font-bold text-[var(--text-primary)]">Novidades</h3>
           {timelineItems.length > 0 && (
             <span className="text-[10px] font-bold bg-indigo-600 text-white px-1.5 py-0.5 rounded-full">
               {timelineItems.length}
@@ -211,7 +211,7 @@ export default function NovidadesSection({ onDocumentClick }: NovidadesSectionPr
 
       {/* Platform updates banner */}
       {data.platformUpdates.length > 0 && (
-        <div className="px-4 py-2.5 bg-gradient-to-r from-purple-50/50 to-indigo-50/50 border-b border-gray-100">
+        <div className="px-4 py-2.5 bg-gradient-to-r from-purple-50/50 to-indigo-50/50 border-b border-[var(--border-default)]">
           <div className="flex items-center gap-3 overflow-x-auto scrollbar-hide">
             {data.platformUpdates.map((pu) => (
               <span
@@ -229,7 +229,7 @@ export default function NovidadesSection({ onDocumentClick }: NovidadesSectionPr
 
       {/* Timeline items */}
       {visibleItems.length > 0 && (
-        <div className="divide-y divide-gray-50">
+        <div className="divide-y divide-[var(--border-default)]">
           {visibleItems.map((item) => {
             const IconComp =
               item.type === 'blog'
@@ -248,23 +248,23 @@ export default function NovidadesSection({ onDocumentClick }: NovidadesSectionPr
             const isClickable = !!(item.href || item.documentId);
 
             const content = (
-              <div className={`flex items-center gap-3 px-4 py-2.5 transition-colors group ${isClickable ? 'hover:bg-gray-50 cursor-pointer' : ''}`}>
+              <div className={`flex items-center gap-3 px-4 py-2.5 transition-colors group ${isClickable ? 'hover:bg-[var(--bg-hover)] cursor-pointer' : ''}`}>
                 <div className={`p-1.5 rounded-lg flex-shrink-0 ${colorClass}`}>
                   <IconComp className="w-3.5 h-3.5" />
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className={`text-sm font-medium text-gray-800 truncate ${isClickable ? 'group-hover:text-brand-600' : ''} transition-colors`}>
+                  <p className={`text-sm font-medium text-[var(--text-primary)] truncate ${isClickable ? 'group-hover:text-brand-600' : ''} transition-colors`}>
                     {item.title}
                   </p>
                   {item.subtitle && (
-                    <p className="text-xs text-gray-400 truncate">{item.subtitle}</p>
+                    <p className="text-xs text-[var(--text-muted)] truncate">{item.subtitle}</p>
                   )}
                 </div>
-                <span className="text-[10px] text-gray-400 flex-shrink-0 whitespace-nowrap">
+                <span className="text-[10px] text-[var(--text-muted)] flex-shrink-0 whitespace-nowrap">
                   {getRelativeDate(item.date)}
                 </span>
                 {isClickable && (
-                  <ChevronRight className="w-3.5 h-3.5 text-gray-300 flex-shrink-0" />
+                  <ChevronRight className="w-3.5 h-3.5 text-[var(--text-muted)] flex-shrink-0" />
                 )}
               </div>
             );
@@ -298,7 +298,7 @@ export default function NovidadesSection({ onDocumentClick }: NovidadesSectionPr
 
       {/* Show more / less */}
       {hasMore && (
-        <div className="px-4 py-2 border-t border-gray-100">
+        <div className="px-4 py-2 border-t border-[var(--border-default)]">
           <button
             onClick={() => setIsExpanded(!isExpanded)}
             className="text-xs font-semibold text-indigo-600 hover:text-indigo-700 transition-colors"
@@ -311,8 +311,8 @@ export default function NovidadesSection({ onDocumentClick }: NovidadesSectionPr
       {/* Empty state */}
       {visibleItems.length === 0 && data.platformUpdates.length === 0 && (
         <div className="px-4 py-6 text-center">
-          <Bell className="w-6 h-6 text-gray-200 mx-auto mb-2" />
-          <p className="text-xs text-gray-400">Nenhuma novidade recente</p>
+          <Bell className="w-6 h-6 text-[var(--text-muted)] mx-auto mb-2" />
+          <p className="text-xs text-[var(--text-muted)]">Nenhuma novidade recente</p>
         </div>
       )}
     </div>

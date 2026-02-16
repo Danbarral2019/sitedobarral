@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { Loader2, FileText, BookOpen, ArrowLeft, BarChart3, TrendingUp } from 'lucide-react';
+import { Loader2, FileText, BookOpen, ArrowLeft, BarChart3, TrendingUp, Scale, Calendar, User, Building2 } from 'lucide-react';
 import { LEI_14133_ARTIGOS as LEI_14133_ARTIGOS_FALLBACK, LeiArticle } from '@/data/lei-14133-artigos';
 import { ArticleRelationshipGraph } from '@/components/ArticleRelationshipGraph';
 
@@ -24,6 +24,15 @@ interface Document {
   fullNumber?: string;
   issuer?: string;
   ementa?: string;
+  // Campos TCU enriquecidos (para acórdãos)
+  tcuNumeroAcordao?: string | null;
+  tcuRelator?: string | null;
+  tcuOrgaoJulgador?: string | null;
+  tcuDataJulgamento?: string | null;
+  tcuArea?: string | null;
+  tcuTema?: string | null;
+  summary?: string | null;
+  summaryHighlights?: string | null;
 }
 
 interface BlogPost {
@@ -304,20 +313,57 @@ export default function ArtigoPage() {
                                 <span className="px-2 py-0.5 bg-white/20 rounded text-xs font-medium">
                                   {categoryNames[doc.category] || doc.category}
                                 </span>
+                                {doc.category === 'acordao' && doc.tcuOrgaoJulgador && (
+                                  <span className="px-2 py-0.5 bg-white/10 rounded text-xs">
+                                    {doc.tcuOrgaoJulgador}
+                                  </span>
+                                )}
                               </div>
                               <h3 className="font-bold text-white line-clamp-1">
-                                {doc.title}
+                                {doc.tcuNumeroAcordao || doc.title}
                               </h3>
-                              {doc.description && (
+                              {/* Metadados TCU enriquecidos */}
+                              {doc.category === 'acordao' && (doc.tcuRelator || doc.tcuDataJulgamento || doc.tcuArea) && (
+                                <div className="flex flex-wrap items-center gap-x-3 gap-y-1 mt-1 text-xs text-white/70">
+                                  {doc.tcuRelator && (
+                                    <span className="flex items-center gap-1">
+                                      <User className="w-3 h-3" />
+                                      {doc.tcuRelator}
+                                    </span>
+                                  )}
+                                  {doc.tcuDataJulgamento && (
+                                    <span className="flex items-center gap-1">
+                                      <Calendar className="w-3 h-3" />
+                                      {new Date(doc.tcuDataJulgamento).toLocaleDateString('pt-BR')}
+                                    </span>
+                                  )}
+                                  {doc.tcuArea && (
+                                    <span className="flex items-center gap-1">
+                                      <Scale className="w-3 h-3" />
+                                      {doc.tcuArea}
+                                    </span>
+                                  )}
+                                </div>
+                              )}
+                              {/* Summary da IA (se disponível) */}
+                              {doc.summary ? (
+                                <p className="text-sm text-white/80 line-clamp-2 mt-1">
+                                  {doc.summary}
+                                </p>
+                              ) : doc.description ? (
                                 <p className="text-sm text-white/80 line-clamp-2 mt-1">
                                   {doc.description}
                                 </p>
-                              )}
+                              ) : null}
                             </div>
                             <div className="flex-shrink-0 w-8 h-8 bg-white/20 rounded-lg flex items-center justify-center">
-                              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                              </svg>
+                              {doc.category === 'acordao' ? (
+                                <Scale className="w-4 h-4" />
+                              ) : (
+                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                </svg>
+                              )}
                             </div>
                           </div>
                         </div>

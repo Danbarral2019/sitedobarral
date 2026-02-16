@@ -2,8 +2,9 @@
 
 import { useState, useRef, useEffect } from 'react';
 import Link from 'next/link';
-import { Send, Loader2, Sparkles, FileText, AlertCircle, Scale, Gavel, ExternalLink } from 'lucide-react';
+import { Send, Loader2, Sparkles, FileText, AlertCircle, Scale, Gavel, ExternalLink, Download } from 'lucide-react';
 import { trackClientEvent } from '@/lib/monitoring/track-client';
+import ArticleAwareMarkdown from './ArticleAwareMarkdown';
 
 // ===========================
 // Types
@@ -62,6 +63,7 @@ export default function ChatInterface({
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [exportingPdf, setExportingPdf] = useState<string | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const abortControllerRef = useRef<AbortController | null>(null);
 
@@ -264,21 +266,99 @@ export default function ChatInterface({
     localStorage.removeItem('chat-history');
   };
 
+  const handleExportMessagePDF = async (message: Message) => {
+    if (exportingPdf) return;
+    setExportingPdf(message.id);
+    try {
+      const { generateSearchResultPDF } = await import('@/lib/pdf-generator');
+      // Find the user message immediately before this assistant message
+      const msgIndex = messages.findIndex(m => m.id === message.id);
+      const userMsg = msgIndex > 0 ? messages[msgIndex - 1] : null;
+      const query = userMsg?.role === 'user' ? userMsg.content : 'Consulta ao assistente';
+
+      generateSearchResultPDF({
+        query,
+        answer: message.content,
+        sources: message.sources?.map(s => ({ title: s.title, category: s.category, url: s.url })),
+        legalSources: message.legalSources?.map(s => ({ type: s.type, title: s.title, url: s.url })),
+      });
+    } catch (err) {
+      console.error('Erro ao gerar PDF:', err);
+    } finally {
+      setExportingPdf(null);
+    }
+  };
+
+  const handleExportConversationPDF = async () => {
+    if (exportingPdf || messages.length === 0) return;
+    setExportingPdf('conversation');
+    try {
+      const { generateSearchResultPDF } = await import('@/lib/pdf-generator');
+      // Use the first user message as the query
+      const firstUserMsg = messages.find(m => m.role === 'user');
+      const lastAssistantMsg = [...messages].reverse().find(m => m.role === 'assistant');
+      const query = firstUserMsg?.content || 'Conversa com assistente IA';
+      const answer = lastAssistantMsg?.content || '';
+
+      // Collect all sources from all assistant messages
+      const allSources = messages
+        .filter(m => m.role === 'assistant' && m.sources)
+        .flatMap(m => m.sources!.map(s => ({ title: s.title, category: s.category, url: s.url })));
+      const allLegalSources = messages
+        .filter(m => m.role === 'assistant' && m.legalSources)
+        .flatMap(m => m.legalSources!.map(s => ({ type: s.type, title: s.title, url: s.url })));
+
+      // Deduplicate sources by title
+      const uniqueSources = allSources.filter((s, i, arr) => arr.findIndex(x => x.title === s.title) === i);
+      const uniqueLegalSources = allLegalSources.filter((s, i, arr) => arr.findIndex(x => x.title === s.title) === i);
+
+      // Build conversation history for refinements section
+      const conversationHistory = messages.map(m => ({ role: m.role, content: m.content }));
+
+      generateSearchResultPDF({
+        query,
+        answer,
+        sources: uniqueSources.length > 0 ? uniqueSources : undefined,
+        legalSources: uniqueLegalSources.length > 0 ? uniqueLegalSources : undefined,
+        conversationHistory,
+      });
+    } catch (err) {
+      console.error('Erro ao gerar PDF da conversa:', err);
+    } finally {
+      setExportingPdf(null);
+    }
+  };
+
   return (
     <div className={`flex flex-col h-full ${className}`}>
       {/* Header */}
-      <div className="flex items-center justify-between p-4 border-b border-gray-200">
+      <div className="flex items-center justify-between p-4 border-b border-[var(--border-default)]">
         <div className="flex items-center gap-2">
           <Sparkles className="w-5 h-5 text-blue-600" />
-          <h3 className="font-semibold text-gray-900">Assistente Inteligente</h3>
+          <h3 className="font-semibold text-[var(--text-primary)]">Assistente Inteligente</h3>
         </div>
         {messages.length > 0 && (
-          <button
-            onClick={clearHistory}
-            className="text-sm text-gray-500 hover:text-gray-700 transition-colors"
-          >
-            Limpar histórico
-          </button>
+          <div className="flex items-center gap-3">
+            <button
+              onClick={handleExportConversationPDF}
+              disabled={exportingPdf === 'conversation'}
+              className="inline-flex items-center gap-1.5 text-sm text-blue-600 hover:text-blue-800 disabled:text-[var(--text-muted)] transition-colors"
+              title="Exportar conversa como PDF"
+            >
+              {exportingPdf === 'conversation' ? (
+                <Loader2 className="w-3.5 h-3.5 animate-spin" />
+              ) : (
+                <Download className="w-3.5 h-3.5" />
+              )}
+              Exportar PDF
+            </button>
+            <button
+              onClick={clearHistory}
+              className="text-sm text-[var(--text-muted)] hover:text-[var(--text-secondary)] transition-colors"
+            >
+              Limpar histórico
+            </button>
+          </div>
         )}
       </div>
 
@@ -287,21 +367,21 @@ export default function ChatInterface({
         {messages.length === 0 ? (
           <div className="text-center py-12">
             <Sparkles className="w-12 h-12 text-blue-500 mx-auto mb-4" />
-            <h4 className="text-lg font-semibold text-gray-900 mb-2">
+            <h4 className="text-lg font-semibold text-[var(--text-primary)] mb-2">
               Como posso ajudar?
             </h4>
-            <p className="text-gray-600 mb-6">
+            <p className="text-[var(--text-secondary)] mb-6">
               Faça perguntas sobre os documentos e materiais do curso
             </p>
 
             {/* Suggestions */}
             <div className="max-w-2xl mx-auto space-y-2">
-              <p className="text-sm text-gray-500 mb-3">Sugestões:</p>
+              <p className="text-sm text-[var(--text-muted)] mb-3">Sugestões:</p>
               {suggestions.map((suggestion, index) => (
                 <button
                   key={index}
                   onClick={() => handleSuggestionClick(suggestion)}
-                  className="w-full text-left px-4 py-3 bg-gray-50 hover:bg-gray-100 rounded-lg transition-colors text-sm text-gray-700"
+                  className="w-full text-left px-4 py-3 bg-[var(--bg-secondary)] hover:bg-[var(--bg-tertiary)] rounded-lg transition-colors text-sm text-[var(--text-secondary)]"
                 >
                   {suggestion}
                 </button>
@@ -317,18 +397,22 @@ export default function ChatInterface({
               }`}
             >
               <div
-                className={`max-w-3xl rounded-lg p-4 ${
+                className={`group/msg max-w-3xl rounded-lg p-4 ${
                   message.role === 'user'
                     ? 'bg-blue-600 text-white'
-                    : 'bg-gray-100 text-gray-900'
+                    : 'bg-[var(--bg-tertiary)] text-[var(--text-primary)]'
                 }`}
               >
-                <div className="whitespace-pre-wrap">{message.content}</div>
+                {message.role === 'assistant' ? (
+                  <ArticleAwareMarkdown content={message.content} />
+                ) : (
+                  <div className="whitespace-pre-wrap">{message.content}</div>
+                )}
 
                 {/* Legal Sources */}
                 {message.legalSources && message.legalSources.length > 0 && (
-                  <div className="mt-4 pt-3 border-t border-gray-300 space-y-1">
-                    <p className="text-xs font-semibold text-gray-600 mb-1.5">
+                  <div className="mt-4 pt-3 border-t border-[var(--border-strong)] space-y-1">
+                    <p className="text-xs font-semibold text-[var(--text-secondary)] mb-1.5">
                       Fundamentação legal:
                     </p>
                     <div className="flex flex-wrap gap-1.5">
@@ -369,24 +453,24 @@ export default function ChatInterface({
 
                 {/* Document Sources */}
                 {message.sources && message.sources.length > 0 && (
-                  <div className="mt-3 pt-3 border-t border-gray-300 space-y-2">
-                    <p className="text-xs font-semibold text-gray-600">
+                  <div className="mt-3 pt-3 border-t border-[var(--border-strong)] space-y-2">
+                    <p className="text-xs font-semibold text-[var(--text-secondary)]">
                       Fontes consultadas:
                     </p>
                     {message.sources.map((source) => {
                       const sourceContent = (
                         <div className="flex items-start gap-2">
-                          <FileText className="w-4 h-4 text-gray-500 flex-shrink-0 mt-0.5" />
+                          <FileText className="w-4 h-4 text-[var(--text-muted)] flex-shrink-0 mt-0.5" />
                           <div className="flex-1">
                             <div className="flex items-center justify-between gap-2">
-                              <span className="font-medium text-gray-900">
+                              <span className="font-medium text-[var(--text-primary)]">
                                 {source.title}
                               </span>
-                              <span className="text-gray-500">
+                              <span className="text-[var(--text-muted)]">
                                 {Math.round(source.relevance * 100)}%
                               </span>
                             </div>
-                            <p className="text-gray-600 text-xs mt-1">
+                            <p className="text-[var(--text-secondary)] text-xs mt-1">
                               {source.category}
                             </p>
                           </div>
@@ -402,7 +486,7 @@ export default function ChatInterface({
                               href={source.url}
                               target="_blank"
                               rel="noopener noreferrer"
-                              className="block text-xs bg-white rounded p-2 hover:bg-gray-50 transition-colors cursor-pointer"
+                              className="block text-xs bg-[var(--bg-card)] rounded p-2 hover:bg-[var(--bg-hover)] transition-colors cursor-pointer"
                             >
                               {sourceContent}
                             </a>
@@ -412,7 +496,7 @@ export default function ChatInterface({
                           <Link
                             key={source.documentId}
                             href={source.url}
-                            className="block text-xs bg-white rounded p-2 hover:bg-gray-50 transition-colors cursor-pointer"
+                            className="block text-xs bg-[var(--bg-card)] rounded p-2 hover:bg-[var(--bg-hover)] transition-colors cursor-pointer"
                           >
                             {sourceContent}
                           </Link>
@@ -422,7 +506,7 @@ export default function ChatInterface({
                       return (
                         <div
                           key={source.documentId}
-                          className="text-xs bg-white rounded p-2"
+                          className="text-xs bg-[var(--bg-card)] rounded p-2"
                         >
                           {sourceContent}
                         </div>
@@ -431,11 +515,28 @@ export default function ChatInterface({
                   </div>
                 )}
 
-                <div className="text-xs mt-2 opacity-70">
-                  {message.timestamp.toLocaleTimeString('pt-BR', {
-                    hour: '2-digit',
-                    minute: '2-digit',
-                  })}
+                <div className="flex items-center justify-between mt-2">
+                  <span className="text-xs opacity-70">
+                    {message.timestamp.toLocaleTimeString('pt-BR', {
+                      hour: '2-digit',
+                      minute: '2-digit',
+                    })}
+                  </span>
+                  {message.role === 'assistant' && message.content && (
+                    <button
+                      onClick={() => handleExportMessagePDF(message)}
+                      disabled={exportingPdf === message.id}
+                      className="opacity-0 group-hover/msg:opacity-100 inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs text-[var(--text-muted)] hover:text-blue-600 hover:bg-blue-50 disabled:text-[var(--text-muted)] transition-all"
+                      title="Baixar resposta como PDF"
+                    >
+                      {exportingPdf === message.id ? (
+                        <Loader2 className="w-3 h-3 animate-spin" />
+                      ) : (
+                        <Download className="w-3 h-3" />
+                      )}
+                      PDF
+                    </button>
+                  )}
                 </div>
               </div>
             </div>
@@ -446,8 +547,8 @@ export default function ChatInterface({
         <div aria-live="polite" aria-atomic="true">
           {isLoading && (
             <div className="flex justify-start">
-              <div className="bg-gray-100 rounded-lg p-4">
-                <Loader2 className="w-5 h-5 animate-spin text-gray-600" aria-label="Processando sua pergunta" />
+              <div className="bg-[var(--bg-tertiary)] rounded-lg p-4">
+                <Loader2 className="w-5 h-5 animate-spin text-[var(--text-secondary)]" aria-label="Processando sua pergunta" />
                 <span className="sr-only">Processando sua pergunta...</span>
               </div>
             </div>
@@ -468,7 +569,7 @@ export default function ChatInterface({
       </div>
 
       {/* Input Area */}
-      <div className="border-t border-gray-200 p-4">
+      <div className="border-t border-[var(--border-default)] p-4">
         <form
           onSubmit={(e) => {
             e.preventDefault();
@@ -482,7 +583,7 @@ export default function ChatInterface({
             onChange={(e) => setInput(e.target.value)}
             placeholder={placeholder}
             disabled={isLoading}
-            className="flex-1 px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-100"
+            className="flex-1 px-4 py-3 border border-[var(--border-strong)] rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-[var(--bg-tertiary)] bg-[var(--bg-input)] text-[var(--text-primary)]"
           />
           <button
             type="submit"

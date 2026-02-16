@@ -167,24 +167,24 @@ export default function CourseArea({
                 className={`text-left p-4 rounded-xl border-2 transition-all ${
                   isActive
                     ? 'border-brand-500 bg-brand-50/30 shadow-md'
-                    : 'border-gray-100 bg-white hover:border-brand-300 hover:shadow-sm'
+                    : 'border-[var(--border-default)] bg-[var(--bg-card)] hover:border-brand-300 hover:shadow-sm'
                 }`}
               >
                 <div className="flex items-center gap-3">
                   <div
-                    className={`p-2 rounded-lg ${isActive ? 'bg-brand-100' : 'bg-gray-100'}`}
+                    className={`p-2 rounded-lg ${isActive ? 'bg-brand-100' : 'bg-[var(--bg-tertiary)]'}`}
                   >
                     <GraduationCap
-                      className={`w-5 h-5 ${isActive ? 'text-brand-600' : 'text-gray-500'}`}
+                      className={`w-5 h-5 ${isActive ? 'text-brand-600' : 'text-[var(--text-muted)]'}`}
                     />
                   </div>
                   <div className="flex-1 min-w-0">
                     <h3
-                      className={`text-sm font-bold line-clamp-1 ${isActive ? 'text-brand-900' : 'text-gray-800'}`}
+                      className={`text-sm font-bold line-clamp-1 ${isActive ? 'text-brand-900' : 'text-[var(--text-primary)]'}`}
                     >
                       {data.course.title.split('(')[0].trim()}
                     </h3>
-                    <p className="text-xs text-gray-500 line-clamp-1 mt-0.5">
+                    <p className="text-xs text-[var(--text-muted)] line-clamp-1 mt-0.5">
                       {data.course.shortDescription}
                     </p>
                     <span
@@ -192,8 +192,8 @@ export default function CourseArea({
                         hasContent
                           ? isActive
                             ? 'text-brand-600'
-                            : 'text-gray-500'
-                          : 'text-gray-400 italic'
+                            : 'text-[var(--text-muted)]'
+                          : 'text-[var(--text-muted)] italic'
                       }`}
                     >
                       {docCount > 0
@@ -211,7 +211,7 @@ export default function CourseArea({
       )}
 
       {/* Unified Course Card */}
-      <div className="bg-white rounded-2xl border border-gray-200 overflow-hidden">
+      <div className="bg-[var(--bg-card)] rounded-2xl border border-[var(--border-default)] overflow-hidden">
         {/* Course Header */}
         <div className="p-5 lg:p-6">
           <div className="flex items-start gap-4">
@@ -219,10 +219,10 @@ export default function CourseArea({
               <GraduationCap className="w-6 h-6 lg:w-7 lg:h-7 text-white" />
             </div>
             <div className="flex-1 min-w-0">
-              <h2 className="text-lg lg:text-xl font-bold text-gray-900 leading-tight">
+              <h2 className="text-lg lg:text-xl font-bold text-[var(--text-primary)] leading-tight">
                 {activeCourse.course.title.split('(')[0].trim()}
               </h2>
-              <p className="text-sm text-gray-500 mt-1 line-clamp-2">
+              <p className="text-sm text-[var(--text-muted)] mt-1 line-clamp-2">
                 {activeCourse.course.shortDescription}
               </p>
               {hasMaterials && (
@@ -234,7 +234,7 @@ export default function CourseArea({
                     </span>
                   )}
                   {sectionDocs.length > 0 && (
-                    <span className="text-xs font-semibold text-gray-500 bg-gray-100 px-2.5 py-1 rounded-full">
+                    <span className="text-xs font-semibold text-[var(--text-muted)] bg-[var(--bg-tertiary)] px-2.5 py-1 rounded-full">
                       {sectionDocs.length}{' '}
                       {sectionDocs.length === 1 ? 'categoria' : 'categorias'}
                     </span>
@@ -246,7 +246,7 @@ export default function CourseArea({
         </div>
 
         {/* Course Action Banner - always visible */}
-        <div className="px-5 py-4 bg-gradient-to-r from-brand-50/50 to-purple-50/50 border-t border-gray-100">
+        <div className="px-5 py-4 bg-gradient-to-r from-brand-50/50 to-purple-50/50 border-t border-[var(--border-default)]">
           <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4">
             <div className="flex items-center gap-3 flex-1 min-w-0">
               <div className="p-2 bg-brand-100 rounded-lg flex-shrink-0">
@@ -281,13 +281,13 @@ export default function CourseArea({
 
         {/* Materials by Section - Clean Layout */}
         {sectionDocs.length > 0 && (
-          <div className="border-t border-gray-100">
+          <div className="border-t border-[var(--border-default)]">
             {sectionDocs.map((section, sectionIdx) => {
               const Icon = section.icon;
               return (
                 <div
                   key={section.category}
-                  className={sectionIdx > 0 ? 'border-t border-gray-50' : ''}
+                  className={sectionIdx > 0 ? 'border-t border-[var(--border-default)]' : ''}
                 >
                   {/* Section Header */}
                   <div className="px-5 pt-4 pb-2 flex items-center gap-2.5">
@@ -297,7 +297,7 @@ export default function CourseArea({
                     >
                       <Icon className="w-4 h-4" style={{ color: section.accent }} />
                     </div>
-                    <h3 className="text-sm font-bold text-gray-800">{section.title}</h3>
+                    <h3 className="text-sm font-bold text-[var(--text-primary)]">{section.title}</h3>
                     <span
                       className="text-xs font-semibold px-2 py-0.5 rounded-full"
                       style={{
@@ -315,7 +315,7 @@ export default function CourseArea({
                       <button
                         key={doc.id}
                         onClick={() => onDocumentClick(doc)}
-                        className="w-full text-left bg-gray-50 hover:bg-gray-100 rounded-xl p-3.5 transition-all group/card flex items-center gap-3"
+                        className="w-full text-left bg-[var(--bg-secondary)] hover:bg-[var(--bg-hover)] rounded-xl p-3.5 transition-all group/card flex items-center gap-3"
                       >
                         <div
                           className="w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0"
@@ -327,19 +327,19 @@ export default function CourseArea({
                           />
                         </div>
                         <div className="flex-1 min-w-0">
-                          <h4 className="font-semibold text-sm text-gray-900 line-clamp-1 group-hover/card:text-brand-600 transition-colors">
+                          <h4 className="font-semibold text-sm text-[var(--text-primary)] line-clamp-1 group-hover/card:text-brand-600 transition-colors">
                             {doc.title}
                           </h4>
                           {doc.description && (
-                            <p className="text-xs text-gray-500 line-clamp-1 mt-0.5">
+                            <p className="text-xs text-[var(--text-muted)] line-clamp-1 mt-0.5">
                               {doc.description}
                             </p>
                           )}
                         </div>
-                        <span className="text-[10px] font-semibold uppercase tracking-wider px-1.5 py-0.5 rounded bg-white text-gray-500 flex-shrink-0">
+                        <span className="text-[10px] font-semibold uppercase tracking-wider px-1.5 py-0.5 rounded bg-[var(--bg-card)] text-[var(--text-muted)] flex-shrink-0">
                           {getDocTypeLabel(doc.type)}
                         </span>
-                        <ChevronRight className="w-4 h-4 text-gray-300 group-hover/card:text-brand-500 flex-shrink-0 transition-colors" />
+                        <ChevronRight className="w-4 h-4 text-[var(--text-muted)] group-hover/card:text-brand-500 flex-shrink-0 transition-colors" />
                       </button>
                     ))}
                   </div>
@@ -351,12 +351,12 @@ export default function CourseArea({
 
         {/* Empty State - Course without materials */}
         {!hasMaterials && (
-          <div className="px-5 py-8 border-t border-gray-100 text-center">
-            <div className="inline-flex p-3 bg-gray-100 rounded-full mb-3">
-              <Clock className="w-6 h-6 text-gray-400" />
+          <div className="px-5 py-8 border-t border-[var(--border-default)] text-center">
+            <div className="inline-flex p-3 bg-[var(--bg-tertiary)] rounded-full mb-3">
+              <Clock className="w-6 h-6 text-[var(--text-muted)]" />
             </div>
-            <p className="text-sm font-medium text-gray-600">Conteúdo em preparação</p>
-            <p className="text-xs text-gray-400 mt-1">
+            <p className="text-sm font-medium text-[var(--text-secondary)]">Conteúdo em preparação</p>
+            <p className="text-xs text-[var(--text-muted)] mt-1">
               Os materiais deste curso serão disponibilizados em breve.
             </p>
           </div>
@@ -366,8 +366,8 @@ export default function CourseArea({
         {sectionDocs.length === 0 &&
           modulesData &&
           modulesData[activeCourseId]?.moduleCount > 0 && (
-            <div className="px-5 py-4 border-t border-gray-100">
-              <p className="text-sm text-gray-500 italic">
+            <div className="px-5 py-4 border-t border-[var(--border-default)]">
+              <p className="text-sm text-[var(--text-muted)] italic">
                 Materiais complementares em breve.
               </p>
             </div>
@@ -378,7 +378,7 @@ export default function CourseArea({
           const courseSitesList = sites?.[activeCourseId];
           if (!courseSitesList || courseSitesList.length === 0) return null;
           return (
-            <div className="p-5 border-t border-gray-100">
+            <div className="p-5 border-t border-[var(--border-default)]">
               <RecommendedSites sites={courseSitesList} compact />
             </div>
           );

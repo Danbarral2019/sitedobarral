@@ -75,21 +75,21 @@ export function MobileTreeDrawer({
       {/* Drawer */}
       <div
         ref={drawerRef}
-        className="fixed inset-y-0 left-0 w-full max-w-sm bg-white shadow-2xl z-50 lg:hidden flex flex-col"
+        className="fixed inset-y-0 left-0 w-full max-w-sm bg-[var(--bg-card)] shadow-2xl z-50 lg:hidden flex flex-col"
         style={{
           transform: isOpen ? 'translateX(0)' : 'translateX(-100%)',
           transition: 'transform 0.3s ease-in-out',
         }}
       >
         {/* Header */}
-        <div className="flex items-center justify-between px-4 py-3 border-b border-gray-200 bg-gradient-to-r from-brand-50 to-white">
+        <div className="flex items-center justify-between px-4 py-3 border-b border-[var(--border-default)] bg-gradient-to-r from-brand-50 to-[var(--bg-card)]">
           <div className="flex items-center gap-2">
             <FolderTree className="w-5 h-5 text-brand-600" />
-            <h2 className="font-bold text-gray-900">Navegar Conteúdo</h2>
+            <h2 className="font-bold text-[var(--text-primary)]">Navegar Conteúdo</h2>
           </div>
           <button
             onClick={onClose}
-            className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
+            className="p-2 text-[var(--text-muted)] hover:text-[var(--text-secondary)] hover:bg-[var(--bg-tertiary)] rounded-lg transition-colors"
             aria-label="Fechar"
           >
             <X className="w-5 h-5" />
@@ -110,7 +110,7 @@ export function MobileTreeDrawer({
         </div>
 
         {/* Footer */}
-        <div className="px-4 py-3 border-t border-gray-200 bg-gray-50">
+        <div className="px-4 py-3 border-t border-[var(--border-default)] bg-[var(--bg-secondary)]">
           <button
             onClick={onClose}
             className="w-full py-2.5 px-4 bg-brand-600 hover:bg-brand-700 text-white font-medium rounded-xl transition-colors"
@@ -134,15 +134,15 @@ export function MobileTreeTrigger({
   return (
     <button
       onClick={onClick}
-      className="lg:hidden w-full flex items-center justify-between px-4 py-3 bg-white rounded-xl border-2 border-gray-200 shadow-sm hover:border-brand-300 transition-colors"
+      className="lg:hidden w-full flex items-center justify-between px-4 py-3 bg-[var(--bg-card)] rounded-xl border-2 border-[var(--border-default)] shadow-sm hover:border-brand-300 transition-colors"
     >
       <div className="flex items-center gap-2">
         <FolderTree className="w-5 h-5 text-brand-600" />
-        <span className="font-medium text-gray-900">
+        <span className="font-medium text-[var(--text-primary)]">
           {selectedLabel || 'Navegar por Tipo'}
         </span>
       </div>
-      <ChevronDown className="w-5 h-5 text-gray-400" />
+      <ChevronDown className="w-5 h-5 text-[var(--text-muted)]" />
     </button>
   );
 }

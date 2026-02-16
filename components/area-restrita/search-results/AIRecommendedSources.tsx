@@ -26,7 +26,7 @@ export function AIRecommendedSources({
     <div>
       <div className="flex items-center gap-2 mb-3">
         <Sparkles className="w-4 h-4 text-purple-500" />
-        <h3 className="font-bold text-gray-900 text-sm">Fontes recomendadas pela IA</h3>
+        <h3 className="font-bold text-[var(--text-primary)] text-sm">Fontes recomendadas pela IA</h3>
         <span className="px-2 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-700">
           {aiSources.length}
         </span>
@@ -58,7 +58,7 @@ export function AIRecommendedSources({
             ? 'border-brand-300 bg-brand-50/30 ring-1 ring-brand-200'
             : isHighPriority
             ? 'border-indigo-200 bg-indigo-50/20'
-            : 'border-gray-200';
+            : 'border-[var(--border-default)]';
           const hoverClass = isProfessorMaterial
             ? 'hover:border-brand-400 hover:shadow-md'
             : 'hover:border-purple-300 hover:shadow-sm';
@@ -71,7 +71,7 @@ export function AIRecommendedSources({
             ? 'bg-brand-100 text-brand-800 font-semibold'
             : isHighPriority
             ? 'bg-indigo-100 text-indigo-700'
-            : 'bg-gray-100 text-gray-600';
+            : 'bg-[var(--bg-tertiary)] text-[var(--text-secondary)]';
 
           const cardContent = (
             <div className="flex items-start gap-3">
@@ -79,11 +79,11 @@ export function AIRecommendedSources({
                 <SourceIcon category={source.category} />
               </div>
               <div className="flex-1 min-w-0">
-                <h4 className={`text-sm font-medium line-clamp-1 transition-colors ${isProfessorMaterial ? 'text-brand-900 group-hover:text-brand-700' : 'text-gray-900 group-hover:text-purple-700'}`}>
+                <h4 className={`text-sm font-medium line-clamp-1 transition-colors ${isProfessorMaterial ? 'text-brand-900 group-hover:text-brand-700' : 'text-[var(--text-primary)] group-hover:text-purple-700'}`}>
                   {source.title}
                 </h4>
                 {source.excerpt && (
-                  <p className="text-xs text-gray-500 mt-0.5 line-clamp-1">{source.excerpt}</p>
+                  <p className="text-xs text-[var(--text-muted)] mt-0.5 line-clamp-1">{source.excerpt}</p>
                 )}
               </div>
               <div className="flex items-center gap-2 flex-shrink-0">

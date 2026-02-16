@@ -213,18 +213,18 @@ export default async function Home() {
       </Suspense>
 
       {/* 4. Depoimentos */}
-      <section className="py-16 bg-gradient-to-b from-white to-gray-50">
+      <section className="py-16 bg-gradient-to-b from-[var(--bg-primary)] to-[var(--bg-secondary)]">
         <div className="container mx-auto px-4">
           <div className="max-w-4xl mx-auto">
             <div className="text-center mb-12">
-              <h2 className="text-4xl font-bold text-gray-900 mb-2">Depoimentos de Alunos</h2>
+              <h2 className="text-4xl font-bold text-[var(--text-primary)] mb-2">Depoimentos de Alunos</h2>
               <div className="h-1 w-24 bg-gradient-to-r from-accent-400 to-accent-500 rounded-full mx-auto"></div>
             </div>
 
             <TestimonialsCarousel />
 
             <div className="text-center mt-10">
-              <p className="text-gray-700 mb-4 text-lg">
+              <p className="text-[var(--text-secondary)] mb-4 text-lg">
                 Você também é aluno e quer compartilhar sua experiência?
               </p>
               <Link
@@ -276,12 +276,12 @@ export default async function Home() {
       </section>
 
       {/* 6. Botao Admin - Discreto */}
-      <section className="py-8 bg-gray-50">
+      <section className="py-8 bg-[var(--bg-secondary)]">
         <div className="container mx-auto px-4">
           <div className="max-w-4xl mx-auto text-center">
             <Link
               href="/admin/login"
-              className="inline-flex items-center gap-2 px-4 py-2 text-sm text-gray-500 hover:text-gray-700 transition-colors"
+              className="inline-flex items-center gap-2 px-4 py-2 text-sm text-[var(--text-muted)] hover:text-[var(--text-secondary)] transition-colors"
             >
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />

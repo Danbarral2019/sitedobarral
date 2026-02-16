@@ -13,11 +13,11 @@ export function VideoResultCard({ video, query }: VideoResultCardProps) {
       href={video.youtubeUrl}
       target="_blank"
       rel="noopener noreferrer"
-      className="block bg-white rounded-xl border border-gray-200 overflow-hidden hover:border-red-300 hover:shadow-md transition-all group"
+      className="block bg-[var(--bg-card)] rounded-xl border border-[var(--border-default)] overflow-hidden hover:border-red-300 hover:shadow-md transition-all group"
     >
       <div className="flex">
         {/* Thumbnail */}
-        <div className="relative w-32 h-20 bg-gray-100 flex-shrink-0">
+        <div className="relative w-32 h-20 bg-[var(--bg-tertiary)] flex-shrink-0">
           {video.thumbnailUrl ? (
             // eslint-disable-next-line @next/next/no-img-element
             <img
@@ -36,11 +36,11 @@ export function VideoResultCard({ video, query }: VideoResultCardProps) {
         </div>
         {/* Content */}
         <div className="p-3 flex-1 min-w-0">
-          <h4 className="font-semibold text-gray-900 text-sm line-clamp-1 group-hover:text-red-600 transition-colors">
+          <h4 className="font-semibold text-[var(--text-primary)] text-sm line-clamp-1 group-hover:text-red-600 transition-colors">
             {highlightText(video.title, query)}
           </h4>
           {video.description && (
-            <p className="text-xs text-gray-500 mt-1 line-clamp-2">{video.description}</p>
+            <p className="text-xs text-[var(--text-muted)] mt-1 line-clamp-2">{video.description}</p>
           )}
           {video.courseName && (
             <span className="inline-block mt-1 px-2 py-0.5 rounded-full text-xs font-medium bg-red-50 text-red-700">
