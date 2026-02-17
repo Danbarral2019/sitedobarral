@@ -17,6 +17,7 @@
 
 import { DOUSearchResult } from './dou-api';
 import { DOUEnrichedContent } from './dou-scraper';
+import { queryGeminiText } from './gemini/cached-client';
 
 /**
  * Categorias de documentos DOU
@@ -390,6 +391,147 @@ export class DOUClassifier {
    */
   private static getMatchedKeywords(text: string, keywords: string[]): string[] {
     return keywords.filter((keyword) => text.includes(keyword.toLowerCase()));
+  }
+
+  /**
+   * Classifica um documento usando IA (Gemini Flash) como fallback
+   * Chamado quando classify() retorna confidence < 60% ou categoria OUTROS
+   */
+  static async classifyWithAI(
+    title: string,
+    abstract: string,
+    enrichedContent?: DOUEnrichedContent
+  ): Promise<ClassificationResult> {
+    const contentPreview = (enrichedContent?.conteudo || '').substring(0, 2000);
+
+    const prompt = `Você é um classificador de documentos do Diário Oficial da União (DOU) especializado em Direito Administrativo, Licitações e Contratos Públicos.
+
+Classifique o documento abaixo em UMA das categorias:
+- fonte_agu: Orientações Normativas, Pareceres ou Súmulas da AGU
+- ato_normativo: Leis, Decretos, Portarias, Instruções Normativas (normas gerais)
+- sumula: Súmulas de Tribunais (STF, STJ, TCU)
+- acordao_tcu: Acórdãos do TCU
+- parecer_orgao: Pareceres de outros órgãos
+- resolucao: Resoluções
+- edital: Editais de licitação
+- aviso_licitacao: Avisos de licitação
+- contrato: Contratos
+- extrato: Extratos de contratos/termos aditivos
+- outros: Não se encaixa em nenhuma categoria acima
+
+Determine também:
+- isRelevant: true se o documento é relevante para estudo de Direito Administrativo, Licitações e Contratos. false se é um ato administrativo rotineiro (nomeação, exoneração, edital específico, extrato de contrato).
+- confidence: 0-100, quão confiante você está na classificação
+
+TÍTULO: ${title}
+RESUMO: ${abstract}
+${contentPreview ? `CONTEÚDO (trecho): ${contentPreview}` : ''}
+
+Responda APENAS com JSON válido no formato:
+{"category":"<categoria>","confidence":<0-100>,"reasoning":"<explicação curta>","isRelevant":<true|false>}`;
+
+    try {
+      const result = await queryGeminiText(prompt, {
+        temperature: 0.1,
+        maxOutputTokens: 256,
+        useCache: false,
+      });
+
+      // Parse JSON da resposta
+      const jsonMatch = result.response.match(/\{[^}]+\}/);
+      if (!jsonMatch) {
+        throw new Error('Resposta IA sem JSON válido');
+      }
+
+      const parsed = JSON.parse(jsonMatch[0]);
+      const category = Object.values(DOUDocumentCategory).includes(parsed.category)
+        ? parsed.category as DOUDocumentCategory
+        : DOUDocumentCategory.OUTROS;
+      const confidence = Math.min(100, Math.max(0, parsed.confidence || 50));
+      const isRelevant = parsed.isRelevant === true;
+
+      // Determinar status baseado na classificação
+      const alwaysRelevant = [DOUDocumentCategory.FONTE_AGU, DOUDocumentCategory.ATO_NORMATIVO, DOUDocumentCategory.SUMULA];
+      const alwaysIrrelevant = [DOUDocumentCategory.EDITAL, DOUDocumentCategory.AVISO_LICITACAO, DOUDocumentCategory.CONTRATO, DOUDocumentCategory.EXTRATO];
+
+      let status: ApprovalStatus;
+      let requiresReview: boolean;
+
+      if (alwaysRelevant.includes(category) && confidence >= 70) {
+        status = ApprovalStatus.AUTO_APPROVED;
+        requiresReview = false;
+      } else if (alwaysIrrelevant.includes(category) && confidence >= 70) {
+        status = ApprovalStatus.AUTO_REJECTED;
+        requiresReview = false;
+      } else {
+        status = ApprovalStatus.PENDING;
+        requiresReview = true;
+      }
+
+      return {
+        category,
+        status,
+        confidence,
+        reasoning: [`[IA] ${parsed.reasoning || 'Classificado por Gemini Flash'}`],
+        isRelevant,
+        requiresReview,
+      };
+    } catch (error) {
+      console.error('[DOUClassifier] Erro na classificação com IA:', error);
+      // Retorna classificação original (OUTROS/baixa confiança)
+      return {
+        category: DOUDocumentCategory.OUTROS,
+        status: ApprovalStatus.PENDING,
+        confidence: 40,
+        reasoning: ['Classificação IA falhou, mantendo como pendente'],
+        isRelevant: true,
+        requiresReview: true,
+      };
+    }
+  }
+
+  /**
+   * Classifica múltiplos documentos com IA (para os que tiveram baixa confiança)
+   * Limitado a maxAICalls por execução
+   */
+  static async classifyBatchWithAI(
+    results: DOUSearchResult[],
+    classifications: Map<DOUSearchResult, ClassificationResult>,
+    enrichedContents?: Map<string, DOUEnrichedContent>,
+    maxAICalls: number = 10
+  ): Promise<{ updated: number; errors: number }> {
+    let updated = 0;
+    let errors = 0;
+    let aiCalls = 0;
+
+    for (const [result, classification] of classifications.entries()) {
+      if (aiCalls >= maxAICalls) break;
+
+      // Só chamar IA para baixa confiança ou OUTROS
+      if (classification.confidence >= 60 && classification.category !== DOUDocumentCategory.OUTROS) {
+        continue;
+      }
+
+      try {
+        aiCalls++;
+        const enriched = enrichedContents?.get(result.href);
+        const aiResult = await this.classifyWithAI(result.title, result.abstract, enriched);
+
+        // Só atualizar se IA der confidence > 70%
+        if (aiResult.confidence > 70) {
+          classifications.set(result, aiResult);
+          updated++;
+        }
+
+        // Rate limiting entre chamadas IA
+        await new Promise(resolve => setTimeout(resolve, 500));
+      } catch {
+        errors++;
+      }
+    }
+
+    console.log(`[DOUClassifier] IA: ${aiCalls} chamadas, ${updated} atualizados, ${errors} erros`);
+    return { updated, errors };
   }
 
   /**

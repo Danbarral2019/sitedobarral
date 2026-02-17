@@ -135,6 +135,12 @@ export async function GET(request: NextRequest) {
     // 3. Classificar com DOUClassifier
     const classifications = DOUClassifier.classifyBatch(results);
 
+    // 3.5. Classificar com IA os documentos com baixa confiança (max 10 por run)
+    const aiStats = await DOUClassifier.classifyBatchWithAI(results, classifications, undefined, 10);
+    if (aiStats.updated > 0) {
+      console.log(`[Sync DOU Normativos] IA reclassificou ${aiStats.updated} docs`);
+    }
+
     // 4. Processar cada resultado
     for (const [result, classification] of classifications.entries()) {
       try {
@@ -471,7 +477,7 @@ export async function GET(request: NextRequest) {
       success: true,
       dryRun,
       message: `Processados: ${stats.autoAprovados} auto-aprovados, ${stats.enviadosParaStaging} para staging, ${stats.alteracoesDetectadas} alterações detectadas`,
-      stats,
+      stats: { ...stats, aiClassified: aiStats.updated, aiErrors: aiStats.errors },
     });
 
   } catch (error) {

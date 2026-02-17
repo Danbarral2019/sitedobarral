@@ -951,6 +951,10 @@ model DOUStagingDocument {
   adminNotes   String? @db.Text
   finalDecision String? // approved ou rejected
 
+  // Feedback loop (classificação)
+  classificationCorrect Boolean? // true=classificação automática estava correta, false=incorreta
+  correctedCategory     String?  // Categoria correta quando admin discorda da classificação
+
   // Importação
   imported      Boolean @default(false)
   importedAt    DateTime?

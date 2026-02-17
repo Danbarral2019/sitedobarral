@@ -220,6 +220,12 @@ async function processApproval(
       },
     });
 
+    // Feedback loop: registrar se classificação automática estava correta
+    const categoryMap2: Record<string, string> = {
+      'fonte_agu': 'parecer', 'ato_normativo': 'legislacao', 'acordao_tcu': 'acordao', 'sumula': 'sumula',
+    };
+    const classificationCorrect = documentCategory === categoryMap2[doc.category];
+
     await tx.dOUStagingDocument.update({
       where: { id: doc.id },
       data: {
@@ -231,6 +237,8 @@ async function processApproval(
         imported: true,
         importedAt: new Date(),
         documentId: newDoc.id,
+        classificationCorrect: classificationCorrect ?? null,
+        correctedCategory: !classificationCorrect ? documentCategory : null,
       },
     });
 
@@ -249,6 +257,8 @@ async function processRejection(
   adminEmail: string,
   adminNotes?: string
 ) {
+  const wasAutoApproved = doc.approvalStatus === 'auto_approved';
+
   await prisma.$transaction(async (tx) => {
     await tx.dOUStagingDocument.update({
       where: { id: doc.id },
@@ -258,6 +268,7 @@ async function processRejection(
         reviewedAt: new Date(),
         adminNotes: adminNotes || null,
         finalDecision: 'rejected',
+        classificationCorrect: wasAutoApproved ? false : null,
       },
     });
 

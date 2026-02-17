@@ -1,9 +1,14 @@
 /// <reference lib="webworker" />
 
-const CACHE_VERSION = 'v1';
+const CACHE_VERSION = 'v2';
 const STATIC_CACHE = `${CACHE_VERSION}-static`;
 const PAGES_CACHE = `${CACHE_VERSION}-pages`;
 const ASSETS_CACHE = `${CACHE_VERSION}-assets`;
+
+// Cache limits
+const PAGES_CACHE_MAX = 30;
+const ASSETS_CACHE_MAX = 60;
+const PAGES_TTL_MS = 24 * 60 * 60 * 1000; // 24h
 
 const PRECACHE_URLS = [
   '/offline',
@@ -12,12 +17,11 @@ const PRECACHE_URLS = [
   '/brand/sublogo.png',
 ];
 
-// Install: pre-cache offline page and essential assets
+// Install: pre-cache offline page and essential assets (no auto skipWaiting)
 self.addEventListener('install', (event) => {
   event.waitUntil(
     caches.open(STATIC_CACHE).then((cache) => cache.addAll(PRECACHE_URLS))
   );
-  self.skipWaiting();
 });
 
 // Activate: clean up old caches
@@ -33,6 +37,13 @@ self.addEventListener('activate', (event) => {
     )
   );
   self.clients.claim();
+});
+
+// Message listener: controlled SW updates
+self.addEventListener('message', (event) => {
+  if (event.data && event.data.type === 'SKIP_WAITING') {
+    self.skipWaiting();
+  }
 });
 
 // Fetch: route requests by strategy
@@ -84,6 +95,7 @@ async function cacheFirst(request, cacheName) {
     if (response.ok) {
       const cache = await caches.open(cacheName);
       cache.put(request, response.clone());
+      trimCache(cacheName, ASSETS_CACHE_MAX);
     }
     return response;
   } catch {
@@ -123,16 +135,45 @@ async function networkFirstWithOfflineFallback(request) {
     const response = await fetch(request);
     if (response.ok) {
       const cache = await caches.open(PAGES_CACHE);
-      cache.put(request, response.clone());
+      // Store with timestamp header for TTL
+      const headers = new Headers(response.headers);
+      headers.set('sw-cache-time', Date.now().toString());
+      const timedResponse = new Response(response.clone().body, {
+        status: response.status,
+        statusText: response.statusText,
+        headers,
+      });
+      cache.put(request, timedResponse);
+      trimCache(PAGES_CACHE, PAGES_CACHE_MAX);
     }
     return response;
   } catch {
+    // Try cache, but check TTL for pages
     const cached = await caches.match(request);
-    if (cached) return cached;
+    if (cached) {
+      const cacheTime = parseInt(cached.headers.get('sw-cache-time') || '0', 10);
+      if (cacheTime > 0 && Date.now() - cacheTime > PAGES_TTL_MS) {
+        // Expired — still serve stale but delete from cache
+        const cache = await caches.open(PAGES_CACHE);
+        cache.delete(request);
+      }
+      return cached;
+    }
 
     const offlinePage = await caches.match('/offline');
     if (offlinePage) return offlinePage;
 
     return new Response('Offline', { status: 503, statusText: 'Offline' });
+  }
+}
+
+// Trim cache to max entries (delete oldest first)
+async function trimCache(cacheName, maxEntries) {
+  const cache = await caches.open(cacheName);
+  const keys = await cache.keys();
+  if (keys.length > maxEntries) {
+    // Delete oldest entries (first in list)
+    const toDelete = keys.slice(0, keys.length - maxEntries);
+    await Promise.all(toDelete.map((key) => cache.delete(key)));
   }
 }

@@ -274,7 +274,13 @@ async function handleApproval(
         },
       });
 
-      // Atualizar staging document
+      // Feedback loop: registrar se a classificação automática estava correta
+      const autoCategory = stagingDoc.category;
+      const classificationCorrect = documentCategory === (
+        { 'fonte_agu': 'parecer', 'ato_normativo': 'legislacao', 'acordao_tcu': 'acordao', 'sumula': 'sumula' } as Record<string, string>
+      )[autoCategory];
+
+      // Atualizar staging document com feedback
       await tx.dOUStagingDocument.update({
         where: { id: stagingDoc.id },
         data: {
@@ -286,6 +292,8 @@ async function handleApproval(
           imported: true,
           importedAt: new Date(),
           documentId: newDoc.id,
+          classificationCorrect: classificationCorrect ?? null,
+          correctedCategory: !classificationCorrect ? documentCategory : null,
         },
       });
 
@@ -333,7 +341,10 @@ async function handleRejection(
   adminNotes?: string
 ) {
   try {
-    // Atualizar staging document
+    // Feedback loop: rejeição indica classificação incorreta se era auto_approved
+    const wasAutoApproved = stagingDoc.approvalStatus === 'auto_approved';
+
+    // Atualizar staging document com feedback
     await prisma.dOUStagingDocument.update({
       where: { id: stagingDoc.id },
       data: {
@@ -342,6 +353,7 @@ async function handleRejection(
         reviewedAt: new Date(),
         adminNotes: adminNotes || null,
         finalDecision: 'rejected',
+        classificationCorrect: wasAutoApproved ? false : null,
       },
     });
 

@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useState, useCallback } from 'react'
-import { Download, Bell, X } from 'lucide-react'
+import { Download, Bell, RefreshCw, X } from 'lucide-react'
 
 interface BeforeInstallPromptEvent extends Event {
   prompt(): Promise<void>
@@ -25,6 +25,8 @@ export function PWAProvider() {
   const [installPrompt, setInstallPrompt] = useState<BeforeInstallPromptEvent | null>(null)
   const [showBanner, setShowBanner] = useState(false)
   const [showNotificationPrompt, setShowNotificationPrompt] = useState(false)
+  const [showUpdateBanner, setShowUpdateBanner] = useState(false)
+  const [waitingWorker, setWaitingWorker] = useState<ServiceWorker | null>(null)
 
   const subscribeToPush = useCallback(async (registration: ServiceWorkerRegistration) => {
     try {
@@ -74,13 +76,9 @@ export function PWAProvider() {
   }, [])
 
   useEffect(() => {
-    let swRegistration: ServiceWorkerRegistration | null = null
-
     // Register service worker
     if ('serviceWorker' in navigator && process.env.NODE_ENV === 'production') {
       navigator.serviceWorker.register('/sw.js').then((reg) => {
-        swRegistration = reg
-
         // If notifications already granted, subscribe silently
         if (Notification.permission === 'granted') {
           subscribeToPush(reg)
@@ -91,8 +89,27 @@ export function PWAProvider() {
             setTimeout(() => setShowNotificationPrompt(true), 5000)
           }
         }
+
+        // Detect SW updates
+        reg.onupdatefound = () => {
+          const newWorker = reg.installing
+          if (!newWorker) return
+
+          newWorker.onstatechange = () => {
+            if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+              // New SW installed, waiting to activate
+              setWaitingWorker(newWorker)
+              setShowUpdateBanner(true)
+            }
+          }
+        }
       }).catch(() => {
         // SW registration failed silently
+      })
+
+      // Listen for controller change (after skipWaiting)
+      navigator.serviceWorker.addEventListener('controllerchange', () => {
+        window.location.reload()
       })
     }
 
@@ -114,7 +131,6 @@ export function PWAProvider() {
 
     return () => {
       window.removeEventListener('beforeinstallprompt', handler)
-      void swRegistration // keep reference alive
     }
   }, [subscribeToPush])
 
@@ -151,10 +167,48 @@ export function PWAProvider() {
     localStorage.setItem('push-dismissed', '1')
   }
 
+  const handleUpdate = () => {
+    if (waitingWorker) {
+      waitingWorker.postMessage({ type: 'SKIP_WAITING' })
+    }
+    setShowUpdateBanner(false)
+  }
+
+  const handleDismissUpdate = () => {
+    setShowUpdateBanner(false)
+  }
+
   return (
     <>
+      {/* SW Update Banner */}
+      {showUpdateBanner && (
+        <div className="fixed bottom-0 left-0 right-0 z-50 bg-[#20364e] text-white px-4 py-3 flex items-center justify-between gap-3 shadow-lg">
+          <div className="flex items-center gap-3 min-w-0">
+            <RefreshCw className="h-5 w-5 shrink-0" />
+            <p className="text-sm truncate">
+              Nova versao disponivel
+            </p>
+          </div>
+          <div className="flex items-center gap-2 shrink-0">
+            <button
+              onClick={handleUpdate}
+              className="bg-white text-[#20364e] px-4 py-1.5 rounded-md text-sm font-medium hover:bg-gray-100 transition-colors"
+            >
+              Atualizar
+            </button>
+            <button
+              onClick={handleDismissUpdate}
+              className="p-1.5 hover:bg-white/10 rounded-md transition-colors"
+              aria-label="Fechar"
+            >
+              <X className="h-4 w-4" />
+            </button>
+          </div>
+        </div>
+      )}
+
       {/* Install PWA Banner */}
-      {showBanner && (
+      {showBanner && !showUpdateBanner && (
         <div className="fixed bottom-0 left-0 right-0 z-50 bg-[#20364e] text-white px-4 py-3 flex items-center justify-between gap-3 shadow-lg">
           <div className="flex items-center gap-3 min-w-0">
             <Download className="h-5 w-5 shrink-0" />
@@ -181,7 +235,7 @@ export function PWAProvider() {
       )}
 
       {/* Push Notification Permission Prompt */}
-      {showNotificationPrompt && !showBanner && (
+      {showNotificationPrompt && !showBanner && !showUpdateBanner && (
         <div className="fixed bottom-0 left-0 right-0 z-50 bg-[#20364e] text-white px-4 py-3 flex items-center justify-between gap-3 shadow-lg">
           <div className="flex items-center gap-3 min-w-0">
             <Bell className="h-5 w-5 shrink-0" />

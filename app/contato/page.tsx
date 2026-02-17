@@ -1,11 +1,38 @@
 'use client';
 
-import { useState } from 'react';
+import { Suspense, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { Instagram, Youtube, Linkedin, Send, CheckCircle, Loader2 } from 'lucide-react';
 import { courses } from '@/data/courses';
 
 export default function ContatoPage() {
+  return (
+    <Suspense fallback={
+      <main className="py-12">
+        <div className="container mx-auto px-4">
+          <div className="max-w-6xl mx-auto">
+            <div className="text-center mb-12">
+              <div className="inline-block">
+                <h1 className="text-5xl font-bold mb-3 text-gray-900 font-cinzel">Entre em Contato</h1>
+                <div className="h-1.5 w-32 bg-gradient-to-r from-brand-500 to-brand-600 rounded-full mx-auto mb-6"></div>
+              </div>
+              <p className="text-xl text-gray-700 leading-relaxed">
+                Tire suas dúvidas, solicite informações sobre cursos ou contrate palestras
+              </p>
+            </div>
+            <div className="flex justify-center py-12">
+              <Loader2 className="w-8 h-8 animate-spin text-brand-600" />
+            </div>
+          </div>
+        </div>
+      </main>
+    }>
+      <ContatoContent />
+    </Suspense>
+  );
+}
+
+function ContatoContent() {
   const searchParams = useSearchParams();
   const motivo = searchParams.get('motivo');
 

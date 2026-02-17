@@ -123,6 +123,10 @@ export async function GET(request: NextRequest) {
     console.log('[Cron DOU Staging] Classificando documentos...');
     const classifications = DOUClassifier.classifyBatch(results);
 
+    // PASSO 2.5: Classificar com IA os documentos com baixa confiança (max 10 por run)
+    const aiStats = await DOUClassifier.classifyBatchWithAI(results, classifications, undefined, 10);
+    console.log(`[Cron DOU Staging] IA classificou ${aiStats.updated} docs (${aiStats.errors} erros)`);
+
     let autoAprovados = 0;
     let pendentes = 0;
     let autoRejeitados = 0;
@@ -270,6 +274,8 @@ export async function GET(request: NextRequest) {
         enriquecidos,
         erros,
         cleanup,
+        aiClassified: aiStats.updated,
+        aiErrors: aiStats.errors,
       },
     });
 
