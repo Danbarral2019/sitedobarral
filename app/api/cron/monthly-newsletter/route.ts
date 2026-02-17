@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { Resend } from 'resend';
 import { verifyCronAuth } from '@/lib/cron-auth';
+import { randomUUID } from 'crypto';
+import { renderMonthlyNewsletter } from '@/lib/email-templates/newsletter';
 
 /**
  * Cron Job: Newsletter Mensal de Documentos Novos
@@ -89,18 +91,35 @@ export async function GET(request: NextRequest) {
       });
     }
 
-    // 5. Gera HTML da newsletter
-    const newsletterHtml = generateNewsletterHtml(documentsByCategory, newDocuments.length);
+    // 5. Gera sendId e HTML da newsletter com template
+    const sendId = randomUUID();
+    const subject = `Novidades do mes: ${newDocuments.length} novos documentos de Licitacoes`;
+    const newsletterHtml = renderMonthlyNewsletter({
+      sendId,
+      documentsByCategory,
+      totalDocuments: newDocuments.length,
+    });
 
     // 6. Inicializa Resend
     const resend = new Resend(process.env.RESEND_API_KEY);
 
-    // 7. Envia email para todos os inscritos (em lote)
+    // 7. Cria registro de envio (antes do envio para que o tracking pixel funcione)
+    await prisma.newsletterSend.create({
+      data: {
+        id: sendId,
+        type: 'monthly',
+        subject,
+        totalSent: 0,
+        totalFailed: 0,
+      },
+    });
+
+    // 8. Envia email para todos os inscritos (em lote)
     const emailPromises = subscribers.map((subscriber) =>
       resend.emails.send({
         from: process.env.EMAIL_FROM || 'newsletter@profdanielbarral.com.br',
         to: subscriber.email,
-        subject: `Novidades do mês: ${newDocuments.length} novos documentos de Licitações`,
+        subject,
         html: newsletterHtml.replace('{{NAME}}', subscriber.name || 'Assinante'),
       })
     );
@@ -112,7 +131,13 @@ export async function GET(request: NextRequest) {
 
     console.log(`[Cron Newsletter] Emails enviados: ${successCount} sucesso, ${errorCount} erro`);
 
-    // 8. Log de erros se houver
+    // 9. Atualiza registro com contagens
+    await prisma.newsletterSend.update({
+      where: { id: sendId },
+      data: { totalSent: successCount, totalFailed: errorCount },
+    });
+
+    // 10. Log de erros se houver
     results.forEach((result, index) => {
       if (result.status === 'rejected') {
         console.error(`[Cron Newsletter] Erro ao enviar para ${subscribers[index].email}:`, result.reason);
@@ -127,6 +152,7 @@ export async function GET(request: NextRequest) {
         subscribers: subscribers.length,
         emailsSent: successCount,
         emailsFailed: errorCount,
+        sendId,
       },
     });
 
@@ -142,146 +168,3 @@ export async function GET(request: NextRequest) {
   }
 }
 
-/**
- * Gera HTML da newsletter mensal
- */
-function generateNewsletterHtml(
-  documentsByCategory: Record<string, Array<{
-    id: string;
-    title: string;
-    description: string | null;
-    category: string;
-    uploadedAt: Date;
-    url: string | null;
-  }>>,
-  totalDocuments: number
-): string {
-  const categoryNames: Record<string, string> = {
-    'apostila': 'Apostilas e Material Didático',
-    'acordao': 'Acórdãos',
-    'parecer': 'Pareceres Jurídicos',
-    'edital': 'Editais',
-    'artigo': 'Artigos e Doutrinas',
-    'orientacao-normativa': 'Orientações Normativas',
-    'outro': 'Outros Documentos',
-  };
-
-  const categoryEmojis: Record<string, string> = {
-    'apostila': '📚',
-    'acordao': '⚖️',
-    'parecer': '📋',
-    'edital': '📄',
-    'artigo': '📰',
-    'orientacao-normativa': '📜',
-    'outro': '📁',
-  };
-
-  // Monta seções por categoria
-  let categorySections = '';
-  for (const [category, docs] of Object.entries(documentsByCategory)) {
-    const categoryName = categoryNames[category] || category;
-    const emoji = categoryEmojis[category] || '📄';
-
-    categorySections += `
-      <div style="margin-bottom: 30px;">
-        <h2 style="color: #003366; font-size: 20px; border-bottom: 2px solid #0066cc; padding-bottom: 10px; margin-bottom: 15px;">
-          ${emoji} ${categoryName} (${docs.length})
-        </h2>
-        <div style="padding-left: 15px;">
-    `;
-
-    docs.forEach((doc, index) => {
-      categorySections += `
-        <div style="margin-bottom: 20px; padding: 15px; background-color: #f8f9fa; border-left: 4px solid #0066cc; border-radius: 4px;">
-          <h3 style="margin: 0 0 8px 0; font-size: 16px; color: #222;">
-            ${index + 1}. ${doc.title}
-          </h3>
-          ${doc.description ? `
-            <p style="margin: 0 0 10px 0; color: #555; font-size: 14px; line-height: 1.5;">
-              ${doc.description.substring(0, 200)}${doc.description.length > 200 ? '...' : ''}
-            </p>
-          ` : ''}
-          <p style="margin: 0; font-size: 12px; color: #777;">
-            Adicionado em: ${new Date(doc.uploadedAt).toLocaleDateString('pt-BR')}
-          </p>
-        </div>
-      `;
-    });
-
-    categorySections += `
-        </div>
-      </div>
-    `;
-  }
-
-  return `
-<!DOCTYPE html>
-<html lang="pt-BR">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Newsletter Mensal - Prof. Daniel Barral</title>
-</head>
-<body style="margin: 0; padding: 0; font-family: Arial, sans-serif; background-color: #f4f4f4;">
-  <div style="max-width: 600px; margin: 0 auto; background-color: #ffffff;">
-
-    <!-- Header -->
-    <div style="background: linear-gradient(135deg, #003366 0%, #0066cc 100%); color: white; padding: 30px 20px; text-align: center;">
-      <h1 style="margin: 0; font-size: 28px;">Prof. Daniel Barral</h1>
-      <p style="margin: 10px 0 0 0; font-size: 16px; opacity: 0.9;">Licitações e Contratos Públicos</p>
-    </div>
-
-    <!-- Greeting -->
-    <div style="padding: 30px 20px;">
-      <p style="margin: 0 0 20px 0; font-size: 16px; color: #333;">
-        Olá, <strong>{{NAME}}</strong>!
-      </p>
-
-      <p style="margin: 0 0 20px 0; font-size: 16px; color: #333; line-height: 1.6;">
-        Confira as novidades deste mês! Foram adicionados <strong>${totalDocuments} novos documentos</strong>
-        na plataforma, todos relacionados a Licitações e Contratos Públicos.
-      </p>
-
-      <!-- Highlight Box -->
-      <div style="background-color: #fff3cd; border: 1px solid #ffc107; border-radius: 8px; padding: 15px; margin-bottom: 30px;">
-        <p style="margin: 0; color: #856404; font-size: 14px;">
-          <strong>💡 Dica:</strong> Acesse a <a href="${process.env.NEXT_PUBLIC_BASE_URL}/area-restrita" style="color: #0066cc; text-decoration: none;">Área Restrita</a>
-          para visualizar os documentos completos e fazer download.
-        </p>
-      </div>
-
-      <!-- Categories -->
-      ${categorySections}
-
-      <!-- CTA -->
-      <div style="text-align: center; margin-top: 40px; padding: 30px 20px; background-color: #f8f9fa; border-radius: 8px;">
-        <p style="margin: 0 0 20px 0; font-size: 16px; color: #333;">
-          Explore todos os documentos na plataforma:
-        </p>
-        <a href="${process.env.NEXT_PUBLIC_BASE_URL}/area-restrita"
-           style="display: inline-block; background-color: #0066cc; color: white; text-decoration: none; padding: 15px 40px; border-radius: 5px; font-size: 16px; font-weight: bold;">
-          Acessar Área Restrita
-        </a>
-      </div>
-    </div>
-
-    <!-- Footer -->
-    <div style="background-color: #f8f9fa; padding: 20px; text-align: center; border-top: 1px solid #e0e0e0;">
-      <p style="margin: 0 0 10px 0; font-size: 14px; color: #666;">
-        Prof. Daniel Barral - Licitações e Contratos Públicos
-      </p>
-      <p style="margin: 0 0 10px 0; font-size: 12px; color: #999;">
-        <a href="${process.env.NEXT_PUBLIC_BASE_URL}" style="color: #0066cc; text-decoration: none;">www.profdanielbarral.com.br</a>
-      </p>
-      <p style="margin: 0; font-size: 11px; color: #999;">
-        Você está recebendo este email porque se inscreveu na nossa newsletter.
-        <br>
-        <a href="${process.env.NEXT_PUBLIC_BASE_URL}/newsletter/unsubscribe" style="color: #999; text-decoration: underline;">Cancelar inscrição</a>
-      </p>
-    </div>
-
-  </div>
-</body>
-</html>
-  `;
-}

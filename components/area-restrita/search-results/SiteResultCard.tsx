@@ -1,3 +1,4 @@
+import Image from 'next/image';
 import { Globe, ExternalLink } from 'lucide-react';
 import type { SiteResult } from '@/lib/types/global-search';
 import { highlightText } from './search-utils';
@@ -18,8 +19,7 @@ export function SiteResultCard({ site, query }: SiteResultCardProps) {
       <div className="flex items-start gap-3">
         <div className="p-2 rounded-lg bg-teal-50 text-teal-600 flex-shrink-0">
           {site.faviconUrl ? (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img src={site.faviconUrl} alt="" className="w-5 h-5 rounded" />
+            <Image src={site.faviconUrl} alt="" width={20} height={20} className="rounded" unoptimized />
           ) : (
             <Globe className="w-5 h-5" />
           )}

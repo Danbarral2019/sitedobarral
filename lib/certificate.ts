@@ -191,6 +191,9 @@ export async function issueCertificate(
   // Enviar email (fire-and-forget)
   sendCertificateEmailAsync(user.email, user.name, course.title, certificateNumber).catch(() => {});
 
+  // Push notification (fire-and-forget)
+  sendPushToUserAsync(userId, course.title).catch(() => {});
+
   return { certificate, alreadyExists: false };
 }
 
@@ -224,5 +227,21 @@ async function sendCertificateEmailAsync(
     await sendCertificateNotification(email, name, courseTitle, certificateNumber, verificationUrl);
   } catch (error) {
     apiLogger.error({ email, certificateNumber, error }, 'Failed to send certificate email');
+  }
+}
+
+/**
+ * Envia push notification de certificado (async, nao bloqueia)
+ */
+async function sendPushToUserAsync(userId: string, courseTitle: string) {
+  try {
+    const { sendPushToUser } = await import('@/lib/push-notifications');
+    await sendPushToUser(userId, {
+      title: 'Certificado Emitido!',
+      body: `Seu certificado de ${courseTitle} esta pronto!`,
+      url: '/area-restrita/meus-certificados',
+    });
+  } catch (error) {
+    apiLogger.error({ userId, courseTitle, error }, 'Failed to send certificate push');
   }
 }

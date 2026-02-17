@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Award, Download, ExternalLink, Loader2, Lock, CheckCircle } from 'lucide-react';
+import { Award, Download, ExternalLink, Loader2, Lock, CheckCircle, Linkedin } from 'lucide-react';
 
 interface EligibilityData {
   eligible: boolean;
@@ -136,6 +136,20 @@ export default function CertificateCard({ courseId }: CertificateCardProps) {
             <ExternalLink className="w-4 h-4" />
             Verificar
           </a>
+          <button
+            onClick={() => {
+              const issued = new Date(data.certificate!.issuedAt);
+              const year = issued.getFullYear();
+              const month = issued.getMonth() + 1;
+              const verificationUrl = `${window.location.origin}/certificado/${data.certificate!.certificateNumber}`;
+              const linkedinUrl = `https://www.linkedin.com/profile/add?startTask=CERTIFICATION_NAME&name=${encodeURIComponent(data.certificate!.courseTitle)}&organizationName=${encodeURIComponent('Prof. Daniel Barral')}&issueYear=${year}&issueMonth=${month}&certUrl=${encodeURIComponent(verificationUrl)}&certId=${encodeURIComponent(data.certificate!.certificateNumber)}`;
+              window.open(linkedinUrl, '_blank');
+            }}
+            className="inline-flex items-center gap-2 border border-blue-300 text-blue-700 px-4 py-2 rounded-lg font-medium text-sm hover:bg-blue-100 transition-colors"
+          >
+            <Linkedin className="w-4 h-4" />
+            LinkedIn
+          </button>
         </div>
       </div>
     );

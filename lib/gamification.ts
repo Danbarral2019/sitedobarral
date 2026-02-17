@@ -119,6 +119,22 @@ export async function awardBadge(
         metadata: metadata ? JSON.stringify(metadata) : null,
       },
     });
+
+    // Push notification (fire-and-forget, server-only)
+    if (typeof window === 'undefined') {
+      const badgeInfo = BADGE_TYPES[type as BadgeType];
+      const badgeLabel = badgeInfo ? `${badgeInfo.icon} ${badgeInfo.label}` : type;
+      import(/* webpackIgnore: true */ '@/lib/push-notifications')
+        .then(({ sendPushToUser }) =>
+          sendPushToUser(userId, {
+            title: 'Badge Conquistado!',
+            body: `Voce ganhou: ${badgeLabel}`,
+            url: '/area-restrita/meu-progresso',
+          })
+        )
+        .catch(() => {});
+    }
+
     return true; // New badge awarded
   } catch (error: unknown) {
     // P2002 = unique constraint violation (badge already exists)

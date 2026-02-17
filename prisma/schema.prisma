@@ -1423,6 +1423,22 @@ model LeiArticleNote {
   @@index([adminReviewed])
 }
 
+// Newsletter Send Tracking (Analytics)
+model NewsletterSend {
+  id          String   @id @default(uuid())
+  type        String   // 'weekly' | 'monthly'
+  subject     String
+  sentAt      DateTime @default(now())
+  totalSent   Int      @default(0)
+  totalFailed Int      @default(0)
+  opens       Int      @default(0)
+  clicks      Int      @default(0)
+  createdAt   DateTime @default(now())
+
+  @@index([sentAt])
+  @@index([type])
+}
+
 // Push Notification Subscriptions (PWA)
 model PushSubscription {
   id        String   @id @default(cuid())

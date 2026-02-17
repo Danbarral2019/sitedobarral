@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { sendInactivityReminderEmail } from '@/lib/email';
+import { sendPushToUser } from '@/lib/push-notifications';
 import { courses } from '@/data/courses';
 import { verifyCronAuth } from '@/lib/cron-auth';
 
@@ -122,6 +123,13 @@ export async function GET(request: NextRequest) {
       const course = courses.find(c => c.id === student.courseId);
       const courseTitle = course?.title || 'Curso';
       const courseSlug = course?.slug || '';
+
+      // Send push notification (fire-and-forget)
+      sendPushToUser(student.userId, {
+        title: 'Sentimos sua falta!',
+        body: 'Continue estudando e mantenha seu streak!',
+        url: '/area-restrita',
+      }).catch(() => {});
 
       const success = await sendInactivityReminderEmail(
         student.email,

@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { LogOut, Heart, CheckCircle } from 'lucide-react';
+import { LogOut, Heart, CheckCircle, Award } from 'lucide-react';
 
 interface MobileBottomNavProps {
   onLogout: () => void;
@@ -24,6 +24,13 @@ export function MobileBottomNav({ onLogout }: MobileBottomNavProps) {
         >
           <Heart className="w-6 h-6 mb-1" />
           <span className="text-xs font-medium">Favoritos</span>
+        </Link>
+        <Link
+          href="/area-restrita/meus-certificados"
+          className="flex flex-col items-center justify-center flex-1 h-full text-gray-600 hover:text-amber-600 focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
+        >
+          <Award className="w-6 h-6 mb-1" />
+          <span className="text-xs font-medium">Certificados</span>
         </Link>
         <button
           onClick={onLogout}
