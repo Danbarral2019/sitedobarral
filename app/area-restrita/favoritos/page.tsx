@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { Heart, Download, FileText, ArrowLeft, Trash2, BookOpen, Scale, ExternalLink, Calendar, Building } from 'lucide-react';
+import { Heart, Download, FileText, ArrowLeft, Trash2, BookOpen, Scale, ExternalLink, Calendar, Building, StickyNote, Check, Loader2 } from 'lucide-react';
 import { useAuth } from '@/hooks/use-auth';
 import { courses } from '@/data/courses';
 
@@ -21,6 +21,7 @@ interface FavoriteWithDocument {
   id: string;
   documentId: string;
   courseId: string;
+  annotation: string | null;
   createdAt: string;
   document: Document | null;
 }
@@ -81,6 +82,10 @@ export default function FavoritosPage() {
   const [isLoadingFavorites, setIsLoadingFavorites] = useState(true);
   const [removingId, setRemovingId] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<'documents' | 'ons' | 'acts'>('documents');
+  const [editingAnnotation, setEditingAnnotation] = useState<string | null>(null);
+  const [annotationText, setAnnotationText] = useState('');
+  const [savingAnnotation, setSavingAnnotation] = useState<string | null>(null);
+  const [annotationTimers, setAnnotationTimers] = useState<Record<string, ReturnType<typeof setTimeout>>>({});
 
   // Redirecionar se não autenticado
   useEffect(() => {
@@ -167,6 +172,53 @@ export default function FavoritosPage() {
     }
     return acc;
   }, [] as GroupedFavorites[]);
+
+  // Salvar anotacao com auto-save debounce
+  const saveAnnotation = async (favoriteId: string, text: string) => {
+    setSavingAnnotation(favoriteId);
+    try {
+      const response = await fetch(`/api/favorites/${favoriteId}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ annotation: text || null }),
+      });
+      if (response.ok) {
+        // Atualizar favorito no estado local
+        setFavorites(prev => prev.map(fav =>
+          fav.id === favoriteId ? { ...fav, annotation: text || null } : fav
+        ));
+        setOnFavorites(prev => prev.map(fav =>
+          fav.id === favoriteId ? { ...fav, annotation: text || null } as typeof fav : fav
+        ));
+      }
+    } catch (error) {
+      console.error('Erro ao salvar anotacao:', error);
+    } finally {
+      setSavingAnnotation(null);
+    }
+  };
+
+  const handleAnnotationChange = (favoriteId: string, text: string) => {
+    setAnnotationText(text);
+    // Limpar timer anterior
+    if (annotationTimers[favoriteId]) {
+      clearTimeout(annotationTimers[favoriteId]);
+    }
+    // Debounce de 1s
+    const timer = setTimeout(() => {
+      saveAnnotation(favoriteId, text);
+    }, 1000);
+    setAnnotationTimers(prev => ({ ...prev, [favoriteId]: timer }));
+  };
+
+  const toggleAnnotation = (favoriteId: string, currentAnnotation: string | null) => {
+    if (editingAnnotation === favoriteId) {
+      setEditingAnnotation(null);
+    } else {
+      setEditingAnnotation(favoriteId);
+      setAnnotationText(currentAnnotation || '');
+    }
+  };
 
   // Remover favorito de documento
   const handleRemoveDocumentFavorite = async (documentId: string) => {
@@ -429,6 +481,17 @@ export default function FavoritosPage() {
 
                                   {/* Ações */}
                                   <div className="flex items-center gap-2 flex-shrink-0">
+                                    <button
+                                      onClick={() => toggleAnnotation(fav.id, fav.annotation)}
+                                      className={`p-2 rounded-lg transition-colors ${
+                                        fav.annotation
+                                          ? 'text-amber-600 bg-amber-50 hover:bg-amber-100'
+                                          : 'text-gray-400 hover:text-amber-600 hover:bg-amber-50'
+                                      }`}
+                                      title={fav.annotation ? 'Editar anotacao' : 'Adicionar anotacao'}
+                                    >
+                                      <StickyNote className="w-5 h-5" />
+                                    </button>
                                     {fav.document.type === 'pdf' && (
                                       <button
                                         onClick={() => handleDownload(fav.document!)}
@@ -452,6 +515,45 @@ export default function FavoritosPage() {
                                     </button>
                                   </div>
                                 </div>
+
+                                {/* Anotação expandível */}
+                                {editingAnnotation === fav.id && (
+                                  <div className="mt-3 pt-3 border-t border-gray-200">
+                                    <div className="flex items-center justify-between mb-1">
+                                      <label className="text-xs font-semibold text-gray-600">Anotacao de estudo</label>
+                                      {savingAnnotation === fav.id ? (
+                                        <span className="flex items-center gap-1 text-xs text-gray-400">
+                                          <Loader2 className="w-3 h-3 animate-spin" />
+                                          Salvando...
+                                        </span>
+                                      ) : annotationText !== (fav.annotation || '') ? null : fav.annotation ? (
+                                        <span className="flex items-center gap-1 text-xs text-green-600">
+                                          <Check className="w-3 h-3" />
+                                          Salvo
+                                        </span>
+                                      ) : null}
+                                    </div>
+                                    <textarea
+                                      value={annotationText}
+                                      onChange={(e) => handleAnnotationChange(fav.id, e.target.value)}
+                                      placeholder="Adicione suas anotacoes sobre este documento..."
+                                      className="w-full p-3 text-sm border border-gray-300 rounded-lg resize-y min-h-[80px] max-h-[200px] focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white"
+                                      maxLength={5000}
+                                    />
+                                    <p className="text-xs text-gray-400 mt-1 text-right">{annotationText.length}/5000</p>
+                                  </div>
+                                )}
+
+                                {/* Mostrar anotação existente (quando não editando) */}
+                                {editingAnnotation !== fav.id && fav.annotation && (
+                                  <button
+                                    onClick={() => toggleAnnotation(fav.id, fav.annotation)}
+                                    className="mt-2 w-full text-left p-2 bg-amber-50 border border-amber-200 rounded-lg text-sm text-amber-800 hover:bg-amber-100 transition-colors"
+                                  >
+                                    <span className="font-medium text-xs text-amber-600 block mb-0.5">Anotacao:</span>
+                                    <span className="line-clamp-2">{fav.annotation}</span>
+                                  </button>
+                                )}
                               </div>
                             </div>
                           );

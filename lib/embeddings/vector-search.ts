@@ -166,27 +166,60 @@ async function executeVectorSearch(
   const { embedding } = await generateQueryEmbedding(query);
   const embeddingStr = embeddingToSql(embedding);
 
-  // 2. Constroi filtros SQL
+  // 2. Constroi filtros SQL com parâmetros posicionais (previne SQL injection)
+  const params: unknown[] = [];
+  let paramIndex = 1;
+
   let whereClause = `d."embeddingStatus" = 'completed'`;
 
   if (courseId) {
-    // Inclui documentos do curso especifico E documentos comuns
-    whereClause += ` AND (d."courseId" = '${courseId}' OR d."isCommon" = true)`;
+    whereClause += ` AND (d."courseId" = $${paramIndex} OR d."isCommon" = true)`;
+    params.push(courseId);
+    paramIndex++;
   }
 
   if (category) {
-    whereClause += ` AND d."category" = '${category}'`;
+    whereClause += ` AND d."category" = $${paramIndex}`;
+    params.push(category);
+    paramIndex++;
   }
 
   const excludeCategories = options.excludeCategories || [];
   if (excludeCategories.length > 0) {
-    const escaped = excludeCategories.map(c => `'${c.replace(/'/g, "''")}'`).join(', ');
-    whereClause += ` AND d."category" NOT IN (${escaped})`;
+    const placeholders = excludeCategories.map((c) => {
+      const ph = `$${paramIndex}`;
+      params.push(c);
+      paramIndex++;
+      return ph;
+    });
+    whereClause += ` AND d."category" NOT IN (${placeholders.join(', ')})`;
   }
+
+  // Parâmetros para threshold e limit (usados em ambos os CTEs)
+  const thresholdParamIdx = paramIndex;
+  params.push(threshold);
+  paramIndex++;
+
+  const docLimitParamIdx = paramIndex;
+  params.push(limit * 2);
+  paramIndex++;
+
+  const actThresholdParamIdx = paramIndex;
+  params.push(threshold);
+  paramIndex++;
+
+  const actLimitParamIdx = paramIndex;
+  params.push(limit * 2);
+  paramIndex++;
+
+  const finalLimitParamIdx = paramIndex;
+  params.push(limit * 3);
+  paramIndex++;
 
   // 3. Executa busca vetorial com pgvector (UNION ALL: DocumentChunk + LegislativeActChunk)
   // Usa <=> para distancia coseno (1 - similaridade)
   // Ordena por similaridade (menor distancia = mais similar)
+  // embeddingStr é gerado internamente pelo Gemini, seguro para inline
   const results = await prisma.$queryRawUnsafe<Array<{
     document_id: string;
     document_title: string;
@@ -200,7 +233,8 @@ async function executeVectorSearch(
     tags: string | null;
     lei_articles: string | null;
     source_type: string;
-  }>>(`
+  }>>(
+    `
     WITH doc_scores AS (
       SELECT
         d.id as document_id,
@@ -238,13 +272,15 @@ async function executeVectorSearch(
       WHERE la."embeddingStatus" = 'completed'
     )
     SELECT * FROM (
-      (SELECT * FROM doc_scores WHERE similarity >= ${threshold} ORDER BY similarity DESC LIMIT ${limit * 2})
+      (SELECT * FROM doc_scores WHERE similarity >= $${thresholdParamIdx} ORDER BY similarity DESC LIMIT $${docLimitParamIdx})
       UNION ALL
-      (SELECT * FROM act_scores WHERE similarity >= ${threshold} ORDER BY similarity DESC LIMIT ${limit * 2})
+      (SELECT * FROM act_scores WHERE similarity >= $${actThresholdParamIdx} ORDER BY similarity DESC LIMIT $${actLimitParamIdx})
     ) combined
     ORDER BY similarity DESC
-    LIMIT ${limit * 3}
-  `);
+    LIMIT $${finalLimitParamIdx}
+    `,
+    ...params
+  );
 
   // 4. Agrupa por documento com multi-chunk (até 3 chunks dos top docs)
   const documentChunks = new Map<string, typeof results>();

@@ -340,6 +340,7 @@ model Favorite {
   legislativeAct     LegislativeAct? @relation(fields: [legislativeActId], references: [id], onDelete: SetNull)
 
   courseId           String?  // Para facilitar filtros por curso (apenas para documentos)
+  annotation         String?  // Anotação de estudo do aluno
   createdAt          DateTime @default(now())
 
   @@unique([userId, documentId, legislativeActId])
@@ -961,6 +962,8 @@ model SearchHistory {
   aiAnswer     String?  @db.Text
   sources      String?  // JSON: [{title, category, url}]
   legalSources String?  // JSON: [{type, title, url}]
+  isPublic     Boolean  @default(false)
+  shareId      String?  @unique
   createdAt    DateTime @default(now())
 
   @@index([userId, createdAt])

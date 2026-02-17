@@ -1,6 +1,7 @@
 import Stripe from 'stripe';
 import { prisma } from '@/lib/prisma';
 import { apiLogger } from '@/lib/logger';
+import { courses } from '@/data/courses';
 
 // Lazy initialization — evita erro no build quando env var não existe
 let _stripe: Stripe | null = null;
@@ -20,8 +21,8 @@ export function getStripe(): Stripe {
 // Re-export stripe getter como propriedade nomeada para conveniência
 export { getStripe as stripe };
 
-// IDs dos cursos (do banco) — todos os 10
-const ALL_COURSE_IDS = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10'];
+// IDs dos cursos derivados de data/courses.ts (fonte única de verdade)
+const ALL_COURSE_IDS = courses.map(c => c.id);
 
 export type PlanType = 'basico' | 'premium';
 
@@ -154,29 +155,31 @@ export async function createSubscriptionEnrollments(
 ): Promise<void> {
   const courseIds = plan === 'premium' ? ALL_COURSE_IDS : courseId ? [courseId] : [];
 
-  for (const cId of courseIds) {
-    // Upsert: se já tem enrollment, não duplicar
-    const existing = await prisma.enrollment.findUnique({
-      where: { userId_courseId: { userId, courseId: cId } },
-    });
+  await prisma.$transaction(async (tx) => {
+    for (const cId of courseIds) {
+      // Upsert: se já tem enrollment, não duplicar
+      const existing = await tx.enrollment.findUnique({
+        where: { userId_courseId: { userId, courseId: cId } },
+      });
 
-    if (!existing) {
-      await prisma.enrollment.create({
-        data: {
-          userId,
-          courseId: cId,
-          // Sem expiresAt — gerenciado pela subscription
-          expiresAt: null,
-        },
-      });
-    } else if (existing.expiresAt) {
-      // Se tinha enrollment com expiração (trial), remover expiração
-      await prisma.enrollment.update({
-        where: { id: existing.id },
-        data: { expiresAt: null },
-      });
+      if (!existing) {
+        await tx.enrollment.create({
+          data: {
+            userId,
+            courseId: cId,
+            // Sem expiresAt — gerenciado pela subscription
+            expiresAt: null,
+          },
+        });
+      } else if (existing.expiresAt) {
+        // Se tinha enrollment com expiração (trial), remover expiração
+        await tx.enrollment.update({
+          where: { id: existing.id },
+          data: { expiresAt: null },
+        });
+      }
     }
-  }
+  });
 
   apiLogger.info({ userId, plan, courseIds }, 'Subscription enrollments created');
 }
@@ -192,18 +195,20 @@ export async function handleSubscriptionCanceled(
 ): Promise<void> {
   const courseIds = plan === 'premium' ? ALL_COURSE_IDS : courseId ? [courseId] : [];
 
-  for (const cId of courseIds) {
-    const enrollment = await prisma.enrollment.findUnique({
-      where: { userId_courseId: { userId, courseId: cId } },
-    });
-
-    // Só remove se não foi matrícula presencial (sem qrCodeId)
-    if (enrollment && !enrollment.qrCodeId) {
-      await prisma.enrollment.delete({
-        where: { id: enrollment.id },
+  await prisma.$transaction(async (tx) => {
+    for (const cId of courseIds) {
+      const enrollment = await tx.enrollment.findUnique({
+        where: { userId_courseId: { userId, courseId: cId } },
       });
+
+      // Só remove se não foi matrícula presencial (sem qrCodeId)
+      if (enrollment && !enrollment.qrCodeId) {
+        await tx.enrollment.delete({
+          where: { id: enrollment.id },
+        });
+      }
     }
-  }
+  });
 
   apiLogger.info({ userId, plan }, 'Subscription enrollments removed');
 }

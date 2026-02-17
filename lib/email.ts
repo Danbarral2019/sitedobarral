@@ -245,6 +245,119 @@ Equipe Prof. Daniel Barral
 }
 
 /**
+ * Envia email de boas-vindas após cadastro
+ */
+export async function sendWelcomeEmail(
+  to: string,
+  name: string
+): Promise<boolean> {
+  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://profbarral.com.br';
+
+  const html = `
+    <!DOCTYPE html>
+    <html>
+      <head>
+        <style>
+          body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+          .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+          .header { background: linear-gradient(135deg, #2563eb 0%, #9333ea 100%); color: white; padding: 30px; text-align: center; border-radius: 10px 10px 0 0; }
+          .content { background: #f9fafb; padding: 30px; border-radius: 0 0 10px 10px; }
+          .button { display: inline-block; background: linear-gradient(135deg, #2563eb 0%, #9333ea 100%); color: white; padding: 15px 30px; text-decoration: none; border-radius: 8px; font-weight: bold; margin: 20px 0; }
+          .footer { text-align: center; margin-top: 30px; color: #666; font-size: 14px; }
+          .guide { background: white; padding: 20px; border-radius: 8px; margin: 20px 0; border: 2px solid #e5e7eb; }
+          .guide-item { margin: 12px 0; display: flex; align-items: flex-start; }
+          .guide-number { display: inline-block; width: 28px; height: 28px; background: linear-gradient(135deg, #2563eb, #9333ea); color: white; border-radius: 50%; text-align: center; line-height: 28px; font-weight: bold; font-size: 14px; margin-right: 12px; flex-shrink: 0; }
+          .guide-text { flex: 1; }
+        </style>
+      </head>
+      <body>
+        <div class="container">
+          <div class="header">
+            <h1>Bem-vindo(a), ${name}!</h1>
+            <p style="margin: 8px 0 0; opacity: 0.9;">Seu cadastro foi realizado com sucesso</p>
+          </div>
+          <div class="content">
+            <p>Ola ${name},</p>
+            <p>E um prazer ter voce conosco! Abaixo segue um guia rapido para voce aproveitar ao maximo a plataforma:</p>
+
+            <div class="guide">
+              <h3 style="margin-top: 0; color: #1f2937;">Guia Rapido</h3>
+              <div class="guide-item">
+                <span class="guide-number">1</span>
+                <div class="guide-text">
+                  <strong>Acesse seus cursos</strong><br>
+                  <span style="font-size: 14px; color: #6b7280;">Na area restrita voce encontra todos os materiais dos cursos em que esta matriculado.</span>
+                </div>
+              </div>
+              <div class="guide-item">
+                <span class="guide-number">2</span>
+                <div class="guide-text">
+                  <strong>Use o Assistente de IA</strong><br>
+                  <span style="font-size: 14px; color: #6b7280;">Tire duvidas sobre licitacoes e contratos diretamente com nosso assistente inteligente.</span>
+                </div>
+              </div>
+              <div class="guide-item">
+                <span class="guide-number">3</span>
+                <div class="guide-text">
+                  <strong>Pesquise documentos</strong><br>
+                  <span style="font-size: 14px; color: #6b7280;">Acesse acordaos do TCU, pareceres, orientacoes normativas e muito mais.</span>
+                </div>
+              </div>
+              <div class="guide-item">
+                <span class="guide-number">4</span>
+                <div class="guide-text">
+                  <strong>Consulte a Lei 14.133 Comentada</strong><br>
+                  <span style="font-size: 14px; color: #6b7280;">Navegue pelos 195 artigos da Nova Lei de Licitacoes com comentarios e documentos relacionados.</span>
+                </div>
+              </div>
+            </div>
+
+            <p>Tem alguma duvida? Acesse nossa <a href="${baseUrl}/faq" style="color: #2563eb; font-weight: bold;">pagina de perguntas frequentes</a> ou entre em contato pelo <a href="${baseUrl}/contato" style="color: #2563eb; font-weight: bold;">formulario de contato</a>.</p>
+
+            <div style="text-align: center;">
+              <a href="${baseUrl}/area-restrita" class="button">Acessar a Plataforma</a>
+            </div>
+
+            <p>Bons estudos!<br><strong>Prof. Daniel Barral</strong><br><span style="font-size: 14px; color: #6b7280;">Especialista em Direito Administrativo, Licitacoes e Contratos</span></p>
+          </div>
+          <div class="footer">
+            <p>Este e um email automatico, por favor nao responda.</p>
+            <p>&copy; ${new Date().getFullYear()} Prof. Daniel Barral - Todos os direitos reservados</p>
+          </div>
+        </div>
+      </body>
+    </html>
+  `;
+
+  const text = `
+Bem-vindo(a), ${name}!
+
+Seu cadastro foi realizado com sucesso no site do Prof. Daniel Barral.
+
+GUIA RAPIDO:
+
+1. Acesse seus cursos - Na area restrita voce encontra todos os materiais.
+2. Use o Assistente de IA - Tire duvidas sobre licitacoes e contratos.
+3. Pesquise documentos - Acordaos do TCU, pareceres, orientacoes normativas e mais.
+4. Consulte a Lei 14.133 Comentada - 195 artigos com comentarios e documentos.
+
+Duvidas? Acesse: ${baseUrl}/faq
+Contato: ${baseUrl}/contato
+
+Bons estudos!
+Prof. Daniel Barral
+  `;
+
+  const result = await sendEmail({
+    to,
+    subject: 'Bem-vindo(a) ao site do Prof. Daniel Barral!',
+    html,
+    text,
+  });
+  return result.success;
+}
+
+/**
  * Envia email de notificação de expiração de acesso (3 meses antes)
  */
 export async function sendExpirationNotification(

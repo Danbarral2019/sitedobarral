@@ -3,12 +3,10 @@ import { LEI_14133_ARTIGOS } from '@/data/lei-14133-artigos';
 import { queryGeminiText } from '@/lib/gemini/cached-client';
 import { prisma } from '@/lib/prisma';
 import { ENUNCIADOS, buscarEnunciados } from '@/data/enunciados';
-import { rateLimit } from '@/lib/rate-limit';
+import { enforceRateLimit, getClientIp } from '@/lib/cache/rate-limit-helper';
 import { RateLimitError, ValidationError } from '@/lib/errors/api-error';
 import { handleApiError } from '@/lib/errors/error-handler';
 import { apiLogger } from '@/lib/logger';
-
-const geminiLimiter = rateLimit({ interval: 60000 });
 
 interface SearchResult {
   articleNumber: string;
@@ -69,11 +67,8 @@ export async function POST(request: NextRequest) {
   const startTime = Date.now();
 
   try {
-    try {
-      await geminiLimiter.check(request, 5);
-    } catch {
-      throw new RateLimitError();
-    }
+    const ip = getClientIp(request);
+    await enforceRateLimit(`lei-search:${ip}`, 5, 60);
 
     const body = await request.json();
     const { query } = body;

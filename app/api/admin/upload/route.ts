@@ -5,19 +5,14 @@ import { writeFile, mkdir } from 'fs/promises';
 import { join } from 'path';
 import { randomBytes } from 'crypto';
 import { courses } from '@/data/courses';
-import { rateLimit } from '@/lib/rate-limit';
+import { enforceRateLimit, getClientIp } from '@/lib/cache/rate-limit-helper';
 import { RateLimitError } from '@/lib/errors/api-error';
 import { handleApiError } from '@/lib/errors/error-handler';
 
-const uploadLimiter = rateLimit({ interval: 60000 });
-
 export const POST = withAdminAuth(async (request: NextRequest) => {
   try {
-    try {
-      await uploadLimiter.check(request, 10);
-    } catch {
-      throw new RateLimitError();
-    }
+    const ip = getClientIp(request);
+    await enforceRateLimit(`upload:${ip}`, 10, 60);
 
     const formData = await request.formData();
     const file = formData.get('file') as File;

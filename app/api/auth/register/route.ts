@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import bcrypt from 'bcryptjs';
 import crypto from 'crypto';
-import { sendVerificationEmail } from '@/lib/email';
+import { sendVerificationEmail, sendWelcomeEmail } from '@/lib/email';
 import { enforceRateLimit, getClientIp } from '@/lib/cache/rate-limit-helper';
 import { validateRequest } from '@/lib/validation-helper';
 import { RegisterSchema } from '@/lib/validation-schemas';
@@ -133,6 +133,11 @@ export async function POST(request: NextRequest) {
     if (!emailSent) {
       authLogger.error({ userId: user.id, email: user.email }, 'Failed to send verification email');
     }
+
+    // Enviar welcome email (fire-and-forget)
+    sendWelcomeEmail(user.email, user.name).catch((err) => {
+      authLogger.error({ err, userId: user.id }, 'Failed to send welcome email');
+    });
 
     // Registrar log de acesso
     try {

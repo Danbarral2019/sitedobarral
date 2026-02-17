@@ -9,6 +9,7 @@ import { queryGeminiText } from '@/lib/gemini/cached-client';
 import { GoogleGenerativeAI } from '@google/generative-ai';
 import { checkRateLimit, withCache, CACHE_TTL } from '@/lib/cache/redis-client';
 import { trackServerEvent } from '@/lib/monitoring/events';
+import { apiLogger } from '@/lib/logger';
 import {
   extractCitedArticles,
   selectRelevantArticles,
@@ -160,14 +161,13 @@ export async function POST(req: NextRequest) {
       semanticQuery = `No âmbito de contratações de TIC (Tecnologia da Informação e Comunicação) pela Administração Pública Federal, conforme INs e Portarias da SGD/MGI: ${semanticQuery}`;
     }
 
-    console.log(`🔍 Query from user ${userId}: "${query}"`);
+    apiLogger.info({ userId, query, filters }, 'Document query started');
     if (semanticQuery !== query) {
-      console.log(`   🔗 Enhanced query with context: "${semanticQuery}"`);
+      apiLogger.debug({ semanticQuery }, 'Query enhanced with context');
     }
     if (filters.ticMode) {
-      console.log(`   🖥️ TIC mode ativado`);
+      apiLogger.info('TIC mode enabled');
     }
-    console.log(`   Filters:`, filters);
 
     // 5. Query expansion: generate alternative queries for better recall
     let expandedQueries: string[] = [semanticQuery];
@@ -204,10 +204,10 @@ Exemplo de resposta: ["variação 1", "variação 2"]`;
       );
       if (expanded.length > 0) {
         expandedQueries = [semanticQuery, ...expanded];
-        console.log(`   🔄 Query expansion: ${expandedQueries.length} queries`);
+        apiLogger.debug({ queryCount: expandedQueries.length }, 'Query expansion completed');
       }
     } catch (err) {
-      console.warn('   ⚠️ Query expansion failed:', err instanceof Error ? err.message : err);
+      apiLogger.warn({ error: err instanceof Error ? err.message : String(err) }, 'Query expansion failed');
     }
 
     // 5a. Hybrid search: combina busca semântica (vetor) + FTS (BM25) via RRF
@@ -222,7 +222,7 @@ Exemplo de resposta: ["variação 1", "variação 2"]`;
       useCache,
     });
 
-    console.log(`   📄 Found ${searchResponse.results.length} relevant documents`);
+    apiLogger.info({ resultCount: searchResponse.results.length }, 'Hybrid search completed');
 
     if (searchResponse.results.length === 0) {
       return NextResponse.json<QueryResponse>({
@@ -309,7 +309,7 @@ Exemplo de resposta: ["variação 1", "variação 2"]`;
         sourceType: 'document' as const,
       }));
 
-      console.log(`   🔍 Complementary priority sources: ${complementaryResults.length} (from ${priorityDocs.length} candidates)`);
+      apiLogger.debug({ complementary: complementaryResults.length, candidates: priorityDocs.length }, 'Complementary sources found');
     }
 
     // 6. Separate results by type
@@ -340,7 +340,7 @@ Exemplo de resposta: ["variação 1", "variação 2"]`;
       cappedLegActs.push(...acts.sort((a, b) => b.similarity - a.similarity).slice(0, 3));
     }
 
-    console.log(`   📜 Lei: ${leiResults.length}, Atos(doc): ${actResults.length}, Atos(semantic): ${cappedLegActs.length}, Docs: ${docResults.length} (raw: ${rawDocResults.length})`);
+    apiLogger.info({ lei: leiResults.length, actsDocs: actResults.length, actsSemantic: cappedLegActs.length, docs: docResults.length }, 'Results categorized');
 
     // 7. Enrich: extract cited articles from docs + semantic article selection (Fase 5B)
     const citedArticlesFromDocs = extractCitedArticles(
@@ -395,10 +395,10 @@ Exemplo de resposta: ["variação 1", "variação 2"]`;
               const artsStr = arts.length > 0 ? ` (Art. ${arts.join(', ')})` : '';
               return `**${act.fullNumber}**${artsStr}\n${act.ementa}`;
             }).join('\n\n');
-          console.log(`   🖥️ TIC context: ${ticActs.length} atos normativos adicionados ao contexto`);
+          apiLogger.debug({ ticActsCount: ticActs.length }, 'TIC context enriched');
         }
       } catch (err) {
-        console.warn('   ⚠️ TIC context enrichment failed:', err instanceof Error ? err.message : err);
+        apiLogger.warn({ error: err instanceof Error ? err.message : String(err) }, 'TIC context enrichment failed');
       }
     }
 
@@ -539,7 +539,7 @@ RESPOSTA:`;
 
             controller.enqueue(encoder.encode('data: [DONE]\n\n'));
           } catch (err) {
-            console.error('Streaming error:', err);
+            apiLogger.error({ error: err }, 'SSE streaming error');
             controller.enqueue(encoder.encode(`data: ${JSON.stringify({ type: 'error', message: 'Streaming failed' })}\n\n`));
           } finally {
             controller.close();
@@ -548,7 +548,7 @@ RESPOSTA:`;
       });
 
       const latency = Date.now() - startTime;
-      console.log(`   ✅ Streaming ${formattedResults.length} results + ${legalSources.length} legal sources (latency: ${latency}ms)`);
+      apiLogger.info({ resultCount: formattedResults.length, legalSourceCount: legalSources.length, latency }, 'Streaming response sent');
       trackServerEvent('ai_search', { resultCount: formattedResults.length, streaming: true });
 
       return new Response(stream, {
@@ -572,12 +572,12 @@ RESPOSTA:`;
       });
       synthesizedAnswer = geminiResult.response;
     } catch (error) {
-      console.error('Error synthesizing answer:', error);
+      apiLogger.error({ error }, 'Gemini synthesis failed');
     }
 
     const latency = Date.now() - startTime;
 
-    console.log(`   ✅ Returned ${formattedResults.length} results + ${legalSources.length} legal sources (latency: ${latency}ms)`);
+    apiLogger.info({ resultCount: formattedResults.length, legalSourceCount: legalSources.length, latency }, 'Query response sent');
     trackServerEvent('ai_search', { resultCount: formattedResults.length });
 
     return NextResponse.json<QueryResponse>({
@@ -592,7 +592,7 @@ RESPOSTA:`;
     });
 
   } catch (error) {
-    console.error('❌ Query error:', error);
+    apiLogger.error({ error }, 'Document query failed');
 
     return NextResponse.json<QueryResponse>(
       {

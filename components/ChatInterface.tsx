@@ -2,7 +2,7 @@
 
 import { useState, useRef, useEffect } from 'react';
 import Link from 'next/link';
-import { Send, Loader2, Sparkles, FileText, AlertCircle, Scale, Gavel, ExternalLink, Download } from 'lucide-react';
+import { Send, Loader2, Sparkles, FileText, AlertCircle, Scale, Gavel, ExternalLink, Download, Share2, Check } from 'lucide-react';
 import { trackClientEvent } from '@/lib/monitoring/track-client';
 import ArticleAwareMarkdown from './ArticleAwareMarkdown';
 
@@ -23,6 +23,7 @@ interface Message {
   content: string;
   sources?: DocumentSource[];
   legalSources?: LegalSourceItem[];
+  searchHistoryId?: string;
   timestamp: Date;
 }
 
@@ -64,6 +65,8 @@ export default function ChatInterface({
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [exportingPdf, setExportingPdf] = useState<string | null>(null);
+  const [sharingId, setSharingId] = useState<string | null>(null);
+  const [sharedUrl, setSharedUrl] = useState<string | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const abortControllerRef = useRef<AbortController | null>(null);
 
@@ -233,6 +236,38 @@ export default function ChatInterface({
         ));
       }
 
+      // Salvar no historico e capturar o ID para compartilhamento
+      if (fullContent) {
+        try {
+          const currentMsg = (await new Promise<Message | undefined>(resolve => {
+            setMessages(prev => {
+              const msg = prev.find(m => m.id === assistantId);
+              resolve(msg);
+              return prev;
+            });
+          }));
+
+          const historyRes = await fetch('/api/area-restrita/search-history', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              query,
+              aiAnswer: fullContent,
+              sources: currentMsg?.sources?.map(s => ({ title: s.title, category: s.category, url: s.url })),
+              legalSources: currentMsg?.legalSources?.map(s => ({ type: s.type, title: s.title, url: s.url })),
+            }),
+          });
+          if (historyRes.ok) {
+            const { id: historyId } = await historyRes.json();
+            setMessages(prev => prev.map(m =>
+              m.id === assistantId ? { ...m, searchHistoryId: historyId } : m
+            ));
+          }
+        } catch {
+          // Non-critical, silently ignore
+        }
+      }
+
       console.log('[ChatInterface] Streaming complete!');
     } catch (err) {
       if (err instanceof Error && err.name === 'AbortError') {
@@ -286,6 +321,29 @@ export default function ChatInterface({
       console.error('Erro ao gerar PDF:', err);
     } finally {
       setExportingPdf(null);
+    }
+  };
+
+  const handleShare = async (message: Message) => {
+    if (!message.searchHistoryId || sharingId) return;
+    setSharingId(message.id);
+    setSharedUrl(null);
+    try {
+      const res = await fetch(`/api/search-history/${message.searchHistoryId}/share`, {
+        method: 'POST',
+      });
+      if (res.ok) {
+        const { url } = await res.json();
+        setSharedUrl(url);
+        await navigator.clipboard.writeText(url);
+        // Limpar estado apos 3 segundos
+        setTimeout(() => {
+          setSharingId(null);
+          setSharedUrl(null);
+        }, 3000);
+      }
+    } catch {
+      setSharingId(null);
     }
   };
 
@@ -523,19 +581,43 @@ export default function ChatInterface({
                     })}
                   </span>
                   {message.role === 'assistant' && message.content && (
-                    <button
-                      onClick={() => handleExportMessagePDF(message)}
-                      disabled={exportingPdf === message.id}
-                      className="opacity-0 group-hover/msg:opacity-100 inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs text-gray-400 hover:text-blue-600 hover:bg-blue-50 disabled:text-gray-400 transition-all"
-                      title="Baixar resposta como PDF"
-                    >
-                      {exportingPdf === message.id ? (
-                        <Loader2 className="w-3 h-3 animate-spin" />
-                      ) : (
-                        <Download className="w-3 h-3" />
+                    <div className="flex items-center gap-1 opacity-0 group-hover/msg:opacity-100 transition-all">
+                      {message.searchHistoryId && (
+                        <button
+                          onClick={() => handleShare(message)}
+                          disabled={sharingId === message.id}
+                          className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs text-gray-400 hover:text-purple-600 hover:bg-purple-50 disabled:text-gray-400 transition-all"
+                          title={sharedUrl && sharingId === message.id ? 'Link copiado!' : 'Compartilhar resposta'}
+                        >
+                          {sharedUrl && sharingId === message.id ? (
+                            <>
+                              <Check className="w-3 h-3 text-green-600" />
+                              <span className="text-green-600">Copiado!</span>
+                            </>
+                          ) : sharingId === message.id ? (
+                            <Loader2 className="w-3 h-3 animate-spin" />
+                          ) : (
+                            <>
+                              <Share2 className="w-3 h-3" />
+                              Compartilhar
+                            </>
+                          )}
+                        </button>
                       )}
-                      PDF
-                    </button>
+                      <button
+                        onClick={() => handleExportMessagePDF(message)}
+                        disabled={exportingPdf === message.id}
+                        className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs text-gray-400 hover:text-blue-600 hover:bg-blue-50 disabled:text-gray-400 transition-all"
+                        title="Baixar resposta como PDF"
+                      >
+                        {exportingPdf === message.id ? (
+                          <Loader2 className="w-3 h-3 animate-spin" />
+                        ) : (
+                          <Download className="w-3 h-3" />
+                        )}
+                        PDF
+                      </button>
+                    </div>
                   )}
                 </div>
               </div>
