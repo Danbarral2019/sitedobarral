@@ -158,6 +158,36 @@ export const POST = withAdminAuth(async (request: NextRequest) => {
           tcuRevisadoPorAdmin: true, // Foi revisado no wizard
         } : {};
 
+        // Build metaTcu data for satellite table
+        const metaTcuData: Record<string, unknown> = {};
+        if (doc.tcuData) {
+          if (doc.tcuData.acordao) metaTcuData.numeroAcordao = doc.tcuData.acordao;
+          if (doc.tcuData.autorTese) metaTcuData.autorTese = doc.tcuData.autorTese;
+          if (doc.tcuData.area) metaTcuData.area = doc.tcuData.area;
+          if (doc.tcuData.tema) metaTcuData.tema = doc.tcuData.tema;
+          if (doc.tcuData.subtema) metaTcuData.subtema = doc.tcuData.subtema;
+          if (doc.tcuData.legislacao) metaTcuData.legislacao = doc.tcuData.legislacao;
+          if (doc.tcuData.outrosIndexadores) metaTcuData.indexadores = doc.tcuData.outrosIndexadores;
+          if (doc.tcuData.tipoProcesso) metaTcuData.tipoProcesso = doc.tcuData.tipoProcesso;
+          if (doc.tcuData.dataJulgamento) metaTcuData.dataJulgamento = doc.tcuData.dataJulgamento;
+        }
+        if (doc.enrichment?.success) {
+          if (doc.enrichment.linkPDF) metaTcuData.linkPDF = doc.enrichment.linkPDF;
+          if (doc.enrichment.ementaCompleta) metaTcuData.ementaCompleta = doc.enrichment.ementaCompleta;
+          if (doc.enrichment.textoCompleto) metaTcuData.textoCompleto = doc.enrichment.textoCompleto;
+          if (doc.enrichment.metadados?.relator) metaTcuData.relator = doc.enrichment.metadados.relator;
+          if (doc.enrichment.metadados?.orgaoJulgador) metaTcuData.orgaoJulgador = doc.enrichment.metadados.orgaoJulgador;
+          metaTcuData.enriquecidoEm = new Date();
+          metaTcuData.enriquecimentoStatus = 'success';
+        } else if (doc.enrichment) {
+          metaTcuData.enriquecimentoStatus = 'failed';
+          metaTcuData.enriquecimentoErro = 'Enriquecimento falhou';
+        }
+        if (doc.classification?.success) {
+          metaTcuData.classificadoEm = new Date();
+          metaTcuData.revisadoPorAdmin = true;
+        }
+
         // Cria documento para cada curso
         for (const courseId of courseIds) {
           await prisma.document.create({
@@ -175,9 +205,15 @@ export const POST = withAdminAuth(async (request: NextRequest) => {
                 ? JSON.stringify(leiArticlesArray)
                 : undefined, // Salva sugestões da IA
               reviewed: true, // TCU docs já revisados
+              // Dual-write: flat fields (transition) + satellite table
               ...tcuFields,
               ...enrichmentFields,
               ...classificationFields,
+              ...(Object.keys(metaTcuData).length > 0 ? {
+                metaTcu: {
+                  create: metaTcuData,
+                },
+              } : {}),
             },
           });
         }

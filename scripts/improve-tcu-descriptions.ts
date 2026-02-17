@@ -47,11 +47,13 @@ const GEMINI_MODEL = 'gemini-2.0-flash';
 function buildPrompt(doc: {
   title: string;
   description: string | null;
-  tcuEmentaCompleta: string | null;
-  tcuArea: string | null;
-  tcuTema: string | null;
-  tcuSubtema: string | null;
   leiArticles: string | null;
+  metaTcu?: {
+    ementaCompleta?: string | null;
+    area?: string | null;
+    tema?: string | null;
+    subtema?: string | null;
+  } | null;
 }): string {
   const artigos = doc.leiArticles ? safeParseArray(doc.leiArticles) : [];
   const artigosStr = artigos.length > 0
@@ -73,15 +75,15 @@ REGRAS:
 
 DADOS DO ACÓRDÃO:
 - Título: ${doc.title}
-- Área: ${doc.tcuArea || 'N/A'}
-- Tema: ${doc.tcuTema || 'N/A'}
-- Subtema: ${doc.tcuSubtema || 'N/A'}
+- Área: ${doc.metaTcu?.area || 'N/A'}
+- Tema: ${doc.metaTcu?.tema || 'N/A'}
+- Subtema: ${doc.metaTcu?.subtema || 'N/A'}
 - ${artigosStr}
 
 Enunciado/Tese:
 ${doc.description || 'N/A'}
 
-${doc.tcuEmentaCompleta ? `Ementa completa:\n${doc.tcuEmentaCompleta.slice(0, 2000)}` : ''}
+${doc.metaTcu?.ementaCompleta ? `Ementa completa:\n${doc.metaTcu.ementaCompleta.slice(0, 2000)}` : ''}
 
 RESUMO EXECUTIVO:`;
 }
@@ -162,11 +164,15 @@ async function main() {
       title: true,
       description: true,
       summary: true,
-      tcuEmentaCompleta: true,
-      tcuArea: true,
-      tcuTema: true,
-      tcuSubtema: true,
       leiArticles: true,
+      metaTcu: {
+        select: {
+          ementaCompleta: true,
+          area: true,
+          tema: true,
+          subtema: true,
+        },
+      },
     },
     orderBy: { uploadedAt: 'desc' },
   });

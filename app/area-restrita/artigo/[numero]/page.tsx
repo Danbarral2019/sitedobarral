@@ -25,13 +25,15 @@ interface Document {
   fullNumber?: string;
   issuer?: string;
   ementa?: string;
-  // Campos TCU enriquecidos (para acórdãos)
-  tcuNumeroAcordao?: string | null;
-  tcuRelator?: string | null;
-  tcuOrgaoJulgador?: string | null;
-  tcuDataJulgamento?: string | null;
-  tcuArea?: string | null;
-  tcuTema?: string | null;
+  // Campos TCU enriquecidos (via metaTcu satellite table)
+  metaTcu?: {
+    numeroAcordao?: string | null;
+    relator?: string | null;
+    orgaoJulgador?: string | null;
+    dataJulgamento?: string | null;
+    area?: string | null;
+    tema?: string | null;
+  } | null;
   summary?: string | null;
   summaryHighlights?: string | null;
   // Campos de enunciados
@@ -373,7 +375,7 @@ export default function ArtigoAreaRestritaPage() {
                                     <div className="flex-1 min-w-0">
                                       <div className="flex items-center gap-2 mb-0.5 flex-wrap">
                                         <h4 className="font-bold text-sm text-gray-900 group-hover:text-blue-600 truncate">
-                                          {doc.tcuNumeroAcordao || doc.title}
+                                          {doc.metaTcu?.numeroAcordao || doc.title}
                                         </h4>
                                         {doc.url && (
                                           <ExternalLink className="w-3 h-3 text-gray-400 flex-shrink-0" />
@@ -390,45 +392,45 @@ export default function ArtigoAreaRestritaPage() {
                                           </span>
                                         )}
                                         {/* Badge órgão julgador TCU */}
-                                        {doc.category === 'acordao' && doc.tcuOrgaoJulgador && (
+                                        {doc.category === 'acordao' && doc.metaTcu?.orgaoJulgador && (
                                           <span className="px-1.5 py-0.5 bg-gray-100 text-gray-600 rounded text-[10px]">
-                                            {doc.tcuOrgaoJulgador}
+                                            {doc.metaTcu.orgaoJulgador}
                                           </span>
                                         )}
                                       </div>
                                       {/* Metadados TCU enriquecidos para acórdãos */}
-                                      {doc.category === 'acordao' && (doc.tcuRelator || doc.tcuDataJulgamento) && (
+                                      {doc.category === 'acordao' && (doc.metaTcu?.relator || doc.metaTcu?.dataJulgamento) && (
                                         <div className="flex flex-wrap items-center gap-x-3 gap-y-0.5 mt-0.5 text-[11px] text-gray-500">
-                                          {doc.tcuRelator && (
+                                          {doc.metaTcu?.relator && (
                                             <span className="flex items-center gap-1">
                                               <User className="w-3 h-3" />
-                                              Rel. {doc.tcuRelator}
+                                              Rel. {doc.metaTcu.relator}
                                             </span>
                                           )}
-                                          {doc.tcuDataJulgamento && (
+                                          {doc.metaTcu?.dataJulgamento && (
                                             <span className="flex items-center gap-1">
                                               <Calendar className="w-3 h-3" />
-                                              {new Date(doc.tcuDataJulgamento).toLocaleDateString('pt-BR')}
+                                              {new Date(doc.metaTcu.dataJulgamento).toLocaleDateString('pt-BR')}
                                             </span>
                                           )}
                                         </div>
                                       )}
                                       {/* Badges de área/tema TCU */}
-                                      {doc.category === 'acordao' && (doc.tcuArea || doc.tcuTema) && (
+                                      {doc.category === 'acordao' && (doc.metaTcu?.area || doc.metaTcu?.tema) && (
                                         <div className="flex flex-wrap gap-1 mt-1">
-                                          {doc.tcuArea && (
+                                          {doc.metaTcu?.area && (
                                             <span className="px-1.5 py-0.5 bg-gray-100 text-gray-600 rounded text-[10px]">
-                                              {doc.tcuArea}
+                                              {doc.metaTcu.area}
                                             </span>
                                           )}
-                                          {doc.tcuTema && (
+                                          {doc.metaTcu?.tema && (
                                             <span className="px-1.5 py-0.5 bg-gray-100 text-gray-600 rounded text-[10px]">
-                                              {doc.tcuTema}
+                                              {doc.metaTcu.tema}
                                             </span>
                                           )}
                                         </div>
                                       )}
-                                      {doc.description && !doc.tcuNumeroAcordao && (
+                                      {doc.description && !doc.metaTcu?.numeroAcordao && (
                                         <p className="text-xs text-gray-600 line-clamp-2">
                                           {doc.description.substring(0, 150)}
                                         </p>

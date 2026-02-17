@@ -116,6 +116,14 @@ interface AISearchResponse {
   latency: number;
 }
 
+interface DocumentNotes {
+  adminNotes?: string | null;
+  publicNotes?: string | null;
+  importance?: string | null;
+  practicalUse?: string | null;
+  keyPoints?: string | null;
+}
+
 interface DocumentData {
   id: string;
   title: string;
@@ -132,6 +140,10 @@ interface DocumentData {
   practicalUse: string | null;
   publicNotes: string | null;
   importance: string | null;
+  notesKeyPoints?: string | null;
+  notesPracticalUse?: string | null;
+  notesImportance?: string | null;
+  notes?: DocumentNotes | null;
 }
 
 // Componente para mostrar detalhes do documento em accordion
@@ -223,7 +235,11 @@ function DocumentDetails({ documentId, documentType = 'document' }: { documentId
 
   const tags = safeParseArray(document.tags);
   const leiArticles = safeParseArray(document.leiArticles);
-  const keyPoints = document.keyPoints ? document.keyPoints.split('\n').filter(p => p.trim()) : [];
+  // Prefer satellite table values, fall back to flat fields
+  const effectiveKeyPoints = document.notes?.keyPoints ?? document.keyPoints ?? document.notesKeyPoints;
+  const effectivePracticalUse = document.notes?.practicalUse ?? document.practicalUse ?? document.notesPracticalUse;
+  const effectivePublicNotes = document.notes?.publicNotes ?? document.publicNotes;
+  const keyPoints = effectiveKeyPoints ? effectiveKeyPoints.split('\n').filter(p => p.trim()) : [];
 
   return (
     <div className="bg-gradient-to-br from-gray-50 to-blue-50 p-6 rounded-lg border-t border-gray-200 space-y-4">
@@ -263,14 +279,14 @@ function DocumentDetails({ documentId, documentType = 'document' }: { documentId
       )}
 
       {/* Practical Use */}
-      {document.practicalUse && (
+      {effectivePracticalUse && (
         <div className="bg-green-50 border-l-4 border-green-500 p-4 rounded-r-lg">
           <div className="flex items-center gap-2 mb-2">
             <Lightbulb className="w-4 h-4 text-green-600" />
             <h4 className="font-bold text-green-900 text-sm">Aplicação Prática</h4>
           </div>
           <div className="space-y-2">
-            {normalizeTextContent(document.practicalUse).map((p, i) => (
+            {normalizeTextContent(effectivePracticalUse).map((p, i) => (
               <p key={i} className="text-gray-800 text-sm leading-relaxed">{p}</p>
             ))}
           </div>
@@ -278,14 +294,14 @@ function DocumentDetails({ documentId, documentType = 'document' }: { documentId
       )}
 
       {/* Professor Notes */}
-      {document.publicNotes && (
+      {effectivePublicNotes && (
         <div className="bg-amber-50 border-l-4 border-amber-500 p-4 rounded-r-lg">
           <div className="flex items-center gap-2 mb-2">
             <BookOpen className="w-4 h-4 text-amber-600" />
             <h4 className="font-bold text-amber-900 text-sm">Observações do Prof. Barral</h4>
           </div>
           <div className="space-y-2">
-            {normalizeTextContent(document.publicNotes).map((p, i) => (
+            {normalizeTextContent(effectivePublicNotes).map((p, i) => (
               <p key={i} className="text-gray-800 text-sm leading-relaxed italic">{p}</p>
             ))}
           </div>

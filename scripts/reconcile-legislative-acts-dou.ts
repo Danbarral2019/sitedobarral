@@ -34,7 +34,7 @@ async function findExistingDocument(act: { title: string; fullNumber: string; nu
   // Busca exata por título primeiro
   const exactMatch = await prisma.document.findFirst({
     where: { title: act.title },
-    select: { id: true, title: true, douUrl: true },
+    select: { id: true, title: true, douUrl: true, metaDou: { select: { url: true } } },
   });
   if (exactMatch) return exactMatch;
 
@@ -52,7 +52,7 @@ async function findExistingDocument(act: { title: string; fullNumber: string; nu
         ],
       },
     },
-    select: { id: true, title: true, douUrl: true },
+    select: { id: true, title: true, douUrl: true, metaDou: { select: { url: true } } },
   });
   if (fullNumberMatch) return fullNumberMatch;
 

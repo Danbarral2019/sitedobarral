@@ -198,6 +198,25 @@ async function processApproval(
           reasoning: JSON.parse(doc.reasoning || '[]'),
           approvalStatus: doc.approvalStatus,
         }),
+        // Satellite tables (dual-write)
+        metaDou: {
+          create: {
+            url: doc.url,
+            data: parsedDate,
+            secao: doc.section,
+            pagina: doc.page,
+            edicao: doc.edition,
+          },
+        },
+        ...(adminNotes ? {
+          notes: {
+            create: {
+              adminNotes: adminNotes,
+              updatedAt: new Date(),
+              updatedBy: adminEmail,
+            },
+          },
+        } : {}),
       },
     });
 

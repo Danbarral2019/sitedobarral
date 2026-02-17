@@ -408,12 +408,25 @@ function convertToDocumentData(aguDoc: AGUDocument) {
     // URLs alternativas
     alternativeUrls: aguDoc.urlsAlternativas ? JSON.stringify(aguDoc.urlsAlternativas) : undefined,
 
-    // Dados do DOU (Diário Oficial da União)
+    // Dados do DOU (Diário Oficial da União) - flat fields for backward compat
     douUrl: aguDoc.douUrl || undefined,
     douData: aguDoc.douData ? parseDateBR(aguDoc.douData) : undefined,
     douSecao: aguDoc.douSecao || undefined,
     douPagina: aguDoc.douPagina || undefined,
     douEdicao: aguDoc.douEdicao || undefined,
+
+    // Satellite table (metaDou) - dual-write
+    ...(aguDoc.douUrl ? {
+      metaDou: {
+        create: {
+          url: aguDoc.douUrl,
+          data: aguDoc.douData ? parseDateBR(aguDoc.douData) : undefined,
+          secao: aguDoc.douSecao || undefined,
+          pagina: aguDoc.douPagina || undefined,
+          edicao: aguDoc.douEdicao || undefined,
+        },
+      },
+    } : {}),
 
     // Análise de IA
     aiClassification: JSON.stringify({

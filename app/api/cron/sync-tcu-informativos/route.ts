@@ -74,11 +74,20 @@ export async function GET(request: NextRequest) {
             reviewedAt: new Date(),
             reviewedBy: 'auto-sync-tcu-informativos',
             tags: JSON.stringify(tags),
+            // Dual-write: flat fields (transition) + satellite table
             tcuLinkPDF: item.linkPdf || null,
             tcuDataJulgamento: item.dataPublicacao || null,
             tcuEnriquecidoEm: new Date(),
             tcuEnriquecimentoStatus: 'success',
             embeddingStatus: 'pending',
+            metaTcu: {
+              create: {
+                linkPDF: item.linkPdf || null,
+                dataJulgamento: item.dataPublicacao || null,
+                enriquecidoEm: new Date(),
+                enriquecimentoStatus: 'success',
+              },
+            },
           },
         });
 

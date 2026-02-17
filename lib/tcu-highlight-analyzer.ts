@@ -39,12 +39,14 @@ interface HighlightAnalysis {
 function buildHighlightPrompt(doc: {
   title: string;
   description: string | null;
-  tcuEmentaCompleta: string | null;
-  tcuArea: string | null;
-  tcuTema: string | null;
-  tcuSubtema: string | null;
-  tcuRelator: string | null;
   leiArticles: string | null;
+  metaTcu?: {
+    ementaCompleta?: string | null;
+    area?: string | null;
+    tema?: string | null;
+    subtema?: string | null;
+    relator?: string | null;
+  } | null;
 }): string {
   let artigosStr = 'Nenhum artigo da Lei 14.133 vinculado.';
   if (doc.leiArticles) {
@@ -68,16 +70,16 @@ CRITÉRIOS DE AVALIAÇÃO (cada um de 0 a 100):
 
 DADOS DO ACÓRDÃO:
 - Título: ${doc.title}
-- Relator: ${doc.tcuRelator || 'N/A'}
-- Área: ${doc.tcuArea || 'N/A'}
-- Tema: ${doc.tcuTema || 'N/A'}
-- Subtema: ${doc.tcuSubtema || 'N/A'}
+- Relator: ${doc.metaTcu?.relator || 'N/A'}
+- Área: ${doc.metaTcu?.area || 'N/A'}
+- Tema: ${doc.metaTcu?.tema || 'N/A'}
+- Subtema: ${doc.metaTcu?.subtema || 'N/A'}
 - ${artigosStr}
 
 Enunciado/Tese:
 ${doc.description || 'N/A'}
 
-${doc.tcuEmentaCompleta ? `Ementa completa:\n${doc.tcuEmentaCompleta.slice(0, 3000)}` : ''}
+${doc.metaTcu?.ementaCompleta ? `Ementa completa:\n${doc.metaTcu.ementaCompleta.slice(0, 3000)}` : ''}
 
 RESPONDA EXCLUSIVAMENTE em JSON válido (sem markdown, sem backticks), com esta estrutura:
 {
@@ -172,17 +174,21 @@ export async function identifyAndAlertHighlights(newDocIds: string[]): Promise<n
       id: true,
       title: true,
       description: true,
-      tcuEmentaCompleta: true,
-      tcuArea: true,
-      tcuTema: true,
-      tcuSubtema: true,
-      tcuRelator: true,
       leiArticles: true,
       url: true,
       acordaoNumero: true,
       acordaoAno: true,
-      tcuOrgaoJulgador: true,
-      tcuDataJulgamento: true,
+      metaTcu: {
+        select: {
+          ementaCompleta: true,
+          area: true,
+          tema: true,
+          subtema: true,
+          relator: true,
+          orgaoJulgador: true,
+          dataJulgamento: true,
+        },
+      },
     },
   });
 

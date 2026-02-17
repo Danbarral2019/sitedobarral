@@ -51,7 +51,11 @@ export default async function AdicionarDocumentosPage({ searchParams }: PageProp
         url: true,
         uploadedAt: true,
         summary: true,
-        tcuNumeroAcordao: true,
+        metaTcu: {
+          select: {
+            numeroAcordao: true,
+          },
+        },
         reviewedBy: true,
       },
       orderBy: { uploadedAt: 'desc' },

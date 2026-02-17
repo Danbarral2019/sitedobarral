@@ -37,7 +37,7 @@ export default function ActionButtons({
           className="flex-1 bg-gradient-to-r from-blue-600 to-indigo-700 text-white px-6 py-3 rounded-xl font-bold hover:from-blue-700 hover:to-indigo-800 transition-all flex items-center justify-center gap-2 shadow-lg min-w-[200px]"
         >
           <ExternalLink className="w-5 h-5" />
-          {urlIsSapiens && document.douUrl ? 'Ver no DOU' : 'Acessar Documento'}
+          {urlIsSapiens && document.metaDou?.url ? 'Ver no DOU' : 'Acessar Documento'}
         </a>
       ) : (
         <a
@@ -53,7 +53,7 @@ export default function ActionButtons({
       {/* Secondary DOU link when primary is not DOU */}
       {hasDouUrl && !urlIsSapiens && (
         <a
-          href={document.douUrl!}
+          href={document.metaDou!.url!}
           target="_blank"
           rel="noopener noreferrer"
           onClick={handleView}

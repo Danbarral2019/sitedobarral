@@ -234,6 +234,14 @@ export async function GET(request: NextRequest) {
                 reviewedAt: new Date(),
                 reviewedBy: 'auto-sync-dou',
                 embeddingStatus: 'pending',
+                // Satellite table (dual-write)
+                metaDou: {
+                  create: {
+                    url: result.href,
+                    data: parsedDate,
+                    secao: result.section,
+                  },
+                },
               },
             });
 

@@ -118,6 +118,15 @@ async function main() {
       tcuRelator: true,
       tcuLinkPDF: true,
       tcuEnriquecidoEm: true,
+      metaTcu: {
+        select: {
+          numeroAcordao: true,
+          ementaCompleta: true,
+          relator: true,
+          linkPDF: true,
+          enriquecidoEm: true,
+        },
+      },
     },
     orderBy: [{ acordaoAno: 'desc' }, { acordaoNumero: 'desc' }],
   });
@@ -251,9 +260,24 @@ async function main() {
         await prisma.document.update({
           where: { id: doc.id },
           data: {
+            // Dual-write: flat fields (transition) + satellite table
             tcuEnriquecidoEm: new Date(),
             tcuEnriquecimentoStatus: 'failed',
             tcuEnriquecimentoErro: 'Acórdão não encontrado na API de dados abertos do TCU',
+            metaTcu: {
+              upsert: {
+                create: {
+                  enriquecidoEm: new Date(),
+                  enriquecimentoStatus: 'failed',
+                  enriquecimentoErro: 'Acórdão não encontrado na API de dados abertos do TCU',
+                },
+                update: {
+                  enriquecidoEm: new Date(),
+                  enriquecimentoStatus: 'failed',
+                  enriquecimentoErro: 'Acórdão não encontrado na API de dados abertos do TCU',
+                },
+              },
+            },
           },
         });
       }
@@ -338,6 +362,7 @@ async function enrichDoc(
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const updateData: any = {
+      // Dual-write: flat fields (transition) + satellite table
       tcuEmentaCompleta: ementaCompleta || undefined,
       tcuRelator: relator || undefined,
       tcuLinkPDF: linkPDF || undefined,
@@ -345,6 +370,28 @@ async function enrichDoc(
       tcuDataJulgamento,
       tcuEnriquecidoEm: new Date(),
       tcuEnriquecimentoStatus: 'success',
+      metaTcu: {
+        upsert: {
+          create: {
+            ementaCompleta: ementaCompleta || undefined,
+            relator: relator || undefined,
+            linkPDF: linkPDF || undefined,
+            orgaoJulgador: orgaoJulgador || undefined,
+            dataJulgamento: tcuDataJulgamento,
+            enriquecidoEm: new Date(),
+            enriquecimentoStatus: 'success',
+          },
+          update: {
+            ementaCompleta: ementaCompleta || undefined,
+            relator: relator || undefined,
+            linkPDF: linkPDF || undefined,
+            orgaoJulgador: orgaoJulgador || undefined,
+            dataJulgamento: tcuDataJulgamento,
+            enriquecidoEm: new Date(),
+            enriquecimentoStatus: 'success',
+          },
+        },
+      },
     };
 
     if (shouldUpdateDescription) {

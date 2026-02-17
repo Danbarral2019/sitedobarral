@@ -43,7 +43,10 @@ export async function addDocument(
       onYear: onYear || null,
       entityType: entityType || null,
       enunciadoNumber: enunciadoNumber || null,
-      adminNotes: notes || null, // Campo correto no schema
+      adminNotes: notes || null, // Campo legado (ainda no Document)
+      notes: notes ? {
+        create: { adminNotes: notes },
+      } : undefined,
     },
   });
 
@@ -403,18 +406,25 @@ export async function fetchPendingDocuments(filters: {
       type: true,
       url: true,
       uploadedAt: true,
-      douData: true,
-      douSecao: true,
-      douEdicao: true,
       tags: true,
       courseId: true,
+      metaDou: { select: { data: true, secao: true, edicao: true } },
     },
   });
 
   return documents.map(doc => ({
-    ...doc,
+    id: doc.id,
+    title: doc.title,
+    description: doc.description,
+    category: doc.category,
+    type: doc.type,
+    url: doc.url,
+    uploadedAt: doc.uploadedAt,
+    tags: doc.tags,
     courseId: doc.courseId ?? undefined,
-    douData: doc.douData ? doc.douData.toISOString() : null,
+    douData: doc.metaDou?.data ? doc.metaDou.data.toISOString() : null,
+    douSecao: doc.metaDou?.secao ?? null,
+    douEdicao: doc.metaDou?.edicao ?? null,
   }));
 }
 
@@ -510,20 +520,27 @@ export async function fetchPendingDocumentsPaginated(params: {
         type: true,
         url: true,
         uploadedAt: true,
-        douData: true,
-        douSecao: true,
-        douEdicao: true,
         tags: true,
         courseId: true,
+        metaDou: { select: { data: true, secao: true, edicao: true } },
       },
     }),
   ]);
 
   return {
     items: documents.map(doc => ({
-      ...doc,
+      id: doc.id,
+      title: doc.title,
+      description: doc.description,
+      category: doc.category,
+      type: doc.type,
+      url: doc.url,
+      uploadedAt: doc.uploadedAt,
+      tags: doc.tags,
       courseId: doc.courseId ?? undefined,
-      douData: doc.douData ? doc.douData.toISOString() : null,
+      douData: doc.metaDou?.data ? doc.metaDou.data.toISOString() : null,
+      douSecao: doc.metaDou?.secao ?? null,
+      douEdicao: doc.metaDou?.edicao ?? null,
     })),
     total,
     page,

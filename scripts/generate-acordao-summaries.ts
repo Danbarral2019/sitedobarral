@@ -64,10 +64,14 @@ async function generateSummaries(options: Options) {
         id: true,
         title: true,
         description: true,
-        tcuEmentaCompleta: true,
-        tcuTextoCompleto: true,
         summary: true,
         summaryGeneratedAt: true,
+        metaTcu: {
+          select: {
+            ementaCompleta: true,
+            textoCompleto: true,
+          },
+        },
       },
       orderBy: { uploadedAt: 'desc' },
       ...(limit ? { take: limit } : {}),
@@ -100,8 +104,8 @@ async function generateSummaries(options: Options) {
         console.log(`  ${idx + 1}. ${doc.title}`);
         console.log(`     ID: ${doc.id}`);
         console.log(`     Status: ${status}`);
-        console.log(`     Ementa TCU: ${doc.tcuEmentaCompleta ? `${doc.tcuEmentaCompleta.length} chars` : 'N/A'}`);
-        console.log(`     Texto completo: ${doc.tcuTextoCompleto ? `${doc.tcuTextoCompleto.length} chars` : 'N/A'}`);
+        console.log(`     Ementa TCU: ${doc.metaTcu?.ementaCompleta ? `${doc.metaTcu.ementaCompleta.length} chars` : 'N/A'}`);
+        console.log(`     Texto completo: ${doc.metaTcu?.textoCompleto ? `${doc.metaTcu.textoCompleto.length} chars` : 'N/A'}`);
         console.log('');
       });
       console.log(`Total: ${acordaos.length} acordao(s) seria(m) processado(s).`);
@@ -126,8 +130,8 @@ async function generateSummaries(options: Options) {
         // Montar texto completo para analise
         const fullTextParts: string[] = [];
         if (doc.description) fullTextParts.push(doc.description);
-        if (doc.tcuEmentaCompleta) fullTextParts.push(doc.tcuEmentaCompleta);
-        if (doc.tcuTextoCompleto) fullTextParts.push(doc.tcuTextoCompleto);
+        if (doc.metaTcu?.ementaCompleta) fullTextParts.push(doc.metaTcu.ementaCompleta);
+        if (doc.metaTcu?.textoCompleto) fullTextParts.push(doc.metaTcu.textoCompleto);
         const fullText = fullTextParts.join('\n\n') || undefined;
 
         // Gerar resumo

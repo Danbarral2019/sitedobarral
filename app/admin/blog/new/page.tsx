@@ -142,8 +142,8 @@ function NewBlogPostPageInner() {
 
         // Tags
         const newTags = ['TCU', 'Acordao'];
-        if (doc.tcuArea) newTags.push(doc.tcuArea);
-        if (doc.tcuTema) newTags.push(doc.tcuTema);
+        if (doc.metaTcu?.area) newTags.push(doc.metaTcu.area);
+        if (doc.metaTcu?.tema) newTags.push(doc.metaTcu.tema);
         setTags(newTags);
 
         // Lei Articles do documento

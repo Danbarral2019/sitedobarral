@@ -33,6 +33,9 @@ export async function GET(
                 contains: `"${numero}"`
               }
             },
+            include: {
+              metaTcu: true,
+            },
             orderBy: [
               { isPublic: 'desc' },
               { uploadedAt: 'desc' }
@@ -62,14 +65,16 @@ export async function GET(
           uploadedAt: doc.uploadedAt,
           leiArticles: doc.leiArticles,
           sourceType: 'document' as const,
-          // Campos TCU enriquecidos (para acórdãos)
+          // Campos TCU enriquecidos (via metaTcu satellite table)
           ...(doc.category === 'acordao' ? {
-            tcuNumeroAcordao: doc.tcuNumeroAcordao,
-            tcuRelator: doc.tcuRelator,
-            tcuOrgaoJulgador: doc.tcuOrgaoJulgador,
-            tcuDataJulgamento: doc.tcuDataJulgamento,
-            tcuArea: doc.tcuArea,
-            tcuTema: doc.tcuTema,
+            metaTcu: doc.metaTcu ? {
+              numeroAcordao: doc.metaTcu.numeroAcordao,
+              relator: doc.metaTcu.relator,
+              orgaoJulgador: doc.metaTcu.orgaoJulgador,
+              dataJulgamento: doc.metaTcu.dataJulgamento,
+              area: doc.metaTcu.area,
+              tema: doc.metaTcu.tema,
+            } : null,
             summary: doc.summary,
             summaryHighlights: doc.summaryHighlights,
           } : {}),

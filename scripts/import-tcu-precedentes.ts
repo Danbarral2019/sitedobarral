@@ -779,6 +779,7 @@ async function main() {
             tags: doc.tags,
             leiArticles: doc.leiArticles,
             courseId: doc.courseId,
+            // Dual-write: flat fields (transition) + satellite table
             tcuArea: doc.tcuArea,
             tcuTema: doc.tcuTema,
             tcuSubtema: doc.tcuSubtema,
@@ -789,6 +790,20 @@ async function main() {
             tcuDataJulgamento: doc.tcuDataJulgamento,
             tcuNumeroAcordao: doc.tcuNumeroAcordao,
             tcuEmentaCompleta: doc.tcuEmentaCompleta,
+            metaTcu: {
+              create: {
+                area: doc.tcuArea,
+                tema: doc.tcuTema,
+                subtema: doc.tcuSubtema,
+                autorTese: doc.tcuAutorTese,
+                legislacao: doc.tcuLegislacao,
+                indexadores: doc.tcuIndexadores,
+                tipoProcesso: doc.tcuTipoProcesso,
+                dataJulgamento: doc.tcuDataJulgamento,
+                numeroAcordao: doc.tcuNumeroAcordao,
+                ementaCompleta: doc.tcuEmentaCompleta,
+              },
+            },
           },
         });
         inseridos++;

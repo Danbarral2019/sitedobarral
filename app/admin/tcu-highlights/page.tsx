@@ -11,13 +11,15 @@ interface TcuHighlightDoc {
   description: string | null;
   acordaoNumero: number | null;
   acordaoAno: number | null;
-  tcuRelator: string | null;
-  tcuOrgaoJulgador: string | null;
-  tcuDataJulgamento: string | null;
-  tcuArea: string | null;
-  tcuTema: string | null;
-  tcuSubtema: string | null;
   leiArticles: string | null;
+  metaTcu?: {
+    relator?: string | null;
+    orgaoJulgador?: string | null;
+    dataJulgamento?: string | null;
+    area?: string | null;
+    tema?: string | null;
+    subtema?: string | null;
+  } | null;
 }
 
 interface TcuHighlight {
@@ -258,10 +260,10 @@ export default function TcuHighlightsPage() {
                         </span>
                       </div>
                       <div className="flex items-center gap-3 text-xs text-gray-500 flex-wrap">
-                        {h.document.tcuRelator && <span>Rel. {h.document.tcuRelator}</span>}
-                        {h.document.tcuOrgaoJulgador && <span>{h.document.tcuOrgaoJulgador}</span>}
-                        {h.document.tcuDataJulgamento && <span>{formatDate(h.document.tcuDataJulgamento)}</span>}
-                        {h.document.tcuArea && <span>{h.document.tcuArea}</span>}
+                        {h.document.metaTcu?.relator && <span>Rel. {h.document.metaTcu.relator}</span>}
+                        {h.document.metaTcu?.orgaoJulgador && <span>{h.document.metaTcu.orgaoJulgador}</span>}
+                        {h.document.metaTcu?.dataJulgamento && <span>{formatDate(h.document.metaTcu.dataJulgamento)}</span>}
+                        {h.document.metaTcu?.area && <span>{h.document.metaTcu.area}</span>}
                       </div>
                     </div>
                     <button

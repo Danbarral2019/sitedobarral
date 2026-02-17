@@ -67,6 +67,11 @@ async function main() {
       acordaoAno: true,
       tcuOrgaoJulgador: true,
       title: true,
+      metaTcu: {
+        select: {
+          orgaoJulgador: true,
+        },
+      },
     },
   });
 
@@ -106,7 +111,7 @@ async function main() {
       continue;
     }
 
-    const novaUrl = construirNovaUrl(numero, ano, doc.tcuOrgaoJulgador);
+    const novaUrl = construirNovaUrl(numero, ano, doc.metaTcu?.orgaoJulgador || doc.tcuOrgaoJulgador);
 
     if (DRY_RUN) {
       console.log(`  [DRY] ${doc.title}`);

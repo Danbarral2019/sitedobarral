@@ -33,6 +33,7 @@ export async function GET(
     // Buscar documento no banco
     const document = await prisma.document.findUnique({
       where: { id },
+      include: { metaDou: true },
     });
 
     if (!document) {
@@ -117,7 +118,8 @@ export async function GET(
 async function downloadFile(document: Record<string, unknown>): Promise<NextResponse> {
   // Se for link externo, redirecionar
   const docUrl = document.url as string;
-  const docDouUrl = document.douUrl as string | null;
+  const metaDou = document.metaDou as { url?: string } | null | undefined;
+  const docDouUrl = (metaDou?.url ?? document.douUrl) as string | null;
   if (document.type === 'link' && docUrl.startsWith('http')) {
     // If the URL points to Sapiens (AGU internal system), prefer douUrl if available
     const isSapiens = docUrl.toLowerCase().includes('sapiens.agu.gov.br') ||

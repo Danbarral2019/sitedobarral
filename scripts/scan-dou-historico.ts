@@ -288,6 +288,13 @@ async function main() {
                 reviewedAt: new Date(),
                 reviewedBy: 'scan-historico-dou',
                 embeddingStatus: 'pending',
+                // Satellite table (dual-write)
+                metaDou: {
+                  create: {
+                    url: gap.url,
+                    data: parsedDate,
+                  },
+                },
               },
             });
             totalImported++;

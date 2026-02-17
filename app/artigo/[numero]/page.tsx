@@ -24,13 +24,15 @@ interface Document {
   fullNumber?: string;
   issuer?: string;
   ementa?: string;
-  // Campos TCU enriquecidos (para acórdãos)
-  tcuNumeroAcordao?: string | null;
-  tcuRelator?: string | null;
-  tcuOrgaoJulgador?: string | null;
-  tcuDataJulgamento?: string | null;
-  tcuArea?: string | null;
-  tcuTema?: string | null;
+  // Campos TCU enriquecidos (via metaTcu satellite table)
+  metaTcu?: {
+    numeroAcordao?: string | null;
+    relator?: string | null;
+    orgaoJulgador?: string | null;
+    dataJulgamento?: string | null;
+    area?: string | null;
+    tema?: string | null;
+  } | null;
   summary?: string | null;
   summaryHighlights?: string | null;
 }
@@ -313,34 +315,34 @@ export default function ArtigoPage() {
                                 <span className="px-2 py-0.5 bg-white/20 rounded text-xs font-medium">
                                   {categoryNames[doc.category] || doc.category}
                                 </span>
-                                {doc.category === 'acordao' && doc.tcuOrgaoJulgador && (
+                                {doc.category === 'acordao' && doc.metaTcu?.orgaoJulgador && (
                                   <span className="px-2 py-0.5 bg-white/10 rounded text-xs">
-                                    {doc.tcuOrgaoJulgador}
+                                    {doc.metaTcu.orgaoJulgador}
                                   </span>
                                 )}
                               </div>
                               <h3 className="font-bold text-white line-clamp-1">
-                                {doc.tcuNumeroAcordao || doc.title}
+                                {doc.metaTcu?.numeroAcordao || doc.title}
                               </h3>
                               {/* Metadados TCU enriquecidos */}
-                              {doc.category === 'acordao' && (doc.tcuRelator || doc.tcuDataJulgamento || doc.tcuArea) && (
+                              {doc.category === 'acordao' && (doc.metaTcu?.relator || doc.metaTcu?.dataJulgamento || doc.metaTcu?.area) && (
                                 <div className="flex flex-wrap items-center gap-x-3 gap-y-1 mt-1 text-xs text-white/70">
-                                  {doc.tcuRelator && (
+                                  {doc.metaTcu?.relator && (
                                     <span className="flex items-center gap-1">
                                       <User className="w-3 h-3" />
-                                      {doc.tcuRelator}
+                                      {doc.metaTcu.relator}
                                     </span>
                                   )}
-                                  {doc.tcuDataJulgamento && (
+                                  {doc.metaTcu?.dataJulgamento && (
                                     <span className="flex items-center gap-1">
                                       <Calendar className="w-3 h-3" />
-                                      {new Date(doc.tcuDataJulgamento).toLocaleDateString('pt-BR')}
+                                      {new Date(doc.metaTcu.dataJulgamento).toLocaleDateString('pt-BR')}
                                     </span>
                                   )}
-                                  {doc.tcuArea && (
+                                  {doc.metaTcu?.area && (
                                     <span className="flex items-center gap-1">
                                       <Scale className="w-3 h-3" />
-                                      {doc.tcuArea}
+                                      {doc.metaTcu.area}
                                     </span>
                                   )}
                                 </div>

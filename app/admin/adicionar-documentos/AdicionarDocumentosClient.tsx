@@ -34,7 +34,9 @@ interface AutoImportDocument {
   url: string;
   uploadedAt: string;
   summary?: string | null;
-  tcuNumeroAcordao?: string | null;
+  metaTcu?: {
+    numeroAcordao?: string | null;
+  } | null;
   reviewedBy?: string | null;
 }
 
@@ -140,7 +142,7 @@ export default function AdicionarDocumentosClient({
     ? autoImports.filter(doc =>
         doc.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
         doc.description?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        doc.tcuNumeroAcordao?.includes(searchTerm)
+        doc.metaTcu?.numeroAcordao?.includes(searchTerm)
       )
     : autoImports;
 
@@ -641,9 +643,9 @@ export default function AdicionarDocumentosClient({
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center gap-2">
                             <h4 className="font-semibold text-gray-900 truncate">{doc.title}</h4>
-                            {doc.tcuNumeroAcordao && (
+                            {doc.metaTcu?.numeroAcordao && (
                               <span className="px-2 py-0.5 bg-indigo-100 text-indigo-700 text-xs rounded-full font-mono flex-shrink-0">
-                                {doc.tcuNumeroAcordao}
+                                {doc.metaTcu.numeroAcordao}
                               </span>
                             )}
                           </div>

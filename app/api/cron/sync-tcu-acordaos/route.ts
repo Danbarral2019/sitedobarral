@@ -85,11 +85,13 @@ function safeParseArray(value: string | null): string[] {
 function buildSummaryPrompt(doc: {
   title: string;
   description: string | null;
-  tcuEmentaCompleta: string | null;
-  tcuArea: string | null;
-  tcuTema: string | null;
-  tcuSubtema: string | null;
   leiArticles: string | null;
+  metaTcu?: {
+    ementaCompleta?: string | null;
+    area?: string | null;
+    tema?: string | null;
+    subtema?: string | null;
+  } | null;
 }): string {
   const artigos = safeParseArray(doc.leiArticles);
   const artigosStr = artigos.length > 0
@@ -111,15 +113,15 @@ REGRAS:
 
 DADOS DO ACÓRDÃO:
 - Título: ${doc.title}
-- Área: ${doc.tcuArea || 'N/A'}
-- Tema: ${doc.tcuTema || 'N/A'}
-- Subtema: ${doc.tcuSubtema || 'N/A'}
+- Área: ${doc.metaTcu?.area || 'N/A'}
+- Tema: ${doc.metaTcu?.tema || 'N/A'}
+- Subtema: ${doc.metaTcu?.subtema || 'N/A'}
 - ${artigosStr}
 
 Enunciado/Tese:
 ${doc.description || 'N/A'}
 
-${doc.tcuEmentaCompleta ? `Ementa completa:\n${doc.tcuEmentaCompleta.slice(0, 2000)}` : ''}
+${doc.metaTcu?.ementaCompleta ? `Ementa completa:\n${doc.metaTcu.ementaCompleta.slice(0, 2000)}` : ''}
 
 RESUMO EXECUTIVO:`;
 }
@@ -171,11 +173,15 @@ async function enrichNewDocuments(docIds: string[]): Promise<{
       content: true,
       category: true,
       tags: true,
-      tcuEmentaCompleta: true,
-      tcuArea: true,
-      tcuTema: true,
-      tcuSubtema: true,
       leiArticles: true,
+      metaTcu: {
+        select: {
+          ementaCompleta: true,
+          area: true,
+          tema: true,
+          subtema: true,
+        },
+      },
     },
   });
 
@@ -337,6 +343,7 @@ export async function GET(request: NextRequest) {
             tags: JSON.stringify(tags),
             acordaoNumero: num,
             acordaoAno: ano,
+            // Dual-write: flat fields (transition) + satellite table
             tcuNumeroAcordao: `${num}/${ano}`,
             tcuEmentaCompleta: sumario || null,
             tcuRelator: item.relator || null,
@@ -345,7 +352,19 @@ export async function GET(request: NextRequest) {
             tcuDataJulgamento: dataJulgamento,
             tcuEnriquecidoEm: new Date(),
             tcuEnriquecimentoStatus: 'success',
-            embeddingStatus: 'pending', // Será indexado pelo cron de index-jobs
+            embeddingStatus: 'pending',
+            metaTcu: {
+              create: {
+                numeroAcordao: `${num}/${ano}`,
+                ementaCompleta: sumario || null,
+                relator: item.relator || null,
+                orgaoJulgador: colegiado || null,
+                linkPDF: item.urlArquivoPDF || item.urlArquivo || null,
+                dataJulgamento: dataJulgamento,
+                enriquecidoEm: new Date(),
+                enriquecimentoStatus: 'success',
+              },
+            },
           },
         });
 

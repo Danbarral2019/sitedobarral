@@ -15,8 +15,8 @@ interface DouPublicationBoxProps {
 export default function DouPublicationBox({ document, urlIsSapiens, handleView }: DouPublicationBoxProps) {
   return (
     <>
-      {/* DOU Publication Info */}
-      {(document.douData || document.douUrl) && (
+      {/* DOU Publication Info (from satellite table) */}
+      {(document.metaDou?.data || document.metaDou?.url) && (
         <div className="bg-sky-50 border border-sky-200 rounded-xl p-4 flex items-start gap-3">
           <div className="p-2 bg-sky-100 rounded-lg flex-shrink-0">
             <Newspaper className="w-4 h-4 text-sky-700" />
@@ -24,30 +24,30 @@ export default function DouPublicationBox({ document, urlIsSapiens, handleView }
           <div className="flex-1 min-w-0">
             <h4 className="text-sm font-bold text-sky-900 mb-1">Publicacao no DOU</h4>
             <div className="flex flex-wrap gap-x-4 gap-y-1 text-sm text-sky-800">
-              {document.douData && (
+              {document.metaDou.data && (
                 <span>
-                  Data: <strong>{new Date(document.douData).toLocaleDateString('pt-BR')}</strong>
+                  Data: <strong>{new Date(document.metaDou.data).toLocaleDateString('pt-BR')}</strong>
                 </span>
               )}
-              {document.douSecao && (
+              {document.metaDou.secao && (
                 <span>
-                  Secao: <strong>{document.douSecao}</strong>
+                  Secao: <strong>{document.metaDou.secao}</strong>
                 </span>
               )}
-              {document.douPagina && (
+              {document.metaDou.pagina && (
                 <span>
-                  Pagina: <strong>{document.douPagina}</strong>
+                  Pagina: <strong>{document.metaDou.pagina}</strong>
                 </span>
               )}
-              {document.douEdicao && (
+              {document.metaDou.edicao && (
                 <span>
-                  Edicao: <strong>{document.douEdicao}</strong>
+                  Edicao: <strong>{document.metaDou.edicao}</strong>
                 </span>
               )}
             </div>
-            {document.douUrl && (
+            {document.metaDou.url && (
               <a
-                href={document.douUrl}
+                href={document.metaDou.url}
                 target="_blank"
                 rel="noopener noreferrer"
                 onClick={handleView}
@@ -63,7 +63,7 @@ export default function DouPublicationBox({ document, urlIsSapiens, handleView }
       )}
 
       {/* Sapiens URL Warning */}
-      {urlIsSapiens && !document.douUrl && (
+      {urlIsSapiens && !document.metaDou?.url && (
         <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 flex items-start gap-3">
           <AlertCircle className="w-5 h-5 text-amber-600 flex-shrink-0 mt-0.5" />
           <div>

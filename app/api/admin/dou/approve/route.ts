@@ -252,6 +252,25 @@ async function handleApproval(
             reasoning: JSON.parse(stagingDoc.reasoning || '[]'),
             approvalStatus: stagingDoc.approvalStatus,
           }),
+          // Satellite tables (dual-write)
+          metaDou: {
+            create: {
+              url: stagingDoc.url,
+              data: parsedDate,
+              secao: stagingDoc.section,
+              pagina: stagingDoc.page,
+              edicao: stagingDoc.edition,
+            },
+          },
+          ...(adminNotes ? {
+            notes: {
+              create: {
+                adminNotes: adminNotes,
+                updatedAt: new Date(),
+                updatedBy: adminEmail,
+              },
+            },
+          } : {}),
         },
       });
 

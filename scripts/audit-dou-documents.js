@@ -65,6 +65,7 @@ async function auditDouDocuments() {
         isCommon: true,
         douUrl: true,
         douData: true,
+        metaDou: { select: { url: true, data: true } },
         url: true,
         uploadedAt: true,
         updatedAt: true
@@ -92,6 +93,7 @@ async function auditDouDocuments() {
         isCommon: true,
         douUrl: true,
         douData: true,
+        metaDou: { select: { url: true, data: true } },
         url: true,
         uploadedAt: true,
         updatedAt: true
@@ -128,6 +130,7 @@ async function auditDouDocuments() {
         isCommon: true,
         douUrl: true,
         douData: true,
+        metaDou: { select: { url: true, data: true } },
         url: true,
         onNumber: true,
         onYear: true,
@@ -225,7 +228,7 @@ async function auditDouDocuments() {
         category: doc.category,
         courseId: doc.courseId,
         isCommon: doc.isCommon,
-        douUrl: doc.douUrl,
+        douUrl: doc.metaDou?.url ?? doc.douUrl,
         url: doc.url,
         uploadedAt: doc.uploadedAt
       }))

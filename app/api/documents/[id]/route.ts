@@ -13,6 +13,11 @@ export async function GET(
 
     const document = await prisma.document.findUnique({
       where: { id: documentId },
+      include: {
+        metaTcu: true,
+        metaDou: true,
+        notes: true,
+      },
     });
 
     if (!document) {
@@ -21,7 +26,18 @@ export async function GET(
     }
 
     apiLogger.info({ documentId }, 'Document fetched successfully');
-    return NextResponse.json(document);
+
+    // Map satellite table notes back to flat names for frontend compatibility
+    const response = {
+      ...document,
+      adminNotes: document.notes?.adminNotes ?? document.adminNotes,
+      publicNotes: document.notes?.publicNotes ?? document.publicNotes,
+      keyPoints: document.notes?.keyPoints ?? document.notesKeyPoints,
+      practicalUse: document.notes?.practicalUse ?? document.notesPracticalUse,
+      importance: document.notes?.importance ?? document.notesImportance,
+    };
+
+    return NextResponse.json(response);
   } catch (error) {
     return handleApiError(error);
   }

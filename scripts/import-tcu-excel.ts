@@ -455,17 +455,41 @@ async function main() {
 
   const BATCH_SIZE = 100;
   let inseridos = 0;
+  let errosInsercao = 0;
 
   for (let i = 0; i < documentos.length; i += BATCH_SIZE) {
     const batch = documentos.slice(i, i + BATCH_SIZE);
-    const result = await prisma.document.createMany({
-      data: batch,
-      skipDuplicates: true,
-    });
-    inseridos += result.count;
+    for (const doc of batch) {
+      try {
+        await prisma.document.create({
+          data: {
+            ...doc,
+            // Dual-write: satellite table metaTcu
+            metaTcu: {
+              create: {
+                numeroAcordao: doc.tcuNumeroAcordao,
+                autorTese: doc.tcuAutorTese,
+                area: doc.tcuArea,
+                tema: doc.tcuTema,
+                subtema: doc.tcuSubtema,
+                legislacao: doc.tcuLegislacao,
+                indexadores: doc.tcuIndexadores,
+                tipoProcesso: doc.tcuTipoProcesso,
+                dataJulgamento: doc.tcuDataJulgamento,
+                orgaoJulgador: doc.tcuOrgaoJulgador,
+              },
+            },
+          },
+        });
+        inseridos++;
+      } catch (err) {
+        errosInsercao++;
+        // Skip duplicates silently
+      }
+    }
 
     const progresso = Math.min(i + BATCH_SIZE, documentos.length);
-    process.stdout.write(`\r  [${progresso}/${documentos.length}] ${inseridos} inseridos`);
+    process.stdout.write(`\r  [${progresso}/${documentos.length}] ${inseridos} inseridos, ${errosInsercao} erros`);
   }
 
   console.log(`\n\nImportação concluída!`);

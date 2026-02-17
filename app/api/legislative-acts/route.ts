@@ -260,6 +260,7 @@ async function fetchBoasPraticas(params: BoasPraticasParams) {
         url: true,
         douUrl: true,
         douData: true,
+        metaDou: { select: { url: true, data: true } },
         issuerOrg: true,
         esfera: true,
         themes: true,
@@ -283,18 +284,18 @@ async function fetchBoasPraticas(params: BoasPraticasParams) {
     title: doc.title,
     ementa: doc.description || '',
     issuer: doc.issuerOrg || 'Não informado',
-    publishDate: doc.douData || doc.uploadedAt,
+    publishDate: doc.metaDou?.data ?? doc.douData ?? doc.uploadedAt,
     esfera: doc.esfera || 'federal',
     themes: doc.themes ? JSON.parse(doc.themes) : [],
     leiArticles: doc.leiArticles ? JSON.parse(doc.leiArticles) : [],
-    officialUrl: doc.douUrl || doc.url,
+    officialUrl: doc.metaDou?.url ?? doc.douUrl ?? doc.url,
     url: doc.url,
   }));
 
   // Buscar facets para boas práticas (usa select mínimo para performance)
   const allBoasPraticas = await prisma.document.findMany({
     where: { category: 'boa_pratica', isPublic: true, reviewed: true },
-    select: { issuerOrg: true, esfera: true, douData: true },
+    select: { issuerOrg: true, esfera: true, douData: true, metaDou: { select: { data: true } } },
   });
 
   const issuerCounts = new Map<string, number>();
@@ -310,8 +311,9 @@ async function fetchBoasPraticas(params: BoasPraticasParams) {
     const esf = bp.esfera || 'federal';
     esferaCounts.set(esf, (esferaCounts.get(esf) || 0) + 1);
 
-    if (bp.douData) {
-      const y = new Date(bp.douData).getFullYear();
+    const bpDate = bp.metaDou?.data ?? bp.douData;
+    if (bpDate) {
+      const y = new Date(bpDate).getFullYear();
       yearCounts.set(y, (yearCounts.get(y) || 0) + 1);
     }
   }

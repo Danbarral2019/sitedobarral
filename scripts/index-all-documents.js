@@ -368,12 +368,27 @@ async function indexAllDocuments() {
           const leiArticles = resultToLeiArticles(result);
 
           // Atualizar documento
+          const autoIndexNote = `[AUTO-INDEXED ${result.analyzedAt.toISOString()}] ${result.reasoning}`;
           await prisma.document.update({
             where: { id: result.documentId },
             data: {
               leiArticles: JSON.stringify(leiArticles),
-              // Adicionar metadados de indexação automática nos adminNotes
-              adminNotes: `[AUTO-INDEXED ${result.analyzedAt.toISOString()}] ${result.reasoning}`,
+              // Adicionar metadados de indexação automática nos adminNotes (dual-write)
+              adminNotes: autoIndexNote,
+              notes: {
+                upsert: {
+                  create: {
+                    adminNotes: autoIndexNote,
+                    updatedAt: new Date(),
+                    updatedBy: 'script:index-all-documents',
+                  },
+                  update: {
+                    adminNotes: autoIndexNote,
+                    updatedAt: new Date(),
+                    updatedBy: 'script:index-all-documents',
+                  },
+                },
+              },
             },
           });
 

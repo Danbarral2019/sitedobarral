@@ -112,6 +112,7 @@ async function main() {
         }
       },
       include: {
+        metaDou: true,
         versions: {
           where: {
             detectedBy: 'scraper-dou'
@@ -129,8 +130,8 @@ async function main() {
       console.log(`   📋 ${doc.title}`);
       console.log(`      ID: ${doc.id}`);
       console.log(`      Categoria: ${doc.category}`);
-      console.log(`      DOU: Seção ${doc.douSecao || 'N/A'}, Edição ${doc.douEdicao || 'N/A'}`);
-      console.log(`      Data DOU: ${doc.douData?.toLocaleDateString('pt-BR') || 'N/A'}`);
+      console.log(`      DOU: Seção ${doc.metaDou?.secao ?? doc.douSecao ?? 'N/A'}, Edição ${doc.metaDou?.edicao ?? doc.douEdicao ?? 'N/A'}`);
+      console.log(`      Data DOU: ${(doc.metaDou?.data ?? doc.douData)?.toLocaleDateString('pt-BR') || 'N/A'}`);
       console.log(`      Curso: ${doc.courseId || 'N/A'}`);
       console.log(`      Versões: ${doc.versions.length}\\n`);
 

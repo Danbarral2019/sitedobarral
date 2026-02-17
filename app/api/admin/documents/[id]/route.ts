@@ -16,6 +16,7 @@ export const GET = withAdminAuth(async (request: NextRequest, context: { params:
 
     const document = await prisma.document.findUnique({
       where: { id },
+      include: { metaTcu: true, metaDou: true, notes: true },
     });
 
     if (!document) {
@@ -24,11 +25,18 @@ export const GET = withAdminAuth(async (request: NextRequest, context: { params:
     }
 
     // Parse JSON fields with safe parsing (handles both JSON and CSV formats)
+    // Map notes satellite fields back to flat names for frontend compatibility
     const parsedDocument = {
       ...document,
       tags: safeParseArray(document.tags),
       leiArticles: safeParseArray(document.leiArticles),
       alternativeUrls: document.alternativeUrls || null,
+      // Prefer satellite table values, fall back to flat fields
+      adminNotes: document.notes?.adminNotes ?? document.adminNotes,
+      publicNotes: document.notes?.publicNotes ?? document.publicNotes,
+      keyPoints: document.notes?.keyPoints ?? document.notesKeyPoints,
+      practicalUse: document.notes?.practicalUse ?? document.notesPracticalUse,
+      importance: document.notes?.importance ?? document.notesImportance,
     };
 
     return NextResponse.json(parsedDocument);
@@ -134,7 +142,7 @@ export const PUT = withAdminAuth(async (request: NextRequest, context: { params:
         // Enunciados
         entityType: entityType !== undefined ? (entityType === '' ? null : entityType) : existing.entityType,
         enunciadoNumber: enunciadoNumber !== undefined ? (enunciadoNumber === '' ? null : enunciadoNumber) : existing.enunciadoNumber,
-        // Observações (mapeadas para os nomes corretos do schema)
+        // Observações flat fields (legado, mantido durante transição)
         notesKeyPoints: keyPoints !== undefined ? (keyPoints === '' ? null : keyPoints) : existing.notesKeyPoints,
         notesPracticalUse: practicalUse !== undefined ? (practicalUse === '' ? null : practicalUse) : existing.notesPracticalUse,
         notesImportance: importance !== undefined ? (importance === '' ? null : importance) : existing.notesImportance,
@@ -142,6 +150,29 @@ export const PUT = withAdminAuth(async (request: NextRequest, context: { params:
         publicNotes: publicNotes !== undefined ? (publicNotes === '' ? null : publicNotes) : existing.publicNotes,
         notesUpdatedAt: new Date(),
         notesUpdatedBy: context.user?.email || 'admin',
+        // Satellite table (dual-write)
+        notes: {
+          upsert: {
+            create: {
+              keyPoints: keyPoints !== undefined ? (keyPoints === '' ? null : keyPoints) : existing.notesKeyPoints,
+              practicalUse: practicalUse !== undefined ? (practicalUse === '' ? null : practicalUse) : existing.notesPracticalUse,
+              importance: importance !== undefined ? (importance === '' ? null : importance) : existing.notesImportance,
+              adminNotes: adminNotes !== undefined ? (adminNotes === '' ? null : adminNotes) : existing.adminNotes,
+              publicNotes: publicNotes !== undefined ? (publicNotes === '' ? null : publicNotes) : existing.publicNotes,
+              updatedAt: new Date(),
+              updatedBy: context.user?.email || 'admin',
+            },
+            update: {
+              keyPoints: keyPoints !== undefined ? (keyPoints === '' ? null : keyPoints) : undefined,
+              practicalUse: practicalUse !== undefined ? (practicalUse === '' ? null : practicalUse) : undefined,
+              importance: importance !== undefined ? (importance === '' ? null : importance) : undefined,
+              adminNotes: adminNotes !== undefined ? (adminNotes === '' ? null : adminNotes) : undefined,
+              publicNotes: publicNotes !== undefined ? (publicNotes === '' ? null : publicNotes) : undefined,
+              updatedAt: new Date(),
+              updatedBy: context.user?.email || 'admin',
+            },
+          },
+        },
       },
     });
 

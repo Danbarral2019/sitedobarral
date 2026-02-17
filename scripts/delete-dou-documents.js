@@ -66,7 +66,8 @@ async function deleteDouDocuments() {
         id: { in: DOU_TO_DELETE_IDS }
       },
       include: {
-        versions: true
+        versions: true,
+        metaDou: true
       }
     });
 
@@ -142,7 +143,7 @@ async function deleteDouDocuments() {
         tcuClassificadoEm: doc.tcuClassificadoEm?.toISOString(),
         r2UploadedAt: doc.r2UploadedAt?.toISOString(),
         geminiLastIndexed: doc.geminiLastIndexed?.toISOString(),
-        douData: doc.douData?.toISOString()
+        douData: (doc.metaDou?.data ?? doc.douData)?.toISOString()
       }))
     };
 

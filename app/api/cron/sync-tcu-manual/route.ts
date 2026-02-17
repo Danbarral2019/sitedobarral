@@ -177,11 +177,27 @@ export async function GET(request: NextRequest) {
     let removed = 0;
     for (const [url, doc] of existingByUrl) {
       if (!processedUrls.has(url)) {
+        const syncNote = `[Sync ${new Date().toISOString().slice(0, 10)}] Seção não encontrada no manual atual. Verificar se foi removida ou se a URL mudou.`;
         await prisma.document.update({
           where: { id: doc.id },
           data: {
             reviewed: false,
-            adminNotes: `[Sync ${new Date().toISOString().slice(0, 10)}] Seção não encontrada no manual atual. Verificar se foi removida ou se a URL mudou.`,
+            adminNotes: syncNote,
+            // Satellite table (dual-write)
+            notes: {
+              upsert: {
+                create: {
+                  adminNotes: syncNote,
+                  updatedAt: new Date(),
+                  updatedBy: 'cron:sync-tcu-manual',
+                },
+                update: {
+                  adminNotes: syncNote,
+                  updatedAt: new Date(),
+                  updatedBy: 'cron:sync-tcu-manual',
+                },
+              },
+            },
           },
         });
         removed++;

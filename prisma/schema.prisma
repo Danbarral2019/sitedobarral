@@ -178,10 +178,81 @@ model Document {
   // Relacionamento com destaques TCU
   highlights TcuHighlight[]
 
+  // Relações 1:1 com tabelas satélite (vertical table splitting)
+  metaTcu   DocumentMetaTcu?
+  metaDou   DocumentMetaDou?
+  notes     DocumentNotes?
+
   // Full-Text Search (gerido via triggers SQL, não pelo Prisma)
   search_vector Unsupported("tsvector")?
 
   @@index([embeddingStatus]) // Índice para buscar documentos por status de embedding
+}
+
+// Metadados TCU (tabela satélite 1:1 — vertical table splitting)
+model DocumentMetaTcu {
+  id                    String    @id @default(uuid())
+  documentId            String    @unique
+  document              Document  @relation(fields: [documentId], references: [id], onDelete: Cascade)
+
+  numeroAcordao         String?
+  autorTese             String?
+  area                  String?
+  tema                  String?
+  subtema               String?
+  legislacao            String?   @db.Text
+  indexadores           String?
+  tipoProcesso          String?
+  dataJulgamento        DateTime?
+  linkPDF               String?
+  ementaCompleta        String?   @db.Text
+  textoCompleto         String?   @db.Text
+  relator               String?
+  orgaoJulgador         String?
+  enriquecidoEm         DateTime?
+  enriquecimentoStatus  String?
+  enriquecimentoErro    String?
+  classificadoEm        DateTime?
+  revisadoPorAdmin      Boolean   @default(false)
+
+  @@index([numeroAcordao])
+  @@index([autorTese])
+  @@index([area, tema])
+  @@index([enriquecimentoStatus])
+}
+
+// Metadados DOU (tabela satélite 1:1 — vertical table splitting)
+model DocumentMetaDou {
+  id          String    @id @default(uuid())
+  documentId  String    @unique
+  document    Document  @relation(fields: [documentId], references: [id], onDelete: Cascade)
+
+  url         String?
+  data        DateTime?
+  secao       String?
+  pagina      String?
+  edicao      String?
+
+  @@index([data])
+  @@index([secao])
+}
+
+// Observações/Notas (tabela satélite 1:1 — vertical table splitting)
+model DocumentNotes {
+  id              String    @id @default(uuid())
+  documentId      String    @unique
+  document        Document  @relation(fields: [documentId], references: [id], onDelete: Cascade)
+
+  adminNotes      String?
+  publicNotes     String?
+  importance      String?
+  relatedDocs     String?
+  practicalUse    String?
+  keyPoints       String?
+  updatedAt       DateTime?
+  updatedBy       String?
+
+  @@index([importance])
 }
 
 // Chunks de documentos com embeddings (Busca Semântica)

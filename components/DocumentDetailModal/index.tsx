@@ -26,6 +26,30 @@ interface DocumentDetailModalProps {
   onToggleFavorite?: () => void;
 }
 
+export interface DocumentMetaTcuData {
+  numeroAcordao: string | null;
+  area: string | null;
+  tema: string | null;
+  relator: string | null;
+  orgaoJulgador: string | null;
+  dataJulgamento: string | null;
+}
+
+export interface DocumentMetaDouData {
+  url: string | null;
+  data: string | null;
+  secao: string | null;
+  pagina: string | null;
+  edicao: string | null;
+}
+
+export interface DocumentNotesData {
+  publicNotes: string | null;
+  importance: string | null;
+  practicalUse: string | null;
+  keyPoints: string | null;
+}
+
 export interface DocumentData {
   id: string;
   title: string;
@@ -38,12 +62,8 @@ export interface DocumentData {
   leiArticles: string | null;
   courseId: string | null;
 
-  // Educational fields (from wizard)
+  // AI Summary (stays on Document)
   summary: string | null;
-  keyPoints: string | null;
-  practicalUse: string | null;
-  publicNotes: string | null;
-  importance: string | null;
 
   // AGU-specific fields
   onNumber: number | null;
@@ -55,26 +75,13 @@ export interface DocumentData {
   issuerOrg: string | null;
   esfera: string | null;
 
-  // DOU fields
-  douUrl: string | null;
-  douData: string | null;
-  douSecao: string | null;
-  douPagina: string | null;
-  douEdicao: string | null;
-
   // Alternative URLs
   alternativeUrls: string | null;
 
-  // Importance
-  notesImportance: string | null;
-
-  // TCU fields
-  tcuNumeroAcordao: string | null;
-  tcuArea: string | null;
-  tcuTema: string | null;
-  tcuRelator: string | null;
-  tcuOrgaoJulgador: string | null;
-  tcuDataJulgamento: string | null;
+  // Satellite tables (1:1 relations)
+  metaTcu: DocumentMetaTcuData | null;
+  metaDou: DocumentMetaDouData | null;
+  notes: DocumentNotesData | null;
 }
 
 export default function DocumentDetailModal({
@@ -214,13 +221,14 @@ export default function DocumentDetailModal({
 
   const tags = parseTags(document.tags);
   const leiArticles = parseLeiArticles(document.leiArticles);
-  const keyPoints = parseKeyPoints(document.keyPoints);
-  const importanceBadge = getImportanceBadge(document.notesImportance);
+  const keyPoints = parseKeyPoints(document.notes?.keyPoints ?? null);
+  const importanceBadge = getImportanceBadge(document.notes?.importance ?? null);
 
   // Determine the best URL to use
   const urlIsSapiens = isSapiensUrl(document.url);
-  const primaryUrl = urlIsSapiens && document.douUrl ? document.douUrl : document.url;
-  const hasDouUrl = !!document.douUrl && document.douUrl !== document.url;
+  const douUrl = document.metaDou?.url ?? null;
+  const primaryUrl = urlIsSapiens && douUrl ? douUrl : document.url;
+  const hasDouUrl = !!douUrl && douUrl !== document.url;
 
   // Build document identifier string (ON n/ano, Acordao n/ano, etc.)
   const documentIdentifier = (() => {
@@ -230,8 +238,8 @@ export default function DocumentDetailModal({
     if (document.acordaoNumero && document.acordaoAno) {
       return `Acordao n. ${document.acordaoNumero}/${document.acordaoAno}`;
     }
-    if (document.tcuNumeroAcordao) {
-      return document.tcuNumeroAcordao;
+    if (document.metaTcu?.numeroAcordao) {
+      return document.metaTcu.numeroAcordao;
     }
     if (document.enunciadoNumber && document.entityType) {
       return `Enunciado ${document.entityType} n. ${document.enunciadoNumber}`;

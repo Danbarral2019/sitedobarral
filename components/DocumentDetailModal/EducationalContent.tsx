@@ -67,8 +67,8 @@ export default function EducationalContent({
         </div>
       )}
 
-      {/* Practical Use - Green Background */}
-      {document.practicalUse && (
+      {/* Practical Use - Green Background (from satellite table) */}
+      {document.notes?.practicalUse && (
         <div className="bg-green-50 border-2 border-green-200 rounded-xl p-5">
           <div className="flex items-center gap-2 mb-3">
             <div className="p-2 bg-green-600 rounded-lg">
@@ -77,15 +77,15 @@ export default function EducationalContent({
             <h3 className="text-lg font-bold text-green-900">Aplicacao Pratica</h3>
           </div>
           <div className="text-gray-800 leading-relaxed space-y-2">
-            {normalizeTextContent(document.practicalUse).map((p, i) => (
+            {normalizeTextContent(document.notes.practicalUse).map((p, i) => (
               <p key={i}>{p}</p>
             ))}
           </div>
         </div>
       )}
 
-      {/* Professor Notes - Amber Background + Italic */}
-      {document.publicNotes && (
+      {/* Professor Notes - Amber Background + Italic (from satellite table) */}
+      {document.notes?.publicNotes && (
         <div className="bg-amber-50 border-2 border-amber-200 rounded-xl p-5">
           <div className="flex items-center gap-2 mb-3">
             <div className="p-2 bg-amber-600 rounded-lg">
@@ -94,7 +94,7 @@ export default function EducationalContent({
             <h3 className="text-lg font-bold text-amber-900">Observacoes do Prof. Barral</h3>
           </div>
           <div className="text-gray-800 leading-relaxed italic space-y-2">
-            {normalizeTextContent(document.publicNotes).map((p, i) => (
+            {normalizeTextContent(document.notes.publicNotes).map((p, i) => (
               <p key={i}>{p}</p>
             ))}
           </div>

@@ -94,7 +94,7 @@ async function main() {
       console.log(`      ID: ${doc.id}`);
       console.log(`      Versões: ${doc.versions.length}`);
       console.log(`      Situação: ${(doc as any).tcuSituacao || 'N/A'}`);
-      console.log(`      Relator: ${(doc as any).tcuRelator || 'N/A'}`);
+      console.log(`      Relator: ${(doc as any).metaTcu?.relator || (doc as any).tcuRelator || 'N/A'}`);
 
       if (doc.versions.length > 0) {
         const latest = doc.versions[0];

@@ -200,12 +200,22 @@ function convertGazetteToDocumentData(
     tags,
     courseId, // Primeiro curso sugerido
     isPublic,
-    // Dados do DOU
+    // Dados do DOU (flat fields for backward compat)
     douUrl: douInfo?.douUrl || url,
     douData,
     douSecao: douInfo?.douSecao || undefined,
     douPagina: douInfo?.douPagina || undefined,
     douEdicao: gazette.edition_number,
+    // Satellite table (metaDou)
+    metaDou: {
+      create: {
+        url: douInfo?.douUrl || url,
+        data: douData,
+        secao: douInfo?.douSecao || undefined,
+        pagina: douInfo?.douPagina || undefined,
+        edicao: gazette.edition_number,
+      },
+    },
   };
 }
 
@@ -408,12 +418,22 @@ function convertDOUResultToDocumentData(
     tags,
     courseId,
     isPublic,
-    // Dados do DOU
+    // Dados do DOU (flat fields for backward compat)
     douUrl: url,
     douData,
     douSecao: result.section,
     douPagina: douInfo?.douPagina || undefined,
     douEdicao: undefined, // API oficial não retorna número de edição
+    // Satellite table (metaDou)
+    metaDou: {
+      create: {
+        url: url,
+        data: douData,
+        secao: result.section,
+        pagina: douInfo?.douPagina || undefined,
+        edicao: undefined,
+      },
+    },
   };
 }
 

@@ -38,8 +38,12 @@ async function main() {
         summary: true,
         embeddingStatus: true,
         leiArticles: true,
-        tcuEmentaCompleta: true,
         uploadedAt: true,
+        metaTcu: {
+          select: {
+            ementaCompleta: true,
+          },
+        },
       },
       orderBy: { uploadedAt: 'desc' },
     });
@@ -51,7 +55,7 @@ async function main() {
       if (d.summary) score += 5;
       if (d.embeddingStatus === 'completed') score += 5;
       if (d.leiArticles) score += 3;
-      if (d.tcuEmentaCompleta) score += 2;
+      if (d.metaTcu?.ementaCompleta) score += 2;
       return { ...d, score };
     });
 

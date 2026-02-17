@@ -65,49 +65,49 @@ export default function MetadataGrid({ document }: MetadataGridProps) {
         </div>
       )}
 
-      {/* TCU specific metadata */}
-      {document.tcuRelator && (
+      {/* TCU specific metadata (from satellite table) */}
+      {document.metaTcu?.relator && (
         <div className="bg-gray-50 p-3.5 rounded-lg border border-gray-200">
           <div className="flex items-center gap-2 text-gray-500 mb-1">
             <Scale className="w-3.5 h-3.5" />
             <span className="text-xs font-medium">Relator</span>
           </div>
-          <p className="font-bold text-gray-900 text-sm">{document.tcuRelator}</p>
+          <p className="font-bold text-gray-900 text-sm">{document.metaTcu.relator}</p>
         </div>
       )}
 
-      {document.tcuOrgaoJulgador && (
+      {document.metaTcu?.orgaoJulgador && (
         <div className="bg-gray-50 p-3.5 rounded-lg border border-gray-200">
           <div className="flex items-center gap-2 text-gray-500 mb-1">
             <Building2 className="w-3.5 h-3.5" />
             <span className="text-xs font-medium">Órgão Julgador</span>
           </div>
-          <p className="font-bold text-gray-900 text-sm">{document.tcuOrgaoJulgador}</p>
+          <p className="font-bold text-gray-900 text-sm">{document.metaTcu.orgaoJulgador}</p>
         </div>
       )}
 
-      {document.tcuDataJulgamento && (
+      {document.metaTcu?.dataJulgamento && (
         <div className="bg-gray-50 p-3.5 rounded-lg border border-gray-200">
           <div className="flex items-center gap-2 text-gray-500 mb-1">
             <Calendar className="w-3.5 h-3.5" />
             <span className="text-xs font-medium">Julgamento</span>
           </div>
           <p className="font-bold text-gray-900 text-sm">
-            {new Date(document.tcuDataJulgamento).toLocaleDateString('pt-BR')}
+            {new Date(document.metaTcu.dataJulgamento).toLocaleDateString('pt-BR')}
           </p>
         </div>
       )}
 
       {/* TCU Area/Tema */}
-      {document.tcuArea && (
+      {document.metaTcu?.area && (
         <div className="bg-gray-50 p-3.5 rounded-lg border border-gray-200 col-span-2">
           <div className="flex items-center gap-2 text-gray-500 mb-1">
             <Hash className="w-3.5 h-3.5" />
             <span className="text-xs font-medium">Área / Tema</span>
           </div>
           <p className="font-bold text-gray-900 text-sm">
-            {document.tcuArea}
-            {document.tcuTema && ` - ${document.tcuTema}`}
+            {document.metaTcu.area}
+            {document.metaTcu.tema && ` - ${document.metaTcu.tema}`}
           </p>
         </div>
       )}
