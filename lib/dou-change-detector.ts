@@ -33,7 +33,7 @@ export function detectModifications(title: string, abstract: string): Modificati
   const text = `${title} ${abstract}`.toLowerCase();
 
   let modifiesLei14133 = false;
-  let affectedArticles: string[] = [];
+  const affectedArticles: string[] = [];
   let modifiesExistingAct = false;
   let existingActRef: ExistingActRef | null = null;
   let changeType: ChangeType = 'complementa';

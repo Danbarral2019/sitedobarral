@@ -26,7 +26,7 @@ function NewBlogPostPageInner() {
   const { success, error: errorToast } = useToast();
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
-  const [highlightId, setHighlightId] = useState<string | null>(fromHighlightId);
+  const [highlightId, _setHighlightId] = useState<string | null>(fromHighlightId);
   const [formData, setFormData] = useState({
     title: '',
     slug: '',

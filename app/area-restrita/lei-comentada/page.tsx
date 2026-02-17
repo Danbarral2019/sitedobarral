@@ -146,7 +146,7 @@ function DocumentDetails({ documentId, documentType = 'document' }: { documentId
 
   const isLegislativeAct = documentType === 'legislativeAct';
   const isFavorite = isLegislativeAct ? actFavorites.isFavorite : docFavorites.isFavorite;
-  const toggleFavorite = isLegislativeAct ? actFavorites.toggleFavorite : docFavorites.toggleFavorite;
+  const _toggleFavorite = isLegislativeAct ? actFavorites.toggleFavorite : docFavorites.toggleFavorite;
 
   useEffect(() => {
     const fetchDocument = async () => {

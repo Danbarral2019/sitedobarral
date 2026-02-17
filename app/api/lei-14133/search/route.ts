@@ -4,7 +4,7 @@ import { queryGeminiText } from '@/lib/gemini/cached-client';
 import { prisma } from '@/lib/prisma';
 import { ENUNCIADOS, buscarEnunciados } from '@/data/enunciados';
 import { enforceRateLimit, getClientIp } from '@/lib/cache/rate-limit-helper';
-import { RateLimitError, ValidationError } from '@/lib/errors/api-error';
+import { ValidationError } from '@/lib/errors/api-error';
 import { handleApiError } from '@/lib/errors/error-handler';
 import { apiLogger } from '@/lib/logger';
 

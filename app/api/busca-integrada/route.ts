@@ -1,7 +1,14 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { searchLeiArticlesWithExcerpts } from '@/data/lei-14133-artigos';
-import { prisma } from '@/lib/prisma';
 import { verifyAuth } from '@/lib/auth';
+import {
+  searchDocuments,
+  searchGlossary,
+  searchLegislativeActs,
+  searchBlogPosts,
+  searchFAQs,
+} from '@/lib/search/full-text-search';
+import { handleApiError } from '@/lib/errors/error-handler';
 
 export async function GET(request: NextRequest) {
   try {
@@ -15,70 +22,44 @@ export async function GET(request: NextRequest) {
           glossaryTerms: [],
           articles: [],
           acts: [],
-          documents: []
+          documents: [],
+          blogPosts: [],
+          faqs: [],
         }
       });
     }
 
-    // Verificar se usuário está autenticado
+    // Verificar se usuário está autenticado (opcional — busca funciona sem login)
     const authResult = await verifyAuth(request);
     const isAuthenticated = authResult.valid;
     const userCourseId = isAuthenticated && authResult.user?.courseId
       ? authResult.user.courseId
       : null;
 
-    // 1. Buscar termos do glossário (prioridade máxima)
-    const glossaryTerms = await prisma.glossaryTerm.findMany({
-      where: {
-        OR: [
-          { term: { contains: query, mode: 'insensitive' } },
-          { definition: { contains: query, mode: 'insensitive' } },
-        ]
-      },
-      take: 5,
-      orderBy: {
-        term: 'asc'
-      }
-    });
+    // Executar todas as buscas em paralelo via FTS (tsvector + stemming português)
+    const [
+      glossaryResults,
+      actResults,
+      docResults,
+      blogResults,
+      faqResults,
+    ] = await Promise.all([
+      searchGlossary(query, { limit: 5 }),
+      searchLegislativeActs(query, { limit: 10 }),
+      searchDocuments(query, { limit: 20 }),
+      searchBlogPosts(query, { limit: 5 }),
+      searchFAQs(query, { limit: 5 }),
+    ]);
 
-    // 2. Buscar artigos da Lei 14.133 com trechos relevantes
-    const articles = searchLeiArticlesWithExcerpts(query).slice(0, 10); // Limitar a 10 resultados
+    // Artigos da Lei 14.133 (busca local em dados estáticos)
+    const articles = searchLeiArticlesWithExcerpts(query).slice(0, 10);
 
-    // 3. Buscar atos normativos
-    const acts = await prisma.legislativeAct.findMany({
-      where: {
-        OR: [
-          { fullNumber: { contains: query, mode: 'insensitive' } },
-          { title: { contains: query, mode: 'insensitive' } },
-          { ementa: { contains: query, mode: 'insensitive' } },
-          { summary: { contains: query, mode: 'insensitive' } },
-        ]
-      },
-      take: 10,
-      orderBy: {
-        publishDate: 'desc'
-      }
-    });
-
-    // 4. Buscar documentos
-    const documents = await prisma.document.findMany({
-      where: {
-        OR: [
-          { title: { contains: query, mode: 'insensitive' } },
-          { description: { contains: query, mode: 'insensitive' } },
-          { content: { contains: query, mode: 'insensitive' } },
-        ]
-      },
-      take: 20,
-      orderBy: {
-        uploadedAt: 'desc'
-      }
-    });
-
-    // Processar documentos para indicar se são acessíveis
-    const processedDocuments = documents.map(doc => {
-      const isPublic = doc.isPublic;
-      const hasAccess = isPublic || (userCourseId && doc.courseId === userCourseId) || authResult.user?.role === 'admin';
+    // Processar documentos para indicar acessibilidade
+    const processedDocuments = docResults.map(({ data: doc }) => {
+      const isPublic = doc.is_public;
+      const hasAccess = isPublic
+        || (userCourseId && doc.course_id === userCourseId)
+        || authResult.user?.role === 'admin';
 
       return {
         id: doc.id,
@@ -87,10 +68,10 @@ export async function GET(request: NextRequest) {
         category: doc.category,
         type: doc.type,
         url: doc.url,
-        courseId: doc.courseId,
-        uploadedAt: doc.uploadedAt,
-        isPublic: doc.isPublic,
-        hasAccess: hasAccess,
+        courseId: doc.course_id,
+        uploadedAt: doc.uploaded_at,
+        isPublic,
+        hasAccess,
         requiresEnrollment: !hasAccess,
       };
     });
@@ -98,37 +79,47 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({
       query,
       results: {
-        glossaryTerms: glossaryTerms.map(term => ({
-          id: term.id,
-          term: term.term,
-          definition: term.definition,
-          category: term.category,
+        glossaryTerms: glossaryResults.map(({ data }) => ({
+          id: data.id,
+          term: data.term,
+          definition: data.definition,
+          category: data.category,
         })),
         articles: articles.map(art => ({
           numero: art.numero,
           titulo: art.titulo,
           ementa: art.ementa,
           capitulo: art.capitulo,
-          excerpts: art.excerpts, // Trechos relevantes com destaque
+          excerpts: art.excerpts,
         })),
-        acts: acts.map(act => ({
-          id: act.id,
-          fullNumber: act.fullNumber,
-          title: act.title,
-          ementa: act.ementa,
-          type: act.type,
-          issuer: act.issuer,
-          publishDate: act.publishDate,
+        acts: actResults.map(({ data }) => ({
+          id: data.id,
+          fullNumber: data.full_number,
+          title: data.title,
+          ementa: data.ementa,
+          type: data.type,
+          issuer: data.issuer,
+          publishDate: data.publish_date,
         })),
-        documents: processedDocuments
+        documents: processedDocuments,
+        blogPosts: blogResults.map(({ data }) => ({
+          id: data.id,
+          slug: data.slug,
+          title: data.title,
+          excerpt: data.excerpt,
+          author: data.author,
+          publishedAt: data.published_at,
+          tags: data.tags,
+        })),
+        faqs: faqResults.map(({ data }) => ({
+          id: data.id,
+          question: data.question,
+          answer: data.answer,
+          category: data.category,
+        })),
       }
     });
-
   } catch (error) {
-    console.error('[Busca Integrada] Erro:', error);
-    return NextResponse.json(
-      { error: 'Erro ao realizar busca' },
-      { status: 500 }
-    );
+    return handleApiError(error);
   }
 }

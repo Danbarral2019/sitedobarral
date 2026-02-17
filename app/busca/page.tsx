@@ -4,7 +4,8 @@ import { useState, useEffect, useMemo } from 'react';
 import Link from 'next/link';
 import {
   Search, Gavel, Scale, FileText, Lock, ArrowRight,
-  X, Loader2, AlertCircle, BookOpen, Sparkles, Database, MessageCircle
+  X, Loader2, AlertCircle, BookOpen, Sparkles, Database, MessageCircle,
+  Newspaper, HelpCircle
 } from 'lucide-react';
 
 interface SearchResults {
@@ -21,7 +22,7 @@ interface SearchResults {
       titulo: string;
       ementa: string;
       capitulo: string;
-      excerpts?: string[]; // Trechos relevantes com termos destacados
+      excerpts?: string[];
     }>;
     acts: Array<{
       id: string;
@@ -45,6 +46,21 @@ interface SearchResults {
       hasAccess: boolean;
       requiresEnrollment: boolean;
     }>;
+    blogPosts: Array<{
+      id: string;
+      slug: string;
+      title: string;
+      excerpt: string | null;
+      author: string;
+      publishedAt: string;
+      tags: string | null;
+    }>;
+    faqs: Array<{
+      id: string;
+      question: string;
+      answer: string;
+      category: string | null;
+    }>;
   };
 }
 
@@ -65,7 +81,7 @@ const CATEGORY_LABELS: Record<string, string> = {
   'informativo': 'Informativos de Licitação TCU',
 };
 
-type TabType = 'all' | 'lei' | 'acts' | 'docs' | 'glossary';
+type TabType = 'all' | 'lei' | 'acts' | 'docs' | 'glossary' | 'blog' | 'faq';
 
 export default function BuscaIntegradaPage() {
   const [searchTerm, setSearchTerm] = useState('');
@@ -113,18 +129,22 @@ export default function BuscaIntegradaPage() {
       results.results.glossaryTerms.length +
       results.results.articles.length +
       results.results.acts.length +
-      results.results.documents.length
+      results.results.documents.length +
+      (results.results.blogPosts?.length || 0) +
+      (results.results.faqs?.length || 0)
     );
   }, [results]);
 
   // Tab counts
   const tabCounts = useMemo(() => {
-    if (!results) return { lei: 0, acts: 0, docs: 0, glossary: 0 };
+    if (!results) return { lei: 0, acts: 0, docs: 0, glossary: 0, blog: 0, faq: 0 };
     return {
       lei: results.results.articles.length,
       acts: results.results.acts.length,
       docs: results.results.documents.length,
       glossary: results.results.glossaryTerms.length,
+      blog: results.results.blogPosts?.length || 0,
+      faq: results.results.faqs?.length || 0,
     };
   }, [results]);
 
@@ -148,7 +168,7 @@ export default function BuscaIntegradaPage() {
             <div>
               <h1 className="text-4xl font-bold mb-2">Busca Integrada</h1>
               <p className="text-xl text-blue-100">
-                Pesquise em glossário, artigos, atos normativos e documentos
+                Pesquise em artigos da lei, atos normativos, documentos, blog e FAQ
               </p>
             </div>
           </div>
@@ -262,6 +282,34 @@ export default function BuscaIntegradaPage() {
                   Documentos ({tabCounts.docs})
                 </button>
               )}
+
+              {tabCounts.blog > 0 && (
+                <button
+                  onClick={() => setActiveTab('blog')}
+                  className={`px-6 py-4 font-semibold text-sm whitespace-nowrap transition-colors border-b-4 flex items-center gap-2 ${
+                    activeTab === 'blog'
+                      ? 'border-rose-600 text-rose-600'
+                      : 'border-transparent text-gray-600 hover:text-gray-900 hover:border-gray-300'
+                  }`}
+                >
+                  <Newspaper className="w-4 h-4" />
+                  Blog ({tabCounts.blog})
+                </button>
+              )}
+
+              {tabCounts.faq > 0 && (
+                <button
+                  onClick={() => setActiveTab('faq')}
+                  className={`px-6 py-4 font-semibold text-sm whitespace-nowrap transition-colors border-b-4 flex items-center gap-2 ${
+                    activeTab === 'faq'
+                      ? 'border-amber-600 text-amber-600'
+                      : 'border-transparent text-gray-600 hover:text-gray-900 hover:border-gray-300'
+                  }`}
+                >
+                  <HelpCircle className="w-4 h-4" />
+                  FAQ ({tabCounts.faq})
+                </button>
+              )}
             </div>
           </div>
         </div>
@@ -280,23 +328,41 @@ export default function BuscaIntegradaPage() {
                 Digite qualquer termo relacionado a licitações e contratos. A busca retornará resultados em:
               </p>
 
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-8">
-                <div className="p-6 bg-blue-50 rounded-xl border-2 border-blue-200">
-                  <Gavel className="w-12 h-12 text-blue-600 mx-auto mb-3" />
-                  <h3 className="font-bold text-gray-900 mb-2">Lei 14.133/2021</h3>
-                  <p className="text-sm text-gray-600">195 artigos organizados por capítulos</p>
+              <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mt-8">
+                <div className="p-5 bg-blue-50 rounded-xl border-2 border-blue-200">
+                  <Gavel className="w-10 h-10 text-blue-600 mx-auto mb-3" />
+                  <h3 className="font-bold text-gray-900 mb-1 text-sm">Lei 14.133/2021</h3>
+                  <p className="text-xs text-gray-600">195 artigos organizados por capítulos</p>
                 </div>
 
-                <div className="p-6 bg-indigo-50 rounded-xl border-2 border-indigo-200">
-                  <Scale className="w-12 h-12 text-indigo-600 mx-auto mb-3" />
-                  <h3 className="font-bold text-gray-900 mb-2">Atos Normativos</h3>
-                  <p className="text-sm text-gray-600">Decretos, portarias e instruções normativas</p>
+                <div className="p-5 bg-indigo-50 rounded-xl border-2 border-indigo-200">
+                  <Scale className="w-10 h-10 text-indigo-600 mx-auto mb-3" />
+                  <h3 className="font-bold text-gray-900 mb-1 text-sm">Atos Normativos</h3>
+                  <p className="text-xs text-gray-600">Decretos, portarias e instruções normativas</p>
                 </div>
 
-                <div className="p-6 bg-purple-50 rounded-xl border-2 border-purple-200">
-                  <FileText className="w-12 h-12 text-purple-600 mx-auto mb-3" />
-                  <h3 className="font-bold text-gray-900 mb-2">Documentos</h3>
-                  <p className="text-sm text-gray-600">Acórdãos, pareceres e materiais exclusivos</p>
+                <div className="p-5 bg-purple-50 rounded-xl border-2 border-purple-200">
+                  <FileText className="w-10 h-10 text-purple-600 mx-auto mb-3" />
+                  <h3 className="font-bold text-gray-900 mb-1 text-sm">Documentos</h3>
+                  <p className="text-xs text-gray-600">Acórdãos, pareceres e materiais exclusivos</p>
+                </div>
+
+                <div className="p-5 bg-green-50 rounded-xl border-2 border-green-200">
+                  <BookOpen className="w-10 h-10 text-green-600 mx-auto mb-3" />
+                  <h3 className="font-bold text-gray-900 mb-1 text-sm">Glossário</h3>
+                  <p className="text-xs text-gray-600">Termos técnicos de licitações</p>
+                </div>
+
+                <div className="p-5 bg-rose-50 rounded-xl border-2 border-rose-200">
+                  <Newspaper className="w-10 h-10 text-rose-600 mx-auto mb-3" />
+                  <h3 className="font-bold text-gray-900 mb-1 text-sm">Blog</h3>
+                  <p className="text-xs text-gray-600">Artigos e análises especializadas</p>
+                </div>
+
+                <div className="p-5 bg-amber-50 rounded-xl border-2 border-amber-200">
+                  <HelpCircle className="w-10 h-10 text-amber-600 mx-auto mb-3" />
+                  <h3 className="font-bold text-gray-900 mb-1 text-sm">FAQ</h3>
+                  <p className="text-xs text-gray-600">Perguntas frequentes respondidas</p>
                 </div>
               </div>
             </div>
@@ -543,6 +609,91 @@ export default function BuscaIntegradaPage() {
                     </div>
                   </div>
                 )}
+              </section>
+            )}
+
+            {/* Blog Posts */}
+            {results.results.blogPosts?.length > 0 && shouldShowSection('blog') && (
+              <section className="bg-white rounded-2xl shadow-lg border-2 border-rose-200 p-8">
+                <div className="flex items-center gap-3 mb-6">
+                  <Newspaper className="w-8 h-8 text-rose-600" />
+                  <h2 className="text-2xl font-bold text-gray-900">
+                    Blog
+                  </h2>
+                  <span className="ml-auto px-3 py-1 bg-rose-100 text-rose-700 rounded-full text-sm font-bold">
+                    {results.results.blogPosts.length} {results.results.blogPosts.length === 1 ? 'artigo' : 'artigos'}
+                  </span>
+                </div>
+
+                <div className="space-y-3">
+                  {results.results.blogPosts.map(post => (
+                    <Link
+                      key={post.id}
+                      href={`/blog/${post.slug}`}
+                      className="block p-5 bg-rose-50 rounded-xl border-2 border-rose-200 hover:border-rose-500 hover:bg-rose-100 transition-all group"
+                    >
+                      <div className="flex items-start gap-4">
+                        <div className="flex-shrink-0 w-12 h-12 bg-rose-600 rounded-lg flex items-center justify-center">
+                          <Newspaper className="w-6 h-6 text-white" />
+                        </div>
+                        <div className="flex-1">
+                          <h3 className="font-bold text-gray-900 mb-1 group-hover:text-rose-700 transition-colors">
+                            {post.title}
+                          </h3>
+                          {post.excerpt && (
+                            <p className="text-sm text-gray-600 line-clamp-2 mb-2">{post.excerpt}</p>
+                          )}
+                          <div className="flex items-center gap-3 text-xs text-gray-500">
+                            <span>{post.author}</span>
+                            {post.publishedAt && (
+                              <span>{new Date(post.publishedAt).toLocaleDateString('pt-BR')}</span>
+                            )}
+                          </div>
+                        </div>
+                        <ArrowRight className="w-5 h-5 text-gray-400 group-hover:text-rose-600 group-hover:translate-x-1 transition-all flex-shrink-0" />
+                      </div>
+                    </Link>
+                  ))}
+                </div>
+              </section>
+            )}
+
+            {/* FAQ */}
+            {results.results.faqs?.length > 0 && shouldShowSection('faq') && (
+              <section className="bg-white rounded-2xl shadow-lg border-2 border-amber-200 p-8">
+                <div className="flex items-center gap-3 mb-6">
+                  <HelpCircle className="w-8 h-8 text-amber-600" />
+                  <h2 className="text-2xl font-bold text-gray-900">
+                    Perguntas Frequentes
+                  </h2>
+                  <span className="ml-auto px-3 py-1 bg-amber-100 text-amber-700 rounded-full text-sm font-bold">
+                    {results.results.faqs.length} {results.results.faqs.length === 1 ? 'resultado' : 'resultados'}
+                  </span>
+                </div>
+
+                <div className="space-y-3">
+                  {results.results.faqs.map(faq => (
+                    <div
+                      key={faq.id}
+                      className="p-5 bg-amber-50 rounded-xl border-2 border-amber-200"
+                    >
+                      <h3 className="font-bold text-gray-900 mb-2 flex items-start gap-2">
+                        <HelpCircle className="w-5 h-5 text-amber-600 flex-shrink-0 mt-0.5" />
+                        {faq.question}
+                      </h3>
+                      <p className="text-sm text-gray-700 leading-relaxed ml-7">
+                        {faq.answer}
+                      </p>
+                      {faq.category && (
+                        <div className="mt-2 ml-7">
+                          <span className="text-xs px-2 py-1 bg-amber-100 text-amber-700 rounded-full">
+                            {faq.category}
+                          </span>
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </div>
               </section>
             )}
           </div>

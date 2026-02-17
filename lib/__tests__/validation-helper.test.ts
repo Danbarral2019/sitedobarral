@@ -8,7 +8,6 @@ import { describe, it, expect } from 'vitest';
 import { NextRequest } from 'next/server';
 import { z } from 'zod';
 import { validateRequest, validateQueryParams, formatZodError } from '../validation-helper';
-import { ZodError } from 'zod';
 
 const testSchema = z.object({
   name: z.string().min(1),

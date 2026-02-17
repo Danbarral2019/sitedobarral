@@ -371,7 +371,7 @@ describe('Auth Module', () => {
     it('deve retornar valid:false sem cookie', async () => {
       const { verifyAuth } = await import('../auth');
 
-      const request = new Request('http://localhost:3000/api/test');
+      const _request = new Request('http://localhost:3000/api/test');
       const nextRequest = {
         cookies: { get: vi.fn().mockReturnValue(undefined) },
         headers: new Headers(),

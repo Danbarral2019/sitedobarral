@@ -6,12 +6,10 @@ const nextConfig: NextConfig = {
   productionBrowserSourceMaps: false,
 
   typescript: {
-    // TODO: Fix remaining TypeScript errors (OG route params, form types)
-    ignoreBuildErrors: true,
+    ignoreBuildErrors: false,
   },
   eslint: {
-    // Ignora erros de ESLint durante build (warnings são mantidos)
-    ignoreDuringBuilds: true,
+    ignoreDuringBuilds: false,
   },
   // Desabilita geração estática durante build
   output: 'standalone',

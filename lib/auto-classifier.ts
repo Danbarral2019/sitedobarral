@@ -326,7 +326,7 @@ export function bulkClassify(
 
 export interface EnhancedClassificationResult {
   courseSlugs: string[]; // Múltiplos cursos possíveis
-  category: 'apostila' | 'acordao' | 'parecer' | 'edital' | 'artigo' | 'orientacao-normativa' | 'outro';
+  category: 'apostila' | 'acordao' | 'parecer' | 'edital' | 'artigo' | 'orientacao-normativa' | 'sumula' | 'consulta_tcu' | 'informativo' | 'outro';
   tags: string[];
   confidence: number;
   source: 'basic' | 'claude' | 'hybrid'; // Origem da classificação

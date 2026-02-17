@@ -11,7 +11,7 @@ export async function addDocument(
   title: string,
   description: string,
   type: 'pdf' | 'doc' | 'link' | 'video',
-  category: 'apostila' | 'acordao' | 'parecer' | 'edital' | 'artigo' | 'orientacao-normativa' | 'enunciados' | 'outro',
+  category: 'apostila' | 'acordao' | 'parecer' | 'edital' | 'artigo' | 'orientacao-normativa' | 'enunciados' | 'sumula' | 'consulta_tcu' | 'informativo' | 'outro',
   isPublic: boolean,
   url: string,
   size?: number,

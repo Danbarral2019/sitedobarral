@@ -190,7 +190,7 @@ export async function GET(request: NextRequest) {
     });
 
     // Check if any enrolled course has LMS modules
-    const hasAnyLmsModules = validCourseIds.some((cId) => (lmsModuleCountMap[cId] || 0) > 0);
+    const _hasAnyLmsModules = validCourseIds.some((cId) => (lmsModuleCountMap[cId] || 0) > 0);
 
     if (validCourseIds.length > 0) {
       // Group materials: merge common (courseId=null) into each enrolled course

@@ -10,7 +10,6 @@ import { ZodError, ZodIssue } from 'zod';
 import { Prisma } from '@prisma/client';
 import { handleApiError, withErrorHandler } from '../error-handler';
 import {
-  ApiError,
   ValidationError,
   AuthenticationError,
   AuthorizationError,

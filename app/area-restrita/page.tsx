@@ -139,11 +139,11 @@ export default function AreaRestritaPage() {
   }, [user, enrolledCourseIds]);
 
   // Handlers
-  const handleDocumentClick = (doc: DocumentType | DocumentResult) => {
+  const handleDocumentClick = (doc: DocumentType | DocumentResult | { id: string; title: string; category: string; url?: string }) => {
     const docType: DocumentType = {
       id: doc.id,
       title: doc.title,
-      description: doc.description || undefined,
+      description: 'description' in doc ? doc.description || undefined : undefined,
       type: 'type' in doc ? doc.type : 'pdf',
       category: doc.category,
       url: doc.url || undefined,

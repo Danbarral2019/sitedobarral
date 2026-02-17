@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { Loader2, FileText, BookOpen, ArrowLeft, BarChart3, TrendingUp, Scale, Calendar, User, Building2 } from 'lucide-react';
+import { Loader2, FileText, BookOpen, ArrowLeft, BarChart3, TrendingUp, Scale, Calendar, User } from 'lucide-react';
 import { LEI_14133_ARTIGOS as LEI_14133_ARTIGOS_FALLBACK, LeiArticle } from '@/data/lei-14133-artigos';
 import { ArticleRelationshipGraph } from '@/components/ArticleRelationshipGraph';
 
