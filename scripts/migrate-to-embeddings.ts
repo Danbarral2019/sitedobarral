@@ -32,6 +32,7 @@ interface MigrationOptions {
   forceReprocess?: boolean;
   dryRun?: boolean;
   concurrency?: number;
+  category?: string;
 }
 
 // ===========================
@@ -44,10 +45,11 @@ async function migrateToEmbeddings(options: MigrationOptions = {}) {
     forceReprocess = false,
     dryRun = false,
     concurrency = 5,
+    category,
   } = options;
 
   console.log('🚀 Starting migration to embeddings system...\n');
-  console.log('Options:', { limit, forceReprocess, dryRun, concurrency });
+  console.log('Options:', { limit, forceReprocess, dryRun, concurrency, category });
   console.log('');
 
   try {
@@ -86,6 +88,10 @@ async function migrateToEmbeddings(options: MigrationOptions = {}) {
         { extractedText: { not: null } },
       ],
     };
+
+    if (category) {
+      whereClause.category = category;
+    }
 
     if (!forceReprocess) {
       whereClause.AND = {
@@ -259,6 +265,9 @@ function parseArgs(): MigrationOptions {
       options.dryRun = true;
     } else if (arg === '--concurrency' && args[i + 1]) {
       options.concurrency = parseInt(args[i + 1], 10);
+      i++;
+    } else if (arg === '--category' && args[i + 1]) {
+      options.category = args[i + 1];
       i++;
     } else if (arg === '--help' || arg === '-h') {
       console.log(`
