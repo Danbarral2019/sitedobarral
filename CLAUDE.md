@@ -68,10 +68,11 @@ export DATABASE_URL="<your-db-url>" && npx tsx scripts/fix-csv-tags.ts  # Conver
 - `lib/` - Core utilities (auth, email, scrapers, versioning)
 - `lib/agu-modules/` - AGU scrapers (ONs, Pareceres, DECOR, Súmulas)
 - `components/` - React components
-- `prisma/schema.prisma` - Database schema (25 models)
+- `prisma/schema.prisma` - Database schema (26 models)
 - `scripts/` - Admin/import/scraping scripts
+- `lib/email-templates/` - Templates HTML de newsletter
 
-**Key Models (25 total):**
+**Key Models (26 total):**
 
 
 - `User` - Admin/student accounts (+ `stripeCustomerId`)
@@ -84,7 +85,7 @@ export DATABASE_URL="<your-db-url>" && npx tsx scripts/fix-csv-tags.ts  # Conver
 - `FAQ`, `FAQFeedback`, `GlossaryTerm`, `LegislativeAct`
 - `CourseVideo`, `SocialMediaPost`, `RecommendedSite`, `SiteToCourse`
 - `AccessLog` - Audit trail
-- `NewsletterSubscriber`, `Favorite`, `ArticleQuestion`
+- `NewsletterSubscriber`, `NewsletterSend`, `Favorite`, `ArticleQuestion`
 - `DocumentAnalysis`, `DOUStagingDocument`, `DOUSavedFilter`
 
 **Auth Flows:**
@@ -106,6 +107,35 @@ export DATABASE_URL="<your-db-url>" && npx tsx scripts/fix-csv-tags.ts  # Conver
 
 
 ## Recent Features
+
+**📧 Newsletter Analytics + Templates (2026-02-17):**
+- ✅ Model `NewsletterSend` — tracking de envios (type, totalSent, opens, clicks)
+- ✅ Templates HTML reutilizáveis em `lib/email-templates/newsletter.ts` (weekly + monthly)
+- ✅ Tracking pixel (open) + redirect (click) em `/api/newsletter/track`
+- ✅ Webhooks Resend (bounce/open/click) em `/api/webhooks/resend`
+- ✅ Dashboard analytics no `/admin/newsletter` (stat cards, gráfico barras, tabela últimos envios)
+- ✅ Crons `monthly-newsletter` e `newsletter-new-content` atualizados com templates + `NewsletterSend`
+- 📖 Ver `lib/email-templates/newsletter.ts`, `app/admin/newsletter/analytics.tsx`
+
+**🎓 Certificados LinkedIn + Galeria (2026-02-17):**
+- ✅ Botão "Compartilhar no LinkedIn" no `CertificateCard` (URL LinkedIn Certification)
+- ✅ Galeria `/area-restrita/meus-certificados` — lista todos certificados do aluno
+- ✅ API `GET /api/area-restrita/certificates` — retorna certificados do usuário
+- ✅ Links na navegação (AreaRestritaHeader + MobileBottomNav)
+- 📖 Ver `components/lms/CertificateCard.tsx`, `app/area-restrita/meus-certificados/page.tsx`
+
+**⚡ Performance — Dynamic Imports + Image Optimization (2026-02-17):**
+- ✅ Dynamic imports (`next/dynamic` + `ssr: false`) em 5 páginas admin pesadas
+- ✅ Componentes extraídos: `TCUManagerClient`, `ScraperAGUClient`, `AnalyticsClient`, `SearchAnalyticsClient`, `DOUFiltrosClient`
+- ✅ `<img>` → `next/image` em `SiteResultCard`, `sites/config`, `depoimentos/config`
+- ⚠️ `ssr: false` requer `'use client'` na page.tsx wrapper (Next.js 15)
+
+**📊 LMS — Dashboard Progresso + Notificações (2026-02-17):**
+- ✅ Dashboard `/area-restrita/meu-progresso` — XP, streaks, badges, progresso por curso, atividades recentes
+- ✅ API `GET /api/area-restrita/progress` — dados agregados do aluno
+- ✅ Push notification em `awardBadge()` (gamification.ts) e `issueCertificate()` (certificate.ts)
+- ✅ Push notification no cron de inatividade LMS (`lms-inactivity`)
+- 📖 Ver `app/area-restrita/meu-progresso/page.tsx`, `lib/gamification.ts`, `lib/certificate.ts`
 
 **⚖️ Embeddings Semânticos para Atos Legislativos (2026-02-15):**
 - ✅ Modelo `LegislativeActChunk` (espelha `DocumentChunk`, FK para `LegislativeAct`)
@@ -471,9 +501,19 @@ function Header() {
 - `POST /api/stripe/webhook` - Webhook handler (sem auth, verificação via signature)
 - `POST /api/stripe/portal` - Cria Customer Portal session (withAuth)
 
+**Newsletter:** `/api/newsletter/*`
+- `GET /api/newsletter/track` - Pixel tracking (opens) + redirect tracking (clicks)
+
+**Webhooks:**
+- `POST /api/webhooks/resend` - Resend webhooks (bounce, open, click)
+
+**Área Restrita:** `/api/area-restrita/*`
+- `GET /api/area-restrita/certificates` - Certificados do aluno
+- `GET /api/area-restrita/progress` - Dados agregados de progresso LMS
+
 **Admin:** `/api/admin/*` (QR codes, documents, blog, publications, analytics)
 
-**Cron:** `/api/enrollment/check-expiration`, `/api/cron/import-documents`, `/api/cron/monthly-newsletter`
+**Cron:** `/api/enrollment/check-expiration`, `/api/cron/import-documents`, `/api/cron/monthly-newsletter`, `/api/cron/lms-inactivity`
 
 Ver código para endpoints completos.
 
@@ -494,6 +534,10 @@ Ver código para endpoints completos.
 - Admin Versioning UI: histórico de versões (timeline), diff viewer, seção collapsible na página de edição
 - Full-Text Search: PostgreSQL tsvector + GIN + stemming português em 7 tabelas, FAQ e Blog na busca global
 - Stripe Subscriptions: Checkout, Webhook, Portal, 2 planos (Básico/Premium), QR Code trial 1 mês
+- Newsletter Analytics: templates HTML, tracking pixel/redirect, webhooks Resend, dashboard admin
+- Certificados: botão LinkedIn, galeria `/area-restrita/meus-certificados`
+- Performance: dynamic imports em 5 admin pages, `<img>` → `next/image`
+- LMS Progresso: dashboard `/area-restrita/meu-progresso`, push em badge/certificado, cron inatividade
 
 **🚧 In Progress:**
 - DOU classifier

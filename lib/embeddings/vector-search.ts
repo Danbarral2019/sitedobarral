@@ -24,6 +24,7 @@ export interface SearchResult {
   isCommon: boolean;
   tags?: string[];
   leiArticles?: string | null;
+  uploadedAt?: string;
   sourceType: 'document' | 'legislative-act'; // Tipo de fonte
 }
 
@@ -233,6 +234,7 @@ async function executeVectorSearch(
     tags: string | null;
     lei_articles: string | null;
     source_type: string;
+    uploaded_at: string | null;
   }>>(
     `
     WITH doc_scores AS (
@@ -248,7 +250,8 @@ async function executeVectorSearch(
         d."isCommon" as is_common,
         d.tags,
         d."leiArticles" as lei_articles,
-        'document' as source_type
+        'document' as source_type,
+        d."uploadedAt" as uploaded_at
       FROM "DocumentChunk" c
       JOIN "Document" d ON c."documentId" = d.id
       WHERE ${whereClause}
@@ -266,7 +269,8 @@ async function executeVectorSearch(
         true as is_common,
         la.themes as tags,
         la."leiArticles" as lei_articles,
-        'legislative-act' as source_type
+        'legislative-act' as source_type,
+        la."publishedAt" as uploaded_at
       FROM "LegislativeActChunk" lc
       JOIN "LegislativeAct" la ON lc."legislativeActId" = la.id
       WHERE la."embeddingStatus" = 'completed'
@@ -342,6 +346,7 @@ async function executeVectorSearch(
       isCommon: bestChunk.is_common,
       tags: bestChunk.tags ? safeParseArray(bestChunk.tags) : undefined,
       leiArticles: bestChunk.lei_articles,
+      uploadedAt: bestChunk.uploaded_at ? new Date(bestChunk.uploaded_at).toISOString() : undefined,
       sourceType: bestChunk.source_type as 'document' | 'legislative-act',
     });
   }
@@ -466,7 +471,8 @@ export function buildContextForLLM(
   let context = '';
 
   for (const result of results) {
-    const source = `[${result.documentTitle}] (${Math.round(result.similarity * 100)}% relevância)`;
+    const yearStr = result.uploadedAt ? ` | Ano: ${new Date(result.uploadedAt).getFullYear()}` : '';
+    const source = `[${result.documentTitle}] (${Math.round(result.similarity * 100)}% relevância${yearStr})`;
     const chunk = result.chunkContent;
 
     const entry = `${source}\n${chunk}\n\n---\n\n`;

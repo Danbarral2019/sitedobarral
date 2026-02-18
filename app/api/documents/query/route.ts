@@ -452,7 +452,18 @@ INSTRUÇÕES:
 5. Diferencie fontes normativas VINCULANTES (lei, decreto, súmula vinculante) de fontes DOUTRINÁRIAS (apostilas, manuais) e JURISPRUDENCIAIS (acórdãos, informativos)
 6. Use linguagem técnica jurídica com citações precisas (ex: "Conforme o Art. 23 da Lei 14.133...", "O Enunciado nº 7 do INCP dispõe...")
 7. Seja completo mas organizado — use parágrafos distintos para cada aspecto
-8. Se os documentos não contiverem informação suficiente, diga isso`;
+8. Se os documentos não contiverem informação suficiente, diga isso
+9. CONSCIÊNCIA TEMPORAL E LEGISLATIVA:
+   a) A Lei 14.133/2021 (Nova Lei de Licitações) SUBSTITUIU a Lei 8.666/1993
+   b) SEMPRE priorize o entendimento atual sob a Lei 14.133/2021 — apresente-o PRIMEIRO
+   c) Quando citar precedentes, acórdãos ou informativos baseados na Lei 8.666/1993, SEMPRE alerte: "⚠️ Precedente anterior à Lei 14.133/2021 — verificar aplicabilidade sob o novo regime"
+   d) Se houver EVOLUÇÃO normativa entre a lei antiga e a nova, EXPLIQUE a mudança
+   e) Ordene as fontes cronologicamente: mais recentes primeiro
+10. FIDELIDADE AO TEXTO-FONTE:
+    a) Para enunciados, pareceres e orientações normativas: SEMPRE cite o texto original entre aspas — não parafraseie
+    b) Apresente PRIMEIRO a transcrição fiel, DEPOIS interpretação (se necessária)
+    c) NUNCA atribua a um enunciado conteúdo que não esteja em seu texto
+    d) Se a fonte no contexto tiver texto completo, reproduza os trechos relevantes`;
 
     const synthesisPrompt = `${fullContext}
 ${historyContext}

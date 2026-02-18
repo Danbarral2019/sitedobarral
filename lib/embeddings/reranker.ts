@@ -57,7 +57,15 @@ export async function rerankResults(
 PERGUNTA: "${query}"
 
 DOCUMENTOS:
-${candidates.map((r, i) => `${i + 1}. [${r.category}] ${r.documentTitle}: ${r.chunkContent.slice(0, 150)}`).join('\n')}
+${candidates.map((r, i) => {
+  const yearStr = r.uploadedAt ? new Date(r.uploadedAt).getFullYear().toString() : '?';
+  return `${i + 1}. [${r.category} | ${yearStr}] ${r.documentTitle}: ${r.chunkContent.slice(0, 150)}`;
+}).join('\n')}
+
+CRITÉRIOS DE ORDENAÇÃO:
+- Priorize fontes mais recentes e que referenciem a Lei 14.133/2021
+- Fontes baseadas na Lei 8.666/1993 devem ter score menor, salvo se ainda aplicáveis
+- Enunciados, orientações normativas e apostilas são fontes de alto valor
 
 Responda APENAS com um JSON array de objetos com "index" (1-based) e "score" (0-100):
 [{"index": 1, "score": 95}, {"index": 2, "score": 80}, ...]
