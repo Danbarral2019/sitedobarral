@@ -110,7 +110,7 @@ export function GlobalSearchBar({
   const hasResults = counts.total > 0;
 
   return (
-    <div className="bg-white rounded-2xl shadow-lg border-2 border-gray-200 overflow-hidden">
+    <div className="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
       {/* Search Input Row */}
       <div className="flex items-center gap-2 p-4">
         {/* Search Icon / Loading Indicator */}
@@ -167,7 +167,7 @@ export function GlobalSearchBar({
             onClick={onAIToggle}
             className={`flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium rounded-lg transition-colors border ${
               aiEnabled
-                ? 'text-purple-700 bg-purple-50 hover:bg-purple-100 border-purple-200'
+                ? 'text-brand-700 bg-brand-50 hover:bg-brand-100 border-brand-200'
                 : 'text-gray-400 bg-gray-50 hover:bg-gray-100 border-gray-200'
             }`}
             title={aiEnabled ? 'Desativar busca com IA' : 'Ativar busca com IA'}

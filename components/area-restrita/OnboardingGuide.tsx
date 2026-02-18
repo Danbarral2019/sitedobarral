@@ -1,3 +1,4 @@
+/** @deprecated Replaced by WelcomeBanner (2026-02-18) */
 'use client';
 
 import { useState, useEffect } from 'react';

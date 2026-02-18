@@ -1,3 +1,4 @@
+/** @deprecated Replaced by KnowledgeBaseSection (2026-02-18) */
 'use client';
 
 import { Scale, FileText, BookOpen, List, Book } from 'lucide-react';

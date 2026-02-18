@@ -1,3 +1,4 @@
+/** @deprecated Replaced by DashboardCourseCard, KnowledgeBaseSection, LeiQuickAccess + inline views (2026-02-18) */
 'use client';
 
 import { Loader2 } from 'lucide-react';

@@ -2,29 +2,33 @@
 
 import { useEffect, useState, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
-import { Loader2 } from 'lucide-react';
+import { Loader2, ArrowLeft } from 'lucide-react';
 import { courses } from '@/data/courses';
 import { useAuth } from '@/hooks/use-auth';
 import { useFavorites } from '@/hooks/use-favorites';
 import { useGlobalSearch } from '@/hooks/use-global-search';
-import { useContentTree } from '@/hooks/use-content-tree';
-import { useCurrentContent } from '@/hooks/use-current-content';
 import { useSearchPdfExport } from '@/hooks/use-search-pdf-export';
 import {
   GlobalSearchBar,
-  ContentTree,
   SearchResultsList,
-  MobileTreeDrawer,
-  MobileTreeTrigger,
   PdfExportBar,
   PDFExportPanel,
   SearchHistoryPanel,
   AreaRestritaHeader,
-  TreeContentArea,
   MobileBottomNav,
   RecentActivity,
+  WelcomeBanner,
+  DashboardHero,
+  QuickAccessBar,
+  LeiQuickAccess,
+  DashboardCourseCard,
+  KnowledgeBaseSection,
 } from '@/components/area-restrita';
+import NovidadesSection from '@/components/area-restrita/NovidadesSection';
 import DocumentDetailModal from '@/components/DocumentDetailModal';
+import DocumentsByCategory from '@/components/DocumentsByCategory';
+import LegislativeActsPanel from '@/components/LegislativeActsPanel';
+import { GlossaryPanel } from '@/components/glossary/GlossaryPanel';
 import type { DocumentResult } from '@/lib/types/global-search';
 
 interface DocumentType {
@@ -41,38 +45,23 @@ interface DocumentType {
   entityType?: string;
 }
 
-interface VideoType {
-  id: string;
-  title: string;
-  description?: string | null;
-  youtubeUrl: string;
-  youtubeId: string;
-  thumbnailUrl?: string | null;
-}
-
-interface SiteType {
-  id: string;
-  title: string;
-  description: string;
-  url: string;
-  faviconUrl?: string | null;
-  category?: string | null;
-}
+type InlineView =
+  | 'home'
+  | 'legislative-acts'
+  | 'glossary'
+  | { type: 'category'; category: string };
 
 export default function AreaRestritaPage() {
   const router = useRouter();
   const { user, isLoading: authLoading, logout, activePlan } = useAuth();
   const { isFavorite, toggleFavorite, favoriteIds } = useFavorites();
   const search = useGlobalSearch();
-  const contentTree = useContentTree();
 
-  // Mobile drawer state
-  const [isMobileDrawerOpen, setIsMobileDrawerOpen] = useState(false);
+  // Inline view state (replaces tree sidebar)
+  const [inlineView, setInlineView] = useState<InlineView>('home');
 
   // Course data state
   const [courseDocuments, setCourseDocuments] = useState<Record<string, DocumentType[]>>({});
-  const [courseVideos, setCourseVideos] = useState<Record<string, VideoType[]>>({});
-  const [courseSites, setCourseSites] = useState<Record<string, SiteType[]>>({});
   const [modulesData, setModulesData] = useState<Record<string, { moduleCount: number; lessonCount: number }>>({});
   const [isDataLoading, setIsDataLoading] = useState(true);
 
@@ -82,14 +71,6 @@ export default function AreaRestritaPage() {
   // Document modal state
   const [selectedDocument, setSelectedDocument] = useState<DocumentType | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
-
-  // Derived content from tree selection
-  const currentContent = useCurrentContent(
-    contentTree.selection,
-    courseDocuments,
-    courseVideos,
-    courseSites,
-  );
 
   // PDF export during search
   const pdfExport = useSearchPdfExport(search.results, search.query, search.aiAnswer);
@@ -109,7 +90,7 @@ export default function AreaRestritaPage() {
       : (user.enrollments?.map((e) => e.courseId) || []);
   }, [user]);
 
-  // Fetch course data for tree navigation
+  // Fetch course data
   useEffect(() => {
     const fetchCourseData = async () => {
       if (!user || enrolledCourseIds.length === 0) {
@@ -124,8 +105,6 @@ export default function AreaRestritaPage() {
         if (response.ok) {
           const data = await response.json();
           setCourseDocuments(data.data.documents || {});
-          setCourseVideos(data.data.videos || {});
-          setCourseSites(data.data.sites || {});
           setModulesData(data.data.modules || {});
         }
       } catch (error) {
@@ -137,6 +116,23 @@ export default function AreaRestritaPage() {
 
     fetchCourseData();
   }, [user, enrolledCourseIds]);
+
+  // All documents flat for KnowledgeBaseSection
+  const allDocuments = useMemo(
+    () => Object.values(courseDocuments).flat(),
+    [courseDocuments],
+  );
+
+  // Documents filtered by category for inline view
+  const categoryDocuments = useMemo(() => {
+    if (typeof inlineView !== 'object') return [];
+    const cat = inlineView.category;
+    const PARECER_CATEGORIES = ['parecer', 'parecer-vinculante', 'decor'];
+    if (cat === 'pareceres') {
+      return allDocuments.filter((d) => PARECER_CATEGORIES.includes(d.category));
+    }
+    return allDocuments.filter((d) => d.category === cat);
+  }, [inlineView, allDocuments]);
 
   // Handlers
   const handleDocumentClick = (doc: DocumentType | DocumentResult | { id: string; title: string; category: string; url?: string }) => {
@@ -161,13 +157,6 @@ export default function AreaRestritaPage() {
     await logout();
   };
 
-  // Get selected label for mobile trigger
-  const selectedLabel = useMemo(() => {
-    if (!contentTree.selection) return undefined;
-    const node = contentTree.tree.find((n) => n.type === contentTree.selection?.type);
-    return node?.label;
-  }, [contentTree.selection, contentTree.tree]);
-
   // Loading state
   if (authLoading) {
     return (
@@ -186,22 +175,25 @@ export default function AreaRestritaPage() {
   }
 
   return (
-    <main className="min-h-screen bg-gradient-to-br from-brand-50 via-white to-brand-50">
+    <main className="min-h-screen bg-gray-50/50">
       <AreaRestritaHeader
         userName={user.name}
         enrolledCount={enrolledCourseIds.length}
         activePlan={activePlan}
         onHomeClick={() => {
-          contentTree.clearSelection();
+          setInlineView('home');
           search.clearSearch();
           window.scrollTo({ top: 0, behavior: 'smooth' });
         }}
         onLogout={handleLogout}
       />
 
-      <div className="max-w-7xl mx-auto px-4 py-6 lg:py-8">
-        {/* Global Search Bar */}
-        <div className="mb-6">
+      <div className="max-w-5xl mx-auto px-4 py-6 lg:py-8 space-y-6">
+        {/* Welcome Banner (first visit) */}
+        <WelcomeBanner />
+
+        {/* Hero Search */}
+        <DashboardHero>
           <GlobalSearchBar
             query={search.query}
             onQueryChange={search.setQuery}
@@ -229,112 +221,104 @@ export default function AreaRestritaPage() {
               }}
             />
           )}
-        </div>
-
-        {/* Recent Activity — Continue de onde parou */}
-        {!search.isSearchActive && (
-          <RecentActivity onDocumentClick={handleDocumentClick} />
-        )}
-
-        {/* Mobile Tree Trigger */}
-        {!search.isSearchActive && (
-          <div className="mb-6 lg:hidden">
-            <MobileTreeTrigger
-              onClick={() => setIsMobileDrawerOpen(true)}
-              selectedLabel={selectedLabel}
-            />
-          </div>
-        )}
+        </DashboardHero>
 
         {/* Content Area */}
-        <div className="flex gap-6">
-          {/* Sidebar Tree - Desktop Only */}
-          {!search.isSearchActive && (
-            <aside className="hidden lg:block w-72 flex-shrink-0">
-              <div className="sticky top-24">
-                <ContentTree
-                  tree={contentTree.tree}
-                  isLoading={contentTree.isLoading}
-                  error={contentTree.error}
-                  selection={contentTree.selection}
-                  onSelectNode={contentTree.selectNode}
-                  expandedNodes={contentTree.expandedNodes}
-                  onToggleNode={contentTree.toggleNode}
-                />
-              </div>
-            </aside>
-          )}
+        {search.isSearchActive ? (
+          <SearchResultsList
+            results={search.results}
+            query={search.query}
+            isLoading={search.isLoading}
+            onDocumentClick={handleDocumentClick}
+            onArticleClick={(num) => router.push(`/area-restrita/artigo/${num}`)}
+            isFavorite={isFavorite}
+            onToggleFavorite={(docId) => toggleFavorite(docId, enrolledCourseIds[0] || '')}
+            aiAnswer={search.aiAnswer}
+            aiSources={search.aiSources}
+            aiLegalSources={search.aiLegalSources}
+            isAiLoading={search.isAiLoading}
+            aiError={search.aiError}
+            onFollowUp={search.sendFollowUp}
+            selectedIds={pdfExport.selectedDocIds}
+            onToggleSelect={pdfExport.toggleDocSelect}
+            onAskAIAboutDoc={(docTitle) => {
+              search.sendFollowUp(`Sobre o documento "${docTitle}": ${search.query}`);
+            }}
+            aiConversationHistory={search.aiConversationHistory}
+          />
+        ) : inlineView === 'home' ? (
+          <>
+            {/* Quick Access Pills */}
+            <QuickAccessBar
+              onShowInlineView={(view) => setInlineView(view)}
+            />
 
-          {/* Main Content Area */}
-          <div className="flex-1 min-w-0">
-            {search.isSearchActive ? (
-              <SearchResultsList
-                results={search.results}
-                query={search.query}
-                isLoading={search.isLoading}
-                onDocumentClick={handleDocumentClick}
-                onArticleClick={(num) => router.push(`/area-restrita/artigo/${num}`)}
-                isFavorite={isFavorite}
-                onToggleFavorite={(docId) => toggleFavorite(docId, enrolledCourseIds[0] || '')}
-                aiAnswer={search.aiAnswer}
-                aiSources={search.aiSources}
-                aiLegalSources={search.aiLegalSources}
-                isAiLoading={search.isAiLoading}
-                aiError={search.aiError}
-                onFollowUp={search.sendFollowUp}
-                selectedIds={pdfExport.selectedDocIds}
-                onToggleSelect={pdfExport.toggleDocSelect}
-                onAskAIAboutDoc={(docTitle) => {
-                  search.sendFollowUp(`Sobre o documento "${docTitle}": ${search.query}`);
-                }}
-                aiConversationHistory={search.aiConversationHistory}
-              />
-            ) : (
-              <TreeContentArea
-                currentContent={currentContent}
-                selection={contentTree.selection}
-                isDataLoading={isDataLoading}
-                courseDocuments={courseDocuments}
+            {/* Continue Studying */}
+            <RecentActivity onDocumentClick={handleDocumentClick} />
+
+            {/* Course Cards */}
+            {!isDataLoading && (
+              <DashboardCourseCard
+                documents={courseDocuments}
                 enrolledCourseIds={enrolledCourseIds}
                 modulesData={modulesData}
-                isFavorite={isFavorite}
-                toggleFavorite={(docId, courseId) => toggleFavorite(docId, courseId)}
                 onDocumentClick={handleDocumentClick}
-                onNovidadeClick={(docId) => {
-                  setSelectedDocument({ id: docId, title: '', type: 'pdf', category: '', url: '' });
-                  setIsModalOpen(true);
-                }}
-                onSelectCategory={(category) => contentTree.setSelection({ type: 'document', category })}
-                onExploreTemas={() => contentTree.selectNode({ id: 'lei', type: 'lei', label: 'Lei 14.133/2021', count: 195 })}
               />
             )}
 
+            {/* Lei Quick Access */}
+            <LeiQuickAccess />
+
+            {/* Knowledge Base */}
+            {!isDataLoading && (
+              <KnowledgeBaseSection
+                documents={allDocuments}
+                onSelectCategory={(cat) => setInlineView({ type: 'category', category: cat })}
+              />
+            )}
+
+            {/* Novidades */}
+            <NovidadesSection
+              onDocumentClick={(docId) => {
+                setSelectedDocument({ id: docId, title: '', type: 'pdf', category: '', url: '' });
+                setIsModalOpen(true);
+              }}
+            />
+
             {/* Important Notice */}
-            {!search.isSearchActive && (
-              <div className="mt-8 bg-gradient-to-r from-orange-50 to-red-50 border-l-4 border-orange-500 p-4 lg:p-6 rounded-r-xl">
-                <h3 className="text-base font-bold text-orange-900 mb-1">Importante</h3>
-                <p className="text-sm text-orange-800">
-                  Este material é de uso exclusivo dos alunos matriculados. O compartilhamento não
-                  autorizado pode resultar na suspensão do acesso.
-                </p>
-              </div>
+            <div className="bg-orange-50 border-l-4 border-orange-500 p-4 lg:p-6 rounded-r-xl">
+              <h3 className="text-base font-bold text-orange-900 mb-1">Importante</h3>
+              <p className="text-sm text-orange-800">
+                Este material é de uso exclusivo dos alunos matriculados. O compartilhamento não
+                autorizado pode resultar na suspensão do acesso.
+              </p>
+            </div>
+          </>
+        ) : (
+          /* Inline Content Views (Atos Normativos, Glossário, Category) */
+          <div>
+            <button
+              onClick={() => setInlineView('home')}
+              className="flex items-center gap-2 text-sm font-medium text-gray-600 hover:text-brand-600 mb-4 transition-colors"
+            >
+              <ArrowLeft className="w-4 h-4" />
+              Voltar ao Início
+            </button>
+
+            {inlineView === 'legislative-acts' && <LegislativeActsPanel />}
+            {inlineView === 'glossary' && <GlossaryPanel articleBasePath="/area-restrita/artigo" />}
+            {typeof inlineView === 'object' && inlineView.type === 'category' && (
+              <DocumentsByCategory
+                documents={categoryDocuments}
+                courseId={enrolledCourseIds[0] || ''}
+                onDocumentClick={handleDocumentClick}
+                isFavorite={isFavorite}
+                toggleFavorite={(docId) => toggleFavorite(docId, enrolledCourseIds[0] || '')}
+              />
             )}
           </div>
-        </div>
+        )}
       </div>
-
-      {/* Mobile Tree Drawer */}
-      <MobileTreeDrawer
-        isOpen={isMobileDrawerOpen}
-        onClose={() => setIsMobileDrawerOpen(false)}
-        tree={contentTree.tree}
-        isLoading={contentTree.isLoading}
-        error={contentTree.error}
-        selection={contentTree.selection}
-        onSelectNode={contentTree.selectNode}
-        expandedNodes={contentTree.expandedNodes}
-        onToggleNode={contentTree.toggleNode}
-      />
 
       {/* Document Detail Modal */}
       {isModalOpen && selectedDocument && (
@@ -347,9 +331,9 @@ export default function AreaRestritaPage() {
       )}
 
       {/* PDF Export Panel - available when NOT searching */}
-      {!search.isSearchActive && (
+      {!search.isSearchActive && typeof inlineView === 'object' && inlineView.type === 'category' && (
         <PDFExportPanel
-          documents={currentContent.documents}
+          documents={categoryDocuments}
           userName={user.name}
           userEmail={user.email}
           favoriteIds={favoriteIds}

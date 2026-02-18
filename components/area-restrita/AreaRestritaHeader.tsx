@@ -27,8 +27,8 @@ export function AreaRestritaHeader({
   onLogout,
 }: AreaRestritaHeaderProps) {
   return (
-    <header className="bg-white border-b-2 border-gray-200 sticky top-0 z-30">
-      <div className="max-w-7xl mx-auto px-4 py-3 lg:py-4">
+    <header className="bg-white/95 backdrop-blur-sm border-b border-gray-100 shadow-sm sticky top-0 z-30">
+      <div className="max-w-5xl mx-auto px-4 py-3 lg:py-4">
         <div className="flex items-center justify-between">
           {/* User Info */}
           <div className="flex items-center gap-3">
@@ -39,7 +39,7 @@ export function AreaRestritaHeader({
             >
               <Home className="w-5 h-5 lg:w-6 lg:h-6" />
             </button>
-            <div className="w-10 h-10 lg:w-12 lg:h-12 bg-gradient-to-br from-green-500 to-green-700 rounded-full flex items-center justify-center shadow-md">
+            <div className="w-10 h-10 lg:w-12 lg:h-12 bg-brand-600 rounded-full flex items-center justify-center shadow-sm">
               <span className="text-white font-bold text-sm lg:text-lg">
                 {userName.charAt(0).toUpperCase()}
               </span>

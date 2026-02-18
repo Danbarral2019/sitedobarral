@@ -1,3 +1,4 @@
+/** @deprecated Replaced by LeiQuickAccess (2026-02-18) */
 'use client';
 
 import { useState } from 'react';

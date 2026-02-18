@@ -189,20 +189,20 @@ export default function NovidadesSection({ onDocumentClick }: NovidadesSectionPr
   return (
     <div className="mb-6 bg-white rounded-2xl border border-gray-200 overflow-hidden">
       {/* Header */}
-      <div className="px-4 py-3 bg-gradient-to-r from-indigo-50 to-purple-50 border-b border-gray-100 flex items-center justify-between">
+      <div className="px-4 py-3 bg-gray-50 border-b border-gray-100 flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <div className="p-1.5 bg-indigo-100 rounded-lg">
-            <Bell className="w-4 h-4 text-indigo-600" />
+          <div className="p-1.5 bg-gray-200 rounded-lg">
+            <Bell className="w-4 h-4 text-gray-600" />
           </div>
           <h3 className="text-sm font-bold text-gray-900">Novidades</h3>
           {timelineItems.length > 0 && (
-            <span className="text-[10px] font-bold bg-indigo-600 text-white px-1.5 py-0.5 rounded-full">
+            <span className="text-[10px] font-bold bg-brand-600 text-white px-1.5 py-0.5 rounded-full">
               {timelineItems.length}
             </span>
           )}
         </div>
         {data.platformUpdates.length > 0 && (
-          <div className="flex items-center gap-1 text-xs text-purple-600 font-semibold">
+          <div className="flex items-center gap-1 text-xs text-brand-600 font-semibold">
             <Sparkles className="w-3 h-3" />
             <span className="hidden sm:inline">Novas funcionalidades</span>
           </div>
@@ -211,12 +211,12 @@ export default function NovidadesSection({ onDocumentClick }: NovidadesSectionPr
 
       {/* Platform updates banner */}
       {data.platformUpdates.length > 0 && (
-        <div className="px-4 py-2.5 bg-gradient-to-r from-purple-50/50 to-indigo-50/50 border-b border-gray-100">
+        <div className="px-4 py-2.5 bg-gray-50/50 border-b border-gray-100">
           <div className="flex items-center gap-3 overflow-x-auto scrollbar-hide">
             {data.platformUpdates.map((pu) => (
               <span
                 key={pu.id}
-                className="flex-shrink-0 inline-flex items-center gap-1.5 text-xs font-medium text-purple-700 bg-purple-100/60 px-2.5 py-1 rounded-full"
+                className="flex-shrink-0 inline-flex items-center gap-1.5 text-xs font-medium text-brand-700 bg-brand-50 px-2.5 py-1 rounded-full"
                 title={pu.description}
               >
                 <Sparkles className="w-3 h-3" />
@@ -301,7 +301,7 @@ export default function NovidadesSection({ onDocumentClick }: NovidadesSectionPr
         <div className="px-4 py-2 border-t border-gray-100">
           <button
             onClick={() => setIsExpanded(!isExpanded)}
-            className="text-xs font-semibold text-indigo-600 hover:text-indigo-700 transition-colors"
+            className="text-xs font-semibold text-brand-600 hover:text-brand-700 transition-colors"
           >
             {isExpanded ? 'Mostrar menos' : `Ver todas as ${timelineItems.length} novidades`}
           </button>

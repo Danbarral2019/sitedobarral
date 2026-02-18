@@ -129,15 +129,15 @@ export function SearchHistoryPanel({ onSelectQuery, isVisible, collapsed = false
               tabIndex={0}
               onClick={() => onSelectQuery(entry.query)}
               onKeyDown={(e) => { if (e.key === 'Enter') onSelectQuery(entry.query); }}
-              className="w-full flex items-start gap-3 px-4 py-2.5 hover:bg-purple-50 transition-colors text-left group border-b border-gray-50 last:border-b-0 cursor-pointer"
+              className="w-full flex items-start gap-3 px-4 py-2.5 hover:bg-brand-50 transition-colors text-left group border-b border-gray-50 last:border-b-0 cursor-pointer"
             >
               {entry.aiAnswer ? (
-                <Sparkles className="w-4 h-4 text-purple-400 flex-shrink-0 mt-0.5" />
+                <Sparkles className="w-4 h-4 text-brand-400 flex-shrink-0 mt-0.5" />
               ) : (
                 <Search className="w-4 h-4 text-gray-400 flex-shrink-0 mt-0.5" />
               )}
               <div className="flex-1 min-w-0">
-                <p className="text-sm font-medium text-gray-800 truncate group-hover:text-purple-700 transition-colors">
+                <p className="text-sm font-medium text-gray-800 truncate group-hover:text-brand-700 transition-colors">
                   {entry.query}
                 </p>
                 {entry.aiAnswer && (
@@ -155,7 +155,7 @@ export function SearchHistoryPanel({ onSelectQuery, isVisible, collapsed = false
                 >
                   <Trash2 className="w-3.5 h-3.5" />
                 </button>
-                <ChevronRight className="w-3.5 h-3.5 text-gray-300 group-hover:text-purple-400 transition-colors" />
+                <ChevronRight className="w-3.5 h-3.5 text-gray-300 group-hover:text-brand-400 transition-colors" />
               </div>
             </div>
           ))}

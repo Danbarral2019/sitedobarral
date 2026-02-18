@@ -1,3 +1,4 @@
+/** @deprecated Replaced by QuickAccessBar + inline views in page.tsx (2026-02-18) */
 'use client';
 
 import { useEffect, useRef } from 'react';
