@@ -29,7 +29,7 @@ async function populateONNumbers() {
 
     for (const on of ons) {
       // Extrair número e ano do título
-      const match = on.title.match(/nº (\d{1,3})\/(\d{4})/);
+      const match = on.title.match(/(?:nº\s*|ON\s+)(\d{1,3})\/(\d{4})/i);
 
       if (match) {
         const numero = parseInt(match[1], 10);

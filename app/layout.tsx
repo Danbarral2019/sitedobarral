@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Cinzel, Poppins } from "next/font/google";
 import "./globals.css";
 import { Header } from "@/components/layout/Header";
@@ -31,7 +31,6 @@ export const metadata: Metadata = {
     default: 'Prof. Daniel Barral - Especialista em Licitações e Contratos',
   },
   manifest: '/manifest.webmanifest',
-  themeColor: '#20364e',
   appleWebApp: {
     capable: true,
     statusBarStyle: 'default',
@@ -100,6 +99,10 @@ export const metadata: Metadata = {
     // google: 'seu-codigo-verificacao-google',
     // yandex: 'seu-codigo-verificacao-yandex',
   },
+};
+
+export const viewport: Viewport = {
+  themeColor: '#20364e',
 };
 
 export default function RootLayout({
