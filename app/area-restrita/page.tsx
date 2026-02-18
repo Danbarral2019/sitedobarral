@@ -20,7 +20,6 @@ import {
   WelcomeBanner,
   DashboardHero,
   QuickAccessBar,
-  LeiQuickAccess,
   DashboardCourseCard,
   KnowledgeBaseSection,
 } from '@/components/area-restrita';
@@ -265,9 +264,6 @@ export default function AreaRestritaPage() {
                 onDocumentClick={handleDocumentClick}
               />
             )}
-
-            {/* Lei Quick Access */}
-            <LeiQuickAccess />
 
             {/* Knowledge Base */}
             {!isDataLoading && (

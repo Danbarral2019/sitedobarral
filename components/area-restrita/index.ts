@@ -9,6 +9,5 @@ export { default as RecentActivity } from './RecentActivity';
 export { WelcomeBanner } from './WelcomeBanner';
 export { DashboardHero } from './DashboardHero';
 export { QuickAccessBar } from './QuickAccessBar';
-export { LeiQuickAccess } from './LeiQuickAccess';
 export { DashboardCourseCard } from './DashboardCourseCard';
 export { KnowledgeBaseSection } from './KnowledgeBaseSection';
