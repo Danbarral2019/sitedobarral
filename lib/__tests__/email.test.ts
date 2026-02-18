@@ -36,6 +36,12 @@ import {
   sendExpirationNotification,
   sendContactNotification,
   sendNewDocumentsNotification,
+  sendWelcomeEmail,
+  sendTcuHighlightAlert,
+  sendCourseWelcomeEmail,
+  sendModuleCompletionEmail,
+  sendInactivityReminderEmail,
+  sendCertificateNotification,
 } from '../email';
 
 describe('Email Module', () => {
@@ -590,6 +596,500 @@ describe('Email Module', () => {
           subject: expect.stringContaining('material'),
         })
       );
+    });
+  });
+
+  describe('sendWelcomeEmail', () => {
+    describe('Modo Desenvolvimento', () => {
+      beforeEach(() => {
+        (process.env as Record<string, string>).NODE_ENV = 'development';
+        delete process.env.RESEND_API_KEY;
+      });
+
+      it('deve incluir nome do usuario no email', async () => {
+        await sendWelcomeEmail('user@test.com', 'Maria Silva');
+
+        const logCalls = consoleSpy.log.mock.calls.flat().join(' ');
+        expect(logCalls).toContain('Maria Silva');
+      });
+
+      it('deve ter assunto de boas-vindas', async () => {
+        await sendWelcomeEmail('user@test.com', 'Test User');
+
+        const logCalls = consoleSpy.log.mock.calls.flat().join(' ');
+        expect(logCalls).toContain('Bem-vindo');
+      });
+
+      it('deve retornar true em desenvolvimento', async () => {
+        const result = await sendWelcomeEmail('user@test.com', 'Test');
+        expect(result).toBe(true);
+      });
+    });
+
+    describe('Com Resend em producao', () => {
+      beforeEach(() => {
+        (process.env as Record<string, string>).NODE_ENV = 'production';
+        process.env.RESEND_API_KEY = 'test-key';
+        process.env.EMAIL_FROM = 'sender@test.com';
+        mockSend.mockResolvedValue({ data: { id: 'email-123' } });
+      });
+
+      it('deve enviar via Resend com subject e destinatario corretos', async () => {
+        const result = await sendWelcomeEmail('user@test.com', 'Test User');
+
+        expect(result).toBe(true);
+        expect(mockSend).toHaveBeenCalledWith(
+          expect.objectContaining({
+            to: 'user@test.com',
+            from: 'sender@test.com',
+            subject: expect.stringContaining('Bem-vindo'),
+            html: expect.stringContaining('Test User'),
+          })
+        );
+      });
+
+      it('deve incluir link para area restrita no html', async () => {
+        await sendWelcomeEmail('user@test.com', 'Test');
+
+        expect(mockSend).toHaveBeenCalledWith(
+          expect.objectContaining({
+            html: expect.stringContaining('area-restrita'),
+          })
+        );
+      });
+    });
+  });
+
+  describe('sendTcuHighlightAlert', () => {
+    const highlights = [
+      {
+        id: 'highlight-1',
+        title: 'Acordao TCU 1234/2025',
+        score: 90,
+        thesisSummary: 'Tese sobre licitacao',
+        whyImportant: 'Muda entendimento sobre pregao',
+        articleAngle: 'Impacto da decisao no pregao eletronico',
+        leiConnections: [{ article: '75', connection: 'Modalidades' }],
+        documentUrl: 'https://example.com/acordao-1234',
+      },
+    ];
+
+    describe('Modo Desenvolvimento', () => {
+      beforeEach(() => {
+        (process.env as Record<string, string>).NODE_ENV = 'development';
+        delete process.env.RESEND_API_KEY;
+        process.env.ADMIN_EMAIL = 'admin@test.com';
+      });
+
+      it('deve enviar para email do admin', async () => {
+        await sendTcuHighlightAlert(highlights);
+
+        const logCalls = consoleSpy.log.mock.calls.flat().join(' ');
+        expect(logCalls).toContain('admin@test.com');
+      });
+
+      it('deve incluir quantidade de acordaos no assunto', async () => {
+        await sendTcuHighlightAlert(highlights);
+
+        const logCalls = consoleSpy.log.mock.calls.flat().join(' ');
+        expect(logCalls).toContain('1 acordao');
+      });
+
+      it('deve retornar true em desenvolvimento', async () => {
+        const result = await sendTcuHighlightAlert(highlights);
+        expect(result).toBe(true);
+      });
+    });
+
+    describe('Com Resend em producao', () => {
+      beforeEach(() => {
+        (process.env as Record<string, string>).NODE_ENV = 'production';
+        process.env.RESEND_API_KEY = 'test-key';
+        process.env.ADMIN_EMAIL = 'admin@test.com';
+        mockSend.mockResolvedValue({ data: { id: 'email-123' } });
+      });
+
+      it('deve enviar via Resend com titulo e score no html', async () => {
+        const result = await sendTcuHighlightAlert(highlights);
+
+        expect(result).toBe(true);
+        expect(mockSend).toHaveBeenCalledWith(
+          expect.objectContaining({
+            to: 'admin@test.com',
+            subject: expect.stringContaining('[TCU]'),
+            html: expect.stringContaining('Acordao TCU 1234/2025'),
+          })
+        );
+      });
+
+      it('deve incluir conexoes com a Lei no html', async () => {
+        await sendTcuHighlightAlert(highlights);
+
+        expect(mockSend).toHaveBeenCalledWith(
+          expect.objectContaining({
+            html: expect.stringContaining('Art. 75'),
+          })
+        );
+      });
+
+      it('deve lidar com multiplos highlights', async () => {
+        const multipleHighlights = [
+          ...highlights,
+          {
+            id: 'highlight-2',
+            title: 'Acordao TCU 5678/2025',
+            score: 70,
+            thesisSummary: 'Segunda tese',
+            whyImportant: 'Relevante para contratos',
+            articleAngle: 'Angulo editorial',
+            leiConnections: [],
+            documentUrl: 'https://example.com/acordao-5678',
+          },
+        ];
+
+        const result = await sendTcuHighlightAlert(multipleHighlights);
+
+        expect(result).toBe(true);
+        expect(mockSend).toHaveBeenCalledWith(
+          expect.objectContaining({
+            subject: expect.stringContaining('2 acordao'),
+            html: expect.stringContaining('Acordao TCU 5678/2025'),
+          })
+        );
+      });
+    });
+  });
+
+  describe('sendCourseWelcomeEmail', () => {
+    describe('Modo Desenvolvimento', () => {
+      beforeEach(() => {
+        (process.env as Record<string, string>).NODE_ENV = 'development';
+        delete process.env.RESEND_API_KEY;
+      });
+
+      it('deve incluir nome do curso no email', async () => {
+        await sendCourseWelcomeEmail('user@test.com', 'Test', 'Nova Lei de Licitacoes', 'nova-lei');
+
+        const logCalls = consoleSpy.log.mock.calls.flat().join(' ');
+        expect(logCalls).toContain('Nova Lei de Licitacoes');
+      });
+
+      it('deve ter assunto com titulo do curso', async () => {
+        await sendCourseWelcomeEmail('user@test.com', 'Test', 'Gestao de Contratos', 'gestao');
+
+        const logCalls = consoleSpy.log.mock.calls.flat().join(' ');
+        expect(logCalls).toContain('Gestao de Contratos');
+      });
+
+      it('deve retornar true em desenvolvimento', async () => {
+        const result = await sendCourseWelcomeEmail('user@test.com', 'Test', 'Curso', 'curso');
+        expect(result).toBe(true);
+      });
+    });
+
+    describe('Com Resend em producao', () => {
+      beforeEach(() => {
+        (process.env as Record<string, string>).NODE_ENV = 'production';
+        process.env.RESEND_API_KEY = 'test-key';
+        mockSend.mockResolvedValue({ data: { id: 'email-123' } });
+      });
+
+      it('deve enviar via Resend com URL do curso correta', async () => {
+        const result = await sendCourseWelcomeEmail(
+          'user@test.com',
+          'Maria',
+          'Nova Lei de Licitacoes',
+          'nova-lei-licitacoes'
+        );
+
+        expect(result).toBe(true);
+        expect(mockSend).toHaveBeenCalledWith(
+          expect.objectContaining({
+            to: 'user@test.com',
+            subject: expect.stringContaining('Nova Lei de Licitacoes'),
+            html: expect.stringContaining('area-restrita/curso/nova-lei-licitacoes'),
+          })
+        );
+      });
+    });
+  });
+
+  describe('sendModuleCompletionEmail', () => {
+    describe('Modo Desenvolvimento', () => {
+      beforeEach(() => {
+        (process.env as Record<string, string>).NODE_ENV = 'development';
+        delete process.env.RESEND_API_KEY;
+      });
+
+      it('deve incluir nome do modulo no email', async () => {
+        await sendModuleCompletionEmail(
+          'user@test.com', 'Test', 'Curso X', 'Modulo 1: Introducao', 'curso-x'
+        );
+
+        const logCalls = consoleSpy.log.mock.calls.flat().join(' ');
+        expect(logCalls).toContain('Modulo 1: Introducao');
+      });
+
+      it('deve incluir nome do curso no email', async () => {
+        await sendModuleCompletionEmail(
+          'user@test.com', 'Test', 'Nova Lei de Licitacoes', 'Modulo 1', 'nova-lei'
+        );
+
+        const logCalls = consoleSpy.log.mock.calls.flat().join(' ');
+        expect(logCalls).toContain('Nova Lei de Licitacoes');
+      });
+
+      it('deve retornar true em desenvolvimento', async () => {
+        const result = await sendModuleCompletionEmail(
+          'user@test.com', 'Test', 'Curso', 'Modulo', 'curso'
+        );
+        expect(result).toBe(true);
+      });
+    });
+
+    describe('Com Resend em producao', () => {
+      beforeEach(() => {
+        (process.env as Record<string, string>).NODE_ENV = 'production';
+        process.env.RESEND_API_KEY = 'test-key';
+        mockSend.mockResolvedValue({ data: { id: 'email-123' } });
+      });
+
+      it('deve enviar via Resend com subject contendo modulo e curso', async () => {
+        const result = await sendModuleCompletionEmail(
+          'user@test.com',
+          'Maria',
+          'Nova Lei de Licitacoes',
+          'Modulo 3: Pregao Eletronico',
+          'nova-lei'
+        );
+
+        expect(result).toBe(true);
+        expect(mockSend).toHaveBeenCalledWith(
+          expect.objectContaining({
+            to: 'user@test.com',
+            subject: expect.stringContaining('Modulo 3: Pregao Eletronico'),
+            html: expect.stringContaining('Nova Lei de Licitacoes'),
+          })
+        );
+      });
+
+      it('deve incluir link para continuar o curso', async () => {
+        await sendModuleCompletionEmail(
+          'user@test.com', 'Test', 'Curso', 'Modulo 1', 'meu-curso'
+        );
+
+        expect(mockSend).toHaveBeenCalledWith(
+          expect.objectContaining({
+            html: expect.stringContaining('area-restrita/curso/meu-curso'),
+          })
+        );
+      });
+    });
+  });
+
+  describe('sendInactivityReminderEmail', () => {
+    describe('Modo Desenvolvimento', () => {
+      beforeEach(() => {
+        (process.env as Record<string, string>).NODE_ENV = 'development';
+        delete process.env.RESEND_API_KEY;
+      });
+
+      it('deve incluir dias de inatividade no email', async () => {
+        await sendInactivityReminderEmail(
+          'user@test.com', 'Test', 'Curso X', 'curso-x', 14
+        );
+
+        const logCalls = consoleSpy.log.mock.calls.flat().join(' ');
+        expect(logCalls).toContain('14 dias');
+      });
+
+      it('deve incluir nome do curso no email', async () => {
+        await sendInactivityReminderEmail(
+          'user@test.com', 'Test', 'Nova Lei de Licitacoes', 'nova-lei', 7
+        );
+
+        const logCalls = consoleSpy.log.mock.calls.flat().join(' ');
+        expect(logCalls).toContain('Nova Lei de Licitacoes');
+      });
+
+      it('deve retornar true em desenvolvimento', async () => {
+        const result = await sendInactivityReminderEmail(
+          'user@test.com', 'Test', 'Curso', 'curso', 10
+        );
+        expect(result).toBe(true);
+      });
+    });
+
+    describe('Com Resend em producao', () => {
+      beforeEach(() => {
+        (process.env as Record<string, string>).NODE_ENV = 'production';
+        process.env.RESEND_API_KEY = 'test-key';
+        mockSend.mockResolvedValue({ data: { id: 'email-123' } });
+      });
+
+      it('deve enviar via Resend com subject contendo nome do curso', async () => {
+        const result = await sendInactivityReminderEmail(
+          'user@test.com',
+          'Joao',
+          'Gestao de Contratos',
+          'gestao-contratos',
+          21
+        );
+
+        expect(result).toBe(true);
+        expect(mockSend).toHaveBeenCalledWith(
+          expect.objectContaining({
+            to: 'user@test.com',
+            subject: expect.stringContaining('Gestao de Contratos'),
+            html: expect.stringContaining('21 dias'),
+          })
+        );
+      });
+
+      it('deve incluir link para retomar o curso', async () => {
+        await sendInactivityReminderEmail(
+          'user@test.com', 'Test', 'Curso', 'meu-curso', 10
+        );
+
+        expect(mockSend).toHaveBeenCalledWith(
+          expect.objectContaining({
+            html: expect.stringContaining('area-restrita/curso/meu-curso'),
+          })
+        );
+      });
+    });
+  });
+
+  describe('sendCertificateNotification', () => {
+    describe('Modo Desenvolvimento', () => {
+      beforeEach(() => {
+        (process.env as Record<string, string>).NODE_ENV = 'development';
+        delete process.env.RESEND_API_KEY;
+      });
+
+      it('deve incluir numero do certificado no email', async () => {
+        await sendCertificateNotification(
+          'user@test.com', 'Test', 'Curso X', 'CERT-2025-001', 'https://test.com/verify/CERT-2025-001'
+        );
+
+        const logCalls = consoleSpy.log.mock.calls.flat().join(' ');
+        expect(logCalls).toContain('CERT-2025-001');
+      });
+
+      it('deve incluir nome do curso no email', async () => {
+        await sendCertificateNotification(
+          'user@test.com', 'Test', 'Nova Lei de Licitacoes', 'CERT-001', 'https://test.com/verify'
+        );
+
+        const logCalls = consoleSpy.log.mock.calls.flat().join(' ');
+        expect(logCalls).toContain('Nova Lei de Licitacoes');
+      });
+
+      it('deve retornar true em desenvolvimento', async () => {
+        const result = await sendCertificateNotification(
+          'user@test.com', 'Test', 'Curso', 'CERT-001', 'https://test.com/verify'
+        );
+        expect(result).toBe(true);
+      });
+    });
+
+    describe('Com Resend em producao', () => {
+      beforeEach(() => {
+        (process.env as Record<string, string>).NODE_ENV = 'production';
+        process.env.RESEND_API_KEY = 'test-key';
+        mockSend.mockResolvedValue({ data: { id: 'email-123' } });
+      });
+
+      it('deve enviar via Resend com subject, certificado e URL de verificacao', async () => {
+        const result = await sendCertificateNotification(
+          'user@test.com',
+          'Maria Silva',
+          'Nova Lei de Licitacoes',
+          'CERT-2025-042',
+          'https://profbarral.com.br/verify/CERT-2025-042'
+        );
+
+        expect(result).toBe(true);
+        expect(mockSend).toHaveBeenCalledWith(
+          expect.objectContaining({
+            to: 'user@test.com',
+            subject: expect.stringContaining('Nova Lei de Licitacoes'),
+            html: expect.stringContaining('CERT-2025-042'),
+          })
+        );
+      });
+
+      it('deve incluir URL de verificacao no html', async () => {
+        await sendCertificateNotification(
+          'user@test.com', 'Test', 'Curso', 'CERT-001', 'https://profbarral.com.br/verify/CERT-001'
+        );
+
+        expect(mockSend).toHaveBeenCalledWith(
+          expect.objectContaining({
+            html: expect.stringContaining('https://profbarral.com.br/verify/CERT-001'),
+          })
+        );
+      });
+
+      it('deve incluir link para download do certificado', async () => {
+        await sendCertificateNotification(
+          'user@test.com', 'Test', 'Curso', 'CERT-001', 'https://test.com/verify'
+        );
+
+        expect(mockSend).toHaveBeenCalledWith(
+          expect.objectContaining({
+            html: expect.stringContaining('certificado/CERT-001'),
+          })
+        );
+      });
+    });
+  });
+
+  describe('sendEmail - Logica de Retry', () => {
+    beforeEach(() => {
+      (process.env as Record<string, string>).NODE_ENV = 'production';
+      process.env.RESEND_API_KEY = 'test-key';
+    });
+
+    const emailOptions = {
+      to: 'test@example.com',
+      subject: 'Test Subject',
+      html: '<p>Test</p>',
+    };
+
+    it('deve fazer retry em erro retryable e ter sucesso na segunda tentativa', async () => {
+      mockSend
+        .mockRejectedValueOnce(new Error('rate limit exceeded'))
+        .mockResolvedValueOnce({ data: { id: 'email-123' } });
+
+      const result = await sendEmail(emailOptions);
+
+      expect(result.success).toBe(true);
+      expect(mockSend).toHaveBeenCalledTimes(2);
+      expect(consoleSpy.warn).toHaveBeenCalled();
+    });
+
+    it('deve falhar apos esgotar tentativas com erro retryable', async () => {
+      mockSend
+        .mockRejectedValueOnce(new Error('timeout'))
+        .mockRejectedValueOnce(new Error('timeout'))
+        .mockRejectedValueOnce(new Error('timeout'));
+
+      const result = await sendEmail(emailOptions);
+
+      expect(result.success).toBe(false);
+      expect(result.retryable).toBe(true);
+      expect(mockSend).toHaveBeenCalledTimes(3);
+    });
+
+    it('deve nao fazer retry em erro nao-retryable', async () => {
+      mockSend.mockRejectedValueOnce(new Error('invalid API key'));
+
+      const result = await sendEmail(emailOptions);
+
+      expect(result.success).toBe(false);
+      expect(result.retryable).toBe(false);
+      expect(mockSend).toHaveBeenCalledTimes(1);
     });
   });
 });

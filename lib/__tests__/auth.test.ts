@@ -6,8 +6,22 @@
  * pois a biblioteca jose requer ambiente Web Crypto.
  */
 
-import { describe, it, expect, vi } from 'vitest';
+import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { AuthPayloadSchema } from '../auth';
+
+// Mock de next/headers — cookies() retorna Promise no Next.js 15
+// vi.hoisted() garante que a variável está disponível quando vi.mock é hoisted
+const { mockCookieStore } = vi.hoisted(() => ({
+  mockCookieStore: {
+    get: vi.fn(),
+    set: vi.fn(),
+    delete: vi.fn(),
+  },
+}));
+
+vi.mock('next/headers', () => ({
+  cookies: vi.fn().mockResolvedValue(mockCookieStore),
+}));
 
 // Mock da biblioteca jose para testes unitários
 vi.mock('jose', () => {
@@ -405,6 +419,268 @@ describe('Auth Module', () => {
 
       const result = await verifyAuth(nextRequest);
       expect(result.valid).toBe(false);
+    });
+  });
+
+  describe('getTokenFromCookies', () => {
+    beforeEach(() => {
+      mockCookieStore.get.mockReset();
+    });
+
+    it('deve retornar o valor do cookie auth-token quando presente', async () => {
+      mockCookieStore.get.mockReturnValue({ value: 'my-jwt-token' });
+      const { getTokenFromCookies } = await import('../auth');
+
+      const token = await getTokenFromCookies();
+      expect(token).toBe('my-jwt-token');
+      expect(mockCookieStore.get).toHaveBeenCalledWith('auth-token');
+    });
+
+    it('deve retornar null quando cookie auth-token nao existe', async () => {
+      mockCookieStore.get.mockReturnValue(undefined);
+      const { getTokenFromCookies } = await import('../auth');
+
+      const token = await getTokenFromCookies();
+      expect(token).toBeNull();
+    });
+
+    it('deve retornar null quando cookie tem valor vazio', async () => {
+      mockCookieStore.get.mockReturnValue({ value: '' });
+      const { getTokenFromCookies } = await import('../auth');
+
+      const token = await getTokenFromCookies();
+      expect(token).toBeNull();
+    });
+  });
+
+  describe('getCurrentUser', () => {
+    beforeEach(() => {
+      mockCookieStore.get.mockReset();
+    });
+
+    it('deve retornar usuario quando cookie tem token valido', async () => {
+      mockCookieStore.get.mockReturnValue({ value: 'mock.jwt.token' });
+      const { getCurrentUser } = await import('../auth');
+
+      const user = await getCurrentUser();
+      expect(user).not.toBeNull();
+      expect(user?.userId).toBe('user-123');
+      expect(user?.role).toBe('student');
+    });
+
+    it('deve retornar null quando nao ha cookie', async () => {
+      mockCookieStore.get.mockReturnValue(undefined);
+      const { getCurrentUser } = await import('../auth');
+
+      const user = await getCurrentUser();
+      expect(user).toBeNull();
+    });
+
+    it('deve retornar null quando token e invalido', async () => {
+      mockCookieStore.get.mockReturnValue({ value: 'invalid-token-xyz' });
+      const { getCurrentUser } = await import('../auth');
+
+      const user = await getCurrentUser();
+      expect(user).toBeNull();
+    });
+  });
+
+  describe('hasAccessToCourse', () => {
+    beforeEach(() => {
+      mockCookieStore.get.mockReset();
+    });
+
+    it('deve retornar false quando usuario nao esta autenticado', async () => {
+      mockCookieStore.get.mockReturnValue(undefined);
+      const { hasAccessToCourse } = await import('../auth');
+
+      const result = await hasAccessToCourse('course-1');
+      expect(result).toBe(false);
+    });
+
+    it('deve retornar true quando admin (acesso a qualquer curso)', async () => {
+      // Mockar jwtVerify para retornar admin
+      const jose = await import('jose');
+      vi.mocked(jose.jwtVerify).mockResolvedValueOnce({
+        payload: { userId: 'admin-1', role: 'admin' },
+        protectedHeader: { alg: 'HS256' },
+      } as never);
+
+      mockCookieStore.get.mockReturnValue({ value: 'valid.admin.token' });
+      const { hasAccessToCourse } = await import('../auth');
+
+      const result = await hasAccessToCourse('any-course');
+      expect(result).toBe(true);
+    });
+
+    it('deve retornar true quando estudante acessa seu proprio curso', async () => {
+      // jwtVerify default mock retorna courseId: 'course-1'
+      mockCookieStore.get.mockReturnValue({ value: 'mock.jwt.token' });
+      const { hasAccessToCourse } = await import('../auth');
+
+      const result = await hasAccessToCourse('course-1');
+      expect(result).toBe(true);
+    });
+
+    it('deve retornar false quando estudante acessa curso diferente', async () => {
+      // jwtVerify default mock retorna courseId: 'course-1'
+      mockCookieStore.get.mockReturnValue({ value: 'mock.jwt.token' });
+      const { hasAccessToCourse } = await import('../auth');
+
+      const result = await hasAccessToCourse('course-999');
+      expect(result).toBe(false);
+    });
+  });
+
+  describe('isAdmin', () => {
+    beforeEach(() => {
+      mockCookieStore.get.mockReset();
+    });
+
+    it('deve retornar true quando usuario e admin', async () => {
+      const jose = await import('jose');
+      vi.mocked(jose.jwtVerify).mockResolvedValueOnce({
+        payload: { userId: 'admin-1', role: 'admin' },
+        protectedHeader: { alg: 'HS256' },
+      } as never);
+
+      mockCookieStore.get.mockReturnValue({ value: 'valid.admin.token' });
+      const { isAdmin } = await import('../auth');
+
+      const result = await isAdmin();
+      expect(result).toBe(true);
+    });
+
+    it('deve retornar false quando usuario e student', async () => {
+      mockCookieStore.get.mockReturnValue({ value: 'mock.jwt.token' });
+      const { isAdmin } = await import('../auth');
+
+      const result = await isAdmin();
+      expect(result).toBe(false);
+    });
+
+    it('deve retornar false quando nao ha usuario autenticado', async () => {
+      mockCookieStore.get.mockReturnValue(undefined);
+      const { isAdmin } = await import('../auth');
+
+      const result = await isAdmin();
+      expect(result).toBe(false);
+    });
+  });
+
+  describe('createAuthSession', () => {
+    beforeEach(() => {
+      mockCookieStore.get.mockReset();
+      mockCookieStore.set.mockReset();
+    });
+
+    it('deve gerar token e setar cookie com opcoes corretas', async () => {
+      const { createAuthSession } = await import('../auth');
+
+      const payload = {
+        userId: 'user-123',
+        role: 'student' as const,
+        courseId: 'course-1',
+      };
+
+      const token = await createAuthSession(payload);
+      expect(token).toBe('mock.jwt.token');
+      expect(mockCookieStore.set).toHaveBeenCalledWith(
+        'auth-token',
+        'mock.jwt.token',
+        expect.objectContaining({
+          httpOnly: true,
+          sameSite: 'strict',
+          path: '/',
+        }),
+      );
+    });
+
+    it('deve usar maxAge de 7 dias quando nao ha validUntil', async () => {
+      const { createAuthSession } = await import('../auth');
+
+      const payload = {
+        userId: 'user-123',
+        role: 'student' as const,
+      };
+
+      await createAuthSession(payload);
+      expect(mockCookieStore.set).toHaveBeenCalledWith(
+        'auth-token',
+        'mock.jwt.token',
+        expect.objectContaining({
+          maxAge: 7 * 24 * 60 * 60,
+        }),
+      );
+    });
+
+    it('deve calcular maxAge custom quando validUntil esta no futuro', async () => {
+      const { createAuthSession } = await import('../auth');
+      const futureDate = new Date(Date.now() + 3600000).toISOString(); // +1 hora
+
+      const payload = {
+        userId: 'user-123',
+        role: 'student' as const,
+        validUntil: futureDate,
+      };
+
+      await createAuthSession(payload);
+
+      const callArgs = mockCookieStore.set.mock.calls[0];
+      const options = callArgs[2];
+      // maxAge deve ser aproximadamente 3600 (1 hora em segundos)
+      expect(options.maxAge).toBeGreaterThan(3500);
+      expect(options.maxAge).toBeLessThanOrEqual(3600);
+    });
+
+    it('deve setar secure:true em producao', async () => {
+      const originalEnv = process.env.NODE_ENV;
+      process.env.NODE_ENV = 'production';
+
+      const { createAuthSession } = await import('../auth');
+      await createAuthSession({
+        userId: 'user-123',
+        role: 'student' as const,
+      });
+
+      expect(mockCookieStore.set).toHaveBeenCalledWith(
+        'auth-token',
+        'mock.jwt.token',
+        expect.objectContaining({ secure: true }),
+      );
+
+      process.env.NODE_ENV = originalEnv;
+    });
+
+    it('deve rejeitar payload invalido', async () => {
+      const { createAuthSession } = await import('../auth');
+
+      await expect(
+        createAuthSession({
+          userId: '',
+          role: 'student' as const,
+        }),
+      ).rejects.toThrow('Payload JWT inválido');
+    });
+  });
+
+  describe('destroyAuthSession', () => {
+    beforeEach(() => {
+      mockCookieStore.delete.mockReset();
+    });
+
+    it('deve deletar o cookie auth-token', async () => {
+      const { destroyAuthSession } = await import('../auth');
+
+      await destroyAuthSession();
+      expect(mockCookieStore.delete).toHaveBeenCalledWith('auth-token');
+    });
+
+    it('deve chamar delete exatamente uma vez', async () => {
+      const { destroyAuthSession } = await import('../auth');
+
+      await destroyAuthSession();
+      expect(mockCookieStore.delete).toHaveBeenCalledTimes(1);
     });
   });
 });
