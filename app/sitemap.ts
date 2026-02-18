@@ -3,6 +3,8 @@ import { prisma } from '@/lib/prisma';
 import { courses } from '@/data/courses';
 const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || 'https://profdanielbarral.com';
 
+export const dynamic = 'force-dynamic';
+
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   // Páginas estáticas
   const staticPages: MetadataRoute.Sitemap = [

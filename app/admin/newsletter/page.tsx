@@ -93,6 +93,8 @@ export default async function NewsletterPage({ searchParams }: PageProps) {
   );
 }
 
+export const dynamic = 'force-dynamic';
+
 export const metadata = {
   title: 'Newsletter | Admin',
   description: 'Gerenciar assinantes da newsletter',
