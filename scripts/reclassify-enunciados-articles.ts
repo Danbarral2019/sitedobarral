@@ -78,8 +78,8 @@ async function queryGemini(prompt: string): Promise<string> {
   const model = getGenAI().getGenerativeModel({
     model: GEMINI_MODEL,
     generationConfig: {
-      temperature: 0.2,
-      maxOutputTokens: 1024,
+      temperature: 0.1,
+      maxOutputTokens: 2048,
     },
   });
 
@@ -145,22 +145,24 @@ function buildPrompt(title: string, text: string, existingArticles: string[]): s
 
   return `Voce e um especialista em licitacoes e contratos (Lei 14.133/2021).
 
-Dado o enunciado abaixo, identifique TODOS os artigos da Lei 14.133/2021
-que sao diretamente relevantes ao tema tratado. Considere nao apenas
-artigos mencionados textualmente, mas artigos TEMATICAMENTE relacionados.
+Dado o enunciado abaixo, identifique os artigos da Lei 14.133/2021
+que sao DIRETAMENTE relevantes ao tema ESPECIFICO tratado.
 
 Enunciado [${title}]: "${text}"
 
 Artigos ja vinculados: ${existingStr}
 
-INSTRUCOES:
-1. Inclua TODOS os artigos ja vinculados (nunca remova artigos existentes)
-2. Adicione artigos tematicamente relacionados que nao estao na lista
-3. Use apenas numeros de artigos validos da Lei 14.133/2021 (1 a 194, incluindo 184-A)
-4. Nao inclua incisos ou paragrafos (ex: use "169" ao inves de "169-II")
-5. Seja abrangente mas preciso — inclua artigos que complementam o tema
+REGRAS ESTRITAS:
+1. Mantenha TODOS os artigos ja vinculados (nunca remova)
+2. Adicione SOMENTE artigos com relacao DIRETA e ESPECIFICA ao tema do enunciado
+3. NAO adicione artigos genericos (ex: art. 15, 16, 17 sao genericos demais para a maioria dos enunciados)
+4. MAXIMO de 10 artigos adicionais alem dos ja vinculados
+5. Use apenas numeros inteiros (1 a 194). Nao inclua incisos ou paragrafos
+6. Prefira PRECISAO a abrangencia — so inclua se o artigo trata DIRETAMENTE do mesmo instituto juridico
 
-Responda APENAS com um JSON valido (sem markdown): {"articles": [15, 16, ...], "reasoning": "..."}`;
+Exemplo: se o enunciado trata de "consorcio", inclua art. 15 (consorcios) mas NAO inclua art. 92 (contratos em geral).
+
+Responda APENAS com um JSON valido (sem markdown): {"articles": [15, 16], "reasoning": "breve justificativa"}`;
 }
 
 function normalizeArticleNumber(art: string | number): string {
