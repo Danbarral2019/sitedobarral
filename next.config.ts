@@ -118,26 +118,31 @@ const nextConfig: NextConfig = {
 };
 
 // Sentry configuration options
-const sentryWebpackPluginOptions = {
-  // Organization and project from environment variables
+const sentryOptions = {
   org: process.env.SENTRY_ORG,
   project: process.env.SENTRY_PROJECT,
-
-  // Auth token for uploading source maps
   authToken: process.env.SENTRY_AUTH_TOKEN,
-
-  // Only upload source maps in production
   silent: !process.env.CI,
 
-  // Suppresses source map uploading logs during build
-  hideSourceMaps: true,
+  // Source maps: upload to Sentry then delete from deployed bundle (replaces hideSourceMaps)
+  sourcemaps: {
+    deleteSourcemapsAfterUpload: true,
+  },
 
-  // Automatically tree-shake Sentry logger statements to reduce bundle size
-  disableLogger: true,
+  // Tree-shake Sentry debug statements to reduce bundle size (replaces disableLogger)
+  bundleSizeOptimizations: {
+    excludeDebugStatements: true,
+  },
 
-  // Enables automatic instrumentation of Vercel Cron Monitors
-  automaticVercelMonitors: true,
+  // Widen client file upload to include all chunks (fixes "could not determine source map" warnings)
+  widenClientFileUpload: true,
+
+  // Webpack-specific options
+  webpack: {
+    // Automatic instrumentation of Vercel Cron Monitors (replaces top-level automaticVercelMonitors)
+    automaticVercelMonitors: true,
+  },
 };
 
 // Wrap config with Sentry - gracefully handles missing env vars
-export default withSentryConfig(nextConfig, sentryWebpackPluginOptions);
+export default withSentryConfig(nextConfig, sentryOptions);

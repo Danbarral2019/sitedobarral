@@ -48,3 +48,6 @@ Sentry.init({
     "There was an error while hydrating",
   ],
 });
+
+// Required for Sentry to instrument client-side navigations
+export const onRouterTransitionStart = Sentry.captureRouterTransitionStart;
