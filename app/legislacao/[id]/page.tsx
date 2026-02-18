@@ -33,17 +33,46 @@ async function getLegislativeAct(id: string) {
     where: { id },
   });
 
-  if (!act) {
-    return null;
+  if (act) {
+    await prisma.legislativeAct.update({
+      where: { id },
+      data: { viewCount: { increment: 1 } },
+    });
+    return act;
   }
 
-  // Incrementar viewCount
-  await prisma.legislativeAct.update({
+  // Fallback: check Document table (for boas-praticas items)
+  const doc = await prisma.document.findUnique({
     where: { id },
-    data: { viewCount: { increment: 1 } },
   });
 
-  return act;
+  if (doc && doc.category === 'boa_pratica') {
+    return {
+      id: doc.id,
+      type: 'boa_pratica',
+      number: null,
+      year: null,
+      fullNumber: doc.title,
+      title: doc.title,
+      ementa: doc.description || '',
+      summary: null,
+      content: doc.content || null,
+      issuer: doc.issuerOrg || 'Não informado',
+      publishDate: doc.douData || doc.uploadedAt,
+      effectiveDate: null,
+      hierarchyLevel: null,
+      leiArticles: doc.leiArticles || '[]',
+      officialUrl: doc.douUrl || doc.url || null,
+      pdfUrl: doc.url || null,
+      viewCount: 0,
+      status: 'active',
+      annexesJson: null,
+      createdAt: doc.uploadedAt,
+      updatedAt: doc.uploadedAt,
+    };
+  }
+
+  return null;
 }
 
 const TYPE_LABELS: Record<string, string> = {
@@ -52,7 +81,8 @@ const TYPE_LABELS: Record<string, string> = {
   'in': 'Instrução Normativa',
   'ordem-servico': 'Ordem de Serviço',
   'lei': 'Lei',
-  'medida-provisoria': 'Medida Provisória'
+  'medida-provisoria': 'Medida Provisória',
+  'boa_pratica': 'Outro Ato Normativo',
 };
 
 const TYPE_COLORS: Record<string, string> = {
@@ -61,7 +91,8 @@ const TYPE_COLORS: Record<string, string> = {
   'in': 'bg-purple-100 text-purple-800 border-purple-300',
   'ordem-servico': 'bg-yellow-100 text-yellow-800 border-yellow-300',
   'lei': 'bg-red-100 text-red-800 border-red-300',
-  'medida-provisoria': 'bg-orange-100 text-orange-800 border-orange-300'
+  'medida-provisoria': 'bg-orange-100 text-orange-800 border-orange-300',
+  'boa_pratica': 'bg-emerald-100 text-emerald-800 border-emerald-300',
 };
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
