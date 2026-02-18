@@ -538,12 +538,11 @@ Ver código para endpoints completos.
 - Certificados: botão LinkedIn, galeria `/area-restrita/meus-certificados`
 - Performance: dynamic imports em 5 admin pages, `<img>` → `next/image`
 - LMS Progresso: dashboard `/area-restrita/meu-progresso`, push em badge/certificado, cron inatividade
+- DOU Classifier: pipeline classificação (keyword + IA), admin UI, cron diário, 7 endpoints, 3 suítes de teste
+- Melhorias na Busca IA: reclassificação de artigos (4 categorias, 482 docs), consciência temporal, fidelidade ao texto, re-indexação embeddings
 
 **🚧 In Progress:**
-- DOU classifier
-
-**📋 Planned:**
-- PWA
+- (nenhum)
 
 ## Important Architecture Patterns
 
