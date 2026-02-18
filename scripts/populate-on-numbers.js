@@ -2,12 +2,18 @@
 require('dotenv').config({ path: '.env.local' });
 
 const { PrismaClient } = require('@prisma/client');
-const prisma = new PrismaClient();
 
 /**
  * Popula os campos onNumber e onYear para todas as ONs existentes
  */
 async function populateONNumbers() {
+  // Prisma 7 requer driver adapter
+  const { PrismaNeon } = await import('@prisma/adapter-neon');
+  const adapter = new PrismaNeon({
+    connectionString: process.env.DATABASE_URL,
+  });
+  const prisma = new PrismaClient({ adapter });
+
   try {
     console.log('🔢 Populando números das ONs...\n');
 
