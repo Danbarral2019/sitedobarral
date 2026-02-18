@@ -7,9 +7,7 @@ generator client {
 
 datasource db {
   provider = "postgresql"
-  url      = env("DATABASE_URL")
-  // Para desenvolvimento local com SQLite, altere provider para "sqlite"
-  // e DATABASE_URL para "file:./dev.db"
+  // URL configurada em prisma.config.ts (Prisma 7)
 }
 
 // QR Codes para acesso aos cursos
