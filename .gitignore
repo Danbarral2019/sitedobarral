@@ -77,3 +77,6 @@ mcp-server-gemini/test-*.mjs
 mcp-server-gemini/*-test.mjs
 !mcp-server-gemini/*.example.*
 .env.production
+
+# Output de scripts (artefatos de execução)
+scripts/output/
