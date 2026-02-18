@@ -270,7 +270,7 @@ async function executeVectorSearch(
         la.themes as tags,
         la."leiArticles" as lei_articles,
         'legislative-act' as source_type,
-        la."publishedAt" as uploaded_at
+        la."publishDate" as uploaded_at
       FROM "LegislativeActChunk" lc
       JOIN "LegislativeAct" la ON lc."legislativeActId" = la.id
       WHERE la."embeddingStatus" = 'completed'
