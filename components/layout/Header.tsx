@@ -4,7 +4,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { useState, memo, useEffect, useRef } from 'react';
 import { usePathname } from 'next/navigation';
-import { Menu, X, ChevronDown, User, FileText, Mail, LogIn, BookOpen, Scale, CreditCard, Gavel } from 'lucide-react';
+import { Menu, X, ChevronDown, Home, User, FileText, Mail, LogIn, BookOpen, Scale, CreditCard, Gavel, BookMarked } from 'lucide-react';
 import { courses } from '@/data/courses';
 
 export const Header = memo(function Header() {
@@ -63,7 +63,16 @@ export const Header = memo(function Header() {
             </div>
           </Link>
 
-          <div className="hidden md:flex items-center space-x-6 lg:space-x-8">
+          <div className="hidden md:flex items-center space-x-4 lg:space-x-6">
+            <Link
+              href="/"
+              aria-current={isActive('/') ? 'page' : undefined}
+              className={`flex items-center space-x-1 transition-colors font-poppins text-sm focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-brand-600 rounded ${isActive('/') ? 'text-white font-semibold' : 'text-white/90 hover:text-white'}`}
+            >
+              <Home className="w-4 h-4" />
+              <span>Início</span>
+            </Link>
+
             <Link
               href="/sobre"
               aria-current={isActive('/sobre') ? 'page' : undefined}
@@ -137,6 +146,15 @@ export const Header = memo(function Header() {
             </Link>
 
             <Link
+              href="/glossario"
+              aria-current={isActive('/glossario') ? 'page' : undefined}
+              className={`flex items-center space-x-1 transition-colors font-poppins text-sm focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-brand-600 rounded ${isActive('/glossario') ? 'text-white font-semibold' : 'text-white/90 hover:text-white'}`}
+            >
+              <BookMarked className="w-4 h-4" />
+              <span>Glossário</span>
+            </Link>
+
+            <Link
               href="/planos"
               aria-current={isActive('/planos') ? 'page' : undefined}
               className={`flex items-center space-x-1 transition-colors font-poppins text-sm focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-brand-600 rounded ${isActive('/planos') ? 'text-white font-semibold' : 'text-white/90 hover:text-white'}`}
@@ -148,11 +166,10 @@ export const Header = memo(function Header() {
             <Link
               href="/contato"
               aria-current={isActive('/contato') ? 'page' : undefined}
-              aria-label="Contato"
-              title="Contato"
-              className={`transition-colors focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-brand-600 rounded p-1 ${isActive('/contato') ? 'text-white' : 'text-white/90 hover:text-white'}`}
+              className={`flex items-center space-x-1 transition-colors font-poppins text-sm focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-brand-600 rounded ${isActive('/contato') ? 'text-white font-semibold' : 'text-white/90 hover:text-white'}`}
             >
-              <Mail className="w-5 h-5" />
+              <Mail className="w-4 h-4" />
+              <span>Contato</span>
             </Link>
 
             <Link
@@ -182,6 +199,7 @@ export const Header = memo(function Header() {
               { href: '/legislacao', label: 'Legislação' },
               { href: '/jurisprudencia', label: 'Jurisprudência' },
               { href: '/blog', label: 'Blog' },
+              { href: '/glossario', label: 'Glossário' },
               { href: '/planos', label: 'Planos' },
               { href: '/contato', label: 'Contato' },
             ].map(({ href, label }) => (
