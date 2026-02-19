@@ -1,6 +1,7 @@
 'use client';
 
-import { Scale, FileText, BookOpen, List, Book } from 'lucide-react';
+import Link from 'next/link';
+import { Scale, FileText, BookOpen, List, Book, Landmark } from 'lucide-react';
 
 const PARECER_CATEGORIES = ['parecer', 'parecer-vinculante', 'decor'];
 
@@ -25,9 +26,10 @@ interface DocumentType {
 interface KnowledgeBaseSectionProps {
   documents: DocumentType[];
   onSelectCategory: (category: string) => void;
+  tribunalDecisionCount?: number;
 }
 
-export function KnowledgeBaseSection({ documents, onSelectCategory }: KnowledgeBaseSectionProps) {
+export function KnowledgeBaseSection({ documents, onSelectCategory, tribunalDecisionCount }: KnowledgeBaseSectionProps) {
   const categoriesWithCounts = KNOWLEDGE_BASE_CATEGORIES.map((cat) => {
     const mc = cat.matchCategories;
     const count = mc
@@ -36,7 +38,7 @@ export function KnowledgeBaseSection({ documents, onSelectCategory }: KnowledgeB
     return { ...cat, count };
   }).filter((cat) => cat.count > 0);
 
-  if (categoriesWithCounts.length === 0) return null;
+  if (categoriesWithCounts.length === 0 && !tribunalDecisionCount) return null;
 
   return (
     <div>
@@ -58,6 +60,18 @@ export function KnowledgeBaseSection({ documents, onSelectCategory }: KnowledgeB
             </button>
           );
         })}
+        {tribunalDecisionCount != null && tribunalDecisionCount > 0 && (
+          <Link
+            href="/jurisprudencia"
+            className="bg-white border border-gray-200 rounded-xl p-4 text-left hover:border-brand-300 hover:shadow-sm transition-all"
+          >
+            <div className="w-9 h-9 bg-brand-100 rounded-full flex items-center justify-center mb-2">
+              <Landmark className="w-4 h-4 text-brand-600" />
+            </div>
+            <p className="text-sm font-semibold text-gray-800">TCEs Estaduais</p>
+            <p className="text-xs text-gray-500">{tribunalDecisionCount} {tribunalDecisionCount === 1 ? 'decisão' : 'decisões'}</p>
+          </Link>
+        )}
       </div>
     </div>
   );

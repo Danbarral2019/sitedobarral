@@ -63,6 +63,7 @@ export default function AreaRestritaPage() {
   const [courseDocuments, setCourseDocuments] = useState<Record<string, DocumentType[]>>({});
   const [modulesData, setModulesData] = useState<Record<string, { moduleCount: number; lessonCount: number }>>({});
   const [isDataLoading, setIsDataLoading] = useState(true);
+  const [tribunalDecisionCount, setTribunalDecisionCount] = useState(0);
 
   // Search history visibility
   const [isSearchFocused, setIsSearchFocused] = useState(false);
@@ -115,6 +116,14 @@ export default function AreaRestritaPage() {
 
     fetchCourseData();
   }, [user, enrolledCourseIds]);
+
+  // Fetch tribunal decision count for KnowledgeBaseSection
+  useEffect(() => {
+    fetch('/api/jurisprudencia?pageSize=1')
+      .then(res => res.ok ? res.json() : null)
+      .then(data => { if (data?.total) setTribunalDecisionCount(data.total); })
+      .catch(() => {});
+  }, []);
 
   // All documents flat for KnowledgeBaseSection
   const allDocuments = useMemo(
@@ -270,6 +279,7 @@ export default function AreaRestritaPage() {
               <KnowledgeBaseSection
                 documents={allDocuments}
                 onSelectCategory={(cat) => setInlineView({ type: 'category', category: cat })}
+                tribunalDecisionCount={tribunalDecisionCount}
               />
             )}
 
