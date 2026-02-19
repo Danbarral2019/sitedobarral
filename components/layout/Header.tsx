@@ -50,9 +50,9 @@ export const Header = memo(function Header() {
         Pular para o conteúdo principal
       </a>
       <nav className="container mx-auto px-4">
-        <div className="flex justify-between items-center h-28">
-          <Link href="/" className="flex items-center space-x-3 sm:space-x-4 flex-shrink-0 group">
-            <div className="w-16 h-16 sm:w-24 sm:h-24 relative flex-shrink-0">
+        <div className="flex justify-between items-center h-20 sm:h-24">
+          <Link href="/" className="flex items-center flex-shrink-0" aria-label="Página inicial - Prof. Daniel Barral">
+            <div className="w-20 h-20 sm:w-24 sm:h-24 relative flex-shrink-0">
               <Image
                 src="/brand/logo-icon.png"
                 alt="Logo Prof. Daniel Barral"
@@ -60,14 +60,6 @@ export const Header = memo(function Header() {
                 className="object-contain"
                 priority
               />
-            </div>
-            <div className="min-w-0 text-center">
-              <h1 className="text-base sm:text-xl font-cinzel font-semibold text-white tracking-wide truncate group-hover:text-brand-100 transition-colors">
-                Daniel Barral
-              </h1>
-              <p className="text-xs text-brand-200 hidden sm:block font-poppins">
-                Professor de Licitações e Contratos
-              </p>
             </div>
           </Link>
 
