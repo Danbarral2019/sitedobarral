@@ -23,10 +23,12 @@ function NewBlogPostPageInner() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const fromHighlightId = searchParams.get('fromHighlight');
+  const fromTribunalHighlightId = searchParams.get('fromTribunalHighlight');
   const { success, error: errorToast } = useToast();
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
   const [highlightId, _setHighlightId] = useState<string | null>(fromHighlightId);
+  const [tribunalHighlightId, _setTribunalHighlightId] = useState<string | null>(fromTribunalHighlightId);
   const [formData, setFormData] = useState({
     title: '',
     slug: '',
@@ -163,6 +165,105 @@ function NewBlogPostPageInner() {
     fetchHighlight();
   }, [fromHighlightId]);
 
+  // Pre-preencher a partir de Tribunal (TCE) Highlight
+  useEffect(() => {
+    if (!fromTribunalHighlightId) return;
+
+    const fetchTribunalHighlight = async () => {
+      try {
+        const res = await fetch(`/api/admin/tribunal-highlights/${fromTribunalHighlightId}`);
+        if (!res.ok) return;
+        const data = await res.json();
+        const h = data.highlight;
+        const dec = h.tribunalDecision;
+
+        const title = `Analise: ${dec.tribunalCode} — ${dec.title}`;
+
+        // Montar conexoes com a lei
+        let leiConnectionsText = '';
+        if (h.aiLeiConnections) {
+          try {
+            const connections = JSON.parse(h.aiLeiConnections);
+            if (Array.isArray(connections) && connections.length > 0) {
+              leiConnectionsText = connections
+                .map((c: { article: string; connection: string }) => `- **Art. ${c.article}:** ${c.connection}`)
+                .join('\n');
+            }
+          } catch { /* ignore */ }
+        }
+
+        const contentParts = [
+          '## Resumo da Decisao',
+          '',
+          h.aiThesisSummary || '',
+          '',
+          '## Por que e Importante',
+          '',
+          h.aiWhyImportant || '',
+          '',
+        ];
+
+        if (leiConnectionsText) {
+          contentParts.push(
+            '## Conexoes com a Lei 14.133',
+            '',
+            leiConnectionsText,
+            '',
+          );
+        }
+
+        contentParts.push(
+          '## Angulo de Analise',
+          '',
+          h.aiArticleAngle || '',
+        );
+
+        const content = contentParts.join('\n');
+
+        const slug = title
+          .toLowerCase()
+          .normalize('NFD')
+          .replace(/[\u0300-\u036f]/g, '')
+          .replace(/[^a-z0-9]+/g, '-')
+          .replace(/^-+|-+$/g, '');
+
+        setFormData(prev => ({
+          ...prev,
+          title,
+          slug,
+          excerpt: h.aiThesisSummary || '',
+          content,
+        }));
+
+        // Tags
+        const newTags = [dec.tribunalCode, 'Jurisprudencia'];
+        if (dec.themes) {
+          try {
+            const themes = JSON.parse(dec.themes);
+            if (Array.isArray(themes)) {
+              newTags.push(...themes.slice(0, 3));
+            }
+          } catch { /* ignore */ }
+        }
+        setTags(newTags);
+
+        // Lei Articles da decisão
+        if (dec.leiArticles) {
+          try {
+            const articles = JSON.parse(dec.leiArticles);
+            if (Array.isArray(articles)) {
+              setLeiArticles(articles.map(String));
+            }
+          } catch { /* ignore */ }
+        }
+      } catch (err) {
+        console.error('Erro ao carregar tribunal highlight:', err);
+      }
+    };
+
+    fetchTribunalHighlight();
+  }, [fromTribunalHighlightId]);
+
   const generateSlug = (title: string) => {
     return title
       .toLowerCase()
@@ -225,6 +326,19 @@ function NewBlogPostPageInner() {
         }
       }
 
+      // Se veio de um highlight TCE, atualizar status para 'written' e vincular blogPostId
+      if (tribunalHighlightId && data.post?.id) {
+        try {
+          await fetch(`/api/admin/tribunal-highlights/${tribunalHighlightId}`, {
+            method: 'PATCH',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ status: 'written', blogPostId: data.post.id }),
+          });
+        } catch (err) {
+          console.error('Erro ao atualizar tribunal highlight:', err);
+        }
+      }
+
       success('Post criado!', 'O post foi criado com sucesso.');
       router.push('/admin/blog');
     } catch (error) {
@@ -266,6 +380,14 @@ function NewBlogPostPageInner() {
             <div className="mb-6 p-4 bg-purple-50 border border-purple-200 rounded-lg">
               <p className="text-sm text-purple-800 font-medium">
                 Pre-preenchido a partir de Destaque TCU. Revise e edite o conteudo antes de publicar.
+              </p>
+            </div>
+          )}
+
+          {fromTribunalHighlightId && (
+            <div className="mb-6 p-4 bg-teal-50 border border-teal-200 rounded-lg">
+              <p className="text-sm text-teal-800 font-medium">
+                Pre-preenchido a partir de Destaque TCE. Revise e edite o conteudo antes de publicar.
               </p>
             </div>
           )}

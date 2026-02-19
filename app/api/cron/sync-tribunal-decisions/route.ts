@@ -65,10 +65,38 @@ export async function GET(request: NextRequest) {
       }
     }
 
+    const totalNew = results.reduce((sum, r) => sum + (('itemsNew' in r ? r.itemsNew : 0) || 0), 0);
+    const totalErrors = results.reduce((sum, r) => sum + (('itemsError' in r ? r.itemsError : 0) || 0), 0);
+
+    // Identificar highlights editoriais nas novas decisões
+    let highlightsCreated = 0;
+    if (totalNew > 0) {
+      try {
+        const startTime = new Date(Date.now() - 600000); // 10 min atrás (margem de segurança)
+        const newDecisions = await prisma.tribunalDecision.findMany({
+          where: {
+            createdAt: { gte: startTime },
+            approvalStatus: 'auto_approved',
+            highlights: { none: {} },
+          },
+          select: { id: true },
+        });
+
+        if (newDecisions.length > 0) {
+          const { identifyAndAlertTribunalHighlights } = await import('@/lib/tribunal-highlight-analyzer');
+          highlightsCreated = await identifyAndAlertTribunalHighlights(newDecisions.map(d => d.id));
+          console.log(`[Sync Tribunal Decisions] ${highlightsCreated} highlights editoriais criados`);
+        }
+      } catch (err) {
+        console.error('[Sync Tribunal Decisions] Erro ao analisar highlights:', err instanceof Error ? err.message : err);
+      }
+    }
+
     const summary = {
       totalScrapers: scrapers.length,
-      totalNew: results.reduce((sum, r) => sum + (('itemsNew' in r ? r.itemsNew : 0) || 0), 0),
-      totalErrors: results.reduce((sum, r) => sum + (('itemsError' in r ? r.itemsError : 0) || 0), 0),
+      totalNew,
+      totalErrors,
+      highlightsCreated,
     };
 
     console.log('[Sync Tribunal Decisions] Concluído:', JSON.stringify(summary));

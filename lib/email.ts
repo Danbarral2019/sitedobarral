@@ -732,6 +732,114 @@ export async function sendTcuHighlightAlert(
 }
 
 /**
+ * Envia alerta de destaques editoriais de TCEs (decisões estaduais)
+ * Gradiente teal/emerald para diferenciar do TCU (purple)
+ */
+export async function sendTribunalHighlightAlert(
+  highlights: Array<{
+    id: string;
+    title: string;
+    score: number;
+    thesisSummary: string;
+    whyImportant: string;
+    articleAngle: string;
+    leiConnections: Array<{ article: string; connection: string }>;
+    decisionUrl: string;
+    tribunalCode: string;
+  }>
+): Promise<boolean> {
+  const adminEmail = process.env.ADMIN_EMAIL || 'admin@profdanielbarral.com';
+  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://profbarral.com.br';
+  const n = highlights.length;
+
+  const highlightCards = highlights.map(h => {
+    const scoreColor = h.score >= 85 ? '#16a34a' : '#ca8a04';
+    const scoreBg = h.score >= 85 ? '#dcfce7' : '#fef9c3';
+    const leiTags = h.leiConnections.length > 0
+      ? h.leiConnections.map(c =>
+          `<span style="display:inline-block;background:#ccfbf1;color:#0f766e;padding:3px 10px;border-radius:12px;font-size:12px;margin:2px;">Art. ${c.article}</span>`
+        ).join(' ')
+      : '';
+
+    return `
+      <div style="background:white;border-radius:12px;padding:24px;margin:16px 0;border-left:4px solid ${scoreColor};box-shadow:0 1px 3px rgba(0,0,0,0.1);">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:12px;">
+          <div style="flex:1;">
+            <span style="display:inline-block;background:#ccfbf1;color:#0f766e;padding:2px 10px;border-radius:12px;font-size:11px;font-weight:bold;margin-bottom:8px;">${h.tribunalCode}</span>
+            <h3 style="margin:0;color:#1f2937;font-size:16px;">${h.title}</h3>
+          </div>
+          <span style="background:${scoreBg};color:${scoreColor};padding:4px 12px;border-radius:20px;font-size:13px;font-weight:bold;white-space:nowrap;margin-left:12px;">${h.score}/100</span>
+        </div>
+
+        <div style="background:#f8fafc;padding:14px;border-radius:8px;margin:10px 0;">
+          <div style="font-weight:600;color:#475569;font-size:13px;margin-bottom:6px;">Tese Principal</div>
+          <div style="color:#334155;font-size:14px;">${h.thesisSummary}</div>
+        </div>
+
+        <div style="background:#f8fafc;padding:14px;border-radius:8px;margin:10px 0;">
+          <div style="font-weight:600;color:#475569;font-size:13px;margin-bottom:6px;">Por que Merece Destaque</div>
+          <div style="color:#334155;font-size:14px;">${h.whyImportant}</div>
+        </div>
+
+        <div style="background:#f0fdfa;padding:14px;border-radius:8px;margin:10px 0;border:1px solid #99f6e4;">
+          <div style="font-weight:600;color:#0f766e;font-size:13px;margin-bottom:6px;">Sugestao de Artigo</div>
+          <div style="color:#134e4a;font-size:14px;">${h.articleAngle}</div>
+        </div>
+
+        ${leiTags ? `<div style="margin:10px 0;">${leiTags}</div>` : ''}
+
+        <div style="margin-top:14px;display:flex;gap:12px;">
+          <a href="${baseUrl}/admin/tribunal-highlights" style="display:inline-block;background:linear-gradient(135deg,#0d9488,#059669);color:white;padding:8px 18px;border-radius:6px;text-decoration:none;font-size:13px;font-weight:600;">Revisar no Admin</a>
+          ${h.decisionUrl ? `<a href="${h.decisionUrl}" style="display:inline-block;background:#f1f5f9;color:#475569;padding:8px 18px;border-radius:6px;text-decoration:none;font-size:13px;" target="_blank">Ver Decisao Completa</a>` : ''}
+        </div>
+      </div>
+    `;
+  }).join('');
+
+  const html = `
+    <!DOCTYPE html>
+    <html>
+      <head>
+        <style>
+          body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; margin: 0; padding: 0; }
+          .container { max-width: 640px; margin: 0 auto; padding: 20px; }
+        </style>
+      </head>
+      <body>
+        <div class="container">
+          <div style="background:linear-gradient(135deg,#0d9488 0%,#059669 100%);color:white;padding:30px;text-align:center;border-radius:12px 12px 0 0;">
+            <h1 style="margin:0;font-size:22px;">Destaques TCE</h1>
+            <p style="margin:8px 0 0;opacity:0.9;font-size:15px;">${n} decisao(oes) com potencial para artigo no blog</p>
+          </div>
+          <div style="background:#f9fafb;padding:24px;border-radius:0 0 12px 12px;">
+            <p style="color:#4b5563;font-size:14px;">A IA identificou as seguintes decisoes de Tribunais de Contas Estaduais como relevantes para publicacao no blog:</p>
+            ${highlightCards}
+            <div style="text-align:center;margin-top:24px;">
+              <a href="${baseUrl}/admin/tribunal-highlights" style="display:inline-block;background:linear-gradient(135deg,#0d9488,#059669);color:white;padding:12px 32px;border-radius:8px;text-decoration:none;font-size:15px;font-weight:bold;">Ver Todos os Destaques</a>
+            </div>
+          </div>
+          <div style="text-align:center;margin-top:20px;color:#9ca3af;font-size:12px;">
+            <p>Notificacao automatica do sistema de analise TCE</p>
+            <p>&copy; ${new Date().getFullYear()} Prof. Daniel Barral</p>
+          </div>
+        </div>
+      </body>
+    </html>
+  `;
+
+  const text = highlights.map(h =>
+    `=== [${h.tribunalCode}] ${h.title} (Score: ${h.score}/100) ===\n\nTese: ${h.thesisSummary}\n\nImportancia: ${h.whyImportant}\n\nSugestao de artigo: ${h.articleAngle}\n\n${h.decisionUrl ? `Link: ${h.decisionUrl}\n` : ''}`
+  ).join('\n---\n\n');
+
+  return (await sendEmail({
+    to: adminEmail,
+    subject: `[TCE] ${n} decisao(oes) com potencial para artigo`,
+    html,
+    text: `${n} DECISAO(OES) TCE COM POTENCIAL EDITORIAL\n\n${text}\n\nRevisar em: ${baseUrl}/admin/tribunal-highlights`,
+  })).success;
+}
+
+/**
  * Envia notificação de novos documentos para aluno matriculado
  */
 export async function sendNewDocumentsNotification(

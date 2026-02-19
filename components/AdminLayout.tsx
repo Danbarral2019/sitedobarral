@@ -5,7 +5,7 @@ import { usePathname } from 'next/navigation';
 import Link from 'next/link';
 import Image from 'next/image';
 import {
-  QrCode, ChevronLeft, ChevronRight, BarChart3, Mail, MessageSquare, Send, GraduationCap, Youtube, Globe, BookOpen, Menu, X, Search, Scale
+  QrCode, ChevronLeft, ChevronRight, BarChart3, Mail, MessageSquare, Send, GraduationCap, Youtube, Globe, BookOpen, Menu, X, Search, Scale, Star
 } from 'lucide-react';
 
 interface AdminLayoutProps {
@@ -15,7 +15,7 @@ interface AdminLayoutProps {
 export default function AdminLayout({ children }: AdminLayoutProps) {
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const [unreadCounts, setUnreadCounts] = useState({ contatos: 0, depoimentos: 0, documentos: 0, tcuHighlights: 0, douPending: 0 });
+  const [unreadCounts, setUnreadCounts] = useState({ contatos: 0, depoimentos: 0, documentos: 0, tcuHighlights: 0, tribunalHighlights: 0, douPending: 0 });
   const pathname = usePathname();
 
   const isActive = (path: string) => {
@@ -27,11 +27,12 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
   useEffect(() => {
     const loadCounts = async () => {
       try {
-        const [contatosRes, depoimentosRes, documentosRes, tcuHighlightsRes, douPendingRes, douAutoApprovedRes] = await Promise.all([
+        const [contatosRes, depoimentosRes, documentosRes, tcuHighlightsRes, tribunalHighlightsRes, douPendingRes, douAutoApprovedRes] = await Promise.all([
           fetch('/api/admin/contatos?unreadOnly=true'),
           fetch('/api/admin/depoimentos?status=pending'),
           fetch('/api/admin/documents/recent-auto-imports-count'),
           fetch('/api/admin/tcu-highlights?countOnly=true'),
+          fetch('/api/admin/tribunal-highlights?countOnly=true'),
           fetch('/api/admin/dou/pending'),
           fetch('/api/admin/dou/auto-approved'),
         ]);
@@ -54,6 +55,11 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
         if (tcuHighlightsRes.ok) {
           const tcuData = await tcuHighlightsRes.json();
           setUnreadCounts(prev => ({ ...prev, tcuHighlights: tcuData.count || 0 }));
+        }
+
+        if (tribunalHighlightsRes.ok) {
+          const tribunalData = await tribunalHighlightsRes.json();
+          setUnreadCounts(prev => ({ ...prev, tribunalHighlights: tribunalData.count || 0 }));
         }
 
         let douTotal = 0;
@@ -88,7 +94,6 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
         </svg>
       ),
-      badge: unreadCounts.tcuHighlights,
     },
     {
       path: '/admin/agu-import',
@@ -122,6 +127,18 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
       path: '/admin/tribunal-decisions',
       label: 'Jurisprudencia',
       icon: Scale,
+    },
+    {
+      path: '/admin/tcu-highlights',
+      label: 'Destaques TCU',
+      icon: Star,
+      badge: unreadCounts.tcuHighlights,
+    },
+    {
+      path: '/admin/tribunal-highlights',
+      label: 'Destaques TCE',
+      icon: Star,
+      badge: unreadCounts.tribunalHighlights,
     },
 
     // === DOCUMENTOS ===

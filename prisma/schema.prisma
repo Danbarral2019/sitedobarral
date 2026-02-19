@@ -1514,6 +1514,7 @@ model TribunalDecision {
   updatedAt       DateTime @updatedAt
 
   chunks TribunalDecisionChunk[]
+  highlights TribunalHighlight[]
 
   @@index([tribunalCode])
   @@index([tribunalCode, year])
@@ -1524,6 +1525,38 @@ model TribunalDecision {
   @@index([embeddingStatus])
   @@index([sourceApi])
   @@index([year])
+}
+
+// Destaques editoriais de decisões TCE (espelha TcuHighlight)
+model TribunalHighlight {
+  id                    String   @id @default(uuid())
+  tribunalDecisionId    String
+  tribunalDecision      TribunalDecision @relation(fields: [tribunalDecisionId], references: [id], onDelete: Cascade)
+
+  // Scores
+  keywordScore          Int
+  aiArticleWorthiness   Int
+
+  // Análise IA
+  aiThesisSummary       String   @db.Text
+  aiWhyImportant        String   @db.Text
+  aiArticleAngle        String   @db.Text
+  aiLeiConnections      String?
+
+  // Workflow admin
+  status                String   @default("pending") // pending | dismissed | will_write | written
+  adminNotes            String?  @db.Text
+  blogPostId            String?
+
+  // Notificação
+  emailSentAt           DateTime?
+
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
+
+  @@index([status])
+  @@index([status, createdAt])
+  @@index([tribunalDecisionId])
 }
 
 // Chunks de decisões com embeddings (Busca Semântica)
