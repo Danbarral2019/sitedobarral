@@ -61,57 +61,15 @@ export async function POST(
       apiLogger.debug({ conversationId: body.conversationId, historyCount: conversationHistory.length }, 'Follow-up conversation history loaded');
     }
 
-    // Buscar documentos do artigo atual
-    const relevantDocs = await prisma.document.findMany({
-      where: {
-        AND: [
-          {
-            leiArticles: {
-              contains: articleNumber,
-            },
-          },
-          {
-            OR: [
-              { isPublic: true },
-              { summary: { not: null } },
-            ],
-          },
-        ],
-      },
-      select: {
-        id: true,
-        title: true,
-        category: true,
-        summary: true,
-        description: true,
-        leiArticles: true,
-      },
-      take: 5,
-      orderBy: [
-        { summary: 'desc' },
-        { uploadedAt: 'desc' },
-      ],
-    });
-
-    // BUSCA CROSS-ARTICLE: Detectar se a pergunta envolve outros temas
-    const { articles: relatedArticleNumbers, topics: matchedTopics } = findRelatedArticles(body.question, articleNumber);
-    apiLogger.debug({ topics: matchedTopics, relatedArticles: relatedArticleNumbers }, 'Cross-reference analysis');
-
-    // Buscar artigos relacionados da Lei 14.133
-    const relatedArticles = relatedArticleNumbers
-      .map(num => ({ ...LEI_14133_ARTIGOS[num] }))
-      .filter(art => art.ementa); // Filtrar apenas artigos que existem
-
-    // Buscar documentos dos artigos relacionados (se houver)
-    let crossReferenceDocs: typeof relevantDocs = [];
-    if (relatedArticleNumbers.length > 0) {
-      crossReferenceDocs = await prisma.document.findMany({
+    // Buscar documentos e atos legislativos do artigo atual (em paralelo)
+    const [relevantDocs, relevantActs] = await Promise.all([
+      prisma.document.findMany({
         where: {
           AND: [
             {
-              OR: relatedArticleNumbers.map(num => ({
-                leiArticles: { contains: num },
-              })),
+              leiArticles: {
+                contains: articleNumber,
+              },
             },
             {
               OR: [
@@ -129,13 +87,98 @@ export async function POST(
           description: true,
           leiArticles: true,
         },
-        take: 3, // Limitar documentos cross-reference
+        take: 5,
         orderBy: [
           { summary: 'desc' },
           { uploadedAt: 'desc' },
         ],
-      });
-      apiLogger.debug({ crossRefDocsCount: crossReferenceDocs.length }, 'Cross-reference documents found');
+      }),
+      prisma.legislativeAct.findMany({
+        where: {
+          leiArticles: {
+            contains: `"${articleNumber}"`,
+          },
+        },
+        select: {
+          id: true,
+          fullNumber: true,
+          title: true,
+          ementa: true,
+          summary: true,
+          issuer: true,
+          type: true,
+          leiArticles: true,
+        },
+        take: 5,
+        orderBy: { publishDate: 'desc' },
+      }),
+    ]);
+
+    // BUSCA CROSS-ARTICLE: Detectar se a pergunta envolve outros temas
+    const { articles: relatedArticleNumbers, topics: matchedTopics } = findRelatedArticles(body.question, articleNumber);
+    apiLogger.debug({ topics: matchedTopics, relatedArticles: relatedArticleNumbers }, 'Cross-reference analysis');
+
+    // Buscar artigos relacionados da Lei 14.133
+    const relatedArticles = relatedArticleNumbers
+      .map(num => ({ ...LEI_14133_ARTIGOS[num] }))
+      .filter(art => art.ementa); // Filtrar apenas artigos que existem
+
+    // Buscar documentos e atos legislativos dos artigos relacionados (se houver)
+    let crossReferenceDocs: typeof relevantDocs = [];
+    let crossReferenceActs: typeof relevantActs = [];
+    if (relatedArticleNumbers.length > 0) {
+      [crossReferenceDocs, crossReferenceActs] = await Promise.all([
+        prisma.document.findMany({
+          where: {
+            AND: [
+              {
+                OR: relatedArticleNumbers.map(num => ({
+                  leiArticles: { contains: num },
+                })),
+              },
+              {
+                OR: [
+                  { isPublic: true },
+                  { summary: { not: null } },
+                ],
+              },
+            ],
+          },
+          select: {
+            id: true,
+            title: true,
+            category: true,
+            summary: true,
+            description: true,
+            leiArticles: true,
+          },
+          take: 3,
+          orderBy: [
+            { summary: 'desc' },
+            { uploadedAt: 'desc' },
+          ],
+        }),
+        prisma.legislativeAct.findMany({
+          where: {
+            OR: relatedArticleNumbers.map(num => ({
+              leiArticles: { contains: `"${num}"` },
+            })),
+          },
+          select: {
+            id: true,
+            fullNumber: true,
+            title: true,
+            ementa: true,
+            summary: true,
+            issuer: true,
+            type: true,
+            leiArticles: true,
+          },
+          take: 3,
+          orderBy: { publishDate: 'desc' },
+        }),
+      ]);
+      apiLogger.debug({ crossRefDocsCount: crossReferenceDocs.length, crossRefActsCount: crossReferenceActs.length }, 'Cross-reference documents and acts found');
     }
 
     // Criar IDs de contexto (para futuro uso na IA)
@@ -174,6 +217,14 @@ export async function POST(
       throw new NotFoundError(`Artigo ${articleNumber}`);
     }
 
+    // Deduplicar atos legislativos (artigo atual + cross-reference)
+    const seenActIds = new Set<string>();
+    const allRelevantActs = [...relevantActs, ...crossReferenceActs].filter(act => {
+      if (seenActIds.has(act.id)) return false;
+      seenActIds.add(act.id);
+      return true;
+    });
+
     // Construir contexto rico para o Gemini
     const docsContext = relevantDocs.length > 0
       ? relevantDocs.map((doc, i) => `
@@ -182,6 +233,19 @@ Categoria: ${doc.category}
 ${doc.summary ? `Resumo: ${doc.summary}` : doc.description ? `Descrição: ${doc.description}` : ''}
 `).join('\n')
       : 'Nenhum documento adicional disponível.';
+
+    // Construir contexto dos atos legislativos (INs, Decretos, Portarias)
+    const actsContext = allRelevantActs.length > 0
+      ? `
+
+**ATOS NORMATIVOS VINCULADOS:**
+${allRelevantActs.map((act, i) => `
+**${act.fullNumber}** (${act.issuer})
+${act.title}
+${act.summary || act.ementa.substring(0, 300)}${(!act.summary && act.ementa.length > 300) ? '...' : ''}
+Artigos regulamentados: ${act.leiArticles || 'N/A'}
+`).join('\n')}`
+      : '';
 
     // Construir contexto dos artigos relacionados (cross-reference)
     let crossReferenceContext = '';
@@ -243,6 +307,7 @@ ${article.ementa}
 
 **DOCUMENTOS RELACIONADOS AO ARTIGO ${articleNumber}:**
 ${docsContext}
+${actsContext}
 ${crossReferenceContext}
 ${crossReferenceDocsContext}
 ${conversationContext}
@@ -291,9 +356,8 @@ Responda agora:`;
       },
     });
 
-    // Preparar fontes para resposta (incluindo docs cross-reference)
+    // Preparar fontes para resposta (incluindo docs cross-reference + atos legislativos)
     const allDocs = [...relevantDocs, ...crossReferenceDocs];
-    // Remover duplicados por ID (O(n) com Set)
     const seenIds = new Set<string>();
     const uniqueDocs = allDocs.filter(doc => {
       if (seenIds.has(doc.id)) return false;
@@ -301,14 +365,24 @@ Responda agora:`;
       return true;
     });
 
-    const sources = uniqueDocs.map(doc => ({
-      id: doc.id,
-      title: doc.title,
-      category: doc.category,
-      excerpt: doc.summary || doc.description || 'Sem resumo disponível',
-    }));
+    const sources = [
+      ...uniqueDocs.map(doc => ({
+        id: doc.id,
+        title: doc.title,
+        category: doc.category,
+        excerpt: doc.summary || doc.description || 'Sem resumo disponível',
+        sourceType: 'document' as const,
+      })),
+      ...allRelevantActs.map(act => ({
+        id: act.id,
+        title: act.fullNumber,
+        category: act.type,
+        excerpt: act.summary || act.ementa.substring(0, 200),
+        sourceType: 'legislative-act' as const,
+      })),
+    ];
 
-    apiLogger.info({ articleNumber, latency: geminiResult.latency, cached: geminiResult.cached, crossRefArticles: relatedArticles.length, crossRefDocs: crossReferenceDocs.length }, 'Gemini response generated');
+    apiLogger.info({ articleNumber, latency: geminiResult.latency, cached: geminiResult.cached, crossRefArticles: relatedArticles.length, crossRefDocs: crossReferenceDocs.length, legislativeActs: allRelevantActs.length }, 'Gemini response generated');
 
     return NextResponse.json({
       conversationId,

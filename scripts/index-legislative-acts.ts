@@ -12,9 +12,13 @@
  */
 
 import { PrismaClient } from '@prisma/client';
+import { PrismaNeon } from '@prisma/adapter-neon';
 import { processLegislativeAct } from '../lib/embeddings/legislative-act-processor';
 
-const prisma = new PrismaClient({ log: ['error', 'warn'] });
+const adapter = new PrismaNeon({
+  connectionString: process.env.DATABASE_URL!,
+});
+const prisma = new PrismaClient({ adapter, log: ['error', 'warn'] });
 
 interface Options {
   dryRun?: boolean;
