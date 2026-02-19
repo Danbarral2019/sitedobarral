@@ -31,13 +31,24 @@ export async function GET(request: NextRequest) {
     // Formatar resposta
     const formatted = pendingDocs.map(doc => ({
       id: doc.id,
-      section: doc.section,
+      douId: doc.douId,
       title: doc.title,
+      abstract: doc.abstract,
+      url: doc.url,
+      section: doc.section,
       publishDate: doc.publishDate,
       category: doc.category,
       confidence: doc.confidence,
       hierarchyStr: doc.hierarchyStr || '',
       approvalStatus: doc.approvalStatus,
+      isRelevant: doc.isRelevant,
+      requiresReview: doc.requiresReview,
+      reasoning: doc.reasoning,
+      createdAt: doc.createdAt.toISOString(),
+      fullContent: doc.fullContent,
+      organ: doc.organ,
+      edition: doc.edition,
+      page: doc.page,
     }));
 
     return NextResponse.json({

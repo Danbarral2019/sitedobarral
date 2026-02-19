@@ -870,19 +870,37 @@ export default function DOUFiltrosClient() {
                             {doc.hierarchyStr && (
                               <div className="text-xs text-gray-600">{doc.hierarchyStr}</div>
                             )}
+                            {doc.abstract && (
+                              <p className="text-xs text-gray-500 mt-1 line-clamp-2">
+                                {doc.abstract.substring(0, 250)}{doc.abstract.length > 250 ? '...' : ''}
+                              </p>
+                            )}
                           </div>
                         </div>
 
-                        <div className="flex items-center gap-2 text-xs flex-wrap">
-                          <span className="bg-green-100 text-green-900 px-2 py-1 rounded font-bold">
-                            Auto-aprovado
-                          </span>
-                          <span className="bg-gray-100 text-gray-800 px-2 py-1 rounded font-medium">
-                            {doc.category}
-                          </span>
-                          <span className="bg-purple-100 text-purple-800 px-2 py-1 rounded font-medium">
-                            {doc.confidence}% confianca
-                          </span>
+                        <div className="flex items-center justify-between gap-2">
+                          <div className="flex items-center gap-2 text-xs flex-wrap">
+                            <span className="bg-green-100 text-green-900 px-2 py-1 rounded font-bold">
+                              Auto-aprovado
+                            </span>
+                            <span className="bg-gray-100 text-gray-800 px-2 py-1 rounded font-medium">
+                              {doc.category}
+                            </span>
+                            <span className="bg-purple-100 text-purple-800 px-2 py-1 rounded font-medium">
+                              {doc.confidence}% confianca
+                            </span>
+                          </div>
+                          {doc.url && (
+                            <a
+                              href={doc.url}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              onClick={(e) => e.stopPropagation()}
+                              className="flex-shrink-0 inline-flex items-center gap-1 px-3 py-1.5 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors text-xs font-medium"
+                            >
+                              Inteiro Teor
+                            </a>
+                          )}
                         </div>
                       </div>
                     </div>
@@ -953,19 +971,37 @@ export default function DOUFiltrosClient() {
                             {doc.hierarchyStr && (
                               <div className="text-xs text-gray-600">{doc.hierarchyStr}</div>
                             )}
+                            {doc.abstract && (
+                              <p className="text-xs text-gray-500 mt-1 line-clamp-2">
+                                {doc.abstract.substring(0, 250)}{doc.abstract.length > 250 ? '...' : ''}
+                              </p>
+                            )}
                           </div>
                         </div>
 
-                        <div className="flex items-center gap-2 text-xs">
-                          <span className="bg-yellow-100 text-yellow-800 px-2 py-1 rounded font-medium">
-                            Aguardando revisao
-                          </span>
-                          <span className="bg-gray-100 text-gray-800 px-2 py-1 rounded">
-                            {doc.category}
-                          </span>
-                          <span className="bg-purple-100 text-purple-800 px-2 py-1 rounded">
-                            Confianca: {doc.confidence}%
-                          </span>
+                        <div className="flex items-center justify-between gap-2">
+                          <div className="flex items-center gap-2 text-xs flex-wrap">
+                            <span className="bg-yellow-100 text-yellow-800 px-2 py-1 rounded font-medium">
+                              Aguardando revisao
+                            </span>
+                            <span className="bg-gray-100 text-gray-800 px-2 py-1 rounded">
+                              {doc.category}
+                            </span>
+                            <span className="bg-purple-100 text-purple-800 px-2 py-1 rounded">
+                              Confianca: {doc.confidence}%
+                            </span>
+                          </div>
+                          {doc.url && (
+                            <a
+                              href={doc.url}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              onClick={(e) => e.stopPropagation()}
+                              className="flex-shrink-0 inline-flex items-center gap-1 px-3 py-1.5 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors text-xs font-medium"
+                            >
+                              Inteiro Teor
+                            </a>
+                          )}
                         </div>
                       </div>
                     </div>
