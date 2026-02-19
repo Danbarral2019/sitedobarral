@@ -216,7 +216,7 @@ export default function TribunalDecisionsClient() {
       const res = await fetch('/api/admin/tribunal-decisions/approve', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ decisionId: id, action: 'approve' }),
+        body: JSON.stringify({ id, action: 'approve' }),
       });
       if (res.ok) {
         toast({ title: 'Decisao aprovada', variant: 'success' });
@@ -240,7 +240,7 @@ export default function TribunalDecisionsClient() {
       const res = await fetch('/api/admin/tribunal-decisions/approve', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ decisionId: id, action: 'reject' }),
+        body: JSON.stringify({ id, action: 'reject' }),
       });
       if (res.ok) {
         toast({ title: 'Decisao rejeitada', variant: 'info' });
@@ -266,14 +266,14 @@ export default function TribunalDecisionsClient() {
       const res = await fetch('/api/admin/tribunal-decisions/bulk-approve', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ decisionIds: Array.from(selectedIds), action: 'approve' }),
+        body: JSON.stringify({ ids: Array.from(selectedIds), action: 'approve' }),
       });
       if (res.ok) {
         const data = await res.json();
         toast({
-          title: `${data.processed} decisao(oes) aprovada(s)`,
-          description: data.errors > 0 ? `${data.errors} erro(s).` : 'Concluido.',
-          variant: data.errors > 0 ? 'error' : 'success',
+          title: `${data.updatedCount} decisao(oes) aprovada(s)`,
+          description: 'Concluido.',
+          variant: 'success',
         });
         setSelectedIds(new Set());
         fetchStats();
@@ -299,12 +299,12 @@ export default function TribunalDecisionsClient() {
       const res = await fetch('/api/admin/tribunal-decisions/bulk-approve', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ decisionIds: Array.from(selectedIds), action: 'reject' }),
+        body: JSON.stringify({ ids: Array.from(selectedIds), action: 'reject' }),
       });
       if (res.ok) {
         const data = await res.json();
         toast({
-          title: `${data.processed} decisao(oes) rejeitada(s)`,
+          title: `${data.updatedCount} decisao(oes) rejeitada(s)`,
           variant: 'success',
         });
         setSelectedIds(new Set());
