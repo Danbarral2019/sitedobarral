@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useMemo, useRef, useCallback } from 'react';
 import { Loader2, Network, Info, ArrowRight, GitBranch, List } from 'lucide-react';
-import { LEI_14133_ARTIGOS } from '@/data/lei-14133-artigos';
+import type { LeiArticle } from '@/data/lei-14133-artigos';
 import dynamic from 'next/dynamic';
 
 const ForceGraph2D = dynamic(
@@ -25,6 +25,7 @@ interface ArticleRelationship {
 
 interface ArticleRelationshipGraphProps {
   articleNumber: string;
+  artigos: Record<string, LeiArticle>;
   onArticleClick?: (articleNumber: string) => void;
 }
 
@@ -76,6 +77,7 @@ const RING_RADII = [0, 100, 175];
 
 export function ArticleRelationshipGraph({
   articleNumber,
+  artigos,
   onArticleClick,
 }: ArticleRelationshipGraphProps) {
   const [relationships, setRelationships] = useState<ArticleRelationship[]>([]);
@@ -144,7 +146,7 @@ export function ArticleRelationshipGraph({
   const graphData = useMemo(() => {
     if (relationships.length === 0) return { nodes: [] as GraphNode[], links: [] as GraphLink[] };
 
-    const centralArticle = LEI_14133_ARTIGOS[articleNumber];
+    const centralArticle = artigos[articleNumber];
 
     const centralNode: GraphNode = {
       id: articleNumber,
@@ -177,7 +179,7 @@ export function ArticleRelationshipGraph({
       const startAngle = -Math.PI / 2;
 
       return rels.map((rel, i) => {
-        const art = LEI_14133_ARTIGOS[rel.articleNumber];
+        const art = artigos[rel.articleNumber];
         const angle = startAngle + i * angleStep;
 
         // Node size based on strength: stronger = bigger
@@ -224,7 +226,7 @@ export function ArticleRelationshipGraph({
       nodes: [centralNode, ...relatedNodes],
       links,
     };
-  }, [relationships, articleNumber]);
+  }, [relationships, articleNumber, artigos]);
 
   // Draw orbital rings in the background
   const onRenderFramePre = useCallback(
@@ -503,7 +505,7 @@ export function ArticleRelationshipGraph({
         <div className="p-6">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
             {relationships.map((rel) => {
-              const article = LEI_14133_ARTIGOS[rel.articleNumber];
+              const article = artigos[rel.articleNumber];
               return (
                 <button
                   key={rel.articleNumber}

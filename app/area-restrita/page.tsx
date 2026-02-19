@@ -2,6 +2,7 @@
 
 import { useEffect, useState, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
+import dynamic from 'next/dynamic';
 import { Loader2, ArrowLeft } from 'lucide-react';
 import { courses } from '@/data/courses';
 import { useAuth } from '@/hooks/use-auth';
@@ -10,9 +11,6 @@ import { useGlobalSearch } from '@/hooks/use-global-search';
 import { useSearchPdfExport } from '@/hooks/use-search-pdf-export';
 import {
   GlobalSearchBar,
-  SearchResultsList,
-  PdfExportBar,
-  PDFExportPanel,
   SearchHistoryPanel,
   AreaRestritaHeader,
   MobileBottomNav,
@@ -23,11 +21,15 @@ import {
   DashboardCourseCard,
   KnowledgeBaseSection,
 } from '@/components/area-restrita';
-import NovidadesSection from '@/components/area-restrita/NovidadesSection';
-import DocumentDetailModal from '@/components/DocumentDetailModal';
-import DocumentsByCategory from '@/components/DocumentsByCategory';
-import LegislativeActsPanel from '@/components/LegislativeActsPanel';
-import { GlossaryPanel } from '@/components/glossary/GlossaryPanel';
+
+const SearchResultsList = dynamic(() => import('@/components/area-restrita/SearchResultsList').then(mod => ({ default: mod.SearchResultsList })));
+const PdfExportBar = dynamic(() => import('@/components/area-restrita/PdfExportBar').then(mod => ({ default: mod.PdfExportBar })));
+const PDFExportPanel = dynamic(() => import('@/components/area-restrita/PDFExportPanel').then(mod => ({ default: mod.PDFExportPanel })));
+const NovidadesSection = dynamic(() => import('@/components/area-restrita/NovidadesSection'));
+const DocumentDetailModal = dynamic(() => import('@/components/DocumentDetailModal'));
+const DocumentsByCategory = dynamic(() => import('@/components/DocumentsByCategory'));
+const LegislativeActsPanel = dynamic(() => import('@/components/LegislativeActsPanel'));
+const GlossaryPanel = dynamic(() => import('@/components/glossary/GlossaryPanel').then(mod => ({ default: mod.GlossaryPanel })));
 import type { DocumentResult } from '@/lib/types/global-search';
 
 interface DocumentType {

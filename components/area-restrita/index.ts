@@ -1,7 +1,4 @@
 export { GlobalSearchBar } from './GlobalSearchBar';
-export { SearchResultsList } from './SearchResultsList';
-export { PdfExportBar } from './PdfExportBar';
-export { PDFExportPanel } from './PDFExportPanel';
 export { SearchHistoryPanel } from './SearchHistoryPanel';
 export { AreaRestritaHeader } from './AreaRestritaHeader';
 export { MobileBottomNav } from './MobileBottomNav';

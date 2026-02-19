@@ -4,7 +4,10 @@ import { useState, useEffect } from 'react';
 import {
   DateRangePreset,
 } from '@/lib/dou-classifier';
-import { DOUDocumentModal, DOUDocument } from '@/components/DOUDocumentModal';
+import type { DOUDocument } from '@/components/DOUDocumentModal';
+import dynamic from 'next/dynamic';
+
+const DOUDocumentModal = dynamic(() => import('@/components/DOUDocumentModal').then(mod => ({ default: mod.DOUDocumentModal })));
 import { useToast } from '@/hooks/use-toast';
 import { courses } from '@/data/courses';
 

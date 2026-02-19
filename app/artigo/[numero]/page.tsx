@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { Loader2, FileText, BookOpen, ArrowLeft, BarChart3, TrendingUp, Scale, Calendar, User } from 'lucide-react';
-import { LEI_14133_ARTIGOS as LEI_14133_ARTIGOS_FALLBACK, LeiArticle } from '@/data/lei-14133-artigos';
+import type { LeiArticle } from '@/data/lei-14133-artigos';
 import { ArticleRelationshipGraph } from '@/components/ArticleRelationshipGraph';
 import JurisprudenciaRelacionada from '@/components/JurisprudenciaRelacionada';
 
@@ -52,7 +52,7 @@ export default function ArtigoPage() {
   const router = useRouter();
   const numero = params?.numero as string;
 
-  const [artigos, setArtigos] = useState<Record<string, LeiArticle>>(LEI_14133_ARTIGOS_FALLBACK);
+  const [artigos, setArtigos] = useState<Record<string, LeiArticle> | null>(null);
   const [article, setArticle] = useState<LeiArticle | null>(null);
   const [relatedDocuments, setRelatedDocuments] = useState<Document[]>([]);
   const [relatedPosts, setRelatedPosts] = useState<BlogPost[]>([]);
@@ -72,15 +72,15 @@ export default function ArtigoPage() {
         }
       } catch (error) {
         console.error('Erro ao buscar artigos:', error);
-        // Mantém fallback em caso de erro
+        // API falhou, artigos continua null
       }
     }
     fetchArtigos();
   }, []);
 
   useEffect(() => {
-    // Valida e carrega o artigo
-    if (!numero || !artigos[numero]) {
+    if (!artigos || !numero) return;
+    if (!artigos[numero]) {
       router.push('/');
       return;
     }
@@ -114,7 +114,7 @@ export default function ArtigoPage() {
     }
   };
 
-  if (!article) {
+  if (!artigos || !article) {
     return (
       <main className="min-h-screen flex items-center justify-center">
         <Loader2 className="w-12 h-12 animate-spin text-blue-600" />
@@ -217,6 +217,7 @@ export default function ArtigoPage() {
               {/* Artigos Relacionados */}
               <ArticleRelationshipGraph
                 articleNumber={numero}
+                artigos={artigos}
                 onArticleClick={(articleNum) => {
                   router.push(`/artigo/${articleNum}`);
                 }}

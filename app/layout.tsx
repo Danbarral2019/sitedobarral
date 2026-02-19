@@ -7,8 +7,7 @@ import { ToastProviderWrapper } from "@/hooks/use-toast";
 import { Toaster } from "@/components/ui/toaster";
 import { ScrollToTop } from "@/components/ui/scroll-to-top";
 import Analytics from "@/components/Analytics";
-import WelcomeModal from "@/components/WelcomeModal";
-import { PWAProvider } from "@/components/PWAProvider";
+import { LazyClientProviders } from "@/components/LazyClientProviders";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import { Analytics as VercelAnalytics } from "@vercel/analytics/react";
 
@@ -126,8 +125,7 @@ export default function RootLayout({
           </div>
           <Toaster />
           <ScrollToTop />
-          <WelcomeModal />
-          <PWAProvider />
+          <LazyClientProviders />
         </ToastProviderWrapper>
       </body>
     </html>

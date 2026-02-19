@@ -3,12 +3,14 @@
 import { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
+import dynamic from 'next/dynamic';
 import { Loader2, FileText, ArrowLeft, ExternalLink, Heart, Filter, X, ChevronDown, ChevronUp, Calendar, User } from 'lucide-react';
-import { LEI_14133_ARTIGOS as LEI_14133_ARTIGOS_FALLBACK, LeiArticle } from '@/data/lei-14133-artigos';
+import type { LeiArticle } from '@/data/lei-14133-artigos';
 import { ArticleRelationshipGraph } from '@/components/ArticleRelationshipGraph';
 import { useAuth } from '@/hooks/use-auth';
 import { useFavorites } from '@/hooks/use-favorites';
-import DocumentDetailModal from '@/components/DocumentDetailModal';
+
+const DocumentDetailModal = dynamic(() => import('@/components/DocumentDetailModal'));
 
 interface Document {
   id: string;
@@ -107,7 +109,7 @@ export default function ArtigoAreaRestritaPage() {
   const { isFavorite, toggleFavorite } = useFavorites();
   const numero = params?.numero as string;
 
-  const [artigos, setArtigos] = useState<Record<string, LeiArticle>>(LEI_14133_ARTIGOS_FALLBACK);
+  const [artigos, setArtigos] = useState<Record<string, LeiArticle> | null>(null);
   const [article, setArticle] = useState<LeiArticle | null>(null);
   const [relatedDocuments, setRelatedDocuments] = useState<Document[]>([]);
   const [relatedPosts, setRelatedPosts] = useState<BlogPost[]>([]);
@@ -143,7 +145,8 @@ export default function ArtigoAreaRestritaPage() {
   }, []);
 
   useEffect(() => {
-    if (!numero || !artigos[numero]) {
+    if (!artigos || !numero) return;
+    if (!artigos[numero]) {
       router.push('/area-restrita');
       return;
     }
@@ -174,7 +177,7 @@ export default function ArtigoAreaRestritaPage() {
     }
   };
 
-  if (authLoading || !article) {
+  if (authLoading || !artigos || !article) {
     return (
       <main className="min-h-screen flex items-center justify-center">
         <Loader2 className="w-12 h-12 animate-spin text-brand-600" />
@@ -299,6 +302,7 @@ export default function ArtigoAreaRestritaPage() {
               {!selectedCategory && (
                 <ArticleRelationshipGraph
                   articleNumber={numero}
+                  artigos={artigos}
                   onArticleClick={(articleNum) => {
                     router.push(`/area-restrita/artigo/${articleNum}`);
                   }}
