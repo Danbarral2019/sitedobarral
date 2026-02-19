@@ -274,9 +274,9 @@ export class DOUClient {
           const pubDate = content.pubDate || '';
           const item: DOUSearchResult = {
             section: (content.pubName || 'do1').toLowerCase(),
-            title: content.title || '',
+            title: stripHighlightHtml(content.title || ''),
             href: content.urlTitle ? this.webBaseUrl + content.urlTitle : '',
-            abstract: content.content || '',
+            abstract: stripHighlightHtml(content.content || ''),
             date: pubDate,
             id: content.classPK || '',
             hierarchyList: Array.isArray(content.hierarchyList) ? content.hierarchyList : [],
@@ -315,6 +315,26 @@ export class DOUClient {
       throw error;
     }
   }
+}
+
+/**
+ * Remove tags HTML de highlight inseridas pela API de busca do DOU
+ * Ex: <span class='highlight' style='background:#FFA;'>licitação</span> → licitação
+ */
+function stripHighlightHtml(text: string): string {
+  if (!text) return text;
+  return text
+    .replace(/<span[^>]*class=['"]?highlight['"]?[^>]*>/gi, '')
+    .replace(/<\/span>/gi, '')
+    .replace(/<[^>]+>/g, '')
+    .replace(/&nbsp;/g, ' ')
+    .replace(/&amp;/g, '&')
+    .replace(/&lt;/g, '<')
+    .replace(/&gt;/g, '>')
+    .replace(/&quot;/g, '"')
+    .replace(/&#39;/g, "'")
+    .replace(/\s{2,}/g, ' ')
+    .trim();
 }
 
 /**

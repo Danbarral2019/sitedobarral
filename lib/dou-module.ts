@@ -376,7 +376,7 @@ function convertDOUResultToDocumentData(
   // Remove tags HTML do título
   const title = result.title.replace(/<[^>]*>/g, '').trim();
 
-  // Descrição (abstract já vem sem HTML)
+  // Descrição (abstract já é limpo de HTML em dou-api.ts)
   const description = result.abstract || `Publicação do DOU - ${result.section} - ${result.date}`;
 
   // URL do documento
