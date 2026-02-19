@@ -2,9 +2,9 @@
  * TCE-PR Scraper
  *
  * Tribunal de Contas do Estado do Parana
- * URL: https://www1.tce.pr.gov.br/jurisprudencia
+ * URL: https://viajuris.tce.pr.gov.br/
  *
- * Portal semi-estruturado. Busca decisoes de licitacoes e contratos.
+ * ViaJuris (ASP.NET MVC). Busca decisoes de licitacoes e contratos.
  */
 
 import * as cheerio from 'cheerio';
@@ -34,8 +34,9 @@ import { classifyDecision } from './classifier';
 // ===========================
 
 const SCRAPER_CODE = 'tce-pr';
-const BASE_URL = 'https://www1.tce.pr.gov.br';
-const SEARCH_URL = `${BASE_URL}/jurisprudencia`;
+const BASE_URL = 'https://viajuris.tce.pr.gov.br';
+const _PORTAL_URL = 'https://www1.tce.pr.gov.br';
+const SEARCH_URL = BASE_URL;
 
 // ===========================
 // Types
@@ -177,17 +178,20 @@ class TCEPRScraper implements TribunalScraper {
   // ===========================
 
   private async searchDecisions(term: string, limit: number): Promise<RawDecision[]> {
-    // TCE-PR jurisprudencia portal
-    // TODO: Verify actual URL params and structure
-    const searchUrl = `${SEARCH_URL}?${new URLSearchParams({
-      pesquisa: term,
-      // Possible params: tipo, relator, data_inicio, data_fim, pagina
-    }).toString()}`;
+    // ViaJuris (ASP.NET MVC) - try search via URL params first
+    const searchUrl = `${BASE_URL}/Pesquisa/Buscar?texto=${encodeURIComponent(term)}`;
 
     try {
       const response = await rateLimitedFetch(searchUrl);
       if (!response.ok) {
-        throw new Error(`HTTP ${response.status}`);
+        // Fallback: try alternate URL patterns
+        const altUrl = `${BASE_URL}/Pesquisa?texto=${encodeURIComponent(term)}`;
+        const altResponse = await rateLimitedFetch(altUrl, {}, 1000);
+        if (!altResponse.ok) {
+          throw new Error(`HTTP ${response.status} / ${altResponse.status}`);
+        }
+        const html = await altResponse.text();
+        return this.parseSearchResults(html, limit);
       }
       const html = await response.text();
       return this.parseSearchResults(html, limit);
@@ -205,17 +209,19 @@ class TCEPRScraper implements TribunalScraper {
     const $ = cheerio.load(html);
     const decisions: RawDecision[] = [];
 
-    // TODO: Adjust selectors for actual TCE-PR HTML structure.
-    // TCE-PR may use ViaJuris system or custom interface.
-
     const selectors = [
+      // ViaJuris ASP.NET MVC patterns
+      '.resultado-pesquisa .item-resultado',
+      '.resultado-pesquisa .panel',
+      '.lista-resultados .item',
+      '.search-results .result-item',
+      // Bootstrap patterns (common in ASP.NET MVC)
+      '.panel-default',
+      '.list-group .list-group-item',
+      'table.table tbody tr',
+      // Generic fallbacks
       '.resultado-item',
-      '.resultado-pesquisa',
-      '.jurisprudencia-item',
-      '.search-result-item',
       '#resultados .item',
-      'table.resultados tbody tr',
-      '.conteudo-resultado li',
     ];
 
     let $items: cheerio.Cheerio | null = null;
@@ -229,7 +235,7 @@ class TCEPRScraper implements TribunalScraper {
 
     if (!$items || $items.length === 0) {
       // Fallback: find links
-      $('a[href*="jurisprudencia"], a[href*="acordao"], a[href*="decisao"], a[href*="consulta"]').each((i, el) => {
+      $('a[href*="DetalhesAcordao"], a[href*="Visualizar"], a[href*="acordao"], a[href*="decisao"]').each((i, el) => {
         if (decisions.length >= limit) return false;
 
         const $el = $(el);
@@ -254,13 +260,13 @@ class TCEPRScraper implements TribunalScraper {
 
       const $el = $(el);
 
-      const title = $el.find('h3, h4, .titulo, .title, strong, a').first().text().trim();
-      const ementa = $el.find('.ementa, .resumo, .descricao, p, .texto').first().text().trim();
-      const relator = $el.find('.relator').text().trim() || undefined;
-      const orgao = $el.find('.orgao, .camara, .turma').text().trim() || undefined;
-      const data = $el.find('.data, time, .data-julgamento').text().trim() || undefined;
-      const link = $el.find('a').first().attr('href') || undefined;
-      const processo = $el.find('.processo, .numero').text().trim() || undefined;
+      const title = $el.find('h3 a, h4 a, .panel-title a, .titulo a, a[href*="DetalhesAcordao"], a[href*="Visualizar"]').first().text().trim();
+      const ementa = $el.find('.ementa, .resumo, .panel-body, .descricao, p').first().text().trim();
+      const relator = $el.find('[class*="relator"], .relator, dd:contains("Relator")').text().trim().replace(/^Relator:?\s*/i, '') || undefined;
+      const orgao = $el.find('[class*="orgao"], [class*="camara"], .orgao, dd:contains("Câmara"), dd:contains("Plen")').text().trim().replace(/^[ÓO]rg[ãa]o:?\s*/i, '') || undefined;
+      const data = $el.find('[class*="data"], time, .data, dd:contains("/")').text().trim() || undefined;
+      const link = $el.find('a[href*="DetalhesAcordao"], a[href*="Visualizar"], a').first().attr('href') || undefined;
+      const processo = $el.find('[class*="processo"], .processo, dd:contains("Processo")').text().trim().replace(/^Processo:?\s*/i, '') || undefined;
 
       if (title || ementa) {
         decisions.push({

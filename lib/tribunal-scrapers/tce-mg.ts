@@ -5,7 +5,9 @@
  * URL: https://tcjuris.tce.mg.gov.br/
  *
  * Busca decisoes de jurisprudencia sobre licitacoes e contratos.
- * O sistema TCJuris disponibiliza busca por texto livre.
+ * O sistema TCJuris 2.0 e uma aplicacao ASP.NET MVC com busca estruturada.
+ * Nota: O TCJuris pode usar AJAX para carregar resultados de busca,
+ * o que pode limitar a eficacia do scraping HTML direto.
  */
 
 import * as cheerio from 'cheerio';
@@ -177,24 +179,27 @@ class TCEMGScraper implements TribunalScraper {
   // ===========================
 
   private async searchDecisions(term: string, limit: number): Promise<RawDecision[]> {
-    // TCJuris typically has a search form
-    // TODO: Verify actual endpoint structure
-    const searchUrl = `${BASE_URL}/Home/Index?${new URLSearchParams({
-      texto: term,
-      // Possible params: tipo, relator, orgao, dataInicio, dataFim, pagina
-    }).toString()}`;
+    // TCJuris 2.0 - try multiple endpoint patterns
+    const searchUrls = [
+      `${BASE_URL}/Home/Index?texto=${encodeURIComponent(term)}`,
+      `${BASE_URL}/Home/Pesquisar?texto=${encodeURIComponent(term)}`,
+      `${BASE_URL}/?texto=${encodeURIComponent(term)}`,
+    ];
 
-    try {
-      const response = await rateLimitedFetch(searchUrl);
-      if (!response.ok) {
-        throw new Error(`HTTP ${response.status}`);
+    for (const searchUrl of searchUrls) {
+      try {
+        const response = await rateLimitedFetch(searchUrl, {}, 1500);
+        if (!response.ok) continue;
+        const html = await response.text();
+        const results = this.parseSearchResults(html, limit);
+        if (results.length > 0) return results;
+      } catch {
+        continue;
       }
-      const html = await response.text();
-      return this.parseSearchResults(html, limit);
-    } catch (error) {
-      console.warn(`[${SCRAPER_CODE}] Search failed for "${term}":`, error);
-      return [];
     }
+
+    console.warn(`[${SCRAPER_CODE}] All search URLs failed for "${term}"`);
+    return [];
   }
 
   // ===========================
@@ -205,16 +210,22 @@ class TCEMGScraper implements TribunalScraper {
     const $ = cheerio.load(html);
     const decisions: RawDecision[] = [];
 
-    // TODO: Adjust selectors for actual TCE-MG TCJuris HTML.
-    // These are best-effort selectors based on common patterns.
-
     const selectors = [
+      // TCJuris ASP.NET MVC patterns
       '.resultado-pesquisa .item',
-      '.jurisprudencia-resultado',
-      '.search-results .result-item',
+      '.resultado-pesquisa .registro',
       '#resultados .registro',
+      '#resultados .item-resultado',
+      // Bootstrap patterns (common in ASP.NET MVC)
+      '.panel-default .panel-body',
+      '.list-group .list-group-item',
+      '.well',
+      // Table patterns
+      'table.table tbody tr',
       'table.tabela-resultado tbody tr',
+      // Generic
       '.conteudo .item-resultado',
+      '.search-results .result-item',
     ];
 
     let $items: cheerio.Cheerio | null = null;
@@ -228,7 +239,7 @@ class TCEMGScraper implements TribunalScraper {
 
     if (!$items || $items.length === 0) {
       // Fallback: links to decisions
-      $('a[href*="acordao"], a[href*="decisao"], a[href*="processo"]').each((i, el) => {
+      $('a[href*="BaixarArquivo"], a[href*="Nota"], a[href*="acordao"], a[href*="decisao"], a[href*="processo"]').each((i, el) => {
         if (decisions.length >= limit) return false;
 
         const $el = $(el);
@@ -253,13 +264,14 @@ class TCEMGScraper implements TribunalScraper {
 
       const $el = $(el);
 
-      const title = $el.find('h3, h4, .titulo, strong, a').first().text().trim();
-      const ementa = $el.find('.ementa, .resumo, p, .texto').first().text().trim();
-      const relator = $el.find('.relator').text().trim() || undefined;
-      const orgao = $el.find('.orgao, .turma, .camara').text().trim() || undefined;
-      const data = $el.find('.data, time').text().trim() || undefined;
-      const link = $el.find('a').first().attr('href') || undefined;
-      const processo = $el.find('.processo').text().trim() || undefined;
+      const title = $el.find('h3 a, h4 a, .titulo a, .panel-title, strong a, a[href*="BaixarArquivo"], a[href*="Nota"]').first().text().trim();
+      const ementa = $el.find('.ementa, .resumo, .texto-ementa, .panel-body p, .conteudo-decisao, p').first().text().trim();
+      const relator = $el.find('[class*="relator"], .relator, span:contains("Relator"), label:contains("Relator")').next().text().trim() ||
+                      $el.find('[class*="relator"]').text().trim().replace(/^Relator:?\s*/i, '') || undefined;
+      const orgao = $el.find('[class*="orgao"], [class*="turma"], [class*="camara"]').text().trim() || undefined;
+      const data = $el.find('[class*="data"], time, .data-julgamento, span:contains("/")').first().text().trim() || undefined;
+      const link = $el.find('a[href*="BaixarArquivo"], a[href*="Nota"], a').first().attr('href') || undefined;
+      const processo = $el.find('[class*="processo"], .processo').text().trim() || undefined;
 
       if (title || ementa) {
         decisions.push({

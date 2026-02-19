@@ -2,7 +2,7 @@
  * TCE-SP Scraper
  *
  * Tribunal de Contas do Estado de Sao Paulo
- * URL: https://www.tce.sp.gov.br/jurisprudencia
+ * URL: https://www4.tce.sp.gov.br/pesquisa-de-jurisprudencia
  *
  * Busca decisoes relacionadas a licitacoes e contratos administrativos.
  * Tenta API REST primeiro; fallback para scraping HTML com cheerio.
@@ -35,12 +35,8 @@ import { classifyDecision } from './classifier';
 // ===========================
 
 const SCRAPER_CODE = 'tce-sp';
-const BASE_URL = 'https://www.tce.sp.gov.br';
-const SEARCH_URL = `${BASE_URL}/jurisprudencia`;
-
-// TCE-SP search API endpoint (form submission)
-// TODO: Verify actual endpoint when testing with real site
-const _API_SEARCH_URL = `${BASE_URL}/jurisprudencia/busca`;
+const BASE_URL = 'https://www4.tce.sp.gov.br';
+const _SEARCH_URL = `${BASE_URL}/pesquisa-de-jurisprudencia`;
 
 // ===========================
 // Types for parsed results
@@ -75,7 +71,7 @@ class TCESPScraper implements TribunalScraper {
 
   async healthCheck(): Promise<ScraperHealthStatus> {
     try {
-      const response = await fetchWithRetry(SEARCH_URL, { timeoutMs: 15000, maxRetries: 1 });
+      const response = await fetchWithRetry(`${BASE_URL}/pesquisa-de-jurisprudencia`, { timeoutMs: 15000, maxRetries: 1 });
       const lastLog = await prisma.scraperHealthLog.findFirst({
         where: { scraperCode: SCRAPER_CODE },
         orderBy: { runAt: 'desc' },
@@ -198,11 +194,7 @@ class TCESPScraper implements TribunalScraper {
   // ===========================
 
   private async searchViaHTML(term: string, limit: number): Promise<RawDecision[]> {
-    const searchUrl = `${SEARCH_URL}?${new URLSearchParams({
-      q: term,
-      // TODO: Adjust params based on actual TCE-SP search form
-      // Common params: tipo, relator, processo, ano, pagina
-    }).toString()}`;
+    const searchUrl = `${BASE_URL}/resultado-da-pesquisa-jurisprudencia?keys=${encodeURIComponent(term)}`;
 
     const response = await rateLimitedFetch(searchUrl);
     if (!response.ok) {
@@ -221,18 +213,18 @@ class TCESPScraper implements TribunalScraper {
     const $ = cheerio.load(html);
     const decisions: RawDecision[] = [];
 
-    // TODO: Adjust selectors based on actual TCE-SP HTML structure.
-    // The selectors below are best-effort guesses based on common
-    // tribunal site patterns. Must be verified with real page.
-
     // Try common patterns for search results
     const selectors = [
+      // Drupal views patterns (TCE-SP uses Drupal with Search API Solr)
+      '.view-content .views-row',
+      '.view-content article',
+      '.view-content .node',
+      '.search-results .search-result',
+      '.search-results li',
+      // Generic fallbacks
       '.resultado-item',
-      '.jurisprudencia-item',
-      '.search-result',
       '.list-group-item',
       'table.resultado tbody tr',
-      '.conteudo-pesquisa .item',
     ];
 
     let $items: cheerio.Cheerio | null = null;
@@ -271,14 +263,14 @@ class TCESPScraper implements TribunalScraper {
 
       const $el = $(el);
 
-      // Extract decision data
-      const title = $el.find('h3, h4, .titulo, .title, a').first().text().trim();
-      const ementa = $el.find('.ementa, .resumo, .descricao, p').first().text().trim();
-      const relator = $el.find('.relator, [data-relator]').text().trim() || undefined;
-      const orgao = $el.find('.orgao, .camara, [data-orgao]').text().trim() || undefined;
-      const data = $el.find('.data, .data-julgamento, time').text().trim() || undefined;
+      // Extract decision data (Drupal-compatible selectors)
+      const title = $el.find('h3 a, h2 a, .views-field-title a, .field--name-title a, .title a').first().text().trim();
+      const ementa = $el.find('.views-field-body, .field--name-body, .field--name-field-ementa, .ementa, p.summary, .search-snippet').first().text().trim();
+      const relator = $el.find('.views-field-field-relator, .field--name-field-relator, [class*="relator"]').text().trim() || undefined;
+      const orgao = $el.find('.views-field-field-orgao, .field--name-field-orgao, [class*="orgao"], [class*="camara"]').text().trim() || undefined;
+      const data = $el.find('.views-field-field-data, .field--name-field-data, .date-display-single, time, [class*="data"]').text().trim() || undefined;
       const link = $el.find('a').first().attr('href') || undefined;
-      const processo = $el.find('.processo, .numero-processo').text().trim() || undefined;
+      const processo = $el.find('.views-field-field-processo, .field--name-field-processo, [class*="processo"]').text().trim() || undefined;
 
       if (title || ementa) {
         const decisionNumber = this.extractDecisionNumberFromText(title || ementa);
