@@ -25,7 +25,7 @@ export interface SearchResult {
   tags?: string[];
   leiArticles?: string | null;
   uploadedAt?: string;
-  sourceType: 'document' | 'legislative-act'; // Tipo de fonte
+  sourceType: 'document' | 'legislative-act' | 'tribunal-decision'; // Tipo de fonte
 }
 
 export interface SearchOptions {
@@ -213,8 +213,16 @@ async function executeVectorSearch(
   params.push(limit * 2);
   paramIndex++;
 
+  const decThresholdParamIdx = paramIndex;
+  params.push(threshold);
+  paramIndex++;
+
+  const decLimitParamIdx = paramIndex;
+  params.push(limit * 2);
+  paramIndex++;
+
   const finalLimitParamIdx = paramIndex;
-  params.push(limit * 3);
+  params.push(limit * 4);
   paramIndex++;
 
   // 3. Executa busca vetorial com pgvector (UNION ALL: DocumentChunk + LegislativeActChunk)
@@ -274,11 +282,33 @@ async function executeVectorSearch(
       FROM "LegislativeActChunk" lc
       JOIN "LegislativeAct" la ON lc."legislativeActId" = la.id
       WHERE la."embeddingStatus" = 'completed'
+    ),
+    decision_scores AS (
+      SELECT
+        td.id as document_id,
+        td."fullIdentifier" as document_title,
+        td."decisionType" as category,
+        tc.content as chunk_content,
+        tc."chunkIndex" as chunk_index,
+        1 - (tc.embedding <=> '${embeddingStr}'::vector) as similarity,
+        td.url,
+        NULL as course_id,
+        true as is_common,
+        td.themes as tags,
+        td."leiArticles" as lei_articles,
+        'tribunal-decision' as source_type,
+        td."dataJulgamento" as uploaded_at
+      FROM "TribunalDecisionChunk" tc
+      JOIN "TribunalDecision" td ON tc."tribunalDecisionId" = td.id
+      WHERE td."embeddingStatus" = 'completed'
+        AND td."approvalStatus" IN ('auto_approved', 'manually_approved')
     )
     SELECT * FROM (
       (SELECT * FROM doc_scores WHERE similarity >= $${thresholdParamIdx} ORDER BY similarity DESC LIMIT $${docLimitParamIdx})
       UNION ALL
       (SELECT * FROM act_scores WHERE similarity >= $${actThresholdParamIdx} ORDER BY similarity DESC LIMIT $${actLimitParamIdx})
+      UNION ALL
+      (SELECT * FROM decision_scores WHERE similarity >= $${decThresholdParamIdx} ORDER BY similarity DESC LIMIT $${decLimitParamIdx})
     ) combined
     ORDER BY similarity DESC
     LIMIT $${finalLimitParamIdx}
@@ -347,7 +377,7 @@ async function executeVectorSearch(
       tags: bestChunk.tags ? safeParseArray(bestChunk.tags) : undefined,
       leiArticles: bestChunk.lei_articles,
       uploadedAt: bestChunk.uploaded_at ? new Date(bestChunk.uploaded_at).toISOString() : undefined,
-      sourceType: bestChunk.source_type as 'document' | 'legislative-act',
+      sourceType: bestChunk.source_type as 'document' | 'legislative-act' | 'tribunal-decision',
     });
   }
 

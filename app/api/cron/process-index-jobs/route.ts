@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { processDocument, getProcessingStats } from '@/lib/embeddings/document-processor';
+import { processTribunalDecision } from '@/lib/embeddings/tribunal-decision-processor';
 
 // ===========================
 // Configuration
@@ -367,7 +368,43 @@ export async function GET(req: NextRequest) {
       }
     }
 
-    // 7. Return summary
+    // 7. Process pending tribunal decisions
+    const pendingDecisions = await prisma.tribunalDecision.findMany({
+      where: {
+        approvalStatus: { in: ['auto_approved', 'manually_approved'] },
+        OR: [
+          { embeddingStatus: null },
+          { embeddingStatus: 'pending' },
+        ],
+      },
+      select: { id: true },
+      take: Math.max(0, MAX_JOBS_PER_RUN - pendingJobs.length - pendingDocuments.length),
+      orderBy: { createdAt: 'desc' },
+    });
+
+    console.log(`Found ${pendingDecisions.length} pending tribunal decisions`);
+
+    for (const decision of pendingDecisions) {
+      console.log(`Processing tribunal decision ${decision.id}`);
+
+      const result = await processTribunalDecision(decision.id);
+
+      results.push({
+        jobId: `tribunal-${decision.id}`,
+        documentId: decision.id,
+        status: result.success ? 'completed' : 'failed',
+        error: result.error,
+        chunkCount: result.stats?.chunkCount,
+      });
+
+      if (result.success) {
+        console.log(`Tribunal decision ${decision.id} processed (${result.stats?.chunkCount} chunks)`);
+      } else {
+        console.log(`Tribunal decision ${decision.id} failed: ${result.error}`);
+      }
+    }
+
+    // 8. Return summary
     const summary = {
       success: true,
       processed: results.length,

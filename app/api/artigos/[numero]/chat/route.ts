@@ -239,7 +239,7 @@ ${doc.summary ? `Resumo: ${doc.summary}` : doc.description ? `Descrição: ${doc
       ? `
 
 **ATOS NORMATIVOS VINCULADOS:**
-${allRelevantActs.map((act, i) => `
+${allRelevantActs.map((act) => `
 **${act.fullNumber}** (${act.issuer})
 ${act.title}
 ${act.summary || act.ementa.substring(0, 300)}${(!act.summary && act.ementa.length > 300) ? '...' : ''}

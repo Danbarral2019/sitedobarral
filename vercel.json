@@ -51,6 +51,14 @@
     {
       "path": "/api/cron/sync-tcu-informativos",
       "schedule": "0 5 * * 1"
+    },
+    {
+      "path": "/api/cron/sync-tribunal-decisions",
+      "schedule": "0 7 * * 1"
+    },
+    {
+      "path": "/api/cron/tribunal-scraper-health",
+      "schedule": "0 0 * * *"
     }
   ]
 }

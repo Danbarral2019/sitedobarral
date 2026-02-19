@@ -5,7 +5,7 @@ import { usePathname } from 'next/navigation';
 import Link from 'next/link';
 import Image from 'next/image';
 import {
-  QrCode, ChevronLeft, ChevronRight, BarChart3, Mail, MessageSquare, Send, GraduationCap, Youtube, Globe, BookOpen, Menu, X, Search
+  QrCode, ChevronLeft, ChevronRight, BarChart3, Mail, MessageSquare, Send, GraduationCap, Youtube, Globe, BookOpen, Menu, X, Search, Scale
 } from 'lucide-react';
 
 interface AdminLayoutProps {
@@ -117,6 +117,11 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
         </svg>
       ),
       badge: unreadCounts.douPending,
+    },
+    {
+      path: '/admin/tribunal-decisions',
+      label: 'Jurisprudencia',
+      icon: Scale,
     },
 
     // === DOCUMENTOS ===

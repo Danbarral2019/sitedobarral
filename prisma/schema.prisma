@@ -1449,3 +1449,113 @@ model PushSubscription {
 
   @@index([userId])
 }
+
+// ============================================================================
+// Tribunal Decisions — Jurisprudência TCEs e Tribunais Judiciais
+// ============================================================================
+
+// Decisões de Tribunais de Contas e Judiciais
+model TribunalDecision {
+  id              String   @id @default(uuid())
+  tribunalCode    String   // "TCE-SP", "TCE-MG", "STJ", "STF", etc.
+  tribunalName    String   // Nome completo
+  decisionType    String   // "acordao", "decisao", "parecer_previo", "sumula"
+  decisionNumber  String   // "1234/2024"
+  processNumber   String?
+  year            Int
+  fullIdentifier  String   @unique // "TCE-SP Acórdão 1234/2024" (chave de dedup)
+
+  // Conteúdo
+  title           String
+  ementa          String   @db.Text
+  fullText        String?  @db.Text
+  summary         String?  @db.Text  // Resumo IA
+
+  // Metadados
+  relator         String?
+  orgaoJulgador   String?
+  dataJulgamento  DateTime?
+  dataPublicacao  DateTime?
+  url             String?
+  pdfUrl          String?
+
+  // Classificação
+  isRelevant      Boolean  @default(true)
+  relevanceScore  Int      @default(0)   // 0-100
+  themes          String?  // JSON array: ["licitação", "contrato"]
+  leiArticles     String?  // JSON array de artigos da Lei 14.133
+  suggestedCourses String?
+
+  // Fonte e rastreamento
+  sourceApi       String   // "tce-sp-web", "datajud", "tce-pr-viajuris"
+  sourceId        String?
+  sourceRawData   String?  @db.Text
+
+  // Pipeline de aprovação (padrão DOUStagingDocument)
+  approvalStatus  String   @default("pending")
+  confidence      Int      @default(0)
+  classificationReasoning String? @db.Text
+  reviewedBy      String?
+  reviewedAt      DateTime?
+  adminNotes      String?  @db.Text
+
+  // Embeddings
+  embeddingStatus String?  @default("pending")
+  chunkCount      Int      @default(0)
+  embeddedAt      DateTime?
+
+  // Notificação
+  notifiedAt      DateTime?
+
+  // Controle
+  scrapedAt       DateTime @default(now())
+  scrapeError     String?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  chunks TribunalDecisionChunk[]
+
+  @@index([tribunalCode])
+  @@index([tribunalCode, year])
+  @@index([decisionType])
+  @@index([approvalStatus])
+  @@index([dataJulgamento])
+  @@index([isRelevant, approvalStatus])
+  @@index([embeddingStatus])
+  @@index([sourceApi])
+  @@index([year])
+}
+
+// Chunks de decisões com embeddings (Busca Semântica)
+model TribunalDecisionChunk {
+  id                  String   @id @default(uuid())
+  tribunalDecisionId  String
+  tribunalDecision    TribunalDecision @relation(fields: [tribunalDecisionId], references: [id], onDelete: Cascade)
+  chunkIndex          Int
+  content             String   @db.Text
+  charStart           Int
+  charEnd             Int
+  embedding           Unsupported("vector(768)")
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+
+  @@index([tribunalDecisionId])
+}
+
+// Health Log dos Scrapers (monitoramento)
+model ScraperHealthLog {
+  id           String   @id @default(uuid())
+  scraperCode  String
+  status       String   // "success", "partial_failure", "failure"
+  itemsFound   Int      @default(0)
+  itemsNew     Int      @default(0)
+  itemsError   Int      @default(0)
+  duration     Int      // ms
+  errorMessage String?  @db.Text
+  metadata     String?  @db.Text
+  runAt        DateTime @default(now())
+
+  @@index([scraperCode])
+  @@index([scraperCode, runAt])
+  @@index([status])
+}

@@ -6,6 +6,7 @@ import Link from 'next/link';
 import { Loader2, FileText, BookOpen, ArrowLeft, BarChart3, TrendingUp, Scale, Calendar, User } from 'lucide-react';
 import { LEI_14133_ARTIGOS as LEI_14133_ARTIGOS_FALLBACK, LeiArticle } from '@/data/lei-14133-artigos';
 import { ArticleRelationshipGraph } from '@/components/ArticleRelationshipGraph';
+import JurisprudenciaRelacionada from '@/components/JurisprudenciaRelacionada';
 
 
 interface Document {
@@ -248,6 +249,9 @@ export default function ArtigoPage() {
                   </div>
                 </div>
               )}
+
+              {/* Jurisprudência Relacionada */}
+              <JurisprudenciaRelacionada articleNumber={numero} />
 
               {/* Preview de Documentos - Área Pública */}
               {publicDocuments.length > 0 && (
