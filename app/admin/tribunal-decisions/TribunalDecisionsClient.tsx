@@ -10,50 +10,57 @@ import { useToast } from '@/hooks/use-toast';
 
 interface Stats {
   total: number;
-  pending: number;
-  approved: number;
-  rejected: number;
+  totalPending: number;
+  totalApproved: number;
+  totalRejected: number;
   byTribunal: Array<{
-    tribunal: string;
-    tribunalType: string;
-    count: number;
+    tribunalCode: string;
+    tribunalName: string;
+    total: number;
+    pending: number;
+    approved: number;
+    rejected: number;
   }>;
 }
 
-interface ScraperHealth {
-  scrapers: Array<{
-    id: string;
-    name: string;
-    tribunal: string;
-    status: 'ok' | 'warning' | 'error';
-    lastRun: string | null;
-    lastRunItems: number;
-    lastRunNewItems: number;
-    errorMessage?: string;
-  }>;
+interface ScraperHealthEntry {
+  scraperCode: string;
+  lastRun: {
+    status: string;
+    itemsFound: number;
+    itemsNew: number;
+    itemsError: number;
+    duration: number;
+    errorMessage: string | null;
+    runAt: string;
+  };
+  consecutiveFailures: number;
+  isHealthy: boolean;
+  totalRuns: number;
 }
 
 interface TribunalDecision {
   id: string;
-  tribunal: string;
-  tribunalType: string;
+  tribunalCode: string;
+  tribunalName: string;
   decisionNumber: string;
   decisionType: string;
-  judgeDate: string | null;
-  publishDate: string | null;
-  relator: string | null;
-  orgao: string | null;
+  title: string;
   ementa: string;
-  summary: string | null;
-  themes: string[];
-  articleReferences: number[];
-  sourceUrl: string | null;
+  relator: string | null;
+  orgaoJulgador: string | null;
+  dataJulgamento: string | null;
+  themes: string | null;
+  leiArticles: string | null;
+  url: string | null;
   relevanceScore: number;
-  status: string;
+  confidence: number;
+  approvalStatus: string;
+  createdAt: string;
 }
 
 interface PaginatedResponse {
-  decisions: TribunalDecision[];
+  items: TribunalDecision[];
   total: number;
   page: number;
   pageSize: number;
@@ -68,7 +75,7 @@ export default function TribunalDecisionsClient() {
   const [statsLoading, setStatsLoading] = useState(true);
 
   // Scraper Health
-  const [scraperHealth, setScraperHealth] = useState<ScraperHealth | null>(null);
+  const [scraperHealth, setScraperHealth] = useState<ScraperHealthEntry[]>([]);
   const [scraperHealthLoading, setScraperHealthLoading] = useState(true);
   const [runningScrapers, setRunningScrapers] = useState<Set<string>>(new Set());
 
@@ -80,9 +87,8 @@ export default function TribunalDecisionsClient() {
   const [currentPage, setCurrentPage] = useState(1);
 
   // Filters
-  const [activeTab, setActiveTab] = useState<'pending' | 'approved' | 'rejected' | 'all'>('pending');
+  const [activeTab, setActiveTab] = useState<'pending' | 'auto_approved' | 'manually_approved' | 'auto_rejected' | 'manually_rejected' | 'all'>('pending');
   const [filterTribunal, setFilterTribunal] = useState('');
-  const [filterYear, setFilterYear] = useState('');
   const [searchText, setSearchText] = useState('');
 
   // Selection
@@ -115,7 +121,7 @@ export default function TribunalDecisionsClient() {
       const res = await fetch('/api/admin/tribunal-decisions/scraper-health');
       if (res.ok) {
         const data = await res.json();
-        setScraperHealth(data);
+        setScraperHealth(data.scrapers || []);
       }
     } catch (err) {
       console.error('Failed to fetch scraper health:', err);
@@ -131,16 +137,15 @@ export default function TribunalDecisionsClient() {
       const params = new URLSearchParams({
         page: String(currentPage),
         pageSize: String(pageSize),
-        status: activeTab === 'all' ? '' : activeTab,
       });
+      if (activeTab !== 'all') params.set('status', activeTab);
       if (filterTribunal) params.set('tribunal', filterTribunal);
-      if (filterYear) params.set('year', filterYear);
-      if (searchText) params.set('search', searchText);
+      if (searchText) params.set('q', searchText);
 
       const res = await fetch(`/api/admin/tribunal-decisions?${params}`);
       if (res.ok) {
         const data: PaginatedResponse = await res.json();
-        setDecisions(data.decisions);
+        setDecisions(data.items);
         setTotalDecisions(data.total);
         setTotalPages(data.totalPages);
       }
@@ -149,7 +154,7 @@ export default function TribunalDecisionsClient() {
     } finally {
       setDecisionsLoading(false);
     }
-  }, [currentPage, activeTab, filterTribunal, filterYear, searchText]);
+  }, [currentPage, activeTab, filterTribunal, searchText]);
 
   // Initial load
   useEffect(() => {
@@ -165,29 +170,30 @@ export default function TribunalDecisionsClient() {
   useEffect(() => {
     setCurrentPage(1);
     setSelectedIds(new Set());
-  }, [activeTab, filterTribunal, filterYear, searchText]);
+  }, [activeTab, filterTribunal, searchText]);
 
   // Run scraper
-  const handleRunScraper = async (scraperId: string) => {
-    setRunningScrapers(prev => new Set(prev).add(scraperId));
+  const handleRunScraper = async (scraperCode: string) => {
+    setRunningScrapers(prev => new Set(prev).add(scraperCode));
     try {
-      const res = await fetch('/api/admin/tribunal-decisions/run-scraper', {
+      const res = await fetch('/api/admin/tribunal-decisions/trigger', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ scraperId }),
+        body: JSON.stringify({ scraperCode }),
       });
       if (res.ok) {
         const data = await res.json();
         toast({
           title: 'Scraper executado',
-          description: `${data.newItems || 0} nova(s) decisao(oes) encontrada(s).`,
+          description: `${data.result?.itemsNew || 0} nova(s) decisao(oes) encontrada(s).`,
           variant: 'success',
         });
         fetchStats();
         fetchScraperHealth();
         fetchDecisions();
       } else {
-        throw new Error('Falha ao executar scraper');
+        const err = await res.json();
+        throw new Error(err.error || 'Falha ao executar scraper');
       }
     } catch (err) {
       toast({
@@ -198,7 +204,7 @@ export default function TribunalDecisionsClient() {
     } finally {
       setRunningScrapers(prev => {
         const next = new Set(prev);
-        next.delete(scraperId);
+        next.delete(scraperCode);
         return next;
       });
     }
@@ -371,16 +377,25 @@ export default function TribunalDecisionsClient() {
     return colors[tribunal] || 'bg-gray-100 text-gray-800';
   };
 
-  // Status badge
-  const statusBadge = (status: string) => {
-    if (status === 'ok') return { color: 'bg-green-100 text-green-800 border-green-200', icon: <CheckCircle className="w-4 h-4 text-green-600" /> };
-    if (status === 'warning') return { color: 'bg-yellow-100 text-yellow-800 border-yellow-200', icon: <AlertTriangle className="w-4 h-4 text-yellow-600" /> };
-    return { color: 'bg-red-100 text-red-800 border-red-200', icon: <XCircle className="w-4 h-4 text-red-600" /> };
+  // Scraper health status badge
+  const healthBadge = (isHealthy: boolean, consecutiveFailures: number) => {
+    if (isHealthy && consecutiveFailures === 0) {
+      return { color: 'bg-green-50 border-green-200', icon: <CheckCircle className="w-4 h-4 text-green-600" />, label: 'ok' };
+    }
+    if (isHealthy) {
+      return { color: 'bg-yellow-50 border-yellow-200', icon: <AlertTriangle className="w-4 h-4 text-yellow-600" />, label: 'warning' };
+    }
+    return { color: 'bg-red-50 border-red-200', icon: <XCircle className="w-4 h-4 text-red-600" />, label: 'error' };
   };
 
-  // Years for filter
-  const currentYear = new Date().getFullYear();
-  const years = Array.from({ length: 5 }, (_, i) => currentYear - i);
+  // Parse themes/articles from string
+  const parseJsonArray = (val: string | null): string[] => {
+    if (!val) return [];
+    try { return JSON.parse(val); } catch { return []; }
+  };
+
+  // Tribunals from stats
+  const availableTribunals = stats?.byTribunal.map(t => t.tribunalCode) || [];
 
   return (
     <div className="max-w-7xl mx-auto p-6">
@@ -412,15 +427,15 @@ export default function TribunalDecisionsClient() {
             <div className="text-sm text-gray-600">Total de decisoes</div>
           </div>
           <div className="bg-white rounded-lg shadow-sm border p-6 border-l-4 border-l-yellow-500">
-            <div className="text-3xl font-bold text-yellow-700">{stats.pending}</div>
+            <div className="text-3xl font-bold text-yellow-700">{stats.totalPending}</div>
             <div className="text-sm text-gray-600">Pendentes de revisao</div>
           </div>
           <div className="bg-white rounded-lg shadow-sm border p-6 border-l-4 border-l-green-500">
-            <div className="text-3xl font-bold text-green-700">{stats.approved}</div>
+            <div className="text-3xl font-bold text-green-700">{stats.totalApproved}</div>
             <div className="text-sm text-gray-600">Aprovadas</div>
           </div>
           <div className="bg-white rounded-lg shadow-sm border p-6 border-l-4 border-l-red-500">
-            <div className="text-3xl font-bold text-red-700">{stats.rejected}</div>
+            <div className="text-3xl font-bold text-red-700">{stats.totalRejected}</div>
             <div className="text-sm text-gray-600">Rejeitadas</div>
           </div>
         </div>
@@ -428,20 +443,21 @@ export default function TribunalDecisionsClient() {
 
       {/* Stats by Tribunal */}
       {stats && stats.byTribunal.length > 0 && (
-        <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-3 mb-6">
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 mb-6">
           {stats.byTribunal.map((t) => (
-            <div key={t.tribunal} className="bg-white rounded-lg shadow-sm border p-4">
-              <div className="flex items-center justify-between mb-1">
-                <span className={`px-2 py-0.5 text-xs font-medium rounded-full ${tribunalColor(t.tribunal)}`}>
-                  {t.tribunal}
+            <div key={t.tribunalCode} className="bg-white rounded-lg shadow-sm border p-4">
+              <div className="flex items-center justify-between mb-2">
+                <span className={`px-2 py-0.5 text-xs font-medium rounded-full ${tribunalColor(t.tribunalCode)}`}>
+                  {t.tribunalCode}
                 </span>
-                <span className={`px-1.5 py-0.5 text-[10px] font-medium rounded ${
-                  t.tribunalType === 'TCE' ? 'bg-orange-100 text-orange-700' : 'bg-indigo-100 text-indigo-700'
-                }`}>
-                  {t.tribunalType}
-                </span>
+                <span className="text-2xl font-bold text-gray-900">{t.total}</span>
               </div>
-              <div className="text-2xl font-bold text-gray-900">{t.count}</div>
+              <div className="text-xs text-gray-500 truncate mb-1">{t.tribunalName}</div>
+              <div className="flex gap-2 text-xs">
+                <span className="text-yellow-600">{t.pending} pend.</span>
+                <span className="text-green-600">{t.approved} aprov.</span>
+                <span className="text-red-600">{t.rejected} rej.</span>
+              </div>
             </div>
           ))}
         </div>
@@ -463,37 +479,43 @@ export default function TribunalDecisionsClient() {
               </div>
             ))}
           </div>
-        ) : scraperHealth ? (
+        ) : scraperHealth.length > 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {scraperHealth.scrapers.map((scraper) => {
-              const badge = statusBadge(scraper.status);
-              const isRunning = runningScrapers.has(scraper.id);
+            {scraperHealth.map((scraper) => {
+              const badge = healthBadge(scraper.isHealthy, scraper.consecutiveFailures);
+              const isRunning = runningScrapers.has(scraper.scraperCode);
               return (
-                <div key={scraper.id} className={`bg-white rounded-lg shadow-sm border p-4 ${badge.color}`}>
+                <div key={scraper.scraperCode} className={`bg-white rounded-lg shadow-sm border p-4 ${badge.color}`}>
                   <div className="flex items-center justify-between mb-3">
                     <div>
-                      <h3 className="font-semibold text-gray-900">{scraper.name}</h3>
-                      <span className={`px-2 py-0.5 text-xs font-medium rounded-full ${tribunalColor(scraper.tribunal)}`}>
-                        {scraper.tribunal}
-                      </span>
+                      <h3 className="font-semibold text-gray-900">{scraper.scraperCode}</h3>
+                      <span className="text-xs text-gray-500">{scraper.totalRuns} execucoes</span>
                     </div>
                     <div className="flex items-center gap-1">
                       {badge.icon}
-                      <span className="text-xs font-medium capitalize">{scraper.status}</span>
+                      <span className="text-xs font-medium capitalize">{badge.label}</span>
                     </div>
                   </div>
                   <div className="text-xs text-gray-600 space-y-1 mb-3">
                     <div className="flex items-center gap-1">
                       <Clock className="w-3 h-3" />
-                      Ultimo run: {relativeTime(scraper.lastRun)}
+                      Ultimo run: {relativeTime(scraper.lastRun?.runAt || null)}
                     </div>
-                    <div>Encontrados: {scraper.lastRunItems} | Novos: {scraper.lastRunNewItems}</div>
-                    {scraper.errorMessage && (
-                      <div className="text-red-600 text-xs mt-1">{scraper.errorMessage}</div>
+                    {scraper.lastRun && (
+                      <div>
+                        Encontrados: {scraper.lastRun.itemsFound} | Novos: {scraper.lastRun.itemsNew}
+                        {scraper.lastRun.itemsError > 0 && <span className="text-red-600"> | Erros: {scraper.lastRun.itemsError}</span>}
+                      </div>
+                    )}
+                    {scraper.consecutiveFailures > 0 && (
+                      <div className="text-red-600">{scraper.consecutiveFailures} falha(s) consecutiva(s)</div>
+                    )}
+                    {scraper.lastRun?.errorMessage && (
+                      <div className="text-red-600 text-xs mt-1">{scraper.lastRun.errorMessage}</div>
                     )}
                   </div>
                   <button
-                    onClick={() => handleRunScraper(scraper.id)}
+                    onClick={() => handleRunScraper(scraper.scraperCode)}
                     disabled={isRunning}
                     className="w-full px-3 py-1.5 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 transition-colors"
                   >
@@ -513,7 +535,11 @@ export default function TribunalDecisionsClient() {
               );
             })}
           </div>
-        ) : null}
+        ) : (
+          <div className="bg-white rounded-lg shadow-sm border p-8 text-center text-gray-500">
+            Nenhum scraper executado ainda. Execute manualmente para iniciar.
+          </div>
+        )}
       </div>
 
       {/* Review Queue */}
@@ -525,17 +551,19 @@ export default function TribunalDecisionsClient() {
           </h2>
 
           {/* Tabs */}
-          <div className="flex gap-1 mb-4 border-b border-gray-200">
+          <div className="flex gap-1 mb-4 border-b border-gray-200 overflow-x-auto">
             {[
-              { key: 'pending' as const, label: 'Pendentes', count: stats?.pending },
-              { key: 'approved' as const, label: 'Aprovados', count: stats?.approved },
-              { key: 'rejected' as const, label: 'Rejeitados', count: stats?.rejected },
+              { key: 'pending' as const, label: 'Pendentes', count: stats?.totalPending },
+              { key: 'auto_approved' as const, label: 'Auto-aprovados' },
+              { key: 'manually_approved' as const, label: 'Aprovados' },
+              { key: 'auto_rejected' as const, label: 'Auto-rejeitados' },
+              { key: 'manually_rejected' as const, label: 'Rejeitados' },
               { key: 'all' as const, label: 'Todos', count: stats?.total },
             ].map(tab => (
               <button
                 key={tab.key}
                 onClick={() => setActiveTab(tab.key)}
-                className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors ${
+                className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors whitespace-nowrap ${
                   activeTab === tab.key
                     ? 'border-blue-600 text-blue-600'
                     : 'border-transparent text-gray-500 hover:text-gray-700'
@@ -554,20 +582,8 @@ export default function TribunalDecisionsClient() {
               className="px-3 py-2 border rounded-lg text-sm bg-white"
             >
               <option value="">Todos os tribunais</option>
-              <option value="TCE-SP">TCE-SP</option>
-              <option value="TCE-MG">TCE-MG</option>
-              <option value="TCE-PR">TCE-PR</option>
-              <option value="TCU">TCU</option>
-            </select>
-
-            <select
-              value={filterYear}
-              onChange={(e) => setFilterYear(e.target.value)}
-              className="px-3 py-2 border rounded-lg text-sm bg-white"
-            >
-              <option value="">Todos os anos</option>
-              {years.map(y => (
-                <option key={y} value={y}>{y}</option>
+              {availableTribunals.map(code => (
+                <option key={code} value={code}>{code}</option>
               ))}
             </select>
 
@@ -647,6 +663,8 @@ export default function TribunalDecisionsClient() {
 
               {decisions.map((decision) => {
                 const isExpanded = expandedIds.has(decision.id);
+                const themes = parseJsonArray(decision.themes);
+                const articles = parseJsonArray(decision.leiArticles);
                 return (
                   <div key={decision.id} className="px-6 py-4 hover:bg-gray-50 transition-colors">
                     <div className="flex gap-3">
@@ -660,15 +678,15 @@ export default function TribunalDecisionsClient() {
                       </div>
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2 mb-1 flex-wrap">
-                          <span className={`px-2 py-0.5 text-xs font-medium rounded-full ${tribunalColor(decision.tribunal)}`}>
-                            {decision.tribunal}
+                          <span className={`px-2 py-0.5 text-xs font-medium rounded-full ${tribunalColor(decision.tribunalCode)}`}>
+                            {decision.tribunalCode}
                           </span>
                           <span className="px-2 py-0.5 text-xs font-medium rounded bg-gray-100 text-gray-700">
                             {decision.decisionType}
                           </span>
-                          {decision.judgeDate && (
+                          {decision.dataJulgamento && (
                             <span className="text-xs text-gray-500">
-                              {new Date(decision.judgeDate).toLocaleDateString('pt-BR')}
+                              {new Date(decision.dataJulgamento).toLocaleDateString('pt-BR')}
                             </span>
                           )}
                           <span className={`px-2 py-0.5 text-xs font-medium rounded ${
@@ -678,10 +696,17 @@ export default function TribunalDecisionsClient() {
                           }`}>
                             Score: {decision.relevanceScore}
                           </span>
+                          <span className={`px-1.5 py-0.5 text-[10px] font-medium rounded ${
+                            decision.approvalStatus === 'pending' ? 'bg-yellow-100 text-yellow-800' :
+                            decision.approvalStatus.includes('approved') ? 'bg-green-100 text-green-800' :
+                            'bg-red-100 text-red-800'
+                          }`}>
+                            {decision.approvalStatus}
+                          </span>
                         </div>
 
                         <h3 className="font-semibold text-gray-900 mb-1">
-                          {decision.decisionNumber}
+                          {decision.decisionNumber || decision.title}
                         </h3>
 
                         <p className="text-sm text-gray-600 mb-2">
@@ -714,15 +739,15 @@ export default function TribunalDecisionsClient() {
                               {decision.relator}
                             </span>
                           )}
-                          {decision.orgao && (
-                            <span>| {decision.orgao}</span>
+                          {decision.orgaoJulgador && (
+                            <span>| {decision.orgaoJulgador}</span>
                           )}
                         </div>
 
                         {/* Themes */}
-                        {decision.themes.length > 0 && (
+                        {themes.length > 0 && (
                           <div className="flex flex-wrap gap-1 mb-2">
-                            {decision.themes.map((theme, i) => (
+                            {themes.map((theme, i) => (
                               <span key={i} className="px-2 py-0.5 bg-blue-50 text-blue-700 text-xs rounded-full">
                                 {theme}
                               </span>
@@ -731,10 +756,10 @@ export default function TribunalDecisionsClient() {
                         )}
 
                         {/* Article references */}
-                        {decision.articleReferences.length > 0 && (
+                        {articles.length > 0 && (
                           <div className="flex flex-wrap gap-1 mb-2">
-                            {decision.articleReferences.map((art) => (
-                              <span key={art} className="px-2 py-0.5 bg-purple-50 text-purple-700 text-xs rounded-full">
+                            {articles.map((art, i) => (
+                              <span key={i} className="px-2 py-0.5 bg-purple-50 text-purple-700 text-xs rounded-full">
                                 Art. {art}
                               </span>
                             ))}
@@ -743,7 +768,7 @@ export default function TribunalDecisionsClient() {
 
                         {/* Actions */}
                         <div className="flex items-center gap-2 mt-2">
-                          {decision.status === 'pending' && (
+                          {decision.approvalStatus === 'pending' && (
                             <>
                               <button
                                 onClick={() => handleApprove(decision.id)}
@@ -759,9 +784,9 @@ export default function TribunalDecisionsClient() {
                               </button>
                             </>
                           )}
-                          {decision.sourceUrl && (
+                          {decision.url && (
                             <a
-                              href={decision.sourceUrl}
+                              href={decision.url}
                               target="_blank"
                               rel="noopener noreferrer"
                               className="px-3 py-1 bg-indigo-600 text-white rounded text-xs font-medium hover:bg-indigo-700 transition-colors flex items-center gap-1"
@@ -793,7 +818,6 @@ export default function TribunalDecisionsClient() {
               >
                 Anterior
               </button>
-              {/* Page numbers */}
               {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
                 let page: number;
                 if (totalPages <= 5) {
