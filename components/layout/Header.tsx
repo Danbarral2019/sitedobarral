@@ -4,7 +4,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { useState, memo, useEffect, useRef } from 'react';
 import { usePathname } from 'next/navigation';
-import { Menu, X, ChevronDown, User, FileText, Mail, Home, LogIn, BookOpen, Scale, CreditCard, Gavel } from 'lucide-react';
+import { Menu, X, ChevronDown, User, FileText, Mail, LogIn, BookOpen, Scale, CreditCard, Gavel } from 'lucide-react';
 import { courses } from '@/data/courses';
 
 export const Header = memo(function Header() {
@@ -61,7 +61,7 @@ export const Header = memo(function Header() {
                 priority
               />
             </div>
-            <div className="min-w-0">
+            <div className="min-w-0 text-center">
               <h1 className="text-base sm:text-xl font-cinzel font-semibold text-white tracking-wide truncate group-hover:text-brand-100 transition-colors">
                 Daniel Barral
               </h1>
@@ -72,15 +72,6 @@ export const Header = memo(function Header() {
           </Link>
 
           <div className="hidden md:flex items-center space-x-6 lg:space-x-8">
-            <Link
-              href="/"
-              aria-current={isActive('/') ? 'page' : undefined}
-              className={`flex items-center space-x-1 transition-colors font-poppins text-sm focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-brand-600 rounded ${isActive('/') ? 'text-white font-semibold' : 'text-white/90 hover:text-white'}`}
-            >
-              <Home className="w-4 h-4" />
-              <span>Início</span>
-            </Link>
-
             <Link
               href="/sobre"
               aria-current={isActive('/sobre') ? 'page' : undefined}
@@ -165,10 +156,11 @@ export const Header = memo(function Header() {
             <Link
               href="/contato"
               aria-current={isActive('/contato') ? 'page' : undefined}
-              className={`flex items-center space-x-1 transition-colors font-poppins text-sm focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-brand-600 rounded ${isActive('/contato') ? 'text-white font-semibold' : 'text-white/90 hover:text-white'}`}
+              aria-label="Contato"
+              title="Contato"
+              className={`transition-colors focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-brand-600 rounded p-1 ${isActive('/contato') ? 'text-white' : 'text-white/90 hover:text-white'}`}
             >
-              <Mail className="w-4 h-4" />
-              <span>Contato</span>
+              <Mail className="w-5 h-5" />
             </Link>
 
             <Link
