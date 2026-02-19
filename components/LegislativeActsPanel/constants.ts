@@ -16,7 +16,7 @@ export type LegislativeAct = {
   url?: string;
 };
 
-export type TabType = 'atos' | 'boas-praticas';
+export type TabType = 'atos' | 'boas-praticas' | 'tic';
 
 export const TYPE_LABELS: Record<string, string> = {
   decreto: 'Decreto',

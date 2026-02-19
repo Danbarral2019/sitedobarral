@@ -7,7 +7,7 @@ export function useLegislativeActs() {
 
   // Abas
   const [activeTab, setActiveTab] = useState<TabType>('atos');
-  const [tabCounts, setTabCounts] = useState({ atos: 0, boasPraticas: 0 });
+  const [tabCounts, setTabCounts] = useState({ atos: 0, boasPraticas: 0, tic: 0 });
 
   // Filtros disponíveis
   const [availableTypes, setAvailableTypes] = useState<Array<{ type: string; count: number }>>([]);
@@ -34,15 +34,17 @@ export function useLegislativeActs() {
   const [expandedAct, setExpandedAct] = useState<string | null>(null);
 
   const isBoasPraticas = activeTab === 'boas-praticas';
+  const isTic = activeTab === 'tic';
   const hasActiveFilters = search || selectedType || issuerFilter || yearFilter || esferaFilter || themeFilter;
 
   // Buscar contagens das abas
   useEffect(() => {
     const fetchCounts = async () => {
       try {
-        const [atosRes, bpRes] = await Promise.all([
+        const [atosRes, bpRes, ticRes] = await Promise.all([
           fetch('/api/legislative-acts?tab=atos&limit=1'),
           fetch('/api/legislative-acts?tab=boas-praticas&limit=1'),
+          fetch('/api/legislative-acts?tab=tic&limit=1'),
         ]);
         if (atosRes.ok) {
           const data = await atosRes.json();
@@ -51,6 +53,10 @@ export function useLegislativeActs() {
         if (bpRes.ok) {
           const data = await bpRes.json();
           setTabCounts(prev => ({ ...prev, boasPraticas: data.pagination?.total || data.acts?.length || 0 }));
+        }
+        if (ticRes.ok) {
+          const data = await ticRes.json();
+          setTabCounts(prev => ({ ...prev, tic: data.pagination?.total || data.acts?.length || 0 }));
         }
       } catch {
         // Silently fail
@@ -150,6 +156,7 @@ export function useLegislativeActs() {
     expandedAct,
     setExpandedAct,
     isBoasPraticas,
+    isTic,
     hasActiveFilters,
     clearFilters,
     switchTab,

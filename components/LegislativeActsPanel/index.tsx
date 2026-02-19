@@ -2,7 +2,7 @@
 
 import {
   Gavel, FileText, Loader2,
-  Scale,
+  Scale, Monitor,
 } from 'lucide-react';
 import { useLegislativeActs } from '@/hooks/use-legislative-acts';
 import ActCard from './ActCard';
@@ -14,6 +14,7 @@ export default function LegislativeActsPanel() {
     isLoading,
     activeTab,
     tabCounts,
+    isTic,
     availableTypes,
     availableIssuers,
     availableYears,
@@ -50,18 +51,22 @@ export default function LegislativeActsPanel() {
       {/* Header com Abas */}
       <div className="p-6 pb-0">
         <div className="flex items-center gap-3 mb-4">
-          {isBoasPraticas
-            ? <FileText className="w-8 h-8 text-emerald-600" />
-            : <Gavel className="w-8 h-8 text-amber-600" />
+          {isTic
+            ? <Monitor className="w-8 h-8 text-cyan-600" />
+            : isBoasPraticas
+              ? <FileText className="w-8 h-8 text-emerald-600" />
+              : <Gavel className="w-8 h-8 text-amber-600" />
           }
           <div className="flex-1">
             <h2 className="text-xl font-bold text-gray-900">
-              {isBoasPraticas ? 'Outros Atos Normativos' : 'Atos Normativos Infralegais'}
+              {isTic ? 'Contratações de TIC' : isBoasPraticas ? 'Outros Atos Normativos' : 'Atos Normativos Infralegais'}
             </h2>
             <p className="text-sm text-gray-600">
-              {isBoasPraticas
-                ? 'Outros atos normativos relacionados a licitações e contratos'
-                : 'Decretos, portarias e instruções normativas que regulamentam a Lei 14.133/2021'}
+              {isTic
+                ? 'Normativos sobre contratações de Tecnologia da Informação e Comunicação'
+                : isBoasPraticas
+                  ? 'Outros atos normativos relacionados a licitações e contratos'
+                  : 'Decretos, portarias e instruções normativas que regulamentam a Lei 14.133/2021'}
             </p>
           </div>
         </div>
@@ -93,11 +98,27 @@ export default function LegislativeActsPanel() {
             }`}
           >
             <FileText className="w-4 h-4" />
-            Outros Atos Normativos
+            Outros Atos
             <span className={`px-1.5 py-0.5 rounded-full text-xs ${
               activeTab === 'boas-praticas' ? 'bg-emerald-100 text-emerald-700' : 'bg-gray-100 text-gray-500'
             }`}>
               {tabCounts.boasPraticas}
+            </span>
+          </button>
+          <button
+            onClick={() => switchTab('tic')}
+            className={`flex items-center gap-1.5 px-4 py-2.5 font-semibold text-sm transition-colors -mb-[2px] border-b-2 ${
+              activeTab === 'tic'
+                ? 'text-cyan-700 border-cyan-600'
+                : 'text-gray-500 border-transparent hover:text-cyan-600'
+            }`}
+          >
+            <Monitor className="w-4 h-4" />
+            TIC
+            <span className={`px-1.5 py-0.5 rounded-full text-xs ${
+              activeTab === 'tic' ? 'bg-cyan-100 text-cyan-700' : 'bg-gray-100 text-gray-500'
+            }`}>
+              {tabCounts.tic}
             </span>
           </button>
         </div>
@@ -135,9 +156,11 @@ export default function LegislativeActsPanel() {
           <div className="mb-4 flex items-center justify-between">
             <span className="flex items-center gap-1 text-sm text-gray-600">
               <FileText className="w-4 h-4" />
-              {total} {isBoasPraticas
-                ? (total === 1 ? 'outro ato normativo' : 'outros atos normativos')
-                : (total === 1 ? 'ato normativo' : 'atos normativos')}
+              {total} {isTic
+                ? (total === 1 ? 'ato de TIC' : 'atos de TIC')
+                : isBoasPraticas
+                  ? (total === 1 ? 'outro ato normativo' : 'outros atos normativos')
+                  : (total === 1 ? 'ato normativo' : 'atos normativos')}
               {hasActiveFilters && ' encontrado(s)'}
             </span>
             {totalPages > 1 && (
@@ -151,7 +174,7 @@ export default function LegislativeActsPanel() {
         {/* Loading */}
         {isLoading ? (
           <div className="flex items-center justify-center py-12">
-            <Loader2 className={`w-8 h-8 animate-spin ${isBoasPraticas ? 'text-emerald-600' : 'text-amber-600'}`} />
+            <Loader2 className={`w-8 h-8 animate-spin ${isTic ? 'text-cyan-600' : isBoasPraticas ? 'text-emerald-600' : 'text-amber-600'}`} />
           </div>
         ) : acts.length === 0 ? (
           /* Empty state */
@@ -175,7 +198,7 @@ export default function LegislativeActsPanel() {
             {hasActiveFilters && (
               <button
                 onClick={clearFilters}
-                className={`mt-3 text-sm font-medium ${isBoasPraticas ? 'text-emerald-600 hover:text-emerald-700' : 'text-amber-600 hover:text-amber-700'}`}
+                className={`mt-3 text-sm font-medium ${isTic ? 'text-cyan-600 hover:text-cyan-700' : isBoasPraticas ? 'text-emerald-600 hover:text-emerald-700' : 'text-amber-600 hover:text-amber-700'}`}
               >
                 Limpar filtros
               </button>

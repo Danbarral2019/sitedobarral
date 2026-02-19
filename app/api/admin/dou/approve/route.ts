@@ -174,25 +174,10 @@ async function handleApproval(
   metadata?: { issuerOrg?: string; esfera?: string; themes?: string[] }
 ) {
   try {
-    // Mapear categoria baseado na escolha do admin
-    let documentCategory: string;
-    let tags: string[];
-
-    if (importAs === 'boa_pratica') {
-      documentCategory = 'boa_pratica';
-      tags = ['boas_praticas'];
-    } else {
-      // Mapear categoria DOU para categoria Document
-      const categoryMap: Record<string, string> = {
-        'fonte_agu': 'parecer',
-        'ato_normativo': 'legislacao',
-        'acordao_tcu': 'acordao',
-        'sumula': 'sumula',
-        'outros': 'outro',
-      };
-      documentCategory = categoryMap[stagingDoc.category] || 'outro';
-      tags = [];
-    }
+    // Todos os documentos DOU aprovados vão para a aba "Outros Atos Normativos"
+    // que filtra por category='boa_pratica'. Usamos tags para diferenciar o tipo.
+    const documentCategory = 'boa_pratica';
+    const tags = importAs === 'boa_pratica' ? ['boas_praticas'] : ['ato_normativo_dou'];
 
     // Verificar duplicatas (mesmo douUrl já existe?)
     const existingDoc = await prisma.document.findFirst({
@@ -230,7 +215,7 @@ async function handleApproval(
           url: stagingDoc.url,
           category: documentCategory,
           courseId: courseIds[0] || null, // Primeiro curso (principal)
-          isPublic: false, // Admin decide depois
+          isPublic: true, // Documentos aprovados são públicos na aba "Outros Atos Normativos"
           tags: JSON.stringify(tags),
           leiArticles: JSON.stringify([]),
           content: stagingDoc.fullContent || stagingDoc.abstract,
@@ -275,10 +260,8 @@ async function handleApproval(
       });
 
       // Feedback loop: registrar se a classificação automática estava correta
-      const autoCategory = stagingDoc.category;
-      const classificationCorrect = documentCategory === (
-        { 'fonte_agu': 'parecer', 'ato_normativo': 'legislacao', 'acordao_tcu': 'acordao', 'sumula': 'sumula' } as Record<string, string>
-      )[autoCategory];
+      // Se o admin aprovou, consideramos a classificação como correta
+      const classificationCorrect = true;
 
       // Atualizar staging document com feedback
       await tx.dOUStagingDocument.update({
