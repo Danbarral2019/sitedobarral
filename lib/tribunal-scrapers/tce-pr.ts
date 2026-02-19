@@ -1,13 +1,20 @@
 /**
- * TCE-PR Scraper
+ * TCE-PR Scraper — Dados Abertos (CSV)
  *
  * Tribunal de Contas do Estado do Parana
  * URL: https://viajuris.tce.pr.gov.br/
  *
- * ViaJuris (ASP.NET MVC). Busca decisoes de licitacoes e contratos.
+ * Usa arquivos CSV dos Dados Abertos do TCE-PR em vez de scraping HTML.
+ * CSV disponivel por ano em:
+ *   https://viajuris.tce.pr.gov.br/DadosAbertos/DadosAbertos/DownloadArquivo?nomeArquivo=YYYY_acordaos_base_de_dados.csv
+ *
+ * CSV: UTF-8 com BOM, delimitador `;`, 24 colunas:
+ *   DsTipoAto;NrAto;AnoAto;SgUnidAdm;DsClasseProcessual;DsSubClasseProcessual;
+ *   NrProcesso;AnoProcesso;DsTitulo;DsResumo;NmCategoriaPublicacao;DsColegiado;
+ *   DsEntidade;DsInteressado;DsVeiculoPublicacao;NmAdvogados;DtPublicacaoDOE;
+ *   DtSessao;NrDOE;NmRelator;Termos;ReferenciaLegislativas;DsTema;UrlPDF
  */
 
-import * as cheerio from 'cheerio';
 import { prisma } from '@/lib/prisma';
 import {
   TribunalScraper,
@@ -19,7 +26,6 @@ import {
 } from './index';
 import {
   fetchWithRetry,
-  rateLimitedFetch,
   normalizeDecisionNumber,
   buildFullIdentifier,
   extractYear,
@@ -35,8 +41,8 @@ import { classifyDecision } from './classifier';
 
 const SCRAPER_CODE = 'tce-pr';
 const BASE_URL = 'https://viajuris.tce.pr.gov.br';
-const _PORTAL_URL = 'https://www1.tce.pr.gov.br';
-const SEARCH_URL = BASE_URL;
+const DADOS_ABERTOS_URL = `${BASE_URL}/DadosAbertos/DadosAbertos/DownloadArquivo`;
+const HEALTH_CHECK_URL = BASE_URL;
 
 // ===========================
 // Types
@@ -53,6 +59,149 @@ interface RawDecision {
   processNumber?: string;
 }
 
+/** Represents a single parsed row from the CSV */
+interface CSVRow {
+  DsTipoAto: string;
+  NrAto: string;
+  AnoAto: string;
+  SgUnidAdm: string;
+  DsClasseProcessual: string;
+  DsSubClasseProcessual: string;
+  NrProcesso: string;
+  AnoProcesso: string;
+  DsTitulo: string;
+  DsResumo: string;
+  NmCategoriaPublicacao: string;
+  DsColegiado: string;
+  DsEntidade: string;
+  DsInteressado: string;
+  DsVeiculoPublicacao: string;
+  NmAdvogados: string;
+  DtPublicacaoDOE: string;
+  DtSessao: string;
+  NrDOE: string;
+  NmRelator: string;
+  Termos: string;
+  ReferenciaLegislativas: string;
+  DsTema: string;
+  UrlPDF: string;
+}
+
+const CSV_COLUMNS: (keyof CSVRow)[] = [
+  'DsTipoAto', 'NrAto', 'AnoAto', 'SgUnidAdm', 'DsClasseProcessual',
+  'DsSubClasseProcessual', 'NrProcesso', 'AnoProcesso', 'DsTitulo', 'DsResumo',
+  'NmCategoriaPublicacao', 'DsColegiado', 'DsEntidade', 'DsInteressado',
+  'DsVeiculoPublicacao', 'NmAdvogados', 'DtPublicacaoDOE', 'DtSessao',
+  'NrDOE', 'NmRelator', 'Termos', 'ReferenciaLegislativas', 'DsTema', 'UrlPDF',
+];
+
+// ===========================
+// CSV Parsing (no external libs)
+// ===========================
+
+/**
+ * Parse a CSV line that uses semicolon delimiter and may have quoted fields.
+ * Handles:
+ * - Fields wrapped in double quotes (e.g., "value with ; inside")
+ * - Escaped double quotes inside quoted fields (e.g., "He said ""hello""")
+ * - Trailing whitespace inside quoted fields
+ */
+function parseCSVLine(line: string): string[] {
+  const fields: string[] = [];
+  let current = '';
+  let inQuotes = false;
+  let i = 0;
+
+  while (i < line.length) {
+    const char = line[i];
+
+    if (inQuotes) {
+      if (char === '"') {
+        // Check for escaped quote ""
+        if (i + 1 < line.length && line[i + 1] === '"') {
+          current += '"';
+          i += 2;
+          continue;
+        }
+        // End of quoted field
+        inQuotes = false;
+        i++;
+        continue;
+      }
+      current += char;
+      i++;
+    } else {
+      if (char === '"') {
+        inQuotes = true;
+        i++;
+        continue;
+      }
+      if (char === ';') {
+        fields.push(current.trim());
+        current = '';
+        i++;
+        continue;
+      }
+      current += char;
+      i++;
+    }
+  }
+
+  // Push the last field
+  fields.push(current.trim());
+
+  return fields;
+}
+
+/**
+ * Parse the full CSV text into an array of CSVRow objects.
+ * Skips the BOM if present and the header row.
+ */
+function parseCSV(csvText: string): CSVRow[] {
+  // Remove BOM if present
+  let text = csvText;
+  if (text.charCodeAt(0) === 0xFEFF) {
+    text = text.slice(1);
+  }
+
+  const lines = text.split(/\r?\n/);
+  if (lines.length < 2) return [];
+
+  // Skip header row (line 0)
+  const rows: CSVRow[] = [];
+
+  for (let i = 1; i < lines.length; i++) {
+    const line = lines[i].trim();
+    if (!line) continue;
+
+    const fields = parseCSVLine(line);
+
+    // Build row object mapping columns to values
+    const row: Record<string, string> = {};
+    for (let j = 0; j < CSV_COLUMNS.length; j++) {
+      row[CSV_COLUMNS[j]] = (fields[j] || '').trim();
+    }
+
+    rows.push(row as unknown as CSVRow);
+  }
+
+  return rows;
+}
+
+/**
+ * Extract the date part from DtSessao format "DD/MM/YYYY HH:MM:SS" or "DD/MM/YYYY"
+ */
+function extractDatePart(dtSessao: string): string | undefined {
+  if (!dtSessao) return undefined;
+  // Take only the date portion before any space
+  const datePart = dtSessao.split(' ')[0];
+  // Validate DD/MM/YYYY format
+  if (/^\d{1,2}\/\d{1,2}\/\d{4}$/.test(datePart)) {
+    return datePart;
+  }
+  return undefined;
+}
+
 // ===========================
 // TCE-PR Scraper Implementation
 // ===========================
@@ -62,7 +211,7 @@ class TCEPRScraper implements TribunalScraper {
   name = 'TCE-PR';
   fullName = 'Tribunal de Contas do Estado do Parana';
   type = 'tce' as const;
-  hasApi = false;
+  hasApi = true;
   supportsFullText = false;
 
   canHandle(tribunalCode: string): boolean {
@@ -71,7 +220,7 @@ class TCEPRScraper implements TribunalScraper {
 
   async healthCheck(): Promise<ScraperHealthStatus> {
     try {
-      const response = await fetchWithRetry(SEARCH_URL, { timeoutMs: 15000, maxRetries: 1 });
+      const response = await fetchWithRetry(HEALTH_CHECK_URL, { timeoutMs: 15000, maxRetries: 1 });
       const lastLog = await prisma.scraperHealthLog.findFirst({
         where: { scraperCode: SCRAPER_CODE },
         orderBy: { runAt: 'desc' },
@@ -83,7 +232,7 @@ class TCEPRScraper implements TribunalScraper {
         lastRun: lastLog?.runAt || undefined,
         lastSuccess: lastLog?.status === 'success' ? lastLog.runAt : undefined,
         consecutiveFailures: lastLog?.status === 'failure' ? 1 : 0,
-        message: response.ok ? 'Site acessivel' : `HTTP ${response.status}`,
+        message: response.ok ? 'Site acessivel (Dados Abertos CSV)' : `HTTP ${response.status}`,
       };
     } catch (error) {
       return {
@@ -114,25 +263,38 @@ class TCEPRScraper implements TribunalScraper {
     };
 
     try {
-      const allDecisions: RawDecision[] = [];
+      // Download CSV for current year and previous year
+      const currentYear = new Date().getFullYear();
+      const yearsToFetch = [currentYear, currentYear - 1];
+      const allRows: CSVRow[] = [];
 
-      for (const term of searchTerms) {
-        if (allDecisions.length >= maxItems) break;
-
+      for (const year of yearsToFetch) {
         try {
-          const decisions = await this.searchDecisions(term, maxItems - allDecisions.length);
-          allDecisions.push(...decisions);
-          await sleep(2500); // Slightly longer delay for gov.br sites
+          const rows = await this.downloadCSV(year);
+          allRows.push(...rows);
+          console.log(`[${SCRAPER_CODE}] Downloaded ${rows.length} rows for year ${year}`);
+          await sleep(1000); // Brief delay between downloads
         } catch (error) {
-          const msg = `Search failed for "${term}": ${error instanceof Error ? error.message : String(error)}`;
+          const msg = `CSV download failed for ${year}: ${error instanceof Error ? error.message : String(error)}`;
           result.errors.push(msg);
           console.error(`[${SCRAPER_CODE}]`, msg);
         }
       }
 
-      // Dedup
+      if (allRows.length === 0) {
+        throw new Error('No CSV data downloaded for any year');
+      }
+
+      // Filter rows by relevance to search terms
+      const filtered = this.filterBySearchTerms(allRows, searchTerms);
+      console.log(`[${SCRAPER_CODE}] Filtered ${filtered.length} relevant rows from ${allRows.length} total`);
+
+      // Convert CSV rows to RawDecision format
+      const decisions = filtered.map(row => this.csvRowToDecision(row));
+
+      // Dedup by decision number
       const seen = new Set<string>();
-      const unique = allDecisions.filter(d => {
+      const unique = decisions.filter(d => {
         const key = normalizeDecisionNumber(d.decisionNumber);
         if (seen.has(key)) return false;
         seen.add(key);
@@ -159,6 +321,11 @@ class TCEPRScraper implements TribunalScraper {
         itemsError: result.itemsError,
         duration: result.duration,
         errorMessage: result.errors.length > 0 ? result.errors.join('; ') : undefined,
+        metadata: {
+          totalCSVRows: allRows.length,
+          filteredRows: filtered.length,
+          source: 'dados-abertos-csv',
+        },
       });
     } catch (error) {
       result.duration = Date.now() - startTime;
@@ -174,126 +341,84 @@ class TCEPRScraper implements TribunalScraper {
   }
 
   // ===========================
-  // Search
+  // CSV Download
   // ===========================
 
-  private async searchDecisions(term: string, limit: number): Promise<RawDecision[]> {
-    // ViaJuris (ASP.NET MVC) - try search via URL params first
-    const searchUrl = `${BASE_URL}/Pesquisa/Buscar?texto=${encodeURIComponent(term)}`;
+  private async downloadCSV(year: number): Promise<CSVRow[]> {
+    const fileName = `${year}_acordaos_base_de_dados.csv`;
+    const url = `${DADOS_ABERTOS_URL}?nomeArquivo=${fileName}`;
 
-    try {
-      const response = await rateLimitedFetch(searchUrl);
-      if (!response.ok) {
-        // Fallback: try alternate URL patterns
-        const altUrl = `${BASE_URL}/Pesquisa?texto=${encodeURIComponent(term)}`;
-        const altResponse = await rateLimitedFetch(altUrl, {}, 1000);
-        if (!altResponse.ok) {
-          throw new Error(`HTTP ${response.status} / ${altResponse.status}`);
-        }
-        const html = await altResponse.text();
-        return this.parseSearchResults(html, limit);
-      }
-      const html = await response.text();
-      return this.parseSearchResults(html, limit);
-    } catch (error) {
-      console.warn(`[${SCRAPER_CODE}] Search failed for "${term}":`, error);
-      return [];
-    }
-  }
-
-  // ===========================
-  // Parse HTML
-  // ===========================
-
-  private parseSearchResults(html: string, limit: number): RawDecision[] {
-    const $ = cheerio.load(html);
-    const decisions: RawDecision[] = [];
-
-    const selectors = [
-      // ViaJuris ASP.NET MVC patterns
-      '.resultado-pesquisa .item-resultado',
-      '.resultado-pesquisa .panel',
-      '.lista-resultados .item',
-      '.search-results .result-item',
-      // Bootstrap patterns (common in ASP.NET MVC)
-      '.panel-default',
-      '.list-group .list-group-item',
-      'table.table tbody tr',
-      // Generic fallbacks
-      '.resultado-item',
-      '#resultados .item',
-    ];
-
-    let $items: cheerio.Cheerio | null = null;
-    for (const selector of selectors) {
-      const found = $(selector);
-      if (found.length > 0) {
-        $items = found;
-        break;
-      }
-    }
-
-    if (!$items || $items.length === 0) {
-      // Fallback: find links
-      $('a[href*="DetalhesAcordao"], a[href*="Visualizar"], a[href*="acordao"], a[href*="decisao"]').each((i, el) => {
-        if (decisions.length >= limit) return false;
-
-        const $el = $(el);
-        const href = $el.attr('href') || '';
-        const text = $el.text().trim();
-
-        if (text.length > 20) {
-          decisions.push({
-            decisionNumber: this.extractNumber(text),
-            title: text.slice(0, 200),
-            ementa: text,
-            url: href.startsWith('http') ? href : `${BASE_URL}${href}`,
-          });
-        }
-      });
-
-      return decisions;
-    }
-
-    $items.each((i, el) => {
-      if (decisions.length >= limit) return false;
-
-      const $el = $(el);
-
-      const title = $el.find('h3 a, h4 a, .panel-title a, .titulo a, a[href*="DetalhesAcordao"], a[href*="Visualizar"]').first().text().trim();
-      const ementa = $el.find('.ementa, .resumo, .panel-body, .descricao, p').first().text().trim();
-      const relator = $el.find('[class*="relator"], .relator, dd:contains("Relator")').text().trim().replace(/^Relator:?\s*/i, '') || undefined;
-      const orgao = $el.find('[class*="orgao"], [class*="camara"], .orgao, dd:contains("Câmara"), dd:contains("Plen")').text().trim().replace(/^[ÓO]rg[ãa]o:?\s*/i, '') || undefined;
-      const data = $el.find('[class*="data"], time, .data, dd:contains("/")').text().trim() || undefined;
-      const link = $el.find('a[href*="DetalhesAcordao"], a[href*="Visualizar"], a').first().attr('href') || undefined;
-      const processo = $el.find('[class*="processo"], .processo, dd:contains("Processo")').text().trim().replace(/^Processo:?\s*/i, '') || undefined;
-
-      if (title || ementa) {
-        decisions.push({
-          decisionNumber: this.extractNumber(title || ementa),
-          title: title || ementa.slice(0, 200),
-          ementa: ementa || title,
-          relator,
-          orgaoJulgador: orgao,
-          dataJulgamento: data,
-          url: link ? (link.startsWith('http') ? link : `${BASE_URL}${link}`) : undefined,
-          processNumber: processo,
-        });
-      }
+    const response = await fetchWithRetry(url, {
+      timeoutMs: 60000, // 60s — CSV files can be large
+      maxRetries: 2,
     });
 
-    return decisions;
+    if (!response.ok) {
+      throw new Error(`HTTP ${response.status} for ${fileName}`);
+    }
+
+    const csvText = await response.text();
+
+    if (!csvText || csvText.length < 100) {
+      throw new Error(`Empty or too small CSV for ${year}`);
+    }
+
+    return parseCSV(csvText);
   }
 
-  private extractNumber(text: string): string {
-    // Pattern: "Acordao 1234/2024", "Decisao 5678/2023"
-    const match = text.match(/(ac[oó]rd[aã]o|decis[aã]o|parecer)\s+(?:n[.ºo°]\s*)?(\d[\d.]*\/\d{4})/i);
-    if (match) return match[2].replace(/\./g, '');
+  // ===========================
+  // Filter by search terms
+  // ===========================
 
-    const numMatch = text.match(/(\d{1,6}\/\d{4})/);
-    if (numMatch) return numMatch[1];
+  private filterBySearchTerms(rows: CSVRow[], searchTerms: string[]): CSVRow[] {
+    const termsLower = searchTerms.map(t => t.toLowerCase());
 
-    return `unknown-${text.slice(0, 20).replace(/\W/g, '-')}`;
+    return rows.filter(row => {
+      // Combine searchable fields into one lowercase string
+      const searchable = [
+        row.DsResumo,
+        row.DsTitulo,
+        row.DsClasseProcessual,
+        row.DsSubClasseProcessual,
+        row.DsTema,
+        row.Termos,
+        row.ReferenciaLegislativas,
+        row.DsEntidade,
+      ]
+        .join(' ')
+        .toLowerCase();
+
+      return termsLower.some(term => searchable.includes(term));
+    });
+  }
+
+  // ===========================
+  // CSV Row → RawDecision
+  // ===========================
+
+  private csvRowToDecision(row: CSVRow): RawDecision {
+    const nrAto = row.NrAto.trim();
+    const anoAto = row.AnoAto.trim();
+    const decisionNumber = nrAto && anoAto ? `${nrAto}/${anoAto}` : nrAto || 'unknown';
+
+    const nrProcesso = row.NrProcesso.trim();
+    const anoProcesso = row.AnoProcesso.trim();
+    const processNumber = nrProcesso && anoProcesso
+      ? `${nrProcesso}/${anoProcesso}`
+      : nrProcesso || undefined;
+
+    const urlPDF = row.UrlPDF.trim();
+
+    return {
+      decisionNumber,
+      title: row.DsTitulo.trim() || `Acordao ${decisionNumber} TCE-PR`,
+      ementa: row.DsResumo.trim(),
+      relator: row.NmRelator.trim() || undefined,
+      orgaoJulgador: row.DsColegiado.trim() || undefined,
+      dataJulgamento: extractDatePart(row.DtSessao),
+      url: urlPDF || undefined,
+      processNumber,
+    };
   }
 
   // ===========================
@@ -344,7 +469,7 @@ class TCEPRScraper implements TribunalScraper {
       themes: JSON.stringify(classification.themes),
       leiArticles: JSON.stringify(classification.leiArticles),
       suggestedCourses: classification.suggestedCourses,
-      sourceApi: 'tce-pr-web',
+      sourceApi: 'tce-pr-dados-abertos',
       approvalStatus: classification.approvalStatus,
       confidence: classification.confidence,
       classificationReasoning: classification.reasoning,

@@ -2,10 +2,19 @@
  * TCE-SP Scraper
  *
  * Tribunal de Contas do Estado de Sao Paulo
- * URL: https://www4.tce.sp.gov.br/pesquisa-de-jurisprudencia
+ * URL: https://www.tce.sp.gov.br/jurisprudencia/pesquisar
  *
  * Busca decisoes relacionadas a licitacoes e contratos administrativos.
- * Tenta API REST primeiro; fallback para scraping HTML com cheerio.
+ * Scraping HTML da tabela de resultados de jurisprudencia.
+ *
+ * Search URL pattern:
+ *   GET /jurisprudencia/pesquisar?txtTdPalvs=TERM&tipoBuscaTxt=Documento&tipoDocumento=3&quantTrechos=1&acao=Executa&offset=X
+ *
+ * Results: HTML table `table.table-docs` with pairs of rows:
+ *   1. Data row (tr.borda-superior): 8 cells (Doc, Nº Proc, Autuacao, Parte 1, Parte 2, Materia, Objeto, Exercicio)
+ *   2. Snippet row (tr > td colspan=8): ementa/excerpt text
+ *
+ * 20 results per page, paginated via offset parameter.
  */
 
 import * as cheerio from 'cheerio';
@@ -35,8 +44,11 @@ import { classifyDecision } from './classifier';
 // ===========================
 
 const SCRAPER_CODE = 'tce-sp';
-const BASE_URL = 'https://www4.tce.sp.gov.br';
-const _SEARCH_URL = `${BASE_URL}/pesquisa-de-jurisprudencia`;
+const BASE_URL = 'https://www.tce.sp.gov.br';
+const SEARCH_URL = `${BASE_URL}/jurisprudencia/pesquisar`;
+const HEALTH_CHECK_URL = `${BASE_URL}/jurisprudencia/`;
+const PDF_BASE_URL = 'https://jurisprudencia.tce.sp.gov.br/arqs_juri/pdf';
+const RESULTS_PER_PAGE = 20;
 
 // ===========================
 // Types for parsed results
@@ -71,7 +83,7 @@ class TCESPScraper implements TribunalScraper {
 
   async healthCheck(): Promise<ScraperHealthStatus> {
     try {
-      const response = await fetchWithRetry(`${BASE_URL}/pesquisa-de-jurisprudencia`, { timeoutMs: 15000, maxRetries: 1 });
+      const response = await fetchWithRetry(HEALTH_CHECK_URL, { timeoutMs: 15000, maxRetries: 1 });
       const lastLog = await prisma.scraperHealthLog.findFirst({
         where: { scraperCode: SCRAPER_CODE },
         orderBy: { runAt: 'desc' },
@@ -180,7 +192,6 @@ class TCESPScraper implements TribunalScraper {
   // ===========================
 
   private async searchDecisions(term: string, limit: number): Promise<RawDecision[]> {
-    // Try API search first, fallback to HTML scraping
     try {
       return await this.searchViaHTML(term, limit);
     } catch (error) {
@@ -194,100 +205,190 @@ class TCESPScraper implements TribunalScraper {
   // ===========================
 
   private async searchViaHTML(term: string, limit: number): Promise<RawDecision[]> {
-    const searchUrl = `${BASE_URL}/resultado-da-pesquisa-jurisprudencia?keys=${encodeURIComponent(term)}`;
+    const allResults: RawDecision[] = [];
+    let offset = 0;
 
-    const response = await rateLimitedFetch(searchUrl);
-    if (!response.ok) {
-      throw new Error(`HTTP ${response.status} for search: ${term}`);
+    while (allResults.length < limit) {
+      const params = new URLSearchParams({
+        txtTdPalvs: term,
+        tipoBuscaTxt: 'Documento',
+        tipoDocumento: '3',
+        quantTrechos: '1',
+        acao: 'Executa',
+      });
+
+      if (offset > 0) {
+        params.set('offset', String(offset));
+      }
+
+      const url = `${SEARCH_URL}?${params.toString()}`;
+      console.log(`[${SCRAPER_CODE}] Fetching: ${url}`);
+
+      const response = await rateLimitedFetch(url);
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status} for search: ${term} (offset=${offset})`);
+      }
+
+      const html = await response.text();
+      const { decisions, totalResults } = this.parseSearchResults(html, limit - allResults.length);
+
+      if (decisions.length === 0) {
+        // No more results on this page
+        break;
+      }
+
+      allResults.push(...decisions);
+
+      // Check if we have more pages
+      offset += RESULTS_PER_PAGE;
+      if (offset >= totalResults || decisions.length < RESULTS_PER_PAGE) {
+        break;
+      }
+
+      // Rate limit between pages
+      await sleep(1500);
     }
 
-    const html = await response.text();
-    return this.parseSearchResults(html, limit);
+    return allResults.slice(0, limit);
   }
 
   // ===========================
   // Parse search result page
   // ===========================
 
-  private parseSearchResults(html: string, limit: number): RawDecision[] {
+  private parseSearchResults(
+    html: string,
+    limit: number
+  ): { decisions: RawDecision[]; totalResults: number } {
     const $ = cheerio.load(html);
     const decisions: RawDecision[] = [];
 
-    // Try common patterns for search results
-    const selectors = [
-      // Drupal views patterns (TCE-SP uses Drupal with Search API Solr)
-      '.view-content .views-row',
-      '.view-content article',
-      '.view-content .node',
-      '.search-results .search-result',
-      '.search-results li',
-      // Generic fallbacks
-      '.resultado-item',
-      '.list-group-item',
-      'table.resultado tbody tr',
-    ];
-
-    let $items: cheerio.Cheerio | null = null;
-    for (const selector of selectors) {
-      const found = $(selector);
-      if (found.length > 0) {
-        $items = found;
-        break;
-      }
+    // Extract total results count from: <h3 class="nopadding">Foram encontrados 60447 registros</h3>
+    let totalResults = 0;
+    const totalText = $('h3.nopadding').text().trim();
+    const totalMatch = totalText.match(/(\d[\d.]*)\s*registros?/i);
+    if (totalMatch) {
+      totalResults = parseInt(totalMatch[1].replace(/\./g, ''), 10);
     }
 
-    if (!$items || $items.length === 0) {
-      // Fallback: try to extract from any structured content
-      $('a[href*="jurisprudencia"], a[href*="acordao"], a[href*="decisao"]').each((i, el) => {
-        if (decisions.length >= limit) return false;
-
-        const $el = $(el);
-        const href = $el.attr('href') || '';
-        const text = $el.text().trim();
-
-        if (text.length > 20) {
-          decisions.push({
-            decisionNumber: this.extractDecisionNumberFromText(text),
-            title: text.slice(0, 200),
-            ementa: text,
-            url: href.startsWith('http') ? href : `${BASE_URL}${href}`,
-          });
-        }
-      });
-
-      return decisions;
+    // Find the results table
+    const $table = $('table.table-docs');
+    if ($table.length === 0) {
+      console.warn(`[${SCRAPER_CODE}] No table.table-docs found in HTML`);
+      return { decisions, totalResults };
     }
 
-    $items.each((i, el) => {
+    // Each result is a pair of rows:
+    //   1. tr.borda-superior — data row with 8 cells
+    //   2. next tr — snippet row with td[colspan=8]
+    const $dataRows = $table.find('tr.borda-superior');
+
+    $dataRows.each((i, el) => {
       if (decisions.length >= limit) return false;
 
-      const $el = $(el);
+      const $row = $(el);
+      const $cells = $row.find('td');
 
-      // Extract decision data (Drupal-compatible selectors)
-      const title = $el.find('h3 a, h2 a, .views-field-title a, .field--name-title a, .title a').first().text().trim();
-      const ementa = $el.find('.views-field-body, .field--name-body, .field--name-field-ementa, .ementa, p.summary, .search-snippet').first().text().trim();
-      const relator = $el.find('.views-field-field-relator, .field--name-field-relator, [class*="relator"]').text().trim() || undefined;
-      const orgao = $el.find('.views-field-field-orgao, .field--name-field-orgao, [class*="orgao"], [class*="camara"]').text().trim() || undefined;
-      const data = $el.find('.views-field-field-data, .field--name-field-data, .date-display-single, time, [class*="data"]').text().trim() || undefined;
-      const link = $el.find('a').first().attr('href') || undefined;
-      const processo = $el.find('.views-field-field-processo, .field--name-field-processo, [class*="processo"]').text().trim() || undefined;
+      if ($cells.length < 8) return; // skip malformed rows
 
-      if (title || ementa) {
-        const decisionNumber = this.extractDecisionNumberFromText(title || ementa);
-        decisions.push({
-          decisionNumber,
-          title: title || ementa.slice(0, 200),
-          ementa: ementa || title,
-          relator: relator || undefined,
-          orgaoJulgador: orgao || undefined,
-          dataJulgamento: data || undefined,
-          url: link ? (link.startsWith('http') ? link : `${BASE_URL}${link}`) : undefined,
-          processNumber: processo || undefined,
-        });
+      // Cell 0: Doc type — contains link to PDF, e.g. <a href="https://jurisprudencia.tce.sp.gov.br/arqs_juri/pdf/12345.pdf">Acordao</a>
+      const $docCell = $cells.eq(0);
+      const $docLink = $docCell.find('a');
+      const docType = $docLink.text().trim() || $docCell.text().trim();
+      const pdfUrl = $docLink.attr('href') || '';
+
+      // Cell 1: Nº Proc — contains link like <a href="exibir?proc=10288/026/09">10288/026/09</a>
+      const $procCell = $cells.eq(1);
+      const $procLink = $procCell.find('a');
+      const processNumber = $procLink.text().trim() || $procCell.text().trim();
+      const procHref = $procLink.attr('href') || '';
+
+      // Cell 2: Autuacao (date)
+      const autuacao = $cells.eq(2).text().trim();
+
+      // Cell 3: Parte 1
+      const parte1 = $cells.eq(3).text().trim();
+
+      // Cell 4: Parte 2
+      const parte2 = $cells.eq(4).text().trim();
+
+      // Cell 5: Materia
+      const materia = $cells.eq(5).text().trim();
+
+      // Cell 6: Objeto
+      const objeto = $cells.eq(6).text().trim();
+
+      // Cell 7: Exercicio (year)
+      const exercicio = $cells.eq(7).text().trim();
+
+      // Get the snippet row — the next sibling tr
+      const $snippetRow = $row.next('tr');
+      let ementa = '';
+      if ($snippetRow.length > 0) {
+        const $snippetTd = $snippetRow.find('td[colspan]');
+        if ($snippetTd.length > 0) {
+          // Remove highlight spans but keep their text content
+          $snippetTd.find('span.texto-resultado-busca').each((_, span) => {
+            $(span).replaceWith($(span).text());
+          });
+          ementa = $snippetTd.text().trim();
+        }
       }
+
+      // Build the decision number from the PDF filename or process number
+      let decisionNumber = '';
+
+      // Try to extract number from PDF URL (e.g. .../pdf/12345.pdf -> 12345)
+      const pdfMatch = pdfUrl.match(/\/(\d+)\.pdf/i);
+      if (pdfMatch) {
+        decisionNumber = pdfMatch[1];
+      } else if (processNumber) {
+        // Use process number as fallback
+        decisionNumber = processNumber.replace(/\//g, '-');
+      } else {
+        decisionNumber = `unknown-${i}`;
+      }
+
+      // Build title from available info
+      const titleParts: string[] = [];
+      if (docType) titleParts.push(docType);
+      if (processNumber) titleParts.push(`- Proc. ${processNumber}`);
+      if (materia) titleParts.push(`- ${materia}`);
+      const title = titleParts.join(' ') || `Decisao TCE-SP ${decisionNumber}`;
+
+      // Build URL: prefer PDF link, fallback to process detail page
+      let url = '';
+      if (pdfUrl) {
+        url = pdfUrl.startsWith('http') ? pdfUrl : `${PDF_BASE_URL}/${pdfUrl}`;
+      } else if (procHref) {
+        url = procHref.startsWith('http') ? procHref : `${BASE_URL}/jurisprudencia/${procHref}`;
+      }
+
+      // Build ementa: combine snippet with metadata for context
+      const ementaParts: string[] = [];
+      if (ementa) ementaParts.push(ementa);
+      if (!ementa) {
+        // If no snippet, build from metadata
+        if (objeto) ementaParts.push(`Objeto: ${objeto}`);
+        if (materia) ementaParts.push(`Materia: ${materia}`);
+        if (parte1) ementaParts.push(`Parte 1: ${parte1}`);
+        if (parte2) ementaParts.push(`Parte 2: ${parte2}`);
+      }
+
+      const decision: RawDecision = {
+        decisionNumber,
+        title,
+        ementa: ementaParts.join('. ') || title,
+        dataJulgamento: autuacao || undefined,
+        url: url || undefined,
+        processNumber: processNumber || undefined,
+      };
+
+      decisions.push(decision);
     });
 
-    return decisions;
+    console.log(`[${SCRAPER_CODE}] Parsed ${decisions.length} decisions (total: ${totalResults})`);
+    return { decisions, totalResults };
   }
 
   // ===========================
