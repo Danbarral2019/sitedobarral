@@ -210,6 +210,20 @@ Exemplo de resposta: ["variação 1", "variação 2"]`;
       apiLogger.warn({ error: err instanceof Error ? err.message : String(err) }, 'Query expansion failed');
     }
 
+    // 5a. Detect if user explicitly asks for state tribunal decisions (TCEs)
+    const tribunalKeywords = [
+      'tce', 'tribunal de contas estadual', 'tribunais de contas estaduais',
+      'tce-sp', 'tce-mg', 'tce-pr', 'tce-sc', 'tce-rj', 'tce-rs', 'tce-pe',
+      'tribunal estadual', 'decisão estadual', 'decisões estaduais',
+      'jurisprudência estadual', 'corte de contas estadual',
+    ];
+    const queryLowerForTribunal = query.toLowerCase();
+    const includeTribunalDecisions = tribunalKeywords.some(kw => queryLowerForTribunal.includes(kw));
+
+    if (includeTribunalDecisions) {
+      apiLogger.info('Tribunal decisions included (user explicitly requested)');
+    }
+
     // 5a. Hybrid search: combina busca semântica (vetor) + FTS (BM25) via RRF
     const searchResponse = await hybridSearch({
       query: semanticQuery,
@@ -220,6 +234,7 @@ Exemplo de resposta: ["variação 1", "variação 2"]`;
       limit: Math.max(maxResults * 5, 60),
       alpha: 0.6,
       useCache,
+      includeTribunalDecisions,
     });
 
     apiLogger.info({ resultCount: searchResponse.results.length }, 'Hybrid search completed');

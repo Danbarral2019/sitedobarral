@@ -36,6 +36,7 @@ export interface SearchOptions {
   threshold?: number;     // Similaridade minima (0-1, default: 0.5)
   useCache?: boolean;     // Usar cache (default: true)
   includeChunkContent?: boolean; // Incluir conteudo do chunk (default: true)
+  includeTribunalDecisions?: boolean; // Incluir decisoes de TCEs estaduais (default: false)
 }
 
 export interface SearchResponse {
@@ -85,7 +86,7 @@ export async function semanticSearch(
   }
 
   // Cache key baseado na query e opcoes
-  const cacheKey = `vector-search:${hashQuery(query)}:${courseId || 'all'}:${category || 'all'}:${limit}:${threshold}:${(options.excludeCategories || []).join(',')}`;
+  const cacheKey = `vector-search:${hashQuery(query)}:${courseId || 'all'}:${category || 'all'}:${limit}:${threshold}:${(options.excludeCategories || []).join(',')}:td=${options.includeTribunalDecisions ? '1' : '0'}`;
 
   // Tenta usar cache
   if (useCache) {
@@ -161,6 +162,7 @@ async function executeVectorSearch(
     limit = 5,
     threshold,
     includeChunkContent = true,
+    includeTribunalDecisions = false,
   } = options;
 
   // 1. Gera embedding da query
@@ -213,22 +215,54 @@ async function executeVectorSearch(
   params.push(limit * 2);
   paramIndex++;
 
-  const decThresholdParamIdx = paramIndex;
-  params.push(threshold);
-  paramIndex++;
+  // Parâmetros para decision_scores (somente se includeTribunalDecisions)
+  let decThresholdParamIdx = 0;
+  let decLimitParamIdx = 0;
+  if (includeTribunalDecisions) {
+    decThresholdParamIdx = paramIndex;
+    params.push(threshold);
+    paramIndex++;
 
-  const decLimitParamIdx = paramIndex;
-  params.push(limit * 2);
-  paramIndex++;
+    decLimitParamIdx = paramIndex;
+    params.push(limit * 2);
+    paramIndex++;
+  }
 
   const finalLimitParamIdx = paramIndex;
   params.push(limit * 4);
   paramIndex++;
 
-  // 3. Executa busca vetorial com pgvector (UNION ALL: DocumentChunk + LegislativeActChunk)
+  // 3. Executa busca vetorial com pgvector (UNION ALL: DocumentChunk + LegislativeActChunk [+ TribunalDecisionChunk])
+  // TribunalDecisionChunk só é incluído quando o usuário pede explicitamente
   // Usa <=> para distancia coseno (1 - similaridade)
-  // Ordena por similaridade (menor distancia = mais similar)
   // embeddingStr é gerado internamente pelo Gemini, seguro para inline
+  const decisionCte = includeTribunalDecisions ? `,
+    decision_scores AS (
+      SELECT
+        td.id as document_id,
+        td."fullIdentifier" as document_title,
+        td."decisionType" as category,
+        tc.content as chunk_content,
+        tc."chunkIndex" as chunk_index,
+        1 - (tc.embedding <=> '${embeddingStr}'::vector) as similarity,
+        td.url,
+        NULL as course_id,
+        true as is_common,
+        td.themes as tags,
+        td."leiArticles" as lei_articles,
+        'tribunal-decision' as source_type,
+        td."dataJulgamento" as uploaded_at
+      FROM "TribunalDecisionChunk" tc
+      JOIN "TribunalDecision" td ON tc."tribunalDecisionId" = td.id
+      WHERE td."embeddingStatus" = 'completed'
+        AND td."approvalStatus" IN ('auto_approved', 'manually_approved')
+    )` : '';
+
+  const decisionUnion = includeTribunalDecisions
+    ? `UNION ALL
+      (SELECT * FROM decision_scores WHERE similarity >= $${decThresholdParamIdx} ORDER BY similarity DESC LIMIT $${decLimitParamIdx})`
+    : '';
+
   const results = await prisma.$queryRawUnsafe<Array<{
     document_id: string;
     document_title: string;
@@ -282,33 +316,12 @@ async function executeVectorSearch(
       FROM "LegislativeActChunk" lc
       JOIN "LegislativeAct" la ON lc."legislativeActId" = la.id
       WHERE la."embeddingStatus" = 'completed'
-    ),
-    decision_scores AS (
-      SELECT
-        td.id as document_id,
-        td."fullIdentifier" as document_title,
-        td."decisionType" as category,
-        tc.content as chunk_content,
-        tc."chunkIndex" as chunk_index,
-        1 - (tc.embedding <=> '${embeddingStr}'::vector) as similarity,
-        td.url,
-        NULL as course_id,
-        true as is_common,
-        td.themes as tags,
-        td."leiArticles" as lei_articles,
-        'tribunal-decision' as source_type,
-        td."dataJulgamento" as uploaded_at
-      FROM "TribunalDecisionChunk" tc
-      JOIN "TribunalDecision" td ON tc."tribunalDecisionId" = td.id
-      WHERE td."embeddingStatus" = 'completed'
-        AND td."approvalStatus" IN ('auto_approved', 'manually_approved')
-    )
+    )${decisionCte}
     SELECT * FROM (
       (SELECT * FROM doc_scores WHERE similarity >= $${thresholdParamIdx} ORDER BY similarity DESC LIMIT $${docLimitParamIdx})
       UNION ALL
       (SELECT * FROM act_scores WHERE similarity >= $${actThresholdParamIdx} ORDER BY similarity DESC LIMIT $${actLimitParamIdx})
-      UNION ALL
-      (SELECT * FROM decision_scores WHERE similarity >= $${decThresholdParamIdx} ORDER BY similarity DESC LIMIT $${decLimitParamIdx})
+      ${decisionUnion}
     ) combined
     ORDER BY similarity DESC
     LIMIT $${finalLimitParamIdx}

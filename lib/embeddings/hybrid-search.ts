@@ -23,6 +23,7 @@ export interface HybridSearchOptions {
   limit?: number;
   alpha?: number;  // Peso do vetor vs FTS (0.6 = 60% vetor, 40% FTS)
   useCache?: boolean;
+  includeTribunalDecisions?: boolean; // Incluir decisoes de TCEs estaduais (default: false)
 }
 
 export interface HybridSearchResponse {
@@ -56,6 +57,7 @@ export async function hybridSearch(
     limit = 10,
     alpha = 0.6,
     useCache = true,
+    includeTribunalDecisions = false,
   } = options;
 
   const vectorOptions: SearchOptions = {
@@ -65,6 +67,7 @@ export async function hybridSearch(
     limit: limit * 3,
     useCache,
     includeChunkContent: true,
+    includeTribunalDecisions,
   };
 
   const ftsOptions: DocumentFTSOptions = {
