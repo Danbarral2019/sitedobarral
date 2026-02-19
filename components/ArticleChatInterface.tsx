@@ -4,7 +4,6 @@ import { useState, useRef, useEffect } from 'react';
 import { Sparkles, Loader2, MessageSquare, FileText, RefreshCw, AlertCircle, ThumbsUp, ThumbsDown, History, Lightbulb, FileDown } from 'lucide-react';
 import ArticleChatHistory from './ArticleChatHistory';
 import { getSuggestedQuestions } from '@/data/lei-14133-suggested-questions';
-import { exportCurrentConversation } from '@/lib/pdf-generator';
 
 interface Source {
   id: string;
@@ -229,9 +228,10 @@ export default function ArticleChatInterface({
     }
   };
 
-  const handleExportPDF = () => {
+  const handleExportPDF = async () => {
     if (!lastQuestion.trim() || !answer) return;
 
+    const { exportCurrentConversation } = await import('@/lib/pdf-generator');
     exportCurrentConversation(
       articleNumber,
       lastQuestion,

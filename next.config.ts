@@ -15,7 +15,12 @@ const nextConfig: NextConfig = {
   output: 'standalone',
 
   // Garante que módulos server-only não sejam incluídos no bundle do cliente
-  serverExternalPackages: ['qrcode', 'bcryptjs', 'jsonwebtoken'],
+  serverExternalPackages: ['qrcode', 'bcryptjs', 'jsonwebtoken', 'xlsx'],
+
+  // Tree-shake barrel exports de pacotes pesados
+  experimental: {
+    optimizePackageImports: ['lucide-react', '@radix-ui/react-icons', 'date-fns'],
+  },
 
   // Otimização de imagens
   images: {

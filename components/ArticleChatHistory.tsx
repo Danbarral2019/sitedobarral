@@ -2,7 +2,6 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { History, X, MessageSquare, Calendar, ThumbsUp, ThumbsDown, Loader2, FileDown } from 'lucide-react';
-import { generateConversationPDF } from '@/lib/pdf-generator';
 
 interface HistoryMessage {
   id: string;
@@ -129,9 +128,10 @@ export default function ArticleChatHistory({
     setExpandedMessageId(expandedMessageId === messageId ? null : messageId);
   };
 
-  const handleExportPDF = () => {
+  const handleExportPDF = async () => {
     if (messages.length === 0) return;
 
+    const { generateConversationPDF } = await import('@/lib/pdf-generator');
     generateConversationPDF({
       articleNumber,
       articleTitle: `Artigo ${articleNumber} da Lei 14.133/2021`,

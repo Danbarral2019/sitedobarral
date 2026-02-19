@@ -11,23 +11,11 @@ Sentry.init({
   environment: process.env.NODE_ENV,
 
   // Performance Monitoring
-  // Capture 10% of transactions for performance monitoring
-  tracesSampleRate: 0.1,
+  // Capture 5% of transactions for performance monitoring
+  tracesSampleRate: 0.05,
 
-  // Session Replay
-  // Capture 10% of sessions for replay
-  replaysSessionSampleRate: 0.1,
-  // Capture 100% of sessions with errors
-  replaysOnErrorSampleRate: 1.0,
-
-  // Integrations
-  integrations: [
-    Sentry.replayIntegration({
-      // Mask all text for privacy
-      maskAllText: true,
-      blockAllMedia: true,
-    }),
-  ],
+  // No heavy integrations (Session Replay removed to save ~115KB)
+  integrations: [],
 
   // Debug mode (only in development)
   debug: false,
