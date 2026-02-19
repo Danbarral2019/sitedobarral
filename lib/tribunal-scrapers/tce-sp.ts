@@ -19,14 +19,13 @@
 
 import * as cheerio from 'cheerio';
 import { prisma } from '@/lib/prisma';
-import {
+import type {
   TribunalScraper,
   TribunalScrapeOptions,
   TribunalScrapeResult,
   ScraperHealthStatus,
-  registerScraper,
-  DEFAULT_SEARCH_TERMS,
 } from './index';
+import { DEFAULT_SEARCH_TERMS } from './utils';
 import {
   fetchWithRetry,
   rateLimitedFetch,
@@ -481,7 +480,6 @@ class TCESPScraper implements TribunalScraper {
 // ===========================
 
 const tceSPScraper = new TCESPScraper();
-registerScraper(tceSPScraper);
 
 export { tceSPScraper };
 export default tceSPScraper;

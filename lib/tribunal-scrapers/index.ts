@@ -2,7 +2,7 @@
  * Tribunal Scrapers - Interface Principal e Registry
  *
  * Sistema unificado para scraping de decisoes de tribunais de contas.
- * Cada scraper implementa a interface TribunalScraper e se auto-registra.
+ * Cada scraper implementa a interface TribunalScraper.
  */
 
 // ===========================
@@ -70,16 +70,18 @@ export function getScrapersByType(type: 'tce' | 'judicial'): TribunalScraper[] {
   return getAllScrapers().filter(s => s.type === type);
 }
 
+// Re-export DEFAULT_SEARCH_TERMS from utils (canonical location)
+export { DEFAULT_SEARCH_TERMS } from './utils';
+
 // ===========================
-// Default search terms for licitacoes/contratos
+// Register all scrapers
+// (imported AFTER registry is initialized — no circular TDZ)
 // ===========================
 
-export const DEFAULT_SEARCH_TERMS = [
-  'licitacao',
-  'contrato administrativo',
-  'lei 14.133',
-  'pregao eletronico',
-  'dispensa de licitacao',
-  'inexigibilidade',
-  'registro de precos',
-];
+import { tceSPScraper } from './tce-sp';
+import { tcePRScraper } from './tce-pr';
+import { tceMGScraper } from './tce-mg';
+
+registerScraper(tceSPScraper);
+registerScraper(tcePRScraper);
+registerScraper(tceMGScraper);

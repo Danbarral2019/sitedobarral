@@ -16,12 +16,11 @@
  * a logica original de scraping.
  */
 
-import {
+import type {
   TribunalScraper,
   TribunalScrapeOptions,
   TribunalScrapeResult,
   ScraperHealthStatus,
-  registerScraper,
 } from './index';
 import {
   logScraperHealth,
@@ -84,7 +83,6 @@ class TCEMGScraper implements TribunalScraper {
 // ===========================
 
 const tceMGScraper = new TCEMGScraper();
-registerScraper(tceMGScraper);
 
 export { tceMGScraper };
 export default tceMGScraper;

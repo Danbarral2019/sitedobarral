@@ -16,14 +16,13 @@
  */
 
 import { prisma } from '@/lib/prisma';
-import {
+import type {
   TribunalScraper,
   TribunalScrapeOptions,
   TribunalScrapeResult,
   ScraperHealthStatus,
-  registerScraper,
-  DEFAULT_SEARCH_TERMS,
 } from './index';
+import { DEFAULT_SEARCH_TERMS } from './utils';
 import {
   fetchWithRetry,
   normalizeDecisionNumber,
@@ -492,7 +491,6 @@ class TCEPRScraper implements TribunalScraper {
 // ===========================
 
 const tcePRScraper = new TCEPRScraper();
-registerScraper(tcePRScraper);
 
 export { tcePRScraper };
 export default tcePRScraper;

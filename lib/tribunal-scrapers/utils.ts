@@ -226,3 +226,17 @@ export async function logScraperHealth(
     console.error(`[${scraperCode}] Failed to log health:`, error);
   }
 }
+
+// ===========================
+// Default search terms for licitacoes/contratos
+// ===========================
+
+export const DEFAULT_SEARCH_TERMS = [
+  'licitacao',
+  'contrato administrativo',
+  'lei 14.133',
+  'pregao eletronico',
+  'dispensa de licitacao',
+  'inexigibilidade',
+  'registro de precos',
+];
