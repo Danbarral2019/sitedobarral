@@ -4,6 +4,7 @@ import { analyzeRelevanceTCU, suggestCoursesTCU } from '@/lib/tcu-module';
 import { LeiIndexer } from '@/lib/lei-indexer';
 import { identifyAndAlertHighlights } from '@/lib/tcu-highlight-analyzer';
 import { verifyCronAuth } from '@/lib/cron-auth';
+import { classifyDecision } from '@/lib/tribunal-scrapers/classifier';
 
 /**
  * Cron Job: Sincronização automática de acórdãos do TCU
@@ -370,6 +371,50 @@ export async function GET(request: NextRequest) {
 
         newDocIds.push(created.id);
         imported++;
+
+        // Dual-write: upsert em TribunalDecision para /jurisprudencia
+        try {
+          const fullId = `TCU Acordao ${num}/${ano}`;
+          const classification = await classifyDecision({
+            title,
+            ementa: sumario || titulo || '',
+            tribunalCode: 'tcu',
+          });
+
+          await prisma.tribunalDecision.upsert({
+            where: { fullIdentifier: fullId },
+            create: {
+              tribunalCode: 'tcu',
+              tribunalName: 'Tribunal de Contas da União',
+              decisionType: 'acordao',
+              decisionNumber: `${num}/${ano}`,
+              year: ano,
+              fullIdentifier: fullId,
+              title,
+              ementa: sumario || titulo || '',
+              relator: item.relator || null,
+              orgaoJulgador: colegiado || null,
+              dataJulgamento: dataJulgamento,
+              url: docUrl,
+              pdfUrl: item.urlArquivoPDF || item.urlArquivo || null,
+              isRelevant: true,
+              relevanceScore: classification.relevanceScore,
+              themes: JSON.stringify(classification.themes),
+              leiArticles: JSON.stringify(classification.leiArticles),
+              suggestedCourses: classification.suggestedCourses || null,
+              sourceApi: 'tcu-dados-abertos',
+              sourceId: item.key || null,
+              approvalStatus: 'auto_approved',
+              confidence: classification.confidence,
+              classificationReasoning: classification.reasoning,
+              embeddingStatus: 'pending',
+            },
+            update: {}, // Idempotente: não sobrescreve se já existe
+          });
+        } catch (tdErr) {
+          console.error(`[Sync TCU] Erro dual-write TribunalDecision ${num}/${ano}:`,
+            tdErr instanceof Error ? tdErr.message : tdErr);
+        }
       } catch (err) {
         errors++;
         console.error(`[Sync TCU] Erro ao importar ${item.numeroAcordao}/${item.anoAcordao}:`,
@@ -379,6 +424,34 @@ export async function GET(request: NextRequest) {
 
     // 6. Enriquecer novos acórdãos (resumo Gemini + indexação Lei 14.133)
     const enrichment = await enrichNewDocuments(newDocIds);
+
+    // 6b. Propagar summaries e leiArticles para TribunalDecision
+    if (enrichment.summaries > 0 || enrichment.leiIndexed > 0) {
+      try {
+        const enrichedDocs = await prisma.document.findMany({
+          where: { id: { in: newDocIds } },
+          select: { acordaoNumero: true, acordaoAno: true, summary: true, leiArticles: true },
+        });
+
+        for (const doc of enrichedDocs) {
+          if (!doc.acordaoNumero || !doc.acordaoAno) continue;
+          const fullId = `TCU Acordao ${doc.acordaoNumero}/${doc.acordaoAno}`;
+          const updateData: Record<string, unknown> = {};
+          if (doc.summary) updateData.summary = doc.summary;
+          if (doc.leiArticles) updateData.leiArticles = doc.leiArticles;
+
+          if (Object.keys(updateData).length > 0) {
+            await prisma.tribunalDecision.update({
+              where: { fullIdentifier: fullId },
+              data: updateData,
+            }).catch(() => { /* ignore if not found */ });
+          }
+        }
+        console.log(`[Sync TCU] Propagados summaries/leiArticles para TribunalDecision`);
+      } catch (propErr) {
+        console.error('[Sync TCU] Erro propagação TribunalDecision:', propErr);
+      }
+    }
 
     // 7. Identificar acórdãos com potencial editorial
     let highlightCount = 0;

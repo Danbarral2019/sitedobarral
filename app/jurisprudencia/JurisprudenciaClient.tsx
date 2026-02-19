@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
-import { Search, Scale, Calendar, ArrowRight, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Search, Scale, Calendar, ArrowRight, ChevronLeft, ChevronRight, Sparkles } from 'lucide-react';
 
 interface Decision {
   id: string;
@@ -29,6 +29,7 @@ interface ApiResponse {
 }
 
 const TRIBUNALS = [
+  { code: 'tcu', label: 'TCU' },
   { code: 'tce-sp', label: 'TCE-SP' },
   { code: 'tce-pr', label: 'TCE-PR' },
   { code: 'tce-mg', label: 'TCE-MG' },
@@ -60,6 +61,7 @@ function tribunalLabel(code: string): string {
 
 function tribunalColor(code: string): string {
   const colors: Record<string, string> = {
+    'tcu': 'bg-amber-100 text-amber-800',
     'tce-sp': 'bg-blue-100 text-blue-800',
     'tce-mg': 'bg-green-100 text-green-800',
     'tce-pr': 'bg-purple-100 text-purple-800',
@@ -136,7 +138,7 @@ export default function JurisprudenciaClient() {
             Jurisprudência sobre Licitações
           </h1>
           <p className="text-xl text-white/90 max-w-2xl mx-auto">
-            Decisões de Tribunais de Contas sobre licitações e contratos administrativos na Lei 14.133/2021
+            Decisões do TCU e de Tribunais de Contas Estaduais sobre licitações e contratos administrativos na Lei 14.133/2021
           </p>
         </div>
       </div>
@@ -203,6 +205,27 @@ export default function JurisprudenciaClient() {
                 {theme}
               </button>
             ))}
+          </div>
+        </div>
+
+        {/* CTA Teaser */}
+        <div className="bg-gradient-to-r from-amber-50 to-blue-50 border border-amber-200 rounded-xl p-6 mb-8">
+          <div className="flex items-start gap-4">
+            <div className="p-2 bg-amber-100 rounded-lg shrink-0">
+              <Sparkles className="w-6 h-6 text-amber-600" />
+            </div>
+            <div className="flex-1">
+              <h3 className="font-bold text-gray-900 mb-1">Consulte com Inteligência Artificial</h3>
+              <p className="text-sm text-gray-600 mb-3">
+                Na Área do Aluno, faça perguntas sobre acórdãos e receba análises com referências à Lei 14.133/2021
+              </p>
+              <Link
+                href="/planos"
+                className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition-colors"
+              >
+                Acesse a Área do Aluno <ArrowRight className="w-4 h-4" />
+              </Link>
+            </div>
           </div>
         </div>
 

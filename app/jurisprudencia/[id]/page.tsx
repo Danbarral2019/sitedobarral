@@ -5,7 +5,7 @@ import { useParams } from 'next/navigation';
 import Link from 'next/link';
 import {
   Scale, ArrowLeft, ExternalLink, Calendar, User, Building2,
-  Tag, BookOpen, Loader2
+  Tag, BookOpen, Loader2, Sparkles
 } from 'lucide-react';
 
 interface DecisionDetail {
@@ -51,6 +51,7 @@ function extractArticleNumbers(articles: string[]): number[] {
 
 function tribunalLabel(code: string): string {
   const map: Record<string, string> = {
+    'tcu': 'TCU',
     'tce-sp': 'TCE-SP',
     'tce-pr': 'TCE-PR',
     'tce-mg': 'TCE-MG',
@@ -60,6 +61,7 @@ function tribunalLabel(code: string): string {
 
 function tribunalColor(code: string): string {
   const colors: Record<string, string> = {
+    'tcu': 'bg-amber-100 text-amber-800',
     'tce-sp': 'bg-blue-100 text-blue-800',
     'tce-mg': 'bg-green-100 text-green-800',
     'tce-pr': 'bg-purple-100 text-purple-800',
@@ -227,6 +229,17 @@ export default function JurisprudenciaDetailPage() {
         <div className="bg-white rounded-xl shadow-sm border p-6 mb-8">
           <h2 className="text-lg font-bold text-gray-900 mb-3">Ementa</h2>
           <p className="text-gray-700 leading-relaxed whitespace-pre-line">{decision.ementa}</p>
+        </div>
+
+        {/* CTA Teaser */}
+        <div className="bg-gradient-to-r from-amber-50 to-blue-50 border border-amber-200 rounded-xl p-5 mb-8 flex items-center gap-4">
+          <Sparkles className="w-5 h-5 text-amber-600 shrink-0" />
+          <p className="text-sm text-gray-700 flex-1">
+            Para análises completas com IA, acesse a{' '}
+            <Link href="/planos" className="text-blue-600 font-semibold hover:underline">
+              Área do Aluno
+            </Link>
+          </p>
         </div>
 
         {/* Themes */}
