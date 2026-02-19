@@ -4,7 +4,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { useState, memo, useEffect, useRef } from 'react';
 import { usePathname } from 'next/navigation';
-import { Menu, X, ChevronDown, User, FileText, Mail, Home, LogIn, BookOpen, Scale, CreditCard } from 'lucide-react';
+import { Menu, X, ChevronDown, User, FileText, Mail, Home, LogIn, BookOpen, Scale, CreditCard, Gavel } from 'lucide-react';
 import { courses } from '@/data/courses';
 
 export const Header = memo(function Header() {
@@ -136,6 +136,15 @@ export const Header = memo(function Header() {
             </Link>
 
             <Link
+              href="/jurisprudencia"
+              aria-current={isActive('/jurisprudencia') ? 'page' : undefined}
+              className={`flex items-center space-x-1 transition-colors font-poppins text-sm focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-brand-600 rounded ${isActive('/jurisprudencia') ? 'text-white font-semibold' : 'text-white/90 hover:text-white'}`}
+            >
+              <Gavel className="w-4 h-4" />
+              <span>Jurisprudência</span>
+            </Link>
+
+            <Link
               href="/blog"
               aria-current={isActive('/blog') ? 'page' : undefined}
               className={`flex items-center space-x-1 transition-colors font-poppins text-sm focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-brand-600 rounded ${isActive('/blog') ? 'text-white font-semibold' : 'text-white/90 hover:text-white'}`}
@@ -187,6 +196,7 @@ export const Header = memo(function Header() {
               { href: '/sobre', label: 'Sobre o Professor' },
               { href: '/cursos', label: 'Cursos' },
               { href: '/legislacao', label: 'Legislação' },
+              { href: '/jurisprudencia', label: 'Jurisprudência' },
               { href: '/blog', label: 'Blog' },
               { href: '/planos', label: 'Planos' },
               { href: '/contato', label: 'Contato' },
