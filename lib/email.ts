@@ -36,7 +36,7 @@ export async function sendEmail(options: EmailOptions): Promise<SendEmailResult>
   // Em produção ou desenvolvimento com RESEND_API_KEY configurado
   if (process.env.RESEND_API_KEY) {
     const resend = new Resend(process.env.RESEND_API_KEY);
-    const fromEmail = process.env.EMAIL_FROM || 'noreply@profbarral.com.br';
+    const fromEmail = process.env.EMAIL_FROM || 'noreply@profdanielbarral.com';
     const maxRetries = 2;
 
     for (let attempt = 0; attempt <= maxRetries; attempt++) {
@@ -48,6 +48,10 @@ export async function sendEmail(options: EmailOptions): Promise<SendEmailResult>
           html,
           text: text || undefined,
         });
+
+        if (result.error) {
+          throw new Error(result.error.message);
+        }
 
         console.log('Email enviado com sucesso:', { to, subject, id: result.data?.id });
         return { success: true };

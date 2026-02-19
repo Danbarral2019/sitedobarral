@@ -114,20 +114,42 @@ export async function GET(request: NextRequest) {
       },
     });
 
-    // 8. Envia email para todos os inscritos (em lote)
-    const emailPromises = subscribers.map((subscriber) =>
-      resend.emails.send({
-        from: process.env.EMAIL_FROM || 'newsletter@profdanielbarral.com.br',
-        to: subscriber.email,
-        subject,
-        html: newsletterHtml.replace('{{NAME}}', subscriber.name || 'Assinante'),
-      })
-    );
+    // 8. Envia email para todos os inscritos (sequencial, respeitando rate limit do Resend: 2/s)
+    const fromAddress = process.env.EMAIL_FROM || 'newsletter@profdanielbarral.com';
+    let successCount = 0;
+    let errorCount = 0;
+    const errors: Array<{ email: string; error: string }> = [];
 
-    const results = await Promise.allSettled(emailPromises);
+    console.log(`[Cron Newsletter] FROM: ${fromAddress} | API_KEY set: ${!!process.env.RESEND_API_KEY}`);
 
-    const successCount = results.filter((r) => r.status === 'fulfilled').length;
-    const errorCount = results.filter((r) => r.status === 'rejected').length;
+    for (const subscriber of subscribers) {
+      try {
+        const result = await resend.emails.send({
+          from: fromAddress,
+          to: subscriber.email,
+          subject,
+          html: newsletterHtml.replace('{{NAME}}', subscriber.name || 'Assinante'),
+        });
+
+        if (result.error) {
+          errorCount++;
+          const msg = JSON.stringify(result.error);
+          errors.push({ email: subscriber.email, error: msg });
+          console.error(`[Cron Newsletter] Resend erro para ${subscriber.email}: ${msg}`);
+        } else {
+          successCount++;
+          console.log(`[Cron Newsletter] Enviado para ${subscriber.email} (id: ${result.data?.id})`);
+        }
+      } catch (err) {
+        errorCount++;
+        const msg = err instanceof Error ? err.message : String(err);
+        errors.push({ email: subscriber.email, error: msg });
+        console.error(`[Cron Newsletter] Erro para ${subscriber.email}: ${msg}`);
+      }
+
+      // Delay de 600ms entre envios para respeitar rate limit (2 req/s)
+      await new Promise(r => setTimeout(r, 600));
+    }
 
     console.log(`[Cron Newsletter] Emails enviados: ${successCount} sucesso, ${errorCount} erro`);
 
@@ -135,13 +157,6 @@ export async function GET(request: NextRequest) {
     await prisma.newsletterSend.update({
       where: { id: sendId },
       data: { totalSent: successCount, totalFailed: errorCount },
-    });
-
-    // 10. Log de erros se houver
-    results.forEach((result, index) => {
-      if (result.status === 'rejected') {
-        console.error(`[Cron Newsletter] Erro ao enviar para ${subscribers[index].email}:`, result.reason);
-      }
     });
 
     return NextResponse.json({
@@ -153,6 +168,7 @@ export async function GET(request: NextRequest) {
         emailsSent: successCount,
         emailsFailed: errorCount,
         sendId,
+        errors: errors.length > 0 ? errors : undefined,
       },
     });
 
