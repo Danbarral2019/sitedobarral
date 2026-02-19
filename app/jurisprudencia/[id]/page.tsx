@@ -10,20 +10,61 @@ import {
 
 interface DecisionDetail {
   id: string;
-  tribunal: string;
-  tribunalType: string;
-  decisionNumber: string;
+  tribunalCode: string;
+  tribunalName: string;
   decisionType: string;
-  judgeDate: string | null;
-  publishDate: string | null;
-  relator: string | null;
-  orgao: string | null;
+  decisionNumber: string;
+  processNumber: string | null;
+  title: string;
   ementa: string;
+  fullText: string | null;
   summary: string | null;
-  themes: string[];
-  articleReferences: number[];
-  sourceUrl: string | null;
-  relevanceScore: number;
+  relator: string | null;
+  orgaoJulgador: string | null;
+  dataJulgamento: string | null;
+  dataPublicacao: string | null;
+  url: string | null;
+  pdfUrl: string | null;
+  themes: string;
+  leiArticles: string;
+  suggestedCourses: string | null;
+}
+
+function parseJsonArray(val: string | null | undefined): string[] {
+  if (!val) return [];
+  try {
+    const arr = JSON.parse(val);
+    return Array.isArray(arr) ? arr : [];
+  } catch {
+    return [];
+  }
+}
+
+function extractArticleNumbers(articles: string[]): number[] {
+  return articles
+    .map(a => {
+      const match = a.match(/(\d+)/);
+      return match ? parseInt(match[1], 10) : NaN;
+    })
+    .filter(n => !isNaN(n));
+}
+
+function tribunalLabel(code: string): string {
+  const map: Record<string, string> = {
+    'tce-sp': 'TCE-SP',
+    'tce-pr': 'TCE-PR',
+    'tce-mg': 'TCE-MG',
+  };
+  return map[code] || code.toUpperCase();
+}
+
+function tribunalColor(code: string): string {
+  const colors: Record<string, string> = {
+    'tce-sp': 'bg-blue-100 text-blue-800',
+    'tce-mg': 'bg-green-100 text-green-800',
+    'tce-pr': 'bg-purple-100 text-purple-800',
+  };
+  return colors[code] || 'bg-gray-100 text-gray-800';
 }
 
 export default function JurisprudenciaDetailPage() {
@@ -44,13 +85,13 @@ export default function JurisprudenciaDetailPage() {
           const data = await res.json();
           setDecision(data);
         } else if (res.status === 404) {
-          setError('Decisao nao encontrada');
+          setError('Decisão não encontrada');
         } else {
-          setError('Erro ao carregar decisao');
+          setError('Erro ao carregar decisão');
         }
       } catch (err) {
         console.error('Failed to fetch decision:', err);
-        setError('Erro ao carregar decisao');
+        setError('Erro ao carregar decisão');
       } finally {
         setLoading(false);
       }
@@ -58,16 +99,6 @@ export default function JurisprudenciaDetailPage() {
 
     fetchDecision();
   }, [id]);
-
-  const tribunalColor = (t: string) => {
-    const colors: Record<string, string> = {
-      'TCE-SP': 'bg-blue-100 text-blue-800',
-      'TCE-MG': 'bg-green-100 text-green-800',
-      'TCE-PR': 'bg-purple-100 text-purple-800',
-      'TCU': 'bg-red-100 text-red-800',
-    };
-    return colors[t] || 'bg-gray-100 text-gray-800';
-  };
 
   if (loading) {
     return (
@@ -82,14 +113,19 @@ export default function JurisprudenciaDetailPage() {
       <main className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
           <Scale className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-          <h1 className="text-2xl font-bold text-gray-900 mb-2">{error || 'Decisao nao encontrada'}</h1>
+          <h1 className="text-2xl font-bold text-gray-900 mb-2">{error || 'Decisão não encontrada'}</h1>
           <Link href="/jurisprudencia" className="text-blue-600 hover:text-blue-800 font-medium">
-            Voltar para Jurisprudencia
+            Voltar para Jurisprudência
           </Link>
         </div>
       </main>
     );
   }
+
+  const themes = parseJsonArray(decision.themes);
+  const leiArticles = parseJsonArray(decision.leiArticles);
+  const articleNumbers = extractArticleNumbers(leiArticles);
+  const sourceUrl = decision.pdfUrl || decision.url;
 
   return (
     <main className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
@@ -98,11 +134,11 @@ export default function JurisprudenciaDetailPage() {
         <div className="max-w-4xl mx-auto px-4">
           {/* Breadcrumb */}
           <nav className="flex items-center gap-2 text-sm text-white/80 mb-6">
-            <Link href="/" className="hover:text-white transition-colors">Inicio</Link>
+            <Link href="/" className="hover:text-white transition-colors">Início</Link>
             <span>/</span>
-            <Link href="/jurisprudencia" className="hover:text-white transition-colors">Jurisprudencia</Link>
+            <Link href="/jurisprudencia" className="hover:text-white transition-colors">Jurisprudência</Link>
             <span>/</span>
-            <span className="text-white">Decisao</span>
+            <span className="text-white">Decisão</span>
           </nav>
 
           <Link
@@ -110,12 +146,12 @@ export default function JurisprudenciaDetailPage() {
             className="inline-flex items-center gap-2 text-white/90 hover:text-white mb-6 transition-colors"
           >
             <ArrowLeft className="w-4 h-4" />
-            Voltar para Jurisprudencia
+            Voltar para Jurisprudência
           </Link>
 
           <div className="flex items-center gap-3 mb-4">
-            <span className={`px-3 py-1 text-sm font-medium rounded-full ${tribunalColor(decision.tribunal)} bg-opacity-90`}>
-              {decision.tribunal}
+            <span className={`px-3 py-1 text-sm font-medium rounded-full ${tribunalColor(decision.tribunalCode)}`}>
+              {tribunalLabel(decision.tribunalCode)}
             </span>
             <span className="px-3 py-1 bg-white/20 backdrop-blur-sm text-sm font-medium rounded-full">
               {decision.decisionType}
@@ -123,8 +159,11 @@ export default function JurisprudenciaDetailPage() {
           </div>
 
           <h1 className="text-3xl md:text-4xl font-bold mb-2">
-            {decision.decisionNumber}
+            {decision.title || decision.decisionNumber}
           </h1>
+          {decision.processNumber && (
+            <p className="text-white/80 text-sm">Processo: {decision.processNumber}</p>
+          )}
         </div>
       </div>
 
@@ -140,34 +179,34 @@ export default function JurisprudenciaDetailPage() {
               <div className="font-semibold text-gray-900">{decision.relator}</div>
             </div>
           )}
-          {decision.orgao && (
+          {decision.orgaoJulgador && (
             <div className="bg-white rounded-lg shadow-sm border p-4">
               <div className="flex items-center gap-2 text-gray-500 text-sm mb-1">
                 <Building2 className="w-4 h-4" />
-                Orgao
+                Órgão Julgador
               </div>
-              <div className="font-semibold text-gray-900">{decision.orgao}</div>
+              <div className="font-semibold text-gray-900">{decision.orgaoJulgador}</div>
             </div>
           )}
-          {decision.judgeDate && (
+          {decision.dataJulgamento && (
             <div className="bg-white rounded-lg shadow-sm border p-4">
               <div className="flex items-center gap-2 text-gray-500 text-sm mb-1">
                 <Calendar className="w-4 h-4" />
                 Julgamento
               </div>
               <div className="font-semibold text-gray-900">
-                {new Date(decision.judgeDate).toLocaleDateString('pt-BR')}
+                {new Date(decision.dataJulgamento).toLocaleDateString('pt-BR')}
               </div>
             </div>
           )}
-          {decision.publishDate && (
+          {decision.dataPublicacao && (
             <div className="bg-white rounded-lg shadow-sm border p-4">
               <div className="flex items-center gap-2 text-gray-500 text-sm mb-1">
                 <Calendar className="w-4 h-4" />
-                Publicacao
+                Publicação
               </div>
               <div className="font-semibold text-gray-900">
-                {new Date(decision.publishDate).toLocaleDateString('pt-BR')}
+                {new Date(decision.dataPublicacao).toLocaleDateString('pt-BR')}
               </div>
             </div>
           )}
@@ -191,14 +230,14 @@ export default function JurisprudenciaDetailPage() {
         </div>
 
         {/* Themes */}
-        {decision.themes.length > 0 && (
+        {themes.length > 0 && (
           <div className="bg-white rounded-xl shadow-sm border p-6 mb-8">
             <h2 className="text-lg font-bold text-gray-900 mb-3 flex items-center gap-2">
               <Tag className="w-5 h-5" />
               Temas
             </h2>
             <div className="flex flex-wrap gap-2">
-              {decision.themes.map((theme, i) => (
+              {themes.map((theme, i) => (
                 <span key={i} className="px-3 py-1 bg-blue-50 text-blue-700 rounded-full text-sm font-medium">
                   {theme}
                 </span>
@@ -208,20 +247,20 @@ export default function JurisprudenciaDetailPage() {
         )}
 
         {/* Article References */}
-        {decision.articleReferences.length > 0 && (
+        {articleNumbers.length > 0 && (
           <div className="bg-white rounded-xl shadow-sm border p-6 mb-8">
             <h2 className="text-lg font-bold text-gray-900 mb-3 flex items-center gap-2">
               <BookOpen className="w-5 h-5" />
-              Artigos Relacionados
+              Artigos Relacionados (Lei 14.133/2021)
             </h2>
             <div className="flex flex-wrap gap-2">
-              {decision.articleReferences.map((art) => (
+              {articleNumbers.map((art) => (
                 <Link
                   key={art}
                   href={`/artigo/${art}`}
                   className="px-3 py-1.5 bg-purple-50 text-purple-700 rounded-lg text-sm font-medium hover:bg-purple-100 transition-colors"
                 >
-                  Art. {art} da Lei 14.133
+                  Art. {art}
                 </Link>
               ))}
             </div>
@@ -229,16 +268,16 @@ export default function JurisprudenciaDetailPage() {
         )}
 
         {/* Source link */}
-        {decision.sourceUrl && (
+        {sourceUrl && (
           <div className="text-center">
             <a
-              href={decision.sourceUrl}
+              href={sourceUrl}
               target="_blank"
               rel="noopener noreferrer"
               className="inline-flex items-center gap-2 px-6 py-3 bg-blue-600 text-white rounded-xl font-bold hover:bg-blue-700 transition-colors shadow-lg"
             >
               <ExternalLink className="w-5 h-5" />
-              Ver decisao original
+              Ver decisão original
             </a>
           </div>
         )}

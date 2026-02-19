@@ -6,36 +6,66 @@ import { Search, Scale, Calendar, ArrowRight, ChevronLeft, ChevronRight } from '
 
 interface Decision {
   id: string;
-  tribunal: string;
-  tribunalType: string;
-  decisionNumber: string;
+  tribunalCode: string;
+  tribunalName: string;
   decisionType: string;
-  judgeDate: string | null;
+  decisionNumber: string;
+  title: string;
   ementa: string;
-  summary: string | null;
-  themes: string[];
-  articleReferences: number[];
-  relevanceScore: number;
+  relator: string | null;
+  orgaoJulgador: string | null;
+  dataJulgamento: string | null;
+  themes: string;
+  leiArticles: string;
+  url: string | null;
 }
 
-interface PaginatedResponse {
-  decisions: Decision[];
+interface ApiResponse {
+  items: Decision[];
   total: number;
   page: number;
   pageSize: number;
   totalPages: number;
 }
 
+const TRIBUNALS = [
+  { code: 'tce-sp', label: 'TCE-SP' },
+  { code: 'tce-pr', label: 'TCE-PR' },
+  { code: 'tce-mg', label: 'TCE-MG' },
+];
+
 const COMMON_THEMES = [
-  'Licitacao',
-  'Contrato',
-  'Pregao',
-  'Dispensa',
-  'Inexigibilidade',
-  'Fiscalizacao',
-  'Sancao',
+  'Licitação',
+  'Contratos Administrativos',
+  'Pregão',
+  'Dispensa/Inexigibilidade',
+  'Fiscalização',
+  'Sanção',
   'Planejamento',
 ];
+
+function parseJsonArray(val: string | null | undefined): string[] {
+  if (!val) return [];
+  try {
+    const arr = JSON.parse(val);
+    return Array.isArray(arr) ? arr : [];
+  } catch {
+    return [];
+  }
+}
+
+function tribunalLabel(code: string): string {
+  return TRIBUNALS.find(t => t.code === code)?.label || code.toUpperCase();
+}
+
+function tribunalColor(code: string): string {
+  const colors: Record<string, string> = {
+    'tce-sp': 'bg-blue-100 text-blue-800',
+    'tce-mg': 'bg-green-100 text-green-800',
+    'tce-pr': 'bg-purple-100 text-purple-800',
+  };
+  return colors[code] || 'bg-gray-100 text-gray-800';
+}
 
 export default function JurisprudenciaClient() {
   const [decisions, setDecisions] = useState<Decision[]>([]);
@@ -61,17 +91,16 @@ export default function JurisprudenciaClient() {
       const params = new URLSearchParams({
         page: String(currentPage),
         pageSize: String(pageSize),
-        status: 'approved',
       });
       if (tribunal) params.set('tribunal', tribunal);
-      if (year) params.set('year', year);
-      if (search) params.set('search', search);
-      if (selectedTheme) params.set('theme', selectedTheme);
+      if (year) params.set('ano', year);
+      if (search) params.set('q', search);
+      if (selectedTheme) params.set('tema', selectedTheme);
 
       const res = await fetch(`/api/jurisprudencia?${params}`);
       if (res.ok) {
-        const data: PaginatedResponse = await res.json();
-        setDecisions(data.decisions);
+        const data: ApiResponse = await res.json();
+        setDecisions(data.items);
         setTotal(data.total);
         setTotalPages(data.totalPages);
       }
@@ -95,16 +124,6 @@ export default function JurisprudenciaClient() {
     setSearch(searchInput);
   };
 
-  const tribunalColor = (t: string) => {
-    const colors: Record<string, string> = {
-      'TCE-SP': 'bg-blue-100 text-blue-800',
-      'TCE-MG': 'bg-green-100 text-green-800',
-      'TCE-PR': 'bg-purple-100 text-purple-800',
-      'TCU': 'bg-red-100 text-red-800',
-    };
-    return colors[t] || 'bg-gray-100 text-gray-800';
-  };
-
   return (
     <main className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
       {/* Hero */}
@@ -114,10 +133,10 @@ export default function JurisprudenciaClient() {
             <Scale className="w-10 h-10" />
           </div>
           <h1 className="text-4xl md:text-5xl font-bold mb-4">
-            Jurisprudencia sobre Licitacoes
+            Jurisprudência sobre Licitações
           </h1>
           <p className="text-xl text-white/90 max-w-2xl mx-auto">
-            Decisoes de Tribunais de Contas e Judiciais sobre licitacoes e contratos administrativos na Lei 14.133/2021
+            Decisões de Tribunais de Contas sobre licitações e contratos administrativos na Lei 14.133/2021
           </p>
         </div>
       </div>
@@ -134,10 +153,9 @@ export default function JurisprudenciaClient() {
                 className="px-3 py-2 border rounded-lg text-sm bg-white min-w-[150px]"
               >
                 <option value="">Todos</option>
-                <option value="TCE-SP">TCE-SP</option>
-                <option value="TCE-MG">TCE-MG</option>
-                <option value="TCE-PR">TCE-PR</option>
-                <option value="TCU">TCU</option>
+                {TRIBUNALS.map(t => (
+                  <option key={t.code} value={t.code}>{t.label}</option>
+                ))}
               </select>
             </div>
 
@@ -163,7 +181,7 @@ export default function JurisprudenciaClient() {
                   type="text"
                   value={searchInput}
                   onChange={(e) => setSearchInput(e.target.value)}
-                  placeholder="Buscar por ementa, numero..."
+                  placeholder="Buscar por ementa, número..."
                   className="w-full pl-9 pr-3 py-2 border rounded-lg text-sm"
                 />
               </div>
@@ -208,7 +226,7 @@ export default function JurisprudenciaClient() {
           <div className="text-center py-16">
             <Scale className="w-16 h-16 text-gray-300 mx-auto mb-4" />
             <h3 className="text-xl font-bold text-gray-900 mb-2">
-              Nenhuma decisao encontrada
+              Nenhuma decisão encontrada
             </h3>
             <p className="text-gray-500">
               Tente ajustar os filtros selecionados
@@ -217,59 +235,63 @@ export default function JurisprudenciaClient() {
         ) : (
           <>
             <p className="text-sm text-gray-600 mb-4">
-              {total} decisao(oes) encontrada(s)
+              {total} decisão(ões) encontrada(s)
             </p>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {decisions.map((decision) => (
-                <Link
-                  key={decision.id}
-                  href={`/jurisprudencia/${decision.id}`}
-                  className="bg-white rounded-xl shadow-sm border p-6 hover:shadow-md hover:border-blue-200 transition-all group"
-                >
-                  <div className="flex items-center gap-2 mb-3">
-                    <span className={`px-2 py-0.5 text-xs font-medium rounded-full ${tribunalColor(decision.tribunal)}`}>
-                      {decision.tribunal}
-                    </span>
-                    <span className="px-2 py-0.5 text-xs font-medium rounded bg-gray-100 text-gray-700">
-                      {decision.decisionType}
-                    </span>
-                    {decision.judgeDate && (
-                      <span className="text-xs text-gray-500 flex items-center gap-1">
-                        <Calendar className="w-3 h-3" />
-                        {new Date(decision.judgeDate).toLocaleDateString('pt-BR')}
+              {decisions.map((decision) => {
+                const themes = parseJsonArray(decision.themes);
+
+                return (
+                  <Link
+                    key={decision.id}
+                    href={`/jurisprudencia/${decision.id}`}
+                    className="bg-white rounded-xl shadow-sm border p-6 hover:shadow-md hover:border-blue-200 transition-all group"
+                  >
+                    <div className="flex items-center gap-2 mb-3">
+                      <span className={`px-2 py-0.5 text-xs font-medium rounded-full ${tribunalColor(decision.tribunalCode)}`}>
+                        {tribunalLabel(decision.tribunalCode)}
                       </span>
-                    )}
-                  </div>
-
-                  <h3 className="font-bold text-gray-900 mb-2 group-hover:text-blue-600 transition-colors">
-                    {decision.decisionNumber}
-                  </h3>
-
-                  <p className="text-sm text-gray-600 mb-3 line-clamp-3">
-                    {decision.summary || decision.ementa}
-                  </p>
-
-                  {decision.themes.length > 0 && (
-                    <div className="flex flex-wrap gap-1 mb-3">
-                      {decision.themes.slice(0, 4).map((theme, i) => (
-                        <span key={i} className="px-2 py-0.5 bg-blue-50 text-blue-700 text-xs rounded-full">
-                          {theme}
-                        </span>
-                      ))}
-                      {decision.themes.length > 4 && (
-                        <span className="px-2 py-0.5 bg-gray-50 text-gray-500 text-xs rounded-full">
-                          +{decision.themes.length - 4}
+                      <span className="px-2 py-0.5 text-xs font-medium rounded bg-gray-100 text-gray-700">
+                        {decision.decisionType}
+                      </span>
+                      {decision.dataJulgamento && (
+                        <span className="text-xs text-gray-500 flex items-center gap-1">
+                          <Calendar className="w-3 h-3" />
+                          {new Date(decision.dataJulgamento).toLocaleDateString('pt-BR')}
                         </span>
                       )}
                     </div>
-                  )}
 
-                  <div className="flex items-center text-blue-600 text-sm font-medium group-hover:gap-2 gap-1 transition-all">
-                    Ver detalhes <ArrowRight className="w-4 h-4" />
-                  </div>
-                </Link>
-              ))}
+                    <h3 className="font-bold text-gray-900 mb-2 group-hover:text-blue-600 transition-colors">
+                      {decision.title || decision.decisionNumber}
+                    </h3>
+
+                    <p className="text-sm text-gray-600 mb-3 line-clamp-3">
+                      {decision.ementa}
+                    </p>
+
+                    {themes.length > 0 && (
+                      <div className="flex flex-wrap gap-1 mb-3">
+                        {themes.slice(0, 4).map((theme, i) => (
+                          <span key={i} className="px-2 py-0.5 bg-blue-50 text-blue-700 text-xs rounded-full">
+                            {theme}
+                          </span>
+                        ))}
+                        {themes.length > 4 && (
+                          <span className="px-2 py-0.5 bg-gray-50 text-gray-500 text-xs rounded-full">
+                            +{themes.length - 4}
+                          </span>
+                        )}
+                      </div>
+                    )}
+
+                    <div className="flex items-center text-blue-600 text-sm font-medium group-hover:gap-2 gap-1 transition-all">
+                      Ver detalhes <ArrowRight className="w-4 h-4" />
+                    </div>
+                  </Link>
+                );
+              })}
             </div>
           </>
         )}
@@ -316,7 +338,7 @@ export default function JurisprudenciaClient() {
               disabled={currentPage === totalPages}
               className="px-3 py-2 border rounded-lg text-sm hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1"
             >
-              Proxima <ChevronRight className="w-4 h-4" />
+              Próxima <ChevronRight className="w-4 h-4" />
             </button>
           </div>
         )}
