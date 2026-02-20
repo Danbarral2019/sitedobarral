@@ -85,7 +85,7 @@ import { tceSCScraper } from './tce-sc';
 import { tceRJScraper } from './tce-rj';
 import { tceRSScraper } from './tce-rs';
 import { tcePEScraper } from './tce-pe';
-import { dataJudSTJScraper, dataJudSTFScraper } from './datajud';
+import { dataJudSTJScraper } from './datajud';
 
 registerScraper(tceSPScraper);
 registerScraper(tcePRScraper);
@@ -95,4 +95,3 @@ registerScraper(tceRJScraper);
 registerScraper(tceRSScraper);
 registerScraper(tcePEScraper);
 registerScraper(dataJudSTJScraper);
-registerScraper(dataJudSTFScraper);

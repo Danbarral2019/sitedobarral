@@ -2,8 +2,19 @@
  * DataJud CNJ Scraper
  * API Elasticsearch publica do CNJ
  * Endpoint: https://api-publica.datajud.cnj.jus.br/api_publica_{tribunal}/_search
- * Tribunais: STJ, STF
- * Foco: decisoes paradigmaticas sobre Lei 14.133/2021
+ * Tribunal: STJ (STF nao esta disponivel na API publica)
+ * Foco: decisoes sobre licitacoes e contratos administrativos
+ *
+ * A API publica retorna apenas metadados (capa processual), nao o inteiro teor.
+ * Busca por codigos de assunto CNJ (descobertos via API 2026-02-20):
+ *   10385 = Licitacoes
+ *   14914 = Contrato Administrativo
+ *   14138 = Pregao
+ *   14131 = Dispensa
+ *   14132 = Inexigibilidade
+ *   14133 = Concorrencia
+ *   14134 = Tomada de Preco
+ *   10392 = Convenio
  */
 import { prisma } from '@/lib/prisma';
 import type { TribunalScraper, TribunalScrapeOptions, TribunalScrapeResult, ScraperHealthStatus } from './index';
@@ -15,10 +26,20 @@ const API_KEY = process.env.DATAJUD_API_KEY || '';
 
 const TRIBUNAIS = [
   { code: 'stj', name: 'STJ', fullName: 'Superior Tribunal de Justica', endpoint: 'api_publica_stj' },
-  { code: 'stf', name: 'STF', fullName: 'Supremo Tribunal Federal', endpoint: 'api_publica_stf' },
 ] as const;
 
-const SEARCH_KEYWORDS = ['lei 14133', 'nova lei de licitações', 'licitação', 'pregão eletrônico'];
+// Codigos de assunto CNJ relacionados a licitacoes e contratos
+// Descobertos via busca na API publica do DataJud (2026-02-20)
+const ASSUNTO_CODES = [
+  10385, // Licitacoes
+  14914, // Contrato Administrativo
+  14138, // Pregao
+  14131, // Dispensa (de Licitacao)
+  14132, // Inexigibilidade
+  14133, // Concorrencia
+  14134, // Tomada de Preco
+  10392, // Convenio
+];
 
 interface DataJudHit {
   _source: {
@@ -26,10 +47,9 @@ interface DataJudHit {
     classe?: { nome?: string; codigo?: number };
     assuntos?: Array<{ nome?: string; codigo?: number }>;
     orgaoJulgador?: { nome?: string };
-    dataJulgamento?: string;
-    dataPublicacao?: string;
+    dataAjuizamento?: string;
+    dataHoraUltimaAtualizacao?: string;
     movimentos?: Array<{ nome?: string; dataHora?: string; complementosTabelados?: Array<{ nome?: string; valor?: string }> }>;
-    textoDecisao?: string;
   };
 }
 
@@ -39,7 +59,7 @@ class DataJudScraper implements TribunalScraper {
   fullName: string;
   type = 'judicial' as const;
   hasApi = true;
-  supportsFullText = true;
+  supportsFullText = false; // API so retorna metadados, nao inteiro teor
   private endpoint: string;
 
   constructor(tribunal: typeof TRIBUNAIS[number]) {
@@ -55,12 +75,21 @@ class DataJudScraper implements TribunalScraper {
 
   async healthCheck(): Promise<ScraperHealthStatus> {
     try {
+      if (!API_KEY) {
+        return {
+          scraperCode: this.code,
+          isHealthy: false,
+          consecutiveFailures: 1,
+          message: 'DATAJUD_API_KEY nao configurada',
+        };
+      }
+
       const url = `${DATAJUD_BASE}/${this.endpoint}/_search`;
       const response = await fetch(url, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          ...(API_KEY ? { 'Authorization': `APIKey ${API_KEY}` } : {}),
+          'Authorization': `APIKey ${API_KEY}`,
         },
         body: JSON.stringify({ size: 1, query: { match_all: {} } }),
         signal: AbortSignal.timeout(15000),
@@ -99,34 +128,38 @@ class DataJudScraper implements TribunalScraper {
       errors: [], duration: 0,
     };
 
+    if (!API_KEY) {
+      result.errors.push('DATAJUD_API_KEY nao configurada');
+      result.duration = Date.now() - startTime;
+      await logScraperHealth(this.code, 'failure', {
+        duration: result.duration, errorMessage: result.errors[0],
+      });
+      return result;
+    }
+
     try {
       // Build date range
       const now = new Date();
-      const from = startDate || new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000); // last 30 days
+      const from = startDate || new Date(now.getTime() - 90 * 24 * 60 * 60 * 1000); // last 90 days
       const to = endDate || now;
 
-      for (const keyword of SEARCH_KEYWORDS) {
-        if (result.itemsFound >= maxItems) break;
+      // Busca por codigos de assunto CNJ (uma query com todos os codigos)
+      try {
+        const hits = await this.searchByAssuntoCodes(from, to, maxItems);
 
-        try {
-          const hits = await this.search(keyword, from, to, maxItems - result.itemsFound);
-
-          for (const hit of hits) {
-            try {
-              const wasNew = await this.processHit(hit);
-              result.itemsFound++;
-              if (wasNew) result.itemsNew++;
-              else result.itemsSkipped++;
-            } catch (error) {
-              result.itemsError++;
-              result.errors.push(`Error processing hit: ${error instanceof Error ? error.message : String(error)}`);
-            }
+        for (const hit of hits) {
+          try {
+            const wasNew = await this.processHit(hit);
+            result.itemsFound++;
+            if (wasNew) result.itemsNew++;
+            else result.itemsSkipped++;
+          } catch (error) {
+            result.itemsError++;
+            result.errors.push(`Error processing hit: ${error instanceof Error ? error.message : String(error)}`);
           }
-
-          await sleep(1000);
-        } catch (error) {
-          result.errors.push(`Search failed for "${keyword}": ${error instanceof Error ? error.message : String(error)}`);
         }
+      } catch (error) {
+        result.errors.push(`Search failed: ${error instanceof Error ? error.message : String(error)}`);
       }
 
       result.duration = Date.now() - startTime;
@@ -146,7 +179,7 @@ class DataJudScraper implements TribunalScraper {
     return result;
   }
 
-  private async search(keyword: string, from: Date, to: Date, limit: number): Promise<DataJudHit[]> {
+  private async searchByAssuntoCodes(from: Date, to: Date, limit: number): Promise<DataJudHit[]> {
     const url = `${DATAJUD_BASE}/${this.endpoint}/_search`;
 
     const body = {
@@ -154,28 +187,26 @@ class DataJudScraper implements TribunalScraper {
       query: {
         bool: {
           must: [
-            { match: { 'textoDecisao': keyword } },
-          ],
-          filter: [
-            { range: { dataJulgamento: { gte: from.toISOString().split('T')[0], lte: to.toISOString().split('T')[0] } } },
+            { terms: { 'assuntos.codigo': ASSUNTO_CODES } },
           ],
         },
       },
-      sort: [{ dataJulgamento: { order: 'desc' } }],
+      sort: [{ '@timestamp': { order: 'desc' } }],
     };
 
     const response = await fetch(url, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        ...(API_KEY ? { 'Authorization': `APIKey ${API_KEY}` } : {}),
+        'Authorization': `APIKey ${API_KEY}`,
       },
       body: JSON.stringify(body),
       signal: AbortSignal.timeout(30000),
     });
 
     if (!response.ok) {
-      throw new Error(`DataJud API returned ${response.status}`);
+      const errBody = await response.text().catch(() => '');
+      throw new Error(`DataJud API returned ${response.status}: ${errBody.slice(0, 200)}`);
     }
 
     const data = await response.json();
@@ -192,13 +223,18 @@ class DataJudScraper implements TribunalScraper {
     const existing = await prisma.tribunalDecision.findUnique({ where: { fullIdentifier } });
     if (existing) return false;
 
+    const assuntosText = src.assuntos?.map(a => a.nome).filter(Boolean).join(', ') || '';
     const title = `${src.classe?.nome || 'Decisao'} ${processNumber} - ${this.name}`;
-    const ementa = src.textoDecisao?.slice(0, 5000) || `${src.classe?.nome || ''} - ${src.assuntos?.map(a => a.nome).join(', ') || ''}`;
+    const ementa = `${src.classe?.nome || ''} - ${assuntosText} - ${src.orgaoJulgador?.nome || ''}`.trim();
+
+    // Build summary from last movements
+    const lastMovements = (src.movimentos || []).slice(-3).map(m => m.nome).filter(Boolean).join('; ');
+    const fullEmenta = lastMovements ? `${ementa}. Movimentos: ${lastMovements}` : ementa;
 
     // Classify
-    const classification = await classifyDecision({ title, ementa, decisionType: src.classe?.nome });
+    const classification = await classifyDecision({ title, ementa: fullEmenta, decisionType: src.classe?.nome });
 
-    const year = src.dataJulgamento ? new Date(src.dataJulgamento).getFullYear() : new Date().getFullYear();
+    const year = src.dataAjuizamento ? new Date(src.dataAjuizamento).getFullYear() : new Date().getFullYear();
 
     await prisma.tribunalDecision.create({
       data: {
@@ -210,10 +246,10 @@ class DataJudScraper implements TribunalScraper {
         year,
         fullIdentifier,
         title,
-        ementa: ementa.slice(0, 10000),
+        ementa: fullEmenta.slice(0, 10000),
         orgaoJulgador: src.orgaoJulgador?.nome || null,
-        dataJulgamento: src.dataJulgamento ? new Date(src.dataJulgamento) : null,
-        dataPublicacao: src.dataPublicacao ? new Date(src.dataPublicacao) : null,
+        dataJulgamento: src.dataAjuizamento ? new Date(src.dataAjuizamento) : null,
+        dataPublicacao: src.dataHoraUltimaAtualizacao ? new Date(src.dataHoraUltimaAtualizacao) : null,
         isRelevant: classification.approvalStatus !== 'auto_rejected',
         relevanceScore: classification.relevanceScore,
         themes: JSON.stringify(classification.themes),
@@ -230,6 +266,5 @@ class DataJudScraper implements TribunalScraper {
   }
 }
 
-// Create scraper instances for each tribunal
+// STJ scraper instance (STF nao esta disponivel na API publica do DataJud)
 export const dataJudSTJScraper = new DataJudScraper(TRIBUNAIS[0]);
-export const dataJudSTFScraper = new DataJudScraper(TRIBUNAIS[1]);

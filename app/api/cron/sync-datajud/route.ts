@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { dataJudSTJScraper, dataJudSTFScraper } from '@/lib/tribunal-scrapers/datajud';
+import { dataJudSTJScraper } from '@/lib/tribunal-scrapers/datajud';
 
 export const dynamic = 'force-dynamic';
 export const maxDuration = 300;
@@ -13,20 +13,12 @@ export async function GET(request: NextRequest) {
 
   const results = [];
 
-  // STJ
+  // STJ (unico tribunal superior disponivel na API publica do DataJud)
   try {
     const stjResult = await dataJudSTJScraper.scrape({ maxItems: 30 });
     results.push(stjResult);
   } catch (error) {
     results.push({ scraperCode: 'stj', error: error instanceof Error ? error.message : String(error) });
-  }
-
-  // STF
-  try {
-    const stfResult = await dataJudSTFScraper.scrape({ maxItems: 30 });
-    results.push(stfResult);
-  } catch (error) {
-    results.push({ scraperCode: 'stf', error: error instanceof Error ? error.message : String(error) });
   }
 
   return NextResponse.json({ results });
