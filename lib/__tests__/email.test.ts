@@ -120,7 +120,7 @@ describe('Email Module', () => {
 
         expect(mockSend).toHaveBeenCalledWith(
           expect.objectContaining({
-            from: 'noreply@profbarral.com.br',
+            from: 'noreply@profdanielbarral.com',
           })
         );
       });
