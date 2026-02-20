@@ -2,7 +2,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import bcrypt from 'bcryptjs';
 import crypto from 'crypto';
-import { sendVerificationEmail, sendWelcomeEmail } from '@/lib/email';
+import { sendVerificationEmail, sendWelcomeEmail, sendCourseWelcomeEmail } from '@/lib/email';
+import { courses } from '@/data/courses';
 import { enforceRateLimit, getClientIp } from '@/lib/cache/rate-limit-helper';
 import { validateRequest } from '@/lib/validation-helper';
 import { RegisterSchema } from '@/lib/validation-schemas';
@@ -114,6 +115,14 @@ export async function POST(request: NextRequest) {
                 { userId: user.id, email: user.email, courseId, expiresAt: expirationDate },
                 'Enrollment created successfully'
               );
+
+              // Enviar email de boas-vindas ao curso (fire-and-forget)
+              const courseData = courses.find(c => c.id === courseId);
+              if (courseData) {
+                sendCourseWelcomeEmail(user.email, user.name, courseData.title, courseData.slug).catch((err) => {
+                  authLogger.error({ err, userId: user.id }, 'Failed to send course welcome email');
+                });
+              }
             }
           }
         }

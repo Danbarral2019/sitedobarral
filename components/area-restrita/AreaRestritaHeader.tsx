@@ -59,12 +59,8 @@ export function AreaRestritaHeader({
           <div className="flex items-center gap-2 lg:gap-3">
             {/* Badge de plano + link de assinatura */}
             {activePlan ? (
-              <button
-                onClick={async () => {
-                  const res = await fetch('/api/stripe/portal', { method: 'POST' });
-                  const data = await res.json();
-                  if (data.url) window.location.href = data.url;
-                }}
+              <Link
+                href="/planos"
                 className="hidden lg:flex items-center gap-1.5 px-3 py-2 text-gray-700 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors font-medium text-sm"
                 title="Gerenciar assinatura"
               >
@@ -72,7 +68,7 @@ export function AreaRestritaHeader({
                 <span className="px-1.5 py-0.5 text-xs font-semibold rounded bg-blue-100 text-blue-700">
                   {activePlan === 'premium' ? 'Premium' : 'Básico'}
                 </span>
-              </button>
+              </Link>
             ) : (
               <Link
                 href="/planos"

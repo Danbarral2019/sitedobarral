@@ -59,6 +59,10 @@
     {
       "path": "/api/cron/tribunal-scraper-health",
       "schedule": "0 0 * * *"
+    },
+    {
+      "path": "/api/cron/sync-datajud",
+      "schedule": "0 6 * * 3"
     }
   ]
 }

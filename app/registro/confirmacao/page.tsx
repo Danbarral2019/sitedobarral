@@ -1,14 +1,19 @@
 'use client';
 
-import { useSearchParams } from 'next/navigation';
+import { useSearchParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useState } from 'react';
 
 export default function ConfirmacaoRegistroPage() {
   const searchParams = useSearchParams();
+  const router = useRouter();
   const email = searchParams.get('email');
+  const _isOpen = searchParams.get('open') === 'true';
   const [resendLoading, setResendLoading] = useState(false);
   const [resendMessage, setResendMessage] = useState('');
+  const [verifyToken, setVerifyToken] = useState('');
+  const [verifyLoading, setVerifyLoading] = useState(false);
+  const [verifyMessage, setVerifyMessage] = useState('');
 
   const handleResendEmail = async () => {
     if (!email) return;
@@ -93,6 +98,58 @@ export default function ConfirmacaoRegistroPage() {
             <p className="text-sm text-yellow-800">
               O link de verificação expira em 24 horas. Após esse período, será necessário solicitar um novo link.
             </p>
+          </div>
+
+          {/* Verificação manual com token */}
+          <div className="bg-gray-50 border border-gray-200 rounded-lg p-6 mb-8">
+            <h3 className="text-sm font-semibold text-gray-900 mb-3">
+              Recebeu o link por email? Cole o token aqui:
+            </h3>
+            <form onSubmit={async (e) => {
+              e.preventDefault();
+              if (!verifyToken.trim()) return;
+              setVerifyLoading(true);
+              setVerifyMessage('');
+              try {
+                const response = await fetch('/api/auth/verify-email', {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify({ token: verifyToken.trim() }),
+                });
+                const data = await response.json();
+                if (response.ok) {
+                  setVerifyMessage('Email verificado com sucesso! Redirecionando...');
+                  setTimeout(() => router.push('/area-restrita'), 2000);
+                } else {
+                  setVerifyMessage(data.error || 'Token inválido ou expirado. Tente novamente.');
+                }
+              } catch {
+                setVerifyMessage('Erro ao verificar. Tente novamente.');
+              } finally {
+                setVerifyLoading(false);
+              }
+            }} className="space-y-3">
+              <input
+                type="text"
+                value={verifyToken}
+                onChange={(e) => setVerifyToken(e.target.value)}
+                placeholder="Cole o token de verificação"
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
+                disabled={verifyLoading}
+              />
+              <button
+                type="submit"
+                disabled={verifyLoading || !verifyToken.trim()}
+                className="w-full bg-blue-600 text-white py-2.5 px-4 rounded-lg font-semibold hover:bg-blue-700 transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed text-sm"
+              >
+                {verifyLoading ? 'Verificando...' : 'Verificar Email'}
+              </button>
+              {verifyMessage && (
+                <p className={`text-sm ${verifyMessage.includes('sucesso') ? 'text-green-600' : 'text-red-600'}`}>
+                  {verifyMessage}
+                </p>
+              )}
+            </form>
           </div>
 
           {/* Botão de reenviar */}

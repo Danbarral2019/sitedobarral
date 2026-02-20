@@ -11,42 +11,95 @@ const COURSES = courses.map(c => ({ id: c.id, name: c.title }));
 const PRICE_BASICO = process.env.NEXT_PUBLIC_PRICE_BASICO || '49,90';
 const PRICE_PREMIUM = process.env.NEXT_PUBLIC_PRICE_PREMIUM || '89,90';
 
+type PaymentMethod = 'cartao' | 'pix';
+
+interface PixData {
+  qrCode: string;
+  qrCodeBase64: string;
+  ticketUrl: string;
+  paymentId: number;
+}
+
 export default function PlanosPage() {
   const router = useRouter();
   const { user, isLoading } = useAuth();
   const [selectedCourse, setSelectedCourse] = useState(COURSES[0]?.id || '2');
   const [loading, setLoading] = useState<'basico' | 'premium' | null>(null);
   const [error, setError] = useState('');
+  const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>('cartao');
+  const [pixData, setPixData] = useState<PixData | null>(null);
+  const [pixPlan, setPixPlan] = useState<string | null>(null);
+  const [copied, setCopied] = useState(false);
 
   const handleSubscribe = async (plan: 'basico' | 'premium') => {
     if (!user) {
-      router.push(`/login?returnTo=/planos`);
+      router.push(`/registro?returnTo=/planos`);
       return;
     }
 
     setError('');
     setLoading(plan);
+    setPixData(null);
 
     try {
-      const response = await fetch('/api/stripe/checkout', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          plan,
-          ...(plan === 'basico' && { courseId: selectedCourse }),
-        }),
-      });
+      if (paymentMethod === 'pix') {
+        const response = await fetch('/api/pagamento/pix', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            plan,
+            ...(plan === 'basico' && { courseId: selectedCourse }),
+          }),
+        });
 
-      const data = await response.json();
+        const data = await response.json();
 
-      if (!response.ok) {
-        throw new Error(data.error || 'Erro ao iniciar checkout');
+        if (!response.ok) {
+          throw new Error(data.error || 'Erro ao gerar PIX');
+        }
+
+        setPixData(data);
+        setPixPlan(plan);
+        setLoading(null);
+      } else {
+        const response = await fetch('/api/pagamento/checkout', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            plan,
+            ...(plan === 'basico' && { courseId: selectedCourse }),
+          }),
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+          throw new Error(data.error || 'Erro ao iniciar checkout');
+        }
+
+        window.location.href = data.url;
       }
-
-      window.location.href = data.url;
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Erro ao processar. Tente novamente.');
       setLoading(null);
+    }
+  };
+
+  const copyPixCode = async () => {
+    if (!pixData?.qrCode) return;
+    try {
+      await navigator.clipboard.writeText(pixData.qrCode);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 3000);
+    } catch {
+      const textarea = document.createElement('textarea');
+      textarea.value = pixData.qrCode;
+      document.body.appendChild(textarea);
+      textarea.select();
+      document.execCommand('copy');
+      document.body.removeChild(textarea);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 3000);
     }
   };
 
@@ -66,6 +119,76 @@ export default function PlanosPage() {
         {error && (
           <div className="mb-8 p-4 bg-red-50 border border-red-200 rounded-lg text-center">
             <p className="text-sm text-red-600">{error}</p>
+          </div>
+        )}
+
+        {/* Seletor de método de pagamento */}
+        <div className="mb-8 flex justify-center">
+          <div className="inline-flex bg-white rounded-xl shadow-sm border border-gray-200 p-1">
+            <button
+              onClick={() => { setPaymentMethod('cartao'); setPixData(null); }}
+              className={`px-6 py-2.5 rounded-lg text-sm font-medium transition-colors ${
+                paymentMethod === 'cartao'
+                  ? 'bg-blue-600 text-white shadow-sm'
+                  : 'text-gray-600 hover:text-gray-900'
+              }`}
+            >
+              Cartão / Boleto
+            </button>
+            <button
+              onClick={() => { setPaymentMethod('pix'); setPixData(null); }}
+              className={`px-6 py-2.5 rounded-lg text-sm font-medium transition-colors ${
+                paymentMethod === 'pix'
+                  ? 'bg-green-600 text-white shadow-sm'
+                  : 'text-gray-600 hover:text-gray-900'
+              }`}
+            >
+              PIX
+            </button>
+          </div>
+        </div>
+
+        {/* QR Code PIX inline */}
+        {pixData && (
+          <div className="mb-8 max-w-md mx-auto bg-white rounded-2xl shadow-lg p-8 border border-green-200">
+            <div className="text-center">
+              <h3 className="text-lg font-bold text-gray-900 mb-2">
+                Pagamento PIX - Plano {pixPlan === 'premium' ? 'Premium' : 'Básico'}
+              </h3>
+              <p className="text-sm text-gray-600 mb-6">
+                Escaneie o QR Code ou copie o código para pagar
+              </p>
+
+              {pixData.qrCodeBase64 && (
+                <div className="mb-6 flex justify-center">
+                  <img
+                    src={`data:image/png;base64,${pixData.qrCodeBase64}`}
+                    alt="QR Code PIX"
+                    className="w-48 h-48 rounded-lg border border-gray-200"
+                  />
+                </div>
+              )}
+
+              {pixData.qrCode && (
+                <div className="mb-4">
+                  <div className="bg-gray-50 rounded-lg p-3 mb-3">
+                    <p className="text-xs text-gray-500 font-mono break-all leading-relaxed">
+                      {pixData.qrCode.slice(0, 80)}...
+                    </p>
+                  </div>
+                  <button
+                    onClick={copyPixCode}
+                    className="w-full bg-green-600 hover:bg-green-700 text-white font-semibold py-3 px-6 rounded-xl transition-colors"
+                  >
+                    {copied ? 'Código copiado!' : 'Copiar código PIX'}
+                  </button>
+                </div>
+              )}
+
+              <p className="text-xs text-gray-500 mt-4">
+                Após o pagamento, seu acesso será liberado automaticamente em até 5 minutos.
+              </p>
+            </div>
           </div>
         )}
 
@@ -133,7 +256,9 @@ export default function PlanosPage() {
               disabled={loading !== null || isLoading}
               className="w-full bg-gray-900 hover:bg-gray-800 text-white font-semibold py-4 px-6 rounded-xl transition-colors disabled:bg-gray-300 disabled:cursor-not-allowed"
             >
-              {loading === 'basico' ? 'Redirecionando...' : 'Assinar Básico'}
+              {loading === 'basico'
+                ? (paymentMethod === 'pix' ? 'Gerando PIX...' : 'Redirecionando...')
+                : `Assinar Básico${paymentMethod === 'pix' ? ' com PIX' : ''}`}
             </button>
           </div>
 
@@ -193,7 +318,9 @@ export default function PlanosPage() {
               disabled={loading !== null || isLoading}
               className="w-full bg-yellow-400 hover:bg-yellow-500 text-yellow-900 font-bold py-4 px-6 rounded-xl transition-colors disabled:bg-gray-300 disabled:text-gray-600 disabled:cursor-not-allowed shadow-lg"
             >
-              {loading === 'premium' ? 'Redirecionando...' : 'Assinar Premium'}
+              {loading === 'premium'
+                ? (paymentMethod === 'pix' ? 'Gerando PIX...' : 'Redirecionando...')
+                : `Assinar Premium${paymentMethod === 'pix' ? ' com PIX' : ''}`}
             </button>
           </div>
         </div>
@@ -213,18 +340,29 @@ export default function PlanosPage() {
               <p className="text-gray-600">Seu QR Code dá 1 mês de acesso gratuito. Após, assine para continuar.</p>
             </div>
             <div>
-              <p className="font-medium text-gray-900 mb-1">Posso trocar de plano?</p>
-              <p className="text-gray-600">Sim, a qualquer momento pelo portal de assinatura.</p>
+              <p className="font-medium text-gray-900 mb-1">Quais formas de pagamento?</p>
+              <p className="text-gray-600">PIX (aprovação instantânea), cartão de crédito e boleto bancário, via Mercado Pago.</p>
             </div>
             <div>
               <p className="font-medium text-gray-900 mb-1">O pagamento é seguro?</p>
-              <p className="text-gray-600">Processado pelo Stripe, líder mundial em pagamentos online.</p>
+              <p className="text-gray-600">Processado pelo Mercado Pago, plataforma líder em pagamentos no Brasil.</p>
             </div>
           </div>
         </div>
 
-        {/* Voltar */}
-        <div className="text-center">
+        {/* Login / Voltar */}
+        <div className="text-center space-y-3">
+          {!user && (
+            <p className="text-sm text-gray-600">
+              Já tem conta?{' '}
+              <Link
+                href="/login?returnTo=/planos"
+                className="text-blue-600 hover:text-blue-700 font-medium"
+              >
+                Fazer login
+              </Link>
+            </p>
+          )}
           <Link
             href="/"
             className="text-blue-600 hover:text-blue-700 font-medium transition-colors"

@@ -116,7 +116,7 @@ export function useAuth(): UseAuthReturn {
     const status = getEnrollmentStatus(courseId);
     if (status?.hasAccess) return true;
 
-    // Verificar subscription (Stripe)
+    // Verificar subscription (Mercado Pago)
     return checkSubscriptionAccess(user?.subscriptions, courseId);
   };
 

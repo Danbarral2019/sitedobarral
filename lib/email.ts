@@ -281,51 +281,51 @@ export async function sendWelcomeEmail(
             <p style="margin: 8px 0 0; opacity: 0.9;">Seu cadastro foi realizado com sucesso</p>
           </div>
           <div class="content">
-            <p>Ola ${name},</p>
-            <p>E um prazer ter voce conosco! Abaixo segue um guia rapido para voce aproveitar ao maximo a plataforma:</p>
+            <p>Olá ${name},</p>
+            <p>É um prazer ter você conosco! Abaixo segue um guia rápido para você aproveitar ao máximo a plataforma:</p>
 
             <div class="guide">
-              <h3 style="margin-top: 0; color: #1f2937;">Guia Rapido</h3>
+              <h3 style="margin-top: 0; color: #1f2937;">Guia Rápido</h3>
               <div class="guide-item">
                 <span class="guide-number">1</span>
                 <div class="guide-text">
                   <strong>Acesse seus cursos</strong><br>
-                  <span style="font-size: 14px; color: #6b7280;">Na area restrita voce encontra todos os materiais dos cursos em que esta matriculado.</span>
+                  <span style="font-size: 14px; color: #6b7280;">Na área restrita você encontra todos os materiais dos cursos em que está matriculado.</span>
                 </div>
               </div>
               <div class="guide-item">
                 <span class="guide-number">2</span>
                 <div class="guide-text">
                   <strong>Use o Assistente de IA</strong><br>
-                  <span style="font-size: 14px; color: #6b7280;">Tire duvidas sobre licitacoes e contratos diretamente com nosso assistente inteligente.</span>
+                  <span style="font-size: 14px; color: #6b7280;">Tire dúvidas sobre licitações e contratos diretamente com nosso assistente inteligente.</span>
                 </div>
               </div>
               <div class="guide-item">
                 <span class="guide-number">3</span>
                 <div class="guide-text">
                   <strong>Pesquise documentos</strong><br>
-                  <span style="font-size: 14px; color: #6b7280;">Acesse acordaos do TCU, pareceres, orientacoes normativas e muito mais.</span>
+                  <span style="font-size: 14px; color: #6b7280;">Acesse acórdãos do TCU, pareceres, orientações normativas e muito mais.</span>
                 </div>
               </div>
               <div class="guide-item">
                 <span class="guide-number">4</span>
                 <div class="guide-text">
                   <strong>Consulte a Lei 14.133 Comentada</strong><br>
-                  <span style="font-size: 14px; color: #6b7280;">Navegue pelos 195 artigos da Nova Lei de Licitacoes com comentarios e documentos relacionados.</span>
+                  <span style="font-size: 14px; color: #6b7280;">Navegue pelos 195 artigos da Nova Lei de Licitações com comentários e documentos relacionados.</span>
                 </div>
               </div>
             </div>
 
-            <p>Tem alguma duvida? Acesse nossa <a href="${baseUrl}/faq" style="color: #2563eb; font-weight: bold;">pagina de perguntas frequentes</a> ou entre em contato pelo <a href="${baseUrl}/contato" style="color: #2563eb; font-weight: bold;">formulario de contato</a>.</p>
+            <p>Tem alguma dúvida? Acesse nossa <a href="${baseUrl}/faq" style="color: #2563eb; font-weight: bold;">página de perguntas frequentes</a> ou entre em contato pelo <a href="${baseUrl}/contato" style="color: #2563eb; font-weight: bold;">formulário de contato</a>.</p>
 
             <div style="text-align: center;">
               <a href="${baseUrl}/area-restrita" class="button">Acessar a Plataforma</a>
             </div>
 
-            <p>Bons estudos!<br><strong>Prof. Daniel Barral</strong><br><span style="font-size: 14px; color: #6b7280;">Especialista em Direito Administrativo, Licitacoes e Contratos</span></p>
+            <p>Bons estudos!<br><strong>Prof. Daniel Barral</strong><br><span style="font-size: 14px; color: #6b7280;">Especialista em Direito Administrativo, Licitações e Contratos</span></p>
           </div>
           <div class="footer">
-            <p>Este e um email automatico, por favor nao responda.</p>
+            <p>Este é um email automático, por favor não responda.</p>
             <p>&copy; ${new Date().getFullYear()} Prof. Daniel Barral - Todos os direitos reservados</p>
           </div>
         </div>
@@ -340,12 +340,12 @@ Seu cadastro foi realizado com sucesso no site do Prof. Daniel Barral.
 
 GUIA RAPIDO:
 
-1. Acesse seus cursos - Na area restrita voce encontra todos os materiais.
-2. Use o Assistente de IA - Tire duvidas sobre licitacoes e contratos.
-3. Pesquise documentos - Acordaos do TCU, pareceres, orientacoes normativas e mais.
-4. Consulte a Lei 14.133 Comentada - 195 artigos com comentarios e documentos.
+1. Acesse seus cursos - Na área restrita você encontra todos os materiais.
+2. Use o Assistente de IA - Tire dúvidas sobre licitações e contratos.
+3. Pesquise documentos - Acórdãos do TCU, pareceres, orientações normativas e mais.
+4. Consulte a Lei 14.133 Comentada - 195 artigos com comentários e documentos.
 
-Duvidas? Acesse: ${baseUrl}/faq
+Dúvidas? Acesse: ${baseUrl}/faq
 Contato: ${baseUrl}/contato
 
 Bons estudos!
@@ -1037,14 +1037,14 @@ export async function sendCourseWelcomeEmail(
             <h1>Bem-vindo(a) ao Curso!</h1>
           </div>
           <div class="content">
-            <p>Ola ${name},</p>
-            <p>Que bom que voce iniciou seus estudos no curso <strong>${courseTitle}</strong>!</p>
+            <p>Olá ${name},</p>
+            <p>Que bom que você iniciou seus estudos no curso <strong>${courseTitle}</strong>!</p>
 
             <div class="tips">
-              <h3 style="margin-top: 0;">Dicas para aproveitar ao maximo:</h3>
-              <div class="tip-item"><span class="check">&#10003;</span> Siga os modulos na ordem — cada um prepara para o proximo</div>
+              <h3 style="margin-top: 0;">Dicas para aproveitar ao máximo:</h3>
+              <div class="tip-item"><span class="check">&#10003;</span> Siga os módulos na ordem — cada um prepara para o próximo</div>
               <div class="tip-item"><span class="check">&#10003;</span> Consulte os documentos de apoio em cada aula</div>
-              <div class="tip-item"><span class="check">&#10003;</span> Use o assistente de IA para tirar duvidas</div>
+              <div class="tip-item"><span class="check">&#10003;</span> Use o assistente de IA para tirar dúvidas</div>
               <div class="tip-item"><span class="check">&#10003;</span> Responda os quizzes para testar seu conhecimento</div>
             </div>
 
@@ -1055,7 +1055,7 @@ export async function sendCourseWelcomeEmail(
             <p>Bons estudos!<br><strong>Equipe Prof. Daniel Barral</strong></p>
           </div>
           <div class="footer">
-            <p>Este e um email automatico, por favor nao responda.</p>
+            <p>Este é um email automático, por favor não responda.</p>
             <p>&copy; ${new Date().getFullYear()} Prof. Daniel Barral - Todos os direitos reservados</p>
           </div>
         </div>
@@ -1066,14 +1066,14 @@ export async function sendCourseWelcomeEmail(
   const text = `
 Bem-vindo(a) ao Curso!
 
-Ola ${name},
+Olá ${name},
 
-Que bom que voce iniciou seus estudos no curso: ${courseTitle}!
+Que bom que você iniciou seus estudos no curso: ${courseTitle}!
 
-Dicas para aproveitar ao maximo:
-- Siga os modulos na ordem
+Dicas para aproveitar ao máximo:
+- Siga os módulos na ordem
 - Consulte os documentos de apoio
-- Use o assistente de IA para duvidas
+- Use o assistente de IA para dúvidas
 - Responda os quizzes
 
 Continuar estudando: ${courseUrl}
@@ -1119,27 +1119,27 @@ export async function sendModuleCompletionEmail(
       <body>
         <div class="container">
           <div class="header">
-            <h1>Modulo Concluido!</h1>
+            <h1>Módulo Concluído!</h1>
           </div>
           <div class="content">
-            <p>Ola ${name},</p>
+            <p>Olá ${name},</p>
 
             <div class="achievement">
-              <p style="margin: 0 0 10px 0; font-size: 14px; color: #666;">Voce concluiu com sucesso:</p>
+              <p style="margin: 0 0 10px 0; font-size: 14px; color: #666;">Você concluiu com sucesso:</p>
               <h2 style="margin: 0; color: #059669;">${moduleTitle}</h2>
               <p style="margin: 10px 0 0; font-size: 14px; color: #666;">do curso <strong>${courseTitle}</strong></p>
             </div>
 
-            <p>Continue assim! Cada modulo concluido te aproxima mais do certificado de conclusao do curso.</p>
+            <p>Continue assim! Cada módulo concluído te aproxima mais do certificado de conclusão do curso.</p>
 
             <div style="text-align: center;">
-              <a href="${courseUrl}" class="button">Continuar para o Proximo Modulo</a>
+              <a href="${courseUrl}" class="button">Continuar para o Próximo Módulo</a>
             </div>
 
             <p>Bons estudos!<br><strong>Equipe Prof. Daniel Barral</strong></p>
           </div>
           <div class="footer">
-            <p>Este e um email automatico, por favor nao responda.</p>
+            <p>Este é um email automático, por favor não responda.</p>
             <p>&copy; ${new Date().getFullYear()} Prof. Daniel Barral - Todos os direitos reservados</p>
           </div>
         </div>
@@ -1148,14 +1148,14 @@ export async function sendModuleCompletionEmail(
   `;
 
   const text = `
-Modulo Concluido!
+Módulo Concluído!
 
-Ola ${name},
+Olá ${name},
 
-Voce concluiu com sucesso o modulo: ${moduleTitle}
+Você concluiu com sucesso o módulo: ${moduleTitle}
 do curso: ${courseTitle}
 
-Continue assim! Cada modulo concluido te aproxima mais do certificado.
+Continue assim! Cada módulo concluído te aproxima mais do certificado.
 
 Continuar estudando: ${courseUrl}
 
@@ -1165,7 +1165,7 @@ Equipe Prof. Daniel Barral
 
   return (await sendEmail({
     to: email,
-    subject: `Modulo concluido: ${moduleTitle} - ${courseTitle}`,
+    subject: `Módulo concluído: ${moduleTitle} - ${courseTitle}`,
     html,
     text,
   })).success;
@@ -1203,23 +1203,23 @@ export async function sendInactivityReminderEmail(
             <h1>Sentimos sua falta!</h1>
           </div>
           <div class="content">
-            <p>Ola ${name},</p>
+            <p>Olá ${name},</p>
 
             <div class="reminder-box">
-              <p style="margin: 0;">Faz <strong>${daysSinceAccess} dias</strong> que voce nao acessa o curso <strong>${courseTitle}</strong>.</p>
+              <p style="margin: 0;">Faz <strong>${daysSinceAccess} dias</strong> que você não acessa o curso <strong>${courseTitle}</strong>.</p>
             </div>
 
-            <p>A constancia e fundamental para o aprendizado. Que tal reservar alguns minutos hoje para retomar seus estudos?</p>
-            <p>Seu progresso esta salvo e voce pode continuar de onde parou.</p>
+            <p>A constância é fundamental para o aprendizado. Que tal reservar alguns minutos hoje para retomar seus estudos?</p>
+            <p>Seu progresso está salvo e você pode continuar de onde parou.</p>
 
             <div style="text-align: center;">
               <a href="${courseUrl}" class="button">Retomar Estudos</a>
             </div>
 
-            <p>Estamos torcendo por voce!<br><strong>Equipe Prof. Daniel Barral</strong></p>
+            <p>Estamos torcendo por você!<br><strong>Equipe Prof. Daniel Barral</strong></p>
           </div>
           <div class="footer">
-            <p>Este e um email automatico, por favor nao responda.</p>
+            <p>Este é um email automático, por favor não responda.</p>
             <p>&copy; ${new Date().getFullYear()} Prof. Daniel Barral - Todos os direitos reservados</p>
           </div>
         </div>
@@ -1230,17 +1230,17 @@ export async function sendInactivityReminderEmail(
   const text = `
 Sentimos sua falta!
 
-Ola ${name},
+Olá ${name},
 
-Faz ${daysSinceAccess} dias que voce nao acessa o curso: ${courseTitle}.
+Faz ${daysSinceAccess} dias que você não acessa o curso: ${courseTitle}.
 
-A constancia e fundamental para o aprendizado. Que tal reservar alguns minutos hoje para retomar seus estudos?
+A constância é fundamental para o aprendizado. Que tal reservar alguns minutos hoje para retomar seus estudos?
 
-Seu progresso esta salvo e voce pode continuar de onde parou.
+Seu progresso está salvo e você pode continuar de onde parou.
 
 Retomar estudos: ${courseUrl}
 
-Estamos torcendo por voce!
+Estamos torcendo por você!
 Equipe Prof. Daniel Barral
   `;
 
@@ -1282,10 +1282,10 @@ export async function sendCertificateNotification(
       <body>
         <div class="container">
           <div class="header">
-            <h1>Parabens, ${name}!</h1>
+            <h1>Parabéns, ${name}!</h1>
           </div>
           <div class="content">
-            <p>Temos o prazer de informar que voce concluiu com sucesso o curso:</p>
+            <p>Temos o prazer de informar que você concluiu com sucesso o curso:</p>
             <h2 style="color: #1f2937; text-align: center;">${courseTitle}</h2>
 
             <div class="cert-box">
@@ -1315,9 +1315,9 @@ export async function sendCertificateNotification(
   `;
 
   const text = `
-Parabens, ${name}!
+Parabéns, ${name}!
 
-Voce concluiu com sucesso o curso: ${courseTitle}
+Você concluiu com sucesso o curso: ${courseTitle}
 
 Seu certificado: ${certificateNumber}
 
@@ -1330,7 +1330,7 @@ Equipe Prof. Daniel Barral
 
   return (await sendEmail({
     to: email,
-    subject: `Certificado de Conclusao - ${courseTitle}`,
+    subject: `Certificado de Conclusão - ${courseTitle}`,
     html,
     text,
   })).success;

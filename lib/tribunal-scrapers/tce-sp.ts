@@ -192,7 +192,11 @@ class TCESPScraper implements TribunalScraper {
 
   private async searchDecisions(term: string, limit: number): Promise<RawDecision[]> {
     try {
-      return await this.searchViaHTML(term, limit);
+      // Search regular documents (tipoDocumento=3)
+      const regular = await this.searchViaHTML(term, limit, '3');
+      // Also search Consultas (tipoDocumento=7) for paradigmatic decisions
+      const consultas = await this.searchViaHTML(term, Math.min(limit, 20), '7');
+      return [...regular, ...consultas];
     } catch (error) {
       console.warn(`[${SCRAPER_CODE}] HTML search failed for "${term}":`, error);
       return [];
@@ -203,7 +207,7 @@ class TCESPScraper implements TribunalScraper {
   // HTML scraping approach
   // ===========================
 
-  private async searchViaHTML(term: string, limit: number): Promise<RawDecision[]> {
+  private async searchViaHTML(term: string, limit: number, tipoDocumento = '3'): Promise<RawDecision[]> {
     const allResults: RawDecision[] = [];
     let offset = 0;
 
@@ -211,7 +215,7 @@ class TCESPScraper implements TribunalScraper {
       const params = new URLSearchParams({
         txtTdPalvs: term,
         tipoBuscaTxt: 'Documento',
-        tipoDocumento: '3',
+        tipoDocumento,
         quantTrechos: '1',
         acao: 'Executa',
       });
@@ -318,7 +322,7 @@ class TCESPScraper implements TribunalScraper {
       const objeto = $cells.eq(6).text().trim();
 
       // Cell 7: Exercicio (year)
-      const exercicio = $cells.eq(7).text().trim();
+      const _exercicio = $cells.eq(7).text().trim();
 
       // Get the snippet row — the next sibling tr
       const $snippetRow = $row.next('tr');

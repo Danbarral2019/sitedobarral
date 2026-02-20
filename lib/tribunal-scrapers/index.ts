@@ -81,7 +81,18 @@ export { DEFAULT_SEARCH_TERMS } from './utils';
 import { tceSPScraper } from './tce-sp';
 import { tcePRScraper } from './tce-pr';
 import { tceMGScraper } from './tce-mg';
+import { tceSCScraper } from './tce-sc';
+import { tceRJScraper } from './tce-rj';
+import { tceRSScraper } from './tce-rs';
+import { tcePEScraper } from './tce-pe';
+import { dataJudSTJScraper, dataJudSTFScraper } from './datajud';
 
 registerScraper(tceSPScraper);
 registerScraper(tcePRScraper);
 registerScraper(tceMGScraper);
+registerScraper(tceSCScraper);
+registerScraper(tceRJScraper);
+registerScraper(tceRSScraper);
+registerScraper(tcePEScraper);
+registerScraper(dataJudSTJScraper);
+registerScraper(dataJudSTFScraper);

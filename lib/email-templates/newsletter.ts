@@ -1,7 +1,7 @@
 /**
- * Newsletter Email Templates (HTML reutilizavel)
- * Design: header com gradiente azul, cards por categoria, CTA, footer profissional
- * Compativel Gmail/Outlook (inline styles, tables)
+ * Newsletter Email Templates (HTML reutilizável)
+ * Design: header com gradiente azul-marinho, cards por categoria, CTA, footer profissional
+ * Compatível Gmail/Outlook (inline styles, tables, sem CSS classes)
  */
 
 interface WeeklyNewsletterData {
@@ -39,24 +39,69 @@ function trackingPixel(sendId: string): string {
 }
 
 const categoryNames: Record<string, string> = {
-  'apostila': 'Apostilas e Material Didatico',
-  'acordao': 'Acordaos',
-  'parecer': 'Pareceres Juridicos',
+  'apostila': 'Apostilas e Material Didático',
+  'acordao': 'Acórdãos',
+  'parecer': 'Pareceres Jurídicos',
   'edital': 'Editais',
   'artigo': 'Artigos e Doutrinas',
-  'orientacao-normativa': 'Orientacoes Normativas',
+  'orientacao-normativa': 'Orientações Normativas',
   'decor': 'DECOR',
   'enunciado': 'Enunciados',
   'outro': 'Outros Documentos',
 };
 
+const categoryIcons: Record<string, string> = {
+  'apostila': '&#128214;',
+  'acordao': '&#9878;',
+  'parecer': '&#128196;',
+  'edital': '&#128203;',
+  'artigo': '&#128221;',
+  'orientacao-normativa': '&#128220;',
+  'decor': '&#128218;',
+  'enunciado': '&#128209;',
+  'outro': '&#128195;',
+};
+
+const categoryColors: Record<string, string> = {
+  'apostila': '#2563eb',
+  'acordao': '#7c3aed',
+  'parecer': '#0891b2',
+  'edital': '#059669',
+  'artigo': '#d97706',
+  'orientacao-normativa': '#dc2626',
+  'decor': '#4f46e5',
+  'enunciado': '#0d9488',
+  'outro': '#6b7280',
+};
+
 function renderHeader(): string {
   return `
-    <table width="100%" cellpadding="0" cellspacing="0" border="0" style="background:linear-gradient(135deg, #003366 0%, #0066cc 100%);">
+    <table width="100%" cellpadding="0" cellspacing="0" border="0" style="background:#1e3a5f;">
       <tr>
-        <td align="center" style="padding:30px 20px;">
-          <h1 style="margin:0;font-size:28px;color:#ffffff;font-family:Arial,sans-serif;">Prof. Daniel Barral</h1>
-          <p style="margin:10px 0 0 0;font-size:16px;color:#ffffff;opacity:0.9;font-family:Arial,sans-serif;">Licitacoes e Contratos Publicos</p>
+        <td align="center" style="padding:0;">
+          <!--[if mso]>
+          <table width="600" cellpadding="0" cellspacing="0" border="0"><tr><td style="background-color:#1e3a5f;padding:40px 30px;">
+          <![endif]-->
+          <!--[if !mso]><!-->
+          <table width="100%" cellpadding="0" cellspacing="0" border="0" style="max-width:600px;background:linear-gradient(135deg, #1e3a5f 0%, #2563eb 100%);">
+            <tr>
+              <td align="center" style="padding:40px 30px;">
+          <!--<![endif]-->
+                <h1 style="margin:0;font-size:32px;color:#ffffff;font-family:Georgia,'Times New Roman',serif;font-weight:700;letter-spacing:0.5px;">Prof. Daniel Barral</h1>
+                <table cellpadding="0" cellspacing="0" border="0" style="margin:12px auto 0 auto;">
+                  <tr>
+                    <td style="height:2px;background-color:#60a5fa;font-size:0;line-height:0;width:60px;">&nbsp;</td>
+                  </tr>
+                </table>
+                <p style="margin:14px 0 0 0;font-size:15px;color:#bfdbfe;font-family:Arial,Helvetica,sans-serif;letter-spacing:0.3px;">Direito Administrativo, Licita&#231;&#245;es e Contratos</p>
+          <!--[if mso]>
+          </td></tr></table>
+          <![endif]-->
+          <!--[if !mso]><!-->
+              </td>
+            </tr>
+          </table>
+          <!--<![endif]-->
         </td>
       </tr>
     </table>`;
@@ -64,19 +109,51 @@ function renderHeader(): string {
 
 function renderFooter(sendId: string): string {
   return `
-    <table width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#f8f9fa;border-top:1px solid #e0e0e0;">
+    <table width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#1e293b;">
       <tr>
-        <td align="center" style="padding:20px;">
-          <p style="margin:0 0 10px 0;font-size:14px;color:#666666;font-family:Arial,sans-serif;">
-            Prof. Daniel Barral - Licitacoes e Contratos Publicos
+        <td align="center" style="padding:30px 20px 15px 20px;">
+          <p style="margin:0 0 6px 0;font-size:16px;color:#f1f5f9;font-family:Georgia,'Times New Roman',serif;font-weight:700;">Prof. Daniel Barral</p>
+          <p style="margin:0 0 16px 0;font-size:13px;color:#94a3b8;font-family:Arial,Helvetica,sans-serif;">Direito Administrativo, Licita&#231;&#245;es e Contratos</p>
+          <table cellpadding="0" cellspacing="0" border="0">
+            <tr>
+              <td align="center" style="padding:0 8px;">
+                <a href="${trackUrl(sendId, 'https://www.linkedin.com/in/danielbarral')}" style="color:#60a5fa;text-decoration:none;font-size:13px;font-family:Arial,Helvetica,sans-serif;">LinkedIn</a>
+              </td>
+              <td style="color:#475569;font-size:13px;">|</td>
+              <td align="center" style="padding:0 8px;">
+                <a href="${trackUrl(sendId, '#')}" style="color:#60a5fa;text-decoration:none;font-size:13px;font-family:Arial,Helvetica,sans-serif;">Instagram</a>
+              </td>
+              <td style="color:#475569;font-size:13px;">|</td>
+              <td align="center" style="padding:0 8px;">
+                <a href="${trackUrl(sendId, baseUrl)}" style="color:#60a5fa;text-decoration:none;font-size:13px;font-family:Arial,Helvetica,sans-serif;">Site</a>
+              </td>
+            </tr>
+          </table>
+        </td>
+      </tr>
+      <tr>
+        <td align="center" style="padding:0 20px;">
+          <table width="80%" cellpadding="0" cellspacing="0" border="0">
+            <tr>
+              <td style="height:1px;background-color:#334155;font-size:0;line-height:0;">&nbsp;</td>
+            </tr>
+          </table>
+        </td>
+      </tr>
+      <tr>
+        <td align="center" style="padding:15px 20px 10px 20px;">
+          <p style="margin:0 0 8px 0;font-size:12px;color:#64748b;font-family:Arial,Helvetica,sans-serif;line-height:1.5;">
+            Voc&#234; est&#225; recebendo este email porque se inscreveu na nossa newsletter.
           </p>
-          <p style="margin:0 0 10px 0;font-size:12px;color:#999999;font-family:Arial,sans-serif;">
-            <a href="${trackUrl(sendId, baseUrl)}" style="color:#0066cc;text-decoration:none;">www.profdanielbarral.com.br</a>
+          <p style="margin:0 0 8px 0;font-size:12px;color:#64748b;font-family:Arial,Helvetica,sans-serif;">
+            <a href="${trackUrl(sendId, `${baseUrl}/newsletter/unsubscribe`)}" style="color:#94a3b8;text-decoration:underline;">Cancelar inscri&#231;&#227;o</a>
           </p>
-          <p style="margin:0;font-size:11px;color:#999999;font-family:Arial,sans-serif;">
-            Voce esta recebendo este email porque se inscreveu na nossa newsletter.
-            <br>
-            <a href="${trackUrl(sendId, `${baseUrl}/newsletter/unsubscribe`)}" style="color:#999999;text-decoration:underline;">Cancelar inscricao</a>
+        </td>
+      </tr>
+      <tr>
+        <td align="center" style="padding:0 20px 20px 20px;">
+          <p style="margin:0;font-size:11px;color:#475569;font-family:Arial,Helvetica,sans-serif;">
+            &copy; ${new Date().getFullYear()} Prof. Daniel Barral. Todos os direitos reservados.
           </p>
           ${trackingPixel(sendId)}
         </td>
@@ -91,14 +168,25 @@ function renderCTAButton(sendId: string, text: string, url: string): string {
         <td align="center" style="padding:30px 20px;">
           <table cellpadding="0" cellspacing="0" border="0">
             <tr>
-              <td align="center" style="background-color:#0066cc;border-radius:5px;">
-                <a href="${trackUrl(sendId, url)}" style="display:inline-block;padding:15px 40px;color:#ffffff;text-decoration:none;font-size:16px;font-weight:bold;font-family:Arial,sans-serif;">${text}</a>
+              <!--[if mso]>
+              <td align="center" bgcolor="#2563eb" style="border-radius:8px;padding:16px 48px;">
+                <a href="${trackUrl(sendId, url)}" style="display:inline-block;color:#ffffff;text-decoration:none;font-size:17px;font-weight:bold;font-family:Arial,Helvetica,sans-serif;">${text}</a>
               </td>
+              <![endif]-->
+              <!--[if !mso]><!-->
+              <td align="center" style="background:linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);border-radius:8px;box-shadow:0 4px 14px rgba(37,99,235,0.35);">
+                <a href="${trackUrl(sendId, url)}" style="display:inline-block;padding:16px 48px;color:#ffffff;text-decoration:none;font-size:17px;font-weight:bold;font-family:Arial,Helvetica,sans-serif;letter-spacing:0.3px;">${text} &rarr;</a>
+              </td>
+              <!--<![endif]-->
             </tr>
           </table>
         </td>
       </tr>
     </table>`;
+}
+
+function renderPreheader(text: string): string {
+  return `<div style="display:none;font-size:1px;line-height:1px;max-height:0px;max-width:0px;opacity:0;overflow:hidden;mso-hide:all;">${text}&#847; &#847; &#847; &#847; &#847; &#847; &#847; &#847; &#847; &#847; &#847; &#847; &#847; &#847; &#847; &#847; &#847; &#847; &#847; &#847; &#847; &#847; &#847; &#847; &#847; &#847; &#847; &#847; &#847; &#847;</div>`;
 }
 
 export function renderWeeklyNewsletter(data: WeeklyNewsletterData): string {
@@ -107,20 +195,32 @@ export function renderWeeklyNewsletter(data: WeeklyNewsletterData): string {
 
   let contentCards = '';
   for (const { courseTitle, documentCount, documents } of coursesWithNewContent) {
+    const icon = documents.length > 0 ? (categoryIcons[documents[0].category] || '&#128195;') : '&#128195;';
     const docList = documents.slice(0, 3).map(doc =>
-      `<tr><td style="padding:4px 0 4px 15px;color:#374151;font-size:14px;font-family:Arial,sans-serif;">- ${doc.title}</td></tr>`
+      `<tr>
+        <td style="padding:6px 0 6px 20px;color:#374151;font-size:14px;font-family:Arial,Helvetica,sans-serif;line-height:1.5;">
+          <span style="color:#9ca3af;">&#8226;</span>&nbsp; ${doc.title}
+        </td>
+      </tr>`
     ).join('');
     const moreCount = documentCount - 3;
     const moreRow = moreCount > 0
-      ? `<tr><td style="padding:4px 0 4px 15px;color:#6b7280;font-size:14px;font-style:italic;font-family:Arial,sans-serif;">E mais ${moreCount} ${moreCount === 1 ? 'material' : 'materiais'}...</td></tr>`
+      ? `<tr><td style="padding:6px 0 6px 20px;color:#9ca3af;font-size:13px;font-style:italic;font-family:Arial,Helvetica,sans-serif;">E mais ${moreCount} ${moreCount === 1 ? 'material' : 'materiais'}...</td></tr>`
       : '';
 
     contentCards += `
-      <table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin:15px 0;background-color:#ffffff;border-left:4px solid #0066cc;border-radius:4px;">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin:12px 0;border:1px solid #e5e7eb;border-left:4px solid #2563eb;border-radius:8px;">
         <tr>
           <td style="padding:20px;">
-            <h3 style="margin:0 0 10px 0;color:#1f2937;font-size:16px;font-family:Arial,sans-serif;">${courseTitle}</h3>
-            <p style="color:#6b7280;margin:0 0 10px 0;font-size:14px;font-family:Arial,sans-serif;">${documentCount} ${documentCount === 1 ? 'novo material' : 'novos materiais'}</p>
+            <table width="100%" cellpadding="0" cellspacing="0" border="0">
+              <tr>
+                <td width="30" valign="top" style="font-size:20px;padding-right:10px;">${icon}</td>
+                <td>
+                  <h3 style="margin:0 0 6px 0;color:#1e293b;font-size:17px;font-family:Arial,Helvetica,sans-serif;font-weight:700;">${courseTitle}</h3>
+                  <p style="color:#64748b;margin:0 0 12px 0;font-size:13px;font-family:Arial,Helvetica,sans-serif;">${documentCount} ${documentCount === 1 ? 'novo material adicionado' : 'novos materiais adicionados'}</p>
+                </td>
+              </tr>
+            </table>
             <table width="100%" cellpadding="0" cellspacing="0" border="0">
               ${docList}
               ${moreRow}
@@ -132,55 +232,102 @@ export function renderWeeklyNewsletter(data: WeeklyNewsletterData): string {
 
   if (newVideos > 0) {
     contentCards += `
-      <table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin:15px 0;background-color:#ffffff;border-left:4px solid #dc2626;border-radius:4px;">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin:12px 0;border:1px solid #e5e7eb;border-left:4px solid #dc2626;border-radius:8px;">
         <tr>
           <td style="padding:20px;">
-            <h3 style="margin:0 0 10px 0;color:#1f2937;font-size:16px;font-family:Arial,sans-serif;">Videos</h3>
-            <p style="color:#6b7280;margin:0;font-size:14px;font-family:Arial,sans-serif;">${newVideos} ${newVideos === 1 ? 'novo video' : 'novos videos'} adicionado${newVideos > 1 ? 's' : ''}</p>
+            <table width="100%" cellpadding="0" cellspacing="0" border="0">
+              <tr>
+                <td width="30" valign="top" style="font-size:20px;padding-right:10px;">&#127909;</td>
+                <td>
+                  <h3 style="margin:0 0 6px 0;color:#1e293b;font-size:17px;font-family:Arial,Helvetica,sans-serif;font-weight:700;">V&#237;deos</h3>
+                  <p style="color:#64748b;margin:0;font-size:13px;font-family:Arial,Helvetica,sans-serif;">${newVideos} ${newVideos === 1 ? 'novo v&#237;deo adicionado' : 'novos v&#237;deos adicionados'}</p>
+                </td>
+              </tr>
+            </table>
           </td>
         </tr>
       </table>`;
   }
 
   return `<!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="pt-BR" xmlns="http://www.w3.org/1999/xhtml" xmlns:v="urn:schemas-microsoft-com:vml" xmlns:o="urn:schemas-microsoft-com:office:office">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <title>Novidades da Semana - Prof. Daniel Barral</title>
+  <!--[if mso]>
+  <noscript>
+    <xml>
+      <o:OfficeDocumentSettings>
+        <o:PixelsPerInch>96</o:PixelsPerInch>
+      </o:OfficeDocumentSettings>
+    </xml>
+  </noscript>
+  <![endif]-->
 </head>
-<body style="margin:0;padding:0;font-family:Arial,sans-serif;background-color:#f4f4f4;">
-  <table width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#f4f4f4;">
+<body style="margin:0;padding:0;font-family:Arial,Helvetica,sans-serif;background-color:#f1f5f9;-webkit-text-size-adjust:100%;-ms-text-size-adjust:100%;">
+  ${renderPreheader(`${totalContent} novos conte&#250;dos dispon&#237;veis esta semana na plataforma do Prof. Daniel Barral.`)}
+  <table width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#f1f5f9;">
     <tr>
-      <td align="center">
-        <table width="600" cellpadding="0" cellspacing="0" border="0" style="max-width:600px;background-color:#ffffff;">
+      <td align="center" style="padding:20px 10px;">
+        <table width="600" cellpadding="0" cellspacing="0" border="0" style="max-width:600px;background-color:#ffffff;border-radius:12px;overflow:hidden;box-shadow:0 4px 24px rgba(0,0,0,0.08);">
           <tr><td>${renderHeader()}</td></tr>
           <tr>
-            <td style="padding:30px 20px;">
-              <p style="margin:0 0 20px 0;font-size:16px;color:#333333;font-family:Arial,sans-serif;">
-                Ola, <strong>{{NAME}}</strong>!
+            <td style="padding:30px 30px 10px 30px;">
+              <p style="margin:0 0 24px 0;font-size:16px;color:#334155;font-family:Arial,Helvetica,sans-serif;line-height:1.6;">
+                Ol&#225;, <strong>{{NAME}}</strong>! Confira o que h&#225; de novo esta semana:
               </p>
 
-              <table width="100%" cellpadding="0" cellspacing="0" border="0" style="background:linear-gradient(135deg, #10b981 0%, #059669 100%);border-radius:8px;">
+              <!-- Banner destaque -->
+              <!--[if mso]>
+              <table width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td align="center" bgcolor="#059669" style="border-radius:10px;padding:28px 20px;">
+              <![endif]-->
+              <!--[if !mso]><!-->
+              <table width="100%" cellpadding="0" cellspacing="0" border="0" style="background:linear-gradient(135deg, #059669 0%, #047857 100%);border-radius:10px;">
                 <tr>
-                  <td align="center" style="padding:20px;">
-                    <h2 style="margin:0 0 10px 0;font-size:32px;color:#ffffff;font-family:Arial,sans-serif;">${totalContent}</h2>
-                    <p style="margin:0;font-size:18px;color:#ffffff;font-family:Arial,sans-serif;">novos conteudos esta semana!</p>
+                  <td align="center" style="padding:28px 20px;">
+              <!--<![endif]-->
+                    <h2 style="margin:0 0 6px 0;font-size:42px;color:#ffffff;font-family:Georgia,'Times New Roman',serif;font-weight:700;">${totalContent}</h2>
+                    <p style="margin:0;font-size:16px;color:#d1fae5;font-family:Arial,Helvetica,sans-serif;letter-spacing:0.3px;">novos conte&#250;dos esta semana</p>
+              <!--[if mso]>
+              </td></tr></table>
+              <![endif]-->
+              <!--[if !mso]><!-->
                   </td>
                 </tr>
               </table>
+              <!--<![endif]-->
 
-              <p style="margin:20px 0;font-size:16px;color:#333333;line-height:1.6;font-family:Arial,sans-serif;">
-                Confira as novidades que foram adicionadas a plataforma nos ultimos 7 dias:
+              <p style="margin:24px 0 16px 0;font-size:15px;color:#475569;line-height:1.7;font-family:Arial,Helvetica,sans-serif;">
+                Confira as novidades adicionadas &#224; plataforma nos &#250;ltimos 7 dias:
               </p>
 
               ${contentCards}
 
-              <table width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#dbeafe;border-left:4px solid #0066cc;border-radius:8px;margin:20px 0;">
+              <!-- Dica da Semana -->
+              <table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin:24px 0;border:1px solid #fde68a;border-left:4px solid #f59e0b;border-radius:8px;background-color:#fffbeb;">
                 <tr>
-                  <td style="padding:15px;">
-                    <p style="margin:0;color:#1e40af;font-size:14px;font-family:Arial,sans-serif;">
-                      <strong>Para alunos matriculados:</strong> Todos esses materiais ja estao disponiveis na sua area restrita!
+                  <td style="padding:18px 20px;">
+                    <table width="100%" cellpadding="0" cellspacing="0" border="0">
+                      <tr>
+                        <td width="28" valign="top" style="font-size:18px;padding-right:10px;">&#128161;</td>
+                        <td>
+                          <p style="margin:0 0 4px 0;color:#92400e;font-size:14px;font-weight:700;font-family:Arial,Helvetica,sans-serif;">Dica da Semana</p>
+                          <p style="margin:0;color:#78350f;font-size:14px;font-family:Arial,Helvetica,sans-serif;line-height:1.6;">A Lei 14.133/2021 trouxe diversas inova&#231;&#245;es. Fique atento &#224;s atualiza&#231;&#245;es publicadas no site!</p>
+                        </td>
+                      </tr>
+                    </table>
+                  </td>
+                </tr>
+              </table>
+
+              <!-- Aviso alunos -->
+              <table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin:8px 0 0 0;border:1px solid #bfdbfe;border-left:4px solid #2563eb;border-radius:8px;background-color:#eff6ff;">
+                <tr>
+                  <td style="padding:16px 20px;">
+                    <p style="margin:0;color:#1e40af;font-size:14px;font-family:Arial,Helvetica,sans-serif;line-height:1.6;">
+                      <strong>Para alunos matriculados:</strong> Todos esses materiais j&#225; est&#227;o dispon&#237;veis na sua &#225;rea restrita!
                     </p>
                   </td>
                 </tr>
@@ -188,11 +335,16 @@ export function renderWeeklyNewsletter(data: WeeklyNewsletterData): string {
 
               ${renderCTAButton(sendId, 'Acessar Plataforma', `${baseUrl}/area-restrita`)}
 
-              <p style="font-size:14px;color:#666666;font-family:Arial,sans-serif;">
-                <strong>Nao e aluno ainda?</strong> Conheca nossos cursos e <a href="${trackUrl(sendId, `${baseUrl}/contato`)}" style="color:#0066cc;">entre em contato</a> para participar das proximas turmas.
-              </p>
-
-              <p style="font-family:Arial,sans-serif;color:#333333;">Bons estudos!<br><strong>Equipe Prof. Daniel Barral</strong></p>
+              <table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin:0 0 10px 0;border-top:1px solid #e5e7eb;">
+                <tr>
+                  <td style="padding:20px 0 0 0;">
+                    <p style="font-size:14px;color:#64748b;font-family:Arial,Helvetica,sans-serif;line-height:1.6;margin:0 0 10px 0;">
+                      <strong>N&#227;o &#233; aluno ainda?</strong> Conhe&#231;a nossos cursos e <a href="${trackUrl(sendId, `${baseUrl}/contato`)}" style="color:#2563eb;text-decoration:none;font-weight:600;">entre em contato</a> para participar das pr&#243;ximas turmas.
+                    </p>
+                    <p style="font-family:Arial,Helvetica,sans-serif;color:#334155;margin:0;font-size:15px;line-height:1.6;">Bons estudos!<br><strong style="color:#1e3a5f;">Equipe Prof. Daniel Barral</strong></p>
+                  </td>
+                </tr>
+              </table>
             </td>
           </tr>
           <tr><td>${renderFooter(sendId)}</td></tr>
@@ -207,25 +359,56 @@ export function renderWeeklyNewsletter(data: WeeklyNewsletterData): string {
 export function renderMonthlyNewsletter(data: MonthlyNewsletterData): string {
   const { sendId, documentsByCategory, totalDocuments } = data;
 
+  const categoryCount = Object.keys(documentsByCategory).length;
+
+  // Mini dashboard stats
+  const statsHtml = `
+    <table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin:0 0 28px 0;">
+      <tr>
+        <td width="50%" style="padding:0 6px 0 0;">
+          <table width="100%" cellpadding="0" cellspacing="0" border="0" style="border:1px solid #e5e7eb;border-radius:8px;background-color:#f8fafc;">
+            <tr>
+              <td align="center" style="padding:20px 12px;">
+                <p style="margin:0 0 4px 0;font-size:32px;color:#1e3a5f;font-family:Georgia,'Times New Roman',serif;font-weight:700;">${totalDocuments}</p>
+                <p style="margin:0;font-size:12px;color:#64748b;font-family:Arial,Helvetica,sans-serif;text-transform:uppercase;letter-spacing:0.5px;">Documentos</p>
+              </td>
+            </tr>
+          </table>
+        </td>
+        <td width="50%" style="padding:0 0 0 6px;">
+          <table width="100%" cellpadding="0" cellspacing="0" border="0" style="border:1px solid #e5e7eb;border-radius:8px;background-color:#f8fafc;">
+            <tr>
+              <td align="center" style="padding:20px 12px;">
+                <p style="margin:0 0 4px 0;font-size:32px;color:#1e3a5f;font-family:Georgia,'Times New Roman',serif;font-weight:700;">${categoryCount}</p>
+                <p style="margin:0;font-size:12px;color:#64748b;font-family:Arial,Helvetica,sans-serif;text-transform:uppercase;letter-spacing:0.5px;">Categorias</p>
+              </td>
+            </tr>
+          </table>
+        </td>
+      </tr>
+    </table>`;
+
   let categorySections = '';
   for (const [category, docs] of Object.entries(documentsByCategory)) {
     const categoryName = categoryNames[category] || category;
+    const borderColor = categoryColors[category] || '#6b7280';
+    const icon = categoryIcons[category] || '&#128195;';
 
     let docRows = '';
     docs.forEach((doc, index) => {
       docRows += `
-        <table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-bottom:15px;background-color:#f8f9fa;border-left:4px solid #0066cc;border-radius:4px;">
+        <table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-bottom:10px;border:1px solid #f1f5f9;border-radius:6px;background-color:#fafbfc;">
           <tr>
-            <td style="padding:15px;">
-              <h3 style="margin:0 0 8px 0;font-size:16px;color:#222222;font-family:Arial,sans-serif;">
+            <td style="padding:14px 16px;">
+              <h3 style="margin:0 0 6px 0;font-size:15px;color:#1e293b;font-family:Arial,Helvetica,sans-serif;font-weight:600;">
                 ${index + 1}. ${doc.title}
               </h3>
               ${doc.description ? `
-                <p style="margin:0 0 10px 0;color:#555555;font-size:14px;line-height:1.5;font-family:Arial,sans-serif;">
+                <p style="margin:0 0 8px 0;color:#64748b;font-size:13px;line-height:1.6;font-family:Arial,Helvetica,sans-serif;">
                   ${doc.description.substring(0, 200)}${doc.description.length > 200 ? '...' : ''}
                 </p>
               ` : ''}
-              <p style="margin:0;font-size:12px;color:#777777;font-family:Arial,sans-serif;">
+              <p style="margin:0;font-size:12px;color:#94a3b8;font-family:Arial,Helvetica,sans-serif;">
                 Adicionado em: ${new Date(doc.uploadedAt).toLocaleDateString('pt-BR')}
               </p>
             </td>
@@ -234,12 +417,18 @@ export function renderMonthlyNewsletter(data: MonthlyNewsletterData): string {
     });
 
     categorySections += `
-      <table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-bottom:30px;">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-bottom:28px;">
         <tr>
           <td>
-            <h2 style="color:#003366;font-size:20px;border-bottom:2px solid #0066cc;padding-bottom:10px;margin-bottom:15px;font-family:Arial,sans-serif;">
-              ${categoryName} (${docs.length})
-            </h2>
+            <table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-bottom:14px;border-bottom:2px solid ${borderColor};">
+              <tr>
+                <td style="padding:0 0 10px 0;">
+                  <span style="font-size:18px;vertical-align:middle;">${icon}</span>
+                  <span style="font-size:19px;color:#1e293b;font-family:Arial,Helvetica,sans-serif;font-weight:700;vertical-align:middle;padding-left:6px;">${categoryName}</span>
+                  <span style="font-size:13px;color:#94a3b8;font-family:Arial,Helvetica,sans-serif;vertical-align:middle;padding-left:8px;">(${docs.length})</span>
+                </td>
+              </tr>
+            </table>
             ${docRows}
           </td>
         </tr>
@@ -247,43 +436,67 @@ export function renderMonthlyNewsletter(data: MonthlyNewsletterData): string {
   }
 
   return `<!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="pt-BR" xmlns="http://www.w3.org/1999/xhtml" xmlns:v="urn:schemas-microsoft-com:vml" xmlns:o="urn:schemas-microsoft-com:office:office">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <title>Newsletter Mensal - Prof. Daniel Barral</title>
+  <!--[if mso]>
+  <noscript>
+    <xml>
+      <o:OfficeDocumentSettings>
+        <o:PixelsPerInch>96</o:PixelsPerInch>
+      </o:OfficeDocumentSettings>
+    </xml>
+  </noscript>
+  <![endif]-->
 </head>
-<body style="margin:0;padding:0;font-family:Arial,sans-serif;background-color:#f4f4f4;">
-  <table width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#f4f4f4;">
+<body style="margin:0;padding:0;font-family:Arial,Helvetica,sans-serif;background-color:#f1f5f9;-webkit-text-size-adjust:100%;-ms-text-size-adjust:100%;">
+  ${renderPreheader(`${totalDocuments} novos documentos adicionados este m&#234;s. Confira o resumo mensal da plataforma do Prof. Daniel Barral.`)}
+  <table width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#f1f5f9;">
     <tr>
-      <td align="center">
-        <table width="600" cellpadding="0" cellspacing="0" border="0" style="max-width:600px;background-color:#ffffff;">
+      <td align="center" style="padding:20px 10px;">
+        <table width="600" cellpadding="0" cellspacing="0" border="0" style="max-width:600px;background-color:#ffffff;border-radius:12px;overflow:hidden;box-shadow:0 4px 24px rgba(0,0,0,0.08);">
           <tr><td>${renderHeader()}</td></tr>
           <tr>
-            <td style="padding:30px 20px;">
-              <p style="margin:0 0 20px 0;font-size:16px;color:#333333;font-family:Arial,sans-serif;">
-                Ola, <strong>{{NAME}}</strong>!
+            <td style="padding:30px 30px 10px 30px;">
+              <p style="margin:0 0 20px 0;font-size:16px;color:#334155;font-family:Arial,Helvetica,sans-serif;line-height:1.6;">
+                Ol&#225;, <strong>{{NAME}}</strong>! Aqui est&#225; o resumo do m&#234;s:
               </p>
 
-              <p style="margin:0 0 20px 0;font-size:16px;color:#333333;line-height:1.6;font-family:Arial,sans-serif;">
-                Confira as novidades deste mes! Foram adicionados <strong>${totalDocuments} novos documentos</strong>
-                na plataforma, todos relacionados a Licitacoes e Contratos Publicos.
+              <p style="margin:0 0 24px 0;font-size:15px;color:#475569;line-height:1.7;font-family:Arial,Helvetica,sans-serif;">
+                Foram adicionados <strong style="color:#1e3a5f;">${totalDocuments} novos documentos</strong>
+                na plataforma, todos relacionados a Licita&#231;&#245;es e Contratos P&#250;blicos.
               </p>
 
-              <table width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#fff3cd;border:1px solid #ffc107;border-radius:8px;margin-bottom:30px;">
+              <!-- Mini Dashboard -->
+              ${statsHtml}
+
+              <!-- Conteudos por categoria -->
+              ${categorySections}
+
+              <!-- Proximos Passos -->
+              <table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin:8px 0 24px 0;border:1px solid #c7d2fe;border-left:4px solid #6366f1;border-radius:8px;background-color:#eef2ff;">
                 <tr>
-                  <td style="padding:15px;">
-                    <p style="margin:0;color:#856404;font-size:14px;font-family:Arial,sans-serif;">
-                      <strong>Dica:</strong> Acesse a <a href="${trackUrl(sendId, `${baseUrl}/area-restrita`)}" style="color:#0066cc;text-decoration:none;">Area Restrita</a>
-                      para visualizar os documentos completos e fazer download.
-                    </p>
+                  <td style="padding:20px;">
+                    <table width="100%" cellpadding="0" cellspacing="0" border="0">
+                      <tr>
+                        <td width="28" valign="top" style="font-size:18px;padding-right:10px;">&#128640;</td>
+                        <td>
+                          <p style="margin:0 0 6px 0;color:#3730a3;font-size:15px;font-weight:700;font-family:Arial,Helvetica,sans-serif;">Pr&#243;ximos Passos</p>
+                          <p style="margin:0;color:#4338ca;font-size:14px;font-family:Arial,Helvetica,sans-serif;line-height:1.6;">
+                            Fique atento &#224;s novidades da plataforma! Em breve teremos novos cursos e materiais exclusivos sobre Licita&#231;&#245;es e Contratos P&#250;blicos.
+                            Acesse a <a href="${trackUrl(sendId, `${baseUrl}/area-restrita`)}" style="color:#4338ca;font-weight:600;">&#193;rea Restrita</a> para acompanhar tudo.
+                          </p>
+                        </td>
+                      </tr>
+                    </table>
                   </td>
                 </tr>
               </table>
 
-              ${categorySections}
-
-              ${renderCTAButton(sendId, 'Acessar Area Restrita', `${baseUrl}/area-restrita`)}
+              ${renderCTAButton(sendId, 'Acessar &#193;rea Restrita', `${baseUrl}/area-restrita`)}
             </td>
           </tr>
           <tr><td>${renderFooter(sendId)}</td></tr>

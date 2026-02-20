@@ -159,10 +159,10 @@ export default function LoginPage() {
               <p className="text-sm text-gray-600">
                 Primeiro acesso?{' '}
                 <Link
-                  href="/validar-acesso"
+                  href="/registro"
                   className="text-brand-600 hover:text-brand-700 font-medium"
                 >
-                  Escaneie o QR Code do seu curso
+                  Criar uma conta
                 </Link>
               </p>
             </div>
@@ -184,9 +184,7 @@ export default function LoginPage() {
         {/* Informações adicionais */}
         <div className="mt-6 text-center">
           <p className="text-sm text-gray-500">
-            O login é vinculado ao curso que você acessou via QR Code.
-            <br />
-            Caso não consiga acessar, verifique com o professor.
+            A plataforma oferece conteúdo gratuito e planos de assinatura.
           </p>
         </div>
 

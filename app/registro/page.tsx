@@ -9,6 +9,7 @@ export default function RegistroPage() {
   const searchParams = useSearchParams();
   const qrCode = searchParams.get('qr');
   const courseId = searchParams.get('curso');
+  const returnTo = searchParams.get('returnTo');
 
   const [formData, setFormData] = useState({
     name: '',
@@ -39,11 +40,6 @@ export default function RegistroPage() {
       return;
     }
 
-    if (!qrCode) {
-      setError('QR Code não fornecido. Escaneie o QR Code novamente.');
-      return;
-    }
-
     setLoading(true);
 
     try {
@@ -56,7 +52,7 @@ export default function RegistroPage() {
           name: formData.name,
           email: formData.email,
           password: formData.password,
-          qrCodeId: qrCode,
+          ...(qrCode && { qrCodeId: qrCode }),
           courseId: courseId,
         }),
       });
@@ -69,7 +65,10 @@ export default function RegistroPage() {
       }
 
       // Sucesso - redireciona para página de confirmação
-      router.push(`/registro/confirmacao?email=${encodeURIComponent(formData.email)}`);
+      const confirmParams = new URLSearchParams({ email: formData.email });
+      if (!qrCode) confirmParams.set('open', 'true');
+      if (returnTo) confirmParams.set('returnTo', returnTo);
+      router.push(`/registro/confirmacao?${confirmParams.toString()}`);
     } catch (err) {
       console.error('Erro ao registrar:', err);
       setError('Erro ao criar conta. Tente novamente.');
@@ -88,7 +87,9 @@ export default function RegistroPage() {
               Criar Conta
             </h1>
             <p className="text-gray-600">
-              Primeiro acesso - Crie suas credenciais
+              {qrCode
+                ? 'Primeiro acesso - Crie suas credenciais'
+                : 'Cadastre-se para acessar conteúdo público e explorar os planos'}
             </p>
           </div>
 
@@ -190,13 +191,15 @@ export default function RegistroPage() {
         </div>
 
         {/* Informações sobre QR Code */}
-        <div className="mt-6 text-center">
-          <p className="text-sm text-gray-500">
-            Este registro está vinculado ao QR Code escaneado.
-            <br />
-            Após criar sua conta, você poderá fazer login diretamente.
-          </p>
-        </div>
+        {qrCode && (
+          <div className="mt-6 text-center">
+            <p className="text-sm text-gray-500">
+              Este registro está vinculado ao QR Code escaneado.
+              <br />
+              Após criar sua conta, você poderá fazer login diretamente.
+            </p>
+          </div>
+        )}
       </div>
     </div>
   );

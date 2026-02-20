@@ -331,9 +331,10 @@ model User {
   // Relacionamento com cursos (para estudantes)
   enrollments  Enrollment[]
 
-  // Stripe
-  stripeCustomerId  String?        @unique
-  subscriptions     Subscription[]
+  // Pagamentos
+  stripeCustomerId     String?     // Legado Stripe (retrocompat)
+  mercadopagoPayerId   String?     // Payer ID do Mercado Pago
+  subscriptions        Subscription[]
 
   // LMS
   lmsReminderSentAt DateTime? // Último lembrete de inatividade LMS enviado
@@ -1365,24 +1366,25 @@ model TcuHighlight {
   @@index([documentId])
 }
 
-// Assinaturas Stripe (planos mensais)
+// Assinaturas (Mercado Pago + legado Stripe)
 model Subscription {
-  id                     String   @id @default(uuid())
-  userId                 String
-  user                   User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  stripeSubscriptionId   String   @unique
-  stripePriceId          String
-  plan                   String   // 'basico' | 'premium'
-  courseId                String?  // Para plano 'basico' — qual curso
-  status                 String   // 'active' | 'canceled' | 'past_due' | 'unpaid'
-  currentPeriodStart     DateTime
-  currentPeriodEnd       DateTime
-  cancelAtPeriodEnd      Boolean  @default(false)
-  createdAt              DateTime @default(now())
-  updatedAt              DateTime @updatedAt
+  id                        String   @id @default(uuid())
+  userId                    String
+  user                      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  stripeSubscriptionId      String?  // Legado Stripe (retrocompat)
+  stripePriceId             String?  // Legado Stripe (retrocompat)
+  mercadopagoPreapprovalId  String?  @unique // ID da assinatura recorrente no MP
+  paymentMethod             String?  // 'pix' | 'credit_card' | 'boleto'
+  plan                      String   // 'basico' | 'premium'
+  courseId                   String?  // Para plano 'basico' — qual curso
+  status                    String   // 'active' | 'canceled' | 'past_due' | 'unpaid'
+  currentPeriodStart        DateTime
+  currentPeriodEnd          DateTime
+  cancelAtPeriodEnd         Boolean  @default(false)
+  createdAt                 DateTime @default(now())
+  updatedAt                 DateTime @updatedAt
 
   @@index([userId])
-  @@index([stripeSubscriptionId])
   @@index([status])
   @@index([userId, status])
 }

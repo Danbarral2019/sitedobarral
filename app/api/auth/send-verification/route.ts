@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
+import crypto from 'crypto';
 import { enforceRateLimit, getClientIp } from '@/lib/cache/rate-limit-helper';
 import { RateLimitError } from '@/lib/errors/api-error';
 import { sendVerificationEmail } from '@/lib/email';
@@ -45,8 +46,8 @@ export async function POST(request: NextRequest) {
       });
     }
 
-    // Gera código de 6 dígitos
-    const verificationCode = Math.floor(100000 + Math.random() * 900000).toString();
+    // Gera token hex seguro (mesmo formato do registro)
+    const verificationToken = crypto.randomBytes(32).toString('hex');
 
     // Token válido por 30 minutos
     const emailTokenExpiry = new Date();
@@ -56,13 +57,13 @@ export async function POST(request: NextRequest) {
     await prisma.user.update({
       where: { id: user.id },
       data: {
-        verificationToken: verificationCode,
+        verificationToken,
         verificationExpiry: emailTokenExpiry,
       },
     });
 
-    // Envia email de verificação
-    const emailSent = await sendVerificationEmail(user.email, user.name, verificationCode);
+    // Envia email de verificação (gera link clicável)
+    const emailSent = await sendVerificationEmail(user.email, user.name, verificationToken);
 
     if (!emailSent) {
       console.warn('⚠️ Não foi possível enviar o email de verificação, mas o código foi salvo.');
@@ -70,10 +71,10 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({
       success: true,
-      message: 'Código de verificação enviado para seu email.',
+      message: 'Link de verificação enviado para seu email.',
       // ATENÇÃO: Remover em produção! Só para desenvolvimento
       devInfo: process.env.NODE_ENV === 'development' ? {
-        code: verificationCode,
+        token: verificationToken,
         expiresAt: emailTokenExpiry.toISOString(),
       } : undefined,
     });

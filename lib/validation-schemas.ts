@@ -34,8 +34,9 @@ export const RegisterSchema = z.object({
     .min(6, 'Senha deve ter no mínimo 6 caracteres')
     .max(100, 'Senha muito longa'),
   qrCodeId: z
-    .string({ error:'Código QR é obrigatório' })
-    .min(1, 'Código QR inválido'),
+    .string()
+    .min(1, 'Código QR inválido')
+    .optional(),
 });
 
 export const ResetPasswordSchema = z.object({

@@ -373,6 +373,12 @@ class TCEPRScraper implements TribunalScraper {
     const termsLower = searchTerms.map(t => t.toLowerCase());
 
     return rows.filter(row => {
+      // Always include Consulta/Prejulgado class (paradigmatic decisions)
+      const classeProcessual = row.DsClasseProcessual.toLowerCase();
+      if (/consulta|prejulgado/.test(classeProcessual)) {
+        return true;
+      }
+
       // Combine searchable fields into one lowercase string
       const searchable = [
         row.DsResumo,

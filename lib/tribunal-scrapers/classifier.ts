@@ -64,10 +64,41 @@ export function detectLeiArticles(text: string): string[] {
 // Keyword-based scoring
 // ===========================
 
+// Paradigmatic keywords (consultas em tese, teses fixadas)
+const PARADIGMATIC_KEYWORDS = {
+  strong: ['consulta', 'fixar tese', 'tese fixada', 'entendimento', 'uniformização', 'súmula', 'enunciado', 'interpretação', 'precedente', 'consulta em tese'],
+  moderate: ['divergência', 'revisão de entendimento', 'paradigma', 'recurso de revisão', 'prejudicial de mérito'],
+  indicators: ['é lícito', 'é ilícito', 'não se admite', 'deve ser observado', 'é obrigatório', 'é vedado', 'firmou entendimento', 'pacificou'],
+};
+
 function calculateKeywordScore(text: string): { score: number; reasoning: string[] } {
   const textLower = text.toLowerCase();
   let score = 0;
   const reasoning: string[] = [];
+
+  // Paradigmatic keywords - strong (+15 each)
+  for (const keyword of PARADIGMATIC_KEYWORDS.strong) {
+    if (textLower.includes(keyword)) {
+      score += 15;
+      reasoning.push(`+15: "${keyword}" (paradigmatico forte)`);
+    }
+  }
+
+  // Paradigmatic keywords - moderate (+8 each)
+  for (const keyword of PARADIGMATIC_KEYWORDS.moderate) {
+    if (textLower.includes(keyword)) {
+      score += 8;
+      reasoning.push(`+8: "${keyword}" (paradigmatico moderado)`);
+    }
+  }
+
+  // Paradigmatic keywords - indicators (+5 each)
+  for (const keyword of PARADIGMATIC_KEYWORDS.indicators) {
+    if (textLower.includes(keyword)) {
+      score += 5;
+      reasoning.push(`+5: "${keyword}" (indicador paradigmatico)`);
+    }
+  }
 
   // High relevance keywords (+10 each)
   for (const keyword of KEYWORDS_RELEVANCIA.high) {
@@ -160,10 +191,16 @@ export async function classifyDecision(
   let approvalStatus: ClassificationResult['approvalStatus'];
   let confidence = 0;
 
-  if (finalScore >= 40) {
+  // Bonus for Consulta-type decisions
+  if (decision.decisionType && /consulta|prejulgado|enunciado/i.test(decision.decisionType)) {
+    finalScore += 20;
+    reasoning.push('+20: tipo de processo paradigmatico');
+  }
+
+  if (finalScore >= 55) {
     approvalStatus = 'auto_approved';
     confidence = Math.min(95, 60 + finalScore);
-  } else if (finalScore >= 10) {
+  } else if (finalScore >= 20) {
     approvalStatus = 'pending';
     confidence = Math.min(60, 30 + finalScore);
   } else {
@@ -217,6 +254,11 @@ Ementa: ${decision.ementa.slice(0, 2000)}
 
 Score keyword: ${keywordScore}
 Temas detectados: ${detectedThemes.join(', ') || 'nenhum'}
+
+Avalie especialmente:
+- Esta decisao fixa uma tese juridica sobre a Lei 14.133? E uma consulta em tese?
+- Traz interpretacao nova ou consolidada sobre licitacoes?
+- Tem carater paradigmatico (uniformizacao, sumula, enunciado, precedente)?
 
 Responda APENAS com JSON (sem markdown):
 {
