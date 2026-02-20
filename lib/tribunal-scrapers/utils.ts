@@ -143,6 +143,7 @@ export function buildFullIdentifier(
     acordao: 'Acordao',
     decisao: 'Decisao',
     parecer_previo: 'Parecer Previo',
+    prejulgado: 'Prejulgado',
     sumula: 'Sumula',
   };
 

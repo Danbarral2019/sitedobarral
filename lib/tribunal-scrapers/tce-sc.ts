@@ -1,19 +1,21 @@
 /**
- * TCE-SC Scraper — HTML Scraping (Prejulgados)
+ * TCE-SC Scraper — API REST (Prejulgados)
  *
  * Tribunal de Contas do Estado de Santa Catarina
  * URL: https://www.tce.sc.gov.br
  *
- * O sistema principal ePapyrus (jurisprudencia.tce.sc.gov.br) e um SPA Angular
- * que requer headless browser. Usamos a pagina de prejulgados que e HTML estatico:
- *   https://www.tce.sc.gov.br/content/prejulgados
+ * Usa a API REST publica de prejulgados do TCE-SC:
+ *   https://servicos.tcesc.tc.br/cojur/prejulgado
  *
- * O TCE-SC tem ~64 prejulgados vigentes sobre temas variados.
- * A filtragem por classifyDecision() garante que so os relevantes
- * para licitacoes sejam salvos.
+ * Endpoints:
+ *   GET /cojur/prejulgado?page=1  — health check (paginado)
+ *   GET /cojur/prejulgado/all     — todos os prejulgados (~2.544 itens)
+ *
+ * Campos retornados por item:
+ *   nu_prejulgado, de_prejulgado, nm_relator, nm_origem,
+ *   data_sessao (YYYY-MM-DD HH:MM:SS), assuntos[].rotulo, st_valido ("S"/"N")
  */
 
-import * as cheerio from 'cheerio';
 import { prisma } from '@/lib/prisma';
 import type {
   TribunalScraper,
@@ -26,6 +28,7 @@ import {
   normalizeDecisionNumber,
   buildFullIdentifier,
   extractYear,
+  parseBRDate,
   logScraperHealth,
 } from './utils';
 import { classifyDecision } from './classifier';
@@ -35,18 +38,31 @@ import { classifyDecision } from './classifier';
 // ===========================
 
 const SCRAPER_CODE = 'tce-sc';
-const BASE_URL = 'https://www.tce.sc.gov.br';
-const PREJULGADOS_URL = `${BASE_URL}/content/prejulgados`;
+const API_BASE = 'https://servicos.tcesc.tc.br/cojur/prejulgado';
 
 // ===========================
 // Types
 // ===========================
 
+interface APIPrejulgado {
+  nu_prejulgado?: number | string;
+  de_prejulgado?: string;
+  nm_relator?: string;
+  nm_origem?: string;
+  data_sessao?: string;
+  st_valido?: string;
+  assuntos?: Array<{ rotulo?: string; [key: string]: unknown }>;
+  [key: string]: unknown;
+}
+
 interface RawDecision {
   decisionNumber: string;
   title: string;
   ementa: string;
-  url?: string;
+  relator?: string;
+  orgaoJulgador?: string;
+  dataJulgamento?: string;
+  themes: string[];
 }
 
 // ===========================
@@ -58,7 +74,7 @@ class TCESCScraper implements TribunalScraper {
   name = 'TCE-SC';
   fullName = 'Tribunal de Contas do Estado de Santa Catarina';
   type = 'tce' as const;
-  hasApi = false;
+  hasApi = true;
   supportsFullText = false;
 
   canHandle(tribunalCode: string): boolean {
@@ -67,9 +83,10 @@ class TCESCScraper implements TribunalScraper {
 
   async healthCheck(): Promise<ScraperHealthStatus> {
     try {
-      const response = await fetchWithRetry(PREJULGADOS_URL, {
+      const response = await fetchWithRetry(`${API_BASE}?page=1`, {
         timeoutMs: 15000,
         maxRetries: 1,
+        headers: { 'Accept': 'application/json' },
       });
 
       const lastLog = await prisma.scraperHealthLog.findFirst({
@@ -83,7 +100,7 @@ class TCESCScraper implements TribunalScraper {
         lastRun: lastLog?.runAt || undefined,
         lastSuccess: lastLog?.status === 'success' ? lastLog.runAt : undefined,
         consecutiveFailures: lastLog?.status === 'failure' ? 1 : 0,
-        message: response.ok ? 'Pagina de prejulgados acessivel' : `HTTP ${response.status}`,
+        message: response.ok ? 'API REST de prejulgados acessivel' : `HTTP ${response.status}`,
       };
     } catch (error) {
       return {
@@ -113,21 +130,21 @@ class TCESCScraper implements TribunalScraper {
     };
 
     try {
-      const decisions = await this.scrapePrejulgados();
+      const decisions = await this.fetchPrejulgados();
 
       if (decisions.length === 0) {
-        console.log(`[${SCRAPER_CODE}] Nenhum prejulgado encontrado na pagina. Layout pode ter mudado.`);
+        console.log(`[${SCRAPER_CODE}] Nenhum prejulgado retornado pela API.`);
         result.duration = Date.now() - startTime;
         await logScraperHealth(SCRAPER_CODE, 'success', {
           itemsFound: 0,
           itemsNew: 0,
           duration: result.duration,
-          metadata: { source: 'prejulgados-html', note: 'Pagina sem resultados parseados' },
+          metadata: { source: 'api-rest', note: 'API retornou 0 itens' },
         });
         return result;
       }
 
-      console.log(`[${SCRAPER_CODE}] Parsed ${decisions.length} prejulgados`);
+      console.log(`[${SCRAPER_CODE}] Fetched ${decisions.length} prejulgados from API`);
       result.itemsFound = decisions.length;
 
       for (const raw of decisions.slice(0, maxItems)) {
@@ -148,7 +165,7 @@ class TCESCScraper implements TribunalScraper {
         itemsError: result.itemsError,
         duration: result.duration,
         errorMessage: result.errors.length > 0 ? result.errors.join('; ') : undefined,
-        metadata: { source: 'prejulgados-html' },
+        metadata: { source: 'api-rest' },
       });
     } catch (error) {
       result.duration = Date.now() - startTime;
@@ -164,91 +181,69 @@ class TCESCScraper implements TribunalScraper {
   }
 
   // ===========================
-  // Scrape prejulgados page
+  // Fetch all prejulgados via API
   // ===========================
 
-  private async scrapePrejulgados(): Promise<RawDecision[]> {
-    const response = await fetchWithRetry(PREJULGADOS_URL, {
-      timeoutMs: 30000,
+  private async fetchPrejulgados(): Promise<RawDecision[]> {
+    const url = `${API_BASE}/all`;
+
+    const response = await fetchWithRetry(url, {
+      timeoutMs: 60000, // 60s — can be large payload
       maxRetries: 2,
+      headers: { 'Accept': 'application/json' },
     });
 
     if (!response.ok) {
-      throw new Error(`HTTP ${response.status} for ${PREJULGADOS_URL}`);
+      throw new Error(`HTTP ${response.status} for ${url}`);
     }
 
-    const html = await response.text();
-    return this.parsePrejulgados(html);
+    const data = await response.json();
+
+    // API returns an array of prejulgados
+    const items: APIPrejulgado[] = Array.isArray(data) ? data : [];
+
+    if (items.length === 0) {
+      console.warn(`[${SCRAPER_CODE}] API returned empty or non-array response`);
+      return [];
+    }
+
+    // Filter only valid prejulgados (st_valido === "S") and convert
+    return items
+      .filter(item => item.st_valido === 'S')
+      .map(item => this.apiItemToDecision(item));
   }
 
   // ===========================
-  // Parse prejulgados HTML
+  // API Item → RawDecision
   // ===========================
 
-  private parsePrejulgados(html: string): RawDecision[] {
-    const $ = cheerio.load(html);
-    const decisions: RawDecision[] = [];
+  private apiItemToDecision(item: APIPrejulgado): RawDecision {
+    const numero = String(item.nu_prejulgado || '').trim();
+    const ementa = (item.de_prejulgado || '').trim();
+    const relator = (item.nm_relator || '').trim() || undefined;
+    const orgaoJulgador = (item.nm_origem || '').trim() || undefined;
 
-    // Strategy 1: Look for structured list items/table rows with prejulgado data
-    // The page typically has a list of prejulgados with number + description/ementa
+    // data_sessao comes as "YYYY-MM-DD HH:MM:SS" — extract date part
+    const dataSessao = (item.data_sessao || '').trim() || undefined;
 
-    // Try: links with "Prejulgado" text or numbered list items
-    $('a, li, tr, .views-row, .item-list li, .field-content').each((_, el) => {
-      const $el = $(el);
-      const text = $el.text().trim();
-
-      // Match patterns like "Prejulgado 1234" or "Prejulgado nº 1234"
-      const prejMatch = text.match(/prejulgado\s+(?:n[.ºo°]\s*)?(\d{1,4})/i);
-      if (!prejMatch) return;
-
-      const numero = prejMatch[1];
-      const decisionNumber = numero;
-
-      // Check if already added
-      if (decisions.some(d => d.decisionNumber === decisionNumber)) return;
-
-      // Extract ementa: text after the number, or the full text
-      const ementa = text;
-
-      // Try to get link URL
-      let url: string | undefined;
-      const $link = $el.is('a') ? $el : $el.find('a').first();
-      if ($link.length > 0) {
-        const href = $link.attr('href');
-        if (href) {
-          url = href.startsWith('http') ? href : `${BASE_URL}${href.startsWith('/') ? '' : '/'}${href}`;
-        }
-      }
-
-      decisions.push({
-        decisionNumber,
-        title: `Prejulgado ${decisionNumber} TCE-SC`,
-        ementa: ementa.slice(0, 2000) || `Prejulgado ${decisionNumber}`,
-        url,
-      });
-    });
-
-    // Strategy 2: If no structured elements found, try regex on the full HTML text
-    if (decisions.length === 0) {
-      const bodyText = $('body').text();
-      const regex = /prejulgado\s+(?:n[.ºo°]\s*)?(\d{1,4})\s*[-–:.]?\s*([^\n]{10,200})/gi;
-      let match;
-
-      while ((match = regex.exec(bodyText)) !== null) {
-        const numero = match[1];
-        const ementa = match[2].trim();
-
-        if (!decisions.some(d => d.decisionNumber === numero)) {
-          decisions.push({
-            decisionNumber: numero,
-            title: `Prejulgado ${numero} TCE-SC`,
-            ementa: ementa || `Prejulgado ${numero}`,
-          });
-        }
+    // Extract theme labels from assuntos array
+    const themes: string[] = [];
+    if (Array.isArray(item.assuntos)) {
+      for (const assunto of item.assuntos) {
+        const rotulo = (assunto.rotulo || '').trim();
+        if (rotulo) themes.push(rotulo);
       }
     }
 
-    return decisions;
+    return {
+      decisionNumber: numero || 'unknown',
+      title: `Prejulgado ${numero} TCE-SC`,
+      ementa: ementa || `Prejulgado ${numero}`,
+      relator,
+      orgaoJulgador,
+      dataJulgamento: dataSessao,
+      themes,
+    };
   }
 
   // ===========================
@@ -261,7 +256,7 @@ class TCESCScraper implements TribunalScraper {
     forceRescrape: boolean
   ): Promise<void> {
     const normalized = normalizeDecisionNumber(raw.decisionNumber);
-    const fullIdentifier = buildFullIdentifier(SCRAPER_CODE, 'acordao', normalized);
+    const fullIdentifier = buildFullIdentifier(SCRAPER_CODE, 'prejulgado', normalized);
 
     const existing = await prisma.tribunalDecision.findUnique({
       where: { fullIdentifier },
@@ -279,27 +274,28 @@ class TCESCScraper implements TribunalScraper {
     });
 
     const year = extractYear(normalized);
+    const dataJulgamento = raw.dataJulgamento ? parseBRDate(raw.dataJulgamento) : null;
 
     const data = {
       tribunalCode: SCRAPER_CODE,
       tribunalName: this.fullName,
-      decisionType: 'acordao',
+      decisionType: 'prejulgado',
       decisionNumber: normalized,
       processNumber: null,
       year,
       fullIdentifier,
       title: raw.title,
       ementa: raw.ementa,
-      relator: null,
-      orgaoJulgador: null,
-      dataJulgamento: null,
-      url: raw.url || null,
+      relator: raw.relator || null,
+      orgaoJulgador: raw.orgaoJulgador || null,
+      dataJulgamento,
+      url: null,
       isRelevant: classification.approvalStatus !== 'auto_rejected',
       relevanceScore: classification.relevanceScore,
       themes: JSON.stringify(classification.themes),
       leiArticles: JSON.stringify(classification.leiArticles),
       suggestedCourses: classification.suggestedCourses,
-      sourceApi: 'tce-sc-prejulgados',
+      sourceApi: 'tce-sc-api-rest',
       approvalStatus: classification.approvalStatus,
       confidence: classification.confidence,
       classificationReasoning: classification.reasoning,

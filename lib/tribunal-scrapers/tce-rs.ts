@@ -8,10 +8,10 @@
  * JSON disponivel por ano em:
  *   https://dados.tce.rs.gov.br/dados/decisoes/{YEAR}.json
  *
- * JSON: array com ~20 campos por decisao:
- *   NR_PROCESSO, TIPO_PROCESSO, MAGISTRADO, ORGAO_JULGADOR,
- *   DATA_SESSAO, DECISAO (texto HTML), NR_ACORDAO, ANO_ACORDAO,
- *   DS_EMENTA, DS_INDEXACAO, etc.
+ * JSON: objeto { decisoes: [...] } com campos por decisao:
+ *   NR_PROCESSO (number), TIPO_PROCESSO, MAGISTRADO, ORGAO_JULGADOR,
+ *   DATA_SESSAO (DD/MM/YYYY), DECISAO (texto HTML),
+ *   ANO_SESSAO, TIPO_SESSAO, NOME_ORGAO, GABINETE, NUMERO_SESSAO, etc.
  * Anos disponíveis: 2011-2025
  */
 
@@ -60,18 +60,20 @@ interface RawDecision {
   decisionType?: string;
 }
 
-/** Represents a single item from the JSON array */
+/** Represents a single item from the JSON decisoes array */
 interface JSONItem {
-  NR_PROCESSO?: string;
+  NR_PROCESSO?: number | string;
   TIPO_PROCESSO?: string;
   MAGISTRADO?: string;
   ORGAO_JULGADOR?: string;
+  NOME_ORGAO?: string;
   DATA_SESSAO?: string;
   DECISAO?: string;
-  NR_ACORDAO?: string;
-  ANO_ACORDAO?: string | number;
-  DS_EMENTA?: string;
-  DS_INDEXACAO?: string;
+  ANO_SESSAO?: number | string;
+  TIPO_SESSAO?: string;
+  GABINETE?: string;
+  NUMERO_SESSAO?: number | string;
+  LINK_VIDEO_SESSAO?: string;
   [key: string]: unknown;
 }
 
@@ -238,11 +240,16 @@ class TCERSScraper implements TribunalScraper {
 
     const data = await response.json();
 
-    if (!Array.isArray(data)) {
-      throw new Error(`Expected JSON array for ${year}, got ${typeof data}`);
+    // JSON real é { decisoes: [...] }, não array raiz
+    if (Array.isArray(data)) {
+      return data as JSONItem[];
     }
 
-    return data as JSONItem[];
+    if (data && Array.isArray(data.decisoes)) {
+      return data.decisoes as JSONItem[];
+    }
+
+    throw new Error(`Expected JSON object with "decisoes" array for ${year}, got ${typeof data}`);
   }
 
   // ===========================
@@ -262,8 +269,6 @@ class TCERSScraper implements TribunalScraper {
       // Combine searchable fields
       const searchable = [
         item.DECISAO || '',
-        item.DS_EMENTA || '',
-        item.DS_INDEXACAO || '',
         item.TIPO_PROCESSO || '',
       ]
         .join(' ')
@@ -278,35 +283,26 @@ class TCERSScraper implements TribunalScraper {
   // ===========================
 
   private jsonItemToDecision(item: JSONItem): RawDecision {
-    const nrAcordao = String(item.NR_ACORDAO || '').trim();
-    const anoAcordao = String(item.ANO_ACORDAO || '').trim();
-    const decisionNumber = nrAcordao && anoAcordao ? `${nrAcordao}/${anoAcordao}` : nrAcordao || 'unknown';
-
-    const ementa = (item.DS_EMENTA || '').trim();
-    const indexacao = (item.DS_INDEXACAO || '').trim();
+    const nrProcesso = String(item.NR_PROCESSO ?? '').trim();
+    const anoSessao = String(item.ANO_SESSAO ?? '').trim();
+    const decisionNumber = nrProcesso && anoSessao ? `${nrProcesso}/${anoSessao}` : nrProcesso || 'unknown';
 
     // Extract plain text from DECISAO HTML field
     const decisaoHtml = (item.DECISAO || '').trim();
     const fullText = decisaoHtml ? extractTextFromHTML(decisaoHtml) : undefined;
 
-    // Build ementa: prefer DS_EMENTA, fallback to indexacao, then fullText excerpt
-    let ementaFinal = ementa;
-    if (!ementaFinal && indexacao) {
-      ementaFinal = indexacao;
-    }
-    if (!ementaFinal && fullText) {
-      ementaFinal = fullText.slice(0, 1000);
-    }
+    // Use DECISAO text as ementa (no DS_EMENTA/DS_INDEXACAO in real data)
+    const ementaFinal = fullText ? fullText.slice(0, 2000) : '';
 
     return {
       decisionNumber,
-      title: `Acordao ${decisionNumber} TCE-RS`,
-      ementa: ementaFinal || `Acordao ${decisionNumber}`,
+      title: `Decisao ${decisionNumber} TCE-RS`,
+      ementa: ementaFinal || `Decisao ${decisionNumber}`,
       fullText,
       relator: (item.MAGISTRADO || '').trim() || undefined,
       orgaoJulgador: (item.ORGAO_JULGADOR || '').trim() || undefined,
       dataJulgamento: (item.DATA_SESSAO || '').trim() || undefined,
-      processNumber: (item.NR_PROCESSO || '').trim() || undefined,
+      processNumber: nrProcesso || undefined,
       decisionType: (item.TIPO_PROCESSO || '').trim() || undefined,
     };
   }

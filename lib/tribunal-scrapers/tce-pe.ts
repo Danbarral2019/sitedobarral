@@ -1,16 +1,22 @@
 /**
- * TCE-PE Scraper — REST API Dados Abertos
+ * TCE-PE Scraper — Portal Jurisprudencia API (JHipster REST)
  *
  * Tribunal de Contas do Estado de Pernambuco
- * URL: https://sistemas.tce.pe.gov.br/DadosAbertos/
+ * URL: https://portal.tce.pe.gov.br/jurisprudencia/
  *
- * API REST com parametros GET:
- *   https://sistemas.tce.pe.gov.br/DadosAbertos/Resultados!json
- *   ?AnoAcordaoParecer=2025
- *   &TipoPesquisa=acordao (ou parecer, resolucao)
+ * API REST publica (sem autenticacao):
+ *   https://portal.tce.pe.gov.br/jurisprudencia/services/jurisprudencia/api/publico/
  *
- * Campos retornados: NrAcordao, AnoAcordao, DsTipoProcesso, NmRelator,
- *   DsOrgaoJulgador, DtSessao, DsEmenta, DsIndexacao, NrProcesso, UrlDocumento
+ * Endpoints usados:
+ *   GET /deliberacoes?page=N&size=200&sort=dataJulgamentoProcesso,desc
+ *       → 57.623+ acordaos paginados (X-Total-Count header)
+ *   GET /sumulas
+ *       → ~10 sumulas vigentes
+ *
+ * Campos da deliberacao:
+ *   nomeTipoDocumento (ACORDAO), numeroProcessoProcesso, anoProcessoProcesso,
+ *   numeroDeliberacaoProcesso, anoDeliberacaoProcesso, dataJulgamentoProcesso (ISO),
+ *   descricaoTipoProcessoProcesso, descricaoParecerProcesso (HTML inteiro teor)
  */
 
 import { prisma } from '@/lib/prisma';
@@ -29,6 +35,7 @@ import {
   parseBRDate,
   logScraperHealth,
   sleep,
+  extractTextFromHTML,
 } from './utils';
 import { classifyDecision } from './classifier';
 
@@ -37,10 +44,9 @@ import { classifyDecision } from './classifier';
 // ===========================
 
 const SCRAPER_CODE = 'tce-pe';
-const API_URL = 'https://sistemas.tce.pe.gov.br/DadosAbertos/Resultados!json';
-const _HEALTH_CHECK_URL = 'https://sistemas.tce.pe.gov.br/DadosAbertos/';
-
-const SEARCH_TYPES = ['acordao', 'parecer'] as const;
+const API_BASE = 'https://portal.tce.pe.gov.br/jurisprudencia/services/jurisprudencia/api/publico';
+const PAGE_SIZE = 200;
+const MAX_PAGES = 50; // Safety limit: 200 * 50 = 10.000 items max scan
 
 // ===========================
 // Types
@@ -50,6 +56,7 @@ interface RawDecision {
   decisionNumber: string;
   title: string;
   ementa: string;
+  fullText?: string;
   relator?: string;
   orgaoJulgador?: string;
   dataJulgamento?: string;
@@ -58,19 +65,34 @@ interface RawDecision {
   decisionType?: string;
 }
 
-/** Represents a single item from the API response */
-interface APIItem {
-  NrAcordao?: string | number;
-  AnoAcordao?: string | number;
-  DsTipoProcesso?: string;
-  NmRelator?: string;
-  DsOrgaoJulgador?: string;
-  DtSessao?: string;
-  DsEmenta?: string;
-  DsIndexacao?: string;
-  NrProcesso?: string;
-  UrlDocumento?: string;
+/** A single deliberacao from the Portal API */
+interface DeliberacaoItem {
+  nomeTipoDocumento?: string;
+  numeroProcessoProcesso?: string;
+  anoProcessoProcesso?: string;
+  numeroDeliberacaoProcesso?: string;
+  anoDeliberacaoProcesso?: string;
+  dataJulgamentoProcesso?: string;
+  descricaoTipoProcessoProcesso?: string;
+  descricaoParecerProcesso?: string;
+  origemProcessoProcesso?: string;
+  codigoValidacaoDocumentoDeliberacaoETCE?: string;
   [key: string]: unknown;
+}
+
+/** A single sumula from the Portal API */
+interface SumulaItem {
+  id: number;
+  descricao?: string;
+  titulo?: string;
+  numero?: number;
+  statusCancelado?: boolean;
+  indexadoresComplementares?: string;
+  nomeServidor?: string;
+  nomeOrgaoJulgador?: string;
+  numeroProcesso?: string;
+  anoProcesso?: string;
+  excluido?: boolean;
 }
 
 // ===========================
@@ -83,7 +105,7 @@ class TCEPEScraper implements TribunalScraper {
   fullName = 'Tribunal de Contas do Estado de Pernambuco';
   type = 'tce' as const;
   hasApi = true;
-  supportsFullText = false;
+  supportsFullText = true;
 
   canHandle(tribunalCode: string): boolean {
     return tribunalCode.toLowerCase() === SCRAPER_CODE;
@@ -91,13 +113,7 @@ class TCEPEScraper implements TribunalScraper {
 
   async healthCheck(): Promise<ScraperHealthStatus> {
     try {
-      const currentYear = new Date().getFullYear();
-      const params = new URLSearchParams({
-        AnoAcordaoParecer: String(currentYear),
-        TipoPesquisa: 'acordao',
-      });
-      const url = `${API_URL}?${params.toString()}`;
-
+      const url = `${API_BASE}/deliberacoes?page=0&size=1`;
       const response = await fetchWithRetry(url, {
         timeoutMs: 15000,
         maxRetries: 1,
@@ -115,7 +131,7 @@ class TCEPEScraper implements TribunalScraper {
         lastRun: lastLog?.runAt || undefined,
         lastSuccess: lastLog?.status === 'success' ? lastLog.runAt : undefined,
         consecutiveFailures: lastLog?.status === 'failure' ? 1 : 0,
-        message: response.ok ? 'API Dados Abertos acessivel' : `HTTP ${response.status}`,
+        message: response.ok ? 'Portal Jurisprudencia API acessivel' : `HTTP ${response.status}`,
       };
     } catch (error) {
       return {
@@ -146,56 +162,81 @@ class TCEPEScraper implements TribunalScraper {
     };
 
     try {
-      const currentYear = new Date().getFullYear();
-      const yearsToFetch = [currentYear, currentYear - 1];
-      const allItems: APIItem[] = [];
-      const seenKeys = new Set<string>();
+      const allItems: DeliberacaoItem[] = [];
+      const minYear = new Date().getFullYear() - 1;
 
-      for (const year of yearsToFetch) {
-        for (const tipoPesquisa of SEARCH_TYPES) {
-          try {
-            const items = await this.fetchDecisions(year, tipoPesquisa);
+      // Fetch deliberacoes paginated (most recent first)
+      for (let page = 0; page < MAX_PAGES; page++) {
+        try {
+          const items = await this.fetchDeliberacoes(page);
 
-            // Dedup within fetch
-            for (const item of items) {
-              const key = `${item.NrAcordao}-${item.AnoAcordao}-${tipoPesquisa}`;
-              if (!seenKeys.has(key)) {
-                seenKeys.add(key);
-                allItems.push(item);
-              }
-            }
+          if (items.length === 0) break;
 
-            console.log(`[${SCRAPER_CODE}] Fetched ${items.length} items for ${year}/${tipoPesquisa}`);
-            await sleep(1500); // Rate limit
-          } catch (error) {
-            const msg = `API fetch failed for ${year}/${tipoPesquisa}: ${error instanceof Error ? error.message : String(error)}`;
-            result.errors.push(msg);
-            console.error(`[${SCRAPER_CODE}]`, msg);
+          allItems.push(...items);
+          console.log(`[${SCRAPER_CODE}] Page ${page}: ${items.length} deliberacoes (total: ${allItems.length})`);
+
+          // Stop if we've gone past the year range
+          const lastItem = items[items.length - 1];
+          const lastDate = lastItem.dataJulgamentoProcesso || '';
+          const lastYear = lastDate ? parseInt(lastDate.slice(0, 4), 10) : 0;
+          if (lastYear > 0 && lastYear < minYear) {
+            console.log(`[${SCRAPER_CODE}] Reached year ${lastYear}, stopping pagination`);
+            break;
           }
+
+          await sleep(500);
+        } catch (error) {
+          const msg = `Page ${page} fetch failed: ${error instanceof Error ? error.message : String(error)}`;
+          result.errors.push(msg);
+          console.error(`[${SCRAPER_CODE}]`, msg);
+          break;
         }
       }
 
+      // Also fetch sumulas
+      try {
+        const sumulas = await this.fetchSumulas();
+        const sumulaDecisions = sumulas.map(s => this.sumulaToDecision(s));
+        console.log(`[${SCRAPER_CODE}] Fetched ${sumulas.length} sumulas`);
+
+        // Process sumulas directly (always relevant)
+        for (const raw of sumulaDecisions) {
+          try {
+            await this.processDecision(raw, result, forceRescrape);
+          } catch (error) {
+            result.itemsError++;
+            result.errors.push(
+              `Error processing sumula ${raw.decisionNumber}: ${error instanceof Error ? error.message : String(error)}`
+            );
+          }
+        }
+      } catch (error) {
+        const msg = `Sumulas fetch failed: ${error instanceof Error ? error.message : String(error)}`;
+        result.errors.push(msg);
+        console.error(`[${SCRAPER_CODE}]`, msg);
+      }
+
       if (allItems.length === 0) {
-        throw new Error('No data from API for any year/type');
+        throw new Error('No deliberacoes returned from Portal API');
       }
 
       // Filter by search terms
       const filtered = this.filterBySearchTerms(allItems, searchTerms);
-      console.log(`[${SCRAPER_CODE}] Filtered ${filtered.length} relevant items from ${allItems.length} total`);
+      console.log(`[${SCRAPER_CODE}] Filtered ${filtered.length} relevant deliberacoes from ${allItems.length} total`);
 
       // Convert to RawDecision
-      const decisions = filtered.map(item => this.apiItemToDecision(item));
+      const decisions = filtered.map(item => this.deliberacaoToDecision(item));
 
       // Dedup by decision number
-      const seenDecisions = new Set<string>();
+      const seen = new Set<string>();
       const unique = decisions.filter(d => {
         const key = normalizeDecisionNumber(d.decisionNumber);
-        if (seenDecisions.has(key)) return false;
-        seenDecisions.add(key);
+        if (seen.has(key)) return false;
+        seen.add(key);
         return true;
       });
 
-      result.itemsFound = unique.length;
+      result.itemsFound += unique.length;
 
       for (const raw of unique.slice(0, maxItems)) {
         try {
@@ -216,9 +257,9 @@ class TCEPEScraper implements TribunalScraper {
         duration: result.duration,
         errorMessage: result.errors.length > 0 ? result.errors.join('; ') : undefined,
         metadata: {
-          totalAPIItems: allItems.length,
+          totalDeliberacoes: allItems.length,
           filteredItems: filtered.length,
-          source: 'dados-abertos-api',
+          source: 'portal-jurisprudencia-api',
         },
       });
     } catch (error) {
@@ -235,15 +276,11 @@ class TCEPEScraper implements TribunalScraper {
   }
 
   // ===========================
-  // API Fetch
+  // Fetch deliberacoes (paginated)
   // ===========================
 
-  private async fetchDecisions(year: number, tipoPesquisa: string): Promise<APIItem[]> {
-    const params = new URLSearchParams({
-      AnoAcordaoParecer: String(year),
-      TipoPesquisa: tipoPesquisa,
-    });
-    const url = `${API_URL}?${params.toString()}`;
+  private async fetchDeliberacoes(page: number): Promise<DeliberacaoItem[]> {
+    const url = `${API_BASE}/deliberacoes?page=${page}&size=${PAGE_SIZE}&sort=dataJulgamentoProcesso,desc`;
 
     const response = await fetchWithRetry(url, {
       timeoutMs: 30000,
@@ -252,85 +289,122 @@ class TCEPEScraper implements TribunalScraper {
     });
 
     if (!response.ok) {
-      throw new Error(`HTTP ${response.status} for ${year}/${tipoPesquisa}`);
+      throw new Error(`HTTP ${response.status} for deliberacoes page ${page}`);
     }
 
     const data = await response.json();
 
-    // API may return array directly or wrapped in an object
-    if (Array.isArray(data)) {
-      return data as APIItem[];
+    if (!Array.isArray(data)) {
+      throw new Error(`Expected JSON array for deliberacoes, got ${typeof data}`);
     }
 
-    // Some APIs wrap in { results: [...] } or similar
-    if (data && typeof data === 'object') {
-      for (const key of Object.keys(data)) {
-        if (Array.isArray(data[key])) {
-          return data[key] as APIItem[];
-        }
-      }
+    return data as DeliberacaoItem[];
+  }
+
+  // ===========================
+  // Fetch sumulas
+  // ===========================
+
+  private async fetchSumulas(): Promise<SumulaItem[]> {
+    const url = `${API_BASE}/sumulas`;
+
+    const response = await fetchWithRetry(url, {
+      timeoutMs: 15000,
+      maxRetries: 2,
+      headers: { 'Accept': 'application/json' },
+    });
+
+    if (!response.ok) {
+      throw new Error(`HTTP ${response.status} for sumulas`);
     }
 
-    return [];
+    const data = await response.json();
+
+    if (!Array.isArray(data)) return [];
+
+    // Filter out cancelled and deleted sumulas
+    return (data as SumulaItem[]).filter(s => !s.statusCancelado && !s.excluido);
   }
 
   // ===========================
   // Filter by search terms
   // ===========================
 
-  private filterBySearchTerms(items: APIItem[], searchTerms: string[]): APIItem[] {
+  private filterBySearchTerms(items: DeliberacaoItem[], searchTerms: string[]): DeliberacaoItem[] {
     const termsLower = searchTerms.map(t => t.toLowerCase());
 
     return items.filter(item => {
-      // Always include Consulta/Prejulgado types
-      const tipoProcesso = (item.DsTipoProcesso || '').toLowerCase();
+      // Always include Consulta types
+      const tipoProcesso = (item.descricaoTipoProcessoProcesso || '').toLowerCase();
       if (/consulta|prejulgado/.test(tipoProcesso)) {
         return true;
       }
 
-      // Combine searchable fields
-      const searchable = [
-        item.DsEmenta || '',
-        item.DsIndexacao || '',
-        item.DsTipoProcesso || '',
-      ]
-        .join(' ')
-        .toLowerCase();
+      // Search in the full text of the deliberation
+      const parecer = (item.descricaoParecerProcesso || '').toLowerCase();
+      const tipo = tipoProcesso;
 
+      const searchable = `${parecer} ${tipo}`;
       return termsLower.some(term => searchable.includes(term));
     });
   }
 
   // ===========================
-  // API Item → RawDecision
+  // Deliberacao → RawDecision
   // ===========================
 
-  private apiItemToDecision(item: APIItem): RawDecision {
-    const nrAcordao = String(item.NrAcordao || '').trim();
-    const anoAcordao = String(item.AnoAcordao || '').trim();
-    const decisionNumber = nrAcordao && anoAcordao ? `${nrAcordao}/${anoAcordao}` : nrAcordao || 'unknown';
+  private deliberacaoToDecision(item: DeliberacaoItem): RawDecision {
+    const numDelib = (item.numeroDeliberacaoProcesso || '').trim();
+    const anoDelib = (item.anoDeliberacaoProcesso || '').trim();
+    const decisionNumber = numDelib && anoDelib ? `${numDelib}/${anoDelib}` : numDelib || 'unknown';
 
-    const ementa = (item.DsEmenta || '').trim();
-    const indexacao = (item.DsIndexacao || '').trim();
-    const tipoProcesso = (item.DsTipoProcesso || '').trim();
+    const tipoDoc = (item.nomeTipoDocumento || 'Acordao').trim();
+    const tipoProcesso = (item.descricaoTipoProcessoProcesso || '').trim();
 
-    let ementaFinal = ementa;
-    if (!ementaFinal && indexacao) {
-      ementaFinal = indexacao;
-    }
+    // Extract plain text from HTML inteiro teor
+    const parecerHtml = (item.descricaoParecerProcesso || '').trim();
+    const fullText = parecerHtml ? extractTextFromHTML(parecerHtml) : undefined;
+    const ementa = fullText ? fullText.slice(0, 2000) : '';
 
-    const urlDoc = (item.UrlDocumento || '').trim();
+    // Build document validation URL if available
+    const codValidacao = (item.codigoValidacaoDocumentoDeliberacaoETCE || '').trim();
+    const url = codValidacao
+      ? `https://etce.tce.pe.gov.br/epp/validaDoc.seam?cod=${codValidacao}`
+      : undefined;
 
     return {
       decisionNumber,
-      title: `${tipoProcesso || 'Acordao'} ${decisionNumber} TCE-PE`,
-      ementa: ementaFinal || `Acordao ${decisionNumber}`,
-      relator: (item.NmRelator || '').trim() || undefined,
-      orgaoJulgador: (item.DsOrgaoJulgador || '').trim() || undefined,
-      dataJulgamento: (item.DtSessao || '').trim() || undefined,
-      url: urlDoc || undefined,
-      processNumber: (item.NrProcesso || '').trim() || undefined,
+      title: `${tipoDoc} ${decisionNumber} TCE-PE${tipoProcesso ? ` (${tipoProcesso})` : ''}`,
+      ementa: ementa || `${tipoDoc} ${decisionNumber}`,
+      fullText,
+      relator: undefined, // Not available in deliberacoes endpoint
+      orgaoJulgador: undefined,
+      dataJulgamento: (item.dataJulgamentoProcesso || '').trim() || undefined,
+      url,
+      processNumber: (item.numeroProcessoProcesso || '').trim() || undefined,
       decisionType: tipoProcesso || undefined,
+    };
+  }
+
+  // ===========================
+  // Sumula → RawDecision
+  // ===========================
+
+  private sumulaToDecision(item: SumulaItem): RawDecision {
+    const numero = String(item.numero || item.id);
+    const descricao = (item.descricao || '').trim();
+
+    return {
+      decisionNumber: numero,
+      title: `Sumula ${numero} TCE-PE`,
+      ementa: descricao || `Sumula ${numero}`,
+      relator: (item.nomeServidor || '').trim() || undefined,
+      orgaoJulgador: (item.nomeOrgaoJulgador || '').trim() || undefined,
+      dataJulgamento: undefined,
+      processNumber: item.numeroProcesso
+        ? `${item.numeroProcesso}${item.anoProcesso ? `/${item.anoProcesso}` : ''}`
+        : undefined,
+      decisionType: 'sumula',
     };
   }
 
@@ -344,7 +418,8 @@ class TCEPEScraper implements TribunalScraper {
     forceRescrape: boolean
   ): Promise<void> {
     const normalized = normalizeDecisionNumber(raw.decisionNumber);
-    const fullIdentifier = buildFullIdentifier(SCRAPER_CODE, 'acordao', normalized);
+    const decisionType = raw.decisionType === 'sumula' ? 'sumula' : 'acordao';
+    const fullIdentifier = buildFullIdentifier(SCRAPER_CODE, decisionType, normalized);
 
     const existing = await prisma.tribunalDecision.findUnique({
       where: { fullIdentifier },
@@ -358,6 +433,7 @@ class TCEPEScraper implements TribunalScraper {
     const classification = await classifyDecision({
       title: raw.title,
       ementa: raw.ementa,
+      fullText: raw.fullText,
       decisionType: raw.decisionType,
     });
 
@@ -367,7 +443,7 @@ class TCEPEScraper implements TribunalScraper {
     const data = {
       tribunalCode: SCRAPER_CODE,
       tribunalName: this.fullName,
-      decisionType: 'acordao',
+      decisionType,
       decisionNumber: normalized,
       processNumber: raw.processNumber || null,
       year,
@@ -383,7 +459,7 @@ class TCEPEScraper implements TribunalScraper {
       themes: JSON.stringify(classification.themes),
       leiArticles: JSON.stringify(classification.leiArticles),
       suggestedCourses: classification.suggestedCourses,
-      sourceApi: 'tce-pe-dados-abertos',
+      sourceApi: 'tce-pe-portal-jurisprudencia',
       approvalStatus: classification.approvalStatus,
       confidence: classification.confidence,
       classificationReasoning: classification.reasoning,
