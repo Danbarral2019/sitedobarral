@@ -210,6 +210,35 @@ async function fetchAtosNormativos(params: AtosParams) {
 // Boas Práticas (Document com category='boa_pratica')
 // ===========================
 
+/**
+ * Extrai o fullNumber de um título de ato normativo.
+ * Ex: "INSTRUÇÃO NORMATIVA ICMBIO Nº 4, DE 10 DE FEVEREIRO DE 2026" → "IN ICMBIO nº 4/2026"
+ *     "PORTARIA NORMATIVA IBC Nº 139, DE 24 DE NOVEMBRO DE 2025" → "Portaria IBC nº 139/2025"
+ */
+function extractFullNumber(title: string): string | undefined {
+  // Match: <TYPE> <ORG> Nº <NUMBER>, DE <DAY> DE <MONTH> DE <YEAR>
+  const match = title.match(
+    /^(INSTRUÇÃO\s+NORMATIVA|PORTARIA\s+NORMATIVA|PORTARIA|RESOLUÇÃO|DECRETO|LEI)\s+(.+?)\s+N[ºo°]\s*(\d+),?\s+DE\s+\d+\s+DE\s+\w+\s+DE\s+(\d{4})/i
+  );
+  if (!match) return undefined;
+
+  const typeMap: Record<string, string> = {
+    'instrução normativa': 'IN',
+    'portaria normativa': 'Portaria',
+    'portaria': 'Portaria',
+    'resolução': 'Resolução',
+    'decreto': 'Decreto',
+    'lei': 'Lei',
+  };
+  const typeKey = match[1].toLowerCase().replace(/\s+/g, ' ');
+  const typeName = typeMap[typeKey] || match[1];
+  const org = match[2].trim();
+  const number = match[3];
+  const year = match[4];
+
+  return `${typeName} ${org} nº ${number}/${year}`;
+}
+
 interface BoasPraticasParams {
   search: string | null;
   year: string | null;
@@ -282,6 +311,7 @@ async function fetchBoasPraticas(params: BoasPraticasParams) {
   const acts = docs.map(doc => ({
     id: doc.id,
     type: 'boa_pratica',
+    fullNumber: extractFullNumber(doc.title),
     title: doc.title,
     ementa: doc.description || '',
     summary: doc.content || null,
@@ -292,6 +322,7 @@ async function fetchBoasPraticas(params: BoasPraticasParams) {
     leiArticles: doc.leiArticles ? JSON.parse(doc.leiArticles) : [],
     officialUrl: doc.metaDou?.url ?? doc.douUrl ?? doc.url,
     url: doc.url,
+    viewCount: 0,
   }));
 
   // Buscar facets para boas práticas (usa select mínimo para performance)

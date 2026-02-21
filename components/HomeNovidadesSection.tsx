@@ -28,7 +28,15 @@ function getCategoryColor(category: string): string {
     sumula: 'bg-indigo-100 text-indigo-700',
     consulta_tcu: 'bg-sky-100 text-sky-700',
     informativo: 'bg-orange-100 text-orange-700',
+    'tribunal-tce-sp': 'bg-violet-100 text-violet-700',
+    'tribunal-tce-pr': 'bg-violet-100 text-violet-700',
+    'tribunal-tce-sc': 'bg-violet-100 text-violet-700',
+    'tribunal-tce-rj': 'bg-violet-100 text-violet-700',
+    'tribunal-tce-rs': 'bg-violet-100 text-violet-700',
+    'tribunal-tce-pe': 'bg-violet-100 text-violet-700',
+    'tribunal-stj': 'bg-violet-100 text-violet-700',
   };
+  if (category.startsWith('tribunal-')) return 'bg-violet-100 text-violet-700';
   return colors[category] || 'bg-gray-100 text-gray-700';
 }
 
@@ -45,7 +53,17 @@ function getCategoryLabel(category: string): string {
     sumula: 'Súmula TCU',
     consulta_tcu: 'Consulta TCU',
     informativo: 'Informativo TCU',
+    'tribunal-tce-sp': 'TCE-SP',
+    'tribunal-tce-pr': 'TCE-PR',
+    'tribunal-tce-sc': 'TCE-SC',
+    'tribunal-tce-rj': 'TCE-RJ',
+    'tribunal-tce-rs': 'TCE-RS',
+    'tribunal-tce-pe': 'TCE-PE',
+    'tribunal-stj': 'STJ (DataJud)',
   };
+  if (category.startsWith('tribunal-')) {
+    return labels[category] || category.replace('tribunal-', '').toUpperCase();
+  }
   return labels[category] || 'Documento';
 }
 
@@ -54,13 +72,16 @@ export default async function HomeNovidadesSection() {
 
   let recentDocs: { id: string; title: string; category: string; uploadedAt: Date | null }[] = [];
   let blogPosts: { id: string; title: string; slug: string; excerpt: string | null; publishedAt: Date | null }[] = [];
+  let tribunalDecisions: { id: string; title: string; tribunalCode: string; createdAt: Date }[] = [];
 
   try {
-    [recentDocs, blogPosts] = await Promise.all([
+    [recentDocs, blogPosts, tribunalDecisions] = await Promise.all([
       prisma.document.findMany({
         where: {
           uploadedAt: { gte: thirtyDaysAgo },
           isPublic: true,
+          reviewed: true,
+          NOT: { category: 'manual-tcu' },
         },
         select: {
           id: true,
@@ -85,12 +106,52 @@ export default async function HomeNovidadesSection() {
         orderBy: { publishedAt: 'desc' },
         take: 4,
       }),
+      prisma.tribunalDecision.findMany({
+        where: {
+          approvalStatus: { in: ['auto_approved', 'manually_approved'] },
+          createdAt: { gte: thirtyDaysAgo },
+        },
+        select: {
+          id: true,
+          title: true,
+          tribunalCode: true,
+          createdAt: true,
+        },
+        orderBy: { createdAt: 'desc' },
+        take: 10,
+      }),
     ]);
   } catch {
     // DB unavailable (e.g. CI build) — render nothing
   }
 
-  const hasContent = recentDocs.length > 0 || blogPosts.length > 0;
+  // Merge documents + tribunal decisions into a unified list sorted by date
+  const allRecentItems: { id: string; title: string; category: string; date: Date; href: string }[] = [];
+
+  for (const doc of recentDocs) {
+    allRecentItems.push({
+      id: doc.id,
+      title: doc.title,
+      category: doc.category,
+      date: doc.uploadedAt ?? new Date(),
+      href: '/login',
+    });
+  }
+
+  for (const td of tribunalDecisions) {
+    allRecentItems.push({
+      id: td.id,
+      title: td.title,
+      category: `tribunal-${td.tribunalCode}`,
+      date: td.createdAt,
+      href: '/jurisprudencia',
+    });
+  }
+
+  allRecentItems.sort((a, b) => b.date.getTime() - a.date.getTime());
+  const visibleItems = allRecentItems.slice(0, 10);
+
+  const hasContent = visibleItems.length > 0 || blogPosts.length > 0;
   if (!hasContent) return null;
 
   return (
@@ -154,37 +215,36 @@ export default async function HomeNovidadesSection() {
               </div>
             )}
 
-            {/* Recent documents — lista compacta */}
-            {recentDocs.length > 0 && (
+            {/* Recent content — lista compacta */}
+            {visibleItems.length > 0 && (
               <div className={blogPosts.length > 0 ? 'lg:col-span-2' : 'lg:col-span-5'}>
                 <h3 className="text-sm font-bold text-gray-500 uppercase tracking-wider mb-4">
                   Conteudo Recente
                 </h3>
                 <div className="space-y-2">
-                  {recentDocs.map((doc) => (
-                    <div
-                      key={doc.id}
-                      className="bg-white rounded-lg border border-gray-200 px-4 py-3 flex items-center gap-3"
+                  {visibleItems.map((item) => (
+                    <Link
+                      key={item.id}
+                      href={item.href}
+                      className="block bg-white rounded-lg border border-gray-200 hover:border-indigo-300 hover:shadow-sm px-4 py-3 flex items-center gap-3 transition-all group"
                     >
                       <span
-                        className={`text-[10px] font-bold px-2 py-0.5 rounded-full flex-shrink-0 ${getCategoryColor(doc.category)}`}
+                        className={`text-[10px] font-bold px-2 py-0.5 rounded-full flex-shrink-0 ${getCategoryColor(item.category)}`}
                       >
-                        {getCategoryLabel(doc.category)}
+                        {getCategoryLabel(item.category)}
                       </span>
-                      <p className="text-sm font-medium text-gray-800 truncate flex-1">
-                        {doc.title}
+                      <p className="text-sm font-medium text-gray-800 group-hover:text-indigo-600 truncate flex-1 transition-colors">
+                        {item.title}
                       </p>
                       <span className="text-xs text-gray-400 flex-shrink-0">
-                        {doc.uploadedAt
-                          ? getRelativeDate(new Date(doc.uploadedAt))
-                          : ''}
+                        {getRelativeDate(item.date)}
                       </span>
-                    </div>
+                    </Link>
                   ))}
                 </div>
                 <div className="mt-4">
                   <Link
-                    href="/validar-acesso"
+                    href="/login"
                     className="inline-flex items-center gap-1 text-sm font-semibold text-indigo-600 hover:text-indigo-700 transition-colors"
                   >
                     Acessar Base de Conhecimento
