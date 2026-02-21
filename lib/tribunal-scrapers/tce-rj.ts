@@ -36,7 +36,7 @@ import {
   logScraperHealth,
   sleep,
 } from './utils';
-import { classifyDecision } from './classifier';
+import { classifyDecision, generateDecisionSummary } from './classifier';
 
 // ===========================
 // Constants
@@ -397,6 +397,12 @@ class TCERJScraper implements TribunalScraper {
         })()
       : null;
 
+    // Generate AI summary for approved decisions
+    let summary: string | null = null;
+    if (classification.approvalStatus === 'auto_approved') {
+      summary = await generateDecisionSummary({ title: raw.title, ementa: raw.ementa, decisionType: raw.decisionType });
+    }
+
     const data = {
       tribunalCode: SCRAPER_CODE,
       tribunalName: this.fullName,
@@ -407,6 +413,7 @@ class TCERJScraper implements TribunalScraper {
       fullIdentifier,
       title: raw.title,
       ementa: raw.ementa,
+      summary,
       relator: null,
       orgaoJulgador: null,
       dataJulgamento,

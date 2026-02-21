@@ -33,7 +33,7 @@ import {
   sleep,
   extractTextFromHTML,
 } from './utils';
-import { classifyDecision } from './classifier';
+import { classifyDecision, generateDecisionSummary } from './classifier';
 
 // ===========================
 // Constants
@@ -287,23 +287,38 @@ class TCERSScraper implements TribunalScraper {
     const anoSessao = String(item.ANO_SESSAO ?? '').trim();
     const decisionNumber = nrProcesso && anoSessao ? `${nrProcesso}/${anoSessao}` : nrProcesso || 'unknown';
 
+    const tipoProcesso = (item.TIPO_PROCESSO || '').trim();
+    const magistrado = (item.MAGISTRADO || '').trim();
+    const orgaoJulgador = (item.ORGAO_JULGADOR || '').trim();
+    const nomeOrgao = (item.NOME_ORGAO || '').trim();
+    const dataSessao = (item.DATA_SESSAO || '').trim();
+
     // Extract plain text from DECISAO HTML field
     const decisaoHtml = (item.DECISAO || '').trim();
     const fullText = decisaoHtml ? extractTextFromHTML(decisaoHtml) : undefined;
 
-    // Use DECISAO text as ementa (no DS_EMENTA/DS_INDEXACAO in real data)
-    const ementaFinal = fullText ? fullText.slice(0, 2000) : '';
+    // Build rich ementa from metadata + DECISAO text
+    // DECISAO field is very short (avg 97 chars) — just vote outcomes
+    // So we compose ementa from all available metadata
+    const ementaParts = [
+      tipoProcesso ? `${tipoProcesso}.` : '',
+      nomeOrgao ? `Orgao: ${nomeOrgao}.` : '',
+      magistrado ? `Relator: ${magistrado}.` : '',
+      orgaoJulgador ? `Orgao Julgador: ${orgaoJulgador}.` : '',
+      dataSessao ? `Sessao: ${dataSessao}.` : '',
+      fullText || '',
+    ].filter(Boolean).join(' ').trim();
 
     return {
       decisionNumber,
-      title: `Decisao ${decisionNumber} TCE-RS`,
-      ementa: ementaFinal || `Decisao ${decisionNumber}`,
+      title: `${tipoProcesso || 'Decisao'} ${decisionNumber} TCE-RS`,
+      ementa: ementaParts || `Decisao ${decisionNumber}`,
       fullText,
-      relator: (item.MAGISTRADO || '').trim() || undefined,
-      orgaoJulgador: (item.ORGAO_JULGADOR || '').trim() || undefined,
-      dataJulgamento: (item.DATA_SESSAO || '').trim() || undefined,
+      relator: magistrado || undefined,
+      orgaoJulgador: orgaoJulgador || undefined,
+      dataJulgamento: dataSessao || undefined,
       processNumber: nrProcesso || undefined,
-      decisionType: (item.TIPO_PROCESSO || '').trim() || undefined,
+      decisionType: tipoProcesso || undefined,
     };
   }
 
@@ -338,6 +353,12 @@ class TCERSScraper implements TribunalScraper {
     const year = extractYear(normalized);
     const dataJulgamento = raw.dataJulgamento ? parseBRDate(raw.dataJulgamento) : null;
 
+    // Generate AI summary for approved decisions
+    let summary: string | null = null;
+    if (classification.approvalStatus === 'auto_approved') {
+      summary = await generateDecisionSummary({ title: raw.title, ementa: raw.ementa, fullText: raw.fullText, decisionType: raw.decisionType });
+    }
+
     const data = {
       tribunalCode: SCRAPER_CODE,
       tribunalName: this.fullName,
@@ -348,6 +369,7 @@ class TCERSScraper implements TribunalScraper {
       fullIdentifier,
       title: raw.title,
       ementa: raw.ementa,
+      summary,
       relator: raw.relator || null,
       orgaoJulgador: raw.orgaoJulgador || null,
       dataJulgamento,

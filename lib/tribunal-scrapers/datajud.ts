@@ -19,7 +19,7 @@
 import { prisma } from '@/lib/prisma';
 import type { TribunalScraper, TribunalScrapeOptions, TribunalScrapeResult, ScraperHealthStatus } from './index';
 import { normalizeDecisionNumber, buildFullIdentifier, logScraperHealth, sleep } from './utils';
-import { classifyDecision } from './classifier';
+import { classifyDecision, generateDecisionSummary } from './classifier';
 
 const DATAJUD_BASE = 'https://api-publica.datajud.cnj.jus.br';
 const API_KEY = process.env.DATAJUD_API_KEY || '';
@@ -234,6 +234,12 @@ class DataJudScraper implements TribunalScraper {
     // Classify
     const classification = await classifyDecision({ title, ementa: fullEmenta, decisionType: src.classe?.nome });
 
+    // Generate AI summary for approved decisions
+    let summary: string | null = null;
+    if (classification.approvalStatus === 'auto_approved') {
+      summary = await generateDecisionSummary({ title, ementa: fullEmenta, decisionType: src.classe?.nome });
+    }
+
     // Parse dates safely — avoid Invalid Date
     const parseDate = (val: unknown): Date | null => {
       if (!val || typeof val !== 'string') return null;
@@ -256,6 +262,7 @@ class DataJudScraper implements TribunalScraper {
         fullIdentifier,
         title,
         ementa: fullEmenta.slice(0, 10000),
+        summary,
         orgaoJulgador: src.orgaoJulgador?.nome || null,
         dataJulgamento,
         dataPublicacao,
