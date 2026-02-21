@@ -567,8 +567,8 @@ Ver código para endpoints completos.
 **🚧 Pendente:**
 - Criar conta Mercado Pago + configurar credenciais na Vercel
 - Configurar webhook MP → `https://www.profdanielbarral.com/api/pagamento/webhook`
-- Scrapers TCE (SC/RJ/RS/PE) são esqueletos — parsing HTML precisa ajuste com dados reais
-- DataJud precisa de `DATAJUD_API_KEY` configurada
+- Scrapers TCE (SC/RJ/RS/PE) corrigidos com APIs reais (commit `f4aff87`)
+- DataJud: `DATAJUD_API_KEY` configurada na Vercel ✅
 
 ## Important Architecture Patterns
 

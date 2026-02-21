@@ -234,7 +234,16 @@ class DataJudScraper implements TribunalScraper {
     // Classify
     const classification = await classifyDecision({ title, ementa: fullEmenta, decisionType: src.classe?.nome });
 
-    const year = src.dataAjuizamento ? new Date(src.dataAjuizamento).getFullYear() : new Date().getFullYear();
+    // Parse dates safely — avoid Invalid Date
+    const parseDate = (val: unknown): Date | null => {
+      if (!val || typeof val !== 'string') return null;
+      const d = new Date(val);
+      return isNaN(d.getTime()) ? null : d;
+    };
+
+    const dataJulgamento = parseDate(src.dataAjuizamento);
+    const dataPublicacao = parseDate(src.dataHoraUltimaAtualizacao);
+    const year = dataJulgamento ? dataJulgamento.getFullYear() : (dataPublicacao ? dataPublicacao.getFullYear() : new Date().getFullYear());
 
     await prisma.tribunalDecision.create({
       data: {
@@ -248,8 +257,8 @@ class DataJudScraper implements TribunalScraper {
         title,
         ementa: fullEmenta.slice(0, 10000),
         orgaoJulgador: src.orgaoJulgador?.nome || null,
-        dataJulgamento: src.dataAjuizamento ? new Date(src.dataAjuizamento) : null,
-        dataPublicacao: src.dataHoraUltimaAtualizacao ? new Date(src.dataHoraUltimaAtualizacao) : null,
+        dataJulgamento,
+        dataPublicacao,
         isRelevant: classification.approvalStatus !== 'auto_rejected',
         relevanceScore: classification.relevanceScore,
         themes: JSON.stringify(classification.themes),
