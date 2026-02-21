@@ -22,6 +22,7 @@ export async function GET(request: NextRequest) {
     const artigo = searchParams.get('artigo');
     const q = searchParams.get('q');
     const status = searchParams.get('status');
+    const sort = searchParams.get('sort') || 'createdAt';
     const page = Math.max(1, parseInt(searchParams.get('page') || '1', 10));
     const pageSize = Math.min(50, Math.max(1, parseInt(searchParams.get('pageSize') || '10', 10)));
 
@@ -71,9 +72,9 @@ export async function GET(request: NextRequest) {
           confidence: true,
           createdAt: true,
         },
-        orderBy: [
-          { createdAt: 'desc' },
-        ],
+        orderBy: sort === 'relevanceScore'
+          ? [{ relevanceScore: 'desc' }, { createdAt: 'desc' }]
+          : [{ createdAt: 'desc' }],
         skip: (page - 1) * pageSize,
         take: pageSize,
       }),

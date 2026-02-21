@@ -92,6 +92,7 @@ export default function TribunalDecisionsClient() {
   const [activeTab, setActiveTab] = useState<'pending' | 'auto_approved' | 'manually_approved' | 'auto_rejected' | 'manually_rejected' | 'all'>('pending');
   const [filterTribunal, setFilterTribunal] = useState('');
   const [searchText, setSearchText] = useState('');
+  const [sortBy, setSortBy] = useState<'createdAt' | 'relevanceScore'>('relevanceScore');
 
   // Selection
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
@@ -139,6 +140,7 @@ export default function TribunalDecisionsClient() {
       const params = new URLSearchParams({
         page: String(currentPage),
         pageSize: String(pageSize),
+        sort: sortBy,
       });
       if (activeTab !== 'all') params.set('status', activeTab);
       if (filterTribunal) params.set('tribunal', filterTribunal);
@@ -156,7 +158,7 @@ export default function TribunalDecisionsClient() {
     } finally {
       setDecisionsLoading(false);
     }
-  }, [currentPage, activeTab, filterTribunal, searchText]);
+  }, [currentPage, activeTab, filterTribunal, searchText, sortBy]);
 
   // Initial load
   useEffect(() => {
@@ -172,7 +174,7 @@ export default function TribunalDecisionsClient() {
   useEffect(() => {
     setCurrentPage(1);
     setSelectedIds(new Set());
-  }, [activeTab, filterTribunal, searchText]);
+  }, [activeTab, filterTribunal, searchText, sortBy]);
 
   // Run scraper
   const handleRunScraper = async (scraperCode: string) => {
@@ -592,6 +594,15 @@ export default function TribunalDecisionsClient() {
               {availableTribunals.map(code => (
                 <option key={code} value={code}>{code}</option>
               ))}
+            </select>
+
+            <select
+              value={sortBy}
+              onChange={(e) => setSortBy(e.target.value as 'createdAt' | 'relevanceScore')}
+              className="px-3 py-2 border rounded-lg text-sm bg-white"
+            >
+              <option value="relevanceScore">Maior score primeiro</option>
+              <option value="createdAt">Mais recentes primeiro</option>
             </select>
 
             <div className="relative flex-1 min-w-[200px]">
