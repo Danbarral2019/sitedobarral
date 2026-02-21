@@ -77,6 +77,14 @@ interface DeliberacaoItem {
   descricaoParecerProcesso?: string;
   origemProcessoProcesso?: string;
   codigoValidacaoDocumentoDeliberacaoETCE?: string;
+  // Campos adicionais descobertos na API
+  detalheProcessoNomeServidor?: string;
+  detalheProcessoNomeOrgaoJulgador?: string;
+  detalheProcessoNomeUnidadeJurisdicionada?: string;
+  modalidadeProcesso?: string;
+  linkConsultaProcesso?: string;
+  linkDocumentoDeliberacao?: string;
+  linkDocumentoITD?: string;
   [key: string]: unknown;
 }
 
@@ -360,30 +368,71 @@ class TCEPEScraper implements TribunalScraper {
 
     const tipoDoc = (item.nomeTipoDocumento || 'Acordao').trim();
     const tipoProcesso = (item.descricaoTipoProcessoProcesso || '').trim();
+    const modalidade = (item.modalidadeProcesso || '').trim();
 
     // Extract plain text from HTML inteiro teor
     const parecerHtml = (item.descricaoParecerProcesso || '').trim();
     const fullText = parecerHtml ? extractTextFromHTML(parecerHtml) : undefined;
-    const ementa = fullText ? fullText.slice(0, 2000) : '';
 
-    // Build document validation URL if available
-    const codValidacao = (item.codigoValidacaoDocumentoDeliberacaoETCE || '').trim();
-    const url = codValidacao
-      ? `https://etce.tce.pe.gov.br/epp/validaDoc.seam?cod=${codValidacao}`
-      : undefined;
+    // Extract ementa: try to find RELATÓRIO/EMENTA section, skip header boilerplate
+    const ementa = fullText ? this.extractEmenta(fullText, tipoDoc, decisionNumber) : '';
+
+    // Use direct links from API (prefer ITD link, fallback to deliberacao link, then consultation)
+    const url = (item.linkDocumentoITD || item.linkDocumentoDeliberacao || item.linkConsultaProcesso || '').trim() || undefined;
+
+    const relator = (item.detalheProcessoNomeServidor || '').trim() || undefined;
+    const orgaoJulgador = (item.detalheProcessoNomeOrgaoJulgador || '').trim() || undefined;
+    const unidade = (item.detalheProcessoNomeUnidadeJurisdicionada || '').trim();
+
+    // Build descriptive title
+    const titleParts = [`${tipoDoc} ${decisionNumber} TCE-PE`];
+    if (modalidade) titleParts.push(`(${modalidade})`);
+    else if (tipoProcesso) titleParts.push(`(${tipoProcesso})`);
 
     return {
       decisionNumber,
-      title: `${tipoDoc} ${decisionNumber} TCE-PE${tipoProcesso ? ` (${tipoProcesso})` : ''}`,
-      ementa: ementa || `${tipoDoc} ${decisionNumber}`,
+      title: titleParts.join(' '),
+      ementa: ementa || (unidade ? `${tipoDoc} ${decisionNumber} - ${unidade}` : `${tipoDoc} ${decisionNumber}`),
       fullText,
-      relator: undefined, // Not available in deliberacoes endpoint
-      orgaoJulgador: undefined,
+      relator,
+      orgaoJulgador,
       dataJulgamento: (item.dataJulgamentoProcesso || '').trim() || undefined,
       url,
       processNumber: (item.numeroProcessoProcesso || '').trim() || undefined,
       decisionType: tipoProcesso || undefined,
     };
+  }
+
+  /**
+   * Extrai a parte mais relevante do inteiro teor para servir como ementa.
+   * Tenta encontrar seções como RELATÓRIO, EMENTA, VOTO, DECISÃO.
+   * Se não encontrar, pula o cabeçalho e retorna os primeiros 2000 chars.
+   */
+  private extractEmenta(fullText: string, tipoDoc: string, decisionNumber: string): string {
+    // Try to find a meaningful section start
+    const sectionPatterns = [
+      /EMENTA[:\s]/i,
+      /RELAT[OÓ]RIO[:\s]/i,
+      /VOTO[:\s]/i,
+    ];
+
+    for (const pattern of sectionPatterns) {
+      const match = fullText.match(pattern);
+      if (match && match.index !== undefined) {
+        return fullText.slice(match.index, match.index + 2000).trim();
+      }
+    }
+
+    // Skip the header boilerplate (INTEIRO TEOR DA DELIBERAÇÃO, session info, etc.)
+    // Find where the actual content starts after INTERESSADOS/RELATÓRIO sections
+    const contentStart = fullText.search(/(?:INTERESSADOS|OBJETO|ASSUNTO)[:\s]/i);
+    if (contentStart > 0 && contentStart < fullText.length - 100) {
+      return fullText.slice(contentStart, contentStart + 2000).trim();
+    }
+
+    // Fallback: skip first 200 chars of boilerplate, take 2000
+    const start = Math.min(200, fullText.length);
+    return fullText.slice(start, start + 2000).trim();
   }
 
   // ===========================

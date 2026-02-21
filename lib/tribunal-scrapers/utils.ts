@@ -98,13 +98,20 @@ export async function rateLimitedFetch(
 // ===========================
 
 export function extractTextFromHTML(html: string): string {
-  const $ = cheerio.load(html);
+  // Replace <br>, <br/>, <br /> with newlines before parsing
+  const preprocessed = html.replace(/<br\s*\/?>/gi, '\n');
+
+  const $ = cheerio.load(preprocessed);
 
   // Remove scripts, styles, nav, footer
   $('script, style, nav, footer, header, noscript').remove();
 
-  // Get text and normalize whitespace
-  const text = $('body').text();
+  // Get text — use body first, fallback to root for HTML fragments without body
+  let text = $('body').text();
+  if (!text.trim()) {
+    text = $.root().text();
+  }
+
   return text
     .replace(/\s+/g, ' ')
     .replace(/\n{3,}/g, '\n\n')
