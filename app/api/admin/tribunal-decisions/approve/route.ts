@@ -3,10 +3,12 @@ import { prisma } from '@/lib/prisma';
 import { verifyAuth } from '@/lib/auth';
 import { handleApiError } from '@/lib/errors/error-handler';
 import { ValidationError, NotFoundError } from '@/lib/errors/api-error';
+import { generateDecisionSummary } from '@/lib/tribunal-scrapers/classifier';
 
 /**
  * POST /api/admin/tribunal-decisions/approve
  * Aprovar ou rejeitar uma decisão individual
+ * Gera resumo IA automaticamente ao aprovar (se ausente)
  */
 export async function POST(request: NextRequest) {
   try {
@@ -31,6 +33,21 @@ export async function POST(request: NextRequest) {
       throw new NotFoundError('Decisão não encontrada');
     }
 
+    // Gerar resumo IA ao aprovar se ainda não tem
+    let summary = decision.summary;
+    if (action === 'approve' && !summary) {
+      try {
+        summary = await generateDecisionSummary({
+          title: decision.title,
+          ementa: decision.ementa,
+          fullText: decision.fullText || undefined,
+          decisionType: decision.decisionType,
+        });
+      } catch (err) {
+        console.error('[approve] Failed to generate summary:', err);
+      }
+    }
+
     const updated = await prisma.tribunalDecision.update({
       where: { id },
       data: {
@@ -38,6 +55,7 @@ export async function POST(request: NextRequest) {
         reviewedBy: authResult.user?.email || authResult.user?.userId || 'admin',
         reviewedAt: new Date(),
         adminNotes: adminNotes || null,
+        ...(summary !== decision.summary ? { summary } : {}),
       },
     });
 
