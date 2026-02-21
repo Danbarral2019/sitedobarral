@@ -50,6 +50,78 @@ const PDF_BASE_URL = 'https://jurisprudencia.tce.sp.gov.br/arqs_juri/pdf';
 const RESULTS_PER_PAGE = 20;
 
 // ===========================
+// Ementa text cleanup
+// ===========================
+
+/**
+ * Limpa texto de ementa extraído de PDFs do TCE-SP.
+ * Remove artefatos comuns: números de página isolados, cabeçalhos de gabinete,
+ * informações de contato, e normaliza espaços em branco.
+ */
+function cleanEmentaText(raw: string): string {
+  let text = raw;
+
+  // Remove prefixo "Trechos localizados no documento: ..." (pode ter espaços entre pontos)
+  text = text.replace(/Trechos\s+localizados\s+no\s+documento\s*:\s*[.\s]*/i, '');
+
+  // Remove blocos de gabinete/contato (ex: "GABINETE DO CONSELHEIRO\nDIMAS RAMALHO\n(11) 3292-3235 - gcder@tce.sp.gov.br")
+  text = text.replace(/GABINETE\s+D[OA]\s+CONSELHEIRO[A]?\s*\n[^\n]+\n\s*\(\d{2}\)\s*[\d\s.-]+\s*-\s*\S+@\S+/gi, '');
+
+  // Remove linhas de contato isoladas (telefone + email)
+  text = text.replace(/\(\d{2}\)\s*[\d\s.-]+\s*-\s*\S+@\S+/g, '');
+
+  // Remove emails isolados
+  text = text.replace(/\b[\w.-]+@[\w.-]+\.\w+\b/g, '');
+
+  // Remove URLs
+  text = text.replace(/https?:\/\/\S+/g, '');
+
+  // Remove referências de folha ("Fl. 209", "Fls. 123")
+  text = text.replace(/\bFls?\.?\s*\d+\b/gi, '');
+
+  // Remove números de página isolados (linha contendo apenas 1-3 dígitos)
+  text = text.replace(/^\s*\d{1,3}\s*$/gm, '');
+
+  // Remove "Página X de Y" ou "Pag. X"
+  text = text.replace(/p[aá]g(?:ina)?\.?\s*\d+\s*(?:de\s*\d+)?/gi, '');
+
+  // Remove "TRIBUNAL DE CONTAS DO ESTADO DE SÃO PAULO" e variantes
+  text = text.replace(/TRIBUNAL\s+DE\s+CONTAS\s+DO\s+ESTADO\s+DE\s+S[AÃ]O\s+PAULO/gi, '');
+
+  // Remove "CORPO DE AUDITORES"
+  text = text.replace(/CORPO\s+DE\s+AUDITORES/gi, '');
+
+  // Remove "SENTENÇA DO(A) AUDITOR(A) NOME"
+  text = text.replace(/SENTEN[CÇ]A\s+D[OA]\s+AUDITOR[A]?\s+[\wÀ-ú\s]+(?=PROCESSO)/gi, '');
+
+  // Remove número TC solto antes de PROCESSO: (redundante)
+  text = text.replace(/TC-?\s*[\d./]+\s+(?=PROCESSO)/gi, '');
+
+  // Remove endereços (Av./Rua ... CEP ... cidade/UF)
+  text = text.replace(/(?:Av\.|Rua|Alameda|Praça)[^,\n]+,\s*\d+[^P\n]*(?:CEP|cep)[:\s-]*[\d.-]+[^\n]*/gi, '');
+
+  // Remove nomes de arquivo Word/PDF (ex: "Microsoft Word - Ambiente3110769.doc")
+  text = text.replace(/Microsoft\s+Word\s*-\s*\S+\.doc[x]?\s*/gi, '');
+
+  // Remove "S E N T E N Ç A" (letras espaçadas)
+  text = text.replace(/S\s+E\s+N\s+T\s+E\s+N\s+[CÇ]\s+A/gi, 'SENTENÇA');
+
+  // Remove "PABX: (11) ..."
+  text = text.replace(/PABX\s*:\s*\(\d{2}\)\s*[\d\s.-]+/gi, '');
+
+  // Remove "Internet: ..."
+  text = text.replace(/Internet\s*:\s*\S+/gi, '');
+
+  // Colapsa múltiplas quebras de linha em espaço único
+  text = text.replace(/\n+/g, ' ');
+
+  // Colapsa múltiplos espaços em um
+  text = text.replace(/\s{2,}/g, ' ');
+
+  return text.trim();
+}
+
+// ===========================
 // Types for parsed results
 // ===========================
 
@@ -334,7 +406,7 @@ class TCESPScraper implements TribunalScraper {
           $snippetTd.find('span.texto-resultado-busca').each((_, span) => {
             $(span).replaceWith($(span).text());
           });
-          ementa = $snippetTd.text().trim();
+          ementa = cleanEmentaText($snippetTd.text());
         }
       }
 

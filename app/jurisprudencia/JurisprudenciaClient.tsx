@@ -29,10 +29,8 @@ interface ApiResponse {
 }
 
 const TRIBUNALS = [
-  { code: 'tcu', label: 'TCU' },
   { code: 'tce-sp', label: 'TCE-SP' },
   { code: 'tce-pr', label: 'TCE-PR' },
-  { code: 'tce-mg', label: 'TCE-MG' },
   { code: 'tce-sc', label: 'TCE-SC' },
   { code: 'tce-rj', label: 'TCE-RJ' },
   { code: 'tce-rs', label: 'TCE-RS' },
@@ -66,7 +64,6 @@ function tribunalLabel(code: string): string {
 
 function tribunalColor(code: string): string {
   const colors: Record<string, string> = {
-    'tcu': 'bg-amber-100 text-amber-800',
     'tce-sp': 'bg-blue-100 text-blue-800',
     'tce-mg': 'bg-green-100 text-green-800',
     'tce-pr': 'bg-purple-100 text-purple-800',

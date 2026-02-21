@@ -9,6 +9,7 @@ async function main() {
   const args = process.argv.slice(2);
   const scraperFilter = args.includes('--scraper') ? args[args.indexOf('--scraper') + 1] : null;
   const maxItems = args.includes('--max') ? parseInt(args[args.indexOf('--max') + 1], 10) : 50;
+  const forceRescrape = args.includes('--force');
 
   console.log('=== Rodando scrapers de tribunais ===\n');
 
@@ -22,7 +23,7 @@ async function main() {
   }
 
   console.log(`Scrapers a executar: ${scrapers.map(s => s!.code).join(', ')}`);
-  console.log(`Max items por scraper: ${maxItems}\n`);
+  console.log(`Max items por scraper: ${maxItems}${forceRescrape ? ' (forceRescrape)' : ''}\n`);
 
   const results: Array<{ code: string; found: number; new_: number; skipped: number; errors: number; duration: number; errorMsgs: string[] }> = [];
 
@@ -33,7 +34,7 @@ async function main() {
     const startTime = Date.now();
 
     try {
-      const result = await scraper.scrape({ maxItems });
+      const result = await scraper.scrape({ maxItems, forceRescrape });
       const duration = Math.round((Date.now() - startTime) / 1000);
 
       console.log(`  Found: ${result.itemsFound} | New: ${result.itemsNew} | Skipped: ${result.itemsSkipped} | Errors: ${result.itemsError} | ${duration}s`);

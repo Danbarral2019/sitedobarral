@@ -51,7 +51,6 @@ function extractArticleNumbers(articles: string[]): number[] {
 
 function tribunalLabel(code: string): string {
   const map: Record<string, string> = {
-    'tcu': 'TCU',
     'tce-sp': 'TCE-SP',
     'tce-pr': 'TCE-PR',
     'tce-mg': 'TCE-MG',
@@ -66,7 +65,6 @@ function tribunalLabel(code: string): string {
 
 function tribunalColor(code: string): string {
   const colors: Record<string, string> = {
-    'tcu': 'bg-amber-100 text-amber-800',
     'tce-sp': 'bg-blue-100 text-blue-800',
     'tce-mg': 'bg-green-100 text-green-800',
     'tce-pr': 'bg-purple-100 text-purple-800',
