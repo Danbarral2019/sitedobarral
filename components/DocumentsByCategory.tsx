@@ -389,6 +389,20 @@ export default function DocumentsByCategory({
 
             {/* Lista de documentos como mini-cards */}
             <div className="p-3 lg:p-4 space-y-3">
+              {/* Aviso de documentos ostensivos para categorias AGU */}
+              {['pareceres', 'orientacao-normativa', 'enunciados'].includes(category) && (
+                <div className="bg-blue-50 border border-blue-200 rounded-lg px-4 py-3 text-xs text-blue-800 leading-relaxed">
+                  <p>
+                    <strong>Nota de transparencia:</strong> Todos os documentos aqui reunidos sao atos administrativos
+                    de carater ostensivo, publicados em portais oficiais de acesso publico na internet
+                    (AGU, TCU, DOU, CJF, entre outros), em conformidade com o principio da publicidade (art. 37, CF)
+                    e com a Lei de Acesso a Informacao (Lei n. 12.527/2011). A contribuicao do Prof. Daniel Barral
+                    limita-se a selecao, organizacao tematica e classificacao por artigo da Lei n. 14.133/2021,
+                    para fins exclusivamente didaticos.
+                  </p>
+                </div>
+              )}
+
               {category === 'enunciados' ? (
                 // Sub-agrupamento por entityType para enunciados
                 (() => {

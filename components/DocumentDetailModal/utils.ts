@@ -1,14 +1,3 @@
-// Detect if a URL points to AGU's Sapiens (internal system)
-export function isSapiensUrl(url: string): boolean {
-  if (!url) return false;
-  const lower = url.toLowerCase();
-  return (
-    lower.includes('sapiens.agu.gov.br') ||
-    lower.includes('supersapiens.agu.gov.br') ||
-    (lower.includes('sapiens') && lower.includes('agu'))
-  );
-}
-
 // Get a user-friendly category label
 export function getCategoryLabel(category: string): string {
   const labels: Record<string, string> = {

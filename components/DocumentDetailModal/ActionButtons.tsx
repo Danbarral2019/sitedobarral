@@ -9,7 +9,6 @@ interface ActionButtonsProps {
   document: DocumentData;
   documentId: string;
   primaryUrl: string;
-  urlIsSapiens: boolean;
   hasDouUrl: boolean;
   handleDownload: () => void;
   handleView: () => void;
@@ -20,7 +19,6 @@ export default function ActionButtons({
   document,
   documentId,
   primaryUrl,
-  urlIsSapiens,
   hasDouUrl,
   handleDownload,
   handleView,
@@ -28,7 +26,7 @@ export default function ActionButtons({
 }: ActionButtonsProps) {
   return (
     <div className="flex flex-wrap gap-3 pt-4 border-t border-gray-200">
-      {document.type === 'link' ? (
+      {document.type === 'link' && primaryUrl ? (
         <a
           href={primaryUrl}
           target="_blank"
@@ -37,9 +35,9 @@ export default function ActionButtons({
           className="flex-1 bg-gradient-to-r from-blue-600 to-indigo-700 text-white px-6 py-3 rounded-xl font-bold hover:from-blue-700 hover:to-indigo-800 transition-all flex items-center justify-center gap-2 shadow-lg min-w-[200px]"
         >
           <ExternalLink className="w-5 h-5" />
-          {urlIsSapiens && document.metaDou?.url ? 'Ver no DOU' : 'Acessar Documento'}
+          Acessar Documento
         </a>
-      ) : (
+      ) : document.type === 'pdf' || document.type === 'doc' ? (
         <a
           href={`/api/documents/${documentId}/download`}
           onClick={handleDownload}
@@ -48,10 +46,10 @@ export default function ActionButtons({
           <Download className="w-5 h-5" />
           Download do Arquivo
         </a>
-      )}
+      ) : null}
 
-      {/* Secondary DOU link when primary is not DOU */}
-      {hasDouUrl && !urlIsSapiens && (
+      {/* Secondary DOU link */}
+      {hasDouUrl && (
         <a
           href={document.metaDou!.url!}
           target="_blank"

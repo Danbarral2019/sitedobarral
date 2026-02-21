@@ -13,7 +13,7 @@ import {
 } from 'lucide-react';
 import Link from 'next/link';
 import { safeParseArray } from '@/lib/utils';
-import { isSapiensUrl, getImportanceBadge } from './utils';
+import { getImportanceBadge } from './utils';
 import MetadataGrid from './MetadataGrid';
 import DouPublicationBox from './DouPublicationBox';
 import EducationalContent from './EducationalContent';
@@ -225,10 +225,9 @@ export default function DocumentDetailModal({
   const importanceBadge = getImportanceBadge(document.notes?.importance ?? null);
 
   // Determine the best URL to use
-  const urlIsSapiens = isSapiensUrl(document.url);
   const douUrl = document.metaDou?.url ?? null;
-  const primaryUrl = urlIsSapiens && douUrl ? douUrl : document.url;
-  const hasDouUrl = !!douUrl && douUrl !== document.url;
+  const primaryUrl = document.url || douUrl || '';
+  const hasDouUrl = !!douUrl && douUrl !== primaryUrl;
 
   // Build document identifier string (ON n/ano, Acordao n/ano, etc.)
   const documentIdentifier = (() => {
@@ -338,7 +337,6 @@ export default function DocumentDetailModal({
 
           <DouPublicationBox
             document={document}
-            urlIsSapiens={urlIsSapiens}
             handleView={handleView}
           />
 
@@ -355,7 +353,6 @@ export default function DocumentDetailModal({
             document={document}
             documentId={documentId}
             primaryUrl={primaryUrl}
-            urlIsSapiens={urlIsSapiens}
             hasDouUrl={hasDouUrl}
             handleDownload={handleDownload}
             handleView={handleView}
