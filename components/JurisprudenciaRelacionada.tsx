@@ -47,7 +47,12 @@ export default function JurisprudenciaRelacionada({ articleNumber }: Jurispruden
       'TCE-SP': 'bg-blue-100 text-blue-800',
       'TCE-MG': 'bg-green-100 text-green-800',
       'TCE-PR': 'bg-purple-100 text-purple-800',
+      'TCE-SC': 'bg-sky-100 text-sky-800',
+      'TCE-RJ': 'bg-orange-100 text-orange-800',
+      'TCE-RS': 'bg-violet-100 text-violet-800',
+      'TCE-PE': 'bg-teal-100 text-teal-800',
       'TCU': 'bg-red-100 text-red-800',
+      'DATAJUD-STJ': 'bg-red-100 text-red-800',
     };
     return colors[t] || 'bg-gray-100 text-gray-800';
   };

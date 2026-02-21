@@ -55,6 +55,11 @@ function tribunalLabel(code: string): string {
     'tce-sp': 'TCE-SP',
     'tce-pr': 'TCE-PR',
     'tce-mg': 'TCE-MG',
+    'tce-sc': 'TCE-SC',
+    'tce-rj': 'TCE-RJ',
+    'tce-rs': 'TCE-RS',
+    'tce-pe': 'TCE-PE',
+    'datajud-stj': 'DataJud (STJ)',
   };
   return map[code] || code.toUpperCase();
 }
@@ -65,6 +70,11 @@ function tribunalColor(code: string): string {
     'tce-sp': 'bg-blue-100 text-blue-800',
     'tce-mg': 'bg-green-100 text-green-800',
     'tce-pr': 'bg-purple-100 text-purple-800',
+    'tce-sc': 'bg-sky-100 text-sky-800',
+    'tce-rj': 'bg-orange-100 text-orange-800',
+    'tce-rs': 'bg-violet-100 text-violet-800',
+    'tce-pe': 'bg-teal-100 text-teal-800',
+    'datajud-stj': 'bg-red-100 text-red-800',
   };
   return colors[code] || 'bg-gray-100 text-gray-800';
 }

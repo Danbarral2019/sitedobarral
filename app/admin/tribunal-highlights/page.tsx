@@ -66,6 +66,8 @@ const TRIBUNAL_COLORS: Record<string, string> = {
   'TCE-SC': 'bg-sky-100 text-sky-700 border-sky-200',
   'TCE-RJ': 'bg-orange-100 text-orange-700 border-orange-200',
   'TCE-RS': 'bg-violet-100 text-violet-700 border-violet-200',
+  'TCE-PE': 'bg-teal-100 text-teal-700 border-teal-200',
+  'DATAJUD-STJ': 'bg-rose-100 text-rose-700 border-rose-200',
 };
 
 const TABS = [
