@@ -120,7 +120,7 @@ async function downloadFile(document: Record<string, unknown>): Promise<NextResp
   const docUrl = document.url as string;
   const metaDou = document.metaDou as { url?: string } | null | undefined;
   const docDouUrl = (metaDou?.url ?? document.douUrl) as string | null;
-  if (document.type === 'link' && docUrl.startsWith('http')) {
+  if (docUrl.startsWith('http')) {
     // If the URL points to Sapiens (AGU internal system), prefer douUrl if available
     const isSapiens = docUrl.toLowerCase().includes('sapiens.agu.gov.br') ||
       docUrl.toLowerCase().includes('supersapiens.agu.gov.br');
