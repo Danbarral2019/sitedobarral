@@ -9,7 +9,7 @@ async function handler() {
   const fourteenDaysAgo = new Date(Date.now() - FOURTEEN_DAYS_AGO);
   const thirtyDaysAgo = new Date(Date.now() - THIRTY_DAYS_AGO);
 
-  const [recentNonManualDocs, recentManualDocs, recentBlogPosts, documentUpdates] = await Promise.all([
+  const [recentNonManualDocs, recentManualDocs, recentBlogPosts, documentUpdates, recentTribunalDecisions] = await Promise.all([
     // Recent documents excluding manual-tcu (which floods the feed with ~165 sections per sync)
     prisma.document.findMany({
       where: {
@@ -85,6 +85,23 @@ async function handler() {
       orderBy: { detectedAt: 'desc' },
       take: 5,
     }),
+
+    // Recent tribunal decisions (approved, last 30 days)
+    prisma.tribunalDecision.findMany({
+      where: {
+        approvalStatus: { in: ['auto_approved', 'manually_approved'] },
+        createdAt: { gte: thirtyDaysAgo },
+      },
+      select: {
+        id: true,
+        title: true,
+        tribunalCode: true,
+        decisionType: true,
+        createdAt: true,
+      },
+      orderBy: { createdAt: 'desc' },
+      take: 10,
+    }),
   ]);
 
   // Platform updates (static for now, easy to maintain)
@@ -112,8 +129,17 @@ async function handler() {
     },
   ];
 
+  // Map tribunal decisions to document-like shape
+  const tribunalAsDocuments = recentTribunalDecisions.map(td => ({
+    id: td.id,
+    title: td.title,
+    category: `tribunal-${td.tribunalCode}`,
+    type: td.decisionType,
+    uploadedAt: td.createdAt,
+  }));
+
   // Merge and sort by date
-  const recentDocuments = [...recentNonManualDocs, ...recentManualDocs]
+  const recentDocuments = [...recentNonManualDocs, ...recentManualDocs, ...tribunalAsDocuments]
     .sort((a, b) => new Date(b.uploadedAt).getTime() - new Date(a.uploadedAt).getTime());
 
   return NextResponse.json({

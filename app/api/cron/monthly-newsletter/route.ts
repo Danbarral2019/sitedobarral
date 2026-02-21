@@ -28,39 +28,51 @@ export async function GET(request: NextRequest) {
     const thirtyDaysAgo = new Date();
     thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
 
-    const newDocuments = await prisma.document.findMany({
-      where: {
-        uploadedAt: {
-          gte: thirtyDaysAgo,
+    const [newDocuments, newTribunalDecisions] = await Promise.all([
+      prisma.document.findMany({
+        where: {
+          uploadedAt: { gte: thirtyDaysAgo },
+          isPublic: true,
         },
-        isPublic: true, // Apenas documentos públicos na newsletter
-      },
-      orderBy: {
-        uploadedAt: 'desc',
-      },
-      select: {
-        id: true,
-        title: true,
-        description: true,
-        category: true,
-        uploadedAt: true,
-        url: true,
-      },
-    });
+        orderBy: { uploadedAt: 'desc' },
+        select: {
+          id: true,
+          title: true,
+          description: true,
+          category: true,
+          uploadedAt: true,
+          url: true,
+        },
+      }),
+      prisma.tribunalDecision.findMany({
+        where: {
+          approvalStatus: { in: ['auto_approved', 'manually_approved'] },
+          createdAt: { gte: thirtyDaysAgo },
+        },
+        orderBy: { createdAt: 'desc' },
+        select: {
+          id: true,
+          title: true,
+          tribunalCode: true,
+          summary: true,
+          createdAt: true,
+        },
+      }),
+    ]);
 
-    console.log(`[Cron Newsletter] ${newDocuments.length} documentos novos encontrados`);
+    console.log(`[Cron Newsletter] ${newDocuments.length} documentos e ${newTribunalDecisions.length} decisões de tribunais encontrados`);
 
-    // Se não houver documentos novos, não envia newsletter
-    if (newDocuments.length === 0) {
-      console.log('[Cron Newsletter] Nenhum documento novo, newsletter não enviada');
+    // Se não houver conteúdo novo, não envia newsletter
+    if (newDocuments.length === 0 && newTribunalDecisions.length === 0) {
+      console.log('[Cron Newsletter] Nenhum conteúdo novo, newsletter não enviada');
       return NextResponse.json({
         success: true,
-        message: 'Nenhum documento novo para enviar na newsletter',
+        message: 'Nenhum conteúdo novo para enviar na newsletter',
         documentCount: 0,
       });
     }
 
-    // 3. Agrupa documentos por categoria
+    // 3. Agrupa documentos por categoria (incluindo decisões de tribunais)
     const documentsByCategory = newDocuments.reduce((acc, doc) => {
       if (!acc[doc.category]) {
         acc[doc.category] = [];
@@ -68,6 +80,18 @@ export async function GET(request: NextRequest) {
       acc[doc.category].push(doc);
       return acc;
     }, {} as Record<string, typeof newDocuments>);
+
+    // Adicionar decisões de tribunais como categoria "tribunal-decisions"
+    if (newTribunalDecisions.length > 0) {
+      (documentsByCategory as Record<string, Array<{ id: string; title: string; description: string | null; category: string; uploadedAt: Date; url: string | null }>>)['tribunal-decisions'] = newTribunalDecisions.map(td => ({
+        id: td.id,
+        title: td.title,
+        description: td.summary || `Decisão ${td.tribunalCode}`,
+        category: 'tribunal-decisions',
+        uploadedAt: td.createdAt,
+        url: null,
+      }));
+    }
 
     // 4. Busca todos os inscritos ativos na newsletter
     const subscribers = await prisma.newsletterSubscriber.findMany({
@@ -93,11 +117,12 @@ export async function GET(request: NextRequest) {
 
     // 5. Gera sendId e HTML da newsletter com template
     const sendId = randomUUID();
-    const subject = `Novidades do mes: ${newDocuments.length} novos documentos de Licitacoes`;
+    const totalItems = newDocuments.length + newTribunalDecisions.length;
+    const subject = `Novidades do mes: ${totalItems} novos conteudos de Licitacoes`;
     const newsletterHtml = renderMonthlyNewsletter({
       sendId,
       documentsByCategory,
-      totalDocuments: newDocuments.length,
+      totalDocuments: totalItems,
     });
 
     // 6. Inicializa Resend

@@ -63,6 +63,7 @@ const CATEGORY_ICONS: Record<string, typeof FileText> = {
   sumula: Scale,
   consulta_tcu: MessageSquare,
   informativo: Newspaper,
+  tribunal: Scale,
   default: FileText,
 };
 
@@ -93,7 +94,17 @@ function getCategoryLabel(category: string): string {
     sumula: 'Súmula TCU',
     consulta_tcu: 'Consulta TCU',
     informativo: 'Informativo TCU',
+    'tribunal-tce-sp': 'TCE-SP',
+    'tribunal-tce-pr': 'TCE-PR',
+    'tribunal-tce-sc': 'TCE-SC',
+    'tribunal-tce-rj': 'TCE-RJ',
+    'tribunal-tce-rs': 'TCE-RS',
+    'tribunal-tce-pe': 'TCE-PE',
+    'tribunal-stj': 'STJ (DataJud)',
   };
+  if (category.startsWith('tribunal-')) {
+    return labels[category] || category.replace('tribunal-', '').toUpperCase();
+  }
   return labels[category] || 'Documento';
 }
 
@@ -139,7 +150,7 @@ export default function NovidadesSection({ onDocumentClick }: NovidadesSectionPr
   // Merge all items into a unified timeline
   const timelineItems: Array<{
     id: string;
-    type: 'document' | 'blog' | 'update' | 'platform';
+    type: 'document' | 'blog' | 'update' | 'platform' | 'tribunal';
     title: string;
     subtitle?: string;
     date: string;
@@ -147,14 +158,15 @@ export default function NovidadesSection({ onDocumentClick }: NovidadesSectionPr
     documentId?: string;
   }> = [];
 
-  for (const doc of data.recentDocuments.slice(0, isExpanded ? 8 : 3)) {
+  for (const doc of data.recentDocuments.slice(0, isExpanded ? 12 : 5)) {
+    const isTribunal = doc.category.startsWith('tribunal-');
     timelineItems.push({
       id: `doc-${doc.id}`,
-      type: 'document',
+      type: isTribunal ? 'tribunal' : 'document',
       title: doc.title,
       subtitle: getCategoryLabel(doc.category),
       date: doc.uploadedAt,
-      documentId: doc.id,
+      ...(isTribunal ? { href: '/jurisprudencia' } : { documentId: doc.id }),
     });
   }
 
@@ -236,6 +248,8 @@ export default function NovidadesSection({ onDocumentClick }: NovidadesSectionPr
                 ? BookOpen
                 : item.type === 'update'
                 ? RefreshCw
+                : item.type === 'tribunal'
+                ? Scale
                 : CATEGORY_ICONS.default;
 
             const colorClass =
@@ -243,6 +257,8 @@ export default function NovidadesSection({ onDocumentClick }: NovidadesSectionPr
                 ? 'text-emerald-500 bg-emerald-50'
                 : item.type === 'update'
                 ? 'text-amber-500 bg-amber-50'
+                : item.type === 'tribunal'
+                ? 'text-indigo-500 bg-indigo-50'
                 : 'text-brand-500 bg-brand-50';
 
             const isClickable = !!(item.href || item.documentId);

@@ -48,12 +48,20 @@ export async function GET(request: NextRequest) {
       },
     });
 
+    // Buscar decisões de tribunais aprovadas na última semana
+    const newTribunalDecisions = await prisma.tribunalDecision.count({
+      where: {
+        approvalStatus: { in: ['auto_approved', 'manually_approved'] },
+        createdAt: { gte: sevenDaysAgo },
+      },
+    });
+
     const totalNewDocuments = newDocumentsByCourse.reduce((sum, item) => sum + item._count, 0);
 
-    console.log(`📊 [NEWSLETTER] Encontrados ${totalNewDocuments} documentos e ${newVideos} vídeos novos`);
+    console.log(`📊 [NEWSLETTER] Encontrados ${totalNewDocuments} documentos, ${newVideos} vídeos e ${newTribunalDecisions} decisões de tribunais`);
 
     // Se não houver conteúdo novo, não envia newsletter
-    if (totalNewDocuments === 0 && newVideos === 0) {
+    if (totalNewDocuments === 0 && newVideos === 0 && newTribunalDecisions === 0) {
       console.log('✅ [NEWSLETTER] Nenhum conteúdo novo para enviar');
       return NextResponse.json({
         success: true,
@@ -121,12 +129,14 @@ export async function GET(request: NextRequest) {
 
     // Gerar sendId e HTML com template
     const sendId = randomUUID();
-    const subject = `${totalNewDocuments + newVideos} novos conteudos esta semana!`;
+    const totalContent = totalNewDocuments + newVideos + newTribunalDecisions;
+    const subject = `${totalContent} novos conteudos esta semana!`;
     const newsletterHtml = renderWeeklyNewsletter({
       sendId,
       coursesWithNewContent,
       totalNewDocuments,
       newVideos,
+      newTribunalDecisions,
     });
 
     // Criar registro de envio (antes do envio para que o tracking pixel funcione)

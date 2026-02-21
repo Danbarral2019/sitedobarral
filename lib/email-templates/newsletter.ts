@@ -13,6 +13,7 @@ interface WeeklyNewsletterData {
   }>;
   totalNewDocuments: number;
   newVideos: number;
+  newTribunalDecisions?: number;
 }
 
 interface MonthlyNewsletterData {
@@ -47,6 +48,8 @@ const categoryNames: Record<string, string> = {
   'orientacao-normativa': 'Orientações Normativas',
   'decor': 'DECOR',
   'enunciado': 'Enunciados',
+  'boa_pratica': 'Outros Atos Normativos',
+  'tribunal-decisions': 'Decisões de Tribunais (TCEs e CNJ)',
   'outro': 'Outros Documentos',
 };
 
@@ -190,8 +193,8 @@ function renderPreheader(text: string): string {
 }
 
 export function renderWeeklyNewsletter(data: WeeklyNewsletterData): string {
-  const { sendId, coursesWithNewContent, totalNewDocuments, newVideos } = data;
-  const totalContent = totalNewDocuments + newVideos;
+  const { sendId, coursesWithNewContent, totalNewDocuments, newVideos, newTribunalDecisions = 0 } = data;
+  const totalContent = totalNewDocuments + newVideos + newTribunalDecisions;
 
   let contentCards = '';
   for (const { courseTitle, documentCount, documents } of coursesWithNewContent) {
@@ -241,6 +244,25 @@ export function renderWeeklyNewsletter(data: WeeklyNewsletterData): string {
                 <td>
                   <h3 style="margin:0 0 6px 0;color:#1e293b;font-size:17px;font-family:Arial,Helvetica,sans-serif;font-weight:700;">V&#237;deos</h3>
                   <p style="color:#64748b;margin:0;font-size:13px;font-family:Arial,Helvetica,sans-serif;">${newVideos} ${newVideos === 1 ? 'novo v&#237;deo adicionado' : 'novos v&#237;deos adicionados'}</p>
+                </td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+      </table>`;
+  }
+
+  if (newTribunalDecisions > 0) {
+    contentCards += `
+      <table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin:12px 0;border:1px solid #e5e7eb;border-left:4px solid #6366f1;border-radius:8px;">
+        <tr>
+          <td style="padding:20px;">
+            <table width="100%" cellpadding="0" cellspacing="0" border="0">
+              <tr>
+                <td width="30" valign="top" style="font-size:20px;padding-right:10px;">&#9878;</td>
+                <td>
+                  <h3 style="margin:0 0 6px 0;color:#1e293b;font-size:17px;font-family:Arial,Helvetica,sans-serif;font-weight:700;">Decis&#245;es de Tribunais</h3>
+                  <p style="color:#64748b;margin:0;font-size:13px;font-family:Arial,Helvetica,sans-serif;">${newTribunalDecisions} ${newTribunalDecisions === 1 ? 'nova decis&#227;o de TCE/CNJ' : 'novas decis&#245;es de TCEs e CNJ'}</p>
                 </td>
               </tr>
             </table>
