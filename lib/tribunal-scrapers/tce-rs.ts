@@ -359,6 +359,11 @@ class TCERSScraper implements TribunalScraper {
       summary = await generateDecisionSummary({ title: raw.title, ementa: raw.ementa, fullText: raw.fullText, decisionType: raw.decisionType });
     }
 
+    // Construct URL to TCE-RS process search
+    const processUrl = raw.processNumber
+      ? `https://portal.tce.rs.gov.br/aplicprod/f?p=10101:1::::RP:P1_NR_PROCESSO:${raw.processNumber}`
+      : null;
+
     const data = {
       tribunalCode: SCRAPER_CODE,
       tribunalName: this.fullName,
@@ -373,7 +378,7 @@ class TCERSScraper implements TribunalScraper {
       relator: raw.relator || null,
       orgaoJulgador: raw.orgaoJulgador || null,
       dataJulgamento,
-      url: null,
+      url: processUrl,
       isRelevant: classification.approvalStatus !== 'auto_rejected',
       relevanceScore: classification.relevanceScore,
       themes: JSON.stringify(classification.themes),

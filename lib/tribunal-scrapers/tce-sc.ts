@@ -282,6 +282,11 @@ class TCESCScraper implements TribunalScraper {
       summary = await generateDecisionSummary({ title: raw.title, ementa: raw.ementa, decisionType: 'prejulgado' });
     }
 
+    // Construct URL to TCE-SC prejudged consultation page
+    const prejulgadoUrl = raw.decisionNumber && raw.decisionNumber !== 'unknown'
+      ? `https://consulta.tce.sc.gov.br/cogNovo/asp/prejulgado.asp?nu_prejulgado=${raw.decisionNumber}`
+      : null;
+
     const data = {
       tribunalCode: SCRAPER_CODE,
       tribunalName: this.fullName,
@@ -296,7 +301,7 @@ class TCESCScraper implements TribunalScraper {
       relator: raw.relator || null,
       orgaoJulgador: raw.orgaoJulgador || null,
       dataJulgamento,
-      url: null,
+      url: prejulgadoUrl,
       isRelevant: classification.approvalStatus !== 'auto_rejected',
       relevanceScore: classification.relevanceScore,
       themes: JSON.stringify(classification.themes),

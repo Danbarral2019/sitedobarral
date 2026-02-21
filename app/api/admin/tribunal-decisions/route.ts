@@ -57,6 +57,8 @@ export async function GET(request: NextRequest) {
           decisionNumber: true,
           title: true,
           ementa: true,
+          fullText: true,
+          summary: true,
           relator: true,
           orgaoJulgador: true,
           dataJulgamento: true,
@@ -78,13 +80,8 @@ export async function GET(request: NextRequest) {
       prisma.tribunalDecision.count({ where }),
     ]);
 
-    const formatted = items.map(item => ({
-      ...item,
-      ementa: item.ementa.length > 300 ? item.ementa.slice(0, 300) + '...' : item.ementa,
-    }));
-
     return NextResponse.json({
-      items: formatted,
+      items,
       total,
       page,
       pageSize,

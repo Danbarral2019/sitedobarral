@@ -4,7 +4,7 @@ import { useState, useEffect, useCallback } from 'react';
 import {
   Scale, CheckCircle, XCircle, AlertTriangle, RefreshCw, Search,
   Filter, ChevronDown, ChevronUp, ExternalLink, Clock, Building2,
-  Loader2
+  Loader2, FileText, Sparkles
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
@@ -47,6 +47,8 @@ interface TribunalDecision {
   decisionType: string;
   title: string;
   ementa: string;
+  fullText: string | null;
+  summary: string | null;
   relator: string | null;
   orgaoJulgador: string | null;
   dataJulgamento: string | null;
@@ -714,16 +716,16 @@ export default function TribunalDecisionsClient() {
                           {decision.decisionNumber || decision.title}
                         </h3>
 
-                        <p className="text-sm text-gray-600 mb-2">
+                        <p className="text-sm text-gray-600 mb-2 whitespace-pre-line">
                           {isExpanded
                             ? decision.ementa
-                            : decision.ementa.length > 200
-                              ? decision.ementa.substring(0, 200) + '...'
+                            : decision.ementa.length > 300
+                              ? decision.ementa.substring(0, 300) + '...'
                               : decision.ementa
                           }
                         </p>
 
-                        {decision.ementa.length > 200 && (
+                        {(decision.ementa.length > 200 || decision.fullText) && (
                           <button
                             onClick={() => toggleExpand(decision.id)}
                             className="text-xs text-blue-600 hover:text-blue-800 flex items-center gap-1 mb-2"
@@ -731,9 +733,29 @@ export default function TribunalDecisionsClient() {
                             {isExpanded ? (
                               <><ChevronUp className="w-3 h-3" /> Menos</>
                             ) : (
-                              <><ChevronDown className="w-3 h-3" /> Mais</>
+                              <><FileText className="w-3 h-3" /> {decision.fullText ? 'Ver Inteiro Teor' : 'Mais'}</>
                             )}
                           </button>
+                        )}
+
+                        {/* Full text when expanded */}
+                        {isExpanded && decision.fullText && decision.fullText !== decision.ementa && (
+                          <div className="bg-gray-50 border rounded-lg p-3 mb-2 max-h-96 overflow-y-auto">
+                            <p className="text-xs font-semibold text-gray-500 mb-1 flex items-center gap-1">
+                              <FileText className="w-3 h-3" /> Inteiro Teor
+                            </p>
+                            <p className="text-sm text-gray-700 whitespace-pre-line">{decision.fullText}</p>
+                          </div>
+                        )}
+
+                        {/* AI Summary */}
+                        {decision.summary && (
+                          <div className="bg-blue-50 border border-blue-100 rounded-lg p-2 mb-2">
+                            <p className="text-xs font-semibold text-blue-600 mb-0.5 flex items-center gap-1">
+                              <Sparkles className="w-3 h-3" /> Resumo IA
+                            </p>
+                            <p className="text-xs text-blue-800">{decision.summary}</p>
+                          </div>
                         )}
 
                         {/* Metadata row */}

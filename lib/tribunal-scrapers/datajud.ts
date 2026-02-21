@@ -251,6 +251,11 @@ class DataJudScraper implements TribunalScraper {
     const dataPublicacao = parseDate(src.dataHoraUltimaAtualizacao);
     const year = dataJulgamento ? dataJulgamento.getFullYear() : (dataPublicacao ? dataPublicacao.getFullYear() : new Date().getFullYear());
 
+    // Construct URL to STJ process search (CNJ unified numbering)
+    const processUrl = processNumber
+      ? `https://processo.stj.jus.br/processo/pesquisa/?aplicacao=processos.ea&tipoPesquisa=tipoPesquisaGenerica&termo=${encodeURIComponent(processNumber)}`
+      : null;
+
     await prisma.tribunalDecision.create({
       data: {
         tribunalCode: this.code,
@@ -263,6 +268,7 @@ class DataJudScraper implements TribunalScraper {
         title,
         ementa: fullEmenta.slice(0, 10000),
         summary,
+        url: processUrl,
         orgaoJulgador: src.orgaoJulgador?.nome || null,
         dataJulgamento,
         dataPublicacao,
