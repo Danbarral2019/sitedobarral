@@ -237,6 +237,49 @@ export async function classifyDecision(
 }
 
 // ===========================
+// AI summary generation
+// ===========================
+
+/**
+ * Gera um resumo didático de uma decisão de tribunal usando Gemini.
+ * Retorna 2-4 frases focando em: contexto, decisão, importância para licitações.
+ */
+export async function generateDecisionSummary(
+  decision: DecisionInput
+): Promise<string | null> {
+  const textForSummary = (decision.fullText || decision.ementa || '').slice(0, 6000);
+
+  if (textForSummary.length < 100) return null;
+
+  const prompt = `Resuma a seguinte decisão de tribunal em 2-4 frases claras e objetivas em português.
+Foque em: (1) do que trata o processo, (2) qual foi a decisão/conclusão, (3) relevância para licitações e contratos (Lei 14.133/2021) se aplicável.
+Use linguagem acessível para estudantes de Direito Administrativo. Não repita o número do processo nem dados já visíveis no cabeçalho.
+
+Tipo: ${decision.decisionType || 'N/A'}
+Título: ${decision.title}
+Texto:
+${textForSummary}
+
+Responda APENAS com o resumo, sem prefixos como "Resumo:" ou marcação.`;
+
+  try {
+    const result = await queryGeminiText(prompt, {
+      temperature: 0.3,
+      maxOutputTokens: 300,
+      useCache: false,
+    });
+
+    const summary = result.response.trim();
+    // Sanity check: reject if too short or looks like an error
+    if (summary.length < 30 || summary.startsWith('{')) return null;
+    return summary;
+  } catch (error) {
+    console.error('[classifier] Summary generation failed:', error instanceof Error ? error.message : error);
+    return null;
+  }
+}
+
+// ===========================
 // AI classification (for pending decisions)
 // ===========================
 
