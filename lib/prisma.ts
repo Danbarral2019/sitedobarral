@@ -1,6 +1,16 @@
 import { PrismaClient } from '@prisma/client';
 import { PrismaNeon } from '@prisma/adapter-neon';
 
+// Auto-load .env.local when running scripts outside Next.js
+if (!process.env.DATABASE_URL && !process.env.NEXT_RUNTIME) {
+  try {
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
+    require('dotenv').config({ path: '.env.local' });
+  } catch {
+    // dotenv not available — ignore
+  }
+}
+
 // Singleton pattern para o Prisma Client
 // Previne múltiplas instâncias durante hot-reload no desenvolvimento
 const globalForPrisma = globalThis as unknown as {

@@ -19,11 +19,17 @@ const TYPE_OPTIONS = [
 ];
 
 const ISSUER_OPTIONS = [
-  { value: 'Presidência', label: 'Presidência da República' },
-  { value: 'SEGES', label: 'SEGES (Secretaria de Gestão e Inovação)' },
-  { value: 'MGI', label: 'MGI (Ministério da Gestão e Inovação)' },
-  { value: 'AGU', label: 'AGU (Advocacia-Geral da União)' },
-  { value: 'TCU', label: 'TCU (Tribunal de Contas da União)' }
+  'Presidência da República',
+  'SEGES (Secretaria de Gestão e Inovação)',
+  'MGI (Ministério da Gestão e Inovação)',
+  'AGU (Advocacia-Geral da União)',
+  'TCU (Tribunal de Contas da União)',
+  'CGU (Controladoria-Geral da União)',
+  'Ministério das Mulheres',
+  'Ministério da Fazenda',
+  'Ministério da Defesa',
+  'Ministério da Saúde',
+  'Ministério da Educação',
 ];
 
 export default function NewLegislativeActPage() {
@@ -38,7 +44,7 @@ export default function NewLegislativeActPage() {
     title: '',
     ementa: '',
     summary: '',
-    issuer: 'Presidência',
+    issuer: '',
     publishDate: '',
     effectiveDate: '',
     leiArticles: '',
@@ -269,17 +275,21 @@ export default function NewLegislativeActPage() {
                   <Building className="w-5 h-5" />
                   Órgão Emissor *
                 </span>
-                <select
+                <input
+                  type="text"
+                  list="issuer-options"
                   value={formData.issuer}
                   onChange={(e) => setFormData({ ...formData, issuer: e.target.value })}
+                  placeholder="Ex: Presidência da República, AGU, TCU..."
                   className={`w-full px-4 py-3 border-2 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
                     errors.issuer ? 'border-red-500' : 'border-gray-300'
                   }`}
-                >
+                />
+                <datalist id="issuer-options">
                   {ISSUER_OPTIONS.map(opt => (
-                    <option key={opt.value} value={opt.value}>{opt.label}</option>
+                    <option key={opt} value={opt} />
                   ))}
-                </select>
+                </datalist>
                 {errors.issuer && (
                   <p className="mt-1 text-sm text-red-600 flex items-center gap-1">
                     <AlertCircle className="w-4 h-4" />

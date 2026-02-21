@@ -64,16 +64,25 @@ export function DOUDocumentModal({
   const [selectedThemes, setSelectedThemes] = useState<string[]>([]);
   const [showFullContent, setShowFullContent] = useState(false);
 
+  // Auto-preencher issuerOrg do hierarchyStr quando disponível
+  const [initialized, setInitialized] = useState(false);
+  if (!initialized && document.hierarchyStr && !issuerOrg) {
+    // Usar o primeiro nível da hierarquia (ex: "Ministério das Mulheres/Gabinete da Ministra" → "Ministério das Mulheres")
+    setIssuerOrg(document.hierarchyStr.split('/')[0].trim());
+    setInitialized(true);
+  }
+
   const handleApprove = async () => {
     if (selectedCourses.length === 0) {
       alert('Selecione pelo menos um curso para vincular o documento');
       return;
     }
-    const metadata = importAs === 'boa_pratica' ? {
+    // Sempre enviar metadados (todos os documentos DOU vão para a aba "Outros Atos Normativos")
+    const metadata = {
       issuerOrg: issuerOrg.trim() || undefined,
       esfera,
       themes: selectedThemes.length > 0 ? selectedThemes : undefined,
-    } : undefined;
+    };
 
     // Delegar completamente para o pai - ele gerencia estado e erros
     await onApprove(selectedCourses, adminNotes.trim() || undefined, importAs, metadata);
@@ -277,9 +286,8 @@ export function DOUDocumentModal({
             </div>
           </div>
 
-          {importAs === 'boa_pratica' && (
-            <div className="space-y-4 p-4 bg-green-50 rounded-lg border border-green-200">
-              <h4 className="text-sm font-bold text-green-800">Metadados da Boa Pratica</h4>
+          <div className="space-y-4 p-4 bg-green-50 rounded-lg border border-green-200">
+              <h4 className="text-sm font-bold text-green-800">Metadados do Documento</h4>
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -334,7 +342,6 @@ export function DOUDocumentModal({
                 </div>
               </div>
             </div>
-          )}
 
           <div>
             <label className="block text-sm font-bold mb-2">
