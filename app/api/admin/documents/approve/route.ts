@@ -128,6 +128,7 @@ export async function POST(request: NextRequest) {
 
     // Invalidate cache
     CacheInvalidation.courseDocuments().catch(console.error);
+    CacheInvalidation.legislativeActs().catch(console.error);
 
     return NextResponse.json({
       success: true,

@@ -142,10 +142,13 @@ export default function JurisprudenciaClient() {
             <Scale className="w-10 h-10" />
           </div>
           <h1 className="text-4xl md:text-5xl font-bold mb-4">
-            Jurisprudência sobre Licitações
+            Jurisprudência sobre Licitações e Contratos
           </h1>
-          <p className="text-xl text-white/90 max-w-2xl mx-auto">
-            Decisões do TCU e de Tribunais de Contas Estaduais sobre licitações e contratos administrativos na Lei 14.133/2021
+          <p className="text-xl text-white/90 max-w-3xl mx-auto mb-4">
+            Compilação das principais decisões de Tribunais de Contas Estaduais e do Poder Judiciário sobre licitações e contratos administrativos na Lei 14.133/2021.
+          </p>
+          <p className="text-sm text-white/70 max-w-3xl mx-auto">
+            A Área do Aluno reúne um acervo ainda mais amplo, incluindo acórdãos do TCU, decisões do CNJ e análises enriquecidas por inteligência artificial proprietária do site.
           </p>
         </div>
       </div>

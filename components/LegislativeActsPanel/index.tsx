@@ -90,22 +90,6 @@ export default function LegislativeActsPanel() {
             </span>
           </button>
           <button
-            onClick={() => switchTab('boas-praticas')}
-            className={`flex items-center gap-1.5 px-4 py-2.5 font-semibold text-sm transition-colors -mb-[2px] border-b-2 ${
-              activeTab === 'boas-praticas'
-                ? 'text-emerald-700 border-emerald-600'
-                : 'text-gray-500 border-transparent hover:text-emerald-600'
-            }`}
-          >
-            <FileText className="w-4 h-4" />
-            Outros Atos
-            <span className={`px-1.5 py-0.5 rounded-full text-xs ${
-              activeTab === 'boas-praticas' ? 'bg-emerald-100 text-emerald-700' : 'bg-gray-100 text-gray-500'
-            }`}>
-              {tabCounts.boasPraticas}
-            </span>
-          </button>
-          <button
             onClick={() => switchTab('tic')}
             className={`flex items-center gap-1.5 px-4 py-2.5 font-semibold text-sm transition-colors -mb-[2px] border-b-2 ${
               activeTab === 'tic'
@@ -119,6 +103,22 @@ export default function LegislativeActsPanel() {
               activeTab === 'tic' ? 'bg-cyan-100 text-cyan-700' : 'bg-gray-100 text-gray-500'
             }`}>
               {tabCounts.tic}
+            </span>
+          </button>
+          <button
+            onClick={() => switchTab('boas-praticas')}
+            className={`flex items-center gap-1.5 px-4 py-2.5 font-semibold text-sm transition-colors -mb-[2px] border-b-2 ${
+              activeTab === 'boas-praticas'
+                ? 'text-emerald-700 border-emerald-600'
+                : 'text-gray-500 border-transparent hover:text-emerald-600'
+            }`}
+          >
+            <FileText className="w-4 h-4" />
+            Outros Atos
+            <span className={`px-1.5 py-0.5 rounded-full text-xs ${
+              activeTab === 'boas-praticas' ? 'bg-emerald-100 text-emerald-700' : 'bg-gray-100 text-gray-500'
+            }`}>
+              {tabCounts.boasPraticas}
             </span>
           </button>
         </div>

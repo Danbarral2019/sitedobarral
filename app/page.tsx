@@ -2,7 +2,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import dynamic from 'next/dynamic';
 import { Suspense } from 'react';
-import { ArrowRight, BookOpen, Star, Scale, BookMarked, FileCheck, Landmark, GraduationCap, ScrollText, Gavel, FileText } from 'lucide-react';
+import { ArrowRight, BookOpen, Star, Scale, BookMarked, FileCheck, Landmark, ScrollText, Gavel, FileText, Building2 } from 'lucide-react';
 import NewsletterForm from '@/components/NewsletterForm';
 import HomeNovidadesSection from '@/components/HomeNovidadesSection';
 import {
@@ -10,8 +10,8 @@ import {
   getCachedLeiArticleCount,
   getCachedGlossaryTermCount,
   getCachedLegislativeActCount,
+  getCachedTribunalDecisionCount,
 } from '@/lib/cached-queries';
-import { courses } from '@/data/courses';
 
 // Revalidate every 1 hour so novidades section stays fresh
 export const revalidate = 3600;
@@ -31,13 +31,15 @@ export default async function Home() {
   let leiArticleCount = 195;
   let glossaryCount = 95;
   let legislativeActCount = 53;
+  let tribunalDecisionCount = 0;
 
   try {
-    [categoryCounts, leiArticleCount, glossaryCount, legislativeActCount] = await Promise.all([
+    [categoryCounts, leiArticleCount, glossaryCount, legislativeActCount, tribunalDecisionCount] = await Promise.all([
       getCachedDocumentCountByCategory(),
       getCachedLeiArticleCount(),
       getCachedGlossaryTermCount(),
       getCachedLegislativeActCount(),
+      getCachedTribunalDecisionCount(),
     ]);
   } catch {
     // DB unavailable (e.g. CI build) — use defaults
@@ -81,13 +83,14 @@ export default async function Home() {
       icon: Landmark,
     },
     {
-      label: 'Cursos Disponíveis',
-      count: courses.length,
-      icon: GraduationCap,
+      label: 'Decisões TCEs e CNJ',
+      count: tribunalDecisionCount,
+      icon: Building2,
+      href: '/jurisprudencia',
     },
   ];
 
-  const totalDocuments = Object.values(categoryCounts).reduce((sum, c) => sum + c, 0);
+  const totalDocuments = Object.values(categoryCounts).reduce((sum, c) => sum + c, 0) + tribunalDecisionCount;
 
   return (
     <main>

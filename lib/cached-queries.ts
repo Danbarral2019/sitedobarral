@@ -140,3 +140,12 @@ export const getCachedGlossaryTermCount = cache(async () => {
 export const getCachedLegislativeActCount = cache(async () => {
   return await prisma.legislativeAct.count();
 });
+
+/**
+ * Conta total de decisões de tribunais aprovadas (cached)
+ */
+export const getCachedTribunalDecisionCount = cache(async () => {
+  return await prisma.tribunalDecision.count({
+    where: { approvalStatus: { in: ['auto_approved', 'manually_approved'] } },
+  });
+});

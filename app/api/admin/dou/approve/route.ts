@@ -295,6 +295,7 @@ async function handleApproval(
     // Invalidate cache
     CacheInvalidation.douStats().catch(console.error);
     CacheInvalidation.courseDocuments().catch(console.error);
+    CacheInvalidation.legislativeActs().catch(console.error);
 
     return NextResponse.json({
       success: true,

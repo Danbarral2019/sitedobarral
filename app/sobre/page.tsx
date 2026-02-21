@@ -389,7 +389,7 @@ export default function SobrePage() {
                 </Link>
               </div>
               <p className="text-white/90 text-sm mt-6">
-                ✓ 10 Cursos Especializados · ✓ Material Atualizado · ✓ Foco Prático
+                ✓ 7 Cursos Especializados · ✓ Material Atualizado · ✓ Foco Prático
               </p>
             </div>
           </div>

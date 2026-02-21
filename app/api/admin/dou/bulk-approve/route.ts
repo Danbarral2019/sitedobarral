@@ -92,6 +92,7 @@ export async function POST(request: NextRequest) {
       CacheInvalidation.douStats().catch(console.error);
       if (action === 'approve') {
         CacheInvalidation.courseDocuments().catch(console.error);
+        CacheInvalidation.legislativeActs().catch(console.error);
       }
     }
 

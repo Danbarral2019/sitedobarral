@@ -263,22 +263,6 @@ export default function LegislacaoPage() {
               </span>
             </button>
             <button
-              onClick={() => switchTab('boas-praticas')}
-              className={`flex items-center gap-2 px-6 py-3 rounded-t-xl font-bold text-sm transition-colors ${
-                activeTab === 'boas-praticas'
-                  ? 'bg-white text-emerald-700 border-2 border-b-0 border-gray-200 shadow-sm'
-                  : 'bg-white/70 text-gray-600 hover:text-emerald-700 hover:bg-white/90 border-2 border-transparent'
-              }`}
-            >
-              <FileText className="w-4 h-4" />
-              Outros Atos Normativos
-              <span className={`px-2 py-0.5 rounded-full text-xs ${
-                activeTab === 'boas-praticas' ? 'bg-emerald-100 text-emerald-700' : 'bg-gray-100 text-gray-600'
-              }`}>
-                {tabCounts.boasPraticas}
-              </span>
-            </button>
-            <button
               onClick={() => switchTab('tic')}
               className={`flex items-center gap-2 px-6 py-3 rounded-t-xl font-bold text-sm transition-colors ${
                 activeTab === 'tic'
@@ -292,6 +276,22 @@ export default function LegislacaoPage() {
                 activeTab === 'tic' ? 'bg-cyan-100 text-cyan-700' : 'bg-gray-100 text-gray-600'
               }`}>
                 {tabCounts.tic}
+              </span>
+            </button>
+            <button
+              onClick={() => switchTab('boas-praticas')}
+              className={`flex items-center gap-2 px-6 py-3 rounded-t-xl font-bold text-sm transition-colors ${
+                activeTab === 'boas-praticas'
+                  ? 'bg-white text-emerald-700 border-2 border-b-0 border-gray-200 shadow-sm'
+                  : 'bg-white/70 text-gray-600 hover:text-emerald-700 hover:bg-white/90 border-2 border-transparent'
+              }`}
+            >
+              <FileText className="w-4 h-4" />
+              Outros Atos Normativos
+              <span className={`px-2 py-0.5 rounded-full text-xs ${
+                activeTab === 'boas-praticas' ? 'bg-emerald-100 text-emerald-700' : 'bg-gray-100 text-gray-600'
+              }`}>
+                {tabCounts.boasPraticas}
               </span>
             </button>
           </div>
