@@ -46,10 +46,10 @@ async function getLegislativeAct(id: string) {
     where: { id },
   });
 
-  if (doc && doc.category === 'boa_pratica') {
+  if (doc && (doc.category === 'boa_pratica' || doc.category === 'orientacao_procedimento')) {
     return {
       id: doc.id,
-      type: 'boa_pratica',
+      type: doc.category,
       number: null,
       year: null,
       fullNumber: doc.title,
@@ -83,6 +83,8 @@ const TYPE_LABELS: Record<string, string> = {
   'lei': 'Lei',
   'medida-provisoria': 'Medida Provisória',
   'boa_pratica': 'Outro Ato Normativo',
+  'orientacao_procedimento': 'Orientação',
+  'resolucao': 'Resolução',
 };
 
 const TYPE_COLORS: Record<string, string> = {
@@ -93,6 +95,8 @@ const TYPE_COLORS: Record<string, string> = {
   'lei': 'bg-red-100 text-red-800 border-red-300',
   'medida-provisoria': 'bg-orange-100 text-orange-800 border-orange-300',
   'boa_pratica': 'bg-emerald-100 text-emerald-800 border-emerald-300',
+  'orientacao_procedimento': 'bg-amber-100 text-amber-800 border-amber-300',
+  'resolucao': 'bg-teal-100 text-teal-800 border-teal-300',
 };
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
