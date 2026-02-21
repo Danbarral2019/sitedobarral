@@ -57,6 +57,7 @@ export async function GET(request: NextRequest) {
           decisionNumber: true,
           title: true,
           ementa: true,
+          summary: true,
           relator: true,
           orgaoJulgador: true,
           dataJulgamento: true,

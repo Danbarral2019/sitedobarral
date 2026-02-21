@@ -12,6 +12,7 @@ interface Decision {
   decisionNumber: string;
   title: string;
   ementa: string;
+  summary: string | null;
   relator: string | null;
   orgaoJulgador: string | null;
   dataJulgamento: string | null;
@@ -303,6 +304,16 @@ export default function JurisprudenciaClient() {
                     <p className="text-sm text-gray-600 mb-3 line-clamp-3">
                       {decision.ementa}
                     </p>
+
+                    {decision.summary && (
+                      <div className="bg-blue-50 border border-blue-100 rounded-lg p-3 mb-3">
+                        <div className="flex items-center gap-1.5 text-xs font-semibold text-blue-700 mb-1">
+                          <Sparkles className="w-3 h-3" />
+                          Resumo IA
+                        </div>
+                        <p className="text-sm text-blue-800 line-clamp-3">{decision.summary}</p>
+                      </div>
+                    )}
 
                     {themes.length > 0 && (
                       <div className="flex flex-wrap gap-1 mb-3">
