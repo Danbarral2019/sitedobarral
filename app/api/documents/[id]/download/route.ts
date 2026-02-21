@@ -16,21 +16,7 @@ export async function GET(
   try {
     const { id } = await params;
 
-    // ✅ Obter e verificar token usando função centralizada
-    const token = request.cookies.get('auth-token')?.value;
-
-    if (!token) {
-      throw new AuthenticationError();
-    }
-
-    // ✅ Verificar token (com validação Zod)
-    const authPayload = await verifyToken(token);
-
-    if (!authPayload) {
-      throw new AuthenticationError('Token inválido ou expirado');
-    }
-
-    // Buscar documento no banco
+    // Buscar documento no banco primeiro (antes da auth)
     const document = await prisma.document.findUnique({
       where: { id },
       include: { metaDou: true },
@@ -41,12 +27,26 @@ export async function GET(
       throw new NotFoundError('Documento');
     }
 
-    // Se o documento for público, permitir download sem verificações adicionais
+    // Documentos públicos não exigem autenticação
     if (document.isPublic) {
+      apiLogger.info({ documentId: document.id }, 'Public document download');
       return await downloadFile(document);
     }
 
-    // Para documentos restritos, verificar acesso do usuário
+    // Para documentos restritos, exigir autenticação
+    const token = request.cookies.get('auth-token')?.value;
+
+    if (!token) {
+      throw new AuthenticationError();
+    }
+
+    const authPayload = await verifyToken(token);
+
+    if (!authPayload) {
+      throw new AuthenticationError('Token inválido ou expirado');
+    }
+
+    // Verificar acesso do usuário
     const enrollmentWhere = document.courseId
       ? { courseId: document.courseId }
       : { courseId: '__none__' };
