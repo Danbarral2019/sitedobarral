@@ -50,6 +50,9 @@ export async function GET(request: NextRequest) {
         if (tab === 'boas-praticas') {
           return await fetchBoasPraticas({ search, year, esfera, theme, issuer, page, limit, skip });
         }
+        if (tab === 'orientacoes') {
+          return await fetchBoasPraticas({ search, year, esfera, theme, issuer, page, limit, skip, category: 'orientacao_procedimento' });
+        }
         if (tab === 'tic') {
           return await fetchAtosNormativos({ type, issuer, year, search, articleNumber, esfera, theme: theme || 'tic', page, limit, skip, ticOnly: true });
         }
@@ -248,14 +251,15 @@ interface BoasPraticasParams {
   page: number;
   limit: number;
   skip: number;
+  category?: string;
 }
 
 async function fetchBoasPraticas(params: BoasPraticasParams) {
-  const { search, year, esfera, theme, issuer, page, limit, skip } = params;
+  const { search, year, esfera, theme, issuer, page, limit, skip, category = 'boa_pratica' } = params;
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const where: Record<string, any> = {
-    category: 'boa_pratica',
+    category,
     isPublic: true,
     reviewed: true,
   };
@@ -327,7 +331,7 @@ async function fetchBoasPraticas(params: BoasPraticasParams) {
 
   // Buscar facets para boas práticas (usa select mínimo para performance)
   const allBoasPraticas = await prisma.document.findMany({
-    where: { category: 'boa_pratica', isPublic: true, reviewed: true },
+    where: { category, isPublic: true, reviewed: true },
     select: { issuerOrg: true, esfera: true, douData: true, metaDou: { select: { data: true } } },
   });
 

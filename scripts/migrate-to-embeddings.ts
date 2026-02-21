@@ -16,14 +16,21 @@
  *   npx tsx scripts/migrate-to-embeddings.ts --dry-run    # Simular execucao
  */
 
+import 'dotenv/config';
+import * as dotenv from 'dotenv';
+dotenv.config({ path: '.env.local' });
+
 import { PrismaClient } from '@prisma/client';
+import { PrismaNeon } from '@prisma/adapter-neon';
 import { processDocument, processPendingDocuments, getProcessingStats } from '../lib/embeddings/document-processor';
 
 // ===========================
 // Configuration
 // ===========================
 
+const adapter = new PrismaNeon({ connectionString: process.env.DATABASE_URL as string });
 const prisma = new PrismaClient({
+  adapter,
   log: ['error', 'warn'],
 });
 

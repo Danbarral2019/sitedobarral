@@ -4,7 +4,7 @@ import { useState, useEffect, useCallback } from 'react';
 import {
   Search, Filter, Scale, Calendar, Building, ChevronDown,
   ChevronUp, ExternalLink, Download, BookOpen, Eye,
-  X, FileText, Globe, ArrowRight, Monitor
+  X, FileText, Globe, ArrowRight, Monitor, Lightbulb
 } from 'lucide-react';
 import Link from 'next/link';
 import MarkdownContent from '@/components/MarkdownContent';
@@ -32,7 +32,7 @@ interface LegislativeAct {
   url?: string;
 }
 
-type TabType = 'atos' | 'boas-praticas' | 'tic';
+type TabType = 'atos' | 'boas-praticas' | 'tic' | 'orientacoes';
 
 const TYPE_LABELS: Record<string, string> = {
   'decreto': 'Decreto',
@@ -41,7 +41,9 @@ const TYPE_LABELS: Record<string, string> = {
   'ordem-servico': 'Ordem de Serviço',
   'lei': 'Lei',
   'medida-provisoria': 'Medida Provisória',
+  'resolucao': 'Resolução',
   'boa_pratica': 'Outro Ato Normativo',
+  'orientacao_procedimento': 'Orientação',
 };
 
 const TYPE_COLORS: Record<string, string> = {
@@ -51,7 +53,9 @@ const TYPE_COLORS: Record<string, string> = {
   'ordem-servico': 'bg-yellow-100 text-yellow-800 border-yellow-300',
   'lei': 'bg-red-100 text-red-800 border-red-300',
   'medida-provisoria': 'bg-orange-100 text-orange-800 border-orange-300',
+  'resolucao': 'bg-rose-100 text-rose-800 border-rose-300',
   'boa_pratica': 'bg-emerald-100 text-emerald-800 border-emerald-300',
+  'orientacao_procedimento': 'bg-amber-100 text-amber-800 border-amber-300',
 };
 
 const ESFERA_LABELS: Record<string, string> = {
@@ -65,7 +69,7 @@ export default function LegislacaoPage() {
 
   // Abas
   const [activeTab, setActiveTab] = useState<TabType>('atos');
-  const [tabCounts, setTabCounts] = useState({ atos: 0, boasPraticas: 0, tic: 0 });
+  const [tabCounts, setTabCounts] = useState({ atos: 0, boasPraticas: 0, tic: 0, orientacoes: 0 });
 
   // Filtros disponíveis
   const [availableTypes, setAvailableTypes] = useState<Array<{ type: string; count: number }>>([]);
@@ -112,10 +116,11 @@ export default function LegislacaoPage() {
   useEffect(() => {
     const fetchCounts = async () => {
       try {
-        const [atosRes, bpRes, ticRes] = await Promise.all([
+        const [atosRes, bpRes, ticRes, oriRes] = await Promise.all([
           fetch('/api/legislative-acts?tab=atos&limit=1'),
           fetch('/api/legislative-acts?tab=boas-praticas&limit=1'),
           fetch('/api/legislative-acts?tab=tic&limit=1'),
+          fetch('/api/legislative-acts?tab=orientacoes&limit=1'),
         ]);
         if (atosRes.ok) {
           const data = await atosRes.json();
@@ -128,6 +133,10 @@ export default function LegislacaoPage() {
         if (ticRes.ok) {
           const data = await ticRes.json();
           setTabCounts(prev => ({ ...prev, tic: data.pagination.total }));
+        }
+        if (oriRes.ok) {
+          const data = await oriRes.json();
+          setTabCounts(prev => ({ ...prev, orientacoes: data.pagination.total }));
         }
       } catch {
         // Silently fail
@@ -210,22 +219,25 @@ export default function LegislacaoPage() {
   const hasActiveFilters = typeFilter || issuerFilter || yearFilter || searchTerm || esferaFilter || themeFilter;
   const isBoasPraticas = activeTab === 'boas-praticas';
   const isTic = activeTab === 'tic';
+  const isOrientacoes = activeTab === 'orientacoes';
 
   return (
     <main className="min-h-screen bg-gradient-to-b from-gray-50 to-white">
         {/* Hero Section */}
-        <section className={`bg-gradient-to-r ${isTic ? 'from-cyan-600 to-blue-700' : isBoasPraticas ? 'from-emerald-600 to-teal-700' : 'from-blue-600 to-indigo-700'} text-white py-16 transition-colors duration-300`}>
+        <section className={`bg-gradient-to-r ${isOrientacoes ? 'from-amber-600 to-orange-700' : isTic ? 'from-cyan-600 to-blue-700' : isBoasPraticas ? 'from-emerald-600 to-teal-700' : 'from-blue-600 to-indigo-700'} text-white py-16 transition-colors duration-300`}>
           <div className="container mx-auto px-4 max-w-6xl">
             <div className="flex items-center gap-4 mb-4">
               <div className="w-16 h-16 bg-white/20 backdrop-blur rounded-2xl flex items-center justify-center">
-                {isTic ? <Monitor className="w-10 h-10 text-white" /> : isBoasPraticas ? <FileText className="w-10 h-10 text-white" /> : <Scale className="w-10 h-10 text-white" />}
+                {isOrientacoes ? <Lightbulb className="w-10 h-10 text-white" /> : isTic ? <Monitor className="w-10 h-10 text-white" /> : isBoasPraticas ? <FileText className="w-10 h-10 text-white" /> : <Scale className="w-10 h-10 text-white" />}
               </div>
               <div>
                 <h1 className="text-4xl md:text-5xl font-bold mb-2">
-                  {isTic ? 'Contratações de TIC' : isBoasPraticas ? 'Outros Atos Normativos' : 'Atos Normativos'}
+                  {isOrientacoes ? 'Orientações e Procedimentos' : isTic ? 'Contratações de TIC' : isBoasPraticas ? 'Outros Atos Normativos' : 'Atos Normativos'}
                 </h1>
-                <p className={`text-xl ${isTic ? 'text-cyan-100' : isBoasPraticas ? 'text-emerald-100' : 'text-blue-100'}`}>
-                  {isTic
+                <p className={`text-xl ${isOrientacoes ? 'text-amber-100' : isTic ? 'text-cyan-100' : isBoasPraticas ? 'text-emerald-100' : 'text-blue-100'}`}>
+                  {isOrientacoes
+                    ? 'Orientações práticas e cadernos de logística do Portal de Compras'
+                    : isTic
                     ? 'Atos normativos de contratação de TIC (SGD/MGI)'
                     : isBoasPraticas
                     ? 'Outros atos normativos relacionados a licitações e contratos'
@@ -233,8 +245,10 @@ export default function LegislacaoPage() {
                 </p>
               </div>
             </div>
-            <p className={`text-lg ${isTic ? 'text-cyan-100' : isBoasPraticas ? 'text-emerald-100' : 'text-blue-100'} max-w-3xl`}>
-              {isTic
+            <p className={`text-lg ${isOrientacoes ? 'text-amber-100' : isTic ? 'text-cyan-100' : isBoasPraticas ? 'text-emerald-100' : 'text-blue-100'} max-w-3xl`}>
+              {isOrientacoes
+                ? 'Orientações da SEGES/MGI e cadernos de logística com procedimentos práticos para gestores e agentes de contratação na Administração Pública Federal.'
+                : isTic
                 ? 'Instruções Normativas, Portarias e Decretos da Secretaria de Governo Digital para contratação de soluções de Tecnologia da Informação e Comunicação.'
                 : isBoasPraticas
                 ? 'Explore outros atos normativos de órgãos federais e estaduais relacionados a licitações e contratos administrativos.'
@@ -287,11 +301,27 @@ export default function LegislacaoPage() {
               }`}
             >
               <FileText className="w-4 h-4" />
-              Outros Atos Normativos
+              Outros Atos
               <span className={`px-2 py-0.5 rounded-full text-xs ${
                 activeTab === 'boas-praticas' ? 'bg-emerald-100 text-emerald-700' : 'bg-gray-100 text-gray-600'
               }`}>
                 {tabCounts.boasPraticas}
+              </span>
+            </button>
+            <button
+              onClick={() => switchTab('orientacoes')}
+              className={`flex items-center gap-2 px-6 py-3 rounded-t-xl font-bold text-sm transition-colors ${
+                activeTab === 'orientacoes'
+                  ? 'bg-white text-amber-700 border-2 border-b-0 border-gray-200 shadow-sm'
+                  : 'bg-white/70 text-gray-600 hover:text-amber-700 hover:bg-white/90 border-2 border-transparent'
+              }`}
+            >
+              <Lightbulb className="w-4 h-4" />
+              Orientações
+              <span className={`px-2 py-0.5 rounded-full text-xs ${
+                activeTab === 'orientacoes' ? 'bg-amber-100 text-amber-700' : 'bg-gray-100 text-gray-600'
+              }`}>
+                {tabCounts.orientacoes}
               </span>
             </button>
           </div>
@@ -333,7 +363,7 @@ export default function LegislacaoPage() {
                 <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
                 <input
                   type="text"
-                  placeholder={isBoasPraticas
+                  placeholder={isBoasPraticas || isOrientacoes
                     ? 'Buscar por título ou descrição...'
                     : 'Buscar por número, título ou assunto...'}
                   value={searchTerm}
@@ -365,7 +395,7 @@ export default function LegislacaoPage() {
                 {/* Linha de dropdowns */}
                 <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
                   {/* Filtro por Tipo (apenas atos) */}
-                  {!isBoasPraticas && (
+                  {!isBoasPraticas && !isOrientacoes && (
                     <div>
                       <label className="block text-sm font-bold text-gray-700 mb-2">
                         Tipo de Ato
@@ -388,9 +418,9 @@ export default function LegislacaoPage() {
                   {/* Filtro por Órgão */}
                   <div>
                     <label className="block text-sm font-bold text-gray-700 mb-2">
-                      {isBoasPraticas ? 'Órgão de Origem' : 'Órgão Emissor'}
+                      {isBoasPraticas || isOrientacoes ? 'Órgão de Origem' : 'Órgão Emissor'}
                     </label>
-                    {isBoasPraticas ? (
+                    {isBoasPraticas || isOrientacoes ? (
                       <input
                         type="text"
                         value={issuerFilter}
@@ -413,7 +443,7 @@ export default function LegislacaoPage() {
                         ))}
                       </select>
                     )}
-                    {isBoasPraticas && availableIssuers.length > 0 && (
+                    {(isBoasPraticas || isOrientacoes) && availableIssuers.length > 0 && (
                       <datalist id="issuers-list">
                         {availableIssuers.map(({ issuer }) => (
                           <option key={issuer} value={issuer} />
@@ -476,7 +506,9 @@ export default function LegislacaoPage() {
                         }}
                         className={`px-3 py-1.5 text-xs rounded-full border-2 transition-colors font-medium ${
                           themeFilter === tema.value
-                            ? isTic
+                            ? isOrientacoes
+                              ? 'bg-amber-600 text-white border-amber-600'
+                              : isTic
                               ? 'bg-cyan-600 text-white border-cyan-600'
                               : isBoasPraticas
                               ? 'bg-emerald-600 text-white border-emerald-600'
@@ -555,9 +587,9 @@ export default function LegislacaoPage() {
           {/* Lista de Atos */}
           {isLoading ? (
             <div className="text-center py-16">
-              <div className={`inline-block w-12 h-12 border-4 ${isTic ? 'border-cyan-600' : isBoasPraticas ? 'border-emerald-600' : 'border-blue-600'} border-t-transparent rounded-full animate-spin`}></div>
+              <div className={`inline-block w-12 h-12 border-4 ${isOrientacoes ? 'border-amber-600' : isTic ? 'border-cyan-600' : isBoasPraticas ? 'border-emerald-600' : 'border-blue-600'} border-t-transparent rounded-full animate-spin`}></div>
               <p className="mt-4 text-gray-600 text-lg">
-                {isBoasPraticas ? 'Carregando outros atos normativos...' : 'Carregando legislação...'}
+                {isOrientacoes ? 'Carregando orientações...' : isBoasPraticas ? 'Carregando outros atos normativos...' : 'Carregando legislação...'}
               </p>
             </div>
           ) : acts.length === 0 ? (
@@ -590,7 +622,7 @@ export default function LegislacaoPage() {
               <div className="mb-6 flex items-center justify-between">
                 <p className="text-gray-600">
                   Mostrando <span className="font-semibold">{acts.length}</span> de{' '}
-                  <span className="font-semibold">{total}</span> {isBoasPraticas ? 'outros atos normativos' : 'atos normativos'}
+                  <span className="font-semibold">{total}</span> {isOrientacoes ? 'orientações' : isBoasPraticas ? 'outros atos normativos' : 'atos normativos'}
                 </p>
                 <p className="text-sm text-gray-500">
                   Página {page} de {totalPages}
@@ -604,7 +636,9 @@ export default function LegislacaoPage() {
                     key={act.id}
                     id={act.id}
                     className={`bg-white border-2 rounded-xl overflow-hidden transition-all ${
-                      isTic
+                      isOrientacoes
+                        ? 'border-gray-200 hover:border-amber-300 hover:shadow-lg'
+                        : isTic
                         ? 'border-gray-200 hover:border-cyan-300 hover:shadow-lg'
                         : isBoasPraticas
                         ? 'border-gray-200 hover:border-emerald-300 hover:shadow-lg'
@@ -676,7 +710,9 @@ export default function LegislacaoPage() {
                                 <span
                                   key={t}
                                   className={`px-2 py-0.5 text-xs rounded-full ${
-                                    isTic
+                                    isOrientacoes
+                                      ? 'bg-amber-50 text-amber-700 border border-amber-200'
+                                      : isTic
                                       ? 'bg-cyan-50 text-cyan-700 border border-cyan-200'
                                       : isBoasPraticas
                                       ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
@@ -733,14 +769,18 @@ export default function LegislacaoPage() {
                       <div className="border-t-2 border-gray-200 bg-gray-50 p-6">
                         {act.summary && (
                           <div className={`mb-6 rounded-xl overflow-hidden shadow-sm ${
-                            isTic
+                            isOrientacoes
+                              ? 'bg-gradient-to-br from-amber-50 via-orange-50 to-yellow-50'
+                              : isTic
                               ? 'bg-gradient-to-br from-cyan-50 via-blue-50 to-indigo-50'
                               : isBoasPraticas
                               ? 'bg-gradient-to-br from-emerald-50 via-teal-50 to-green-50'
                               : 'bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50'
                           }`}>
                             <div className={`px-4 py-3 ${
-                              isTic
+                              isOrientacoes
+                                ? 'bg-gradient-to-r from-amber-600 to-orange-600'
+                                : isTic
                                 ? 'bg-gradient-to-r from-cyan-600 to-blue-600'
                                 : isBoasPraticas
                                 ? 'bg-gradient-to-r from-emerald-600 to-teal-600'
@@ -784,7 +824,9 @@ export default function LegislacaoPage() {
                               target="_blank"
                               rel="noopener noreferrer"
                               className={`flex items-center gap-2 px-4 py-2.5 text-white rounded-lg transition-colors font-semibold ${
-                                isTic
+                                isOrientacoes
+                                  ? 'bg-amber-600 hover:bg-amber-700'
+                                  : isTic
                                   ? 'bg-cyan-600 hover:bg-cyan-700'
                                   : isBoasPraticas
                                   ? 'bg-emerald-600 hover:bg-emerald-700'
@@ -792,7 +834,7 @@ export default function LegislacaoPage() {
                               }`}
                             >
                               <ExternalLink className="w-5 h-5" />
-                              {isBoasPraticas ? 'Ver Fonte Original' : 'Ver Texto Oficial'}
+                              {isBoasPraticas || isOrientacoes ? 'Ver Fonte Original' : 'Ver Texto Oficial'}
                             </a>
                           )}
                           {act.pdfUrl && (
