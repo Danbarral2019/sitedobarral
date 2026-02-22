@@ -249,7 +249,7 @@ export DATABASE_URL="<your-db-url>" && npx tsx scripts/fix-csv-tags.ts  # Conver
 - ✅ Sistema de versionamento automático com detecção de mudanças
 - ✅ 97 Orientações Normativas com análise de relevância
 - ✅ Significance scoring (0-100) para mudanças
-- 📖 Ver `AGU_SCRAPER_V4.md` e `RESUMO_FINAL_AGU_SCRAPER_COMPLETO.md`
+- 📖 Ver `AGU_SCRAPER_V4.md`
 
 **TCU Manager:**
 - ✅ Interface admin unificada
@@ -469,14 +469,13 @@ function Header() {
 **Setup:**
 
 - `SETUP.md` - Initial setup completo
-- `CONFIGURACAO_EMAIL.md` - Resend config
+- `RESEND_SETUP_COMPLETO.md` - Resend email config
 - `MCP_SETUP.md` - MCPs instalação
 
 **Features:**
 
 
 - `AGU_SCRAPER_V4.md` - AGU scraping platform
-- `RESUMO_FINAL_AGU_SCRAPER_COMPLETO.md` - AGU resumo técnico
 - `IMPORTACAO_EXCEL.md` - Excel import guide
 - `AUTOMACAO_CRON_JOBS.md` - Cron jobs
 
