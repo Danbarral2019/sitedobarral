@@ -498,6 +498,10 @@ function Header() {
 - `COURSE_IDS_REFERENCE.md` - Course IDs vs slugs
 - `prisma/schema.prisma` - Complete database schema
 
+**Planejamento:**
+
+- `FUTURE_TASKS.md` - **Tarefas futuras planejadas** (backlog de melhorias e novas features pendentes)
+
 **Auditoria:**
 
 - `AUDITORIA_CHECKPOINT_FASE_8_FINAL.md` - Status Fase 8 (Error Handling)
