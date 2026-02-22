@@ -75,4 +75,21 @@ Verificar se todos os atos normativos recém-adicionados estão completamente in
 
 ---
 
+## 5. Contador de Legislação no Admin Não Atualiza
+
+**Status:** Pendente
+**Prioridade:** Alta
+**Data de registro:** 2026-02-22
+
+A aba de legislação na página admin continua exibindo o valor histórico de 105 normas, sem refletir as novas adições feitas pelo Claude. Necessário:
+
+- Investigar como o contador de atos legislativos é calculado na página admin
+- Verificar se há valor hardcoded ou cache desatualizado
+- Corrigir para que o contador reflita a contagem real do banco de dados (tabela `LegislativeAct`)
+- Testar que novas adições são refletidas imediatamente no painel
+
+**Arquivos relevantes:** `app/admin/`, `app/api/admin/`, componentes do dashboard admin
+
+---
+
 *Última atualização: 2026-02-22*
