@@ -498,10 +498,9 @@ function Header() {
 - `COURSE_IDS_REFERENCE.md` - Course IDs vs slugs
 - `prisma/schema.prisma` - Complete database schema
 
-**Auditoria:**
+**Planejamento:**
 
-- `AUDITORIA_CHECKPOINT_FASE_8_FINAL.md` - Status Fase 8 (Error Handling)
-- `AUDITORIA_FASES_8-11_PLANO.md` - Roadmap Fases 8-11
+- `FUTURE_TASKS.md` - Backlog centralizado de tarefas futuras, pendências e melhorias
 
 
 ## API Routes Summary
