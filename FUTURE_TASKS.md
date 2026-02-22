@@ -185,4 +185,63 @@ O painel admin possui atualmente **~20 abas** no menu lateral (organizadas em 8 
 
 ---
 
+## 7. Responsividade do Painel Admin para Mobile
+
+**Status:** Pendente
+**Prioridade:** Média
+**Dependência:** Tarefa #6 (Simplificação do Painel Admin) — executar após a consolidação das abas
+**Data de registro:** 2026-02-22
+
+A página admin atualmente não funciona bem em dispositivos móveis: layout muito amplo, elementos mal ajustados, navegação difícil pelo celular. Após a simplificação dos menus (tarefa #6), adaptar toda a área admin para uso confortável em telas pequenas.
+
+### Problemas Esperados
+
+- Menu lateral (sidebar) ocupa espaço demais ou não colapsa em telas pequenas
+- Tabelas de dados (documentos, decisões, analytics) extrapolam a largura da tela
+- Formulários de edição/criação com campos lado a lado que não empilham
+- Botões de ação e badges mal posicionados
+- Modais e painéis de detalhes não adaptados
+- Sub-abas horizontais (Radix Tabs) podem ficar ilegíveis em telas estreitas
+
+### Ajustes Necessários
+
+1. **Sidebar → Menu hamburger ou bottom sheet**
+   - Em mobile, sidebar deve colapsar e abrir via botão hamburger
+   - Alternativa: bottom navigation com as categorias principais
+   - Manter badges de notificação visíveis no menu colapsado
+
+2. **Tabelas responsivas**
+   - Converter tabelas largas para cards empilhados em mobile
+   - Ou usar scroll horizontal com indicador visual
+   - Priorizar colunas essenciais, ocultar secundárias em telas pequenas
+
+3. **Formulários**
+   - Campos lado a lado → empilhar verticalmente em mobile
+   - Botões de ação full-width em telas pequenas
+   - Selects e dropdowns acessíveis por toque
+
+4. **Sub-abas internas (das consolidações da tarefa #6)**
+   - Tabs horizontais → scrollable tabs ou dropdown/accordion em mobile
+   - Garantir que `?tab=` deep links funcionem em ambas as versões
+
+5. **Modais e painéis**
+   - Modais → full-screen em mobile (drawer bottom-up)
+   - Painéis de detalhes adaptados à largura
+
+6. **Gráficos e charts (Analytics)**
+   - Redimensionar automaticamente para caber na tela
+   - Simplificar legendas e labels em mobile
+
+### Abordagem Técnica
+
+- Usar Tailwind CSS breakpoints (`sm:`, `md:`, `lg:`) — já disponível no projeto
+- `AdminLayout.tsx` é o ponto central para o menu lateral
+- Testar com viewport de 375px (iPhone SE) e 390px (iPhone 14)
+- Considerar `useMediaQuery` hook para lógica condicional se necessário
+- Priorizar as páginas mais usadas no dia a dia (Documentos, Blog, Analytics)
+
+**Arquivos relevantes:** `components/AdminLayout.tsx`, todas as páginas em `app/admin/`, Tailwind config
+
+---
+
 *Última atualização: 2026-02-22*
