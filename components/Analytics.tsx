@@ -1,4 +1,4 @@
-// Lazy-load Google Analytics after page load to avoid blocking LCP/FCP
+// Google Analytics — afterInteractive balances mobile FCP and desktop TBT
 import Script from 'next/script';
 
 export default function Analytics() {
@@ -12,9 +12,9 @@ export default function Analytics() {
     <>
       <Script
         src={`https://www.googletagmanager.com/gtag/js?id=${gaId}`}
-        strategy="lazyOnload"
+        strategy="afterInteractive"
       />
-      <Script id="google-analytics" strategy="lazyOnload">
+      <Script id="google-analytics" strategy="afterInteractive">
         {`window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','${gaId}');`}
       </Script>
     </>
