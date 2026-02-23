@@ -5,8 +5,10 @@ export default function OfflinePage() {
     <div className="min-h-screen flex flex-col items-center justify-center px-4 bg-white">
       {/* eslint-disable-next-line @next/next/no-img-element */}
       <img
-        src="/brand/sublogo.png"
+        src="/brand/favicon-180.png"
         alt="Prof. Daniel Barral"
+        width={80}
+        height={80}
         className="h-20 w-auto mb-8"
       />
       <h1 className="text-2xl font-semibold text-[#20364e] mb-3 font-heading text-center">

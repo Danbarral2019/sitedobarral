@@ -238,9 +238,10 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 relative flex-shrink-0">
                 <Image
-                  src="/brand/logo-icon.png"
+                  src="/brand/logo-icon-96.png"
                   alt="Logo"
-                  fill
+                  width={40}
+                  height={40}
                   className="object-contain"
                 />
               </div>
@@ -252,9 +253,10 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
           ) : (
             <div className="w-10 h-10 relative mx-auto">
               <Image
-                src="/brand/logo-icon.png"
+                src="/brand/logo-icon-96.png"
                 alt="Logo"
-                fill
+                width={40}
+                height={40}
                 className="object-contain"
               />
             </div>

@@ -19,7 +19,7 @@ const cinzel = Cinzel({
 
 const poppins = Poppins({
   subsets: ["latin"],
-  weight: ["300", "400", "500", "600", "700"],
+  weight: ["400", "500", "600", "700"],
   variable: "--font-poppins",
   display: "swap",
 });
@@ -36,9 +36,12 @@ export const metadata: Metadata = {
     title: 'Prof. Barral',
   },
   icons: {
-    icon: '/brand/sublogo.png',
-    shortcut: '/brand/sublogo.png',
-    apple: '/icons/apple-touch-icon.png',
+    icon: [
+      { url: '/brand/favicon-32.png', sizes: '32x32', type: 'image/png' },
+      { url: '/brand/favicon-64.png', sizes: '64x64', type: 'image/png' },
+    ],
+    shortcut: '/brand/favicon-32.png',
+    apple: '/brand/favicon-180.png',
   },
   description: "Repositório especializado de materiais jurídicos em Direito Administrativo. Cursos sobre licitações, contratos administrativos, Nova Lei 14.133/2021 e mais.",
   keywords: [
@@ -118,7 +121,6 @@ export default function RootLayout({
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         <link rel="dns-prefetch" href="https://vitals.vercel-insights.com" />
         <link rel="dns-prefetch" href="https://va.vercel-scripts.com" />
-        <link rel="dns-prefetch" href="https://sdk.mercadopago.com" />
       </head>
       <body className={`${cinzel.variable} ${poppins.variable} font-sans antialiased bg-white text-gray-900`}>
         <Analytics />

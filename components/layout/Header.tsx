@@ -54,10 +54,11 @@ export const Header = memo(function Header() {
           <Link href="/" className="flex items-center flex-shrink-0" aria-label="Página inicial - Prof. Daniel Barral">
             <div className="w-20 h-20 sm:w-24 sm:h-24 relative flex-shrink-0">
               <Image
-                src="/brand/logo-icon.png"
+                src="/brand/logo-icon-96.png"
                 alt="Logo Prof. Daniel Barral"
-                fill
-                className="object-contain"
+                width={96}
+                height={96}
+                className="object-contain w-full h-full"
                 priority
               />
             </div>

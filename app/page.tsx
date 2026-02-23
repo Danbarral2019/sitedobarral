@@ -104,7 +104,7 @@ export default async function Home() {
                   <h1 className="text-4xl md:text-5xl font-cinzel font-semibold mb-6 tracking-wide">
                     Prof. Daniel Barral
                   </h1>
-                  <p className="text-xl md:text-2xl mb-4 font-poppins font-light">
+                  <p className="text-xl md:text-2xl mb-4 font-poppins font-normal">
                     Professor | Mestre em Direito Público
                   </p>
                   <p className="text-lg mb-8 text-brand-100 font-poppins">
@@ -140,8 +140,8 @@ export default async function Home() {
                     alt="Prof. Daniel Barral"
                     fill
                     className="object-cover object-[40%_center]"
-                    priority
-                    sizes="55vw"
+                    sizes="(max-width: 1023px) 0px, 55vw"
+                    loading="eager"
                   />
                 </div>
               </div>
