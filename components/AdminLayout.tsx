@@ -6,7 +6,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import AdminBottomNav from '@/components/admin/AdminBottomNav';
 import {
-  QrCode, ChevronLeft, ChevronRight, BarChart3, Mail, MessageSquare, Send, GraduationCap, Globe, BookOpen, Menu, X, FileText, PenSquare, FileSpreadsheet, Filter, Scale, Star
+  QrCode, ChevronLeft, ChevronRight, BarChart3, Mail, MessageSquare, Send, GraduationCap, Globe, BookOpen, Menu, X, FileText, PenSquare, FileSpreadsheet, Filter, Scale, Star, Activity
 } from 'lucide-react';
 
 interface AdminLayoutProps {
@@ -140,6 +140,11 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
       path: '/admin/analytics-hub',
       label: 'Analytics',
       icon: BarChart3,
+    },
+    {
+      path: '/admin/monitoring',
+      label: 'Monitoramento',
+      icon: Activity,
     },
 
     // === CONTEUDO ===

@@ -14,8 +14,15 @@ Sentry.init({
   // Capture 5% of transactions for performance monitoring
   tracesSampleRate: 0.05,
 
-  // No heavy integrations (Session Replay removed to save ~115KB)
-  integrations: [],
+  // Session Replay (lazy-loaded ~60KB, only when sampled)
+  integrations: [
+    Sentry.replayIntegration({
+      maskAllText: false,
+      blockAllMedia: false,
+    }),
+  ],
+  replaysSessionSampleRate: 0.01,
+  replaysOnErrorSampleRate: 0.5,
 
   // Debug mode (only in development)
   debug: false,

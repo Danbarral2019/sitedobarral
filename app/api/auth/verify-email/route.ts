@@ -4,6 +4,7 @@ import { generateToken } from '@/lib/auth';
 import { handleApiError } from '@/lib/errors/error-handler';
 import { ValidationError } from '@/lib/errors/api-error';
 import { authLogger } from '@/lib/logger';
+import { trackServerEvent } from '@/lib/monitoring/events';
 
 export async function POST(request: NextRequest) {
   try {
@@ -76,6 +77,7 @@ export async function POST(request: NextRequest) {
     });
 
     authLogger.info({ userId: user.id }, 'Email verificado com sucesso');
+    trackServerEvent('email_verified');
     return response;
   } catch (error) {
     return handleApiError(error);

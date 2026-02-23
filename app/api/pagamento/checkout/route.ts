@@ -6,6 +6,7 @@ import { prisma } from '@/lib/prisma';
 import { handleApiError } from '@/lib/errors/error-handler';
 import { ValidationError } from '@/lib/errors/api-error';
 import { apiLogger } from '@/lib/logger';
+import { trackServerEvent } from '@/lib/monitoring/events';
 
 const CheckoutSchema = z.object({
   plan: z.enum(['basico', 'premium']),
@@ -48,6 +49,7 @@ export const POST = withAuth(async (request: NextRequest, context?: Record<strin
     });
 
     apiLogger.info({ userId: user.userId, plan, courseId }, 'MP checkout initiated');
+    trackServerEvent('payment_checkout', { plan });
 
     return NextResponse.json({ url });
   } catch (error) {

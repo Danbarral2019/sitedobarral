@@ -214,24 +214,21 @@ Estudar viabilidade de criar aplicativo nativo ou usar PWA avançado:
 - ~~Server Components em `/area-restrita`~~: **Inviável** — todas as 10 páginas usam hooks/state/interatividade
 - ~~Virtual scrolling lei-comentada~~: **Deferido** — sidebar usa accordion (apenas itens expandidos no DOM, ~230 items max), complexidade alta para ganho marginal
 
-### T13. Cache Redis Completo (Upstash) [Código Pronto ✅]
-**Status:** Infraestrutura 100% implementada (964 linhas em `lib/cache/redis-client.ts`, 60+ rotas integradas, 798 linhas de testes). Falta apenas configurar credenciais.
+### T13. Cache Redis Completo (Upstash) [Concluído ✅]
+**Status:** 100% concluído — código (964 linhas em `lib/cache/redis-client.ts`, 60+ rotas, 798 linhas de testes) + credenciais Upstash configuradas na Vercel (`UPSTASH_REDIS_REST_URL` + `UPSTASH_REDIS_REST_TOKEN` em Production/Preview/Development). Cache ativo em produção.
 
-Ação manual do usuário:
-- [ ] Criar conta em https://console.upstash.com
-- [ ] Criar database Redis (`profbarral-cache`, Regional, us-east-1, allkeys-lru)
-- [ ] Configurar na Vercel: `UPSTASH_REDIS_REST_URL` + `UPSTASH_REDIS_REST_TOKEN`
-- [ ] Deploy — 60+ rotas ativam cache automaticamente
-
-### T14. Monitoring — Dashboard e Alertas [Baixa]
+### T14. Monitoring — Dashboard e Alertas [Baixa] ✅ CONCLUÍDO (2026-02-23)
 **Prioridade:** Baixa
-**Status:** Parcialmente implementado (Sentry + Vercel Analytics ativos)
+**Status:** Implementado
 
-Falta:
-- [ ] Dashboard de monitoramento consolidado
-- [ ] Alertas por email/Slack para error rate acima do threshold
-- [ ] Tracking de 5+ eventos customizados adicionais
-- [ ] Session Replay configurado no Sentry
+**Implementado (2026-02-23):**
+- [x] Dashboard de monitoramento consolidado (`/admin/monitoring`) — cards de saúde, tabela atividade recente, gráfico 14 dias, status scrapers
+- [x] API admin `/api/admin/monitoring` com queries agregadas ao AccessLog/User/ScraperHealthLog
+- [x] Alertas por email via cron a cada 6h (`/api/cron/monitoring-alerts`) — zero logins 12h + scraper health degradado
+- [x] Session Replay configurado no Sentry (1% sessões normais, 50% sessões com erro)
+- [x] +7 server events: payment_checkout, payment_pix, payment_approved, payment_failed, certificate_issued, email_verified, subscription_created (via trackServerEvent)
+- [x] +1 client event: favorite_toggled (via trackClientEvent)
+- [x] Link "Monitoramento" no sidebar admin (ícone Activity)
 
 ---
 

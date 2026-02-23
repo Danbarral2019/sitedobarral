@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
+import { trackClientEvent } from '@/lib/monitoring/track-client';
 
 interface Favorite {
   id: string;
@@ -60,6 +61,7 @@ export function useFavorites(courseId?: string) {
           setFavorites(previousFavorites); // Rollback
           return { success: false };
         }
+        trackClientEvent('favorite_toggled', { action: 'remove' });
         return { success: true, action: 'removed' };
       } else {
         const response = await fetch('/api/favorites', {
@@ -70,6 +72,7 @@ export function useFavorites(courseId?: string) {
         if (response.ok) {
           const data = await response.json();
           setFavorites(prev => [...prev, data.favorite]);
+          trackClientEvent('favorite_toggled', { action: 'add' });
           return { success: true, action: 'added' };
         }
         return { success: false };

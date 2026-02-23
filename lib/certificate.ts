@@ -1,6 +1,7 @@
 import { prisma } from '@/lib/prisma';
 import { getCourseById } from '@/lib/courses';
 import { apiLogger } from '@/lib/logger';
+import { trackServerEvent } from '@/lib/monitoring/events';
 
 /**
  * Verifica se o aluno completou todos os requisitos para certificado:
@@ -187,6 +188,7 @@ export async function issueCertificate(
     { certificateId: certificate.id, userId, courseId, certificateNumber },
     'Certificate issued'
   );
+  trackServerEvent('certificate_issued', { courseId });
 
   // Enviar email (fire-and-forget)
   sendCertificateEmailAsync(user.email, user.name, course.title, certificateNumber).catch(() => {});

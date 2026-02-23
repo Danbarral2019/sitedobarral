@@ -3,6 +3,7 @@ import { Payment } from 'mercadopago';
 import { getMPClient, createSubscriptionEnrollments, handleSubscriptionCanceled, type PlanType } from '@/lib/mercadopago';
 import { prisma } from '@/lib/prisma';
 import { apiLogger } from '@/lib/logger';
+import { trackServerEvent } from '@/lib/monitoring/events';
 
 export const runtime = 'nodejs';
 
@@ -73,6 +74,8 @@ export async function POST(request: NextRequest) {
         await createSubscriptionEnrollments(userId, plan as PlanType, courseId || undefined);
 
         apiLogger.info({ userId, plan, paymentId: payment.id }, 'Subscription created via MP webhook');
+        trackServerEvent('payment_approved', { paymentId: String(payment.id) });
+        trackServerEvent('subscription_created', { plan });
       } else {
         apiLogger.info({ userId, plan }, 'Subscription already active, skipping');
       }
@@ -90,6 +93,7 @@ export async function POST(request: NextRequest) {
         await handleSubscriptionCanceled(userId, plan as PlanType, courseId || undefined);
 
         apiLogger.info({ userId, plan, paymentId: payment.id }, 'Subscription canceled via MP webhook');
+        trackServerEvent('payment_failed', { paymentId: String(payment.id), status: paymentStatus });
       }
     } else {
       apiLogger.info({ userId, plan, status: paymentStatus, paymentId: payment.id }, 'MP webhook: status pendente/outro');
