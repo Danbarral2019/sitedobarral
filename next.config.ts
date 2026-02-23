@@ -21,7 +21,6 @@ const nextConfig: NextConfig = {
   // Tree-shake barrel exports de pacotes pesados
   experimental: {
     optimizePackageImports: ['lucide-react', '@radix-ui/react-icons', 'date-fns'],
-    optimizeCss: true,
   },
 
   // Otimização de imagens
