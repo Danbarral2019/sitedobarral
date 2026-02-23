@@ -43,6 +43,7 @@ export const POST = withAdminAuth(async (request: NextRequest) => {
         isPublished: data.isPublished ?? false,
         estimatedMinutes: data.estimatedMinutes,
         leiArticles: data.leiArticles ? JSON.stringify(data.leiArticles) : null,
+        prerequisiteId: data.prerequisiteId || null,
       },
     });
 

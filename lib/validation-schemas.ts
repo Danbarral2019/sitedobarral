@@ -211,6 +211,7 @@ export const CreateLessonSchema = z.object({
   isPublished: z.boolean().optional(),
   estimatedMinutes: z.number().int().min(1).max(600).optional(),
   leiArticles: z.array(z.string()).optional(),
+  prerequisiteId: z.string().nullable().optional(),
 });
 
 export const UpdateLessonSchema = z.object({
@@ -222,6 +223,7 @@ export const UpdateLessonSchema = z.object({
   isPublished: z.boolean().optional(),
   estimatedMinutes: z.number().int().min(1).max(600).nullable().optional(),
   leiArticles: z.array(z.string()).nullable().optional(),
+  prerequisiteId: z.string().nullable().optional(),
   aiSummary: z.string().nullable().optional(),
   aiKeyPoints: z.array(z.string()).nullable().optional(),
 });

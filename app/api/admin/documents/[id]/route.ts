@@ -223,6 +223,7 @@ export const PATCH = withAdminAuth(async (request: NextRequest, context: { param
     if (body.courseId !== undefined) allowedFields.courseId = body.courseId;
     if (body.category !== undefined) allowedFields.category = body.category;
     if (body.tags !== undefined) allowedFields.tags = body.tags;
+    if (body.leiArticles !== undefined) allowedFields.leiArticles = JSON.stringify(body.leiArticles);
     if (body.isPublic !== undefined) allowedFields.isPublic = body.isPublic;
     if (body.reviewed !== undefined) {
       allowedFields.reviewed = body.reviewed;
@@ -247,6 +248,9 @@ export const PATCH = withAdminAuth(async (request: NextRequest, context: { param
       }
     } else if (existing.courseId) {
       await CacheInvalidation.courseDocuments(existing.courseId);
+    }
+    if (body.leiArticles !== undefined) {
+      await CacheInvalidation.leiArticles();
     }
 
     return NextResponse.json({

@@ -9,7 +9,10 @@ import {
   FileText,
   ChevronRight,
   Loader2,
-  BarChart3
+  BarChart3,
+  LinkIcon,
+  AlertTriangle,
+  TrendingUp
 } from 'lucide-react';
 import { LEI_14133_ARTIGOS as LEI_14133_ARTIGOS_FALLBACK, LeiArticle } from '@/data/lei-14133-artigos';
 
@@ -17,6 +20,7 @@ export default function AdminLei14133Page() {
   const [artigos, setArtigos] = useState<Record<string, LeiArticle>>(LEI_14133_ARTIGOS_FALLBACK);
   const [isLoadingArtigos, setIsLoadingArtigos] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
+  const [coverageStats, setCoverageStats] = useState<{articleStats: Record<string, number>; totalArticles: number; totalDocuments: number} | null>(null);
 
   // Buscar artigos do banco de dados ao montar componente
   useEffect(() => {
@@ -31,12 +35,23 @@ export default function AdminLei14133Page() {
         }
       } catch (error) {
         console.error('Erro ao buscar artigos:', error);
-        // Mantém fallback em caso de erro
       } finally {
         setIsLoadingArtigos(false);
       }
     }
+    async function fetchCoverageStats() {
+      try {
+        const response = await fetch('/api/lei-14133/stats');
+        if (response.ok) {
+          const data = await response.json();
+          setCoverageStats(data);
+        }
+      } catch (error) {
+        console.error('Erro ao buscar coverage stats:', error);
+      }
+    }
     fetchArtigos();
+    fetchCoverageStats();
   }, []);
 
   // Preparar artigos com status
@@ -106,13 +121,22 @@ export default function AdminLei14133Page() {
                 Gerencie e edite os 195 artigos da Nova Lei de Licitações (193 originais + Art. 184-A + Art. 194)
               </p>
             </div>
-            <Link
-              href="/admin/lei-14133/analytics"
-              className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-purple-600 to-blue-600 text-white rounded-lg hover:from-purple-700 hover:to-blue-700 transition-all shadow-md hover:shadow-lg font-semibold whitespace-nowrap"
-            >
-              <BarChart3 className="w-5 h-5" />
-              Ver Analytics
-            </Link>
+            <div className="flex items-center gap-3">
+              <Link
+                href="/admin/lei-14133/bulk-linker"
+                className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-green-600 to-emerald-600 text-white rounded-lg hover:from-green-700 hover:to-emerald-700 transition-all shadow-md hover:shadow-lg font-semibold whitespace-nowrap"
+              >
+                <LinkIcon className="w-5 h-5" />
+                Bulk Linker
+              </Link>
+              <Link
+                href="/admin/lei-14133/analytics"
+                className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-purple-600 to-blue-600 text-white rounded-lg hover:from-purple-700 hover:to-blue-700 transition-all shadow-md hover:shadow-lg font-semibold whitespace-nowrap"
+              >
+                <BarChart3 className="w-5 h-5" />
+                Ver Analytics
+              </Link>
+            </div>
           </div>
         </div>
 
@@ -151,6 +175,110 @@ export default function AdminLei14133Page() {
             </div>
           </div>
         </div>
+
+        {/* Coverage Dashboard */}
+        {coverageStats && (() => {
+          const allArticleNumbers = Array.from({ length: 194 }, (_, i) => String(i + 1));
+          const ranges = [
+            { label: '0 docs', min: 0, max: 0, color: 'bg-red-500' },
+            { label: '1-2 docs', min: 1, max: 2, color: 'bg-orange-500' },
+            { label: '3-5 docs', min: 3, max: 5, color: 'bg-blue-500' },
+            { label: '6-14 docs', min: 6, max: 14, color: 'bg-green-500' },
+            { label: '15+ docs', min: 15, max: Infinity, color: 'bg-emerald-600' },
+          ];
+          const distribution = ranges.map(r => ({
+            ...r,
+            count: allArticleNumbers.filter(n => {
+              const c = coverageStats.articleStats[n] || 0;
+              return c >= r.min && c <= r.max;
+            }).length,
+          }));
+          const maxDistCount = Math.max(...distribution.map(d => d.count), 1);
+
+          const top10 = allArticleNumbers
+            .map(n => ({ numero: n, count: coverageStats.articleStats[n] || 0 }))
+            .sort((a, b) => b.count - a.count)
+            .slice(0, 10);
+          const maxTop10 = top10[0]?.count || 1;
+
+          const orphans = allArticleNumbers.filter(n => !coverageStats.articleStats[n] || coverageStats.articleStats[n] === 0);
+
+          return (
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+              {/* Distribution Bars */}
+              <div className="bg-white rounded-lg shadow-md p-6">
+                <h3 className="text-lg font-bold text-gray-900 mb-1 flex items-center gap-2">
+                  <BarChart3 className="w-5 h-5 text-blue-600" />
+                  Cobertura por Faixa
+                </h3>
+                <p className="text-sm text-gray-500 mb-4">Distribuicao dos 194 artigos por quantidade de documentos vinculados</p>
+                <div className="space-y-3">
+                  {distribution.map(d => (
+                    <div key={d.label} className="flex items-center gap-3">
+                      <span className="text-sm text-gray-700 w-20 flex-shrink-0">{d.label}</span>
+                      <div className="flex-1 bg-gray-100 rounded-full h-6 overflow-hidden">
+                        <div
+                          className={`${d.color} h-full rounded-full transition-all duration-500 flex items-center justify-end pr-2`}
+                          style={{ width: `${Math.max((d.count / maxDistCount) * 100, 8)}%` }}
+                        >
+                          <span className="text-xs font-bold text-white">{d.count}</span>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Top 10 Most Documented */}
+              <div className="bg-white rounded-lg shadow-md p-6">
+                <h3 className="text-lg font-bold text-gray-900 mb-1 flex items-center gap-2">
+                  <TrendingUp className="w-5 h-5 text-emerald-600" />
+                  Top 10 Artigos Mais Documentados
+                </h3>
+                <p className="text-sm text-gray-500 mb-4">Artigos com maior numero de documentos vinculados</p>
+                <div className="space-y-2">
+                  {top10.map((item, idx) => (
+                    <div key={item.numero} className="flex items-center gap-3">
+                      <span className="text-sm font-mono text-gray-600 w-16 flex-shrink-0">Art. {item.numero}</span>
+                      <div className="flex-1 bg-gray-100 rounded-full h-5 overflow-hidden">
+                        <div
+                          className="bg-gradient-to-r from-emerald-500 to-green-500 h-full rounded-full transition-all duration-500 flex items-center justify-end pr-2"
+                          style={{ width: `${Math.max((item.count / maxTop10) * 100, 10)}%` }}
+                        >
+                          <span className="text-xs font-bold text-white">{item.count}</span>
+                        </div>
+                      </div>
+                      {idx === 0 && <span className="text-xs text-yellow-600 font-bold">1o</span>}
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Orphan Articles */}
+              {orphans.length > 0 && (
+                <div className="bg-white rounded-lg shadow-md p-6 lg:col-span-2">
+                  <h3 className="text-lg font-bold text-red-700 mb-1 flex items-center gap-2">
+                    <AlertTriangle className="w-5 h-5 text-red-600" />
+                    Artigos sem Documentos ({orphans.length})
+                  </h3>
+                  <p className="text-sm text-gray-500 mb-4">Artigos que ainda nao possuem nenhum documento vinculado</p>
+                  <div className="flex flex-wrap gap-2">
+                    {orphans.map(n => (
+                      <Link
+                        key={n}
+                        href={`/artigo/${n}`}
+                        target="_blank"
+                        className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-red-100 text-red-800 hover:bg-red-200 transition-colors"
+                      >
+                        Art. {n}
+                      </Link>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+          );
+        })()}
 
         {/* Filtros */}
         <div className="bg-white rounded-lg shadow-md p-6 mb-6">

@@ -11,6 +11,7 @@ interface LessonItem {
   slug: string;
   estimatedMinutes?: number | null;
   requiresQuizPass?: boolean;
+  prerequisiteId?: string | null;
   hasQuiz?: boolean;
   quizPassed?: boolean;
   progress: { status: string; completedAt?: string | null } | null;
@@ -109,9 +110,23 @@ export default function ModuleSidebar({
                     const isCurrent = lesson.id === currentLessonId;
                     const isCompleted = lesson.progress?.status === 'completed';
 
-                    // Check if locked: requiresQuizPass and previous lesson quiz not passed
+                    // Check if locked via prerequisiteId (cross-module)
                     let isLocked = false;
-                    if (lesson.requiresQuizPass && lessonIdx > 0) {
+                    if (lesson.prerequisiteId) {
+                      // Find prerequisite lesson across all modules
+                      const allLessons = modules.flatMap(m => m.lessons);
+                      const prereq = allLessons.find(l => l.id === lesson.prerequisiteId);
+                      if (prereq) {
+                        const prereqCompleted = prereq.progress?.status === 'completed';
+                        if (!prereqCompleted) {
+                          isLocked = true;
+                        } else if (prereq.requiresQuizPass && prereq.hasQuiz && !prereq.quizPassed) {
+                          isLocked = true;
+                        }
+                      }
+                    }
+                    // Legacy: requiresQuizPass with previous lesson in same module
+                    if (!isLocked && lesson.requiresQuizPass && lessonIdx > 0) {
                       const prevLesson = mod.lessons[lessonIdx - 1];
                       if (prevLesson?.hasQuiz && !prevLesson.quizPassed) {
                         isLocked = true;

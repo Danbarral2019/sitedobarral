@@ -34,10 +34,10 @@ const portarias: PortariaData[] = [
     leiArticles: ['12'],
   },
   {
-    title: 'Portaria-TCU nº 119, de 28 de junho de 2022',
-    description: 'Dispõe sobre a gestão da execução contratual e sanções no âmbito do Tribunal de Contas da União, com remissão ao art. 156 da Lei nº 14.133/2021.',
-    url: 'https://pesquisa.apps.tcu.gov.br/doc/norma/Portaria/TCU/119/2022/',
-    leiArticles: ['117', '156'],
+    title: 'Portaria-TCU nº 3, de 2 de janeiro de 2025',
+    description: 'Delega competência ao Secretário-Geral de Administração para praticar atos de gestão orçamentária e financeira, patrimonial, de compras e contratações, de gestão do Quadro de Pessoal, e demais atribuições da Segedam. Revogou as Portarias-TCU nº 6/2023 e nº 126/2024.',
+    url: 'https://pesquisa.apps.tcu.gov.br/doc/norma/Portaria/TCU/3/2025/',
+    leiArticles: ['8', '12', '31', '74', '75', '82', '86', '140', '156', '162'],
   },
   {
     title: 'Portaria-TCU nº 121, de 28 de junho de 2023',

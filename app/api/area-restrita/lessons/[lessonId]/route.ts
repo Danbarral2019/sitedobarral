@@ -68,6 +68,32 @@ export async function GET(
       if (!enrollment) throw new AuthorizationError('Você não está matriculado neste curso.');
     }
 
+    // Prerequisite check (admin bypasses)
+    if (user.role !== 'admin' && lesson.prerequisiteId) {
+      const prereqProgress = await prisma.lessonProgress.findUnique({
+        where: { userId_lessonId: { userId: user.id, lessonId: lesson.prerequisiteId } },
+      });
+      const prereqCompleted = prereqProgress?.status === 'completed';
+
+      if (!prereqCompleted) {
+        throw new AuthorizationError('Você precisa completar a aula pré-requisito antes de acessar esta aula.');
+      }
+
+      // If prerequisite lesson has requiresQuizPass, also check quiz
+      const prereqLesson = await prisma.lesson.findUnique({
+        where: { id: lesson.prerequisiteId },
+        select: { requiresQuizPass: true, quiz: { select: { id: true } } },
+      });
+      if (prereqLesson?.requiresQuizPass && prereqLesson.quiz) {
+        const quizPassed = await prisma.quizAttempt.findFirst({
+          where: { userId: user.id, quizId: prereqLesson.quiz.id, passed: true },
+        });
+        if (!quizPassed) {
+          throw new AuthorizationError('Você precisa ser aprovado no quiz da aula anterior para desbloquear esta aula.');
+        }
+      }
+    }
+
     // Fetch user progress
     const progress = await prisma.lessonProgress.findUnique({
       where: { userId_lessonId: { userId: user.id, lessonId } },

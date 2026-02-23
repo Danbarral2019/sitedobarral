@@ -43,6 +43,7 @@ export async function GET(
             estimatedMinutes: true,
             displayOrder: true,
             requiresQuizPass: true,
+            prerequisiteId: true,
             quiz: {
               select: { id: true, isPublished: true },
             },
@@ -103,6 +104,7 @@ export async function GET(
           estimatedMinutes: lesson.estimatedMinutes,
           displayOrder: lesson.displayOrder,
           requiresQuizPass: lesson.requiresQuizPass,
+          prerequisiteId: lesson.prerequisiteId,
           hasQuiz,
           quizPassed,
           progress: progress

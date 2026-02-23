@@ -11,6 +11,7 @@ import {
   Clock,
   ChevronRight,
   Play,
+  Lock,
 } from 'lucide-react';
 import { getIdFromSlug, getCourseBySlug } from '@/lib/courses';
 import LessonProgressBar from '@/components/lms/LessonProgressBar';
@@ -21,6 +22,10 @@ interface LessonInfo {
   slug: string;
   estimatedMinutes?: number | null;
   displayOrder: number;
+  prerequisiteId?: string | null;
+  requiresQuizPass?: boolean;
+  hasQuiz?: boolean;
+  quizPassed?: boolean;
   progress: { status: string; completedAt?: string | null } | null;
 }
 
@@ -311,6 +316,44 @@ export default function CourseLandingPage({
                     const isCompleted = lesson.progress?.status === 'completed';
                     const isInProgress = lesson.progress?.status === 'in_progress';
                     const isContinueTarget = continueLesson?.id === lesson.id;
+
+                    // Check prerequisite lock
+                    let isLocked = false;
+                    if (lesson.prerequisiteId) {
+                      const prereq = allLessons.find(l => l.id === lesson.prerequisiteId);
+                      if (prereq) {
+                        const prereqCompleted = prereq.progress?.status === 'completed';
+                        if (!prereqCompleted) {
+                          isLocked = true;
+                        } else if (prereq.requiresQuizPass && prereq.hasQuiz && !prereq.quizPassed) {
+                          isLocked = true;
+                        }
+                      }
+                    }
+
+                    if (isLocked) {
+                      return (
+                        <div
+                          key={lesson.id}
+                          className="flex items-center gap-3 px-5 py-3.5 lg:px-6 lg:py-4 opacity-50 cursor-not-allowed"
+                          title="Complete a aula pre-requisito para desbloquear"
+                        >
+                          <Lock className="w-5 h-5 text-gray-400 flex-shrink-0" />
+                          <div className="flex-1 min-w-0">
+                            <p className="text-sm font-medium leading-tight text-gray-400">
+                              {lesson.title}
+                            </p>
+                            {lesson.estimatedMinutes && (
+                              <span className="flex items-center gap-1 text-xs text-gray-300 mt-0.5">
+                                <Clock className="w-3 h-3" />
+                                {lesson.estimatedMinutes} min
+                              </span>
+                            )}
+                          </div>
+                          <Lock className="w-4 h-4 text-gray-300 flex-shrink-0" />
+                        </div>
+                      );
+                    }
 
                     return (
                       <Link

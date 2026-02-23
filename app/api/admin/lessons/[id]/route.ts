@@ -78,6 +78,10 @@ export async function PUT(
     if (data.aiKeyPoints !== undefined) {
       updateData.aiKeyPoints = data.aiKeyPoints ? JSON.stringify(data.aiKeyPoints) : null;
     }
+    // prerequisiteId: null means remove, string means set
+    if (data.prerequisiteId !== undefined) {
+      updateData.prerequisiteId = data.prerequisiteId || null;
+    }
 
     const lesson = await prisma.lesson.update({
       where: { id },

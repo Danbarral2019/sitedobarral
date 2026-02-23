@@ -171,18 +171,58 @@ export default function LMSAnalyticsClient() {
           </div>
 
           {/* Course selector */}
-          <div className="relative inline-block">
-            <select
-              value={selectedCourse}
-              onChange={(e) => handleCourseChange(e.target.value)}
-              className="appearance-none bg-white border border-gray-300 rounded-lg pl-4 pr-10 py-2 text-sm font-medium text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-            >
-              <option value="">Visao Global</option>
-              {courses.map(c => (
-                <option key={c.id} value={c.id}>{c.title}</option>
-              ))}
-            </select>
-            <ChevronDown className="w-4 h-4 text-gray-500 absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" />
+          <div className="flex items-center gap-2">
+            <div className="relative inline-block">
+              <select
+                value={selectedCourse}
+                onChange={(e) => handleCourseChange(e.target.value)}
+                className="appearance-none bg-white border border-gray-300 rounded-lg pl-4 pr-10 py-2 text-sm font-medium text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              >
+                <option value="">Visao Global</option>
+                {courses.map(c => (
+                  <option key={c.id} value={c.id}>{c.title}</option>
+                ))}
+              </select>
+              <ChevronDown className="w-4 h-4 text-gray-500 absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" />
+            </div>
+            {!selectedCourse && (
+              <button
+                onClick={() => {
+                  const rows: string[] = [];
+                  rows.push('Resumo LMS');
+                  rows.push('Metrica,Valor');
+                  rows.push(`Alunos Ativos,${summary.activeStudents}`);
+                  rows.push(`Aulas Concluidas,${summary.completedLessons}`);
+                  rows.push(`Certificados,${summary.totalCertificates}`);
+                  rows.push(`Quizzes Aprovados,${summary.quizzesApproved}`);
+                  rows.push('');
+                  rows.push('Cursos');
+                  rows.push('Curso,Alunos Ativos');
+                  for (const c of courseSummary) {
+                    rows.push(`"${c.title}",${c.activeStudents}`);
+                  }
+                  rows.push('');
+                  rows.push('Alunos Inativos (>7 dias)');
+                  rows.push('Nome,Email,Dias Inativo');
+                  for (const s of inactiveStudents) {
+                    rows.push(`"${s.name}","${s.email}",${s.daysSince}`);
+                  }
+                  const csvContent = rows.join('\n');
+                  const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+                  const url = URL.createObjectURL(blob);
+                  const a = document.createElement('a');
+                  a.href = url;
+                  a.download = `LMS_Global_${new Date().toISOString().split('T')[0]}.csv`;
+                  a.click();
+                  URL.revokeObjectURL(url);
+                }}
+                className="flex items-center gap-1.5 px-3 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 hover:bg-gray-50 rounded-lg transition-colors"
+                title="Exportar CSV global"
+              >
+                <Download className="w-4 h-4" />
+                CSV
+              </button>
+            )}
           </div>
         </div>
 

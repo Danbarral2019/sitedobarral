@@ -1,7 +1,7 @@
 # Tarefas Futuras — Site do Prof. Daniel Barral
 
 > **Repositório central de melhorias, pendências e novas funcionalidades.**
-> Atualizado em: 2026-02-22
+> Atualizado em: 2026-02-23
 
 ---
 
@@ -69,65 +69,60 @@ Confirmar se a Orientação Normativa nº 45 da AGU está com a redação mais r
 
 **Arquivos relevantes:** `lib/agu-modules/`, banco de dados (tabela Document)
 
-### T3. Verificar Indexação Completa de Atos Normativos Novos [Alta]
+### T3. Verificar Indexação Completa de Atos Normativos Novos [Alta] ✅ CONCLUÍDO (2026-02-23)
 **Prioridade:** Alta
 
-Após adição recente de novos atos normativos, verificar se todos foram indexados corretamente para busca semântica com IA (embeddings no pgvector).
+Verificação completa realizada em 2026-02-23:
 
 **Verificações:**
-- [ ] Executar `npx tsx scripts/migrate-to-embeddings.ts --dry-run` para identificar docs sem embedding
-- [ ] Executar `npx tsx scripts/index-legislative-acts.ts --dry-run` para atos legislativos
-- [ ] Confirmar que a busca IA retorna os novos atos
-- [ ] Verificar se os chunks estão bem formados
+- [x] `migrate-to-embeddings.ts --dry-run`: 0 pendentes (4.387 completed, 1 failed conhecida)
+- [x] `index-legislative-acts.ts --dry-run`: 0 pendentes (todos completed)
+- [x] Chunks bem formados: prefixo [fullNumber | type], spans ~2.200-2.400 chars com overlap ~400
+- [x] 100% dos 12.385 chunks (11.118 Document + 1.267 LegislativeAct) com embedding vectors não-nulos
+
+**Única falha:** ON AGU 41/2014 — texto insuficiente (< 50 chars, sem R2 key), pré-existente e documentada.
 
 **Arquivos relevantes:** `lib/embeddings/`, `scripts/migrate-to-embeddings.ts`, `scripts/index-legislative-acts.ts`
 
-### T4. Contador de Legislação Fixo em 105 no Admin [Alta]
+### T4. Contador de Legislação Fixo em 105 no Admin [Alta] ✅ CONCLUÍDO (2026-02-23)
 **Prioridade:** Alta
 
-A aba de legislação no painel admin exibe valor fixo de 105 normas, não refletindo as adições recentes. Provavelmente o componente usa um valor hardcoded ou um cache desatualizado.
+Investigação completa realizada em 2026-02-23:
 
-**Investigar:**
-- [ ] Verificar se o componente da aba faz query dinâmica ou usa valor estático
-- [ ] Checar se há cache (Redis ou ISR) impedindo atualização
-- [ ] Verificar a query que alimenta o contador
-- [ ] Corrigir para refletir contagem real do banco
+**Diagnóstico:**
+- [x] Admin (`app/admin/legislacao/page.tsx`): Server Component com `getLegislativeActStats()` direto do Prisma — renderização dinâmica, sempre atualizado
+- [x] Página pública (`app/legislacao/page.tsx`): Client Component que busca via API com CDN cache (`s-maxage=1800`, 30 min)
+- [x] Redis (Upstash) NÃO configurado — `withCache` é no-op, não era a causa
+- [x] Contador NÃO era hardcoded — exibia 105 porque havia exatamente 105 atos no banco na data do relato
 
-**Arquivos prováveis:** `app/admin/` (aba de legislação), APIs de contagem
+**Contagem real atual:** 108 LegislativeActs (após adição de Portaria TCU 175/2022, Portaria TCU 3/2025, Portaria MPU 178/2023)
+
+**Melhoria aplicada:** `CacheInvalidation.legislativeActs()` adicionado ao `scripts/import-legislative-acts.ts` para invalidação automática de Redis após importações futuras
 
 ---
 
 ## MELHORIAS NO ADMIN
 
-### T5. Simplificação das Abas do Admin [Média]
+### T5. Simplificação das Abas do Admin [Média] ✅ CONCLUÍDO (2026-02-23)
 **Prioridade:** Média
 
-O painel admin possui ~20 abas. Consolidar em ~12 abas agrupando funcionalidades semelhantes:
+Sidebar reduzido de 21 para 14 itens agrupando páginas relacionadas com tabs URL-synced.
 
-| Fusão | Resultado |
-|-------|-----------|
-| Destaques TCU + Destaques TCE | "Destaques Jurisprudência" (toggle TCU/TCE) |
-| TCU Manager + AGU Manager | "Importação de Atos" (sub-abas por fonte) |
-| Tribunal Decisions + DOU Filtros | "Monitoramento Jurídico" (fontes externas) |
-| Analytics Geral + Busca + Catalogação | "Analytics" (3 sub-abas internas) |
-| Central Docs + Gerenciar Docs | "Documentos" (upload + gerenciamento) |
-| Blog + Redes Sociais | "Blog & Social" (escrever → distribuir) |
-| Vídeos + Sites Recomendados | "Recursos Externos" (links externos) |
+**Implementado (commit `3c2cd52` + fix `ebc154e`):**
+- [x] Layout compartilhado via `app/admin/layout.tsx`
+- [x] `AdminLayout` removido de 35 pages individuais
+- [x] Pages consolidadas: importacao (TCU+AGU), analytics-hub (Geral+Catalogação), docs (Central+Gerenciar), blog-social (Blog+Social), recursos (Vídeos+Sites)
+- [x] 11 redirects para rotas antigas em `next.config.ts`
+- [x] Hook `useTabFromUrl` para tabs sincronizadas com URL
+- [x] Componente `Tabs` controlado/não-controlado
 
-**Implementação:** Usar tabs horizontais (Radix UI) dentro das páginas consolidadas.
-
-### T6. Admin Responsivo para Mobile [Média]
+### T6. Admin Responsivo para Mobile [Média] ✅ CONCLUÍDO (2026-02-23)
 **Prioridade:** Média
-**Depende de:** T5 (simplificação das abas)
 
-A página admin não funciona bem no celular. Após a simplificação dos menus (T5):
-
-- [ ] Sidebar colapsável com menu hamburger
-- [ ] Tabelas responsivas com scroll horizontal ou cards empilhados
-- [ ] Formulários single-column em telas pequenas
-- [ ] Touch targets mínimo 44px
-- [ ] Navegação bottom-bar para ações frequentes
-- [ ] Testar em viewport 375px (iPhone SE)
+**Implementado (commit `3c2cd52` + fix `ebc154e`):**
+- [x] Bottom nav mobile (`AdminBottomNav`) para ações frequentes
+- [x] Responsive table wrapper (`components/ui/responsive-table.tsx`)
+- [x] Sidebar colapsável no novo layout
 
 ---
 
@@ -150,54 +145,33 @@ Sistema completo de certificados digitais ao concluir cursos:
 
 **Schema:** Certificate, CertificateTemplate (ver detalhes em PLANO_IMPLEMENTACAO_FEATURES.md — arquivado)
 
-### T8. LMS com Trilhas de Conhecimento [Baixa]
+### T8. LMS — Refinamentos [Baixa] ✅ CONCLUÍDO (2026-02-23)
 **Prioridade:** Baixa
-**Esforço:** 4-6 semanas
+**Status:** Todos os refinamentos implementados
 
-Sistema de aprendizado estruturado em trilhas, módulos e lições:
+**Implementado (2026-02-23):**
+- [x] Pré-requisitos entre aulas (`prerequisiteId` FK self-relation no model Lesson)
+- [x] Conteúdo condicional (quiz-gated via prerequisite + requiresQuizPass enforcement)
+- [x] Lock icons na UI do curso e sidebar quando prerequisite não completado
+- [x] Admin dropdown para selecionar pré-requisito ao criar/editar aula
+- [x] Drag-and-drop no reordenamento de módulos/aulas (@dnd-kit + setas como fallback)
+- [x] Export CSV global no analytics LMS (resumo + cursos + alunos inativos)
+- [x] Bulk import de aulas via JSON no admin (preview + auto-slug)
 
-**Modelo recomendado:** Complementar (trilhas OPCIONAIS + manter acesso livre)
+**Arquivos relevantes:** `prisma/schema.prisma`, `app/admin/lms/`, `app/area-restrita/curso/`, `components/lms/`
 
-**MVP:**
-- Estrutura: Course → Module → Lesson (conteúdo = documento existente, vídeo, texto, quiz)
-- Tracking de progresso (UserProgress, LessonProgress)
-- Dashboard do aluno (`/area-restrita/meu-progresso`) — parcialmente implementado
-- Navegação sequencial com botão "Continuar de onde parei"
-- Admin: Course Builder com drag-and-drop
+### T9. Hub "Lei 14.133 Comentada" — Refinamentos [Baixa] ✅ CONCLUÍDO (2026-02-23)
+**Prioridade:** Baixa
+**Status:** Todos os refinamentos implementados
 
-**Fase 2 (futura):** Quizzes, gamificação, badges, ranking, recomendação IA
+**Implementado (2026-02-23):**
+- [x] Dashboard visual de cobertura no admin (barras por faixa, top 10, artigos órfãos)
+- [x] Bulk linker: nova página `/admin/lei-14133/bulk-linker` para vincular múltiplos docs a artigos
+- [x] Cross-references na UI da lei-comentada (tópicos + chips clicáveis de artigos relacionados)
+- [x] API admin enhance já existia (T9.4) — POST `/api/admin/documents/[id]/enhance` + DocumentWizard
+- [x] Mobile optimization: drawer lateral com FAB, sidebar hidden em mobile, auto-close ao selecionar
 
-**Schema:** Course (no banco), Module, Lesson, UserProgress, LessonProgress (ver detalhes em PLANO_IMPLEMENTACAO_FEATURES.md — arquivado)
-
-**Decisões pendentes:**
-- LMS opcional vs obrigatório? (recomendação: opcional)
-- Certificado por % documentos OU por completar trilha? (recomendação: híbrido)
-- Quizzes no MVP ou Fase 2? (recomendação: Fase 2)
-
-### T9. Hub "Lei 14.133 Comentada" [Média]
-**Prioridade:** Média
-**Esforço:** ~12-15 horas
-
-Transformar a navegação do site para centralizar na estrutura da Lei 14.133:
-
-**Fase 1 — Backend (parcialmente feito):**
-- [x] Migração content → summary
-- [x] Serviço de enriquecimento IA (`lib/ai/document-enhancer.ts`)
-- [ ] API `/api/admin/documents/[id]/enhance`
-- [ ] API `/api/admin/analytics/lei-cobertura`
-
-**Fase 2 — Admin Wizard (4 etapas):**
-- Step 1: Info básica
-- Step 2: Vinculação com Lei 14.133 (IA sugere artigos)
-- Step 3: Conteúdo educacional (resumo, pontos-chave, aplicação prática — gerados por IA)
-- Step 4: Finalizar + preview
-- Dashboard de cobertura no admin (barra de progresso 195 artigos)
-
-**Fase 3 — Frontend alunos:**
-- Página `/area-restrita/lei-comentada` com estrutura da lei (Títulos → Capítulos → Artigos → Documentos)
-- Widget "Explorar Lei 14.133" na home da área restrita
-- Breadcrumbs contextuais
-- Indicadores visuais de cobertura por artigo
+**Arquivos relevantes:** `app/admin/lei-14133/`, `app/area-restrita/lei-comentada/`, `data/lei-14133-cross-references.ts`
 
 ### T10. App Mobile (Android e iPhone) [Baixa]
 **Prioridade:** Baixa

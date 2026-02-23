@@ -1114,6 +1114,11 @@ model Lesson {
   estimatedMinutes Int?
   requiresQuizPass Boolean  @default(false)
 
+  // Pré-requisito: outra lição que precisa ser completada antes
+  prerequisiteId String?
+  prerequisite   Lesson?  @relation("LessonPrereq", fields: [prerequisiteId], references: [id], onDelete: SetNull)
+  dependents     Lesson[] @relation("LessonPrereq")
+
   // Campos IA
   aiSummary   String? @db.Text
   aiKeyPoints String? // JSON array
@@ -1131,6 +1136,7 @@ model Lesson {
   @@unique([moduleId, slug])
   @@index([moduleId])
   @@index([moduleId, displayOrder])
+  @@index([prerequisiteId])
 }
 
 // Junction: Lesson ↔ Document

@@ -31,6 +31,7 @@ import { useLegislativeActFavorites } from '@/hooks/use-legislative-act-favorite
 import { safeParseArray, normalizeTextContent } from '@/lib/utils';
 import Link from 'next/link';
 import ArticleChatInterface from '@/components/ArticleChatInterface';
+import { CROSS_REFERENCES } from '@/data/lei-14133-cross-references';
 
 interface EnunciadoResumo {
   id: string;
@@ -436,6 +437,9 @@ function LeiComentadaContent() {
   // Accordion de documentos individuais
   const [expandedDocumentId, setExpandedDocumentId] = useState<string | null>(null);
 
+  // Mobile drawer
+  const [mobileDrawerOpen, setMobileDrawerOpen] = useState(false);
+
   // Estados para busca com IA
   const [isAISearching, setIsAISearching] = useState(false);
   const [aiSearchResults, setAiSearchResults] = useState<AISearchResponse | null>(null);
@@ -592,6 +596,7 @@ function LeiComentadaContent() {
 
   const handleSelectArticle = (article: LeiArticle) => {
     setSelectedArticle(article);
+    setMobileDrawerOpen(false);
 
     // Atualizar URL
     router.push(`/area-restrita/lei-comentada?artigo=${article.numero}`, { scroll: false });
@@ -612,6 +617,119 @@ function LeiComentadaContent() {
   const toggleDocumentExpanded = (documentId: string) => {
     setExpandedDocumentId(prev => prev === documentId ? null : documentId);
   };
+
+  const renderSidebarContent = () => (
+    <div className="p-2">
+      {filteredHierarchy &&
+        Object.entries(filteredHierarchy).map(([tituloKey, tituloData]) => {
+          const isTituloExpanded = expandedTitulos.has(tituloKey);
+
+          return (
+            <div key={tituloKey} className="mb-2">
+              {/* TITULO */}
+              <button
+                onClick={() => toggleTitulo(tituloKey)}
+                className="w-full flex items-center gap-2 p-3 hover:bg-blue-50 rounded-lg transition-colors text-left"
+              >
+                {isTituloExpanded ? (
+                  <ChevronDown className="w-5 h-5 text-blue-600 flex-shrink-0" />
+                ) : (
+                  <ChevronRight className="w-5 h-5 text-gray-400 flex-shrink-0" />
+                )}
+                <div className="flex-1 min-w-0">
+                  <p className="font-semibold text-gray-900 truncate">{tituloData.titulo}</p>
+                  <p className="text-xs text-gray-500">
+                    {Object.values(tituloData.capitulos).reduce(
+                      (sum, cap) => sum + cap.artigos.length,
+                      0
+                    )}{' '}
+                    artigos
+                  </p>
+                </div>
+              </button>
+
+              {/* CAPITULOS */}
+              {isTituloExpanded && (
+                <div className="ml-4 mt-1 space-y-1">
+                  {Object.entries(tituloData.capitulos).map(([capituloKey, capituloData]) => {
+                    const capituloId = `${tituloKey}::${capituloKey}`;
+                    const isCapituloExpanded = expandedCapitulos.has(capituloId);
+
+                    return (
+                      <div key={capituloKey}>
+                        {/* CAPITULO */}
+                        <button
+                          onClick={() => toggleCapitulo(tituloKey, capituloKey)}
+                          className="w-full flex items-center gap-2 p-2 hover:bg-indigo-50 rounded-lg transition-colors text-left"
+                        >
+                          {isCapituloExpanded ? (
+                            <ChevronDown className="w-4 h-4 text-indigo-600 flex-shrink-0" />
+                          ) : (
+                            <ChevronRight className="w-4 h-4 text-gray-400 flex-shrink-0" />
+                          )}
+                          <div className="flex-1 min-w-0">
+                            <p className="text-sm font-medium text-gray-800 truncate">
+                              {capituloData.capituloCompleto}
+                            </p>
+                            <p className="text-xs text-gray-500">
+                              {capituloData.artigos.length} artigos
+                            </p>
+                          </div>
+                        </button>
+
+                        {/* ARTIGOS */}
+                        {isCapituloExpanded && (
+                          <div className="ml-4 mt-1 space-y-1">
+                            {capituloData.artigos.map((article) => {
+                              const isSelected = selectedArticle?.numero === article.numero;
+
+                              return (
+                                <button
+                                  key={article.numero}
+                                  ref={(el) => {
+                                    articleRefs.current[article.numero] = el;
+                                  }}
+                                  onClick={() => handleSelectArticle(article)}
+                                  className={`w-full flex items-center gap-2 p-2 rounded-lg transition-colors text-left ${
+                                    isSelected
+                                      ? 'bg-blue-100 border-2 border-blue-500'
+                                      : 'hover:bg-gray-100'
+                                  }`}
+                                >
+                                  <span
+                                    className={`px-2 py-1 rounded text-xs font-bold ${
+                                      isSelected
+                                        ? 'bg-blue-600 text-white'
+                                        : 'bg-gray-200 text-gray-700'
+                                    }`}
+                                  >
+                                    Art. {article.numero}
+                                  </span>
+                                  <div className="flex-1 min-w-0">
+                                    <p className="text-xs text-gray-700 truncate">
+                                      {article.ementa.substring(0, 40)}...
+                                    </p>
+                                  </div>
+                                  {article.documentCount > 0 && (
+                                    <span className="flex-shrink-0 px-2 py-0.5 bg-green-100 text-green-700 text-xs font-medium rounded">
+                                      {article.documentCount}
+                                    </span>
+                                  )}
+                                </button>
+                              );
+                            })}
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+          );
+        })}
+    </div>
+  );
 
   const getArticleStatus = (count: number) => {
     if (count === 0) return { label: 'Órfão', color: 'bg-red-100 text-red-700', icon: AlertCircle };
@@ -1032,8 +1150,8 @@ function LeiComentadaContent() {
       {/* Main Layout */}
       <div className="container mx-auto px-4 py-6">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-          {/* Sidebar - Estrutura da Lei */}
-          <div className="lg:col-span-4">
+          {/* Sidebar - Estrutura da Lei (hidden on mobile, shown via drawer) */}
+          <div className="hidden lg:block lg:col-span-4">
             <div className="bg-white rounded-lg shadow-md sticky top-6 max-h-[calc(100vh-8rem)] overflow-y-auto">
               <div className="p-4 border-b border-gray-200">
                 <h2 className="text-lg font-bold text-gray-900">Estrutura da Lei</h2>
@@ -1041,117 +1159,7 @@ function LeiComentadaContent() {
                   {Object.keys(filteredHierarchy || {}).length} títulos
                 </p>
               </div>
-
-              <div className="p-2">
-                {filteredHierarchy &&
-                  Object.entries(filteredHierarchy).map(([tituloKey, tituloData]) => {
-                    const isTituloExpanded = expandedTitulos.has(tituloKey);
-
-                    return (
-                      <div key={tituloKey} className="mb-2">
-                        {/* TÍTULO */}
-                        <button
-                          onClick={() => toggleTitulo(tituloKey)}
-                          className="w-full flex items-center gap-2 p-3 hover:bg-blue-50 rounded-lg transition-colors text-left"
-                        >
-                          {isTituloExpanded ? (
-                            <ChevronDown className="w-5 h-5 text-blue-600 flex-shrink-0" />
-                          ) : (
-                            <ChevronRight className="w-5 h-5 text-gray-400 flex-shrink-0" />
-                          )}
-                          <div className="flex-1 min-w-0">
-                            <p className="font-semibold text-gray-900 truncate">{tituloData.titulo}</p>
-                            <p className="text-xs text-gray-500">
-                              {Object.values(tituloData.capitulos).reduce(
-                                (sum, cap) => sum + cap.artigos.length,
-                                0
-                              )}{' '}
-                              artigos
-                            </p>
-                          </div>
-                        </button>
-
-                        {/* CAPÍTULOS */}
-                        {isTituloExpanded && (
-                          <div className="ml-4 mt-1 space-y-1">
-                            {Object.entries(tituloData.capitulos).map(([capituloKey, capituloData]) => {
-                              const capituloId = `${tituloKey}::${capituloKey}`;
-                              const isCapituloExpanded = expandedCapitulos.has(capituloId);
-
-                              return (
-                                <div key={capituloKey}>
-                                  {/* CAPÍTULO */}
-                                  <button
-                                    onClick={() => toggleCapitulo(tituloKey, capituloKey)}
-                                    className="w-full flex items-center gap-2 p-2 hover:bg-indigo-50 rounded-lg transition-colors text-left"
-                                  >
-                                    {isCapituloExpanded ? (
-                                      <ChevronDown className="w-4 h-4 text-indigo-600 flex-shrink-0" />
-                                    ) : (
-                                      <ChevronRight className="w-4 h-4 text-gray-400 flex-shrink-0" />
-                                    )}
-                                    <div className="flex-1 min-w-0">
-                                      <p className="text-sm font-medium text-gray-800 truncate">
-                                        {capituloData.capituloCompleto}
-                                      </p>
-                                      <p className="text-xs text-gray-500">
-                                        {capituloData.artigos.length} artigos
-                                      </p>
-                                    </div>
-                                  </button>
-
-                                  {/* ARTIGOS */}
-                                  {isCapituloExpanded && (
-                                    <div className="ml-4 mt-1 space-y-1">
-                                      {capituloData.artigos.map((article) => {
-                                        const isSelected = selectedArticle?.numero === article.numero;
-
-                                        return (
-                                          <button
-                                            key={article.numero}
-                                            ref={(el) => {
-                                              articleRefs.current[article.numero] = el;
-                                            }}
-                                            onClick={() => handleSelectArticle(article)}
-                                            className={`w-full flex items-center gap-2 p-2 rounded-lg transition-colors text-left ${
-                                              isSelected
-                                                ? 'bg-blue-100 border-2 border-blue-500'
-                                                : 'hover:bg-gray-100'
-                                            }`}
-                                          >
-                                            <span
-                                              className={`px-2 py-1 rounded text-xs font-bold ${
-                                                isSelected
-                                                  ? 'bg-blue-600 text-white'
-                                                  : 'bg-gray-200 text-gray-700'
-                                              }`}
-                                            >
-                                              Art. {article.numero}
-                                            </span>
-                                            <div className="flex-1 min-w-0">
-                                              <p className="text-xs text-gray-700 truncate">
-                                                {article.ementa.substring(0, 40)}...
-                                              </p>
-                                            </div>
-                                            {article.documentCount > 0 && (
-                                              <span className="flex-shrink-0 px-2 py-0.5 bg-green-100 text-green-700 text-xs font-medium rounded">
-                                                {article.documentCount}
-                                              </span>
-                                            )}
-                                          </button>
-                                        );
-                                      })}
-                                    </div>
-                                  )}
-                                </div>
-                              );
-                            })}
-                          </div>
-                        )}
-                      </div>
-                    );
-                  })}
-              </div>
+              {renderSidebarContent()}
             </div>
           </div>
 
@@ -1199,6 +1207,47 @@ function LeiComentadaContent() {
                     </div>
                   </div>
                 </div>
+
+                {/* Cross-references */}
+                {(() => {
+                  const relatedTopics = CROSS_REFERENCES.filter(ref =>
+                    ref.articles.includes(selectedArticle.numero)
+                  );
+                  if (relatedTopics.length === 0) return null;
+                  return (
+                    <div className="bg-white rounded-lg shadow-md p-6">
+                      <h3 className="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
+                        <Scale className="w-5 h-5 text-indigo-600" />
+                        Artigos Relacionados
+                      </h3>
+                      <div className="space-y-4">
+                        {relatedTopics.map(topic => (
+                          <div key={topic.topic}>
+                            <span className="inline-block px-3 py-1 bg-indigo-100 text-indigo-700 rounded-full text-sm font-medium mb-2">
+                              {topic.topic}
+                            </span>
+                            <div className="flex flex-wrap gap-2">
+                              {topic.articles
+                                .filter(a => a !== selectedArticle.numero)
+                                .map(artNum => (
+                                  <button
+                                    key={artNum}
+                                    onClick={() => {
+                                      const art = apiData?.articles.find(a => a.numero === artNum);
+                                      if (art) handleSelectArticle(art);
+                                    }}
+                                    className="px-2.5 py-1 bg-blue-50 text-blue-700 rounded text-xs font-medium hover:bg-blue-100 transition-colors"
+                                  >
+                                    Art. {artNum}
+                                  </button>
+                                ))}
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  );
+                })()}
 
                 {/* Chat com IA */}
                 <ArticleChatInterface
@@ -1379,6 +1428,45 @@ function LeiComentadaContent() {
         </div>
       </div>
 
+      {/* Mobile FAB */}
+      <button
+        onClick={() => setMobileDrawerOpen(true)}
+        className="lg:hidden fixed bottom-6 right-6 z-40 w-14 h-14 bg-blue-600 text-white rounded-full shadow-lg flex items-center justify-center hover:bg-blue-700 transition-colors"
+        aria-label="Abrir navegação"
+      >
+        <BookOpen className="w-6 h-6" />
+      </button>
+
+      {/* Mobile Drawer */}
+      {mobileDrawerOpen && (
+        <div className="lg:hidden fixed inset-0 z-50">
+          {/* Backdrop */}
+          <div
+            className="absolute inset-0 bg-black/50"
+            onClick={() => setMobileDrawerOpen(false)}
+          />
+          {/* Drawer */}
+          <div
+            className="absolute top-0 left-0 h-full w-[80vw] max-w-sm bg-white shadow-2xl overflow-y-auto"
+            style={{ animation: 'slide-in-left 0.2s ease-out' }}
+          >
+            <div className="p-4 border-b border-gray-200 flex items-center justify-between sticky top-0 bg-white z-10">
+              <h2 className="text-lg font-bold text-gray-900">Estrutura da Lei</h2>
+              <button onClick={() => setMobileDrawerOpen(false)} className="p-2 hover:bg-gray-100 rounded-lg">
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+            {renderSidebarContent()}
+          </div>
+        </div>
+      )}
+
+      <style jsx>{`
+        @keyframes slide-in-left {
+          from { transform: translateX(-100%); }
+          to { transform: translateX(0); }
+        }
+      `}</style>
     </div>
   );
 }

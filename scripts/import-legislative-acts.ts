@@ -24,6 +24,7 @@ import * as path from 'path';
 dotenv.config({ path: path.join(__dirname, '..', '.env.local') });
 
 import { prisma } from '../lib/prisma';
+import { CacheInvalidation } from '../lib/cache/redis-client';
 import * as fs from 'fs/promises';
 
 // ============================================================================
@@ -355,6 +356,14 @@ async function main() {
   if (dryRun) {
     console.log('💡 Este foi um DRY-RUN. Nenhum dado foi alterado.');
     console.log('   Para executar de verdade, remova a flag --dry-run');
+  } else if (result.created > 0 || result.updated > 0) {
+    // Invalidar cache Redis para que contadores reflitam novos dados
+    try {
+      const invalidated = await CacheInvalidation.legislativeActs();
+      console.log(`🗑️  Cache Redis invalidado (${invalidated} chaves removidas)`);
+    } catch {
+      console.log('⚠️  Cache Redis não disponível (contadores atualizarão em até 2h)');
+    }
   }
 
   console.log('═'.repeat(80));
