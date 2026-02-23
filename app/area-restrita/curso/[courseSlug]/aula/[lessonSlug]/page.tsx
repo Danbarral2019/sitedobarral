@@ -14,15 +14,28 @@ import {
 import Link from 'next/link';
 import { use } from 'react';
 import { getIdFromSlug, getCourseBySlug } from '@/lib/courses';
+import dynamic from 'next/dynamic';
 import ModuleSidebar from '@/components/lms/ModuleSidebar';
 import LessonContent from '@/components/lms/LessonContent';
 import LessonDocuments from '@/components/lms/LessonDocuments';
 import LessonVideos from '@/components/lms/LessonVideos';
-import LessonAIAssistant from '@/components/lms/LessonAIAssistant';
-import LessonDiscussion from '@/components/lms/LessonDiscussion';
 import MarkCompleteButton from '@/components/lms/MarkCompleteButton';
-import QuizPlayer from '@/components/lms/QuizPlayer';
-import GamificationSidebar from '@/components/lms/GamificationSidebar';
+
+const LessonAIAssistant = dynamic(() => import('@/components/lms/LessonAIAssistant'), {
+  loading: () => <div className="flex justify-center py-8"><Loader2 className="w-6 h-6 animate-spin text-blue-500" /></div>,
+});
+
+const QuizPlayer = dynamic(() => import('@/components/lms/QuizPlayer'), {
+  loading: () => <div className="flex justify-center py-8"><Loader2 className="w-6 h-6 animate-spin text-blue-500" /></div>,
+});
+
+const GamificationSidebar = dynamic(() => import('@/components/lms/GamificationSidebar'), {
+  loading: () => <div className="flex justify-center py-8"><Loader2 className="w-6 h-6 animate-spin text-blue-500" /></div>,
+});
+
+const LessonDiscussion = dynamic(() => import('@/components/lms/LessonDiscussion'), {
+  loading: () => <div className="flex justify-center py-8"><Loader2 className="w-6 h-6 animate-spin text-blue-500" /></div>,
+});
 
 interface LessonData {
   id: string;

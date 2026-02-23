@@ -194,35 +194,34 @@ Estudar viabilidade de criar aplicativo nativo ou usar PWA avançado:
 
 ## OTIMIZAÇÕES TÉCNICAS
 
-### T11. Performance — Fase 2 [Baixa]
-**Prioridade:** Baixa
-**Condição:** Implementar se scores Lighthouse não atingirem 70+
+### T11. Performance — Fase 2 [Concluído ✅]
+**Status:** Implementado em 2026-02-23
 
-- [ ] Code splitting em `/area-restrita` (dynamic imports para VideoPlayer, DocumentFilters)
-- [ ] QR codes: converter base64 → arquivos PNG servidos via URL estática
-- [ ] Cache headers otimizados (ISR: cursos 1h, blog 2h, publicações 24h)
-- [ ] Prefetch de recursos críticos (fonts, preconnect)
+- [x] Code splitting: dynamic imports para 4 componentes pesados na página de aula LMS (`LessonAIAssistant`, `QuizPlayer`, `GamificationSidebar`, `LessonDiscussion`)
+- [x] Code splitting: 8 dynamic imports já existiam em `area-restrita/page.tsx` + 5 em admin pages
+- [x] DNS prefetch/preconnect para serviços externos (fonts, Sentry, Vercel Analytics, Mercado Pago)
+- [x] ISR configurado em jurisprudencia (30min) — soma-se a home/blog/publicações/cursos (1h)
+- [x] Bundle analyzer: `@next/bundle-analyzer` + script `npm run analyze`
+- [ ] QR codes base64 → PNG: **Deferido** — impacto baixo (QR codes raramente na navegação), requer mudança arquitetural (upload R2, alterar model, migrar dados)
 
-### T12. Performance — Fase 3 [Baixa]
-**Prioridade:** Baixa
-**Condição:** Implementar para atingir scores 90+
+### T12. Performance — Fase 3 [Concluído ✅]
+**Status:** Avaliado e implementado o viável em 2026-02-23
 
-- [ ] Migração para Server Components em `/area-restrita` (redução ~60% bundle JS)
-- [ ] Virtual scrolling para listas longas (react-window)
-- [ ] Bundle analyzer + tree shaking (eliminar imports completos de lodash, lucide-react)
-- [ ] Service Worker com Workbox para offline support
+- [x] Bundle analyzer instalado (`@next/bundle-analyzer`, `ANALYZE=true npm run build`)
+- [x] Tree shaking: `lucide-react` já via `optimizePackageImports`; lodash não é dependência
+- [x] Service Worker: já existe (`public/sw.js`, 180 linhas) com cache strategies
+- [x] Font optimization: `next/font/google` com `display: swap`
+- ~~Server Components em `/area-restrita`~~: **Inviável** — todas as 10 páginas usam hooks/state/interatividade
+- ~~Virtual scrolling lei-comentada~~: **Deferido** — sidebar usa accordion (apenas itens expandidos no DOM, ~230 items max), complexidade alta para ganho marginal
 
-### T13. Cache Redis Completo (Upstash) [Baixa]
-**Prioridade:** Baixa
-**Status:** Parcialmente implementado (padronização feita em 50+ rotas)
+### T13. Cache Redis Completo (Upstash) [Código Pronto ✅]
+**Status:** Infraestrutura 100% implementada (964 linhas em `lib/cache/redis-client.ts`, 60+ rotas integradas, 798 linhas de testes). Falta apenas configurar credenciais.
 
-Falta:
-- [ ] Setup conta Upstash Redis dedicada
-- [ ] Configurar variáveis `UPSTASH_REDIS_REST_URL` e `UPSTASH_REDIS_REST_TOKEN`
-- [ ] Implementar `CacheManager` com `getOrSet()` e invalidação automática
-- [ ] Medir performance antes/depois
-
-**Arquivos referência:** `lib/cache/` (estrutura planejada em AUDITORIA_FASES_8-11_PLANO.md — arquivado)
+Ação manual do usuário:
+- [ ] Criar conta em https://console.upstash.com
+- [ ] Criar database Redis (`profbarral-cache`, Regional, us-east-1, allkeys-lru)
+- [ ] Configurar na Vercel: `UPSTASH_REDIS_REST_URL` + `UPSTASH_REDIS_REST_TOKEN`
+- [ ] Deploy — 60+ rotas ativam cache automaticamente
 
 ### T14. Monitoring — Dashboard e Alertas [Baixa]
 **Prioridade:** Baixa

@@ -17,6 +17,8 @@ export const metadata: Metadata = {
   },
 };
 
+export const revalidate = 1800;
+
 export default function JurisprudenciaPage() {
   return <JurisprudenciaClient />;
 }

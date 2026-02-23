@@ -1,4 +1,5 @@
 import type { NextConfig } from "next";
+import withBundleAnalyzer from '@next/bundle-analyzer';
 import { withSentryConfig } from "@sentry/nextjs";
 
 const nextConfig: NextConfig = {
@@ -139,6 +140,11 @@ const nextConfig: NextConfig = {
   },
 };
 
+// Bundle analyzer — ativar com ANALYZE=true npm run build
+const analyzedConfig = process.env.ANALYZE === 'true'
+  ? withBundleAnalyzer({ enabled: true })(nextConfig)
+  : nextConfig;
+
 // Sentry configuration options
 const sentryOptions = {
   org: process.env.SENTRY_ORG,
@@ -167,4 +173,4 @@ const sentryOptions = {
 };
 
 // Wrap config with Sentry - gracefully handles missing env vars
-export default withSentryConfig(nextConfig, sentryOptions);
+export default withSentryConfig(analyzedConfig, sentryOptions);
