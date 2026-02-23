@@ -28,7 +28,6 @@
     "@hookform/resolvers": "^5.2.1",
     "@mailchimp/mailchimp_marketing": "^3.0.80",
     "@neondatabase/serverless": "^1.0.2",
-    "@next/third-parties": "^16.1.6",
     "@prisma/adapter-neon": "^7.4.0",
     "@prisma/client": "^7.4.0",
     "@radix-ui/react-dialog": "^1.1.15",
