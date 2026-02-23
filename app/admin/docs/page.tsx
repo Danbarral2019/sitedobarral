@@ -54,7 +54,7 @@ export default async function DocsPage({ searchParams }: PageProps) {
   const serializedPendingDocs = pendingDocs.map(doc => ({
     ...doc,
     uploadedAt: doc.uploadedAt.toISOString(),
-    douData: doc.douData ? doc.douData.toISOString() : null,
+    douData: doc.douData ?? null,
   }));
 
   const serializedRecentUploads = recentUploads.map(doc => ({

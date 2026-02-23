@@ -5,11 +5,13 @@ import { Globe } from 'lucide-react';
 import { Tabs, TabList, Tab, TabPanel } from '@/components/ui/Tabs';
 import { useTabFromUrl } from '@/hooks/use-tab-from-url';
 import { VideosClient } from '../videos/VideosClient';
+import { PaginatedResult } from '@/lib/types/admin-list';
+import { CourseVideo } from '@prisma/client';
 
 interface RecursosClientProps {
   defaultTab: string;
   courses: Array<{ id: string; title: string }>;
-  initialVideos: any;
+  initialVideos: PaginatedResult<CourseVideo>;
   searchParams: { [key: string]: string | string[] | undefined };
   children: ReactNode;
 }

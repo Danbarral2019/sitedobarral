@@ -14,16 +14,41 @@ const DocumentosContent = dynamic(() => import('../documentos/page'), {
   ),
 });
 
+interface SerializedDocument {
+  id: string;
+  title: string;
+  description: string | null;
+  category: string;
+  type: string;
+  url: string;
+  uploadedAt: string;
+  summary?: string | null;
+  metaTcu?: { numeroAcordao?: string | null } | null;
+  reviewedBy?: string | null;
+  douData?: string | null;
+}
+
+interface SerializedUpload {
+  id: string;
+  title: string;
+  category: string;
+  type: string;
+  courseId: string | null;
+  isPublic: boolean;
+  uploadedAt: string;
+  isCommon: boolean;
+}
+
 interface DocsClientProps {
   defaultTab: string;
-  pendingDocuments: any[];
+  pendingDocuments: SerializedDocument[];
   pendingPagination: {
     total: number;
     page: number;
     pageSize: number;
     totalPages: number;
   };
-  recentUploads: any[];
+  recentUploads: SerializedUpload[];
 }
 
 export default function DocsClient({
@@ -55,8 +80,8 @@ export default function DocsClient({
         </TabList>
         <TabPanel id="central">
           <AdicionarDocumentosClient
-            pendingDocuments={pendingDocuments}
-            pendingPagination={pendingPagination}
+            autoImports={pendingDocuments}
+            autoImportsPagination={pendingPagination}
             recentUploads={recentUploads}
           />
         </TabPanel>
