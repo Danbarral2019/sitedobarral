@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import AdminLayout from '@/components/AdminLayout';
+
 
 type AGUDocumentType =
   | 'orientacao-normativa'
@@ -192,7 +192,6 @@ export default function ScraperAGUPage() {
     .some(t => t.needsPlaywright);
 
   return (
-    <AdminLayout>
       <div className="max-w-6xl mx-auto">
         <div className="mb-8">
           <h1 className="text-3xl font-bold mb-2">AGU Scraper v4</h1>
@@ -542,6 +541,5 @@ export default function ScraperAGUPage() {
           </div>
         )}
       </div>
-    </AdminLayout>
   );
 }

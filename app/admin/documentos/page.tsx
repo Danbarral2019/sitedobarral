@@ -12,7 +12,7 @@ import { useToast } from '@/hooks/use-toast';
 import { AlertDialog } from '@/components/ui/alert-dialog';
 import { DocumentPreview } from '@/components/ui/document-preview';
 import { Pagination } from '@/components/ui/pagination';
-import AdminLayout from '@/components/AdminLayout';
+
 import { DocumentCard, type DocumentData } from '@/components/admin/DocumentCard';
 
 // Dynamic imports for heavy components
@@ -420,7 +420,7 @@ export default function DocumentosPage() {
   }
 
   return (
-    <AdminLayout>
+    <>
       <div className="p-8">
         <div className="max-w-7xl mx-auto">
           {/* Header */}
@@ -814,6 +814,6 @@ export default function DocumentosPage() {
         variant="danger"
         isLoading={isDeleting}
       />
-    </AdminLayout>
+    </>
   );
 }

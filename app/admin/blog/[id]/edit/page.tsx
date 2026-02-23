@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import dynamic from 'next/dynamic';
 import { Loader2, Save, ArrowLeft, Trash2, Plus, X } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
-import AdminLayout from '@/components/AdminLayout';
+
 
 // Lazy load do editor Markdown (150KB+ economia)
 const MarkdownEditor = dynamic(() => import('@/components/MarkdownEditor'), {
@@ -209,7 +209,6 @@ export default function EditBlogPostPage({ params }: { params: Promise<{ id: str
   }
 
   return (
-    <AdminLayout>
       <div className="p-8">
         <div className="max-w-5xl mx-auto">
           <div className="mb-8">
@@ -428,6 +427,5 @@ export default function EditBlogPostPage({ params }: { params: Promise<{ id: str
           </div>
         </div>
       </div>
-    </AdminLayout>
   );
 }

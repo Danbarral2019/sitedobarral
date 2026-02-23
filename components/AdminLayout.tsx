@@ -4,8 +4,9 @@ import { useState, useEffect } from 'react';
 import { usePathname } from 'next/navigation';
 import Link from 'next/link';
 import Image from 'next/image';
+import AdminBottomNav from '@/components/admin/AdminBottomNav';
 import {
-  QrCode, ChevronLeft, ChevronRight, BarChart3, Mail, MessageSquare, Send, GraduationCap, Youtube, Globe, BookOpen, Menu, X, Search, Scale, Star
+  QrCode, ChevronLeft, ChevronRight, BarChart3, Mail, MessageSquare, Send, GraduationCap, Globe, BookOpen, Menu, X, FileText, PenSquare, FileSpreadsheet, Filter, Scale, Star
 } from 'lucide-react';
 
 interface AdminLayoutProps {
@@ -19,8 +20,8 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
   const pathname = usePathname();
 
   const isActive = (path: string) => {
-    if (path === '/admin/lms') return pathname === path || pathname.startsWith('/admin/lms/');
-    return pathname === path;
+    if (path === '/admin') return pathname === '/admin';
+    return pathname === path || pathname.startsWith(path + '/');
   };
 
   // Buscar contadores de notificações
@@ -82,31 +83,18 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
     return () => clearInterval(interval);
   }, []);
 
-  // Menus ORGANIZADOS POR CATEGORIA
+  // Menus ORGANIZADOS POR CATEGORIA — Consolidado (14 itens)
   const menuItems = [
-    // === JURISPRUDÊNCIA ===
-    { divider: true, label: '📚 Jurisprudência' },
+    // === JURISPRUDENCIA ===
+    { divider: true, label: '\u{1F4DA} Jurisprudencia' },
     {
-      path: '/admin/tcu-manager',
-      label: 'TCU Manager',
-      icon: (props: Record<string, unknown>) => (
-        <svg {...props} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
-        </svg>
-      ),
-    },
-    {
-      path: '/admin/agu-import',
-      label: 'AGU Manager',
-      icon: (props: Record<string, unknown>) => (
-        <svg {...props} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-        </svg>
-      ),
+      path: '/admin/importacao',
+      label: 'Importacao de Atos',
+      icon: FileSpreadsheet,
     },
     {
       path: '/admin/legislacao',
-      label: 'Legislação',
+      label: 'Legislacao',
       icon: (props: Record<string, unknown>) => (
         <svg {...props} fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 6l3 1m0 0l-3 9a5.002 5.002 0 006.001 0M6 7l3 9M6 7l6-2m6 2l3-1m-3 1l-3 9a5.002 5.002 0 006.001 0M18 7l3 9m-3-9l-6-2m0-2v2m0 16V5m0 16H9m3 0h3" />
@@ -116,11 +104,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
     {
       path: '/admin/dou-filtros',
       label: 'DOU Filtros',
-      icon: (props: Record<string, unknown>) => (
-        <svg {...props} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
-        </svg>
-      ),
+      icon: Filter,
       badge: unreadCounts.douPending,
     },
     {
@@ -142,71 +126,32 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
     },
 
     // === DOCUMENTOS ===
-    { divider: true, label: '📁 Documentos' },
+    { divider: true, label: '\u{1F4C1} Documentos' },
     {
-      path: '/admin/adicionar-documentos',
-      label: 'Central de Documentos',
-      icon: (props: Record<string, unknown>) => (
-        <svg {...props} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-        </svg>
-      ),
+      path: '/admin/docs',
+      label: 'Documentos',
+      icon: FileText,
       badge: unreadCounts.documentos,
-    },
-    {
-      path: '/admin/documentos',
-      label: 'Gerenciar Documentos',
-      icon: (props: Record<string, unknown>) => (
-        <svg {...props} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
-        </svg>
-      ),
     },
 
     // === ANALYTICS ===
-    { divider: true, label: '📊 Analytics' },
+    { divider: true, label: '\u{1F4CA} Analytics' },
     {
-      path: '/admin/analytics',
-      label: 'Analytics Geral',
+      path: '/admin/analytics-hub',
+      label: 'Analytics',
       icon: BarChart3,
     },
-    {
-      path: '/admin/analytics-documentos',
-      label: 'Catalogação',
-      icon: (props: Record<string, unknown>) => (
-        <svg {...props} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-        </svg>
-      ),
-    },
-    {
-      path: '/admin/search-analytics',
-      label: 'Analytics de Busca',
-      icon: Search,
-    },
 
-    // === LMS ===
-    { divider: true, label: '🎓 LMS' },
+    // === CONTEUDO ===
+    { divider: true, label: '\u{270D}\u{FE0F} Conteudo' },
     {
-      path: '/admin/lms',
-      label: 'Cursos',
-      icon: GraduationCap,
-    },
-
-    // === CONTEÚDO ===
-    { divider: true, label: '✍️ Conteúdo' },
-    {
-      path: '/admin/blog',
-      label: 'Blog',
-      icon: (props: Record<string, unknown>) => (
-        <svg {...props} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-        </svg>
-      ),
+      path: '/admin/blog-social',
+      label: 'Blog & Social',
+      icon: PenSquare,
     },
     {
       path: '/admin/publicacoes',
-      label: 'Publicações',
+      label: 'Publicacoes',
       icon: (props: Record<string, unknown>) => (
         <svg {...props} fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
@@ -215,31 +160,17 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
     },
     {
       path: '/admin/glossario',
-      label: 'Glossário',
+      label: 'Glossario',
       icon: BookOpen,
     },
     {
-      path: '/admin/videos',
-      label: 'Vídeos YouTube',
-      icon: Youtube,
-    },
-    {
-      path: '/admin/sites',
-      label: 'Sites Recomendados',
+      path: '/admin/recursos',
+      label: 'Recursos Externos',
       icon: Globe,
     },
-    {
-      path: '/admin/assistente-social',
-      label: 'Redes Sociais',
-      icon: (props: Record<string, unknown>) => (
-        <svg {...props} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
-        </svg>
-      ),
-    },
 
-    // === GESTÃO ===
-    { divider: true, label: '⚙️ Gestão' },
+    // === GESTAO ===
+    { divider: true, label: '\u{2699}\u{FE0F} Gestao' },
     {
       path: '/admin',
       label: 'QR Codes',
@@ -401,12 +332,12 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
               rel="noopener noreferrer"
               onClick={() => setIsMobileMenuOpen(false)}
               className="flex items-center gap-3 px-4 py-3 rounded-lg text-white hover:bg-brand-500 font-medium transition-colors"
-              title={isCollapsed ? 'Área do Aluno (abre em nova aba)' : ''}
+              title={isCollapsed ? 'Area do Aluno (abre em nova aba)' : ''}
             >
               <GraduationCap className="w-5 h-5 flex-shrink-0" />
               {!isCollapsed && (
                 <div className="flex items-center gap-2">
-                  <span>Área do Aluno</span>
+                  <span>Area do Aluno</span>
                   <svg className="w-3 h-3 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
                   </svg>
@@ -431,11 +362,16 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
       {/* Main Content */}
       <main
         className={`${
-          isCollapsed ? 'ml-20' : 'ml-64'
-        } flex-1 transition-all duration-300`}
+          isCollapsed ? 'lg:ml-20' : 'lg:ml-64'
+        } ml-0 flex-1 transition-all duration-300 pb-20 lg:pb-0`}
       >
+        {/* Spacer for mobile hamburger button */}
+        <div className="h-16 lg:hidden" />
         {children}
       </main>
+
+      {/* Mobile Bottom Navigation */}
+      <AdminBottomNav unreadCounts={unreadCounts} />
     </div>
   );
 }

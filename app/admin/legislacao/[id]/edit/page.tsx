@@ -2,7 +2,6 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { useRouter, useParams } from 'next/navigation';
-import AdminLayout from '@/components/AdminLayout';
 import MarkdownContent from '@/components/MarkdownContent';
 import {
   Save, X, Scale, Calendar, Building, FileText,
@@ -265,17 +264,14 @@ export default function EditLegislativeActPage() {
 
   if (isFetching) {
     return (
-      <AdminLayout>
         <div className="p-6 md:p-8 max-w-5xl mx-auto text-center py-12">
           <div className="inline-block w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
           <p className="mt-4 text-gray-600">Carregando ato normativo...</p>
         </div>
-      </AdminLayout>
     );
   }
 
   return (
-    <AdminLayout>
       <div className="p-6 md:p-8 max-w-5xl mx-auto">
         <div className="mb-8">
           <div className="flex items-center gap-3 mb-2">
@@ -762,6 +758,5 @@ export default function EditLegislativeActPage() {
           </div>
         </form>
       </div>
-    </AdminLayout>
   );
 }

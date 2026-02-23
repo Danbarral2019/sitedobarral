@@ -13,10 +13,16 @@ interface TabsProps {
   defaultTab: string;
   children: ReactNode;
   className?: string;
+  activeTab?: string;
+  onTabChange?: (tab: string) => void;
 }
 
-export function Tabs({ defaultTab, children, className = '' }: TabsProps) {
-  const [activeTab, setActiveTab] = useState(defaultTab);
+export function Tabs({ defaultTab, children, className = '', activeTab: controlledTab, onTabChange }: TabsProps) {
+  const [internalTab, setInternalTab] = useState(defaultTab);
+
+  const isControlled = controlledTab !== undefined && onTabChange !== undefined;
+  const activeTab = isControlled ? controlledTab : internalTab;
+  const setActiveTab = isControlled ? onTabChange : setInternalTab;
 
   return (
     <TabsContext.Provider value={{ activeTab, setActiveTab }}>

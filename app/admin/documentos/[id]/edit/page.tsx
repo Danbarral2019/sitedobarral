@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useParams } from 'next/navigation';
-import AdminLayout from '@/components/AdminLayout';
+
 import DocumentWizard from '@/components/admin/DocumentWizard';
 import { DocumentFormState } from '@/components/admin/DocumentWizard/types';
 import { Loader2, ChevronDown, ChevronRight, History } from 'lucide-react';
@@ -117,7 +117,6 @@ export default function EditDocumentPage() {
   }, [documentId]);
 
   return (
-    <AdminLayout>
       <div className="container mx-auto px-4 py-8">
         {/* Loading State */}
         {loading && (
@@ -186,6 +185,5 @@ export default function EditDocumentPage() {
           </>
         )}
       </div>
-    </AdminLayout>
   );
 }

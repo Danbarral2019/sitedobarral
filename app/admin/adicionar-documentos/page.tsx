@@ -1,6 +1,6 @@
 import { prisma } from '@/lib/prisma';
 import AdicionarDocumentosClient from './AdicionarDocumentosClient';
-import AdminLayout from '@/components/AdminLayout';
+
 
 interface PageProps {
   searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
@@ -106,7 +106,6 @@ export default async function AdicionarDocumentosPage({ searchParams }: PageProp
   }));
 
   return (
-    <AdminLayout>
       <AdicionarDocumentosClient
         autoImports={serializedAutoImports}
         autoImportsPagination={{
@@ -117,7 +116,6 @@ export default async function AdicionarDocumentosPage({ searchParams }: PageProp
         }}
         recentUploads={serializedRecentUploads}
       />
-    </AdminLayout>
   );
 }
 

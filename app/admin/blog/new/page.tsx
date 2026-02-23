@@ -6,7 +6,7 @@ import Link from 'next/link';
 import dynamic from 'next/dynamic';
 import { Loader2, Save, ArrowLeft, Plus, X } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
-import AdminLayout from '@/components/AdminLayout';
+
 import LeiArticleSelector from '@/components/LeiArticleSelector';
 
 // Lazy load do editor Markdown (150KB+ economia)
@@ -361,7 +361,6 @@ function NewBlogPostPageInner() {
   }
 
   return (
-    <AdminLayout>
       <div className="p-8">
         <div className="max-w-5xl mx-auto">
           <div className="mb-8">
@@ -595,7 +594,6 @@ function NewBlogPostPageInner() {
           </div>
         </div>
       </div>
-    </AdminLayout>
   );
 }
 

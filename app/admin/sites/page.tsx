@@ -5,7 +5,6 @@
 import { ResourceListContainer } from '@/components/admin/ResourceListContainer';
 import { fetchSitesPaginated } from '@/lib/sites';
 import { sitesConfig, SitesHeader } from './config';
-import AdminLayout from '@/components/AdminLayout';
 
 interface PageProps {
   searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
@@ -13,7 +12,6 @@ interface PageProps {
 
 export default async function SitesPage({ searchParams }: PageProps) {
   return (
-    <AdminLayout>
       <div className="p-8">
         <div className="max-w-7xl mx-auto">
           <SitesHeader />
@@ -26,7 +24,6 @@ export default async function SitesPage({ searchParams }: PageProps) {
           </div>
         </div>
       </div>
-    </AdminLayout>
   );
 }
 

@@ -8,7 +8,7 @@
 import { ResourceListContainer } from '@/components/admin/ResourceListContainer';
 import { fetchGlossaryTermsPaginated } from '@/lib/glossario';
 import { glossarioConfig, GlossarioHeader } from './config';
-import AdminLayout from '@/components/AdminLayout';
+
 
 interface PageProps {
   searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
@@ -16,7 +16,6 @@ interface PageProps {
 
 export default async function GlossarioPage({ searchParams }: PageProps) {
   return (
-    <AdminLayout>
       <div className="p-8">
         <div className="max-w-7xl mx-auto">
           {/* Header customizado com botões */}
@@ -32,7 +31,6 @@ export default async function GlossarioPage({ searchParams }: PageProps) {
           </div>
         </div>
       </div>
-    </AdminLayout>
   );
 }
 

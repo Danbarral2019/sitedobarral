@@ -1,7 +1,6 @@
 'use client';
 
 import { useState } from 'react';
-import AdminLayout from '@/components/AdminLayout';
 import { CheckSquare, Square, Edit2, Save, Eye, ExternalLink } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 
@@ -247,7 +246,7 @@ export default function TCUImportPage() {
   const tiposUnicos = [...new Set(preview.map(ac => ac.tipo))].filter(Boolean);
 
   return (
-    <AdminLayout>
+    <>
       <div className="max-w-6xl mx-auto p-6">
         <h1 className="text-3xl font-bold mb-6">🏛️ Importação de Acórdãos do TCU</h1>
 
@@ -809,6 +808,6 @@ export default function TCUImportPage() {
           )}
         </DialogContent>
       </Dialog>
-    </AdminLayout>
+    </>
   );
 }

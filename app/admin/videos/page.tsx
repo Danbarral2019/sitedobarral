@@ -8,7 +8,6 @@
  */
 
 import { VideosClient } from './VideosClient';
-import AdminLayout from '@/components/AdminLayout';
 import { courses } from '@/data/courses';
 import { fetchCourseVideosPaginated } from '@/lib/videos';
 
@@ -34,9 +33,7 @@ export default async function VideosPage({ searchParams }: PageProps) {
 
   // ✅ Passar dados prontos para Client
   return (
-    <AdminLayout>
       <VideosClient courses={coursesList} initialData={videos} />
-    </AdminLayout>
   );
 }
 

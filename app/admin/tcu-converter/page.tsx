@@ -1,7 +1,6 @@
 'use client';
 
 import { useState } from 'react';
-import AdminLayout from '@/components/AdminLayout';
 import { Upload, FileSpreadsheet, Download, CheckCircle, AlertCircle, Loader2, ArrowRight, Info } from 'lucide-react';
 
 export default function TCUConverterPage() {
@@ -69,7 +68,6 @@ export default function TCUConverterPage() {
   };
 
   return (
-    <AdminLayout>
       <div className="max-w-4xl mx-auto">
         {/* Header */}
         <div className="mb-8">
@@ -248,6 +246,5 @@ export default function TCUConverterPage() {
           </div>
         </div>
       </div>
-    </AdminLayout>
   );
 }

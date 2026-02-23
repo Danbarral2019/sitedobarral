@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import AdminLayout from '@/components/AdminLayout';
+
 import {
   Save, X, Eye, BookOpen, Grid,
   AlertCircle, Scale, Link as LinkIcon
@@ -148,7 +148,6 @@ export default function NewGlossaryTermPage() {
   };
 
   return (
-    <AdminLayout>
       <div className="p-6 md:p-8 max-w-5xl mx-auto">
         <div className="mb-8">
           <div className="flex items-center gap-3 mb-2">
@@ -373,6 +372,5 @@ export default function NewGlossaryTermPage() {
           </div>
         </form>
       </div>
-    </AdminLayout>
   );
 }

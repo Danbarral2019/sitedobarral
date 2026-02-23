@@ -5,7 +5,7 @@
 import { ResourceListContainer } from '@/components/admin/ResourceListContainer';
 import { fetchContactFormsPaginated } from '@/lib/contatos';
 import { contatosConfig, ContatosHeader } from './config';
-import AdminLayout from '@/components/AdminLayout';
+
 
 interface PageProps {
   searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
@@ -13,7 +13,6 @@ interface PageProps {
 
 export default async function ContatosPage({ searchParams }: PageProps) {
   return (
-    <AdminLayout>
       <div className="p-8">
         <div className="max-w-7xl mx-auto">
           <ContatosHeader />
@@ -26,7 +25,6 @@ export default async function ContatosPage({ searchParams }: PageProps) {
           </div>
         </div>
       </div>
-    </AdminLayout>
   );
 }
 

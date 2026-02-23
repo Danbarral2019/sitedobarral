@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useCallback } from 'react';
 import { useRouter, useParams } from 'next/navigation';
-import AdminLayout from '@/components/AdminLayout';
+
 import {
   Save, X, Eye, BookOpen, Grid,
   AlertCircle, Scale, Link as LinkIcon, Loader2, BarChart3
@@ -224,11 +224,9 @@ export default function EditGlossaryTermPage() {
 
   if (isLoading) {
     return (
-      <AdminLayout>
         <div className="flex items-center justify-center min-h-screen">
           <Loader2 className="w-8 h-8 animate-spin text-purple-600" />
         </div>
-      </AdminLayout>
     );
   }
 
@@ -237,7 +235,6 @@ export default function EditGlossaryTermPage() {
   }
 
   return (
-    <AdminLayout>
       <div className="p-6 md:p-8 max-w-5xl mx-auto">
         <div className="mb-8">
           <div className="flex items-center gap-3 mb-4">
@@ -473,6 +470,5 @@ export default function EditGlossaryTermPage() {
           </div>
         </form>
       </div>
-    </AdminLayout>
   );
 }

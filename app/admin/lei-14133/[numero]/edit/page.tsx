@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
-import AdminLayout from '@/components/AdminLayout';
 import Link from 'next/link';
 import {
   ArrowLeft,
@@ -83,14 +82,12 @@ export default function EditArtigoPage() {
 
   if (!formData || isLoading) {
     return (
-      <AdminLayout>
         <div className="flex items-center justify-center min-h-screen">
           <div className="text-center">
             <RefreshCw className="w-12 h-12 animate-spin text-blue-600 mx-auto mb-4" />
             <p className="text-gray-600">Carregando artigo {numero} do banco de dados...</p>
           </div>
         </div>
-      </AdminLayout>
     );
   }
 
@@ -144,7 +141,6 @@ export default function EditArtigoPage() {
   };
 
   return (
-    <AdminLayout>
       <div className="max-w-6xl mx-auto">
         {/* Header */}
         <div className="mb-8">
@@ -419,6 +415,5 @@ export default function EditArtigoPage() {
           </div>
         </div>
       </div>
-    </AdminLayout>
   );
 }

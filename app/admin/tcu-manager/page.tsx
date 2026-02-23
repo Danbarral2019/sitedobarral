@@ -1,7 +1,6 @@
 'use client';
 
 import dynamic from 'next/dynamic';
-import AdminLayout from '@/components/AdminLayout';
 import { Loader2 } from 'lucide-react';
 
 const TCUManagerClient = dynamic(() => import('./TCUManagerClient'), {
@@ -15,8 +14,6 @@ const TCUManagerClient = dynamic(() => import('./TCUManagerClient'), {
 
 export default function TCUManagerPage() {
   return (
-    <AdminLayout>
       <TCUManagerClient />
-    </AdminLayout>
   );
 }

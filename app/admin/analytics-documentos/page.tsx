@@ -1,7 +1,6 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import AdminLayout from '@/components/AdminLayout';
 import {
   BarChart3,
   FileText,
@@ -101,20 +100,17 @@ export default function AnalyticsDocumentosPage() {
 
   if (loading) {
     return (
-      <AdminLayout>
         <div className="flex items-center justify-center min-h-screen">
           <div className="text-center">
             <Loader2 className="w-12 h-12 animate-spin text-blue-600 mx-auto mb-4" />
             <p className="text-gray-600">Carregando analytics...</p>
           </div>
         </div>
-      </AdminLayout>
     );
   }
 
   if (error || !stats) {
     return (
-      <AdminLayout>
         <div className="flex items-center justify-center min-h-screen">
           <div className="text-center">
             <AlertCircle className="w-12 h-12 text-red-600 mx-auto mb-4" />
@@ -128,12 +124,10 @@ export default function AnalyticsDocumentosPage() {
             </button>
           </div>
         </div>
-      </AdminLayout>
     );
   }
 
   return (
-    <AdminLayout>
       <div className="p-6 max-w-7xl mx-auto">
         {/* Header */}
         <div className="mb-8">
@@ -356,6 +350,5 @@ export default function AnalyticsDocumentosPage() {
           )}
         </div>
       </div>
-    </AdminLayout>
   );
 }

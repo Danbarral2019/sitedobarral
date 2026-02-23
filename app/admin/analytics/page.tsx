@@ -1,7 +1,6 @@
 'use client';
 
 import dynamic from 'next/dynamic';
-import AdminLayout from '@/components/AdminLayout';
 import { Loader2 } from 'lucide-react';
 
 const AnalyticsClient = dynamic(() => import('./AnalyticsClient'), {
@@ -15,8 +14,6 @@ const AnalyticsClient = dynamic(() => import('./AnalyticsClient'), {
 
 export default function AnalyticsDashboard() {
   return (
-    <AdminLayout>
       <AnalyticsClient />
-    </AdminLayout>
   );
 }

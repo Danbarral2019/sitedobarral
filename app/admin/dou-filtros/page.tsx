@@ -1,7 +1,6 @@
 'use client';
 
 import dynamic from 'next/dynamic';
-import AdminLayout from '@/components/AdminLayout';
 import { Loader2 } from 'lucide-react';
 
 const DOUFiltrosClient = dynamic(() => import('./DOUFiltrosClient'), {
@@ -15,8 +14,6 @@ const DOUFiltrosClient = dynamic(() => import('./DOUFiltrosClient'), {
 
 export default function DOUFiltrosPage() {
   return (
-    <AdminLayout>
       <DOUFiltrosClient />
-    </AdminLayout>
   );
 }

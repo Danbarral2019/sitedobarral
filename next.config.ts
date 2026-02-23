@@ -33,6 +33,23 @@ const nextConfig: NextConfig = {
     contentSecurityPolicy: "default-src 'self'; script-src 'none'; sandbox;",
   },
 
+  // Redirects para rotas consolidadas do admin
+  async redirects() {
+    return [
+      { source: '/admin/tcu-manager', destination: '/admin/importacao?tab=tcu', permanent: false },
+      { source: '/admin/agu-import', destination: '/admin/importacao?tab=agu', permanent: false },
+      { source: '/admin/scraper-agu', destination: '/admin/importacao?tab=agu', permanent: false },
+      { source: '/admin/analytics', destination: '/admin/analytics-hub', permanent: false },
+      { source: '/admin/analytics-documentos', destination: '/admin/analytics-hub?tab=catalogacao', permanent: false },
+      { source: '/admin/adicionar-documentos', destination: '/admin/docs?tab=central', permanent: false },
+      { source: '/admin/documentos', destination: '/admin/docs?tab=gerenciar', permanent: false },
+      { source: '/admin/blog', destination: '/admin/blog-social', permanent: false },
+      { source: '/admin/assistente-social', destination: '/admin/blog-social?tab=social', permanent: false },
+      { source: '/admin/videos', destination: '/admin/recursos?tab=videos', permanent: false },
+      { source: '/admin/sites', destination: '/admin/recursos?tab=sites', permanent: false },
+    ];
+  },
+
   // Headers de Cache para performance
   async headers() {
     return [

@@ -5,7 +5,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { Loader2, Copy, Check, Download, ArrowLeft, Instagram, Linkedin, Image as ImageIcon } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
-import AdminLayout from '@/components/AdminLayout';
+
 
 interface BlogPost {
   id: string;
@@ -151,7 +151,6 @@ ${blogPost.excerpt}
 
   if (!postId || !post) {
     return (
-      <AdminLayout>
         <div className="p-8">
           <div className="max-w-4xl mx-auto">
             <div className="bg-yellow-50 border-l-4 border-yellow-500 p-6 rounded-lg">
@@ -169,12 +168,10 @@ ${blogPost.excerpt}
             </div>
           </div>
         </div>
-      </AdminLayout>
     );
   }
 
   return (
-    <AdminLayout>
       <div className="p-8">
         <div className="max-w-5xl mx-auto">
           {/* Header */}
@@ -345,6 +342,5 @@ ${blogPost.excerpt}
           </div>
         </div>
       </div>
-    </AdminLayout>
   );
 }

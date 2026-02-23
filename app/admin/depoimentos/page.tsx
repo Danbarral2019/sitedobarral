@@ -8,7 +8,7 @@
  */
 
 import { DepoimentosClient } from './DepoimentosClient';
-import AdminLayout from '@/components/AdminLayout';
+
 import { fetchTestimonialsPaginated } from '@/lib/depoimentos';
 
 interface PageProps {
@@ -40,9 +40,7 @@ export default async function DepoimentosPage({ searchParams }: PageProps) {
 
   // ✅ Passar dados prontos para Client
   return (
-    <AdminLayout>
       <DepoimentosClient initialData={serializedTestimonials as typeof testimonials} />
-    </AdminLayout>
   );
 }
 

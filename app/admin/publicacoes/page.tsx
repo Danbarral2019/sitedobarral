@@ -8,7 +8,6 @@
 import { ResourceListContainer } from '@/components/admin/ResourceListContainer';
 import { fetchPublicationsPaginated } from '@/lib/publications';
 import { publicationsConfig, PublicationsHeader } from './config';
-import AdminLayout from '@/components/AdminLayout';
 
 interface PageProps {
   searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
@@ -16,7 +15,6 @@ interface PageProps {
 
 export default async function PublicationsPage({ searchParams }: PageProps) {
   return (
-    <AdminLayout>
       <div className="p-8">
         <div className="max-w-7xl mx-auto">
           {/* Header customizado com botões */}
@@ -32,7 +30,6 @@ export default async function PublicationsPage({ searchParams }: PageProps) {
           </div>
         </div>
       </div>
-    </AdminLayout>
   );
 }
 

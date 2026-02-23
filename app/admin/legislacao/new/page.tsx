@@ -2,7 +2,6 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import AdminLayout from '@/components/AdminLayout';
 import {
   Save, X, Scale, Calendar, Building, FileText,
   Link as LinkIcon, AlertCircle
@@ -128,7 +127,6 @@ export default function NewLegislativeActPage() {
   };
 
   return (
-    <AdminLayout>
       <div className="p-6 md:p-8 max-w-5xl mx-auto">
         <div className="mb-8">
           <div className="flex items-center gap-3 mb-2">
@@ -470,6 +468,5 @@ export default function NewLegislativeActPage() {
           </div>
         </form>
       </div>
-    </AdminLayout>
   );
 }

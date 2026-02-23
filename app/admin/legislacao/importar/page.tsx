@@ -2,7 +2,6 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import AdminLayout from '@/components/AdminLayout';
 import {
   Upload, Download, FileText, CheckCircle, XCircle,
   AlertCircle, ArrowLeft, Scale
@@ -97,7 +96,6 @@ export default function ImportarLegislacaoPage() {
   };
 
   return (
-    <AdminLayout>
       <div className="p-6 md:p-8 max-w-5xl mx-auto">
         {/* Header */}
         <div className="mb-8">
@@ -318,6 +316,5 @@ export default function ImportarLegislacaoPage() {
           </div>
         )}
       </div>
-    </AdminLayout>
   );
 }

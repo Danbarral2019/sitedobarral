@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { ArrowLeft, Save, Eye, FileDown } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
-import AdminLayout from '@/components/AdminLayout';
+
 import WordUploader from '@/components/WordUploader';
 
 interface UploadedData {
@@ -125,7 +125,6 @@ export default function UploadWordPage() {
   };
 
   return (
-    <AdminLayout>
       <div className="p-8">
         <div className="max-w-6xl mx-auto">
           {/* Header */}
@@ -331,7 +330,6 @@ export default function UploadWordPage() {
           )}
         </div>
       </div>
-    </AdminLayout>
   );
 }
 

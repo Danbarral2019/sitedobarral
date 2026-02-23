@@ -15,7 +15,6 @@ import {
   fetchLegislativeActsPaginated
 } from '@/lib/legislacao';
 import { LegislacaoClient } from './LegislacaoClient';
-import AdminLayout from '@/components/AdminLayout';
 
 interface PageProps {
   searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
@@ -45,7 +44,6 @@ export default async function LegislacaoPage({ searchParams }: PageProps) {
 
   // ✅ Passar dados prontos para Client
   return (
-    <AdminLayout>
       <LegislacaoClient
         initialData={acts}
         types={types}
@@ -53,7 +51,6 @@ export default async function LegislacaoPage({ searchParams }: PageProps) {
         years={years}
         stats={stats}
       />
-    </AdminLayout>
   );
 }
 

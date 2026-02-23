@@ -12,7 +12,7 @@ import { courses } from '@/data/courses';
 import { useToast } from '@/hooks/use-toast';
 import { QRCardSkeleton } from '@/components/ui/skeleton';
 import { Pagination } from '@/components/ui/pagination';
-import AdminLayout from '@/components/AdminLayout';
+
 
 interface QRCodeData {
   id: string;
@@ -304,7 +304,7 @@ export default function AdminPage() {
   }
 
   return (
-    <AdminLayout>
+    <>
       <div className="p-8">
         <div className="max-w-7xl mx-auto">
           <div className="mb-8">
@@ -746,6 +746,6 @@ export default function AdminPage() {
           </div>
         </div>
       )}
-    </AdminLayout>
+    </>
   );
 }

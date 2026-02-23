@@ -1,7 +1,6 @@
 'use client';
 
 import { useState, useMemo, useEffect } from 'react';
-import AdminLayout from '@/components/AdminLayout';
 import Link from 'next/link';
 import {
   Edit,
@@ -87,19 +86,16 @@ export default function AdminLei14133Page() {
   // Loading state
   if (isLoadingArtigos) {
     return (
-      <AdminLayout>
         <div className="flex items-center justify-center min-h-screen">
           <div className="text-center">
             <Loader2 className="w-12 h-12 animate-spin text-blue-600 mx-auto mb-4" />
             <p className="text-gray-600">Carregando artigos do banco de dados...</p>
           </div>
         </div>
-      </AdminLayout>
     );
   }
 
   return (
-    <AdminLayout>
       <div className="max-w-7xl mx-auto">
         {/* Header */}
         <div className="mb-8">
@@ -318,6 +314,5 @@ export default function AdminLei14133Page() {
           </a>
         </div>
       </div>
-    </AdminLayout>
   );
 }

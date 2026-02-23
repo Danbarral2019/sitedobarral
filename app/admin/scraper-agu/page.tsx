@@ -1,7 +1,6 @@
 'use client';
 
 import dynamic from 'next/dynamic';
-import AdminLayout from '@/components/AdminLayout';
 import { Loader2 } from 'lucide-react';
 
 const ScraperAGUClient = dynamic(() => import('./ScraperAGUClient'), {
@@ -15,8 +14,6 @@ const ScraperAGUClient = dynamic(() => import('./ScraperAGUClient'), {
 
 export default function ScraperAGUPage() {
   return (
-    <AdminLayout>
       <ScraperAGUClient />
-    </AdminLayout>
   );
 }

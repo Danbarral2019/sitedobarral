@@ -6,7 +6,6 @@
 import { ResourceListContainer } from '@/components/admin/ResourceListContainer';
 import { fetchNewsletterSubscribersPaginated } from '@/lib/newsletter';
 import { newsletterConfig, NewsletterHeader } from './config';
-import AdminLayout from '@/components/AdminLayout';
 import { prisma } from '@/lib/prisma';
 import { NewsletterAnalytics } from './analytics';
 
@@ -73,7 +72,6 @@ export default async function NewsletterPage({ searchParams }: PageProps) {
   const analytics = await getAnalyticsData();
 
   return (
-    <AdminLayout>
       <div className="p-8">
         <div className="max-w-7xl mx-auto">
           <NewsletterHeader />
@@ -89,7 +87,6 @@ export default async function NewsletterPage({ searchParams }: PageProps) {
           </div>
         </div>
       </div>
-    </AdminLayout>
   );
 }
 
