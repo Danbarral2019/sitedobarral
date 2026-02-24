@@ -2,134 +2,12 @@
 
 import { useState } from 'react';
 import { Sparkles, ChevronDown, ChevronUp } from 'lucide-react';
+import LessonMarkdownContent from './LessonMarkdownContent';
 
 interface LessonContentProps {
   content: string;
   aiSummary?: string | null;
   aiKeyPoints?: string[] | null;
-}
-
-function renderMarkdown(text: string): React.ReactNode[] {
-  const lines = text.split('\n');
-  const elements: React.ReactNode[] = [];
-  let listItems: React.ReactNode[] = [];
-  let orderedItems: React.ReactNode[] = [];
-  let listKey = 0;
-
-  const flushList = () => {
-    if (listItems.length > 0) {
-      elements.push(
-        <ul key={`ul-${listKey++}`} className="list-disc pl-6 space-y-1 my-3 text-gray-700">
-          {listItems}
-        </ul>
-      );
-      listItems = [];
-    }
-    if (orderedItems.length > 0) {
-      elements.push(
-        <ol key={`ol-${listKey++}`} className="list-decimal pl-6 space-y-1 my-3 text-gray-700">
-          {orderedItems}
-        </ol>
-      );
-      orderedItems = [];
-    }
-  };
-
-  const formatInline = (str: string): React.ReactNode[] => {
-    const parts: React.ReactNode[] = [];
-    // Process **bold**, *italic*, `code`
-    const regex = /(\*\*(.+?)\*\*|\*(.+?)\*|`(.+?)`)/g;
-    let lastIndex = 0;
-    let match;
-    let partKey = 0;
-
-    while ((match = regex.exec(str)) !== null) {
-      if (match.index > lastIndex) {
-        parts.push(str.slice(lastIndex, match.index));
-      }
-      if (match[2]) {
-        parts.push(<strong key={`b-${partKey++}`} className="font-semibold text-gray-900">{match[2]}</strong>);
-      } else if (match[3]) {
-        parts.push(<em key={`i-${partKey++}`} className="italic">{match[3]}</em>);
-      } else if (match[4]) {
-        parts.push(
-          <code key={`c-${partKey++}`} className="px-1.5 py-0.5 bg-gray-100 rounded text-sm font-mono text-brand-700">
-            {match[4]}
-          </code>
-        );
-      }
-      lastIndex = match.index + match[0].length;
-    }
-    if (lastIndex < str.length) {
-      parts.push(str.slice(lastIndex));
-    }
-    return parts.length > 0 ? parts : [str];
-  };
-
-  for (let i = 0; i < lines.length; i++) {
-    const line = lines[i];
-    const trimmed = line.trim();
-
-    // Empty line
-    if (!trimmed) {
-      flushList();
-      continue;
-    }
-
-    // Headers
-    if (trimmed.startsWith('### ')) {
-      flushList();
-      elements.push(
-        <h3 key={`h3-${i}`} className="text-lg font-bold text-gray-900 mt-6 mb-2">
-          {formatInline(trimmed.slice(4))}
-        </h3>
-      );
-      continue;
-    }
-    if (trimmed.startsWith('## ')) {
-      flushList();
-      elements.push(
-        <h2 key={`h2-${i}`} className="text-xl font-bold text-gray-900 mt-8 mb-3">
-          {formatInline(trimmed.slice(3))}
-        </h2>
-      );
-      continue;
-    }
-
-    // Unordered list
-    if (trimmed.startsWith('- ') || trimmed.startsWith('* ')) {
-      if (orderedItems.length > 0) flushList();
-      listItems.push(
-        <li key={`li-${i}`} className="text-sm leading-relaxed">
-          {formatInline(trimmed.slice(2))}
-        </li>
-      );
-      continue;
-    }
-
-    // Ordered list
-    const olMatch = trimmed.match(/^(\d+)\.\s+(.+)/);
-    if (olMatch) {
-      if (listItems.length > 0) flushList();
-      orderedItems.push(
-        <li key={`oli-${i}`} className="text-sm leading-relaxed">
-          {formatInline(olMatch[2])}
-        </li>
-      );
-      continue;
-    }
-
-    // Paragraph
-    flushList();
-    elements.push(
-      <p key={`p-${i}`} className="text-sm text-gray-700 leading-relaxed my-2">
-        {formatInline(trimmed)}
-      </p>
-    );
-  }
-
-  flushList();
-  return elements;
 }
 
 export default function LessonContent({
@@ -160,7 +38,7 @@ export default function LessonContent({
           </button>
           {summaryOpen && (
             <div className="px-5 pb-4 text-sm text-purple-900 leading-relaxed">
-              {renderMarkdown(aiSummary)}
+              <LessonMarkdownContent content={aiSummary} />
             </div>
           )}
         </div>
@@ -193,7 +71,7 @@ export default function LessonContent({
       )}
 
       {/* Main Content */}
-      <div className="prose-custom">{renderMarkdown(content)}</div>
+      <LessonMarkdownContent content={content} />
     </div>
   );
 }

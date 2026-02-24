@@ -48,6 +48,7 @@
     "bcryptjs": "^3.0.2",
     "cheerio": "^0.22.0",
     "docx": "^9.5.1",
+    "gray-matter": "^4.0.3",
     "html2canvas": "^1.4.1",
     "jose": "^6.1.0",
     "jsonwebtoken": "^9.0.2",
