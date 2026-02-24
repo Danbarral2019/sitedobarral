@@ -263,6 +263,23 @@ export default function LessonPage({
 
   if (!lesson) return null;
 
+  const handleNavigateNext = async (nextSlug: string) => {
+    // Auto-complete current lesson if not already completed
+    if (lesson && progress?.status !== 'completed') {
+      try {
+        await fetch(`/api/area-restrita/lessons/${lesson.id}/progress`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ status: 'completed' }),
+        });
+        handleMarkComplete('completed');
+      } catch {
+        // Navigate anyway even if marking fails
+      }
+    }
+    router.push(`/area-restrita/curso/${courseSlug}/aula/${nextSlug}`);
+  };
+
   const courseTitle = course?.title || 'Curso';
 
   return (
@@ -436,9 +453,9 @@ export default function LessonPage({
                 <div className="flex-1" />
               )}
               {navigation.next ? (
-                <Link
-                  href={`/area-restrita/curso/${courseSlug}/aula/${navigation.next.slug}`}
-                  className="flex-1 flex items-center justify-end gap-3 bg-white border border-gray-200 rounded-2xl p-4 hover:border-brand-300 hover:shadow-sm transition-all group text-right"
+                <button
+                  onClick={() => handleNavigateNext(navigation.next!.slug)}
+                  className="flex-1 flex items-center justify-end gap-3 bg-white border border-gray-200 rounded-2xl p-4 hover:border-brand-300 hover:shadow-sm transition-all group text-right cursor-pointer"
                 >
                   <div className="min-w-0">
                     <p className="text-[10px] text-gray-400 uppercase font-bold">Proxima</p>
@@ -447,7 +464,7 @@ export default function LessonPage({
                     </p>
                   </div>
                   <ChevronRight className="w-5 h-5 text-gray-300 group-hover:text-brand-500 flex-shrink-0" />
-                </Link>
+                </button>
               ) : (
                 <div className="flex-1" />
               )}
