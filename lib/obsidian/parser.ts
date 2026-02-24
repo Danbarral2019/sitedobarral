@@ -119,34 +119,51 @@ export function processCallouts(content: string): string {
 // Document link resolution
 // ---------------------------------------------------------------------------
 
-/** Normalize a document name for fuzzy matching (lowercase, no accents, trimmed). */
+/**
+ * Normalize a name for fuzzy matching:
+ * - remove accents, lowercase, trim
+ * - normalize all dashes (em-dash, en-dash, hyphen) and slashes to spaces
+ *   so "992-2023" matches "992/2023" and "SEGES-ME" matches "SEGES/ME"
+ */
 function normalizeDocName(name: string): string {
-  return name.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().trim();
+  return name
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')   // remove accents
+    .toLowerCase()
+    .replace(/[\u2014\u2013]/g, '-')   // em-dash / en-dash → hyphen
+    .replace(/[/\-]/g, ' ')            // "/" and "-" → space
+    .replace(/\s+/g, ' ')             // collapse whitespace
+    .trim();
 }
 
 /**
- * Build a lookup map from document titles to their IDs.
- * Supports exact and prefix matching for truncated names (ending with "...").
+ * Build a unified lookup map from entity names to URL paths.
+ * Entries from Document, LegislativeAct, and TribunalDecision are all supported.
+ * First entry wins when names collide after normalization.
  */
-export function buildDocMap(docs: { id: string; title: string }[]): Map<string, string> {
+export function buildLinkMap(entries: { name: string; url: string }[]): Map<string, string> {
   const map = new Map<string, string>();
-  for (const doc of docs) {
-    map.set(normalizeDocName(doc.title), doc.id);
+  for (const entry of entries) {
+    const key = normalizeDocName(entry.name);
+    if (key && !map.has(key)) {
+      map.set(key, entry.url);
+    }
   }
   return map;
 }
 
 /**
- * Replace `/legislacao?q=ENCODED_NAME` links with `/documento/{id}` when the
- * document exists in the database.
+ * Replace `/legislacao?q=ENCODED_NAME` links with the correct entity URL
+ * (/documento/{id}, /legislacao/{id}, or /jurisprudencia/{id}) when found
+ * in the link map.
  *
  * Falls back to the original `/legislacao?q=...` link when no match is found.
  */
 export function resolveDocumentLinks(
   content: string,
-  docMap: Map<string, string>,
+  linkMap: Map<string, string>,
 ): string {
-  if (docMap.size === 0) return content;
+  if (linkMap.size === 0) return content;
 
   // Match markdown links pointing to /legislacao?q=...
   return content.replace(
@@ -162,25 +179,25 @@ export function resolveDocumentLinks(
       const normalized = normalizeDocName(name);
 
       // 1. Exact match
-      const exactId = docMap.get(normalized);
-      if (exactId) {
-        return `[${display}](/documento/${exactId})`;
+      const exactUrl = linkMap.get(normalized);
+      if (exactUrl) {
+        return `[${display}](${exactUrl})`;
       }
 
       // 2. Prefix match for truncated names (e.g. "Acórdão TCU 992-2023...")
       const withoutEllipsis = normalized.replace(/\.{2,}$/, '');
       if (withoutEllipsis !== normalized) {
-        for (const [key, id] of docMap) {
+        for (const [key, url] of linkMap) {
           if (key.startsWith(withoutEllipsis)) {
-            return `[${display}](/documento/${id})`;
+            return `[${display}](${url})`;
           }
         }
       }
 
-      // 3. Try matching if the query is a substring of a doc title (for short names)
-      for (const [key, id] of docMap) {
-        if (key.startsWith(normalized) && normalized.length > 15) {
-          return `[${display}](/documento/${id})`;
+      // 3. Prefix match for short vault names that match the start of a DB title
+      for (const [key, url] of linkMap) {
+        if (key.startsWith(normalized) && normalized.length > 10) {
+          return `[${display}](${url})`;
         }
       }
 

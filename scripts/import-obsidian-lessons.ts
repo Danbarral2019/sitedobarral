@@ -14,7 +14,7 @@
 
 import { createHash } from 'crypto';
 import { prisma } from '../lib/prisma';
-import { parseVaultCourses, resolveDocumentLinks, buildDocMap } from '../lib/obsidian/parser';
+import { parseVaultCourses, resolveDocumentLinks, buildLinkMap } from '../lib/obsidian/parser';
 import { courses } from '../data/courses';
 
 import type { ObsidianCourse } from '../lib/obsidian/types';
@@ -94,7 +94,7 @@ async function importCourse(
   courseId: string,
   stats: Stats,
   opts: { dryRun: boolean; force: boolean },
-  docMap: Map<string, string>,
+  linkMap: Map<string, string>,
 ): Promise<void> {
   const moduleIdMap = new Map<string, string>(); // module title -> db id
   const lessonSlugMap = new Map<string, string>(); // "courseId:slug" -> db lesson id
@@ -172,8 +172,8 @@ async function importCourse(
           // Content already processed by parser (wikilinks, callouts)
           // Resolve document links using the docMap (DOC → /documento/{id})
           let processedContent = obsLesson.content || null;
-          if (processedContent && docMap.size > 0) {
-            processedContent = resolveDocumentLinks(processedContent, docMap);
+          if (processedContent && linkMap.size > 0) {
+            processedContent = resolveDocumentLinks(processedContent, linkMap);
           }
 
           const hash = processedContent ? contentHash(processedContent) : '';
@@ -453,10 +453,35 @@ async function main() {
   console.log(`Force: ${force}`);
   console.log('');
 
-  // Build document map for resolving DOC links → /documento/{id}
+  // Build unified link map for resolving DOC links → /documento, /legislacao, /jurisprudencia
+  const linkEntries: { name: string; url: string }[] = [];
+
   const allDocs = await prisma.document.findMany({ select: { id: true, title: true } });
-  const docMap = buildDocMap(allDocs);
-  console.log(`Document map: ${docMap.size} documentos para resolucao de links\n`);
+  for (const doc of allDocs) {
+    linkEntries.push({ name: doc.title, url: `/documento/${doc.id}` });
+  }
+
+  const allActs = await prisma.legislativeAct.findMany({ select: { id: true, fullNumber: true, title: true } });
+  for (const act of allActs) {
+    linkEntries.push({ name: act.fullNumber, url: `/legislacao/${act.id}` });
+    if (act.title !== act.fullNumber) {
+      linkEntries.push({ name: act.title, url: `/legislacao/${act.id}` });
+    }
+  }
+
+  const allDecisions = await prisma.tribunalDecision.findMany({
+    where: { approvalStatus: { in: ['auto_approved', 'manually_approved'] } },
+    select: { id: true, title: true, fullIdentifier: true },
+  });
+  for (const dec of allDecisions) {
+    linkEntries.push({ name: dec.fullIdentifier, url: `/jurisprudencia/${dec.id}` });
+    if (dec.title !== dec.fullIdentifier) {
+      linkEntries.push({ name: dec.title, url: `/jurisprudencia/${dec.id}` });
+    }
+  }
+
+  const linkMap = buildLinkMap(linkEntries);
+  console.log(`Link map: ${linkMap.size} entradas (${allDocs.length} docs, ${allActs.length} atos, ${allDecisions.length} decisoes)\n`);
 
   const stats = newStats();
 
@@ -472,7 +497,7 @@ async function main() {
 
     stats.coursesProcessed++;
 
-    await importCourse(vc, course.id, stats, { dryRun, force }, docMap);
+    await importCourse(vc, course.id, stats, { dryRun, force }, linkMap);
 
     console.log('');
   }
