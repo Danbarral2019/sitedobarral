@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { scrapeUrl, canScrapeUrl } from '@/lib/legislative-scrapers';
 import { hasHashChanged } from '@/lib/legislative-scrapers/change-detector';
+import { scrapeAndIndexAct } from '@/lib/legislative-scrapers/scrape-and-index';
 import { verifyCronAuth } from '@/lib/cron-auth';
 
 /**
@@ -133,6 +134,42 @@ export async function GET(request: NextRequest) {
       await new Promise(resolve => setTimeout(resolve, 2000));
     }
 
+    // Segunda passagem: preencher backlog de atos COM officialUrl mas SEM content
+    const backlogActs = await prisma.legislativeAct.findMany({
+      where: {
+        officialUrl: { not: null },
+        content: null,
+        // Excluir atos já processados nesta execução
+        id: { notIn: actsToCheck.map(a => a.id) },
+      },
+      select: { id: true, fullNumber: true },
+      take: 10,
+      orderBy: { createdAt: 'asc' },
+    });
+
+    const backlogResults: { id: string; fullNumber: string; scraped: boolean; indexed: boolean; error?: string }[] = [];
+
+    if (backlogActs.length > 0) {
+      console.log(`[Cron Legislative] Preenchendo backlog: ${backlogActs.length} atos sem conteúdo`);
+
+      for (const act of backlogActs) {
+        try {
+          const res = await scrapeAndIndexAct(act.id);
+          backlogResults.push({ id: act.id, fullNumber: act.fullNumber, ...res });
+        } catch (error) {
+          backlogResults.push({
+            id: act.id,
+            fullNumber: act.fullNumber,
+            scraped: false,
+            indexed: false,
+            error: error instanceof Error ? error.message : 'Erro desconhecido',
+          });
+        }
+
+        await new Promise(resolve => setTimeout(resolve, 2000));
+      }
+    }
+
     // Estatísticas
     const stats = {
       total: results.length,
@@ -141,6 +178,11 @@ export async function GET(request: NextRequest) {
       failed: results.filter(r => r.status === 'failed').length,
       skipped: results.filter(r => r.status === 'skipped').length,
       changed: results.filter(r => r.changed).length,
+      backlog: {
+        total: backlogResults.length,
+        scraped: backlogResults.filter(r => r.scraped).length,
+        indexed: backlogResults.filter(r => r.indexed).length,
+      },
     };
 
     console.log('[Cron Legislative] Concluído:', stats);
@@ -150,6 +192,7 @@ export async function GET(request: NextRequest) {
       timestamp: new Date().toISOString(),
       stats,
       results,
+      backlogResults,
     });
   } catch (error) {
     console.error('[Cron Legislative] Erro geral:', error);

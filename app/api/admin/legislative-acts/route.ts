@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { verifyAdmin } from '@/lib/api-middleware';
 import { CacheInvalidation } from '@/lib/cache/redis-client';
+import { scrapeAndIndexAct } from '@/lib/legislative-scrapers/scrape-and-index';
 
 /**
  * GET /api/admin/legislative-acts
@@ -179,6 +180,13 @@ export async function POST(request: NextRequest) {
     await CacheInvalidation.legislativeActs();
     if (body.leiArticles && body.leiArticles.length > 0) {
       await CacheInvalidation.leiArticles();
+    }
+
+    // Scrape + index se tem officialUrl e não veio content no body
+    if (act.officialUrl && !body.content) {
+      scrapeAndIndexAct(act.id).catch(err =>
+        console.error(`[Admin LegActs] Erro scrape+index ${act.id}:`, err)
+      );
     }
 
     return NextResponse.json({

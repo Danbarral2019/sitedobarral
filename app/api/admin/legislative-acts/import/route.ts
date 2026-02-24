@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { verifyAdmin } from '@/lib/api-middleware';
 import { CacheInvalidation } from '@/lib/cache/redis-client';
+import { scrapeAndIndexAct } from '@/lib/legislative-scrapers/scrape-and-index';
 
 /**
  * POST /api/admin/legislative-acts/import
@@ -118,7 +119,7 @@ export async function POST(request: NextRequest) {
         }
 
         // Criar ato normativo
-        await prisma.legislativeAct.create({
+        const newAct = await prisma.legislativeAct.create({
           data: {
             type: type.toLowerCase(),
             number: number.toString(),
@@ -137,6 +138,16 @@ export async function POST(request: NextRequest) {
             createdBy: user.email
           }
         });
+
+        // Scrape + index se tem officialUrl
+        if (officialUrl?.trim()) {
+          try {
+            await scrapeAndIndexAct(newAct.id);
+            await new Promise(resolve => setTimeout(resolve, 2000));
+          } catch (err) {
+            console.error(`[Import CSV] Erro scrape+index ${newAct.id}:`, err);
+          }
+        }
 
         results.success++;
 

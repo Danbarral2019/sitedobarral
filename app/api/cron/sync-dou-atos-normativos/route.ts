@@ -28,6 +28,7 @@ import { isAtoNormativoGeral, shouldAutoApprove, detectAtoType, isProcurementRel
 import { detectModifications } from '@/lib/dou-change-detector';
 import { scrapeContent } from '@/lib/dou-scraper';
 import { LeiIndexer } from '@/lib/lei-indexer';
+import { scrapeAndIndexAct } from '@/lib/legislative-scrapers/scrape-and-index';
 import { prisma } from '@/lib/prisma';
 import { verifyCronAuth } from '@/lib/cron-auth';
 
@@ -94,6 +95,8 @@ export async function GET(request: NextRequest) {
       duplicados: 0,
       autoAprovados: 0,
       enriquecidos: 0,
+      actsScrapeados: 0,
+      actsIndexados: 0,
       enviadosParaStaging: 0,
       alteracoesDetectadas: 0,
       notasLeiCriadas: 0,
@@ -131,6 +134,8 @@ export async function GET(request: NextRequest) {
 
     // Docs auto-aprovados para enriquecer com scraper após o loop principal
     const docsToScrape: Array<{ id: string; url: string }> = [];
+    // Atos legislativos criados para scrape+index após o loop
+    const actsToScrape: string[] = [];
 
     // 3. Classificar com DOUClassifier
     const classifications = DOUClassifier.classifyBatch(results);
@@ -270,7 +275,7 @@ export async function GET(request: NextRequest) {
               if (!existingAct && number) {
                 const issuer = extractIssuer(result.hierarchyStr);
 
-                await tx.legislativeAct.create({
+                const newAct = await tx.legislativeAct.create({
                   data: {
                     type: atoType,
                     number,
@@ -285,6 +290,7 @@ export async function GET(request: NextRequest) {
                     createdBy: 'auto-sync-dou',
                   },
                 });
+                actsToScrape.push(newAct.id);
               }
             }
 
@@ -444,6 +450,26 @@ export async function GET(request: NextRequest) {
       }
 
       console.log(`[Sync DOU Normativos] ${stats.enriquecidos}/${toScrape.length} documentos enriquecidos`);
+    }
+
+    // 6b. Scrape + index atos legislativos criados
+    if (!dryRun && actsToScrape.length > 0) {
+      const toScrapeActs = actsToScrape.slice(0, MAX_SCRAPE_PER_RUN);
+      console.log(`[Sync DOU Normativos] Scraping+indexing ${toScrapeActs.length} atos legislativos...`);
+
+      for (const actId of toScrapeActs) {
+        try {
+          const res = await scrapeAndIndexAct(actId);
+          if (res.scraped) stats.actsScrapeados++;
+          if (res.indexed) stats.actsIndexados++;
+
+          await new Promise(resolve => setTimeout(resolve, 2000));
+        } catch (error) {
+          console.error(`[Sync DOU Normativos] Erro ao scrape+index act ${actId}:`, error);
+        }
+      }
+
+      console.log(`[Sync DOU Normativos] ${stats.actsScrapeados}/${toScrapeActs.length} atos scrapeados, ${stats.actsIndexados} indexados`);
     }
 
     // 7. Sincronizar staging: marcar imported=true onde URL já existe como Document
