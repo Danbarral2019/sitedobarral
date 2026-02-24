@@ -115,6 +115,81 @@ export function processCallouts(content: string): string {
   );
 }
 
+// ---------------------------------------------------------------------------
+// Document link resolution
+// ---------------------------------------------------------------------------
+
+/** Normalize a document name for fuzzy matching (lowercase, no accents, trimmed). */
+function normalizeDocName(name: string): string {
+  return name.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().trim();
+}
+
+/**
+ * Build a lookup map from document titles to their IDs.
+ * Supports exact and prefix matching for truncated names (ending with "...").
+ */
+export function buildDocMap(docs: { id: string; title: string }[]): Map<string, string> {
+  const map = new Map<string, string>();
+  for (const doc of docs) {
+    map.set(normalizeDocName(doc.title), doc.id);
+  }
+  return map;
+}
+
+/**
+ * Replace `/legislacao?q=ENCODED_NAME` links with `/documento/{id}` when the
+ * document exists in the database.
+ *
+ * Falls back to the original `/legislacao?q=...` link when no match is found.
+ */
+export function resolveDocumentLinks(
+  content: string,
+  docMap: Map<string, string>,
+): string {
+  if (docMap.size === 0) return content;
+
+  // Match markdown links pointing to /legislacao?q=...
+  return content.replace(
+    /\[([^\]]+)\]\(\/legislacao\?q=([^)]+)\)/g,
+    (match, display: string, encodedQuery: string) => {
+      let name: string;
+      try {
+        name = decodeURIComponent(encodedQuery);
+      } catch {
+        return match; // malformed encoding — keep as-is
+      }
+
+      const normalized = normalizeDocName(name);
+
+      // 1. Exact match
+      const exactId = docMap.get(normalized);
+      if (exactId) {
+        return `[${display}](/documento/${exactId})`;
+      }
+
+      // 2. Prefix match for truncated names (e.g. "Acórdão TCU 992-2023...")
+      const withoutEllipsis = normalized.replace(/\.{2,}$/, '');
+      if (withoutEllipsis !== normalized) {
+        for (const [key, id] of docMap) {
+          if (key.startsWith(withoutEllipsis)) {
+            return `[${display}](/documento/${id})`;
+          }
+        }
+      }
+
+      // 3. Try matching if the query is a substring of a doc title (for short names)
+      for (const [key, id] of docMap) {
+        if (key.startsWith(normalized) && normalized.length > 15) {
+          return `[${display}](/documento/${id})`;
+        }
+      }
+
+      // No match — keep original /legislacao?q=... link
+      return match;
+    },
+  );
+}
+
 /** Run all content transformations. */
 export function processContent(content: string): string {
   let result = content;

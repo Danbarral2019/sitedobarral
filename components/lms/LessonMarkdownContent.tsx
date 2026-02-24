@@ -2,7 +2,6 @@
 
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
-import Link from 'next/link';
 import type { ComponentPropsWithoutRef } from 'react';
 
 interface LessonMarkdownContentProps {
@@ -262,18 +261,17 @@ export default function LessonMarkdownContent({ content }: LessonMarkdownContent
         remarkPlugins={[remarkGfm]}
         components={{
           a: ({ href, children, ...props }: ComponentPropsWithoutRef<'a'>) => {
-            if (href?.startsWith('/area-restrita/artigo/')) {
-              return (
-                <Link href={href} className="text-blue-700 font-medium hover:text-blue-900 hover:underline">
-                  {children}
-                </Link>
-              );
-            }
-            if (href?.startsWith('/')) {
-              return <Link href={href}>{children}</Link>;
-            }
+            if (!href) return <span {...props}>{children}</span>;
+            const isArticle = href.startsWith('/area-restrita/artigo/') || href.startsWith('/artigo/');
+            const isDocument = href.startsWith('/documento/');
             return (
-              <a href={href} target="_blank" rel="noopener noreferrer" {...props}>
+              <a
+                href={href}
+                target="_blank"
+                rel="noopener noreferrer"
+                className={isArticle || isDocument ? 'text-blue-700 font-medium hover:text-blue-900 hover:underline' : undefined}
+                {...props}
+              >
                 {children}
               </a>
             );

@@ -14,7 +14,7 @@
 
 import { createHash } from 'crypto';
 import { prisma } from '../lib/prisma';
-import { parseVaultCourses } from '../lib/obsidian/parser';
+import { parseVaultCourses, resolveDocumentLinks, buildDocMap } from '../lib/obsidian/parser';
 import { courses } from '../data/courses';
 
 import type { ObsidianCourse } from '../lib/obsidian/types';
@@ -94,6 +94,7 @@ async function importCourse(
   courseId: string,
   stats: Stats,
   opts: { dryRun: boolean; force: boolean },
+  docMap: Map<string, string>,
 ): Promise<void> {
   const moduleIdMap = new Map<string, string>(); // module title -> db id
   const lessonSlugMap = new Map<string, string>(); // "courseId:slug" -> db lesson id
@@ -169,7 +170,11 @@ async function importCourse(
 
         try {
           // Content already processed by parser (wikilinks, callouts)
-          const processedContent = obsLesson.content || null;
+          // Resolve document links using the docMap (DOC → /documento/{id})
+          let processedContent = obsLesson.content || null;
+          if (processedContent && docMap.size > 0) {
+            processedContent = resolveDocumentLinks(processedContent, docMap);
+          }
 
           const hash = processedContent ? contentHash(processedContent) : '';
 
@@ -448,6 +453,11 @@ async function main() {
   console.log(`Force: ${force}`);
   console.log('');
 
+  // Build document map for resolving DOC links → /documento/{id}
+  const allDocs = await prisma.document.findMany({ select: { id: true, title: true } });
+  const docMap = buildDocMap(allDocs);
+  console.log(`Document map: ${docMap.size} documentos para resolucao de links\n`);
+
   const stats = newStats();
 
   for (const vc of vaultCourses) {
@@ -462,7 +472,7 @@ async function main() {
 
     stats.coursesProcessed++;
 
-    await importCourse(vc, course.id, stats, { dryRun, force });
+    await importCourse(vc, course.id, stats, { dryRun, force }, docMap);
 
     console.log('');
   }
