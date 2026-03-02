@@ -247,7 +247,9 @@ class DataJudScraper implements TribunalScraper {
       return isNaN(d.getTime()) ? null : d;
     };
 
-    const dataJulgamento = parseDate(src.dataAjuizamento);
+    // DataJud não fornece dataJulgamento explícita; dataAjuizamento é usada como aproximação
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const dataJulgamento = parseDate((src as any).dataJulgamento) || parseDate(src.dataAjuizamento);
     const dataPublicacao = parseDate(src.dataHoraUltimaAtualizacao);
     const year = dataJulgamento ? dataJulgamento.getFullYear() : (dataPublicacao ? dataPublicacao.getFullYear() : new Date().getFullYear());
 

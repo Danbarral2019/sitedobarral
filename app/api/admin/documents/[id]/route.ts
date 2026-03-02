@@ -222,7 +222,7 @@ export const PATCH = withAdminAuth(async (request: NextRequest, context: { param
 
     if (body.courseId !== undefined) allowedFields.courseId = body.courseId;
     if (body.category !== undefined) allowedFields.category = body.category;
-    if (body.tags !== undefined) allowedFields.tags = body.tags;
+    if (body.tags !== undefined) allowedFields.tags = Array.isArray(body.tags) ? JSON.stringify(body.tags) : body.tags;
     if (body.leiArticles !== undefined) allowedFields.leiArticles = JSON.stringify(body.leiArticles);
     if (body.isPublic !== undefined) allowedFields.isPublic = body.isPublic;
     if (body.reviewed !== undefined) {

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import {
   Dialog,
   DialogContent,
@@ -64,13 +64,12 @@ export function DOUDocumentModal({
   const [selectedThemes, setSelectedThemes] = useState<string[]>([]);
   const [showFullContent, setShowFullContent] = useState(false);
 
-  // Auto-preencher issuerOrg do hierarchyStr quando disponível
-  const [initialized, setInitialized] = useState(false);
-  if (!initialized && document.hierarchyStr && !issuerOrg) {
-    // Usar o primeiro nível da hierarquia (ex: "Ministério das Mulheres/Gabinete da Ministra" → "Ministério das Mulheres")
-    setIssuerOrg(document.hierarchyStr.split('/')[0].trim());
-    setInitialized(true);
-  }
+  // Auto-preencher issuerOrg do hierarchyStr quando o documento muda
+  useEffect(() => {
+    if (document.hierarchyStr) {
+      setIssuerOrg(document.hierarchyStr.split('/')[0].trim());
+    }
+  }, [document.hierarchyStr]);
 
   const handleApprove = async () => {
     if (selectedCourses.length === 0) {

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import {
   ClipboardCheck,
   Clock,
@@ -124,6 +124,9 @@ export default function QuizPlayer({ lessonId, onQuizPass }: QuizPlayerProps) {
     fetchQuiz();
   }, [fetchQuiz]);
 
+  // Ref to always have fresh handleSubmit (avoids stale closure in timer)
+  const handleSubmitRef = useRef<(() => Promise<void>) | null>(null);
+
   // Timer countdown
   useEffect(() => {
     if (!isStarted || results) return;
@@ -135,8 +138,8 @@ export default function QuizPlayer({ lessonId, onQuizPass }: QuizPlayerProps) {
         setTimeRemaining(prev => {
           if (prev === null) return null;
           if (prev <= 1) {
-            // Auto-submit when time runs out
-            handleSubmit();
+            // Auto-submit when time runs out (uses ref to avoid stale closure)
+            handleSubmitRef.current?.();
             return 0;
           }
           return prev - 1;
@@ -145,7 +148,6 @@ export default function QuizPlayer({ lessonId, onQuizPass }: QuizPlayerProps) {
     }, 1000);
 
     return () => clearInterval(interval);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isStarted, results, quiz?.timeLimitMinutes]);
 
   const handleStart = () => {
@@ -167,6 +169,7 @@ export default function QuizPlayer({ lessonId, onQuizPass }: QuizPlayerProps) {
   const handleSubmit = async () => {
     if (isSubmitting) return;
     setIsSubmitting(true);
+    handleSubmitRef.current = handleSubmit;
 
     try {
       const answersArray = Object.entries(answers).map(([questionId, selectedOptionId]) => ({
@@ -217,6 +220,9 @@ export default function QuizPlayer({ lessonId, onQuizPass }: QuizPlayerProps) {
       setIsSubmitting(false);
     }
   };
+
+  // Keep ref updated every render so timer always calls latest version
+  handleSubmitRef.current = handleSubmit;
 
   const formatTime = (seconds: number) => {
     const m = Math.floor(seconds / 60);

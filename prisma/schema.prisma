@@ -282,7 +282,7 @@ model DocumentVersion {
 
   // Snapshot dos dados nesta versão
   title           String
-  description     String   @db.Text
+  description     String?  @db.Text  // Nullable: Document.description é nullable
   url             String
   urlPDF          String?
   category        String

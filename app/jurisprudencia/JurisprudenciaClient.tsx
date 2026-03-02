@@ -95,11 +95,11 @@ export default function JurisprudenciaClient() {
   const currentYear = new Date().getFullYear();
   const years = Array.from({ length: 5 }, (_, i) => currentYear - i);
 
-  const fetchDecisions = useCallback(async () => {
+  const fetchDecisions = useCallback(async (page: number) => {
     setLoading(true);
     try {
       const params = new URLSearchParams({
-        page: String(currentPage),
+        page: String(page),
         pageSize: String(pageSize),
       });
       if (tribunal) params.set('tribunal', tribunal);
@@ -119,12 +119,14 @@ export default function JurisprudenciaClient() {
     } finally {
       setLoading(false);
     }
-  }, [currentPage, tribunal, year, search, selectedTheme]);
+  }, [tribunal, year, search, selectedTheme]);
 
+  // Fetch when page changes
   useEffect(() => {
-    fetchDecisions();
-  }, [fetchDecisions]);
+    fetchDecisions(currentPage);
+  }, [currentPage, fetchDecisions]);
 
+  // Reset to page 1 when filters change (fetchDecisions dep change triggers the fetch above)
   useEffect(() => {
     setCurrentPage(1);
   }, [tribunal, year, search, selectedTheme]);

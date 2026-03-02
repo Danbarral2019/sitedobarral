@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { withAuth } from '@/lib/api-middleware';
 import { prisma } from '@/lib/prisma';
 import { handleApiError } from '@/lib/errors/error-handler';
-import { NotFoundError } from '@/lib/errors/api-error';
+import { NotFoundError, AuthorizationError } from '@/lib/errors/api-error';
 import { apiLogger } from '@/lib/logger';
 import { SubmitQuizAttemptSchema } from '@/lib/validation-schemas';
 
@@ -14,19 +14,37 @@ export const POST = withAuth(async (
   context?: Record<string, unknown>
 ) => {
   try {
-    const user = context?.user as { userId: string };
+    const user = context?.user as { userId: string; role?: string };
     const { lessonId } = await (context as { params: Promise<{ lessonId: string }> }).params;
     const body = await request.json();
     const data = SubmitQuizAttemptSchema.parse(body);
 
-    // Buscar quiz com perguntas
+    // Buscar quiz com perguntas + lesson para verificar enrollment
     const quiz = await prisma.quiz.findUnique({
       where: { lessonId },
-      include: { questions: true },
+      include: { questions: true, lesson: { include: { module: { select: { courseId: true } } } } },
     });
 
     if (!quiz || !quiz.isPublished) {
       throw new NotFoundError('Quiz');
+    }
+
+    // Verificar enrollment válido (não expirado)
+    if (user.role !== 'admin') {
+      const enrollment = await prisma.enrollment.findFirst({
+        where: {
+          userId: user.userId,
+          courseId: quiz.lesson.module.courseId,
+          OR: [
+            { isLifetime: true },
+            { expiresAt: null },
+            { expiresAt: { gt: new Date() } },
+          ],
+        },
+      });
+      if (!enrollment) {
+        throw new AuthorizationError('Acesso expirado ou inexistente para este curso.');
+      }
     }
 
     // Verificar maxAttempts

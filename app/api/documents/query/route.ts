@@ -492,18 +492,21 @@ ${sourcesList || 'nenhum'}
 
 RESPOSTA:`;
 
-    // 12b. Build formatted results (needed for both streaming and non-streaming)
-    const formattedResults: DocumentResult[] = await Promise.all(
-      allDisplayResults.map(async (result) => {
-        const doc = await prisma.document.findUnique({
-          where: { id: result.documentId },
-          select: {
-            uploadedAt: true,
-            tags: true,
-            courseId: true,
-            isCommon: true,
-          },
-        });
+    // 12b. Build formatted results — batch query instead of N+1
+    const docIds = [...new Set(allDisplayResults.map(r => r.documentId))];
+    const docsMap = new Map<string, { uploadedAt: Date; tags: string | null; courseId: string | null; isCommon: boolean }>();
+    if (docIds.length > 0) {
+      const docs = await prisma.document.findMany({
+        where: { id: { in: docIds } },
+        select: { id: true, uploadedAt: true, tags: true, courseId: true, isCommon: true },
+      });
+      for (const doc of docs) {
+        docsMap.set(doc.id, doc);
+      }
+    }
+
+    const formattedResults: DocumentResult[] = allDisplayResults.map((result) => {
+        const doc = docsMap.get(result.documentId) || null;
 
         const courseIds = result.isCommon
           ? []
@@ -523,8 +526,7 @@ RESPOSTA:`;
           tags: result.tags,
           courseIds: courseIds.length > 0 ? courseIds : undefined,
         };
-      })
-    );
+      });
 
     // 13. Streaming response (SSE)
     if (wantStream) {

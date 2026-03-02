@@ -96,17 +96,20 @@ export async function POST(request: NextRequest) {
     const paymentStatus = payment.status; // approved, pending, rejected, refunded, cancelled, in_process
 
     if (paymentStatus === 'approved') {
-      // Verificar se ja existe subscription ativa para este usuario/plano
-      const existing = await prisma.subscription.findFirst({
-        where: { userId, plan, status: 'active' },
-      });
+      // Usar transaction para evitar race condition (webhooks concorrentes)
+      const created = await prisma.$transaction(async (tx) => {
+        // Verificar se ja existe subscription ativa (dentro da transaction)
+        const existing = await tx.subscription.findFirst({
+          where: { userId, plan, status: 'active' },
+        });
 
-      if (!existing) {
+        if (existing) return false;
+
         const now = new Date();
         const periodEnd = new Date(now);
         periodEnd.setMonth(periodEnd.getMonth() + 1);
 
-        await prisma.subscription.create({
+        await tx.subscription.create({
           data: {
             userId,
             plan,
@@ -119,7 +122,11 @@ export async function POST(request: NextRequest) {
           },
         });
 
-        // Criar enrollments
+        return true;
+      });
+
+      if (created) {
+        // Criar enrollments (fora da transaction — idempotente)
         await createSubscriptionEnrollments(userId, plan as PlanType, courseId || undefined);
 
         apiLogger.info({ userId, plan, paymentId: payment.id }, 'Subscription created via MP webhook');

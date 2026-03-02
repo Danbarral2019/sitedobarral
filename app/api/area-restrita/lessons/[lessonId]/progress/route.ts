@@ -31,12 +31,20 @@ export async function POST(
     });
     if (!lesson) throw new NotFoundError('Lição');
 
-    // Enrollment check (admin bypasses)
+    // Enrollment check with expiry verification (admin bypasses)
     if (user.role !== 'admin') {
       const enrollment = await prisma.enrollment.findFirst({
-        where: { userId: user.id, courseId: lesson.module.courseId },
+        where: {
+          userId: user.id,
+          courseId: lesson.module.courseId,
+          OR: [
+            { isLifetime: true },
+            { expiresAt: null },
+            { expiresAt: { gt: new Date() } },
+          ],
+        },
       });
-      if (!enrollment) throw new AuthorizationError('Você não está matriculado neste curso.');
+      if (!enrollment) throw new AuthorizationError('Acesso expirado ou inexistente para este curso.');
     }
 
     // Parse and validate body

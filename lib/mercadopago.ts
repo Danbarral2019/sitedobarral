@@ -62,8 +62,12 @@ export async function createCheckoutPreference({
     },
   });
 
+  if (!result.init_point) {
+    throw new Error('Mercado Pago não retornou init_point na preferência de checkout');
+  }
+
   apiLogger.info({ userId, plan, preferenceId: result.id }, 'MP checkout preference created');
-  return result.init_point!;
+  return result.init_point;
 }
 
 /**
@@ -97,8 +101,12 @@ export async function createPixPayment({
   const qrCodeBase64 = result.point_of_interaction?.transaction_data?.qr_code_base64 || '';
   const ticketUrl = result.point_of_interaction?.transaction_data?.ticket_url || '';
 
+  if (!result.id) {
+    throw new Error('Mercado Pago não retornou ID do pagamento PIX');
+  }
+
   apiLogger.info({ userId, plan, paymentId: result.id }, 'PIX payment created');
-  return { qrCode, qrCodeBase64, ticketUrl, paymentId: result.id! };
+  return { qrCode, qrCodeBase64, ticketUrl, paymentId: result.id };
 }
 
 /**
