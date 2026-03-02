@@ -15,7 +15,11 @@
     "test:coverage": "vitest run --coverage",
     "test:ui": "vitest --ui",
     "test:watch": "vitest --watch",
-    "analyze": "ANALYZE=true next build"
+    "analyze": "ANALYZE=true next build",
+    "sync:obsidian": "tsx scripts/sync-obsidian.ts",
+    "sync:obsidian:full": "tsx scripts/sync-obsidian.ts --full",
+    "export:obsidian": "tsx scripts/sync-obsidian.ts --export-only",
+    "import:obsidian": "tsx scripts/sync-obsidian.ts --import-only"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.78.0",

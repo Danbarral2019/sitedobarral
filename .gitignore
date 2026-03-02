@@ -80,3 +80,6 @@ mcp-server-gemini/*-test.mjs
 
 # Output de scripts (artefatos de execução)
 scripts/output/
+
+# Obsidian sync state (local, por desenvolvedor)
+.obsidian-sync-state.json
