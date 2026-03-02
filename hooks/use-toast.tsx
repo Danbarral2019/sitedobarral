@@ -22,6 +22,16 @@ const ToastContext = React.createContext<ToastContextType | undefined>(undefined
 
 export function ToastProviderWrapper({ children }: { children: React.ReactNode }) {
   const [toasts, setToasts] = React.useState<ToastMessage[]>([]);
+  const timersRef = React.useRef<Map<string, ReturnType<typeof setTimeout>>>(new Map());
+
+  // Cleanup all timers on unmount
+  React.useEffect(() => {
+    const timers = timersRef.current;
+    return () => {
+      timers.forEach(clearTimeout);
+      timers.clear();
+    };
+  }, []);
 
   const addToast = React.useCallback((toast: Omit<ToastMessage, 'id'>) => {
     const id = Math.random().toString(36).substring(2, 9);
@@ -30,9 +40,11 @@ export function ToastProviderWrapper({ children }: { children: React.ReactNode }
     setToasts((prev) => [...prev, newToast]);
 
     // Auto remove after duration (default 5s)
-    setTimeout(() => {
+    const timer = setTimeout(() => {
       setToasts((prev) => prev.filter((t) => t.id !== id));
+      timersRef.current.delete(id);
     }, toast.duration || 5000);
+    timersRef.current.set(id, timer);
   }, []);
 
   const removeToast = React.useCallback((id: string) => {

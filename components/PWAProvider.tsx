@@ -108,9 +108,13 @@ export function PWAProvider() {
       })
 
       // Listen for controller change (after skipWaiting)
-      navigator.serviceWorker.addEventListener('controllerchange', () => {
+      const controllerChangeHandler = () => {
         window.location.reload()
-      })
+      }
+      navigator.serviceWorker.addEventListener('controllerchange', controllerChangeHandler)
+
+      // Cleanup will be handled by component unmount — however serviceWorker listeners
+      // persist beyond component lifecycle intentionally (reload on SW update is global behavior)
     }
 
     // Install banner
@@ -124,13 +128,15 @@ export function PWAProvider() {
     }
 
     window.addEventListener('beforeinstallprompt', handler)
-    window.addEventListener('appinstalled', () => {
+    const appInstalledHandler = () => {
       setShowBanner(false)
       setInstallPrompt(null)
-    })
+    }
+    window.addEventListener('appinstalled', appInstalledHandler)
 
     return () => {
       window.removeEventListener('beforeinstallprompt', handler)
+      window.removeEventListener('appinstalled', appInstalledHandler)
     }
   }, [subscribeToPush])
 

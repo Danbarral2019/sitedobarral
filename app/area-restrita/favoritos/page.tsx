@@ -87,6 +87,14 @@ export default function FavoritosPage() {
   const [savingAnnotation, setSavingAnnotation] = useState<string | null>(null);
   const [annotationTimers, setAnnotationTimers] = useState<Record<string, ReturnType<typeof setTimeout>>>({});
 
+  // Cleanup debounce timers on unmount
+  useEffect(() => {
+    return () => {
+      Object.values(annotationTimers).forEach(clearTimeout);
+    };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   // Redirecionar se não autenticado
   useEffect(() => {
     if (!isLoading && !user) {

@@ -17,7 +17,7 @@ interface MonthlyNewsletterData {
   totalDocuments: number;
 }
 
-const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://profdanielbarral.com.br';
+const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://profdanielbarral.com';
 
 function trackUrl(sendId: string, originalUrl: string): string {
   return `${baseUrl}/api/newsletter/track?id=${sendId}&type=click&url=${encodeURIComponent(originalUrl)}`;
@@ -112,7 +112,7 @@ function renderFooter(sendId: string): string {
               </td>
               <td style="color:#475569;font-size:13px;">|</td>
               <td align="center" style="padding:0 8px;">
-                <a href="${trackUrl(sendId, '#')}" style="color:#60a5fa;text-decoration:none;font-size:13px;font-family:Arial,Helvetica,sans-serif;">Instagram</a>
+                <a href="${trackUrl(sendId, 'https://www.instagram.com/prof.danielbarral')}" style="color:#60a5fa;text-decoration:none;font-size:13px;font-family:Arial,Helvetica,sans-serif;">Instagram</a>
               </td>
               <td style="color:#475569;font-size:13px;">|</td>
               <td align="center" style="padding:0 8px;">

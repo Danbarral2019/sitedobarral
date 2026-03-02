@@ -92,7 +92,7 @@ export default function JurisprudenciaClient() {
   const [selectedTheme, setSelectedTheme] = useState('');
 
   const pageSize = 12;
-  const currentYear = new Date().getFullYear();
+  const [currentYear] = useState(() => new Date().getFullYear());
   const years = Array.from({ length: 5 }, (_, i) => currentYear - i);
 
   const fetchDecisions = useCallback(async (page: number) => {

@@ -74,8 +74,9 @@ const nextConfig: NextConfig = {
             value: 'nosniff'
           },
           {
+            // X-XSS-Protection desabilitado — header depreciado, CSP é a proteção moderna
             key: 'X-XSS-Protection',
-            value: '1; mode=block'
+            value: '0'
           },
           {
             key: 'Referrer-Policy',
@@ -91,7 +92,9 @@ const nextConfig: NextConfig = {
         ],
       },
       {
-        source: '/public/:path*',
+        // Next.js serves static files from /public at root path (e.g., /favicon.ico)
+        // Static asset caching is handled by /_next/static and /_next/image rules below
+        source: '/icons/:path*',
         headers: [
           {
             key: 'Cache-Control',

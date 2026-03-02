@@ -95,17 +95,31 @@ class DataJudScraper implements TribunalScraper {
         signal: AbortSignal.timeout(15000),
       });
 
-      const lastLog = await prisma.scraperHealthLog.findFirst({
+      const recentLogs = await prisma.scraperHealthLog.findMany({
         where: { scraperCode: this.code },
         orderBy: { runAt: 'desc' },
+        take: 20,
       });
+
+      const lastLog = recentLogs[0] || null;
+      const lastSuccessLog = recentLogs.find(l => l.status === 'success');
+
+      // Count consecutive failures from the most recent log backwards
+      let consecutiveFailures = 0;
+      for (const log of recentLogs) {
+        if (log.status === 'failure' || log.status === 'partial_failure') {
+          consecutiveFailures++;
+        } else {
+          break;
+        }
+      }
 
       return {
         scraperCode: this.code,
         isHealthy: response.ok,
         lastRun: lastLog?.runAt || undefined,
-        lastSuccess: lastLog?.status === 'success' ? lastLog.runAt : undefined,
-        consecutiveFailures: lastLog?.status === 'failure' ? 1 : 0,
+        lastSuccess: lastSuccessLog?.runAt || undefined,
+        consecutiveFailures,
         message: response.ok ? 'API acessivel' : `HTTP ${response.status}`,
       };
     } catch (error) {
