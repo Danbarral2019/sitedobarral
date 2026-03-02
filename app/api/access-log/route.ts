@@ -6,7 +6,7 @@ import { verifyToken } from '@/lib/auth';
 // POST /api/access-log - Registrar um acesso/download
 export async function POST(request: NextRequest) {
   try {
-    const token = request.cookies.get('token')?.value;
+    const token = request.cookies.get('auth-token')?.value;
 
     if (!token) {
       return NextResponse.json({ error: 'Não autorizado' }, { status: 401 });
@@ -49,7 +49,7 @@ export async function POST(request: NextRequest) {
 // GET /api/access-log - Listar histórico de acessos do usuário
 export async function GET(request: NextRequest) {
   try {
-    const token = request.cookies.get('token')?.value;
+    const token = request.cookies.get('auth-token')?.value;
 
     if (!token) {
       return NextResponse.json({ error: 'Não autorizado' }, { status: 401 });

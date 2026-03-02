@@ -6,11 +6,18 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server';
+import { verifyAuth } from '@/lib/auth';
 import { trackAnalysis } from '@/lib/analytics-tracker';
 import type { ArticleSuggestion } from '@/lib/document-analyzer';
 
 export async function POST(request: NextRequest) {
   try {
+    // Verificar autenticação admin
+    const authResult = await verifyAuth(request);
+    if (!authResult.valid || authResult.user?.role !== 'admin') {
+      return NextResponse.json({ success: false, error: 'Não autorizado' }, { status: 401 });
+    }
+
     const body = await request.json();
 
     const {
@@ -22,7 +29,6 @@ export async function POST(request: NextRequest) {
       keywordsMatched,
       suggestions,
       acceptedArticles,
-      userId
     } = body;
 
     // Validação
@@ -43,7 +49,7 @@ export async function POST(request: NextRequest) {
       keywordsMatched: keywordsMatched || 0,
       suggestions: suggestions as ArticleSuggestion[],
       acceptedArticles: acceptedArticles || [],
-      userId
+      userId: authResult.user!.userId
     });
 
     if (!result.success) {

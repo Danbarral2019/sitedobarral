@@ -134,9 +134,10 @@ export async function POST(request: NextRequest) {
 // GET - Listar inscritos (admin apenas)
 export async function GET(request: NextRequest) {
   try {
-    // Verificar autenticação admin
-    const token = request.cookies.get('auth-token')?.value;
-    if (!token) {
+    // Verificar autenticação admin (decodificar token e verificar role)
+    const { verifyAuth } = await import('@/lib/auth');
+    const authResult = await verifyAuth(request);
+    if (!authResult.valid || authResult.user?.role !== 'admin') {
       return NextResponse.json({ error: 'Não autorizado' }, { status: 401 });
     }
 

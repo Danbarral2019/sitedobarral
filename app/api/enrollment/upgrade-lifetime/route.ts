@@ -15,6 +15,14 @@ export async function POST(request: NextRequest) {
       throw new AuthenticationError();
     }
 
+    // Apenas admins podem conceder acesso vitalício
+    if (auth.user.role !== 'admin') {
+      return NextResponse.json(
+        { error: 'Apenas administradores podem conceder acesso vitalício' },
+        { status: 403 }
+      );
+    }
+
     const body = await request.json();
     const { courseId, price } = body;
 
