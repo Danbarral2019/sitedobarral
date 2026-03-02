@@ -82,6 +82,9 @@ const nextConfig: NextConfig = {
             value: 'origin-when-cross-origin'
           },
           {
+            // NOTA: 'unsafe-inline' em script-src é necessário para Next.js funcionar (inline scripts de hydration).
+            // A remoção requer implementação de nonce-based CSP via middleware — melhoria futura.
+            // 'strict-dynamic' não é aplicável sem nonces.
             key: 'Content-Security-Policy',
             value: `default-src 'self'; script-src 'self' 'unsafe-inline'${process.env.NODE_ENV === 'development' ? " 'unsafe-eval'" : ''} https://vercel.live https://va.vercel-scripts.com https://www.googletagmanager.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com data:; img-src 'self' data: blob: https:; connect-src 'self' https://*.sentry.io https://vitals.vercel-insights.com https://va.vercel-scripts.com https://vercel.live https://www.google-analytics.com https://sdk.mercadopago.com wss://vercel.live${process.env.NODE_ENV === 'development' ? ' ws://localhost:3000' : ''}; frame-src 'self' https://www.youtube.com https://vercel.live https://www.mercadopago.com.br; media-src 'self' https:; object-src 'none'; base-uri 'self'; form-action 'self'; worker-src 'self' blob:`
           },

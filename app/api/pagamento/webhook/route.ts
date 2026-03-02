@@ -4,8 +4,51 @@ import { getMPClient, createSubscriptionEnrollments, handleSubscriptionCanceled,
 import { prisma } from '@/lib/prisma';
 import { apiLogger } from '@/lib/logger';
 import { trackServerEvent } from '@/lib/monitoring/events';
+import { createHmac } from 'crypto';
 
 export const runtime = 'nodejs';
+
+/**
+ * Verifica a assinatura HMAC do webhook do Mercado Pago.
+ * Header x-signature: ts=<timestamp>,v1=<hmac>
+ * Manifest: id:<data.id>;request-id:<x-request-id>;ts:<timestamp>;
+ */
+function verifyWebhookSignature(request: NextRequest, dataId: string): boolean {
+  const secret = process.env.MERCADOPAGO_WEBHOOK_SECRET;
+  if (!secret) {
+    apiLogger.warn('MERCADOPAGO_WEBHOOK_SECRET not configured — skipping HMAC verification');
+    return true; // Fail open when secret not configured
+  }
+
+  const xSignature = request.headers.get('x-signature');
+  const xRequestId = request.headers.get('x-request-id');
+
+  if (!xSignature || !xRequestId) {
+    apiLogger.warn('MP webhook: missing x-signature or x-request-id headers');
+    return false;
+  }
+
+  // Parse x-signature: ts=<timestamp>,v1=<hmac>
+  const parts: Record<string, string> = {};
+  for (const part of xSignature.split(',')) {
+    const [key, ...valueParts] = part.split('=');
+    parts[key.trim()] = valueParts.join('=').trim();
+  }
+
+  const ts = parts['ts'];
+  const v1 = parts['v1'];
+
+  if (!ts || !v1) {
+    apiLogger.warn({ xSignature }, 'MP webhook: malformed x-signature header');
+    return false;
+  }
+
+  // Build manifest and compute HMAC
+  const manifest = `id:${dataId};request-id:${xRequestId};ts:${ts};`;
+  const hmac = createHmac('sha256', secret).update(manifest).digest('hex');
+
+  return hmac === v1;
+}
 
 export async function POST(request: NextRequest) {
   try {
@@ -13,6 +56,12 @@ export async function POST(request: NextRequest) {
 
     // Mercado Pago envia notificações IPN com tipo e data.id
     const { type, data } = body;
+
+    // Verificar assinatura HMAC do Mercado Pago
+    if (data?.id && !verifyWebhookSignature(request, String(data.id))) {
+      apiLogger.warn({ dataId: data.id }, 'MP webhook: HMAC signature verification failed');
+      return NextResponse.json({ error: 'Invalid signature' }, { status: 403 });
+    }
 
     if (type !== 'payment' || !data?.id) {
       apiLogger.info({ type }, 'MP webhook: tipo ignorado');

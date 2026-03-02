@@ -422,16 +422,24 @@ export async function getCache<T>(key: string): Promise<T | null> {
 
 /**
  * Set in cache with TTL
+ * @param prefix - Optional prefix for registry (enables prefix-based invalidation)
  */
 export async function setCache<T>(
   key: string,
   value: T,
-  ttl: number = CACHE_TTL.SEARCH_RESULTS
+  ttl: number = CACHE_TTL.SEARCH_RESULTS,
+  prefix?: string
 ): Promise<void> {
   if (!redis) return;
 
   try {
-    await redis.setex(key, ttl, JSON.stringify(value));
+    // Upstash redis.set auto-serializes objects, so pass value directly (not JSON.stringify)
+    await redis.setex(key, ttl, value);
+
+    // Register key in prefix registry if specified
+    if (prefix) {
+      await registerCacheKey(prefix, key);
+    }
   } catch (error) {
     console.error('Cache set error:', error);
   }
@@ -451,19 +459,34 @@ export async function deleteCache(key: string): Promise<void> {
 }
 
 /**
- * Delete multiple keys by pattern
+ * Delete multiple keys by pattern using Upstash SCAN.
+ * Pattern uses Redis glob-style matching (e.g. "faq:*", "blog:*").
  */
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-export async function deleteCachePattern(pattern: string): Promise<void> {
-  if (!redis) return;
+export async function deleteCachePattern(pattern: string): Promise<number> {
+  if (!redis) return 0;
 
   try {
-    // Note: Upstash Redis doesn't support SCAN, so we need to be careful with patterns
-    // For now, we'll just delete exact keys
-    // In production, consider using a key prefix strategy
-    console.warn('Pattern deletion not fully supported. Consider using exact keys.');
+    let cursor: string | number = 0;
+    let totalDeleted = 0;
+
+    do {
+      const result: [string, string[]] = await redis.scan(cursor, { match: pattern, count: 100 }) as [string, string[]];
+      cursor = result[0];
+      const keys: string[] = result[1];
+
+      if (keys.length > 0) {
+        await Promise.all(keys.map((key: string) => redis!.del(key)));
+        totalDeleted += keys.length;
+      }
+    } while (Number(cursor) !== 0);
+
+    if (totalDeleted > 0) {
+      console.log(`🗑️ deleteCachePattern("${pattern}"): deleted ${totalDeleted} keys`);
+    }
+    return totalDeleted;
   } catch (error) {
     console.error('Cache pattern delete error:', error);
+    return 0;
   }
 }
 

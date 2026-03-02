@@ -413,10 +413,13 @@ model Favorite {
   annotation         String?  // Anotação de estudo do aluno
   createdAt          DateTime @default(now())
 
-  @@unique([userId, documentId, legislativeActId])
+  // Unique constraints separados para documentos e atos legislativos
+  // PostgreSQL permite múltiplos NULLs em unique constraints, então um único
+  // @@unique([userId, documentId, legislativeActId]) não previne duplicados.
+  @@unique([userId, documentId])
+  @@unique([userId, legislativeActId])
   @@index([userId])
   @@index([courseId])
-  @@index([legislativeActId])
 }
 
 // Posts do Blog

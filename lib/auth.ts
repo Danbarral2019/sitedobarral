@@ -125,7 +125,8 @@ export async function getCurrentUser(): Promise<AuthPayload | null> {
 }
 
 /**
- * Verifica se o usuário tem acesso a um curso específico
+ * Verifica se o usuário tem acesso a um curso específico.
+ * Checa: (1) role admin, (2) courseId no JWT, (3) enrollments no banco, (4) subscriptions ativas.
  */
 export async function hasAccessToCourse(courseId: string): Promise<boolean> {
   const user = await getCurrentUser();
@@ -139,8 +140,43 @@ export async function hasAccessToCourse(courseId: string): Promise<boolean> {
     return true;
   }
 
-  // Estudante só tem acesso ao curso específico do token
-  return user.courseId === courseId;
+  // Check rápido: courseId no JWT token
+  if (user.courseId === courseId) {
+    return true;
+  }
+
+  // Check no banco: enrollment válido (não expirado, ou lifetime)
+  const { prisma } = await import('@/lib/prisma');
+
+  const enrollment = await prisma.enrollment.findFirst({
+    where: {
+      userId: user.userId,
+      courseId,
+      OR: [
+        { isLifetime: true },
+        { expiresAt: null },
+        { expiresAt: { gt: new Date() } },
+      ],
+    },
+  });
+
+  if (enrollment) {
+    return true;
+  }
+
+  // Check no banco: subscription ativa (Premium = todos cursos, Básico = curso específico)
+  const subscription = await prisma.subscription.findFirst({
+    where: {
+      userId: user.userId,
+      status: 'active',
+      OR: [
+        { plan: 'premium' },
+        { plan: 'basico', courseId },
+      ],
+    },
+  });
+
+  return !!subscription;
 }
 
 /**
