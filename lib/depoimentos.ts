@@ -8,19 +8,24 @@ import { PaginatedResult } from './types/admin-list';
 export interface Testimonial {
   id: string;
   name: string;
+  email: string;
+  phone: string | null;
   role: string;
-  company: string | null;
-  content: string;
+  text: string;
   rating: number;
-  photoUrl: string | null;
-  isPublished: boolean;
+  avatar: string;
+  color: string;
+  status: string;
+  moderatedBy: string | null;
+  moderatedAt: Date | string | null;
+  rejectionReason: string | null;
   createdAt: Date | string;
 }
 
 export async function fetchTestimonialsPaginated(params: {
   page?: string;
   pageSize?: string;
-  isPublished?: string;
+  status?: string;
   search?: string;
 }): Promise<PaginatedResult<Testimonial>> {
   const page = parseInt(params.page || '1');
@@ -29,15 +34,15 @@ export async function fetchTestimonialsPaginated(params: {
 
   const where: Record<string, unknown> = {};
 
-  if (params.isPublished !== undefined && params.isPublished !== '') {
-    where.isPublished = params.isPublished === 'true';
+  if (params.status !== undefined && params.status !== '') {
+    where.status = params.status;
   }
 
   if (params.search) {
     where.OR = [
       { name: { contains: params.search, mode: 'insensitive' } },
       { role: { contains: params.search, mode: 'insensitive' } },
-      { content: { contains: params.search, mode: 'insensitive' } },
+      { text: { contains: params.search, mode: 'insensitive' } },
     ];
   }
 

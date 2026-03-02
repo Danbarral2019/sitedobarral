@@ -4,9 +4,8 @@
  * Configuração da lista de Depoimentos
  */
 
-import Image from 'next/image';
 import Link from 'next/link';
-import { MessageSquare, Star, Edit, Trash2, CheckCircle, XCircle, User } from 'lucide-react';
+import { MessageSquare, Star, Edit, Trash2, CheckCircle, XCircle, Clock } from 'lucide-react';
 import { createListConfig } from '@/components/admin/ResourceListContainer';
 import { AdminListConfig } from '@/lib/types/admin-list';
 import { Testimonial } from '@/lib/depoimentos';
@@ -27,8 +26,8 @@ export const depoimentosConfig: AdminListConfig<Testimonial> = createListConfig<
       color: 'bg-blue-100 text-blue-600',
     },
     {
-      label: 'Publicados',
-      value: items.filter((t) => t.isPublished).length,
+      label: 'Aprovados',
+      value: items.filter((t) => t.status === 'approved').length,
       icon: CheckCircle,
       color: 'bg-green-100 text-green-600',
     },
@@ -42,13 +41,14 @@ export const depoimentosConfig: AdminListConfig<Testimonial> = createListConfig<
 
   filters: [
     {
-      id: 'isPublished',
+      id: 'status',
       label: 'Status',
       type: 'select',
       options: [
         { value: '', label: 'Todos' },
-        { value: 'true', label: 'Publicados' },
-        { value: 'false', label: 'Rascunhos' },
+        { value: 'approved', label: 'Aprovados' },
+        { value: 'pending', label: 'Pendentes' },
+        { value: 'rejected', label: 'Rejeitados' },
       ],
     },
   ],
@@ -59,28 +59,21 @@ export const depoimentosConfig: AdminListConfig<Testimonial> = createListConfig<
       label: 'Pessoa',
       render: (testimonial) => (
         <div className="flex items-center gap-3">
-          {testimonial.photoUrl ? (
-            <Image src={testimonial.photoUrl} alt="" width={40} height={40} className="rounded-full" unoptimized />
-          ) : (
-            <div className="w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center">
-              <User className="w-5 h-5 text-gray-400" />
-            </div>
-          )}
+          <div className={`w-10 h-10 rounded-full bg-gradient-to-br ${testimonial.color} flex items-center justify-center text-white font-bold`}>
+            {testimonial.avatar}
+          </div>
           <div>
             <p className="font-semibold text-gray-900">{testimonial.name}</p>
             <p className="text-sm text-gray-600">{testimonial.role}</p>
-            {testimonial.company && (
-              <p className="text-xs text-gray-500">{testimonial.company}</p>
-            )}
           </div>
         </div>
       ),
     },
     {
-      id: 'content',
+      id: 'text',
       label: 'Depoimento',
       render: (testimonial) => (
-        <p className="text-sm text-gray-700 line-clamp-2">{testimonial.content}</p>
+        <p className="text-sm text-gray-700 line-clamp-2">{testimonial.text}</p>
       ),
     },
     {
@@ -98,20 +91,32 @@ export const depoimentosConfig: AdminListConfig<Testimonial> = createListConfig<
       ),
     },
     {
-      id: 'isPublished',
+      id: 'status',
       label: 'Status',
-      render: (testimonial) =>
-        testimonial.isPublished ? (
-          <span className="px-3 py-1 bg-green-100 text-green-800 text-xs font-bold rounded-full flex items-center gap-1 w-fit">
-            <CheckCircle className="w-3 h-3" />
-            Publicado
+      render: (testimonial) => {
+        if (testimonial.status === 'approved') {
+          return (
+            <span className="px-3 py-1 bg-green-100 text-green-800 text-xs font-bold rounded-full flex items-center gap-1 w-fit">
+              <CheckCircle className="w-3 h-3" />
+              Aprovado
+            </span>
+          );
+        }
+        if (testimonial.status === 'rejected') {
+          return (
+            <span className="px-3 py-1 bg-red-100 text-red-800 text-xs font-bold rounded-full flex items-center gap-1 w-fit">
+              <XCircle className="w-3 h-3" />
+              Rejeitado
+            </span>
+          );
+        }
+        return (
+          <span className="px-3 py-1 bg-yellow-100 text-yellow-800 text-xs font-bold rounded-full flex items-center gap-1 w-fit">
+            <Clock className="w-3 h-3" />
+            Pendente
           </span>
-        ) : (
-          <span className="px-3 py-1 bg-gray-100 text-gray-800 text-xs font-bold rounded-full flex items-center gap-1 w-fit">
-            <XCircle className="w-3 h-3" />
-            Rascunho
-          </span>
-        ),
+        );
+      },
     },
   ],
 

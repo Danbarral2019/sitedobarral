@@ -60,6 +60,48 @@ export async function GET(request: NextRequest) {
 }
 
 /**
+ * POST /api/admin/depoimentos
+ * Cria um novo depoimento (admin)
+ */
+export async function POST(request: NextRequest) {
+  try {
+    const body = await request.json();
+    const { name, email, phone, role, text, rating, avatar, color, status } = body;
+
+    if (!name || !email || !role || !text) {
+      return NextResponse.json(
+        { error: 'Nome, email, cargo e texto são obrigatórios' },
+        { status: 400 }
+      );
+    }
+
+    const testimonial = await prisma.testimonial.create({
+      data: {
+        name,
+        email,
+        phone: phone || null,
+        role,
+        text,
+        rating: Math.min(5, Math.max(1, parseInt(rating) || 5)),
+        avatar: avatar || name.charAt(0).toUpperCase(),
+        color: color || 'from-blue-400 to-blue-600',
+        status: status || 'pending',
+      },
+    });
+
+    await CacheInvalidation.testimonials();
+
+    return NextResponse.json({ success: true, testimonial }, { status: 201 });
+  } catch (error) {
+    console.error('Erro ao criar depoimento:', error);
+    return NextResponse.json(
+      { error: 'Erro ao criar depoimento' },
+      { status: 500 }
+    );
+  }
+}
+
+/**
  * PATCH /api/admin/depoimentos
  * Atualiza status de um depoimento (aprovar/rejeitar)
  */
