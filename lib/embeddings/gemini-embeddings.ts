@@ -1,31 +1,32 @@
 /**
  * Gemini Embeddings Client
  *
- * Wrapper para o modelo gemini-embedding-001 da Google
+ * Wrapper para o modelo de embeddings da Google (Gemini)
  * Free tier: 1500 req/min
  *
+ * Modelo configuravel via env var EMBEDDING_MODEL (default: gemini-embedding-2-preview)
  * Documentacao: https://ai.google.dev/gemini-api/docs/embeddings
  */
 
-import { GoogleGenerativeAI, type EmbedContentRequest, type BatchEmbedContentsRequest } from '@google/generative-ai';
+import { GoogleGenAI } from '@google/genai';
 
 // ===========================
 // Configuration
 // ===========================
 
 const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
-const EMBEDDING_MODEL = 'gemini-embedding-001';
-const EMBEDDING_DIMENSION = 768; // Nosso banco usa vector(768); gemini-embedding-001 default é 3072
+const EMBEDDING_MODEL = process.env.EMBEDDING_MODEL || 'gemini-embedding-2-preview';
+const EMBEDDING_DIMENSION = 768; // Nosso banco usa vector(768); Matryoshka truncation
 
 // Lazy-loaded client
-let genAI: GoogleGenerativeAI | null = null;
+let genAI: GoogleGenAI | null = null;
 
-function getGenAI(): GoogleGenerativeAI {
+function getGenAI(): GoogleGenAI {
   if (!GEMINI_API_KEY) {
     throw new Error('GEMINI_API_KEY not configured');
   }
   if (!genAI) {
-    genAI = new GoogleGenerativeAI(GEMINI_API_KEY);
+    genAI = new GoogleGenAI({ apiKey: GEMINI_API_KEY });
   }
   return genAI;
 }
@@ -62,16 +63,20 @@ export async function generateEmbedding(text: string): Promise<EmbeddingResult> 
     throw new Error('Text cannot be empty');
   }
 
-  const model = getGenAI().getGenerativeModel({ model: EMBEDDING_MODEL });
+  const ai = getGenAI();
 
-  // outputDimensionality não está nos tipos do SDK mas a API aceita o campo
-  const request = {
-    content: { parts: [{ text }], role: 'user' as const },
-    outputDimensionality: EMBEDDING_DIMENSION,
-  } as EmbedContentRequest;
+  const result = await ai.models.embedContent({
+    model: EMBEDDING_MODEL,
+    contents: text,
+    config: {
+      outputDimensionality: EMBEDDING_DIMENSION,
+    },
+  });
 
-  const result = await model.embedContent(request);
-  const embedding = result.embedding.values;
+  const embedding = result.embeddings?.[0]?.values;
+  if (!embedding) {
+    throw new Error('No embedding returned from Gemini API');
+  }
 
   return {
     embedding,
@@ -107,7 +112,7 @@ export async function generateBatchEmbeddings(
     throw new Error('All texts are empty');
   }
 
-  const model = getGenAI().getGenerativeModel({ model: EMBEDDING_MODEL });
+  const ai = getGenAI();
 
   // Processa em batches de 100 (limite recomendado da API)
   const BATCH_SIZE = 100;
@@ -116,18 +121,25 @@ export async function generateBatchEmbeddings(
   for (let i = 0; i < validTexts.length; i += BATCH_SIZE) {
     const batch = validTexts.slice(i, i + BATCH_SIZE);
 
-    // outputDimensionality não está nos tipos do SDK mas a API aceita o campo
-    const batchRequest = {
-      requests: batch.map(text => ({
-        content: { parts: [{ text }], role: 'user' as const },
+    // embedContent com contents como array retorna multiple embeddings
+    const result = await ai.models.embedContent({
+      model: EMBEDDING_MODEL,
+      contents: batch.map(text => ({ role: 'user' as const, parts: [{ text }] })),
+      config: {
         outputDimensionality: EMBEDDING_DIMENSION,
-      })),
-    } as BatchEmbedContentsRequest;
+      },
+    });
 
-    const result = await model.batchEmbedContents(batchRequest);
+    if (!result.embeddings || result.embeddings.length !== batch.length) {
+      throw new Error(`Expected ${batch.length} embeddings, got ${result.embeddings?.length ?? 0}`);
+    }
 
-    const batchEmbeddings = result.embeddings.map(e => e.values);
-    allEmbeddings.push(...batchEmbeddings);
+    for (const emb of result.embeddings) {
+      if (!emb.values) {
+        throw new Error('No embedding values returned from Gemini API in batch');
+      }
+      allEmbeddings.push(emb.values);
+    }
 
     // Small delay between batches to avoid rate limiting
     if (i + BATCH_SIZE < validTexts.length) {

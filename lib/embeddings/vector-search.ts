@@ -132,7 +132,7 @@ async function performSearch(
   // Threshold dinâmico: tenta do mais restritivo ao mais permissivo
   const thresholds = requestedThreshold
     ? [requestedThreshold]
-    : [0.55, 0.45, 0.35];
+    : [0.65, 0.55, 0.45];
 
   for (const threshold of thresholds) {
     const result = await executeVectorSearch(query, { ...options, threshold });
@@ -146,7 +146,7 @@ async function performSearch(
   }
 
   // Fallback: retorna o que tiver com threshold mais baixo
-  return executeVectorSearch(query, { ...options, threshold: 0.30 });
+  return executeVectorSearch(query, { ...options, threshold: 0.40 });
 }
 
 /**
