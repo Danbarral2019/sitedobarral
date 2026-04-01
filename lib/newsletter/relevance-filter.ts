@@ -44,7 +44,7 @@ export interface RelevanceFilterResult {
 // Constants
 // ===========================
 
-const BATCH_SIZE = 20;
+const BATCH_SIZE = 10;
 const MIN_SCORE = 50;
 const MIN_DECISIONS = 10;
 const MAX_DECISIONS = 30;
@@ -101,7 +101,7 @@ async function evaluateBatch(decisions: DecisionInput[]): Promise<Map<string, { 
     const result = await queryGeminiText(prompt, {
       model: 'gemini-2.0-flash',
       temperature: 0.3,
-      maxOutputTokens: 4096,
+      maxOutputTokens: 8192,
       useCache: false,
       systemInstruction: SYSTEM_INSTRUCTION,
     });
