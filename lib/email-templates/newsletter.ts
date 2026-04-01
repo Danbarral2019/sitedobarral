@@ -1,11 +1,33 @@
 /**
- * Newsletter Email Templates (HTML reutilizável)
+ * Newsletter Email Templates v0.2 (HTML reutilizável)
+ *
+ * Melhorias v0.2:
+ * - Texto introdutório gerado por IA (panorama do mês)
+ * - Seção de conteúdos autorais (blog, publicações, vídeos)
+ * - Jurisprudência filtrada por relevância com AI summaries
+ * - Cobertura de todas as categorias de documentos
+ * - Seção de alterações legislativas
+ * - Links de redes sociais corrigidos
+ *
  * Design: header com gradiente azul-marinho, cards por categoria, CTA, footer profissional
  * Compatível Gmail/Outlook (inline styles, tables, sem CSS classes)
  */
 
-interface MonthlyNewsletterData {
+import type { FilteredDecision } from '@/lib/newsletter/relevance-filter';
+
+// ===========================
+// Types
+// ===========================
+
+export interface MonthlyNewsletterData {
   sendId: string;
+  introHtml: string;
+  authorContent: {
+    blogPosts: Array<{ title: string; slug: string; excerpt: string; publishedAt: Date }>;
+    publications: Array<{ title: string; type: string; description: string; externalUrl: string | null; publishedAt: Date }>;
+    videos: Array<{ title: string; courseId: string; youtubeUrl: string }>;
+  };
+  selectedDecisions: FilteredDecision[];
   documentsByCategory: Record<string, Array<{
     id: string;
     title: string;
@@ -14,56 +36,79 @@ interface MonthlyNewsletterData {
     uploadedAt: Date;
     url: string | null;
   }>>;
+  legislativeChanges: Array<{ fullNumber: string; title: string; ementa: string; publishDate: Date }>;
   totalDocuments: number;
 }
 
-const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://profdanielbarral.com';
+// ===========================
+// Constants
+// ===========================
 
-function trackUrl(sendId: string, originalUrl: string): string {
-  return `${baseUrl}/api/newsletter/track?id=${sendId}&type=click&url=${encodeURIComponent(originalUrl)}`;
-}
+const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://profdanielbarral.com';
 
 function trackingPixel(sendId: string): string {
   return `<img src="${baseUrl}/api/newsletter/track?id=${sendId}&type=open" width="1" height="1" style="display:block;" alt="" />`;
 }
 
 const categoryNames: Record<string, string> = {
-  'apostila': 'Apostilas e Material Didático',
-  'acordao': 'Acórdãos',
-  'parecer': 'Pareceres Jurídicos',
+  'apostila': 'Apostilas e Material Did\u00e1tico',
+  'parecer': 'Pareceres Jur\u00eddicos',
   'edital': 'Editais',
   'artigo': 'Artigos e Doutrinas',
-  'orientacao-normativa': 'Orientações Normativas',
+  'orientacao-normativa': 'Orienta\u00e7\u00f5es Normativas',
   'decor': 'DECOR',
   'enunciado': 'Enunciados',
   'boa_pratica': 'Outros Atos Normativos',
-  'tribunal-decisions': 'Decisões de Tribunais (TCEs e CNJ)',
+  'sumula': 'S\u00famulas',
+  'legislacao': 'Legisla\u00e7\u00e3o',
   'outro': 'Outros Documentos',
 };
 
 const categoryIcons: Record<string, string> = {
   'apostila': '&#128214;',
-  'acordao': '&#9878;',
   'parecer': '&#128196;',
   'edital': '&#128203;',
   'artigo': '&#128221;',
   'orientacao-normativa': '&#128220;',
   'decor': '&#128218;',
   'enunciado': '&#128209;',
+  'boa_pratica': '&#128203;',
+  'sumula': '&#128203;',
+  'legislacao': '&#9878;',
   'outro': '&#128195;',
 };
 
 const categoryColors: Record<string, string> = {
   'apostila': '#2563eb',
-  'acordao': '#7c3aed',
   'parecer': '#0891b2',
   'edital': '#059669',
   'artigo': '#d97706',
   'orientacao-normativa': '#dc2626',
   'decor': '#4f46e5',
   'enunciado': '#0d9488',
+  'boa_pratica': '#6366f1',
+  'sumula': '#7c3aed',
+  'legislacao': '#b91c1c',
   'outro': '#6b7280',
 };
+
+const tribunalColors: Record<string, string> = {
+  'TCU': '#7c3aed',
+  'TCE-SP': '#2563eb',
+  'TCE-MG': '#059669',
+  'TCE-PR': '#0891b2',
+  'TCE-SC': '#6366f1',
+  'TCE-RJ': '#d97706',
+  'TCE-RS': '#dc2626',
+  'TCE-PE': '#0d9488',
+  'STJ': '#b91c1c',
+  'STF': '#991b1b',
+  'CNJ': '#4f46e5',
+};
+
+// ===========================
+// Shared Render Helpers
+// ===========================
 
 function renderHeader(): string {
   return `
@@ -108,15 +153,15 @@ function renderFooter(sendId: string): string {
           <table cellpadding="0" cellspacing="0" border="0">
             <tr>
               <td align="center" style="padding:0 8px;">
-                <a href="${trackUrl(sendId, 'https://www.linkedin.com/in/danielbarral')}" style="color:#60a5fa;text-decoration:none;font-size:13px;font-family:Arial,Helvetica,sans-serif;">LinkedIn</a>
+                <a href="https://www.linkedin.com/in/daniel-de-andrade-oliveira-barral-b5110870/" style="color:#60a5fa;text-decoration:none;font-size:13px;font-family:Arial,Helvetica,sans-serif;">LinkedIn</a>
               </td>
               <td style="color:#475569;font-size:13px;">|</td>
               <td align="center" style="padding:0 8px;">
-                <a href="${trackUrl(sendId, 'https://www.instagram.com/prof.danielbarral')}" style="color:#60a5fa;text-decoration:none;font-size:13px;font-family:Arial,Helvetica,sans-serif;">Instagram</a>
+                <a href="https://instagram.com/danbarral" style="color:#60a5fa;text-decoration:none;font-size:13px;font-family:Arial,Helvetica,sans-serif;">Instagram</a>
               </td>
               <td style="color:#475569;font-size:13px;">|</td>
               <td align="center" style="padding:0 8px;">
-                <a href="${trackUrl(sendId, baseUrl)}" style="color:#60a5fa;text-decoration:none;font-size:13px;font-family:Arial,Helvetica,sans-serif;">Site</a>
+                <a href="${baseUrl}" style="color:#60a5fa;text-decoration:none;font-size:13px;font-family:Arial,Helvetica,sans-serif;">Site</a>
               </td>
             </tr>
           </table>
@@ -137,7 +182,7 @@ function renderFooter(sendId: string): string {
             Voc&#234; est&#225; recebendo este email porque se inscreveu na nossa newsletter.
           </p>
           <p style="margin:0 0 8px 0;font-size:12px;color:#64748b;font-family:Arial,Helvetica,sans-serif;">
-            <a href="${trackUrl(sendId, `${baseUrl}/newsletter/unsubscribe`)}" style="color:#94a3b8;text-decoration:underline;">Cancelar inscri&#231;&#227;o</a>
+            <a href="${baseUrl}/newsletter/unsubscribe" style="color:#94a3b8;text-decoration:underline;">Cancelar inscri&#231;&#227;o</a>
           </p>
         </td>
       </tr>
@@ -152,21 +197,21 @@ function renderFooter(sendId: string): string {
     </table>`;
 }
 
-function renderCTAButton(sendId: string, text: string, url: string): string {
+function renderCTAButton(text: string, url: string): string {
   return `
     <table width="100%" cellpadding="0" cellspacing="0" border="0">
       <tr>
-        <td align="center" style="padding:30px 20px;">
+        <td align="center" style="padding:24px 20px;">
           <table cellpadding="0" cellspacing="0" border="0">
             <tr>
               <!--[if mso]>
               <td align="center" bgcolor="#2563eb" style="border-radius:8px;padding:16px 48px;">
-                <a href="${trackUrl(sendId, url)}" style="display:inline-block;color:#ffffff;text-decoration:none;font-size:17px;font-weight:bold;font-family:Arial,Helvetica,sans-serif;">${text}</a>
+                <a href="${url}" style="display:inline-block;color:#ffffff;text-decoration:none;font-size:17px;font-weight:bold;font-family:Arial,Helvetica,sans-serif;">${text}</a>
               </td>
               <![endif]-->
               <!--[if !mso]><!-->
               <td align="center" style="background:linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);border-radius:8px;box-shadow:0 4px 14px rgba(37,99,235,0.35);">
-                <a href="${trackUrl(sendId, url)}" style="display:inline-block;padding:16px 48px;color:#ffffff;text-decoration:none;font-size:17px;font-weight:bold;font-family:Arial,Helvetica,sans-serif;letter-spacing:0.3px;">${text} &rarr;</a>
+                <a href="${url}" style="display:inline-block;padding:16px 48px;color:#ffffff;text-decoration:none;font-size:17px;font-weight:bold;font-family:Arial,Helvetica,sans-serif;letter-spacing:0.3px;">${text} &rarr;</a>
               </td>
               <!--<![endif]-->
             </tr>
@@ -180,39 +225,179 @@ function renderPreheader(text: string): string {
   return `<div style="display:none;font-size:1px;line-height:1px;max-height:0px;max-width:0px;opacity:0;overflow:hidden;mso-hide:all;">${text}&#847; &#847; &#847; &#847; &#847; &#847; &#847; &#847; &#847; &#847; &#847; &#847; &#847; &#847; &#847; &#847; &#847; &#847; &#847; &#847; &#847; &#847; &#847; &#847; &#847; &#847; &#847; &#847; &#847; &#847;</div>`;
 }
 
-export function renderMonthlyNewsletter(data: MonthlyNewsletterData): string {
-  const { sendId, documentsByCategory, totalDocuments } = data;
-
-  const categoryCount = Object.keys(documentsByCategory).length;
-
-  // Mini dashboard stats
-  const statsHtml = `
-    <table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin:0 0 28px 0;">
+function renderSectionTitle(icon: string, title: string, subtitle?: string): string {
+  return `
+    <table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-bottom:16px;">
       <tr>
-        <td width="50%" style="padding:0 6px 0 0;">
-          <table width="100%" cellpadding="0" cellspacing="0" border="0" style="border:1px solid #e5e7eb;border-radius:8px;background-color:#f8fafc;">
-            <tr>
-              <td align="center" style="padding:20px 12px;">
-                <p style="margin:0 0 4px 0;font-size:32px;color:#1e3a5f;font-family:Georgia,'Times New Roman',serif;font-weight:700;">${totalDocuments}</p>
-                <p style="margin:0;font-size:12px;color:#64748b;font-family:Arial,Helvetica,sans-serif;text-transform:uppercase;letter-spacing:0.5px;">Documentos</p>
-              </td>
-            </tr>
-          </table>
+        <td style="padding:0;">
+          <span style="font-size:20px;vertical-align:middle;">${icon}</span>
+          <span style="font-size:20px;color:#1e293b;font-family:Georgia,'Times New Roman',serif;font-weight:700;vertical-align:middle;padding-left:8px;">${title}</span>
+          ${subtitle ? `<span style="font-size:13px;color:#94a3b8;font-family:Arial,Helvetica,sans-serif;vertical-align:middle;padding-left:8px;">${subtitle}</span>` : ''}
         </td>
-        <td width="50%" style="padding:0 0 0 6px;">
-          <table width="100%" cellpadding="0" cellspacing="0" border="0" style="border:1px solid #e5e7eb;border-radius:8px;background-color:#f8fafc;">
-            <tr>
-              <td align="center" style="padding:20px 12px;">
-                <p style="margin:0 0 4px 0;font-size:32px;color:#1e3a5f;font-family:Georgia,'Times New Roman',serif;font-weight:700;">${categoryCount}</p>
-                <p style="margin:0;font-size:12px;color:#64748b;font-family:Arial,Helvetica,sans-serif;text-transform:uppercase;letter-spacing:0.5px;">Categorias</p>
-              </td>
-            </tr>
+      </tr>
+      <tr>
+        <td style="padding:6px 0 0 0;">
+          <table width="100%" cellpadding="0" cellspacing="0" border="0">
+            <tr><td style="height:2px;background:linear-gradient(90deg, #2563eb 0%, #60a5fa 50%, transparent 100%);font-size:0;line-height:0;">&nbsp;</td></tr>
           </table>
         </td>
       </tr>
     </table>`;
+}
 
-  let categorySections = '';
+// ===========================
+// Section: Author Content
+// ===========================
+
+function renderAuthorContentSection(authorContent: MonthlyNewsletterData['authorContent']): string {
+  const { blogPosts, publications, videos } = authorContent;
+  const hasContent = blogPosts.length > 0 || publications.length > 0 || videos.length > 0;
+
+  if (!hasContent) return '';
+
+  let items = '';
+
+  // Blog posts
+  for (const post of blogPosts) {
+    items += `
+      <table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-bottom:12px;border:1px solid #fde68a;border-left:4px solid #f59e0b;border-radius:6px;background-color:#fffbeb;">
+        <tr>
+          <td style="padding:14px 16px;">
+            <p style="margin:0 0 2px 0;font-size:11px;color:#92400e;font-family:Arial,Helvetica,sans-serif;text-transform:uppercase;letter-spacing:0.5px;font-weight:600;">&#128221; Artigo no Blog</p>
+            <h3 style="margin:0 0 6px 0;font-size:15px;color:#1e293b;font-family:Arial,Helvetica,sans-serif;font-weight:600;">
+              <a href="${baseUrl}/blog/${post.slug}" style="color:#1e293b;text-decoration:none;">${post.title}</a>
+            </h3>
+            <p style="margin:0 0 8px 0;color:#64748b;font-size:13px;line-height:1.6;font-family:Arial,Helvetica,sans-serif;">
+              ${post.excerpt.substring(0, 180)}${post.excerpt.length > 180 ? '...' : ''}
+            </p>
+            <a href="${baseUrl}/blog/${post.slug}" style="color:#d97706;font-size:13px;font-weight:600;font-family:Arial,Helvetica,sans-serif;text-decoration:none;">Ler artigo &rarr;</a>
+          </td>
+        </tr>
+      </table>`;
+  }
+
+  // Publications
+  const publicationTypeNames: Record<string, string> = {
+    'livro': 'Livro',
+    'artigo': 'Artigo Publicado',
+    'noticia': 'Not\u00edcia',
+  };
+
+  for (const pub of publications) {
+    const typeName = publicationTypeNames[pub.type] || pub.type;
+    items += `
+      <table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-bottom:12px;border:1px solid #fde68a;border-left:4px solid #f59e0b;border-radius:6px;background-color:#fffbeb;">
+        <tr>
+          <td style="padding:14px 16px;">
+            <p style="margin:0 0 2px 0;font-size:11px;color:#92400e;font-family:Arial,Helvetica,sans-serif;text-transform:uppercase;letter-spacing:0.5px;font-weight:600;">&#128218; ${typeName}</p>
+            <h3 style="margin:0 0 6px 0;font-size:15px;color:#1e293b;font-family:Arial,Helvetica,sans-serif;font-weight:600;">${pub.title}</h3>
+            <p style="margin:0 0 8px 0;color:#64748b;font-size:13px;line-height:1.6;font-family:Arial,Helvetica,sans-serif;">
+              ${pub.description.substring(0, 180)}${pub.description.length > 180 ? '...' : ''}
+            </p>
+            ${pub.externalUrl ? `<a href="${pub.externalUrl}" style="color:#d97706;font-size:13px;font-weight:600;font-family:Arial,Helvetica,sans-serif;text-decoration:none;">Acessar &rarr;</a>` : ''}
+          </td>
+        </tr>
+      </table>`;
+  }
+
+  // Videos
+  for (const video of videos) {
+    items += `
+      <table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-bottom:12px;border:1px solid #fde68a;border-left:4px solid #f59e0b;border-radius:6px;background-color:#fffbeb;">
+        <tr>
+          <td style="padding:14px 16px;">
+            <p style="margin:0 0 2px 0;font-size:11px;color:#92400e;font-family:Arial,Helvetica,sans-serif;text-transform:uppercase;letter-spacing:0.5px;font-weight:600;">&#127909; V&#237;deo</p>
+            <h3 style="margin:0 0 6px 0;font-size:15px;color:#1e293b;font-family:Arial,Helvetica,sans-serif;font-weight:600;">${video.title}</h3>
+            <a href="${video.youtubeUrl}" style="color:#d97706;font-size:13px;font-weight:600;font-family:Arial,Helvetica,sans-serif;text-decoration:none;">Assistir &rarr;</a>
+          </td>
+        </tr>
+      </table>`;
+  }
+
+  return `
+    <table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-bottom:32px;">
+      <tr>
+        <td>
+          ${renderSectionTitle('&#11088;', 'Destaques do Professor')}
+          ${items}
+        </td>
+      </tr>
+    </table>`;
+}
+
+// ===========================
+// Section: Selected Decisions (Jurisprudência)
+// ===========================
+
+function renderSelectedDecisionsSection(decisions: FilteredDecision[]): string {
+  if (decisions.length === 0) return '';
+
+  let decisionCards = '';
+  for (const decision of decisions) {
+    const tribunalColor = tribunalColors[decision.tribunalCode] || '#6b7280';
+
+    // Theme tags
+    const themeTags = decision.themes.slice(0, 3).map(theme =>
+      `<span style="display:inline-block;padding:2px 8px;margin:0 4px 4px 0;background-color:#f1f5f9;border-radius:4px;font-size:11px;color:#475569;font-family:Arial,Helvetica,sans-serif;">${theme}</span>`
+    ).join('');
+
+    // Lei articles
+    const articleTags = decision.leiArticles.slice(0, 4).map(art =>
+      `<span style="display:inline-block;padding:2px 8px;margin:0 4px 4px 0;background-color:#eef2ff;border-radius:4px;font-size:11px;color:#4338ca;font-family:Arial,Helvetica,sans-serif;">Art. ${art}</span>`
+    ).join('');
+
+    decisionCards += `
+      <table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-bottom:14px;border:1px solid #e5e7eb;border-left:4px solid ${tribunalColor};border-radius:6px;background-color:#fafbfc;">
+        <tr>
+          <td style="padding:16px;">
+            <table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-bottom:8px;">
+              <tr>
+                <td>
+                  <span style="display:inline-block;padding:3px 10px;background-color:${tribunalColor};border-radius:4px;font-size:11px;color:#ffffff;font-family:Arial,Helvetica,sans-serif;font-weight:600;">${decision.tribunalCode}</span>
+                </td>
+              </tr>
+            </table>
+            <h3 style="margin:0 0 8px 0;font-size:15px;color:#1e293b;font-family:Arial,Helvetica,sans-serif;font-weight:600;line-height:1.4;">
+              ${decision.title}
+            </h3>
+            <p style="margin:0 0 10px 0;color:#475569;font-size:13px;line-height:1.7;font-family:Arial,Helvetica,sans-serif;">
+              ${decision.aiSummary}
+            </p>
+            ${themeTags || articleTags ? `
+              <table width="100%" cellpadding="0" cellspacing="0" border="0">
+                <tr>
+                  <td style="padding:0;">
+                    ${themeTags}${articleTags}
+                  </td>
+                </tr>
+              </table>
+            ` : ''}
+          </td>
+        </tr>
+      </table>`;
+  }
+
+  return `
+    <table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-bottom:32px;">
+      <tr>
+        <td>
+          ${renderSectionTitle('&#9878;', 'Jurisprud&#234;ncia Selecionada', `(${decisions.length} decis&#245;es)`)}
+          <p style="margin:0 0 16px 0;font-size:13px;color:#64748b;font-family:Arial,Helvetica,sans-serif;line-height:1.5;">
+            Selecionamos as decis&#245;es mais relevantes do m&#234;s para o estudo da Lei 14.133/2021, com resumo explicativo de cada uma.
+          </p>
+          ${decisionCards}
+        </td>
+      </tr>
+    </table>`;
+}
+
+// ===========================
+// Section: Other Document Categories
+// ===========================
+
+function renderDocumentCategories(documentsByCategory: MonthlyNewsletterData['documentsByCategory']): string {
+  let sections = '';
+
   for (const [category, docs] of Object.entries(documentsByCategory)) {
     const categoryName = categoryNames[category] || category;
     const borderColor = categoryColors[category] || '#6b7280';
@@ -240,7 +425,7 @@ export function renderMonthlyNewsletter(data: MonthlyNewsletterData): string {
         </table>`;
     });
 
-    categorySections += `
+    sections += `
       <table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-bottom:28px;">
         <tr>
           <td>
@@ -258,6 +443,108 @@ export function renderMonthlyNewsletter(data: MonthlyNewsletterData): string {
         </tr>
       </table>`;
   }
+
+  if (!sections) return '';
+
+  return `
+    <table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-bottom:16px;">
+      <tr>
+        <td>
+          ${renderSectionTitle('&#128196;', 'Demais Documentos')}
+          ${sections}
+        </td>
+      </tr>
+    </table>`;
+}
+
+// ===========================
+// Section: Legislative Changes
+// ===========================
+
+function renderLegislativeChangesSection(changes: MonthlyNewsletterData['legislativeChanges']): string {
+  if (changes.length === 0) return '';
+
+  let rows = '';
+  for (const act of changes) {
+    rows += `
+      <table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-bottom:10px;border:1px solid #fecaca;border-left:4px solid #dc2626;border-radius:6px;background-color:#fef2f2;">
+        <tr>
+          <td style="padding:14px 16px;">
+            <p style="margin:0 0 2px 0;font-size:11px;color:#991b1b;font-family:Arial,Helvetica,sans-serif;text-transform:uppercase;letter-spacing:0.5px;font-weight:600;">${act.fullNumber}</p>
+            <h3 style="margin:0 0 6px 0;font-size:15px;color:#1e293b;font-family:Arial,Helvetica,sans-serif;font-weight:600;">${act.title}</h3>
+            <p style="margin:0;color:#64748b;font-size:13px;line-height:1.6;font-family:Arial,Helvetica,sans-serif;">
+              ${act.ementa.substring(0, 250)}${act.ementa.length > 250 ? '...' : ''}
+            </p>
+          </td>
+        </tr>
+      </table>`;
+  }
+
+  return `
+    <table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-bottom:32px;">
+      <tr>
+        <td>
+          ${renderSectionTitle('&#128220;', 'Altera&#231;&#245;es Legislativas')}
+          ${rows}
+        </td>
+      </tr>
+    </table>`;
+}
+
+// ===========================
+// Main Render Function
+// ===========================
+
+export function renderMonthlyNewsletter(data: MonthlyNewsletterData): string {
+  const {
+    sendId,
+    introHtml,
+    authorContent,
+    selectedDecisions,
+    documentsByCategory,
+    legislativeChanges,
+    totalDocuments,
+  } = data;
+
+  const categoryCount = Object.keys(documentsByCategory).length;
+  const hasAuthorContent = authorContent.blogPosts.length > 0 || authorContent.publications.length > 0 || authorContent.videos.length > 0;
+
+  // Mini dashboard stats (3 columns)
+  const statsHtml = `
+    <table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin:0 0 28px 0;">
+      <tr>
+        <td width="33%" style="padding:0 4px 0 0;">
+          <table width="100%" cellpadding="0" cellspacing="0" border="0" style="border:1px solid #e5e7eb;border-radius:8px;background-color:#f8fafc;">
+            <tr>
+              <td align="center" style="padding:16px 8px;">
+                <p style="margin:0 0 4px 0;font-size:28px;color:#1e3a5f;font-family:Georgia,'Times New Roman',serif;font-weight:700;">${totalDocuments}</p>
+                <p style="margin:0;font-size:11px;color:#64748b;font-family:Arial,Helvetica,sans-serif;text-transform:uppercase;letter-spacing:0.5px;">Documentos</p>
+              </td>
+            </tr>
+          </table>
+        </td>
+        <td width="34%" style="padding:0 2px;">
+          <table width="100%" cellpadding="0" cellspacing="0" border="0" style="border:1px solid #e5e7eb;border-radius:8px;background-color:#f8fafc;">
+            <tr>
+              <td align="center" style="padding:16px 8px;">
+                <p style="margin:0 0 4px 0;font-size:28px;color:#7c3aed;font-family:Georgia,'Times New Roman',serif;font-weight:700;">${selectedDecisions.length}</p>
+                <p style="margin:0;font-size:11px;color:#64748b;font-family:Arial,Helvetica,sans-serif;text-transform:uppercase;letter-spacing:0.5px;">Destaques</p>
+              </td>
+            </tr>
+          </table>
+        </td>
+        <td width="33%" style="padding:0 0 0 4px;">
+          <table width="100%" cellpadding="0" cellspacing="0" border="0" style="border:1px solid #e5e7eb;border-radius:8px;background-color:#f8fafc;">
+            <tr>
+              <td align="center" style="padding:16px 8px;">
+                <p style="margin:0 0 4px 0;font-size:28px;color:#059669;font-family:Georgia,'Times New Roman',serif;font-weight:700;">${categoryCount + (selectedDecisions.length > 0 ? 1 : 0) + (legislativeChanges.length > 0 ? 1 : 0) + (hasAuthorContent ? 1 : 0)}</p>
+                <p style="margin:0;font-size:11px;color:#64748b;font-family:Arial,Helvetica,sans-serif;text-transform:uppercase;letter-spacing:0.5px;">Se&#231;&#245;es</p>
+              </td>
+            </tr>
+          </table>
+        </td>
+      </tr>
+    </table>`;
 
   return `<!DOCTYPE html>
 <html lang="pt-BR" xmlns="http://www.w3.org/1999/xhtml" xmlns:v="urn:schemas-microsoft-com:vml" xmlns:o="urn:schemas-microsoft-com:office:office">
@@ -277,7 +564,7 @@ export function renderMonthlyNewsletter(data: MonthlyNewsletterData): string {
   <![endif]-->
 </head>
 <body style="margin:0;padding:0;font-family:Arial,Helvetica,sans-serif;background-color:#f1f5f9;-webkit-text-size-adjust:100%;-ms-text-size-adjust:100%;">
-  ${renderPreheader(`${totalDocuments} novos documentos adicionados este m&#234;s. Confira o resumo mensal da plataforma do Prof. Daniel Barral.`)}
+  ${renderPreheader(`Destaques de Licita&#231;&#245;es e Contratos: ${selectedDecisions.length} decis&#245;es selecionadas, ${totalDocuments} documentos. Confira a curadoria mensal do Prof. Daniel Barral.`)}
   <table width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#f1f5f9;">
     <tr>
       <td align="center" style="padding:20px 10px;">
@@ -285,22 +572,34 @@ export function renderMonthlyNewsletter(data: MonthlyNewsletterData): string {
           <tr><td>${renderHeader()}</td></tr>
           <tr>
             <td style="padding:30px 30px 10px 30px;">
-              <p style="margin:0 0 20px 0;font-size:16px;color:#334155;font-family:Arial,Helvetica,sans-serif;line-height:1.6;">
-                Ol&#225;, <strong>{{NAME}}</strong>! Aqui est&#225; o resumo do m&#234;s:
-              </p>
 
+              <!-- 1. Saudação + Texto Introdutório IA -->
+              <p style="margin:0 0 16px 0;font-size:17px;color:#334155;font-family:Arial,Helvetica,sans-serif;line-height:1.6;">
+                Ol&#225;, <strong>{{NAME}}</strong>!
+              </p>
               <p style="margin:0 0 24px 0;font-size:15px;color:#475569;line-height:1.7;font-family:Arial,Helvetica,sans-serif;">
-                Foram adicionados <strong style="color:#1e3a5f;">${totalDocuments} novos documentos</strong>
-                na plataforma, todos relacionados a Licita&#231;&#245;es e Contratos P&#250;blicos.
+                ${introHtml}
               </p>
 
-              <!-- Mini Dashboard -->
+              <!-- 2. Mini Dashboard -->
               ${statsHtml}
 
-              <!-- Conteudos por categoria -->
-              ${categorySections}
+              <!-- 3. Conteúdos do Professor -->
+              ${renderAuthorContentSection(authorContent)}
 
-              <!-- Proximos Passos -->
+              <!-- 4. Jurisprudência Selecionada -->
+              ${renderSelectedDecisionsSection(selectedDecisions)}
+
+              <!-- 5. Demais Categorias de Documentos -->
+              ${renderDocumentCategories(documentsByCategory)}
+
+              <!-- 6. Alterações Legislativas -->
+              ${renderLegislativeChangesSection(legislativeChanges)}
+
+              <!-- 7. CTA Arquivo Completo -->
+              ${renderCTAButton('Ver todos os documentos do m&#234;s', `${baseUrl}/novidades`)}
+
+              <!-- 8. Próximos Passos -->
               <table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin:8px 0 24px 0;border:1px solid #c7d2fe;border-left:4px solid #6366f1;border-radius:8px;background-color:#eef2ff;">
                 <tr>
                   <td style="padding:20px;">
@@ -310,8 +609,7 @@ export function renderMonthlyNewsletter(data: MonthlyNewsletterData): string {
                         <td>
                           <p style="margin:0 0 6px 0;color:#3730a3;font-size:15px;font-weight:700;font-family:Arial,Helvetica,sans-serif;">Pr&#243;ximos Passos</p>
                           <p style="margin:0;color:#4338ca;font-size:14px;font-family:Arial,Helvetica,sans-serif;line-height:1.6;">
-                            Fique atento &#224;s novidades da plataforma! Em breve teremos novos cursos e materiais exclusivos sobre Licita&#231;&#245;es e Contratos P&#250;blicos.
-                            Acesse a <a href="${trackUrl(sendId, `${baseUrl}/area-restrita`)}" style="color:#4338ca;font-weight:600;">&#193;rea Restrita</a> para acompanhar tudo.
+                            Acesse a <a href="${baseUrl}/area-restrita" style="color:#4338ca;font-weight:600;">&#193;rea Restrita</a> para consultar os documentos na &#237;ntegra, utilizar o assistente de IA e acompanhar todas as novidades da plataforma.
                           </p>
                         </td>
                       </tr>
@@ -320,7 +618,7 @@ export function renderMonthlyNewsletter(data: MonthlyNewsletterData): string {
                 </tr>
               </table>
 
-              ${renderCTAButton(sendId, 'Acessar &#193;rea Restrita', `${baseUrl}/area-restrita`)}
+              ${renderCTAButton('Acessar &#193;rea Restrita', `${baseUrl}/area-restrita`)}
             </td>
           </tr>
           <tr><td>${renderFooter(sendId)}</td></tr>
