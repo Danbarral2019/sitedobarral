@@ -35,10 +35,21 @@ export async function POST(request: NextRequest) {
         break;
       }
 
+      case 'email.clicked': {
+        // Increment clicks on the most recent newsletter send matching the subject
+        const clickSubject = event.data.subject;
+        if (clickSubject) {
+          await prisma.newsletterSend.updateMany({
+            where: { subject: clickSubject },
+            data: { clicks: { increment: 1 } },
+          });
+        }
+        console.log(`[Resend Webhook] ${event.type} for ${event.data.to?.join(', ')}`);
+        break;
+      }
+
       case 'email.delivered':
       case 'email.opened':
-      case 'email.clicked':
-        // Log only - tracking is handled by our own pixel/link tracking
         console.log(`[Resend Webhook] ${event.type} for ${event.data.to?.join(', ')}`);
         break;
 
