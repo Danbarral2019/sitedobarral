@@ -1,20 +1,8 @@
 // @vitest-environment node
-import { describe, it, expect, vi, beforeAll } from 'vitest'
+import { describe, it, expect, vi } from 'vitest'
 
-// Mock logger before importing generate
+// Pino crashes in the vitest node environment; mock only what lib/ai uses
 vi.mock('@/lib/logger', () => ({
-  apiLogger: {
-    info: vi.fn(),
-    warn: vi.fn(),
-    error: vi.fn(),
-    debug: vi.fn(),
-  },
-  authLogger: {
-    info: vi.fn(),
-    warn: vi.fn(),
-    error: vi.fn(),
-    debug: vi.fn(),
-  },
   logger: {
     info: vi.fn(),
     warn: vi.fn(),
