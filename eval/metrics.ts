@@ -58,7 +58,7 @@ export function ndcgAtK(
 
   // IDCG = DCG do ranking ideal
   const idealGains: number[] = []
-  for (const id of highlyRelevant) idealGains.push(2)
+  for (const _id of highlyRelevant) idealGains.push(2)
   for (const id of relevant) {
     if (!highlyRelevant.has(id)) idealGains.push(1)
   }
