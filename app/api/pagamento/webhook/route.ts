@@ -78,7 +78,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ received: true });
     }
 
-    let refData: { userId: string; plan: string; courseId: string };
+    let refData: { userId: string; plan: string; courseId: string; billingCycle?: string };
     try {
       refData = JSON.parse(payment.external_reference);
     } catch {
@@ -86,7 +86,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ received: true });
     }
 
-    const { userId, plan, courseId } = refData;
+    const { userId, plan, courseId, billingCycle } = refData;
 
     if (!userId || !plan) {
       apiLogger.error({ refData }, 'MP webhook: dados incompletos no external_reference');
@@ -107,13 +107,18 @@ export async function POST(request: NextRequest) {
 
         const now = new Date();
         const periodEnd = new Date(now);
-        periodEnd.setMonth(periodEnd.getMonth() + 1);
+        if (billingCycle === 'yearly') {
+          periodEnd.setFullYear(periodEnd.getFullYear() + 1);
+        } else {
+          periodEnd.setMonth(periodEnd.getMonth() + 1);
+        }
 
         await tx.subscription.create({
           data: {
             userId,
             plan,
             courseId: courseId || null,
+            billingCycle: billingCycle || 'monthly',
             status: 'active',
             paymentMethod: payment.payment_method_id || 'pix',
             mercadopagoPreapprovalId: String(payment.id),

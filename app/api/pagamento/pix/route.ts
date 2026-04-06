@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 import { withAuth } from '@/lib/api-middleware';
-import { createPixPayment, type PlanType } from '@/lib/mercadopago';
+import { createPixPayment, type PlanType, type BillingCycle } from '@/lib/mercadopago';
 import { prisma } from '@/lib/prisma';
 import { handleApiError } from '@/lib/errors/error-handler';
 import { ValidationError } from '@/lib/errors/api-error';
@@ -11,6 +11,7 @@ import { trackServerEvent } from '@/lib/monitoring/events';
 const PixSchema = z.object({
   plan: z.enum(['basico', 'premium']),
   courseId: z.string().optional(),
+  billingCycle: z.enum(['monthly', 'yearly']).default('monthly'),
 });
 
 export const POST = withAuth(async (request: NextRequest, context?: Record<string, unknown>) => {
@@ -23,7 +24,7 @@ export const POST = withAuth(async (request: NextRequest, context?: Record<strin
       throw new ValidationError(result.error.issues[0]?.message || 'Dados inválidos');
     }
 
-    const { plan, courseId } = result.data;
+    const { plan, courseId, billingCycle } = result.data;
 
     if (plan === 'basico' && !courseId) {
       throw new ValidationError('courseId é obrigatório para o plano Básico');
@@ -40,9 +41,10 @@ export const POST = withAuth(async (request: NextRequest, context?: Record<strin
       name: dbUser?.name || user.name || '',
       plan: plan as PlanType,
       courseId,
+      billingCycle: billingCycle as BillingCycle,
     });
 
-    apiLogger.info({ userId: user.userId, plan, paymentId: pixData.paymentId }, 'PIX payment initiated');
+    apiLogger.info({ userId: user.userId, plan, billingCycle, paymentId: pixData.paymentId }, 'PIX payment initiated');
     trackServerEvent('payment_pix', { plan });
 
     return NextResponse.json(pixData);

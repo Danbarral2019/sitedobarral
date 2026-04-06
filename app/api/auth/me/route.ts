@@ -35,6 +35,7 @@ export async function GET(request: NextRequest) {
             id: true,
             plan: true,
             courseId: true,
+            billingCycle: true,
             status: true,
             currentPeriodEnd: true,
             cancelAtPeriodEnd: true,

@@ -18,32 +18,39 @@ export function getMPClient(): MercadoPagoConfig {
 }
 
 export type PlanType = 'basico' | 'premium';
+export type BillingCycle = 'monthly' | 'yearly';
 
-export function getPlanConfig(plan: PlanType) {
+export function getPlanConfig(plan: PlanType, billingCycle: BillingCycle = 'monthly') {
   const configs = {
-    basico: { name: 'Básico', price: 49.90, description: 'Acesso a 1 curso específico' },
-    premium: { name: 'Premium', price: 89.90, description: 'Acesso a todos os cursos + Assistente IA' },
+    basico: {
+      monthly: { name: 'Básico Mensal', price: 49.90, description: 'Acesso a 1 curso específico — mensal' },
+      yearly: { name: 'Básico Anual', price: 499.00, description: 'Acesso a 1 curso específico — anual (2 meses grátis)' },
+    },
+    premium: {
+      monthly: { name: 'Premium Mensal', price: 89.90, description: 'Acesso a todos os cursos + Assistente IA — mensal' },
+      yearly: { name: 'Premium Anual', price: 899.00, description: 'Acesso a todos os cursos + Assistente IA — anual (2 meses grátis)' },
+    },
   };
-  return configs[plan];
+  return configs[plan][billingCycle];
 }
 
 /**
  * Cria preferência de checkout (redireciona para Mercado Pago)
  */
 export async function createCheckoutPreference({
-  userId, email, name, plan, courseId, returnUrl,
+  userId, email, name, plan, courseId, returnUrl, billingCycle = 'monthly',
 }: {
   userId: string; email: string; name: string;
-  plan: PlanType; courseId?: string; returnUrl: string;
+  plan: PlanType; courseId?: string; returnUrl: string; billingCycle?: BillingCycle;
 }): Promise<string> {
   const client = getMPClient();
   const preference = new Preference(client);
-  const planConfig = getPlanConfig(plan);
+  const planConfig = getPlanConfig(plan, billingCycle);
 
   const result = await preference.create({
     body: {
       items: [{
-        id: `plan-${plan}`,
+        id: `plan-${plan}-${billingCycle}`,
         title: `Plano ${planConfig.name} - Prof. Daniel Barral`,
         description: planConfig.description,
         quantity: 1,
@@ -57,7 +64,7 @@ export async function createCheckoutPreference({
         pending: `${returnUrl}/assinatura/pendente`,
       },
       auto_return: 'approved',
-      external_reference: JSON.stringify({ userId, plan, courseId: courseId || '' }),
+      external_reference: JSON.stringify({ userId, plan, courseId: courseId || '', billingCycle }),
       notification_url: `${returnUrl}/api/pagamento/webhook`,
     },
   });
@@ -74,14 +81,14 @@ export async function createCheckoutPreference({
  * Cria pagamento PIX direto
  */
 export async function createPixPayment({
-  userId, email, name, plan, courseId,
+  userId, email, name, plan, courseId, billingCycle = 'monthly',
 }: {
   userId: string; email: string; name: string;
-  plan: PlanType; courseId?: string;
+  plan: PlanType; courseId?: string; billingCycle?: BillingCycle;
 }): Promise<{ qrCode: string; qrCodeBase64: string; ticketUrl: string; paymentId: number }> {
   const client = getMPClient();
   const payment = new Payment(client);
-  const planConfig = getPlanConfig(plan);
+  const planConfig = getPlanConfig(plan, billingCycle);
 
   const result = await payment.create({
     body: {
@@ -93,7 +100,7 @@ export async function createPixPayment({
         first_name: name.split(' ')[0],
         last_name: name.split(' ').slice(1).join(' ') || name,
       },
-      external_reference: JSON.stringify({ userId, plan, courseId: courseId || '' }),
+      external_reference: JSON.stringify({ userId, plan, courseId: courseId || '', billingCycle }),
     },
   });
 

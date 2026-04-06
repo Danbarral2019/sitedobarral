@@ -1385,6 +1385,7 @@ model Subscription {
   mercadopagoPreapprovalId  String?  @unique // ID da assinatura recorrente no MP
   paymentMethod             String?  // 'pix' | 'credit_card' | 'boleto'
   plan                      String   // 'basico' | 'premium'
+  billingCycle              String?  // 'monthly' | 'yearly'
   courseId                   String?  // Para plano 'basico' — qual curso
   status                    String   // 'active' | 'canceled' | 'past_due' | 'unpaid'
   currentPeriodStart        DateTime

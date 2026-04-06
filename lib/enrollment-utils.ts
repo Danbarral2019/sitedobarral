@@ -147,6 +147,7 @@ export interface SubscriptionInfo {
   id: string;
   plan: string; // 'basico' | 'premium'
   courseId?: string | null;
+  billingCycle?: string | null; // 'monthly' | 'yearly'
   status: string; // 'active' | 'canceled' | 'past_due' | 'unpaid'
   currentPeriodEnd: Date | string;
   cancelAtPeriodEnd: boolean;
