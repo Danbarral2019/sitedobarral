@@ -664,6 +664,18 @@ Embeddings continuam fora desta camada (interface diferente, controlado por `EMB
 
 Esta camada inclui retry com backoff exponencial em erros transitórios (429/5xx/rede) e logging estruturado via pino. Persistência de auditoria em DB ainda não implementada (aguarda criação do modelo `AuditLog`).
 
+## Eval framework (`eval/`)
+
+Framework de avaliação de qualidade de retrieval da busca jurídica.
+
+- Golden set em `eval/golden-set.json`
+- Métricas: recall@5, MRR, nDCG@10
+- CLIs: `npm run eval:annotate` (interativo) e `npm run eval:run` (gera relatório)
+- Reports versionados em `eval/reports/`
+
+Ver `eval/README.md` para detalhes. Esta fase mede só retrieval — síntese da LLM
+fica para fase futura.
+
 ## Notes for Future Claude Instances
 
 - Este é um site em PRODUÇÃO - cuidado com mudanças
