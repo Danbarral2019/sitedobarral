@@ -1,0 +1,20 @@
+{
+  "version": 1,
+  "createdAt": "2026-04-06",
+  "queries": [
+    {
+      "id": "q-data-a-data",
+      "query": "sistema data a data",
+      "description": "Termo técnico para contagem de prazo de vigência de contratos. Citado expressamente no art. 183, II da Lei 14.133/2021.",
+      "category": "termo-juridico-especifico",
+      "difficulty": "hard",
+      "annotations": {
+        "relevant": [],
+        "highlyRelevant": [],
+        "annotatedAt": null,
+        "annotatedBy": null,
+        "notes": "Hoje a busca devolve resposta sobre reajuste de preços (art. 134, 182, 124) — completamente fora do tópico. O documento certo é o art. 183 II da Lei 14.133. Anotar via CLI eval:annotate quando o framework estiver pronto."
+      }
+    }
+  ]
+}
