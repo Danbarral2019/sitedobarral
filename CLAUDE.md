@@ -630,6 +630,40 @@ Ver código para endpoints completos.
 - Change detection compares fields (title, content, url, etc.)
 - Admin can review changes before publishing to students
 
+## Camada de IA (`lib/ai/`)
+
+Ponto de entrada único: `import { generate } from '@/lib/ai'`.
+
+```ts
+const { text } = await generate('search', {
+  systemPrompt: '...',
+  messages: [{ role: 'user', content: '...' }],
+  temperature: 0.2,
+  maxTokens: 1024,
+})
+```
+
+Tasks suportadas e defaults atuais:
+
+| Task | Provider default | Modelo default |
+|---|---|---|
+| `search` | gemini | `gemini-2.0-flash` |
+| `chat` | gemini | `gemini-2.0-flash` |
+| `extraction` | gemini | `gemini-2.0-flash` |
+| `classification` | anthropic | `claude-3-5-haiku-20241022` |
+| `summarization` | anthropic | `claude-3-5-haiku-20241022` |
+| `enhancement` | anthropic | `claude-sonnet-4-20250514` |
+
+Override por env: `AI_<TASK>_PROVIDER` e `AI_<TASK>_MODEL`. Ex.:
+```
+AI_SEARCH_PROVIDER=gemini
+AI_SEARCH_MODEL=gemini-2.5-pro
+```
+
+Embeddings continuam fora desta camada (interface diferente, controlado por `EMBEDDING_MODEL`).
+
+Esta camada inclui retry com backoff exponencial em erros transitórios (429/5xx/rede) e logging estruturado via pino. Persistência de auditoria em DB ainda não implementada (aguarda criação do modelo `AuditLog`).
+
 ## Notes for Future Claude Instances
 
 - Este é um site em PRODUÇÃO - cuidado com mudanças
