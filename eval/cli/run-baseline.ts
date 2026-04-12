@@ -7,7 +7,7 @@
  */
 import { writeFileSync, readFileSync, mkdirSync } from 'node:fs'
 import { join } from 'node:path'
-import { baselineSearch, rerankSearch } from '../search-adapter'
+import { baselineSearch, rerankSearch, hydeSearch } from '../search-adapter'
 import { runEval } from '../runner'
 import { formatReport } from '../report'
 import type { GoldenSet } from '../types'
@@ -18,6 +18,7 @@ async function main() {
   const label = labelIdx >= 0 ? args[labelIdx + 1] : 'baseline'
   const useRerank = args.includes('--rerank')
   const useCohere = args.includes('--cohere')
+  const useHyde = args.includes('--hyde')
 
   // --cohere seta RERANK_PROVIDER para o reranker usar Cohere em vez de Gemini
   if (useCohere) process.env.RERANK_PROVIDER = 'cohere'
@@ -26,8 +27,8 @@ async function main() {
   const raw = readFileSync(goldenSetPath, 'utf8')
   const goldenSet: GoldenSet = JSON.parse(raw)
 
-  const searchFn = (useRerank || useCohere) ? rerankSearch : baselineSearch
-  const mode = useCohere ? 'hybrid + rerank (Cohere 3.5)' : useRerank ? 'hybrid + rerank (Gemini)' : 'hybrid baseline'
+  const searchFn = useHyde ? hydeSearch : (useRerank || useCohere) ? rerankSearch : baselineSearch
+  const mode = useHyde ? 'hybrid + HyDE + rerank' : useCohere ? 'hybrid + rerank (Cohere 3.5)' : useRerank ? 'hybrid + rerank (Gemini)' : 'hybrid baseline'
   console.log(`[eval] Loaded ${goldenSet.queries.length} queries`)
   console.log(`[eval] Search mode: ${mode}`)
   console.log(`[eval] Running search adapter against each annotated query...`)

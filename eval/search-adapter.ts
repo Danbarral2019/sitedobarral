@@ -1,4 +1,5 @@
 import { hybridSearch } from '@/lib/embeddings/hybrid-search'
+import { understandQuery } from '@/lib/embeddings/query-understanding'
 import type { SearchFn } from './types'
 
 /** Deduplica resultados por documentId mantendo a primeira ocorrência */
@@ -41,6 +42,33 @@ export const rerankSearch: SearchFn = async (query: string) => {
   const start = Date.now()
   const response = await hybridSearch({
     query,
+    limit: 40,
+    alpha: 0.6,
+    useCache: false,
+    rerank: true,
+  })
+  return { documentIds: dedup(response.results), latencyMs: Date.now() - start }
+}
+
+/**
+ * Adapter com query understanding (HyDE + expanded queries) + reranking.
+ * Analisa a query, gera documentos hipotéticos e queries expandidas,
+ * depois combina tudo via multiQuerySearch + reranking.
+ */
+export const hydeSearch: SearchFn = async (query: string) => {
+  const start = Date.now()
+  const understanding = await understandQuery(query)
+
+  // Combinar: query original + HyDE documents + expanded queries
+  const allQueries = [
+    query,
+    ...understanding.hydeDocuments,
+    ...understanding.expandedQueries,
+  ].filter(Boolean)
+
+  const response = await hybridSearch({
+    query,
+    expandedQueries: allQueries.length > 1 ? allQueries : undefined,
     limit: 40,
     alpha: 0.6,
     useCache: false,
