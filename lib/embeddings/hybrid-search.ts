@@ -9,6 +9,7 @@
 
 import { semanticSearch, multiQuerySearch, type SearchResult, type SearchOptions } from './vector-search';
 import { searchDocuments, type DocumentFTSOptions } from '../search/full-text-search';
+import { rerankResults } from './reranker';
 
 // ===========================
 // Types
@@ -24,6 +25,7 @@ export interface HybridSearchOptions {
   alpha?: number;  // Peso do vetor vs FTS (0.6 = 60% vetor, 40% FTS)
   useCache?: boolean;
   includeTribunalDecisions?: boolean; // Incluir decisoes de TCEs estaduais (default: false)
+  rerank?: boolean; // Aplicar reranking nos resultados (default: false)
 }
 
 export interface HybridSearchResponse {
@@ -58,6 +60,7 @@ export async function hybridSearch(
     alpha = 0.6,
     useCache = true,
     includeTribunalDecisions = false,
+    rerank = false,
   } = options;
 
   const vectorOptions: SearchOptions = {
@@ -72,7 +75,7 @@ export async function hybridSearch(
 
   const ftsOptions: DocumentFTSOptions = {
     limit: limit * 3,
-    excludeCategories: [...excludeCategories, 'lei-artigo', 'ato-normativo'],
+    excludeCategories,
   };
 
   // Executar ambas as buscas em paralelo
@@ -157,10 +160,16 @@ export async function hybridSearch(
     }
   }
 
+  // Reranking opcional (Gemini Flash avalia relevância semântica)
+  // Passa topK=limit para que o reranker reordene e corte ao tamanho final
+  const finalResults = rerank
+    ? await rerankResults(query, results, limit)
+    : results;
+
   return {
-    results,
+    results: finalResults,
     query,
-    totalFound: results.length,
+    totalFound: finalResults.length,
     latency: Date.now() - startTime,
     cached: false,
   };

@@ -4,7 +4,7 @@ import { verifyAuth } from '@/lib/auth';
 import { buildContextForLLM } from '@/lib/embeddings/vector-search';
 import type { SearchResult } from '@/lib/embeddings/vector-search';
 import { hybridSearch } from '@/lib/embeddings/hybrid-search';
-import { rerankResults } from '@/lib/embeddings/reranker';
+
 import { queryGeminiText } from '@/lib/gemini/cached-client';
 import { GoogleGenerativeAI } from '@google/generative-ai';
 import { checkRateLimit, withCache, CACHE_TTL } from '@/lib/cache/redis-client';
@@ -224,7 +224,7 @@ Exemplo de resposta: ["variação 1", "variação 2"]`;
       apiLogger.info('Tribunal decisions included (user explicitly requested)');
     }
 
-    // 5a. Hybrid search: combina busca semântica (vetor) + FTS (BM25) via RRF
+    // 5a. Hybrid search: combina busca semântica (vetor) + FTS (BM25) via RRF + reranking
     const searchResponse = await hybridSearch({
       query: semanticQuery,
       expandedQueries: expandedQueries.length > 1 ? expandedQueries : undefined,
@@ -235,6 +235,7 @@ Exemplo de resposta: ["variação 1", "variação 2"]`;
       alpha: 0.6,
       useCache,
       includeTribunalDecisions,
+      rerank: true,
     });
 
     apiLogger.info({ resultCount: searchResponse.results.length }, 'Hybrid search completed');
@@ -337,11 +338,8 @@ Exemplo de resposta: ["variação 1", "variação 2"]`;
       r => !['lei-artigo', 'ato-normativo'].includes(r.category) && r.sourceType !== 'legislative-act'
     );
 
-    // Rerank doc results for better precision (only when top results have close similarity)
-    const rerankedDocResults = await rerankResults(query, rawDocResults, Math.max(maxResults * 3, 20));
-
-    // Diversify doc results with priority tiers
-    const docResults = diversifyResults(rerankedDocResults, maxResults);
+    // Diversify doc results with priority tiers (reranking já feito dentro do hybridSearch)
+    const docResults = diversifyResults(rawDocResults, maxResults);
 
     // Cap semantic legislative acts: top 3 per act type to avoid flooding
     const legActsByType = new Map<string, typeof semanticLegActResults>();

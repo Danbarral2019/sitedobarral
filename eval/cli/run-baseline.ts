@@ -7,7 +7,7 @@
  */
 import { writeFileSync, readFileSync, mkdirSync } from 'node:fs'
 import { join } from 'node:path'
-import { baselineSearch } from '../search-adapter'
+import { baselineSearch, rerankSearch } from '../search-adapter'
 import { runEval } from '../runner'
 import { formatReport } from '../report'
 import type { GoldenSet } from '../types'
@@ -16,15 +16,23 @@ async function main() {
   const args = process.argv.slice(2)
   const labelIdx = args.indexOf('--label')
   const label = labelIdx >= 0 ? args[labelIdx + 1] : 'baseline'
+  const useRerank = args.includes('--rerank')
+  const useCohere = args.includes('--cohere')
+
+  // --cohere seta RERANK_PROVIDER para o reranker usar Cohere em vez de Gemini
+  if (useCohere) process.env.RERANK_PROVIDER = 'cohere'
 
   const goldenSetPath = join(process.cwd(), 'eval/golden-set.json')
   const raw = readFileSync(goldenSetPath, 'utf8')
   const goldenSet: GoldenSet = JSON.parse(raw)
 
+  const searchFn = (useRerank || useCohere) ? rerankSearch : baselineSearch
+  const mode = useCohere ? 'hybrid + rerank (Cohere 3.5)' : useRerank ? 'hybrid + rerank (Gemini)' : 'hybrid baseline'
   console.log(`[eval] Loaded ${goldenSet.queries.length} queries`)
+  console.log(`[eval] Search mode: ${mode}`)
   console.log(`[eval] Running search adapter against each annotated query...`)
 
-  const run = await runEval(goldenSet, baselineSearch)
+  const run = await runEval(goldenSet, searchFn)
 
   console.log(`[eval] ${run.summary.queriesAnnotated} evaluated, ${run.summary.queriesSkipped} skipped (not annotated)`)
   console.log(`[eval] recall@5=${(run.summary.recallAt5_avg * 100).toFixed(1)}% mrr=${run.summary.mrr.toFixed(3)} ndcg@10=${run.summary.ndcgAt10_avg.toFixed(3)}`)

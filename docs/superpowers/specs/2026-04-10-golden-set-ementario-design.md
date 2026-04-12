@@ -15,11 +15,13 @@ Gerar automaticamente ~79 queries anotadas para o golden set do eval framework d
 ### Etapa 1: Extracao e normalizacao
 
 Script le banco.json + fichas e extrai para cada tese selecionada:
+
 - `query`: versao resumida do enunciado, como um procurador buscaria (~10-20 palavras)
 - `fundamentos_raw`: lista de referencias parseadas individualmente (ex: "Acordao 597/2023-Plenario", "ON AGU 52/2014")
 - `metadata`: transversal vs especifica, template de origem, tema, dificuldade estimada
 
 A reformulacao do enunciado em query de busca e feita por regras simples:
+
 - Remover conectivos juridicos longos ("A inscricao da contratada no... impede a celebracao de...")
 - Manter termos-chave do dominio ("CADIN inscricao contratos impedimento")
 - Queries devem ter 5-15 palavras, linguagem natural
@@ -29,11 +31,13 @@ A reformulacao do enunciado em query de busca e feita por regras simples:
 Para cada fundamento extraido, resolver o documentId correspondente no banco:
 
 **Match exato (prioridade):**
+
 - Acordaos TCU: buscar `acordaoNumero` + `acordaoAno` na tabela Document (campos acordaoNumero, acordaoAno)
 - ONs AGU: buscar `onNumber` + `onYear` na tabela Document
 - Para outros: buscar substring no campo `title` via SQL ILIKE
 
 **Fallback semantico:**
+
 - Se match exato nao encontrar, rodar `hybridSearch({ query: referencia, limit: 5 })` e aceitar top-1 se `similarity >= 0.7`
 - Marcar como `not_found` se nenhum caminho resolver
 
@@ -42,6 +46,7 @@ Resultado: mapeamento `referencia -> documentId | null`
 ### Etapa 3: Montagem do golden set
 
 Para cada tese selecionada:
+
 1. `highlyRelevant` = documentIds resolvidos dos fundamentos curados (confianca maxima)
 2. `relevant` = highlyRelevant (inicialmente identicos; expandidos apos revisao)
 3. Rodar a query no baselineSearch e coletar top-10
@@ -70,6 +75,7 @@ Compativel com `eval/golden-set.json` (tipo GoldenSet de eval/types.ts):
 ```
 
 Campo extra `_elic` (ignorado pelo runner, util para rastreabilidade):
+
 ```json
 "_elic": {
   "source": "transversal",

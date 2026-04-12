@@ -1,16 +1,25 @@
 import { hybridSearch } from '@/lib/embeddings/hybrid-search'
 import type { SearchFn } from './types'
 
+/** Deduplica resultados por documentId mantendo a primeira ocorrência */
+function dedup(results: { documentId: string }[]): string[] {
+  const seen = new Set<string>()
+  const ids: string[] = []
+  for (const r of results) {
+    if (!seen.has(r.documentId)) {
+      seen.add(r.documentId)
+      ids.push(r.documentId)
+    }
+  }
+  return ids
+}
+
 /**
- * Adapter que envolve `hybridSearch` na interface SearchFn esperada pelo runner.
+ * Adapter baseline: hybridSearch sem reranking.
  *
- * Decisões:
- * - `limit: 20` — pega top-20 para ter espaço para nDCG@10 e recall@5 sem cortar.
- * - `useCache: false` — eval deve refletir comportamento "frio" do sistema.
- * - Sem filtro de curso/categoria — golden set assume busca global.
- * - Deduplica por documentId mantendo a primeira ocorrência (chunks do mesmo doc
- *   aparecem em sequência; a métrica é por documento, não por chunk).
- * - `alpha: 0.6` — peso padrão do sistema para balanço vetor/FTS (60/40).
+ * - `limit: 20` — espaço para nDCG@10 e recall@5.
+ * - `useCache: false` — eval reflete comportamento "frio".
+ * - `alpha: 0.6` — balanço padrão vetor/FTS (60/40).
  */
 export const baselineSearch: SearchFn = async (query: string) => {
   const start = Date.now()
@@ -20,16 +29,22 @@ export const baselineSearch: SearchFn = async (query: string) => {
     alpha: 0.6,
     useCache: false,
   })
-  const latencyMs = Date.now() - start
+  return { documentIds: dedup(response.results), latencyMs: Date.now() - start }
+}
 
-  const seen = new Set<string>()
-  const documentIds: string[] = []
-  for (const r of response.results) {
-    if (!seen.has(r.documentId)) {
-      seen.add(r.documentId)
-      documentIds.push(r.documentId)
-    }
-  }
-
-  return { documentIds, latencyMs }
+/**
+ * Adapter com reranking Gemini: hybridSearch + rerankResults.
+ * Pede 40 resultados do RRF para que o reranker tenha candidatos suficientes
+ * para reordenar e cortar nos top 20.
+ */
+export const rerankSearch: SearchFn = async (query: string) => {
+  const start = Date.now()
+  const response = await hybridSearch({
+    query,
+    limit: 40,
+    alpha: 0.6,
+    useCache: false,
+    rerank: true,
+  })
+  return { documentIds: dedup(response.results), latencyMs: Date.now() - start }
 }

@@ -9,10 +9,22 @@
       "category": "termo-juridico-especifico",
       "difficulty": "hard",
       "annotations": {
-        "relevant": [],
-        "highlyRelevant": [],
-        "annotatedAt": null,
-        "annotatedBy": null,
+        "relevant": [
+          "96cbdacf-7387-4286-9529-f2aacc81e7d8",
+          "ce817fb1-7e5f-417a-bdd8-5aa44a6f089d",
+          "ae92b5a7-11e8-4c28-8001-251f8c79a35a",
+          "6c690202-8ddb-4431-935d-826d0c0a4594",
+          "f29d4d7b-f104-4fa3-9a63-5ca73d781fb2",
+          "097d3cdb-303b-40ec-b15b-e5ce70ae50ba",
+          "0eb5c8f1-089b-4a56-a279-a6b864565421"
+        ],
+        "highlyRelevant": [
+          "96cbdacf-7387-4286-9529-f2aacc81e7d8",
+          "097d3cdb-303b-40ec-b15b-e5ce70ae50ba",
+          "0eb5c8f1-089b-4a56-a279-a6b864565421"
+        ],
+        "annotatedAt": "2026-04-12T19:34:46.936Z",
+        "annotatedBy": "daniel",
         "notes": "Hoje a busca devolve resposta sobre reajuste de preços (art. 134, 182, 124) — completamente fora do tópico. O documento certo é o art. 183 II da Lei 14.133. Anotar via CLI eval:annotate quando o framework estiver pronto."
       }
     },
@@ -23,10 +35,23 @@
       "category": "dispensa-inexigibilidade",
       "difficulty": "easy",
       "annotations": {
-        "relevant": [],
-        "highlyRelevant": [],
-        "annotatedAt": null,
-        "annotatedBy": null,
+        "relevant": [
+          "69a817c8-09ce-4a35-8f81-9ee6af60dd65",
+          "c3282fa3-427c-44c1-a697-fff692afae40",
+          "1d1ffcd4-74d1-4a4c-a31c-7deec9ab17b4",
+          "84963384-e299-4d5d-91f0-e5a4a85525e9",
+          "a43ecdd7-97aa-4c7e-8a50-cbcb040d4402",
+          "8723b179-62f9-4897-a3a0-6d354e350e0b",
+          "66bd252b-2f22-4997-ae04-b8359ae5b1c4",
+          "3e629804-4262-4f9b-a632-d7d71b594e76"
+        ],
+        "highlyRelevant": [
+          "69a817c8-09ce-4a35-8f81-9ee6af60dd65",
+          "a43ecdd7-97aa-4c7e-8a50-cbcb040d4402",
+          "3e629804-4262-4f9b-a632-d7d71b594e76"
+        ],
+        "annotatedAt": "2026-04-12T19:38:03.911Z",
+        "annotatedBy": "daniel",
         "notes": "Esperado: art. 75 I/II e atualizações de valores via decreto/IN."
       }
     },
@@ -37,10 +62,27 @@
       "category": "dispensa-inexigibilidade",
       "difficulty": "medium",
       "annotations": {
-        "relevant": [],
-        "highlyRelevant": [],
-        "annotatedAt": null,
-        "annotatedBy": null,
+        "relevant": [
+          "c3374d38-a774-4b17-b6c5-8bdcc041aa4d",
+          "74752277-4c43-4f1e-a55d-ccaa1ecd9667",
+          "a6c183bb-fb83-4a15-a669-352c2688c46c",
+          "184684cb-397a-4550-92be-f8503d1c6f08",
+          "554bd8d4-bc95-4e06-a857-33fe624d6d98",
+          "9fc651a4-843e-473b-b8a9-dbca7f711a7a",
+          "6ab49267-58d2-4c4c-ad90-6a645c050090",
+          "9cf5ba5d-e899-4511-a9ef-a34d3265c658",
+          "c9c06c9f-10ca-46e8-a3ad-d5ba8bbf2b12",
+          "af8f9f1b-3013-4ea1-92f7-a2feb27544fe",
+          "40ef9d6e-2346-4459-9153-773f19265795"
+        ],
+        "highlyRelevant": [
+          "c3374d38-a774-4b17-b6c5-8bdcc041aa4d",
+          "554bd8d4-bc95-4e06-a857-33fe624d6d98",
+          "9cf5ba5d-e899-4511-a9ef-a34d3265c658",
+          "40ef9d6e-2346-4459-9153-773f19265795"
+        ],
+        "annotatedAt": "2026-04-12T19:41:52.747Z",
+        "annotatedBy": "daniel",
         "notes": "Esperado: art. 74 III e §§ 3º a 5º da Lei 14.133."
       }
     },
@@ -51,10 +93,26 @@
       "category": "modalidade-licitacao",
       "difficulty": "easy",
       "annotations": {
-        "relevant": [],
-        "highlyRelevant": [],
-        "annotatedAt": null,
-        "annotatedBy": null,
+        "relevant": [
+          "97519905-ffb0-4311-a88a-9d38652d5c13",
+          "80153e1c-6b32-419d-8f6b-f911fcd75cc1",
+          "f1b10c34-d544-490d-b786-5f63057ea828",
+          "1b1f9f62-e8ec-4e6b-a45c-c4c7ec1d7f6c",
+          "c821ae29-2777-46c1-b0f2-6cc55c3dc8c7",
+          "51c8e3c9-de7f-4471-aabb-f7c6a89b8f20",
+          "7ba9b8e4-a85e-4b2c-8b7f-aad54f1b76f7",
+          "3bb941f8-10fe-4372-a62c-c46b5916b55e",
+          "9aa9cc50-12fb-4145-b146-3f8487649b41",
+          "55eed326-2d61-4c80-994b-c3b3a15bc2bb"
+        ],
+        "highlyRelevant": [
+          "97519905-ffb0-4311-a88a-9d38652d5c13",
+          "80153e1c-6b32-419d-8f6b-f911fcd75cc1",
+          "1b1f9f62-e8ec-4e6b-a45c-c4c7ec1d7f6c",
+          "c821ae29-2777-46c1-b0f2-6cc55c3dc8c7"
+        ],
+        "annotatedAt": "2026-04-12T19:43:52.864Z",
+        "annotatedBy": "daniel",
         "notes": "Esperado: art. 6º XIII (definição de bens/serviços comuns) e art. 29."
       }
     },
@@ -65,10 +123,27 @@
       "category": "modalidade-licitacao",
       "difficulty": "medium",
       "annotations": {
-        "relevant": [],
-        "highlyRelevant": [],
-        "annotatedAt": null,
-        "annotatedBy": null,
+        "relevant": [
+          "70831e48-8b98-4d3f-be5c-b0313132d68d",
+          "0da4d49f-48b3-4fcf-9e7f-f0c6e5b57f62",
+          "773b551b-5902-463a-8921-2459962d6e44",
+          "7f7803f8-811b-4ff3-a3f6-395379fb6541",
+          "3b067048-6e66-4e1c-b221-693179e4dcc9",
+          "0b941f4f-e370-4e06-bd1e-40bc59e5031d",
+          "29c68b6c-cde9-456a-9b9b-e7c31598cfe4",
+          "aa182dbd-b77a-4238-82d6-4756604ab4b0",
+          "3e1c9b59-f7da-4149-9ae4-9558f9f44213"
+        ],
+        "highlyRelevant": [
+          "70831e48-8b98-4d3f-be5c-b0313132d68d",
+          "0da4d49f-48b3-4fcf-9e7f-f0c6e5b57f62",
+          "773b551b-5902-463a-8921-2459962d6e44",
+          "7f7803f8-811b-4ff3-a3f6-395379fb6541",
+          "3b067048-6e66-4e1c-b221-693179e4dcc9",
+          "0b941f4f-e370-4e06-bd1e-40bc59e5031d"
+        ],
+        "annotatedAt": "2026-04-12T19:45:25.410Z",
+        "annotatedBy": "daniel",
         "notes": "Esperado: art. 32 da Lei 14.133 e orientações AGU/TCU sobre a modalidade."
       }
     },
@@ -79,10 +154,29 @@
       "category": "registro-de-precos",
       "difficulty": "medium",
       "annotations": {
-        "relevant": [],
-        "highlyRelevant": [],
-        "annotatedAt": null,
-        "annotatedBy": null,
+        "relevant": [
+          "0b8164a6-a8a8-44c4-8bac-7d32467236c8",
+          "dce83597-9282-4f44-8544-27fe6b9cd473",
+          "ede2366c-8bae-4082-a4ae-6a48cec39b5f",
+          "542707cb-9d4c-4e65-bd89-b63f014fb128",
+          "b3dcb6d0-b0e2-4047-aa1b-086d6ebf2ea3",
+          "270226d4-b0d8-404e-9526-4e223f68b50e",
+          "6e295908-7443-46a9-8842-38fc55be5ee6",
+          "e993f778-ce05-4db8-b834-ef05a5b9ae98",
+          "d0720d82-19dd-4f12-aca5-e3c79156b1ef",
+          "f16d1227-1f6a-468b-9fae-6dafb7f2a5af",
+          "c71859e3-146e-469f-9d35-4df123747844",
+          "a3e8ea6a-710d-49ab-b075-535675328fdb",
+          "439bfdc0-a49a-4b1b-9e86-116595c42d58"
+        ],
+        "highlyRelevant": [
+          "dce83597-9282-4f44-8544-27fe6b9cd473",
+          "c71859e3-146e-469f-9d35-4df123747844",
+          "a3e8ea6a-710d-49ab-b075-535675328fdb",
+          "439bfdc0-a49a-4b1b-9e86-116595c42d58"
+        ],
+        "annotatedAt": "2026-04-12T19:49:57.139Z",
+        "annotatedBy": "daniel",
         "notes": "Esperado: art. 86 e Decreto 11.462/2023 (regulamento federal de SRP)."
       }
     },
@@ -93,10 +187,28 @@
       "category": "contratos",
       "difficulty": "medium",
       "annotations": {
-        "relevant": [],
-        "highlyRelevant": [],
-        "annotatedAt": null,
-        "annotatedBy": null,
+        "relevant": [
+          "4b024873-8de5-4642-8f9a-7ae834f55b3e",
+          "24502f07-38b6-43c7-b01f-6afae2c898e2",
+          "9f34ce96-3318-4f86-bdf7-2f7fbe7c1c1b",
+          "3354ffef-b85f-487f-832e-b38f56040173",
+          "0ba17b0a-c8fe-42a0-8939-bbacb2027ee2",
+          "9b73c3e8-639b-453c-ab21-af1542162905",
+          "059126cc-6a22-49c8-b801-a5116304c07f",
+          "3bb9bf5f-e673-4a08-9545-0ef508effc09",
+          "b1f42954-a814-410b-a0b7-624da413faac",
+          "3b086e9f-d79f-44f4-a8f6-6324a5663d1c",
+          "64a7e603-5479-4a2d-9ad3-6b3e6a6f73dc",
+          "9b29a1fb-9d04-462b-b9f0-4008d04a1921"
+        ],
+        "highlyRelevant": [
+          "4b024873-8de5-4642-8f9a-7ae834f55b3e",
+          "9b73c3e8-639b-453c-ab21-af1542162905",
+          "64a7e603-5479-4a2d-9ad3-6b3e6a6f73dc",
+          "9b29a1fb-9d04-462b-b9f0-4008d04a1921"
+        ],
+        "annotatedAt": "2026-04-12T20:08:42.741Z",
+        "annotatedBy": "daniel",
         "notes": "Esperado: art. 124 II d, art. 134, e distinção entre reajuste, repactuação e revisão."
       }
     },
@@ -107,10 +219,24 @@
       "category": "sancoes",
       "difficulty": "medium",
       "annotations": {
-        "relevant": [],
-        "highlyRelevant": [],
-        "annotatedAt": null,
-        "annotatedBy": null,
+        "relevant": [
+          "5da5e8be-3d61-485c-b7b6-713d595ed65e",
+          "303e0c55-bf9e-4ec7-84a0-45392c1d537b",
+          "ab203fb8-86a0-4ae5-b265-709cb238e993",
+          "322da1d9-007d-4468-966d-8f85771b8385",
+          "bae1c868-2bbd-4728-90d9-8f2e10dfb48e",
+          "8ddc5ff2-25b7-48bf-a39e-862bc54a5cb1",
+          "3f982e45-3186-4303-9b41-3061305b4ec9",
+          "0f9f1d52-4a9a-422f-8649-1fe584b9e789",
+          "bda6421b-4ff2-4127-afbe-062177c8a97c",
+          "84d20c44-e282-4565-92cb-9604b878f814"
+        ],
+        "highlyRelevant": [
+          "5da5e8be-3d61-485c-b7b6-713d595ed65e",
+          "303e0c55-bf9e-4ec7-84a0-45392c1d537b"
+        ],
+        "annotatedAt": "2026-04-12T20:09:56.604Z",
+        "annotatedBy": "daniel",
         "notes": "Esperado: art. 156 e art. 163 da Lei 14.133."
       }
     },
@@ -121,10 +247,31 @@
       "category": "gestao-fiscalizacao",
       "difficulty": "easy",
       "annotations": {
-        "relevant": [],
-        "highlyRelevant": [],
-        "annotatedAt": null,
-        "annotatedBy": null,
+        "relevant": [
+          "1663c095-4387-434d-b0ed-67e449283ba0",
+          "4d9bf742-d6bf-480f-a58b-6b9c90427c79",
+          "4fab2b25-d0a3-4b30-b190-7e58f5e1168d",
+          "9de93f4a-63e8-4d72-a248-618e075d5548",
+          "89c3b0fc-2358-400d-8dc9-f64e8cf83fbb",
+          "ca7323ae-a709-4c51-ab3a-fea2c912dc6d",
+          "7c70f117-69ca-4817-8d9b-aa39b1dc9b0b",
+          "5efefd78-4fa2-4aeb-8d10-85afe0257bf7",
+          "fb7369ca-a033-486e-ba23-93412da38e70",
+          "eba3fa76-3f2a-440b-be5f-d73ca2d5602a"
+        ],
+        "highlyRelevant": [
+          "1663c095-4387-434d-b0ed-67e449283ba0",
+          "4d9bf742-d6bf-480f-a58b-6b9c90427c79",
+          "4fab2b25-d0a3-4b30-b190-7e58f5e1168d",
+          "9de93f4a-63e8-4d72-a248-618e075d5548",
+          "89c3b0fc-2358-400d-8dc9-f64e8cf83fbb",
+          "ca7323ae-a709-4c51-ab3a-fea2c912dc6d",
+          "5efefd78-4fa2-4aeb-8d10-85afe0257bf7",
+          "fb7369ca-a033-486e-ba23-93412da38e70",
+          "eba3fa76-3f2a-440b-be5f-d73ca2d5602a"
+        ],
+        "annotatedAt": "2026-04-12T20:11:38.989Z",
+        "annotatedBy": "daniel",
         "notes": "Esperado: art. 117 e orientações AGU/TCU sobre fiscalização."
       }
     },
@@ -135,10 +282,30 @@
       "category": "planejamento",
       "difficulty": "easy",
       "annotations": {
-        "relevant": [],
-        "highlyRelevant": [],
-        "annotatedAt": null,
-        "annotatedBy": null,
+        "relevant": [
+          "1d360446-9621-46cc-a771-e415a169b926",
+          "1950446e-306d-4756-8670-2bc44bb7cc0e",
+          "f610b5a7-8c0f-40ec-8000-d406d04c92c4",
+          "d7c2231a-70f6-4f35-82c0-d4aacde3d537",
+          "be9de479-e191-46b1-a874-00cffd7941c2",
+          "4405ab8c-1cca-4c11-957e-7309b547b3ea",
+          "e53f9a2d-fdc0-4e78-bbd9-4a1dbc1f8f74",
+          "3e3d019f-30c4-4e16-bff9-2d254a0bce23",
+          "6acc3c38-f24b-477d-ba5d-95404fc3d37b",
+          "16184659-7248-4b8a-b34f-3f561fa723d4"
+        ],
+        "highlyRelevant": [
+          "1d360446-9621-46cc-a771-e415a169b926",
+          "1950446e-306d-4756-8670-2bc44bb7cc0e",
+          "f610b5a7-8c0f-40ec-8000-d406d04c92c4",
+          "d7c2231a-70f6-4f35-82c0-d4aacde3d537",
+          "be9de479-e191-46b1-a874-00cffd7941c2",
+          "3e3d019f-30c4-4e16-bff9-2d254a0bce23",
+          "6acc3c38-f24b-477d-ba5d-95404fc3d37b",
+          "16184659-7248-4b8a-b34f-3f561fa723d4"
+        ],
+        "annotatedAt": "2026-04-12T20:14:00.730Z",
+        "annotatedBy": "daniel",
         "notes": "Esperado: art. 18 §1º e IN SEGES 58/2022."
       }
     },
@@ -149,10 +316,26 @@
       "category": "contratos",
       "difficulty": "medium",
       "annotations": {
-        "relevant": [],
-        "highlyRelevant": [],
-        "annotatedAt": null,
-        "annotatedBy": null,
+        "relevant": [
+          "8404ca7f-1d9a-416a-8670-879a8d5ced61",
+          "07d0df46-af48-4ec9-ac5a-c654e580e227",
+          "7b9ebc05-b71c-42df-97bc-df01ea706d23",
+          "fdeb02d9-9235-414b-ba28-38b3d0a4404b",
+          "afcb2c20-892d-48fc-960e-2aeb78c5bc20",
+          "05d88b1a-9f75-4724-9ab3-7e44dc902b7b",
+          "3bcba395-995d-481e-9230-4d1169787b55",
+          "902bdf54-4851-44a0-aaf0-79e5ae5743a0",
+          "32b6e1f1-81ca-420e-849c-81faca725a63",
+          "55451448-0935-4035-ad3e-ebb904d2611a"
+        ],
+        "highlyRelevant": [
+          "8404ca7f-1d9a-416a-8670-879a8d5ced61",
+          "fdeb02d9-9235-414b-ba28-38b3d0a4404b",
+          "3bcba395-995d-481e-9230-4d1169787b55",
+          "902bdf54-4851-44a0-aaf0-79e5ae5743a0"
+        ],
+        "annotatedAt": "2026-04-12T20:17:16.548Z",
+        "annotatedBy": "daniel",
         "notes": "Esperado: art. 22 e art. 103."
       }
     },
@@ -163,10 +346,31 @@
       "category": "habilitacao",
       "difficulty": "easy",
       "annotations": {
-        "relevant": [],
-        "highlyRelevant": [],
-        "annotatedAt": null,
-        "annotatedBy": null,
+        "relevant": [
+          "85f37b59-dd09-4134-84bd-e2457d22a90a",
+          "03aa2d88-de89-4d5b-86df-bb162a42f702",
+          "e97ec8e4-79ee-4280-966c-44966ab2600f",
+          "1d360446-9621-46cc-a771-e415a169b926",
+          "b40f683e-c9c1-491e-ab0c-9318e1cd833f",
+          "6532dcee-34f9-43de-84ad-1bce69c0d07a",
+          "00386a26-fa90-4b23-90c5-2efc36820a3e",
+          "3c0b5b6d-fba4-465f-8233-65e6aeffab0f",
+          "2b68a846-6045-4455-8c68-508d104559e7",
+          "21c9350e-6b12-49b9-8938-2b672c84f38e"
+        ],
+        "highlyRelevant": [
+          "85f37b59-dd09-4134-84bd-e2457d22a90a",
+          "03aa2d88-de89-4d5b-86df-bb162a42f702",
+          "e97ec8e4-79ee-4280-966c-44966ab2600f",
+          "1d360446-9621-46cc-a771-e415a169b926",
+          "b40f683e-c9c1-491e-ab0c-9318e1cd833f",
+          "6532dcee-34f9-43de-84ad-1bce69c0d07a",
+          "00386a26-fa90-4b23-90c5-2efc36820a3e",
+          "3c0b5b6d-fba4-465f-8233-65e6aeffab0f",
+          "21c9350e-6b12-49b9-8938-2b672c84f38e"
+        ],
+        "annotatedAt": "2026-04-12T20:18:43.752Z",
+        "annotatedBy": "daniel",
         "notes": "Esperado: art. 68 e CND's relacionadas (CNDT, FGTS, fazendas)."
       }
     },
@@ -177,10 +381,14 @@
       "category": "tese-transversal",
       "difficulty": "medium",
       "annotations": {
-        "relevant": [],
-        "highlyRelevant": [],
-        "annotatedAt": null,
-        "annotatedBy": null,
+        "relevant": [
+          "54c714e9-5889-4622-8900-54d1d5143e0a"
+        ],
+        "highlyRelevant": [
+          "54c714e9-5889-4622-8900-54d1d5143e0a"
+        ],
+        "annotatedAt": "2026-04-12T20:21:06.094Z",
+        "annotatedBy": "daniel",
         "notes": "Fundamentos curados: Lei 10.522/2002, art. 6º-A, incluído pela Lei 14.973/2024; Parecer 63/2024/DECOR/CGU/AGU, de aplicação compulsória pelos membros da AGU (Despacho do Advogado-Geral da União nº 539).. Nao encontrados no indice: Parecer 63/2024/DECOR/CGU/AGU, de aplicação compulsória pelos membros da AGU (Despacho do Advogado-Geral da União nº 539)."
       },
       "_elic": {
@@ -264,10 +472,21 @@
       "category": "tese-transversal",
       "difficulty": "easy",
       "annotations": {
-        "relevant": [],
-        "highlyRelevant": [],
-        "annotatedAt": null,
-        "annotatedBy": null,
+        "relevant": [
+          "a71e7ed0-3627-414a-aba7-b5df490f2520",
+          "303e0c55-bf9e-4ec7-84a0-45392c1d537b",
+          "8a98fb73-3f60-45e0-b921-ca51276508cc",
+          "8e56d9eb-9971-4d8f-ada9-a568322c0780",
+          "3bd48153-ff17-4a3a-a05e-ed0dfc11d3a2",
+          "41c42be6-362a-460a-af09-19d7d2a5d09a",
+          "26d6758e-b333-4075-8db6-cccc325e7840"
+        ],
+        "highlyRelevant": [
+          "a71e7ed0-3627-414a-aba7-b5df490f2520",
+          "303e0c55-bf9e-4ec7-84a0-45392c1d537b"
+        ],
+        "annotatedAt": "2026-04-12T20:22:30.450Z",
+        "annotatedBy": "daniel",
         "notes": "Fundamentos curados: Lei 8.666/1993, arts. 29 e 55, XIII; Lei 14.133/2021, arts. 68 e 92, XVI; Instrução Normativa nº 3, de 26 de abril de 2018, art. 34.. Nao encontrados no indice: Instrução Normativa nº 3, de 26 de abril de 2018, art. 34."
       },
       "_elic": {

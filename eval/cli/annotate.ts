@@ -7,13 +7,15 @@
  *   tsx eval/cli/annotate.ts --new                 — cria uma nova query do zero
  *
  * Para modo --id (e seleção da lista): roda baselineSearch, mostra top-10 com título +
- * trecho, usuário marca cada um como (h)ighly relevant, (r)elevant ou (n)othing.
+ * conteúdo completo, usuário marca relevantes e highly relevant.
+ * Inclui busca integrada de documentos por termo para encontrar IDs fora do top-10.
  * Salva em eval/golden-set.json.
  */
 import { writeFileSync, readFileSync } from 'node:fs'
 import { join } from 'node:path'
 import { select, input, confirm, checkbox } from '@inquirer/prompts'
 import { hybridSearch } from '@/lib/embeddings/hybrid-search'
+import { prisma } from '@/lib/prisma'
 import type { GoldenSet, GoldenQuery, Difficulty } from '../types'
 
 const GOLDEN_PATH = join(process.cwd(), 'eval/golden-set.json')
@@ -24,6 +26,97 @@ function loadGoldenSet(): GoldenSet {
 
 function saveGoldenSet(gs: GoldenSet): void {
   writeFileSync(GOLDEN_PATH, JSON.stringify(gs, null, 2) + '\n', 'utf8')
+}
+
+/** Formata texto em linhas de ~100 chars com indentação */
+function printWrapped(text: string, indent = '    '): void {
+  const content = text.replace(/\s+/g, ' ').trim()
+  const words = content.split(' ')
+  let line = indent
+  for (const word of words) {
+    if (line.length + word.length > 100) {
+      console.log(line)
+      line = indent + word
+    } else {
+      line += (line.trim() ? ' ' : '') + word
+    }
+  }
+  if (line.trim()) console.log(line)
+}
+
+/** Busca documentos no banco por termo (título, conteúdo, artigo de lei) */
+async function searchDocuments(term: string): Promise<void> {
+  console.log(`\nBuscando "${term}" no banco...\n`)
+
+  // Buscar em Document
+  const docs = await prisma.document.findMany({
+    where: {
+      OR: [
+        { title: { contains: term, mode: 'insensitive' } },
+        { content: { contains: term, mode: 'insensitive' } },
+      ],
+    },
+    select: { id: true, title: true, category: true, content: true },
+    take: 15,
+  })
+
+  // Buscar em LeiArticle
+  const articles = await prisma.leiArticle.findMany({
+    where: {
+      OR: [
+        { numero: { contains: term, mode: 'insensitive' } },
+        { ementa: { contains: term, mode: 'insensitive' } },
+        { titulo: { contains: term, mode: 'insensitive' } },
+      ],
+    },
+    select: { id: true, numero: true, titulo: true, ementa: true, capitulo: true },
+    take: 15,
+  })
+
+  const separator = '─'.repeat(80)
+
+  if (docs.length > 0) {
+    console.log(`=== Documentos encontrados: ${docs.length} ===\n`)
+    docs.forEach((d, i) => {
+      console.log(separator)
+      console.log(`[D${i + 1}] ${d.title}`)
+      console.log(`     Categoria: ${d.category}`)
+      console.log(`     ID: ${d.id}`)
+      if (d.content) {
+        console.log()
+        // Mostrar trecho do conteúdo ao redor do termo buscado
+        const idx = d.content.toLowerCase().indexOf(term.toLowerCase())
+        if (idx >= 0) {
+          const start = Math.max(0, idx - 200)
+          const end = Math.min(d.content.length, idx + term.length + 400)
+          const snippet = (start > 0 ? '...' : '') + d.content.slice(start, end) + (end < d.content.length ? '...' : '')
+          printWrapped(snippet)
+        } else {
+          printWrapped(d.content.slice(0, 500) + (d.content.length > 500 ? '...' : ''))
+        }
+      }
+      console.log()
+    })
+  }
+
+  if (articles.length > 0) {
+    console.log(`\n=== Artigos da Lei 14.133 encontrados: ${articles.length} ===\n`)
+    articles.forEach((a, i) => {
+      console.log(separator)
+      console.log(`[A${i + 1}] Art. ${a.numero}${a.titulo ? ' — ' + a.titulo : ''}`)
+      console.log(`     Capítulo: ${a.capitulo}`)
+      console.log(`     ID: ${a.id}`)
+      console.log()
+      printWrapped(a.ementa.slice(0, 800) + (a.ementa.length > 800 ? '...' : ''))
+      console.log()
+    })
+  }
+
+  if (docs.length === 0 && articles.length === 0) {
+    console.log('Nenhum resultado encontrado.')
+  }
+
+  console.log(separator)
 }
 
 async function annotateQuery(gs: GoldenSet, q: GoldenQuery): Promise<void> {
@@ -48,12 +141,17 @@ async function annotateQuery(gs: GoldenSet, q: GoldenQuery): Promise<void> {
   const top = Array.from(byDoc.values()).slice(0, 10)
 
   console.log(`\nTop ${top.length} unique documents:\n`)
+  const separator = '─'.repeat(80)
   top.forEach((r, i) => {
-    console.log(`[${i + 1}] (${r.category}) ${r.documentTitle}`)
-    console.log(`     ID: ${r.documentId}`)
-    console.log(`     ${r.chunkContent.slice(0, 200).replace(/\s+/g, ' ')}...`)
+    console.log(separator)
+    console.log(`[${i + 1}] ${r.documentTitle}`)
+    console.log(`    Categoria: ${r.category} | Similaridade: ${(r.similarity * 100).toFixed(1)}%`)
+    console.log(`    ID: ${r.documentId}`)
+    console.log()
+    printWrapped(r.chunkContent)
     console.log()
   })
+  console.log(separator)
 
   // Etapa 1: marcar relevantes (multi-select)
   const relevantChoices = top.map((r, i) => ({
@@ -78,17 +176,42 @@ async function annotateQuery(gs: GoldenSet, q: GoldenQuery): Promise<void> {
     })
   }
 
-  // Etapa 3: também aceita IDs colados manualmente (caso o doc certo não esteja no top-10)
-  const addManual = await confirm({
-    message: 'Quer adicionar IDs de documentos relevantes que NÃO estavam no top-10?',
-    default: false,
-  })
-  if (addManual) {
-    const ids = await input({
-      message: 'Cole os documentIds separados por vírgula:',
+  // Etapa 3: busca integrada + adição manual de IDs
+  let addMore = true
+  while (addMore) {
+    const action = await select({
+      message: 'Documentos fora do top-10:',
+      choices: [
+        { name: 'Buscar documento por termo (título, conteúdo, nº artigo)', value: 'search' },
+        { name: 'Colar ID manualmente', value: 'paste' },
+        { name: 'Pronto, não preciso adicionar mais nada', value: 'done' },
+      ],
     })
-    const extras = ids.split(',').map((s) => s.trim()).filter(Boolean)
-    relevant.push(...extras)
+
+    if (action === 'search') {
+      const term = await input({ message: 'Termo de busca (ex: "183", "data a data", "credenciamento"):' })
+      if (term.trim()) {
+        await searchDocuments(term.trim())
+        const wantAdd = await confirm({ message: 'Quer adicionar algum ID dos resultados acima?', default: false })
+        if (wantAdd) {
+          const ids = await input({ message: 'Cole os IDs separados por vírgula:' })
+          const extras = ids.split(',').map((s) => s.trim()).filter(Boolean)
+          const isHR = await confirm({ message: 'Esses documentos são ALTAMENTE relevantes?', default: true })
+          relevant.push(...extras)
+          if (isHR) highlyRelevant.push(...extras)
+        }
+      }
+    } else if (action === 'paste') {
+      const ids = await input({ message: 'Cole os IDs separados por vírgula:' })
+      const extras = ids.split(',').map((s) => s.trim()).filter(Boolean)
+      if (extras.length > 0) {
+        const isHR = await confirm({ message: 'Esses documentos são ALTAMENTE relevantes?', default: true })
+        relevant.push(...extras)
+        if (isHR) highlyRelevant.push(...extras)
+      }
+    } else {
+      addMore = false
+    }
   }
 
   const annotatedBy = await input({ message: 'Seu nome (para auditoria):', default: 'daniel' })
@@ -159,7 +282,7 @@ async function main() {
     target = found
   } else {
     const choices = gs.queries.map((q) => ({
-      name: `${q.annotations.relevant.length === 0 ? '[ ]' : '[x]'} ${q.id} — ${q.query}`,
+      name: `${q.annotations.annotatedAt ? '[x]' : '[ ]'} ${q.id} — ${q.query}`,
       value: q.id,
     }))
     const id = await select({ message: 'Qual query anotar?', choices })

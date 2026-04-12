@@ -1,11 +1,11 @@
 /**
- * Reranker com Gemini Flash
+ * Rerankers para re-pontuar resultados de busca.
  *
- * Re-pontua os top resultados da busca vetorial usando Gemini
- * para melhorar a precisão dos resultados mais relevantes.
+ * Dois providers:
+ * - Gemini Flash (LLM-based, prompt scoring)
+ * - Cohere Rerank 3.5 (cross-encoder treinado para ranking)
  *
- * Trade-off: +300-500ms de latência, mas top 5 muito mais preciso.
- * Usado apenas quando os top resultados têm similaridade próxima.
+ * Configurável via env: RERANK_PROVIDER=cohere|gemini (default: gemini)
  */
 
 import { queryGeminiText } from '../gemini/cached-client';
@@ -20,15 +20,20 @@ interface RerankScore {
   score: number;
 }
 
+type RerankProvider = 'gemini' | 'cohere';
+
+const RERANK_PROVIDER: RerankProvider =
+  (process.env.RERANK_PROVIDER as RerankProvider) || 'gemini';
+
 // ===========================
 // Main Function
 // ===========================
 
 /**
- * Re-rankeia resultados usando Gemini Flash para avaliar relevância
+ * Re-rankeia resultados usando o provider configurado (env RERANK_PROVIDER).
  *
  * @param query - Pergunta original do usuário
- * @param results - Resultados da busca vetorial (já ordenados por similaridade)
+ * @param results - Resultados da busca (já ordenados por RRF score)
  * @param topK - Quantos resultados finais retornar
  * @returns Resultados reordenados por relevância semântica
  */
@@ -37,19 +42,63 @@ export async function rerankResults(
   results: SearchResult[],
   topK: number = 8
 ): Promise<SearchResult[]> {
-  // Não vale a pena rerankar poucos resultados
-  if (results.length <= topK) return results;
+  if (results.length <= Math.min(topK, 3)) return results.slice(0, topK);
 
-  // Só rerankear se os top resultados têm similaridade próxima
-  // (quando a diferença é grande, o ranking vetorial já é bom)
-  const topSimilarity = results[0]?.similarity || 0;
-  const fifthSimilarity = results[Math.min(4, results.length - 1)]?.similarity || 0;
-  if (topSimilarity - fifthSimilarity > 0.15) {
-    // Ranking claro — não precisa rerankar
-    return results.slice(0, topK);
+  const provider = RERANK_PROVIDER;
+  if (provider === 'cohere' && process.env.COHERE_API_KEY) {
+    return rerankWithCohere(query, results, topK);
   }
+  return rerankWithGemini(query, results, topK);
+}
 
-  // Pegar os top 20 para rerankar (não faz sentido enviar mais)
+// ===========================
+// Cohere Rerank 3.5
+// ===========================
+
+async function rerankWithCohere(
+  query: string,
+  results: SearchResult[],
+  topK: number
+): Promise<SearchResult[]> {
+  const candidates = results.slice(0, 40);
+
+  try {
+    const { CohereClient } = await import('cohere-ai');
+    const cohere = new CohereClient({ token: process.env.COHERE_API_KEY! });
+
+    const documents = candidates.map((r) => {
+      const content = r.chunkContent.slice(0, 500);
+      return `[${r.category}] ${r.documentTitle}\n${content}`;
+    });
+
+    const response = await cohere.v2.rerank({
+      model: 'rerank-v3.5',
+      query,
+      documents,
+      topN: topK,
+    });
+
+    const reranked: SearchResult[] = response.results.map((rr) => ({
+      ...candidates[rr.index],
+      similarity: rr.relevanceScore,
+    }));
+
+    return reranked;
+  } catch (err) {
+    console.warn('Cohere reranking failed, falling back to Gemini:', err instanceof Error ? err.message : err);
+    return rerankWithGemini(query, results, topK);
+  }
+}
+
+// ===========================
+// Gemini Flash (LLM-based)
+// ===========================
+
+async function rerankWithGemini(
+  query: string,
+  results: SearchResult[],
+  topK: number
+): Promise<SearchResult[]> {
   const candidates = results.slice(0, 20);
 
   const prompt = `Dado a pergunta do usuário sobre Licitações e Contratos (Lei 14.133/2021), ordene os documentos abaixo por relevância.
@@ -80,29 +129,26 @@ Ordene do mais relevante ao menos relevante. Inclua TODOS os ${candidates.length
     });
 
     let text = response.response.trim();
-    // Extrair JSON do markdown se necessário
     if (text.includes('```json')) text = text.split('```json')[1].split('```')[0].trim();
     else if (text.includes('```')) text = text.split('```')[1].split('```')[0].trim();
 
     const scores: RerankScore[] = JSON.parse(text);
 
-    // Reordenar por score do Gemini
     const reranked: SearchResult[] = [];
     const usedIndices = new Set<number>();
 
     for (const { index, score } of scores.sort((a, b) => b.score - a.score)) {
-      const i = index - 1; // Convert to 0-based
+      const i = index - 1;
       if (i >= 0 && i < candidates.length && !usedIndices.has(i)) {
         usedIndices.add(i);
         reranked.push({
           ...candidates[i],
-          similarity: score / 100, // Normalizar para 0-1
+          similarity: score / 100,
         });
       }
       if (reranked.length >= topK) break;
     }
 
-    // Se o parse falhou parcialmente, completar com os restantes
     if (reranked.length < topK) {
       for (let i = 0; i < candidates.length && reranked.length < topK; i++) {
         if (!usedIndices.has(i)) {
@@ -113,7 +159,7 @@ Ordene do mais relevante ao menos relevante. Inclua TODOS os ${candidates.length
 
     return reranked;
   } catch (err) {
-    console.warn('Reranking failed, falling back to vector ranking:', err instanceof Error ? err.message : err);
+    console.warn('Gemini reranking failed, falling back to vector ranking:', err instanceof Error ? err.message : err);
     return results.slice(0, topK);
   }
 }

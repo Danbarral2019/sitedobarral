@@ -165,11 +165,11 @@ export async function searchDocuments(
   }
   conditions.push(`(${accessParts.join(' OR ')})`);
 
-  // Exclude categories that have dedicated search types
-  const defaultExclude = ['lei-artigo', 'ato-normativo', 'boa_pratica'];
-  const allExclude = [...new Set([...defaultExclude, ...excludeCategories])];
-  const excludeEscaped = allExclude.map(c => `'${c.replace(/'/g, "''")}'`).join(', ');
-  conditions.push(`category NOT IN (${excludeEscaped})`);
+  // Exclude categories passed by caller (no hardcoded defaults)
+  if (excludeCategories.length > 0) {
+    const excludeEscaped = excludeCategories.map(c => `'${c.replace(/'/g, "''")}'`).join(', ');
+    conditions.push(`category NOT IN (${excludeEscaped})`);
+  }
 
   const sql = `
     SELECT
