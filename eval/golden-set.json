@@ -1,5 +1,5 @@
 {
-  "version": 1,
+  "version": 2,
   "createdAt": "2026-04-06",
   "queries": [
     {
@@ -14,6 +14,2450 @@
         "annotatedAt": null,
         "annotatedBy": null,
         "notes": "Hoje a busca devolve resposta sobre reajuste de preços (art. 134, 182, 124) — completamente fora do tópico. O documento certo é o art. 183 II da Lei 14.133. Anotar via CLI eval:annotate quando o framework estiver pronto."
+      }
+    },
+    {
+      "id": "q-dispensa-valor",
+      "query": "dispensa de licitação por valor",
+      "description": "Hipóteses de dispensa em razão do valor — art. 75, I e II da Lei 14.133/2021 (obras/serviços de engenharia e demais contratações).",
+      "category": "dispensa-inexigibilidade",
+      "difficulty": "easy",
+      "annotations": {
+        "relevant": [],
+        "highlyRelevant": [],
+        "annotatedAt": null,
+        "annotatedBy": null,
+        "notes": "Esperado: art. 75 I/II e atualizações de valores via decreto/IN."
+      }
+    },
+    {
+      "id": "q-inexigibilidade-notoria",
+      "query": "inexigibilidade notória especialização",
+      "description": "Contratação direta por inexigibilidade de serviços técnicos especializados de natureza predominantemente intelectual com profissional de notória especialização — art. 74, III da Lei 14.133/2021.",
+      "category": "dispensa-inexigibilidade",
+      "difficulty": "medium",
+      "annotations": {
+        "relevant": [],
+        "highlyRelevant": [],
+        "annotatedAt": null,
+        "annotatedBy": null,
+        "notes": "Esperado: art. 74 III e §§ 3º a 5º da Lei 14.133."
+      }
+    },
+    {
+      "id": "q-pregao-bens-comuns",
+      "query": "pregão bens e serviços comuns",
+      "description": "Obrigatoriedade do pregão para aquisição de bens e serviços comuns — art. 29 da Lei 14.133/2021.",
+      "category": "modalidade-licitacao",
+      "difficulty": "easy",
+      "annotations": {
+        "relevant": [],
+        "highlyRelevant": [],
+        "annotatedAt": null,
+        "annotatedBy": null,
+        "notes": "Esperado: art. 6º XIII (definição de bens/serviços comuns) e art. 29."
+      }
+    },
+    {
+      "id": "q-dialogo-competitivo",
+      "query": "diálogo competitivo hipóteses cabimento",
+      "description": "Modalidade diálogo competitivo — condições e hipóteses de cabimento (art. 32 da Lei 14.133/2021).",
+      "category": "modalidade-licitacao",
+      "difficulty": "medium",
+      "annotations": {
+        "relevant": [],
+        "highlyRelevant": [],
+        "annotatedAt": null,
+        "annotatedBy": null,
+        "notes": "Esperado: art. 32 da Lei 14.133 e orientações AGU/TCU sobre a modalidade."
+      }
+    },
+    {
+      "id": "q-srp-adesao-carona",
+      "query": "adesão ata registro de preços carona",
+      "description": "Possibilidade de adesão à ata de registro de preços por órgão não participante (carona) — art. 86 da Lei 14.133/2021 e decretos regulamentadores.",
+      "category": "registro-de-precos",
+      "difficulty": "medium",
+      "annotations": {
+        "relevant": [],
+        "highlyRelevant": [],
+        "annotatedAt": null,
+        "annotatedBy": null,
+        "notes": "Esperado: art. 86 e Decreto 11.462/2023 (regulamento federal de SRP)."
+      }
+    },
+    {
+      "id": "q-reequilibrio-economico",
+      "query": "reequilíbrio econômico-financeiro do contrato",
+      "description": "Manutenção do equilíbrio econômico-financeiro dos contratos administrativos — art. 124, II, 'd' e art. 134 da Lei 14.133/2021.",
+      "category": "contratos",
+      "difficulty": "medium",
+      "annotations": {
+        "relevant": [],
+        "highlyRelevant": [],
+        "annotatedAt": null,
+        "annotatedBy": null,
+        "notes": "Esperado: art. 124 II d, art. 134, e distinção entre reajuste, repactuação e revisão."
+      }
+    },
+    {
+      "id": "q-sancoes-impedimento-licitar",
+      "query": "sanções impedimento de licitar e contratar",
+      "description": "Regime sancionatório da Lei 14.133/2021 — art. 156 (advertência, multa, impedimento, declaração de inidoneidade) e prazos de reabilitação.",
+      "category": "sancoes",
+      "difficulty": "medium",
+      "annotations": {
+        "relevant": [],
+        "highlyRelevant": [],
+        "annotatedAt": null,
+        "annotatedBy": null,
+        "notes": "Esperado: art. 156 e art. 163 da Lei 14.133."
+      }
+    },
+    {
+      "id": "q-fiscal-contrato-responsabilidade",
+      "query": "responsabilidades do fiscal de contrato",
+      "description": "Atribuições e responsabilidades do fiscal de contrato — art. 117 da Lei 14.133/2021 e IN SEGES 05/2017 (no que ainda aplicável).",
+      "category": "gestao-fiscalizacao",
+      "difficulty": "easy",
+      "annotations": {
+        "relevant": [],
+        "highlyRelevant": [],
+        "annotatedAt": null,
+        "annotatedBy": null,
+        "notes": "Esperado: art. 117 e orientações AGU/TCU sobre fiscalização."
+      }
+    },
+    {
+      "id": "q-etp-obrigatoriedade",
+      "query": "estudo técnico preliminar obrigatório",
+      "description": "Obrigatoriedade e conteúdo mínimo do Estudo Técnico Preliminar (ETP) — art. 18, §1º da Lei 14.133/2021.",
+      "category": "planejamento",
+      "difficulty": "easy",
+      "annotations": {
+        "relevant": [],
+        "highlyRelevant": [],
+        "annotatedAt": null,
+        "annotatedBy": null,
+        "notes": "Esperado: art. 18 §1º e IN SEGES 58/2022."
+      }
+    },
+    {
+      "id": "q-matriz-risco",
+      "query": "matriz de riscos contratos",
+      "description": "Matriz de alocação de riscos em contratos de obras e serviços de engenharia — art. 22 e art. 103 da Lei 14.133/2021.",
+      "category": "contratos",
+      "difficulty": "medium",
+      "annotations": {
+        "relevant": [],
+        "highlyRelevant": [],
+        "annotatedAt": null,
+        "annotatedBy": null,
+        "notes": "Esperado: art. 22 e art. 103."
+      }
+    },
+    {
+      "id": "q-habilitacao-fiscal-trabalhista",
+      "query": "habilitação fiscal social trabalhista documentos",
+      "description": "Documentação exigida para habilitação fiscal, social e trabalhista — art. 68 da Lei 14.133/2021.",
+      "category": "habilitacao",
+      "difficulty": "easy",
+      "annotations": {
+        "relevant": [],
+        "highlyRelevant": [],
+        "annotatedAt": null,
+        "annotatedBy": null,
+        "notes": "Esperado: art. 68 e CND's relacionadas (CNDT, FGTS, fazendas)."
+      }
+    },
+    {
+      "id": "t-cadin-01",
+      "query": "inscrição da contratada no CADIN, posteriormente a 16 de setembro de 2024, impede a celebração de contratos, convênios,",
+      "description": "Tese transversal T-CADIN-01: A inscrição da contratada no CADIN, posteriormente a 16 de setembro de 2024, impede a celebração de ...",
+      "category": "tese-transversal",
+      "difficulty": "medium",
+      "annotations": {
+        "relevant": [],
+        "highlyRelevant": [],
+        "annotatedAt": null,
+        "annotatedBy": null,
+        "notes": "Fundamentos curados: Lei 10.522/2002, art. 6º-A, incluído pela Lei 14.973/2024; Parecer 63/2024/DECOR/CGU/AGU, de aplicação compulsória pelos membros da AGU (Despacho do Advogado-Geral da União nº 539).. Nao encontrados no indice: Parecer 63/2024/DECOR/CGU/AGU, de aplicação compulsória pelos membros da AGU (Despacho do Advogado-Geral da União nº 539)."
+      },
+      "_elic": {
+        "source": "transversal",
+        "code": "T-CADIN-01",
+        "templateId": null,
+        "enunciado": "A inscrição da contratada no CADIN, posteriormente a 16 de setembro de 2024, impede a celebração de contratos, convênios, acordos e ajustes, bem como respectivos aditamentos, que envolvam desembolso de recursos públicos.",
+        "fundamentos_resolved": {},
+        "fundamentos_not_found": [
+          "Parecer 63/2024/DECOR/CGU/AGU, de aplicação compulsória pelos membros da AGU (Despacho do Advogado-Geral da União nº 539)."
+        ],
+        "candidates_pending_review": []
+      }
+    },
+    {
+      "id": "t-sancao-exnunc-01",
+      "query": "sanções de suspensão, impedimento e declaração de inidoneidade produzem efeitos ex nunc, não afetam por si os contratos",
+      "description": "Tese transversal T-SANCAO-EXNUNC-01: As sanções de suspensão, impedimento e declaração de inidoneidade produzem efeitos ex nunc, não afet...",
+      "category": "tese-transversal",
+      "difficulty": "medium",
+      "annotations": {
+        "relevant": [
+          "6eb43809-838b-43ea-93dc-51c44fd3e077"
+        ],
+        "highlyRelevant": [
+          "6eb43809-838b-43ea-93dc-51c44fd3e077"
+        ],
+        "annotatedAt": "2026-04-12T13:05:57.664Z",
+        "annotatedBy": "elic-import",
+        "notes": "Fundamentos curados: Orientação Normativa AGU nº 49/2014 (Parecer 13/2023/CNLCA/CGU/AGU); Enunciados PGF nº 88, 89 e 90 (Parecer 00008/2013/CPLC/DEPCONSU/PGF/AGU); Lei 8.666/1993, arts. 55, XIII, 78, I, 87 e 88; Lei 10.520/2002, art. 7º; Lei 14.133/2021, art. 156, III e IV.. Nao encontrados no indice: Enunciados PGF nº 88, 89 e 90 (Parecer 00008/2013/CPLC/DEPCONSU/PGF/AGU)"
+      },
+      "_elic": {
+        "source": "transversal",
+        "code": "T-SANCAO-EXNUNC-01",
+        "templateId": null,
+        "enunciado": "As sanções de suspensão, impedimento e declaração de inidoneidade produzem efeitos ex nunc, não afetam por si os contratos em andamento e, embora vedem a renovação contratual, não impedem a prorrogação fundada no art. 57, § 1º, ou no art. 79, § 5º, da Lei 8.666/1993.",
+        "fundamentos_resolved": {
+          "Orientação Normativa AGU nº 49/2014 (Parecer 13/2023/CNLCA/CGU/AGU)": "6eb43809-838b-43ea-93dc-51c44fd3e077"
+        },
+        "fundamentos_not_found": [
+          "Enunciados PGF nº 88, 89 e 90 (Parecer 00008/2013/CPLC/DEPCONSU/PGF/AGU)"
+        ],
+        "candidates_pending_review": []
+      }
+    },
+    {
+      "id": "t-garantia-modalidade-01",
+      "query": "garantia contratual só pode ser prestada nas modalidades de caução (em dinheiro ou títulos da dívida pública),",
+      "description": "Tese transversal T-GARANTIA-MODALIDADE-01: A garantia contratual só pode ser prestada nas modalidades de caução (em dinheiro ou títulos da dívi...",
+      "category": "tese-transversal",
+      "difficulty": "medium",
+      "annotations": {
+        "relevant": [
+          "f71cc1cd-1acb-402f-94f4-864c3f14f15b"
+        ],
+        "highlyRelevant": [
+          "f71cc1cd-1acb-402f-94f4-864c3f14f15b"
+        ],
+        "annotatedAt": "2026-04-12T13:05:57.864Z",
+        "annotatedBy": "elic-import",
+        "notes": "Fundamentos curados: Lei 8.666/1993, art. 56, § 1º, III; Lei 14.133/2021, art. 96, § 1º, III; TCU, Acórdão 597/2023-Plenário (Boletim de Jurisprudência nº 441; Informativo de Licitações e Contratos nº 456).. Nao encontrados no indice: Informativo de Licitações e Contratos nº 456)."
+      },
+      "_elic": {
+        "source": "transversal",
+        "code": "T-GARANTIA-MODALIDADE-01",
+        "templateId": null,
+        "enunciado": "A garantia contratual só pode ser prestada nas modalidades de caução (em dinheiro ou títulos da dívida pública), seguro-garantia ou fiança bancária, sendo irregular a aceitação de carta de fiança fidejussória de natureza não bancária.",
+        "fundamentos_resolved": {
+          "TCU, Acórdão 597/2023-Plenário (Boletim de Jurisprudência nº 441": "f71cc1cd-1acb-402f-94f4-864c3f14f15b"
+        },
+        "fundamentos_not_found": [
+          "Informativo de Licitações e Contratos nº 456)."
+        ],
+        "candidates_pending_review": []
+      }
+    },
+    {
+      "id": "t-habilitacao-manutencao-01",
+      "query": "contratada deve manter, durante toda a execução do contrato, as condições de habilitação exigidas na licitação, o que",
+      "description": "Tese transversal T-HABILITACAO-MANUTENCAO-01: A contratada deve manter, durante toda a execução do contrato, as condições de habilitação exigidas ...",
+      "category": "tese-transversal",
+      "difficulty": "easy",
+      "annotations": {
+        "relevant": [],
+        "highlyRelevant": [],
+        "annotatedAt": null,
+        "annotatedBy": null,
+        "notes": "Fundamentos curados: Lei 8.666/1993, arts. 29 e 55, XIII; Lei 14.133/2021, arts. 68 e 92, XVI; Instrução Normativa nº 3, de 26 de abril de 2018, art. 34.. Nao encontrados no indice: Instrução Normativa nº 3, de 26 de abril de 2018, art. 34."
+      },
+      "_elic": {
+        "source": "transversal",
+        "code": "T-HABILITACAO-MANUTENCAO-01",
+        "templateId": null,
+        "enunciado": "A contratada deve manter, durante toda a execução do contrato, as condições de habilitação exigidas na licitação, o que se verifica, entre outros meios, pela consulta ao SICAF, ao CADIN e à Consulta Consolidada de Pessoa Jurídica do TCU.",
+        "fundamentos_resolved": {},
+        "fundamentos_not_found": [
+          "Instrução Normativa nº 3, de 26 de abril de 2018, art. 34."
+        ],
+        "candidates_pending_review": []
+      }
+    },
+    {
+      "id": "t-empenho-previo-01",
+      "query": "celebração de contrato ou de aditivo com impacto orçamentário pressupõe a prévia expedição de nota de empenho, com",
+      "description": "Tese transversal T-EMPENHO-PREVIO-01: A celebração de contrato ou de aditivo com impacto orçamentário pressupõe a prévia expedição de nota...",
+      "category": "tese-transversal",
+      "difficulty": "easy",
+      "annotations": {
+        "relevant": [],
+        "highlyRelevant": [],
+        "annotatedAt": null,
+        "annotatedBy": null,
+        "notes": "Fundamentos curados: Lei 4.320/1964, art. 60; Decreto 93.872/1986, art. 30, § 1º; IN SEGES/MP nº 05/2017, Anexo IX, item 10.. Nao encontrados no indice: Decreto 93.872/1986, art. 30, § 1º; IN SEGES/MP nº 05/2017, Anexo IX, item 10."
+      },
+      "_elic": {
+        "source": "transversal",
+        "code": "T-EMPENHO-PREVIO-01",
+        "templateId": null,
+        "enunciado": "A celebração de contrato ou de aditivo com impacto orçamentário pressupõe a prévia expedição de nota de empenho, com indicação de seu número no instrumento respectivo.",
+        "fundamentos_resolved": {},
+        "fundamentos_not_found": [
+          "Decreto 93.872/1986, art. 30, § 1º",
+          "IN SEGES/MP nº 05/2017, Anexo IX, item 10."
+        ],
+        "candidates_pending_review": []
+      }
+    },
+    {
+      "id": "t-publicacao-extrato-01",
+      "query": "contrato e seus aditivos dependem de publicação do respectivo extrato na imprensa oficial para produzir",
+      "description": "Tese transversal T-PUBLICACAO-EXTRATO-01: O contrato e seus aditivos dependem de publicação do respectivo extrato na imprensa oficial para pro...",
+      "category": "tese-transversal",
+      "difficulty": "easy",
+      "annotations": {
+        "relevant": [],
+        "highlyRelevant": [],
+        "annotatedAt": null,
+        "annotatedBy": null,
+        "notes": "Fundamentos curados: Lei 8.666/1993, art. 61, parágrafo único; Lei 14.133/2021, art. 94."
+      },
+      "_elic": {
+        "source": "transversal",
+        "code": "T-PUBLICACAO-EXTRATO-01",
+        "templateId": null,
+        "enunciado": "O contrato e seus aditivos dependem de publicação do respectivo extrato na imprensa oficial para produzir efeitos.",
+        "fundamentos_resolved": {},
+        "fundamentos_not_found": [],
+        "candidates_pending_review": []
+      }
+    },
+    {
+      "id": "t-competencia-elic-bpc7-01",
+      "query": "análise jurídica da ELIC restringe-se aos aspectos estritamente jurídicos do procedimento, excluídas as questões de",
+      "description": "Tese transversal T-COMPETENCIA-ELIC-BPC7-01: A análise jurídica da ELIC restringe-se aos aspectos estritamente jurídicos do procedimento, excluíd...",
+      "category": "tese-transversal",
+      "difficulty": "hard",
+      "annotations": {
+        "relevant": [],
+        "highlyRelevant": [],
+        "annotatedAt": null,
+        "annotatedBy": null,
+        "notes": "Fundamentos curados: Boa Prática Consultiva nº 7 (Manual de Boas Práticas Consultivas da AGU, Portaria Conjunta nº 1/2016); Enunciado nº 7 do Manual de Boas Práticas Consultivas da AGU; Portaria Normativa PGF/AGU nº 73/2025, art. 2º.. Nao encontrados no indice: Boa Prática Consultiva nº 7 (Manual de Boas Práticas Consultivas da AGU, Portaria Conjunta nº 1/2016); Enunciado nº 7 do Manual de Boas Práticas Consultivas da AGU; Portaria Normativa PGF/AGU nº 73/2025, art. 2º."
+      },
+      "_elic": {
+        "source": "transversal",
+        "code": "T-COMPETENCIA-ELIC-BPC7-01",
+        "templateId": null,
+        "enunciado": "A análise jurídica da ELIC restringe-se aos aspectos estritamente jurídicos do procedimento, excluídas as questões de natureza técnica, econômica ou de conveniência e oportunidade, bem como a legislação específica afeta à atividade-fim do ente assessorado.",
+        "fundamentos_resolved": {},
+        "fundamentos_not_found": [
+          "Boa Prática Consultiva nº 7 (Manual de Boas Práticas Consultivas da AGU, Portaria Conjunta nº 1/2016)",
+          "Enunciado nº 7 do Manual de Boas Práticas Consultivas da AGU",
+          "Portaria Normativa PGF/AGU nº 73/2025, art. 2º."
+        ],
+        "candidates_pending_review": []
+      }
+    },
+    {
+      "id": "t-sancao-abrangencia-01",
+      "query": "penalidade de suspensão temporária do art. 87, III, da Lei 8.666/1993 restringe seus efeitos ao ente responsável pela",
+      "description": "Tese transversal T-SANCAO-ABRANGENCIA-01: A penalidade de suspensão temporária do art. 87, III, da Lei 8.666/1993 restringe seus efeitos ao en...",
+      "category": "tese-transversal",
+      "difficulty": "medium",
+      "annotations": {
+        "relevant": [],
+        "highlyRelevant": [],
+        "annotatedAt": null,
+        "annotatedBy": null,
+        "notes": "Fundamentos curados: Enunciado Consultivo PGF nº 88 (Parecer 00008/2013/CPLC/DEPCONSU/PGF/AGU); Instrução Normativa nº 3/2018, art. 34, §§ 1º a 3º.. Nao encontrados no indice: Enunciado Consultivo PGF nº 88 (Parecer 00008/2013/CPLC/DEPCONSU/PGF/AGU); Instrução Normativa nº 3/2018, art. 34, §§ 1º a 3º."
+      },
+      "_elic": {
+        "source": "transversal",
+        "code": "T-SANCAO-ABRANGENCIA-01",
+        "templateId": null,
+        "enunciado": "A penalidade de suspensão temporária do art. 87, III, da Lei 8.666/1993 restringe seus efeitos ao ente responsável pela aplicação da sanção; a penalidade de impedimento do art. 7º da Lei 10.520/2002, aplicada por ente federal, veda a participação em toda a Administração Pública Federal; a declaração de inidoneidade do art. 87, IV, produz efeitos em toda a Administração direta e indireta de todos os entes federativos.",
+        "fundamentos_resolved": {},
+        "fundamentos_not_found": [
+          "Enunciado Consultivo PGF nº 88 (Parecer 00008/2013/CPLC/DEPCONSU/PGF/AGU)",
+          "Instrução Normativa nº 3/2018, art. 34, §§ 1º a 3º."
+        ],
+        "candidates_pending_review": []
+      }
+    },
+    {
+      "id": "t-lrf-art16-01",
+      "query": "Despesas qualificáveis como atividades rotineiras e ordinárias dispensam o atendimento das exigências do art. 16, I e",
+      "description": "Tese transversal T-LRF-ART16-01: Despesas qualificáveis como atividades rotineiras e ordinárias dispensam o atendimento das exigência...",
+      "category": "tese-transversal",
+      "difficulty": "medium",
+      "annotations": {
+        "relevant": [
+          "53650881-79b5-487d-a02b-1659ef1c3139"
+        ],
+        "highlyRelevant": [
+          "53650881-79b5-487d-a02b-1659ef1c3139"
+        ],
+        "annotatedAt": "2026-04-12T13:05:58.063Z",
+        "annotatedBy": "elic-import",
+        "notes": "Fundamentos curados: Lei Complementar nº 101/2000, art. 16; Orientação Normativa AGU nº 52/2014; Conclusão DEPCONSU/PGF/AGU nº 01/2012.. Nao encontrados no indice: Conclusão DEPCONSU/PGF/AGU nº 01/2012."
+      },
+      "_elic": {
+        "source": "transversal",
+        "code": "T-LRF-ART16-01",
+        "templateId": null,
+        "enunciado": "Despesas qualificáveis como atividades rotineiras e ordinárias dispensam o atendimento das exigências do art. 16, I e II, da Lei de Responsabilidade Fiscal.",
+        "fundamentos_resolved": {
+          "Orientação Normativa AGU nº 52/2014": "53650881-79b5-487d-a02b-1659ef1c3139"
+        },
+        "fundamentos_not_found": [
+          "Conclusão DEPCONSU/PGF/AGU nº 01/2012."
+        ],
+        "candidates_pending_review": []
+      }
+    },
+    {
+      "id": "t-minuta-cnmlc-01",
+      "query": "instrumentos contratuais e seus aditivos devem adotar, com os ajustes necessários ao caso concreto, as minutas",
+      "description": "Tese transversal T-MINUTA-CNMLC-01: Os instrumentos contratuais e seus aditivos devem adotar, com os ajustes necessários ao caso concret...",
+      "category": "tese-transversal",
+      "difficulty": "hard",
+      "annotations": {
+        "relevant": [],
+        "highlyRelevant": [],
+        "annotatedAt": null,
+        "annotatedBy": null,
+        "notes": "Fundamentos curados: Portaria Normativa PGF/AGU nº 73/2025, art. 1º.. Nao encontrados no indice: Portaria Normativa PGF/AGU nº 73/2025, art. 1º."
+      },
+      "_elic": {
+        "source": "transversal",
+        "code": "T-MINUTA-CNMLC-01",
+        "templateId": null,
+        "enunciado": "Os instrumentos contratuais e seus aditivos devem adotar, com os ajustes necessários ao caso concreto, as minutas padronizadas da Câmara Nacional de Modelos de Licitações e Contratos Administrativos (CNMLC/CGU/AGU), observadas as respectivas notas explicativas.",
+        "fundamentos_resolved": {},
+        "fundamentos_not_found": [
+          "Portaria Normativa PGF/AGU nº 73/2025, art. 1º."
+        ],
+        "candidates_pending_review": []
+      }
+    },
+    {
+      "id": "t-lgpd-signatarios-01",
+      "query": "minutas de contratos e aditivos não devem conter números de documentos pessoais dos signatários, cabendo a",
+      "description": "Tese transversal T-LGPD-SIGNATARIOS-01: As minutas de contratos e aditivos não devem conter números de documentos pessoais dos signatários, ...",
+      "category": "tese-transversal",
+      "difficulty": "medium",
+      "annotations": {
+        "relevant": [],
+        "highlyRelevant": [],
+        "annotatedAt": null,
+        "annotatedBy": null,
+        "notes": "Fundamentos curados: Lei 13.709/2018 (LGPD); Parecer nº 4/2022/CNMLC/CGU/AGU.. Nao encontrados no indice: Parecer nº 4/2022/CNMLC/CGU/AGU."
+      },
+      "_elic": {
+        "source": "transversal",
+        "code": "T-LGPD-SIGNATARIOS-01",
+        "templateId": null,
+        "enunciado": "As minutas de contratos e aditivos não devem conter números de documentos pessoais dos signatários, cabendo a identificação dos representantes da Administração pela matrícula funcional e dos representantes da contratada pelo nome.",
+        "fundamentos_resolved": {},
+        "fundamentos_not_found": [
+          "Parecer nº 4/2022/CNMLC/CGU/AGU."
+        ],
+        "candidates_pending_review": []
+      }
+    },
+    {
+      "id": "t-bpc5-nao-fiscalizacao-01",
+      "query": "manifestação da ELIC limita-se ao exame da minuta e dos elementos jurídicos do ato submetido a parecer, não lhe",
+      "description": "Tese transversal T-BPC5-NAO-FISCALIZACAO-01: A manifestação da ELIC limita-se ao exame da minuta e dos elementos jurídicos do ato submetido a par...",
+      "category": "tese-transversal",
+      "difficulty": "hard",
+      "annotations": {
+        "relevant": [],
+        "highlyRelevant": [],
+        "annotatedAt": null,
+        "annotatedBy": null,
+        "notes": "Fundamentos curados: Manual de Boas Práticas Consultivas da AGU, BPC nº 5.. Nao encontrados no indice: Manual de Boas Práticas Consultivas da AGU, BPC nº 5."
+      },
+      "_elic": {
+        "source": "transversal",
+        "code": "T-BPC5-NAO-FISCALIZACAO-01",
+        "templateId": null,
+        "enunciado": "A manifestação da ELIC limita-se ao exame da minuta e dos elementos jurídicos do ato submetido a parecer, não lhe incumbindo a fiscalização posterior do cumprimento das recomendações.",
+        "fundamentos_resolved": {},
+        "fundamentos_not_found": [
+          "Manual de Boas Práticas Consultivas da AGU, BPC nº 5."
+        ],
+        "candidates_pending_review": []
+      }
+    },
+    {
+      "id": "t-publicacao-lai-01",
+      "query": "Além da publicação resumida do extrato na imprensa oficial, condição de eficácia do instrumento, a Administração deve",
+      "description": "Tese transversal T-PUBLICACAO-LAI-01: Além da publicação resumida do extrato na imprensa oficial, condição de eficácia do instrumento, a A...",
+      "category": "tese-transversal",
+      "difficulty": "easy",
+      "annotations": {
+        "relevant": [],
+        "highlyRelevant": [],
+        "annotatedAt": null,
+        "annotatedBy": null,
+        "notes": "Fundamentos curados: Lei 8.666/1993, art. 61, parágrafo único; Lei 14.133/2021, art. 94; Lei 12.527/2011, art. 8º, §§ 1º e 2º; Decreto nº 7.724/2012, art. 7º, § 3º, V; TCU, Acórdão 1.855/2018-Plenário.. Nao encontrados no indice: Decreto nº 7.724/2012, art. 7º, § 3º, V; TCU, Acórdão 1.855/2018-Plenário."
+      },
+      "_elic": {
+        "source": "transversal",
+        "code": "T-PUBLICACAO-LAI-01",
+        "templateId": null,
+        "enunciado": "Além da publicação resumida do extrato na imprensa oficial, condição de eficácia do instrumento, a Administração deve disponibilizar integralmente o contrato, seus anexos e aditivos no sítio oficial do ente na internet, por força do regime de transparência ativa da Lei de Acesso à Informação.",
+        "fundamentos_resolved": {},
+        "fundamentos_not_found": [
+          "Decreto nº 7.724/2012, art. 7º, § 3º, V",
+          "TCU, Acórdão 1.855/2018-Plenário."
+        ],
+        "candidates_pending_review": []
+      }
+    },
+    {
+      "id": "t-ipp-destaques-01",
+      "query": "análise jurídica da ELIC pressupõe a adoção dos modelos padronizados da AGU e o uso do Instrumento de Padronização dos",
+      "description": "Tese transversal T-IPP-DESTAQUES-01: A análise jurídica da ELIC pressupõe a adoção dos modelos padronizados da AGU e o uso do Instrumento...",
+      "category": "tese-transversal",
+      "difficulty": "easy",
+      "annotations": {
+        "relevant": [],
+        "highlyRelevant": [],
+        "annotatedAt": null,
+        "annotatedBy": null,
+        "notes": "Fundamentos curados: Lei 14.133/2021, art. 19, IV; Portaria Normativa PGF/AGU nº 73/2025; Boa Prática Consultiva nº 6 do Manual de Boas Práticas Consultivas da AGU.. Nao encontrados no indice: Portaria Normativa PGF/AGU nº 73/2025; Boa Prática Consultiva nº 6 do Manual de Boas Práticas Consultivas da AGU."
+      },
+      "_elic": {
+        "source": "transversal",
+        "code": "T-IPP-DESTAQUES-01",
+        "templateId": null,
+        "enunciado": "A análise jurídica da ELIC pressupõe a adoção dos modelos padronizados da AGU e o uso do Instrumento de Padronização dos Procedimentos de Contratação (IPP), com destaques visuais e justificativas por escrito das alterações introduzidas nas minutas padronizadas; alterações não destacadas são de responsabilidade exclusiva da Administração.",
+        "fundamentos_resolved": {},
+        "fundamentos_not_found": [
+          "Portaria Normativa PGF/AGU nº 73/2025",
+          "Boa Prática Consultiva nº 6 do Manual de Boas Práticas Consultivas da AGU."
+        ],
+        "candidates_pending_review": []
+      }
+    },
+    {
+      "id": "t-srp-contratacao-unica-01",
+      "query": "Sistema de Registro de Preços não se presta a contratação única e exauriente previamente definida; nesses casos, a ata",
+      "description": "Tese transversal T-SRP-CONTRATACAO-UNICA-01: O Sistema de Registro de Preços não se presta a contratação única e exauriente previamente definida;...",
+      "category": "tese-transversal",
+      "difficulty": "medium",
+      "annotations": {
+        "relevant": [
+          "a1cf1a79-9034-42b9-8df1-d348346b86ec"
+        ],
+        "highlyRelevant": [
+          "a1cf1a79-9034-42b9-8df1-d348346b86ec"
+        ],
+        "annotatedAt": "2026-04-12T13:05:58.263Z",
+        "annotatedBy": "elic-import",
+        "notes": "Fundamentos curados: Lei 14.133/2021, art. 6º, XLV; Decreto 11.462/2023, arts. 2º, I, e 3º; TCU, Acórdão 1351/2025-Plenário; Parecer 00012/2025/CPLC/SUBCONSU/PGF/AGU.. Nao encontrados no indice: Decreto 11.462/2023, arts. 2º, I, e 3º; Parecer 00012/2025/CPLC/SUBCONSU/PGF/AGU."
+      },
+      "_elic": {
+        "source": "transversal",
+        "code": "T-SRP-CONTRATACAO-UNICA-01",
+        "templateId": null,
+        "enunciado": "O Sistema de Registro de Preços não se presta a contratação única e exauriente previamente definida; nesses casos, a ata esgota-se no primeiro uso, o que é incompatível com a finalidade do instituto.",
+        "fundamentos_resolved": {
+          "TCU, Acórdão 1351/2025-Plenário": "a1cf1a79-9034-42b9-8df1-d348346b86ec"
+        },
+        "fundamentos_not_found": [
+          "Decreto 11.462/2023, arts. 2º, I, e 3º",
+          "Parecer 00012/2025/CPLC/SUBCONSU/PGF/AGU."
+        ],
+        "candidates_pending_review": []
+      }
+    },
+    {
+      "id": "t-etp-obrigatorio-01",
+      "query": "estudo técnico preliminar é obrigatório e deve contemplar, no mínimo, os elementos dos incisos I, IV, VI, VIII e XIII",
+      "description": "Tese transversal T-ETP-OBRIGATORIO-01: O estudo técnico preliminar é obrigatório e deve contemplar, no mínimo, os elementos dos incisos I, ...",
+      "category": "tese-transversal",
+      "difficulty": "easy",
+      "annotations": {
+        "relevant": [],
+        "highlyRelevant": [],
+        "annotatedAt": null,
+        "annotatedBy": null,
+        "notes": "Fundamentos curados: Lei 14.133/2021, art. 18, §§ 1º e 2º; IN SEGES/ME nº 58/2022, arts. 6º e 9º, § 1º.. Nao encontrados no indice: IN SEGES/ME nº 58/2022, arts. 6º e 9º, § 1º."
+      },
+      "_elic": {
+        "source": "transversal",
+        "code": "T-ETP-OBRIGATORIO-01",
+        "templateId": null,
+        "enunciado": "O estudo técnico preliminar é obrigatório e deve contemplar, no mínimo, os elementos dos incisos I, IV, VI, VIII e XIII do § 1º do art. 18 da Lei 14.133/2021; a ausência dos demais elementos deve ser justificada no próprio documento.",
+        "fundamentos_resolved": {},
+        "fundamentos_not_found": [
+          "IN SEGES/ME nº 58/2022, arts. 6º e 9º, § 1º."
+        ],
+        "candidates_pending_review": []
+      }
+    },
+    {
+      "id": "t-me-epp-80k-01",
+      "query": "processo licitatório deve ser destinado exclusivamente à participação de microempresas, empresas de pequeno porte e",
+      "description": "Tese transversal T-ME-EPP-80K-01: O processo licitatório deve ser destinado exclusivamente à participação de microempresas, empresas d...",
+      "category": "tese-transversal",
+      "difficulty": "easy",
+      "annotations": {
+        "relevant": [],
+        "highlyRelevant": [],
+        "annotatedAt": null,
+        "annotatedBy": null,
+        "notes": "Fundamentos curados: Lei Complementar 123/2006; Lei 11.488/2007, art. 34; Decreto 8.538/2015, arts. 6º e 10; Lei 14.133/2021, art. 4º, § 3º (cálculo por valor anual em contratos plurianuais).. Nao encontrados no indice: Decreto 8.538/2015, arts. 6º e 10"
+      },
+      "_elic": {
+        "source": "transversal",
+        "code": "T-ME-EPP-80K-01",
+        "templateId": null,
+        "enunciado": "O processo licitatório deve ser destinado exclusivamente à participação de microempresas, empresas de pequeno porte e cooperativas nos itens ou lotes de valor até R$ 80.000,00, salvo incidência de uma das hipóteses taxativas de afastamento do tratamento diferenciado.",
+        "fundamentos_resolved": {},
+        "fundamentos_not_found": [
+          "Decreto 8.538/2015, arts. 6º e 10"
+        ],
+        "candidates_pending_review": []
+      }
+    },
+    {
+      "id": "t-atestados-limites-01",
+      "query": "exigências de qualificação técnica por meio de atestados submetem-se a limites cumulativos: quantitativos mínimos até",
+      "description": "Tese transversal T-ATESTADOS-LIMITES-01: As exigências de qualificação técnica por meio de atestados submetem-se a limites cumulativos: quant...",
+      "category": "tese-transversal",
+      "difficulty": "easy",
+      "annotations": {
+        "relevant": [],
+        "highlyRelevant": [],
+        "annotatedAt": null,
+        "annotatedBy": null,
+        "notes": "Fundamentos curados: Lei 14.133/2021, art. 67, §§ 1º, 2º e 5º; TCU, Acórdãos 1.229/2008-Plenário, 2.303/2015-Plenário e 134/2017-Plenário.. Nao encontrados no indice: TCU, Acórdãos 1.229/2008-Plenário, 2.303/2015-Plenário e 134/2017-Plenário."
+      },
+      "_elic": {
+        "source": "transversal",
+        "code": "T-ATESTADOS-LIMITES-01",
+        "templateId": null,
+        "enunciado": "As exigências de qualificação técnica por meio de atestados submetem-se a limites cumulativos: quantitativos mínimos até 50% das parcelas de maior relevância ou valor significativo; parcelas consideradas relevantes apenas aquelas com valor individual igual ou superior a 4% do total estimado; experiência mínima não superior a três anos; vedação à exigência de vínculo empregatício para o responsável técnico.",
+        "fundamentos_resolved": {},
+        "fundamentos_not_found": [
+          "TCU, Acórdãos 1.229/2008-Plenário, 2.303/2015-Plenário e 134/2017-Plenário."
+        ],
+        "candidates_pending_review": []
+      }
+    },
+    {
+      "id": "t-marca-vs-fornecedor-01",
+      "query": "exclusividade de marca não se confunde com a exclusividade de fornecedor e, por si só, não comprova a inviabilidade de",
+      "description": "Tese transversal T-MARCA-VS-FORNECEDOR-01: A exclusividade de marca não se confunde com a exclusividade de fornecedor e, por si só, não comprov...",
+      "category": "tese-transversal",
+      "difficulty": "medium",
+      "annotations": {
+        "relevant": [
+          "5d4cfb06-a745-46ca-a389-c18e006d24b4"
+        ],
+        "highlyRelevant": [
+          "5d4cfb06-a745-46ca-a389-c18e006d24b4"
+        ],
+        "annotatedAt": "2026-04-12T13:05:58.461Z",
+        "annotatedBy": "elic-import",
+        "notes": "Fundamentos curados: Lei 14.133/2021, arts. 41, I, e 74, §1º, in fine; TCU, Acórdão 6875/2021-Segunda Câmara (Boletim de Jurisprudência nº 354); Súmula TCU nº 270.. Nao encontrados no indice: Lei 14.133/2021, arts. 41, I, e 74, §1º, in fine; Súmula TCU nº 270."
+      },
+      "_elic": {
+        "source": "transversal",
+        "code": "T-MARCA-VS-FORNECEDOR-01",
+        "templateId": null,
+        "enunciado": "A exclusividade de marca não se confunde com a exclusividade de fornecedor e, por si só, não comprova a inviabilidade de competição exigida para a inexigibilidade de licitação; a indicação de marca é admissível apenas como elemento acessório, desde que justificada tecnicamente nas hipóteses do art. 41, I, da Lei 14.133/2021.",
+        "fundamentos_resolved": {
+          "TCU, Acórdão 6875/2021-Segunda Câmara (Boletim de Jurisprudência nº 354)": "5d4cfb06-a745-46ca-a389-c18e006d24b4"
+        },
+        "fundamentos_not_found": [
+          "Lei 14.133/2021, arts. 41, I, e 74, §1º, in fine",
+          "Súmula TCU nº 270."
+        ],
+        "candidates_pending_review": []
+      }
+    },
+    {
+      "id": "t-srp-pluralidade-direta-01",
+      "query": "Sistema de Registro de Preços em contratação direta, autorizado pelo art. 82, §6º, da Lei 14.133/2021, somente é",
+      "description": "Tese transversal T-SRP-PLURALIDADE-DIRETA-01: O Sistema de Registro de Preços em contratação direta, autorizado pelo art. 82, §6º, da Lei 14.133/2...",
+      "category": "tese-transversal",
+      "difficulty": "medium",
+      "annotations": {
+        "relevant": [
+          "439bfdc0-a49a-4b1b-9e86-116595c42d58"
+        ],
+        "highlyRelevant": [
+          "439bfdc0-a49a-4b1b-9e86-116595c42d58"
+        ],
+        "annotatedAt": "2026-04-12T13:05:58.660Z",
+        "annotatedBy": "elic-import",
+        "notes": "Fundamentos curados: Lei 14.133/2021, art. 82, §6º; Decreto 11.462/2023, art. 16; Parecer 39/2024/DECOR/CGU/AGU, aprovado pelo Despacho do Ministro Chefe da AGU nº 461, de aplicação vinculante aos membros da AGU.. Nao encontrados no indice: Parecer 39/2024/DECOR/CGU/AGU, aprovado pelo Despacho do Ministro Chefe da AGU nº 461, de aplicação vinculante aos membros da AGU."
+      },
+      "_elic": {
+        "source": "transversal",
+        "code": "T-SRP-PLURALIDADE-DIRETA-01",
+        "templateId": null,
+        "enunciado": "O Sistema de Registro de Preços em contratação direta, autorizado pelo art. 82, §6º, da Lei 14.133/2021, somente é cabível quando houver pluralidade efetiva de órgãos ou entidades contratantes apta a justificar o registro, não suprindo tal exigência a mera possibilidade futura de adesão por caronas.",
+        "fundamentos_resolved": {
+          "Decreto 11.462/2023, art. 16": "439bfdc0-a49a-4b1b-9e86-116595c42d58"
+        },
+        "fundamentos_not_found": [
+          "Parecer 39/2024/DECOR/CGU/AGU, aprovado pelo Despacho do Ministro Chefe da AGU nº 461, de aplicação vinculante aos membros da AGU."
+        ],
+        "candidates_pending_review": []
+      }
+    },
+    {
+      "id": "t-pesquisa-ferramenta-privada-01",
+      "query": "utilização de ferramenta privada de pesquisa de preços (Banco de Preços, Cotação Zênite, Fonte de Preços e congêneres)",
+      "description": "Tese transversal T-PESQUISA-FERRAMENTA-PRIVADA-01: A utilização de ferramenta privada de pesquisa de preços (Banco de Preços, Cotação Zênite, Fonte de ...",
+      "category": "tese-transversal",
+      "difficulty": "easy",
+      "annotations": {
+        "relevant": [
+          "fedc9e92-8472-4271-9a64-0e94496734f6"
+        ],
+        "highlyRelevant": [
+          "fedc9e92-8472-4271-9a64-0e94496734f6"
+        ],
+        "annotatedAt": "2026-04-12T13:05:58.857Z",
+        "annotatedBy": "elic-import",
+        "notes": "Fundamentos curados: Lei 14.133/2021, art. 23, §1º; IN SEGES/ME 65/2021, art. 5º, I e §1º."
+      },
+      "_elic": {
+        "source": "transversal",
+        "code": "T-PESQUISA-FERRAMENTA-PRIVADA-01",
+        "templateId": null,
+        "enunciado": "A utilização de ferramenta privada de pesquisa de preços (Banco de Preços, Cotação Zênite, Fonte de Preços e congêneres) não atende, isoladamente, às exigências do art. 5º da IN SEGES/ME nº 65/2021, por não constituir fonte oficial, servindo apenas como mecanismo auxiliar de busca.",
+        "fundamentos_resolved": {
+          "IN SEGES/ME 65/2021, art. 5º, I e §1º.": "fedc9e92-8472-4271-9a64-0e94496734f6"
+        },
+        "fundamentos_not_found": [],
+        "candidates_pending_review": []
+      }
+    },
+    {
+      "id": "t-pesquisa-precos-in65-01",
+      "query": "pesquisa de preços deve observar os parâmetros do art. 23, §1º, da Lei 14.133/2021 e do art. 5º da IN SEGES/ME 65/2021,",
+      "description": "Tese transversal T-PESQUISA-PRECOS-IN65-01: A pesquisa de preços deve observar os parâmetros do art. 23, §1º, da Lei 14.133/2021 e do art. 5º da...",
+      "category": "tese-transversal",
+      "difficulty": "medium",
+      "annotations": {
+        "relevant": [
+          "845a2f3e-752e-4aff-8804-a061a767d6ac"
+        ],
+        "highlyRelevant": [
+          "845a2f3e-752e-4aff-8804-a061a767d6ac"
+        ],
+        "annotatedAt": "2026-04-12T13:05:59.057Z",
+        "annotatedBy": "elic-import",
+        "notes": "Fundamentos curados: Lei 14.133/2021, art. 23, §1º; IN SEGES/ME 65/2021, arts. 3º, 5º e 6º; Orientação Normativa AGU nº 17/2009.. Nao encontrados no indice: IN SEGES/ME 65/2021, arts. 3º, 5º e 6º"
+      },
+      "_elic": {
+        "source": "transversal",
+        "code": "T-PESQUISA-PRECOS-IN65-01",
+        "templateId": null,
+        "enunciado": "A pesquisa de preços deve observar os parâmetros do art. 23, §1º, da Lei 14.133/2021 e do art. 5º da IN SEGES/ME 65/2021, com prioridade para os incisos I e II, formalização em documento único nos termos do art. 3º, análise crítica conclusiva dos preços coletados e desconsideração dos valores inexequíveis, inconsistentes ou excessivamente elevados.",
+        "fundamentos_resolved": {
+          "Orientação Normativa AGU nº 17/2009.": "845a2f3e-752e-4aff-8804-a061a767d6ac"
+        },
+        "fundamentos_not_found": [
+          "IN SEGES/ME 65/2021, arts. 3º, 5º e 6º"
+        ],
+        "candidates_pending_review": []
+      }
+    },
+    {
+      "id": "t-minutas-agu-destaques-01",
+      "query": "análise jurídica da ELIC pressupõe a utilização das minutas padronizadas da AGU, acompanhadas de Declaração de",
+      "description": "Tese transversal T-MINUTAS-AGU-DESTAQUES-01: A análise jurídica da ELIC pressupõe a utilização das minutas padronizadas da AGU, acompanhadas de D...",
+      "category": "tese-transversal",
+      "difficulty": "easy",
+      "annotations": {
+        "relevant": [],
+        "highlyRelevant": [],
+        "annotatedAt": null,
+        "annotatedBy": null,
+        "notes": "Fundamentos curados: Lei 14.133/2021, art. 19, IV; Portaria Normativa PGF/AGU nº 73/2025; Boa Prática Consultiva nº 6 do Manual de Boas Práticas Consultivas da AGU.. Nao encontrados no indice: Portaria Normativa PGF/AGU nº 73/2025; Boa Prática Consultiva nº 6 do Manual de Boas Práticas Consultivas da AGU."
+      },
+      "_elic": {
+        "source": "transversal",
+        "code": "T-MINUTAS-AGU-DESTAQUES-01",
+        "templateId": null,
+        "enunciado": "A análise jurídica da ELIC pressupõe a utilização das minutas padronizadas da AGU, acompanhadas de Declaração de Utilização de Modelos AGU/MGI, com destaques visuais das alterações e justificativas por escrito, nos termos do Instrumento de Padronização dos Procedimentos de Contratação (IPP).",
+        "fundamentos_resolved": {},
+        "fundamentos_not_found": [
+          "Portaria Normativa PGF/AGU nº 73/2025",
+          "Boa Prática Consultiva nº 6 do Manual de Boas Práticas Consultivas da AGU."
+        ],
+        "candidates_pending_review": []
+      }
+    },
+    {
+      "id": "t-instrumento-substitutivo-on84-01",
+      "query": "substituição do termo de contrato por instrumento equivalente, autorizada pelo art. 95, I e II, da Lei 14.133/2021, é",
+      "description": "Tese transversal T-INSTRUMENTO-SUBSTITUTIVO-ON84-01: A substituição do termo de contrato por instrumento equivalente, autorizada pelo art. 95, I e II, da...",
+      "category": "tese-transversal",
+      "difficulty": "medium",
+      "annotations": {
+        "relevant": [
+          "e003992a-2831-44d2-a23d-83343acf07ad"
+        ],
+        "highlyRelevant": [
+          "e003992a-2831-44d2-a23d-83343acf07ad"
+        ],
+        "annotatedAt": "2026-04-12T13:05:59.257Z",
+        "annotatedBy": "elic-import",
+        "notes": "Fundamentos curados: Lei 14.133/2021, arts. 92 e 95, I, II e §1º; Orientação Normativa AGU nº 84/2024."
+      },
+      "_elic": {
+        "source": "transversal",
+        "code": "T-INSTRUMENTO-SUBSTITUTIVO-ON84-01",
+        "templateId": null,
+        "enunciado": "A substituição do termo de contrato por instrumento equivalente, autorizada pelo art. 95, I e II, da Lei 14.133/2021, é admitida nas contratações cujo valor se enquadre no limite atualizado da dispensa do art. 75, II, ou nas compras com entrega imediata e integral sem obrigações futuras, observadas as cláusulas do art. 92 no que couber.",
+        "fundamentos_resolved": {
+          "Orientação Normativa AGU nº 84/2024.": "e003992a-2831-44d2-a23d-83343acf07ad"
+        },
+        "fundamentos_not_found": [],
+        "candidates_pending_review": []
+      }
+    },
+    {
+      "id": "t-eng-precos-max-unitarios-01",
+      "query": "Em contratos de obras e serviços de engenharia, além do preço global, é obrigatória a fixação de preços máximos",
+      "description": "Tese transversal T-ENG-PRECOS-MAX-UNITARIOS-01: Em contratos de obras e serviços de engenharia, além do preço global, é obrigatória a fixação de pre...",
+      "category": "tese-transversal",
+      "difficulty": "medium",
+      "annotations": {
+        "relevant": [
+          "d2831f21-4f4d-4610-b988-c12626978182",
+          "c456890d-46ce-4c0c-836c-6e9fe3d7ecb4"
+        ],
+        "highlyRelevant": [
+          "d2831f21-4f4d-4610-b988-c12626978182",
+          "c456890d-46ce-4c0c-836c-6e9fe3d7ecb4"
+        ],
+        "annotatedAt": "2026-04-12T13:05:59.457Z",
+        "annotatedBy": "elic-import",
+        "notes": "Fundamentos curados: Lei 14.133/2021, arts. 23, §2º, e 59, III; Súmula TCU nº 259; Orientação Normativa AGU nº 5/2009; TCU, Acórdão 1.695/2018-Plenário.. Nao encontrados no indice: TCU, Acórdão 1.695/2018-Plenário."
+      },
+      "_elic": {
+        "source": "transversal",
+        "code": "T-ENG-PRECOS-MAX-UNITARIOS-01",
+        "templateId": null,
+        "enunciado": "Em contratos de obras e serviços de engenharia, além do preço global, é obrigatória a fixação de preços máximos unitários, sob pena de comprometimento do controle de aditivos e do equilíbrio econômico-financeiro, admitida a divulgação dos orçamentos ao público em geral.",
+        "fundamentos_resolved": {
+          "Súmula TCU nº 259": "d2831f21-4f4d-4610-b988-c12626978182",
+          "Orientação Normativa AGU nº 5/2009": "c456890d-46ce-4c0c-836c-6e9fe3d7ecb4"
+        },
+        "fundamentos_not_found": [
+          "TCU, Acórdão 1.695/2018-Plenário."
+        ],
+        "candidates_pending_review": []
+      }
+    },
+    {
+      "id": "t-eng-bdi-irpj-csll-01",
+      "query": "vedada a inclusão das parcelas relativas ao IRPJ e à CSLL na composição do BDI e no orçamento-base de obras e serviços",
+      "description": "Tese transversal T-ENG-BDI-IRPJ-CSLL-01: É vedada a inclusão das parcelas relativas ao IRPJ e à CSLL na composição do BDI e no orçamento-base...",
+      "category": "tese-transversal",
+      "difficulty": "medium",
+      "annotations": {
+        "relevant": [
+          "47f91ef1-807e-43de-a206-e18a10da2aef"
+        ],
+        "highlyRelevant": [
+          "47f91ef1-807e-43de-a206-e18a10da2aef"
+        ],
+        "annotatedAt": "2026-04-12T13:05:59.654Z",
+        "annotatedBy": "elic-import",
+        "notes": "Fundamentos curados: Súmula TCU nº 254; TCU, Informativo de Licitações e Contratos nº 279 (Acórdão 325/2007-Plenário); Decreto 7.983/2013, art. 9º, II.. Nao encontrados no indice: TCU, Informativo de Licitações e Contratos nº 279 (Acórdão 325/2007-Plenário); Decreto 7.983/2013, art. 9º, II."
+      },
+      "_elic": {
+        "source": "transversal",
+        "code": "T-ENG-BDI-IRPJ-CSLL-01",
+        "templateId": null,
+        "enunciado": "É vedada a inclusão das parcelas relativas ao IRPJ e à CSLL na composição do BDI e no orçamento-base de obras e serviços de engenharia, por se tratar de tributos diretos personalíssimos incidentes sobre o lucro da contratada.",
+        "fundamentos_resolved": {
+          "Súmula TCU nº 254": "47f91ef1-807e-43de-a206-e18a10da2aef"
+        },
+        "fundamentos_not_found": [
+          "TCU, Informativo de Licitações e Contratos nº 279 (Acórdão 325/2007-Plenário)",
+          "Decreto 7.983/2013, art. 9º, II."
+        ],
+        "candidates_pending_review": []
+      }
+    },
+    {
+      "id": "t-eng-desoneracao-folha-01",
+      "query": "definição do regime previdenciário aplicável ao contrato (desoneração da folha.546/2011, ou contribuição patronal",
+      "description": "Tese transversal T-ENG-DESONERACAO-FOLHA-01: A definição do regime previdenciário aplicável ao contrato (desoneração da folha, nos termos da Lei ...",
+      "category": "tese-transversal",
+      "difficulty": "easy",
+      "annotations": {
+        "relevant": [],
+        "highlyRelevant": [],
+        "annotatedAt": null,
+        "annotatedBy": null,
+        "notes": "Fundamentos curados: Lei 12.546/2011, arts. 7º a 9º; Lei 8.212/1991, art. 22; TCU, Acórdão 2.293/2013-Plenário.. Nao encontrados no indice: TCU, Acórdão 2.293/2013-Plenário."
+      },
+      "_elic": {
+        "source": "transversal",
+        "code": "T-ENG-DESONERACAO-FOLHA-01",
+        "templateId": null,
+        "enunciado": "A definição do regime previdenciário aplicável ao contrato (desoneração da folha, nos termos da Lei 12.546/2011, ou contribuição patronal ordinária do art. 22 da Lei 8.212/1991) é ônus da contratada no momento da proposta, e deve refletir-se de forma congruente na planilha orçamentária e no BDI.",
+        "fundamentos_resolved": {},
+        "fundamentos_not_found": [
+          "TCU, Acórdão 2.293/2013-Plenário."
+        ],
+        "candidates_pending_review": []
+      }
+    },
+    {
+      "id": "t-eng-art-rrt-trt-01",
+      "query": "elaboração de projetos, orçamentos e a execução de obras e serviços de engenharia exigem Anotação de Responsabilidade",
+      "description": "Tese transversal T-ENG-ART-RRT-TRT-01: A elaboração de projetos, orçamentos e a execução de obras e serviços de engenharia exigem Anotação ...",
+      "category": "tese-transversal",
+      "difficulty": "medium",
+      "annotations": {
+        "relevant": [
+          "17f6bcef-bbb3-455e-9e53-7a55a119a4bf"
+        ],
+        "highlyRelevant": [
+          "17f6bcef-bbb3-455e-9e53-7a55a119a4bf"
+        ],
+        "annotatedAt": "2026-04-12T13:05:59.852Z",
+        "annotatedBy": "elic-import",
+        "notes": "Fundamentos curados: Lei 6.496/1977; Lei 12.378/2010; Súmula TCU nº 260; Resolução CONFEA nº 1.025/2009.. Nao encontrados no indice: Resolução CONFEA nº 1.025/2009."
+      },
+      "_elic": {
+        "source": "transversal",
+        "code": "T-ENG-ART-RRT-TRT-01",
+        "templateId": null,
+        "enunciado": "A elaboração de projetos, orçamentos e a execução de obras e serviços de engenharia exigem Anotação de Responsabilidade Técnica (ART), Registro de Responsabilidade Técnica (RRT) ou Termo de Responsabilidade Técnica (TRT), conforme o respectivo conselho profissional, como condição de regularidade do ato técnico.",
+        "fundamentos_resolved": {
+          "Súmula TCU nº 260": "17f6bcef-bbb3-455e-9e53-7a55a119a4bf"
+        },
+        "fundamentos_not_found": [
+          "Resolução CONFEA nº 1.025/2009."
+        ],
+        "candidates_pending_review": []
+      }
+    },
+    {
+      "id": "t-eng-reajuste-in5-01",
+      "query": "contratos de obras e serviços de engenharia devem conter cláusula de reajuste em sentido estrito, com índice setorial",
+      "description": "Tese transversal T-ENG-REAJUSTE-IN5-01: Os contratos de obras e serviços de engenharia devem conter cláusula de reajuste em sentido estrito,...",
+      "category": "tese-transversal",
+      "difficulty": "easy",
+      "annotations": {
+        "relevant": [],
+        "highlyRelevant": [],
+        "annotatedAt": null,
+        "annotatedBy": null,
+        "notes": "Fundamentos curados: Lei 14.133/2021, arts. 6º, LVIII, e 25, §7º; Lei 10.192/2001, art. 3º; IN SEGES/MP nº 05/2017, Anexo IX; Decreto 7.983/2013.. Nao encontrados no indice: IN SEGES/MP nº 05/2017, Anexo IX; Decreto 7.983/2013."
+      },
+      "_elic": {
+        "source": "transversal",
+        "code": "T-ENG-REAJUSTE-IN5-01",
+        "templateId": null,
+        "enunciado": "Os contratos de obras e serviços de engenharia devem conter cláusula de reajuste em sentido estrito, com índice setorial adequado ao objeto (preferencialmente SINAPI, SICRO, ou índices do IBGE/FGV aderentes) e periodicidade anual, contada da data-base do orçamento ou da proposta.",
+        "fundamentos_resolved": {},
+        "fundamentos_not_found": [
+          "IN SEGES/MP nº 05/2017, Anexo IX",
+          "Decreto 7.983/2013."
+        ],
+        "candidates_pending_review": []
+      }
+    },
+    {
+      "id": "t-modo-disputa-fechado-01",
+      "query": "modo de disputa fechado, isoladamente, é vedado em pregão e concorrência; é admitido apenas o modo aberto ou a",
+      "description": "Tese transversal T-MODO-DISPUTA-FECHADO-01: O modo de disputa fechado, isoladamente, é vedado em pregão e concorrência; é admitido apenas o modo...",
+      "category": "tese-transversal",
+      "difficulty": "easy",
+      "annotations": {
+        "relevant": [],
+        "highlyRelevant": [],
+        "annotatedAt": null,
+        "annotatedBy": null,
+        "notes": "Fundamentos curados: Lei 14.133/2021, art. 56, §1º e §2º; Decreto 10.024/2019 (no que couber); Decreto 11.462/2023.. Nao encontrados no indice: Decreto 10.024/2019 (no que couber); Decreto 11.462/2023."
+      },
+      "_elic": {
+        "source": "transversal",
+        "code": "T-MODO-DISPUTA-FECHADO-01",
+        "templateId": null,
+        "enunciado": "O modo de disputa fechado, isoladamente, é vedado em pregão e concorrência; é admitido apenas o modo aberto ou a combinação aberto-fechado e fechado-aberto, conforme regulamento, com justificativa para a opção adotada.",
+        "fundamentos_resolved": {},
+        "fundamentos_not_found": [
+          "Decreto 10.024/2019 (no que couber)",
+          "Decreto 11.462/2023."
+        ],
+        "candidates_pending_review": []
+      }
+    },
+    {
+      "id": "t-contrato-escopo-on92-01",
+      "query": "Contratos de escopo, cujo objeto é a entrega de produto ou resultado determinado, têm vigência adstrita ao prazo",
+      "description": "Tese transversal T-CONTRATO-ESCOPO-ON92-01: Contratos de escopo, cujo objeto é a entrega de produto ou resultado determinado, têm vigência adstr...",
+      "category": "tese-transversal",
+      "difficulty": "medium",
+      "annotations": {
+        "relevant": [
+          "4ce3acbb-9ab6-42c7-9d11-aaa3c1bea783"
+        ],
+        "highlyRelevant": [
+          "4ce3acbb-9ab6-42c7-9d11-aaa3c1bea783"
+        ],
+        "annotatedAt": "2026-04-12T13:06:00.051Z",
+        "annotatedBy": "elic-import",
+        "notes": "Fundamentos curados: Lei 14.133/2021, arts. 105, 107 e 111; Orientação Normativa AGU nº 92/2024."
+      },
+      "_elic": {
+        "source": "transversal",
+        "code": "T-CONTRATO-ESCOPO-ON92-01",
+        "templateId": null,
+        "enunciado": "Contratos de escopo, cujo objeto é a entrega de produto ou resultado determinado, têm vigência adstrita ao prazo necessário à execução e entrega do objeto, não se lhes aplicando o regime de prorrogação dos serviços e fornecimentos contínuos do art. 107 da Lei 14.133/2021.",
+        "fundamentos_resolved": {
+          "Orientação Normativa AGU nº 92/2024.": "4ce3acbb-9ab6-42c7-9d11-aaa3c1bea783"
+        },
+        "fundamentos_not_found": [],
+        "candidates_pending_review": []
+      }
+    },
+    {
+      "id": "t-terceirizacao-art48-01",
+      "query": "vedada a contratação, por meio de terceirização, de atividades que envolvam a tomada de decisão ou posicionamento",
+      "description": "Tese transversal T-TERCEIRIZACAO-ART48-01: É vedada a contratação, por meio de terceirização, de atividades que envolvam a tomada de decisão ou...",
+      "category": "tese-transversal",
+      "difficulty": "medium",
+      "annotations": {
+        "relevant": [
+          "2b9515a0-c3e2-458a-8acc-8b2d517c45cd"
+        ],
+        "highlyRelevant": [
+          "2b9515a0-c3e2-458a-8acc-8b2d517c45cd"
+        ],
+        "annotatedAt": "2026-04-12T13:06:00.251Z",
+        "annotatedBy": "elic-import",
+        "notes": "Fundamentos curados: Lei 14.133/2021, art. 48; Súmula TCU nº 269; Decreto 9.507/2018.. Nao encontrados no indice: Decreto 9.507/2018."
+      },
+      "_elic": {
+        "source": "transversal",
+        "code": "T-TERCEIRIZACAO-ART48-01",
+        "templateId": null,
+        "enunciado": "É vedada a contratação, por meio de terceirização, de atividades que envolvam a tomada de decisão ou posicionamento institucional nas áreas de planejamento, coordenação, supervisão e controle; que sejam consideradas estratégicas para o órgão ou entidade; ou que estejam relacionadas ao poder de polícia, de regulação, de outorga de serviços públicos e de aplicação de sanção.",
+        "fundamentos_resolved": {
+          "Súmula TCU nº 269": "2b9515a0-c3e2-458a-8acc-8b2d517c45cd"
+        },
+        "fundamentos_not_found": [
+          "Decreto 9.507/2018."
+        ],
+        "candidates_pending_review": []
+      }
+    },
+    {
+      "id": "t-pcfp-cct-vigente-01",
+      "query": "planilha de custos e formação de preços, nos contratos com dedicação exclusiva de mão de obra ou com pagamento por",
+      "description": "Tese transversal T-PCFP-CCT-VIGENTE-01: A planilha de custos e formação de preços, nos contratos com dedicação exclusiva de mão de obra ou c...",
+      "category": "tese-transversal",
+      "difficulty": "medium",
+      "annotations": {
+        "relevant": [
+          "5dc5ae72-3e91-49ec-86d7-caac64ba77fd"
+        ],
+        "highlyRelevant": [
+          "5dc5ae72-3e91-49ec-86d7-caac64ba77fd"
+        ],
+        "annotatedAt": "2026-04-12T13:06:00.450Z",
+        "annotatedBy": "elic-import",
+        "notes": "Fundamentos curados: IN SEGES/MP nº 05/2017, art. 19, §§ 1º e 2º, e Anexo V; Lei 14.133/2021, art. 63, IV; Parecer 92/2019/DECOR/CGU/AGU; Orientação Normativa AGU nº 63/2020.. Nao encontrados no indice: IN SEGES/MP nº 05/2017, art. 19, §§ 1º e 2º, e Anexo V; Parecer 92/2019/DECOR/CGU/AGU"
+      },
+      "_elic": {
+        "source": "transversal",
+        "code": "T-PCFP-CCT-VIGENTE-01",
+        "templateId": null,
+        "enunciado": "A planilha de custos e formação de preços, nos contratos com dedicação exclusiva de mão de obra ou com pagamento por homem-hora, deve basear-se em instrumento coletivo de trabalho (CCT ou ACT) vigente na base territorial de execução do contrato, para cada categoria profissional envolvida.",
+        "fundamentos_resolved": {
+          "Orientação Normativa AGU nº 63/2020.": "5dc5ae72-3e91-49ec-86d7-caac64ba77fd"
+        },
+        "fundamentos_not_found": [
+          "IN SEGES/MP nº 05/2017, art. 19, §§ 1º e 2º, e Anexo V",
+          "Parecer 92/2019/DECOR/CGU/AGU"
+        ],
+        "candidates_pending_review": []
+      }
+    },
+    {
+      "id": "esp-354980-13",
+      "query": "Havendo atraso imputável à contratada, prevalece, em regra, a prorrogação em homenagem à primazia do interesse público,",
+      "description": "Tese especifica do template 354980 (Aditivo 8.666 — exceto engenharia): Havendo atraso imputável à contratada, prevalece, em regra, a prorrogação em hom...",
+      "category": "tese-especifica",
+      "difficulty": "medium",
+      "annotations": {
+        "relevant": [],
+        "highlyRelevant": [],
+        "annotatedAt": null,
+        "annotatedBy": null,
+        "notes": "Fundamentos curados: Lei 8.666/1993, art. 3º, caput; Decreto nº 1.054/1994, art. 6º; Decreto-Lei nº 4.657/1942 (LINDB), art. 20; Decreto nº 9.830/2019, arts. 2º e 3º; Parecer nº 133/2011/DECOR/CGU/AGU; TCU, Acórdão 1.218/2021-Plenário.. Nao encontrados no indice: Decreto nº 1.054/1994, art. 6º; Decreto nº 9.830/2019, arts. 2º e 3º; Parecer nº 133/2011/DECOR/CGU/AGU; TCU, Acórdão 1.218/2021-Plenário."
+      },
+      "_elic": {
+        "source": "especifica",
+        "code": null,
+        "templateId": "354980",
+        "enunciado": "Havendo atraso imputável à contratada, prevalece, em regra, a prorrogação em homenagem à primazia do interesse público, à continuidade do serviço e à solução mais vantajosa para o erário, reservada a rescisão para casos extremos, sem prejuízo das penalidades contratuais.",
+        "fundamentos_resolved": {},
+        "fundamentos_not_found": [
+          "Decreto nº 1.054/1994, art. 6º",
+          "Decreto nº 9.830/2019, arts. 2º e 3º",
+          "Parecer nº 133/2011/DECOR/CGU/AGU",
+          "TCU, Acórdão 1.218/2021-Plenário."
+        ],
+        "candidates_pending_review": []
+      }
+    },
+    {
+      "id": "esp-354980-8",
+      "query": "admissível a alteração, por termo aditivo, do regime de prestação de serviços continuados com dedicação exclusiva de",
+      "description": "Tese especifica do template 354980 (Aditivo 8.666 — exceto engenharia): É admissível a alteração, por termo aditivo, do regime de prestação de serviços ...",
+      "category": "tese-especifica",
+      "difficulty": "medium",
+      "annotations": {
+        "relevant": [],
+        "highlyRelevant": [],
+        "annotatedAt": null,
+        "annotatedBy": null,
+        "notes": "Fundamentos curados: Lei 6.019/1974, art. 5º-A, § 2º; Lei 8.666/1993, art. 65, II; IN SEGES/MP nº 05/2017, art. 57, § 1º, c/c art. 6º; Parecer nº 6/2022/CPLC/DEPCONSU/PGF/AGU; Enunciado Consultivo PGF nº 382.. Nao encontrados no indice: IN SEGES/MP nº 05/2017, art. 57, § 1º, c/c art. 6º; Parecer nº 6/2022/CPLC/DEPCONSU/PGF/AGU; Enunciado Consultivo PGF nº 382."
+      },
+      "_elic": {
+        "source": "especifica",
+        "code": null,
+        "templateId": "354980",
+        "enunciado": "É admissível a alteração, por termo aditivo, do regime de prestação de serviços continuados com dedicação exclusiva de mão de obra de presencial para remoto, desde que haja estudos de compatibilidade, concordância da contratada e exclusão, da planilha de custos, das rubricas incompatíveis com o teletrabalho.",
+        "fundamentos_resolved": {},
+        "fundamentos_not_found": [
+          "IN SEGES/MP nº 05/2017, art. 57, § 1º, c/c art. 6º",
+          "Parecer nº 6/2022/CPLC/DEPCONSU/PGF/AGU",
+          "Enunciado Consultivo PGF nº 382."
+        ],
+        "candidates_pending_review": []
+      }
+    },
+    {
+      "id": "esp-354989-0",
+      "query": "resposta a consulta jurídica é manifestação consultiva de caráter prévio, opinativo e não vinculante, restrita aos",
+      "description": "Tese especifica do template 354989 (Resposta a Consulta): A resposta a consulta jurídica é manifestação consultiva de caráter prévio, opin...",
+      "category": "tese-especifica",
+      "difficulty": "easy",
+      "annotations": {
+        "relevant": [],
+        "highlyRelevant": [],
+        "annotatedAt": null,
+        "annotatedBy": null,
+        "notes": "Fundamentos curados: Lei 14.133/2021, art. 53; Lei 9.784/1999, art. 50, § 1º; Enunciados BPC nº 5 e nº 7.. Nao encontrados no indice: Enunciados BPC nº 5 e nº 7."
+      },
+      "_elic": {
+        "source": "especifica",
+        "code": null,
+        "templateId": "354989",
+        "enunciado": "A resposta a consulta jurídica é manifestação consultiva de caráter prévio, opinativo e não vinculante, restrita aos limites da pergunta formulada e de seus temas correlatos, sendo vedada ao órgão consultivo substituir-se à autoridade administrativa no juízo de mérito, conveniência e oportunidade.",
+        "fundamentos_resolved": {},
+        "fundamentos_not_found": [
+          "Enunciados BPC nº 5 e nº 7."
+        ],
+        "candidates_pending_review": []
+      }
+    },
+    {
+      "id": "esp-354989-4",
+      "query": "Observações complementares feitas de ofício, não abrangidas pelo objeto da consulta, têm caráter de mero alerta ao",
+      "description": "Tese especifica do template 354989 (Resposta a Consulta): Observações complementares feitas de ofício, não abrangidas pelo objeto da consu...",
+      "category": "tese-especifica",
+      "difficulty": "hard",
+      "annotations": {
+        "relevant": [],
+        "highlyRelevant": [],
+        "annotatedAt": null,
+        "annotatedBy": null,
+        "notes": "Fundamentos curados: Enunciado BPC nº 7.. Nao encontrados no indice: Enunciado BPC nº 7."
+      },
+      "_elic": {
+        "source": "especifica",
+        "code": null,
+        "templateId": "354989",
+        "enunciado": "Observações complementares feitas de ofício, não abrangidas pelo objeto da consulta, têm caráter de mero alerta ao gestor e não constituem recomendação vinculante, sujeitando-se à discricionariedade de acatamento.",
+        "fundamentos_resolved": {},
+        "fundamentos_not_found": [
+          "Enunciado BPC nº 7."
+        ],
+        "candidates_pending_review": []
+      }
+    },
+    {
+      "id": "esp-451193-17",
+      "query": "alterações em planilhas orçamentárias de obras e serviços de engenharia exigem a emissão da respectiva Anotação de",
+      "description": "Tese especifica do template 451193 (Aditivo engenharia e obras — Lei 8.666): As alterações em planilhas orçamentárias de obras e serviços de engenharia exige...",
+      "category": "tese-especifica",
+      "difficulty": "medium",
+      "annotations": {
+        "relevant": [],
+        "highlyRelevant": [],
+        "annotatedAt": null,
+        "annotatedBy": null,
+        "notes": "Fundamentos curados: Lei 6.496/1977, arts. 1º e 2º; Decreto 7.983/2013, art. 10; Resolução CONFEA nº 1.137/2023, arts. 10, II, e 12; Súmula TCU nº 260.. Nao encontrados no indice: Decreto 7.983/2013, art. 10; Resolução CONFEA nº 1.137/2023, arts. 10, II, e 12; Súmula TCU nº 260."
+      },
+      "_elic": {
+        "source": "especifica",
+        "code": null,
+        "templateId": "451193",
+        "enunciado": "As alterações em planilhas orçamentárias de obras e serviços de engenharia exigem a emissão da respectiva Anotação de Responsabilidade Técnica (ART) pelo profissional responsável.",
+        "fundamentos_resolved": {},
+        "fundamentos_not_found": [
+          "Decreto 7.983/2013, art. 10",
+          "Resolução CONFEA nº 1.137/2023, arts. 10, II, e 12",
+          "Súmula TCU nº 260."
+        ],
+        "candidates_pending_review": []
+      }
+    },
+    {
+      "id": "esp-451193-3",
+      "query": "acréscimos e as supressões do objeto contratual devem ser calculados sobre o valor inicial atualizado do contrato,",
+      "description": "Tese especifica do template 451193 (Aditivo engenharia e obras — Lei 8.666): Os acréscimos e as supressões do objeto contratual devem ser calculados sobre o ...",
+      "category": "tese-especifica",
+      "difficulty": "medium",
+      "annotations": {
+        "relevant": [
+          "471684ee-29fc-453f-890f-0c1661f3f15f"
+        ],
+        "highlyRelevant": [
+          "471684ee-29fc-453f-890f-0c1661f3f15f"
+        ],
+        "annotatedAt": "2026-04-12T13:06:00.653Z",
+        "annotatedBy": "elic-import",
+        "notes": "Fundamentos curados: Lei 8.666/1993, art. 65, § 1º; Orientação Normativa AGU nº 50/2014; Enunciado PGF nº 368 (Parecer 00005/2022/CPLC/DEPCONSU/PGF/AGU); TCU, Acórdão 749/2010-Plenário.. Nao encontrados no indice: Enunciado PGF nº 368 (Parecer 00005/2022/CPLC/DEPCONSU/PGF/AGU); TCU, Acórdão 749/2010-Plenário."
+      },
+      "_elic": {
+        "source": "especifica",
+        "code": null,
+        "templateId": "451193",
+        "enunciado": "Os acréscimos e as supressões do objeto contratual devem ser calculados sobre o valor inicial atualizado do contrato, aplicando-se de forma isolada os limites percentuais do art. 65, § 1º, da Lei 8.666/1993, vedada a compensação entre acréscimos e supressões de itens distintos.",
+        "fundamentos_resolved": {
+          "Orientação Normativa AGU nº 50/2014": "471684ee-29fc-453f-890f-0c1661f3f15f"
+        },
+        "fundamentos_not_found": [
+          "Enunciado PGF nº 368 (Parecer 00005/2022/CPLC/DEPCONSU/PGF/AGU)",
+          "TCU, Acórdão 749/2010-Plenário."
+        ],
+        "candidates_pending_review": []
+      }
+    },
+    {
+      "id": "esp-518661-2",
+      "query": "contratação do remanescente de obra, serviço ou fornecimento, prevista no art. 75, III, da Lei nº 14.133/2021, deve ser",
+      "description": "Tese especifica do template 518661 (Cota Processo Autônomo): A contratação do remanescente de obra, serviço ou fornecimento, prevista no art....",
+      "category": "tese-especifica",
+      "difficulty": "medium",
+      "annotations": {
+        "relevant": [
+          "9add63a3-6d13-4955-aa4c-69715cc1f194"
+        ],
+        "highlyRelevant": [
+          "9add63a3-6d13-4955-aa4c-69715cc1f194"
+        ],
+        "annotatedAt": "2026-04-12T13:06:00.855Z",
+        "annotatedBy": "elic-import",
+        "notes": "Fundamentos curados: Lei 14.133/2021, art. 75, III; Orientação Normativa AGU nº 2/2009; Parecer CNLCA nº 17/2023.. Nao encontrados no indice: Parecer CNLCA nº 17/2023."
+      },
+      "_elic": {
+        "source": "especifica",
+        "code": null,
+        "templateId": "518661",
+        "enunciado": "A contratação do remanescente de obra, serviço ou fornecimento, prevista no art. 75, III, da Lei nº 14.133/2021, deve ser processada nos próprios autos do contrato originário rescindido, e não em processo autônomo, sob pena de quebra da cadeia instrutória necessária à verificação dos requisitos do dispositivo.",
+        "fundamentos_resolved": {
+          "Orientação Normativa AGU nº 2/2009": "9add63a3-6d13-4955-aa4c-69715cc1f194"
+        },
+        "fundamentos_not_found": [
+          "Parecer CNLCA nº 17/2023."
+        ],
+        "candidates_pending_review": []
+      }
+    },
+    {
+      "id": "esp-518661-1",
+      "query": "consulta jurídica facultativa formulada em processo autônomo, desvinculada dos autos da contratação subjacente, impede",
+      "description": "Tese especifica do template 518661 (Cota Processo Autônomo): A consulta jurídica facultativa formulada em processo autônomo, desvinculada dos...",
+      "category": "tese-especifica",
+      "difficulty": "medium",
+      "annotations": {
+        "relevant": [
+          "9add63a3-6d13-4955-aa4c-69715cc1f194"
+        ],
+        "highlyRelevant": [
+          "9add63a3-6d13-4955-aa4c-69715cc1f194"
+        ],
+        "annotatedAt": "2026-04-12T13:06:01.053Z",
+        "annotatedBy": "elic-import",
+        "notes": "Fundamentos curados: Orientação Normativa AGU nº 2/2009; Portaria Normativa PGF/AGU nº 73/2025; Lei 14.133/2021, art. 53.. Nao encontrados no indice: Portaria Normativa PGF/AGU nº 73/2025"
+      },
+      "_elic": {
+        "source": "especifica",
+        "code": null,
+        "templateId": "518661",
+        "enunciado": "A consulta jurídica facultativa formulada em processo autônomo, desvinculada dos autos da contratação subjacente, impede o exame pela ELIC, ainda quando atendidos os demais requisitos da Portaria Normativa PGF/AGU nº 73/2025, pois a resposta consultiva deve integrar o processo principal para ter eficácia instrutória.",
+        "fundamentos_resolved": {
+          "Orientação Normativa AGU nº 2/2009": "9add63a3-6d13-4955-aa4c-69715cc1f194"
+        },
+        "fundamentos_not_found": [
+          "Portaria Normativa PGF/AGU nº 73/2025"
+        ],
+        "candidates_pending_review": []
+      }
+    },
+    {
+      "id": "esp-640788-17",
+      "query": "parcelamento do objeto nas contratações de TIC é a regra, somente se admitindo a adjudicação por lote ou global quando",
+      "description": "Tese especifica do template 640788 (Pregão SRP TIC (Lei 14.133)): O parcelamento do objeto nas contratações de TIC é a regra, somente se admitindo...",
+      "category": "tese-especifica",
+      "difficulty": "medium",
+      "annotations": {
+        "relevant": [
+          "03c1afd0-352c-4212-b14f-73d2ef585e15"
+        ],
+        "highlyRelevant": [
+          "03c1afd0-352c-4212-b14f-73d2ef585e15"
+        ],
+        "annotatedAt": "2026-04-12T13:06:01.254Z",
+        "annotatedBy": "elic-import",
+        "notes": "Fundamentos curados: Lei 14.133/2021, art. 47, II; Súmula TCU nº 247; IN SGD/ME nº 94, de 2022, art. 12, §§ 2º e 3º; Acórdão TCU 1972/2018-Plenário.. Nao encontrados no indice: IN SGD/ME nº 94, de 2022, art. 12, §§ 2º e 3º; Acórdão TCU 1972/2018-Plenário."
+      },
+      "_elic": {
+        "source": "especifica",
+        "code": null,
+        "templateId": "640788",
+        "enunciado": "O parcelamento do objeto nas contratações de TIC é a regra, somente se admitindo a adjudicação por lote ou global quando demonstrado o prejuízo técnico ou econômico ao conjunto do objeto.",
+        "fundamentos_resolved": {
+          "Súmula TCU nº 247": "03c1afd0-352c-4212-b14f-73d2ef585e15"
+        },
+        "fundamentos_not_found": [
+          "IN SGD/ME nº 94, de 2022, art. 12, §§ 2º e 3º",
+          "Acórdão TCU 1972/2018-Plenário."
+        ],
+        "candidates_pending_review": []
+      }
+    },
+    {
+      "id": "esp-640788-8",
+      "query": "Termo de Referência da contratação de TIC deve explicitar critérios objetivos de mensuração do desempenho dos bens e",
+      "description": "Tese especifica do template 640788 (Pregão SRP TIC (Lei 14.133)): O Termo de Referência da contratação de TIC deve explicitar critérios objetivos ...",
+      "category": "tese-especifica",
+      "difficulty": "medium",
+      "annotations": {
+        "relevant": [],
+        "highlyRelevant": [],
+        "annotatedAt": null,
+        "annotatedBy": null,
+        "notes": "Fundamentos curados: Decreto nº 7.174, de 2010, art. 2º, III; IN SGD/ME nº 94, de 2022, arts. 19, I; 30; 33, II, \"j\" e Anexo I, item 8; Súmula TCU nº 269.. Nao encontrados no indice: Decreto nº 7.174, de 2010, art. 2º, III; IN SGD/ME nº 94, de 2022, arts. 19, I; 30; 33, II, \"j\" e Anexo I, item 8; Súmula TCU nº 269."
+      },
+      "_elic": {
+        "source": "especifica",
+        "code": null,
+        "templateId": "640788",
+        "enunciado": "O Termo de Referência da contratação de TIC deve explicitar critérios objetivos de mensuração do desempenho dos bens e serviços, em particular por meio de métricas e de Acordos de Nível de Serviço (ANS/IMR).",
+        "fundamentos_resolved": {},
+        "fundamentos_not_found": [
+          "Decreto nº 7.174, de 2010, art. 2º, III",
+          "IN SGD/ME nº 94, de 2022, arts. 19, I",
+          "30",
+          "33, II, \"j\" e Anexo I, item 8",
+          "Súmula TCU nº 269."
+        ],
+        "candidates_pending_review": []
+      }
+    },
+    {
+      "id": "esp-647772-7",
+      "query": "adoção do SRP em inexigibilidade para capacitação exige pluralidade efetiva de órgãos ou entidades contratantes",
+      "description": "Tese especifica do template 647772 (Inexigibilidade SRP Capacitação (art. 74, caput/III, f)): A adoção do SRP em inexigibilidade para capacitação exige pluralidade efetiva de...",
+      "category": "tese-especifica",
+      "difficulty": "medium",
+      "annotations": {
+        "relevant": [
+          "439bfdc0-a49a-4b1b-9e86-116595c42d58"
+        ],
+        "highlyRelevant": [
+          "439bfdc0-a49a-4b1b-9e86-116595c42d58"
+        ],
+        "annotatedAt": "2026-04-12T13:06:01.454Z",
+        "annotatedBy": "elic-import",
+        "notes": "Fundamentos curados: Lei 14.133/2021, art. 82, §6º; Decreto 11.462/2023, art. 16; Parecer 39/2024/DECOR/CGU/AGU (vinculante).. Nao encontrados no indice: Parecer 39/2024/DECOR/CGU/AGU (vinculante)."
+      },
+      "_elic": {
+        "source": "especifica",
+        "code": null,
+        "templateId": "647772",
+        "enunciado": "A adoção do SRP em inexigibilidade para capacitação exige pluralidade efetiva de órgãos ou entidades contratantes demonstrada na Intenção de Registro de Preços (IRP), não suprida por eventuais caronas posteriores.",
+        "fundamentos_resolved": {
+          "Decreto 11.462/2023, art. 16": "439bfdc0-a49a-4b1b-9e86-116595c42d58"
+        },
+        "fundamentos_not_found": [
+          "Parecer 39/2024/DECOR/CGU/AGU (vinculante)."
+        ],
+        "candidates_pending_review": []
+      }
+    },
+    {
+      "id": "esp-647772-6",
+      "query": "pagamento antecipado da inscrição em cursos de capacitação é admitido em caráter excepcional, mediante preenchimento",
+      "description": "Tese especifica do template 647772 (Inexigibilidade SRP Capacitação (art. 74, caput/III, f)): O pagamento antecipado da inscrição em cursos de capacitação é admitido em carát...",
+      "category": "tese-especifica",
+      "difficulty": "easy",
+      "annotations": {
+        "relevant": [],
+        "highlyRelevant": [],
+        "annotatedAt": null,
+        "annotatedBy": null,
+        "notes": "Fundamentos curados: Lei 14.133/2021, art. 145, §§1º a 3º; Orientação Normativa AGU 76/2023; Decreto 93.872/1986, art. 38; Lei 4.320/1964, arts. 62 e 63.. Nao encontrados no indice: Orientação Normativa AGU 76/2023; Decreto 93.872/1986, art. 38"
+      },
+      "_elic": {
+        "source": "especifica",
+        "code": null,
+        "templateId": "647772",
+        "enunciado": "O pagamento antecipado da inscrição em cursos de capacitação é admitido em caráter excepcional, mediante preenchimento cumulativo dos requisitos da Orientação Normativa AGU 76/2023 e do art. 145 da Lei 14.133/2021: economia sensível ou condição indispensável, previsão expressa no instrumento, e cláusula obrigatória de devolução em caso de inexecução.",
+        "fundamentos_resolved": {},
+        "fundamentos_not_found": [
+          "Orientação Normativa AGU 76/2023",
+          "Decreto 93.872/1986, art. 38"
+        ],
+        "candidates_pending_review": []
+      }
+    },
+    {
+      "id": "esp-647824-2",
+      "query": "justificativa de preços para os serviços exclusivos satisfaz-se com a tabela oficial de tarifas da ECT, atualizada e",
+      "description": "Tese especifica do template 647824 (Contratação direta ECT — serviços postais): A justificativa de preços para os serviços exclusivos satisfaz-se com a tabela o...",
+      "category": "tese-especifica",
+      "difficulty": "easy",
+      "annotations": {
+        "relevant": [],
+        "highlyRelevant": [],
+        "annotatedAt": null,
+        "annotatedBy": null,
+        "notes": "Fundamentos curados: Lei 14.133/2021, art. 23, § 4º; IN SEGES/ME nº 65/2021, no que compatível.. Nao encontrados no indice: IN SEGES/ME nº 65/2021, no que compatível."
+      },
+      "_elic": {
+        "source": "especifica",
+        "code": null,
+        "templateId": "647824",
+        "enunciado": "A justificativa de preços para os serviços exclusivos satisfaz-se com a tabela oficial de tarifas da ECT, atualizada e vigente, dispensando a pesquisa de mercado ampla prevista na IN SEGES/ME nº 65/2021.",
+        "fundamentos_resolved": {},
+        "fundamentos_not_found": [
+          "IN SEGES/ME nº 65/2021, no que compatível."
+        ],
+        "candidates_pending_review": []
+      }
+    },
+    {
+      "id": "esp-647824-0",
+      "query": "serviços postais arrolados no art. 9º da Lei nº 6.538/1978 (carta, cartão-postal e correspondência agrupada) são",
+      "description": "Tese especifica do template 647824 (Contratação direta ECT — serviços postais): Os serviços postais arrolados no art. 9º da Lei nº 6.538/1978 (carta, cartão-pos...",
+      "category": "tese-especifica",
+      "difficulty": "easy",
+      "annotations": {
+        "relevant": [],
+        "highlyRelevant": [],
+        "annotatedAt": null,
+        "annotatedBy": null,
+        "notes": "Fundamentos curados: Lei 6.538/1978, arts. 9º e 47; Lei 14.133/2021, art. 74, I; STF, ADPF 46.. Nao encontrados no indice: STF, ADPF 46."
+      },
+      "_elic": {
+        "source": "especifica",
+        "code": null,
+        "templateId": "647824",
+        "enunciado": "Os serviços postais arrolados no art. 9º da Lei nº 6.538/1978 (carta, cartão-postal e correspondência agrupada) são explorados pela União em regime de monopólio, o que enseja a contratação direta da ECT por inexigibilidade de licitação fundada no art. 74, I, da Lei nº 14.133/2021.",
+        "fundamentos_resolved": {},
+        "fundamentos_not_found": [
+          "STF, ADPF 46."
+        ],
+        "candidates_pending_review": []
+      }
+    },
+    {
+      "id": "esp-669066-13",
+      "query": "adjudicação por itens é regra geral nas licitações de objeto divisível; o agrupamento em lote ou grupo depende de",
+      "description": "Tese especifica do template 669066 (Concorrência SRP — Obras/Eng. — Empreitada (Unitário/Global)): A adjudicação por itens é regra geral nas licitações de objeto divisível; o agru...",
+      "category": "tese-especifica",
+      "difficulty": "medium",
+      "annotations": {
+        "relevant": [
+          "03c1afd0-352c-4212-b14f-73d2ef585e15"
+        ],
+        "highlyRelevant": [
+          "03c1afd0-352c-4212-b14f-73d2ef585e15"
+        ],
+        "annotatedAt": "2026-04-12T13:06:01.651Z",
+        "annotatedBy": "elic-import",
+        "notes": "Fundamentos curados: Lei 14.133/2021, art. 47, II, § 1º; Súmula TCU nº 247; TCU, Acórdão 1972/2018-Plenário; Informativo TCU nº 148/2013.. Nao encontrados no indice: TCU, Acórdão 1972/2018-Plenário; Informativo TCU nº 148/2013."
+      },
+      "_elic": {
+        "source": "especifica",
+        "code": null,
+        "templateId": "669066",
+        "enunciado": "A adjudicação por itens é regra geral nas licitações de objeto divisível; o agrupamento em lote ou grupo depende de justificativa técnica e econômica fundamentada em ganhos concretos de economia de escala, integração ou responsabilidade única, não bastando invocação genérica de risco administrativo.",
+        "fundamentos_resolved": {
+          "Súmula TCU nº 247": "03c1afd0-352c-4212-b14f-73d2ef585e15"
+        },
+        "fundamentos_not_found": [
+          "TCU, Acórdão 1972/2018-Plenário",
+          "Informativo TCU nº 148/2013."
+        ],
+        "candidates_pending_review": []
+      }
+    },
+    {
+      "id": "esp-669066-2",
+      "query": "No regime de empreitada por preço unitário, a desclassificação de propostas por custos unitários superiores aos fixados",
+      "description": "Tese especifica do template 669066 (Concorrência SRP — Obras/Eng. — Empreitada (Unitário/Global)): No regime de empreitada por preço unitário, a desclassificação de propostas por ...",
+      "category": "tese-especifica",
+      "difficulty": "easy",
+      "annotations": {
+        "relevant": [],
+        "highlyRelevant": [],
+        "annotatedAt": null,
+        "annotatedBy": null,
+        "notes": "Fundamentos curados: Lei 14.133/2021, art. 6º, LVI; art. 59, § 3º; Decreto 7.983/2013, arts. 2º, IX, e 11.. Nao encontrados no indice: art. 59, § 3º; Decreto 7.983/2013, arts. 2º, IX, e 11."
+      },
+      "_elic": {
+        "source": "especifica",
+        "code": null,
+        "templateId": "669066",
+        "enunciado": "No regime de empreitada por preço unitário, a desclassificação de propostas por custos unitários superiores aos fixados pela Administração é expressamente admitida, devendo o critério de aceitabilidade dos preços unitários constar do edital e refletir as peculiaridades do objeto, admitida a focalização nos itens tidos como relevantes.",
+        "fundamentos_resolved": {},
+        "fundamentos_not_found": [
+          "art. 59, § 3º",
+          "Decreto 7.983/2013, arts. 2º, IX, e 11."
+        ],
+        "candidates_pending_review": []
+      }
+    },
+    {
+      "id": "esp-693793-7",
+      "query": "inviabilidade de parcelamento do objeto TIC deve ser justificada à luz dos §§ 2º e 3º do art. 40 e do § 1º do art. 47",
+      "description": "Tese especifica do template 693793 (Inexigibilidade SRP TIC (art. 74, I)): A inviabilidade de parcelamento do objeto TIC deve ser justificada à luz dos §§ ...",
+      "category": "tese-especifica",
+      "difficulty": "easy",
+      "annotations": {
+        "relevant": [],
+        "highlyRelevant": [],
+        "annotatedAt": null,
+        "annotatedBy": null,
+        "notes": "Fundamentos curados: Lei 14.133/2021, arts. 40, §§ 2º e 3º, e 47, § 1º; IN SGD/ME 94/2022, arts. 3º, I, e 12, §§ 2º e 3º; Súmula TCU 247.. Nao encontrados no indice: IN SGD/ME 94/2022, arts. 3º, I, e 12, §§ 2º e 3º; Súmula TCU 247."
+      },
+      "_elic": {
+        "source": "especifica",
+        "code": null,
+        "templateId": "693793",
+        "enunciado": "A inviabilidade de parcelamento do objeto TIC deve ser justificada à luz dos §§ 2º e 3º do art. 40 e do § 1º do art. 47 da Lei 14.133/2021 e do art. 3º, I, da IN SGD/ME 94/2022, que veda mais de uma solução de TIC em um único contrato.",
+        "fundamentos_resolved": {},
+        "fundamentos_not_found": [
+          "IN SGD/ME 94/2022, arts. 3º, I, e 12, §§ 2º e 3º",
+          "Súmula TCU 247."
+        ],
+        "candidates_pending_review": []
+      }
+    },
+    {
+      "id": "esp-693793-8",
+      "query": "justificativa de preço na inexigibilidade de TIC segue a sistemática do art. 23, §4º, da Lei 14.133/2021 e do art. 7º",
+      "description": "Tese especifica do template 693793 (Inexigibilidade SRP TIC (art. 74, I)): A justificativa de preço na inexigibilidade de TIC segue a sistemática do art. 2...",
+      "category": "tese-especifica",
+      "difficulty": "easy",
+      "annotations": {
+        "relevant": [],
+        "highlyRelevant": [],
+        "annotatedAt": null,
+        "annotatedBy": null,
+        "notes": "Fundamentos curados: Lei 14.133/2021, art. 23, §4º, e art. 72, VII; IN SEGES/ME 65/2021, arts. 5º e 7º; IN SGD/ME 94/2022, arts. 20 e 40; Orientação Normativa AGU 17/2009.. Nao encontrados no indice: IN SEGES/ME 65/2021, arts. 5º e 7º; IN SGD/ME 94/2022, arts. 20 e 40; Orientação Normativa AGU 17/2009."
+      },
+      "_elic": {
+        "source": "especifica",
+        "code": null,
+        "templateId": "693793",
+        "enunciado": "A justificativa de preço na inexigibilidade de TIC segue a sistemática do art. 23, §4º, da Lei 14.133/2021 e do art. 7º da IN SEGES/ME 65/2021, admitida a utilização do PMC-TIC dos Catálogos de Soluções com Condições Padronizadas como parâmetro vinculante quando disponível.",
+        "fundamentos_resolved": {},
+        "fundamentos_not_found": [
+          "IN SEGES/ME 65/2021, arts. 5º e 7º",
+          "IN SGD/ME 94/2022, arts. 20 e 40",
+          "Orientação Normativa AGU 17/2009."
+        ],
+        "candidates_pending_review": []
+      }
+    },
+    {
+      "id": "esp-728449-7",
+      "query": "fixação de preços máximos unitários e global e a definição de critérios de aceitabilidade dos preços são obrigatórias",
+      "description": "Tese especifica do template 728449 (Concorrência — Obras/Serviços Especiais de Engenharia (Integrada ou Semi-Integrada)): A fixação de preços máximos unitários e global e a definição de critérios de ace...",
+      "category": "tese-especifica",
+      "difficulty": "medium",
+      "annotations": {
+        "relevant": [
+          "d2831f21-4f4d-4610-b988-c12626978182",
+          "c456890d-46ce-4c0c-836c-6e9fe3d7ecb4"
+        ],
+        "highlyRelevant": [
+          "d2831f21-4f4d-4610-b988-c12626978182",
+          "c456890d-46ce-4c0c-836c-6e9fe3d7ecb4"
+        ],
+        "annotatedAt": "2026-04-12T13:06:01.849Z",
+        "annotatedBy": "elic-import",
+        "notes": "Fundamentos curados: Lei 14.133/2021, art. 23, § 2º, I; art. 24 e parágrafo único; art. 46, § 9º; art. 59, § 3º; Decreto 7.983/2013, arts. 2º, IX, 11 e 13, parágrafo único; Súmula TCU nº 259; Orientação Normativa AGU nº 5/2009; TCU, Acórdão 1695/2018-Plenário.. Nao encontrados no indice: art. 24 e parágrafo único; art. 46, § 9º; art. 59, § 3º; Decreto 7.983/2013, arts. 2º, IX, 11 e 13, parágrafo único; TCU, Acórdão 1695/2018-Plenário."
+      },
+      "_elic": {
+        "source": "especifica",
+        "code": null,
+        "templateId": "728449",
+        "enunciado": "A fixação de preços máximos unitários e global e a definição de critérios de aceitabilidade dos preços são obrigatórias nas contratações de obras e serviços de engenharia, inclusive nos regimes de contratação integrada e semi-integrada, independentemente do regime de empreitada, como medida de mitigação dos riscos de jogo de planilha e jogo de cronograma.",
+        "fundamentos_resolved": {
+          "Súmula TCU nº 259": "d2831f21-4f4d-4610-b988-c12626978182",
+          "Orientação Normativa AGU nº 5/2009": "c456890d-46ce-4c0c-836c-6e9fe3d7ecb4"
+        },
+        "fundamentos_not_found": [
+          "art. 24 e parágrafo único",
+          "art. 46, § 9º",
+          "art. 59, § 3º",
+          "Decreto 7.983/2013, arts. 2º, IX, 11 e 13, parágrafo único",
+          "TCU, Acórdão 1695/2018-Plenário."
+        ],
+        "candidates_pending_review": []
+      }
+    },
+    {
+      "id": "esp-728449-12",
+      "query": "elaboração de plantas, planilhas orçamentárias, composições de custos unitários, cronograma físico-financeiro e demais",
+      "description": "Tese especifica do template 728449 (Concorrência — Obras/Serviços Especiais de Engenharia (Integrada ou Semi-Integrada)): A elaboração de plantas, planilhas orçamentárias, composições de custos unitário...",
+      "category": "tese-especifica",
+      "difficulty": "medium",
+      "annotations": {
+        "relevant": [
+          "17f6bcef-bbb3-455e-9e53-7a55a119a4bf"
+        ],
+        "highlyRelevant": [
+          "17f6bcef-bbb3-455e-9e53-7a55a119a4bf"
+        ],
+        "annotatedAt": "2026-04-12T13:06:02.046Z",
+        "annotatedBy": "elic-import",
+        "notes": "Fundamentos curados: Decreto 7.983/2013, art. 10; Lei 6.496/1977 (ART); Lei 12.378/2010, arts. 45 e 46 (RRT); Lei 13.639/2018, arts. 16 e 19 (TRT); Súmula TCU nº 260; Resoluções CONFEA nº 361/1991 e 1137/2023; Resolução CAU nº 91/2014; Resolução CFT nº 101/2020.. Nao encontrados no indice: Decreto 7.983/2013, art. 10; Resoluções CONFEA nº 361/1991 e 1137/2023; Resolução CAU nº 91/2014; Resolução CFT nº 101/2020."
+      },
+      "_elic": {
+        "source": "especifica",
+        "code": null,
+        "templateId": "728449",
+        "enunciado": "A elaboração de plantas, planilhas orçamentárias, composições de custos unitários, cronograma físico-financeiro e demais peças técnicas relativas a obras e serviços de engenharia exige Anotação, Registro ou Termo de Responsabilidade Técnica, independentemente de o profissional pertencer aos quadros da Administração ou ser contratado.",
+        "fundamentos_resolved": {
+          "Súmula TCU nº 260": "17f6bcef-bbb3-455e-9e53-7a55a119a4bf"
+        },
+        "fundamentos_not_found": [
+          "Decreto 7.983/2013, art. 10",
+          "Resoluções CONFEA nº 361/1991 e 1137/2023",
+          "Resolução CAU nº 91/2014",
+          "Resolução CFT nº 101/2020."
+        ],
+        "candidates_pending_review": []
+      }
+    },
+    {
+      "id": "esp-729227-3",
+      "query": "contratação de solução de tecnologia da informação e comunicação sujeita-se a regime próprio, com exigência de minutas",
+      "description": "Tese especifica do template 729227 (Nota de Devolução): A contratação de solução de tecnologia da informação e comunicação sujeita-se a ...",
+      "category": "tese-especifica",
+      "difficulty": "easy",
+      "annotations": {
+        "relevant": [],
+        "highlyRelevant": [],
+        "annotatedAt": null,
+        "annotatedBy": null,
+        "notes": "Fundamentos curados: Lei 14.133/2021, art. 6º, inciso XLIII; IN SGD/ME nº 94/2022.. Nao encontrados no indice: IN SGD/ME nº 94/2022."
+      },
+      "_elic": {
+        "source": "especifica",
+        "code": null,
+        "templateId": "729227",
+        "enunciado": "A contratação de solução de tecnologia da informação e comunicação sujeita-se a regime próprio, com exigência de minutas específicas e de observância da IN SGD/ME nº 94/2022 e sucedâneas, de modo que a adoção de minutas genéricas em contratação cujo objeto se enquadre como TIC compromete a análise jurídica e impõe a devolução para adequação.",
+        "fundamentos_resolved": {},
+        "fundamentos_not_found": [
+          "IN SGD/ME nº 94/2022."
+        ],
+        "candidates_pending_review": []
+      }
+    },
+    {
+      "id": "esp-729227-1",
+      "query": "instrução processual deficiente, com ausência de elementos essenciais previstos no art. 18 da Lei 14.133/2021, termo de",
+      "description": "Tese especifica do template 729227 (Nota de Devolução): A instrução processual deficiente, com ausência de elementos essenciais previsto...",
+      "category": "tese-especifica",
+      "difficulty": "easy",
+      "annotations": {
+        "relevant": [],
+        "highlyRelevant": [],
+        "annotatedAt": null,
+        "annotatedBy": null,
+        "notes": "Fundamentos curados: Lei 14.133/2021, arts. 18 e 53; Portaria Normativa PGF/AGU nº 73/2025.. Nao encontrados no indice: Portaria Normativa PGF/AGU nº 73/2025."
+      },
+      "_elic": {
+        "source": "especifica",
+        "code": null,
+        "templateId": "729227",
+        "enunciado": "A instrução processual deficiente, com ausência de elementos essenciais previstos no art. 18 da Lei 14.133/2021, especialmente estudo técnico preliminar, termo de referência, pesquisa de preços, autorização da autoridade competente e demonstração da adequação orçamentária, impede a manifestação jurídica e impõe o retorno dos autos à Administração para complementação antes do exame de mérito.",
+        "fundamentos_resolved": {},
+        "fundamentos_not_found": [
+          "Portaria Normativa PGF/AGU nº 73/2025."
+        ],
+        "candidates_pending_review": []
+      }
+    },
+    {
+      "id": "esp-729752-8",
+      "query": "edital de credenciamento e seus anexos devem ser integralmente disponibilizados no Portal Nacional de Contratações",
+      "description": "Tese especifica do template 729752 (Inexigibilidade - Credenciamento (art. 74, IV)): O edital de credenciamento e seus anexos devem ser integralmente disponibilizado...",
+      "category": "tese-especifica",
+      "difficulty": "easy",
+      "annotations": {
+        "relevant": [
+          "c784628c-fec9-4898-b0ce-98a5b13797a1"
+        ],
+        "highlyRelevant": [
+          "c784628c-fec9-4898-b0ce-98a5b13797a1"
+        ],
+        "annotatedAt": "2026-04-12T13:06:02.245Z",
+        "annotatedBy": "elic-import",
+        "notes": "Fundamentos curados: Lei 14.133/2021, arts. 79, parágrafo único, I, 94 e 174; Decreto 11.878/2024, art. 8º; ON AGU 85/2024.. Nao encontrados no indice: ON AGU 85/2024."
+      },
+      "_elic": {
+        "source": "especifica",
+        "code": null,
+        "templateId": "729752",
+        "enunciado": "O edital de credenciamento e seus anexos devem ser integralmente disponibilizados no Portal Nacional de Contratações Públicas (PNCP) e no sítio eletrônico oficial do órgão, sendo a publicação no PNCP condição de eficácia do contrato e de seus aditamentos.",
+        "fundamentos_resolved": {
+          "Decreto 11.878/2024, art. 8º": "c784628c-fec9-4898-b0ce-98a5b13797a1"
+        },
+        "fundamentos_not_found": [
+          "ON AGU 85/2024."
+        ],
+        "candidates_pending_review": []
+      }
+    },
+    {
+      "id": "esp-729752-3",
+      "query": "No edital de credenciamento é facultado fixar os valores e prever índice de reajustamento de preços nas hipóteses de",
+      "description": "Tese especifica do template 729752 (Inexigibilidade - Credenciamento (art. 74, IV)): No edital de credenciamento é facultado fixar os valores e prever índice de reaj...",
+      "category": "tese-especifica",
+      "difficulty": "hard",
+      "annotations": {
+        "relevant": [
+          "c784628c-fec9-4898-b0ce-98a5b13797a1"
+        ],
+        "highlyRelevant": [
+          "c784628c-fec9-4898-b0ce-98a5b13797a1"
+        ],
+        "annotatedAt": "2026-04-12T13:06:02.445Z",
+        "annotatedBy": "elic-import",
+        "notes": "Fundamentos curados: Decreto 11.878/2024, art. 7º, §1º; IN SEGES/MP 05/2017, anexo IX, item 7, b; Conclusão DEPCONSU/PGF/AGU 38/2013, item III.. Nao encontrados no indice: IN SEGES/MP 05/2017, anexo IX, item 7, b; Conclusão DEPCONSU/PGF/AGU 38/2013, item III."
+      },
+      "_elic": {
+        "source": "especifica",
+        "code": null,
+        "templateId": "729752",
+        "enunciado": "No edital de credenciamento é facultado fixar os valores e prever índice de reajustamento de preços nas hipóteses de contratação paralela e não excludente e de contratação com seleção a critério de terceiros, sempre com justificativa técnica do índice escolhido.",
+        "fundamentos_resolved": {
+          "Decreto 11.878/2024, art. 7º, §1º": "c784628c-fec9-4898-b0ce-98a5b13797a1"
+        },
+        "fundamentos_not_found": [
+          "IN SEGES/MP 05/2017, anexo IX, item 7, b",
+          "Conclusão DEPCONSU/PGF/AGU 38/2013, item III."
+        ],
+        "candidates_pending_review": []
+      }
+    },
+    {
+      "id": "esp-761729-4",
+      "query": "Caracterizado o objeto como serviço comum pela Administração, mas presentes na instrução elementos típicos de serviço",
+      "description": "Tese especifica do template 761729 (Cota de Instrução (falhas)): Caracterizado o objeto como serviço comum pela Administração, mas presentes na i...",
+      "category": "tese-especifica",
+      "difficulty": "medium",
+      "annotations": {
+        "relevant": [
+          "17f6bcef-bbb3-455e-9e53-7a55a119a4bf"
+        ],
+        "highlyRelevant": [
+          "17f6bcef-bbb3-455e-9e53-7a55a119a4bf"
+        ],
+        "annotatedAt": "2026-04-12T13:06:02.646Z",
+        "annotatedBy": "elic-import",
+        "notes": "Fundamentos curados: Lei 14.133/2021, art. 6º, XXI; IN SEGES/MP nº 5/2017, art. 22, § 1º; Decreto 7.983/2013; Súmula TCU nº 260; Lei 6.496/1977; Resolução CONFEA nº 1.137/2023.. Nao encontrados no indice: IN SEGES/MP nº 5/2017, art. 22, § 1º; Decreto 7.983/2013; Resolução CONFEA nº 1.137/2023."
+      },
+      "_elic": {
+        "source": "especifica",
+        "code": null,
+        "templateId": "761729",
+        "enunciado": "Caracterizado o objeto como serviço comum pela Administração, mas presentes na instrução elementos típicos de serviço de engenharia (integrante da equipe de planejamento com formação em engenharia ou arquitetura, orçamento nos termos do Decreto nº 7.983/2013, ART/RRT/TRT do TR e do orçamento, minutas próprias de engenharia, requisitos de qualificação técnica de engenharia), o processo deve ser devolvido para correção do enquadramento.",
+        "fundamentos_resolved": {
+          "Súmula TCU nº 260": "17f6bcef-bbb3-455e-9e53-7a55a119a4bf"
+        },
+        "fundamentos_not_found": [
+          "IN SEGES/MP nº 5/2017, art. 22, § 1º",
+          "Decreto 7.983/2013",
+          "Resolução CONFEA nº 1.137/2023."
+        ],
+        "candidates_pending_review": []
+      }
+    },
+    {
+      "id": "esp-761729-3",
+      "query": "consulta facultativa à ELIC deve observar os requisitos formais de delimitação do objeto, autorização da autoridade",
+      "description": "Tese especifica do template 761729 (Cota de Instrução (falhas)): A consulta facultativa à ELIC deve observar os requisitos formais de delimitação...",
+      "category": "tese-especifica",
+      "difficulty": "easy",
+      "annotations": {
+        "relevant": [],
+        "highlyRelevant": [],
+        "annotatedAt": null,
+        "annotatedBy": null,
+        "notes": "Fundamentos curados: Portaria Normativa PGF/AGU nº 73/2025; Lei 9.784/1999, art. 39.. Nao encontrados no indice: Portaria Normativa PGF/AGU nº 73/2025"
+      },
+      "_elic": {
+        "source": "especifica",
+        "code": null,
+        "templateId": "761729",
+        "enunciado": "A consulta facultativa à ELIC deve observar os requisitos formais de delimitação do objeto, autorização da autoridade competente e instrução mínima da questão, sob pena de devolução para adequação antes do conhecimento do pedido.",
+        "fundamentos_resolved": {},
+        "fundamentos_not_found": [
+          "Portaria Normativa PGF/AGU nº 73/2025"
+        ],
+        "candidates_pending_review": []
+      }
+    },
+    {
+      "id": "esp-765940-4",
+      "query": "ELIC não se manifesta em consultas genéricas ou abstratas, em processos já contemplados por parecer referencial da ELIC",
+      "description": "Tese especifica do template 765940 (Cota de Competência): A ELIC não se manifesta em consultas genéricas ou abstratas, em processos já con...",
+      "category": "tese-especifica",
+      "difficulty": "medium",
+      "annotations": {
+        "relevant": [
+          "e31bc0c2-bc6a-4b7b-81c3-264dec3bb60f",
+          "871b05bc-e583-4d8e-ad3f-42d4b1596011"
+        ],
+        "highlyRelevant": [
+          "e31bc0c2-bc6a-4b7b-81c3-264dec3bb60f",
+          "871b05bc-e583-4d8e-ad3f-42d4b1596011"
+        ],
+        "annotatedAt": "2026-04-12T13:06:02.845Z",
+        "annotatedBy": "elic-import",
+        "notes": "Fundamentos curados: Orientação Normativa AGU nº 69/2021; Portarias PGF nº 526/2013 e 261/2017; Decreto 11.246/2022, art. 15, § 2º; OJI-C ELIC nº 4.. Nao encontrados no indice: Portarias PGF nº 526/2013 e 261/2017; OJI-C ELIC nº 4."
+      },
+      "_elic": {
+        "source": "especifica",
+        "code": null,
+        "templateId": "765940",
+        "enunciado": "A ELIC não se manifesta em consultas genéricas ou abstratas, em processos já contemplados por parecer referencial da ELIC ou da Procuradoria local, em prorrogações de serviços continuados cobertas pelos pareceres referenciais, em pequenas contratações diretas sem dúvida jurídica específica, em termos aditivos de LGPD, em reajuste ou repactuação sem dúvida específica, nem no exame do cumprimento de recomendações de parecer anterior, conforme OJI-C nº 4.",
+        "fundamentos_resolved": {
+          "Orientação Normativa AGU nº 69/2021": "e31bc0c2-bc6a-4b7b-81c3-264dec3bb60f",
+          "Decreto 11.246/2022, art. 15, § 2º": "871b05bc-e583-4d8e-ad3f-42d4b1596011"
+        },
+        "fundamentos_not_found": [
+          "Portarias PGF nº 526/2013 e 261/2017",
+          "OJI-C ELIC nº 4."
+        ],
+        "candidates_pending_review": []
+      }
+    },
+    {
+      "id": "esp-765940-1",
+      "query": "cessão de uso de imóvel administrado pela União ou suas autarquias e fundações, cumulada com prestação de serviço de",
+      "description": "Tese especifica do template 765940 (Cota de Competência): A cessão de uso de imóvel administrado pela União ou suas autarquias e fundações...",
+      "category": "tese-especifica",
+      "difficulty": "medium",
+      "annotations": {
+        "relevant": [
+          "bcd057f0-8e13-43bf-bfa1-1fc4756e9dac"
+        ],
+        "highlyRelevant": [
+          "bcd057f0-8e13-43bf-bfa1-1fc4756e9dac"
+        ],
+        "annotatedAt": "2026-04-12T13:06:03.044Z",
+        "annotatedBy": "elic-import",
+        "notes": "Fundamentos curados: Orientação Normativa AGU nº 96/2025; Parecer nº 6/2025/CPLC/SUBCONSU/PGF/AGU.. Nao encontrados no indice: Parecer nº 6/2025/CPLC/SUBCONSU/PGF/AGU."
+      },
+      "_elic": {
+        "source": "especifica",
+        "code": null,
+        "templateId": "765940",
+        "enunciado": "A cessão de uso de imóvel administrado pela União ou suas autarquias e fundações, cumulada com prestação de serviço de apoio remunerado diretamente pelo usuário (sem dispêndio de verba pública), é matéria patrimonial que escapa à competência da ELIC, por se enquadrar na Orientação Normativa AGU nº 96/2025.",
+        "fundamentos_resolved": {
+          "Orientação Normativa AGU nº 96/2025": "bcd057f0-8e13-43bf-bfa1-1fc4756e9dac"
+        },
+        "fundamentos_not_found": [
+          "Parecer nº 6/2025/CPLC/SUBCONSU/PGF/AGU."
+        ],
+        "candidates_pending_review": []
+      }
+    },
+    {
+      "id": "esp-782120-5",
+      "query": "Administração não se vincula às disposições de acordos, convenções ou dissídios coletivos que tratem de matérias não",
+      "description": "Tese especifica do template 782120 (Pregão DEMO (Lei 14.133)): A Administração não se vincula às disposições de acordos, convenções ou dissídio...",
+      "category": "tese-especifica",
+      "difficulty": "medium",
+      "annotations": {
+        "relevant": [
+          "5dc5ae72-3e91-49ec-86d7-caac64ba77fd"
+        ],
+        "highlyRelevant": [
+          "5dc5ae72-3e91-49ec-86d7-caac64ba77fd"
+        ],
+        "annotatedAt": "2026-04-12T13:06:03.246Z",
+        "annotatedBy": "elic-import",
+        "notes": "Fundamentos curados: Lei 14.133/2021, art. 135, §§ 1º e 2º; Orientação Normativa AGU nº 63/2020; Nota nº 86/2017/DECOR/CGU/AGU; Parecer nº 60/2015/DECOR/CGU/AGU.. Nao encontrados no indice: Nota nº 86/2017/DECOR/CGU/AGU; Parecer nº 60/2015/DECOR/CGU/AGU."
+      },
+      "_elic": {
+        "source": "especifica",
+        "code": null,
+        "templateId": "782120",
+        "enunciado": "A Administração não se vincula às disposições de acordos, convenções ou dissídios coletivos que tratem de matérias não trabalhistas, de participação nos lucros, de valores ou índices obrigatórios de encargos, ou que estabeleçam obrigações aplicáveis exclusivamente a contratos com a Administração Pública.",
+        "fundamentos_resolved": {
+          "Orientação Normativa AGU nº 63/2020": "5dc5ae72-3e91-49ec-86d7-caac64ba77fd"
+        },
+        "fundamentos_not_found": [
+          "Nota nº 86/2017/DECOR/CGU/AGU",
+          "Parecer nº 60/2015/DECOR/CGU/AGU."
+        ],
+        "candidates_pending_review": []
+      }
+    },
+    {
+      "id": "esp-782120-23",
+      "query": "vigência inicial da ata de registro de preços é de um ano, contado do primeiro dia útil subsequente à divulgação no",
+      "description": "Tese especifica do template 782120 (Pregão DEMO (Lei 14.133)): A vigência inicial da ata de registro de preços é de um ano, contado do primeiro...",
+      "category": "tese-especifica",
+      "difficulty": "medium",
+      "annotations": {
+        "relevant": [
+          "439bfdc0-a49a-4b1b-9e86-116595c42d58",
+          "13e9aea2-bc86-4568-96a0-c50b13d56a1a"
+        ],
+        "highlyRelevant": [
+          "439bfdc0-a49a-4b1b-9e86-116595c42d58",
+          "13e9aea2-bc86-4568-96a0-c50b13d56a1a"
+        ],
+        "annotatedAt": "2026-04-12T13:06:03.446Z",
+        "annotatedBy": "elic-import",
+        "notes": "Fundamentos curados: Lei 14.133/2021, art. 84; Decreto 11.462/2023, art. 22; Orientação Normativa AGU nº 89/2024."
+      },
+      "_elic": {
+        "source": "especifica",
+        "code": null,
+        "templateId": "782120",
+        "enunciado": "A vigência inicial da ata de registro de preços é de um ano, contado do primeiro dia útil subsequente à divulgação no PNCP, sendo admissível a prorrogação dentro da vigência inicial mediante demonstração da vantajosidade do preço registrado.",
+        "fundamentos_resolved": {
+          "Decreto 11.462/2023, art. 22": "439bfdc0-a49a-4b1b-9e86-116595c42d58",
+          "Orientação Normativa AGU nº 89/2024.": "13e9aea2-bc86-4568-96a0-c50b13d56a1a"
+        },
+        "fundamentos_not_found": [],
+        "candidates_pending_review": []
+      }
+    },
+    {
+      "id": "esp-785767-12",
+      "query": "Exigências de instalação de escritório na cidade de execução do objeto são restritivas da competitividade e somente se",
+      "description": "Tese especifica do template 785767 (Pregão sem DEMO (14.133)): Exigências de instalação de escritório na cidade de execução do objeto são restr...",
+      "category": "tese-especifica",
+      "difficulty": "medium",
+      "annotations": {
+        "relevant": [
+          "521424ed-97ba-4b00-b4a1-2b0113b5929d"
+        ],
+        "highlyRelevant": [
+          "521424ed-97ba-4b00-b4a1-2b0113b5929d"
+        ],
+        "annotatedAt": "2026-04-12T13:06:03.644Z",
+        "annotatedBy": "elic-import",
+        "notes": "Fundamentos curados: Lei 14.133/2021, art. 40 e art. 70, III; TCU, Acórdão 1176/2021-Plenário; Resolução TCU nº 315/2020, art. 9º, I.. Nao encontrados no indice: Resolução TCU nº 315/2020, art. 9º, I."
+      },
+      "_elic": {
+        "source": "especifica",
+        "code": null,
+        "templateId": "785767",
+        "enunciado": "Exigências de instalação de escritório na cidade de execução do objeto são restritivas da competitividade e somente se justificam quando imprescindíveis à adequada prestação do serviço, com demonstração fundamentada no ETP.",
+        "fundamentos_resolved": {
+          "TCU, Acórdão 1176/2021-Plenário": "521424ed-97ba-4b00-b4a1-2b0113b5929d"
+        },
+        "fundamentos_not_found": [
+          "Resolução TCU nº 315/2020, art. 9º, I."
+        ],
+        "candidates_pending_review": []
+      }
+    },
+    {
+      "id": "esp-785767-20",
+      "query": "No pregão eletrônico para registro de preços, a vigência da ata é de até um ano, prorrogável por igual período desde",
+      "description": "Tese especifica do template 785767 (Pregão sem DEMO (14.133)): No pregão eletrônico para registro de preços, a vigência da ata é de até um ano,...",
+      "category": "tese-especifica",
+      "difficulty": "medium",
+      "annotations": {
+        "relevant": [
+          "13e9aea2-bc86-4568-96a0-c50b13d56a1a"
+        ],
+        "highlyRelevant": [
+          "13e9aea2-bc86-4568-96a0-c50b13d56a1a"
+        ],
+        "annotatedAt": "2026-04-12T13:06:03.841Z",
+        "annotatedBy": "elic-import",
+        "notes": "Fundamentos curados: Lei 14.133/2021, art. 84; Decreto 11.462/2023, arts. 2º, III, e 14; Orientação Normativa AGU nº 89/2024.. Nao encontrados no indice: Decreto 11.462/2023, arts. 2º, III, e 14"
+      },
+      "_elic": {
+        "source": "especifica",
+        "code": null,
+        "templateId": "785767",
+        "enunciado": "No pregão eletrônico para registro de preços, a vigência da ata é de até um ano, prorrogável por igual período desde que comprovada a vantajosidade, observadas as regras do Decreto 11.462/2023 e a Orientação Normativa AGU nº 89/2024.",
+        "fundamentos_resolved": {
+          "Orientação Normativa AGU nº 89/2024.": "13e9aea2-bc86-4568-96a0-c50b13d56a1a"
+        },
+        "fundamentos_not_found": [
+          "Decreto 11.462/2023, arts. 2º, III, e 14"
+        ],
+        "candidates_pending_review": []
+      }
+    },
+    {
+      "id": "esp-789829-9",
+      "query": "Administração não se vincula a cláusulas de instrumento coletivo que tratem de matéria não trabalhista, de participação",
+      "description": "Tese especifica do template 789829 (Pregão — Serviços Comuns de Engenharia (Lei 14.133)): A Administração não se vincula a cláusulas de instrumento coletivo que tratem de...",
+      "category": "tese-especifica",
+      "difficulty": "medium",
+      "annotations": {
+        "relevant": [
+          "5dc5ae72-3e91-49ec-86d7-caac64ba77fd"
+        ],
+        "highlyRelevant": [
+          "5dc5ae72-3e91-49ec-86d7-caac64ba77fd"
+        ],
+        "annotatedAt": "2026-04-12T13:06:04.044Z",
+        "annotatedBy": "elic-import",
+        "notes": "Fundamentos curados: Lei 14.133/2021, art. 135, §§ 1º e 2º; IN SEGES/MP nº 5/2017, art. 6º e parágrafo único; Decreto 9.507/2018, art. 9º; Orientação Normativa AGU nº 63/2020; Parecer nº 00092/2019/DECOR/CGU/AGU; Parecer nº 00005/2020/CPLC/DEPCONSU/PGF/AGU; Súmula TST nº 374; TCU, Acórdão 1097/2019-Plenário.. Nao encontrados no indice: IN SEGES/MP nº 5/2017, art. 6º e parágrafo único; Decreto 9.507/2018, art. 9º; Parecer nº 00092/2019/DECOR/CGU/AGU; Parecer nº 00005/2020/CPLC/DEPCONSU/PGF/AGU; Súmula TST nº 374; TCU, Acórdão 1097/2019-Plenário."
+      },
+      "_elic": {
+        "source": "especifica",
+        "code": null,
+        "templateId": "789829",
+        "enunciado": "A Administração não se vincula a cláusulas de instrumento coletivo que tratem de matéria não trabalhista, de participação nos lucros, de direitos não previstos em lei ou de valores obrigatórios de encargos, insumos ou preços relacionados à execução do contrato administrativo.",
+        "fundamentos_resolved": {
+          "Orientação Normativa AGU nº 63/2020": "5dc5ae72-3e91-49ec-86d7-caac64ba77fd"
+        },
+        "fundamentos_not_found": [
+          "IN SEGES/MP nº 5/2017, art. 6º e parágrafo único",
+          "Decreto 9.507/2018, art. 9º",
+          "Parecer nº 00092/2019/DECOR/CGU/AGU",
+          "Parecer nº 00005/2020/CPLC/DEPCONSU/PGF/AGU",
+          "Súmula TST nº 374",
+          "TCU, Acórdão 1097/2019-Plenário."
+        ],
+        "candidates_pending_review": []
+      }
+    },
+    {
+      "id": "esp-789829-8",
+      "query": "Nas contratações de serviços comuns de engenharia com dedicação exclusiva de mão de obra, a planilha de custos e",
+      "description": "Tese especifica do template 789829 (Pregão — Serviços Comuns de Engenharia (Lei 14.133)): Nas contratações de serviços comuns de engenharia com dedicação exclusiva de mão...",
+      "category": "tese-especifica",
+      "difficulty": "medium",
+      "annotations": {
+        "relevant": [
+          "3d72ba58-4a00-4109-923f-175eec3265c5",
+          "5dc5ae72-3e91-49ec-86d7-caac64ba77fd"
+        ],
+        "highlyRelevant": [
+          "3d72ba58-4a00-4109-923f-175eec3265c5",
+          "5dc5ae72-3e91-49ec-86d7-caac64ba77fd"
+        ],
+        "annotatedAt": "2026-04-12T13:06:04.249Z",
+        "annotatedBy": "elic-import",
+        "notes": "Fundamentos curados: Lei 14.133/2021, arts. 23, § 2º, e 135, §§ 1º e 2º; IN SEGES/MP nº 5/2017, Anexo V, item 2.9, 'b', e Anexos VII-A, VII-B e VII-D; IN SEGES/MGI nº 176/2024; Decreto 12.174/2024, art. 5º, § 2º; CLT, art. 614, § 3º; Parecer nº 00041/2019/DECOR/CGU/AGU; Orientação Normativa AGU nº 63/2020; TCU, Acórdão 2443/2017-Plenário.. Nao encontrados no indice: IN SEGES/MP nº 5/2017, Anexo V, item 2.9, 'b', e Anexos VII-A, VII-B e VII-D; IN SEGES/MGI nº 176/2024; CLT, art. 614, § 3º; Parecer nº 00041/2019/DECOR/CGU/AGU; TCU, Acórdão 2443/2017-Plenário."
+      },
+      "_elic": {
+        "source": "especifica",
+        "code": null,
+        "templateId": "789829",
+        "enunciado": "Nas contratações de serviços comuns de engenharia com dedicação exclusiva de mão de obra, a planilha de custos e formação de preços deve ser elaborada segundo o modelo do Anexo VII-D da IN SEGES/MP nº 5/2017, com base em instrumento coletivo de trabalho vigente, apto e abrangente da base territorial de execução e da categoria profissional envolvida, vedada a ultratividade da convenção coletiva expirada.",
+        "fundamentos_resolved": {
+          "Decreto 12.174/2024, art. 5º, § 2º": "3d72ba58-4a00-4109-923f-175eec3265c5",
+          "Orientação Normativa AGU nº 63/2020": "5dc5ae72-3e91-49ec-86d7-caac64ba77fd"
+        },
+        "fundamentos_not_found": [
+          "IN SEGES/MP nº 5/2017, Anexo V, item 2.9, 'b', e Anexos VII-A, VII-B e VII-D",
+          "IN SEGES/MGI nº 176/2024",
+          "CLT, art. 614, § 3º",
+          "Parecer nº 00041/2019/DECOR/CGU/AGU",
+          "TCU, Acórdão 2443/2017-Plenário."
+        ],
+        "candidates_pending_review": []
+      }
+    },
+    {
+      "id": "esp-792741-1",
+      "query": "limite de 25% do art. 125 da Lei 14.133/2021 aplica-se às alterações qualitativas e quantitativas, isoladamente ao",
+      "description": "Tese especifica do template 792741 (Aditivo, alterações e prorrogações (exceto engenharia) (14.133)): O limite de 25% do art. 125 da Lei 14.133/2021 aplica-se às alterações qualitati...",
+      "category": "tese-especifica",
+      "difficulty": "medium",
+      "annotations": {
+        "relevant": [
+          "471684ee-29fc-453f-890f-0c1661f3f15f"
+        ],
+        "highlyRelevant": [
+          "471684ee-29fc-453f-890f-0c1661f3f15f"
+        ],
+        "annotatedAt": "2026-04-12T13:06:04.448Z",
+        "annotatedBy": "elic-import",
+        "notes": "Fundamentos curados: Lei 14.133/2021, arts. 125 e 126; Orientação Normativa AGU nº 50/2014 (com redação da Portaria AGU nº 140/2021); Parecer nº 09/2025/CPLC/SUBCONSU/PGF/AGU.. Nao encontrados no indice: Parecer nº 09/2025/CPLC/SUBCONSU/PGF/AGU."
+      },
+      "_elic": {
+        "source": "especifica",
+        "code": null,
+        "templateId": "792741",
+        "enunciado": "O limite de 25% do art. 125 da Lei 14.133/2021 aplica-se às alterações qualitativas e quantitativas, isoladamente ao conjunto de acréscimos e ao de supressões, calculado sobre o valor inicial atualizado do contrato, vedada a compensação entre acréscimos e supressões de itens distintos.",
+        "fundamentos_resolved": {
+          "Orientação Normativa AGU nº 50/2014 (com redação da Portaria AGU nº 140/2021)": "471684ee-29fc-453f-890f-0c1661f3f15f"
+        },
+        "fundamentos_not_found": [
+          "Parecer nº 09/2025/CPLC/SUBCONSU/PGF/AGU."
+        ],
+        "candidates_pending_review": []
+      }
+    },
+    {
+      "id": "esp-792741-16",
+      "query": "minuta do termo aditivo deve identificar: o fundamento legal, o objeto original e a alteração, o valor anterior e o",
+      "description": "Tese especifica do template 792741 (Aditivo, alterações e prorrogações (exceto engenharia) (14.133)): A minuta do termo aditivo deve identificar: o fundamento legal, o objeto origina...",
+      "category": "tese-especifica",
+      "difficulty": "easy",
+      "annotations": {
+        "relevant": [],
+        "highlyRelevant": [],
+        "annotatedAt": null,
+        "annotatedBy": null,
+        "notes": "Fundamentos curados: Lei 14.133/2021, arts. 124 a 132; Decreto 93.872/1986, art. 30, §1º; IN SEGES/MP nº 5/2017, Anexo IX, item 10.. Nao encontrados no indice: Decreto 93.872/1986, art. 30, §1º; IN SEGES/MP nº 5/2017, Anexo IX, item 10."
+      },
+      "_elic": {
+        "source": "especifica",
+        "code": null,
+        "templateId": "792741",
+        "enunciado": "A minuta do termo aditivo deve identificar: o fundamento legal, o objeto original e a alteração, o valor anterior e o posterior, o percentual isolado e o acumulado de alterações, o crédito e o empenho, o termo inicial de efeitos (regra de não retroatividade com exceção de um mês), eventual adequação da garantia e a ratificação das cláusulas não alteradas.",
+        "fundamentos_resolved": {},
+        "fundamentos_not_found": [
+          "Decreto 93.872/1986, art. 30, §1º",
+          "IN SEGES/MP nº 5/2017, Anexo IX, item 10."
+        ],
+        "candidates_pending_review": []
+      }
+    },
+    {
+      "id": "esp-795204-11",
+      "query": "cronograma físico-financeiro alterado deve ser elaborado e juntado como anexo ao termo aditivo; quando o aditivo não",
+      "description": "Tese especifica do template 795204 (Aditivo, obras e serviços de engenharia (14.133)): O cronograma físico-financeiro alterado deve ser elaborado e juntado como anexo ...",
+      "category": "tese-especifica",
+      "difficulty": "hard",
+      "annotations": {
+        "relevant": [],
+        "highlyRelevant": [],
+        "annotatedAt": null,
+        "annotatedBy": null,
+        "notes": "Fundamentos curados: Decreto 7.983/2013; IN SEGES/MP nº 5/2017, Anexo X; TCU, Acórdão 4.465/2011-Segunda Câmara, item 9.2.2.. Nao encontrados no indice: Decreto 7.983/2013; IN SEGES/MP nº 5/2017, Anexo X; TCU, Acórdão 4.465/2011-Segunda Câmara, item 9.2.2."
+      },
+      "_elic": {
+        "source": "especifica",
+        "code": null,
+        "templateId": "795204",
+        "enunciado": "O cronograma físico-financeiro alterado deve ser elaborado e juntado como anexo ao termo aditivo; quando o aditivo não modificar prazos, a Administração deve manifestar-se expressamente sobre a vantajosidade.",
+        "fundamentos_resolved": {},
+        "fundamentos_not_found": [
+          "Decreto 7.983/2013",
+          "IN SEGES/MP nº 5/2017, Anexo X",
+          "TCU, Acórdão 4.465/2011-Segunda Câmara, item 9.2.2."
+        ],
+        "candidates_pending_review": []
+      }
+    },
+    {
+      "id": "esp-795204-10",
+      "query": "obrigatória a juntada de documento de responsabilidade técnica (ART, RRT ou TRT) referente às peças técnicas da",
+      "description": "Tese especifica do template 795204 (Aditivo, obras e serviços de engenharia (14.133)): É obrigatória a juntada de documento de responsabilidade técnica (ART, RRT ou TR...",
+      "category": "tese-especifica",
+      "difficulty": "medium",
+      "annotations": {
+        "relevant": [
+          "17f6bcef-bbb3-455e-9e53-7a55a119a4bf"
+        ],
+        "highlyRelevant": [
+          "17f6bcef-bbb3-455e-9e53-7a55a119a4bf"
+        ],
+        "annotatedAt": "2026-04-12T13:06:04.648Z",
+        "annotatedBy": "elic-import",
+        "notes": "Fundamentos curados: Decreto 7.983/2013, art. 10; Súmula TCU nº 260; STF, RE 838.284; Nota Interna nº 02/2016/CPLC/DEPCONSU/PGF/AGU; Resolução CONFEA nº 1.137/2023; Resolução CAU nº 91/2014; Resolução CFT nº 55/2019.. Nao encontrados no indice: Decreto 7.983/2013, art. 10; STF, RE 838.284; Nota Interna nº 02/2016/CPLC/DEPCONSU/PGF/AGU; Resolução CONFEA nº 1.137/2023; Resolução CAU nº 91/2014; Resolução CFT nº 55/2019."
+      },
+      "_elic": {
+        "source": "especifica",
+        "code": null,
+        "templateId": "795204",
+        "enunciado": "É obrigatória a juntada de documento de responsabilidade técnica (ART, RRT ou TRT) referente às peças técnicas da alteração, independentemente de o profissional pertencer aos quadros da Administração ou ser contratado por esta, cabendo ao ente público o pagamento das taxas correspondentes como sujeito passivo.",
+        "fundamentos_resolved": {
+          "Súmula TCU nº 260": "17f6bcef-bbb3-455e-9e53-7a55a119a4bf"
+        },
+        "fundamentos_not_found": [
+          "Decreto 7.983/2013, art. 10",
+          "STF, RE 838.284",
+          "Nota Interna nº 02/2016/CPLC/DEPCONSU/PGF/AGU",
+          "Resolução CONFEA nº 1.137/2023",
+          "Resolução CAU nº 91/2014",
+          "Resolução CFT nº 55/2019."
+        ],
+        "candidates_pending_review": []
+      }
+    },
+    {
+      "id": "esp-797806-3",
+      "query": "utilização do catálogo eletrônico de padronização de compras, serviços e obras deve ser observada para a especificação",
+      "description": "Tese especifica do template 797806 (Pregão Eletrônico — Compras em geral): A utilização do catálogo eletrônico de padronização de compras, serviços e obras...",
+      "category": "tese-especifica",
+      "difficulty": "easy",
+      "annotations": {
+        "relevant": [],
+        "highlyRelevant": [],
+        "annotatedAt": null,
+        "annotatedBy": null,
+        "notes": "Fundamentos curados: Lei 14.133/2021, art. 19, II, e art. 43, I; IN SEGES/ME nº 58/2022; Portaria SEGES/ME nº 938/2022.. Nao encontrados no indice: IN SEGES/ME nº 58/2022; Portaria SEGES/ME nº 938/2022."
+      },
+      "_elic": {
+        "source": "especifica",
+        "code": null,
+        "templateId": "797806",
+        "enunciado": "A utilização do catálogo eletrônico de padronização de compras, serviços e obras deve ser observada para a especificação do objeto quando o item constar do catálogo.",
+        "fundamentos_resolved": {},
+        "fundamentos_not_found": [
+          "IN SEGES/ME nº 58/2022",
+          "Portaria SEGES/ME nº 938/2022."
+        ],
+        "candidates_pending_review": []
+      }
+    },
+    {
+      "id": "esp-797806-1",
+      "query": "indicação de marca ou modelo no edital somente é admitida nas hipóteses taxativas do art. 41, I, da Lei 14.133/2021,",
+      "description": "Tese especifica do template 797806 (Pregão Eletrônico — Compras em geral): A indicação de marca ou modelo no edital somente é admitida nas hipóteses taxati...",
+      "category": "tese-especifica",
+      "difficulty": "medium",
+      "annotations": {
+        "relevant": [
+          "470a8111-5323-4659-9d99-d284b92cbc4d"
+        ],
+        "highlyRelevant": [
+          "470a8111-5323-4659-9d99-d284b92cbc4d"
+        ],
+        "annotatedAt": "2026-04-12T13:06:04.851Z",
+        "annotatedBy": "elic-import",
+        "notes": "Fundamentos curados: Lei 14.133/2021, art. 41, I, e §§; Súmula TCU nº 270; Acórdãos TCU 113/2016-Plenário e 2.401/2006-Plenário.. Nao encontrados no indice: Acórdãos TCU 113/2016-Plenário e 2.401/2006-Plenário."
+      },
+      "_elic": {
+        "source": "especifica",
+        "code": null,
+        "templateId": "797806",
+        "enunciado": "A indicação de marca ou modelo no edital somente é admitida nas hipóteses taxativas do art. 41, I, da Lei 14.133/2021, com justificativa técnica formal nos autos e, como regra, acompanhada da expressão ou similar/equivalente, vedada a restrição injustificada da competitividade.",
+        "fundamentos_resolved": {
+          "Súmula TCU nº 270": "470a8111-5323-4659-9d99-d284b92cbc4d"
+        },
+        "fundamentos_not_found": [
+          "Acórdãos TCU 113/2016-Plenário e 2.401/2006-Plenário."
+        ],
+        "candidates_pending_review": []
+      }
+    },
+    {
+      "id": "esp-799559-2",
+      "query": "laudo de avaliação do imóvel destinado à cessão deve ser atual, emitido por profissional habilitado e conter memória de",
+      "description": "Tese especifica do template 799559 (Serviços de apoio com cessão de espaço físico): O laudo de avaliação do imóvel destinado à cessão deve ser atual, emitido por pr...",
+      "category": "tese-especifica",
+      "difficulty": "easy",
+      "annotations": {
+        "relevant": [],
+        "highlyRelevant": [],
+        "annotatedAt": null,
+        "annotatedBy": null,
+        "notes": "Fundamentos curados: Lei 14.133/2021, art. 23, § 1º, por analogia; NBR 14.653 da ABNT; Acórdão TCU 1.374/2021-Plenário.. Nao encontrados no indice: NBR 14.653 da ABNT; Acórdão TCU 1.374/2021-Plenário."
+      },
+      "_elic": {
+        "source": "especifica",
+        "code": null,
+        "templateId": "799559",
+        "enunciado": "O laudo de avaliação do imóvel destinado à cessão deve ser atual, emitido por profissional habilitado e conter memória de cálculo que permita o controle externo da taxa de ocupação.",
+        "fundamentos_resolved": {},
+        "fundamentos_not_found": [
+          "NBR 14.653 da ABNT",
+          "Acórdão TCU 1.374/2021-Plenário."
+        ],
+        "candidates_pending_review": []
+      }
+    },
+    {
+      "id": "esp-799559-1",
+      "query": "cessão de uso do imóvel público vinculada à contratação deve ser onerosa, com taxa de ocupação fixada em laudo de",
+      "description": "Tese especifica do template 799559 (Serviços de apoio com cessão de espaço físico): A cessão de uso do imóvel público vinculada à contratação deve ser onerosa, com ...",
+      "category": "tese-especifica",
+      "difficulty": "easy",
+      "annotations": {
+        "relevant": [],
+        "highlyRelevant": [],
+        "annotatedAt": null,
+        "annotatedBy": null,
+        "notes": "Fundamentos curados: Lei 9.636/1998; Decreto-Lei 9.760/1946; Orientação Normativa AGU nº 96, de 2025.. Nao encontrados no indice: Orientação Normativa AGU nº 96, de 2025."
+      },
+      "_elic": {
+        "source": "especifica",
+        "code": null,
+        "templateId": "799559",
+        "enunciado": "A cessão de uso do imóvel público vinculada à contratação deve ser onerosa, com taxa de ocupação fixada em laudo de avaliação técnica e recolhida mensalmente à conta única do Tesouro Nacional mediante GRU, admitida a retenção em fatura no caso de inadimplemento.",
+        "fundamentos_resolved": {},
+        "fundamentos_not_found": [
+          "Orientação Normativa AGU nº 96, de 2025."
+        ],
+        "candidates_pending_review": []
+      }
+    },
+    {
+      "id": "esp-800676-4",
+      "query": "regra do parcelamento do objeto permanece aplicável mesmo em contratações por inexigibilidade quando o objeto comportar",
+      "description": "Tese especifica do template 800676 (Inexigibilidade fornecedor exclusivo (não TIC)): A regra do parcelamento do objeto permanece aplicável mesmo em contratações por ...",
+      "category": "tese-especifica",
+      "difficulty": "medium",
+      "annotations": {
+        "relevant": [
+          "03c1afd0-352c-4212-b14f-73d2ef585e15"
+        ],
+        "highlyRelevant": [
+          "03c1afd0-352c-4212-b14f-73d2ef585e15"
+        ],
+        "annotatedAt": "2026-04-12T13:06:05.050Z",
+        "annotatedBy": "elic-import",
+        "notes": "Fundamentos curados: Lei 14.133/2021, art. 40, V, b, e §§ 2º e 3º, e art. 47, II, §1º; Súmula TCU nº 247; TCU, Acórdãos 2529/2021-Plenário, 1972/2018-Plenário e Informativo de Licitações e Contratos nº 148/2013.. Nao encontrados no indice: TCU, Acórdãos 2529/2021-Plenário, 1972/2018-Plenário e Informativo de Licitações e Contratos nº 148/2013."
+      },
+      "_elic": {
+        "source": "especifica",
+        "code": null,
+        "templateId": "800676",
+        "enunciado": "A regra do parcelamento do objeto permanece aplicável mesmo em contratações por inexigibilidade quando o objeto comportar divisão tecnicamente viável e economicamente vantajosa, cabendo à Administração justificar a contratação única diante das hipóteses excepcionais de agrupamento.",
+        "fundamentos_resolved": {
+          "Súmula TCU nº 247": "03c1afd0-352c-4212-b14f-73d2ef585e15"
+        },
+        "fundamentos_not_found": [
+          "TCU, Acórdãos 2529/2021-Plenário, 1972/2018-Plenário e Informativo de Licitações e Contratos nº 148/2013."
+        ],
+        "candidates_pending_review": []
+      }
+    },
+    {
+      "id": "esp-800676-7",
+      "query": "contratação direta de empresa estrangeira que não funcione no País admite, em caráter excepcional e devidamente",
+      "description": "Tese especifica do template 800676 (Inexigibilidade fornecedor exclusivo (não TIC)): A contratação direta de empresa estrangeira que não funcione no País admite, em ...",
+      "category": "tese-especifica",
+      "difficulty": "medium",
+      "annotations": {
+        "relevant": [],
+        "highlyRelevant": [],
+        "annotatedAt": null,
+        "annotatedBy": null,
+        "notes": "Fundamentos curados: Parecer 23/2023/CPLC/SUBCONSU/PGF/AGU (NUP 00407.009694/2019-96, seq. 16); LINDB, art. 20; Lei 14.195/2021.. Nao encontrados no indice: Parecer 23/2023/CPLC/SUBCONSU/PGF/AGU (NUP 00407.009694/2019-96, seq. 16); LINDB, art. 20"
+      },
+      "_elic": {
+        "source": "especifica",
+        "code": null,
+        "templateId": "800676",
+        "enunciado": "A contratação direta de empresa estrangeira que não funcione no País admite, em caráter excepcional e devidamente justificado, a dispensa dos documentos de habilitação equivalentes e a celebração de contrato de adesão, observadas as consequências práticas da decisão, a especificidade da situação, a inexistência de alternativas e o interesse público.",
+        "fundamentos_resolved": {},
+        "fundamentos_not_found": [
+          "Parecer 23/2023/CPLC/SUBCONSU/PGF/AGU (NUP 00407.009694/2019-96, seq. 16)",
+          "LINDB, art. 20"
+        ],
+        "candidates_pending_review": []
+      }
+    },
+    {
+      "id": "esp-811212-11",
+      "query": "Nas dispensas emergenciais que envolvam serviços com dedicação exclusiva de mão de obra, permanecem aplicáveis as",
+      "description": "Tese especifica do template 811212 (Dispensa emergencial SRP): Nas dispensas emergenciais que envolvam serviços com dedicação exclusiva de mão ...",
+      "category": "tese-especifica",
+      "difficulty": "medium",
+      "annotations": {
+        "relevant": [
+          "04a6f957-9e17-4918-b299-3c55d11bb3fe"
+        ],
+        "highlyRelevant": [
+          "04a6f957-9e17-4918-b299-3c55d11bb3fe"
+        ],
+        "annotatedAt": "2026-04-12T13:06:05.250Z",
+        "annotatedBy": "elic-import",
+        "notes": "Fundamentos curados: Lei 14.133/2021, art. 135, §§1º e 2º; IN SEGES/MGI 176/2024; IN 5/2017, art. 5º, VI; ON AGU 63/2020; Parecer 92/2019/DECOR; Parecer 41/2019/DECOR; Súmula TST 374; CLT, art. 614, §3º; Parecer 5/2020/CPLC; Acórdão TCU 2443/2017-Plenário.. Nao encontrados no indice: IN 5/2017, art. 5º, VI; ON AGU 63/2020; Parecer 92/2019/DECOR; Parecer 41/2019/DECOR; Súmula TST 374; CLT, art. 614, §3º; Parecer 5/2020/CPLC; Acórdão TCU 2443/2017-Plenário."
+      },
+      "_elic": {
+        "source": "especifica",
+        "code": null,
+        "templateId": "811212",
+        "enunciado": "Nas dispensas emergenciais que envolvam serviços com dedicação exclusiva de mão de obra, permanecem aplicáveis as regras de custos mínimos, salário acima do piso, não vinculação automática a CCT e vedação de ultratividade.",
+        "fundamentos_resolved": {
+          "IN SEGES/MGI 176/2024": "04a6f957-9e17-4918-b299-3c55d11bb3fe"
+        },
+        "fundamentos_not_found": [
+          "IN 5/2017, art. 5º, VI",
+          "ON AGU 63/2020",
+          "Parecer 92/2019/DECOR",
+          "Parecer 41/2019/DECOR",
+          "Súmula TST 374",
+          "CLT, art. 614, §3º",
+          "Parecer 5/2020/CPLC",
+          "Acórdão TCU 2443/2017-Plenário."
+        ],
+        "candidates_pending_review": []
+      }
+    },
+    {
+      "id": "esp-811212-12",
+      "query": "Nas dispensas emergenciais que envolvam serviços ou obras de engenharia, aplicam-se integralmente as regras de",
+      "description": "Tese especifica do template 811212 (Dispensa emergencial SRP): Nas dispensas emergenciais que envolvam serviços ou obras de engenharia, aplicam...",
+      "category": "tese-especifica",
+      "difficulty": "medium",
+      "annotations": {
+        "relevant": [],
+        "highlyRelevant": [],
+        "annotatedAt": null,
+        "annotatedBy": null,
+        "notes": "Fundamentos curados: Decreto 7.983/2013, arts. 10 a 12; Lei 14.133/2021, arts. 23, §2º, 56, §5º e 59, §3º; Acórdãos TCU 2622/2013, 2842/2011, 1695/2018; Súmulas TCU 253, 254, 258, 259, 260, 261; Parecer 5/2024/CPLC; ON AGU 5/2009; OT-IBR 001/2006.. Nao encontrados no indice: Decreto 7.983/2013, arts. 10 a 12; Acórdãos TCU 2622/2013, 2842/2011, 1695/2018; Súmulas TCU 253, 254, 258, 259, 260, 261; Parecer 5/2024/CPLC; ON AGU 5/2009; OT-IBR 001/2006."
+      },
+      "_elic": {
+        "source": "especifica",
+        "code": null,
+        "templateId": "811212",
+        "enunciado": "Nas dispensas emergenciais que envolvam serviços ou obras de engenharia, aplicam-se integralmente as regras de orçamento do Decreto 7.983/2013, com utilização do SINAPI, composição de BDI conforme Acórdão TCU 2622/2013 e Súmulas TCU 253 e 254, BDI reduzido para materiais relevantes e apresentação de ART/RRT/TRT pelo responsável técnico.",
+        "fundamentos_resolved": {},
+        "fundamentos_not_found": [
+          "Decreto 7.983/2013, arts. 10 a 12",
+          "Acórdãos TCU 2622/2013, 2842/2011, 1695/2018",
+          "Súmulas TCU 253, 254, 258, 259, 260, 261",
+          "Parecer 5/2024/CPLC",
+          "ON AGU 5/2009",
+          "OT-IBR 001/2006."
+        ],
+        "candidates_pending_review": []
       }
     }
   ]
