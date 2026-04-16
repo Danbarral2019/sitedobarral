@@ -331,9 +331,8 @@ model User {
   // Relacionamento com cursos (para estudantes)
   enrollments  Enrollment[]
 
-  // Pagamentos
-  stripeCustomerId     String?     // Legado Stripe (retrocompat)
-  mercadopagoPayerId   String?     // Payer ID do Mercado Pago
+  // Pagamentos (Stripe)
+  stripeCustomerId     String?
   subscriptions        Subscription[]
 
   // LMS
@@ -1375,28 +1374,33 @@ model TcuHighlight {
   @@index([documentId])
 }
 
-// Assinaturas (Mercado Pago + legado Stripe)
+// Assinaturas (Stripe Checkout + Subscriptions)
 model Subscription {
   id                        String   @id @default(uuid())
   userId                    String
   user                      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  stripeSubscriptionId      String?  // Legado Stripe (retrocompat)
-  stripePriceId             String?  // Legado Stripe (retrocompat)
-  mercadopagoPreapprovalId  String?  @unique // ID da assinatura recorrente no MP
-  paymentMethod             String?  // 'pix' | 'credit_card' | 'boleto'
+
+  stripeCustomerId          String?
+  stripeSubscriptionId      String?  @unique
+  stripeCheckoutSessionId   String?  @unique
+  stripePriceId             String?
+
+  paymentMethod             String?  // 'card' | 'pix'
   plan                      String   // 'basico' | 'premium'
   billingCycle              String?  // 'monthly' | 'yearly'
-  courseId                   String?  // Para plano 'basico' — qual curso
-  status                    String   // 'active' | 'canceled' | 'past_due' | 'unpaid'
+  courseId                  String?
+  status                    String   // 'active' | 'processing' | 'canceled' | 'past_due' | 'unpaid' | 'incomplete'
   currentPeriodStart        DateTime
   currentPeriodEnd          DateTime
   cancelAtPeriodEnd         Boolean  @default(false)
+
   createdAt                 DateTime @default(now())
   updatedAt                 DateTime @updatedAt
 
   @@index([userId])
   @@index([status])
   @@index([userId, status])
+  @@index([stripeSubscriptionId])
 }
 
 // Embeddings pré-computados dos artigos da Lei 14.133/2021 (Fase 5B)
@@ -1603,4 +1607,13 @@ model ScraperHealthLog {
   @@index([scraperCode])
   @@index([scraperCode, runAt])
   @@index([status])
+}
+
+// Dedup de webhooks Stripe
+model ProcessedWebhookEvent {
+  stripeEventId String   @id
+  eventType     String
+  processedAt   DateTime @default(now())
+
+  @@index([processedAt])
 }
