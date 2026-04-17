@@ -5,12 +5,16 @@ import { describe, it, expect, vi, beforeEach } from 'vitest'
 
 const mockPricesList = vi.fn()
 const mockCustomersCreate = vi.fn()
+const mockCheckoutSessionsCreate = vi.fn()
+const mockBillingPortalSessionsCreate = vi.fn()
 
 vi.mock('stripe', () => {
   function StripeMock() {
     return {
       prices: { list: mockPricesList },
       customers: { create: mockCustomersCreate },
+      checkout: { sessions: { create: mockCheckoutSessionsCreate } },
+      billingPortal: { sessions: { create: mockBillingPortalSessionsCreate } },
     }
   }
   return { default: StripeMock }
@@ -150,6 +154,107 @@ describe('lib/stripe', () => {
       expect(customerId).toBe('cus_existing')
       expect(mockCustomersCreate).not.toHaveBeenCalled()
       expect(mockPrismaUserUpdate).not.toHaveBeenCalled()
+    })
+  })
+
+  // ── Task 6: createCheckoutSession + createBillingPortalSession ────────
+
+  describe('createCheckoutSession', () => {
+    beforeEach(() => {
+      mockPricesList.mockResolvedValue({ data: [{ id: 'price_test' }] })
+      mockPrismaUserFindUnique.mockResolvedValue({
+        id: 'user-1',
+        email: 'test@example.com',
+        name: 'Test',
+        stripeCustomerId: 'cus_abc',
+      })
+    })
+
+    it('creates card checkout session with correct params (no mandate)', async () => {
+      const { createCheckoutSession } = await import('../stripe')
+      mockCheckoutSessionsCreate.mockResolvedValueOnce({
+        url: 'https://checkout.stripe.com/session123',
+        id: 'cs_test_123',
+      })
+
+      const result = await createCheckoutSession({
+        userId: 'user-1',
+        plan: 'basico',
+        billingCycle: 'monthly',
+        method: 'card',
+        baseUrl: 'https://example.com',
+      })
+
+      expect(result).toEqual({
+        url: 'https://checkout.stripe.com/session123',
+        sessionId: 'cs_test_123',
+      })
+
+      const createCall = mockCheckoutSessionsCreate.mock.calls[0][0]
+      expect(createCall.mode).toBe('subscription')
+      expect(createCall.customer).toBe('cus_abc')
+      expect(createCall.payment_method_types).toEqual(['card'])
+      expect(createCall.line_items).toEqual([{ price: 'price_test', quantity: 1 }])
+      expect(createCall.payment_method_options).toBeUndefined()
+      expect(createCall.success_url).toBe(
+        'https://example.com/assinatura/sucesso?session_id={CHECKOUT_SESSION_ID}'
+      )
+      expect(createCall.cancel_url).toBe('https://example.com/assinatura/cancelado')
+      expect(createCall.metadata.userId).toBe('user-1')
+      expect(createCall.metadata.plan).toBe('basico')
+      expect(createCall.metadata.billingCycle).toBe('monthly')
+    })
+
+    it('creates pix checkout session with mandate_options', async () => {
+      const { createCheckoutSession } = await import('../stripe')
+      mockCheckoutSessionsCreate.mockResolvedValueOnce({
+        url: 'https://checkout.stripe.com/pix-session',
+        id: 'cs_pix_123',
+      })
+
+      await createCheckoutSession({
+        userId: 'user-1',
+        plan: 'premium',
+        billingCycle: 'yearly',
+        method: 'pix',
+        baseUrl: 'https://example.com',
+      })
+
+      const createCall = mockCheckoutSessionsCreate.mock.calls[0][0]
+      expect(createCall.payment_method_types).toEqual(['pix'])
+      expect(createCall.payment_method_options).toBeDefined()
+      const pixOpts = createCall.payment_method_options.pix.mandate_options
+      expect(pixOpts.amount).toBe(89900)
+      expect(pixOpts.amount_type).toBe('fixed')
+      expect(pixOpts.payment_schedule).toBe('yearly')
+      expect(pixOpts.reference).toBe('Site do Barral - Premium Anual')
+    })
+  })
+
+  describe('createBillingPortalSession', () => {
+    it('returns url from billing portal session', async () => {
+      const { createBillingPortalSession } = await import('../stripe')
+
+      mockPrismaUserFindUnique.mockResolvedValueOnce({
+        id: 'user-1',
+        email: 'test@example.com',
+        name: 'Test',
+        stripeCustomerId: 'cus_portal',
+      })
+      mockBillingPortalSessionsCreate.mockResolvedValueOnce({
+        url: 'https://billing.stripe.com/portal-session',
+      })
+
+      const result = await createBillingPortalSession(
+        'user-1',
+        'https://example.com/area-restrita'
+      )
+
+      expect(result).toEqual({ url: 'https://billing.stripe.com/portal-session' })
+      expect(mockBillingPortalSessionsCreate).toHaveBeenCalledWith({
+        customer: 'cus_portal',
+        return_url: 'https://example.com/area-restrita',
+      })
     })
   })
 })

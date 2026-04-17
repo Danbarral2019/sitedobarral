@@ -97,3 +97,81 @@ export async function ensureStripeCustomer(userId: string): Promise<string> {
   apiLogger.info({ userId, customerId: customer.id }, 'Created Stripe customer')
   return customer.id
 }
+
+// ── Checkout session ───────────────────────────────────────────────────────
+
+const PLAN_LABELS: Record<`${PlanType}_${BillingCycle}`, string> = {
+  basico_monthly: 'Básico Mensal',
+  basico_yearly: 'Básico Anual',
+  premium_monthly: 'Premium Mensal',
+  premium_yearly: 'Premium Anual',
+}
+
+export async function createCheckoutSession(params: {
+  userId: string
+  plan: PlanType
+  billingCycle: BillingCycle
+  method: PaymentMethod
+  courseId?: string
+  baseUrl: string
+}): Promise<{ url: string; sessionId: string }> {
+  const { userId, plan, billingCycle, method, courseId, baseUrl } = params
+
+  const [priceId, customerId] = await Promise.all([
+    resolvePriceId(plan, billingCycle),
+    ensureStripeCustomer(userId),
+  ])
+
+  const metadata = {
+    userId,
+    plan,
+    billingCycle,
+    courseId: courseId ?? '',
+  }
+
+  const planLabel = PLAN_LABELS[`${plan}_${billingCycle}`]
+
+  const session = await getStripe().checkout.sessions.create({
+    mode: 'subscription',
+    customer: customerId,
+    line_items: [{ price: priceId, quantity: 1 }],
+    payment_method_types: [method],
+    payment_method_options:
+      method === 'pix'
+        ? ({
+            pix: {
+              mandate_options: {
+                amount: priceAmountInCents(plan, billingCycle),
+                amount_type: 'fixed',
+                payment_schedule: billingCycle === 'yearly' ? 'yearly' : 'monthly',
+                reference: `Site do Barral - ${planLabel}`,
+              },
+            },
+          } as any)
+        : undefined,
+    subscription_data: { metadata },
+    success_url: `${baseUrl}/assinatura/sucesso?session_id={CHECKOUT_SESSION_ID}`,
+    cancel_url: `${baseUrl}/assinatura/cancelado`,
+    metadata,
+  } as any)
+
+  apiLogger.info({ sessionId: session.id, plan, billingCycle, method }, 'Created checkout session')
+  return { url: session.url!, sessionId: session.id }
+}
+
+// ── Billing Portal ─────────────────────────────────────────────────────────
+
+export async function createBillingPortalSession(
+  userId: string,
+  returnUrl: string
+): Promise<{ url: string }> {
+  const customerId = await ensureStripeCustomer(userId)
+
+  const session = await getStripe().billingPortal.sessions.create({
+    customer: customerId,
+    return_url: returnUrl,
+  })
+
+  apiLogger.info({ userId, customerId }, 'Created billing portal session')
+  return { url: session.url }
+}
