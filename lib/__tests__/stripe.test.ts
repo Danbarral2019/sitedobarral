@@ -4,15 +4,29 @@ import { describe, it, expect, vi, beforeEach } from 'vitest'
 // ── Mocks ──────────────────────────────────────────────────────────────────
 
 const mockPricesList = vi.fn()
+const mockCustomersCreate = vi.fn()
 
 vi.mock('stripe', () => {
   function StripeMock() {
     return {
       prices: { list: mockPricesList },
+      customers: { create: mockCustomersCreate },
     }
   }
   return { default: StripeMock }
 })
+
+const mockPrismaUserFindUnique = vi.fn()
+const mockPrismaUserUpdate = vi.fn()
+
+vi.mock('@/lib/prisma', () => ({
+  prisma: {
+    user: {
+      findUnique: (...args: unknown[]) => mockPrismaUserFindUnique(...args),
+      update: (...args: unknown[]) => mockPrismaUserUpdate(...args),
+    },
+  },
+}))
 
 vi.mock('@/lib/logger', () => ({
   apiLogger: {
@@ -89,6 +103,53 @@ describe('lib/stripe', () => {
       await expect(resolvePriceId('premium', 'yearly')).rejects.toThrow(
         'Stripe price not found for lookup_key: premium_yearly'
       )
+    })
+  })
+
+  // ── Task 5: ensureStripeCustomer ──────────────────────────────────────
+
+  describe('ensureStripeCustomer', () => {
+    it('creates customer when none exists and saves to DB', async () => {
+      const { ensureStripeCustomer } = await import('../stripe')
+
+      mockPrismaUserFindUnique.mockResolvedValueOnce({
+        id: 'user-1',
+        email: 'test@example.com',
+        name: 'Test User',
+        stripeCustomerId: null,
+      })
+      mockCustomersCreate.mockResolvedValueOnce({ id: 'cus_new123' })
+      mockPrismaUserUpdate.mockResolvedValueOnce({})
+
+      const customerId = await ensureStripeCustomer('user-1')
+
+      expect(customerId).toBe('cus_new123')
+      expect(mockCustomersCreate).toHaveBeenCalledWith({
+        email: 'test@example.com',
+        name: 'Test User',
+        metadata: { userId: 'user-1' },
+      })
+      expect(mockPrismaUserUpdate).toHaveBeenCalledWith({
+        where: { id: 'user-1' },
+        data: { stripeCustomerId: 'cus_new123' },
+      })
+    })
+
+    it('reuses existing customer and does not call Stripe API', async () => {
+      const { ensureStripeCustomer } = await import('../stripe')
+
+      mockPrismaUserFindUnique.mockResolvedValueOnce({
+        id: 'user-1',
+        email: 'test@example.com',
+        name: 'Test User',
+        stripeCustomerId: 'cus_existing',
+      })
+
+      const customerId = await ensureStripeCustomer('user-1')
+
+      expect(customerId).toBe('cus_existing')
+      expect(mockCustomersCreate).not.toHaveBeenCalled()
+      expect(mockPrismaUserUpdate).not.toHaveBeenCalled()
     })
   })
 })

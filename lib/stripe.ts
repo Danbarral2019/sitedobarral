@@ -1,4 +1,5 @@
 import Stripe from 'stripe'
+import { prisma } from '@/lib/prisma'
 import { apiLogger } from '@/lib/logger'
 
 // ── Types ──────────────────────────────────────────────────────────────────
@@ -66,4 +67,33 @@ export function calculatePeriodEnd(start: Date, billingCycle: BillingCycle): Dat
     end.setUTCFullYear(end.getUTCFullYear() + 1)
   }
   return end
+}
+
+// ── Customer management ────────────────────────────────────────────────────
+
+export async function ensureStripeCustomer(userId: string): Promise<string> {
+  const user = await prisma.user.findUnique({ where: { id: userId } })
+  if (!user) {
+    throw new Error(`User not found: ${userId}`)
+  }
+
+  if (user.stripeCustomerId) {
+    apiLogger.debug({ userId, customerId: user.stripeCustomerId }, 'Reusing existing Stripe customer')
+    return user.stripeCustomerId
+  }
+
+  const stripe = getStripe()
+  const customer = await stripe.customers.create({
+    email: user.email,
+    name: user.name,
+    metadata: { userId },
+  })
+
+  await prisma.user.update({
+    where: { id: userId },
+    data: { stripeCustomerId: customer.id },
+  })
+
+  apiLogger.info({ userId, customerId: customer.id }, 'Created Stripe customer')
+  return customer.id
 }
