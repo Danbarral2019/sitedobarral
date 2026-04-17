@@ -1,5 +1,6 @@
 import Stripe from 'stripe'
 import { prisma } from '@/lib/prisma'
+import { courses } from '@/data/courses'
 import { apiLogger } from '@/lib/logger'
 
 // ── Types ──────────────────────────────────────────────────────────────────
@@ -174,4 +175,67 @@ export async function createBillingPortalSession(
 
   apiLogger.info({ userId, customerId }, 'Created billing portal session')
   return { url: session.url }
+}
+
+// ── Enrollment helpers ─────────────────────────────────────────────────────
+
+export async function createEnrollmentsForSubscription(params: {
+  userId: string
+  plan: PlanType
+  courseId?: string
+}): Promise<void> {
+  const { userId, plan, courseId } = params
+
+  const courseIds = plan === 'premium' ? courses.map((c) => c.id) : [courseId!]
+
+  await prisma.$transaction(async (tx) => {
+    for (const cId of courseIds) {
+      const existing = await tx.enrollment.findUnique({
+        where: { userId_courseId: { userId, courseId: cId } },
+      })
+
+      if (!existing) {
+        await tx.enrollment.create({
+          data: { userId, courseId: cId, expiresAt: null },
+        })
+      } else if (existing.expiresAt !== null) {
+        await tx.enrollment.update({
+          where: { id: existing.id },
+          data: { expiresAt: null },
+        })
+      }
+    }
+  })
+
+  apiLogger.info({ userId, plan, courseIds }, 'Created enrollments for subscription')
+}
+
+export async function removeEnrollmentsForSubscription(
+  stripeSubscriptionId: string
+): Promise<void> {
+  const subscription = await prisma.subscription.findUnique({
+    where: { stripeSubscriptionId },
+  })
+
+  if (!subscription) {
+    apiLogger.warn({ stripeSubscriptionId }, 'Subscription not found for enrollment removal')
+    return
+  }
+
+  const { userId, plan, courseId } = subscription
+  const courseIds = plan === 'premium' ? courses.map((c) => c.id) : [courseId!]
+
+  await prisma.$transaction(async (tx) => {
+    for (const cId of courseIds) {
+      const existing = await tx.enrollment.findUnique({
+        where: { userId_courseId: { userId, courseId: cId } },
+      })
+
+      if (existing && existing.qrCodeId === null) {
+        await tx.enrollment.delete({ where: { id: existing.id } })
+      }
+    }
+  })
+
+  apiLogger.info({ stripeSubscriptionId, userId, plan, courseIds }, 'Removed enrollments for subscription')
 }

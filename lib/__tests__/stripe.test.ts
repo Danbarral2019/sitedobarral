@@ -22,6 +22,8 @@ vi.mock('stripe', () => {
 
 const mockPrismaUserFindUnique = vi.fn()
 const mockPrismaUserUpdate = vi.fn()
+const mockPrismaSubscriptionFindUnique = vi.fn()
+const mockPrismaTransaction = vi.fn()
 
 vi.mock('@/lib/prisma', () => ({
   prisma: {
@@ -29,7 +31,19 @@ vi.mock('@/lib/prisma', () => ({
       findUnique: (...args: unknown[]) => mockPrismaUserFindUnique(...args),
       update: (...args: unknown[]) => mockPrismaUserUpdate(...args),
     },
+    subscription: {
+      findUnique: (...args: unknown[]) => mockPrismaSubscriptionFindUnique(...args),
+    },
+    $transaction: (...args: unknown[]) => mockPrismaTransaction(...args),
   },
+}))
+
+vi.mock('@/data/courses', () => ({
+  courses: [
+    { id: '2' },
+    { id: '3' },
+    { id: '4' },
+  ],
 }))
 
 vi.mock('@/lib/logger', () => ({
@@ -255,6 +269,132 @@ describe('lib/stripe', () => {
         customer: 'cus_portal',
         return_url: 'https://example.com/area-restrita',
       })
+    })
+  })
+
+  // ── Task 7: Enrollment helpers ────────────────────────────────────────
+
+  describe('createEnrollmentsForSubscription', () => {
+    it('premium enrolls in ALL courses', async () => {
+      const { createEnrollmentsForSubscription } = await import('../stripe')
+
+      mockPrismaTransaction.mockImplementationOnce(async (cb: (tx: unknown) => Promise<void>) => {
+        const tx = {
+          enrollment: {
+            findUnique: vi.fn().mockResolvedValue(null),
+            create: vi.fn().mockResolvedValue({}),
+            update: vi.fn().mockResolvedValue({}),
+          },
+        }
+        await cb(tx)
+        expect(tx.enrollment.findUnique).toHaveBeenCalledTimes(3)
+        expect(tx.enrollment.create).toHaveBeenCalledTimes(3)
+      })
+
+      await createEnrollmentsForSubscription({
+        userId: 'user-1',
+        plan: 'premium',
+      })
+
+      expect(mockPrismaTransaction).toHaveBeenCalledTimes(1)
+    })
+
+    it('basico enrolls in single courseId only', async () => {
+      const { createEnrollmentsForSubscription } = await import('../stripe')
+
+      mockPrismaTransaction.mockImplementationOnce(async (cb: (tx: unknown) => Promise<void>) => {
+        const tx = {
+          enrollment: {
+            findUnique: vi.fn().mockResolvedValue(null),
+            create: vi.fn().mockResolvedValue({}),
+            update: vi.fn().mockResolvedValue({}),
+          },
+        }
+        await cb(tx)
+        expect(tx.enrollment.findUnique).toHaveBeenCalledTimes(1)
+        expect(tx.enrollment.create).toHaveBeenCalledTimes(1)
+        expect(tx.enrollment.create).toHaveBeenCalledWith({
+          data: expect.objectContaining({
+            userId: 'user-1',
+            courseId: '2',
+            expiresAt: null,
+          }),
+        })
+      })
+
+      await createEnrollmentsForSubscription({
+        userId: 'user-1',
+        plan: 'basico',
+        courseId: '2',
+      })
+
+      expect(mockPrismaTransaction).toHaveBeenCalledTimes(1)
+    })
+  })
+
+  describe('removeEnrollmentsForSubscription', () => {
+    it('preserves enrollment with qrCodeId', async () => {
+      const { removeEnrollmentsForSubscription } = await import('../stripe')
+
+      mockPrismaSubscriptionFindUnique.mockResolvedValueOnce({
+        id: 'sub-1',
+        userId: 'user-1',
+        plan: 'basico',
+        courseId: '2',
+      })
+
+      mockPrismaTransaction.mockImplementationOnce(async (cb: (tx: unknown) => Promise<void>) => {
+        const tx = {
+          enrollment: {
+            findUnique: vi.fn().mockResolvedValue({
+              id: 'enr-1',
+              userId: 'user-1',
+              courseId: '2',
+              qrCodeId: 'qr-abc',
+            }),
+            delete: vi.fn(),
+          },
+        }
+        await cb(tx)
+        expect(tx.enrollment.delete).not.toHaveBeenCalled()
+      })
+
+      await removeEnrollmentsForSubscription('stripe_sub_123')
+
+      expect(mockPrismaSubscriptionFindUnique).toHaveBeenCalledWith({
+        where: { stripeSubscriptionId: 'stripe_sub_123' },
+      })
+    })
+
+    it('deletes enrollment without qrCodeId', async () => {
+      const { removeEnrollmentsForSubscription } = await import('../stripe')
+
+      mockPrismaSubscriptionFindUnique.mockResolvedValueOnce({
+        id: 'sub-1',
+        userId: 'user-1',
+        plan: 'basico',
+        courseId: '2',
+      })
+
+      mockPrismaTransaction.mockImplementationOnce(async (cb: (tx: unknown) => Promise<void>) => {
+        const tx = {
+          enrollment: {
+            findUnique: vi.fn().mockResolvedValue({
+              id: 'enr-1',
+              userId: 'user-1',
+              courseId: '2',
+              qrCodeId: null,
+            }),
+            delete: vi.fn().mockResolvedValue({}),
+          },
+        }
+        await cb(tx)
+        expect(tx.enrollment.delete).toHaveBeenCalledWith({
+          where: { id: 'enr-1' },
+        })
+      })
+
+      await removeEnrollmentsForSubscription('stripe_sub_456')
     })
   })
 })
