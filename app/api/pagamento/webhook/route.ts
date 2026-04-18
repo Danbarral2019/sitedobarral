@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import Stripe from 'stripe';
-import { getStripe, createEnrollmentsForSubscription, removeEnrollmentsForSubscription, calculatePeriodEnd } from '@/lib/stripe';
+import { getStripe, createEnrollmentsForSubscription, removeEnrollmentsForSubscription, calculatePeriodEnd, createBillingPortalSession } from '@/lib/stripe';
 import type { PlanType, BillingCycle } from '@/lib/stripe';
 import { prisma } from '@/lib/prisma';
 import { apiLogger } from '@/lib/logger';
@@ -49,16 +49,32 @@ const IGNORED_EVENTS = new Set([
 // ── Email helper (no-op safe) ─────────────────────────────────────────────
 
 async function trySendSubscriptionEmail(
-  renderFn: (...args: any[]) => { subject: string; html: string },
+  renderFn: (...args: any[]) => { subject: string; html: string; text?: string },
   to: string,
   data: any,
 ): Promise<void> {
   try {
-    const { subject, html } = renderFn(data);
+    const { subject, html, text } = renderFn(data);
     if (!subject && !html) return; // stub template — skip
-    await sendEmail({ to, subject, html });
+    await sendEmail({ to, subject, html, text });
   } catch (err) {
     apiLogger.warn({ err, to }, 'Failed to send subscription email (non-fatal)');
+  }
+}
+
+/**
+ * Best-effort billing portal URL. Failing to create a session shouldn't block
+ * the email — fall back to the account page so the user still has somewhere to go.
+ */
+async function resolveBillingPortalUrl(userId: string): Promise<string> {
+  const siteUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://profdanielbarral.com';
+  const accountUrl = `${siteUrl}/area-restrita`;
+  try {
+    const { url } = await createBillingPortalSession(userId, accountUrl);
+    return url;
+  } catch (err) {
+    apiLogger.warn({ err, userId }, 'Failed to create billing portal session — using fallback URL');
+    return accountUrl;
   }
 }
 
@@ -174,6 +190,9 @@ async function handleInvoicePaid(event: Stripe.Event) {
       plan: sub.plan,
       billingCycle,
       nextBillingDate: newPeriodEnd,
+      amountPaidCents: invoice.amount_paid ?? 0,
+      currency: invoice.currency || 'brl',
+      invoiceUrl: invoice.hosted_invoice_url,
     });
   }
 
@@ -204,8 +223,10 @@ async function handleInvoicePaymentFailed(event: Stripe.Event) {
 
   if (sub.user?.email) {
     const renderFn = sub.paymentMethod === 'pix' ? renderPixMandateFailedEmail : renderCardFailedEmail;
+    const billingPortalUrl = await resolveBillingPortalUrl(sub.userId);
     await trySendSubscriptionEmail(renderFn, sub.user.email, {
       name: sub.user.name || '',
+      billingPortalUrl,
     });
   }
 
@@ -264,6 +285,7 @@ async function handleSubscriptionDeleted(event: Stripe.Event) {
   if (sub?.user?.email) {
     await trySendSubscriptionEmail(renderCanceledEmail, sub.user.email, {
       name: sub.user.name || '',
+      accessEndsAt: sub.currentPeriodEnd,
     });
   }
 
