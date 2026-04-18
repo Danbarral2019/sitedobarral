@@ -430,14 +430,14 @@ describe('Redis Cache Client', () => {
       expect(mockSetex).toHaveBeenCalledWith(
         'key',
         CACHE_TTL.SEARCH_RESULTS,
-        JSON.stringify({ data: 'value' })
+        { data: 'value' }
       );
     });
 
     it('deve salvar valor com TTL customizado', async () => {
       mockSetex.mockResolvedValue('OK');
       await setCache('key', 'value', 3600);
-      expect(mockSetex).toHaveBeenCalledWith('key', 3600, JSON.stringify('value'));
+      expect(mockSetex).toHaveBeenCalledWith('key', 3600, 'value');
     });
 
     it('deve lidar com erro sem lancar excecao', async () => {
@@ -670,7 +670,7 @@ describe('Redis Cache Client', () => {
 
       expect(result).toEqual({ data: 'fresh' });
       expect(fn).toHaveBeenCalled();
-      expect(mockSetex).toHaveBeenCalledWith('key', 3600, JSON.stringify({ data: 'fresh' }));
+      expect(mockSetex).toHaveBeenCalledWith('key', 3600, { data: 'fresh' });
     });
 
     it('deve registrar chave no registry quando prefix fornecido', async () => {
@@ -704,7 +704,7 @@ describe('Redis Cache Client', () => {
       expect(mockSetex).toHaveBeenCalledWith(
         'key',
         CACHE_TTL.SEARCH_RESULTS,
-        JSON.stringify('value')
+        'value'
       );
     });
   });
