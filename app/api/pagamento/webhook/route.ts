@@ -1,168 +1,427 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { Payment } from 'mercadopago';
-import { getMPClient, createSubscriptionEnrollments, handleSubscriptionCanceled, type PlanType } from '@/lib/mercadopago';
+import Stripe from 'stripe';
+import { getStripe, createEnrollmentsForSubscription, removeEnrollmentsForSubscription, calculatePeriodEnd } from '@/lib/stripe';
+import type { PlanType, BillingCycle } from '@/lib/stripe';
 import { prisma } from '@/lib/prisma';
 import { apiLogger } from '@/lib/logger';
 import { trackServerEvent } from '@/lib/monitoring/events';
-import { createHmac } from 'crypto';
+import { sendEmail } from '@/lib/email';
+import {
+  renderWelcomeEmail,
+  renderReceiptEmail,
+  renderCardFailedEmail,
+  renderPixMandateFailedEmail,
+  renderCanceledEmail,
+} from '@/lib/email-templates/subscription';
 
 export const runtime = 'nodejs';
 
-/**
- * Verifica a assinatura HMAC do webhook do Mercado Pago.
- * Header x-signature: ts=<timestamp>,v1=<hmac>
- * Manifest: id:<data.id>;request-id:<x-request-id>;ts:<timestamp>;
- */
-function verifyWebhookSignature(request: NextRequest, dataId: string): boolean {
-  const secret = process.env.MERCADOPAGO_WEBHOOK_SECRET;
-  if (!secret) {
-    apiLogger.warn('MERCADOPAGO_WEBHOOK_SECRET not configured — skipping HMAC verification');
-    return true; // Fail open when secret not configured
+// ── Ignored event types (return 200 silently) ─────────────────────────────
+
+const IGNORED_EVENTS = new Set([
+  'payment_intent.created',
+  'payment_intent.succeeded',
+  'payment_intent.processing',
+  'payment_intent.payment_failed',
+  'payment_intent.canceled',
+  'payment_method.attached',
+  'payment_method.detached',
+  'customer.created',
+  'customer.updated',
+  'customer.deleted',
+  'customer.subscription.created',
+  'customer.subscription.trial_will_end',
+  'customer.subscription.pending_update_applied',
+  'customer.subscription.pending_update_expired',
+  'invoice.created',
+  'invoice.finalized',
+  'invoice.updated',
+  'invoice.voided',
+  'invoice.payment_action_required',
+  'charge.succeeded',
+  'charge.failed',
+  'charge.updated',
+  'checkout.session.expired',
+  'setup_intent.created',
+  'setup_intent.succeeded',
+]);
+
+// ── Email helper (no-op safe) ─────────────────────────────────────────────
+
+async function trySendSubscriptionEmail(
+  renderFn: (...args: any[]) => { subject: string; html: string },
+  to: string,
+  data: any,
+): Promise<void> {
+  try {
+    const { subject, html } = renderFn(data);
+    if (!subject && !html) return; // stub template — skip
+    await sendEmail({ to, subject, html });
+  } catch (err) {
+    apiLogger.warn({ err, to }, 'Failed to send subscription email (non-fatal)');
   }
-
-  const xSignature = request.headers.get('x-signature');
-  const xRequestId = request.headers.get('x-request-id');
-
-  if (!xSignature || !xRequestId) {
-    apiLogger.warn('MP webhook: missing x-signature or x-request-id headers');
-    return false;
-  }
-
-  // Parse x-signature: ts=<timestamp>,v1=<hmac>
-  const parts: Record<string, string> = {};
-  for (const part of xSignature.split(',')) {
-    const [key, ...valueParts] = part.split('=');
-    parts[key.trim()] = valueParts.join('=').trim();
-  }
-
-  const ts = parts['ts'];
-  const v1 = parts['v1'];
-
-  if (!ts || !v1) {
-    apiLogger.warn({ xSignature }, 'MP webhook: malformed x-signature header');
-    return false;
-  }
-
-  // Build manifest and compute HMAC
-  const manifest = `id:${dataId};request-id:${xRequestId};ts:${ts};`;
-  const hmac = createHmac('sha256', secret).update(manifest).digest('hex');
-
-  return hmac === v1;
 }
 
-export async function POST(request: NextRequest) {
+// ── Metadata extraction helper ────────────────────────────────────────────
+
+interface SubscriptionMeta {
+  userId: string;
+  plan: PlanType;
+  billingCycle: BillingCycle;
+  courseId?: string;
+}
+
+function extractMeta(metadata: Record<string, string> | undefined | null): SubscriptionMeta | null {
+  if (!metadata?.userId || !metadata?.plan) return null;
+  return {
+    userId: metadata.userId,
+    plan: metadata.plan as PlanType,
+    billingCycle: (metadata.billingCycle || 'monthly') as BillingCycle,
+    courseId: metadata.courseId || undefined,
+  };
+}
+
+// ── Handler: checkout.session.completed ───────────────────────────────────
+
+async function handleCheckoutCompleted(event: Stripe.Event) {
+  const session = event.data.object as Stripe.Checkout.Session;
+  const meta = extractMeta(session.metadata as Record<string, string>);
+  if (!meta) {
+    apiLogger.warn({ sessionId: session.id }, 'Checkout session missing metadata');
+    return;
+  }
+
+  const stripeSubscriptionId = typeof session.subscription === 'string'
+    ? session.subscription
+    : (session.subscription as Stripe.Subscription)?.id;
+
+  if (!stripeSubscriptionId) {
+    apiLogger.warn({ sessionId: session.id }, 'Checkout session has no subscription');
+    return;
+  }
+
+  const now = new Date();
+  const periodEnd = calculatePeriodEnd(now, meta.billingCycle);
+
+  await prisma.subscription.create({
+    data: {
+      userId: meta.userId,
+      plan: meta.plan,
+      billingCycle: meta.billingCycle,
+      courseId: meta.courseId || null,
+      status: 'active',
+      paymentMethod: session.payment_method_types?.[0] || 'card',
+      stripeCustomerId: typeof session.customer === 'string' ? session.customer : null,
+      stripeSubscriptionId,
+      stripeCheckoutSessionId: session.id,
+      stripePriceId: null,
+      currentPeriodStart: now,
+      currentPeriodEnd: periodEnd,
+    },
+  });
+
+  await createEnrollmentsForSubscription({
+    userId: meta.userId,
+    plan: meta.plan,
+    courseId: meta.courseId,
+  });
+
+  // Welcome email
+  const user = await prisma.user.findUnique({ where: { id: meta.userId } });
+  if (user?.email) {
+    await trySendSubscriptionEmail(renderWelcomeEmail, user.email, {
+      name: user.name || '',
+      plan: meta.plan,
+      billingCycle: meta.billingCycle,
+    });
+  }
+
+  apiLogger.info({ userId: meta.userId, plan: meta.plan, stripeSubscriptionId }, 'Subscription created via checkout');
+  trackServerEvent('subscription_created', { plan: meta.plan });
+}
+
+// ── Handler: invoice.paid ─────────────────────────────────────────────────
+
+async function handleInvoicePaid(event: Stripe.Event) {
+  const invoice = event.data.object as Stripe.Invoice;
+  const stripeSubscriptionId = typeof invoice.subscription === 'string'
+    ? invoice.subscription
+    : (invoice.subscription as Stripe.Subscription)?.id;
+
+  if (!stripeSubscriptionId) return;
+
+  const sub = await prisma.subscription.findUnique({
+    where: { stripeSubscriptionId },
+    include: { user: { select: { email: true, name: true } } },
+  });
+
+  if (!sub) {
+    apiLogger.warn({ stripeSubscriptionId }, 'invoice.paid: subscription not found');
+    return;
+  }
+
+  const billingCycle = (sub.billingCycle || 'monthly') as BillingCycle;
+  const newPeriodEnd = calculatePeriodEnd(new Date(), billingCycle);
+
+  await prisma.subscription.update({
+    where: { stripeSubscriptionId },
+    data: { currentPeriodEnd: newPeriodEnd, status: 'active' },
+  });
+
+  if (sub.user?.email) {
+    await trySendSubscriptionEmail(renderReceiptEmail, sub.user.email, {
+      name: sub.user.name || '',
+      plan: sub.plan,
+      billingCycle,
+      nextBillingDate: newPeriodEnd,
+    });
+  }
+
+  apiLogger.info({ stripeSubscriptionId }, 'Subscription period renewed via invoice.paid');
+}
+
+// ── Handler: invoice.payment_failed ───────────────────────────────────────
+
+async function handleInvoicePaymentFailed(event: Stripe.Event) {
+  const invoice = event.data.object as Stripe.Invoice;
+  const stripeSubscriptionId = typeof invoice.subscription === 'string'
+    ? invoice.subscription
+    : (invoice.subscription as Stripe.Subscription)?.id;
+
+  if (!stripeSubscriptionId) return;
+
+  const sub = await prisma.subscription.findUnique({
+    where: { stripeSubscriptionId },
+    include: { user: { select: { email: true, name: true } } },
+  });
+
+  if (!sub) return;
+
+  await prisma.subscription.update({
+    where: { stripeSubscriptionId },
+    data: { status: 'past_due' },
+  });
+
+  if (sub.user?.email) {
+    const renderFn = sub.paymentMethod === 'pix' ? renderPixMandateFailedEmail : renderCardFailedEmail;
+    await trySendSubscriptionEmail(renderFn, sub.user.email, {
+      name: sub.user.name || '',
+    });
+  }
+
+  apiLogger.warn({ stripeSubscriptionId }, 'Invoice payment failed — subscription past_due');
+}
+
+// ── Handler: customer.subscription.updated ────────────────────────────────
+
+async function handleSubscriptionUpdated(event: Stripe.Event) {
+  const stripeSub = event.data.object as Stripe.Subscription;
+  const stripeSubscriptionId = stripeSub.id;
+
+  const sub = await prisma.subscription.findUnique({
+    where: { stripeSubscriptionId },
+  });
+
+  if (!sub) {
+    apiLogger.warn({ stripeSubscriptionId }, 'subscription.updated: not found in DB');
+    return;
+  }
+
+  await prisma.subscription.update({
+    where: { stripeSubscriptionId },
+    data: {
+      cancelAtPeriodEnd: stripeSub.cancel_at_period_end,
+      status: stripeSub.status === 'active' ? 'active'
+        : stripeSub.status === 'past_due' ? 'past_due'
+        : stripeSub.status === 'canceled' ? 'canceled'
+        : sub.status,
+      currentPeriodEnd: new Date(stripeSub.current_period_end * 1000),
+    },
+  });
+
+  apiLogger.info({ stripeSubscriptionId, status: stripeSub.status }, 'Subscription updated');
+}
+
+// ── Handler: customer.subscription.deleted ────────────────────────────────
+
+async function handleSubscriptionDeleted(event: Stripe.Event) {
+  const stripeSub = event.data.object as Stripe.Subscription;
+  const stripeSubscriptionId = stripeSub.id;
+
+  await prisma.subscription.updateMany({
+    where: { stripeSubscriptionId },
+    data: { status: 'canceled' },
+  });
+
+  await removeEnrollmentsForSubscription(stripeSubscriptionId);
+
+  // Canceled email
+  const sub = await prisma.subscription.findUnique({
+    where: { stripeSubscriptionId },
+    include: { user: { select: { email: true, name: true } } },
+  });
+
+  if (sub?.user?.email) {
+    await trySendSubscriptionEmail(renderCanceledEmail, sub.user.email, {
+      name: sub.user.name || '',
+    });
+  }
+
+  apiLogger.info({ stripeSubscriptionId }, 'Subscription canceled');
+  trackServerEvent('subscription_canceled', { stripeSubscriptionId });
+}
+
+// ── Handler: charge.refunded ──────────────────────────────────────────────
+
+async function handleChargeRefunded(event: Stripe.Event) {
+  const charge = event.data.object as Stripe.Charge;
+  const invoiceId = typeof charge.invoice === 'string' ? charge.invoice : (charge.invoice as Stripe.Invoice)?.id;
+  if (!invoiceId) return;
+
+  // Look up the subscription via the invoice
+  const stripe = getStripe();
+  const invoice = await stripe.invoices.retrieve(invoiceId);
+  const stripeSubscriptionId = typeof invoice.subscription === 'string'
+    ? invoice.subscription
+    : (invoice.subscription as Stripe.Subscription)?.id;
+
+  if (!stripeSubscriptionId) return;
+
+  await prisma.subscription.updateMany({
+    where: { stripeSubscriptionId },
+    data: { status: 'canceled' },
+  });
+
+  await removeEnrollmentsForSubscription(stripeSubscriptionId);
+
+  apiLogger.info({ stripeSubscriptionId }, 'Subscription canceled due to refund');
+  trackServerEvent('charge_refunded', { stripeSubscriptionId });
+}
+
+// ── Handler: charge.dispute.created ───────────────────────────────────────
+
+async function handleDisputeCreated(event: Stripe.Event) {
+  const dispute = event.data.object as Stripe.Dispute;
+  const charge = typeof dispute.charge === 'string' ? dispute.charge : (dispute.charge as Stripe.Charge)?.id;
+
+  if (!charge) return;
+
+  const stripe = getStripe();
+  const chargeObj = typeof dispute.charge === 'string'
+    ? await stripe.charges.retrieve(dispute.charge)
+    : dispute.charge as Stripe.Charge;
+
+  const invoiceId = typeof chargeObj.invoice === 'string' ? chargeObj.invoice : (chargeObj.invoice as Stripe.Invoice)?.id;
+  if (!invoiceId) return;
+
+  const invoice = await stripe.invoices.retrieve(invoiceId);
+  const stripeSubscriptionId = typeof invoice.subscription === 'string'
+    ? invoice.subscription
+    : (invoice.subscription as Stripe.Subscription)?.id;
+
+  if (!stripeSubscriptionId) return;
+
+  await prisma.subscription.updateMany({
+    where: { stripeSubscriptionId },
+    data: { status: 'canceled' },
+  });
+
+  await removeEnrollmentsForSubscription(stripeSubscriptionId);
+
+  // Sentry alert for disputes
   try {
-    const body = await request.json();
+    const Sentry = await import('@sentry/nextjs');
+    Sentry.captureMessage(`Stripe dispute created for subscription ${stripeSubscriptionId}`, 'error');
+  } catch {
+    // Sentry not available
+  }
 
-    // Mercado Pago envia notificações IPN com tipo e data.id
-    const { type, data } = body;
+  apiLogger.error({ stripeSubscriptionId, disputeId: dispute.id }, 'Dispute created — subscription canceled');
+  trackServerEvent('charge_disputed', { stripeSubscriptionId });
+}
 
-    // Verificar assinatura HMAC do Mercado Pago
-    if (data?.id && !verifyWebhookSignature(request, String(data.id))) {
-      apiLogger.warn({ dataId: data.id }, 'MP webhook: HMAC signature verification failed');
-      return NextResponse.json({ error: 'Invalid signature' }, { status: 403 });
-    }
+// ── Event dispatcher ──────────────────────────────────────────────────────
 
-    if (type !== 'payment' || !data?.id) {
-      apiLogger.info({ type }, 'MP webhook: tipo ignorado');
+const HANDLERS: Record<string, (event: Stripe.Event) => Promise<void>> = {
+  'checkout.session.completed': handleCheckoutCompleted,
+  'invoice.paid': handleInvoicePaid,
+  'invoice.payment_failed': handleInvoicePaymentFailed,
+  'customer.subscription.updated': handleSubscriptionUpdated,
+  'customer.subscription.deleted': handleSubscriptionDeleted,
+  'charge.refunded': handleChargeRefunded,
+  'charge.dispute.created': handleDisputeCreated,
+};
+
+// ── POST /api/pagamento/webhook ───────────────────────────────────────────
+
+export async function POST(request: NextRequest) {
+  // 1. Fail-closed: require secret
+  const secret = process.env.STRIPE_WEBHOOK_SECRET;
+  if (!secret) {
+    apiLogger.error('STRIPE_WEBHOOK_SECRET is not set — rejecting webhook');
+    return NextResponse.json({ error: 'Server misconfigured' }, { status: 500 });
+  }
+
+  // 2. Require signature header
+  const sig = request.headers.get('stripe-signature');
+  if (!sig) {
+    return NextResponse.json({ error: 'Missing stripe-signature header' }, { status: 400 });
+  }
+
+  // 3. Verify signature
+  let event: Stripe.Event;
+  try {
+    const rawBody = await request.text();
+    event = getStripe().webhooks.constructEvent(rawBody, sig, secret);
+  } catch (err) {
+    apiLogger.warn({ err }, 'Webhook signature verification failed');
+    return NextResponse.json({ error: 'Invalid signature' }, { status: 400 });
+  }
+
+  // 4. Dedup
+  try {
+    await prisma.processedWebhookEvent.create({
+      data: {
+        stripeEventId: event.id,
+        eventType: event.type,
+      },
+    });
+  } catch (err: any) {
+    // Unique constraint violation = already processed
+    if (err?.code === 'P2002') {
+      apiLogger.info({ eventId: event.id }, 'Webhook event already processed (dedup)');
       return NextResponse.json({ received: true });
     }
+    throw err;
+  }
 
-    // Buscar detalhes do pagamento na API do MP
-    const client = getMPClient();
-    const paymentApi = new Payment(client);
-    const payment = await paymentApi.get({ id: data.id });
-
-    if (!payment.external_reference) {
-      apiLogger.warn({ paymentId: data.id }, 'MP webhook: sem external_reference');
-      return NextResponse.json({ received: true });
-    }
-
-    let refData: { userId: string; plan: string; courseId: string; billingCycle?: string };
-    try {
-      refData = JSON.parse(payment.external_reference);
-    } catch {
-      apiLogger.error({ paymentId: data.id, ref: payment.external_reference }, 'MP webhook: external_reference invalido');
-      return NextResponse.json({ received: true });
-    }
-
-    const { userId, plan, courseId, billingCycle } = refData;
-
-    if (!userId || !plan) {
-      apiLogger.error({ refData }, 'MP webhook: dados incompletos no external_reference');
-      return NextResponse.json({ received: true });
-    }
-
-    const paymentStatus = payment.status; // approved, pending, rejected, refunded, cancelled, in_process
-
-    if (paymentStatus === 'approved') {
-      // Usar transaction para evitar race condition (webhooks concorrentes)
-      const created = await prisma.$transaction(async (tx) => {
-        // Verificar se ja existe subscription ativa (dentro da transaction)
-        const existing = await tx.subscription.findFirst({
-          where: { userId, plan, status: 'active' },
-        });
-
-        if (existing) return false;
-
-        const now = new Date();
-        const periodEnd = new Date(now);
-        if (billingCycle === 'yearly') {
-          periodEnd.setFullYear(periodEnd.getFullYear() + 1);
-        } else {
-          periodEnd.setMonth(periodEnd.getMonth() + 1);
-        }
-
-        await tx.subscription.create({
-          data: {
-            userId,
-            plan,
-            courseId: courseId || null,
-            billingCycle: billingCycle || 'monthly',
-            status: 'active',
-            paymentMethod: payment.payment_method_id || 'pix',
-            mercadopagoPreapprovalId: String(payment.id),
-            currentPeriodStart: now,
-            currentPeriodEnd: periodEnd,
-          },
-        });
-
-        return true;
-      });
-
-      if (created) {
-        // Criar enrollments (fora da transaction — idempotente)
-        await createSubscriptionEnrollments(userId, plan as PlanType, courseId || undefined);
-
-        apiLogger.info({ userId, plan, paymentId: payment.id }, 'Subscription created via MP webhook');
-        trackServerEvent('payment_approved', { paymentId: String(payment.id) });
-        trackServerEvent('subscription_created', { plan });
-      } else {
-        apiLogger.info({ userId, plan }, 'Subscription already active, skipping');
-      }
-    } else if (paymentStatus === 'refunded' || paymentStatus === 'cancelled') {
-      const dbSubscription = await prisma.subscription.findFirst({
-        where: { userId, plan, status: 'active' },
-      });
-
-      if (dbSubscription) {
-        await prisma.subscription.update({
-          where: { id: dbSubscription.id },
-          data: { status: 'canceled' },
-        });
-
-        await handleSubscriptionCanceled(userId, plan as PlanType, courseId || undefined);
-
-        apiLogger.info({ userId, plan, paymentId: payment.id }, 'Subscription canceled via MP webhook');
-        trackServerEvent('payment_failed', { paymentId: String(payment.id), status: paymentStatus });
-      }
-    } else {
-      apiLogger.info({ userId, plan, status: paymentStatus, paymentId: payment.id }, 'MP webhook: status pendente/outro');
-    }
-
+  // 5. Ignored events
+  if (IGNORED_EVENTS.has(event.type)) {
+    apiLogger.debug({ eventType: event.type }, 'Ignored webhook event');
     return NextResponse.json({ received: true });
-  } catch (error) {
-    apiLogger.error({ err: error }, 'MP webhook handler error');
-    return NextResponse.json({ error: 'Webhook handler failed' }, { status: 500 });
+  }
+
+  // 6. Dispatch to handler
+  const handler = HANDLERS[event.type];
+  if (!handler) {
+    apiLogger.warn({ eventType: event.type }, 'Unknown webhook event type');
+    return NextResponse.json({ received: true });
+  }
+
+  try {
+    await handler(event);
+    return NextResponse.json({ received: true });
+  } catch (err) {
+    // Rollback dedup record on handler failure
+    try {
+      await prisma.processedWebhookEvent.delete({
+        where: { stripeEventId: event.id },
+      });
+    } catch (rollbackErr) {
+      apiLogger.error({ rollbackErr, eventId: event.id }, 'Failed to rollback dedup record');
+    }
+
+    apiLogger.error({ err, eventType: event.type, eventId: event.id }, 'Webhook handler error');
+    return NextResponse.json({ error: 'Handler failed' }, { status: 500 });
   }
 }
