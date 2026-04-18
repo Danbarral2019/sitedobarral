@@ -41,6 +41,7 @@ export default function PlanosPage() {
   const [selectedCourse, setSelectedCourse] = useState(COURSES[0]?.id || '2');
   const [loading, setLoading] = useState<'basico' | 'premium' | null>(null);
   const [error, setError] = useState('');
+  const [hasActiveSubscription, setHasActiveSubscription] = useState(false);
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>('cartao');
   const [billingCycle, setBillingCycle] = useState<BillingCycle>('monthly');
   const [pixData, setPixData] = useState<PixData | null>(null);
@@ -56,6 +57,7 @@ export default function PlanosPage() {
     }
 
     setError('');
+    setHasActiveSubscription(false);
     setLoading(plan);
     setPixData(null);
 
@@ -92,6 +94,9 @@ export default function PlanosPage() {
         const data = await response.json();
 
         if (!response.ok) {
+          if (response.status === 409) {
+            setHasActiveSubscription(true);
+          }
           throw new Error(data.error || 'Erro ao iniciar checkout');
         }
 
@@ -137,6 +142,14 @@ export default function PlanosPage() {
         {error && (
           <div className="mb-8 p-4 bg-red-50 border border-red-200 rounded-lg text-center">
             <p className="text-sm text-red-600">{error}</p>
+            {hasActiveSubscription && (
+              <a
+                href="/api/conta/portal"
+                className="inline-block mt-3 px-4 py-2 bg-red-600 hover:bg-red-700 text-white text-sm font-semibold rounded-lg transition-colors"
+              >
+                Gerenciar assinatura
+              </a>
+            )}
           </div>
         )}
 
