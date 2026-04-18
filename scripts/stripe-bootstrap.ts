@@ -42,7 +42,7 @@ async function upsertProduct(stripe: Stripe, def: ProductDef): Promise<string> {
     console.log(`  ✓ Product ${def.id} atualizado`);
     return existing.id;
   } catch (err) {
-    if ((err as Stripe.errors.StripeError).code === 'resource_missing') {
+    if ((err as { code?: string }).code === 'resource_missing') {
       const created = await stripe.products.create({
         id: def.id,
         name: def.name,

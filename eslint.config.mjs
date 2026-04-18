@@ -25,6 +25,14 @@ const eslintConfig = [
     },
   },
   {
+    // Test files rely on pass-through mock helpers where `any` is the pragmatic
+    // choice (untyped Request shims, vi.fn() spreads of (...args: any[])).
+    files: ["**/*.test.ts", "**/*.test.tsx", "**/__tests__/**"],
+    rules: {
+      "@typescript-eslint/no-explicit-any": "off",
+    },
+  },
+  {
     ignores: [
       "node_modules/**",
       ".next/**",
@@ -34,6 +42,9 @@ const eslintConfig = [
       "scripts/**",
       "FUNCIONALIDADES_FUTURAS/**",
       "test-static-image.js",
+      // Internal tooling, not part of the web app bundle
+      "eval/**",
+      "mcp-server-gemini/**",
     ],
   },
 ];

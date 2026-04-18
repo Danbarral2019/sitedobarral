@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
+import { Suspense, useEffect, useRef, useState } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 
@@ -10,6 +10,26 @@ const POLL_INTERVAL_MS = 3000;
 const MAX_ATTEMPTS = 10; // 10 × 3s = 30s
 
 export default function AssinaturaSucessoPage() {
+  return (
+    <Suspense fallback={<SuspenseFallback />}>
+      <SucessoContent />
+    </Suspense>
+  );
+}
+
+function SuspenseFallback() {
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-green-50 to-white flex items-center justify-center px-4">
+      <div className="max-w-md w-full text-center">
+        <div className="bg-white rounded-2xl shadow-lg p-10 border border-gray-100">
+          <PollingView />
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function SucessoContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const sessionId = searchParams.get('session_id');

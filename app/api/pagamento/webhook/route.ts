@@ -48,10 +48,10 @@ const IGNORED_EVENTS = new Set([
 
 // ── Email helper (no-op safe) ─────────────────────────────────────────────
 
-async function trySendSubscriptionEmail(
-  renderFn: (...args: any[]) => { subject: string; html: string; text?: string },
+async function trySendSubscriptionEmail<T>(
+  renderFn: (data: T) => { subject: string; html: string; text?: string },
   to: string,
-  data: any,
+  data: T,
 ): Promise<void> {
   try {
     const { subject, html, text } = renderFn(data);
@@ -85,6 +85,42 @@ interface SubscriptionMeta {
   plan: PlanType;
   billingCycle: BillingCycle;
   courseId?: string;
+}
+
+/**
+ * In Stripe SDK v22+, `invoice.subscription` was removed in favor of
+ * `invoice.parent.subscription_details.subscription`. This helper isolates
+ * the traversal so all handlers share the same logic.
+ */
+function extractInvoiceSubscriptionId(invoice: Stripe.Invoice): string | null {
+  const sub = invoice.parent?.subscription_details?.subscription;
+  if (!sub) return null;
+  return typeof sub === 'string' ? sub : sub.id;
+}
+
+/**
+ * In Stripe SDK v22+, `subscription.current_period_end` was moved to the
+ * subscription item level (`subscription.items.data[0].current_period_end`).
+ * This helper centralizes the lookup and returns seconds since epoch, or
+ * `null` when no items are present (should not happen in practice).
+ */
+function extractCurrentPeriodEnd(subscription: Stripe.Subscription): number | null {
+  const first = subscription.items?.data?.[0];
+  return first?.current_period_end ?? null;
+}
+
+/**
+ * The Stripe SDK v22 dropped `Charge.invoice` from its type, but the API still
+ * returns the field on charges that belong to an invoice. We restore the shape
+ * locally so we don't have to run an extra `charges.retrieve` just to pull it.
+ */
+type ChargeWithInvoice = Stripe.Charge & { invoice?: string | Stripe.Invoice | null };
+
+function extractChargeInvoiceId(charge: Stripe.Charge): string | null {
+  const withInvoice = charge as ChargeWithInvoice;
+  const inv = withInvoice.invoice;
+  if (!inv) return null;
+  return typeof inv === 'string' ? inv : inv.id ?? null;
 }
 
 function extractMeta(metadata: Record<string, string> | undefined | null): SubscriptionMeta | null {
@@ -160,9 +196,7 @@ async function handleCheckoutCompleted(event: Stripe.Event) {
 
 async function handleInvoicePaid(event: Stripe.Event) {
   const invoice = event.data.object as Stripe.Invoice;
-  const stripeSubscriptionId = typeof invoice.subscription === 'string'
-    ? invoice.subscription
-    : (invoice.subscription as Stripe.Subscription)?.id;
+  const stripeSubscriptionId = extractInvoiceSubscriptionId(invoice);
 
   if (!stripeSubscriptionId) return;
 
@@ -203,9 +237,7 @@ async function handleInvoicePaid(event: Stripe.Event) {
 
 async function handleInvoicePaymentFailed(event: Stripe.Event) {
   const invoice = event.data.object as Stripe.Invoice;
-  const stripeSubscriptionId = typeof invoice.subscription === 'string'
-    ? invoice.subscription
-    : (invoice.subscription as Stripe.Subscription)?.id;
+  const stripeSubscriptionId = extractInvoiceSubscriptionId(invoice);
 
   if (!stripeSubscriptionId) return;
 
@@ -248,6 +280,8 @@ async function handleSubscriptionUpdated(event: Stripe.Event) {
     return;
   }
 
+  const periodEndSeconds = extractCurrentPeriodEnd(stripeSub);
+
   await prisma.subscription.update({
     where: { stripeSubscriptionId },
     data: {
@@ -256,7 +290,9 @@ async function handleSubscriptionUpdated(event: Stripe.Event) {
         : stripeSub.status === 'past_due' ? 'past_due'
         : stripeSub.status === 'canceled' ? 'canceled'
         : sub.status,
-      currentPeriodEnd: new Date(stripeSub.current_period_end * 1000),
+      ...(periodEndSeconds !== null && {
+        currentPeriodEnd: new Date(periodEndSeconds * 1000),
+      }),
     },
   });
 
@@ -297,15 +333,13 @@ async function handleSubscriptionDeleted(event: Stripe.Event) {
 
 async function handleChargeRefunded(event: Stripe.Event) {
   const charge = event.data.object as Stripe.Charge;
-  const invoiceId = typeof charge.invoice === 'string' ? charge.invoice : (charge.invoice as Stripe.Invoice)?.id;
+  const invoiceId = extractChargeInvoiceId(charge);
   if (!invoiceId) return;
 
   // Look up the subscription via the invoice
   const stripe = getStripe();
   const invoice = await stripe.invoices.retrieve(invoiceId);
-  const stripeSubscriptionId = typeof invoice.subscription === 'string'
-    ? invoice.subscription
-    : (invoice.subscription as Stripe.Subscription)?.id;
+  const stripeSubscriptionId = extractInvoiceSubscriptionId(invoice);
 
   if (!stripeSubscriptionId) return;
 
@@ -333,13 +367,11 @@ async function handleDisputeCreated(event: Stripe.Event) {
     ? await stripe.charges.retrieve(dispute.charge)
     : dispute.charge as Stripe.Charge;
 
-  const invoiceId = typeof chargeObj.invoice === 'string' ? chargeObj.invoice : (chargeObj.invoice as Stripe.Invoice)?.id;
+  const invoiceId = extractChargeInvoiceId(chargeObj);
   if (!invoiceId) return;
 
   const invoice = await stripe.invoices.retrieve(invoiceId);
-  const stripeSubscriptionId = typeof invoice.subscription === 'string'
-    ? invoice.subscription
-    : (invoice.subscription as Stripe.Subscription)?.id;
+  const stripeSubscriptionId = extractInvoiceSubscriptionId(invoice);
 
   if (!stripeSubscriptionId) return;
 
@@ -408,9 +440,10 @@ export async function POST(request: NextRequest) {
         eventType: event.type,
       },
     });
-  } catch (err: any) {
+  } catch (err) {
     // Unique constraint violation = already processed
-    if (err?.code === 'P2002') {
+    const prismaErr = err as { code?: string };
+    if (prismaErr?.code === 'P2002') {
       apiLogger.info({ eventId: event.id }, 'Webhook event already processed (dedup)');
       return NextResponse.json({ received: true });
     }

@@ -148,12 +148,14 @@ export async function createCheckoutSession(params: {
                 reference: `Site do Barral - ${planLabel}`,
               },
             },
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Stripe SDK hasn't typed Pix Automático mandate_options yet
           } as any)
         : undefined,
     subscription_data: { metadata },
     success_url: `${baseUrl}/assinatura/sucesso?session_id={CHECKOUT_SESSION_ID}`,
     cancel_url: `${baseUrl}/assinatura/cancelado`,
     metadata,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any -- wraps the Pix mandate cast above
   } as any)
 
   apiLogger.info({ sessionId: session.id, plan, billingCycle, method }, 'Created checkout session')
