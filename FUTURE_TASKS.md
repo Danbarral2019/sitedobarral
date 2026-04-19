@@ -1,7 +1,7 @@
 # Tarefas Futuras — Site do Prof. Daniel Barral
 
 > **Repositório central de melhorias, pendências e novas funcionalidades.**
-> Atualizado em: 2026-02-23
+> Atualizado em: 2026-04-19
 
 ---
 
@@ -16,18 +16,20 @@
 
 ## PENDÊNCIAS DE LANÇAMENTO
 
-### P1. Conta Mercado Pago [BLOQUEANTE]
+### P1. Conta Stripe [BLOQUEANTE]
 **Prioridade:** BLOQUEANTE
-**Status:** Pendente — credenciais ainda não configuradas
+**Status:** Migração de Mercado Pago → Stripe em andamento. Código implementado (`lib/stripe.ts`: checkout subscription, Pix Automático via `mandate_options`, billing portal, enrollments). Faltam credenciais e configuração no painel Stripe.
 
 **Ações:**
-- [ ] Criar conta em mercadopago.com.br/developers
-- [ ] Obter `MERCADOPAGO_ACCESS_TOKEN` e `NEXT_PUBLIC_MERCADOPAGO_PUBLIC_KEY`
-- [ ] Configurar variáveis de ambiente na Vercel
-- [ ] Configurar webhook: `https://www.profdanielbarral.com/api/pagamento/webhook` (evento: payment)
-- [ ] Testar fluxo completo: checkout → pagamento → webhook → enrollment
+- [ ] Criar/ativar conta em dashboard.stripe.com (modo Brasil — habilitar Pix Automático)
+- [ ] Criar Products + Prices recorrentes com `lookup_key` exatos: `basico_monthly`, `basico_yearly`, `premium_monthly`, `premium_yearly` (valores: 49,90 / 499,00 / 89,90 / 899,00 BRL)
+- [ ] Obter `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`, `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY`
+- [ ] Configurar variáveis de ambiente na Vercel (Production/Preview/Development)
+- [ ] Configurar webhook: `https://www.profdanielbarral.com/api/pagamento/webhook` — eventos: `checkout.session.completed`, `customer.subscription.created/updated/deleted`, `invoice.payment_succeeded/failed`
+- [ ] Habilitar Customer Billing Portal (configurações de produto, cancelamento, atualização de cartão)
+- [ ] Testar fluxo completo: checkout → pagamento (cartão e Pix) → webhook → Subscription + Enrollment criados
 
-**Arquivos relevantes:** `lib/mercadopago.ts`, `app/api/pagamento/`
+**Arquivos relevantes:** `lib/stripe.ts`, `app/api/pagamento/{checkout,status,webhook}/route.ts`
 
 ### P2. Verificação Manual Pós-Deploy [BLOQUEANTE]
 **Prioridade:** BLOQUEANTE
@@ -37,8 +39,8 @@
 - [ ] Registro com QR Code → verificação → login → área restrita
 - [ ] Reenvio de verificação com token → funciona
 - [ ] Email de boas-vindas com acentos corretos
-- [ ] Checkout MP (cartão) → webhook → enrollment
-- [ ] PIX → QR Code → pagamento → webhook → enrollment
+- [ ] Checkout Stripe (cartão) → webhook → Subscription + Enrollment
+- [ ] Pix Automático Stripe → autorização → cobrança → webhook → Enrollment
 - [ ] Newsletter renderiza em Gmail/Outlook
 
 ---
@@ -271,11 +273,12 @@ Código funcional arquivado em `FUNCIONALIDADES_FUTURAS/` para implementação f
 
 ## NOTAS E LIÇÕES APRENDIDAS
 
-- **Mercado Pago SDK v2** usa classes (Payment, Preference, MercadoPagoConfig)
-- **external_reference** é string — usar `JSON.stringify()` para dados compostos
+- **Stripe SDK v22** com `apiVersion` default; usar lazy init `getStripe()` — NUNCA instanciar no top-level (quebra build sem env var)
+- **Stripe Prices** resolvidos via `lookup_key` (não hardcode de IDs) — ver `resolvePriceId()` em `lib/stripe.ts`
+- **Pix Automático Stripe** ainda não tipado no SDK — cast `as any` em `payment_method_options.pix.mandate_options` é intencional
+- **Webhook signature** validar com `stripe.webhooks.constructEvent` usando `STRIPE_WEBHOOK_SECRET` (raw body)
 - **Email fallback** mudou de `profbarral.com.br` para `profdanielbarral.com`
 - **Resend SDK** retorna `{data, error}`, não lança exceções
 - **prisma-client** (local) quebra webpack — usar `prisma-client-js`
 - **Scripts standalone** precisam adapter PrismaNeon
 - **DOU API** retorna HTML highlight — sanitizar com `stripHighlightHtml()`
-- **MP lazy init:** `getMPClient()` evita erro no build — NUNCA instanciar no top-level
