@@ -192,3 +192,32 @@ Taxonomia de 15 temas já existia (`scripts/enrich-legislative-acts-themes.ts` c
 - Fix em `scripts/enrich-legislative-acts-themes.ts` (import do Neon adapter)
 
 Bundle D concluído. Restantes: Bundle D-2 (AI fallback para 11 INs SEGES sem themes) e refinamento do heurístico do audit (gerou falsos-positivos de `truncated` durante toda essa jornada).
+
+## Sétima passada (Bundle D-2 — AI classifier)
+
+Dos 43 atos originalmente sem themes, 32 foram cobertos pela heurística (Bundle D). Restaram 11 atos com `leiArticles` apontando para artigos fora do mapping canônico (art 60, 87, 174, 180, 191) ou sem `leiArticles`. Bundle D-2 usa `lib/ai` (task `'classification'`, Claude Haiku 4.5) para classificar esses 11 atos com validação estrita contra a taxonomia de 15 temas canônicos.
+
+**Mudança no registry AI:** `lib/ai/registry.ts` migrado `classification` + `summarization` de `claude-3-5-haiku-20241022` (deprecated, EOL 2026-02-19) para `claude-haiku-4-5-20251001`.
+
+**Novos artefatos:**
+- `lib/legislative-scrapers/theme-validator.ts` + 13 unit tests — validador puro que rejeita: temas não-canônicos, arrays > 4 itens, não-strings, estruturas inesperadas. Deduplica preservando ordem.
+- `scripts/enrich-themes-ai.ts` — script com prompt system restringindo a taxonomia, lida com code-fences que o Claude ocasionalmente adiciona apesar de `jsonMode: true`.
+
+**Métricas v7:**
+
+| Métrica | v6 | v7 |
+|---|---:|---:|
+| Atos com `themes` preenchido | 97 / 108 (90%) | **108 / 108 (100%)** |
+| Atos classificados por AI neste pass | — | 11 |
+| Custo Claude Haiku 4.5 | — | ~$0.013 (11.506 input + 354 output tokens) |
+
+**Classificações AI (amostra):**
+- `MP 1.167/2023` (art 191 regime transição) → `[principios-gerais, planejamento, contratos]`
+- `IN SEGES 52/2025` (Contrata+Brasil) → `[tecnologia-informacao, modalidades, contratos, agentes-governanca]`
+- `IN SEGES 53/2023` (SICAF cadastro) → `[agentes-governanca, tecnologia-informacao, controle-transparencia]`
+- `IN SEGES 382/2025` (equidade gênero) → `[principios-gerais, modalidades, sustentabilidade]`
+- `IN SEGES 2/2023` (técnica e preço) → `[modalidades, pregao-eletronico, planejamento]`
+
+Validador em 100% dos 11 casos — zero temas fora da taxonomia, zero resposta inválida.
+
+Bundle D-2 concluído. T1 está estruturalmente fechada (100% themes). Único follow-up remanescente: refinamento do heurístico `ratio` do próprio audit (gera falsos-positivos de `truncated` para parsers dedicados que limpam masthead mais do que o `stripHtml` naive do audit).
