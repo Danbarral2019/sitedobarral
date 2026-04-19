@@ -504,9 +504,21 @@ git commit -m "feat(audit): seções 4-6 (hosts, metadata, duplicatas)"
 **Files:**
 - Modify: `scripts/audit-legislative-acts.ts`
 
-- [ ] **Step 1: Helper `stripHtml` (copiado de scrape-legislative-acts-content.ts)**
+- [ ] **Step 1: Constants + Helper `stripHtml` (copiado de scrape-legislative-acts-content.ts)**
 
-Adicionar junto aos outros helpers:
+Adicionar bloco de constantes no início da seção de helpers:
+
+```typescript
+// ── Constants ────────────────────────────────────────────────────────────
+
+const SPOT_CHECK_DELAY_MS = 2000;
+const FETCH_TIMEOUT_MS = 30000;
+const TRUNCATED_RATIO = 0.5;
+const BLOATED_RATIO = 1.5;
+const HEALTHY_MIN_LEN = 3000;
+```
+
+E o helper `stripHtml` junto aos outros:
 
 ```typescript
 function stripHtml(html: string): string {
@@ -571,11 +583,13 @@ async function queryContentSamples(): Promise<ContentSample[]> {
 
 - [ ] **Step 3: Helper de fetch com timeout e delay**
 
+`clearTimeout` deve ficar em `finally` para evitar leak no caminho de erro. `charset` aceita alias `latin-1` e cai para `iso-8859-1` quando a URL é `*.gov.br` e o header não especifica charset.
+
 ```typescript
-async function fetchOnce(url: string, timeoutMs = 30000): Promise<{ status: number; bodyBytes: number; text: string } | { error: string }> {
+async function fetchOnce(url: string, timeoutMs = FETCH_TIMEOUT_MS): Promise<{ status: number; bodyBytes: number; text: string } | { error: string }> {
+  const controller = new AbortController();
+  const to = setTimeout(() => controller.abort(), timeoutMs);
   try {
-    const controller = new AbortController();
-    const to = setTimeout(() => controller.abort(), timeoutMs);
     const res = await fetch(url, {
       signal: controller.signal,
       headers: {
@@ -584,17 +598,20 @@ async function fetchOnce(url: string, timeoutMs = 30000): Promise<{ status: numb
         'Accept-Language': 'pt-BR,pt;q=0.9',
       },
     });
-    clearTimeout(to);
     const buffer = await res.arrayBuffer();
     const ct = res.headers.get('content-type') || '';
     const charset = ct.match(/charset=([^\s;]+)/i)?.[1]?.toLowerCase();
+    const isLatin1 = charset === 'iso-8859-1' || charset === 'latin1' || charset === 'latin-1';
+    const isGovBr = /(^|\.)gov\.br$/.test(new URL(url).hostname);
     const decoder = new TextDecoder(
-      charset === 'iso-8859-1' || charset === 'latin1' ? 'iso-8859-1' : 'utf-8',
+      isLatin1 || (!charset && isGovBr) ? 'iso-8859-1' : 'utf-8',
     );
     const text = decoder.decode(buffer);
     return { status: res.status, bodyBytes: buffer.byteLength, text };
   } catch (err) {
     return { error: err instanceof Error ? err.message : String(err) };
+  } finally {
+    clearTimeout(to);
   }
 }
 
@@ -603,12 +620,24 @@ function sleep(ms: number) {
 }
 ```
 
-- [ ] **Step 4: Query de spot-check**
+- [ ] **Step 4: Helper puro `computeVerdict` + query de spot-check**
+
+`computeVerdict` é uma função pura que mapeia `(status, storedLen, strippedLen)` → verdict, reutilizando as constantes de threshold. Dentro de `runSpotCheck`, a classificação inline foi substituída por chamada a esse helper. O `sleep` entre fetches é pulado na última iteração (economiza ~2s). O threshold de "healthy" usa `HEALTHY_MIN_LEN` em vez do literal `3000`.
 
 ```typescript
+function computeVerdict(status: number, storedLen: number, strippedLen: number): SpotCheckRow['verdict'] {
+  if (status >= 400) return 'url-dead';
+  if (storedLen === 0) return 'truncated';
+  if (strippedLen === 0) return 'ok'; // can't compute ratio; caller may want to flag separately
+  const ratio = storedLen / strippedLen;
+  if (ratio < TRUNCATED_RATIO) return 'truncated';
+  if (ratio > BLOATED_RATIO) return 'bloated';
+  return 'ok';
+}
+
 async function runSpotCheck(limit: number): Promise<SpotCheckRow[]> {
   // Seleção: prioriza suspeitos (content.length < 1000 E officialUrl presente),
-  // + 2 "saudáveis" (content.length > 3000) como controle.
+  // + 2 "saudáveis" (content.length > HEALTHY_MIN_LEN) como controle.
   const suspicious = await prisma.legislativeAct.findMany({
     where: {
       officialUrl: { not: null },
@@ -642,10 +671,11 @@ async function runSpotCheck(limit: number): Promise<SpotCheckRow[]> {
     orderBy: { createdAt: 'desc' },
   });
 
-  const all = [...suspicious, ...healthy.filter((h) => (h.content?.length ?? 0) > 3000)].slice(0, limit);
+  const all = [...suspicious, ...healthy.filter((h) => (h.content?.length ?? 0) > HEALTHY_MIN_LEN)].slice(0, limit);
   const results: SpotCheckRow[] = [];
 
-  for (const act of all) {
+  for (let i = 0; i < all.length; i++) {
+    const act = all[i];
     const stored = act.content?.length ?? 0;
     console.log(`  fetching ${act.fullNumber} → ${act.officialUrl}`);
     const r = await fetchOnce(act.officialUrl!);
@@ -667,12 +697,7 @@ async function runSpotCheck(limit: number): Promise<SpotCheckRow[]> {
     } else {
       const stripped = stripHtml(r.text);
       const ratio = stripped.length === 0 ? null : stored / stripped.length;
-      let verdict: SpotCheckRow['verdict'];
-      if (r.status >= 400) verdict = 'url-dead';
-      else if (stored === 0) verdict = 'truncated';
-      else if (ratio !== null && ratio < 0.5) verdict = 'truncated';
-      else if (ratio !== null && ratio > 1.5) verdict = 'bloated';
-      else verdict = 'ok';
+      const verdict = computeVerdict(r.status, stored, stripped.length);
 
       results.push({
         id: act.id,
@@ -689,7 +714,7 @@ async function runSpotCheck(limit: number): Promise<SpotCheckRow[]> {
       });
     }
 
-    await sleep(2000); // delay entre fetches
+    if (i < all.length - 1) await sleep(SPOT_CHECK_DELAY_MS); // delay entre fetches (pulado no último)
   }
 
   return results;
