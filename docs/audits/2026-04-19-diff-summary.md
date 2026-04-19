@@ -104,3 +104,25 @@ Notas sobre a tabela:
 - Brasão do Brasil e Borda do rodapé: **eliminados** (F5 concluído end-to-end na DB).
 - `<NOME DO FISCAL TECNICO>`: eliminado de todos os atos cujo rescrape foi possível. Os 4 remanescentes dependem de extensão de scraper (URL `governodigital`).
 - 3+ `\n`: mitigado no pipeline Planalto; residual em gov.br/compras aguarda aplicar `collapseWhitespace` no `GovBrComprasScraper`.
+
+## Terceira passada (after governodigital + collapseWhitespace fix)
+
+Dois fixes adicionais após o v2 descobriu:
+- `GovBrComprasScraper.canHandle` não cobria `gov.br/governodigital` — 4 SGD/MGI portarias ficavam sem scraper
+- `GovBrComprasScraper` não aplicava `collapseWhitespace` — gov.br/compras mantinha 3+ `\n` runs
+
+**Métricas pós-v3:**
+
+| Métrica | Baseline | v1 | v2 | v3 |
+|---|---:|---:|---:|---:|
+| Atos com "Brasão do Brasil" | ≥3 | 3 | 0 | 0 |
+| Atos com "<NOME DO FISCAL TECNICO>" | ≥4 | 4 | 4 | 0 |
+| Atos com 3+ \n consecutivos | ≥14 | 14 | 14 | 0 |
+| `spotCheckSuspicious` | 11 | 10 | 11 | 10 |
+
+**Fixtures alvo (finais):**
+- Decreto 12.807/2025: 2.872, todos os markers false
+- IN SGD/MGI nº 86/2025: 4.477, todos os markers false
+- Portaria SGD/MGI nº 6.680/2024: 172.340, todos os markers false
+
+Bundle A concluído. Falhas residuais: TCU SPA (2 atos) e MPF PDF (1 ato), esperadas e planejadas para Bundles B e C.
