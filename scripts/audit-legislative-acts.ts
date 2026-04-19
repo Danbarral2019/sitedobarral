@@ -460,6 +460,173 @@ async function runSpotCheck(limit: number): Promise<SpotCheckRow[]> {
   return results;
 }
 
+async function buildProblemIdIndex(params: {
+  hosts: HostRow[];
+  duplicates: DuplicateGroup[];
+  spotCheck: SpotCheckRow[];
+}): Promise<ProblemIdIndex> {
+  // contentMissing: content null ou vazio
+  const missing = await prisma.legislativeAct.findMany({
+    where: { OR: [{ content: null }, { content: '' }] },
+    select: { id: true },
+  });
+
+  // contentTruncated: content < 500 chars mas officialUrl presente
+  const truncated = await prisma.legislativeAct.findMany({
+    where: { officialUrl: { not: null }, content: { not: null } },
+    select: { id: true, content: true },
+  });
+  const truncatedIds = truncated
+    .filter((a) => (a.content?.length ?? 0) < 500)
+    .map((a) => a.id);
+
+  // metadataIncomplete: falta qualquer um de (number, ementa, officialUrl)
+  const incomplete = await prisma.legislativeAct.findMany({
+    where: {
+      OR: [{ number: '' }, { ementa: '' }, { officialUrl: null }],
+    },
+    select: { id: true },
+  });
+
+  // unparsedHost: atos com officialUrl cujo host NÃO tem parser
+  const allWithUrl = await prisma.legislativeAct.findMany({
+    where: { officialUrl: { not: null } },
+    select: { id: true, officialUrl: true },
+  });
+  const unparsedIds = allWithUrl
+    .filter((a) => !hostHasParser(extractHost(a.officialUrl)))
+    .map((a) => a.id);
+
+  return {
+    contentMissing: missing.map((a) => a.id),
+    contentTruncated: truncatedIds,
+    metadataIncomplete: incomplete.map((a) => a.id),
+    duplicateCandidates: params.duplicates.flatMap((g) => g.ids),
+    unparsedHost: unparsedIds,
+    spotCheckSuspicious: params.spotCheck
+      .filter((r) => r.verdict === 'truncated' || r.verdict === 'bloated')
+      .map((r) => r.id),
+  };
+}
+
+// ── Markdown renderer ─────────────────────────────────────────────────────
+
+function renderMarkdown(r: AuditReport): string {
+  const lines: string[] = [];
+  lines.push(`# Auditoria de LegislativeActs`);
+  lines.push(``);
+  lines.push(`**Gerado em:** ${r.generatedAt}`);
+  lines.push(`**Total de atos:** ${r.total}`);
+  lines.push(``);
+
+  lines.push(`## 1. Inventário por (issuer, type)`);
+  lines.push(``);
+  lines.push(`| Issuer | Type | Count |`);
+  lines.push(`|---|---|---:|`);
+  for (const row of r.inventory) lines.push(`| ${row.issuer} | ${row.type} | ${row.count} |`);
+  lines.push(``);
+
+  lines.push(`## 2. Distribuição de content.length por issuer`);
+  lines.push(``);
+  lines.push(`| Issuer | Bucket | Count |`);
+  lines.push(`|---|---|---:|`);
+  for (const row of r.contentLength) lines.push(`| ${row.issuer} | ${row.bucket} | ${row.count} |`);
+  lines.push(``);
+
+  lines.push(`## 3. scrapeStatus por issuer`);
+  lines.push(``);
+  lines.push(`| Issuer | Status | Count | Último scrape |`);
+  lines.push(`|---|---|---:|---|`);
+  for (const row of r.scrapeStatus) {
+    const age = row.lastScrapedAgoDays !== null ? `${row.lastScrapedAgoDays}d atrás` : 'nunca';
+    lines.push(`| ${row.issuer} | ${row.status} | ${row.count} | ${age} |`);
+  }
+  lines.push(``);
+
+  if (r.hostDistribution) {
+    lines.push(`## 4. Hosts de officialUrl`);
+    lines.push(``);
+    lines.push(`| Host | Count | Parser dedicado |`);
+    lines.push(`|---|---:|---|`);
+    for (const row of r.hostDistribution) {
+      lines.push(`| \`${row.host}\` | ${row.count} | ${row.hasParser ? '✓' : '✗ fallback'} |`);
+    }
+    lines.push(``);
+  }
+
+  if (r.metadataCompleteness) {
+    lines.push(`## 5. Completude de metadados por issuer`);
+    lines.push(``);
+    lines.push(`| Issuer | Campo | % preenchido | Filled/Total |`);
+    lines.push(`|---|---|---:|---|`);
+    for (const row of r.metadataCompleteness) {
+      lines.push(`| ${row.issuer} | ${row.field} | ${row.filledPct}% | ${row.filledCount}/${row.totalCount} |`);
+    }
+    lines.push(``);
+  }
+
+  if (r.duplicates) {
+    lines.push(`## 6. Duplicatas candidatas`);
+    lines.push(``);
+    if (r.duplicates.length === 0) {
+      lines.push(`Nenhuma.`);
+    } else {
+      for (const g of r.duplicates) {
+        lines.push(`- **[${g.issuer}] ${g.type} ${g.number}/${g.year}** — ${g.count} ocorrências:`);
+        for (const fn of g.fullNumbers) lines.push(`  - ${fn}`);
+      }
+    }
+    lines.push(``);
+  }
+
+  if (r.samples) {
+    lines.push(`## 7. Amostras de conteúdo (top 5 issuers × 3 atos)`);
+    lines.push(``);
+    for (const s of r.samples) {
+      lines.push(`### [${s.issuer}] ${s.fullNumber} — ${s.contentLength} chars`);
+      lines.push(``);
+      lines.push(`**HEAD:**`);
+      lines.push('```');
+      lines.push(s.head);
+      lines.push('```');
+      if (s.tail) {
+        lines.push(`**TAIL:**`);
+        lines.push('```');
+        lines.push(s.tail);
+        lines.push('```');
+      }
+      lines.push(``);
+    }
+  }
+
+  if (r.spotCheck && r.spotCheck.length > 0) {
+    lines.push(`## 8. Spot-check de URLs`);
+    lines.push(``);
+    lines.push(`| fullNumber | Issuer | HTTP | Stored | Stripped | Ratio | Verdict |`);
+    lines.push(`|---|---|---:|---:|---:|---:|---|`);
+    for (const r2 of r.spotCheck) {
+      const http = r2.httpStatus ?? 'ERR';
+      const stripped = r2.strippedTextLength ?? '—';
+      const ratio = r2.ratio !== null ? r2.ratio.toFixed(2) : '—';
+      lines.push(`| ${r2.fullNumber} | ${r2.issuer} | ${http} | ${r2.storedContentLength} | ${stripped} | ${ratio} | ${r2.verdict} |`);
+    }
+    lines.push(``);
+  }
+
+  lines.push(`## Problem IDs (para consumo pelo fix)`);
+  lines.push(``);
+  lines.push(`- \`contentMissing\`: ${r.problemIds.contentMissing.length} atos`);
+  lines.push(`- \`contentTruncated\`: ${r.problemIds.contentTruncated.length} atos`);
+  lines.push(`- \`metadataIncomplete\`: ${r.problemIds.metadataIncomplete.length} atos`);
+  lines.push(`- \`duplicateCandidates\`: ${r.problemIds.duplicateCandidates.length} atos`);
+  lines.push(`- \`unparsedHost\`: ${r.problemIds.unparsedHost.length} atos`);
+  lines.push(`- \`spotCheckSuspicious\`: ${r.problemIds.spotCheckSuspicious.length} atos`);
+  lines.push(``);
+  lines.push(`Lista completa de IDs no arquivo JSON gerado junto com este relatório.`);
+
+  return lines.join('\n');
+}
+
 // ── Main ──────────────────────────────────────────────────────────────────
 
 async function main() {
@@ -535,6 +702,38 @@ async function main() {
   } else {
     console.log('\n— Seção 8: Spot-check pulado (--skip-fetch) —');
   }
+
+  // Construir relatório e índice de problemas
+  const report: AuditReport = {
+    generatedAt: new Date().toISOString(),
+    total,
+    inventory,
+    contentLength,
+    scrapeStatus,
+    hostDistribution: hosts,
+    metadataCompleteness: metadata,
+    duplicates,
+    samples,
+    spotCheck: SKIP_FETCH ? undefined : spotCheck,
+    problemIds: await buildProblemIdIndex({ hosts, duplicates, spotCheck }),
+  };
+
+  if (DRY_RUN) {
+    console.log('\n[dry-run] Relatório NÃO será salvo.');
+    return;
+  }
+
+  const outDir = path.join(process.cwd(), 'docs', 'audits');
+  fs.mkdirSync(outDir, { recursive: true });
+  const today = new Date().toISOString().slice(0, 10);
+  const mdPath = path.join(outDir, `${today}-legislative-acts-audit.md`);
+  const jsonPath = path.join(outDir, `${today}-legislative-acts-audit.json`);
+
+  fs.writeFileSync(mdPath, renderMarkdown(report), 'utf-8');
+  fs.writeFileSync(jsonPath, JSON.stringify(report, null, 2), 'utf-8');
+
+  console.log(`\n✓ Relatório markdown: ${mdPath}`);
+  console.log(`✓ Dump JSON: ${jsonPath}`);
 }
 
 main()
