@@ -10,6 +10,7 @@ import {
   CreditCard,
   Award,
 } from 'lucide-react';
+import { AreaRestritaMenuTrigger } from './AreaRestritaMenuTrigger';
 
 interface AreaRestritaHeaderProps {
   userName: string;
@@ -32,9 +33,10 @@ export function AreaRestritaHeader({
         <div className="flex items-center justify-between">
           {/* User Info */}
           <div className="flex items-center gap-3">
+            <AreaRestritaMenuTrigger variant="header" />
             <button
               onClick={onHomeClick}
-              className="p-2 rounded-lg text-brand-600 hover:bg-brand-50 transition-colors"
+              className="p-2 rounded-lg text-brand-600 hover:bg-brand-50 transition-colors hidden sm:inline-flex"
               title="Voltar ao Início"
             >
               <Home className="w-5 h-5 lg:w-6 lg:h-6" />

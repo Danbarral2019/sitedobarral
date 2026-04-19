@@ -20,6 +20,7 @@ import {
   QuickAccessBar,
   DashboardCourseCard,
   KnowledgeBaseSection,
+  HeroPlanejamento,
 } from '@/components/area-restrita';
 
 const SearchResultsList = dynamic(() => import('@/components/area-restrita/SearchResultsList').then(mod => ({ default: mod.SearchResultsList })));
@@ -201,6 +202,9 @@ export default function AreaRestritaPage() {
       <div className="max-w-5xl mx-auto px-4 py-6 lg:py-8 space-y-6">
         {/* Welcome Banner (first visit) */}
         <WelcomeBanner />
+
+        {/* Destaque Módulo Planejamento (ETP/TR/Matriz) */}
+        <HeroPlanejamento />
 
         {/* Hero Search */}
         <DashboardHero>
