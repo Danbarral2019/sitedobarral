@@ -69,7 +69,7 @@
 **Bundle A concluído em 2026-04-19.** Fixes F3-F7 aplicados em `lib/legislative-scrapers/`. Ver `docs/audits/2026-04-19-diff-summary.md` para comparativo antes/depois. Restante (TCU SPA, MPF PDF, themes taxonomy) em bundles futuros.
 
 **Ações priorizadas:**
-- [ ] Adicionar parser dedicado para `pesquisa.apps.tcu.gov.br` / `btcu.apps.tcu.gov.br` — hoje cai no parser gov.br genérico, mas TCU é SPA com conteúdo JS-rendered. Avaliar: (a) endpoint JSON/API oficial do TCU, (b) rota alternativa em `portal.tcu.gov.br` com HTML estático, ou (c) Playwright headless como último recurso.
+- [x] ~~Adicionar parser dedicado para `pesquisa.apps.tcu.gov.br`~~ — Bundle B (2026-04-19): investigação revelou que as 2 Portarias TCU afetadas já tinham conteúdo correto no banco (import manual anterior). Solução aplicada: marcar `scrapeStatus: 'manual'` para bloquear re-scrape e excluir de falsos-positivos do audit. Parser dedicado TCU fica para quando houver Portarias TCU futuras sem conteúdo importado — cenário não presente hoje.
 - [ ] Adicionar parser dedicado (ou tratamento de fallback) para `biblioteca.mpf.mp.br` — é PDF/repositório de bitstream, não HTML; precisa pipeline de extração de PDF (pdfjs-dist ou similar).
 - [x] Corrigir `www.gov.br` / `www.in.gov.br` parser para não truncar o corpo — 8/12 URLs do spot-check voltaram `truncated`. Investigar se o seletor de conteúdo está parando cedo (ex: fechando no primeiro `<section>` em vez do fim do artigo principal). (F3 ✓ — gov.br/compras 'maior match > 500')
 - [x] Limpar ruído de table-row do parser Planalto (`www.planalto.gov.br`) — Decretos apresentam blocos longos de `⏎` sucessivos; colapsar whitespace consecutivo a no máximo 2 newlines. (F4 ✓ — collapseWhitespace)

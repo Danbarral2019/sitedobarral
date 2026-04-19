@@ -126,3 +126,28 @@ Dois fixes adicionais após o v2 descobriu:
 - Portaria SGD/MGI nº 6.680/2024: 172.340, todos os markers false
 
 Bundle A concluído. Falhas residuais: TCU SPA (2 atos) e MPF PDF (1 ato), esperadas e planejadas para Bundles B e C.
+
+## Quarta passada (Bundle B — manual status marker)
+
+Bundle B não precisou de scraper TCU — investigação revelou que as 2 Portarias TCU (3/2025, 175/2022) já tinham conteúdo correto e completo no banco (22.103 e 15.602 chars de texto real), importado de fonte externa em sessão anterior. O verdict `bloated` da auditoria era falso-positivo (compara stored 22k vs live-fetch 187 chars de SPA shell).
+
+**Fix aplicado:** marcar `scrapeStatus: 'manual'` para essas 2 Portarias, bloqueando:
+- Cron `check-legislative-updates` (re-scrape periódico)
+- Script `rescrape-affected-acts.ts`
+- Script `rescrape-by-content-pattern.ts`
+
+E excluindo-as de `spotCheckSuspicious` do audit via helper puro `filterSuspiciousExcludingManual` em `scripts/audit-helpers.ts` (coberto por 5 unit tests).
+
+**Métricas v4:**
+
+| Métrica | v3 | v4 |
+|---|---:|---:|
+| `spotCheckSuspicious` | 10 | 8 |
+| Atos `scrapeStatus: 'manual'` | 0 | 2 |
+| Testes do diretório scrapers | 28/28 | 33/33 |
+
+**IDs removidos v3→v4 (exatamente os esperados):**
+- Portaria TCU 3/2025 (verdict `bloated`)
+- Portaria TCU 175/2022 (verdict `bloated`)
+
+Bundle B concluído. Restantes: MPU 178/2023 (Bundle C — parser PDF), themes taxonomy (Bundle D).
