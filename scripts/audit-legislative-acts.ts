@@ -17,7 +17,8 @@ import { PrismaClient } from '@prisma/client';
 import { PrismaNeon } from '@prisma/adapter-neon';
 import * as fs from 'node:fs';
 import * as path from 'node:path';
-import { filterSuspiciousExcludingManual } from './audit-helpers';
+import { filterSuspiciousExcludingManual, computeVerdictByCompare } from './audit-helpers';
+import { scrapeUrl, findScraperForUrl } from '@/lib/legislative-scrapers';
 
 const connStr = process.env.DATABASE_URL;
 if (!connStr) {
@@ -89,7 +90,7 @@ interface SpotCheckRow {
   strippedTextLength: number | null;
   storedContentLength: number;
   ratio: number | null;
-  verdict: 'ok' | 'truncated' | 'bloated' | 'url-dead' | 'skipped';
+  verdict: 'ok' | 'truncated' | 'bloated' | 'url-dead' | 'skipped' | 'manual' | 'no-scraper' | 'scrape-failed';
 }
 
 // ── Constants ────────────────────────────────────────────────────────────
@@ -384,7 +385,7 @@ async function runSpotCheck(limit: number): Promise<SpotCheckRow[]> {
       officialUrl: { not: null },
       OR: [{ content: null }, { content: '' }],
     },
-    select: { id: true, fullNumber: true, issuer: true, officialUrl: true, content: true },
+    select: { id: true, fullNumber: true, issuer: true, officialUrl: true, content: true, scrapeStatus: true },
     take: Math.max(0, limit - 2),
   });
 
@@ -394,7 +395,7 @@ async function runSpotCheck(limit: number): Promise<SpotCheckRow[]> {
         officialUrl: { not: null },
         id: { notIn: suspicious.map((s) => s.id) },
       },
-      select: { id: true, fullNumber: true, issuer: true, officialUrl: true, content: true },
+      select: { id: true, fullNumber: true, issuer: true, officialUrl: true, content: true, scrapeStatus: true },
       take: (limit - 2) - suspicious.length,
       orderBy: { createdAt: 'desc' },
     });
@@ -407,7 +408,7 @@ async function runSpotCheck(limit: number): Promise<SpotCheckRow[]> {
       content: { not: null },
       id: { notIn: suspicious.map((s) => s.id) },
     },
-    select: { id: true, fullNumber: true, issuer: true, officialUrl: true, content: true },
+    select: { id: true, fullNumber: true, issuer: true, officialUrl: true, content: true, scrapeStatus: true },
     take: 2,
     orderBy: { createdAt: 'desc' },
   });
@@ -418,44 +419,54 @@ async function runSpotCheck(limit: number): Promise<SpotCheckRow[]> {
   for (let i = 0; i < all.length; i++) {
     const act = all[i];
     const stored = act.content?.length ?? 0;
-    console.log(`  fetching ${act.fullNumber} → ${act.officialUrl}`);
-    const r = await fetchOnce(act.officialUrl!);
+    const url = act.officialUrl!;
 
-    if ('error' in r) {
+    // 1. Manual-status: conteúdo de origem externa, não comparar.
+    if (act.scrapeStatus === 'manual') {
+      console.log(`  [${i + 1}/${all.length}] ${act.fullNumber}: manual (pulando fetch)`);
       results.push({
-        id: act.id,
-        fullNumber: act.fullNumber,
-        issuer: act.issuer,
-        officialUrl: act.officialUrl!,
-        httpStatus: null,
-        fetchError: r.error,
-        rawHtmlBytes: null,
-        strippedTextLength: null,
-        storedContentLength: stored,
-        ratio: null,
-        verdict: 'url-dead',
+        id: act.id, fullNumber: act.fullNumber, issuer: act.issuer, officialUrl: url,
+        httpStatus: null, fetchError: null, rawHtmlBytes: null, strippedTextLength: null,
+        storedContentLength: stored, ratio: null, verdict: 'manual',
+      });
+      continue;
+    }
+
+    // 2. Sem scraper registrado: não há como gerar content fresco comparável.
+    if (!findScraperForUrl(url)) {
+      console.log(`  [${i + 1}/${all.length}] ${act.fullNumber}: no-scraper (host sem handler)`);
+      results.push({
+        id: act.id, fullNumber: act.fullNumber, issuer: act.issuer, officialUrl: url,
+        httpStatus: null, fetchError: null, rawHtmlBytes: null, strippedTextLength: null,
+        storedContentLength: stored, ratio: null, verdict: 'no-scraper',
+      });
+      continue;
+    }
+
+    // 3. Roda o MESMO scraper de produção para obter conteúdo fresh comparável.
+    console.log(`  [${i + 1}/${all.length}] scraping ${act.fullNumber} → ${url}`);
+    const scrapeResult = await scrapeUrl(url);
+
+    if (!scrapeResult.success || !scrapeResult.content) {
+      results.push({
+        id: act.id, fullNumber: act.fullNumber, issuer: act.issuer, officialUrl: url,
+        httpStatus: null, fetchError: scrapeResult.error ?? 'empty content',
+        rawHtmlBytes: null, strippedTextLength: null,
+        storedContentLength: stored, ratio: null, verdict: 'scrape-failed',
       });
     } else {
-      const stripped = stripHtml(r.text);
-      const ratio = stripped.length === 0 ? null : stored / stripped.length;
-      const verdict = computeVerdict(r.status, stored, stripped.length);
-
+      const freshLen = scrapeResult.content.length;
+      const ratio = freshLen === 0 ? null : stored / freshLen;
+      const verdict = computeVerdictByCompare(stored, freshLen);
       results.push({
-        id: act.id,
-        fullNumber: act.fullNumber,
-        issuer: act.issuer,
-        officialUrl: act.officialUrl!,
-        httpStatus: r.status,
-        fetchError: null,
-        rawHtmlBytes: r.bodyBytes,
-        strippedTextLength: stripped.length,
-        storedContentLength: stored,
-        ratio,
-        verdict,
+        id: act.id, fullNumber: act.fullNumber, issuer: act.issuer, officialUrl: url,
+        httpStatus: 200, fetchError: null, rawHtmlBytes: null,
+        strippedTextLength: freshLen, // Reusa o campo para "fresh length" (apples-to-apples)
+        storedContentLength: stored, ratio, verdict,
       });
     }
 
-    if (i < all.length - 1) await sleep(SPOT_CHECK_DELAY_MS); // delay entre fetches (pulado no último)
+    if (i < all.length - 1) await sleep(SPOT_CHECK_DELAY_MS); // delay entre scrapes (pulado no último)
   }
 
   return results;

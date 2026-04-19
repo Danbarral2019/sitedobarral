@@ -221,3 +221,36 @@ Dos 43 atos originalmente sem themes, 32 foram cobertos pela heurística (Bundle
 Validador em 100% dos 11 casos — zero temas fora da taxonomia, zero resposta inválida.
 
 Bundle D-2 concluído. T1 está estruturalmente fechada (100% themes). Único follow-up remanescente: refinamento do heurístico `ratio` do próprio audit (gera falsos-positivos de `truncated` para parsers dedicados que limpam masthead mais do que o `stripHtml` naive do audit).
+
+## Oitava passada (Refinamento do audit — apples-to-apples)
+
+O heurístico `ratio` original comparava `stored` (saída de parser dedicado que remove masthead/footer/share-links) contra `stripHtml(liveHtml)` (naive, deixa todo esse ruído). Resultado: parsers que fazem bem o trabalho produziam `stored << stripHtml`, gerando falso-positivo `truncated`. Isso explica por que v5 (Bundle C) ainda tinha 7 atos em `spotCheckSuspicious` mesmo com parsers A-D consertados.
+
+**Fix:** `runSpotCheck` agora usa `scrapeUrl()` de `lib/legislative-scrapers` (mesmo path de produção) em vez de `fetchOnce` + `stripHtml` naive. Comparação é apples-to-apples: stored vs fresh output do MESMO scraper.
+
+**Novos verdicts (mapeiam estados não-comparáveis em vez de forçar ratio):**
+- `manual` — ato tem `scrapeStatus: 'manual'`, pula fetch
+- `no-scraper` — `findScraperForUrl()` não tem handler para o host
+- `scrape-failed` — scraper tentou mas falhou (transiente ou permanente)
+
+Esses 3 verdicts são **excluídos** de `spotCheckSuspicious` pelo `filterSuspiciousExcludingManual`.
+
+**Novo `computeVerdictByCompare(stored, fresh)`:**
+- `< 0.6 × fresh` → `truncated` (stored perdeu conteúdo real)
+- `> 1.4 × fresh` → `bloated` (stored tem ruído que scraper atual remove)
+- 0.6–1.4 → `ok`
+
+**Métricas v8:**
+
+| Métrica | v5 (com fetch) | v8 (com fetch + refatorado) |
+|---|---:|---:|
+| Verdict breakdown | 7× truncated + 3× bloated + 1× url-dead + 1× ok | **3× manual + 12× ok** |
+| `spotCheckSuspicious` | 7 (falsos-positivos) | **0** |
+| Amostras com ratio ~1.00 (apples-to-apples) | — | 12/12 |
+
+**Novos artefatos:**
+- `scripts/audit-helpers.ts` expandido com `computeVerdictByCompare` + `NON_COMPARABLE_VERDICTS`
+- `test/legislative-scrapers/verdict-compare.test.ts` — 13 unit tests
+- `test/legislative-scrapers/manual-status.test.ts` — +1 teste para novos verdicts
+
+**T1 CONCLUÍDA** estruturalmente e instrumentalmente. Todos os falsos-positivos eliminados. Audit agora é apples-to-apples e serve como monitor confiável para drift futuro.

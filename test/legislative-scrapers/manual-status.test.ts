@@ -42,6 +42,18 @@ describe('filterSuspiciousExcludingManual', () => {
     expect(filterSuspiciousExcludingManual(spotCheck, manualIds)).toEqual(['d']);
   });
 
+  it('ignora novos verdicts não-comparáveis (manual, no-scraper, scrape-failed)', () => {
+    const spotCheck = [
+      { id: 'a', verdict: 'manual' },
+      { id: 'b', verdict: 'no-scraper' },
+      { id: 'c', verdict: 'scrape-failed' },
+      { id: 'd', verdict: 'truncated' },
+      { id: 'e', verdict: 'bloated' },
+    ];
+    const manualIds = new Set<string>();
+    expect(filterSuspiciousExcludingManual(spotCheck, manualIds)).toEqual(['d', 'e']);
+  });
+
   it('retorna lista vazia quando não há spotCheck suspicious', () => {
     expect(filterSuspiciousExcludingManual([], new Set())).toEqual([]);
   });
