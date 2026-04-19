@@ -8,3 +8,6 @@ export { DashboardHero } from './DashboardHero';
 export { QuickAccessBar } from './QuickAccessBar';
 export { DashboardCourseCard } from './DashboardCourseCard';
 export { KnowledgeBaseSection } from './KnowledgeBaseSection';
+export { HeroPlanejamento } from './HeroPlanejamento';
+export { AreaRestritaMenuTrigger } from './AreaRestritaMenuTrigger';
+export { AreaRestritaMenuDrawer } from './AreaRestritaMenuDrawer';
