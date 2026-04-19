@@ -7,7 +7,7 @@
 
 import * as cheerio from 'cheerio';
 import { computeHash } from './change-detector';
-import { stripDouBoilerplate, stripFormAnnex } from './normalize';
+import { stripDouBoilerplate, stripFormAnnex, collapseWhitespace } from './normalize';
 import type { LegislativeScraper, ScraperResult } from './index';
 
 /**
@@ -18,6 +18,7 @@ const GOVBR_PATTERNS = [
   /gov\.br\/gestao/i,
   /gov\.br\/mgi/i,
   /gov\.br\/seges/i,
+  /gov\.br\/governodigital/i,
   /in\.gov\.br/i,
 ];
 
@@ -196,17 +197,6 @@ export class GovBrComprasScraper implements LegislativeScraper {
    * Limpa e normaliza o texto extraído
    */
   private cleanText(text: string): string {
-    return text
-      // Normalizar quebras de linha
-      .replace(/\r\n/g, '\n')
-      .replace(/\r/g, '\n')
-      // Remover múltiplas quebras de linha
-      .replace(/\n{3,}/g, '\n\n')
-      // Remover espaços múltiplos
-      .replace(/[ \t]+/g, ' ')
-      // Remover espaços no início/fim de linhas
-      .replace(/^ +| +$/gm, '')
-      // Remover linhas em branco no início/fim
-      .trim();
+    return collapseWhitespace(text);
   }
 }
