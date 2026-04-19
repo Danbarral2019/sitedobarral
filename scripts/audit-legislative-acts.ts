@@ -17,6 +17,7 @@ import { PrismaClient } from '@prisma/client';
 import { PrismaNeon } from '@prisma/adapter-neon';
 import * as fs from 'node:fs';
 import * as path from 'node:path';
+import { filterSuspiciousExcludingManual } from './audit-helpers';
 
 const connStr = process.env.DATABASE_URL;
 if (!connStr) {
@@ -498,15 +499,21 @@ async function buildProblemIdIndex(params: {
     .filter((a) => !hostHasParser(extractHost(a.officialUrl)))
     .map((a) => a.id);
 
+  // Atos com scrapeStatus='manual' são falso-positivos permanentes em spotCheck
+  // (ex: TCU Portarias cujo conteúdo veio de import, mas officialUrl é SPA).
+  const manualActs = await prisma.legislativeAct.findMany({
+    where: { scrapeStatus: 'manual' },
+    select: { id: true },
+  });
+  const manualIds = new Set(manualActs.map((a) => a.id));
+
   return {
     contentMissing: missing.map((a) => a.id),
     contentTruncated: truncatedIds,
     metadataIncomplete: incomplete.map((a) => a.id),
     duplicateCandidates: params.duplicates.flatMap((g) => g.ids),
     unparsedHost: unparsedIds,
-    spotCheckSuspicious: params.spotCheck
-      .filter((r) => r.verdict === 'truncated' || r.verdict === 'bloated')
-      .map((r) => r.id),
+    spotCheckSuspicious: filterSuspiciousExcludingManual(params.spotCheck, manualIds),
   };
 }
 
