@@ -130,7 +130,7 @@ Adicione abaixo das CLI args, antes de `main()`:
 ```typescript
 // ── Types ─────────────────────────────────────────────────────────────────
 
-type ContentBucket = 'null' | '0' | '<500' | '500-2000' | '2000-5000' | '>5000';
+type ContentBucket = 'missing' | '0' | '<500' | '500-2000' | '2000-5000' | '>5000';
 
 interface InventoryRow { issuer: string; type: string; count: number; }
 interface ContentLengthRow { issuer: string; bucket: ContentBucket; count: number; }
@@ -162,11 +162,11 @@ interface ProblemIdIndex {
 // ── Helpers ───────────────────────────────────────────────────────────────
 
 function bucketContentLength(len: number | null | undefined): ContentBucket {
-  if (len === null || len === undefined) return 'null';
+  if (len === null || len === undefined) return 'missing';
   if (len === 0) return '0';
   if (len < 500) return '<500';
   if (len < 2000) return '500-2000';
-  if (len <= 5000) return '2000-5000';
+  if (len < 5000) return '2000-5000';
   return '>5000';
 }
 ```
