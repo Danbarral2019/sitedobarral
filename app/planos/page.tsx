@@ -20,13 +20,6 @@ const ECONOMIA_PREMIUM = ((89.90 * 12) - 899.00).toFixed(2).replace('.', ',');
 type PaymentMethod = 'cartao' | 'pix';
 type BillingCycle = 'monthly' | 'yearly';
 
-interface PixData {
-  qrCode: string;
-  qrCodeBase64: string;
-  ticketUrl: string;
-  paymentId: number;
-}
-
 function CheckIcon({ className }: { className?: string }) {
   return (
     <svg className={className || 'w-5 h-5 text-green-500 mt-0.5 flex-shrink-0'} fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -41,11 +34,9 @@ export default function PlanosPage() {
   const [selectedCourse, setSelectedCourse] = useState(COURSES[0]?.id || '2');
   const [loading, setLoading] = useState<'basico' | 'premium' | null>(null);
   const [error, setError] = useState('');
+  const [hasActiveSubscription, setHasActiveSubscription] = useState(false);
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>('cartao');
   const [billingCycle, setBillingCycle] = useState<BillingCycle>('monthly');
-  const [pixData, setPixData] = useState<PixData | null>(null);
-  const [pixPlan, setPixPlan] = useState<string | null>(null);
-  const [copied, setCopied] = useState(false);
 
   const isYearly = billingCycle === 'yearly';
 
@@ -56,68 +47,36 @@ export default function PlanosPage() {
     }
 
     setError('');
+    setHasActiveSubscription(false);
     setLoading(plan);
-    setPixData(null);
 
     try {
       const payload = {
         plan,
         billingCycle,
+        method: paymentMethod === 'cartao' ? 'card' : 'pix',
         ...(plan === 'basico' && { courseId: selectedCourse }),
       };
 
-      if (paymentMethod === 'pix') {
-        const response = await fetch('/api/pagamento/pix', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(payload),
-        });
+      const response = await fetch('/api/pagamento/checkout', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      });
 
-        const data = await response.json();
+      const data = await response.json();
 
-        if (!response.ok) {
-          throw new Error(data.error || 'Erro ao gerar PIX');
+      if (!response.ok) {
+        if (response.status === 409) {
+          setHasActiveSubscription(true);
         }
-
-        setPixData(data);
-        setPixPlan(plan);
-        setLoading(null);
-      } else {
-        const response = await fetch('/api/pagamento/checkout', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(payload),
-        });
-
-        const data = await response.json();
-
-        if (!response.ok) {
-          throw new Error(data.error || 'Erro ao iniciar checkout');
-        }
-
-        window.location.href = data.url;
+        throw new Error(data.error || 'Erro ao iniciar checkout');
       }
+
+      window.location.href = data.url;
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Erro ao processar. Tente novamente.');
       setLoading(null);
-    }
-  };
-
-  const copyPixCode = async () => {
-    if (!pixData?.qrCode) return;
-    try {
-      await navigator.clipboard.writeText(pixData.qrCode);
-      setCopied(true);
-      setTimeout(() => setCopied(false), 3000);
-    } catch {
-      const textarea = document.createElement('textarea');
-      textarea.value = pixData.qrCode;
-      document.body.appendChild(textarea);
-      textarea.select();
-      document.execCommand('copy');
-      document.body.removeChild(textarea);
-      setCopied(true);
-      setTimeout(() => setCopied(false), 3000);
     }
   };
 
@@ -137,6 +96,14 @@ export default function PlanosPage() {
         {error && (
           <div className="mb-8 p-4 bg-red-50 border border-red-200 rounded-lg text-center">
             <p className="text-sm text-red-600">{error}</p>
+            {hasActiveSubscription && (
+              <a
+                href="/api/conta/portal"
+                className="inline-block mt-3 px-4 py-2 bg-red-600 hover:bg-red-700 text-white text-sm font-semibold rounded-lg transition-colors"
+              >
+                Gerenciar assinatura
+              </a>
+            )}
           </div>
         )}
 
@@ -144,7 +111,7 @@ export default function PlanosPage() {
         <div className="mb-6 flex justify-center">
           <div className="inline-flex bg-white rounded-xl shadow-sm border border-gray-200 p-1">
             <button
-              onClick={() => { setBillingCycle('monthly'); setPixData(null); }}
+              onClick={() => { setBillingCycle('monthly');}}
               className={`px-6 py-2.5 rounded-lg text-sm font-medium transition-colors ${
                 !isYearly
                   ? 'bg-blue-600 text-white shadow-sm'
@@ -154,7 +121,7 @@ export default function PlanosPage() {
               Mensal
             </button>
             <button
-              onClick={() => { setBillingCycle('yearly'); setPixData(null); }}
+              onClick={() => { setBillingCycle('yearly');}}
               className={`px-6 py-2.5 rounded-lg text-sm font-medium transition-colors flex items-center gap-2 ${
                 isYearly
                   ? 'bg-blue-600 text-white shadow-sm'
@@ -177,7 +144,7 @@ export default function PlanosPage() {
         <div className="mb-8 flex justify-center">
           <div className="inline-flex bg-white rounded-xl shadow-sm border border-gray-200 p-1">
             <button
-              onClick={() => { setPaymentMethod('cartao'); setPixData(null); }}
+              onClick={() => { setPaymentMethod('cartao');}}
               className={`px-6 py-2.5 rounded-lg text-sm font-medium transition-colors ${
                 paymentMethod === 'cartao'
                   ? 'bg-gray-800 text-white shadow-sm'
@@ -187,7 +154,7 @@ export default function PlanosPage() {
               Cartão / Boleto
             </button>
             <button
-              onClick={() => { setPaymentMethod('pix'); setPixData(null); }}
+              onClick={() => { setPaymentMethod('pix');}}
               className={`px-6 py-2.5 rounded-lg text-sm font-medium transition-colors ${
                 paymentMethod === 'pix'
                   ? 'bg-green-600 text-white shadow-sm'
@@ -198,51 +165,6 @@ export default function PlanosPage() {
             </button>
           </div>
         </div>
-
-        {/* QR Code PIX inline */}
-        {pixData && (
-          <div className="mb-8 max-w-md mx-auto bg-white rounded-2xl shadow-lg p-8 border border-green-200">
-            <div className="text-center">
-              <h3 className="text-lg font-bold text-gray-900 mb-2">
-                Pagamento PIX - Plano {pixPlan === 'premium' ? 'Premium' : 'Básico'}{' '}
-                {isYearly ? 'Anual' : 'Mensal'}
-              </h3>
-              <p className="text-sm text-gray-600 mb-6">
-                Escaneie o QR Code ou copie o código para pagar
-              </p>
-
-              {pixData.qrCodeBase64 && (
-                <div className="mb-6 flex justify-center">
-                  <img
-                    src={`data:image/png;base64,${pixData.qrCodeBase64}`}
-                    alt="QR Code PIX"
-                    className="w-48 h-48 rounded-lg border border-gray-200"
-                  />
-                </div>
-              )}
-
-              {pixData.qrCode && (
-                <div className="mb-4">
-                  <div className="bg-gray-50 rounded-lg p-3 mb-3">
-                    <p className="text-xs text-gray-500 font-mono break-all leading-relaxed">
-                      {pixData.qrCode.slice(0, 80)}...
-                    </p>
-                  </div>
-                  <button
-                    onClick={copyPixCode}
-                    className="w-full bg-green-600 hover:bg-green-700 text-white font-semibold py-3 px-6 rounded-xl transition-colors"
-                  >
-                    {copied ? 'Código copiado!' : 'Copiar código PIX'}
-                  </button>
-                </div>
-              )}
-
-              <p className="text-xs text-gray-500 mt-4">
-                Após o pagamento, seu acesso será liberado automaticamente em até 5 minutos.
-              </p>
-            </div>
-          </div>
-        )}
 
         {/* Cards de planos */}
         <div className="grid md:grid-cols-2 gap-8 mb-16">
@@ -414,11 +336,11 @@ export default function PlanosPage() {
             </div>
             <div>
               <p className="font-medium text-gray-900 mb-1">Quais formas de pagamento?</p>
-              <p className="text-gray-600">PIX (aprovação instantânea), cartão de crédito e boleto bancário, via Mercado Pago.</p>
+              <p className="text-gray-600">Cartão de crédito e Pix Automático (débito recorrente autorizado no app do seu banco).</p>
             </div>
             <div>
               <p className="font-medium text-gray-900 mb-1">O pagamento é seguro?</p>
-              <p className="text-gray-600">Processado pelo Mercado Pago, plataforma líder em pagamentos no Brasil.</p>
+              <p className="text-gray-600">Processado pelo Stripe, plataforma líder em pagamentos no mundo, com criptografia de ponta a ponta.</p>
             </div>
             <div>
               <p className="font-medium text-gray-900 mb-1">Qual a vantagem do plano anual?</p>

@@ -1,58 +1,50 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 import { withAuth } from '@/lib/api-middleware';
-import { createCheckoutPreference, getPlanConfig, type PlanType, type BillingCycle } from '@/lib/mercadopago';
+import { createCheckoutSession } from '@/lib/stripe';
 import { prisma } from '@/lib/prisma';
 import { handleApiError } from '@/lib/errors/error-handler';
-import { ValidationError } from '@/lib/errors/api-error';
+import { ValidationError, ConflictError } from '@/lib/errors/api-error';
 import { apiLogger } from '@/lib/logger';
 import { trackServerEvent } from '@/lib/monitoring/events';
 
 const CheckoutSchema = z.object({
   plan: z.enum(['basico', 'premium']),
-  courseId: z.string().optional(),
   billingCycle: z.enum(['monthly', 'yearly']).default('monthly'),
-});
+  method: z.enum(['card', 'pix']),
+  courseId: z.string().optional(),
+}).refine(
+  (d) => d.plan !== 'basico' || !!d.courseId,
+  { message: 'courseId obrigatório para plano Básico', path: ['courseId'] }
+);
 
 export const POST = withAuth(async (request: NextRequest, context?: Record<string, unknown>) => {
   try {
-    const user = context?.user as { userId: string; email?: string; name?: string };
+    const user = context?.user as { userId: string };
     const body = await request.json();
-    const result = CheckoutSchema.safeParse(body);
-
-    if (!result.success) {
-      throw new ValidationError(result.error.issues[0]?.message || 'Dados inválidos');
+    const parsed = CheckoutSchema.safeParse(body);
+    if (!parsed.success) {
+      throw new ValidationError(parsed.error.issues[0]?.message || 'Dados inválidos');
     }
 
-    const { plan, courseId, billingCycle } = result.data;
+    const { plan, billingCycle, method, courseId } = parsed.data;
 
-    if (plan === 'basico' && !courseId) {
-      throw new ValidationError('courseId é obrigatório para o plano Básico');
-    }
-
-    // Verificar config do plano
-    getPlanConfig(plan as PlanType, billingCycle as BillingCycle);
-
-    const dbUser = await prisma.user.findUnique({
-      where: { id: user.userId },
-      select: { email: true, name: true },
+    const existing = await prisma.subscription.findFirst({
+      where: {
+        userId: user.userId,
+        status: { in: ['active', 'processing', 'past_due'] },
+        currentPeriodEnd: { gt: new Date() },
+      },
     });
+    if (existing) {
+      throw new ConflictError('Você já tem uma assinatura ativa. Gerencie pelo portal.');
+    }
 
     const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000';
+    const { url } = await createCheckoutSession({ userId: user.userId, plan, billingCycle, method, courseId, baseUrl });
 
-    const url = await createCheckoutPreference({
-      userId: user.userId,
-      email: dbUser?.email || user.email || '',
-      name: dbUser?.name || user.name || '',
-      plan: plan as PlanType,
-      courseId,
-      returnUrl: baseUrl,
-      billingCycle: billingCycle as BillingCycle,
-    });
-
-    apiLogger.info({ userId: user.userId, plan, courseId, billingCycle }, 'MP checkout initiated');
+    apiLogger.info({ userId: user.userId, plan, billingCycle, method }, 'Stripe checkout session created');
     trackServerEvent('payment_checkout', { plan });
-
     return NextResponse.json({ url });
   } catch (error) {
     return handleApiError(error);

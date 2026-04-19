@@ -31,6 +31,7 @@ export async function GET(request: NextRequest) {
     const actsToCheck = await prisma.legislativeAct.findMany({
       where: {
         officialUrl: { not: null },
+        scrapeStatus: { not: 'manual' },
         OR: [
           { lastScrapedAt: null },
           { lastScrapedAt: { lt: sevenDaysAgo } },

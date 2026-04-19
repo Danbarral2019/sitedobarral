@@ -1,0 +1,209 @@
+{
+  "version": 1,
+  "matrixSlug": "modalidade-julgamento",
+  "cases": [
+    {
+      "id": "comum-001",
+      "descricao": "Aquisição de material de expediente padronizado",
+      "inputs": {
+        "objeto": "aquisicao_bem",
+        "comum_especial": "comum",
+        "natureza_intelectual": false,
+        "objeto_definivel": true,
+        "solucao_inovadora": false,
+        "regime_srp": false,
+        "maior_desconto_aplicavel": false,
+        "valor_estimado": 120000
+      },
+      "expected": {
+        "modalidade": "pregao",
+        "criterio": "menor_preco",
+        "ruleId": "pregao-comum"
+      }
+    },
+    {
+      "id": "comum-002",
+      "descricao": "Limpeza e conservação — serviço continuado comum com dedicação de mão de obra",
+      "inputs": {
+        "objeto": "prestacao_servico",
+        "comum_especial": "comum",
+        "natureza_intelectual": false,
+        "objeto_definivel": true,
+        "solucao_inovadora": false,
+        "regime_srp": false,
+        "maior_desconto_aplicavel": false,
+        "valor_estimado": 1800000
+      },
+      "expected": {
+        "modalidade": "pregao",
+        "criterio": "menor_preco",
+        "ruleId": "pregao-comum"
+      }
+    },
+    {
+      "id": "comum-003",
+      "descricao": "Aquisição de combustível com tabela ANP de referência (maior desconto)",
+      "inputs": {
+        "objeto": "aquisicao_bem",
+        "comum_especial": "comum",
+        "natureza_intelectual": false,
+        "objeto_definivel": true,
+        "solucao_inovadora": false,
+        "regime_srp": true,
+        "maior_desconto_aplicavel": true,
+        "valor_estimado": 2400000
+      },
+      "expected": {
+        "modalidade": "pregao",
+        "criterio": "maior_desconto",
+        "ruleId": "pregao-maior-desconto"
+      }
+    },
+    {
+      "id": "especial-001",
+      "descricao": "Consultoria jurídica especializada (serviço especial, natureza intelectual)",
+      "inputs": {
+        "objeto": "prestacao_servico",
+        "comum_especial": "especial",
+        "natureza_intelectual": true,
+        "objeto_definivel": true,
+        "solucao_inovadora": false,
+        "regime_srp": false,
+        "maior_desconto_aplicavel": false,
+        "valor_estimado": 500000
+      },
+      "expected": {
+        "modalidade": "concorrencia",
+        "criterio": "tecnica_e_preco",
+        "ruleId": "especial-intelectual"
+      }
+    },
+    {
+      "id": "especial-002",
+      "descricao": "Aquisição de obra de arte única (bem especial, sem natureza intelectual discutida)",
+      "inputs": {
+        "objeto": "aquisicao_bem",
+        "comum_especial": "especial",
+        "natureza_intelectual": false,
+        "objeto_definivel": true,
+        "solucao_inovadora": false,
+        "regime_srp": false,
+        "maior_desconto_aplicavel": false
+      },
+      "expected": {
+        "modalidade": "concorrencia",
+        "criterio": "melhor_tecnica",
+        "ruleId": "especial-tecnica"
+      }
+    },
+    {
+      "id": "engenharia-001",
+      "descricao": "Reforma de edifício administrativo — projeto executivo disponível",
+      "inputs": {
+        "objeto": "obra",
+        "comum_especial": "nao_se_aplica",
+        "natureza_intelectual": false,
+        "objeto_definivel": true,
+        "solucao_inovadora": false,
+        "regime_srp": false,
+        "maior_desconto_aplicavel": false,
+        "valor_estimado": 12000000
+      },
+      "expected": {
+        "modalidade": "concorrencia",
+        "criterio": "menor_preco",
+        "ruleId": "engenharia-geral"
+      }
+    },
+    {
+      "id": "engenharia-002",
+      "descricao": "Elaboração de projeto executivo de engenharia (natureza intelectual)",
+      "inputs": {
+        "objeto": "servico_engenharia",
+        "comum_especial": "nao_se_aplica",
+        "natureza_intelectual": true,
+        "objeto_definivel": true,
+        "solucao_inovadora": false,
+        "regime_srp": false,
+        "maior_desconto_aplicavel": false
+      },
+      "expected": {
+        "modalidade": "concorrencia",
+        "criterio": "tecnica_e_preco",
+        "ruleId": "engenharia-intelectual"
+      }
+    },
+    {
+      "id": "leilao-001",
+      "descricao": "Alienação de frota inservível",
+      "inputs": {
+        "objeto": "alienacao",
+        "comum_especial": "nao_se_aplica",
+        "natureza_intelectual": false,
+        "objeto_definivel": true,
+        "solucao_inovadora": false,
+        "regime_srp": false,
+        "maior_desconto_aplicavel": false
+      },
+      "expected": {
+        "modalidade": "leilao",
+        "criterio": "maior_lance",
+        "ruleId": "leilao-alienacao"
+      }
+    },
+    {
+      "id": "concurso-001",
+      "descricao": "Seleção de projeto arquitetônico de memorial público",
+      "inputs": {
+        "objeto": "trabalho_tecnico",
+        "comum_especial": "nao_se_aplica",
+        "natureza_intelectual": true,
+        "objeto_definivel": false,
+        "solucao_inovadora": false,
+        "regime_srp": false,
+        "maior_desconto_aplicavel": false
+      },
+      "expected": {
+        "modalidade": "concurso",
+        "criterio": "melhor_tecnica",
+        "ruleId": "concurso-trabalho-tecnico"
+      }
+    },
+    {
+      "id": "dialogo-001",
+      "descricao": "Solução inovadora de analytics sem modelo disponível no mercado",
+      "inputs": {
+        "objeto": "prestacao_servico",
+        "comum_especial": "especial",
+        "natureza_intelectual": true,
+        "objeto_definivel": false,
+        "solucao_inovadora": true,
+        "regime_srp": false,
+        "maior_desconto_aplicavel": false
+      },
+      "expected": {
+        "modalidade": "dialogo_competitivo",
+        "criterio": "tecnica_e_preco",
+        "ruleId": "dialogo-solucao-inovadora"
+      }
+    },
+    {
+      "id": "fallback-001",
+      "descricao": "Inputs insuficientes — deve cair no fallback conservador",
+      "inputs": {
+        "objeto": "aquisicao_bem",
+        "comum_especial": "nao_se_aplica",
+        "natureza_intelectual": false,
+        "objeto_definivel": true,
+        "solucao_inovadora": false,
+        "regime_srp": false,
+        "maior_desconto_aplicavel": false
+      },
+      "expected": {
+        "modalidade": "concorrencia",
+        "criterio": "menor_preco",
+        "ruleId": null
+      }
+    }
+  ]
+}

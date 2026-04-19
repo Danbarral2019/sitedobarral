@@ -7,6 +7,7 @@
 
 import * as cheerio from 'cheerio';
 import { computeHash } from './change-detector';
+import { stripDouBoilerplate, stripFormAnnex, collapseWhitespace } from './normalize';
 import type { LegislativeScraper, ScraperResult } from './index';
 
 /**
@@ -17,30 +18,8 @@ const GOVBR_PATTERNS = [
   /gov\.br\/gestao/i,
   /gov\.br\/mgi/i,
   /gov\.br\/seges/i,
+  /gov\.br\/governodigital/i,
   /in\.gov\.br/i,
-];
-
-/**
- * Seletores CSS para extração de conteúdo do Gov.br
- */
-const CONTENT_SELECTORS = [
-  // Portal Gov.br moderno
-  '#content-core',
-  '.content-area',
-  '#main-content',
-  '.documentFirstHeading + div',
-  // Páginas de legislação
-  '.texto-dou',
-  '.conteudo-materia',
-  '.text-body',
-  // IN.gov.br
-  '.dou-paragraph',
-  '.materia',
-  '#materia',
-  // Fallbacks
-  'article',
-  'main',
-  '.content',
 ];
 
 /**
@@ -102,7 +81,21 @@ export class GovBrComprasScraper implements LegislativeScraper {
         };
       }
 
-      const content = this.extractContent(html);
+      // Detectar se é página DOU (in.gov.br). Em in.gov.br o wrapper do artigo
+      // tem class="portlet", então saltamos a remoção de .portlet nessa origem
+      // para não apagar o próprio corpo normativo.
+      let isDou = false;
+      try {
+        isDou = /(?:^|\.)in\.gov\.br$/.test(new URL(url).hostname);
+      } catch {
+        isDou = false;
+      }
+
+      const rawContent = this.extractContent(html, { skipPortletRemoval: isDou });
+
+      // Aplicar limpeza DOU se URL for in.gov.br
+      const douCleaned = isDou ? stripDouBoilerplate(rawContent) : rawContent;
+      const content = stripFormAnnex(douCleaned);
 
       if (!content || content.length < 100) {
         return {
@@ -134,27 +127,69 @@ export class GovBrComprasScraper implements LegislativeScraper {
 
   /**
    * Extrai o conteúdo textual limpo do HTML
+   *
+   * @param opts.skipPortletRemoval - Se true, pula a remoção do seletor `.portlet`.
+   *   Necessário para páginas in.gov.br, onde `<article id="materia">` fica
+   *   dentro de um wrapper `.portlet` (remover o portlet apagaria o corpo
+   *   normativo inteiro).
    */
-  private extractContent(html: string): string {
+  private extractContent(html: string, opts: { skipPortletRemoval?: boolean } = {}): string {
     const $ = cheerio.load(html);
 
     // Remover elementos indesejados
-    ELEMENTS_TO_REMOVE.forEach(selector => {
+    const toRemove = opts.skipPortletRemoval
+      ? ELEMENTS_TO_REMOVE.filter(s => s !== '.portlet')
+      : ELEMENTS_TO_REMOVE;
+    toRemove.forEach(selector => {
       $(selector).remove();
     });
 
-    // Tentar cada seletor até encontrar conteúdo
-    for (const selector of CONTENT_SELECTORS) {
-      const element = $(selector);
-      if (element.length > 0) {
-        const text = this.cleanText(element.text());
-        if (text.length > 100) {
-          return text;
-        }
+    // Estratégia: coletar texto de TODOS os seletores primários,
+    // escolher o de MAIOR tamanho desde que > 500 chars.
+    // Primários = seletores que capturam o corpo completo do ato.
+    const PRIMARY_SELECTORS = [
+      '#parent-fieldname-text', // Plone body (gov.br/compras, gov.br/gestao) — geralmente o mais longo
+      '.materia',                // DOU materia
+      '#content-core',           // Plone content wrapper (pode conter body ou só metadados)
+      'article',                 // HTML5 article
+      'main',                    // HTML5 main
+      '.content-area',
+      '#main-content',
+      '.conteudo-materia',
+      '.texto-dou',
+    ];
+
+    let best = '';
+    for (const selector of PRIMARY_SELECTORS) {
+      const el = $(selector);
+      if (el.length === 0) continue;
+      const text = this.cleanText(el.text());
+      if (text.length > best.length) {
+        best = text;
       }
     }
 
-    // Fallback: pegar todo o body
+    if (best.length >= 500) {
+      return best;
+    }
+
+    // Fallbacks genéricos com threshold menor (para atos legitimamente curtos)
+    const FALLBACK_SELECTORS = [
+      '.text-body',
+      '.dou-paragraph',
+      '#materia',
+      '.content',
+      '.documentFirstHeading + div',
+    ];
+
+    for (const selector of FALLBACK_SELECTORS) {
+      const el = $(selector);
+      if (el.length === 0) continue;
+      const text = this.cleanText(el.text());
+      if (text.length > 100) return text;
+    }
+
+    // Último recurso: body inteiro
     return this.cleanText($('body').text());
   }
 
@@ -162,17 +197,6 @@ export class GovBrComprasScraper implements LegislativeScraper {
    * Limpa e normaliza o texto extraído
    */
   private cleanText(text: string): string {
-    return text
-      // Normalizar quebras de linha
-      .replace(/\r\n/g, '\n')
-      .replace(/\r/g, '\n')
-      // Remover múltiplas quebras de linha
-      .replace(/\n{3,}/g, '\n\n')
-      // Remover espaços múltiplos
-      .replace(/[ \t]+/g, ' ')
-      // Remover espaços no início/fim de linhas
-      .replace(/^ +| +$/gm, '')
-      // Remover linhas em branco no início/fim
-      .trim();
+    return collapseWhitespace(text);
   }
 }

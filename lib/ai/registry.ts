@@ -23,8 +23,8 @@ const DEFAULTS: Record<AiTask, TaskDefault> = {
   'search': { provider: 'gemini', model: 'gemini-2.0-flash' },
   'chat': { provider: 'gemini', model: 'gemini-2.0-flash' },
   'extraction': { provider: 'gemini', model: 'gemini-2.0-flash' },
-  'classification': { provider: 'anthropic', model: 'claude-3-5-haiku-20241022' },
-  'summarization': { provider: 'anthropic', model: 'claude-3-5-haiku-20241022' },
+  'classification': { provider: 'anthropic', model: 'claude-haiku-4-5-20251001' },
+  'summarization': { provider: 'anthropic', model: 'claude-haiku-4-5-20251001' },
   'enhancement': { provider: 'anthropic', model: 'claude-sonnet-4-20250514' },
 }
 

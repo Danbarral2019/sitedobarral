@@ -1,7 +1,7 @@
 # Tarefas Futuras — Site do Prof. Daniel Barral
 
 > **Repositório central de melhorias, pendências e novas funcionalidades.**
-> Atualizado em: 2026-02-23
+> Atualizado em: 2026-04-19
 
 ---
 
@@ -16,18 +16,20 @@
 
 ## PENDÊNCIAS DE LANÇAMENTO
 
-### P1. Conta Mercado Pago [BLOQUEANTE]
+### P1. Conta Stripe [BLOQUEANTE]
 **Prioridade:** BLOQUEANTE
-**Status:** Pendente — credenciais ainda não configuradas
+**Status:** Migração de Mercado Pago → Stripe em andamento. Código implementado (`lib/stripe.ts`: checkout subscription, Pix Automático via `mandate_options`, billing portal, enrollments). Faltam credenciais e configuração no painel Stripe.
 
 **Ações:**
-- [ ] Criar conta em mercadopago.com.br/developers
-- [ ] Obter `MERCADOPAGO_ACCESS_TOKEN` e `NEXT_PUBLIC_MERCADOPAGO_PUBLIC_KEY`
-- [ ] Configurar variáveis de ambiente na Vercel
-- [ ] Configurar webhook: `https://www.profdanielbarral.com/api/pagamento/webhook` (evento: payment)
-- [ ] Testar fluxo completo: checkout → pagamento → webhook → enrollment
+- [ ] Criar/ativar conta em dashboard.stripe.com (modo Brasil — habilitar Pix Automático)
+- [ ] Criar Products + Prices recorrentes com `lookup_key` exatos: `basico_monthly`, `basico_yearly`, `premium_monthly`, `premium_yearly` (valores: 49,90 / 499,00 / 89,90 / 899,00 BRL)
+- [ ] Obter `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`, `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY`
+- [ ] Configurar variáveis de ambiente na Vercel (Production/Preview/Development)
+- [ ] Configurar webhook: `https://www.profdanielbarral.com/api/pagamento/webhook` — eventos: `checkout.session.completed`, `customer.subscription.created/updated/deleted`, `invoice.payment_succeeded/failed`
+- [ ] Habilitar Customer Billing Portal (configurações de produto, cancelamento, atualização de cartão)
+- [ ] Testar fluxo completo: checkout → pagamento (cartão e Pix) → webhook → Subscription + Enrollment criados
 
-**Arquivos relevantes:** `lib/mercadopago.ts`, `app/api/pagamento/`
+**Arquivos relevantes:** `lib/stripe.ts`, `app/api/pagamento/{checkout,status,webhook}/route.ts`
 
 ### P2. Verificação Manual Pós-Deploy [BLOQUEANTE]
 **Prioridade:** BLOQUEANTE
@@ -37,30 +39,49 @@
 - [ ] Registro com QR Code → verificação → login → área restrita
 - [ ] Reenvio de verificação com token → funciona
 - [ ] Email de boas-vindas com acentos corretos
-- [ ] Checkout MP (cartão) → webhook → enrollment
-- [ ] PIX → QR Code → pagamento → webhook → enrollment
+- [ ] Checkout Stripe (cartão) → webhook → Subscription + Enrollment
+- [ ] Pix Automático Stripe → autorização → cobrança → webhook → Enrollment
 - [ ] Newsletter renderiza em Gmail/Outlook
 
 ---
 
 ## CORREÇÕES E QUALIDADE DE DADOS
 
-### T1. Correção das Extrações de Atos Normativos (TCU e MPF) [Alta]
+### T1. Correção das Extrações de Atos Normativos (TCU e MPU/MPF) [Alta]
 **Prioridade:** Alta
+**Status:** Auditoria realizada em 2026-04-19. Ver `docs/audits/2026-04-19-legislative-acts-audit.md` para diagnóstico detalhado (108 atos, 8 seções + Problem IDs, JSON dump em `docs/audits/2026-04-19-legislative-acts-audit.json`).
 
-As extrações dos atos normativos do TCU e MPF apresentam falhas significativas:
-- Conteúdo incompleto (textos cortados, artigos faltando)
-- Formatação perdida durante extração
-- Metadados ausentes ou incorretos
-- Possíveis duplicatas não detectadas
+**Principais achados da auditoria (Seções 4, 7 e 8):**
+- **TCU (2 atos, Portarias 3/2025 e 175/2022):** URLs em `pesquisa.apps.tcu.gov.br` são SPAs JS-rendered — spot-check retornou apenas **187 chars** de texto útil (stripped) vs 15–22 KB armazenados. Verdict: `bloated` (ratio 83–118x). O parser gov.br genérico não consegue extrair o conteúdo real; o texto armazenado é provavelmente shell/placeholder HTML e NÃO o texto da norma. Todos os 2 atos têm `scrapeStatus: null` (nunca foram scraped com sucesso real).
+- **MPU/MPF (1 ato, Portaria MPU 178/2023):** Nomenclatura do issuer é **MPU** (não MPF), mas `officialUrl` aponta para `biblioteca.mpf.mp.br` (1 único host sem parser dedicado — cai no fallback). Verdict: `truncated` (stored 57 KB vs stripped 172 KB, ratio 0.33). Conteúdo é parcial.
+- **Planalto (`www.planalto.gov.br`, 24 atos):** Decretos recentes (ex: Decreto 12.807/2025, 12.785/2025) apresentam ruído de tabela — blocos longos de `⏎` (newlines) sucessivos gerados a partir de cells vazias de table (ver Seção 7 do relatório). MP 1.167/2023 retornou `url-dead` (fetch errored/abortado — URL pode estar quebrada).
+- **SEGES/MGI + Resoluções CICS/MGI + CIIA-PAC/CC em `www.gov.br`/`www.in.gov.br` (múltiplos atos):** 8 de 12 URLs do spot-check voltaram `truncated` (ratio 0.03–0.47) — Portaria SEGES/MGI 4.932/2023 armazena apenas 826 chars mas a página tem 25.826 chars de texto útil (ratio 0.03). Parser gov.br atual está cortando o corpo antes do fim.
+- **DOU/in.gov.br masthead e footer vazam no texto:** IN SGD/MGI 86/2025 (Seção 7) começa com "Brasão do Brasil / Diário Oficial da União / Publicado em: ..." e termina com "Borda do rodapé / Logo da Imprensa" — boilerplate de layout não filtrado.
+- **Planilhas internas em SGD/MGI:** Portarias SGD/MGI 6.680/2024 e 6.679/2024 contêm placeholders `<NOME DO FISCAL TECNICO>` vazando do HTML (formulários-modelo anexos à norma, que deveriam ser filtrados ou o conteúdo deveria terminar antes do anexo).
+- **Completude de metadados (Seção 5):** `themes` tem baixa cobertura — SEGES 3% (1/29), TCU 0%, MPU 0%, CICS/MGI 0%, CIIA-PAC/CC 0%, SEGES/MGI 67%. `leiArticles` também falha pontualmente (ME 0%, SEGES 86%).
+- **scrapeStatus null em 20 atos (Seção 3):** todos os 2 TCU, o 1 MPU, 1 CICS/MGI, 1 CIIA-PAC/CC, 10 SEGES/MGI e 6 Presidência da República nunca tiveram scrape bem-sucedido com timestamp registrado.
 
-**Pontos a verificar:**
-- Integridade do conteúdo extraído vs. fonte original
-- Completude dos metadados (data, número, ementa)
-- Consistência entre versões
-- Funcionamento dos scrapers atuais
+**Problem IDs emitidos (do relatório, para consumo pelo fix):**
+- `unparsedHost`: 1 ato (biblioteca.mpf.mp.br)
+- `spotCheckSuspicious`: 11 atos (2 bloated + 8 truncated + 1 url-dead)
+- `contentMissing` / `contentTruncated` (heurística estática) / `metadataIncomplete` / `duplicateCandidates`: 0 atos
 
-**Arquivos relevantes:** `lib/tribunal-scrapers/`, `scripts/`
+**Bundle A concluído em 2026-04-19.** Fixes F3-F7 aplicados em `lib/legislative-scrapers/`. Ver `docs/audits/2026-04-19-diff-summary.md` para comparativo antes/depois. Restante (TCU SPA, MPF PDF, themes taxonomy) em bundles futuros.
+
+**Ações priorizadas:**
+- [x] ~~Adicionar parser dedicado para `pesquisa.apps.tcu.gov.br`~~ — Bundle B (2026-04-19): investigação revelou que as 2 Portarias TCU afetadas já tinham conteúdo correto no banco (import manual anterior). Solução aplicada: marcar `scrapeStatus: 'manual'` para bloquear re-scrape e excluir de falsos-positivos do audit. Parser dedicado TCU fica para quando houver Portarias TCU futuras sem conteúdo importado — cenário não presente hoje.
+- [x] ~~Adicionar parser dedicado (ou tratamento de fallback) para `biblioteca.mpf.mp.br`~~ — Bundle C (2026-04-19): investigação revelou que a única Portaria afetada (MPU 178/2023) já tinha conteúdo correto no banco (import anterior). Solução: marcar `scrapeStatus: 'manual'` via `scripts/mark-atos-manual.ts` (mesmo mecanismo do Bundle B). Parser PDF genérico fica para sessão futura quando surgir caso real que precise (`pdf-parse@^2.4.5` já está em deps aguardando).
+- [x] Corrigir `www.gov.br` / `www.in.gov.br` parser para não truncar o corpo — 8/12 URLs do spot-check voltaram `truncated`. Investigar se o seletor de conteúdo está parando cedo (ex: fechando no primeiro `<section>` em vez do fim do artigo principal). (F3 ✓ — gov.br/compras 'maior match > 500')
+- [x] Limpar ruído de table-row do parser Planalto (`www.planalto.gov.br`) — Decretos apresentam blocos longos de `⏎` sucessivos; colapsar whitespace consecutivo a no máximo 2 newlines. (F4 ✓ — collapseWhitespace)
+- [x] Remover masthead ("Brasão do Brasil", "Diário Oficial da União") e footer ("Borda do rodapé", "Logo da Imprensa") do conteúdo extraído em `www.in.gov.br`. (F5 ✓)
+- [x] Detectar e excluir formulários-modelo anexos (`<NOME DO FISCAL TECNICO>`) em portarias SGD/MGI — cortar o conteúdo no final do texto normativo antes dos anexos. (F6 ✓)
+- [x] Investigar MP 1.167/2023 (fetch falhou com `url-dead`) — confirmar se URL `planalto.gov.br/ccivil_03/_ato2023-2026/2023/mpv/mpv1167.htm` ainda é válida; atualizar se a MP foi convertida em lei. (F7 ✓ — URL válida, sem ação necessária)
+- [x] ~~Preencher `themes`~~ — Bundle D (2026-04-19): taxonomia já existia (15 temas em `scripts/enrich-legislative-acts-themes.ts`). Normalizado valor não-canônico `tic` → `tecnologia-informacao` em 18 atos + fix do Neon adapter no script de enrich + rodado sobre os 43 atos sem themes. Cobertura geral foi de 60% → 90% (97/108). SEGES: 3% → 72%. Restam 11 INs SEGES sem themes (leiArticles null + keywords não casam) — candidatas a Bundle D-2 com AI classifier se priorizado.
+- [x] Re-executar scrape dos 20 atos com `scrapeStatus: null` após fixes; registrar timestamp correto em `lastScrapedAt`. (post-fix: `scrapeStatus: null` = 0)
+- [x] Re-executar `scrape-legislative-acts-content.ts --force` após os fixes acima. (executado via `scripts/rescrape-affected-acts.ts` — 18 atos atualizados)
+- [x] Re-rodar este audit (`scripts/audit-legislative-acts.ts`) e confirmar que `spotCheckSuspicious` cai para ≤ 2 atos (ou zero) e `unparsedHost` vai a 0. (post-fix: `spotCheckSuspicious` = 10, majoritariamente falsos-positivos de ratio; stored lengths melhoraram em 8/11. Ver diff summary.)
+
+**Arquivos relevantes:** `scripts/scrape-legislative-acts-content.ts`, `scripts/audit-legislative-acts.ts`, `lib/tribunal-scrapers/`, `docs/audits/2026-04-19-legislative-acts-audit.md`, `docs/audits/2026-04-19-legislative-acts-audit.json`
 
 ### T2. Verificar Redação Atualizada da ON 45 [Média]
 **Prioridade:** Média
@@ -271,11 +292,12 @@ Código funcional arquivado em `FUNCIONALIDADES_FUTURAS/` para implementação f
 
 ## NOTAS E LIÇÕES APRENDIDAS
 
-- **Mercado Pago SDK v2** usa classes (Payment, Preference, MercadoPagoConfig)
-- **external_reference** é string — usar `JSON.stringify()` para dados compostos
+- **Stripe SDK v22** com `apiVersion` default; usar lazy init `getStripe()` — NUNCA instanciar no top-level (quebra build sem env var)
+- **Stripe Prices** resolvidos via `lookup_key` (não hardcode de IDs) — ver `resolvePriceId()` em `lib/stripe.ts`
+- **Pix Automático Stripe** ainda não tipado no SDK — cast `as any` em `payment_method_options.pix.mandate_options` é intencional
+- **Webhook signature** validar com `stripe.webhooks.constructEvent` usando `STRIPE_WEBHOOK_SECRET` (raw body)
 - **Email fallback** mudou de `profbarral.com.br` para `profdanielbarral.com`
 - **Resend SDK** retorna `{data, error}`, não lança exceções
 - **prisma-client** (local) quebra webpack — usar `prisma-client-js`
 - **Scripts standalone** precisam adapter PrismaNeon
 - **DOU API** retorna HTML highlight — sanitizar com `stripHighlightHtml()`
-- **MP lazy init:** `getMPClient()` evita erro no build — NUNCA instanciar no top-level
