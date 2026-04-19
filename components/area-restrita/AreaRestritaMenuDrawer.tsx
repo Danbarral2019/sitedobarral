@@ -1,6 +1,7 @@
 'use client';
 
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
+import { createPortal } from 'react-dom';
 import Link from 'next/link';
 import {
   X,
@@ -118,6 +119,12 @@ interface Props {
 }
 
 export function AreaRestritaMenuDrawer({ open, onClose }: Props) {
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
   useEffect(() => {
     if (!open) return;
     function onKey(e: KeyboardEvent) {
@@ -133,9 +140,9 @@ export function AreaRestritaMenuDrawer({ open, onClose }: Props) {
     };
   }, [open, onClose]);
 
-  if (!open) return null;
+  if (!open || !mounted) return null;
 
-  return (
+  const content = (
     <>
       <div
         className="fixed inset-0 z-[60] bg-black/40 backdrop-blur-[2px]"
@@ -145,7 +152,7 @@ export function AreaRestritaMenuDrawer({ open, onClose }: Props) {
       <aside
         role="dialog"
         aria-label="Menu de navegação"
-        className="fixed right-0 top-0 z-[70] flex h-full w-full max-w-sm flex-col border-l border-gray-200 bg-white shadow-2xl"
+        className="fixed right-0 top-0 z-[70] flex h-screen w-full max-w-sm flex-col border-l border-gray-200 bg-white shadow-2xl"
       >
         <header className="flex items-center justify-between border-b border-gray-100 px-5 py-4">
           <div>
@@ -218,6 +225,8 @@ export function AreaRestritaMenuDrawer({ open, onClose }: Props) {
       </aside>
     </>
   );
+
+  return createPortal(content, document.body);
 }
 
 function MenuIcon({ Icon }: { Icon: LucideIcon }) {
