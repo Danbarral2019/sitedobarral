@@ -52,10 +52,12 @@ export function collapseWhitespace(text: string): string {
 export function stripDouBoilerplate(text: string): string {
   let result = text;
 
-  // Masthead: se começar com "Brasão do Brasil" (tolerando whitespace),
-  // cortar tudo até o início do texto normativo.
-  if (/^\s*Brasão do Brasil/.test(result)) {
-    const orgaoIdx = result.indexOf('Órgão:');
+  // Masthead: se contiver "Brasão do Brasil" (com ou sem chrome de wrapper
+  // antes, como "Publicador de Conteúdos"/"Voltar"/"Compartilhe"), cortar
+  // tudo desde o início até o começo do texto normativo (logo após "Órgão:").
+  const brasaoIdx = result.indexOf('Brasão do Brasil');
+  if (brasaoIdx >= 0) {
+    const orgaoIdx = result.indexOf('Órgão:', brasaoIdx);
     if (orgaoIdx >= 0) {
       const afterOrgao = result.slice(orgaoIdx);
       const match = afterOrgao.match(/(?:Instrução Normativa|Portaria|Decreto|Resolução|Lei)[\s\S]*/);

@@ -7,6 +7,7 @@
 
 import * as cheerio from 'cheerio';
 import { computeHash } from './change-detector';
+import { stripDouBoilerplate } from './normalize';
 import type { LegislativeScraper, ScraperResult } from './index';
 
 /**
@@ -79,7 +80,20 @@ export class GovBrComprasScraper implements LegislativeScraper {
         };
       }
 
-      const content = this.extractContent(html);
+      // Detectar se é página DOU (in.gov.br). Em in.gov.br o wrapper do artigo
+      // tem class="portlet", então saltamos a remoção de .portlet nessa origem
+      // para não apagar o próprio corpo normativo.
+      let isDou = false;
+      try {
+        isDou = /(?:^|\.)in\.gov\.br$/.test(new URL(url).hostname);
+      } catch {
+        isDou = false;
+      }
+
+      const rawContent = this.extractContent(html, { skipPortletRemoval: isDou });
+
+      // Aplicar limpeza DOU se URL for in.gov.br
+      const content = isDou ? stripDouBoilerplate(rawContent) : rawContent;
 
       if (!content || content.length < 100) {
         return {
@@ -111,12 +125,20 @@ export class GovBrComprasScraper implements LegislativeScraper {
 
   /**
    * Extrai o conteúdo textual limpo do HTML
+   *
+   * @param opts.skipPortletRemoval - Se true, pula a remoção do seletor `.portlet`.
+   *   Necessário para páginas in.gov.br, onde `<article id="materia">` fica
+   *   dentro de um wrapper `.portlet` (remover o portlet apagaria o corpo
+   *   normativo inteiro).
    */
-  private extractContent(html: string): string {
+  private extractContent(html: string, opts: { skipPortletRemoval?: boolean } = {}): string {
     const $ = cheerio.load(html);
 
     // Remover elementos indesejados
-    ELEMENTS_TO_REMOVE.forEach(selector => {
+    const toRemove = opts.skipPortletRemoval
+      ? ELEMENTS_TO_REMOVE.filter(s => s !== '.portlet')
+      : ELEMENTS_TO_REMOVE;
+    toRemove.forEach(selector => {
       $(selector).remove();
     });
 
