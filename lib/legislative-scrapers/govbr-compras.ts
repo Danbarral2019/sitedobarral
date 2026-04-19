@@ -7,7 +7,7 @@
 
 import * as cheerio from 'cheerio';
 import { computeHash } from './change-detector';
-import { stripDouBoilerplate } from './normalize';
+import { stripDouBoilerplate, stripFormAnnex } from './normalize';
 import type { LegislativeScraper, ScraperResult } from './index';
 
 /**
@@ -93,7 +93,8 @@ export class GovBrComprasScraper implements LegislativeScraper {
       const rawContent = this.extractContent(html, { skipPortletRemoval: isDou });
 
       // Aplicar limpeza DOU se URL for in.gov.br
-      const content = isDou ? stripDouBoilerplate(rawContent) : rawContent;
+      const douCleaned = isDou ? stripDouBoilerplate(rawContent) : rawContent;
+      const content = stripFormAnnex(douCleaned);
 
       if (!content || content.length < 100) {
         return {

@@ -78,3 +78,25 @@ describe('GovBrComprasScraper — IN SGD/MGI 86/2025 (caso in.gov.br boilerplate
     }
   });
 });
+
+describe('GovBrComprasScraper — Portaria SGD/MGI 6.680/2024 (caso form annex)', () => {
+  const html = readFileSync(join(FIXTURES, 'sgd-mgi-portaria-6680-2024.html'), 'utf-8');
+  const url = 'https://www.gov.br/governodigital/pt-br/contratacoes-de-tic/legislacao/modelo-de-contracao-de-servicos-de-operacao-de-infraestrutura-e-de-atendimento-a-usuarios-de-tic/portaria-sgd-mgi-no-6-680-de-4-de-outubro-de-2024';
+
+  it('NÃO contém "<NOME DO FISCAL TECNICO>" no conteúdo', async () => {
+    mockFetch(html);
+    const scraper = new GovBrComprasScraper();
+    const result = await scraper.scrape(url);
+    expect(result.content).not.toContain('<NOME DO FISCAL TECNICO>');
+    expect(result.content).not.toContain('<NOME DO GESTOR>');
+    expect(result.content).not.toContain('<NOME DO PREPOSTO>');
+  });
+
+  it('preserva texto normativo (Art. 1º e ementa)', async () => {
+    mockFetch(html);
+    const scraper = new GovBrComprasScraper();
+    const result = await scraper.scrape(url);
+    expect(result.content).toMatch(/Portaria SGD\/MGI/i);
+    expect(result.content).toMatch(/Art\.\s*1/);
+  });
+});
