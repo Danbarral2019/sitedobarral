@@ -102,6 +102,32 @@ function bucketContentLength(len: number | null | undefined): ContentBucket {
   return '>5000';
 }
 
+/**
+ * Hosts que têm parser dedicado em scripts/scrape-legislative-acts-content.ts.
+ * Atualizar se novos parsers forem adicionados.
+ */
+const HOSTS_WITH_PARSER = new Set<string>([
+  'www.planalto.gov.br',
+  'planalto.gov.br',
+  // Qualquer subdomínio de gov.br (exceto os acima) cai no parser genérico gov.br
+]);
+
+function extractHost(url: string | null | undefined): string {
+  if (!url) return '(sem officialUrl)';
+  try {
+    return new URL(url).hostname;
+  } catch {
+    return '(URL inválida)';
+  }
+}
+
+function hostHasParser(host: string): boolean {
+  if (HOSTS_WITH_PARSER.has(host)) return true;
+  // extractGovBr aceita qualquer *.gov.br
+  if (host.endsWith('.gov.br') || host === 'gov.br') return true;
+  return false;
+}
+
 // ── Queries ───────────────────────────────────────────────────────────────
 
 async function queryInventory(): Promise<InventoryRow[]> {
@@ -165,6 +191,84 @@ async function queryScrapeStatus(): Promise<ScrapeStatusRow[]> {
   return rows.sort((a, b) => a.issuer.localeCompare(b.issuer) || a.status.localeCompare(b.status));
 }
 
+async function queryHostDistribution(): Promise<HostRow[]> {
+  const acts = await prisma.legislativeAct.findMany({
+    select: { officialUrl: true },
+  });
+  const map = new Map<string, number>();
+  for (const act of acts) {
+    const host = extractHost(act.officialUrl);
+    map.set(host, (map.get(host) ?? 0) + 1);
+  }
+  return Array.from(map.entries())
+    .map(([host, count]) => ({ host, count, hasParser: hostHasParser(host) }))
+    .sort((a, b) => b.count - a.count);
+}
+
+async function queryMetadataCompleteness(): Promise<MetadataRow[]> {
+  const acts = await prisma.legislativeAct.findMany({
+    select: {
+      issuer: true,
+      number: true,
+      year: true,
+      fullNumber: true,
+      publishDate: true,
+      ementa: true,
+      officialUrl: true,
+      content: true,
+      themes: true,
+      leiArticles: true,
+    },
+  });
+
+  const fields = ['number', 'year', 'fullNumber', 'publishDate', 'ementa', 'officialUrl', 'content', 'themes', 'leiArticles'] as const;
+  const byIssuer = new Map<string, Map<string, { filled: number; total: number }>>();
+
+  for (const act of acts) {
+    if (!byIssuer.has(act.issuer)) {
+      const inner = new Map<string, { filled: number; total: number }>();
+      for (const f of fields) inner.set(f, { filled: 0, total: 0 });
+      byIssuer.set(act.issuer, inner);
+    }
+    const inner = byIssuer.get(act.issuer)!;
+    for (const f of fields) {
+      const v = (act as Record<string, unknown>)[f];
+      const filled = v !== null && v !== undefined && v !== '';
+      const prev = inner.get(f)!;
+      inner.set(f, { filled: prev.filled + (filled ? 1 : 0), total: prev.total + 1 });
+    }
+  }
+
+  const rows: MetadataRow[] = [];
+  for (const [issuer, fieldMap] of byIssuer) {
+    for (const [field, v] of fieldMap) {
+      const pct = v.total === 0 ? 0 : Math.round((v.filled / v.total) * 100);
+      rows.push({ issuer, field, filledPct: pct, filledCount: v.filled, totalCount: v.total });
+    }
+  }
+  return rows.sort((a, b) => a.issuer.localeCompare(b.issuer) || a.field.localeCompare(b.field));
+}
+
+async function queryDuplicates(): Promise<DuplicateGroup[]> {
+  const acts = await prisma.legislativeAct.findMany({
+    select: { id: true, issuer: true, type: true, number: true, year: true, fullNumber: true },
+  });
+  const map = new Map<string, { issuer: string; type: string; number: string; year: number; ids: string[]; fullNumbers: string[] }>();
+  for (const act of acts) {
+    const key = `${act.issuer}|${act.type}|${act.number}|${act.year}`;
+    if (!map.has(key)) {
+      map.set(key, { issuer: act.issuer, type: act.type, number: act.number, year: act.year, ids: [], fullNumbers: [] });
+    }
+    const group = map.get(key)!;
+    group.ids.push(act.id);
+    group.fullNumbers.push(act.fullNumber);
+  }
+  return Array.from(map.values())
+    .filter((g) => g.ids.length > 1)
+    .map((g) => ({ ...g, count: g.ids.length }))
+    .sort((a, b) => b.count - a.count);
+}
+
 // ── Main ──────────────────────────────────────────────────────────────────
 
 async function main() {
@@ -194,6 +298,30 @@ async function main() {
   for (const row of scrapeStatus) {
     const age = row.lastScrapedAgoDays !== null ? `${row.lastScrapedAgoDays}d atrás` : 'nunca';
     console.log(`  [${row.issuer}] ${row.status}: ${row.count} (último: ${age})`);
+  }
+
+  console.log('\n— Seção 4: Hosts de officialUrl —');
+  const hosts = await queryHostDistribution();
+  for (const row of hosts) {
+    const flag = row.hasParser ? '✓ parser' : '✗ fallback';
+    console.log(`  ${row.host}: ${row.count} (${flag})`);
+  }
+
+  console.log('\n— Seção 5: Completude de metadados por issuer —');
+  const metadata = await queryMetadataCompleteness();
+  for (const row of metadata) {
+    console.log(`  [${row.issuer}] ${row.field}: ${row.filledPct}% (${row.filledCount}/${row.totalCount})`);
+  }
+
+  console.log('\n— Seção 6: Duplicatas candidatas —');
+  const duplicates = await queryDuplicates();
+  if (duplicates.length === 0) {
+    console.log('  Nenhuma.');
+  } else {
+    for (const g of duplicates) {
+      console.log(`  [${g.issuer}] ${g.type} ${g.number}/${g.year}: ${g.count} ocorrências`);
+      for (const fn of g.fullNumbers) console.log(`    - ${fn}`);
+    }
   }
 }
 
