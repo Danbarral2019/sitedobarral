@@ -2,8 +2,8 @@
  * Classificador de temas via LLM para atos normativos que não foram cobertos
  * pela heurística (scripts/enrich-legislative-acts-themes.ts).
  *
- * Usa lib/ai task 'classification' (Claude Haiku por padrão). Restringe saída
- * à taxonomia canônica de 15 temas. Valida via lib/legislative-scrapers/theme-validator.
+ * Delega para lib/legislative-scrapers/theme-enricher#classifyByAi (também
+ * usado pelo cron /api/cron/enrich-themes).
  *
  * Uso:
  *   npx dotenv -e .env.local -- npx tsx scripts/enrich-themes-ai.ts --dry-run
@@ -17,11 +17,7 @@ dotenv.config({ path: '.env.local' });
 
 import { PrismaClient } from '@prisma/client';
 import { PrismaNeon } from '@prisma/adapter-neon';
-import { generate } from '@/lib/ai';
-import {
-  CANONICAL_THEMES,
-  validateThemes,
-} from '@/lib/legislative-scrapers/theme-validator';
+import { classifyByAi } from '@/lib/legislative-scrapers/theme-enricher';
 
 const adapter = new PrismaNeon({ connectionString: process.env.DATABASE_URL! });
 const prisma = new PrismaClient({ adapter });
@@ -33,167 +29,55 @@ const LIMIT = LIMIT_ARG ? parseInt(LIMIT_ARG.split('=')[1], 10) : Number.POSITIV
 const DELAY_MS = 500;
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
-const SYSTEM_PROMPT = `Você é classificador de atos normativos sobre licitações e contratos públicos (Lei 14.133/2021). Sua tarefa: atribuir temas de uma taxonomia FIXA.`;
-
-function buildUserPrompt(params: {
-  fullNumber: string;
-  ementa: string | null;
-  contentHead: string | null;
-}): string {
-  const { fullNumber, ementa, contentHead } = params;
-  return `Classifique o ato abaixo usando APENAS valores da taxonomia fixa:
-
-TAXONOMIA FIXA (use somente estes strings exatos):
-${CANONICAL_THEMES.map((t) => `- ${t}`).join('\n')}
-
-ATO: ${fullNumber}
-EMENTA: ${ementa ?? '(sem ementa)'}
-
-TRECHO DO CONTEÚDO:
-${contentHead ?? '(sem conteúdo)'}
-
-Regras:
-- Retorne JSON no formato: {"themes": ["tema1", "tema2"]}
-- Máximo 4 temas
-- Se nenhum tema da taxonomia encaixar bem, retorne {"themes": []}
-- NÃO invente novos valores; use exatamente os strings listados acima
-
-Responda APENAS com o JSON, sem explicação.`;
-}
-
-interface ClassificationOutcome {
-  id: string;
-  fullNumber: string;
-  status: 'success' | 'skipped-invalid' | 'skipped-empty' | 'skipped-error';
-  themes?: string[];
-  reason?: string;
-  tokens?: { input?: number; output?: number };
-}
-
-async function classifyOne(act: {
-  id: string;
-  fullNumber: string;
-  ementa: string | null;
-  content: string | null;
-}): Promise<ClassificationOutcome> {
-  const contentHead = act.content ? act.content.slice(0, 2000) : null;
-  const userPrompt = buildUserPrompt({
-    fullNumber: act.fullNumber,
-    ementa: act.ementa,
-    contentHead,
-  });
-
-  let responseText: string;
-  let tokens: { input?: number; output?: number } = {};
-  try {
-    const resp = await generate('classification', {
-      systemPrompt: SYSTEM_PROMPT,
-      messages: [{ role: 'user', content: userPrompt }],
-      temperature: 0.1,
-      maxTokens: 200,
-      jsonMode: true,
-    });
-    responseText = resp.text;
-    tokens = { input: resp.inputTokens, output: resp.outputTokens };
-  } catch (err) {
-    return {
-      id: act.id,
-      fullNumber: act.fullNumber,
-      status: 'skipped-error',
-      reason: err instanceof Error ? err.message : String(err),
-    };
-  }
-
-  // Remove markdown fences (```json ... ```) se presentes — Claude às vezes
-  // envelopa JSON em code blocks apesar de jsonMode: true.
-  const stripped = responseText
-    .replace(/^\s*```(?:json)?\s*/i, '')
-    .replace(/\s*```\s*$/i, '')
-    .trim();
-
-  let parsed: unknown;
-  try {
-    parsed = JSON.parse(stripped);
-  } catch {
-    return {
-      id: act.id,
-      fullNumber: act.fullNumber,
-      status: 'skipped-invalid',
-      reason: `non-JSON response: ${responseText.slice(0, 120)}`,
-      tokens,
-    };
-  }
-
-  const validation = validateThemes(parsed);
-  if (!validation.ok) {
-    return {
-      id: act.id,
-      fullNumber: act.fullNumber,
-      status: 'skipped-invalid',
-      reason: validation.reason,
-      tokens,
-    };
-  }
-
-  if (validation.themes!.length === 0) {
-    return {
-      id: act.id,
-      fullNumber: act.fullNumber,
-      status: 'skipped-empty',
-      reason: 'LLM returned empty themes array',
-      tokens,
-    };
-  }
-
-  return {
-    id: act.id,
-    fullNumber: act.fullNumber,
-    status: 'success',
-    themes: validation.themes,
-    tokens,
-  };
-}
-
 async function main() {
   const targets = await prisma.legislativeAct.findMany({
     where: { themes: null },
-    select: { id: true, fullNumber: true, ementa: true, content: true },
+    select: { id: true, fullNumber: true, title: true, ementa: true, leiArticles: true, content: true },
   });
   const toProcess = targets.slice(0, LIMIT);
   console.log(`Encontrados ${targets.length} atos sem themes.`);
   console.log(`Processando ${toProcess.length} (limit=${LIMIT}, dry-run=${DRY_RUN})\n`);
 
-  const results: ClassificationOutcome[] = [];
+  let ok = 0;
+  let invalid = 0;
+  let empty = 0;
+  let error = 0;
   let totalInput = 0;
   let totalOutput = 0;
 
   for (let i = 0; i < toProcess.length; i++) {
     const act = toProcess[i];
     console.log(`[${i + 1}/${toProcess.length}] ${act.fullNumber}`);
-    const outcome = await classifyOne(act);
-    results.push(outcome);
-    totalInput += outcome.tokens?.input ?? 0;
-    totalOutput += outcome.tokens?.output ?? 0;
 
-    if (outcome.status === 'success') {
-      console.log(`  ✓ themes: ${JSON.stringify(outcome.themes)}`);
+    const result = await classifyByAi(act);
+    totalInput += result.tokens?.input ?? 0;
+    totalOutput += result.tokens?.output ?? 0;
+
+    if (!result.ok) {
+      const isApiError = result.reason && /\d{3}|rate|quota|credit|api/i.test(result.reason);
+      if (isApiError) {
+        error++;
+        console.log(`  ✗ erro API: ${result.reason}`);
+      } else {
+        invalid++;
+        console.log(`  ✗ resposta inválida: ${result.reason}`);
+      }
+    } else if (result.themes.length === 0) {
+      empty++;
+      console.log(`  = themes vazio (AI decidiu que nenhum tema canônico serve)`);
+    } else {
+      console.log(`  ✓ themes: ${JSON.stringify(result.themes)}`);
       if (!DRY_RUN) {
         await prisma.legislativeAct.update({
           where: { id: act.id },
-          data: { themes: JSON.stringify(outcome.themes) },
+          data: { themes: JSON.stringify(result.themes) },
         });
       }
-    } else {
-      console.log(`  ✗ ${outcome.status}: ${outcome.reason ?? '(sem razão)'}`);
+      ok++;
     }
 
     if (i < toProcess.length - 1) await sleep(DELAY_MS);
   }
-
-  const ok = results.filter((r) => r.status === 'success').length;
-  const invalid = results.filter((r) => r.status === 'skipped-invalid').length;
-  const empty = results.filter((r) => r.status === 'skipped-empty').length;
-  const error = results.filter((r) => r.status === 'skipped-error').length;
 
   console.log(`\n=== Resumo ===`);
   console.log(`Sucesso (themes gravados): ${ok}`);
