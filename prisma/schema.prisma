@@ -341,6 +341,12 @@ model User {
   // Push Notifications
   pushSubscriptions PushSubscription[]
 
+  // Módulo Planejamento (ETP/TR/Matriz)
+  planningSessions        PlanningSession[]
+  planningSnippets        PlanningLibrarySnippet[]
+  planningTrailsAuthored  PlanningTrailTemplate[]  @relation("PlanningTrailAuthor")
+  planningVersionsAuthored PlanningDocumentVersion[] @relation("PlanningVersionAuthor")
+
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
 
@@ -1616,4 +1622,190 @@ model ProcessedWebhookEvent {
   processedAt   DateTime @default(now())
 
   @@index([processedAt])
+}
+
+// =======================================================================
+// Módulo Planejamento (ETP + TR + Matriz)
+// =======================================================================
+// Valores aceitos mantidos como strings (convenção do schema); validação
+// feita em data/planejamento/types.ts (Zod) e em runtime.
+//
+// natureza: BEM_COMUM | BEM_ESPECIAL | SERVICO_COMUM | SERVICO_CONTINUADO |
+//           SERVICO_ESPECIAL | OBRA | SERVICO_ENGENHARIA
+// documentType: ETP | TR
+// sessionStatus: ONBOARDING | TRAIL_ETP | MATRIX_RUN | TRAIL_TR |
+//                REVIEW | EXPORT | ARCHIVED
+// sectionStatus: PENDING | IN_PROGRESS | DRAFTED | CONFIRMED |
+//                SKIPPED_WITH_JUSTIFICATION
+// generationProvenance: RAG_ANCHORED | PARTIALLY_ANCHORED | NOT_ANCHORED |
+//                       USER_WRITTEN
+// exportFormat: html-sei | docx | pdf | pncp-metadata
+// authorKind: user | ai | system
+
+model PlanningSession {
+  id                String    @id @default(uuid())
+  userId            String
+  user              User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  titulo            String
+  natureza          String?   // definida após onboarding
+  trailTemplateId   String?
+  trailTemplate     PlanningTrailTemplate? @relation(fields: [trailTemplateId], references: [id])
+  status            String    @default("ONBOARDING")
+  learningMode      Boolean   @default(true)
+  descricaoLivre    String?   @db.Text  // texto bruto do onboarding
+  classificacaoJson String?   @db.Text  // {naturezaSugerida, confianca, perguntasFollowUp[]}
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+  deletedAt         DateTime?
+  archivedAt        DateTime?
+
+  documents     PlanningDocument[]
+  decisionRuns  PlanningDecisionRun[]
+
+  @@index([userId, status])
+  @@index([userId, deletedAt])
+  @@index([userId, updatedAt])
+}
+
+model PlanningDocument {
+  id               String   @id @default(uuid())
+  sessionId        String
+  session          PlanningSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  type             String   // ETP | TR
+  status           String   @default("PENDING")
+  currentVersionId String?
+  decisionRunId    String?
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  sections PlanningDocumentSection[]
+  versions PlanningDocumentVersion[]
+  exports  PlanningExport[]
+
+  @@unique([sessionId, type])
+  @@index([sessionId])
+}
+
+model PlanningDocumentSection {
+  id                    String   @id @default(uuid())
+  documentId            String
+  document              PlanningDocument @relation(fields: [documentId], references: [id], onDelete: Cascade)
+  sectionKey            String   // ex: "descricao-necessidade"
+  ordem                 Int
+  required              Boolean  @default(true)
+  discretionary         Boolean  @default(false)
+  status                String   @default("PENDING")
+  contentMd             String?  @db.Text
+  didacticCacheJson     String?  @db.Text  // {conceito, fundamento, excertos, articles, sources}
+  generationProvenance  String?  // RAG_ANCHORED | PARTIALLY_ANCHORED | NOT_ANCHORED | USER_WRITTEN
+  sourcesJson           String?  @db.Text  // [{type,title,url,articleNumber,chunkId,similarity}]
+  justificationSkipped  String?  @db.Text
+  sufficiencyScore      Float?
+  conceptualCheckPassed Boolean?
+  conceptualCheckAnswerMd   String?  @db.Text
+  conceptualCheckAnsweredAt DateTime?
+  derivedFromSectionId  String?  // para herança ETP→TR
+  derivedFrom           PlanningDocumentSection? @relation("PlanningSectionInheritance", fields: [derivedFromSectionId], references: [id], onDelete: SetNull)
+  derivedBy             PlanningDocumentSection[] @relation("PlanningSectionInheritance")
+  lastEditedAt          DateTime?
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
+
+  @@unique([documentId, sectionKey])
+  @@index([documentId, ordem])
+  @@index([status])
+}
+
+model PlanningDocumentVersion {
+  id            String   @id @default(uuid())
+  documentId    String
+  document      PlanningDocument @relation(fields: [documentId], references: [id], onDelete: Cascade)
+  versionNumber Int
+  snapshotJson  String   @db.Text  // árvore de seções serializada
+  diffJson      String?  @db.Text  // diff vs. versão anterior
+  authorKind    String   // user | ai | system
+  authorId      String?
+  author        User?    @relation("PlanningVersionAuthor", fields: [authorId], references: [id], onDelete: SetNull)
+  label         String?
+  createdAt     DateTime @default(now())
+
+  @@unique([documentId, versionNumber])
+  @@index([documentId, createdAt])
+}
+
+model PlanningLibrarySnippet {
+  id              String   @id @default(uuid())
+  userId          String
+  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  titulo          String
+  corpoMd         String   @db.Text
+  tagsJson        String?  @db.Text
+  sourceSectionId String?  // de onde foi salvo
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@index([userId, updatedAt])
+  @@index([userId, titulo])
+}
+
+model PlanningTrailTemplate {
+  id                   String   @id @default(uuid())
+  slug                 String   @unique      // ex: servico-comum-continuado-etp
+  natureza             String
+  documentType         String   // ETP | TR
+  version              Int      @default(1)
+  definitionJsonCache  String   @db.Text     // snapshot do TS na publicação
+  changelogMd          String?  @db.Text
+  authorId             String?
+  author               User?    @relation("PlanningTrailAuthor", fields: [authorId], references: [id], onDelete: SetNull)
+  publishedAt          DateTime?
+  createdAt            DateTime @default(now())
+  updatedAt            DateTime @updatedAt
+
+  sessions         PlanningSession[]
+  sectionTemplates PlanningSectionTemplate[]
+
+  @@index([natureza, documentType])
+  @@index([publishedAt])
+}
+
+model PlanningSectionTemplate {
+  id              String   @id @default(uuid())
+  trailTemplateId String
+  trailTemplate   PlanningTrailTemplate @relation(fields: [trailTemplateId], references: [id], onDelete: Cascade)
+  sectionKey      String
+  promptTemplateMd String? @db.Text
+  ragFilterJson   String?  @db.Text
+  placeholderTextMd String? @db.Text
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@unique([trailTemplateId, sectionKey])
+}
+
+model PlanningDecisionRun {
+  id            String   @id @default(uuid())
+  sessionId     String
+  session       PlanningSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  matrixSlug    String
+  matrixVersion Int
+  inputsJson    String   @db.Text
+  resultJson    String   @db.Text  // {recommendation,rationaleMd,citationsJson,matchedRuleIds}
+  executedAt    DateTime @default(now())
+
+  @@index([sessionId, executedAt])
+  @@index([matrixSlug, matrixVersion])
+}
+
+model PlanningExport {
+  id         String   @id @default(uuid())
+  documentId String
+  document   PlanningDocument @relation(fields: [documentId], references: [id], onDelete: Cascade)
+  format     String   // html-sei | docx | pdf | pncp-metadata
+  r2Key      String
+  sizeBytes  Int?
+  checksum   String?
+  createdAt  DateTime @default(now())
+
+  @@index([documentId, createdAt])
 }

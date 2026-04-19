@@ -17,6 +17,7 @@
     "test:watch": "vitest --watch",
     "eval:annotate": "dotenv -e .env.local -- tsx eval/cli/annotate.ts",
     "eval:run": "dotenv -e .env.local -- tsx eval/cli/run-baseline.ts",
+    "eval:planejamento:decision": "tsx eval/planejamento/run-decision.ts",
     "analyze": "ANALYZE=true next build",
     "sync:obsidian": "tsx scripts/sync-obsidian.ts",
     "sync:obsidian:full": "tsx scripts/sync-obsidian.ts --full",
