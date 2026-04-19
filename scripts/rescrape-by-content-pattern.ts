@@ -39,7 +39,11 @@ const NOISE_PATTERNS = [
 async function main() {
   // Buscar atos com content match em qualquer pattern OU com 3+ \n consecutivos
   const all = await prisma.legislativeAct.findMany({
-    where: { officialUrl: { not: null }, content: { not: null } },
+    where: {
+      officialUrl: { not: null },
+      content: { not: null },
+      scrapeStatus: { not: 'manual' },
+    },
     select: { id: true, fullNumber: true, officialUrl: true, content: true },
   });
 
