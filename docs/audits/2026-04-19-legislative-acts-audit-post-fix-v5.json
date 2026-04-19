@@ -1,0 +1,1366 @@
+{
+  "generatedAt": "2026-04-19T18:10:39.607Z",
+  "total": 108,
+  "inventory": [
+    {
+      "issuer": "AUTOR/ME",
+      "type": "in",
+      "count": 1
+    },
+    {
+      "issuer": "CICS/MGI",
+      "type": "resolucao",
+      "count": 1
+    },
+    {
+      "issuer": "CIIA-PAC/CC",
+      "type": "resolucao",
+      "count": 1
+    },
+    {
+      "issuer": "ME",
+      "type": "portaria",
+      "count": 1
+    },
+    {
+      "issuer": "MPU",
+      "type": "portaria",
+      "count": 1
+    },
+    {
+      "issuer": "Presidência",
+      "type": "decreto",
+      "count": 3
+    },
+    {
+      "issuer": "Presidência",
+      "type": "lei",
+      "count": 1
+    },
+    {
+      "issuer": "Presidência da República",
+      "type": "decreto",
+      "count": 19
+    },
+    {
+      "issuer": "Presidência da República",
+      "type": "medida-provisoria",
+      "count": 1
+    },
+    {
+      "issuer": "SEGES",
+      "type": "in",
+      "count": 29
+    },
+    {
+      "issuer": "SEGES/ME",
+      "type": "in",
+      "count": 11
+    },
+    {
+      "issuer": "SEGES/ME",
+      "type": "portaria",
+      "count": 2
+    },
+    {
+      "issuer": "SEGES/MGI",
+      "type": "in",
+      "count": 15
+    },
+    {
+      "issuer": "SEGES/MGI",
+      "type": "portaria",
+      "count": 5
+    },
+    {
+      "issuer": "SEGES/MGI",
+      "type": "resolucao",
+      "count": 4
+    },
+    {
+      "issuer": "SGD/MGI",
+      "type": "in",
+      "count": 3
+    },
+    {
+      "issuer": "SGD/MGI",
+      "type": "portaria",
+      "count": 8
+    },
+    {
+      "issuer": "TCU",
+      "type": "portaria",
+      "count": 2
+    }
+  ],
+  "contentLength": [
+    {
+      "issuer": "AUTOR/ME",
+      "bucket": "2000-5000",
+      "count": 1
+    },
+    {
+      "issuer": "CICS/MGI",
+      "bucket": ">5000",
+      "count": 1
+    },
+    {
+      "issuer": "CIIA-PAC/CC",
+      "bucket": ">5000",
+      "count": 1
+    },
+    {
+      "issuer": "ME",
+      "bucket": "2000-5000",
+      "count": 1
+    },
+    {
+      "issuer": "MPU",
+      "bucket": ">5000",
+      "count": 1
+    },
+    {
+      "issuer": "Presidência",
+      "bucket": ">5000",
+      "count": 3
+    },
+    {
+      "issuer": "Presidência",
+      "bucket": "2000-5000",
+      "count": 1
+    },
+    {
+      "issuer": "Presidência da República",
+      "bucket": ">5000",
+      "count": 13
+    },
+    {
+      "issuer": "Presidência da República",
+      "bucket": "2000-5000",
+      "count": 6
+    },
+    {
+      "issuer": "Presidência da República",
+      "bucket": "500-2000",
+      "count": 1
+    },
+    {
+      "issuer": "SEGES",
+      "bucket": ">5000",
+      "count": 19
+    },
+    {
+      "issuer": "SEGES",
+      "bucket": "2000-5000",
+      "count": 1
+    },
+    {
+      "issuer": "SEGES",
+      "bucket": "500-2000",
+      "count": 9
+    },
+    {
+      "issuer": "SEGES/ME",
+      "bucket": ">5000",
+      "count": 10
+    },
+    {
+      "issuer": "SEGES/ME",
+      "bucket": "2000-5000",
+      "count": 1
+    },
+    {
+      "issuer": "SEGES/ME",
+      "bucket": "500-2000",
+      "count": 2
+    },
+    {
+      "issuer": "SEGES/MGI",
+      "bucket": ">5000",
+      "count": 14
+    },
+    {
+      "issuer": "SEGES/MGI",
+      "bucket": "2000-5000",
+      "count": 3
+    },
+    {
+      "issuer": "SEGES/MGI",
+      "bucket": "500-2000",
+      "count": 7
+    },
+    {
+      "issuer": "SGD/MGI",
+      "bucket": ">5000",
+      "count": 10
+    },
+    {
+      "issuer": "SGD/MGI",
+      "bucket": "2000-5000",
+      "count": 1
+    },
+    {
+      "issuer": "TCU",
+      "bucket": ">5000",
+      "count": 2
+    }
+  ],
+  "scrapeStatus": [
+    {
+      "issuer": "AUTOR/ME",
+      "status": "success",
+      "count": 1,
+      "lastScrapedAgoDays": 66
+    },
+    {
+      "issuer": "CICS/MGI",
+      "status": "success",
+      "count": 1,
+      "lastScrapedAgoDays": 0
+    },
+    {
+      "issuer": "CIIA-PAC/CC",
+      "status": "success",
+      "count": 1,
+      "lastScrapedAgoDays": 0
+    },
+    {
+      "issuer": "ME",
+      "status": "success",
+      "count": 1,
+      "lastScrapedAgoDays": 66
+    },
+    {
+      "issuer": "MPU",
+      "status": "manual",
+      "count": 1,
+      "lastScrapedAgoDays": 0
+    },
+    {
+      "issuer": "Presidência",
+      "status": "success",
+      "count": 4,
+      "lastScrapedAgoDays": 62
+    },
+    {
+      "issuer": "Presidência da República",
+      "status": "success",
+      "count": 20,
+      "lastScrapedAgoDays": 0
+    },
+    {
+      "issuer": "SEGES",
+      "status": "success",
+      "count": 29,
+      "lastScrapedAgoDays": 59
+    },
+    {
+      "issuer": "SEGES/ME",
+      "status": "success",
+      "count": 13,
+      "lastScrapedAgoDays": 66
+    },
+    {
+      "issuer": "SEGES/MGI",
+      "status": "success",
+      "count": 24,
+      "lastScrapedAgoDays": 0
+    },
+    {
+      "issuer": "SGD/MGI",
+      "status": "success",
+      "count": 11,
+      "lastScrapedAgoDays": 0
+    },
+    {
+      "issuer": "TCU",
+      "status": "manual",
+      "count": 2,
+      "lastScrapedAgoDays": 0
+    }
+  ],
+  "hostDistribution": [
+    {
+      "host": "www.gov.br",
+      "count": 78,
+      "hasParser": true
+    },
+    {
+      "host": "www.planalto.gov.br",
+      "count": 24,
+      "hasParser": true
+    },
+    {
+      "host": "www.in.gov.br",
+      "count": 3,
+      "hasParser": true
+    },
+    {
+      "host": "pesquisa.apps.tcu.gov.br",
+      "count": 2,
+      "hasParser": true
+    },
+    {
+      "host": "biblioteca.mpf.mp.br",
+      "count": 1,
+      "hasParser": false
+    }
+  ],
+  "metadataCompleteness": [
+    {
+      "issuer": "AUTOR/ME",
+      "field": "content",
+      "filledPct": 100,
+      "filledCount": 1,
+      "totalCount": 1
+    },
+    {
+      "issuer": "AUTOR/ME",
+      "field": "ementa",
+      "filledPct": 100,
+      "filledCount": 1,
+      "totalCount": 1
+    },
+    {
+      "issuer": "AUTOR/ME",
+      "field": "fullNumber",
+      "filledPct": 100,
+      "filledCount": 1,
+      "totalCount": 1
+    },
+    {
+      "issuer": "AUTOR/ME",
+      "field": "leiArticles",
+      "filledPct": 100,
+      "filledCount": 1,
+      "totalCount": 1
+    },
+    {
+      "issuer": "AUTOR/ME",
+      "field": "number",
+      "filledPct": 100,
+      "filledCount": 1,
+      "totalCount": 1
+    },
+    {
+      "issuer": "AUTOR/ME",
+      "field": "officialUrl",
+      "filledPct": 100,
+      "filledCount": 1,
+      "totalCount": 1
+    },
+    {
+      "issuer": "AUTOR/ME",
+      "field": "publishDate",
+      "filledPct": 100,
+      "filledCount": 1,
+      "totalCount": 1
+    },
+    {
+      "issuer": "AUTOR/ME",
+      "field": "themes",
+      "filledPct": 100,
+      "filledCount": 1,
+      "totalCount": 1
+    },
+    {
+      "issuer": "AUTOR/ME",
+      "field": "year",
+      "filledPct": 100,
+      "filledCount": 1,
+      "totalCount": 1
+    },
+    {
+      "issuer": "CICS/MGI",
+      "field": "content",
+      "filledPct": 100,
+      "filledCount": 1,
+      "totalCount": 1
+    },
+    {
+      "issuer": "CICS/MGI",
+      "field": "ementa",
+      "filledPct": 100,
+      "filledCount": 1,
+      "totalCount": 1
+    },
+    {
+      "issuer": "CICS/MGI",
+      "field": "fullNumber",
+      "filledPct": 100,
+      "filledCount": 1,
+      "totalCount": 1
+    },
+    {
+      "issuer": "CICS/MGI",
+      "field": "leiArticles",
+      "filledPct": 100,
+      "filledCount": 1,
+      "totalCount": 1
+    },
+    {
+      "issuer": "CICS/MGI",
+      "field": "number",
+      "filledPct": 100,
+      "filledCount": 1,
+      "totalCount": 1
+    },
+    {
+      "issuer": "CICS/MGI",
+      "field": "officialUrl",
+      "filledPct": 100,
+      "filledCount": 1,
+      "totalCount": 1
+    },
+    {
+      "issuer": "CICS/MGI",
+      "field": "publishDate",
+      "filledPct": 100,
+      "filledCount": 1,
+      "totalCount": 1
+    },
+    {
+      "issuer": "CICS/MGI",
+      "field": "themes",
+      "filledPct": 0,
+      "filledCount": 0,
+      "totalCount": 1
+    },
+    {
+      "issuer": "CICS/MGI",
+      "field": "year",
+      "filledPct": 100,
+      "filledCount": 1,
+      "totalCount": 1
+    },
+    {
+      "issuer": "CIIA-PAC/CC",
+      "field": "content",
+      "filledPct": 100,
+      "filledCount": 1,
+      "totalCount": 1
+    },
+    {
+      "issuer": "CIIA-PAC/CC",
+      "field": "ementa",
+      "filledPct": 100,
+      "filledCount": 1,
+      "totalCount": 1
+    },
+    {
+      "issuer": "CIIA-PAC/CC",
+      "field": "fullNumber",
+      "filledPct": 100,
+      "filledCount": 1,
+      "totalCount": 1
+    },
+    {
+      "issuer": "CIIA-PAC/CC",
+      "field": "leiArticles",
+      "filledPct": 100,
+      "filledCount": 1,
+      "totalCount": 1
+    },
+    {
+      "issuer": "CIIA-PAC/CC",
+      "field": "number",
+      "filledPct": 100,
+      "filledCount": 1,
+      "totalCount": 1
+    },
+    {
+      "issuer": "CIIA-PAC/CC",
+      "field": "officialUrl",
+      "filledPct": 100,
+      "filledCount": 1,
+      "totalCount": 1
+    },
+    {
+      "issuer": "CIIA-PAC/CC",
+      "field": "publishDate",
+      "filledPct": 100,
+      "filledCount": 1,
+      "totalCount": 1
+    },
+    {
+      "issuer": "CIIA-PAC/CC",
+      "field": "themes",
+      "filledPct": 0,
+      "filledCount": 0,
+      "totalCount": 1
+    },
+    {
+      "issuer": "CIIA-PAC/CC",
+      "field": "year",
+      "filledPct": 100,
+      "filledCount": 1,
+      "totalCount": 1
+    },
+    {
+      "issuer": "ME",
+      "field": "content",
+      "filledPct": 100,
+      "filledCount": 1,
+      "totalCount": 1
+    },
+    {
+      "issuer": "ME",
+      "field": "ementa",
+      "filledPct": 100,
+      "filledCount": 1,
+      "totalCount": 1
+    },
+    {
+      "issuer": "ME",
+      "field": "fullNumber",
+      "filledPct": 100,
+      "filledCount": 1,
+      "totalCount": 1
+    },
+    {
+      "issuer": "ME",
+      "field": "leiArticles",
+      "filledPct": 0,
+      "filledCount": 0,
+      "totalCount": 1
+    },
+    {
+      "issuer": "ME",
+      "field": "number",
+      "filledPct": 100,
+      "filledCount": 1,
+      "totalCount": 1
+    },
+    {
+      "issuer": "ME",
+      "field": "officialUrl",
+      "filledPct": 100,
+      "filledCount": 1,
+      "totalCount": 1
+    },
+    {
+      "issuer": "ME",
+      "field": "publishDate",
+      "filledPct": 100,
+      "filledCount": 1,
+      "totalCount": 1
+    },
+    {
+      "issuer": "ME",
+      "field": "themes",
+      "filledPct": 100,
+      "filledCount": 1,
+      "totalCount": 1
+    },
+    {
+      "issuer": "ME",
+      "field": "year",
+      "filledPct": 100,
+      "filledCount": 1,
+      "totalCount": 1
+    },
+    {
+      "issuer": "MPU",
+      "field": "content",
+      "filledPct": 100,
+      "filledCount": 1,
+      "totalCount": 1
+    },
+    {
+      "issuer": "MPU",
+      "field": "ementa",
+      "filledPct": 100,
+      "filledCount": 1,
+      "totalCount": 1
+    },
+    {
+      "issuer": "MPU",
+      "field": "fullNumber",
+      "filledPct": 100,
+      "filledCount": 1,
+      "totalCount": 1
+    },
+    {
+      "issuer": "MPU",
+      "field": "leiArticles",
+      "filledPct": 100,
+      "filledCount": 1,
+      "totalCount": 1
+    },
+    {
+      "issuer": "MPU",
+      "field": "number",
+      "filledPct": 100,
+      "filledCount": 1,
+      "totalCount": 1
+    },
+    {
+      "issuer": "MPU",
+      "field": "officialUrl",
+      "filledPct": 100,
+      "filledCount": 1,
+      "totalCount": 1
+    },
+    {
+      "issuer": "MPU",
+      "field": "publishDate",
+      "filledPct": 100,
+      "filledCount": 1,
+      "totalCount": 1
+    },
+    {
+      "issuer": "MPU",
+      "field": "themes",
+      "filledPct": 0,
+      "filledCount": 0,
+      "totalCount": 1
+    },
+    {
+      "issuer": "MPU",
+      "field": "year",
+      "filledPct": 100,
+      "filledCount": 1,
+      "totalCount": 1
+    },
+    {
+      "issuer": "Presidência",
+      "field": "content",
+      "filledPct": 100,
+      "filledCount": 4,
+      "totalCount": 4
+    },
+    {
+      "issuer": "Presidência",
+      "field": "ementa",
+      "filledPct": 100,
+      "filledCount": 4,
+      "totalCount": 4
+    },
+    {
+      "issuer": "Presidência",
+      "field": "fullNumber",
+      "filledPct": 100,
+      "filledCount": 4,
+      "totalCount": 4
+    },
+    {
+      "issuer": "Presidência",
+      "field": "leiArticles",
+      "filledPct": 100,
+      "filledCount": 4,
+      "totalCount": 4
+    },
+    {
+      "issuer": "Presidência",
+      "field": "number",
+      "filledPct": 100,
+      "filledCount": 4,
+      "totalCount": 4
+    },
+    {
+      "issuer": "Presidência",
+      "field": "officialUrl",
+      "filledPct": 100,
+      "filledCount": 4,
+      "totalCount": 4
+    },
+    {
+      "issuer": "Presidência",
+      "field": "publishDate",
+      "filledPct": 100,
+      "filledCount": 4,
+      "totalCount": 4
+    },
+    {
+      "issuer": "Presidência",
+      "field": "themes",
+      "filledPct": 100,
+      "filledCount": 4,
+      "totalCount": 4
+    },
+    {
+      "issuer": "Presidência",
+      "field": "year",
+      "filledPct": 100,
+      "filledCount": 4,
+      "totalCount": 4
+    },
+    {
+      "issuer": "Presidência da República",
+      "field": "content",
+      "filledPct": 100,
+      "filledCount": 20,
+      "totalCount": 20
+    },
+    {
+      "issuer": "Presidência da República",
+      "field": "ementa",
+      "filledPct": 100,
+      "filledCount": 20,
+      "totalCount": 20
+    },
+    {
+      "issuer": "Presidência da República",
+      "field": "fullNumber",
+      "filledPct": 100,
+      "filledCount": 20,
+      "totalCount": 20
+    },
+    {
+      "issuer": "Presidência da República",
+      "field": "leiArticles",
+      "filledPct": 100,
+      "filledCount": 20,
+      "totalCount": 20
+    },
+    {
+      "issuer": "Presidência da República",
+      "field": "number",
+      "filledPct": 100,
+      "filledCount": 20,
+      "totalCount": 20
+    },
+    {
+      "issuer": "Presidência da República",
+      "field": "officialUrl",
+      "filledPct": 100,
+      "filledCount": 20,
+      "totalCount": 20
+    },
+    {
+      "issuer": "Presidência da República",
+      "field": "publishDate",
+      "filledPct": 100,
+      "filledCount": 20,
+      "totalCount": 20
+    },
+    {
+      "issuer": "Presidência da República",
+      "field": "themes",
+      "filledPct": 90,
+      "filledCount": 18,
+      "totalCount": 20
+    },
+    {
+      "issuer": "Presidência da República",
+      "field": "year",
+      "filledPct": 100,
+      "filledCount": 20,
+      "totalCount": 20
+    },
+    {
+      "issuer": "SEGES",
+      "field": "content",
+      "filledPct": 100,
+      "filledCount": 29,
+      "totalCount": 29
+    },
+    {
+      "issuer": "SEGES",
+      "field": "ementa",
+      "filledPct": 100,
+      "filledCount": 29,
+      "totalCount": 29
+    },
+    {
+      "issuer": "SEGES",
+      "field": "fullNumber",
+      "filledPct": 100,
+      "filledCount": 29,
+      "totalCount": 29
+    },
+    {
+      "issuer": "SEGES",
+      "field": "leiArticles",
+      "filledPct": 86,
+      "filledCount": 25,
+      "totalCount": 29
+    },
+    {
+      "issuer": "SEGES",
+      "field": "number",
+      "filledPct": 100,
+      "filledCount": 29,
+      "totalCount": 29
+    },
+    {
+      "issuer": "SEGES",
+      "field": "officialUrl",
+      "filledPct": 100,
+      "filledCount": 29,
+      "totalCount": 29
+    },
+    {
+      "issuer": "SEGES",
+      "field": "publishDate",
+      "filledPct": 100,
+      "filledCount": 29,
+      "totalCount": 29
+    },
+    {
+      "issuer": "SEGES",
+      "field": "themes",
+      "filledPct": 3,
+      "filledCount": 1,
+      "totalCount": 29
+    },
+    {
+      "issuer": "SEGES",
+      "field": "year",
+      "filledPct": 100,
+      "filledCount": 29,
+      "totalCount": 29
+    },
+    {
+      "issuer": "SEGES/ME",
+      "field": "content",
+      "filledPct": 100,
+      "filledCount": 13,
+      "totalCount": 13
+    },
+    {
+      "issuer": "SEGES/ME",
+      "field": "ementa",
+      "filledPct": 100,
+      "filledCount": 13,
+      "totalCount": 13
+    },
+    {
+      "issuer": "SEGES/ME",
+      "field": "fullNumber",
+      "filledPct": 100,
+      "filledCount": 13,
+      "totalCount": 13
+    },
+    {
+      "issuer": "SEGES/ME",
+      "field": "leiArticles",
+      "filledPct": 100,
+      "filledCount": 13,
+      "totalCount": 13
+    },
+    {
+      "issuer": "SEGES/ME",
+      "field": "number",
+      "filledPct": 100,
+      "filledCount": 13,
+      "totalCount": 13
+    },
+    {
+      "issuer": "SEGES/ME",
+      "field": "officialUrl",
+      "filledPct": 100,
+      "filledCount": 13,
+      "totalCount": 13
+    },
+    {
+      "issuer": "SEGES/ME",
+      "field": "publishDate",
+      "filledPct": 100,
+      "filledCount": 13,
+      "totalCount": 13
+    },
+    {
+      "issuer": "SEGES/ME",
+      "field": "themes",
+      "filledPct": 100,
+      "filledCount": 13,
+      "totalCount": 13
+    },
+    {
+      "issuer": "SEGES/ME",
+      "field": "year",
+      "filledPct": 100,
+      "filledCount": 13,
+      "totalCount": 13
+    },
+    {
+      "issuer": "SEGES/MGI",
+      "field": "content",
+      "filledPct": 100,
+      "filledCount": 24,
+      "totalCount": 24
+    },
+    {
+      "issuer": "SEGES/MGI",
+      "field": "ementa",
+      "filledPct": 100,
+      "filledCount": 24,
+      "totalCount": 24
+    },
+    {
+      "issuer": "SEGES/MGI",
+      "field": "fullNumber",
+      "filledPct": 100,
+      "filledCount": 24,
+      "totalCount": 24
+    },
+    {
+      "issuer": "SEGES/MGI",
+      "field": "leiArticles",
+      "filledPct": 100,
+      "filledCount": 24,
+      "totalCount": 24
+    },
+    {
+      "issuer": "SEGES/MGI",
+      "field": "number",
+      "filledPct": 100,
+      "filledCount": 24,
+      "totalCount": 24
+    },
+    {
+      "issuer": "SEGES/MGI",
+      "field": "officialUrl",
+      "filledPct": 100,
+      "filledCount": 24,
+      "totalCount": 24
+    },
+    {
+      "issuer": "SEGES/MGI",
+      "field": "publishDate",
+      "filledPct": 100,
+      "filledCount": 24,
+      "totalCount": 24
+    },
+    {
+      "issuer": "SEGES/MGI",
+      "field": "themes",
+      "filledPct": 67,
+      "filledCount": 16,
+      "totalCount": 24
+    },
+    {
+      "issuer": "SEGES/MGI",
+      "field": "year",
+      "filledPct": 100,
+      "filledCount": 24,
+      "totalCount": 24
+    },
+    {
+      "issuer": "SGD/MGI",
+      "field": "content",
+      "filledPct": 100,
+      "filledCount": 11,
+      "totalCount": 11
+    },
+    {
+      "issuer": "SGD/MGI",
+      "field": "ementa",
+      "filledPct": 100,
+      "filledCount": 11,
+      "totalCount": 11
+    },
+    {
+      "issuer": "SGD/MGI",
+      "field": "fullNumber",
+      "filledPct": 100,
+      "filledCount": 11,
+      "totalCount": 11
+    },
+    {
+      "issuer": "SGD/MGI",
+      "field": "leiArticles",
+      "filledPct": 100,
+      "filledCount": 11,
+      "totalCount": 11
+    },
+    {
+      "issuer": "SGD/MGI",
+      "field": "number",
+      "filledPct": 100,
+      "filledCount": 11,
+      "totalCount": 11
+    },
+    {
+      "issuer": "SGD/MGI",
+      "field": "officialUrl",
+      "filledPct": 100,
+      "filledCount": 11,
+      "totalCount": 11
+    },
+    {
+      "issuer": "SGD/MGI",
+      "field": "publishDate",
+      "filledPct": 100,
+      "filledCount": 11,
+      "totalCount": 11
+    },
+    {
+      "issuer": "SGD/MGI",
+      "field": "themes",
+      "filledPct": 100,
+      "filledCount": 11,
+      "totalCount": 11
+    },
+    {
+      "issuer": "SGD/MGI",
+      "field": "year",
+      "filledPct": 100,
+      "filledCount": 11,
+      "totalCount": 11
+    },
+    {
+      "issuer": "TCU",
+      "field": "content",
+      "filledPct": 100,
+      "filledCount": 2,
+      "totalCount": 2
+    },
+    {
+      "issuer": "TCU",
+      "field": "ementa",
+      "filledPct": 100,
+      "filledCount": 2,
+      "totalCount": 2
+    },
+    {
+      "issuer": "TCU",
+      "field": "fullNumber",
+      "filledPct": 100,
+      "filledCount": 2,
+      "totalCount": 2
+    },
+    {
+      "issuer": "TCU",
+      "field": "leiArticles",
+      "filledPct": 100,
+      "filledCount": 2,
+      "totalCount": 2
+    },
+    {
+      "issuer": "TCU",
+      "field": "number",
+      "filledPct": 100,
+      "filledCount": 2,
+      "totalCount": 2
+    },
+    {
+      "issuer": "TCU",
+      "field": "officialUrl",
+      "filledPct": 100,
+      "filledCount": 2,
+      "totalCount": 2
+    },
+    {
+      "issuer": "TCU",
+      "field": "publishDate",
+      "filledPct": 100,
+      "filledCount": 2,
+      "totalCount": 2
+    },
+    {
+      "issuer": "TCU",
+      "field": "themes",
+      "filledPct": 0,
+      "filledCount": 0,
+      "totalCount": 2
+    },
+    {
+      "issuer": "TCU",
+      "field": "year",
+      "filledPct": 100,
+      "filledCount": 2,
+      "totalCount": 2
+    }
+  ],
+  "duplicates": [],
+  "samples": [
+    {
+      "issuer": "SEGES",
+      "fullNumber": "IN SEGES 512/2025",
+      "id": "29c68b6c-cde9-456a-9b9b-e7c31598cfe4",
+      "contentLength": 29307,
+      "head": "O SECRETÁRIO DE GESTÃO E INOVAÇÃO DO MINISTÉRIO DA GESTÃO E DA INOVAÇÃO EM SERVIÇOS PÚBLICOS, no uso das atribuições que lhe confere o art. 16, caput, incisos VI e VII, alínea \"a\", do Anexo I do Decreto nº 12.102, de 8 de julho de 2024, e o Decreto nº 1.094, de 23 de março de 1994, e tendo em vista ",
+      "tail": "ção em Serviços Públicos, que poderá expedir normas complementares e disponibilizar, em meio eletrônico, informações adicionais.\n\nVigência\n\nArt. 63. Esta Instrução Normativa entra em vigor em 1º de abril de 2026.\n\nROBERTO POJO\n\nEste conteúdo não substitui o publicado no Diário Oficial da União - DOU"
+    },
+    {
+      "issuer": "SEGES",
+      "fullNumber": "IN SEGES 460/2025",
+      "id": "596eb7cc-7b8d-4e9b-8f74-6d31e9441b2a",
+      "contentLength": 7723,
+      "head": "O SECRETÁRIO DE GESTÃO E INOVAÇÃO DO MINISTÉRIO DA GESTÃO E DA INOVAÇÃO EM SERVIÇOS PÚBLICOS, no uso das atribuições que lhe confere o inciso VI e a alínea \"a\" do inc. VII do art. 16 do Anexo I do Decreto nº 12.102, de 8 de julho de 2024, e o Decreto nº 1.094, de 23 de março de 1994, resolve:\n\nArt. ",
+      "tail": "NR)\n\nArt. 4º Ficam revogados o § 5º do art. 32 e o parágrafo único do art. 40 da Instrução Normativa nº 52, de 10 de fevereiro de 2025.\n\nArt. 5º Esta Instrução Normativa entra em vigor na data da sua publicação.\n\nROBERTO POJO\n\n Este conteúdo não substitui o publicado no Diário Oficial da União - DOU"
+    },
+    {
+      "issuer": "SEGES",
+      "fullNumber": "IN SEGES 412/2025",
+      "id": "36ca80ab-7c22-43c6-a1ba-34be70624f5b",
+      "contentLength": 23827,
+      "head": "O SECRETÁRIO DE GESTÃO E INOVAÇÃO DO MINISTÉRIO DA GESTÃO E DA INOVAÇÃO EM SERVIÇOS PÚBLICOS, no uso das atribuições que lhe conferem o art. 16, caput, inciso I, alínea \"a\", e inciso VII, alínea \"c\", do Anexo I ao Decreto nº 12.102, de 8 de julho de 2024, e tendo em vista o disposto no art. 8º do De",
+      "tail": "ra poderá ser feita por meio do sistema de processo eletrônico do órgão ou utilizando a assinatura eletrônica do Gov.Br)\n\nRepublicada por ter saído no DOU Nº 188, de 02-04-2025, Seção 1, página 110, com incorreção no original.\n\nEste conteúdo não substitui o publicado no Diário Oficial da União - DOU"
+    },
+    {
+      "issuer": "SEGES/MGI",
+      "fullNumber": "Portaria SEGES/MGI 4.932/2023",
+      "id": "1c16baeb-6bda-4702-a6fa-9f40b144e861",
+      "contentLength": 1539,
+      "head": "Info\n\nPORTARIA SEGES/MGI Nº 4.932, DE 30 DE AGOSTO DE 2023\n\nAltera o preâmbulo da Portaria SEGES/MGI nº 1769, de 25 de abril de 2023, que dispõe sobre o regime de transição de que trata o art. 191 da Lei nº 14.133, de 1º de abril de 2021, no âmbito da Administração Pública federal direta, autárquica",
+      "tail": " Portaria entra em vigor na data de sua publicação.\nROBERTO POJO\nEste conteúdo não substitui o publicado no Diário Oficial da União - DOU.\n\nCompartilhe:\n\nCompartilhe por Facebook\n\nCompartilhe por Twitter\n\nCompartilhe por LinkedIn\n\nCompartilhe por WhatsApp\n\nlink para Copiar para área de transferência"
+    },
+    {
+      "issuer": "SEGES/MGI",
+      "fullNumber": "Portaria SEGES/MGI 1.769/2023",
+      "id": "5150eee6-0e15-42de-8e72-d401c04b782c",
+      "contentLength": 6127,
+      "head": "Info\n\nPORTARIA SEGES/MGI N.º 1.769, DE 25 DE ABRIL DE 2023 (Revoga a Portaria SEGES/MGI N.º 720, DE 15 DE MARÇO DE 2023) - Alterada pela Portaria SEGES/MGI Nº 4.932, DE 30 DE AGOSTO DE 2023 e pela Portaria SEGES/MGI N.º 9.598, DE 17 DE DEZEMBRO DE 2024\n\nDispõe sobre o regime de transição de que trat",
+      "tail": "xigibilidades não abrangidas no item (2)\n\nAto de autorização / ratificação\n\nAté 28 de dezembro de 2023, às 16h\n\nAté 29 de dezembro de 2023\n\nCompartilhe:\n\nCompartilhe por Facebook\n\nCompartilhe por Twitter\n\nCompartilhe por LinkedIn\n\nCompartilhe por WhatsApp\n\nlink para Copiar para área de transferência"
+    },
+    {
+      "issuer": "SEGES/MGI",
+      "fullNumber": "Resolução SEGES-CICS/MGI 6/2024",
+      "id": "50fb3214-2988-4cb6-94eb-ae8bb9af49bc",
+      "contentLength": 1475,
+      "head": "Info\n\nRESOLUÇÃO SEGES-CICS/MGI Nº 6, DE 25 DE NOVEMBRO DE 2024\n\nSuspende a aplicação de margens de preferência em licitações que tenham por critério de julgamento o menor preço por grupo de itens\n\nCompartilhe:\n\nCompartilhe por Facebook\n\nCompartilhe por Twitter\n\nCompartilhe por LinkedIn\n\nCompartilhe ",
+      "tail": "sua publicação.\nROBERTO SEARA MACHADO POJO\nPresidente da Comissão\nEste conteúdo não substitui o publicado no Diário Oficial da União - DOU\n\nCompartilhe:\n\nCompartilhe por Facebook\n\nCompartilhe por Twitter\n\nCompartilhe por LinkedIn\n\nCompartilhe por WhatsApp\n\nlink para Copiar para área de transferência"
+    },
+    {
+      "issuer": "Presidência da República",
+      "fullNumber": "MP 1.167/2023",
+      "id": "b3242d4f-9ead-4951-b864-46c607e622ef",
+      "contentLength": 2130,
+      "head": "Presid�ncia\nda Rep�blica\nCasa Civil\nSecretaria Especial para Assuntos Jur�dicos\n\nMEDIDA PROVIS�RIA N�\n1.167, DE 31\nDE MAR�O DE 2023\n\nExposi��o de motivos\n\nVig�ncia encerrada\nTexto para\nimpress�o\n\nAltera a Lei n� 14.133, de 1� de abril de 2021, para prorrogar a\npossibilidade de uso da Lei n� 8.666, d",
+      "tail": "rt. 191 da Lei n� 14.133, de 2021.\n\nArt. 3� Esta Medida\nProvis�ria entra em vigor na data de sua publica��o.\n\nBras�lia, 31 de mar�o de 2023; 202� da Independ�ncia e 135� da Rep�blica.\n\nLUIZ IN�CIO LULA DA SILVA\n\nEsther Dweck\n\nEste texto n�o substitui o\npublicado no DOU de 31.3.2023 - Edi��o extra\n\n*"
+    },
+    {
+      "issuer": "Presidência da República",
+      "fullNumber": "Decreto 12.807/2025",
+      "id": "0e770099-b45d-4659-8e0a-6bf5c5ffd773",
+      "contentLength": 2872,
+      "head": "Presidência da República\n\n Casa Civil\n\n Secretaria Especial para Assuntos Jurídicos\n \n \n \n \n\n \n \n\n \n\n \n \n \n \n \n DECRETO Nº 12.807, DE 29 DE DEZEMBRO DE 2025\n \n \n \n \n \n\n \n \n \n \n \n \n Vigência\n \n \n \n Atualiza os valores estabelecidos na Lei nº 14.133, de 1º de abril de 2021.\n \n\n \n \n\n O \n PRESIDENTE DA ",
+      "tail": "e oito reais e \n setenta e quatro centavos)\n \n\n \n \n \n\n Art. 95, § 2º\n \n \n\n \n R$ 13.098,41 (treze mil noventa e oito reais e quarenta e um \n centavos)\n \n\n \n \n \n\n Art. 184-A\n \n \n\n \n R$ 1.646.430,90 (um milhão seiscentos e quarenta e seis mil \n quatrocentos e trinta reais e noventa centavos)\n \n\n \n \n\n *"
+    },
+    {
+      "issuer": "Presidência da República",
+      "fullNumber": "Decreto 12.785/2025",
+      "id": "69226752-81ac-41f0-869e-c1eda1535a12",
+      "contentLength": 14394,
+      "head": "Presidência da República\n\n Casa Civil\n\n Secretaria Especial para Assuntos Jurídicos\n \n \n \n \n\n \n \n\n \n\n \n \n \n \n \n DECRETO Nº 12.785, DE 19 DE DEZEMBRO DE 2025\n \n \n \n \n \n\n \n \n \n \n \n \n \n \n \n\n \n \n Dispõe sobre mecanismos para promoção da circularidade de bens móveis, no \n âmbito da administração pública ",
+      "tail": "o de 2020.\n\n \n\n \n Vigência\n\n \n\n \n Art. \n 24. Este Decreto entra em vigor na data de sua publicação.\n\n \n\n \n Brasília, 19 de dezembro de 2025; 204º da Independência e 137º da República.\n\n \nLUIZ INÁCIO LULA DA SILVA\n\n Esther Dweck\n\n \n\n Este texto não substitui o \n publicado no DOU de 22.12.2025.\n\n \n\n *"
+    },
+    {
+      "issuer": "SEGES/ME",
+      "fullNumber": "IN SEGES/ME 103/2022",
+      "id": "2c048888-c413-464d-a8bd-b784f3701b4b",
+      "contentLength": 20840,
+      "head": "O SECRETÁRIO DE GESTÃO DA SECRETARIA ESPECIAL DE DESBUROCRATIZAÇÃO, GESTÃO E GOVERNO DIGITAL DO MINISTÉRIO DA ECONOMIA, no uso das atribuições que lhe conferem os incisos I e II do art. 127 do Anexo I do Decreto nº 9.745 de 8 de abril de 2019, e o Decreto nº 1.094, de 23 de março de 1994, e tendo em",
+      "tail": "ério da Economia, que poderá expedir normas complementares e disponibilizar informações adicionais, em meio eletrônico.\n\nVigência\n\nArt. 27. Esta Instrução Normativa entra em vigor em 30 de março de 2023.\n\nRENATO RIBEIRO FENILI\n\nEste conteúdo não substitui o publicado no Diário Oficial da União - DOU"
+    },
+    {
+      "issuer": "SEGES/ME",
+      "fullNumber": "IN SEGES/ME 98/2022",
+      "id": "88e07a18-883d-41a1-8cd0-90b43e76da93",
+      "contentLength": 929,
+      "head": "O SECRETÁRIO DE GESTÃO DA SECRETARIA ESPECIAL DE DESBUROCRATIZAÇÃO, GESTÃO E GOVERNO DIGITAL DO MINISTÉRIO DA ECONOMIA, no uso das atribuições que lhe conferem o Decreto nº 9.745, de 8 de abril de 2019, e o Decreto nº 1.094, de 23 de março de 1994, e tendo em vista o disposto na Lei nº 14.133, de 1º",
+      "tail": " a realização dos processos de licitação e de contratação direta de serviços de que dispõe a Lei nº 14.133, de 1º de abril de 2021.\n\nArt. 2º Esta Instrução Normativa entra em vigor na data de publicação.\n\nRENATO RIBEIRO FENILI\n\nEste conteúdo não substitui o publicado no Diário Oficial da União - DOU"
+    },
+    {
+      "issuer": "SEGES/ME",
+      "fullNumber": "IN SEGES/ME 96/2022",
+      "id": "5a514689-7f93-4519-84b9-2006c0fdd3b3",
+      "contentLength": 42179,
+      "head": "O SECRETÁRIO DE GESTÃO DA SECRETARIA ESPECIAL DE DESBUROCRATIZAÇÃO, GESTÃO E GOVERNO DIGITAL DO MINISTÉRIO DA ECONOMIA, no uso das atribuições que lhe conferem o Decreto nº 9.745, de 8 de abril de 2019, e o Decreto nº 1.094, de 23 de março de 1994, e tendo em vista o disposto na Lei nº 14.133, de 1º",
+      "tail": "r, para a verificação de conformidade da habilitação dos licitantes, de que dispõe o art. 62 da Lei nº 14.133, de 2021.\n\nVigência\n\nArt. 62. Esta Instrução Normativa entra em vigor em 30 de março de 2023.\n\nRENATO RIBEIRO FENILI\n\nEste conteúdo não substitui o publicado no Diário Oficial da União - DOU"
+    },
+    {
+      "issuer": "SGD/MGI",
+      "fullNumber": "Portaria SGD/MGI nº 6.680/2024",
+      "id": "95076c02-6a25-4283-9fad-1df723e2b64f",
+      "contentLength": 172340,
+      "head": "Info\n\nPORTARIA SGD/MGI Nº 6.680, DE 4 DE OUTUBRO DE 2024\n\nCompartilhe:\n\nCompartilhe por Facebook\n\nCompartilhe por Twitter\n\nCompartilhe por LinkedIn\n\nCompartilhe por WhatsApp\n\nlink para Copiar para área de transferência\n\nPublicado em\n\n09/10/2024 12h49\n\nAtualizado em\n17/09/2025 16h39\n\nPORTARIA SGD/MGI",
+      "tail": "e Serviços\n\nSituação\n(atendido/Não atendido)\n\nGlosas/faixas de ajuste aplicadas\n\nValor da Glosa apurada\n\nIndicação de sanção\n\nObservações complementares\n\n4 - Dessa forma, encaminhamos este Relatório de Fiscalização para análise do(a) Gestor(a) do Contrato e providências cabíveis.\nEste é o relatório."
+    },
+    {
+      "issuer": "SGD/MGI",
+      "fullNumber": "Portaria SGD/MGI nº 6.679/2024",
+      "id": "bf0c539f-da21-4d6e-a292-67d119ad32fd",
+      "contentLength": 26530,
+      "head": "Info\n\nPortaria SGD/MGI nº 6.679, de 17 de setembro de 2024\n\nPortaria SGD/MGI nº 6.679, de 17 de setembro de 2024, que altera os Anexos I e II e inclui os Anexos VII e VIII da Portaria SGD/MGI nº 750, de 20 de março de 2023, que estabelece modelo para a contratação de serviços de desenvolvimento, man",
+      "tail": " de Serviços\n\nSituação(Atendido/Não Atendido)\n\nGlosas/faixas de ajuste aplicadas\n\nValor da Glosa apurada\n\nIndicação de Sanção\n\nObservações Complementares\n\n4. Dessa forma, encaminhamos este Relatório de Fiscalização para análise do(a) Gestor(a) do Contrato e providências cabíveis.\nEste é o relatório."
+    },
+    {
+      "issuer": "SGD/MGI",
+      "fullNumber": "IN SGD/MGI nº 86/2025",
+      "id": "1d0a71db-c277-4dc6-bb75-427532e83855",
+      "contentLength": 4477,
+      "head": "Instrução Normativa SGD/MGI Nº 86, DE 25 DE JULHO DE 2025\nAltera a Instrução Normativa SGD/MGI nº 6, de 29 de março de 2023, que regulamenta os requisitos e procedimentos para aprovação de contratações ou de formação de atas de registro de preços, a serem efetuados por órgãos e entidades integrantes",
+      "tail": " dispositivos da Instrução Normativa SGD/MGI nº 6, de 29 de março de 2023:\nI - o inciso IV do caput do art. 3º; e\nII - o § 2º do art. 4º.\nArt. 3º Esta Instrução Normativa entra em vigor em 1º de agosto de 2025.\nROGÉRIO SOUZA MASCARENHAS\n\nEste conteúdo não substitui o publicado na versão certificada."
+    }
+  ],
+  "spotCheck": [
+    {
+      "id": "569023b8-09f3-4faf-8bc7-c3e495153a5a",
+      "fullNumber": "Portaria MPU 178/2023",
+      "issuer": "MPU",
+      "officialUrl": "https://biblioteca.mpf.mp.br/repositorio/bitstreams/3741588e-1b76-46e7-b79f-a4fb48513346/download",
+      "httpStatus": 200,
+      "fetchError": null,
+      "rawHtmlBytes": 373084,
+      "strippedTextLength": 172136,
+      "storedContentLength": 57628,
+      "ratio": 0.3347818004368639,
+      "verdict": "truncated"
+    },
+    {
+      "id": "9b637cb3-c29e-47c8-936e-7812ca2411a6",
+      "fullNumber": "Portaria TCU 3/2025",
+      "issuer": "TCU",
+      "officialUrl": "https://pesquisa.apps.tcu.gov.br/doc/norma/Portaria/TCU/3/2025/",
+      "httpStatus": 200,
+      "fetchError": null,
+      "rawHtmlBytes": 22108,
+      "strippedTextLength": 187,
+      "storedContentLength": 22103,
+      "ratio": 118.19786096256685,
+      "verdict": "bloated"
+    },
+    {
+      "id": "19506c49-becb-45e8-b413-50f02dc63146",
+      "fullNumber": "Portaria TCU 175/2022",
+      "issuer": "TCU",
+      "officialUrl": "https://pesquisa.apps.tcu.gov.br/doc/norma/Portaria/TCU/175/2022/",
+      "httpStatus": 200,
+      "fetchError": null,
+      "rawHtmlBytes": 22108,
+      "strippedTextLength": 187,
+      "storedContentLength": 15602,
+      "ratio": 83.43315508021391,
+      "verdict": "bloated"
+    },
+    {
+      "id": "b3242d4f-9ead-4951-b864-46c607e622ef",
+      "fullNumber": "MP 1.167/2023",
+      "issuer": "Presidência da República",
+      "officialUrl": "https://www.planalto.gov.br/ccivil_03/_ato2023-2026/2023/mpv/mpv1167.htm",
+      "httpStatus": null,
+      "fetchError": "This operation was aborted",
+      "rawHtmlBytes": null,
+      "strippedTextLength": null,
+      "storedContentLength": 2130,
+      "ratio": null,
+      "verdict": "url-dead"
+    },
+    {
+      "id": "1c16baeb-6bda-4702-a6fa-9f40b144e861",
+      "fullNumber": "Portaria SEGES/MGI 4.932/2023",
+      "issuer": "SEGES/MGI",
+      "officialUrl": "https://www.gov.br/compras/pt-br/acesso-a-informacao/legislacao/portarias/portaria-seges-mgi-no-4-932-de-30-de-agosto-de-2023",
+      "httpStatus": 200,
+      "fetchError": null,
+      "rawHtmlBytes": 170411,
+      "strippedTextLength": 25826,
+      "storedContentLength": 1539,
+      "ratio": 0.05959110973437621,
+      "verdict": "truncated"
+    },
+    {
+      "id": "5150eee6-0e15-42de-8e72-d401c04b782c",
+      "fullNumber": "Portaria SEGES/MGI 1.769/2023",
+      "issuer": "SEGES/MGI",
+      "officialUrl": "https://www.gov.br/compras/pt-br/acesso-a-informacao/legislacao/portarias/portaria-seges-mgi-no-1-769-de-25-de-abril-de-2023",
+      "httpStatus": 200,
+      "fetchError": null,
+      "rawHtmlBytes": 180620,
+      "strippedTextLength": 31004,
+      "storedContentLength": 6127,
+      "ratio": 0.19761966197909947,
+      "verdict": "truncated"
+    },
+    {
+      "id": "266b5df7-0f6b-49f3-a307-110d04c4bec8",
+      "fullNumber": "Resolução CIIA-PAC/CC 3/2025",
+      "issuer": "CIIA-PAC/CC",
+      "officialUrl": "https://www.in.gov.br/en/web/dou/-/resolucao-ciia-pac/cc-n-3-de-28-de-julho-de-2025-645262422",
+      "httpStatus": 200,
+      "fetchError": null,
+      "rawHtmlBytes": 97157,
+      "strippedTextLength": 9521,
+      "storedContentLength": 5522,
+      "ratio": 0.5799810944228547,
+      "verdict": "ok"
+    },
+    {
+      "id": "19490c99-39f5-44e1-bb5c-760d3cce2d46",
+      "fullNumber": "Resolução CICS/MGI 7/2024",
+      "issuer": "CICS/MGI",
+      "officialUrl": "https://www.gov.br/compras/pt-br/acesso-a-informacao/legislacao/resolucoes/resolucao-cics-mgi-no-7-de-23-de-dezembro-de-2024",
+      "httpStatus": 200,
+      "fetchError": null,
+      "rawHtmlBytes": 176042,
+      "strippedTextLength": 30896,
+      "storedContentLength": 6593,
+      "ratio": 0.2133933195235629,
+      "verdict": "truncated"
+    },
+    {
+      "id": "50fb3214-2988-4cb6-94eb-ae8bb9af49bc",
+      "fullNumber": "Resolução SEGES-CICS/MGI 6/2024",
+      "issuer": "SEGES/MGI",
+      "officialUrl": "https://www.gov.br/compras/pt-br/acesso-a-informacao/legislacao/resolucoes/resolucao-seges-cics-mgi-no-6-de-25-de-novembro-de-2024",
+      "httpStatus": 200,
+      "fetchError": null,
+      "rawHtmlBytes": 170203,
+      "strippedTextLength": 25767,
+      "storedContentLength": 1475,
+      "ratio": 0.057243761400240616,
+      "verdict": "truncated"
+    },
+    {
+      "id": "d3810ae7-7f1b-424a-9410-bfca009fa451",
+      "fullNumber": "Resolução SEGES-CICS/MGI 5/2024",
+      "issuer": "SEGES/MGI",
+      "officialUrl": "https://www.gov.br/compras/pt-br/acesso-a-informacao/legislacao/resolucoes/resolucao-seges-cics-mgi-no-5-de-18-de-outubro-de-2024",
+      "httpStatus": 200,
+      "fetchError": null,
+      "rawHtmlBytes": 171123,
+      "strippedTextLength": 26619,
+      "storedContentLength": 2319,
+      "ratio": 0.08711822382508734,
+      "verdict": "truncated"
+    },
+    {
+      "id": "c3c02d1c-70e0-431f-a610-8d1f0ce2607d",
+      "fullNumber": "Resolução SEGES-CICS/MGI 4/2024",
+      "issuer": "SEGES/MGI",
+      "officialUrl": "https://www.gov.br/compras/pt-br/acesso-a-informacao/legislacao/resolucoes/resolucao-seges-cics-mgi-no-4-de-18-de-outubro-de-2024",
+      "httpStatus": 200,
+      "fetchError": null,
+      "rawHtmlBytes": 182828,
+      "strippedTextLength": 34257,
+      "storedContentLength": 9896,
+      "ratio": 0.2888752663689173,
+      "verdict": "truncated"
+    },
+    {
+      "id": "c40492b2-3ff7-4b23-9dff-ab7e33c44e06",
+      "fullNumber": "Resolução SEGES-CICS/MGI 2/2024",
+      "issuer": "SEGES/MGI",
+      "officialUrl": "https://www.gov.br/compras/pt-br/acesso-a-informacao/legislacao/resolucoes/resolucao-seges-cics-mgi-no-2-de-2-de-julho-de-2024",
+      "httpStatus": 200,
+      "fetchError": null,
+      "rawHtmlBytes": 188041,
+      "strippedTextLength": 39985,
+      "storedContentLength": 15558,
+      "ratio": 0.3890959109666125,
+      "verdict": "truncated"
+    }
+  ],
+  "problemIds": {
+    "contentMissing": [],
+    "contentTruncated": [],
+    "metadataIncomplete": [],
+    "duplicateCandidates": [],
+    "unparsedHost": [
+      "569023b8-09f3-4faf-8bc7-c3e495153a5a"
+    ],
+    "spotCheckSuspicious": [
+      "1c16baeb-6bda-4702-a6fa-9f40b144e861",
+      "5150eee6-0e15-42de-8e72-d401c04b782c",
+      "19490c99-39f5-44e1-bb5c-760d3cce2d46",
+      "50fb3214-2988-4cb6-94eb-ae8bb9af49bc",
+      "d3810ae7-7f1b-424a-9410-bfca009fa451",
+      "c3c02d1c-70e0-431f-a610-8d1f0ce2607d",
+      "c40492b2-3ff7-4b23-9dff-ab7e33c44e06"
+    ]
+  }
+}

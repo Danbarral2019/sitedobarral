@@ -151,3 +151,22 @@ E excluindo-as de `spotCheckSuspicious` do audit via helper puro `filterSuspicio
 - Portaria TCU 175/2022 (verdict `bloated`)
 
 Bundle B concluído. Restantes: MPU 178/2023 (Bundle C — parser PDF), themes taxonomy (Bundle D).
+
+## Quinta passada (Bundle C — MPU 178/2023 manual status)
+
+Mesmo padrão do Bundle B: investigação revelou que **Portaria MPU 178/2023 já tinha conteúdo correto e completo no banco** (57.628 chars começando com "PORTARIA PGR/MPU Nº 178..." e terminando com "ANTÔNIO AUGUSTO BRANDÃO DE ARAS", ementa completa). O verdict `truncated` do audit era falso-positivo: comparava stored (57K texto real) vs stripped-do-PDF-bruto (172K bytes binários interpretados como texto) = ratio 0.33.
+
+URL é PDF (`biblioteca.mpf.mp.br/repositorio/bitstreams/.../download`). `pdf-parse@^2.4.5` já está em deps do projeto, mas parser dedicado é desnecessário para este 1 ato — conteúdo já está correto.
+
+**Fix aplicado:** adicionar `Portaria MPU 178/2023` à lista `MANUAL_FULL_NUMBERS` em `scripts/mark-atos-manual.ts` e rodar. Re-usa toda a infraestrutura do Bundle B (cron filter, rescrape filters, audit helper).
+
+**Métricas v5:**
+
+| Métrica | v4 | v5 |
+|---|---:|---:|
+| `spotCheckSuspicious` | 8 | **7** |
+| Atos `scrapeStatus: 'manual'` | 2 | **3** |
+
+**IDs removidos v4→v5:** Portaria MPU 178/2023 (verdict era `truncated`).
+
+Bundle C concluído. Restantes: themes taxonomy (Bundle D). Parser PDF genérico fica para sessão futura quando surgir caso real que precise (pdf-parse já está em deps aguardando).

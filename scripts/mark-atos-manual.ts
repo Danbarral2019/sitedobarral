@@ -22,6 +22,7 @@ const DRY_RUN = process.argv.includes('--dry-run');
 const MANUAL_FULL_NUMBERS: string[] = [
   'Portaria TCU 3/2025',
   'Portaria TCU 175/2022',
+  'Portaria MPU 178/2023',
 ];
 
 async function main() {
