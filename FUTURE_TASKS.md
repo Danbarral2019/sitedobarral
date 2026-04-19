@@ -47,22 +47,39 @@
 
 ## CORREÇÕES E QUALIDADE DE DADOS
 
-### T1. Correção das Extrações de Atos Normativos (TCU e MPF) [Alta]
+### T1. Correção das Extrações de Atos Normativos (TCU e MPU/MPF) [Alta]
 **Prioridade:** Alta
+**Status:** Auditoria realizada em 2026-04-19. Ver `docs/audits/2026-04-19-legislative-acts-audit.md` para diagnóstico detalhado (108 atos, 8 seções + Problem IDs, JSON dump em `docs/audits/2026-04-19-legislative-acts-audit.json`).
 
-As extrações dos atos normativos do TCU e MPF apresentam falhas significativas:
-- Conteúdo incompleto (textos cortados, artigos faltando)
-- Formatação perdida durante extração
-- Metadados ausentes ou incorretos
-- Possíveis duplicatas não detectadas
+**Principais achados da auditoria (Seções 4, 7 e 8):**
+- **TCU (2 atos, Portarias 3/2025 e 175/2022):** URLs em `pesquisa.apps.tcu.gov.br` são SPAs JS-rendered — spot-check retornou apenas **187 chars** de texto útil (stripped) vs 15–22 KB armazenados. Verdict: `bloated` (ratio 83–118x). O parser gov.br genérico não consegue extrair o conteúdo real; o texto armazenado é provavelmente shell/placeholder HTML e NÃO o texto da norma. Todos os 2 atos têm `scrapeStatus: null` (nunca foram scraped com sucesso real).
+- **MPU/MPF (1 ato, Portaria MPU 178/2023):** Nomenclatura do issuer é **MPU** (não MPF), mas `officialUrl` aponta para `biblioteca.mpf.mp.br` (1 único host sem parser dedicado — cai no fallback). Verdict: `truncated` (stored 57 KB vs stripped 172 KB, ratio 0.33). Conteúdo é parcial.
+- **Planalto (`www.planalto.gov.br`, 24 atos):** Decretos recentes (ex: Decreto 12.807/2025, 12.785/2025) apresentam ruído de tabela — blocos longos de `⏎` (newlines) sucessivos gerados a partir de cells vazias de table (ver Seção 7 do relatório). MP 1.167/2023 retornou `url-dead` (fetch errored/abortado — URL pode estar quebrada).
+- **SEGES/MGI + Resoluções CICS/MGI + CIIA-PAC/CC em `www.gov.br`/`www.in.gov.br` (múltiplos atos):** 8 de 12 URLs do spot-check voltaram `truncated` (ratio 0.03–0.47) — Portaria SEGES/MGI 4.932/2023 armazena apenas 826 chars mas a página tem 25.826 chars de texto útil (ratio 0.03). Parser gov.br atual está cortando o corpo antes do fim.
+- **DOU/in.gov.br masthead e footer vazam no texto:** IN SGD/MGI 86/2025 (Seção 7) começa com "Brasão do Brasil / Diário Oficial da União / Publicado em: ..." e termina com "Borda do rodapé / Logo da Imprensa" — boilerplate de layout não filtrado.
+- **Planilhas internas em SGD/MGI:** Portarias SGD/MGI 6.680/2024 e 6.679/2024 contêm placeholders `<NOME DO FISCAL TECNICO>` vazando do HTML (formulários-modelo anexos à norma, que deveriam ser filtrados ou o conteúdo deveria terminar antes do anexo).
+- **Completude de metadados (Seção 5):** `themes` tem baixa cobertura — SEGES 3% (1/29), TCU 0%, MPU 0%, CICS/MGI 0%, CIIA-PAC/CC 0%, SEGES/MGI 67%. `leiArticles` também falha pontualmente (ME 0%, SEGES 86%).
+- **scrapeStatus null em 20 atos (Seção 3):** todos os 2 TCU, o 1 MPU, 1 CICS/MGI, 1 CIIA-PAC/CC, 10 SEGES/MGI e 6 Presidência da República nunca tiveram scrape bem-sucedido com timestamp registrado.
 
-**Pontos a verificar:**
-- Integridade do conteúdo extraído vs. fonte original
-- Completude dos metadados (data, número, ementa)
-- Consistência entre versões
-- Funcionamento dos scrapers atuais
+**Problem IDs emitidos (do relatório, para consumo pelo fix):**
+- `unparsedHost`: 1 ato (biblioteca.mpf.mp.br)
+- `spotCheckSuspicious`: 11 atos (2 bloated + 8 truncated + 1 url-dead)
+- `contentMissing` / `contentTruncated` (heurística estática) / `metadataIncomplete` / `duplicateCandidates`: 0 atos
 
-**Arquivos relevantes:** `lib/tribunal-scrapers/`, `scripts/`
+**Ações priorizadas:**
+- [ ] Adicionar parser dedicado para `pesquisa.apps.tcu.gov.br` / `btcu.apps.tcu.gov.br` — hoje cai no parser gov.br genérico, mas TCU é SPA com conteúdo JS-rendered. Avaliar: (a) endpoint JSON/API oficial do TCU, (b) rota alternativa em `portal.tcu.gov.br` com HTML estático, ou (c) Playwright headless como último recurso.
+- [ ] Adicionar parser dedicado (ou tratamento de fallback) para `biblioteca.mpf.mp.br` — é PDF/repositório de bitstream, não HTML; precisa pipeline de extração de PDF (pdfjs-dist ou similar).
+- [ ] Corrigir `www.gov.br` / `www.in.gov.br` parser para não truncar o corpo — 8/12 URLs do spot-check voltaram `truncated`. Investigar se o seletor de conteúdo está parando cedo (ex: fechando no primeiro `<section>` em vez do fim do artigo principal).
+- [ ] Limpar ruído de table-row do parser Planalto (`www.planalto.gov.br`) — Decretos apresentam blocos longos de `⏎` sucessivos; colapsar whitespace consecutivo a no máximo 2 newlines.
+- [ ] Remover masthead ("Brasão do Brasil", "Diário Oficial da União") e footer ("Borda do rodapé", "Logo da Imprensa") do conteúdo extraído em `www.in.gov.br`.
+- [ ] Detectar e excluir formulários-modelo anexos (`<NOME DO FISCAL TECNICO>`) em portarias SGD/MGI — cortar o conteúdo no final do texto normativo antes dos anexos.
+- [ ] Investigar MP 1.167/2023 (fetch falhou com `url-dead`) — confirmar se URL `planalto.gov.br/ccivil_03/_ato2023-2026/2023/mpv/mpv1167.htm` ainda é válida; atualizar se a MP foi convertida em lei.
+- [ ] Preencher `themes` para issuers com 0% (TCU, MPU, CICS/MGI, CIIA-PAC/CC) e baixa cobertura (SEGES 3%). Definir taxonomia mínima + scripts de tagging retroativo.
+- [ ] Re-executar scrape dos 20 atos com `scrapeStatus: null` após fixes; registrar timestamp correto em `lastScrapedAt`.
+- [ ] Re-executar `scrape-legislative-acts-content.ts --force` após os fixes acima.
+- [ ] Re-rodar este audit (`scripts/audit-legislative-acts.ts`) e confirmar que `spotCheckSuspicious` cai para ≤ 2 atos (ou zero) e `unparsedHost` vai a 0.
+
+**Arquivos relevantes:** `scripts/scrape-legislative-acts-content.ts`, `scripts/audit-legislative-acts.ts`, `lib/tribunal-scrapers/`, `docs/audits/2026-04-19-legislative-acts-audit.md`, `docs/audits/2026-04-19-legislative-acts-audit.json`
 
 ### T2. Verificar Redação Atualizada da ON 45 [Média]
 **Prioridade:** Média
