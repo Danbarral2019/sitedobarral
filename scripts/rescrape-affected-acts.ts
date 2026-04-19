@@ -36,9 +36,18 @@ async function main() {
   const auditPath = path.join(process.cwd(), 'docs', 'audits', '2026-04-19-legislative-acts-audit.json');
   const audit = JSON.parse(fs.readFileSync(auditPath, 'utf-8'));
 
+  // Atos marcados como 'manual' não devem ser re-scraped, mesmo se aparecerem
+  // como suspicious no audit (falso-positivo típico: TCU SPA cujo conteúdo
+  // veio de import manual).
+  const manualActs = await prisma.legislativeAct.findMany({
+    where: { scrapeStatus: 'manual' },
+    select: { id: true },
+  });
+  const manualIds = new Set(manualActs.map((a) => a.id));
+
   const ids = new Set<string>();
   for (const row of audit.spotCheck ?? []) {
-    if (row.verdict !== 'ok') ids.add(row.id);
+    if (row.verdict !== 'ok' && !manualIds.has(row.id)) ids.add(row.id);
   }
 
   if (INCLUDE_NULL) {
