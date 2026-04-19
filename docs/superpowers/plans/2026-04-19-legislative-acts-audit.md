@@ -793,7 +793,6 @@ Adicionar junto às queries:
 
 ```typescript
 async function buildProblemIdIndex(params: {
-  hosts: HostRow[];
   duplicates: DuplicateGroup[];
   spotCheck: SpotCheckRow[];
 }): Promise<ProblemIdIndex> {
@@ -810,7 +809,9 @@ async function buildProblemIdIndex(params: {
   });
   const truncatedIds = truncated.filter((a) => (a.content?.length ?? 0) < 500).map((a) => a.id);
 
-  // metadataIncomplete: falta qualquer um de (number, year, ementa, publishDate, officialUrl)
+  // metadataIncomplete: falta qualquer um de (number, ementa, officialUrl)
+  // year (Int) and publishDate (DateTime) can't be OR-compared to ''.
+  // Section 5 (metadataCompleteness) tracks their fill rate separately.
   const incomplete = await prisma.legislativeAct.findMany({
     where: {
       OR: [
@@ -972,7 +973,7 @@ Substitua as seções de print por uma estrutura que colete os dados e, ao final
     duplicates,
     samples,
     spotCheck: SKIP_FETCH ? undefined : spotCheck,
-    problemIds: await buildProblemIdIndex({ hosts, duplicates, spotCheck }),
+    problemIds: await buildProblemIdIndex({ duplicates, spotCheck }),
   };
 
   if (DRY_RUN) {

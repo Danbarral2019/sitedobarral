@@ -461,7 +461,6 @@ async function runSpotCheck(limit: number): Promise<SpotCheckRow[]> {
 }
 
 async function buildProblemIdIndex(params: {
-  hosts: HostRow[];
   duplicates: DuplicateGroup[];
   spotCheck: SpotCheckRow[];
 }): Promise<ProblemIdIndex> {
@@ -481,6 +480,8 @@ async function buildProblemIdIndex(params: {
     .map((a) => a.id);
 
   // metadataIncomplete: falta qualquer um de (number, ementa, officialUrl)
+  // year (Int) and publishDate (DateTime) can't be OR-compared to ''.
+  // Section 5 (metadataCompleteness) tracks their fill rate separately.
   const incomplete = await prisma.legislativeAct.findMany({
     where: {
       OR: [{ number: '' }, { ementa: '' }, { officialUrl: null }],
@@ -715,7 +716,7 @@ async function main() {
     duplicates,
     samples,
     spotCheck: SKIP_FETCH ? undefined : spotCheck,
-    problemIds: await buildProblemIdIndex({ hosts, duplicates, spotCheck }),
+    problemIds: await buildProblemIdIndex({ duplicates, spotCheck }),
   };
 
   if (DRY_RUN) {
