@@ -14,9 +14,15 @@
  *   npx dotenv -e .env.local -- npx tsx scripts/enrich-legislative-acts-themes.ts --force
  */
 
-import { PrismaClient } from '@prisma/client';
+import 'dotenv/config';
+import * as dotenv from 'dotenv';
+dotenv.config({ path: '.env.local' });
 
-const prisma = new PrismaClient();
+import { PrismaClient } from '@prisma/client';
+import { PrismaNeon } from '@prisma/adapter-neon';
+
+const adapter = new PrismaNeon({ connectionString: process.env.DATABASE_URL! });
+const prisma = new PrismaClient({ adapter });
 
 // Reproduzir taxonomia inline para evitar problemas de path resolution
 const TEMAS_LICITACOES = [

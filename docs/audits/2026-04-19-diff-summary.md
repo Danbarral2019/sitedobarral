@@ -170,3 +170,25 @@ URL é PDF (`biblioteca.mpf.mp.br/repositorio/bitstreams/.../download`). `pdf-pa
 **IDs removidos v4→v5:** Portaria MPU 178/2023 (verdict era `truncated`).
 
 Bundle C concluído. Restantes: themes taxonomy (Bundle D). Parser PDF genérico fica para sessão futura quando surgir caso real que precise (pdf-parse já está em deps aguardando).
+
+## Sexta passada (Bundle D — themes taxonomy)
+
+Taxonomia de 15 temas já existia (`scripts/enrich-legislative-acts-themes.ts` com mapping por artigo da Lei 14.133 + keyword fallback). Bundle D fez 3 coisas: (1) normalizou valor não-canônico `tic` → `tecnologia-informacao` em 18 atos, (2) corrigiu bug do script enrich que usava `new PrismaClient()` sem Neon adapter (impedia qualquer execução), (3) rodou enrich sobre os 43 atos que estavam sem themes.
+
+**Métricas v6 (cobertura de themes):**
+
+| Métrica | Baseline (pré-Bundle D) | v6 (pós-Bundle D) |
+|---|---:|---:|
+| Atos com `themes` preenchido | 65 / 108 (60%) | **97 / 108 (90%)** |
+| Atos com `tic` não-canônico | 18 | **0** |
+| SEGES/MGI themes coverage | 67% | 100% |
+| Presidência da República themes coverage | 90% | 100% |
+| SEGES themes coverage | 3% | 72% (21/29 — resíduo em INs antigas sem `leiArticles`) |
+
+**Residuais (11 atos SEGES sem themes):** IN SEGES 53/2023, 82/2025, 382/2025, 412/2025, 460/2025, 2/2023, IN SEGES/ME 5/2022 e outros — são INs cujo `leiArticles` é null e cuja ementa/título não casa com keywords. Solução para esse gap: AI classifier via `lib/ai` lendo ementa + content[:2000] (Bundle D-2, sessão separada se priorizado).
+
+**Novos artefatos:**
+- `scripts/normalize-theme-tic.ts` + unit test (5 casos) — normalização pura
+- Fix em `scripts/enrich-legislative-acts-themes.ts` (import do Neon adapter)
+
+Bundle D concluído. Restantes: Bundle D-2 (AI fallback para 11 INs SEGES sem themes) e refinamento do heurístico do audit (gerou falsos-positivos de `truncated` durante toda essa jornada).
