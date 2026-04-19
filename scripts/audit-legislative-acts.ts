@@ -128,6 +128,58 @@ function hostHasParser(host: string): boolean {
   return false;
 }
 
+function stripHtml(html: string): string {
+  return html
+    .replace(/<script[^>]*>[\s\S]*?<\/script>/gi, '')
+    .replace(/<style[^>]*>[\s\S]*?<\/style>/gi, '')
+    .replace(/<br\s*\/?>/gi, '\n')
+    .replace(/<\/(p|div|li|h[1-6]|tr)>/gi, '\n')
+    .replace(/<(p|div|li|h[1-6])[^>]*>/gi, '\n')
+    .replace(/<[^>]+>/g, '')
+    .replace(/&nbsp;/g, ' ')
+    .replace(/&amp;/g, '&')
+    .replace(/&lt;/g, '<')
+    .replace(/&gt;/g, '>')
+    .replace(/&quot;/g, '"')
+    .replace(/&#39;/g, "'")
+    .replace(/&#(\d+);/g, (_, code) => String.fromCharCode(parseInt(code, 10)))
+    .replace(/\r\n/g, '\n')
+    .replace(/[ \t]+/g, ' ')
+    .replace(/\n[ \t]+\n/g, '\n\n')
+    .replace(/\n{3,}/g, '\n\n')
+    .trim();
+}
+
+async function fetchOnce(url: string, timeoutMs = 30000): Promise<{ status: number; bodyBytes: number; text: string } | { error: string }> {
+  try {
+    const controller = new AbortController();
+    const to = setTimeout(() => controller.abort(), timeoutMs);
+    const res = await fetch(url, {
+      signal: controller.signal,
+      headers: {
+        'User-Agent': 'SiteDoBarral-Audit/1.0 (+https://profdanielbarral.com)',
+        'Accept': 'text/html,application/xhtml+xml;q=0.9,*/*;q=0.8',
+        'Accept-Language': 'pt-BR,pt;q=0.9',
+      },
+    });
+    clearTimeout(to);
+    const buffer = await res.arrayBuffer();
+    const ct = res.headers.get('content-type') || '';
+    const charset = ct.match(/charset=([^\s;]+)/i)?.[1]?.toLowerCase();
+    const decoder = new TextDecoder(
+      charset === 'iso-8859-1' || charset === 'latin1' ? 'iso-8859-1' : 'utf-8',
+    );
+    const text = decoder.decode(buffer);
+    return { status: res.status, bodyBytes: buffer.byteLength, text };
+  } catch (err) {
+    return { error: err instanceof Error ? err.message : String(err) };
+  }
+}
+
+function sleep(ms: number) {
+  return new Promise((r) => setTimeout(r, ms));
+}
+
 // ── Queries ───────────────────────────────────────────────────────────────
 
 async function queryInventory(): Promise<InventoryRow[]> {
@@ -269,6 +321,128 @@ async function queryDuplicates(): Promise<DuplicateGroup[]> {
     .sort((a, b) => b.count - a.count);
 }
 
+async function queryContentSamples(): Promise<ContentSample[]> {
+  // Top 5 issuers por contagem
+  const top = await prisma.legislativeAct.groupBy({
+    by: ['issuer'],
+    _count: { _all: true },
+    orderBy: { _count: { issuer: 'desc' } },
+    take: 5,
+  });
+
+  const samples: ContentSample[] = [];
+  for (const t of top) {
+    const acts = await prisma.legislativeAct.findMany({
+      where: { issuer: t.issuer, content: { not: null } },
+      select: { id: true, fullNumber: true, issuer: true, content: true },
+      take: 3,
+      orderBy: { createdAt: 'desc' },
+    });
+    for (const act of acts) {
+      const c = act.content ?? '';
+      if (c.length === 0) continue;
+      samples.push({
+        issuer: act.issuer,
+        fullNumber: act.fullNumber,
+        id: act.id,
+        contentLength: c.length,
+        head: c.slice(0, 300),
+        tail: c.length > 600 ? c.slice(-300) : '',
+      });
+    }
+  }
+  return samples;
+}
+
+async function runSpotCheck(limit: number): Promise<SpotCheckRow[]> {
+  // Seleção: prioriza suspeitos (content.length < 1000 E officialUrl presente),
+  // + 2 "saudáveis" (content.length > 3000) como controle.
+  const suspicious = await prisma.legislativeAct.findMany({
+    where: {
+      officialUrl: { not: null },
+      OR: [{ content: null }, { content: '' }],
+    },
+    select: { id: true, fullNumber: true, issuer: true, officialUrl: true, content: true },
+    take: Math.max(0, limit - 2),
+  });
+
+  if (suspicious.length < limit - 2) {
+    const extra = await prisma.legislativeAct.findMany({
+      where: {
+        officialUrl: { not: null },
+        id: { notIn: suspicious.map((s) => s.id) },
+      },
+      select: { id: true, fullNumber: true, issuer: true, officialUrl: true, content: true },
+      take: (limit - 2) - suspicious.length,
+      orderBy: { createdAt: 'desc' },
+    });
+    suspicious.push(...extra);
+  }
+
+  const healthy = await prisma.legislativeAct.findMany({
+    where: {
+      officialUrl: { not: null },
+      content: { not: null },
+      id: { notIn: suspicious.map((s) => s.id) },
+    },
+    select: { id: true, fullNumber: true, issuer: true, officialUrl: true, content: true },
+    take: 2,
+    orderBy: { createdAt: 'desc' },
+  });
+
+  const all = [...suspicious, ...healthy.filter((h) => (h.content?.length ?? 0) > 3000)].slice(0, limit);
+  const results: SpotCheckRow[] = [];
+
+  for (const act of all) {
+    const stored = act.content?.length ?? 0;
+    console.log(`  fetching ${act.fullNumber} → ${act.officialUrl}`);
+    const r = await fetchOnce(act.officialUrl!);
+
+    if ('error' in r) {
+      results.push({
+        id: act.id,
+        fullNumber: act.fullNumber,
+        issuer: act.issuer,
+        officialUrl: act.officialUrl!,
+        httpStatus: null,
+        fetchError: r.error,
+        rawHtmlBytes: null,
+        strippedTextLength: null,
+        storedContentLength: stored,
+        ratio: null,
+        verdict: 'url-dead',
+      });
+    } else {
+      const stripped = stripHtml(r.text);
+      const ratio = stripped.length === 0 ? null : stored / stripped.length;
+      let verdict: SpotCheckRow['verdict'];
+      if (r.status >= 400) verdict = 'url-dead';
+      else if (stored === 0) verdict = 'truncated';
+      else if (ratio !== null && ratio < 0.5) verdict = 'truncated';
+      else if (ratio !== null && ratio > 1.5) verdict = 'bloated';
+      else verdict = 'ok';
+
+      results.push({
+        id: act.id,
+        fullNumber: act.fullNumber,
+        issuer: act.issuer,
+        officialUrl: act.officialUrl!,
+        httpStatus: r.status,
+        fetchError: null,
+        rawHtmlBytes: r.bodyBytes,
+        strippedTextLength: stripped.length,
+        storedContentLength: stored,
+        ratio,
+        verdict,
+      });
+    }
+
+    await sleep(2000); // delay entre fetches
+  }
+
+  return results;
+}
+
 // ── Main ──────────────────────────────────────────────────────────────────
 
 async function main() {
@@ -322,6 +496,27 @@ async function main() {
       console.log(`  [${g.issuer}] ${g.type} ${g.number}/${g.year}: ${g.count} ocorrências`);
       for (const fn of g.fullNumbers) console.log(`    - ${fn}`);
     }
+  }
+
+  console.log('\n— Seção 7: Amostras de conteúdo (top 5 issuers × 3 atos) —');
+  const samples = await queryContentSamples();
+  for (const s of samples) {
+    console.log(`\n  [${s.issuer}] ${s.fullNumber} (${s.contentLength} chars)`);
+    console.log(`    HEAD: ${s.head.replace(/\n/g, ' ⏎ ').slice(0, 200)}...`);
+    if (s.tail) console.log(`    TAIL: ...${s.tail.replace(/\n/g, ' ⏎ ').slice(-200)}`);
+  }
+
+  let spotCheck: SpotCheckRow[] = [];
+  if (!SKIP_FETCH) {
+    console.log(`\n— Seção 8: Spot-check (até ${SPOT_CHECK_LIMIT} URLs) —`);
+    spotCheck = await runSpotCheck(SPOT_CHECK_LIMIT);
+    for (const r of spotCheck) {
+      const ratio = r.ratio !== null ? r.ratio.toFixed(2) : 'n/a';
+      console.log(`  [${r.verdict}] ${r.fullNumber}: stored=${r.storedContentLength}, stripped=${r.strippedTextLength ?? 'n/a'}, ratio=${ratio}`);
+      if (r.fetchError) console.log(`    ERRO: ${r.fetchError}`);
+    }
+  } else {
+    console.log('\n— Seção 8: Spot-check pulado (--skip-fetch) —');
   }
 }
 
