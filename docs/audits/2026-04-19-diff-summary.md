@@ -61,3 +61,46 @@ Das 11 URLs em `spotCheckSuspicious` do baseline, 7 viraram verdict diferente de
 ## Conclusão
 
 Bundle A concluído com sucesso nas vertentes F3 (gov.br compras truncation), F4 (Planalto whitespace), F5 (DOU boilerplate), F6 (SGD fiscal-técnico annex) e F7 (MP 1.167 URL). Dos 11 atos em `spotCheckSuspicious`, 8 tiveram ganho real de conteúdo (SEGES/MGI + Resoluções totalizando +18.121 chars extras), com o restante sendo TCU SPA (2) + MP 1.167 url-dead transitório (1). Os 21 atos com `scrapeStatus: null` foram eliminados (0 no post-fix). Falhas residuais (TCU SPA, MPF PDF) ficam para Bundle B e C. Identificados 3 follow-ups de qualidade secundária para consolidação futura.
+
+## Segunda passada (pattern-based rescrape)
+
+Após o primeiro rescrape, ficaram para trás atos com `scrapeStatus: success` mas content sujo (não foram selecionados pelo rescrape baseado em suspeitos/null). Segundo pass com `scripts/rescrape-by-content-pattern.ts` pegou esses casos — seleciona atos cujo content DB contém `Brasão do Brasil`, `Borda do rodapé`, `<NOME DO FISCAL TECNICO>`, `<NOME DO GESTOR>`, `<NOME DO PREPOSTO>` ou runs de 3+ `\n` consecutivos.
+
+**Resumo do segundo pass:**
+
+- Dry-run encontrou **18 atos** com content sujo.
+- Real run: **14 OK, 4 falharam, 18 total.**
+- As 4 falhas são URLs `www.gov.br/governodigital/...` (4 portarias SGD/MGI de modelos de contratação de TIC): o `findScraperForUrl` não tem handler para `governodigital` — apenas para `gov.br/compras`, `gov.br/gestao`, `gov.br/mgi`, `gov.br/seges`, e `in.gov.br`. Portarias afetadas:
+  - Portaria SGD/MGI nº 1.070/2023
+  - Portaria SGD/MGI nº 6.680/2024 (fixture F6)
+  - Portaria SGD/MGI nº 750/2023
+  - Portaria SGD/MGI nº 6.679/2024
+
+**Métricas pós-v2** (`docs/audits/2026-04-19-legislative-acts-audit-post-fix-v2.md`):
+
+| Métrica                                   | Baseline | v1 (post-fix) | v2 (pattern rescrape) |
+|-------------------------------------------|---------:|--------------:|----------------------:|
+| Atos com "Brasão do Brasil" em content    |       ≥3 |             3 |                     0 |
+| Atos com "Borda do rodapé" em content     |       ≥1 |             ≥1 |                    0 |
+| Atos com "<NOME DO FISCAL TECNICO>"       |       ≥4 |             4 |                     4 |
+| Atos com 3+ `\n` consecutivos             |      ≥14 |            14 |                    14 |
+| `spotCheckSuspicious`                     |       12 |            11 |                    11 |
+| Total de atos                             |      108 |           108 |                   108 |
+
+Notas sobre a tabela:
+- **Baseline/v1 para Brasão/Borda/FISCAL_TECNICO/3+\\n**: os audits baseline/v1 não emitem essas contagens diretamente; os números em v1 foram derivados do dry-run do `rescrape-by-content-pattern` (que consulta o DB no momento pós-v1). Baseline só pode ser inferido como `≥ v1` (o primeiro rescrape pode ter limpado alguns casos antes).
+- **"<NOME DO FISCAL TECNICO>" permanece em 4 atos pós-v2**: são exatamente as 4 URLs `governodigital` sem scraper registrado (o re-fetch falhou). Parser está corrigido; faltam mudanças de canHandle/URL para executar o rescrape. Registrar como F8 / follow-up Bundle B.
+- **"3+ `\n` consecutivos" permanece em 14 atos pós-v2**: o `collapseWhitespace` só é aplicado em `PlanaltoScraper`. O `GovBrComprasScraper` (que atende `gov.br/compras` e `in.gov.br`) roda apenas `stripDouBoilerplate` + `stripFormAnnex` — sem colapso de whitespace. O ato `IN SGD/MGI nº 86/2025` (DOU) apresenta apenas 1 run residual de 6 `\n` no rodapé; os outros 13 são gov.br/compras com 16-17 runs de até 18 `\n` cada. Parser Planalto está OK para novos scrapes; falta aplicar o mesmo pipeline ao GovBrComprasScraper. Registrar como follow-up (retomada do follow-up #2 da lista original).
+
+**Fixtures alvo confirmados via query direta ao DB pós-v2:**
+
+| Fixture | Length | Brasão | Borda | FISCAL_TECNICO | 3+\\n |
+|---|---:|:---:|:---:|:---:|:---:|
+| Decreto 12.807/2025 | 2.872 | false | false | false | false |
+| IN SGD/MGI nº 86/2025 | 4.481 | false | false | false | **true** (1 run de 6 `\n` no rodapé) |
+| Portaria SGD/MGI nº 6.680/2024 | 173.399 | false | false | **true** | false |
+
+**Síntese v2:**
+- Brasão do Brasil e Borda do rodapé: **eliminados** (F5 concluído end-to-end na DB).
+- `<NOME DO FISCAL TECNICO>`: eliminado de todos os atos cujo rescrape foi possível. Os 4 remanescentes dependem de extensão de scraper (URL `governodigital`).
+- 3+ `\n`: mitigado no pipeline Planalto; residual em gov.br/compras aguarda aplicar `collapseWhitespace` no `GovBrComprasScraper`.
