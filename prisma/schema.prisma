@@ -748,7 +748,7 @@ model LegislativeAct {
   // Scraping e atualização automática
   contentHash       String?   // Hash MD5 para detectar mudanças no texto
   lastScrapedAt     DateTime? // Última tentativa de scraping
-  scrapeStatus      String?   // 'success' | 'failed' | 'pending' | 'unchanged'
+  scrapeStatus      String?   // 'success' | 'failed' | 'pending' | 'unchanged' | 'manual'
   scrapeError       String?   @db.Text // Mensagem de erro (se falhou)
   changeDetectedAt  DateTime? // Quando uma mudança foi detectada
   notifyOnChange    Boolean   @default(true) // Notificar admin sobre mudanças
