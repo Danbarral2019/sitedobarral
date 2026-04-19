@@ -1,4 +1,13 @@
 /**
+ * [!] DEPRECADO — use `scripts/rescrape-affected-acts.ts` ou
+ * `lib/legislative-scrapers/scrape-and-index.ts#scrapeAndIndexAct(id)`.
+ *
+ * Este script é baseado em regex e NÃO é o caminho de produção.
+ * Os fixes de extração (F3-F7 do Bundle A, 2026-04-19) estão em `lib/legislative-scrapers/`.
+ * Mantido temporariamente para compatibilidade. Remover em sessão futura.
+ */
+
+/**
  * Script para fazer scraping do inteiro teor dos atos normativos
  *
  * Para cada LegislativeAct com officialUrl e sem content:

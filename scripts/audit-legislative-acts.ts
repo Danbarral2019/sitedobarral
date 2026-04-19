@@ -727,8 +727,10 @@ async function main() {
   const outDir = path.join(process.cwd(), 'docs', 'audits');
   fs.mkdirSync(outDir, { recursive: true });
   const today = new Date().toISOString().slice(0, 10);
-  const mdPath = path.join(outDir, `${today}-legislative-acts-audit.md`);
-  const jsonPath = path.join(outDir, `${today}-legislative-acts-audit.json`);
+  const SUFFIX_ARG = process.argv.find((a) => a.startsWith('--suffix='));
+  const suffix = SUFFIX_ARG ? '-' + SUFFIX_ARG.split('=')[1] : '';
+  const mdPath = path.join(outDir, `${today}-legislative-acts-audit${suffix}.md`);
+  const jsonPath = path.join(outDir, `${today}-legislative-acts-audit${suffix}.json`);
 
   fs.writeFileSync(mdPath, renderMarkdown(report), 'utf-8');
   fs.writeFileSync(jsonPath, JSON.stringify(report, null, 2), 'utf-8');

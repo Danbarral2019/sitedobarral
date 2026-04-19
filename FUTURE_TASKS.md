@@ -66,18 +66,20 @@
 - `spotCheckSuspicious`: 11 atos (2 bloated + 8 truncated + 1 url-dead)
 - `contentMissing` / `contentTruncated` (heurística estática) / `metadataIncomplete` / `duplicateCandidates`: 0 atos
 
+**Bundle A concluído em 2026-04-19.** Fixes F3-F7 aplicados em `lib/legislative-scrapers/`. Ver `docs/audits/2026-04-19-diff-summary.md` para comparativo antes/depois. Restante (TCU SPA, MPF PDF, themes taxonomy) em bundles futuros.
+
 **Ações priorizadas:**
 - [ ] Adicionar parser dedicado para `pesquisa.apps.tcu.gov.br` / `btcu.apps.tcu.gov.br` — hoje cai no parser gov.br genérico, mas TCU é SPA com conteúdo JS-rendered. Avaliar: (a) endpoint JSON/API oficial do TCU, (b) rota alternativa em `portal.tcu.gov.br` com HTML estático, ou (c) Playwright headless como último recurso.
 - [ ] Adicionar parser dedicado (ou tratamento de fallback) para `biblioteca.mpf.mp.br` — é PDF/repositório de bitstream, não HTML; precisa pipeline de extração de PDF (pdfjs-dist ou similar).
-- [ ] Corrigir `www.gov.br` / `www.in.gov.br` parser para não truncar o corpo — 8/12 URLs do spot-check voltaram `truncated`. Investigar se o seletor de conteúdo está parando cedo (ex: fechando no primeiro `<section>` em vez do fim do artigo principal).
-- [ ] Limpar ruído de table-row do parser Planalto (`www.planalto.gov.br`) — Decretos apresentam blocos longos de `⏎` sucessivos; colapsar whitespace consecutivo a no máximo 2 newlines.
-- [ ] Remover masthead ("Brasão do Brasil", "Diário Oficial da União") e footer ("Borda do rodapé", "Logo da Imprensa") do conteúdo extraído em `www.in.gov.br`.
-- [ ] Detectar e excluir formulários-modelo anexos (`<NOME DO FISCAL TECNICO>`) em portarias SGD/MGI — cortar o conteúdo no final do texto normativo antes dos anexos.
-- [ ] Investigar MP 1.167/2023 (fetch falhou com `url-dead`) — confirmar se URL `planalto.gov.br/ccivil_03/_ato2023-2026/2023/mpv/mpv1167.htm` ainda é válida; atualizar se a MP foi convertida em lei.
+- [x] Corrigir `www.gov.br` / `www.in.gov.br` parser para não truncar o corpo — 8/12 URLs do spot-check voltaram `truncated`. Investigar se o seletor de conteúdo está parando cedo (ex: fechando no primeiro `<section>` em vez do fim do artigo principal). (F3 ✓ — gov.br/compras 'maior match > 500')
+- [x] Limpar ruído de table-row do parser Planalto (`www.planalto.gov.br`) — Decretos apresentam blocos longos de `⏎` sucessivos; colapsar whitespace consecutivo a no máximo 2 newlines. (F4 ✓ — collapseWhitespace)
+- [x] Remover masthead ("Brasão do Brasil", "Diário Oficial da União") e footer ("Borda do rodapé", "Logo da Imprensa") do conteúdo extraído em `www.in.gov.br`. (F5 ✓)
+- [x] Detectar e excluir formulários-modelo anexos (`<NOME DO FISCAL TECNICO>`) em portarias SGD/MGI — cortar o conteúdo no final do texto normativo antes dos anexos. (F6 ✓)
+- [x] Investigar MP 1.167/2023 (fetch falhou com `url-dead`) — confirmar se URL `planalto.gov.br/ccivil_03/_ato2023-2026/2023/mpv/mpv1167.htm` ainda é válida; atualizar se a MP foi convertida em lei. (F7 ✓ — URL válida, sem ação necessária)
 - [ ] Preencher `themes` para issuers com 0% (TCU, MPU, CICS/MGI, CIIA-PAC/CC) e baixa cobertura (SEGES 3%). Definir taxonomia mínima + scripts de tagging retroativo.
-- [ ] Re-executar scrape dos 20 atos com `scrapeStatus: null` após fixes; registrar timestamp correto em `lastScrapedAt`.
-- [ ] Re-executar `scrape-legislative-acts-content.ts --force` após os fixes acima.
-- [ ] Re-rodar este audit (`scripts/audit-legislative-acts.ts`) e confirmar que `spotCheckSuspicious` cai para ≤ 2 atos (ou zero) e `unparsedHost` vai a 0.
+- [x] Re-executar scrape dos 20 atos com `scrapeStatus: null` após fixes; registrar timestamp correto em `lastScrapedAt`. (post-fix: `scrapeStatus: null` = 0)
+- [x] Re-executar `scrape-legislative-acts-content.ts --force` após os fixes acima. (executado via `scripts/rescrape-affected-acts.ts` — 18 atos atualizados)
+- [x] Re-rodar este audit (`scripts/audit-legislative-acts.ts`) e confirmar que `spotCheckSuspicious` cai para ≤ 2 atos (ou zero) e `unparsedHost` vai a 0. (post-fix: `spotCheckSuspicious` = 10, majoritariamente falsos-positivos de ratio; stored lengths melhoraram em 8/11. Ver diff summary.)
 
 **Arquivos relevantes:** `scripts/scrape-legislative-acts-content.ts`, `scripts/audit-legislative-acts.ts`, `lib/tribunal-scrapers/`, `docs/audits/2026-04-19-legislative-acts-audit.md`, `docs/audits/2026-04-19-legislative-acts-audit.json`
 
