@@ -17,17 +17,21 @@ import {
   Loader2,
   FileText,
   ExternalLink,
+  Sparkles,
 } from 'lucide-react';
 import { useAuth } from '@/hooks/use-auth';
 
+type QuestionSource = 'article' | 'assistant';
+
 interface QuestionData {
   id: string;
-  articleNumber: string;
+  source: QuestionSource;
   question: string;
   answer: string | null;
+  createdAt: string;
+  articleNumber: string | null;
   conversationId: string | null;
   wasHelpful: boolean | null;
-  createdAt: string;
 }
 
 interface GroupedQuestions {
@@ -40,6 +44,8 @@ interface GroupedQuestions {
 
 interface Stats {
   total: number;
+  articleCount: number;
+  assistantCount: number;
   helpful: number;
   notHelpful: number;
   unanswered: number;
@@ -127,6 +133,15 @@ export default function HistoricoIAPage() {
     });
   };
 
+  const findQuestion = (id: string): QuestionData | undefined => {
+    if (!data?.questions) return undefined;
+    for (const period of Object.keys(data.questions) as Array<keyof GroupedQuestions>) {
+      const found = data.questions[period].find(q => q.id === id);
+      if (found) return found;
+    }
+    return undefined;
+  };
+
   const handleDeleteQuestion = async (questionId: string) => {
     if (!confirm('Deseja realmente excluir esta pergunta do historico?')) {
       return;
@@ -134,7 +149,9 @@ export default function HistoricoIAPage() {
 
     try {
       setDeletingId(questionId);
-      const response = await fetch(`/api/chat/history?id=${questionId}`, {
+      const question = findQuestion(questionId);
+      const source = question?.source || 'article';
+      const response = await fetch(`/api/chat/history?id=${questionId}&source=${source}`, {
         method: 'DELETE',
       });
 
@@ -237,10 +254,18 @@ export default function HistoricoIAPage() {
           {/* Stats */}
           {data?.stats && totalQuestions > 0 && (
             <div className="mt-4 flex flex-wrap gap-4 text-sm">
-              <div className="flex items-center gap-2">
-                <FileText className="w-4 h-4" />
-                <span>{data.stats.uniqueArticles} artigos consultados</span>
-              </div>
+              {data.stats.assistantCount > 0 && (
+                <div className="flex items-center gap-2">
+                  <Sparkles className="w-4 h-4" />
+                  <span>{data.stats.assistantCount} consultas ao Assistente</span>
+                </div>
+              )}
+              {data.stats.articleCount > 0 && (
+                <div className="flex items-center gap-2">
+                  <FileText className="w-4 h-4" />
+                  <span>{data.stats.articleCount} em artigos da Lei</span>
+                </div>
+              )}
               {data.stats.helpful > 0 && (
                 <div className="flex items-center gap-2">
                   <ThumbsUp className="w-4 h-4" />
@@ -318,14 +343,24 @@ export default function HistoricoIAPage() {
                                 <ChevronRight className="w-4 h-4 text-gray-400 flex-shrink-0 mt-1" />
                               )}
                               <div className="flex-1 min-w-0">
-                                <div className="flex items-center gap-2 mb-1">
-                                  <Link
-                                    href={`/area-restrita/lei-comentada?artigo=${question.articleNumber}`}
-                                    onClick={(e) => e.stopPropagation()}
-                                    className="px-2 py-0.5 bg-blue-600 text-white rounded text-xs font-bold hover:bg-blue-700"
-                                  >
-                                    Art. {question.articleNumber}
-                                  </Link>
+                                <div className="flex items-center gap-2 mb-1 flex-wrap">
+                                  {question.source === 'assistant' ? (
+                                    <Link
+                                      href="/area-restrita/assistente"
+                                      onClick={(e) => e.stopPropagation()}
+                                      className="px-2 py-0.5 bg-purple-600 text-white rounded text-xs font-bold hover:bg-purple-700 inline-flex items-center gap-1"
+                                    >
+                                      <Sparkles className="w-3 h-3" /> Assistente
+                                    </Link>
+                                  ) : question.articleNumber ? (
+                                    <Link
+                                      href={`/area-restrita/lei-comentada?artigo=${question.articleNumber}`}
+                                      onClick={(e) => e.stopPropagation()}
+                                      className="px-2 py-0.5 bg-blue-600 text-white rounded text-xs font-bold hover:bg-blue-700"
+                                    >
+                                      Art. {question.articleNumber}
+                                    </Link>
+                                  ) : null}
                                   <span className="text-xs text-gray-500">{formatDate(question.createdAt)}</span>
                                   {question.wasHelpful === true && (
                                     <ThumbsUp className="w-3 h-3 text-green-600" />
@@ -350,11 +385,15 @@ export default function HistoricoIAPage() {
                                   {/* Acoes */}
                                   <div className="mt-4 pt-3 border-t border-gray-200 flex items-center justify-between">
                                     <Link
-                                      href={`/area-restrita/lei-comentada?artigo=${question.articleNumber}`}
+                                      href={
+                                        question.source === 'assistant'
+                                          ? '/area-restrita/assistente'
+                                          : `/area-restrita/lei-comentada?artigo=${question.articleNumber}`
+                                      }
                                       className="flex items-center gap-1 text-blue-600 hover:text-blue-800 text-sm font-medium"
                                     >
                                       <ExternalLink className="w-4 h-4" />
-                                      Ver no artigo
+                                      {question.source === 'assistant' ? 'Ir ao Assistente' : 'Ver no artigo'}
                                     </Link>
                                     <button
                                       onClick={(e) => {
@@ -386,11 +425,15 @@ export default function HistoricoIAPage() {
 
                                   <div className="mt-3 flex items-center justify-between">
                                     <Link
-                                      href={`/area-restrita/lei-comentada?artigo=${question.articleNumber}`}
+                                      href={
+                                        question.source === 'assistant'
+                                          ? '/area-restrita/assistente'
+                                          : `/area-restrita/lei-comentada?artigo=${question.articleNumber}`
+                                      }
                                       className="flex items-center gap-1 text-blue-600 hover:text-blue-800 text-sm font-medium"
                                     >
                                       <ExternalLink className="w-4 h-4" />
-                                      Ver artigo
+                                      {question.source === 'assistant' ? 'Ir ao Assistente' : 'Ver artigo'}
                                     </Link>
                                     <button
                                       onClick={(e) => {

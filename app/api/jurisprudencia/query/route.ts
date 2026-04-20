@@ -128,6 +128,16 @@ export const POST = withAuth(async (request: NextRequest, context?: Record<strin
       );
     }
 
+    if (!process.env.GEMINI_API_KEY) {
+      return NextResponse.json(
+        {
+          error:
+            'Serviço de IA não está configurado neste ambiente. A pesquisa com IA requer a variável GEMINI_API_KEY — peça ao administrador para provisioná-la.',
+        },
+        { status: 503 },
+      );
+    }
+
     const { query, filters, topK } = parsed.data;
     const limit = topK ?? DEFAULT_TOP_K;
 

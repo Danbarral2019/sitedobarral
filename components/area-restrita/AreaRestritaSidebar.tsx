@@ -4,10 +4,23 @@ import { useEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { X, PanelLeftClose, PanelLeftOpen, Menu } from 'lucide-react';
+import { X, PanelLeftClose, PanelLeftOpen, Menu, GraduationCap } from 'lucide-react';
 import { NAV_SECTIONS, type MenuItem } from './nav-catalog';
 import { useSidebar } from './SidebarContext';
 import { cn } from '@/lib/planejamento/cn';
+import { courses as ALL_COURSES } from '@/data/courses';
+
+interface EnrolledCourse {
+  id: string;
+  slug: string;
+  title: string;
+}
+
+interface ApiEnrollment {
+  courseId: string;
+  expiresAt: string | null;
+  isLifetime: boolean;
+}
 
 /**
  * Sidebar de navegação da área restrita.
@@ -27,8 +40,36 @@ export function AreaRestritaSidebar() {
     useSidebar();
   const pathname = usePathname();
   const [mounted, setMounted] = useState(false);
+  const [enrolledCourses, setEnrolledCourses] = useState<EnrolledCourse[]>([]);
 
   useEffect(() => setMounted(true), []);
+
+  useEffect(() => {
+    let cancelled = false;
+    fetch('/api/auth/me')
+      .then(res => (res.ok ? res.json() : null))
+      .then(data => {
+        if (cancelled || !data?.user?.enrollments) return;
+        const now = new Date();
+        const active: ApiEnrollment[] = (data.user.enrollments as ApiEnrollment[]).filter(
+          (e) => e.isLifetime || (e.expiresAt && new Date(e.expiresAt) >= now),
+        );
+        const mapped = active
+          .map((e) => {
+            const course = ALL_COURSES.find(c => c.id === e.courseId);
+            if (!course) return null;
+            return { id: course.id, slug: course.slug, title: course.title };
+          })
+          .filter((c): c is EnrolledCourse => c !== null);
+        setEnrolledCourses(mapped);
+      })
+      .catch(() => {
+        /* silently ignore — sidebar fixa segue funcional */
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   // Fecha o drawer mobile ao navegar
   useEffect(() => {
@@ -63,6 +104,27 @@ export function AreaRestritaSidebar() {
                 <SidebarLink item={item} pathname={pathname ?? ''} />
               </li>
             ))}
+            {section.title === 'Meus estudos' && enrolledCourses.length > 0 && (
+              <li className="pt-1">
+                <p className="px-2 pb-1 text-[10px] font-semibold uppercase tracking-wider text-gray-400">
+                  Meus cursos
+                </p>
+                <ul className="space-y-0.5">
+                  {enrolledCourses.map(course => (
+                    <li key={`course-${course.id}`}>
+                      <SidebarLink
+                        item={{
+                          label: course.title,
+                          href: `/area-restrita/curso/${course.slug}`,
+                          icon: GraduationCap,
+                        }}
+                        pathname={pathname ?? ''}
+                      />
+                    </li>
+                  ))}
+                </ul>
+              </li>
+            )}
           </ul>
         </section>
       ))}

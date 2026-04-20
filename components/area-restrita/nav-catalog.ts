@@ -89,7 +89,7 @@ export const NAV_SECTIONS: MenuSection[] = [
   {
     title: 'Minha conta',
     items: [
-      { label: 'Meu plano', href: '/api/conta/portal', icon: CreditCard, external: true },
+      { label: 'Meu plano', href: '/area-restrita/meu-plano', icon: CreditCard },
       { label: 'Favoritos', href: '/area-restrita/favoritos', icon: Heart },
       { label: 'Histórico', href: '/area-restrita/historico', icon: Clock },
       { label: 'Sair', href: '/api/auth/logout', icon: LogOut, external: true },
