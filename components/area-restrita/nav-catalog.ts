@@ -82,7 +82,7 @@ export const NAV_SECTIONS: MenuSection[] = [
     title: 'Acervo',
     items: [
       { label: 'Atos normativos', href: '/legislacao', icon: FileText },
-      { label: 'Jurisprudência', href: '/jurisprudencia', icon: Gavel },
+      { label: 'Jurisprudência', href: '/area-restrita/jurisprudencia', icon: Gavel },
       { label: 'Blog', href: '/blog', icon: Newspaper },
     ],
   },
