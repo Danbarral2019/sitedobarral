@@ -19,7 +19,7 @@ export function DashboardHero({ children }: DashboardHeroProps) {
         Pesquise em todo o acervo jurídico
       </h2>
       <p className="text-sm text-gray-500 mb-4">
-        Documentos, artigos da Lei, pareceres, acórdãos e mais
+        Busca rápida por palavras-chave em documentos, artigos da Lei, pareceres e acórdãos. Para perguntas em linguagem natural com histórico e citações, use o <strong>Assistente IA</strong>.
       </p>
       {children}
       <p className="text-xs text-gray-400 mt-2 hidden lg:block">

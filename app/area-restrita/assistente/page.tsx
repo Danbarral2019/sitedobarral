@@ -96,6 +96,9 @@ export default async function AssistentePage() {
                     {courseTitle}
                   </span>
                 </p>
+                <p className="text-gray-500 text-sm mt-2">
+                  Conversa multi-turno com histórico e citações das fontes. Para busca rápida por palavras-chave, use a <strong>busca global</strong> na Área Restrita.
+                </p>
               </div>
             </div>
 

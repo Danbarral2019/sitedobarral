@@ -1,12 +1,10 @@
 import {
   Home,
-  GraduationCap,
   LineChart,
   Award,
   BookOpen,
   Sparkles,
   Clock,
-  Search,
   Scale,
   FileText,
   Gavel,
@@ -14,6 +12,7 @@ import {
   CreditCard,
   Heart,
   LogOut,
+  Newspaper,
   type LucideIcon,
 } from 'lucide-react';
 
@@ -77,7 +76,6 @@ export const NAV_SECTIONS: MenuSection[] = [
     items: [
       { label: 'Assistente IA', href: '/area-restrita/assistente', icon: Sparkles },
       { label: 'Histórico de IA', href: '/area-restrita/historico-ia', icon: Clock },
-      { label: 'Busca global', href: '/area-restrita?focus=search', icon: Search },
     ],
   },
   {
@@ -85,13 +83,13 @@ export const NAV_SECTIONS: MenuSection[] = [
     items: [
       { label: 'Atos normativos', href: '/legislacao', icon: FileText },
       { label: 'Jurisprudência', href: '/jurisprudencia', icon: Gavel },
-      { label: 'Publicações', href: '/publicacoes', icon: GraduationCap },
+      { label: 'Blog', href: '/blog', icon: Newspaper },
     ],
   },
   {
     title: 'Minha conta',
     items: [
-      { label: 'Meu plano', href: '/planos', icon: CreditCard },
+      { label: 'Meu plano', href: '/api/conta/portal', icon: CreditCard, external: true },
       { label: 'Favoritos', href: '/area-restrita/favoritos', icon: Heart },
       { label: 'Histórico', href: '/area-restrita/historico', icon: Clock },
       { label: 'Sair', href: '/api/auth/logout', icon: LogOut, external: true },
