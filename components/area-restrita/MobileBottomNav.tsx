@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { Heart, Scale, Sparkles, Home } from 'lucide-react';
-import { AreaRestritaMenuTrigger } from './AreaRestritaMenuTrigger';
+import { SidebarMobileTrigger } from './AreaRestritaSidebar';
 
 /**
  * Bottom nav para mobile (≤ lg). O slot que antes era "Sair" passou
@@ -49,7 +49,7 @@ export function MobileBottomNav(_props: MobileBottomNavProps) {
           <Heart className="w-5 h-5 mb-1" />
           <span className="text-[10px] font-medium">Favoritos</span>
         </Link>
-        <AreaRestritaMenuTrigger variant="bottom" />
+        <SidebarMobileTrigger variant="bottom" />
       </div>
     </nav>
   );

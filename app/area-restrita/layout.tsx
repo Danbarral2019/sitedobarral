@@ -1,4 +1,9 @@
 import { GlobalSearchShortcut } from '@/components/area-restrita/GlobalSearchShortcut';
+import {
+  SidebarProvider,
+  AreaRestritaSidebar,
+  AreaRestritaShell,
+} from '@/components/area-restrita';
 
 export default function AreaRestritaLayout({
   children,
@@ -6,9 +11,10 @@ export default function AreaRestritaLayout({
   children: React.ReactNode;
 }) {
   return (
-    <>
+    <SidebarProvider>
       <GlobalSearchShortcut />
-      {children}
-    </>
+      <AreaRestritaSidebar />
+      <AreaRestritaShell>{children}</AreaRestritaShell>
+    </SidebarProvider>
   );
 }
