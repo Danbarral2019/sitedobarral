@@ -6,6 +6,8 @@
  * docs/superpowers/specs/2026-04-21-integracao-tcu-jurisprudencia-design.md
  */
 
+import { Prisma } from '@prisma/client';
+
 export interface UnifiedDecision {
   id: string;
   tribunalCode: string;
@@ -143,4 +145,127 @@ export function mapDocumentTcuToDecision(doc: DocumentTcuRaw): UnifiedDecision {
     createdAt: doc.uploadedAt,
     updatedAt: doc.updatedAt,
   };
+}
+
+/**
+ * WHERE de TribunalDecision.
+ * - Sempre aplica `isRelevant=true AND approvalStatus IN (...)`
+ * - Filtros dinâmicos são adicionados apenas quando presentes
+ */
+export function buildTribunalDecisionWhere(
+  filters: JurisprudenciaFilters
+): Prisma.Sql {
+  const fragments: Prisma.Sql[] = [
+    Prisma.sql`"isRelevant" = ${true}`,
+    Prisma.sql`"approvalStatus" IN (${Prisma.join([
+      'auto_approved',
+      'manually_approved',
+    ])})`,
+  ];
+
+  if (filters.tribunal) {
+    fragments.push(Prisma.sql`"tribunalCode" = ${filters.tribunal}`);
+  }
+  if (typeof filters.ano === 'number') {
+    fragments.push(Prisma.sql`year = ${filters.ano}`);
+  }
+  if (filters.tema) {
+    fragments.push(
+      Prisma.sql`themes ILIKE ${'%' + filters.tema + '%'}`
+    );
+  }
+  if (filters.artigo) {
+    fragments.push(
+      Prisma.sql`"leiArticles" ILIKE ${'%' + filters.artigo + '%'}`
+    );
+  }
+  if (filters.decisionType) {
+    fragments.push(
+      Prisma.sql`"decisionType" = ${filters.decisionType}`
+    );
+  }
+  if (filters.relator) {
+    fragments.push(
+      Prisma.sql`relator ILIKE ${'%' + filters.relator + '%'}`
+    );
+  }
+  if (filters.orgao) {
+    fragments.push(
+      Prisma.sql`"orgaoJulgador" ILIKE ${'%' + filters.orgao + '%'}`
+    );
+  }
+  if (filters.dataFrom) {
+    fragments.push(Prisma.sql`"dataJulgamento" >= ${filters.dataFrom}`);
+  }
+  if (filters.dataTo) {
+    fragments.push(Prisma.sql`"dataJulgamento" <= ${filters.dataTo}`);
+  }
+  if (filters.q) {
+    const term = '%' + filters.q + '%';
+    fragments.push(
+      Prisma.sql`(title ILIKE ${term} OR ementa ILIKE ${term})`
+    );
+  }
+
+  return Prisma.join(fragments, ' AND ');
+}
+
+/**
+ * WHERE de Document TCU.
+ * - Sempre aplica `category='acordao' AND tcuNumeroAcordao IS NOT NULL`
+ * - Filtros mapeiam para campos tcu* quando necessário
+ */
+export function buildDocumentTcuWhere(
+  filters: JurisprudenciaFilters
+): Prisma.Sql {
+  const fragments: Prisma.Sql[] = [
+    Prisma.sql`category = ${'acordao'}`,
+    Prisma.sql`"tcuNumeroAcordao" IS NOT NULL`,
+  ];
+
+  if (typeof filters.ano === 'number') {
+    fragments.push(
+      Prisma.sql`("acordaoAno" = ${filters.ano} OR EXTRACT(YEAR FROM "tcuDataJulgamento")::int = ${filters.ano})`
+    );
+  }
+  if (filters.tema) {
+    const term = '%' + filters.tema + '%';
+    fragments.push(
+      Prisma.sql`(themes ILIKE ${term} OR "tcuArea" ILIKE ${term} OR "tcuTema" ILIKE ${term} OR "tcuSubtema" ILIKE ${term})`
+    );
+  }
+  if (filters.artigo) {
+    fragments.push(
+      Prisma.sql`"leiArticles" ILIKE ${'%' + filters.artigo + '%'}`
+    );
+  }
+  if (filters.relator) {
+    const term = '%' + filters.relator + '%';
+    fragments.push(
+      Prisma.sql`("tcuRelator" ILIKE ${term} OR "tcuAutorTese" ILIKE ${term})`
+    );
+  }
+  if (filters.orgao) {
+    fragments.push(
+      Prisma.sql`"tcuOrgaoJulgador" ILIKE ${'%' + filters.orgao + '%'}`
+    );
+  }
+  if (filters.dataFrom) {
+    fragments.push(
+      Prisma.sql`"tcuDataJulgamento" >= ${filters.dataFrom}`
+    );
+  }
+  if (filters.dataTo) {
+    fragments.push(
+      Prisma.sql`"tcuDataJulgamento" <= ${filters.dataTo}`
+    );
+  }
+  if (filters.q) {
+    const term = '%' + filters.q + '%';
+    fragments.push(
+      Prisma.sql`(title ILIKE ${term} OR "tcuEmentaCompleta" ILIKE ${term})`
+    );
+  }
+
+  return Prisma.join(fragments, ' AND ');
 }

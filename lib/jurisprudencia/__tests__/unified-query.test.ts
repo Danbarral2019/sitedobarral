@@ -4,6 +4,8 @@ import {
   mapDocumentTcuToDecision,
   shouldIncludeTribunalDecisionBranch,
   shouldIncludeDocumentTcuBranch,
+  buildTribunalDecisionWhere,
+  buildDocumentTcuWhere,
   type JurisprudenciaFilters,
 } from '../unified-query';
 
@@ -209,5 +211,74 @@ describe('shouldIncludeDocumentTcuBranch', () => {
         decisionType: 'sumula',
       })
     ).toBe(false);
+  });
+});
+
+describe('buildTribunalDecisionWhere', () => {
+  it('inclui condição base sem filtros', () => {
+    const where = buildTribunalDecisionWhere({});
+    // .text usa placeholders $1, $2, ... (formato PostgreSQL)
+    const text = where.text;
+    expect(text).toMatch(/"isRelevant"\s*=\s*\$\d+/);
+    expect(text).toMatch(/"approvalStatus"\s+IN/);
+    expect(where.values).toEqual(
+      expect.arrayContaining([true, 'auto_approved', 'manually_approved'])
+    );
+  });
+
+  it('adiciona filtro de tribunal', () => {
+    const where = buildTribunalDecisionWhere({ tribunal: 'TCE-SP' });
+    expect(where.text).toMatch(/"tribunalCode"\s*=\s*\$/);
+    expect(where.values).toContain('TCE-SP');
+  });
+
+  it('adiciona filtro de ano', () => {
+    const where = buildTribunalDecisionWhere({ ano: 2024 });
+    expect(where.text).toMatch(/year\s*=\s*\$/);
+    expect(where.values).toContain(2024);
+  });
+
+  it('adiciona filtro de busca textual q em title OR ementa', () => {
+    const where = buildTribunalDecisionWhere({ q: 'pregão' });
+    expect(where.sql).toMatch(/title ILIKE/);
+    expect(where.sql).toMatch(/ementa ILIKE/);
+    expect(where.values).toContain('%pregão%');
+  });
+});
+
+describe('buildDocumentTcuWhere', () => {
+  it('inclui condição base sem filtros', () => {
+    const where = buildDocumentTcuWhere({});
+    expect(where.text).toMatch(/category\s*=\s*\$/);
+    expect(where.sql).toMatch(/"tcuNumeroAcordao"\s+IS NOT NULL/);
+    expect(where.values).toContain('acordao');
+  });
+
+  it('filtro ano casa em acordaoAno OR EXTRACT(YEAR FROM tcuDataJulgamento)', () => {
+    const where = buildDocumentTcuWhere({ ano: 2024 });
+    expect(where.text).toMatch(/"acordaoAno"\s*=\s*\$/);
+    expect(where.sql).toMatch(/EXTRACT\(YEAR FROM "tcuDataJulgamento"\)/);
+    // parametrizado com 2024 duas vezes (uma pra cada lado do OR)
+    expect(where.values.filter(v => v === 2024)).toHaveLength(2);
+  });
+
+  it('filtro tema casa em themes, tcuArea, tcuTema, tcuSubtema', () => {
+    const where = buildDocumentTcuWhere({ tema: 'pregão' });
+    expect(where.sql).toMatch(/themes ILIKE/);
+    expect(where.sql).toMatch(/"tcuArea" ILIKE/);
+    expect(where.sql).toMatch(/"tcuTema" ILIKE/);
+    expect(where.sql).toMatch(/"tcuSubtema" ILIKE/);
+  });
+
+  it('filtro relator casa em tcuRelator OR tcuAutorTese', () => {
+    const where = buildDocumentTcuWhere({ relator: 'sherman' });
+    expect(where.sql).toMatch(/"tcuRelator" ILIKE/);
+    expect(where.sql).toMatch(/"tcuAutorTese" ILIKE/);
+  });
+
+  it('filtro q casa em title OR tcuEmentaCompleta', () => {
+    const where = buildDocumentTcuWhere({ q: 'contrato' });
+    expect(where.sql).toMatch(/title ILIKE/);
+    expect(where.sql).toMatch(/"tcuEmentaCompleta" ILIKE/);
   });
 });
