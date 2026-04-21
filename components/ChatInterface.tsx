@@ -70,15 +70,37 @@ export default function ChatInterface({
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const abortControllerRef = useRef<AbortController | null>(null);
   const didMountRef = useRef(false);
+  const prevMessagesLengthRef = useRef(0);
 
-  // Auto-scroll to bottom when new messages arrive, ignoring initial mount
-  // (histórico carregado do localStorage não deve forçar scroll da página).
+  // Auto-scroll inteligente:
+  //  - Ignora mount inicial (histórico do localStorage).
+  //  - Sempre rola quando CHEGA uma nova mensagem (user enviou ou resposta
+  //    começou).
+  //  - Durante streaming (mesma msg sendo atualizada): só rola se o usuário
+  //    já estiver próximo do fim. Se ele subiu para reler, respeita.
   useEffect(() => {
     if (!didMountRef.current) {
       didMountRef.current = true;
+      prevMessagesLengthRef.current = messages.length;
       return;
     }
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+
+    const isNewMessage = messages.length > prevMessagesLengthRef.current;
+    prevMessagesLengthRef.current = messages.length;
+
+    if (isNewMessage) {
+      messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+      return;
+    }
+
+    // Streaming update: só rola se user está perto do fim.
+    const threshold = 120;
+    const nearBottom =
+      window.innerHeight + window.scrollY >=
+      document.documentElement.scrollHeight - threshold;
+    if (nearBottom) {
+      messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    }
   }, [messages]);
 
   // Load conversation history from localStorage
@@ -233,13 +255,22 @@ export default function ChatInterface({
         }
       }
 
-      // If no content was streamed, show fallback
+      // If no content was streamed, show fallback — distingue entre "sem
+      // fontes" (base não indexou nada) e "fontes encontradas mas a síntese
+      // da IA falhou" (timeout, rate limit, safety filter).
       if (!fullContent) {
-        setMessages((prev) => prev.map(m =>
-          m.id === assistantId
-            ? { ...m, content: 'Não encontrei documentos relevantes para sua pergunta. Tente reformular ou fazer uma pergunta mais específica.' }
-            : m
-        ));
+        setMessages((prev) => prev.map(m => {
+          if (m.id !== assistantId) return m;
+          const hasSources =
+            (m.sources && m.sources.length > 0) ||
+            (m.legalSources && m.legalSources.length > 0);
+          return {
+            ...m,
+            content: hasSources
+              ? 'Não consegui gerar uma síntese agora — o modelo de IA pode estar sobrecarregado ou indisponível. Encontrei as fontes relevantes abaixo; tente perguntar de novo em alguns instantes.'
+              : 'Não encontrei documentos relevantes para sua pergunta. Tente reformular ou fazer uma pergunta mais específica.',
+          };
+        }));
       }
 
       // Salvar no historico e capturar o ID para compartilhamento

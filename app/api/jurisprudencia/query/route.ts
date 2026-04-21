@@ -7,6 +7,7 @@ import { apiLogger } from '@/lib/logger';
 import { z } from 'zod';
 
 export const runtime = 'nodejs';
+export const maxDuration = 60;
 
 const filtersSchema = z
   .object({
@@ -29,8 +30,8 @@ const bodySchema = z.object({
   topK: z.number().int().min(1).max(20).optional(),
 });
 
-const MAX_EMENTA_CHARS = 1200;
-const DEFAULT_TOP_K = 8;
+const MAX_EMENTA_CHARS = 800;
+const DEFAULT_TOP_K = 6;
 
 type JurisFilters = z.infer<typeof filtersSchema>;
 
@@ -120,7 +121,7 @@ Sua resposta (em português, estruturada, com citações no formato [Tribunal Ti
 
 export const POST = withAuth(async (request: NextRequest, context?: Record<string, unknown>) => {
   try {
-    const user = context?.user as { userId: string };
+    const user = context?.user as { userId: string; role?: string };
 
     const json = await request.json();
     const parsed = bodySchema.safeParse(json);
@@ -193,36 +194,69 @@ export const POST = withAuth(async (request: NextRequest, context?: Record<strin
 
     const prompt = buildPrompt(query, decisions);
 
-    const result = await queryGeminiText(prompt, {
-      model: 'gemini-2.0-flash',
-      temperature: 0.3,
-      maxOutputTokens: 1500,
-      useCache: true,
-      systemInstruction:
-        'Você é um assistente jurídico técnico e conciso. Fundamente tudo nas decisões citadas; nunca invente números de acórdão ou relatores.',
-    });
+    const sourcesPayload = decisions.map(d => ({
+      id: d.id,
+      tribunalCode: d.tribunalCode,
+      tribunalName: d.tribunalName,
+      decisionType: d.decisionType,
+      decisionNumber: d.decisionNumber,
+      title: d.title,
+      relator: d.relator,
+      orgaoJulgador: d.orgaoJulgador,
+      dataJulgamento: d.dataJulgamento,
+      url: d.url,
+    }));
 
-    apiLogger.info(
-      { userId: user.userId, consulted: decisions.length, cached: result.cached, latencyMs: result.latency },
-      'jurisprudencia/query answered'
-    );
+    let answerText: string;
+    let cached = false;
+
+    try {
+      const result = await queryGeminiText(prompt, {
+        temperature: 0.3,
+        maxOutputTokens: 1500,
+        useCache: true,
+        systemInstruction:
+          'Você é um assistente jurídico técnico e conciso. Fundamente tudo nas decisões citadas; nunca invente números de acórdão ou relatores.',
+      });
+
+      if (!result.response || result.response.trim().length === 0) {
+        throw new Error('empty-response');
+      }
+
+      answerText = result.response;
+      cached = result.cached;
+
+      apiLogger.info(
+        { userId: user.userId, consulted: decisions.length, cached, latencyMs: result.latency },
+        'jurisprudencia/query answered'
+      );
+    } catch (err) {
+      apiLogger.error(
+        { userId: user.userId, consulted: decisions.length, err },
+        'jurisprudencia/query Gemini failed — returning sources only'
+      );
+      const errMsg = err instanceof Error ? err.message : String(err);
+      const errStack = err instanceof Error ? err.stack : undefined;
+      answerText =
+        'Não consegui gerar uma síntese agora — o modelo de IA pode estar sobrecarregado, em timeout ou indisponível. Encontrei as decisões relevantes abaixo; consulte-as diretamente ou tente perguntar de novo em alguns instantes.';
+
+      // Debug info liberado enquanto estamos diagnosticando o bug em preview.
+      // TODO: restringir para role === 'admin' quando o diagnóstico terminar.
+      const debug = { geminiError: errMsg, stack: errStack };
+      return NextResponse.json({
+        answer: answerText,
+        sources: sourcesPayload,
+        consulted: decisions.length,
+        cached: false,
+        debug,
+      });
+    }
 
     return NextResponse.json({
-      answer: result.response,
-      sources: decisions.map(d => ({
-        id: d.id,
-        tribunalCode: d.tribunalCode,
-        tribunalName: d.tribunalName,
-        decisionType: d.decisionType,
-        decisionNumber: d.decisionNumber,
-        title: d.title,
-        relator: d.relator,
-        orgaoJulgador: d.orgaoJulgador,
-        dataJulgamento: d.dataJulgamento,
-        url: d.url,
-      })),
+      answer: answerText,
+      sources: sourcesPayload,
       consulted: decisions.length,
-      cached: result.cached,
+      cached,
     });
   } catch (error) {
     return handleApiError(error);
