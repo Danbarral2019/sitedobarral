@@ -14,6 +14,11 @@ export async function GET(request: NextRequest) {
     const ano = searchParams.get('ano');
     const tema = searchParams.get('tema');
     const artigo = searchParams.get('artigo');
+    const decisionType = searchParams.get('decisionType');
+    const relator = searchParams.get('relator');
+    const orgao = searchParams.get('orgao');
+    const dataFrom = searchParams.get('dataFrom');
+    const dataTo = searchParams.get('dataTo');
     const q = searchParams.get('q');
     const page = Math.max(1, parseInt(searchParams.get('page') || '1', 10));
     const pageSize = Math.min(50, Math.max(1, parseInt(searchParams.get('pageSize') || '10', 10)));
@@ -37,6 +42,25 @@ export async function GET(request: NextRequest) {
 
     if (artigo) {
       where.leiArticles = { contains: artigo, mode: 'insensitive' };
+    }
+
+    if (decisionType) {
+      where.decisionType = decisionType;
+    }
+
+    if (relator) {
+      where.relator = { contains: relator, mode: 'insensitive' };
+    }
+
+    if (orgao) {
+      where.orgaoJulgador = { contains: orgao, mode: 'insensitive' };
+    }
+
+    if (dataFrom || dataTo) {
+      const dateFilter: Record<string, Date> = {};
+      if (dataFrom) dateFilter.gte = new Date(dataFrom);
+      if (dataTo) dateFilter.lte = new Date(dataTo);
+      where.dataJulgamento = dateFilter;
     }
 
     if (q) {
