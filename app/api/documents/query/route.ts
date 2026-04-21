@@ -6,7 +6,16 @@ import type { SearchResult } from '@/lib/embeddings/vector-search';
 import { hybridSearch } from '@/lib/embeddings/hybrid-search';
 
 import { queryGeminiText } from '@/lib/gemini/cached-client';
-import { GoogleGenerativeAI } from '@google/generative-ai';
+import { GoogleGenerativeAI, HarmCategory, HarmBlockThreshold } from '@google/generative-ai';
+
+// Safety settings permissivos para contexto jurídico — o padrão bloqueia
+// termos como "sanção", "fraude", "ato ilícito" comuns em ementas.
+const LEGAL_SAFETY_SETTINGS = [
+  { category: HarmCategory.HARM_CATEGORY_HARASSMENT, threshold: HarmBlockThreshold.BLOCK_ONLY_HIGH },
+  { category: HarmCategory.HARM_CATEGORY_HATE_SPEECH, threshold: HarmBlockThreshold.BLOCK_ONLY_HIGH },
+  { category: HarmCategory.HARM_CATEGORY_SEXUALLY_EXPLICIT, threshold: HarmBlockThreshold.BLOCK_ONLY_HIGH },
+  { category: HarmCategory.HARM_CATEGORY_DANGEROUS_CONTENT, threshold: HarmBlockThreshold.BLOCK_ONLY_HIGH },
+];
 import { checkRateLimit, withCache, CACHE_TTL } from '@/lib/cache/redis-client';
 import { trackServerEvent } from '@/lib/monitoring/events';
 import { apiLogger } from '@/lib/logger';
@@ -538,6 +547,7 @@ RESPOSTA:`;
         model: 'gemini-2.0-flash',
         systemInstruction,
         generationConfig: { temperature: 0.3, maxOutputTokens: 3000 },
+        safetySettings: LEGAL_SAFETY_SETTINGS,
       });
 
       const encoder = new TextEncoder();

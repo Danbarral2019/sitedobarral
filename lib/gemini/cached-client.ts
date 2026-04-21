@@ -5,7 +5,11 @@
  * Used for text synthesis (answers based on semantic search context)
  */
 
-import { GoogleGenerativeAI } from '@google/generative-ai';
+import {
+  GoogleGenerativeAI,
+  HarmCategory,
+  HarmBlockThreshold,
+} from '@google/generative-ai';
 import { withCache, CacheKeys, CACHE_TTL } from '../cache/redis-client';
 import {
   PRIMARY_GEMINI_MODEL,
@@ -72,6 +76,20 @@ export interface GeminiQueryResult {
  * Executa uma chamada direta ao Gemini com um modelo específico.
  * Sem cache, sem fallback. Retorna texto + tokens.
  */
+/**
+ * Safety settings permissivos para contexto jurídico profissional. Os
+ * padrões do Gemini bloqueiam termos como "sanção", "fraude", "ato
+ * ilícito", "responsabilização" — comuns em ementas de TCU/STJ e em
+ * conteúdo sobre direito administrativo sancionador. Usamos BLOCK_ONLY_HIGH
+ * para evitar falsos positivos sem abrir para conteúdo genuinamente tóxico.
+ */
+const LEGAL_SAFETY_SETTINGS = [
+  { category: HarmCategory.HARM_CATEGORY_HARASSMENT, threshold: HarmBlockThreshold.BLOCK_ONLY_HIGH },
+  { category: HarmCategory.HARM_CATEGORY_HATE_SPEECH, threshold: HarmBlockThreshold.BLOCK_ONLY_HIGH },
+  { category: HarmCategory.HARM_CATEGORY_SEXUALLY_EXPLICIT, threshold: HarmBlockThreshold.BLOCK_ONLY_HIGH },
+  { category: HarmCategory.HARM_CATEGORY_DANGEROUS_CONTENT, threshold: HarmBlockThreshold.BLOCK_ONLY_HIGH },
+];
+
 async function callGeminiOnce(
   modelName: string,
   query: string,
@@ -84,9 +102,23 @@ async function callGeminiOnce(
       temperature: opts.temperature,
       maxOutputTokens: opts.maxOutputTokens,
     },
+    safetySettings: LEGAL_SAFETY_SETTINGS,
   });
 
   const result = await geminiModel.generateContent(query);
+
+  // Detectar bloqueio por safety antes de chamar .text() (pode lançar).
+  const candidate = result.response.candidates?.[0];
+  const finishReason = candidate?.finishReason;
+  const blockReason = result.response.promptFeedback?.blockReason;
+
+  if (blockReason) {
+    throw new Error(`Gemini blocked prompt: ${blockReason}`);
+  }
+  if (finishReason && finishReason !== 'STOP' && finishReason !== 'MAX_TOKENS') {
+    throw new Error(`Gemini finished with reason: ${finishReason}`);
+  }
+
   const response = result.response.text();
 
   const usageMetadata = result.response.usageMetadata;
