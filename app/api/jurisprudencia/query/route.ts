@@ -34,7 +34,7 @@ const DEFAULT_TOP_K = 8;
 
 type JurisFilters = z.infer<typeof filtersSchema>;
 
-function buildWhere(filters: JurisFilters, queryText: string) {
+function buildWhere(filters: JurisFilters) {
   const where: Record<string, unknown> = {
     isRelevant: true,
     approvalStatus: { in: ['auto_approved', 'manually_approved'] },
@@ -59,7 +59,10 @@ function buildWhere(filters: JurisFilters, queryText: string) {
     where.dataJulgamento = dateFilter;
   }
 
-  const textTerm = filters?.q?.trim() || queryText.trim();
+  // Apenas o filtro textual explícito (input "Busca textual") restringe o
+  // conjunto. A pergunta em linguagem natural NÃO entra como substring —
+  // a IA quem interpreta a pergunta contra o top-K de decisões.
+  const textTerm = filters?.q?.trim();
   if (textTerm) {
     where.OR = [
       { title: { contains: textTerm, mode: 'insensitive' } },
@@ -141,7 +144,7 @@ export const POST = withAuth(async (request: NextRequest, context?: Record<strin
     const { query, filters, topK } = parsed.data;
     const limit = topK ?? DEFAULT_TOP_K;
 
-    const where = buildWhere(filters, query);
+    const where = buildWhere(filters);
 
     const decisions = await prisma.tribunalDecision.findMany({
       where,
@@ -170,11 +173,21 @@ export const POST = withAuth(async (request: NextRequest, context?: Record<strin
     });
 
     if (decisions.length === 0) {
+      const totalInDatabase = await prisma.tribunalDecision.count({
+        where: {
+          isRelevant: true,
+          approvalStatus: { in: ['auto_approved', 'manually_approved'] },
+        },
+      });
+      const msg =
+        totalInDatabase === 0
+          ? 'A base de jurisprudência deste ambiente ainda não foi populada. Fale com o administrador para rodar a ingestão de decisões.'
+          : 'Nenhuma decisão casou com os filtros ativos. Tente afrouxar os filtros (por exemplo, limpar tribunal, ano ou texto) e perguntar novamente.';
       return NextResponse.json({
-        answer:
-          'Não encontrei decisões que casem com a sua pergunta e os filtros atuais. Tente afrouxar os filtros (por exemplo, remover o tribunal ou o ano) ou reformular a pergunta.',
+        answer: msg,
         sources: [],
         consulted: 0,
+        totalInDatabase,
       });
     }
 
