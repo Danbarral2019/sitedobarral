@@ -215,6 +215,8 @@ export const POST = withAuth(
         answerText =
           'Não consegui gerar uma síntese agora — o modelo de IA pode estar sobrecarregado, em timeout ou indisponível. Encontrei as decisões relevantes abaixo; consulte-as diretamente ou tente perguntar de novo em alguns instantes.';
 
+        // Debug info liberado enquanto estamos diagnosticando o bug em preview.
+        // TODO: restringir para role === 'admin' quando o diagnóstico terminar.
         const debug = { geminiError: errMsg, stack: errStack };
         return NextResponse.json({
           answer: answerText,
