@@ -1,5 +1,5 @@
 // @vitest-environment node
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, vi, beforeEach } from 'vitest';
 import {
   mapDocumentTcuToDecision,
   shouldIncludeTribunalDecisionBranch,
@@ -8,6 +8,20 @@ import {
   buildDocumentTcuWhere,
   type JurisprudenciaFilters,
 } from '../unified-query';
+
+const { mockQueryRaw } = vi.hoisted(() => ({
+  mockQueryRaw: vi.fn(),
+}));
+
+vi.mock('@/lib/prisma', () => ({
+  prisma: {
+    $queryRaw: (...args: any[]) => mockQueryRaw(...args),
+  },
+}));
+
+beforeEach(() => {
+  mockQueryRaw.mockReset();
+});
 
 describe('mapDocumentTcuToDecision', () => {
   it('mapeia todos os campos TCU preenchidos para o shape UnifiedDecision', () => {
@@ -280,5 +294,120 @@ describe('buildDocumentTcuWhere', () => {
     const where = buildDocumentTcuWhere({ q: 'contrato' });
     expect(where.sql).toMatch(/title ILIKE/);
     expect(where.sql).toMatch(/"tcuEmentaCompleta" ILIKE/);
+  });
+});
+
+describe('fetchUnifiedList', () => {
+  it('retorna lista vazia sem chamar o banco quando ambos os ramos estão excluídos', async () => {
+    const { fetchUnifiedList } = await import('../unified-query');
+    const result = await fetchUnifiedList(
+      { tribunal: 'TCU', decisionType: 'sumula' },
+      { page: 1, pageSize: 10 }
+    );
+    expect(result).toEqual({ items: [], total: 0 });
+    expect(mockQueryRaw).not.toHaveBeenCalled();
+  });
+
+  it('chama $queryRaw duas vezes (items + count) quando há ramos ativos', async () => {
+    const { fetchUnifiedList } = await import('../unified-query');
+    mockQueryRaw
+      .mockResolvedValueOnce([
+        {
+          id: 'td-1',
+          tribunalCode: 'TCE-SP',
+          tribunalName: 'Tribunal de Contas do Estado de São Paulo',
+          decisionType: 'acordao',
+          decisionNumber: '1234/2024',
+          title: 'Acórdão TCE-SP',
+          ementa: 'ementa',
+          fullText: null,
+          summary: null,
+          relator: 'Rel.',
+          orgaoJulgador: 'Pleno',
+          dataJulgamento: new Date('2024-05-01'),
+          dataPublicacao: null,
+          themes: null,
+          leiArticles: null,
+          url: null,
+          pdfUrl: null,
+          isRelevant: true,
+          relevanceScore: 50,
+          approvalStatus: 'auto_approved',
+          year: 2024,
+          processNumber: null,
+          fullIdentifier: 'TCE-SP Acórdão 1234/2024',
+          sourceType: 'tribunal-decision',
+          createdAt: new Date(),
+          updatedAt: new Date(),
+        },
+      ])
+      .mockResolvedValueOnce([{ total: 1 }]);
+
+    const result = await fetchUnifiedList({}, { page: 1, pageSize: 10 });
+    expect(result.items).toHaveLength(1);
+    expect(result.total).toBe(1);
+    expect(mockQueryRaw).toHaveBeenCalledTimes(2);
+  });
+});
+
+describe('fetchUnifiedTopK', () => {
+  it('retorna [] sem chamar o banco quando ambos os ramos estão excluídos', async () => {
+    const { fetchUnifiedTopK } = await import('../unified-query');
+    const result = await fetchUnifiedTopK(
+      { tribunal: 'TCU', decisionType: 'sumula' },
+      5
+    );
+    expect(result).toEqual([]);
+    expect(mockQueryRaw).not.toHaveBeenCalled();
+  });
+
+  it('chama $queryRaw uma vez com LIMIT topK', async () => {
+    const { fetchUnifiedTopK } = await import('../unified-query');
+    mockQueryRaw.mockResolvedValueOnce([]);
+    await fetchUnifiedTopK({}, 3);
+    expect(mockQueryRaw).toHaveBeenCalledTimes(1);
+    const callArg = mockQueryRaw.mock.calls[0][0];
+    expect(callArg.text).toMatch(/LIMIT \$\d+/);
+    expect(callArg.values).toContain(3);
+  });
+});
+
+describe('fetchUnifiedById', () => {
+  it('tenta ramo A, retorna match se encontrar', async () => {
+    const { fetchUnifiedById } = await import('../unified-query');
+    mockQueryRaw.mockResolvedValueOnce([
+      { id: 'td-1', sourceType: 'tribunal-decision' },
+    ]);
+    const result = await fetchUnifiedById('td-1');
+    expect(result).toMatchObject({ id: 'td-1', sourceType: 'tribunal-decision' });
+    expect(mockQueryRaw).toHaveBeenCalledTimes(1);
+  });
+
+  it('tenta ramo B quando A não encontra', async () => {
+    const { fetchUnifiedById } = await import('../unified-query');
+    mockQueryRaw
+      .mockResolvedValueOnce([])
+      .mockResolvedValueOnce([
+        { id: 'doc-1', sourceType: 'document-tcu' },
+      ]);
+    const result = await fetchUnifiedById('doc-1');
+    expect(result).toMatchObject({ id: 'doc-1', sourceType: 'document-tcu' });
+    expect(mockQueryRaw).toHaveBeenCalledTimes(2);
+  });
+
+  it('retorna null quando nenhum ramo encontra', async () => {
+    const { fetchUnifiedById } = await import('../unified-query');
+    mockQueryRaw.mockResolvedValueOnce([]).mockResolvedValueOnce([]);
+    const result = await fetchUnifiedById('inexistente');
+    expect(result).toBeNull();
+  });
+});
+
+describe('countUnifiedApproved', () => {
+  it('retorna a soma das duas tabelas', async () => {
+    const { countUnifiedApproved } = await import('../unified-query');
+    mockQueryRaw.mockResolvedValueOnce([{ total: 424 }]);
+    const total = await countUnifiedApproved();
+    expect(total).toBe(424);
   });
 });

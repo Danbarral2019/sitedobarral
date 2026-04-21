@@ -7,6 +7,7 @@
  */
 
 import { Prisma } from '@prisma/client';
+import { prisma } from '@/lib/prisma';
 
 export interface UnifiedDecision {
   id: string;
@@ -268,4 +269,204 @@ export function buildDocumentTcuWhere(
   }
 
   return Prisma.join(fragments, ' AND ');
+}
+
+// ──────────────────────────────────────────────────────────────────────────
+// Composição da query UNION ALL
+// ──────────────────────────────────────────────────────────────────────────
+
+/**
+ * SELECT normalizado do ramo A (TribunalDecision) — alinha com UnifiedDecision.
+ */
+function tribunalDecisionSelect(where: Prisma.Sql): Prisma.Sql {
+  return Prisma.sql`
+    SELECT
+      id,
+      "tribunalCode",
+      "tribunalName",
+      "decisionType",
+      "decisionNumber",
+      title,
+      ementa,
+      "fullText",
+      summary,
+      relator,
+      "orgaoJulgador",
+      "dataJulgamento",
+      "dataPublicacao",
+      themes,
+      "leiArticles",
+      url,
+      "pdfUrl",
+      "isRelevant",
+      "relevanceScore",
+      "approvalStatus",
+      year,
+      "processNumber",
+      "fullIdentifier",
+      'tribunal-decision' AS "sourceType",
+      "createdAt",
+      "updatedAt"
+    FROM "TribunalDecision"
+    WHERE ${where}
+  `;
+}
+
+/**
+ * SELECT normalizado do ramo B (Document TCU) — mesmos campos do ramo A,
+ * derivando a partir dos campos tcu*.
+ */
+function documentTcuSelect(where: Prisma.Sql): Prisma.Sql {
+  return Prisma.sql`
+    SELECT
+      id,
+      'TCU' AS "tribunalCode",
+      'Tribunal de Contas da União' AS "tribunalName",
+      'acordao' AS "decisionType",
+      COALESCE("tcuNumeroAcordao", title) AS "decisionNumber",
+      title,
+      COALESCE("tcuEmentaCompleta", description, content, '') AS ementa,
+      COALESCE("tcuTextoCompleto", content) AS "fullText",
+      summary,
+      COALESCE("tcuRelator", "tcuAutorTese") AS relator,
+      "tcuOrgaoJulgador" AS "orgaoJulgador",
+      "tcuDataJulgamento" AS "dataJulgamento",
+      "douData" AS "dataPublicacao",
+      CASE
+        WHEN themes IS NOT NULL THEN themes
+        WHEN "tcuArea" IS NOT NULL OR "tcuTema" IS NOT NULL OR "tcuSubtema" IS NOT NULL THEN
+          to_jsonb(ARRAY_REMOVE(ARRAY["tcuArea", "tcuTema", "tcuSubtema"], NULL))::text
+        ELSE NULL
+      END AS themes,
+      "leiArticles",
+      url,
+      "tcuLinkPDF" AS "pdfUrl",
+      TRUE AS "isRelevant",
+      0 AS "relevanceScore",
+      'manually_approved' AS "approvalStatus",
+      COALESCE("acordaoAno", EXTRACT(YEAR FROM "tcuDataJulgamento")::int) AS year,
+      NULL::text AS "processNumber",
+      'TCU Acórdão ' || COALESCE("tcuNumeroAcordao", title) AS "fullIdentifier",
+      'document-tcu' AS "sourceType",
+      "uploadedAt" AS "createdAt",
+      "updatedAt"
+    FROM "Document"
+    WHERE ${where}
+  `;
+}
+
+/**
+ * Monta o corpo do UNION ALL baseado no short-circuit.
+ * Retorna `null` quando ambos os ramos são excluídos.
+ */
+function composeUnifiedBody(
+  filters: JurisprudenciaFilters
+): Prisma.Sql | null {
+  const includeA = shouldIncludeTribunalDecisionBranch(filters);
+  const includeB = shouldIncludeDocumentTcuBranch(filters);
+
+  if (!includeA && !includeB) return null;
+
+  if (includeA && includeB) {
+    return Prisma.sql`
+      (${tribunalDecisionSelect(buildTribunalDecisionWhere(filters))})
+      UNION ALL
+      (${documentTcuSelect(buildDocumentTcuWhere(filters))})
+    `;
+  }
+  if (includeA) {
+    return tribunalDecisionSelect(buildTribunalDecisionWhere(filters));
+  }
+  // includeB only
+  return documentTcuSelect(buildDocumentTcuWhere(filters));
+}
+
+// ──────────────────────────────────────────────────────────────────────────
+// Funções fetch públicas
+// ──────────────────────────────────────────────────────────────────────────
+
+export interface PaginationOptions {
+  page: number;
+  pageSize: number;
+}
+
+export interface UnifiedListResult {
+  items: UnifiedDecision[];
+  total: number;
+}
+
+export async function fetchUnifiedList(
+  filters: JurisprudenciaFilters,
+  { page, pageSize }: PaginationOptions
+): Promise<UnifiedListResult> {
+  const body = composeUnifiedBody(filters);
+  if (!body) return { items: [], total: 0 };
+
+  const offset = (page - 1) * pageSize;
+
+  const itemsSql = Prisma.sql`
+    SELECT * FROM (${body}) unified
+    ORDER BY "dataJulgamento" DESC NULLS LAST, id ASC
+    LIMIT ${pageSize} OFFSET ${offset}
+  `;
+  const countSql = Prisma.sql`
+    SELECT COUNT(*)::int AS total FROM (${body}) sub
+  `;
+
+  const [items, countRows] = await Promise.all([
+    prisma.$queryRaw<UnifiedDecision[]>(itemsSql),
+    prisma.$queryRaw<Array<{ total: number }>>(countSql),
+  ]);
+
+  return { items, total: countRows[0]?.total ?? 0 };
+}
+
+export async function fetchUnifiedTopK(
+  filters: JurisprudenciaFilters,
+  topK: number
+): Promise<UnifiedDecision[]> {
+  const body = composeUnifiedBody(filters);
+  if (!body) return [];
+
+  const sql = Prisma.sql`
+    SELECT * FROM (${body}) unified
+    ORDER BY "relevanceScore" DESC NULLS LAST, "dataJulgamento" DESC NULLS LAST
+    LIMIT ${topK}
+  `;
+
+  return prisma.$queryRaw<UnifiedDecision[]>(sql);
+}
+
+export async function fetchUnifiedById(
+  id: string
+): Promise<UnifiedDecision | null> {
+  // Tenta ramo A primeiro (filtros equivalentes ao default)
+  const tribA = await prisma.$queryRaw<UnifiedDecision[]>(Prisma.sql`
+    SELECT * FROM (${tribunalDecisionSelect(
+      buildTribunalDecisionWhere({})
+    )}) unified
+    WHERE id = ${id}
+    LIMIT 1
+  `);
+  if (tribA.length > 0) return tribA[0];
+
+  const tribB = await prisma.$queryRaw<UnifiedDecision[]>(Prisma.sql`
+    SELECT * FROM (${documentTcuSelect(
+      buildDocumentTcuWhere({})
+    )}) unified
+    WHERE id = ${id}
+    LIMIT 1
+  `);
+  if (tribB.length > 0) return tribB[0];
+
+  return null;
+}
+
+export async function countUnifiedApproved(): Promise<number> {
+  const body = composeUnifiedBody({});
+  if (!body) return 0;
+  const rows = await prisma.$queryRaw<Array<{ total: number }>>(Prisma.sql`
+    SELECT COUNT(*)::int AS total FROM (${body}) sub
+  `);
+  return rows[0]?.total ?? 0;
 }
