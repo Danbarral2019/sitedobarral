@@ -76,6 +76,38 @@ function deriveYear(doc: DocumentTcuRaw): number | null {
   return null;
 }
 
+export interface JurisprudenciaFilters {
+  tribunal?: string;
+  ano?: number;
+  tema?: string;
+  artigo?: string;
+  decisionType?: string;
+  relator?: string;
+  orgao?: string;
+  dataFrom?: Date;
+  dataTo?: Date;
+  q?: string;
+}
+
+export function shouldIncludeTribunalDecisionBranch(
+  filters: JurisprudenciaFilters
+): boolean {
+  if (filters.tribunal === 'TCU') return false;
+  return true;
+}
+
+export function shouldIncludeDocumentTcuBranch(
+  filters: JurisprudenciaFilters
+): boolean {
+  if (filters.tribunal && filters.tribunal !== 'TCU') return false;
+  if (
+    filters.decisionType &&
+    filters.decisionType !== 'acordao'
+  )
+    return false;
+  return true;
+}
+
 export function mapDocumentTcuToDecision(doc: DocumentTcuRaw): UnifiedDecision {
   const decisionNumber = doc.tcuNumeroAcordao ?? doc.title;
   const ementa =

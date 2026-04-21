@@ -1,6 +1,11 @@
 // @vitest-environment node
 import { describe, it, expect } from 'vitest';
-import { mapDocumentTcuToDecision } from '../unified-query';
+import {
+  mapDocumentTcuToDecision,
+  shouldIncludeTribunalDecisionBranch,
+  shouldIncludeDocumentTcuBranch,
+  type JurisprudenciaFilters,
+} from '../unified-query';
 
 describe('mapDocumentTcuToDecision', () => {
   it('mapeia todos os campos TCU preenchidos para o shape UnifiedDecision', () => {
@@ -131,5 +136,78 @@ describe('mapDocumentTcuToDecision', () => {
 
     expect(result.themes).toBeNull();
     expect(result.year).toBeNull();
+  });
+});
+
+describe('shouldIncludeTribunalDecisionBranch', () => {
+  it('inclui quando sem filtros', () => {
+    expect(shouldIncludeTribunalDecisionBranch({})).toBe(true);
+  });
+
+  it('exclui quando tribunal=TCU', () => {
+    expect(
+      shouldIncludeTribunalDecisionBranch({ tribunal: 'TCU' })
+    ).toBe(false);
+  });
+
+  it('inclui quando tribunal=TCE-SP', () => {
+    expect(
+      shouldIncludeTribunalDecisionBranch({ tribunal: 'TCE-SP' })
+    ).toBe(true);
+  });
+
+  it('inclui com qualquer decisionType', () => {
+    expect(
+      shouldIncludeTribunalDecisionBranch({ decisionType: 'sumula' })
+    ).toBe(true);
+    expect(
+      shouldIncludeTribunalDecisionBranch({ decisionType: 'acordao' })
+    ).toBe(true);
+  });
+});
+
+describe('shouldIncludeDocumentTcuBranch', () => {
+  it('inclui quando sem filtros', () => {
+    expect(shouldIncludeDocumentTcuBranch({})).toBe(true);
+  });
+
+  it('inclui quando tribunal=TCU', () => {
+    expect(
+      shouldIncludeDocumentTcuBranch({ tribunal: 'TCU' })
+    ).toBe(true);
+  });
+
+  it('exclui quando tribunal=TCE-SP', () => {
+    expect(
+      shouldIncludeDocumentTcuBranch({ tribunal: 'TCE-SP' })
+    ).toBe(false);
+  });
+
+  it('exclui quando decisionType não é acordao', () => {
+    expect(
+      shouldIncludeDocumentTcuBranch({ decisionType: 'sumula' })
+    ).toBe(false);
+    expect(
+      shouldIncludeDocumentTcuBranch({ decisionType: 'parecer_previo' })
+    ).toBe(false);
+    expect(
+      shouldIncludeDocumentTcuBranch({ decisionType: 'decisao' })
+    ).toBe(false);
+  });
+
+  it('inclui quando decisionType=acordao ou vazio', () => {
+    expect(
+      shouldIncludeDocumentTcuBranch({ decisionType: 'acordao' })
+    ).toBe(true);
+    expect(shouldIncludeDocumentTcuBranch({})).toBe(true);
+  });
+
+  it('combina filtros: tribunal=TCU + decisionType=sumula = excluído', () => {
+    expect(
+      shouldIncludeDocumentTcuBranch({
+        tribunal: 'TCU',
+        decisionType: 'sumula',
+      })
+    ).toBe(false);
   });
 });
