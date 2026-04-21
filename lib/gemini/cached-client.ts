@@ -14,7 +14,8 @@ import { withCache, CacheKeys, CACHE_TTL } from '../cache/redis-client';
 import {
   PRIMARY_GEMINI_MODEL,
   FALLBACK_GEMINI_MODELS,
-  isModelAvailabilityError,
+  shouldTryFallbackModel,
+  isRateLimitError,
 } from './config';
 
 // ===========================
@@ -155,26 +156,30 @@ async function callGeminiWithFallback(
     try {
       const result = await callGeminiOnce(modelName, query, opts);
       if (i > 0) {
-        // Caiu em fallback — loga warning para Sentry pegar.
         console.warn(
-          `[gemini] Primary model "${requestedModel}" unavailable; succeeded on fallback "${modelName}".`,
+          `[gemini] Primary model "${requestedModel}" failed; succeeded on fallback "${modelName}".`,
         );
       }
       return { ...result, modelUsed: modelName };
     } catch (err) {
       lastError = err;
-      if (!isModelAvailabilityError(err)) {
-        // Erro que não é de disponibilidade (quota, rede, safety, etc.).
-        // Não adianta trocar de modelo — rethrow imediato.
+      if (!shouldTryFallbackModel(err)) {
+        // Erro não recuperável por troca de modelo (safety, auth, rede).
         throw err;
       }
+      const reason = isRateLimitError(err) ? 'rate-limit (429)' : 'unavailable';
       console.warn(
-        `[gemini] Model "${modelName}" unavailable (${err instanceof Error ? err.message : String(err)}). Trying next.`,
+        `[gemini] Model "${modelName}" ${reason}. Trying next fallback.`,
       );
     }
   }
-  // Todos os modelos falharam com erro de disponibilidade.
-  throw lastError ?? new Error('All Gemini models unavailable');
+  // Se chegou aqui, todos os modelos falharam por disponibilidade/quota.
+  if (isRateLimitError(lastError)) {
+    throw new Error(
+      'Gemini quota esgotada em todos os modelos configurados (HTTP 429). Ative billing em https://console.cloud.google.com/billing ou reduza volume de chamadas.',
+    );
+  }
+  throw lastError ?? new Error('Todos os modelos Gemini indisponíveis');
 }
 
 export async function queryGeminiText(

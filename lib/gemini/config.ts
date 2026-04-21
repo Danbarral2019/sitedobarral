@@ -38,3 +38,28 @@ export function isModelAvailabilityError(err: unknown): boolean {
     (/\b400\b/.test(msg) && msg.includes('model'))
   );
 }
+
+/**
+ * Detecta HTTP 429 / quota esgotada. No free tier do Gemini, cada modelo
+ * tem quota RPM/RPD separada, então trocar para um fallback pode funcionar
+ * mesmo quando o primary está esgotado.
+ */
+export function isRateLimitError(err: unknown): boolean {
+  const raw = err instanceof Error ? err.message : String(err);
+  const msg = raw.toLowerCase();
+  return (
+    /\b429\b/.test(msg) ||
+    msg.includes('resource exhausted') ||
+    msg.includes('quota exceeded') ||
+    msg.includes('too many requests') ||
+    msg.includes('rate limit')
+  );
+}
+
+/**
+ * Retorna true se o erro justifica tentar o próximo modelo da cascata.
+ * Erros de rede, safety, auth NÃO entram aqui.
+ */
+export function shouldTryFallbackModel(err: unknown): boolean {
+  return isModelAvailabilityError(err) || isRateLimitError(err);
+}
