@@ -1,5 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
+
+export const runtime = 'nodejs';
+export const maxDuration = 60;
+
 import { verifyAuth } from '@/lib/auth';
 import { buildContextForLLM } from '@/lib/embeddings/vector-search';
 import type { SearchResult } from '@/lib/embeddings/vector-search';
