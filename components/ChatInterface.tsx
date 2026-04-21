@@ -233,13 +233,22 @@ export default function ChatInterface({
         }
       }
 
-      // If no content was streamed, show fallback
+      // If no content was streamed, show fallback — distingue entre "sem
+      // fontes" (base não indexou nada) e "fontes encontradas mas a síntese
+      // da IA falhou" (timeout, rate limit, safety filter).
       if (!fullContent) {
-        setMessages((prev) => prev.map(m =>
-          m.id === assistantId
-            ? { ...m, content: 'Não encontrei documentos relevantes para sua pergunta. Tente reformular ou fazer uma pergunta mais específica.' }
-            : m
-        ));
+        setMessages((prev) => prev.map(m => {
+          if (m.id !== assistantId) return m;
+          const hasSources =
+            (m.sources && m.sources.length > 0) ||
+            (m.legalSources && m.legalSources.length > 0);
+          return {
+            ...m,
+            content: hasSources
+              ? 'Não consegui gerar uma síntese agora — o modelo de IA pode estar sobrecarregado ou indisponível. Encontrei as fontes relevantes abaixo; tente perguntar de novo em alguns instantes.'
+              : 'Não encontrei documentos relevantes para sua pergunta. Tente reformular ou fazer uma pergunta mais específica.',
+          };
+        }));
       }
 
       // Salvar no historico e capturar o ID para compartilhamento

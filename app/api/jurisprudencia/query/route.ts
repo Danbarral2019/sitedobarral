@@ -7,6 +7,7 @@ import { apiLogger } from '@/lib/logger';
 import { z } from 'zod';
 
 export const runtime = 'nodejs';
+export const maxDuration = 60;
 
 const filtersSchema = z
   .object({
@@ -193,36 +194,57 @@ export const POST = withAuth(async (request: NextRequest, context?: Record<strin
 
     const prompt = buildPrompt(query, decisions);
 
-    const result = await queryGeminiText(prompt, {
-      model: 'gemini-2.0-flash',
-      temperature: 0.3,
-      maxOutputTokens: 1500,
-      useCache: true,
-      systemInstruction:
-        'Você é um assistente jurídico técnico e conciso. Fundamente tudo nas decisões citadas; nunca invente números de acórdão ou relatores.',
-    });
+    const sourcesPayload = decisions.map(d => ({
+      id: d.id,
+      tribunalCode: d.tribunalCode,
+      tribunalName: d.tribunalName,
+      decisionType: d.decisionType,
+      decisionNumber: d.decisionNumber,
+      title: d.title,
+      relator: d.relator,
+      orgaoJulgador: d.orgaoJulgador,
+      dataJulgamento: d.dataJulgamento,
+      url: d.url,
+    }));
 
-    apiLogger.info(
-      { userId: user.userId, consulted: decisions.length, cached: result.cached, latencyMs: result.latency },
-      'jurisprudencia/query answered'
-    );
+    let answerText: string;
+    let cached = false;
+
+    try {
+      const result = await queryGeminiText(prompt, {
+        model: 'gemini-2.0-flash',
+        temperature: 0.3,
+        maxOutputTokens: 1500,
+        useCache: true,
+        systemInstruction:
+          'Você é um assistente jurídico técnico e conciso. Fundamente tudo nas decisões citadas; nunca invente números de acórdão ou relatores.',
+      });
+
+      if (!result.response || result.response.trim().length === 0) {
+        throw new Error('empty-response');
+      }
+
+      answerText = result.response;
+      cached = result.cached;
+
+      apiLogger.info(
+        { userId: user.userId, consulted: decisions.length, cached, latencyMs: result.latency },
+        'jurisprudencia/query answered'
+      );
+    } catch (err) {
+      apiLogger.error(
+        { userId: user.userId, consulted: decisions.length, err },
+        'jurisprudencia/query Gemini failed — returning sources only'
+      );
+      answerText =
+        'Não consegui gerar uma síntese agora — o modelo de IA pode estar sobrecarregado, em timeout ou indisponível. Encontrei as decisões relevantes abaixo; consulte-as diretamente ou tente perguntar de novo em alguns instantes.';
+    }
 
     return NextResponse.json({
-      answer: result.response,
-      sources: decisions.map(d => ({
-        id: d.id,
-        tribunalCode: d.tribunalCode,
-        tribunalName: d.tribunalName,
-        decisionType: d.decisionType,
-        decisionNumber: d.decisionNumber,
-        title: d.title,
-        relator: d.relator,
-        orgaoJulgador: d.orgaoJulgador,
-        dataJulgamento: d.dataJulgamento,
-        url: d.url,
-      })),
+      answer: answerText,
+      sources: sourcesPayload,
       consulted: decisions.length,
-      cached: result.cached,
+      cached,
     });
   } catch (error) {
     return handleApiError(error);

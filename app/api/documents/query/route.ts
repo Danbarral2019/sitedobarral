@@ -556,17 +556,29 @@ RESPOSTA:`;
 
             // Stream Gemini tokens
             const streamResult = await geminiModel.generateContentStream(synthesisPrompt);
+            let hasTokens = false;
             for await (const chunk of streamResult.stream) {
               const text = chunk.text();
               if (text) {
+                hasTokens = true;
                 controller.enqueue(encoder.encode(`data: ${JSON.stringify({ type: 'token', text })}\n\n`));
               }
+            }
+
+            // Fallback quando o modelo não emitiu tokens (timeout, safety
+            // filter, quota). Evita que o cliente caia na mensagem genérica
+            // "não encontrei documentos" quando na verdade há fontes.
+            if (!hasTokens) {
+              const fallback = 'Não consegui sintetizar uma resposta agora. Consulte as fontes abaixo — elas contêm a informação relevante para sua pergunta.';
+              controller.enqueue(encoder.encode(`data: ${JSON.stringify({ type: 'token', text: fallback })}\n\n`));
             }
 
             controller.enqueue(encoder.encode('data: [DONE]\n\n'));
           } catch (err) {
             apiLogger.error({ error: err }, 'SSE streaming error');
-            controller.enqueue(encoder.encode(`data: ${JSON.stringify({ type: 'error', message: 'Streaming failed' })}\n\n`));
+            const fallback = 'Não consegui sintetizar uma resposta agora. Consulte as fontes abaixo — elas contêm a informação relevante para sua pergunta.';
+            controller.enqueue(encoder.encode(`data: ${JSON.stringify({ type: 'token', text: fallback })}\n\n`));
+            controller.enqueue(encoder.encode('data: [DONE]\n\n'));
           } finally {
             controller.close();
           }
