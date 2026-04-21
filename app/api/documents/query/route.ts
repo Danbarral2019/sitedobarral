@@ -6,6 +6,7 @@ import type { SearchResult } from '@/lib/embeddings/vector-search';
 import { hybridSearch } from '@/lib/embeddings/hybrid-search';
 
 import { queryGeminiText } from '@/lib/gemini/cached-client';
+import { PRIMARY_GEMINI_MODEL } from '@/lib/gemini/config';
 import { GoogleGenerativeAI, HarmCategory, HarmBlockThreshold } from '@google/generative-ai';
 
 // Safety settings permissivos para contexto jurídico — o padrão bloqueia
@@ -544,7 +545,7 @@ RESPOSTA:`;
 
       const genAI = new GoogleGenerativeAI(GEMINI_API_KEY);
       const geminiModel = genAI.getGenerativeModel({
-        model: 'gemini-2.0-flash',
+        model: PRIMARY_GEMINI_MODEL,
         systemInstruction,
         generationConfig: { temperature: 0.3, maxOutputTokens: 3000 },
         safetySettings: LEGAL_SAFETY_SETTINGS,

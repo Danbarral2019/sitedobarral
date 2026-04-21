@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { withAuth } from '@/lib/api-middleware';
 import { queryGeminiText } from '@/lib/gemini/cached-client';
+import { PRIMARY_GEMINI_MODEL } from '@/lib/gemini/config';
 
 export const runtime = 'nodejs';
 export const maxDuration = 60;
@@ -35,7 +36,7 @@ export const GET = withAuth(async (_request: NextRequest, context?: Record<strin
     const result = await queryGeminiText(
       'Responda em uma única palavra: qual é a capital do Brasil?',
       {
-        model: 'gemini-2.0-flash',
+        model: PRIMARY_GEMINI_MODEL,
         temperature: 0,
         maxOutputTokens: 20,
         useCache: false,
@@ -46,7 +47,7 @@ export const GET = withAuth(async (_request: NextRequest, context?: Record<strin
       latencyMs: Date.now() - started,
       response: result.response?.trim() || '(vazio)',
       env: { hasKey, hasRedisUrl, hasRedisToken },
-      model: 'gemini-2.0-flash',
+      model: PRIMARY_GEMINI_MODEL,
     });
   } catch (err) {
     return NextResponse.json({
@@ -56,7 +57,7 @@ export const GET = withAuth(async (_request: NextRequest, context?: Record<strin
       message: err instanceof Error ? err.message : String(err),
       stack: err instanceof Error ? err.stack : undefined,
       env: { hasKey, hasRedisUrl, hasRedisToken },
-      model: 'gemini-2.0-flash',
+      model: PRIMARY_GEMINI_MODEL,
     }, { status: 500 });
   }
 });

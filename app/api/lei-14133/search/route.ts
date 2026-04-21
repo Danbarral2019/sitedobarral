@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { LEI_14133_ARTIGOS } from '@/data/lei-14133-artigos';
 import { queryGeminiText } from '@/lib/gemini/cached-client';
+import { PRIMARY_GEMINI_MODEL } from '@/lib/gemini/config';
 import { prisma } from '@/lib/prisma';
 import { ENUNCIADOS, buscarEnunciados } from '@/data/enunciados';
 import { enforceRateLimit, getClientIp } from '@/lib/cache/rate-limit-helper';
@@ -112,7 +113,7 @@ Regras:
     apiLogger.info({ query: searchQuery }, 'Lei 14133 search initiated');
 
     const geminiResult = await queryGeminiText(prompt, {
-      model: 'gemini-2.0-flash',
+      model: PRIMARY_GEMINI_MODEL,
       temperature: 0.3, // Baixa para respostas mais precisas
       maxOutputTokens: 1024,
       useCache: true,

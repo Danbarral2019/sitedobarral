@@ -212,7 +212,6 @@ export const POST = withAuth(async (request: NextRequest, context?: Record<strin
 
     try {
       const result = await queryGeminiText(prompt, {
-        model: 'gemini-2.0-flash',
         temperature: 0.3,
         maxOutputTokens: 1500,
         useCache: true,

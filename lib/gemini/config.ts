@@ -6,16 +6,19 @@
  * lista automaticamente quando detecta erro de "modelo não disponível".
  */
 
-export const PRIMARY_GEMINI_MODEL = 'gemini-2.0-flash';
+// Google deprecou gemini-2.0-flash (shutdown 2026-06-01, acesso restrito
+// desde 2026-03-06). Substituto GA é gemini-2.5-flash.
+// Ref: https://ai.google.dev/gemini-api/docs/models
+export const PRIMARY_GEMINI_MODEL = 'gemini-2.5-flash';
 
 /**
  * Lista ordenada de fallbacks. Se o primary falhar com erro de
- * disponibilidade de modelo, o cliente tenta cada um em ordem.
+ * disponibilidade OU 429, o cliente tenta cada um em ordem.
  * Manter do mais capaz para o menos capaz.
  */
 export const FALLBACK_GEMINI_MODELS: ReadonlyArray<string> = [
+  'gemini-2.5-flash-lite',
   'gemini-1.5-flash',
-  'gemini-1.5-flash-8b',
 ];
 
 /**

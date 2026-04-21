@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { randomUUID } from 'crypto';
 import { queryGeminiText } from '@/lib/gemini/cached-client';
+import { PRIMARY_GEMINI_MODEL } from '@/lib/gemini/config';
 import { LEI_14133_ARTIGOS } from '@/data/lei-14133-artigos';
 import { findRelatedArticles } from '@/data/lei-14133-cross-references';
 import { enforceRateLimit, getClientIp } from '@/lib/cache/rate-limit-helper';
@@ -332,7 +333,7 @@ Responda agora:`;
     // Consultar Gemini com caching
     apiLogger.info({ articleNumber }, 'Querying Gemini for article chat');
     const geminiResult = await queryGeminiText(prompt, {
-      model: 'gemini-2.0-flash',
+      model: PRIMARY_GEMINI_MODEL,
       temperature: 0.7,
       maxOutputTokens: 2048,
       useCache: true,
@@ -348,7 +349,7 @@ Responda agora:`;
         answer,
         isPlaceholder: false,
         aiProvider: 'gemini',
-        geminiModel: 'gemini-2.0-flash',
+        geminiModel: PRIMARY_GEMINI_MODEL,
         geminiTokens: geminiResult.tokens ? geminiResult.tokens.total : null,
         geminiLatency: geminiResult.latency,
         geminiCached: geminiResult.cached,
@@ -402,7 +403,7 @@ Responda agora:`;
           additionalDocsCount: crossReferenceDocs.length,
         } : null,
         gemini: {
-          model: 'gemini-2.0-flash',
+          model: PRIMARY_GEMINI_MODEL,
           cached: geminiResult.cached,
           latency: geminiResult.latency,
           tokens: geminiResult.tokens,

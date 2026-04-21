@@ -1,5 +1,6 @@
 import { geminiProvider } from './providers/gemini'
 import { anthropicProvider } from './providers/anthropic'
+import { PRIMARY_GEMINI_MODEL } from '../gemini/config'
 import type { AiProvider, AiProviderName, AiTask } from './types'
 
 const PROVIDERS: Record<AiProviderName, AiProvider> = {
@@ -20,9 +21,9 @@ interface TaskDefault {
  * claude-sonnet-4 para enhancement). Upgrades acontecem em fases posteriores.
  */
 const DEFAULTS: Record<AiTask, TaskDefault> = {
-  'search': { provider: 'gemini', model: 'gemini-2.0-flash' },
-  'chat': { provider: 'gemini', model: 'gemini-2.0-flash' },
-  'extraction': { provider: 'gemini', model: 'gemini-2.0-flash' },
+  'search': { provider: 'gemini', model: PRIMARY_GEMINI_MODEL },
+  'chat': { provider: 'gemini', model: PRIMARY_GEMINI_MODEL },
+  'extraction': { provider: 'gemini', model: PRIMARY_GEMINI_MODEL },
   'classification': { provider: 'anthropic', model: 'claude-haiku-4-5-20251001' },
   'summarization': { provider: 'anthropic', model: 'claude-haiku-4-5-20251001' },
   'enhancement': { provider: 'anthropic', model: 'claude-sonnet-4-20250514' },
