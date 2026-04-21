@@ -30,8 +30,8 @@ const bodySchema = z.object({
   topK: z.number().int().min(1).max(20).optional(),
 });
 
-const MAX_EMENTA_CHARS = 1200;
-const DEFAULT_TOP_K = 8;
+const MAX_EMENTA_CHARS = 800;
+const DEFAULT_TOP_K = 6;
 
 type JurisFilters = z.infer<typeof filtersSchema>;
 
@@ -121,7 +121,7 @@ Sua resposta (em português, estruturada, com citações no formato [Tribunal Ti
 
 export const POST = withAuth(async (request: NextRequest, context?: Record<string, unknown>) => {
   try {
-    const user = context?.user as { userId: string };
+    const user = context?.user as { userId: string; role?: string };
 
     const json = await request.json();
     const parsed = bodySchema.safeParse(json);
@@ -236,8 +236,20 @@ export const POST = withAuth(async (request: NextRequest, context?: Record<strin
         { userId: user.userId, consulted: decisions.length, err },
         'jurisprudencia/query Gemini failed — returning sources only'
       );
+      const errMsg = err instanceof Error ? err.message : String(err);
+      const errStack = err instanceof Error ? err.stack : undefined;
       answerText =
         'Não consegui gerar uma síntese agora — o modelo de IA pode estar sobrecarregado, em timeout ou indisponível. Encontrei as decisões relevantes abaixo; consulte-as diretamente ou tente perguntar de novo em alguns instantes.';
+
+      // Admin vê o erro cru para diagnóstico rápido.
+      const debug = user.role === 'admin' ? { geminiError: errMsg, stack: errStack } : undefined;
+      return NextResponse.json({
+        answer: answerText,
+        sources: sourcesPayload,
+        consulted: decisions.length,
+        cached: false,
+        ...(debug ? { debug } : {}),
+      });
     }
 
     return NextResponse.json({
