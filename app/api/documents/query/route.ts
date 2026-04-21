@@ -486,11 +486,11 @@ INSTRUÇÕES:
    c) Quando citar precedentes, acórdãos ou informativos baseados na Lei 8.666/1993, SEMPRE alerte: "⚠️ Precedente anterior à Lei 14.133/2021 — verificar aplicabilidade sob o novo regime"
    d) Se houver EVOLUÇÃO normativa entre a lei antiga e a nova, EXPLIQUE a mudança
    e) Ordene as fontes cronologicamente: mais recentes primeiro
-10. FIDELIDADE AO TEXTO-FONTE:
-    a) Para enunciados, pareceres e orientações normativas: SEMPRE cite o texto original entre aspas — não parafraseie
-    b) Apresente PRIMEIRO a transcrição fiel, DEPOIS interpretação (se necessária)
+10. FIDELIDADE AO CONTEÚDO DAS FONTES:
+    a) Para enunciados, pareceres e orientações normativas: indique o número/origem e explique o entendimento com suas próprias palavras, de forma fiel ao que a fonte dispõe
+    b) Use trechos curtos entre aspas APENAS quando a redação literal for essencial (ex.: um termo técnico definido na fonte); evite reproduzir parágrafos inteiros
     c) NUNCA atribua a um enunciado conteúdo que não esteja em seu texto
-    d) Se a fonte no contexto tiver texto completo, reproduza os trechos relevantes`;
+    d) Se o aluno precisar do texto completo, oriente-o a consultar a fonte listada`;
 
     const synthesisPrompt = `${fullContext}
 ${historyContext}
@@ -551,7 +551,7 @@ RESPOSTA:`;
       const geminiModel = genAI.getGenerativeModel({
         model: PRIMARY_GEMINI_MODEL,
         systemInstruction,
-        generationConfig: { temperature: 0.3, maxOutputTokens: 3000 },
+        generationConfig: { temperature: 0.5, maxOutputTokens: 3000 },
         safetySettings: LEGAL_SAFETY_SETTINGS,
       });
 
@@ -580,9 +580,33 @@ RESPOSTA:`;
               }
             }
 
-            // Fallback quando o modelo não emitiu tokens (timeout, safety
-            // filter, quota). Evita que o cliente caia na mensagem genérica
-            // "não encontrei documentos" quando na verdade há fontes.
+            // Depois do stream, verifica finishReason. Gemini 2.5 aborta em
+            // meio de resposta quando detecta recitação literal (RECITATION)
+            // ou safety parcial. Sem esse check, UI exibe resposta truncada
+            // sem aviso.
+            try {
+              const finalResp = await streamResult.response;
+              const finishReason = finalResp.candidates?.[0]?.finishReason;
+              if (
+                finishReason &&
+                finishReason !== 'STOP' &&
+                finishReason !== 'MAX_TOKENS'
+              ) {
+                apiLogger.warn(
+                  { finishReason, hasTokens },
+                  'Gemini stream interrupted before STOP',
+                );
+                const note = hasTokens
+                  ? `\n\n⚠️ (Resposta interrompida antes do final — motivo: ${finishReason}. Tente reformular a pergunta para evitar citação literal.)`
+                  : `Não consegui gerar uma síntese (motivo: ${finishReason}). Consulte as fontes abaixo.`;
+                controller.enqueue(
+                  encoder.encode(`data: ${JSON.stringify({ type: 'token', text: note })}\n\n`),
+                );
+              }
+            } catch {
+              /* ignora erro de metadata pós-stream */
+            }
+
             if (!hasTokens) {
               const fallback = 'Não consegui sintetizar uma resposta agora. Consulte as fontes abaixo — elas contêm a informação relevante para sua pergunta.';
               controller.enqueue(encoder.encode(`data: ${JSON.stringify({ type: 'token', text: fallback })}\n\n`));
@@ -618,7 +642,7 @@ RESPOSTA:`;
 
     try {
       const geminiResult = await queryGeminiText(synthesisPrompt, {
-        temperature: 0.3,
+        temperature: 0.5,
         maxOutputTokens: 3000,
         useCache,
         systemInstruction,
