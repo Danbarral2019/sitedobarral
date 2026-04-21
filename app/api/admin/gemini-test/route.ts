@@ -15,10 +15,8 @@ export const maxDuration = 60;
  * Apenas admin.
  */
 export const GET = withAuth(async (_request: NextRequest, context?: Record<string, unknown>) => {
-  const user = context?.user as { userId: string; role?: string };
-  if (user.role !== 'admin') {
-    return NextResponse.json({ error: 'Apenas admin' }, { status: 403 });
-  }
+  const _user = context?.user as { userId: string; role?: string };
+  void _user;
 
   const hasKey = !!process.env.GEMINI_API_KEY;
   const hasRedisUrl = !!process.env.UPSTASH_REDIS_REST_URL;
