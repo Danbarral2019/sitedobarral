@@ -91,7 +91,7 @@ const LEGAL_SAFETY_SETTINGS = [
   { category: HarmCategory.HARM_CATEGORY_DANGEROUS_CONTENT, threshold: HarmBlockThreshold.BLOCK_ONLY_HIGH },
 ];
 
-async function callGeminiOnce(
+async function callGeminiRaw(
   modelName: string,
   query: string,
   opts: { temperature: number; maxOutputTokens: number; systemInstruction?: string },
@@ -108,7 +108,6 @@ async function callGeminiOnce(
 
   const result = await geminiModel.generateContent(query);
 
-  // Detectar bloqueio por safety antes de chamar .text() (pode lançar).
   const candidate = result.response.candidates?.[0];
   const finishReason = candidate?.finishReason;
   const blockReason = result.response.promptFeedback?.blockReason;
@@ -132,6 +131,39 @@ async function callGeminiOnce(
     : undefined;
 
   return { response, tokens };
+}
+
+/**
+ * Wrapper com retry exponencial para 429. Rajadas momentâneas de TPM/RPM
+ * (provocadas por crons concorrentes ou picos locais) se resolvem em 1-3s.
+ * Sem retry, a primeira 429 mata a request — daí a UX ruim.
+ * Delays: 1.5s, 4s. Máximo 3 tentativas totais.
+ */
+async function callGeminiOnce(
+  modelName: string,
+  query: string,
+  opts: { temperature: number; maxOutputTokens: number; systemInstruction?: string },
+) {
+  const delaysMs = [1500, 4000];
+  let lastErr: unknown;
+
+  for (let attempt = 0; attempt <= delaysMs.length; attempt++) {
+    try {
+      return await callGeminiRaw(modelName, query, opts);
+    } catch (err) {
+      lastErr = err;
+      if (!isRateLimitError(err) || attempt === delaysMs.length) {
+        throw err;
+      }
+      const delay = delaysMs[attempt];
+      console.warn(
+        `[gemini] "${modelName}" 429 on attempt ${attempt + 1}. Retrying in ${delay}ms.`,
+      );
+      await new Promise(resolve => setTimeout(resolve, delay));
+    }
+  }
+
+  throw lastErr;
 }
 
 /**
