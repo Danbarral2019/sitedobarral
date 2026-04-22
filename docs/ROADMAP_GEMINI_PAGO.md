@@ -2,7 +2,7 @@
 
 **Criado em:** 2026-04-22
 **Autor:** Daniel Barral + Claude (sessão de planejamento)
-**Status:** Em execução — Fases 0 e 1 concluídas em 2026-04-22
+**Status:** Em execução — Fases 0, 1, 2, 3 e 4 concluídas em 2026-04-22. Fase 5 aguarda autorização do usuário (primeira fase que escreve no banco).
 **Prioridade:** Alta — impacta diretamente qualidade das buscas IA no site
 
 ---
@@ -135,9 +135,12 @@ que o anterior (cita elementos do voto, não só da ementa).
 
 ---
 
-### Fase 2 — Ampliar janela na indexação da Lei 14.133
+### Fase 2 — Ampliar janela na indexação da Lei 14.133 — ✅ CONCLUÍDA (2026-04-22)
 
 **Arquivo:** `lib/lei-indexer.ts`
+
+**Execução:** `maxLength` em `prepareContent` passou de 4.000 para 32.000 chars; delay entre chamadas em `analyzeBatch` de 500ms → 50ms. Typecheck limpo. Commit `ccbb469`.
+
 
 **Mudanças:**
 - Linha 211: `const maxLength = 4000` → `const maxLength = 32000`.
@@ -154,9 +157,12 @@ em teste ≥ os da versão 4k.
 
 ---
 
-### Fase 3 — Remover delays artificiais do cron de enriquecimento
+### Fase 3 — Remover delays artificiais do cron de enriquecimento — ✅ CONCLUÍDA (2026-04-22)
 
 **Arquivo:** `app/api/cron/sync-tcu-acordaos/route.ts`
+
+**Execução:** `ENRICHMENT_DELAY_MS` 800 → 50. Aplicado nos dois pontos (após Lei indexer e após resumo Gemini). Sem concorrência paralela ainda — deixada para avaliação futura se o tempo total do cron virar gargalo. Commit `ce3868a`.
+
 
 **Mudanças:**
 - Linha 74: `const ENRICHMENT_DELAY_MS = 800` → `const ENRICHMENT_DELAY_MS = 50`.
@@ -173,9 +179,12 @@ cron começar a rodar mais rápido e processar mais acórdãos por run, tudo ok.
 
 ---
 
-### Fase 4 — Otimizar batch de embeddings
+### Fase 4 — Otimizar batch de embeddings — ✅ CONCLUÍDA (2026-04-22)
 
 **Arquivo:** `lib/embeddings/gemini-embeddings.ts`
+
+**Execução:** `BATCH_SIZE` 100 → 250; delay entre batches 100ms → 25ms; `EMBEDDING_CONFIG.rateLimit` 1500 → 10000; comentários do módulo e docstrings atualizados para refletir tier pago. Typecheck limpo. Commit `fce78ff`.
+
 
 **Mudanças:**
 - Linha 118: `const BATCH_SIZE = 100` → `const BATCH_SIZE = 250`.
