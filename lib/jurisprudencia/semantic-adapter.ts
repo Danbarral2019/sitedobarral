@@ -326,3 +326,159 @@ export async function enrichSources(
 
   return enriched;
 }
+
+// ──────────────────────────────────────────────────────────────────────────
+// Payload uniforme para o front-end
+// ──────────────────────────────────────────────────────────────────────────
+
+export interface JurisprudenciaSource {
+  id: string;
+  tribunalCode: string;
+  tribunalName: string;
+  decisionType: string;
+  decisionNumber: string;
+  title: string;
+  relator: string | null;
+  orgaoJulgador: string | null;
+  dataJulgamento: Date | null;
+  url: string | null;
+  sourceType: string; // 'tribunal-decision' | 'document-tcu-acordao' | 'document-tcu-informativo' | ...
+  similarity: number;
+}
+
+const ENTITY_TRIBUNAL_NAMES: Record<string, string> = {
+  IBDA: 'Instituto Brasileiro de Direito Administrativo',
+  INCP: 'Instituto Nacional da Contratação Pública',
+  CJF: 'Conselho da Justiça Federal',
+};
+
+function deriveInformativoNumber(title: string): string {
+  // Tenta casar "Informativo LC nº 42", "Informativo CGU 123", etc.
+  const match = title.match(/Informativo[\s\w]*?(nº\s*\d+|\d+)/i);
+  return match ? match[0] : title;
+}
+
+export function adaptToSourcesPayload(
+  enriched: EnrichedSource[]
+): JurisprudenciaSource[] {
+  return enriched.map(e => {
+    if (e.source.kind === 'tribunal-decision') {
+      const td = e.source.data;
+      return {
+        id: td.id,
+        tribunalCode: td.tribunalCode,
+        tribunalName: td.tribunalName,
+        decisionType: td.decisionType,
+        decisionNumber: td.decisionNumber,
+        title: td.title,
+        relator: td.relator,
+        orgaoJulgador: td.orgaoJulgador,
+        dataJulgamento: td.dataJulgamento,
+        url: td.url,
+        sourceType: 'tribunal-decision',
+        similarity: e.similarity,
+      };
+    }
+
+    // Document — switch por categoria
+    const doc = e.source.data;
+    switch (e.source.category) {
+      case 'acordao':
+      case 'consulta_tcu':
+        return {
+          id: doc.id,
+          tribunalCode: 'TCU',
+          tribunalName: 'Tribunal de Contas da União',
+          decisionType: 'acordao',
+          decisionNumber: doc.tcuNumeroAcordao ?? doc.title,
+          title: doc.title,
+          relator: doc.tcuRelator ?? doc.tcuAutorTese,
+          orgaoJulgador: doc.tcuOrgaoJulgador,
+          dataJulgamento: doc.tcuDataJulgamento,
+          url: doc.url,
+          sourceType: `document-tcu-${e.source.category === 'consulta_tcu' ? 'consulta' : 'acordao'}`,
+          similarity: e.similarity,
+        };
+      case 'informativo':
+        return {
+          id: doc.id,
+          tribunalCode: 'TCU',
+          tribunalName: 'Tribunal de Contas da União',
+          decisionType: 'informativo',
+          decisionNumber: deriveInformativoNumber(doc.title),
+          title: doc.title,
+          relator: null,
+          orgaoJulgador: null,
+          dataJulgamento: doc.douData ?? doc.uploadedAt,
+          url: doc.url,
+          sourceType: 'document-tcu-informativo',
+          similarity: e.similarity,
+        };
+      case 'manual-tcu':
+        return {
+          id: doc.id,
+          tribunalCode: 'TCU',
+          tribunalName: 'Tribunal de Contas da União',
+          decisionType: 'manual',
+          decisionNumber: doc.title,
+          title: doc.title,
+          relator: null,
+          orgaoJulgador: null,
+          dataJulgamento: doc.uploadedAt,
+          url: doc.url,
+          sourceType: 'document-tcu-manual',
+          similarity: e.similarity,
+        };
+      case 'enunciados': {
+        const code = doc.entityType ?? 'IBDA';
+        return {
+          id: doc.id,
+          tribunalCode: code,
+          tribunalName: ENTITY_TRIBUNAL_NAMES[code] ?? code,
+          decisionType: 'enunciado',
+          decisionNumber: doc.enunciadoNumber ?? doc.title,
+          title: doc.title,
+          relator: null,
+          orgaoJulgador: null,
+          dataJulgamento: doc.uploadedAt,
+          url: doc.url,
+          sourceType: 'document-tcu-enunciado',
+          similarity: e.similarity,
+        };
+      }
+      default:
+        // Fallback genérico — não deveria acontecer, mas shape sempre válido
+        return {
+          id: doc.id,
+          tribunalCode: 'TCU',
+          tribunalName: 'Tribunal de Contas da União',
+          decisionType: e.source.category,
+          decisionNumber: doc.title,
+          title: doc.title,
+          relator: null,
+          orgaoJulgador: null,
+          dataJulgamento: doc.uploadedAt,
+          url: doc.url,
+          sourceType: `document-${e.source.category}`,
+          similarity: e.similarity,
+        };
+    }
+  });
+}
+
+/**
+ * Fallback chain para ementa, usado na construção do prompt Gemini.
+ * Document TCU acórdão tem tcuEmentaCompleta; informativo usa description; etc.
+ */
+export function resolveEmenta(e: EnrichedSource): string {
+  if (e.source.kind === 'tribunal-decision') {
+    return e.source.data.ementa ?? '';
+  }
+  const doc = e.source.data;
+  return (
+    doc.tcuEmentaCompleta ??
+    doc.description ??
+    doc.content ??
+    ''
+  );
+}

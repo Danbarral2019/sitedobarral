@@ -286,3 +286,232 @@ describe('enrichSources', () => {
     expect(enriched.find(e => e.documentId === 'td-1')?.source.kind).toBe('tribunal-decision');
   });
 });
+
+describe('adaptToSourcesPayload — TribunalDecision', () => {
+  it('mapeia campos diretos', async () => {
+    const { adaptToSourcesPayload } = await import('../semantic-adapter');
+
+    const enriched = [
+      {
+        documentId: 'td-1',
+        similarity: 0.85,
+        chunkContent: 'trecho',
+        source: {
+          kind: 'tribunal-decision' as const,
+          data: {
+            id: 'td-1',
+            tribunalCode: 'TCE-SP',
+            tribunalName: 'Tribunal de Contas do Estado de São Paulo',
+            decisionType: 'acordao',
+            decisionNumber: '1234/2024',
+            title: 'Acórdão TCE-SP',
+            ementa: 'Ementa completa',
+            summary: null,
+            relator: 'Ministro X',
+            orgaoJulgador: 'Plenário',
+            dataJulgamento: new Date('2024-05-01'),
+            themes: '["tema1"]',
+            leiArticles: '["75"]',
+            url: 'http://x',
+          },
+        },
+      },
+    ];
+
+    const payload = adaptToSourcesPayload(enriched);
+    expect(payload).toHaveLength(1);
+    expect(payload[0]).toEqual({
+      id: 'td-1',
+      tribunalCode: 'TCE-SP',
+      tribunalName: 'Tribunal de Contas do Estado de São Paulo',
+      decisionType: 'acordao',
+      decisionNumber: '1234/2024',
+      title: 'Acórdão TCE-SP',
+      relator: 'Ministro X',
+      orgaoJulgador: 'Plenário',
+      dataJulgamento: new Date('2024-05-01'),
+      url: 'http://x',
+      sourceType: 'tribunal-decision',
+      similarity: 0.85,
+    });
+  });
+});
+
+describe('adaptToSourcesPayload — Document acordao/consulta_tcu', () => {
+  it('acordao TCU: tribunalCode=TCU, decisionType=acordao, relator com fallback', async () => {
+    const { adaptToSourcesPayload } = await import('../semantic-adapter');
+
+    const enriched = [
+      {
+        documentId: 'doc-1',
+        similarity: 0.82,
+        chunkContent: 'tr',
+        source: {
+          kind: 'document' as const,
+          category: 'acordao',
+          data: {
+            id: 'doc-1',
+            title: 'Acórdão',
+            category: 'acordao',
+            tcuNumeroAcordao: 'AC-1106/24-P',
+            tcuEmentaCompleta: 'ementa',
+            description: null,
+            content: null,
+            tcuRelator: null,
+            tcuAutorTese: 'MIN AUGUSTO',
+            tcuOrgaoJulgador: 'Plenário',
+            tcuDataJulgamento: new Date('2024-05-20'),
+            tcuLinkPDF: 'http://tcu.pdf',
+            summary: null,
+            themes: null,
+            leiArticles: null,
+            url: 'http://tcu.ac/1106',
+            douData: null,
+            uploadedAt: new Date(),
+            updatedAt: new Date(),
+            entityType: null,
+            enunciadoNumber: null,
+          },
+        },
+      },
+    ];
+
+    const payload = adaptToSourcesPayload(enriched);
+    expect(payload[0]).toMatchObject({
+      tribunalCode: 'TCU',
+      tribunalName: 'Tribunal de Contas da União',
+      decisionType: 'acordao',
+      decisionNumber: 'AC-1106/24-P',
+      relator: 'MIN AUGUSTO', // fallback tcuAutorTese
+      orgaoJulgador: 'Plenário',
+      sourceType: 'document-tcu-acordao',
+    });
+  });
+});
+
+describe('adaptToSourcesPayload — informativo', () => {
+  it('informativo: decisionType=informativo, decisionNumber derivado do title', async () => {
+    const { adaptToSourcesPayload } = await import('../semantic-adapter');
+
+    const enriched = [
+      {
+        documentId: 'inf-1',
+        similarity: 0.88,
+        chunkContent: 't',
+        source: {
+          kind: 'document' as const,
+          category: 'informativo',
+          data: {
+            id: 'inf-1',
+            title: 'Informativo LC nº 42',
+            category: 'informativo',
+            tcuNumeroAcordao: null,
+            tcuEmentaCompleta: null,
+            description: 'resumo',
+            content: null,
+            tcuRelator: null,
+            tcuAutorTese: null,
+            tcuOrgaoJulgador: null,
+            tcuDataJulgamento: null,
+            tcuLinkPDF: null,
+            summary: null,
+            themes: null,
+            leiArticles: null,
+            url: null,
+            douData: new Date('2024-01-15'),
+            uploadedAt: new Date('2024-02-01'),
+            updatedAt: new Date(),
+            entityType: null,
+            enunciadoNumber: null,
+          },
+        },
+      },
+    ];
+
+    const payload = adaptToSourcesPayload(enriched);
+    expect(payload[0]).toMatchObject({
+      tribunalCode: 'TCU',
+      decisionType: 'informativo',
+      decisionNumber: 'Informativo LC nº 42',
+      relator: null,
+      dataJulgamento: new Date('2024-01-15'), // prefere douData
+      sourceType: 'document-tcu-informativo',
+    });
+  });
+});
+
+describe('adaptToSourcesPayload — manual-tcu', () => {
+  it('manual: decisionType=manual, decisionNumber=title', async () => {
+    const { adaptToSourcesPayload } = await import('../semantic-adapter');
+
+    const enriched = [
+      {
+        documentId: 'man-1',
+        similarity: 0.7,
+        chunkContent: 't',
+        source: {
+          kind: 'document' as const,
+          category: 'manual-tcu',
+          data: {
+            id: 'man-1',
+            title: 'Manual de Auditoria TCU 2023',
+            category: 'manual-tcu',
+            tcuNumeroAcordao: null, tcuEmentaCompleta: null, description: null, content: null,
+            tcuRelator: null, tcuAutorTese: null, tcuOrgaoJulgador: null,
+            tcuDataJulgamento: null, tcuLinkPDF: null, summary: null, themes: null,
+            leiArticles: null, url: null, douData: null,
+            uploadedAt: new Date('2023-01-01'), updatedAt: new Date(),
+            entityType: null, enunciadoNumber: null,
+          },
+        },
+      },
+    ];
+
+    const payload = adaptToSourcesPayload(enriched);
+    expect(payload[0]).toMatchObject({
+      tribunalCode: 'TCU',
+      decisionType: 'manual',
+      decisionNumber: 'Manual de Auditoria TCU 2023',
+      sourceType: 'document-tcu-manual',
+    });
+  });
+});
+
+describe('adaptToSourcesPayload — enunciados', () => {
+  it('enunciado: tribunalCode do entityType, decisionNumber=enunciadoNumber', async () => {
+    const { adaptToSourcesPayload } = await import('../semantic-adapter');
+
+    const enriched = [
+      {
+        documentId: 'en-1',
+        similarity: 0.75,
+        chunkContent: 't',
+        source: {
+          kind: 'document' as const,
+          category: 'enunciados',
+          data: {
+            id: 'en-1',
+            title: 'Enunciado IBDA nº 10',
+            category: 'enunciados',
+            tcuNumeroAcordao: null, tcuEmentaCompleta: null, description: 'texto',
+            content: null, tcuRelator: null, tcuAutorTese: null, tcuOrgaoJulgador: null,
+            tcuDataJulgamento: null, tcuLinkPDF: null, summary: null, themes: null,
+            leiArticles: null, url: null, douData: null,
+            uploadedAt: new Date(), updatedAt: new Date(),
+            entityType: 'IBDA',
+            enunciadoNumber: '10',
+          },
+        },
+      },
+    ];
+
+    const payload = adaptToSourcesPayload(enriched);
+    expect(payload[0]).toMatchObject({
+      tribunalCode: 'IBDA',
+      tribunalName: 'Instituto Brasileiro de Direito Administrativo',
+      decisionType: 'enunciado',
+      decisionNumber: '10',
+      sourceType: 'document-tcu-enunciado',
+    });
+  });
+});
