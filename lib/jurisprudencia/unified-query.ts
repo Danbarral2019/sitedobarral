@@ -137,7 +137,7 @@ export function mapDocumentTcuToDecision(doc: DocumentTcuRaw): UnifiedDecision {
     url: doc.url,
     pdfUrl: doc.tcuLinkPDF,
     isRelevant: true,
-    relevanceScore: 0,
+    relevanceScore: 50,
     approvalStatus: 'manually_approved',
     year: deriveYear(doc),
     processNumber: null,
@@ -212,15 +212,24 @@ export function buildTribunalDecisionWhere(
 }
 
 /**
+ * Categorias de `Document` que representam decisões do TCU. Cobrem:
+ * - `acordao` — acórdãos TCU em geral
+ * - `consulta_tcu` — respostas a consultas (emitidas como acórdão no TCU oficial)
+ */
+const TCU_DOCUMENT_CATEGORIES = ['acordao', 'consulta_tcu'] as const;
+
+/**
  * WHERE de Document TCU.
- * - Sempre aplica `category='acordao' AND tcuNumeroAcordao IS NOT NULL`
+ * - Sempre aplica `category IN (acordao, consulta_tcu) AND tcuNumeroAcordao IS NOT NULL`
  * - Filtros mapeiam para campos tcu* quando necessário
  */
 export function buildDocumentTcuWhere(
   filters: JurisprudenciaFilters
 ): Prisma.Sql {
   const fragments: Prisma.Sql[] = [
-    Prisma.sql`category = ${'acordao'}`,
+    Prisma.sql`category IN (${Prisma.join(
+      TCU_DOCUMENT_CATEGORIES as unknown as string[]
+    )})`,
     Prisma.sql`"tcuNumeroAcordao" IS NOT NULL`,
   ];
 
@@ -342,7 +351,7 @@ function documentTcuSelect(where: Prisma.Sql): Prisma.Sql {
       url,
       "tcuLinkPDF" AS "pdfUrl",
       TRUE AS "isRelevant",
-      0 AS "relevanceScore",
+      50 AS "relevanceScore",
       'manually_approved' AS "approvalStatus",
       COALESCE("acordaoAno", EXTRACT(YEAR FROM "tcuDataJulgamento")::int) AS year,
       NULL::text AS "processNumber",

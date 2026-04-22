@@ -72,7 +72,7 @@ describe('mapDocumentTcuToDecision', () => {
       summary: 'Resumo IA.',
       url: 'https://tcu.gov.br/ac/1106',
       isRelevant: true,
-      relevanceScore: 0,
+      relevanceScore: 50,
       approvalStatus: 'manually_approved',
       sourceType: 'document-tcu',
       fullIdentifier: 'TCU Acórdão AC-1106/24-P',
@@ -261,11 +261,12 @@ describe('buildTribunalDecisionWhere', () => {
 });
 
 describe('buildDocumentTcuWhere', () => {
-  it('inclui condição base sem filtros', () => {
+  it('inclui condição base sem filtros com as duas categorias TCU', () => {
     const where = buildDocumentTcuWhere({});
-    expect(where.text).toMatch(/category\s*=\s*\$/);
+    expect(where.text).toMatch(/category\s+IN\s*\(/);
     expect(where.sql).toMatch(/"tcuNumeroAcordao"\s+IS NOT NULL/);
     expect(where.values).toContain('acordao');
+    expect(where.values).toContain('consulta_tcu');
   });
 
   it('filtro ano casa em acordaoAno OR EXTRACT(YEAR FROM tcuDataJulgamento)', () => {
