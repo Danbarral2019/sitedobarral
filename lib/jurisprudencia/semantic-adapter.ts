@@ -25,8 +25,10 @@ const ALL_CATEGORIES_WITH_ENUNCIADOS = [
 
 /**
  * Constrói extraWhere para o ramo DOCUMENT (categorias TCU principalmente).
- * Baseado em buildDocumentTcuWhere da PR anterior, mas SEM a condição base
- * (category IN (...)) que agora é responsabilidade do categoryIn do vector-search.
+ * Baseado em buildDocumentTcuWhere da PR anterior, mas SEM a condição base:
+ * - `category IN (...)` agora é responsabilidade do `categoryIn` do vector-search
+ * - `"tcuNumeroAcordao" IS NOT NULL` não se aplica pois o ramo também retorna
+ *   informativos, manuais e enunciados (categorias sem número de acórdão TCU).
  */
 function buildDocumentExtraWhere(
   filters: JurisprudenciaFilters
@@ -150,16 +152,14 @@ export function mapFiltersToSemanticOptions(
   }
 
   // decisionType: se não for 'acordao' ou vazio, pula ramo Document
-  // (informativos/manuais/enunciados não são "acordao" na taxonomia)
+  // (informativos/manuais/enunciados não são "acordao" na taxonomia).
+  // Nota: quando tribunal=TCU + decisionType!=acordao, ambos os ramos ficam
+  // inativos e a rota devolve conjunto vazio — comportamento esperado.
   if (
     filters.decisionType &&
     filters.decisionType !== 'acordao'
   ) {
     base.skipDocumentBranch = true;
-    if (!base.includeTribunalDecisions) {
-      // coerência: se estávamos em modo TCU-only e usuário pediu sumula, não há nada a retornar
-      base.includeTribunalDecisions = false;
-    }
   }
 
   const docWhere = !base.skipDocumentBranch
