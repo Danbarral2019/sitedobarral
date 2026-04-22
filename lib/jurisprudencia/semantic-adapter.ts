@@ -9,7 +9,9 @@
 
 import { Prisma } from '@prisma/client';
 import type { SearchOptions } from '@/lib/embeddings/vector-search';
+import type { SearchResult } from '@/lib/embeddings/vector-search';
 import type { JurisprudenciaFilters } from './unified-query';
+import { prisma } from '@/lib/prisma';
 
 const TCU_DOCUMENT_CATEGORIES = [
   'acordao',
@@ -177,4 +179,150 @@ export function mapFiltersToSemanticOptions(
   }
 
   return base;
+}
+
+// ──────────────────────────────────────────────────────────────────────────
+// Enriquecimento de resultados
+// ──────────────────────────────────────────────────────────────────────────
+
+export interface EnrichedDocument {
+  id: string;
+  title: string;
+  category: string;
+  tcuNumeroAcordao: string | null;
+  tcuEmentaCompleta: string | null;
+  description: string | null;
+  content: string | null;
+  tcuRelator: string | null;
+  tcuAutorTese: string | null;
+  tcuOrgaoJulgador: string | null;
+  tcuDataJulgamento: Date | null;
+  tcuLinkPDF: string | null;
+  summary: string | null;
+  themes: string | null;
+  leiArticles: string | null;
+  url: string | null;
+  douData: Date | null;
+  uploadedAt: Date;
+  updatedAt: Date;
+  entityType: string | null;
+  enunciadoNumber: string | null;
+}
+
+export interface EnrichedTribunalDecision {
+  id: string;
+  tribunalCode: string;
+  tribunalName: string;
+  decisionType: string;
+  decisionNumber: string;
+  title: string;
+  ementa: string;
+  summary: string | null;
+  relator: string | null;
+  orgaoJulgador: string | null;
+  dataJulgamento: Date | null;
+  themes: string | null;
+  leiArticles: string | null;
+  url: string | null;
+}
+
+export interface EnrichedSource {
+  documentId: string;
+  similarity: number;
+  chunkContent: string;
+  source:
+    | { kind: 'document'; data: EnrichedDocument; category: string }
+    | { kind: 'tribunal-decision'; data: EnrichedTribunalDecision };
+}
+
+export async function enrichSources(
+  results: SearchResult[]
+): Promise<EnrichedSource[]> {
+  const docIds = results
+    .filter(r => r.sourceType === 'document')
+    .map(r => r.documentId);
+  const tdIds = results
+    .filter(r => r.sourceType === 'tribunal-decision')
+    .map(r => r.documentId);
+
+  const [docs, tds] = await Promise.all([
+    docIds.length > 0
+      ? prisma.document.findMany({
+          where: { id: { in: docIds } },
+          select: {
+            id: true,
+            title: true,
+            category: true,
+            tcuNumeroAcordao: true,
+            tcuEmentaCompleta: true,
+            description: true,
+            content: true,
+            tcuRelator: true,
+            tcuAutorTese: true,
+            tcuOrgaoJulgador: true,
+            tcuDataJulgamento: true,
+            tcuLinkPDF: true,
+            summary: true,
+            themes: true,
+            leiArticles: true,
+            url: true,
+            douData: true,
+            uploadedAt: true,
+            updatedAt: true,
+            entityType: true,
+            enunciadoNumber: true,
+          },
+        })
+      : Promise.resolve([] as EnrichedDocument[]),
+    tdIds.length > 0
+      ? prisma.tribunalDecision.findMany({
+          where: { id: { in: tdIds } },
+          select: {
+            id: true,
+            tribunalCode: true,
+            tribunalName: true,
+            decisionType: true,
+            decisionNumber: true,
+            title: true,
+            ementa: true,
+            summary: true,
+            relator: true,
+            orgaoJulgador: true,
+            dataJulgamento: true,
+            themes: true,
+            leiArticles: true,
+            url: true,
+          },
+        })
+      : Promise.resolve([] as EnrichedTribunalDecision[]),
+  ]);
+
+  const docById = new Map(docs.map(d => [d.id, d]));
+  const tdById = new Map(tds.map(t => [t.id, t]));
+
+  const enriched: EnrichedSource[] = [];
+  for (const r of results) {
+    if (r.sourceType === 'document') {
+      const doc = docById.get(r.documentId);
+      if (!doc) continue; // órfão — skip silencioso
+      enriched.push({
+        documentId: r.documentId,
+        similarity: r.similarity,
+        chunkContent: r.chunkContent,
+        source: { kind: 'document', data: doc, category: doc.category },
+      });
+    } else if (r.sourceType === 'tribunal-decision') {
+      const td = tdById.get(r.documentId);
+      if (!td) continue;
+      enriched.push({
+        documentId: r.documentId,
+        similarity: r.similarity,
+        chunkContent: r.chunkContent,
+        source: { kind: 'tribunal-decision', data: td },
+      });
+    }
+    // legislative-act não chega aqui porque skipLegislativeActBranch=true na rota IA
+  }
+
+  return enriched;
 }

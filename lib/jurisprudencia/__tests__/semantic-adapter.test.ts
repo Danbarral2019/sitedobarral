@@ -1,7 +1,24 @@
 // @vitest-environment node
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { Prisma } from '@prisma/client';
 import { mapFiltersToSemanticOptions } from '../semantic-adapter';
+
+const { mockDocumentFindMany, mockTribunalDecisionFindMany } = vi.hoisted(() => ({
+  mockDocumentFindMany: vi.fn(),
+  mockTribunalDecisionFindMany: vi.fn(),
+}));
+
+vi.mock('@/lib/prisma', () => ({
+  prisma: {
+    document: { findMany: (...args: any[]) => mockDocumentFindMany(...args) },
+    tribunalDecision: { findMany: (...args: any[]) => mockTribunalDecisionFindMany(...args) },
+  },
+}));
+
+beforeEach(() => {
+  mockDocumentFindMany.mockReset();
+  mockTribunalDecisionFindMany.mockReset();
+});
 
 describe('mapFiltersToSemanticOptions — tribunal TCU', () => {
   it('tribunal=TCU: categoryIn TCU, includeTD=false, skipLegActs=true', () => {
@@ -128,5 +145,144 @@ describe('mapFiltersToSemanticOptions — decisionType', () => {
     const options = mapFiltersToSemanticOptions({ decisionType: 'acordao' });
 
     expect(options.skipDocumentBranch).toBe(false);
+  });
+});
+
+describe('enrichSources', () => {
+  const makeDocResult = (id: string, category: string) => ({
+    documentId: id,
+    documentTitle: `Title ${id}`,
+    category,
+    chunkContent: `chunk ${id}`,
+    chunkIndex: 0,
+    similarity: 0.8,
+    url: `http://x/${id}`,
+    courseId: null,
+    isCommon: true,
+    tags: null,
+    leiArticles: null,
+    uploadedAt: '2024-01-01',
+    sourceType: 'document' as const,
+  });
+
+  const makeTdResult = (id: string) => ({
+    documentId: id,
+    documentTitle: `TD ${id}`,
+    category: 'acordao',
+    chunkContent: `chunk ${id}`,
+    chunkIndex: 0,
+    similarity: 0.75,
+    url: null,
+    courseId: null,
+    isCommon: true,
+    tags: null,
+    leiArticles: null,
+    uploadedAt: '2024-01-01',
+    sourceType: 'tribunal-decision' as const,
+  });
+
+  it('quando só há documents: chama só document.findMany', async () => {
+    const { enrichSources } = await import('../semantic-adapter');
+    mockDocumentFindMany.mockResolvedValueOnce([
+      {
+        id: 'doc-1',
+        title: 'Doc 1',
+        category: 'acordao',
+        tcuNumeroAcordao: 'AC-1/24',
+        tcuEmentaCompleta: 'ementa',
+        description: null,
+        content: null,
+        tcuRelator: 'Rel',
+        tcuAutorTese: null,
+        tcuOrgaoJulgador: 'Plenário',
+        tcuDataJulgamento: new Date('2024-05-01'),
+        tcuLinkPDF: null,
+        summary: null,
+        themes: null,
+        leiArticles: null,
+        url: null,
+        douData: null,
+        uploadedAt: new Date(),
+        updatedAt: new Date(),
+        entityType: null,
+        enunciadoNumber: null,
+      },
+    ]);
+
+    const results = [makeDocResult('doc-1', 'acordao')];
+    const enriched = await enrichSources(results);
+
+    expect(enriched).toHaveLength(1);
+    expect(mockDocumentFindMany).toHaveBeenCalledTimes(1);
+    expect(mockTribunalDecisionFindMany).not.toHaveBeenCalled();
+    expect(enriched[0]).toMatchObject({
+      documentId: 'doc-1',
+      similarity: 0.8,
+      chunkContent: 'chunk doc-1',
+      source: { kind: 'document', category: 'acordao' },
+    });
+  });
+
+  it('quando só há tribunal-decisions: chama só tribunalDecision.findMany', async () => {
+    const { enrichSources } = await import('../semantic-adapter');
+    mockTribunalDecisionFindMany.mockResolvedValueOnce([
+      {
+        id: 'td-1',
+        tribunalCode: 'TCE-SP',
+        tribunalName: 'TCE-SP',
+        decisionType: 'acordao',
+        decisionNumber: '1234/2024',
+        title: 'TD 1',
+        ementa: 'ementa td',
+        summary: null,
+        relator: 'Rel TD',
+        orgaoJulgador: 'Pleno',
+        dataJulgamento: new Date('2024-06-01'),
+        themes: null,
+        leiArticles: null,
+        url: null,
+      },
+    ]);
+
+    const results = [makeTdResult('td-1')];
+    const enriched = await enrichSources(results);
+
+    expect(enriched).toHaveLength(1);
+    expect(mockDocumentFindMany).not.toHaveBeenCalled();
+    expect(mockTribunalDecisionFindMany).toHaveBeenCalledTimes(1);
+    expect(enriched[0].source.kind).toBe('tribunal-decision');
+  });
+
+  it('resultado órfão (chunk → doc deletado): skip silencioso', async () => {
+    const { enrichSources } = await import('../semantic-adapter');
+    mockDocumentFindMany.mockResolvedValueOnce([]); // sem match
+
+    const results = [makeDocResult('doc-orphan', 'acordao')];
+    const enriched = await enrichSources(results);
+
+    expect(enriched).toHaveLength(0);
+  });
+
+  it('múltiplos tipos: 1 query por tipo em paralelo', async () => {
+    const { enrichSources } = await import('../semantic-adapter');
+    mockDocumentFindMany.mockResolvedValueOnce([
+      { id: 'doc-1', title: 'D', category: 'informativo', tcuNumeroAcordao: null,
+        tcuEmentaCompleta: null, description: 'desc', content: null, tcuRelator: null,
+        tcuAutorTese: null, tcuOrgaoJulgador: null, tcuDataJulgamento: null, tcuLinkPDF: null,
+        summary: null, themes: null, leiArticles: null, url: null, douData: null,
+        uploadedAt: new Date(), updatedAt: new Date(), entityType: null, enunciadoNumber: null },
+    ]);
+    mockTribunalDecisionFindMany.mockResolvedValueOnce([
+      { id: 'td-1', tribunalCode: 'STJ', tribunalName: 'STJ', decisionType: 'decisao',
+        decisionNumber: '9/24', title: 'T', ementa: 'e', summary: null, relator: null,
+        orgaoJulgador: null, dataJulgamento: null, themes: null, leiArticles: null, url: null },
+    ]);
+
+    const results = [makeDocResult('doc-1', 'informativo'), makeTdResult('td-1')];
+    const enriched = await enrichSources(results);
+
+    expect(enriched).toHaveLength(2);
+    expect(enriched.find(e => e.documentId === 'doc-1')?.source.kind).toBe('document');
+    expect(enriched.find(e => e.documentId === 'td-1')?.source.kind).toBe('tribunal-decision');
   });
 });
