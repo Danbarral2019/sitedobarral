@@ -95,7 +95,18 @@ export async function semanticSearch(
   }
 
   // Cache key baseado na query e opcoes (inclui novas opcoes)
-  const cacheKey = `vector-search:${hashQuery(query)}:${courseId || 'all'}:${category || 'all'}:${limit}:${threshold}:${(options.excludeCategories || []).join(',')}:td=${options.includeTribunalDecisions ? '1' : '0'}:cin=${(options.categoryIn || []).join(',')}:sd=${options.skipDocumentBranch ? '1' : '0'}:sl=${options.skipLegislativeActBranch ? '1' : '0'}:tc=${options.tribunalCodeFilter || ''}:ew=${options.extraWhere ? '1' : '0'}`;
+  // extraWhere precisa serializar conteudo porque valores vindos de filtros UI
+  // (ano, tema, q, dataFrom/dataTo) diferenciam os resultados — so marcar presenca
+  // causaria colisao entre chamadas com mesmos outros filtros mas extraWhere diferente.
+  const ewDocSql = options.extraWhere?.document?.sql ?? '';
+  const ewDocVals = JSON.stringify(options.extraWhere?.document?.values ?? []);
+  const ewTdSql = options.extraWhere?.tribunalDecision?.sql ?? '';
+  const ewTdVals = JSON.stringify(options.extraWhere?.tribunalDecision?.values ?? []);
+  const ewKey = options.extraWhere
+    ? `${ewDocSql}|${ewDocVals}|${ewTdSql}|${ewTdVals}`
+    : '';
+
+  const cacheKey = `vector-search:${hashQuery(query)}:${courseId || 'all'}:${category || 'all'}:${limit}:${threshold}:${(options.excludeCategories || []).join(',')}:td=${options.includeTribunalDecisions ? '1' : '0'}:cin=${(options.categoryIn || []).join(',')}:sd=${options.skipDocumentBranch ? '1' : '0'}:sl=${options.skipLegislativeActBranch ? '1' : '0'}:tc=${options.tribunalCodeFilter || ''}:ew=${ewKey}`;
 
   // Tenta usar cache
   if (useCache) {
