@@ -207,8 +207,10 @@ export class LeiIndexer {
     }
 
     if (document.content) {
-      // Limitar tamanho do conteúdo (Gemini tem limites)
-      const maxLength = 4000; // ~1000 tokens
+      // Tier pago Gemini: janela de 1M tokens. 32k chars (~8k tokens) captura
+      // o acórdão inteiro na grande maioria dos casos, preservando artigos
+      // citados em votos longos (ver ROADMAP_GEMINI_PAGO.md, Fase 2).
+      const maxLength = 32000;
       const content = document.content.substring(0, maxLength);
       parts.push(content);
 
@@ -305,9 +307,9 @@ export class LeiIndexer {
       const result = await this.analyzeDocument(document, options);
       results.push(result);
 
-      // Rate limiting: aguardar 500ms entre chamadas
+      // Rate limiting: 50ms entre chamadas (tier pago Gemini, ROADMAP_GEMINI_PAGO.md Fase 2)
       if (i < documents.length - 1) {
-        await new Promise(resolve => setTimeout(resolve, 500));
+        await new Promise(resolve => setTimeout(resolve, 50));
       }
     }
 
