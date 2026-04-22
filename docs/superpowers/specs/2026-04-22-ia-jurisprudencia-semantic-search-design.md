@@ -133,7 +133,7 @@ Pipeline de indexação (paralelo):
 ### Script operacional (1)
 
 8. **`scripts/backfill-pending-embeddings.ts`** — acelerador one-shot
-   - Processa todos os `embeddingStatus ∈ (NULL, 'pending')` em paralelo (batches de 10)
+   - Processa todos os `embeddingStatus ∈ (NULL, 'pending')` em paralelo (batches de 20)
    - Idempotente (skip de `completed`)
    - Flags: `--limit N`, `--type document|tribunal|both` (default both), `--dry-run`
    - Uso: `npx tsx scripts/backfill-pending-embeddings.ts`
@@ -254,10 +254,10 @@ Três mudanças:
 
 1. **`MAX_JOBS_PER_RUN: 10 → 50`**
 2. **Ordenação FIFO** — `orderBy: { uploadedAt/createdAt: 'asc' }` em ambos os `findMany` (Documents e TribunalDecisions)
-3. **Batches paralelos de 5**:
+3. **Batches paralelos de 10** (aproveitando tier Gemini paid de 3000 RPM):
 
 ```ts
-const BATCH_SIZE = 5;
+const BATCH_SIZE = 10;
 const TIME_BUDGET_MS = 250_000;
 
 for (let i = 0; i < pendingDocuments.length; i += BATCH_SIZE) {
@@ -281,7 +281,7 @@ for (let i = 0; i < pendingDocuments.length; i += BATCH_SIZE) {
 
 Mesmo padrão aplicado ao loop de `pendingDecisions`.
 
-Rate limits Gemini: 1500 RPM free / 3000 RPM paid. 5 req paralelos × ~500ms cada = 600 RPM efetivo — folgado.
+Rate limits Gemini paid: 3000 RPM. 10 req paralelos × ~500ms cada = ~1200 RPM efetivo — folgado.
 
 ### Capacidade resultante
 
@@ -293,7 +293,7 @@ Rate limits Gemini: 1500 RPM free / 3000 RPM paid. 5 req paralelos × ~500ms cad
 
 ```ts
 // Pseudocódigo — detalhes no plano
-const BATCH = 10;
+const BATCH = 20; // sem timeout Vercel aqui; tier Gemini paid suporta
 const pendingDocs = await prisma.document.findMany({
   where: { embeddingStatus: { in: [null, 'pending'] } },
   select: { id: true },
