@@ -71,7 +71,7 @@ function parseDateTCU(dataSessao: string | undefined): Date | null {
 // --- Enriquecimento via Gemini ---
 
 const GEMINI_MODEL = 'gemini-2.0-flash';
-const ENRICHMENT_DELAY_MS = 800; // Delay entre chamadas Gemini
+const ENRICHMENT_DELAY_MS = 50; // Delay entre chamadas Gemini (tier pago, ROADMAP_GEMINI_PAGO.md Fase 3)
 
 function safeParseArray(value: string | null): string[] {
   if (!value) return [];
