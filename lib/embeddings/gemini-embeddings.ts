@@ -2,7 +2,7 @@
  * Gemini Embeddings Client
  *
  * Wrapper para o modelo de embeddings da Google (Gemini)
- * Free tier: 1500 req/min
+ * Paid tier: ~10k req/min (ver ROADMAP_GEMINI_PAGO.md Fase 4)
  *
  * Modelo configuravel via env var EMBEDDING_MODEL (default: gemini-embedding-2-preview)
  * Documentacao: https://ai.google.dev/gemini-api/docs/embeddings
@@ -92,8 +92,8 @@ export async function generateEmbedding(text: string): Promise<EmbeddingResult> 
 /**
  * Gera embeddings para multiplos textos em batch
  *
- * Otimizado para processar ate 100 textos por chamada
- * Rate limit: 1500 req/min (free tier)
+ * Otimizado para processar ate 250 textos por chamada (tier pago)
+ * Rate limit: ~10k req/min (paid tier)
  *
  * @param texts - Array de textos para gerar embeddings
  * @returns Array de embeddings (mesma ordem dos textos)
@@ -114,8 +114,8 @@ export async function generateBatchEmbeddings(
 
   const ai = getGenAI();
 
-  // Processa em batches de 100 (limite recomendado da API)
-  const BATCH_SIZE = 100;
+  // Processa em batches de 250 (tier pago Gemini, ROADMAP_GEMINI_PAGO.md Fase 4)
+  const BATCH_SIZE = 250;
   const allEmbeddings: number[][] = [];
 
   for (let i = 0; i < validTexts.length; i += BATCH_SIZE) {
@@ -141,9 +141,9 @@ export async function generateBatchEmbeddings(
       allEmbeddings.push(emb.values);
     }
 
-    // Small delay between batches to avoid rate limiting
+    // Small delay between batches to avoid rate limiting (tier pago, ROADMAP_GEMINI_PAGO.md Fase 4)
     if (i + BATCH_SIZE < validTexts.length) {
-      await new Promise(resolve => setTimeout(resolve, 100));
+      await new Promise(resolve => setTimeout(resolve, 25));
     }
   }
 
@@ -232,8 +232,8 @@ export const EMBEDDING_CONFIG = {
   model: EMBEDDING_MODEL,
   dimension: EMBEDDING_DIMENSION,
   maxTokens: 8000, // Limite aproximado de tokens por texto
-  batchSize: 100, // Textos por batch
-  rateLimit: 1500, // Requisicoes por minuto (free tier)
+  batchSize: 250, // Textos por batch (tier pago)
+  rateLimit: 10000, // Requisicoes por minuto (paid tier; free era 1500)
 } as const;
 
 // ===========================
