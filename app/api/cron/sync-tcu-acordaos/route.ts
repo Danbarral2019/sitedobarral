@@ -86,6 +86,7 @@ function safeParseArray(value: string | null): string[] {
 function buildSummaryPrompt(doc: {
   title: string;
   description: string | null;
+  content: string | null;
   leiArticles: string | null;
   metaTcu?: {
     ementaCompleta?: string | null;
@@ -99,15 +100,34 @@ function buildSummaryPrompt(doc: {
     ? `Artigos da Lei 14.133/2021 vinculados: ${artigos.map((a: string) => `Art. ${a}`).join(', ')}`
     : 'Nenhum artigo da Lei 14.133 vinculado especificamente.';
 
+  // Tier pago Gemini: janela de 1M tokens suporta bem ementa completa + conteúdo integral.
+  // Limites generosos para capturar votação/relatório quando disponíveis (ver ROADMAP_GEMINI_PAGO.md).
+  const EMENTA_MAX = 32000;
+  const CONTENT_MAX = 20000;
+
+  const ementaSection = doc.metaTcu?.ementaCompleta
+    ? `Ementa completa:\n${doc.metaTcu.ementaCompleta.slice(0, EMENTA_MAX)}`
+    : '';
+
+  // Só inclui conteúdo integral se for diferente do que já está em description/ementa
+  // (evita repetição inútil de tokens quando content é igual ao sumário).
+  const hasDistinctContent = doc.content
+    && doc.content.length > 500
+    && doc.content !== doc.description
+    && doc.content !== doc.metaTcu?.ementaCompleta;
+  const contentSection = hasDistinctContent
+    ? `Conteúdo integral do acórdão (voto/relatório/fundamentação):\n${doc.content!.slice(0, CONTENT_MAX)}`
+    : '';
+
   return `Você é um especialista em Direito Administrativo, Licitações e Contratos.
 
-TAREFA: Gerar um resumo executivo de 2-3 frases para o acórdão do TCU abaixo.
+TAREFA: Gerar um resumo executivo de 3-5 frases para o acórdão do TCU abaixo.
 
 REGRAS:
 1. O resumo deve explicar a decisão em linguagem acessível (para servidores públicos, não juristas)
 2. Deve conectar claramente a decisão com a prática de licitações e contratos públicos
 3. Se houver artigos da Lei 14.133/2021 vinculados, mencione-os brevemente
-4. Máximo 3 frases. Seja direto e prático
+4. Entre 3 e 5 frases. Priorize densidade: cite o raciocínio/fundamento quando relevante, não apenas a tese
 5. NÃO repita o número do acórdão no resumo
 6. Use voz ativa e evite jargão desnecessário
 7. Retorne APENAS o resumo, sem preâmbulos
@@ -122,7 +142,9 @@ DADOS DO ACÓRDÃO:
 Enunciado/Tese:
 ${doc.description || 'N/A'}
 
-${doc.metaTcu?.ementaCompleta ? `Ementa completa:\n${doc.metaTcu.ementaCompleta.slice(0, 2000)}` : ''}
+${ementaSection}
+
+${contentSection}
 
 RESUMO EXECUTIVO:`;
 }
@@ -138,7 +160,7 @@ async function callGemini(prompt: string): Promise<string> {
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
       contents: [{ parts: [{ text: prompt }] }],
-      generationConfig: { temperature: 0.3, maxOutputTokens: 512 },
+      generationConfig: { temperature: 0.3, maxOutputTokens: 1024 },
     }),
   });
 
