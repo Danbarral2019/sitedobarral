@@ -52,4 +52,9 @@ describe('matchKeyTermsInText', () => {
     const hit = matchKeyTermsInText(['BDI'], '')
     expect(hit).toEqual({ BDI: false })
   })
+
+  it('normaliza pontuação e espaços — "art. 75" casa com "Art 75" no texto', () => {
+    const hit = matchKeyTermsInText(['art. 75'], 'conforme o Art 75 desta lei')
+    expect(hit).toEqual({ 'art. 75': true })
+  })
 })

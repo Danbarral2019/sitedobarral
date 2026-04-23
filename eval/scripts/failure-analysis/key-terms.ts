@@ -20,13 +20,22 @@ const PATTERNS: Array<RegExp> = [
 
 const UPPER_SIGLA = /\b[A-Z]{2,}\b/g
 
+/** Normaliza para comparação: lowercase, sem pontos, whitespace colapsado. */
+function normalizeForMatch(s: string): string {
+  return s
+    .toLowerCase()
+    .replace(/\./g, '')
+    .replace(/\s+/g, ' ')
+    .trim()
+}
+
 /** Extrai key-terms únicos de uma query. Ordem de aparição preservada. */
 export function extractKeyTerms(query: string): string[] {
   const hits: string[] = []
   const seen = new Set<string>()
 
   const push = (t: string) => {
-    const key = t.toLowerCase()
+    const key = normalizeForMatch(t)
     if (!seen.has(key)) {
       seen.add(key)
       hits.push(t)
@@ -54,10 +63,10 @@ export function matchKeyTermsInText(
   terms: string[],
   text: string
 ): Record<string, boolean> {
-  const lc = text.toLowerCase()
+  const normalizedText = normalizeForMatch(text)
   const out: Record<string, boolean> = {}
   for (const t of terms) {
-    out[t] = lc.includes(t.toLowerCase())
+    out[t] = normalizedText.includes(normalizeForMatch(t))
   }
   return out
 }
