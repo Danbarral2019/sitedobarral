@@ -102,7 +102,9 @@
           "7ba9b8e4-a85e-4b2c-8b7f-aad54f1b76f7",
           "3bb941f8-10fe-4372-a62c-c46b5916b55e",
           "9aa9cc50-12fb-4145-b146-3f8487649b41",
-          "55eed326-2d61-4c80-994b-c3b3a15bc2bb"
+          "55eed326-2d61-4c80-994b-c3b3a15bc2bb",
+          "6da81a69-6ccd-4771-89b9-b30935b65437",
+          "baa74c75-6659-491f-8fec-4fa7d7962555"
         ],
         "highlyRelevant": [
           "97519905-ffb0-4311-a88a-9d38652d5c13",
@@ -110,9 +112,9 @@
           "1b1f9f62-e8ec-4e6b-a45c-c4c7ec1d7f6c",
           "c821ae29-2777-46c1-b0f2-6cc55c3dc8c7"
         ],
-        "annotatedAt": "2026-04-12T19:43:52.864Z",
+        "annotatedAt": "2026-04-23T23:02:17.578Z",
         "annotatedBy": "daniel",
-        "notes": "Esperado: art. 6º XIII (definição de bens/serviços comuns) e art. 29."
+        "notes": "Esperado: art. 6º XIII (definição de bens/serviços comuns) e art. 29. [Fase 6B — audit]"
       }
     },
     {
@@ -230,15 +232,18 @@
           "3f982e45-3186-4303-9b41-3061305b4ec9",
           "0f9f1d52-4a9a-422f-8649-1fe584b9e789",
           "bda6421b-4ff2-4127-afbe-062177c8a97c",
-          "84d20c44-e282-4565-92cb-9604b878f814"
+          "84d20c44-e282-4565-92cb-9604b878f814",
+          "662c03a9-8006-4ae8-8978-ec7c039b9796",
+          "986bf562-0910-4fac-ad7e-0a894f9ba3c3",
+          "7f2967d1-f3d0-47f0-837e-39555b3b2a27"
         ],
         "highlyRelevant": [
           "5da5e8be-3d61-485c-b7b6-713d595ed65e",
           "303e0c55-bf9e-4ec7-84a0-45392c1d537b"
         ],
-        "annotatedAt": "2026-04-12T20:09:56.604Z",
+        "annotatedAt": "2026-04-23T23:02:17.578Z",
         "annotatedBy": "daniel",
-        "notes": "Esperado: art. 156 e art. 163 da Lei 14.133."
+        "notes": "Esperado: art. 156 e art. 163 da Lei 14.133. [Fase 6B — audit]"
       }
     },
     {
@@ -258,7 +263,8 @@
           "7c70f117-69ca-4817-8d9b-aa39b1dc9b0b",
           "5efefd78-4fa2-4aeb-8d10-85afe0257bf7",
           "fb7369ca-a033-486e-ba23-93412da38e70",
-          "eba3fa76-3f2a-440b-be5f-d73ca2d5602a"
+          "eba3fa76-3f2a-440b-be5f-d73ca2d5602a",
+          "2e423dee-7d8b-43c3-869e-3161321b6e74"
         ],
         "highlyRelevant": [
           "1663c095-4387-434d-b0ed-67e449283ba0",
@@ -271,9 +277,9 @@
           "fb7369ca-a033-486e-ba23-93412da38e70",
           "eba3fa76-3f2a-440b-be5f-d73ca2d5602a"
         ],
-        "annotatedAt": "2026-04-12T20:11:38.989Z",
+        "annotatedAt": "2026-04-23T23:02:17.578Z",
         "annotatedBy": "daniel",
-        "notes": "Esperado: art. 117 e orientações AGU/TCU sobre fiscalização."
+        "notes": "Esperado: art. 117 e orientações AGU/TCU sobre fiscalização. [Fase 6B — audit]"
       }
     },
     {
@@ -412,14 +418,19 @@
       "difficulty": "medium",
       "annotations": {
         "relevant": [
-          "6eb43809-838b-43ea-93dc-51c44fd3e077"
+          "6eb43809-838b-43ea-93dc-51c44fd3e077",
+          "0770cd2e-d970-4b68-93ca-ebb94790154d",
+          "1e43c60f-8d59-4fcb-b3b6-b53aa98cfa41",
+          "4377e9b9-6dff-464d-8774-e7817eb70588",
+          "8a98fb73-3f60-45e0-b921-ca51276508cc"
         ],
         "highlyRelevant": [
-          "6eb43809-838b-43ea-93dc-51c44fd3e077"
+          "6eb43809-838b-43ea-93dc-51c44fd3e077",
+          "0770cd2e-d970-4b68-93ca-ebb94790154d"
         ],
-        "annotatedAt": "2026-04-12T13:05:57.664Z",
+        "annotatedAt": "2026-04-23T23:02:17.578Z",
         "annotatedBy": "elic-import",
-        "notes": "Fundamentos curados: Orientação Normativa AGU nº 49/2014 (Parecer 13/2023/CNLCA/CGU/AGU); Enunciados PGF nº 88, 89 e 90 (Parecer 00008/2013/CPLC/DEPCONSU/PGF/AGU); Lei 8.666/1993, arts. 55, XIII, 78, I, 87 e 88; Lei 10.520/2002, art. 7º; Lei 14.133/2021, art. 156, III e IV.. Nao encontrados no indice: Enunciados PGF nº 88, 89 e 90 (Parecer 00008/2013/CPLC/DEPCONSU/PGF/AGU)"
+        "notes": "Fundamentos curados: Orientação Normativa AGU nº 49/2014 (Parecer 13/2023/CNLCA/CGU/AGU); Enunciados PGF nº 88, 89 e 90 (Parecer 00008/2013/CPLC/DEPCONSU/PGF/AGU); Lei 8.666/1993, arts. 55, XIII, 78, I, 87 e 88; Lei 10.520/2002, art. 7º; Lei 14.133/2021, art. 156, III e IV.. Nao encontrados no indice: Enunciados PGF nº 88, 89 e 90 (Parecer 00008/2013/CPLC/DEPCONSU/PGF/AGU) [Fase 6B — audit]"
       },
       "_elic": {
         "source": "transversal",
@@ -443,14 +454,19 @@
       "difficulty": "medium",
       "annotations": {
         "relevant": [
-          "f71cc1cd-1acb-402f-94f4-864c3f14f15b"
+          "f71cc1cd-1acb-402f-94f4-864c3f14f15b",
+          "977dd2d2-4b9f-4140-be74-120884684a3b",
+          "46257c58-3808-4b59-ae12-e1507b12eb1d",
+          "e16ba264-d94f-415a-84ed-3bc180573a33",
+          "4dcbd88a-b9ab-480a-815e-2e9bd866a9b5"
         ],
         "highlyRelevant": [
-          "f71cc1cd-1acb-402f-94f4-864c3f14f15b"
+          "f71cc1cd-1acb-402f-94f4-864c3f14f15b",
+          "977dd2d2-4b9f-4140-be74-120884684a3b"
         ],
-        "annotatedAt": "2026-04-12T13:05:57.864Z",
+        "annotatedAt": "2026-04-23T23:02:17.578Z",
         "annotatedBy": "elic-import",
-        "notes": "Fundamentos curados: Lei 8.666/1993, art. 56, § 1º, III; Lei 14.133/2021, art. 96, § 1º, III; TCU, Acórdão 597/2023-Plenário (Boletim de Jurisprudência nº 441; Informativo de Licitações e Contratos nº 456).. Nao encontrados no indice: Informativo de Licitações e Contratos nº 456)."
+        "notes": "Fundamentos curados: Lei 8.666/1993, art. 56, § 1º, III; Lei 14.133/2021, art. 96, § 1º, III; TCU, Acórdão 597/2023-Plenário (Boletim de Jurisprudência nº 441; Informativo de Licitações e Contratos nº 456).. Nao encontrados no indice: Informativo de Licitações e Contratos nº 456). [Fase 6B — audit]"
       },
       "_elic": {
         "source": "transversal",
@@ -614,14 +630,16 @@
       "difficulty": "medium",
       "annotations": {
         "relevant": [
-          "53650881-79b5-487d-a02b-1659ef1c3139"
+          "53650881-79b5-487d-a02b-1659ef1c3139",
+          "2f8fd417-a293-471a-a7dc-10f520de88d4"
         ],
         "highlyRelevant": [
-          "53650881-79b5-487d-a02b-1659ef1c3139"
+          "53650881-79b5-487d-a02b-1659ef1c3139",
+          "2f8fd417-a293-471a-a7dc-10f520de88d4"
         ],
-        "annotatedAt": "2026-04-12T13:05:58.063Z",
+        "annotatedAt": "2026-04-23T23:02:17.578Z",
         "annotatedBy": "elic-import",
-        "notes": "Fundamentos curados: Lei Complementar nº 101/2000, art. 16; Orientação Normativa AGU nº 52/2014; Conclusão DEPCONSU/PGF/AGU nº 01/2012.. Nao encontrados no indice: Conclusão DEPCONSU/PGF/AGU nº 01/2012."
+        "notes": "Fundamentos curados: Lei Complementar nº 101/2000, art. 16; Orientação Normativa AGU nº 52/2014; Conclusão DEPCONSU/PGF/AGU nº 01/2012.. Nao encontrados no indice: Conclusão DEPCONSU/PGF/AGU nº 01/2012. [Fase 6B — audit]"
       },
       "_elic": {
         "source": "transversal",
@@ -772,14 +790,19 @@
       "difficulty": "medium",
       "annotations": {
         "relevant": [
-          "a1cf1a79-9034-42b9-8df1-d348346b86ec"
+          "a1cf1a79-9034-42b9-8df1-d348346b86ec",
+          "7b7502ed-824f-4101-8955-f84833b952ce",
+          "09454fe9-ed5c-4c9e-9693-3f4096d89fb6",
+          "7ad10ec0-721a-4205-a5ee-a5c724109852"
         ],
         "highlyRelevant": [
-          "a1cf1a79-9034-42b9-8df1-d348346b86ec"
+          "a1cf1a79-9034-42b9-8df1-d348346b86ec",
+          "7b7502ed-824f-4101-8955-f84833b952ce",
+          "09454fe9-ed5c-4c9e-9693-3f4096d89fb6"
         ],
-        "annotatedAt": "2026-04-12T13:05:58.263Z",
+        "annotatedAt": "2026-04-23T23:02:17.578Z",
         "annotatedBy": "elic-import",
-        "notes": "Fundamentos curados: Lei 14.133/2021, art. 6º, XLV; Decreto 11.462/2023, arts. 2º, I, e 3º; TCU, Acórdão 1351/2025-Plenário; Parecer 00012/2025/CPLC/SUBCONSU/PGF/AGU.. Nao encontrados no indice: Decreto 11.462/2023, arts. 2º, I, e 3º; Parecer 00012/2025/CPLC/SUBCONSU/PGF/AGU."
+        "notes": "Fundamentos curados: Lei 14.133/2021, art. 6º, XLV; Decreto 11.462/2023, arts. 2º, I, e 3º; TCU, Acórdão 1351/2025-Plenário; Parecer 00012/2025/CPLC/SUBCONSU/PGF/AGU.. Nao encontrados no indice: Decreto 11.462/2023, arts. 2º, I, e 3º; Parecer 00012/2025/CPLC/SUBCONSU/PGF/AGU. [Fase 6B — audit]"
       },
       "_elic": {
         "source": "transversal",
@@ -879,14 +902,20 @@
       "difficulty": "medium",
       "annotations": {
         "relevant": [
-          "5d4cfb06-a745-46ca-a389-c18e006d24b4"
+          "5d4cfb06-a745-46ca-a389-c18e006d24b4",
+          "22c9aec7-3929-4adf-811f-e6352f8639ff",
+          "cd2f1a65-bce9-4361-bb6d-31842cdb70f4",
+          "bb0023dc-ee9f-41e1-9063-0b71a85c5467",
+          "2dee0322-b77e-4274-8e6c-11941128f920"
         ],
         "highlyRelevant": [
-          "5d4cfb06-a745-46ca-a389-c18e006d24b4"
+          "5d4cfb06-a745-46ca-a389-c18e006d24b4",
+          "22c9aec7-3929-4adf-811f-e6352f8639ff",
+          "2dee0322-b77e-4274-8e6c-11941128f920"
         ],
-        "annotatedAt": "2026-04-12T13:05:58.461Z",
+        "annotatedAt": "2026-04-23T23:02:17.578Z",
         "annotatedBy": "elic-import",
-        "notes": "Fundamentos curados: Lei 14.133/2021, arts. 41, I, e 74, §1º, in fine; TCU, Acórdão 6875/2021-Segunda Câmara (Boletim de Jurisprudência nº 354); Súmula TCU nº 270.. Nao encontrados no indice: Lei 14.133/2021, arts. 41, I, e 74, §1º, in fine; Súmula TCU nº 270."
+        "notes": "Fundamentos curados: Lei 14.133/2021, arts. 41, I, e 74, §1º, in fine; TCU, Acórdão 6875/2021-Segunda Câmara (Boletim de Jurisprudência nº 354); Súmula TCU nº 270.. Nao encontrados no indice: Lei 14.133/2021, arts. 41, I, e 74, §1º, in fine; Súmula TCU nº 270. [Fase 6B — audit]"
       },
       "_elic": {
         "source": "transversal",
@@ -911,14 +940,20 @@
       "difficulty": "medium",
       "annotations": {
         "relevant": [
-          "439bfdc0-a49a-4b1b-9e86-116595c42d58"
+          "439bfdc0-a49a-4b1b-9e86-116595c42d58",
+          "dce83597-9282-4f44-8544-27fe6b9cd473",
+          "6426b5b4-df1b-4356-b96e-db00f2021615",
+          "7b7502ed-824f-4101-8955-f84833b952ce",
+          "631bf08f-c4d5-44dc-a6f3-43f275b41aa8",
+          "1e85a248-58a2-468b-9371-78404a5aa5cd"
         ],
         "highlyRelevant": [
-          "439bfdc0-a49a-4b1b-9e86-116595c42d58"
+          "439bfdc0-a49a-4b1b-9e86-116595c42d58",
+          "1e85a248-58a2-468b-9371-78404a5aa5cd"
         ],
-        "annotatedAt": "2026-04-12T13:05:58.660Z",
+        "annotatedAt": "2026-04-23T23:02:17.578Z",
         "annotatedBy": "elic-import",
-        "notes": "Fundamentos curados: Lei 14.133/2021, art. 82, §6º; Decreto 11.462/2023, art. 16; Parecer 39/2024/DECOR/CGU/AGU, aprovado pelo Despacho do Ministro Chefe da AGU nº 461, de aplicação vinculante aos membros da AGU.. Nao encontrados no indice: Parecer 39/2024/DECOR/CGU/AGU, aprovado pelo Despacho do Ministro Chefe da AGU nº 461, de aplicação vinculante aos membros da AGU."
+        "notes": "Fundamentos curados: Lei 14.133/2021, art. 82, §6º; Decreto 11.462/2023, art. 16; Parecer 39/2024/DECOR/CGU/AGU, aprovado pelo Despacho do Ministro Chefe da AGU nº 461, de aplicação vinculante aos membros da AGU.. Nao encontrados no indice: Parecer 39/2024/DECOR/CGU/AGU, aprovado pelo Despacho do Ministro Chefe da AGU nº 461, de aplicação vinculante aos membros da AGU. [Fase 6B — audit]"
       },
       "_elic": {
         "source": "transversal",
@@ -942,14 +977,18 @@
       "difficulty": "easy",
       "annotations": {
         "relevant": [
-          "fedc9e92-8472-4271-9a64-0e94496734f6"
+          "fedc9e92-8472-4271-9a64-0e94496734f6",
+          "9f82ba4c-5075-4829-957b-57c2e9700595",
+          "19556917-4cdf-4eb7-80fd-8ba8e782adb1",
+          "d2dc2bc7-a50c-4a71-a0ff-d718e0a4cede"
         ],
         "highlyRelevant": [
-          "fedc9e92-8472-4271-9a64-0e94496734f6"
+          "fedc9e92-8472-4271-9a64-0e94496734f6",
+          "9f82ba4c-5075-4829-957b-57c2e9700595"
         ],
-        "annotatedAt": "2026-04-12T13:05:58.857Z",
+        "annotatedAt": "2026-04-23T23:02:17.578Z",
         "annotatedBy": "elic-import",
-        "notes": "Fundamentos curados: Lei 14.133/2021, art. 23, §1º; IN SEGES/ME 65/2021, art. 5º, I e §1º."
+        "notes": "Fundamentos curados: Lei 14.133/2021, art. 23, §1º; IN SEGES/ME 65/2021, art. 5º, I e §1º. [Fase 6B — audit]"
       },
       "_elic": {
         "source": "transversal",
@@ -1032,14 +1071,19 @@
       "difficulty": "medium",
       "annotations": {
         "relevant": [
-          "e003992a-2831-44d2-a23d-83343acf07ad"
+          "e003992a-2831-44d2-a23d-83343acf07ad",
+          "05722b33-20e5-40e9-9eb2-4f3d3b266026",
+          "0021234f-a00d-4740-923b-f96305015ccb",
+          "825f7ba3-d491-44ea-b955-3d7eab3828ad",
+          "670dfb0a-9a4c-4d64-9876-d6fc14f7f65c"
         ],
         "highlyRelevant": [
-          "e003992a-2831-44d2-a23d-83343acf07ad"
+          "e003992a-2831-44d2-a23d-83343acf07ad",
+          "670dfb0a-9a4c-4d64-9876-d6fc14f7f65c"
         ],
-        "annotatedAt": "2026-04-12T13:05:59.257Z",
+        "annotatedAt": "2026-04-23T23:02:17.578Z",
         "annotatedBy": "elic-import",
-        "notes": "Fundamentos curados: Lei 14.133/2021, arts. 92 e 95, I, II e §1º; Orientação Normativa AGU nº 84/2024."
+        "notes": "Fundamentos curados: Lei 14.133/2021, arts. 92 e 95, I, II e §1º; Orientação Normativa AGU nº 84/2024. [Fase 6B — audit]"
       },
       "_elic": {
         "source": "transversal",
@@ -1062,15 +1106,21 @@
       "annotations": {
         "relevant": [
           "d2831f21-4f4d-4610-b988-c12626978182",
-          "c456890d-46ce-4c0c-836c-6e9fe3d7ecb4"
+          "c456890d-46ce-4c0c-836c-6e9fe3d7ecb4",
+          "d221c8b1-1c86-43eb-8b68-61f530a8f5d4",
+          "34a55c77-e3d3-4898-8431-95ffdbc244aa",
+          "010dc278-f41c-4a4c-ba7e-744d0a32def3",
+          "f8f4e7d9-4c7a-420c-b517-e2a089e1bf16"
         ],
         "highlyRelevant": [
           "d2831f21-4f4d-4610-b988-c12626978182",
-          "c456890d-46ce-4c0c-836c-6e9fe3d7ecb4"
+          "c456890d-46ce-4c0c-836c-6e9fe3d7ecb4",
+          "34a55c77-e3d3-4898-8431-95ffdbc244aa",
+          "010dc278-f41c-4a4c-ba7e-744d0a32def3"
         ],
-        "annotatedAt": "2026-04-12T13:05:59.457Z",
+        "annotatedAt": "2026-04-23T23:02:17.578Z",
         "annotatedBy": "elic-import",
-        "notes": "Fundamentos curados: Lei 14.133/2021, arts. 23, §2º, e 59, III; Súmula TCU nº 259; Orientação Normativa AGU nº 5/2009; TCU, Acórdão 1.695/2018-Plenário.. Nao encontrados no indice: TCU, Acórdão 1.695/2018-Plenário."
+        "notes": "Fundamentos curados: Lei 14.133/2021, arts. 23, §2º, e 59, III; Súmula TCU nº 259; Orientação Normativa AGU nº 5/2009; TCU, Acórdão 1.695/2018-Plenário.. Nao encontrados no indice: TCU, Acórdão 1.695/2018-Plenário. [Fase 6B — audit]"
       },
       "_elic": {
         "source": "transversal",
@@ -1157,14 +1207,19 @@
       "difficulty": "medium",
       "annotations": {
         "relevant": [
-          "17f6bcef-bbb3-455e-9e53-7a55a119a4bf"
+          "17f6bcef-bbb3-455e-9e53-7a55a119a4bf",
+          "8a113b1c-d40d-4d92-8925-e8039122e43a",
+          "260e84c7-558b-4a02-8978-696ad8946342",
+          "7faef377-f0ab-49aa-ad32-5a4f89406895"
         ],
         "highlyRelevant": [
-          "17f6bcef-bbb3-455e-9e53-7a55a119a4bf"
+          "17f6bcef-bbb3-455e-9e53-7a55a119a4bf",
+          "8a113b1c-d40d-4d92-8925-e8039122e43a",
+          "260e84c7-558b-4a02-8978-696ad8946342"
         ],
-        "annotatedAt": "2026-04-12T13:05:59.852Z",
+        "annotatedAt": "2026-04-23T23:02:17.578Z",
         "annotatedBy": "elic-import",
-        "notes": "Fundamentos curados: Lei 6.496/1977; Lei 12.378/2010; Súmula TCU nº 260; Resolução CONFEA nº 1.025/2009.. Nao encontrados no indice: Resolução CONFEA nº 1.025/2009."
+        "notes": "Fundamentos curados: Lei 6.496/1977; Lei 12.378/2010; Súmula TCU nº 260; Resolução CONFEA nº 1.025/2009.. Nao encontrados no indice: Resolução CONFEA nº 1.025/2009. [Fase 6B — audit]"
       },
       "_elic": {
         "source": "transversal",
@@ -1240,14 +1295,19 @@
       "difficulty": "medium",
       "annotations": {
         "relevant": [
-          "4ce3acbb-9ab6-42c7-9d11-aaa3c1bea783"
+          "4ce3acbb-9ab6-42c7-9d11-aaa3c1bea783",
+          "5eb27afb-477f-4e16-8b87-fc79c14512c6",
+          "453611c2-2910-4b04-bd1d-f96f2833d442",
+          "2e3b7760-7bec-4aa6-b2a5-08fc54418fd1"
         ],
         "highlyRelevant": [
-          "4ce3acbb-9ab6-42c7-9d11-aaa3c1bea783"
+          "4ce3acbb-9ab6-42c7-9d11-aaa3c1bea783",
+          "453611c2-2910-4b04-bd1d-f96f2833d442",
+          "2e3b7760-7bec-4aa6-b2a5-08fc54418fd1"
         ],
-        "annotatedAt": "2026-04-12T13:06:00.051Z",
+        "annotatedAt": "2026-04-23T23:02:17.578Z",
         "annotatedBy": "elic-import",
-        "notes": "Fundamentos curados: Lei 14.133/2021, arts. 105, 107 e 111; Orientação Normativa AGU nº 92/2024."
+        "notes": "Fundamentos curados: Lei 14.133/2021, arts. 105, 107 e 111; Orientação Normativa AGU nº 92/2024. [Fase 6B — audit]"
       },
       "_elic": {
         "source": "transversal",
@@ -1303,14 +1363,18 @@
       "difficulty": "medium",
       "annotations": {
         "relevant": [
-          "5dc5ae72-3e91-49ec-86d7-caac64ba77fd"
+          "5dc5ae72-3e91-49ec-86d7-caac64ba77fd",
+          "597e7ec0-cf45-4d7d-8879-ec5673642cd9",
+          "6f7efd0d-52c4-4888-a9c6-51efe3e930a9",
+          "e1ec5d77-f165-46f0-ba2f-d0671367ae5c"
         ],
         "highlyRelevant": [
-          "5dc5ae72-3e91-49ec-86d7-caac64ba77fd"
+          "5dc5ae72-3e91-49ec-86d7-caac64ba77fd",
+          "597e7ec0-cf45-4d7d-8879-ec5673642cd9"
         ],
-        "annotatedAt": "2026-04-12T13:06:00.450Z",
+        "annotatedAt": "2026-04-23T23:02:17.578Z",
         "annotatedBy": "elic-import",
-        "notes": "Fundamentos curados: IN SEGES/MP nº 05/2017, art. 19, §§ 1º e 2º, e Anexo V; Lei 14.133/2021, art. 63, IV; Parecer 92/2019/DECOR/CGU/AGU; Orientação Normativa AGU nº 63/2020.. Nao encontrados no indice: IN SEGES/MP nº 05/2017, art. 19, §§ 1º e 2º, e Anexo V; Parecer 92/2019/DECOR/CGU/AGU"
+        "notes": "Fundamentos curados: IN SEGES/MP nº 05/2017, art. 19, §§ 1º e 2º, e Anexo V; Lei 14.133/2021, art. 63, IV; Parecer 92/2019/DECOR/CGU/AGU; Orientação Normativa AGU nº 63/2020.. Nao encontrados no indice: IN SEGES/MP nº 05/2017, art. 19, §§ 1º e 2º, e Anexo V; Parecer 92/2019/DECOR/CGU/AGU [Fase 6B — audit]"
       },
       "_elic": {
         "source": "transversal",
@@ -1467,14 +1531,20 @@
       "difficulty": "medium",
       "annotations": {
         "relevant": [
-          "471684ee-29fc-453f-890f-0c1661f3f15f"
+          "471684ee-29fc-453f-890f-0c1661f3f15f",
+          "a396c7de-aaa4-43f7-ad6d-1e99d584b3fe",
+          "e017a0a6-3ef5-4dcd-b735-dbff83208cb8",
+          "315c1ce2-7152-49d7-80c2-183d6caf958c",
+          "5a026b2d-7aa7-4ff0-a2e5-c27e3e0f7458",
+          "969b22a2-a40c-4314-b020-09131b3fa961"
         ],
         "highlyRelevant": [
-          "471684ee-29fc-453f-890f-0c1661f3f15f"
+          "471684ee-29fc-453f-890f-0c1661f3f15f",
+          "969b22a2-a40c-4314-b020-09131b3fa961"
         ],
-        "annotatedAt": "2026-04-12T13:06:00.653Z",
+        "annotatedAt": "2026-04-23T23:02:17.578Z",
         "annotatedBy": "elic-import",
-        "notes": "Fundamentos curados: Lei 8.666/1993, art. 65, § 1º; Orientação Normativa AGU nº 50/2014; Enunciado PGF nº 368 (Parecer 00005/2022/CPLC/DEPCONSU/PGF/AGU); TCU, Acórdão 749/2010-Plenário.. Nao encontrados no indice: Enunciado PGF nº 368 (Parecer 00005/2022/CPLC/DEPCONSU/PGF/AGU); TCU, Acórdão 749/2010-Plenário."
+        "notes": "Fundamentos curados: Lei 8.666/1993, art. 65, § 1º; Orientação Normativa AGU nº 50/2014; Enunciado PGF nº 368 (Parecer 00005/2022/CPLC/DEPCONSU/PGF/AGU); TCU, Acórdão 749/2010-Plenário.. Nao encontrados no indice: Enunciado PGF nº 368 (Parecer 00005/2022/CPLC/DEPCONSU/PGF/AGU); TCU, Acórdão 749/2010-Plenário. [Fase 6B — audit]"
       },
       "_elic": {
         "source": "especifica",
@@ -1565,14 +1635,21 @@
       "difficulty": "medium",
       "annotations": {
         "relevant": [
-          "03c1afd0-352c-4212-b14f-73d2ef585e15"
+          "03c1afd0-352c-4212-b14f-73d2ef585e15",
+          "19200f88-a24e-4957-8fd7-4d60fdbba1c1",
+          "7fdf5643-11b0-4c99-b845-66e29e75cba2",
+          "c35294a9-8e86-47ac-be03-314b8f3d7f91",
+          "8f28a994-e678-4f05-a621-30c7ae78a09a",
+          "7fe9e0f3-3dc4-4307-973d-0a7c5271e52a",
+          "3b8e0e15-da90-4507-9e79-a82e67a87bd1",
+          "f6e16285-57ef-4338-a656-f07b0034f40e"
         ],
         "highlyRelevant": [
           "03c1afd0-352c-4212-b14f-73d2ef585e15"
         ],
-        "annotatedAt": "2026-04-12T13:06:01.254Z",
+        "annotatedAt": "2026-04-23T23:02:17.578Z",
         "annotatedBy": "elic-import",
-        "notes": "Fundamentos curados: Lei 14.133/2021, art. 47, II; Súmula TCU nº 247; IN SGD/ME nº 94, de 2022, art. 12, §§ 2º e 3º; Acórdão TCU 1972/2018-Plenário.. Nao encontrados no indice: IN SGD/ME nº 94, de 2022, art. 12, §§ 2º e 3º; Acórdão TCU 1972/2018-Plenário."
+        "notes": "Fundamentos curados: Lei 14.133/2021, art. 47, II; Súmula TCU nº 247; IN SGD/ME nº 94, de 2022, art. 12, §§ 2º e 3º; Acórdão TCU 1972/2018-Plenário.. Nao encontrados no indice: IN SGD/ME nº 94, de 2022, art. 12, §§ 2º e 3º; Acórdão TCU 1972/2018-Plenário. [Fase 6B — audit]"
       },
       "_elic": {
         "source": "especifica",
@@ -1626,14 +1703,16 @@
       "difficulty": "medium",
       "annotations": {
         "relevant": [
-          "439bfdc0-a49a-4b1b-9e86-116595c42d58"
+          "439bfdc0-a49a-4b1b-9e86-116595c42d58",
+          "7b7502ed-824f-4101-8955-f84833b952ce",
+          "6426b5b4-df1b-4356-b96e-db00f2021615"
         ],
         "highlyRelevant": [
           "439bfdc0-a49a-4b1b-9e86-116595c42d58"
         ],
-        "annotatedAt": "2026-04-12T13:06:01.454Z",
+        "annotatedAt": "2026-04-23T23:02:17.578Z",
         "annotatedBy": "elic-import",
-        "notes": "Fundamentos curados: Lei 14.133/2021, art. 82, §6º; Decreto 11.462/2023, art. 16; Parecer 39/2024/DECOR/CGU/AGU (vinculante).. Nao encontrados no indice: Parecer 39/2024/DECOR/CGU/AGU (vinculante)."
+        "notes": "Fundamentos curados: Lei 14.133/2021, art. 82, §6º; Decreto 11.462/2023, art. 16; Parecer 39/2024/DECOR/CGU/AGU (vinculante).. Nao encontrados no indice: Parecer 39/2024/DECOR/CGU/AGU (vinculante). [Fase 6B — audit]"
       },
       "_elic": {
         "source": "especifica",
@@ -1852,15 +1931,20 @@
       "annotations": {
         "relevant": [
           "d2831f21-4f4d-4610-b988-c12626978182",
-          "c456890d-46ce-4c0c-836c-6e9fe3d7ecb4"
+          "c456890d-46ce-4c0c-836c-6e9fe3d7ecb4",
+          "d221c8b1-1c86-43eb-8b68-61f530a8f5d4",
+          "34a55c77-e3d3-4898-8431-95ffdbc244aa",
+          "5f3384dd-9981-4514-8c1c-a61dbbc9a888",
+          "4ba641a4-8549-4b06-ac7d-7e84d5bf4d93"
         ],
         "highlyRelevant": [
           "d2831f21-4f4d-4610-b988-c12626978182",
-          "c456890d-46ce-4c0c-836c-6e9fe3d7ecb4"
+          "c456890d-46ce-4c0c-836c-6e9fe3d7ecb4",
+          "5f3384dd-9981-4514-8c1c-a61dbbc9a888"
         ],
-        "annotatedAt": "2026-04-12T13:06:01.849Z",
+        "annotatedAt": "2026-04-23T23:02:17.578Z",
         "annotatedBy": "elic-import",
-        "notes": "Fundamentos curados: Lei 14.133/2021, art. 23, § 2º, I; art. 24 e parágrafo único; art. 46, § 9º; art. 59, § 3º; Decreto 7.983/2013, arts. 2º, IX, 11 e 13, parágrafo único; Súmula TCU nº 259; Orientação Normativa AGU nº 5/2009; TCU, Acórdão 1695/2018-Plenário.. Nao encontrados no indice: art. 24 e parágrafo único; art. 46, § 9º; art. 59, § 3º; Decreto 7.983/2013, arts. 2º, IX, 11 e 13, parágrafo único; TCU, Acórdão 1695/2018-Plenário."
+        "notes": "Fundamentos curados: Lei 14.133/2021, art. 23, § 2º, I; art. 24 e parágrafo único; art. 46, § 9º; art. 59, § 3º; Decreto 7.983/2013, arts. 2º, IX, 11 e 13, parágrafo único; Súmula TCU nº 259; Orientação Normativa AGU nº 5/2009; TCU, Acórdão 1695/2018-Plenário.. Nao encontrados no indice: art. 24 e parágrafo único; art. 46, § 9º; art. 59, § 3º; Decreto 7.983/2013, arts. 2º, IX, 11 e 13, parágrafo único; TCU, Acórdão 1695/2018-Plenário. [Fase 6B — audit]"
       },
       "_elic": {
         "source": "especifica",
@@ -1979,14 +2063,15 @@
       "difficulty": "easy",
       "annotations": {
         "relevant": [
-          "c784628c-fec9-4898-b0ce-98a5b13797a1"
+          "c784628c-fec9-4898-b0ce-98a5b13797a1",
+          "a95705c4-fe06-4752-b50e-5f76df8040f2"
         ],
         "highlyRelevant": [
           "c784628c-fec9-4898-b0ce-98a5b13797a1"
         ],
-        "annotatedAt": "2026-04-12T13:06:02.245Z",
+        "annotatedAt": "2026-04-23T23:02:17.578Z",
         "annotatedBy": "elic-import",
-        "notes": "Fundamentos curados: Lei 14.133/2021, arts. 79, parágrafo único, I, 94 e 174; Decreto 11.878/2024, art. 8º; ON AGU 85/2024.. Nao encontrados no indice: ON AGU 85/2024."
+        "notes": "Fundamentos curados: Lei 14.133/2021, arts. 79, parágrafo único, I, 94 e 174; Decreto 11.878/2024, art. 8º; ON AGU 85/2024.. Nao encontrados no indice: ON AGU 85/2024. [Fase 6B — audit]"
       },
       "_elic": {
         "source": "especifica",
@@ -2042,14 +2127,18 @@
       "difficulty": "medium",
       "annotations": {
         "relevant": [
-          "17f6bcef-bbb3-455e-9e53-7a55a119a4bf"
+          "17f6bcef-bbb3-455e-9e53-7a55a119a4bf",
+          "a0fcbaa8-9733-46c1-a3e9-171879338cad",
+          "67a91b82-64f3-47eb-82c3-11ec67064312",
+          "66c4c4d2-b107-4b4e-bd1d-1ba7fbbe63a9",
+          "eee8fbd4-65a4-476c-92de-04199edc624d"
         ],
         "highlyRelevant": [
           "17f6bcef-bbb3-455e-9e53-7a55a119a4bf"
         ],
-        "annotatedAt": "2026-04-12T13:06:02.646Z",
+        "annotatedAt": "2026-04-23T23:02:17.578Z",
         "annotatedBy": "elic-import",
-        "notes": "Fundamentos curados: Lei 14.133/2021, art. 6º, XXI; IN SEGES/MP nº 5/2017, art. 22, § 1º; Decreto 7.983/2013; Súmula TCU nº 260; Lei 6.496/1977; Resolução CONFEA nº 1.137/2023.. Nao encontrados no indice: IN SEGES/MP nº 5/2017, art. 22, § 1º; Decreto 7.983/2013; Resolução CONFEA nº 1.137/2023."
+        "notes": "Fundamentos curados: Lei 14.133/2021, art. 6º, XXI; IN SEGES/MP nº 5/2017, art. 22, § 1º; Decreto 7.983/2013; Súmula TCU nº 260; Lei 6.496/1977; Resolução CONFEA nº 1.137/2023.. Nao encontrados no indice: IN SEGES/MP nº 5/2017, art. 22, § 1º; Decreto 7.983/2013; Resolução CONFEA nº 1.137/2023. [Fase 6B — audit]"
       },
       "_elic": {
         "source": "especifica",
@@ -2101,15 +2190,18 @@
       "annotations": {
         "relevant": [
           "e31bc0c2-bc6a-4b7b-81c3-264dec3bb60f",
-          "871b05bc-e583-4d8e-ad3f-42d4b1596011"
+          "871b05bc-e583-4d8e-ad3f-42d4b1596011",
+          "e14dc806-dd54-4aec-a41a-adff15be4a2a",
+          "ab2edc76-96ec-4d81-a8e8-63fa315be427"
         ],
         "highlyRelevant": [
           "e31bc0c2-bc6a-4b7b-81c3-264dec3bb60f",
-          "871b05bc-e583-4d8e-ad3f-42d4b1596011"
+          "871b05bc-e583-4d8e-ad3f-42d4b1596011",
+          "ab2edc76-96ec-4d81-a8e8-63fa315be427"
         ],
-        "annotatedAt": "2026-04-12T13:06:02.845Z",
+        "annotatedAt": "2026-04-23T23:02:17.578Z",
         "annotatedBy": "elic-import",
-        "notes": "Fundamentos curados: Orientação Normativa AGU nº 69/2021; Portarias PGF nº 526/2013 e 261/2017; Decreto 11.246/2022, art. 15, § 2º; OJI-C ELIC nº 4.. Nao encontrados no indice: Portarias PGF nº 526/2013 e 261/2017; OJI-C ELIC nº 4."
+        "notes": "Fundamentos curados: Orientação Normativa AGU nº 69/2021; Portarias PGF nº 526/2013 e 261/2017; Decreto 11.246/2022, art. 15, § 2º; OJI-C ELIC nº 4.. Nao encontrados no indice: Portarias PGF nº 526/2013 e 261/2017; OJI-C ELIC nº 4. [Fase 6B — audit]"
       },
       "_elic": {
         "source": "especifica",
@@ -2135,14 +2227,18 @@
       "difficulty": "medium",
       "annotations": {
         "relevant": [
-          "bcd057f0-8e13-43bf-bfa1-1fc4756e9dac"
+          "bcd057f0-8e13-43bf-bfa1-1fc4756e9dac",
+          "846e290c-1d31-42ac-9388-ba9dfd2deccf",
+          "6ccbaa42-416c-4d88-8ae1-8cbad2ecd622",
+          "18b79efd-8d38-4fa4-9026-c53be28372a2",
+          "587c402a-fa0d-438f-a350-ca1c728103a7"
         ],
         "highlyRelevant": [
           "bcd057f0-8e13-43bf-bfa1-1fc4756e9dac"
         ],
-        "annotatedAt": "2026-04-12T13:06:03.044Z",
+        "annotatedAt": "2026-04-23T23:02:17.578Z",
         "annotatedBy": "elic-import",
-        "notes": "Fundamentos curados: Orientação Normativa AGU nº 96/2025; Parecer nº 6/2025/CPLC/SUBCONSU/PGF/AGU.. Nao encontrados no indice: Parecer nº 6/2025/CPLC/SUBCONSU/PGF/AGU."
+        "notes": "Fundamentos curados: Orientação Normativa AGU nº 96/2025; Parecer nº 6/2025/CPLC/SUBCONSU/PGF/AGU.. Nao encontrados no indice: Parecer nº 6/2025/CPLC/SUBCONSU/PGF/AGU. [Fase 6B — audit]"
       },
       "_elic": {
         "source": "especifica",
@@ -2166,14 +2262,18 @@
       "difficulty": "medium",
       "annotations": {
         "relevant": [
-          "5dc5ae72-3e91-49ec-86d7-caac64ba77fd"
+          "5dc5ae72-3e91-49ec-86d7-caac64ba77fd",
+          "6f7efd0d-52c4-4888-a9c6-51efe3e930a9",
+          "49e400ce-b432-4e20-8c5a-49e4c15d2f0a",
+          "cf018aa5-42bc-4456-a9c5-a89e06dcfdb1"
         ],
         "highlyRelevant": [
-          "5dc5ae72-3e91-49ec-86d7-caac64ba77fd"
+          "5dc5ae72-3e91-49ec-86d7-caac64ba77fd",
+          "cf018aa5-42bc-4456-a9c5-a89e06dcfdb1"
         ],
-        "annotatedAt": "2026-04-12T13:06:03.246Z",
+        "annotatedAt": "2026-04-23T23:02:17.578Z",
         "annotatedBy": "elic-import",
-        "notes": "Fundamentos curados: Lei 14.133/2021, art. 135, §§ 1º e 2º; Orientação Normativa AGU nº 63/2020; Nota nº 86/2017/DECOR/CGU/AGU; Parecer nº 60/2015/DECOR/CGU/AGU.. Nao encontrados no indice: Nota nº 86/2017/DECOR/CGU/AGU; Parecer nº 60/2015/DECOR/CGU/AGU."
+        "notes": "Fundamentos curados: Lei 14.133/2021, art. 135, §§ 1º e 2º; Orientação Normativa AGU nº 63/2020; Nota nº 86/2017/DECOR/CGU/AGU; Parecer nº 60/2015/DECOR/CGU/AGU.. Nao encontrados no indice: Nota nº 86/2017/DECOR/CGU/AGU; Parecer nº 60/2015/DECOR/CGU/AGU. [Fase 6B — audit]"
       },
       "_elic": {
         "source": "especifica",
@@ -2199,15 +2299,19 @@
       "annotations": {
         "relevant": [
           "439bfdc0-a49a-4b1b-9e86-116595c42d58",
-          "13e9aea2-bc86-4568-96a0-c50b13d56a1a"
+          "13e9aea2-bc86-4568-96a0-c50b13d56a1a",
+          "dce83597-9282-4f44-8544-27fe6b9cd473",
+          "ff005d74-0e9d-4a1b-b121-8a021f5b484b",
+          "0162181f-12be-4448-afea-cb86ac57f344"
         ],
         "highlyRelevant": [
           "439bfdc0-a49a-4b1b-9e86-116595c42d58",
-          "13e9aea2-bc86-4568-96a0-c50b13d56a1a"
+          "13e9aea2-bc86-4568-96a0-c50b13d56a1a",
+          "ff005d74-0e9d-4a1b-b121-8a021f5b484b"
         ],
-        "annotatedAt": "2026-04-12T13:06:03.446Z",
+        "annotatedAt": "2026-04-23T23:02:17.578Z",
         "annotatedBy": "elic-import",
-        "notes": "Fundamentos curados: Lei 14.133/2021, art. 84; Decreto 11.462/2023, art. 22; Orientação Normativa AGU nº 89/2024."
+        "notes": "Fundamentos curados: Lei 14.133/2021, art. 84; Decreto 11.462/2023, art. 22; Orientação Normativa AGU nº 89/2024. [Fase 6B — audit]"
       },
       "_elic": {
         "source": "especifica",
@@ -2230,14 +2334,17 @@
       "difficulty": "medium",
       "annotations": {
         "relevant": [
-          "521424ed-97ba-4b00-b4a1-2b0113b5929d"
+          "521424ed-97ba-4b00-b4a1-2b0113b5929d",
+          "43d138d6-d0bd-41e0-a0d4-5bc8dea5abb4",
+          "4f9a0c6e-132f-4dcf-b8cc-cfb7d7c7e867"
         ],
         "highlyRelevant": [
-          "521424ed-97ba-4b00-b4a1-2b0113b5929d"
+          "521424ed-97ba-4b00-b4a1-2b0113b5929d",
+          "43d138d6-d0bd-41e0-a0d4-5bc8dea5abb4"
         ],
-        "annotatedAt": "2026-04-12T13:06:03.644Z",
+        "annotatedAt": "2026-04-23T23:02:17.578Z",
         "annotatedBy": "elic-import",
-        "notes": "Fundamentos curados: Lei 14.133/2021, art. 40 e art. 70, III; TCU, Acórdão 1176/2021-Plenário; Resolução TCU nº 315/2020, art. 9º, I.. Nao encontrados no indice: Resolução TCU nº 315/2020, art. 9º, I."
+        "notes": "Fundamentos curados: Lei 14.133/2021, art. 40 e art. 70, III; TCU, Acórdão 1176/2021-Plenário; Resolução TCU nº 315/2020, art. 9º, I.. Nao encontrados no indice: Resolução TCU nº 315/2020, art. 9º, I. [Fase 6B — audit]"
       },
       "_elic": {
         "source": "especifica",
@@ -2292,14 +2399,19 @@
       "difficulty": "medium",
       "annotations": {
         "relevant": [
-          "5dc5ae72-3e91-49ec-86d7-caac64ba77fd"
+          "5dc5ae72-3e91-49ec-86d7-caac64ba77fd",
+          "cc32fff6-a9a7-4c32-a5a9-1cb72b869166",
+          "cf018aa5-42bc-4456-a9c5-a89e06dcfdb1",
+          "6f7efd0d-52c4-4888-a9c6-51efe3e930a9",
+          "2935d8a8-2b88-4452-a438-f2baa4b85299"
         ],
         "highlyRelevant": [
-          "5dc5ae72-3e91-49ec-86d7-caac64ba77fd"
+          "5dc5ae72-3e91-49ec-86d7-caac64ba77fd",
+          "cf018aa5-42bc-4456-a9c5-a89e06dcfdb1"
         ],
-        "annotatedAt": "2026-04-12T13:06:04.044Z",
+        "annotatedAt": "2026-04-23T23:02:17.578Z",
         "annotatedBy": "elic-import",
-        "notes": "Fundamentos curados: Lei 14.133/2021, art. 135, §§ 1º e 2º; IN SEGES/MP nº 5/2017, art. 6º e parágrafo único; Decreto 9.507/2018, art. 9º; Orientação Normativa AGU nº 63/2020; Parecer nº 00092/2019/DECOR/CGU/AGU; Parecer nº 00005/2020/CPLC/DEPCONSU/PGF/AGU; Súmula TST nº 374; TCU, Acórdão 1097/2019-Plenário.. Nao encontrados no indice: IN SEGES/MP nº 5/2017, art. 6º e parágrafo único; Decreto 9.507/2018, art. 9º; Parecer nº 00092/2019/DECOR/CGU/AGU; Parecer nº 00005/2020/CPLC/DEPCONSU/PGF/AGU; Súmula TST nº 374; TCU, Acórdão 1097/2019-Plenário."
+        "notes": "Fundamentos curados: Lei 14.133/2021, art. 135, §§ 1º e 2º; IN SEGES/MP nº 5/2017, art. 6º e parágrafo único; Decreto 9.507/2018, art. 9º; Orientação Normativa AGU nº 63/2020; Parecer nº 00092/2019/DECOR/CGU/AGU; Parecer nº 00005/2020/CPLC/DEPCONSU/PGF/AGU; Súmula TST nº 374; TCU, Acórdão 1097/2019-Plenário.. Nao encontrados no indice: IN SEGES/MP nº 5/2017, art. 6º e parágrafo único; Decreto 9.507/2018, art. 9º; Parecer nº 00092/2019/DECOR/CGU/AGU; Parecer nº 00005/2020/CPLC/DEPCONSU/PGF/AGU; Súmula TST nº 374; TCU, Acórdão 1097/2019-Plenário. [Fase 6B — audit]"
       },
       "_elic": {
         "source": "especifica",
@@ -2329,15 +2441,18 @@
       "annotations": {
         "relevant": [
           "3d72ba58-4a00-4109-923f-175eec3265c5",
-          "5dc5ae72-3e91-49ec-86d7-caac64ba77fd"
+          "5dc5ae72-3e91-49ec-86d7-caac64ba77fd",
+          "f6da312d-da59-4e0c-91e0-75a98a09412a",
+          "bdb5417f-4dc4-49cb-85f1-78cf13ef7d2f",
+          "c6b0adfe-a4e4-4e4c-b1d7-db60c06fdb51"
         ],
         "highlyRelevant": [
           "3d72ba58-4a00-4109-923f-175eec3265c5",
           "5dc5ae72-3e91-49ec-86d7-caac64ba77fd"
         ],
-        "annotatedAt": "2026-04-12T13:06:04.249Z",
+        "annotatedAt": "2026-04-23T23:02:17.578Z",
         "annotatedBy": "elic-import",
-        "notes": "Fundamentos curados: Lei 14.133/2021, arts. 23, § 2º, e 135, §§ 1º e 2º; IN SEGES/MP nº 5/2017, Anexo V, item 2.9, 'b', e Anexos VII-A, VII-B e VII-D; IN SEGES/MGI nº 176/2024; Decreto 12.174/2024, art. 5º, § 2º; CLT, art. 614, § 3º; Parecer nº 00041/2019/DECOR/CGU/AGU; Orientação Normativa AGU nº 63/2020; TCU, Acórdão 2443/2017-Plenário.. Nao encontrados no indice: IN SEGES/MP nº 5/2017, Anexo V, item 2.9, 'b', e Anexos VII-A, VII-B e VII-D; IN SEGES/MGI nº 176/2024; CLT, art. 614, § 3º; Parecer nº 00041/2019/DECOR/CGU/AGU; TCU, Acórdão 2443/2017-Plenário."
+        "notes": "Fundamentos curados: Lei 14.133/2021, arts. 23, § 2º, e 135, §§ 1º e 2º; IN SEGES/MP nº 5/2017, Anexo V, item 2.9, 'b', e Anexos VII-A, VII-B e VII-D; IN SEGES/MGI nº 176/2024; Decreto 12.174/2024, art. 5º, § 2º; CLT, art. 614, § 3º; Parecer nº 00041/2019/DECOR/CGU/AGU; Orientação Normativa AGU nº 63/2020; TCU, Acórdão 2443/2017-Plenário.. Nao encontrados no indice: IN SEGES/MP nº 5/2017, Anexo V, item 2.9, 'b', e Anexos VII-A, VII-B e VII-D; IN SEGES/MGI nº 176/2024; CLT, art. 614, § 3º; Parecer nº 00041/2019/DECOR/CGU/AGU; TCU, Acórdão 2443/2017-Plenário. [Fase 6B — audit]"
       },
       "_elic": {
         "source": "especifica",
@@ -2458,14 +2573,19 @@
       "difficulty": "medium",
       "annotations": {
         "relevant": [
-          "17f6bcef-bbb3-455e-9e53-7a55a119a4bf"
+          "17f6bcef-bbb3-455e-9e53-7a55a119a4bf",
+          "7faef377-f0ab-49aa-ad32-5a4f89406895",
+          "8a113b1c-d40d-4d92-8925-e8039122e43a",
+          "f423170e-d598-455a-aad3-be5a82d7cb15",
+          "3bd2200f-d574-4374-a8a8-f2feeeee3a83"
         ],
         "highlyRelevant": [
-          "17f6bcef-bbb3-455e-9e53-7a55a119a4bf"
+          "17f6bcef-bbb3-455e-9e53-7a55a119a4bf",
+          "8a113b1c-d40d-4d92-8925-e8039122e43a"
         ],
-        "annotatedAt": "2026-04-12T13:06:04.648Z",
+        "annotatedAt": "2026-04-23T23:02:17.578Z",
         "annotatedBy": "elic-import",
-        "notes": "Fundamentos curados: Decreto 7.983/2013, art. 10; Súmula TCU nº 260; STF, RE 838.284; Nota Interna nº 02/2016/CPLC/DEPCONSU/PGF/AGU; Resolução CONFEA nº 1.137/2023; Resolução CAU nº 91/2014; Resolução CFT nº 55/2019.. Nao encontrados no indice: Decreto 7.983/2013, art. 10; STF, RE 838.284; Nota Interna nº 02/2016/CPLC/DEPCONSU/PGF/AGU; Resolução CONFEA nº 1.137/2023; Resolução CAU nº 91/2014; Resolução CFT nº 55/2019."
+        "notes": "Fundamentos curados: Decreto 7.983/2013, art. 10; Súmula TCU nº 260; STF, RE 838.284; Nota Interna nº 02/2016/CPLC/DEPCONSU/PGF/AGU; Resolução CONFEA nº 1.137/2023; Resolução CAU nº 91/2014; Resolução CFT nº 55/2019.. Nao encontrados no indice: Decreto 7.983/2013, art. 10; STF, RE 838.284; Nota Interna nº 02/2016/CPLC/DEPCONSU/PGF/AGU; Resolução CONFEA nº 1.137/2023; Resolução CAU nº 91/2014; Resolução CFT nº 55/2019. [Fase 6B — audit]"
       },
       "_elic": {
         "source": "especifica",
