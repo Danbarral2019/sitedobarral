@@ -104,8 +104,13 @@ Para cada query, agregar sobre **todos** os docs em `annotations.relevant[]` (n�
 - Fase sugerida: fix no cron/scraper ou re-rodar `migrate-to-embeddings.ts`.
 
 ### Regra 2 — `D. Ranking ruim`
-- Se `reciprocalRank > 0` (algum doc relevante no top-20 mas fora do top-5) **ou** `docPositionInTop100 ≤ 20` → bucket `D`.
-- Subcaso `D+` se `docPositionInTop100 ≤ 10` (perto de top-5; reranker provavelmente resolve).
+- Definir `effective_position` da seguinte forma:
+  - Se `reciprocalRank > 0` → `round(1 / reciprocalRank)` (posição derivada do top-20 que o eval já viu).
+  - Senão, se `docPositionInTop100` não-nulo → `docPositionInTop100`.
+  - Senão → `null` (doc fora do top-100; não entra em D).
+- Se `effective_position ∈ [6, 20]` → bucket `D`.
+- Subcaso `D+` se `effective_position ≤ 10` (perto de top-5; reranker provavelmente resolve).
+- Nota: `D` só se aplica a posições **fora** do top-5. Queries no escopo já têm `recall@5 ≤ 0.2`, então qualquer acerto canônico no top-5 é raro — se `effective_position ≤ 5` por alguma razão (ex.: múltiplos relevantes e só parte ranqueou), ainda é D.
 - Fase sugerida: **Fase 2** (cross-encoder rerank) ou **Fase 4** (hybrid tuning).
 
 ### Regra 3 — `A. Termo específico ausente do doc`
