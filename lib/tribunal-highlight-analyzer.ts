@@ -15,8 +15,9 @@
 
 import { prisma } from '@/lib/prisma';
 import { sendTribunalHighlightAlert } from '@/lib/email';
+import { PRIMARY_GEMINI_MODEL } from '@/lib/gemini/config';
 
-const GEMINI_MODEL = 'gemini-2.0-flash';
+const GEMINI_MODEL = PRIMARY_GEMINI_MODEL;
 const ANALYSIS_DELAY_MS = 800;
 const MAX_CANDIDATES = 15;
 const MAX_HIGHLIGHTS = 5;
