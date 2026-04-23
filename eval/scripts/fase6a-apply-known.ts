@@ -2,16 +2,16 @@
  * Sub-fase 6A do ROADMAP_BUSCA_QUALIDADE: aplica operações conhecidas
  * ao eval/golden-set.json.
  *
- * Uso:
+ * Modos:
  *   npx dotenv -e .env.local -- tsx eval/scripts/fase6a-apply-known.ts
+ *     Interativo: prompts pra multi-matches e confirm final.
  *
- * Interativo. Para cada operação em KNOWN_OPERATIONS:
- * - Resolve títulos no DB via LIKE.
- * - Mostra matches para o usuário e pede confirmação.
- * - Monta operações, aplica em memória.
- * - Ao final, mostra diff consolidado e pergunta se salva.
+ *   npx dotenv -e .env.local -- tsx eval/scripts/fase6a-apply-known.ts --auto
+ *     Auto: picks first match em multi-matches, aceita dedups, NÃO salva.
+ *     (Usar para preview automatizado.)
  *
- * Spot-check de dedup roda primeiro, antes das operações hardcoded.
+ *   npx dotenv -e .env.local -- tsx eval/scripts/fase6a-apply-known.ts --auto --apply
+ *     Auto + persist. Usar depois de revisar o diff do --auto.
  */
 
 import { readFileSync, writeFileSync } from 'node:fs'
@@ -24,6 +24,9 @@ import { addToAnnotations, removeFromAnnotations } from './golden-audit/golden-o
 import type { KnownOperation } from './golden-audit/types'
 
 const GOLDEN_PATH = join(process.cwd(), 'eval/golden-set.json')
+
+const AUTO = process.argv.includes('--auto')
+const APPLY = process.argv.includes('--apply')
 
 interface ResolvedOp {
   queryId: string
@@ -45,7 +48,12 @@ async function resolveTitleToId(titleQuery: string): Promise<{ id: string; title
     console.log(`  ✓ Match único: ${docs[0].title.slice(0, 80)} (${docs[0].id.slice(0, 8)})`)
     return docs[0]
   }
-  // Múltiplos matches — pedir seleção
+  // Múltiplos matches
+  if (AUTO) {
+    console.log(`  ⚠ ${docs.length} matches para "${titleQuery}" — AUTO: escolhendo primeiro.`)
+    for (const d of docs) console.log(`      [${d.id === docs[0].id ? '✓' : ' '}] ${d.title.slice(0, 90)} (${d.id.slice(0, 8)})`)
+    return docs[0]
+  }
   const choice = await select<string | null>({
     message: `  ${docs.length} matches para "${titleQuery}" — escolha:`,
     choices: [
@@ -137,8 +145,12 @@ async function dedupSpotCheck(golden: GoldenSet): Promise<ResolvedOp[]> {
       `⚠ ${relevant.length} pares afetam o golden — acima do threshold de 15 definido no spec. ` +
         `Recomendado registrar "Fase 7 — Dedup estrutural" no roadmap e só aplicar dedup defensivo seletivo aqui.`
     )
-    const proceed = await confirm({ message: 'Continuar e tratar só os casos óbvios (esp-785767-20)?', default: true })
-    if (!proceed) return []
+    if (AUTO) {
+      console.log('  AUTO: continuando.')
+    } else {
+      const proceed = await confirm({ message: 'Continuar e tratar só os casos óbvios (esp-785767-20)?', default: true })
+      if (!proceed) return []
+    }
   }
 
   const ops: ResolvedOp[] = []
@@ -159,10 +171,16 @@ async function dedupSpotCheck(golden: GoldenSet): Promise<ResolvedOp[]> {
     for (const q of golden.queries) {
       const overlap = q.annotations.relevant.filter((id) => inGolden.includes(id))
       if (overlap.length === 0) continue
-      const apply = await confirm({
-        message: `  Query "${q.id}" tem ${overlap.length} ID(s) desse doc anotados. Adicionar o(s) duplicado(s) ${notInGolden.join(', ')} também?`,
-        default: true,
-      })
+      let apply: boolean
+      if (AUTO) {
+        console.log(`  AUTO: adicionando ${notInGolden.join(', ')} em "${q.id}" (${overlap.length} ID(s) já anotados).`)
+        apply = true
+      } else {
+        apply = await confirm({
+          message: `  Query "${q.id}" tem ${overlap.length} ID(s) desse doc anotados. Adicionar o(s) duplicado(s) ${notInGolden.join(', ')} também?`,
+          default: true,
+        })
+      }
       if (!apply) continue
       const isHighly = q.annotations.highlyRelevant.some((id) => overlap.includes(id))
       const list = isHighly ? 'highly' : 'relevant'
@@ -281,7 +299,17 @@ async function main() {
   console.log(diff || '(sem mudanças)')
 
   // 5. Confirmar save
-  const save = await confirm({ message: '\nSalvar golden-set.json com essas mudanças?', default: false })
+  let save: boolean
+  if (AUTO) {
+    if (!APPLY) {
+      console.log('\n[AUTO] Preview-only. Use --auto --apply para persistir.')
+      return
+    }
+    console.log('\n[AUTO --apply] Salvando sem prompt.')
+    save = true
+  } else {
+    save = await confirm({ message: '\nSalvar golden-set.json com essas mudanças?', default: false })
+  }
   if (!save) {
     console.log('Abortado. Nada gravado.')
     return
