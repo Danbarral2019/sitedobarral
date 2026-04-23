@@ -9,7 +9,7 @@
  *   tsx eval/scripts/analyze-failures.ts --threshold 0.2
  */
 
-import { readFileSync, writeFileSync, readdirSync } from 'node:fs'
+import { readFileSync, writeFileSync, readdirSync, existsSync } from 'node:fs'
 import { join } from 'node:path'
 import type { EvalRun, GoldenQuery, GoldenSet, QueryEvalResult } from '../types'
 import { extractKeyTerms, matchKeyTermsInText } from './failure-analysis/key-terms'
@@ -32,7 +32,8 @@ function parseArgs() {
   const from = get('--from')
   const thresholdRaw = get('--threshold')
   const threshold = thresholdRaw !== undefined ? parseFloat(thresholdRaw) : 0.2
-  return { from, threshold }
+  const force = args.includes('--force')
+  return { from, threshold, force }
 }
 
 function findLatestJsonRun(reportsDir: string): string {
@@ -89,7 +90,7 @@ async function buildSignals(
 }
 
 async function main() {
-  const { from, threshold } = parseArgs()
+  const { from, threshold, force } = parseArgs()
   const reportsDir = join(process.cwd(), 'eval/reports')
   const jsonPath = from ?? findLatestJsonRun(reportsDir)
 
@@ -117,16 +118,29 @@ async function main() {
     rows.push({ ...signals, bucketAuto: bucket, bucketReason: reason, bucketManual: '' })
   }
 
+  const stamp = new Date().toISOString().slice(0, 10)
+
   const report: FailureAnalysisReport = {
     sourceRunPath: jsonPath.replace(/\\/g, '/'),
     scopeDescription: `${rows.length} queries com recall@5 ≤ ${(threshold * 100).toFixed(0)}%`,
-    generatedAt: new Date().toISOString().slice(0, 10),
+    generatedAt: stamp,
     rows,
   }
 
-  const stamp = new Date().toISOString().slice(0, 10)
   const mdPath = join(reportsDir, `failure-analysis-${stamp}.md`)
   const csvPath = join(reportsDir, `failure-analysis-${stamp}.csv`)
+
+  if (!force) {
+    const existing: string[] = []
+    if (existsSync(mdPath)) existing.push(mdPath)
+    if (existsSync(csvPath)) existing.push(csvPath)
+    if (existing.length > 0) {
+      throw new Error(
+        `Arquivos já existem (usa --force para sobrescrever):\n  ${existing.join('\n  ')}`
+      )
+    }
+  }
+
   writeFileSync(mdPath, formatMarkdown(report), 'utf8')
   writeFileSync(csvPath, formatCSV(rows), 'utf8')
 
