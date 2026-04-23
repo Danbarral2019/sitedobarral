@@ -9,6 +9,7 @@
  */
 
 import { queryGeminiText } from '@/lib/gemini/cached-client';
+import { PRIMARY_GEMINI_MODEL } from '@/lib/gemini/config';
 
 // ===========================
 // Types

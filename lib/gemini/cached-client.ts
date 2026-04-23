@@ -52,6 +52,13 @@ export interface GeminiQueryOptions {
   useCache?: boolean;
   cacheTTL?: number;
   systemInstruction?: string;
+  /**
+   * Desativa (0) ou limita o "thinking mode" do Gemini 2.5. Default do Google
+   * é deixar thinking ligado, o que pode consumir ~95% do maxOutputTokens em
+   * tarefas curtas e truncar a resposta. Passe 0 para resumos / classificação
+   * / extração simples. Deixe undefined para raciocínio complexo.
+   */
+  thinkingBudget?: number;
 }
 
 export interface GeminiQueryResult {
@@ -94,7 +101,7 @@ const LEGAL_SAFETY_SETTINGS = [
 async function callGeminiRaw(
   modelName: string,
   query: string,
-  opts: { temperature: number; maxOutputTokens: number; systemInstruction?: string },
+  opts: { temperature: number; maxOutputTokens: number; systemInstruction?: string; thinkingBudget?: number },
 ) {
   const geminiModel = getGenAI().getGenerativeModel({
     model: modelName,
@@ -102,6 +109,9 @@ async function callGeminiRaw(
     generationConfig: {
       temperature: opts.temperature,
       maxOutputTokens: opts.maxOutputTokens,
+      ...(opts.thinkingBudget !== undefined && {
+        thinkingConfig: { thinkingBudget: opts.thinkingBudget },
+      }),
     },
     safetySettings: LEGAL_SAFETY_SETTINGS,
   });
@@ -142,7 +152,7 @@ async function callGeminiRaw(
 async function callGeminiOnce(
   modelName: string,
   query: string,
-  opts: { temperature: number; maxOutputTokens: number; systemInstruction?: string },
+  opts: { temperature: number; maxOutputTokens: number; systemInstruction?: string; thinkingBudget?: number },
 ) {
   const delaysMs = [1500, 4000];
   let lastErr: unknown;
@@ -175,7 +185,7 @@ async function callGeminiOnce(
 async function callGeminiWithFallback(
   requestedModel: string,
   query: string,
-  opts: { temperature: number; maxOutputTokens: number; systemInstruction?: string },
+  opts: { temperature: number; maxOutputTokens: number; systemInstruction?: string; thinkingBudget?: number },
 ) {
   const tryOrder = [
     requestedModel,
@@ -225,11 +235,12 @@ export async function queryGeminiText(
     useCache = true,
     cacheTTL = CACHE_TTL.GEMINI_QUERY,
     systemInstruction,
+    thinkingBudget,
   } = options;
 
   const startTime = Date.now();
   const cacheKey = CacheKeys.geminiQuery('text', query);
-  const callOpts = { temperature, maxOutputTokens, systemInstruction };
+  const callOpts = { temperature, maxOutputTokens, systemInstruction, thinkingBudget };
 
   if (useCache) {
     const cached = await withCache(

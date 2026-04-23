@@ -153,7 +153,12 @@ async function callGeminiForHighlight(prompt: string): Promise<HighlightAnalysis
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
       contents: [{ parts: [{ text: prompt }] }],
-      generationConfig: { temperature: 0.3, maxOutputTokens: 1024 },
+      generationConfig: {
+        temperature: 0.3,
+        maxOutputTokens: 1024,
+        // Scoring + resumo curto — thinking come o budget, gera truncagem.
+        thinkingConfig: { thinkingBudget: 0 },
+      },
     }),
   });
 
