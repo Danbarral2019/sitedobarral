@@ -29,7 +29,7 @@ const prisma = new PrismaClient({ log: ['error', 'warn'] });
 // Configuration
 // ===========================
 
-const GEMINI_MODEL = 'gemini-2.0-flash';
+const GEMINI_MODEL = 'gemini-2.5-flash';
 const DELAY_BETWEEN_BATCHES_MS = 1200;
 const MIN_TEXT_LENGTH = 30;
 
@@ -84,6 +84,8 @@ async function queryGemini(prompt: string): Promise<string> {
     generationConfig: {
       temperature: 0.1,
       maxOutputTokens: 2048,
+      // Extração JSON de artigos — thinking come o budget e trunca.
+      thinkingConfig: { thinkingBudget: 0 },
     },
   });
 

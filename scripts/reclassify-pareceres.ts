@@ -29,7 +29,7 @@ const prisma = new PrismaClient({
 
 // --- Configuração ---
 
-const GEMINI_MODEL = 'gemini-2.0-flash';
+const GEMINI_MODEL = 'gemini-2.5-flash';
 const RATE_LIMIT_MS = 800;
 const PARECER_CATEGORIES = ['parecer-vinculante', 'parecer', 'decor'];
 
@@ -123,6 +123,8 @@ async function callGemini(prompt: string): Promise<string> {
         topK: 40,
         topP: 0.95,
         maxOutputTokens: 2048,
+        // Extração JSON curta — thinking trunca.
+        thinkingConfig: { thinkingBudget: 0 },
       },
     }),
   });
