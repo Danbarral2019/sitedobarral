@@ -29,7 +29,7 @@ const prisma = new PrismaClient({ log: ['error', 'warn'] });
 // Configuration
 // ===========================
 
-const GEMINI_MODEL = 'gemini-2.0-flash';
+const GEMINI_MODEL = 'gemini-2.5-flash';
 const DELAY_BETWEEN_BATCHES_MS = 1000;
 
 // ===========================
@@ -77,10 +77,14 @@ function getGenAI(): GoogleGenerativeAI {
 async function queryGemini(prompt: string): Promise<string> {
   const model = getGenAI().getGenerativeModel({
     model: GEMINI_MODEL,
+    // Cast: o SDK @google/generative-ai não tipou thinkingConfig ainda, mas
+    // a propriedade é propagada para o body REST e funciona em runtime.
     generationConfig: {
       temperature: 0.1,
       maxOutputTokens: 2048,
-    },
+      // Extração JSON de artigos — thinking come o budget e trunca.
+      thinkingConfig: { thinkingBudget: 0 },
+    } as unknown as import('@google/generative-ai').GenerationConfig,
   });
 
   const result = await model.generateContent(prompt);

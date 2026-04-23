@@ -7,6 +7,7 @@
 import { prisma } from '@/lib/prisma';
 import { generateQueryEmbedding, embeddingToSql } from './gemini-embeddings';
 import { withCache, CACHE_TTL } from '@/lib/cache/redis-client';
+import type { Prisma } from '@prisma/client';
 
 // ===========================
 // Types
@@ -31,12 +32,20 @@ export interface SearchResult {
 export interface SearchOptions {
   courseId?: string;      // Filtrar por curso
   category?: string;      // Filtrar por categoria
+  categoryIn?: string[];  // Lista de categorias (complementa category singular)
   excludeCategories?: string[];  // Categories to exclude from results
   limit?: number;         // Numero maximo de resultados (default: 5)
   threshold?: number;     // Similaridade minima (0-1, default: 0.5)
   useCache?: boolean;     // Usar cache (default: true)
   includeChunkContent?: boolean; // Incluir conteudo do chunk (default: true)
   includeTribunalDecisions?: boolean; // Incluir decisoes de TCEs estaduais (default: false)
+  skipDocumentBranch?: boolean;       // Omitir o ramo DocumentChunk (default: false)
+  skipLegislativeActBranch?: boolean; // Omitir o ramo LegislativeActChunk (default: false)
+  tribunalCodeFilter?: string;        // Filtrar TribunalDecisionChunk por tribunalCode
+  extraWhere?: {                      // Fragmentos WHERE extras compostos pelo chamador
+    document?: Prisma.Sql;
+    tribunalDecision?: Prisma.Sql;
+  };
 }
 
 export interface SearchResponse {
@@ -85,8 +94,19 @@ export async function semanticSearch(
     };
   }
 
-  // Cache key baseado na query e opcoes
-  const cacheKey = `vector-search:${hashQuery(query)}:${courseId || 'all'}:${category || 'all'}:${limit}:${threshold}:${(options.excludeCategories || []).join(',')}:td=${options.includeTribunalDecisions ? '1' : '0'}`;
+  // Cache key baseado na query e opcoes (inclui novas opcoes)
+  // extraWhere precisa serializar conteudo porque valores vindos de filtros UI
+  // (ano, tema, q, dataFrom/dataTo) diferenciam os resultados — so marcar presenca
+  // causaria colisao entre chamadas com mesmos outros filtros mas extraWhere diferente.
+  const ewDocSql = options.extraWhere?.document?.sql ?? '';
+  const ewDocVals = JSON.stringify(options.extraWhere?.document?.values ?? []);
+  const ewTdSql = options.extraWhere?.tribunalDecision?.sql ?? '';
+  const ewTdVals = JSON.stringify(options.extraWhere?.tribunalDecision?.values ?? []);
+  const ewKey = options.extraWhere
+    ? `${ewDocSql}|${ewDocVals}|${ewTdSql}|${ewTdVals}`
+    : '';
+
+  const cacheKey = `vector-search:${hashQuery(query)}:${courseId || 'all'}:${category || 'all'}:${limit}:${threshold}:${(options.excludeCategories || []).join(',')}:td=${options.includeTribunalDecisions ? '1' : '0'}:cin=${(options.categoryIn || []).join(',')}:sd=${options.skipDocumentBranch ? '1' : '0'}:sl=${options.skipLegislativeActBranch ? '1' : '0'}:tc=${options.tribunalCodeFilter || ''}:ew=${ewKey}`;
 
   // Tenta usar cache
   if (useCache) {
@@ -149,6 +169,36 @@ async function performSearch(
   return executeVectorSearch(query, { ...options, threshold: 0.40 });
 }
 
+// ===========================
+// Helper: appendExtraWhere
+// ===========================
+
+/**
+ * Integra um fragmento Prisma.Sql ao WHERE de uma query $queryRawUnsafe.
+ * Renumera os placeholders $N do fragmento para continuar a sequência global de params.
+ */
+function appendExtraWhere(
+  baseWhere: string,
+  extra: Prisma.Sql | undefined,
+  params: unknown[],
+  getNextParamIdx: () => number
+): string {
+  if (!extra) return baseWhere;
+
+  // extra.strings: partes literais entre os valores interpolados
+  // extra.values: valores interpolados
+  let rebuilt = '';
+  for (let i = 0; i < extra.strings.length; i++) {
+    rebuilt += extra.strings[i];
+    if (i < extra.values.length) {
+      rebuilt += `$${getNextParamIdx()}`;
+      params.push(extra.values[i]);
+    }
+  }
+
+  return baseWhere ? `${baseWhere} AND (${rebuilt})` : rebuilt;
+}
+
 /**
  * Executa a busca vetorial com um threshold específico
  */
@@ -159,127 +209,84 @@ async function executeVectorSearch(
   const {
     courseId,
     category,
+    categoryIn,
     limit = 5,
     threshold,
     includeChunkContent = true,
     includeTribunalDecisions = false,
+    skipDocumentBranch = false,
+    skipLegislativeActBranch = false,
+    tribunalCodeFilter,
+    extraWhere,
   } = options;
+
+  const includeDocBranch = !skipDocumentBranch;
+  const includeLegActBranch = !skipLegislativeActBranch;
+
+  // Early return se todos os ramos estão excluídos
+  if (!includeDocBranch && !includeLegActBranch && !includeTribunalDecisions) {
+    return { results: [], query, totalFound: 0 };
+  }
 
   // 1. Gera embedding da query
   const { embedding } = await generateQueryEmbedding(query);
   const embeddingStr = embeddingToSql(embedding);
 
-  // 2. Constroi filtros SQL com parâmetros posicionais (previne SQL injection)
+  // 2. Constrói filtros SQL com parâmetros posicionais (previne SQL injection)
   const params: unknown[] = [];
   let paramIndex = 1;
 
-  let whereClause = `d."embeddingStatus" = 'completed'`;
-
-  if (courseId) {
-    whereClause += ` AND (d."courseId" = $${paramIndex} OR d."isCommon" = true)`;
-    params.push(courseId);
+  // Helper para obter e incrementar paramIndex
+  const nextParam = (): number => {
+    const i = paramIndex;
     paramIndex++;
-  }
+    return i;
+  };
 
-  if (category) {
-    whereClause += ` AND d."category" = $${paramIndex}`;
-    params.push(category);
-    paramIndex++;
-  }
+  const ctes: string[] = [];
+  const unions: string[] = [];
 
-  const excludeCategories = options.excludeCategories || [];
-  if (excludeCategories.length > 0) {
-    const placeholders = excludeCategories.map((c) => {
-      const ph = `$${paramIndex}`;
-      params.push(c);
-      paramIndex++;
-      return ph;
-    });
-    whereClause += ` AND d."category" NOT IN (${placeholders.join(', ')})`;
-  }
+  // ---- Ramo A: DocumentChunk ----
+  if (includeDocBranch) {
+    let whereClause = `d."embeddingStatus" = 'completed'`;
 
-  // Parâmetros para threshold e limit (usados em ambos os CTEs)
-  const thresholdParamIdx = paramIndex;
-  params.push(threshold);
-  paramIndex++;
+    if (courseId) {
+      whereClause += ` AND (d."courseId" = $${nextParam()} OR d."isCommon" = true)`;
+      params.push(courseId);
+    }
 
-  const docLimitParamIdx = paramIndex;
-  params.push(limit * 2);
-  paramIndex++;
+    if (category) {
+      whereClause += ` AND d."category" = $${nextParam()}`;
+      params.push(category);
+    }
 
-  const actThresholdParamIdx = paramIndex;
-  params.push(threshold);
-  paramIndex++;
+    const excludeCategories = options.excludeCategories || [];
+    if (excludeCategories.length > 0) {
+      const placeholders = excludeCategories.map((c) => {
+        const ph = `$${nextParam()}`;
+        params.push(c);
+        return ph;
+      });
+      whereClause += ` AND d."category" NOT IN (${placeholders.join(', ')})`;
+    }
 
-  const actLimitParamIdx = paramIndex;
-  params.push(limit * 2);
-  paramIndex++;
+    if (categoryIn && categoryIn.length > 0) {
+      const placeholders = categoryIn.map((c) => {
+        const ph = `$${nextParam()}`;
+        params.push(c);
+        return ph;
+      });
+      whereClause += ` AND d."category" IN (${placeholders.join(', ')})`;
+    }
 
-  // Parâmetros para decision_scores (somente se includeTribunalDecisions)
-  let decThresholdParamIdx = 0;
-  let decLimitParamIdx = 0;
-  if (includeTribunalDecisions) {
-    decThresholdParamIdx = paramIndex;
+    const finalDocWhere = appendExtraWhere(whereClause, extraWhere?.document, params, nextParam);
+
+    const docThresholdIdx = nextParam();
     params.push(threshold);
-    paramIndex++;
-
-    decLimitParamIdx = paramIndex;
+    const docLimitIdx = nextParam();
     params.push(limit * 2);
-    paramIndex++;
-  }
 
-  const finalLimitParamIdx = paramIndex;
-  params.push(limit * 4);
-  paramIndex++;
-
-  // 3. Executa busca vetorial com pgvector (UNION ALL: DocumentChunk + LegislativeActChunk [+ TribunalDecisionChunk])
-  // TribunalDecisionChunk só é incluído quando o usuário pede explicitamente
-  // Usa <=> para distancia coseno (1 - similaridade)
-  // embeddingStr é gerado internamente pelo Gemini, seguro para inline
-  const decisionCte = includeTribunalDecisions ? `,
-    decision_scores AS (
-      SELECT
-        td.id as document_id,
-        td."fullIdentifier" as document_title,
-        td."decisionType" as category,
-        tc.content as chunk_content,
-        tc."chunkIndex" as chunk_index,
-        1 - (tc.embedding <=> '${embeddingStr}'::vector) as similarity,
-        td.url,
-        NULL as course_id,
-        true as is_common,
-        td.themes as tags,
-        td."leiArticles" as lei_articles,
-        'tribunal-decision' as source_type,
-        td."dataJulgamento" as uploaded_at
-      FROM "TribunalDecisionChunk" tc
-      JOIN "TribunalDecision" td ON tc."tribunalDecisionId" = td.id
-      WHERE td."embeddingStatus" = 'completed'
-        AND td."approvalStatus" IN ('auto_approved', 'manually_approved')
-    )` : '';
-
-  const decisionUnion = includeTribunalDecisions
-    ? `UNION ALL
-      (SELECT * FROM decision_scores WHERE similarity >= $${decThresholdParamIdx} ORDER BY similarity DESC LIMIT $${decLimitParamIdx})`
-    : '';
-
-  const results = await prisma.$queryRawUnsafe<Array<{
-    document_id: string;
-    document_title: string;
-    category: string;
-    chunk_content: string;
-    chunk_index: number;
-    similarity: number;
-    url: string | null;
-    course_id: string | null;
-    is_common: boolean;
-    tags: string | null;
-    lei_articles: string | null;
-    source_type: string;
-    uploaded_at: string | null;
-  }>>(
-    `
-    WITH doc_scores AS (
+    ctes.push(`doc_scores AS (
       SELECT
         d.id as document_id,
         d.title as document_title,
@@ -296,9 +303,20 @@ async function executeVectorSearch(
         d."uploadedAt" as uploaded_at
       FROM "DocumentChunk" c
       JOIN "Document" d ON c."documentId" = d.id
-      WHERE ${whereClause}
-    ),
-    act_scores AS (
+      WHERE ${finalDocWhere}
+    )`);
+
+    unions.push(`(SELECT * FROM doc_scores WHERE similarity >= $${docThresholdIdx} ORDER BY similarity DESC LIMIT $${docLimitIdx})`);
+  }
+
+  // ---- Ramo B: LegislativeActChunk ----
+  if (includeLegActBranch) {
+    const actThresholdIdx = nextParam();
+    params.push(threshold);
+    const actLimitIdx = nextParam();
+    params.push(limit * 2);
+
+    ctes.push(`act_scores AS (
       SELECT
         la.id as document_id,
         la."fullNumber" as document_title,
@@ -316,16 +334,80 @@ async function executeVectorSearch(
       FROM "LegislativeActChunk" lc
       JOIN "LegislativeAct" la ON lc."legislativeActId" = la.id
       WHERE la."embeddingStatus" = 'completed'
-    )${decisionCte}
+    )`);
+
+    unions.push(`(SELECT * FROM act_scores WHERE similarity >= $${actThresholdIdx} ORDER BY similarity DESC LIMIT $${actLimitIdx})`);
+  }
+
+  // ---- Ramo C: TribunalDecisionChunk ----
+  if (includeTribunalDecisions) {
+    let decisionWhere = `td."embeddingStatus" = 'completed' AND td."approvalStatus" IN ('auto_approved', 'manually_approved')`;
+
+    if (tribunalCodeFilter) {
+      decisionWhere += ` AND td."tribunalCode" = $${nextParam()}`;
+      params.push(tribunalCodeFilter);
+    }
+
+    const finalDecisionWhere = appendExtraWhere(decisionWhere, extraWhere?.tribunalDecision, params, nextParam);
+
+    const decThresholdIdx = nextParam();
+    params.push(threshold);
+    const decLimitIdx = nextParam();
+    params.push(limit * 2);
+
+    ctes.push(`decision_scores AS (
+      SELECT
+        td.id as document_id,
+        td."fullIdentifier" as document_title,
+        td."decisionType" as category,
+        tc.content as chunk_content,
+        tc."chunkIndex" as chunk_index,
+        1 - (tc.embedding <=> '${embeddingStr}'::vector) as similarity,
+        td.url,
+        NULL as course_id,
+        true as is_common,
+        td.themes as tags,
+        td."leiArticles" as lei_articles,
+        'tribunal-decision' as source_type,
+        td."dataJulgamento" as uploaded_at
+      FROM "TribunalDecisionChunk" tc
+      JOIN "TribunalDecision" td ON tc."tribunalDecisionId" = td.id
+      WHERE ${finalDecisionWhere}
+    )`);
+
+    unions.push(`(SELECT * FROM decision_scores WHERE similarity >= $${decThresholdIdx} ORDER BY similarity DESC LIMIT $${decLimitIdx})`);
+  }
+
+  // ---- Final limit ----
+  const finalLimitParamIdx = nextParam();
+  params.push(limit * 4);
+
+  // 3. Monta e executa a query
+  const sqlQuery = `
+    WITH ${ctes.join(',\n    ')}
     SELECT * FROM (
-      (SELECT * FROM doc_scores WHERE similarity >= $${thresholdParamIdx} ORDER BY similarity DESC LIMIT $${docLimitParamIdx})
-      UNION ALL
-      (SELECT * FROM act_scores WHERE similarity >= $${actThresholdParamIdx} ORDER BY similarity DESC LIMIT $${actLimitParamIdx})
-      ${decisionUnion}
+      ${unions.join('\n      UNION ALL\n      ')}
     ) combined
     ORDER BY similarity DESC
     LIMIT $${finalLimitParamIdx}
-    `,
+  `;
+
+  const results = await prisma.$queryRawUnsafe<Array<{
+    document_id: string;
+    document_title: string;
+    category: string;
+    chunk_content: string;
+    chunk_index: number;
+    similarity: number;
+    url: string | null;
+    course_id: string | null;
+    is_common: boolean;
+    tags: string | null;
+    lei_articles: string | null;
+    source_type: string;
+    uploaded_at: string | null;
+  }>>(
+    sqlQuery,
     ...params
   );
 

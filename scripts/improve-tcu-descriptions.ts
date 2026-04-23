@@ -1,26 +1,26 @@
 /**
  * Melhoria de descrições de acórdãos TCU via Gemini AI
  *
- * Gera resumos executivos de 2-3 frases que:
+ * Gera resumos executivos em 3-5 frases (ver regra do prompt em
+ * `lib/tcu-enrichment.ts`) que:
  * - Explicam o que o acórdão decidiu em linguagem acessível
  * - Conectam explicitamente com licitações/contratos (Lei 14.133)
  * - Citam artigos da Lei 14.133 vinculados (se houver)
  *
+ * Compartilha o prompt e o HTTP client do Gemini com o cron
+ * `app/api/cron/sync-tcu-acordaos/route.ts` via `lib/tcu-enrichment.ts`.
+ * Manter mudanças de prompt/parâmetros no módulo compartilhado.
+ *
  * Uso:
- *   cd sitedobarral
  *   npx tsx scripts/improve-tcu-descriptions.ts --dry-run         # Simular
- *   npx tsx scripts/improve-tcu-descriptions.ts --limit 10        # Testar com poucos
+ *   npx tsx scripts/improve-tcu-descriptions.ts --limit 5         # Testar com poucos
  *   npx tsx scripts/improve-tcu-descriptions.ts --concurrency 3   # Paralelas (default 3)
  *   npx tsx scripts/improve-tcu-descriptions.ts                   # Executar todos
  *   npx tsx scripts/improve-tcu-descriptions.ts --force           # Reprocessar todos
  */
 
-import { config } from 'dotenv';
-config({ path: '.env.local' });
-
-import { PrismaClient } from '@prisma/client';
-
-const prisma = new PrismaClient();
+import { prisma } from '../lib/prisma';
+import { buildSummaryPrompt, callGemini } from '../lib/tcu-enrichment';
 
 // --- Parse CLI args ---
 const args = process.argv.slice(2);
@@ -38,100 +38,9 @@ function getArgValue(flag: string, defaultValue: number): number {
 
 const LIMIT = getArgValue('--limit', 0);
 const CONCURRENCY = getArgValue('--concurrency', 3);
-const DELAY_MS = 1200; // Delay entre chamadas (ms)
+const DELAY_MS = 200; // Delay entre chunks (ms) — tier pago, era 1200 no tier free
 
 const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
-const GEMINI_MODEL = 'gemini-2.0-flash';
-
-// --- Prompt para geração do resumo ---
-function buildPrompt(doc: {
-  title: string;
-  description: string | null;
-  leiArticles: string | null;
-  metaTcu?: {
-    ementaCompleta?: string | null;
-    area?: string | null;
-    tema?: string | null;
-    subtema?: string | null;
-  } | null;
-}): string {
-  const artigos = doc.leiArticles ? safeParseArray(doc.leiArticles) : [];
-  const artigosStr = artigos.length > 0
-    ? `Artigos da Lei 14.133/2021 vinculados: ${artigos.map((a: string) => `Art. ${a}`).join(', ')}`
-    : 'Nenhum artigo da Lei 14.133 vinculado especificamente.';
-
-  return `Você é um especialista em Direito Administrativo, Licitações e Contratos.
-
-TAREFA: Gerar um resumo executivo de 2-3 frases para o acórdão do TCU abaixo.
-
-REGRAS:
-1. O resumo deve explicar a decisão em linguagem acessível (para servidores públicos, não juristas)
-2. Deve conectar claramente a decisão com a prática de licitações e contratos públicos
-3. Se houver artigos da Lei 14.133/2021 vinculados, mencione-os brevemente
-4. Máximo 3 frases. Seja direto e prático
-5. NÃO repita o número do acórdão no resumo
-6. Use voz ativa e evite jargão desnecessário
-7. Retorne APENAS o resumo, sem preâmbulos
-
-DADOS DO ACÓRDÃO:
-- Título: ${doc.title}
-- Área: ${doc.metaTcu?.area || 'N/A'}
-- Tema: ${doc.metaTcu?.tema || 'N/A'}
-- Subtema: ${doc.metaTcu?.subtema || 'N/A'}
-- ${artigosStr}
-
-Enunciado/Tese:
-${doc.description || 'N/A'}
-
-${doc.metaTcu?.ementaCompleta ? `Ementa completa:\n${doc.metaTcu.ementaCompleta.slice(0, 2000)}` : ''}
-
-RESUMO EXECUTIVO:`;
-}
-
-function safeParseArray(value: string | null): string[] {
-  if (!value) return [];
-  try {
-    const parsed = JSON.parse(value);
-    return Array.isArray(parsed) ? parsed : [];
-  } catch {
-    // Pode ser CSV
-    return value.split(',').map(s => s.trim()).filter(Boolean);
-  }
-}
-
-// --- Chamada à API do Gemini ---
-async function callGemini(prompt: string): Promise<string> {
-  if (!GEMINI_API_KEY) {
-    throw new Error('GEMINI_API_KEY não configurada');
-  }
-
-  const url = `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent?key=${GEMINI_API_KEY}`;
-
-  const response = await fetch(url, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      contents: [{ parts: [{ text: prompt }] }],
-      generationConfig: {
-        temperature: 0.3,
-        maxOutputTokens: 512,
-      },
-    }),
-  });
-
-  if (!response.ok) {
-    const errorText = await response.text();
-    throw new Error(`Gemini API error (${response.status}): ${errorText.slice(0, 200)}`);
-  }
-
-  const data = await response.json();
-
-  if (data.candidates?.[0]?.content?.parts?.[0]?.text) {
-    return data.candidates[0].content.parts[0].text.trim();
-  }
-
-  throw new Error('Resposta do Gemini sem texto');
-}
 
 // --- Main ---
 async function main() {
@@ -164,6 +73,7 @@ async function main() {
       title: true,
       description: true,
       summary: true,
+      content: true, // usado em buildSummaryPrompt como "Conteúdo integral do acórdão"
       leiArticles: true,
       metaTcu: {
         select: {
@@ -211,7 +121,7 @@ async function main() {
           await new Promise(resolve => setTimeout(resolve, DELAY_MS * idx));
         }
 
-        const prompt = buildPrompt(doc);
+        const prompt = buildSummaryPrompt(doc);
         const summary = await callGemini(prompt);
 
         return { doc, summary };

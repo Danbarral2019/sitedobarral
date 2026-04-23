@@ -147,8 +147,9 @@ export async function extractTextWithGeminiVision(fileBuffer: Buffer): Promise<T
 
   try {
     const { GoogleGenerativeAI } = await import('@google/generative-ai');
+    const { PRIMARY_GEMINI_MODEL } = await import('@/lib/gemini/config');
     const genAI = new GoogleGenerativeAI(GEMINI_API_KEY);
-    const model = genAI.getGenerativeModel({ model: 'gemini-2.0-flash' });
+    const model = genAI.getGenerativeModel({ model: PRIMARY_GEMINI_MODEL });
 
     // Converte buffer para base64
     const base64 = fileBuffer.toString('base64');

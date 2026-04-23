@@ -34,34 +34,34 @@ describe('lib/ai/registry', () => {
     }
   })
 
-  it('search default e Gemini 2.0 Flash', () => {
+  it('search default e Gemini 2.5 Flash', () => {
     const r = resolveTask('search')
     expect(r.provider.name).toBe('gemini')
-    expect(r.modelId).toBe('gemini-2.0-flash')
+    expect(r.modelId).toBe('gemini-2.5-flash')
   })
 
-  it('chat default e Gemini 2.0 Flash', () => {
+  it('chat default e Gemini 2.5 Flash', () => {
     const r = resolveTask('chat')
     expect(r.provider.name).toBe('gemini')
-    expect(r.modelId).toBe('gemini-2.0-flash')
+    expect(r.modelId).toBe('gemini-2.5-flash')
   })
 
-  it('extraction default e Gemini 2.0 Flash', () => {
+  it('extraction default e Gemini 2.5 Flash', () => {
     const r = resolveTask('extraction')
     expect(r.provider.name).toBe('gemini')
-    expect(r.modelId).toBe('gemini-2.0-flash')
+    expect(r.modelId).toBe('gemini-2.5-flash')
   })
 
   it('classification default e Claude 3.5 Haiku', () => {
     const r = resolveTask('classification')
     expect(r.provider.name).toBe('anthropic')
-    expect(r.modelId).toBe('claude-3-5-haiku-20241022')
+    expect(r.modelId).toBe('claude-haiku-4-5-20251001')
   })
 
   it('summarization default e Claude 3.5 Haiku', () => {
     const r = resolveTask('summarization')
     expect(r.provider.name).toBe('anthropic')
-    expect(r.modelId).toBe('claude-3-5-haiku-20241022')
+    expect(r.modelId).toBe('claude-haiku-4-5-20251001')
   })
 
   it('enhancement default e Claude Sonnet 4', () => {

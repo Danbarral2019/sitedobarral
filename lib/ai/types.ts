@@ -31,6 +31,12 @@ export interface AiGenerateRequest {
   maxTokens?: number
   /** Se true, instrui o modelo a retornar JSON puro. */
   jsonMode?: boolean
+  /**
+   * Gemini 2.5 only. Desativa (0) ou limita o "thinking mode". Passe 0 para
+   * tarefas curtas (resumo / classificacao); senao o thinking pode consumir
+   * ~95% do maxTokens e truncar a resposta. Ignorado pelo provider Anthropic.
+   */
+  thinkingBudget?: number
   /** Opcional: usuario que disparou a chamada (uso futuro p/ auditoria). */
   userId?: string
 }

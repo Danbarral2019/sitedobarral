@@ -28,7 +28,9 @@ const MODEL_MAPPING: Record<string, string> = {
   'gemini-2.5-pro': 'gemini-2.5-pro',
   'gemini-2.5-flash': 'gemini-2.5-flash',
   'gemini-2.5-flash-lite': 'gemini-2.5-flash-lite',
-  'gemini-2.0-flash': 'gemini-2.0-flash',
+  // Cliente que ainda peça 2.0-flash é encaminhado para 2.5-flash.
+  // 2.0-flash tem shutdown marcado pela Google em 2026-06-01.
+  'gemini-2.0-flash': 'gemini-2.5-flash',
 };
 
 // Tools disponíveis
@@ -46,7 +48,7 @@ const TOOLS: Tool[] = [
         model: {
           type: 'string',
           description: 'Gemini model to use (default: gemini-2.5-flash)',
-          enum: ['gemini-2.5-pro', 'gemini-2.5-flash', 'gemini-2.5-flash-lite', 'gemini-2.0-flash'],
+          enum: ['gemini-2.5-pro', 'gemini-2.5-flash', 'gemini-2.5-flash-lite'],
           default: 'gemini-2.5-flash',
         },
         temperature: {

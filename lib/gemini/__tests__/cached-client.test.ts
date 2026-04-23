@@ -22,11 +22,15 @@ const mockGetGenerativeModel = vi.hoisted(() =>
   }))
 );
 
-vi.mock('@google/generative-ai', () => ({
-  GoogleGenerativeAI: class MockGoogleGenerativeAI {
-    getGenerativeModel = mockGetGenerativeModel;
-  },
-}));
+vi.mock('@google/generative-ai', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('@google/generative-ai')>();
+  return {
+    ...actual,
+    GoogleGenerativeAI: class MockGoogleGenerativeAI {
+      getGenerativeModel = mockGetGenerativeModel;
+    },
+  };
+});
 
 // Mock redis-client withCache
 const mockWithCache = vi.hoisted(() => vi.fn());
@@ -146,13 +150,15 @@ describe('cached-client: queryGeminiText', () => {
 
       await queryGeminiText('test query');
 
-      expect(mockGetGenerativeModel).toHaveBeenCalledWith({
-        model: 'gemini-2.0-flash',
-        generationConfig: {
-          temperature: 0.7,
-          maxOutputTokens: 2048,
-        },
-      });
+      expect(mockGetGenerativeModel).toHaveBeenCalledWith(
+        expect.objectContaining({
+          model: 'gemini-2.5-flash',
+          generationConfig: {
+            temperature: 0.7,
+            maxOutputTokens: 2048,
+          },
+        })
+      );
     });
 
     it('deve passar systemInstruction quando fornecida', async () => {
@@ -240,13 +246,15 @@ describe('cached-client: queryGeminiText', () => {
         maxOutputTokens: 4096,
       });
 
-      expect(mockGetGenerativeModel).toHaveBeenCalledWith({
-        model: 'gemini-1.5-pro',
-        generationConfig: {
-          temperature: 0.2,
-          maxOutputTokens: 4096,
-        },
-      });
+      expect(mockGetGenerativeModel).toHaveBeenCalledWith(
+        expect.objectContaining({
+          model: 'gemini-1.5-pro',
+          generationConfig: {
+            temperature: 0.2,
+            maxOutputTokens: 4096,
+          },
+        })
+      );
     });
   });
 

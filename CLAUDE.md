@@ -438,10 +438,11 @@ cd ~/.claude-mcp-servers/gemini
 ./setup-global.sh   # Linux/Mac
 ```
 
-**Modelo Gemini descontinuado:**
-- ⚠️ `gemini-2.0-flash-exp` foi removido pela Google (404 Not Found)
-- ✅ Usar `gemini-2.0-flash` (modelo estável de produção)
-- Arquivos afetados: `lib/gemini/cached-client.ts`, `lib/gemini-helper.js`, `lib/text-extractor.ts`, `lib/embeddings/document-processor.ts`, `app/api/artigos/[numero]/chat/route.ts`, `app/api/lei-14133/search/route.ts`
+**Modelo Gemini — histórico de mudanças:**
+- ⚠️ `gemini-2.0-flash-exp` foi removido pela Google em 2025 (404 Not Found).
+- ⚠️ `gemini-2.0-flash` está **deprecado** pela Google: acesso restrito desde 2026-03-06, shutdown em **2026-06-01**. Ver comentário em `lib/gemini/config.ts`.
+- ✅ **Usar `gemini-2.5-flash`** (definido em `PRIMARY_GEMINI_MODEL`, `lib/gemini/config.ts`). Para tarefas curtas (resumo/classificação), passar também `thinkingBudget: 0` — senão o thinking mode do 2.5 consome ~95% do `maxOutputTokens` e trunca a resposta.
+- Migração dos 24 arquivos que hardcodavam `gemini-2.0-flash` registrada em `docs/ROADMAP_GEMINI_MODELO_25.md` (abril/2026).
 
 **React Hydration Errors:**
 
@@ -590,7 +591,7 @@ Ver código para endpoints completos.
 
 ### Chat RAG Flow (Página Assistente)
 1. User query → `/api/documents/query` POST
-2. API calls Gemini (`gemini-2.0-flash`) with user query + document context
+2. API calls Gemini (`gemini-2.5-flash`, via `PRIMARY_GEMINI_MODEL`) with user query + document context
 3. Gemini returns structured response with relevance scores
 4. Response cached with query hash (60s TTL)
 5. Frontend displays sources with citations
@@ -647,11 +648,11 @@ Tasks suportadas e defaults atuais:
 
 | Task | Provider default | Modelo default |
 |---|---|---|
-| `search` | gemini | `gemini-2.0-flash` |
-| `chat` | gemini | `gemini-2.0-flash` |
-| `extraction` | gemini | `gemini-2.0-flash` |
-| `classification` | anthropic | `claude-3-5-haiku-20241022` |
-| `summarization` | anthropic | `claude-3-5-haiku-20241022` |
+| `search` | gemini | `gemini-2.5-flash` |
+| `chat` | gemini | `gemini-2.5-flash` |
+| `extraction` | gemini | `gemini-2.5-flash` |
+| `classification` | anthropic | `claude-haiku-4-5-20251001` |
+| `summarization` | anthropic | `claude-haiku-4-5-20251001` |
 | `enhancement` | anthropic | `claude-sonnet-4-20250514` |
 
 Override por env: `AI_<TASK>_PROVIDER` e `AI_<TASK>_MODEL`. Ex.:

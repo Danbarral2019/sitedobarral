@@ -49,7 +49,7 @@ export interface AnalysisOptions {
   minConfidence?: number; // Confiança mínima para incluir artigo (padrão: 30)
   maxArticles?: number; // Máximo de artigos a retornar (padrão: 10)
   includeReasoning?: boolean; // Incluir explicação detalhada (padrão: true)
-  geminiModel?: 'gemini-2.0-flash' | 'gemini-2.5-flash' | 'gemini-2.5-pro'; // Modelo Gemini (padrão: gemini-2.0-flash)
+  geminiModel?: 'gemini-2.5-flash' | 'gemini-2.5-pro' | 'gemini-2.0-flash'; // Modelo Gemini (padrão: gemini-2.5-flash — billing pago cobre 2.5)
 }
 
 /**
@@ -124,7 +124,7 @@ export class LeiIndexer {
     minConfidence: 50,
     maxArticles: 10,
     includeReasoning: true,
-    geminiModel: 'gemini-2.0-flash',
+    geminiModel: 'gemini-2.5-flash',
   };
 
   /**
@@ -207,8 +207,10 @@ export class LeiIndexer {
     }
 
     if (document.content) {
-      // Limitar tamanho do conteúdo (Gemini tem limites)
-      const maxLength = 4000; // ~1000 tokens
+      // Tier pago Gemini: janela de 1M tokens. 32k chars (~8k tokens) captura
+      // o acórdão inteiro na grande maioria dos casos, preservando artigos
+      // citados em votos longos (ver ROADMAP_GEMINI_PAGO.md, Fase 2).
+      const maxLength = 32000;
       const content = document.content.substring(0, maxLength);
       parts.push(content);
 
@@ -243,7 +245,7 @@ export class LeiIndexer {
       throw new Error('GEMINI_API_KEY não configurada no ambiente');
     }
 
-    const apiModel = model || 'gemini-2.0-flash';
+    const apiModel = model || 'gemini-2.5-flash';
     const url = `https://generativelanguage.googleapis.com/v1beta/models/${apiModel}:generateContent?key=${apiKey}`;
 
     const response = await fetch(url, {
@@ -305,9 +307,9 @@ export class LeiIndexer {
       const result = await this.analyzeDocument(document, options);
       results.push(result);
 
-      // Rate limiting: aguardar 500ms entre chamadas
+      // Rate limiting: 50ms entre chamadas (tier pago Gemini, ROADMAP_GEMINI_PAGO.md Fase 2)
       if (i < documents.length - 1) {
-        await new Promise(resolve => setTimeout(resolve, 500));
+        await new Promise(resolve => setTimeout(resolve, 50));
       }
     }
 

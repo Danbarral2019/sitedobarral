@@ -6,6 +6,7 @@
  */
 
 import { queryGeminiText } from '@/lib/gemini/cached-client';
+import { PRIMARY_GEMINI_MODEL } from '@/lib/gemini/config';
 import type { FilteredDecision } from './relevance-filter';
 
 // ===========================
@@ -126,9 +127,10 @@ export async function generateNewsletterIntro(input: IntroGeneratorInput): Promi
   try {
     const prompt = buildIntroPrompt(input);
     const result = await queryGeminiText(prompt, {
-      model: 'gemini-2.0-flash',
+      model: PRIMARY_GEMINI_MODEL,
       temperature: 0.8,
       maxOutputTokens: 1024,
+      thinkingBudget: 0, // reescrita criativa curta; temp=0.8 já dá criatividade
       useCache: false,
       systemInstruction: SYSTEM_INSTRUCTION,
     });

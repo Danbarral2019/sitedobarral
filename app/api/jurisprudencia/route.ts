@@ -1,114 +1,106 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { prisma } from '@/lib/prisma';
+import { z } from 'zod';
+import {
+  fetchUnifiedList,
+  type JurisprudenciaFilters,
+} from '@/lib/jurisprudencia/unified-query';
 import { handleApiError } from '@/lib/errors/error-handler';
+import { apiLogger } from '@/lib/logger';
 
-/**
- * GET /api/jurisprudencia
- * API pública de jurisprudência — retorna decisões aprovadas e relevantes
- */
+const TRIBUNAL_CODES = [
+  'TCU',
+  'TCE-SP',
+  'TCE-PR',
+  'TCE-MG',
+  'TCE-RS',
+  'TCE-SC',
+  'TCE-RJ',
+  'TCE-PE',
+  'STJ',
+  'STF',
+] as const;
+
+const DECISION_TYPES = [
+  'acordao',
+  'decisao',
+  'parecer_previo',
+  'sumula',
+] as const;
+
+const querySchema = z.object({
+  tribunal: z.enum(TRIBUNAL_CODES).optional(),
+  ano: z.coerce.number().int().min(1900).max(2100).optional(),
+  tema: z.string().min(1).max(200).optional(),
+  artigo: z.string().min(1).max(50).optional(),
+  decisionType: z.enum(DECISION_TYPES).optional(),
+  relator: z.string().min(1).max(200).optional(),
+  orgao: z.string().min(1).max(200).optional(),
+  dataFrom: z.coerce.date().optional(),
+  dataTo: z.coerce.date().optional(),
+  q: z.string().min(1).max(200).optional(),
+  page: z.coerce.number().int().min(1).default(1),
+  pageSize: z.coerce.number().int().min(1).default(10).transform(v => Math.min(v, 50)),
+});
+
+function truncate(text: string, max: number): string {
+  return text.length > max ? text.slice(0, max) + '...' : text;
+}
+
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
+    const raw = Object.fromEntries(searchParams.entries());
+    const parsed = querySchema.safeParse(raw);
 
-    const tribunal = searchParams.get('tribunal');
-    const ano = searchParams.get('ano');
-    const tema = searchParams.get('tema');
-    const artigo = searchParams.get('artigo');
-    const decisionType = searchParams.get('decisionType');
-    const relator = searchParams.get('relator');
-    const orgao = searchParams.get('orgao');
-    const dataFrom = searchParams.get('dataFrom');
-    const dataTo = searchParams.get('dataTo');
-    const q = searchParams.get('q');
-    const page = Math.max(1, parseInt(searchParams.get('page') || '1', 10));
-    const pageSize = Math.min(50, Math.max(1, parseInt(searchParams.get('pageSize') || '10', 10)));
-
-    const where: Record<string, unknown> = {
-      isRelevant: true,
-      approvalStatus: { in: ['auto_approved', 'manually_approved'] },
-    };
-
-    if (tribunal) {
-      where.tribunalCode = tribunal;
+    if (!parsed.success) {
+      return NextResponse.json(
+        { error: 'Parâmetros inválidos', details: parsed.error.flatten() },
+        { status: 400 }
+      );
     }
 
-    if (ano) {
-      where.year = parseInt(ano, 10);
-    }
+    const { page, pageSize, ...filters } = parsed.data;
+    const jurisFilters: JurisprudenciaFilters = filters;
 
-    if (tema) {
-      where.themes = { contains: tema, mode: 'insensitive' };
-    }
-
-    if (artigo) {
-      where.leiArticles = { contains: artigo, mode: 'insensitive' };
-    }
-
-    if (decisionType) {
-      where.decisionType = decisionType;
-    }
-
-    if (relator) {
-      where.relator = { contains: relator, mode: 'insensitive' };
-    }
-
-    if (orgao) {
-      where.orgaoJulgador = { contains: orgao, mode: 'insensitive' };
-    }
-
-    if (dataFrom || dataTo) {
-      const dateFilter: Record<string, Date> = {};
-      if (dataFrom) dateFilter.gte = new Date(dataFrom);
-      if (dataTo) dateFilter.lte = new Date(dataTo);
-      where.dataJulgamento = dateFilter;
-    }
-
-    if (q) {
-      where.OR = [
-        { title: { contains: q, mode: 'insensitive' } },
-        { ementa: { contains: q, mode: 'insensitive' } },
-      ];
-    }
-
-    const [items, total] = await Promise.all([
-      prisma.tribunalDecision.findMany({
-        where,
-        select: {
-          id: true,
-          tribunalCode: true,
-          tribunalName: true,
-          decisionType: true,
-          decisionNumber: true,
-          title: true,
-          ementa: true,
-          summary: true,
-          relator: true,
-          orgaoJulgador: true,
-          dataJulgamento: true,
-          themes: true,
-          leiArticles: true,
-          url: true,
-        },
-        orderBy: [
-          { dataJulgamento: { sort: 'desc', nulls: 'last' } },
-        ],
-        skip: (page - 1) * pageSize,
-        take: pageSize,
-      }),
-      prisma.tribunalDecision.count({ where }),
-    ]);
+    const { items, total } = await fetchUnifiedList(jurisFilters, {
+      page,
+      pageSize,
+    });
 
     const formatted = items.map(item => ({
-      ...item,
-      ementa: item.ementa.length > 300 ? item.ementa.slice(0, 300) + '...' : item.ementa,
+      id: item.id,
+      tribunalCode: item.tribunalCode,
+      tribunalName: item.tribunalName,
+      decisionType: item.decisionType,
+      decisionNumber: item.decisionNumber,
+      title: item.title,
+      ementa: truncate(item.ementa, 300),
+      summary: item.summary,
+      relator: item.relator,
+      orgaoJulgador: item.orgaoJulgador,
+      dataJulgamento: item.dataJulgamento,
+      themes: item.themes,
+      leiArticles: item.leiArticles,
+      url: item.url,
+      sourceType: item.sourceType,
     }));
+
+    apiLogger.info(
+      {
+        total,
+        page,
+        pageSize,
+        filters: jurisFilters,
+      },
+      'jurisprudencia/list answered'
+    );
 
     return NextResponse.json({
       items: formatted,
       total,
       page,
       pageSize,
-      totalPages: Math.ceil(total / pageSize),
+      totalPages: Math.max(1, Math.ceil(total / pageSize)),
     });
   } catch (error) {
     return handleApiError(error);

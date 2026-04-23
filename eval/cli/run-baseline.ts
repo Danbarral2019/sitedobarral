@@ -45,6 +45,11 @@ async function main() {
   const fullPath = join(reportsDir, filename)
   writeFileSync(fullPath, formatReport(run, label), 'utf8')
 
+  const jsonFilename = `${stamp}_${label}.json`
+  const jsonFullPath = join(reportsDir, jsonFilename)
+  writeFileSync(jsonFullPath, JSON.stringify(run, null, 2), 'utf8')
+  console.log(`[eval] JSON dump written to eval/reports/${jsonFilename}`)
+
   console.log(`[eval] Report written to eval/reports/${filename}`)
 }
 

@@ -9,6 +9,7 @@
  */
 
 import { queryGeminiText } from '@/lib/gemini/cached-client';
+import { PRIMARY_GEMINI_MODEL } from '@/lib/gemini/config';
 
 // ===========================
 // Types
@@ -99,9 +100,10 @@ async function evaluateBatch(decisions: DecisionInput[]): Promise<Map<string, { 
   try {
     const prompt = buildFilterPrompt(decisions);
     const result = await queryGeminiText(prompt, {
-      model: 'gemini-2.0-flash',
+      model: PRIMARY_GEMINI_MODEL,
       temperature: 0.3,
       maxOutputTokens: 8192,
+      thinkingBudget: 0, // batch scoring + resumo curto; thinking não agrega
       useCache: false,
       systemInstruction: SYSTEM_INSTRUCTION,
     });
