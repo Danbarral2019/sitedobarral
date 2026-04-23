@@ -36,7 +36,7 @@ const LIMIT = getArgValue('--limit', 0);
 const DELAY_MS = 1500;
 
 const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
-const GEMINI_MODEL = 'gemini-2.0-flash';
+const GEMINI_MODEL = 'gemini-2.5-flash';
 
 // --- Gemini ---
 async function callGemini(prompt: string, maxTokens = 4096): Promise<string> {
@@ -52,6 +52,8 @@ async function callGemini(prompt: string, maxTokens = 4096): Promise<string> {
         temperature: 0.3,
         maxOutputTokens: maxTokens,
         responseMimeType: 'application/json',
+        // Geração JSON estruturada — thinking consumiria o budget.
+        thinkingConfig: { thinkingBudget: 0 },
       },
     }),
   });
