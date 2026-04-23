@@ -19,6 +19,9 @@ export const geminiProvider: AiProvider = {
         temperature: req.temperature ?? 0.3,
         maxOutputTokens: req.maxTokens ?? 4096,
         ...(req.jsonMode ? { responseMimeType: 'application/json' } : {}),
+        ...(req.thinkingBudget !== undefined && {
+          thinkingConfig: { thinkingBudget: req.thinkingBudget },
+        }),
       },
     }
     if (req.systemPrompt) {

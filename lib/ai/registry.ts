@@ -16,9 +16,12 @@ interface TaskDefault {
 /**
  * Defaults por tarefa. Sobrescritiveis via env vars.
  *
- * Esta fase preserva os modelos atualmente em uso no codigo (gemini-2.0-flash
- * em search/chat/extraction, claude-3-5-haiku para classificacao/sumarizacao,
- * claude-sonnet-4 para enhancement). Upgrades acontecem em fases posteriores.
+ * search/chat/extraction usam PRIMARY_GEMINI_MODEL (hoje `gemini-2.5-flash`,
+ * ver lib/gemini/config.ts). Migracao feita pelo ROADMAP_GEMINI_MODELO_25.md
+ * em 2026-04-22.
+ *
+ * Anthropic: claude-haiku-4-5 para classificacao/sumarizacao,
+ * claude-sonnet-4 para enhancement.
  */
 const DEFAULTS: Record<AiTask, TaskDefault> = {
   'search': { provider: 'gemini', model: PRIMARY_GEMINI_MODEL },
