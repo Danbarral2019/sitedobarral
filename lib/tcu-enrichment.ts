@@ -23,9 +23,13 @@ export const EMENTA_MAX = 32_000;
 export const CONTENT_MAX = 20_000;
 
 // Config de output do Gemini para resumos executivos.
+// thinkingBudget: 0 desativa o "thinking mode" do Gemini 2.5 — senão ele
+// consome ~95% do maxOutputTokens raciocinando e a resposta sai truncada.
+// Resumo executivo não precisa de thinking; é uma reformulação direta.
 export const SUMMARY_GENERATION_CONFIG = {
   temperature: 0.3,
   maxOutputTokens: 1024,
+  thinkingConfig: { thinkingBudget: 0 },
 } as const;
 
 export interface SummaryPromptDoc {
