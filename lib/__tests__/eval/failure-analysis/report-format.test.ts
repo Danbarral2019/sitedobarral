@@ -40,6 +40,13 @@ describe('formatCSV', () => {
     expect(csv).toContain('"um, dois ""três"""')
   })
 
+  it('escapa carriage return e newlines (RFC 4180)', () => {
+    const csvCrlf = formatCSV([row({ query: 'linha1\r\nlinha2' })])
+    expect(csvCrlf).toContain('"linha1\r\nlinha2"')
+    const csvCr = formatCSV([row({ query: 'a\rb' })])
+    expect(csvCr).toContain('"a\rb"')
+  })
+
   it('linha por row', () => {
     const csv = formatCSV([row({ id: 'a' }), row({ id: 'b' })])
     expect(csv.split('\n').filter(Boolean)).toHaveLength(3) // header + 2

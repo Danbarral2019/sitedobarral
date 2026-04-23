@@ -20,7 +20,7 @@ const CSV_COLUMNS = [
 
 function csvEscape(value: unknown): string {
   const s = String(value ?? '')
-  if (/[",\n]/.test(s)) return `"${s.replace(/"/g, '""')}"`
+  if (/["\r\n,]/.test(s)) return `"${s.replace(/"/g, '""')}"`
   return s
 }
 
