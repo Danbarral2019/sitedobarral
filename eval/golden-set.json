@@ -10,22 +10,21 @@
       "difficulty": "hard",
       "annotations": {
         "relevant": [
-          "96cbdacf-7387-4286-9529-f2aacc81e7d8",
           "ce817fb1-7e5f-417a-bdd8-5aa44a6f089d",
           "ae92b5a7-11e8-4c28-8001-251f8c79a35a",
           "6c690202-8ddb-4431-935d-826d0c0a4594",
           "f29d4d7b-f104-4fa3-9a63-5ca73d781fb2",
-          "097d3cdb-303b-40ec-b15b-e5ce70ae50ba",
-          "0eb5c8f1-089b-4a56-a279-a6b864565421"
+          "0eb5c8f1-089b-4a56-a279-a6b864565421",
+          "1935bfc2-4322-4e46-b5c6-98868058d4de",
+          "a476d950-07c8-4857-9118-11d3f2f2c816",
+          "c22e52f4-16a3-4ad0-abdc-1228e3923893"
         ],
         "highlyRelevant": [
-          "96cbdacf-7387-4286-9529-f2aacc81e7d8",
-          "097d3cdb-303b-40ec-b15b-e5ce70ae50ba",
           "0eb5c8f1-089b-4a56-a279-a6b864565421"
         ],
-        "annotatedAt": "2026-04-12T19:34:46.936Z",
+        "annotatedAt": "2026-04-23T20:43:04.341Z",
         "annotatedBy": "daniel",
-        "notes": "Hoje a busca devolve resposta sobre reajuste de preços (art. 134, 182, 124) — completamente fora do tópico. O documento certo é o art. 183 II da Lei 14.133. Anotar via CLI eval:annotate quando o framework estiver pronto."
+        "notes": "Hoje a busca devolve resposta sobre reajuste de preços (art. 134, 182, 124) — completamente fora do tópico. O documento certo é o art. 183 II da Lei 14.133. Anotar via CLI eval:annotate quando o framework estiver pronto. [Fase 6A — 2026-04-23]"
       }
     },
     {
@@ -167,17 +166,19 @@
           "f16d1227-1f6a-468b-9fae-6dafb7f2a5af",
           "c71859e3-146e-469f-9d35-4df123747844",
           "a3e8ea6a-710d-49ab-b075-535675328fdb",
-          "439bfdc0-a49a-4b1b-9e86-116595c42d58"
+          "439bfdc0-a49a-4b1b-9e86-116595c42d58",
+          "124a6e34-fe34-4017-adc9-5ffcb8e09d60"
         ],
         "highlyRelevant": [
           "dce83597-9282-4f44-8544-27fe6b9cd473",
           "c71859e3-146e-469f-9d35-4df123747844",
           "a3e8ea6a-710d-49ab-b075-535675328fdb",
-          "439bfdc0-a49a-4b1b-9e86-116595c42d58"
+          "439bfdc0-a49a-4b1b-9e86-116595c42d58",
+          "124a6e34-fe34-4017-adc9-5ffcb8e09d60"
         ],
-        "annotatedAt": "2026-04-12T19:49:57.139Z",
+        "annotatedAt": "2026-04-23T20:43:04.342Z",
         "annotatedBy": "daniel",
-        "notes": "Esperado: art. 86 e Decreto 11.462/2023 (regulamento federal de SRP)."
+        "notes": "Esperado: art. 86 e Decreto 11.462/2023 (regulamento federal de SRP). [Fase 6A — 2026-04-23]"
       }
     },
     {
@@ -479,15 +480,17 @@
           "8e56d9eb-9971-4d8f-ada9-a568322c0780",
           "3bd48153-ff17-4a3a-a05e-ed0dfc11d3a2",
           "41c42be6-362a-460a-af09-19d7d2a5d09a",
-          "26d6758e-b333-4075-8db6-cccc325e7840"
+          "26d6758e-b333-4075-8db6-cccc325e7840",
+          "191ee78d-c72b-4d97-8e4d-068d4707a8e9"
         ],
         "highlyRelevant": [
           "a71e7ed0-3627-414a-aba7-b5df490f2520",
-          "303e0c55-bf9e-4ec7-84a0-45392c1d537b"
+          "303e0c55-bf9e-4ec7-84a0-45392c1d537b",
+          "191ee78d-c72b-4d97-8e4d-068d4707a8e9"
         ],
-        "annotatedAt": "2026-04-12T20:22:30.450Z",
+        "annotatedAt": "2026-04-23T20:43:04.342Z",
         "annotatedBy": "daniel",
-        "notes": "Fundamentos curados: Lei 8.666/1993, arts. 29 e 55, XIII; Lei 14.133/2021, arts. 68 e 92, XVI; Instrução Normativa nº 3, de 26 de abril de 2018, art. 34.. Nao encontrados no indice: Instrução Normativa nº 3, de 26 de abril de 2018, art. 34."
+        "notes": "Fundamentos curados: Lei 8.666/1993, arts. 29 e 55, XIII; Lei 14.133/2021, arts. 68 e 92, XVI; Instrução Normativa nº 3, de 26 de abril de 2018, art. 34.. Nao encontrados no indice: Instrução Normativa nº 3, de 26 de abril de 2018, art. 34. [Fase 6A — 2026-04-23]"
       },
       "_elic": {
         "source": "transversal",
@@ -968,14 +971,18 @@
       "difficulty": "medium",
       "annotations": {
         "relevant": [
-          "845a2f3e-752e-4aff-8804-a061a767d6ac"
+          "845a2f3e-752e-4aff-8804-a061a767d6ac",
+          "fedc9e92-8472-4271-9a64-0e94496734f6",
+          "51c561c6-063a-4556-971f-7bf46a62f370",
+          "1df660b6-04c8-4156-a596-fde65c238e8a"
         ],
         "highlyRelevant": [
-          "845a2f3e-752e-4aff-8804-a061a767d6ac"
+          "845a2f3e-752e-4aff-8804-a061a767d6ac",
+          "fedc9e92-8472-4271-9a64-0e94496734f6"
         ],
-        "annotatedAt": "2026-04-12T13:05:59.057Z",
+        "annotatedAt": "2026-04-23T20:43:04.342Z",
         "annotatedBy": "elic-import",
-        "notes": "Fundamentos curados: Lei 14.133/2021, art. 23, §1º; IN SEGES/ME 65/2021, arts. 3º, 5º e 6º; Orientação Normativa AGU nº 17/2009.. Nao encontrados no indice: IN SEGES/ME 65/2021, arts. 3º, 5º e 6º"
+        "notes": "Fundamentos curados: Lei 14.133/2021, art. 23, §1º; IN SEGES/ME 65/2021, arts. 3º, 5º e 6º; Orientação Normativa AGU nº 17/2009.. Nao encontrados no indice: IN SEGES/ME 65/2021, arts. 3º, 5º e 6º [Fase 6A — 2026-04-23]"
       },
       "_elic": {
         "source": "transversal",
@@ -1088,14 +1095,19 @@
       "difficulty": "medium",
       "annotations": {
         "relevant": [
-          "47f91ef1-807e-43de-a206-e18a10da2aef"
+          "47f91ef1-807e-43de-a206-e18a10da2aef",
+          "218680ed-6361-4389-ad84-649918328713",
+          "8689e08b-6b2f-42c7-992f-d1f4fb59dc91",
+          "1f925faf-4058-4afd-8e68-b19d7fafbe0c",
+          "b998b012-f7a3-45e5-a8f9-a3fbdc176e65"
         ],
         "highlyRelevant": [
-          "47f91ef1-807e-43de-a206-e18a10da2aef"
+          "47f91ef1-807e-43de-a206-e18a10da2aef",
+          "218680ed-6361-4389-ad84-649918328713"
         ],
-        "annotatedAt": "2026-04-12T13:05:59.654Z",
+        "annotatedAt": "2026-04-23T20:43:04.342Z",
         "annotatedBy": "elic-import",
-        "notes": "Fundamentos curados: Súmula TCU nº 254; TCU, Informativo de Licitações e Contratos nº 279 (Acórdão 325/2007-Plenário); Decreto 7.983/2013, art. 9º, II.. Nao encontrados no indice: TCU, Informativo de Licitações e Contratos nº 279 (Acórdão 325/2007-Plenário); Decreto 7.983/2013, art. 9º, II."
+        "notes": "Fundamentos curados: Súmula TCU nº 254; TCU, Informativo de Licitações e Contratos nº 279 (Acórdão 325/2007-Plenário); Decreto 7.983/2013, art. 9º, II.. Nao encontrados no indice: TCU, Informativo de Licitações e Contratos nº 279 (Acórdão 325/2007-Plenário); Decreto 7.983/2013, art. 9º, II. [Fase 6A — 2026-04-23]"
       },
       "_elic": {
         "source": "transversal",
@@ -1257,14 +1269,17 @@
       "difficulty": "medium",
       "annotations": {
         "relevant": [
-          "2b9515a0-c3e2-458a-8acc-8b2d517c45cd"
+          "2b9515a0-c3e2-458a-8acc-8b2d517c45cd",
+          "eb0133bf-d4b4-429d-9bc0-9a5023d1aef5",
+          "64731de4-e450-4246-b5cf-d727bcbda1d6"
         ],
         "highlyRelevant": [
-          "2b9515a0-c3e2-458a-8acc-8b2d517c45cd"
+          "2b9515a0-c3e2-458a-8acc-8b2d517c45cd",
+          "eb0133bf-d4b4-429d-9bc0-9a5023d1aef5"
         ],
-        "annotatedAt": "2026-04-12T13:06:00.251Z",
+        "annotatedAt": "2026-04-23T20:43:04.342Z",
         "annotatedBy": "elic-import",
-        "notes": "Fundamentos curados: Lei 14.133/2021, art. 48; Súmula TCU nº 269; Decreto 9.507/2018.. Nao encontrados no indice: Decreto 9.507/2018."
+        "notes": "Fundamentos curados: Lei 14.133/2021, art. 48; Súmula TCU nº 269; Decreto 9.507/2018.. Nao encontrados no indice: Decreto 9.507/2018. [Fase 6A — 2026-04-23]"
       },
       "_elic": {
         "source": "transversal",
@@ -1484,14 +1499,18 @@
       "difficulty": "medium",
       "annotations": {
         "relevant": [
-          "9add63a3-6d13-4955-aa4c-69715cc1f194"
+          "16cde768-fa95-43dc-a719-ec3aab65a583",
+          "6b1b285f-f1ba-4789-bc80-c6f569479bc4",
+          "1c86b87b-3ea8-4b75-842a-550491e24384",
+          "19eb7ced-d1a8-4d54-b852-9192fd64d02f",
+          "76747e3a-c37e-4f04-b0f7-6b3858976c27"
         ],
         "highlyRelevant": [
-          "9add63a3-6d13-4955-aa4c-69715cc1f194"
+          "16cde768-fa95-43dc-a719-ec3aab65a583"
         ],
-        "annotatedAt": "2026-04-12T13:06:00.855Z",
+        "annotatedAt": "2026-04-23T20:43:04.342Z",
         "annotatedBy": "elic-import",
-        "notes": "Fundamentos curados: Lei 14.133/2021, art. 75, III; Orientação Normativa AGU nº 2/2009; Parecer CNLCA nº 17/2023.. Nao encontrados no indice: Parecer CNLCA nº 17/2023."
+        "notes": "Fundamentos curados: Lei 14.133/2021, art. 75, III; Orientação Normativa AGU nº 2/2009; Parecer CNLCA nº 17/2023.. Nao encontrados no indice: Parecer CNLCA nº 17/2023. [Fase 6A — 2026-04-23]"
       },
       "_elic": {
         "source": "especifica",
@@ -1714,14 +1733,21 @@
       "difficulty": "medium",
       "annotations": {
         "relevant": [
-          "03c1afd0-352c-4212-b14f-73d2ef585e15"
+          "03c1afd0-352c-4212-b14f-73d2ef585e15",
+          "8f28a994-e678-4f05-a621-30c7ae78a09a",
+          "7fdf5643-11b0-4c99-b845-66e29e75cba2",
+          "9b672146-dea5-468b-9c68-964061a7cfc2",
+          "b952163d-b645-476b-ae56-c96f59656147",
+          "2d8b1518-53bd-4d79-b16d-a56caccdc842"
         ],
         "highlyRelevant": [
-          "03c1afd0-352c-4212-b14f-73d2ef585e15"
+          "03c1afd0-352c-4212-b14f-73d2ef585e15",
+          "8f28a994-e678-4f05-a621-30c7ae78a09a",
+          "7fdf5643-11b0-4c99-b845-66e29e75cba2"
         ],
-        "annotatedAt": "2026-04-12T13:06:01.651Z",
+        "annotatedAt": "2026-04-23T20:43:04.342Z",
         "annotatedBy": "elic-import",
-        "notes": "Fundamentos curados: Lei 14.133/2021, art. 47, II, § 1º; Súmula TCU nº 247; TCU, Acórdão 1972/2018-Plenário; Informativo TCU nº 148/2013.. Nao encontrados no indice: TCU, Acórdão 1972/2018-Plenário; Informativo TCU nº 148/2013."
+        "notes": "Fundamentos curados: Lei 14.133/2021, art. 47, II, § 1º; Súmula TCU nº 247; TCU, Acórdão 1972/2018-Plenário; Informativo TCU nº 148/2013.. Nao encontrados no indice: TCU, Acórdão 1972/2018-Plenário; Informativo TCU nº 148/2013. [Fase 6A — 2026-04-23]"
       },
       "_elic": {
         "source": "especifica",
@@ -1863,14 +1889,20 @@
       "difficulty": "medium",
       "annotations": {
         "relevant": [
-          "17f6bcef-bbb3-455e-9e53-7a55a119a4bf"
+          "17f6bcef-bbb3-455e-9e53-7a55a119a4bf",
+          "92d157c2-d44b-46e2-ba99-eb3577f26efb",
+          "65c9eedf-4177-463c-ad00-407ec669c185",
+          "bdb5417f-4dc4-49cb-85f1-78cf13ef7d2f",
+          "b87ded81-71aa-4d7b-aabe-1072e3ce3a39"
         ],
         "highlyRelevant": [
-          "17f6bcef-bbb3-455e-9e53-7a55a119a4bf"
+          "17f6bcef-bbb3-455e-9e53-7a55a119a4bf",
+          "92d157c2-d44b-46e2-ba99-eb3577f26efb",
+          "65c9eedf-4177-463c-ad00-407ec669c185"
         ],
-        "annotatedAt": "2026-04-12T13:06:02.046Z",
+        "annotatedAt": "2026-04-23T20:43:04.342Z",
         "annotatedBy": "elic-import",
-        "notes": "Fundamentos curados: Decreto 7.983/2013, art. 10; Lei 6.496/1977 (ART); Lei 12.378/2010, arts. 45 e 46 (RRT); Lei 13.639/2018, arts. 16 e 19 (TRT); Súmula TCU nº 260; Resoluções CONFEA nº 361/1991 e 1137/2023; Resolução CAU nº 91/2014; Resolução CFT nº 101/2020.. Nao encontrados no indice: Decreto 7.983/2013, art. 10; Resoluções CONFEA nº 361/1991 e 1137/2023; Resolução CAU nº 91/2014; Resolução CFT nº 101/2020."
+        "notes": "Fundamentos curados: Decreto 7.983/2013, art. 10; Lei 6.496/1977 (ART); Lei 12.378/2010, arts. 45 e 46 (RRT); Lei 13.639/2018, arts. 16 e 19 (TRT); Súmula TCU nº 260; Resoluções CONFEA nº 361/1991 e 1137/2023; Resolução CAU nº 91/2014; Resolução CFT nº 101/2020.. Nao encontrados no indice: Decreto 7.983/2013, art. 10; Resoluções CONFEA nº 361/1991 e 1137/2023; Resolução CAU nº 91/2014; Resolução CFT nº 101/2020. [Fase 6A — 2026-04-23]"
       },
       "_elic": {
         "source": "especifica",
@@ -2334,14 +2366,22 @@
       "difficulty": "medium",
       "annotations": {
         "relevant": [
-          "471684ee-29fc-453f-890f-0c1661f3f15f"
+          "471684ee-29fc-453f-890f-0c1661f3f15f",
+          "03249160-cd59-41ba-aa3b-f6c04dc2edf1",
+          "f0097eb4-1daf-4f32-8e8b-8fddf8f8cb99",
+          "65e7ca7e-c343-4767-8ff1-a73c8ce12cfa",
+          "06d8b03c-e018-4d04-9096-d8165a9491a0",
+          "0819e716-8a09-44cb-b812-6f736076dd1e"
         ],
         "highlyRelevant": [
-          "471684ee-29fc-453f-890f-0c1661f3f15f"
+          "471684ee-29fc-453f-890f-0c1661f3f15f",
+          "03249160-cd59-41ba-aa3b-f6c04dc2edf1",
+          "f0097eb4-1daf-4f32-8e8b-8fddf8f8cb99",
+          "65e7ca7e-c343-4767-8ff1-a73c8ce12cfa"
         ],
-        "annotatedAt": "2026-04-12T13:06:04.448Z",
+        "annotatedAt": "2026-04-23T20:43:04.342Z",
         "annotatedBy": "elic-import",
-        "notes": "Fundamentos curados: Lei 14.133/2021, arts. 125 e 126; Orientação Normativa AGU nº 50/2014 (com redação da Portaria AGU nº 140/2021); Parecer nº 09/2025/CPLC/SUBCONSU/PGF/AGU.. Nao encontrados no indice: Parecer nº 09/2025/CPLC/SUBCONSU/PGF/AGU."
+        "notes": "Fundamentos curados: Lei 14.133/2021, arts. 125 e 126; Orientação Normativa AGU nº 50/2014 (com redação da Portaria AGU nº 140/2021); Parecer nº 09/2025/CPLC/SUBCONSU/PGF/AGU.. Nao encontrados no indice: Parecer nº 09/2025/CPLC/SUBCONSU/PGF/AGU. [Fase 6A — 2026-04-23]"
       },
       "_elic": {
         "source": "especifica",
@@ -2480,14 +2520,19 @@
       "difficulty": "medium",
       "annotations": {
         "relevant": [
-          "470a8111-5323-4659-9d99-d284b92cbc4d"
+          "470a8111-5323-4659-9d99-d284b92cbc4d",
+          "ad911973-b63f-4fd3-981a-7281219fc538",
+          "db394b7b-0bb7-463f-ad41-eee144716e47",
+          "5d4cfb06-a745-46ca-a389-c18e006d24b4",
+          "22c9aec7-3929-4adf-811f-e6352f8639ff"
         ],
         "highlyRelevant": [
-          "470a8111-5323-4659-9d99-d284b92cbc4d"
+          "470a8111-5323-4659-9d99-d284b92cbc4d",
+          "ad911973-b63f-4fd3-981a-7281219fc538"
         ],
-        "annotatedAt": "2026-04-12T13:06:04.851Z",
+        "annotatedAt": "2026-04-23T20:43:04.342Z",
         "annotatedBy": "elic-import",
-        "notes": "Fundamentos curados: Lei 14.133/2021, art. 41, I, e §§; Súmula TCU nº 270; Acórdãos TCU 113/2016-Plenário e 2.401/2006-Plenário.. Nao encontrados no indice: Acórdãos TCU 113/2016-Plenário e 2.401/2006-Plenário."
+        "notes": "Fundamentos curados: Lei 14.133/2021, art. 41, I, e §§; Súmula TCU nº 270; Acórdãos TCU 113/2016-Plenário e 2.401/2006-Plenário.. Nao encontrados no indice: Acórdãos TCU 113/2016-Plenário e 2.401/2006-Plenário. [Fase 6A — 2026-04-23]"
       },
       "_elic": {
         "source": "especifica",
