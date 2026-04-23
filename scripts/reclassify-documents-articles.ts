@@ -81,12 +81,14 @@ function getGenAI(): GoogleGenerativeAI {
 async function queryGemini(prompt: string): Promise<string> {
   const model = getGenAI().getGenerativeModel({
     model: GEMINI_MODEL,
+    // Cast: o SDK @google/generative-ai não tipou thinkingConfig ainda, mas
+    // a propriedade é propagada para o body REST e funciona em runtime.
     generationConfig: {
       temperature: 0.1,
       maxOutputTokens: 2048,
       // Extração JSON de artigos — thinking come o budget e trunca.
       thinkingConfig: { thinkingBudget: 0 },
-    },
+    } as unknown as import('@google/generative-ai').GenerationConfig,
   });
 
   const result = await model.generateContent(prompt);
