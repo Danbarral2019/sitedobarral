@@ -192,15 +192,20 @@ Buscar em `lib/embeddings/hybrid-search.ts` e `lib/embeddings/vector-search.ts`:
 
 ## Ordem sugerida de execução
 
-1. **Fase 0 — Diagnóstico** (2-3h). **OBRIGATÓRIA antes de qualquer outra.** Sem saber quais queries falham, as outras fases são chute.
-2. **Fase 1 — HyDE** (15 min). Maior retorno por minuto de trabalho. Já implementado, só rodar.
-3. **Fase 2 — Cross-encoder rerank** (1h para tentar os 2 existentes; 2-3h se implementar HF). Se Fase 1 não bastar.
-4. **Fase 4 — Hybrid tuning** (2h). Barato, pode surpreender.
-5. **Fase 6 — Auditoria golden set** (3-4h). Pode revelar que o problema não é o retrieval, é a anotação.
-6. **Fase 3 — Trocar embedding model** (1-2 dias). Só se Fases 1, 2 e 4 juntas não atingirem a meta de 50%.
-7. **Fase 5 — Chunking** (1 dia). Mais incerto; deixar por último.
+**Ordem revisada após execução da Fase 0** (diagnóstico concluído em 2026-04-23 — ver `eval/reports/failure-analysis-2026-04-23.md`). A distribuição real das 29 queries falhas reorganizou as prioridades: 28% das falhas se revelaram problema de anotação do golden set, não de retrieval.
 
-Se Fase 1 + Fase 2 já entregarem +10-15pp, as fases 3 e 5 podem ser arquivadas.
+1. ✅ **Fase 0 — Diagnóstico** (concluída em 2026-04-23). Relatório: `eval/reports/failure-analysis-2026-04-23.md`. Distribuição: A=2, A'=2, B=7, D=1, D+=9, E=8, C/C-parcial=0. Achado crítico: 8 queries classificadas como E (anotação suspeita).
+2. **Fase 6 — Auditoria do golden set** (3-4h) — **SUBIU PRA PRIMEIRO**. 8 queries em E + 1 cleanup (q-data-a-data tem 2 IDs fantasma). Sem golden limpo, qualquer métrica das próximas fases é ruído. Expandir anotações para incluir docs modernos equivalentes (Art. literal da Lei 14.133, Manual TCU, INs vigentes) quando respondem equivalentemente ao clássico (ON AGU, Súmula TCU pré-2021).
+3. **Fase 2 — Cross-encoder rerank** (1h). 10 queries em D/D+ (34% do escopo) com doc relevante em pos 6-20. Maior ROI de retrieval real. Adapter `rerankSearch` já pronto — só rodar e medir.
+4. **Fase 1 — HyDE** (15 min). Cheap, já implementado. Complementar ao rerank para queries A/A'/B onde o vetor não aproxima.
+5. **Fase 3 — Trocar embedding model** (1-2 dias). Ativar se Fase 2 + Fase 1 juntos não atingirem meta de 50% recall@5. 7 queries em B (paráfrase pura) são o sinal mais forte; custo de migração é alto.
+6. **Fase 4 — Hybrid tuning (FTS)** (2h). 2 queries em A' indicam peso FTS subótimo. Barato e pontual.
+7. **Fase 5 — Chunking** — **arquivada**. Zero sinal específico nas 29 queries. Reabrir apenas com nova evidência.
+
+### Follow-ups de infraestrutura (paralelos ao fluxo de fases)
+
+- **Expandir regex de key-terms em `eval/scripts/failure-analysis/key-terms.ts`** — hoje não captura expressões multi-palavra minúsculas ("data a data", "dedicação exclusiva", "escopo"). Caso q-data-a-data ficou mal-classificado por causa disso.
+- **Investigar deduplicação no banco** — `esp-785767-20` revelou que "ON 89/2024" existe como duplicata com IDs distintos. Pode haver mais pares assim, afetando tanto busca quanto golden.
 
 ---
 
@@ -238,3 +243,4 @@ Fase 3 (troca de embedding model) é a única que muda dados de forma grande —
 ## Histórico
 
 - **2026-04-23**: documento criado após constatação (via eval) de que o reprocessamento do `ROADMAP_GEMINI_PAGO.md` não moveu o ponteiro. Hipótese "melhor resumo = melhor embedding" refutada empiricamente. Este roadmap separa resumos (Gemini pago) de busca (que precisa mexer em retrieval, não em geração).
+- **2026-04-23**: Fase 0 concluída. Pipeline automático (`eval/scripts/analyze-failures.ts`) + revisão manual das 29 queries falhas. 28% revelaram-se problema de anotação (bucket E), não de retrieval — Fase 6 promovida para prioridade máxima. Relatório: `eval/reports/failure-analysis-2026-04-23.md`.
