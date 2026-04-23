@@ -896,7 +896,7 @@ model ArticleQuestion {
   aiProvider      String?  // "anthropic-claude" | "openai" | "gemini" | null
 
   // Metadados do Gemini (quando gemini usado)
-  geminiModel     String?  // Modelo usado (ex: "gemini-2.0-flash-exp")
+  geminiModel     String?  // Modelo usado (ex: "gemini-2.5-flash")
   geminiTokens    Int?     // Total de tokens usados
   geminiLatency   Int?     // Latência em ms
   geminiCached    Boolean? // Se resposta veio do cache

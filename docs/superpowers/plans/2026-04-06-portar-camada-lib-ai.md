@@ -1,5 +1,12 @@
 # Portar camada `lib/ai/` para o site do Barral — Fase 1
 
+> **⚠️ NOTA HISTÓRICA (2026-04-22):** Este plano original fixava os defaults
+> em `gemini-2.0-flash`. A Google depois deprecou esse modelo
+> (shutdown 2026-06-01) e o billing pago do usuário migrou para a família
+> 2.5. Os defaults atuais (já no código) são `gemini-2.5-flash`, ajustados
+> em `docs/ROADMAP_GEMINI_MODELO_25.md`. Partes deste plano abaixo refletem
+> o estado original e **não devem mais ser executadas sem releitura**.
+
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
 **Goal:** Introduzir uma camada única de abstração de provedores de LLM (`lib/ai/`) no site do Barral, permitindo trocar provider/modelo de cada tarefa via env var, sem alterar nenhum chamador existente nesta fase.
