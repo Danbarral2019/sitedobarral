@@ -353,8 +353,13 @@ const ENTITY_TRIBUNAL_NAMES: Record<string, string> = {
 };
 
 function deriveInformativoNumber(title: string): string {
-  // Tenta casar "Informativo LC nº 42", "Informativo CGU 123", etc.
-  const match = title.match(/Informativo[\s\w]*?(nº\s*\d+|\d+)/i);
+  // Casa padrões comuns dos informativos TCU:
+  //  - "Informativo LC nº 42"
+  //  - "Informativo de Licitações e Contratos 42" (padrão padrão com acentos)
+  //  - "Informativo Especial nº 1/2024" (captura o ano também)
+  // Usa [^\d]*? (não-greedy de não-dígitos) pra aceitar acentos e atravessar
+  // até o primeiro numero, capturando numero opcionalmente seguido de /ano.
+  const match = title.match(/Informativo[^\d]*?(nº\s*[\d/]+|[\d/]+)/i);
   return match ? match[0] : title;
 }
 
