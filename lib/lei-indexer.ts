@@ -49,7 +49,7 @@ export interface AnalysisOptions {
   minConfidence?: number; // Confiança mínima para incluir artigo (padrão: 30)
   maxArticles?: number; // Máximo de artigos a retornar (padrão: 10)
   includeReasoning?: boolean; // Incluir explicação detalhada (padrão: true)
-  geminiModel?: 'gemini-2.0-flash' | 'gemini-2.5-flash' | 'gemini-2.5-pro'; // Modelo Gemini (padrão: gemini-2.0-flash)
+  geminiModel?: 'gemini-2.5-flash' | 'gemini-2.5-pro' | 'gemini-2.0-flash'; // Modelo Gemini (padrão: gemini-2.5-flash — billing pago cobre 2.5)
 }
 
 /**
@@ -124,7 +124,7 @@ export class LeiIndexer {
     minConfidence: 50,
     maxArticles: 10,
     includeReasoning: true,
-    geminiModel: 'gemini-2.0-flash',
+    geminiModel: 'gemini-2.5-flash',
   };
 
   /**
@@ -245,7 +245,7 @@ export class LeiIndexer {
       throw new Error('GEMINI_API_KEY não configurada no ambiente');
     }
 
-    const apiModel = model || 'gemini-2.0-flash';
+    const apiModel = model || 'gemini-2.5-flash';
     const url = `https://generativelanguage.googleapis.com/v1beta/models/${apiModel}:generateContent?key=${apiKey}`;
 
     const response = await fetch(url, {
