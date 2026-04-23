@@ -2,7 +2,11 @@
 
 **Criado em:** 2026-04-22
 **Autor:** Daniel Barral + Claude (sessão de planejamento)
-**Status:** Em execução — Fases 0, 1, 2, 3 e 4 concluídas em 2026-04-22. Fase 5 aguarda autorização do usuário (primeira fase que escreve no banco).
+**Status:** Em execução — Fases 0-4 concluídas em 2026-04-22; Fase 5 em smoke test (5 acórdãos reprocessados com sucesso), aguarda autorização para o batch completo (1555 acórdãos).
+
+**Acidentes importantes desta execução:**
+1. O billing pago do usuário cobre a família Gemini **2.5**, não 2.0-flash (hardcoded em 28 arquivos do repo). Migração dos arquivos em escopo (`lib/tcu-enrichment.ts`, `lib/lei-indexer.ts`) feita no commit `eb7c4b1`. Outros arquivos ainda usam 2.0-flash e caem no pool free — roadmap de migração separado será necessário se a busca IA em produção estiver apresentando 429s.
+2. Gemini 2.5 tem thinking mode **ativo por default**. Em tarefas curtas com `maxOutputTokens: 1024`, o thinking consome ~95% do budget e a resposta sai truncada. Fix em `SUMMARY_GENERATION_CONFIG` com `thinkingConfig: { thinkingBudget: 0 }` (commit `1e1dd55`). `lib/lei-indexer.ts` ainda não tem essa config — avaliar depois.
 **Prioridade:** Alta — impacta diretamente qualidade das buscas IA no site
 
 ---
