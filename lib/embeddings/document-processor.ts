@@ -9,6 +9,7 @@ import { downloadFromR2 } from '@/lib/storage/r2-client';
 import { extractText, normalizeText } from '@/lib/text-extractor';
 import { chunkText, chunkLegalDocument, chunkTCUDocument, TextChunk } from './text-chunker';
 import { generateBatchEmbeddings, embeddingToSql } from './gemini-embeddings';
+import { PRIMARY_GEMINI_MODEL } from '@/lib/gemini/config';
 
 // ===========================
 // Types
@@ -403,7 +404,7 @@ async function extractTextWithGeminiVision(pdfBuffer: Buffer): Promise<string> {
   }
 
   const genAI = new GoogleGenerativeAI(GEMINI_API_KEY);
-  const model = genAI.getGenerativeModel({ model: 'gemini-2.0-flash' });
+  const model = genAI.getGenerativeModel({ model: PRIMARY_GEMINI_MODEL });
 
   // Converte PDF buffer para base64
   const base64 = pdfBuffer.toString('base64');
