@@ -23,6 +23,11 @@ export interface BucketDecision {
  * do spec Fase 0. Primeira regra que bate vence.
  */
 export function classifyBucket(s: Signals): BucketDecision {
+  // Defensive guard: sem docs relevantes, nenhuma regra faz sentido.
+  if (s.relevantDocs.length === 0) {
+    return { bucket: 'B', reason: 'sem docs relevantes anotados (caso defensivo)' }
+  }
+
   // Regra 1: C / C-parcial — chunks
   const anyWithoutChunks = s.relevantDocs.some((d) => d.chunkCount === 0)
   const allWithoutChunks = s.relevantDocs.every((d) => d.chunkCount === 0)
@@ -39,10 +44,22 @@ export function classifyBucket(s: Signals): BucketDecision {
   // Regra 2: D / D+ — ranking ruim
   const pos = effectivePosition(s)
   if (pos !== null && pos <= 20) {
-    if (pos <= 10) {
-      return { bucket: 'D+', reason: `doc relevante em posição ${pos} (próximo do top-5)` }
+    if (pos <= 5) {
+      return {
+        bucket: 'D+',
+        reason: `doc relevante em posição ${pos} dentro do top-5 (ranking parcial — outros relevantes faltando)`,
+      }
     }
-    return { bucket: 'D', reason: `doc relevante em posição ${pos} (top-20 mas não top-5)` }
+    if (pos <= 10) {
+      return {
+        bucket: 'D+',
+        reason: `doc relevante em posição ${pos} (próximo do top-5)`,
+      }
+    }
+    return {
+      bucket: 'D',
+      reason: `doc relevante em posição ${pos} (top-20 mas não top-5)`,
+    }
   }
 
   // Regras 3 e 4: A / A' — key terms

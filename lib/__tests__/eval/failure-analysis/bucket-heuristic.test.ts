@@ -112,3 +112,32 @@ describe('classifyBucket — Regra 5 (B fallback)', () => {
     expect(classifyBucket(s).bucket).toBe('B')
   })
 })
+
+describe('classifyBucket — edge case: relevantDocs vazio', () => {
+  it('retorna B com reason específica quando relevantDocs é []', () => {
+    const s = baseSignals({ relevantIds: [], relevantDocs: [] })
+    const { bucket, reason } = classifyBucket(s)
+    expect(bucket).toBe('B')
+    expect(reason).toMatch(/sem docs relevantes/i)
+  })
+})
+
+describe('classifyBucket — reason ajustada para pos ∈ [1, 5]', () => {
+  it('reason menciona ranking parcial quando pos ≤ 5 e recall@5 baixo (múltiplos relevantes)', () => {
+    const s = baseSignals({
+      reciprocalRank: 1, // pos = 1
+      relevantIds: ['d1', 'd2', 'd3', 'd4', 'd5', 'd6', 'd7', 'd8', 'd9', 'd10'],
+      relevantDocs: [
+        { id: 'd1', exists: true, title: 'T1', contentLen: 500, chunkCount: 5 },
+        { id: 'd2', exists: true, title: 'T2', contentLen: 500, chunkCount: 5 },
+      ],
+      recallAt5: 0.1,
+    })
+    const { bucket, reason } = classifyBucket(s)
+    // Ainda bucket D+ (pos ≤ 10), mas reason NÃO deve dizer "próximo do top-5"
+    // pois pos=1 ESTÁ dentro do top-5.
+    expect(bucket).toBe('D+')
+    expect(reason).not.toMatch(/próximo do top-5/i)
+    expect(reason).toMatch(/ranking parcial|incompleto|parte/i)
+  })
+})
