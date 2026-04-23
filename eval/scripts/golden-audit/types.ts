@@ -5,14 +5,6 @@
 /** Nome de lista onde um doc pode entrar. */
 export type AnnotationList = 'relevant' | 'highly'
 
-/** Operação declarativa aplicada a uma query do golden. */
-export interface GoldenOp {
-  /** Adicionar ID em `relevant` e, se `list === 'highly'`, em `highlyRelevant` também. */
-  addId: (args: { id: string; list: AnnotationList }) => void
-  /** Remover ID de ambos os arrays. */
-  removeId: (args: { id: string }) => void
-}
-
 /** Linha bruta do CSV de auditoria (6B passo 1). */
 export interface AuditCandidate {
   queryId: string
