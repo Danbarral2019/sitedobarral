@@ -238,7 +238,9 @@ Exemplo de resposta: ["variação 1", "variação 2"]`;
       apiLogger.info('Tribunal decisions included (user explicitly requested)');
     }
 
-    // 5a. Hybrid search: combina busca semântica (vetor) + FTS (BM25) via RRF + reranking
+    // 5a. Hybrid search: combina busca semântica (vetor) + FTS (BM25) via RRF.
+    // Reranking desligado em 2026-04-23 após Fase 2 provar regressão de
+    // −15pp a −25pp em recall@5 com Gemini e Cohere. Ver ROADMAP_BUSCA_QUALIDADE.md.
     const searchResponse = await hybridSearch({
       query: semanticQuery,
       expandedQueries: expandedQueries.length > 1 ? expandedQueries : undefined,
@@ -249,7 +251,7 @@ Exemplo de resposta: ["variação 1", "variação 2"]`;
       alpha: 0.6,
       useCache,
       includeTribunalDecisions,
-      rerank: true,
+      rerank: false,
     });
 
     apiLogger.info({ resultCount: searchResponse.results.length }, 'Hybrid search completed');

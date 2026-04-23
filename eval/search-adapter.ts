@@ -51,9 +51,10 @@ export const rerankSearch: SearchFn = async (query: string) => {
 }
 
 /**
- * Adapter com query understanding (HyDE + expanded queries) + reranking.
+ * Adapter com query understanding (HyDE + expanded queries), sem reranking.
  * Analisa a query, gera documentos hipotéticos e queries expandidas,
- * depois combina tudo via multiQuerySearch + reranking.
+ * depois combina tudo via multiQuerySearch. Reranking desligado desde
+ * 2026-04-23 (Fase 2 provou regressão, ver ROADMAP_BUSCA_QUALIDADE.md).
  */
 export const hydeSearch: SearchFn = async (query: string) => {
   const start = Date.now()
@@ -72,7 +73,7 @@ export const hydeSearch: SearchFn = async (query: string) => {
     limit: 40,
     alpha: 0.6,
     useCache: false,
-    rerank: true,
+    rerank: false,
   })
   return { documentIds: dedup(response.results), latencyMs: Date.now() - start }
 }
