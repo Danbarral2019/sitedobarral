@@ -58,20 +58,88 @@ Fase 6 executa em 3 sub-fases sequenciais, cada uma produzindo commit separado p
    - `highlyRelevant` — docs cuja ementa/conteúdo resolve diretamente a tese da query (ex.: art. literal citado, Inf. com ementa quase idêntica à query).
    - `relevant` — docs de contexto adjacente (Manuais TCU, pareceres sobre o tema).
 
-   Tabela de operações por query:
+   Detalhamento por query (verificado e aprovado em conversa caso-a-caso em 2026-04-23). Cada linha indica a operação específica. **IDs exatos são extraídos do JSON do eval run** (campo `perQuery[i].predicted[]`) — a coluna "Documento" usa o título pra legibilidade.
 
-   | Query | Adicionar | Remover |
+   **Caso 1 — `t-pesquisa-precos-in65-01`**
+   | Ação | Documento | Lista |
    |---|---|---|
-   | `t-pesquisa-precos-in65-01` | IN SEGES/ME 65/2021 (highly); Manuais TCU 4.3.9.1/4.3.9.3 (relevant) | — |
-   | `t-eng-bdi-irpj-csll-01` | Inf. 17/2010 (highly); Inf. 12/2010, 44/2010, 279/2016, 222/2014 (relevant) | — |
-   | `t-terceirizacao-art48-01` | Inf. 114/2012 (highly); outros Inf.s sobre terceirização (relevant) | — |
-   | `esp-518661-2` | Acórdão 1498/2021 (highly); 4 Inf.s remanescente (relevant) | ON AGU 2/2009 (`9add63a3`) — anotação errada |
-   | `esp-669066-13` | Inf. 183/2014 (highly); Inf. 173/2013, 216/2014, 250/2015, 237/2015 (relevant) | — |
-   | `esp-728449-12` | Manual TCU 4.4.3 + 4.4.3.6 (highly); 3 Inf.s orçamento (relevant) | — |
-   | `esp-792741-1` | Art. 125 - Lei 14.133/2021 + Acórdãos 2391/2025, 781/2021 (highly); Inf.s (relevant) | — |
-   | `esp-797806-1` | Art. 41 - Lei 14.133/2021 (highly); Enunciados IBDA (relevant) | — |
+   | Adicionar | IN SEGES/ME 65/2021 | `highlyRelevant` |
+   | Adicionar | Manual TCU - 4.3.9.1 Fontes para obtenção de preços | `relevant` |
+   | Adicionar | Manual TCU - 4.3.9.3 Definição e execução da forma de cálculo | `relevant` |
+   | Manter | ON AGU 17/2009 (`845a2f3e`) | `relevant` |
+   | Não adicionar | Manual TCU 5.10, Manual TCU 4.1.6 | — (tangenciais) |
 
-   Os IDs exatos são extraídos do JSON do eval run (campo `perQuery[i].predicted[]`).
+   **Caso 2 — `t-eng-bdi-irpj-csll-01`**
+   | Ação | Documento | Lista |
+   |---|---|---|
+   | Adicionar | Inf. 17/2010 (Vedação da inclusão de IRPJ e CSLL no BDI) | `highlyRelevant` |
+   | Adicionar | Inf. 12/2010 | `relevant` |
+   | Adicionar | Inf. 44/2010 | `relevant` |
+   | Adicionar | Inf. 279/2016 | `relevant` |
+   | Adicionar | Inf. 222/2014 | `relevant` |
+   | Manter | Súmula TCU 254 (`47f91ef1`) | `highlyRelevant` |
+
+   **Caso 3 — `t-terceirizacao-art48-01`**
+   | Ação | Documento | Lista |
+   |---|---|---|
+   | Adicionar | Inf. 114/2012 (Proibir terceirização de atividade-fim) | `highlyRelevant` |
+   | Adicionar | Inf. 345/2018 | `relevant` |
+   | Manter | Súmula TCU 269 (`2b9515a0`) | `highlyRelevant` |
+   | Não adicionar | Inf. 139/2013, Inf. 291/2016, Inf. 191/2014 | — (nicho terceirização jurídica, não o tema) |
+
+   **Caso 4 — `esp-518661-2` (inclui remoção)**
+   | Ação | Documento | Lista |
+   |---|---|---|
+   | **Remover** | ON AGU 2/2009 (`9add63a3`) | — (anotação colada errada — tema é parecer jurídico, não remanescente) |
+   | Adicionar | Acórdão TCU 1498/2021 (Dispensa - Remanescente) | `highlyRelevant` |
+   | Adicionar | Inf. 349/2018 | `relevant` |
+   | Adicionar | Inf. 188/2014 | `relevant` |
+   | Adicionar | Inf. 310/2016 | `relevant` |
+   | Adicionar | Inf. 300/2016 | `relevant` |
+
+   Após a operação, `relevant = [acc-1498, inf-349, inf-188, inf-310, inf-300]`, `highlyRelevant = [acc-1498]`.
+
+   **Caso 5 — `esp-669066-13`**
+   | Ação | Documento | Lista |
+   |---|---|---|
+   | Adicionar | Inf. 183/2014 (Adjudicar por item em objetos divisíveis) | `highlyRelevant` |
+   | Adicionar | Inf. 237/2015 (Adjudicar por item como garantia de competitividade) | `highlyRelevant` |
+   | Adicionar | Inf. 173/2013 | `relevant` |
+   | Adicionar | Inf. 216/2014 | `relevant` |
+   | Adicionar | Inf. 250/2015 | `relevant` |
+   | Manter | Súmula TCU 247 (`03c1afd0`) | `highlyRelevant` |
+
+   **Caso 6 — `esp-728449-12`**
+   | Ação | Documento | Lista |
+   |---|---|---|
+   | Adicionar | Manual TCU - 4.4.3 Projeto Básico | `highlyRelevant` |
+   | Adicionar | Manual TCU - 4.4.3.6 Orçamento detalhado | `highlyRelevant` |
+   | Adicionar | Inf. 220/2014 | `relevant` |
+   | Adicionar | Inf. 99/2012 | `relevant` |
+   | Adicionar | Inf. 50/2011 | `relevant` |
+   | Manter | Súmula TCU 260 (`17f6bcef`) | `highlyRelevant` |
+
+   **Caso 7 — `esp-792741-1`**
+   | Ação | Documento | Lista |
+   |---|---|---|
+   | Adicionar | Art. 125 - Lei 14.133/2021 | `highlyRelevant` |
+   | Adicionar | Acórdão TCU 2391/2025 - Aditivo - Limite | `highlyRelevant` |
+   | Adicionar | Acórdão TCU 781/2021 - Aditivo - Limite | `highlyRelevant` |
+   | Adicionar | Inf. 516/2025 | `relevant` |
+   | Adicionar | Inf. 476/2024 | `relevant` |
+   | Manter | ON AGU 50/2014 (`471684ee`) | `relevant` (rebaixada de seu status original; mantida como referência histórica) |
+
+   **Caso 8 — `esp-797806-1`**
+   | Ação | Documento | Lista |
+   |---|---|---|
+   | Adicionar | Art. 41 - Lei 14.133/2021 | `highlyRelevant` |
+   | Adicionar | Enunciado do IBDA nº 27 | `relevant` |
+   | Adicionar | Enunciado do IBDA nº 5 | `relevant` |
+   | Adicionar | Acórdão TCU 6875/2021 - Inexigibilidade - Fornecedor exclusivo | `relevant` |
+   | Adicionar | Inf. 413/2021 | `relevant` |
+   | Manter | Súmula TCU 270 (`470a8111`) | `highlyRelevant` |
+
+   **Totais agregados:** 1 remoção, 34 adições (15 em `highlyRelevant`, 19 em `relevant`), 7 queries mantêm doc original.
 
 4. **Commit:** `fix(eval): reanotar 8 queries E + remover IDs fantasma + handle dedup ON 89/2024`.
 
