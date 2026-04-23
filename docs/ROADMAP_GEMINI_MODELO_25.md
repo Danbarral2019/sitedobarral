@@ -2,7 +2,7 @@
 
 **Criado em:** 2026-04-22
 **Autor:** Daniel Barral + Claude (sessão de auditoria)
-**Status:** Planejado, aguardando execução
+**Status:** ✅ **CONCLUÍDO em 2026-04-22/23**. Fases 0-7 executadas. Eval sem regressão (recall@5 34,2% mantido). Zero `gemini-2.0-flash` em código executável — só comentários/type-unions explicativos. 13+ commits entre `0bde6eb` e `4797a5f`.
 **Prioridade:** **P0 — URGENTE**. Código em produção (chat, busca IA, cron de jurisprudência, text extractor, newsletter) está batendo 429 silenciosamente porque o billing pago do usuário cobre a família 2.5 e o código chama 2.0-flash.
 **Roadmap irmão:** `ROADMAP_GEMINI_PAGO.md` (otimização do pipeline TCU; premissa do qual que o modelo estivesse certo — foi corrigida em `lib/tcu-enrichment.ts` e `lib/lei-indexer.ts` durante aquela execução, por isso este roadmap começa a partir dos 24 arquivos restantes).
 
