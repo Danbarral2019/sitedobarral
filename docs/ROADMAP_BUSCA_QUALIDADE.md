@@ -33,17 +33,19 @@ Relatório que prova isso: `eval/reports/2026-04-23T02-25-41_pos-reprocessamento
 
 ## Baseline atual (referência deste roadmap)
 
-- **recall@5: 34,1%** (golden set de 91 queries, 53 anotadas)
-- **MRR: 0,352**
-- **nDCG@10: 0,367**
-- **Hard queries (2): 0,0% recall** — completamente perdidas
-- **Medium queries (43): ~34%**
-- **Easy queries (8): ~42%**
+**Pós-Fase 6 (2026-04-23):** `eval/reports/fase6-summary-2026-04-23.md`
 
-Alvos realistas:
-- Curto prazo (Fases 1-2, sem mudar schema): **≥ 42% recall@5** (+8pp)
-- Médio prazo (Fase 3 com novo embedding model): **≥ 55% recall@5**
-- Teto prático para busca jurídica sem LLM re-ranker pesado: ~65%
+- **recall@5: 66,3%** (era 34,1% pré-Fase 6; golden set de 91 queries, 53 anotadas)
+- **MRR: 0,851** (era 0,352)
+- **nDCG@10: 0,668** (era 0,367)
+- **Easy queries (8): 54,6%** (era 38%)
+- **Medium queries (43): 69,3%** (era 32,6%) — maior ganho
+- **Hard queries (2): 50,0%** (era 50% já) — travado; `q-data-a-data` continua em 0%
+
+Alvos revisados (a partir do novo baseline 66,3%):
+- Curto prazo (Fases 2 rerank + 1 HyDE, sem mudar schema): **≥ 72% recall@5** (+6pp)
+- Médio prazo (Fase 3 com novo embedding model): **≥ 78% recall@5**
+- Teto prático para busca jurídica com ferramentas disponíveis: ~80%
 
 ---
 
@@ -192,20 +194,38 @@ Buscar em `lib/embeddings/hybrid-search.ts` e `lib/embeddings/vector-search.ts`:
 
 ## Ordem sugerida de execução
 
-**Ordem revisada após execução da Fase 0** (diagnóstico concluído em 2026-04-23 — ver `eval/reports/failure-analysis-2026-04-23.md`). A distribuição real das 29 queries falhas reorganizou as prioridades: 28% das falhas se revelaram problema de anotação do golden set, não de retrieval.
+**Status 2026-04-23:** Fase 0 (diagnóstico) e Fase 6 (auditoria do golden) concluídas. **recall@5 saltou de 34,1% para 66,3%** com golden auditado, sem mudar retrieval.
 
-1. ✅ **Fase 0 — Diagnóstico** (concluída em 2026-04-23). Relatório: `eval/reports/failure-analysis-2026-04-23.md`. Distribuição: A=2, A'=2, B=7, D=1, D+=9, E=8, C/C-parcial=0. Achado crítico: 8 queries classificadas como E (anotação suspeita).
-2. **Fase 6 — Auditoria do golden set** (3-4h) — **SUBIU PRA PRIMEIRO**. 8 queries em E + 1 cleanup (q-data-a-data tem 2 IDs fantasma). Sem golden limpo, qualquer métrica das próximas fases é ruído. Expandir anotações para incluir docs modernos equivalentes (Art. literal da Lei 14.133, Manual TCU, INs vigentes) quando respondem equivalentemente ao clássico (ON AGU, Súmula TCU pré-2021).
-3. **Fase 2 — Cross-encoder rerank** (1h). 10 queries em D/D+ (34% do escopo) com doc relevante em pos 6-20. Maior ROI de retrieval real. Adapter `rerankSearch` já pronto — só rodar e medir.
-4. **Fase 1 — HyDE** (15 min). Cheap, já implementado. Complementar ao rerank para queries A/A'/B onde o vetor não aproxima.
-5. **Fase 3 — Trocar embedding model** (1-2 dias). Ativar se Fase 2 + Fase 1 juntos não atingirem meta de 50% recall@5. 7 queries em B (paráfrase pura) são o sinal mais forte; custo de migração é alto.
-6. **Fase 4 — Hybrid tuning (FTS)** (2h). 2 queries em A' indicam peso FTS subótimo. Barato e pontual.
-7. **Fase 5 — Chunking** — **arquivada**. Zero sinal específico nas 29 queries. Reabrir apenas com nova evidência.
+1. ✅ **Fase 0 — Diagnóstico** (concluída em 2026-04-23). Relatório: `eval/reports/failure-analysis-2026-04-23.md`. Distribuição: A=2, A'=2, B=7, D=1, D+=9, E=8, C/C-parcial=0. Achado crítico: 8 queries em E = problema de anotação, não retrieval.
+2. ✅ **Fase 6 — Auditoria do golden set** (concluída em 2026-04-23). Resumo: `eval/reports/fase6-summary-2026-04-23.md`. 95 docs novos anotados + 3 removidos (1 ON misanotada + 2 IDs fantasma) + 4 dedups aplicados. **Ganho: +32,2pp em recall@5** (meta era +13,9pp).
+3. **Fase 2 — Cross-encoder rerank** (próxima). Com recall@5 já em 66,3%, rerank deve puxar os 33,7% restantes onde o doc relevante existe no top-20 mas não top-5. Adapter `rerankSearch` pronto em `eval/search-adapter.ts`.
+4. **Fase 1 — HyDE** (15 min, complementar). Pode ajudar queries residuais como `q-data-a-data` (0% recall — termo técnico multi-palavra).
+5. **Fase 3 — Trocar embedding model** (1-2 dias). Só se Fase 2 + Fase 1 juntos não passarem de ~75%. Meta agora é > 78%.
+6. **Fase 4 — Hybrid tuning (FTS)** (2h). Ainda útil para queries A'.
+7. **Fase 5 — Chunking** — **arquivada**. Sem evidência nas falhas restantes.
 
-### Follow-ups de infraestrutura (paralelos ao fluxo de fases)
+### Fase 7 — Dedup estrutural do banco (nova, registrada em 2026-04-23)
 
-- **Expandir regex de key-terms em `eval/scripts/failure-analysis/key-terms.ts`** — hoje não captura expressões multi-palavra minúsculas ("data a data", "dedicação exclusiva", "escopo"). Caso q-data-a-data ficou mal-classificado por causa disso.
-- **Investigar deduplicação no banco** — `esp-785767-20` revelou que "ON 89/2024" existe como duplicata com IDs distintos. Pode haver mais pares assim, afetando tanto busca quanto golden.
+Spot-check durante 6A revelou **37 títulos duplicados** em `Document` (padrão "Resposta a Consulta — Acórdão AC-XXX/YY-P"), dos quais 4 afetavam o golden (tratados defensivamente). Os 33 restantes não afetam o golden mas poluem o DB.
+
+**Fix estrutural:** SQL de merge (manter 1 ID canônico, atualizar referências em `DocumentChunk` e remover duplicatas). Também incluir dedup por número (ON 89/2024 com 2 títulos diferentes — "ON 89/2024" e "Orientação Normativa AGU nº 89/2024" — precisa fuzzy match).
+
+**Fora do escopo imediato** — fazer quando precisar endurecer o DB.
+
+### Fase 8 — Modelagem de regime/vigência de normas (nova, registrada em 2026-04-23)
+
+Revelação da 6B: várias teses mudaram entre Lei 8.666 e Lei 14.133 (ex.: preço máximo era obrigatório só em obras; agora é em qualquer objeto). Documentos das duas leis coexistem no DB, e o retriever não distingue vigência.
+
+**Ideal:** enriquecer cada doc com metadata `lawRegime` (`'8.666' | '14.133' | 'both'`) e permitir filtro/boost por regime na busca.
+
+**Pode ser feito:** (a) via regra manual sobre tabela `Document` (ex.: docs anteriores a 2021 = Lei 8.666), ou (b) via LLM classificando o content de cada doc. Incluir no retrieval adaptando o score RRF com peso por vigência da norma citada na query.
+
+Fora do escopo imediato.
+
+### Follow-ups de infraestrutura (abertos)
+
+- **Expandir regex de key-terms** em `eval/scripts/failure-analysis/key-terms.ts` — hoje não captura expressões multi-palavra minúsculas ("data a data", "dedicação exclusiva", "escopo"). Afetou classificação de `q-data-a-data` na Fase 0.
+- **Docs ausentes no DB** — 3 Inf.s/Enunciados referenciados no plano da Fase 6 não existem no banco (Inf. 44/2010, Inf. 50/2011, Enunciado IBDA nº 5). Indica buracos no scraper/indexação.
 
 ---
 
@@ -244,3 +264,4 @@ Fase 3 (troca de embedding model) é a única que muda dados de forma grande —
 
 - **2026-04-23**: documento criado após constatação (via eval) de que o reprocessamento do `ROADMAP_GEMINI_PAGO.md` não moveu o ponteiro. Hipótese "melhor resumo = melhor embedding" refutada empiricamente. Este roadmap separa resumos (Gemini pago) de busca (que precisa mexer em retrieval, não em geração).
 - **2026-04-23**: Fase 0 concluída. Pipeline automático (`eval/scripts/analyze-failures.ts`) + revisão manual das 29 queries falhas. 28% revelaram-se problema de anotação (bucket E), não de retrieval — Fase 6 promovida para prioridade máxima. Relatório: `eval/reports/failure-analysis-2026-04-23.md`.
+- **2026-04-23**: Fase 6 concluída. 6A aplicou 10 operações conhecidas (8 queries E + 2 IDs fantasma + 4 dedups). 6B auditou 41 queries restantes via heurística + revisão caso-a-caso no chat (141 decisões manuais em 34 queries). Total: 95 docs novos anotados (70 relevant + 25 highly), 3 removidos. **recall@5: 34,1% → 66,3% (+32,2pp)**, MRR: 0,352 → 0,851, nDCG@10: 0,367 → 0,668. Meta (48%) superada por +18pp. Registradas Fase 7 (dedup estrutural — 33 duplicatas remanescentes) e Fase 8 (modelagem de regime/vigência de normas). Resumo: `eval/reports/fase6-summary-2026-04-23.md`.

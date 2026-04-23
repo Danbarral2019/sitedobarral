@@ -1,0 +1,1300 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<title>Audit Review — 34 queries, 141 candidatos "maybe"</title>
+<style>
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; max-width: 1100px; margin: 20px auto; padding: 0 20px; color: #222; line-height: 1.5; }
+  h1 { font-size: 20px; color: #0066cc; border-bottom: 2px solid #0066cc; padding-bottom: 6px; }
+  h2 { background: #eef; padding: 8px 12px; border-left: 4px solid #0066cc; font-size: 15px; margin-top: 30px; font-family: monospace; }
+  .query-text { background: #f8f8f0; padding: 10px; border: 1px solid #ddd; margin-bottom: 10px; font-style: italic; }
+  .query-meta { color: #888; font-size: 12px; margin-bottom: 14px; }
+  .card { border: 1px solid #ccc; border-radius: 4px; padding: 10px; margin-bottom: 10px; background: #fafafa; }
+  .card .pos { display: inline-block; background: #0066cc; color: white; font-weight: bold; padding: 2px 8px; border-radius: 3px; font-size: 12px; margin-right: 6px; }
+  .card .title { font-weight: 600; font-size: 14px; }
+  .card .id { color: #999; font-family: monospace; font-size: 11px; margin-left: 6px; }
+  .card .snippet { margin-top: 6px; color: #555; font-size: 13px; background: white; padding: 6px; border: 1px dashed #ddd; border-radius: 2px; }
+  .legend { background: #eef8ff; padding: 10px; border: 1px solid #bde; margin-bottom: 20px; font-size: 13px; }
+  .toc { background: #f0f0f0; padding: 10px; border: 1px solid #ccc; margin-bottom: 30px; font-size: 13px; column-count: 2; }
+  .toc a { display: block; color: #0066cc; text-decoration: none; padding: 2px 0; }
+  .toc a:hover { text-decoration: underline; }
+  .count { background: #ffc; padding: 2px 6px; border-radius: 3px; font-size: 11px; color: #666; }
+</style>
+</head>
+<body>
+<h1>Audit Review — 34 queries · 141 candidatos a decidir</h1>
+
+<div class="legend">
+<b>Como responder no chat:</b> para cada query abaixo, me envie as decisões no formato:<br>
+<code>&lt;query_id&gt;: &lt;pos1&gt;=&lt;decision&gt;, &lt;pos2&gt;=&lt;decision&gt;, ...</code><br>
+Exemplo: <code>q-dispensa-valor: 2=accept-highly, 4=reject, 6=accept</code><br><br>
+<b>Decisões:</b> <code>accept</code> (adicionar como relevant) · <code>accept-highly</code> (relevant + highly) · <code>reject</code> (não adicionar) · <code>comment:&lt;texto&gt;</code> (ambíguo)
+</div>
+
+<div class="toc">
+<b>Queries (clica pra pular):</b><br>
+<a href="#esp-451193-3">esp-451193-3 <span class="count">5</span></a>
+<a href="#esp-518661-1">esp-518661-1 <span class="count">5</span></a>
+<a href="#esp-640788-17">esp-640788-17 <span class="count">4</span></a>
+<a href="#esp-647772-7">esp-647772-7 <span class="count">3</span></a>
+<a href="#esp-728449-7">esp-728449-7 <span class="count">5</span></a>
+<a href="#esp-729752-3">esp-729752-3 <span class="count">4</span></a>
+<a href="#esp-729752-8">esp-729752-8 <span class="count">5</span></a>
+<a href="#esp-761729-4">esp-761729-4 <span class="count">5</span></a>
+<a href="#esp-765940-1">esp-765940-1 <span class="count">4</span></a>
+<a href="#esp-765940-4">esp-765940-4 <span class="count">5</span></a>
+<a href="#esp-782120-23">esp-782120-23 <span class="count">3</span></a>
+<a href="#esp-782120-5">esp-782120-5 <span class="count">5</span></a>
+<a href="#esp-785767-12">esp-785767-12 <span class="count">4</span></a>
+<a href="#esp-789829-8">esp-789829-8 <span class="count">5</span></a>
+<a href="#esp-789829-9">esp-789829-9 <span class="count">5</span></a>
+<a href="#esp-795204-10">esp-795204-10 <span class="count">4</span></a>
+<a href="#esp-800676-4">esp-800676-4 <span class="count">5</span></a>
+<a href="#esp-811212-11">esp-811212-11 <span class="count">5</span></a>
+<a href="#q-fiscal-contrato-responsabilidade">q-fiscal-contrato-responsabilidade <span class="count">1</span></a>
+<a href="#q-pregao-bens-comuns">q-pregao-bens-comuns <span class="count">2</span></a>
+<a href="#q-sancoes-impedimento-licitar">q-sancoes-impedimento-licitar <span class="count">3</span></a>
+<a href="#t-cadin-01">t-cadin-01 <span class="count">4</span></a>
+<a href="#t-contrato-escopo-on92-01">t-contrato-escopo-on92-01 <span class="count">5</span></a>
+<a href="#t-eng-art-rrt-trt-01">t-eng-art-rrt-trt-01 <span class="count">4</span></a>
+<a href="#t-eng-precos-max-unitarios-01">t-eng-precos-max-unitarios-01 <span class="count">4</span></a>
+<a href="#t-garantia-modalidade-01">t-garantia-modalidade-01 <span class="count">5</span></a>
+<a href="#t-instrumento-substitutivo-on84-01">t-instrumento-substitutivo-on84-01 <span class="count">2</span></a>
+<a href="#t-lrf-art16-01">t-lrf-art16-01 <span class="count">4</span></a>
+<a href="#t-marca-vs-fornecedor-01">t-marca-vs-fornecedor-01 <span class="count">4</span></a>
+<a href="#t-pcfp-cct-vigente-01">t-pcfp-cct-vigente-01 <span class="count">5</span></a>
+<a href="#t-pesquisa-ferramenta-privada-01">t-pesquisa-ferramenta-privada-01 <span class="count">5</span></a>
+<a href="#t-sancao-exnunc-01">t-sancao-exnunc-01 <span class="count">4</span></a>
+<a href="#t-srp-contratacao-unica-01">t-srp-contratacao-unica-01 <span class="count">4</span></a>
+<a href="#t-srp-pluralidade-direta-01">t-srp-pluralidade-direta-01 <span class="count">4</span></a>
+</div>
+
+
+<section>
+<h2 id="esp-451193-3">esp-451193-3</h2>
+<div class="query-text">acréscimos e as supressões do objeto contratual devem ser calculados sobre o valor inicial atualizado do contrato,</div>
+<div class="query-meta">5 candidato(s) a decidir · já tem 1 relevant(s) anotado(s)</div>
+
+<div class="card">
+  <span class="pos">pos 1</span>
+  <span class="title">Manual TCU - 6.2.1 Unilateral</span>
+  <span class="id">a396c7de</span>
+  <div class="snippet">A Administração tem o poder de alterar unilateralmente os contratos administrativos, desde que essa alteração seja decorrente de um fato ocorrido ou conhecido após a contratação e que seja para melhor adequação às finalidades de interesse público [[1]]. No entanto, como se trata de uma cláusula exorbitante, deve ser usada com cautela e sempre acompanhada da justificativa [[2]]. A Administração não deve banalizar o uso dessa prerrogativa, de modo a se eximir do seu dever de realizar um planejame...</div>
+</div>
+
+<div class="card">
+  <span class="pos">pos 2</span>
+  <span class="title">Inf. 84/2011 — Calcular alterações contratuais sobre valor original sem compensação entre acréscimos e reduções</span>
+  <span class="id">e017a0a6</span>
+  <div class="snippet">Para efeito de observância dos limites de alterações contratuais previstos no art. 65 da Lei nº 8.666/93, o conjunto de reduções e o conjunto de acréscimos devem ser sempre calculados sobre o valor original do contrato, aplicando-se a cada um desses conjuntos, individualmente e sem nenhum tipo de compensação entre eles, os limites de alteração estabelecidos no dispositivo legal O Departamento Nacional de Infraestrutura de Transportes - DNIT, por meio de pedido de reexame interposto nos autos de...</div>
+</div>
+
+<div class="card">
+  <span class="pos">pos 3</span>
+  <span class="title">Inf. 78/2011 — Calcular acréscimos contratuais considerando supressões anteriores</span>
+  <span class="id">315c1ce2</span>
+  <div class="snippet">Supressões contratuais anteriores devem ser levadas em consideração para o fim de se determinar a base para acréscimos percentuais posteriores A partir de auditoria realizada nas obras do Canal do Sertão Alagoano, executadas por conta do Contrato nº 03/1992, celebrado pela Secretaria de Infra-Estrutura do Governo do Estado de Alagoas, o Tribunal apreciou razões de justificativas apresentadas por responsáveis acerca de alterações contratuais acima dos limites permitidos pelo ordenamento jurídico...</div>
+</div>
+
+<div class="card">
+  <span class="pos">pos 4</span>
+  <span class="title">Inf. 80/2011 — Calcular alterações contratuais sobre valor original sem compensação entre acréscimos e reduções</span>
+  <span class="id">5a026b2d</span>
+  <div class="snippet">Para efeito de observância dos limites de alterações contratuais previstos no art. 65 da Lei nº 8.666/93, o conjunto de reduções e o conjunto de acréscimos devem ser sempre calculados sobre o valor original do contrato, aplicando-se a cada um desses conjuntos, individualmente e sem nenhum tipo de compensação entre eles, os limites de alteração estabelecidos no dispositivo legal Mediante pedidos de reexame, diversos responsáveis manifestaram seu inconformismo contra o Acórdão nº 170/2011-Plenári...</div>
+</div>
+
+<div class="card">
+  <span class="pos">pos 5</span>
+  <span class="title">Inf. 136/2012 — Calcular limites de aditamento contratual com atualização monetária integral</span>
+  <span class="id">969b22a2</span>
+  <div class="snippet">O cálculo dos limites de aditamento de que trata o § 1º do art. 65 da Lei nº 8.666/1993 demanda a atualização do valor do contrato e de seus aditivos até o momento do novo aditamento, ou o deflacionamento de cada um dos aditivos até a data-base do ajuste original Ex-Diretores da Agência Estadual de Gestão e Empreendimentos de Mato Grosso do Sul - Agesul interpuseram Pedidos de Reexame contra o Acórdão 111/2008-Plenário. Por meio dessa decisão, o Tribunal aplicara a esses gestores multas em razã...</div>
+</div>
+
+</section>
+
+<section>
+<h2 id="esp-518661-1">esp-518661-1</h2>
+<div class="query-text">consulta jurídica facultativa formulada em processo autônomo, desvinculada dos autos da contratação subjacente, impede</div>
+<div class="query-meta">5 candidato(s) a decidir · já tem 1 relevant(s) anotado(s)</div>
+
+<div class="card">
+  <span class="pos">pos 1</span>
+  <span class="title">Inf. 64/2011 — Responsabilização de parecerista jurídico em licitações por manifestação irregular</span>
+  <span class="id">12e11ec3</span>
+  <div class="snippet">Contratação de serviços: 2 - Parecer jurídico em processo licitatório, exarado com fundamento no parágrafo único do art. 38 da Lei 8.666/1993, não constitui ato meramente opinativo e pode levar à responsabilização do emitente Ainda na tomada de contas da Secretaria Executiva do Ministério do Turismo - (MTur), relativa ao exercício de 2007, o TCU analisou a contratação, por inexigibilidade de licitação, do Centro de Excelência em Turismo da Universidade Federal de Brasília - (CET/UnB), para pres...</div>
+</div>
+
+<div class="card">
+  <span class="pos">pos 2</span>
+  <span class="title">Inf. 21/2010 — Vinculação de Pareceres Jurídicos em Processos Licitatórios</span>
+  <span class="id">36e648d8</span>
+  <div class="snippet">Caráter vinculante do parecer da assessoria jurídica Em razão de diversas irregularidades constatadas nos procedimentos relativos à Concorrência n.º 1/2001, promovida no âmbito da Sociedade de Navegação, Portos e Hidrovias do Estado do Amazonas, destinada à revitalização do Porto de Manaus, &quot;delegado mediante o Convênio n.º 7/1997, do Ministério dos Transportes&quot;, o Tribunal aplicou multa aos responsáveis, por meio do Acórdão n.º 371/2006-Plenário. Em sede de recurso, eles aduziram, entre outros...</div>
+</div>
+
+<div class="card">
+  <span class="pos">pos 3</span>
+  <span class="title">Inf. 143/2013 — Fundamentar decisão divergente de parecer jurídico em licitações</span>
+  <span class="id">c24341a9</span>
+  <div class="snippet">A falta de implementação do encaminhamento apontado no parecer jurídico de que tratam o inciso VI e o parágrafo único do art. 38 da Lei nº 8.666/1993 demanda a explicitação, por escrito, dos motivos que embasam a solução adotada e sujeita o gestor às consequências de tal ato, caso se confirmem as irregularidades apontadas pelo órgão jurídico Ainda no âmbito da Representação acerca de supostas irregularidades relativas a processos licitatórios conduzidos pelo Instituto Nacional de Pesquisas Espa...</div>
+</div>
+
+<div class="card">
+  <span class="pos">pos 4</span>
+  <span class="title">Inf. 417/2021 — Limitar parecer jurídico à análise legal em contratações integradas</span>
+  <span class="id">d10df8b0</span>
+  <div class="snippet">Não é da competência do parecerista jurídico a avaliação de aspectos técnicos para adoção do regime de contratação integrada (art. 9º da Lei 12.462/2011). Auditoria realizada nas obras do Sistema de Esgotamento Sanitário de Porto Velho/RO, lastreadas com recursos federais transferidos por meio de termos de compromisso firmados entre o Governo do Estado de Rondônia e a União, por intermédio do Ministério das Cidades, identificou possíveis irregularidades no RDC Eletrônico 005/2015, que dera ense...</div>
+</div>
+
+<div class="card">
+  <span class="pos">pos 5</span>
+  <span class="title">Inf. 38/2010 — Responsabilizar parecerista por opinião jurídica negligente em licitações</span>
+  <span class="id">c00b9ab7</span>
+  <div class="snippet">O parecer jurídico, mesmo aquele de caráter eminentemente opinativo, pode ensejar a responsabilização do agente que, injustificadamente, descuidou do seu dever de bem opinar e orientar Por intermédio do Acórdão n.º 1.898/2010-Plenário, o Tribunal aplicou multa ao ex-Procurador Geral do Estado de Tocantins e à ex-Coordenadora da Procuradoria Administrativa, responsáveis pela emissão de parecer que fundamentou a celebração de contrato com objeto excessivamente amplo, destinado a suportar diversas...</div>
+</div>
+
+</section>
+
+<section>
+<h2 id="esp-640788-17">esp-640788-17</h2>
+<div class="query-text">parcelamento do objeto nas contratações de TIC é a regra, somente se admitindo a adjudicação por lote ou global quando</div>
+<div class="query-meta">4 candidato(s) a decidir · já tem 1 relevant(s) anotado(s)</div>
+
+<div class="card">
+  <span class="pos">pos 6</span>
+  <span class="title">Inf. 353/2018 — Parcelar licitações priorizando especificações técnicas de integração</span>
+  <span class="id">482f63a4</span>
+  <div class="snippet">... para registro de preços, lançado pelo Conselho Regional de Engenharia e Agronomia de Minas Gerais (Crea/MG), com vistas à contratação de empresa especializada em prestação de serviços de impressão, digitalização e organização de informações arquivísticas. O relator determinou a oitiva prévia do ente contratante e da licitante que se sagrara vencedora do procedimento, a fim de que se pronunciassem sobre a concentração, em um único item, de diversos serviços da área de tecnologia da informação, junt...</div>
+</div>
+
+<div class="card">
+  <span class="pos">pos 7</span>
+  <span class="title">Inf. 443/2022 — Avaliar parcelamento de licitação conforme viabilidade técnica e interesse público</span>
+  <span class="id">49288390</span>
+  <div class="snippet">... tal opção não representar prejuízo para o conjunto da contratação ou perda de economia de escala (Súmula TCU 247), por outro lado, também seria cediço que o parcelamento do objeto deve visar precipuamente ao interesse da Administração, e não dos particulares. Nesse sentido, invocou o Acórdão 1238/2016-Plenário. Ainda de acordo com o relator, a Lei 8.666/1993, que regulou grande parte das licitações examinadas pelo TCU durante a construção desse entendimento, prevê que &quot;as obras, serviços e compras...</div>
+</div>
+
+<div class="card">
+  <span class="pos">pos 8</span>
+  <span class="title">Inf. 20/2010 — Vedação ao agrupamento de itens distintos em licitação de tecnologia da informação</span>
+  <span class="id">3b8e0e15</span>
+  <div class="snippet">...ionamento do ambiente operacional e evitar incompatibilidades que poderiam advir da aquisição individual dos diversos itens; b) foi examinada pela Consultoria Jurídica do MRE; c) não comprometeu a competitividade do certame, tendo sido admitida a participação de empresas reunidas em consórcio; d) permitiu o atendimento dos requisitos operacionais definidos pela ABC e pelo DPR; e) foi feita, graças à integração, a preços 20% abaixo do mercado, conforme pesquisas realizadas à época. Em seu voto, o re...</div>
+</div>
+
+<div class="card">
+  <span class="pos">pos 9</span>
+  <span class="title">Inf. 24/2010 — Analisar parcelamento de objeto em contratação de sistema informatizado</span>
+  <span class="id">f6e16285</span>
+  <div class="snippet">...nção Integral&quot;, a ser implantada em seis hospitais federais no Rio de Janeiro. Entre as questões levantadas na denúncia, destacava-se o cerceamento à competição, &quot;em virtude da ausência de divisão do objeto do certame em lotes, o que permitiria a participação de um número maior de licitantes&quot;, isso porque a licitação abrangia dois itens bem distintos: 1) &quot;fornecimento de um sistema que atenda previamente aos requisitos técnicos funcionais&quot;, com transferência de propriedade para o Ministério da Saúd...</div>
+</div>
+
+</section>
+
+<section>
+<h2 id="esp-647772-7">esp-647772-7</h2>
+<div class="query-text">adoção do SRP em inexigibilidade para capacitação exige pluralidade efetiva de órgãos ou entidades contratantes</div>
+<div class="query-meta">3 candidato(s) a decidir · já tem 1 relevant(s) anotado(s)</div>
+
+<div class="card">
+  <span class="pos">pos 1</span>
+  <span class="title">Inf. 439/2022 — Interpretar singularidade em inexigibilidade de licitação além da exclusividade</span>
+  <span class="id">9cf5ba5d</span>
+  <div class="snippet">Nas contratações diretas por inexigibilidade de licitação, o conceito de singularidade não pode ser confundido com a ideia de unicidade, exclusividade, ineditismo ou raridade. O fato de o objeto poder ser executado por outros profissionais ou empresas não impede a contratação direta amparada no art. 25, inciso II, da Lei 8.666/1993. A inexigibilidade, amparada nesse dispositivo legal, decorre da impossibilidade de se fixar critérios objetivos de julgamento. Relatório de inspeção realizada em de...</div>
+</div>
+
+<div class="card">
+  <span class="pos">pos 4</span>
+  <span class="title">Inf. 59/2011 — Demonstrar singularidade e notória especialização em contratação por inexigibilidade</span>
+  <span class="id">c3374d38</span>
+  <div class="snippet">Contratação por inexigibilidade de licitação: 1 - Para a contratação, por inexigibilidade de licitação, de serviço técnico profissional especializado deve estar demonstrado que este possui características singulares, além da condição de notória especialização do prestador Mediante denúncia, foram relatados ao Tribunal indícios de irregularidades que estariam ocorrendo no âmbito do Conselho Regional de Engenharia, Arquitetura e Agronomia do Piauí - (CREA/PI), nos exercícios de 2006 a 2008, dentr...</div>
+</div>
+
+<div class="card">
+  <span class="pos">pos 5</span>
+  <span class="title">Inf. 264/2015 — Interpretar singularidade em contratações diretas por inexigibilidade de licitação</span>
+  <span class="id">af8f9f1b</span>
+  <div class="snippet">Nas contratações diretas por inexigibilidade de licitação, o conceito de singularidade não pode ser confundido com a ideia de unicidade, exclusividade, ineditismo ou raridade. O fato de o objeto poder ser executado por outros profissionais ou empresas não impede a contratação direta amparada no art. 25, inciso II, da Lei 8.666/93. A inexigibilidade, amparada nesse dispositivo legal, decorre da impossibilidade de se fixar critérios objetivos de julgamento. Fiscalização em processo de Solicitação...</div>
+</div>
+
+</section>
+
+<section>
+<h2 id="esp-728449-7">esp-728449-7</h2>
+<div class="query-text">fixação de preços máximos unitários e global e a definição de critérios de aceitabilidade dos preços são obrigatórias</div>
+<div class="query-meta">5 candidato(s) a decidir · já tem 2 relevant(s) anotado(s)</div>
+
+<div class="card">
+  <span class="pos">pos 1</span>
+  <span class="title">Inf. 171/2013 — Definir preços máximos em licitações conforme natureza da contratação</span>
+  <span class="id">d221c8b1</span>
+  <div class="snippet">Nos termos da Súmula TCU 259, a fixação de preços máximos é obrigatória apenas nas contratações de obras e serviços de engenharia. Nas demais contratações, é facultativa, podendo, por exemplo, o preço máximo ser definido com base no valor orçado, mas sempre em conformidade com o mercado. Em Auditoria realizada na Prefeitura Municipal de Nova Cruz/RN, com o objetivo de verificar a regularidade da aplicação dos recursos dos programas &quot;Caminho da Escola&quot; e Programa Nacional de Apoio ao Transporte ...</div>
+</div>
+
+<div class="card">
+  <span class="pos">pos 2</span>
+  <span class="title">Inf. 351/2018 — Fixar preços máximos em editais de obras como obrigação do gestor público</span>
+  <span class="id">34a55c77</span>
+  <div class="snippet">A definição do critério de aceitabilidade dos preços unitários e global nos editais para a contratação de obras, com a fixação de preços máximos para ambos, é obrigação e não faculdade do gestor (Súmula TCU 259), ainda que se trate de empreitada por preço global. Essa obrigação tem por objetivo mitigar a ocorrência dos riscos associados tanto ao &quot;jogo de cronograma&quot; quanto ao &quot;jogo de planilha&quot;. Por determinação contida no Acórdão 2257/2015 Plenário, proferido em processo de auditoria realizada...</div>
+</div>
+
+<div class="card">
+  <span class="pos">pos 3</span>
+  <span class="title">Inf. 493/2024 — Definir critérios de aceitabilidade de preços em licitações públicas</span>
+  <span class="id">5f3384dd</span>
+  <div class="snippet">O edital da licitação deve deixar explícito se o critério de aceitabilidade previsto no art. 59, inciso III, da Lei 14.133/2021 aplica-se somente ao preço global da proposta ou se, também, ao preço unitário dos itens. Representação formulada ao TCU apontou possíveis irregularidades no Pregão Eletrônico 90005/2024, realizado pelo Centro de Intendência Tecnológico da Marinha em São Paulo com vistas à contratação de &quot;sistema para gerenciamento de ciclo de vida de produto (PLM) para desenvolvimento...</div>
+</div>
+
+<div class="card">
+  <span class="pos">pos 4</span>
+  <span class="title">Inf. 361/2019 — Dispensar divulgação de preços unitários em pregão eletrônico</span>
+  <span class="id">60cd6298</span>
+  <div class="snippet">Não é obrigatória a divulgação dos preços unitários no edital do pregão, mesmo quando eles forem utilizados como critério de aceitabilidade das propostas. Representação formulada por licitante apontou possíveis irregularidades no Pregão Eletrônico para Registro de Preços 2/2018, promovido pelo Fundo Nacional de Desenvolvimento da Educação (FNDE), cujo objeto era a &quot;aquisição de materiais escolares, em atendimento às entidades educacionais das redes públicas de ensino nos Estados, Distrito Feder...</div>
+</div>
+
+<div class="card">
+  <span class="pos">pos 5</span>
+  <span class="title">Inf. 263/2015 — Definir critérios de precificação em editais de pregão com flexibilidade condicionada</span>
+  <span class="id">4ba641a4</span>
+  <div class="snippet">Em regra, os editais de pregão devem contemplar orçamento detalhado e critérios de aceitabilidade de preços unitários e global, admitida sua dispensa, motivadamente e considerando os riscos e benefícios da medida, no caso de objetos complexos, com alto grau de incerteza em sua definição e/ou características muito peculiares de mercado. A Caixa Econômica Federal opôs Embargos de Declaração contra acórdão do TCU que expedira determinação à empresa no sentido de que os futuros editais de licitação...</div>
+</div>
+
+</section>
+
+<section>
+<h2 id="esp-729752-3">esp-729752-3</h2>
+<div class="query-text">No edital de credenciamento é facultado fixar os valores e prever índice de reajustamento de preços nas hipóteses de</div>
+<div class="query-meta">4 candidato(s) a decidir · já tem 1 relevant(s) anotado(s)</div>
+
+<div class="card">
+  <span class="pos">pos 1</span>
+  <span class="title">Manual TCU - 5.9.1 Credenciamento</span>
+  <span class="id">fc1a0707</span>
+  <div class="snippet">O credenciamento é definido pela Lei 14.133/2021 como [[1]]: Processo administrativo de chamamento público em que a Administração Pública convoca interessados em prestar serviços ou fornecer bens para que, preenchidos os requisitos necessários, se credenciem no órgão ou na entidade para executar o objeto quando convocados. Esse procedimento auxiliar é adotado quando se constata, na fase de planejamento da contratação, que a abordagem mais vantajosa para a administração consiste em permitir que...</div>
+</div>
+
+<div class="card">
+  <span class="pos">pos 2</span>
+  <span class="title">(doc não encontrado)</span>
+  <span class="id">9a6f124c</span>
+  <div class="snippet"><i>(sem snippet)</i></div>
+</div>
+
+<div class="card">
+  <span class="pos">pos 4</span>
+  <span class="title">Inf. 227/2015 — Credenciar prestadores sem limitar número de contratados em licitação</span>
+  <span class="id">f85f3d66</span>
+  <div class="snippet">O credenciamento é hipótese de inviabilidade de competição não expressamente mencionada no art. 25 da Lei 8.666/93 (cujos incisos são meramente exemplificativos). Adota-se o credenciamento quando a Administração tem por objetivo dispor da maior rede possível de prestadores de serviços. Nessa situação, a inviabilidade de competição não decorre da ausência de possibilidade de competição, mas sim da ausência de interesse da Administração em restringir o número de contratados. Representações formul...</div>
+</div>
+
+<div class="card">
+  <span class="pos">pos 5</span>
+  <span class="title">Enunciado do IBDA nº 59</span>
+  <span class="id">00cb497c</span>
+  <div class="snippet">O credenciamento previsto no art. 79 da Lei nº 14.133/21 pode ser utilizado para seleção de empresas prestadoras de serviço que atendam a requisitos pré-estabelecidos, independentemente do valor da contratação.</div>
+</div>
+
+</section>
+
+<section>
+<h2 id="esp-729752-8">esp-729752-8</h2>
+<div class="query-text">edital de credenciamento e seus anexos devem ser integralmente disponibilizados no Portal Nacional de Contratações</div>
+<div class="query-meta">5 candidato(s) a decidir · já tem 1 relevant(s) anotado(s)</div>
+
+<div class="card">
+  <span class="pos">pos 1</span>
+  <span class="title">Manual TCU - 2.5 Promoção da transparência e da accountability das contratações</span>
+  <span class="id">a95705c4</span>
+  <div class="snippet">A transparência nas organizações públicas refere-se à divulgação de informações primárias, íntegras, autênticas e atualizadas, de interesse coletivo ou geral. Isso significa disponibilizar dados sobre operações, estruturas, políticas, processos decisórios, resultados e desempenho do setor público, entre outros, sem a necessidade de solicitações específicas [[1]]. No contexto das organizações públicas, a transparência vai além do cumprimento das leis e regulamentos. O Instituto Brasileiro de Gov...</div>
+</div>
+
+<div class="card">
+  <span class="pos">pos 2</span>
+  <span class="title">Inf. 386/2020 — Credenciar Prestadores: Chamamento Público Isonômico em Inexigibilidade de Licitação</span>
+  <span class="id">3e4ccc7e</span>
+  <div class="snippet">O credenciamento, entendido como espécie de inexigibilidade de licitação, é ato administrativo de chamamento público de prestadores de serviços que satisfaçam determinados requisitos, constituindo etapa prévia à contratação, devendo-se oferecer a todos igual oportunidade de se credenciar. Denúncia oferecida ao TCU apontou possíveis irregularidades no credenciamento conduzido pela Gerência de Filial Logística da Caixa Econômica Federal em Brasília com vistas ao &quot;cadastramento de empresas especia...</div>
+</div>
+
+<div class="card">
+  <span class="pos">pos 3</span>
+  <span class="title">Manual TCU - 5.9.1 Credenciamento</span>
+  <span class="id">fc1a0707</span>
+  <div class="snippet">O credenciamento é definido pela Lei 14.133/2021 como [[1]]: Processo administrativo de chamamento público em que a Administração Pública convoca interessados em prestar serviços ou fornecer bens para que, preenchidos os requisitos necessários, se credenciem no órgão ou na entidade para executar o objeto quando convocados. Esse procedimento auxiliar é adotado quando se constata, na fase de planejamento da contratação, que a abordagem mais vantajosa para a administração consiste em permitir que...</div>
+</div>
+
+<div class="card">
+  <span class="pos">pos 4</span>
+  <span class="title">Inf. 162/2013 — Requisitos para Credenciamento de Serviços em Licitações Públicas</span>
+  <span class="id">e0d57a84</span>
+  <div class="snippet">A aplicação do sistema de credenciamento na contratação de serviços deve observar os seguintes requisitos, conforme as orientações expedidas pelo Acórdão 351/2010-Plenário: a) a contratação de todos os que tiverem interesse e que satisfaçam as condições fixadas pela Administração, não havendo relação de exclusão; b) a garantia da igualdade de condições entre todos os interessados hábeis a contratar com a Administração, pelo preço por ela definido; c) a demonstração inequívoca de que as necessid...</div>
+</div>
+
+<div class="card">
+  <span class="pos">pos 5</span>
+  <span class="title">(doc não encontrado)</span>
+  <span class="id">9a6f124c</span>
+  <div class="snippet"><i>(sem snippet)</i></div>
+</div>
+
+</section>
+
+<section>
+<h2 id="esp-761729-4">esp-761729-4</h2>
+<div class="query-text">Caracterizado o objeto como serviço comum pela Administração, mas presentes na instrução elementos típicos de serviço</div>
+<div class="query-meta">5 candidato(s) a decidir · já tem 1 relevant(s) anotado(s)</div>
+
+<div class="card">
+  <span class="pos">pos 1</span>
+  <span class="title">Inf. 229/2015 — Qualificar serviço técnico como comum apesar de projeto inédito</span>
+  <span class="id">a0fcbaa8</span>
+  <div class="snippet">O fato de o serviço objeto da contratação fazer parte de projeto inédito e com eventuais complexidades logísticas não repercute necessariamente no nível de dificuldade intrínseca do serviço, sendo possível o seu enquadramento na condição de serviço comum. Em Prestação de Contas da Eletrosul Centrais Elétricas S.A., fora efetuada a audiência dos responsáveis em face, dentre outros aspectos, do uso indevido da modalidade pregão eletrônico para contratação de bens e serviços destinados à execução ...</div>
+</div>
+
+<div class="card">
+  <span class="pos">pos 2</span>
+  <span class="title">Inf. 518/2025 — Definir requisitos compatíveis com a natureza do objeto licitado</span>
+  <span class="id">67a91b82</span>
+  <div class="snippet">A definição dos &quot;requisitos da contratação&quot; no termo de referência (art. 6º, inciso XXIII, alínea d, da Lei 14.133/2021) deve manter fidelidade às reais características do objeto pretendido, de modo a evitar a inclusão de exigências incompatíveis com a real natureza dos serviços licitados, a exemplo da existência de informações no termo de referência indicando que um contrato de serviços continuados de engenharia abrange gestão de projetos de grande porte. Ao apreciar denúncia endereçada ao TCU...</div>
+</div>
+
+<div class="card">
+  <span class="pos">pos 3</span>
+  <span class="title">Inf. 195/2014 — Aplicar pregão em serviços de engenharia sem excluir técnica e preço em projetos complexos</span>
+  <span class="id">66c4c4d2</span>
+  <div class="snippet">O emprego da modalidade pregão, como regra para a contratação de serviços de engenharia consultiva, supervisão e elaboração de projetos de obras, não exclui o modelo tradicional de licitação por melhor técnica ou técnica e preço, para o caso de trabalhos de alta complexidade que não possam ser enquadrados como comuns e, portanto, ter padrões de desempenho e qualidade objetivamente definidos por meio de especificações usuais, segundo reconhecimento e justificativa prévia do contratante. Em autos...</div>
+</div>
+
+<div class="card">
+  <span class="pos">pos 4</span>
+  <span class="title">Inf. 54/2011 — Limitar pregão para serviços intelectuais com múltiplas soluções técnicas</span>
+  <span class="id">eee8fbd4</span>
+  <div class="snippet">É inviável o uso do pregão para contratação de serviços nos quais predomine a intelectualidade, assim considerados aqueles que podem apresentar diferentes metodologias, tecnologias e níveis de desempenho e qualidade, sendo necessário avaliar as vantagens e desvantagens de cada solução &quot;O pregão não deverá ser utilizado para a contratação de serviços de natureza predominantemente intelectual, assim considerados aqueles que podem apresentar diferentes metodologias, tecnologias e níveis de desempe...</div>
+</div>
+
+<div class="card">
+  <span class="pos">pos 5</span>
+  <span class="title">Inf. 416/2021 — Contratação de serviços Microsoft 365 por pregão eletrônico como serviços comuns de tecnologia</span>
+  <span class="id">7ba9b8e4</span>
+  <div class="snippet">Serviços de consultoria técnica e educacional na Plataforma Microsoft 365 devem ser contratados por meio de pregão eletrônico, pois são serviços comuns e padronizados, passíveis de ser prestados de maneira praticamente idêntica, sem margem significativa para diferenciação técnica, por vários parceiros certificados pela empresa Microsoft. Representação formulada ao TCU apontou supostas irregularidades na Concorrência Pública 8/2020, do tipo técnica e preço, lançada pelo Serviço Nacional de Apren...</div>
+</div>
+
+</section>
+
+<section>
+<h2 id="esp-765940-1">esp-765940-1</h2>
+<div class="query-text">cessão de uso de imóvel administrado pela União ou suas autarquias e fundações, cumulada com prestação de serviço de</div>
+<div class="query-meta">4 candidato(s) a decidir · já tem 1 relevant(s) anotado(s)</div>
+
+<div class="card">
+  <span class="pos">pos 2</span>
+  <span class="title">Orientação Normativa AGU nº 96/2025</span>
+  <span class="id">846e290c</span>
+  <div class="snippet"><i>(sem snippet)</i></div>
+</div>
+
+<div class="card">
+  <span class="pos">pos 3</span>
+  <span class="title">Orientação Normativa CNU/CGU/AGU nº 01/2016</span>
+  <span class="id">6ccbaa42</span>
+  <div class="snippet"><i>(sem snippet)</i></div>
+</div>
+
+<div class="card">
+  <span class="pos">pos 4</span>
+  <span class="title">DECOR PARECER n. 00022/2024/CNLCA/CGU/AGU - Natureza jurídica da cessão onerosa de bem público federal e a sua classificação como contrato de re</span>
+  <span class="id">18b79efd</span>
+  <div class="snippet">DECOR PARECER n. 00022/2024/CNLCA/CGU/AGU ASSUNTO: Natureza jurídica da cessão onerosa de bem público federal e a sua classificação como contrato de receita, bem como a não aplicabilidade da Lei Complementar 123/2006. EMENTA: EMENTA: DIREITO ADMINISTRATIVO. CESSÃO ONEROSA DE BEM PÚBLICO. NATUREZA JURÍDICA. CONTRATO DE RECEITA. OBRIGAÇÃO PRINCIPAL. REMUNERAÇÃO PELA UTILIZAÇÃO DO BEM. INAPLICABILIDADE DA LEI COMPLEMENTAR 123/2006 NOS CONTRATOS DE RECEITA. I. Objeto contratual é o que se pretende...</div>
+</div>
+
+<div class="card">
+  <span class="pos">pos 5</span>
+  <span class="title">DECOR PARECER N. 00030/2019/DECOR/CGU/AGU - CONTROVÉRSIA ACERCA DA NATUREZA CONTRATUAL DA CESSÃO DE IMÓVEIS PÚBLICOS</span>
+  <span class="id">587c402a</span>
+  <div class="snippet">DECOR PARECER N. 00030/2019/DECOR/CGU/AGU ASSUNTO: CONTROVÉRSIA ACERCA DA NATUREZA CONTRATUAL DA CESSÃO DE IMÓVEIS PÚBLICOS EMENTA: DIREITO ADMINISTRATIVO. PATRIMÔNIO IMOBILIÁRIO DA UNIÃO. CESSÃO DE IMÓVEL A OUTRO ENTE DA FEDERAÇÃO, A TÍTULO GRATUITO, COM FUNDAMENTO NO ART. 18, I, DA LEI Nº 9.636, DE 15 DE MAIO DE 1998.,, I - QUESTIONAMENTO DO ENTENDIMENTO ADOTADO PELA CÂMARA REGIONAL DE ENTENDIMENTOS CONSULTIVOS DA 3ª REGIÃO - CRU-3, QUE ATRIBUIU NATUREZA NÃO CONTRATUAL À CESSÃO DE USO GRA...</div>
+</div>
+
+</section>
+
+<section>
+<h2 id="esp-765940-4">esp-765940-4</h2>
+<div class="query-text">ELIC não se manifesta em consultas genéricas ou abstratas, em processos já contemplados por parecer referencial da ELIC</div>
+<div class="query-meta">5 candidato(s) a decidir · já tem 2 relevant(s) anotado(s)</div>
+
+<div class="card">
+  <span class="pos">pos 1</span>
+  <span class="title">Inf. 218/2014 — Reutilização de Parecer Jurídico em Licitações Federais</span>
+  <span class="id">e14dc806</span>
+  <div class="snippet">É possível a utilização, pelos órgãos e entidades da Administração Pública Federal, de um mesmo parecer jurídico em procedimentos licitatórios diversos, desde que envolva matéria comprovadamente idêntica e seja completo, amplo e abranja todas as questões jurídicas pertinentes. Embargos de Declaração opostos pela Advocacia-Geral da União (AGU), em face de determinação expedida pelo TCU à Comissão Municipal de Licitação de Manaus e à Secretaria Municipal de Educação de Manaus, alegara obscuridade...</div>
+</div>
+
+<div class="card">
+  <span class="pos">pos 2</span>
+  <span class="title">ON 55/2014</span>
+  <span class="id">ab2edc76</span>
+  <div class="snippet"><i>(sem snippet)</i></div>
+</div>
+
+<div class="card">
+  <span class="pos">pos 3</span>
+  <span class="title">Inf. 218/2014 — Dispensar parecer jurídico em licitações internacionais de baixo valor</span>
+  <span class="id">8723b179</span>
+  <div class="snippet">É viável juridicamente ao Ministério das Relações Exteriores (MRE), desde que tecnicamente motivado, o estabelecimento de regra que dispense a obrigatoriedade da emissão de parecer jurídico nas licitações e contratações de bens e serviços efetuadas pelos postos no exterior, cujos valores sejam inferiores a US$ 150,000.00, excetuadas as referentes a locação de imóveis, em consonância com o art. 123 da Lei 8.666/93, com os princípios da eficiência e da economicidade e ainda considerando as peculia...</div>
+</div>
+
+<div class="card">
+  <span class="pos">pos 4</span>
+  <span class="title">Resposta a Consulta — Acórdão AC-2633/14-P</span>
+  <span class="id">cd8049de</span>
+  <div class="snippet">É viável juridicamente ao Ministério das Relações Exteriores (MRE), desde que tecnicamente motivado, o estabelecimento de regra que dispense a obrigatoriedade da emissão de parecer jurídico nas licitações e contratações de bens e serviços efetuadas pelos postos no exterior, cujos valores sejam inferiores a US$ 150,000.00, excetuadas as referentes a locação de imóveis, em consonância com o art. 123 da Lei 8.666/1993, com os princípios da eficiência e da economicidade e ainda considerando as pecul...</div>
+</div>
+
+<div class="card">
+  <span class="pos">pos 5</span>
+  <span class="title">ON 82/2024</span>
+  <span class="id">773b551b</span>
+  <div class="snippet"><i>(sem snippet)</i></div>
+</div>
+
+</section>
+
+<section>
+<h2 id="esp-782120-23">esp-782120-23</h2>
+<div class="query-text">vigência inicial da ata de registro de preços é de um ano, contado do primeiro dia útil subsequente à divulgação no</div>
+<div class="query-meta">3 candidato(s) a decidir · já tem 2 relevant(s) anotado(s)</div>
+
+<div class="card">
+  <span class="pos">pos 1</span>
+  <span class="title">Manual TCU - 5.9.4 Sistema de Registro de Preços</span>
+  <span class="id">dce83597</span>
+  <div class="snippet">O Sistema de Registro de Preços (SRP) é um conjunto de procedimentos adotados pela Administração para registro formal de preços relativos à prestação de serviços, a obras e a aquisição e locação de bens para contratações futuras [[1]]. No âmbito da Administração Pública federal direta, autárquica e fundacional [[2]], o Decreto 11.462/2023 dispôs sobre os procedimentos para o SRP. As organizações que utilizam o sistema Compras do Governo Federal poderão realizar o registro de preços por meio do ...</div>
+</div>
+
+<div class="card">
+  <span class="pos">pos 3</span>
+  <span class="title">ON 89/2024</span>
+  <span class="id">ff005d74</span>
+  <div class="snippet"><i>(sem snippet)</i></div>
+</div>
+
+<div class="card">
+  <span class="pos">pos 5</span>
+  <span class="title">Inf. 134/2012 — Limitar vigência de atas de registro de preços municipais a um ano</span>
+  <span class="id">0162181f</span>
+  <div class="snippet">A vigência de atas de registro de preços resultante de pregão promovido por município não pode superar o prazo de um ano, tendo em vista o disposto no inciso III, do § 3º, do art. 15 da Lei 8.666/1993 Ainda no âmbito da Representação acerca de supostas irregularidades na condução do Pregão Presencial para Registro de Preços realizado pela Secretaria Municipal da Educação de São Paulo para aquisição de suco de laranja integral pasteurizado congelado e de néctar de frutas congelado, destaque-se t...</div>
+</div>
+
+</section>
+
+<section>
+<h2 id="esp-782120-5">esp-782120-5</h2>
+<div class="query-text">Administração não se vincula às disposições de acordos, convenções ou dissídios coletivos que tratem de matérias não</div>
+<div class="query-meta">5 candidato(s) a decidir · já tem 1 relevant(s) anotado(s)</div>
+
+<div class="card">
+  <span class="pos">pos 1</span>
+  <span class="title">Parecer Vinculante JT - 02 - REPACTUAÇÃO - REPACTUAÇÃO COMO ESPÉCIE DE REAJUSTAMENTO TERMO A QUO DO PRAZO DE 1 (UM) ANO PARA REQU</span>
+  <span class="id">1e27b595</span>
+  <div class="snippet">PARECER VINCULANTE JT - 02 ASSUNTO: REPACTUAÇÃO - REPACTUAÇÃO COMO ESPÉCIE DE REAJUSTAMENTO TERMO A QUO DO PRAZO DE 1 (UM) ANO PARA REQUERER A REPACTUAÇÃO - EFEITOS FINANCEIROS DA REPACTUAÇÃO TERMO FINAL PARA REQUERER A REPACTUAÇÃO. EMENTA: PARECER No AGU/JTB 01/2008PROCESSO No 00400.010482/2008-69INTERESSADOS: Órgãos Consultivos da Advocacia-Geral da União.ASSUNTO : REPACTUAÇÃO - REPACTUAÇÃO COMO ESPÉCIE DE REAJUSTAMENTO TERMO A QUO DO PRAZO DE 1 (UM) ANO PARA REQUERER A REPACTUAÇÃO - EFEITOS...</div>
+</div>
+
+<div class="card">
+  <span class="pos">pos 2</span>
+  <span class="title">Inf. 485/2024 — Limitar convenção coletiva em licitações de serviços terceirizados</span>
+  <span class="id">6f7efd0d</span>
+  <div class="snippet">Nos editais de licitação para contratação de serviços terceirizados com dedicação exclusiva de mão de obra, não é permitido determinar a convenção ou o acordo coletivo de trabalho a ser utilizado pelas empresas licitantes como base para a confecção das respectivas propostas, em decorrência da previsão estabelecida no art. 511, §§ 2º e 3º, da CLT. Não obstante, em tais licitações, é lícito ao edital prever que somente serão aceitas propostas que adotarem na planilha de custos e formação de preços...</div>
+</div>
+
+<div class="card">
+  <span class="pos">pos 3</span>
+  <span class="title">Inf. 343/2018 — Examinar propostas de licitação sem obrigatoriedade de verificação de despesas trabalhistas</span>
+  <span class="id">49e400ce</span>
+  <div class="snippet">Na contratação de obras públicas, não há determinação legal que obrigue a Administração a examinar as propostas dos licitantes para verificar se estes consideraram nos seus preços as despesas com mão de obra decorrentes do cumprimento de acordo, convenção ou dissídio coletivo de trabalho, devendo ser observadas as disposições dos arts. 48 e 44, § 3º, da Lei 8.666/1993, bem como os critérios de aceitabilidade de preços e outros requisitos previstos no edital. Isso não exime os licitantes do cumpr...</div>
+</div>
+
+<div class="card">
+  <span class="pos">pos 4</span>
+  <span class="title">Inf. 216/2014 — Limitar Encargos Sociais em Editais de Licitação: Vedação de Percentuais Mínimos</span>
+  <span class="id">cf018aa5</span>
+  <div class="snippet">É indevida a fixação, nos editais de licitação, de percentuais, ainda que mínimos, para encargos sociais e trabalhistas. A Administração Pública não está vinculada ao cumprimento de cláusulas de convenções coletivas de trabalho, excetuadas as alusivas às obrigações trabalhistas. Representação formulada por sociedade empresária em face de pregão presencial realizado pelo Serviço Nacional de Aprendizagem Comercial - Administração Regional em Sergipe (Senac/SE), tendo por objeto a prestação de ser...</div>
+</div>
+
+<div class="card">
+  <span class="pos">pos 5</span>
+  <span class="title">Inf. 254/2015 — Vedação de convênios para delegação de serviços de pagamento de servidores públicos</span>
+  <span class="id">7dec2e98</span>
+  <div class="snippet">A delegação a terceiros da prestação de serviços, em caráter exclusivo, de pagamento de remuneração de servidores ativos, inativos e pensionistas e outros serviços similares deve ser instrumentalizada por meio de contrato administrativo, não se admitindo a utilização de convênios ou instrumentos similares, haja vista a ausência, no objeto da relação jurídica, de interesses recíprocos e de regime de mútua cooperação. Ainda na Consulta acerca da juridicidade da contratação de instituição financei...</div>
+</div>
+
+</section>
+
+<section>
+<h2 id="esp-785767-12">esp-785767-12</h2>
+<div class="query-text">Exigências de instalação de escritório na cidade de execução do objeto são restritivas da competitividade e somente se</div>
+<div class="query-meta">4 candidato(s) a decidir · já tem 1 relevant(s) anotado(s)</div>
+
+<div class="card">
+  <span class="pos">pos 1</span>
+  <span class="title">Inf. 414/2021 — Restringir localização de escritório em licitação sem justificativa técnica</span>
+  <span class="id">43d138d6</span>
+  <div class="snippet">É irregular a exigência de que o contratado instale escritório em localidade específica, sem a devida demonstração de que tal medida seja imprescindível à adequada execução do objeto licitado, considerando os custos a serem suportados pelo contratado, sem avaliar a sua pertinência frente à materialidade da contratação e aos impactos no orçamento estimativo e na competitividade do certame, devido ao potencial de restringir o caráter competitivo da licitação, afetar a economicidade do contrato e f...</div>
+</div>
+
+<div class="card">
+  <span class="pos">pos 2</span>
+  <span class="title">Acórdão TCU 1757/2022 - Competitividade - Restrição</span>
+  <span class="id">f7649733</span>
+  <div class="snippet"><i>(sem snippet)</i></div>
+</div>
+
+<div class="card">
+  <span class="pos">pos 4</span>
+  <span class="title">Acórdão TCU 949/2025 - Terceirização - Serviços advocatícios</span>
+  <span class="id">dac71c4f</span>
+  <div class="snippet"><i>(sem snippet)</i></div>
+</div>
+
+<div class="card">
+  <span class="pos">pos 5</span>
+  <span class="title">Inf. 185/2014 — Limitar Localização de Equipe Técnica como Restrição Indevida em Licitações</span>
+  <span class="id">4f9a0c6e</span>
+  <div class="snippet">Nas licitações de serviços de manutenção preventiva e corretiva, é ilegal a exigência, como critério de habilitação, de que as empresas participantes possuam representação ou equipe técnica em local previamente definido no edital. Tal exigência pode ser feita a partir da assinatura do contrato, desde que respaldada em análise técnica fundamentada. Representação concernente a pregão eletrônico promovido pelo Instituto Nacional de Câncer José de Alencar Gomes da Silva (Inca), para contratação de ...</div>
+</div>
+
+</section>
+
+<section>
+<h2 id="esp-789829-8">esp-789829-8</h2>
+<div class="query-text">Nas contratações de serviços comuns de engenharia com dedicação exclusiva de mão de obra, a planilha de custos e</div>
+<div class="query-meta">5 candidato(s) a decidir · já tem 2 relevant(s) anotado(s)</div>
+
+<div class="card">
+  <span class="pos">pos 1</span>
+  <span class="title">Manual TCU - 5.2 Apresentação de propostas</span>
+  <span class="id">14af91ec</span>
+  <div class="snippet">Os prazos mínimos para apresentação das propostas, fixados em dias úteis e contados a partir da divulgação do edital, estão dispostos no art. 55 da Lei 14.133/2021: Art. 55. Os prazos mínimos para apresentação de propostas e lances, contados a partir da data de divulgação do edital de licitação, são de: I – para aquisição de bens: a) 8 (oito) dias úteis, quando adotados os critérios de julgamento de menor preço ou de maior desconto; b) 15 (quinze) dias úteis, nas hipóteses não abrangidas pel...</div>
+</div>
+
+<div class="card">
+  <span class="pos">pos 2</span>
+  <span class="title">Portaria-TCU nº 121, de 28 de junho de 2023</span>
+  <span class="id">1d360446</span>
+  <div class="snippet">PORTARIA-TCU Nº 121, DE 28 DE JUNHO DE 2023. Dispõe sobre a fase preparatória e a fase de seleção de fornecedor relativas aos processos de contratações de serviços, de compras e de fornecimentos contínuos no âmbito da Secretaria do Tribunal de Contas da União. O PRESIDENTE DO TRIBUNAL DE CONTAS DA UNIÃO, no uso de suas atribuições legais e regimentais, e considerando a publicação da Lei nº 14.133, de 1º de abril de 2021, que estabelece normas gerais de licitação e contratação para os órgãos do...</div>
+</div>
+
+<div class="card">
+  <span class="pos">pos 3</span>
+  <span class="title">Inf. 371/2019 — Calcular PIS e Cofins sobre receita bruta em licitações de serviços continuados</span>
+  <span class="id">f6da312d</span>
+  <div class="snippet">Nas licitações de serviços continuados com dedicação exclusiva de mão de obra, as planilhas de custos e formação de preços das licitantes devem prever a incidência do PIS e da Cofins sobre a receita bruta do contrato, e não somente sobre a taxa de administração. Representação formulada ao TCU apontou supostas irregularidades no Pregão Eletrônico 43/2018, promovido pela Universidade Federal Rural de Pernambuco (UFRPE), e no Contrato 6/2019, dele decorrente, tendo por objeto a prestação de serviç...</div>
+</div>
+
+<div class="card">
+  <span class="pos">pos 4</span>
+  <span class="title">Inf. 220/2014 — Detalhar composição de custos unitários em planilhas orçamentárias de licitações públicas</span>
+  <span class="id">bdb5417f</span>
+  <div class="snippet">A Administração está obrigada a adotar, desde o projeto básico, planilhas orçamentárias que expressem a composição dos custos unitários dos itens de serviço, com detalhamento suficiente à sua precisa identificação, abstendo-se de utilizar grandes &quot;grupos funcionais&quot; para mão de obra ou outras unidades genéricas do tipo &quot;quantia fixa&quot; ou &quot;verba&quot;. Auditoria realizada nas obras das usinas nucleares de Angra I e II, de responsabilidade da Eletrobrás Termonuclear S.A., apontara possíveis irregularid...</div>
+</div>
+
+<div class="card">
+  <span class="pos">pos 5</span>
+  <span class="title">Inf. 399/2020 — Exigir planilhas detalhadas de custos unitários em licitações públicas</span>
+  <span class="id">c6b0adfe</span>
+  <div class="snippet">O edital do certame deve exigir dos licitantes a apresentação de planilhas que expressem a composição de todos os custos unitários, sob pena de afronta ao art. 7º, § 2º, inciso II, da Lei 8.666/1993. Representação formulada ao TCU apontou supostas irregularidades no Pregão Eletrônico 05/2020, realizado pela Agência Nacional de Transportes Aquáticos (Antaq) com o objetivo de contratar empresa especializada para a &quot;prestação de serviços de desenvolvimento e manutenção evolutiva e corretiva e para...</div>
+</div>
+
+</section>
+
+<section>
+<h2 id="esp-789829-9">esp-789829-9</h2>
+<div class="query-text">Administração não se vincula a cláusulas de instrumento coletivo que tratem de matéria não trabalhista, de participação</div>
+<div class="query-meta">5 candidato(s) a decidir · já tem 1 relevant(s) anotado(s)</div>
+
+<div class="card">
+  <span class="pos">pos 1</span>
+  <span class="title">Inf. 401/2020 — Definir proposta de licitação pelo enquadramento sindical da atividade econômica</span>
+  <span class="id">cc32fff6</span>
+  <div class="snippet">É irregular a exigência de que as propostas dos licitantes indiquem os acordos coletivos, as convenções coletivas ou as sentenças normativas que regem as categorias profissionais que executarão o serviço. As propostas devem considerar o enquadramento sindical pela atividade econômica preponderante do empregador. Em autos de representação, sociedade empresária apontou supostas irregularidade ocorridas em pregão eletrônico realizado pela Fundação Oswaldo Cruz (Fiocruz), que teve por objeto a cont...</div>
+</div>
+
+<div class="card">
+  <span class="pos">pos 2</span>
+  <span class="title">Inf. 216/2014 — Limitar Encargos Sociais em Editais de Licitação: Vedação de Percentuais Mínimos</span>
+  <span class="id">cf018aa5</span>
+  <div class="snippet">É indevida a fixação, nos editais de licitação, de percentuais, ainda que mínimos, para encargos sociais e trabalhistas. A Administração Pública não está vinculada ao cumprimento de cláusulas de convenções coletivas de trabalho, excetuadas as alusivas às obrigações trabalhistas. Representação formulada por sociedade empresária em face de pregão presencial realizado pelo Serviço Nacional de Aprendizagem Comercial - Administração Regional em Sergipe (Senac/SE), tendo por objeto a prestação de ser...</div>
+</div>
+
+<div class="card">
+  <span class="pos">pos 3</span>
+  <span class="title">Inf. 485/2024 — Limitar convenção coletiva em licitações de serviços terceirizados</span>
+  <span class="id">6f7efd0d</span>
+  <div class="snippet">Nos editais de licitação para contratação de serviços terceirizados com dedicação exclusiva de mão de obra, não é permitido determinar a convenção ou o acordo coletivo de trabalho a ser utilizado pelas empresas licitantes como base para a confecção das respectivas propostas, em decorrência da previsão estabelecida no art. 511, §§ 2º e 3º, da CLT. Não obstante, em tais licitações, é lícito ao edital prever que somente serão aceitas propostas que adotarem na planilha de custos e formação de preços...</div>
+</div>
+
+<div class="card">
+  <span class="pos">pos 4</span>
+  <span class="title">Inf. 369/2019 — Flexibilizar norma coletiva em planilha de preços de licitação</span>
+  <span class="id">2935d8a8</span>
+  <div class="snippet">Na elaboração de sua planilha de formação de preços, o licitante pode utilizar norma coletiva de trabalho diversa daquela adotada pelo órgão ou entidade como parâmetro para o orçamento estimado da contratação, tendo em vista que o enquadramento sindical do empregador é definido por sua atividade econômica preponderante, e não em função da atividade desenvolvida pela categoria profissional que prestará os serviços mediante cessão de mão de obra (art. 581, § 2º, da CLT e art. 8º, inciso II, da Con...</div>
+</div>
+
+<div class="card">
+  <span class="pos">pos 5</span>
+  <span class="title">Inf. 271/2016 — Reter pagamentos para garantir obrigações trabalhistas em contratos administrativos</span>
+  <span class="id">1302f846</span>
+  <div class="snippet">É lícita a previsão contratual de retenção pela Administração de pagamentos devidos à contratada em valores correspondentes às obrigações trabalhistas e previdenciárias inadimplidas, incluindo salários, demais verbas trabalhistas e FGTS, relativas aos empregados dedicados à execução do contrato. Representação formulada por licitantes noticiara supostas irregularidades cometidas pela Companhia de Entrepostos e Armazéns Gerais de São Paulo (Ceagesp), no âmbito do Pregão Presencial 14/2013, destin...</div>
+</div>
+
+</section>
+
+<section>
+<h2 id="esp-795204-10">esp-795204-10</h2>
+<div class="query-text">obrigatória a juntada de documento de responsabilidade técnica (ART, RRT ou TRT) referente às peças técnicas da</div>
+<div class="query-meta">4 candidato(s) a decidir · já tem 1 relevant(s) anotado(s)</div>
+
+<div class="card">
+  <span class="pos">pos 2</span>
+  <span class="title">Inf. 164/2013 — Exigir Anotações de Responsabilidade Técnica em obras e serviços de engenharia públicos</span>
+  <span class="id">8a113b1c</span>
+  <div class="snippet">Nas licitações e contratações de obras e serviços de engenharia, compete aos gestores públicos exigir, a cada etapa (projeto, execução, supervisão e fiscalização), as respectivas Anotações de Responsabilidade Técnica, sob pena de responsabilização. Em autos de Prestação de Contas Simplificada, exercício de 2009, do Instituto Federal de Educação, Ciência e Tecnologia de Sergipe - IFS fora verificado, dentre outros apontamentos, o desabamento da estrutura de um galpão da Unidade Educativa de Prod...</div>
+</div>
+
+<div class="card">
+  <span class="pos">pos 4</span>
+  <span class="title">Acórdão TCU 2353/2024 - Qualificação técnica - Exigência</span>
+  <span class="id">d538d6e0</span>
+  <div class="snippet"><i>(sem snippet)</i></div>
+</div>
+
+<div class="card">
+  <span class="pos">pos 5</span>
+  <span class="title">Inf. 246/2015 — Limitar exigências de atestado técnico a regras específicas da atividade profissional</span>
+  <span class="id">6d049f29</span>
+  <div class="snippet">Somente é lícito exigir que o atestado de capacidade técnica seja visado, reconhecido, autenticado ou averbado pelo conselho de fiscalização profissional se a legislação especial aplicável à atividade em questão previr que a entidade de fiscalização mantenha controle individualizado sobre cada trabalho realizado. O edital da licitação não pode conter exigências de habilitação técnica que não guardem correspondência com o regramento próprio da atividade demandada, sob pena de criar restrição arbi...</div>
+</div>
+
+<div class="card">
+  <span class="pos">pos 7</span>
+  <span class="title">Inf. 404/2020 — Limitar exigência de registro de atestado técnico-operacional no Crea em licitações</span>
+  <span class="id">3bd2200f</span>
+  <div class="snippet">...rt. 55 da Resolução-Confea 1.025/2009), cabendo tal exigência apenas para fins de qualificação técnico-profissional. Podem, no entanto, ser solicitadas as certidões de acervo técnico (CAT) ou as anotações e registros de responsabilidade técnica (ART/RRT) emitidas pelo conselho de fiscalização em nome dos profissionais vinculados aos atestados, como forma de conferir autenticidade e veracidade às informações constantes nos documentos emitidos em nome das licitantes. Representação formulada ao TCU a...</div>
+</div>
+
+</section>
+
+<section>
+<h2 id="esp-800676-4">esp-800676-4</h2>
+<div class="query-text">regra do parcelamento do objeto permanece aplicável mesmo em contratações por inexigibilidade quando o objeto comportar</div>
+<div class="query-meta">5 candidato(s) a decidir · já tem 1 relevant(s) anotado(s)</div>
+
+<div class="card">
+  <span class="pos">pos 1</span>
+  <span class="title">Inf. 443/2022 — Avaliar parcelamento de licitação conforme viabilidade técnica e interesse público</span>
+  <span class="id">49288390</span>
+  <div class="snippet">A viabilidade técnica e econômica da subcontratação de determinada parcela do objeto não significa a obrigatoriedade da adoção do parcelamento na licitação, pois há hipóteses em que a celebração de um único contrato se mostra a opção mais adequada para o atendimento do interesse público e das necessidades da Administração, ainda que eventualmente parte dos serviços, de caráter acessório, seja realizada por empresa subcontratada, circunstância que deve ser devidamente justificada no processo da c...</div>
+</div>
+
+<div class="card">
+  <span class="pos">pos 2</span>
+  <span class="title">Inf. 357/2018 — Parcelamento de serviços limitado à alta complexidade técnica</span>
+  <span class="id">e17af67f</span>
+  <div class="snippet">O parcelamento do objeto deve ser adotado apenas na contratação de serviços de maior especialização técnica, uma vez que, como regra, ele não propicia ampliação de competitividade na contratação de serviços de menor especialização. Representação formulada ao TCU apontou possíveis irregularidades no Pregão Eletrônico 7/2018, promovido pelo Departamento Regional do Serviço Social da Indústria no Estado de São Paulo (Sesi/SP) para a contratação de serviços continuados de portaria, jardinagem, limp...</div>
+</div>
+
+<div class="card">
+  <span class="pos">pos 3</span>
+  <span class="title">Inf. 96/2012 — Parcelar objeto licitatório para ampliar competitividade e isonomia</span>
+  <span class="id">b5095554</span>
+  <div class="snippet">A falta de parcelamento de objeto que implique diminuição sensível de licitantes aptos a prestar parte dos serviços demandados configura violação ao comando contido no art. 23, § 1º, da Lei nº 8.666/1993 Representação formulada por empresa deu notícia de possíveis irregularidades no Pregão Eletrônico 229/7066-2011 conduzido pela Caixa Econômica Federal - CEF para a contratação de prestação de serviço de transporte de executivos da entidade, com disponibilização de um veículo blindado e 12 carro...</div>
+</div>
+
+<div class="card">
+  <span class="pos">pos 4</span>
+  <span class="title">Inf. 88/2011 — Parcelar objeto licitatório de serviços de viagem para garantir competitividade</span>
+  <span class="id">86f03aa3</span>
+  <div class="snippet">A falta de parcelamento de objeto, em licitação preordenada à contratação de serviços de naturezas variadas (emissão, marcação, remarcação e fornecimento de passagens aéreas nacionais e internacionais e terrestres, hospedagem e locação de meios de transportes, excesso de bagagem e seguro viagem) viola o disposto no art. 23, § 1º, da Lei 8.666/1993, por restringir o caráter competitivo do certame Representação formulada por empresa, com base no comando contido no art. 113, § 1º, da Lei nº 8.666/...</div>
+</div>
+
+<div class="card">
+  <span class="pos">pos 5</span>
+  <span class="title">Inf. 97/2012 — Parcelar objeto complexo para garantir competitividade em licitação de eventos</span>
+  <span class="id">ee55996d</span>
+  <div class="snippet">A falta de parcelamento de objeto, que abrange tarefas de vários ramos de expertise, como os de publicidade, consultoria técnicas e turismo, indica provável restrição ao caráter competitivo de certame que tem por objeto a contratação de serviços de realização de eventos Ainda na Representação formulada por pessoa física que acusou possíveis irregularidades no edital da Concorrência Pública nº 01/2012 conduzida pela Fundação de Apoio a Pesquisa e Extensão da Universidade Federal da Bahia - Fapex...</div>
+</div>
+
+</section>
+
+<section>
+<h2 id="esp-811212-11">esp-811212-11</h2>
+<div class="query-text">Nas dispensas emergenciais que envolvam serviços com dedicação exclusiva de mão de obra, permanecem aplicáveis as</div>
+<div class="query-meta">5 candidato(s) a decidir · já tem 1 relevant(s) anotado(s)</div>
+
+<div class="card">
+  <span class="pos">pos 1</span>
+  <span class="title">Inf. 427/2021 — Considerar exequível proposta com salário proporcional à jornada em licitação de serviços terceirizados</span>
+  <span class="id">1a0191c2</span>
+  <div class="snippet">Não deve ser considerada inexequível proposta de licitante que prevê, em sua planilha de preços para prestação de serviços terceirizados com dedicação exclusiva de mão de obra, o pagamento de salário proporcional à jornada semanal definida no edital, ainda que esse valor salarial seja inferior ao piso da categoria, fixado em convenção coletiva de trabalho para jornada semanal de maior duração. Representação formulada ao TCU apontou suposta irregularidade no Pregão Eletrônico 10/2021, promovido ...</div>
+</div>
+
+<div class="card">
+  <span class="pos">pos 2</span>
+  <span class="title">Inf. 371/2019 — Calcular PIS e Cofins sobre receita bruta em licitações de serviços continuados</span>
+  <span class="id">f6da312d</span>
+  <div class="snippet">Nas licitações de serviços continuados com dedicação exclusiva de mão de obra, as planilhas de custos e formação de preços das licitantes devem prever a incidência do PIS e da Cofins sobre a receita bruta do contrato, e não somente sobre a taxa de administração. Representação formulada ao TCU apontou supostas irregularidades no Pregão Eletrônico 43/2018, promovido pela Universidade Federal Rural de Pernambuco (UFRPE), e no Contrato 6/2019, dele decorrente, tendo por objeto a prestação de serviç...</div>
+</div>
+
+<div class="card">
+  <span class="pos">pos 3</span>
+  <span class="title">Inf. 290/2016 — Aplicar repactuação de preços em contratos de serviços continuados com mão de obra exclusiva</span>
+  <span class="id">debf021f</span>
+  <div class="snippet">O instituto da repactuação de preços aplica-se apenas a contratos de serviços continuados prestados com dedicação exclusiva da mão de obra. O Plenário apreciou monitoramento do Acórdão 1.677/2015 Plenário, proferido em processo de Representação que apontara possíveis irregularidades em edital de pregão eletrônico promovido pelo Departamento de Polícia Rodoviária Federal (DPRF), destinado à contratação de serviço de monitoramento eletrônico de veículos mediante sistema de leitura automática de p...</div>
+</div>
+
+<div class="card">
+  <span class="pos">pos 4</span>
+  <span class="title">Inf. 81/2011 — Justificar contratação emergencial para garantir legalidade em dispensa de licitação</span>
+  <span class="id">72d90cab</span>
+  <div class="snippet">A contratação direta com base na emergência prevista no inc. IV do art. 24 da Lei 8.666/1993 deve ser adequadamente justificada, de maneira a se afastar qualquer tipo de dúvida quanto à regularidade no uso do dispositivo Mediante representação que noticiou ao TCU irregularidades em processo de contratação por dispensa de licitação, em caráter emergencial, de empresa para execução das obras de reforma e adequação do antigo terminal de cargas da empresa Vasp, no Aeroporto de Guarulhos/SP, de modo...</div>
+</div>
+
+<div class="card">
+  <span class="pos">pos 5</span>
+  <span class="title">Resposta a Consulta — Acórdão AC-1207/24-P</span>
+  <span class="id">e1ec5d77</span>
+  <div class="snippet">Na contratação de serviços terceirizados com dedicação exclusiva de mão de obra, de modo a resguardar o interesse da Administração Pública, bem como buscar garantir a proteção do trabalhador terceirizado, o edital de licitação deve contemplar dispositivos que estabeleçam: a) exigência para que o licitante entregue junto com sua proposta de preços uma declaração informando o enquadramento sindical da empresa, a atividade econômica preponderante e a justificativa para adoção do instrumento coletiv...</div>
+</div>
+
+</section>
+
+<section>
+<h2 id="q-fiscal-contrato-responsabilidade">q-fiscal-contrato-responsabilidade</h2>
+<div class="query-text">responsabilidades do fiscal de contrato</div>
+<div class="query-meta">1 candidato(s) a decidir · já tem 10 relevant(s) anotado(s)</div>
+
+<div class="card">
+  <span class="pos">pos 3</span>
+  <span class="title">Inf. 381/2019 — Responsabilizar fiscal de contrato sem designação formal</span>
+  <span class="id">2e423dee</span>
+  <div class="snippet">A ausência de designação formal não obsta a responsabilização do agente que tenha praticado atos concernentes à função de fiscal de contrato, como o atesto de notas fiscais. Processo de auditoria realizada sobre contrato do extinto Ministério da Cultura que tinha por objeto organização de eventos foi convertido em tomada de contas especial, com vistas à apuração de suposto prejuízo ao erário decorrente do pagamento de despesas (hospedagem e alimentação) atestadas sem a efetiva comprovação de su...</div>
+</div>
+
+</section>
+
+<section>
+<h2 id="q-pregao-bens-comuns">q-pregao-bens-comuns</h2>
+<div class="query-text">pregão bens e serviços comuns</div>
+<div class="query-meta">2 candidato(s) a decidir · já tem 10 relevant(s) anotado(s)</div>
+
+<div class="card">
+  <span class="pos">pos 1</span>
+  <span class="title">Inf. 47/2011 — Limitar pregão a serviços estritamente comuns</span>
+  <span class="id">6da81a69</span>
+  <div class="snippet">Impossibilidade do uso do pregão para serviços não caracterizados como comuns Representação formulada pela Associação Brasileira de Consultores de Engenharia - (ABCE) cuidou de possíveis irregularidades no Pregão Eletrônico 78/2010, realizado pela Companhia Docas do Estado do Pará - (CDP), cujo objeto consistiu na elaboração de estudos e projetos de engenharia para: (I) construção de nova portaria; (II) centro administrativo; (III) urbanização das vias; (IV) rampa rodofluvial; (V) terminal de m...</div>
+</div>
+
+<div class="card">
+  <span class="pos">pos 5</span>
+  <span class="title">Inf. 323/2017 — Licitar serviços de comunicação como pregão por serem considerados comuns</span>
+  <span class="id">baa74c75</span>
+  <div class="snippet">Os serviços de assessoria de imprensa, clipping, media training e monitoramento de redes sociais devem ser contratados mediante procedimentos licitatórios, observado o devido parcelamento, na modalidade pregão, por se tratar de serviços comuns, e não por meio de licitações do tipo melhor técnica ou técnica e preço, pois não se enquadram na definição de serviços de publicidade constante do art. 2º da Lei 12.232/2010. O Plenário do TCU apreciou representação a respeito de irregularidades em conco...</div>
+</div>
+
+</section>
+
+<section>
+<h2 id="q-sancoes-impedimento-licitar">q-sancoes-impedimento-licitar</h2>
+<div class="query-text">sanções impedimento de licitar e contratar</div>
+<div class="query-meta">3 candidato(s) a decidir · já tem 10 relevant(s) anotado(s)</div>
+
+<div class="card">
+  <span class="pos">pos 1</span>
+  <span class="title">Inf. 399/2020 — Estender sanção de impedimento de licitar a toda esfera de governo e empresas estatais</span>
+  <span class="id">662c03a9</span>
+  <div class="snippet">Os efeitos da sanção de impedimento de licitar e contratar prevista no art. 7º da Lei 10.520/2002 se estendem a toda a esfera de governo do órgão ou da entidade que aplicou a penalidade, incluindo as empresas estatais. Ao apreciar embargos de declaração opostos contra o Acórdão 7181/2020-1ª Câmara, em que se arguia suposta omissão quanto à extensão dos efeitos da sanção do art. 7º da Lei 10.520/2002 em relação às empresas estatais, o relator, reconhecendo a omissão na deliberação embargada, esc...</div>
+</div>
+
+<div class="card">
+  <span class="pos">pos 3</span>
+  <span class="title">Inf. 209/2014 — Estender sanção de impedimento de licitar a toda esfera do ente federativo</span>
+  <span class="id">986bf562</span>
+  <div class="snippet">A sanção de impedimento de licitar e contratar pautada no art. 7º da Lei 10.520/02 (Lei do Pregão) produz efeitos não apenas no âmbito do órgão/entidade aplicador da penalidade, mas em toda a esfera do respectivo ente federativo (União ou estado ou município ou Distrito Federal). Embargos de Declaração opostos contra decisão prolatada pelo Plenário do TCU - pela qual fora considerada improcedente representação formulada por sociedade empresária contra sanção de impedimento para licitar e contra...</div>
+</div>
+
+<div class="card">
+  <span class="pos">pos 5</span>
+  <span class="title">Inf. 237/2015 — Aplicar sanção de impedimento de licitar sem exigência de dolo ou má-fé</span>
+  <span class="id">7f2967d1</span>
+  <div class="snippet">A aplicação da sanção de impedimento de licitar e contratar com a União, estados, Distrito Federal ou municípios, em face de irregularidade elencada no art. 7º da Lei 10.520/02, não depende da comprovação de dolo ou má-fé. Requer tão somente a evidenciação da prática injustificada de ato ilegal tipificado nesse dispositivo legal. Ainda na Auditoria realizada nos pregões eletrônicos lançados entre 2009 e 2012 por meio do Comprasnet, a relatora, a par das irregularidades praticadas pelos licitant...</div>
+</div>
+
+</section>
+
+<section>
+<h2 id="t-cadin-01">t-cadin-01</h2>
+<div class="query-text">inscrição da contratada no CADIN, posteriormente a 16 de setembro de 2024, impede a celebração de contratos, convênios,</div>
+<div class="query-meta">4 candidato(s) a decidir · já tem 1 relevant(s) anotado(s)</div>
+
+<div class="card">
+  <span class="pos">pos 2</span>
+  <span class="title">ON 82/2024</span>
+  <span class="id">773b551b</span>
+  <div class="snippet"><i>(sem snippet)</i></div>
+</div>
+
+<div class="card">
+  <span class="pos">pos 3</span>
+  <span class="title">ON 90/2024</span>
+  <span class="id">8a0c90a8</span>
+  <div class="snippet"><i>(sem snippet)</i></div>
+</div>
+
+<div class="card">
+  <span class="pos">pos 4</span>
+  <span class="title">Manual TCU - 5.11.6 Convocação para contratar</span>
+  <span class="id">2e940119</span>
+  <div class="snippet">A Administração deverá convocar o licitante vencedor para assinar o termo de contrato ou para aceitar ou retirar instrumento equivalente, dentro do prazo e condições estabelecidas no edital de licitação, sob pena de decair o direito à contratação, sem prejuízo das sanções previstas na Lei 14.133/2021 [[1]]. O prazo para assinatura do contrato poderá ser prorrogado uma vez, por igual período, mediante solicitação fundamentada da parte interessada, antes de findo o prazo e desde que o motivo seja...</div>
+</div>
+
+<div class="card">
+  <span class="pos">pos 5</span>
+  <span class="title">ON 92/2024</span>
+  <span class="id">4ce3acbb</span>
+  <div class="snippet"><i>(sem snippet)</i></div>
+</div>
+
+</section>
+
+<section>
+<h2 id="t-contrato-escopo-on92-01">t-contrato-escopo-on92-01</h2>
+<div class="query-text">Contratos de escopo, cujo objeto é a entrega de produto ou resultado determinado, têm vigência adstrita ao prazo</div>
+<div class="query-meta">5 candidato(s) a decidir · já tem 1 relevant(s) anotado(s)</div>
+
+<div class="card">
+  <span class="pos">pos 1</span>
+  <span class="title">Manual TCU - 5.11.5 Duração</span>
+  <span class="id">5eb27afb</span>
+  <div class="snippet">A Lei 14.133/2021 apresenta importantes alterações em relação ao regime da Lei 8.666/1993 no tocante à duração dos contratos. As disposições sobre o assunto constam dos arts. 105 a 114 da nova Lei. O art. 105 estabelece que a duração dos contratos será a prevista no edital. Assim, desvincula-se a duração dos contratos do exercício financeiro. No entanto, deve ser observada a disponibilidade de créditos orçamentários, no momento da contratação e a cada exercício financeiro [[1]]. Quando a contr...</div>
+</div>
+
+<div class="card">
+  <span class="pos">pos 2</span>
+  <span class="title">Inf. 203/2014 — Distinguir extinção contratual em contratos por escopo e por tempo determinado</span>
+  <span class="id">453611c2</span>
+  <div class="snippet">Nos contratos por escopo, inexistindo motivos para sua rescisão ou anulação, a extinção do ajuste somente se opera com a conclusão do objeto e o seu recebimento pela Administração, diferentemente dos ajustes por tempo determinado, nos quais o prazo constitui elemento essencial e imprescindível para a consecução ou a eficácia do objeto avençado. Tomada de Contas Especial originada da conversão de autos de Representação apurou dano ao erário na retomada das obras de construção de rodovia vicinal ...</div>
+</div>
+
+<div class="card">
+  <span class="pos">pos 3</span>
+  <span class="title">Inf. 272/2016 — Invalidar contratos expirados em convênio educacional com recursos federais</span>
+  <span class="id">4aa4580e</span>
+  <div class="snippet">Auditoria realizada em junho de 2015 verificara a aplicação de recursos federais repassados mediante convênio pelo Fundo Nacional de Desenvolvimento da Educação (FNDE) à Secretaria de Educação do Estado do Tocantins (Seduc/TO) para a construção de dezenove escolas. A unidade técnica do TCU promoveu oitiva prévia da secretaria e das empresas contratadas para a execução das obras, tendo em vista a suspeita de uso de recursos federais no pagamento de despesas de contratos que se encontrariam com va...</div>
+</div>
+
+<div class="card">
+  <span class="pos">pos 4</span>
+  <span class="title">DECOR PARECER n. 00004/2024/CNCIC/CGU/AGU - Revisão da Orientação Normativa n. 92/2024.</span>
+  <span class="id">2e3b7760</span>
+  <div class="snippet">DECOR PARECER n. 00004/2024/CNCIC/CGU/AGU ASSUNTO: Revisão da Orientação Normativa n. 92/2024. EMENTA: EMENTA: DIREITO ADMINISTRATIVO. CONVÊNIOS E INSTRUMENTOS CONGÊNERES. MANUTENÇÃO, ATUALIZAÇÃO, MODIFICAÇÃO OU CANCELAMENTO DE ORIENTAÇÃO NORMATIVA DA ADVOCACIA-GERAL DA UNIÃO. ORIENTAÇÃO NORMATIVA Nº 03/2009. SUGESTÃO DE NOVO TEXTO PARA A ON Nº 92/2024. I - São características marcantes dos contratos administrativos, regidos predominantemente pelo direito público: 1 a supremacia da Administra...</div>
+</div>
+
+<div class="card">
+  <span class="pos">pos 5</span>
+  <span class="title">Inf. 44/2010 — Celebrar aditivo contratual em contrato extinto com vigência retroativa</span>
+  <span class="id">780d21f7</span>
+  <div class="snippet">Celebração de aditivo a contrato extinto e com vigência retroativa Ao apreciar pedido de reexame interposto por dirigente da Empresa Brasileira de Infraestrutura Aeroportuária - Infraero contra o Acórdão n.º 2.538/2007-Plenário, por meio do qual o recorrente fora multado em razão da &quot;celebração de termos aditivos a contratos expirados e com vigência retroativa, sem previsão legal&quot;, a unidade técnica propôs a manutenção da penalidade, sob o argumento de que a prática era generalizada naquela ent...</div>
+</div>
+
+</section>
+
+<section>
+<h2 id="t-eng-art-rrt-trt-01">t-eng-art-rrt-trt-01</h2>
+<div class="query-text">elaboração de projetos, orçamentos e a execução de obras e serviços de engenharia exigem Anotação de Responsabilidade</div>
+<div class="query-meta">4 candidato(s) a decidir · já tem 1 relevant(s) anotado(s)</div>
+
+<div class="card">
+  <span class="pos">pos 1</span>
+  <span class="title">Inf. 164/2013 — Exigir Anotações de Responsabilidade Técnica em obras e serviços de engenharia públicos</span>
+  <span class="id">8a113b1c</span>
+  <div class="snippet">Nas licitações e contratações de obras e serviços de engenharia, compete aos gestores públicos exigir, a cada etapa (projeto, execução, supervisão e fiscalização), as respectivas Anotações de Responsabilidade Técnica, sob pena de responsabilização. Em autos de Prestação de Contas Simplificada, exercício de 2009, do Instituto Federal de Educação, Ciência e Tecnologia de Sergipe - IFS fora verificado, dentre outros apontamentos, o desabamento da estrutura de um galpão da Unidade Educativa de Prod...</div>
+</div>
+
+<div class="card">
+  <span class="pos">pos 2</span>
+  <span class="title">Manual TCU - 4.4.3 Projeto Básico (PB)</span>
+  <span class="id">92d157c2</span>
+  <div class="snippet">O projeto básico é um dos elementos mais importantes tanto para a licitação como para a execução de obras públicas. Ele define, detalhadamente, o objeto a ser licitado e seu respectivo custo. As irregularidades causadas por projetos básicos incompletos, deficientes ou desatualizados são encontradas com frequência nas auditorias realizadas pelo TCU e podem causar uma série de problemas, seja durante a execução da obra ou após a sua conclusão, gerando prejuízo ao funcionamento e à durabilidade da...</div>
+</div>
+
+<div class="card">
+  <span class="pos">pos 4</span>
+  <span class="title">Inf. 23/2010 — Aplicação de Súmulas em Licitações e Contratos Administrativos</span>
+  <span class="id">260e84c7</span>
+  <div class="snippet">NOVAS SÚMULAS Súmula n.º 260 É dever do gestor exigir apresentação de Anotação de Responsabilidade Técnica - ART referente a projeto, execução, supervisão e fiscalização de obras e serviços de engenharia, com indicação do responsável pela elaboração de plantas, orçamento-base, especificações técnicas, composições de custos unitários, cronograma físico-financeiro e outras peças técnicas.</div>
+</div>
+
+<div class="card">
+  <span class="pos">pos 5</span>
+  <span class="title">Inf. 440/2022 — Comprovação de Capacidade Técnico-Operacional em Licitações de Engenharia</span>
+  <span class="id">7faef377</span>
+  <div class="snippet">Para fins de habilitação técnico-operacional em certames visando à contratação de obras e serviços de engenharia, devem ser exigidos atestados emitidos em nome da licitante, podendo ser solicitadas as certidões de acervo técnico (CAT) ou anotações/registros de responsabilidade técnica (ART/RRT) emitidas pelo conselho de fiscalização profissional competente em nome dos profissionais vinculados aos referidos atestados, como forma de conferir autenticidade e veracidade às informações constantes nos...</div>
+</div>
+
+</section>
+
+<section>
+<h2 id="t-eng-precos-max-unitarios-01">t-eng-precos-max-unitarios-01</h2>
+<div class="query-text">Em contratos de obras e serviços de engenharia, além do preço global, é obrigatória a fixação de preços máximos</div>
+<div class="query-meta">4 candidato(s) a decidir · já tem 2 relevant(s) anotado(s)</div>
+
+<div class="card">
+  <span class="pos">pos 1</span>
+  <span class="title">Inf. 171/2013 — Definir preços máximos em licitações conforme natureza da contratação</span>
+  <span class="id">d221c8b1</span>
+  <div class="snippet">Nos termos da Súmula TCU 259, a fixação de preços máximos é obrigatória apenas nas contratações de obras e serviços de engenharia. Nas demais contratações, é facultativa, podendo, por exemplo, o preço máximo ser definido com base no valor orçado, mas sempre em conformidade com o mercado. Em Auditoria realizada na Prefeitura Municipal de Nova Cruz/RN, com o objetivo de verificar a regularidade da aplicação dos recursos dos programas &quot;Caminho da Escola&quot; e Programa Nacional de Apoio ao Transporte ...</div>
+</div>
+
+<div class="card">
+  <span class="pos">pos 2</span>
+  <span class="title">Inf. 351/2018 — Fixar preços máximos em editais de obras como obrigação do gestor público</span>
+  <span class="id">34a55c77</span>
+  <div class="snippet">A definição do critério de aceitabilidade dos preços unitários e global nos editais para a contratação de obras, com a fixação de preços máximos para ambos, é obrigação e não faculdade do gestor (Súmula TCU 259), ainda que se trate de empreitada por preço global. Essa obrigação tem por objetivo mitigar a ocorrência dos riscos associados tanto ao &quot;jogo de cronograma&quot; quanto ao &quot;jogo de planilha&quot;. Por determinação contida no Acórdão 2257/2015 Plenário, proferido em processo de auditoria realizada...</div>
+</div>
+
+<div class="card">
+  <span class="pos">pos 3</span>
+  <span class="title">Inf. 174/2013 — Limitar preços unitários em empreitada por preço global para evitar desvantagens contratuais</span>
+  <span class="id">010dc278</span>
+  <div class="snippet">Nas licitações para contratação sob regime de empreitada por preço global, não se exclui a necessidade de limitação dos preços unitários, uma vez que, mesmo nesses ajustes, os valores pactuados para cada item, em princípio, servirão de base para eventuais acréscimos contratuais, sob pena de uma proposta aparentemente vantajosa vir a se tornar desfavorável à Administração. Ainda no âmbito dos Pedidos de Reexame interpostos por gestores da SRHMA/TO, fora questionada a irregularidade relativa à &quot;i...</div>
+</div>
+
+<div class="card">
+  <span class="pos">pos 5</span>
+  <span class="title">Inf. 50/2011 — Detalhar orçamento como requisito essencial em contratações públicas de obras</span>
+  <span class="id">f8f4e7d9</span>
+  <div class="snippet">Contratação de obras públicas: 1 - É necessário que os itens do orçamento de referência da contratação sejam detalhados adequadamente, sendo irrelevante se a contratação ocorrerá por preço global ou unitário Em levantamento de auditoria realizado nas obras de modernização da Refinaria Presidente Getúlio Vargas (Repar), unidade da Petrobras no Estado do Paraná, foram constatadas diversas possíveis irregularidades. Dentre elas, a existência de planilhas de preços, anexas a contratos, que incluíra...</div>
+</div>
+
+</section>
+
+<section>
+<h2 id="t-garantia-modalidade-01">t-garantia-modalidade-01</h2>
+<div class="query-text">garantia contratual só pode ser prestada nas modalidades de caução (em dinheiro ou títulos da dívida pública),</div>
+<div class="query-meta">5 candidato(s) a decidir · já tem 1 relevant(s) anotado(s)</div>
+
+<div class="card">
+  <span class="pos">pos 1</span>
+  <span class="title">Manual TCU - 5.11.2 Garantias</span>
+  <span class="id">977dd2d2</span>
+  <div class="snippet">A Administração tem a opção de exigir a prestação de garantia nas contratações de bens, obras e serviços. Isso serve para garantir o fiel cumprimento das obrigações assumidas pelo contratado, inclusive no que diz respeito a multas, prejuízos e indenizações decorrentes de inadimplemento. Quando exigida, a garantia deve estar expressa no edital de licitação e na minuta de contrato, para que todas as partes estejam cientes dessa exigência. [[1]] Durante a fase de planejamento da contratação, é imp...</div>
+</div>
+
+<div class="card">
+  <span class="pos">pos 2</span>
+  <span class="title">Portaria-TCU nº 122, de 28 de junho de 2023</span>
+  <span class="id">4fab2b25</span>
+  <div class="snippet">PORTARIA-TCU Nº 122, DE 28 DE JUNHO DE 2023 Dispõe sobre a gestão e a fiscalização dos contratos de serviços, de compras e de fornecimentos contínuos no âmbito da Secretaria do Tribunal de Contas da União (TCU). (* Republicada após a compilação das alterações determinadas pela Portaria-TCU nº 73, de 24 de abril de 2024) O PRESIDENTE DO TRIBUNAL DE CONTAS DA UNIÃO, no uso de suas atribuições legais e regimentais, considerando a publicação da Lei nº 14.133, de 1º de abril de 2021, que estabele...</div>
+</div>
+
+<div class="card">
+  <span class="pos">pos 3</span>
+  <span class="title">Inf. 99/2012 — Substituir retenção cautelar por garantia contratual em licitações</span>
+  <span class="id">46257c58</span>
+  <div class="snippet">É possível, &quot;em caráter excepcional&quot;, a substituição da retenção cautelar de pagamentos à contratada por garantia prevista no art. 56 da Lei 8.666/93 Representação noticiou possíveis irregularidades no edital da concorrência 1/2010 do Instituto Nacional de Traumatologia e Ortopedia (Into), visando à contratação de empresa para realização de obras e serviços necessários à conclusão da nova sede da entidade. Em face de provável sobrepreço decorrente de valor excessivo de BDI e sobrepreço em servi...</div>
+</div>
+
+<div class="card">
+  <span class="pos">pos 4</span>
+  <span class="title">Inf. 108/2012 — Reconhecer impossibilidade de exigência de garantia contratual além do limite legal</span>
+  <span class="id">e16ba264</span>
+  <div class="snippet">Súmula n.º 275 Para fins de qualificação econômico-financeira, a Administração pode exigir das licitantes, de forma não cumulativa, capital social mínimo, patrimônio líquido mínimo ou garantias que assegurem o adimplemento do contrato a ser celebrado, no caso de compras para entrega futura e de execução de obras e serviços.</div>
+</div>
+
+<div class="card">
+  <span class="pos">pos 5</span>
+  <span class="title">Inf. 334/2017 — Exigir patrimônio líquido mínimo sem duplicar garantias em licitação</span>
+  <span class="id">4dcbd88a</span>
+  <div class="snippet">Não viola o art. 31, § 2º, da Lei 8.666/1993 o edital da licitação exigir comprovação de patrimônio líquido mínimo pelo licitante, para fins de qualificação econômico-financeira, concomitantemente com previsão de prestação de garantia contratual (art. 56) pelo contratado. Afronta aquele dispositivo legal a exigência simultânea de patrimônio líquido mínimo e de garantia de participação na licitação (art. 31, inciso III) como requisitos de habilitação. O TCU apreciou processo de representação a r...</div>
+</div>
+
+</section>
+
+<section>
+<h2 id="t-instrumento-substitutivo-on84-01">t-instrumento-substitutivo-on84-01</h2>
+<div class="query-text">substituição do termo de contrato por instrumento equivalente, autorizada pelo art. 95, I e II, da Lei 14.133/2021, é</div>
+<div class="query-meta">2 candidato(s) a decidir · já tem 1 relevant(s) anotado(s)</div>
+
+<div class="card">
+  <span class="pos">pos 5</span>
+  <span class="title">ON 84/2024</span>
+  <span class="id">670dfb0a</span>
+  <div class="snippet"><i>(sem snippet)</i></div>
+</div>
+
+<div class="card">
+  <span class="pos">pos 10</span>
+  <span class="title">Enunciado do INCP nº 20</span>
+  <span class="id">e890c16f</span>
+  <div class="snippet">A vigência contratual de que trata o artigo 105 da Lei Federal nº 14.133/2021 pode ser distinta do prazo de execução do objeto, devendo o contrato prever expressamente as hipóteses de prorrogação e os critérios para sua aplicação.</div>
+</div>
+
+</section>
+
+<section>
+<h2 id="t-lrf-art16-01">t-lrf-art16-01</h2>
+<div class="query-text">Despesas qualificáveis como atividades rotineiras e ordinárias dispensam o atendimento das exigências do art. 16, I e</div>
+<div class="query-meta">4 candidato(s) a decidir · já tem 1 relevant(s) anotado(s)</div>
+
+<div class="card">
+  <span class="pos">pos 1</span>
+  <span class="title">ON 52/2014</span>
+  <span class="id">2f8fd417</span>
+  <div class="snippet"><i>(sem snippet)</i></div>
+</div>
+
+<div class="card">
+  <span class="pos">pos 3</span>
+  <span class="title">Resposta a Consulta — Acórdão AC-1661/11-P</span>
+  <span class="id">b5ba5aad</span>
+  <div class="snippet">A comprovação de regularidade com a Fazenda Federal (art. 29, inciso III, da Lei 8.666/1993) poderá ser dispensada nos casos de contratações realizadas mediante dispensa de licitação de baixo valor (art. 24, incisos I e II, da Lei 8.666/1993).</div>
+</div>
+
+<div class="card">
+  <span class="pos">pos 4</span>
+  <span class="title">Acórdão TCU 1641/2021 - Despesa pública - Festividade</span>
+  <span class="id">46cda9f1</span>
+  <div class="snippet"><i>(sem snippet)</i></div>
+</div>
+
+<div class="card">
+  <span class="pos">pos 5</span>
+  <span class="title">Inf. 305/2016 — Verificar requisitos para dispensa de licitação em situação emergencial</span>
+  <span class="id">f5196c36</span>
+  <div class="snippet">A mera existência de decreto municipal declarando a situação do município como emergencial não é suficiente para justificar a contratação por dispensa de licitação com fundamento no art. 24, inciso IV, da Lei 8.666/1993, devendo-se verificar se os fatos relacionados à contratação amoldam-se à hipótese de dispensa prevista na lei. Auditoria realizada na Prefeitura Municipal de Araripina/PE, em virtude de possíveis irregularidades na aplicação de recursos públicos federais noticiadas ao TCU pelo ...</div>
+</div>
+
+</section>
+
+<section>
+<h2 id="t-marca-vs-fornecedor-01">t-marca-vs-fornecedor-01</h2>
+<div class="query-text">exclusividade de marca não se confunde com a exclusividade de fornecedor e, por si só, não comprova a inviabilidade de</div>
+<div class="query-meta">4 candidato(s) a decidir · já tem 1 relevant(s) anotado(s)</div>
+
+<div class="card">
+  <span class="pos">pos 1</span>
+  <span class="title">Inf. 413/2021 — Comprovar exclusividade de marca não garante inexigibilidade licitatória</span>
+  <span class="id">22c9aec7</span>
+  <div class="snippet">A demonstração de exclusividade de marca não comprova, por si só, o requisito de inviabilidade de competição necessário para fundamentar inexigibilidade de licitação. Representação formulada ao TCU apontou possível irregularidade na condução do Processo Administrativo 624/2019, pelo Serviço de Apoio às Micro e Pequenas Empresas de São Paulo (Sebrae-SP), que resultou na celebração, por inexigibilidade de licitação, do Contrato de Prestação de Serviços 005/2020, cujo objeto era o &quot;fornecimento do...</div>
+</div>
+
+<div class="card">
+  <span class="pos">pos 2</span>
+  <span class="title">Inf. 290/2016 — Comprovar exclusividade comercial por contrato entre empresas do mesmo grupo</span>
+  <span class="id">cd2f1a65</span>
+  <div class="snippet">Uma vez comprovada, na forma do art. 25, inciso I, da Lei 8.666/1993, a exclusividade de fabricação do produto por determinada empresa, a condição de comerciante único desse bem pode ser demonstrada por meio de contrato de exclusividade firmado entre as empresas fabricante e comerciante, cuja legitimidade não é afetada pelo fato de essas empresas serem do mesmo grupo, sendo dispensável, nesse caso, novo atestado fornecido nos termos do citado dispositivo legal para comprovar a exclusividade de c...</div>
+</div>
+
+<div class="card">
+  <span class="pos">pos 3</span>
+  <span class="title">Inf. 49/2011 — Comprovar exclusividade de fornecimento além da carta de exclusividade</span>
+  <span class="id">bb0023dc</span>
+  <div class="snippet">O documento &quot;carta de exclusividade&quot;, per si, é insuficiente para demonstrar que a empresa que o apresenta é fornecedora exclusiva de determinado produto Mediante recurso de revisão, o Ministério Público junto ao TCU - (MPTCU) pediu a reabertura das contas anuais, do exercício de 2002, da então Delegacia Federal de Agricultura do Estado do Tocantins - (DFA/TO). As contas do órgão tinham sido julgadas regulares com ressalvas, com quitação aos respectivos responsáveis e devidas determinações. O p...</div>
+</div>
+
+<div class="card">
+  <span class="pos">pos 5</span>
+  <span class="title">Manual TCU - 5.10.1.1 Fornecedor exclusivo</span>
+  <span class="id">2dee0322</span>
+  <div class="snippet">Trata-se de hipótese de inexigibilidade prevista no art. 74, inciso I, da Lei 14.133/2021 para aquisição de materiais, de equipamentos ou de gêneros ou contratação de serviços que só possam ser fornecidos por produtor, empresa ou representante comercial exclusivos. Observa-se que a hipótese de inexigibilidade de licitação se aplica à aquisição de bens e à prestação de serviços. Não se aplica, portanto, a obras. De todo modo, demonstrada a inviabilidade de competição, a contratação por inexigibi...</div>
+</div>
+
+</section>
+
+<section>
+<h2 id="t-pcfp-cct-vigente-01">t-pcfp-cct-vigente-01</h2>
+<div class="query-text">planilha de custos e formação de preços, nos contratos com dedicação exclusiva de mão de obra ou com pagamento por</div>
+<div class="query-meta">5 candidato(s) a decidir · já tem 1 relevant(s) anotado(s)</div>
+
+<div class="card">
+  <span class="pos">pos 1</span>
+  <span class="title">Portaria-TCU nº 122, de 28 de junho de 2023</span>
+  <span class="id">4fab2b25</span>
+  <div class="snippet">PORTARIA-TCU Nº 122, DE 28 DE JUNHO DE 2023 Dispõe sobre a gestão e a fiscalização dos contratos de serviços, de compras e de fornecimentos contínuos no âmbito da Secretaria do Tribunal de Contas da União (TCU). (* Republicada após a compilação das alterações determinadas pela Portaria-TCU nº 73, de 24 de abril de 2024) O PRESIDENTE DO TRIBUNAL DE CONTAS DA UNIÃO, no uso de suas atribuições legais e regimentais, considerando a publicação da Lei nº 14.133, de 1º de abril de 2021, que estabele...</div>
+</div>
+
+<div class="card">
+  <span class="pos">pos 2</span>
+  <span class="title">Manual TCU - 4.3.9.3 Definição e execução da forma de cálculo do valor estimado da contratação</span>
+  <span class="id">1df660b6</span>
+  <div class="snippet">O art. 6º da IN – Seges/ME 65/2021 trata da forma de cálculo da estimativa do preço da seguinte maneira: Art. 6º Serão utilizados, como métodos para obtenção do preço estimado, a média, a mediana ou o menor dos valores obtidos na pesquisa de preços, desde que o cálculo incida sobre um conjunto de três ou mais preços, oriundos de um ou mais dos parâmetros de que trata o art. 5º, desconsiderados os valores inexequíveis, inconsistentes e os excessivamente elevados. § 1º Poderão ser utilizados out...</div>
+</div>
+
+<div class="card">
+  <span class="pos">pos 3</span>
+  <span class="title">Orientação nº 29 — Tratamento de Risco e Custos Renováveis na Conta-Depósito Vinculada</span>
+  <span class="id">597e7ec0</span>
+  <div class="snippet">Orientação nº 29 — Tratamento de Risco e Custos Renováveis na Conta-Depósito Vinculada A Secretaria de Gestão orienta os órgãos e entidades do Sistema de Serviços Gerais (Sisg) sobre três pontos principais: (i) Planilha de Custos e Formação de Preços A planilha de custos referenciada no item 1 do Anexo VII-D da Instrução Normativa nº 5 de 2017 funciona como modelo sugerido. Os órgãos contratantes podem adaptá-la conforme necessidades e características específicas de cada serviço. (ii) Ferram...</div>
+</div>
+
+<div class="card">
+  <span class="pos">pos 4</span>
+  <span class="title">Inf. 485/2024 — Limitar convenção coletiva em licitações de serviços terceirizados</span>
+  <span class="id">6f7efd0d</span>
+  <div class="snippet">Nos editais de licitação para contratação de serviços terceirizados com dedicação exclusiva de mão de obra, não é permitido determinar a convenção ou o acordo coletivo de trabalho a ser utilizado pelas empresas licitantes como base para a confecção das respectivas propostas, em decorrência da previsão estabelecida no art. 511, §§ 2º e 3º, da CLT. Não obstante, em tais licitações, é lícito ao edital prever que somente serão aceitas propostas que adotarem na planilha de custos e formação de preços...</div>
+</div>
+
+<div class="card">
+  <span class="pos">pos 5</span>
+  <span class="title">Resposta a Consulta — Acórdão AC-1207/24-P</span>
+  <span class="id">e1ec5d77</span>
+  <div class="snippet">Na contratação de serviços terceirizados com dedicação exclusiva de mão de obra, de modo a resguardar o interesse da Administração Pública, bem como buscar garantir a proteção do trabalhador terceirizado, o edital de licitação deve contemplar dispositivos que estabeleçam: a) exigência para que o licitante entregue junto com sua proposta de preços uma declaração informando o enquadramento sindical da empresa, a atividade econômica preponderante e a justificativa para adoção do instrumento coletiv...</div>
+</div>
+
+</section>
+
+<section>
+<h2 id="t-pesquisa-ferramenta-privada-01">t-pesquisa-ferramenta-privada-01</h2>
+<div class="query-text">utilização de ferramenta privada de pesquisa de preços (Banco de Preços, Cotação Zênite, Fonte de Preços e congêneres)</div>
+<div class="query-meta">5 candidato(s) a decidir · já tem 1 relevant(s) anotado(s)</div>
+
+<div class="card">
+  <span class="pos">pos 1</span>
+  <span class="title">Orientação Normativa CNU/CGU/AGU nº 04/2016</span>
+  <span class="id">9f82ba4c</span>
+  <div class="snippet"><i>(sem snippet)</i></div>
+</div>
+
+<div class="card">
+  <span class="pos">pos 2</span>
+  <span class="title">Inf. 498/2025 — Realizar pesquisa local de preços em obras e serviços de engenharia apesar da omissão legal</span>
+  <span class="id">b522e763</span>
+  <div class="snippet">A omissão do art. 23, § 2º, da Lei 14.133/2021 quanto à possibilidade da realização de cotação local no caso de obras e serviços de engenharia não deve obstar, por si só, a prática de pesquisa local de valores de insumos para definição do preço estimado da contratação, desde que sua adoção seja devidamente justificada e a vantagem em relação ao sistema referencial de custos demonstrada pelo orçamentista, nos termos do art. 8º do Decreto 7.983/2013, cuja aplicação no âmbito da referida lei está a...</div>
+</div>
+
+<div class="card">
+  <span class="pos">pos 3</span>
+  <span class="title">Inf. 264/2015 — Fundamentar estimativas de preços em cesta de referências diversificadas</span>
+  <span class="id">19556917</span>
+  <div class="snippet">As estimativas de preços prévias às licitações devem estar baseadas em cesta de preços aceitáveis, tais como os oriundos de pesquisas diretas com fornecedores ou em seus catálogos, valores adjudicados em licitações de órgãos públicos, sistemas de compras (Comprasnet), valores registrados em atas de SRP, avaliação de contratos recentes ou vigentes, compras e contratações realizadas por corporações privadas em condições idênticas ou semelhantes. Em Representação formulada por sociedade empresária...</div>
+</div>
+
+<div class="card">
+  <span class="pos">pos 4</span>
+  <span class="title">Acórdão TCU 2595/2021 - Obras e serviços de engenharia - Orçamento estimativo</span>
+  <span class="id">68875705</span>
+  <div class="snippet"><i>(sem snippet)</i></div>
+</div>
+
+<div class="card">
+  <span class="pos">pos 5</span>
+  <span class="title">Inf. 147/2013 — Estimar preços em licitações mediante múltiplas fontes de pesquisa</span>
+  <span class="id">d2dc2bc7</span>
+  <div class="snippet">A deflagração de procedimentos licitatórios exige estimativa de preços que pode ser realizada a partir de consultas a fontes variadas, como fornecedores, licitações similares, atas de registros de preço, contratações realizadas por entes privados em condições semelhantes, entre outras. No entanto, os valores obtidos por meio dessas consultas que sejam incapazes de refletir a realidade de mercado devem ser desprezados Auditoria no Serviço Nacional de Aprendizagem do Cooperativismo - Sescoop aval...</div>
+</div>
+
+</section>
+
+<section>
+<h2 id="t-sancao-exnunc-01">t-sancao-exnunc-01</h2>
+<div class="query-text">sanções de suspensão, impedimento e declaração de inidoneidade produzem efeitos ex nunc, não afetam por si os contratos</div>
+<div class="query-meta">4 candidato(s) a decidir · já tem 1 relevant(s) anotado(s)</div>
+
+<div class="card">
+  <span class="pos">pos 1</span>
+  <span class="title">Inf. 187/2014 — Declarar inidoneidade sem efeito automático em contratos vigentes</span>
+  <span class="id">0770cd2e</span>
+  <div class="snippet">A sanção de declaração de inidoneidade, prevista no art. 46 da Lei 8.443/92, produz efeitos ex-nunc, não afetando, automaticamente, contratos em andamento celebrados antes da aplicação da penalidade. Pedido de Reexame interposto por sociedade empresária requereu a reforma do acórdão que a declarou inidônea para participar de licitação na Administração Pública Federal por seis meses, por ter apresentado declaração inverídica de que atendia às condições para usufruir das vantagens previstas na Le...</div>
+</div>
+
+<div class="card">
+  <span class="pos">pos 2</span>
+  <span class="title">Inf. 42/2010 — Declarar inidoneidade sem efeito retroativo em contratos vigentes</span>
+  <span class="id">1e43c60f</span>
+  <div class="snippet">A declaração de inidoneidade produz efeitos para o futuro, não alcançando os contratos já celebrados com a empresa sancionada Por meio do Acórdão n.º 1.262/2009-Plenário, o Tribunal deliberou no sentido de &quot;9.1. declarar as empresas Skymaster Airlines Ltda., CNPJ 00.966.339/0001-47; Beta - Brazilian Express Transportes Aéreos Ltda., CNPJ 64.862.642/0001-82; e Aeropostal Brasil Transporte Aéreo Ltda., CNPJ 003.765.091/0001-44, inidôneas para participar, por cinco anos, de todas as licitações que...</div>
+</div>
+
+<div class="card">
+  <span class="pos">pos 3</span>
+  <span class="title">Inf. 64/2011 — Declarar inidoneidade de empresa licitante com efeitos prospectivos e rescisão contratual</span>
+  <span class="id">4377e9b9</span>
+  <div class="snippet">Contratação de serviços: 2 - A declaração de inidoneidade possui efeito &#39;ex-nunc&#39;, cabendo às entidades administrativas medidas com vistas à rescisão de contrato que possuam com a empresa julgada inidônea, caso entendam necessário. Contudo, no caso do certame que levou à aplicação da sanção, a instituição pública deve adotar as providências necessárias, com vistas à pronta rescisão do contrato decorrente Ainda na representação em que tratou de possíveis irregularidades na Concorrência 159/2009,...</div>
+</div>
+
+<div class="card">
+  <span class="pos">pos 5</span>
+  <span class="title">Inf. 391/2020 — Vedação de prorrogação contratual com empresa declarada inidônea</span>
+  <span class="id">8a98fb73</span>
+  <div class="snippet">É indevida a prorrogação de contrato de prestação de serviços contínuos celebrado com sociedade empresária que, na vigência do contrato, seja declarada inidônea para contratar com a Administração (art. 46 da Lei 8.443/1992) ou que tenha os efeitos dessa sanção a ela estendidos. Se a contratada deve manter os requisitos de habilitação durante a execução do contrato (art. 55, inciso XIII, da Lei 8.666/1993), deve, por consequência, deter essa condição quando da sua prorrogação. Em autos de repres...</div>
+</div>
+
+</section>
+
+<section>
+<h2 id="t-srp-contratacao-unica-01">t-srp-contratacao-unica-01</h2>
+<div class="query-text">Sistema de Registro de Preços não se presta a contratação única e exauriente previamente definida; nesses casos, a ata</div>
+<div class="query-meta">4 candidato(s) a decidir · já tem 1 relevant(s) anotado(s)</div>
+
+<div class="card">
+  <span class="pos">pos 1</span>
+  <span class="title">Inf. 508/2025 — Limitar uso da ata de registro de preços em contratação única e integral</span>
+  <span class="id">7b7502ed</span>
+  <div class="snippet">É irregular a utilização, pelo órgão gerenciador, do sistema de registro de preços para realização de contratação única e integral do objeto registrado, ocasionando a extinção da ata na primeira contratação, por afronta aos princípios da razoabilidade e da finalidade. Denúncia formulada ao TCU apontara supostas irregularidades no Pregão Eletrônico 90.003/2024, promovido pela Universidade Federal de São Paulo (Unifesp), campus de Guarulhos, com vistas ao registro de preços para contratação de &quot;s...</div>
+</div>
+
+<div class="card">
+  <span class="pos">pos 3</span>
+  <span class="title">Inf. 147/2013 — Limitar adesão a atas de registro de preços anteriores ao Decreto 7.892/2013</span>
+  <span class="id">f16d1227</span>
+  <div class="snippet">A falta de estimativa prévia, no edital, das quantidades a serem adquiridas por não participante impede a adesão desses entes a atas de registro de preços conformadas após o início da vigência do novo Decreto 7.892/2013. As atas constituídas antes da vigência do mencionado normativo (sob a égide do antigo Decreto 3.931/2001) somente podem ser utilizadas pelo órgão gerenciador e pelos órgãos participantes, não sendo cabível a adesão por parte de órgãos não participantes Ainda no âmbito do Pregão...</div>
+</div>
+
+<div class="card">
+  <span class="pos">pos 4</span>
+  <span class="title">Inf. 91/2012 — Invalidar registro de preços por inobservância de requisitos legais específicos</span>
+  <span class="id">09454fe9</span>
+  <div class="snippet">É ilícita a utilização do sistema de registro de preços, por falta de observância dos comandos contidos nos incisos do art. 2º do Decreto nº 3.931, de 19/9/2001, quando as peculiaridades do objeto a ser executado e sua localização indicam que só será possível uma única contratação Representação formulada por empresa apontou possíveis irregularidades na condução do Pregão Eletrônico nº 119/2011, que tem por objeto a contratação de empresa de engenharia para executar serviços de ampliação e melho...</div>
+</div>
+
+<div class="card">
+  <span class="pos">pos 5</span>
+  <span class="title">Inf. 453/2023 — Inaplicabilidade do Sistema de Registro de Preços em Obras de Engenharia</span>
+  <span class="id">7ad10ec0</span>
+  <div class="snippet">O sistema de registro de preços não é aplicável à contratação de obras de engenharia, uma vez que o objeto não se enquadra em nenhuma das hipóteses previstas no art. 3º do Decreto 7.892/2013 e, também, porque, na contratação de obras, não há demanda por itens isolados, pois os serviços não podem ser dissociados uns dos outros. Representação formulada pela Procuradoria da República no Rio Grande do Sul apontou indícios de irregularidades na construção do &quot;Campus Litoral Norte&quot; da Universidade Fe...</div>
+</div>
+
+</section>
+
+<section>
+<h2 id="t-srp-pluralidade-direta-01">t-srp-pluralidade-direta-01</h2>
+<div class="query-text">Sistema de Registro de Preços em contratação direta, autorizado pelo art. 82, §6º, da Lei 14.133/2021, somente é</div>
+<div class="query-meta">4 candidato(s) a decidir · já tem 1 relevant(s) anotado(s)</div>
+
+<div class="card">
+  <span class="pos">pos 5</span>
+  <span class="title">Acórdão TCU 1351/2025 - Registro de preços - Cabimento</span>
+  <span class="id">a1cf1a79</span>
+  <div class="snippet"><i>(sem snippet)</i></div>
+</div>
+
+<div class="card">
+  <span class="pos">pos 6</span>
+  <span class="title">Enunciado do INCP nº 16</span>
+  <span class="id">631bf08f</span>
+  <div class="snippet">O Sistema de Registro de Preços previsto no artigo 82 da Lei nº 14.133/2021 pode ser utilizado para qualquer objeto, desde que atendidos os requisitos de que trata o referido dispositivo, não havendo impedimento para registro de preços de obras ou serviços de engenharia.</div>
+</div>
+
+<div class="card">
+  <span class="pos">pos 8</span>
+  <span class="title">Art. 82 - Lei 14.133/2021</span>
+  <span class="id">1e85a248</span>
+  <div class="snippet">Art. 82º . O edital de licitação para registro de preços observará as regras gerais desta Lei e deverá dispor sobre: I - as especificidades da licitação e de seu objeto, inclusive a quantidade máxima de cada item que poderá ser adquirida; II - a quantidad...</div>
+</div>
+
+<div class="card">
+  <span class="pos">pos 10</span>
+  <span class="title">Enunciado do CJF nº 16</span>
+  <span class="id">3e119cf5</span>
+  <div class="snippet">É possível a adoção do sistema de registro de preços para a contratação de bens e serviços de informática, ainda que comuns, nos termos do inciso III do art. 6º da Lei n. 14.133/2021, devendo a análise da necessidade e os requisitos para contratação serem tratados no estudo técnico preliminar e no termo de referência.</div>
+</div>
+
+</section>
+
+
+</body>
+</html>

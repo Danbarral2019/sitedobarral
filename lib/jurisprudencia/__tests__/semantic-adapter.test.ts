@@ -438,6 +438,39 @@ describe('adaptToSourcesPayload — informativo', () => {
       sourceType: 'document-tcu-informativo',
     });
   });
+
+  it('informativo com título contendo acentos: regex casa corretamente', async () => {
+    const { adaptToSourcesPayload } = await import('../semantic-adapter');
+
+    const makeInformativoEnriched = (title: string) => [{
+      documentId: 'inf-acc',
+      similarity: 0.8,
+      chunkContent: 't',
+      source: {
+        kind: 'document' as const,
+        category: 'informativo',
+        data: {
+          id: 'inf-acc',
+          title,
+          category: 'informativo',
+          tcuNumeroAcordao: null, tcuEmentaCompleta: null, description: null,
+          content: null, tcuRelator: null, tcuAutorTese: null, tcuOrgaoJulgador: null,
+          tcuDataJulgamento: null, tcuLinkPDF: null, summary: null, themes: null,
+          leiArticles: null, url: null, douData: null,
+          uploadedAt: new Date(), updatedAt: new Date(),
+          entityType: null, enunciadoNumber: null,
+        },
+      },
+    }];
+
+    // Padrão oficial TCU com acentos ("Licitações")
+    const p1 = adaptToSourcesPayload(makeInformativoEnriched('Informativo de Licitações e Contratos 42'));
+    expect(p1[0].decisionNumber).toBe('Informativo de Licitações e Contratos 42');
+
+    // Com ano após barra
+    const p2 = adaptToSourcesPayload(makeInformativoEnriched('Informativo Especial nº 1/2024'));
+    expect(p2[0].decisionNumber).toBe('Informativo Especial nº 1/2024');
+  });
 });
 
 describe('adaptToSourcesPayload — manual-tcu', () => {
