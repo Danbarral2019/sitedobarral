@@ -16,7 +16,7 @@
 
 import { readFileSync, writeFileSync } from 'node:fs'
 import { join } from 'node:path'
-import { select, confirm, input } from '@inquirer/prompts'
+import { select, confirm } from '@inquirer/prompts'
 import { prisma } from '@/lib/prisma'
 import type { GoldenSet, GoldenQuery } from '../types'
 import { KNOWN_OPERATIONS } from './golden-audit/known-operations'
@@ -61,7 +61,10 @@ async function resolveTitleToId(titleQuery: string): Promise<{ id: string; title
   return picked
 }
 
-async function resolveRemoveId(idPrefix: string): Promise<{ id: string; title: string | null } | null> {
+async function resolveRemoveId(
+  idPrefix: string,
+  golden: GoldenSet
+): Promise<{ id: string; title: string | null } | null> {
   if (idPrefix.length === 36) {
     // Full UUID — busca direto
     const doc = await prisma.document.findUnique({
@@ -75,8 +78,25 @@ async function resolveRemoveId(idPrefix: string): Promise<{ id: string; title: s
     SELECT id, title FROM "Document" WHERE id::text LIKE ${idPrefix + '%'} LIMIT 5
   `
   if (docs.length === 0) {
-    // Pode ser ID fantasma — retornar original pra remoção mesmo assim
-    return { id: idPrefix, title: null }
+    // Fallback: procurar prefix nas annotations do próprio golden
+    const byPrefix = new Set<string>()
+    for (const q of golden.queries) {
+      for (const id of q.annotations.relevant) {
+        if (id.toLowerCase().startsWith(idPrefix.toLowerCase())) byPrefix.add(id)
+      }
+    }
+    if (byPrefix.size === 1) {
+      const id = Array.from(byPrefix)[0]
+      console.log(`  ⚠ Prefix "${idPrefix}" não encontrado no DB, mas existe no golden como "${id.slice(0, 8)}..." — removendo pelo golden.`)
+      return { id, title: '(doc deletado do DB)' }
+    }
+    if (byPrefix.size > 1) {
+      console.log(`  ⚠ Prefix "${idPrefix}" ambíguo: ${byPrefix.size} IDs no golden começam com esse prefix. Pulando remoção.`)
+      return null
+    }
+    // Nem DB nem golden tem esse prefix — aviso claro
+    console.log(`  ⚠ Prefix "${idPrefix}" não resolve em nenhum doc (DB ou golden). Pulando remoção.`)
+    return null
   }
   if (docs.length === 1) return { id: docs[0].id, title: docs[0].title }
   const choice = await select<string>({
@@ -156,7 +176,10 @@ async function dedupSpotCheck(golden: GoldenSet): Promise<ResolvedOp[]> {
   return ops
 }
 
-async function resolveKnownOperation(op: KnownOperation): Promise<ResolvedOp> {
+async function resolveKnownOperation(
+  op: KnownOperation,
+  golden: GoldenSet
+): Promise<ResolvedOp> {
   console.log(`\n=== Query ${op.queryId} ===`)
   console.log(`Descrição: ${op.description}`)
 
@@ -177,7 +200,7 @@ async function resolveKnownOperation(op: KnownOperation): Promise<ResolvedOp> {
 
   const removeIds: ResolvedOp['removeIds'] = []
   for (const idPrefix of op.removeIds) {
-    const resolved = await resolveRemoveId(idPrefix)
+    const resolved = await resolveRemoveId(idPrefix, golden)
     if (resolved) removeIds.push({ id: resolved.id, previousTitle: resolved.title ?? undefined })
   }
 
@@ -189,6 +212,9 @@ function applyResolvedOps(golden: GoldenSet, ops: ResolvedOp[]): GoldenSet {
   const newQueries: GoldenQuery[] = golden.queries.map((q) => {
     const queryOps = ops.filter((op) => op.queryId === q.id)
     if (queryOps.length === 0) return q
+    if (queryOps.length > 1) {
+      console.log(`  ⚠ Query ${q.id} tem ${queryOps.length} operações no mesmo plano (dedup + known_op?). Aplicando em ordem.`)
+    }
     let ann = q.annotations
     for (const op of queryOps) {
       for (const add of op.addIds) ann = addToAnnotations(ann, add.id, add.list)
@@ -200,7 +226,9 @@ function applyResolvedOps(golden: GoldenSet, ops: ResolvedOp[]): GoldenSet {
         ...ann,
         annotatedAt: new Date().toISOString(),
         annotatedBy: ann.annotatedBy ?? 'fase6a',
-        notes: [ann.notes, '[Fase 6A — 2026-04-23]'].filter(Boolean).join(' '),
+        notes: ann.notes?.includes('[Fase 6A')
+          ? ann.notes
+          : [ann.notes, '[Fase 6A — 2026-04-23]'].filter(Boolean).join(' '),
       },
     }
   })
@@ -240,7 +268,7 @@ async function main() {
   // 2. Operações conhecidas (8 E + 2 fantasmas)
   console.log('\n=== Aplicando operações conhecidas ===')
   for (const op of KNOWN_OPERATIONS) {
-    const resolved = await resolveKnownOperation(op)
+    const resolved = await resolveKnownOperation(op, golden)
     allOps.push(resolved)
   }
 
