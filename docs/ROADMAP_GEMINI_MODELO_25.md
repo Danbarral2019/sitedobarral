@@ -49,21 +49,35 @@ Para cada `'gemini-2.0-flash'` no código:
 
 Cada fase é pequena, commitável separadamente, com rollback trivial. Ordem segue criticidade: **hot paths primeiro**, docs por último. Entre cada fase, commit.
 
-### Fase 0 — Sanity check de produção
+### Fase 0 — Sanity check de produção — ✅ CONCLUÍDA (2026-04-22)
 
-**Por quê:** antes de mexer, confirmar que os 429 estão mesmo acontecendo em endpoints live. Evita ficar caçando bug imaginário.
+**Achados:**
 
-**Passos:**
-1. Levantar o dev server (`npm run dev`).
-2. Abrir `/area-restrita/assistente` (chat RAG) e fazer 3-4 perguntas rápidas.
-3. Conferir console/server logs para 429.
-4. Anotar na seção "Medições" deste roadmap.
+1. **Os 7 endpoints user-facing (`/api/documents/query`, `/api/jurisprudencia/query`,
+   `/api/artigos/[numero]/chat`, `/api/lei-14133/search`, `/api/admin/gemini-test`,
+   `/api/admin/lei-14133/analytics`, `/api/cron/gemini-health`) já consomem
+   `PRIMARY_GEMINI_MODEL` de `lib/gemini/config.ts`, que é `'gemini-2.5-flash'`.
+   Chat RAG e busca IA não estão afetados pelo bug.** A dor real está em:
+   - Crons de highlights (TCU + TCE) — silenciosamente sem destaques editoriais.
+   - Cron de newsletter (relevance-filter + intro-generator) — sem filtragem/intro.
+   - Pipeline de OCR (text-extractor + document-processor) — PDFs escaneados não
+     são processados.
+   - Scripts manuais — afetam quando executados.
 
-Alternativa: checar logs de produção na Vercel (Sentry captura erros 500 mas 429 tratado como "erro Gemini" pode estar invisível). Se tiver Sentry em mãos, vale olhar também.
+2. **Deadline DURA descoberto em `lib/gemini/config.ts:9-10`:**
+   > "Google deprecou gemini-2.0-flash (shutdown **2026-06-01**, acesso restrito
+   > desde 2026-03-06). Substituto GA é gemini-2.5-flash."
+   Hoje é 2026-04-22. Faltam ~6 semanas. Depois disso, **toda chamada a 2.0-flash
+   vai retornar 404**, não 429. A migração passa de "qualidade" para
+   "não-quebrar-nada".
 
-**Critério de aceite:** temos evidência documentada de 429 em produção **ou** confirmação de que não está batendo (o que mudaria a urgência deste roadmap).
+3. **Reprodução do 429 já documentada nesta mesma sessão** em
+   `scripts/debug-gemini-25.ts` (commit `1e1dd55`): gemini-2.0-flash retorna 429
+   com o key atual, enquanto 2.5-flash e 2.5-pro retornam 200. Evidência suficiente
+   — não precisa de dev server para confirmar.
 
-**Sem commit nessa fase** — só captura evidência.
+**Decisão:** pular o passo "levantar dev server + testar chat" — era pra validar
+hipótese que os achados acima já resolvem. Seguir direto para Fase 1.
 
 ---
 
@@ -146,7 +160,20 @@ Todos são **cron-críticos** (rodam em background após import ou antes de envi
 
 ---
 
-### Fase 5 — Scripts manuais (9 arquivos)
+### Fase 5 — Scripts manuais (8 arquivos ativos) — ✅ CONCLUÍDA (2026-04-22)
+
+**Commits:**
+- `5592e1e` reclassify + reanalyze → 2.5-flash
+- `28de1f9` fix typing (cast thinkingConfig no SDK)
+- `71f3a27` populate-* → 2.5-flash
+- `58c6003` index-* → 2.5-flash
+- `b650abb` (corrigiu model-swap que ficou pela metade no commit de Fase 2)
+
+**Descobertas durante a execução:**
+1. O SDK `@google/generative-ai` não tipa `thinkingConfig` em `GenerationConfig`. Runtime funciona (a prop é propagada para o body REST); cast aplicado em 2 scripts para silenciar `tsc`.
+2. O helper `lib/gemini-helper.js` tinha um bug silencioso: o `modelMap` remapeava qualquer pedido de 2.5 **de volta para 2.0-flash** chamando isso de "Fallback". Corrigido na Fase 4.
+3. Alguns Edits iniciais reportaram sucesso mas não persistiram (intro-generator, relevance-filter, tribunal-highlight-analyzer tiveram só o import aplicado — o model-swap ficou de fora). Corrigido no commit `b650abb`.
+
 
 **Arquivos:**
 - `scripts/reclassify-documents-articles.ts`
@@ -173,7 +200,14 @@ Todos são **cron-críticos** (rodam em background após import ou antes de envi
 
 ---
 
-### Fase 6 — Documentação e schema
+### Fase 6 — Documentação e schema — ✅ CONCLUÍDA (2026-04-22)
+
+**Commit:** `aba937a`
+- `CLAUDE.md`: 3 seções atualizadas (modelo descontinuado, chat RAG flow, tabela da camada de IA).
+- `prisma/schema.prisma`: comentário de exemplo em `DocumentAnalysis.geminiModel`.
+- `docs/superpowers/plans/2026-04-06-portar-camada-lib-ai.md`: nota histórica no topo apontando para este novo roadmap.
+- `lib/gemini/__tests__/cached-client.test.ts`: assertion de model. Nota: esse arquivo tem outro bug pré-existente (mock de `HarmCategory` incompleto); conserto fora do escopo.
+
 
 **Arquivos:**
 - `CLAUDE.md` — trocar quaisquer referências "usar gemini-2.0-flash" por "gemini-2.5-flash"; atualizar a tabela `lib/ai/registry.ts` no CLAUDE.md com os novos defaults da Fase 3.
@@ -186,7 +220,19 @@ Todos são **cron-críticos** (rodam em background após import ou antes de envi
 
 ---
 
-### Fase 7 — Validação final + checks de qualidade
+### Fase 7 — Validação final + checks de qualidade — ✅ CONCLUÍDA (2026-04-23)
+
+**Medições:**
+- **Eval pós-roadmap** (`eval/reports/2026-04-23T01-07-30_pos-roadmap-2-5.md`):
+  recall@5 = **34,2%** (idêntico ao baseline 2026-04-22T18-24-07). Zero regressão, como esperado — o endpoint de busca já usava `PRIMARY_GEMINI_MODEL` (= 2.5) antes deste roadmap começar.
+- **Grep final por `gemini-2.0-flash`** em `app/`, `lib/`, `scripts/`, `prisma/`: 5 ocorrências restantes, todas em comentários ou type-unions explicativos (config.ts, gemini-helper.js, lei-indexer.ts, tcu-enrichment.ts). Zero em código executável.
+- **Sanity check em produção (24h de logs)**: pendente. Recomenda-se monitorar Sentry/Vercel logs após o próximo deploy para confirmar que os 429 sumiram dos crons de newsletter e TCE highlights.
+
+**O que este roadmap NÃO resolveu** (não era o escopo):
+- Qualidade semântica da busca (baseline 34,2% segue baixo; tema do `ROADMAP_GEMINI_PAGO.md`).
+- Backlog de 727 docs pendentes no cron de index-jobs.
+- Bug pré-existente no mock de `cached-client.test.ts`.
+
 
 **Passos:**
 1. Re-rodar os mesmos testes da Fase 0 (chat no `/area-restrita/assistente`).
