@@ -14,6 +14,7 @@ import type { JurisprudenciaFilters } from '@/lib/jurisprudencia/unified-query';
 import { queryGeminiText } from '@/lib/gemini/cached-client';
 import { handleApiError } from '@/lib/errors/error-handler';
 import { apiLogger } from '@/lib/logger';
+import { prisma } from '@/lib/prisma';
 import { z } from 'zod';
 
 export const runtime = 'nodejs';
@@ -145,6 +146,43 @@ function countBySourceType(payload: JurisprudenciaSource[]) {
   return counts;
 }
 
+/**
+ * Persiste uma entrada no SearchHistory para analytics e feedback loop.
+ * Server-side (diferente do /api/documents/query que persiste client-side)
+ * porque o front de jurisprudência ainda não tinha esse wire-up. Salva
+ * sempre — mesmo em queries que não acharam resultado — porque "o que
+ * o aluno pergunta e não recebe resposta" é exatamente o sinal mais
+ * valioso pra melhorar retrieval.
+ */
+async function persistJurisprudenciaSearch(params: {
+  userId: string;
+  query: string;
+  filters: unknown;
+  aiAnswer: string | null;
+  sources: JurisprudenciaSource[] | null;
+}): Promise<string | null> {
+  try {
+    const entry = await prisma.searchHistory.create({
+      data: {
+        userId: params.userId,
+        type: 'jurisprudencia',
+        query: params.query.trim(),
+        filters: params.filters ? JSON.stringify(params.filters) : null,
+        aiAnswer: params.aiAnswer,
+        sources: params.sources ? JSON.stringify(params.sources) : null,
+      },
+      select: { id: true },
+    });
+    return entry.id;
+  } catch (err) {
+    apiLogger.error(
+      { err, userId: params.userId },
+      'Falha ao persistir jurisprudencia/query no SearchHistory',
+    );
+    return null;
+  }
+}
+
 export const POST = withAuth(
   async (request: NextRequest, context?: Record<string, unknown>) => {
     try {
@@ -185,11 +223,19 @@ export const POST = withAuth(
           totalInDatabase === 0
             ? 'A base de jurisprudência deste ambiente ainda não foi populada. Fale com o administrador para rodar a ingestão de decisões.'
             : 'Não encontrei decisões que casassem semanticamente com essa pergunta. Tente reformular em outros termos ou usar os filtros para restringir manualmente a pesquisa.';
+        const searchHistoryId = await persistJurisprudenciaSearch({
+          userId: user.userId,
+          query,
+          filters,
+          aiAnswer: null,
+          sources: null,
+        });
         return NextResponse.json({
           answer: msg,
           sources: [],
           consulted: 0,
           totalInDatabase,
+          searchHistoryId,
         });
       }
 
@@ -199,12 +245,20 @@ export const POST = withAuth(
           { userId: user.userId, resultCount: searchResponse.results.length },
           'jurisprudencia/query all results were orphaned chunks'
         );
+        const searchHistoryId = await persistJurisprudenciaSearch({
+          userId: user.userId,
+          query,
+          filters,
+          aiAnswer: null,
+          sources: null,
+        });
         return NextResponse.json({
           answer:
             'Os trechos relevantes encontrados apontam para documentos que não estão mais disponíveis. Tente reformular a pergunta.',
           sources: [],
           consulted: 0,
           totalInDatabase: await countUnifiedApproved(),
+          searchHistoryId,
         });
       }
 
@@ -260,20 +314,36 @@ export const POST = withAuth(
         // Debug info liberado enquanto estamos diagnosticando o bug em preview.
         // TODO: restringir para role === 'admin' quando o diagnóstico terminar.
         const debug = { geminiError: errMsg, stack: errStack };
+        const searchHistoryId = await persistJurisprudenciaSearch({
+          userId: user.userId,
+          query,
+          filters,
+          aiAnswer: null,
+          sources: sourcesPayload,
+        });
         return NextResponse.json({
           answer: answerText,
           sources: sourcesPayload,
           consulted: enriched.length,
           cached: false,
           debug,
+          searchHistoryId,
         });
       }
 
+      const searchHistoryId = await persistJurisprudenciaSearch({
+        userId: user.userId,
+        query,
+        filters,
+        aiAnswer: answerText,
+        sources: sourcesPayload,
+      });
       return NextResponse.json({
         answer: answerText,
         sources: sourcesPayload,
         consulted: enriched.length,
         cached,
+        searchHistoryId,
       });
     } catch (error) {
       return handleApiError(error);

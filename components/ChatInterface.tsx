@@ -2,7 +2,7 @@
 
 import { useState, useRef, useEffect } from 'react';
 import Link from 'next/link';
-import { Send, Loader2, Sparkles, FileText, AlertCircle, Scale, Gavel, ExternalLink, Download, Share2, Check } from 'lucide-react';
+import { Send, Loader2, Sparkles, FileText, AlertCircle, Scale, Gavel, ExternalLink, Download, Share2, Check, ThumbsUp, ThumbsDown } from 'lucide-react';
 import { trackClientEvent } from '@/lib/monitoring/track-client';
 import ArticleAwareMarkdown from './ArticleAwareMarkdown';
 
@@ -24,6 +24,7 @@ interface Message {
   sources?: DocumentSource[];
   legalSources?: LegalSourceItem[];
   searchHistoryId?: string;
+  feedback?: 1 | -1 | null;
   timestamp: Date;
 }
 
@@ -288,8 +289,10 @@ export default function ChatInterface({
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
+              type: 'documents',
               query,
               aiAnswer: fullContent,
+              filters: courseId ? { courseId } : undefined,
               sources: currentMsg?.sources?.map(s => ({ title: s.title, category: s.category, url: s.url })),
               legalSources: currentMsg?.legalSources?.map(s => ({ type: s.type, title: s.title, url: s.url })),
             }),
@@ -358,6 +361,38 @@ export default function ChatInterface({
       console.error('Erro ao gerar PDF:', err);
     } finally {
       setExportingPdf(null);
+    }
+  };
+
+  /**
+   * Envia feedback 👍/👎 para uma mensagem. Toggle: clicar no mesmo botão
+   * limpa o feedback. Atualização otimista — se o servidor falhar, reverte
+   * o estado local.
+   */
+  const handleFeedback = async (message: Message, value: 1 | -1) => {
+    if (!message.searchHistoryId) return;
+    const newValue: 1 | -1 | null = message.feedback === value ? null : value;
+    // Otimista
+    setMessages(prev =>
+      prev.map(m => (m.id === message.id ? { ...m, feedback: newValue } : m)),
+    );
+    try {
+      const res = await fetch(
+        `/api/area-restrita/search-history/${message.searchHistoryId}/feedback`,
+        {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ feedback: newValue }),
+        },
+      );
+      if (!res.ok) throw new Error('feedback-failed');
+    } catch {
+      // Reverte se falhar
+      setMessages(prev =>
+        prev.map(m =>
+          m.id === message.id ? { ...m, feedback: message.feedback ?? null } : m,
+        ),
+      );
     }
   };
 
@@ -620,26 +655,54 @@ export default function ChatInterface({
                   {message.role === 'assistant' && message.content && (
                     <div className="flex items-center gap-1 opacity-0 group-hover/msg:opacity-100 transition-all">
                       {message.searchHistoryId && (
-                        <button
-                          onClick={() => handleShare(message)}
-                          disabled={sharingId === message.id}
-                          className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs text-gray-400 hover:text-purple-600 hover:bg-purple-50 disabled:text-gray-400 transition-all"
-                          title={sharedUrl && sharingId === message.id ? 'Link copiado!' : 'Compartilhar resposta'}
-                        >
-                          {sharedUrl && sharingId === message.id ? (
-                            <>
-                              <Check className="w-3 h-3 text-green-600" />
-                              <span className="text-green-600">Copiado!</span>
-                            </>
-                          ) : sharingId === message.id ? (
-                            <Loader2 className="w-3 h-3 animate-spin" />
-                          ) : (
-                            <>
-                              <Share2 className="w-3 h-3" />
-                              Compartilhar
-                            </>
-                          )}
-                        </button>
+                        <>
+                          <button
+                            onClick={() => handleFeedback(message, 1)}
+                            className={`inline-flex items-center px-2 py-0.5 rounded text-xs transition-all ${
+                              message.feedback === 1
+                                ? 'text-green-600 bg-green-50'
+                                : 'text-gray-400 hover:text-green-600 hover:bg-green-50'
+                            }`}
+                            aria-label="Resposta útil"
+                            aria-pressed={message.feedback === 1}
+                            title="Resposta útil"
+                          >
+                            <ThumbsUp className="w-3 h-3" />
+                          </button>
+                          <button
+                            onClick={() => handleFeedback(message, -1)}
+                            className={`inline-flex items-center px-2 py-0.5 rounded text-xs transition-all ${
+                              message.feedback === -1
+                                ? 'text-red-600 bg-red-50'
+                                : 'text-gray-400 hover:text-red-600 hover:bg-red-50'
+                            }`}
+                            aria-label="Resposta não ajudou"
+                            aria-pressed={message.feedback === -1}
+                            title="Resposta não ajudou"
+                          >
+                            <ThumbsDown className="w-3 h-3" />
+                          </button>
+                          <button
+                            onClick={() => handleShare(message)}
+                            disabled={sharingId === message.id}
+                            className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs text-gray-400 hover:text-purple-600 hover:bg-purple-50 disabled:text-gray-400 transition-all"
+                            title={sharedUrl && sharingId === message.id ? 'Link copiado!' : 'Compartilhar resposta'}
+                          >
+                            {sharedUrl && sharingId === message.id ? (
+                              <>
+                                <Check className="w-3 h-3 text-green-600" />
+                                <span className="text-green-600">Copiado!</span>
+                              </>
+                            ) : sharingId === message.id ? (
+                              <Loader2 className="w-3 h-3 animate-spin" />
+                            ) : (
+                              <>
+                                <Share2 className="w-3 h-3" />
+                                Compartilhar
+                              </>
+                            )}
+                          </button>
+                        </>
                       )}
                       <button
                         onClick={() => handleExportMessagePDF(message)}

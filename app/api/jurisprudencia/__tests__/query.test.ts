@@ -9,6 +9,7 @@ const {
   mockResolveEmenta,
   mockCountUnifiedApproved,
   mockQueryGeminiText,
+  mockSearchHistoryCreate,
 } = vi.hoisted(() => ({
   mockSemanticSearch: vi.fn(),
   mockEnrichSources: vi.fn(),
@@ -17,6 +18,7 @@ const {
   mockResolveEmenta: vi.fn(),
   mockCountUnifiedApproved: vi.fn(),
   mockQueryGeminiText: vi.fn(),
+  mockSearchHistoryCreate: vi.fn(),
 }));
 
 vi.mock('@/lib/embeddings/vector-search', () => ({
@@ -32,6 +34,14 @@ vi.mock('@/lib/jurisprudencia/semantic-adapter', () => ({
 
 vi.mock('@/lib/jurisprudencia/unified-query', () => ({
   countUnifiedApproved: (...args: any[]) => mockCountUnifiedApproved(...args),
+}));
+
+vi.mock('@/lib/prisma', () => ({
+  prisma: {
+    searchHistory: {
+      create: (...args: any[]) => mockSearchHistoryCreate(...args),
+    },
+  },
 }));
 
 vi.mock('@/lib/gemini/cached-client', () => ({
@@ -74,6 +84,7 @@ beforeEach(() => {
   mockResolveEmenta.mockReset();
   mockCountUnifiedApproved.mockReset();
   mockQueryGeminiText.mockReset();
+  mockSearchHistoryCreate.mockReset();
 
   // Default: adapter passes options through
   mockMapFiltersToSemanticOptions.mockReturnValue({
@@ -81,6 +92,7 @@ beforeEach(() => {
     includeTribunalDecisions: true,
   });
   mockResolveEmenta.mockReturnValue('ementa mock');
+  mockSearchHistoryCreate.mockResolvedValue({ id: 'sh-mock' });
 });
 
 describe('POST /api/jurisprudencia/query', () => {
@@ -253,5 +265,60 @@ describe('POST /api/jurisprudencia/query', () => {
         dataFrom: expect.any(Date),
       })
     );
+  });
+
+  it('persiste SearchHistory com type=jurisprudencia e retorna searchHistoryId', async () => {
+    mockSemanticSearch.mockResolvedValueOnce({
+      results: [{ documentId: 'td-1', documentTitle: 't', category: 'acordao', chunkContent: 'c', chunkIndex: 0, similarity: 0.8, url: null, courseId: null, isCommon: true, tags: null, leiArticles: null, uploadedAt: '2024-01-01', sourceType: 'tribunal-decision' }],
+      query: 'q', totalFound: 1, latency: 10, cached: false,
+    });
+    mockEnrichSources.mockResolvedValueOnce([{
+      documentId: 'td-1', similarity: 0.8, chunkContent: 'c',
+      source: { kind: 'tribunal-decision', data: { id: 'td-1', tribunalCode: 'TCE-SP', tribunalName: 'T', decisionType: 'acordao', decisionNumber: '1', title: 't', ementa: 'e', summary: null, relator: null, orgaoJulgador: null, dataJulgamento: null, themes: null, leiArticles: null, url: null } },
+    }]);
+    mockAdaptToSourcesPayload.mockReturnValueOnce([{
+      id: 'td-1', tribunalCode: 'TCE-SP', tribunalName: 'T', decisionType: 'acordao',
+      decisionNumber: '1', title: 't', relator: null, orgaoJulgador: null,
+      dataJulgamento: null, url: null, sourceType: 'tribunal-decision', similarity: 0.8,
+    }]);
+    mockQueryGeminiText.mockResolvedValueOnce({ response: 'r', cached: false, latency: 10 });
+    mockSearchHistoryCreate.mockResolvedValueOnce({ id: 'sh-123' });
+
+    const res = await POST(makeReq({ query: 'pregão', filters: { tribunal: 'TCE-SP' } }));
+    const body = await readJson(res);
+
+    expect(mockSearchHistoryCreate).toHaveBeenCalledWith(
+      expect.objectContaining({
+        data: expect.objectContaining({
+          userId: 'u1',
+          type: 'jurisprudencia',
+          query: 'pregão',
+          filters: expect.stringContaining('TCE-SP'),
+          aiAnswer: 'r',
+        }),
+      }),
+    );
+    expect(body.searchHistoryId).toBe('sh-123');
+  });
+
+  it('persiste SearchHistory mesmo quando semanticSearch=[] (analytics de falhas)', async () => {
+    mockSemanticSearch.mockResolvedValueOnce({
+      results: [], query: 'q', totalFound: 0, latency: 10, cached: false,
+    });
+    mockCountUnifiedApproved.mockResolvedValueOnce(500);
+    mockSearchHistoryCreate.mockResolvedValueOnce({ id: 'sh-empty' });
+
+    const res = await POST(makeReq({ query: 'tese obscura' }));
+    const body = await readJson(res);
+
+    expect(mockSearchHistoryCreate).toHaveBeenCalledWith(
+      expect.objectContaining({
+        data: expect.objectContaining({
+          type: 'jurisprudencia',
+          aiAnswer: null,
+        }),
+      }),
+    );
+    expect(body.searchHistoryId).toBe('sh-empty');
   });
 });
