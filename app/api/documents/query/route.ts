@@ -553,7 +553,15 @@ RESPOSTA:`;
       const geminiModel = genAI.getGenerativeModel({
         model: PRIMARY_GEMINI_MODEL,
         systemInstruction,
-        generationConfig: { temperature: 0.5, maxOutputTokens: 3000 },
+        generationConfig: {
+          temperature: 0.5,
+          maxOutputTokens: 8192,
+          // Gemini 2.5-flash: sem thinkingBudget: 0, o raciocínio come o
+          // maxOutputTokens e a resposta trunca no meio. Síntese factual
+          // não precisa de thinking — só cita fontes. Spread driblando
+          // excess-property-check do SDK type (mesmo padrão do cached-client).
+          ...{ thinkingConfig: { thinkingBudget: 0 } },
+        },
         safetySettings: LEGAL_SAFETY_SETTINGS,
       });
 
@@ -645,7 +653,8 @@ RESPOSTA:`;
     try {
       const geminiResult = await queryGeminiText(synthesisPrompt, {
         temperature: 0.5,
-        maxOutputTokens: 3000,
+        maxOutputTokens: 8192,
+        thinkingBudget: 0,
         useCache,
         systemInstruction,
       });

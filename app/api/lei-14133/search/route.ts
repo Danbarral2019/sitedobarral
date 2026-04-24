@@ -116,6 +116,7 @@ Regras:
       model: PRIMARY_GEMINI_MODEL,
       temperature: 0.3, // Baixa para respostas mais precisas
       maxOutputTokens: 1024,
+      thinkingBudget: 0,
       useCache: true,
       cacheTTL: 1800, // 30 minutos
     });

@@ -176,7 +176,8 @@ export const POST = withAuth(
       try {
         const result = await queryGeminiText(prompt, {
           temperature: 0.3,
-          maxOutputTokens: 1500,
+          maxOutputTokens: 8192,
+          thinkingBudget: 0,
           useCache: true,
           systemInstruction:
             'Você é um assistente jurídico técnico e conciso. Fundamente tudo nas decisões citadas; nunca invente números de acórdão ou relatores.',
