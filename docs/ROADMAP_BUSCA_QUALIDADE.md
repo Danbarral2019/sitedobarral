@@ -46,20 +46,40 @@
 
 Inversão total do comportamento anterior.
 
-### 🆕 Pendência descoberta: backfill de embeddings em `TribunalDecision`
+### ✅ Backfill de embeddings TribunalDecision executado (commit `31fbf9e` cron fix)
 
-Script `scripts/diagnose-jurisprudencia-embeddings.ts` expôs que o pipeline de embeddings das `TribunalDecision` **mal rodou**:
+**Antes (descoberto hoje):**
 
-| Tribunal | Total | Aprovadas | `embeddingStatus=completed` | Chunks |
-|---|---|---|---|---|
-| TCU | 238 | 238 | **10** | 10 |
-| TCE-PE | 172 | 149 | **8** | 10 |
-| TCE-PR | 121 | 23 | 0 | 0 |
-| TCE-SP / SC / RJ / RS / STJ | 270 | 20 | 0 | 0 |
+| Tribunal | Total | Aprovadas | `embeddingStatus=completed` |
+|---|---|---|---|
+| TCU | 238 | 238 | 10 |
+| TCE-PE | 172 | 149 | 8 |
+| TCE-PR | 121 | 23 | 0 |
+| demais | 270 | 20 | 0 |
 
-~680 decisões aprovadas sem chunks. Pós-fix do Bug 2, queries tipicamente respondidas por TCEs (casos estaduais específicos) vão achar pouco material via semantic search. **Não bloqueia** a UX do Bug 2 — queries temáticas nacionais (tipo "segregação de funções") são bem servidas pelos 1555 acórdãos TCU via `DocumentChunk`. Mas o backfill é a próxima prioridade natural.
+**Depois do backfill** (`scripts/index-tribunal-decisions.ts`, 545s, 562 chunks):
 
-**Próxima sessão:** executar o backfill (Task 7 do plano `2026-04-22-ia-jurisprudencia-semantic-search.md` — script `backfill-pending-embeddings.ts`) ou diagnosticar o pipeline (Task 6 — `process-index-jobs` cron).
+| Tribunal | Total | Aprovadas | `embeddingStatus=completed` |
+|---|---|---|---|
+| TCU | 238 | 238 | **238** ✅ |
+| TCE-PE | 172 | 149 | **149** ✅ |
+| TCE-PR | 121 | 23 | **23** ✅ |
+| TCE-SP | 67 | 4 | **4** ✅ |
+| TCE-SC | 59 | 16 | **15** (1 falha — retry cron pega) |
+| STJ / TCE-RJ / TCE-RS | 144 | 0 | 0 (bloqueados por approvalStatus, não por indexação) |
+
+**Causa-raiz do backlog** (também corrigida no commit `31fbf9e`): o cron `process-index-jobs` processava **10 jobs por run**, priorizando IndexJobs + Documents nessa ordem. TribunalDecisions sempre ficavam com o resto, zero na maioria das runs. Pior: havia um early-return quando `jobs + docs = 0` que pulava TDs completamente mesmo com 412 delas pending.
+
+**Fix** (Task 6 do plano `2026-04-22-ia-jurisprudencia-semantic-search.md`):
+- `MAX_JOBS_PER_RUN: 10 → 50` com time budget 250s e batches paralelos de 10 via `Promise.all`.
+- Ordenação `DESC → ASC` nos dois `findMany` (Documents e TribunalDecisions) — FIFO real, backlog não envelhece.
+- Query de TribunalDecisions movida pra antes da checagem de `totalPending` pra eliminar o early-return bug.
+
+### Smoke test pós-backfill
+
+Re-rodada de `validate-bugfixes-2026-04-24.ts` confirma que a busca agora considera também TCEs:
+- "segregação de funções" → top-6: **5× TCU + 1× Prejulgado 2542 TCE-SC** (antes: 6× TCU, 0× TCE — apenas porque TCEs não tinham embeddings).
+- Bug 1 continua passando (respostas terminam em ponto final, ~900 tokens de 8192 usados).
 
 ### Smoke test de regressão
 
@@ -73,8 +93,9 @@ npx dotenv -e .env.local -- npx tsx scripts/validate-bugfixes-2026-04-24.ts
 
 ## Plano para a próxima sessão
 
-1. **Backfill de embeddings TribunalDecision** (~680 decisões faltando) — Task 7 do plano `2026-04-22-ia-jurisprudencia-semantic-search.md`. Ou diagnosticar antes por que o cron não rodou (Task 6).
-2. **Depois disso**: voltar à decisão estratégica de investir em golden set / UX / frescor. Golden set expandido continua sendo o caminho mais concreto e de maior retorno.
+1. **Golden set expansion** — objetivo: sair das 53 queries anotadas para 150+. Frente de maior retorno conforme decisão estratégica tomada em 2026-04-23. Revisar `docs/superpowers/plans` em busca de um plano existente, ou escrever novo.
+2. **UX da jurisprudência** — validar a rota reescrita no browser (login via `aluno@teste.com`), confirmar que as fontes aparecem bem renderizadas na UI de `/area-restrita/jurisprudencia`. O smoke test já cobre retrieval + Gemini; falta validação visual.
+3. **Opcional**: investigar 1 falha residual no backfill TCE-SC e os ~180 de `STJ + TCE-RJ + TCE-RS` que estão em `approvalStatus != 'auto_approved'` — pipeline de curadoria separado, não é problema de indexação.
 
 ---
 
