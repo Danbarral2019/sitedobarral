@@ -8,7 +8,12 @@ import { processTribunalDecision } from '@/lib/embeddings/tribunal-decision-proc
 // ===========================
 
 const CRON_SECRET = process.env.CRON_SECRET;
-const MAX_JOBS_PER_RUN = 10; // Process up to 10 documents per cron execution
+// 2026-04-24: subiu de 10→50 porque TribunalDecisions ficavam starved
+// quando Documents enchiam a fila. FIFO + batches paralelos de 10 com
+// time budget evitam regressão.
+const MAX_JOBS_PER_RUN = 50;
+const BATCH_SIZE = 10;
+const TIME_BUDGET_MS = 250_000;
 const MAX_RETRY_ATTEMPTS = 3;
 
 // ===========================
@@ -266,6 +271,7 @@ export async function GET(req: NextRequest) {
     });
 
     // 4. Also fetch documents that need embedding (direct processing)
+    // FIFO: itens mais antigos primeiro, pra não deixar backlog envelhecer.
     const pendingDocuments = await prisma.document.findMany({
       where: {
         r2Key: { not: null },
@@ -276,11 +282,32 @@ export async function GET(req: NextRequest) {
       },
       select: { id: true },
       take: MAX_JOBS_PER_RUN - pendingJobs.length,
-      orderBy: { uploadedAt: 'desc' },
+      orderBy: { uploadedAt: 'asc' },
     });
 
-    const totalPending = pendingJobs.length + pendingDocuments.length;
-    console.log(`📋 Found ${pendingJobs.length} jobs + ${pendingDocuments.length} pending documents`);
+    // 4b. Também busca TribunalDecisions pendentes — precisa estar aqui (antes
+    // do early-return) pra não starvar TDs em períodos sem jobs/docs novos.
+    const pendingDecisions = await prisma.tribunalDecision.findMany({
+      where: {
+        approvalStatus: { in: ['auto_approved', 'manually_approved'] },
+        OR: [
+          { embeddingStatus: null },
+          { embeddingStatus: 'pending' },
+        ],
+      },
+      select: { id: true },
+      take: Math.max(
+        0,
+        MAX_JOBS_PER_RUN - pendingJobs.length - pendingDocuments.length,
+      ),
+      orderBy: { createdAt: 'asc' },
+    });
+
+    const totalPending =
+      pendingJobs.length + pendingDocuments.length + pendingDecisions.length;
+    console.log(
+      `📋 Found ${pendingJobs.length} jobs + ${pendingDocuments.length} pending documents + ${pendingDecisions.length} pending tribunal decisions`,
+    );
 
     if (totalPending === 0) {
       return NextResponse.json({
@@ -347,61 +374,82 @@ export async function GET(req: NextRequest) {
       }
     }
 
-    // 6. Process direct documents (without IndexJob entry)
-    for (const doc of pendingDocuments) {
-      console.log(`⚙️  Processing document ${doc.id} directly`);
-
-      const result = await processDocument(doc.id);
-
-      results.push({
-        jobId: `direct-${doc.id}`,
-        documentId: doc.id,
-        status: result.success ? 'completed' : 'failed',
-        error: result.error,
-        chunkCount: result.stats?.chunkCount,
-      });
-
-      if (result.success) {
-        console.log(`✅ Document ${doc.id} processed (${result.stats?.chunkCount} chunks)`);
-      } else {
-        console.log(`❌ Document ${doc.id} failed: ${result.error}`);
+    // 6. Process direct documents em batches paralelos de 10 com time budget.
+    const batchStartTime = Date.now();
+    for (let i = 0; i < pendingDocuments.length; i += BATCH_SIZE) {
+      if (Date.now() - batchStartTime > TIME_BUDGET_MS) {
+        console.warn(
+          `⏰ Time budget exhausted; skipping ${pendingDocuments.length - i} remaining docs`,
+        );
+        break;
       }
+      const batch = pendingDocuments.slice(i, i + BATCH_SIZE);
+      const batchResults = await Promise.all(
+        batch.map(doc =>
+          processDocument(doc.id).catch(err => ({
+            success: false,
+            error: err instanceof Error ? err.message : String(err),
+          })),
+        ),
+      );
+      batchResults.forEach((result, idx) => {
+        const doc = batch[idx];
+        results.push({
+          jobId: `direct-${doc.id}`,
+          documentId: doc.id,
+          status: result.success ? 'completed' : 'failed',
+          error: (result as { error?: string }).error,
+          chunkCount: (result as { stats?: { chunkCount?: number } }).stats?.chunkCount,
+        });
+        if (result.success) {
+          console.log(
+            `✅ Document ${doc.id} (${(result as { stats?: { chunkCount?: number } }).stats?.chunkCount} chunks)`,
+          );
+        } else {
+          console.log(
+            `❌ Document ${doc.id}: ${(result as { error?: string }).error}`,
+          );
+        }
+      });
     }
 
-    // 7. Process pending tribunal decisions
-    const pendingDecisions = await prisma.tribunalDecision.findMany({
-      where: {
-        approvalStatus: { in: ['auto_approved', 'manually_approved'] },
-        OR: [
-          { embeddingStatus: null },
-          { embeddingStatus: 'pending' },
-        ],
-      },
-      select: { id: true },
-      take: Math.max(0, MAX_JOBS_PER_RUN - pendingJobs.length - pendingDocuments.length),
-      orderBy: { createdAt: 'desc' },
-    });
-
-    console.log(`Found ${pendingDecisions.length} pending tribunal decisions`);
-
-    for (const decision of pendingDecisions) {
-      console.log(`Processing tribunal decision ${decision.id}`);
-
-      const result = await processTribunalDecision(decision.id);
-
-      results.push({
-        jobId: `tribunal-${decision.id}`,
-        documentId: decision.id,
-        status: result.success ? 'completed' : 'failed',
-        error: result.error,
-        chunkCount: result.stats?.chunkCount,
-      });
-
-      if (result.success) {
-        console.log(`Tribunal decision ${decision.id} processed (${result.stats?.chunkCount} chunks)`);
-      } else {
-        console.log(`Tribunal decision ${decision.id} failed: ${result.error}`);
+    // 7. Process pending tribunal decisions — FIFO + batches paralelos.
+    // (queryados acima em 4b pra garantir que ocorrem mesmo se docs/jobs = 0)
+    for (let i = 0; i < pendingDecisions.length; i += BATCH_SIZE) {
+      if (Date.now() - batchStartTime > TIME_BUDGET_MS) {
+        console.warn(
+          `⏰ Time budget exhausted; skipping ${pendingDecisions.length - i} remaining decisions`,
+        );
+        break;
       }
+      const batch = pendingDecisions.slice(i, i + BATCH_SIZE);
+      const batchResults = await Promise.all(
+        batch.map(decision =>
+          processTribunalDecision(decision.id).catch(err => ({
+            success: false,
+            error: err instanceof Error ? err.message : String(err),
+          })),
+        ),
+      );
+      batchResults.forEach((result, idx) => {
+        const decision = batch[idx];
+        results.push({
+          jobId: `tribunal-${decision.id}`,
+          documentId: decision.id,
+          status: result.success ? 'completed' : 'failed',
+          error: (result as { error?: string }).error,
+          chunkCount: (result as { stats?: { chunkCount?: number } }).stats?.chunkCount,
+        });
+        if (result.success) {
+          console.log(
+            `✅ Tribunal decision ${decision.id} (${(result as { stats?: { chunkCount?: number } }).stats?.chunkCount} chunks)`,
+          );
+        } else {
+          console.log(
+            `❌ Tribunal decision ${decision.id}: ${(result as { error?: string }).error}`,
+          );
+        }
+      });
     }
 
     // 8. Return summary

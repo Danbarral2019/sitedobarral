@@ -22,8 +22,15 @@ interface RerankScore {
 
 type RerankProvider = 'gemini' | 'cohere';
 
-const RERANK_PROVIDER: RerankProvider =
-  (process.env.RERANK_PROVIDER as RerankProvider) || 'gemini';
+/**
+ * Lê o provider por chamada (não por module-load) — o CLI de eval seta
+ * `process.env.RERANK_PROVIDER = 'cohere'` dentro do `main()`, ou seja, depois
+ * dos imports ESM terem sido hoisted. Ler em runtime garante que o flag
+ * `--cohere` realmente mude o caminho.
+ */
+function getRerankProvider(): RerankProvider {
+  return (process.env.RERANK_PROVIDER as RerankProvider) || 'gemini';
+}
 
 // ===========================
 // Main Function
@@ -44,7 +51,7 @@ export async function rerankResults(
 ): Promise<SearchResult[]> {
   if (results.length <= Math.min(topK, 3)) return results.slice(0, topK);
 
-  const provider = RERANK_PROVIDER;
+  const provider = getRerankProvider();
   if (provider === 'cohere' && process.env.COHERE_API_KEY) {
     return rerankWithCohere(query, results, topK);
   }

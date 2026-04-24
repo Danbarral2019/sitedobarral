@@ -1037,19 +1037,35 @@ model LeiArticle {
 }
 
 // Histórico de Pesquisas IA (para alunos retomarem consultas)
+// Também serve como analytics de uso — consulte /api/admin/search-analytics.
 model SearchHistory {
   id           String   @id @default(uuid())
   userId       String
+  // 'documents' (busca geral no acervo via /api/documents/query)
+  // 'jurisprudencia' (busca na aba de jurisprudência via /api/jurisprudencia/query)
+  type         String   @default("documents")
   query        String
+  // Filtros aplicados no momento da busca (courseId, category, tribunal, etc.).
+  // JSON porque o shape varia por `type`. Essencial pra reproduzir queries
+  // exatamente no eval do golden set.
+  filters      String?  @db.Text
   aiAnswer     String?  @db.Text
   sources      String?  // JSON: [{title, category, url}]
   legalSources String?  // JSON: [{type, title, url}]
+  // Feedback do aluno: -1 (ruim), 1 (boa), null (não avaliou). Usado para
+  // calibrar retrieval contra uso real e priorizar queries problemáticas
+  // para anotação manual no golden set.
+  feedback     Int?
+  feedbackNote String?  @db.Text
+  feedbackAt   DateTime?
   isPublic     Boolean  @default(false)
   shareId      String?  @unique
   createdAt    DateTime @default(now())
 
   @@index([userId, createdAt])
   @@index([userId])
+  @@index([type, createdAt])
+  @@index([feedback])
 }
 
 // Fila de Indexação (Background Jobs para Embeddings)

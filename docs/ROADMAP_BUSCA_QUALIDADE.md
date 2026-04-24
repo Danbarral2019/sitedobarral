@@ -2,8 +2,123 @@
 
 **Criado em:** 2026-04-23
 **Autor:** Daniel Barral + Claude (sessão de execução do reprocessamento)
-**Status:** Planejado, aguardando execução
-**Prioridade:** Média — produto funciona, mas recall@5 de ~34% é baixo para busca jurídica profissional. Limita utilidade do chat IA e da busca semântica na `/area-restrita/assistente`.
+**Status atual (2026-04-24):** Fases 0, 1, 2, 6 e 9 concluídas. **Teto prático aceito em 66,3% recall@5.** Bugs 1 e 2 (descobertos em 2026-04-23 à noite) **FECHADOS em 2026-04-24** — ver seção abaixo. Pendência aberta nova: backfill de embeddings em `TribunalDecision`.
+**Prioridade:** Média — produto funciona, recall@5 atual 66,3% é razoável para busca jurídica.
+
+---
+
+## ✅ Sessão 2026-04-24 — Bugs 1 e 2 FECHADOS
+
+### Bug 1 — Respostas da IA truncavam no meio — RESOLVIDO (commit `0fd9dad`)
+
+**Causa-raiz confirmada:** Gemini 2.5-flash consumia `maxOutputTokens` em raciocínio quando `thinkingBudget` não era zerado. Exato mesmo padrão do rerank que foi arrumado em 2026-04-23.
+
+**Fix aplicado em 5 call sites:**
+- `app/api/documents/query/route.ts:553` (streaming SSE — SDK direto) → `thinkingConfig: { thinkingBudget: 0 }` inline + `maxOutputTokens: 8192`.
+- `app/api/documents/query/route.ts:646` (non-streaming) → `thinkingBudget: 0` + `maxOutputTokens: 8192`.
+- `app/api/jurisprudencia/query/route.ts` → idem (subiu de 1500 → 8192).
+- `app/api/artigos/[numero]/chat/route.ts` → idem (subiu de 2048 → 8192).
+- `app/api/lei-14133/search/route.ts` → só `thinkingBudget: 0` (maxOutput mantido em 1024 — é classificação JSON curta).
+
+**Detalhe técnico:** no call do SDK direto, `thinkingConfig` não está na tipagem `GenerationConfig` do `@google/generative-ai`, então o spread pattern `...{ thinkingConfig: { thinkingBudget: 0 } }` foi usado pra driblar excess-property-check (mesmo padrão que `lib/gemini/cached-client.ts` já usava).
+
+**Validação end-to-end** (via `scripts/validate-bugfixes-2026-04-24.ts`):
+- "paradoxo do lucro-incompetência" → 3164 chars, 815 tokens completion, termina em "." ✅
+- "requisitos pregão" → 2918 chars, 783 tokens completion, termina em "." ✅
+- Tokens usados ≪ 8192 → thinking não está mais comendo o budget.
+
+### Bug 2 — `/jurisprudencia/query` só retornava TCE-PE — RESOLVIDO (commit `ba1bf8b`)
+
+**Causa-raiz confirmada:** `fetchUnifiedTopK` em `lib/jurisprudencia/unified-query.ts:433-447` usava `ORDER BY "relevanceScore" DESC, "dataJulgamento" DESC` e **NUNCA usava a query do usuário**. Pior: TCE-PE tem `avg(relevanceScore) = 97` (149 decisões) vs TCU `avg = 19` (238 decisões via TribunalDecision) e `relevanceScore = 50` hardcoded para TCU via `Document`. Isso garantia que TCE-PE vencia sistematicamente qualquer query.
+
+**Fix aplicado:** executou a **Task 5 pendente** do plano `docs/superpowers/plans/2026-04-22-ia-jurisprudencia-semantic-search.md`. O adapter `lib/jurisprudencia/semantic-adapter.ts` já existia (489 linhas) com `mapFiltersToSemanticOptions + enrichSources + adaptToSourcesPayload`, os testes já existiam (550 linhas), só o wire-up na rota tinha ficado pendente. Agora:
+- `app/api/jurisprudencia/query/route.ts` usa `semanticSearch(query, mapFiltersToSemanticOptions(filters))` em vez de `fetchUnifiedTopK`.
+- Prompt do Gemini agora recebe o `chunkContent` (trecho casado) + ementa, não só ementa truncada.
+- Testes de rota reescritos para mockar `semanticSearch/enrichSources/adaptToSourcesPayload` em vez de `fetchUnifiedTopK`. Suite completa (91 testes em `lib/jurisprudencia + lib/embeddings + app/api/jurisprudencia`) passa.
+
+**Validação end-to-end** — query "segregação de funções" sem filtros agora retorna top-6 **6/6 TCU, zero TCE-PE**:
+1. Manual TCU 2.3.1.1 (78%)
+2. Inf. TCU 213/2014 — Segregar funções na fiscalização (75%)
+3. Inf. TCU 55/2011 — Observar segregação em processos licitatórios (75%)
+4. Inf. TCU 518/2025 — Segregar funções em pregão (75%)
+5. Acórdão TCU 6389/2025 — Pregão — Princípio da segregação (74%)
+6. Manual TCU 3.3 — Agentes públicos (73%)
+
+Inversão total do comportamento anterior.
+
+### ✅ Backfill de embeddings TribunalDecision executado (commit `31fbf9e` cron fix)
+
+**Antes (descoberto hoje):**
+
+| Tribunal | Total | Aprovadas | `embeddingStatus=completed` |
+|---|---|---|---|
+| TCU | 238 | 238 | 10 |
+| TCE-PE | 172 | 149 | 8 |
+| TCE-PR | 121 | 23 | 0 |
+| demais | 270 | 20 | 0 |
+
+**Depois do backfill** (`scripts/index-tribunal-decisions.ts`, 545s, 562 chunks):
+
+| Tribunal | Total | Aprovadas | `embeddingStatus=completed` |
+|---|---|---|---|
+| TCU | 238 | 238 | **238** ✅ |
+| TCE-PE | 172 | 149 | **149** ✅ |
+| TCE-PR | 121 | 23 | **23** ✅ |
+| TCE-SP | 67 | 4 | **4** ✅ |
+| TCE-SC | 59 | 16 | **15** (1 falha — retry cron pega) |
+| STJ / TCE-RJ / TCE-RS | 144 | 0 | 0 (bloqueados por approvalStatus, não por indexação) |
+
+**Causa-raiz do backlog** (também corrigida no commit `31fbf9e`): o cron `process-index-jobs` processava **10 jobs por run**, priorizando IndexJobs + Documents nessa ordem. TribunalDecisions sempre ficavam com o resto, zero na maioria das runs. Pior: havia um early-return quando `jobs + docs = 0` que pulava TDs completamente mesmo com 412 delas pending.
+
+**Fix** (Task 6 do plano `2026-04-22-ia-jurisprudencia-semantic-search.md`):
+- `MAX_JOBS_PER_RUN: 10 → 50` com time budget 250s e batches paralelos de 10 via `Promise.all`.
+- Ordenação `DESC → ASC` nos dois `findMany` (Documents e TribunalDecisions) — FIFO real, backlog não envelhece.
+- Query de TribunalDecisions movida pra antes da checagem de `totalPending` pra eliminar o early-return bug.
+
+### Smoke test pós-backfill
+
+Re-rodada de `validate-bugfixes-2026-04-24.ts` confirma que a busca agora considera também TCEs:
+- "segregação de funções" → top-6: **5× TCU + 1× Prejulgado 2542 TCE-SC** (antes: 6× TCU, 0× TCE — apenas porque TCEs não tinham embeddings).
+- Bug 1 continua passando (respostas terminam em ponto final, ~900 tokens de 8192 usados).
+
+### Smoke test de regressão
+
+`scripts/validate-bugfixes-2026-04-24.ts` valida os dois fixes sem auth, sem dev server, em ~10s. Rodar antes de qualquer mudança em `semanticSearch`, adapter ou config Gemini:
+
+```bash
+npx dotenv -e .env.local -- npx tsx scripts/validate-bugfixes-2026-04-24.ts
+```
+
+### Infra de analytics pré-lançamento (commits `0c01f40` + `dc451bf`)
+
+Entregue na mesma sessão após os bug fixes, antes da sessão fechar. Prepara o sistema para — quando os alunos chegarem — coletar dados reais e usar pra (a) expandir golden set por uso real, (b) priorizar melhorias de retrieval por queries marcadas como ruins.
+
+**A — Filtros persistidos no SearchHistory**. Coluna `filters Text?` no Prisma + POST `/api/area-restrita/search-history` aceita `filters`. Hook `use-global-search` e `ChatInterface` enviam `{types, ticMode, courseId}` conforme contexto. Essencial pra reproduzir queries exatamente no eval.
+
+**B — Jurisprudência agora grava no SearchHistory** (commit da rota). Coluna `type` (`'documents' | 'jurisprudencia'`, default `'documents'`). Rota `/api/jurisprudencia/query` persiste server-side em **todas** as branches — inclusive quando não acha resultado ou quando Gemini falha ("query sem resposta" é sinal gold pra melhorar retrieval). Retorna `searchHistoryId` no response pro frontend usar no feedback.
+
+**C — Feedback loop 👍/👎**. Colunas `feedback Int?`, `feedbackNote Text?`, `feedbackAt DateTime?`. Nova rota `PATCH /api/area-restrita/search-history/[id]/feedback` com ownership check. UI em `ChatInterface.tsx` (hover toolbar) e `JurisprudenciaRestritaClient.tsx` (header da resposta) — toggle, estado otimista, revert no erro, aria-pressed.
+
+**Admin view** em `/admin/search-analytics` expandido (commit `dc451bf`): seção "Feedback dos alunos" com contador 👍/👎, top queries recorrentes 👎 agrupadas, últimas ocorrências com filtros e note pra drill-in. Ver `docs/ADMIN_SEARCH_ANALYTICS.md` para guia de operação.
+
+**Validado end-to-end** no browser com `aluno@teste.com`: busca → persiste com filtros → 👍 → toggle 👎 → tudo refletido na DB com timestamps corretos.
+
+---
+
+## Plano — próximas sessões
+
+**Pré-lançamento (nada crítico no roadmap de busca).** Tecnicamente pronto pra lançar. Frentes de busca estão aguardando dados reais.
+
+**Pós-lançamento**, por ordem de retorno esperado:
+
+1. **Golden set expansion por uso real** (Opção C). Escrever `eval/cli/import-from-history.ts` que amostra top N queries distintas (do `SearchHistory` dos últimos 30d, agrupadas por texto normalizado, com filtros), gera template anotável. Priorizar queries marcadas 👎 e queries sem resposta — gaps explícitos.
+2. **Revisão semanal do admin analytics** (`/admin/search-analytics` → seção Feedback). Anotar queries recorrentes 👎 no golden, investigar padrões (termo que retrieval perde, filtro que está restringindo demais, etc.).
+3. **Fase 3 — Trocar embedding model** (1-2 dias, meta >78%). Só faz sentido depois de ter baseline pós-lançamento medido com golden expandido.
+4. **Curadoria manual TCEs** (~180 `STJ/TCE-RJ/TCE-RS` em `approvalStatus != auto_approved` + 1 falha TCE-SC residual). Pipeline separado, trabalho manual de aprovação.
+5. **Fase 4 — Tuning FTS** (2h). Incremental. Fazer se eval mostrar headroom ainda.
+6. **Follow-ups infra**: expandir regex de key-terms em `eval/scripts/failure-analysis/key-terms.ts`; investigar 3 docs ausentes no scraper referenciados no plano Fase 6.
+
+---
 
 **Roadmaps antecessores (ambos já concluídos):**
 - `ROADMAP_GEMINI_MODELO_25.md` — migração 2.0-flash → 2.5-flash (urgência de deprecação 2026-06-01).
@@ -198,11 +313,17 @@ Buscar em `lib/embeddings/hybrid-search.ts` e `lib/embeddings/vector-search.ts`:
 
 1. ✅ **Fase 0 — Diagnóstico** (concluída em 2026-04-23). Relatório: `eval/reports/failure-analysis-2026-04-23.md`. Distribuição: A=2, A'=2, B=7, D=1, D+=9, E=8, C/C-parcial=0. Achado crítico: 8 queries em E = problema de anotação, não retrieval.
 2. ✅ **Fase 6 — Auditoria do golden set** (concluída em 2026-04-23). Resumo: `eval/reports/fase6-summary-2026-04-23.md`. 95 docs novos anotados + 3 removidos (1 ON misanotada + 2 IDs fantasma) + 4 dedups aplicados. **Ganho: +32,2pp em recall@5** (meta era +13,9pp).
-3. **Fase 2 — Cross-encoder rerank** (próxima). Com recall@5 já em 66,3%, rerank deve puxar os 33,7% restantes onde o doc relevante existe no top-20 mas não top-5. Adapter `rerankSearch` pronto em `eval/search-adapter.ts`.
-4. **Fase 1 — HyDE** (15 min, complementar). Pode ajudar queries residuais como `q-data-a-data` (0% recall — termo técnico multi-palavra).
-5. **Fase 3 — Trocar embedding model** (1-2 dias). Só se Fase 2 + Fase 1 juntos não passarem de ~75%. Meta agora é > 78%.
+3. ❌ **Fase 2 — Cross-encoder rerank** (concluída em 2026-04-23, **FALHOU**). Três abordagens testadas, todas regrediram vs baseline 66,3%:
+   - **Gemini biased** (prompt original com "priorize 14.133, puna 8.666"): 41,5% (−24,8pp)
+   - **Gemini neutral** (prompt sem viés + chunk slice 500 chars): 50,9% (−15,4pp)
+   - **Cohere Rerank 3.5** (cross-encoder multilingual): 40,9% (−25,4pp)
+
+   Hipótese validada por 3 experimentos: **RRF hybrid (vetor + BM25/FTS) já está próximo do teto do top-5 para este dataset.** Queries jurídicas dependem pesadamente de termos exatos (ex.: `art. 125`, `IN SEGES/ME 65/2021`, `ex nunc`) que a FTS captura sobre o documento inteiro. Rerankers veem só 500 chars truncados do chunk e pontuam por similaridade semântica geral — perdem o sinal léxico que tornava o top-5 bom. Fase 2 arquivada permanentemente. Ver Fase 2 abaixo para detalhes técnicos dos 3 runs.
+4. ❌ **Fase 1 — HyDE** (concluída em 2026-04-23, **FALHOU**). `eval/reports/2026-04-23T23-51-42_hyde-pos-fase6.md`: 61,4% recall@5 (−4,9pp vs baseline). Regressão modesta mas real. Easy queries caíram mais (−9pp), hard queries empataram — os docs hipotéticos diluem o sinal léxico do RRF em queries que já estavam bem encaminhadas, sem ajudar as difíceis. Arquivada.
+5. **Fase 3 — Trocar embedding model** (1-2 dias). Agora com Fase 2 descartada, Fase 3 é o caminho mais provável para ganho significativo (meta >78%).
 6. **Fase 4 — Hybrid tuning (FTS)** (2h). Ainda útil para queries A'.
 7. **Fase 5 — Chunking** — **arquivada**. Sem evidência nas falhas restantes.
+8. **Fase 9 — Desligar rerank em produção** (nova, registrada em 2026-04-23). `app/api/documents/query/route.ts:252` tem `rerank: true`, mas o reranker Gemini falha silenciosamente em produção (JSON truncado por thinking tokens do 2.5-flash) há tempos — o fallback para vector ranking já estava em vigor. Com Fase 2 arquivada, trocar para `rerank: false` remove 2-5s de latência inútil por query. Baixo esforço, alto retorno de UX.
 
 ### Fase 7 — Dedup estrutural do banco (nova, registrada em 2026-04-23)
 
@@ -265,3 +386,11 @@ Fase 3 (troca de embedding model) é a única que muda dados de forma grande —
 - **2026-04-23**: documento criado após constatação (via eval) de que o reprocessamento do `ROADMAP_GEMINI_PAGO.md` não moveu o ponteiro. Hipótese "melhor resumo = melhor embedding" refutada empiricamente. Este roadmap separa resumos (Gemini pago) de busca (que precisa mexer em retrieval, não em geração).
 - **2026-04-23**: Fase 0 concluída. Pipeline automático (`eval/scripts/analyze-failures.ts`) + revisão manual das 29 queries falhas. 28% revelaram-se problema de anotação (bucket E), não de retrieval — Fase 6 promovida para prioridade máxima. Relatório: `eval/reports/failure-analysis-2026-04-23.md`.
 - **2026-04-23**: Fase 6 concluída. 6A aplicou 10 operações conhecidas (8 queries E + 2 IDs fantasma + 4 dedups). 6B auditou 41 queries restantes via heurística + revisão caso-a-caso no chat (141 decisões manuais em 34 queries). Total: 95 docs novos anotados (70 relevant + 25 highly), 3 removidos. **recall@5: 34,1% → 66,3% (+32,2pp)**, MRR: 0,352 → 0,851, nDCG@10: 0,367 → 0,668. Meta (48%) superada por +18pp. Registradas Fase 7 (dedup estrutural — 33 duplicatas remanescentes) e Fase 8 (modelagem de regime/vigência de normas). Resumo: `eval/reports/fase6-summary-2026-04-23.md`.
+- **2026-04-23**: Fase 1 (HyDE) concluída com conclusão negativa. `eval/reports/2026-04-23T23-51-42_hyde-pos-fase6.md`: 61,4% recall@5 (−4,9pp), MRR 0,827 (−0,024), nDCG@10 0,624 (−0,044). Easy queries: 45,6% (−9,0pp). Medium: 64,9% (−4,4pp). Hard: 50% (=). Padrão: HyDE dilui sinal léxico em queries que já tinham match forte via FTS. Adapter `hydeSearch` em `eval/search-adapter.ts` corrigido para rodar limpo (`rerank: false`) antes do run. Arquivada. **Somando com Fase 2:** RRF hybrid atual é ceiling prático com ferramentas de pré/pós-processamento; única alavanca restante é trocar o próprio retrieval (Fase 3 — embedding model).
+- **2026-04-23**: Fase 9 executada. `app/api/documents/query/route.ts:252` trocado de `rerank: true` → `rerank: false`. Também desligado em `eval/search-adapter.ts:76` (hydeSearch adapter). Não tocado em `lib/planejamento/rag.ts:100` (fluxo semantic-only + rerank, sem eval para validar — precaução).
+- **2026-04-23**: Fase 2 concluída com conclusão negativa. Três reranking approaches testadas, todas regrediram vs baseline 66,3% (auditado):
+  - **Run 1 — Gemini biased prompt** (`eval/reports/2026-04-23T23-20-49_rerank-pos-fase6.md`): 41,5% recall@5 (−24,8pp). Prompt original do `reranker.ts` tinha viés forte ("priorize Lei 14.133, puna Lei 8.666") que afundava Acórdãos TCU da era 8.666 ainda vigentes. Descoberto bug adjacente: `thinkingBudget` ausente em Gemini 2.5-flash consumia todo o `maxOutputTokens: 512` em tokens de raciocínio → JSON truncava → fallback silencioso para vector ranking. Em produção desde always — nunca foi reranking de verdade.
+  - **Run 2 — Gemini neutral prompt** (`eval/reports/2026-04-23T23-29-49_gemini-rerank-neutral.md`): 50,9% recall@5 (−15,4pp). Removido viés 14.133/8.666, slice de chunk subiu de 150 → 500 chars, `thinkingBudget: 0` aplicado. Recuperou +9,4pp vs biased mas ainda abaixo do baseline. MRR/nDCG@10 empataram com baseline → doc certo tá no top-20, mas reranker empurra para posições 6-10.
+  - **Run 3 — Cohere Rerank 3.5** (`eval/reports/2026-04-23T23-41-02_cohere-pos-fase6.md`): 40,9% recall@5 (−25,4pp). Cross-encoder multilingual treinado para ranking — fundamentalmente diferente de LLM-rerank. Ainda assim regrediu pior que Gemini neutral. Descoberto bug secundário: `RERANK_PROVIDER` era lido no module-load, antes do CLI setar a env var — primeira tentativa de Cohere rodou 100% em fallback Gemini (corrigido via `getRerankProvider()` em runtime).
+
+  Conclusão consolidada (3 experimentos independentes): **RRF hybrid (vetor + BM25/FTS) está próximo do teto do top-5 para este dataset.** Queries jurídicas dependem de termos exatos (artigos, números de INs, expressões técnicas) que a FTS casa sobre o documento inteiro. Rerankers veem só 500 chars do chunk e pontuam por similaridade semântica geral — o sinal léxico que fazia o top-5 funcionar fica pra trás. **Fase 2 arquivada permanentemente.** Próximo passo recomendado: Fase 1 (HyDE, 15 min) ou Fase 3 (trocar embedding model, 1-2 dias).

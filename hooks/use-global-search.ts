@@ -255,13 +255,20 @@ export function useGlobalSearch(options: UseGlobalSearchOptions = {}): UseGlobal
               { role: 'assistant' as const, content: answer },
             ]);
 
-            // Save to search history (fire-and-forget)
+            // Save to search history (fire-and-forget). Persistimos os
+            // filtros ativos pra reproduzir a busca exatamente no eval do
+            // golden set e para analytics por filtro.
             fetch('/api/area-restrita/search-history', {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
               body: JSON.stringify({
+                type: 'documents',
                 query: searchQuery,
                 aiAnswer: answer,
+                filters: {
+                  types: filters.types,
+                  ticMode,
+                },
                 sources: streamSources.map((r: AISource) => ({
                   title: r.title,
                   category: r.category,

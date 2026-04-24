@@ -22,6 +22,8 @@ export async function GET(req: NextRequest) {
   }
 }
 
+const ALLOWED_TYPES = new Set(['documents', 'jurisprudencia']);
+
 export async function POST(req: NextRequest) {
   try {
     const authResult = await verifyAuth(req);
@@ -30,7 +32,7 @@ export async function POST(req: NextRequest) {
     }
 
     const body = await req.json();
-    const { query, aiAnswer, sources, legalSources } = body;
+    const { query, aiAnswer, sources, legalSources, filters, type } = body;
 
     if (!query || query.trim().length < 2) {
       return NextResponse.json({ error: 'Query is required' }, { status: 400 });
@@ -39,7 +41,9 @@ export async function POST(req: NextRequest) {
     const entry = await prisma.searchHistory.create({
       data: {
         userId: authResult.user.userId,
+        type: typeof type === 'string' && ALLOWED_TYPES.has(type) ? type : 'documents',
         query: query.trim(),
+        filters: filters ? JSON.stringify(filters) : null,
         aiAnswer: aiAnswer || null,
         sources: sources ? JSON.stringify(sources) : null,
         legalSources: legalSources ? JSON.stringify(legalSources) : null,

@@ -335,7 +335,8 @@ Responda agora:`;
     const geminiResult = await queryGeminiText(prompt, {
       model: PRIMARY_GEMINI_MODEL,
       temperature: 0.7,
-      maxOutputTokens: 2048,
+      maxOutputTokens: 8192,
+      thinkingBudget: 0,
       useCache: true,
       cacheTTL: 3600, // 1 hora
     });

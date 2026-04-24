@@ -238,7 +238,9 @@ Exemplo de resposta: ["variação 1", "variação 2"]`;
       apiLogger.info('Tribunal decisions included (user explicitly requested)');
     }
 
-    // 5a. Hybrid search: combina busca semântica (vetor) + FTS (BM25) via RRF + reranking
+    // 5a. Hybrid search: combina busca semântica (vetor) + FTS (BM25) via RRF.
+    // Reranking desligado em 2026-04-23 após Fase 2 provar regressão de
+    // −15pp a −25pp em recall@5 com Gemini e Cohere. Ver ROADMAP_BUSCA_QUALIDADE.md.
     const searchResponse = await hybridSearch({
       query: semanticQuery,
       expandedQueries: expandedQueries.length > 1 ? expandedQueries : undefined,
@@ -249,7 +251,7 @@ Exemplo de resposta: ["variação 1", "variação 2"]`;
       alpha: 0.6,
       useCache,
       includeTribunalDecisions,
-      rerank: true,
+      rerank: false,
     });
 
     apiLogger.info({ resultCount: searchResponse.results.length }, 'Hybrid search completed');
@@ -551,7 +553,15 @@ RESPOSTA:`;
       const geminiModel = genAI.getGenerativeModel({
         model: PRIMARY_GEMINI_MODEL,
         systemInstruction,
-        generationConfig: { temperature: 0.5, maxOutputTokens: 3000 },
+        generationConfig: {
+          temperature: 0.5,
+          maxOutputTokens: 8192,
+          // Gemini 2.5-flash: sem thinkingBudget: 0, o raciocínio come o
+          // maxOutputTokens e a resposta trunca no meio. Síntese factual
+          // não precisa de thinking — só cita fontes. Spread driblando
+          // excess-property-check do SDK type (mesmo padrão do cached-client).
+          ...{ thinkingConfig: { thinkingBudget: 0 } },
+        },
         safetySettings: LEGAL_SAFETY_SETTINGS,
       });
 
@@ -643,7 +653,8 @@ RESPOSTA:`;
     try {
       const geminiResult = await queryGeminiText(synthesisPrompt, {
         temperature: 0.5,
-        maxOutputTokens: 3000,
+        maxOutputTokens: 8192,
+        thinkingBudget: 0,
         useCache,
         systemInstruction,
       });

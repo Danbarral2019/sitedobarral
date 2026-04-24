@@ -11,6 +11,8 @@ import {
   ExternalLink,
   Search,
   BookOpen,
+  ThumbsUp,
+  ThumbsDown,
 } from 'lucide-react';
 
 interface DecisionItem {
@@ -49,6 +51,7 @@ interface AIAnswer {
     url: string | null;
   }>;
   consulted: number;
+  searchHistoryId?: string | null;
 }
 
 interface Filters {
@@ -138,6 +141,7 @@ export default function JurisprudenciaRestritaClient() {
 
   const [aiQuery, setAiQuery] = useState('');
   const [aiAnswer, setAiAnswer] = useState<AIAnswer | null>(null);
+  const [aiFeedback, setAiFeedback] = useState<1 | -1 | null>(null);
   const [loadingAi, setLoadingAi] = useState(false);
   const [aiError, setAiError] = useState<string | null>(null);
 
@@ -180,6 +184,26 @@ export default function JurisprudenciaRestritaClient() {
 
   const hasActiveFilters = Object.values(filters).some(v => v !== '');
 
+  const submitAiFeedback = async (value: 1 | -1) => {
+    if (!aiAnswer?.searchHistoryId) return;
+    const newValue: 1 | -1 | null = aiFeedback === value ? null : value;
+    const prev = aiFeedback;
+    setAiFeedback(newValue);
+    try {
+      const res = await fetch(
+        `/api/area-restrita/search-history/${aiAnswer.searchHistoryId}/feedback`,
+        {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ feedback: newValue }),
+        },
+      );
+      if (!res.ok) throw new Error('feedback-failed');
+    } catch {
+      setAiFeedback(prev);
+    }
+  };
+
   const askAI = async () => {
     if (aiQuery.trim().length < 3) {
       setAiError('Digite uma pergunta com pelo menos 3 caracteres.');
@@ -188,6 +212,7 @@ export default function JurisprudenciaRestritaClient() {
     setLoadingAi(true);
     setAiError(null);
     setAiAnswer(null);
+    setAiFeedback(null);
     try {
       const res = await fetch('/api/jurisprudencia/query', {
         method: 'POST',
@@ -280,9 +305,41 @@ export default function JurisprudenciaRestritaClient() {
           {aiAnswer && (
             <div className="mt-5 border-t border-gray-100 pt-5">
               <div className="bg-gradient-to-r from-amber-50 to-emerald-50 border border-amber-100 rounded-xl p-5">
-                <div className="flex items-center gap-2 mb-2 text-xs text-gray-500">
-                  <Sparkles className="w-3 h-3" />
-                  Resposta baseada em {aiAnswer.consulted} decisão(ões)
+                <div className="flex items-center justify-between mb-2">
+                  <div className="flex items-center gap-2 text-xs text-gray-500">
+                    <Sparkles className="w-3 h-3" />
+                    Resposta baseada em {aiAnswer.consulted} decisão(ões)
+                  </div>
+                  {aiAnswer.searchHistoryId && (
+                    <div className="flex items-center gap-1">
+                      <button
+                        onClick={() => submitAiFeedback(1)}
+                        className={`inline-flex items-center p-1.5 rounded transition-all ${
+                          aiFeedback === 1
+                            ? 'text-green-600 bg-green-50'
+                            : 'text-gray-400 hover:text-green-600 hover:bg-green-50'
+                        }`}
+                        aria-label="Resposta útil"
+                        aria-pressed={aiFeedback === 1}
+                        title="Resposta útil"
+                      >
+                        <ThumbsUp className="w-4 h-4" />
+                      </button>
+                      <button
+                        onClick={() => submitAiFeedback(-1)}
+                        className={`inline-flex items-center p-1.5 rounded transition-all ${
+                          aiFeedback === -1
+                            ? 'text-red-600 bg-red-50'
+                            : 'text-gray-400 hover:text-red-600 hover:bg-red-50'
+                        }`}
+                        aria-label="Resposta não ajudou"
+                        aria-pressed={aiFeedback === -1}
+                        title="Resposta não ajudou"
+                      >
+                        <ThumbsDown className="w-4 h-4" />
+                      </button>
+                    </div>
+                  )}
                 </div>
                 <div className="whitespace-pre-wrap text-sm text-gray-800 leading-relaxed">
                   {aiAnswer.answer}
