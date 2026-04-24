@@ -2,8 +2,69 @@
 
 **Criado em:** 2026-04-23
 **Autor:** Daniel Barral + Claude (sessão de execução do reprocessamento)
-**Status:** Planejado, aguardando execução
-**Prioridade:** Média — produto funciona, mas recall@5 de ~34% é baixo para busca jurídica profissional. Limita utilidade do chat IA e da busca semântica na `/area-restrita/assistente`.
+**Status atual (2026-04-23 noite):** Fases 0, 1, 2, 6 e 9 concluídas. **Teto prático aceito em 66,3% recall@5.** Decisão: pivotar para golden set / UX / frescor em vez de continuar mexendo em retrieval. Próxima sessão começa pelos bugs abaixo.
+**Prioridade:** Média — produto funciona, recall@5 atual 66,3% é razoável para busca jurídica. Frente ativa: corrigir bugs de UX descobertos em 2026-04-23.
+
+---
+
+## 🚨 Sessão seguinte (2026-04-24) — bugs críticos descobertos em 2026-04-23 à noite
+
+Daniel relatou 3 casos na UI após a sessão de experimentos terminar:
+
+### Bug 1 — Respostas da IA truncam no meio (CRÍTICO, alta prioridade)
+
+**Sintoma reproduzido pelo usuário:**
+- Pergunta "paradoxo do lucro-incompetência" → resposta ~4.500 chars termina abrupta em `"Art. 6º dessa portaria, ao dispor sobre os modelos de contratação de TIC, busca orientar a Administração para a adoção de métricas de desempenho e resultados, alinhando-se"` (faltando o fim da frase + o restante da seção 4).
+- Pergunta "Quais são os requisitos para licitação na modalidade pregão?" → resposta corta em `"bens e serviços comuns são aqueles"` faltando a definição inteira.
+
+**Causa-raiz identificada (mesma descoberta do rerank hoje):** Gemini 2.5-flash **consome `maxOutputTokens` em tokens de raciocínio quando `thinkingBudget` não é explicitamente zerado.** Para síntese factual (que é o que estes endpoints fazem), thinking não adiciona valor e só come o budget de saída.
+
+**Call sites afetados** (todos sem `thinkingBudget: 0`):
+1. `app/api/documents/query/route.ts:553-557` — **streaming SSE** (usa `genAI.getGenerativeModel()` direto, config inline). Provavelmente o path que o usuário tocou para as 2 perguntas. `maxOutputTokens: 3000`.
+2. `app/api/documents/query/route.ts:646-651` — non-streaming via `queryGeminiText`. `maxOutputTokens: 3000`, sem `thinkingBudget` no options.
+3. `app/api/jurisprudencia/query/route.ts:177-183` — `maxOutputTokens: 1500`, sem `thinkingBudget`.
+4. `app/api/artigos/[numero]/chat/route.ts:338` — `maxOutputTokens: 2048`, sem `thinkingBudget` (suspeito, confirmar).
+5. `app/api/lei-14133/search/route.ts:118` — `maxOutputTokens: 1024`, sem `thinkingBudget` (suspeito, confirmar).
+
+**Fix proposto** (pequeno, isolado, replicável):
+- No call do SDK direto (route.ts:553): adicionar `thinkingConfig: { thinkingBudget: 0 }` dentro de `generationConfig`, **e** subir `maxOutputTokens` para 8192 como margem para respostas jurídicas longas.
+- Nos calls de `queryGeminiText` (demais): adicionar `thinkingBudget: 0` no objeto de opções. O cliente já suporta (`lib/gemini/cached-client.ts:61`). Subir `maxOutputTokens` para 8192 nos de síntese factual.
+- **Deixar thinking ligado** só em endpoints que precisam de raciocínio complexo (se houver algum — por default, síntese sobre contexto recuperado não precisa).
+
+**Teste de aceitação:** reproduzir "paradoxo do lucro-incompetência" e "requisitos pregão" após fix; respostas devem terminar em ponto final, sem corte. Contar tokens via `response.tokens` do `queryGeminiText` para confirmar que output != maxOutputTokens (se bater no teto, ainda ficou apertado).
+
+### Bug 2 — `/jurisprudencia/query` não encontra teses clássicas de TCU
+
+**Sintoma reproduzido:** pergunta "segregação de funções" retornou 6 fontes, **todas TCE-PE**, e o LLM respondeu corretamente que esses trechos não tratam do tema. Segregação de funções é tese clássica do TCU (Súmula 222, Acórdão 1784/2011-P, etc.) — TCU devia dominar o top-6.
+
+**Fluxo e arquivos:**
+- `app/api/jurisprudencia/query/route.ts:141` chama `fetchUnifiedTopK(jurisFilters, limit)` (default topK=6).
+- Função em `lib/jurisprudencia/unified-query.ts` — precisa inspecionar para entender ranking.
+
+**Hipóteses** (validar amanhã):
+- (a) **Viés de recência**: se `fetchUnifiedTopK` ordena por `dataJulgamento DESC`, TCE-PE pode ter acórdãos mais recentes que TCU. Acórdãos TCU clássicos (2011) ficam afundados.
+- (b) **Ausência de busca semântica**: se a função só filtra por filtros exatos (tribunal, ano, tema), sem embedding search sobre a ementa, a query "segregação de funções" vira noise — retorna o que estiver no top por outra métrica.
+- (c) **Indexação enviesada**: talvez TCU tenha muito menos decisões na base que TCE-PE (verificar `countUnifiedApproved` agregado por tribunal).
+- (d) **Default de filtro**: o schema de filtros permite `tribunal`, mas não há default de balanceamento por tribunal quando o usuário não filtra.
+
+**Passos de diagnóstico:**
+1. `SELECT tribunalCode, COUNT(*) FROM jurisprudencia GROUP BY tribunalCode` — ver distribuição.
+2. Ler `lib/jurisprudencia/unified-query.ts` e entender o que `fetchUnifiedTopK` realmente faz.
+3. Se for (a) ou (b), propor: usar semantic search sobre ementa + boost por tribunal de origem (TCU > TCE-XX em temas federais) + diversification no top-k.
+
+### Bug 3 — Mencionado pelo usuário como o pior dos 3
+
+Daniel disse "no ultimo caso, de resposta" — ou seja, a jurisprudência com IA dando "não encontrei" mesmo quando a tese é conhecida e existe na base é mais frustrante que as respostas truncadas. Priorizar visualmente acima do bug 1 para UX, mas tecnicamente os dois são independentes. Pode-se atacar em paralelo.
+
+---
+
+## Plano de ataque para 2026-04-24
+
+1. **Começar pelo Bug 1** (15-30 min): adicionar `thinkingBudget: 0` + bumps de `maxOutputTokens` nos 5 call sites. Baixo risco, ganho imediato.
+2. **Bug 2** (1-2h): diagnosticar `fetchUnifiedTopK`, testar hipóteses (a)-(d), propor fix (provavelmente semantic search + boost TCU em temas federais).
+3. **Depois disso**: voltar à decisão estratégica de investir em golden set / UX / frescor. Golden set expandido continua sendo o caminho mais concreto e de maior retorno.
+
+---
 
 **Roadmaps antecessores (ambos já concluídos):**
 - `ROADMAP_GEMINI_MODELO_25.md` — migração 2.0-flash → 2.5-flash (urgência de deprecação 2026-06-01).
