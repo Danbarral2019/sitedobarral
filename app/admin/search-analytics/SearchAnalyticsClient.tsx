@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import {
   Search, TrendingUp, AlertTriangle, FileText, Users,
-  Loader2, AlertCircle, Calendar, BarChart3
+  Loader2, AlertCircle, Calendar, BarChart3, ThumbsDown, ThumbsUp
 } from 'lucide-react';
 
 interface SearchAnalyticsData {
@@ -39,6 +39,26 @@ interface SearchAnalyticsData {
     email: string;
     count: number;
   }>;
+  feedback?: {
+    positiveCount: number;
+    negativeCount: number;
+    noFeedbackCount: number;
+    negativeFeedbackTop: Array<{
+      query: string;
+      count: number;
+      lastUsed: string;
+      type: string;
+    }>;
+    negativeFeedbackRecent: Array<{
+      id: string;
+      type: string;
+      query: string;
+      filters: string | null;
+      note: string | null;
+      feedbackAt: string | null;
+      createdAt: string;
+    }>;
+  };
 }
 
 export default function SearchAnalyticsClient() {
@@ -359,6 +379,121 @@ export default function SearchAnalyticsClient() {
           </div>
         </div>
       </div>
+
+      {/* Feedback loop — queries marcadas 👎 pelos alunos */}
+      {data.feedback && (
+        <div className="mt-8 bg-white rounded-xl shadow-md border-2 border-gray-200 p-6">
+          <div className="flex items-center justify-between mb-6">
+            <div className="flex items-center gap-3">
+              <ThumbsDown className="w-6 h-6 text-red-600" />
+              <h2 className="text-xl font-bold text-gray-900">Feedback dos alunos</h2>
+            </div>
+            <div className="flex items-center gap-4 text-sm">
+              <div className="flex items-center gap-1.5">
+                <ThumbsUp className="w-4 h-4 text-green-600" />
+                <span className="font-bold text-green-700">{data.feedback.positiveCount}</span>
+              </div>
+              <div className="flex items-center gap-1.5">
+                <ThumbsDown className="w-4 h-4 text-red-600" />
+                <span className="font-bold text-red-700">{data.feedback.negativeCount}</span>
+              </div>
+              <span className="text-xs text-gray-500">
+                ({data.feedback.noFeedbackCount} sem feedback)
+              </span>
+            </div>
+          </div>
+
+          <p className="text-sm text-gray-600 mb-5">
+            Queries marcadas como 👎 pelos alunos nos últimos 30 dias. Use como
+            prioridade para (a) melhorar retrieval (casos em que o resultado
+            não ajudou), (b) expandir o golden set com as queries recorrentes.
+          </p>
+
+          {data.feedback.negativeCount === 0 ? (
+            <div className="text-center py-8 text-gray-500">
+              <ThumbsDown className="w-10 h-10 mx-auto mb-2 text-gray-300" />
+              <p className="text-sm">Nenhuma resposta foi marcada como ruim nos últimos 30 dias.</p>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              {/* Top queries 👎 agrupadas */}
+              <div>
+                <h3 className="text-sm font-semibold text-gray-700 mb-3 uppercase tracking-wide">
+                  Top queries recorrentes
+                </h3>
+                <div className="space-y-2 max-h-[400px] overflow-y-auto">
+                  {data.feedback.negativeFeedbackTop.length === 0 ? (
+                    <p className="text-xs text-gray-500">—</p>
+                  ) : (
+                    data.feedback.negativeFeedbackTop.map((q, i) => (
+                      <div
+                        key={`${q.query}-${i}`}
+                        className="flex items-start gap-3 p-3 bg-red-50 border border-red-100 rounded-lg"
+                      >
+                        <span className="inline-flex items-center justify-center w-6 h-6 bg-red-600 text-white rounded text-xs font-bold flex-shrink-0">
+                          {q.count}
+                        </span>
+                        <div className="flex-1 min-w-0">
+                          <p className="text-sm text-gray-900 break-words">{q.query}</p>
+                          <div className="flex items-center gap-2 mt-1 text-xs text-gray-500">
+                            <span className="inline-block px-1.5 py-0.5 bg-gray-100 rounded">
+                              {q.type}
+                            </span>
+                            <span>
+                              último: {new Date(q.lastUsed).toLocaleDateString('pt-BR')}
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                    ))
+                  )}
+                </div>
+              </div>
+
+              {/* Lista recente com detalhes pra drill-in */}
+              <div>
+                <h3 className="text-sm font-semibold text-gray-700 mb-3 uppercase tracking-wide">
+                  Últimas ocorrências (com filtros e nota)
+                </h3>
+                <div className="space-y-2 max-h-[400px] overflow-y-auto">
+                  {data.feedback.negativeFeedbackRecent.length === 0 ? (
+                    <p className="text-xs text-gray-500">—</p>
+                  ) : (
+                    data.feedback.negativeFeedbackRecent.map(r => (
+                      <div
+                        key={r.id}
+                        className="p-3 bg-gray-50 border border-gray-200 rounded-lg"
+                      >
+                        <div className="flex items-start justify-between gap-2 mb-1">
+                          <p className="text-sm text-gray-900 break-words flex-1">{r.query}</p>
+                          <span className="inline-block px-1.5 py-0.5 bg-gray-200 rounded text-xs flex-shrink-0">
+                            {r.type}
+                          </span>
+                        </div>
+                        {r.filters && (
+                          <p className="text-xs text-gray-500 font-mono break-all mt-1">
+                            filtros: {r.filters}
+                          </p>
+                        )}
+                        {r.note && (
+                          <p className="text-xs text-gray-700 mt-1 italic">
+                            “{r.note}”
+                          </p>
+                        )}
+                        <p className="text-xs text-gray-400 mt-1">
+                          {r.feedbackAt
+                            ? new Date(r.feedbackAt).toLocaleString('pt-BR')
+                            : new Date(r.createdAt).toLocaleString('pt-BR')}
+                        </p>
+                      </div>
+                    ))
+                  )}
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+      )}
     </div>
   );
 }

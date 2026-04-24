@@ -157,6 +157,62 @@ export const GET = withAdminAuth(async () => {
       };
     });
 
+    // 8. Feedback dos alunos — sinal mais valioso pra melhorar retrieval.
+    // Totais dos últimos 30 dias agrupados.
+    const feedbackCounts = await prisma.$queryRaw<
+      Array<{ feedback: number | null; count: bigint }>
+    >`
+      SELECT feedback, COUNT(*) as count
+      FROM "SearchHistory"
+      WHERE "createdAt" >= ${thirtyDaysAgo}
+      GROUP BY feedback
+    `;
+    const positiveCount = Number(
+      feedbackCounts.find(f => f.feedback === 1)?.count ?? 0,
+    );
+    const negativeCount = Number(
+      feedbackCounts.find(f => f.feedback === -1)?.count ?? 0,
+    );
+    const noFeedbackCount = Number(
+      feedbackCounts.find(f => f.feedback === null)?.count ?? 0,
+    );
+
+    // Top queries marcadas como 👎 (agrupadas), últimos 30 dias.
+    const negativeFeedbackTop = await prisma.$queryRaw<
+      Array<{ query: string; count: bigint; last_used: Date; type: string }>
+    >`
+      SELECT
+        LOWER(TRIM(query)) as query,
+        COUNT(*) as count,
+        MAX("createdAt") as last_used,
+        MAX(type) as type
+      FROM "SearchHistory"
+      WHERE "createdAt" >= ${thirtyDaysAgo}
+        AND feedback = -1
+      GROUP BY LOWER(TRIM(query))
+      ORDER BY count DESC
+      LIMIT 20
+    `;
+
+    // Lista detalhada recente — pra drill-in. Inclui filtros, fontes e note.
+    const negativeFeedbackRecent = await prisma.searchHistory.findMany({
+      where: {
+        createdAt: { gte: thirtyDaysAgo },
+        feedback: -1,
+      },
+      select: {
+        id: true,
+        type: true,
+        query: true,
+        filters: true,
+        feedbackNote: true,
+        feedbackAt: true,
+        createdAt: true,
+      },
+      orderBy: { feedbackAt: 'desc' },
+      take: 30,
+    });
+
     return NextResponse.json({
       success: true,
       data: {
@@ -182,6 +238,26 @@ export const GET = withAdminAuth(async () => {
         })),
         topSources,
         topUsers: topUsersFormatted,
+        feedback: {
+          positiveCount,
+          negativeCount,
+          noFeedbackCount,
+          negativeFeedbackTop: negativeFeedbackTop.map(q => ({
+            query: q.query,
+            count: Number(q.count),
+            lastUsed: q.last_used,
+            type: q.type,
+          })),
+          negativeFeedbackRecent: negativeFeedbackRecent.map(r => ({
+            id: r.id,
+            type: r.type,
+            query: r.query,
+            filters: r.filters,
+            note: r.feedbackNote,
+            feedbackAt: r.feedbackAt,
+            createdAt: r.createdAt,
+          })),
+        },
       },
     });
   } catch (error) {
