@@ -89,13 +89,34 @@ Re-rodada de `validate-bugfixes-2026-04-24.ts` confirma que a busca agora consid
 npx dotenv -e .env.local -- npx tsx scripts/validate-bugfixes-2026-04-24.ts
 ```
 
+### Infra de analytics pré-lançamento (commits `0c01f40` + `dc451bf`)
+
+Entregue na mesma sessão após os bug fixes, antes da sessão fechar. Prepara o sistema para — quando os alunos chegarem — coletar dados reais e usar pra (a) expandir golden set por uso real, (b) priorizar melhorias de retrieval por queries marcadas como ruins.
+
+**A — Filtros persistidos no SearchHistory**. Coluna `filters Text?` no Prisma + POST `/api/area-restrita/search-history` aceita `filters`. Hook `use-global-search` e `ChatInterface` enviam `{types, ticMode, courseId}` conforme contexto. Essencial pra reproduzir queries exatamente no eval.
+
+**B — Jurisprudência agora grava no SearchHistory** (commit da rota). Coluna `type` (`'documents' | 'jurisprudencia'`, default `'documents'`). Rota `/api/jurisprudencia/query` persiste server-side em **todas** as branches — inclusive quando não acha resultado ou quando Gemini falha ("query sem resposta" é sinal gold pra melhorar retrieval). Retorna `searchHistoryId` no response pro frontend usar no feedback.
+
+**C — Feedback loop 👍/👎**. Colunas `feedback Int?`, `feedbackNote Text?`, `feedbackAt DateTime?`. Nova rota `PATCH /api/area-restrita/search-history/[id]/feedback` com ownership check. UI em `ChatInterface.tsx` (hover toolbar) e `JurisprudenciaRestritaClient.tsx` (header da resposta) — toggle, estado otimista, revert no erro, aria-pressed.
+
+**Admin view** em `/admin/search-analytics` expandido (commit `dc451bf`): seção "Feedback dos alunos" com contador 👍/👎, top queries recorrentes 👎 agrupadas, últimas ocorrências com filtros e note pra drill-in. Ver `docs/ADMIN_SEARCH_ANALYTICS.md` para guia de operação.
+
+**Validado end-to-end** no browser com `aluno@teste.com`: busca → persiste com filtros → 👍 → toggle 👎 → tudo refletido na DB com timestamps corretos.
+
 ---
 
-## Plano para a próxima sessão
+## Plano — próximas sessões
 
-1. **Golden set expansion** — objetivo: sair das 53 queries anotadas para 150+. Frente de maior retorno conforme decisão estratégica tomada em 2026-04-23. Revisar `docs/superpowers/plans` em busca de um plano existente, ou escrever novo.
-2. **UX da jurisprudência** — validar a rota reescrita no browser (login via `aluno@teste.com`), confirmar que as fontes aparecem bem renderizadas na UI de `/area-restrita/jurisprudencia`. O smoke test já cobre retrieval + Gemini; falta validação visual.
-3. **Opcional**: investigar 1 falha residual no backfill TCE-SC e os ~180 de `STJ + TCE-RJ + TCE-RS` que estão em `approvalStatus != 'auto_approved'` — pipeline de curadoria separado, não é problema de indexação.
+**Pré-lançamento (nada crítico no roadmap de busca).** Tecnicamente pronto pra lançar. Frentes de busca estão aguardando dados reais.
+
+**Pós-lançamento**, por ordem de retorno esperado:
+
+1. **Golden set expansion por uso real** (Opção C). Escrever `eval/cli/import-from-history.ts` que amostra top N queries distintas (do `SearchHistory` dos últimos 30d, agrupadas por texto normalizado, com filtros), gera template anotável. Priorizar queries marcadas 👎 e queries sem resposta — gaps explícitos.
+2. **Revisão semanal do admin analytics** (`/admin/search-analytics` → seção Feedback). Anotar queries recorrentes 👎 no golden, investigar padrões (termo que retrieval perde, filtro que está restringindo demais, etc.).
+3. **Fase 3 — Trocar embedding model** (1-2 dias, meta >78%). Só faz sentido depois de ter baseline pós-lançamento medido com golden expandido.
+4. **Curadoria manual TCEs** (~180 `STJ/TCE-RJ/TCE-RS` em `approvalStatus != auto_approved` + 1 falha TCE-SC residual). Pipeline separado, trabalho manual de aprovação.
+5. **Fase 4 — Tuning FTS** (2h). Incremental. Fazer se eval mostrar headroom ainda.
+6. **Follow-ups infra**: expandir regex de key-terms em `eval/scripts/failure-analysis/key-terms.ts`; investigar 3 docs ausentes no scraper referenciados no plano Fase 6.
 
 ---
 
