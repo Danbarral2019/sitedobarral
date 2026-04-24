@@ -18,18 +18,54 @@
 
 ### P1. Conta Stripe [BLOQUEANTE]
 **Prioridade:** BLOQUEANTE
-**Status:** Migração de Mercado Pago → Stripe em andamento. Código implementado (`lib/stripe.ts`: checkout subscription, Pix Automático via `mandate_options`, billing portal, enrollments). Faltam credenciais e configuração no painel Stripe.
+**Status (2026-04-24):** Modo teste **100% configurado e validado**. Modo live depende de KYC da Stripe (análise em andamento) + repetir os passos de configuração com chaves live. Teste end-to-end com cartão 4242 ainda pendente.
 
-**Ações:**
-- [ ] Criar/ativar conta em dashboard.stripe.com (modo Brasil — habilitar Pix Automático)
-- [ ] Criar Products + Prices recorrentes com `lookup_key` exatos: `basico_monthly`, `basico_yearly`, `premium_monthly`, `premium_yearly` (valores: 49,90 / 499,00 / 89,90 / 899,00 BRL)
-- [ ] Obter `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`, `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY`
-- [ ] Configurar variáveis de ambiente na Vercel (Production/Preview/Development)
-- [ ] Configurar webhook: `https://www.profdanielbarral.com/api/pagamento/webhook` — eventos: `checkout.session.completed`, `customer.subscription.created/updated/deleted`, `invoice.payment_succeeded/failed`
-- [ ] Habilitar Customer Billing Portal (configurações de produto, cancelamento, atualização de cartão)
-- [ ] Testar fluxo completo: checkout → pagamento (cartão e Pix) → webhook → Subscription + Enrollment criados
+**Fase 1 — Modo TESTE (concluída 2026-04-24):**
+- [x] Criar conta em dashboard.stripe.com (modo Brasil)
+- [x] Criar Products + Prices recorrentes com `lookup_key` exatos: `basico_monthly`, `basico_yearly`, `premium_monthly`, `premium_yearly` (valores 49,90 / 499,00 / 89,90 / 899,00 BRL) — via `npx dotenv -e .env.local -- npx tsx scripts/stripe-bootstrap.ts`
+- [x] Obter `sk_test_...`, `pk_test_...` e `whsec_...` (test mode)
+- [x] Configurar as 3 vars em `.env.local`
+- [x] Configurar as 3 vars no Vercel:
+  - Production: ✅ (test keys por enquanto — precisa trocar pra live antes de abrir pra alunos reais)
+  - Preview (branch `stripe-migration`): ✅
+  - Development: ainda não configurado no Vercel (`.env.local` local cobre esse caso)
+- [x] Configurar webhook no dashboard Stripe (modo teste):
+  - URL: `https://www.profdanielbarral.com/api/pagamento/webhook`
+  - 6 eventos ouvidos: `checkout.session.completed`, `customer.subscription.{created,updated,deleted}`, `invoice.payment_{succeeded,failed}`
+- [x] Redeploy produção pra carregar env vars novas (deploy `sitedobarral-4cclhsxkd...`, Ready em 7min)
+- [x] Verificar healthcheck: `POST /api/pagamento/webhook` sem signature retorna **400** (prova que `STRIPE_WEBHOOK_SECRET` está carregada e validação ativa)
 
-**Arquivos relevantes:** `lib/stripe.ts`, `app/api/pagamento/{checkout,status,webhook}/route.ts`
+**Fase 2 — PENDENTE (pra próxima sessão Stripe):**
+
+- [ ] **Habilitar Customer Billing Portal** (modo teste) — dashboard Stripe → Configurações → Billing → Portal do cliente:
+  - Cancelar assinaturas
+  - Atualizar método de pagamento
+  - Visualizar histórico de faturas
+  - Salvar
+- [ ] **Teste end-to-end com cartão `4242 4242 4242 4242`** em `/planos` de produção:
+  - Checkout → Stripe hosted → volta pra `/obrigado` ou `/pagamento/sucesso`
+  - Webhook dispara → visível em dashboard Stripe em Desenvolvedores → Webhooks → [endpoint] → Tentativas
+  - Subscription criada no DB (`prisma.subscription.findFirst`)
+  - Enrollment criado pro usuário logado
+  - Entrar no Customer Portal via algum link no site → cancelar teste → webhook → Subscription cancelled
+- [ ] **Teste end-to-end com Pix Automático** (Stripe fornece fluxo fake em test mode)
+- [ ] **Habilitar Pix Automático** — verificar em Settings → Payment methods → Pix. Pode depender do KYC live ser concluído.
+
+**Fase 3 — LIVE MODE (bloqueada por KYC da Stripe):**
+
+- [ ] Concluir KYC (verificação de identidade + dados da empresa/CNPJ que a Stripe pediu no onboarding). Prazo Stripe: 1-2 dias úteis.
+- [ ] Com live mode ativado: repetir `scripts/stripe-bootstrap.ts` com `sk_live_...` pra criar os mesmos 4 Prices no ambiente live
+- [ ] Obter `sk_live_...`, `pk_live_...` e criar webhook live → `whsec_live_...`
+- [ ] Trocar as 3 vars no Vercel Production pra chaves **live** (preview pode continuar em test)
+- [ ] Redeploy production
+- [ ] Teste final com cartão real pequeno valor (ex: R$ 49,90 básico mensal) → validar cobrança efetiva + webhook → reembolso imediato via dashboard Stripe
+- [ ] Customer Billing Portal: repetir config em live mode
+
+**Arquivos relevantes:** `lib/stripe.ts`, `app/api/pagamento/{checkout,status,webhook}/route.ts`, `scripts/stripe-bootstrap.ts`
+
+**Scripts de diagnóstico úteis:**
+- `scripts/check-stripe-env.ts` — confirma 3 vars Stripe carregadas em `.env.local` (mostra prefixo + últimos 4 chars, sem expor)
+- `scripts/verify-stripe-prices.ts` — confirma que os 4 `lookup_keys` resolvem pra preços ativos no Stripe
 
 ### P2. Verificação Manual Pós-Deploy [BLOQUEANTE]
 **Prioridade:** BLOQUEANTE
