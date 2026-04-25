@@ -28,7 +28,7 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server';
-import { searchLastWeek, searchLastMonth } from '@/lib/dou-api';
+import { searchLastWeek, searchLastMonth, DOUSection } from '@/lib/dou-api';
 import { DOUClassifier } from '@/lib/dou-classifier';
 import { scrapeContent } from '@/lib/dou-scraper';
 import { prisma } from '@/lib/prisma';
@@ -91,11 +91,15 @@ export async function GET(request: NextRequest) {
     console.log(`[Cron DOU Staging] Buscando publicacoes (periodo: ${period}, limite: ${maxResults})`);
 
     // PASSO 1: Buscar publicacoes na API oficial do DOU
-    const searchTerm = 'licitação OR pregão OR dispensa OR contrato OR contratação';
+    // Term focado em tipos de atos normativos + temas relevantes (Lei 14.133, terceirização, jornada).
+    // Limita à Seção 1 (atos normativos do Executivo) e Seção 2 (atos do Judiciário/AGU/TCU)
+    // para evitar a Seção 3 (editais, extratos, contratos) que gera ruído maciço.
+    const searchTerm = '"instrução normativa" OR "orientação normativa" OR "decreto nº" OR "portaria normativa" OR "súmula" OR "acórdão" OR "lei nº" OR licitação OR contratação OR pregão OR terceirização OR jornada';
+    const sections = [DOUSection.SECAO_1, DOUSection.SECAO_2];
 
     const results = period === 'month'
-      ? await searchLastMonth(searchTerm, undefined, maxResults)
-      : await searchLastWeek(searchTerm, undefined, maxResults);
+      ? await searchLastMonth(searchTerm, sections, maxResults)
+      : await searchLastWeek(searchTerm, sections, maxResults);
 
     console.log(`[Cron DOU Staging] ${results.length} publicacoes encontradas`);
 

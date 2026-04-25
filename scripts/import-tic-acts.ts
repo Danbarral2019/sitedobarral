@@ -9,9 +9,15 @@
  *   npx tsx scripts/import-tic-acts.ts --dry-run    # Simular sem alterar
  */
 
-import { PrismaClient } from '@prisma/client';
+import 'dotenv/config';
+import * as dotenv from 'dotenv';
+dotenv.config({ path: '.env.local' });
 
-const prisma = new PrismaClient();
+import { PrismaClient } from '@prisma/client';
+import { PrismaNeon } from '@prisma/adapter-neon';
+
+const adapter = new PrismaNeon({ connectionString: process.env.DATABASE_URL! });
+const prisma = new PrismaClient({ adapter });
 
 const DRY_RUN = process.argv.includes('--dry-run');
 
@@ -52,7 +58,7 @@ const TIC_ACTS: TicAct[] = [
     officialUrl: 'https://www.gov.br/governodigital/pt-br/legislacao/instrucao-normativa-sgd-me-no-94-de-23-de-dezembro-de-2022',
     pdfUrl: null,
     leiArticles: ['18', '19', '20', '21', '72', '75'],
-    themes: ['tic', 'planejamento'],
+    themes: ['tecnologia-informacao', 'planejamento'],
   },
   {
     type: 'in',
@@ -67,7 +73,7 @@ const TIC_ACTS: TicAct[] = [
     officialUrl: 'https://www.gov.br/governodigital/pt-br/legislacao/in-sgd-mgi-no-6-de-13-de-junho-de-2023',
     pdfUrl: null,
     leiArticles: ['18', '19'],
-    themes: ['tic', 'planejamento'],
+    themes: ['tecnologia-informacao', 'planejamento'],
   },
   {
     type: 'portaria',
@@ -82,7 +88,7 @@ const TIC_ACTS: TicAct[] = [
     officialUrl: 'https://www.gov.br/governodigital/pt-br/legislacao/portaria-sgd-mgi-no-750-de-20-de-marco-de-2023',
     pdfUrl: null,
     leiArticles: ['6'],
-    themes: ['tic', 'contratos'],
+    themes: ['tecnologia-informacao', 'contratos'],
   },
   {
     type: 'portaria',
@@ -97,7 +103,7 @@ const TIC_ACTS: TicAct[] = [
     officialUrl: 'https://www.gov.br/governodigital/pt-br/legislacao/portaria-sgd-mgi-no-5950-de-26-de-outubro-de-2023',
     pdfUrl: null,
     leiArticles: ['6', '75'],
-    themes: ['tic', 'contratos'],
+    themes: ['tecnologia-informacao', 'contratos'],
   },
   {
     type: 'portaria',
@@ -112,7 +118,7 @@ const TIC_ACTS: TicAct[] = [
     officialUrl: null,
     pdfUrl: null,
     leiArticles: ['6', '82'],
-    themes: ['tic', 'registro-precos'],
+    themes: ['tecnologia-informacao', 'registro-precos'],
   },
   {
     type: 'portaria',
@@ -127,7 +133,7 @@ const TIC_ACTS: TicAct[] = [
     officialUrl: null,
     pdfUrl: null,
     leiArticles: ['6'],
-    themes: ['tic', 'contratos', 'gestao-fiscalizacao'],
+    themes: ['tecnologia-informacao', 'contratos', 'gestao-fiscalizacao'],
   },
   {
     type: 'portaria',
@@ -142,7 +148,7 @@ const TIC_ACTS: TicAct[] = [
     officialUrl: null,
     pdfUrl: null,
     leiArticles: ['6'],
-    themes: ['tic', 'contratos'],
+    themes: ['tecnologia-informacao', 'contratos'],
   },
   {
     type: 'portaria',
@@ -157,7 +163,7 @@ const TIC_ACTS: TicAct[] = [
     officialUrl: null,
     pdfUrl: null,
     leiArticles: ['23'],
-    themes: ['tic', 'pesquisa-precos', 'planejamento'],
+    themes: ['tecnologia-informacao', 'pesquisa-precos', 'planejamento'],
   },
   {
     type: 'decreto',
@@ -172,7 +178,7 @@ const TIC_ACTS: TicAct[] = [
     officialUrl: 'https://www.planalto.gov.br/ccivil_03/_ato2007-2010/2010/decreto/d7174.htm',
     pdfUrl: null,
     leiArticles: [],
-    themes: ['tic', 'modalidades'],
+    themes: ['tecnologia-informacao', 'modalidades'],
   },
   {
     type: 'decreto',
@@ -187,7 +193,7 @@ const TIC_ACTS: TicAct[] = [
     officialUrl: 'https://www.planalto.gov.br/ccivil_03/_ato2019-2022/2019/decreto/D10193.htm',
     pdfUrl: null,
     leiArticles: [],
-    themes: ['tic', 'agentes-governanca'],
+    themes: ['tecnologia-informacao', 'agentes-governanca'],
   },
   // === Novos atos da página gov.br (fev/2026) ===
   {
@@ -203,7 +209,7 @@ const TIC_ACTS: TicAct[] = [
     officialUrl: 'https://www.planalto.gov.br/ccivil_03/_ato2023-2026/2023/lei/l14744.htm',
     pdfUrl: null,
     leiArticles: [],
-    themes: ['tic', 'contratos'],
+    themes: ['tecnologia-informacao', 'contratos'],
   },
   {
     type: 'decreto',
@@ -218,7 +224,7 @@ const TIC_ACTS: TicAct[] = [
     officialUrl: 'https://www.planalto.gov.br/ccivil_03/_ato2023-2026/2024/decreto/d12124.htm',
     pdfUrl: null,
     leiArticles: [],
-    themes: ['tic', 'contratos'],
+    themes: ['tecnologia-informacao', 'contratos'],
   },
   {
     type: 'in',
@@ -233,7 +239,7 @@ const TIC_ACTS: TicAct[] = [
     officialUrl: 'https://www.in.gov.br/web/dou/-/instrucao-normativa-sgd/mgi-n-86-de-25-de-julho-de-2025-645137365',
     pdfUrl: null,
     leiArticles: ['18', '19'],
-    themes: ['tic', 'planejamento'],
+    themes: ['tecnologia-informacao', 'planejamento'],
   },
   {
     type: 'portaria',
@@ -248,7 +254,7 @@ const TIC_ACTS: TicAct[] = [
     officialUrl: 'https://www.gov.br/governodigital/pt-br/contratacoes-de-tic/legislacao/modelo-de-contratacao-de-servicos-de-desenvolvimento-manutencao-e-sustentacao-de-software/portaria-sgd-mgi-no-6679-de-17-de-setembro-de-2024',
     pdfUrl: null,
     leiArticles: ['6'],
-    themes: ['tic', 'contratos'],
+    themes: ['tecnologia-informacao', 'contratos'],
   },
   {
     type: 'portaria',
@@ -263,7 +269,7 @@ const TIC_ACTS: TicAct[] = [
     officialUrl: 'https://www.gov.br/governodigital/pt-br/contratacoes-de-tic/legislacao/modelo-de-contracao-de-servicos-de-operacao-de-infraestrutura-e-de-atendimento-a-usuarios-de-tic/portaria-sgd-mgi-no-6-680-de-4-de-outubro-de-2024',
     pdfUrl: null,
     leiArticles: ['6'],
-    themes: ['tic', 'contratos', 'gestao-fiscalizacao'],
+    themes: ['tecnologia-informacao', 'contratos', 'gestao-fiscalizacao'],
   },
 ];
 
@@ -287,18 +293,19 @@ async function main() {
       if (existing) {
         console.log(`⏭️  Já existe: ${act.fullNumber}`);
 
-        // Verificar se precisa adicionar tag 'tic' aos themes
+        // Verificar se precisa adicionar tag 'tecnologia-informacao' aos themes
         const existingThemes: string[] = existing.themes ? JSON.parse(existing.themes) : [];
-        if (!existingThemes.includes('tic')) {
+        const hasTicTag = existingThemes.includes('tecnologia-informacao') || existingThemes.includes('tic');
+        if (!hasTicTag) {
           if (!DRY_RUN) {
-            const updatedThemes = [...new Set([...existingThemes, 'tic'])];
+            const updatedThemes = [...new Set([...existingThemes, 'tecnologia-informacao'])];
             await prisma.legislativeAct.update({
               where: { id: existing.id },
               data: { themes: JSON.stringify(updatedThemes) },
             });
-            console.log(`   ✅ Adicionada tag 'tic' aos themes`);
+            console.log(`   ✅ Adicionada tag 'tecnologia-informacao' aos themes`);
           } else {
-            console.log(`   [DRY-RUN] Adicionaria tag 'tic' aos themes`);
+            console.log(`   [DRY-RUN] Adicionaria tag 'tecnologia-informacao' aos themes`);
           }
         }
 
@@ -356,11 +363,11 @@ async function main() {
         continue;
       }
       const existingThemes: string[] = existing.themes ? JSON.parse(existing.themes) : [];
-      if (existingThemes.includes('tic')) {
+      if (existingThemes.includes('tecnologia-informacao') || existingThemes.includes('tic')) {
         console.log(`⏭️  Já tem tag TIC: ${fullNumber}`);
         continue;
       }
-      const updatedThemes = [...new Set([...existingThemes, 'tic'])];
+      const updatedThemes = [...new Set([...existingThemes, 'tecnologia-informacao'])];
       if (!DRY_RUN) {
         await prisma.legislativeAct.update({
           where: { id: existing.id },
