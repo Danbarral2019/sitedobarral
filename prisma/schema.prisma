@@ -778,6 +778,10 @@ model LegislativeAct {
   // Relacionamento com chunks (embeddings)
   chunks LegislativeActChunk[]
 
+  // Relações com outros atos (alterações, revogações, etc.)
+  relationsAsSource LegislativeActRelation[] @relation("RelationSource")
+  relationsAsTarget LegislativeActRelation[] @relation("RelationTarget")
+
   // Full-Text Search
   search_vector Unsupported("tsvector")?
 
@@ -1824,4 +1828,42 @@ model PlanningExport {
   createdAt  DateTime @default(now())
 
   @@index([documentId, createdAt])
+}
+
+model LegislativeActRelation {
+  id            String   @id @default(uuid())
+
+  sourceActId   String   // ato que CAUSA a alteração (ex: Decreto 100 que altera Decreto 99)
+  sourceAct     LegislativeAct @relation("RelationSource", fields: [sourceActId], references: [id], onDelete: Cascade)
+
+  targetActId   String   // ato que É AFETADO (ex: Decreto 99)
+  targetAct     LegislativeAct @relation("RelationTarget", fields: [targetActId], references: [id], onDelete: Cascade)
+
+  // Tipo da relação
+  // 'revoga'        — revoga total ou parcialmente (ex: "Revoga a Lei 8.666/93")
+  // 'altera'        — altera/modifica/dá nova redação (ex: "Altera o art. 75...")
+  // 'regulamenta'   — regulamenta dispositivo (ex: "Regulamenta o art. 8º da Lei 14.133")
+  // 'complementa'   — complementa sem alterar (ex: anexos, planilhas)
+  // 'modifica'      — modifica de forma genérica (fallback se outros não casam)
+  relationType  String
+
+  // Origem da detecção: 'heuristica' | 'ia' | 'manual'
+  source        String
+
+  // 0..1 — confiança da detecção (heurística sempre 0.7-0.9, IA varia, manual=1.0)
+  confidence    Float
+
+  // Trecho do texto (ementa ou content) que originou a detecção. Útil pra debug e pra UI mostrar "por quê"
+  excerpt       String   @db.Text
+
+  detectedAt    DateTime @default(now())
+  confirmedBy   String?  // email do admin que confirmou (ou marcou como falso positivo)
+  confirmedAt   DateTime?
+  // 'pending' | 'confirmed' | 'rejected' — workflow simples de revisão admin
+  reviewStatus  String   @default("pending")
+
+  @@unique([sourceActId, targetActId, relationType])
+  @@index([targetActId])
+  @@index([sourceActId])
+  @@index([reviewStatus])
 }
