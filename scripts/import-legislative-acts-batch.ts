@@ -58,6 +58,8 @@ import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { PrismaClient } from '@prisma/client';
 import { PrismaNeon } from '@prisma/adapter-neon';
+import { detectAmendments } from '../lib/legislative-acts/amendment-detector';
+import { saveDetectedRelations } from '../lib/legislative-acts/relations';
 
 const adapter = new PrismaNeon({ connectionString: process.env.DATABASE_URL! });
 const prisma = new PrismaClient({ adapter });
@@ -305,6 +307,24 @@ async function main() {
           await prisma.legislativeAct.create({ data: createData as never });
         }
         stats.criados++;
+      }
+
+      // Detector heurístico de relações roda só em created/updated reais (não dry-run, não inalterados, não bloqueados — esses já fizeram `continue`).
+      if (!DRY_RUN) {
+        const sourceAct = await prisma.legislativeAct.findUnique({
+          where: { fullNumber: act.fullNumber },
+          select: { id: true, ementa: true, content: true },
+        });
+        if (sourceAct) {
+          const detected = detectAmendments(sourceAct.ementa, sourceAct.content || '');
+          if (detected.length > 0) {
+            const r = await saveDetectedRelations(sourceAct.id, detected, 'heuristica');
+            const skipDesc = r.skippedTargets.length > 0
+              ? ` (targets ausentes: ${r.skippedTargets.slice(0, 3).join(', ')}${r.skippedTargets.length > 3 ? '...' : ''})`
+              : '';
+            console.log(`   🔗 Relações: ${r.created} criadas, ${r.skipped} puladas${skipDesc}`);
+          }
+        }
       }
     } catch (err) {
       stats.erros++;
