@@ -114,8 +114,11 @@ export async function generateBatchEmbeddings(
 
   const ai = getGenAI();
 
-  // Processa em batches de 250 (tier pago Gemini, ROADMAP_GEMINI_PAGO.md Fase 4)
-  const BATCH_SIZE = 250;
+  // Gemini API limita BatchEmbedContentsRequest a 100 requests por call (limite hard,
+  // independente do tier). Tentativa de 250 falhava com 400 INVALID_ARGUMENT em
+  // atos grandes (Portaria SGD/MGI 1.070/2023 e 5.950/2023, ~200 chunks cada).
+  // Fix descoberto em 2026-04-25 quando rodando index-legislative-acts.
+  const BATCH_SIZE = 100;
   const allEmbeddings: number[][] = [];
 
   for (let i = 0; i < validTexts.length; i += BATCH_SIZE) {
