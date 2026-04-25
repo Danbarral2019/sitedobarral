@@ -1,10 +1,12 @@
 // @vitest-environment node
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 
-const { mockFindUnique, mockUpsert, mockFindMany } = vi.hoisted(() => ({
+const { mockFindUnique, mockUpsert, mockFindMany, mockDetectHeuristic, mockDetectAI } = vi.hoisted(() => ({
   mockFindUnique: vi.fn(),
   mockUpsert: vi.fn(),
   mockFindMany: vi.fn(),
+  mockDetectHeuristic: vi.fn(),
+  mockDetectAI: vi.fn(),
 }));
 
 vi.mock('@/lib/prisma', () => ({
@@ -17,7 +19,15 @@ vi.mock('@/lib/prisma', () => ({
   },
 }));
 
-import { saveDetectedRelations, getRelationsForAct } from '../relations';
+vi.mock('../amendment-detector', () => ({
+  detectAmendments: (...args: unknown[]) => mockDetectHeuristic(...args),
+}));
+
+vi.mock('../amendment-detector-ai', () => ({
+  detectAmendmentsAI: (...args: unknown[]) => mockDetectAI(...args),
+}));
+
+import { saveDetectedRelations, getRelationsForAct, detectAndSaveRelationsHybrid } from '../relations';
 
 describe('saveDetectedRelations', () => {
   beforeEach(() => {
@@ -115,5 +125,59 @@ describe('getRelationsForAct', () => {
         where: expect.objectContaining({ reviewStatus: 'confirmed' }),
       })
     );
+  });
+});
+
+describe('detectAndSaveRelationsHybrid', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    mockFindUnique.mockResolvedValue({ id: 'target-1' });
+    mockUpsert.mockResolvedValue({ id: 'rel-1' });
+  });
+
+  it('roda só heurística quando IA está desabilitada (sem env)', async () => {
+    delete process.env.DETECT_AMENDMENTS_AI;
+    mockDetectHeuristic.mockReturnValue([
+      { relationType: 'altera', targetFullNumber: 'Lei 14.133/2021', excerpt: 'x', confidence: 0.85 },
+    ]);
+
+    const result = await detectAndSaveRelationsHybrid('source-1', 'ementa', '');
+
+    expect(mockDetectAI).not.toHaveBeenCalled();
+    expect(result.heuristicCount).toBe(1);
+    expect(result.aiAdded).toBe(0);
+    expect(result.created).toBe(1);
+  });
+
+  it('NÃO roda IA mesmo habilitada se heurística não achou nada (evita custo)', async () => {
+    process.env.DETECT_AMENDMENTS_AI = 'true';
+    mockDetectHeuristic.mockReturnValue([]);
+
+    const result = await detectAndSaveRelationsHybrid('source-1', 'ementa sem verbos', '');
+
+    expect(mockDetectAI).not.toHaveBeenCalled();
+    expect(result.heuristicCount).toBe(0);
+    expect(result.aiAdded).toBe(0);
+    expect(result.created).toBe(0);
+  });
+
+  it('mescla heurística + IA deduplicando por (type, target)', async () => {
+    process.env.DETECT_AMENDMENTS_AI = 'true';
+    mockDetectHeuristic.mockReturnValue([
+      { relationType: 'altera', targetFullNumber: 'Lei 14.133/2021', excerpt: 'h', confidence: 0.85 },
+    ]);
+    mockDetectAI.mockResolvedValue([
+      // Mesma relação que heurística (dedup): IA tem confidence maior, deve prevalecer
+      { relationType: 'altera', targetFullNumber: 'Lei 14.133/2021', excerpt: 'ai-x', confidence: 0.95 },
+      // Nova: regulamenta (não estava na heurística — aiAdded)
+      { relationType: 'regulamenta', targetFullNumber: 'Lei 14.133/2021', excerpt: 'ai-y', confidence: 0.9 },
+    ]);
+
+    const result = await detectAndSaveRelationsHybrid('source-1', 'altera', 'content');
+
+    expect(mockDetectAI).toHaveBeenCalled();
+    expect(result.heuristicCount).toBe(1);
+    expect(result.aiAdded).toBe(1); // só a regulamenta é nova
+    expect(result.created).toBe(2); // total mesclado: 2 únicas
   });
 });

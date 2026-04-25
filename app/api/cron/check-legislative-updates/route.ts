@@ -4,8 +4,7 @@ import { scrapeUrl, canScrapeUrl } from '@/lib/legislative-scrapers';
 import { hasHashChanged } from '@/lib/legislative-scrapers/change-detector';
 import { scrapeAndIndexAct } from '@/lib/legislative-scrapers/scrape-and-index';
 import { verifyCronAuth } from '@/lib/cron-auth';
-import { detectAmendments } from '@/lib/legislative-acts/amendment-detector';
-import { saveDetectedRelations } from '@/lib/legislative-acts/relations';
+import { detectAndSaveRelationsHybrid } from '@/lib/legislative-acts/relations';
 
 /**
  * GET /api/cron/check-legislative-updates
@@ -124,18 +123,17 @@ export async function GET(request: NextRequest) {
           });
 
           // Re-detectar relações quando o conteúdo mudou (ex: portal oficial
-          // consolidou alteração de norma posterior). Re-roda heurística sobre
-          // ementa+content novo.
+          // consolidou alteração de norma posterior). Heurística + IA opt-in.
           if (changed && result.content) {
             const updated = await prisma.legislativeAct.findUnique({
               where: { id: act.id },
               select: { ementa: true },
             });
             if (updated) {
-              const detected = detectAmendments(updated.ementa, result.content);
-              if (detected.length > 0) {
-                const r = await saveDetectedRelations(act.id, detected, 'heuristica');
-                console.log(`[Cron Legislative] ${act.fullNumber}: ${r.created} relações novas, ${r.skipped} puladas`);
+              const r = await detectAndSaveRelationsHybrid(act.id, updated.ementa, result.content);
+              if (r.heuristicCount > 0 || r.aiAdded > 0) {
+                const aiDesc = r.aiAdded > 0 ? ` [+${r.aiAdded} IA]` : '';
+                console.log(`[Cron Legislative] ${act.fullNumber}: ${r.created} relações novas, ${r.skipped} puladas${aiDesc}`);
               }
             }
           }
