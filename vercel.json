@@ -75,6 +75,10 @@
     {
       "path": "/api/cron/gemini-health",
       "schedule": "0 5 * * *"
+    },
+    {
+      "path": "/api/cron/check-legislative-updates",
+      "schedule": "0 3 * * 1"
     }
   ]
 }
