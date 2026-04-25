@@ -164,6 +164,21 @@ export const Footer = memo(function Footer() {
           <p className="text-xs mt-2 text-brand-300 font-poppins">
             Desenvolvido com dedicação para compartilhar conhecimento em Direito Administrativo
           </p>
+          <div className="mt-4 flex justify-center items-center gap-3 text-xs font-poppins">
+            <Link
+              href="/termos"
+              className="text-brand-200 hover:text-white transition-colors"
+            >
+              Termos de Uso
+            </Link>
+            <span className="text-brand-300" aria-hidden="true">·</span>
+            <Link
+              href="/privacidade"
+              className="text-brand-200 hover:text-white transition-colors"
+            >
+              Política de Privacidade
+            </Link>
+          </div>
         </div>
       </div>
     </footer>
