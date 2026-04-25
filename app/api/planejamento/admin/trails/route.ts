@@ -10,7 +10,6 @@ import { zTrailDefinition } from "@/data/planejamento/types";
  * DB — quais estão publicadas, em que versão, e quando.
  */
 export const GET = withAdminAuth(async () => {
-  const catalogBySlug = Object.fromEntries(PLANNING_TRAILS.map((t) => [t.slug, t]));
   const dbTemplates = await prisma.planningTrailTemplate.findMany({
     orderBy: { updatedAt: "desc" },
   });

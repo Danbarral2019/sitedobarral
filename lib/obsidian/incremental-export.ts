@@ -126,12 +126,6 @@ export async function runIncrementalExport(
       // Incremental: check what changed since last export
       const since = new Date(lastExportAt);
 
-      const changedDocs = allDocuments.filter(
-        (d) => (d as DbDocument & { updatedAt?: Date }).updatedAt
-          ? new Date((d as DbDocument & { updatedAt?: Date }).updatedAt!) > since
-          : false,
-      );
-
       // For acts and decisions, we need updatedAt — fetch separately
       const changedActIds = (await prisma.legislativeAct.findMany({
         where: { updatedAt: { gt: since } },

@@ -34,10 +34,6 @@ function makeReq(body: unknown): Request {
   });
 }
 
-async function readJson(res: Response) {
-  return JSON.parse(await res.text());
-}
-
 beforeEach(() => {
   mockFindUnique.mockReset();
   mockUpdate.mockReset();

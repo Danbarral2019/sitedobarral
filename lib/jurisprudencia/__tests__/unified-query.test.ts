@@ -6,7 +6,6 @@ import {
   shouldIncludeDocumentTcuBranch,
   buildTribunalDecisionWhere,
   buildDocumentTcuWhere,
-  type JurisprudenciaFilters,
 } from '../unified-query';
 
 const { mockQueryRaw } = vi.hoisted(() => ({

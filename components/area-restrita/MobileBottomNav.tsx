@@ -16,7 +16,6 @@ interface MobileBottomNavProps {
   onLogout?: () => void;
 }
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
 export function MobileBottomNav(_props: MobileBottomNavProps) {
   return (
     <nav className="lg:hidden fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-sm border-t border-gray-100 shadow-sm z-50 pb-safe">

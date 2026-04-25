@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import {
   Scale, CheckCircle, XCircle, AlertTriangle, RefreshCw, Search,
-  Filter, ChevronDown, ChevronUp, ExternalLink, Clock, Building2,
+  Filter, ChevronUp, ExternalLink, Clock, Building2,
   Loader2, FileText, Sparkles
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';

@@ -1,6 +1,5 @@
 'use client';
 
-import { Suspense } from 'react';
 import dynamic from 'next/dynamic';
 import { Loader2, FileSpreadsheet } from 'lucide-react';
 import { Tabs, TabList, Tab, TabPanel } from '@/components/ui/Tabs';

@@ -55,7 +55,6 @@ vi.mock('@/lib/auth', () => ({
 import { POST } from '../login/route';
 import { prisma } from '@/lib/prisma';
 import bcrypt from 'bcryptjs';
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 const mockPrisma = vi.mocked(prisma) as any;
 const mockBcrypt = vi.mocked(bcrypt);
 

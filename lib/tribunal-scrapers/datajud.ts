@@ -18,7 +18,7 @@
  */
 import { prisma } from '@/lib/prisma';
 import type { TribunalScraper, TribunalScrapeOptions, TribunalScrapeResult, ScraperHealthStatus } from './index';
-import { normalizeDecisionNumber, buildFullIdentifier, logScraperHealth, sleep } from './utils';
+import { normalizeDecisionNumber, buildFullIdentifier, logScraperHealth } from './utils';
 import { classifyDecision, generateDecisionSummary } from './classifier';
 
 const DATAJUD_BASE = 'https://api-publica.datajud.cnj.jus.br';

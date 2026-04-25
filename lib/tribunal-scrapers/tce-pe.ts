@@ -408,7 +408,7 @@ class TCEPEScraper implements TribunalScraper {
    * Tenta encontrar seções como RELATÓRIO, EMENTA, VOTO, DECISÃO.
    * Se não encontrar, pula o cabeçalho e retorna os primeiros 2000 chars.
    */
-  private extractEmenta(fullText: string, tipoDoc: string, decisionNumber: string): string {
+  private extractEmenta(fullText: string, _tipoDoc: string, _decisionNumber: string): string {
     // Try to find a meaningful section start
     const sectionPatterns = [
       /EMENTA[:\s]/i,
