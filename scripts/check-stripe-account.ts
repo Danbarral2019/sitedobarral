@@ -21,8 +21,13 @@ async function main() {
   console.log(`Account ID:        ${acc.id}`);
   console.log(`Country:           ${acc.country}`);
   console.log(`Type:              ${acc.type}`);
-  console.log(`Email:             ${acc.email ?? '(none)'}`);
-  console.log(`Business name:     ${acc.business_profile?.name ?? '(none)'}`);
+  console.log(`Business type:     ${acc.business_type ?? '(none)'}`);
+  // Standard accounts BR usam settings.dashboard.display_name em vez de business_profile.name.
+  // O email top-level é o login do Stripe (nem sempre populado); o de suporte vai em outro campo.
+  const displayName = acc.settings?.dashboard?.display_name ?? acc.business_profile?.name ?? '(none)';
+  console.log(`Display name:      ${displayName}`);
+  console.log(`Statement descriptor: ${acc.settings?.payments?.statement_descriptor ?? '(none)'}`);
+  console.log(`Login email:       ${acc.email ?? '(none — login via OAuth)'}`);
   console.log('');
   console.log('Status global:');
   console.log(`  charges_enabled:  ${acc.charges_enabled ? '✓' : '✗'}`);
