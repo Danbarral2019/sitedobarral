@@ -4,6 +4,8 @@ import { scrapeUrl, canScrapeUrl } from '@/lib/legislative-scrapers';
 import { hasHashChanged } from '@/lib/legislative-scrapers/change-detector';
 import { scrapeAndIndexAct } from '@/lib/legislative-scrapers/scrape-and-index';
 import { verifyCronAuth } from '@/lib/cron-auth';
+import { detectAmendments } from '@/lib/legislative-acts/amendment-detector';
+import { saveDetectedRelations } from '@/lib/legislative-acts/relations';
 
 /**
  * GET /api/cron/check-legislative-updates
@@ -120,6 +122,23 @@ export async function GET(request: NextRequest) {
             status: changed ? 'success' : 'unchanged',
             changed,
           });
+
+          // Re-detectar relações quando o conteúdo mudou (ex: portal oficial
+          // consolidou alteração de norma posterior). Re-roda heurística sobre
+          // ementa+content novo.
+          if (changed && result.content) {
+            const updated = await prisma.legislativeAct.findUnique({
+              where: { id: act.id },
+              select: { ementa: true },
+            });
+            if (updated) {
+              const detected = detectAmendments(updated.ementa, result.content);
+              if (detected.length > 0) {
+                const r = await saveDetectedRelations(act.id, detected, 'heuristica');
+                console.log(`[Cron Legislative] ${act.fullNumber}: ${r.created} relações novas, ${r.skipped} puladas`);
+              }
+            }
+          }
         }
       } catch (error) {
         console.error(`[Cron Legislative] Erro em ${act.fullNumber}:`, error);
