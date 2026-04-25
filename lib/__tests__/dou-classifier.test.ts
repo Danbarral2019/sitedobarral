@@ -179,7 +179,9 @@ describe('DOUClassifier', () => {
       expect(result.category).toBe(DOUDocumentCategory.OUTROS);
       expect(result.status).toBe(ApprovalStatus.PENDING);
       expect(result.requiresReview).toBe(true);
-      expect(result.confidence).toBeLessThan(50);
+      // Classifier endurecido (commit ea68a1b) usa 50 como fallback "ambíguo" — não <50.
+      // Antes era 40 (genérico baixa-confiança) e ficava confundindo com auto_rejected.
+      expect(result.confidence).toBeLessThanOrEqual(50);
     });
   });
 
