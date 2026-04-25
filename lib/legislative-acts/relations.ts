@@ -15,6 +15,48 @@ export interface SaveResult {
   skippedTargets: string[];
 }
 
+/**
+ * Resolve um targetFullNumber pra id do LegislativeAct correspondente.
+ *
+ * Estratégia:
+ *  1. Match exato por `fullNumber` (caso ideal — funciona quando detector e DB
+ *     gravaram a mesma forma).
+ *  2. Fallback flexível: parsear targetFullNumber em type/number/year e buscar
+ *     ignorando o issuer. Resolve casos onde o detector pega "IN nº 5/2017"
+ *     (sem issuer SEGES) mas o DB tem "IN SEGES/MP 5/2017".
+ *
+ * Retorna `null` se nenhum estratégia achou.
+ *
+ * Em caso de múltiplos candidatos no fallback (ex: 2 INs com mesmo number/year
+ * mas issuers diferentes), retorna o primeiro por publishDate desc — geralmente
+ * o mais relevante.
+ */
+async function resolveTargetActId(targetFullNumber: string): Promise<string | null> {
+  // 1. Exact match
+  const exact = await prisma.legislativeAct.findUnique({
+    where: { fullNumber: targetFullNumber },
+    select: { id: true },
+  });
+  if (exact) return exact.id;
+
+  // 2. Fallback: parse "Lei 14.133/2021" / "Decreto 7.892/2013" / "IN N/Y" / "IN ISSUER N/Y" / "Portaria ..."
+  // Padrão: <Tipo> [<ISSUER>] <number>/<year>
+  const m = targetFullNumber.match(/^(Lei|Decreto|MP|IN|Portaria)\s+(?:[A-Z][\w/]*\s+)?([\d.]+)\/(\d{4})$/);
+  if (!m) return null;
+  const [, prefix, num, yearStr] = m;
+  const typeMap: Record<string, string> = { Lei: 'lei', Decreto: 'decreto', MP: 'medida-provisoria', IN: 'in', Portaria: 'portaria' };
+  const type = typeMap[prefix];
+  if (!type) return null;
+
+  const candidates = await prisma.legislativeAct.findMany({
+    where: { type, number: num, year: parseInt(yearStr, 10) },
+    select: { id: true, fullNumber: true },
+    orderBy: { publishDate: 'desc' },
+    take: 1,
+  });
+  return candidates[0]?.id ?? null;
+}
+
 export async function saveDetectedRelations(
   sourceActId: string,
   detected: DetectedRelation[],
@@ -23,16 +65,14 @@ export async function saveDetectedRelations(
   const result: SaveResult = { created: 0, skipped: 0, skippedTargets: [] };
 
   for (const rel of detected) {
-    const target = await prisma.legislativeAct.findUnique({
-      where: { fullNumber: rel.targetFullNumber },
-      select: { id: true },
-    });
+    const targetId = await resolveTargetActId(rel.targetFullNumber);
 
-    if (!target) {
+    if (!targetId) {
       result.skipped++;
       result.skippedTargets.push(rel.targetFullNumber);
       continue;
     }
+    const target = { id: targetId };
 
     if (target.id === sourceActId) {
       // Self-relation: ato menciona a si mesmo (raro, mas possível)

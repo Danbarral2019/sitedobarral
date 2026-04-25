@@ -1,17 +1,18 @@
 // @vitest-environment node
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 
-const { mockFindUnique, mockUpsert, mockFindMany, mockDetectHeuristic, mockDetectAI } = vi.hoisted(() => ({
+const { mockFindUnique, mockUpsert, mockFindMany, mockActFindMany, mockDetectHeuristic, mockDetectAI } = vi.hoisted(() => ({
   mockFindUnique: vi.fn(),
   mockUpsert: vi.fn(),
   mockFindMany: vi.fn(),
+  mockActFindMany: vi.fn(),
   mockDetectHeuristic: vi.fn(),
   mockDetectAI: vi.fn(),
 }));
 
 vi.mock('@/lib/prisma', () => ({
   prisma: {
-    legislativeAct: { findUnique: mockFindUnique },
+    legislativeAct: { findUnique: mockFindUnique, findMany: mockActFindMany },
     legislativeActRelation: {
       upsert: mockUpsert,
       findMany: mockFindMany,
@@ -55,8 +56,9 @@ describe('saveDetectedRelations', () => {
     expect(result.skipped).toBe(0);
   });
 
-  it('pula candidato sem target no DB (orphan)', async () => {
+  it('pula candidato sem target no DB (orphan, nem fallback acha)', async () => {
     mockFindUnique.mockResolvedValue(null);
+    mockActFindMany.mockResolvedValue([]);
 
     const result = await saveDetectedRelations('source-id-1', [
       { relationType: 'altera', targetFullNumber: 'Lei 99.999/9999', excerpt: 'x', confidence: 0.85 },
@@ -66,6 +68,24 @@ describe('saveDetectedRelations', () => {
     expect(result.created).toBe(0);
     expect(result.skipped).toBe(1);
     expect(result.skippedTargets).toContain('Lei 99.999/9999');
+  });
+
+  it('fallback: resolve "IN 5/2017" via type+number+year quando exact match falha', async () => {
+    // exact match falha
+    mockFindUnique.mockResolvedValue(null);
+    // mas findMany acha IN 5/2017 com qualquer issuer
+    mockActFindMany.mockResolvedValue([{ id: 'in-5-2017-id', fullNumber: 'IN SEGES/MP 5/2017' }]);
+    mockUpsert.mockResolvedValue({ id: 'rel-1' });
+
+    const result = await saveDetectedRelations('source-1', [
+      { relationType: 'altera', targetFullNumber: 'IN 5/2017', excerpt: 'x', confidence: 0.85 },
+    ]);
+
+    expect(mockActFindMany).toHaveBeenCalledWith(expect.objectContaining({
+      where: expect.objectContaining({ type: 'in', number: '5', year: 2017 }),
+    }));
+    expect(result.created).toBe(1);
+    expect(result.skipped).toBe(0);
   });
 
   it('NÃO cria self-relation (source == target)', async () => {
