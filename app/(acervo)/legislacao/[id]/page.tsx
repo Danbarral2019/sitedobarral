@@ -17,6 +17,8 @@ import {
 import MarkdownContent from '@/components/MarkdownContent';
 import { normalizeTextContent } from '@/lib/utils';
 import { formatLegalContent } from '@/lib/format-legal-content';
+import { getRelationsForAct } from '@/lib/legislative-acts/relations';
+import { RelationHistory } from '@/components/LegislativeActsPanel/RelationHistory';
 
 interface PageProps {
   params: Promise<{ id: string }>;
@@ -130,6 +132,10 @@ export default async function LegislativeActPage({ params }: PageProps) {
   const leiArticlesArray: string[] = act.leiArticles
     ? (typeof act.leiArticles === 'string' ? JSON.parse(act.leiArticles) : act.leiArticles)
     : [];
+
+  // Buscar relações entre atos (revoga/altera/regulamenta/etc.)
+  // Se vier do fallback Document (não LegislativeAct), retorna vazio sem custo significativo
+  const relations = await getRelationsForAct(act.id);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50">
@@ -339,6 +345,9 @@ export default async function LegislativeActPage({ params }: PageProps) {
             </div>
           </div>
         )}
+
+        {/* Histórico de relações (este ato altera / é alterado por outros) */}
+        <RelationHistory alters={relations.alters} alteredBy={relations.alteredBy} />
 
         {/* Artigos Relacionados da Lei 14.133 */}
         {leiArticlesArray.length > 0 && (
