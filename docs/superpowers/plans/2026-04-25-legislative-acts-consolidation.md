@@ -31,16 +31,22 @@
 **Pendência pré-existente fora do escopo:**
 - `lib/__tests__/dou-classifier.test.ts > deve retornar OUTROS com revisão pendente para texto genérico` falha desde o commit `ea68a1b` (base da branch). Erro: `expected 50 to be less than 50`. Fix trivial: ajustar threshold pra `< 51` ou classifier retornar `49`.
 
-### ⏳ Pendentes (próxima sessão)
+### ✅ Sessão 2026-04-25 (continuação) — TODAS as tasks completas (T8-T13)
 
-| Task | Estimativa | Prioridade |
+| Task | Commit | Resultado |
 |---|---|---|
-| T8 — UI RelationHistory testes | 30min | Alta |
-| T9 — UI RelationHistory implementação | 1h | Alta |
-| T10 — Plug na página de detalhe `/legislacao/[id]` | 30min | Alta |
-| T11 — API admin pra confirmar/rejeitar relações | 1h | Média (resolve falsos positivos) |
-| T12 — Detector via IA (Gemini) | 1h | Baixa (heurística já cobre 16 casos) |
-| T13 — Suite + lint + push final + memória | 30min | Baixa (parte já feita hoje) |
+| T8+T9 — UI RelationHistory | (commit do T9) | ✅ `components/LegislativeActsPanel/RelationHistory.tsx` (Server Component, badges coloridos por tipo, link pra cada ato relacionado) — 4/4 testes verde |
+| T10 — Plug na página | `17ded7a` | ✅ `app/(acervo)/legislacao/[id]/page.tsx` busca `getRelationsForAct(act.id)` e renderiza `<RelationHistory>` antes dos artigos relacionados |
+| T11 — API admin | (commit do T11) | ✅ `app/api/admin/legislative-relations/[id]/route.ts` (PATCH confirm/reject + DELETE) usando `withAdminAuth` (padrão do projeto, descoberto em vez do `requireAdmin` fictício do plano) — 4/4 testes verde |
+| T12 — Detector via IA | (commit do T12) | ✅ `lib/legislative-acts/amendment-detector-ai.ts` com Gemini 2.5-flash, `responseMimeType: 'application/json'`, `thinkingBudget: 0` (mesmo padrão dos outros call sites do projeto) — 5/5 testes verde. Opt-in: caller decide quando chamar (não plugado em cron/import por default pra evitar custo). |
+| T13 — Suite final | (este commit) | ✅ 1053/1056 verde + 2 skipped + 1 pré-existente (`dou-classifier.test.ts > deve retornar OUTROS`, falha no commit base `ea68a1b` — não regressão). +29 testes novos no total da feature. |
+
+### Feature 100% pronta. Próximas decisões:
+
+- **Mergear branch em `main`** — abrir PR em https://github.com/Danbarral2019/sitedobarral/compare/main...fix/legislacao-tic-dou-classifier
+- **(Opcional) Plugar `detectAmendmentsAI` em paralelo com heurística** — chamar a IA só se heurística achou ≥1 match (sinaliza ato relevante), e mesclar deduplicando por `(type, target)`. ~30min, opt-in via flag de ambiente.
+- **(Opcional) Criar UI admin pra revisar fila pending** — listar relações `reviewStatus='pending'`, botões pra confirm/reject batendo na API criada em T11. ~1h.
+- **Importar atos legislativos referenciados** pra fechar grafo (92 orphans no backfill atual — Lei 8.666/93, etc.).
 
 ---
 
