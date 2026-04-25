@@ -12,6 +12,38 @@
 
 ---
 
+## Status de execução
+
+### ✅ Sessão 2026-04-25 — MVP COMPLETO (Tasks 0-7)
+
+| Task | Commit | Estado |
+|---|---|---|
+| T0 — Cron de re-scrape | `5550e00` | ✅ Agendado segundas 3h UTC no `vercel.json` |
+| T1 — Schema | `106d716` | ✅ `LegislativeActRelation` no Neon prod (5 fields, 3 índices, 2 FKs cascade) — usei `prisma db push` em vez de `migrate dev` (descoberto que projeto não usa migrations: `migration_lock.toml` declara sqlite, Neon não tem `_prisma_migrations`. Vercel-build é `prisma db push --accept-data-loss`). Anotação pra futuro: baselining se quisermos retomar migrations. |
+| T2+T3 — Detector heurístico | (incluído no commit do T3) | ✅ 13/13 testes verde. Regex bidirecional (após verbo, depois antes). Fixes durante TDD: separador obrigatório entre número e ano (evita backtracking pegar "8.6" como num e "66" como year); olhar antes do verbo se janela após não encontrar. |
+| T4+T5 — CRUD relations | (incluído no commit do T5) | ✅ 6/6 testes verde. saveDetectedRelations faz upsert idempotente, pula orphans e self-relations. |
+| T6 — Integração batch import | `51e8cf1` | ✅ Detector roda pós-create/update real (não dry-run, não inalterados, não bloqueados). |
+| T7 — Cron + backfill | `3f3cf8d` | ✅ Cron detecta quando content muda. Backfill rodado em prod (112 atos): **108 candidatos detectados, 16 relações criadas (11 altera + 3 regulamenta + 2 revoga), 92 puladas (target ainda não importado, ex: Lei 8.666/93)**. |
+
+**Achados pra revisão admin futura (T11):**
+- Pelo menos 1 falso positivo cronológico nas amostras: "Decreto 12.343/2024 → revoga → Decreto 12.807/2025" — 2024 não pode revogar 2025. Workflow `reviewStatus='pending'` já marca essa pendência; T11 cuidará da UI de revisão.
+
+**Pendência pré-existente fora do escopo:**
+- `lib/__tests__/dou-classifier.test.ts > deve retornar OUTROS com revisão pendente para texto genérico` falha desde o commit `ea68a1b` (base da branch). Erro: `expected 50 to be less than 50`. Fix trivial: ajustar threshold pra `< 51` ou classifier retornar `49`.
+
+### ⏳ Pendentes (próxima sessão)
+
+| Task | Estimativa | Prioridade |
+|---|---|---|
+| T8 — UI RelationHistory testes | 30min | Alta |
+| T9 — UI RelationHistory implementação | 1h | Alta |
+| T10 — Plug na página de detalhe `/legislacao/[id]` | 30min | Alta |
+| T11 — API admin pra confirmar/rejeitar relações | 1h | Média (resolve falsos positivos) |
+| T12 — Detector via IA (Gemini) | 1h | Baixa (heurística já cobre 16 casos) |
+| T13 — Suite + lint + push final + memória | 30min | Baixa (parte já feita hoje) |
+
+---
+
 ## File Structure (decomposição)
 
 ### Novos arquivos
