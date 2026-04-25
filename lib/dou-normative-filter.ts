@@ -190,6 +190,29 @@ const PROCUREMENT_KEYWORDS = [
   'gestão de contratos', 'fiscalização de contratos',
   'compras públicas', 'compras governamentais',
   'seges', // Secretaria de Gestão — órgão central de compras
+  // Terceirização e serviços continuados (regulamentos SEGES)
+  'terceirização', 'terceirizacao', 'terceirizado', 'terceirizada', 'terceirizados',
+  'serviços continuados', 'servicos continuados',
+  'dedicação exclusiva', 'dedicacao exclusiva',
+  'mão de obra', 'mao de obra',
+  'execução indireta', 'execucao indireta',
+  'planilha de custos', 'planilha de custo',
+  'repactuação', 'repactuacao',
+  // Jornada e benefícios em contratos terceirizados
+  'jornada de trabalho', 'jornada semanal',
+  'redução de jornada', 'reducao de jornada',
+  'compensação de jornada', 'compensacao de jornada',
+  'auxílio creche', 'auxilio creche',
+  'reembolso creche', 'reembolso de creche',
+  'benefício creche', 'beneficio creche',
+  'auxílio alimentação', 'auxilio alimentacao',
+  'vale transporte', 'vale-transporte',
+  'férias dos empregados', 'ferias dos empregados',
+  // Plataformas e sistemas de compras
+  'pncp', 'portal nacional de contratações',
+  'comprasnet', 'contrata+brasil', 'contrata mais brasil',
+  'sistema etp', 'etp digital', 'tr digital',
+  'sicaf',
 ];
 
 /**

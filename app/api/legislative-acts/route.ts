@@ -54,7 +54,7 @@ export async function GET(request: NextRequest) {
           return await fetchBoasPraticas({ search, year, esfera, theme, issuer, page, limit, skip, category: 'orientacao_procedimento' });
         }
         if (tab === 'tic') {
-          return await fetchAtosNormativos({ type, issuer, year, search, articleNumber, esfera, theme: theme || 'tic', page, limit, skip, ticOnly: true });
+          return await fetchAtosNormativos({ type, issuer, year, search, articleNumber, esfera, theme: theme || 'tecnologia-informacao', page, limit, skip, ticOnly: true });
         }
         return await fetchAtosNormativos({ type, issuer, year, search, articleNumber, esfera, theme, page, limit, skip });
       },

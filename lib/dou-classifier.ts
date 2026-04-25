@@ -18,6 +18,7 @@
 import { DOUSearchResult } from './dou-api';
 import { DOUEnrichedContent } from './dou-scraper';
 import { queryGeminiText } from './gemini/cached-client';
+import { isAtoNormativoGeral } from './dou-normative-filter';
 
 /**
  * Categorias de documentos DOU
@@ -261,6 +262,34 @@ export class DOUClassifier {
     'exonerar servidor',
     'portaria de pessoal',
     'portaria administrativa',
+    'designar o servidor',
+    'designar a servidora',
+    'designar os servidores',
+    'designar fiscal',
+    'designar gestor',
+    'designar pregoeiro',
+    'autorizar o afastamento',
+    'autorizar afastamento',
+    'conceder aposentadoria',
+    'conceder pensão',
+    'conceder pensao',
+    'conceder licença',
+    'conceder licenca',
+    'tornar sem efeito',
+    'matrícula siape',
+    'matricula siape',
+    'siape n',
+    'cpf nº',
+    'cnpj nº',
+    'edital de convocação',
+    'edital de convocacao',
+    'edital de credenciamento',
+    'edital de chamamento',
+    'avisos de licitação',
+    'avisos de licitacao',
+    'resultado de habilitação',
+    'resultado de habilitacao',
+    'resultado parcial',
   ];
 
   /**
@@ -364,10 +393,40 @@ export class DOUClassifier {
       };
     }
 
-    // PASSO 5: Não classificado - REVISÃO MANUAL
-    reasoning.push('Documento não classificado automaticamente');
+    // PASSO 5: Aplicar filtro normativo geral antes de cair em revisão manual.
+    // Evita que atos concretos (designações, extratos, editais) cheguem à fila pending
+    // só porque não bateram com IRRELEVANT_KEYWORDS.
+    const normativeClass = isAtoNormativoGeral(title, abstract);
+
+    if (normativeClass === 'concreto') {
+      reasoning.push('Ato concreto detectado por filtro normativo (designação, extrato, edital, etc.)');
+      return {
+        category: DOUDocumentCategory.OUTROS,
+        status: ApprovalStatus.AUTO_REJECTED,
+        confidence: 75,
+        reasoning,
+        isRelevant: false,
+        requiresReview: false,
+      };
+    }
+
+    if (normativeClass === 'geral') {
+      reasoning.push('Indicadores de ato normativo geral (regulamenta, dispõe sobre, institui, etc.)');
+      reasoning.push('Requer revisão manual para confirmar relevância');
+      return {
+        category: DOUDocumentCategory.ATO_NORMATIVO,
+        status: ApprovalStatus.PENDING,
+        confidence: 65,
+        reasoning,
+        isRelevant: true,
+        requiresReview: true,
+      };
+    }
+
+    // Ambíguo: mantém pending mas com confiança maior que o fallback antigo
+    reasoning.push('Documento ambíguo — sem indicadores claros de ato normativo ou concreto');
     reasoning.push('Requer revisão manual');
-    confidence = 40;
+    confidence = 50;
 
     return {
       category: DOUDocumentCategory.OUTROS,
