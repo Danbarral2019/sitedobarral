@@ -282,10 +282,15 @@ async function handleSubscriptionUpdated(event: Stripe.Event) {
 
   const periodEndSeconds = extractCurrentPeriodEnd(stripeSub);
 
+  // O Customer Portal hoje agenda cancelamento via `cancel_at` (timestamp),
+  // não via o boolean `cancel_at_period_end`. Os dois indicam cancel agendado;
+  // tratamos qualquer um como "marcado pra cancelar".
+  const isScheduledToCancel = stripeSub.cancel_at_period_end || stripeSub.cancel_at !== null;
+
   await prisma.subscription.update({
     where: { stripeSubscriptionId },
     data: {
-      cancelAtPeriodEnd: stripeSub.cancel_at_period_end,
+      cancelAtPeriodEnd: isScheduledToCancel,
       status: stripeSub.status === 'active' ? 'active'
         : stripeSub.status === 'past_due' ? 'past_due'
         : stripeSub.status === 'canceled' ? 'canceled'
@@ -398,7 +403,11 @@ async function handleDisputeCreated(event: Stripe.Event) {
 
 const HANDLERS: Record<string, (event: Stripe.Event) => Promise<void>> = {
   'checkout.session.completed': handleCheckoutCompleted,
+  // Stripe envia ambos pra cobranças bem-sucedidas (event.id distinto). O dispatch
+  // dedup via ProcessedWebhookEvent garante que cada um roda no máximo 1x; o handler
+  // é idempotente (atualiza currentPeriodEnd e status='active' sem efeitos colaterais).
   'invoice.paid': handleInvoicePaid,
+  'invoice.payment_succeeded': handleInvoicePaid,
   'invoice.payment_failed': handleInvoicePaymentFailed,
   'customer.subscription.updated': handleSubscriptionUpdated,
   'customer.subscription.deleted': handleSubscriptionDeleted,

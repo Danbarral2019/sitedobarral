@@ -54,6 +54,7 @@
 **Fase 3 — LIVE MODE (bloqueada por KYC da Stripe):**
 
 - [ ] Concluir KYC (verificação de identidade + dados da empresa/CNPJ que a Stripe pediu no onboarding). Prazo Stripe: 1-2 dias úteis.
+- [ ] **Criar páginas `/termos` e `/privacidade`** no site e cadastrar URLs em Stripe → Public business information (referenciado pelo Customer Portal em "Políticas jurídicas" — hoje vazias)
 - [ ] Com live mode ativado: repetir `scripts/stripe-bootstrap.ts` com `sk_live_...` pra criar os mesmos 4 Prices no ambiente live
 - [ ] Obter `sk_live_...`, `pk_live_...` e criar webhook live → `whsec_live_...`
 - [ ] Trocar as 3 vars no Vercel Production pra chaves **live** (preview pode continuar em test)

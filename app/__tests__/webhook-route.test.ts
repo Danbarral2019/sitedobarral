@@ -202,6 +202,31 @@ describe('POST /api/pagamento/webhook', () => {
     });
   });
 
+  // 5b. subscription.updated com cancel_at (Customer Portal moderno)
+  // Regression: handler antes só lia `cancel_at_period_end` (boolean) — Stripe
+  // Portal agenda via `cancel_at` (timestamp). Sem esse fix, cancelamento via
+  // portal era silenciosamente ignorado no DB.
+  it('marks cancelAtPeriodEnd=true when subscription.updated carries cancel_at timestamp', async () => {
+    const updateEvent = makeEvent('customer.subscription.updated', {
+      id: 'sub_stripe_1',
+      status: 'active',
+      cancel_at_period_end: false,
+      cancel_at: 1779999999, // qualquer timestamp futuro
+      items: { data: [{ current_period_end: 1779999999 }] },
+    });
+
+    mockConstructEvent.mockReturnValue(updateEvent);
+    mockSubscriptionFindUnique.mockResolvedValue({ status: 'active' });
+    mockSubscriptionUpdate.mockResolvedValue({});
+
+    const res = await POST(makeRequest('{}', 'valid_sig') as any);
+    expect(res.status).toBe(200);
+    expect(mockSubscriptionUpdate).toHaveBeenCalledWith({
+      where: { stripeSubscriptionId: 'sub_stripe_1' },
+      data: expect.objectContaining({ cancelAtPeriodEnd: true }),
+    });
+  });
+
   // 6. customer.subscription.deleted
   it('cancels subscription and removes enrollments on subscription.deleted', async () => {
     const deletedEvent = makeEvent('customer.subscription.deleted', {
@@ -224,6 +249,35 @@ describe('POST /api/pagamento/webhook', () => {
     });
 
     expect(mockRemoveEnrollments).toHaveBeenCalledWith('sub_stripe_1');
+  });
+
+  // 7a. invoice.payment_succeeded reaches the same handler as invoice.paid
+  // Regression: cadastrado no Stripe Dashboard mas faltava no HANDLERS dispatch table.
+  it('renews period on invoice.payment_succeeded (alias of invoice.paid)', async () => {
+    const invoiceEvent = makeEvent('invoice.payment_succeeded', {
+      id: 'in_test_1',
+      amount_paid: 4990,
+      currency: 'brl',
+      hosted_invoice_url: 'https://invoice.url',
+      parent: { subscription_details: { subscription: 'sub_stripe_1' } },
+    });
+
+    mockConstructEvent.mockReturnValue(invoiceEvent);
+    mockSubscriptionFindUnique.mockResolvedValue({
+      stripeSubscriptionId: 'sub_stripe_1',
+      plan: 'basico',
+      billingCycle: 'monthly',
+      paymentMethod: 'card',
+      user: { email: 'user@test.com', name: 'User' },
+    });
+    mockSubscriptionUpdate.mockResolvedValue({});
+
+    const res = await POST(makeRequest('{}', 'valid_sig') as any);
+    expect(res.status).toBe(200);
+    expect(mockSubscriptionUpdate).toHaveBeenCalledWith({
+      where: { stripeSubscriptionId: 'sub_stripe_1' },
+      data: expect.objectContaining({ status: 'active' }),
+    });
   });
 
   // 7. Handler failure -> dedup rollback + 500
