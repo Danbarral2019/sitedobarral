@@ -97,7 +97,7 @@ async function main() {
   // 7) Eventos recentes na conta Stripe envolvendo esse customer
   const recentEvents = await stripe.events.list({ limit: 30 });
   const relevant = recentEvents.data.filter((ev) => {
-    const obj = ev.data.object as Record<string, unknown>;
+    const obj = ev.data.object as unknown as Record<string, unknown>;
     if (obj.customer === user.stripeCustomerId) return true;
     if (obj.id && stripeSubs.data.some((s) => s.id === obj.id)) return true;
     return false;

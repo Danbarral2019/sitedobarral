@@ -15,7 +15,9 @@ async function main() {
   const keyMode = key.includes('_test_') ? 'TEST' : key.includes('_live_') ? 'LIVE' : '?';
   console.log(`\nUsando chave em modo ${keyMode}\n`);
 
-  const acc = await stripe.accounts.retrieve();
+  // SDK v22 tipa retrieve com id obrigatório; sem id, a API retorna a conta da própria chave.
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Stripe SDK type bug
+  const acc = await (stripe.accounts as any).retrieve() as Stripe.Account;
   console.log(`Account ID:        ${acc.id}`);
   console.log(`Country:           ${acc.country}`);
   console.log(`Type:              ${acc.type}`);

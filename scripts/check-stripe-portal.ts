@@ -43,7 +43,10 @@ async function main() {
   console.log(`  payment_method_update       ${bool(f.payment_method_update.enabled)}`);
   console.log(`  subscription_cancel         ${bool(f.subscription_cancel.enabled)}  mode=${f.subscription_cancel.mode}  proration=${f.subscription_cancel.proration_behavior}`);
   console.log(`  subscription_update         ${bool(f.subscription_update.enabled)}`);
-  console.log(`  subscription_pause          ${bool(f.subscription_pause?.enabled ?? false)}`);
+  // subscription_pause foi removido do tipo Features no SDK v22; acesso defensivo via cast.
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Stripe SDK type drift
+  const pauseEnabled = ((f as any).subscription_pause?.enabled ?? false) as boolean;
+  console.log(`  subscription_pause          ${bool(pauseEnabled)}`);
 
   const issues: string[] = [];
   if (!f.invoice_history.enabled) issues.push('invoice_history desligado');
@@ -53,7 +56,7 @@ async function main() {
   if (f.subscription_cancel.enabled && f.subscription_cancel.mode !== 'at_period_end') {
     issues.push(`subscription_cancel.mode=${f.subscription_cancel.mode} (esperado: at_period_end — alinha com nosso webhook customer.subscription.deleted)`);
   }
-  if (f.subscription_pause?.enabled) issues.push('subscription_pause LIGADO sem handler no webhook');
+  if (pauseEnabled) issues.push('subscription_pause LIGADO sem handler no webhook');
 
   console.log('');
   if (issues.length === 0) {

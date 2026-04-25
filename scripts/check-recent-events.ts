@@ -5,7 +5,7 @@ async function main() {
   const evs = await s.events.list({ limit: 50 });
   console.log(`Últimos ${evs.data.length} eventos (qualquer tipo):`);
   for (const ev of evs.data) {
-    const obj = ev.data.object as Record<string, unknown>;
+    const obj = ev.data.object as unknown as Record<string, unknown>;
     const tag = obj.id ? `obj=${obj.id}` : '';
     console.log(`  - ${new Date(ev.created * 1000).toISOString()}  ${ev.type.padEnd(40)}  ${ev.id}  ${tag}`);
   }
