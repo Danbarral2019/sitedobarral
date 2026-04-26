@@ -154,3 +154,31 @@ export function stripFormAnnex(text: string): string {
 
   return result.trimEnd();
 }
+
+/**
+ * Pipeline de normalização full-stack para texto bruto extraído de scrapers.
+ *
+ * Aplica os cleaners em ordem segura — cada um é no-op quando seu marker
+ * específico não aparece, então rodar todos não tem efeito colateral em
+ * texto que não os contém:
+ *
+ *   collapseWhitespace → stripDouBoilerplate (in.gov.br)
+ *   → stripGovbrUiNoise (gov.br/*) → stripFormAnnex (Plone forms)
+ *   → collapseWhitespace (limpa whitespace que sobrou dos cortes)
+ *
+ * Use nos pontos do pipeline onde texto bruto entra no banco:
+ * - cron import-dou ao salvar DOUStagingDocument.fullContent
+ * - sync-dou-atos-normativos ao salvar LegislativeAct.ementa do abstract
+ * - import-legislative-acts-batch ao receber `content` do JSON
+ * - dou-scraper.scrapeContent() pós-extração
+ *
+ * É no-op em string vazia/null/undefined (retorna a entrada).
+ */
+export function normalizeScrapedText(text: string | null | undefined): string {
+  if (!text) return text ?? '';
+  let result = collapseWhitespace(text);
+  result = stripDouBoilerplate(result);
+  result = stripGovbrUiNoise(result);
+  result = stripFormAnnex(result);
+  return collapseWhitespace(result);
+}

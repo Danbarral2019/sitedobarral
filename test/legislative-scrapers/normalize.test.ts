@@ -6,6 +6,7 @@ import {
   stripDouBoilerplate,
   stripFormAnnex,
   stripGovbrUiNoise,
+  normalizeScrapedText,
 } from '../../lib/legislative-scrapers/normalize';
 
 describe('collapseWhitespace', () => {
@@ -206,5 +207,52 @@ describe('stripGovbrUiNoise', () => {
     const out = stripGovbrUiNoise(input);
     expect(out.length).toBeGreaterThanOrEqual(body.length - 5);
     expect(out.length).toBeLessThan(input.length);
+  });
+});
+
+describe('normalizeScrapedText (pipeline completo)', () => {
+  it('retorna string vazia para null/undefined/""', () => {
+    expect(normalizeScrapedText(null)).toBe('');
+    expect(normalizeScrapedText(undefined)).toBe('');
+    expect(normalizeScrapedText('')).toBe('');
+  });
+
+  it('é no-op em texto já limpo', () => {
+    const clean = 'Art. 1º Esta Lei dispõe sobre normas gerais.\n\nArt. 2º Aplica-se a todos os entes.';
+    expect(normalizeScrapedText(clean)).toBe(clean);
+  });
+
+  it('aplica collapseWhitespace + remove "Compartilhe:" em texto gov.br', () => {
+    const input = 'Info\n\nArt. 1º   Esta IN aplica-se a contratos.\n\nArt. 2º Norma geral.\n\nCompartilhe: Facebook Twitter LinkedIn';
+    const out = normalizeScrapedText(input);
+    expect(out).not.toContain('Info');
+    expect(out).not.toContain('Compartilhe');
+    expect(out).not.toContain('   '); // colapsa runs de 3+ espaços
+    expect(out).toContain('Esta IN');
+    expect(out).toContain('aplica-se a contratos');
+    expect(out).toContain('Norma geral');
+  });
+
+  it('remove masthead DOU + footer "Borda do rodapé"', () => {
+    const input = 'Brasão do Brasil\nDiário Oficial da União\nPublicado em: 25/04/2026\nÓrgão: Ministério\nPortaria nº 1234, de 25 de abril de 2026\n\nArt. 1º Conteúdo do ato.\n\nBorda do rodapé\nLogo da Imprensa';
+    const out = normalizeScrapedText(input);
+    expect(out).toContain('Portaria nº 1234');
+    expect(out).toContain('Art. 1º Conteúdo do ato');
+    expect(out).not.toContain('Brasão do Brasil');
+    expect(out).not.toContain('Borda do rodapé');
+  });
+
+  it('preserva "Este conteúdo não substitui..."', () => {
+    const input = 'Art. 1º Norma X.\n\nEste conteúdo não substitui o publicado no Diário Oficial.\n\nCompartilhe: Facebook';
+    const out = normalizeScrapedText(input);
+    expect(out).toContain('Este conteúdo não substitui');
+    expect(out).not.toContain('Compartilhe');
+  });
+
+  it('é idempotente — aplicar duas vezes dá o mesmo resultado', () => {
+    const input = 'Info\n\nArt. 1º  Texto.\n\n\n\nCompartilhe: X';
+    const once = normalizeScrapedText(input);
+    const twice = normalizeScrapedText(once);
+    expect(twice).toBe(once);
   });
 });

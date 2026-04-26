@@ -29,6 +29,7 @@ import { detectModifications } from '@/lib/dou-change-detector';
 import { scrapeContent } from '@/lib/dou-scraper';
 import { LeiIndexer } from '@/lib/lei-indexer';
 import { scrapeAndIndexAct } from '@/lib/legislative-scrapers/scrape-and-index';
+import { normalizeScrapedText } from '@/lib/legislative-scrapers/normalize';
 import { prisma } from '@/lib/prisma';
 import { verifyCronAuth } from '@/lib/cron-auth';
 
@@ -156,6 +157,10 @@ export async function GET(request: NextRequest) {
         }
 
         const cleanTitle = result.title.replace(/<[^>]*>/g, '').trim();
+        // Abstract vindo da API DOU pode trazer whitespace/NBSP/boilerplate
+        // residual quando o serviço inclui chrome do in.gov.br. Normalizamos
+        // antes de persistir como ementa/content/description para o banco.
+        const cleanAbstract = normalizeScrapedText(result.abstract || '');
 
         // 4b. Filtro de ato normativo geral vs concreto
         const normativeType = isAtoNormativoGeral(cleanTitle, result.abstract);
@@ -231,13 +236,13 @@ export async function GET(request: NextRequest) {
             const newDoc = await tx.document.create({
               data: {
                 title: cleanTitle,
-                description: result.abstract || '',
+                description: cleanAbstract,
                 type: 'link',
                 url: result.href,
                 category: documentCategory,
                 isPublic: true,
                 tags: JSON.stringify(['ato_normativo', atoType || 'outro'].filter(Boolean)),
-                content: result.abstract || '',
+                content: cleanAbstract,
                 douUrl: result.href,
                 douData: parsedDate,
                 douSecao: result.section,
@@ -282,7 +287,7 @@ export async function GET(request: NextRequest) {
                     year,
                     fullNumber,
                     title: cleanTitle,
-                    ementa: result.abstract || cleanTitle,
+                    ementa: cleanAbstract || cleanTitle,
                     issuer,
                     publishDate: parsedDate || new Date(),
                     hierarchyLevel: HIERARCHY_MAP[atoType] || 5,
@@ -301,8 +306,8 @@ export async function GET(request: NextRequest) {
                 title: cleanTitle,
                 category: documentCategory,
                 tags: JSON.stringify([atoType]),
-                content: result.abstract || '',
-                description: result.abstract || '',
+                content: cleanAbstract,
+                description: cleanAbstract,
               });
 
               if (analysis.articles.length > 0) {
@@ -366,7 +371,7 @@ export async function GET(request: NextRequest) {
                       articleNumber: artNumber,
                       type: CHANGE_TYPE_MAP[modification.changeType] || 'comentario',
                       title: `${modification.changeType === 'altera' ? 'Alterado' : modification.changeType === 'revoga' ? 'Revogado' : 'Regulamentado'} por: ${cleanTitle.substring(0, 100)}`,
-                      description: result.abstract || null,
+                      description: cleanAbstract || null,
                       detectedBy: 'auto-sync-dou',
                       isPublic: false,
                       adminReviewed: false,
