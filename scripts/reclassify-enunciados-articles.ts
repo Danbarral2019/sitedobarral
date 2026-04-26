@@ -19,7 +19,7 @@
  */
 
 import { PrismaClient } from '@prisma/client';
-import { GoogleGenerativeAI } from '@google/generative-ai';
+import { GoogleGenAI } from '@google/genai';
 import * as fs from 'fs/promises';
 import * as path from 'path';
 
@@ -29,7 +29,7 @@ const prisma = new PrismaClient({ log: ['error', 'warn'] });
 // Configuration
 // ===========================
 
-const GEMINI_MODEL = 'gemini-2.5-flash';
+const GEMINI_MODEL = 'gemini-3-flash-preview';
 const DELAY_BETWEEN_BATCHES_MS = 1000;
 
 // ===========================
@@ -61,34 +61,32 @@ interface ReclassifyRecord {
 // Gemini Client
 // ===========================
 
-let genAI: GoogleGenerativeAI | null = null;
+let genAI: GoogleGenAI | null = null;
 
-function getGenAI(): GoogleGenerativeAI {
+function getGenAI(): GoogleGenAI {
   const apiKey = process.env.GEMINI_API_KEY;
   if (!apiKey) {
     throw new Error('GEMINI_API_KEY nao configurada. Configure a variavel de ambiente.');
   }
   if (!genAI) {
-    genAI = new GoogleGenerativeAI(apiKey);
+    genAI = new GoogleGenAI({ apiKey });
   }
   return genAI;
 }
 
 async function queryGemini(prompt: string): Promise<string> {
-  const model = getGenAI().getGenerativeModel({
+  const result = await getGenAI().models.generateContent({
     model: GEMINI_MODEL,
-    // Cast: o SDK @google/generative-ai não tipou thinkingConfig ainda, mas
-    // a propriedade é propagada para o body REST e funciona em runtime.
-    generationConfig: {
+    contents: prompt,
+    config: {
       temperature: 0.1,
       maxOutputTokens: 2048,
       // Extração JSON de artigos — thinking come o budget e trunca.
       thinkingConfig: { thinkingBudget: 0 },
-    } as unknown as import('@google/generative-ai').GenerationConfig,
+    },
   });
 
-  const result = await model.generateContent(prompt);
-  let text = result.response.text().trim();
+  let text = (result.text ?? '').trim();
 
   // Remove markdown code blocks if present
   if (text.includes('```json')) {

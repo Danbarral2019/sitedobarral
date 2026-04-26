@@ -142,7 +142,7 @@ async function analyzeDocument(document) {
       .replace('{{TAGS}}', formatTags(document.tags))
       .replace('{{CONTENT}}', content);
 
-    const response = await callGeminiJSON(prompt, 'gemini-2.5-flash');
+    const response = await callGeminiJSON(prompt, 'gemini-3-flash-preview');
 
     // Filtrar por confiança mínima
     const filteredArticles = (response.articles || [])

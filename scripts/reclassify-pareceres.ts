@@ -29,7 +29,7 @@ const prisma = new PrismaClient({
 
 // --- Configuração ---
 
-const GEMINI_MODEL = 'gemini-2.5-flash';
+const GEMINI_MODEL = 'gemini-3-flash-preview';
 const RATE_LIMIT_MS = 800;
 const PARECER_CATEGORIES = ['parecer-vinculante', 'parecer', 'decor'];
 

@@ -6,6 +6,78 @@
 
 ---
 
+## Operação em produção (kill-switch + alertas automáticos)
+
+### Kill-switch: `SEARCH_ANALYTICS_ENABLED`
+
+Variável de ambiente (default ligado). Para **pausar a coleta** sem deploy:
+
+```
+SEARCH_ANALYTICS_ENABLED=false
+```
+
+Quando desligado:
+- `POST /api/area-restrita/search-history` retorna `{ id: null, disabled: true }` sem gravar.
+- Dados históricos continuam acessíveis em `/admin/search-analytics`.
+- Botões 👍/👎 em entradas existentes continuam funcionando (PATCH não é gateado).
+
+**Quando usar:** se aparecer bug em coleta, queda de DB, vazamento, ou se for fazer manutenção. Coloca `false` na Vercel → invalidar cache → coleta para. Reativar é só remover/setar `true` e redeploy.
+
+### Alerta automático no cron `monitoring-alerts` (a cada 6h)
+
+Dispara email para `ADMIN_ALERT_EMAIL` se nos **últimos 7 dias** houver **≥10 votos** E **proporção de 👎 ≥ 30%**. Configurado em `app/api/cron/monitoring-alerts/route.ts` (constantes `FEEDBACK_RATIO_THRESHOLD` e `FEEDBACK_MIN_VOTES`).
+
+Ao receber alerta:
+1. Acessar `/admin/search-analytics` e olhar a seção Feedback.
+2. Seguir o decision tree abaixo.
+3. Se for falso alarme (caso raro/uma feature nova causou flutuação), considerar ajustar threshold ou silenciar pontualmente em produção.
+
+### Targets de qualidade (do `ROADMAP_BUSCA_QUALIDADE.md`)
+
+- **Curto prazo:** recall@5 ≥ 72%
+- **Médio prazo:** recall@5 ≥ 78%
+- **Hoje (baseline):** 66,3% (medido 2026-04-23 com golden set de 91 queries)
+
+Eval com `npm run eval:run` regressão a cada PR que toque retrieval/embedding.
+
+---
+
+## Decision tree pós-feedback negativo
+
+Quando você recebe um alerta ou identifica queries 👎 recorrentes:
+
+```
+Query 👎 detectada
+  │
+  ├─ Reproduzir com mesmos filtros (coluna "Últimas ocorrências")
+  │
+  ├── O doc/decisão certo apareceu no top-K?
+  │   ├── SIM → problema de SÍNTESE
+  │   │   → Ajustar systemInstruction/buildPrompt da rota
+  │   │   → Path: app/api/{documents,jurisprudencia}/query/route.ts
+  │   │
+  │   └── NÃO → problema de RETRIEVAL
+  │       │
+  │       ├── O doc existe no acervo?
+  │       │   ├── SIM → adicionar ao golden set (`eval/golden-set.json`)
+  │       │   │   → Considerar Fase 3 (embedding) ou Fase 4 (FTS)
+  │       │   │     do ROADMAP_BUSCA_QUALIDADE.md
+  │       │   │
+  │       │   └── NÃO → gap de conteúdo
+  │       │       → Scraper/indexação ou import legislativo manual
+  │       │       → Verificar `scripts/diagnose-pending-embeddings.ts`
+  │       │
+  │       └── Tribunal específico (TCE-X) sem chunks?
+  │           → `scripts/diagnose-jurisprudencia-embeddings.ts`
+  │           → Backfill via `process-index-jobs`
+  │
+  └── 5+ feedbacks 👎 distintos na mesma sessão de revisão?
+      → Considerar pausar com SEARCH_ANALYTICS_ENABLED=false
+        enquanto investiga regressão maior
+```
+
+---
+
 ## Onde encontrar
 
 URL: `/admin/search-analytics` (requer role `admin`).
@@ -127,3 +199,15 @@ LIMIT 20;
 - **Clicks em fontes e reformulações de query não são rastreados**. Daria sinal comportamental fino mas exige instrumentação adicional no frontend.
 
 Esses 3 são explicitamente fora do escopo da entrega 2026-04-24. Adicionar só se derem sinal que valem o esforço.
+
+---
+
+## Banner educativo (rollout)
+
+`components/area-restrita/FeedbackTipBanner.tsx` é mostrado **uma vez por usuário** em `/area-restrita/assistente` e `/area-restrita/jurisprudencia`, persistido via `localStorage` (`feedback-tip-shown-v1`). Reset manual pra testar:
+
+```js
+localStorage.removeItem('feedback-tip-shown-v1');
+```
+
+Para ressetar para todos os usuários após uma mudança de UX significativa, basta bumpar a versão na key (`feedback-tip-shown-v2`).

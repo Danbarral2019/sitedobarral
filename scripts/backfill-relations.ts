@@ -14,7 +14,10 @@ dotenv.config({ path: '.env.local' });
 import { PrismaClient } from '@prisma/client';
 import { PrismaNeon } from '@prisma/adapter-neon';
 import { detectAmendments } from '../lib/legislative-acts/amendment-detector';
-import { saveDetectedRelations } from '../lib/legislative-acts/relations';
+import {
+  detectAndSaveRelationsHybrid,
+  saveDetectedRelations,
+} from '../lib/legislative-acts/relations';
 
 const adapter = new PrismaNeon({ connectionString: process.env.DATABASE_URL! });
 const prisma = new PrismaClient({ adapter });
@@ -25,7 +28,12 @@ const limitArgIdx = args.indexOf('--limit');
 const LIMIT = limitArgIdx >= 0 ? parseInt(args[limitArgIdx + 1] ?? '0', 10) : 0;
 
 async function main() {
-  console.log(`\n=== Backfill de relações ${DRY_RUN ? '[DRY-RUN]' : '[EXEC]'} ===\n`);
+  const aiEnabled = process.env.DETECT_AMENDMENTS_AI === 'true';
+  const premium = process.env.USE_PREMIUM_FOR_DETECTOR === 'true';
+  console.log(
+    `\n=== Backfill de relações ${DRY_RUN ? '[DRY-RUN]' : '[EXEC]'} ` +
+      `${aiEnabled ? `[AI ${premium ? '3.1-Pro' : '3-Flash'}]` : '[heurística-only]'} ===\n`,
+  );
 
   const acts = await prisma.legislativeAct.findMany({
     select: { id: true, fullNumber: true, ementa: true, content: true },
@@ -36,24 +44,42 @@ async function main() {
   let totalDetected = 0;
   let totalCreated = 0;
   let totalSkipped = 0;
+  let totalAiAdded = 0;
 
   for (const act of acts) {
-    const detected = detectAmendments(act.ementa, act.content || '');
-    if (detected.length === 0) continue;
-
-    totalDetected += detected.length;
+    const heuristic = detectAmendments(act.ementa, act.content || '');
+    if (heuristic.length === 0) continue;
 
     if (DRY_RUN) {
-      console.log(`${act.fullNumber}: ${detected.length} candidatos`);
-      for (const d of detected) console.log(`  - ${d.relationType} → ${d.targetFullNumber} (conf=${d.confidence})`);
+      totalDetected += heuristic.length;
+      console.log(`${act.fullNumber}: ${heuristic.length} candidatos heurística`);
+      for (const d of heuristic) console.log(`  - ${d.relationType} → ${d.targetFullNumber} (conf=${d.confidence})`);
       continue;
     }
 
-    const r = await saveDetectedRelations(act.id, detected, 'heuristica');
-    totalCreated += r.created;
-    totalSkipped += r.skipped;
-    if (r.created > 0 || r.skipped > 0) {
-      console.log(`${act.fullNumber}: +${r.created} criadas, ${r.skipped} puladas`);
+    if (aiEnabled) {
+      const r = await detectAndSaveRelationsHybrid(
+        act.id,
+        act.ementa,
+        act.content || '',
+      );
+      totalDetected += r.heuristicCount + r.aiAdded;
+      totalCreated += r.created;
+      totalSkipped += r.skipped;
+      totalAiAdded += r.aiAdded;
+      if (r.created > 0 || r.skipped > 0 || r.aiAdded > 0) {
+        console.log(
+          `${act.fullNumber}: +${r.created} criadas, ${r.skipped} puladas, ${r.aiAdded} adicionadas pela IA`,
+        );
+      }
+    } else {
+      totalDetected += heuristic.length;
+      const r = await saveDetectedRelations(act.id, heuristic, 'heuristica');
+      totalCreated += r.created;
+      totalSkipped += r.skipped;
+      if (r.created > 0 || r.skipped > 0) {
+        console.log(`${act.fullNumber}: +${r.created} criadas, ${r.skipped} puladas`);
+      }
     }
   }
 
@@ -61,6 +87,9 @@ async function main() {
   console.log(`Candidatos detectados: ${totalDetected}`);
   console.log(`Relações criadas:      ${totalCreated}`);
   console.log(`Pulados (orphan/self): ${totalSkipped}`);
+  if (aiEnabled) {
+    console.log(`Adicionadas pela IA:   ${totalAiAdded}`);
+  }
 
   await prisma.$disconnect();
 }

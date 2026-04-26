@@ -1,0 +1,173 @@
+{
+  "generatedAt": "2026-04-26T13:39:28.688Z",
+  "totalActs": 132,
+  "totalDetected": 118,
+  "totalResolved": 98,
+  "totalOrphanTargets": 16,
+  "orphans": [
+    {
+      "target": "Portaria SGD/MGI 6.055/2025",
+      "count": 2,
+      "citedBy": [
+        "Portaria SGD/MGI nº 1.070/2023"
+      ],
+      "relationTypes": [
+        "revoga",
+        "altera"
+      ]
+    },
+    {
+      "target": "Decreto 12.102/2024",
+      "count": 2,
+      "citedBy": [
+        "IN SGD/MGI nº 86/2025",
+        "IN SEGES 460/2025"
+      ],
+      "relationTypes": [
+        "altera"
+      ]
+    },
+    {
+      "target": "IN Seges/ME 53/2020",
+      "count": 2,
+      "citedBy": [
+        "IN SEGES/MGI 82/2025",
+        "IN SEGES 82/2025"
+      ],
+      "relationTypes": [
+        "revoga"
+      ]
+    },
+    {
+      "target": "Decreto 3.800/2001",
+      "count": 2,
+      "citedBy": [
+        "Decreto 5.906/2006"
+      ],
+      "relationTypes": [
+        "altera",
+        "modifica"
+      ]
+    },
+    {
+      "target": "Portaria Seges 21.332/2020",
+      "count": 1,
+      "citedBy": [
+        "Portaria SEGES/MGI 7.604/2025"
+      ],
+      "relationTypes": [
+        "revoga"
+      ]
+    },
+    {
+      "target": "Portaria MGI 2.264/2023",
+      "count": 1,
+      "citedBy": [
+        "IN SGD/MGI nº 86/2025"
+      ],
+      "relationTypes": [
+        "revoga"
+      ]
+    },
+    {
+      "target": "Lei 8.220/1991",
+      "count": 1,
+      "citedBy": [
+        "Lei 8.666/1993"
+      ],
+      "relationTypes": [
+        "revoga"
+      ]
+    },
+    {
+      "target": "Lei 9.760/1946",
+      "count": 1,
+      "citedBy": [
+        "Lei 8.666/1993"
+      ],
+      "relationTypes": [
+        "altera"
+      ]
+    },
+    {
+      "target": "Decreto 5.343/2005",
+      "count": 1,
+      "citedBy": [
+        "Decreto 5.906/2006"
+      ],
+      "relationTypes": [
+        "revoga"
+      ]
+    },
+    {
+      "target": "Lei 11.077/2004",
+      "count": 1,
+      "citedBy": [
+        "Decreto 5.906/2006"
+      ],
+      "relationTypes": [
+        "regulamenta"
+      ]
+    },
+    {
+      "target": "IN 53/2020",
+      "count": 1,
+      "citedBy": [
+        "IN AUTOR/ME 62/2021"
+      ],
+      "relationTypes": [
+        "altera"
+      ]
+    },
+    {
+      "target": "IN 10/2018",
+      "count": 1,
+      "citedBy": [
+        "IN SEGES 412/2025"
+      ],
+      "relationTypes": [
+        "revoga"
+      ]
+    },
+    {
+      "target": "IN 3/2015",
+      "count": 1,
+      "citedBy": [
+        "IN SEGES/ME 5/2022"
+      ],
+      "relationTypes": [
+        "altera"
+      ]
+    },
+    {
+      "target": "Lei 10.356/2001",
+      "count": 1,
+      "citedBy": [
+        "Portaria TCU 3/2025"
+      ],
+      "relationTypes": [
+        "altera"
+      ]
+    },
+    {
+      "target": "IN 72/2021",
+      "count": 1,
+      "citedBy": [
+        "IN SEGES/ME 91/2022"
+      ],
+      "relationTypes": [
+        "revoga"
+      ]
+    },
+    {
+      "target": "Lei 123/2006",
+      "count": 1,
+      "citedBy": [
+        "IN SEGES 460/2025"
+      ],
+      "relationTypes": [
+        "altera"
+      ]
+    }
+  ]
+}

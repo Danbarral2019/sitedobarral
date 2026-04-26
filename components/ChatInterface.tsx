@@ -653,7 +653,7 @@ export default function ChatInterface({
                     })}
                   </span>
                   {message.role === 'assistant' && message.content && (
-                    <div className="flex items-center gap-1 opacity-0 group-hover/msg:opacity-100 transition-all">
+                    <div className="flex items-center gap-1 opacity-60 group-hover/msg:opacity-100 transition-all">
                       {message.searchHistoryId && (
                         <>
                           <button

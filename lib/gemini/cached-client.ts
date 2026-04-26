@@ -6,10 +6,10 @@
  */
 
 import {
-  GoogleGenerativeAI,
+  GoogleGenAI,
   HarmCategory,
   HarmBlockThreshold,
-} from '@google/generative-ai';
+} from '@google/genai';
 import { withCache, CacheKeys, CACHE_TTL } from '../cache/redis-client';
 import {
   PRIMARY_GEMINI_MODEL,
@@ -25,7 +25,7 @@ import {
 const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
 
 // Lazy-loaded client (validated on first use)
-let genAI: GoogleGenerativeAI | null = null;
+let genAI: GoogleGenAI | null = null;
 
 function validateGeminiConfig() {
   if (!GEMINI_API_KEY) {
@@ -33,10 +33,10 @@ function validateGeminiConfig() {
   }
 }
 
-function getGenAI(): GoogleGenerativeAI {
+function getGenAI(): GoogleGenAI {
   validateGeminiConfig();
   if (!genAI) {
-    genAI = new GoogleGenerativeAI(GEMINI_API_KEY!);
+    genAI = new GoogleGenAI({ apiKey: GEMINI_API_KEY! });
   }
   return genAI;
 }
@@ -103,24 +103,23 @@ async function callGeminiRaw(
   query: string,
   opts: { temperature: number; maxOutputTokens: number; systemInstruction?: string; thinkingBudget?: number },
 ) {
-  const geminiModel = getGenAI().getGenerativeModel({
+  const result = await getGenAI().models.generateContent({
     model: modelName,
-    ...(opts.systemInstruction ? { systemInstruction: opts.systemInstruction } : {}),
-    generationConfig: {
+    contents: query,
+    config: {
+      ...(opts.systemInstruction ? { systemInstruction: opts.systemInstruction } : {}),
       temperature: opts.temperature,
       maxOutputTokens: opts.maxOutputTokens,
       ...(opts.thinkingBudget !== undefined && {
         thinkingConfig: { thinkingBudget: opts.thinkingBudget },
       }),
+      safetySettings: LEGAL_SAFETY_SETTINGS,
     },
-    safetySettings: LEGAL_SAFETY_SETTINGS,
   });
 
-  const result = await geminiModel.generateContent(query);
-
-  const candidate = result.response.candidates?.[0];
+  const candidate = result.candidates?.[0];
   const finishReason = candidate?.finishReason;
-  const blockReason = result.response.promptFeedback?.blockReason;
+  const blockReason = result.promptFeedback?.blockReason;
 
   if (blockReason) {
     throw new Error(`Gemini blocked prompt: ${blockReason}`);
@@ -129,9 +128,9 @@ async function callGeminiRaw(
     throw new Error(`Gemini finished with reason: ${finishReason}`);
   }
 
-  const response = result.response.text();
+  const response = result.text ?? '';
 
-  const usageMetadata = result.response.usageMetadata;
+  const usageMetadata = result.usageMetadata;
   const tokens = usageMetadata
     ? {
         prompt: usageMetadata.promptTokenCount || 0,

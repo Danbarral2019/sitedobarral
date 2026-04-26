@@ -3,6 +3,7 @@ import { redirect } from 'next/navigation';
 import { verifyToken } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
 import ChatInterface from '@/components/ChatInterface';
+import FeedbackTipBanner from '@/components/area-restrita/FeedbackTipBanner';
 import Link from 'next/link';
 import { ArrowLeft, Sparkles, BookOpen, MessageSquare, Zap } from 'lucide-react';
 
@@ -145,6 +146,7 @@ export default async function AssistentePage() {
 
         {/* Chat Interface */}
         <div className="max-w-5xl mx-auto">
+          <FeedbackTipBanner />
           <div className="bg-white rounded-2xl shadow-xl border border-gray-200 overflow-hidden">
             <ChatInterface
               courseId={primaryEnrollment.courseId}

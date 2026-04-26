@@ -9,6 +9,7 @@
  */
 
 import * as cheerio from 'cheerio';
+import { normalizeScrapedText } from './legislative-scrapers/normalize';
 
 /**
  * Dados enriquecidos de uma publicacao DOU
@@ -101,7 +102,11 @@ export async function scrapeContent(url: string): Promise<DOUEnrichedContent | n
       }
     });
 
-    const conteudo = paragrafos.join('\n\n');
+    // Aplica pipeline completo de normalização (collapseWhitespace +
+    // stripDouBoilerplate + stripGovbrUiNoise + stripFormAnnex). Cada
+    // helper é no-op em texto sem seus markers, então rodar todos é
+    // seguro mesmo quando o conteúdo veio bem-formado do DOU.
+    const conteudo = normalizeScrapedText(paragrafos.join('\n\n'));
 
     // Extrair edicao, secao e pagina dos metadados
     const edicaoMatch = publicacao.match(/Edi[çc][ãa]o:\s*(\d+(?:-[A-Z])?)/i);

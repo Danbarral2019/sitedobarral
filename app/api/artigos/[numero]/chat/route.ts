@@ -2,7 +2,11 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { randomUUID } from 'crypto';
 import { queryGeminiText } from '@/lib/gemini/cached-client';
-import { PRIMARY_GEMINI_MODEL } from '@/lib/gemini/config';
+import {
+  PRIMARY_GEMINI_MODEL,
+  PREMIUM_GEMINI_MODEL,
+  isPremiumChatQuery,
+} from '@/lib/gemini/config';
 import { LEI_14133_ARTIGOS } from '@/data/lei-14133-artigos';
 import { findRelatedArticles } from '@/data/lei-14133-cross-references';
 import { enforceRateLimit, getClientIp } from '@/lib/cache/rate-limit-helper';
@@ -330,13 +334,21 @@ ${isFollowUp ? `9. Esta é uma pergunta de FOLLOW-UP. O usuário está continuan
 
 Responda agora:`;
 
-    // Consultar Gemini com caching
-    apiLogger.info({ articleNumber }, 'Querying Gemini for article chat');
+    // Consultar Gemini com caching. Roteamento opcional para premium 3.1 Pro
+    // em queries complexas (USE_PREMIUM_FOR_CHAT=true + heurística). Default
+    // continua flash. Premium ganha thinking ativo (sem budget=0) porque o
+    // valor da troca é justamente o raciocínio profundo.
+    const useGeminiPremium = isPremiumChatQuery(body.question);
+    const chatModel = useGeminiPremium ? PREMIUM_GEMINI_MODEL : PRIMARY_GEMINI_MODEL;
+    apiLogger.info(
+      { articleNumber, model: chatModel, premium: useGeminiPremium },
+      'Querying Gemini for article chat',
+    );
     const geminiResult = await queryGeminiText(prompt, {
-      model: PRIMARY_GEMINI_MODEL,
+      model: chatModel,
       temperature: 0.7,
       maxOutputTokens: 8192,
-      thinkingBudget: 0,
+      thinkingBudget: useGeminiPremium ? undefined : 0,
       useCache: true,
       cacheTTL: 3600, // 1 hora
     });
@@ -350,7 +362,7 @@ Responda agora:`;
         answer,
         isPlaceholder: false,
         aiProvider: 'gemini',
-        geminiModel: PRIMARY_GEMINI_MODEL,
+        geminiModel: chatModel,
         geminiTokens: geminiResult.tokens ? geminiResult.tokens.total : null,
         geminiLatency: geminiResult.latency,
         geminiCached: geminiResult.cached,
@@ -404,7 +416,8 @@ Responda agora:`;
           additionalDocsCount: crossReferenceDocs.length,
         } : null,
         gemini: {
-          model: PRIMARY_GEMINI_MODEL,
+          model: chatModel,
+          premium: useGeminiPremium,
           cached: geminiResult.cached,
           latency: geminiResult.latency,
           tokens: geminiResult.tokens,

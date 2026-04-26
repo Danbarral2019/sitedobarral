@@ -59,6 +59,7 @@ import { resolve } from 'node:path';
 import { PrismaClient } from '@prisma/client';
 import { PrismaNeon } from '@prisma/adapter-neon';
 import { detectAndSaveRelationsHybrid } from '../lib/legislative-acts/relations';
+import { normalizeScrapedText } from '../lib/legislative-scrapers/normalize';
 
 const adapter = new PrismaNeon({ connectionString: process.env.DATABASE_URL! });
 const prisma = new PrismaClient({ adapter });
@@ -119,13 +120,15 @@ function jsonOrNull(v: unknown): string | null {
  * Campos não-fornecidos ficam de fora → Prisma não toca neles.
  */
 function buildUpdateData(act: ActInput): Record<string, unknown> {
-  // Campos obrigatórios — sempre presentes no schema, sempre vão pro update
+  // Campos obrigatórios — sempre presentes no schema, sempre vão pro update.
+  // `ementa` é normalizada (remove ruído de UI/boilerplate caso JSON tenha
+  // sido feito por copy-paste de gov.br/in.gov.br).
   const data: Record<string, unknown> = {
     type: act.type,
     number: act.number,
     year: act.year,
     title: act.title,
-    ementa: act.ementa,
+    ementa: normalizeScrapedText(act.ementa),
     issuer: act.issuer,
     publishDate: new Date(act.publishDate),
     hierarchyLevel: act.hierarchyLevel,
@@ -133,7 +136,9 @@ function buildUpdateData(act: ActInput): Record<string, unknown> {
   };
 
   // Campos opcionais — só inclui se o JSON fornecer (presente AND não-undefined)
-  if (isProvided(act, 'summary')) data.summary = act.summary ?? null;
+  if (isProvided(act, 'summary')) {
+    data.summary = act.summary ? normalizeScrapedText(act.summary) : null;
+  }
   if (isProvided(act, 'effectiveDate')) {
     data.effectiveDate = act.effectiveDate ? new Date(act.effectiveDate) : null;
   }
@@ -141,7 +146,9 @@ function buildUpdateData(act: ActInput): Record<string, unknown> {
   if (isProvided(act, 'themes')) data.themes = jsonOrNull(act.themes);
   if (isProvided(act, 'officialUrl')) data.officialUrl = act.officialUrl ?? null;
   if (isProvided(act, 'pdfUrl')) data.pdfUrl = act.pdfUrl ?? null;
-  if (isProvided(act, 'content')) data.content = act.content ?? null;
+  if (isProvided(act, 'content')) {
+    data.content = act.content ? normalizeScrapedText(act.content) : null;
+  }
 
   return data;
 }
@@ -157,8 +164,8 @@ function buildCreateData(act: ActInput): Record<string, unknown> {
     number: act.number,
     year: act.year,
     title: act.title,
-    ementa: act.ementa,
-    summary: act.summary ?? null,
+    ementa: normalizeScrapedText(act.ementa),
+    summary: act.summary ? normalizeScrapedText(act.summary) : null,
     issuer: act.issuer,
     publishDate: new Date(act.publishDate),
     effectiveDate: act.effectiveDate ? new Date(act.effectiveDate) : null,
@@ -167,7 +174,7 @@ function buildCreateData(act: ActInput): Record<string, unknown> {
     themes: jsonOrNull(act.themes),
     officialUrl: act.officialUrl ?? null,
     pdfUrl: act.pdfUrl ?? null,
-    content: act.content ?? null,
+    content: act.content ? normalizeScrapedText(act.content) : null,
     esfera: act.esfera ?? 'federal',
     embeddingStatus: 'pending',
     createdBy: 'batch-import',

@@ -12,8 +12,11 @@ export const maxDuration = 30;
  * Checks:
  * - Zero logins nas últimas 12h (possível outage)
  * - Scrapers com 3+ falhas consecutivas
+ * - Feedback 👎 ≥30% na busca nos últimos 7 dias (com mín. 10 votos)
  * Schedule: every 6 hours
  */
+const FEEDBACK_RATIO_THRESHOLD = 0.30;
+const FEEDBACK_MIN_VOTES = 10;
 export async function GET(request: NextRequest) {
   try {
     const authError = verifyCronAuth(request);
@@ -62,6 +65,34 @@ export async function GET(request: NextRequest) {
         const lastError = logs[0]?.errorMessage || 'sem mensagem';
         alerts.push(
           `Scraper "${code}" com ${consecutiveFailures} falhas consecutivas. Ultimo erro: ${lastError.slice(0, 200)}`
+        );
+      }
+    }
+
+    // Check 3: Feedback negativo na busca ≥30% nos últimos 7 dias (com mín. 10 votos)
+    const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
+    const feedbackGroups = await prisma.searchHistory.groupBy({
+      by: ['feedback'],
+      where: {
+        feedbackAt: { gte: sevenDaysAgo },
+        feedback: { in: [1, -1] },
+      },
+      _count: { _all: true },
+    });
+
+    const positiveVotes =
+      feedbackGroups.find((g) => g.feedback === 1)?._count._all ?? 0;
+    const negativeVotes =
+      feedbackGroups.find((g) => g.feedback === -1)?._count._all ?? 0;
+    const totalVotes = positiveVotes + negativeVotes;
+
+    if (totalVotes >= FEEDBACK_MIN_VOTES) {
+      const negativeRatio = negativeVotes / totalVotes;
+      if (negativeRatio >= FEEDBACK_RATIO_THRESHOLD) {
+        alerts.push(
+          `Feedback negativo na busca: ${negativeVotes} 👎 vs ${positiveVotes} 👍 ` +
+            `nos ultimos 7 dias (${(negativeRatio * 100).toFixed(0)}%, threshold ${FEEDBACK_RATIO_THRESHOLD * 100}%). ` +
+            `Investigar queries problematicas em /admin/search-analytics.`,
         );
       }
     }

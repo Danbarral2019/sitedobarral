@@ -34,22 +34,22 @@ describe('lib/ai/registry', () => {
     }
   })
 
-  it('search default e Gemini 2.5 Flash', () => {
+  it('search default e Gemini 3 Flash Preview', () => {
     const r = resolveTask('search')
     expect(r.provider.name).toBe('gemini')
-    expect(r.modelId).toBe('gemini-2.5-flash')
+    expect(r.modelId).toBe('gemini-3-flash-preview')
   })
 
-  it('chat default e Gemini 2.5 Flash', () => {
+  it('chat default e Gemini 3 Flash Preview', () => {
     const r = resolveTask('chat')
     expect(r.provider.name).toBe('gemini')
-    expect(r.modelId).toBe('gemini-2.5-flash')
+    expect(r.modelId).toBe('gemini-3-flash-preview')
   })
 
-  it('extraction default e Gemini 2.5 Flash', () => {
+  it('extraction default e Gemini 3 Flash Preview', () => {
     const r = resolveTask('extraction')
     expect(r.provider.name).toBe('gemini')
-    expect(r.modelId).toBe('gemini-2.5-flash')
+    expect(r.modelId).toBe('gemini-3-flash-preview')
   })
 
   it('classification default e Claude 3.5 Haiku', () => {

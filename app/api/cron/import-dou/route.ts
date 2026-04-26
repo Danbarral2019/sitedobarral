@@ -33,6 +33,7 @@ import { DOUClassifier } from '@/lib/dou-classifier';
 import { scrapeContent } from '@/lib/dou-scraper';
 import { prisma } from '@/lib/prisma';
 import { verifyCronAuth } from '@/lib/cron-auth';
+import { normalizeScrapedText } from '@/lib/legislative-scrapers/normalize';
 
 export const runtime = 'nodejs';
 export const maxDuration = 300; // 5 minutos (maximo para Vercel Pro)
@@ -225,8 +226,10 @@ export async function GET(request: NextRequest) {
           const enriched = await scrapeContent(doc.url);
 
           if (enriched && enriched.caracteres > 0) {
-            // Truncar conteudo grande para nao sobrecarregar o banco/UI
-            let content = enriched.conteudo;
+            // Normaliza ANTES de truncar para que cortes de boilerplate
+            // (masthead DOU, "Compartilhe:" do gov.br, etc.) não consumam
+            // o budget de MAX_FULL_CONTENT_CHARS.
+            let content = normalizeScrapedText(enriched.conteudo);
             let truncated = false;
             if (content.length > MAX_FULL_CONTENT_CHARS) {
               content = content.substring(0, MAX_FULL_CONTENT_CHARS) + `\n\n[... truncado: ${enriched.caracteres.toLocaleString('pt-BR')} caracteres no total]`;
