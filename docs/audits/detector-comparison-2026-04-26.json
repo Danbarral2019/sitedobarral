@@ -1,0 +1,401 @@
+{
+  "generatedAt": "2026-04-26T14:01:47.488Z",
+  "actsCount": 10,
+  "models": {
+    "flash": "gemini-3-flash-preview",
+    "pro": "gemini-3.1-pro-preview"
+  },
+  "totals": {
+    "heuristic": 3,
+    "flash": 23,
+    "pro": 12,
+    "agreedFlashPro": 11,
+    "proOnlyVsFlash": 1,
+    "flashOnlyVsPro": 12
+  },
+  "latencyMs": {
+    "flashAvg": 2010,
+    "proAvg": 13520
+  },
+  "results": [
+    {
+      "fullNumber": "Resolução SEGES-CICS/MGI 6/2024",
+      "counts": {
+        "heur": 0,
+        "flash": 1,
+        "pro": 1
+      },
+      "flashLatencyMs": 1997,
+      "proLatencyMs": 8728,
+      "heuristic": [],
+      "flash": [
+        {
+          "relationType": "regulamenta",
+          "targetFullNumber": "Lei 14.133/2021",
+          "excerpt": "Suspende a aplicação de margens de preferência em licitações da Administração Pública Federal, conforme art. 26 da Lei nº 14.133/2021.",
+          "confidence": 0.95
+        }
+      ],
+      "pro": [
+        {
+          "relationType": "regulamenta",
+          "targetFullNumber": "Lei 14.133/2021",
+          "excerpt": "Suspende a aplicação de margens de preferência em licitações da Administração Pública Federal, conforme art. 26 da Lei nº 14.133/2021.",
+          "confidence": 0.9
+        }
+      ]
+    },
+    {
+      "fullNumber": "Resolução SEGES-CICS/MGI 5/2024",
+      "counts": {
+        "heur": 0,
+        "flash": 1,
+        "pro": 1
+      },
+      "flashLatencyMs": 2030,
+      "proLatencyMs": 12776,
+      "heuristic": [],
+      "flash": [
+        {
+          "relationType": "altera",
+          "targetFullNumber": "Resolução SEGES/CICS-MGI 2/2024",
+          "excerpt": "Altera a Resolução SEGES/CICS-MGI nº 2, de 2 de julho de 2024... O Anexo I da Resolução SEGES/CICS-MGI nº 2, de 2 de julho de 2024... passa a vigorar na forma do Anexo I desta Resolução.",
+          "confidence": 1
+        }
+      ],
+      "pro": [
+        {
+          "relationType": "altera",
+          "targetFullNumber": "Resolução SEGES/CICS-MGI 2/2024",
+          "excerpt": "Altera a Resolução SEGES/CICS-MGI n.º 2, de 2 de julho de 2024, publicada no DOU de 03 de julho de 2024, que aprova o Regimento Interno da CICS.",
+          "confidence": 1
+        }
+      ]
+    },
+    {
+      "fullNumber": "Resolução SEGES-CICS/MGI 4/2024",
+      "counts": {
+        "heur": 0,
+        "flash": 7,
+        "pro": 2
+      },
+      "flashLatencyMs": 3291,
+      "proLatencyMs": 17039,
+      "heuristic": [],
+      "flash": [
+        {
+          "relationType": "regulamenta",
+          "targetFullNumber": "Lei 14.133/2021",
+          "excerpt": "Especifica os produtos manufaturados nacionais que serão objeto de margens de preferência nas licitações da Administração Pública Federal, conforme o art. 26 da Lei nº 14.133/2021",
+          "confidence": 1
+        },
+        {
+          "relationType": "regulamenta",
+          "targetFullNumber": "Decreto 11.890/2024",
+          "excerpt": "no uso das atribuições que lhe conferem o art. 2º e o art. 8º do Decreto nº 11.890, de 22 de janeiro de 2024, resolve:",
+          "confidence": 1
+        },
+        {
+          "relationType": "modifica",
+          "targetFullNumber": "Portaria MCT 950/2006",
+          "excerpt": "produto resultante de desenvolvimento e inovação no país, habilitado nos termos da Portaria MCT nº 950, de 12 de dezembro de 2006",
+          "confidence": 0.8
+        },
+        {
+          "relationType": "modifica",
+          "targetFullNumber": "Portaria MCTI 1.309/2013",
+          "excerpt": "produto resultante de desenvolvimento e inovação no país, habilitado nos termos da Portaria MCTI nº 1.309, de 19 de dezembro de 2013",
+          "confidence": 0.8
+        },
+        {
+          "relationType": "modifica",
+          "targetFullNumber": "Portaria MCTI 4.514/2021",
+          "excerpt": "produto resultante de desenvolvimento e inovação no país, habilitado nos termos da Portaria MCTI nº 4.514, de 2 de março de 2021",
+          "confidence": 0.8
+        },
+        {
+          "relationType": "modifica",
+          "targetFullNumber": "Portaria MCTIC 356/2018",
+          "excerpt": "produto resultante de desenvolvimento e inovação no país, habilitado nos termos da Portaria MCTIC nº 356, de 19 de janeiro de 2018",
+          "confidence": 0.8
+        },
+        {
+          "relationType": "modifica",
+          "targetFullNumber": "Portaria MCTIC 3.303/2018",
+          "excerpt": "produto resultante de desenvolvimento e inovação no país, habilitado nos termos da Portaria MCTIC nº 3.303, de 25 de junho de 2018",
+          "confidence": 0.8
+        }
+      ],
+      "pro": [
+        {
+          "relationType": "regulamenta",
+          "targetFullNumber": "Lei 14.133/2021",
+          "excerpt": "Especifica os produtos manufaturados nacionais que serão objeto de margens de preferência nas licitações da Administração Pública Federal, conforme o art. 26 da Lei nº 14.133/2021",
+          "confidence": 0.95
+        },
+        {
+          "relationType": "regulamenta",
+          "targetFullNumber": "Decreto 11.890/2024",
+          "excerpt": "A COMISSÃO INTERMINISTERIAL DE CONTRATAÇÕES PÚBLICAS PARA O DESENVOLVIMENTO SUSTENTÁVEL - CICS, no uso das atribuições que lhe conferem o art. 2º e o art. 8º do Decreto nº 11.890",
+          "confidence": 0.95
+        }
+      ]
+    },
+    {
+      "fullNumber": "Resolução SEGES-CICS/MGI 2/2024",
+      "counts": {
+        "heur": 1,
+        "flash": 2,
+        "pro": 0
+      },
+      "flashLatencyMs": 1589,
+      "proLatencyMs": 18187,
+      "heuristic": [
+        {
+          "relationType": "regulamenta",
+          "targetFullNumber": "Lei 14.133/2021",
+          "excerpt": "tabilidade - CICS, criada pelo Decreto nº 11.890, de 22 de janeiro de 2024, que regulamenta o art. 26 da Lei nº 14.133/2021. RESOLUÇÃO SEGES-CICS/MGI Nº 2, DE 2 DE JULHO DE 2024 (Atualizada) Aprova...",
+          "confidence": 0.85
+        }
+      ],
+      "flash": [
+        {
+          "relationType": "regulamenta",
+          "targetFullNumber": "Decreto 11.890/2024",
+          "excerpt": "Aprova o Regimento Interno da Comissão Interministerial de Contratações Públicas para Sustentabilidade - CICS, criada pelo Decreto nº 11.890, de 22 de janeiro de 2024",
+          "confidence": 1
+        },
+        {
+          "relationType": "regulamenta",
+          "targetFullNumber": "Lei 14.133/2021",
+          "excerpt": "Aprova o Regimento Interno da Comissão Interministerial de Contratações Públicas para Sustentabilidade - CICS (...) que regulamenta o art. 26 da Lei nº 14.133/2021.",
+          "confidence": 0.95
+        }
+      ],
+      "pro": []
+    },
+    {
+      "fullNumber": "Resolução CICS/MGI 7/2024",
+      "counts": {
+        "heur": 0,
+        "flash": 2,
+        "pro": 2
+      },
+      "flashLatencyMs": 1775,
+      "proLatencyMs": 13521,
+      "heuristic": [],
+      "flash": [
+        {
+          "relationType": "altera",
+          "targetFullNumber": "Resolução SEGES/CICS-MGI 4/2024",
+          "excerpt": "Art. 1º A Resolução SEGES/CICS-MGI nº 4, de 18 de outubro de 2024, passa a vigorar com a seguinte redação: [...] Art. 2º. O Anexo da Resolução SEGES/CICS-MGI nº 4, de 18 de outubro de 2024, passa a vi",
+          "confidence": 1
+        },
+        {
+          "relationType": "complementa",
+          "targetFullNumber": "Resolução SEGES/CICS-MGI 4/2024",
+          "excerpt": "Art. 3º Ficam incluídos na Resolução SEGES/CICS-MGI nº 4, de 18 de outubro de 2024, os Anexos II.a e II.b, na forma do Anexo II desta Resolução.",
+          "confidence": 1
+        }
+      ],
+      "pro": [
+        {
+          "relationType": "altera",
+          "targetFullNumber": "Resolução SEGES/CICS-MGI 4/2024",
+          "excerpt": "Art. 1º A Resolução SEGES/CICS-MGI nº 4, de 18 de outubro de 2024, passa a vigorar com a seguinte redação:",
+          "confidence": 1
+        },
+        {
+          "relationType": "regulamenta",
+          "targetFullNumber": "Decreto 11.890/2024",
+          "excerpt": "no uso das atribuições que lhe conferem o art. 2º e o art. 8º do Decreto nº 11.890, de 22 de janeiro de 2024, resolve:",
+          "confidence": 0.9
+        }
+      ]
+    },
+    {
+      "fullNumber": "Decreto 12.926/2026",
+      "counts": {
+        "heur": 1,
+        "flash": 2,
+        "pro": 2
+      },
+      "flashLatencyMs": 1511,
+      "proLatencyMs": 17538,
+      "heuristic": [
+        {
+          "relationType": "altera",
+          "targetFullNumber": "Decreto 12.174/2024",
+          "excerpt": "Altera o Decreto nº 12.174, de 11 de setembro de 2024, que dispõe sobre as garantias trabalhistas a serem observadas na execução dos",
+          "confidence": 0.85
+        }
+      ],
+      "flash": [
+        {
+          "relationType": "altera",
+          "targetFullNumber": "Decreto 12.174/2024",
+          "excerpt": "Art. 1º O Decreto nº 12.174, de 11 de setembro de 2024, passa a vigorar com as seguintes alterações:",
+          "confidence": 1
+        },
+        {
+          "relationType": "altera",
+          "targetFullNumber": "Decreto 9.507/2018",
+          "excerpt": "Art. 2º O Decreto nº 9.507, de 21 de setembro de 2018, passa a vigorar com as seguintes alterações:",
+          "confidence": 1
+        }
+      ],
+      "pro": [
+        {
+          "relationType": "altera",
+          "targetFullNumber": "Decreto 12.174/2024",
+          "excerpt": "Altera o Decreto nº 12.174, de 11 de setembro de 2024, que dispõe sobre as garantias trabalhistas a serem observadas na execução dos contratos administrativos",
+          "confidence": 0.99
+        },
+        {
+          "relationType": "altera",
+          "targetFullNumber": "Decreto 9.507/2018",
+          "excerpt": "e o Decreto nº 9.507, de 21 de setembro de 2018, que dispõe sobre a execução indireta, mediante contratação, de serviços da administração pública federal",
+          "confidence": 0.99
+        }
+      ]
+    },
+    {
+      "fullNumber": "Decreto 11.345/2023",
+      "counts": {
+        "heur": 0,
+        "flash": 2,
+        "pro": 0
+      },
+      "flashLatencyMs": 2300,
+      "proLatencyMs": 11547,
+      "heuristic": [],
+      "flash": [
+        {
+          "relationType": "complementa",
+          "targetFullNumber": "Decreto 9.739/2019",
+          "excerpt": "Art. 3º O disposto nos art. 14 e art. 15 do Decreto nº 9.739, de 28 de março de 2019 (...) aplica-se quanto ao registro de dados no Siorg; aos prazos para apostilamentos; ao regimento interno (...)",
+          "confidence": 0.95
+        },
+        {
+          "relationType": "complementa",
+          "targetFullNumber": "Decreto 10.829/2021",
+          "excerpt": "Art. 3º O disposto (...) nos art. 11 a art. 14 do Decreto nº 10.829, de 5 de outubro de 2021, aplica-se quanto ao registro de dados no Siorg; aos prazos para apostilamentos; ao regimento interno (...)",
+          "confidence": 0.95
+        }
+      ],
+      "pro": []
+    },
+    {
+      "fullNumber": "Lei 13.709/2018",
+      "counts": {
+        "heur": 0,
+        "flash": 1,
+        "pro": 1
+      },
+      "flashLatencyMs": 1957,
+      "proLatencyMs": 9581,
+      "heuristic": [],
+      "flash": [
+        {
+          "relationType": "altera",
+          "targetFullNumber": "Lei 12.965/2014",
+          "excerpt": "Dispõe sobre a proteção de dados pessoais e altera a Lei nº 12.965, de 23 de abril de 2014 (Marco Civil da Internet).",
+          "confidence": 1
+        }
+      ],
+      "pro": [
+        {
+          "relationType": "altera",
+          "targetFullNumber": "Lei 12.965/2014",
+          "excerpt": "Dispe sobre a proteo de dados pessoais e altera a Lei n 12.965, de 23 de abril de 2014 (Marco Civil da Internet).",
+          "confidence": 1
+        }
+      ]
+    },
+    {
+      "fullNumber": "Decreto 9.373/2018",
+      "counts": {
+        "heur": 0,
+        "flash": 3,
+        "pro": 2
+      },
+      "flashLatencyMs": 2001,
+      "proLatencyMs": 17014,
+      "heuristic": [],
+      "flash": [
+        {
+          "relationType": "regulamenta",
+          "targetFullNumber": "Lei 8.666/1993",
+          "excerpt": "no uso das atribuies que lhe confere o art. 84... e tendo em vista o disposto na Lei n 8.666, de 21 de junho de 1993",
+          "confidence": 1
+        },
+        {
+          "relationType": "regulamenta",
+          "targetFullNumber": "Lei 12.305/2010",
+          "excerpt": "Art. 2 No cumprimento ao disposto neste Decreto, aplicam-se os princpios e objetivos da Poltica Nacional de Resduos Slidos, conforme o disposto na Lei n 12.305, de 2 de agosto de 2010",
+          "confidence": 1
+        },
+        {
+          "relationType": "complementa",
+          "targetFullNumber": "Decreto 5.940/2006",
+          "excerpt": "associaes ou cooperativas que atendam aos requisitos do Decreto n 5.940, de 25 de outubro de 2006",
+          "confidence": 0.9
+        }
+      ],
+      "pro": [
+        {
+          "relationType": "regulamenta",
+          "targetFullNumber": "Lei 8.666/1993",
+          "excerpt": "tendo em vista o disposto na Lei n 8.666, de 21 de junho de 1993, e na Lei n 12.305, de 2 de agosto de 2010",
+          "confidence": 0.95
+        },
+        {
+          "relationType": "regulamenta",
+          "targetFullNumber": "Lei 12.305/2010",
+          "excerpt": "tendo em vista o disposto na Lei n 8.666, de 21 de junho de 1993, e na Lei n 12.305, de 2 de agosto de 2010",
+          "confidence": 0.95
+        }
+      ]
+    },
+    {
+      "fullNumber": "Decreto 11.246/2022",
+      "counts": {
+        "heur": 1,
+        "flash": 2,
+        "pro": 1
+      },
+      "flashLatencyMs": 1651,
+      "proLatencyMs": 9269,
+      "heuristic": [
+        {
+          "relationType": "regulamenta",
+          "targetFullNumber": "Lei 14.133/2021",
+          "excerpt": "Regulamenta o disposto no § 3º do art. 8º da Lei nº 14.133, de 1º de abril de 2021, para dispor sobre as regras para a atuação do agente de contratação e da equip",
+          "confidence": 0.85
+        }
+      ],
+      "flash": [
+        {
+          "relationType": "regulamenta",
+          "targetFullNumber": "Lei 14.133/2021",
+          "excerpt": "Regulamenta o disposto no § 3º do art. 8º da Lei nº 14.133, de 1º de abril de 2021, para dispor sobre as regras para a atuação do agente de contratação e da equipe de apoio...",
+          "confidence": 1
+        },
+        {
+          "relationType": "modifica",
+          "targetFullNumber": "Decreto 9.759/2019",
+          "excerpt": "O disposto no Decreto nº 9.759, de 11 de abril de 2019, não se aplica à comissão de que trata o caput.",
+          "confidence": 0.9
+        }
+      ],
+      "pro": [
+        {
+          "relationType": "regulamenta",
+          "targetFullNumber": "Lei 14.133/2021",
+          "excerpt": "Regulamenta o disposto no § 3º do art. 8º da Lei nº 14.133, de 1º de abril de 2021, para dispor sobre as regras para a atuação do agente de contratação e da equipe de apoio",
+          "confidence": 1
+        }
+      ]
+    }
+  ]
+}

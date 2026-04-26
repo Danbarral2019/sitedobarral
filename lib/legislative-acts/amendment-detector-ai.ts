@@ -26,7 +26,22 @@ Texto:
 
 const VALID_TYPES: RelationType[] = ['revoga', 'altera', 'regulamenta', 'complementa', 'modifica'];
 
-export async function detectAmendmentsAI(ementa: string, content: string): Promise<DetectedRelation[]> {
+export interface DetectAmendmentsAIOptions {
+  /**
+   * Modelo Gemini para usar. Override do env-flag default.
+   * - Sem opção: respeita USE_PREMIUM_FOR_DETECTOR (Flash ou Pro).
+   * - Com 'gemini-3-flash-preview': força Flash (com thinkingBudget=0).
+   * - Com 'gemini-3.1-pro-preview': força Pro (thinking ativo).
+   * Útil pra scripts comparativos (compare-detector-models.ts).
+   */
+  model?: string;
+}
+
+export async function detectAmendmentsAI(
+  ementa: string,
+  content: string,
+  opts: DetectAmendmentsAIOptions = {},
+): Promise<DetectedRelation[]> {
   const apiKey = process.env.GEMINI_API_KEY;
   if (!apiKey) return [];
 
@@ -37,8 +52,10 @@ export async function detectAmendmentsAI(ementa: string, content: string): Promi
   // de citação anafórica / verbo não-padrão. Default Flash mantém custo baixo
   // pra cron semanal e batch import. Quando premium ativo, deixa thinking
   // ligado — é justamente o valor que o Pro entrega.
-  const usePremium = isPremiumDetectorEnabled();
-  const model = usePremium ? PREMIUM_GEMINI_MODEL : 'gemini-3-flash-preview';
+  const model =
+    opts.model ??
+    (isPremiumDetectorEnabled() ? PREMIUM_GEMINI_MODEL : 'gemini-3-flash-preview');
+  const isPremium = model === PREMIUM_GEMINI_MODEL;
 
   try {
     const response = await ai.models.generateContent({
@@ -46,7 +63,7 @@ export async function detectAmendmentsAI(ementa: string, content: string): Promi
       contents: PROMPT.replace('{TEXT}', text),
       config: {
         responseMimeType: 'application/json',
-        ...(usePremium ? {} : { thinkingConfig: { thinkingBudget: 0 } }),
+        ...(isPremium ? {} : { thinkingConfig: { thinkingBudget: 0 } }),
       },
     });
 
