@@ -1,9 +1,9 @@
 {
-  "generatedAt": "2026-04-26T12:44:38.232Z",
-  "totalActs": 117,
-  "totalDetected": 114,
-  "totalResolved": 81,
-  "totalOrphanTargets": 28,
+  "generatedAt": "2026-04-26T13:39:28.688Z",
+  "totalActs": 132,
+  "totalDetected": 118,
+  "totalResolved": 98,
+  "totalOrphanTargets": 16,
   "orphans": [
     {
       "target": "Portaria SGD/MGI 6.055/2025",
@@ -14,17 +14,6 @@
       "relationTypes": [
         "revoga",
         "altera"
-      ]
-    },
-    {
-      "target": "Lei 8.248/1991",
-      "count": 2,
-      "citedBy": [
-        "Decreto 3.555/2000",
-        "Resolução CIIA-PAC/CC 3/2025"
-      ],
-      "relationTypes": [
-        "regulamenta"
       ]
     },
     {
@@ -50,24 +39,14 @@
       ]
     },
     {
-      "target": "Lei 95/1998",
+      "target": "Decreto 3.800/2001",
       "count": 2,
       "citedBy": [
-        "IN SEGES 90/2022",
-        "IN SEGES 20/2022"
+        "Decreto 5.906/2006"
       ],
       "relationTypes": [
-        "revoga"
-      ]
-    },
-    {
-      "target": "Decreto 7.546/2011",
-      "count": 1,
-      "citedBy": [
-        "Decreto 11.890/2024"
-      ],
-      "relationTypes": [
-        "revoga"
+        "altera",
+        "modifica"
       ]
     },
     {
@@ -78,26 +57,6 @@
       ],
       "relationTypes": [
         "revoga"
-      ]
-    },
-    {
-      "target": "Lei 12.846/2013",
-      "count": 1,
-      "citedBy": [
-        "Portaria SEGES/MGI 7.604/2025"
-      ],
-      "relationTypes": [
-        "regulamenta"
-      ]
-    },
-    {
-      "target": "Decreto 10.024/2019",
-      "count": 1,
-      "citedBy": [
-        "Decreto 3.555/2000"
-      ],
-      "relationTypes": [
-        "regulamenta"
       ]
     },
     {
@@ -131,23 +90,23 @@
       ]
     },
     {
-      "target": "Lei 13.709/2018",
+      "target": "Decreto 5.343/2005",
       "count": 1,
       "citedBy": [
-        "Decreto 11.430/2023"
+        "Decreto 5.906/2006"
       ],
       "relationTypes": [
         "revoga"
       ]
     },
     {
-      "target": "Decreto 1.819/1996",
+      "target": "Lei 11.077/2004",
       "count": 1,
       "citedBy": [
-        "Decreto 11.531/2023"
+        "Decreto 5.906/2006"
       ],
       "relationTypes": [
-        "revoga"
+        "regulamenta"
       ]
     },
     {
@@ -158,16 +117,6 @@
       ],
       "relationTypes": [
         "altera"
-      ]
-    },
-    {
-      "target": "Decreto 9.373/2018",
-      "count": 1,
-      "citedBy": [
-        "Decreto 12.785/2025"
-      ],
-      "relationTypes": [
-        "revoga"
       ]
     },
     {
@@ -191,60 +140,10 @@
       ]
     },
     {
-      "target": "Decreto 11.345/2023",
-      "count": 1,
-      "citedBy": [
-        "Portaria SGD/MGI nº 750/2023"
-      ],
-      "relationTypes": [
-        "altera"
-      ]
-    },
-    {
-      "target": "Lei 9.784/1999",
-      "count": 1,
-      "citedBy": [
-        "Portaria TCU 3/2025"
-      ],
-      "relationTypes": [
-        "revoga"
-      ]
-    },
-    {
       "target": "Lei 10.356/2001",
       "count": 1,
       "citedBy": [
         "Portaria TCU 3/2025"
-      ],
-      "relationTypes": [
-        "altera"
-      ]
-    },
-    {
-      "target": "Decreto 7.930/2013",
-      "count": 1,
-      "citedBy": [
-        "Decreto 10.193/2019"
-      ],
-      "relationTypes": [
-        "revoga"
-      ]
-    },
-    {
-      "target": "Decreto 5.906/2006",
-      "count": 1,
-      "citedBy": [
-        "Decreto 7.174/2010"
-      ],
-      "relationTypes": [
-        "regulamenta"
-      ]
-    },
-    {
-      "target": "Lei 12.527/2011",
-      "count": 1,
-      "citedBy": [
-        "Portaria SGD/MGI nº 5.950/2023"
       ],
       "relationTypes": [
         "altera"
@@ -261,16 +160,6 @@
       ]
     },
     {
-      "target": "Decreto 11.871/2023",
-      "count": 1,
-      "citedBy": [
-        "Decreto 12.343/2024"
-      ],
-      "relationTypes": [
-        "revoga"
-      ]
-    },
-    {
       "target": "Lei 123/2006",
       "count": 1,
       "citedBy": [
@@ -278,16 +167,6 @@
       ],
       "relationTypes": [
         "altera"
-      ]
-    },
-    {
-      "target": "Decreto 2.271/1997",
-      "count": 1,
-      "citedBy": [
-        "IN SEGES/MP 5/2017"
-      ],
-      "relationTypes": [
-        "regulamenta"
       ]
     }
   ]
