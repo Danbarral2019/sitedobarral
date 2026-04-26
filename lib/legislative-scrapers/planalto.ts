@@ -85,13 +85,12 @@ export class PlanaltoScraper implements LegislativeScraper {
 
       const html = await response.text();
 
-      // Verificar tamanho máximo (3MB). Aumentado de 500KB pra 3MB em 2026-04-25
-      // após Lei 14.133/2021, CLT (Lei 5.452/43) e Decreto 9.745/2019 falharem
-      // por excederem 500KB de HTML bruto.
-      if (html.length > 3 * 1024 * 1024) {
+      // Verificar tamanho máximo (5MB). Aumentado em 2 etapas em 2026-04-25:
+      // 500KB → 3MB → 5MB. CLT (Lei 5.452/43) excede 3MB; 5MB cobre.
+      if (html.length > 5 * 1024 * 1024) {
         return {
           success: false,
-          error: 'Conteúdo muito grande (>3MB)',
+          error: 'Conteúdo muito grande (>5MB)',
         };
       }
 

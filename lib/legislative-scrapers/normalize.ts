@@ -99,27 +99,28 @@ export function stripGovbrUiNoise(text: string): string {
   // 1. Header "Info" solto no topo (com possíveis whitespace antes)
   result = result.replace(/^\s*Info\s*\n+/i, '');
 
-  // 2. Footer "Compartilhe:" — corta tudo a partir do bloco final.
-  // ATENÇÃO: gov.br/compras renderiza "Compartilhe:" mais de uma vez na página
-  // (uma no header/sidebar, outra no rodapé do artigo). Se cortássemos da
-  // PRIMEIRA ocorrência, perderíamos o corpo inteiro do ato. Usamos a ÚLTIMA
-  // ocorrência (rodapé real) como marker de corte.
+  // 2. Bloco "Compartilhe:" + lista de botões (Facebook/Twitter/LinkedIn/WhatsApp).
+  // ATENÇÃO: gov.br/compras renderiza esse bloco MAIS DE UMA VEZ na página
+  // (uma no header/sidebar, outra no rodapé do artigo). Estratégia:
+  //   a) Encontrar todos os "Compartilhe:" e cortar do ÚLTIMO em diante (footer real)
+  //   b) Iterar: depois do corte, se ainda houver "Compartilhe por X" sem o
+  //      prefix "Compartilhe:" (resíduo do header), remover essas linhas isoladas
+  // A heurística de segurança (não cortar se removeria >90%) protege contra
+  // páginas onde "Compartilhe:" só aparece no header.
   const re = /\n\s*Compartilhe\s*:/gi;
   let lastShareIdx = -1;
   let m: RegExpExecArray | null;
   while ((m = re.exec(result)) !== null) {
     lastShareIdx = m.index;
   }
-  if (lastShareIdx >= 0) {
-    // Heurística de segurança: se o corte removeria mais de 90% do texto
-    // (sinal que estamos cortando no início, não no fim), pular o corte
-    // pra evitar perder o conteúdo. Acontece em páginas onde "Compartilhe:"
-    // só aparece no header e a heurística de last falha.
-    const remaining = lastShareIdx;
-    if (remaining >= text.length * 0.1) {
-      result = result.slice(0, lastShareIdx).trimEnd();
-    }
+  if (lastShareIdx >= 0 && lastShareIdx >= text.length * 0.1) {
+    result = result.slice(0, lastShareIdx).trimEnd();
   }
+
+  // Resíduo do header (linhas isoladas tipo "Compartilhe por Facebook" sem
+  // o prefix "Compartilhe:" — caso do header da fixture govbr-portaria-4932).
+  // Remove cada linha que comece com "Compartilhe por " ou exatamente "Compartilhe:".
+  result = result.replace(/^\s*Compartilhe(?:\s*:|\s+por\s+\w+).*$/gim, '').replace(/\n{3,}/g, '\n\n').trim();
 
   return result;
 }

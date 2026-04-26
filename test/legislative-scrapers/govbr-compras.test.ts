@@ -24,10 +24,12 @@ describe('GovBrComprasScraper — Portaria SEGES/MGI 4.932/2023 (caso truncation
     expect(result.success).toBe(true);
     // Pré-fix: extractContent retornava ~826 chars (stub curto do #content-core
     // que envolvia apenas navegação/metadata). Pós-fix: seletor '#parent-fieldname-text'
-    // é agora incluído na lista primária e, via estratégia "maior match",
-    // retorna o corpo completo da portaria (~1600 chars para este ato curto de
-    // 2 artigos; atos mais longos como as resoluções SEGES-CICS retornam >10k).
-    expect(result.content!.length).toBeGreaterThan(1500);
+    // retornava ~1539 chars (corpo completo).
+    // Após stripGovbrUiNoise (2026-04-25) que remove "Compartilhe:" do final
+    // E linhas isoladas "Compartilhe por X" do header, valor caiu pra ~1254 chars.
+    expect(result.content!.length).toBeGreaterThan(1200);
+    // Garantir que o ruído de social share NÃO está mais presente
+    expect(result.content).not.toContain('Compartilhe por Facebook');
   });
 
   it('contém o corpo da portaria (Art. 1º, Art. 2º, etc.)', async () => {
