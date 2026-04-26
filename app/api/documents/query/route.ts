@@ -11,7 +11,12 @@ import { hybridSearch } from '@/lib/embeddings/hybrid-search';
 
 import { queryGeminiText } from '@/lib/gemini/cached-client';
 import { PRIMARY_GEMINI_MODEL } from '@/lib/gemini/config';
-import { GoogleGenerativeAI, HarmCategory, HarmBlockThreshold } from '@google/generative-ai';
+import {
+  GoogleGenAI,
+  HarmCategory,
+  HarmBlockThreshold,
+  type GenerateContentResponse,
+} from '@google/genai';
 
 // Safety settings permissivos para contexto jurídico — o padrão bloqueia
 // termos como "sanção", "fraude", "ato ilícito" comuns em ementas.
@@ -549,21 +554,7 @@ RESPOSTA:`;
         return NextResponse.json({ success: false, error: 'Gemini API key not configured' }, { status: 500 });
       }
 
-      const genAI = new GoogleGenerativeAI(GEMINI_API_KEY);
-      const geminiModel = genAI.getGenerativeModel({
-        model: PRIMARY_GEMINI_MODEL,
-        systemInstruction,
-        generationConfig: {
-          temperature: 0.5,
-          maxOutputTokens: 8192,
-          // Gemini 2.5-flash: sem thinkingBudget: 0, o raciocínio come o
-          // maxOutputTokens e a resposta trunca no meio. Síntese factual
-          // não precisa de thinking — só cita fontes. Spread driblando
-          // excess-property-check do SDK type (mesmo padrão do cached-client).
-          ...{ thinkingConfig: { thinkingBudget: 0 } },
-        },
-        safetySettings: LEGAL_SAFETY_SETTINGS,
-      });
+      const genAI = new GoogleGenAI({ apiKey: GEMINI_API_KEY });
 
       const encoder = new TextEncoder();
       const stream = new ReadableStream({
@@ -580,10 +571,25 @@ RESPOSTA:`;
             controller.enqueue(encoder.encode(`data: ${meta}\n\n`));
 
             // Stream Gemini tokens
-            const streamResult = await geminiModel.generateContentStream(synthesisPrompt);
+            const streamResult = await genAI.models.generateContentStream({
+              model: PRIMARY_GEMINI_MODEL,
+              contents: synthesisPrompt,
+              config: {
+                systemInstruction,
+                temperature: 0.5,
+                maxOutputTokens: 8192,
+                // Gemini 2.5-flash: sem thinkingBudget: 0, o raciocínio come o
+                // maxOutputTokens e a resposta trunca no meio. Síntese factual
+                // não precisa de thinking — só cita fontes.
+                thinkingConfig: { thinkingBudget: 0 },
+                safetySettings: LEGAL_SAFETY_SETTINGS,
+              },
+            });
             let hasTokens = false;
-            for await (const chunk of streamResult.stream) {
-              const text = chunk.text();
+            let lastChunk: GenerateContentResponse | undefined;
+            for await (const chunk of streamResult) {
+              lastChunk = chunk;
+              const text = chunk.text;
               if (text) {
                 hasTokens = true;
                 controller.enqueue(encoder.encode(`data: ${JSON.stringify({ type: 'token', text })}\n\n`));
@@ -593,10 +599,9 @@ RESPOSTA:`;
             // Depois do stream, verifica finishReason. Gemini 2.5 aborta em
             // meio de resposta quando detecta recitação literal (RECITATION)
             // ou safety parcial. Sem esse check, UI exibe resposta truncada
-            // sem aviso.
+            // sem aviso. No SDK novo, o último chunk traz o finishReason.
             try {
-              const finalResp = await streamResult.response;
-              const finishReason = finalResp.candidates?.[0]?.finishReason;
+              const finishReason = lastChunk?.candidates?.[0]?.finishReason;
               if (
                 finishReason &&
                 finishReason !== 'STOP' &&

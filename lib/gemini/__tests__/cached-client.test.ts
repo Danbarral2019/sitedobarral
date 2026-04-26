@@ -5,6 +5,8 @@
  * - Com cache habilitado (cache hit e cache miss)
  * - Sem cache habilitado (chamada direta)
  * - Validacao de config e tratamento de erros
+ *
+ * SDK: @google/genai (migração 2026-04-26)
  */
 
 import { describe, it, expect, vi, beforeEach } from 'vitest';
@@ -14,20 +16,17 @@ vi.hoisted(() => {
   process.env.GEMINI_API_KEY = 'test-gemini-api-key';
 });
 
-// Mock GoogleGenerativeAI com vi.hoisted
+// Mock @google/genai com vi.hoisted
 const mockGenerateContent = vi.hoisted(() => vi.fn());
-const mockGetGenerativeModel = vi.hoisted(() =>
-  vi.fn(() => ({
-    generateContent: mockGenerateContent,
-  }))
-);
 
-vi.mock('@google/generative-ai', async (importOriginal) => {
-  const actual = await importOriginal<typeof import('@google/generative-ai')>();
+vi.mock('@google/genai', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('@google/genai')>();
   return {
     ...actual,
-    GoogleGenerativeAI: class MockGoogleGenerativeAI {
-      getGenerativeModel = mockGetGenerativeModel;
+    GoogleGenAI: class MockGoogleGenAI {
+      models = {
+        generateContent: mockGenerateContent,
+      };
     },
   };
 });
@@ -52,30 +51,29 @@ vi.spyOn(console, 'error').mockImplementation(() => {});
 
 import { queryGeminiText } from '../cached-client';
 
-// Helper: resposta padrao do Gemini
-function makeGeminiResponse(text: string, tokens?: { prompt: number; candidates: number; total: number }) {
+// Helper: resposta padrao do Gemini (novo SDK shape)
+function makeGeminiResponse(
+  text: string,
+  tokens?: { prompt: number; candidates: number; total: number },
+) {
   return {
-    response: {
-      text: () => text,
-      usageMetadata: tokens
-        ? {
-            promptTokenCount: tokens.prompt,
-            candidatesTokenCount: tokens.candidates,
-            totalTokenCount: tokens.total,
-          }
-        : undefined,
-    },
+    text,
+    candidates: [{ finishReason: 'STOP' }],
+    promptFeedback: undefined,
+    usageMetadata: tokens
+      ? {
+          promptTokenCount: tokens.prompt,
+          candidatesTokenCount: tokens.candidates,
+          totalTokenCount: tokens.total,
+        }
+      : undefined,
   };
 }
 
-describe('cached-client: queryGeminiText', () => {
+describe('cached-client: queryGeminiText (SDK @google/genai)', () => {
   beforeEach(() => {
     vi.clearAllMocks();
   });
-
-  // ===========================
-  // Cache habilitado - cache hit
-  // ===========================
 
   describe('com cache habilitado (cache hit)', () => {
     it('deve retornar resposta do cache via withCache', async () => {
@@ -98,10 +96,7 @@ describe('cached-client: queryGeminiText', () => {
 
       await queryGeminiText('outra pergunta');
 
-      // withCache foi chamado, mas generateContent NAO (pois withCache resolveu do cache)
       expect(mockWithCache).toHaveBeenCalledTimes(1);
-      // generateContent nao e chamado diretamente - e chamado dentro do callback de withCache
-      // Podemos verificar que o resultado veio do mock de withCache
     });
 
     it('deve marcar cached=true quando latencia < 500ms', async () => {
@@ -112,25 +107,19 @@ describe('cached-client: queryGeminiText', () => {
 
       const result = await queryGeminiText('pergunta rapida');
 
-      // withCache resolve instantaneamente no mock, entao latencia < 500ms
       expect(result.cached).toBe(true);
       expect(result.latency).toBeLessThan(500);
     });
   });
 
-  // ===========================
-  // Cache habilitado - cache miss
-  // ===========================
-
   describe('com cache habilitado (cache miss)', () => {
     it('deve executar o callback do withCache e retornar resultado', async () => {
-      // Simular cache miss: withCache executa o callback fn
-      mockWithCache.mockImplementation(async (_key: string, fn: () => Promise<unknown>) => {
-        return fn();
-      });
+      mockWithCache.mockImplementation(
+        async (_key: string, fn: () => Promise<unknown>) => fn(),
+      );
 
       mockGenerateContent.mockResolvedValue(
-        makeGeminiResponse('Resposta da API', { prompt: 5, candidates: 15, total: 20 })
+        makeGeminiResponse('Resposta da API', { prompt: 5, candidates: 15, total: 20 }),
       );
 
       const result = await queryGeminiText('pergunta nova');
@@ -139,58 +128,66 @@ describe('cached-client: queryGeminiText', () => {
       expect(result.tokens).toEqual({ prompt: 5, completion: 15, total: 20 });
     });
 
-    it('deve configurar modelo com parametros padrao', async () => {
-      mockWithCache.mockImplementation(async (_key: string, fn: () => Promise<unknown>) => {
-        return fn();
-      });
-
-      mockGenerateContent.mockResolvedValue(
-        makeGeminiResponse('Ok')
+    it('deve passar model, contents e config no formato novo do SDK', async () => {
+      mockWithCache.mockImplementation(
+        async (_key: string, fn: () => Promise<unknown>) => fn(),
       );
+      mockGenerateContent.mockResolvedValue(makeGeminiResponse('Ok'));
 
       await queryGeminiText('test query');
 
-      expect(mockGetGenerativeModel).toHaveBeenCalledWith(
+      expect(mockGenerateContent).toHaveBeenCalledWith(
         expect.objectContaining({
           model: 'gemini-2.5-flash',
-          generationConfig: {
+          contents: 'test query',
+          config: expect.objectContaining({
             temperature: 0.7,
             maxOutputTokens: 2048,
-          },
-        })
+          }),
+        }),
       );
     });
 
-    it('deve passar systemInstruction quando fornecida', async () => {
-      mockWithCache.mockImplementation(async (_key: string, fn: () => Promise<unknown>) => {
-        return fn();
-      });
-
-      mockGenerateContent.mockResolvedValue(
-        makeGeminiResponse('Com instrucao')
+    it('deve passar systemInstruction dentro de config quando fornecida', async () => {
+      mockWithCache.mockImplementation(
+        async (_key: string, fn: () => Promise<unknown>) => fn(),
       );
+      mockGenerateContent.mockResolvedValue(makeGeminiResponse('Com instrucao'));
 
       await queryGeminiText('query', {
         systemInstruction: 'Voce e um assistente juridico',
       });
 
-      expect(mockGetGenerativeModel).toHaveBeenCalledWith(
+      expect(mockGenerateContent).toHaveBeenCalledWith(
         expect.objectContaining({
-          systemInstruction: 'Voce e um assistente juridico',
-        })
+          config: expect.objectContaining({
+            systemInstruction: 'Voce e um assistente juridico',
+          }),
+        }),
+      );
+    });
+
+    it('deve passar thinkingConfig.thinkingBudget quando opção fornecida', async () => {
+      mockWithCache.mockImplementation(
+        async (_key: string, fn: () => Promise<unknown>) => fn(),
+      );
+      mockGenerateContent.mockResolvedValue(makeGeminiResponse('Sem thinking'));
+
+      await queryGeminiText('query', { thinkingBudget: 0 });
+
+      expect(mockGenerateContent).toHaveBeenCalledWith(
+        expect.objectContaining({
+          config: expect.objectContaining({
+            thinkingConfig: { thinkingBudget: 0 },
+          }),
+        }),
       );
     });
   });
 
-  // ===========================
-  // Sem cache (useCache: false)
-  // ===========================
-
   describe('sem cache habilitado (useCache: false)', () => {
     it('nao deve chamar withCache quando useCache=false', async () => {
-      mockGenerateContent.mockResolvedValue(
-        makeGeminiResponse('Resposta direta')
-      );
+      mockGenerateContent.mockResolvedValue(makeGeminiResponse('Resposta direta'));
 
       const result = await queryGeminiText('query direta', { useCache: false });
 
@@ -199,9 +196,7 @@ describe('cached-client: queryGeminiText', () => {
     });
 
     it('deve sempre retornar cached=false quando useCache=false', async () => {
-      mockGenerateContent.mockResolvedValue(
-        makeGeminiResponse('Sem cache')
-      );
+      mockGenerateContent.mockResolvedValue(makeGeminiResponse('Sem cache'));
 
       const result = await queryGeminiText('query', { useCache: false });
 
@@ -210,7 +205,7 @@ describe('cached-client: queryGeminiText', () => {
 
     it('deve incluir tokens quando usageMetadata esta presente', async () => {
       mockGenerateContent.mockResolvedValue(
-        makeGeminiResponse('Com tokens', { prompt: 100, candidates: 200, total: 300 })
+        makeGeminiResponse('Com tokens', { prompt: 100, candidates: 200, total: 300 }),
       );
 
       const result = await queryGeminiText('query', { useCache: false });
@@ -219,9 +214,7 @@ describe('cached-client: queryGeminiText', () => {
     });
 
     it('deve retornar tokens undefined quando usageMetadata nao existe', async () => {
-      mockGenerateContent.mockResolvedValue(
-        makeGeminiResponse('Sem metadata')
-      );
+      mockGenerateContent.mockResolvedValue(makeGeminiResponse('Sem metadata'));
 
       const result = await queryGeminiText('query', { useCache: false });
 
@@ -229,15 +222,9 @@ describe('cached-client: queryGeminiText', () => {
     });
   });
 
-  // ===========================
-  // Opcoes customizadas
-  // ===========================
-
   describe('opcoes customizadas', () => {
     it('deve usar modelo e parametros customizados', async () => {
-      mockGenerateContent.mockResolvedValue(
-        makeGeminiResponse('Custom')
-      );
+      mockGenerateContent.mockResolvedValue(makeGeminiResponse('Custom'));
 
       await queryGeminiText('query', {
         useCache: false,
@@ -246,37 +233,59 @@ describe('cached-client: queryGeminiText', () => {
         maxOutputTokens: 4096,
       });
 
-      expect(mockGetGenerativeModel).toHaveBeenCalledWith(
+      expect(mockGenerateContent).toHaveBeenCalledWith(
         expect.objectContaining({
           model: 'gemini-1.5-pro',
-          generationConfig: {
+          config: expect.objectContaining({
             temperature: 0.2,
             maxOutputTokens: 4096,
-          },
-        })
+          }),
+        }),
       );
     });
   });
-
-  // ===========================
-  // Tratamento de erros
-  // ===========================
 
   describe('tratamento de erros', () => {
     it('deve propagar erro quando API do Gemini falha (sem cache)', async () => {
       mockGenerateContent.mockRejectedValue(new Error('Gemini API Error'));
 
       await expect(
-        queryGeminiText('query falha', { useCache: false })
+        queryGeminiText('query falha', { useCache: false }),
       ).rejects.toThrow('Gemini API Error');
     });
 
     it('deve propagar erro quando withCache falha', async () => {
       mockWithCache.mockRejectedValue(new Error('Cache Error'));
 
+      await expect(queryGeminiText('query cache falha')).rejects.toThrow(
+        'Cache Error',
+      );
+    });
+
+    it('deve lançar quando promptFeedback.blockReason existe', async () => {
+      mockGenerateContent.mockResolvedValue({
+        text: '',
+        candidates: [],
+        promptFeedback: { blockReason: 'SAFETY' },
+        usageMetadata: undefined,
+      });
+
       await expect(
-        queryGeminiText('query cache falha')
-      ).rejects.toThrow('Cache Error');
+        queryGeminiText('query bloqueada', { useCache: false }),
+      ).rejects.toThrow(/blocked prompt: SAFETY/);
+    });
+
+    it('deve lançar quando finishReason é diferente de STOP/MAX_TOKENS', async () => {
+      mockGenerateContent.mockResolvedValue({
+        text: 'parcial',
+        candidates: [{ finishReason: 'RECITATION' }],
+        promptFeedback: undefined,
+        usageMetadata: undefined,
+      });
+
+      await expect(
+        queryGeminiText('query recitacao', { useCache: false }),
+      ).rejects.toThrow(/finished with reason: RECITATION/);
     });
   });
 });

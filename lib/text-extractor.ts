@@ -146,30 +146,32 @@ export async function extractTextWithGeminiVision(fileBuffer: Buffer): Promise<T
   }
 
   try {
-    const { GoogleGenerativeAI } = await import('@google/generative-ai');
+    const { GoogleGenAI } = await import('@google/genai');
     const { PRIMARY_GEMINI_MODEL } = await import('@/lib/gemini/config');
-    const genAI = new GoogleGenerativeAI(GEMINI_API_KEY);
-    const model = genAI.getGenerativeModel({ model: PRIMARY_GEMINI_MODEL });
+    const genAI = new GoogleGenAI({ apiKey: GEMINI_API_KEY });
 
     // Converte buffer para base64
     const base64 = fileBuffer.toString('base64');
 
-    const result = await model.generateContent([
-      {
-        inlineData: {
-          mimeType: 'application/pdf',
-          data: base64,
+    const result = await genAI.models.generateContent({
+      model: PRIMARY_GEMINI_MODEL,
+      contents: [
+        {
+          inlineData: {
+            mimeType: 'application/pdf',
+            data: base64,
+          },
         },
-      },
-      {
-        text: `Extraia todo o texto deste documento PDF escaneado.
+        {
+          text: `Extraia todo o texto deste documento PDF escaneado.
                Mantenha a formatacao original (paragrafos, listas, numeracao).
                Preserve a estrutura de artigos, paragrafos e incisos se for documento juridico.
                Retorne apenas o texto extraido, sem comentarios adicionais.`,
-      },
-    ]);
+        },
+      ],
+    });
 
-    const text = result.response.text();
+    const text = result.text ?? '';
 
     return {
       success: true,
