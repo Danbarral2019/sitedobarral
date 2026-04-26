@@ -149,10 +149,15 @@ async function performSearch(
     threshold: requestedThreshold,
   } = options;
 
-  // Threshold dinâmico: tenta do mais restritivo ao mais permissivo
+  // Threshold dinâmico: tenta do mais restritivo ao mais permissivo.
+  // Mínimo absoluto agora é 0.50 (era 0.40 antes do incidente IBDA 29 de
+  // 2026-04-26): em queries genéricas, fontes com similarity < 0.50 entravam
+  // no top-K sem ser sobre o tópico, e o LLM alucinava conteúdo pra justificar
+  // a presença delas. 0.50 é um piso conservador; abaixo disso, melhor
+  // retornar vazio e deixar o LLM dizer "não encontrei material relevante".
   const thresholds = requestedThreshold
     ? [requestedThreshold]
-    : [0.65, 0.55, 0.45];
+    : [0.65, 0.55, 0.50];
 
   for (const threshold of thresholds) {
     const result = await executeVectorSearch(query, { ...options, threshold });
@@ -165,8 +170,8 @@ async function performSearch(
     }
   }
 
-  // Fallback: retorna o que tiver com threshold mais baixo
-  return executeVectorSearch(query, { ...options, threshold: 0.40 });
+  // Fallback: retorna o que tiver com piso 0.50 (anti-hallucination)
+  return executeVectorSearch(query, { ...options, threshold: 0.50 });
 }
 
 // ===========================

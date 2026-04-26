@@ -8,6 +8,10 @@ import { verifyAuth } from '@/lib/auth';
 import { buildContextForLLM } from '@/lib/embeddings/vector-search';
 import type { SearchResult } from '@/lib/embeddings/vector-search';
 import { hybridSearch } from '@/lib/embeddings/hybrid-search';
+import {
+  validateQuotedCitations,
+  buildCitationWarning,
+} from '@/lib/embeddings/citation-validator';
 
 import { queryGeminiText } from '@/lib/gemini/cached-client';
 import { PRIMARY_GEMINI_MODEL } from '@/lib/gemini/config';
@@ -493,13 +497,27 @@ INSTRUÇÕES:
    c) Quando citar precedentes, acórdãos ou informativos baseados na Lei 8.666/1993, SEMPRE alerte: "⚠️ Precedente anterior à Lei 14.133/2021 — verificar aplicabilidade sob o novo regime"
    d) Se houver EVOLUÇÃO normativa entre a lei antiga e a nova, EXPLIQUE a mudança
    e) Ordene as fontes cronologicamente: mais recentes primeiro
-10. FIDELIDADE AO CONTEÚDO DAS FONTES:
-    a) Para enunciados, pareceres e orientações normativas: indique o número/origem e explique o entendimento com suas próprias palavras, de forma fiel ao que a fonte dispõe
-    b) Use trechos curtos entre aspas APENAS quando a redação literal for essencial (ex.: um termo técnico definido na fonte); evite reproduzir parágrafos inteiros
-    c) NUNCA atribua a um enunciado conteúdo que não esteja em seu texto
-    d) Se o aluno precisar do texto completo, oriente-o a consultar a fonte listada`;
+10. FIDELIDADE ABSOLUTA AO CONTEÚDO DAS FONTES (regra crítica — viola = resposta inválida):
+    a) Para enunciados, pareceres e orientações normativas: indique o número/origem e explique o entendimento com suas PRÓPRIAS PALAVRAS, fielmente ao que a fonte literalmente dispõe no contexto fornecido.
+    b) **PROIBIDO usar aspas duplas ("...") a menos que o trecho EXATO esteja literalmente presente no contexto fornecido acima.** Aspas implicam citação literal; conteúdo entre aspas que não aparece no contexto é HALUCINAÇÃO e quebra a confiança do aluno em prova/peça processual. Se você quer transmitir uma ideia da fonte mas não tem o trecho literal, parafraseie SEM aspas.
+    c) NUNCA atribua a um enunciado, súmula, parecer ou acórdão um conteúdo que não esteja LITERALMENTE escrito no contexto. Se o título de uma fonte aparece mas o chunk recuperado é sobre OUTRO tópico (ex.: título "Enunciado IBDA 29" mas o chunk fala de credenciamento, e a pergunta é sobre ciclo de vida), **NÃO cite essa fonte** — ignore-a e cite apenas o que tiver cobertura real.
+    d) EXEMPLO DO QUE NÃO FAZER (caso real registrado): pergunta "ciclo de vida do objeto" trouxe Enunciado IBDA 29 entre as fontes (que na verdade trata de credenciamento), e a resposta inventou "Enunciado IBDA nº 29: Reforça que o dever de eficiência impõe a adoção da solução mais vantajosa..., 'ainda que isso implique seleção de proposta com preço nominal superior'". O Enunciado 29 NUNCA disse isso. Esse tipo de erro NÃO PODE se repetir.
+    e) Se o aluno precisar do texto completo, oriente-o a consultar a fonte listada
+    f) Quando o sinal de COBERTURA BAIXA estiver presente no início do contexto, prefixe sua resposta com aviso: "⚠️ A base tem cobertura limitada para essa pergunta — confira diretamente nas fontes listadas." e use linguagem cautelosa (evite "estabelece", "determina", prefira "parece tratar de", "sugere").`;
 
-    const synthesisPrompt = `${fullContext}
+    // Sinal de COBERTURA BAIXA: quando o melhor resultado tem similarity
+    // sub-0.60, a base não tem material claramente sobre o tema. Avisamos
+    // o LLM para usar linguagem cautelosa e evitar inventar conteúdo nas
+    // fontes "raspadas" do top-K (ver regra 10f do systemInstruction).
+    const maxSimilarity = allDisplayResults.length > 0
+      ? Math.max(...allDisplayResults.map((r) => r.similarity))
+      : 0;
+    const lowCoverageBanner =
+      maxSimilarity < 0.6
+        ? `⚠️ COBERTURA BAIXA: o melhor match nas fontes recuperadas tem ${(maxSimilarity * 100).toFixed(0)}% de similaridade (abaixo de 60%). A base provavelmente NÃO contém material direto sobre essa pergunta. Aplique a regra 10f do systemInstruction: avise o aluno e use linguagem cautelosa. NÃO INVENTE conteúdo de enunciados, súmulas ou pareceres só porque seus títulos apareceram aqui — eles podem ter sido recuperados por correspondência fraca.\n\n`
+        : '';
+
+    const synthesisPrompt = `${lowCoverageBanner}${fullContext}
 ${historyContext}
 PERGUNTA DO USUÁRIO:
 ${query}
@@ -587,11 +605,16 @@ RESPOSTA:`;
             });
             let hasTokens = false;
             let lastChunk: GenerateContentResponse | undefined;
+            // Acumula tokens em buffer pra validação pós-stream de citações
+            // entre aspas (anti-hallucination). Stream segue normal pro
+            // cliente em paralelo — verificação é feita ao final.
+            let fullAnswer = '';
             for await (const chunk of streamResult) {
               lastChunk = chunk;
               const text = chunk.text;
               if (text) {
                 hasTokens = true;
+                fullAnswer += text;
                 controller.enqueue(encoder.encode(`data: ${JSON.stringify({ type: 'token', text })}\n\n`));
               }
             }
@@ -625,6 +648,34 @@ RESPOSTA:`;
             if (!hasTokens) {
               const fallback = 'Não consegui sintetizar uma resposta agora. Consulte as fontes abaixo — elas contêm a informação relevante para sua pergunta.';
               controller.enqueue(encoder.encode(`data: ${JSON.stringify({ type: 'token', text: fallback })}\n\n`));
+            }
+
+            // Validação anti-hallucination: detecta citações entre aspas que
+            // não existem nos chunks do contexto e adiciona aviso ao final.
+            // Defesa em camadas — independe de o LLM ter respeitado o prompt.
+            // Caso fundador: 2026-04-26, Enunciado IBDA 29 com aspas inventadas.
+            if (hasTokens && fullAnswer.length > 0) {
+              try {
+                const contextChunks = allDisplayResults.map((r) => r.chunkContent);
+                const validation = validateQuotedCitations(fullAnswer, contextChunks);
+                if (validation.invalidQuotes.length > 0) {
+                  apiLogger.warn(
+                    {
+                      query: query.slice(0, 200),
+                      totalQuotes: validation.totalQuotes,
+                      invalidQuotes: validation.invalidQuotes.map((q) => q.slice(0, 120)),
+                      maxSimilarity,
+                    },
+                    'Citation validation: aspas não encontradas nos chunks de contexto',
+                  );
+                  const warning = buildCitationWarning(validation.invalidQuotes);
+                  controller.enqueue(
+                    encoder.encode(`data: ${JSON.stringify({ type: 'token', text: warning })}\n\n`),
+                  );
+                }
+              } catch (err) {
+                apiLogger.error({ err }, 'Citation validator falhou — segue sem aviso');
+              }
             }
 
             controller.enqueue(encoder.encode('data: [DONE]\n\n'));
