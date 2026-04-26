@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import {
   Search, TrendingUp, AlertTriangle, FileText, Users,
-  Loader2, AlertCircle, Calendar, BarChart3, ThumbsDown, ThumbsUp
+  Loader2, AlertCircle, Calendar, BarChart3, ThumbsDown, ThumbsUp, Download
 } from 'lucide-react';
 
 interface SearchAnalyticsData {
@@ -131,14 +131,25 @@ export default function SearchAnalyticsClient() {
     <div className="p-6 md:p-8">
       {/* Header */}
       <div className="mb-8">
-        <div className="flex items-center gap-3 mb-2">
-          <div className="w-12 h-12 bg-gradient-to-br from-violet-600 to-indigo-600 rounded-xl flex items-center justify-center">
-            <Search className="w-6 h-6 text-white" />
+        <div className="flex items-center justify-between gap-3 mb-2 flex-wrap">
+          <div className="flex items-center gap-3">
+            <div className="w-12 h-12 bg-gradient-to-br from-violet-600 to-indigo-600 rounded-xl flex items-center justify-center">
+              <Search className="w-6 h-6 text-white" />
+            </div>
+            <div>
+              <h1 className="text-3xl font-bold text-gray-900">Analytics de Busca</h1>
+              <p className="text-gray-600">Dados de uso do assistente IA e busca global</p>
+            </div>
           </div>
-          <div>
-            <h1 className="text-3xl font-bold text-gray-900">Analytics de Busca</h1>
-            <p className="text-gray-600">Dados de uso do assistente IA e busca global</p>
-          </div>
+          <a
+            href="/api/admin/search-analytics/export?days=30"
+            download
+            className="inline-flex items-center gap-2 px-4 py-2 bg-white border border-gray-300 text-gray-700 rounded-lg shadow-sm hover:bg-gray-50 hover:border-gray-400 transition-colors text-sm font-medium"
+            title="Exporta SearchHistory dos últimos 30 dias como CSV"
+          >
+            <Download className="w-4 h-4" />
+            Exportar CSV (30 dias)
+          </a>
         </div>
       </div>
 

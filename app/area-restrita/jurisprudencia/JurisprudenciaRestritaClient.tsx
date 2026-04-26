@@ -14,6 +14,7 @@ import {
   ThumbsUp,
   ThumbsDown,
 } from 'lucide-react';
+import FeedbackTipBanner from '@/components/area-restrita/FeedbackTipBanner';
 
 interface DecisionItem {
   id: string;
@@ -262,6 +263,8 @@ export default function JurisprudenciaRestritaClient() {
             </div>
           </div>
         </div>
+
+        <FeedbackTipBanner />
 
         {/* Ask AI box */}
         <section className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6 mb-6">

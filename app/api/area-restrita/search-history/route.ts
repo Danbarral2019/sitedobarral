@@ -31,6 +31,10 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
+    if (process.env.SEARCH_ANALYTICS_ENABLED === 'false') {
+      return NextResponse.json({ id: null, disabled: true }, { status: 200 });
+    }
+
     const body = await req.json();
     const { query, aiAnswer, sources, legalSources, filters, type } = body;
 
