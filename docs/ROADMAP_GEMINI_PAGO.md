@@ -2,7 +2,39 @@
 
 **Criado em:** 2026-04-22
 **Autor:** Daniel Barral + Claude (sessão de planejamento)
-**Status:** Em execução — Fases 0-4 concluídas em 2026-04-22; Fase 5 em smoke test (5 acórdãos reprocessados com sucesso), aguarda autorização para o batch completo (1555 acórdãos).
+**Status:** 🚫 **ARQUIVADO** em 2026-04-26 — hipótese refutada empiricamente em 2 experimentos independentes. Reprocessar resumos/descrições NÃO move recall@5, independente do modelo Gemini usado. Documentação preservada para histórico.
+
+---
+
+## Resultado final — hipótese refutada
+
+A hipótese central deste roadmap era que **resumos enriquecidos** (input maior, output mais denso, parâmetros otimizados) gerariam embeddings melhores e elevariam recall em ≥10pp.
+
+**Foi testada 2 vezes com modelos diferentes:**
+
+| Data | Modelo | Pré (recall@5) | Pós (recall@5) | Δ |
+|---|---|---:|---:|---:|
+| 2026-04-23 | Gemini 2.5-flash | 34.2% | 34.1% | -0.1pp |
+| 2026-04-26 | Gemini 3-flash-preview | 66.0% | 65.8% | -0.2pp |
+
+Em ambos os casos a Δ ficou dentro da margem de ruído natural do LLM (~±0.5pp entre execuções idênticas). **Hipótese refutada com confiança.**
+
+**Diagnóstico real:** o gargalo do retrieval NÃO é qualidade dos resumos. O salto de 34% → 66% que aconteceu em 2026-04-23 veio inteiramente da **auditoria do golden set** (Fase 6 do `ROADMAP_BUSCA_QUALIDADE.md`) — corrigir queries mal anotadas. O retrieval em si já estava OK; só o eval estava medindo errado.
+
+**Próximos vetores reais de ganho** (não tratados por este roadmap):
+- Trocar modelo de embedding (`gemini-embedding-2-preview` → `text-embedding-004` ou Voyage AI)
+- Tuning de FTS (Postgres `tsvector` weights)
+- Expansão do golden set por uso real (`SearchHistory` → eval)
+- Cohere/Gemini rerank — já testado em 2026-04-12, regrediu, arquivado
+
+**Custo total do experimento:** ~R$ 7 (1570 reprocess Flash + 1570 re-embed + 2 evals).
+
+**Tempo total:** ~50min de wall clock, totalmente automatizado e idempotente (script `improve-tcu-descriptions.ts` + `migrate-to-embeddings.ts`).
+
+---
+
+## Status histórico (preservado)
+
 
 **Acidentes importantes desta execução:**
 1. O billing pago do usuário cobre a família Gemini **2.5**, não 2.0-flash (hardcoded em 28 arquivos do repo). Migração dos arquivos em escopo (`lib/tcu-enrichment.ts`, `lib/lei-indexer.ts`) feita no commit `eb7c4b1`. Outros arquivos ainda usam 2.0-flash e caem no pool free — roadmap de migração separado será necessário se a busca IA em produção estiver apresentando 429s.
