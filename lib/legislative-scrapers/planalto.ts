@@ -85,11 +85,13 @@ export class PlanaltoScraper implements LegislativeScraper {
 
       const html = await response.text();
 
-      // Verificar tamanho máximo (500KB)
-      if (html.length > 500 * 1024) {
+      // Verificar tamanho máximo (3MB). Aumentado de 500KB pra 3MB em 2026-04-25
+      // após Lei 14.133/2021, CLT (Lei 5.452/43) e Decreto 9.745/2019 falharem
+      // por excederem 500KB de HTML bruto.
+      if (html.length > 3 * 1024 * 1024) {
         return {
           success: false,
-          error: 'Conteúdo muito grande (>500KB)',
+          error: 'Conteúdo muito grande (>3MB)',
         };
       }
 
@@ -150,9 +152,21 @@ export class PlanaltoScraper implements LegislativeScraper {
   }
 
   /**
-   * Limpa e normaliza o texto extraído
+   * Limpa e normaliza o texto extraído.
+   *
+   * Trata pontilhados (`...........`) que o Planalto usa como convenção legal
+   * pra indicar omissão de incisos/parágrafos não alterados pela norma — ex:
+   *   "Art. 2º .................................. I - acordo de adesão"
+   * Visualmente esses pontos longos ficam horríveis. Padrão internacional é
+   * `[…]` ou `[...]`. Convertemos `\.{6,}` → `[...]` (6+ pontos consecutivos
+   * com possíveis espaços; preservamos `...` e `....` literais que aparecem
+   * em fim de frase).
    */
   private cleanText(text: string): string {
-    return collapseWhitespace(text);
+    const collapsed = collapseWhitespace(text);
+    // Sequências de 6+ pontos (com espaços/quebras intercalados) → "[...]"
+    // Casos cobertos: "Art. 2º ..................." → "Art. 2º [...]"
+    //                 "Art. 2º .  .  .  .  .  ." → "Art. 2º [...]"
+    return collapsed.replace(/(?:\s*\.\s*){6,}/g, ' [...] ');
   }
 }

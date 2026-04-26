@@ -7,7 +7,7 @@
 
 import * as cheerio from 'cheerio';
 import { computeHash } from './change-detector';
-import { stripDouBoilerplate, stripFormAnnex, collapseWhitespace } from './normalize';
+import { stripDouBoilerplate, stripFormAnnex, stripGovbrUiNoise, collapseWhitespace } from './normalize';
 import type { LegislativeScraper, ScraperResult } from './index';
 
 /**
@@ -73,11 +73,14 @@ export class GovBrComprasScraper implements LegislativeScraper {
 
       const html = await response.text();
 
-      // Verificar tamanho máximo (500KB)
-      if (html.length > 500 * 1024) {
+      // Verificar tamanho máximo (3MB). Aumentado de 500KB pra 3MB em 2026-04-25
+      // após Lei 14.133/2021, CLT (Lei 5.452/43) e Decreto 9.745/2019 falharem
+      // por excederem 500KB de HTML bruto. Esses são leis fundacionais cujo
+      // texto integral é grande mas perfeitamente válido.
+      if (html.length > 3 * 1024 * 1024) {
         return {
           success: false,
-          error: 'Conteúdo muito grande (>500KB)',
+          error: 'Conteúdo muito grande (>3MB)',
         };
       }
 
@@ -95,7 +98,9 @@ export class GovBrComprasScraper implements LegislativeScraper {
 
       // Aplicar limpeza DOU se URL for in.gov.br
       const douCleaned = isDou ? stripDouBoilerplate(rawContent) : rawContent;
-      const content = stripFormAnnex(douCleaned);
+      // Remove ruído de UI gov.br/compras (Plone): "Info" no topo, "Compartilhe:" no final
+      const uiCleaned = stripGovbrUiNoise(douCleaned);
+      const content = stripFormAnnex(uiCleaned);
 
       if (!content || content.length < 100) {
         return {
