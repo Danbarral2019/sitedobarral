@@ -30,6 +30,62 @@ export const FALLBACK_GEMINI_MODELS: ReadonlyArray<string> = [
 ];
 
 /**
+ * Modelo "premium" (Gemini 3.1 Pro) para queries de raciocínio profundo.
+ * Custa ~6x mais que o Flash, então só ativar onde compense:
+ *   - Chat jurídico em queries complexas (heurística em isPremiumChatQuery)
+ *   - Detector IA de relações (opt-in via USE_PREMIUM_FOR_DETECTOR)
+ *
+ * Override via env GEMINI_PREMIUM_MODEL para rollback / experimentação.
+ */
+export const PREMIUM_GEMINI_MODEL =
+  process.env.GEMINI_PREMIUM_MODEL || 'gemini-3.1-pro-preview';
+
+/**
+ * Heurística simples para decidir se uma query do chat de artigos vale
+ * o custo extra do modelo premium. Default desligado — só ativa quando
+ * USE_PREMIUM_FOR_CHAT=true. Quando ativado, rotaciona para premium em
+ * queries que combinem 1+ dos critérios:
+ *
+ *   - Comprimento ≥ 200 caracteres (perguntas extensas tendem a precisar
+ *     de raciocínio multi-passo)
+ *   - Verbos analíticos: comparar, relacionar, interpretar, fundamentar,
+ *     diferenciar, implicações, hipótese
+ *
+ * Conservador por design — falsos negativos vão para Flash (mais barato),
+ * o que é OK; falsos positivos custam ~6× mais.
+ */
+const PREMIUM_TRIGGER_PATTERNS = [
+  /\bcompar/i,
+  /\brela[cç][aã]o/i,
+  /\binterpret/i,
+  /\bfundament/i,
+  /\bdiferen[cç]/i,
+  /\bimplic/i,
+  /\bhip[oó]tese/i,
+  /\banalis/i,
+  /\bcontradi[cç]/i,
+  /\baplicabilidade/i,
+];
+
+export function isPremiumChatQuery(query: string): boolean {
+  if (process.env.USE_PREMIUM_FOR_CHAT !== 'true') return false;
+  if (!query) return false;
+  if (query.length >= 200) return true;
+  return PREMIUM_TRIGGER_PATTERNS.some((re) => re.test(query));
+}
+
+/**
+ * Decide se o detector IA de relações deve usar o modelo premium.
+ * Default off — ative com USE_PREMIUM_FOR_DETECTOR=true. Detector roda
+ * em batch (cron semanal + script de import), então quando ativado o
+ * impacto de custo é fixo no volume de atos novos por semana — não
+ * proporcional a tráfego de usuário.
+ */
+export function isPremiumDetectorEnabled(): boolean {
+  return process.env.USE_PREMIUM_FOR_DETECTOR === 'true';
+}
+
+/**
  * Detecta se o erro é de "modelo indisponível/depreciado" — sinal para
  * tentar o próximo modelo da lista. Erros de quota, rate limit, auth ou
  * timeout NÃO entram aqui (não adianta trocar de modelo).

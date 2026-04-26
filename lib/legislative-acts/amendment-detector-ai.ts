@@ -6,6 +6,10 @@
  * que detectAmendments. Modelo: gemini-2.5-flash com response JSON.
  */
 import { GoogleGenAI } from '@google/genai';
+import {
+  PREMIUM_GEMINI_MODEL,
+  isPremiumDetectorEnabled,
+} from '../gemini/config';
 import type { DetectedRelation, RelationType } from './amendment-detector';
 
 const PROMPT = `Você é um classificador jurídico. Analise o texto abaixo (ementa + parte do conteúdo) de um ato normativo brasileiro e identifique se ele REVOGA, ALTERA, REGULAMENTA, COMPLEMENTA ou MODIFICA outros atos normativos brasileiros (Leis, Decretos, Portarias, Instruções Normativas, MPs).
@@ -29,15 +33,20 @@ export async function detectAmendmentsAI(ementa: string, content: string): Promi
   const text = `${ementa}\n\n${content.slice(0, 8000)}`; // Limita pra evitar custo
   const ai = new GoogleGenAI({ apiKey });
 
+  // Premium opt-in (Gemini 3.1 Pro): mais caro, mas captura mais casos sutis
+  // de citação anafórica / verbo não-padrão. Default Flash mantém custo baixo
+  // pra cron semanal e batch import. Quando premium ativo, deixa thinking
+  // ligado — é justamente o valor que o Pro entrega.
+  const usePremium = isPremiumDetectorEnabled();
+  const model = usePremium ? PREMIUM_GEMINI_MODEL : 'gemini-3-flash-preview';
+
   try {
     const response = await ai.models.generateContent({
-      model: 'gemini-3-flash-preview',
+      model,
       contents: PROMPT.replace('{TEXT}', text),
       config: {
         responseMimeType: 'application/json',
-        // Desliga "thinking" pra Gemini 2.5-flash não consumir tokens em reasoning
-        // (mesmo padrão dos outros call sites do projeto — ver lib/embeddings/, app/api/documents/query)
-        thinkingConfig: { thinkingBudget: 0 },
+        ...(usePremium ? {} : { thinkingConfig: { thinkingBudget: 0 } }),
       },
     });
 
