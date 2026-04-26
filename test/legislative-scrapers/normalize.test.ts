@@ -5,6 +5,7 @@ import {
   collapseWhitespace,
   stripDouBoilerplate,
   stripFormAnnex,
+  stripGovbrUiNoise,
 } from '../../lib/legislative-scrapers/normalize';
 
 describe('collapseWhitespace', () => {
@@ -131,5 +132,79 @@ describe('stripFormAnnex', () => {
   it('é no-op quando não há placeholder', () => {
     const input = 'Art. 1º Norma sem anexo.\n\nEste texto não substitui...';
     expect(stripFormAnnex(input)).toBe(input);
+  });
+});
+
+// ─── stripGovbrUiNoise ────────────────────────────────────────────────────
+// Regression: case real reportado pelo user em 2026-04-25 — IN SEGES 412/2025
+// e Portaria SGD/MGI 6.680/2024 vinham com "Info" no topo e
+// "Compartilhe: / Compartilhe por Facebook ..." no fim.
+
+describe('stripGovbrUiNoise', () => {
+  it('remove "Info" solto no topo (breadcrumb Plone)', () => {
+    const input = 'Info\n\nINSTRUÇÃO NORMATIVA Nº 1\n\nArt. 1º';
+    const out = stripGovbrUiNoise(input);
+    expect(out.startsWith('Info')).toBe(false);
+    expect(out).toContain('INSTRUÇÃO NORMATIVA');
+  });
+
+  it('corta "Compartilhe:" e botões de social no final', () => {
+    const input = [
+      'Art. 1º Norma A.',
+      'Art. 2º Norma B.',
+      'Este conteúdo não substitui o publicado no Diário Oficial da União - DOU',
+      '',
+      'Compartilhe:',
+      '',
+      'Compartilhe por Facebook',
+      'Compartilhe por Twitter',
+      'Compartilhe por LinkedIn',
+      'Compartilhe por WhatsApp',
+      'link para Copiar para área de transferência',
+    ].join('\n');
+    const out = stripGovbrUiNoise(input);
+    expect(out).toContain('Este conteúdo não substitui');
+    expect(out).not.toContain('Compartilhe por Facebook');
+    expect(out).not.toContain('Compartilhe:');
+  });
+
+  it('REGRESSION: NÃO corta o conteúdo todo se "Compartilhe:" aparece no início', () => {
+    // Caso real: gov.br/compras renderiza "Compartilhe:" tanto no header
+    // quanto no rodapé. Se cortássemos da PRIMEIRA ocorrência, perderíamos
+    // o ato inteiro (era esse o bug original detectado em 2026-04-25).
+    const input = [
+      'Compartilhe:',
+      'Compartilhe por Facebook',
+      '',
+      'INSTRUÇÃO NORMATIVA Nº 5/2017',
+      'Art. 1º A presente IN dispõe sobre serviços terceirizados...',
+      'Art. 2º Aplicação subsidiária da CLT.',
+      'ROBERTO POJO',
+      'Este conteúdo não substitui o publicado no DOU',
+      '',
+      'Compartilhe:',
+      'Compartilhe por Facebook',
+    ].join('\n');
+    const out = stripGovbrUiNoise(input);
+    expect(out).toContain('Art. 1º A presente IN');
+    expect(out).toContain('ROBERTO POJO');
+    expect(out).toContain('Este conteúdo não substitui');
+    // O último "Compartilhe:" e abaixo somem
+    const matches = out.match(/Compartilhe:/g);
+    // Idealmente 0 (corte do final removeu todos), mas se sobrou só o header tudo bem
+    expect(matches?.length ?? 0).toBeLessThanOrEqual(1);
+  });
+
+  it('é no-op quando não há "Info" nem "Compartilhe:"', () => {
+    const input = 'Art. 1º Texto normal\n\nArt. 2º Continuação';
+    expect(stripGovbrUiNoise(input)).toBe(input);
+  });
+
+  it('preserva tamanho do conteúdo quando só remove footer', () => {
+    const body = 'Art. 1º '.repeat(200);
+    const input = body + '\n\nCompartilhe:\nCompartilhe por Facebook';
+    const out = stripGovbrUiNoise(input);
+    expect(out.length).toBeGreaterThanOrEqual(body.length - 5);
+    expect(out.length).toBeLessThan(input.length);
   });
 });

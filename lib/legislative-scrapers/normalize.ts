@@ -77,6 +77,55 @@ export function stripDouBoilerplate(text: string): string {
 }
 
 /**
+ * Remove ruído de UI específico de gov.br/compras (Plone) do início e fim
+ * do texto extraído.
+ *
+ * Início:
+ * - Remove a linha "Info" solta no topo (breadcrumb visual do Plone).
+ *
+ * Fim:
+ * - Corta do "Compartilhe:" em diante (botões de social share renderizados
+ *   após o corpo do ato): "Compartilhe por Facebook / Twitter / LinkedIn /
+ *   WhatsApp / link para Copiar...".
+ *
+ * Preserva "Este conteúdo não substitui o publicado no Diário Oficial..."
+ * que é o footer DOU legítimo (geralmente vem ANTES do "Compartilhe:").
+ *
+ * É no-op quando os marcadores não estão presentes.
+ */
+export function stripGovbrUiNoise(text: string): string {
+  let result = text;
+
+  // 1. Header "Info" solto no topo (com possíveis whitespace antes)
+  result = result.replace(/^\s*Info\s*\n+/i, '');
+
+  // 2. Bloco "Compartilhe:" + lista de botões (Facebook/Twitter/LinkedIn/WhatsApp).
+  // ATENÇÃO: gov.br/compras renderiza esse bloco MAIS DE UMA VEZ na página
+  // (uma no header/sidebar, outra no rodapé do artigo). Estratégia:
+  //   a) Encontrar todos os "Compartilhe:" e cortar do ÚLTIMO em diante (footer real)
+  //   b) Iterar: depois do corte, se ainda houver "Compartilhe por X" sem o
+  //      prefix "Compartilhe:" (resíduo do header), remover essas linhas isoladas
+  // A heurística de segurança (não cortar se removeria >90%) protege contra
+  // páginas onde "Compartilhe:" só aparece no header.
+  const re = /\n\s*Compartilhe\s*:/gi;
+  let lastShareIdx = -1;
+  let m: RegExpExecArray | null;
+  while ((m = re.exec(result)) !== null) {
+    lastShareIdx = m.index;
+  }
+  if (lastShareIdx >= 0 && lastShareIdx >= text.length * 0.1) {
+    result = result.slice(0, lastShareIdx).trimEnd();
+  }
+
+  // Resíduo do header (linhas isoladas tipo "Compartilhe por Facebook" sem
+  // o prefix "Compartilhe:" — caso do header da fixture govbr-portaria-4932).
+  // Remove cada linha que comece com "Compartilhe por " ou exatamente "Compartilhe:".
+  result = result.replace(/^\s*Compartilhe(?:\s*:|\s+por\s+\w+).*$/gim, '').replace(/\n{3,}/g, '\n\n').trim();
+
+  return result;
+}
+
+/**
  * Remove formulários-modelo anexados ao fim do texto normativo.
  *
  * Detecta o PRIMEIRO placeholder de formulário (`<NOME DO FISCAL TECNICO>`,
