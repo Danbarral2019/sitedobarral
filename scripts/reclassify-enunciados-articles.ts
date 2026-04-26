@@ -29,7 +29,7 @@ const prisma = new PrismaClient({ log: ['error', 'warn'] });
 // Configuration
 // ===========================
 
-const GEMINI_MODEL = 'gemini-2.5-flash';
+const GEMINI_MODEL = 'gemini-3-flash-preview';
 const DELAY_BETWEEN_BATCHES_MS = 1000;
 
 // ===========================

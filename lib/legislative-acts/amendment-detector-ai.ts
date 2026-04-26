@@ -31,7 +31,7 @@ export async function detectAmendmentsAI(ementa: string, content: string): Promi
 
   try {
     const response = await ai.models.generateContent({
-      model: 'gemini-2.5-flash',
+      model: 'gemini-3-flash-preview',
       contents: PROMPT.replace('{TEXT}', text),
       config: {
         responseMimeType: 'application/json',

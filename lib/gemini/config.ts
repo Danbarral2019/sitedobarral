@@ -6,17 +6,25 @@
  * lista automaticamente quando detecta erro de "modelo não disponível".
  */
 
-// Google deprecou gemini-2.0-flash (shutdown 2026-06-01, acesso restrito
-// desde 2026-03-06). Substituto GA é gemini-2.5-flash.
+// Migração para Gemini 3 Flash (2026-04-26):
+// - gemini-2.5-flash: deprecação anunciada para 17/jun/2026 (substituto natural)
+// - gemini-3-flash-preview: GA em homolog do Google desde dez/2025, próximo Flash
+// - thinkingConfig continua suportado, mesma família arquitetural
+// Allow override via env GEMINI_PRIMARY_MODEL para rollback rápido sem deploy.
 // Ref: https://ai.google.dev/gemini-api/docs/models
-export const PRIMARY_GEMINI_MODEL = 'gemini-2.5-flash';
+export const PRIMARY_GEMINI_MODEL =
+  process.env.GEMINI_PRIMARY_MODEL || 'gemini-3-flash-preview';
 
 /**
  * Lista ordenada de fallbacks. Se o primary falhar com erro de
  * disponibilidade OU 429, o cliente tenta cada um em ordem.
  * Manter do mais capaz para o menos capaz.
+ *
+ * gemini-2.5-flash é o fallback de transição até 17/jun/2026 — depois disso
+ * vira 404 e a cascata pula direto para 2.5-flash-lite.
  */
 export const FALLBACK_GEMINI_MODELS: ReadonlyArray<string> = [
+  'gemini-2.5-flash',
   'gemini-2.5-flash-lite',
   'gemini-1.5-flash',
 ];

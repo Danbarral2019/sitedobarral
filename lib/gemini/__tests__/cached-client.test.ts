@@ -138,7 +138,7 @@ describe('cached-client: queryGeminiText (SDK @google/genai)', () => {
 
       expect(mockGenerateContent).toHaveBeenCalledWith(
         expect.objectContaining({
-          model: 'gemini-2.5-flash',
+          model: 'gemini-3-flash-preview',
           contents: 'test query',
           config: expect.objectContaining({
             temperature: 0.7,

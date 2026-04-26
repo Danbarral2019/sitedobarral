@@ -10,10 +10,10 @@
 
 import { safeParseArray } from './utils';
 
-// O billing pago deste projeto cobre a família 2.5 (gemini-2.5-flash / 2.5-pro).
-// Chamadas a gemini-2.0-flash caem no pool free do mesmo key e retornam 429 em
-// baixa concorrência. Ver ROADMAP_GEMINI_PAGO.md e a nota na memória do Claude.
-export const GEMINI_MODEL = 'gemini-2.5-flash';
+// Família 3.x cobre billing pago (3-flash-preview é sucessor direto de 2.5-flash).
+// gemini-2.5-flash continua até 17/jun/2026 como fallback (ver lib/gemini/config.ts).
+// Chamadas a gemini-2.0-flash caem no pool free e retornam 429.
+export const GEMINI_MODEL = 'gemini-3-flash-preview';
 
 // Delay entre chamadas Gemini (ms). Tier pago aguenta ~10k req/min.
 export const ENRICHMENT_DELAY_MS = 50;
