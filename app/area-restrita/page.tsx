@@ -7,7 +7,7 @@ import { Loader2, ArrowLeft } from 'lucide-react';
 import { courses } from '@/data/courses';
 import { useAuth } from '@/hooks/use-auth';
 import { useFavorites } from '@/hooks/use-favorites';
-import { useGlobalSearch } from '@/hooks/use-global-search';
+import { useGlobalSearch, type SearchSnapshot } from '@/hooks/use-global-search';
 import { useSearchPdfExport } from '@/hooks/use-search-pdf-export';
 import {
   GlobalSearchBar,
@@ -85,17 +85,84 @@ function AreaRestritaContent() {
     }
   }, [authLoading, user, router]);
 
-  // Restaurar query da URL no mount (preserva busca quando usuário volta de
-  // /documento/[id] via router.back()). Só roda uma vez na montagem.
+  // Restaurar query da URL no mount: tenta primeiro recuperar snapshot
+  // completo de sessionStorage (resultados + IA) — sem refetch. Se snapshot
+  // não existir ou estiver stale (>30 min), cai pra setQuery normal que
+  // dispara busca debounced.
   const didRestoreRef = useRef(false);
+  const SNAPSHOT_KEY = 'area-restrita:last-search';
+  const SNAPSHOT_TTL_MS = 30 * 60 * 1000; // 30 min
+
   useEffect(() => {
     if (didRestoreRef.current) return;
     const q = urlSearchParams?.get('q') ?? '';
-    if (q && q !== search.query) {
+    if (!q) {
+      didRestoreRef.current = true;
+      return;
+    }
+
+    // Tenta restaurar snapshot
+    if (typeof window !== 'undefined') {
+      try {
+        const raw = window.sessionStorage.getItem(SNAPSHOT_KEY);
+        if (raw) {
+          const snap = JSON.parse(raw) as SearchSnapshot;
+          const fresh = Date.now() - (snap.savedAt ?? 0) < SNAPSHOT_TTL_MS;
+          if (fresh && snap.query === q) {
+            search.restoreSnapshot(snap);
+            didRestoreRef.current = true;
+            return;
+          }
+        }
+      } catch {
+        // sessionStorage indisponível (modo privado, etc.) — segue fluxo normal
+      }
+    }
+
+    if (q !== search.query) {
       search.setQuery(q);
     }
     didRestoreRef.current = true;
   }, [urlSearchParams, search]);
+
+  // Persistir snapshot em sessionStorage quando os resultados estabilizam.
+  // Salvamos apenas quando: query >= 2 chars, NÃO está carregando IA, e há
+  // resposta IA OU há resultados. Evita salvar estados intermediários.
+  useEffect(() => {
+    if (!didRestoreRef.current) return;
+    if (search.query.length < 2) return;
+    if (search.isAiLoading || search.isLoading) return;
+    if (!search.aiAnswer && search.results.length === 0) return;
+
+    if (typeof window === 'undefined') return;
+    try {
+      const snap: SearchSnapshot = {
+        query: search.query,
+        results: search.results,
+        counts: search.counts,
+        aiAnswer: search.aiAnswer,
+        aiSources: search.aiSources,
+        aiLegalSources: search.aiLegalSources,
+        aiConversationHistory: search.aiConversationHistory,
+        ticMode: search.ticMode,
+        savedAt: Date.now(),
+      };
+      window.sessionStorage.setItem(SNAPSHOT_KEY, JSON.stringify(snap));
+    } catch {
+      // sessionStorage cheio ou indisponível — não-fatal
+    }
+  }, [
+    search.query,
+    search.results,
+    search.counts,
+    search.aiAnswer,
+    search.aiSources,
+    search.aiLegalSources,
+    search.aiConversationHistory,
+    search.ticMode,
+    search.isAiLoading,
+    search.isLoading,
+  ]);
 
   // Sincronizar query → URL para que router.back() de outra rota volte com a
   // busca preenchida. Usa replace (sem entrada de histórico nova) e debounce.

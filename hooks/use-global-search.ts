@@ -36,6 +36,23 @@ interface UseGlobalSearchOptions {
   initialFilters?: Partial<GlobalSearchFilters>;
 }
 
+/**
+ * Snapshot serializável do estado da última busca — usado para restaurar a
+ * tela ao voltar de /documento/[id] sem ter que rodar a busca de novo. Salvo
+ * em sessionStorage pela página que consome o hook.
+ */
+export interface SearchSnapshot {
+  query: string;
+  results: SearchResultItem[];
+  counts: GlobalSearchResponse['counts'];
+  aiAnswer: string | null;
+  aiSources: AISource[];
+  aiLegalSources: LegalSource[];
+  aiConversationHistory: ConversationMessage[];
+  ticMode: boolean;
+  savedAt: number; // epoch ms — para TTL
+}
+
 interface UseGlobalSearchReturn {
   // State
   query: string;
@@ -72,6 +89,10 @@ interface UseGlobalSearchReturn {
   search: (query: string) => Promise<void>;
   clearSearch: () => void;
   triggerAISearch: () => void;
+  // Restaura snapshot completo (query + resultados + IA) sem refetch.
+  // Cancela qualquer busca em curso. Usado pelo consumidor pra recuperar
+  // estado de sessionStorage ao voltar de outra rota.
+  restoreSnapshot: (snapshot: SearchSnapshot) => void;
 
   // Type toggles
   toggleType: (type: ContentType) => void;
@@ -505,6 +526,30 @@ export function useGlobalSearch(options: UseGlobalSearchOptions = {}): UseGlobal
     [filters.types]
   );
 
+  // Restaura estado completo a partir de snapshot — sem disparar fetch nem
+  // debounce. Usado pelo consumidor pra recuperar busca após voltar de outra
+  // rota, evitando re-rodar a busca IA (que demora 2-5s).
+  const restoreSnapshot = useCallback((snapshot: SearchSnapshot) => {
+    // Cancela tudo em curso pra evitar overwrite do snapshot.
+    if (debounceTimerRef.current) clearTimeout(debounceTimerRef.current);
+    if (aiDebounceTimerRef.current) clearTimeout(aiDebounceTimerRef.current);
+    if (abortControllerRef.current) abortControllerRef.current.abort();
+    if (aiAbortControllerRef.current) aiAbortControllerRef.current.abort();
+
+    setQueryState(snapshot.query);
+    setResults(snapshot.results);
+    setCounts(snapshot.counts);
+    setIsLoading(false);
+    setError(null);
+    setAiAnswer(snapshot.aiAnswer);
+    setAiSources(snapshot.aiSources);
+    setAiLegalSources(snapshot.aiLegalSources);
+    setIsAiLoading(false);
+    setAiError(null);
+    setAiConversationHistory(snapshot.aiConversationHistory);
+    setTicMode(snapshot.ticMode);
+  }, []);
+
   // Cleanup on unmount
   useEffect(() => {
     return () => {
@@ -559,6 +604,7 @@ export function useGlobalSearch(options: UseGlobalSearchOptions = {}): UseGlobal
     search,
     clearSearch,
     triggerAISearch,
+    restoreSnapshot,
 
     // Type toggles
     toggleType,
