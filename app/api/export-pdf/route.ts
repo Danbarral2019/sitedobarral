@@ -275,9 +275,21 @@ export async function POST(request: NextRequest) {
       apostila: 'Apostilas e Material Didatico',
       acordao: 'Acordaos',
       parecer: 'Pareceres Juridicos',
+      'parecer-vinculante': 'Pareceres Vinculantes',
       edital: 'Editais',
       artigo: 'Artigos e Doutrinas',
       'orientacao-normativa': 'Orientacoes Normativas',
+      'orientacao_procedimento': 'Orientacoes de Procedimento',
+      'manual-tcu': 'Manual TCU',
+      'lei-artigo': 'Artigos da Lei 14.133/2021',
+      'ato-normativo': 'Atos Normativos',
+      'consulta_tcu': 'Respostas a Consultas TCU',
+      'informativo': 'Informativos TCU',
+      'enunciados': 'Enunciados (IBDA/INCP/CJF)',
+      sumula: 'Sumulas TCU',
+      'boa_pratica': 'Boas Praticas',
+      decor: 'Pareceres DECOR',
+      bibliografia: 'Bibliografia',
       outro: 'Outros Documentos',
     };
 
@@ -315,8 +327,14 @@ export async function POST(request: NextRequest) {
         pdf.setFontSize(10);
         pdf.setFont('helvetica', 'bold');
         pdf.setTextColor(40, 40, 40);
-        pdf.text(sanitizeForPdf((i + 1) + '. ' + doc.title), margin + 3, currentY);
-        currentY += 6;
+        // Wrappa título longo — antes saía da página em pareceres vinculantes
+        // ("ASSUNTO: Ocupação indígena do Parque Nacional Iguaçu. Ação de…").
+        const titleLines = pdf.splitTextToSize(
+          sanitizeForPdf((i + 1) + '. ' + doc.title),
+          maxLineWidth - 6,
+        );
+        pdf.text(titleLines, margin + 3, currentY);
+        currentY += titleLines.length * 5 + 1;
 
         if (doc.description) {
           pdf.setFontSize(9);
