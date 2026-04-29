@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState, useMemo, useRef } from 'react';
+import { useEffect, useState, useMemo, useRef, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import dynamic from 'next/dynamic';
 import { Loader2, ArrowLeft } from 'lucide-react';
@@ -52,7 +52,7 @@ type InlineView =
   | 'glossary'
   | { type: 'category'; category: string };
 
-export default function AreaRestritaPage() {
+function AreaRestritaContent() {
   const router = useRouter();
   const urlSearchParams = useSearchParams();
   const { user, isLoading: authLoading, logout, activePlan } = useAuth();
@@ -396,5 +396,20 @@ export default function AreaRestritaPage() {
 
       <MobileBottomNav onLogout={handleLogout} />
     </main>
+  );
+}
+
+// Wrapper com Suspense (requerido pelo Next.js 15 para useSearchParams)
+export default function AreaRestritaPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-blue-50 via-white to-blue-50">
+          <Loader2 className="w-8 h-8 animate-spin text-blue-600" />
+        </div>
+      }
+    >
+      <AreaRestritaContent />
+    </Suspense>
   );
 }
