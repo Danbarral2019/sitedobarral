@@ -244,22 +244,19 @@ function DocumentDetails({ documentId, documentType = 'document' }: { documentId
 
   return (
     <div className="bg-gradient-to-br from-gray-50 to-blue-50 p-6 rounded-lg border-t border-gray-200 space-y-4">
-      {/* Summary */}
-      {document.summary && (
+      {/* Conteúdo (description) — texto-fonte ou curadoria, na íntegra.
+          Document.summary é gerado por IA e nunca exibido (ver lib/literal-sources.ts). */}
+      {document.description && (
         <div className="bg-blue-50 border-l-4 border-blue-500 p-4 rounded-r-lg">
           <div className="flex items-center gap-2 mb-2">
             <BookOpen className="w-4 h-4 text-blue-600" />
-            <h4 className="font-bold text-blue-900 text-sm">Resumo</h4>
+            <h4 className="font-bold text-blue-900 text-sm">Conteúdo</h4>
           </div>
-          <div className="space-y-2">
-            {normalizeTextContent(document.summary).map((p, i) => (
-              <p key={i} className="text-gray-800 text-sm leading-relaxed">{p}</p>
-            ))}
-          </div>
+          <p className="text-gray-800 text-sm leading-relaxed whitespace-pre-line">{document.description}</p>
         </div>
       )}
 
-      {/* Key Points */}
+      {/* Key Points (admin-authored em DocumentNotes.keyPoints) */}
       {keyPoints.length > 0 && (
         <div className="bg-purple-50 border-l-4 border-purple-500 p-4 rounded-r-lg">
           <div className="flex items-center gap-2 mb-2">
@@ -309,13 +306,7 @@ function DocumentDetails({ documentId, documentType = 'document' }: { documentId
         </div>
       )}
 
-      {/* Description (fallback) */}
-      {document.description && !document.summary && (
-        <div className="bg-blue-50 border-l-4 border-blue-500 p-4 rounded-r-lg">
-          <h4 className="font-bold text-gray-900 text-sm mb-2">Descrição</h4>
-          <p className="text-gray-800 text-sm leading-relaxed">{document.description}</p>
-        </div>
-      )}
+      {/* Description fallback removido: o bloco "Conteúdo" no topo já exibe document.description universalmente. */}
 
       {/* Tags */}
       {tags.length > 0 && (
@@ -1063,9 +1054,7 @@ function LeiComentadaContent() {
                                   </span>
                                   <span className="text-xs text-gray-500">{doc.relevance}</span>
                                 </div>
-                                {doc.summary && (
-                                  <p className="text-xs text-gray-600 line-clamp-2">{doc.summary}</p>
-                                )}
+                                {/* Resumo IA nunca exibido — Document.summary é reescrita IA, política universal. Ver lib/literal-sources.ts. */}
                               </div>
                               <ExternalLink className="w-4 h-4 text-gray-400 flex-shrink-0" />
                             </div>

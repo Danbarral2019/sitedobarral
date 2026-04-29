@@ -352,12 +352,8 @@ export default function ArtigoPage() {
                                   )}
                                 </div>
                               )}
-                              {/* Summary da IA (se disponível) */}
-                              {doc.summary ? (
-                                <p className="text-sm text-white/80 line-clamp-2 mt-1">
-                                  {doc.summary}
-                                </p>
-                              ) : doc.description ? (
+                              {/* Description (texto-fonte/curadoria) — Document.summary é IA e nunca exibido. Ver lib/literal-sources.ts. */}
+                              {doc.description ? (
                                 <p className="text-sm text-white/80 line-clamp-2 mt-1">
                                   {doc.description}
                                 </p>

@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { withAdminAuth } from '@/lib/api-middleware';
 import { generateDocumentSummary, isSummaryServiceAvailable } from '@/lib/summary-generator';
+import { isLiteralSourceCategory } from '@/lib/literal-sources';
 
 /**
  * POST /api/admin/documents/[id]/generate-summary
@@ -39,6 +40,18 @@ export const POST = withAdminAuth(async (
       return NextResponse.json(
         { error: 'Documento não encontrado' },
         { status: 404 }
+      );
+    }
+
+    // Bloqueio de fontes literais: enunciados (e equivalentes) precisam ser citados
+    // na íntegra. Reescrita IA introduz alucinações e foi causa raiz de incidente.
+    if (isLiteralSourceCategory(document.category)) {
+      return NextResponse.json(
+        {
+          error: 'Categoria literal — geração de resumo IA bloqueada',
+          detail: `Documentos da categoria "${document.category}" devem ser citados na íntegra. Resumos IA estão desabilitados para preservar a redação oficial.`,
+        },
+        { status: 422 }
       );
     }
 
