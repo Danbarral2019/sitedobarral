@@ -801,6 +801,13 @@ model LegislativeAct {
   @@index([lastScrapedAt])
   @@index([scrapeStatus])
   @@index([embeddingStatus])
+
+  // Previne duplicatas do mesmo ato real-world quando o issuer aparece em
+  // formas diferentes ("SEGES" vs "SEGES/MGI" pós-2023). Antes desta
+  // restrição existiam 21 grupos duplicados — limpos via
+  // scripts/dedupe-legislative-acts.ts. Ver lib/legislative-scrapers/normalize.ts
+  // para a normalização que evita gerar novas duplicatas no scrape.
+  @@unique([type, number, year])
 }
 
 // Chunks de atos legislativos com embeddings (Busca Semântica)
