@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import dynamic from 'next/dynamic';
-import { Loader2, FileText, ArrowLeft, ExternalLink, Heart, Filter, X, ChevronDown, ChevronUp, Calendar, User } from 'lucide-react';
+import { Loader2, FileText, ArrowLeft, ExternalLink, Heart, Filter, X, Calendar, User } from 'lucide-react';
 import type { LeiArticle } from '@/data/lei-14133-artigos';
 import { ArticleRelationshipGraph } from '@/components/ArticleRelationshipGraph';
 import { useAuth } from '@/hooks/use-auth';
@@ -117,7 +117,7 @@ export default function ArtigoAreaRestritaPage() {
   const [isContentExpanded, setIsContentExpanded] = useState(false);
   const [selectedDocId, setSelectedDocId] = useState<string | null>(null);
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
-  const [expandedSummaryId, setExpandedSummaryId] = useState<string | null>(null);
+  // expandedSummaryId removido — Document.summary nunca é exibido (política universal).
 
   // Redirect if not authenticated
   useEffect(() => {
@@ -373,7 +373,7 @@ export default function ArtigoAreaRestritaPage() {
                                       setSelectedDocId(doc.id);
                                     }
                                   }}
-                                  className={`w-full text-left p-3 rounded-lg transition-colors border group ${getTierCardStyle(tier)} ${doc.summary && expandedSummaryId === doc.id ? 'rounded-b-none border-b-0' : ''}`}
+                                  className={`w-full text-left p-3 rounded-lg transition-colors border group ${getTierCardStyle(tier)}`}
                                 >
                                   <div className="flex items-start justify-between gap-3">
                                     <div className="flex-1 min-w-0">
@@ -441,23 +441,7 @@ export default function ArtigoAreaRestritaPage() {
                                       )}
                                     </div>
                                     <div className="flex items-center gap-1 flex-shrink-0">
-                                      {/* Botão Ver resumo */}
-                                      {doc.summary && (
-                                        <button
-                                          onClick={(e) => {
-                                            e.stopPropagation();
-                                            setExpandedSummaryId(expandedSummaryId === doc.id ? null : doc.id);
-                                          }}
-                                          className="p-1.5 rounded-lg text-gray-400 hover:text-blue-600 hover:bg-blue-50 transition-colors"
-                                          title="Ver resumo"
-                                        >
-                                          {expandedSummaryId === doc.id ? (
-                                            <ChevronUp className="w-4 h-4" />
-                                          ) : (
-                                            <ChevronDown className="w-4 h-4" />
-                                          )}
-                                        </button>
-                                      )}
+                                      {/* Botão "Ver resumo" removido — política universal não exibe Document.summary (reescrita IA). */}
                                       {doc.sourceType !== 'legislative-act' && (
                                         <button
                                           onClick={(e) => {
@@ -476,30 +460,7 @@ export default function ArtigoAreaRestritaPage() {
                                     </div>
                                   </div>
                                 </button>
-                                {/* Summary expandível */}
-                                {doc.summary && expandedSummaryId === doc.id && (
-                                  <div className="px-3 pb-3 pt-2 bg-blue-50/50 border border-t-0 border-blue-200/50 rounded-b-lg text-xs text-gray-700 leading-relaxed">
-                                    <p>{doc.summary}</p>
-                                    {doc.summaryHighlights && (() => {
-                                      try {
-                                        const highlights = JSON.parse(doc.summaryHighlights) as string[];
-                                        if (highlights.length > 0) {
-                                          return (
-                                            <ul className="mt-2 space-y-1">
-                                              {highlights.map((h, i) => (
-                                                <li key={i} className="flex items-start gap-1.5">
-                                                  <span className="text-blue-500 mt-0.5 flex-shrink-0">-</span>
-                                                  <span>{h}</span>
-                                                </li>
-                                              ))}
-                                            </ul>
-                                          );
-                                        }
-                                      } catch { /* ignore parse errors */ }
-                                      return null;
-                                    })()}
-                                  </div>
-                                )}
+                                {/* Painel expandido de summary IA removido — política universal. */}
                               </div>
                             ))}
                           </div>

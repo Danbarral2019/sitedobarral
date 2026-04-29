@@ -4,6 +4,7 @@
  */
 
 import Anthropic from '@anthropic-ai/sdk';
+import { isLiteralSourceCategory } from './literal-sources';
 
 // Cliente Claude (lazy initialization)
 function getClaudeClient(): Anthropic | null {
@@ -35,6 +36,15 @@ export async function generateDocumentSummary(
   fullText?: string,
   category?: string
 ): Promise<DocumentSummary | null> {
+  // Defesa em profundidade: fontes literais (enunciados etc.) jamais são parafraseadas.
+  // O guard primário está na rota /api/admin/documents/[id]/generate-summary.
+  if (isLiteralSourceCategory(category)) {
+    console.warn(
+      `[Summary Generator] Bloqueado: categoria "${category}" é fonte literal, não pode ser resumida por IA.`
+    );
+    return null;
+  }
+
   const anthropic = getClaudeClient();
 
   if (!anthropic) {
