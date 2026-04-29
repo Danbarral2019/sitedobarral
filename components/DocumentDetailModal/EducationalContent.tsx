@@ -44,14 +44,25 @@ export default function EducationalContent({
         </div>
       )}
 
-      {/* Resumo IA (não-literais): bloco principal quando summary existe */}
+      {/* Resumo IA (não-literais): bloco principal quando summary existe.
+          Badge "não revisado" exibido até admin aprovar via summaryReviewedByAdmin. */}
       {!isLiteral && summary && (
         <div className="bg-gradient-to-r from-blue-50 to-indigo-50 border-2 border-blue-200 rounded-xl p-5">
-          <div className="flex items-center gap-2 mb-3">
-            <div className="p-2 bg-blue-600 rounded-lg">
-              <BookOpen className="w-5 h-5 text-white" />
+          <div className="flex items-center justify-between gap-2 mb-3 flex-wrap">
+            <div className="flex items-center gap-2">
+              <div className="p-2 bg-blue-600 rounded-lg">
+                <BookOpen className="w-5 h-5 text-white" />
+              </div>
+              <h3 className="text-lg font-bold text-blue-900">Resumo</h3>
             </div>
-            <h3 className="text-lg font-bold text-blue-900">Resumo</h3>
+            {!document.summaryReviewedByAdmin && (
+              <span
+                className="px-2 py-1 bg-amber-100 text-amber-800 border border-amber-300 rounded-full text-xs font-semibold inline-flex items-center gap-1"
+                title="Resumo gerado por IA — ainda não foi revisado por um administrador. Pode conter imprecisões."
+              >
+                <span aria-hidden>⚠️</span> Resumo IA não revisado
+              </span>
+            )}
           </div>
           <div className="text-gray-800 leading-relaxed space-y-2">
             {normalizeTextContent(summary).map((p, i) => (

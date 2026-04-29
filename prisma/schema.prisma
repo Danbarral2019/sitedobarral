@@ -68,6 +68,9 @@ model Document {
   summaryHighlights   String?   // JSON array com destaques principais
   summaryGeneratedAt  DateTime? // Data de geração do resumo
   summaryEditedByAdmin Boolean @default(false) // Se o resumo foi editado manualmente pelo admin
+  summaryReviewedByAdmin Boolean @default(false) // Aprovação humana — badge "Resumo IA não revisado" some quando true
+  summaryReviewedAt   DateTime? // Quando o admin marcou o resumo como revisado/aprovado
+  summaryReviewedBy   String?   // Email do admin que aprovou o resumo
 
   // Sistema de Enunciados (IBDA, INCP, CJF)
   entityType          String?   // Entidade responsável: "IBDA", "INCP", "CJF" (apenas para categoria="enunciados")

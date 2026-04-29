@@ -64,6 +64,7 @@ export interface DocumentData {
 
   // AI Summary (stays on Document)
   summary: string | null;
+  summaryReviewedByAdmin?: boolean | null;
 
   // AGU-specific fields
   onNumber: number | null;
