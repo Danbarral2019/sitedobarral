@@ -1,31 +1,23 @@
 /**
- * Política da base de conhecimento: NENHUM documento pode ter seu texto
- * reescrito por IA na exibição ao aluno.
+ * "Fontes literais" — categorias de documentos cujo `description` é o
+ * próprio texto-fonte oficial (citação obrigatória na íntegra). Para essas,
+ * a IA NUNCA pode gerar resumos: o risco de alucinação ou paráfrase
+ * desfigurar a fonte é grande demais (incidente IBDA 29: enunciados com
+ * temas/artigos completamente trocados pelo Claude).
  *
- * Motivo: a base contém fontes oficiais (enunciados, súmulas, acórdãos, ONs,
- * pareceres, artigos da lei) e curadoria didática manual do prof. Barral.
- * Reescritas IA introduzem alucinações (incidente IBDA 29: enunciados com
- * temas/artigos completamente trocados pelo Claude) e desfiguram tanto a
- * fonte quanto a curadoria.
+ * Para outras categorias (acórdãos, ONs, súmulas, lei-artigo, etc.),
+ * `description` já é uma curadoria didática — IA pode gerar resumos
+ * complementares pelo endpoint /api/admin/documents/[id]/generate-summary.
  *
- * O que esta proteção faz:
+ * O que esta proteção faz para categorias literais:
  * - UI nunca exibe `Document.summary` nem `Document.summaryHighlights`
- *   (campos populados por IA via /api/admin/documents/[id]/generate-summary)
- * - O endpoint de geração de summary IA é bloqueado (HTTP 422)
+ * - O endpoint /generate-summary retorna HTTP 422
  * - `lib/summary-generator.ts` recusa qualquer chamada (defesa em profundidade)
- *
- * O que NÃO é afetado:
- * - `Document.description` — texto-fonte ou curadoria, exibido na íntegra
- * - `DocumentNotes.keyPoints` / `practicalUse` / `publicNotes` — admin-authored,
- *   continuam visíveis como antes
- * - Resumos pedagógicos manuais (ex: TribunalDecision.summary, LegislativeAct.summary)
- *   ficam fora deste arquivo (têm fluxos próprios de curadoria)
  */
+export const LITERAL_SOURCE_CATEGORIES = ['enunciados'] as const;
 
-/** A política é universal — qualquer categoria é tratada como fonte literal. */
+export type LiteralSourceCategory = typeof LITERAL_SOURCE_CATEGORIES[number];
+
 export function isLiteralSourceCategory(category: string | null | undefined): boolean {
-  // Mantemos a função (em vez de inlinar `true`) para que, se no futuro a
-  // política precisar de exceções, exista um único ponto de mudança.
-  void category;
-  return true;
+  return !!category && (LITERAL_SOURCE_CATEGORIES as readonly string[]).includes(category);
 }

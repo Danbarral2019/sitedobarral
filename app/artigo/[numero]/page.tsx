@@ -7,6 +7,7 @@ import { Loader2, FileText, BookOpen, ArrowLeft, BarChart3, TrendingUp, Scale, C
 import type { LeiArticle } from '@/data/lei-14133-artigos';
 import { ArticleRelationshipGraph } from '@/components/ArticleRelationshipGraph';
 import JurisprudenciaRelacionada from '@/components/JurisprudenciaRelacionada';
+import { isLiteralSourceCategory } from '@/lib/literal-sources';
 
 
 interface Document {
@@ -352,8 +353,12 @@ export default function ArtigoPage() {
                                   )}
                                 </div>
                               )}
-                              {/* Description (texto-fonte/curadoria) — Document.summary é IA e nunca exibido. Ver lib/literal-sources.ts. */}
-                              {doc.description ? (
+                              {/* Summary IA quando disponível (não-literais); description em fontes literais (enunciados). Ver lib/literal-sources.ts. */}
+                              {!isLiteralSourceCategory(doc.category) && doc.summary ? (
+                                <p className="text-sm text-white/80 line-clamp-2 mt-1">
+                                  {doc.summary}
+                                </p>
+                              ) : doc.description ? (
                                 <p className="text-sm text-white/80 line-clamp-2 mt-1">
                                   {doc.description}
                                 </p>

@@ -5,7 +5,7 @@ import { useParams } from 'next/navigation';
 
 import DocumentWizard from '@/components/admin/DocumentWizard';
 import { DocumentFormState } from '@/components/admin/DocumentWizard/types';
-import { Loader2, ChevronDown, ChevronRight, History } from 'lucide-react';
+import { Loader2, ChevronDown, ChevronRight, History, CheckCircle2, AlertTriangle } from 'lucide-react';
 import DocumentVersionHistory from '@/components/admin/DocumentVersionHistory';
 
 interface DocumentFromAPI {
@@ -22,6 +22,9 @@ interface DocumentFromAPI {
   leiArticles: string[];
   alternativeUrls: string | null;
   summary?: string | null;
+  summaryReviewedByAdmin?: boolean | null;
+  summaryReviewedAt?: string | null;
+  summaryReviewedBy?: string | null;
   keyPoints?: string | null;
   practicalUse?: string | null;
   publicNotes?: string | null;
@@ -40,6 +43,13 @@ export default function EditDocumentPage() {
   const [initialData, setInitialData] = useState<Partial<DocumentFormState> | null>(null);
   const [versionCount, setVersionCount] = useState<number | null>(null);
   const [historyOpen, setHistoryOpen] = useState(false);
+  const [summaryInfo, setSummaryInfo] = useState<{
+    hasSummary: boolean;
+    reviewed: boolean;
+    reviewedAt: string | null;
+    reviewedBy: string | null;
+  } | null>(null);
+  const [reviewBusy, setReviewBusy] = useState(false);
 
   // Carregar documento existente
   useEffect(() => {
@@ -97,6 +107,12 @@ export default function EditDocumentPage() {
         };
 
         setInitialData(wizardData);
+        setSummaryInfo({
+          hasSummary: !!doc.summary,
+          reviewed: !!doc.summaryReviewedByAdmin,
+          reviewedAt: doc.summaryReviewedAt ?? null,
+          reviewedBy: doc.summaryReviewedBy ?? null,
+        });
 
         // Buscar contagem de versões (não bloqueia o carregamento principal)
         fetch(`/api/admin/documents/${documentId}/versions`)
@@ -115,6 +131,32 @@ export default function EditDocumentPage() {
 
     loadDocument();
   }, [documentId]);
+
+  async function toggleSummaryReview() {
+    if (!summaryInfo) return;
+    setReviewBusy(true);
+    try {
+      const res = await fetch(`/api/admin/documents/${documentId}/mark-summary-reviewed`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ reviewed: !summaryInfo.reviewed }),
+      });
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        alert(err?.error ?? 'Erro ao atualizar status de revisão');
+        return;
+      }
+      const data = await res.json();
+      setSummaryInfo({
+        hasSummary: true,
+        reviewed: data.document.summaryReviewedByAdmin,
+        reviewedAt: data.document.summaryReviewedAt,
+        reviewedBy: data.document.summaryReviewedBy,
+      });
+    } finally {
+      setReviewBusy(false);
+    }
+  }
 
   return (
       <div className="container mx-auto px-4 py-8">
@@ -155,6 +197,55 @@ export default function EditDocumentPage() {
             </div>
 
             <DocumentWizard documentId={documentId} initialData={initialData} />
+
+            {/* Aprovação humana do resumo IA */}
+            {summaryInfo?.hasSummary && (
+              <div className="max-w-4xl mx-auto mt-8">
+                {summaryInfo.reviewed ? (
+                  <div className="flex items-center justify-between gap-4 p-4 bg-green-50 border-2 border-green-200 rounded-lg">
+                    <div className="flex items-start gap-3">
+                      <CheckCircle2 className="w-5 h-5 text-green-600 flex-shrink-0 mt-0.5" />
+                      <div>
+                        <p className="font-semibold text-green-900">Resumo IA aprovado</p>
+                        <p className="text-sm text-green-700">
+                          Revisado em{' '}
+                          {summaryInfo.reviewedAt
+                            ? new Date(summaryInfo.reviewedAt).toLocaleString('pt-BR')
+                            : '—'}
+                          {summaryInfo.reviewedBy ? ` por ${summaryInfo.reviewedBy}` : ''}
+                        </p>
+                      </div>
+                    </div>
+                    <button
+                      onClick={toggleSummaryReview}
+                      disabled={reviewBusy}
+                      className="px-4 py-2 text-sm bg-white border border-green-300 text-green-700 rounded-lg hover:bg-green-50 transition-colors disabled:opacity-50"
+                    >
+                      Desmarcar revisão
+                    </button>
+                  </div>
+                ) : (
+                  <div className="flex items-center justify-between gap-4 p-4 bg-amber-50 border-2 border-amber-200 rounded-lg">
+                    <div className="flex items-start gap-3">
+                      <AlertTriangle className="w-5 h-5 text-amber-600 flex-shrink-0 mt-0.5" />
+                      <div>
+                        <p className="font-semibold text-amber-900">Resumo IA pendente de revisão</p>
+                        <p className="text-sm text-amber-700">
+                          Os alunos veem um aviso "Resumo IA não revisado" até você aprovar.
+                        </p>
+                      </div>
+                    </div>
+                    <button
+                      onClick={toggleSummaryReview}
+                      disabled={reviewBusy}
+                      className="px-4 py-2 text-sm bg-amber-600 text-white rounded-lg hover:bg-amber-700 transition-colors disabled:opacity-50 font-semibold"
+                    >
+                      {reviewBusy ? 'Processando…' : 'Marcar como revisado'}
+                    </button>
+                  </div>
+                )}
+              </div>
+            )}
 
             {/* Histórico de Versões — collapsible */}
             <div className="max-w-4xl mx-auto mt-8">

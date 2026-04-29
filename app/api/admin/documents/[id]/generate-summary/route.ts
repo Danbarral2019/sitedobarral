@@ -72,7 +72,8 @@ export const POST = withAdminAuth(async (
       );
     }
 
-    // Salva resumo no banco
+    // Salva resumo no banco. Sempre reseta a flag de revisão — resumo novo
+    // (mesmo regerado) precisa de aprovação humana antes do badge sumir.
     const updated = await prisma.document.update({
       where: { id },
       data: {
@@ -80,6 +81,9 @@ export const POST = withAdminAuth(async (
         summaryHighlights: JSON.stringify(summaryResult.highlights),
         summaryGeneratedAt: new Date(),
         summaryEditedByAdmin: false,
+        summaryReviewedByAdmin: false,
+        summaryReviewedAt: null,
+        summaryReviewedBy: null,
         // Atualiza tags e artigos se confiança for alta
         ...(summaryResult.confidence >= 70 && {
           tags: summaryResult.tags.join(', '),

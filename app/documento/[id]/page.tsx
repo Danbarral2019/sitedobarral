@@ -2,7 +2,8 @@ import { prisma } from '@/lib/prisma';
 import { notFound } from 'next/navigation';
 import { Metadata } from 'next';
 import Link from 'next/link';
-import { ArrowLeft, ExternalLink, Calendar, Tag } from 'lucide-react';
+import { ExternalLink, Calendar, Tag } from 'lucide-react';
+import BackLink from './BackLink';
 
 const CATEGORY_LABELS: Record<string, string> = {
   acordao: 'Acórdão TCU',
@@ -90,15 +91,9 @@ export default async function DocumentoPage({ params }: PageProps) {
   return (
     <main className="min-h-screen bg-gradient-to-b from-gray-50 to-white">
       <div className="container mx-auto px-4 max-w-4xl py-8">
-        {/* Navigation */}
+        {/* Navigation — preserva contexto de busca via router.back() */}
         <div className="mb-8">
-          <Link
-            href="/busca"
-            className="inline-flex items-center gap-2 text-sm text-gray-600 hover:text-gray-900 transition-colors"
-          >
-            <ArrowLeft className="w-4 h-4" />
-            Voltar para pesquisa
-          </Link>
+          <BackLink />
         </div>
 
         {/* Header */}
