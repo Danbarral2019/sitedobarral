@@ -19,7 +19,8 @@ export interface SearchResult {
   category: string;
   chunkContent: string;
   chunkIndex: number;
-  similarity: number; // 0-1 (1 = identico)
+  similarity: number; // 0-1 (1 = identico). Para legislative-act, já vem
+                      // com boost de hierarquia aplicado (ver act_scores).
   url?: string;
   courseId?: string;
   isCommon: boolean;
@@ -27,6 +28,9 @@ export interface SearchResult {
   leiArticles?: string | null;
   uploadedAt?: string;
   sourceType: 'document' | 'legislative-act' | 'tribunal-decision'; // Tipo de fonte
+  // Para legislative-act: nível na hierarquia legal (1=Lei, 2=Decreto,
+  // 3=Portaria, 4=IN, 5=Ordem). Usado pra ordenação e boost. Null pros demais.
+  hierarchyLevel?: number | null;
 }
 
 export interface SearchOptions {
@@ -304,6 +308,7 @@ async function executeVectorSearch(
         d."isCommon" as is_common,
         d.tags,
         d."leiArticles" as lei_articles,
+        NULL::int as hierarchy_level,
         'document' as source_type,
         d."uploadedAt" as uploaded_at
       FROM "DocumentChunk" c
@@ -321,6 +326,10 @@ async function executeVectorSearch(
     const actLimitIdx = nextParam();
     params.push(limit * 2);
 
+    // Boost por hierarquia (R4): atos de hierarquia mais alta sobem no ranking.
+    // hierarchyLevel: 1=Lei, 2=Decreto, 3=Portaria, 4=IN, 5=Ordem. Multiplicador
+    // calibrado p/ não dominar similarity puro (level 1 ganha +15%, level 2 +10%,
+    // level 3 +5%, level 4 +0%, level 5 −5%). hierarchyLevel é exposto pro caller.
     ctes.push(`act_scores AS (
       SELECT
         la.id as document_id,
@@ -328,12 +337,21 @@ async function executeVectorSearch(
         la.type as category,
         lc.content as chunk_content,
         lc."chunkIndex" as chunk_index,
-        1 - (lc.embedding <=> '${embeddingStr}'::vector) as similarity,
+        (1 - (lc.embedding <=> '${embeddingStr}'::vector)) *
+          CASE la."hierarchyLevel"
+            WHEN 1 THEN 1.15
+            WHEN 2 THEN 1.10
+            WHEN 3 THEN 1.05
+            WHEN 4 THEN 1.00
+            WHEN 5 THEN 0.95
+            ELSE 1.00
+          END as similarity,
         la."officialUrl" as url,
         NULL as course_id,
         true as is_common,
         la.themes as tags,
         la."leiArticles" as lei_articles,
+        la."hierarchyLevel" as hierarchy_level,
         'legislative-act' as source_type,
         la."publishDate" as uploaded_at
       FROM "LegislativeActChunk" lc
@@ -373,6 +391,7 @@ async function executeVectorSearch(
         true as is_common,
         td.themes as tags,
         td."leiArticles" as lei_articles,
+        NULL::int as hierarchy_level,
         'tribunal-decision' as source_type,
         td."dataJulgamento" as uploaded_at
       FROM "TribunalDecisionChunk" tc
@@ -478,6 +497,7 @@ async function executeVectorSearch(
       leiArticles: bestChunk.lei_articles,
       uploadedAt: bestChunk.uploaded_at ? new Date(bestChunk.uploaded_at).toISOString() : undefined,
       sourceType: bestChunk.source_type as 'document' | 'legislative-act' | 'tribunal-decision',
+      hierarchyLevel: (bestChunk as { hierarchy_level?: number | null }).hierarchy_level ?? null,
     });
   }
 
