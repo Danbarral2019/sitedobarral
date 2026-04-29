@@ -366,7 +366,11 @@ Exemplo de resposta: ["variação 1", "variação 2"]`;
     // Diversify doc results with priority tiers (reranking já feito dentro do hybridSearch)
     const docResults = diversifyResults(rawDocResults, maxResults);
 
-    // Cap semantic legislative acts: top 3 per act type to avoid flooding
+    // R3: cap por tipo subiu de 3 → 5. Cobre cenários com vários atos do mesmo
+    // tipo regulamentando matéria (ex: 4-5 INs sobre serviços contínuos) sem
+    // estourar o contexto. Bypass dinâmico em R1 quando o ato é regulamentador
+    // direto (leiArticles ⊃ artigos da query).
+    const PER_TYPE_CAP = 5;
     const legActsByType = new Map<string, typeof semanticLegActResults>();
     for (const act of semanticLegActResults) {
       const arr = legActsByType.get(act.category) || [];
@@ -375,7 +379,7 @@ Exemplo de resposta: ["variação 1", "variação 2"]`;
     }
     const cappedLegActs: typeof semanticLegActResults = [];
     for (const [, acts] of legActsByType) {
-      cappedLegActs.push(...acts.sort((a, b) => b.similarity - a.similarity).slice(0, 3));
+      cappedLegActs.push(...acts.sort((a, b) => b.similarity - a.similarity).slice(0, PER_TYPE_CAP));
     }
 
     apiLogger.info({ lei: leiResults.length, actsDocs: actResults.length, actsSemantic: cappedLegActs.length, docs: docResults.length }, 'Results categorized');
@@ -405,12 +409,15 @@ Exemplo de resposta: ["variação 1", "variação 2"]`;
       ...cappedLegActs.map(r => r.documentTitle),
     ];
     const allCitedArticles = [...new Set([...citedArticles, ...leiResultArticleNums])];
-    const extraActs = await findRelatedActs(allCitedArticles, alreadyFoundActTitles, 3);
+    // R1: subimos o limite (3 → 8) e o budget de chars (1000 → 2000) — esses
+    // atos são "regulamentadores diretos" (matched por leiArticles ⊇ artigos
+    // citados) e merecem mais espaço que candidatos puramente semânticos.
+    const extraActs = await findRelatedActs(allCitedArticles, alreadyFoundActTitles, 8);
 
     // Build acts context (includes Document-based acts + semantic LegislativeAct acts)
     const allActContextResults = [...actResults, ...cappedLegActs];
-    const semanticActsContext = buildContextForLLM(allActContextResults, 2000);
-    const extraActsFormatted = formatActsContext(extraActs, 1000);
+    const semanticActsContext = buildContextForLLM(allActContextResults, 2500);
+    const extraActsFormatted = formatActsContext(extraActs, 2000);
     const fullActsContext = [semanticActsContext, extraActsFormatted].filter(Boolean).join('\n\n');
 
     // Build docs context (increased to fit more diverse results)
@@ -481,7 +488,7 @@ INSTRUÇÕES:
    a) Materiais do curso (apostilas, infográficos, materiais de apoio) — cite PRIMEIRO se disponíveis
    b) Enunciados de instituições (IBDA, INCP, etc.) e Orientações Normativas da AGU — SEMPRE cite quando pertinentes, são fontes de alto valor
    c) Artigos da Lei 14.133/2021 — cite CADA artigo relevante do contexto
-   d) Atos normativos regulamentadores (INs, Decretos)
+   d) Atos normativos regulamentadores (INs, Decretos, Portarias) — SEMPRE cite quando aparecerem em "ATOS NORMATIVOS REGULAMENTADORES" do contexto. Quando o título traz prefixo [Lei]/[Decreto]/[Portaria]/[IN]/[Ordem], esse é o nível na hierarquia legal — priorize os de hierarquia mais alta. Não omita atos normativos que tratem da matéria perguntada.
    e) Acórdãos do TCU e Manual do TCU — cite com número/ano (ex: "Acórdão TCU 1234/2024 - Plenário")
    f) Informativos e Súmulas do TCU — cite com número (ex: "Informativo TCU nº 350", "Súmula TCU nº 247")
    g) Pareceres da AGU (DECOR, Pareceres Vinculantes)

@@ -155,17 +155,22 @@ export function buildLeiContext(articleNumbers: string[], maxLength: number = 30
 // ===========================
 
 /**
- * Busca atos normativos relacionados aos artigos citados
- * que NÃO apareceram na busca semântica
+ * Busca atos normativos relacionados aos artigos citados na resposta/contexto
+ * que NÃO apareceram na busca semântica.
+ *
+ * R1 (2026-04-29): expandido para retornar mais atos (limit default 5 → 8) e
+ * ordenar por (matchCount desc, hierarchyLevel asc) — atos de hierarquia mais
+ * alta (Lei > Decreto > Portaria > IN) sobem quando empatam em matchCount.
+ * Esses atos são tratados como "regulamentadores diretos" no caller e entram
+ * no contexto FORA do cap por tipo (R3).
  */
 export async function findRelatedActs(
   articleNumbers: string[],
   alreadyFoundTitles: string[],
-  limit: number = 5
-): Promise<Array<{ title: string; ementa: string; url: string; leiArticles: string[] }>> {
+  limit: number = 8
+): Promise<Array<{ title: string; ementa: string; url: string; leiArticles: string[]; hierarchyLevel: number }>> {
   if (articleNumbers.length === 0) return [];
 
-  // Filtrar no SQL: busca atos que contenham ao menos um dos artigos citados
   const articleConditions = articleNumbers.map(art =>
     `"leiArticles"::text LIKE '%"${art.replace(/'/g, "''")}"%'`
   ).join(' OR ');
@@ -179,8 +184,10 @@ export async function findRelatedActs(
     ementa: string;
     official_url: string | null;
     lei_articles: string | null;
+    hierarchy_level: number;
   }>>(`
-    SELECT "fullNumber" as full_number, ementa, "officialUrl" as official_url, "leiArticles" as lei_articles
+    SELECT "fullNumber" as full_number, ementa, "officialUrl" as official_url,
+           "leiArticles" as lei_articles, "hierarchyLevel" as hierarchy_level
     FROM "LegislativeAct"
     WHERE "leiArticles" IS NOT NULL
       AND (${articleConditions})
@@ -188,7 +195,6 @@ export async function findRelatedActs(
     LIMIT ${limit * 3}
   `);
 
-  // Contar matches e ordenar por relevância
   const matched = acts.map(act => {
     let actArticles: string[] = [];
     try {
@@ -203,12 +209,18 @@ export async function findRelatedActs(
       ementa: act.ementa,
       url: act.official_url || '',
       leiArticles: actArticles,
+      hierarchyLevel: act.hierarchy_level,
       matchCount,
     };
   });
 
   return matched
-    .sort((a, b) => b.matchCount - a.matchCount)
+    .sort((a, b) => {
+      // 1. mais artigos casados primeiro
+      if (a.matchCount !== b.matchCount) return b.matchCount - a.matchCount;
+      // 2. hierarquia mais alta (1=Lei) ganha desempate
+      return a.hierarchyLevel - b.hierarchyLevel;
+    })
     .slice(0, limit)
     .map(({ matchCount: _matchCount, ...rest }) => rest);
 }
@@ -219,9 +231,13 @@ export async function findRelatedActs(
 
 /**
  * Monta contexto em 3 camadas para o prompt do Gemini:
- * 1. Lei 14.133 (artigos)
- * 2. Atos normativos regulamentadores
- * 3. Documentos e jurisprudência
+ * 1. Lei 14.133 (artigos) — 30%
+ * 2. Atos normativos regulamentadores — 30% (era 20%)
+ * 3. Documentos e jurisprudência — 40% (era 50%)
+ *
+ * R2 (2026-04-29): aumentamos a camada 2 para dar mais espaço a decretos/INs/
+ * portarias que regulamentam matérias específicas; antes ficavam prensados
+ * em 20% e raramente apareciam nas respostas IA, mesmo quando recuperados.
  */
 export function buildLayeredContext(
   leiContext: string,
@@ -240,15 +256,15 @@ export function buildLayeredContext(
     remaining -= trimmedLei.length + 50;
   }
 
-  // Camada 2: Atos normativos (até 20% do espaço)
+  // Camada 2: Atos normativos (até 30% do espaço)
   if (actsContext) {
-    const maxActs = Math.min(actsContext.length, Math.floor(maxTotal * 0.20));
+    const maxActs = Math.min(actsContext.length, Math.floor(maxTotal * 0.30));
     const trimmedActs = actsContext.slice(0, maxActs);
     parts.push(`ATOS NORMATIVOS REGULAMENTADORES:\n${trimmedActs}`);
     remaining -= trimmedActs.length + 50;
   }
 
-  // Camada 3: Documentos/jurisprudência (resto do espaço, ~50%)
+  // Camada 3: Documentos/jurisprudência (resto do espaço, ~40%)
   if (docsContext) {
     const trimmedDocs = docsContext.slice(0, Math.max(remaining, 2000));
     parts.push(`DOCUMENTOS E JURISPRUDÊNCIA:\n${trimmedDocs}`);
@@ -262,19 +278,32 @@ export function buildLayeredContext(
 // ===========================
 
 /**
- * Formata atos normativos como texto para o prompt
+ * Formata atos normativos como texto para o prompt.
+ *
+ * R1 (2026-04-29): atos vindos com hierarchyLevel (regulamentadores diretos)
+ * recebem prefixo de hierarquia (Lei/Decreto/Portaria/IN) — o LLM entende
+ * que tem autoridade variada e cita preferencialmente os mais altos.
  */
 export function formatActsContext(
-  acts: Array<{ title: string; ementa: string; url: string; leiArticles: string[] }>,
+  acts: Array<{ title: string; ementa: string; url: string; leiArticles: string[]; hierarchyLevel?: number }>,
   maxLength: number = 2000
 ): string {
   let context = '';
+  const HIERARCHY_LABEL: Record<number, string> = {
+    1: '[Lei]',
+    2: '[Decreto]',
+    3: '[Portaria]',
+    4: '[IN]',
+    5: '[Ordem]',
+  };
 
   for (const act of acts) {
     const articles = act.leiArticles.length > 0
       ? ` (Art. ${act.leiArticles.slice(0, 5).join(', ')}${act.leiArticles.length > 5 ? '...' : ''})`
       : '';
-    const entry = `**${act.title}**${articles}\n${act.ementa}\n\n`;
+    const hierLabel = act.hierarchyLevel ? HIERARCHY_LABEL[act.hierarchyLevel] ?? '' : '';
+    const prefix = hierLabel ? `${hierLabel} ` : '';
+    const entry = `**${prefix}${act.title}**${articles}\n${act.ementa}\n\n`;
 
     if (context.length + entry.length > maxLength) break;
     context += entry;
