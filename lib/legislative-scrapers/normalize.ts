@@ -6,6 +6,54 @@
  */
 
 /**
+ * Detecta o charset declarado pelo servidor + meta tags do HTML, com fallback
+ * via sniffing: se a decodificação UTF-8 produz bytes inválidos, assume
+ * ISO-8859-1.
+ *
+ * Muitas páginas do planalto.gov.br não declaram charset (nem header nem
+ * <meta>) e servem ISO-8859-1. Sem o sniff, fetch().text() decodifica como
+ * UTF-8 e chars acentuados viram U+FFFD ("Bras�lia").
+ *
+ * Estratégia:
+ *   1. Content-Type header (ex: "text/html; charset=ISO-8859-1")
+ *   2. <meta charset> ou <meta http-equiv="Content-Type"> nos primeiros 2KB
+ *   3. Sniff: tenta UTF-8 com fatal=true. Se falha (= bytes inválidos),
+ *      assume ISO-8859-1 (cobertura prática para sites .gov.br legados).
+ */
+export function detectCharsetFromResponse(
+  contentTypeHeader: string | null,
+  buffer: ArrayBuffer,
+): string {
+  if (contentTypeHeader) {
+    const m = contentTypeHeader.match(/charset=([^\s;]+)/i);
+    if (m) return normalizeCharsetName(m[1]);
+  }
+  const head = new TextDecoder('latin1').decode(buffer.slice(0, 2048));
+  const m1 = head.match(/<meta[^>]+charset=["']?([^"'>;\s]+)/i);
+  if (m1) return normalizeCharsetName(m1[1]);
+  const m2 = head.match(/<meta[^>]+http-equiv=["']?content-type["']?[^>]+charset=([^"'>;\s]+)/i);
+  if (m2) return normalizeCharsetName(m2[1]);
+
+  // Sniff: tenta UTF-8 estrito; se falha, é provavelmente ISO-8859-1.
+  // Limitamos o sniff aos primeiros 64KB para não pagar custo em páginas grandes.
+  const sample = buffer.slice(0, Math.min(buffer.byteLength, 64 * 1024));
+  try {
+    new TextDecoder('utf-8', { fatal: true }).decode(sample);
+    return 'utf-8';
+  } catch {
+    return 'iso-8859-1';
+  }
+}
+
+function normalizeCharsetName(c: string): string {
+  const lower = c.toLowerCase().trim();
+  if (lower === 'iso-8859-1' || lower === 'latin1' || lower === 'latin-1') return 'iso-8859-1';
+  if (lower === 'windows-1252' || lower === 'cp1252' || lower === 'win1252') return 'windows-1252';
+  if (lower === 'utf-8' || lower === 'utf8') return 'utf-8';
+  return lower;
+}
+
+/**
  * Colapsa espaços em branco em excesso.
  *
  * - Remove espaços/NBSP no início e fim de cada linha.

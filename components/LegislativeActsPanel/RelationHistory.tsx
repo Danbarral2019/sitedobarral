@@ -69,7 +69,7 @@ function RelationItem({
   otherAct,
 }: {
   rel: RelationView;
-  otherAct: { fullNumber: string; title: string };
+  otherAct: { id: string; fullNumber: string; title: string };
 }) {
   const typeColor = TYPE_COLORS[rel.relationType] ?? 'bg-gray-100 text-gray-700 border-gray-300';
   return (
@@ -84,7 +84,7 @@ function RelationItem({
           </span>
         )}
         <Link
-          href={`/legislacao/${encodeURIComponent(otherAct.fullNumber)}`}
+          href={`/legislacao/${otherAct.id}`}
           className="font-poppins font-semibold text-brand-700 hover:underline"
         >
           {otherAct.fullNumber}

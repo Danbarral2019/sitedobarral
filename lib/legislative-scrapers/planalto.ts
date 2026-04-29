@@ -8,7 +8,7 @@
 import * as cheerio from 'cheerio';
 import { computeHash } from './change-detector';
 import type { LegislativeScraper, ScraperResult } from './index';
-import { collapseWhitespace } from './normalize';
+import { collapseWhitespace, detectCharsetFromResponse } from './normalize';
 
 /**
  * Patterns de URL do Planalto
@@ -83,16 +83,22 @@ export class PlanaltoScraper implements LegislativeScraper {
         };
       }
 
-      const html = await response.text();
+      // planalto.gov.br serve grande parte das páginas em ISO-8859-1.
+      // response.text() do fetch() decodifica como UTF-8 — chars acentuados
+      // viram U+FFFD ("Bras�lia"). Detectamos o charset (Content-Type +
+      // <meta>) e decodificamos com TextDecoder explícito.
+      const buffer = await response.arrayBuffer();
 
-      // Verificar tamanho máximo (5MB). Aumentado em 2 etapas em 2026-04-25:
-      // 500KB → 3MB → 5MB. CLT (Lei 5.452/43) excede 3MB; 5MB cobre.
-      if (html.length > 5 * 1024 * 1024) {
+      // Verificar tamanho máximo (5MB).
+      if (buffer.byteLength > 5 * 1024 * 1024) {
         return {
           success: false,
           error: 'Conteúdo muito grande (>5MB)',
         };
       }
+
+      const charset = detectCharsetFromResponse(response.headers.get('content-type'), buffer);
+      const html = new TextDecoder(charset, { fatal: false }).decode(buffer);
 
       const content = this.extractContent(html);
 

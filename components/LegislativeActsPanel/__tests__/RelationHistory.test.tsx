@@ -19,7 +19,7 @@ describe('RelationHistory', () => {
 
   it('renderiza atos que este ato altera', () => {
     render(<RelationHistory
-      alters={[{ ...baseRel, targetAct: { fullNumber: 'Lei 14.133/2021', title: 'Nova Lei de Licitações' } }]}
+      alters={[{ ...baseRel, targetAct: { id: 'a1', fullNumber: 'Lei 14.133/2021', title: 'Nova Lei de Licitações' } }]}
       alteredBy={[]}
     />);
     expect(screen.getByText(/este ato altera/i)).toBeTruthy();
@@ -30,7 +30,7 @@ describe('RelationHistory', () => {
   it('renderiza atos que alteram este ato', () => {
     render(<RelationHistory
       alters={[]}
-      alteredBy={[{ ...baseRel, sourceAct: { fullNumber: 'Decreto 12.926/2026', title: 'Atualização' } }]}
+      alteredBy={[{ ...baseRel, sourceAct: { id: 'a2', fullNumber: 'Decreto 12.926/2026', title: 'Atualização' } }]}
     />);
     expect(screen.getByText(/foi alterado por/i)).toBeTruthy();
     expect(screen.getByText('Decreto 12.926/2026')).toBeTruthy();
@@ -38,7 +38,7 @@ describe('RelationHistory', () => {
 
   it('mostra badge "pending" pra relações não-confirmadas', () => {
     render(<RelationHistory
-      alters={[{ ...baseRel, reviewStatus: 'pending', targetAct: { fullNumber: 'Lei X', title: 't' } }]}
+      alters={[{ ...baseRel, reviewStatus: 'pending', targetAct: { id: 'a3', fullNumber: 'Lei X', title: 't' } }]}
       alteredBy={[]}
     />);
     expect(screen.getByText(/pendente/i)).toBeTruthy();
