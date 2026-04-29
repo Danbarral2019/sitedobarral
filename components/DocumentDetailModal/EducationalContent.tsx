@@ -7,13 +7,11 @@ import {
 } from 'lucide-react';
 import Link from 'next/link';
 import { normalizeTextContent } from '@/lib/utils';
+import { isLiteralSourceCategory } from '@/lib/literal-sources';
 import type { DocumentData } from './index';
 
 interface EducationalContentProps {
   document: DocumentData;
-  // `summary` aceito por compatibilidade da assinatura, mas nunca é renderizado:
-  // política universal — Document.summary é gerado por IA e foi causa raiz do
-  // incidente IBDA 29 (alucinações). Ver lib/literal-sources.ts.
   summary: string | null;
   keyPoints: string[];
   tags: string[];
@@ -23,19 +21,42 @@ interface EducationalContentProps {
 
 export default function EducationalContent({
   document,
+  summary,
   keyPoints,
   tags,
   leiArticles,
   onClose,
 }: EducationalContentProps) {
+  // Fontes literais (enunciados): exibem `description` como texto-fonte e NUNCA
+  // mostram summary IA. Outras categorias: mostram summary quando presente, com
+  // description como fallback. Ver lib/literal-sources.ts.
+  const isLiteral = isLiteralSourceCategory(document.category);
+
   return (
     <>
-      {/* Conteúdo (description) — texto-fonte ou curadoria, exibido na íntegra */}
-      {document.description && (
+      {/* Texto-fonte (enunciados): exibido na íntegra, sem reescrita IA */}
+      {isLiteral && document.description && (
         <div>
-          <h3 className="text-lg font-bold text-gray-900 mb-3">Conteúdo</h3>
+          <h3 className="text-lg font-bold text-gray-900 mb-3">Texto do Enunciado</h3>
           <div className="bg-blue-50 border-l-4 border-blue-500 p-4 rounded-r-lg">
             <p className="text-gray-800 leading-relaxed whitespace-pre-line">{document.description}</p>
+          </div>
+        </div>
+      )}
+
+      {/* Resumo IA (não-literais): bloco principal quando summary existe */}
+      {!isLiteral && summary && (
+        <div className="bg-gradient-to-r from-blue-50 to-indigo-50 border-2 border-blue-200 rounded-xl p-5">
+          <div className="flex items-center gap-2 mb-3">
+            <div className="p-2 bg-blue-600 rounded-lg">
+              <BookOpen className="w-5 h-5 text-white" />
+            </div>
+            <h3 className="text-lg font-bold text-blue-900">Resumo</h3>
+          </div>
+          <div className="text-gray-800 leading-relaxed space-y-2">
+            {normalizeTextContent(summary).map((p, i) => (
+              <p key={i}>{p}</p>
+            ))}
           </div>
         </div>
       )}
@@ -92,6 +113,16 @@ export default function EducationalContent({
             {normalizeTextContent(document.notes.publicNotes).map((p, i) => (
               <p key={i}>{p}</p>
             ))}
+          </div>
+        </div>
+      )}
+
+      {/* Descrição (não-literais): exibida quando não há summary */}
+      {!isLiteral && document.description && !summary && (
+        <div>
+          <h3 className="text-lg font-bold text-gray-900 mb-3">Descrição</h3>
+          <div className="bg-blue-50 border-l-4 border-blue-500 p-4 rounded-r-lg">
+            <p className="text-gray-800 leading-relaxed">{document.description}</p>
           </div>
         </div>
       )}

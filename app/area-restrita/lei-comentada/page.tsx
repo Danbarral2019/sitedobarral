@@ -29,6 +29,7 @@ import { useAuth } from '@/hooks/use-auth';
 import { useFavorites } from '@/hooks/use-favorites';
 import { useLegislativeActFavorites } from '@/hooks/use-legislative-act-favorites';
 import { safeParseArray, normalizeTextContent } from '@/lib/utils';
+import { isLiteralSourceCategory } from '@/lib/literal-sources';
 import Link from 'next/link';
 import ArticleChatInterface from '@/components/ArticleChatInterface';
 import { CROSS_REFERENCES } from '@/data/lei-14133-cross-references';
@@ -241,18 +242,35 @@ function DocumentDetails({ documentId, documentType = 'document' }: { documentId
   const effectivePracticalUse = document.notes?.practicalUse ?? document.practicalUse ?? document.notesPracticalUse;
   const effectivePublicNotes = document.notes?.publicNotes ?? document.publicNotes;
   const keyPoints = effectiveKeyPoints ? effectiveKeyPoints.split('\n').filter(p => p.trim()) : [];
+  // Fontes literais (enunciados): texto-fonte sempre na íntegra, sem summary IA.
+  // Outras: summary IA quando presente, description como fallback. Ver lib/literal-sources.ts.
+  const isLiteral = isLiteralSourceCategory(document.category);
 
   return (
     <div className="bg-gradient-to-br from-gray-50 to-blue-50 p-6 rounded-lg border-t border-gray-200 space-y-4">
-      {/* Conteúdo (description) — texto-fonte ou curadoria, na íntegra.
-          Document.summary é gerado por IA e nunca exibido (ver lib/literal-sources.ts). */}
-      {document.description && (
+      {/* Texto-fonte (enunciados): exibido na íntegra */}
+      {isLiteral && document.description && (
         <div className="bg-blue-50 border-l-4 border-blue-500 p-4 rounded-r-lg">
           <div className="flex items-center gap-2 mb-2">
             <BookOpen className="w-4 h-4 text-blue-600" />
-            <h4 className="font-bold text-blue-900 text-sm">Conteúdo</h4>
+            <h4 className="font-bold text-blue-900 text-sm">Texto do Enunciado</h4>
           </div>
           <p className="text-gray-800 text-sm leading-relaxed whitespace-pre-line">{document.description}</p>
+        </div>
+      )}
+
+      {/* Resumo IA (não-literais) */}
+      {!isLiteral && document.summary && (
+        <div className="bg-blue-50 border-l-4 border-blue-500 p-4 rounded-r-lg">
+          <div className="flex items-center gap-2 mb-2">
+            <BookOpen className="w-4 h-4 text-blue-600" />
+            <h4 className="font-bold text-blue-900 text-sm">Resumo</h4>
+          </div>
+          <div className="space-y-2">
+            {normalizeTextContent(document.summary).map((p, i) => (
+              <p key={i} className="text-gray-800 text-sm leading-relaxed">{p}</p>
+            ))}
+          </div>
         </div>
       )}
 
@@ -306,7 +324,13 @@ function DocumentDetails({ documentId, documentType = 'document' }: { documentId
         </div>
       )}
 
-      {/* Description fallback removido: o bloco "Conteúdo" no topo já exibe document.description universalmente. */}
+      {/* Descrição (não-literais): fallback quando não há summary IA */}
+      {!isLiteral && document.description && !document.summary && (
+        <div className="bg-blue-50 border-l-4 border-blue-500 p-4 rounded-r-lg">
+          <h4 className="font-bold text-gray-900 text-sm mb-2">Descrição</h4>
+          <p className="text-gray-800 text-sm leading-relaxed">{document.description}</p>
+        </div>
+      )}
 
       {/* Tags */}
       {tags.length > 0 && (
@@ -1054,7 +1078,10 @@ function LeiComentadaContent() {
                                   </span>
                                   <span className="text-xs text-gray-500">{doc.relevance}</span>
                                 </div>
-                                {/* Resumo IA nunca exibido — Document.summary é reescrita IA, política universal. Ver lib/literal-sources.ts. */}
+                                {/* Resumo IA: bloqueado para fontes literais (enunciados). Ver lib/literal-sources.ts. */}
+                                {!isLiteralSourceCategory(doc.category) && doc.summary && (
+                                  <p className="text-xs text-gray-600 line-clamp-2">{doc.summary}</p>
+                                )}
                               </div>
                               <ExternalLink className="w-4 h-4 text-gray-400 flex-shrink-0" />
                             </div>

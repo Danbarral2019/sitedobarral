@@ -1,11 +1,10 @@
 /**
- * Limpa os campos `summary`, `summaryHighlights`, `summaryGeneratedAt`
- * (gerados por IA via /api/admin/documents/[id]/generate-summary) de TODOS
- * os documentos da base de conhecimento.
+ * Limpa os campos `summary`, `summaryHighlights`, `summaryGeneratedAt` apenas
+ * para documentos em LITERAL_SOURCE_CATEGORIES (atualmente: enunciados).
  *
- * Política: nenhum item da base é exibido como reescrita IA. Texto-fonte e
- * curadoria didática (description, notes.*) ficam intactos. Ver
- * `lib/literal-sources.ts` para o racional.
+ * Para essas categorias, summary IA é alucinação por design (incidente IBDA 29).
+ * Para outras categorias, summary IA é admissível e não deve ser limpo.
+ * Ver lib/literal-sources.ts.
  *
  * Uso:
  *   npx dotenv -e .env.local -- npx tsx scripts/clear-ai-summaries.ts            # dry-run (default)
@@ -13,15 +12,18 @@
  */
 
 import { prisma } from '../lib/prisma';
+import { LITERAL_SOURCE_CATEGORIES } from '../lib/literal-sources';
 
 async function main() {
   const apply = process.argv.includes('--apply');
 
-  console.log('=== Cleanup: summary IA em TODA a base de conhecimento ===');
+  console.log('=== Cleanup: summary IA em fontes literais ===');
+  console.log(`Categorias afetadas: ${LITERAL_SOURCE_CATEGORIES.join(', ')}`);
   console.log(`Modo: ${apply ? 'APPLY (escreve no banco)' : 'DRY-RUN (somente conta)'}`);
   console.log('');
 
   const where = {
+    category: { in: [...LITERAL_SOURCE_CATEGORIES] },
     OR: [
       { summary: { not: null } },
       { summaryHighlights: { not: null } },
@@ -29,56 +31,38 @@ async function main() {
     ],
   };
 
-  const totalDocs = await prisma.document.count();
+  const total = await prisma.document.count({
+    where: { category: { in: [...LITERAL_SOURCE_CATEGORIES] } },
+  });
   const affected = await prisma.document.count({ where });
 
-  console.log(`Documentos na base: ${totalDocs}`);
-  console.log(`Documentos com summary IA populado: ${affected}`);
+  console.log(`Documentos nas categorias literais: ${total}`);
+  console.log(`Documentos com summary populado: ${affected}`);
 
   if (affected === 0) {
     console.log('\nNada a limpar. Saindo.');
     return;
   }
 
-  // Distribuição por categoria
-  type Row = { category: string; count: bigint };
-  const dist = await prisma.$queryRaw<Row[]>`
-    SELECT "category", COUNT(*)::bigint AS count
-    FROM "Document"
-    WHERE "summary" IS NOT NULL
-       OR "summaryHighlights" IS NOT NULL
-       OR "summaryGeneratedAt" IS NOT NULL
-    GROUP BY "category"
-    ORDER BY COUNT(*) DESC
-  `;
-
-  console.log('\nDistribuição por categoria:');
-  for (const r of dist) {
-    console.log(`  ${r.category.padEnd(28)} ${String(Number(r.count)).padStart(6)}`);
-  }
-
-  // Amostra dos primeiros 3
   const sample = await prisma.document.findMany({
     where,
     select: {
       id: true,
       title: true,
       category: true,
-      description: true,
+      entityType: true,
+      enunciadoNumber: true,
       summary: true,
     },
-    take: 3,
+    take: 5,
     orderBy: { uploadedAt: 'desc' },
   });
 
-  console.log('\nAmostra (3 mais recentes):');
+  console.log('\nAmostra (5 mais recentes):');
   for (const d of sample) {
-    const desc = (d.description ?? '').replace(/\s+/g, ' ').slice(0, 100);
-    const sum = (d.summary ?? '').replace(/\s+/g, ' ').slice(0, 100);
-    const isCopia = (d.description ?? '').trim() === (d.summary ?? '').trim();
-    console.log(`  - [${d.category}] ${d.title.slice(0, 70)}`);
-    console.log(`    description: "${desc}…"`);
-    console.log(`    summary    : "${sum}…" ${isCopia ? '(== description)' : '(!= description)'}`);
+    const head = (d.summary ?? '').replace(/\s+/g, ' ').slice(0, 120);
+    console.log(`  - [${d.category}/${d.entityType ?? '?'} #${d.enunciadoNumber ?? '?'}] ${d.title}`);
+    console.log(`    summary: "${head}${(d.summary ?? '').length > 120 ? '…' : ''}"`);
   }
 
   if (!apply) {

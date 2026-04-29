@@ -1,10 +1,10 @@
 /**
  * Audita o uso do campo Document.summary (gerado por IA) por categoria.
  *
- * Política atual (ver lib/literal-sources.ts): TODA a base é tratada como
- * literal — `summary` IA é bloqueado para qualquer categoria. Este script
- * existe para detectar regressões (rows com summary populado depois do
- * cleanup) e diagnosticar drift.
+ * Política (ver lib/literal-sources.ts):
+ * - LITERAL_SOURCE_CATEGORIES (enunciados): NUNCA podem ter summary populado.
+ *   Linhas com summary aqui = REGRESSÃO (precisa rodar clear-ai-summaries).
+ * - Demais categorias: summary IA é admissível como complemento didático.
  *
  * Uso:
  *   npx dotenv -e .env.local -- npx tsx scripts/audit-summaries.ts
@@ -12,6 +12,7 @@
  */
 
 import { prisma } from '../lib/prisma';
+import { LITERAL_SOURCE_CATEGORIES } from '../lib/literal-sources';
 
 async function main() {
   const args = process.argv.slice(2);
@@ -19,7 +20,7 @@ async function main() {
   const sampleSize = sampleIdx >= 0 ? parseInt(args[sampleIdx + 1] ?? '0', 10) : 0;
 
   console.log('=== Auditoria: Document.summary por categoria ===');
-  console.log('Política: toda categoria é literal — qualquer linha aqui com c/Summary > 0 é regressão.');
+  console.log(`Categorias literais (não podem ter summary): ${LITERAL_SOURCE_CATEGORIES.join(', ')}`);
   console.log('');
 
   type Row = { category: string; total: bigint; comSummary: bigint };
@@ -41,7 +42,10 @@ async function main() {
     const total = Number(r.total);
     const comSum = Number(r.comSummary);
     const pct = total > 0 ? ((comSum / total) * 100).toFixed(0) + '%' : '0%';
-    const tag = comSum > 0 ? ' [REGRESSÃO]' : '';
+    const isLiteral = (LITERAL_SOURCE_CATEGORIES as readonly string[]).includes(r.category);
+    const tag = isLiteral
+      ? (comSum > 0 ? ' [REGRESSÃO — literal não pode ter summary]' : ' [literal]')
+      : '';
     console.log(
       r.category.padEnd(28) +
       String(total).padStart(8) +
