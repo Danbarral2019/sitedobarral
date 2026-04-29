@@ -86,7 +86,7 @@ export function formatLegalContent(rawContent: string): string {
       const prevEndsClean = /[.;:!?)"']$/.test(prev.trim());
       const prevIsHeading = isHeading(prev);
       const curIsHeading = isHeading(p);
-      const curStartsArticle = /^(Art\.\s|§\s|Parágrafo único)/i.test(p);
+      const curStartsArticle = /^(Art\.\s|§\s*\d|Parágrafo único)/i.test(p);
 
       if (!prevEndsClean && !prevIsHeading && !curIsHeading && !curStartsArticle) {
         merged[merged.length - 1] = prev + ' ' + p;
@@ -211,7 +211,7 @@ function isStructuralStart(line: string): boolean {
     /^SUBSEÇÃO\s/i,
     /^TÍTULO\s/i,
     /^Art\.\s/,             // Case-sensitive
-    /^§\s/,
+    /^§\s*\d/,              // §1º, §2º, §10 (com ou sem espaço entre § e dígito)
     /^Parágrafo único/i,
     /^[IVXLCDM]+\s*[-–]/,  // Roman numeral items
     /^[a-z]\)\s/,           // Alphabetical items

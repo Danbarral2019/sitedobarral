@@ -168,7 +168,24 @@ export function stripGovbrUiNoise(text: string): string {
   // Resíduo do header (linhas isoladas tipo "Compartilhe por Facebook" sem
   // o prefix "Compartilhe:" — caso do header da fixture govbr-portaria-4932).
   // Remove cada linha que comece com "Compartilhe por " ou exatamente "Compartilhe:".
-  result = result.replace(/^\s*Compartilhe(?:\s*:|\s+por\s+\w+).*$/gim, '').replace(/\n{3,}/g, '\n\n').trim();
+  result = result.replace(/^\s*Compartilhe(?:\s*:|\s+por\s+\w+).*$/gim, '');
+
+  // Boilerplate da página de detalhe MGI/in.gov.br ("link para Copiar para área
+  // de transferência\nPublicado em 13/09/2024 14h32\nAtualizado em ...\nPerguntas e respostas - IN ...").
+  // Esses meta-blocos aparecem entre a ementa e "O SECRETÁRIO" — precisamos
+  // remover linha-a-linha sem comer o corpo do ato.
+  result = result
+    .replace(/^\s*link para Copiar para área de transferência.*$/gim, '')
+    .replace(/^\s*Copiar para área de transferência.*$/gim, '')
+    .replace(/^\s*Publicado em\s*$/gim, '')
+    .replace(/^\s*Publicado em\s+\d{1,2}\/\d{1,2}\/\d{2,4}(?:\s+\d{1,2}h\d{1,2})?\s*$/gim, '')
+    .replace(/^\s*Atualizado em\s*$/gim, '')
+    .replace(/^\s*Atualizado em\s+\d{1,2}\/\d{1,2}\/\d{2,4}(?:\s+\d{1,2}h\d{1,2})?\s*$/gim, '')
+    .replace(/^\s*\d{1,2}\/\d{1,2}\/\d{2,4}\s+\d{1,2}h\d{1,2}\s*$/gim, '') // só a data/hora solta
+    .replace(/^\s*Perguntas e respostas\s*-\s*[^\n]{0,80}$/gim, '');
+
+  // Colapsa quebras de linha duplas excessivas geradas pelas remoções acima.
+  result = result.replace(/\n{3,}/g, '\n\n').trim();
 
   return result;
 }

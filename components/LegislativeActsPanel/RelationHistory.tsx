@@ -17,12 +17,51 @@ const TYPE_COLORS: Record<string, string> = {
   modifica: 'bg-purple-100 text-purple-700 border-purple-300',
 };
 
+/**
+ * Prioridade entre relationTypes — usada para deduplicar quando o mesmo par
+ * (sourceAct, targetAct) gera múltiplas relations (ex: detector heurístico
+ * encontra "regulamenta" e "complementa" no mesmo ato em trechos distintos).
+ * Menor número = mais específico → vence.
+ */
+const TYPE_PRIORITY: Record<string, number> = {
+  revoga: 0,
+  altera: 1,
+  modifica: 2,
+  regulamenta: 3,
+  complementa: 4,
+};
+
+function dedupeRelations(rels: RelationView[], side: 'source' | 'target'): RelationView[] {
+  const byOtherId = new Map<string, RelationView>();
+  for (const rel of rels) {
+    const other = side === 'source' ? rel.targetAct : rel.sourceAct;
+    if (!other?.id) continue;
+    const existing = byOtherId.get(other.id);
+    if (!existing) {
+      byOtherId.set(other.id, rel);
+      continue;
+    }
+    const exPrio = TYPE_PRIORITY[existing.relationType] ?? 99;
+    const newPrio = TYPE_PRIORITY[rel.relationType] ?? 99;
+    if (newPrio < exPrio) byOtherId.set(other.id, rel);
+  }
+  return Array.from(byOtherId.values());
+}
+
 export interface RelationHistoryProps {
   alters: RelationView[];
   alteredBy: RelationView[];
 }
 
 export function RelationHistory({ alters, alteredBy }: RelationHistoryProps) {
+  // Mesmo par (este ato, outro ato) pode ter múltiplas relations no DB quando
+  // o detector encontrou verbos diferentes em trechos distintos do texto-fonte
+  // (ex: ato cita Lei 14.133 dizendo "regulamenta" no preâmbulo e "complementa"
+  // numa cláusula posterior). Deduplicar por outro-ato e manter o relationType
+  // de maior especificidade (revoga > altera > modifica > regulamenta > complementa).
+  alters = dedupeRelations(alters, 'source');
+  alteredBy = dedupeRelations(alteredBy, 'target');
+
   if (alters.length === 0 && alteredBy.length === 0) {
     return (
       <div className="bg-gray-50 border border-gray-200 rounded-xl p-6 my-6">
