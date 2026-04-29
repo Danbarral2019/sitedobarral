@@ -1,14 +1,14 @@
 /**
- * Sobrescreve `description` e `content` de Document(category='enunciados') no DB
- * com o texto literal validado em `data/enunciados.ts` (já comparado com o PDF
- * oficial INCP de 2024 e Excel-fonte IBDA/CJF).
+ * Sincroniza description, content, tags, leiArticles e themes de
+ * Document(category='enunciados') a partir do static file `data/enunciados.ts`
+ * (já validado contra PDF oficial INCP e Excel-fonte IBDA/CJF).
  *
- * Motivo: auditoria detectou 117/129 enunciados com texto errado (IBDA/INCP
- * 100% trocados, CJF parcial truncado). Bug pré-existente, não causado pelos
- * commits recentes do summary IA.
+ * Motivo: textos estavam trocados/truncados no DB e tags eram alucinações
+ * do classifier IA (ex.: IBDA-29 com "Custo do Ciclo de Vida" — não tem
+ * relação com o tema real, que é credenciamento).
  *
- * Identificação do enunciado: (entityType + enunciadoNumber) → orgao + numero
- * no static file.
+ * Tags sintetizadas a partir do static file:
+ *   [orgao, "Enunciado", tema, jornada (curta)]
  *
  * Uso:
  *   npx dotenv -e .env.local -- npx tsx scripts/fix-enunciados-text.ts            # dry-run
@@ -16,14 +16,26 @@
  */
 
 import { prisma } from '../lib/prisma';
-import { ENUNCIADOS } from '../data/enunciados';
+import { ENUNCIADOS, type Enunciado } from '../data/enunciados';
 
 const norm = (s: string) =>
   s.replace(/\(Aprovado por[^)]*\)\s*$/i, '').replace(/\s+/g, ' ').trim();
 
+function buildTags(e: Enunciado): string[] {
+  const tags = new Set<string>();
+  tags.add(e.orgao);
+  tags.add('Enunciado');
+  if (e.tema && e.tema.trim()) tags.add(e.tema.trim());
+  if (e.jornada) {
+    const j = e.jornada.trim().slice(0, 80);
+    if (j) tags.add(j);
+  }
+  return Array.from(tags);
+}
+
 async function main() {
   const apply = process.argv.includes('--apply');
-  console.log('=== Fix: enunciados.description/content a partir de data/enunciados.ts ===');
+  console.log('=== Sync: enunciados (description+content+tags+leiArticles) ===');
   console.log(`Modo: ${apply ? 'APPLY (escreve no banco)' : 'DRY-RUN (somente conta)'}\n`);
 
   const docs = await prisma.document.findMany({
@@ -35,54 +47,87 @@ async function main() {
       enunciadoNumber: true,
       description: true,
       content: true,
+      tags: true,
+      leiArticles: true,
     },
   });
 
   console.log(`Documentos no DB: ${docs.length}`);
-  console.log(`Static reference: ${ENUNCIADOS.length} (CJF + IBDA + INCP)\n`);
+  console.log(`Static reference: ${ENUNCIADOS.length}\n`);
 
   let willUpdate = 0;
-  let alreadyOk = 0;
-  let noMatch = 0;
-  const updates: { id: string; title: string; entity: string; numero: number; newText: string }[] = [];
+  const updates: {
+    id: string;
+    title: string;
+    entity: string;
+    numero: number;
+    description: string;
+    content: string;
+    tags: string;
+    leiArticles: string;
+  }[] = [];
 
   for (const e of ENUNCIADOS) {
     const doc = docs.find(
       (d) => d.entityType === e.orgao && Number(d.enunciadoNumber) === e.numero
     );
     if (!doc) {
-      noMatch++;
-      console.log(`  ⚠️  ${e.orgao}-${e.numero}: sem doc correspondente no DB`);
+      console.log(`  ⚠️  ${e.orgao}-${e.numero}: sem doc no DB`);
       continue;
     }
-    const expectedText = norm(e.texto);
+    const newText = norm(e.texto);
+    const newTags = buildTags(e);
+    const newLeiArticles = e.artigosVinculados;
+
     const dbContentClean = norm((doc.content ?? '').split('\n\nFase:')[0]);
-    if (dbContentClean === expectedText && norm(doc.description ?? '') === expectedText) {
-      alreadyOk++;
-      continue;
-    }
+    const dbDesc = norm(doc.description ?? '');
+    const dbTagsArr = (() => {
+      try {
+        return JSON.parse(doc.tags ?? '[]') as string[];
+      } catch {
+        return [];
+      }
+    })();
+    const dbLeiArr = (() => {
+      try {
+        return JSON.parse(doc.leiArticles ?? '[]') as string[];
+      } catch {
+        return [];
+      }
+    })();
+
+    const same =
+      dbContentClean === newText &&
+      dbDesc === newText &&
+      JSON.stringify(dbTagsArr) === JSON.stringify(newTags) &&
+      JSON.stringify(dbLeiArr) === JSON.stringify(newLeiArticles);
+
+    if (same) continue;
+
     willUpdate++;
     updates.push({
       id: doc.id,
       title: doc.title,
       entity: e.orgao,
       numero: e.numero,
-      newText: expectedText,
+      description: newText,
+      content: newText,
+      tags: JSON.stringify(newTags),
+      leiArticles: JSON.stringify(newLeiArticles),
     });
   }
 
-  console.log(`\nA atualizar: ${willUpdate}`);
-  console.log(`Já corretos: ${alreadyOk}`);
-  console.log(`Sem correspondência: ${noMatch}`);
+  console.log(`A atualizar: ${willUpdate} de ${docs.length}\n`);
 
-  console.log('\nAmostra (3 primeiros a atualizar):');
+  console.log('Amostra (3 primeiros):');
   for (const u of updates.slice(0, 3)) {
-    console.log(`  ${u.entity}-${u.numero} [${u.id.slice(0, 8)}] ${u.title}`);
-    console.log(`    novo: "${u.newText.slice(0, 160)}…"`);
+    console.log(`  ${u.entity}-${u.numero} [${u.id.slice(0, 8)}]`);
+    console.log(`    tags: ${u.tags}`);
+    console.log(`    leiArticles: ${u.leiArticles}`);
   }
 
   if (!apply) {
-    console.log('\n(dry-run — nada foi alterado. Re-executar com --apply para gravar.)');
+    console.log('\n(dry-run — re-execute com --apply para gravar.)');
     return;
   }
 
@@ -93,15 +138,16 @@ async function main() {
       await prisma.document.update({
         where: { id: u.id },
         data: {
-          description: u.newText,
-          content: u.newText,
+          description: u.description,
+          content: u.content,
+          tags: u.tags,
+          leiArticles: u.leiArticles,
         },
       });
       success++;
     } catch (err) {
       failed++;
-      const msg = err instanceof Error ? err.message : String(err);
-      console.error(`  ❌ ${u.entity}-${u.numero}: ${msg}`);
+      console.error(`  ❌ ${u.entity}-${u.numero}:`, err instanceof Error ? err.message : err);
     }
   }
 

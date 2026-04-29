@@ -66,7 +66,17 @@ export function useSearchPdfExport(
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
-      a.download = `documentos-${new Date().toISOString().split('T')[0]}.pdf`;
+      // Nome do arquivo: slug da pesquisa do aluno + data; cai em "pesquisa-<data>"
+      // se a query for vazia. Limita a 60 chars para nomes legíveis.
+      const slug = (searchQuery || '')
+        .normalize('NFD')
+        .replace(/\p{Diacritic}/gu, '')
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, '-')
+        .replace(/^-+|-+$/g, '')
+        .slice(0, 60);
+      const dateStr = new Date().toISOString().split('T')[0];
+      a.download = slug ? `${slug}-${dateStr}.pdf` : `pesquisa-${dateStr}.pdf`;
       document.body.appendChild(a);
       a.click();
       document.body.removeChild(a);
