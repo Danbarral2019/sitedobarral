@@ -24,6 +24,11 @@ export interface DetectedRelation {
 const VERB_PATTERNS: Array<{ regex: RegExp; type: RelationType; conf: number }> = [
   { regex: /\brevoga(?:m|do|da|dos|das)?\b/i, type: 'revoga', conf: 0.9 },
   { regex: /\bd[áa]\s+nova\s+reda[çc][ãa]o\b/i, type: 'altera', conf: 0.9 },
+  // "passa a vigorar com a seguinte redação/alteração" — euphemism standard pra
+  // alterar texto de outro ato. Padrão exato (case insensitive): a frase aparece
+  // sempre antes de transcrever o novo texto, e referencia o ato alterado nos
+  // 200 chars anteriores ("A IN nº 81... passa a vigorar com a seguinte redação").
+  { regex: /\bpassa(?:m)?\s+a\s+vigorar\b/i, type: 'altera', conf: 0.9 },
   { regex: /\bacresce(?:m)?\b/i, type: 'altera', conf: 0.85 },
   { regex: /\baltera(?:m|do|da|dos|das)?\b/i, type: 'altera', conf: 0.85 },
   { regex: /\bmodifica(?:m|do|da|dos|das)?\b/i, type: 'modifica', conf: 0.8 },
