@@ -7,7 +7,7 @@
 
 import * as cheerio from 'cheerio';
 import { computeHash } from './change-detector';
-import { stripDouBoilerplate, stripFormAnnex, stripGovbrUiNoise, collapseWhitespace } from './normalize';
+import { stripDouBoilerplate, stripFormAnnex, stripGovbrUiNoise, collapseWhitespace, detectCharsetFromResponse } from './normalize';
 import type { LegislativeScraper, ScraperResult } from './index';
 
 /**
@@ -71,18 +71,19 @@ export class GovBrComprasScraper implements LegislativeScraper {
         };
       }
 
-      const html = await response.text();
-
-      // Verificar tamanho máximo (3MB). Aumentado de 500KB pra 3MB em 2026-04-25
-      // após Lei 14.133/2021, CLT (Lei 5.452/43) e Decreto 9.745/2019 falharem
-      // por excederem 500KB de HTML bruto. Esses são leis fundacionais cujo
-      // texto integral é grande mas perfeitamente válido.
-      if (html.length > 3 * 1024 * 1024) {
+      // Decodifica respeitando charset do servidor. gov.br/compras e in.gov.br
+      // hoje servem UTF-8, mas mirrors antigos (e o próprio planalto.gov.br ao
+      // qual essa rota também serve via redirects) usam ISO-8859-1 — precisamos
+      // detectar pra não corromper acentos.
+      const buffer = await response.arrayBuffer();
+      if (buffer.byteLength > 3 * 1024 * 1024) {
         return {
           success: false,
           error: 'Conteúdo muito grande (>3MB)',
         };
       }
+      const charset = detectCharsetFromResponse(response.headers.get('content-type'), buffer);
+      const html = new TextDecoder(charset, { fatal: false }).decode(buffer);
 
       // Detectar se é página DOU (in.gov.br). Em in.gov.br o wrapper do artigo
       // tem class="portlet", então saltamos a remoção de .portlet nessa origem

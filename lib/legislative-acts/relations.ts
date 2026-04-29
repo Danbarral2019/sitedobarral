@@ -115,8 +115,10 @@ export interface RelationView {
   excerpt: string;
   confidence: number;
   reviewStatus: string;
-  sourceAct?: { fullNumber: string; title: string };
-  targetAct?: { fullNumber: string; title: string };
+  // `id` exposto para que a UI possa linkar para /legislacao/[id] (UUID),
+  // não para fullNumber (que é texto livre e quebra a rota dinâmica).
+  sourceAct?: { id: string; fullNumber: string; title: string };
+  targetAct?: { id: string; fullNumber: string; title: string };
 }
 
 export interface RelationsForAct {
@@ -188,12 +190,12 @@ export async function getRelationsForAct(
   const [alters, alteredBy] = await Promise.all([
     prisma.legislativeActRelation.findMany({
       where: { sourceActId: actId, ...reviewFilter },
-      include: { targetAct: { select: { fullNumber: true, title: true } } },
+      include: { targetAct: { select: { id: true, fullNumber: true, title: true } } },
       orderBy: { detectedAt: 'desc' },
     }),
     prisma.legislativeActRelation.findMany({
       where: { targetActId: actId, ...reviewFilter },
-      include: { sourceAct: { select: { fullNumber: true, title: true } } },
+      include: { sourceAct: { select: { id: true, fullNumber: true, title: true } } },
       orderBy: { detectedAt: 'desc' },
     }),
   ]);

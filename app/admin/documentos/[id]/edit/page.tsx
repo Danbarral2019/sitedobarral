@@ -231,7 +231,7 @@ export default function EditDocumentPage() {
                       <div>
                         <p className="font-semibold text-amber-900">Resumo IA pendente de revisão</p>
                         <p className="text-sm text-amber-700">
-                          Os alunos veem um aviso "Resumo IA não revisado" até você aprovar.
+                          Os alunos veem um aviso &quot;Resumo IA não revisado&quot; até você aprovar.
                         </p>
                       </div>
                     </div>

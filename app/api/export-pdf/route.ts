@@ -6,6 +6,44 @@ import jsPDF from 'jspdf';
 const JWT_SECRET = new TextEncoder().encode(process.env.JWT_SECRET || 'your-secret-key');
 
 /**
+ * Sanitiza texto para o jsPDF (Helvetica/WinANSI).
+ *
+ * O jsPDF default não embute fonte UTF-8, então emojis e símbolos fora do
+ * WinANSI quebram o rendering — caracteres aparecem como "& þ" e o tracking
+ * do font fica espaçado ("C o n s c i ê n c i a"). Substituímos os símbolos
+ * comuns por equivalentes ASCII e removemos pictográficos.
+ *
+ * Aplicar SEMPRE em strings vindas de input externo (descrições, tags,
+ * respostas IA, query do aluno) antes de passar para pdf.text.
+ */
+function sanitizeForPdf(text: string | null | undefined): string {
+  if (!text) return '';
+  return text
+    // Substituições explícitas para preservar semântica
+    .replace(/[✓✔☑]/g, '[OK]')
+    .replace(/[✗✘☒]/g, '[X]')
+    .replace(/[⚠️⚠]/g, '[!]')
+    .replace(/[ℹ️ℹ]/g, '[i]')
+    .replace(/[→➜➔➡]/g, '->')
+    .replace(/[←⬅]/g, '<-')
+    .replace(/[•·]/g, '-')
+    .replace(/[–—]/g, '-')
+    .replace(/[“”„]/g, '"')
+    .replace(/[‘’‚]/g, "'")
+    .replace(/…/g, '...')
+    // Remove emojis/pictográficos sem equivalente
+    .replace(/[\u{1F000}-\u{1FFFF}]/gu, '')
+    .replace(/[\u{2600}-\u{27BF}]/gu, '')
+    .replace(/[\u{2B00}-\u{2BFF}]/gu, '')
+    .replace(/[\u{2300}-\u{23FF}]/gu, '')
+    // Variation selectors e zero-width
+    .replace(/[\u{FE00}-\u{FE0F}​-‍﻿]/gu, '')
+    // Normaliza espaços (quebras simples preservadas)
+    .replace(/[ \t]+/g, ' ')
+    .trim();
+}
+
+/**
  * POST: Gera PDF com marca d'água contendo documentos selecionados
  */
 export async function POST(request: NextRequest) {
@@ -98,7 +136,7 @@ export async function POST(request: NextRequest) {
       pdf.setFontSize(8);
       pdf.setTextColor(150, 150, 150);
       pdf.text(
-        `Documento gerado para: ${user.name} (${user.email}) em ${new Date().toLocaleString('pt-BR')}`,
+        sanitizeForPdf(`Documento gerado para: ${user.name} (${user.email}) em ${new Date().toLocaleString('pt-BR')}`),
         pageWidth / 2,
         pageHeight - 10,
         { align: 'center' }
@@ -137,8 +175,8 @@ export async function POST(request: NextRequest) {
     pdf.setFontSize(11);
     pdf.setFont('helvetica', 'normal');
     pdf.setTextColor(80, 80, 80);
-    pdf.text(`Aluno: ${user.name}`, margin, 100);
-    pdf.text(`Email: ${user.email}`, margin, 107);
+    pdf.text(sanitizeForPdf(`Aluno: ${user.name}`), margin, 100);
+    pdf.text(sanitizeForPdf(`Email: ${user.email}`), margin, 107);
 
     let currentInfoY = 114;
 
@@ -149,7 +187,7 @@ export async function POST(request: NextRequest) {
       currentInfoY += 7;
 
       pdf.setFont('helvetica', 'normal');
-      const queryLines = pdf.splitTextToSize(`"${searchContext.query}"`, maxLineWidth);
+      const queryLines = pdf.splitTextToSize(sanitizeForPdf(`"${searchContext.query}"`), maxLineWidth);
       pdf.text(queryLines, margin + 5, currentInfoY);
       currentInfoY += (queryLines.length * 5) + 5;
 
@@ -167,11 +205,18 @@ export async function POST(request: NextRequest) {
       pdf.text(`Tipo de Busca: ${searchTypeLabel}`, margin, currentInfoY);
       currentInfoY += 7;
 
-      // Se houver resposta da IA, adicionar em box destacado
+      // Se houver resposta da IA, adicionar em box destacado.
+      // Sanitiza emojis (✓ → [OK], ⚠️ → [!] etc.) que jsPDF Helvetica não
+      // renderiza — sem isso o output fica espaçado ("C o n s c i ê n c i a")
+      // e com lixo "& þ".
       if (searchContext.aiResponse) {
+        const sanitizedAi = sanitizeForPdf(searchContext.aiResponse);
+        const aiLinesAll = pdf.splitTextToSize(sanitizedAi, maxLineWidth - 6);
+        const visibleAiLines = aiLinesAll.slice(0, 6);
+        const aiBoxHeight = Math.max(35, 10 + visibleAiLines.length * 5);
+
         pdf.setFillColor(240, 235, 255); // Roxo muito claro
         pdf.setDrawColor(147, 51, 234); // Roxo
-        const aiBoxHeight = 35;
         pdf.rect(margin, currentInfoY, maxLineWidth, aiBoxHeight, 'FD');
 
         pdf.setFontSize(9);
@@ -179,38 +224,42 @@ export async function POST(request: NextRequest) {
         pdf.setFont('helvetica', 'bold');
         pdf.text('ANALISE DA IA:', margin + 3, currentInfoY + 5);
         pdf.setFont('helvetica', 'normal');
-        const aiLines = pdf.splitTextToSize(searchContext.aiResponse, maxLineWidth - 6);
-        pdf.text(aiLines.slice(0, 4), margin + 3, currentInfoY + 10);
+        pdf.text(visibleAiLines, margin + 3, currentInfoY + 10);
         currentInfoY += aiBoxHeight + 5;
       }
     } else {
-      pdf.text(`Data de Exportação: ${new Date().toLocaleDateString('pt-BR', {
+      pdf.text(sanitizeForPdf(`Data de Exportação: ${new Date().toLocaleDateString('pt-BR', {
         year: 'numeric',
         month: 'long',
         day: 'numeric',
         hour: '2-digit',
         minute: '2-digit',
-      })}`, margin, currentInfoY);
+      })}`), margin, currentInfoY);
       currentInfoY += 7;
     }
 
     pdf.text(`Total de Documentos: ${documents.length}`, margin, currentInfoY);
     currentInfoY += 10;
 
-    // Box de aviso
+    // Box de aviso (altura dinâmica conforme número de linhas)
+    pdf.setFontSize(9);
+    pdf.setFont('helvetica', 'normal');
+    const avisoText = sanitizeForPdf(
+      'Este documento foi gerado exclusivamente para o aluno identificado acima. E proibida a distribuicao, reproducao ou compartilhamento sem autorizacao previa.'
+    );
+    const avisoLines = pdf.splitTextToSize(avisoText, maxLineWidth - 6);
+    const avisoBoxHeight = 10 + avisoLines.length * 5;
+
     pdf.setFillColor(255, 243, 205); // Amarelo claro
     pdf.setDrawColor(255, 193, 7); // Amarelo
-    pdf.rect(margin, currentInfoY, maxLineWidth, 25, 'FD');
+    pdf.rect(margin, currentInfoY, maxLineWidth, avisoBoxHeight, 'FD');
 
-    pdf.setFontSize(9);
     pdf.setTextColor(102, 77, 3); // Marrom
     pdf.setFont('helvetica', 'bold');
-    pdf.text('ATENCAO:', margin + 3, currentInfoY + 7);
+    pdf.text('ATENCAO:', margin + 3, currentInfoY + 6);
     pdf.setFont('helvetica', 'normal');
-    const avisoText = 'Este documento foi gerado exclusivamente para o aluno identificado acima. E proibida a distribuicao, reproducao ou compartilhamento sem autorizacao previa.';
-    const avisoLines = pdf.splitTextToSize(avisoText, maxLineWidth - 6);
-    pdf.text(avisoLines, margin + 3, currentInfoY + 13);
-    currentInfoY += 30;
+    pdf.text(avisoLines, margin + 3, currentInfoY + 12);
+    currentInfoY += avisoBoxHeight + 5;
 
     // Lista de documentos
     let currentY = currentInfoY + 10;
@@ -251,7 +300,7 @@ export async function POST(request: NextRequest) {
       pdf.setFontSize(11);
       pdf.setFont('helvetica', 'bold');
       pdf.setTextColor(0, 102, 204);
-      pdf.text(categoryNames[category] || category, margin, currentY);
+      pdf.text(sanitizeForPdf(categoryNames[category] || category), margin, currentY);
       currentY += 8;
 
       for (let i = 0; i < docs.length; i++) {
@@ -266,14 +315,14 @@ export async function POST(request: NextRequest) {
         pdf.setFontSize(10);
         pdf.setFont('helvetica', 'bold');
         pdf.setTextColor(40, 40, 40);
-        pdf.text((i + 1) + '. ' + doc.title, margin + 3, currentY);
+        pdf.text(sanitizeForPdf((i + 1) + '. ' + doc.title), margin + 3, currentY);
         currentY += 6;
 
         if (doc.description) {
           pdf.setFontSize(9);
           pdf.setFont('helvetica', 'normal');
           pdf.setTextColor(80, 80, 80);
-          const descLines = pdf.splitTextToSize(doc.description, maxLineWidth - 6);
+          const descLines = pdf.splitTextToSize(sanitizeForPdf(doc.description), maxLineWidth - 6);
           pdf.text(descLines.slice(0, 3), margin + 6, currentY);
           currentY += (Math.min(descLines.length, 3) * 4) + 2;
         }
@@ -284,7 +333,7 @@ export async function POST(request: NextRequest) {
             if (Array.isArray(tags) && tags.length > 0) {
               pdf.setFontSize(8);
               pdf.setTextColor(100, 100, 100);
-              pdf.text('Tags: ' + tags.slice(0, 5).join(', '), margin + 6, currentY);
+              pdf.text(sanitizeForPdf('Tags: ' + tags.slice(0, 5).join(', ')), margin + 6, currentY);
               currentY += 5;
             }
           } catch {
@@ -322,7 +371,7 @@ export async function POST(request: NextRequest) {
     pdf.setFontSize(10);
     pdf.setFont('helvetica', 'normal');
     pdf.setTextColor(60, 60, 60);
-    const infoText = `Este documento contém ${documents.length} documentos selecionados pelo aluno ${user.name} na Área Restrita do site do Prof. Daniel Barral.
+    const infoText = sanitizeForPdf(`Este documento contém ${documents.length} documentos selecionados pelo aluno ${user.name} na Área Restrita do site do Prof. Daniel Barral.
 
 Para acessar o conteúdo completo dos documentos, links externos e materiais complementares, acesse a Área Restrita em:
 
@@ -331,7 +380,7 @@ https://www.profdanielbarral.com.br/area-restrita
 Dúvidas ou suporte:
 Email: contato@profdanielbarral.com.br
 
-(c) ${new Date().getFullYear()} Prof. Daniel Barral - Todos os direitos reservados.`;
+(c) ${new Date().getFullYear()} Prof. Daniel Barral - Todos os direitos reservados.`);
 
     const infoLines = pdf.splitTextToSize(infoText, maxLineWidth);
     pdf.text(infoLines, margin, 50);

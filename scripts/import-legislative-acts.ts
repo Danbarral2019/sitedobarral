@@ -177,10 +177,21 @@ async function importActs(
     const fullNumber = generateFullNumber(act);
 
     try {
-      // Verificar se já existe
-      const existing = await prisma.legislativeAct.findUnique({
+      // Verificar se já existe — primeiro por fullNumber, depois pelo
+      // (type, number, year) para detectar mesmo ato real-world com fullNumber
+      // diferente (ex: "IN SEGES 190/2024" vs "IN SEGES/MGI 190/2024"). A
+      // unique constraint do schema garante o invariant em qualquer caminho.
+      let existing = await prisma.legislativeAct.findUnique({
         where: { fullNumber },
       });
+      if (!existing) {
+        existing = await prisma.legislativeAct.findFirst({
+          where: { type: act.type, number: act.number, year: act.year },
+        });
+        if (existing) {
+          console.log(`  ℹ️  Existe sob outro fullNumber: "${existing.fullNumber}" — atualizando em vez de criar duplicata`);
+        }
+      }
 
       if (existing && !options.update) {
         console.log(`  ⏭️  Pulando (já existe): ${fullNumber}`);
@@ -215,9 +226,10 @@ async function importActs(
       }
 
       if (existing) {
-        // Atualizar
+        // Atualiza por id — `existing.fullNumber` pode ser diferente do
+        // `fullNumber` recém-gerado (ex: issuer renormalizado pós-2023).
         await prisma.legislativeAct.update({
-          where: { fullNumber },
+          where: { id: existing.id },
           data,
         });
         console.log(`  🔄 Atualizado: ${fullNumber}`);

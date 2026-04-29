@@ -1,7 +1,7 @@
 'use client';
 
-import { useEffect, useState, useMemo } from 'react';
-import { useRouter } from 'next/navigation';
+import { useEffect, useState, useMemo, useRef, Suspense } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
 import dynamic from 'next/dynamic';
 import { Loader2, ArrowLeft } from 'lucide-react';
 import { courses } from '@/data/courses';
@@ -52,8 +52,9 @@ type InlineView =
   | 'glossary'
   | { type: 'category'; category: string };
 
-export default function AreaRestritaPage() {
+function AreaRestritaContent() {
   const router = useRouter();
+  const urlSearchParams = useSearchParams();
   const { user, isLoading: authLoading, logout, activePlan } = useAuth();
   const { isFavorite, toggleFavorite, favoriteIds } = useFavorites();
   const search = useGlobalSearch();
@@ -83,6 +84,39 @@ export default function AreaRestritaPage() {
       router.push('/login');
     }
   }, [authLoading, user, router]);
+
+  // Restaurar query da URL no mount (preserva busca quando usuário volta de
+  // /documento/[id] via router.back()). Só roda uma vez na montagem.
+  const didRestoreRef = useRef(false);
+  useEffect(() => {
+    if (didRestoreRef.current) return;
+    const q = urlSearchParams?.get('q') ?? '';
+    if (q && q !== search.query) {
+      search.setQuery(q);
+    }
+    didRestoreRef.current = true;
+  }, [urlSearchParams, search]);
+
+  // Sincronizar query → URL para que router.back() de outra rota volte com a
+  // busca preenchida. Usa replace (sem entrada de histórico nova) e debounce.
+  useEffect(() => {
+    if (!didRestoreRef.current) return;
+    const t = setTimeout(() => {
+      const params = new URLSearchParams(urlSearchParams?.toString() ?? '');
+      if (search.query.length >= 2) {
+        params.set('q', search.query);
+      } else {
+        params.delete('q');
+      }
+      const next = params.toString();
+      const current = urlSearchParams?.toString() ?? '';
+      if (next !== current) {
+        const url = next ? `?${next}` : '/area-restrita';
+        router.replace(url, { scroll: false });
+      }
+    }, 400);
+    return () => clearTimeout(t);
+  }, [search.query, router, urlSearchParams]);
 
   // Enrolled course IDs
   const enrolledCourseIds = useMemo(() => {
@@ -362,5 +396,20 @@ export default function AreaRestritaPage() {
 
       <MobileBottomNav onLogout={handleLogout} />
     </main>
+  );
+}
+
+// Wrapper com Suspense (requerido pelo Next.js 15 para useSearchParams)
+export default function AreaRestritaPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-blue-50 via-white to-blue-50">
+          <Loader2 className="w-8 h-8 animate-spin text-blue-600" />
+        </div>
+      }
+    >
+      <AreaRestritaContent />
+    </Suspense>
   );
 }
