@@ -38,8 +38,12 @@ export function RelationHistory({ alters, alteredBy }: RelationHistoryProps) {
       {alters.length > 0 && (
         <section>
           <h3 className="font-cinzel font-semibold text-lg text-gray-900 mb-3">
-            ✏️ Este ato altera:
+            ✏️ Este ato afeta os seguintes atos:
           </h3>
+          <p className="text-xs text-gray-500 mb-3 font-poppins">
+            Inclui revogações, alterações, regulamentações, complementações e modificações — o tipo
+            específico é indicado pelo selo colorido em cada item.
+          </p>
           <ul className="space-y-3">
             {alters.map((rel) => (
               <RelationItem key={rel.id} rel={rel} otherAct={rel.targetAct!} />
@@ -51,8 +55,12 @@ export function RelationHistory({ alters, alteredBy }: RelationHistoryProps) {
       {alteredBy.length > 0 && (
         <section>
           <h3 className="font-cinzel font-semibold text-lg text-gray-900 mb-3">
-            📌 Este ato foi alterado por:
+            📌 Este ato é afetado pelos seguintes atos:
           </h3>
+          <p className="text-xs text-gray-500 mb-3 font-poppins">
+            Inclui atos que revogam, alteram, regulamentam, complementam ou modificam este — o tipo
+            específico é indicado pelo selo colorido em cada item.
+          </p>
           <ul className="space-y-3">
             {alteredBy.map((rel) => (
               <RelationItem key={rel.id} rel={rel} otherAct={rel.sourceAct!} />

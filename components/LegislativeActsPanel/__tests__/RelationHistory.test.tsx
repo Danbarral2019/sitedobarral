@@ -22,7 +22,7 @@ describe('RelationHistory', () => {
       alters={[{ ...baseRel, targetAct: { id: 'a1', fullNumber: 'Lei 14.133/2021', title: 'Nova Lei de Licitações' } }]}
       alteredBy={[]}
     />);
-    expect(screen.getByText(/este ato altera/i)).toBeTruthy();
+    expect(screen.getByText(/este ato afeta os seguintes atos/i)).toBeTruthy();
     expect(screen.getByText('Lei 14.133/2021')).toBeTruthy();
     expect(screen.getByText(/nova lei de licitações/i)).toBeTruthy();
   });
@@ -32,7 +32,7 @@ describe('RelationHistory', () => {
       alters={[]}
       alteredBy={[{ ...baseRel, sourceAct: { id: 'a2', fullNumber: 'Decreto 12.926/2026', title: 'Atualização' } }]}
     />);
-    expect(screen.getByText(/foi alterado por/i)).toBeTruthy();
+    expect(screen.getByText(/é afetado pelos seguintes atos/i)).toBeTruthy();
     expect(screen.getByText('Decreto 12.926/2026')).toBeTruthy();
   });
 
