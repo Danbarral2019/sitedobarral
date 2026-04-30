@@ -79,10 +79,13 @@ const config: Config = {
         secondary: '#ffffff',
       },
       fontFamily: {
-        sans: ['var(--font-poppins)', 'Poppins', 'system-ui', 'sans-serif'],
-        serif: ['var(--font-cinzel)', 'Cinzel', 'Georgia', 'serif'],
-        cinzel: ['var(--font-cinzel)', 'Cinzel', 'Georgia', 'serif'],
-        poppins: ['var(--font-poppins)', 'Poppins', 'system-ui', 'sans-serif'],
+        sans: ['var(--font-sans)', 'Inter', 'system-ui', 'sans-serif'],
+        serif: ['var(--font-serif)', 'Source Serif 4', 'Georgia', 'serif'],
+        mono: ['var(--font-mono)', 'JetBrains Mono', 'Fira Code', 'Consolas', 'monospace'],
+        // Aliases legados — mantêm compat com classes existentes (font-cinzel, font-poppins)
+        // Apontam para as fontes novas durante a migração tipográfica.
+        cinzel: ['var(--font-serif)', 'Source Serif 4', 'Georgia', 'serif'],
+        poppins: ['var(--font-sans)', 'Inter', 'system-ui', 'sans-serif'],
       },
       spacing: {
         '18': '4.5rem',

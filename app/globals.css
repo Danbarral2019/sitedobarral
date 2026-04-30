@@ -1,11 +1,12 @@
 @import "tailwindcss";
 
-/* Variaveis da marca - azul petroleo #20364e */
-:root {
-  --background: #ffffff;
-  --foreground: #111827;
+/* ============================================================
+   Tokens — Site do Prof. Daniel Barral
+   Sistema visual: "O Caderno do Tribunal" (DESIGN.md)
+   ============================================================ */
 
-  /* Paleta brand */
+:root {
+  /* ---- Brand (azul petróleo, mantido) ---- */
   --brand-primary: #20364e;
   --brand-light: #3a5a73;
   --brand-dark: #142230;
@@ -14,15 +15,40 @@
   --brand-600: #20364e;
   --brand-700: #1a2c3f;
   --brand-800: #142230;
+
+  /* ---- Off-whites e tintas (NOVO — DESIGN.md) ---- */
+  /* Substituem #fff/#000 conforme A Regra Off-White */
+  --surface-page: #fdfdfb;       /* fundo principal, off-white levemente quente */
+  --surface-raised: #f7f6f3;     /* cards, sidebars, painéis */
+  --surface-deep: #eeeae4;       /* separadores de capítulo, marcadores de seção */
+  --ink-primary: #1a1c20;        /* texto base */
+  --ink-secondary: #3d4044;      /* texto descritivo */
+  --ink-muted: #6b6e72;          /* metadados, datas, contagens */
+  --border-subtle: #e8e6e1;      /* divisores, borda input default */
+  --border-strong: #cdcac4;      /* hover de borda, separador forte */
+
+  /* ---- Âmbar acadêmico (NOVO — "Lápis Vermelho") ---- */
+  /* Aparece apenas em referências e fontes oficiais */
+  --amber-accent: #b07d3a;
+  --amber-accent-deep: #8a6235;
+  --amber-accent-soft: #e9d8b8;
+
+  /* ---- Compat com tokens antigos (deprecado, manter durante transição) ---- */
+  --background: var(--surface-page);
+  --foreground: var(--ink-primary);
 }
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-poppins);
-  --font-serif: var(--font-cinzel);
+  /* ---- Cores semânticas ---- */
+  --color-background: var(--surface-page);
+  --color-foreground: var(--ink-primary);
 
-  /* Paleta brand - azul petroleo #20364e */
+  /* ---- Fontes (DESIGN.md) ---- */
+  --font-sans: var(--font-sans);          /* Inter */
+  --font-serif: var(--font-serif);        /* Source Serif 4 */
+  --font-mono: var(--font-mono);          /* JetBrains Mono */
+
+  /* ---- Brand (mantido pra compat com classes bg-brand-*, text-brand-*) ---- */
   --color-brand-50: #f0f4f7;
   --color-brand-100: #d9e2ea;
   --color-brand-200: #b3c5d5;
@@ -34,26 +60,100 @@
   --color-brand-800: #142230;
   --color-brand-900: #0e1821;
   --color-brand-950: #080d11;
+
+  /* ---- Surfaces e ink (DESIGN.md, NOVO) ---- */
+  --color-surface-page: #fdfdfb;
+  --color-surface-raised: #f7f6f3;
+  --color-surface-deep: #eeeae4;
+  --color-ink-primary: #1a1c20;
+  --color-ink-secondary: #3d4044;
+  --color-ink-muted: #6b6e72;
+  --color-border-subtle: #e8e6e1;
+  --color-border-strong: #cdcac4;
+
+  /* ---- Âmbar acadêmico (NOVO) ---- */
+  --color-amber-accent: #b07d3a;
+  --color-amber-accent-deep: #8a6235;
+  --color-amber-accent-soft: #e9d8b8;
 }
 
-/* Tema claro com nova tipografia */
+/* ============================================================
+   Body — fundamento tipográfico
+   ============================================================ */
+
 body {
-  background: #f9fafb;
-  color: #111827;
-  font-family: var(--font-poppins), Poppins, system-ui, sans-serif;
+  background: var(--surface-page);
+  color: var(--ink-primary);
+  font-family: var(--font-sans), Inter, system-ui, -apple-system, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
-/* Classe utilitaria para titulos com Cinzel */
+/* ============================================================
+   Classes utilitárias de tipografia
+   ============================================================ */
+
+/* Headings com Source Serif 4 (substitui Cinzel via .font-heading legado) */
 .font-heading {
-  font-family: var(--font-cinzel), Cinzel, Georgia, serif;
+  font-family: var(--font-serif), 'Source Serif 4', Georgia, serif;
+  font-weight: 500;
+  letter-spacing: -0.01em;
 }
 
-/* Permitir que classes Tailwind sobrescrevam */
-[class*="bg-"], [class*="text-"] {
-  /* Classes Tailwind têm prioridade */
+/* Display: hero de página, abertura de seção */
+.font-display {
+  font-family: var(--font-serif), 'Source Serif 4', Georgia, serif;
+  font-weight: 400;
+  letter-spacing: -0.015em;
+  line-height: 1.08;
 }
 
-/* Animação de skeleton loading */
+/* Reading: leitura prolongada (texto integral de artigo, doutrina) */
+.font-reading {
+  font-family: var(--font-serif), 'Source Serif 4', Georgia, serif;
+  font-weight: 400;
+  font-size: 1.0625rem;
+  line-height: 1.7;
+  letter-spacing: 0.005em;
+}
+
+/* Mono: número de artigo, código técnico, citação `art. 75, II, b` */
+.font-mono-tech {
+  font-family: var(--font-mono), 'JetBrains Mono', 'Fira Code', Consolas, monospace;
+  font-weight: 400;
+  letter-spacing: 0;
+}
+
+/* Label: tags, marcadores de seção, categorias */
+.font-label {
+  font-family: var(--font-sans), Inter, system-ui, sans-serif;
+  font-weight: 500;
+  font-size: 0.75rem;
+  line-height: 1.4;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+/* ============================================================
+   Compat com legado — manter durante migração tipográfica
+   Remover quando todas as ocorrências de font-cinzel/font-poppins
+   tiverem sido migradas no codebase.
+   ============================================================ */
+
+.font-cinzel {
+  font-family: var(--font-serif), 'Source Serif 4', Georgia, serif;
+  font-weight: 500;
+  letter-spacing: -0.01em;
+}
+
+.font-poppins {
+  font-family: var(--font-sans), Inter, system-ui, sans-serif;
+}
+
+/* ============================================================
+   Animações (mantidas)
+   ============================================================ */
+
 @keyframes skeleton-loading {
   0% {
     background-position: 200% 0;
@@ -63,7 +163,6 @@ body {
   }
 }
 
-/* Animação de fade-in para carrossel */
 @keyframes fade-in {
   from {
     opacity: 0;
@@ -79,7 +178,6 @@ body {
   animation: fade-in 0.5s ease-out;
 }
 
-/* Respeitar preferência do usuário por menos movimento */
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {
     animation-duration: 0.01ms !important;

@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { Cinzel, Poppins } from "next/font/google";
+import { Source_Serif_4, Inter, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
@@ -11,16 +11,27 @@ import { LazyClientProviders } from "@/components/LazyClientProviders";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import { Analytics as VercelAnalytics } from "@vercel/analytics/react";
 
-const cinzel = Cinzel({
-  subsets: ["latin"],
-  variable: "--font-cinzel",
+// Source Serif 4 — display + reading. Substitui Cinzel.
+const sourceSerif = Source_Serif_4({
+  subsets: ["latin", "latin-ext"],
+  weight: ["400", "500", "600", "700"],
+  variable: "--font-serif",
   display: "swap",
 });
 
-const poppins = Poppins({
-  subsets: ["latin"],
+// Inter — UI/sans. Substitui Poppins.
+const inter = Inter({
+  subsets: ["latin", "latin-ext"],
   weight: ["400", "500", "600", "700"],
-  variable: "--font-poppins",
+  variable: "--font-sans",
+  display: "swap",
+});
+
+// JetBrains Mono — números de artigo, citações técnicas, códigos.
+const jetbrainsMono = JetBrains_Mono({
+  subsets: ["latin"],
+  weight: ["400", "500"],
+  variable: "--font-mono",
   display: "swap",
 });
 
@@ -118,7 +129,7 @@ export default function RootLayout({
         <link rel="dns-prefetch" href="https://vitals.vercel-insights.com" />
         <link rel="dns-prefetch" href="https://va.vercel-scripts.com" />
       </head>
-      <body className={`${cinzel.variable} ${poppins.variable} font-sans antialiased bg-white text-gray-900`}>
+      <body className={`${sourceSerif.variable} ${inter.variable} ${jetbrainsMono.variable} font-sans antialiased`}>
         <Analytics />
         <VercelAnalytics />
         <SpeedInsights />
