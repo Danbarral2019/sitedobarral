@@ -1,0 +1,1389 @@
+{
+  "stats": {
+    "cjf": {
+      "total": 54,
+      "match": 54,
+      "naoMatch": 0,
+      "semFonte": 0
+    },
+    "ibda": {
+      "total": 61,
+      "match": 0,
+      "naoMatch": 0,
+      "semFonte": 61
+    },
+    "incp": {
+      "total": 43,
+      "match": 0,
+      "naoMatch": 0,
+      "semFonte": 43
+    }
+  },
+  "rows": [
+    {
+      "id": "e890c16f-e1b8-408a-af56-457796626a99",
+      "ente": "INCP",
+      "numero": 20,
+      "title": "Enunciado do INCP nº 20",
+      "descDb": "As estatais devem observar a obrigação de manter regulamento atualizado, nos termos do artigo 40 da Lei n. 13.303/2016, podendo, excepcionalmente, utilizar regras compatíveis da Lei n. 14.133/2021 para integração analógica.",
+      "sourceUrl": "(fonte oficial INCP não disponível pra audit automático)"
+    },
+    {
+      "id": "4d515913-7116-42df-aa57-f3605594848d",
+      "ente": "INCP",
+      "numero": 13,
+      "title": "Enunciado do INCP nº 13",
+      "descDb": "O termo de contrato poderá ser substituído por outro instrumento hábil na hipótese de contratação cujo valor não ultrapasse os limites estabelecidos para a dispensa de licitação, inclusive nas inexigibilidades.",
+      "sourceUrl": "(fonte oficial INCP não disponível pra audit automático)"
+    },
+    {
+      "id": "af859d10-0b25-4816-bd86-bfd673d23618",
+      "ente": "INCP",
+      "numero": 42,
+      "title": "Enunciado do INCP nº 42",
+      "descDb": "A responsabilização do gestor e do fiscal do contrato exige comprovação de dolo ou culpa grave no exercício de suas atribuições, não podendo ocorrer a responsabilização automática por falhas exclusivas do contratado ou pela ausência de condições adequadas para a gestão e a fiscalização.",
+      "sourceUrl": "(fonte oficial INCP não disponível pra audit automático)"
+    },
+    {
+      "id": "3e629804-4262-4f9b-a632-d7d71b594e76",
+      "ente": "CJF",
+      "numero": 18,
+      "title": "Enunciado do CJF nº 18",
+      "descDb": "A análise de riscos que instrui o processo administrativo de contratação, conforme determinam o art. 18, inciso X, da Lei n. 14.133/2021 e, a exemplo, os arts. 11 a 13 da Portaria CJF n. 62/2021, deve lidar com os riscos específicos da solução a ser contratada de forma complementar aos riscos gerais e abstratos já enfrentados no Plano de Tratamento de Riscos do Macroprocesso de Contratação, instrumento de governança nas contratações previsto no art. 5º da Resolução CNJ n. 347/2020.",
+      "descOfficial": "A análise de riscos que instrui o processo administrativo de contratação, conforme determinam o art. 18, inciso X, da Lei n. 14.133/2021 e, a exemplo, os arts. 11 a 13 da Portaria CJF n. 62/2021, deve lidar com os riscos específicos da solução a ser contratada de forma complementar aos riscos gerais e abstratos já enfrentados no Plano de Tratamento de Riscos do Macroprocesso de Contratação, instrumento de governança nas contratações previsto no art. 5º da Resolução CNJ n. 347/2020.",
+      "sourceUrl": "cjf.jus.br",
+      "similaridade": 1,
+      "matches": true
+    },
+    {
+      "id": "9a22a51b-fceb-4fac-8a59-f3100f979577",
+      "ente": "IBDA",
+      "numero": 21,
+      "title": "Enunciado do IBDA nº 21",
+      "descDb": "É indevida a inabilitação de licitante por falta de documento que esteja sob a guarda da Administração promotora da licitação, quando suscitada a questão pelo interessado."
+    },
+    {
+      "id": "c7ffbf78-0357-4d5c-873f-7f3c9dc3c19c",
+      "ente": "CJF",
+      "numero": 23,
+      "title": "Enunciado do CJF nº 23",
+      "descDb": "Ferramenta privada de pesquisa de preços mantida por prestador de serviços especializados constitui instrumento idôneo (parâmetro) para a pesquisa de preços na contratação pública.",
+      "descOfficial": "Ferramenta privada de pesquisa de preços mantida por prestador de serviços especializados constitui instrumento idôneo (parâmetro) para a pesquisa de preços na contratação pública.",
+      "sourceUrl": "cjf.jus.br",
+      "similaridade": 1,
+      "matches": true
+    },
+    {
+      "id": "069de222-a6f8-4790-b1d2-b4d49ccd96d2",
+      "ente": "INCP",
+      "numero": 25,
+      "title": "Enunciado do INCP nº 25",
+      "descDb": "Nos contratos de fornecimento contínuo, o quantitativo contratado para cada exercício financeiro deve ser compatível com o plano de contratações anual.",
+      "sourceUrl": "(fonte oficial INCP não disponível pra audit automático)"
+    },
+    {
+      "id": "e2f19531-9ae5-47cb-b1c4-502498922571",
+      "ente": "IBDA",
+      "numero": 26,
+      "title": "Enunciado do IBDA nº 26",
+      "descDb": "Para fins de aferição dos valores referidos nos incisos I e II do art. 75 da Lei n. 14.133/2021, deve ser considerado somente o somatório do que for despendido no exercício financeiro, independentemente do prazo de duração do contrato administrativo e da previsão de prorrogação contratual."
+    },
+    {
+      "id": "8bb7c951-fb2c-478a-8d1c-a60adad7ca79",
+      "ente": "IBDA",
+      "numero": 51,
+      "title": "Enunciado do IBDA nº 51",
+      "descDb": "Os métodos alternativos, adequados ou multiportas de resolução e prevenção de disputas são estimulados pela Lei n. 14.133/2021, cujo rol constante do art. 151 é exemplificativo."
+    },
+    {
+      "id": "fa6fe504-ef13-4ba4-b5d7-21ead06a0395",
+      "ente": "INCP",
+      "numero": 3,
+      "title": "Enunciado do INCP nº 3",
+      "descDb": "A estimativa do valor da contratação constante do Estudo Técnico Preliminar, que está relacionada à escolha da solução do que a definição de um preço de referência, não precisa seguir estritamente todas as regras definidas pelo artigo 23 da Lei nº 14.133/2021, permitindo a opção por aferições mais simples, quando cabível.",
+      "sourceUrl": "(fonte oficial INCP não disponível pra audit automático)"
+    },
+    {
+      "id": "1a4a0147-ff2d-49d4-b954-c7698546d210",
+      "ente": "INCP",
+      "numero": 8,
+      "title": "Enunciado do INCP nº 8",
+      "descDb": "Na modalidade diálogo competitivo, os critérios de pré-seleção, previstos no inciso II do §1º do artigo 32 da Lei 14.133/2021, não precisam se limitar às exigências previstas nos artigos 62 a 70 da mesma Lei.",
+      "sourceUrl": "(fonte oficial INCP não disponível pra audit automático)"
+    },
+    {
+      "id": "3c142ea9-9342-4c05-8a0f-e23b1945a5fa",
+      "ente": "INCP",
+      "numero": 18,
+      "title": "Enunciado do INCP nº 18",
+      "descDb": "Excepcionalmente, nos casos de esgotamento da quantidade registrada, será admitida a antecipação da prorrogação, pelo prazo máximo de doze meses, com a renovação das quantidades.",
+      "sourceUrl": "(fonte oficial INCP não disponível pra audit automático)"
+    },
+    {
+      "id": "3b1dd2dd-287c-4ac1-a247-cc2a523a9a17",
+      "ente": "INCP",
+      "numero": 43,
+      "title": "Enunciado do INCP nº 43",
+      "descDb": "O contrato de locação de imóveis em que a Administração Pública seja locatária não se sujeita aos limites de vigência previstos na Lei 14.133/2021.",
+      "sourceUrl": "(fonte oficial INCP não disponível pra audit automático)"
+    },
+    {
+      "id": "9007e55a-14b9-4d8f-866e-dc2785c0ec33",
+      "ente": "INCP",
+      "numero": 40,
+      "title": "Enunciado do INCP nº 40",
+      "descDb": "Na ausência de disposição específica, o prazo para a apresentação de defesa prévia em processo administrativo sancionador, em caso de aplicação da sanção de advertência, é aquele previsto na lei geral de processo administrativo do respectivo ente federativo.",
+      "sourceUrl": "(fonte oficial INCP não disponível pra audit automático)"
+    },
+    {
+      "id": "e8c6745f-c807-4a79-bb2d-d1afdff843e9",
+      "ente": "INCP",
+      "numero": 39,
+      "title": "Enunciado do INCP nº 39",
+      "descDb": "Em caso de atraso no cumprimento do contrato, é vedada a aplicação automática da multa de mora, sem a avaliação criteriosa da culpabilidade do contratado, respeitada a garantia da ampla defesa e do contraditório.",
+      "sourceUrl": "(fonte oficial INCP não disponível pra audit automático)"
+    },
+    {
+      "id": "abed0c8b-6610-48c2-8c47-6c5dda689f39",
+      "ente": "INCP",
+      "numero": 33,
+      "title": "Enunciado do INCP nº 33",
+      "descDb": "Para os fins do art. 143 da Lei 14.133/2021, divergências entre o fiscal e o contratado a respeito da execução do objeto devem ser encaminhadas ao gestor do contrato para decisão fundamentada, oportunidade em que deve ser avaliado se a entrega parcial atende ao interesse público, sem prejuízo da utilização de métodos alternativos de resolução de conflitos, caso previstos.",
+      "sourceUrl": "(fonte oficial INCP não disponível pra audit automático)"
+    },
+    {
+      "id": "c79da81b-3df2-44b4-ad95-c314c66cf293",
+      "ente": "INCP",
+      "numero": 41,
+      "title": "Enunciado do INCP nº 41",
+      "descDb": "O artigo 10 da Lei 14.133/2021 não invade a seara de organização da Advocacia Pública e tem por objetivo definir um direito (de representação) em favor do agente público que, atuando em nome da Administração, praticou um ato administrativo lastreado em orientação emanada pelo órgão jurídico da Administração.",
+      "sourceUrl": "(fonte oficial INCP não disponível pra audit automático)"
+    },
+    {
+      "id": "ec7be831-54ba-4f5e-bb92-1b402db31e9f",
+      "ente": "INCP",
+      "numero": 32,
+      "title": "Enunciado do INCP nº 32",
+      "descDb": "No recebimento provisório de serviços contínuos em regime de dedicação exclusiva de mão de obra, em razão da responsabilidade subsidiária e solidária prevista no art. 121 da Lei 14.133/2021, deve ser emitido termo detalhado atestando o cumprimento das obrigações e exigências de caráter técnico e administrativo.",
+      "sourceUrl": "(fonte oficial INCP não disponível pra audit automático)"
+    },
+    {
+      "id": "8942762c-97ac-4d3c-a610-90ed6fa592c2",
+      "ente": "INCP",
+      "numero": 34,
+      "title": "Enunciado do INCP nº 34",
+      "descDb": "Não configura parcela incontroversa, para efeito do art. 143 da Lei nº 14.133/2021, a divergência acerca da qualidade, quando o objeto entregue for inadequado para o atendimento do interesse público.",
+      "sourceUrl": "(fonte oficial INCP não disponível pra audit automático)"
+    },
+    {
+      "id": "b2424a87-9b0b-4c73-8192-ee75588cb165",
+      "ente": "INCP",
+      "numero": 30,
+      "title": "Enunciado do INCP nº 30",
+      "descDb": "No que se refere à dispensa de licitação em razão do valor, prevista nos incisos I e II do artigo 75 da Lei 14.133/2021, para contratos de fornecimento ou serviço continuado com vigência plurianual, deve ser considerado como valor da contratação o montante equivalente ao período de 1 (um) ano de vigência do contrato, conforme § 1º do artigo 75 da Lei 14.133/2021.",
+      "sourceUrl": "(fonte oficial INCP não disponível pra audit automático)"
+    },
+    {
+      "id": "2de9c46b-e1db-489a-ae66-7d7ab933f9f8",
+      "ente": "INCP",
+      "numero": 37,
+      "title": "Enunciado do INCP nº 37",
+      "descDb": "Não viola o princípio da isonomia, tampouco desnatura a figura do credenciamento, a utilização, para a hipótese prevista no inciso I do art. 79, de critérios técnicos objetivos, mediante pontuação, para definir a ordem de distribuição da demanda aos credenciados, quando não for conveniente para o interesse público a contratação imediata de todos.",
+      "sourceUrl": "(fonte oficial INCP não disponível pra audit automático)"
+    },
+    {
+      "id": "d4be53eb-72ee-41b1-9cbf-6978c4db6d93",
+      "ente": "INCP",
+      "numero": 31,
+      "title": "Enunciado do INCP nº 31",
+      "descDb": "A garantia adicional à qual se refere o §5º do art. 59 da Lei nº 14.133, de 2021, tem natureza de garantia contratual e pode ser prestada nas mesmas modalidades e prazos previstos no art. 96 da Lei 14.133/2021.",
+      "sourceUrl": "(fonte oficial INCP não disponível pra audit automático)"
+    },
+    {
+      "id": "d171ca69-c606-4421-81bf-a176ee81b1d8",
+      "ente": "INCP",
+      "numero": 24,
+      "title": "Enunciado do INCP nº 24",
+      "descDb": "A atuação conjunta entre os agentes responsáveis pelo planejamento e pela gestão e fiscalização do contrato, durante a elaboração do Estudo Técnico Preliminar (ETP) e do Termo de Referência (TR), é essencial para prevenir falhas na execução contratual, sendo recomendada a realização de reuniões periódicas para alinhamento.",
+      "sourceUrl": "(fonte oficial INCP não disponível pra audit automático)"
+    },
+    {
+      "id": "631bf08f-c4d5-44dc-a6f3-43f275b41aa8",
+      "ente": "INCP",
+      "numero": 16,
+      "title": "Enunciado do INCP nº 16",
+      "descDb": "Constitui direito do contratado e da sociedade que a análise do impacto invalidatório, prevista pelo artigo 147 da Lei nº 14.133/2021, seja realizada, sendo ainda, condição para que se entenda legítimo o ato de suspensão ou invalidação.",
+      "sourceUrl": "(fonte oficial INCP não disponível pra audit automático)"
+    },
+    {
+      "id": "c99d8f30-168c-4e97-93c6-b15b2baf7a20",
+      "ente": "INCP",
+      "numero": 17,
+      "title": "Enunciado do INCP nº 17",
+      "descDb": "A prorrogação da Ata de Registro de Preços admite a renovação das quantidades registradas, independentemente de previsão no edital ou na ata.",
+      "sourceUrl": "(fonte oficial INCP não disponível pra audit automático)"
+    },
+    {
+      "id": "01f14534-401d-4933-8fc5-0fb7d8ba39c6",
+      "ente": "INCP",
+      "numero": 27,
+      "title": "Enunciado do INCP nº 27",
+      "descDb": "A não apresentação de documentos de habilitação, após a realização de diligências, quando for o caso, equipara-se à não apresentação dos documentos para contratação, para os fins da execução integral da garantia na forma do § 3º do art. 58 da Lei 14.133/2021.",
+      "sourceUrl": "(fonte oficial INCP não disponível pra audit automático)"
+    },
+    {
+      "id": "1dfe24d9-a54d-4c25-a3ea-37e63a523a10",
+      "ente": "IBDA",
+      "numero": 52,
+      "title": "Enunciado do IBDA nº 52",
+      "descDb": "É dever da Administração, mediante decisão da autoridade competente, receber e analisar as propostas de acordos administrativos apresentadas pelo contratado durante a execução do ajuste, inclusive na fase executória da sanção aplicada. A recusa ou a celebração do acordo deve ser motivada nos autos do processo administrativo."
+    },
+    {
+      "id": "f21394b6-a718-4f0e-8213-8a82702a45a0",
+      "ente": "INCP",
+      "numero": 26,
+      "title": "Enunciado do INCP nº 26",
+      "descDb": "As atividades típicas de gestão direcionadas ao controle interno na Lei 14.133/2021 não devem ser atribuídas à auditoria interna, compreendida como a estrutura organizacional de terceira linha, responsável pelas atividades de consultoria e avaliação independente e objetiva da gestão.",
+      "sourceUrl": "(fonte oficial INCP não disponível pra audit automático)"
+    },
+    {
+      "id": "ebcd7f7e-e0c6-48cb-8a6c-86fc3b54f31f",
+      "ente": "INCP",
+      "numero": 19,
+      "title": "Enunciado do INCP nº 19",
+      "descDb": "A participação do agente de contratação ou pregoeiro, do fiscal e do gestor do contrato na condução do processo administrativo sancionador fere os princípios da impessoalidade e da segregação de funções nos casos em que a infração estiver relacionada à etapa do processo em que tenha atuado.",
+      "sourceUrl": "(fonte oficial INCP não disponível pra audit automático)"
+    },
+    {
+      "id": "eb76929f-a1c2-498a-b4ff-754ec5488762",
+      "ente": "INCP",
+      "numero": 21,
+      "title": "Enunciado do INCP nº 21",
+      "descDb": "Enquanto o art. 66 da Lei nº 13.303/16 não for regulamentado pelo Decreto do Poder Executivo do ente federativo respectivo, as empresas públicas e sociedades de economia mista podem aplicar subsidiariamente as disposições do Decreto nº 11.462/2023, desde que previsto em seu regulamento interno de licitações e contratos.",
+      "sourceUrl": "(fonte oficial INCP não disponível pra audit automático)"
+    },
+    {
+      "id": "a43ecdd7-97aa-4c7e-8a50-cbcb040d4402",
+      "ente": "INCP",
+      "numero": 28,
+      "title": "Enunciado do INCP nº 28",
+      "descDb": "Para fins de habilitação econômico-financeira em licitações, os índices de Capital Circulante Líquido (CCL) e Patrimônio Líquido (PL) deverão ser calculados com base nas demonstrações contábeis do último exercício social disponível, a fim de assegurar avaliação mais precisa e atual da situação financeira das empresas licitantes.",
+      "sourceUrl": "(fonte oficial INCP não disponível pra audit automático)"
+    },
+    {
+      "id": "f8df7855-b6d8-43fe-a087-96afb158266b",
+      "ente": "INCP",
+      "numero": 23,
+      "title": "Enunciado do INCP nº 23",
+      "descDb": "O Documento de Formalização da Demanda (DFD) ou documento equivalente deve iniciar todos os processos de contratação e não apenas os processos administrativos que instruem a contratação direta.",
+      "sourceUrl": "(fonte oficial INCP não disponível pra audit automático)"
+    },
+    {
+      "id": "2d0789c9-56ab-4b48-b60f-4b012152bb17",
+      "ente": "INCP",
+      "numero": 15,
+      "title": "Enunciado do INCP nº 15",
+      "descDb": "A hipótese de vigência de contrato por escopo ser automaticamente prorrogada, caso o objeto não tenha sido concluído no período pactuado, não implica necessariamente a ausência dessa formalização, mesmo que a posteriori, o que pode ser feito por termo aditivo ou por apostilamento.",
+      "sourceUrl": "(fonte oficial INCP não disponível pra audit automático)"
+    },
+    {
+      "id": "e733ba8e-69cd-49c6-a3fb-359459288950",
+      "ente": "INCP",
+      "numero": 4,
+      "title": "Enunciado do INCP nº 4",
+      "descDb": "Nos termos do inciso III, art. 41 da Lei nº 14.133/2021, para que a Administração Pública proceda à vedação de modelo e marca, deve-se observar: (i) a incidência da vedação recai sobre o objeto, não sobre a empresa contratada; (ii) a vedação deve se referir a objetos já adquiridos e utilizados pela Administração; (iii) a vedação deve se pautar em critérios objetivamente identificáveis e aferíveis; (iv) a vedação deve decorrer de prévio processo administrativo que garanta o contraditório e a ampla defesa; (v) a vedação deve ser consequência lógica das conclusões obtidas no processo administrativo; (vi) os impactos da vedação nas licitações em curso e nos contratos já em execução; (vii) os recursos cabíveis contra a decisão de vedação; (viii) o tempo de duração da vedação; e (ix) as hipóteses de reabilitação da marca perante a Administração.",
+      "sourceUrl": "(fonte oficial INCP não disponível pra audit automático)"
+    },
+    {
+      "id": "a2d1486d-832f-4a07-b5ec-b831a6a2c2f6",
+      "ente": "INCP",
+      "numero": 12,
+      "title": "Enunciado do INCP nº 12",
+      "descDb": "A hipótese de inexigibilidade de licitação do art. 74, inc. III, da Lei 14.133/2021 não exige pesquisa prévia de preços, devendo a Administração identificar o profissional ou empresa a ser contratada nos termos do §3º daquele artigo, justificando o preço conforme o art. 23, §4º da mesma Lei.",
+      "sourceUrl": "(fonte oficial INCP não disponível pra audit automático)"
+    },
+    {
+      "id": "08f9ab16-3de2-4a27-bc82-e18e541bf47e",
+      "ente": "INCP",
+      "numero": 6,
+      "title": "Enunciado do INCP nº 6",
+      "descDb": "É admitida a participação em licitação ou a contratação direta de empresa em recuperação judicial ou extrajudicial, diante da ausência de vedação expressa na Lei 14.133/2021.",
+      "sourceUrl": "(fonte oficial INCP não disponível pra audit automático)"
+    },
+    {
+      "id": "ef40cdd6-644f-4d61-910c-4c9cd9544bea",
+      "ente": "INCP",
+      "numero": 7,
+      "title": "Enunciado do INCP nº 7",
+      "descDb": "A modalidade leilão pode ser utilizada em contratos que tenham como critério de julgamento o maior lance, ainda que não sejam hipóteses de alienação de bens imóveis ou de bens móveis inservíveis ou legalmente apreendidos, como a licitação para concessão de uso de bens públicos.",
+      "sourceUrl": "(fonte oficial INCP não disponível pra audit automático)"
+    },
+    {
+      "id": "b4eff35f-f981-44a8-979d-9c33a24619ee",
+      "ente": "INCP",
+      "numero": 5,
+      "title": "Enunciado do INCP nº 5",
+      "descDb": "Nos termos do art. 181, os entes federativos deverão avaliar a conveniência e oportunidade de instituir centrais de compras, com o objetivo de realizar compras em grande escala, para atender a diversos órgãos e entidades sob sua competência e atingir as finalidades da Lei 14.133/2021.",
+      "sourceUrl": "(fonte oficial INCP não disponível pra audit automático)"
+    },
+    {
+      "id": "f888ce36-05db-4949-9fac-6c68359a2ec6",
+      "ente": "IBDA",
+      "numero": 60,
+      "title": "Enunciado do IBDA nº 60",
+      "descDb": "A atuação dos tribunais de contas nas representações previstas no art. 170, § 4º, da Lei n. 14.133/2021, não está condicionada à prévia provocação de outros órgãos, entidades e agentes."
+    },
+    {
+      "id": "8c976453-ed2a-4710-b817-aaa4cac0f77c",
+      "ente": "IBDA",
+      "numero": 57,
+      "title": "Enunciado do IBDA nº 57",
+      "descDb": "Cabe à autoridade máxima do órgão ou entidade, na forma do regulamento, garantir o suporte necessário de recursos humanos, materiais e tecnologia, para que os controles internos a que se refere o art. 169, II e III, da Lei n. 14.133/2021 desenvolvam atividades de controle, inspeção, fiscalização e auditoria, com autonomia técnica, a fim de assegurar a boa gestão de licitações e contratos."
+    },
+    {
+      "id": "00cb497c-1d7e-4ddd-b653-b3af8db38815",
+      "ente": "IBDA",
+      "numero": 59,
+      "title": "Enunciado do IBDA nº 59",
+      "descDb": "Nas ações de controle relacionadas a licitações e contratos regidos pela Lei n. 14.133/2021, ao identificar não conformidades, os órgãos de controle assegurarão o contraditório e a ampla defesa, diferenciarão as impropriedades formais das irregularidades que configuram dano à Administração, bem como considerarão os efeitos práticos de suas decisões."
+    },
+    {
+      "id": "304f4f66-743e-4c86-9253-16928ad28fb2",
+      "ente": "IBDA",
+      "numero": 50,
+      "title": "Enunciado do IBDA nº 50",
+      "descDb": "O rol do parágrafo único do art. 151 da Lei n. 14.133/2021 tem caráter exemplificativo sobre controvérsias relacionadas a direitos patrimoniais disponíveis."
+    },
+    {
+      "id": "6eb69ae1-8ea9-46b5-9a0d-e86af8a11e07",
+      "ente": "IBDA",
+      "numero": 54,
+      "title": "Enunciado do IBDA nº 54",
+      "descDb": "A pedido do licitante ou contratado, poderá ser reconhecido o cumprimento dos requisitos para reabilitação antes do decurso dos prazos previstos no inciso III do art. 163 da Lei n. 14.133/2021, situação na qual a decisão que lhe for favorável terá eficácia a partir do decurso do prazo estipulado."
+    },
+    {
+      "id": "6e55c56c-71ee-431f-ab03-f9aaefd4a6af",
+      "ente": "IBDA",
+      "numero": 49,
+      "title": "Enunciado do IBDA nº 49",
+      "descDb": "Os métodos consensuais de resolução de disputas previstos na Lei n. 14.133/2021 permitem a utilização da celebração de compromisso para eliminar irregularidade, incerteza jurídica ou situação contenciosa, nos termos dos arts. 26 e 27 da LINDB."
+    },
+    {
+      "id": "c5e590b3-b86d-4780-b232-b79e5d6a3795",
+      "ente": "IBDA",
+      "numero": 45,
+      "title": "Enunciado do IBDA nº 45",
+      "descDb": "É obrigatório o saneamento de vícios constantes de licitações e contratos administrativos, nos termos do art. 147 da Lei n. 14.133/21."
+    },
+    {
+      "id": "12817525-b883-4b65-8092-b0f229ce436a",
+      "ente": "IBDA",
+      "numero": 47,
+      "title": "Enunciado do IBDA nº 47",
+      "descDb": "Os aspectos exemplificativamente indicados nos incisos do art. 147 da Lei n. 14.133/2021 servem de parâmetro para órgãos de controle cumprirem o dever, decorrente do art. 20 da LINDB, de avaliar as consequências práticas de suas decisões relacionadas a licitações e contratos."
+    },
+    {
+      "id": "32dfda1f-0a70-4c36-a366-049c0739b0fa",
+      "ente": "IBDA",
+      "numero": 41,
+      "title": "Enunciado do IBDA nº 41",
+      "descDb": "No dever de resposta previsto no art. 123 da Lei n. 14.133/2021, ainda que considere o requerimento impertinente, protelatório ou de nenhum interesse para a boa execução do contrato, a Administração deve respondê-lo, informando sua negativa em razão de uma ou mais dessas características do requerimento, dentro do prazo estabelecido."
+    },
+    {
+      "id": "c9c94fcd-fdf9-42eb-aafb-bedb8ee5de15",
+      "ente": "IBDA",
+      "numero": 42,
+      "title": "Enunciado do IBDA nº 42",
+      "descDb": "Nas hipóteses listadas no § 2º do art. 137, a Lei n. 14.133/2021 assegura ao contratado o direito de requerer a extinção contratual, oportunidade em que a Administração deverá, tão somente, avaliar a ocorrência de uma das hipóteses legais previstas e, em caso positivo, deferir o pedido."
+    },
+    {
+      "id": "ad69104c-137d-423f-ae0b-386adf975b2f",
+      "ente": "IBDA",
+      "numero": 40,
+      "title": "Enunciado do IBDA nº 40",
+      "descDb": "Em contratos de terceirização com mão de obra exclusiva, caso não seja demonstrado, dentro do prazo estabelecido no contrato, o cumprimento das obrigações trabalhistas dos empregados alocados na execução dos serviços, será possível a retenção cautelar de valores devidos pela Administração à contratada, proporcionalmente ao montante do direito devido aos empregados."
+    },
+    {
+      "id": "7c770d4f-bb2d-4ec6-9632-fa409867cbc3",
+      "ente": "IBDA",
+      "numero": 43,
+      "title": "Enunciado do IBDA nº 43",
+      "descDb": "O direito de suspensão, pelo contratado, do cumprimento de obrigações contratuais, previsto no inciso II do § 3º do art. 137 da Lei n. 14.133/2021, será exercido no âmbito administrativo, não dependendo de provimento jurisdicional."
+    },
+    {
+      "id": "531342c6-8189-478a-80f5-ef0467835551",
+      "ente": "IBDA",
+      "numero": 44,
+      "title": "Enunciado do IBDA nº 44",
+      "descDb": "O § 4º do art. 137 da Lei n. 14.133/2021 autoriza os emitentes das garantias a participarem do processo de apuração de irregularidade, havendo a necessidade de notificação do garantidor para assegurar o devido processo legal."
+    },
+    {
+      "id": "811a6524-8809-4140-99b6-9d1812e65127",
+      "ente": "IBDA",
+      "numero": 36,
+      "title": "Enunciado do IBDA nº 36",
+      "descDb": "A substituição do instrumento de contrato, estabelecida no inciso I do art. 95 da Lei n. 14.133/2021, é também possível nos demais casos de dispensa de licitação, de inexigibilidade e de contratação mediante licitação, contanto que o valor da contratação respeite os limites estabelecidos nos incisos I e II do art. 75 dessa lei."
+    },
+    {
+      "id": "2501726d-ae00-42bf-9287-0ea9921671cb",
+      "ente": "IBDA",
+      "numero": 39,
+      "title": "Enunciado do IBDA nº 39",
+      "descDb": "As prorrogações de vigência contratual, a que se refere o art. 107 da Lei n. 14.133/2021, não precisam ser estabelecidas por iguais períodos."
+    },
+    {
+      "id": "d4471b77-d353-49e9-a91f-9671456bc2e9",
+      "ente": "IBDA",
+      "numero": 38,
+      "title": "Enunciado do IBDA nº 38",
+      "descDb": "A modificação unilateral do contrato administrativo deve ser justificada no âmbito de processo administrativo, contendo motivação sobre fato ocorrido ou conhecido após a celebração do contrato, não cabendo invocação de interesse público genérico, abstrato e indeterminado."
+    },
+    {
+      "id": "28b15c1d-bf7d-400e-a9e2-b1da2028a23b",
+      "ente": "IBDA",
+      "numero": 37,
+      "title": "Enunciado do IBDA nº 37",
+      "descDb": "A norma do inciso II do art. 95 da Lei n. 14.133/2021 aplica-se também aos contratos de prestação de serviços, desde que possam ser executados no prazo de até 30 (trinta) dias, a contar da ordem de serviço, e deles não resultem obrigações futuras, inclusive quanto à assistência técnica, quando cabível."
+    },
+    {
+      "id": "56066093-f57b-4cc4-9394-3a81cef64bc5",
+      "ente": "IBDA",
+      "numero": 25,
+      "title": "Enunciado do IBDA nº 25",
+      "descDb": "A contratação direta, por inexigibilidade, para locação de imóvel cujas características de instalações e de localização tornem necessária sua escolha, pode ser realizada com o locador possuidor, desde que comprovada a justa posse, que deve ser minuciosamente caracterizada e demonstrada nos autos do processo administrativo, para que seja possível a locação."
+    },
+    {
+      "id": "d9a03528-9134-4d93-890e-065b8a608d2b",
+      "ente": "IBDA",
+      "numero": 17,
+      "title": "Enunciado do IBDA nº 17",
+      "descDb": "Após a fase de julgamento, o licitante vencedor deverá reelaborar e apresentar à Administração, por meio eletrônico, as planilhas com os respectivos valores readequados à proposta vencedora, inclusive nos casos de regime de dedicação exclusiva de mão de obra ou predominância de mão de obra."
+    },
+    {
+      "id": "02ee8bd2-435d-45b5-8fc7-bd122dc47521",
+      "ente": "IBDA",
+      "numero": 32,
+      "title": "Enunciado do IBDA nº 32",
+      "descDb": "A abertura do procedimento de manifestação de interesse poderá ser provocada pelas pessoas físicas ou jurídicas que desejam contribuir com a realização de estudos, investigações, levantamentos e projetos, mediante a apresentação de requerimento formal perante a Administração Pública, que deverá examiná-lo com o objetivo de avaliar a conveniência e oportunidade de instaurar tal procedimento."
+    },
+    {
+      "id": "7cc950cc-a63c-4d77-9e8a-eaba30acceb7",
+      "ente": "IBDA",
+      "numero": 18,
+      "title": "Enunciado do IBDA nº 18",
+      "descDb": "O § 4º do art. 59 da Lei n. 14.133/2021 contém presunção relativa de inexequibilidade de preços, devendo a Administração dar à licitante a oportunidade de demonstrar a exequibilidade da sua proposta, nos termos do § 2º do mesmo art. 59."
+    },
+    {
+      "id": "aa367715-7ab3-4685-952a-f24ef334f671",
+      "ente": "IBDA",
+      "numero": 31,
+      "title": "Enunciado do IBDA nº 31",
+      "descDb": "A certificação de pré-qualificação de bens, mediante justificativa, poderá ser usada no credenciamento para substituir a prova de qualidade, sendo dispensada a exigência de amostra ou prova de conceito."
+    },
+    {
+      "id": "9629cd5a-2073-4f71-b89c-af3b8a4520cc",
+      "ente": "IBDA",
+      "numero": 29,
+      "title": "Enunciado do IBDA nº 29",
+      "descDb": "Na contratação por meio de credenciamento, a exigência da comprovação da regularidade fiscal poderá ocorrer apenas no momento da formalização do contrato, não sendo requisito necessário de verificação no procedimento de credenciamento."
+    },
+    {
+      "id": "0465911d-9d2c-4238-8ad8-859c45eafb3f",
+      "ente": "IBDA",
+      "numero": 20,
+      "title": "Enunciado do IBDA nº 20",
+      "descDb": "Esgotados os critérios previstos no art. 60 da Lei n. 14.133/2021 e mantendo-se o empate, é admissível a utilização de critérios objetivos e isonômicos para desempate, tal como o sorteio, desde que previstos em edital e que a procedimentalização esteja objetivamente descrita, garantida a transparência, acompanhamento do procedimento pelos interessados e auditabilidade da ferramenta."
+    },
+    {
+      "id": "a63a563f-b38e-4d7e-a6de-36aaa032d9e6",
+      "ente": "IBDA",
+      "numero": 28,
+      "title": "Enunciado do IBDA nº 28",
+      "descDb": "No caso de contratação emergencial por dispensa fundada no art. 75, VIII, da Lei n. 14.133/2021, a urgência do caso concreto, oportunamente justificada, autoriza, em caráter excepcional, que os processos relacionados à aquisição de bens e à contratação de serviços sejam formalizados posteriormente."
+    },
+    {
+      "id": "db394b7b-0bb7-463f-ad41-eee144716e47",
+      "ente": "IBDA",
+      "numero": 27,
+      "title": "Enunciado do IBDA nº 27",
+      "descDb": "Nos processos de contratação direta fundada nos incisos I e II do art. 75 da Lei n. 14.133/2021, a inobservância do procedimento de divulgação prévia do aviso, previsto no § 3º do art. 75 dessa Lei, deverá ser motivada expressamente nos autos."
+    },
+    {
+      "id": "3e3d019f-30c4-4e16-bff9-2d254a0bce23",
+      "ente": "IBDA",
+      "numero": 23,
+      "title": "Enunciado do IBDA nº 23",
+      "descDb": "A responsabilidade solidária de que trata o art. 73 da Lei n. 14.133/2021 configura-se apenas quando comprovado que ambos atuaram com dolo, fraude ou erro grosseiro."
+    },
+    {
+      "id": "b5701ebe-80dd-4fa0-9bca-50c05d8ab7f0",
+      "ente": "IBDA",
+      "numero": 22,
+      "title": "Enunciado do IBDA nº 22",
+      "descDb": "É admitida a exigência de comprovação de capacidade técnico-operacional nas licitações para compra de bens, desde que a materialidade, relevância e risco relacionados ao fornecimento demonstrem essa necessidade."
+    },
+    {
+      "id": "97789b4c-18d3-4cf9-a30a-408c250f4c6b",
+      "ente": "IBDA",
+      "numero": 5,
+      "title": "Enunciado do IBDA nº 5",
+      "descDb": "O regime de dedicação exclusiva de mão de obra não se limita apenas à realização de serviços contínuos nas dependências do contratante, como definido na alínea 'a' do inciso XVI do art. 6º da Lei n. 14.133/2021, aplicando-se também aos serviços prestados pelos terceirizados ao tomador nas dependências do próprio empregador ou de terceiros."
+    },
+    {
+      "id": "c62979b3-a5df-4943-9fbc-faf716cd9f62",
+      "ente": "IBDA",
+      "numero": 12,
+      "title": "Enunciado do IBDA nº 12",
+      "descDb": "A exigência de habilitação técnica, profissional e/ou operacional, relacionada à tecnologia Modelagem da Informação da Construção (Building Information Modelling – BIM) independe do critério de julgamento escolhido, podendo ser requerida mesmo quando o critério menor preço for adotado."
+    },
+    {
+      "id": "b3bb9102-434f-4d78-9512-85028c5367e8",
+      "ente": "IBDA",
+      "numero": 19,
+      "title": "Enunciado do IBDA nº 19",
+      "descDb": "Nas contratações de obras e serviços de engenharia, ocorrida a situação do art. 59, § 5º, da Lei n. 14.133/2021, a garantia adicional será exigida do licitante vencedor ainda que o instrumento convocatório não tenha exigido a garantia contratual dos arts. 96, caput, e 98, caput, da mesma lei."
+    },
+    {
+      "id": "5fda27f6-4471-476f-b172-585f2057d2e0",
+      "ente": "IBDA",
+      "numero": 16,
+      "title": "Enunciado do IBDA nº 16",
+      "descDb": "O art. 48 da Lei n. 14.133/2021 não veda à Administração o estabelecimento, no edital da licitação, de valor mínimo de remuneração em favor dos trabalhadores que executarão o serviço terceirizado, desde que essa opção seja justificada no processo licitatório, com base em razões objetivas de interesse público, tais como atender à realidade do mercado, obter serviços mais qualificados ou evitar a excessiva rotatividade da mão de obra."
+    },
+    {
+      "id": "19238a19-d0d5-4389-8ffc-d51bcfe0e01f",
+      "ente": "IBDA",
+      "numero": 13,
+      "title": "Enunciado do IBDA nº 13",
+      "descDb": "A exigência de experiência na utilização da tecnologia Modelagem da Informação da Construção (Building Information Modelling – BIM) em licitações de obras e serviços de engenharia não configura exigência de qualificação técnica excessiva, capaz de restringir a competitividade do certame, desde que caracterizada a relevância técnica da utilização desta metodologia para execução do objeto ou seu valor significativo."
+    },
+    {
+      "id": "515eaae4-878e-4ca8-b4fc-8e1ff59144ed",
+      "ente": "IBDA",
+      "numero": 6,
+      "title": "Enunciado do IBDA nº 6",
+      "descDb": "O valor da obra de grande vulto, previsto pela Lei n. 14.133/2021, poderá ser reduzido por normativo próprio específico, editado pelos entes subnacionais."
+    },
+    {
+      "id": "d411e0fd-ea79-450a-8d6c-0a097a582414",
+      "ente": "IBDA",
+      "numero": 7,
+      "title": "Enunciado do IBDA nº 7",
+      "descDb": "Os riscos estabelecidos nas relações contratuais devem ser interpretados de maneira sistêmica, levando em consideração a matriz de riscos em conjunto com as demais cláusulas contratuais, conforme disposto no inciso XXVII do art. 6º e no art. 22 da Lei n. 14.133/2021."
+    },
+    {
+      "id": "89ee36a8-329c-4dba-b42f-beb50556e2d7",
+      "ente": "IBDA",
+      "numero": 4,
+      "title": "Enunciado do IBDA nº 4",
+      "descDb": "O regime jurídico das sanções previstas na Lei n. 14.133/2021, se mais benéfico, tem o condão de alterar as sanções a serem aplicadas, ou em fase de cumprimento, em contratos firmados com base em legislação pretérita, em decorrência do princípio da retroatividade da lei posterior mais benéfica em matéria sancionatória."
+    },
+    {
+      "id": "e484f8b2-125b-4edc-8050-3e96b18bb221",
+      "ente": "CJF",
+      "numero": 25,
+      "title": "Enunciado do CJF nº 25",
+      "descDb": "O prazo para resposta ao pedido de repactuação de preços determinado no contrato administrativo (art. 92, inciso X, e § 6º da Lei n. 14.133/2021) começa a fluir somente a partir do momento em que o pedido da contratada se encontre correto e completamente instruído.",
+      "descOfficial": "O prazo para resposta ao pedido de repactuação de preços determinado no contrato administrativo (art. 92, inciso X, e § 6º da Lei n. 14.133/2021) começa a fluir somente a partir do momento em que o pedido da contratada se encontre correto e completamente instruído.",
+      "sourceUrl": "cjf.jus.br",
+      "similaridade": 1,
+      "matches": true
+    },
+    {
+      "id": "e600a1f1-59b4-4d62-b622-2d147534d846",
+      "ente": "CJF",
+      "numero": 20,
+      "title": "Enunciado do CJF nº 20",
+      "descDb": "As contratações públicas submetem-se às práticas contínuas e permanentes de gestão de riscos e de controles internos previstas na Lei n. 14.133/2021, que devem ser implementadas em todo o macroprocesso de contratação, não se limitando à atuação de uma estrutura administrativa de controle interno.",
+      "descOfficial": "As contratações públicas submetem-se às práticas contínuas e permanentes de gestão de riscos e de controles internos previstas na Lei n. 14.133/2021, que devem ser implementadas em todo o macroprocesso de contratação, não se limitando à atuação de uma estrutura administrativa de controle interno.",
+      "sourceUrl": "cjf.jus.br",
+      "similaridade": 1,
+      "matches": true
+    },
+    {
+      "id": "aaf94035-54af-475b-89ae-ccc9e9f56ae2",
+      "ente": "CJF",
+      "numero": 11,
+      "title": "Enunciado do CJF nº 11",
+      "descDb": "Não é obrigatório parecer jurídico nas contratações de dispensa em razão do valor (art. 75, incisos I e II) e inexigibilidade (art. 74) até o limite de dispensa previsto no art. 75, incisos I e II e § 3º da Lei n. 14.133/2021, ressalvados os casos em que as relações contratuais sejam formalizadas por meio de instrumento de contrato que não seja padronizado no órgão ou nas hipóteses em que o administrador tenha suscitado dúvida a respeito da legalidade da dispensa, consoante disposto no § 5º do art. 53 da nova lei de licitações, devendo a autoridade administrativa do órgão emitir orientação nesse sentido.",
+      "descOfficial": "Não é obrigatório parecer jurídico nas contratações de dispensa em razão do valor (art. 75, incisos I e II) e inexigibilidade (art. 74) até o limite de dispensa previsto no art. 75, incisos I e II e § 3º da Lei n. 14.133/2021, ressalvados os casos em que as relações contratuais sejam formalizadas por meio de instrumento de contrato que não seja padronizado no órgão ou nas hipóteses em que o administrador tenha suscitado dúvida a respeito da legalidade da dispensa, consoante disposto no § 5º do art. 53 da nova lei de licitações, devendo a autoridade administrativa do órgão emitir orientação nesse sentido.",
+      "sourceUrl": "cjf.jus.br",
+      "similaridade": 1,
+      "matches": true
+    },
+    {
+      "id": "34d8a1e8-b17b-4214-adda-688e49c22fa0",
+      "ente": "CJF",
+      "numero": 21,
+      "title": "Enunciado do CJF nº 21",
+      "descDb": "As unidades de auditoria interna poderão responder a questionamentos formulados pela Administração, como atividade de consultoria prevista no art. 2º, inciso III, da Resolução CNJ n. 309/2020, observada a capacidade operacional da unidade de auditoria interna, desde que não se refiram a casos concretos, o que configuraria atos de cogestão, prática vedada pelo art. 29, inciso IV, da Resolução CNJ n. 347/2020.",
+      "descOfficial": "As unidades de auditoria interna poderão responder a questionamentos formulados pela Administração, como atividade de consultoria prevista no art. 2º, inciso III, da Resolução CNJ n. 309/2020, observada a capacidade operacional da unidade de auditoria interna, desde que não se refiram a casos concretos, o que configuraria atos de cogestão, prática vedada pelo art. 29, inciso IV, da Resolução CNJ n. 347/2020.",
+      "sourceUrl": "cjf.jus.br",
+      "similaridade": 1,
+      "matches": true
+    },
+    {
+      "id": "be50e6f3-be11-4d8f-9833-eafc30fe16c1",
+      "ente": "CJF",
+      "numero": 19,
+      "title": "Enunciado do CJF nº 19",
+      "descDb": "As atribuições e responsabilidades típicas de gestão determinadas à unidade de controle interno por meio da Lei n. 14.133/2021 não podem ser atribuídas à unidade de auditoria interna, por contrariarem o disposto no parágrafo único do art. 2º da Resolução CNJ n. 308/2020. Por sua vez, a implementação de controles internos da gestão de que trata a Lei, sejam eles preventivos ou corretivos, cabe aos gestores envolvidos na instrução do processo administrativo de contratação e às instâncias de governança na ocasião de elaboração do Plano de Tratamento de Riscos do Macroprocesso de Contratação.",
+      "descOfficial": "As atribuições e responsabilidades típicas de gestão determinadas à unidade de controle interno por meio da Lei n. 14.133/2021 não podem ser atribuídas à unidade de auditoria interna, por contrariarem o disposto no parágrafo único do art. 2º da Resolução CNJ n. 308/2020. Por sua vez, a implementação de controles internos da gestão de que trata a Lei, sejam eles preventivos ou corretivos, cabe aos gestores envolvidos na instrução do processo administrativo de contratação e às instâncias de governança na ocasião de elaboração do Plano de Tratamento de Riscos do Macroprocesso de Contratação.",
+      "sourceUrl": "cjf.jus.br",
+      "similaridade": 1,
+      "matches": true
+    },
+    {
+      "id": "66a148cf-1252-454a-abe3-290681a9d2ee",
+      "ente": "CJF",
+      "numero": 5,
+      "title": "Enunciado do CJF nº 5",
+      "descDb": "Em atenção aos princípios da eficiência e do formalismo moderado e em face do caráter instrumental dos procedimentos licitatórios, ainda que não apresentados na oportunidade prevista em regulamento e/ou no edital, será admitida a juntada posterior de documentos de habilitação referentes às declarações emitidas unilateralmente pelo licitante.",
+      "descOfficial": "Em atenção aos princípios da eficiência e do formalismo moderado e em face do caráter instrumental dos procedimentos licitatórios, ainda que não apresentados na oportunidade prevista em regulamento e/ou no edital, será admitida a juntada posterior de documentos de habilitação referentes às declarações emitidas unilateralmente pelo licitante.",
+      "sourceUrl": "cjf.jus.br",
+      "similaridade": 1,
+      "matches": true
+    },
+    {
+      "id": "3e119cf5-b0e8-4198-8a1b-7af3fd9adcfa",
+      "ente": "CJF",
+      "numero": 16,
+      "title": "Enunciado do CJF nº 16",
+      "descDb": "O Documento de Formalização da Demanda – DFD previsto no art. 12, inciso VII, da Lei n. 14.133/2021, que coleta demandas para elaboração do Plano de Contratações Anual, não é o mesmo Documento de Formalização da Demanda, que instrui o processo administrativo de contratação. O primeiro será composto das informações constantes do art. 4º da Resolução CJF n. 701/2021, além da necessidade da unidade demandante. Já o segundo será documento sucinto que abrirá o processo e conterá a necessidade a ser atendida mediante contratação e o respectivo item do PAC.",
+      "descOfficial": "O Documento de Formalização da Demanda – DFD previsto no art. 12, inciso VII, da Lei n. 14.133/2021, que coleta demandas para elaboração do Plano de Contratações Anual, não é o mesmo Documento de Formalização da Demanda, que instrui o processo administrativo de contratação. O primeiro será composto das informações constantes do art. 4º da Resolução CJF n. 701/2021, além da necessidade da unidade demandante. Já o segundo será documento sucinto que abrirá o processo e conterá a necessidade a ser atendida mediante contratação e o respectivo item do PAC.",
+      "sourceUrl": "cjf.jus.br",
+      "similaridade": 1,
+      "matches": true
+    },
+    {
+      "id": "3fa366d0-57f9-4b14-b497-6cd01e55d874",
+      "ente": "CJF",
+      "numero": 2,
+      "title": "Enunciado do CJF nº 2",
+      "descDb": "A atuação da unidade de auditoria interna, para efeitos da aplicação da Lei n. 14.133/2021, dar-se-á na forma de terceira linha de defesa, consoante inciso III do art. 169 e mediante técnicas de auditoria, em atendimento às Resoluções CNJ n. 308 e 309/2020, CJF n. 676 e 677/2020 e aos normativos técnicos de auditoria. Os tribunais podem instituir estruturas administrativas destinadas a absorver as atribuições necessárias ao cumprimento do inciso II do art. 169 (segunda linha de defesa), com vistas a manter a adequada segregação de funções entre os agentes responsáveis pelos controles internos.",
+      "descOfficial": "A atuação da unidade de auditoria interna, para efeitos da aplicação da Lei n. 14.133/2021, dar-se-á na forma de terceira linha de defesa, consoante inciso III do art. 169 e mediante técnicas de auditoria, em atendimento às Resoluções CNJ n. 308 e 309/2020, CJF n. 676 e 677/2020 e aos normativos técnicos de auditoria. Os tribunais podem instituir estruturas administrativas destinadas a absorver as atribuições necessárias ao cumprimento do inciso II do art. 169 (segunda linha de defesa), com vistas a manter a adequada segregação de funções entre os agentes responsáveis pelos controles internos.",
+      "sourceUrl": "cjf.jus.br",
+      "similaridade": 1,
+      "matches": true
+    },
+    {
+      "id": "319d3bc4-f4e2-46b3-82e0-52ec673eeecb",
+      "ente": "CJF",
+      "numero": 8,
+      "title": "Enunciado do CJF nº 8",
+      "descDb": "O agente de contratação de que trata o art. 8º da Lei n. 14.133/2021 somente poderá ser responsabilizado, em tal qualidade, em decorrência dos atos decisórios praticados em razão da condução da fase externa das modalidades de licitação, observado o disposto no art. 28 do Decreto-lei n. 4.657/1942 (Lei de introdução às normas do Direito Brasileiro) e a eventual fundamentação das decisões com base em pareceres e manifestações técnicas do órgão de assessoramento jurídico e/ou das unidades responsáveis pela elaboração dos artefatos de planejamento.",
+      "descOfficial": "O agente de contratação de que trata o art. 8º da Lei n. 14.133/2021 somente poderá ser responsabilizado, em tal qualidade, em decorrência dos atos decisórios praticados em razão da condução da fase externa das modalidades de licitação, observado o disposto no art. 28 do Decreto-lei n. 4.657/1942 (Lei de introdução às normas do Direito Brasileiro) e a eventual fundamentação das decisões com base em pareceres e manifestações técnicas do órgão de assessoramento jurídico e/ou das unidades responsáveis pela elaboração dos artefatos de planejamento.",
+      "sourceUrl": "cjf.jus.br",
+      "similaridade": 1,
+      "matches": true
+    },
+    {
+      "id": "c10791cb-0bd9-45ce-a3fc-5fed303ada5f",
+      "ente": "CJF",
+      "numero": 4,
+      "title": "Enunciado do CJF nº 4",
+      "descDb": "Os acréscimos e as supressões de quantitativos decorrentes de alteração contratual devem ser considerados isoladamente, ou seja, o conjunto de acréscimos e o conjunto de supressões devem ser sempre calculados sobre o valor inicial atualizado do contrato, aplicando-se, a cada um desses conjuntos, sem nenhum tipo de compensação entre eles, os limites de alteração estabelecidos no art. 125 da Lei n. 14.133/2021.",
+      "descOfficial": "Os acréscimos e as supressões de quantitativos decorrentes de alteração contratual devem ser considerados isoladamente, ou seja, o conjunto de acréscimos e o conjunto de supressões devem ser sempre calculados sobre o valor inicial atualizado do contrato, aplicando-se, a cada um desses conjuntos, sem nenhum tipo de compensação entre eles, os limites de alteração estabelecidos no art. 125 da Lei n. 14.133/2021.",
+      "sourceUrl": "cjf.jus.br",
+      "similaridade": 1,
+      "matches": true
+    },
+    {
+      "id": "a7b2fa6d-1480-4322-91c4-39852e47de0c",
+      "ente": "CJF",
+      "numero": 3,
+      "title": "Enunciado do CJF nº 3",
+      "descDb": "A efetivação da prorrogação contratual prevista no art. 107 da Lei n. 14.133/2021 fica condicionada a uma avaliação qualitativa realizada pelo fiscal/gestor do contrato em relação aos serviços prestados pela contratada, devendo utilizar-se de parâmetros objetivos de avaliação.",
+      "descOfficial": "A efetivação da prorrogação contratual prevista no art. 107 da Lei n. 14.133/2021 fica condicionada a uma avaliação qualitativa realizada pelo fiscal/gestor do contrato em relação aos serviços prestados pela contratada, devendo utilizar-se de parâmetros objetivos de avaliação.",
+      "sourceUrl": "cjf.jus.br",
+      "similaridade": 1,
+      "matches": true
+    },
+    {
+      "id": "9b9581e7-0ee1-425a-b031-587c9b7f98f3",
+      "ente": "CJF",
+      "numero": 7,
+      "title": "Enunciado do CJF nº 7",
+      "descDb": "Pondera-se que os requisitos sustentáveis de aceitação de proposta e habilitação não sejam motivo de desclassificação sumária de licitantes que não detêm ingerência sobre tal regularidade, sendo razoável, na condução do certame pelo agente/comissão de contratação, que seja oportunizada a troca de marca/produto, desde que em igual ou superior qualidade ao ofertado inicialmente, porém, com o atendimento de todas as especificações e requisitos dispostos em edital (art. 11 da Lei n. 14.133/2021).",
+      "descOfficial": "Pondera-se que os requisitos sustentáveis de aceitação de proposta e habilitação não sejam motivo de desclassificação sumária de licitantes que não detêm ingerência sobre tal regularidade, sendo razoável, na condução do certame pelo agente/comissão de contratação, que seja oportunizada a troca de marca/produto, desde que em igual ou superior qualidade ao ofertado inicialmente, porém, com o atendimento de todas as especificações e requisitos dispostos em edital (art. 11 da Lei n. 14.133/2021).",
+      "sourceUrl": "cjf.jus.br",
+      "similaridade": 1,
+      "matches": true
+    },
+    {
+      "id": "136b5b7c-a177-40b6-90c6-d41fd105abe8",
+      "ente": "CJF",
+      "numero": 13,
+      "title": "Enunciado do CJF nº 13",
+      "descDb": "Consideram-se fornecimentos contínuos, para fins de aplicação do disposto nos arts. 106, 109, parágrafo único do art. 98, parágrafo único do art. 97, inciso I do art. 40 e § 8º do art. 25 da Lei n. 14.133/2021, as compras para a manutenção da Gráfica do Conselho da Justiça Federal decorrentes de necessidades permanentes ou prolongadas, tais como os seguintes itens: (a) papéis para aplicação/utilização na indústria gráfica no formato comercial 66×96, em gramaturas variadas, a exemplo: couchè brilho e fosco, papéis tipo duo design, linha papel offset, linha papel offset, papel kraft, papel adesivo brilho, couchè brilho e fosco, papéis tipo duo design, linha papel offset, papel kraft, papel adesivo brilho, papel tipo pólen soft, filme de polipropileno biorientado (BOPP); (b) espiral metalico Wire-o; (c) tintas da escala CMYC; (d) colas granulada e cola branca; (e) químicos tipo solvente, solução de fonte, pasta para limpeza profunda dos rolos, álcool isopropílico, água desmineralizada, limpador de chapas, restaurador de blanquetas, (f) solução especial para limpeza automática de blanqueta e rolos, pó antimaculador, goma antioxidante, óleo de silicone, lubrificante spray, blanqueta compressível com barra em aço, panos para limpeza de rolos, caneta corretora de chapas gráficas, pano de lavagem automática original para impressora offset Heidelberg.",
+      "descOfficial": "Consideram-se fornecimentos contínuos, para fins de aplicação do disposto nos arts. 106, 109, parágrafo único do art. 98, parágrafo único do art. 97, inciso I do art. 40 e § 8º do art. 25 da Lei n. 14.133/2021, as compras para a manutenção da Gráfica do Conselho da Justiça Federal decorrentes de necessidades permanentes ou prolongadas, tais como os seguintes itens: (a) papéis para aplicação/utilização na indústria gráfica no formato comercial 66×96, em gramaturas variadas, a exemplo: couchè brilho e fosco, papéis tipo duo design, linha papel offset, linha papel offset, papel kraft, papel adesivo brilho, couchè brilho e fosco, papéis tipo duo design, linha papel offset, papel kraft, papel adesivo brilho, papel tipo pólen soft, filme de polipropileno biorientado (BOPP); (b) espiral metalico Wire-o; (c) tintas da escala CMYC; (d) colas granulada e cola branca; (e) químicos tipo solvente, solução de fonte, pasta para limpeza profunda dos rolos, álcool isopropílico, água desmineralizada, limpador de chapas, restaurador de blanquetas, (f) solução especial para limpeza automática de blanqueta e rolos, pó antimaculador, goma antioxidante, óleo de silicone, lubrificante spray, blanqueta compressível com barra em aço, panos para limpeza de rolos, caneta corretora de chapas gráficas, pano de lavagem automática original para impressora offset Heidelberg.",
+      "sourceUrl": "cjf.jus.br",
+      "similaridade": 1,
+      "matches": true
+    },
+    {
+      "id": "6c0ea319-6e55-4c47-a515-b1a551cef4bc",
+      "ente": "CJF",
+      "numero": 14,
+      "title": "Enunciado do CJF nº 14",
+      "descDb": "Consideram-se serviços prestados de forma contínua, para fins de aplicação do disposto nos arts. 106, 109, parágrafo único do art. 98, parágrafo único do art. 97, inciso I do art. 40 e § 8º do art. 25 da Lei n. 14.133/2021, as compras para a manutenção dos órgãos da Justiça Federal decorrentes de necessidades permanentes ou prolongadas, tais como: I – agenciamento de viagens e emissão de passagem aérea e rodoviária; II – apoio operacional, atendente e mensageria; III – assinatura de: (a) jornais, revistas e periódicos especializados em formato digital ou eletrônico; (b) mídia impressa e eletrônica; (c) ferramentas de pesquisas on-line e de monitoramento on-line de redes sociais; (d) plataforma de desenvolvimento de aplicativos móveis e plataforma tecnológica de materiais informativos; (e) bases de dados jurídicas; IV – atendimento a usuários de Tecnologia da Informação e Comunicação – TIC; V – atividades de bombeiro civil; VI – aluguel de equipamentos e utilização de programas de informática, contratados com fundamento na Lei n. 14.133/2021; VII – atividade de segurança pessoal privada armada e desarmada; VIII – atividade de vigilância armada e desarmada; IX – coleta, tratamento e destinação final de resíduos sólidos e hospitalares; X – cópia, digitalização e fax; XI – correios e telégrafos e remessa de encomendas e cargas por via aérea, porta a porta, nacional e internacional; XII – desinsetização; XIII – energia elétrica; XIV – fotografia; XV – gerenciamento de serviços corporativos de TIC; XVI – gerenciamento e controle de aquisição de combustíveis em rede de postos credenciados, por meio de sistema de gerenciamento integrado (software); XVII – impressão de material gráfico em grandes formatos, em papel, em lona, em tecido ou vinil; XVIII – infovia; XIX – internet; XX – intérprete de Libras; XXI – jardinagem; XXII – lavanderia, limpeza e conservação; XXIII – manutenção preditiva, preventiva, corretiva, operação, suporte e/ou atualização do sistema, no que couber, de: (a) ar-condicionado, ventilação e exaustão; (b) cabeamento de transmissão de dados e voz; (c) estruturas de dados das soluções de Business Intelligence das áreas judicial e administrativa; (d) central telefônica do CJF; (e) elevadores; (f) equipamentos elétricos, eletrônicos, eletroeletrônicos e de TIC; (g) equipamentos de combate a incêndio, com ou sem reposição de peças, componentes e acessórios; (h) equipamentos de inspeção por raio-x, de detectores de metais e de narcóticos e explosivos; (i) grupo de geradores fornecedores de energia; (j) persianas e cortinas; (k) softwares e serviços de TIC; (l) sinalização de segurança, CFTV e controle de acesso; m) veículo da frota, mediante sistema de administração e gerenciamento; n) prédios (instalação, estrutura e todos os seus subsistemas); XXIV – plano de saúde para os servidores e dependentes; XXV – planejamento, organização, coordenação e acompanhamento de eventos institucionais, com o fornecimento de materiais e serviços; XXVI – produção, operação, geração e transmissão de produtos e programas para rádio, televisão e web; XXVII – recepção, secretariado e técnico em secretariado; XXVIII – reparo e/ou recuperação de mobiliário; XXIX – serviços gerais e de almoxarifado, de ascensorista, de berçário, de biblioteca, de cerimonialista, de copeiragem, de carregador, de estocagem, de faturista, de garçom, de marcenaria, de lavador de veículos e de limpeza e conservação; XXX – designer gráfico, webdesigner e publicitário; XXXI – operação, gravação, edição, digitalização, organização e transmissão do áudio e vídeo das sessões de julgamento, videoconferências e das solenidades das sessões plenárias, das audiências e de outros eventos demandados por unidades do CJF; XXXII – apoio à administração de dados, padronização, suporte, execução, implantação e operacionalização das bases de dados da integração; XXXIII – desenvolvimento, sustentação e documentação de sistemas de informação existentes (legados) e novos, para atendimento das demandas de integração entre o CJF e outras instituições; XXXIV – seguro veicular; XXXV – chaveiro; XXXVI – consultas às normas da Associação Brasileira de Normas Técnicas – ABNT e tabela de preços – Pini; XXXVII – sonorização, degravação e afins; XXXVIII – telefonia fixa e móvel, nacional e internacional e serviços de 0800; XXXIX – televisão por assinatura; XL – interpretação simultânea, tradução, revisão e versão de textos; XLI – transporte, descontaminação e reciclagem de lâmpadas queimadas; XLII – transporte de pessoas e pequenas cargas, por meio rodoviário; XLIII – transposição de conteúdos para Ensino a Distância – EAD.",
+      "descOfficial": "Consideram-se serviços prestados de forma contínua, para fins de aplicação do disposto nos arts. 106, 109, parágrafo único do art. 98, parágrafo único do art. 97, inciso I do art. 40 e § 8º do art. 25 da Lei n. 14.133/2021, as compras para a manutenção dos órgãos da Justiça Federal decorrentes de necessidades permanentes ou prolongadas, tais como: I – agenciamento de viagens e emissão de passagem aérea e rodoviária; II – apoio operacional, atendente e mensageria; III – assinatura de: (a) jornais, revistas e periódicos especializados em formato digital ou eletrônico; (b) mídia impressa e eletrônica; (c) ferramentas de pesquisas on-line e de monitoramento on-line de redes sociais; (d) plataforma de desenvolvimento de aplicativos móveis e plataforma tecnológica de materiais informativos; (e) bases de dados jurídicas; IV – atendimento a usuários de Tecnologia da Informação e Comunicação – TIC; V – atividades de bombeiro civil; VI – aluguel de equipamentos e utilização de programas de informática, contratados com fundamento na Lei n. 14.133/2021; VII – atividade de segurança pessoal privada armada e desarmada; VIII – atividade de vigilância armada e desarmada; IX – coleta, tratamento e destinação final de resíduos sólidos e hospitalares; X – cópia, digitalização e fax; XI – correios e telégrafos e remessa de encomendas e cargas por via aérea, porta a porta, nacional e internacional; XII – desinsetização; XIII – energia elétrica; XIV – fotografia; XV – gerenciamento de serviços corporativos de TIC; XVI – gerenciamento e controle de aquisição de combustíveis em rede de postos credenciados, por meio de sistema de gerenciamento integrado (software); XVII – impressão de material gráfico em grandes formatos, em papel, em lona, em tecido ou vinil; XVIII – infovia; XIX – internet; XX – intérprete de Libras; XXI – jardinagem; XXII – lavanderia, limpeza e conservação; XXIII – manutenção preditiva, preventiva, corretiva, operação, suporte e/ou atualização do sistema, no que couber, de: (a) ar-condicionado, ventilação e exaustão; (b) cabeamento de transmissão de dados e voz; (c) estruturas de dados das soluções de Business Intelligence das áreas judicial e administrativa; (d) central telefônica do CJF; (e) elevadores; (f) equipamentos elétricos, eletrônicos, eletroeletrônicos e de TIC; (g) equipamentos de combate a incêndio, com ou sem reposição de peças, componentes e acessórios; (h) equipamentos de inspeção por raio-x, de detectores de metais e de narcóticos e explosivos; (i) grupo de geradores fornecedores de energia; (j) persianas e cortinas; (k) softwares e serviços de TIC; (l) sinalização de segurança, CFTV e controle de acesso; m) veículo da frota, mediante sistema de administração e gerenciamento; n) prédios (instalação, estrutura e todos os seus subsistemas); XXIV – plano de saúde para os servidores e dependentes; XXV – planejamento, organização, coordenação e acompanhamento de eventos institucionais, com o fornecimento de materiais e serviços; XXVI – produção, operação, geração e transmissão de produtos e programas para rádio, televisão e web; XXVII – recepção, secretariado e técnico em secretariado; XXVIII – reparo e/ou recuperação de mobiliário; XXIX – serviços gerais e de almoxarifado, de ascensorista, de berçário, de biblioteca, de cerimonialista, de copeiragem, de carregador, de estocagem, de faturista, de garçom, de marcenaria, de lavador de veículos e de limpeza e conservação; XXX – designer gráfico, webdesigner e publicitário; XXXI – operação, gravação, edição, digitalização, organização e transmissão do áudio e vídeo das sessões de julgamento, videoconferências e das solenidades das sessões plenárias, das audiências e de outros eventos demandados por unidades do CJF; XXXII – apoio à administração de dados, padronização, suporte, execução, implantação e operacionalização das bases de dados da integração; XXXIII – desenvolvimento, sustentação e documentação de sistemas de informação existentes (legados) e novos, para atendimento das demandas de integração entre o CJF e outras instituições; XXXIV – seguro veicular; XXXV – chaveiro; XXXVI – consultas às normas da Associação Brasileira de Normas Técnicas – ABNT e tabela de preços – Pini; XXXVII – sonorização, degravação e afins; XXXVIII – telefonia fixa e móvel, nacional e internacional e serviços de 0800; XXXIX – televisão por assinatura; XL – interpretação simultânea, tradução, revisão e versão de textos; XLI – transporte, descontaminação e reciclagem de lâmpadas queimadas; XLII – transporte de pessoas e pequenas cargas, por meio rodoviário; XLIII – transposição de conteúdos para Ensino a Distância – EAD.",
+      "sourceUrl": "cjf.jus.br",
+      "similaridade": 1,
+      "matches": true
+    },
+    {
+      "id": "eb8132ba-0821-434c-897f-940a457a1f16",
+      "ente": "CJF",
+      "numero": 17,
+      "title": "Enunciado do CJF nº 17",
+      "descDb": "A estimativa do valor da contratação realizada por meio dos Estudos Técnicos Preliminares, de que trata o art. 18, § 1º, inciso VI, será, via de regra, uma análise inicial dos preços praticados no mercado por servir unicamente à análise da autoridade competente quanto à viabilidade econômica da contratação. De forma diferente, há uma estimativa do valor da contratação realizada pelo setor competente do órgão, conforme o art. 6º, inciso XXIII, “i”, que servirá como base à análise da aceitabilidade das propostas na fase externa do processo licitatório e, por isso, utilizará os parâmetros do art. 23 e seus parágrafos, combinados, sempre que possível, em uma “cesta de preços”, priorizando os preços públicos, salvo quando, de acordo com o Manual de Atribuições e Regulamento Interno do órgão, a obrigação recair para o mesmo setor que estiver elaborando os Estudos Técnicos Preliminares.",
+      "descOfficial": "A estimativa do valor da contratação realizada por meio dos Estudos Técnicos Preliminares, de que trata o art. 18, § 1º, inciso VI, será, via de regra, uma análise inicial dos preços praticados no mercado por servir unicamente à análise da autoridade competente quanto à viabilidade econômica da contratação. De forma diferente, há uma estimativa do valor da contratação realizada pelo setor competente do órgão, conforme o art. 6º, inciso XXIII, “i”, que servirá como base à análise da aceitabilidade das propostas na fase externa do processo licitatório e, por isso, utilizará os parâmetros do art. 23 e seus parágrafos, combinados, sempre que possível, em uma “cesta de preços”, priorizando os preços públicos, salvo quando, de acordo com o Manual de Atribuições e Regulamento Interno do órgão, a obrigação recair para o mesmo setor que estiver elaborando os Estudos Técnicos Preliminares.",
+      "sourceUrl": "cjf.jus.br",
+      "similaridade": 1,
+      "matches": true
+    },
+    {
+      "id": "aa7c2a28-6dd1-4a31-9914-1a03a3230e72",
+      "ente": "CJF",
+      "numero": 26,
+      "title": "Enunciado do CJF nº 26",
+      "descDb": "O instrumento de contrato poderá ser substituído por outro instrumento hábil na hipótese de contratação cujo valor não ultrapasse os limites estabelecidos para a dispensa de licitação (art. 75 da Lei n. 14.133/2021), inclusive nas inexigibilidades.",
+      "descOfficial": "O instrumento de contrato poderá ser substituído por outro instrumento hábil na hipótese de contratação cujo valor não ultrapasse os limites estabelecidos para a dispensa de licitação (art. 75 da Lei n. 14.133/2021), inclusive nas inexigibilidades.",
+      "sourceUrl": "cjf.jus.br",
+      "similaridade": 1,
+      "matches": true
+    },
+    {
+      "id": "5d9f65f8-f0f7-42d3-a590-a14577097643",
+      "ente": "CJF",
+      "numero": 27,
+      "title": "Enunciado do CJF nº 27",
+      "descDb": "Desde que considerado o critério de julgamento da licitação e da adjudicação do objeto (menor preço por item, global ou por lote), é juridicamente possível, no âmbito do mesmo item, o restabelecimento total ou parcial de quantitativo anteriormente suprimido e a realização de novos aditamentos para acréscimos e supressões, observados os limites legais para alterações do objeto em relação ao valor inicial e atualizado do contrato, não representando compensação vedada, desde que sejam observadas as mesmas condições e os mesmos preços iniciais pactuados, não haja fraude ao certame ou à contratação direta, jogo de planilha, nem transfiguração do objeto. Sendo possível, além do restabelecimento, novos acréscimos sobre o valor original do contrato.",
+      "descOfficial": "Desde que considerado o critério de julgamento da licitação e da adjudicação do objeto (menor preço por item, global ou por lote), é juridicamente possível, no âmbito do mesmo item, o restabelecimento total ou parcial de quantitativo anteriormente suprimido e a realização de novos aditamentos para acréscimos e supressões, observados os limites legais para alterações do objeto em relação ao valor inicial e atualizado do contrato, não representando compensação vedada, desde que sejam observadas as mesmas condições e os mesmos preços iniciais pactuados, não haja fraude ao certame ou à contratação direta, jogo de planilha, nem transfiguração do objeto. Sendo possível, além do restabelecimento, novos acréscimos sobre o valor original do contrato.",
+      "sourceUrl": "cjf.jus.br",
+      "similaridade": 1,
+      "matches": true
+    },
+    {
+      "id": "85c8ae4d-00cb-43aa-94df-800888aa9d6c",
+      "ente": "CJF",
+      "numero": 28,
+      "title": "Enunciado do CJF nº 28",
+      "descDb": "A base de cálculo para a incidência dos limites de alterações contratuais do objeto relaciona-se com o critério de julgamento da licitação e da adjudicação do objeto. Em contratos derivados de licitação, em que o critério de julgamento tenha sido o menor preço por item, com adjudicação por item, o limite legal para as alterações deve ser calculado sobre o valor do item que sofrerá a alteração. No contrato derivado de licitação com critério de julgamento menor preço global e adjudicação global, o limite das alterações deve ser calculado sobre o valor inicial atualizado do contrato, ainda que a alteração recaia sobre um ou alguns itens, vedando-se a compensação entre acréscimos e supressões, nos termos da Orientação Normativa AGU n. 50.",
+      "descOfficial": "A base de cálculo para a incidência dos limites de alterações contratuais do objeto relaciona-se com o critério de julgamento da licitação e da adjudicação do objeto. Em contratos derivados de licitação, em que o critério de julgamento tenha sido o menor preço por item, com adjudicação por item, o limite legal para as alterações deve ser calculado sobre o valor do item que sofrerá a alteração. No contrato derivado de licitação com critério de julgamento menor preço global e adjudicação global, o limite das alterações deve ser calculado sobre o valor inicial atualizado do contrato, ainda que a alteração recaia sobre um ou alguns itens, vedando-se a compensação entre acréscimos e supressões, nos termos da Orientação Normativa AGU n. 50.",
+      "sourceUrl": "cjf.jus.br",
+      "similaridade": 1,
+      "matches": true
+    },
+    {
+      "id": "82d9628b-4e6d-4e4f-947e-62661597efdd",
+      "ente": "CJF",
+      "numero": 29,
+      "title": "Enunciado do CJF nº 29",
+      "descDb": "É medida de controle, que deve ser priorizada, o recebimento provisório do objeto do contrato pelo responsável por seu acompanhamento e fiscalização, bem como o recebimento definitivo a ser realizado pelo servidor gestor do contrato, comissão de gestão ou unidade de gestão de contratos, na forma prevista no art. 140 da Lei n. 14.133/2021.",
+      "descOfficial": "É medida de controle, que deve ser priorizada, o recebimento provisório do objeto do contrato pelo responsável por seu acompanhamento e fiscalização, bem como o recebimento definitivo a ser realizado pelo servidor gestor do contrato, comissão de gestão ou unidade de gestão de contratos, na forma prevista no art. 140 da Lei n. 14.133/2021.",
+      "sourceUrl": "cjf.jus.br",
+      "similaridade": 1,
+      "matches": true
+    },
+    {
+      "id": "af5aaf2b-7b20-4000-817d-84cebcbb787e",
+      "ente": "CJF",
+      "numero": 30,
+      "title": "Enunciado do CJF nº 30",
+      "descDb": "A fixação de salários em valores superiores aos pisos estabelecidos em convenções coletivas de trabalho é admitida na contratação por postos de serviço, observados os seguintes requisitos: (a) justificativa técnica de que os serviços demandam, por suas características e peculiaridades, a execução por profissional com nível de qualificação acima da média, comprovável objetivamente por exame de documentos exigidos no ato convocatório; (b) realização de pesquisa de preços que demonstre a compatibilidade com os valores de mercado, realizado para contratações similares, fundamentada em estudos e pesquisas de mercado que considerem objetivamente a complexidade de atividades e aptidões necessárias para seus exercícios.",
+      "descOfficial": "A fixação de salários em valores superiores aos pisos estabelecidos em convenções coletivas de trabalho é admitida na contratação por postos de serviço, observados os seguintes requisitos: (a) justificativa técnica de que os serviços demandam, por suas características e peculiaridades, a execução por profissional com nível de qualificação acima da média, comprovável objetivamente por exame de documentos exigidos no ato convocatório; (b) realização de pesquisa de preços que demonstre a compatibilidade com os valores de mercado, realizado para contratações similares, fundamentada em estudos e pesquisas de mercado que considerem objetivamente a complexidade de atividades e aptidões necessárias para seus exercícios.",
+      "sourceUrl": "cjf.jus.br",
+      "similaridade": 1,
+      "matches": true
+    },
+    {
+      "id": "72ff3046-491f-4f01-bfdc-7e8c33658d41",
+      "ente": "CJF",
+      "numero": 31,
+      "title": "Enunciado do CJF nº 31",
+      "descDb": "Como boa prática, o órgão deve definir modelos de Estudos Técnicos Preliminares (ETP) e Termos de Referência (TR) para órgãos ou entidades, com o objetivo de estabelecer a utilização de documentação padronizada e aumentar a eficiência nas aquisições/contratações, em especial em compras compartilhadas.",
+      "descOfficial": "Como boa prática, o órgão deve definir modelos de Estudos Técnicos Preliminares (ETP) e Termos de Referência (TR) para órgãos ou entidades, com o objetivo de estabelecer a utilização de documentação padronizada e aumentar a eficiência nas aquisições/contratações, em especial em compras compartilhadas.",
+      "sourceUrl": "cjf.jus.br",
+      "similaridade": 1,
+      "matches": true
+    },
+    {
+      "id": "df719bd8-92a9-497e-865f-873c05025ca4",
+      "ente": "CJF",
+      "numero": 32,
+      "title": "Enunciado do CJF nº 32",
+      "descDb": "Na confecção do Estudo Técnico Preliminar (ETP), os requisitos da contratação (art. 18, § 1º, inciso III, da Lei n. 14.133/2021) devem ser entendidos como os necessários e suficientes à escolha da solução, e não como os requisitos de habilitação a serem exigidos na licitação ou na contratação direta, estes últimos constantes do art. 6º, inciso XXIII, “d”, da mencionada lei.",
+      "descOfficial": "Na confecção do Estudo Técnico Preliminar (ETP), os requisitos da contratação (art. 18, § 1º, inciso III, da Lei n. 14.133/2021) devem ser entendidos como os necessários e suficientes à escolha da solução, e não como os requisitos de habilitação a serem exigidos na licitação ou na contratação direta, estes últimos constantes do art. 6º, inciso XXIII, “d”, da mencionada lei.",
+      "sourceUrl": "cjf.jus.br",
+      "similaridade": 1,
+      "matches": true
+    },
+    {
+      "id": "36ee2b0a-cd1b-4cda-8424-f927405a4a83",
+      "ente": "CJF",
+      "numero": 33,
+      "title": "Enunciado do CJF nº 33",
+      "descDb": "Utilizar critérios estatísticos para a avaliação crítica dos preços coletados na pesquisa de preços, a exemplo: média saneada para a exclusão dos valores que destoam muito da média simples, como valores que podem ser inexequíveis e/ou excessivos; coeficiente de variação para a seleção do método de cálculo, média ou mediana, a ser utilizado na definição do valor estimado para a contratação.",
+      "descOfficial": "Utilizar critérios estatísticos para a avaliação crítica dos preços coletados na pesquisa de preços, a exemplo: média saneada para a exclusão dos valores que destoam muito da média simples, como valores que podem ser inexequíveis e/ou excessivos; coeficiente de variação para a seleção do método de cálculo, média ou mediana, a ser utilizado na definição do valor estimado para a contratação.",
+      "sourceUrl": "cjf.jus.br",
+      "similaridade": 1,
+      "matches": true
+    },
+    {
+      "id": "6367eef0-ec28-44af-98c3-795f35036b71",
+      "ente": "CJF",
+      "numero": 34,
+      "title": "Enunciado do CJF nº 34",
+      "descDb": "O Plano de Logística Sustentável deve ser considerado instrumento de governança imprescindível para corroborar com o desenvolvimento nacional sustentável e elucidar o preenchimento desse campo com critérios e diretrizes claros para a organização.",
+      "descOfficial": "O Plano de Logística Sustentável deve ser considerado instrumento de governança imprescindível para corroborar com o desenvolvimento nacional sustentável e elucidar o preenchimento desse campo com critérios e diretrizes claros para a organização.",
+      "sourceUrl": "cjf.jus.br",
+      "similaridade": 1,
+      "matches": true
+    },
+    {
+      "id": "48db7db3-d320-4790-a7a1-967adb53f073",
+      "ente": "CJF",
+      "numero": 35,
+      "title": "Enunciado do CJF nº 35",
+      "descDb": "A elaboração dos artefatos da fase preparatória determinada no art. 18 da Lei n. 14.133/2021 deve ser conduzida por representante da unidade demandante. Conforme a complexidade do objeto, poderá ser assistido por equipe de planejamento, formada, além do representante da unidade demandante, por representantes da unidade técnica, que fornecerá conhecimentos sobre aspectos técnico-operacionais e de uso do objeto, e da unidade administrativa, que assistirá em aspectos licitatórios e contratuais. Tal dinâmica não impede a criação de unidade organizacional especializada em planejamento das contratações, que prestará apoio fornecendo integrante administrativo à equipe de planejamento. Imprescindível, em todas as hipóteses, a ampla participação do demandante.",
+      "descOfficial": "A elaboração dos artefatos da fase preparatória determinada no art. 18 da Lei n. 14.133/2021 deve ser conduzida por representante da unidade demandante. Conforme a complexidade do objeto, poderá ser assistido por equipe de planejamento, formada, além do representante da unidade demandante, por representantes da unidade técnica, que fornecerá conhecimentos sobre aspectos técnico-operacionais e de uso do objeto, e da unidade administrativa, que assistirá em aspectos licitatórios e contratuais. Tal dinâmica não impede a criação de unidade organizacional especializada em planejamento das contratações, que prestará apoio fornecendo integrante administrativo à equipe de planejamento. Imprescindível, em todas as hipóteses, a ampla participação do demandante.",
+      "sourceUrl": "cjf.jus.br",
+      "similaridade": 1,
+      "matches": true
+    },
+    {
+      "id": "7c6319ca-64d8-4801-9062-cd951dcf25e5",
+      "ente": "CJF",
+      "numero": 36,
+      "title": "Enunciado do CJF nº 36",
+      "descDb": "Os limites previstos no art. 156, § 3º, da Lei n. 14.133/2021 deverão ser analisados em conjunto com o art. 20 da Lei de Introdução às Normas do Direito Brasileiro – LINDB.",
+      "descOfficial": "Os limites previstos no art. 156, § 3º, da Lei n. 14.133/2021 deverão ser analisados em conjunto com o art. 20 da Lei de Introdução às Normas do Direito Brasileiro – LINDB.",
+      "sourceUrl": "cjf.jus.br",
+      "similaridade": 1,
+      "matches": true
+    },
+    {
+      "id": "ae9fa620-c8f7-4a9c-b179-7c8fb2fd468e",
+      "ente": "CJF",
+      "numero": 37,
+      "title": "Enunciado do CJF nº 37",
+      "descDb": "Ao estabelecer o número máximo de participantes no procedimento de registro de preços, conforme art. 7º, inciso I, do Decreto n. 11.462/2023, o órgão da Justiça Federal poderá, mediante justificativa, limitar a intenção de registro de preços (IRP) aos demais órgãos da Justiça Federal ou, até mesmo, dispensá-la, caso todos tenham tido a oportunidade de manifestação prévia acerca do planejamento da contratação.",
+      "descOfficial": "Ao estabelecer o número máximo de participantes no procedimento de registro de preços, conforme art. 7º, inciso I, do Decreto n. 11.462/2023, o órgão da Justiça Federal poderá, mediante justificativa, limitar a intenção de registro de preços (IRP) aos demais órgãos da Justiça Federal ou, até mesmo, dispensá-la, caso todos tenham tido a oportunidade de manifestação prévia acerca do planejamento da contratação.",
+      "sourceUrl": "cjf.jus.br",
+      "similaridade": 1,
+      "matches": true
+    },
+    {
+      "id": "bd86d774-a5ed-4ecd-b746-ce0bed363435",
+      "ente": "CJF",
+      "numero": 38,
+      "title": "Enunciado do CJF nº 38",
+      "descDb": "Permite-se, excepcionalmente, a realização de contratação que não conste no Plano de Contratações Anual (PCA), desde que devidamente justificada e enquadrada em uma das hipóteses: (a) demanda superveniente: que não existia no momento da elaboração do PCA; (b) demanda não prevista: que já existia no momento da elaboração do PCA, mas que permaneceu parcial ou totalmente oculta ao gestor responsável por sua elaboração. Em ambos os casos, a continuidade da contratação fica condicionada à aprovação da autoridade competente com as justificativas apresentadas, além da demonstração de alinhamento com a estratégia e da existência de lastro orçamentário. Caberá, ainda, a inclusão do bem, serviço ou obra no PCA vigente para fins de monitoramento dos indicadores de desempenho.",
+      "descOfficial": "Permite-se, excepcionalmente, a realização de contratação que não conste no Plano de Contratações Anual (PCA), desde que devidamente justificada e enquadrada em uma das hipóteses: (a) demanda superveniente: que não existia no momento da elaboração do PCA; (b) demanda não prevista: que já existia no momento da elaboração do PCA, mas que permaneceu parcial ou totalmente oculta ao gestor responsável por sua elaboração. Em ambos os casos, a continuidade da contratação fica condicionada à aprovação da autoridade competente com as justificativas apresentadas, além da demonstração de alinhamento com a estratégia e da existência de lastro orçamentário. Caberá, ainda, a inclusão do bem, serviço ou obra no PCA vigente para fins de monitoramento dos indicadores de desempenho.",
+      "sourceUrl": "cjf.jus.br",
+      "similaridade": 1,
+      "matches": true
+    },
+    {
+      "id": "b9d4b309-9332-489d-9c57-a509d42d1902",
+      "ente": "CJF",
+      "numero": 39,
+      "title": "Enunciado do CJF nº 39",
+      "descDb": "Não há ofensa ao princípio da segregação de funções caso seja escolhido o mesmo agente público que funcionou, na fase preparatória, como membro da equipe de planejamento da contratação, na designação do gestor e do fiscal do contrato.",
+      "descOfficial": "Não há ofensa ao princípio da segregação de funções caso seja escolhido o mesmo agente público que funcionou, na fase preparatória, como membro da equipe de planejamento da contratação, na designação do gestor e do fiscal do contrato.",
+      "sourceUrl": "cjf.jus.br",
+      "similaridade": 1,
+      "matches": true
+    },
+    {
+      "id": "5174cb4b-1164-45bd-9459-05a60123e5ad",
+      "ente": "CJF",
+      "numero": 40,
+      "title": "Enunciado do CJF nº 40",
+      "descDb": "O Documento de Formalização de Demanda (DFD) deve ser o primeiro documento para instrução do processo, tanto em licitações quanto em contratações diretas para aquisição de bens, prestação de serviços e realização de obras.",
+      "descOfficial": "O Documento de Formalização de Demanda (DFD) deve ser o primeiro documento para instrução do processo, tanto em licitações quanto em contratações diretas para aquisição de bens, prestação de serviços e realização de obras.",
+      "sourceUrl": "cjf.jus.br",
+      "similaridade": 1,
+      "matches": true
+    },
+    {
+      "id": "933cd9b6-37a9-449c-be1f-c5f4252092e2",
+      "ente": "CJF",
+      "numero": 41,
+      "title": "Enunciado do CJF nº 41",
+      "descDb": "De acordo com o art. 18, § 1º, inciso II, o ETP deve demonstrar que a contratação está prevista no Plano de Contratações Anual (PCA), indicando seu alinhamento ao planejamento da Administração. Caso não esteja, retorna-se o ETP para área requisitante para que esta justifique sua necessidade, motivando a ausência de planejamento prévio. Após a devida justificativa e a aprovação pela autoridade competente, inclui-se a demanda e publica-se a alteração do PCA, para que assim volte à fase de avaliação da viabilidade técnica e econômica da contratação.",
+      "descOfficial": "De acordo com o art. 18, § 1º, inciso II, o ETP deve demonstrar que a contratação está prevista no Plano de Contratações Anual (PCA), indicando seu alinhamento ao planejamento da Administração. Caso não esteja, retorna-se o ETP para área requisitante para que esta justifique sua necessidade, motivando a ausência de planejamento prévio. Após a devida justificativa e a aprovação pela autoridade competente, inclui-se a demanda e publica-se a alteração do PCA, para que assim volte à fase de avaliação da viabilidade técnica e econômica da contratação.",
+      "sourceUrl": "cjf.jus.br",
+      "similaridade": 1,
+      "matches": true
+    },
+    {
+      "id": "a4407cbe-8034-4c66-b582-dfc8868a2e9f",
+      "ente": "CJF",
+      "numero": 42,
+      "title": "Enunciado do CJF nº 42",
+      "descDb": "No caso de prorrogação do prazo de vigência da ata de registro de preços, atendidas as condições previstas no art. 84 da Lei n. 14.133/2021, as quantidades registradas poderão ser renovadas, devendo o tema ser tratado na fase de planejamento da contratação e previsto no ato convocatório.",
+      "descOfficial": "No caso de prorrogação do prazo de vigência da ata de registro de preços, atendidas as condições previstas no art. 84 da Lei n. 14.133/2021, as quantidades registradas poderão ser renovadas, devendo o tema ser tratado na fase de planejamento da contratação e previsto no ato convocatório.",
+      "sourceUrl": "cjf.jus.br",
+      "similaridade": 1,
+      "matches": true
+    },
+    {
+      "id": "2cf8a1d9-2c94-4a1f-aa1b-2e52ee769c59",
+      "ente": "CJF",
+      "numero": 43,
+      "title": "Enunciado do CJF nº 43",
+      "descDb": "O responsável pela construção do ETP, TR ou Projeto Básico poderá solicitar apoio de fiscal de contrato, ou outro servidor que tenha atuado no processo de contratação de objeto igual ou análogo ao que está se construindo, com o objetivo de afastar riscos já conhecidos por estes e almejar o alcance dos mandamentos contidos no art. 18 da Lei n. 14.133/2021.",
+      "descOfficial": "O responsável pela construção do ETP, TR ou Projeto Básico poderá solicitar apoio de fiscal de contrato, ou outro servidor que tenha atuado no processo de contratação de objeto igual ou análogo ao que está se construindo, com o objetivo de afastar riscos já conhecidos por estes e almejar o alcance dos mandamentos contidos no art. 18 da Lei n. 14.133/2021.",
+      "sourceUrl": "cjf.jus.br",
+      "similaridade": 1,
+      "matches": true
+    },
+    {
+      "id": "b2c169d3-5f62-47e3-85a9-debddd00bff8",
+      "ente": "CJF",
+      "numero": 44,
+      "title": "Enunciado do CJF nº 44",
+      "descDb": "A palavra “poderá” contida no art. 12, inciso VII, da Lei n. 14.133/2021, será entendida como poder/dever, não podendo a alta administração promover interpretação que conduza a ideia de não elaboração do Plano de Contratações Anual (PCA), em razão das diretrizes do Conselho Nacional de Justiça.",
+      "descOfficial": "A palavra “poderá” contida no art. 12, inciso VII, da Lei n. 14.133/2021, será entendida como poder/dever, não podendo a alta administração promover interpretação que conduza a ideia de não elaboração do Plano de Contratações Anual (PCA), em razão das diretrizes do Conselho Nacional de Justiça.",
+      "sourceUrl": "cjf.jus.br",
+      "similaridade": 1,
+      "matches": true
+    },
+    {
+      "id": "df96428f-7f2c-4c5f-8bde-7722aaa15511",
+      "ente": "CJF",
+      "numero": 45,
+      "title": "Enunciado do CJF nº 45",
+      "descDb": "Considera-se participação indireta, para fins do disposto no art. 14 da Lei n. 14.133/2021, a existência de vínculo de natureza técnica, comercial, econômica, financeira ou trabalhista entre o autor do projeto, pessoa física ou jurídica, e o licitante ou responsável pelos serviços, fornecimentos e obras, incluindo-se os fornecimentos de bens e serviços a estes necessários, exceto nos casos das contratações integradas e semi-integradas.",
+      "descOfficial": "Considera-se participação indireta, para fins do disposto no art. 14 da Lei n. 14.133/2021, a existência de vínculo de natureza técnica, comercial, econômica, financeira ou trabalhista entre o autor do projeto, pessoa física ou jurídica, e o licitante ou responsável pelos serviços, fornecimentos e obras, incluindo-se os fornecimentos de bens e serviços a estes necessários, exceto nos casos das contratações integradas e semi-integradas.",
+      "sourceUrl": "cjf.jus.br",
+      "similaridade": 1,
+      "matches": true
+    },
+    {
+      "id": "fb13eb35-7923-461f-a8ee-f6adc3e2d553",
+      "ente": "CJF",
+      "numero": 46,
+      "title": "Enunciado do CJF nº 46",
+      "descDb": "Os profissionais organizados em cooperativa poderão participar das contratações diretas, de acordo com os princípios da razoabilidade, da competitividade, da proporcionalidade e do desenvolvimento nacional sustentável, desde que cumpridos os requisitos previstos nos incisos do art. 16 da Lei n. 14.133/2021.",
+      "descOfficial": "Os profissionais organizados em cooperativa poderão participar das contratações diretas, de acordo com os princípios da razoabilidade, da competitividade, da proporcionalidade e do desenvolvimento nacional sustentável, desde que cumpridos os requisitos previstos nos incisos do art. 16 da Lei n. 14.133/2021.",
+      "sourceUrl": "cjf.jus.br",
+      "similaridade": 1,
+      "matches": true
+    },
+    {
+      "id": "950239be-a863-40d4-b586-0dcae74c35fe",
+      "ente": "CJF",
+      "numero": 47,
+      "title": "Enunciado do CJF nº 47",
+      "descDb": "Diante das limitações do Portal de Compras (Comprasnet), nas contratações com vigência inicial plurianual, em que o valor anual da contratação para cada grupo/item seja inferior ao disposto no art. 6º do Decreto n. 8.538/2015 (R$ 80.000,00 atualmente), mas que o valor plurianual seja superior ao limite para participação exclusiva de ME/EPP, o cadastro do grupo/item no portal de compras pode ser realizado com quantitativos e valores estimados para a contratação anual. Posteriormente, durante a realização da sessão pública do Pregão, a proposta final, ajustada pelo licitante, deverá conter os quantitativos e valores estimados para a vigência total prevista no Termo de Referência. Assim, deverá ser emitido um aviso no edital e no portal de compras de que a proposta ajustada deve prever a vigência plurianual.",
+      "descOfficial": "Diante das limitações do Portal de Compras (Comprasnet), nas contratações com vigência inicial plurianual, em que o valor anual da contratação para cada grupo/item seja inferior ao disposto no art. 6º do Decreto n. 8.538/2015 (R$ 80.000,00 atualmente), mas que o valor plurianual seja superior ao limite para participação exclusiva de ME/EPP, o cadastro do grupo/item no portal de compras pode ser realizado com quantitativos e valores estimados para a contratação anual. Posteriormente, durante a realização da sessão pública do Pregão, a proposta final, ajustada pelo licitante, deverá conter os quantitativos e valores estimados para a vigência total prevista no Termo de Referência. Assim, deverá ser emitido um aviso no edital e no portal de compras de que a proposta ajustada deve prever a vigência plurianual.",
+      "sourceUrl": "cjf.jus.br",
+      "similaridade": 1,
+      "matches": true
+    },
+    {
+      "id": "f541bbc4-3c6d-4d09-a2d3-39f12e9c58e5",
+      "ente": "CJF",
+      "numero": 48,
+      "title": "Enunciado do CJF nº 48",
+      "descDb": "Quando a proposta apresentada na sessão pública possuir valor inferior a 50% do valor orçado pela Administração, constitui boa prática solicitar que a licitante comprove a exequibilidade de sua proposta, por meio de notas fiscais, contratos ou outros documentos que demonstrem que ela tem capacidade de fornecer o produto ou prestar serviço compatível com aquele preço.",
+      "descOfficial": "Quando a proposta apresentada na sessão pública possuir valor inferior a 50% do valor orçado pela Administração, constitui boa prática solicitar que a licitante comprove a exequibilidade de sua proposta, por meio de notas fiscais, contratos ou outros documentos que demonstrem que ela tem capacidade de fornecer o produto ou prestar serviço compatível com aquele preço.",
+      "sourceUrl": "cjf.jus.br",
+      "similaridade": 1,
+      "matches": true
+    },
+    {
+      "id": "eea8c846-f871-492f-8e38-14c5645fdce9",
+      "ente": "CJF",
+      "numero": 49,
+      "title": "Enunciado do CJF nº 49",
+      "descDb": "Constitui boa prática da Administração a indicação do código mais específico do CATMAT/CATSER (Catálogo de Materiais e Serviços do SIASG) no Termo de Referência ou Projeto Básico, para cadastro de objeto da aquisição ou contratação da licitação no portal de compras.",
+      "descOfficial": "Constitui boa prática da Administração a indicação do código mais específico do CATMAT/CATSER (Catálogo de Materiais e Serviços do SIASG) no Termo de Referência ou Projeto Básico, para cadastro de objeto da aquisição ou contratação da licitação no portal de compras.",
+      "sourceUrl": "cjf.jus.br",
+      "similaridade": 1,
+      "matches": true
+    },
+    {
+      "id": "737d482e-45d3-4b7c-acbc-3f3b9355b064",
+      "ente": "CJF",
+      "numero": 50,
+      "title": "Enunciado do CJF nº 50",
+      "descDb": "Nas contratações de serviços e fornecimentos contínuos por dispensa de licitação em função do valor, de acordo com o art. 75, incisos I e II, da Lei n. 14.133/2021, o valor limite para fins de apuração de fracionamento da despesa deve ser considerado por exercício financeiro, de modo que uma contratação com prazo de vigência superior a 12 meses pode ter valor acima dos limites estabelecidos nos referidos incisos, desde que sejam respeitados os limites por exercício financeiro.",
+      "descOfficial": "Nas contratações de serviços e fornecimentos contínuos por dispensa de licitação em função do valor, de acordo com o art. 75, incisos I e II, da Lei n. 14.133/2021, o valor limite para fins de apuração de fracionamento da despesa deve ser considerado por exercício financeiro, de modo que uma contratação com prazo de vigência superior a 12 meses pode ter valor acima dos limites estabelecidos nos referidos incisos, desde que sejam respeitados os limites por exercício financeiro.",
+      "sourceUrl": "cjf.jus.br",
+      "similaridade": 1,
+      "matches": true
+    },
+    {
+      "id": "f646a031-1d14-40ac-8bd6-6ba4065212f2",
+      "ente": "CJF",
+      "numero": 51,
+      "title": "Enunciado do CJF nº 51",
+      "descDb": "As sanções previstas no art. 156 da Lei n. 14.133/2021 poderão ser aplicadas àqueles que participem do procedimento de contratação direta, desde que haja expressa previsão no ato convocatório.",
+      "descOfficial": "As sanções previstas no art. 156 da Lei n. 14.133/2021 poderão ser aplicadas àqueles que participem do procedimento de contratação direta, desde que haja expressa previsão no ato convocatório.",
+      "sourceUrl": "cjf.jus.br",
+      "similaridade": 1,
+      "matches": true
+    },
+    {
+      "id": "45121f1b-7263-46cb-91a5-903352919035",
+      "ente": "CJF",
+      "numero": 52,
+      "title": "Enunciado do CJF nº 52",
+      "descDb": "No caso de justificativa de preços para contratação direta, não sendo possível a utilização dos parâmetros previstos nos §§ 1º, 2º e 3º do art. 23 da Lei n. 14.133/2021, além da comprovação da conformidade dos preços com os praticados em contratações semelhantes, trazida pelo particular (art. 23, § 4º), deve a Administração avaliar a necessidade de realizar sua própria pesquisa de preços praticados pelo proponente, evitando que os documentos juntados ao processo sejam trazidos apenas pelo futuro contratado.",
+      "descOfficial": "No caso de justificativa de preços para contratação direta, não sendo possível a utilização dos parâmetros previstos nos §§ 1º, 2º e 3º do art. 23 da Lei n. 14.133/2021, além da comprovação da conformidade dos preços com os praticados em contratações semelhantes, trazida pelo particular (art. 23, § 4º), deve a Administração avaliar a necessidade de realizar sua própria pesquisa de preços praticados pelo proponente, evitando que os documentos juntados ao processo sejam trazidos apenas pelo futuro contratado.",
+      "sourceUrl": "cjf.jus.br",
+      "similaridade": 1,
+      "matches": true
+    },
+    {
+      "id": "d1da30a0-e5ab-4819-885d-ea1f725c6da3",
+      "ente": "CJF",
+      "numero": 53,
+      "title": "Enunciado do CJF nº 53",
+      "descDb": "Previamente à tomada de decisão, o agente ou a comissão de contratação considerará eventuais manifestações apresentadas pelos órgãos de assessoramento jurídico e de controle interno, observado o disposto no inciso VII do caput e no § 1º do art. 50 da Lei n. 9.784/1999.",
+      "descOfficial": "Previamente à tomada de decisão, o agente ou a comissão de contratação considerará eventuais manifestações apresentadas pelos órgãos de assessoramento jurídico e de controle interno, observado o disposto no inciso VII do caput e no § 1º do art. 50 da Lei n. 9.784/1999.",
+      "sourceUrl": "cjf.jus.br",
+      "similaridade": 1,
+      "matches": true
+    },
+    {
+      "id": "a122d1f3-c075-4a54-b470-2b185eab45bf",
+      "ente": "CJF",
+      "numero": 54,
+      "title": "Enunciado do CJF nº 54",
+      "descDb": "As práticas contínuas e permanentes de gestão de riscos e de controle preventivo, às quais devem se submeter as contratações públicas, conforme disposto no art. 169, caput, da Lei n. 14.133/2021, não devem se restringir à existência de uma unidade orgânica de controle interno, mas devem ser implementadas em todo o macroprocesso de contratação.",
+      "descOfficial": "As práticas contínuas e permanentes de gestão de riscos e de controle preventivo, às quais devem se submeter as contratações públicas, conforme disposto no art. 169, caput, da Lei n. 14.133/2021, não devem se restringir à existência de uma unidade orgânica de controle interno, mas devem ser implementadas em todo o macroprocesso de contratação.",
+      "sourceUrl": "cjf.jus.br",
+      "similaridade": 1,
+      "matches": true
+    },
+    {
+      "id": "8e53615a-d080-49d7-af94-2d731522599b",
+      "ente": "INCP",
+      "numero": 11,
+      "title": "Enunciado do INCP nº 11",
+      "descDb": "O art. 59, § 4º, da Lei nº 14.133/2021, contempla presunção relativa de inexequibilidade às propostas de obras e serviços de engenharia, situação em que a Administração deverá realizar as diligências previstas no inciso IV e no § 2º, ambos daquele artigo.",
+      "sourceUrl": "(fonte oficial INCP não disponível pra audit automático)"
+    },
+    {
+      "id": "ed107a32-7344-464f-9244-e823807d36f3",
+      "ente": "INCP",
+      "numero": 2,
+      "title": "Enunciado do INCP nº 2",
+      "descDb": "São considerados de luxo os itens cujas especificações sejam manifestamente superiores à necessidade da Administração descrita no processo de contratação.",
+      "sourceUrl": "(fonte oficial INCP não disponível pra audit automático)"
+    },
+    {
+      "id": "1cbc51c4-7fbd-4dfa-83d3-51a0279531b9",
+      "ente": "INCP",
+      "numero": 14,
+      "title": "Enunciado do INCP nº 14",
+      "descDb": "O termo inicial do reajustamento em sentido estrito é a data do orçamento, que deverá ser indicada expressamente no ato convocatório.",
+      "sourceUrl": "(fonte oficial INCP não disponível pra audit automático)"
+    },
+    {
+      "id": "24b0a4df-8372-42d3-884c-7f9972597edd",
+      "ente": "IBDA",
+      "numero": 58,
+      "title": "Enunciado do IBDA nº 58",
+      "descDb": "Sem prejuízo dos pressupostos legais de admissibilidade, os órgãos de controle considerarão os critérios de oportunidade, materialidade, relevância e risco na seleção de fiscalizações e outras ações de controle relacionadas a licitações e contratos regidos pela Lei n. 14.133/2021, inclusive aquelas voltadas à apuração de denúncias e representações, com vistas à eficiência e à racionalidade administrativa."
+    },
+    {
+      "id": "e4b1c7ba-bcff-4d0b-bc91-104199386061",
+      "ente": "IBDA",
+      "numero": 24,
+      "title": "Enunciado do IBDA nº 24",
+      "descDb": "A justificativa de preços baseada em pesquisa diretamente com potenciais prestadores de serviços não inviabiliza, por si só, a contratação por inexigibilidade de licitação."
+    },
+    {
+      "id": "843603fc-5102-40ad-a25a-b9da29b578e4",
+      "ente": "IBDA",
+      "numero": 10,
+      "title": "Enunciado do IBDA nº 10",
+      "descDb": "Não configura desvio de função a designação de agente de contratação para atuar em procedimentos de dispensa e inexigibilidade de licitação, desde que a escolha seja feita respeitando o disposto no art. 7º da Lei n. 14.133/2021."
+    },
+    {
+      "id": "c9f15908-4f6c-4e3d-9c6b-82529ab3ce95",
+      "ente": "IBDA",
+      "numero": 1,
+      "title": "Enunciado do IBDA nº 1",
+      "descDb": "A incidência da Lei n. 14.133/2021, nos termos dos seus arts. 2º e 3º, permite a aplicação da Convenção das Nações Unidas para a Compra e Venda Internacional de Mercadorias (CISG), aprovada pelo Decreto Legislativo n. 538/2012 e promulgada pelo Decreto n. 8.327/2014, apenas nos pontos em que a Lei n. 14.133/2021 for omissa ou não regular a matéria de modo incompatível com a solução prevista na Convenção."
+    },
+    {
+      "id": "c38fe07f-92d9-44bd-ab3f-34e552ea10c5",
+      "ente": "CJF",
+      "numero": 9,
+      "title": "Enunciado do CJF nº 9",
+      "descDb": "Em sede de diligência, o agente de contratação poderá realizar, de ofício, consultas junto aos sítios eletrônicos e às bases de dados oficiais para verificação do atendimento de condições de habilitação do licitante, inclusive no tocante a documentos eventualmente não apresentados. (Inciso VI do art. 12; § 3º do art. 67; § 1º do art. 68 e art. 87, todos da Lei n. 14.133/2021).",
+      "descOfficial": "Em sede de diligência, o agente de contratação poderá realizar, de ofício, consultas junto aos sítios eletrônicos e às bases de dados oficiais para verificação do atendimento de condições de habilitação do licitante, inclusive no tocante a documentos eventualmente não apresentados. (Inciso VI do art. 12; § 3º do art. 67; § 1º do art. 68 e art. 87, todos da Lei n. 14.133/2021).",
+      "sourceUrl": "cjf.jus.br",
+      "similaridade": 1,
+      "matches": true
+    },
+    {
+      "id": "0afb90a7-6546-4227-9f2c-2828139fffae",
+      "ente": "IBDA",
+      "numero": 35,
+      "title": "Enunciado do IBDA nº 35",
+      "descDb": "É viável a previsão da adesão de órgão ou entidade ao credenciamento, assim como a inserção na qualidade de participante, por analogia à disciplina legal da adesão à ata de registro de preços, prevista no caput e no §2º do art. 86 da Lei n. 14.133/2021."
+    },
+    {
+      "id": "82eb76a2-8972-477b-87fb-60f97791fbbd",
+      "ente": "CJF",
+      "numero": 10,
+      "title": "Enunciado do CJF nº 10",
+      "descDb": "A juntada posterior de documento referente à comprovação dos requisitos de habilitação de que trata o inciso I do art. 64 da Lei n. 14.133/2021 contempla somente os documentos necessários ao esclarecimento, à retificação e/ou complementação da documentação efetivamente apresentada/enviada pelo licitante provisoriamente vencedor, nos termos do art. 63, inciso II, da NLLCA, em conformidade com o marco temporal preclusivo previsto no regulamento e/ou no edital.",
+      "descOfficial": "A juntada posterior de documento referente à comprovação dos requisitos de habilitação de que trata o inciso I do art. 64 da Lei n. 14.133/2021 contempla somente os documentos necessários ao esclarecimento, à retificação e/ou complementação da documentação efetivamente apresentada/enviada pelo licitante provisoriamente vencedor, nos termos do art. 63, inciso II, da NLLCA, em conformidade com o marco temporal preclusivo previsto no regulamento e/ou no edital.",
+      "sourceUrl": "cjf.jus.br",
+      "similaridade": 1,
+      "matches": true
+    },
+    {
+      "id": "303fd5c8-cb38-4e8d-80f5-46f6a68e2d2d",
+      "ente": "IBDA",
+      "numero": 15,
+      "title": "Enunciado do IBDA nº 15",
+      "descDb": "O pregão poderá adotar como critério de julgamento o maior lance, desde que configurada a necessidade da apresentação de propostas sucessivas e crescentes, condicionado à adoção do modo de disputa aberto, isoladamente ou combinado."
+    },
+    {
+      "id": "29b5cde9-37ea-498b-ada5-260670faa19a",
+      "ente": "INCP",
+      "numero": 29,
+      "title": "Enunciado do INCP nº 29",
+      "descDb": "É admissível que a Administração Pública exija, como requisito de habilitação econômico-financeira, a apresentação do balanço patrimonial, demonstração do resultado do exercício e outras demonstrações contábeis, referentes aos dois últimos exercícios sociais ou, alternativamente, apenas do mais recente, conforme especificado no instrumento convocatório.",
+      "sourceUrl": "(fonte oficial INCP não disponível pra audit automático)"
+    },
+    {
+      "id": "bcda907d-5422-4228-8806-b82841dcebed",
+      "ente": "INCP",
+      "numero": 22,
+      "title": "Enunciado do INCP nº 22",
+      "descDb": "O grau de risco de integridade, como condição excludente da participação na licitação, é incompatível com as exigências de habilitação, não estando em conformidade com o artigo 37, XXI da CF/88, podendo, contudo, representar situação para reforço de garantia nos limites da Lei, ampliação de fiscalização, estruturação de programa de integridade, dentre outras exigências permitidas na fase contratual.",
+      "sourceUrl": "(fonte oficial INCP não disponível pra audit automático)"
+    },
+    {
+      "id": "ccba3509-6b04-4da0-9d61-f35e5fcc1d5d",
+      "ente": "INCP",
+      "numero": 10,
+      "title": "Enunciado do INCP nº 10",
+      "descDb": "Em que pese não haver previsão legal, o sorteio poderá ser utilizado como critério de desempate, quando todos os critérios previstos nos incisos do artigo 60 e §1º da Lei 14.133/21 quando forem utilizados sem sucesso.",
+      "sourceUrl": "(fonte oficial INCP não disponível pra audit automático)"
+    },
+    {
+      "id": "a27f5c20-0c2c-4490-920b-b2d9a710b679",
+      "ente": "INCP",
+      "numero": 9,
+      "title": "Enunciado do INCP nº 9",
+      "descDb": "A dispensa, parcial ou total, da documentação de habilitação, prevista no inciso III do art. 70, não exige justificativa, devendo ser motivada nas demais hipóteses.",
+      "sourceUrl": "(fonte oficial INCP não disponível pra audit automático)"
+    },
+    {
+      "id": "edd86665-d321-44e4-9462-a48db9922082",
+      "ente": "INCP",
+      "numero": 1,
+      "title": "Enunciado do INCP nº 1",
+      "descDb": "Para fins de interpretação do artigo 20 da Lei 14.133/2021, o conceito de itens de consumo de luxo abrange, inclusive, os itens envolvidos em obras, serviços e locações.",
+      "sourceUrl": "(fonte oficial INCP não disponível pra audit automático)"
+    },
+    {
+      "id": "8894cc52-28db-4fda-a6ab-c430e5e98d62",
+      "ente": "IBDA",
+      "numero": 61,
+      "title": "Enunciado do IBDA nº 61",
+      "descDb": "Há possibilidade de adesão à ata de registro de preços vigente celebrada com base na Lei n. 8.666/1993, mesmo após sua revogação."
+    },
+    {
+      "id": "fe3c7724-6eea-4c3b-bb27-54915703e93f",
+      "ente": "IBDA",
+      "numero": 55,
+      "title": "Enunciado do IBDA nº 55",
+      "descDb": "No âmbito das licitações e contratos administrativos, é possível a celebração de acordos com a Administração, com o objetivo de isentar ou atenuar a aplicação das sanções previstas na Lei n. 14.133/2021."
+    },
+    {
+      "id": "d0f492c0-8bd8-4548-8afc-33ad92dded7b",
+      "ente": "IBDA",
+      "numero": 56,
+      "title": "Enunciado do IBDA nº 56",
+      "descDb": "A manifestação de intenção de recurso não exige motivação pelo licitante."
+    },
+    {
+      "id": "0da4d49f-48b3-4fcf-9e7f-f0c6e5b57f62",
+      "ente": "IBDA",
+      "numero": 30,
+      "title": "Enunciado do IBDA nº 30",
+      "descDb": "É admissível prazo de vigência indeterminado no edital de credenciamento."
+    },
+    {
+      "id": "02694bd9-4dcf-4a39-96af-d5ead4eb557d",
+      "ente": "IBDA",
+      "numero": 11,
+      "title": "Enunciado do IBDA nº 11",
+      "descDb": "O termo 'preferencialmente', constante do § 3º do art. 19 da Lei n. 14.133/2021, implica um dever legal para a Administração, de modo que a opção pela não adoção da Modelagem da Informação da Construção (Building Information Modelling – BIM), ou tecnologias e processos integrados similares ou mais avançados que venham a substitui-la, dependerá de justificativa."
+    },
+    {
+      "id": "128751d0-732f-42cf-81d6-7425b1252f41",
+      "ente": "IBDA",
+      "numero": 9,
+      "title": "Enunciado do IBDA nº 9",
+      "descDb": "Viola o princípio da segregação de funções a designação de integrantes das unidades de assessoramento jurídico e de controle interno para exercer, de forma simultânea, a função de agente de contratação/pregoeiro."
+    },
+    {
+      "id": "b17e0fb0-e088-496b-8cb6-796f5b5fe361",
+      "ente": "IBDA",
+      "numero": 8,
+      "title": "Enunciado do IBDA nº 8",
+      "descDb": "A exigência de que o agente de contratação e o pregoeiro tenham vínculo permanente com a Administração Pública licitante é norma geral, aplicável a todos os entes da federação."
+    },
+    {
+      "id": "353fd4fa-3800-4568-8f7f-4b833b4cb057",
+      "ente": "IBDA",
+      "numero": 2,
+      "title": "Enunciado do IBDA nº 2",
+      "descDb": "O contrato de securitização formalizado pelo Poder Público não se submete ao regime jurídico dos contratos administrativos disciplinado pela Lei n. 14.133/2021."
+    },
+    {
+      "id": "b175a046-9352-43ec-be29-2750983c9877",
+      "ente": "CJF",
+      "numero": 24,
+      "title": "Enunciado do CJF nº 24",
+      "descDb": "O verbo “poderá” presente no § 1º do art. 140 da Lei n. 14.133/2021 deverá ser interpretado à luz do art. 147 do mesmo diploma legal.",
+      "descOfficial": "O verbo “poderá” presente no § 1º do art. 140 da Lei n. 14.133/2021 deverá ser interpretado à luz do art. 147 do mesmo diploma legal.",
+      "sourceUrl": "cjf.jus.br",
+      "similaridade": 1,
+      "matches": true
+    },
+    {
+      "id": "52edc300-6bed-46ea-af8d-b17d5c2b1549",
+      "ente": "CJF",
+      "numero": 1,
+      "title": "Enunciado do CJF nº 1",
+      "descDb": "Constitui boa prática da Administração, no momento da instrução da prorrogação, emitir alerta à contratada a respeito dos efeitos da formalização do termo aditivo sem a ressalva do direito aos reajustes nos termos da lei e do contrato. (art. 92 da Lei n. 14.133/2021)",
+      "descOfficial": "Constitui boa prática da Administração, no momento da instrução da prorrogação, emitir alerta à contratada a respeito dos efeitos da formalização do termo aditivo sem a ressalva do direito aos reajustes nos termos da lei e do contrato. (art. 92 da Lei n. 14.133/2021)",
+      "sourceUrl": "cjf.jus.br",
+      "similaridade": 1,
+      "matches": true
+    },
+    {
+      "id": "abf354d7-ebd2-4477-a1aa-ddf778b79495",
+      "ente": "INCP",
+      "numero": 35,
+      "title": "Enunciado do INCP nº 35",
+      "descDb": "Nas hipóteses de extinção contratual do art. 138 da Lei 14.133/2021, deverão ser avaliadas, em cada caso concreto, as consequências práticas da decisão, conforme as necessidades do interesse público envolvido, sendo boa prática observar os aspectos previstos no art. 147 da mesma lei.",
+      "sourceUrl": "(fonte oficial INCP não disponível pra audit automático)"
+    },
+    {
+      "id": "ddeb3ad5-71bd-40ea-8640-daacc28891aa",
+      "ente": "INCP",
+      "numero": 36,
+      "title": "Enunciado do INCP nº 36",
+      "descDb": "É admissível o credenciamento com prazo de vigência indeterminado, sem prejuízo da possibilidade de ulterior revogação do procedimento, mediante comprovação da conveniência administrativa.",
+      "sourceUrl": "(fonte oficial INCP não disponível pra audit automático)"
+    },
+    {
+      "id": "55661aa8-bfbe-4514-a219-1c09b0b8c48a",
+      "ente": "CJF",
+      "numero": 22,
+      "title": "Enunciado do CJF nº 22",
+      "descDb": "A proibição de exigência de registro cadastral complementar das licitantes deve ser entendida de forma ampla, a partir dos objetivos da vedação, entre eles, desobrigar o particular de manter ativos diversos cadastros, com a mesma finalidade, incrementando custos de transação.",
+      "descOfficial": "A proibição de exigência de registro cadastral complementar das licitantes deve ser entendida de forma ampla, a partir dos objetivos da vedação, entre eles, desobrigar o particular de manter ativos diversos cadastros, com a mesma finalidade, incrementando custos de transação.",
+      "sourceUrl": "cjf.jus.br",
+      "similaridade": 1,
+      "matches": true
+    },
+    {
+      "id": "8aea818b-74cf-4d85-9f8f-e0d4afd8708a",
+      "ente": "IBDA",
+      "numero": 33,
+      "title": "Enunciado do IBDA nº 33",
+      "descDb": "Em conformidade com o art. 82 da Lei n. 14.133/2021, a alteração ou a atualização de preços da ata de registro de preços pode ser regulamentada com a utilização de instrumentos próprios de atualização, além do reajuste, da repactuação e da revisão."
+    },
+    {
+      "id": "49043513-76c8-4909-b3bb-952f0a03b800",
+      "ente": "IBDA",
+      "numero": 3,
+      "title": "Enunciado do IBDA nº 3",
+      "descDb": "Os critérios de avaliação das soluções que encontram maior aderência ao princípio da economicidade de que trata o art. 5º da Lei n. 14.133/2021, devem considerar o maior retorno socioeconômico à sociedade no âmbito da contratação pretendida, e não apenas o menor desembolso a ser dispensado pela Administração."
+    },
+    {
+      "id": "5179ec90-5708-4180-aa18-f53e61627168",
+      "ente": "INCP",
+      "numero": 38,
+      "title": "Enunciado do INCP nº 38",
+      "descDb": "A renovação dos quantitativos da ata de registro de preços exige anuência do fornecedor.",
+      "sourceUrl": "(fonte oficial INCP não disponível pra audit automático)"
+    },
+    {
+      "id": "3dd639d1-b760-41fc-913f-76e8fd07a0d9",
+      "ente": "CJF",
+      "numero": 12,
+      "title": "Enunciado do CJF nº 12",
+      "descDb": "Consideram-se fornecimentos contínuos, para fins de aplicação do disposto nos arts. 106, 109, parágrafo único do art. 98, parágrafo único do art. 97, inciso I do art. 40 e § 8º do art. 25 da Lei n. 14.133/2021, as compras para a manutenção dos órgãos da Justiça Federal decorrentes de necessidades permanentes ou prolongadas, tais como: (a) álcool em gel; (b) açúcar; (c) água mineral com ou sem gás; (d) aquisição, ajustes e consertos de becas, capas e vestimentas afins; (e) café em pó; (f) fornecimento de gêneros alimentícios; (g) fornecimento e instalação de persianas; (h) fornecimento, montagem e desmontagem de divisórias e seus componentes; (i) licenças de software; (j) munições de arma de fogo para treinamentos; (k) óleo diesel para geração de energia elétrica; (l) fornecimento de material e obra bibliográfica de origem nacional e estrangeira; (m) papel higiênico e papel-toalha; (n) ressuprimento de material de consumo estocável; (o) sabonete líquido; (p) suprimentos para impressão em impressora fotográfica; (q) suprimentos para impressão de instrumentos de identificação; (r) uniformes.",
+      "descOfficial": "Consideram-se fornecimentos contínuos, para fins de aplicação do disposto nos arts. 106, 109, parágrafo único do art. 98, parágrafo único do art. 97, inciso I do art. 40 e § 8º do art. 25 da Lei n. 14.133/2021, as compras para a manutenção dos órgãos da Justiça Federal decorrentes de necessidades permanentes ou prolongadas, tais como: (a) álcool em gel; (b) açúcar; (c) água mineral com ou sem gás; (d) aquisição, ajustes e consertos de becas, capas e vestimentas afins; (e) café em pó; (f) fornecimento de gêneros alimentícios; (g) fornecimento e instalação de persianas; (h) fornecimento, montagem e desmontagem de divisórias e seus componentes; (i) licenças de software; (j) munições de arma de fogo para treinamentos; (k) óleo diesel para geração de energia elétrica; (l) fornecimento de material e obra bibliográfica de origem nacional e estrangeira; (m) papel higiênico e papel-toalha; (n) ressuprimento de material de consumo estocável; (o) sabonete líquido; (p) suprimentos para impressão em impressora fotográfica; (q) suprimentos para impressão de instrumentos de identificação; (r) uniformes.",
+      "sourceUrl": "cjf.jus.br",
+      "similaridade": 1,
+      "matches": true
+    },
+    {
+      "id": "7ffdcb84-2138-42e8-97f9-ba362e764691",
+      "ente": "IBDA",
+      "numero": 34,
+      "title": "Enunciado do IBDA nº 34",
+      "descDb": "São vedadas as adesões, por órgãos da Administração direta, autárquica e fundacional, a atas de registro de preços geradas por empresas estatais, com a aplicação do regime licitatório e contratual da Lei n. 13.303/2016."
+    },
+    {
+      "id": "05ac33f8-4e62-41ba-ba98-aae074e64879",
+      "ente": "IBDA",
+      "numero": 48,
+      "title": "Enunciado do IBDA nº 48",
+      "descDb": "Na hipótese de reconhecimento de vícios insanáveis nos contratos administrativos, restando demonstrado que a interrupção ou o desfazimento gerará maiores ônus ao interesse público primário do que a sua manutenção, deve-se preservar a avença, resolvendo-se os efeitos da nulidade pela indenização por perdas e danos, com apuração das responsabilidades cabíveis, se for o caso."
+    },
+    {
+      "id": "f36711bf-dd8a-4ac6-a07a-c6c998e02616",
+      "ente": "IBDA",
+      "numero": 14,
+      "title": "Enunciado do IBDA nº 14",
+      "descDb": "O critério de julgamento maior lance poderá ser aplicado em licitações na modalidade concorrência, quando demonstrada maior vantajosidade para a Administração."
+    },
+    {
+      "id": "962c1e10-965a-4fd3-afab-373f2251965a",
+      "ente": "IBDA",
+      "numero": 46,
+      "title": "Enunciado do IBDA nº 46",
+      "descDb": "Os parâmetros dos arts. 147 a 150 também são aplicáveis às licitações e contratos regidos pelas leis n. 8.666/1993, n. 10.520/2002 e n. 12.462/2011."
+    },
+    {
+      "id": "8e60b12d-08aa-4a11-b70b-098bfacaa648",
+      "ente": "CJF",
+      "numero": 15,
+      "title": "Enunciado do CJF nº 15",
+      "descDb": "Diante da ocorrência de condutas infracionais tipificadas no art. 155 da Lei n. 14.133/2021, ao agente de contratação compete apenas a comunicação do fato à autoridade superior para fins de avaliação quanto à pertinência de instauração do processo administrativo sancionatório, sendo atentatória aos postulados da segregação de funções e da imparcialidade a atribuição de competências ao agente de contratação para promover a instrução e a deliberação quanto à aplicação e dosimetria de penalidade.",
+      "descOfficial": "Diante da ocorrência de condutas infracionais tipificadas no art. 155 da Lei n. 14.133/2021, ao agente de contratação compete apenas a comunicação do fato à autoridade superior para fins de avaliação quanto à pertinência de instauração do processo administrativo sancionatório, sendo atentatória aos postulados da segregação de funções e da imparcialidade a atribuição de competências ao agente de contratação para promover a instrução e a deliberação quanto à aplicação e dosimetria de penalidade.",
+      "sourceUrl": "cjf.jus.br",
+      "similaridade": 1,
+      "matches": true
+    },
+    {
+      "id": "320fb3c1-7fe0-4a1e-a91e-0794770ae6dd",
+      "ente": "CJF",
+      "numero": 6,
+      "title": "Enunciado do CJF nº 6",
+      "descDb": "Embora não haja preclusão lógica do direito ao reajuste em sentido estrito, compete à contratada a apresentação do pedido, não cabendo, portanto, ao contratante processar, de ofício, o reajuste.",
+      "descOfficial": "Embora não haja preclusão lógica do direito ao reajuste em sentido estrito, compete à contratada a apresentação do pedido, não cabendo, portanto, ao contratante processar, de ofício, o reajuste.",
+      "sourceUrl": "cjf.jus.br",
+      "similaridade": 1,
+      "matches": true
+    },
+    {
+      "id": "dc3cb68b-be6f-4ab2-8ce9-df29fbb7f4fe",
+      "ente": "IBDA",
+      "numero": 53,
+      "title": "Enunciado do IBDA nº 53",
+      "descDb": "O art. 159 da Lei n. 14.133/2021, ao determinar o processamento conjunto das infrações nela previstas, ou em outras leis de licitações e contratos da Administração Pública, que também sejam tipificadas no art. 5º da Lei n. 12.846/2013, não admite aplicação dúplice da penalidade de multa, em razão do princípio non bis in idem."
+    }
+  ]
+}

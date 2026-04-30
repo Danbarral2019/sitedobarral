@@ -4,7 +4,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { useState, memo, useEffect, useRef } from 'react';
 import { usePathname } from 'next/navigation';
-import { Menu, X, ChevronDown, Home, User, FileText, Mail, LogIn, BookOpen, Scale, CreditCard, Gavel, BookMarked } from 'lucide-react';
+import { Menu, X, ChevronDown, Home, User, FileText, Mail, LogIn, BookOpen, Scale, CreditCard, Gavel, BookMarked, Library } from 'lucide-react';
 import { courses } from '@/data/courses';
 
 export const Header = memo(function Header() {
@@ -120,6 +120,15 @@ export const Header = memo(function Header() {
             </div>
 
             <Link
+              href="/base-conhecimento"
+              aria-current={isActive('/base-conhecimento') ? 'page' : undefined}
+              className={`flex items-center space-x-1 transition-colors font-poppins text-sm focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-brand-600 rounded ${isActive('/base-conhecimento') ? 'text-white font-semibold' : 'text-white/90 hover:text-white'}`}
+            >
+              <Library className="w-4 h-4" />
+              <span>Base de Conhecimento</span>
+            </Link>
+
+            <Link
               href="/legislacao"
               aria-current={isActive('/legislacao') ? 'page' : undefined}
               className={`flex items-center space-x-1 transition-colors font-poppins text-sm focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-brand-600 rounded ${isActive('/legislacao') ? 'text-white font-semibold' : 'text-white/90 hover:text-white'}`}
@@ -197,6 +206,7 @@ export const Header = memo(function Header() {
               { href: '/', label: 'Início' },
               { href: '/sobre', label: 'Sobre o Professor' },
               { href: '/cursos', label: 'Cursos' },
+              { href: '/base-conhecimento', label: 'Base de Conhecimento' },
               { href: '/legislacao', label: 'Legislação' },
               { href: '/jurisprudencia', label: 'Jurisprudência' },
               { href: '/blog', label: 'Blog' },

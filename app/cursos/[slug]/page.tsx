@@ -1,10 +1,8 @@
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
 import {
-  ArrowLeft, BookOpen, Lock, FileText,
-  QrCode, CheckCircle, Users,
-  Clock, Award, Target, Lightbulb, Star,
-  PlayCircle, Layers
+  ArrowLeft, BookOpen, Lock, CheckCircle,
+  Award, Target, PlayCircle, Layers
 } from 'lucide-react';
 import { courses } from '@/data/courses';
 import { prisma } from '@/lib/prisma';
@@ -260,18 +258,10 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ s
                     <div className="bg-white/20 backdrop-blur-sm rounded-xl px-6 py-3 flex items-center gap-3">
                       <Layers className="w-5 h-5 text-white" />
                       <span className="text-white font-semibold">
-                        {modules.length} {modules.length === 1 ? 'Modulo' : 'Modulos'} · {modules.reduce((s, m) => s + m._count.lessons, 0)} Aulas
+                        {modules.length} {modules.length === 1 ? 'Módulo' : 'Módulos'} · {modules.reduce((s, m) => s + m._count.lessons, 0)} Aulas
                       </span>
                     </div>
                   )}
-                  <div className="bg-white/20 backdrop-blur-sm rounded-xl px-6 py-3 flex items-center gap-3">
-                    <FileText className="w-5 h-5 text-white" />
-                    <span className="text-white font-semibold">Material Completo</span>
-                  </div>
-                  <div className="bg-white/20 backdrop-blur-sm rounded-xl px-6 py-3 flex items-center gap-3">
-                    <Clock className="w-5 h-5 text-white" />
-                    <span className="text-white font-semibold">Atualizado 2025</span>
-                  </div>
                   <div className="bg-white/20 backdrop-blur-sm rounded-xl px-6 py-3 flex items-center gap-3">
                     <Award className="w-5 h-5 text-white" />
                     <span className="text-white font-semibold">Certificado</span>
@@ -306,13 +296,13 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ s
                 </div>
 
                 {/* Diferenciais */}
-                <div className="grid md:grid-cols-2 gap-4">
+                <div className="grid md:grid-cols-3 gap-4">
                   <div className={`${color.bg} p-4 rounded-xl`}>
                     <div className="flex items-start gap-3">
                       <CheckCircle className={`w-6 h-6 ${color.text} flex-shrink-0 mt-1`} />
                       <div>
                         <h3 className="font-bold text-gray-900 mb-1">Conteúdo Atualizado</h3>
-                        <p className="text-sm text-gray-700">Material constantemente revisado conforme nova legislação</p>
+                        <p className="text-sm text-gray-700">Material revisado conforme nova legislação</p>
                       </div>
                     </div>
                   </div>
@@ -331,15 +321,6 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ s
                       <div>
                         <h3 className="font-bold text-gray-900 mb-1">Material Exclusivo</h3>
                         <p className="text-sm text-gray-700">Acórdãos, pareceres e apostilas especializadas</p>
-                      </div>
-                    </div>
-                  </div>
-                  <div className={`${color.bg} p-4 rounded-xl`}>
-                    <div className="flex items-start gap-3">
-                      <CheckCircle className={`w-6 h-6 ${color.text} flex-shrink-0 mt-1`} />
-                      <div>
-                        <h3 className="font-bold text-gray-900 mb-1">Especialista Renomado</h3>
-                        <p className="text-sm text-gray-700">Prof. Daniel Barral, referência na área</p>
                       </div>
                     </div>
                   </div>
@@ -394,245 +375,44 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ s
                 </div>
               )}
 
-              {/* Bibliografia Recomendada */}
-              <div className="bg-white rounded-2xl shadow-lg p-8 border-2 border-gray-200 hover:shadow-xl transition-shadow">
-                <div className="flex items-center gap-3 mb-6">
-                  <div className={`w-12 h-12 bg-gradient-to-br ${color.gradient} rounded-xl flex items-center justify-center`}>
-                    <FileText className="w-6 h-6 text-white" />
-                  </div>
-                  <div className="flex-1">
-                    <h2 className="text-3xl font-bold text-gray-900">Bibliografia Recomendada</h2>
-                    <p className="text-sm text-gray-600 mt-1">
-                      Material de referência disponível em PDF para alunos matriculados
-                    </p>
-                  </div>
-                </div>
-
-                <div className={`${color.bg} p-6 rounded-xl border-l-4 ${color.border}`}>
-                  <div className="flex items-start gap-4">
-                    <FileText className={`w-12 h-12 ${color.text} flex-shrink-0`} />
-                    <div>
-                      <h3 className="font-bold text-gray-900 text-lg mb-2">
-                        Bibliografia Completa em PDF
-                      </h3>
-                      <p className="text-gray-700 leading-relaxed mb-4">
-                        O material bibliográfico completo deste curso está disponível em formato PDF
-                        para download na área restrita dos alunos matriculados, incluindo:
-                      </p>
-                      <ul className="space-y-2 text-sm text-gray-700">
-                        <li className="flex items-center gap-2">
-                          <div className={`w-1.5 h-1.5 rounded-full bg-gradient-to-r ${color.gradient}`}></div>
-                          <span>Livros e doutrinas de referência</span>
-                        </li>
-                        <li className="flex items-center gap-2">
-                          <div className={`w-1.5 h-1.5 rounded-full bg-gradient-to-r ${color.gradient}`}></div>
-                          <span>Manuais e guias práticos</span>
-                        </li>
-                        <li className="flex items-center gap-2">
-                          <div className={`w-1.5 h-1.5 rounded-full bg-gradient-to-r ${color.gradient}`}></div>
-                          <span>Publicações técnicas especializadas</span>
-                        </li>
-                        <li className="flex items-center gap-2">
-                          <div className={`w-1.5 h-1.5 rounded-full bg-gradient-to-r ${color.gradient}`}></div>
-                          <span>Orientações normativas e legislação</span>
-                        </li>
-                      </ul>
-                      <div className="mt-6 pt-4 border-t border-gray-300">
-                        <Link
-                          href="/login"
-                          className={`inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r ${color.gradient} text-white rounded-xl font-semibold hover:shadow-lg transition-all`}
-                        >
-                          <Lock className="w-4 h-4" />
-                          Acessar Área Restrita
-                        </Link>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              {/* Material de Apoio */}
-              <div className="bg-white rounded-2xl shadow-lg p-8 border-2 border-gray-200 hover:shadow-xl transition-shadow">
-                <div className="flex items-center gap-3 mb-6">
-                  <div className={`w-12 h-12 bg-gradient-to-br ${color.gradient} rounded-xl flex items-center justify-center`}>
-                    <Lock className="w-6 h-6 text-white" />
-                  </div>
-                  <h2 className="text-3xl font-bold text-gray-900">Material de Apoio Exclusivo</h2>
-                </div>
-
-                <div className="bg-gradient-to-r from-accent-50 to-accent-100 border-l-4 border-accent-500 p-6 mb-6 rounded-xl">
-                  <div className="flex items-start gap-3">
-                    <Lightbulb className="w-6 h-6 text-accent-600 flex-shrink-0 mt-1" />
-                    <div>
-                      <p className="text-accent-900 font-semibold mb-2">Acesso Exclusivo para Alunos</p>
-                      <p className="text-accent-800 text-sm leading-relaxed">
-                        O material completo deste curso está disponível apenas para alunos matriculados
-                        que receberam o QR Code de acesso durante o curso presencial.
-                      </p>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="grid md:grid-cols-2 gap-4">
-                  <div className="bg-gradient-to-br from-gray-50 to-gray-100 border-2 border-gray-300 rounded-xl p-6 hover:shadow-md transition-all">
-                    <div className="flex items-center justify-between mb-3">
-                      <h3 className="font-bold text-gray-900 text-lg">Apostila Completa</h3>
-                      <Lock className="w-6 h-6 text-gray-400" />
-                    </div>
-                    <p className="text-sm text-gray-700 leading-relaxed">
-                      Material didático completo com teoria atualizada e casos práticos
-                    </p>
-                  </div>
-
-                  <div className="bg-gradient-to-br from-gray-50 to-gray-100 border-2 border-gray-300 rounded-xl p-6 hover:shadow-md transition-all">
-                    <div className="flex items-center justify-between mb-3">
-                      <h3 className="font-bold text-gray-900 text-lg">Acórdãos do TCU</h3>
-                      <Lock className="w-6 h-6 text-gray-400" />
-                    </div>
-                    <p className="text-sm text-gray-700 leading-relaxed">
-                      Jurisprudência selecionada, organizada e comentada
-                    </p>
-                  </div>
-
-                  <div className="bg-gradient-to-br from-gray-50 to-gray-100 border-2 border-gray-300 rounded-xl p-6 hover:shadow-md transition-all">
-                    <div className="flex items-center justify-between mb-3">
-                      <h3 className="font-bold text-gray-900 text-lg">Pareceres da AGU</h3>
-                      <Lock className="w-6 h-6 text-gray-400" />
-                    </div>
-                    <p className="text-sm text-gray-700 leading-relaxed">
-                      Orientações normativas e pareceres relevantes
-                    </p>
-                  </div>
-
-                  <div className="bg-gradient-to-br from-gray-50 to-gray-100 border-2 border-gray-300 rounded-xl p-6 hover:shadow-md transition-all">
-                    <div className="flex items-center justify-between mb-3">
-                      <h3 className="font-bold text-gray-900 text-lg">Editais Comentados</h3>
-                      <Lock className="w-6 h-6 text-gray-400" />
-                    </div>
-                    <p className="text-sm text-gray-700 leading-relaxed">
-                      Modelos práticos com análise detalhada
-                    </p>
-                  </div>
-                </div>
-              </div>
             </div>
 
             {/* Sidebar */}
-            <div className="lg:col-span-1 space-y-6">
-              {/* Call to Action - Área Restrita */}
-              <div className={`bg-gradient-to-br ${color.gradient} rounded-2xl shadow-xl p-8 text-white`}>
-                <div className="text-center mb-6">
-                  <div className="w-20 h-20 bg-white/20 backdrop-blur-sm rounded-2xl flex items-center justify-center mx-auto mb-4">
-                    <QrCode className="w-12 h-12 text-white" />
-                  </div>
+            <div className="lg:col-span-1">
+              <div className={`bg-gradient-to-br ${color.gradient} rounded-2xl shadow-xl p-8 text-white sticky top-8`}>
+                <div className="text-center">
                   <h3 className="text-2xl font-bold mb-3">Já é Aluno?</h3>
-                  <p className="text-white/95 leading-relaxed mb-6">
-                    Faça login para acessar todo o material exclusivo deste curso
+                  <p className="text-white/90 leading-relaxed mb-6 text-sm">
+                    Faça login para acessar o material exclusivo deste curso na área restrita.
                   </p>
 
-                  {/* Botões de Acesso */}
-                  <div className="space-y-3">
-                    <Link
-                      href={`/login?curso=${course.id}`}
-                      className={`block bg-white ${color.text} px-8 py-4 rounded-xl font-bold hover:bg-white/90 transition-all shadow-lg hover:shadow-xl hover:scale-105 transform`}
-                    >
-                      Fazer Login
-                    </Link>
+                  <Link
+                    href={`/login?curso=${course.id}`}
+                    className={`block bg-white ${color.text} px-8 py-4 rounded-xl font-bold hover:bg-white/90 transition-all shadow-lg`}
+                  >
+                    Fazer Login
+                  </Link>
 
-                    <Link
-                      href="/validar-acesso"
-                      className="block bg-white/10 backdrop-blur-sm border-2 border-white/30 text-white px-8 py-3 rounded-xl font-semibold hover:bg-white/20 transition-all"
-                    >
-                      Usar QR Code
+                  <p className="text-xs text-white/80 mt-4">
+                    Primeiro acesso?{' '}
+                    <Link href="/validar-acesso" className="underline hover:text-white">
+                      Use o QR Code do curso
                     </Link>
-                  </div>
-
-                  <p className="text-xs text-white/75 mt-4">
-                    Primeiro acesso? Use o QR Code do curso presencial
                   </p>
                 </div>
-
-                <div className="border-t border-white/20 pt-6 mt-6">
-                  <div className="space-y-4">
-                    <div className="flex items-start gap-3">
-                      <CheckCircle className="w-5 h-5 text-white flex-shrink-0 mt-0.5" />
-                      <p className="text-sm text-white/90">Acesso por 1 ano ao material</p>
-                    </div>
-                    <div className="flex items-start gap-3">
-                      <CheckCircle className="w-5 h-5 text-white flex-shrink-0 mt-0.5" />
-                      <p className="text-sm text-white/90">Atualizações constantes</p>
-                    </div>
-                    <div className="flex items-start gap-3">
-                      <CheckCircle className="w-5 h-5 text-white flex-shrink-0 mt-0.5" />
-                      <p className="text-sm text-white/90">Download de todo material</p>
-                    </div>
-                    <div className="flex items-start gap-3">
-                      <Star className="w-5 h-5 text-accent-300 flex-shrink-0 mt-0.5" />
-                      <p className="text-sm text-white/90 font-semibold">Opção de upgrade vitalício disponível</p>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              {/* Card - Quer Participar? */}
-              <div className="bg-white rounded-2xl shadow-lg p-6 border-2 border-gray-200 hover:shadow-xl transition-shadow">
-                <div className="flex items-center gap-3 mb-4">
-                  <Users className={`w-8 h-8 ${color.text}`} />
-                  <h3 className="text-xl font-bold text-gray-900">Quer Participar?</h3>
-                </div>
-                <p className="text-gray-700 mb-6 leading-relaxed">
-                  Entre em contato para saber sobre as próximas turmas abertas ou solicitar informações
-                </p>
-                <Link
-                  href="/contato"
-                  className={`block text-center bg-gradient-to-r ${color.gradient} text-white px-6 py-3 rounded-xl font-bold ${color.hover} transition-all shadow-md hover:shadow-lg`}
-                >
-                  Solicitar Informações
-                </Link>
-              </div>
-
-              {/* Card - Cursos de Curta Duração */}
-              <div className={`${color.bg} rounded-2xl p-6 border-2 ${color.border}`}>
-                <div className="flex items-center gap-3 mb-4">
-                  <Award className={`w-8 h-8 ${color.text}`} />
-                  <h3 className="text-xl font-bold text-gray-900">Cursos de Curta Duração</h3>
-                </div>
-                <p className="text-gray-800 mb-4 leading-relaxed">
-                  Podemos levar este curso para sua instituição com conteúdo personalizado e adaptado às necessidades específicas
-                </p>
-                <div className="space-y-2 text-sm">
-                  <div className="flex items-center gap-2">
-                    <CheckCircle className={`w-4 h-4 ${color.text}`} />
-                    <span className="text-gray-700">Conteúdo customizado</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <CheckCircle className={`w-4 h-4 ${color.text}`} />
-                    <span className="text-gray-700">Agenda flexível</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <CheckCircle className={`w-4 h-4 ${color.text}`} />
-                    <span className="text-gray-700">Certificado digital</span>
-                  </div>
-                </div>
-              </div>
-
-              {/* Card Rápido - Outros Cursos */}
-              <div className="bg-gradient-to-br from-gray-100 to-gray-200 rounded-2xl p-6 border-2 border-gray-300">
-                <h3 className="text-lg font-bold text-gray-900 mb-3 flex items-center gap-2">
-                  <Star className="w-5 h-5 text-accent-600" />
-                  Explore Outros Cursos
-                </h3>
-                <p className="text-sm text-gray-700 mb-4">
-                  Temos {courses.length} cursos especializados em Licitações e Contratos
-                </p>
-                <Link
-                  href="/cursos"
-                  className="block text-center bg-blue-600 text-white px-6 py-3 rounded-xl font-semibold hover:bg-blue-700 transition-colors text-sm"
-                >
-                  Ver Todos os Cursos
-                </Link>
               </div>
             </div>
+          </div>
+
+          {/* Link discreto pra catálogo */}
+          <div className="mt-16 text-center">
+            <Link
+              href="/cursos"
+              className="inline-flex items-center gap-2 text-gray-600 hover:text-brand-700 transition-colors text-sm font-medium"
+            >
+              <ArrowLeft className="w-4 h-4" />
+              Ver todos os cursos
+            </Link>
           </div>
         </div>
       </div>

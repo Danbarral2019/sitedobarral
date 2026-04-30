@@ -1,0 +1,942 @@
+{
+  "stats": {
+    "total": 105,
+    "matches": 95,
+    "altaSim": 0,
+    "baixaSim": 3,
+    "semFonte": 7
+  },
+  "rows": [
+    {
+      "numero": 8,
+      "ano": 2018,
+      "descDB": "A verificação da autodeclaração de candidatos cotistas em concursos públicos, por meio de comissão de heteroidentificação e utilizando o critério fenotípico, é uma prática válida e essencial para assegurar a igualdade material e a efetividade das políticas afirmativas. Essa medida, que visa combater fraudes e garantir que as vagas sejam preenchidas por quem realmente se enquadra nos critérios raciais, é fundamental para a lisura dos certames e se alinha com a busca por eficiência e transparência na administração pública. Embora não haja um artigo específico na Lei nº 14.133/2021 sobre concursos, o princípio da igualdade e a necessidade de critérios objetivos na seleção de pessoal são pilares que perpassam a atuação administrativa.",
+      "fontePrimaria": "sem fonte",
+      "matches": false
+    },
+    {
+      "numero": 7,
+      "ano": 2017,
+      "descDB": "Esta orientação normativa esclarece que o estágio probatório de servidores públicos pode ser suspenso por outras situações além das expressamente previstas na Lei nº 8.112/90, desde que não sejam de efetivo exercício, como licenças e afastamentos. Contudo, licenças-maternidade, paternidade e adotante são exceções e contam como tempo de efetivo exercício para o estágio probatório, garantindo que esses períodos não prejudiquem a avaliação do servidor. Embora não haja um artigo direto na Lei 14.133/2021, a compreensão do estágio probatório é fundamental para a gestão de contratos com a Administração Pública que envolvam a alocação de pessoal, impactando a estabilidade e a continuidade dos serviços (relacionado ao art. 11, que trata dos princípios da eficiência e da segurança jurídica na contratação).",
+      "fontePrimaria": "sem fonte",
+      "matches": false
+    },
+    {
+      "numero": 6,
+      "ano": 2017,
+      "descDB": "A Câmara Nacional de Uniformização de Entendimentos Consultivos (CNU) da AGU não analisa divergências jurídicas que envolvam órgãos ou entidades que não são obrigados a seguir as orientações da Advocacia-Geral da União. Isso significa que a CNU atua para harmonizar entendimentos apenas dentro do âmbito federal que se submete à AGU, evitando que órgãos com autonomia jurídica busquem essa uniformização. Na prática, essa orientação delimita a atuação da AGU na pacificação de entendimentos sobre licitações e contratos, focando nos entes que a ela se vinculam, o que se alinha com a busca por eficiência e segurança jurídica nas contratações públicas (relacionado aos arts. 74 e 75 da Lei 14.133/2021, que tratam de hipóteses de contratação direta, onde a uniformidade de entendimento é crucial para a correta aplicação da lei).",
+      "fontePrimaria": "sem fonte",
+      "matches": false
+    },
+    {
+      "numero": 4,
+      "ano": 2016,
+      "descDB": "A Administração Pública não é obrigada a usar apenas ferramentas governamentais para pesquisar preços em licitações e contratações, podendo contratar sistemas privados se justificar a necessidade e a vantagem dessa escolha. Essa orientação é relevante para a fase de planejamento das contratações diretas, como as dispensas e inexigibilidades de licitação (art. 74 e 75 da Lei 14.133/2021), pois permite maior flexibilidade na busca pela melhor proposta. Na prática, isso significa que o gestor pode usar plataformas de pesquisa de mercado pagas, desde que comprove que elas oferecem um benefício superior ou informações mais precisas que as ferramentas gratuitas do governo.",
+      "fontePrimaria": "sem fonte",
+      "matches": false
+    },
+    {
+      "numero": 2,
+      "ano": 2016,
+      "descDB": "Esta Orientação Normativa, embora substituída pela ON AGU nº 80/2024, tratava da dispensa de licitação para contratação de remanescente de obra, serviço ou fornecimento, em virtude de rescisão contratual, desde que observada a ordem de classificação da licitação original e aceitas as mesmas condições propostas pelo licitante vencedor. Na prática, permitia que a Administração Pública, após rescindir um contrato, chamasse o próximo colocado na licitação para dar continuidade ao objeto, agilizando a conclusão do projeto sem a necessidade de um novo processo licitatório. Atualmente, a Lei nº 14.133/2021 aborda a dispensa de licitação em situações específicas (art. 74) e a contratação de remanescente de obra, serviço ou fornecimento (relacionado ao art. 75, § 5º), que permite a contratação de remanescente de obra, serviço ou fornecimento em caso de rescisão, observando-se a ordem de classificação e as condições originais.",
+      "fontePrimaria": "sem fonte",
+      "matches": false
+    },
+    {
+      "numero": 1,
+      "ano": 2016,
+      "descDB": "Ao ceder o uso de imóveis da União para serviços comuns a servidores e cidadãos, como lanchonetes ou copiadoras, a licitação deve ser feita por pregão, preferencialmente eletrônico, pois o foco é o serviço prestado e não o imóvel em si (relacionado ao art. 74, que trata de inexigibilidade, e art. 75, que trata de dispensa de licitação, ambos aplicáveis a situações específicas de contratação direta, mas aqui a orientação é pela licitação). Somente em casos excepcionais e devidamente justificados pode-se usar o pregão presencial.",
+      "fontePrimaria": "sem fonte",
+      "matches": false
+    },
+    {
+      "numero": 3,
+      "ano": 2016,
+      "descDB": "Servidores públicos em estágio probatório que tiram licença gestante, adotante ou paternidade não terão o tempo dessas licenças descontado da contagem do seu período de avaliação. Isso significa que o estágio probatório continua correndo normalmente, sem interrupção, mesmo durante o afastamento para cuidar da família, garantindo que o servidor seja avaliado no prazo legal (relacionado ao art. 70 da Lei 14.133/2021, que trata da fase de planejamento e da necessidade de observância da legislação trabalhista e previdenciária).",
+      "fontePrimaria": "sem fonte",
+      "matches": false
+    },
+    {
+      "numero": 32,
+      "ano": 2010,
+      "descDB": "Orientação Normativa revogada. Consulte a listagem oficial da AGU em https://www.gov.br/agu/pt-br/composicao/cgu/cgu/onsagu para a versão vigente.",
+      "fontePrimaria": "listagem AGU",
+      "descEsperada": "( revogada,",
+      "matches": false,
+      "similaridade": 0.09
+    },
+    {
+      "numero": 56,
+      "ano": 2018,
+      "descDB": "Art. 1º As autoridades de segurança pública do Poder Executivo Federal que atuarem nas medidas necessárias e suficientes ao resguardo da ordem, segurança e impedimento de ocupação, obstrução ou quaisquer outras dificuldades relativas à trafegabilidade nas vias terrestres federais, inclusive nos seus acostamentos e entornos, poderão certificar os fatos que caracterizem violação à decisão proferida na ADPF 519, com no mínimo os seguintes elementos: I - indicação da via ou entorno que esteja sendo afetado; II - enumeração das pessoas responsáveis pela infração, se possível com qualificação, indicação dos veículos envolvidos, dia e hora; III - indicação da relação estabelecida entre o condutor infrator e a empresa transportadora, se for o caso; IV - identificação da(s) autoridade(s) que elaborou(aram) o relatório. Art. 2º As autoridades referidas no art. 1º poderão encaminhar o documento elaborado para as Procuradorias Seccionais da União, Procuradorias da União e Procuradorias Regionais da União, conforme a proximidade ou facilidade de acesso.",
+      "fontePrimaria": "content (DOU)",
+      "descEsperada": "Considerando a necessidade de orientação aos órgãos federais de segurança pública quanto à implementação das medidas necessárias aos efeitos da decisão proferida na Arguição de Descumprimento de Preceito Fundamental nº 519, resolve orientar:",
+      "matches": false,
+      "similaridade": 0.19
+    },
+    {
+      "numero": 41,
+      "ano": 2014,
+      "descDB": "Orientação Normativa substituída. A nova redação está na Orientação Normativa nº 77/2023. Consulte https://www.gov.br/agu/pt-br/composicao/cgu/cgu/onsagu",
+      "fontePrimaria": "listagem AGU",
+      "descEsperada": "(nova redação na",
+      "matches": false,
+      "similaridade": 0.25
+    },
+    {
+      "numero": 98,
+      "ano": 2025,
+      "descDB": "I - A extinção antecipada do contrato de execução contínua com fundamento na ausência de créditos orçamentários ou na perda de vantagem contratual poderá se dar com ônus ou sem ônus para a Administração Pública. II - A extinção antecipada do contrato de execução contínua nestas hipóteses, deverá ser justificada formalmente pela Administração Pública, observada as seguintes balizas: a) a justificativa deve ser fundamentada na ausência de créditos orçamentários ou na perda de vantagem contratual, conforme art. 106, III da Lei nº 14.133/2021; b) a justificativa deve apresentar elementos objetivos e documentados que comprovem a ausência de recursos ou a perda da vantagem contratual. III - A extinção antecipada do contrato de execução contínua sem ônus, prevista no art. 106, III c/c art. 106, §1º, ambos da Lei nº 14.133/2021, ocorrerá na próxima data de aniversário do contrato, garantido um prazo mínimo de dois meses para ciência do contratado, devendo ser observada a regra do art. 183 da Lei nº 14.133/2021 para a contagem destes prazos. IV - A regra do artigo 106, § 1º da Lei 14.133/2021 não é inconstitucional e não obriga a Administração a manter contratos sem crédito orçamentário, pois não impede a Administração Pública de rescindir o contrato, apenas impõe um limite temporal para que a extinção ocorra sem ônus. V - A Administração Pública pode renunciar à prerrogativa de extinção antecipada do contrato de execução contínua sem ônus prevista no art. 106, III da Lei nº 14.133/2021, desde que expressamente prevista no edital e no contrato e que conste no processo administrativo justificativa fundamentada no interesse público e na vantajosidade econômica. VI - A Administração Pública pode extinguir o contrato de execução contínua com fundamento na ausência de créditos orçamentários ou na perda de vantagem contratual antes da data de aniversário do contrato, desde que ocorra com ônus para Administração, conforme previsto no art. 138, §2º da Lei nº 14.133/2021.",
+      "fontePrimaria": "content (DOU)",
+      "descEsperada": "I - A extinção antecipada do contrato de execução contínua com fundamento na ausência de créditos orçamentários ou na perda de vantagem contratual poderá se dar com ônus ou sem ônus para a Administração Pública.",
+      "matches": true,
+      "similaridade": 0.36
+    },
+    {
+      "numero": 95,
+      "ano": 2025,
+      "descDB": "I - Na eventualidade de constatação da prescrição da pretensão ressarcitória durante a fase interna ou de cobrança administrativa, as normas aplicáveis à prescrição possuem o condão de auxiliar a atuação dos órgãos e entidades, incluído Instruções Normativas e Resoluções expedidas pelo Tribunal de Contas da União, nesses dois últimos casos desde que não conflitem com os entendimentos da Advocacia - Geral da União ou com norma específica aplicável ao órgão ou entidade. II - Os processos não devem ser arquivados no âmbito dos órgãos ou entidades e devem ser remetidos para julgamento pelo Tribunal de Contas da União. III - A autoridade competente deve, imediatamente, antes da instauração da tomada de contas especial, adotar medidas administrativas para caracterização ou elisão do dano no caso de omissão no dever de prestar contas, não comprovação da aplicação de recursos repassados pela União mediante convênio, contrato de repasse, ou instrumento congênere, ocorrência de desfalque, alcance, desvio ou desaparecimento de dinheiro, bens ou valores públicos, ou da prática de ato ilegal, ilegítimo ou antieconômico de que resulte dano ao Erário. IV - A dispensa de instauração de tomadas de contas especiais prevista em norma específica não exime a autoridade administrativa de adotar outras medidas administrativas ao seu alcance ou requerer ao órgão jurídico pertinente as medidas judiciais e extrajudiciais cabíveis, com vistas à obtenção do ressarcimento. V - Aplicam-se aos processos de tomada de contas especial, ainda que na fase interna, os marcos iniciais da prescrição da pretensão de ressarcimento, bem como os marcos interruptivos e suspensivos previstos na Resolução TCU n° 344/2022 ou em norma que a suceder, desde que não conflitem com os entendimentos da Advocacia - Geral da União ou com norma específica aplicável ao órgão ou entidade. VI - Em razão do definido pelo STF na tese referente ao Tema 897, recomenda-se, em se cogitando a ocorrência de prescrição, verificar o cometimento de eventual ato de improbidade doloso. VII - Caso identificada e reconhecida a prescrição, são necessárias as seguintes providências, sem prejuízo de outras que se entenda necessárias: a) analisar a prestação de contas dos recursos públicos utilizados para fins de avaliação dos mecanismos de governança, previstos no Decreto nº 9.203/2017; b) analisar os autos, a fim de se verificar a existência ou não de indícios de improbidade administrativa dolosa, apta a autorizar o afastamento da prescrição; c) verificada a existência de indícios de improbidade administrativa, providenciar comunicação ao órgão responsável, nos termos do art. 7º da Lei nº 8.429/1992, acompanhada dos subsídios aptos a auxiliar a eventual atuação em juízo; d) apurar eventuais responsabilidades funcionais da autoridade administrativa competente ou do agente público que deram causa à prescrição, e, ao imputar responsabilidades por omissão não justificada, comunicar o órgão de controle interno do órgão ou entidade.",
+      "fontePrimaria": "content (DOU)",
+      "descEsperada": "I - Na eventualidade de constatação da prescrição da pretensão ressarcitória durante a fase interna ou de cobrança administrativa, as normas aplicáveis à prescrição possuem o condão de auxiliar a atuação dos órgãos e entidades, incluído Instruções Normativas e Resoluções expedidas pelo Tribunal de Contas da União, nesses dois últimos casos desde que não conflitem com os entendimentos da Advocacia - Geral da União ou com norma específica aplicável ao órgão ou entidade.",
+      "matches": true,
+      "similaridade": 0.4
+    },
+    {
+      "numero": 76,
+      "ano": 2023,
+      "descDB": "I - Nos contratos administrativos regidos pela Lei nº 14.133, de 2021, em regra, é vedado o pagamento antecipado, parcial ou total, do objeto contratado, sendo excepcionalmente admitido desde que, motivadamente, seja justificado o preenchimento cumulativo dos seguintes requisitos: a) a medida proporcione sensível economia de recursos ou represente condição indispensável para a consecução do objeto; b) haja previsão expressa no edital de licitação ou no instrumento formal de contratação direta; e c) contenha no instrumento convocatório ou no contrato como cautela obrigatória a exigência de devolução do valor antecipado caso não haja execução do objeto no prazo contratual. II - A partir do exame das circunstâncias que são próprias de cada caso concreto, e para resguardar o interesse público e prejuízos ao erário, poderá, ainda, a administração exigir garantias adicionais para fins de admissão do pagamento antecipado, na forma do art. 92, inciso XII, e art. 96, da Lei nº 14.133, de 2021, bem como poderá adotar outras cautelas, tais como: comprovação da execução de parte ou de etapa inicial do objeto pelo contratado para a antecipação do valor remanescente; emissão de título de crédito pelo contratado; acompanhamento da mercadoria, em qualquer momento do transporte, por representante da administração; exigência de certificação do produto ou do fornecedor; dentre outras. Referência Legislativa: Art. 92, inciso XII, Art. 96 e Art. 145 da Lei nº 14.133, de 2021; art. 38 do Decreto nº 93.872, de 1986.",
+      "fontePrimaria": "content (DOU)",
+      "descEsperada": "I - Nos contratos administrativos regidos pela Lei nº 14.133, de 2021, em regra, é vedado o pagamento antecipado, parcial ou total, do objeto contratado, sendo excepcionalmente admitido desde que, motivadamente, seja justificado o preenchimento cumulativo dos seguintes requisitos:",
+      "matches": true,
+      "similaridade": 0.43
+    },
+    {
+      "numero": 100,
+      "ano": 2025,
+      "descDB": "I - No regime jurídico da Lei nº 8.666/1993 e da Lei nº 10.520/2002, o reajuste em sentido estrito, a repactuação e a revisão por álea extraordinária são fenômenos próprios dos contratos administrativos, não sendo aplicáveis às atas de registro de preços. II - No regime jurídico da Lei nº 14.133/2021, o reajuste em sentido estrito, a repactuação e a revisão por álea extraordinária são aplicáveis às atas de registro de preços, conforme o inciso VI do art. 82 da Lei nº 14.133/2021 e o art. 25 do Decreto nº 11.462/2023. III - Os preços registrados poderão ser alterados, no que se refere ao reajuste em sentido estrito e à repactuação, desde que haja previsão expressa no edital. IV - O instituto da preclusão não se aplica ao reajuste em sentido estrito, desde que previsto no edital, uma vez que a medida consiste na aplicação automática (de ofício) de índice de correção por parte da Administração Pública. V - O instituto da preclusão aplica-se à repactuação na ata de registro de preços quando o fornecedor não solicitar a atualização dos valores antes da data de prorrogação da ata de registro de preços. VI - A revisão por álea extraordinária da ata de registro de preços não necessita estar prevista em edital e pode ser aplicada a qualquer momento, sempre que necessária ao reequilíbrio econômico-financeiro, nos termos dos incisos I e II do art. 25 do Decreto nº 11.462/2023. VII - Prevista a possibilidade de prorrogação no edital e na ata de registro de preços, mas não havendo cláusula de reajustamento ou repactuação sobre os preços registrados, a prorrogação poderá ser realizada sem a atualização dos valores. Nesses casos, deve-se colher formalmente a anuência do fornecedor quanto à manutenção dos preços, a fim de evitar discussões futuras.",
+      "fontePrimaria": "content (DOU)",
+      "descEsperada": "I - No regime jurídico da Lei nº 8.666/1993 e da Lei nº 10.520/2002, o reajuste em sentido estrito, a repactuação e a revisão por álea extraordinária são fenômenos próprios dos contratos administrativos, não sendo aplicáveis às atas de registro de preços.",
+      "matches": true,
+      "similaridade": 0.45
+    },
+    {
+      "numero": 81,
+      "ano": 2024,
+      "descDB": "I - As exceções previstas em lei ordinária que permitem a celebração de uma transferência voluntária mesmo em caso de inadimplência do ente convenente ou não cumprimento de uma das condições para celebração do instrumento, possuem plena validade e eficácia, aplicando-se ainda que a inadimplência se refira a condição prevista em Lei Complementar. Isso, porque: (i) a aplicação de uma exceção para realização da transferência não afasta uma exigência ao ente político disposta na mesma norma; (ii) a lei ordinária pode disciplinar matéria sobre a qual a Constituição Federal não reservou à lei complementar; e (iii) o tema atinente às transferências voluntárias (critérios/exigências/restrições/condições) não é restrito à reserva de lei complementar. II - A exceção prevista em lei somente não será aplicada se a própria Constituição Federal definir o requisito como obrigatório para realizar transferências voluntárias, a exemplo da regularidade no pagamento de precatórios judiciais (art. 104, parágrafo único, ADCT), cumprimento das regras gerais de organização e de funcionamento de regime próprio de previdência social (art. 167, XIII, CF) e cumprimento dos limites com despesas de pessoal (art. 169, §2º, CF). III - São juridicamente válidas as exceções eventualmente dispostas em Lei de Diretrizes Orçamentária, que porventura exclua a exigência de regularidade fiscal nos cadastros ou sistemas de informações financeiras, contábeis e fiscais, em relação a convenentes que apresente condição específica que mereça tratamento diferenciado, a exemplo de determinado número de habitantes, hipótese que, contudo, não afasta a incidência de vedações constitucionais expressas, tampouco a exigibilidade e comprovação de outros requisitos estabelecidos em ato normativo veiculado pelo órgão central do sistema que opera as transferências voluntárias, devendo o convenente, em todo caso, manter o controle e a boa gestão fiscal. Referência legislativa : art. 87, § 2º, da Lei nº 14.116, de 2020; art. 25 da Lei Complementar nº 101, de 2000; arts. 167, III, 169, § 2º, da Constituição Federal; art. 104, parágrafo único, da ADCT.",
+      "fontePrimaria": "content (DOU)",
+      "descEsperada": "I - As exceções previstas em lei ordinária que permitem a celebração de uma transferência voluntária mesmo em caso de inadimplência do ente convenente ou não cumprimento de uma das condições para celebração do instrumento, possuem plena validade e eficácia, aplicando-se ainda que a inadimplência se refira a condição prevista em Lei Complementar. Isso, porque: (i) a aplicação de uma exceção para realização da transferência não afasta uma exigência ao ente político disposta na mesma norma; (ii) a lei ordinária pode disciplinar matéria sobre a qual a Constituição Federal não reservou à lei complementar; e (iii) o tema atinente às transferências voluntárias (critérios/exigências/restrições/condições) não é restrito à reserva de lei complementar.",
+      "matches": true,
+      "similaridade": 0.59
+    },
+    {
+      "numero": 84,
+      "ano": 2024,
+      "descDB": "I - É possível a substituição do instrumento de contrato a que alude o art. 92 da Lei nº 14.133, de 2021, por outro instrumento mais simples, com base no art. 95, inciso I, do mesmo diploma legal, sempre que: a) o valor de contratos relativos a obras, serviços de engenharia e de manutenção de veículos automotores se encaixe no valor atualizado autorizativo da dispensa de licitação prevista no inciso I do art. 75, da Lei nº 14.133, de 2021; ou b) o valor de contratos relativos a compras e serviços em geral se encaixe no valor atualizado que autoriza a dispensa de licitação prevista no inciso II do art. 75, da Lei nº 14.133, de 2021. II - Não importa para a aplicação do inciso I do art. 95, da Lei nº 14.133, de 2021, se a contratação resultou de licitação, inexigibilidade ou dispensa. Referência Legislativa: Art. 95, inciso I, c/c os arts. 91, 92 e 75, incisos I e II, todos da Lei nº 14.133, de 2021.",
+      "fontePrimaria": "content (DOU)",
+      "descEsperada": "I - É possível a substituição do instrumento de contrato a que alude o art. 92 da Lei nº 14.133, de 2021, por outro instrumento mais simples, com base no art. 95, inciso I, do mesmo diploma legal, sempre que:",
+      "matches": true,
+      "similaridade": 0.63
+    },
+    {
+      "numero": 96,
+      "ano": 2025,
+      "descDB": "I. Na cessão de uso de imóvel administrado pela União e suas autarquias e fundações, com a prestação de serviços comuns em favor de servidores públicos e administrados, é admissível adotar o critério de julgamento de maior preço nas modalidades pregão ou concorrência. II. O objeto principal da cessão de uso é a remuneração pelo uso do bem público, sendo o serviço de apoio meramente auxiliar. III. Excepcionalmente podem ser usados justificadamente critérios de julgamento relacionados ao objeto da atividade de apoio, desde que demonstrada que tal forma irá melhor atender o interesse público almejado pela cessão onerosa.",
+      "fontePrimaria": "content (DOU)",
+      "descEsperada": "I. Na cessão de uso de imóvel administrado pela União e suas autarquias e fundações, com a prestação de serviços comuns em favor de servidores públicos e administrados, é admissível adotar o critério de julgamento de maior preço nas modalidades pregão ou concorrência.",
+      "matches": true,
+      "similaridade": 0.67
+    },
+    {
+      "numero": 101,
+      "ano": 2025,
+      "descDB": "Os contratos regidos pela Lei nº 14.133, de 2021, como previsto no caput do art. 105, da citada Lei, podem ultrapassar o exercício financeiro em que celebrados, desde que as despesas a eles referentes sejam integralmente empenhadas até 31 de dezembro, permitindo-se, assim, sua inscrição em restos a pagar. Referência : arts. 35 e 36, da Lei nº 4.320, de 1965; art. 16 da Complementar nº 101, de 2000 e art. 165, §1º, da Constituição Federal. Fonte : Parecer nº 00010/2021/CNLCA/CGU/AGU e Orientação Normativa AGU nº 39, de 13 de dezembro de 2011.",
+      "fontePrimaria": "content (DOU)",
+      "descEsperada": "Enunciado : Os contratos regidos pela Lei nº 14.133, de 2021, como previsto no caput do art. 105, da citada Lei, podem ultrapassar o exercício financeiro em que celebrados, desde que as despesas a eles referentes sejam integralmente empenhadas até 31 de dezembro, permitindo-se, assim, sua inscrição em restos a pagar.",
+      "matches": true,
+      "similaridade": 0.77
+    },
+    {
+      "numero": 77,
+      "ano": 2023,
+      "descDB": "I - A partir de 1º de janeiro de 2024, a celebração de convênios entre a União e os demais entes federativos na forma do Decreto nº 11.531, de 16 de maio de 2023, não deve ser inferior a R$ 400.000,00 (quatrocentos mil reais) para execução de obras e R$ 200.000,00 (duzentos mil reais) para demais objetos, salvo se advir norma jurídica que defina outros valores. II - A vedação alcança todas as dotações orçamentárias, inclusive as decorrentes de emendas parlamentares. III - Não se aplicam os limites do art. 10 do Decreto nº 11.531/2023 aos convênios regidos por legislação especial Referência Legislativa: inc. I do art. 5º c.c. inc. I e II do art. 10, todos do Decreto nº 11.531, de 16 de maio de 2023.",
+      "fontePrimaria": "content (DOU)",
+      "descEsperada": "I - A partir de 1º de janeiro de 2024, a celebração de convênios entre a União e os demais entes federativos na forma do Decreto nº 11.531, de 16 de maio de 2023, não deve ser inferior a R$ 400.000,00 (quatrocentos mil reais) para execução de obras e R$ 200.000,00 (duzentos mil reais) para demais objetos, salvo se advir norma jurídica que defina outros valores.",
+      "matches": true,
+      "similaridade": 0.79
+    },
+    {
+      "numero": 79,
+      "ano": 2023,
+      "descDB": "Mesmo após a revogação da Lei nº 8.666, de 21 de junho de 1993, havendo rescisão de contrato administrativo que tenha sido nela fundamentado, será admitida a celebração de contrato de remanescente de obra, serviço ou fornecimento com base em seu art. 24, inciso XI, desde que sejam atendidos todos demais requisitos legais aplicáveis a essa espécie de contratação. Referência Legislativa: Art. 37, inciso XXI, da Constituição Federal, Arts. 4º e 6º do Decreto-Lei nº 4.657, de 1942, Art. 24, inciso XI, da Lei nº 8.666, de 1993 e Art. 191 da Lei nº 14.133, de 2021.",
+      "fontePrimaria": "content (DOU)",
+      "descEsperada": "Mesmo após a revogação da Lei nº 8.666, de 21 de junho de 1993, havendo rescisão de contrato administrativo que tenha sido nela fundamentado, será admitida a celebração de contrato de remanescente de obra, serviço ou fornecimento com base em seu art. 24, inciso XI, desde que sejam atendidos todos demais requisitos legais aplicáveis a essa espécie de contratação.",
+      "matches": true,
+      "similaridade": 0.84
+    },
+    {
+      "numero": 82,
+      "ano": 2024,
+      "descDB": "No processo licitatório na modalidade do diálogo competitivo é possível estabelecer no edital de pré-seleção critérios de exclusão a serem observados pelos licitantes para participação e durante o desenvolvimento dos diálogos, sob pena de exclusão da fase competitiva. Referência legislativa: art. 32 da Lei nº 14.133, de 1º de abril de 2021.",
+      "fontePrimaria": "content (DOU)",
+      "descEsperada": "No processo licitatório na modalidade do diálogo competitivo é possível estabelecer no edital de pré-seleção critérios de exclusão a serem observados pelos licitantes para participação e durante o desenvolvimento dos diálogos, sob pena de exclusão da fase competitiva.",
+      "matches": true,
+      "similaridade": 0.86
+    },
+    {
+      "numero": 99,
+      "ano": 2025,
+      "descDB": "I - A legalidade da prorrogação do prazo de vigência dos contratos administrativos de serviços e de fornecimentos contínuos, nos termos do artigo 107 da Lei nº 14.133, de 1º de abril de 2021, demanda expressa previsão no edital ou em cláusula contratual. II - No caso dos contratos de serviços e fornecimentos contínuos celebrados por meio de dispensa e inexigibilidade de licitação, a legalidade da prorrogação do prazo de vigência demanda previsão no respectivo termo de referência ou em cláusula contratual.",
+      "fontePrimaria": "content (DOU)",
+      "descEsperada": "I - A legalidade da prorrogação do prazo de vigência dos contratos administrativos de serviços e de fornecimentos contínuos, nos termos do artigo 107 da Lei nº 14.133, de 1º de abril de 2021, demanda expressa previsão no edital ou em cláusula contratual.",
+      "matches": true,
+      "similaridade": 0.87
+    },
+    {
+      "numero": 83,
+      "ano": 2024,
+      "descDB": "\"Incumbe às unidades jurídicas da AGU instruir seus assessorados a realizarem Análise de Impacto Regulatório - AIR quando da elaboração de atos normativos de interesse geral de agentes econômicos ou de usuários de serviços prestados, mediante relatório aderente às exigências do art. 6º do Decreto nº 10.411/2020, dispensada apenas em situações abrangidas pelo seu art. 4º e pela forma de seu §1º, consoante nota técnica ou equivalente, que fundamente a proposta de edição ou alteração do ato normativo, cabendo-lhes em caso de dúvida sobre a incidência em concreto da exigência legal consultar o órgão de assessoramento jurídico competente\". Referências: Lei nº 13.874, de 20/09/2019 (art. 5º). Lei nº 13.848, de 25/06/2019 (art. 6º). Decreto nº 10.411, de 30/07/2020 (artigos 1º e §1º, 4º e §1º e 6º). Acórdão nº 2.325/2022-TCU- Plenário.",
+      "fontePrimaria": "content (DOU)",
+      "descEsperada": "\"Incumbe às unidades jurídicas da AGU instruir seus assessorados a realizarem Análise de Impacto Regulatório - AIR quando da elaboração de atos normativos de interesse geral de agentes econômicos ou de usuários de serviços prestados, mediante relatório aderente às exigências do art. 6º do Decreto nº 10.411/2020, dispensada apenas em situações abrangidas pelo seu art. 4º e pela forma de seu §1º, consoante nota técnica ou equivalente, que fundamente a proposta de edição ou alteração do ato normativo, cabendo-lhes em caso de dúvida sobre a incidência em concreto da exigência legal consultar o órgão de assessoramento jurídico competente\".",
+      "matches": true,
+      "similaridade": 0.89
+    },
+    {
+      "numero": 69,
+      "ano": 2021,
+      "descDB": "(Lei 14.133/2021) Não é obrigatória manifestação jurídica nas contratações diretas de pequeno valor com fundamento no art. 75, I ou II, e § 3º da Lei nº 14.133, de 1º de abril de 2021, salvo se houver celebração de contrato administrativo e este não for padronizado pelo órgão de assessoramento jurídico, ou nas hipóteses em que o administrador tenha suscitado dúvida a respeito da legalidade da dispensa de licitação. Aplica-se o mesmo entendimento às contratações diretas fundadas no art. 74, da Lei nº 14.133, de 2021, desde que seus valores não ultrapassem os limites previstos nos incisos I e II do art. 75 do mesmo diploma.",
+      "fontePrimaria": "listagem AGU",
+      "descEsperada": "(Lei 14.133/2021) Não é obrigatória manifestação jurídica nas contratações diretas de pequeno valor com fundamento no art. 75, I ou II, e § 3º da Lei nº 14.133, de 1º de abril de 2021, salvo se houver celebração de contrato administrativo e este não for padronizado pelo órgão de assessoramento jurídico, ou nas hipóteses em que o administrador tenha suscitado dúvida a respeito da legalidade da dispensa de licitação. Aplica-se o mesmo entendimento às contratações diretas fundadas no art. 74, da Lei nº 14.133, de 2021, desde que seus valores não ultrapassem os limites previstos nos incisos I e II do art. 75, da Lei nº 14.133, de 2021.",
+      "matches": true,
+      "similaridade": 0.99
+    },
+    {
+      "numero": 102,
+      "ano": 2025,
+      "descDB": "É juridicamente possível, desde que justificados a necessidade e o quantitativo no Documento de Formalização de Demanda, dispensar os órgãos participantes de elaborar Estudo Técnico Preliminar (ETP) próprio, desde que adiram ao conteúdo do ETP do gerenciador bem como estejam na mesma estrutura administrativa deste último.",
+      "fontePrimaria": "content (DOU)",
+      "descEsperada": "É juridicamente possível, desde que justificados a necessidade e o quantitativo no Documento de Formalização de Demanda, dispensar os órgãos participantes de elaborar Estudo Técnico Preliminar (ETP) próprio, desde que adiram ao conteúdo do ETP do gerenciador bem como estejam na mesma estrutura administrativa deste último.",
+      "matches": true,
+      "similaridade": 1
+    },
+    {
+      "numero": 97,
+      "ano": 2025,
+      "descDB": "Não é obrigatória manifestação jurídica nas contratações diretas (dispensas e inexigibilidades de licitação) de pequeno valor e de baixa complexidade realizadas por repartições públicas sediadas no exterior com fundamento no art. 1º, § 2º, da Lei nº 14.133, de 1º de abril de 2021, salvo nas hipóteses em que o administrador tenha suscitado dúvida a respeito da juridicidade do procedimento de contratação e nos contratos que, em ato específico, demandem análise do órgão de assessoramento jurídico.",
+      "fontePrimaria": "content (DOU)",
+      "descEsperada": "Não é obrigatória manifestação jurídica nas contratações diretas (dispensas e inexigibilidades de licitação) de pequeno valor e de baixa complexidade realizadas por repartições públicas sediadas no exterior com fundamento no art. 1º, § 2º, da Lei nº 14.133, de 1º de abril de 2021, salvo nas hipóteses em que o administrador tenha suscitado dúvida a respeito da juridicidade do procedimento de contratação e nos contratos que, em ato específico, demandem análise do órgão de assessoramento jurídico.",
+      "matches": true,
+      "similaridade": 1
+    },
+    {
+      "numero": 85,
+      "ano": 2024,
+      "descDB": "Nas contratações diretas, a divulgação do contrato no Portal Nacional de Contratações Públicas (PNCP), na forma dos artigos 94, inc. II, e 174 da Lei nº 14.133, de 2021, supre a exigência de publicidade prevista no artigo 72, p. único, do mesmo diploma.",
+      "fontePrimaria": "content (DOU)",
+      "descEsperada": "Nas contratações diretas, a divulgação do contrato no Portal Nacional de Contratações Públicas (PNCP), na forma dos artigos 94, inc. II, e 174 da Lei nº 14.133, de 2021, supre a exigência de publicidade prevista no artigo 72, p. único, do mesmo diploma.",
+      "matches": true,
+      "similaridade": 1
+    },
+    {
+      "numero": 91,
+      "ano": 2024,
+      "descDB": "Na análise dos processos relativos à prorrogação de prazo contratos de serviços e fornecimentos continuados, previstos no art. 107 da Lei 14.133, de 2021, cumpre aos órgãos jurídicos verificar se não há extrapolação do atual prazo de vigência, bem como eventual ocorrência de solução de continuidade nos aditivos precedentes, hipóteses que configuram a extinção do ajuste, impedindo a sua prorrogação.",
+      "fontePrimaria": "listagem AGU",
+      "descEsperada": "Na análise dos processos relativos à prorrogação de prazo contratos de serviços e fornecimentos continuados, previstos no art. 107 da Lei 14.133, de 2021, cumpre aos órgãos jurídicos verificar se não há extrapolação do atual prazo de vigência, bem como eventual ocorrência de solução de continuidade nos aditivos precedentes, hipóteses que configuram a extinção do ajuste, impedindo a sua prorrogação.",
+      "matches": true,
+      "similaridade": 1
+    },
+    {
+      "numero": 94,
+      "ano": 2024,
+      "descDB": "I - O cônjuge do Presidente da República, em sua atuação de interesse público, possui natureza jurídica própria, decorrente do vínculo civil mantido com o Chefe de Estado e Governo, exercendo um papel representativo simbólico em nome do Presidente da República de caráter social, cultural, cerimonial, político e/ou diplomático;",
+      "fontePrimaria": "content (DOU)",
+      "descEsperada": "I - O cônjuge do Presidente da República, em sua atuação de interesse público, possui natureza jurídica própria, decorrente do vínculo civil mantido com o Chefe de Estado e Governo, exercendo um papel representativo simbólico em nome do Presidente da República de caráter social, cultural, cerimonial, político e/ou diplomático;",
+      "matches": true,
+      "similaridade": 1
+    },
+    {
+      "numero": 90,
+      "ano": 2024,
+      "descDB": "(Lei 14.133/2021) A vigência do contrato de serviço contínuo ou de fornecimento não está adstrita ao exercício financeiro devendo a Administração atestar, no início da contratação e de cada exercício, a existência de créditos orçamentários vinculados à contratação e a vantagem em sua manutenção.",
+      "fontePrimaria": "listagem AGU",
+      "descEsperada": "(Lei 14.133/2021) A vigência do contrato de serviço contínuo ou de fornecimento não está adstrita ao exercício financeiro devendo a Administração atestar, no início da contratação e de cada exercício, a existência de créditos orçamentários vinculados à contratação e a vantagem em sua manutenção.",
+      "matches": true,
+      "similaridade": 1
+    },
+    {
+      "numero": 89,
+      "ano": 2024,
+      "descDB": "O prazo inicial de vigência da ata de registro de preços é necessariamente de 1 (um) ano, contado do primeiro dia útil subsequente à data de sua divulgação no PNCP, podendo ocorrer a prorrogação da vigência da ata para o período de mais de um ano, desde que formalizada na vigência inicial da ata e comprovada a vantajosidade do preço registrado, tudo conforme os termos do art. 84, da Lei nº 14.133, de 2021, c/c o art. 22 do Decreto nº 11.462, de 2023.",
+      "fontePrimaria": "listagem AGU",
+      "descEsperada": "O prazo inicial de vigência da ata de registro de preços é necessariamente de 1 (um) ano, contado do primeiro dia útil subsequente à data de sua divulgação no PNCP, podendo ocorrer a prorrogação da vigência da ata para o período de mais de um ano, desde que formalizada na vigência inicial da ata e comprovada a vantajosidade do preço registrado, tudo conforme os termos do art. 84, da Lei nº 14.133, de 2021, c/c o art. 22 do Decreto nº 11.462, de 2023.",
+      "matches": true,
+      "similaridade": 1
+    },
+    {
+      "numero": 92,
+      "ano": 2024,
+      "descDB": "I - A vigência dos contratos, dos convênios e instrumentos congêneres com escopo predefinido extingue-se pela conclusão de seu objeto, e não pela expiração do prazo originalmente previsto no ajuste, conforme o art. 111 da Lei 14.133, de 2021. II - É recomendável que a Administração avalie, no caso concreto, a necessidade de formalizar termo aditivo ou apostilamento, conforme a situação, para a fixação de novas datas, prazos ou cronogramas para a execução da obrigação ajustada, mesmo após ser atingido o termo final de vigência originalmente estabelecido, tendo em vista a proibição de instrumentos com prazo de vigência indeterminado.",
+      "fontePrimaria": "listagem AGU",
+      "descEsperada": "I - A vigência dos contratos, dos convênios e instrumentos congêneres com escopo predefinido extingue-se pela conclusão de seu objeto, e não pela expiração do prazo originalmente previsto no ajuste, conforme o art. 111 da Lei 14.133, de 2021. II - É recomendável que a Administração avalie, no caso concreto, a necessidade de formalizar termo aditivo ou apostilamento, conforme a situação, para a fixação de novas datas, prazos ou cronogramas para a execução da obrigação ajustada, mesmo após ser atingido o termo final de vigência originalmente estabelecido, tendo em vista a proibição de instrumentos com prazo de vigência indeterminado.",
+      "matches": true,
+      "similaridade": 1
+    },
+    {
+      "numero": 86,
+      "ano": 2024,
+      "descDB": "Qualquer caso de demissão do serviço público, em decorrência de processo administrativo disciplinar, incompatibiliza o ex-servidor para nova investidura em cargo público federal pelo prazo de 8 (oito) anos, nos termos do art. 1º, inciso I, alínea \"o\", da Lei Complementar nº 64, de 1990, cumulado com o art. 5º, inciso II, da Lei nº 8.112, de 1990.",
+      "fontePrimaria": "content (DOU)",
+      "descEsperada": "Qualquer caso de demissão do serviço público, em decorrência de processo administrativo disciplinar, incompatibiliza o ex-servidor para nova investidura em cargo público federal pelo prazo de 8 (oito) anos, nos termos do art. 1º, inciso I, alínea \"o\", da Lei Complementar nº 64, de 1990, cumulado com o art. 5º, inciso II, da Lei nº 8.112, de 1990.",
+      "matches": true,
+      "similaridade": 1
+    },
+    {
+      "numero": 80,
+      "ano": 2024,
+      "descDB": "I - A vedação prevista no art. 73, §10, da Lei nº 9.504, de 30 de setembro de 1997, dirige-se à distribuição gratuita e discricionária diretamente a particulares, incluídas as doações com encargo e cessões (com a ressalva do disposto no item II abaixo), não alcançando os atos vinculados em razão de direito subjetivo do beneficiário e as transferências realizadas entre órgãos públicos do mesmo ente federativo ou as que envolvam entes federativos distintos, observando-se neste último caso o disposto no inciso VI, alínea \"a\", do mesmo artigo, que veda transferências nos três meses anteriores ao pleito eleitoral; II - Na doação/cessão com encargo, pode haver o afastamento da vedação contida no § 10 do art. 73 da Lei nº 9.504/1997, desde que, diante da verificação d",
+      "fontePrimaria": "listagem AGU",
+      "descEsperada": "I - A vedação prevista no art. 73, §10, da Lei nº 9.504, de 30 de setembro de 1997, dirige-se à distribuição gratuita e discricionária diretamente a particulares, incluídas as doações com encargo e cessões (com a ressalva do disposto no item II abaixo), não alcançando os atos vinculados em razão de direito subjetivo do beneficiário e as transferências realizadas entre órgãos públicos do mesmo ente federativo ou as que envolvam entes federativos distintos, observando-se neste último caso o disposto no inciso VI, alínea \"a\", do mesmo artigo, que veda transferências nos três meses anteriores ao pleito eleitoral; II - Na doação/cessão com encargo, pode haver o afastamento da vedação contida no § 10 do art. 73 da Lei nº 9.504/1997, desde que, diante da verificação d",
+      "matches": true,
+      "similaridade": 1
+    },
+    {
+      "numero": 87,
+      "ano": 2024,
+      "descDB": "Para fins de dispensa de licitação em razão do valor (incisos I e II do art. 75 da Lei nº 14.133, de 2021) destinada a contratos de fornecimento ou serviço continuado com vigência plurianual, nos termos dos arts. 106 e 107, da Lei nº 14.133, de 2021, será considerado valor da contratação o montante equivalente ao período de 1 (um) ano de vigência contratual, na forma do §1º do art. 75 da Lei n. 14.133/2021.",
+      "fontePrimaria": "listagem AGU",
+      "descEsperada": "Para fins de dispensa de licitação em razão do valor (incisos I e II do art. 75 da Lei nº 14.133, de 2021) destinada a contratos de fornecimento ou serviço continuado com vigência plurianual, nos termos dos arts. 106 e 107, da Lei nº 14.133, de 2021, será considerado valor da contratação o montante equivalente ao período de 1 (um) ano de vigência contratual, na forma do §1º do art. 75 da Lei n. 14.133/2021.",
+      "matches": true,
+      "similaridade": 1
+    },
+    {
+      "numero": 93,
+      "ano": 2024,
+      "descDB": "A vigência do contrato de locação de imóveis no qual a Administração Pública é locatária não se sujeita aos limites constantes dos arts. 106 e 107 da Lei 14.133, de 1º de abril de 2021, sendo facultado que atos normativos internos estipulem limites de vigência contratual.",
+      "fontePrimaria": "listagem AGU",
+      "descEsperada": "A vigência do contrato de locação de imóveis no qual a Administração Pública é locatária não se sujeita aos limites constantes dos arts. 106 e 107 da Lei 14.133, de 1º de abril de 2021, sendo facultado que atos normativos internos estipulem limites de vigência contratual.",
+      "matches": true,
+      "similaridade": 1
+    },
+    {
+      "numero": 88,
+      "ano": 2024,
+      "descDB": "(Lei 14.133/2021) I) No âmbito do Sistema de Registro de Preços, as competências do art. 53 da lei nº 14.133, de 2021, e do art. 11, inciso vi, alínea \"a\", da Lei Complementar nº 73, de 1993, relativas ao controle de legalidade mediante análise jurídica do processo de contratação, são da exclusiva alçada da unidade consultiva que presta assessoramento jurídico ao órgão gerenciador do registro de preços. II) O órgão não participante, em obediência ao § 4º do art. 53 da lei nº 14.133, de 2021, deverá submeter o processo de adesão à análise jurídica do respectivo órgão de assessoramento jurídico, hipótese em que este limitar-se-á a examinar a legalidade em relação aos requisitos da adesão. III) A análise a que se refere o inciso ii desta orientação normativa é dis",
+      "fontePrimaria": "listagem AGU",
+      "descEsperada": "(Lei 14.133/2021) I) No âmbito do Sistema de Registro de Preços, as competências do art. 53 da lei nº 14.133, de 2021, e do art. 11, inciso vi, alínea \"a\", da Lei Complementar nº 73, de 1993, relativas ao controle de legalidade mediante análise jurídica do processo de contratação, são da exclusiva alçada da unidade consultiva que presta assessoramento jurídico ao órgão gerenciador do registro de preços. II) O órgão não participante, em obediência ao § 4º do art. 53 da lei nº 14.133, de 2021, deverá submeter o processo de adesão à análise jurídica do respectivo órgão de assessoramento jurídico, hipótese em que este limitar-se-á a examinar a legalidade em relação aos requisitos da adesão. III) A análise a que se refere o inciso ii desta orientação normativa é dis",
+      "matches": true,
+      "similaridade": 1
+    },
+    {
+      "numero": 78,
+      "ano": 2023,
+      "descDB": "O regime jurídico das sanções previstas na Lei n.º 14.133, de 2021 não é aplicável aos contratos firmados com base na legislação anterior, nem alterará as sanções já aplicadas ou a serem aplicadas com fundamento na legislação anterior, em respeito à proteção do ato jurídico perfeito.",
+      "fontePrimaria": "content (DOU)",
+      "descEsperada": "O regime jurídico das sanções previstas na Lei n.º 14.133, de 2021 não é aplicável aos contratos firmados com base na legislação anterior, nem alterará as sanções já aplicadas ou a serem aplicadas com fundamento na legislação anterior, em respeito à proteção do ato jurídico perfeito.",
+      "matches": true,
+      "similaridade": 1
+    },
+    {
+      "numero": 62,
+      "ano": 2020,
+      "descDB": "HÁ RESPALDO JURÍDICO PARA QUE EMPRESA PÚBLICA E SOCIEDADE DE ECONOMIA MISTA ADOTE O RITO LICITATÓRIO DE QUE CUIDA A LEI Nº 13.303, DE 2016, NAS HIPÓTESES EM QUE ATUE COMO UNIDADE EXECUTORA NOS TERMOS DE COMPROMISSO DE QUE CUIDA A LEI Nº 11.578, DE 2007, E NOS CONVÊNIOS E CONTRATOS DE REPASSE PACTUADOS PARA FINS DE REPASSE DE TRANSFERÊNCIAS VOLUNTÁRIAS.",
+      "fontePrimaria": "content (DOU)",
+      "descEsperada": "HÁ RESPALDO JURÍDICO PARA QUE EMPRESA PÚBLICA E SOCIEDADE DE ECONOMIA MISTA ADOTE O RITO LICITATÓRIO DE QUE CUIDA A LEI Nº 13.303, DE 2016, NAS HIPÓTESES EM QUE ATUE COMO UNIDADE EXECUTORA NOS TERMOS DE COMPROMISSO DE QUE CUIDA A LEI Nº 11.578, DE 2007, E NOS CONVÊNIOS E CONTRATOS DE REPASSE PACTUADOS PARA FINS DE REPASSE DE TRANSFERÊNCIAS VOLUNTÁRIAS.",
+      "matches": true,
+      "similaridade": 1
+    },
+    {
+      "numero": 59,
+      "ano": 2020,
+      "descDB": "ACORDO ENTRE ACIONISTAS, QUE CONFIRA O CONTROLE SOCIETÁRIO DE DETERMINADA EMPRESA A SOCIEDADES DE ECONOMIA MISTA E EMPRESAS PÚBLICAS, NÃO É SUFICIENTE PARA A LEGALIDADE DA CONTRATAÇÃO DIRETA DE QUE CUIDA O ART. 24, INCISO XXIII, DA LEI Nº 8.666, DE 1993; E O ART. 29, INCISO XI, DA LEI Nº 13.303, DE 2016; QUE DEMANDA EFETIVO CONTROLE ACIONÁRIO DA PESSOA JURÍDICA A SER CONTRATADA POR PARTE DA ENTIDADE CONTRATANTE.",
+      "fontePrimaria": "content (DOU)",
+      "descEsperada": "ACORDO ENTRE ACIONISTAS, QUE CONFIRA O CONTROLE SOCIETÁRIO DE DETERMINADA EMPRESA A SOCIEDADES DE ECONOMIA MISTA E EMPRESAS PÚBLICAS, NÃO É SUFICIENTE PARA A LEGALIDADE DA CONTRATAÇÃO DIRETA DE QUE CUIDA O ART. 24, INCISO XXIII, DA LEI Nº 8.666, DE 1993; E O ART. 29, INCISO XI, DA LEI Nº 13.303, DE 2016; QUE DEMANDA EFETIVO CONTROLE ACIONÁRIO DA PESSOA JURÍDICA A SER CONTRATADA POR PARTE DA ENTIDADE CONTRATANTE.",
+      "matches": true,
+      "similaridade": 1
+    },
+    {
+      "numero": 58,
+      "ano": 2020,
+      "descDB": "O USO OFICIAL DO SISTEMA SAPIENS DEVE ESTAR ADSTRITO AO DESEMPENHO DE ATIVIDADES FINALÍSTICAS OU ADMINISTRATIVAS DA INSTITUIÇÃO, O QUE ABRANGE A ELABORAÇÃO E EDIÇÃO DOS DOCUMENTOS OFICIAIS DE ACORDO COM AS NORMAS VIGENTES, INCLUSIVE QUANTO À APOSIÇÃO DO BRASÃO DA REPÚBLICA E DE CABEÇALHO E NUMERAÇÃO INDICATIVOS DOS ÓRGÃOS, UNIDADES E DE SEUS SETORES INTERNOS, BEM COMO O REGISTRO DE TAREFAS E ATIVIDADES.",
+      "fontePrimaria": "content (DOU)",
+      "descEsperada": "O USO OFICIAL DO SISTEMA SAPIENS DEVE ESTAR ADSTRITO AO DESEMPENHO DE ATIVIDADES FINALÍSTICAS OU ADMINISTRATIVAS DA INSTITUIÇÃO, O QUE ABRANGE A ELABORAÇÃO E EDIÇÃO DOS DOCUMENTOS OFICIAIS DE ACORDO COM AS NORMAS VIGENTES, INCLUSIVE QUANTO À APOSIÇÃO DO BRASÃO DA REPÚBLICA E DE CABEÇALHO E NUMERAÇÃO INDICATIVOS DOS ÓRGÃOS, UNIDADES E DE SEUS SETORES INTERNOS, BEM COMO O REGISTRO DE TAREFAS E ATIVIDADES.",
+      "matches": true,
+      "similaridade": 1
+    },
+    {
+      "numero": 63,
+      "ano": 2020,
+      "descDB": "É INDEVIDA A INCLUSÃO, NAS PLANILHAS DE CUSTOS E FORMAÇÃO DE PREÇOS, DE BENEFÍCIOS ESTABELECIDOS EM ACORDO OU CONVENÇÃO COLETIVA DE TRABALHO QUE ONEREM EXCLUSIVAMENTE A ADMINISTRAÇÃO PÚBLICA TOMADORA DE SERVIÇO.",
+      "fontePrimaria": "content (DOU)",
+      "descEsperada": "É INDEVIDA A INCLUSÃO, NAS PLANILHAS DE CUSTOS E FORMAÇÃO DE PREÇOS, DE BENEFÍCIOS ESTABELECIDOS EM ACORDO OU CONVENÇÃO COLETIVA DE TRABALHO QUE ONEREM EXCLUSIVAMENTE A ADMINISTRAÇÃO PÚBLICA TOMADORA DE SERVIÇO.",
+      "matches": true,
+      "similaridade": 1
+    },
+    {
+      "numero": 67,
+      "ano": 2020,
+      "descDB": "NÃO HÁ ÓBICE JURÍDICO PARA ADOÇÃO DA MODALIDADE PREGÃO PARA CONTRAÇÃO DE SERVIÇOS DE ENGENHARIA CASO O OBJETO SEJA TECNICAMENTE CARACTERIZADO COMO SERVIÇO DE NATUREZA COMUM, NA FORMA DO PARÁGRAFO ÚNICO DO ART. 1º DA LEI Nº 10.520, DE 2002.",
+      "fontePrimaria": "content (DOU)",
+      "descEsperada": "NÃO HÁ ÓBICE JURÍDICO PARA ADOÇÃO DA MODALIDADE PREGÃO PARA CONTRAÇÃO DE SERVIÇOS DE ENGENHARIA CASO O OBJETO SEJA TECNICAMENTE CARACTERIZADO COMO SERVIÇO DE NATUREZA COMUM, NA FORMA DO PARÁGRAFO ÚNICO DO ART. 1º DA LEI Nº 10.520, DE 2002.",
+      "matches": true,
+      "similaridade": 1
+    },
+    {
+      "numero": 66,
+      "ano": 2020,
+      "descDB": "HÁ RESPALDO JURÍDICO PARA EXECUÇÃO DE CONTRATO ADMINISTRATIVO POR FILIAL DE PESSOA JURÍDICA CUJA MATRIZ PARTICIPOU DA LICITAÇÃO PÚBLICA CORRESPONDENTE, DESDE QUE OBSERVADAS AS SEGUINTES PREMISSAS:",
+      "fontePrimaria": "content (DOU)",
+      "descEsperada": "HÁ RESPALDO JURÍDICO PARA EXECUÇÃO DE CONTRATO ADMINISTRATIVO POR FILIAL DE PESSOA JURÍDICA CUJA MATRIZ PARTICIPOU DA LICITAÇÃO PÚBLICA CORRESPONDENTE, DESDE QUE OBSERVADAS AS SEGUINTES PREMISSAS:",
+      "matches": true,
+      "similaridade": 1
+    },
+    {
+      "numero": 68,
+      "ano": 2020,
+      "descDB": "I) A COMPRA OU LOCAÇÃO DE IMÓVEL DEVE NECESSARIAMENTE SER PRECEDIDA DE CONSULTA SOBRE A EXISTÊNCIA DE IMÓVEL PÚBLICO DISPONÍVEL;",
+      "fontePrimaria": "content (DOU)",
+      "descEsperada": "I) A COMPRA OU LOCAÇÃO DE IMÓVEL DEVE NECESSARIAMENTE SER PRECEDIDA DE CONSULTA SOBRE A EXISTÊNCIA DE IMÓVEL PÚBLICO DISPONÍVEL;",
+      "matches": true,
+      "similaridade": 1
+    },
+    {
+      "numero": 60,
+      "ano": 2020,
+      "descDB": "I) É FACULTATIVA A REALIZAÇÃO DE PESQUISA DE PREÇOS PARA FINS DE PRORROGAÇÃO DO PRAZO DE VIGÊNCIA DE CONTRATOS ADMINISTRATIVOS DE PRESTAÇÃO DE SERVIÇOS CONTÍNUOS SEM DEDICAÇÃO EXCLUSIVA DE MÃO DE OBRA NOS CASOS EM QUE QUE HAJA MANIFESTAÇÃO TÉCNICA MOTIVADA NO SENTIDO DE QUE O ÍNDICE DE REAJUSTE ADOTADO NO INSTRUMENTO CONVOCATÓRIO ACOMPANHA A VARIAÇÃO DOS PREÇOS DO OBJETO CONTRATADO.",
+      "fontePrimaria": "content (DOU)",
+      "descEsperada": "I) É FACULTATIVA A REALIZAÇÃO DE PESQUISA DE PREÇOS PARA FINS DE PRORROGAÇÃO DO PRAZO DE VIGÊNCIA DE CONTRATOS ADMINISTRATIVOS DE PRESTAÇÃO DE SERVIÇOS CONTÍNUOS SEM DEDICAÇÃO EXCLUSIVA DE MÃO DE OBRA NOS CASOS EM QUE QUE HAJA MANIFESTAÇÃO TÉCNICA MOTIVADA NO SENTIDO DE QUE O ÍNDICE DE REAJUSTE ADOTADO NO INSTRUMENTO CONVOCATÓRIO ACOMPANHA A VARIAÇÃO DOS PREÇOS DO OBJETO CONTRATADO.",
+      "matches": true,
+      "similaridade": 1
+    },
+    {
+      "numero": 65,
+      "ano": 2020,
+      "descDB": "A LEGALIDADE DA PRORROGAÇÃO DO PRAZO DE VIGÊNCIA DOS CONTRATOS ADMINISTRATIVOS DE PRESTAÇÃO DE SERVIÇOS CONTINUADOS, DE QUE CUIDA O INCISO II DO ART. 57 DA LEI Nº 8.666, DE 1993, DEMANDA EXPRESSA PREVISÃO NO EDITAL E EM CLÁUSULA CONTRATUAL.",
+      "fontePrimaria": "content (DOU)",
+      "descEsperada": "A LEGALIDADE DA PRORROGAÇÃO DO PRAZO DE VIGÊNCIA DOS CONTRATOS ADMINISTRATIVOS DE PRESTAÇÃO DE SERVIÇOS CONTINUADOS, DE QUE CUIDA O INCISO II DO ART. 57 DA LEI Nº 8.666, DE 1993, DEMANDA EXPRESSA PREVISÃO NO EDITAL E EM CLÁUSULA CONTRATUAL.",
+      "matches": true,
+      "similaridade": 1
+    },
+    {
+      "numero": 61,
+      "ano": 2020,
+      "descDB": "A EXCLUSÃO DO REGIME TRIBUTÁRIO DO SIMPLES NACIONAL POR ATO VOLUNTÁRIO DA CONTRATADA OU POR SUPERAÇÃO DOS LIMITES DE RECEITA BRUTA ANUAL DE QUE CUIDA O ART. 30 DA LEI COMPLEMENTAR Nº 123, DE 2006, NÃO ENSEJA O REEQUILÍBRIO ECONÔMICO-FINANCEIRO DO CONTRATO ADMINISTRATIVO.",
+      "fontePrimaria": "content (DOU)",
+      "descEsperada": "A EXCLUSÃO DO REGIME TRIBUTÁRIO DO SIMPLES NACIONAL POR ATO VOLUNTÁRIO DA CONTRATADA OU POR SUPERAÇÃO DOS LIMITES DE RECEITA BRUTA ANUAL DE QUE CUIDA O ART. 30 DA LEI COMPLEMENTAR Nº 123, DE 2006, NÃO ENSEJA O REEQUILÍBRIO ECONÔMICO-FINANCEIRO DO CONTRATO ADMINISTRATIVO.",
+      "matches": true,
+      "similaridade": 1
+    },
+    {
+      "numero": 64,
+      "ano": 2020,
+      "descDB": "I) NO ÂMBITO DO SISTEMA DE REGISTRO DE PREÇOS, AS COMPETÊNCIAS DO PARÁGRAFO ÚNICO DO ART. 38 DA LEI 8.666, DE 1993; E DO ART. 11, INCISO VI, ALÍNEA \"A\", DA LEI COMPLEMENTAR Nº 73, DE 1993; RELATIVAS À APROVAÇÃO DA MINUTA DE EDITAL E CONTRATO ADMINISTRATIVO, SÃO DA EXCLUSIVA ALÇADA DA UNIDADE CONSULTIVA QUE PRESTA ASSESSORAMENTO JURÍDICO AO ÓRGÃO GERENCIADOR DO CERTAME.",
+      "fontePrimaria": "content (DOU)",
+      "descEsperada": "I) NO ÂMBITO DO SISTEMA DE REGISTRO DE PREÇOS, AS COMPETÊNCIAS DO PARÁGRAFO ÚNICO DO ART. 38 DA LEI 8.666, DE 1993; E DO ART. 11, INCISO VI, ALÍNEA \"A\", DA LEI COMPLEMENTAR Nº 73, DE 1993; RELATIVAS À APROVAÇÃO DA MINUTA DE EDITAL E CONTRATO ADMINISTRATIVO, SÃO DA EXCLUSIVA ALÇADA DA UNIDADE CONSULTIVA QUE PRESTA ASSESSORAMENTO JURÍDICO AO ÓRGÃO GERENCIADOR DO CERTAME.",
+      "matches": true,
+      "similaridade": 1
+    },
+    {
+      "numero": 57,
+      "ano": 2019,
+      "descDB": "O EXERCÍCIO DE ATIVIDADES PRIVADAS RELACIONADAS ÀS SOLUÇÕES ALTERNATIVAS DE DISPUTAS E CONFLITOS (ARBITRAGEM, MEDIAÇÃO, CONCILIAÇÃO E NEGOCIAÇÃO) E O EXERCÍCIO DE ATIVIDADES PRIVADAS RELACIONADAS À COMPLIANCE SÃO INCOMPATÍVEIS COM O EXERCÍCIO DOS CARGOS DAS CARREIRAS JURÍDICAS DA ADVOCACIA-GERAL DA UNIÃO, DA PROCURADORIA-GERAL FEDERAL E DA PROCURADORIA-GERAL DO BANCO CENTRAL.",
+      "fontePrimaria": "content (DOU)",
+      "descEsperada": "O EXERCÍCIO DE ATIVIDADES PRIVADAS RELACIONADAS ÀS SOLUÇÕES ALTERNATIVAS DE DISPUTAS E CONFLITOS (ARBITRAGEM, MEDIAÇÃO, CONCILIAÇÃO E NEGOCIAÇÃO) E O EXERCÍCIO DE ATIVIDADES PRIVADAS RELACIONADAS À COMPLIANCE SÃO INCOMPATÍVEIS COM O EXERCÍCIO DOS CARGOS DAS CARREIRAS JURÍDICAS DA ADVOCACIA-GERAL DA UNIÃO, DA PROCURADORIA-GERAL FEDERAL E DA PROCURADORIA-GERAL DO BANCO CENTRAL.",
+      "matches": true,
+      "similaridade": 1
+    },
+    {
+      "numero": 46,
+      "ano": 2014,
+      "descDB": "(Lei 8.666/1993) Somente é obrigatória a manifestação jurídica nas contratações de pequeno valor com fundamento no art. 24, I ou II, da Lei nº 8.666, de 21 de junho de 1993, quando houver minuta de contrato não padronizada ou haja, o administrador, suscitado dúvida jurídica sobre tal contratação. Aplica-se o mesmo entendimento às contratações fundadas no art. 25 da lei nº 8.666, de 1993, desde que seus valores subsumam-se aos limites previstos nos incisos I e II do art. 24 da Lei nº 8.666, de 1993.",
+      "fontePrimaria": "listagem AGU",
+      "descEsperada": "(Lei 8.666/1993) Somente é obrigatória a manifestação jurídica nas contratações de pequeno valor com fundamento no art. 24, I ou II, da Lei nº 8.666, de 21 de junho de 1993, quando houver minuta de contrato não padronizada ou haja, o administrador, suscitado dúvida jurídica sobre tal contratação. Aplica-se o mesmo entendimento às contratações fundadas no art. 25 da lei nº 8.666, de 1993, desde que seus valores subsumam-se aos limites previstos nos incisos I e II do art. 24 da Lei nº 8.666, de 1993.",
+      "matches": true,
+      "similaridade": 1
+    },
+    {
+      "numero": 45,
+      "ano": 2014,
+      "descDB": "I - O limite de acréscimo contratual do art. 125 da Lei nº 14.133, de 1º de abril de 2021, não se aplica aos convênios e instrumentos congêneres, sem prejuízo da aplicação de eventual limite definido em legislação específica e/ou no próprio instrumento. II - O acréscimo exige justificativa técnica, manutenção da natureza do objeto, aquiescência dos partícipes e formalização por aditivo.",
+      "fontePrimaria": "listagem AGU",
+      "descEsperada": "I - O limite de acréscimo contratual do art. 125 da Lei nº 14.133, de 1º de abril de 2021, não se aplica aos convênios e instrumentos congêneres, sem prejuízo da aplicação de eventual limite definido em legislação específica e/ou no próprio instrumento. II - O acréscimo exige justificativa técnica, manutenção da natureza do objeto, aquiescência dos partícipes e formalização por aditivo.",
+      "matches": true,
+      "similaridade": 1
+    },
+    {
+      "numero": 43,
+      "ano": 2014,
+      "descDB": "A publicação do extrato de convênio é condição de eficácia do ajuste e a sua ausência admite convalidação, sem prejuízo de eventual apuração de responsabilidade administrativa.",
+      "fontePrimaria": "listagem AGU",
+      "descEsperada": "A publicação do extrato de convênio é condição de eficácia do ajuste e a sua ausência admite convalidação, sem prejuízo de eventual apuração de responsabilidade administrativa.",
+      "matches": true,
+      "similaridade": 1
+    },
+    {
+      "numero": 42,
+      "ano": 2014,
+      "descDB": "A despeito do limite de 18 meses previsto no § 3º do art. 37 da Portaria Interministerial CGU/MF/MP nº 507, de 2011, o prazo para a apresentação do projeto básico/termo de referência deve ser fixado de forma compatível com o prazo previsto no § 2º do art. 68 do Decreto nº 93.872, de 1986, e com o prazo de diligência previsto na respectiva lei de diretrizes orçamentárias, ressalvadas as exceções previstas no citado decreto.",
+      "fontePrimaria": "listagem AGU",
+      "descEsperada": "A despeito do limite de 18 meses previsto no § 3º do art. 37 da Portaria Interministerial CGU/MF/MP nº 507, de 2011, o prazo para a apresentação do projeto básico/termo de referência deve ser fixado de forma compatível com o prazo previsto no § 2º do art. 68 do Decreto nº 93.872, de 1986, e com o prazo de diligência previsto na respectiva lei de diretrizes orçamentárias, ressalvadas as exceções previstas no citado decreto.",
+      "matches": true,
+      "similaridade": 1
+    },
+    {
+      "numero": 54,
+      "ano": 2014,
+      "descDB": "Compete ao agente ou setor técnico da administração declarar que o objeto licitatório é de natureza comum para efeito de utilização da modalidade pregão e definir se o objeto corresponde a obra ou serviço de engenharia, sendo atribuição do órgão jurídico analisar o devido enquadramento da modalidade licitatória aplicável.",
+      "fontePrimaria": "listagem AGU",
+      "descEsperada": "Compete ao agente ou setor técnico da administração declarar que o objeto licitatório é de natureza comum para efeito de utilização da modalidade pregão e definir se o objeto corresponde a obra ou serviço de engenharia, sendo atribuição do órgão jurídico analisar o devido enquadramento da modalidade licitatória aplicável.",
+      "matches": true,
+      "similaridade": 1
+    },
+    {
+      "numero": 47,
+      "ano": 2014,
+      "descDB": "Em licitação dividida em itens ou lotes/grupos, deverá ser adotada a participação exclusiva de microempresa, empresa de pequeno porte ou sociedade cooperativa (art. 34 da Lei nº 11.488, de 2007) em relação aos itens ou lotes/grupos cujo valor seja igual ou inferior a R$ 80.000,00 (oitenta mil reais), desde que não haja a subsunção a quaisquer das situações previstas pelo art. 9º do decreto nº 6.204, de 2007.",
+      "fontePrimaria": "listagem AGU",
+      "descEsperada": "Em licitação dividida em itens ou lotes/grupos, deverá ser adotada a participação exclusiva de microempresa, empresa de pequeno porte ou sociedade cooperativa (art. 34 da Lei nº 11.488, de 2007) em relação aos itens ou lotes/grupos cujo valor seja igual ou inferior a R$ 80.000,00 (oitenta mil reais), desde que não haja a subsunção a quaisquer das situações previstas pelo art. 9º do decreto nº 6.204, de 2007.",
+      "matches": true,
+      "similaridade": 1
+    },
+    {
+      "numero": 50,
+      "ano": 2014,
+      "descDB": "I - Os acréscimos e as supressões do objeto contratual devem ser sempre calculados sobre o valor inicial do contrato atualizado, aplicando-se de forma isolada os limites percentuais previstos em lei ao conjunto de acréscimos e supressões, vedada a compensação de acréscimos e supressões entre itens distintos, não se admitindo que a supressão de quantitativos de um ou mais itens seja compensada por acréscimos de itens diferentes ou pela inclusão de novos itens. II - no âmbito do mesmo item, o restabelecimento parcial ou total de quantitativo anteriormente suprimido não representa compensação vedada, desde que sejam observadas as mesmas condições e preços iniciais pactuados, não haja fraude ao certame ou à contratação direta, jogo de planilha, nem descaracterizaçã",
+      "fontePrimaria": "listagem AGU",
+      "descEsperada": "I - Os acréscimos e as supressões do objeto contratual devem ser sempre calculados sobre o valor inicial do contrato atualizado, aplicando-se de forma isolada os limites percentuais previstos em lei ao conjunto de acréscimos e supressões, vedada a compensação de acréscimos e supressões entre itens distintos, não se admitindo que a supressão de quantitativos de um ou mais itens seja compensada por acréscimos de itens diferentes ou pela inclusão de novos itens. II - no âmbito do mesmo item, o restabelecimento parcial ou total de quantitativo anteriormente suprimido não representa compensação vedada, desde que sejam observadas as mesmas condições e preços iniciais pactuados, não haja fraude ao certame ou à contratação direta, jogo de planilha, nem descaracterizaçã",
+      "matches": true,
+      "similaridade": 1
+    },
+    {
+      "numero": 44,
+      "ano": 2014,
+      "descDB": "I - A vigência dos convênios e instrumentos congêneres deverá ser dimensionada segundo o prazo previsto para o alcance das metas traçadas no plano de trabalho, não se aplicando os arts. 106 e 107 da Lei nº 14.133, de 2021. II - Por via de regra, não é admitida a vigência por prazo indeterminado, ressalvadas as hipóteses previstas em norma legal ou infralegal, devendo constar no plano de trabalho o respectivo cronograma de execução, salvo no caso de sua expressa dispensa pela respectiva norma regulamentadora. III - É vedada a inclusão posterior de metas que não tenham relação com o objeto inicialmente pactuado.",
+      "fontePrimaria": "listagem AGU",
+      "descEsperada": "I - A vigência dos convênios e instrumentos congêneres deverá ser dimensionada segundo o prazo previsto para o alcance das metas traçadas no plano de trabalho, não se aplicando os arts. 106 e 107 da Lei nº 14.133, de 2021. II - Por via de regra, não é admitida a vigência por prazo indeterminado, ressalvadas as hipóteses previstas em norma legal ou infralegal, devendo constar no plano de trabalho o respectivo cronograma de execução, salvo no caso de sua expressa dispensa pela respectiva norma regulamentadora. III - É vedada a inclusão posterior de metas que não tenham relação com o objeto inicialmente pactuado.",
+      "matches": true,
+      "similaridade": 1
+    },
+    {
+      "numero": 55,
+      "ano": 2014,
+      "descDB": "I - Os processos que sejam objeto de manifestação jurídica referencial, isto é, aquela que analisa todas as questões jurídicas que envolvam matérias idênticas e recorrentes, estão dispensados de análise individualizada pelos órgãos consultivos, desde que a área técnica ateste, de forma expressa, que o caso concreto se amolda aos termos da citada manifestação. II - Para a elaboração de manifestação jurídica referencial devem ser observados os seguintes requisitos: a) o volume de processos em matérias idênticas e recorrentes impactar, justificadamente, a atuação do órgão consultivo ou a celeridade dos serviços administrativos; e b) a atividade jurídica exercida se restringir à verificação do atendimento das exigências legais a partir da simples conferência de doc",
+      "fontePrimaria": "listagem AGU",
+      "descEsperada": "I - Os processos que sejam objeto de manifestação jurídica referencial, isto é, aquela que analisa todas as questões jurídicas que envolvam matérias idênticas e recorrentes, estão dispensados de análise individualizada pelos órgãos consultivos, desde que a área técnica ateste, de forma expressa, que o caso concreto se amolda aos termos da citada manifestação. II - Para a elaboração de manifestação jurídica referencial devem ser observados os seguintes requisitos: a) o volume de processos em matérias idênticas e recorrentes impactar, justificadamente, a atuação do órgão consultivo ou a celeridade dos serviços administrativos; e b) a atividade jurídica exercida se restringir à verificação do atendimento das exigências legais a partir da simples conferência de doc",
+      "matches": true,
+      "similaridade": 1
+    },
+    {
+      "numero": 52,
+      "ano": 2014,
+      "descDB": "As despesas ordinárias e rotineiras da administração, já previstas no orçamento e destinadas à manutenção das ações governamentais preexistentes, dispensam as exigências previstas nos incisos i e ii do art. 16 da lei complementar nº 101, de 2000.",
+      "fontePrimaria": "listagem AGU",
+      "descEsperada": "As despesas ordinárias e rotineiras da administração, já previstas no orçamento e destinadas à manutenção das ações governamentais preexistentes, dispensam as exigências previstas nos incisos i e ii do art. 16 da lei complementar nº 101, de 2000.",
+      "matches": true,
+      "similaridade": 1
+    },
+    {
+      "numero": 48,
+      "ano": 2014,
+      "descDB": "É competente para a aplicação de penalidades previstas nas Leis nº. 10.520, de 2002, 8.666, de 1993, e 14.133, de 2021, excepcionada a sanção de declaração de inidoneidade, a autoridade responsável pela celebração do contrato ou outra prevista em regimento. *A nova redação de 2024 apenas incluiu a citação à Lei 14.133/2021, conforme",
+      "fontePrimaria": "listagem AGU",
+      "descEsperada": "É competente para a aplicação de penalidades previstas nas Leis nº. 10.520, de 2002, 8.666, de 1993, e 14.133, de 2021, excepcionada a sanção de declaração de inidoneidade, a autoridade responsável pela celebração do contrato ou outra prevista em regimento. *A nova redação de 2024 apenas incluiu a citação à Lei 14.133/2021, conforme",
+      "matches": true,
+      "similaridade": 1
+    },
+    {
+      "numero": 51,
+      "ano": 2014,
+      "descDB": "A garantia legal ou contratual do objeto tem prazo de vigência próprio e desvinculado daquele fixado no contrato, permitindo eventual aplicação de penalidades em caso de descumprimento de alguma de suas condições, mesmo depois de expirada a vigência contratual. *A reedição de 2025 apenas incluiu nas referências legislativas a sua aplicabilidade no regime da Lei 14.133/2021, mantendo-se a mesma",
+      "fontePrimaria": "listagem AGU",
+      "descEsperada": "A garantia legal ou contratual do objeto tem prazo de vigência próprio e desvinculado daquele fixado no contrato, permitindo eventual aplicação de penalidades em caso de descumprimento de alguma de suas condições, mesmo depois de expirada a vigência contratual. *A reedição de 2025 apenas incluiu nas referências legislativas a sua aplicabilidade no regime da Lei 14.133/2021, mantendo-se a mesma",
+      "matches": true,
+      "similaridade": 1
+    },
+    {
+      "numero": 40,
+      "ano": 2014,
+      "descDB": "I - Nos convênios cuja execução envolva a alocação de créditos de leis orçamentárias subsequentes, a indicação do crédito orçamentário e do respectivo empenho para atender à despesa relativa aos exercícios posteriores poderá ser formalizada, relativamente a cada exercício, por meio de apostila. II - Tal medida dispensa o prévio exame e aprovação pela assessoria jurídica.",
+      "fontePrimaria": "listagem AGU",
+      "descEsperada": "I - Nos convênios cuja execução envolva a alocação de créditos de leis orçamentárias subsequentes, a indicação do crédito orçamentário e do respectivo empenho para atender à despesa relativa aos exercícios posteriores poderá ser formalizada, relativamente a cada exercício, por meio de apostila. II - Tal medida dispensa o prévio exame e aprovação pela assessoria jurídica.",
+      "matches": true,
+      "similaridade": 1
+    },
+    {
+      "numero": 53,
+      "ano": 2014,
+      "descDB": "A empresa que realize cessão ou locação de mão de obra, optante pelo simples nacional, que participe de licitação cujo objeto não esteja previsto no disposto no § 1º do art. 17 da lei complementar nº 123, de 2006, deverá apresentar planilha de formação de custos sem contemplar os benefícios do regime tributário diferenciado.",
+      "fontePrimaria": "listagem AGU",
+      "descEsperada": "A empresa que realize cessão ou locação de mão de obra, optante pelo simples nacional, que participe de licitação cujo objeto não esteja previsto no disposto no § 1º do art. 17 da lei complementar nº 123, de 2006, deverá apresentar planilha de formação de custos sem contemplar os benefícios do regime tributário diferenciado.",
+      "matches": true,
+      "similaridade": 1
+    },
+    {
+      "numero": 49,
+      "ano": 2014,
+      "descDB": "A aplicação das sanções previstas no artigo 87, incisos, III e IV, da Lei nº 8.666, de 1993, no artigo 7º da Lei nº 10.520, de 2002, e no artigo 156, III e IV, da Lei nº 14.133, de 2021, possuem efeito ex nunc, não afetando por si só os contratos em andamento, competindo à Administração avaliar a possibilidade de sua extinção unilateral caso existente justificativa. *A nova redação de 2024 apenas incluiu a citação à Lei 14.133/2021, conforme",
+      "fontePrimaria": "listagem AGU",
+      "descEsperada": "A aplicação das sanções previstas no artigo 87, incisos, III e IV, da Lei nº 8.666, de 1993, no artigo 7º da Lei nº 10.520, de 2002, e no artigo 156, III e IV, da Lei nº 14.133, de 2021, possuem efeito ex nunc, não afetando por si só os contratos em andamento, competindo à Administração avaliar a possibilidade de sua extinção unilateral caso existente justificativa. *A nova redação de 2024 apenas incluiu a citação à Lei 14.133/2021, conforme",
+      "matches": true,
+      "similaridade": 1
+    },
+    {
+      "numero": 1,
+      "ano": 2012,
+      "descDB": "I - nas ações ajuizadas até 21.08.2008 objetivando a restituição de taxa de matrícula referente a cursos de graduação, devem os órgãos jurídicos reconhecer a procedência do pedido, não contestar, não recorrer ou desistir dos recursos já interpostos, ressalvada a arguição de questões processuais, de prescrição, de decadência, das matérias do Art. 301 do código de processo civil e de outras de ordem pública; II - nas ações ajuizadas a partir de 22.08.2008, mas referentes a cobranças anteriores a esta data, não é devida a restituição em razão da modulação de efeitos procedida pelo plenário do supremo tribunal federal no julgamento de embargos de declaração no RE nº 500.171/GO, a qual deve ser expressamente alegada como matéria de defesa. III - nas ações ajuizadas a",
+      "fontePrimaria": "listagem AGU",
+      "descEsperada": "I - nas ações ajuizadas até 21.08.2008 objetivando a restituição de taxa de matrícula referente a cursos de graduação, devem os órgãos jurídicos reconhecer a procedência do pedido, não contestar, não recorrer ou desistir dos recursos já interpostos, ressalvada a arguição de questões processuais, de prescrição, de decadência, das matérias do Art. 301 do código de processo civil e de outras de ordem pública; II - nas ações ajuizadas a partir de 22.08.2008, mas referentes a cobranças anteriores a esta data, não é devida a restituição em razão da modulação de efeitos procedida pelo plenário do supremo tribunal federal no julgamento de embargos de declaração no RE nº 500.171/GO, a qual deve ser expressamente alegada como matéria de defesa. III - nas ações ajuizadas a",
+      "matches": true,
+      "similaridade": 1
+    },
+    {
+      "numero": 2,
+      "ano": 2012,
+      "descDB": "Orientar as unidades de contencioso da Advocacia-Geral da União a não apresentarem recurso extraordinário (ou agravo com o objetivo de destrancar o inadmitido na origem) que discuta o conceito de ex-combatente para fins de concessão de pensão especial.",
+      "fontePrimaria": "listagem AGU",
+      "descEsperada": "Orientar as unidades de contencioso da Advocacia-Geral da União a não apresentarem recurso extraordinário (ou agravo com o objetivo de destrancar o inadmitido na origem) que discuta o conceito de ex-combatente para fins de concessão de pensão especial.",
+      "matches": true,
+      "similaridade": 1
+    },
+    {
+      "numero": 39,
+      "ano": 2011,
+      "descDB": "A vigência dos contratos regidos pelo art. 57, caput, da lei 8.666, de 1993, pode ultrapassar o exercício financeiro em que celebrados, desde que as despesas a eles referentes sejam integralmente empenhadas até 31 de dezembro, permitindo-se, assim, sua inscrição em restos a pagar.",
+      "fontePrimaria": "listagem AGU",
+      "descEsperada": "A vigência dos contratos regidos pelo art. 57, caput, da lei 8.666, de 1993, pode ultrapassar o exercício financeiro em que celebrados, desde que as despesas a eles referentes sejam integralmente empenhadas até 31 de dezembro, permitindo-se, assim, sua inscrição em restos a pagar.",
+      "matches": true,
+      "similaridade": 1
+    },
+    {
+      "numero": 33,
+      "ano": 2011,
+      "descDB": "O ato administrativo que autoriza a contratação direta (art. 17, §§ 2º e 4º, art. 24, inc. III e seguintes, e art. 25 da Lei nº 8.666, de 1993) deve ser publicado na imprensa oficial, sendo desnecessária a publicação do extrato contratual.",
+      "fontePrimaria": "listagem AGU",
+      "descEsperada": "O ato administrativo que autoriza a contratação direta (art. 17, §§ 2º e 4º, art. 24, inc. III e seguintes, e art. 25 da Lei nº 8.666, de 1993) deve ser publicado na imprensa oficial, sendo desnecessária a publicação do extrato contratual.",
+      "matches": true,
+      "similaridade": 1
+    },
+    {
+      "numero": 38,
+      "ano": 2011,
+      "descDB": "Nos contratos de prestação de serviços de natureza continuada deve-se observar que: a) o prazo de vigência originário, de regra, é de até 12 meses; b) excepcionalmente, este prazo poderá ser fixado por período superior a 12 meses nos casos em que, diante da peculiaridade e/ou complexidade do objeto, fique tecnicamente demonstrado o benefício advindo para a administração; e c) é juridicamente possível a prorrogação do contrato por prazo diverso do contratado originariamente.",
+      "fontePrimaria": "listagem AGU",
+      "descEsperada": "Nos contratos de prestação de serviços de natureza continuada deve-se observar que: a) o prazo de vigência originário, de regra, é de até 12 meses; b) excepcionalmente, este prazo poderá ser fixado por período superior a 12 meses nos casos em que, diante da peculiaridade e/ou complexidade do objeto, fique tecnicamente demonstrado o benefício advindo para a administração; e c) é juridicamente possível a prorrogação do contrato por prazo diverso do contratado originariamente.",
+      "matches": true,
+      "similaridade": 1
+    },
+    {
+      "numero": 36,
+      "ano": 2011,
+      "descDB": "A administração pode estabelecer a vigência por prazo indeterminado nos contratos em que seja usuária de serviços públicos essenciais de energia elétrica, água e esgoto, serviços postais monopolizados pela ECT (Empresa Brasileira de Correios e Telégrafos) e ajustes firmados com a Imprensa Nacional, desde que no processo da contratação estejam explicitados os motivos que justificam a adoção do prazo indeterminado e comprovadas, a cada exercício financeiro, a estimativa de consumo e a existência de previsão de recursos orçamentários. * a nova redação de 2014 incluiu a expressão \"serviços postais monopolizados pela ECT (Empresa Brasileira de Correios e Telégrafos) e ajustes firmados com a Imprensa Nacional\"",
+      "fontePrimaria": "listagem AGU",
+      "descEsperada": "A administração pode estabelecer a vigência por prazo indeterminado nos contratos em que seja usuária de serviços públicos essenciais de energia elétrica, água e esgoto, serviços postais monopolizados pela ECT (Empresa Brasileira de Correios e Telégrafos) e ajustes firmados com a Imprensa Nacional, desde que no processo da contratação estejam explicitados os motivos que justificam a adoção do prazo indeterminado e comprovadas, a cada exercício financeiro, a estimativa de consumo e a existência de previsão de recursos orçamentários. * a nova redação de 2014 incluiu a expressão \"serviços postais monopolizados pela ECT (Empresa Brasileira de Correios e Telégrafos) e ajustes firmados com a Imprensa Nacional\"",
+      "matches": true,
+      "similaridade": 1
+    },
+    {
+      "numero": 34,
+      "ano": 2011,
+      "descDB": "As hipóteses de inexigibilidade (art. 25) e dispensa de licitação (incisos III e seguintes do Art. 24) da Lei nº 8.666, de 1993, cujos valores não ultrapassem aqueles fixados nos incisos I e II do Art. 24 da mesma lei, dispensam a publicação na imprensa oficial do ato que autoriza a contratação direta, em virtude dos princípios da economicidade e eficiência, sem prejuízo da utilização de meios eletrônicos de publicidade dos atos e da observância dos demais requisitos do Art. 26 e de seu parágrafo único, respeitando-se o fundamento jurídico que amparou a dispensa e a inexigibilidade",
+      "fontePrimaria": "listagem AGU",
+      "descEsperada": "As hipóteses de inexigibilidade (art. 25) e dispensa de licitação (incisos III e seguintes do Art. 24) da Lei nº 8.666, de 1993, cujos valores não ultrapassem aqueles fixados nos incisos I e II do Art. 24 da mesma lei, dispensam a publicação na imprensa oficial do ato que autoriza a contratação direta, em virtude dos princípios da economicidade e eficiência, sem prejuízo da utilização de meios eletrônicos de publicidade dos atos e da observância dos demais requisitos do Art. 26 e de seu parágrafo único, respeitando-se o fundamento jurídico que amparou a dispensa e a inexigibilidade",
+      "matches": true,
+      "similaridade": 1
+    },
+    {
+      "numero": 35,
+      "ano": 2011,
+      "descDB": "Nos contratos cuja duração ultrapasse o exercício financeiro, a indicação do crédito orçamentário e do respectivo empenho para atender a despesa relativa ao exercício futuro poderá ser formalizada por apostilamento.",
+      "fontePrimaria": "listagem AGU",
+      "descEsperada": "Nos contratos cuja duração ultrapasse o exercício financeiro, a indicação do crédito orçamentário e do respectivo empenho para atender a despesa relativa ao exercício futuro poderá ser formalizada por apostilamento.",
+      "matches": true,
+      "similaridade": 1
+    },
+    {
+      "numero": 37,
+      "ano": 2011,
+      "descDB": "A antecipação de pagamento somente deve ser admitida em situações excepcionais, devidamente justificada pela administração, demonstrando-se a existência de interesse público, observados os seguintes critérios: 1) represente condição sem a qual não seja possível obter o bem ou assegurar a prestação do serviço, ou propicie sensível economia de recursos; 2) existência de previsão no edital de licitação ou nos instrumentos formais de contratação direta; e 3) adoção de indispensáveis garantias, como as do art. 56 da lei nº 8.666/93, ou cautelas, como por exemplo a previsão de devolução do valor antecipado caso não executado o objeto, a comprovação de execução de parte ou etapa do objeto e a emissão de título de crédito pelo contratado, entre outras.",
+      "fontePrimaria": "listagem AGU",
+      "descEsperada": "A antecipação de pagamento somente deve ser admitida em situações excepcionais, devidamente justificada pela administração, demonstrando-se a existência de interesse público, observados os seguintes critérios: 1) represente condição sem a qual não seja possível obter o bem ou assegurar a prestação do serviço, ou propicie sensível economia de recursos; 2) existência de previsão no edital de licitação ou nos instrumentos formais de contratação direta; e 3) adoção de indispensáveis garantias, como as do art. 56 da lei nº 8.666/93, ou cautelas, como por exemplo a previsão de devolução do valor antecipado caso não executado o objeto, a comprovação de execução de parte ou etapa do objeto e a emissão de título de crédito pelo contratado, entre outras.",
+      "matches": true,
+      "similaridade": 1
+    },
+    {
+      "numero": 30,
+      "ano": 2010,
+      "descDB": "Os dados constantes no sistema de gestão de convênios e contratos de repasse (SICONV) possuem fé pública. Logo, os órgãos jurídicos não necessitam solicitar ao gestor público a apresentação física, a complementação e a atualização de documentação já inserida no ato de cadastramento no SICONV, salvo se houver dúvida fundada.",
+      "fontePrimaria": "listagem AGU",
+      "descEsperada": "Os dados constantes no sistema de gestão de convênios e contratos de repasse (SICONV) possuem fé pública. Logo, os órgãos jurídicos não necessitam solicitar ao gestor público a apresentação física, a complementação e a atualização de documentação já inserida no ato de cadastramento no SICONV, salvo se houver dúvida fundada.",
+      "matches": true,
+      "similaridade": 1
+    },
+    {
+      "numero": 31,
+      "ano": 2010,
+      "descDB": "( cancelada ,",
+      "fontePrimaria": "listagem AGU",
+      "descEsperada": "( cancelada ,",
+      "matches": true,
+      "similaridade": 1
+    },
+    {
+      "numero": 29,
+      "ano": 2010,
+      "descDB": "A Administração Pública pode firmar termo de parceria ou convênio com as organizações da sociedade civil de interesse público (OSCIPs), observada, respectivamente, a regra do concurso de projetos ou do chamamento público. A opção pelo termo de parceria ou convênio deve ser motivada. Após a celebração do instrumento, não é possível alterar o respectivo regime jurídico, vinculando os partícipes.",
+      "fontePrimaria": "listagem AGU",
+      "descEsperada": "A Administração Pública pode firmar termo de parceria ou convênio com as organizações da sociedade civil de interesse público (OSCIPs), observada, respectivamente, a regra do concurso de projetos ou do chamamento público. A opção pelo termo de parceria ou convênio deve ser motivada. Após a celebração do instrumento, não é possível alterar o respectivo regime jurídico, vinculando os partícipes.",
+      "matches": true,
+      "similaridade": 1
+    },
+    {
+      "numero": 25,
+      "ano": 2009,
+      "descDB": "No contrato de serviço continuado com dedicação exclusiva de mão de obra, o interregno de um ano para que se autorize a repactuação deverá ser contado da data do orçamento a que a proposta se referir, assim entendido o acordo, convenção ou dissídio coletivo de trabalho, para os custos decorrentes de mão de obra, e da data limite para a apresentação da proposta em relação aos demais insumos.",
+      "fontePrimaria": "listagem AGU",
+      "descEsperada": "No contrato de serviço continuado com dedicação exclusiva de mão de obra, o interregno de um ano para que se autorize a repactuação deverá ser contado da data do orçamento a que a proposta se referir, assim entendido o acordo, convenção ou dissídio coletivo de trabalho, para os custos decorrentes de mão de obra, e da data limite para a apresentação da proposta em relação aos demais insumos.",
+      "matches": true,
+      "similaridade": 1
+    },
+    {
+      "numero": 21,
+      "ano": 2009,
+      "descDB": "É vedada aos órgãos públicos federais a adesão à ata de registro de preços, quando a licitação tiver sido realizada pela administração pública estadual, municipal ou do distrito federal.",
+      "fontePrimaria": "listagem AGU",
+      "descEsperada": "É vedada aos órgãos públicos federais a adesão à ata de registro de preços, quando a licitação tiver sido realizada pela administração pública estadual, municipal ou do distrito federal.",
+      "matches": true,
+      "similaridade": 1
+    },
+    {
+      "numero": 17,
+      "ano": 2009,
+      "descDB": "A razoabilidade do valor das contratações decorrentes de inexigibilidade de licitação poderá ser aferida por meio da comparação da proposta apresentada com os preços praticados pela futura contratada junto a outros entes públicos e/ou privados, ou outros meios igualmente idôneos.",
+      "fontePrimaria": "listagem AGU",
+      "descEsperada": "A razoabilidade do valor das contratações decorrentes de inexigibilidade de licitação poderá ser aferida por meio da comparação da proposta apresentada com os preços praticados pela futura contratada junto a outros entes públicos e/ou privados, ou outros meios igualmente idôneos.",
+      "matches": true,
+      "similaridade": 1
+    },
+    {
+      "numero": 10,
+      "ano": 2009,
+      "descDB": "Para fins de escolha das modalidades licitatórias convencionais (concorrência, tomada de preços e convite), bem como de enquadramento das contratações previstas no art. 24, I e II da Lei nº 8.666/1993, a definição do valor da contratação levará em conta o período de vigência contratual e as possíveis prorrogações. Nas licitações exclusivas para microempresas, empresas de pequeno porte e sociedades cooperativas, o valor de R$ 80.000,00 (oitenta mil reais) refere-se ao período de um ano, observada a respectiva proporcionalidade em casos de períodos distintos.",
+      "fontePrimaria": "listagem AGU",
+      "descEsperada": "Para fins de escolha das modalidades licitatórias convencionais (concorrência, tomada de preços e convite), bem como de enquadramento das contratações previstas no art. 24, I e II da Lei nº 8.666/1993, a definição do valor da contratação levará em conta o período de vigência contratual e as possíveis prorrogações. Nas licitações exclusivas para microempresas, empresas de pequeno porte e sociedades cooperativas, o valor de R$ 80.000,00 (oitenta mil reais) refere-se ao período de um ano, observada a respectiva proporcionalidade em casos de períodos distintos.",
+      "matches": true,
+      "similaridade": 1
+    },
+    {
+      "numero": 19,
+      "ano": 2009,
+      "descDB": "O prazo de validade da ata de registro de preços é de no máximo um ano, nos termos do art.15, §3º, inc. III , da Lei nº 8.666, de 1993, razão pela qual eventual prorrogação da sua vigência, com fundamento no art. 12, caput, do Decreto nº 7.892, de 2013, somente será admitida até o referido limite e desde que devidamente justificada, mediante autorização da autoridade superior e que a proposta continue se mostrando mais vantajosa.",
+      "fontePrimaria": "listagem AGU",
+      "descEsperada": "O prazo de validade da ata de registro de preços é de no máximo um ano, nos termos do art.15, §3º, inc. III , da Lei nº 8.666, de 1993, razão pela qual eventual prorrogação da sua vigência, com fundamento no art. 12, caput, do Decreto nº 7.892, de 2013, somente será admitida até o referido limite e desde que devidamente justificada, mediante autorização da autoridade superior e que a proposta continue se mostrando mais vantajosa.",
+      "matches": true,
+      "similaridade": 1
+    },
+    {
+      "numero": 2,
+      "ano": 2009,
+      "descDB": "I - O processo administrativo eletrônico é a regra na tramitação de licitações, contratos, convênios, instrumentos congêneres e seus respectivos aditamentos, que devem compor o mesmo processo, desde a sua instauração até a conclusão. II - Excepcionalmente, admite-se que o processo administrativo eletrônico seja originado - total ou parcialmente - de autos ou documentos físicos, hipótese na qual, visando garantir a segurança jurídica, por meio da integralidade, integridade e controle do processo eletrônico espelhado em processo físico, exige-se que todos os documentos sejam digitalizados, formando-se um único processo administrativo eletrônico.",
+      "fontePrimaria": "listagem AGU",
+      "descEsperada": "I - O processo administrativo eletrônico é a regra na tramitação de licitações, contratos, convênios, instrumentos congêneres e seus respectivos aditamentos, que devem compor o mesmo processo, desde a sua instauração até a conclusão. II - Excepcionalmente, admite-se que o processo administrativo eletrônico seja originado - total ou parcialmente - de autos ou documentos físicos, hipótese na qual, visando garantir a segurança jurídica, por meio da integralidade, integridade e controle do processo eletrônico espelhado em processo físico, exige-se que todos os documentos sejam digitalizados, formando-se um único processo administrativo eletrônico.",
+      "matches": true,
+      "similaridade": 1
+    },
+    {
+      "numero": 27,
+      "ano": 2009,
+      "descDB": "É vedado aos membros da Advocacia-Geral da União e de seus órgãos vinculados o exercício da advocacia privada e figurar como sócio em sociedade de advogados, mesmo durante o período de gozo de licença para tratar de interesses particulares, ou de licença incentivada sem remuneração, ou durante afastamento para o exercício de mandato eletivo, salvo o exercício da advocacia em causa própria e a advocacia pro bono.",
+      "fontePrimaria": "listagem AGU",
+      "descEsperada": "É vedado aos membros da Advocacia-Geral da União e de seus órgãos vinculados o exercício da advocacia privada e figurar como sócio em sociedade de advogados, mesmo durante o período de gozo de licença para tratar de interesses particulares, ou de licença incentivada sem remuneração, ou durante afastamento para o exercício de mandato eletivo, salvo o exercício da advocacia em causa própria e a advocacia pro bono.",
+      "matches": true,
+      "similaridade": 1
+    },
+    {
+      "numero": 24,
+      "ano": 2009,
+      "descDB": "O contrato de serviço continuado sem dedicação exclusiva de mão de obra deve indicar que o reajuste dar-se-á após decorrido o interregno de um ano contado da data limite para a apresentação da proposta.",
+      "fontePrimaria": "listagem AGU",
+      "descEsperada": "O contrato de serviço continuado sem dedicação exclusiva de mão de obra deve indicar que o reajuste dar-se-á após decorrido o interregno de um ano contado da data limite para a apresentação da proposta.",
+      "matches": true,
+      "similaridade": 1
+    },
+    {
+      "numero": 5,
+      "ano": 2009,
+      "descDB": "Na contratação de obra ou serviço de engenharia, o instrumento convocatório deve estabelecer critérios de aceitabilidade dos preços unitários e global.",
+      "fontePrimaria": "listagem AGU",
+      "descEsperada": "Na contratação de obra ou serviço de engenharia, o instrumento convocatório deve estabelecer critérios de aceitabilidade dos preços unitários e global.",
+      "matches": true,
+      "similaridade": 1
+    },
+    {
+      "numero": 18,
+      "ano": 2009,
+      "descDB": "Contrata-se por inexigibilidade de licitação com fundamento no art. 25, caput ou inciso II, da lei n° 8.666, de 21 de junho de 1993, pessoas naturais e jurídicas para ministrar cursos fechados para treinamento e aperfeiçoamento de pessoal ou a inscrição em cursos abertos. O art. 25, caput, como fundamento, impõe a constatação da inviabilidade de competição por ausência de critério objetivo de seleção ou por exclusividade do objeto perseguido pela administração, mediante robusta instrução dos autos do processo administrativo, sem prejuízo da fiscalização e controle ainda maiores por parte dos órgãos competentes. A motivação legal com base no art. 25, inciso II, da lei n° 8.666, de 1993, exige a identificação dos requisitos da notória especialização e da singular",
+      "fontePrimaria": "listagem AGU",
+      "descEsperada": "Contrata-se por inexigibilidade de licitação com fundamento no art. 25, caput ou inciso II, da lei n° 8.666, de 21 de junho de 1993, pessoas naturais e jurídicas para ministrar cursos fechados para treinamento e aperfeiçoamento de pessoal ou a inscrição em cursos abertos. O art. 25, caput, como fundamento, impõe a constatação da inviabilidade de competição por ausência de critério objetivo de seleção ou por exclusividade do objeto perseguido pela administração, mediante robusta instrução dos autos do processo administrativo, sem prejuízo da fiscalização e controle ainda maiores por parte dos órgãos competentes. A motivação legal com base no art. 25, inciso II, da lei n° 8.666, de 1993, exige a identificação dos requisitos da notória especialização e da singular",
+      "matches": true,
+      "similaridade": 1
+    },
+    {
+      "numero": 12,
+      "ano": 2009,
+      "descDB": "Não se dispensa licitação, com fundamento nos incs. V e VII do art. 24 da Lei nº 8.666, de 1993, caso a licitação fracassada ou deserta tenha sido realizada na modalidade convite.",
+      "fontePrimaria": "listagem AGU",
+      "descEsperada": "Não se dispensa licitação, com fundamento nos incs. V e VII do art. 24 da Lei nº 8.666, de 1993, caso a licitação fracassada ou deserta tenha sido realizada na modalidade convite.",
+      "matches": true,
+      "similaridade": 1
+    },
+    {
+      "numero": 4,
+      "ano": 2009,
+      "descDB": "A despesa sem cobertura contratual deverá ser objeto de reconhecimento da obrigação de indenizar nos termos do art. 59, parágrafo único, da Lei nº 8.666, de 1993, sem prejuízo da apuração da responsabilidade de quem lhe der causa.",
+      "fontePrimaria": "listagem AGU",
+      "descEsperada": "A despesa sem cobertura contratual deverá ser objeto de reconhecimento da obrigação de indenizar nos termos do art. 59, parágrafo único, da Lei nº 8.666, de 1993, sem prejuízo da apuração da responsabilidade de quem lhe der causa.",
+      "matches": true,
+      "similaridade": 1
+    },
+    {
+      "numero": 20,
+      "ano": 2009,
+      "descDB": "Na licitação para registro de preços, a indicação da dotação orçamentária é exigível apenas antes da assinatura do contrato.",
+      "fontePrimaria": "listagem AGU",
+      "descEsperada": "Na licitação para registro de preços, a indicação da dotação orçamentária é exigível apenas antes da assinatura do contrato.",
+      "matches": true,
+      "similaridade": 1
+    },
+    {
+      "numero": 13,
+      "ano": 2009,
+      "descDB": "Empresa pública ou sociedade de economia mista que exerça atividade econômica não se enquadra como órgão ou entidade que integra a administração pública, para os fins de dispensa de licitação com fundamento no inciso VIII do art. 24 da Lei nº 8.666, de 1993 ou no inciso IX do art. 75 da Lei n.º 14.133, de 2021. * A atual nova redação de 2025 apenas incluiu a citação à Lei 14.133/2021 , conforme",
+      "fontePrimaria": "listagem AGU",
+      "descEsperada": "Empresa pública ou sociedade de economia mista que exerça atividade econômica não se enquadra como órgão ou entidade que integra a administração pública, para os fins de dispensa de licitação com fundamento no inciso VIII do art. 24 da Lei nº 8.666, de 1993 ou no inciso IX do art. 75 da Lei n.º 14.133, de 2021. * A atual nova redação de 2025 apenas incluiu a citação à Lei 14.133/2021 , conforme",
+      "matches": true,
+      "similaridade": 1
+    },
+    {
+      "numero": 6,
+      "ano": 2009,
+      "descDB": "A vigência do contrato de locação de imóveis, no qual a administração pública é locatária, rege-se pelo art. 51 da Lei nº 8.245, de 1991, não estando sujeita ao limite máximo de sessenta meses, estipulado pelo inc. II do art. 57, da Lei nº 8.666, de 1993.",
+      "fontePrimaria": "listagem AGU",
+      "descEsperada": "A vigência do contrato de locação de imóveis, no qual a administração pública é locatária, rege-se pelo art. 51 da Lei nº 8.245, de 1991, não estando sujeita ao limite máximo de sessenta meses, estipulado pelo inc. II do art. 57, da Lei nº 8.666, de 1993.",
+      "matches": true,
+      "similaridade": 1
+    },
+    {
+      "numero": 3,
+      "ano": 2009,
+      "descDB": "(Lei 8.666/1993) Na análise dos processos relativos à prorrogação de prazo, cumpre aos órgãos jurídicos verificar se não há extrapolação do atual prazo de vigência, bem como eventual ocorrência de solução de continuidade nos aditivos precedentes, hipóteses que configuram a extinção do ajuste, impedindo a sua prorrogação.",
+      "fontePrimaria": "listagem AGU",
+      "descEsperada": "(Lei 8.666/1993) Na análise dos processos relativos à prorrogação de prazo, cumpre aos órgãos jurídicos verificar se não há extrapolação do atual prazo de vigência, bem como eventual ocorrência de solução de continuidade nos aditivos precedentes, hipóteses que configuram a extinção do ajuste, impedindo a sua prorrogação.",
+      "matches": true,
+      "similaridade": 1
+    },
+    {
+      "numero": 16,
+      "ano": 2009,
+      "descDB": "Compete à administração averiguar a veracidade do atestado de exclusividade apresentado nos termos do art. 25, inc. I, da Lei nº 8.666, de 1993.",
+      "fontePrimaria": "listagem AGU",
+      "descEsperada": "Compete à administração averiguar a veracidade do atestado de exclusividade apresentado nos termos do art. 25, inc. I, da Lei nº 8.666, de 1993.",
+      "matches": true,
+      "similaridade": 1
+    },
+    {
+      "numero": 1,
+      "ano": 2009,
+      "descDB": "(Lei 8.666/1993) A vigência do contrato de serviço contínuo não está adstrita ao exercício financeiro.",
+      "fontePrimaria": "listagem AGU",
+      "descEsperada": "(Lei 8.666/1993) A vigência do contrato de serviço contínuo não está adstrita ao exercício financeiro.",
+      "matches": true,
+      "similaridade": 1
+    },
+    {
+      "numero": 14,
+      "ano": 2009,
+      "descDB": "Os contratos firmados com as fundações de apoio com base na dispensa de licitação prevista no inciso XIII do art. 24 da Lei nº 8.666, de 1993 ou no inciso XV do art. 75 da Lei n.º 14.133, de 2021, devem estar diretamente vinculados a projetos com definição clara do objeto e com prazo determinado, sendo vedadas a subcontratação; a contratação de serviços contínuos ou de manutenção; e a contratação de serviços destinados a atender as necessidades permanentes da instituição. * A atual nova redação de 2025 apenas incluiu a citação à Lei 14.133/2021 , conforme",
+      "fontePrimaria": "listagem AGU",
+      "descEsperada": "Os contratos firmados com as fundações de apoio com base na dispensa de licitação prevista no inciso XIII do art. 24 da Lei nº 8.666, de 1993 ou no inciso XV do art. 75 da Lei n.º 14.133, de 2021, devem estar diretamente vinculados a projetos com definição clara do objeto e com prazo determinado, sendo vedadas a subcontratação; a contratação de serviços contínuos ou de manutenção; e a contratação de serviços destinados a atender as necessidades permanentes da instituição. * A atual nova redação de 2025 apenas incluiu a citação à Lei 14.133/2021 , conforme",
+      "matches": true,
+      "similaridade": 1
+    },
+    {
+      "numero": 28,
+      "ano": 2009,
+      "descDB": "A competência para representar judicial e extrajudicialmente a união, suas autarquias e fundações públicas, bem como para exercer as atividades de consultoria e assessoramento jurídico do poder executivo federal, é exclusiva dos membros da Advocacia-Geral da União e de seus órgãos vinculados.",
+      "fontePrimaria": "listagem AGU",
+      "descEsperada": "A competência para representar judicial e extrajudicialmente a união, suas autarquias e fundações públicas, bem como para exercer as atividades de consultoria e assessoramento jurídico do poder executivo federal, é exclusiva dos membros da Advocacia-Geral da União e de seus órgãos vinculados.",
+      "matches": true,
+      "similaridade": 1
+    },
+    {
+      "numero": 7,
+      "ano": 2009,
+      "descDB": "O tratamento favorecido de que tratam os Arts. 43 a 45 da Lei Complementar nº 123, de 2006, deverá ser concedido às microempresas e empresas de pequeno porte independentemente de previsão editalícia.",
+      "fontePrimaria": "listagem AGU",
+      "descEsperada": "O tratamento favorecido de que tratam os Arts. 43 a 45 da Lei Complementar nº 123, de 2006, deverá ser concedido às microempresas e empresas de pequeno porte independentemente de previsão editalícia.",
+      "matches": true,
+      "similaridade": 1
+    },
+    {
+      "numero": 26,
+      "ano": 2009,
+      "descDB": "No caso das repactuações subsequentes à primeira, o interregno de um ano deve ser contado da última repactuação correspondente à mesma parcela objeto da nova solicitação. Entende-se como última repactuação a data em que iniciados seus efeitos financeiros, independentemente daquela em que celebrada ou apostilada.",
+      "fontePrimaria": "listagem AGU",
+      "descEsperada": "No caso das repactuações subsequentes à primeira, o interregno de um ano deve ser contado da última repactuação correspondente à mesma parcela objeto da nova solicitação. Entende-se como última repactuação a data em que iniciados seus efeitos financeiros, independentemente daquela em que celebrada ou apostilada.",
+      "matches": true,
+      "similaridade": 1
+    },
+    {
+      "numero": 11,
+      "ano": 2009,
+      "descDB": "A contratação direta com fundamento no inciso IV do art. 24 da Lei nº 8.666, de 1993 ou no inciso VIII do art. 75 da Lei n.º 14.133, de 2021, exige que, concomitantemente, seja apurado se a situação emergencial foi gerada por falta de planejamento, desídia ou má gestão, hipótese que, quem lhe deu causa será responsabilizado na forma da lei. * A atual nova redação de 2025 apenas incluiu a citação à Lei 14.133/2021 , conforme",
+      "fontePrimaria": "listagem AGU",
+      "descEsperada": "A contratação direta com fundamento no inciso IV do art. 24 da Lei nº 8.666, de 1993 ou no inciso VIII do art. 75 da Lei n.º 14.133, de 2021, exige que, concomitantemente, seja apurado se a situação emergencial foi gerada por falta de planejamento, desídia ou má gestão, hipótese que, quem lhe deu causa será responsabilizado na forma da lei. * A atual nova redação de 2025 apenas incluiu a citação à Lei 14.133/2021 , conforme",
+      "matches": true,
+      "similaridade": 1
+    },
+    {
+      "numero": 8,
+      "ano": 2009,
+      "descDB": "O fornecimento de passagens aéreas e terrestres enquadra-se no conceito de serviço previsto no inc. II do art. 6º da Lei nº 8.666, de 1993.",
+      "fontePrimaria": "listagem AGU",
+      "descEsperada": "O fornecimento de passagens aéreas e terrestres enquadra-se no conceito de serviço previsto no inc. II do art. 6º da Lei nº 8.666, de 1993.",
+      "matches": true,
+      "similaridade": 1
+    },
+    {
+      "numero": 22,
+      "ano": 2009,
+      "descDB": "O reequilíbrio econômico-financeiro pode ser concedido a qualquer tempo, independentemente de previsão contratual, desde que verificadas as circunstâncias elencadas na letra 'd' do inc. II do art. 65, da Lei no 8.666, de 1993.",
+      "fontePrimaria": "listagem AGU",
+      "descEsperada": "O reequilíbrio econômico-financeiro pode ser concedido a qualquer tempo, independentemente de previsão contratual, desde que verificadas as circunstâncias elencadas na letra 'd' do inc. II do art. 65, da Lei no 8.666, de 1993.",
+      "matches": true,
+      "similaridade": 1
+    },
+    {
+      "numero": 15,
+      "ano": 2009,
+      "descDB": "A contratação direta com fundamento na inexigibilidade prevista no Art. 25, inc. I, da Lei nº 8.666, de 1993, é restrita aos casos de compras, não podendo abranger serviços.",
+      "fontePrimaria": "listagem AGU",
+      "descEsperada": "A contratação direta com fundamento na inexigibilidade prevista no Art. 25, inc. I, da Lei nº 8.666, de 1993, é restrita aos casos de compras, não podendo abranger serviços.",
+      "matches": true,
+      "similaridade": 1
+    },
+    {
+      "numero": 9,
+      "ano": 2009,
+      "descDB": "A comprovação da regularidade fiscal e trabalhista na celebração do contrato ou no pagamento de serviços já prestados, no caso de empresas que detenham o monopólio de serviço público, pode ser dispensada em caráter excepcional, desde que previamente autorizada pela autoridade maior do órgão contratante e concomitantemente, a situação de irregularidade seja comunicada ao agente arrecadador e à agência reguladora.",
+      "fontePrimaria": "listagem AGU",
+      "descEsperada": "A comprovação da regularidade fiscal e trabalhista na celebração do contrato ou no pagamento de serviços já prestados, no caso de empresas que detenham o monopólio de serviço público, pode ser dispensada em caráter excepcional, desde que previamente autorizada pela autoridade maior do órgão contratante e concomitantemente, a situação de irregularidade seja comunicada ao agente arrecadador e à agência reguladora.",
+      "matches": true,
+      "similaridade": 1
+    },
+    {
+      "numero": 23,
+      "ano": 2009,
+      "descDB": "O edital ou o contrato de serviço continuado deverá indicar o critério de reajustamento de preços, sob a forma de reajuste em sentido estrito, admitida a adoção de índices gerais, específicos ou setoriais, ou por repactuação, para os contratos com dedicação exclusiva de mão de obra, pela demonstração analítica da variação dos componentes dos custos.",
+      "fontePrimaria": "listagem AGU",
+      "descEsperada": "O edital ou o contrato de serviço continuado deverá indicar o critério de reajustamento de preços, sob a forma de reajuste em sentido estrito, admitida a adoção de índices gerais, específicos ou setoriais, ou por repactuação, para os contratos com dedicação exclusiva de mão de obra, pela demonstração analítica da variação dos componentes dos custos.",
+      "matches": true,
+      "similaridade": 1
+    }
+  ]
+}

@@ -1,0 +1,349 @@
+{
+  "runAt": "2026-04-30T20:20:47.211Z",
+  "apply": true,
+  "plans": [
+    {
+      "numero": 1,
+      "action": "skip",
+      "motivo": "igual (sim=0.95)",
+      "similaridade": 0.9454545454545454,
+      "dbId": "edd86665-d321-44e4-9462-a48db9922082"
+    },
+    {
+      "numero": 2,
+      "action": "skip",
+      "motivo": "igual (sim=0.93)",
+      "similaridade": 0.926829268292683,
+      "dbId": "ed107a32-7344-464f-9244-e823807d36f3"
+    },
+    {
+      "numero": 3,
+      "action": "skip",
+      "motivo": "igual (sim=0.98)",
+      "similaridade": 0.9777777777777777,
+      "dbId": "fa6fe504-ef13-4ba4-b5d7-21ead06a0395"
+    },
+    {
+      "numero": 4,
+      "action": "skip",
+      "motivo": "igual (sim=0.98)",
+      "similaridade": 0.9830508474576272,
+      "dbId": "e733ba8e-69cd-49c6-a3fb-359459288950"
+    },
+    {
+      "numero": 5,
+      "action": "skip",
+      "motivo": "igual (sim=0.95)",
+      "similaridade": 0.9534883720930233,
+      "dbId": "b4eff35f-f981-44a8-979d-9c33a24619ee"
+    },
+    {
+      "numero": 6,
+      "action": "skip",
+      "motivo": "igual (sim=0.94)",
+      "similaridade": 0.9411764705882353,
+      "dbId": "08f9ab16-3de2-4a27-bc82-e18e541bf47e"
+    },
+    {
+      "numero": 7,
+      "action": "skip",
+      "motivo": "igual (sim=0.96)",
+      "similaridade": 0.9577464788732394,
+      "dbId": "ef40cdd6-644f-4d61-910c-4c9cd9544bea"
+    },
+    {
+      "numero": 8,
+      "action": "skip",
+      "motivo": "igual (sim=0.96)",
+      "similaridade": 0.958904109589041,
+      "dbId": "1a4a0147-ff2d-49d4-b954-c7698546d210"
+    },
+    {
+      "numero": 9,
+      "action": "skip",
+      "motivo": "igual (sim=0.94)",
+      "similaridade": 0.9433962264150944,
+      "dbId": "a27f5c20-0c2c-4490-920b-b2d9a710b679"
+    },
+    {
+      "numero": 10,
+      "action": "skip",
+      "motivo": "igual (sim=0.96)",
+      "similaridade": 0.961038961038961,
+      "dbId": "ccba3509-6b04-4da0-9d61-f35e5fcc1d5d"
+    },
+    {
+      "numero": 11,
+      "action": "update",
+      "motivo": "diff (sim=0.91)",
+      "similaridade": 0.9135802469135802,
+      "dbId": "8e53615a-d080-49d7-af94-2d731522599b",
+      "descAntiga": "O art. 59, § 4º, da Lei nº 14.133/2021, contempla presunção relativa de inexequibilidade às propostas de obras e serviços de engenharia, situação em que a Administração deverá realizar as diligências previstas no inciso IV e no § 2º, ambos daquele artigo.",
+      "descNova": "O art. 59, § 4º, da Lei nº 14.133/2021, contempla presunção relativa de inexequibilidade às propostas de obras e serviços de engenharia, situação em que a Administração deverá realizar as diligências previstas no inciso IV e no § 2º, ambos daquele artigo. (Aprovado por unanimidade) Baixe o PDF Contratação direta"
+    },
+    {
+      "numero": 12,
+      "action": "skip",
+      "motivo": "igual (sim=0.95)",
+      "similaridade": 0.9523809523809523,
+      "dbId": "a2d1486d-832f-4a07-b5ec-b831a6a2c2f6"
+    },
+    {
+      "numero": 13,
+      "action": "skip",
+      "motivo": "igual (sim=0.97)",
+      "similaridade": 0.9655172413793104,
+      "dbId": "4d515913-7116-42df-aa57-f3605594848d"
+    },
+    {
+      "numero": 14,
+      "action": "skip",
+      "motivo": "igual (sim=0.93)",
+      "similaridade": 0.9302325581395349,
+      "dbId": "1cbc51c4-7fbd-4dfa-83d3-51a0279531b9"
+    },
+    {
+      "numero": 15,
+      "action": "skip",
+      "motivo": "igual (sim=0.97)",
+      "similaridade": 0.9714285714285714,
+      "dbId": "2d0789c9-56ab-4b48-b60f-4b012152bb17"
+    },
+    {
+      "numero": 16,
+      "action": "skip",
+      "motivo": "igual (sim=0.92)",
+      "similaridade": 0.9230769230769231,
+      "dbId": "631bf08f-c4d5-44dc-a6f3-43f275b41aa8"
+    },
+    {
+      "numero": 17,
+      "action": "update",
+      "motivo": "diff (sim=0.90)",
+      "similaridade": 0.9,
+      "dbId": "c99d8f30-168c-4e97-93c6-b15b2baf7a20",
+      "descAntiga": "A prorrogação da Ata de Registro de Preços admite a renovação das quantidades registradas, independentemente de previsão no edital ou na ata.",
+      "descNova": "A prorrogação da Ata de Registro de Preços admite a renovação das quantidades registradas, independentemente de previsão no edital ou na ata. (Aprovado por maioria qualificada)"
+    },
+    {
+      "numero": 18,
+      "action": "update",
+      "motivo": "diff (sim=0.81)",
+      "similaridade": 0.8148148148148148,
+      "dbId": "3c142ea9-9342-4c05-8a0f-e23b1945a5fa",
+      "descAntiga": "Excepcionalmente, nos casos de esgotamento da quantidade registrada, será admitida a antecipação da prorrogação, pelo prazo máximo de doze meses, com a renovação das quantidades.",
+      "descNova": "Excepcionalmente, nos casos de esgotamento da quantidade registrada, será admitida a antecipação da prorrogação, pelo prazo máximo de doze meses, com a renovação das quantidades. (Aprovado por maioria qualificada) Baixe o PDF Processo administrativo sancionador"
+    },
+    {
+      "numero": 19,
+      "action": "skip",
+      "motivo": "igual (sim=0.94)",
+      "similaridade": 0.9444444444444444,
+      "dbId": "ebcd7f7e-e0c6-48cb-8a6c-86fc3b54f31f"
+    },
+    {
+      "numero": 20,
+      "action": "skip",
+      "motivo": "igual (sim=0.96)",
+      "similaridade": 0.9552238805970149,
+      "dbId": "e890c16f-e1b8-408a-af56-457796626a99"
+    },
+    {
+      "numero": 21,
+      "action": "skip",
+      "motivo": "igual (sim=0.93)",
+      "similaridade": 0.9278350515463918,
+      "dbId": "eb76929f-a1c2-498a-b4ff-754ec5488762"
+    },
+    {
+      "numero": 22,
+      "action": "update",
+      "motivo": "diff (sim=0.39)",
+      "similaridade": 0.3948497854077253,
+      "dbId": "bcda907d-5422-4228-8806-b82841dcebed",
+      "descAntiga": "O grau de risco de integridade, como condição excludente da participação na licitação, é incompatível com as exigências de habilitação, não estando em conformidade com o artigo 37, XXI da CF/88, podendo, contudo, representar situação para reforço de garantia nos limites da Lei, ampliação de fiscalização, estruturação de programa de integridade, dentre outras exigências permitidas na fase contratual.",
+      "descNova": "O grau de risco de integridade, como condição excludente da participação na licitação, é incompatível com as exigências de habilitação, não estando em conformidade com o artigo 37, XXI da CF/88, podendo, contudo, representar situação para reforço de garantia nos limites da Lei, ampliação de fiscalização, estruturação de programa de integridade, dentre outras exigências permitidas na fase contratual. (Aprovado por unanimidade) MEMBROS QUE PARTICIPARAM DOS DEBATES E DA ELABORAÇÃODOS ENUNCIADOS Luciano Elias Reis | Presidente Gabriela Verona Pércio | Vice-Presidente Bradson Camelo Carolina Zancaner Zockun Christianne de Carvalho Stroppa Felipe Boselli Felipe Dalenogare Mariana Guimarães Mariane Lubke Michelle Marry Marques da Silveira Murilo Jacoby Fernandes Renila Bragagnolli Rodrigo Pironti Aguirre de Castro Ronny Charles Lopes de Torres Viviane Mafissioni Baixe o PDF informativo_enunciados-1 Baixar Pesquisar Pesquisar Categorias Administração Análise Técnica Artigos Assistência Socail Auditoria Capacitação Contratação Pública Economia e Administração Educação Estadual Eventos Fiscalização Habitação Infraestrutura Licitação Municipal Notícias Gerais Nova Lei de Licitações Orçamento Planejamento Processo Licitatório Revista INCP Saneamento Segurança Tecnologia Transporte Urbanismo Tags Acórdão Administração Pública Auditores Auditoria CAGE Concurso Público Contas Públicas Contratação Contratações Públicas Contrato de Obras Contratos Contratos Administrativos DNIT Edital Fiscalização Jurisprudência LGPD Licitação Licitações Medida Cautelar Minas Gerais Municípios NLL Nova Lei de Licitações Obras Públicas Paranaguá Paraná PCA Petrobras PNCP Políticas Públicas Pregão Eletrônico Prestação de Contas Previdência Processo Administrativo Regulamentação Revista Rio de Janeiro SEED-PR TCE-MG TCE-PR TCU Transparência Transporte Público Tribunal de Contas Publicações relacionadas Revista INCP 4ª EDIÇÃO dezembro 17, 2025"
+    },
+    {
+      "numero": 44,
+      "action": "site-only",
+      "motivo": "no site mas não no DB"
+    },
+    {
+      "numero": 45,
+      "action": "site-only",
+      "motivo": "no site mas não no DB"
+    },
+    {
+      "numero": 46,
+      "action": "site-only",
+      "motivo": "no site mas não no DB"
+    },
+    {
+      "numero": 47,
+      "action": "site-only",
+      "motivo": "no site mas não no DB"
+    },
+    {
+      "numero": 48,
+      "action": "site-only",
+      "motivo": "no site mas não no DB"
+    },
+    {
+      "numero": 49,
+      "action": "site-only",
+      "motivo": "no site mas não no DB"
+    },
+    {
+      "numero": 50,
+      "action": "site-only",
+      "motivo": "no site mas não no DB"
+    },
+    {
+      "numero": 51,
+      "action": "site-only",
+      "motivo": "no site mas não no DB"
+    },
+    {
+      "numero": 52,
+      "action": "site-only",
+      "motivo": "no site mas não no DB"
+    },
+    {
+      "numero": 53,
+      "action": "site-only",
+      "motivo": "no site mas não no DB"
+    },
+    {
+      "numero": 54,
+      "action": "site-only",
+      "motivo": "no site mas não no DB"
+    },
+    {
+      "numero": 42,
+      "action": "db-only",
+      "motivo": "no DB mas não no site oficial",
+      "dbId": "af859d10-0b25-4816-bd86-bfd673d23618"
+    },
+    {
+      "numero": 25,
+      "action": "db-only",
+      "motivo": "no DB mas não no site oficial",
+      "dbId": "069de222-a6f8-4790-b1d2-b4d49ccd96d2"
+    },
+    {
+      "numero": 43,
+      "action": "db-only",
+      "motivo": "no DB mas não no site oficial",
+      "dbId": "3b1dd2dd-287c-4ac1-a247-cc2a523a9a17"
+    },
+    {
+      "numero": 40,
+      "action": "db-only",
+      "motivo": "no DB mas não no site oficial",
+      "dbId": "9007e55a-14b9-4d8f-866e-dc2785c0ec33"
+    },
+    {
+      "numero": 39,
+      "action": "db-only",
+      "motivo": "no DB mas não no site oficial",
+      "dbId": "e8c6745f-c807-4a79-bb2d-d1afdff843e9"
+    },
+    {
+      "numero": 33,
+      "action": "db-only",
+      "motivo": "no DB mas não no site oficial",
+      "dbId": "abed0c8b-6610-48c2-8c47-6c5dda689f39"
+    },
+    {
+      "numero": 41,
+      "action": "db-only",
+      "motivo": "no DB mas não no site oficial",
+      "dbId": "c79da81b-3df2-44b4-ad95-c314c66cf293"
+    },
+    {
+      "numero": 32,
+      "action": "db-only",
+      "motivo": "no DB mas não no site oficial",
+      "dbId": "ec7be831-54ba-4f5e-bb92-1b402db31e9f"
+    },
+    {
+      "numero": 34,
+      "action": "db-only",
+      "motivo": "no DB mas não no site oficial",
+      "dbId": "8942762c-97ac-4d3c-a610-90ed6fa592c2"
+    },
+    {
+      "numero": 30,
+      "action": "db-only",
+      "motivo": "no DB mas não no site oficial",
+      "dbId": "b2424a87-9b0b-4c73-8192-ee75588cb165"
+    },
+    {
+      "numero": 37,
+      "action": "db-only",
+      "motivo": "no DB mas não no site oficial",
+      "dbId": "2de9c46b-e1db-489a-ae66-7d7ab933f9f8"
+    },
+    {
+      "numero": 31,
+      "action": "db-only",
+      "motivo": "no DB mas não no site oficial",
+      "dbId": "d4be53eb-72ee-41b1-9cbf-6978c4db6d93"
+    },
+    {
+      "numero": 24,
+      "action": "db-only",
+      "motivo": "no DB mas não no site oficial",
+      "dbId": "d171ca69-c606-4421-81bf-a176ee81b1d8"
+    },
+    {
+      "numero": 27,
+      "action": "db-only",
+      "motivo": "no DB mas não no site oficial",
+      "dbId": "01f14534-401d-4933-8fc5-0fb7d8ba39c6"
+    },
+    {
+      "numero": 26,
+      "action": "db-only",
+      "motivo": "no DB mas não no site oficial",
+      "dbId": "f21394b6-a718-4f0e-8213-8a82702a45a0"
+    },
+    {
+      "numero": 28,
+      "action": "db-only",
+      "motivo": "no DB mas não no site oficial",
+      "dbId": "a43ecdd7-97aa-4c7e-8a50-cbcb040d4402"
+    },
+    {
+      "numero": 23,
+      "action": "db-only",
+      "motivo": "no DB mas não no site oficial",
+      "dbId": "f8df7855-b6d8-43fe-a087-96afb158266b"
+    },
+    {
+      "numero": 29,
+      "action": "db-only",
+      "motivo": "no DB mas não no site oficial",
+      "dbId": "29b5cde9-37ea-498b-ada5-260670faa19a"
+    },
+    {
+      "numero": 35,
+      "action": "db-only",
+      "motivo": "no DB mas não no site oficial",
+      "dbId": "abf354d7-ebd2-4477-a1aa-ddf778b79495"
+    },
+    {
+      "numero": 36,
+      "action": "db-only",
+      "motivo": "no DB mas não no site oficial",
+      "dbId": "ddeb3ad5-71bd-40ea-8640-daacc28891aa"
+    },
+    {
+      "numero": 38,
+      "action": "db-only",
+      "motivo": "no DB mas não no site oficial",
+      "dbId": "5179ec90-5708-4180-aa18-f53e61627168"
+    }
+  ]
+}

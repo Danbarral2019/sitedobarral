@@ -129,6 +129,76 @@ Confirmar se a Orientação Normativa nº 45 da AGU está com a redação mais r
 
 **Arquivos relevantes:** `lib/agu-modules/`, banco de dados (tabela Document)
 
+### T2c. Auditoria de autenticidade dos enunciados (✅ parcial concluída 2026-04-30)
+
+| Ente | Total DB | Auditado | Resultado |
+|---|---|---|---|
+| **CJF** | 54 | ✅ 54/54 | match perfeito com fonte oficial (compilação Irene Nohara que reproduz PDF do CJF). Inclui os 25 do 1º Simpósio (já existentes, 8 atualizados) + 29 do 2º Simpósio (criados nesta sessão) |
+| **IBDA** | 61 | ✅ 61/61 | match perfeito com PDF oficial `ibda.com.br/wp-content/uploads/2025/03/ENUNCIADOS-_-DIGITAL.pdf` (III Jornada, Lei 14.133/2021). Texto integral validado |
+| **INCP** | 43 | ✅ 22/43 + 11 site-only | 22 enunciados (1-22 da 1ª Reunião Técnica) auditados via `incpbrasil.com.br/enunciados-aprovados/` (4 atualizados, 18 já idênticos). Outros 21 (números 23-43) NÃO foram localizados no site público do INCP |
+
+**Pendente pra próxima sessão:**
+
+- [ ] **INCP 23-43 (21 enunciados)**: estão no DB mas não estão no site público do INCP. Investigar: (a) se foram apagados/movidos, (b) se estão em outra URL/PDF, (c) contato direto INCP. Hoje continuam com texto do upload original — pode ser legítimo, mas precisa validar.
+- [ ] **INCP 44-54 (11 enunciados site-only)**: estão no `incpbrasil.com.br/informativo-enunciados-2a-edicao/` mas NÃO no DB. Avaliar se vale importar (talvez sejam da 3ª Reunião Técnica?).
+
+**Scripts permanentes** (em `scripts/`): `scrape-cjf-enunciados.ts`, `import-cjf-enunciados.ts`, `scrape-ibda-pdf.ts`, `apply-ibda-enunciados.ts`, `scrape-incp-enunciados.ts`, `apply-incp-enunciados.ts`, `audit-enunciados-autenticidade.ts`.
+
+### T2b. Substituir paráfrase IA por texto oficial em todas as ONs [Alta]
+**Prioridade:** Alta · **Aberta em 2026-04-30** · **Leva 1 concluída em 2026-04-30**
+
+Inspeção em 2026-04-30 (ON 102) revelou que a base de ONs tinha `description` populada com paráfrase IA, não texto oficial.
+
+**Leva 1 — descrições (✅ concluída 2026-04-30):**
+
+- [x] Scripts criados: `scrape-ons-oficial.ts` (read-only), `fix-and-diff-ons.ts` (read-only), `apply-ons-update.ts` (com `--apply`)
+- [x] Scrape de https://www.gov.br/agu/pt-br/composicao/cgu/cgu/onsagu → 98 ONs (entre números 5 e 102)
+- [x] Diff vs DB salvo em `docs/audits/2026-04-30-ons-diff-report.md` e `.json`
+- [x] **98 ONs atualizadas com texto oficial** (`description` substituída, `reviewed=false` para forçar revisão humana)
+- [x] Rota `/base-conhecimento/orientacoes-normativas` reativada com `showDescription: true` e disclaimer azul "texto oficial"
+
+**Leva 2 — URLs DOU específicas (✅ parcial concluída 2026-04-30):**
+
+- [x] Diagnóstico: links DOU no HTML do portal AGU aparecem dentro do bloco da ON anterior (não do bloco "dono"), por isso o parser do lib/agu-modules arrastava
+- [x] Scraper v2: `scripts/scrape-ons-douurls.ts` extrai TODOS os links DOU e mapeia por número embutido na própria URL (independente de delimitação de bloco) → 32 ONs com link DOU específico encontradas
+- [x] **32 URLs DOU aplicadas no DB** (`scripts/apply-ons-dou-urls.ts --apply`). URL antiga (PDF de fundamentação ou `/onsagu` genérico) movida para `alternativeUrls`
+- [ ] **73 ONs restantes** sem link DOU específico (28 de 2009, 16 de 2014, 8 de 2024 etc.). Investigação 2026-04-30 mostrou que a busca do in.gov.br **não responde a query strings simples** (`?q=` retorna 0 resultados mesmo pra ONs que sabemos estar lá). Precisa fluxo de UI automation (typing + click + wait results) via Playwright. Custo estimado: 73 × ~10s = 12 min. Risco alto pras ONs antigas (2009-2014) não estarem indexadas no novo portal.
+- [ ] Alternativa: usar Wayback Machine ou base de dados consolidada (planalto.gov.br) pras ONs muito antigas
+- [ ] As 7 ONs antigas (1-8/2016-2018 da extinta CNU/CGU) não estão na listagem atual
+
+**Leva 4 — texto integral (✅ concluída 2026-04-30):**
+
+- [x] `scripts/scrape-ons-content.ts` extrai `<p class="dou-paragraph">` da página DOU
+- [x] **32 ONs com texto integral em `Document.content`** (média 1300 chars, vai de 776 a 3989)
+- [x] Inclui preâmbulo + enunciado + referência + fonte + cláusula de vigência
+- [x] Throttle de 1.5s entre requests (rate-limit friendly)
+- [ ] Pra ONs sem URL DOU (Leva 3 pendente), preencher quando URLs estiverem disponíveis
+
+**Leva 5 — auditoria + correção bug de versionamento (✅ concluída 2026-04-30):**
+
+Auditoria comparativa DB × DOU (`scripts/audit-ons-vs-agu.ts`, removido após uso) revelou que:
+- O sistema de versionamento (`findOrCreateWithVersioning`) cria nova `Document(isPublic=false)` quando detecta mudança em vez de atualizar a versão pública. As Levas 1-4 atualizaram versões históricas (não-públicas).
+- 22 das 32 ONs com `content` tinham `description` divergente do "Enunciado:" oficial do DOU.
+- 9 ONs públicas tinham paráfrase IA enquanto as versões históricas (criadas pelos scripts) já tinham texto oficial.
+
+- [x] `fix-descriptions-from-content.ts` extraiu "Enunciado:" do `content` e atualizou 30 ONs.
+- [x] `sync-on-public-versions.ts` copiou texto oficial das versões históricas (isPublic=false) para as públicas (isPublic=true) — 9 ONs sincronizadas.
+- [x] `fix-final-stragglers.ts` tratou 5 casos especiais (ONs revogadas, substituídas, e ON 56/2018 com formato resolutivo).
+- [x] **Audit final: 95 de 105 match exato (90.5%); 3 "não-match" são falsos positivos (DB tem texto correto explicando revogação/substituição); 7 ONs antigas CNU sem fonte na listagem atual.**
+
+**Bug a corrigir em sessão futura:** scripts `apply-ons-update.ts` e `apply-ons-dou-urls.ts` usam Map por `(numero, ano)` que pode colidir com versões históricas. Deveriam filtrar `isPublic=true` na query inicial.
+
+**Leva 4 — revisão humana (pendente):**
+
+- [ ] Admin UI já tem fluxo `reviewed=true` (botão revisar). Workflow: ler ON na rota pública → comparar com DOU oficial → marcar revisado.
+- [ ] Quando 100% revisadas, remover marca `reviewed=false` que ficou após Leva 1.
+
+**ONs intocadas pelo script (não estão na listagem atual da AGU):**
+
+7 ONs antigas (1-8/2016-2018) da extinta CNU/CGU. Continuam no DB com paráfrase IA até alguém adicionar manualmente o texto oficial.
+
+**Arquivos relevantes:** `scripts/scrape-ons-oficial.ts`, `scripts/fix-and-diff-ons.ts`, `scripts/apply-ons-update.ts`, `lib/agu-modules/orientacoes-normativas.ts`, `app/(acervo)/base-conhecimento/[categoria]/page.tsx`, banco (tabela `Document` filtrada por `category='orientacao-normativa'`).
+
 ### T3. Verificar Indexação Completa de Atos Normativos Novos [Alta] ✅ CONCLUÍDO (2026-02-23)
 **Prioridade:** Alta
 

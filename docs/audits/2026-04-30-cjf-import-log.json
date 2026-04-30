@@ -1,0 +1,408 @@
+{
+  "runAt": "2026-04-30T19:28:43.428Z",
+  "apply": true,
+  "stats": {
+    "success": 37,
+    "errors": 0
+  },
+  "plans": [
+    {
+      "numero": 1,
+      "simposio": 1,
+      "ano": 2022,
+      "action": "update",
+      "dbId": "52edc300-6bed-46ea-af8d-b17d5c2b1549",
+      "diffDesc": {
+        "antes": "Constitui boa prática da Administração, no momento da instrução da prorrogação, emitir alerta à contratada a respeito dos efeitos da formalização do termo aditivo sem a ressalva do direito aos reajustes nos termos da lei e do contrato.",
+        "depois": "Constitui boa prática da Administração, no momento da instrução da prorrogação, emitir alerta à contratada a respeito dos efeitos da formalização do termo aditivo sem a ressalva do direito aos reajustes nos termos da lei e do contrato. (art. 92 da Lei n. 14.133/2021)"
+      }
+    },
+    {
+      "numero": 2,
+      "simposio": 1,
+      "ano": 2022,
+      "action": "skip",
+      "motivo": "já igual",
+      "dbId": "3fa366d0-57f9-4b14-b497-6cd01e55d874"
+    },
+    {
+      "numero": 3,
+      "simposio": 1,
+      "ano": 2022,
+      "action": "skip",
+      "motivo": "já igual",
+      "dbId": "a7b2fa6d-1480-4322-91c4-39852e47de0c"
+    },
+    {
+      "numero": 4,
+      "simposio": 1,
+      "ano": 2022,
+      "action": "skip",
+      "motivo": "já igual",
+      "dbId": "c10791cb-0bd9-45ce-a3fc-5fed303ada5f"
+    },
+    {
+      "numero": 5,
+      "simposio": 1,
+      "ano": 2022,
+      "action": "skip",
+      "motivo": "já igual",
+      "dbId": "66a148cf-1252-454a-abe3-290681a9d2ee"
+    },
+    {
+      "numero": 6,
+      "simposio": 1,
+      "ano": 2022,
+      "action": "skip",
+      "motivo": "já igual",
+      "dbId": "320fb3c1-7fe0-4a1e-a91e-0794770ae6dd"
+    },
+    {
+      "numero": 7,
+      "simposio": 1,
+      "ano": 2022,
+      "action": "update",
+      "dbId": "9b9581e7-0ee1-425a-b031-587c9b7f98f3",
+      "diffDesc": {
+        "antes": "Pondera-se que os requisitos sustentáveis de aceitação de proposta e habilitação não sejam motivo de desclassificação sumária de licitantes que não detêm ingerência sobre tal regularidade, sendo razoável, na condução do certame pelo agente/comissão de contratação, que seja oportunizada a troca de marca/produto, desde que em igual ou superior qualidade ao ofertado inicialmente, porém, com o atendimento de todas as especificações e requisitos dispostos em edital.",
+        "depois": "Pondera-se que os requisitos sustentáveis de aceitação de proposta e habilitação não sejam motivo de desclassificação sumária de licitantes que não detêm ingerência sobre tal regularidade, sendo razoável, na condução do certame pelo agente/comissão de contratação, que seja oportunizada a troca de marca/produto, desde que em igual ou superior qualidade ao ofertado inicialmente, porém, com o atendimento de todas as especificações e requisitos dispostos em edital (art. 11 da Lei n. 14.133/2021)."
+      }
+    },
+    {
+      "numero": 8,
+      "simposio": 1,
+      "ano": 2022,
+      "action": "skip",
+      "motivo": "já igual",
+      "dbId": "319d3bc4-f4e2-46b3-82e0-52ec673eeecb"
+    },
+    {
+      "numero": 9,
+      "simposio": 1,
+      "ano": 2022,
+      "action": "update",
+      "dbId": "c38fe07f-92d9-44bd-ab3f-34e552ea10c5",
+      "diffDesc": {
+        "antes": "Em sede de diligência, o agente de contratação poderá realizar, de ofício, consultas junto aos sítios eletrônicos e às bases de dados oficiais para verificação do atendimento de condições de habilitação do licitante, inclusive no tocante a documentos eventualmente não apresentados.",
+        "depois": "Em sede de diligência, o agente de contratação poderá realizar, de ofício, consultas junto aos sítios eletrônicos e às bases de dados oficiais para verificação do atendimento de condições de habilitação do licitante, inclusive no tocante a documentos eventualmente não apresentados. (Inciso VI do art. 12; § 3º do art. 67; § 1º do art. 68 e art. 87, todos da Lei n. 14.133/2021)."
+      }
+    },
+    {
+      "numero": 10,
+      "simposio": 1,
+      "ano": 2022,
+      "action": "skip",
+      "motivo": "já igual",
+      "dbId": "82eb76a2-8972-477b-87fb-60f97791fbbd"
+    },
+    {
+      "numero": 11,
+      "simposio": 1,
+      "ano": 2022,
+      "action": "skip",
+      "motivo": "já igual",
+      "dbId": "aaf94035-54af-475b-89ae-ccc9e9f56ae2"
+    },
+    {
+      "numero": 12,
+      "simposio": 1,
+      "ano": 2022,
+      "action": "update",
+      "dbId": "3dd639d1-b760-41fc-913f-76e8fd07a0d9",
+      "diffDesc": {
+        "antes": "Consideram-se fornecimentos contínuos, para fins de aplicação do disposto nos arts. 106, 109, parágrafo único do art. 98, parágrafo único do art. 97, inciso I do art. 40 e § 8º do art. 25 da Lei n. 14.133/2021, as compras para a manutenção dos órgãos da Justiça Federal decorrentes de necessidades permanentes ou prolongadas, tais como: a) álcool em gel; b) açúcar; c) água mineral com ou sem gás; d) aquisição, ajustes e consertos de becas, capas e vestimentas afins; e) café em pó; f) fornecimento de gêneros alimentícios; g) fornecimento e instalação de persianas; h) fornecimento, montagem e desmontagem de divisórias e seus componentes; i) licenças de software; j) munições de arma de fogo para treinamentos; k) óleo diesel para geração de energia elétrica; l) fornecimento de material e obra bibliográfica de origem nacional e estrangeira; m) papel higiênico e papel-toalha; n) ressuprimento de material de consumo estocável; o) sabonete líquido; p) suprimentos para impressão em impressora fotográfica; q) suprimentos para impressão de instrumentos de identificação; r) uniformes.",
+        "depois": "Consideram-se fornecimentos contínuos, para fins de aplicação do disposto nos arts. 106, 109, parágrafo único do art. 98, parágrafo único do art. 97, inciso I do art. 40 e § 8º do art. 25 da Lei n. 14.133/2021, as compras para a manutenção dos órgãos da Justiça Federal decorrentes de necessidades permanentes ou prolongadas, tais como: (a) álcool em gel; (b) açúcar; (c) água mineral com ou sem gás; (d) aquisição, ajustes e consertos de becas, capas e vestimentas afins; (e) café em pó; (f) fornecimento de gêneros alimentícios; (g) fornecimento e instalação de persianas; (h) fornecimento, montagem e desmontagem de divisórias e seus componentes; (i) licenças de software; (j) munições de arma de fogo para treinamentos; (k) óleo diesel para geração de energia elétrica; (l) fornecimento de material e obra bibliográfica de origem nacional e estrangeira; (m) papel higiênico e papel-toalha; (n) ressuprimento de material de consumo estocável; (o) sabonete líquido; (p) suprimentos para impressão em impressora fotográfica; (q) suprimentos para impressão de instrumentos de identificação; (r) uniformes."
+      }
+    },
+    {
+      "numero": 13,
+      "simposio": 1,
+      "ano": 2022,
+      "action": "update",
+      "dbId": "136b5b7c-a177-40b6-90c6-d41fd105abe8",
+      "diffDesc": {
+        "antes": "Consideram-se fornecimentos contínuos, para fins de aplicação do disposto nos arts. 106, 109, parágrafo único do art. 98, parágrafo único do art. 97, inciso I do art. 40 e § 8º do art. 25 da Lei n. 14.133/2021, as compras para a manutenção da Gráfica do Conselho da Justiça Federal decorrentes de necessidades permanentes ou prolongadas, tais como os seguintes itens: a) papéis para aplicação/utilização na indústria gráfica no formato comercial 66x96, em gramaturas variadas; b) espiral metálico Wire-o; c) tintas da escala CMYC; d) colas granulada e cola branca; e) químicos tipo solvente, solução de fonte, pasta para limpeza profunda dos rolos, álcool isopropílico, água desmineralizada, limpador de chapas, restaurador de blanquetas; f) solução especial para limpeza automática de blanqueta e rolos, pó antimaculador, goma antioxidante, óleo de silicone, lubrificante spray, blanqueta compressível com barra em aço, panos para limpeza de rolos, caneta corretora de chapas gráficas, pano de lavagem automática original para impressora offset Heidelberg.",
+        "depois": "Consideram-se fornecimentos contínuos, para fins de aplicação do disposto nos arts. 106, 109, parágrafo único do art. 98, parágrafo único do art. 97, inciso I do art. 40 e § 8º do art. 25 da Lei n. 14.133/2021, as compras para a manutenção da Gráfica do Conselho da Justiça Federal decorrentes de necessidades permanentes ou prolongadas, tais como os seguintes itens: (a) papéis para aplicação/utilização na indústria gráfica no formato comercial 66×96, em gramaturas variadas, a exemplo: couchè brilho e fosco, papéis tipo duo design, linha papel offset, linha papel offset, papel kraft, papel adesivo brilho, couchè brilho e fosco, papéis tipo duo design, linha papel offset, papel kraft, papel adesivo brilho, papel tipo pólen soft, filme de polipropileno biorientado (BOPP); (b) espiral metalico Wire-o; (c) tintas da escala CMYC; (d) colas granulada e cola branca; (e) químicos tipo solvente, solução de fonte, pasta para limpeza profunda dos rolos, álcool isopropílico, água desmineralizada, limpador de chapas, restaurador de blanquetas, (f) solução especial para limpeza automática de blanqueta e rolos, pó antimaculador, goma antioxidante, óleo de silicone, lubrificante spray, blanqueta compressível com barra em aço, panos para limpeza de rolos, caneta corretora de chapas gráficas, pano de lavagem automática original para impressora offset Heidelberg."
+      }
+    },
+    {
+      "numero": 14,
+      "simposio": 1,
+      "ano": 2022,
+      "action": "update",
+      "dbId": "6c0ea319-6e55-4c47-a515-b1a551cef4bc",
+      "diffDesc": {
+        "antes": "Consideram-se serviços prestados de forma contínua, para fins de aplicação do disposto nos arts. 106, 109, parágrafo único do art. 98, parágrafo único do art. 97, inciso I do art. 40 e § 8º do art. 25 da Lei n. 14.133/2021, as compras para a manutenção dos órgãos da Justiça Federal decorrentes de necessidades permanentes ou prolongadas, tais como: I – agenciamento de viagens e emissão de passagem aérea e rodoviária; II – apoio operacional, atendente e mensageria; III – assinatura de periódicos, plataformas e bases de dados; IV – atendimento a usuários de TIC; V – atividades de bombeiro civil; VI – aluguel de equipamentos e programas de informática; VII – segurança pessoal privada; VIII – vigilância; IX – coleta e tratamento de resíduos; X – cópia e digitalização; XI – correios e remessas; XII – desinsetização; XIII – energia elétrica; XIV – fotografia; XV – gerenciamento de serviços de TIC; XVI – gerenciamento de combustíveis; XVII – impressão gráfica; XVIII – infovia; XIX – internet; XX – intérprete de Libras; XXI – jardinagem; XXII – lavanderia, limpeza e conservação; XXIII – manutenção predial e de equipamentos; XXIV – plano de saúde; XXV – eventos institucionais; XXVI – produção audiovisual; XXVII – recepção e secretariado; XXVIII – reparo de mobiliário; XXIX – serviços gerais diversos; XXX – design gráfico e web; XXXI – gravação e edição de sessões; XXXII – apoio à administração de dados; XXXIII – desenvolvimento de sistemas; XXXIV – seguro veicular; XXXV – chaveiro; XXXVI – consultas a normas ABNT e tabela Pini; XXXVII – sonorização e degravação; XXXVIII – telefonia; XXXIX – televisão por assinatura; XL – tradução e interpretação; XLI – reciclagem de lâmpadas; XLII – transporte de pessoas e cargas; XLIII – transposição para EAD.",
+        "depois": "Consideram-se serviços prestados de forma contínua, para fins de aplicação do disposto nos arts. 106, 109, parágrafo único do art. 98, parágrafo único do art. 97, inciso I do art. 40 e § 8º do art. 25 da Lei n. 14.133/2021, as compras para a manutenção dos órgãos da Justiça Federal decorrentes de necessidades permanentes ou prolongadas, tais como: I – agenciamento de viagens e emissão de passagem aérea e rodoviária; II – apoio operacional, atendente e mensageria; III – assinatura de: (a) jornais, revistas e periódicos especializados em formato digital ou eletrônico; (b) mídia impressa e eletrônica; (c) ferramentas de pesquisas on-line e de monitoramento on-line de redes sociais; (d) plataforma de desenvolvimento de aplicativos móveis e plataforma tecnológica de materiais informativos; (e) bases de dados jurídicas; IV – atendimento a usuários de Tecnologia da Informação e Comunicação – TIC; V – atividades de bombeiro civil; VI – aluguel de equipamentos e utilização de programas de informática, contratados com fundamento na Lei n. 14.133/2021; VII – atividade de segurança pessoal privada armada e desarmada; VIII – atividade de vigilância armada e desarmada; IX – coleta, tratamento e destinação final de resíduos sólidos e hospitalares; X – cópia, digitalização e fax; XI – correios e telégrafos e remessa de encomendas e cargas por via aérea, porta a porta, nacional e internacional; XII – desinsetização; XIII – energia elétrica; XIV – fotografia; XV – gerenciamento de serviços corporativos de TIC; XVI – gerenciamento e controle de aquisição de combustíveis em rede de postos credenciados, por meio de sistema de gerenciamento integrado (software); XVII – impressão de material gráfico em grandes formatos, em papel, em lona, em tecido ou vinil; XVIII – infovia; XIX – internet; XX – intérprete de Libras; XXI – jardinagem; XXII – lavanderia, limpeza e conservação; XXIII – manutenção preditiva, preventiva, corretiva, operação, suporte e/ou atualização do sistema, no que couber, de: (a) ar-condicionado, ventilação e exaustão; (b) cabeamento de transmissão de dados e voz; (c) estruturas de dados das soluções de Business Intelligence das áreas judicial e administrativa; (d) central telefônica do CJF; (e) elevadores; (f) equipamentos elétricos, eletrônicos, eletroeletrônicos e de TIC; (g) equipamentos de combate a incêndio, com ou sem reposição de peças, componentes e acessórios; (h) equipamentos de inspeção por raio-x, de detectores de metais e de narcóticos e explosivos; (i) grupo de geradores fornecedores de energia; (j) persianas e cortinas; (k) softwares e serviços de TIC; (l) sinalização de segurança, CFTV e controle de acesso; m) veículo da frota, mediante sistema de administração e gerenciamento; n) prédios (instalação, estrutura e todos os seus subsistemas); XXIV – plano de saúde para os servidores e dependentes; XXV – planejamento, organização, coordenação e acompanhamento de eventos institucionais, com o fornecimento de materiais e serviços; XXVI – produção, operação, geração e transmissão de produtos e programas para rádio, televisão e web; XXVII – recepção, secretariado e técnico em secretariado; XXVIII – reparo e/ou recuperação de mobiliário; XXIX – serviços gerais e de almoxarifado, de ascensorista, de berçário, de biblioteca, de cerimonialista, de copeiragem, de carregador, de estocagem, de faturista, de garçom, de marcenaria, de lavador de veículos e de limpeza e conservação; XXX – designer gráfico, webdesigner e publicitário; XXXI – operação, gravação, edição, digitalização, organização e transmissão do áudio e vídeo das sessões de julgamento, videoconferências e das solenidades das sessões plenárias, das audiências e de outros eventos demandados por unidades do CJF; XXXII – apoio à administração de dados, padronização, suporte, execução, implantação e operacionalização das bases de dados da integração; XXXIII – desenvolvimento, sustentação e documentação de sistemas de informação existentes (legados) e novos, para atendimento das demandas de integração entre o CJF e outras instituições; XXXIV – seguro veicular; XXXV – chaveiro; XXXVI – consultas às normas da Associação Brasileira de Normas Técnicas – ABNT e tabela de preços – Pini; XXXVII – sonorização, degravação e afins; XXXVIII – telefonia fixa e móvel, nacional e internacional e serviços de 0800; XXXIX – televisão por assinatura; XL – interpretação simultânea, tradução, revisão e versão de textos; XLI – transporte, descontaminação e reciclagem de lâmpadas queimadas; XLII – transporte de pessoas e pequenas cargas, por meio rodoviário; XLIII – transposição de conteúdos para Ensino a Distância – EAD."
+      }
+    },
+    {
+      "numero": 15,
+      "simposio": 1,
+      "ano": 2022,
+      "action": "skip",
+      "motivo": "já igual",
+      "dbId": "8e60b12d-08aa-4a11-b70b-098bfacaa648"
+    },
+    {
+      "numero": 16,
+      "simposio": 1,
+      "ano": 2022,
+      "action": "skip",
+      "motivo": "já igual",
+      "dbId": "3e119cf5-b0e8-4198-8a1b-7af3fd9adcfa"
+    },
+    {
+      "numero": 17,
+      "simposio": 1,
+      "ano": 2022,
+      "action": "update",
+      "dbId": "eb8132ba-0821-434c-897f-940a457a1f16",
+      "diffDesc": {
+        "antes": "A estimativa do valor da contratação realizada por meio dos Estudos Técnicos Preliminares, de que trata o art. 18, § 1º, inciso VI, será, via de regra, uma análise inicial dos preços praticados no mercado por servir unicamente à análise da autoridade competente quanto à viabilidade econômica da contratação. De forma diferente, há uma estimativa do valor da contratação realizada pelo setor competente do órgão, conforme o art. 6º, inciso XXIII, 'i', que servirá como base à análise da aceitabilidade das propostas na fase externa do processo licitatório e, por isso, utilizará os parâmetros do art. 23 e seus parágrafos, combinados, sempre que possível, em uma 'cesta de preços', priorizando os preços públicos, salvo quando, de acordo com o Manual de Atribuições e Regulamento Interno do órgão, a obrigação recair para o mesmo setor que estiver elaborando os Estudos Técnicos Preliminares.",
+        "depois": "A estimativa do valor da contratação realizada por meio dos Estudos Técnicos Preliminares, de que trata o art. 18, § 1º, inciso VI, será, via de regra, uma análise inicial dos preços praticados no mercado por servir unicamente à análise da autoridade competente quanto à viabilidade econômica da contratação. De forma diferente, há uma estimativa do valor da contratação realizada pelo setor competente do órgão, conforme o art. 6º, inciso XXIII, “i”, que servirá como base à análise da aceitabilidade das propostas na fase externa do processo licitatório e, por isso, utilizará os parâmetros do art. 23 e seus parágrafos, combinados, sempre que possível, em uma “cesta de preços”, priorizando os preços públicos, salvo quando, de acordo com o Manual de Atribuições e Regulamento Interno do órgão, a obrigação recair para o mesmo setor que estiver elaborando os Estudos Técnicos Preliminares."
+      }
+    },
+    {
+      "numero": 18,
+      "simposio": 1,
+      "ano": 2022,
+      "action": "skip",
+      "motivo": "já igual",
+      "dbId": "3e629804-4262-4f9b-a632-d7d71b594e76"
+    },
+    {
+      "numero": 19,
+      "simposio": 1,
+      "ano": 2022,
+      "action": "skip",
+      "motivo": "já igual",
+      "dbId": "be50e6f3-be11-4d8f-9833-eafc30fe16c1"
+    },
+    {
+      "numero": 20,
+      "simposio": 1,
+      "ano": 2022,
+      "action": "skip",
+      "motivo": "já igual",
+      "dbId": "e600a1f1-59b4-4d62-b622-2d147534d846"
+    },
+    {
+      "numero": 21,
+      "simposio": 1,
+      "ano": 2022,
+      "action": "skip",
+      "motivo": "já igual",
+      "dbId": "34d8a1e8-b17b-4214-adda-688e49c22fa0"
+    },
+    {
+      "numero": 22,
+      "simposio": 1,
+      "ano": 2022,
+      "action": "skip",
+      "motivo": "já igual",
+      "dbId": "55661aa8-bfbe-4514-a219-1c09b0b8c48a"
+    },
+    {
+      "numero": 23,
+      "simposio": 1,
+      "ano": 2022,
+      "action": "skip",
+      "motivo": "já igual",
+      "dbId": "c7ffbf78-0357-4d5c-873f-7f3c9dc3c19c"
+    },
+    {
+      "numero": 24,
+      "simposio": 1,
+      "ano": 2022,
+      "action": "update",
+      "dbId": "b175a046-9352-43ec-be29-2750983c9877",
+      "diffDesc": {
+        "antes": "O verbo 'poderá' presente no § 1º do art. 140 da Lei n. 14.133/2021 deverá ser interpretado à luz do art. 147 do mesmo diploma legal.",
+        "depois": "O verbo “poderá” presente no § 1º do art. 140 da Lei n. 14.133/2021 deverá ser interpretado à luz do art. 147 do mesmo diploma legal."
+      }
+    },
+    {
+      "numero": 25,
+      "simposio": 1,
+      "ano": 2022,
+      "action": "skip",
+      "motivo": "já igual",
+      "dbId": "e484f8b2-125b-4edc-8050-3e96b18bb221"
+    },
+    {
+      "numero": 26,
+      "simposio": 2,
+      "ano": 2023,
+      "action": "create"
+    },
+    {
+      "numero": 27,
+      "simposio": 2,
+      "ano": 2023,
+      "action": "create"
+    },
+    {
+      "numero": 28,
+      "simposio": 2,
+      "ano": 2023,
+      "action": "create"
+    },
+    {
+      "numero": 29,
+      "simposio": 2,
+      "ano": 2023,
+      "action": "create"
+    },
+    {
+      "numero": 30,
+      "simposio": 2,
+      "ano": 2023,
+      "action": "create"
+    },
+    {
+      "numero": 31,
+      "simposio": 2,
+      "ano": 2023,
+      "action": "create"
+    },
+    {
+      "numero": 32,
+      "simposio": 2,
+      "ano": 2023,
+      "action": "create"
+    },
+    {
+      "numero": 33,
+      "simposio": 2,
+      "ano": 2023,
+      "action": "create"
+    },
+    {
+      "numero": 34,
+      "simposio": 2,
+      "ano": 2023,
+      "action": "create"
+    },
+    {
+      "numero": 35,
+      "simposio": 2,
+      "ano": 2023,
+      "action": "create"
+    },
+    {
+      "numero": 36,
+      "simposio": 2,
+      "ano": 2023,
+      "action": "create"
+    },
+    {
+      "numero": 37,
+      "simposio": 2,
+      "ano": 2023,
+      "action": "create"
+    },
+    {
+      "numero": 38,
+      "simposio": 2,
+      "ano": 2023,
+      "action": "create"
+    },
+    {
+      "numero": 39,
+      "simposio": 2,
+      "ano": 2023,
+      "action": "create"
+    },
+    {
+      "numero": 40,
+      "simposio": 2,
+      "ano": 2023,
+      "action": "create"
+    },
+    {
+      "numero": 41,
+      "simposio": 2,
+      "ano": 2023,
+      "action": "create"
+    },
+    {
+      "numero": 42,
+      "simposio": 2,
+      "ano": 2023,
+      "action": "create"
+    },
+    {
+      "numero": 43,
+      "simposio": 2,
+      "ano": 2023,
+      "action": "create"
+    },
+    {
+      "numero": 44,
+      "simposio": 2,
+      "ano": 2023,
+      "action": "create"
+    },
+    {
+      "numero": 45,
+      "simposio": 2,
+      "ano": 2023,
+      "action": "create"
+    },
+    {
+      "numero": 46,
+      "simposio": 2,
+      "ano": 2023,
+      "action": "create"
+    },
+    {
+      "numero": 47,
+      "simposio": 2,
+      "ano": 2023,
+      "action": "create"
+    },
+    {
+      "numero": 48,
+      "simposio": 2,
+      "ano": 2023,
+      "action": "create"
+    },
+    {
+      "numero": 49,
+      "simposio": 2,
+      "ano": 2023,
+      "action": "create"
+    },
+    {
+      "numero": 50,
+      "simposio": 2,
+      "ano": 2023,
+      "action": "create"
+    },
+    {
+      "numero": 51,
+      "simposio": 2,
+      "ano": 2023,
+      "action": "create"
+    },
+    {
+      "numero": 52,
+      "simposio": 2,
+      "ano": 2023,
+      "action": "create"
+    },
+    {
+      "numero": 53,
+      "simposio": 2,
+      "ano": 2023,
+      "action": "create"
+    },
+    {
+      "numero": 54,
+      "simposio": 2,
+      "ano": 2023,
+      "action": "create"
+    }
+  ]
+}

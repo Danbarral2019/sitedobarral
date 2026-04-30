@@ -50,26 +50,31 @@ export default async function Home() {
       label: 'Acórdãos TCU',
       count: categoryCounts['acordao'] || 0,
       icon: Gavel,
+      href: '/jurisprudencia',
     },
     {
       label: 'Pareceres uniformizantes',
       count: (categoryCounts['decor'] || 0) + (categoryCounts['parecer-vinculante'] || 0),
       icon: FileCheck,
+      href: '/base-conhecimento/pareceres',
     },
     {
       label: 'Orientações Normativas',
       count: categoryCounts['orientacao-normativa'] || 0,
       icon: ScrollText,
+      href: '/base-conhecimento/orientacoes-normativas',
     },
     {
       label: 'Enunciados',
       count: categoryCounts['enunciados'] || 0,
       icon: BookMarked,
+      href: '/base-conhecimento/enunciados',
     },
     {
       label: 'Artigos da Lei 14.133',
       count: leiArticleCount,
       icon: Scale,
+      href: '/lei-14133',
     },
     {
       label: 'Atos Normativos',
@@ -81,6 +86,7 @@ export default async function Home() {
       label: 'Termos no Glossário',
       count: glossaryCount,
       icon: Landmark,
+      href: '/glossario',
     },
     {
       label: 'Decisões TCEs e CNJ',

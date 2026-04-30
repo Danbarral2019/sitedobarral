@@ -1,0 +1,199 @@
+{
+  "scrapedAt": "2026-04-30T18:19:10.075Z",
+  "source": "https://www.gov.br/agu/pt-br/composicao/cgu/cgu/onsagu",
+  "total": 32,
+  "entries": [
+    {
+      "numero": 56,
+      "url": "https://www.in.gov.br/web/dou/-/orientacao-normativa-n-56-de-28-de-maio-de-2018-16320949",
+      "hasAguPrefix": false,
+      "douDate": "28/maio/2018"
+    },
+    {
+      "numero": 57,
+      "url": "https://www.in.gov.br/web/dou/-/orientacao-normativa-n-57-de-29-de-agosto-de-2019-213478329",
+      "hasAguPrefix": false,
+      "douDate": "29/agosto/2019"
+    },
+    {
+      "numero": 58,
+      "url": "https://www.in.gov.br/web/dou/-/orientacao-normativa-n-58-de-28-de-abril-de-2020-254429919",
+      "hasAguPrefix": false,
+      "douDate": "28/abril/2020"
+    },
+    {
+      "numero": 59,
+      "url": "https://www.in.gov.br/web/dou/-/orientacao-normativa-n-59-de-29-de-maio-de-2020-261277797",
+      "hasAguPrefix": false,
+      "douDate": "29/maio/2020"
+    },
+    {
+      "numero": 60,
+      "url": "https://www.in.gov.br/web/dou/-/orientacao-normativa-n-60-de-29-de-maio-de-2020-261278068",
+      "hasAguPrefix": false,
+      "douDate": "29/maio/2020"
+    },
+    {
+      "numero": 61,
+      "url": "https://www.in.gov.br/web/dou/-/orientacao-normativa-n-61-de-29-de-maio-de-2020-261277985",
+      "hasAguPrefix": false,
+      "douDate": "29/maio/2020"
+    },
+    {
+      "numero": 62,
+      "url": "https://www.in.gov.br/web/dou/-/orientacao-normativa-n-62-de-29-de-maio-de-2020-261278061",
+      "hasAguPrefix": false,
+      "douDate": "29/maio/2020"
+    },
+    {
+      "numero": 63,
+      "url": "https://www.in.gov.br/web/dou/-/orientacao-normativa-n-63-de-29-de-maio-de-2020-261278044",
+      "hasAguPrefix": false,
+      "douDate": "29/maio/2020"
+    },
+    {
+      "numero": 64,
+      "url": "https://www.in.gov.br/web/dou/-/orientacao-normativa-n-64-de-29-de-maio-de-2020-261278205",
+      "hasAguPrefix": false,
+      "douDate": "29/maio/2020"
+    },
+    {
+      "numero": 65,
+      "url": "https://www.in.gov.br/web/dou/-/orientacao-normativa-n-65-de-29-de-maio-de-2020-261278248",
+      "hasAguPrefix": false,
+      "douDate": "29/maio/2020"
+    },
+    {
+      "numero": 66,
+      "url": "https://www.in.gov.br/web/dou/-/orientacao-normativa-n-66-de-29-de-maio-de-2020-261278070",
+      "hasAguPrefix": false,
+      "douDate": "29/maio/2020"
+    },
+    {
+      "numero": 67,
+      "url": "https://www.in.gov.br/web/dou/-/orientacao-normativa-n-67-de-29-de-maio-de-2020-261278163",
+      "hasAguPrefix": false,
+      "douDate": "29/maio/2020"
+    },
+    {
+      "numero": 68,
+      "url": "https://www.in.gov.br/web/dou/-/orientacao-normativa-n-68-de-29-de-maio-de-2020-261277997",
+      "hasAguPrefix": false,
+      "douDate": "29/maio/2020"
+    },
+    {
+      "numero": 76,
+      "url": "https://www.in.gov.br/en/web/dou/-/orientacao-normativa-agu-n-76-de-25-de-julho-de-2023-510865320",
+      "hasAguPrefix": true,
+      "douDate": "25/julho/2023"
+    },
+    {
+      "numero": 77,
+      "url": "https://www.in.gov.br/web/dou/-/orientacao-normativa-agu-n-77-de-21-de-novembro-de-2023-524559950",
+      "hasAguPrefix": true,
+      "douDate": "21/novembro/2023"
+    },
+    {
+      "numero": 78,
+      "url": "https://www.in.gov.br/web/dou/-/orientacao-normativa-agu-n-78-de-28-de-novembro-de-2023-526593953",
+      "hasAguPrefix": true,
+      "douDate": "28/novembro/2023"
+    },
+    {
+      "numero": 79,
+      "url": "https://www.in.gov.br/web/dou/-/orientacao-normativa-agu-n-79-de-29-de-dezembro-de-2023-534992097",
+      "hasAguPrefix": true,
+      "douDate": "29/dezembro/2023"
+    },
+    {
+      "numero": 81,
+      "url": "https://www.in.gov.br/web/dou/-/orientacao-normativa-n-81-de-25-de-abril-de-2024-556249049",
+      "hasAguPrefix": false,
+      "douDate": "25/abril/2024"
+    },
+    {
+      "numero": 82,
+      "url": "https://www.in.gov.br/en/web/dou/-/orientacao-normativa-n-82-de-17-de-maio-de-2024-560705067",
+      "hasAguPrefix": false,
+      "douDate": "17/maio/2024"
+    },
+    {
+      "numero": 83,
+      "url": "https://www.in.gov.br/en/web/dou/-/orientacao-normativa-n-83-de-17-de-maio-de-2024-560701068",
+      "hasAguPrefix": false,
+      "douDate": "17/maio/2024"
+    },
+    {
+      "numero": 84,
+      "url": "https://www.in.gov.br/en/web/dou/-/orientacao-normativa-n-84-de-17-de-maio-de-2024-560705146",
+      "hasAguPrefix": false,
+      "douDate": "17/maio/2024"
+    },
+    {
+      "numero": 85,
+      "url": "https://www.in.gov.br/en/web/dou/-/orientacao-normativa-n-85-de-3-de-julho-de-2024-569933232",
+      "hasAguPrefix": false,
+      "douDate": "3/julho/2024"
+    },
+    {
+      "numero": 86,
+      "url": "https://www.in.gov.br/en/web/dou/-/orientacao-normativa-n-86-de-5-de-julho-de-2024-570602127",
+      "hasAguPrefix": false,
+      "douDate": "5/julho/2024"
+    },
+    {
+      "numero": 94,
+      "url": "https://www.in.gov.br/web/dou/-/orientacao-normativa-n-94-de-4-de-abril-de-2024-622221787",
+      "hasAguPrefix": false,
+      "douDate": "4/abril/2024"
+    },
+    {
+      "numero": 95,
+      "url": "https://www.in.gov.br/en/web/dou/-/orientacao-normativa-n-95-de-28-de-maio-de-2025-632506632",
+      "hasAguPrefix": false,
+      "douDate": "28/maio/2025"
+    },
+    {
+      "numero": 96,
+      "url": "https://www.in.gov.br/en/web/dou/-/orientacao-normativa-n-96-de-2-de-junho-de-2025-633785816",
+      "hasAguPrefix": false,
+      "douDate": "2/junho/2025"
+    },
+    {
+      "numero": 97,
+      "url": "https://www.in.gov.br/en/web/dou/-/orientacao-normativa-n-97-de-2-de-junho-de-2025-633786778",
+      "hasAguPrefix": false,
+      "douDate": "2/junho/2025"
+    },
+    {
+      "numero": 98,
+      "url": "https://www.in.gov.br/en/web/dou/-/orientacao-normativa-n-98-de-8-de-agosto-de-2025-647412565",
+      "hasAguPrefix": false,
+      "douDate": "8/agosto/2025"
+    },
+    {
+      "numero": 99,
+      "url": "https://www.in.gov.br/en/web/dou/-/orientacao-normativa-n-99-de-8-de-agosto-de-2025-647418353",
+      "hasAguPrefix": false,
+      "douDate": "8/agosto/2025"
+    },
+    {
+      "numero": 100,
+      "url": "https://www.in.gov.br/web/dou/-/orientacao-normativa-n-100-de-13-de-agosto-de-2025-648313085",
+      "hasAguPrefix": false,
+      "douDate": "13/agosto/2025"
+    },
+    {
+      "numero": 101,
+      "url": "https://www.in.gov.br/web/dou/-/orientacao-normativa-n-101-de-8-de-setembro-de-2025-653989935",
+      "hasAguPrefix": false,
+      "douDate": "8/setembro/2025"
+    },
+    {
+      "numero": 102,
+      "url": "https://www.in.gov.br/web/dou/-/orientacao-normativa-n-102-de-12-de-dezembro-de-2025-675159017",
+      "hasAguPrefix": false,
+      "douDate": "12/dezembro/2025"
+    }
+  ]
+}

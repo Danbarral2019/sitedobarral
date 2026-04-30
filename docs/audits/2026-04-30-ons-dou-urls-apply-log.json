@@ -1,0 +1,236 @@
+{
+  "appliedAt": "2026-04-30T18:20:25.109Z",
+  "total": 32,
+  "success": 32,
+  "errors": 0,
+  "failures": [],
+  "plans": [
+    {
+      "numero": 56,
+      "ano": 2018,
+      "dbId": "e6c2d479-f3c2-4591-ba42-a53e4e172fdb",
+      "urlAntiga": "https://www.gov.br/agu/pt-br/composicao/cgu/cgu/onsagu",
+      "urlNovaDOU": "https://www.in.gov.br/web/dou/-/orientacao-normativa-n-56-de-28-de-maio-de-2018-16320949"
+    },
+    {
+      "numero": 57,
+      "ano": 2019,
+      "dbId": "78ee2f5e-9121-4308-b8a5-d826228c5359",
+      "urlAntiga": "https://www.gov.br/agu/pt-br/composicao/cgu/cgu/onsagu",
+      "urlNovaDOU": "https://www.in.gov.br/web/dou/-/orientacao-normativa-n-57-de-29-de-agosto-de-2019-213478329"
+    },
+    {
+      "numero": 58,
+      "ano": 2020,
+      "dbId": "e71e373b-5c3b-4ebb-9f1f-c6ab393a55fb",
+      "urlAntiga": "https://www.gov.br/agu/pt-br/composicao/cgu/cgu/onsagu",
+      "urlNovaDOU": "https://www.in.gov.br/web/dou/-/orientacao-normativa-n-58-de-28-de-abril-de-2020-254429919"
+    },
+    {
+      "numero": 59,
+      "ano": 2020,
+      "dbId": "4579ecd5-ec65-4016-a641-062d5d076e41",
+      "urlAntiga": "https://www.gov.br/agu/pt-br/composicao/cgu/cgu/onsagu",
+      "urlNovaDOU": "https://www.in.gov.br/web/dou/-/orientacao-normativa-n-59-de-29-de-maio-de-2020-261277797"
+    },
+    {
+      "numero": 60,
+      "ano": 2020,
+      "dbId": "d552adc8-fe08-4db0-b3d4-9f3d94f6cf86",
+      "urlAntiga": "https://www.gov.br/agu/pt-br/composicao/cgu/cgu/onsagu",
+      "urlNovaDOU": "https://www.in.gov.br/web/dou/-/orientacao-normativa-n-60-de-29-de-maio-de-2020-261278068"
+    },
+    {
+      "numero": 61,
+      "ano": 2020,
+      "dbId": "51cc9729-9cca-45cc-bfeb-699b5ba3f6d8",
+      "urlAntiga": "https://www.gov.br/agu/pt-br/composicao/cgu/cgu/onsagu",
+      "urlNovaDOU": "https://www.in.gov.br/web/dou/-/orientacao-normativa-n-61-de-29-de-maio-de-2020-261277985"
+    },
+    {
+      "numero": 62,
+      "ano": 2020,
+      "dbId": "c79afcbc-04ba-4c56-bc52-41bb9a1c1e73",
+      "urlAntiga": "https://www.gov.br/agu/pt-br/composicao/cgu/cgu/onsagu",
+      "urlNovaDOU": "https://www.in.gov.br/web/dou/-/orientacao-normativa-n-62-de-29-de-maio-de-2020-261278061"
+    },
+    {
+      "numero": 63,
+      "ano": 2020,
+      "dbId": "7f6702bc-f01c-40ec-8d83-b0deb52bd3d4",
+      "urlAntiga": "https://www.gov.br/agu/pt-br/composicao/cgu/cgu/onsagu",
+      "urlNovaDOU": "https://www.in.gov.br/web/dou/-/orientacao-normativa-n-63-de-29-de-maio-de-2020-261278044"
+    },
+    {
+      "numero": 64,
+      "ano": 2020,
+      "dbId": "9d2aed90-9a09-48ab-876d-2c8a124a6c1b",
+      "urlAntiga": "https://www.gov.br/agu/pt-br/composicao/cgu/cgu/onsagu",
+      "urlNovaDOU": "https://www.in.gov.br/web/dou/-/orientacao-normativa-n-64-de-29-de-maio-de-2020-261278205"
+    },
+    {
+      "numero": 65,
+      "ano": 2020,
+      "dbId": "a3e7d09e-b314-4d03-af12-32f7552176cc",
+      "urlAntiga": "https://www.gov.br/agu/pt-br/composicao/cgu/cgu/onsagu",
+      "urlNovaDOU": "https://www.in.gov.br/web/dou/-/orientacao-normativa-n-65-de-29-de-maio-de-2020-261278248"
+    },
+    {
+      "numero": 66,
+      "ano": 2020,
+      "dbId": "7ca2064b-0003-43fb-aa9d-295b569dd99f",
+      "urlAntiga": "https://www.gov.br/agu/pt-br/composicao/cgu/cgu/onsagu",
+      "urlNovaDOU": "https://www.in.gov.br/web/dou/-/orientacao-normativa-n-66-de-29-de-maio-de-2020-261278070"
+    },
+    {
+      "numero": 67,
+      "ano": 2020,
+      "dbId": "c1d9216f-3264-4b4e-9a47-10f55a45ad7e",
+      "urlAntiga": "https://www.gov.br/agu/pt-br/composicao/cgu/cgu/onsagu",
+      "urlNovaDOU": "https://www.in.gov.br/web/dou/-/orientacao-normativa-n-67-de-29-de-maio-de-2020-261278163"
+    },
+    {
+      "numero": 68,
+      "ano": 2020,
+      "dbId": "8beef6c6-4bfc-4435-bac9-f5098e030c57",
+      "urlAntiga": "https://www.gov.br/agu/pt-br/composicao/cgu/cgu/onsagu",
+      "urlNovaDOU": "https://www.in.gov.br/web/dou/-/orientacao-normativa-n-68-de-29-de-maio-de-2020-261277997"
+    },
+    {
+      "numero": 76,
+      "ano": 2023,
+      "dbId": "5be44859-6b18-4aff-ae83-750de540a523",
+      "urlAntiga": "https://www.gov.br/agu/pt-br/composicao/cgu/cgu/onsagu",
+      "urlNovaDOU": "https://www.in.gov.br/en/web/dou/-/orientacao-normativa-agu-n-76-de-25-de-julho-de-2023-510865320"
+    },
+    {
+      "numero": 77,
+      "ano": 2023,
+      "dbId": "1037e397-9ff4-435b-bf5f-7515c5a421de",
+      "urlAntiga": "https://www.gov.br/agu/pt-br/composicao/cgu/cgu/ons/fundamentacao-on-41-original.pdf",
+      "urlNovaDOU": "https://www.in.gov.br/web/dou/-/orientacao-normativa-agu-n-77-de-21-de-novembro-de-2023-524559950",
+      "alternativeUrlsNovas": "[\"https://www.gov.br/agu/pt-br/composicao/cgu/cgu/ons/fundamentacao-on-41-original.pdf\"]"
+    },
+    {
+      "numero": 78,
+      "ano": 2023,
+      "dbId": "c0373388-419b-44de-8ded-1a111e144713",
+      "urlAntiga": "https://www.gov.br/agu/pt-br/composicao/cgu/cgu/onsagu",
+      "urlNovaDOU": "https://www.in.gov.br/web/dou/-/orientacao-normativa-agu-n-78-de-28-de-novembro-de-2023-526593953"
+    },
+    {
+      "numero": 79,
+      "ano": 2023,
+      "dbId": "3b3f9900-201d-4922-aed3-7b85eea5f966",
+      "urlAntiga": "https://www.gov.br/agu/pt-br/composicao/cgu/cgu/onsagu",
+      "urlNovaDOU": "https://www.in.gov.br/web/dou/-/orientacao-normativa-agu-n-79-de-29-de-dezembro-de-2023-534992097"
+    },
+    {
+      "numero": 81,
+      "ano": 2024,
+      "dbId": "faed1fba-8110-42e2-bd58-20c9765bd474",
+      "urlAntiga": "https://www.gov.br/agu/pt-br/composicao/cgu/cgu/onsagu",
+      "urlNovaDOU": "https://www.in.gov.br/web/dou/-/orientacao-normativa-n-81-de-25-de-abril-de-2024-556249049"
+    },
+    {
+      "numero": 82,
+      "ano": 2024,
+      "dbId": "3e1c9b59-f7da-4149-9ae4-9558f9f44213",
+      "urlAntiga": "https://www.gov.br/agu/pt-br/composicao/cgu/cgu/onsagu",
+      "urlNovaDOU": "https://www.in.gov.br/en/web/dou/-/orientacao-normativa-n-82-de-17-de-maio-de-2024-560705067"
+    },
+    {
+      "numero": 83,
+      "ano": 2024,
+      "dbId": "a35fffa9-10d8-47f2-8b6c-e82432cdffb7",
+      "urlAntiga": "https://www.gov.br/agu/pt-br/composicao/cgu/cgu/onsagu",
+      "urlNovaDOU": "https://www.in.gov.br/en/web/dou/-/orientacao-normativa-n-83-de-17-de-maio-de-2024-560701068"
+    },
+    {
+      "numero": 84,
+      "ano": 2024,
+      "dbId": "e003992a-2831-44d2-a23d-83343acf07ad",
+      "urlAntiga": "https://www.gov.br/agu/pt-br/composicao/cgu/cgu/onsagu",
+      "urlNovaDOU": "https://www.in.gov.br/en/web/dou/-/orientacao-normativa-n-84-de-17-de-maio-de-2024-560705146"
+    },
+    {
+      "numero": 85,
+      "ano": 2024,
+      "dbId": "a02a5d70-91aa-4e4a-9d7f-61c2187bbbcc",
+      "urlAntiga": "https://www.gov.br/agu/pt-br/composicao/cgu/cgu/onsagu",
+      "urlNovaDOU": "https://www.in.gov.br/en/web/dou/-/orientacao-normativa-n-85-de-3-de-julho-de-2024-569933232"
+    },
+    {
+      "numero": 86,
+      "ano": 2024,
+      "dbId": "7c060662-6de6-4045-b1af-b60446700509",
+      "urlAntiga": "https://www.gov.br/agu/pt-br/composicao/cgu/cgu/onsagu",
+      "urlNovaDOU": "https://www.in.gov.br/en/web/dou/-/orientacao-normativa-n-86-de-5-de-julho-de-2024-570602127"
+    },
+    {
+      "numero": 94,
+      "ano": 2024,
+      "dbId": "b1db68da-f471-4de4-8711-713486697cb2",
+      "urlAntiga": "https://www.gov.br/agu/pt-br/composicao/cgu/cgu/onsagu",
+      "urlNovaDOU": "https://www.in.gov.br/web/dou/-/orientacao-normativa-n-94-de-4-de-abril-de-2024-622221787"
+    },
+    {
+      "numero": 95,
+      "ano": 2025,
+      "dbId": "0d84af61-aefe-44da-9b8d-14f4471b9129",
+      "urlAntiga": "https://www.gov.br/agu/pt-br/composicao/cgu/cgu/onsagu",
+      "urlNovaDOU": "https://www.in.gov.br/en/web/dou/-/orientacao-normativa-n-95-de-28-de-maio-de-2025-632506632"
+    },
+    {
+      "numero": 96,
+      "ano": 2025,
+      "dbId": "846e290c-1d31-42ac-9388-ba9dfd2deccf",
+      "urlAntiga": "https://www.gov.br/agu/pt-br/composicao/cgu/cgu/onsagu",
+      "urlNovaDOU": "https://www.in.gov.br/en/web/dou/-/orientacao-normativa-n-96-de-2-de-junho-de-2025-633785816"
+    },
+    {
+      "numero": 97,
+      "ano": 2025,
+      "dbId": "3441faa6-c697-4ce2-8005-b54f188f83be",
+      "urlAntiga": "https://www.gov.br/agu/pt-br/composicao/cgu/cgu/onsagu",
+      "urlNovaDOU": "https://www.in.gov.br/en/web/dou/-/orientacao-normativa-n-97-de-2-de-junho-de-2025-633786778"
+    },
+    {
+      "numero": 98,
+      "ano": 2025,
+      "dbId": "be8fabca-569b-4d05-9c45-dc00b6a86208",
+      "urlAntiga": "https://www.gov.br/agu/pt-br/composicao/cgu/cgu/onsagu",
+      "urlNovaDOU": "https://www.in.gov.br/en/web/dou/-/orientacao-normativa-n-98-de-8-de-agosto-de-2025-647412565"
+    },
+    {
+      "numero": 99,
+      "ano": 2025,
+      "dbId": "6f80e9f5-d84c-4394-a502-3346d78c0726",
+      "urlAntiga": "https://www.gov.br/agu/pt-br/composicao/cgu/cgu/onsagu",
+      "urlNovaDOU": "https://www.in.gov.br/en/web/dou/-/orientacao-normativa-n-99-de-8-de-agosto-de-2025-647418353"
+    },
+    {
+      "numero": 100,
+      "ano": 2025,
+      "dbId": "74721ad8-28c1-4deb-a2c6-60cfd81a560d",
+      "urlAntiga": "https://www.gov.br/agu/pt-br/composicao/cgu/cgu/onsagu",
+      "urlNovaDOU": "https://www.in.gov.br/web/dou/-/orientacao-normativa-n-100-de-13-de-agosto-de-2025-648313085"
+    },
+    {
+      "numero": 101,
+      "ano": 2025,
+      "dbId": "4fd5b03d-59c5-4c54-a294-16875504bcd4",
+      "urlAntiga": "https://www.gov.br/agu/pt-br/composicao/cgu/cgu/ons/fundamentacao-on-101.pdf",
+      "urlNovaDOU": "https://www.in.gov.br/web/dou/-/orientacao-normativa-n-101-de-8-de-setembro-de-2025-653989935",
+      "alternativeUrlsNovas": "[\"https://www.gov.br/agu/pt-br/composicao/cgu/cgu/ons/fundamentacao-on-101.pdf\"]"
+    },
+    {
+      "numero": 102,
+      "ano": 2025,
+      "dbId": "bb893bbf-7be9-43d7-a5af-8860cc457dc1",
+      "urlAntiga": "https://www.gov.br/agu/pt-br/composicao/cgu/cgu/ons/fundamentacao-on-102-2025.pdf",
+      "urlNovaDOU": "https://www.in.gov.br/web/dou/-/orientacao-normativa-n-102-de-12-de-dezembro-de-2025-675159017",
+      "alternativeUrlsNovas": "[\"https://www.gov.br/agu/pt-br/composicao/cgu/cgu/ons/fundamentacao-on-102-2025.pdf\"]"
+    }
+  ]
+}
