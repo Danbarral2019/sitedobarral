@@ -79,12 +79,22 @@ export async function PUT(
     const normalizedEmenta = body.ementa !== undefined ? normalizeScrapedText(body.ementa as string) : undefined;
     const normalizedContent = body.content !== undefined ? (body.content ? normalizeScrapedText(body.content as string) : null) : undefined;
 
-    // Validar formatação ANTES do save quando ementa ou content foram passados.
-    if (normalizedEmenta !== undefined || normalizedContent !== undefined) {
+    // Validar formatação ANTES do save quando ementa, content, title, year
+    // ou publishDate foram passados.
+    const willTouchValidatedFields =
+      normalizedEmenta !== undefined ||
+      normalizedContent !== undefined ||
+      body.title !== undefined ||
+      body.year !== undefined ||
+      body.publishDate !== undefined;
+    if (willTouchValidatedFields) {
       const validation = validateActContent({
         url: body.officialUrl ?? existing.officialUrl,
         content: normalizedContent ?? existing.content ?? '',
         ementa: normalizedEmenta ?? existing.ementa,
+        title: body.title ?? existing.title,
+        year: body.year !== undefined ? parseInt(body.year) : existing.year,
+        publishDate: body.publishDate !== undefined ? new Date(body.publishDate) : existing.publishDate,
       });
       if (!validation.ok) {
         return NextResponse.json(

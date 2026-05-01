@@ -29,6 +29,15 @@ export interface ValidationInput {
    * tamanho mínimo, padrões de fragmento de body que vazaram pra ementa).
    */
   ementa?: string | null;
+  /**
+   * Título oficial do ato. Quando presente, checa mojibake (não capturado
+   * em audits anteriores até 2026-05-01) e padrão "LEI/DECRETO Nº X DE...".
+   */
+  title?: string | null;
+  /** Ano declarado no fullNumber. Comparado com publishDate.getUTCFullYear(). */
+  year?: number | null;
+  /** Data de publicação. Comparada com `year` quando ambos presentes. */
+  publishDate?: Date | string | null;
 }
 
 export interface ValidationResult {
@@ -289,6 +298,47 @@ export function validateActContent(input: ValidationInput): ValidationResult {
       // 19. NBSP/zero-width na ementa — warning (mesmo do content)
       if (/[ ​‌‍﻿⁠]/.test(ementa)) {
         warnings.push('Ementa contém NBSP/zero-width residuais — passar por normalizeScrapedText.');
+      }
+    }
+  }
+
+  // ─── Checks de formatação (title) ────────────────────────────────────
+  if (input.title !== undefined && input.title !== null) {
+    const title = input.title.trim();
+    if (!title) {
+      errors.push('Título vazio.');
+    } else {
+      // 20. Mojibake no título — bloqueia. Visto em prod (5 atos importados
+      // antes do charset detection): Lei 13.709/2018, 12.846/2013, 12.527/2011,
+      // 9.784/1999, 8.248/1991 — todos com "LEI NÿFD ..." em vez de "LEI Nº ...".
+      const titleFffd = (title.match(/�/g) ?? []).length;
+      if (titleFffd > 0) {
+        errors.push(
+          `Título contém ${titleFffd}× U+FFFD — charset detection falhou ou title foi importado de fonte com encoding errado. ` +
+            `Re-extrair via fetch + detectCharsetFromResponse.`,
+        );
+      }
+
+      // 21. NBSP/zero-width no title — warning
+      if (/[ ​‌‍﻿⁠]/.test(title)) {
+        warnings.push('Título contém NBSP/zero-width residuais — passar por normalizeScrapedText.');
+      }
+    }
+  }
+
+  // ─── Checks de consistência year × publishDate ───────────────────────
+  if (input.year != null && input.publishDate != null) {
+    const date = input.publishDate instanceof Date ? input.publishDate : new Date(input.publishDate);
+    if (!isNaN(date.getTime())) {
+      const dateYear = date.getUTCFullYear();
+      // Visto em prod: Lei 12.846/2013 com publishDate=2000-11-30, Decreto
+      // 11.345/2023 com publishDate=2021-10-05. publishDate.year DEVE bater
+      // com year do fullNumber, senão lista/filtros por ano quebram.
+      if (dateYear !== input.year) {
+        errors.push(
+          `publishDate (${date.toISOString().slice(0, 10)}) está no ano ${dateYear}, mas o ato é declarado de ${input.year}. ` +
+            `Provável bug de import — verificar dia/mês também.`,
+        );
       }
     }
   }

@@ -155,3 +155,73 @@ describe('validateActContent — checks de formatação na ementa', () => {
     expect(result.errors.filter((e) => e.toLowerCase().includes('ementa'))).toEqual([]);
   });
 });
+
+describe('validateActContent — checks de formatação no title', () => {
+  it('bloqueia title com mojibake U+FFFD', () => {
+    const result = validateActContent({
+      content: VALID_BIG,
+      title: 'LEI N� 13.709, DE 14 DE AGOSTO DE 2018',
+    });
+    expect(result.ok).toBe(false);
+    expect(result.errors.join(' ')).toMatch(/Título.*U\+FFFD/);
+  });
+
+  it('bloqueia title vazio', () => {
+    const result = validateActContent({
+      content: VALID_BIG,
+      title: '',
+    });
+    expect(result.ok).toBe(false);
+    expect(result.errors.join(' ')).toMatch(/Título vazio/);
+  });
+
+  it('aceita title canônico', () => {
+    const result = validateActContent({
+      content: VALID_BIG,
+      title: 'LEI Nº 13.709, DE 14 DE AGOSTO DE 2018',
+    });
+    expect(result.errors.filter((e) => e.toLowerCase().includes('título'))).toEqual([]);
+  });
+
+  it('é no-op quando title não é passado', () => {
+    const result = validateActContent({ content: VALID_BIG });
+    expect(result.errors.filter((e) => e.toLowerCase().includes('título'))).toEqual([]);
+  });
+});
+
+describe('validateActContent — consistência year × publishDate', () => {
+  it('bloqueia quando publishDate.year ≠ year declarado', () => {
+    const result = validateActContent({
+      content: VALID_BIG,
+      year: 2013,
+      publishDate: new Date('2000-11-30T00:00:00Z'),
+    });
+    expect(result.ok).toBe(false);
+    expect(result.errors.join(' ')).toMatch(/publishDate.*2000.*ano 2000.*declarado de 2013/);
+  });
+
+  it('aceita quando publishDate.year bate com year', () => {
+    const result = validateActContent({
+      content: VALID_BIG,
+      year: 2018,
+      publishDate: new Date('2018-08-14T00:00:00Z'),
+    });
+    expect(result.errors.filter((e) => /publishDate/.test(e))).toEqual([]);
+  });
+
+  it('aceita publishDate como string ISO', () => {
+    const result = validateActContent({
+      content: VALID_BIG,
+      year: 2021,
+      publishDate: '2021-04-01T00:00:00.000Z',
+    });
+    expect(result.errors.filter((e) => /publishDate/.test(e))).toEqual([]);
+  });
+
+  it('é no-op quando year ou publishDate ausente', () => {
+    const r1 = validateActContent({ content: VALID_BIG, year: 2020 });
+    const r2 = validateActContent({ content: VALID_BIG, publishDate: new Date() });
+    expect(r1.errors.filter((e) => /publishDate/.test(e))).toEqual([]);
+    expect(r2.errors.filter((e) => /publishDate/.test(e))).toEqual([]);
+  });
+});

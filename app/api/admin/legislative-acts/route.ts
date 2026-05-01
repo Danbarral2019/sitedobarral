@@ -162,11 +162,15 @@ export async function POST(request: NextRequest) {
     const normalizedContent = body.content ? normalizeScrapedText(body.content as string) : null;
 
     // Validar formatação. Errors bloqueiam o save (mojibake, FAQ no lugar
-    // do ato, ementa fragmento). Warnings vão pro response mas não bloqueiam.
+    // do ato, ementa fragmento, title com U+FFFD, publishDate.year ≠ year).
+    // Warnings vão pro response mas não bloqueiam.
     const validation = validateActContent({
       url: body.officialUrl,
       content: normalizedContent ?? '',
       ementa: normalizedEmenta,
+      title: body.title,
+      year: parseInt(body.year),
+      publishDate: body.publishDate ? new Date(body.publishDate) : null,
     });
     if (!validation.ok && normalizedContent) {
       // Só bloqueia quando há content (criação só com ementa não tem content
