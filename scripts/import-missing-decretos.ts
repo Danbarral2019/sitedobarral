@@ -13,6 +13,7 @@ import { prisma } from '../lib/prisma';
 import { scrapeUrl } from '../lib/legislative-scrapers';
 import { validateActContent } from '../lib/legislative-scrapers/validate-content';
 import { processLegislativeAct } from '../lib/embeddings/legislative-act-processor';
+import { normalizeIssuer } from '../lib/legislative-acts/issuers';
 
 interface DecretoToImport {
   number: string;
@@ -198,7 +199,7 @@ async function main() {
         fullNumber,
         title,
         ementa,
-        issuer: 'Presidência',
+        issuer: normalizeIssuer('Presidência'),
         publishDate: finalDate,
         hierarchyLevel: 2,
         officialUrl: d.url,

@@ -16,12 +16,35 @@ aprendizado.
 2. **Sempre rode `normalizeScrapedText` antes de gravar `content`/`ementa`**
    — limpa cabeçalho institucional, "Compartilhe:", anexos vazados, form
    annexes, etc.
-3. **Não invente formatação do conteúdo.** Salve texto cru limpo. O
+3. **Sempre rode `normalizeIssuer` antes de gravar `issuer`** — valida
+   contra a lista canônica em `lib/legislative-acts/issuers.ts`. Lança erro
+   se receber valor não-canônico, forçando confirmação antes de criar
+   issuer novo (em ~99% dos casos é variação de um já existente).
+4. **Não invente formatação do conteúdo.** Salve texto cru limpo. O
    `formatLegalContent` em runtime aplica markdown corretamente
    (## CAPÍTULO, **Art. Nº**, etc.).
-4. **Use `validateActContent` antes de salvar.** Já está plugado no scraper
+5. **Use `validateActContent` antes de salvar.** Já está plugado no scraper
    e no batch import, mas se você está escrevendo um script novo: chame
    diretamente.
+
+## Órgãos emissores canônicos
+
+A coluna `LegislativeAct.issuer` aceita APENAS estes valores:
+
+| Canônico | Aliases tratados | Notas |
+|---|---|---|
+| `Presidência da República` | Presidência, Presidencia, PR | Decretos, Leis, MPs |
+| `SEGES` | SEGES/MGI, SEGES/ME, SEGES/MP, AUTOR/ME, ME, SESGES | Atual MGI; antes era ME (2018-22), antes MPOG. Histórico do mesmo órgão sempre vira SEGES |
+| `MPOG` | MP, Ministério do Planejamento | INs históricas pre-2018 (preserva distinção das atuais SEGES) |
+| `SGD/MGI` | SGD | Secretaria de Governo Digital — distinta de SEGES |
+| `TCU` | — | Tribunal de Contas da União |
+| `MPU` | — | Ministério Público da União |
+| `CICS/MGI` | — | Comissão Inter-secretarial |
+| `CIIA-PAC/CC` | — | Comissão Interministerial PAC/Casa Civil |
+
+**Não adicione issuer novo sem confirmação explícita** — abrir issuer novo
+em `ISSUER_ALIASES` deve ser passado pelo mantenedor, porque em geral é
+variação de um já existente.
 
 ## Sinais de Erro
 

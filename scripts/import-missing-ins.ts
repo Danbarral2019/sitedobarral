@@ -13,6 +13,7 @@ import { prisma } from '../lib/prisma';
 import { GovBrComprasScraper } from '../lib/legislative-scrapers/govbr-compras';
 import { validateActContent } from '../lib/legislative-scrapers/validate-content';
 import { processLegislativeAct } from '../lib/embeddings/legislative-act-processor';
+import { normalizeIssuer, type CanonicalIssuer } from '../lib/legislative-acts/issuers';
 
 interface OfficialIn {
   number: string;
@@ -73,20 +74,25 @@ const MONTH_PT: Record<string, number> = {
   julho: 7, agosto: 8, setembro: 9, outubro: 10, novembro: 11, dezembro: 12,
 };
 
-/** Extrai issuer da URL slug. */
-function inferIssuerFromUrl(url: string): string {
+/**
+ * Extrai issuer canônico da URL slug. Sempre retorna valor canônico
+ * de CANONICAL_ISSUERS (lib/legislative-acts/issuers.ts).
+ */
+function inferIssuerFromUrl(url: string): CanonicalIssuer {
   const slug = url.toLowerCase();
-  if (/seges-mgi-/.test(slug)) return 'SEGES/MGI';
-  if (/seges-me-/.test(slug)) return 'SEGES/ME';
-  if (/autor-me-/.test(slug)) return 'AUTOR/ME';
-  if (/seges-no-/.test(slug)) return 'SEGES';
-  if (/-mp-no-/.test(slug)) return 'MP';
-  // INs antigas (sem prefix de issuer): 1980s-2010s, classifico como "MP" (Min. Planejamento)
-  return 'MP';
+  // Todas as variações de SEGES → "SEGES" (atual MGI/antes ME/AUTOR-ME)
+  if (/seges-(mgi|me|no)-/.test(slug)) return normalizeIssuer('SEGES');
+  if (/autor-me-/.test(slug)) return normalizeIssuer('AUTOR/ME'); // → SEGES
+  if (/-mp-no-/.test(slug)) return normalizeIssuer('MP'); // → MPOG
+  // INs antigas sem prefix → MPOG (Ministério do Planejamento histórico)
+  return normalizeIssuer('MP');
 }
 
-/** Constrói fullNumber no padrão usado no banco. */
-function buildFullNumber(issuer: string, number: string, year: number): string {
+/**
+ * Constrói fullNumber. Usa o issuer canônico exatamente como salvo
+ * no DB, garantindo consistência com lookups posteriores.
+ */
+function buildFullNumber(issuer: CanonicalIssuer, number: string, year: number): string {
   return `IN ${issuer} ${number}/${year}`;
 }
 
@@ -217,7 +223,7 @@ async function main() {
         fullNumber,
         title: inDef.title,
         ementa,
-        issuer: issuer.split('/')[0], // "SEGES/MGI" → "SEGES" no campo issuer
+        issuer, // já canônico de inferIssuerFromUrl()
         publishDate: finalDate,
         hierarchyLevel: 4,
         officialUrl: inDef.url,

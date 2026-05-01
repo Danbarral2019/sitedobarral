@@ -61,6 +61,7 @@ import { PrismaNeon } from '@prisma/adapter-neon';
 import { detectAndSaveRelationsHybrid } from '../lib/legislative-acts/relations';
 import { normalizeScrapedText } from '../lib/legislative-scrapers/normalize';
 import { validateActContent } from '../lib/legislative-scrapers/validate-content';
+import { normalizeIssuer } from '../lib/legislative-acts/issuers';
 
 const adapter = new PrismaNeon({ connectionString: process.env.DATABASE_URL! });
 const prisma = new PrismaClient({ adapter });
@@ -131,7 +132,7 @@ function buildUpdateData(act: ActInput): Record<string, unknown> {
     year: act.year,
     title: act.title,
     ementa: normalizeScrapedText(act.ementa),
-    issuer: act.issuer,
+    issuer: normalizeIssuer(act.issuer),
     publishDate: new Date(act.publishDate),
     hierarchyLevel: act.hierarchyLevel,
     esfera: act.esfera ?? 'federal',
@@ -168,7 +169,7 @@ function buildCreateData(act: ActInput): Record<string, unknown> {
     title: act.title,
     ementa: normalizeScrapedText(act.ementa),
     summary: act.summary ? normalizeScrapedText(act.summary) : null,
-    issuer: act.issuer,
+    issuer: normalizeIssuer(act.issuer),
     publishDate: new Date(act.publishDate),
     effectiveDate: act.effectiveDate ? new Date(act.effectiveDate) : null,
     hierarchyLevel: act.hierarchyLevel,
