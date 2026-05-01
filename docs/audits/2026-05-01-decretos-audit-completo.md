@@ -8,12 +8,12 @@
 
 | Métrica | Valor |
 |---|---|
-| Decretos no banco | **35** |
-| Decretos em ambos (banco ∩ oficial) | 26 |
-| ✅ OK (sem erro/warning) | 33 |
+| Decretos no banco | **61** |
+| Decretos em ambos (banco ∩ oficial) | 52 |
+| ✅ OK (sem erro/warning) | 58 |
 | ❌ Errors | 0 |
-| ⚠️ Warnings | 2 |
-| 📥 Decretos do oficial faltando no banco | 27 |
+| ⚠️ Warnings | 3 |
+| 📥 Decretos do oficial faltando no banco | 0 |
 | **dos quais regulamentam Lei 14.133** | **0** |
 
 ## ❌ Decretos com errors
@@ -30,38 +30,11 @@ Estes são decretos que regulamentam ESPECIFICAMENTE a Lei 14.133 e ainda não e
 
 Decretos importantes para contratações públicas que estão na lista oficial mas fora do banco.
 
-| Número/Ano | Tema |
-|---|---|
-| 11.476/2023 | Regulamenta o Programa de Aquisição de Alimentos. |
-| 10.667/2021 | Altera Decreto 9.764 (recebimento de doações). |
-| 10.554/2020 | Declara revogação de decretos normativos. |
-| 10.426/2020 | Descentralização de créditos. |
-| 10.340/2020 | Altera Decreto 9.373 (alienação de bens móveis). |
-| 10.314/2020 | Altera Decreto 9.764 (recebimento de doações). |
-| 10.309/2020 | Altera Decreto 9.287 (veículos oficiais). |
-| 10.278/2020 | Digitalização de documentos públicos (Lei 13.874). |
-| 10.273/2020 | Altera Decreto 8.538 (margem ME/EPP, Lei 11.488). |
-| 10.183/2019 | Altera Decreto 9.507 (execução indireta de serviços). |
-| 10.132/2019 | Altera Decreto 7.983 (orçamento de referência de obras). |
-| 9.764/2019 | Recebimento de doações de bens móveis e serviços. |
-| 9.507/2018 | Execução indireta, mediante contratação, de serviços da administração federal. |
-| 9.488/2018 | Altera Decreto 7.892 (Sistema de Registro de Preços, Lei 8.666). |
-| 9.412/2018 | Atualiza valores das modalidades da Lei 8.666 (histórico). |
-| 9.287/2018 | Utilização de veículos oficiais. |
-| 9.046/2017 | Contratação plurianual de obras, bens e serviços (Poder Executivo federal). |
-| 8.539/2015 | Uso do meio eletrônico para processo administrativo federal. |
-| 8.535/2015 | Contratação de serviços de instituições financeiras pelo Executivo federal. |
-| 8.241/2014 | Regulamenta art. 3º da Lei 8.958 (fundações de apoio). |
-| 7.983/2013 | Regras para orçamento de referência de obras e serviços de engenharia. |
-| 7.892/2013 | Sistema de Registro de Preços (art. 15 Lei 8.666 — histórico). |
-| 7.746/2012 | Regulamenta art. 3º Lei 8.666 (sustentabilidade). |
-| 7.581/2011 | Regulamenta o RDC (Lei 12.462). |
-| 7.404/2010 | Regulamenta a Política Nacional de Resíduos Sólidos (Lei 12.305). |
-| 7.892/2013 | SRP histórico (referenciado pela Lei 14.133) |
-| 1.094/1994 | SISG (Sistema de Serviços Gerais). |
+_Nenhum._
 
 ## ⚠️ Decretos com warnings
 
+- **Decreto 10.309/2020** (1050 chars): Conteúdo curto (1050 chars). Verificar se está completo.
 - **Decreto 9.745/2019** (881 chars): Conteúdo curto (881 chars). Verificar se está completo.
 - **Decreto 7.930/2013** (1243 chars): Conteúdo curto (1243 chars). Verificar se está completo.
 
@@ -81,6 +54,7 @@ Decretos importantes para contratações públicas que estão na lista oficial m
 | Decreto 11.878/2024 | 19118 | ✅ | ✅ | ✅ |
 | Decreto 11.871/2023 | 2163 | ✅ | ✅ | ✅ |
 | Decreto 11.531/2023 | 35079 | ✅ | — | — |
+| Decreto 11.476/2023 | 29350 | ✅ | ✅ | — |
 | Decreto 11.462/2023 | 40075 | ✅ | ✅ | ✅ |
 | Decreto 11.461/2023 | 19989 | ✅ | ✅ | ✅ |
 | Decreto 11.430/2023 | 13277 | ✅ | ✅ | ✅ |
@@ -92,15 +66,40 @@ Decretos importantes para contratações públicas que estão na lista oficial m
 | Decreto 10.899/2021 | 2420 | ✅ | — | — |
 | Decreto 10.818/2021 | 4581 | ✅ | ✅ | ✅ |
 | Decreto 10.764/2021 | 4313 | ✅ | ✅ | ✅ |
+| Decreto 10.667/2021 | 5605 | ✅ | ✅ | — |
+| Decreto 10.554/2020 | 22536 | ✅ | ✅ | — |
 | Decreto 10.496/2020 | 9139 | ✅ | — | — |
+| Decreto 10.426/2020 | 33627 | ✅ | ✅ | — |
+| Decreto 10.340/2020 | 3480 | ✅ | ✅ | — |
+| Decreto 10.314/2020 | 10015 | ✅ | ✅ | — |
+| Decreto 10.309/2020 | 1050 | ⚠️ | ✅ | — |
+| Decreto 10.278/2020 | 9910 | ✅ | ✅ | — |
+| Decreto 10.273/2020 | 3007 | ✅ | ✅ | — |
+| Decreto 9.764/2019 | 34761 | ✅ | ✅ | — |
 | Decreto 9.745/2019 | 881 | ⚠️ | — | — |
 | Decreto 10.193/2019 | 7317 | ✅ | ✅ | — |
+| Decreto 10.183/2019 | 1728 | ✅ | ✅ | — |
+| Decreto 10.132/2019 | 3425 | ✅ | ✅ | — |
 | Decreto 10.024/2019 | 46579 | ✅ | ✅ | — |
+| Decreto 9.507/2018 | 15271 | ✅ | ✅ | — |
+| Decreto 9.488/2018 | 6184 | ✅ | ✅ | — |
+| Decreto 9.412/2018 | 1530 | ✅ | ✅ | — |
 | Decreto 9.373/2018 | 15490 | ✅ | ✅ | — |
+| Decreto 9.287/2018 | 8363 | ✅ | ✅ | — |
+| Decreto 9.046/2017 | 3653 | ✅ | ✅ | — |
+| Decreto 8.539/2015 | 12506 | ✅ | ✅ | — |
+| Decreto 8.535/2015 | 3698 | ✅ | ✅ | — |
+| Decreto 8.241/2014 | 27413 | ✅ | ✅ | — |
+| Decreto 7.983/2013 | 21409 | ✅ | ✅ | — |
 | Decreto 7.930/2013 | 1243 | ⚠️ | — | — |
+| Decreto 7.892/2013 | 33074 | ✅ | ✅ | — |
+| Decreto 7.746/2012 | 16623 | ✅ | ✅ | — |
+| Decreto 7.581/2011 | 88882 | ✅ | ✅ | — |
 | Decreto 7.546/2011 | 15116 | ✅ | ✅ | — |
+| Decreto 7.404/2010 | 67738 | ✅ | ✅ | — |
 | Decreto 7.174/2010 | 12960 | ✅ | ✅ | — |
 | Decreto 5.906/2006 | 91402 | ✅ | ✅ | — |
 | Decreto 3.555/2000 | 29620 | ✅ | ✅ | — |
 | Decreto 2.271/1997 | 4992 | ✅ | ✅ | — |
 | Decreto 1.819/1996 | 2814 | ✅ | — | — |
+| Decreto 1.094/1994 | 6898 | ✅ | ✅ | — |
