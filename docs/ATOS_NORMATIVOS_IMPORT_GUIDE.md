@@ -36,6 +36,7 @@ A coluna `LegislativeAct.issuer` aceita APENAS estes valores:
 | `Presidência da República` | Presidência, Presidencia, PR | Decretos, Leis, MPs |
 | `SEGES` | SEGES/MGI, SEGES/ME, SEGES/MP, AUTOR/ME, ME, SESGES | Atual MGI; antes era ME (2018-22), antes MPOG. Histórico do mesmo órgão sempre vira SEGES |
 | `MPOG` | MP, Ministério do Planejamento | INs históricas pre-2018 (preserva distinção das atuais SEGES) |
+| `MF` | Ministério da Fazenda | Portarias fiscais (suprimento de fundos, CPGF) |
 | `SGD/MGI` | SGD | Secretaria de Governo Digital — distinta de SEGES |
 | `TCU` | — | Tribunal de Contas da União |
 | `MPU` | — | Ministério Público da União |

@@ -15,6 +15,7 @@ export const CANONICAL_ISSUERS = [
   'Presidência da República',
   'SEGES', // Secretaria de Gestão (atual MGI, antes ME, antes MPOG)
   'MPOG', // Ministério do Planejamento, Orçamento e Gestão (antigo — INs históricas pre-2018)
+  'MF', // Ministério da Fazenda — atos fiscais, suprimento de fundos, CPGF
   'SGD/MGI', // Secretaria de Governo Digital
   'TCU', // Tribunal de Contas da União
   'MPU', // Ministério Público da União
@@ -54,6 +55,10 @@ const ISSUER_ALIASES: Record<string, CanonicalIssuer> = {
   'MPO': 'MPOG',
   'MPOG': 'MPOG',
   'Ministério do Planejamento': 'MPOG',
+
+  // MF — Ministério da Fazenda (Portarias fiscais, suprimento de fundos, CPGF)
+  'MF': 'MF',
+  'Ministério da Fazenda': 'MF',
 
   // Demais órgãos — passam direto (não consolidam com nada)
   'SGD/MGI': 'SGD/MGI',

@@ -1,0 +1,319 @@
+{
+  "generatedAt": "2026-05-01T12:54:26.900Z",
+  "summary": {
+    "total": 19,
+    "ok": 18,
+    "errors": 1,
+    "warnings": 1
+  },
+  "entries": [
+    {
+      "id": "396b387c-bb61-4076-a140-a8126016bc49",
+      "fullNumber": "Portaria SEGES/MGI 7.604/2025",
+      "number": "7.604",
+      "year": 2025,
+      "title": "Adesão ao Portal AntecipaGov",
+      "issuer": "SEGES",
+      "officialUrl": "https://www.gov.br/compras/pt-br/acesso-a-informacao/legislacao/portarias/portaria-seges-mgi-no-7-604-de-8-de-setembro-de-2025",
+      "contentLength": 15060,
+      "publishDate": "2025-09-08",
+      "validation": {
+        "ok": true,
+        "errors": [],
+        "warnings": []
+      }
+    },
+    {
+      "id": "753d9752-0698-4901-956c-c9177f48435a",
+      "fullNumber": "Portaria SEGES/MGI 6.521/2025",
+      "number": "6.521",
+      "year": 2025,
+      "title": "Percentuais de Uso do Portal AntecipaGov",
+      "issuer": "SEGES",
+      "officialUrl": "https://www.gov.br/compras/pt-br/acesso-a-informacao/legislacao/portarias/portaria-seges-mgi-no-6-521-de-8-de-agosto-de-2025",
+      "contentLength": 2013,
+      "publishDate": "2025-08-11",
+      "validation": {
+        "ok": true,
+        "errors": [],
+        "warnings": []
+      }
+    },
+    {
+      "id": "2956f827-a91b-4043-8e3a-5336ba595dd1",
+      "fullNumber": "Portaria SGD/MGI nº 6.040/2025",
+      "number": "6.040",
+      "year": 2025,
+      "title": "Mapa de Pesquisa Salarial para TIC",
+      "issuer": "SGD/MGI",
+      "officialUrl": "https://www.in.gov.br/web/dou/-/portaria-sgd/mgi-n-6.040-de-11-de-agosto-de-2025-648006261",
+      "contentLength": 11450,
+      "publishDate": "2025-01-15",
+      "validation": {
+        "ok": true,
+        "errors": [],
+        "warnings": []
+      }
+    },
+    {
+      "id": "9b637cb3-c29e-47c8-936e-7812ca2411a6",
+      "fullNumber": "Portaria TCU 3/2025",
+      "number": "3",
+      "year": 2025,
+      "title": "Portaria-TCU nº 3, de 2 de janeiro de 2025",
+      "issuer": "TCU",
+      "officialUrl": "https://pesquisa.apps.tcu.gov.br/doc/norma/Portaria/TCU/3/2025/",
+      "contentLength": 22103,
+      "publishDate": "2025-01-02",
+      "validation": {
+        "ok": true,
+        "errors": [],
+        "warnings": []
+      }
+    },
+    {
+      "id": "95076c02-6a25-4283-9fad-1df723e2b64f",
+      "fullNumber": "Portaria SGD/MGI nº 6.680/2024",
+      "number": "6.680",
+      "year": 2024,
+      "title": "Alteração do Modelo de Infraestrutura e Atendimento de TIC",
+      "issuer": "SGD/MGI",
+      "officialUrl": "https://www.gov.br/governodigital/pt-br/contratacoes-de-tic/legislacao/modelo-de-contracao-de-servicos-de-operacao-de-infraestrutura-e-de-atendimento-a-usuarios-de-tic/portaria-sgd-mgi-no-6-680-de-4-de-outubro-de-2024",
+      "contentLength": 172108,
+      "publishDate": "2024-10-04",
+      "validation": {
+        "ok": true,
+        "errors": [],
+        "warnings": []
+      }
+    },
+    {
+      "id": "bf0c539f-da21-4d6e-a292-67d119ad32fd",
+      "fullNumber": "Portaria SGD/MGI nº 6.679/2024",
+      "number": "6.679",
+      "year": 2024,
+      "title": "Alteração do Modelo de Desenvolvimento de Software",
+      "issuer": "SGD/MGI",
+      "officialUrl": "https://www.gov.br/governodigital/pt-br/contratacoes-de-tic/legislacao/modelo-de-contratacao-de-servicos-de-desenvolvimento-manutencao-e-sustentacao-de-software/portaria-sgd-mgi-no-6679-de-17-de-setembro-de-2024",
+      "contentLength": 26298,
+      "publishDate": "2024-09-17",
+      "validation": {
+        "ok": true,
+        "errors": [],
+        "warnings": []
+      }
+    },
+    {
+      "id": "954c191e-5de9-436d-99cc-98f209bda127",
+      "fullNumber": "Portaria SGD/MGI nº 750/2023",
+      "number": "750",
+      "year": 2023,
+      "title": "Desenvolvimento e Manutenção de Software",
+      "issuer": "SGD/MGI",
+      "officialUrl": "https://www.gov.br/governodigital/pt-br/contratacoes-de-tic/legislacao/modelo-de-contratacao-de-servicos-de-desenvolvimento-manutencao-e-sustentacao-de-software/portaria-sgd-mgi-no-750-de-20-de-marco-de-2023",
+      "contentLength": 147179,
+      "publishDate": "2023-03-20",
+      "validation": {
+        "ok": true,
+        "errors": [],
+        "warnings": []
+      }
+    },
+    {
+      "id": "81f78d22-b9b4-42ad-85d4-bc420ae76524",
+      "fullNumber": "Portaria SGD/MGI nº 5.950/2023",
+      "number": "5.950",
+      "year": 2023,
+      "title": "Contratação de Software e Nuvem",
+      "issuer": "SGD/MGI",
+      "officialUrl": "https://www.gov.br/governodigital/pt-br/contratacoes-de-tic/legislacao/modelo-de-contratacao-de-software-e-servicos-em-nuvem/vigentes/portaria-sgd-mgi-no-5-950-de-26-de-outubro-de-2023",
+      "contentLength": 209897,
+      "publishDate": "2023-10-26",
+      "validation": {
+        "ok": true,
+        "errors": [],
+        "warnings": []
+      }
+    },
+    {
+      "id": "a5c9939a-a46f-407c-8bf5-eabd2369b4a2",
+      "fullNumber": "Portaria SEGES/MGI 5.376/2023",
+      "number": "5.376",
+      "year": 2023,
+      "title": "Modelo de Referência para Plano de Logística Sustentável",
+      "issuer": "SEGES",
+      "officialUrl": "https://www.gov.br/compras/pt-br/acesso-a-informacao/legislacao/portarias/portaria-seges-mgi-no-5376-de-14-de-setembro-de-2023",
+      "contentLength": 2496,
+      "publishDate": "2023-09-15",
+      "validation": {
+        "ok": true,
+        "errors": [],
+        "warnings": []
+      }
+    },
+    {
+      "id": "1c16baeb-6bda-4702-a6fa-9f40b144e861",
+      "fullNumber": "Portaria SEGES/MGI 4.932/2023",
+      "number": "4.932",
+      "year": 2023,
+      "title": "Alteração do Regime de Transição da Lei nº 14.133/2021",
+      "issuer": "SEGES",
+      "officialUrl": "https://www.gov.br/compras/pt-br/acesso-a-informacao/legislacao/portarias/portaria-seges-mgi-no-4-932-de-30-de-agosto-de-2023",
+      "contentLength": 309,
+      "publishDate": "2023-08-30",
+      "validation": {
+        "ok": false,
+        "errors": [
+          "Conteúdo muito curto (309 chars, mínimo 500). Provável falha de scrape ou redirect."
+        ],
+        "warnings": [
+          "Não detectado preâmbulo legal típico (O SECRETÁRIO/MINISTRO/PRESIDENTE/Art. 1º) nos primeiros 4KB. Verificar se o ato está completo e bem formado."
+        ]
+      }
+    },
+    {
+      "id": "7c232c38-6259-4fb5-ab41-1c72b1f28886",
+      "fullNumber": "Portaria SGD/MGI nº 370/2023",
+      "number": "370",
+      "year": 2023,
+      "title": "Outsourcing de Impressão",
+      "issuer": "SGD/MGI",
+      "officialUrl": "https://www.gov.br/governodigital/pt-br/contratacoes-de-tic/legislacao/modelo-de-contratacao-de-servicos-de-outsourcing-de-impressao/anexos/portaria-sgd-mgi-no-370-de-8-de-marco-de-2023",
+      "contentLength": 83002,
+      "publishDate": "2023-02-01",
+      "validation": {
+        "ok": true,
+        "errors": [],
+        "warnings": []
+      }
+    },
+    {
+      "id": "e2595d75-da1e-4fe2-8e07-3e8f21c339a5",
+      "fullNumber": "Portaria SGD/MGI nº 2.715/2023",
+      "number": "2.715",
+      "year": 2023,
+      "title": "Contratação de Estações de Trabalho",
+      "issuer": "SGD/MGI",
+      "officialUrl": "https://www.gov.br/governodigital/pt-br/contratacoes-de-tic/legislacao/modelo-de-contratacao-e-gestao-de-estacoes-de-trabalho/vigente/portaria-sgd-mgi-no-2-715-de-21-de-junho-de-2023",
+      "contentLength": 69467,
+      "publishDate": "2023-06-30",
+      "validation": {
+        "ok": true,
+        "errors": [],
+        "warnings": []
+      }
+    },
+    {
+      "id": "569023b8-09f3-4faf-8bc7-c3e495153a5a",
+      "fullNumber": "Portaria MPU 178/2023",
+      "number": "178",
+      "year": 2023,
+      "title": "Portaria PGR/MPU nº 178, de 13 de setembro de 2023",
+      "issuer": "MPU",
+      "officialUrl": "https://biblioteca.mpf.mp.br/repositorio/bitstreams/3741588e-1b76-46e7-b79f-a4fb48513346/download",
+      "contentLength": 57628,
+      "publishDate": "2023-09-15",
+      "validation": {
+        "ok": true,
+        "errors": [],
+        "warnings": []
+      }
+    },
+    {
+      "id": "5150eee6-0e15-42de-8e72-d401c04b782c",
+      "fullNumber": "Portaria SEGES/MGI 1.769/2023",
+      "number": "1.769",
+      "year": 2023,
+      "title": "Regime de Transição da Lei nº 14.133/2021",
+      "issuer": "SEGES",
+      "officialUrl": "https://www.gov.br/compras/pt-br/acesso-a-informacao/legislacao/portarias/portaria-seges-mgi-no-1-769-de-25-de-abril-de-2023",
+      "contentLength": 5733,
+      "publishDate": "2023-04-25",
+      "validation": {
+        "ok": true,
+        "errors": [],
+        "warnings": []
+      }
+    },
+    {
+      "id": "34d11a88-cdfc-4c82-be5b-74cea0d2cfb2",
+      "fullNumber": "Portaria SGD/MGI nº 1.070/2023",
+      "number": "1.070",
+      "year": 2023,
+      "title": "Infraestrutura e Atendimento de TIC",
+      "issuer": "SGD/MGI",
+      "officialUrl": "https://www.gov.br/governodigital/pt-br/contratacoes-de-tic/legislacao/modelo-de-contracao-de-servicos-de-operacao-de-infraestrutura-e-de-atendimento-a-usuarios-de-tic/portaria-sgd-mgi-no-1-070-de-1o-de-junho-de-2023",
+      "contentLength": 186223,
+      "publishDate": "2023-04-05",
+      "validation": {
+        "ok": true,
+        "errors": [],
+        "warnings": []
+      }
+    },
+    {
+      "id": "3070adb5-0897-4436-bae3-831522f5868b",
+      "fullNumber": "Portaria SEGES/ME 938/2022",
+      "number": "938",
+      "year": 2022,
+      "title": "Catálogo Eletrônico de Padronização (Compras Públicas)",
+      "issuer": "SEGES",
+      "officialUrl": "https://www.gov.br/transferegov/pt-br/legislacao/portarias/portaria-seges-me-no-938-de-2-de-fevereiro-de-2022",
+      "contentLength": 8592,
+      "publishDate": "2022-02-03",
+      "validation": {
+        "ok": true,
+        "errors": [],
+        "warnings": []
+      }
+    },
+    {
+      "id": "8321e87f-7f6c-4450-975b-a2a9dfd47c13",
+      "fullNumber": "Portaria ME 7.828/2022",
+      "number": "7.828",
+      "year": 2022,
+      "title": "Governança de Contratações e Gastos Federais",
+      "issuer": "SEGES",
+      "officialUrl": "https://www.gov.br/compras/pt-br/acesso-a-informacao/legislacao/portarias/portaria-me-no-7-828-de-30-de-agosto-de-2022",
+      "contentLength": 4488,
+      "publishDate": "2022-08-31",
+      "validation": {
+        "ok": true,
+        "errors": [],
+        "warnings": []
+      }
+    },
+    {
+      "id": "19506c49-becb-45e8-b413-50f02dc63146",
+      "fullNumber": "Portaria TCU 175/2022",
+      "number": "175",
+      "year": 2022,
+      "title": "Portaria-TCU nº 175, de 28 de junho de 2022",
+      "issuer": "TCU",
+      "officialUrl": "https://pesquisa.apps.tcu.gov.br/doc/norma/Portaria/TCU/175/2022/",
+      "contentLength": 15602,
+      "publishDate": "2022-11-30",
+      "validation": {
+        "ok": true,
+        "errors": [],
+        "warnings": []
+      }
+    },
+    {
+      "id": "2cd49d0a-973a-4b99-a786-e417af5de987",
+      "fullNumber": "Portaria SEGES/ME 8.678/2021",
+      "number": "8.678",
+      "year": 2021,
+      "title": "Governança das Contratações Públicas Federais",
+      "issuer": "SEGES",
+      "officialUrl": "https://www.gov.br/compras/pt-br/acesso-a-informacao/legislacao/portarias/portaria-seges-me-no-8-678-de-19-de-julho-de-2021",
+      "contentLength": 18733,
+      "publishDate": "2021-07-20",
+      "validation": {
+        "ok": true,
+        "errors": [],
+        "warnings": []
+      }
+    }
+  ]
+}

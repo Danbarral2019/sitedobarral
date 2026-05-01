@@ -118,11 +118,21 @@ describe('assertCanonicalIssuer', () => {
 });
 
 describe('CANONICAL_ISSUERS', () => {
-  it('contém os 8 órgãos esperados', () => {
-    expect(CANONICAL_ISSUERS).toHaveLength(8);
+  it('contém os 9 órgãos esperados', () => {
+    expect(CANONICAL_ISSUERS).toHaveLength(9);
     expect(CANONICAL_ISSUERS).toContain('SEGES');
     expect(CANONICAL_ISSUERS).toContain('MPOG');
+    expect(CANONICAL_ISSUERS).toContain('MF');
     expect(CANONICAL_ISSUERS).toContain('Presidência da República');
     expect(CANONICAL_ISSUERS).toContain('SGD/MGI');
+  });
+});
+
+describe('MF (Ministério da Fazenda)', () => {
+  it('mantém "MF"', () => {
+    expect(normalizeIssuer('MF')).toBe('MF');
+  });
+  it('"Ministério da Fazenda" → "MF"', () => {
+    expect(normalizeIssuer('Ministério da Fazenda')).toBe('MF');
   });
 });
