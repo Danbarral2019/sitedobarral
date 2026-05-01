@@ -21,6 +21,7 @@ import {
   detectCharsetFromResponse,
   normalizeScrapedText,
 } from '../lib/legislative-scrapers/normalize';
+import { CacheInvalidation } from '../lib/cache/redis-client';
 
 // Verbos típicos de ementa. NÃO inclui "Lei" / "Decreto" — esses aparecem
 // apenas no título do ato e capturam falso positivo.
@@ -165,6 +166,13 @@ async function main() {
     for (const r of results.filter((x) => x.status === 'failed')) {
       console.log(`   - ${r.fullNumber}: ${r.reason}`);
     }
+  }
+
+  // Invalida cache pra que listagens públicas reflitam imediatamente.
+  if (apply && fixed > 0) {
+    console.log(`\n🔄 Invalidando cache...`);
+    const removed = await CacheInvalidation.legislativeActs();
+    console.log(`✅ Cache invalidado (${removed} keys).`);
   }
 
   await prisma.$disconnect();

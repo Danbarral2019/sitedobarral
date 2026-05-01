@@ -176,5 +176,17 @@ npx tsx scripts/reextract-ementa-mojibake.ts --apply
 - [ ] Warnings foram lidos e aceitos (ou consertados)
 - [ ] Issuer normalizado via `normalizeIssuer()`
 - [ ] `contentHash` recomputado (se atualização)
+- [ ] **Cache Redis invalidado**: `await CacheInvalidation.legislativeActs()` — sem isso, o site mostra contagens antigas (filtros "Lei (15)" quando o real é 33) por até 2h. Os endpoints admin (POST/PUT/import/update-content) já fazem; scripts manuais PRECISAM chamar explicitamente.
 - [ ] `inspect-ementas.ts` e `inspect-content-formatting.ts` rodados pós-import e o ato NÃO aparece com problemas
 - [ ] Re-indexação para embeddings (`processLegislativeAct` com `forceReprocess: true`) — quando aplicável
+
+## Sobre cache stale (sintoma público)
+
+O site público usa Redis (`CACHE_TTL.LEGISLATIVE_ACTS = 2h`) + Vercel CDN (`s-maxage=1800`). Sem invalidação, dados novos demoram até 2.5h pra aparecer — visível como filtros com contagens erradas ("Lei (15)" em vez de "Lei (33)") e listagens incompletas.
+
+Endpoints admin já invalidam automaticamente. Scripts em `scripts/` que mexem em `LegislativeAct` PRECISAM chamar `CacheInvalidation.legislativeActs()` no final. Já corrigido em `backfill-legislative-acts-format.ts`, `reextract-ementa-mojibake.ts`, `fix-mojibake-titles.ts`.
+
+Pra forçar invalidação manual sem editar código:
+```sh
+curl "https://www.profdanielbarral.com/api/legislative-acts?_revalidate=$CRON_SECRET&tab=atos&page=1"
+```

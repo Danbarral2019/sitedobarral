@@ -14,6 +14,7 @@
 import { createHash } from 'crypto';
 import { prisma } from '../lib/prisma';
 import { normalizeScrapedText } from '../lib/legislative-scrapers/normalize';
+import { CacheInvalidation } from '../lib/cache/redis-client';
 
 const md5 = (s: string) => createHash('md5').update(s).digest('hex');
 
@@ -172,6 +173,16 @@ async function main() {
     if (written % 25 === 0) console.log(`   ${written}/${diffs.length}...`);
   }
   console.log(`✅ ${written} updates aplicados.`);
+
+  // Invalidar cache Redis pra que as agregações (counts por tipo, ano,
+  // issuer) reflitam imediatamente as mudanças. Sem isso, o site mostra
+  // dados antigos por até 2h (CACHE_TTL.LEGISLATIVE_ACTS).
+  if (written > 0) {
+    console.log(`🔄 Invalidando cache...`);
+    const removed = await CacheInvalidation.legislativeActs();
+    console.log(`✅ Cache invalidado (${removed} keys).`);
+  }
+
   await prisma.$disconnect();
 }
 
