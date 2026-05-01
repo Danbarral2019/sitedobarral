@@ -184,6 +184,12 @@ export function stripGovbrUiNoise(text: string): string {
     .replace(/^\s*\d{1,2}\/\d{1,2}\/\d{2,4}\s+\d{1,2}h\d{1,2}\s*$/gim, '') // só a data/hora solta
     .replace(/^\s*Perguntas e respostas\s*-\s*[^\n]{0,80}$/gim, '');
 
+  // Lista de anexos/links da sidebar do gov.br vazada como linha de texto:
+  // "• IN nº 5/2017 - hiperlink• Perguntas e Respostas• ENAP• ..." — sempre
+  // colada num único parágrafo, com 3+ bullets `•` separando os itens.
+  // Linhas legítimas com 1-2 bullets (raras em texto jurídico) são preservadas.
+  result = result.replace(/^.*?(?:•[^\n•]*){3,}.*$/gm, '');
+
   // Colapsa quebras de linha duplas excessivas geradas pelas remoções acima.
   result = result.replace(/\n{3,}/g, '\n\n').trim();
 

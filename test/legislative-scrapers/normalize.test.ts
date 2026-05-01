@@ -208,6 +208,29 @@ describe('stripGovbrUiNoise', () => {
     expect(out.length).toBeGreaterThanOrEqual(body.length - 5);
     expect(out.length).toBeLessThan(input.length);
   });
+
+  it('remove lista de anexos vazada do gov.br (linha com 3+ bullets •)', () => {
+    const input =
+      'Dispõe sobre as regras...\n\n' +
+      '• IN nº 5/2017 - hiperlink• Perguntas e Respostas• Apresentação da IN - ENAP• Apresentação da Planilha de Custos\n\n' +
+      'O SECRETÁRIO DE GESTÃO, no uso das atribuições, resolve:';
+    const out = stripGovbrUiNoise(input);
+    expect(out).not.toContain('• IN nº 5/2017');
+    expect(out).not.toContain('Perguntas e Respostas');
+    expect(out).toContain('O SECRETÁRIO DE GESTÃO');
+    expect(out).toContain('Dispõe sobre as regras');
+  });
+
+  it('preserva linha com 1-2 bullets (legítima)', () => {
+    const input =
+      'I - primeiro item; e\n' +
+      '• marcador único usado no texto\n' +
+      '• segundo bullet\n' +
+      'continuação do parágrafo.';
+    const out = stripGovbrUiNoise(input);
+    expect(out).toContain('marcador único');
+    expect(out).toContain('segundo bullet');
+  });
 });
 
 describe('normalizeScrapedText (pipeline completo)', () => {

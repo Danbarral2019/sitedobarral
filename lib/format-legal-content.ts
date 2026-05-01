@@ -86,9 +86,13 @@ export function formatLegalContent(rawContent: string): string {
       const prevEndsClean = /[.;:!?)"']$/.test(prev.trim());
       const prevIsHeading = isHeading(prev);
       const curIsHeading = isHeading(p);
-      const curStartsArticle = /^(Art\.\s|§\s*\d|Parágrafo único)/i.test(p);
+      // Não mergear quando o atual começa com algum marcador estrutural
+      // (artigo, parágrafo, inciso romano ou alínea) — caso contrário
+      // "II - ... ; e III - ..." ficam grudados num único parágrafo.
+      const curIsStructural =
+        /^(Art\.\s|§\s*\d|Parágrafo único|[IVXLCDM]+\s*[-–—]\s|[a-z]\)\s)/i.test(p);
 
-      if (!prevEndsClean && !prevIsHeading && !curIsHeading && !curStartsArticle) {
+      if (!prevEndsClean && !prevIsHeading && !curIsHeading && !curIsStructural) {
         merged[merged.length - 1] = prev + ' ' + p;
         continue;
       }
