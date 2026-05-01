@@ -4,6 +4,7 @@ import { verifyToken } from '@/lib/auth';
 import { scrapeUrl, canScrapeUrl } from '@/lib/legislative-scrapers';
 import { hasHashChanged, generateChangeSummary } from '@/lib/legislative-scrapers/change-detector';
 import { CacheInvalidation } from '@/lib/cache/redis-client';
+import { validateActContent } from '@/lib/legislative-scrapers/validate-content';
 
 /**
  * POST /api/admin/legislative-acts/[id]/update-content
@@ -100,6 +101,41 @@ export async function POST(
       );
     }
 
+    // Validar formatação do novo content ANTES de comparar hash. Se a
+    // extração veio quebrada (mojibake, FAQ no lugar do ato, etc.), abortar
+    // pra não substituir o conteúdo bom no banco por lixo.
+    let validationWarnings: string[] = [];
+    if (result.content) {
+      const validation = validateActContent({
+        url: act.officialUrl,
+        content: result.content,
+        previousContent: act.content,
+      });
+      if (!validation.ok) {
+        const errMsg = `Validação falhou: ${validation.errors.join('; ')}`;
+        await prisma.legislativeAct.update({
+          where: { id },
+          data: {
+            lastScrapedAt: new Date(),
+            scrapeStatus: 'failed',
+            scrapeError: errMsg.slice(0, 500),
+          },
+        });
+        return NextResponse.json(
+          {
+            success: false,
+            error: 'Validação de formatação falhou',
+            details: validation.errors,
+            warnings: validation.warnings,
+            message: 'Scrape executou mas o conteúdo extraído não passou na validação. ' +
+              'Conteúdo atual no banco preservado.',
+          },
+          { status: 422 },
+        );
+      }
+      validationWarnings = validation.warnings;
+    }
+
     // Verificar se houve mudança
     const changed = hasHashChanged(act.contentHash, result.hash!);
 
@@ -149,6 +185,7 @@ export async function POST(
       message: changed
         ? 'Conteúdo atualizado com sucesso'
         : 'Conteúdo verificado - sem alterações detectadas',
+      warnings: validationWarnings,
       data: {
         fullNumber: act.fullNumber,
         source: result.source,

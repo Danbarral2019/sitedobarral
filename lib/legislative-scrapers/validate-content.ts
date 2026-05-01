@@ -24,6 +24,11 @@ export interface ValidationInput {
   content: string | null | undefined;
   /** Se for atualização, conteúdo anterior — usado pra comparações sanity. */
   previousContent?: string | null;
+  /**
+   * Ementa do ato. Quando presente, recebe checks dedicados (mojibake,
+   * tamanho mínimo, padrões de fragmento de body que vazaram pra ementa).
+   */
+  ementa?: string | null;
 }
 
 export interface ValidationResult {
@@ -157,6 +162,134 @@ export function validateActContent(input: ValidationInput): ValidationResult {
           `(${input.previousContent.length} → ${content.length} chars). ` +
           `Possível regressão.`,
       );
+    }
+  }
+
+  // ─── Checks de formatação (content) ──────────────────────────────────
+  // Esses sinais indicam que o pipeline `normalizeScrapedText` ou o
+  // charset detection falharam — bloqueiam o save (errors) ou avisam
+  // (warnings) conforme severidade.
+
+  // 7. Mojibake U+FFFD — perda irreversível de informação por charset
+  // detection ausente. Bloqueia o save: a ementa/content vai virar `Disp�e
+  // sobre a aliena��o` e poluir busca/IA. Resolução: refetch com
+  // detectCharsetFromResponse.
+  const fffdCount = (content.match(/�/g) ?? []).length;
+  if (fffdCount > 0) {
+    errors.push(
+      `Conteúdo contém ${fffdCount}× U+FFFD (replacement char) — charset detection falhou. ` +
+        `Refazer fetch com detectCharsetFromResponse antes de salvar.`,
+    );
+  }
+
+  // 8. NBSP (U+00A0) residual no meio do texto. Não bloqueia (collapse no
+  // próximo backfill cuida), mas avisa que o pipeline não foi aplicado.
+  const nbspCount = (content.match(/ /g) ?? []).length;
+  if (nbspCount > 0) {
+    warnings.push(
+      `${nbspCount}× NBSP (U+00A0) residual — collapseWhitespace deveria ter convertido pra espaço comum.`,
+    );
+  }
+
+  // 9. Zero-width chars residuais
+  const zwCount = (content.match(/[​‌‍﻿⁠]/g) ?? []).length;
+  if (zwCount > 0) {
+    warnings.push(
+      `${zwCount}× zero-width char residual — stripZeroWidthChars deveria ter removido.`,
+    );
+  }
+
+  // 10. "Este texto não substitui..." duplicado
+  const naoSubstituiCount = (content.match(/Este texto não substitui/g) ?? []).length;
+  if (naoSubstituiCount > 1) {
+    warnings.push(
+      `"Este texto não substitui" aparece ${naoSubstituiCount}× — dedupeBoilerplateFooter deveria deixar apenas 1.`,
+    );
+  }
+
+  // 11. HTML entities não decodificados — sinal de que a extração não
+  // passou por cheerio (ou usou .html() em vez de .text())
+  if (/&(?:nbsp|amp|lt|gt|quot|#\d+);/.test(content)) {
+    warnings.push(
+      'Detectadas HTML entities (`&nbsp;`/`&amp;`/...) — a extração não decodificou. Refazer com cheerio `.text()` ou usar `he.decode()`.',
+    );
+  }
+
+  // 12. Tags HTML cruas (não confundir com placeholders de template tipo
+  // `<nº processo>` ou expressões `< 95%`). Procuramos APENAS tags HTML
+  // canônicas (br, p, div, span, a, table, etc.) — palavras conhecidas.
+  const htmlTagPattern = /<\/?(?:br|p|div|span|a|strong|em|b|i|u|table|tr|td|th|ul|ol|li|h[1-6]|font|hr)(?:\s[^>]*)?>/i;
+  if (htmlTagPattern.test(content)) {
+    warnings.push(
+      'Detectadas tags HTML canônicas (br/p/div/span/etc) no texto — extração capturou markup. Limpar com cheerio.',
+    );
+  }
+
+  // 13. Bloco gov.br/compras inline (Publicado em.../Modificado em.../Compartilhe:)
+  // que escapou do stripGovbrUiNoise.
+  if (
+    /Publicado em\s*\d{1,2}\/\d{1,2}\/\d{2,4}/.test(content) &&
+    /Modificado em\s*\d{1,2}\/\d{1,2}\/\d{2,4}/.test(content)
+  ) {
+    warnings.push(
+      'Bloco "Publicado em.../Modificado em..." inline residual — stripGovbrUiNoise deveria ter removido.',
+    );
+  }
+
+  // ─── Checks de formatação (ementa) ───────────────────────────────────
+  if (input.ementa !== undefined && input.ementa !== null) {
+    const ementa = input.ementa.trim();
+
+    if (!ementa) {
+      errors.push('Ementa vazia.');
+    } else {
+      // 14. Mojibake na ementa — bloqueia (mesma razão do content).
+      const ementaFffd = (ementa.match(/�/g) ?? []).length;
+      if (ementaFffd > 0) {
+        errors.push(
+          `Ementa contém ${ementaFffd}× U+FFFD — charset detection falhou. ` +
+            `Re-extrair via fetch + detectCharsetFromResponse.`,
+        );
+      }
+
+      // 15. Ementa muito curta — provavelmente fragmento incompleto.
+      // Mínimo razoável: "Lei sobre X." ≈ 12 chars. Mas decretos costumam
+      // ter ementas de 50+ chars. Aviso a partir de < 25.
+      if (ementa.length < 25) {
+        warnings.push(
+          `Ementa muito curta (${ementa.length} chars): "${ementa}". Verificar se é fragmento.`,
+        );
+      }
+
+      // 16. Ementa começa com "Art. X" — é fragmento do body, não ementa real.
+      // Visto em prod (IN MP 10/2012): "Art. 14. Ao final de cada ano..."
+      if (/^Art\.\s*\d/.test(ementa)) {
+        errors.push(
+          `Ementa começa com "Art. X" — é fragmento do corpo do ato, não a ementa oficial. ` +
+            `Re-extrair com seletor correto (primeiro <p> com verbo "Dispõe/Altera/Regulamenta/...").`,
+        );
+      }
+
+      // 17. Ementa = só uma palavra de header institucional
+      // Visto em prod (Decreto 11.871/2023): ementa = "Presidência"
+      if (/^(Presidência|Casa Civil|Subchefia|Brasão|Ministério|Vigência)$/i.test(ementa)) {
+        errors.push(
+          `Ementa contém apenas "${ementa}" — é header institucional, não ementa real.`,
+        );
+      }
+
+      // 18. Ementa começa com cardinal ("8.660, de 29 de janeiro de 2016, ou de outro...")
+      // Sinal clássico de fragmento mid-sentence pego pelo scraper.
+      if (/^\d[\d.,]*,\s+de\s+\d/.test(ementa)) {
+        errors.push(
+          `Ementa começa em meio de frase ("${ementa.slice(0, 60)}...") — fragmento do corpo.`,
+        );
+      }
+
+      // 19. NBSP/zero-width na ementa — warning (mesmo do content)
+      if (/[ ​‌‍﻿⁠]/.test(ementa)) {
+        warnings.push('Ementa contém NBSP/zero-width residuais — passar por normalizeScrapedText.');
+      }
     }
   }
 

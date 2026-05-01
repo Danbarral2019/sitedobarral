@@ -3,6 +3,8 @@ import { prisma } from '@/lib/prisma';
 import { verifyAdmin } from '@/lib/api-middleware';
 import { CacheInvalidation } from '@/lib/cache/redis-client';
 import { scrapeAndIndexAct } from '@/lib/legislative-scrapers/scrape-and-index';
+import { validateActContent } from '@/lib/legislative-scrapers/validate-content';
+import { normalizeScrapedText } from '@/lib/legislative-scrapers/normalize';
 
 /**
  * GET /api/admin/legislative-acts
@@ -154,6 +156,28 @@ export async function POST(request: NextRequest) {
       hierarchyLevel = hierarchy[body.type] || 5;
     }
 
+    // Normalizar ementa + content ANTES de salvar — garante que NBSP,
+    // zero-width chars, boilerplate residual nunca entrem no banco.
+    const normalizedEmenta = normalizeScrapedText(body.ementa as string);
+    const normalizedContent = body.content ? normalizeScrapedText(body.content as string) : null;
+
+    // Validar formatação. Errors bloqueiam o save (mojibake, FAQ no lugar
+    // do ato, ementa fragmento). Warnings vão pro response mas não bloqueiam.
+    const validation = validateActContent({
+      url: body.officialUrl,
+      content: normalizedContent ?? '',
+      ementa: normalizedEmenta,
+    });
+    if (!validation.ok && normalizedContent) {
+      // Só bloqueia quando há content (criação só com ementa não tem content
+      // pra validar — usuário pode estar criando o esqueleto e o cron scrape
+      // depois).
+      return NextResponse.json(
+        { error: 'Validação de formatação falhou', details: validation.errors, warnings: validation.warnings },
+        { status: 422 },
+      );
+    }
+
     // Criar ato normativo
     const act = await prisma.legislativeAct.create({
       data: {
@@ -162,7 +186,7 @@ export async function POST(request: NextRequest) {
         year: parseInt(body.year),
         fullNumber,
         title: body.title,
-        ementa: body.ementa,
+        ementa: normalizedEmenta,
         summary: body.summary || null,
         issuer: body.issuer,
         publishDate: new Date(body.publishDate),
@@ -171,7 +195,7 @@ export async function POST(request: NextRequest) {
         leiArticles: body.leiArticles ? JSON.stringify(body.leiArticles) : null,
         officialUrl: body.officialUrl || null,
         pdfUrl: body.pdfUrl || null,
-        content: body.content || null,
+        content: normalizedContent,
         createdBy: user.email
       }
     });
@@ -191,7 +215,8 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({
       success: true,
-      act
+      act,
+      warnings: validation.warnings,
     }, { status: 201 });
 
   } catch (error: unknown) {

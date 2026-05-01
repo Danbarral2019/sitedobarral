@@ -3,6 +3,8 @@ import { prisma } from '@/lib/prisma';
 import { verifyAdmin } from '@/lib/api-middleware';
 import { CacheInvalidation } from '@/lib/cache/redis-client';
 import { scrapeAndIndexAct } from '@/lib/legislative-scrapers/scrape-and-index';
+import { validateActContent } from '@/lib/legislative-scrapers/validate-content';
+import { normalizeScrapedText } from '@/lib/legislative-scrapers/normalize';
 
 /**
  * POST /api/admin/legislative-acts/import
@@ -118,6 +120,29 @@ export async function POST(request: NextRequest) {
           continue; // Pular duplicatas
         }
 
+        // Normalizar ementa antes de validar/salvar (NBSP, zero-width, edges)
+        const normalizedEmenta = normalizeScrapedText(ementa.trim());
+
+        // Validar formatação da ementa. CSV não traz content (esse vem do
+        // scrape pós-create), então só validamos ementa aqui.
+        const validation = validateActContent({
+          url: officialUrl?.trim() || null,
+          content: '',
+          ementa: normalizedEmenta,
+        });
+        // Filtra erros que dependem do content (vamos scrape em seguida).
+        const ementaErrors = validation.errors.filter(
+          (e) => /Ementa|ementa/.test(e),
+        );
+        if (ementaErrors.length > 0) {
+          results.errors.push({
+            row: i + 1,
+            error: `Ementa inválida: ${ementaErrors.join('; ')}`,
+            data: row as Record<string, unknown>,
+          });
+          continue;
+        }
+
         // Criar ato normativo
         const newAct = await prisma.legislativeAct.create({
           data: {
@@ -126,7 +151,7 @@ export async function POST(request: NextRequest) {
             year: parseInt(year),
             fullNumber,
             title: title.trim(),
-            ementa: ementa.trim(),
+            ementa: normalizedEmenta,
             summary: summary?.trim() || null,
             issuer: issuer.trim(),
             publishDate: new Date(publishDate),

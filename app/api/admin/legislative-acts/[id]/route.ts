@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { verifyAdmin } from '@/lib/api-middleware';
 import { CacheInvalidation } from '@/lib/cache/redis-client';
+import { validateActContent } from '@/lib/legislative-scrapers/validate-content';
+import { normalizeScrapedText } from '@/lib/legislative-scrapers/normalize';
 
 /**
  * GET /api/admin/legislative-acts/[id]
@@ -72,6 +74,26 @@ export async function PUT(
       );
     }
 
+    // Normalizar campos de texto que vão pra DB (idempotente — passar pelo
+    // pipeline garante NBSP/zero-width/boilerplate residual nunca entra).
+    const normalizedEmenta = body.ementa !== undefined ? normalizeScrapedText(body.ementa as string) : undefined;
+    const normalizedContent = body.content !== undefined ? (body.content ? normalizeScrapedText(body.content as string) : null) : undefined;
+
+    // Validar formatação ANTES do save quando ementa ou content foram passados.
+    if (normalizedEmenta !== undefined || normalizedContent !== undefined) {
+      const validation = validateActContent({
+        url: body.officialUrl ?? existing.officialUrl,
+        content: normalizedContent ?? existing.content ?? '',
+        ementa: normalizedEmenta ?? existing.ementa,
+      });
+      if (!validation.ok) {
+        return NextResponse.json(
+          { error: 'Validação de formatação falhou', details: validation.errors, warnings: validation.warnings },
+          { status: 422 },
+        );
+      }
+    }
+
     // Construir dados de atualização
     const updateData: Record<string, unknown> = {};
 
@@ -80,7 +102,7 @@ export async function PUT(
     if (body.year !== undefined) updateData.year = parseInt(body.year);
     if (body.fullNumber !== undefined) updateData.fullNumber = body.fullNumber;
     if (body.title !== undefined) updateData.title = body.title;
-    if (body.ementa !== undefined) updateData.ementa = body.ementa;
+    if (normalizedEmenta !== undefined) updateData.ementa = normalizedEmenta;
     if (body.summary !== undefined) updateData.summary = body.summary || null;
     if (body.issuer !== undefined) updateData.issuer = body.issuer;
     if (body.publishDate !== undefined) updateData.publishDate = new Date(body.publishDate);
@@ -93,7 +115,7 @@ export async function PUT(
     }
     if (body.officialUrl !== undefined) updateData.officialUrl = body.officialUrl || null;
     if (body.pdfUrl !== undefined) updateData.pdfUrl = body.pdfUrl || null;
-    if (body.content !== undefined) updateData.content = body.content || null;
+    if (normalizedContent !== undefined) updateData.content = normalizedContent;
 
     // Atualizar ato normativo
     const act = await prisma.legislativeAct.update({

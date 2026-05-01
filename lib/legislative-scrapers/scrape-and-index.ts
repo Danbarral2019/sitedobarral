@@ -8,11 +8,14 @@
 import { prisma } from '@/lib/prisma';
 import { scrapeUrl } from '@/lib/legislative-scrapers';
 import { processLegislativeAct } from '@/lib/embeddings/legislative-act-processor';
+import { validateActContent } from '@/lib/legislative-scrapers/validate-content';
 
 export interface ScrapeAndIndexResult {
   scraped: boolean;
   indexed: boolean;
   error?: string;
+  /** Warnings da validação de formatação. Não bloqueiam mas vão pro log. */
+  warnings?: string[];
 }
 
 export async function scrapeAndIndexAct(actId: string): Promise<ScrapeAndIndexResult> {
@@ -38,6 +41,34 @@ export async function scrapeAndIndexAct(actId: string): Promise<ScrapeAndIndexRe
       },
     });
     return { scraped: false, indexed: false, error: result.error };
+  }
+
+  // 1.5. Validar formatação ANTES de salvar — evita poluir DB com mojibake,
+  // FAQ-no-lugar-do-ato, NBSP/zero-width residuais. Errors bloqueiam,
+  // warnings são logadas mas não bloqueiam.
+  const validation = validateActContent({
+    url: act.officialUrl,
+    content: result.content,
+    previousContent: act.content,
+  });
+  if (!validation.ok) {
+    const errMsg = `Validação falhou: ${validation.errors.join('; ')}`;
+    console.error(`[ScrapeAndIndex] ${act.fullNumber}: ${errMsg}`);
+    await prisma.legislativeAct.update({
+      where: { id: actId },
+      data: {
+        scrapeStatus: 'failed',
+        scrapeError: errMsg.slice(0, 500),
+        lastScrapedAt: new Date(),
+      },
+    });
+    return { scraped: false, indexed: false, error: errMsg };
+  }
+  if (validation.warnings.length > 0) {
+    console.warn(
+      `[ScrapeAndIndex] ${act.fullNumber} — ${validation.warnings.length} warning(s):`,
+      validation.warnings,
+    );
   }
 
   // 2. Salvar content
@@ -66,5 +97,5 @@ export async function scrapeAndIndexAct(actId: string): Promise<ScrapeAndIndexRe
     console.error(`[ScrapeAndIndex] Erro ao indexar "${act.fullNumber}":`, error);
   }
 
-  return { scraped: true, indexed };
+  return { scraped: true, indexed, warnings: validation.warnings };
 }
