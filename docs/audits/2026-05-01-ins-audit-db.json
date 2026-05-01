@@ -1,0 +1,695 @@
+{
+  "generatedAt": "2026-05-01T11:51:38.041Z",
+  "summary": {
+    "total": 41,
+    "ok": 32,
+    "errors": 5,
+    "warnings": 9
+  },
+  "entries": [
+    {
+      "id": "2ea417e4-fe43-4227-ae79-dd3be9f6cec0",
+      "fullNumber": "IN SEGES/MGI 148/2026",
+      "number": "148",
+      "year": 2026,
+      "title": "Altera IN 190/2024 — novos serviços com redução de jornada para 40h",
+      "issuer": "SEGES",
+      "officialUrl": "https://www.gov.br/compras/pt-br/acesso-a-informacao/legislacao/instrucoes-normativas/instrucao-normativa-seges-mgi-no-148-de-13-de-abril-de-2026",
+      "contentLength": 4199,
+      "publishDate": "2026-04-14",
+      "validation": {
+        "ok": true,
+        "errors": [],
+        "warnings": []
+      }
+    },
+    {
+      "id": "acbcac17-2bea-43d7-95db-3a95770237e2",
+      "fullNumber": "IN SEGES/MGI 147/2026",
+      "number": "147",
+      "year": 2026,
+      "title": "Reembolso-creche para trabalhadores terceirizados",
+      "issuer": "SEGES",
+      "officialUrl": "https://www.gov.br/compras/pt-br/acesso-a-informacao/legislacao/instrucoes-normativas/instrucao-normativa-seges-mgi-no-147-de-13-de-abril-de-2026",
+      "contentLength": 21519,
+      "publishDate": "2026-04-14",
+      "validation": {
+        "ok": true,
+        "errors": [],
+        "warnings": []
+      }
+    },
+    {
+      "id": "3bdcea96-827a-4a0f-af3f-be37831ff464",
+      "fullNumber": "IN SEGES/MGI 129/2026",
+      "number": "129",
+      "year": 2026,
+      "title": "Altera IN 512/2025 — adia entrada em vigor do regulamento de Diálogo Competitivo",
+      "issuer": "SEGES",
+      "officialUrl": "https://www.gov.br/compras/pt-br/acesso-a-informacao/legislacao/instrucoes-normativas/instrucao-normativa-seges-mgi-no-129-de-30-de-marco-de-2026",
+      "contentLength": 1087,
+      "publishDate": "2026-03-31",
+      "validation": {
+        "ok": true,
+        "errors": [],
+        "warnings": [
+          "Conteúdo curto (1087 chars). Verificar se está completo."
+        ]
+      }
+    },
+    {
+      "id": "1d0a71db-c277-4dc6-bb75-427532e83855",
+      "fullNumber": "IN SGD/MGI nº 86/2025",
+      "number": "86",
+      "year": 2025,
+      "title": "Alteração das Regras de Aprovação de Contratações de TIC",
+      "issuer": "SGD/MGI",
+      "officialUrl": "https://www.in.gov.br/web/dou/-/instrucao-normativa-sgd/mgi-n-86-de-25-de-julho-de-2025-645137365",
+      "contentLength": 4477,
+      "publishDate": "2025-07-25",
+      "validation": {
+        "ok": true,
+        "errors": [],
+        "warnings": []
+      }
+    },
+    {
+      "id": "8d1e1201-5814-4a8b-8a26-a5ff6c362b77",
+      "fullNumber": "IN SEGES/MGI 82/2025",
+      "number": "82",
+      "year": 2025,
+      "title": "Antecipação de Crédito em Contratos Administrativos",
+      "issuer": "SEGES/MGI",
+      "officialUrl": "https://www.gov.br/compras/pt-br/acesso-a-informacao/legislacao/instrucoes-normativas/instrucao-normativa-seges-mgi-no-82-de-21-de-fevereiro-de-2025",
+      "contentLength": 14717,
+      "publishDate": "2025-02-24",
+      "validation": {
+        "ok": true,
+        "errors": [],
+        "warnings": []
+      }
+    },
+    {
+      "id": "7c7585f8-8bac-4e51-9e1c-779e2c61529a",
+      "fullNumber": "IN SEGES/MGI 52/2025",
+      "number": "52",
+      "year": 2025,
+      "title": "Plataforma de Negócios Públicos Contrata+Brasil",
+      "issuer": "SEGES/MGI",
+      "officialUrl": "https://www.gov.br/contratamaisbrasil/pt-br/central-de-conteudo/editais-e-regulamentacao/instrucoes-normativas/instrucao-normativa-seges-mgi-no-52-de-10-de-fevereiro-de-2025",
+      "contentLength": 28308,
+      "publishDate": "2025-02-10",
+      "validation": {
+        "ok": true,
+        "errors": [],
+        "warnings": []
+      }
+    },
+    {
+      "id": "aa182dbd-b77a-4238-82d6-4756604ab4b0",
+      "fullNumber": "IN SEGES/MGI 512/2025",
+      "number": "512",
+      "year": 2025,
+      "title": "Diálogo Competitivo na Administração Pública Federal",
+      "issuer": "SEGES/MGI",
+      "officialUrl": "https://www.gov.br/compras/pt-br/acesso-a-informacao/legislacao/instrucoes-normativas/instrucao-normativa-seges-mgi-no-512-de-3-de-dezembro-de-2025",
+      "contentLength": 29483,
+      "publishDate": "2025-12-03",
+      "validation": {
+        "ok": true,
+        "errors": [],
+        "warnings": []
+      }
+    },
+    {
+      "id": "596eb7cc-7b8d-4e9b-8f74-6d31e9441b2a",
+      "fullNumber": "IN SEGES 460/2025",
+      "number": "460",
+      "year": 2025,
+      "title": "Altera a Instrução Normativa SEGES/MGI nº 52, de 10 de fevereiro de 2025, sobre o Contrata+Brasil",
+      "issuer": "SEGES",
+      "officialUrl": "https://www.gov.br/compras/pt-br/acesso-a-informacao/legislacao/instrucoes-normativas/instrucao-normativa-seges-mgi-no-460-de-31-de-outubro-de-2025",
+      "contentLength": 7976,
+      "publishDate": "2025-10-31",
+      "validation": {
+        "ok": true,
+        "errors": [],
+        "warnings": []
+      }
+    },
+    {
+      "id": "36ca80ab-7c22-43c6-a1ba-34be70624f5b",
+      "fullNumber": "IN SEGES 412/2025",
+      "number": "412",
+      "year": 2025,
+      "title": "Dispõe sobre a contratação de serviços de transporte terrestre administrativo",
+      "issuer": "SEGES",
+      "officialUrl": "https://www.gov.br/compras/pt-br/acesso-a-informacao/legislacao/instrucoes-normativas/instrucao-normativa-seges-mgi-no-412-de-1o-de-outubro-de-2025",
+      "contentLength": 23945,
+      "publishDate": "2025-10-01",
+      "validation": {
+        "ok": true,
+        "errors": [],
+        "warnings": []
+      }
+    },
+    {
+      "id": "bbc10ab9-8aad-41c2-a4a3-4abc27583b5f",
+      "fullNumber": "IN SEGES/MGI 382/2025",
+      "number": "382",
+      "year": 2025,
+      "title": "Equidade de Gênero em Licitações Públicas",
+      "issuer": "SEGES/MGI",
+      "officialUrl": "https://www.gov.br/compras/pt-br/acesso-a-informacao/legislacao/instrucoes-normativas/instrucao-normativa-seges-mgi-no-382-de-17-de-setembro-de-2025",
+      "contentLength": 9738,
+      "publishDate": "2025-09-17",
+      "validation": {
+        "ok": true,
+        "errors": [],
+        "warnings": []
+      }
+    },
+    {
+      "id": "a64fb652-2bb3-4c68-89e9-f70ddb35dbc2",
+      "fullNumber": "IN SEGES/MGI 381/2025",
+      "number": "381",
+      "year": 2025,
+      "title": "Serviços Contínuos com Redução de Jornada",
+      "issuer": "SEGES/MGI",
+      "officialUrl": "https://www.gov.br/compras/pt-br/acesso-a-informacao/legislacao/instrucoes-normativas/instrucao-normativa-seges-mgi-no-381-de-17-de-setembro-de-2025",
+      "contentLength": 469,
+      "publishDate": "2025-09-17",
+      "validation": {
+        "ok": false,
+        "errors": [
+          "Conteúdo muito curto (469 chars, mínimo 500). Provável falha de scrape ou redirect."
+        ],
+        "warnings": [
+          "Não detectado preâmbulo legal típico (O SECRETÁRIO/MINISTRO/PRESIDENTE/Art. 1º) nos primeiros 4KB. Verificar se o ato está completo e bem formado."
+        ]
+      }
+    },
+    {
+      "id": "127f0c57-1020-403f-a23f-914ab20fd2b5",
+      "fullNumber": "IN SEGES 213/2025",
+      "number": "213",
+      "year": 2025,
+      "title": "Dispõe sobre a previsibilidade do gozo de férias dos empregados terceirizados",
+      "issuer": "SEGES",
+      "officialUrl": "https://www.gov.br/compras/pt-br/acesso-a-informacao/legislacao/instrucoes-normativas/instrucao-normativa-seges-mgi-no-213-de-29-de-maio-de-2025",
+      "contentLength": 7732,
+      "publishDate": "2025-05-29",
+      "validation": {
+        "ok": true,
+        "errors": [],
+        "warnings": []
+      }
+    },
+    {
+      "id": "7b77b1cf-f5c5-4e73-86d0-a29573b748a6",
+      "fullNumber": "IN SEGES/MGI 81/2024",
+      "number": "81",
+      "year": 2024,
+      "title": "Compensação de Jornada em Serviços Contínuos",
+      "issuer": "SEGES/MGI",
+      "officialUrl": "https://www.gov.br/compras/pt-br/acesso-a-informacao/legislacao/instrucoes-normativas/instrucao-normativa-seges-mgi-no-81-de-12-de-setembro-de-2024",
+      "contentLength": 13485,
+      "publishDate": "2024-09-13",
+      "validation": {
+        "ok": true,
+        "errors": [],
+        "warnings": []
+      }
+    },
+    {
+      "id": "601ccdfe-6ab2-42be-84ef-005bb0fc131e",
+      "fullNumber": "IN SEGES/MGI 79/2024",
+      "number": "79",
+      "year": 2024,
+      "title": "Sorteio e Margens de Preferência em Licitações",
+      "issuer": "SEGES/MGI",
+      "officialUrl": "https://www.gov.br/compras/pt-br/acesso-a-informacao/legislacao/instrucoes-normativas/instrucao-normativa-seges-mgi-no-79-de-12-de-setembro-de-2024",
+      "contentLength": 4079,
+      "publishDate": "2024-10-14",
+      "validation": {
+        "ok": true,
+        "errors": [],
+        "warnings": []
+      }
+    },
+    {
+      "id": "8f12a269-4b1f-47ba-81e7-2c6f26c3c60b",
+      "fullNumber": "IN SEGES/MGI 190/2024",
+      "number": "190",
+      "year": 2024,
+      "title": "Serviços Contínuos com Redução de Jornada",
+      "issuer": "SEGES/MGI",
+      "officialUrl": "https://www.gov.br/compras/pt-br/acesso-a-informacao/legislacao/instrucoes-normativas/instrucao-normativa-seges-mgi-no-190-de-5-de-dezembro-de-2024",
+      "contentLength": 9783,
+      "publishDate": "2024-12-06",
+      "validation": {
+        "ok": true,
+        "errors": [],
+        "warnings": []
+      }
+    },
+    {
+      "id": "dd6139bd-ef12-41bd-b485-7d58e80a17a0",
+      "fullNumber": "IN SEGES/MGI 176/2024",
+      "number": "176",
+      "year": 2024,
+      "title": "Custos Mínimos em Contratos de Serviços Contínuos",
+      "issuer": "SEGES/MGI",
+      "officialUrl": "https://www.gov.br/compras/pt-br/acesso-a-informacao/legislacao/instrucoes-normativas/instrucao-normativa-seges-mgi-no-176-de-25-de-novembro-de-2024",
+      "contentLength": 16365,
+      "publishDate": "2024-11-26",
+      "validation": {
+        "ok": true,
+        "errors": [],
+        "warnings": []
+      }
+    },
+    {
+      "id": "612999f9-8b58-4437-b9bd-bf21523c5e0f",
+      "fullNumber": "IN SEGES 8/2023",
+      "number": "8",
+      "year": 2023,
+      "title": "Altera a Instrução Normativa SEGES/ME nº 67, de 8 de julho de 2021, que dispõe sobre a dispensa eletrônica",
+      "issuer": "SEGES",
+      "officialUrl": "https://www.gov.br/compras/pt-br/acesso-a-informacao/legislacao/instrucoes-normativas/instrucao-normativa-seges-mgi-no-8-de-23-de-marco-de-2023",
+      "contentLength": 366,
+      "publishDate": "2023-03-23",
+      "validation": {
+        "ok": false,
+        "errors": [
+          "Conteúdo muito curto (366 chars, mínimo 500). Provável falha de scrape ou redirect."
+        ],
+        "warnings": [
+          "Não detectado preâmbulo legal típico (O SECRETÁRIO/MINISTRO/PRESIDENTE/Art. 1º) nos primeiros 4KB. Verificar se o ato está completo e bem formado."
+        ]
+      }
+    },
+    {
+      "id": "8252d880-fd29-4b8f-8d96-7eccb6b1491a",
+      "fullNumber": "IN SGD/MGI nº 6/2023",
+      "number": "6",
+      "year": 2023,
+      "title": "Aprovação de Contratações de TIC",
+      "issuer": "SGD/MGI",
+      "officialUrl": "https://www.gov.br/governodigital/pt-br/contratacoes-de-tic/legislacao/analise-de-alcadas-regido-pela-lei-ndeg-14-333-de-2021/analise-de-alcadas-regido-pela-lei-ndeg-14-333-de-2021",
+      "contentLength": 9273,
+      "publishDate": "2023-06-13",
+      "validation": {
+        "ok": true,
+        "errors": [],
+        "warnings": []
+      }
+    },
+    {
+      "id": "659fcdb5-44f0-4c85-a413-448b98167350",
+      "fullNumber": "IN SEGES/MGI 53/2023",
+      "number": "53",
+      "year": 2023,
+      "title": "Sicaf para Habilitação de Empresas Estrangeiras",
+      "issuer": "SEGES/MGI",
+      "officialUrl": "https://www.gov.br/compras/pt-br/acesso-a-informacao/legislacao/instrucoes-normativas/instrucao-normativa-seges-mgi-no-53-de-28-de-dezembro-de-2023",
+      "contentLength": 1897,
+      "publishDate": "2023-12-29",
+      "validation": {
+        "ok": true,
+        "errors": [],
+        "warnings": []
+      }
+    },
+    {
+      "id": "eef30b2a-1fbf-4b1a-a0d4-fc29e38ce83f",
+      "fullNumber": "IN SEGES 4/2023",
+      "number": "4",
+      "year": 2023,
+      "title": "Dispõe sobre disposições complementares ao Decreto nº 10.818, de 27 de setembro de 2021",
+      "issuer": "SEGES",
+      "officialUrl": "https://www.gov.br/compras/pt-br/acesso-a-informacao/legislacao/instrucoes-normativas/instrucao-normativa-seges-mgi-no-4-de-2-de-fevereiro-de-2023",
+      "contentLength": 1792,
+      "publishDate": "2023-02-02",
+      "validation": {
+        "ok": true,
+        "errors": [],
+        "warnings": []
+      }
+    },
+    {
+      "id": "664151d0-cf48-4c3e-91ea-99a50d6f5465",
+      "fullNumber": "IN SEGES 2/2023",
+      "number": "2",
+      "year": 2023,
+      "title": "Dispõe sobre a licitação pelo critério de julgamento por técnica e preço na forma eletrônica",
+      "issuer": "SEGES",
+      "officialUrl": "https://www.gov.br/compras/pt-br/acesso-a-informacao/legislacao/instrucoes-normativas/instrucao-normativa-seges-mgi-no-2-de-7-de-fevereiro-de-2023",
+      "contentLength": 38691,
+      "publishDate": "2023-02-07",
+      "validation": {
+        "ok": true,
+        "errors": [],
+        "warnings": []
+      }
+    },
+    {
+      "id": "a96321cd-de61-4eef-b912-c92ba135d5c2",
+      "fullNumber": "IN SEGES/MGI 12/2023",
+      "number": "12",
+      "year": 2023,
+      "title": "Instrução Normativa SEGES/MGI nº 12, de 31 de março de 2023",
+      "issuer": "SEGES/MGI",
+      "officialUrl": "https://www.gov.br/compras/pt-br/acesso-a-informacao/legislacao/instrucoes-normativas/instrucao-normativa-seges-mgi-no-12-de-31-de-marco-de-2023",
+      "contentLength": 35047,
+      "publishDate": "2023-04-03",
+      "validation": {
+        "ok": true,
+        "errors": [],
+        "warnings": []
+      }
+    },
+    {
+      "id": "b1bceca3-98bd-4ef0-8180-cebae0528722",
+      "fullNumber": "IN SEGES/MGI 11/2023",
+      "number": "11",
+      "year": 2023,
+      "title": "Instrução Normativa SEGES/MGI nº 11, de 29 de março de 2023",
+      "issuer": "SEGES/MGI",
+      "officialUrl": "https://www.gov.br/compras/pt-br/acesso-a-informacao/legislacao/instrucoes-normativas/instrucao-normativa-seges-mgi-no-11-de-29-de-marco-de-2023ss",
+      "contentLength": 1102,
+      "publishDate": "2023-03-30",
+      "validation": {
+        "ok": true,
+        "errors": [],
+        "warnings": [
+          "Conteúdo curto (1102 chars). Verificar se está completo."
+        ]
+      }
+    },
+    {
+      "id": "88e07a18-883d-41a1-8cd0-90b43e76da93",
+      "fullNumber": "IN SEGES/ME 98/2022",
+      "number": "98",
+      "year": 2022,
+      "title": "Contratação Indireta de Serviços na Administração Pública",
+      "issuer": "SEGES/ME",
+      "officialUrl": "https://www.gov.br/compras/pt-br/acesso-a-informacao/legislacao/instrucoes-normativas/instrucao-normativa-seges-me-no-98-de-26-de-dezembro-de-2022",
+      "contentLength": 929,
+      "publishDate": "2022-12-27",
+      "validation": {
+        "ok": true,
+        "errors": [],
+        "warnings": [
+          "Conteúdo curto (929 chars). Verificar se está completo."
+        ]
+      }
+    },
+    {
+      "id": "b8fab553-819d-4044-8f17-484f0c0dd8c6",
+      "fullNumber": "IN SEGES 96/2022",
+      "number": "96",
+      "year": 2022,
+      "title": "Dispõe sobre a licitação pelo critério de julgamento por maior retorno econômico",
+      "issuer": "SEGES",
+      "officialUrl": "https://www.gov.br/compras/pt-br/acesso-a-informacao/legislacao/instrucoes-normativas/instrucao-normativa-seges-me-no-96-de-23-de-dezembro-de-2022",
+      "contentLength": 42123,
+      "publishDate": "2022-12-23",
+      "validation": {
+        "ok": true,
+        "errors": [],
+        "warnings": []
+      }
+    },
+    {
+      "id": "8666e504-5945-480f-95fb-ac4f6ac8b96d",
+      "fullNumber": "IN SGD/ME nº 94/2022",
+      "number": "94",
+      "year": 2022,
+      "title": "Processo de Contratação de Soluções de TIC",
+      "issuer": "SGD/MGI",
+      "officialUrl": "https://www.gov.br/governodigital/pt-br/contratacoes-de-tic/instrucao-normativa-sgd-me-no-94-de-23-de-dezembro-de-2022",
+      "contentLength": 96335,
+      "publishDate": "2022-04-23",
+      "validation": {
+        "ok": true,
+        "errors": [],
+        "warnings": []
+      }
+    },
+    {
+      "id": "69ab916c-c526-4a5e-91d8-241611a7ecab",
+      "fullNumber": "IN SEGES/ME 91/2022",
+      "number": "91",
+      "year": 2022,
+      "title": "Valor Estimado em Obras e Serviços de Engenharia",
+      "issuer": "SEGES/ME",
+      "officialUrl": "https://www.gov.br/compras/pt-br/acesso-a-informacao/legislacao/instrucoes-normativas/instrucao-normativa-seges-me-no-91-de-16-de-dezembro-de-2022",
+      "contentLength": 1116,
+      "publishDate": "2022-12-20",
+      "validation": {
+        "ok": true,
+        "errors": [],
+        "warnings": [
+          "Conteúdo curto (1116 chars). Verificar se está completo."
+        ]
+      }
+    },
+    {
+      "id": "2dee7d63-0f24-445f-9219-275394f9550d",
+      "fullNumber": "IN SEGES 90/2022",
+      "number": "90",
+      "year": 2022,
+      "title": "Revoga a Instrução Normativa SEGES nº 75, de 8 de dezembro de 2021",
+      "issuer": "SEGES",
+      "officialUrl": "https://www.gov.br/compras/pt-br/acesso-a-informacao/legislacao/instrucoes-normativas/instrucao-normativa-seges-me-no-90-de-16-de-dezembro-de-2022",
+      "contentLength": 238,
+      "publishDate": "2022-12-16",
+      "validation": {
+        "ok": false,
+        "errors": [
+          "Conteúdo muito curto (238 chars, mínimo 500). Provável falha de scrape ou redirect."
+        ],
+        "warnings": [
+          "Não detectado preâmbulo legal típico (O SECRETÁRIO/MINISTRO/PRESIDENTE/Art. 1º) nos primeiros 4KB. Verificar se o ato está completo e bem formado."
+        ]
+      }
+    },
+    {
+      "id": "85e2cbf7-273b-4893-8d53-4d110d9adf57",
+      "fullNumber": "IN SEGES 81/2022",
+      "number": "81",
+      "year": 2022,
+      "title": "Dispõe sobre a elaboração do Termo de Referência na forma digital",
+      "issuer": "SEGES",
+      "officialUrl": "https://www.gov.br/compras/pt-br/acesso-a-informacao/legislacao/instrucoes-normativas/instrucao-normativa-seges-me-no-81-de-25-de-novembro-de-2022",
+      "contentLength": 11164,
+      "publishDate": "2022-11-25",
+      "validation": {
+        "ok": true,
+        "errors": [],
+        "warnings": []
+      }
+    },
+    {
+      "id": "2bdcd5f1-6276-40a8-bc5e-7cffbbc7cc19",
+      "fullNumber": "IN SEGES 77/2022",
+      "number": "77",
+      "year": 2022,
+      "title": "Dispõe sobre a observância da ordem cronológica de pagamentos das obrigações",
+      "issuer": "SEGES",
+      "officialUrl": "https://www.gov.br/compras/pt-br/acesso-a-informacao/legislacao/instrucoes-normativas/instrucao-normativa-seges-me-no-77-de-4-de-novembro-de-2022",
+      "contentLength": 12619,
+      "publishDate": "2022-11-04",
+      "validation": {
+        "ok": true,
+        "errors": [],
+        "warnings": []
+      }
+    },
+    {
+      "id": "b011ef2f-2ff4-4a1c-a76f-96d022bb8225",
+      "fullNumber": "IN SEGES 73/2022",
+      "number": "73",
+      "year": 2022,
+      "title": "Dispõe sobre a licitação pelo critério de julgamento de menor preço ou maior desconto na forma eletrônica",
+      "issuer": "SEGES",
+      "officialUrl": "https://www.gov.br/compras/pt-br/acesso-a-informacao/legislacao/instrucoes-normativas/instrucao-normativa-seges-me-no-73-de-30-de-setembro-de-2022",
+      "contentLength": 45677,
+      "publishDate": "2022-09-30",
+      "validation": {
+        "ok": true,
+        "errors": [],
+        "warnings": []
+      }
+    },
+    {
+      "id": "45c05e96-7375-4953-ad49-a12ecd4f1c6c",
+      "fullNumber": "IN SEGES 58/2022",
+      "number": "58",
+      "year": 2022,
+      "title": "Dispõe sobre a elaboração dos Estudos Técnicos Preliminares - ETP, para a aquisição de bens e a contratação de serviços e obras",
+      "issuer": "SEGES",
+      "officialUrl": "https://www.gov.br/compras/pt-br/acesso-a-informacao/legislacao/instrucoes-normativas/instrucao-normativa-seges-no-58-de-8-de-agosto-de-2022",
+      "contentLength": 13619,
+      "publishDate": "2022-08-08",
+      "validation": {
+        "ok": true,
+        "errors": [],
+        "warnings": []
+      }
+    },
+    {
+      "id": "ca6d7ca8-d3dd-439d-baa7-2be691204ee0",
+      "fullNumber": "IN SEGES/ME 5/2022",
+      "number": "5",
+      "year": 2022,
+      "title": "Altera a Instrução Normativa nº 3, de 11 de fevereiro de 2015, que dispõe sobre passagens aéreas",
+      "issuer": "SEGES",
+      "officialUrl": "https://www.gov.br/compras/pt-br/acesso-a-informacao/legislacao/instrucoes-normativas/instrucao-normativa-seges-me-no-5-de-7-de-fevereiro-de-2022",
+      "contentLength": 274,
+      "publishDate": "2022-02-07",
+      "validation": {
+        "ok": false,
+        "errors": [
+          "Conteúdo muito curto (274 chars, mínimo 500). Provável falha de scrape ou redirect."
+        ],
+        "warnings": [
+          "Não detectado preâmbulo legal típico (O SECRETÁRIO/MINISTRO/PRESIDENTE/Art. 1º) nos primeiros 4KB. Verificar se o ato está completo e bem formado."
+        ]
+      }
+    },
+    {
+      "id": "053bfb87-c472-414f-89f5-0c3265d9b3bd",
+      "fullNumber": "IN SEGES 26/2022",
+      "number": "26",
+      "year": 2022,
+      "title": "Dispõe sobre a dispensa de licitação e a compensação de débitos de multa",
+      "issuer": "SEGES",
+      "officialUrl": "https://www.gov.br/compras/pt-br/acesso-a-informacao/legislacao/instrucoes-normativas/instrucao-normativa-seges-me-no-26-de-13-de-abril-de-2022",
+      "contentLength": 9575,
+      "publishDate": "2022-04-13",
+      "validation": {
+        "ok": true,
+        "errors": [],
+        "warnings": []
+      }
+    },
+    {
+      "id": "8ac149ab-2c7f-4d9c-a9d0-cf24fec0dec1",
+      "fullNumber": "IN SEGES 20/2022",
+      "number": "20",
+      "year": 2022,
+      "title": "Revoga instruções normativas anteriores no âmbito da SEGES",
+      "issuer": "SEGES",
+      "officialUrl": "https://www.gov.br/compras/pt-br/acesso-a-informacao/legislacao/instrucoes-normativas/instrucao-normativa-seges-me-no-20-de-04-de-abril-de-2022",
+      "contentLength": 197,
+      "publishDate": "2022-04-04",
+      "validation": {
+        "ok": false,
+        "errors": [
+          "Conteúdo muito curto (197 chars, mínimo 500). Provável falha de scrape ou redirect."
+        ],
+        "warnings": [
+          "Não detectado preâmbulo legal típico (O SECRETÁRIO/MINISTRO/PRESIDENTE/Art. 1º) nos primeiros 4KB. Verificar se o ato está completo e bem formado."
+        ]
+      }
+    },
+    {
+      "id": "85fb6012-8f96-4432-b08e-4ceb561c5415",
+      "fullNumber": "IN SEGES 103/2022",
+      "number": "103",
+      "year": 2022,
+      "title": "Dispõe sobre a seleção de imóveis para locação pela administração pública federal",
+      "issuer": "SEGES",
+      "officialUrl": "https://www.gov.br/compras/pt-br/acesso-a-informacao/legislacao/instrucoes-normativas/instrucao-normtaiva-seges-me-no-103-de-30-de-dezembro-de-2022",
+      "contentLength": 20888,
+      "publishDate": "2022-12-30",
+      "validation": {
+        "ok": true,
+        "errors": [],
+        "warnings": []
+      }
+    },
+    {
+      "id": "5003d8d9-25d3-4317-9336-1fae51c80098",
+      "fullNumber": "IN SEGES/ME 67/2021",
+      "number": "67",
+      "year": 2021,
+      "title": "Dispensa Eletrônica na Administração Pública Federal",
+      "issuer": "SEGES/ME",
+      "officialUrl": "https://www.gov.br/compras/pt-br/acesso-a-informacao/legislacao/instrucoes-normativas/instrucao-normativa-seges-me-no-67-de-8-de-julho-de-2021",
+      "contentLength": 18916,
+      "publishDate": "2021-07-09",
+      "validation": {
+        "ok": true,
+        "errors": [],
+        "warnings": []
+      }
+    },
+    {
+      "id": "9d62c0d1-0e4f-4bec-8423-8247d5b76cf3",
+      "fullNumber": "IN SEGES/ME 65/2021",
+      "number": "65",
+      "year": 2021,
+      "title": "Pesquisa de Preços na Administração Pública Federal",
+      "issuer": "SEGES/ME",
+      "officialUrl": "https://www.gov.br/compras/pt-br/acesso-a-informacao/legislacao/instrucoes-normativas/instrucao-normativa-seges-me-no-65-de-7-de-julho-de-2021",
+      "contentLength": 11731,
+      "publishDate": "2021-07-08",
+      "validation": {
+        "ok": true,
+        "errors": [],
+        "warnings": []
+      }
+    },
+    {
+      "id": "54bb2441-828d-472c-b381-c1beae02f170",
+      "fullNumber": "IN AUTOR/ME 62/2021",
+      "number": "62",
+      "year": 2021,
+      "title": "Cessão Fiduciária de Créditos em Contratos Administrativos",
+      "issuer": "AUTOR/ME",
+      "officialUrl": "https://www.gov.br/compras/pt-br/acesso-a-informacao/legislacao/instrucoes-normativas/instrucao-normativa-autor-me-no-62-de-28-de-junho-de-2021",
+      "contentLength": 2017,
+      "publishDate": "2021-06-29",
+      "validation": {
+        "ok": true,
+        "errors": [],
+        "warnings": []
+      }
+    },
+    {
+      "id": "3fe21340-68d5-42cd-a6c9-16a173e52346",
+      "fullNumber": "IN SEGES/ME 116/2021",
+      "number": "116",
+      "year": 2021,
+      "title": "Participação de Pessoa Física em Licitações",
+      "issuer": "SEGES/ME",
+      "officialUrl": "https://www.gov.br/compras/pt-br/acesso-a-informacao/legislacao/instrucoes-normativas/instrucao-normativa-seges-me-no-116-de-21-de-dezembro-de-2021",
+      "contentLength": 4058,
+      "publishDate": "2021-12-30",
+      "validation": {
+        "ok": true,
+        "errors": [],
+        "warnings": []
+      }
+    },
+    {
+      "id": "16184659-7248-4b8a-b34f-3f561fa723d4",
+      "fullNumber": "IN SEGES/MP 5/2017",
+      "number": "5",
+      "year": 2017,
+      "title": "Dispõe sobre as regras e diretrizes do procedimento de contratação de serviços sob o regime de execução indireta",
+      "issuer": "SEGES",
+      "officialUrl": "https://www.gov.br/compras/pt-br/acesso-a-informacao/legislacao/instrucoes-normativas/instrucao-normativa-no-5-de-26-de-maio-de-2017-atualizada",
+      "contentLength": 222398,
+      "publishDate": "2017-05-26",
+      "validation": {
+        "ok": true,
+        "errors": [],
+        "warnings": []
+      }
+    }
+  ]
+}
