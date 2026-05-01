@@ -6,6 +6,8 @@ import {
   stripDouBoilerplate,
   stripFormAnnex,
   stripGovbrUiNoise,
+  stripZeroWidthChars,
+  dedupeBoilerplateFooter,
   normalizeScrapedText,
 } from '../../lib/legislative-scrapers/normalize';
 
@@ -28,6 +30,14 @@ describe('collapseWhitespace', () => {
 
   it('colapsa espaços múltiplos em 1', () => {
     expect(collapseWhitespace('A    B')).toBe('A B');
+  });
+
+  it('converte NBSP (\\u00A0) inline para espaço comum', () => {
+    expect(collapseWhitespace('A B')).toBe('A B');
+  });
+
+  it('colapsa runs mistos de espaço/tab/NBSP em 1 espaço', () => {
+    expect(collapseWhitespace('A \t  B')).toBe('A B');
   });
 
   it('remove espaços nas bordas de cada linha', () => {
@@ -221,6 +231,31 @@ describe('stripGovbrUiNoise', () => {
     expect(out).toContain('Dispõe sobre as regras');
   });
 
+  it('remove metadados gov.br inline "Publicado em.../Compartilhe:" entre ementa e corpo', () => {
+    // Padrão real visto em IN SEGES/MGI 52/2025, IN SEGES 460/2025, Portaria SEGES 15.496/2021
+    const input =
+      'Dispõe sobre o Sistema de Cadastramento Unificado de Fornecedores (Sicaf), e dá outras providências.' +
+      'Publicado em 05/11/2025 09:54' +
+      'Modificado em 12/11/2025 16:48' +
+      'Compartilhe:' +
+      'O SECRETÁRIO DE GESTÃO E INOVAÇÃO, no uso das atribuições, resolve:';
+    const out = stripGovbrUiNoise(input);
+    expect(out).not.toContain('Publicado em 05/11/2025');
+    expect(out).not.toContain('Modificado em 12/11/2025');
+    expect(out).not.toContain('Compartilhe');
+    expect(out).toContain('Dispõe sobre o Sistema');
+    expect(out).toContain('outras providências');
+    expect(out).toContain('O SECRETÁRIO DE GESTÃO');
+  });
+
+  it('lida com o bloco quando aparece só "Compartilhe:" inline, sem "Publicado em"', () => {
+    const input = 'Texto da ementa.Compartilhe:O SECRETÁRIO, resolve:';
+    const out = stripGovbrUiNoise(input);
+    expect(out).not.toContain('Compartilhe');
+    expect(out).toContain('Texto da ementa');
+    expect(out).toContain('O SECRETÁRIO');
+  });
+
   it('preserva linha com 1-2 bullets (legítima)', () => {
     const input =
       'I - primeiro item; e\n' +
@@ -230,6 +265,67 @@ describe('stripGovbrUiNoise', () => {
     const out = stripGovbrUiNoise(input);
     expect(out).toContain('marcador único');
     expect(out).toContain('segundo bullet');
+  });
+});
+
+describe('stripZeroWidthChars', () => {
+  it('remove ZWSP (U+200B)', () => {
+    expect(stripZeroWidthChars('contratados;​b)')).toBe('contratados;b)');
+  });
+
+  it('remove ZWNJ (U+200C), ZWJ (U+200D), BOM (U+FEFF), WJ (U+2060)', () => {
+    expect(stripZeroWidthChars('A‌B‍C﻿D⁠E')).toBe('ABCDE');
+  });
+
+  it('remove runs múltiplos do mesmo char invisível', () => {
+    expect(stripZeroWidthChars('Dimens​​​​ionamento')).toBe('Dimensionamento');
+  });
+
+  it('é no-op em texto sem zero-width chars', () => {
+    const input = 'Art. 1º Texto normal sem invisíveis.';
+    expect(stripZeroWidthChars(input)).toBe(input);
+  });
+});
+
+describe('dedupeBoilerplateFooter', () => {
+  it('remove ocorrências anteriores e mantém apenas a última', () => {
+    const input = [
+      'Art. 1º Texto normativo.',
+      '',
+      'Este texto não substitui o publicado no DOU de 26.10.2021',
+      '',
+      'Anexo I do ato.',
+      '',
+      'Este texto não substitui o publicado no DOU de 26.10.2021',
+    ].join('\n');
+    const out = dedupeBoilerplateFooter(input);
+    expect(out).toContain('Anexo I do ato');
+    // Apenas 1 ocorrência da frase deve permanecer
+    expect(out.match(/Este texto não substitui/g)?.length).toBe(1);
+  });
+
+  it('cobre variação que continua na linha de baixo', () => {
+    const input = [
+      'Conteúdo principal.',
+      '',
+      'Este texto não substitui o',
+      'publicado no DOU de 4.7.2023',
+      '',
+      'Errata publicada depois.',
+      '',
+      'Este texto não substitui o',
+      'publicado no DOU de 4.7.2023',
+    ].join('\n');
+    const out = dedupeBoilerplateFooter(input);
+    expect(out).toContain('Errata publicada depois');
+    expect(out.match(/Este texto não substitui/g)?.length).toBe(1);
+  });
+
+  it('é no-op com 0 ou 1 ocorrência', () => {
+    const zero = 'Art. 1º Sem rodapé DOU.';
+    expect(dedupeBoilerplateFooter(zero)).toBe(zero);
+    const one = 'Art. 1º Texto.\n\nEste texto não substitui o publicado no DOU de 1.1.2024';
+    expect(dedupeBoilerplateFooter(one)).toBe(one);
   });
 });
 
@@ -277,5 +373,34 @@ describe('normalizeScrapedText (pipeline completo)', () => {
     const once = normalizeScrapedText(input);
     const twice = normalizeScrapedText(once);
     expect(twice).toBe(once);
+  });
+
+  it('converte NBSP inline para espaço comum no pipeline', () => {
+    const input = 'Art. 1º Esta IN aplica-se a contratos.';
+    const out = normalizeScrapedText(input);
+    expect(out).not.toMatch(/ /);
+    expect(out).toBe('Art. 1º Esta IN aplica-se a contratos.');
+  });
+
+  it('remove zero-width chars no pipeline', () => {
+    const input = 'Art. 8º Previamente​ ao pagamento';
+    const out = normalizeScrapedText(input);
+    expect(out).toBe('Art. 8º Previamente ao pagamento');
+    expect(out).not.toMatch(/[​‌‍﻿⁠]/);
+  });
+
+  it('deduplica rodapé "Este texto não substitui" no pipeline', () => {
+    const input = [
+      'Art. 1º Texto da lei.',
+      '',
+      'Este texto não substitui o publicado no DOU de 16.9.2024',
+      '',
+      'Anexo posterior.',
+      '',
+      'Este texto não substitui o publicado no DOU de 16.9.2024',
+    ].join('\n');
+    const out = normalizeScrapedText(input);
+    expect(out.match(/Este texto não substitui/g)?.length).toBe(1);
+    expect(out).toContain('Anexo posterior');
   });
 });

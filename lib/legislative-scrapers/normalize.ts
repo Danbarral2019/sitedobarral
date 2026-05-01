@@ -71,12 +71,66 @@ export function collapseWhitespace(text: string): string {
     .replace(/^[\s\u00A0]+$/gm, '')
     // Trim por linha
     .replace(/^[ \t\u00A0]+|[ \t\u00A0]+$/gm, '')
-    // Múltiplos espaços internos → 1
-    .replace(/[ \t]+/g, ' ')
+    // Múltiplos espaços/tabs/NBSP internos → 1 espaço comum
+    // (NBSP   inline raramente é intencional em texto scraped — poluí
+    // busca full-text e quebra wrap natural no CSS)
+    .replace(/[ \t ]+/g, ' ')
     // Runs de 3+ \n → 2
     .replace(/\n{3,}/g, '\n\n')
     // Trim geral
     .trim();
+}
+
+/**
+ * Remove caracteres invisíveis que sobrevivem a collapseWhitespace mas poluem
+ * busca, quebram word-break do CSS e atrapalham diff entre versões.
+ *
+ * Cobre:
+ * - U+200B ZERO WIDTH SPACE — comum em copy-paste de PDF/Word
+ * - U+200C ZERO WIDTH NON-JOINER
+ * - U+200D ZERO WIDTH JOINER
+ * - U+FEFF ZERO WIDTH NO-BREAK SPACE / BOM
+ * - U+2060 WORD JOINER
+ *
+ * Visto em prod: "contratados;​b)" (ZWSP entre `;` e `b)` em IN SEGES/MP 5/2017),
+ * "Dimensionamento​​​​" em Portaria SGD/MGI 5.950/2023.
+ */
+export function stripZeroWidthChars(text: string): string {
+  return text.replace(/[​‌‍﻿⁠]/g, '');
+}
+
+/**
+ * Deduplica o rodapé "Este texto não substitui o publicado no DOU..." quando
+ * aparece mais de uma vez no mesmo ato.
+ *
+ * Visto em prod: Lei 14.611/2023, Lei 14.973/2024 e Lei 14.230/2021 têm a
+ * frase 2-3× — uma como rodapé do texto principal e outra(s) repetidas após
+ * publicação de erratas/anexos. Mantemos apenas a ÚLTIMA (referencia a
+ * publicação mais recente do DOU).
+ *
+ * Match captura a frase + o texto até a próxima quebra de parágrafo (incluindo
+ * variações que continuam na linha de baixo, ex: "DOU de\n16.9.2024").
+ *
+ * É no-op quando há 0 ou 1 ocorrência.
+ */
+export function dedupeBoilerplateFooter(text: string): string {
+  const pattern = /Este texto não substitui[^\n]*(?:\n[^\n]{0,80}?\d{4}[^\n]{0,80})?/g;
+  const matches: { index: number; length: number }[] = [];
+  let m: RegExpExecArray | null;
+  while ((m = pattern.exec(text)) !== null) {
+    matches.push({ index: m.index, length: m[0].length });
+  }
+  if (matches.length <= 1) return text;
+  let result = text;
+  for (let i = matches.length - 2; i >= 0; i--) {
+    const { index, length } = matches[i];
+    let cutStart = index;
+    while (cutStart > 0 && /[\n\s]/.test(result[cutStart - 1])) cutStart--;
+    let cutEnd = index + length;
+    while (cutEnd < result.length && /[\n\s]/.test(result[cutEnd])) cutEnd++;
+    result = result.slice(0, cutStart) + '\n\n' + result.slice(cutEnd);
+  }
+  return result;
 }
 
 /**
@@ -190,6 +244,23 @@ export function stripGovbrUiNoise(text: string): string {
   // Linhas legítimas com 1-2 bullets (raras em texto jurídico) são preservadas.
   result = result.replace(/^.*?(?:•[^\n•]*){3,}.*$/gm, '');
 
+  // Bloco de metadados gov.br/compras vazado INLINE (sem quebras de linha)
+  // entre a ementa e o início do ato. Padrão real visto em prod (IN SEGES/MGI
+  // 52/2025, IN SEGES 460/2025, Portaria SEGES 15.496/2021):
+  //   "...e dá outras providências.Publicado em 05/11/2025 09:54Modificado em 12/11/2025 16:48Compartilhe:O SECRETÁRIO..."
+  // Substituímos a sequência por uma quebra de parágrafo, preservando o
+  // ponto final do parágrafo anterior e o início do parágrafo seguinte.
+  result = result.replace(
+    /(?:Publicado em\s*\d{1,2}\/\d{1,2}\/\d{2,4}(?:\s*\d{1,2}:\d{2}|\s*\d{1,2}h\d{2})?)?(?:Modificado em\s*\d{1,2}\/\d{1,2}\/\d{2,4}(?:\s*\d{1,2}:\d{2}|\s*\d{1,2}h\d{2})?)?Compartilhe:/g,
+    '\n\n',
+  );
+  // Caso o bloco "Publicado em.../Modificado em..." apareça SEM o "Compartilhe:"
+  // no final (raro mas possível), também removemos:
+  result = result.replace(
+    /(?:Publicado em\s*\d{1,2}\/\d{1,2}\/\d{2,4}(?:\s*\d{1,2}:\d{2}|\s*\d{1,2}h\d{2}))(?:Modificado em\s*\d{1,2}\/\d{1,2}\/\d{2,4}(?:\s*\d{1,2}:\d{2}|\s*\d{1,2}h\d{2}))?(?=[A-ZÁÉÍÓÚÂÊÔÃÕÇ])/g,
+    '\n\n',
+  );
+
   // Colapsa quebras de linha duplas excessivas geradas pelas remoções acima.
   result = result.replace(/\n{3,}/g, '\n\n').trim();
 
@@ -233,8 +304,11 @@ export function stripFormAnnex(text: string): string {
  * específico não aparece, então rodar todos não tem efeito colateral em
  * texto que não os contém:
  *
- *   collapseWhitespace → stripDouBoilerplate (in.gov.br)
- *   → stripGovbrUiNoise (gov.br/*) → stripFormAnnex (Plone forms)
+ *   stripZeroWidthChars → collapseWhitespace
+ *   → stripDouBoilerplate (in.gov.br)
+ *   → stripGovbrUiNoise (gov.br/*)
+ *   → stripFormAnnex (Plone forms)
+ *   → dedupeBoilerplateFooter ("Este texto não substitui" duplicado)
  *   → collapseWhitespace (limpa whitespace que sobrou dos cortes)
  *
  * Use nos pontos do pipeline onde texto bruto entra no banco:
@@ -243,13 +317,16 @@ export function stripFormAnnex(text: string): string {
  * - import-legislative-acts-batch ao receber `content` do JSON
  * - dou-scraper.scrapeContent() pós-extração
  *
+ * É idempotente: rodar 2× produz o mesmo resultado de rodar 1×.
  * É no-op em string vazia/null/undefined (retorna a entrada).
  */
 export function normalizeScrapedText(text: string | null | undefined): string {
   if (!text) return text ?? '';
-  let result = collapseWhitespace(text);
+  let result = stripZeroWidthChars(text);
+  result = collapseWhitespace(result);
   result = stripDouBoilerplate(result);
   result = stripGovbrUiNoise(result);
   result = stripFormAnnex(result);
+  result = dedupeBoilerplateFooter(result);
   return collapseWhitespace(result);
 }
