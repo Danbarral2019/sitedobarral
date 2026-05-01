@@ -7,8 +7,12 @@ import { renderMonthlyNewsletter } from '@/lib/email-templates/newsletter';
 import { filterByRelevance, type DecisionInput } from '@/lib/newsletter/relevance-filter';
 import { generateNewsletterIntro } from '@/lib/newsletter/intro-generator';
 
-// Allow up to 120s for AI processing + email sending
-export const maxDuration = 120;
+// Aumentado de 120s pra 300s em 2026-05-01 — newsletter de maio caiu por
+// FUNCTION_INVOCATION_TIMEOUT (504) com 5 chamadas Gemini de 8-10s cada
+// somando ~50s só de IA, mais Prisma + Resend rate-limit (600ms × N).
+// Vercel Pro permite até 800s. Conjuntamente colocamos try/catch com
+// fallbacks na IA pra newsletter sair mesmo se Gemini estiver caído.
+export const maxDuration = 300;
 
 /**
  * Cron Job: Newsletter Mensal v0.2
@@ -166,9 +170,46 @@ export async function GET(request: NextRequest) {
 
     console.log(`[Cron Newsletter v0.2] ${allDecisions.length} decisões para filtrar, ${otherDocs.length} outros documentos`);
 
-    // 4. Filtrar acórdãos por relevância com IA
-    const filterResult = await filterByRelevance(allDecisions);
-    console.log(`[Cron Newsletter v0.2] Filtro: ${filterResult.totalSelected}/${filterResult.totalEvaluated} decisões selecionadas`);
+    // 3b. Criar registro NewsletterSend com status 'started' já — assim
+    // qualquer falha silenciosa adiante deixa pista no DB. Atualizado
+    // depois com totalSent/totalFailed reais.
+    const sendId = randomUUID();
+    if (!dryRun) {
+      await prisma.newsletterSend.create({
+        data: {
+          id: sendId,
+          type: 'monthly',
+          subject: `[em processamento] Newsletter mensal — disparo iniciado`,
+          totalSent: 0,
+          totalFailed: 0,
+        },
+      });
+    }
+
+    // 4. Filtrar acórdãos por relevância com IA (com fallback pra modo
+    // sem IA se Gemini falhar/timeout — newsletter sai mesmo sem ranking)
+    let filterResult: Awaited<ReturnType<typeof filterByRelevance>>;
+    try {
+      filterResult = await filterByRelevance(allDecisions);
+      console.log(`[Cron Newsletter v0.2] Filtro: ${filterResult.totalSelected}/${filterResult.totalEvaluated} decisões selecionadas`);
+    } catch (err) {
+      console.error('[Cron Newsletter v0.2] filterByRelevance falhou — fallback sem IA:', err);
+      // Fallback: pegar até 25 decisões mais recentes sem score IA
+      const fallbackSelected = allDecisions.slice(0, 25).map((d) => ({
+        id: d.id,
+        title: d.title,
+        tribunalCode: d.tribunalCode || 'TCU',
+        relevanceScore: 0,
+        aiSummary: d.summary || (d.ementa || d.description || '').substring(0, 200),
+        themes: [] as string[],
+        leiArticles: [] as string[],
+      }));
+      filterResult = {
+        selected: fallbackSelected,
+        totalEvaluated: allDecisions.length,
+        totalSelected: fallbackSelected.length,
+      };
+    }
 
     // 5. Agrupar demais documentos por categoria (excluindo acórdãos)
     const documentsByCategory = otherDocs.reduce((acc, doc) => {
@@ -192,20 +233,25 @@ export async function GET(request: NextRequest) {
       categorySummary['jurisprudência selecionada'] = filterResult.totalSelected;
     }
 
-    const introHtml = await generateNewsletterIntro({
-      selectedDecisions: filterResult.selected,
-      categorySummary,
-      authorContent: {
-        blogPosts: newBlogPosts,
-        publications: newPublications,
-        videos: newVideos,
-      },
-      legislativeChanges: newLegislativeActs,
-      monthName,
-      totalDocuments: totalItems,
-    });
-
-    console.log('[Cron Newsletter v0.2] Texto introdutório gerado');
+    let introHtml: string;
+    try {
+      introHtml = await generateNewsletterIntro({
+        selectedDecisions: filterResult.selected,
+        categorySummary,
+        authorContent: {
+          blogPosts: newBlogPosts,
+          publications: newPublications,
+          videos: newVideos,
+        },
+        legislativeChanges: newLegislativeActs,
+        monthName,
+        totalDocuments: totalItems,
+      });
+      console.log('[Cron Newsletter v0.2] Texto introdutório gerado');
+    } catch (err) {
+      console.error('[Cron Newsletter v0.2] generateNewsletterIntro falhou — fallback genérico:', err);
+      introHtml = `<p>Olá, este é o panorama de <strong>${monthName}</strong> dos principais conteúdos de Licitações e Contratos publicados no portal: ${filterResult.totalSelected} decisões selecionadas, ${totalItems} documentos novos, ${newLegislativeActs.length} atos legislativos.</p>`;
+    }
 
     // 7. Buscar inscritos ativos
     const subscribers = await prisma.newsletterSubscriber.findMany({
@@ -224,8 +270,7 @@ export async function GET(request: NextRequest) {
       });
     }
 
-    // 8. Gerar HTML da newsletter
-    const sendId = randomUUID();
+    // 8. Gerar HTML da newsletter (sendId criado no passo 3b)
     const subject = `Newsletter: ${filterResult.totalSelected} decisões selecionadas e ${totalItems} documentos em ${monthName}`;
 
     const newsletterHtml = renderMonthlyNewsletter({
@@ -272,17 +317,12 @@ export async function GET(request: NextRequest) {
       });
     }
 
-    // 9. Inicializar Resend e criar registro de envio
+    // 9. Inicializar Resend e atualizar subject do registro criado no passo 3b
     const resend = new Resend(process.env.RESEND_API_KEY);
 
-    await prisma.newsletterSend.create({
-      data: {
-        id: sendId,
-        type: 'monthly',
-        subject,
-        totalSent: 0,
-        totalFailed: 0,
-      },
+    await prisma.newsletterSend.update({
+      where: { id: sendId },
+      data: { subject },
     });
 
     // 10. Enviar emails (sequencial, respeitando rate limit Resend: 2/s)
