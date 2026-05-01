@@ -27,7 +27,9 @@ describe('GovBrComprasScraper — Portaria SEGES/MGI 4.932/2023 (caso truncation
     // retornava ~1539 chars (corpo completo).
     // Após stripGovbrUiNoise (2026-04-25) que remove "Compartilhe:" do final
     // E linhas isoladas "Compartilhe por X" do header, valor caiu pra ~1254 chars.
-    expect(result.content!.length).toBeGreaterThan(1200);
+    // Após cleanups adicionais (Publicado em / Atualizado em / link Copiar)
+    // valor caiu pra ~1145 chars — ainda significativamente acima do stub pré-fix.
+    expect(result.content!.length).toBeGreaterThan(1000);
     // Garantir que o ruído de social share NÃO está mais presente
     expect(result.content).not.toContain('Compartilhe por Facebook');
   });

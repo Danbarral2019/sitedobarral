@@ -60,6 +60,7 @@ import { PrismaClient } from '@prisma/client';
 import { PrismaNeon } from '@prisma/adapter-neon';
 import { detectAndSaveRelationsHybrid } from '../lib/legislative-acts/relations';
 import { normalizeScrapedText } from '../lib/legislative-scrapers/normalize';
+import { validateActContent } from '../lib/legislative-scrapers/validate-content';
 
 const adapter = new PrismaNeon({ connectionString: process.env.DATABASE_URL! });
 const prisma = new PrismaClient({ adapter });
@@ -92,6 +93,7 @@ interface BatchInput {
 const args = process.argv.slice(2);
 const DRY_RUN = args.includes('--dry-run');
 const ALLOW_CLEARING = args.includes('--allow-clearing');
+const ALLOW_INVALID_CONTENT = args.includes('--allow-invalid-content');
 const jsonPath = args.find((a) => !a.startsWith('--'));
 
 if (!jsonPath) {
@@ -241,6 +243,7 @@ async function main() {
   console.log(`  Arquivo: ${fullPath}`);
   console.log(`  ${DRY_RUN ? '🔍 MODO DRY-RUN' : '✅ MODO EXECUÇÃO'}`);
   if (ALLOW_CLEARING) console.log(`  ⚠️  --allow-clearing ATIVO (vai aceitar zerar campos)`);
+  if (ALLOW_INVALID_CONTENT) console.log(`  ⚠️  --allow-invalid-content ATIVO (vai aceitar conteúdo com erros de validação)`);
   console.log(`${'='.repeat(60)}\n`);
 
   const raw = readFileSync(fullPath, 'utf-8');
@@ -254,11 +257,32 @@ async function main() {
   const acts = parsed.legislativeActs;
   console.log(`Atos no JSON: ${acts.length}\n`);
 
-  const stats = { criados: 0, atualizados: 0, inalterados: 0, bloqueados: 0, erros: 0 };
+  const stats = { criados: 0, atualizados: 0, inalterados: 0, bloqueados: 0, invalidos: 0, erros: 0 };
   const blockedActs: { fullNumber: string; clearings: FieldDiff[] }[] = [];
 
   for (const act of acts) {
     try {
+      // Validação prévia: se o JSON traz content/officialUrl, checar se passa
+      // pelos sanity checks (URL não-FAQ, conteúdo não-FAQ, sem ruído residual,
+      // tamanho mínimo). Bloqueia errors a menos que --allow-invalid-content.
+      if (act.content || act.officialUrl) {
+        const validation = validateActContent({
+          url: act.officialUrl,
+          content: act.content ? normalizeScrapedText(act.content) : '',
+        });
+        if (validation.errors.length > 0 && !ALLOW_INVALID_CONTENT) {
+          stats.invalidos++;
+          console.log(`🛑 INVÁLIDO: ${act.fullNumber}`);
+          for (const e of validation.errors) console.log(`   ❌ ${e}`);
+          for (const w of validation.warnings) console.log(`   ⚠️  ${w}`);
+          continue;
+        }
+        if (validation.warnings.length > 0) {
+          console.log(`⚠️  Avisos em ${act.fullNumber}:`);
+          for (const w of validation.warnings) console.log(`     ${w}`);
+        }
+      }
+
       const existing = await prisma.legislativeAct.findUnique({
         where: { fullNumber: act.fullNumber },
       });
@@ -345,6 +369,7 @@ async function main() {
   console.log(`  🔄 Atualizados:    ${stats.atualizados}`);
   console.log(`  ⏸️  Inalterados:    ${stats.inalterados}`);
   console.log(`  🛑 Bloqueados:     ${stats.bloqueados}  (clearing detectado — use --allow-clearing pra forçar)`);
+  console.log(`  🚫 Inválidos:      ${stats.invalidos}  (validação de conteúdo falhou — use --allow-invalid-content pra forçar)`);
   console.log(`  ❌ Erros:          ${stats.erros}`);
   console.log(`${'='.repeat(60)}\n`);
 

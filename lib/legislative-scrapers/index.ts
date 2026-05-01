@@ -10,6 +10,7 @@
 
 import { PlanaltoScraper } from './planalto';
 import { GovBrComprasScraper } from './govbr-compras';
+import { validateActContent } from './validate-content';
 
 /**
  * Resultado de uma operação de scraping
@@ -17,10 +18,18 @@ import { GovBrComprasScraper } from './govbr-compras';
 export interface ScraperResult {
   success: boolean;
   content?: string;
+  contentHash?: string;
+  /** @deprecated use contentHash */
   hash?: string;
   error?: string;
   source?: string;
   extractedAt?: Date;
+  /**
+   * Lista de problemas detectados pelo `validateActContent` no resultado.
+   * `errors` indicam que o conteúdo provavelmente está errado (ex: URL é FAQ,
+   * conteúdo vazio); `warnings` são sinais suspeitos não-bloqueantes.
+   */
+  validation?: { errors: string[]; warnings: string[] };
 }
 
 /**
@@ -76,10 +85,12 @@ export async function scrapeUrl(url: string): Promise<ScraperResult> {
 
   try {
     const result = await scraper.scrape(url);
+    const validation = validateActContent({ url, content: result.content });
     return {
       ...result,
       source: scraper.name,
       extractedAt: new Date(),
+      validation,
     };
   } catch (error) {
     return {
@@ -89,6 +100,10 @@ export async function scrapeUrl(url: string): Promise<ScraperResult> {
     };
   }
 }
+
+// Re-export pra callers que querem validar diretamente.
+export { validateActContent } from './validate-content';
+export type { ValidationInput, ValidationResult } from './validate-content';
 
 /**
  * Lista todos os scrapers disponíveis
