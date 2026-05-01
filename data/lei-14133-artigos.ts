@@ -180,7 +180,7 @@ a) serviço comum de engenharia: todo serviço de engenharia que tem por objeto 
 
 b) serviço especial de engenharia: aquele que, por sua alta heterogeneidade ou complexidade, não pode se enquadrar na definição constante da alínea a deste inciso;
 
-XXII - obras, serviços e fornecimentos de grande vulto: aqueles cujo valor estimado supera R$ 200.000.000,00 (duzentos milhões de reais);        (Vide Decreto nº 10.922, de 2021)       (Vigência)     (Vide Decreto nº 11.317, de 2022)        Vigência      (Vide Decreto nº 11.871, de 2023)      Vigência      (Vide Decreto nº 12.343, de 2024)     Vigência     (Vide Decreto nº 12.807, de 2025)    Vigência
+XXII - obras, serviços e fornecimentos de grande vulto: aqueles cujo valor estimado supera R$ 200.000.000,00 (duzentos milhões de reais); (Vide Decreto nº 10.922, de 2021) (Vigência) (Vide Decreto nº 11.317, de 2022) Vigência (Vide Decreto nº 11.871, de 2023) Vigência (Vide Decreto nº 12.343, de 2024) Vigência (Vide Decreto nº 12.807, de 2025) Vigência
 
 XXIII - termo de referência: documento necessário para a contratação de bens e serviços, que deve conter os seguintes parâmetros e elementos descritivos:
 
@@ -368,7 +368,7 @@ III - não sejam cônjuge ou companheiro de licitantes ou contratados habituais 
 
 § 2º Em licitação que envolva bens ou serviços especiais, desde que observados os requisitos estabelecidos no art. 7º desta Lei , o agente de contratação poderá ser substituído por comissão de contratação formada por, no mínimo, 3 (três) membros, que responderão solidariamente por todos os atos praticados pela comissão, ressalvado o membro que expressar posição individual divergente fundamentada e registrada em ata lavrada na reunião em que houver sido tomada a decisão.
 
-§ 3º As regras relativas à atuação do agente de contratação e da equipe de apoio, ao funcionamento da comissão de contratação e à atuação de fiscais e gestores de contratos de que trata esta Lei serão estabelecidas em regulamento, e deverá ser prevista a possibilidade de eles contarem com o apoio dos órgãos de assessoramento jurídico e de controle interno para o desempenho das funções essenciais à execução do disposto nesta Lei.   (Regulamento)    Vigência
+§ 3º As regras relativas à atuação do agente de contratação e da equipe de apoio, ao funcionamento da comissão de contratação e à atuação de fiscais e gestores de contratos de que trata esta Lei serão estabelecidas em regulamento, e deverá ser prevista a possibilidade de eles contarem com o apoio dos órgãos de assessoramento jurídico e de controle interno para o desempenho das funções essenciais à execução do disposto nesta Lei. (Regulamento) Vigência
 
 § 4º Em licitação que envolva bens ou serviços especiais cujo objeto não seja rotineiramente contratado pela Administração, poderá ser contratado, por prazo determinado, serviço de empresa ou de profissional especializado para assessorar os agentes públicos responsáveis pela condução da licitação.
 
@@ -454,7 +454,7 @@ V - o reconhecimento de firma somente será exigido quando houver dúvida de aut
 
 VI - os atos serão preferencialmente digitais, de forma a permitir que sejam produzidos, comunicados, armazenados e validados por meio eletrônico;
 
-VII - a partir de documentos de formalização de demandas, os órgãos responsáveis pelo planejamento de cada ente federativo poderão, na forma de regulamento, elaborar plano de contratações anual, com o objetivo de racionalizar as contratações dos órgãos e entidades sob sua competência, garantir o alinhamento com o seu planejamento estratégico e subsidiar a elaboração das respectivas leis orçamentárias.       (Regulamento)
+VII - a partir de documentos de formalização de demandas, os órgãos responsáveis pelo planejamento de cada ente federativo poderão, na forma de regulamento, elaborar plano de contratações anual, com o objetivo de racionalizar as contratações dos órgãos e entidades sob sua competência, garantir o alinhamento com o seu planejamento estratégico e subsidiar a elaboração das respectivas leis orçamentárias. (Regulamento)
 
 § 1º O plano de contratações anual de que trata o inciso VII do caput deste artigo deverá ser divulgado e mantido à disposição do público em sítio eletrônico oficial e será observado pelo ente federativo na realização de licitações e na execução dos contratos.
 
@@ -1041,7 +1041,7 @@ II - profissionais contratados por conhecimento técnico, experiência ou renome
 
 § 2º (VETADO).
 
-§ 2º  Ressalvados os casos de inexigibilidade de licitação, na licitação para contratação dos serviços técnicos especializados de natureza predominantemente intelectual previstos nas alíneas a, d e h do inciso XVIII do caput do art. 6º desta Lei cujo valor estimado da contratação seja superior a R$ 300.000,00 (trezentos mil reais), o julgamento será por:       (Promulgação partes vetadas)         (Vide Decreto nº 10.922, de 2021)       (Vigência)      (Vide Decreto nº 11.317, de 2022)        Vigência      (Vide Decreto nº 11.871, de 2023)      Vigência    (Vide Decreto nº 12.343, de 2024)     Vigência        (Vide Decreto nº 12.807, de 2025)    Vigência
+§ 2º  Ressalvados os casos de inexigibilidade de licitação, na licitação para contratação dos serviços técnicos especializados de natureza predominantemente intelectual previstos nas alíneas a, d e h do inciso XVIII do caput do art. 6º desta Lei cujo valor estimado da contratação seja superior a R$ 300.000,00 (trezentos mil reais), o julgamento será por: (Promulgação partes vetadas) (Vide Decreto nº 10.922, de 2021) (Vigência) (Vide Decreto nº 11.317, de 2022) Vigência (Vide Decreto nº 11.871, de 2023) Vigência (Vide Decreto nº 12.343, de 2024) Vigência (Vide Decreto nº 12.807, de 2025) Vigência
 
 I - melhor técnica; ou
 
@@ -1188,17 +1188,17 @@ III - síntese da justificativa e descrição sucinta do padrão definido, divul
   },
   "44-A": {
     numero: "44-A",
-    ementa: `Art. 44-Aº O processo licitatório para compra de equipamento destinado a procedimento diagnóstico ou terapêutico no âmbito do Sistema Único de Saúde (SUS) que tenha valor superior ao previsto no inciso II do art. 75 desta Lei deve levar em consideração o seu adequado aproveitamento ao longo de sua vida útil. (Incluído pela Lei nº 15.210, de 2025)    Vigência
+    ementa: `Art. 44-Aº O processo licitatório para compra de equipamento destinado a procedimento diagnóstico ou terapêutico no âmbito do Sistema Único de Saúde (SUS) que tenha valor superior ao previsto no inciso II do art. 75 desta Lei deve levar em consideração o seu adequado aproveitamento ao longo de sua vida útil. (Incluído pela Lei nº 15.210, de 2025) Vigência
 
-§ 1º No edital de licitação, deve constar a demonstração da capacidade instalada para operação do equipamento ou o plano de atendimento aos requisitos necessários à operação.     (Incluído pela Lei nº 15.210, de 2025)    Vigência
+§ 1º No edital de licitação, deve constar a demonstração da capacidade instalada para operação do equipamento ou o plano de atendimento aos requisitos necessários à operação. (Incluído pela Lei nº 15.210, de 2025) Vigência
 
-§ 2º (VETADO).      (Incluído pela Lei nº 15.210, de 2025)    Vigência
+§ 2º (VETADO). (Incluído pela Lei nº 15.210, de 2025) Vigência
 
-§ 3º (VETADO).     (Incluído pela Lei nº 15.210, de 2025)    Vigência
+§ 3º (VETADO). (Incluído pela Lei nº 15.210, de 2025) Vigência
 
-§ 4º (VETADO).     (Incluído pela Lei nº 15.210, de 2025)    Vigência
+§ 4º (VETADO). (Incluído pela Lei nº 15.210, de 2025) Vigência
 
-§ 5º (VETADO).    (Incluído pela Lei nº 15.210, de 2025)    Vigência
+§ 5º (VETADO). (Incluído pela Lei nº 15.210, de 2025) Vigência
 
 Subseção II
 
@@ -1370,7 +1370,7 @@ III - (VETADO).
 
 § 1º (VETADO).
 
-§ 1º Sem prejuízo do disposto no caput , é obrigatória a publicação de extrato do edital no Diário Oficial da União, do Estado, do Distrito Federal ou do Município, ou, no caso de consórcio público, do ente de maior nível entre eles, bem como em jornal diário de grande circulação.       (Promulgação partes vetadas)
+§ 1º Sem prejuízo do disposto no caput , é obrigatória a publicação de extrato do edital no Diário Oficial da União, do Estado, do Distrito Federal ou do Município, ou, no caso de consórcio público, do ente de maior nível entre eles, bem como em jornal diário de grande circulação. (Promulgação partes vetadas)
 
 § 2º É facultada a divulgação adicional e a manutenção do inteiro teor do edital e de seus anexos em sítio eletrônico oficial do ente federativo do órgão ou entidade responsável pela licitação ou, no caso de consórcio público, do ente de maior nível entre eles, admitida, ainda, a divulgação direta a interessados devidamente cadastrados para esse fim.
 
@@ -1484,7 +1484,7 @@ I - disputa final, hipótese em que os licitantes empatados poderão apresentar 
 
 II - avaliação do desempenho contratual prévio dos licitantes, para a qual deverão preferencialmente ser utilizados registros cadastrais para efeito de atesto de cumprimento de obrigações previstos nesta Lei;
 
-III - desenvolvimento pelo licitante de ações de equidade entre homens e mulheres no ambiente de trabalho, conforme regulamento;    (Vide Decreto nº 11.430, de 2023)      Vigência
+III - desenvolvimento pelo licitante de ações de equidade entre homens e mulheres no ambiente de trabalho, conforme regulamento; (Vide Decreto nº 11.430, de 2023) Vigência
 
 IV - desenvolvimento pelo licitante de programa de integridade, conforme orientações dos órgãos de controle.
 
@@ -1776,9 +1776,9 @@ Da Dispensa de Licitação`,
     numero: "75",
     ementa: `Art. 75º É dispensável a licitação:
 
-I - para contratação que envolva valores inferiores a R$ 100.000,00 (cem mil reais), no caso de obras e serviços de engenharia ou de serviços de manutenção de veículos automotores;        (Vide Decreto nº 10.922, de 2021)       (Vigência)        (Vide Decreto nº 11.317, de 2022)        Vigência       (Vide Decreto nº 11.871, de 2023)      Vigência     (Vide Decreto nº 12.343, de 2024)     Vigência         (Vide Decreto nº 12.807, de 2025)    Vigência
+I - para contratação que envolva valores inferiores a R$ 100.000,00 (cem mil reais), no caso de obras e serviços de engenharia ou de serviços de manutenção de veículos automotores; (Vide Decreto nº 10.922, de 2021) (Vigência) (Vide Decreto nº 11.317, de 2022) Vigência (Vide Decreto nº 11.871, de 2023) Vigência (Vide Decreto nº 12.343, de 2024) Vigência (Vide Decreto nº 12.807, de 2025) Vigência
 
-II - para contratação que envolva valores inferiores a R$ 50.000,00 (cinquenta mil reais), no caso de outros serviços e compras;        (Vide Decreto nº 10.922, de 2021)       (Vigência)         (Vide Decreto nº 11.317, de 2022)        Vigência        (Vide Decreto nº 11.871, de 2023)      Vigência     (Vide Decreto nº 12.343, de 2024)     Vigência         (Vide Decreto nº 12.807, de 2025)    Vigência
+II - para contratação que envolva valores inferiores a R$ 50.000,00 (cinquenta mil reais), no caso de outros serviços e compras; (Vide Decreto nº 10.922, de 2021) (Vigência) (Vide Decreto nº 11.317, de 2022) Vigência (Vide Decreto nº 11.871, de 2023) Vigência (Vide Decreto nº 12.343, de 2024) Vigência (Vide Decreto nº 12.807, de 2025) Vigência
 
 III - para contratação que mantenha todas as condições definidas em edital de licitação realizada há menos de 1 (um) ano, quando se verificar que naquela licitação:
 
@@ -1792,7 +1792,7 @@ a) bens, componentes ou peças de origem nacional ou estrangeira necessários à
 
 b) bens, serviços, alienações ou obras, nos termos de acordo internacional específico aprovado pelo Congresso Nacional, quando as condições ofertadas forem manifestamente vantajosas para a Administração;
 
-c) produtos para pesquisa e desenvolvimento, limitada a contratação, no caso de obras e serviços de engenharia, ao valor de R$ 300.000,00 (trezentos mil reais);        (Vide Decreto nº 10.922, de 2021)       (Vigência)        (Vide Decreto nº 11.317, de 2022)        Vigência        (Vide Decreto nº 11.871, de 2023)      Vigência     (Vide Decreto nº 12.343, de 2024)     Vigência          (Vide Decreto nº 12.807, de 2025)    Vigência
+c) produtos para pesquisa e desenvolvimento, limitada a contratação, no caso de obras e serviços de engenharia, ao valor de R$ 300.000,00 (trezentos mil reais); (Vide Decreto nº 10.922, de 2021) (Vigência) (Vide Decreto nº 11.317, de 2022) Vigência (Vide Decreto nº 11.871, de 2023) Vigência (Vide Decreto nº 12.343, de 2024) Vigência (Vide Decreto nº 12.807, de 2025) Vigência
 
 d) transferência de tecnologia ou licenciamento de direito de uso ou de exploração de criação protegida, nas contratações realizadas por instituição científica, tecnológica e de inovação (ICT) pública ou por agência de fomento, desde que demonstrada vantagem para a Administração;
 
@@ -1838,15 +1838,15 @@ XV - para contratação de instituição brasileira que tenha por finalidade est
 
 XVI - para aquisição, por pessoa jurídica de direito público interno, de insumos estratégicos para a saúde produzidos por fundação que, regimental ou estatutariamente, tenha por finalidade apoiar órgão da Administração Pública direta, sua autarquia ou fundação em projetos de ensino, pesquisa, extensão, desenvolvimento institucional, científico e tecnológico e de estímulo à inovação, inclusive na gestão administrativa e financeira necessária à execução desses projetos, ou em parcerias que envolvam transferência de tecnologia de produtos estratégicos para o SUS, nos termos do inciso XII do caput deste artigo, e que tenha sido criada para esse fim específico em data anterior à entrada em vigor desta Lei, desde que o preço contratado seja compatível com o praticado no mercado.
 
-XVI - para aquisição, por pessoa jurídica de direito público interno, de insumos estratégicos para a saúde produzidos por fundação que, regimental ou estatutariamente, tenha por finalidade apoiar órgão da Administração Pública direta, sua autarquia ou fundação em projetos de ensino, pesquisa, extensão, desenvolvimento institucional, científico e tecnológico e de estímulo à inovação, inclusive na gestão administrativa e financeira necessária à execução desses projetos, ou em parcerias que envolvam transferência de tecnologia de produtos estratégicos para o SUS, nos termos do inciso XII do caput deste artigo, e que tenha sido criada para esse fim específico em data anterior à entrada em vigor desta Lei, desde que o preço contratado seja compatível com o praticado no mercado; e   (Redação dada pela Medida Provisória nº 1.166, de 2023)    Vigência encerrada
+XVI - para aquisição, por pessoa jurídica de direito público interno, de insumos estratégicos para a saúde produzidos por fundação que, regimental ou estatutariamente, tenha por finalidade apoiar órgão da Administração Pública direta, sua autarquia ou fundação em projetos de ensino, pesquisa, extensão, desenvolvimento institucional, científico e tecnológico e de estímulo à inovação, inclusive na gestão administrativa e financeira necessária à execução desses projetos, ou em parcerias que envolvam transferência de tecnologia de produtos estratégicos para o SUS, nos termos do inciso XII do caput deste artigo, e que tenha sido criada para esse fim específico em data anterior à entrada em vigor desta Lei, desde que o preço contratado seja compatível com o praticado no mercado; e (Redação dada pela Medida Provisória nº 1.166, de 2023) Vigência encerrada
 
-XVI - para aquisição, por pessoa jurídica de direito público interno, de insumos estratégicos para a saúde produzidos por fundação que, regimental ou estatutariamente, tenha por finalidade apoiar órgão da Administração Pública direta, sua autarquia ou fundação em projetos de ensino, pesquisa, extensão, desenvolvimento institucional, científico e tecnológico e de estímulo à inovação, inclusive na gestão administrativa e financeira necessária à execução desses projetos, ou em parcerias que envolvam transferência de tecnologia de produtos estratégicos para o SUS, nos termos do inciso XII deste caput , e que tenha sido criada para esse fim específico em data anterior à entrada em vigor desta Lei, desde que o preço contratado seja compatível com o praticado no mercado;    (Redação dada pela Lei nº 14.628, de 2023)
+XVI - para aquisição, por pessoa jurídica de direito público interno, de insumos estratégicos para a saúde produzidos por fundação que, regimental ou estatutariamente, tenha por finalidade apoiar órgão da Administração Pública direta, sua autarquia ou fundação em projetos de ensino, pesquisa, extensão, desenvolvimento institucional, científico e tecnológico e de estímulo à inovação, inclusive na gestão administrativa e financeira necessária à execução desses projetos, ou em parcerias que envolvam transferência de tecnologia de produtos estratégicos para o SUS, nos termos do inciso XII deste caput , e que tenha sido criada para esse fim específico em data anterior à entrada em vigor desta Lei, desde que o preço contratado seja compatível com o praticado no mercado; (Redação dada pela Lei nº 14.628, de 2023)
 
-XVII - para a contratação de entidades privadas sem ﬁns lucrativos para a implementação de cisternas ou outras tecnologias sociais de acesso à água para consumo humano e produção de alimentos, para beneﬁciar as famílias rurais de baixa renda atingidas pela seca ou pela falta regular de água.      (Incluído pela Medida Provisória nº 1.166, de 2023)    Vigência encerrada
+XVII - para a contratação de entidades privadas sem ﬁns lucrativos para a implementação de cisternas ou outras tecnologias sociais de acesso à água para consumo humano e produção de alimentos, para beneﬁciar as famílias rurais de baixa renda atingidas pela seca ou pela falta regular de água. (Incluído pela Medida Provisória nº 1.166, de 2023) Vigência encerrada
 
-XVII - para contratação de entidades privadas sem fins lucrativos para a implementação de cisternas ou outras tecnologias sociais de acesso à água para consumo humano e produção de alimentos, a fim de beneficiar as famílias rurais de baixa renda atingidas pela seca ou pela falta regular de água; e       (Incluído pela Lei nº 14.628, de 2023)
+XVII - para contratação de entidades privadas sem fins lucrativos para a implementação de cisternas ou outras tecnologias sociais de acesso à água para consumo humano e produção de alimentos, a fim de beneficiar as famílias rurais de baixa renda atingidas pela seca ou pela falta regular de água; e (Incluído pela Lei nº 14.628, de 2023)
 
-XVIII - para contratação de entidades privadas sem fins lucrativos, para a implementação do Programa Cozinha Solidária, que tem como finalidade fornecer alimentação gratuita preferencialmente à população em situação de vulnerabilidade e risco social, incluída a população em situação de rua, com vistas à promoção de políticas de segurança alimentar e nutricional e de assistência social e à efetivação de direitos sociais, dignidade humana, resgate social e melhoria da qualidade de vida.      (Incluído pela Lei nº 14.628, de 2023)
+XVIII - para contratação de entidades privadas sem fins lucrativos, para a implementação do Programa Cozinha Solidária, que tem como finalidade fornecer alimentação gratuita preferencialmente à população em situação de vulnerabilidade e risco social, incluída a população em situação de rua, com vistas à promoção de políticas de segurança alimentar e nutricional e de assistência social e à efetivação de direitos sociais, dignidade humana, resgate social e melhoria da qualidade de vida. (Incluído pela Lei nº 14.628, de 2023)
 
 § 1º Para fins de aferição dos valores que atendam aos limites referidos nos incisos I e II do caput deste artigo, deverão ser observados:
 
@@ -1864,7 +1864,7 @@ II - o somatório da despesa realizada com objetos de mesma natureza, entendidos
 
 § 6º Para os fins do inciso VIII do caput deste artigo, considera-se emergencial a contratação por dispensa com objetivo de manter a continuidade do serviço público, e deverão ser observados os valores praticados pelo mercado na forma do art. 23 desta Lei e adotadas as providências necessárias para a conclusão do processo licitatório, sem prejuízo de apuração de responsabilidade dos agentes públicos que deram causa à situação emergencial.
 
-§ 7º Não se aplica o disposto no § 1º deste artigo às contratações de até R$ 8.000,00 (oito mil reais) de serviços de manutenção de veículos automotores de propriedade do órgão ou entidade contratante, incluído o fornecimento de peças.        (Vide Decreto nº 10.922, de 2021)       (Vigência)        (Vide Decreto nº 11.317, de 2022)        Vigência        (Vide Decreto nº 11.871, de 2023)      Vigência     (Vide Decreto nº 12.343, de 2024)     Vigência         (Vide Decreto nº 12.807, de 2025)    Vigência
+§ 7º Não se aplica o disposto no § 1º deste artigo às contratações de até R$ 8.000,00 (oito mil reais) de serviços de manutenção de veículos automotores de propriedade do órgão ou entidade contratante, incluído o fornecimento de peças. (Vide Decreto nº 10.922, de 2021) (Vigência) (Vide Decreto nº 11.317, de 2022) Vigência (Vide Decreto nº 11.871, de 2023) Vigência (Vide Decreto nº 12.343, de 2024) Vigência (Vide Decreto nº 12.807, de 2025) Vigência
 
 DAS ALIENAÇÕES`,
     capitulo: "TÍTULO II - CAPÍTULO V",
@@ -2172,11 +2172,11 @@ III - prévias consulta e aceitação do órgão ou entidade gerenciadora e do f
 
 § 3º A faculdade conferida pelo § 2º deste artigo estará limitada a órgãos e entidades da Administração Pública federal, estadual, distrital e municipal que, na condição de não participantes, desejarem aderir à ata de registro de preços de órgão ou entidade gerenciadora federal, estadual ou distrital.
 
-§ 3º A faculdade de aderir à ata de registro de preços na condição de não participante poderá ser exercida:   (Redação dada pela Lei nº 14.770, de 2023)
+§ 3º A faculdade de aderir à ata de registro de preços na condição de não participante poderá ser exercida: (Redação dada pela Lei nº 14.770, de 2023)
 
-I - por órgãos e entidades da Administração Pública federal, estadual, distrital e municipal, relativamente a ata de registro de preços de órgão ou entidade gerenciadora federal, estadual ou distrital; ou   (Incluído pela Lei nº 14.770, de 2023)
+I - por órgãos e entidades da Administração Pública federal, estadual, distrital e municipal, relativamente a ata de registro de preços de órgão ou entidade gerenciadora federal, estadual ou distrital; ou (Incluído pela Lei nº 14.770, de 2023)
 
-II - por órgãos e entidades da Administração Pública municipal, relativamente a ata de registro de preços de órgão ou entidade gerenciadora municipal, desde que o sistema de registro de preços tenha sido formalizado mediante licitação.   (Incluído pela Lei nº 14.770, de 2023)
+II - por órgãos e entidades da Administração Pública municipal, relativamente a ata de registro de preços de órgão ou entidade gerenciadora municipal, desde que o sistema de registro de preços tenha sido formalizado mediante licitação. (Incluído pela Lei nº 14.770, de 2023)
 
 § 4º As aquisições ou as contratações adicionais a que se refere o § 2º deste artigo não poderão exceder, por órgão ou entidade, a 50% (cinquenta por cento) dos quantitativos dos itens do instrumento convocatório registrados na ata de registro de preços para o órgão gerenciador e para os órgãos participantes.
 
@@ -2350,7 +2350,7 @@ II - repactuação, quando houver regime de dedicação exclusiva de mão de obr
 
 § 6º Nos contratos para serviços contínuos com regime de dedicação exclusiva de mão de obra ou com predominância de mão de obra, o prazo para resposta ao pedido de repactuação de preços será preferencialmente de 1 (um) mês, contado da data do fornecimento da documentação prevista no § 6º do art. 135 desta Lei .
 
-§ 7º Para efeito do disposto nesta Lei, consideram-se como adimplemento da obrigação contratual a prestação do serviço, a realização da obra ou a entrega do bem, ou parcela destes, bem como qualquer outro evento contratual a cuja ocorrência esteja vinculada a emissão de documento de cobrança.   (Incluído pela Lei nº 14.770, de 2023)`,
+§ 7º Para efeito do disposto nesta Lei, consideram-se como adimplemento da obrigação contratual a prestação do serviço, a realização da obra ou a entrega do bem, ou parcela destes, bem como qualquer outro evento contratual a cuja ocorrência esteja vinculada a emissão de documento de cobrança. (Incluído pela Lei nº 14.770, de 2023)`,
     capitulo: "TÍTULO III - CAPÍTULO I",
   },
   "93": {
@@ -2393,7 +2393,7 @@ II - compras com entrega imediata e integral dos bens adquiridos e dos quais nã
 
 § 1º Às hipóteses de substituição do instrumento de contrato, aplica-se, no que couber, o disposto no art. 92 desta Lei .
 
-§ 2º É nulo e de nenhum efeito o contrato verbal com a Administração, salvo o de pequenas compras ou o de prestação de serviços de pronto pagamento, assim entendidos aqueles de valor não superior a R$ 10.000,00 (dez mil reais).        (Vide Decreto nº 10.922, de 2021)       (Vigência)      (Vide Decreto nº 11.317, de 2022)        Vigência        (Vide Decreto nº 11.871, de 2023)      Vigência     (Vide Decreto nº 12.343, de 2024)     Vigência         (Vide Decreto nº 12.807, de 2025)    Vigência
+§ 2º É nulo e de nenhum efeito o contrato verbal com a Administração, salvo o de pequenas compras ou o de prestação de serviços de pronto pagamento, assim entendidos aqueles de valor não superior a R$ 10.000,00 (dez mil reais). (Vide Decreto nº 10.922, de 2021) (Vigência) (Vide Decreto nº 11.317, de 2022) Vigência (Vide Decreto nº 11.871, de 2023) Vigência (Vide Decreto nº 12.343, de 2024) Vigência (Vide Decreto nº 12.807, de 2025) Vigência
 
 DAS GARANTIAS`,
     capitulo: "TÍTULO III - CAPÍTULO I",
@@ -2410,7 +2410,7 @@ II - seguro-garantia;
 
 III - fiança bancária emitida por banco ou instituição financeira devidamente autorizada a operar no País pelo Banco Central do Brasil.
 
-IV - título de capitalização custeado por pagamento único, com resgate pelo valor total.   (Incluído pela Lei nº 14.770, de 2023)
+IV - título de capitalização custeado por pagamento único, com resgate pelo valor total. (Incluído pela Lei nº 14.770, de 2023)
 
 § 2º Na hipótese de suspensão do contrato por ordem ou inadimplemento da Administração, o contratado ficará desobrigado de renovar a garantia ou de endossar a apólice de seguro até a ordem de reinício da execução ou o adimplemento pela Administração.
 
@@ -2425,7 +2425,7 @@ I - o prazo de vigência da apólice será igual ou superior ao prazo estabeleci
 
 II - o seguro-garantia continuará em vigor mesmo se o contratado não tiver pago o prêmio nas datas convencionadas.
 
-Parágrafo único. Nos contratos de execução continuada ou de fornecimento contínuo de bens e serviços, será permitida a substituição da apólice de seguro-garantia na data de renovação ou de aniversário, desde que mantidas as mesmas condições e coberturas da apólice vigente e desde que nenhum período fique descoberto, ressalvado o disposto no     § 2º do art. 96 desta Lei.`,
+Parágrafo único. Nos contratos de execução continuada ou de fornecimento contínuo de bens e serviços, será permitida a substituição da apólice de seguro-garantia na data de renovação ou de aniversário, desde que mantidas as mesmas condições e coberturas da apólice vigente e desde que nenhum período fique descoberto, ressalvado o disposto no § 2º do art. 96 desta Lei.`,
     capitulo: "TÍTULO III - CAPÍTULO I",
   },
   "98": {
@@ -2525,7 +2525,7 @@ b) necessidade de acautelar apuração administrativa de faltas contratuais pelo
     numero: "105",
     ementa: `Art. 105º A duração dos contratos regidos por esta Lei será a prevista em edital, e deverão ser observadas, no momento da contratação e a cada exercício financeiro, a disponibilidade de créditos orçamentários, bem como a previsão no plano plurianual, quando ultrapassar 1 (um) exercício financeiro.
 
-Parágrafo único. Não serão objeto de cancelamento automático os restos a pagar vinculados a contratos de duração plurianual, senão depois de encerrada a vigência destes, nem os vinculados a contratos rescindidos, nos casos dos §§ 8º e 9º do art. 90 desta Lei.   (Incluído pela Lei nº 14.770, de 2023)`,
+Parágrafo único. Não serão objeto de cancelamento automático os restos a pagar vinculados a contratos de duração plurianual, senão depois de encerrada a vigência destes, nem os vinculados a contratos rescindidos, nos casos dos §§ 8º e 9º do art. 90 desta Lei. (Incluído pela Lei nº 14.770, de 2023)`,
     capitulo: "TÍTULO III - CAPÍTULO I",
   },
   "106": {
@@ -2624,7 +2624,7 @@ II - a Administração poderá optar pela extinção do contrato e, nesse caso, 
   },
   "117": {
     numero: "117",
-    ementa: `Art. 117º A execução do contrato deverá ser acompanhada e fiscalizada por         1 (um) ou mais fiscais do contrato, representantes da Administração especialmente designados conforme requisitos estabelecidos no art. 7º desta Lei , ou pelos respectivos substitutos, permitida a contratação de terceiros para assisti-los e subsidiá-los com informações pertinentes a essa atribuição.
+    ementa: `Art. 117º A execução do contrato deverá ser acompanhada e fiscalizada por 1 (um) ou mais fiscais do contrato, representantes da Administração especialmente designados conforme requisitos estabelecidos no art. 7º desta Lei , ou pelos respectivos substitutos, permitida a contratação de terceiros para assisti-los e subsidiá-los com informações pertinentes a essa atribuição.
 
 § 1º O fiscal do contrato anotará em registro próprio todas as ocorrências relacionadas à execução do contrato, determinando o que for necessário para a regularização das faltas ou dos defeitos observados.
 
@@ -3207,7 +3207,7 @@ IV - cumprimento das condições de reabilitação definidas no ato punitivo;
 
 V - análise jurídica prévia, com posicionamento conclusivo quanto ao cumprimento dos requisitos definidos neste artigo.
 
-Parágrafo único. A sanção pelas infrações previstas nos incisos VIII e XII do caput do art. 155 desta Lei exigirá, como condição de reabilitação do licitante ou contratado, a implantação ou aperfeiçoamento de programa de integridade pelo responsável.    (Regulamento)
+Parágrafo único. A sanção pelas infrações previstas nos incisos VIII e XII do caput do art. 155 desta Lei exigirá, como condição de reabilitação do licitante ou contratado, a implantação ou aperfeiçoamento de programa de integridade pelo responsável. (Regulamento)
 
 DAS IMPUGNAÇÕES, DOS PEDIDOS DE ESCLARECIMENTO E DOS RECURSOS`,
     capitulo: "TÍTULO IV - CAPÍTULO III",
@@ -3520,46 +3520,46 @@ II - a data de juntada aos autos do aviso de recebimento, quando a notificação
     numero: "184",
     ementa: `Art. 184º Aplicam-se as disposições desta Lei, no que couber e na ausência de norma específica, aos convênios, acordos, ajustes e outros instrumentos congêneres celebrados por órgãos e entidades da Administração Pública, na forma estabelecida em regulamento do Poder Executivo federal.
 
-§ 1º (VETADO).   (Incluído pela Lei nº 14.770, de 2023)
+§ 1º (VETADO). (Incluído pela Lei nº 14.770, de 2023)
 
-§ 2º Quando, verificada qualquer das hipóteses da alínea d do inciso II do caput do art. 124 desta Lei, o valor global inicialmente pactuado demonstrar-se insuficiente para a execução do objeto, poderão ser:   (Incluído pela Lei nº 14.770, de 2023)
+§ 2º Quando, verificada qualquer das hipóteses da alínea d do inciso II do caput do art. 124 desta Lei, o valor global inicialmente pactuado demonstrar-se insuficiente para a execução do objeto, poderão ser: (Incluído pela Lei nº 14.770, de 2023)
 
-I - utilizados saldos de recursos ou rendimentos de aplicação financeira;   (Incluído pela Lei nº 14.770, de 2023)
+I - utilizados saldos de recursos ou rendimentos de aplicação financeira; (Incluído pela Lei nº 14.770, de 2023)
 
-II - aportados novos recursos pelo concedente;   (Incluído pela Lei nº 14.770, de 2023)
+II - aportados novos recursos pelo concedente; (Incluído pela Lei nº 14.770, de 2023)
 
-III - reduzidas as metas e as etapas, desde que isso não comprometa a fruição ou a funcionalidade do objeto pactuado.   (Incluído pela Lei nº 14.770, de 2023)
+III - reduzidas as metas e as etapas, desde que isso não comprometa a fruição ou a funcionalidade do objeto pactuado. (Incluído pela Lei nº 14.770, de 2023)
 
-§ 3º São permitidos ajustes nos instrumentos celebrados com recursos de transferências voluntárias, para promover alterações em seu objeto, desde que:   (Incluído pela Lei nº 14.770, de 2023)
+§ 3º São permitidos ajustes nos instrumentos celebrados com recursos de transferências voluntárias, para promover alterações em seu objeto, desde que: (Incluído pela Lei nº 14.770, de 2023)
 
-I - isso não importe transposição, remanejamento ou transferência de recursos de uma categoria de programação para outra ou de um órgão para outro;   (Incluído pela Lei nº 14.770, de 2023)
+I - isso não importe transposição, remanejamento ou transferência de recursos de uma categoria de programação para outra ou de um órgão para outro; (Incluído pela Lei nº 14.770, de 2023)
 
-II - seja apresentada justificativa objetiva pelo convenente; e   (Incluído pela Lei nº 14.770, de 2023)
+II - seja apresentada justificativa objetiva pelo convenente; e (Incluído pela Lei nº 14.770, de 2023)
 
-III - quando se tratar de obra, seja mantido o que foi pactuado quanto a suas características.   (Incluído pela Lei nº 14.770, de 2023)
+III - quando se tratar de obra, seja mantido o que foi pactuado quanto a suas características. (Incluído pela Lei nº 14.770, de 2023)
 
-§ 4º Os saldos remanescentes e os rendimentos financeiros auferidos na forma do § 1º deste artigo serão obrigatoriamente computados a crédito do convênio e aplicados no objeto de sua finalidade e na ampliação de meta, quando possível, sem prejuízo da funcionalidade do objeto pactuado, devendo constar de demonstrativo específico que integrará as prestações de contas do ajuste.    (Incluído pela Lei nº 14.770, de 2023)`,
+§ 4º Os saldos remanescentes e os rendimentos financeiros auferidos na forma do § 1º deste artigo serão obrigatoriamente computados a crédito do convênio e aplicados no objeto de sua finalidade e na ampliação de meta, quando possível, sem prejuízo da funcionalidade do objeto pactuado, devendo constar de demonstrativo específico que integrará as prestações de contas do ajuste. (Incluído pela Lei nº 14.770, de 2023)`,
     capitulo: "TÍTULO VII",
   },
   "184-A": {
     numero: "184-A",
-    ementa: `Art. 184-Aº À celebração, à execução, ao acompanhamento e à prestação de contas dos convênios, contratos de repasse e instrumentos congêneres em que for parte a União, com valor global de até R$ 1.500.000,00 (um milhão e quinhentos mil reais), aplicar-se-á o seguinte regime simplificado:   (Incluído pela Lei nº 14.770, de 2023)       (Vide Decreto nº 12.343, de 2024)     Vigência         (Vide Decreto nº 12.807, de 2025)    Vigência
+    ementa: `Art. 184-Aº À celebração, à execução, ao acompanhamento e à prestação de contas dos convênios, contratos de repasse e instrumentos congêneres em que for parte a União, com valor global de até R$ 1.500.000,00 (um milhão e quinhentos mil reais), aplicar-se-á o seguinte regime simplificado: (Incluído pela Lei nº 14.770, de 2023) (Vide Decreto nº 12.343, de 2024) Vigência (Vide Decreto nº 12.807, de 2025) Vigência
 
-I - o plano de trabalho aprovado conterá parâmetros objetivos para caracterizar o cumprimento do objeto;   (Incluído pela Lei nº 14.770, de 2023)
+I - o plano de trabalho aprovado conterá parâmetros objetivos para caracterizar o cumprimento do objeto; (Incluído pela Lei nº 14.770, de 2023)
 
-II - a minuta dos instrumentos deverá ser simplificada;   (Incluído pela Lei nº 14.770, de 2023)
+II - a minuta dos instrumentos deverá ser simplificada; (Incluído pela Lei nº 14.770, de 2023)
 
-III - a liberação dos recursos dar-se-á em parcela única;      (Incluído pela Lei nº 14.770, de 2023)
+III - a liberação dos recursos dar-se-á em parcela única; (Incluído pela Lei nº 14.770, de 2023)
 
-IV - a verificação da execução do objeto ocorrerá mediante visita de constatação da compatibilidade com o plano de trabalho.   (Incluído pela Lei nº 14.770, de 2023)
+IV - a verificação da execução do objeto ocorrerá mediante visita de constatação da compatibilidade com o plano de trabalho. (Incluído pela Lei nº 14.770, de 2023)
 
-§ 1º O acompanhamento pela concedente ou mandatária será realizado pela verificação dos boletins de medição e fotos georreferenciadas registradas pela empresa executora e pelo convenente do Transferegov e por vistorias in loco , realizadas considerando o marco de execução de 100% (cem por cento) do cronograma físico, podendo ocorrer outras vistorias, quando necessárias.   (Incluído pela Lei nº 14.770, de 2023)
+§ 1º O acompanhamento pela concedente ou mandatária será realizado pela verificação dos boletins de medição e fotos georreferenciadas registradas pela empresa executora e pelo convenente do Transferegov e por vistorias in loco , realizadas considerando o marco de execução de 100% (cem por cento) do cronograma físico, podendo ocorrer outras vistorias, quando necessárias. (Incluído pela Lei nº 14.770, de 2023)
 
-§ 2º Não haverá análise nem aceite de termo de referência, anteprojeto, projeto, orçamento, resultado do processo licitatório ou outro documento necessário para o início da execução do objeto, e caberá à concedente ou mandatária verificar o cumprimento do objeto pactuado ao final da execução do instrumento.   (Incluído pela Lei nº 14.770, de 2023)
+§ 2º Não haverá análise nem aceite de termo de referência, anteprojeto, projeto, orçamento, resultado do processo licitatório ou outro documento necessário para o início da execução do objeto, e caberá à concedente ou mandatária verificar o cumprimento do objeto pactuado ao final da execução do instrumento. (Incluído pela Lei nº 14.770, de 2023)
 
-§ 3º Quando exigidos, os registros dos projetos de engenharia, dos documentos de titularidade de área, do licenciamento ambiental e do processo licitatório pelo convenente no Transferegov constituirão condição para a liberação da parcela única dos recursos de que trata o inciso III do caput deste artigo.   (Incluído pela Lei nº 14.770, de 2023)
+§ 3º Quando exigidos, os registros dos projetos de engenharia, dos documentos de titularidade de área, do licenciamento ambiental e do processo licitatório pelo convenente no Transferegov constituirão condição para a liberação da parcela única dos recursos de que trata o inciso III do caput deste artigo. (Incluído pela Lei nº 14.770, de 2023)
 
-§ 4º O regime simplificado de que trata este artigo aplica-se aos convênios, contratos de repasse e instrumentos congêneres celebrados após a publicação desta Lei.   (Incluído pela Lei nº 14.770, de 2023)`,
+§ 4º O regime simplificado de que trata este artigo aplica-se aos convênios, contratos de repasse e instrumentos congêneres celebrados após a publicação desta Lei. (Incluído pela Lei nº 14.770, de 2023)`,
     capitulo: "TÍTULO VII",
   },
   "185": {
@@ -3615,21 +3615,21 @@ I - os arts. 89 a 108 da Lei nº 8.666, de 21 de junho de 1993 , na data de publ
 
 II - a Lei nº 8.666, de 21 de junho de 1993 , a Lei nº 10.520, de 17 de julho de 2002 , e os arts. 1º a 47-A da Lei nº 12.462, de 4 de agosto de 2011 , após decorridos 2 (dois) anos da publicação oficial desta Lei.
 
-II - em 30 de dezembro de 2023:       (Redação dada pela Medida Provisória nº 1.167, de 2023)        Vigência encerrada
+II - em 30 de dezembro de 2023: (Redação dada pela Medida Provisória nº 1.167, de 2023) Vigência encerrada
 
-a) a Lei nº 8.666, de 1993 ;      (Incluído pela Medida Provisória nº 1.167, de 2023)       Vigência encerrada
+a) a Lei nº 8.666, de 1993 ; (Incluído pela Medida Provisória nº 1.167, de 2023) Vigência encerrada
 
-b) a Lei nº 10.520, de 2002 ; e      (Incluído pela Medida Provisória nº 1.167, de 2023)       Vigência encerrada
+b) a Lei nº 10.520, de 2002 ; e (Incluído pela Medida Provisória nº 1.167, de 2023) Vigência encerrada
 
-c) os art. 1º a art. 47-A da Lei nº 12.462, de 2011 .       (Incluído pela Medida Provisória nº 1.167, de 2023)       Vigência encerrada
+c) os art. 1º a art. 47-A da Lei nº 12.462, de 2011 . (Incluído pela Medida Provisória nº 1.167, de 2023) Vigência encerrada
 
-II - em 30 de dezembro de 2023:       (Redação dada pela Lei Complementar nº 198, de 2023)
+II - em 30 de dezembro de 2023: (Redação dada pela Lei Complementar nº 198, de 2023)
 
-a) a Lei nº 8.666, de 21 de junho de 1993;        (Redação dada pela Lei Complementar nº 198, de 2023)
+a) a Lei nº 8.666, de 21 de junho de 1993; (Redação dada pela Lei Complementar nº 198, de 2023)
 
-b) a Lei nº 10.520, de 17 de julho de 2002; e     (Redação dada pela Lei Complementar nº 198, de 2023)
+b) a Lei nº 10.520, de 17 de julho de 2002; e (Redação dada pela Lei Complementar nº 198, de 2023)
 
-c) os arts. 1º a 47-A da Lei nº 12.462, de 4 de agosto de 2011 .       (Redação dada pela Lei Complementar nº 198, de 2023)`,
+c) os arts. 1º a 47-A da Lei nº 12.462, de 4 de agosto de 2011 . (Redação dada pela Lei Complementar nº 198, de 2023)`,
     capitulo: "TÍTULO VII",
   },
   "194": {
@@ -3652,7 +3652,7 @@ Wagner de Campos Rosário
 
 André Luiz de Almeida Mendonça
 
-Este texto não substitui o publicado no DOU de 1º.4.2021   - Edição extra-F
+Este texto não substitui o publicado no DOU de 1º.4.2021 - Edição extra-F
 
  
 
@@ -3678,7 +3678,7 @@ LEI Nº 14.133, DE 1º DE ABRIL DE 2021
 
 Lei de Licitações e Contratos Administrativos. O PRESIDENTE DA REPÚBLICA Faço saber que o Congresso Nacional decreta e eu promulgo, nos termos do parágrafo 5 o do art. 66 da Constituição Federal, as seguintes partes vetadas da Lei n o 14.133, de 1º de abril de 2021:
 
- Art. 37   .....................................................................................................................
+ Art. 37 .....................................................................................................................
 
 ...................................................................................................................................
 
@@ -3688,13 +3688,13 @@ I - melhor técnica; ou
 
 II - técnica e preço, na proporção de 70% (setenta por cento) de valoração da proposta técnica.
 
- Art. 54   ....................................................................................................................
+ Art. 54 ....................................................................................................................
 
 § 1º Sem prejuízo do disposto no caput , é obrigatória a publicação de extrato do edital no Diário Oficial da União, do Estado, do Distrito Federal ou do Município, ou, no caso de consórcio público, do ente de maior nível entre eles, bem como em jornal diário de grande circulação.
 
 .................................................................................................................................
 
- Art. 115   ...................................................................................................................
+ Art. 115 ...................................................................................................................
 
 ....................................................................................................................................
 
@@ -3708,7 +3708,7 @@ II - técnica e preço, na proporção de 70% (setenta por cento) de valoração
 
 § 2º Até 31 de dezembro de 2023, os Municípios deverão realizar divulgação complementar de suas contratações mediante publicação de extrato de edital de licitação em jornal diário de grande circulação local.
 
-Brasília,  10  de junho de 2021; 200 o   da Independência e 133 o   da República.
+Brasília,  10  de junho de 2021; 200 o da Independência e 133 o da República.
 
 JAIR MESSIAS BOLSONARO
 
