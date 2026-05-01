@@ -272,9 +272,11 @@ export async function GET(req: NextRequest) {
 
     // 4. Also fetch documents that need embedding (direct processing)
     // FIFO: itens mais antigos primeiro, pra não deixar backlog envelhecer.
+    // Sem filtro de r2Key: processDocument tem fallback pra link-type (usa
+    // content || description). Filtro antigo `r2Key: { not: null }` deixava
+    // ~99% dos Documents (que são link-type) órfãos no pipeline.
     const pendingDocuments = await prisma.document.findMany({
       where: {
-        r2Key: { not: null },
         OR: [
           { embeddingStatus: null },
           { embeddingStatus: 'pending' },
