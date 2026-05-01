@@ -29,14 +29,18 @@ interface ApiResponse {
   totalPages: number;
 }
 
+// Lista exibida no filtro público. TCU primeiro (mais relevante para
+// licitações federais), depois TCEs e STJ. Códigos UPPERCASE alinhados
+// com o que a API valida (z.enum) e com o que o DB armazena.
 const TRIBUNALS = [
-  { code: 'tce-sp', label: 'TCE-SP' },
-  { code: 'tce-pr', label: 'TCE-PR' },
-  { code: 'tce-sc', label: 'TCE-SC' },
-  { code: 'tce-rj', label: 'TCE-RJ' },
-  { code: 'tce-rs', label: 'TCE-RS' },
-  { code: 'tce-pe', label: 'TCE-PE' },
-  { code: 'datajud-stj', label: 'DataJud (STJ)' },
+  { code: 'TCU', label: 'TCU' },
+  { code: 'TCE-SP', label: 'TCE-SP' },
+  { code: 'TCE-PR', label: 'TCE-PR' },
+  { code: 'TCE-SC', label: 'TCE-SC' },
+  { code: 'TCE-RJ', label: 'TCE-RJ' },
+  { code: 'TCE-RS', label: 'TCE-RS' },
+  { code: 'TCE-PE', label: 'TCE-PE' },
+  { code: 'STJ', label: 'STJ' },
 ];
 
 const COMMON_THEMES = [
@@ -64,17 +68,21 @@ function tribunalLabel(code: string): string {
 }
 
 function tribunalColor(code: string): string {
+  // Aceita ambos cases pra retro-compat com decisões antigas, mas a forma
+  // canônica pós-normalização (2026-05-01) é UPPERCASE.
   const colors: Record<string, string> = {
-    'tce-sp': 'bg-blue-100 text-blue-800',
-    'tce-mg': 'bg-green-100 text-green-800',
-    'tce-pr': 'bg-purple-100 text-purple-800',
-    'tce-sc': 'bg-sky-100 text-sky-800',
-    'tce-rj': 'bg-orange-100 text-orange-800',
-    'tce-rs': 'bg-violet-100 text-violet-800',
-    'tce-pe': 'bg-teal-100 text-teal-800',
-    'datajud-stj': 'bg-red-100 text-red-800',
+    'TCU': 'bg-amber-100 text-amber-900',
+    'TCE-SP': 'bg-blue-100 text-blue-800',
+    'TCE-MG': 'bg-green-100 text-green-800',
+    'TCE-PR': 'bg-purple-100 text-purple-800',
+    'TCE-SC': 'bg-sky-100 text-sky-800',
+    'TCE-RJ': 'bg-orange-100 text-orange-800',
+    'TCE-RS': 'bg-violet-100 text-violet-800',
+    'TCE-PE': 'bg-teal-100 text-teal-800',
+    'STJ': 'bg-red-100 text-red-800',
+    'STF': 'bg-rose-100 text-rose-800',
   };
-  return colors[code] || 'bg-gray-100 text-gray-800';
+  return colors[code.toUpperCase()] || 'bg-gray-100 text-gray-800';
 }
 
 export default function JurisprudenciaClient() {

@@ -36,6 +36,27 @@ export async function middleware(request: NextRequest) {
     return NextResponse.next();
   }
 
+  // Redireciona /jurisprudencia → /area-restrita/jurisprudencia quando
+  // o usuário está logado. Versão restrita tem TCU/STJ/STF + busca IA, e
+  // o aluno espera consistência: clicar "Jurisprudência" no menu superior
+  // deve abrir a versão completa, não a pública resumida.
+  // (A página pública continua acessível diretamente em /jurisprudencia
+  // pra usuários não logados, e via deep link em /jurisprudencia/[id] —
+  // só o root /jurisprudencia faz o redirect.)
+  if (pathname === '/jurisprudencia') {
+    const token = request.cookies.get('auth-token')?.value;
+    if (token) {
+      const payload = await verifyAuth(token);
+      if (payload) {
+        const url = new URL('/area-restrita/jurisprudencia', request.url);
+        // Preserva search params (filtros de tribunal/ano/busca) na transição
+        url.search = request.nextUrl.search;
+        return NextResponse.redirect(url);
+      }
+    }
+    return NextResponse.next();
+  }
+
   // ✅ Verifica se é uma rota protegida (match exato ou subpath)
   const isProtectedRoute = protectedRoutes.some(route =>
     pathname === route || pathname.startsWith(route + '/')
@@ -79,5 +100,6 @@ export const config = {
   matcher: [
     '/area-restrita/:path*',
     '/admin/:path*',
+    '/jurisprudencia',
   ],
 };
