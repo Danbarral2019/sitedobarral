@@ -4,8 +4,8 @@ import { useEffect, useState, useMemo, useRef, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import dynamic from 'next/dynamic';
 import { Loader2, ArrowLeft } from 'lucide-react';
-import { courses } from '@/data/courses';
 import { useAuth } from '@/hooks/use-auth';
+import { useEnrolledCourses } from '@/hooks/use-enrolled-courses';
 import { useFavorites } from '@/hooks/use-favorites';
 import { useGlobalSearch, type SearchSnapshot } from '@/hooks/use-global-search';
 import { useSearchPdfExport } from '@/hooks/use-search-pdf-export';
@@ -185,13 +185,12 @@ function AreaRestritaContent() {
     return () => clearTimeout(t);
   }, [search.query, router, urlSearchParams]);
 
-  // Enrolled course IDs
-  const enrolledCourseIds = useMemo(() => {
-    if (!user) return [];
-    return user.role === 'admin'
-      ? courses.map((c) => c.id)
-      : (user.enrollments?.map((e) => e.courseId) || []);
-  }, [user]);
+  // Cursos do usuário (fonte única — sidebar, header e dashboard)
+  const enrolledCourses = useEnrolledCourses();
+  const enrolledCourseIds = useMemo(
+    () => enrolledCourses.map((c) => c.id),
+    [enrolledCourses],
+  );
 
   // Fetch course data
   useEffect(() => {

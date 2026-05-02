@@ -8,11 +8,13 @@ import {
   Scale,
   FileText,
   Gavel,
-  BookMarked,
   CreditCard,
   Heart,
   LogOut,
   Newspaper,
+  List,
+  Book,
+  Library,
   type LucideIcon,
 } from 'lucide-react';
 
@@ -61,17 +63,6 @@ export const NAV_SECTIONS: MenuSection[] = [
     ],
   },
   {
-    title: 'Lei 14.133 e referência',
-    items: [
-      {
-        label: 'Lei 14.133 comentada',
-        href: '/area-restrita/lei-comentada',
-        icon: BookOpen,
-      },
-      { label: 'Glossário', href: '/glossario', icon: BookMarked },
-    ],
-  },
-  {
     title: 'Ferramentas de IA',
     items: [
       { label: 'Assistente IA', href: '/area-restrita/assistente', icon: Sparkles },
@@ -83,7 +74,21 @@ export const NAV_SECTIONS: MenuSection[] = [
     items: [
       { label: 'Atos normativos', href: '/legislacao', icon: FileText },
       { label: 'Jurisprudência', href: '/area-restrita/jurisprudencia', icon: Gavel },
+      { label: 'Pareceres', href: '/base-conhecimento/pareceres', icon: Library },
+      { label: 'Orientações Normativas', href: '/base-conhecimento/orientacoes-normativas', icon: BookOpen },
+      { label: 'Enunciados', href: '/base-conhecimento/enunciados', icon: List },
+      { label: 'Manual TCU', href: '/base-conhecimento/manual-tcu', icon: Book },
       { label: 'Blog', href: '/blog', icon: Newspaper },
+    ],
+  },
+  {
+    title: 'Lei 14.133 e referência',
+    items: [
+      {
+        label: 'Lei 14.133 comentada',
+        href: '/area-restrita/lei-comentada',
+        icon: BookOpen,
+      },
     ],
   },
   {

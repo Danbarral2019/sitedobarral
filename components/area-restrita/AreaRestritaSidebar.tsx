@@ -8,19 +8,7 @@ import { X, PanelLeftClose, PanelLeftOpen, Menu, GraduationCap } from 'lucide-re
 import { NAV_SECTIONS, type MenuItem } from './nav-catalog';
 import { useSidebar } from './SidebarContext';
 import { cn } from '@/lib/planejamento/cn';
-import { courses as ALL_COURSES } from '@/data/courses';
-
-interface EnrolledCourse {
-  id: string;
-  slug: string;
-  title: string;
-}
-
-interface ApiEnrollment {
-  courseId: string;
-  expiresAt: string | null;
-  isLifetime: boolean;
-}
+import { useEnrolledCourses } from '@/hooks/use-enrolled-courses';
 
 /**
  * Sidebar de navegação da área restrita.
@@ -40,36 +28,9 @@ export function AreaRestritaSidebar() {
     useSidebar();
   const pathname = usePathname();
   const [mounted, setMounted] = useState(false);
-  const [enrolledCourses, setEnrolledCourses] = useState<EnrolledCourse[]>([]);
+  const enrolledCourses = useEnrolledCourses();
 
   useEffect(() => setMounted(true), []);
-
-  useEffect(() => {
-    let cancelled = false;
-    fetch('/api/auth/me')
-      .then(res => (res.ok ? res.json() : null))
-      .then(data => {
-        if (cancelled || !data?.user?.enrollments) return;
-        const now = new Date();
-        const active: ApiEnrollment[] = (data.user.enrollments as ApiEnrollment[]).filter(
-          (e) => e.isLifetime || (e.expiresAt && new Date(e.expiresAt) >= now),
-        );
-        const mapped = active
-          .map((e) => {
-            const course = ALL_COURSES.find(c => c.id === e.courseId);
-            if (!course) return null;
-            return { id: course.id, slug: course.slug, title: course.title };
-          })
-          .filter((c): c is EnrolledCourse => c !== null);
-        setEnrolledCourses(mapped);
-      })
-      .catch(() => {
-        /* silently ignore — sidebar fixa segue funcional */
-      });
-    return () => {
-      cancelled = true;
-    };
-  }, []);
 
   // Fecha o drawer mobile ao navegar
   useEffect(() => {
