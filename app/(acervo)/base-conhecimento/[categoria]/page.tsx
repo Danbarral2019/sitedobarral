@@ -187,12 +187,20 @@ export default async function CategoriaPage({ params, searchParams }: PageProps)
     AND?: Array<Record<string, unknown>>;
     tags?: { contains: string };
     aiClassification?: { contains: string };
+    NOT?: Record<string, unknown>;
   };
 
   const where: WhereClause = {
     isPublic: true,
     category: { in: [...activeDbCategories] },
   };
+
+  // Pra categorias CONUNI (pareceres, notas, despachos), esconde docs
+  // classificados pelo Gemini como NÃO relevantes pra licitações/contratos.
+  // Docs sem classificação ainda continuam visíveis (filtragem gradual).
+  if (cfg.tipoFilter) {
+    where.NOT = { aiClassification: { contains: '"licitacoesContratos":false' } };
+  }
 
   if (searchTerm) {
     where.OR = [

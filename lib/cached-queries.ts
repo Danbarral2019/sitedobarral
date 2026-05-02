@@ -110,14 +110,33 @@ export const getCachedPublishedPostCount = cache(async () => {
 });
 
 /**
- * Conta documentos agrupados por categoria (cached)
+ * Conta documentos agrupados por categoria (cached).
+ *
+ * Para categorias do CONUNI (parecer/parecer-vinculante/decor/nota-tecnica/
+ * despacho), exclui docs marcados como `licitacoesContratos:false` pelo
+ * classificador Gemini (irrelevantes pra licitações). Docs ainda não
+ * classificados continuam contando — filtragem é gradual.
  */
 export const getCachedDocumentCountByCategory = cache(async () => {
-  const counts = await prisma.document.groupBy({
-    by: ['category'],
-    _count: { id: true },
-  });
-  return Object.fromEntries(counts.map(c => [c.category, c._count.id]));
+  const CONUNI_CATEGORIES = ['parecer', 'parecer-vinculante', 'decor', 'nota-tecnica', 'despacho'];
+  const [conuniCounts, otherCounts] = await Promise.all([
+    prisma.document.groupBy({
+      by: ['category'],
+      where: {
+        category: { in: CONUNI_CATEGORIES },
+        NOT: { aiClassification: { contains: '"licitacoesContratos":false' } },
+      },
+      _count: { id: true },
+    }),
+    prisma.document.groupBy({
+      by: ['category'],
+      where: { category: { notIn: CONUNI_CATEGORIES } },
+      _count: { id: true },
+    }),
+  ]);
+  return Object.fromEntries(
+    [...conuniCounts, ...otherCounts].map(c => [c.category, c._count.id]),
+  );
 });
 
 /**

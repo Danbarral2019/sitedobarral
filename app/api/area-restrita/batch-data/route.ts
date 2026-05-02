@@ -124,6 +124,7 @@ export async function GET(request: NextRequest) {
           acordaoNumero: true,
           acordaoAno: true,
           entityType: true,
+          aiClassification: true, // só pra extrair licitacoesContratos no map abaixo
         },
       });
       console.log('[Batch-Data] Documentos encontrados:', documents.length);
@@ -210,8 +211,29 @@ export async function GET(request: NextRequest) {
       console.error('[Batch-Data] Warning: could not fetch module counts:', error);
     }
 
+    // Otimizar payload: truncar description, remover tags e aiClassification.
+    // De aiClassification extrai apenas o boolean licitacoesContratos pra o
+    // KnowledgeBaseSection filtrar irrelevantes — sem mandar JSON inteiro.
+    const truncatedDocs = documents.map(doc => {
+      let licitacoesContratos: boolean | null = null;
+      if (doc.aiClassification) {
+        try {
+          const parsed = JSON.parse(doc.aiClassification) as { licitacoesContratos?: boolean };
+          if (typeof parsed.licitacoesContratos === 'boolean') licitacoesContratos = parsed.licitacoesContratos;
+        } catch { /* ignora */ }
+      }
+      const { aiClassification: _ignored, ...rest } = doc;
+      void _ignored;
+      return {
+        ...rest,
+        description: doc.description ? doc.description.substring(0, 120) : null,
+        tags: null as string | null,
+        licitacoesContratos,
+      };
+    });
+
     // Agrupar resultados por courseId para fácil acesso no frontend
-    const groupedDocuments: Record<string, typeof documents> = {};
+    const groupedDocuments: Record<string, typeof truncatedDocs> = {};
     const groupedVideos: Record<string, typeof videos> = {};
     const groupedSites: Record<string, Array<typeof siteToCourse[0]['site']>> = {};
 
@@ -221,13 +243,6 @@ export async function GET(request: NextRequest) {
       groupedVideos[courseId] = [];
       groupedSites[courseId] = [];
     });
-
-    // Otimizar payload: truncar description e remover tags (não usados na listagem)
-    const truncatedDocs = documents.map(doc => ({
-      ...doc,
-      description: doc.description ? doc.description.substring(0, 120) : null,
-      tags: null as string | null, // Removido da listagem (economiza ~1 MB com 2k+ docs)
-    }));
 
     // Agrupar documentos
     truncatedDocs.forEach(doc => {

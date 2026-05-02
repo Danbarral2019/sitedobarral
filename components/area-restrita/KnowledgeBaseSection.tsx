@@ -21,6 +21,7 @@ const KNOWLEDGE_BASE_CATEGORIES: Array<{
 interface DocumentType {
   id: string;
   category: string;
+  licitacoesContratos?: boolean | null;
 }
 
 interface KnowledgeBaseSectionProps {
@@ -29,12 +30,21 @@ interface KnowledgeBaseSectionProps {
   tribunalDecisionCount?: number;
 }
 
+const CONUNI_CATEGORIES = new Set(['parecer', 'parecer-vinculante', 'decor', 'nota-tecnica', 'despacho']);
+
 export function KnowledgeBaseSection({ documents, onSelectCategory, tribunalDecisionCount }: KnowledgeBaseSectionProps) {
+  // Pra categorias CONUNI: oculta docs marcados como irrelevantes pelo Gemini
+  // (licitacoesContratos === false). Sem classificação ainda conta.
+  const filteredDocs = documents.filter((d) => {
+    if (!CONUNI_CATEGORIES.has(d.category)) return true;
+    return d.licitacoesContratos !== false;
+  });
+
   const categoriesWithCounts = KNOWLEDGE_BASE_CATEGORIES.map((cat) => {
     const mc = cat.matchCategories;
     const count = mc
-      ? documents.filter((d) => mc.includes(d.category)).length
-      : documents.filter((d) => d.category === cat.category).length;
+      ? filteredDocs.filter((d) => mc.includes(d.category)).length
+      : filteredDocs.filter((d) => d.category === cat.category).length;
     return { ...cat, count };
   }).filter((cat) => cat.count > 0);
 
