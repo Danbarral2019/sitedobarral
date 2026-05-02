@@ -784,9 +784,7 @@ export const CacheInvalidation = {
   },
   leiArticle: async (numero: string): Promise<number> => {
     if (!redis) return 0;
-    const keys = await redis.keys(`*lei:article-editor:${numero}*`);
-    if (keys.length === 0) return 0;
-    return await redis.del(...keys);
+    return await redis.del(CacheKeys.leiArticleEditor(numero));
   },
 
   /**
