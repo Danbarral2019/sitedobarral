@@ -1288,8 +1288,16 @@ function LeiComentadaContent() {
                           'portaria': 'Portarias',
                           'in': 'Instruções Normativas',
                           'orientacao-normativa': 'Orientações Normativas - AGU',
-                          'parecer-vinculante': 'Precedentes da AGU',
-                          'decor': 'Precedentes da AGU',
+                          // Família AGU (CONUNI/DECOR)
+                          'parecer': 'Pareceres da AGU',
+                          'parecer-vinculante': 'Pareceres da AGU',
+                          'decor': 'Pareceres da AGU',
+                          'nota-tecnica': 'Pareceres da AGU',
+                          'despacho': 'Pareceres da AGU',
+                          // Família TCU
+                          'sumula': 'Súmulas do TCU',
+                          'consulta_tcu': 'Respostas a Consultas do TCU',
+                          'informativo': 'Informativos do TCU',
                           'acordao': 'Jurisprudência dos Tribunais de Contas',
                           'outro': 'Outros Documentos',
                         };
@@ -1312,7 +1320,10 @@ function LeiComentadaContent() {
                           'Portarias',
                           'Instruções Normativas',
                           'Orientações Normativas - AGU',
-                          'Precedentes da AGU',
+                          'Pareceres da AGU',
+                          'Súmulas do TCU',
+                          'Respostas a Consultas do TCU',
+                          'Informativos do TCU',
                           'Jurisprudência dos Tribunais de Contas',
                           'Outros Documentos',
                         ];

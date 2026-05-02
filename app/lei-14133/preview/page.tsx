@@ -37,8 +37,8 @@ import {
   Star,
   MessageSquareQuote,
 } from 'lucide-react';
-import { ArticleFull } from '@/components/lei-14133/ArticleFull';
 import { CROSS_REFERENCES } from '@/data/lei-14133-cross-references';
+import { normalizeTextContent } from '@/lib/utils';
 
 interface EnunciadoResumo {
   id: string;
@@ -46,6 +46,7 @@ interface EnunciadoResumo {
   numero: number;
   texto: string;
   tema: string;
+  url?: string;
 }
 
 interface LeiArticle {
@@ -599,11 +600,14 @@ function PreviewContent() {
           <div className="lg:col-span-8">
             {selectedArticle ? (
               <div className="space-y-6">
-                {/* Card do artigo: meta + texto integral via ArticleFull */}
-                <div className="bg-white rounded-lg shadow-md p-6 lg:p-8">
-                  <div className="flex items-start justify-between mb-4 pb-4 border-b border-gray-100">
+                {/* Card do artigo: meta + texto */}
+                <div className="bg-white rounded-lg shadow-md p-6">
+                  <div className="flex items-start justify-between mb-4">
                     <div>
                       <div className="flex items-center gap-3 mb-2 flex-wrap">
+                        <span className="px-4 py-2 bg-blue-600 text-white font-bold rounded-lg">
+                          Artigo {selectedArticle.numero}
+                        </span>
                         {(() => {
                           const status = getArticleStatus(selectedArticle.documentCount);
                           const Icon = status.icon;
@@ -621,7 +625,7 @@ function PreviewContent() {
                         <p className="text-sm text-gray-600 mb-1">{selectedArticle.titulo}</p>
                       )}
                       {selectedArticle.capituloCompleto && (
-                        <p className="text-sm text-gray-600">{selectedArticle.capituloCompleto}</p>
+                        <p className="text-sm text-gray-600 mb-2">{selectedArticle.capituloCompleto}</p>
                       )}
                     </div>
                     <div className="text-right flex-shrink-0">
@@ -630,7 +634,13 @@ function PreviewContent() {
                     </div>
                   </div>
 
-                  <ArticleFull numero={selectedArticle.numero} ementa={selectedArticle.ementa} />
+                  <div className="prose max-w-none">
+                    <div className="space-y-2">
+                      {normalizeTextContent(selectedArticle.ementa).map((p, i) => (
+                        <p key={i} className="text-gray-800">{p}</p>
+                      ))}
+                    </div>
+                  </div>
                 </div>
 
                 {/* Cross-references */}
@@ -733,19 +743,39 @@ function PreviewContent() {
                       Enunciados Interpretativos ({selectedArticle.enunciados.length})
                     </h3>
                     <div className="space-y-3">
-                      {selectedArticle.enunciados.map((e) => (
-                        <div key={e.id} className="border-l-4 border-purple-500 bg-purple-50 p-4 rounded-r-lg">
-                          <div className="flex items-center gap-2 mb-2">
-                            <span className="px-2 py-1 bg-purple-600 text-white text-xs font-bold rounded">
-                              {e.orgao} {e.numero}
-                            </span>
-                            <span className="text-xs text-purple-700 bg-purple-100 px-2 py-0.5 rounded">
-                              {e.tema}
-                            </span>
+                      {selectedArticle.enunciados.map((e) => {
+                        const cardContent = (
+                          <>
+                            <div className="flex items-center gap-2 mb-2 flex-wrap">
+                              <span className="px-2 py-1 bg-purple-600 text-white text-xs font-bold rounded">
+                                {e.orgao} {e.numero}
+                              </span>
+                              <span className="text-xs text-purple-700 bg-purple-100 px-2 py-0.5 rounded">
+                                {e.tema}
+                              </span>
+                              {e.url && (
+                                <ExternalLink className="w-3.5 h-3.5 text-purple-600 ml-auto" aria-hidden="true" />
+                              )}
+                            </div>
+                            <p className="text-gray-800 text-sm leading-relaxed">{e.texto}</p>
+                          </>
+                        );
+                        return e.url ? (
+                          <a
+                            key={e.id}
+                            href={e.url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="block border-l-4 border-purple-500 bg-purple-50 p-4 rounded-r-lg hover:bg-purple-100 transition-colors"
+                          >
+                            {cardContent}
+                          </a>
+                        ) : (
+                          <div key={e.id} className="border-l-4 border-purple-500 bg-purple-50 p-4 rounded-r-lg">
+                            {cardContent}
                           </div>
-                          <p className="text-gray-800 text-sm leading-relaxed">{e.texto}</p>
-                        </div>
-                      ))}
+                        );
+                      })}
                     </div>
                   </div>
                 )}

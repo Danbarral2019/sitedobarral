@@ -173,6 +173,7 @@ export async function GET(request: NextRequest) {
             numero: e.numero,
             texto: e.texto.substring(0, 200) + (e.texto.length > 200 ? '...' : ''),
             tema: e.tema,
+            url: e.url,
           }));
 
           return {

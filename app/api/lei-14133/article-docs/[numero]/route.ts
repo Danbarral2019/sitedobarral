@@ -43,10 +43,18 @@ const CATEGORY_DISPLAY: Record<string, string> = {
   portaria: 'Portarias',
   in: 'Instruções Normativas',
   'orientacao-normativa': 'Orientações Normativas - AGU',
-  'parecer-vinculante': 'Precedentes da AGU',
-  decor: 'Precedentes da AGU',
+  // Família AGU (CONUNI/DECOR) — manifestações jurídicas variadas
+  parecer: 'Pareceres da AGU',
+  'parecer-vinculante': 'Pareceres da AGU',
+  decor: 'Pareceres da AGU',
+  'nota-tecnica': 'Pareceres da AGU',
+  despacho: 'Pareceres da AGU',
+  // Família TCU — antes caíam todos em "Outros Documentos"
+  sumula: 'Súmulas do TCU',
+  consulta_tcu: 'Respostas a Consultas do TCU',
+  informativo: 'Informativos do TCU',
   acordao: 'Jurisprudência dos Tribunais de Contas',
-  enunciados: 'Enunciados',
+  // 'enunciados' propositalmente fora — tem seção dedicada na página
 };
 
 const DISPLAY_ORDER = [
@@ -55,9 +63,11 @@ const DISPLAY_ORDER = [
   'Portarias',
   'Instruções Normativas',
   'Orientações Normativas - AGU',
-  'Precedentes da AGU',
+  'Pareceres da AGU',
+  'Súmulas do TCU',
+  'Respostas a Consultas do TCU',
+  'Informativos do TCU',
   'Jurisprudência dos Tribunais de Contas',
-  'Enunciados',
   'Outros Documentos',
 ];
 
@@ -68,11 +78,38 @@ const DOCUMENT_CATEGORY_SCORE: Record<string, number> = {
   in: 90,
   portaria: 70,
   'orientacao-normativa': 80,
-  'parecer-vinculante': 55,
+  parecer: 55,
+  'parecer-vinculante': 60,
   decor: 50,
+  'nota-tecnica': 45,
+  despacho: 40,
+  sumula: 65, // Súmulas do TCU são vinculantes
+  consulta_tcu: 55,
+  informativo: 45,
   acordao: 35,
   enunciados: 45,
 };
+
+// Termos típicos de atos normativos com baixa relevância para regulamentação
+// substantiva da Lei 14.133 (estrutura interna, atualização de valores,
+// criação de comitês). Penalizam o score de destaque.
+const NOISY_PATTERNS = [
+  /atualiza\b.*(valor|valores|limit)/i,
+  /(institui|cria|estrutura)\b.*comit[eê]/i,
+  /comit[eê]\s+(gestor|nacional|interministerial)/i,
+  /(altera|atualiza|aprova)\b.*(estrutura\s+regimental|estatuto|regimento\s+interno)/i,
+  /(competências|atribuições|organização)\s+(interna|do\s+órgão)/i,
+  /\b(governança|integridade)\s+(interna|do\s+órgão)\b/i,
+];
+
+function noisinessPenalty(title: string, ementa: string | null | undefined): number {
+  const text = `${title} ${ementa || ''}`;
+  let penalty = 0;
+  for (const pat of NOISY_PATTERNS) {
+    if (pat.test(text)) penalty += 100;
+  }
+  return penalty;
+}
 
 function importanceBoost(importance: string | null | undefined): number {
   if (importance === 'critica') return 1000;
@@ -203,7 +240,8 @@ export async function GET(
 
       const score =
         legislativeTierScore(act.hierarchyLevel, act.esfera) +
-        specificityBoost(articles.length);
+        specificityBoost(articles.length) -
+        noisinessPenalty(act.title, act.ementa);
 
       const item: EnrichedDoc = {
         id: act.id,
@@ -231,12 +269,16 @@ export async function GET(
     const HIGHLIGHTS_COUNT = 5;
     const highlights = enriched.slice(0, HIGHLIGHTS_COUNT);
 
-    // Agrupa todos por categoria de exibição (highlights e demais)
+    // Agrupa por categoria — exclui 'enunciados' (tem seção dedicada na página).
+    // Total mostrado em "Todos os documentos" reflete só o que está nos accordions.
     const byCategory: Record<string, EnrichedDoc[]> = {};
+    let totalCategorized = 0;
     for (const doc of enriched) {
+      if (doc.category === 'enunciados') continue;
       const display = CATEGORY_DISPLAY[doc.category || ''] || 'Outros Documentos';
       if (!byCategory[display]) byCategory[display] = [];
       byCategory[display].push(doc);
+      totalCategorized++;
     }
 
     const sortedCategoryNames = Object.keys(byCategory).sort((a, b) => {
@@ -252,7 +294,8 @@ export async function GET(
 
     return NextResponse.json({
       articleNumber: numeroStr,
-      total: enriched.length,
+      total: totalCategorized, // exclui enunciados — eles aparecem em seção dedicada
+      totalAll: enriched.length,
       highlights,
       byCategory: orderedByCategory,
     });
