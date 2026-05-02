@@ -107,7 +107,10 @@ ${blogPost.excerpt}
     } finally {
       setIsLoading(false);
     }
-  }, [postId, errorToast]);
+    // errorToast vem do useToast() — nova ref a cada render. Não pode entrar nas
+    // deps senão o useEffect que depende deste callback dispara em loop.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [postId]);
 
   useEffect(() => {
     verifyAdmin();

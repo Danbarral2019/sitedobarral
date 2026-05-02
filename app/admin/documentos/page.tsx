@@ -147,7 +147,10 @@ export default function DocumentosPage() {
       isFetchingRef.current = false;
       setIsLoadingDocs(false);
     }
-  }, [currentPage, itemsPerPage, filterCategory, errorToast]); // Server-side filters need to trigger refetch
+    // errorToast vem do useToast() — nova ref a cada render, dispara loop
+    // se entrar nas deps (mesmo com isFetchingRef, ele só evita race intra-render).
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [currentPage, itemsPerPage, filterCategory]); // Server-side filters need to trigger refetch
 
   useEffect(() => {
     verifyAdmin();

@@ -96,7 +96,10 @@ export default function EditPublicationPage({ params }: EditPublicationPageProps
     } finally {
       setIsLoading(false);
     }
-  }, [errorToast, router]);
+    // errorToast vem do useToast() — nova ref a cada render, dispara loop
+    // se entrar nas deps. router é estável (Next.js).
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [router]);
 
   useEffect(() => {
     const loadData = async () => {
