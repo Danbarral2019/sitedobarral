@@ -184,6 +184,7 @@ export const CacheKeys = {
     const filterHash = filters ? hashString(JSON.stringify(filters)) : 'all';
     return `lei:articles:${authKey}:${filterHash}`;
   },
+  leiArticleEditor: (numero: string): string => `lei:article-editor:${numero}`,
 
   /**
    * FAQ list cache key
@@ -780,6 +781,12 @@ export const CacheInvalidation = {
    */
   leiArticles: async (): Promise<number> => {
     return invalidateCacheByPrefix('lei');
+  },
+  leiArticle: async (numero: string): Promise<number> => {
+    if (!redis) return 0;
+    const keys = await redis.keys(`*lei:article-editor:${numero}*`);
+    if (keys.length === 0) return 0;
+    return await redis.del(...keys);
   },
 
   /**

@@ -1049,6 +1049,12 @@ model LeiArticle {
   capitulo         String   // "TÍTULO I - CAPÍTULO I"
   secao            String?  // "Disposições Preliminares"
 
+  professorComment String? @db.Text   // Markdown — bloco editorial do prof
+  commentUpdatedAt DateTime?
+
+  crossRefs         LeiArticleCrossRef[]
+  suggestedReadings LeiArticleSuggestedReading[]
+
   createdAt        DateTime @default(now())
   updatedAt        DateTime @updatedAt
 
@@ -1882,4 +1888,50 @@ model LegislativeActRelation {
   @@index([targetActId])
   @@index([sourceActId])
   @@index([reviewStatus])
+}
+
+model LeiArticleCrossRef {
+  id            String   @id @default(uuid())
+  articleNumber String
+  targetNumber  String
+  note          String   @db.Text
+  order         Int      @default(0)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  article LeiArticle @relation(fields: [articleNumber], references: [numero], onDelete: Cascade)
+
+  @@index([articleNumber, order])
+  @@index([targetNumber])
+}
+
+model LeiArticleSuggestedReading {
+  id            String   @id @default(uuid())
+  articleNumber String
+
+  // Discriminator: 'internal' (referência ao site) ou 'external' (URL livre)
+  kind          String
+
+  // kind='internal': referência por ID/slug
+  // internalType: 'blog' | 'glossary' | 'legislative-act' | 'document'
+  internalType  String?
+  internalId    String?
+
+  // kind='external': URL livre + categoria
+  // externalType: 'video' | 'article' | 'book' | 'other'
+  externalUrl   String?
+  externalType  String?
+
+  // Comum
+  title         String?  // Override do título capturado da fonte interna
+  description   String?  @db.Text
+  author        String?
+  order         Int      @default(0)
+
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  article LeiArticle @relation(fields: [articleNumber], references: [numero], onDelete: Cascade)
+
+  @@index([articleNumber, order])
 }
