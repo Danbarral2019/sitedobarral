@@ -1,8 +1,9 @@
 import Link from 'next/link';
+import Form from 'next/form';
 import { notFound, redirect } from 'next/navigation';
 import { Metadata } from 'next';
 import {
-  ArrowLeft, ArrowRight, FileText, BookOpen, List, Book, Search, ChevronLeft, ChevronRight, AlertTriangle,
+  ArrowLeft, ArrowRight, FileText, BookOpen, List, Book, Search, ChevronLeft, ChevronRight, AlertTriangle, X,
 } from 'lucide-react';
 import { prisma } from '@/lib/prisma';
 import { NavigateSelect } from '@/components/acervo/NavigateSelect';
@@ -410,7 +411,15 @@ export default async function CategoriaPage({ params, searchParams }: PageProps)
                   {cfg.description}
                 </p>
                 <p className="text-sm text-brand-200 mt-3 font-poppins">
-                  {total.toLocaleString('pt-BR')} {total === 1 ? 'documento disponível' : 'documentos disponíveis'}
+                  {searchTerm ? (
+                    <>
+                      {total.toLocaleString('pt-BR')} {total === 1 ? 'resultado' : 'resultados'} para &quot;{searchTerm}&quot;
+                    </>
+                  ) : (
+                    <>
+                      {total.toLocaleString('pt-BR')} {total === 1 ? 'documento disponível' : 'documentos disponíveis'}
+                    </>
+                  )}
                 </p>
               </div>
             </div>
@@ -420,7 +429,7 @@ export default async function CategoriaPage({ params, searchParams }: PageProps)
 
       {/* Busca + filtros + lista */}
       <section className="container mx-auto px-4 py-10 md:py-12 max-w-5xl">
-        <form method="get" className="mb-6">
+        <Form action={`/base-conhecimento/${categoria}`} scroll={false} className="mb-6">
           <div className="relative">
             <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 pointer-events-none" />
             <input
@@ -440,7 +449,7 @@ export default async function CategoriaPage({ params, searchParams }: PageProps)
           {anoFilter && <input type="hidden" name="ano" value={anoFilter} />}
           {cursoFilter && <input type="hidden" name="curso" value={cursoFilter} />}
           {sortFilter && sortFilter !== 'recent' && <input type="hidden" name="sort" value={sortFilter} />}
-        </form>
+        </Form>
 
         {/* Filtro por ente (enunciados) */}
         {cfg.enteFilter && (
@@ -615,6 +624,25 @@ export default async function CategoriaPage({ params, searchParams }: PageProps)
                 no DOU de cada orientação (em consolidação), abra o documento individual.
               </p>
             </div>
+          </div>
+        )}
+
+        {/* Banner de resultados de busca — deixa claro que a lista é resposta à query */}
+        {searchTerm && (
+          <div className="mb-4 flex items-center justify-between gap-3 bg-brand-50 border border-brand-200 rounded-xl px-4 py-3">
+            <div className="text-sm text-brand-900 leading-snug">
+              <span className="font-semibold">{total.toLocaleString('pt-BR')}</span>
+              {' '}{total === 1 ? 'resultado' : 'resultados'} para
+              {' '}<span className="font-semibold">&quot;{searchTerm}&quot;</span>
+            </div>
+            <Link
+              href={buildFilterUrl(categoria, currentParams, { q: '', page: 1 })}
+              className="inline-flex items-center gap-1 text-xs font-medium text-brand-700 hover:text-brand-900 whitespace-nowrap"
+              aria-label="Limpar busca"
+            >
+              <X className="w-3.5 h-3.5" />
+              Limpar busca
+            </Link>
           </div>
         )}
 

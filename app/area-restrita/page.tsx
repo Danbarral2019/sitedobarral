@@ -21,8 +21,8 @@ import {
   DashboardCourseCard,
   KnowledgeBaseSection,
 } from '@/components/area-restrita';
+import { SearchResultsList } from '@/components/area-restrita/SearchResultsList';
 
-const SearchResultsList = dynamic(() => import('@/components/area-restrita/SearchResultsList').then(mod => ({ default: mod.SearchResultsList })));
 const PdfExportBar = dynamic(() => import('@/components/area-restrita/PdfExportBar').then(mod => ({ default: mod.PdfExportBar })));
 const PDFExportPanel = dynamic(() => import('@/components/area-restrita/PDFExportPanel').then(mod => ({ default: mod.PDFExportPanel })));
 const NovidadesSection = dynamic(() => import('@/components/area-restrita/NovidadesSection'));
