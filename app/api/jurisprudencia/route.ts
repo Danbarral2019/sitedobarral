@@ -40,6 +40,7 @@ const querySchema = z.object({
   q: z.string().min(1).max(200).optional(),
   page: z.coerce.number().int().min(1).default(1),
   pageSize: z.coerce.number().int().min(1).default(10).transform(v => Math.min(v, 50)),
+  sort: z.enum(['recent', 'oldest', 'numero', 'relevance']).optional(),
 });
 
 function truncate(text: string, max: number): string {
@@ -59,12 +60,13 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    const { page, pageSize, ...filters } = parsed.data;
+    const { page, pageSize, sort, ...filters } = parsed.data;
     const jurisFilters: JurisprudenciaFilters = filters;
 
     const { items, total } = await fetchUnifiedList(jurisFilters, {
       page,
       pageSize,
+      sort,
     });
 
     const formatted = items.map(item => ({

@@ -98,6 +98,8 @@ export default function JurisprudenciaClient() {
   const [search, setSearch] = useState('');
   const [searchInput, setSearchInput] = useState('');
   const [selectedTheme, setSelectedTheme] = useState('');
+  const [decisionType, setDecisionType] = useState('');
+  const [sort, setSort] = useState<'recent' | 'oldest' | 'numero' | 'relevance'>('recent');
 
   const pageSize = 12;
   const [currentYear] = useState(() => new Date().getFullYear());
@@ -114,6 +116,8 @@ export default function JurisprudenciaClient() {
       if (year) params.set('ano', year);
       if (search) params.set('q', search);
       if (selectedTheme) params.set('tema', selectedTheme);
+      if (decisionType) params.set('decisionType', decisionType);
+      if (sort && sort !== 'recent') params.set('sort', sort);
 
       const res = await fetch(`/api/jurisprudencia?${params}`);
       if (res.ok) {
@@ -127,7 +131,7 @@ export default function JurisprudenciaClient() {
     } finally {
       setLoading(false);
     }
-  }, [tribunal, year, search, selectedTheme]);
+  }, [tribunal, year, search, selectedTheme, decisionType, sort]);
 
   // Fetch when page changes
   useEffect(() => {
@@ -137,7 +141,7 @@ export default function JurisprudenciaClient() {
   // Reset to page 1 when filters change (fetchDecisions dep change triggers the fetch above)
   useEffect(() => {
     setCurrentPage(1);
-  }, [tribunal, year, search, selectedTheme]);
+  }, [tribunal, year, search, selectedTheme, decisionType, sort]);
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
@@ -193,6 +197,35 @@ export default function JurisprudenciaClient() {
                 {years.map(y => (
                   <option key={y} value={y}>{y}</option>
                 ))}
+              </select>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Tipo</label>
+              <select
+                value={decisionType}
+                onChange={(e) => setDecisionType(e.target.value)}
+                className="px-3 py-2 border rounded-lg text-sm bg-white min-w-[150px]"
+              >
+                <option value="">Todos</option>
+                <option value="acordao">Acórdão</option>
+                <option value="decisao">Decisão</option>
+                <option value="parecer_previo">Parecer prévio</option>
+                <option value="sumula">Súmula</option>
+              </select>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Ordenar</label>
+              <select
+                value={sort}
+                onChange={(e) => setSort(e.target.value as typeof sort)}
+                className="px-3 py-2 border rounded-lg text-sm bg-white min-w-[160px]"
+              >
+                <option value="recent">Mais recentes</option>
+                <option value="oldest">Mais antigos</option>
+                <option value="numero">Por número</option>
+                {search && <option value="relevance">Mais relevantes</option>}
               </select>
             </div>
 

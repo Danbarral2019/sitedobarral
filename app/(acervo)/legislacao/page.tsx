@@ -84,6 +84,7 @@ export default function LegislacaoPage() {
   const [yearFilter, setYearFilter] = useState('');
   const [esferaFilter, setEsferaFilter] = useState('');
   const [themeFilter, setThemeFilter] = useState('');
+  const [sortFilter, setSortFilter] = useState('recent');
 
   // Paginação
   const [page, setPage] = useState(1);
@@ -158,6 +159,7 @@ export default function LegislacaoPage() {
       if (searchTerm) params.set('search', searchTerm);
       if (esferaFilter) params.set('esfera', esferaFilter);
       if (themeFilter) params.set('theme', themeFilter);
+      if (sortFilter && sortFilter !== 'recent') params.set('sort', sortFilter);
 
       const response = await fetch(`/api/legislative-acts?${params}`);
       if (!response.ok) throw new Error('Erro ao carregar atos');
@@ -176,7 +178,7 @@ export default function LegislacaoPage() {
     } finally {
       setIsLoading(false);
     }
-  }, [page, limit, typeFilter, issuerFilter, yearFilter, searchTerm, activeTab, esferaFilter, themeFilter]);
+  }, [page, limit, typeFilter, issuerFilter, yearFilter, searchTerm, activeTab, esferaFilter, themeFilter, sortFilter]);
 
   useEffect(() => {
     fetchActs();
@@ -201,6 +203,7 @@ export default function LegislacaoPage() {
     setSearchTerm('');
     setEsferaFilter('');
     setThemeFilter('');
+    setSortFilter('recent');
     setPage(1);
   };
 
@@ -374,6 +377,25 @@ export default function LegislacaoPage() {
                   className="w-full pl-12 pr-4 py-4 border-2 border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent text-lg"
                 />
               </div>
+
+              {/* Ordenação */}
+              <select
+                value={sortFilter}
+                onChange={(e) => { setSortFilter(e.target.value); setPage(1); }}
+                className="px-4 py-4 bg-white border-2 border-gray-300 rounded-xl hover:border-blue-500 font-semibold text-sm focus:ring-2 focus:ring-blue-500 cursor-pointer"
+                aria-label="Ordenar por"
+                title="Ordenar por"
+              >
+                <option value="recent">Mais recentes</option>
+                <option value="oldest">Mais antigos</option>
+                {!isBoasPraticas && !isOrientacoes && (
+                  <>
+                    <option value="hierarchy">Hierarquia (lei → OS)</option>
+                    <option value="number">Por número</option>
+                  </>
+                )}
+                <option value="alpha">Alfabética A→Z</option>
+              </select>
 
               {/* Botão de Filtros */}
               <button

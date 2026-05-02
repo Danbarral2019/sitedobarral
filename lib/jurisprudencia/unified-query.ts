@@ -394,9 +394,12 @@ function composeUnifiedBody(
 // Funções fetch públicas
 // ──────────────────────────────────────────────────────────────────────────
 
+export type SortOption = 'recent' | 'oldest' | 'numero' | 'relevance';
+
 export interface PaginationOptions {
   page: number;
   pageSize: number;
+  sort?: SortOption;
 }
 
 export interface UnifiedListResult {
@@ -404,9 +407,23 @@ export interface UnifiedListResult {
   total: number;
 }
 
+function getOrderClause(sort: SortOption | undefined): Prisma.Sql {
+  switch (sort) {
+    case 'oldest':
+      return Prisma.sql`ORDER BY "dataJulgamento" ASC NULLS LAST, id ASC`;
+    case 'numero':
+      return Prisma.sql`ORDER BY "decisionNumber" DESC NULLS LAST, id ASC`;
+    case 'relevance':
+      return Prisma.sql`ORDER BY "relevanceScore" DESC NULLS LAST, "dataJulgamento" DESC NULLS LAST`;
+    case 'recent':
+    default:
+      return Prisma.sql`ORDER BY "dataJulgamento" DESC NULLS LAST, id ASC`;
+  }
+}
+
 export async function fetchUnifiedList(
   filters: JurisprudenciaFilters,
-  { page, pageSize }: PaginationOptions
+  { page, pageSize, sort }: PaginationOptions
 ): Promise<UnifiedListResult> {
   const body = composeUnifiedBody(filters);
   if (!body) return { items: [], total: 0 };
@@ -415,7 +432,7 @@ export async function fetchUnifiedList(
 
   const itemsSql = Prisma.sql`
     SELECT * FROM (${body}) unified
-    ORDER BY "dataJulgamento" DESC NULLS LAST, id ASC
+    ${getOrderClause(sort)}
     LIMIT ${pageSize} OFFSET ${offset}
   `;
   const countSql = Prisma.sql`

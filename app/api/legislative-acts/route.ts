@@ -20,6 +20,7 @@ export async function GET(request: NextRequest) {
     const articleNumber = searchParams.get('article'); // Filtrar por artigo da Lei 14.133
     const esfera = searchParams.get('esfera'); // 'federal' | 'estadual'
     const theme = searchParams.get('theme'); // tema da taxonomia
+    const sort = searchParams.get('sort'); // recent (default) | oldest | hierarchy | number | alpha
 
     // Parâmetros de paginação
     const page = parseInt(searchParams.get('page') || '1');
@@ -41,22 +42,22 @@ export async function GET(request: NextRequest) {
       articleNumber,
       page,
       limit,
-    }) + `:tab=${tab}:esf=${esfera || ''}:th=${theme || ''}`;
+    }) + `:tab=${tab}:esf=${esfera || ''}:th=${theme || ''}:sort=${sort || ''}`;
 
     // Use cached result or fetch from database
     const result = await withCache(
       cacheKey,
       async () => {
         if (tab === 'boas-praticas') {
-          return await fetchBoasPraticas({ search, year, esfera, theme, issuer, page, limit, skip });
+          return await fetchBoasPraticas({ search, year, esfera, theme, issuer, page, limit, skip, sort });
         }
         if (tab === 'orientacoes') {
-          return await fetchBoasPraticas({ search, year, esfera, theme, issuer, page, limit, skip, category: 'orientacao_procedimento' });
+          return await fetchBoasPraticas({ search, year, esfera, theme, issuer, page, limit, skip, category: 'orientacao_procedimento', sort });
         }
         if (tab === 'tic') {
-          return await fetchAtosNormativos({ type, issuer, year, search, articleNumber, esfera, theme: theme || 'tecnologia-informacao', page, limit, skip, ticOnly: true });
+          return await fetchAtosNormativos({ type, issuer, year, search, articleNumber, esfera, theme: theme || 'tecnologia-informacao', page, limit, skip, ticOnly: true, sort });
         }
-        return await fetchAtosNormativos({ type, issuer, year, search, articleNumber, esfera, theme, page, limit, skip });
+        return await fetchAtosNormativos({ type, issuer, year, search, articleNumber, esfera, theme, page, limit, skip, sort });
       },
       CACHE_TTL.LEGISLATIVE_ACTS,
       { prefix: 'acts' }
@@ -91,10 +92,27 @@ interface AtosParams {
   limit: number;
   skip: number;
   ticOnly?: boolean;
+  sort?: string | null;
+}
+
+function getAtosOrderBy(sort: string | null | undefined) {
+  switch (sort) {
+    case 'oldest':
+      return [{ publishDate: 'asc' as const }, { hierarchyLevel: 'asc' as const }];
+    case 'hierarchy':
+      return [{ hierarchyLevel: 'asc' as const }, { year: 'desc' as const }, { publishDate: 'desc' as const }];
+    case 'number':
+      return [{ year: 'desc' as const }, { number: 'desc' as const }];
+    case 'alpha':
+      return [{ title: 'asc' as const }];
+    case 'recent':
+    default:
+      return [{ publishDate: 'desc' as const }, { hierarchyLevel: 'asc' as const }];
+  }
 }
 
 async function fetchAtosNormativos(params: AtosParams) {
-  const { type, issuer, year, search, articleNumber, esfera, theme, page, limit, skip, ticOnly } = params;
+  const { type, issuer, year, search, articleNumber, esfera, theme, page, limit, skip, ticOnly, sort } = params;
 
   // Construir where clause
   const where: Record<string, unknown> = {};
@@ -146,11 +164,7 @@ async function fetchAtosNormativos(params: AtosParams) {
         createdAt: true,
         updatedAt: true
       },
-      orderBy: [
-        { year: 'desc' },
-        { hierarchyLevel: 'asc' },
-        { publishDate: 'desc' }
-      ],
+      orderBy: getAtosOrderBy(sort),
       skip,
       take: limit
     }),
@@ -252,10 +266,23 @@ interface BoasPraticasParams {
   limit: number;
   skip: number;
   category?: string;
+  sort?: string | null;
+}
+
+function getBoasOrderBy(sort: string | null | undefined) {
+  switch (sort) {
+    case 'oldest':
+      return [{ douData: 'asc' as const }, { uploadedAt: 'asc' as const }];
+    case 'alpha':
+      return [{ title: 'asc' as const }];
+    case 'recent':
+    default:
+      return [{ douData: 'desc' as const }, { uploadedAt: 'desc' as const }];
+  }
 }
 
 async function fetchBoasPraticas(params: BoasPraticasParams) {
-  const { search, year, esfera, theme, issuer, page, limit, skip, category = 'boa_pratica' } = params;
+  const { search, year, esfera, theme, issuer, page, limit, skip, category = 'boa_pratica', sort } = params;
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const where: Record<string, any> = {
@@ -301,10 +328,7 @@ async function fetchBoasPraticas(params: BoasPraticasParams) {
         leiArticles: true,
         uploadedAt: true,
       },
-      orderBy: [
-        { douData: 'desc' },
-        { uploadedAt: 'desc' },
-      ],
+      orderBy: getBoasOrderBy(sort),
       skip,
       take: limit,
     }),

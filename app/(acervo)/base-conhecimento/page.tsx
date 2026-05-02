@@ -7,7 +7,8 @@ import {
   getCachedGlossaryTermCount,
 } from '@/lib/cached-queries';
 
-export const revalidate = 3600;
+// 10 min: contadores mudam quando admin classifica/sync roda
+export const revalidate = 600;
 
 export const metadata = {
   title: 'Base de Conhecimento | Prof. Daniel Barral',

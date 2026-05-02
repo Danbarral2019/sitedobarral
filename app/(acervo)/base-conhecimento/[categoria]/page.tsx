@@ -5,6 +5,7 @@ import {
   ArrowLeft, ArrowRight, FileText, BookOpen, List, Book, Search, ChevronLeft, ChevronRight, AlertTriangle,
 } from 'lucide-react';
 import { prisma } from '@/lib/prisma';
+import { NavigateSelect } from '@/components/acervo/NavigateSelect';
 
 export const revalidate = 3600;
 
@@ -23,7 +24,23 @@ type CategoryConfig = {
   tipoFilter?: { options: readonly TipoOption[] }; // pílulas pra Pareceres/Notas/Despachos/Vinculantes
   orgaoFilter?: { orgaos: readonly string[] };     // dropdown pra câmara/coordenação
   vigenciaFilter?: boolean;                         // pílulas Vigentes/Revogados/Modificados
+  yearFilter?: { years: readonly number[] };       // dropdown ano (extraído do título)
+  cursoFilter?: { cursos: ReadonlyArray<{ id: string; label: string }> }; // dropdown curso (do classify Gemini)
+  sortOptions?: ReadonlyArray<{ value: string; label: string }>;
 };
+
+const COURSE_OPTIONS = [
+  { id: '2', label: 'Planejamento' },
+  { id: '3', label: 'Gestão e Fiscalização' },
+  { id: '4', label: 'Sancionador' },
+  { id: '7', label: 'Assessoramento Jurídico' },
+  { id: '8', label: 'Revisão/Reajuste' },
+  { id: '9', label: 'Alterações Contratuais' },
+  { id: '10', label: 'Contratação Direta' },
+] as const;
+
+// Anos comuns nos pareceres CONUNI (2007-2026)
+const PARECER_YEARS = Array.from({ length: 2026 - 2007 + 1 }, (_, i) => 2026 - i);
 
 const CONUNI_ORGAOS = [
   'CONUNI', 'CNLCA', 'CNCIC', 'CNMLC', 'CNPAD', 'CNDE', 'CNPAT',
@@ -50,6 +67,14 @@ const CATEGORY_CONFIG: Record<string, CategoryConfig> = {
     },
     orgaoFilter: { orgaos: CONUNI_ORGAOS },
     vigenciaFilter: true,
+    yearFilter: { years: PARECER_YEARS },
+    cursoFilter: { cursos: COURSE_OPTIONS },
+    sortOptions: [
+      { value: 'recent', label: 'Mais recentes' },
+      { value: 'oldest', label: 'Mais antigos' },
+      { value: 'alpha', label: 'A→Z' },
+      { value: 'alpha-desc', label: 'Z→A' },
+    ],
   },
   'orientacoes-normativas': {
     slug: 'orientacoes-normativas',
@@ -60,6 +85,11 @@ const CATEGORY_CONFIG: Record<string, CategoryConfig> = {
     dbCategories: ['orientacao-normativa'],
     orderBy: 'numeroDecrescente',
     showDescription: true,
+    sortOptions: [
+      { value: 'recent', label: 'Número (mais recente)' },
+      { value: 'numero-asc', label: 'Número (mais antigo)' },
+      { value: 'alpha', label: 'A→Z' },
+    ],
   },
   enunciados: {
     slug: 'enunciados',
@@ -71,6 +101,11 @@ const CATEGORY_CONFIG: Record<string, CategoryConfig> = {
     orderBy: 'recent',
     showDescription: true,
     enteFilter: { entes: ['CJF', 'IBDA', 'INCP'], placeholder: 'Filtrar por ente' },
+    sortOptions: [
+      { value: 'recent', label: 'Mais recentes' },
+      { value: 'oldest', label: 'Mais antigos' },
+      { value: 'alpha', label: 'A→Z' },
+    ],
   },
   'manual-tcu': {
     slug: 'manual-tcu',
@@ -81,6 +116,10 @@ const CATEGORY_CONFIG: Record<string, CategoryConfig> = {
     dbCategories: ['manual-tcu'],
     orderBy: 'recent',
     showDescription: true,
+    sortOptions: [
+      { value: 'recent', label: 'Ordem do manual' },
+      { value: 'alpha', label: 'A→Z' },
+    ],
   },
 };
 
@@ -95,6 +134,9 @@ interface PageProps {
     tipo?: string;
     orgao?: string;
     vigencia?: string;
+    ano?: string;
+    curso?: string;
+    sort?: string;
   }>;
 }
 
@@ -117,7 +159,19 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   };
 }
 
-function getOrderBy(orderBy: CategoryConfig['orderBy']) {
+function getOrderBy(orderBy: CategoryConfig['orderBy'], sort?: string) {
+  if (sort === 'oldest') return [{ uploadedAt: 'asc' as const }];
+  if (sort === 'alpha') return [{ title: 'asc' as const }];
+  if (sort === 'alpha-desc') return [{ title: 'desc' as const }];
+  if (sort === 'numero-asc' && orderBy === 'numeroDecrescente') {
+    return [
+      { acordaoAno: 'asc' as const },
+      { acordaoNumero: 'asc' as const },
+      { onYear: 'asc' as const },
+      { onNumber: 'asc' as const },
+      { uploadedAt: 'asc' as const },
+    ];
+  }
   if (orderBy === 'numeroDecrescente') {
     return [
       { acordaoAno: 'desc' as const },
@@ -132,7 +186,7 @@ function getOrderBy(orderBy: CategoryConfig['orderBy']) {
 
 function buildFilterUrl(
   categoria: string,
-  current: { q?: string; tipo?: string; orgao?: string; vigencia?: string; ente?: string; page?: number },
+  current: { q?: string; tipo?: string; orgao?: string; vigencia?: string; ente?: string; ano?: string; curso?: string; sort?: string; page?: number },
   changes: Partial<typeof current>,
 ): string {
   const merged = { ...current, ...changes };
@@ -142,6 +196,9 @@ function buildFilterUrl(
   if (merged.orgao) params.set('orgao', merged.orgao);
   if (merged.vigencia) params.set('vigencia', merged.vigencia);
   if (merged.ente) params.set('ente', merged.ente);
+  if (merged.ano) params.set('ano', merged.ano);
+  if (merged.curso) params.set('curso', merged.curso);
+  if (merged.sort && merged.sort !== 'recent') params.set('sort', merged.sort);
   if (merged.page && merged.page > 1) params.set('page', String(merged.page));
   const qs = params.toString();
   return `/base-conhecimento/${categoria}${qs ? `?${qs}` : ''}`;
@@ -173,6 +230,11 @@ export default async function CategoriaPage({ params, searchParams }: PageProps)
     ? sp.orgao : '';
   const vigenciaFilter = cfg.vigenciaFilter && sp.vigencia && ['vigente', 'revogado', 'modificado'].includes(sp.vigencia)
     ? sp.vigencia : '';
+  const anoFilter = cfg.yearFilter && sp.ano && /^\d{4}$/.test(sp.ano) ? sp.ano : '';
+  const cursoFilter = cfg.cursoFilter && sp.curso && cfg.cursoFilter.cursos.some(c => c.id === sp.curso)
+    ? sp.curso : '';
+  const sortFilter = cfg.sortOptions && sp.sort && cfg.sortOptions.some(s => s.value === sp.sort)
+    ? sp.sort : 'recent';
 
   // Resolve dbCategories: se tipoFilter ativo, usa o subset; senão, todos da categoria
   const activeDbCategories = tipoFilter && cfg.tipoFilter
@@ -186,18 +248,19 @@ export default async function CategoriaPage({ params, searchParams }: PageProps)
     OR?: Array<Record<string, unknown>>;
     AND?: Array<Record<string, unknown>>;
     tags?: { contains: string };
-    aiClassification?: { contains: string };
+    title?: { contains: string };
     NOT?: Record<string, unknown>;
   };
+
+  // Coleta todos os "contains" do aiClassification e empacota em AND
+  const aiContains: string[] = [];
 
   const where: WhereClause = {
     isPublic: true,
     category: { in: [...activeDbCategories] },
   };
 
-  // Pra categorias CONUNI (pareceres, notas, despachos), esconde docs
-  // classificados pelo Gemini como NÃO relevantes pra licitações/contratos.
-  // Docs sem classificação ainda continuam visíveis (filtragem gradual).
+  // Pra categorias CONUNI: esconde irrelevantes (Gemini)
   if (cfg.tipoFilter) {
     where.NOT = { aiClassification: { contains: '"licitacoesContratos":false' } };
   }
@@ -213,9 +276,24 @@ export default async function CategoriaPage({ params, searchParams }: PageProps)
   if (enteFilter) where.tags = { contains: `"${enteFilter}"` };
   if (orgaoFilter) where.tags = { contains: `"${orgaoFilter}"` };
 
-  // vigencia vive em aiClassification JSON (preenchida pelo sync CONUNI)
-  if (vigenciaFilter) {
-    where.aiClassification = { contains: `"vigencia":"${vigenciaFilter}"` };
+  if (vigenciaFilter) aiContains.push(`"vigencia":"${vigenciaFilter}"`);
+  if (cursoFilter) aiContains.push(`"cursosRelevantes":${JSON.stringify([cursoFilter]).slice(0, -1)}`);
+  // ↑ heurística: cursosRelevantes é array; busca por '["X"' ou '"X"' dentro do array.
+  // Postgres JSON contains de string parcial — pode ter falso positivo se outro array tiver "X" como sufixo.
+  // Pra simplificar: busca qualquer ocorrência de "X" entre aspas (cursos são IDs curtos).
+  if (cursoFilter) {
+    // override mais seguro: substring com aspas isolando o id
+    aiContains[aiContains.length - 1] = `"${cursoFilter}"`;
+  }
+
+  // Ano: filtra pelo padrão "/AAAA/" no título (formato CONUNI: "PARECER nº 0001/2024/CNCIC/CGU/AGU")
+  if (anoFilter) where.title = { contains: `/${anoFilter}/` };
+
+  // Combina todos os "contains" do aiClassification em AND
+  if (aiContains.length === 1) {
+    (where as Record<string, unknown>).aiClassification = { contains: aiContains[0] };
+  } else if (aiContains.length > 1) {
+    where.AND = aiContains.map(c => ({ aiClassification: { contains: c } }));
   }
 
   let docs: Array<{
@@ -252,7 +330,7 @@ export default async function CategoriaPage({ params, searchParams }: PageProps)
           aiClassification: true,
           category: true,
         },
-        orderBy: getOrderBy(cfg.orderBy),
+        orderBy: getOrderBy(cfg.orderBy, sortFilter),
         skip,
         take: PAGE_SIZE,
       }),
@@ -272,6 +350,24 @@ export default async function CategoriaPage({ params, searchParams }: PageProps)
     } catch { return null; }
   }
 
+  // Retorna summary IA se existir; senão, fallback pra description.
+  // Filtra strings inúteis comuns (ementa CONUNI: "", "-", "Não há.").
+  function getDisplayDescription(aiCls: string | null, fallback: string | null): string | null {
+    if (aiCls) {
+      try {
+        const parsed = JSON.parse(aiCls) as { summary?: string };
+        if (parsed.summary && parsed.summary.trim().length > 5) return parsed.summary.trim();
+      } catch { /* ignora */ }
+    }
+    const fb = (fallback || '').trim();
+    if (!fb) return null;
+    const lower = fb.toLowerCase();
+    if (lower === '-' || lower === 'não há.' || lower === 'não há' || lower === 'nao ha' || lower === 'nao ha.') {
+      return null;
+    }
+    return fb;
+  }
+
   function getTipoLabel(category: string): string | null {
     if (category === 'parecer-vinculante') return 'Vinculante';
     if (category === 'nota-tecnica') return 'Nota técnica';
@@ -281,9 +377,12 @@ export default async function CategoriaPage({ params, searchParams }: PageProps)
 
   const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
   const Icon = cfg.icon;
-  const currentParams = { q: searchTerm, tipo: tipoFilter, orgao: orgaoFilter, vigencia: vigenciaFilter, ente: enteFilter };
-  const hasAdvancedFilters = !!(cfg.tipoFilter || cfg.orgaoFilter || cfg.vigenciaFilter);
-  const hasActiveFilter = !!(searchTerm || tipoFilter || orgaoFilter || vigenciaFilter || enteFilter);
+  const currentParams = {
+    q: searchTerm, tipo: tipoFilter, orgao: orgaoFilter, vigencia: vigenciaFilter, ente: enteFilter,
+    ano: anoFilter, curso: cursoFilter, sort: sortFilter === 'recent' ? '' : sortFilter,
+  };
+  const hasAdvancedFilters = !!(cfg.tipoFilter || cfg.orgaoFilter || cfg.vigenciaFilter || cfg.yearFilter || cfg.cursoFilter);
+  const hasActiveFilter = !!(searchTerm || tipoFilter || orgaoFilter || vigenciaFilter || enteFilter || anoFilter || cursoFilter || (sortFilter && sortFilter !== 'recent'));
 
   return (
     <main className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-50">
@@ -338,6 +437,9 @@ export default async function CategoriaPage({ params, searchParams }: PageProps)
           {orgaoFilter && <input type="hidden" name="orgao" value={orgaoFilter} />}
           {vigenciaFilter && <input type="hidden" name="vigencia" value={vigenciaFilter} />}
           {enteFilter && <input type="hidden" name="ente" value={enteFilter} />}
+          {anoFilter && <input type="hidden" name="ano" value={anoFilter} />}
+          {cursoFilter && <input type="hidden" name="curso" value={cursoFilter} />}
+          {sortFilter && sortFilter !== 'recent' && <input type="hidden" name="sort" value={sortFilter} />}
         </form>
 
         {/* Filtro por ente (enunciados) */}
@@ -446,6 +548,67 @@ export default async function CategoriaPage({ params, searchParams }: PageProps)
               </div>
             )}
 
+            {/* Curso (do classify Gemini) */}
+            {cfg.cursoFilter && (
+              <div className="flex flex-wrap items-center gap-2">
+                <span className="text-sm text-gray-600 font-medium mr-1 min-w-[60px]">Curso:</span>
+                <Link
+                  href={buildFilterUrl(categoria, currentParams, { curso: '', page: 1 })}
+                  className={`px-3 py-1 rounded-full text-xs font-medium transition-colors ${
+                    !cursoFilter ? 'bg-brand-600 text-white' : 'bg-white border border-gray-300 text-gray-700 hover:border-brand-400'
+                  }`}
+                >
+                  Todos
+                </Link>
+                {cfg.cursoFilter.cursos.map((c) => (
+                  <Link
+                    key={c.id}
+                    href={buildFilterUrl(categoria, currentParams, { curso: c.id, page: 1 })}
+                    className={`px-3 py-1 rounded-full text-xs font-medium transition-colors ${
+                      cursoFilter === c.id ? 'bg-brand-600 text-white' : 'bg-white border border-gray-300 text-gray-700 hover:border-brand-400'
+                    }`}
+                  >
+                    {c.label}
+                  </Link>
+                ))}
+              </div>
+            )}
+
+            {/* Ano (dropdown — muitas opções) + Ordenar */}
+            {(cfg.yearFilter || cfg.sortOptions) && (
+              <div className="flex flex-wrap items-center gap-3">
+                {cfg.yearFilter && (
+                  <div className="flex items-center gap-2">
+                    <span className="text-sm text-gray-600 font-medium">Ano:</span>
+                    <NavigateSelect
+                      value={anoFilter}
+                      options={cfg.yearFilter.years.map(y => ({ value: String(y), label: String(y) }))}
+                      buildHref={(v) => buildFilterUrl(categoria, currentParams, { ano: v, page: 1 })}
+                      ariaLabel="Filtrar por ano"
+                    />
+                  </div>
+                )}
+                {cfg.sortOptions && (
+                  <div className="flex items-center gap-2">
+                    <span className="text-sm text-gray-600 font-medium">Ordenar:</span>
+                    <div className="flex flex-wrap gap-1">
+                      {cfg.sortOptions.map((opt) => (
+                        <Link
+                          key={opt.value}
+                          href={buildFilterUrl(categoria, currentParams, { sort: opt.value, page: 1 })}
+                          className={`px-2.5 py-1 rounded-md text-xs font-medium transition-colors ${
+                            sortFilter === opt.value ? 'bg-gray-800 text-white' : 'bg-white border border-gray-300 text-gray-700 hover:border-gray-400'
+                          }`}
+                        >
+                          {opt.label}
+                        </Link>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
+
             {hasActiveFilter && (
               <div className="pt-1">
                 <Link
@@ -536,11 +699,14 @@ export default async function CategoriaPage({ params, searchParams }: PageProps)
                         {doc.title}
                       </h2>
                     </div>
-                    {cfg.showDescription && doc.description && (
-                      <p className="text-sm text-gray-600 leading-relaxed line-clamp-2 ml-0">
-                        {doc.description}
-                      </p>
-                    )}
+                    {cfg.showDescription && (() => {
+                      const desc = getDisplayDescription(doc.aiClassification, doc.description);
+                      return desc ? (
+                        <p className="text-sm text-gray-600 leading-relaxed line-clamp-2 ml-0">
+                          {desc}
+                        </p>
+                      ) : null;
+                    })()}
                     <div className="mt-2 flex items-center gap-3 text-xs text-gray-500">
                       {doc.acordaoAno && doc.acordaoNumero && (
                         <span>Acórdão {doc.acordaoNumero}/{doc.acordaoAno}</span>
