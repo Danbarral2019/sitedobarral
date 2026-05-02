@@ -245,6 +245,7 @@ export async function syncConuni(
             url: newUrl,
             category: newCategory,
             isPublic: true,
+            isCommon: true,
             tags: JSON.stringify([item.orgao]),
             content: newContent,
             aiClassification,

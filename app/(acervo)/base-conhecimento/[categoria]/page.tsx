@@ -2,11 +2,13 @@ import Link from 'next/link';
 import { notFound, redirect } from 'next/navigation';
 import { Metadata } from 'next';
 import {
-  ArrowLeft, ArrowRight, FileText, BookOpen, List, Book, Search, ChevronLeft, ChevronRight, AlertTriangle, ClipboardList, FileSignature,
+  ArrowLeft, ArrowRight, FileText, BookOpen, List, Book, Search, ChevronLeft, ChevronRight, AlertTriangle,
 } from 'lucide-react';
 import { prisma } from '@/lib/prisma';
 
 export const revalidate = 3600;
+
+type TipoOption = { value: string; label: string; dbCategories: readonly string[] };
 
 type CategoryConfig = {
   slug: string;
@@ -15,40 +17,39 @@ type CategoryConfig = {
   icon: typeof FileText;
   dbCategories: readonly string[];
   orderBy: 'recent' | 'numeroDecrescente';
-  showDescription: boolean; // se false, esconde paráfrase IA na lista (ex.: ONs sem texto oficial revisado)
-  enteFilter?: { entes: readonly string[]; placeholder: string }; // filtro por ente (parsed from tags)
+  showDescription: boolean;
+  enteFilter?: { entes: readonly string[]; placeholder: string };
+  // Filtros avançados (CONUNI/AGU)
+  tipoFilter?: { options: readonly TipoOption[] }; // pílulas pra Pareceres/Notas/Despachos/Vinculantes
+  orgaoFilter?: { orgaos: readonly string[] };     // dropdown pra câmara/coordenação
+  vigenciaFilter?: boolean;                         // pílulas Vigentes/Revogados/Modificados
 };
+
+const CONUNI_ORGAOS = [
+  'CONUNI', 'CNLCA', 'CNCIC', 'CNMLC', 'CNPAD', 'CNDE', 'CNPAT',
+  'CNASP', 'CNPDI', 'CNS', 'CNU', 'CNIR',
+] as const;
 
 const CATEGORY_CONFIG: Record<string, CategoryConfig> = {
   pareceres: {
     slug: 'pareceres',
-    label: 'Pareceres Uniformizantes',
+    label: 'Pareceres, Notas e Despachos',
     description:
-      'Pareceres da Advocacia-Geral da União, vinculantes e do CONUNI/DECOR, consolidando entendimentos sobre licitações.',
+      'Manifestações da Advocacia-Geral da União (CONUNI/DECOR): pareceres uniformizantes (incluindo vinculantes), notas técnicas e despachos sobre licitações e contratos.',
     icon: FileText,
-    dbCategories: ['parecer', 'parecer-vinculante', 'decor'],
+    dbCategories: ['parecer', 'parecer-vinculante', 'decor', 'nota-tecnica', 'despacho'],
     orderBy: 'recent',
     showDescription: true,
-  },
-  'notas-tecnicas': {
-    slug: 'notas-tecnicas',
-    label: 'Notas Técnicas',
-    description:
-      'Notas técnicas e jurídicas produzidas pelo CONUNI/AGU em resposta a consultas dos órgãos federais.',
-    icon: ClipboardList,
-    dbCategories: ['nota-tecnica'],
-    orderBy: 'recent',
-    showDescription: true,
-  },
-  despachos: {
-    slug: 'despachos',
-    label: 'Despachos',
-    description:
-      'Despachos uniformizadores e cotas do CONUNI/AGU sobre matérias de licitação e contratos.',
-    icon: FileSignature,
-    dbCategories: ['despacho'],
-    orderBy: 'recent',
-    showDescription: true,
+    tipoFilter: {
+      options: [
+        { value: 'parecer', label: 'Pareceres', dbCategories: ['parecer'] },
+        { value: 'vinculante', label: 'Vinculantes', dbCategories: ['parecer-vinculante'] },
+        { value: 'nota-tecnica', label: 'Notas técnicas', dbCategories: ['nota-tecnica'] },
+        { value: 'despacho', label: 'Despachos', dbCategories: ['despacho'] },
+      ],
+    },
+    orgaoFilter: { orgaos: CONUNI_ORGAOS },
+    vigenciaFilter: true,
   },
   'orientacoes-normativas': {
     slug: 'orientacoes-normativas',
@@ -87,7 +88,14 @@ const PAGE_SIZE = 20;
 
 interface PageProps {
   params: Promise<{ categoria: string }>;
-  searchParams: Promise<{ page?: string; q?: string; ente?: string }>;
+  searchParams: Promise<{
+    page?: string;
+    q?: string;
+    ente?: string;
+    tipo?: string;
+    orgao?: string;
+    vigencia?: string;
+  }>;
 }
 
 export async function generateStaticParams() {
@@ -96,10 +104,8 @@ export async function generateStaticParams() {
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { categoria } = await params;
-  // Acórdãos do TCU agora vivem em /jurisprudencia (não duplicar)
-  if (categoria === 'acordaos') {
-    return { title: 'Redirecionando…' };
-  }
+  if (categoria === 'acordaos') return { title: 'Redirecionando…' };
+  if (categoria === 'notas-tecnicas' || categoria === 'despachos') return { title: 'Redirecionando…' };
   const cfg = CATEGORY_CONFIG[categoria];
   if (!cfg) return { title: 'Categoria não encontrada' };
   return {
@@ -124,38 +130,85 @@ function getOrderBy(orderBy: CategoryConfig['orderBy']) {
   return [{ uploadedAt: 'desc' as const }];
 }
 
+function buildFilterUrl(
+  categoria: string,
+  current: { q?: string; tipo?: string; orgao?: string; vigencia?: string; ente?: string; page?: number },
+  changes: Partial<typeof current>,
+): string {
+  const merged = { ...current, ...changes };
+  const params = new URLSearchParams();
+  if (merged.q) params.set('q', merged.q);
+  if (merged.tipo) params.set('tipo', merged.tipo);
+  if (merged.orgao) params.set('orgao', merged.orgao);
+  if (merged.vigencia) params.set('vigencia', merged.vigencia);
+  if (merged.ente) params.set('ente', merged.ente);
+  if (merged.page && merged.page > 1) params.set('page', String(merged.page));
+  const qs = params.toString();
+  return `/base-conhecimento/${categoria}${qs ? `?${qs}` : ''}`;
+}
+
 export default async function CategoriaPage({ params, searchParams }: PageProps) {
   const { categoria } = await params;
 
-  // Acórdãos TCU já vivem em /jurisprudencia — redirecionar
-  if (categoria === 'acordaos') {
-    redirect('/jurisprudencia');
-  }
+  // Redirects de URLs antigas
+  if (categoria === 'acordaos') redirect('/jurisprudencia');
+  if (categoria === 'notas-tecnicas') redirect('/base-conhecimento/pareceres?tipo=nota-tecnica');
+  if (categoria === 'despachos') redirect('/base-conhecimento/pareceres?tipo=despacho');
 
-  const { page: pageStr, q, ente } = await searchParams;
+  const sp = await searchParams;
   const cfg = CATEGORY_CONFIG[categoria];
-
   if (!cfg) notFound();
 
-  const page = Math.max(1, parseInt(pageStr || '1', 10) || 1);
+  const page = Math.max(1, parseInt(sp.page || '1', 10) || 1);
   const skip = (page - 1) * PAGE_SIZE;
-  const searchTerm = q?.trim() || '';
-  const enteFilter = cfg.enteFilter && ente && cfg.enteFilter.entes.includes(ente) ? ente : '';
+  const searchTerm = sp.q?.trim() || '';
 
-  const where = {
-    isPublic: true,
-    category: { in: [...cfg.dbCategories] },
-    ...(searchTerm && {
-      OR: [
-        { title: { contains: searchTerm, mode: 'insensitive' as const } },
-        { description: { contains: searchTerm, mode: 'insensitive' as const } },
-      ],
-    }),
-    // Filtro por ente: tags é JSON-stringified array; usar contains com aspas pra reduzir falsos positivos
-    ...(enteFilter && {
-      tags: { contains: `"${enteFilter}"` },
-    }),
+  // Filtro ente (enunciados)
+  const enteFilter = cfg.enteFilter && sp.ente && cfg.enteFilter.entes.includes(sp.ente) ? sp.ente : '';
+
+  // Filtros CONUNI
+  const tipoFilter = cfg.tipoFilter && sp.tipo && cfg.tipoFilter.options.some(o => o.value === sp.tipo)
+    ? sp.tipo : '';
+  const orgaoFilter = cfg.orgaoFilter && sp.orgao && cfg.orgaoFilter.orgaos.includes(sp.orgao as typeof CONUNI_ORGAOS[number])
+    ? sp.orgao : '';
+  const vigenciaFilter = cfg.vigenciaFilter && sp.vigencia && ['vigente', 'revogado', 'modificado'].includes(sp.vigencia)
+    ? sp.vigencia : '';
+
+  // Resolve dbCategories: se tipoFilter ativo, usa o subset; senão, todos da categoria
+  const activeDbCategories = tipoFilter && cfg.tipoFilter
+    ? cfg.tipoFilter.options.find(o => o.value === tipoFilter)!.dbCategories
+    : cfg.dbCategories;
+
+  type WhereClause = {
+    isPublic: boolean;
+    isCommon?: boolean;
+    category: { in: string[] };
+    OR?: Array<Record<string, unknown>>;
+    AND?: Array<Record<string, unknown>>;
+    tags?: { contains: string };
+    aiClassification?: { contains: string };
   };
+
+  const where: WhereClause = {
+    isPublic: true,
+    category: { in: [...activeDbCategories] },
+  };
+
+  if (searchTerm) {
+    where.OR = [
+      { title: { contains: searchTerm, mode: 'insensitive' as const } },
+      { description: { contains: searchTerm, mode: 'insensitive' as const } },
+    ];
+  }
+
+  // tags é JSON-stringified array — usar contains com aspas pra reduzir falsos positivos
+  if (enteFilter) where.tags = { contains: `"${enteFilter}"` };
+  if (orgaoFilter) where.tags = { contains: `"${orgaoFilter}"` };
+
+  // vigencia vive em aiClassification JSON (preenchida pelo sync CONUNI)
+  if (vigenciaFilter) {
+    where.aiClassification = { contains: `"vigencia":"${vigenciaFilter}"` };
+  }
 
   let docs: Array<{
     id: string;
@@ -169,6 +222,7 @@ export default async function CategoriaPage({ params, searchParams }: PageProps)
     onYear: number | null;
     tags: string | null;
     aiClassification: string | null;
+    category: string;
   }> = [];
   let total = 0;
 
@@ -188,6 +242,7 @@ export default async function CategoriaPage({ params, searchParams }: PageProps)
           onYear: true,
           tags: true,
           aiClassification: true,
+          category: true,
         },
         orderBy: getOrderBy(cfg.orderBy),
         skip,
@@ -199,7 +254,6 @@ export default async function CategoriaPage({ params, searchParams }: PageProps)
     // DB indisponível
   }
 
-  // Extrai vigência do aiClassification JSON (preenchido pelo sync CONUNI)
   function getVigencia(aiCls: string | null): 'revogado' | 'modificado' | null {
     if (!aiCls) return null;
     try {
@@ -210,8 +264,18 @@ export default async function CategoriaPage({ params, searchParams }: PageProps)
     } catch { return null; }
   }
 
+  function getTipoLabel(category: string): string | null {
+    if (category === 'parecer-vinculante') return 'Vinculante';
+    if (category === 'nota-tecnica') return 'Nota técnica';
+    if (category === 'despacho') return 'Despacho';
+    return null;
+  }
+
   const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
   const Icon = cfg.icon;
+  const currentParams = { q: searchTerm, tipo: tipoFilter, orgao: orgaoFilter, vigencia: vigenciaFilter, ente: enteFilter };
+  const hasAdvancedFilters = !!(cfg.tipoFilter || cfg.orgaoFilter || cfg.vigenciaFilter);
+  const hasActiveFilter = !!(searchTerm || tipoFilter || orgaoFilter || vigenciaFilter || enteFilter);
 
   return (
     <main className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-50">
@@ -247,7 +311,7 @@ export default async function CategoriaPage({ params, searchParams }: PageProps)
         </div>
       </section>
 
-      {/* Busca + lista */}
+      {/* Busca + filtros + lista */}
       <section className="container mx-auto px-4 py-10 md:py-12 max-w-5xl">
         <form method="get" className="mb-6">
           <div className="relative">
@@ -261,19 +325,21 @@ export default async function CategoriaPage({ params, searchParams }: PageProps)
               aria-label={`Buscar em ${cfg.label}`}
             />
           </div>
+          {/* Preserva filtros ativos como hidden inputs ao submeter busca */}
+          {tipoFilter && <input type="hidden" name="tipo" value={tipoFilter} />}
+          {orgaoFilter && <input type="hidden" name="orgao" value={orgaoFilter} />}
+          {vigenciaFilter && <input type="hidden" name="vigencia" value={vigenciaFilter} />}
           {enteFilter && <input type="hidden" name="ente" value={enteFilter} />}
         </form>
 
-        {/* Filtro por ente (só aparece se a categoria define enteFilter) */}
+        {/* Filtro por ente (enunciados) */}
         {cfg.enteFilter && (
-          <div className="mb-8 flex flex-wrap items-center gap-2">
+          <div className="mb-4 flex flex-wrap items-center gap-2">
             <span className="text-sm text-gray-600 font-medium mr-1">Ente:</span>
             <Link
-              href={`/base-conhecimento/${categoria}${searchTerm ? `?q=${encodeURIComponent(searchTerm)}` : ''}`}
+              href={buildFilterUrl(categoria, currentParams, { ente: '', page: 1 })}
               className={`px-4 py-1.5 rounded-full text-sm font-medium transition-colors ${
-                !enteFilter
-                  ? 'bg-brand-600 text-white'
-                  : 'bg-white border border-gray-300 text-gray-700 hover:border-brand-400'
+                !enteFilter ? 'bg-brand-600 text-white' : 'bg-white border border-gray-300 text-gray-700 hover:border-brand-400'
               }`}
             >
               Todos
@@ -281,14 +347,9 @@ export default async function CategoriaPage({ params, searchParams }: PageProps)
             {cfg.enteFilter.entes.map((e) => (
               <Link
                 key={e}
-                href={`/base-conhecimento/${categoria}?${new URLSearchParams({
-                  ...(searchTerm && { q: searchTerm }),
-                  ente: e,
-                }).toString()}`}
+                href={buildFilterUrl(categoria, currentParams, { ente: e, page: 1 })}
                 className={`px-4 py-1.5 rounded-full text-sm font-medium transition-colors ${
-                  enteFilter === e
-                    ? 'bg-brand-600 text-white'
-                    : 'bg-white border border-gray-300 text-gray-700 hover:border-brand-400'
+                  enteFilter === e ? 'bg-brand-600 text-white' : 'bg-white border border-gray-300 text-gray-700 hover:border-brand-400'
                 }`}
               >
                 {e}
@@ -297,7 +358,100 @@ export default async function CategoriaPage({ params, searchParams }: PageProps)
           </div>
         )}
 
-        {/* Disclaimer pra ONs: texto extraído da listagem oficial AGU; URLs DOU específicas em consolidação */}
+        {/* Filtros CONUNI (pareceres) */}
+        {hasAdvancedFilters && (
+          <div className="mb-6 space-y-3">
+            {cfg.tipoFilter && (
+              <div className="flex flex-wrap items-center gap-2">
+                <span className="text-sm text-gray-600 font-medium mr-1 min-w-[60px]">Tipo:</span>
+                <Link
+                  href={buildFilterUrl(categoria, currentParams, { tipo: '', page: 1 })}
+                  className={`px-3 py-1 rounded-full text-sm font-medium transition-colors ${
+                    !tipoFilter ? 'bg-brand-600 text-white' : 'bg-white border border-gray-300 text-gray-700 hover:border-brand-400'
+                  }`}
+                >
+                  Todos
+                </Link>
+                {cfg.tipoFilter.options.map((opt) => (
+                  <Link
+                    key={opt.value}
+                    href={buildFilterUrl(categoria, currentParams, { tipo: opt.value, page: 1 })}
+                    className={`px-3 py-1 rounded-full text-sm font-medium transition-colors ${
+                      tipoFilter === opt.value ? 'bg-brand-600 text-white' : 'bg-white border border-gray-300 text-gray-700 hover:border-brand-400'
+                    }`}
+                  >
+                    {opt.label}
+                  </Link>
+                ))}
+              </div>
+            )}
+
+            {cfg.vigenciaFilter && (
+              <div className="flex flex-wrap items-center gap-2">
+                <span className="text-sm text-gray-600 font-medium mr-1 min-w-[60px]">Vigência:</span>
+                <Link
+                  href={buildFilterUrl(categoria, currentParams, { vigencia: '', page: 1 })}
+                  className={`px-3 py-1 rounded-full text-sm font-medium transition-colors ${
+                    !vigenciaFilter ? 'bg-brand-600 text-white' : 'bg-white border border-gray-300 text-gray-700 hover:border-brand-400'
+                  }`}
+                >
+                  Todas
+                </Link>
+                {(['vigente', 'revogado', 'modificado'] as const).map((v) => (
+                  <Link
+                    key={v}
+                    href={buildFilterUrl(categoria, currentParams, { vigencia: v, page: 1 })}
+                    className={`px-3 py-1 rounded-full text-sm font-medium transition-colors capitalize ${
+                      vigenciaFilter === v
+                        ? v === 'revogado' ? 'bg-red-600 text-white' : v === 'modificado' ? 'bg-amber-600 text-white' : 'bg-brand-600 text-white'
+                        : 'bg-white border border-gray-300 text-gray-700 hover:border-brand-400'
+                    }`}
+                  >
+                    {v === 'vigente' ? 'Vigentes' : v === 'revogado' ? 'Revogados' : 'Modificados'}
+                  </Link>
+                ))}
+              </div>
+            )}
+
+            {cfg.orgaoFilter && (
+              <div className="flex flex-wrap items-center gap-2">
+                <span className="text-sm text-gray-600 font-medium mr-1 min-w-[60px]">Câmara:</span>
+                <Link
+                  href={buildFilterUrl(categoria, currentParams, { orgao: '', page: 1 })}
+                  className={`px-3 py-1 rounded-full text-xs font-medium transition-colors ${
+                    !orgaoFilter ? 'bg-brand-600 text-white' : 'bg-white border border-gray-300 text-gray-700 hover:border-brand-400'
+                  }`}
+                >
+                  Todas
+                </Link>
+                {cfg.orgaoFilter.orgaos.map((o) => (
+                  <Link
+                    key={o}
+                    href={buildFilterUrl(categoria, currentParams, { orgao: o, page: 1 })}
+                    className={`px-3 py-1 rounded-full text-xs font-medium transition-colors ${
+                      orgaoFilter === o ? 'bg-brand-600 text-white' : 'bg-white border border-gray-300 text-gray-700 hover:border-brand-400'
+                    }`}
+                  >
+                    {o}
+                  </Link>
+                ))}
+              </div>
+            )}
+
+            {hasActiveFilter && (
+              <div className="pt-1">
+                <Link
+                  href={`/base-conhecimento/${categoria}`}
+                  className="text-xs font-medium text-gray-500 hover:text-brand-700 underline"
+                >
+                  Limpar todos os filtros
+                </Link>
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Disclaimer pra ONs */}
         {categoria === 'orientacoes-normativas' && (
           <div className="mb-6 bg-blue-50 border border-blue-200 rounded-xl p-4 flex items-start gap-3">
             <AlertTriangle className="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5" />
@@ -314,11 +468,11 @@ export default async function CategoriaPage({ params, searchParams }: PageProps)
         {docs.length === 0 ? (
           <div className="bg-white border border-gray-200 rounded-2xl p-12 text-center">
             <p className="text-gray-600">
-              {searchTerm || enteFilter
-                ? `Nenhum documento encontrado${searchTerm ? ` para "${searchTerm}"` : ''}${enteFilter ? ` no ente ${enteFilter}` : ''}.`
+              {hasActiveFilter
+                ? 'Nenhum documento encontrado com os filtros atuais.'
                 : 'Nenhum documento disponível nesta categoria no momento.'}
             </p>
-            {(searchTerm || enteFilter) && (
+            {hasActiveFilter && (
               <Link
                 href={`/base-conhecimento/${categoria}`}
                 className="inline-block mt-4 text-brand-600 hover:text-brand-700 font-semibold"
@@ -330,7 +484,6 @@ export default async function CategoriaPage({ params, searchParams }: PageProps)
         ) : (
           <ul className="space-y-3">
             {docs.map((doc) => {
-              // Extrai ente das tags (ex.: ["IBDA","Enunciado",...] → "IBDA")
               let enteTag: string | null = null;
               if (cfg.enteFilter && doc.tags) {
                 try {
@@ -342,37 +495,36 @@ export default async function CategoriaPage({ params, searchParams }: PageProps)
                   // tags malformadas; ignora
                 }
               }
+              const tipoLabel = cfg.tipoFilter ? getTipoLabel(doc.category) : null;
+              const v = getVigencia(doc.aiClassification);
               return (
                 <li key={doc.id}>
                   <Link
                     href={`/documento/${doc.id}`}
                     className="block bg-white border border-gray-200 rounded-xl p-5 hover:border-brand-400 hover:shadow-md transition-all group focus-visible:ring-2 focus-visible:ring-brand-500 focus-visible:ring-offset-2"
                   >
-                    <div className="flex items-start gap-3 mb-1">
+                    <div className="flex items-start gap-2 mb-1 flex-wrap">
                       {enteTag && (
-                        <span className="inline-block px-2 py-0.5 bg-brand-50 text-brand-700 text-xs font-semibold rounded-md flex-shrink-0 mt-0.5">
+                        <span className="inline-block px-2 py-0.5 bg-brand-50 text-brand-700 text-xs font-semibold rounded-md mt-0.5">
                           {enteTag}
                         </span>
                       )}
-                      {(() => {
-                        const v = getVigencia(doc.aiClassification);
-                        if (v === 'revogado') {
-                          return (
-                            <span className="inline-block px-2 py-0.5 bg-red-100 text-red-800 text-xs font-bold uppercase tracking-wide rounded-md flex-shrink-0 mt-0.5">
-                              Revogado
-                            </span>
-                          );
-                        }
-                        if (v === 'modificado') {
-                          return (
-                            <span className="inline-block px-2 py-0.5 bg-amber-100 text-amber-800 text-xs font-bold uppercase tracking-wide rounded-md flex-shrink-0 mt-0.5">
-                              Modificado
-                            </span>
-                          );
-                        }
-                        return null;
-                      })()}
-                      <h2 className="text-base md:text-lg font-semibold text-gray-900 group-hover:text-brand-700 transition-colors leading-snug flex-1">
+                      {tipoLabel && (
+                        <span className="inline-block px-2 py-0.5 bg-blue-50 text-blue-700 text-xs font-semibold rounded-md mt-0.5">
+                          {tipoLabel}
+                        </span>
+                      )}
+                      {v === 'revogado' && (
+                        <span className="inline-block px-2 py-0.5 bg-red-100 text-red-800 text-xs font-bold uppercase tracking-wide rounded-md mt-0.5">
+                          Revogado
+                        </span>
+                      )}
+                      {v === 'modificado' && (
+                        <span className="inline-block px-2 py-0.5 bg-amber-100 text-amber-800 text-xs font-bold uppercase tracking-wide rounded-md mt-0.5">
+                          Modificado
+                        </span>
+                      )}
+                      <h2 className="text-base md:text-lg font-semibold text-gray-900 group-hover:text-brand-700 transition-colors leading-snug flex-1 basis-full sm:basis-auto">
                         {doc.title}
                       </h2>
                     </div>
@@ -405,11 +557,7 @@ export default async function CategoriaPage({ params, searchParams }: PageProps)
           <nav className="mt-10 flex items-center justify-center gap-2" aria-label="Paginação">
             {page > 1 && (
               <Link
-                href={`/base-conhecimento/${categoria}?${new URLSearchParams({
-                  ...(searchTerm && { q: searchTerm }),
-                  ...(enteFilter && { ente: enteFilter }),
-                  page: String(page - 1),
-                }).toString()}`}
+                href={buildFilterUrl(categoria, currentParams, { page: page - 1 })}
                 className="inline-flex items-center gap-1 px-4 py-2 bg-white border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:border-brand-400 hover:text-brand-700"
               >
                 <ChevronLeft className="w-4 h-4" />
@@ -421,11 +569,7 @@ export default async function CategoriaPage({ params, searchParams }: PageProps)
             </span>
             {page < totalPages && (
               <Link
-                href={`/base-conhecimento/${categoria}?${new URLSearchParams({
-                  ...(searchTerm && { q: searchTerm }),
-                  ...(enteFilter && { ente: enteFilter }),
-                  page: String(page + 1),
-                }).toString()}`}
+                href={buildFilterUrl(categoria, currentParams, { page: page + 1 })}
                 className="inline-flex items-center gap-1 px-4 py-2 bg-white border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:border-brand-400 hover:text-brand-700"
               >
                 Próxima

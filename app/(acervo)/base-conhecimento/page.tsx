@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { Scale, FileText, BookOpen, List, Book, Landmark, Sparkles, Library, ClipboardList, FileSignature } from 'lucide-react';
+import { Scale, FileText, BookOpen, List, Book, Landmark, Sparkles, Library } from 'lucide-react';
 import {
   getCachedDocumentCountByCategory,
   getCachedTribunalDecisionCount,
@@ -18,9 +18,7 @@ export const metadata = {
   },
 };
 
-const PARECER_CATEGORIES = ['parecer', 'parecer-vinculante', 'decor'] as const;
-const NOTA_CATEGORIES = ['nota-tecnica'] as const;
-const DESPACHO_CATEGORIES = ['despacho'] as const;
+const PARECER_CATEGORIES = ['parecer', 'parecer-vinculante', 'decor', 'nota-tecnica', 'despacho'] as const;
 
 type CategoryConfig = {
   key: string;
@@ -48,27 +46,11 @@ const CATEGORIES: CategoryConfig[] = [
   },
   {
     key: 'pareceres',
-    label: 'Pareceres Uniformizantes',
-    description: 'Pareceres da AGU, vinculantes e do CONUNI/DECOR.',
+    label: 'Pareceres, Notas e Despachos',
+    description: 'Manifestações da AGU (CONUNI/DECOR) — pareceres uniformizantes, vinculantes, notas técnicas e despachos.',
     icon: FileText,
     href: '/base-conhecimento/pareceres',
     matchCategories: PARECER_CATEGORIES,
-  },
-  {
-    key: 'notas-tecnicas',
-    label: 'Notas Técnicas',
-    description: 'Notas técnicas e jurídicas do CONUNI/AGU.',
-    icon: ClipboardList,
-    href: '/base-conhecimento/notas-tecnicas',
-    matchCategories: NOTA_CATEGORIES,
-  },
-  {
-    key: 'despachos',
-    label: 'Despachos',
-    description: 'Despachos uniformizadores do CONUNI/AGU.',
-    icon: FileSignature,
-    href: '/base-conhecimento/despachos',
-    matchCategories: DESPACHO_CATEGORIES,
   },
   {
     key: 'orientacao-normativa',
