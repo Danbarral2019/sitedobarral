@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useRef, useMemo, Suspense } from 'react';
+import React, { useState, useEffect, useRef, useMemo, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import {
   ChevronRight,
@@ -33,6 +33,7 @@ import { isLiteralSourceCategory } from '@/lib/literal-sources';
 import Link from 'next/link';
 import { CROSS_REFERENCES } from '@/data/lei-14133-cross-references';
 import { Star } from 'lucide-react';
+import { LeiSidebar } from '@/components/lei-14133/LeiSidebar';
 
 interface EnunciadoResumo {
   id: string;
@@ -686,116 +687,19 @@ function LeiComentadaContent() {
   };
 
   const renderSidebarContent = () => (
-    <div className="p-2">
-      {filteredHierarchy &&
-        Object.entries(filteredHierarchy).map(([tituloKey, tituloData]) => {
-          const isTituloExpanded = expandedTitulos.has(tituloKey);
-
-          return (
-            <div key={tituloKey} className="mb-2">
-              {/* TITULO */}
-              <button
-                onClick={() => toggleTitulo(tituloKey)}
-                className="w-full flex items-center gap-2 p-3 hover:bg-blue-50 rounded-lg transition-colors text-left"
-              >
-                {isTituloExpanded ? (
-                  <ChevronDown className="w-5 h-5 text-blue-600 flex-shrink-0" />
-                ) : (
-                  <ChevronRight className="w-5 h-5 text-gray-400 flex-shrink-0" />
-                )}
-                <div className="flex-1 min-w-0">
-                  <p className="font-semibold text-gray-900 truncate">{tituloData.titulo}</p>
-                  <p className="text-xs text-gray-500">
-                    {Object.values(tituloData.capitulos).reduce(
-                      (sum, cap) => sum + cap.artigos.length,
-                      0
-                    )}{' '}
-                    artigos
-                  </p>
-                </div>
-              </button>
-
-              {/* CAPITULOS */}
-              {isTituloExpanded && (
-                <div className="ml-4 mt-1 space-y-1">
-                  {Object.entries(tituloData.capitulos).map(([capituloKey, capituloData]) => {
-                    const capituloId = `${tituloKey}::${capituloKey}`;
-                    const isCapituloExpanded = expandedCapitulos.has(capituloId);
-
-                    return (
-                      <div key={capituloKey}>
-                        {/* CAPITULO */}
-                        <button
-                          onClick={() => toggleCapitulo(tituloKey, capituloKey)}
-                          className="w-full flex items-center gap-2 p-2 hover:bg-indigo-50 rounded-lg transition-colors text-left"
-                        >
-                          {isCapituloExpanded ? (
-                            <ChevronDown className="w-4 h-4 text-indigo-600 flex-shrink-0" />
-                          ) : (
-                            <ChevronRight className="w-4 h-4 text-gray-400 flex-shrink-0" />
-                          )}
-                          <div className="flex-1 min-w-0">
-                            <p className="text-sm font-medium text-gray-800 truncate">
-                              {capituloData.capituloCompleto}
-                            </p>
-                            <p className="text-xs text-gray-500">
-                              {capituloData.artigos.length} artigos
-                            </p>
-                          </div>
-                        </button>
-
-                        {/* ARTIGOS */}
-                        {isCapituloExpanded && (
-                          <div className="ml-4 mt-1 space-y-1">
-                            {capituloData.artigos.map((article) => {
-                              const isSelected = selectedArticle?.numero === article.numero;
-
-                              return (
-                                <button
-                                  key={article.numero}
-                                  ref={(el) => {
-                                    articleRefs.current[article.numero] = el;
-                                  }}
-                                  onClick={() => handleSelectArticle(article)}
-                                  className={`w-full flex items-center gap-2 p-2 rounded-lg transition-colors text-left ${
-                                    isSelected
-                                      ? 'bg-blue-100 border-2 border-blue-500'
-                                      : 'hover:bg-gray-100'
-                                  }`}
-                                >
-                                  <span
-                                    className={`px-2 py-1 rounded text-xs font-bold ${
-                                      isSelected
-                                        ? 'bg-blue-600 text-white'
-                                        : 'bg-gray-200 text-gray-700'
-                                    }`}
-                                  >
-                                    Art. {article.numero}
-                                  </span>
-                                  <div className="flex-1 min-w-0">
-                                    <p className="text-xs text-gray-700 truncate">
-                                      {article.ementa.substring(0, 40)}...
-                                    </p>
-                                  </div>
-                                  {article.documentCount > 0 && (
-                                    <span className="flex-shrink-0 px-2 py-0.5 bg-green-100 text-green-700 text-xs font-medium rounded">
-                                      {article.documentCount}
-                                    </span>
-                                  )}
-                                </button>
-                              );
-                            })}
-                          </div>
-                        )}
-                      </div>
-                    );
-                  })}
-                </div>
-              )}
-            </div>
-          );
-        })}
-    </div>
+    <LeiSidebar
+      hierarchy={filteredHierarchy}
+      selectedNumero={selectedArticle?.numero || null}
+      expandedTitulos={expandedTitulos}
+      expandedCapitulos={expandedCapitulos}
+      onToggleTitulo={toggleTitulo}
+      onToggleCapitulo={toggleCapitulo}
+      onSelectArticle={(art) => {
+        const fullArt = apiData?.articles.find((a) => a.numero === art.numero);
+        if (fullArt) handleSelectArticle(fullArt);
+      }}
+      articleRefs={articleRefs as React.RefObject<Record<string, HTMLElement | null>>}
+    />
   );
 
   const getArticleStatus = (count: number) => {
