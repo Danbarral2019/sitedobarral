@@ -81,7 +81,8 @@ export default async function HomeNovidadesSection() {
           uploadedAt: { gte: thirtyDaysAgo },
           isPublic: true,
           reviewed: true,
-          NOT: { category: 'manual-tcu' },
+          // Acórdãos e manual TCU são canônicos em TribunalDecision/categoria própria
+          NOT: { category: { in: ['manual-tcu', 'acordao'] } },
         },
         select: {
           id: true,
@@ -90,7 +91,7 @@ export default async function HomeNovidadesSection() {
           uploadedAt: true,
         },
         orderBy: { uploadedAt: 'desc' },
-        take: 8,
+        take: 10,
       }),
       prisma.blogPost.findMany({
         where: {
@@ -149,7 +150,19 @@ export default async function HomeNovidadesSection() {
   }
 
   allRecentItems.sort((a, b) => b.date.getTime() - a.date.getTime());
-  const visibleItems = allRecentItems.slice(0, 10);
+
+  // Dedup por título normalizado — defesa caso o mesmo conteúdo apareça
+  // em Document e TribunalDecision (caso histórico do TCU). Mantém a entrada
+  // mais recente (primeira após sort desc).
+  const seen = new Set<string>();
+  const deduped = allRecentItems.filter((item) => {
+    const key = item.title.trim().toLowerCase().replace(/\s+/g, ' ');
+    if (seen.has(key)) return false;
+    seen.add(key);
+    return true;
+  });
+
+  const visibleItems = deduped.slice(0, 10);
 
   const hasContent = visibleItems.length > 0 || blogPosts.length > 0;
   if (!hasContent) return null;
