@@ -73,10 +73,7 @@ export default function PareceresRevisaoPage() {
     } finally {
       setLoading(false);
     }
-    // errorToast é re-criado pelo useToast a cada render — não pode entrar nas deps
-    // ou causa loop infinito. As demais deps controlam quando recarregar.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [filter, page, q]);
+  }, [filter, page, q, errorToast]);
 
   useEffect(() => { load(); }, [load]);
 

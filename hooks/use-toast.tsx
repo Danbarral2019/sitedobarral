@@ -58,6 +58,19 @@ export function ToastProviderWrapper({ children }: { children: React.ReactNode }
   );
 }
 
+/**
+ * Hook de toasts.
+ *
+ * **Contrato de estabilidade:** `toast`, `success`, `error`, `info`,
+ * `warning` e `removeToast` retornam *referências estáveis* (memoizadas
+ * via useCallback no provider e neste hook). Por isso, podem ser
+ * incluídas com segurança nas deps de `useCallback`/`useEffect` sem
+ * causar loop de re-render.
+ *
+ * O array `toasts` E o objeto-raiz retornado MUDAM quando há novo
+ * toast — não use `useToast()` inteiro como dep, desestruture a função
+ * específica que precisa.
+ */
 export function useToast() {
   const context = React.useContext(ToastContext);
 
@@ -67,16 +80,29 @@ export function useToast() {
 
   const { addToast } = context;
 
+  const success = React.useCallback(
+    (title: string, description?: string) => addToast({ title, description, variant: 'success' }),
+    [addToast],
+  );
+  const error = React.useCallback(
+    (title: string, description?: string) => addToast({ title, description, variant: 'error' }),
+    [addToast],
+  );
+  const info = React.useCallback(
+    (title: string, description?: string) => addToast({ title, description, variant: 'info' }),
+    [addToast],
+  );
+  const warning = React.useCallback(
+    (title: string, description?: string) => addToast({ title, description, variant: 'warning' }),
+    [addToast],
+  );
+
   return {
     toast: addToast,
-    success: (title: string, description?: string) =>
-      addToast({ title, description, variant: 'success' }),
-    error: (title: string, description?: string) =>
-      addToast({ title, description, variant: 'error' }),
-    info: (title: string, description?: string) =>
-      addToast({ title, description, variant: 'info' }),
-    warning: (title: string, description?: string) =>
-      addToast({ title, description, variant: 'warning' }),
+    success,
+    error,
+    info,
+    warning,
     ...context,
   };
 }
