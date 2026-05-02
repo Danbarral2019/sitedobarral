@@ -66,11 +66,24 @@ export default async function DocumentoPage({ params }: PageProps) {
       tags: true,
       leiArticles: true,
       isPublic: true,
+      aiClassification: true,
     },
   });
 
   if (!doc || !doc.isPublic) {
     notFound();
+  }
+
+  // Extrai resumo IA + vigência do aiClassification (preenchido pelo
+  // pipeline CONUNI: sync + classify + summarize)
+  let summary: string | null = null;
+  let vigencia: 'revogado' | 'modificado' | null = null;
+  if (doc.aiClassification) {
+    try {
+      const ai = JSON.parse(doc.aiClassification) as { summary?: string; vigencia?: string };
+      if (ai.summary && ai.summary.trim().length > 5) summary = ai.summary.trim();
+      if (ai.vigencia === 'revogado' || ai.vigencia === 'modificado') vigencia = ai.vigencia;
+    } catch { /* ignora */ }
   }
 
   const categoryLabel = CATEGORY_LABELS[doc.category] || 'Documento';
@@ -99,11 +112,21 @@ export default async function DocumentoPage({ params }: PageProps) {
         {/* Header */}
         <div className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
           <div className="p-8">
-            {/* Category Badge */}
-            <div className="flex items-center gap-3 mb-4">
+            {/* Category + Vigência Badges */}
+            <div className="flex items-center gap-3 mb-4 flex-wrap">
               <span className={`px-3 py-1 text-sm font-bold rounded-lg ${categoryColor}`}>
                 {categoryLabel}
               </span>
+              {vigencia === 'revogado' && (
+                <span className="px-3 py-1 text-xs font-bold uppercase tracking-wide bg-red-100 text-red-800 rounded-lg">
+                  Revogado
+                </span>
+              )}
+              {vigencia === 'modificado' && (
+                <span className="px-3 py-1 text-xs font-bold uppercase tracking-wide bg-amber-100 text-amber-800 rounded-lg">
+                  Modificado
+                </span>
+              )}
               {doc.uploadedAt && (
                 <span className="flex items-center gap-1.5 text-sm text-gray-500">
                   <Calendar className="w-4 h-4" />
@@ -137,7 +160,19 @@ export default async function DocumentoPage({ params }: PageProps) {
               </div>
             )}
 
-            {/* Content */}
+            {/* Resumo IA contextualizado (gerado pelo pipeline CONUNI) */}
+            {summary && (
+              <div className="mb-6 bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 border-l-4 border-blue-500 rounded-r-xl p-5">
+                <div className="flex items-start gap-3">
+                  <div className="text-blue-600 font-bold text-xs uppercase tracking-wider whitespace-nowrap pt-0.5">
+                    Resumo
+                  </div>
+                  <p className="text-gray-800 leading-relaxed">{summary}</p>
+                </div>
+              </div>
+            )}
+
+            {/* Content (texto cru — assunto, ementa, aprovação, natureza) */}
             {displayContent && (
               <div className="prose prose-gray max-w-none">
                 {displayContent.split('\n').map((paragraph, i) => (
