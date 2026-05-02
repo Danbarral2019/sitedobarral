@@ -53,8 +53,13 @@ export default async function Home() {
       href: '/jurisprudencia',
     },
     {
-      label: 'Pareceres uniformizantes',
-      count: (categoryCounts['decor'] || 0) + (categoryCounts['parecer-vinculante'] || 0),
+      label: 'Pareceres, Notas e Despachos',
+      count:
+        (categoryCounts['parecer'] || 0) +
+        (categoryCounts['parecer-vinculante'] || 0) +
+        (categoryCounts['nota-tecnica'] || 0) +
+        (categoryCounts['despacho'] || 0) +
+        (categoryCounts['decor'] || 0),
       icon: FileCheck,
       href: '/base-conhecimento/pareceres',
     },
