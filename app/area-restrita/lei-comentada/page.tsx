@@ -31,8 +31,8 @@ import { useLegislativeActFavorites } from '@/hooks/use-legislative-act-favorite
 import { safeParseArray, normalizeTextContent } from '@/lib/utils';
 import { isLiteralSourceCategory } from '@/lib/literal-sources';
 import Link from 'next/link';
-import ArticleChatInterface from '@/components/ArticleChatInterface';
 import { CROSS_REFERENCES } from '@/data/lei-14133-cross-references';
+import { Star } from 'lucide-react';
 
 interface EnunciadoResumo {
   id: string;
@@ -40,6 +40,32 @@ interface EnunciadoResumo {
   numero: number;
   texto: string;
   tema: string;
+  url?: string;
+}
+
+interface EnrichedDoc {
+  id: string;
+  title: string;
+  type: 'document' | 'legislativeAct';
+  category: string | null;
+  isPublic: boolean;
+  url?: string;
+  summary?: string | null;
+  notesImportance?: string | null;
+  hierarchyLevel?: number | null;
+  esfera?: string | null;
+  fullNumber?: string | null;
+  leiArticlesCount: number;
+  score: number;
+  highlightReason: string;
+}
+
+interface ArticleDocsResponse {
+  articleNumber: string;
+  total: number;
+  totalAll: number;
+  highlights: EnrichedDoc[];
+  byCategory: Record<string, EnrichedDoc[]>;
 }
 
 interface LeiArticle {
@@ -452,6 +478,10 @@ function LeiComentadaContent() {
   // Accordion de documentos individuais
   const [expandedDocumentId, setExpandedDocumentId] = useState<string | null>(null);
 
+  // Documentos relacionados ao artigo selecionado (highlights + agrupamento)
+  const [relatedDocs, setRelatedDocs] = useState<ArticleDocsResponse | null>(null);
+  const [loadingDocs, setLoadingDocs] = useState(false);
+
   // Mobile drawer
   const [mobileDrawerOpen, setMobileDrawerOpen] = useState(false);
 
@@ -530,6 +560,28 @@ function LeiComentadaContent() {
       }
     }
   }, [searchParams, apiData, loading]);
+
+  // 2.1 Buscar documentos relacionados (com highlights) quando artigo muda
+  useEffect(() => {
+    if (!selectedArticle) {
+      setRelatedDocs(null);
+      return;
+    }
+    let aborted = false;
+    setLoadingDocs(true);
+    fetch(`/api/lei-14133/article-docs/${selectedArticle.numero}`)
+      .then((r) => (r.ok ? r.json() : null))
+      .then((data: ArticleDocsResponse | null) => {
+        if (!aborted) setRelatedDocs(data);
+      })
+      .catch(() => {})
+      .finally(() => {
+        if (!aborted) setLoadingDocs(false);
+      });
+    return () => {
+      aborted = true;
+    };
+  }, [selectedArticle]);
 
   // 3. Filtrar artigos por busca
   const filteredHierarchy = useMemo(() => {
@@ -1265,139 +1317,161 @@ function LeiComentadaContent() {
                   );
                 })()}
 
-                {/* Chat com IA */}
-                <ArticleChatInterface
-                  articleNumber={selectedArticle.numero}
-                  articleTitle={selectedArticle.titulo || undefined}
-                />
-
-                {/* Documentos Agrupados por Categoria */}
+                {/* Documentos: Destaques + lista por categoria (via /api/lei-14133/article-docs) */}
                 {selectedArticle.documentCount > 0 ? (
                   <div className="bg-white rounded-lg shadow-md p-6">
-                    <h3 className="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
-                      <FileText className="w-5 h-5 text-blue-600" />
-                      Documentos Relacionados ({selectedArticle.documentCount})
-                    </h3>
-                    <div className="space-y-3">
-                      {(() => {
-                        // Mapear categorias brutas para nomes de exibição
-                        const categoryDisplayNames: Record<string, string> = {
-                          'lei': 'Leis',
-                          'medida-provisoria': 'Leis',
-                          'decreto': 'Decretos',
-                          'portaria': 'Portarias',
-                          'in': 'Instruções Normativas',
-                          'orientacao-normativa': 'Orientações Normativas - AGU',
-                          // Família AGU (CONUNI/DECOR)
-                          'parecer': 'Pareceres da AGU',
-                          'parecer-vinculante': 'Pareceres da AGU',
-                          'decor': 'Pareceres da AGU',
-                          'nota-tecnica': 'Pareceres da AGU',
-                          'despacho': 'Pareceres da AGU',
-                          // Família TCU
-                          'sumula': 'Súmulas do TCU',
-                          'consulta_tcu': 'Respostas a Consultas do TCU',
-                          'informativo': 'Informativos do TCU',
-                          'acordao': 'Jurisprudência dos Tribunais de Contas',
-                          'outro': 'Outros Documentos',
-                        };
-
-                        // Agrupar documentos pelo NOME DE EXIBIÇÃO (consolidando categorias relacionadas)
-                        const docsByDisplayName: Record<string, typeof selectedArticle.documents> = {};
-                        selectedArticle.documents.forEach((doc) => {
-                          const rawCategory = doc.category || 'outro';
-                          const displayName = categoryDisplayNames[rawCategory] || rawCategory;
-                          if (!docsByDisplayName[displayName]) {
-                            docsByDisplayName[displayName] = [];
-                          }
-                          docsByDisplayName[displayName].push(doc);
-                        });
-
-                        // Ordem de exibição das categorias consolidadas
-                        const displayOrder = [
-                          'Leis',
-                          'Decretos',
-                          'Portarias',
-                          'Instruções Normativas',
-                          'Orientações Normativas - AGU',
-                          'Pareceres da AGU',
-                          'Súmulas do TCU',
-                          'Respostas a Consultas do TCU',
-                          'Informativos do TCU',
-                          'Jurisprudência dos Tribunais de Contas',
-                          'Outros Documentos',
-                        ];
-
-                        const sortedDisplayNames = Object.keys(docsByDisplayName).sort((a, b) => {
-                          const indexA = displayOrder.indexOf(a);
-                          const indexB = displayOrder.indexOf(b);
-                          return (indexA === -1 ? 999 : indexA) - (indexB === -1 ? 999 : indexB);
-                        });
-
-                        return sortedDisplayNames.map((displayName) => {
-                          const docs = docsByDisplayName[displayName];
-                          const isCategoryExpanded = expandedCategories.has(displayName);
-
-                          return (
-                            <div key={displayName} className="border-2 border-gray-200 rounded-lg overflow-hidden">
-                              {/* Header do Accordion de Categoria */}
-                              <button
-                                onClick={() => toggleCategoryExpanded(displayName)}
-                                className="w-full flex items-center gap-3 p-4 bg-gradient-to-r from-blue-50 to-purple-50 hover:from-blue-100 hover:to-purple-100 transition-colors text-left"
-                              >
-                                {isCategoryExpanded ? (
-                                  <ChevronDown className="w-6 h-6 text-blue-600 flex-shrink-0" />
-                                ) : (
-                                  <ChevronRight className="w-6 h-6 text-gray-400 flex-shrink-0" />
-                                )}
-                                <FileText className="w-6 h-6 text-blue-600 flex-shrink-0" />
-                                <div className="flex-1">
-                                  <h4 className="font-bold text-gray-900">{displayName}</h4>
-                                  <p className="text-xs text-gray-600">{docs.length} {docs.length === 1 ? 'documento' : 'documentos'}</p>
-                                </div>
-                                <div className="px-3 py-1 bg-blue-600 text-white rounded-full text-sm font-bold">
-                                  {docs.length}
-                                </div>
-                              </button>
-
-                              {/* Lista de Documentos da Categoria */}
-                              {isCategoryExpanded && (
-                                <div className="bg-white border-t-2 border-gray-200">
-                                  <div className="p-3 space-y-2">
-                                    {docs.map((doc) => {
-                                      const isDocExpanded = expandedDocumentId === doc.id;
-                                      return (
-                                        <div key={doc.id} className="border border-gray-200 rounded-lg overflow-hidden">
-                                          <button
-                                            onClick={() => toggleDocumentExpanded(doc.id)}
-                                            className="w-full flex items-center gap-3 p-3 bg-gray-50 hover:bg-blue-50 transition-colors text-left"
-                                          >
-                                            {isDocExpanded ? (
-                                              <ChevronDown className="w-4 h-4 text-blue-600 flex-shrink-0" />
-                                            ) : (
-                                              <ChevronRight className="w-4 h-4 text-gray-400 flex-shrink-0" />
-                                            )}
-                                            <FileText className="w-4 h-4 text-blue-600 flex-shrink-0" />
-                                            <span className="flex-1 text-gray-900 text-sm font-medium line-clamp-1">{doc.title}</span>
-                                            {doc.isPublic && (
-                                              <span className="px-2 py-0.5 bg-green-100 text-green-700 text-xs font-medium rounded">
-                                                Público
-                                              </span>
-                                            )}
-                                          </button>
-
-                                          {isDocExpanded && <DocumentDetails documentId={doc.id} documentType={doc.type} />}
-                                        </div>
-                                      );
-                                    })}
-                                  </div>
-                                </div>
-                              )}
+                    {loadingDocs && !relatedDocs ? (
+                      <div className="flex items-center justify-center py-8">
+                        <Loader2 className="w-6 h-6 animate-spin text-blue-600" />
+                      </div>
+                    ) : relatedDocs ? (
+                      <>
+                        {/* Destaques */}
+                        {relatedDocs.highlights.length > 0 && (
+                          <section className="mb-8">
+                            <div className="flex items-center gap-2 mb-4">
+                              <Star className="w-5 h-5 text-amber-500 fill-amber-500" />
+                              <h3 className="text-lg font-bold text-gray-900">
+                                Regulamentações em destaque
+                              </h3>
+                              <span className="text-sm text-gray-500">
+                                ({relatedDocs.highlights.length} de {relatedDocs.total})
+                              </span>
                             </div>
-                          );
-                        });
-                      })()}
-                    </div>
+                            <div className="space-y-3">
+                              {relatedDocs.highlights.map((doc) => {
+                                const tierLabel = (() => {
+                                  if (doc.type === 'legislativeAct' && doc.hierarchyLevel) {
+                                    const map: Record<number, string> = {
+                                      1: 'Lei', 2: 'Decreto', 3: 'Portaria', 4: 'IN', 5: 'OS',
+                                    };
+                                    return map[doc.hierarchyLevel] || doc.category || 'Documento';
+                                  }
+                                  return doc.category || 'Documento';
+                                })();
+                                const isLei = doc.category === 'lei' || doc.category === 'medida-provisoria';
+                                const isDecreto = doc.category === 'decreto';
+                                const accent = isLei
+                                  ? 'border-purple-300 bg-purple-50/40'
+                                  : isDecreto
+                                  ? 'border-blue-300 bg-blue-50/40'
+                                  : 'border-amber-300 bg-amber-50/40';
+                                return (
+                                  <a
+                                    key={doc.id}
+                                    href={
+                                      doc.url ||
+                                      (doc.type === 'legislativeAct'
+                                        ? `/atos-normativos/${doc.id}`
+                                        : `/api/documents/${doc.id}/download`)
+                                    }
+                                    target={doc.url ? '_blank' : undefined}
+                                    rel={doc.url ? 'noopener noreferrer' : undefined}
+                                    className={`block border-2 ${accent} rounded-xl p-4 hover:shadow-md transition-all group`}
+                                  >
+                                    <div className="flex items-start gap-3">
+                                      <div className="flex-shrink-0 w-10 h-10 bg-white rounded-lg flex items-center justify-center shadow-sm">
+                                        <Star className="w-5 h-5 text-amber-500 fill-amber-500" />
+                                      </div>
+                                      <div className="flex-1 min-w-0">
+                                        <div className="flex items-center gap-2 mb-1 flex-wrap">
+                                          <span className="px-2 py-0.5 bg-white border border-gray-300 text-gray-700 text-[11px] font-bold uppercase rounded tracking-wide">
+                                            {tierLabel}
+                                          </span>
+                                          {doc.notesImportance === 'critica' && (
+                                            <span className="px-2 py-0.5 bg-red-100 text-red-700 text-[11px] font-bold uppercase rounded">Crítico</span>
+                                          )}
+                                          {doc.notesImportance === 'alta' && (
+                                            <span className="px-2 py-0.5 bg-amber-100 text-amber-800 text-[11px] font-bold uppercase rounded">Destaque</span>
+                                          )}
+                                          {doc.esfera === 'federal' && doc.type === 'legislativeAct' && (
+                                            <span className="px-2 py-0.5 bg-blue-50 text-blue-700 text-[11px] font-medium rounded">Federal</span>
+                                          )}
+                                        </div>
+                                        <h4 className="font-semibold text-gray-900 text-base leading-snug mb-1 group-hover:text-blue-700 transition-colors">
+                                          {doc.title}
+                                        </h4>
+                                        {doc.summary && (
+                                          <p className="text-sm text-gray-600 leading-relaxed line-clamp-2 mb-2">{doc.summary}</p>
+                                        )}
+                                        <p className="text-xs text-gray-500 italic">{doc.highlightReason}</p>
+                                      </div>
+                                      <ExternalLink className="w-4 h-4 text-gray-400 flex-shrink-0 mt-1 group-hover:text-blue-600 transition-colors" />
+                                    </div>
+                                  </a>
+                                );
+                              })}
+                            </div>
+                          </section>
+                        )}
+
+                        {/* Lista completa por categoria */}
+                        <section>
+                          <h3 className="text-base font-semibold text-gray-700 mb-3 flex items-center gap-2">
+                            <FileText className="w-4 h-4 text-gray-500" />
+                            Todos os documentos relacionados ({relatedDocs.total})
+                          </h3>
+                          <div className="space-y-2">
+                            {Object.entries(relatedDocs.byCategory).map(([displayName, docs]) => {
+                              const isCategoryExpanded = expandedCategories.has(displayName);
+                              return (
+                                <div key={displayName} className="border border-gray-200 rounded-lg overflow-hidden">
+                                  <button
+                                    onClick={() => toggleCategoryExpanded(displayName)}
+                                    className="w-full flex items-center gap-3 px-4 py-3 bg-gray-50 hover:bg-gray-100 transition-colors text-left"
+                                  >
+                                    {isCategoryExpanded ? (
+                                      <ChevronDown className="w-5 h-5 text-blue-600 flex-shrink-0" />
+                                    ) : (
+                                      <ChevronRight className="w-5 h-5 text-gray-400 flex-shrink-0" />
+                                    )}
+                                    <FileText className="w-5 h-5 text-blue-600 flex-shrink-0" />
+                                    <h4 className="flex-1 font-semibold text-gray-900 text-sm">{displayName}</h4>
+                                    <span className="px-2.5 py-0.5 bg-blue-600 text-white rounded-full text-xs font-bold">{docs.length}</span>
+                                  </button>
+
+                                  {isCategoryExpanded && (
+                                    <div className="bg-white border-t border-gray-200 p-3 space-y-2">
+                                      {docs.map((doc) => {
+                                        const isDocExpanded = expandedDocumentId === doc.id;
+                                        return (
+                                          <div key={doc.id} className="border border-gray-200 rounded-lg overflow-hidden">
+                                            <button
+                                              onClick={() => toggleDocumentExpanded(doc.id)}
+                                              className="w-full flex items-center gap-3 p-3 bg-gray-50 hover:bg-blue-50 transition-colors text-left"
+                                            >
+                                              {isDocExpanded ? (
+                                                <ChevronDown className="w-4 h-4 text-blue-600 flex-shrink-0" />
+                                              ) : (
+                                                <ChevronRight className="w-4 h-4 text-gray-400 flex-shrink-0" />
+                                              )}
+                                              <FileText className="w-4 h-4 text-blue-600 flex-shrink-0" />
+                                              <span className="flex-1 text-gray-900 text-sm font-medium line-clamp-1">{doc.title}</span>
+                                              {doc.isPublic && (
+                                                <span className="px-2 py-0.5 bg-green-100 text-green-700 text-xs font-medium rounded">
+                                                  Público
+                                                </span>
+                                              )}
+                                            </button>
+                                            {isDocExpanded && (
+                                              <DocumentDetails documentId={doc.id} documentType={doc.type} />
+                                            )}
+                                          </div>
+                                        );
+                                      })}
+                                    </div>
+                                  )}
+                                </div>
+                              );
+                            })}
+                          </div>
+                        </section>
+                      </>
+                    ) : (
+                      <p className="text-sm text-gray-500 text-center py-4">
+                        Não foi possível carregar os documentos relacionados.
+                      </p>
+                    )}
                   </div>
                 ) : (
                   <div className="bg-amber-50 border border-amber-200 rounded-lg p-6 text-center">
@@ -1419,22 +1493,42 @@ function LeiComentadaContent() {
                       Enunciados Interpretativos ({selectedArticle.enunciados.length})
                     </h3>
                     <div className="space-y-3">
-                      {selectedArticle.enunciados.map((enunciado) => (
-                        <div
-                          key={enunciado.id}
-                          className="border-l-4 border-purple-500 bg-purple-50 p-4 rounded-r-lg"
-                        >
-                          <div className="flex items-center gap-2 mb-2">
-                            <span className="px-2 py-1 bg-purple-600 text-white text-xs font-bold rounded">
-                              {enunciado.orgao} {enunciado.numero}
-                            </span>
-                            <span className="text-xs text-purple-700 bg-purple-100 px-2 py-0.5 rounded">
-                              {enunciado.tema}
-                            </span>
+                      {selectedArticle.enunciados.map((enunciado) => {
+                        const cardContent = (
+                          <>
+                            <div className="flex items-center gap-2 mb-2 flex-wrap">
+                              <span className="px-2 py-1 bg-purple-600 text-white text-xs font-bold rounded">
+                                {enunciado.orgao} {enunciado.numero}
+                              </span>
+                              <span className="text-xs text-purple-700 bg-purple-100 px-2 py-0.5 rounded">
+                                {enunciado.tema}
+                              </span>
+                              {enunciado.url && (
+                                <ExternalLink className="w-3.5 h-3.5 text-purple-600 ml-auto" aria-hidden="true" />
+                              )}
+                            </div>
+                            <p className="text-gray-800 text-sm leading-relaxed">{enunciado.texto}</p>
+                          </>
+                        );
+                        return enunciado.url ? (
+                          <a
+                            key={enunciado.id}
+                            href={enunciado.url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="block border-l-4 border-purple-500 bg-purple-50 p-4 rounded-r-lg hover:bg-purple-100 transition-colors"
+                          >
+                            {cardContent}
+                          </a>
+                        ) : (
+                          <div
+                            key={enunciado.id}
+                            className="border-l-4 border-purple-500 bg-purple-50 p-4 rounded-r-lg"
+                          >
+                            {cardContent}
                           </div>
-                          <p className="text-gray-800 text-sm leading-relaxed">{enunciado.texto}</p>
-                        </div>
-                      ))}
+                        );
+                      })}
                     </div>
                     <p className="text-xs text-gray-500 mt-4 text-center">
                       Enunciados interpretativos aprovados pelos institutos especializados
