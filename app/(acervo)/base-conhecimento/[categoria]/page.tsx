@@ -381,7 +381,7 @@ export default async function CategoriaPage({ params, searchParams }: PageProps)
     q: searchTerm, tipo: tipoFilter, orgao: orgaoFilter, vigencia: vigenciaFilter, ente: enteFilter,
     ano: anoFilter, curso: cursoFilter, sort: sortFilter === 'recent' ? '' : sortFilter,
   };
-  const hasAdvancedFilters = !!(cfg.tipoFilter || cfg.orgaoFilter || cfg.vigenciaFilter || cfg.yearFilter || cfg.cursoFilter);
+  const hasAdvancedFilters = !!(cfg.tipoFilter || cfg.orgaoFilter || cfg.vigenciaFilter || cfg.yearFilter || cfg.cursoFilter || cfg.sortOptions);
   const hasActiveFilter = !!(searchTerm || tipoFilter || orgaoFilter || vigenciaFilter || enteFilter || anoFilter || cursoFilter || (sortFilter && sortFilter !== 'recent'));
 
   return (
