@@ -35,7 +35,14 @@ Gere um resumo em 2-3 frases (até 350 caracteres) explicando o que esta manifes
 - A conclusão/tese principal
 - Artigo(s) da Lei 14.133/2021 aplicável(is), quando relevante
 
-Evite repetir o número do parecer (já está no título). Não use "Trata-se de..." ou "O presente parecer...". Vá direto ao ponto.
+REGRAS DE ESTILO (OBRIGATÓRIAS):
+1. NUNCA comece o resumo com palavras vagas que descrevem o documento em vez do conteúdo. Proibido começar com:
+   - "Trata-se de...", "Esta nota...", "Este parecer...", "Esta manifestação...", "A manifestação...", "A presente...", "O presente...", "A AGU define...", "A AGU orienta...", "A norma..."
+   A primeira palavra deve ser um SUBSTANTIVO CONCRETO do tema (ex: "Dispensa de licitação...", "A permuta de imóveis...", "O apostilamento...") ou um VERBO DE AÇÃO direto (ex: "Permite-se...", "Veda-se...", "Admite-se...").
+2. Não repita o número/sigla do parecer (já consta no título).
+3. NUNCA escreva "Note que" ou comentários meta sobre revogação no fim — isso já tem badge separado na UI.
+4. Use APENAS caracteres UTF-8 normais (ç, é, ã, ó). NUNCA escape HTML como &iacute;, &ccedil;, &eacute; — isso quebra a renderização.
+5. Cite artigos da Lei 14.133/2021 com formato "art. X" ou "arts. X e Y" (não "artigo" por extenso, exceto na primeira citação se preferir).
 
 DOCUMENTO:
 """

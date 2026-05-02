@@ -581,9 +581,19 @@ export default async function CategoriaPage({ params, searchParams }: PageProps)
                   <div className="flex items-center gap-2">
                     <span className="text-sm text-gray-600 font-medium">Ano:</span>
                     <NavigateSelect
+                      basePath={`/base-conhecimento/${categoria}`}
+                      param="ano"
+                      preservedParams={{
+                        q: searchTerm,
+                        tipo: tipoFilter,
+                        orgao: orgaoFilter,
+                        vigencia: vigenciaFilter,
+                        ente: enteFilter,
+                        curso: cursoFilter,
+                        ...(sortFilter !== 'recent' ? { sort: sortFilter } : {}),
+                      }}
                       value={anoFilter}
                       options={cfg.yearFilter.years.map(y => ({ value: String(y), label: String(y) }))}
-                      buildHref={(v) => buildFilterUrl(categoria, currentParams, { ano: v, page: 1 })}
                       ariaLabel="Filtrar por ano"
                     />
                   </div>

@@ -3,8 +3,12 @@
 import { useRouter } from 'next/navigation';
 
 export interface NavigateSelectProps {
-  /** Function que recebe o novo valor e retorna a URL pra navegar */
-  buildHref: (value: string) => string;
+  /** Path base (ex: '/base-conhecimento/pareceres') */
+  basePath: string;
+  /** Querystring param key que esse select controla (ex: 'ano') */
+  param: string;
+  /** Demais params atuais a preservar (não inclui o controlado) */
+  preservedParams: Record<string, string>;
   /** Valor atualmente selecionado (vazio = "Todos") */
   value: string;
   /** Opções do select */
@@ -18,10 +22,14 @@ export interface NavigateSelectProps {
 
 /**
  * Dropdown que navega via Next router ao mudar valor. Client Component
- * mínimo embutido em páginas de listagem (Server Components).
+ * embutido em páginas Server. Recebe APENAS dados serializáveis (sem
+ * funções) — constrói a URL internamente a partir de basePath + param +
+ * preservedParams.
  */
 export function NavigateSelect({
-  buildHref,
+  basePath,
+  param,
+  preservedParams,
   value,
   options,
   emptyLabel = 'Todos',
@@ -29,6 +37,18 @@ export function NavigateSelect({
   className = 'px-3 py-1 text-sm border border-gray-300 rounded-md bg-white focus:ring-2 focus:ring-brand-500',
 }: NavigateSelectProps) {
   const router = useRouter();
+
+  function buildHref(newValue: string): string {
+    const params = new URLSearchParams();
+    for (const [k, v] of Object.entries(preservedParams)) {
+      if (v) params.set(k, v);
+    }
+    if (newValue) params.set(param, newValue);
+    else params.delete(param);
+    const qs = params.toString();
+    return `${basePath}${qs ? `?${qs}` : ''}`;
+  }
+
   return (
     <select
       defaultValue={value}
