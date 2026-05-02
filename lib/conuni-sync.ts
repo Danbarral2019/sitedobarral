@@ -293,14 +293,22 @@ export async function syncConuni(
 }
 
 /**
- * Lê metadados do último sync. Usado pelo endpoint /api/conuni-health pra
- * monitoramento remoto (sem expor PII nem secrets).
+ * Lê metadados do último sync e do classify. Usado pelo endpoint
+ * /api/conuni-health pra monitoramento remoto (sem expor PII nem secrets).
  */
 export async function getLastSyncInfo(prisma: PrismaClient): Promise<{
   lastSyncedAt: string | null;
+  lastClassifiedAt: string | null;
   totalDocs: number;
   byCategory: Record<string, number>;
   vigenciaCounts: Record<string, number>;
+  classificationStats: {
+    classified: number;
+    pending: number;
+    relevant: number;
+    irrelevant: number;
+    manualOverrides: number;
+  };
 }> {
   const cats = ['parecer', 'parecer-vinculante', 'decor', 'nota-tecnica', 'despacho'];
   const docs = await prisma.document.findMany({
@@ -311,22 +319,55 @@ export async function getLastSyncInfo(prisma: PrismaClient): Promise<{
   const byCategory: Record<string, number> = {};
   const vigenciaCounts: Record<string, number> = {};
   let lastSyncedAt: string | null = null;
+  let lastClassifiedAt: string | null = null;
+  let classified = 0;
+  let pending = 0;
+  let relevant = 0;
+  let irrelevant = 0;
+  let manualOverrides = 0;
 
   for (const d of docs) {
     byCategory[d.category] = (byCategory[d.category] || 0) + 1;
-    if (!d.aiClassification) continue;
+    if (!d.aiClassification) {
+      pending++;
+      continue;
+    }
     try {
-      const parsed = JSON.parse(d.aiClassification) as { syncedAt?: string; vigencia?: string; source?: string };
+      const parsed = JSON.parse(d.aiClassification) as {
+        syncedAt?: string;
+        vigencia?: string;
+        source?: string;
+        licitacoesContratos?: boolean;
+        classifiedAt?: string;
+        licitacoesContratosManualBy?: string;
+      };
       if (parsed.source === 'conuni-sync' && parsed.syncedAt) {
         if (!lastSyncedAt || parsed.syncedAt > lastSyncedAt) lastSyncedAt = parsed.syncedAt;
       }
+      if (parsed.classifiedAt) {
+        if (!lastClassifiedAt || parsed.classifiedAt > lastClassifiedAt) lastClassifiedAt = parsed.classifiedAt;
+      }
+      if (typeof parsed.licitacoesContratos === 'boolean') {
+        classified++;
+        if (parsed.licitacoesContratos) relevant++; else irrelevant++;
+      } else {
+        pending++;
+      }
+      if (parsed.licitacoesContratosManualBy) manualOverrides++;
       if (parsed.vigencia && parsed.vigencia !== 'vigente') {
         vigenciaCounts[parsed.vigencia] = (vigenciaCounts[parsed.vigencia] || 0) + 1;
       }
     } catch {
-      // ignore
+      pending++;
     }
   }
 
-  return { lastSyncedAt, totalDocs: docs.length, byCategory, vigenciaCounts };
+  return {
+    lastSyncedAt,
+    lastClassifiedAt,
+    totalDocs: docs.length,
+    byCategory,
+    vigenciaCounts,
+    classificationStats: { classified, pending, relevant, irrelevant, manualOverrides },
+  };
 }

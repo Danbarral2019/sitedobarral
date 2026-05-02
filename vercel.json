@@ -41,6 +41,10 @@
       "schedule": "0 6 1 * *"
     },
     {
+      "path": "/api/cron/classify-conuni",
+      "schedule": "0 7 1 * *"
+    },
+    {
       "path": "/api/cron/lms-inactivity",
       "schedule": "0 10 * * *"
     },
