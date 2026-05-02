@@ -34,6 +34,7 @@ import Link from 'next/link';
 import { CROSS_REFERENCES } from '@/data/lei-14133-cross-references';
 import { Star } from 'lucide-react';
 import { LeiSidebar } from '@/components/lei-14133/LeiSidebar';
+import MarkdownContent from '@/components/MarkdownContent';
 
 interface EnunciadoResumo {
   id: string;
@@ -87,6 +88,21 @@ interface LeiArticle {
   }[];
   enunciadoCount?: number;
   enunciados?: EnunciadoResumo[];
+  professorComment?: string | null;
+  commentUpdatedAt?: string | null;
+  crossRefs?: Array<{ id: string; targetNumber: string; note: string; order: number }>;
+  suggestedReadings?: Array<{
+    id: string;
+    kind: 'internal' | 'external';
+    internalType?: string | null;
+    internalId?: string | null;
+    externalUrl?: string | null;
+    externalType?: string | null;
+    title?: string | null;
+    description?: string | null;
+    author?: string | null;
+    order: number;
+  }>;
 }
 
 interface HierarchyCapitulo {
@@ -1179,6 +1195,81 @@ function LeiComentadaContent() {
                     </div>
                   </div>
                 </div>
+
+                {/* Comentário do prof */}
+                {selectedArticle.professorComment && (
+                  <div className="bg-amber-50/40 border-2 border-amber-200 rounded-lg shadow-sm p-6">
+                    <h3 className="text-lg font-bold text-gray-900 mb-3 flex items-center gap-2">
+                      <span className="text-amber-500">✦</span> Comentário do Prof. Daniel Barral
+                    </h3>
+                    <div className="prose prose-sm max-w-none">
+                      <MarkdownContent content={selectedArticle.professorComment} />
+                    </div>
+                  </div>
+                )}
+
+                {/* Leitura combinada de artigos */}
+                {selectedArticle.crossRefs && selectedArticle.crossRefs.length > 0 && (
+                  <div className="bg-indigo-50/30 border-2 border-indigo-200 rounded-lg shadow-sm p-6">
+                    <h3 className="text-lg font-bold text-gray-900 mb-3 flex items-center gap-2">
+                      📚 Leitura combinada
+                    </h3>
+                    <p className="text-xs text-indigo-700 mb-3 italic">Vínculos curados entre artigos da Lei 14.133.</p>
+                    <ul className="space-y-2">
+                      {selectedArticle.crossRefs.map((ref) => {
+                        const target = apiData.articles.find((a) => a.numero === ref.targetNumber);
+                        return (
+                          <li key={ref.id} className="flex items-start gap-3">
+                            <button
+                              onClick={() => target && handleSelectArticle(target)}
+                              className="flex-shrink-0 px-2.5 py-1 bg-indigo-600 text-white text-xs font-bold rounded hover:bg-indigo-700"
+                            >
+                              Art. {ref.targetNumber}
+                            </button>
+                            <p className="text-sm text-gray-800">{ref.note}</p>
+                          </li>
+                        );
+                      })}
+                    </ul>
+                  </div>
+                )}
+
+                {/* Sugestões de leitura */}
+                {selectedArticle.suggestedReadings && selectedArticle.suggestedReadings.length > 0 && (
+                  <div className="bg-emerald-50/30 border-2 border-emerald-200 rounded-lg shadow-sm p-6">
+                    <h3 className="text-lg font-bold text-gray-900 mb-3 flex items-center gap-2">
+                      🔗 Sugestões de leitura
+                    </h3>
+                    <ul className="space-y-2">
+                      {selectedArticle.suggestedReadings.map((r) => {
+                        let href = '#';
+                        if (r.kind === 'internal') {
+                          if (r.internalType === 'blog') href = `/blog/${r.internalId}`;
+                          else if (r.internalType === 'glossary') href = `/glossario/${r.internalId}`;
+                          else if (r.internalType === 'legislative-act') href = `/atos-normativos/${r.internalId}`;
+                          else if (r.internalType === 'document') href = `/documento/${r.internalId}`;
+                        } else if (r.kind === 'external' && r.externalUrl) {
+                          href = r.externalUrl;
+                        }
+                        const isExternal = r.kind === 'external';
+                        return (
+                          <li key={r.id}>
+                            <a
+                              href={href}
+                              target={isExternal ? '_blank' : undefined}
+                              rel={isExternal ? 'noopener noreferrer' : undefined}
+                              className="block bg-white border border-emerald-200 rounded-lg p-3 hover:border-emerald-400 hover:shadow-sm transition-all"
+                            >
+                              <p className="text-sm font-medium text-gray-900">{r.title || r.externalUrl}</p>
+                              {r.author && <p className="text-xs text-gray-600 mt-0.5">por {r.author}</p>}
+                              {r.description && <p className="text-xs text-gray-600 mt-1 line-clamp-2">{r.description}</p>}
+                            </a>
+                          </li>
+                        );
+                      })}
+                    </ul>
+                  </div>
+                )}
 
                 {/* Cross-references */}
                 {(() => {
