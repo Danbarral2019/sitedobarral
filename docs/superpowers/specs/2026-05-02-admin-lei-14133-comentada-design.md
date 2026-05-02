@@ -58,12 +58,29 @@ model LeiArticleCrossRef {
 model LeiArticleSuggestedReading {
   id            String   @id @default(uuid())
   articleNumber String
-  type          String   // 'video' | 'article' | 'blog' | 'book' | 'other'
-  title         String
-  url           String?  // Pode ser vazio se for "livro físico"
-  description   String?  @db.Text  // Curta — 1-3 linhas
-  author        String?  // Opcional
+
+  // Discriminator: referência interna ao próprio site OU link externo livre
+  kind          String   // 'internal' | 'external'
+
+  // Internal (kind='internal'): referência por ID/slug — link gerado dinamicamente,
+  // sobrevive a renomeações. Tipos: 'blog' | 'glossary' | 'legislative-act' | 'document'.
+  // Vídeo não está aqui no MVP — usar kind='external' com externalType='video'
+  // (YouTube/Vimeo etc.). Aulas do LMS também ficam fora do MVP.
+  internalType  String?
+  internalId    String?  // ID ou slug do alvo (depende do internalType)
+
+  // External (kind='external'): URL livre + categoria.
+  // Tipos: 'video' | 'article' | 'book' | 'other'.
+  externalUrl   String?
+  externalType  String?
+
+  // Comum (override do título capturado no momento da inclusão; se vazio, UI
+  // resolve dinamicamente da fonte interna ou usa o externalUrl como fallback)
+  title         String?
+  description   String?  @db.Text  // Nota curta do prof — 1-3 linhas
+  author        String?
   order         Int      @default(0)
+
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
 
@@ -97,8 +114,9 @@ Todos sob `/api/admin/lei-14133/articles/[numero]/...` e exigem `verifyAdmin`. A
 | DELETE  | `.../link-document/[documentId]`                 | Remove |
 | POST    | `.../link-act`                                   | Body `{ actId }` → adiciona ao `LegislativeAct.leiArticles` |
 | DELETE  | `.../link-act/[actId]`                           | Remove |
-| GET     | `/api/admin/documents/search?q=...`              | Search da base pra modal "incluir doc" (já existe ou criar) |
-| GET     | `/api/admin/legislative-acts/search?q=...`       | Search da base pra modal "incluir ato" (já existe) |
+| GET     | `/api/admin/documents/search?q=...`              | Search da base pra modal "incluir doc" |
+| GET     | `/api/admin/legislative-acts/search?q=...`       | Search da base pra modal "incluir ato" |
+| GET     | `/api/admin/internal-search?type=...&q=...`      | Search unificado por tipo interno: `blog \| glossary \| legislative-act \| document`. Retorna lista `{ id, title, slug?, snippet? }` pra modal de seleção do reading interno. |
 
 Reuso: o endpoint público `/api/lei-14133/article-docs/[numero]` já entrega o que a UI pública precisa; basta o admin alimentar os dados certos.
 
@@ -110,7 +128,15 @@ Vou adicionar duas seções novas no `LeiComentadaClient` (público) e na `lei-c
 
 2. **Leitura combinada do Prof.** — card com tipografia editorial. Cada item: número do artigo (badge clicável → `?artigo=N`) + nota curta do prof. Só aparece se `crossRefs.length > 0`.
 
-3. **Sugestões de leitura** — card listando readings com ícone do tipo (vídeo/artigo/livro), título linkado pra URL externa, descrição curta. Só aparece se `readings.length > 0`.
+3. **Sugestões de leitura** — card listando readings com ícone do tipo, título linkado e descrição curta. Só aparece se `readings.length > 0`.
+
+   - Para `kind='internal'`: link gerado a partir do `internalType` + `internalId`:
+     - `blog` → `/blog/[slug]`
+     - `glossary` → `/glossario/[slug]`
+     - `legislative-act` → `/atos-normativos/[id]`
+     - `document` → `/documento/[id]`
+     Título e metadata são resolvidos dinamicamente do alvo (sobrevive a edições no conteúdo original); admin pode sobrescrever com `title`/`description` próprios.
+   - Para `kind='external'`: link direto pra `externalUrl`, ícone conforme `externalType` (vídeo/artigo/livro/outro). Vídeos do YouTube e similares vão aqui.
 
 A API pública `/api/lei-14133/articles` precisa expor `professorComment`, `crossRefs[]` e `suggestedReadings[]` em cada artigo enriquecido (com cache invalidation já existente).
 
@@ -148,7 +174,11 @@ A API pública `/api/lei-14133/articles` precisa expor `professorComment`, `cros
 
 - **Modal full-width** para o markdown do comentário (textarea + preview lado-a-lado via `MarkdownContent`). Botões: salvar / cancelar / `⌘S`.
 - **Inline** para crossRefs (linha = `<select artigo>` + `<input note>` + salvar/cancelar)
-- **Inline** para readings (linha = `<select tipo>` + `<input title>` + `<input url>` + `<textarea description>`)
+- **Inline** para readings, fluxo em 2 passos:
+  - Passo 1: dropdown "Tipo de referência" → `interno` ou `externo`
+  - Passo 2A (se interno): outro dropdown com 4 opções (Blog / Glossário / Ato normativo / Documento) → abre modal de busca da base; ao escolher, captura o ID e o título inicial
+  - Passo 2B (se externo): inputs `URL` + `título` + `tipo` (Vídeo / Artigo / Livro / Outro) + `autor` opcional
+  - Comum: campo `descrição` curto (textarea ≤ 3 linhas) — a "nota do prof"
 - **Modal de busca** para "vincular documento" e "vincular ato" — search field, lista paginada, clica pra linkar; mostra os já vinculados com botão "remover"
 - **Inline** para `LegislativeAct.importance` — dropdown ao lado de cada ato vinculado (já existe na página de edit, vai virar ação inline aqui também)
 
