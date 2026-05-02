@@ -52,6 +52,27 @@ export async function GET(request: NextRequest) {
             secao: true,
             createdAt: true,
             updatedAt: true,
+            professorComment: true,
+            commentUpdatedAt: true,
+            crossRefs: {
+              select: { id: true, targetNumber: true, note: true, order: true },
+              orderBy: { order: 'asc' },
+            },
+            suggestedReadings: {
+              select: {
+                id: true,
+                kind: true,
+                internalType: true,
+                internalId: true,
+                externalUrl: true,
+                externalType: true,
+                title: true,
+                description: true,
+                author: true,
+                order: true,
+              },
+              orderBy: { order: 'asc' },
+            },
           },
         });
 
