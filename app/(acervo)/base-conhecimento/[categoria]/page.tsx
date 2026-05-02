@@ -2,7 +2,7 @@ import Link from 'next/link';
 import { notFound, redirect } from 'next/navigation';
 import { Metadata } from 'next';
 import {
-  ArrowLeft, ArrowRight, FileText, BookOpen, List, Book, Search, ChevronLeft, ChevronRight, AlertTriangle,
+  ArrowLeft, ArrowRight, FileText, BookOpen, List, Book, Search, ChevronLeft, ChevronRight, AlertTriangle, ClipboardList, FileSignature,
 } from 'lucide-react';
 import { prisma } from '@/lib/prisma';
 
@@ -24,9 +24,29 @@ const CATEGORY_CONFIG: Record<string, CategoryConfig> = {
     slug: 'pareceres',
     label: 'Pareceres Uniformizantes',
     description:
-      'Pareceres da Advocacia-Geral da União, vinculantes e do DECOR, consolidando entendimentos sobre licitações.',
+      'Pareceres da Advocacia-Geral da União, vinculantes e do CONUNI/DECOR, consolidando entendimentos sobre licitações.',
     icon: FileText,
     dbCategories: ['parecer', 'parecer-vinculante', 'decor'],
+    orderBy: 'recent',
+    showDescription: true,
+  },
+  'notas-tecnicas': {
+    slug: 'notas-tecnicas',
+    label: 'Notas Técnicas',
+    description:
+      'Notas técnicas e jurídicas produzidas pelo CONUNI/AGU em resposta a consultas dos órgãos federais.',
+    icon: ClipboardList,
+    dbCategories: ['nota-tecnica'],
+    orderBy: 'recent',
+    showDescription: true,
+  },
+  despachos: {
+    slug: 'despachos',
+    label: 'Despachos',
+    description:
+      'Despachos uniformizadores e cotas do CONUNI/AGU sobre matérias de licitação e contratos.',
+    icon: FileSignature,
+    dbCategories: ['despacho'],
     orderBy: 'recent',
     showDescription: true,
   },
@@ -148,6 +168,7 @@ export default async function CategoriaPage({ params, searchParams }: PageProps)
     onNumber: number | null;
     onYear: number | null;
     tags: string | null;
+    aiClassification: string | null;
   }> = [];
   let total = 0;
 
@@ -166,6 +187,7 @@ export default async function CategoriaPage({ params, searchParams }: PageProps)
           onNumber: true,
           onYear: true,
           tags: true,
+          aiClassification: true,
         },
         orderBy: getOrderBy(cfg.orderBy),
         skip,
@@ -175,6 +197,17 @@ export default async function CategoriaPage({ params, searchParams }: PageProps)
     ]);
   } catch {
     // DB indisponível
+  }
+
+  // Extrai vigência do aiClassification JSON (preenchido pelo sync CONUNI)
+  function getVigencia(aiCls: string | null): 'revogado' | 'modificado' | null {
+    if (!aiCls) return null;
+    try {
+      const parsed = JSON.parse(aiCls) as { vigencia?: string };
+      if (parsed.vigencia === 'revogado') return 'revogado';
+      if (parsed.vigencia === 'modificado') return 'modificado';
+      return null;
+    } catch { return null; }
   }
 
   const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
@@ -321,6 +354,24 @@ export default async function CategoriaPage({ params, searchParams }: PageProps)
                           {enteTag}
                         </span>
                       )}
+                      {(() => {
+                        const v = getVigencia(doc.aiClassification);
+                        if (v === 'revogado') {
+                          return (
+                            <span className="inline-block px-2 py-0.5 bg-red-100 text-red-800 text-xs font-bold uppercase tracking-wide rounded-md flex-shrink-0 mt-0.5">
+                              Revogado
+                            </span>
+                          );
+                        }
+                        if (v === 'modificado') {
+                          return (
+                            <span className="inline-block px-2 py-0.5 bg-amber-100 text-amber-800 text-xs font-bold uppercase tracking-wide rounded-md flex-shrink-0 mt-0.5">
+                              Modificado
+                            </span>
+                          );
+                        }
+                        return null;
+                      })()}
                       <h2 className="text-base md:text-lg font-semibold text-gray-900 group-hover:text-brand-700 transition-colors leading-snug flex-1">
                         {doc.title}
                       </h2>

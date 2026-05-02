@@ -15,6 +15,8 @@ import {
   List,
   Book,
   Library,
+  ClipboardList,
+  FileSignature,
   type LucideIcon,
 } from 'lucide-react';
 
@@ -75,6 +77,8 @@ export const NAV_SECTIONS: MenuSection[] = [
       { label: 'Atos normativos', href: '/legislacao', icon: FileText },
       { label: 'Jurisprudência', href: '/area-restrita/jurisprudencia', icon: Gavel },
       { label: 'Pareceres', href: '/base-conhecimento/pareceres', icon: Library },
+      { label: 'Notas técnicas', href: '/base-conhecimento/notas-tecnicas', icon: ClipboardList },
+      { label: 'Despachos', href: '/base-conhecimento/despachos', icon: FileSignature },
       { label: 'Orientações Normativas', href: '/base-conhecimento/orientacoes-normativas', icon: BookOpen },
       { label: 'Enunciados', href: '/base-conhecimento/enunciados', icon: List },
       { label: 'Manual TCU', href: '/base-conhecimento/manual-tcu', icon: Book },

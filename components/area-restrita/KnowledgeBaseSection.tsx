@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { Scale, FileText, BookOpen, List, Book, Landmark } from 'lucide-react';
+import { Scale, FileText, BookOpen, List, Book, Landmark, ClipboardList, FileSignature } from 'lucide-react';
 
 const PARECER_CATEGORIES = ['parecer', 'parecer-vinculante', 'decor'];
 
@@ -13,6 +13,8 @@ const KNOWLEDGE_BASE_CATEGORIES: Array<{
 }> = [
   { category: 'acordao', label: 'Acórdãos TCU', icon: Scale },
   { category: 'pareceres', label: 'Pareceres', icon: FileText, matchCategories: PARECER_CATEGORIES },
+  { category: 'nota-tecnica', label: 'Notas técnicas', icon: ClipboardList },
+  { category: 'despacho', label: 'Despachos', icon: FileSignature },
   { category: 'orientacao-normativa', label: 'Orientações Normativas', icon: BookOpen },
   { category: 'enunciados', label: 'Enunciados', icon: List },
   { category: 'manual-tcu', label: 'Manual do TCU', icon: Book },

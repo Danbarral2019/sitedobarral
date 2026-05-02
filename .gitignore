@@ -85,3 +85,6 @@ scripts/output/
 
 # Obsidian sync state (local, por desenvolvedor)
 .obsidian-sync-state.json
+
+# CONUNI snapshot (3.7MB, regenerável via sync-conuni.ts --refetch)
+data/conuni-snapshot.json
