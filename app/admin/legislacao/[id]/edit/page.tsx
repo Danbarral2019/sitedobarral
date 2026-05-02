@@ -67,6 +67,7 @@ export default function EditLegislativeActPage() {
     content: '',
     esfera: 'federal' as string,
     themes: [] as string[],
+    importance: '' as string, // '', 'baixa', 'media', 'alta', 'critica'
   });
 
   const fetchAct = useCallback(async () => {
@@ -110,6 +111,7 @@ export default function EditLegislativeActPage() {
         content: act.content || '',
         esfera: act.esfera || 'federal',
         themes: act.themes ? JSON.parse(act.themes) : [],
+        importance: act.importance || '',
       });
     } catch (error) {
       console.error('Erro ao carregar ato:', error);
@@ -244,6 +246,7 @@ export default function EditLegislativeActPage() {
           content: formData.content || undefined,
           esfera: formData.esfera,
           themes: formData.themes.length > 0 ? formData.themes : undefined,
+          importance: formData.importance || null,
         })
       });
 
@@ -511,6 +514,27 @@ export default function EditLegislativeActPage() {
                     <span className="text-sm font-medium">Estadual</span>
                   </label>
                 </div>
+              </div>
+
+              <div>
+                <label className="text-sm font-bold text-gray-900 mb-2 block" htmlFor="importance-select">
+                  Destaque editorial
+                  <span className="ml-2 font-normal text-xs text-gray-500">
+                    (priorização nos cards &quot;Regulamentação em destaque&quot; da Lei 14.133)
+                  </span>
+                </label>
+                <select
+                  id="importance-select"
+                  value={formData.importance}
+                  onChange={(e) => setFormData({ ...formData, importance: e.target.value })}
+                  className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white"
+                >
+                  <option value="">Sem marcação (usa heurística automática)</option>
+                  <option value="critica">🔴 Crítica — sempre no topo</option>
+                  <option value="alta">⭐ Alta — destacar</option>
+                  <option value="media">Média — leve boost</option>
+                  <option value="baixa">Baixa — manter no fim</option>
+                </select>
               </div>
             </div>
 

@@ -751,6 +751,12 @@ model LegislativeAct {
   esfera      String  @default("federal")  // "federal" | "estadual"
   themes      String?                       // JSON array: ["planejamento","contratos"]
 
+  // Destaque editorial — espelha Document.notesImportance
+  // 'baixa' | 'media' | 'alta' | 'critica'. Null = sem marcação (usa heurística).
+  // Usado pelo /api/lei-14133/article-docs pra priorizar atos no Top 5 destaques
+  // de cada artigo da Lei 14.133. Override forte sobre score automático.
+  importance  String?
+
   // Analytics
   viewCount   Int     @default(0)
 

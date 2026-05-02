@@ -202,6 +202,7 @@ export async function GET(
         issuer: true,
         officialUrl: true,
         leiArticles: true,
+        importance: true,
       },
     });
 
@@ -239,6 +240,7 @@ export async function GET(
       if (!articles.map(String).includes(numeroStr)) continue;
 
       const score =
+        importanceBoost(act.importance) +
         legislativeTierScore(act.hierarchyLevel, act.esfera) +
         specificityBoost(articles.length) -
         noisinessPenalty(act.title, act.ementa);
@@ -252,6 +254,7 @@ export async function GET(
         url: act.officialUrl || undefined,
         summary: act.summary || act.ementa,
         ementa: act.ementa,
+        notesImportance: act.importance,
         hierarchyLevel: act.hierarchyLevel,
         esfera: act.esfera,
         fullNumber: act.fullNumber,

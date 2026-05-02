@@ -126,6 +126,11 @@ export async function PUT(
     if (body.officialUrl !== undefined) updateData.officialUrl = body.officialUrl || null;
     if (body.pdfUrl !== undefined) updateData.pdfUrl = body.pdfUrl || null;
     if (normalizedContent !== undefined) updateData.content = normalizedContent;
+    if (body.importance !== undefined) {
+      // Aceita 'baixa' | 'media' | 'alta' | 'critica' ou null/string vazia para limpar
+      const allowed = ['baixa', 'media', 'alta', 'critica'];
+      updateData.importance = allowed.includes(body.importance) ? body.importance : null;
+    }
 
     // Atualizar ato normativo
     const act = await prisma.legislativeAct.update({
