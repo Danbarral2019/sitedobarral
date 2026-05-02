@@ -58,7 +58,6 @@ export const newsletterConfig: AdminListConfig<NewsletterSubscriber> = createLis
       options: [
         { value: 'all', label: 'Todos' },
         { value: 'active', label: 'Ativos' },
-        { value: 'pending', label: 'Pendentes' },
         { value: 'unsubscribed', label: 'Cancelados' },
       ],
     },

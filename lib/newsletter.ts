@@ -27,8 +27,14 @@ export async function fetchNewsletterSubscribersPaginated(params: {
 
   const where: Record<string, unknown> = {};
 
-  if (params.status && params.status !== 'all') {
-    where.status = params.status;
+  // Mapeia status (UI) → isActive (schema). Não há "pending" no banco —
+  // schema só tem isActive boolean. Anteriormente passava `where.status`
+  // direto, que dava 500 porque a coluna não existe.
+  if (params.status === 'active') where.isActive = true;
+  else if (params.status === 'unsubscribed') where.isActive = false;
+  else if (params.status === 'pending') {
+    // Sem coluna pending — força resultado vazio em vez de 500
+    where.id = '__pending_not_supported__';
   }
 
   if (params.search) {
@@ -48,8 +54,14 @@ export async function fetchNewsletterSubscribersPaginated(params: {
     }),
   ]);
 
+  // Deriva campo "status" textual a partir de isActive pra UI exibir
+  const itemsWithStatus = subscribers.map((s) => ({
+    ...s,
+    status: s.isActive ? 'active' : 'unsubscribed',
+  }));
+
   return {
-    items: subscribers as unknown as NewsletterSubscriber[],
+    items: itemsWithStatus as unknown as NewsletterSubscriber[],
     total,
     page,
     pageSize,
