@@ -468,169 +468,141 @@ export default async function CategoriaPage({ params, searchParams }: PageProps)
           </div>
         )}
 
-        {/* Filtros CONUNI (pareceres) */}
-        {hasAdvancedFilters && (
-          <div className="mb-6 space-y-3">
-            {cfg.tipoFilter && (
-              <div className="flex flex-wrap items-center gap-2">
-                <span className="text-sm text-gray-600 font-medium mr-1 min-w-[60px]">Tipo:</span>
-                <Link
-                  href={buildFilterUrl(categoria, currentParams, { tipo: '', page: 1 })}
-                  className={`px-3 py-1 rounded-full text-sm font-medium transition-colors ${
-                    !tipoFilter ? 'bg-brand-600 text-white' : 'bg-white border border-gray-300 text-gray-700 hover:border-brand-400'
-                  }`}
-                >
-                  Todos
-                </Link>
-                {cfg.tipoFilter.options.map((opt) => (
-                  <Link
-                    key={opt.value}
-                    href={buildFilterUrl(categoria, currentParams, { tipo: opt.value, page: 1 })}
-                    className={`px-3 py-1 rounded-full text-sm font-medium transition-colors ${
-                      tipoFilter === opt.value ? 'bg-brand-600 text-white' : 'bg-white border border-gray-300 text-gray-700 hover:border-brand-400'
-                    }`}
-                  >
-                    {opt.label}
-                  </Link>
-                ))}
-              </div>
-            )}
-
-            {cfg.vigenciaFilter && (
-              <div className="flex flex-wrap items-center gap-2">
-                <span className="text-sm text-gray-600 font-medium mr-1 min-w-[60px]">Vigência:</span>
-                <Link
-                  href={buildFilterUrl(categoria, currentParams, { vigencia: '', page: 1 })}
-                  className={`px-3 py-1 rounded-full text-sm font-medium transition-colors ${
-                    !vigenciaFilter ? 'bg-brand-600 text-white' : 'bg-white border border-gray-300 text-gray-700 hover:border-brand-400'
-                  }`}
-                >
-                  Todas
-                </Link>
-                {(['vigente', 'revogado', 'modificado'] as const).map((v) => (
-                  <Link
-                    key={v}
-                    href={buildFilterUrl(categoria, currentParams, { vigencia: v, page: 1 })}
-                    className={`px-3 py-1 rounded-full text-sm font-medium transition-colors capitalize ${
-                      vigenciaFilter === v
-                        ? v === 'revogado' ? 'bg-red-600 text-white' : v === 'modificado' ? 'bg-amber-600 text-white' : 'bg-brand-600 text-white'
-                        : 'bg-white border border-gray-300 text-gray-700 hover:border-brand-400'
-                    }`}
-                  >
-                    {v === 'vigente' ? 'Vigentes' : v === 'revogado' ? 'Revogados' : 'Modificados'}
-                  </Link>
-                ))}
-              </div>
-            )}
-
-            {cfg.orgaoFilter && (
-              <div className="flex flex-wrap items-center gap-2">
-                <span className="text-sm text-gray-600 font-medium mr-1 min-w-[60px]">Câmara:</span>
-                <Link
-                  href={buildFilterUrl(categoria, currentParams, { orgao: '', page: 1 })}
-                  className={`px-3 py-1 rounded-full text-xs font-medium transition-colors ${
-                    !orgaoFilter ? 'bg-brand-600 text-white' : 'bg-white border border-gray-300 text-gray-700 hover:border-brand-400'
-                  }`}
-                >
-                  Todas
-                </Link>
-                {cfg.orgaoFilter.orgaos.map((o) => (
-                  <Link
-                    key={o}
-                    href={buildFilterUrl(categoria, currentParams, { orgao: o, page: 1 })}
-                    className={`px-3 py-1 rounded-full text-xs font-medium transition-colors ${
-                      orgaoFilter === o ? 'bg-brand-600 text-white' : 'bg-white border border-gray-300 text-gray-700 hover:border-brand-400'
-                    }`}
-                  >
-                    {o}
-                  </Link>
-                ))}
-              </div>
-            )}
-
-            {/* Curso (do classify Gemini) */}
-            {cfg.cursoFilter && (
-              <div className="flex flex-wrap items-center gap-2">
-                <span className="text-sm text-gray-600 font-medium mr-1 min-w-[60px]">Curso:</span>
-                <Link
-                  href={buildFilterUrl(categoria, currentParams, { curso: '', page: 1 })}
-                  className={`px-3 py-1 rounded-full text-xs font-medium transition-colors ${
-                    !cursoFilter ? 'bg-brand-600 text-white' : 'bg-white border border-gray-300 text-gray-700 hover:border-brand-400'
-                  }`}
-                >
-                  Todos
-                </Link>
-                {cfg.cursoFilter.cursos.map((c) => (
-                  <Link
-                    key={c.id}
-                    href={buildFilterUrl(categoria, currentParams, { curso: c.id, page: 1 })}
-                    className={`px-3 py-1 rounded-full text-xs font-medium transition-colors ${
-                      cursoFilter === c.id ? 'bg-brand-600 text-white' : 'bg-white border border-gray-300 text-gray-700 hover:border-brand-400'
-                    }`}
-                  >
-                    {c.label}
-                  </Link>
-                ))}
-              </div>
-            )}
-
-            {/* Ano (dropdown — muitas opções) + Ordenar */}
-            {(cfg.yearFilter || cfg.sortOptions) && (
-              <div className="flex flex-wrap items-center gap-3">
-                {cfg.yearFilter && (
-                  <div className="flex items-center gap-2">
-                    <span className="text-sm text-gray-600 font-medium">Ano:</span>
+        {/* Filtros CONUNI (pareceres) — visual igual ao /legislacao */}
+        {hasAdvancedFilters && (() => {
+          const preservedAll = {
+            q: searchTerm,
+            tipo: tipoFilter,
+            orgao: orgaoFilter,
+            vigencia: vigenciaFilter,
+            ano: anoFilter,
+            curso: cursoFilter,
+            ente: enteFilter,
+            ...(sortFilter !== 'recent' ? { sort: sortFilter } : {}),
+          };
+          const basePath = `/base-conhecimento/${categoria}`;
+          return (
+            <div className="bg-white border-2 border-gray-200 rounded-xl p-6 shadow-sm space-y-4 mb-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                {cfg.tipoFilter && (
+                  <div>
+                    <label className="block text-sm font-bold text-gray-700 mb-2">Tipo</label>
                     <NavigateSelect
-                      basePath={`/base-conhecimento/${categoria}`}
-                      param="ano"
-                      preservedParams={{
-                        q: searchTerm,
-                        tipo: tipoFilter,
-                        orgao: orgaoFilter,
-                        vigencia: vigenciaFilter,
-                        ente: enteFilter,
-                        curso: cursoFilter,
-                        ...(sortFilter !== 'recent' ? { sort: sortFilter } : {}),
-                      }}
-                      value={anoFilter}
-                      options={cfg.yearFilter.years.map(y => ({ value: String(y), label: String(y) }))}
-                      ariaLabel="Filtrar por ano"
+                      basePath={basePath}
+                      param="tipo"
+                      preservedParams={{ ...preservedAll, tipo: '' }}
+                      value={tipoFilter}
+                      options={cfg.tipoFilter.options.map(o => ({ value: o.value, label: o.label }))}
+                      ariaLabel="Filtrar por tipo"
+                      className="w-full px-4 py-2 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
                     />
                   </div>
                 )}
-                {cfg.sortOptions && (
-                  <div className="flex items-center gap-2">
-                    <span className="text-sm text-gray-600 font-medium">Ordenar:</span>
-                    <div className="flex flex-wrap gap-1">
-                      {cfg.sortOptions.map((opt) => (
-                        <Link
-                          key={opt.value}
-                          href={buildFilterUrl(categoria, currentParams, { sort: opt.value, page: 1 })}
-                          className={`px-2.5 py-1 rounded-md text-xs font-medium transition-colors ${
-                            sortFilter === opt.value ? 'bg-gray-800 text-white' : 'bg-white border border-gray-300 text-gray-700 hover:border-gray-400'
-                          }`}
-                        >
-                          {opt.label}
-                        </Link>
-                      ))}
-                    </div>
+                {cfg.orgaoFilter && (
+                  <div>
+                    <label className="block text-sm font-bold text-gray-700 mb-2">Câmara</label>
+                    <NavigateSelect
+                      basePath={basePath}
+                      param="orgao"
+                      preservedParams={{ ...preservedAll, orgao: '' }}
+                      value={orgaoFilter}
+                      options={cfg.orgaoFilter.orgaos.map(o => ({ value: o, label: o }))}
+                      ariaLabel="Filtrar por câmara"
+                      className="w-full px-4 py-2 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                    />
+                  </div>
+                )}
+                {cfg.vigenciaFilter && (
+                  <div>
+                    <label className="block text-sm font-bold text-gray-700 mb-2">Vigência</label>
+                    <NavigateSelect
+                      basePath={basePath}
+                      param="vigencia"
+                      preservedParams={{ ...preservedAll, vigencia: '' }}
+                      value={vigenciaFilter}
+                      options={[
+                        { value: 'vigente', label: 'Vigentes' },
+                        { value: 'revogado', label: 'Revogados' },
+                        { value: 'modificado', label: 'Modificados' },
+                      ]}
+                      emptyLabel="Todas"
+                      ariaLabel="Filtrar por vigência"
+                      className="w-full px-4 py-2 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                    />
+                  </div>
+                )}
+                {cfg.yearFilter && (
+                  <div>
+                    <label className="block text-sm font-bold text-gray-700 mb-2">Ano</label>
+                    <NavigateSelect
+                      basePath={basePath}
+                      param="ano"
+                      preservedParams={{ ...preservedAll, ano: '' }}
+                      value={anoFilter}
+                      options={cfg.yearFilter.years.map(y => ({ value: String(y), label: String(y) }))}
+                      ariaLabel="Filtrar por ano"
+                      className="w-full px-4 py-2 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                    />
                   </div>
                 )}
               </div>
-            )}
 
-            {hasActiveFilter && (
-              <div className="pt-1">
-                <Link
-                  href={`/base-conhecimento/${categoria}`}
-                  className="text-xs font-medium text-gray-500 hover:text-brand-700 underline"
-                >
-                  Limpar todos os filtros
-                </Link>
-              </div>
-            )}
-          </div>
-        )}
+              {/* Curso — chips (igual aos Temas dos atos normativos) */}
+              {cfg.cursoFilter && (
+                <div>
+                  <label className="block text-sm font-bold text-gray-700 mb-2">Cursos relevantes</label>
+                  <div className="flex flex-wrap gap-2">
+                    {cfg.cursoFilter.cursos.map((c) => (
+                      <Link
+                        key={c.id}
+                        href={buildFilterUrl(categoria, currentParams, { curso: cursoFilter === c.id ? '' : c.id, page: 1 })}
+                        className={`px-3 py-1.5 text-xs rounded-full border-2 transition-colors font-medium ${
+                          cursoFilter === c.id
+                            ? 'bg-blue-600 text-white border-blue-600'
+                            : 'bg-white text-gray-700 border-gray-300 hover:border-gray-400'
+                        }`}
+                      >
+                        {c.label}
+                      </Link>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Ordenar + Limpar */}
+              {(cfg.sortOptions || hasActiveFilter) && (
+                <div className="flex flex-wrap items-center gap-3 pt-2 border-t border-gray-100">
+                  {cfg.sortOptions && (
+                    <div className="flex items-center gap-2">
+                      <span className="text-sm text-gray-600 font-medium">Ordenar:</span>
+                      <div className="flex flex-wrap gap-1">
+                        {cfg.sortOptions.map((opt) => (
+                          <Link
+                            key={opt.value}
+                            href={buildFilterUrl(categoria, currentParams, { sort: opt.value, page: 1 })}
+                            className={`px-2.5 py-1 rounded-md text-xs font-medium transition-colors ${
+                              sortFilter === opt.value ? 'bg-gray-800 text-white' : 'bg-white border border-gray-300 text-gray-700 hover:border-gray-400'
+                            }`}
+                          >
+                            {opt.label}
+                          </Link>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                  {hasActiveFilter && (
+                    <Link
+                      href={`/base-conhecimento/${categoria}`}
+                      className="ml-auto text-xs font-medium text-gray-500 hover:text-brand-700 underline"
+                    >
+                      Limpar todos os filtros
+                    </Link>
+                  )}
+                </div>
+              )}
+            </div>
+          );
+        })()}
 
         {/* Disclaimer pra ONs */}
         {categoria === 'orientacoes-normativas' && (
