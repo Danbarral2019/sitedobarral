@@ -184,7 +184,16 @@ export async function syncConuni(
     const newContent = buildContent(item);
     const newTitle = buildTitle(item);
     const newUrl = buildExternalUrl(item);
-    const aiClassification = JSON.stringify({
+
+    // Mescla com aiClassification existente pra preservar classificação Gemini
+    // e overrides manuais. Sync só atualiza campos próprios do CONUNI.
+    let existingAi: Record<string, unknown> = {};
+    if (matched?.aiClassification) {
+      try { existingAi = JSON.parse(matched.aiClassification); } catch { /* ignora */ }
+    }
+    const mergedAi = {
+      ...existingAi,
+      // Campos sempre atualizados pelo sync CONUNI
       category: newCategory,
       conuniId: item.id,
       vigencia: vigenciaLabel(item.vigencia),
@@ -194,7 +203,8 @@ export async function syncConuni(
       revogadoPor: item.manifestacao_revogadora || null,
       source: 'conuni-sync',
       syncedAt: startedAt.toISOString(),
-    });
+    };
+    const aiClassification = JSON.stringify(mergedAi);
 
     if (vigenciaLabel(item.vigencia) !== 'vigente') {
       const v = vigenciaLabel(item.vigencia);

@@ -135,13 +135,16 @@ async function main() {
 
   const genAI = new GoogleGenAI({ apiKey });
 
-  // Buscar pareceres SEM classificacao IA (via aiClassification.licitacoesContratos)
+  // Buscar pareceres SEM classificacao IA. Pula os que têm override manual
+  // (admin já decidiu) ou que já têm licitacoesContratos preenchido.
   const candidates = await prisma.document.findMany({
     where: {
       category: { in: ['parecer', 'parecer-vinculante', 'nota-tecnica', 'despacho', 'decor'] },
       isPublic: true,
-      // Filter no Postgres: aiClassification não contém "licitacoesContratos"
-      NOT: { aiClassification: { contains: 'licitacoesContratos' } },
+      AND: [
+        { NOT: { aiClassification: { contains: 'licitacoesContratos' } } },
+        { NOT: { aiClassification: { contains: 'licitacoesContratosManualBy' } } },
+      ],
     },
     select: { id: true, title: true, description: true, content: true, aiClassification: true, category: true },
     orderBy: { uploadedAt: 'desc' },

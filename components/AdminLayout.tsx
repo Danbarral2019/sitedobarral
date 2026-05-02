@@ -133,6 +133,11 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
       icon: FileText,
       badge: unreadCounts.documentos,
     },
+    {
+      path: '/admin/pareceres-revisao',
+      label: 'Revisao Pareceres CONUNI',
+      icon: FileText,
+    },
 
     // === ANALYTICS ===
     { divider: true, label: '\u{1F4CA} Analytics' },
