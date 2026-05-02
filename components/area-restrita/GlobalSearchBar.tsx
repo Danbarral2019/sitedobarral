@@ -194,7 +194,7 @@ export function GlobalSearchBar({
       </div>
 
       {/* Type Filters Row */}
-      <div className="flex items-center gap-2 px-4 pb-4 overflow-x-auto scrollbar-hide">
+      <div className="flex flex-wrap items-center gap-2 px-4 pb-4">
         {(Object.keys(CONTENT_TYPE_CONFIG) as ContentType[]).filter((type) => type !== 'faq' && type !== 'site').map((type) => {
           const config = CONTENT_TYPE_CONFIG[type];
           const Icon = TYPE_ICONS[type] || FileText;
@@ -241,16 +241,6 @@ export function GlobalSearchBar({
           Nenhum resultado encontrado para &quot;{query}&quot;
         </div>
       )}
-
-      <style jsx>{`
-        .scrollbar-hide::-webkit-scrollbar {
-          display: none;
-        }
-        .scrollbar-hide {
-          -ms-overflow-style: none;
-          scrollbar-width: none;
-        }
-      `}</style>
     </div>
   );
 }

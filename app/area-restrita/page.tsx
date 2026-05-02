@@ -19,13 +19,11 @@ import {
   DashboardHero,
   QuickAccessBar,
   DashboardCourseCard,
-  KnowledgeBaseSection,
 } from '@/components/area-restrita';
 import { SearchResultsList } from '@/components/area-restrita/SearchResultsList';
 
 const PdfExportBar = dynamic(() => import('@/components/area-restrita/PdfExportBar').then(mod => ({ default: mod.PdfExportBar })));
 const PDFExportPanel = dynamic(() => import('@/components/area-restrita/PDFExportPanel').then(mod => ({ default: mod.PDFExportPanel })));
-const NovidadesSection = dynamic(() => import('@/components/area-restrita/NovidadesSection'));
 const DocumentDetailModal = dynamic(() => import('@/components/DocumentDetailModal'));
 const DocumentsByCategory = dynamic(() => import('@/components/DocumentsByCategory'));
 const LegislativeActsPanel = dynamic(() => import('@/components/LegislativeActsPanel'));
@@ -66,7 +64,6 @@ function AreaRestritaContent() {
   const [courseDocuments, setCourseDocuments] = useState<Record<string, DocumentType[]>>({});
   const [modulesData, setModulesData] = useState<Record<string, { moduleCount: number; lessonCount: number }>>({});
   const [isDataLoading, setIsDataLoading] = useState(true);
-  const [tribunalDecisionCount, setTribunalDecisionCount] = useState(0);
 
   // Search history visibility
   const [isSearchFocused, setIsSearchFocused] = useState(false);
@@ -219,15 +216,7 @@ function AreaRestritaContent() {
     fetchCourseData();
   }, [user, enrolledCourseIds]);
 
-  // Fetch tribunal decision count for KnowledgeBaseSection
-  useEffect(() => {
-    fetch('/api/jurisprudencia?pageSize=1')
-      .then(res => res.ok ? res.json() : null)
-      .then(data => { if (data?.total) setTribunalDecisionCount(data.total); })
-      .catch(() => {});
-  }, []);
-
-  // All documents flat for KnowledgeBaseSection
+  // All documents flat (usado nas inline views por categoria)
   const allDocuments = useMemo(
     () => Object.values(courseDocuments).flat(),
     [courseDocuments],
@@ -375,23 +364,6 @@ function AreaRestritaContent() {
                 onDocumentClick={handleDocumentClick}
               />
             )}
-
-            {/* Knowledge Base */}
-            {!isDataLoading && (
-              <KnowledgeBaseSection
-                documents={allDocuments}
-                onSelectCategory={(cat) => setInlineView({ type: 'category', category: cat })}
-                tribunalDecisionCount={tribunalDecisionCount}
-              />
-            )}
-
-            {/* Novidades */}
-            <NovidadesSection
-              onDocumentClick={(docId) => {
-                setSelectedDocument({ id: docId, title: '', type: 'pdf', category: '', url: '' });
-                setIsModalOpen(true);
-              }}
-            />
 
             {/* Important Notice */}
             <div className="bg-orange-50 border-l-4 border-orange-500 p-4 lg:p-6 rounded-r-xl">
