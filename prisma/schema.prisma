@@ -991,6 +991,20 @@ model DOUStagingDocument {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
+  // === Clipping v2 — enrichment IA editorial ===
+  editorialScore        Int?       // 0-100 do classificador IA editorial
+  editorialReason       String?    @db.Text  // 1-2 frases: "por que é relevante"
+  editorialSummary      String?    @db.Text  // 2-3 frases neutras: "o que o ato faz"
+  editorialAffects      String?    @db.Text  // JSON array: ["Lei 14.133", ...]
+  editorialActType      String?              // "decreto" | "portaria" | "in" | "lei" | "mp" | "on"
+  editorialAmbiguous    Boolean    @default(false)
+  editorialModel        String?              // ex: "gemini-3-flash-preview"
+  editorialPromptVer    String?              // "v1", "v2"...
+  editorialClassifiedAt DateTime?
+
+  // Origem do staging (cron diário vs lookback CLI)
+  source                String?    @default("cron") // "cron" | "lookback"
+
   @@index([approvalStatus])
   @@index([category])
   @@index([requiresReview])
@@ -998,6 +1012,9 @@ model DOUStagingDocument {
   @@index([publishDate])
   @@index([createdAt])
   @@index([reviewedAt])
+  @@index([editorialScore])
+  @@index([editorialPromptVer])
+  @@index([source])
 }
 
 // Filtros personalizados salvos para DOU
