@@ -35,6 +35,7 @@ import { verifyCronAuth } from '@/lib/cron-auth';
 import { classifyEditorialBatch, EDITORIAL_PROMPT_VERSION, type EditorialCandidate } from '@/lib/dou-editorial-classifier';
 import { sendDouEditorialAlert, type DouEditorialAlertItem } from '@/lib/email';
 import { PRIMARY_GEMINI_MODEL } from '@/lib/gemini/config';
+import { extractIssuerFromDouHierarchy } from '@/lib/dou-issuer';
 
 export const runtime = 'nodejs';
 export const maxDuration = 300;
@@ -310,7 +311,7 @@ export async function GET(request: NextRequest) {
               });
 
               if (!existingAct && number) {
-                const issuer = extractIssuer(result.hierarchyStr);
+                const issuer = extractIssuerFromDouHierarchy(result.hierarchyStr);
 
                 const newAct = await tx.legislativeAct.create({
                   data: {
@@ -754,7 +755,7 @@ async function runV2(dryRun: boolean, maxResults: number): Promise<NextResponse>
           summary: cls.summary,
           affects: cls.affects,
           actType: cls.actType,
-          issuer: extractIssuer(cand.raw.hierarchyStr || ''),
+          issuer: extractIssuerFromDouHierarchy(cand.raw.hierarchyStr || ''),
           publishDate: cand.raw.date || '',
           douUrl: cand.raw.href,
           ambiguous: isAmbiguous,
@@ -799,17 +800,3 @@ async function runV2(dryRun: boolean, maxResults: number): Promise<NextResponse>
   });
 }
 
-/**
- * Extrai o órgão emissor da hierarquia DOU
- */
-function extractIssuer(hierarchyStr: string): string {
-  const h = hierarchyStr.toLowerCase();
-  if (h.includes('presidência') || h.includes('presidente')) return 'Presidência';
-  if (h.includes('mgi') || h.includes('gestão e inovação')) return 'MGI';
-  if (h.includes('seges') || h.includes('gestão e inovação')) return 'SEGES';
-  if (h.includes('agu') || h.includes('advocacia')) return 'AGU';
-  if (h.includes('tcu') || h.includes('tribunal de contas')) return 'TCU';
-  if (h.includes('cgu') || h.includes('controladoria')) return 'CGU';
-  if (h.includes('fazenda')) return 'Fazenda';
-  return 'Outro';
-}

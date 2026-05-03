@@ -4,6 +4,7 @@ import { verifyAdmin } from '@/lib/api-middleware';
 import { scrapeContent } from '@/lib/dou-scraper';
 import { LeiIndexer } from '@/lib/lei-indexer';
 import { scrapeAndIndexAct } from '@/lib/legislative-scrapers/scrape-and-index';
+import { extractIssuerFromDouHierarchy } from '@/lib/dou-issuer';
 
 export const runtime = 'nodejs';
 export const maxDuration = 120;
@@ -66,7 +67,7 @@ export async function POST(
       `[clipping-dou approve] Invalid editorialActType "${atoType}" on staging ${id}, treating as null`,
     );
   }
-  const issuer = extractIssuerFromHierarchy(staging.hierarchyStr || '');
+  const issuer = extractIssuerFromDouHierarchy(staging.hierarchyStr || '');
   let actIdToScrape: string | null = null;
 
   const documentId = await prisma.$transaction(async (tx) => {
@@ -190,16 +191,4 @@ export async function POST(
   );
 
   return NextResponse.json({ success: true, documentId, actId: actIdToScrape });
-}
-
-function extractIssuerFromHierarchy(hierarchyStr: string): string {
-  const h = hierarchyStr.toLowerCase();
-  if (h.includes('presidência') || h.includes('presidente')) return 'Presidência';
-  if (h.includes('seges')) return 'SEGES';
-  if (h.includes('mgi') || h.includes('gestão e inovação')) return 'MGI';
-  if (h.includes('agu') || h.includes('advocacia')) return 'AGU';
-  if (h.includes('cgu') || h.includes('controladoria')) return 'CGU';
-  if (h.includes('tcu') || h.includes('tribunal de contas')) return 'TCU';
-  if (h.includes('fazenda')) return 'Fazenda';
-  return 'Outro';
 }
