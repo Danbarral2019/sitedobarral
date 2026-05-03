@@ -54,6 +54,15 @@ describe('renderDouEditorialAlertEmail', () => {
     const html = renderDouEditorialAlertEmail([sample({ score: 60, ambiguous: true })]);
     expect(html.toLowerCase()).toContain('ambíguo');
   });
+
+  it('substitui URLs não-http(s) por # no link Ver DOU', () => {
+    const html = renderDouEditorialAlertEmail([
+      sample({ douUrl: 'javascript:alert(1)' }),
+    ]);
+    // The "Ver DOU" anchor must NOT carry a javascript: href
+    expect(html).not.toContain('javascript:alert');
+    expect(html).toMatch(/href="#"[^>]*>Ver DOU/);
+  });
 });
 
 describe('sendDouEditorialAlert', () => {

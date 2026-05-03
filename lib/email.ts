@@ -759,6 +759,16 @@ function escapeHtml(s: string): string {
     .replace(/'/g, '&#39;');
 }
 
+function safeHttpUrl(url: string): string {
+  try {
+    const parsed = new URL(url);
+    if (parsed.protocol === 'http:' || parsed.protocol === 'https:') {
+      return escapeHtml(url);
+    }
+  } catch { /* invalid URL */ }
+  return '#';
+}
+
 /**
  * Renderiza o HTML do email de destaque DOU. Pure function — útil pra testes
  * sem disparar envio real.
@@ -808,7 +818,7 @@ export function renderDouEditorialAlertEmail(items: DouEditorialAlertItem[]): st
 
         <div style="margin-top:14px;display:flex;gap:12px;">
           <a href="${queueLink}" style="display:inline-block;background:linear-gradient(135deg,#f97316,#ea580c);color:white;padding:8px 18px;border-radius:6px;text-decoration:none;font-size:13px;font-weight:600;">Revisar na Fila</a>
-          <a href="${escapeHtml(it.douUrl)}" style="display:inline-block;background:#f1f5f9;color:#475569;padding:8px 18px;border-radius:6px;text-decoration:none;font-size:13px;" target="_blank" rel="noopener">Ver DOU</a>
+          <a href="${safeHttpUrl(it.douUrl)}" style="display:inline-block;background:#f1f5f9;color:#475569;padding:8px 18px;border-radius:6px;text-decoration:none;font-size:13px;" target="_blank" rel="noopener">Ver DOU</a>
         </div>
       </div>`;
     })
