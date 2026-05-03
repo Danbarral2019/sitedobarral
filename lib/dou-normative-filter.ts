@@ -51,20 +51,23 @@ const CONCRETE_ACT_PATTERNS = [
 /**
  * Regex de título que indicam ato concreto (prioridade sobre classificação)
  */
+// Sem `\b` final pra capturar plural ("AVISOS") e concatenado sem espaço
+// ("AVISOPregão", visto no DOU). DOU não tem ato normativo que comece
+// literalmente por essas raízes — risco de falso positivo é desprezível.
 const CONCRETE_TITLE_PATTERNS = [
-  /^edital\b/i,
-  /^aviso\b/i,
-  /^extratos?\b/i,
-  /^retifica[çc][ãa]o\b/i,
-  /^despacho\b/i,
+  /^edita(?:l|is)/i,
+  /^avisos?/i,
+  /^extratos?/i,
+  /^retifica/i,
+  /^despachos?/i,
   /^ata\s+n[ºo°]/i,
-  /^autoriza[çc][ãa]o\b/i,
+  /^autoriza[çc]/i,
   /^portarias\s+de\s+\d/i,
   /^ato\s+declarat[óo]rio/i,
-  /^alvar[áa]\b/i,
-  /^adendo\b/i,
-  /^aditamento\b/i,
-  /^decis[ãa]o\s+de\b/i,
+  /^alvar[áa]/i,
+  /^adendos?/i,
+  /^aditamentos?/i,
+  /^decis(?:[ãa]o|ões)\s+de\b/i,
 ];
 
 /**
