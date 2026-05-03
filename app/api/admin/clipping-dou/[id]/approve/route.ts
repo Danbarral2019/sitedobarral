@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextRequest, NextResponse, after } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { verifyAdmin } from '@/lib/api-middleware';
 import { scrapeContent } from '@/lib/dou-scraper';
@@ -16,6 +16,25 @@ const HIERARCHY_MAP: Record<string, number> = {
   in: 4,
   on: 5,
 };
+
+const VALID_ACT_TYPES = new Set(['decreto', 'portaria', 'in', 'lei', 'mp', 'on']);
+
+type ActType = 'decreto' | 'portaria' | 'in' | 'lei' | 'mp' | 'on';
+
+/**
+ * Schedules a promise to run after the response is sent.
+ * Uses Next.js `after()` when available (request scope); falls back to bare
+ * `void` outside a request scope (e.g. unit tests). The bare-void fallback
+ * loses the post-response guarantee, but is acceptable in tests since the
+ * mocked promises resolve immediately.
+ */
+function runAfterResponse(promise: Promise<unknown>): void {
+  try {
+    after(promise);
+  } catch {
+    void promise;
+  }
+}
 
 export async function POST(
   request: NextRequest,
@@ -40,7 +59,13 @@ export async function POST(
   }
 
   const cleanTitle = staging.title;
-  const atoType = staging.editorialActType as 'decreto' | 'portaria' | 'in' | 'lei' | 'mp' | 'on' | null;
+  const atoType = staging.editorialActType as ActType | null;
+  const safeActType: ActType | null = atoType && VALID_ACT_TYPES.has(atoType) ? atoType : null;
+  if (atoType && !safeActType) {
+    console.warn(
+      `[clipping-dou approve] Invalid editorialActType "${atoType}" on staging ${id}, treating as null`,
+    );
+  }
   const issuer = extractIssuerFromHierarchy(staging.hierarchyStr || '');
   let actIdToScrape: string | null = null;
 
@@ -53,7 +78,7 @@ export async function POST(
         url: staging.url,
         category: 'legislacao',
         isPublic: true,
-        tags: JSON.stringify(['ato_normativo', atoType || 'outro'].filter(Boolean)),
+        tags: JSON.stringify(['ato_normativo', safeActType || 'outro'].filter(Boolean)),
         content: staging.abstract,
         douUrl: staging.url,
         douData: parsedDate,
@@ -67,7 +92,7 @@ export async function POST(
       select: { id: true },
     });
 
-    if (atoType) {
+    if (safeActType) {
       const numberMatch = cleanTitle.match(
         /(?:decreto|portaria|instrução\s+normativa|in|lei|medida\s+provisória)\s+(?:[\w/]+\s+)?n[ºo°]?\s*([\d.]+(?:\/\d{4})?)/i,
       );
@@ -76,12 +101,12 @@ export async function POST(
       const year = yearMatch ? parseInt(yearMatch[1], 10) : new Date().getFullYear();
 
       if (number) {
-        const fullNumber = `${atoType === 'in' ? 'IN' : atoType === 'on' ? 'ON' : atoType === 'mp' ? 'MP' : atoType.charAt(0).toUpperCase() + atoType.slice(1)} ${number}/${year}`;
+        const fullNumber = `${safeActType === 'in' ? 'IN' : safeActType === 'on' ? 'ON' : safeActType === 'mp' ? 'MP' : safeActType.charAt(0).toUpperCase() + safeActType.slice(1)} ${number}/${year}`;
         const existing = await tx.legislativeAct.findUnique({ where: { fullNumber } });
         if (!existing) {
           const newAct = await tx.legislativeAct.create({
             data: {
-              type: atoType,
+              type: safeActType,
               number,
               year,
               fullNumber,
@@ -89,7 +114,7 @@ export async function POST(
               ementa: staging.abstract || cleanTitle,
               issuer,
               publishDate: parsedDate || new Date(),
-              hierarchyLevel: HIERARCHY_MAP[atoType] || 5,
+              hierarchyLevel: HIERARCHY_MAP[safeActType] || 5,
               officialUrl: staging.url,
               createdBy: 'clipping-dou-approve',
             },
@@ -98,26 +123,6 @@ export async function POST(
           actIdToScrape = newAct.id;
         }
       }
-    }
-
-    try {
-      const analysis = await LeiIndexer.analyzeDocument({
-        id: newDoc.id,
-        title: cleanTitle,
-        category: 'legislacao',
-        tags: JSON.stringify([atoType]),
-        content: staging.abstract,
-        description: staging.abstract,
-      });
-      if (analysis.articles.length > 0) {
-        const articleNumbers = LeiIndexer.resultToLeiArticles(analysis);
-        await tx.document.update({
-          where: { id: newDoc.id },
-          data: { leiArticles: JSON.stringify(articleNumbers) },
-        });
-      }
-    } catch (e) {
-      console.error('[clipping-dou approve] LeiIndexer falhou:', e);
     }
 
     await tx.dOUStagingDocument.update({
@@ -136,24 +141,53 @@ export async function POST(
     return newDoc.id;
   });
 
-  // Pós-transação: scrape do conteúdo + scrape+index do ato
-  void scrapeContent(staging.url)
-    .then(async (enriched) => {
-      if (enriched && enriched.caracteres > 0) {
-        const content =
-          enriched.conteudo.length > 50_000
-            ? enriched.conteudo.substring(0, 50_000) + '\n\n[... truncado]'
-            : enriched.conteudo;
-        await prisma.document.update({ where: { id: documentId }, data: { content } });
-      }
-    })
-    .catch((e) => console.error('[clipping-dou approve] scrapeContent falhou:', e));
+  // Pós-transação (background): scrape do conteúdo, scrape+index do ato, e LeiIndexer
+  // (este último era 2-15s de Gemini segurando locks Postgres dentro da txn).
+  runAfterResponse(
+    scrapeContent(staging.url)
+      .then(async (enriched) => {
+        if (enriched && enriched.caracteres > 0) {
+          const content =
+            enriched.conteudo.length > 50_000
+              ? enriched.conteudo.substring(0, 50_000) + '\n\n[... truncado]'
+              : enriched.conteudo;
+          await prisma.document.update({ where: { id: documentId }, data: { content } });
+        }
+      })
+      .catch((e) => console.error('[clipping-dou approve] scrapeContent falhou:', e)),
+  );
 
   if (actIdToScrape) {
-    void scrapeAndIndexAct(actIdToScrape).catch((e) =>
-      console.error('[clipping-dou approve] scrapeAndIndexAct falhou:', e),
+    runAfterResponse(
+      scrapeAndIndexAct(actIdToScrape).catch((e) =>
+        console.error('[clipping-dou approve] scrapeAndIndexAct falhou:', e),
+      ),
     );
   }
+
+  runAfterResponse(
+    (async () => {
+      try {
+        const analysis = await LeiIndexer.analyzeDocument({
+          id: documentId,
+          title: cleanTitle,
+          category: 'legislacao',
+          tags: JSON.stringify([safeActType]),
+          content: staging.abstract,
+          description: staging.abstract,
+        });
+        if (analysis.articles.length > 0) {
+          const articleNumbers = LeiIndexer.resultToLeiArticles(analysis);
+          await prisma.document.update({
+            where: { id: documentId },
+            data: { leiArticles: JSON.stringify(articleNumbers) },
+          });
+        }
+      } catch (e) {
+        console.error('[clipping-dou approve] LeiIndexer falhou:', e);
+      }
+    })(),
+  );
 
   return NextResponse.json({ success: true, documentId, actId: actIdToScrape });
 }
