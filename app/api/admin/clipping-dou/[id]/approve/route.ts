@@ -1,0 +1,171 @@
+import { NextRequest, NextResponse } from 'next/server';
+import { prisma } from '@/lib/prisma';
+import { verifyAdmin } from '@/lib/api-middleware';
+import { scrapeContent } from '@/lib/dou-scraper';
+import { LeiIndexer } from '@/lib/lei-indexer';
+import { scrapeAndIndexAct } from '@/lib/legislative-scrapers/scrape-and-index';
+
+export const runtime = 'nodejs';
+export const maxDuration = 120;
+
+const HIERARCHY_MAP: Record<string, number> = {
+  lei: 1,
+  mp: 1,
+  decreto: 2,
+  portaria: 3,
+  in: 4,
+  on: 5,
+};
+
+export async function POST(
+  request: NextRequest,
+  { params }: { params: Promise<{ id: string }> },
+) {
+  const adminCheck = await verifyAdmin(request);
+  if (adminCheck.error) return adminCheck.response;
+
+  const { id } = await params;
+  const staging = await prisma.dOUStagingDocument.findUnique({ where: { id } });
+  if (!staging) return NextResponse.json({ error: 'Staging não encontrado' }, { status: 404 });
+  if (staging.finalDecision || staging.imported) {
+    return NextResponse.json({ error: `Já ${staging.finalDecision || 'importado'}` }, { status: 409 });
+  }
+
+  let parsedDate: Date | undefined;
+  try {
+    const [d, m, y] = (staging.publishDate || '').split('/').map(Number);
+    if (d && m && y) parsedDate = new Date(y, m - 1, d);
+  } catch {
+    /* noop */
+  }
+
+  const cleanTitle = staging.title;
+  const atoType = staging.editorialActType as 'decreto' | 'portaria' | 'in' | 'lei' | 'mp' | 'on' | null;
+  const issuer = extractIssuerFromHierarchy(staging.hierarchyStr || '');
+  let actIdToScrape: string | null = null;
+
+  const documentId = await prisma.$transaction(async (tx) => {
+    const newDoc = await tx.document.create({
+      data: {
+        title: cleanTitle,
+        description: staging.abstract,
+        type: 'link',
+        url: staging.url,
+        category: 'legislacao',
+        isPublic: true,
+        tags: JSON.stringify(['ato_normativo', atoType || 'outro'].filter(Boolean)),
+        content: staging.abstract,
+        douUrl: staging.url,
+        douData: parsedDate,
+        douSecao: staging.section,
+        reviewed: true,
+        reviewedAt: new Date(),
+        reviewedBy: adminCheck.user.email,
+        embeddingStatus: 'pending',
+        metaDou: { create: { url: staging.url, data: parsedDate, secao: staging.section } },
+      },
+      select: { id: true },
+    });
+
+    if (atoType) {
+      const numberMatch = cleanTitle.match(
+        /(?:decreto|portaria|instrução\s+normativa|in|lei|medida\s+provisória)\s+(?:[\w/]+\s+)?n[ºo°]?\s*([\d.]+(?:\/\d{4})?)/i,
+      );
+      const number = numberMatch ? numberMatch[1] : '';
+      const yearMatch = cleanTitle.match(/(\d{4})/);
+      const year = yearMatch ? parseInt(yearMatch[1], 10) : new Date().getFullYear();
+
+      if (number) {
+        const fullNumber = `${atoType === 'in' ? 'IN' : atoType === 'on' ? 'ON' : atoType === 'mp' ? 'MP' : atoType.charAt(0).toUpperCase() + atoType.slice(1)} ${number}/${year}`;
+        const existing = await tx.legislativeAct.findUnique({ where: { fullNumber } });
+        if (!existing) {
+          const newAct = await tx.legislativeAct.create({
+            data: {
+              type: atoType,
+              number,
+              year,
+              fullNumber,
+              title: cleanTitle,
+              ementa: staging.abstract || cleanTitle,
+              issuer,
+              publishDate: parsedDate || new Date(),
+              hierarchyLevel: HIERARCHY_MAP[atoType] || 5,
+              officialUrl: staging.url,
+              createdBy: 'clipping-dou-approve',
+            },
+            select: { id: true },
+          });
+          actIdToScrape = newAct.id;
+        }
+      }
+    }
+
+    try {
+      const analysis = await LeiIndexer.analyzeDocument({
+        id: newDoc.id,
+        title: cleanTitle,
+        category: 'legislacao',
+        tags: JSON.stringify([atoType]),
+        content: staging.abstract,
+        description: staging.abstract,
+      });
+      if (analysis.articles.length > 0) {
+        const articleNumbers = LeiIndexer.resultToLeiArticles(analysis);
+        await tx.document.update({
+          where: { id: newDoc.id },
+          data: { leiArticles: JSON.stringify(articleNumbers) },
+        });
+      }
+    } catch (e) {
+      console.error('[clipping-dou approve] LeiIndexer falhou:', e);
+    }
+
+    await tx.dOUStagingDocument.update({
+      where: { id },
+      data: {
+        finalDecision: 'approved',
+        imported: true,
+        importedAt: new Date(),
+        documentId: newDoc.id,
+        reviewedAt: new Date(),
+        reviewedBy: adminCheck.user.email,
+        classificationCorrect: true,
+      },
+    });
+
+    return newDoc.id;
+  });
+
+  // Pós-transação: scrape do conteúdo + scrape+index do ato
+  void scrapeContent(staging.url)
+    .then(async (enriched) => {
+      if (enriched && enriched.caracteres > 0) {
+        const content =
+          enriched.conteudo.length > 50_000
+            ? enriched.conteudo.substring(0, 50_000) + '\n\n[... truncado]'
+            : enriched.conteudo;
+        await prisma.document.update({ where: { id: documentId }, data: { content } });
+      }
+    })
+    .catch((e) => console.error('[clipping-dou approve] scrapeContent falhou:', e));
+
+  if (actIdToScrape) {
+    void scrapeAndIndexAct(actIdToScrape).catch((e) =>
+      console.error('[clipping-dou approve] scrapeAndIndexAct falhou:', e),
+    );
+  }
+
+  return NextResponse.json({ success: true, documentId, actId: actIdToScrape });
+}
+
+function extractIssuerFromHierarchy(hierarchyStr: string): string {
+  const h = hierarchyStr.toLowerCase();
+  if (h.includes('presidência') || h.includes('presidente')) return 'Presidência';
+  if (h.includes('seges')) return 'SEGES';
+  if (h.includes('mgi') || h.includes('gestão e inovação')) return 'MGI';
+  if (h.includes('agu') || h.includes('advocacia')) return 'AGU';
+  if (h.includes('cgu') || h.includes('controladoria')) return 'CGU';
+  if (h.includes('tcu') || h.includes('tribunal de contas')) return 'TCU';
+  if (h.includes('fazenda')) return 'Fazenda';
+  return 'Outro';
+}
