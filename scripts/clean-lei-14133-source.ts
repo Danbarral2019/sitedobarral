@@ -9,10 +9,11 @@
  *  3. Linhas de pontos `..............` → `[…]`
  *  4. Espaços múltiplos horizontais (`  +`) → ` ` (preserva \n)
  *  5. Whitespace trailing por linha
+ *  6. Sequências de "(Vide Decreto nº X, de YYYY) [Vigência]" repetidas →
+ *     "(Vide Decretos nº X/YYYY, X/YYYY... — Vigência)"
  *
- * NÃO trata (decisão de produto pendente):
- *  - (VETADO) styling
- *  - (Vide Decreto) collapse/normalização
+ * NÃO trata (renderer):
+ *  - (VETADO) styling — handled in EmentaParagraph component
  *
  * Uso:
  *   npx tsx scripts/clean-lei-14133-source.ts --dry-run [--samples 5]
@@ -36,6 +37,15 @@ const ARTICLE_PREFIX_EXTRA_DOT =
 const DOTS_LINE = /\.{20,}/g;
 const MULTI_HSPACE = /[ \t]{2,}/g;
 const TRAILING_HSPACE = /[ \t]+$/gm;
+
+// Sequências de "(Vide Decreto nº X, de YYYY) [Vigência|(Vigência)]" repetidas.
+// Captura 2+ ocorrências consecutivas SEPARADAS APENAS POR ESPAÇO/TAB —
+// nunca por newline. Caso contrário o regex come os \n\n entre incisos
+// diferentes e mashada todos os incisos do artigo numa linha só.
+const VIDE_DECRETO_RUN =
+  /(?:[ \t]*\(Vide\s+Decreto\s+n[ºo°]?\s*[\d.]+,\s*de\s+\d{4}\)(?:[ \t]*\(?[ \t]*Vig[êe]ncia[ \t]*\)?)?){2,}/g;
+const VIDE_DECRETO_ITEM =
+  /\(Vide\s+Decreto\s+n[ºo°]?\s*([\d.]+),\s*de\s+(\d{4})\)/g;
 
 interface CleanResult {
   ementa: string;
@@ -81,6 +91,27 @@ function cleanEmenta(raw: string): CleanResult {
   if (MULTI_HSPACE.test(text)) {
     text = text.replace(MULTI_HSPACE, ' ');
     changes.push('collapsed-multi-hspace');
+  }
+
+  // 6. Collapse repeated "(Vide Decreto nº X, de YYYY) [Vigência]"
+  if (VIDE_DECRETO_RUN.test(text)) {
+    let runs = 0;
+    text = text.replace(VIDE_DECRETO_RUN, (match) => {
+      const items: Array<[string, string]> = [];
+      let m: RegExpExecArray | null;
+      // Reset lastIndex pra não saltar matches em runs sequenciais
+      VIDE_DECRETO_ITEM.lastIndex = 0;
+      while ((m = VIDE_DECRETO_ITEM.exec(match)) !== null) {
+        items.push([m[1], m[2]]);
+      }
+      if (items.length < 2) return match;
+      runs++;
+      const hasVigencia = /Vig[êe]ncia/i.test(match);
+      const list = items.map(([n, y]) => `${n}/${y}`).join(', ');
+      // Espaço inicial preserva o break antes da abertura do parêntese
+      return ` (Vide Decretos nº ${list}${hasVigencia ? ' — Vigência' : ''})`;
+    });
+    if (runs > 0) changes.push(`collapsed-vide-decreto (${runs}x)`);
   }
 
   return { ementa: text, changes };

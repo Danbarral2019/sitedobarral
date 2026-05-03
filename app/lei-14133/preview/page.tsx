@@ -39,6 +39,7 @@ import {
 } from 'lucide-react';
 import { CROSS_REFERENCES } from '@/data/lei-14133-cross-references';
 import { normalizeTextContent } from '@/lib/utils';
+import { EmentaParagraph } from '@/components/lei-14133/EmentaParagraph';
 
 interface EnunciadoResumo {
   id: string;
@@ -637,7 +638,7 @@ function PreviewContent() {
                   <div className="prose max-w-none">
                     <div className="space-y-2">
                       {normalizeTextContent(selectedArticle.ementa).map((p, i) => (
-                        <p key={i} className="text-gray-800">{p}</p>
+                        <EmentaParagraph key={i} text={p} />
                       ))}
                     </div>
                   </div>

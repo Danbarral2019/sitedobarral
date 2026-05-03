@@ -180,7 +180,7 @@ a) serviço comum de engenharia: todo serviço de engenharia que tem por objeto 
 
 b) serviço especial de engenharia: aquele que, por sua alta heterogeneidade ou complexidade, não pode se enquadrar na definição constante da alínea a deste inciso;
 
-XXII - obras, serviços e fornecimentos de grande vulto: aqueles cujo valor estimado supera R$ 200.000.000,00 (duzentos milhões de reais); (Vide Decreto nº 10.922, de 2021) (Vigência) (Vide Decreto nº 11.317, de 2022) Vigência (Vide Decreto nº 11.871, de 2023) Vigência (Vide Decreto nº 12.343, de 2024) Vigência (Vide Decreto nº 12.807, de 2025) Vigência
+XXII - obras, serviços e fornecimentos de grande vulto: aqueles cujo valor estimado supera R$ 200.000.000,00 (duzentos milhões de reais); (Vide Decretos nº 10.922/2021, 11.317/2022, 11.871/2023, 12.343/2024, 12.807/2025 — Vigência)
 
 XXIII - termo de referência: documento necessário para a contratação de bens e serviços, que deve conter os seguintes parâmetros e elementos descritivos:
 
@@ -1035,7 +1035,7 @@ II - profissionais contratados por conhecimento técnico, experiência ou renome
 
 § 2º (VETADO).
 
-§ 2º Ressalvados os casos de inexigibilidade de licitação, na licitação para contratação dos serviços técnicos especializados de natureza predominantemente intelectual previstos nas alíneas a, d e h do inciso XVIII do caput do art. 6º desta Lei cujo valor estimado da contratação seja superior a R$ 300.000,00 (trezentos mil reais), o julgamento será por: (Promulgação partes vetadas) (Vide Decreto nº 10.922, de 2021) (Vigência) (Vide Decreto nº 11.317, de 2022) Vigência (Vide Decreto nº 11.871, de 2023) Vigência (Vide Decreto nº 12.343, de 2024) Vigência (Vide Decreto nº 12.807, de 2025) Vigência
+§ 2º Ressalvados os casos de inexigibilidade de licitação, na licitação para contratação dos serviços técnicos especializados de natureza predominantemente intelectual previstos nas alíneas a, d e h do inciso XVIII do caput do art. 6º desta Lei cujo valor estimado da contratação seja superior a R$ 300.000,00 (trezentos mil reais), o julgamento será por: (Promulgação partes vetadas) (Vide Decretos nº 10.922/2021, 11.317/2022, 11.871/2023, 12.343/2024, 12.807/2025 — Vigência)
 
 I - melhor técnica; ou
 
@@ -1660,7 +1660,7 @@ I - apresentada em original, por cópia ou por qualquer outro meio expressamente
 
 II - substituída por registro cadastral emitido por órgão ou entidade pública, desde que previsto no edital e que o registro tenha sido feito em obediência ao disposto nesta Lei;
 
-III - dispensada, total ou parcialmente, nas contratações para entrega imediata, nas contratações em valores inferiores a 1/4 (um quarto) do limite para dispensa de licitação para compras em geral e nas contratações de produto para pesquisa e desenvolvimento até o valor de R$ 300.000,00 (trezentos mil reais). (Vide Decreto nº 10.922, de 2021) (Vigência) (Vide Decreto nº 11.317, de 2022) Vigência (Vide Decreto nº 11.871, de 2023) Vigência (Vide Decreto nº 12.343, de 2024) Vigência Parágrafo único. As empresas estrangeiras que não funcionem no País deverão apresentar documentos equivalentes, na forma de regulamento emitido pelo Poder Executivo federal.`,
+III - dispensada, total ou parcialmente, nas contratações para entrega imediata, nas contratações em valores inferiores a 1/4 (um quarto) do limite para dispensa de licitação para compras em geral e nas contratações de produto para pesquisa e desenvolvimento até o valor de R$ 300.000,00 (trezentos mil reais). (Vide Decretos nº 10.922/2021, 11.317/2022, 11.871/2023, 12.343/2024 — Vigência)Parágrafo único. As empresas estrangeiras que não funcionem no País deverão apresentar documentos equivalentes, na forma de regulamento emitido pelo Poder Executivo federal.`,
     capitulo: "TÍTULO II - CAPÍTULO IV",
   },
   "71": {
@@ -1766,9 +1766,9 @@ Da Dispensa de Licitação`,
     numero: "75",
     ementa: `Art. 75º É dispensável a licitação:
 
-I - para contratação que envolva valores inferiores a R$ 100.000,00 (cem mil reais), no caso de obras e serviços de engenharia ou de serviços de manutenção de veículos automotores; (Vide Decreto nº 10.922, de 2021) (Vigência) (Vide Decreto nº 11.317, de 2022) Vigência (Vide Decreto nº 11.871, de 2023) Vigência (Vide Decreto nº 12.343, de 2024) Vigência (Vide Decreto nº 12.807, de 2025) Vigência
+I - para contratação que envolva valores inferiores a R$ 100.000,00 (cem mil reais), no caso de obras e serviços de engenharia ou de serviços de manutenção de veículos automotores; (Vide Decretos nº 10.922/2021, 11.317/2022, 11.871/2023, 12.343/2024, 12.807/2025 — Vigência)
 
-II - para contratação que envolva valores inferiores a R$ 50.000,00 (cinquenta mil reais), no caso de outros serviços e compras; (Vide Decreto nº 10.922, de 2021) (Vigência) (Vide Decreto nº 11.317, de 2022) Vigência (Vide Decreto nº 11.871, de 2023) Vigência (Vide Decreto nº 12.343, de 2024) Vigência (Vide Decreto nº 12.807, de 2025) Vigência
+II - para contratação que envolva valores inferiores a R$ 50.000,00 (cinquenta mil reais), no caso de outros serviços e compras; (Vide Decretos nº 10.922/2021, 11.317/2022, 11.871/2023, 12.343/2024, 12.807/2025 — Vigência)
 
 III - para contratação que mantenha todas as condições definidas em edital de licitação realizada há menos de 1 (um) ano, quando se verificar que naquela licitação:
 
@@ -1782,7 +1782,7 @@ a) bens, componentes ou peças de origem nacional ou estrangeira necessários à
 
 b) bens, serviços, alienações ou obras, nos termos de acordo internacional específico aprovado pelo Congresso Nacional, quando as condições ofertadas forem manifestamente vantajosas para a Administração;
 
-c) produtos para pesquisa e desenvolvimento, limitada a contratação, no caso de obras e serviços de engenharia, ao valor de R$ 300.000,00 (trezentos mil reais); (Vide Decreto nº 10.922, de 2021) (Vigência) (Vide Decreto nº 11.317, de 2022) Vigência (Vide Decreto nº 11.871, de 2023) Vigência (Vide Decreto nº 12.343, de 2024) Vigência (Vide Decreto nº 12.807, de 2025) Vigência
+c) produtos para pesquisa e desenvolvimento, limitada a contratação, no caso de obras e serviços de engenharia, ao valor de R$ 300.000,00 (trezentos mil reais); (Vide Decretos nº 10.922/2021, 11.317/2022, 11.871/2023, 12.343/2024, 12.807/2025 — Vigência)
 
 d) transferência de tecnologia ou licenciamento de direito de uso ou de exploração de criação protegida, nas contratações realizadas por instituição científica, tecnológica e de inovação (ICT) pública ou por agência de fomento, desde que demonstrada vantagem para a Administração;
 
@@ -1854,7 +1854,7 @@ II - o somatório da despesa realizada com objetos de mesma natureza, entendidos
 
 § 6º Para os fins do inciso VIII do caput deste artigo, considera-se emergencial a contratação por dispensa com objetivo de manter a continuidade do serviço público, e deverão ser observados os valores praticados pelo mercado na forma do art. 23 desta Lei e adotadas as providências necessárias para a conclusão do processo licitatório, sem prejuízo de apuração de responsabilidade dos agentes públicos que deram causa à situação emergencial.
 
-§ 7º Não se aplica o disposto no § 1º deste artigo às contratações de até R$ 8.000,00 (oito mil reais) de serviços de manutenção de veículos automotores de propriedade do órgão ou entidade contratante, incluído o fornecimento de peças. (Vide Decreto nº 10.922, de 2021) (Vigência) (Vide Decreto nº 11.317, de 2022) Vigência (Vide Decreto nº 11.871, de 2023) Vigência (Vide Decreto nº 12.343, de 2024) Vigência (Vide Decreto nº 12.807, de 2025) Vigência
+§ 7º Não se aplica o disposto no § 1º deste artigo às contratações de até R$ 8.000,00 (oito mil reais) de serviços de manutenção de veículos automotores de propriedade do órgão ou entidade contratante, incluído o fornecimento de peças. (Vide Decretos nº 10.922/2021, 11.317/2022, 11.871/2023, 12.343/2024, 12.807/2025 — Vigência)
 
 DAS ALIENAÇÕES`,
     capitulo: "TÍTULO II - CAPÍTULO V",
@@ -2379,7 +2379,7 @@ II - compras com entrega imediata e integral dos bens adquiridos e dos quais nã
 
 § 1º Às hipóteses de substituição do instrumento de contrato, aplica-se, no que couber, o disposto no art. 92 desta Lei .
 
-§ 2º É nulo e de nenhum efeito o contrato verbal com a Administração, salvo o de pequenas compras ou o de prestação de serviços de pronto pagamento, assim entendidos aqueles de valor não superior a R$ 10.000,00 (dez mil reais). (Vide Decreto nº 10.922, de 2021) (Vigência) (Vide Decreto nº 11.317, de 2022) Vigência (Vide Decreto nº 11.871, de 2023) Vigência (Vide Decreto nº 12.343, de 2024) Vigência (Vide Decreto nº 12.807, de 2025) Vigência
+§ 2º É nulo e de nenhum efeito o contrato verbal com a Administração, salvo o de pequenas compras ou o de prestação de serviços de pronto pagamento, assim entendidos aqueles de valor não superior a R$ 10.000,00 (dez mil reais). (Vide Decretos nº 10.922/2021, 11.317/2022, 11.871/2023, 12.343/2024, 12.807/2025 — Vigência)
 
 DAS GARANTIAS`,
     capitulo: "TÍTULO III - CAPÍTULO I",
@@ -3521,7 +3521,7 @@ III - quando se tratar de obra, seja mantido o que foi pactuado quanto a suas ca
   },
   "184-A": {
     numero: "184-A",
-    ementa: `Art. 184-Aº À celebração, à execução, ao acompanhamento e à prestação de contas dos convênios, contratos de repasse e instrumentos congêneres em que for parte a União, com valor global de até R$ 1.500.000,00 (um milhão e quinhentos mil reais), aplicar-se-á o seguinte regime simplificado: (Incluído pela Lei nº 14.770, de 2023) (Vide Decreto nº 12.343, de 2024) Vigência (Vide Decreto nº 12.807, de 2025) Vigência
+    ementa: `Art. 184-Aº À celebração, à execução, ao acompanhamento e à prestação de contas dos convênios, contratos de repasse e instrumentos congêneres em que for parte a União, com valor global de até R$ 1.500.000,00 (um milhão e quinhentos mil reais), aplicar-se-á o seguinte regime simplificado: (Incluído pela Lei nº 14.770, de 2023) (Vide Decretos nº 12.343/2024, 12.807/2025 — Vigência)
 
 I - o plano de trabalho aprovado conterá parâmetros objetivos para caracterizar o cumprimento do objeto; (Incluído pela Lei nº 14.770, de 2023)
 

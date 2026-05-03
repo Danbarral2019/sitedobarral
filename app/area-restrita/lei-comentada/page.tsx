@@ -34,6 +34,7 @@ import Link from 'next/link';
 import { CROSS_REFERENCES } from '@/data/lei-14133-cross-references';
 import { Star } from 'lucide-react';
 import { LeiSidebar } from '@/components/lei-14133/LeiSidebar';
+import { EmentaParagraph } from '@/components/lei-14133/EmentaParagraph';
 import MarkdownContent from '@/components/MarkdownContent';
 
 interface EnunciadoResumo {
@@ -1190,7 +1191,7 @@ function LeiComentadaContent() {
                   <div className="prose max-w-none">
                     <div className="space-y-2">
                       {normalizeTextContent(selectedArticle.ementa).map((p, i) => (
-                        <p key={i} className="text-gray-800">{p}</p>
+                        <EmentaParagraph key={i} text={p} />
                       ))}
                     </div>
                   </div>
