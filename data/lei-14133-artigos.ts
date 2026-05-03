@@ -95,14 +95,14 @@ II - no caso de contratação de obras e serviços de engenharia, às licitaçõ
 
 § 2º A obtenção de benefícios a que se refere o caput deste artigo fica limitada às microempresas e às empresas de pequeno porte que, no ano-calendário de realização da licitação, ainda não tenham celebrado contratos com a Administração Pública cujos valores somados extrapolem a receita bruta máxima admitida para fins de enquadramento como empresa de pequeno porte, devendo o órgão ou entidade exigir do licitante declaração de observância desse limite na licitação.
 
-§ 3º Nas contratações com prazo de vigência superior a 1 (um) ano, será considerado o valor anual do contrato na aplicação dos limites previstos nos §§ 1º e 2º deste artigo. DOS PRINCÍPIOS`,
+§ 3º Nas contratações com prazo de vigência superior a 1 (um) ano, será considerado o valor anual do contrato na aplicação dos limites previstos nos §§ 1º e 2º deste artigo.`,
     capitulo: "TÍTULO I - CAPÍTULO I",
   },
   "5": {
     numero: "5",
     titulo: "TÍTULO I - DISPOSIÇÕES PRELIMINARES",
     capituloCompleto: "CAPÍTULO II - DOS PRINCÍPIOS",
-    ementa: `Art. 5º Na aplicação desta Lei, serão observados os princípios da legalidade, da impessoalidade, da moralidade, da publicidade, da eficiência, do interesse público, da probidade administrativa, da igualdade, do planejamento, da transparência, da eficácia, da segregação de funções, da motivação, da vinculação ao edital, do julgamento objetivo, da segurança jurídica, da razoabilidade, da competitividade, da proporcionalidade, da celeridade, da economicidade e do desenvolvimento nacional sustentável, assim como as disposições do Decreto-Lei nº 4.657, de 4 de setembro de 1942 (Lei de Introdução às Normas do Direito Brasileiro). DAS DEFINIÇÕES`,
+    ementa: `Art. 5º Na aplicação desta Lei, serão observados os princípios da legalidade, da impessoalidade, da moralidade, da publicidade, da eficiência, do interesse público, da probidade administrativa, da igualdade, do planejamento, da transparência, da eficácia, da segregação de funções, da motivação, da vinculação ao edital, do julgamento objetivo, da segurança jurídica, da razoabilidade, da competitividade, da proporcionalidade, da celeridade, da economicidade e do desenvolvimento nacional sustentável, assim como as disposições do Decreto-Lei nº 4.657, de 4 de setembro de 1942 (Lei de Introdução às Normas do Direito Brasileiro).`,
     capitulo: "TÍTULO I - CAPÍTULO II",
     secao: "Princípios",
   },
@@ -332,9 +332,7 @@ LVIII - reajustamento em sentido estrito: forma de manutenção do equilíbrio e
 
 LIX - repactuação: forma de manutenção do equilíbrio econômico-financeiro de contrato utilizada para serviços contínuos com regime de dedicação exclusiva de mão de obra ou predominância de mão de obra, por meio da análise da variação dos custos contratuais, devendo estar prevista no edital com data vinculada à apresentação das propostas, para os custos decorrentes do mercado, e com data vinculada ao acordo, à convenção coletiva ou ao dissídio coletivo ao qual o orçamento esteja vinculado, para os custos decorrentes da mão de obra;
 
-LX - agente de contratação: pessoa designada pela autoridade competente, entre servidores efetivos ou empregados públicos dos quadros permanentes da Administração Pública, para tomar decisões, acompanhar o trâmite da licitação, dar impulso ao procedimento licitatório e executar quaisquer outras atividades necessárias ao bom andamento do certame até a homologação.
-
-DOS AGENTES PÚBLICOS`,
+LX - agente de contratação: pessoa designada pela autoridade competente, entre servidores efetivos ou empregados públicos dos quadros permanentes da Administração Pública, para tomar decisões, acompanhar o trâmite da licitação, dar impulso ao procedimento licitatório e executar quaisquer outras atividades necessárias ao bom andamento do certame até a homologação.`,
     capitulo: "TÍTULO I - CAPÍTULO III",
     secao: "Definições",
   },
@@ -412,11 +410,7 @@ I - (VETADO);
 
 II - provas da prática de atos ilícitos dolosos constarem nos autos do processo administrativo ou judicial.
 
-§ 2º Aplica-se o disposto no caput deste artigo inclusive na hipótese de o agente público não mais ocupar o cargo, emprego ou função em que foi praticado o ato questionado.
-
-DAS LICITAÇÕES
-
-DO PROCESSO LICITATÓRIO`,
+§ 2º Aplica-se o disposto no caput deste artigo inclusive na hipótese de o agente público não mais ocupar o cargo, emprego ou função em que foi praticado o ato questionado.`,
     capitulo: "TÍTULO I - CAPÍTULO IV",
     secao: "Agentes Públicos",
   },
@@ -424,7 +418,7 @@ DO PROCESSO LICITATÓRIO`,
     numero: "11",
     titulo: "TÍTULO I - DISPOSIÇÕES PRELIMINARES",
     capituloCompleto: "CAPÍTULO IV - DOS AGENTES PÚBLICOS",
-    ementa: `Art. 11º . O processo licitatório tem por objetivos:
+    ementa: `Art. 11º O processo licitatório tem por objetivos:
 
 I - assegurar a seleção da proposta apta a gerar o resultado de contratação mais vantajoso para a Administração Pública, inclusive no que se refere ao ciclo de vida do objeto;
 
@@ -480,7 +474,7 @@ II - quanto ao orçamento da Administração, nos termos do art. 24 desta Lei.`,
     numero: "14",
     titulo: "TÍTULO I - DISPOSIÇÕES PRELIMINARES",
     capituloCompleto: "CAPÍTULO V - DOS ÓRGÃOS DE ASSESSORAMENTO JURÍDICO E DE CONTROLE",
-    ementa: `Art. 14º . Não poderão disputar licitação ou participar da execução de contrato, direta ou indiretamente:
+    ementa: `Art. 14º Não poderão disputar licitação ou participar da execução de contrato, direta ou indiretamente:
 
 I - autor do anteprojeto, do projeto básico ou do projeto executivo, pessoa física ou jurídica, quando a licitação versar sobre obra, serviços ou fornecimento de bens a ele relacionados;
 
@@ -510,7 +504,7 @@ VI - pessoa física ou jurídica que, nos 5 (cinco) anos anteriores à divulgaç
     numero: "15",
     titulo: "TÍTULO I - DISPOSIÇÕES PRELIMINARES",
     capituloCompleto: "CAPÍTULO V - DOS ÓRGÃOS DE ASSESSORAMENTO JURÍDICO E DE CONTROLE",
-    ementa: `Art. 15º . Salvo vedação devidamente justificada no processo licitatório, pessoa jurídica poderá participar de licitação em consórcio, observadas as seguintes normas:
+    ementa: `Art. 15º Salvo vedação devidamente justificada no processo licitatório, pessoa jurídica poderá participar de licitação em consórcio, observadas as seguintes normas:
 
 I - comprovação de compromisso público ou particular de constituição de consórcio, subscrito pelos consorciados;
 
@@ -540,7 +534,7 @@ V - responsabilidade solidária dos integrantes pelos atos praticados em consór
     numero: "16",
     titulo: "TÍTULO I - DISPOSIÇÕES PRELIMINARES",
     capituloCompleto: "CAPÍTULO V - DOS ÓRGÃOS DE ASSESSORAMENTO JURÍDICO E DE CONTROLE",
-    ementa: `Art. 16º . Os profissionais organizados sob a forma de cooperativa poderão participar de licitação quando:
+    ementa: `Art. 16º Os profissionais organizados sob a forma de cooperativa poderão participar de licitação quando:
 
 I - a constituição e o funcionamento da cooperativa observarem as regras estabelecidas na legislação aplicável, em especial a Lei nº 5.764, de 16 de dezembro de 1971, a Lei nº 12.690, de 19 de julho de 2012, e a Lei Complementar nº 130, de 17 de abril de 2009;
 
@@ -556,7 +550,7 @@ IV - o objeto da licitação referir-se, em se tratando de cooperativas enquadra
     numero: "17",
     titulo: "TÍTULO I - DISPOSIÇÕES PRELIMINARES",
     capituloCompleto: "CAPÍTULO V - DOS ÓRGÃOS DE ASSESSORAMENTO JURÍDICO E DE CONTROLE",
-    ementa: `Art. 17º . O processo de licitação observará as seguintes fases, em sequência:
+    ementa: `Art. 17º O processo de licitação observará as seguintes fases, em sequência:
 
 I - preparatória;
 
@@ -660,7 +654,7 @@ XIII - posicionamento conclusivo sobre a adequação da contratação para o ate
     numero: "19",
     titulo: "TÍTULO II - DAS LICITAÇÕES",
     capituloCompleto: "CAPÍTULO I - DAS REGRAS GERAIS DAS LICITAÇÕES - SEÇÃO I - DAS REGRAS APLICÁVEIS ÀS LICITAÇÕES",
-    ementa: `Art. 19º . Os órgãos da Administração com competências regulamentares relativas às atividades de administração de materiais, de obras e serviços e de licitações e contratos deverão:
+    ementa: `Art. 19º Os órgãos da Administração com competências regulamentares relativas às atividades de administração de materiais, de obras e serviços e de licitações e contratos deverão:
 
 I - instituir instrumentos que permitam, preferencialmente, a centralização dos procedimentos de aquisição e contratação de bens e serviços;
 
@@ -684,7 +678,7 @@ V - promover a adoção gradativa de tecnologias e processos integrados que perm
     numero: "20",
     titulo: "TÍTULO II - DAS LICITAÇÕES",
     capituloCompleto: "CAPÍTULO I - DAS REGRAS GERAIS DAS LICITAÇÕES - SEÇÃO I - DAS REGRAS APLICÁVEIS ÀS LICITAÇÕES",
-    ementa: `Art. 20º . Os itens de consumo adquiridos para suprir as demandas das estruturas da Administração Pública deverão ser de qualidade comum, não superior à necessária para cumprir as finalidades às quais se destinam, vedada a aquisição de artigos de luxo. Regulamento (Vigência)
+    ementa: `Art. 20º Os itens de consumo adquiridos para suprir as demandas das estruturas da Administração Pública deverão ser de qualidade comum, não superior à necessária para cumprir as finalidades às quais se destinam, vedada a aquisição de artigos de luxo. Regulamento (Vigência)
 
 § 1º Os Poderes Executivo, Legislativo e Judiciário definirão em regulamento os limites para o enquadramento dos bens de consumo nas categorias comum e luxo.
 
@@ -700,7 +694,7 @@ V - promover a adoção gradativa de tecnologias e processos integrados que perm
     numero: "21",
     titulo: "TÍTULO II - DAS LICITAÇÕES",
     capituloCompleto: "CAPÍTULO I - DAS REGRAS GERAIS DAS LICITAÇÕES - SEÇÃO I - DAS REGRAS APLICÁVEIS ÀS LICITAÇÕES",
-    ementa: `Art. 21º . A Administração poderá convocar, com antecedência mínima de 8 (oito) dias úteis, audiência pública, presencial ou a distância, na forma eletrônica, sobre licitação que pretenda realizar, com disponibilização prévia de informações pertinentes, inclusive de estudo técnico preliminar e elementos do edital de licitação, e com possibilidade de manifestação de todos os interessados. Parágrafo único. A Administração também poderá submeter a licitação a prévia consulta pública, mediante a disponibilização de seus elementos a todos os interessados, que poderão formular sugestões no prazo fixado.`,
+    ementa: `Art. 21º A Administração poderá convocar, com antecedência mínima de 8 (oito) dias úteis, audiência pública, presencial ou a distância, na forma eletrônica, sobre licitação que pretenda realizar, com disponibilização prévia de informações pertinentes, inclusive de estudo técnico preliminar e elementos do edital de licitação, e com possibilidade de manifestação de todos os interessados. Parágrafo único. A Administração também poderá submeter a licitação a prévia consulta pública, mediante a disponibilização de seus elementos a todos os interessados, que poderão formular sugestões no prazo fixado.`,
     capitulo: "TÍTULO II - CAPÍTULO I - SEÇÃO I",
     secao: "Regras Gerais das Licitações",
   },
@@ -708,7 +702,7 @@ V - promover a adoção gradativa de tecnologias e processos integrados que perm
     numero: "22",
     titulo: "TÍTULO II - DAS LICITAÇÕES",
     capituloCompleto: "CAPÍTULO I - DAS REGRAS GERAIS DAS LICITAÇÕES - SEÇÃO II - DO PLANEJAMENTO DA CONTRATAÇÃO",
-    ementa: `Art. 22º . O edital poderá contemplar matriz de alocação de riscos entre o contratante e o contratado, hipótese em que o cálculo do valor estimado da contratação poderá considerar taxa de risco compatível com o objeto da licitação e com os riscos atribuídos ao contratado, de acordo com metodologia predefinida pelo ente federativo.
+    ementa: `Art. 22º O edital poderá contemplar matriz de alocação de riscos entre o contratante e o contratado, hipótese em que o cálculo do valor estimado da contratação poderá considerar taxa de risco compatível com o objeto da licitação e com os riscos atribuídos ao contratado, de acordo com metodologia predefinida pelo ente federativo.
 
 § 1º A matriz de que trata o caput deste artigo deverá promover a alocação eficiente dos riscos de cada contrato e estabelecer a responsabilidade que caiba a cada parte contratante, bem como os mecanismos que afastem a ocorrência do sinistro e mitiguem os seus efeitos, caso este ocorra durante a execução contratual.
 
@@ -728,7 +722,7 @@ III - à contratação de seguros obrigatórios previamente definidos no contrat
   },
   "23": {
     numero: "23",
-    ementa: `Art. 23º . O valor previamente estimado da contratação deverá ser compatível com os valores praticados pelo mercado, considerados os preços constantes de bancos de dados públicos e as quantidades a serem contratadas, observadas a potencial economia de escala e as peculiaridades do local de execução do objeto.
+    ementa: `Art. 23º O valor previamente estimado da contratação deverá ser compatível com os valores praticados pelo mercado, considerados os preços constantes de bancos de dados públicos e as quantidades a serem contratadas, observadas a potencial economia de escala e as peculiaridades do local de execução do objeto.
 
 § 1º No processo licitatório para aquisição de bens e contratação de serviços em geral, conforme regulamento, o valor estimado será definido com base no melhor preço aferido por meio da utilização dos seguintes parâmetros, adotados de forma combinada ou não:
 
@@ -780,7 +774,7 @@ Parágrafo único. Na hipótese de licitação em que for adotado o critério de
   },
   "25": {
     numero: "25",
-    ementa: `Art. 25º . O edital deverá conter o objeto da licitação e as regras relativas à convocação, ao julgamento, à habilitação, aos recursos e às penalidades da licitação, à fiscalização e à gestão do contrato, à entrega do objeto e às condições de pagamento.
+    ementa: `Art. 25º O edital deverá conter o objeto da licitação e as regras relativas à convocação, ao julgamento, à habilitação, aos recursos e às penalidades da licitação, à fiscalização e à gestão do contrato, à entrega do objeto e às condições de pagamento.
 
 § 1º Sempre que o objeto permitir, a Administração adotará minutas padronizadas de edital e de contrato com cláusulas uniformes.
 
@@ -815,7 +809,7 @@ II - oriundos ou egressos do sistema prisional.`,
   },
   "26": {
     numero: "26",
-    ementa: `Art. 26º . No processo de licitação, poderá ser estabelecida margem de preferência para: (Regulamento)
+    ementa: `Art. 26º No processo de licitação, poderá ser estabelecida margem de preferência para: (Regulamento)
 
 I - bens manufaturados e serviços nacionais que atendam a normas técnicas brasileiras;
 
@@ -896,7 +890,7 @@ Parágrafo único. Nos concursos destinados à elaboração de projeto, o venced
   },
   "31": {
     numero: "31",
-    ementa: `Art. 31º . O leilão poderá ser cometido a leiloeiro oficial ou a servidor designado pela autoridade competente da Administração, e regulamento deverá dispor sobre seus procedimentos operacionais.
+    ementa: `Art. 31º O leilão poderá ser cometido a leiloeiro oficial ou a servidor designado pela autoridade competente da Administração, e regulamento deverá dispor sobre seus procedimentos operacionais.
 
 § 1º Se optar pela realização de leilão por intermédio de leiloeiro oficial, a Administração deverá selecioná-lo mediante credenciamento ou licitação na modalidade pregão e adotar o critério de julgamento de maior desconto para as comissões a serem cobradas, utilizados como parâmetro máximo os percentuais definidos na lei que regula a referida profissão e observados os valores dos bens a serem leiloados.
 
@@ -919,7 +913,7 @@ V - a especificação de eventuais ônus, gravames ou pendências existentes sob
   },
   "32": {
     numero: "32",
-    ementa: `Art. 32º . A modalidade diálogo competitivo é restrita a contratações em que a Administração:
+    ementa: `Art. 32º A modalidade diálogo competitivo é restrita a contratações em que a Administração:
 
 I - vise a contratar objeto que envolva as seguintes condições:
 
@@ -972,7 +966,7 @@ XII - (VETADO).
   },
   "33": {
     numero: "33",
-    ementa: `Art. 33º . O julgamento das propostas será realizado de acordo com os seguintes critérios:
+    ementa: `Art. 33º O julgamento das propostas será realizado de acordo com os seguintes critérios:
 
 I - menor preço;
 
@@ -989,7 +983,7 @@ VI - maior retorno econômico.`,
   },
   "34": {
     numero: "34",
-    ementa: `Art. 34º . O julgamento por menor preço ou maior desconto e, quando couber, por técnica e preço considerará o menor dispêndio para a Administração, atendidos os parâmetros mínimos de qualidade definidos no edital de licitação.
+    ementa: `Art. 34º O julgamento por menor preço ou maior desconto e, quando couber, por técnica e preço considerará o menor dispêndio para a Administração, atendidos os parâmetros mínimos de qualidade definidos no edital de licitação.
 
 § 1º Os custos indiretos, relacionados com as despesas de manutenção, utilização, reposição, depreciação e impacto ambiental do objeto licitado, entre outros fatores vinculados ao seu ciclo de vida, poderão ser considerados para a definição do menor dispêndio, sempre que objetivamente mensuráveis, conforme disposto em regulamento.
 
@@ -998,7 +992,7 @@ VI - maior retorno econômico.`,
   },
   "35": {
     numero: "35",
-    ementa: `Art. 35º . O julgamento por melhor técnica ou conteúdo artístico considerará exclusivamente as propostas técnicas ou artísticas apresentadas pelos licitantes, e o edital deverá definir o prêmio ou a remuneração que será atribuída aos vencedores. Parágrafo único. O critério de julgamento de que trata o caput deste artigo poderá ser utilizado para a contratação de projetos e trabalhos de natureza técnica, científica ou artística.`,
+    ementa: `Art. 35º O julgamento por melhor técnica ou conteúdo artístico considerará exclusivamente as propostas técnicas ou artísticas apresentadas pelos licitantes, e o edital deverá definir o prêmio ou a remuneração que será atribuída aos vencedores. Parágrafo único. O critério de julgamento de que trata o caput deste artigo poderá ser utilizado para a contratação de projetos e trabalhos de natureza técnica, científica ou artística.`,
     capitulo: "TÍTULO II - CAPÍTULO III",
     secao: "Critérios de Julgamento",
   },
@@ -1041,7 +1035,7 @@ II - profissionais contratados por conhecimento técnico, experiência ou renome
 
 § 2º (VETADO).
 
-§ 2º  Ressalvados os casos de inexigibilidade de licitação, na licitação para contratação dos serviços técnicos especializados de natureza predominantemente intelectual previstos nas alíneas a, d e h do inciso XVIII do caput do art. 6º desta Lei cujo valor estimado da contratação seja superior a R$ 300.000,00 (trezentos mil reais), o julgamento será por: (Promulgação partes vetadas) (Vide Decreto nº 10.922, de 2021) (Vigência) (Vide Decreto nº 11.317, de 2022) Vigência (Vide Decreto nº 11.871, de 2023) Vigência (Vide Decreto nº 12.343, de 2024) Vigência (Vide Decreto nº 12.807, de 2025) Vigência
+§ 2º Ressalvados os casos de inexigibilidade de licitação, na licitação para contratação dos serviços técnicos especializados de natureza predominantemente intelectual previstos nas alíneas a, d e h do inciso XVIII do caput do art. 6º desta Lei cujo valor estimado da contratação seja superior a R$ 300.000,00 (trezentos mil reais), o julgamento será por: (Promulgação partes vetadas) (Vide Decreto nº 10.922, de 2021) (Vigência) (Vide Decreto nº 11.317, de 2022) Vigência (Vide Decreto nº 11.871, de 2023) Vigência (Vide Decreto nº 12.343, de 2024) Vigência (Vide Decreto nº 12.807, de 2025) Vigência
 
 I - melhor técnica; ou
 
@@ -1050,12 +1044,12 @@ II - técnica e preço, na proporção de 70% (setenta por cento) de valoração
   },
   "38": {
     numero: "38",
-    ementa: `Art. 38º . No julgamento por melhor técnica ou por técnica e preço, a obtenção de pontuação devido à capacitação técnico-profissional exigirá que a execução do respectivo contrato tenha participação direta e pessoal do profissional correspondente.`,
+    ementa: `Art. 38º No julgamento por melhor técnica ou por técnica e preço, a obtenção de pontuação devido à capacitação técnico-profissional exigirá que a execução do respectivo contrato tenha participação direta e pessoal do profissional correspondente.`,
     capitulo: "TÍTULO II - CAPÍTULO III",
   },
   "39": {
     numero: "39",
-    ementa: `Art. 39º . O julgamento por maior retorno econômico, utilizado exclusivamente para a celebração de contrato de eficiência, considerará a maior economia para a Administração, e a remuneração deverá ser fixada em percentual que incidirá de forma proporcional à economia efetivamente obtida na execução do contrato.
+    ementa: `Art. 39º O julgamento por maior retorno econômico, utilizado exclusivamente para a celebração de contrato de eficiência, considerará a maior economia para a Administração, e a remuneração deverá ser fixada em percentual que incidirá de forma proporcional à economia efetivamente obtida na execução do contrato.
 
 § 1º Nas licitações que adotarem o critério de julgamento de que trata o caput deste artigo, os licitantes apresentarão:
 
@@ -1127,7 +1121,7 @@ III - o processo de padronização ou de escolha de marca levar a fornecedor exc
   },
   "41": {
     numero: "41",
-    ementa: `Art. 41º . No caso de licitação que envolva o fornecimento de bens, a Administração poderá excepcionalmente:
+    ementa: `Art. 41º No caso de licitação que envolva o fornecimento de bens, a Administração poderá excepcionalmente:
 
 I - indicar uma ou mais marcas ou modelos, desde que formalmente justificado, nas seguintes hipóteses:
 
@@ -1149,7 +1143,7 @@ IV - solicitar, motivadamente, carta de solidariedade emitida pelo fabricante, q
   },
   "42": {
     numero: "42",
-    ementa: `Art. 42º . A prova de qualidade de produto apresentado pelos proponentes como similar ao das marcas eventualmente indicadas no edital será admitida por qualquer um dos seguintes meios:
+    ementa: `Art. 42º A prova de qualidade de produto apresentado pelos proponentes como similar ao das marcas eventualmente indicadas no edital será admitida por qualquer um dos seguintes meios:
 
 I - comprovação de que o produto está de acordo com as normas técnicas determinadas pelos órgãos oficiais competentes, pela Associação Brasileira de Normas Técnicas (ABNT) ou por outra entidade credenciada pelo Inmetro;
 
@@ -1168,7 +1162,7 @@ III - certificação, certificado, laudo laboratorial ou documento similar que p
   },
   "43": {
     numero: "43",
-    ementa: `Art. 43º . O processo de padronização deverá conter:
+    ementa: `Art. 43º O processo de padronização deverá conter:
 
 I - parecer técnico sobre o produto, considerados especificações técnicas e estéticas, desempenho, análise de contratações anteriores, custo e condições de manutenção e garantia;
 
@@ -1183,7 +1177,7 @@ III - síntese da justificativa e descrição sucinta do padrão definido, divul
   },
   "44": {
     numero: "44",
-    ementa: `Art. 44º . Quando houver a possibilidade de compra ou de locação de bens, o estudo técnico preliminar deverá considerar os custos e os benefícios de cada opção, com indicação da alternativa mais vantajosa. Das Obras e Serviços de Engenharia`,
+    ementa: `Art. 44º Quando houver a possibilidade de compra ou de locação de bens, o estudo técnico preliminar deverá considerar os custos e os benefícios de cada opção, com indicação da alternativa mais vantajosa. Das Obras e Serviços de Engenharia`,
     capitulo: "TÍTULO II - CAPÍTULO IV",
   },
   "44-A": {
@@ -1207,7 +1201,7 @@ Das Obras e Serviços de Engenharia`,
   },
   "45": {
     numero: "45",
-    ementa: `Art. 45º . As licitações de obras e serviços de engenharia devem respeitar, especialmente, as normas relativas a:
+    ementa: `Art. 45º As licitações de obras e serviços de engenharia devem respeitar, especialmente, as normas relativas a:
 
 I - disposição final ambientalmente adequada dos resíduos sólidos gerados pelas obras contratadas;
 
@@ -1248,12 +1242,12 @@ b) deficiência na execução de obras e de serviços de engenharia que resulte 
 
 c) alterações no orçamento de obras e de serviços de engenharia que causem desequilíbrio econômico-financeiro do contrato em favor do contratado;
 
-d) outras alterações de cláusulas financeiras que gerem recebimentos contratuais antecipados, distorção do cronograma físico-financeiro, prorrogação injustificada do prazo contratual com custos adicionais para a Administração ou reajuste irregular de preços; LVIII - reajustamento em sentido estrito: forma de manutenção do equilíbrio econômico-financeiro de contrato consistente na aplicação do índice de correção monetária previsto no contrato, que deve retratar a variação efetiva do custo de produção, admitida a adoção de índices específicos ou setoriais; LIX - repactuação: forma de manutenção do equilíbrio econômico-financeiro de contrato utilizada para serviços contínuos com regime de dedicação exclusiva de mão de obra ou predominância de mão de obra, por meio da análise da variação dos custos contratuais, devendo estar prevista no edital com data vinculada à apresentação das propostas, para os custos decorrentes do mercado, e com data vinculada ao acordo, à convenção coletiva ou ao dissídio coletivo ao qual o orçamento esteja vinculado, para os custos decorrentes da mão de obra; LX - agente de contratação: pessoa designada pela autoridade competente, entre servidores efetivos ou empregados públicos dos quadros permanentes da Administração Pública, para tomar decisões, acompanhar o trâmite da licitação, dar impulso ao procedimento licitatório e executar quaisquer outras atividades necessárias ao bom andamento do certame até a homologação. DOS AGENTES PÚBLICOS`,
+d) outras alterações de cláusulas financeiras que gerem recebimentos contratuais antecipados, distorção do cronograma físico-financeiro, prorrogação injustificada do prazo contratual com custos adicionais para a Administração ou reajuste irregular de preços; LVIII - reajustamento em sentido estrito: forma de manutenção do equilíbrio econômico-financeiro de contrato consistente na aplicação do índice de correção monetária previsto no contrato, que deve retratar a variação efetiva do custo de produção, admitida a adoção de índices específicos ou setoriais; LIX - repactuação: forma de manutenção do equilíbrio econômico-financeiro de contrato utilizada para serviços contínuos com regime de dedicação exclusiva de mão de obra ou predominância de mão de obra, por meio da análise da variação dos custos contratuais, devendo estar prevista no edital com data vinculada à apresentação das propostas, para os custos decorrentes do mercado, e com data vinculada ao acordo, à convenção coletiva ou ao dissídio coletivo ao qual o orçamento esteja vinculado, para os custos decorrentes da mão de obra; LX - agente de contratação: pessoa designada pela autoridade competente, entre servidores efetivos ou empregados públicos dos quadros permanentes da Administração Pública, para tomar decisões, acompanhar o trâmite da licitação, dar impulso ao procedimento licitatório e executar quaisquer outras atividades necessárias ao bom andamento do certame até a homologação.`,
     capitulo: "TÍTULO II - CAPÍTULO IV",
   },
   "47": {
     numero: "47",
-    ementa: `Art. 47º . As licitações de serviços atenderão aos princípios:
+    ementa: `Art. 47º As licitações de serviços atenderão aos princípios:
 
 I - da padronização, considerada a compatibilidade de especificações estéticas, técnicas ou de desempenho;
 
@@ -1272,7 +1266,7 @@ III - o dever de buscar a ampliação da competição e de evitar a concentraç�
   },
   "48": {
     numero: "48",
-    ementa: `Art. 48º . Poderão ser objeto de execução por terceiros as atividades materiais acessórias, instrumentais ou complementares aos assuntos que constituam área de competência legal do órgão ou da entidade, vedado à Administração ou a seus agentes, na contratação do serviço terceirizado:
+    ementa: `Art. 48º Poderão ser objeto de execução por terceiros as atividades materiais acessórias, instrumentais ou complementares aos assuntos que constituam área de competência legal do órgão ou da entidade, vedado à Administração ou a seus agentes, na contratação do serviço terceirizado:
 
 I - indicar pessoas expressamente nominadas para executar direta ou indiretamente o objeto contratado;
 
@@ -1289,7 +1283,7 @@ VI - prever em edital exigências que constituam intervenção indevida da Admin
   },
   "49": {
     numero: "49",
-    ementa: `Art. 49º . A Administração poderá, mediante justificativa expressa, contratar mais de uma empresa ou instituição para executar o mesmo serviço, desde que essa contratação não implique perda de economia de escala, quando:
+    ementa: `Art. 49º A Administração poderá, mediante justificativa expressa, contratar mais de uma empresa ou instituição para executar o mesmo serviço, desde que essa contratação não implique perda de economia de escala, quando:
 
 I - o objeto da contratação puder ser executado de forma concorrente e simultânea por mais de um contratado; e
 
@@ -1298,7 +1292,7 @@ II - a múltipla execução for conveniente para atender à Administração. Par
   },
   "50": {
     numero: "50",
-    ementa: `Art. 50º . Nas contratações de serviços com regime de dedicação exclusiva de mão de obra, o contratado deverá apresentar, quando solicitado pela Administração, sob pena de multa, comprovação do cumprimento das obrigações trabalhistas e com o Fundo de Garantia do Tempo de Serviço (FGTS) em relação aos empregados diretamente envolvidos na execução do contrato, em especial quanto ao:
+    ementa: `Art. 50º Nas contratações de serviços com regime de dedicação exclusiva de mão de obra, o contratado deverá apresentar, quando solicitado pela Administração, sob pena de multa, comprovação do cumprimento das obrigações trabalhistas e com o Fundo de Garantia do Tempo de Serviço (FGTS) em relação aos empregados diretamente envolvidos na execução do contrato, em especial quanto ao:
 
 I - registro de ponto;
 
@@ -1374,14 +1368,12 @@ III - (VETADO).
 
 § 2º É facultada a divulgação adicional e a manutenção do inteiro teor do edital e de seus anexos em sítio eletrônico oficial do ente federativo do órgão ou entidade responsável pela licitação ou, no caso de consórcio público, do ente de maior nível entre eles, admitida, ainda, a divulgação direta a interessados devidamente cadastrados para esse fim.
 
-§ 3º Após a homologação do processo licitatório, serão disponibilizados no Portal Nacional de Contratações Públicas (PNCP) e, se o órgão ou entidade responsável pela licitação entender cabível, também no sítio referido no § 2º deste artigo, os documentos elaborados na fase preparatória que porventura não tenham integrado o edital e seus anexos.
-
-DA APRESENTAÇÃO DE PROPOSTAS E LANCES`,
+§ 3º Após a homologação do processo licitatório, serão disponibilizados no Portal Nacional de Contratações Públicas (PNCP) e, se o órgão ou entidade responsável pela licitação entender cabível, também no sítio referido no § 2º deste artigo, os documentos elaborados na fase preparatória que porventura não tenham integrado o edital e seus anexos.`,
     capitulo: "TÍTULO II - CAPÍTULO IV",
   },
   "55": {
     numero: "55",
-    ementa: `Art. 55º . Os prazos mínimos para apresentação de propostas e lances, contados a partir da data de divulgação do edital de licitação, são de:
+    ementa: `Art. 55º Os prazos mínimos para apresentação de propostas e lances, contados a partir da data de divulgação do edital de licitação, são de:
 
 I - para aquisição de bens:
 
@@ -1410,7 +1402,7 @@ IV - para licitação em que se adote o critério de julgamento de técnica e pr
   },
   "56": {
     numero: "56",
-    ementa: `Art. 56º . O modo de disputa poderá ser, isolada ou conjuntamente:
+    ementa: `Art. 56º O modo de disputa poderá ser, isolada ou conjuntamente:
 
 I - aberto, hipótese em que os licitantes apresentarão suas propostas por meio de lances públicos e sucessivos, crescentes ou decrescentes;
 
@@ -1433,7 +1425,7 @@ II - iguais ou superiores ao menor já ofertado, quando adotados os demais crit�
   },
   "57": {
     numero: "57",
-    ementa: `Art. 57º . O edital de licitação poderá estabelecer intervalo mínimo de diferença de valores entre os lances, que incidirá tanto em relação aos lances intermediários quanto em relação à proposta que cobrir a melhor oferta.`,
+    ementa: `Art. 57º O edital de licitação poderá estabelecer intervalo mínimo de diferença de valores entre os lances, que incidirá tanto em relação aos lances intermediários quanto em relação à proposta que cobrir a melhor oferta.`,
     capitulo: "TÍTULO II - CAPÍTULO IV",
   },
   "58": {
@@ -1446,14 +1438,12 @@ II - iguais ou superiores ao menor já ofertado, quando adotados os demais crit�
 
 § 3º Implicará execução do valor integral da garantia de proposta a recusa em assinar o contrato ou a não apresentação dos documentos para a contratação.
 
-§ 4º A garantia de proposta poderá ser prestada nas modalidades de que trata o § 1º do art. 96 desta Lei .
-
-DO JULGAMENTO`,
+§ 4º A garantia de proposta poderá ser prestada nas modalidades de que trata o § 1º do art. 96 desta Lei .`,
     capitulo: "TÍTULO II - CAPÍTULO IV",
   },
   "59": {
     numero: "59",
-    ementa: `Art. 59º . Serão desclassificadas as propostas que:
+    ementa: `Art. 59º Serão desclassificadas as propostas que:
 
 I - contiverem vícios insanáveis;
 
@@ -1503,16 +1493,16 @@ IV - empresas que comprovem a prática de mitigação, nos termos da Lei nº 12.
   },
   "61": {
     numero: "61",
-    ementa: `Art. 61º . Definido o resultado do julgamento, a Administração poderá negociar condições mais vantajosas com o primeiro colocado.
+    ementa: `Art. 61º Definido o resultado do julgamento, a Administração poderá negociar condições mais vantajosas com o primeiro colocado.
 
 § 1º A negociação poderá ser feita com os demais licitantes, segundo a ordem de classificação inicialmente estabelecida, quando o primeiro colocado, mesmo após a negociação, for desclassificado em razão de sua proposta permanecer acima do preço máximo definido pela Administração.
 
-§ 2º A negociação será conduzida por agente de contratação ou comissão de contratação, na forma de regulamento, e, depois de concluída, terá seu resultado divulgado a todos os licitantes e anexado aos autos do processo licitatório. DA HABILITAÇÃO`,
+§ 2º A negociação será conduzida por agente de contratação ou comissão de contratação, na forma de regulamento, e, depois de concluída, terá seu resultado divulgado a todos os licitantes e anexado aos autos do processo licitatório.`,
     capitulo: "TÍTULO II - CAPÍTULO IV",
   },
   "62": {
     numero: "62",
-    ementa: `Art. 62º . A habilitação é a fase da licitação em que se verifica o conjunto de informações e documentos necessários e suficientes para demonstrar a capacidade do licitante de realizar o objeto da licitação, dividindo-se em:
+    ementa: `Art. 62º A habilitação é a fase da licitação em que se verifica o conjunto de informações e documentos necessários e suficientes para demonstrar a capacidade do licitante de realizar o objeto da licitação, dividindo-se em:
 
 I - jurídica;
 
@@ -1525,7 +1515,7 @@ IV - econômico-financeira.`,
   },
   "63": {
     numero: "63",
-    ementa: `Art. 63º . Na fase de habilitação das licitações serão observadas as seguintes disposições:
+    ementa: `Art. 63º Na fase de habilitação das licitações serão observadas as seguintes disposições:
 
 I - poderá ser exigida dos licitantes a declaração de que atendem aos requisitos de habilitação, e o declarante responderá pela veracidade das informações prestadas, na forma da lei;
 
@@ -1550,7 +1540,7 @@ IV - será exigida do licitante declaração de que cumpre as exigências de res
   },
   "64": {
     numero: "64",
-    ementa: `Art. 64º . Após a entrega dos documentos para habilitação, não será permitida a substituição ou a apresentação de novos documentos, salvo em sede de diligência, para:
+    ementa: `Art. 64º Após a entrega dos documentos para habilitação, não será permitida a substituição ou a apresentação de novos documentos, salvo em sede de diligência, para:
 
 I - complementação de informações acerca dos documentos já apresentados pelos licitantes e desde que necessária para apurar fatos existentes à época da abertura do certame;
 
@@ -1563,7 +1553,7 @@ II - atualização de documentos cuja validade tenha expirado após a data de re
   },
   "65": {
     numero: "65",
-    ementa: `Art. 65º . As condições de habilitação serão definidas no edital.
+    ementa: `Art. 65º As condições de habilitação serão definidas no edital.
 
 § 1º As empresas criadas no exercício financeiro da licitação deverão atender a todas as exigências da habilitação e ficarão autorizadas a substituir os demonstrativos contábeis pelo balanço de abertura.
 
@@ -1572,7 +1562,7 @@ II - atualização de documentos cuja validade tenha expirado após a data de re
   },
   "66": {
     numero: "66",
-    ementa: `Art. 66º . A habilitação jurídica visa a demonstrar a capacidade de o licitante exercer direitos e assumir obrigações, e a documentação a ser apresentada por ele limita-se à comprovação de existência jurídica da pessoa e, quando cabível, de autorização para o exercício da atividade a ser contratada.`,
+    ementa: `Art. 66º A habilitação jurídica visa a demonstrar a capacidade de o licitante exercer direitos e assumir obrigações, e a documentação a ser apresentada por ele limita-se à comprovação de existência jurídica da pessoa e, quando cabível, de autorização para o exercício da atividade a ser contratada.`,
     capitulo: "TÍTULO II - CAPÍTULO IV",
   },
   "67": {
@@ -1643,7 +1633,7 @@ VI - o cumprimento do disposto no inciso XXXIII do art. 7º da Constituição Fe
   },
   "69": {
     numero: "69",
-    ementa: `Art. 69º . A habilitação econômico-financeira visa a demonstrar a aptidão econômica do licitante para cumprir as obrigações decorrentes do futuro contrato, devendo ser comprovada de forma objetiva, por coeficientes e índices econômicos previstos no edital, devidamente justificados no processo licitatório, e será restrita à apresentação da seguinte documentação:
+    ementa: `Art. 69º A habilitação econômico-financeira visa a demonstrar a aptidão econômica do licitante para cumprir as obrigações decorrentes do futuro contrato, devendo ser comprovada de forma objetiva, por coeficientes e índices econômicos previstos no edital, devidamente justificados no processo licitatório, e será restrita à apresentação da seguinte documentação:
 
 I - balanço patrimonial, demonstração de resultado de exercício e demais demonstrações contábeis dos 2 (dois) últimos exercícios sociais;
 
@@ -1664,18 +1654,18 @@ II - certidão negativa de feitos sobre falência expedida pelo distribuidor da 
   },
   "70": {
     numero: "70",
-    ementa: `Art. 70º . A documentação referida neste Capítulo poderá ser:
+    ementa: `Art. 70º A documentação referida neste Capítulo poderá ser:
 
 I - apresentada em original, por cópia ou por qualquer outro meio expressamente admitido pela Administração;
 
 II - substituída por registro cadastral emitido por órgão ou entidade pública, desde que previsto no edital e que o registro tenha sido feito em obediência ao disposto nesta Lei;
 
-III - dispensada, total ou parcialmente, nas contratações para entrega imediata, nas contratações em valores inferiores a 1/4 (um quarto) do limite para dispensa de licitação para compras em geral e nas contratações de produto para pesquisa e desenvolvimento até o valor de R$ 300.000,00 (trezentos mil reais). (Vide Decreto nº 10.922, de 2021) (Vigência) (Vide Decreto nº 11.317, de 2022) Vigência (Vide Decreto nº 11.871, de 2023) Vigência (Vide Decreto nº 12.343, de 2024) Vigência Parágrafo único. As empresas estrangeiras que não funcionem no País deverão apresentar documentos equivalentes, na forma de regulamento emitido pelo Poder Executivo federal. DO ENCERRAMENTO DA LICITAÇÃO`,
+III - dispensada, total ou parcialmente, nas contratações para entrega imediata, nas contratações em valores inferiores a 1/4 (um quarto) do limite para dispensa de licitação para compras em geral e nas contratações de produto para pesquisa e desenvolvimento até o valor de R$ 300.000,00 (trezentos mil reais). (Vide Decreto nº 10.922, de 2021) (Vigência) (Vide Decreto nº 11.317, de 2022) Vigência (Vide Decreto nº 11.871, de 2023) Vigência (Vide Decreto nº 12.343, de 2024) Vigência Parágrafo único. As empresas estrangeiras que não funcionem no País deverão apresentar documentos equivalentes, na forma de regulamento emitido pelo Poder Executivo federal.`,
     capitulo: "TÍTULO II - CAPÍTULO IV",
   },
   "71": {
     numero: "71",
-    ementa: `Art. 71º . Encerradas as fases de julgamento e habilitação, e exauridos os recursos administrativos, o processo licitatório será encaminhado à autoridade superior, que poderá:
+    ementa: `Art. 71º Encerradas as fases de julgamento e habilitação, e exauridos os recursos administrativos, o processo licitatório será encaminhado à autoridade superior, que poderá:
 
 I - determinar o retorno dos autos para saneamento de irregularidades;
 
@@ -1720,7 +1710,7 @@ Parágrafo único. O ato que autoriza a contratação direta ou o extrato decorr
   },
   "73": {
     numero: "73",
-    ementa: `Art. 73º . Na hipótese de contratação direta indevida ocorrida com dolo, fraude ou erro grosseiro, o contratado e o agente público responsável responderão solidariamente pelo dano causado ao erário, sem prejuízo de outras sanções legais cabíveis. Da Inexigibilidade de Licitação`,
+    ementa: `Art. 73º Na hipótese de contratação direta indevida ocorrida com dolo, fraude ou erro grosseiro, o contratado e o agente público responsável responderão solidariamente pelo dano causado ao erário, sem prejuízo de outras sanções legais cabíveis. Da Inexigibilidade de Licitação`,
     capitulo: "TÍTULO II - CAPÍTULO V",
   },
   "74": {
@@ -1820,11 +1810,11 @@ VI - para contratação que possa acarretar comprometimento da segurança nacion
 
 VII - nos casos de guerra, estado de defesa, estado de sítio, intervenção federal ou de grave perturbação da ordem;
 
-VIII - nos casos de emergência ou de calamidade pública, quando caracterizada urgência de atendimento de situação que possa ocasionar prejuízo ou comprometer a continuidade dos serviços públicos ou a segurança de pessoas, obras, serviços, equipamentos e outros bens, públicos ou particulares, e somente para aquisição dos bens necessários ao atendimento da situação emergencial ou calamitosa e para as parcelas de obras e serviços que possam ser concluídas no prazo máximo de 1 (um) ano, contado da data de ocorrência da emergência ou da calamidade, vedadas a prorrogação dos respectivos contratos e a recontratação de empresa já contratada com base no disposto neste inciso;  (Vide ADI 6890)
+VIII - nos casos de emergência ou de calamidade pública, quando caracterizada urgência de atendimento de situação que possa ocasionar prejuízo ou comprometer a continuidade dos serviços públicos ou a segurança de pessoas, obras, serviços, equipamentos e outros bens, públicos ou particulares, e somente para aquisição dos bens necessários ao atendimento da situação emergencial ou calamitosa e para as parcelas de obras e serviços que possam ser concluídas no prazo máximo de 1 (um) ano, contado da data de ocorrência da emergência ou da calamidade, vedadas a prorrogação dos respectivos contratos e a recontratação de empresa já contratada com base no disposto neste inciso; (Vide ADI 6890)
 
 IX - para a aquisição, por pessoa jurídica de direito público interno, de bens produzidos ou serviços prestados por órgão ou entidade que integrem a Administração Pública e que tenham sido criados para esse fim específico, desde que o preço contratado seja compatível com o praticado no mercado;
 
-X - quando a União tiver que intervir no domínio econômico para regular preços ou normalizar o abastecimento; 
+X - quando a União tiver que intervir no domínio econômico para regular preços ou normalizar o abastecimento;
 
 XI - para celebração de contrato de programa com ente federativo ou com entidade de sua Administração Pública indireta que envolva prestação de serviços públicos de forma associada nos termos autorizados em contrato de consórcio público ou em convênio de cooperação;
 
@@ -1948,7 +1938,7 @@ II - alienação, ao legítimo possuidor direto ou, na falta dele, ao poder púb
   },
   "77": {
     numero: "77",
-    ementa: `Art. 77º . Para a venda de bens imóveis, será concedido direito de preferência ao licitante que, submetendo-se a todas as regras do edital, comprove a ocupação do imóvel objeto da licitação. DOS INSTRUMENTOS AUXILIARES Dos Procedimentos Auxiliares`,
+    ementa: `Art. 77º Para a venda de bens imóveis, será concedido direito de preferência ao licitante que, submetendo-se a todas as regras do edital, comprove a ocupação do imóvel objeto da licitação. DOS INSTRUMENTOS AUXILIARES Dos Procedimentos Auxiliares`,
     capitulo: "TÍTULO II - CAPÍTULO V",
   },
   "78": {
@@ -2017,7 +2007,7 @@ f) as sanções aplicáveis ao responsável por infrações, observado o dispost
   },
   "80": {
     numero: "80",
-    ementa: `Art. 80º . A pré-qualificação é o procedimento técnico-administrativo para selecionar previamente:
+    ementa: `Art. 80º A pré-qualificação é o procedimento técnico-administrativo para selecionar previamente:
 
 I - licitantes que reúnam condições de habilitação para participar de futura licitação ou de licitação vinculada a programas de obras ou de serviços objetivamente definidos;
 
@@ -2056,7 +2046,7 @@ II - não superior ao prazo de validade dos documentos apresentados pelos intere
   },
   "81": {
     numero: "81",
-    ementa: `Art. 81º . A Administração poderá solicitar à iniciativa privada, mediante procedimento aberto de manifestação de interesse a ser iniciado com a publicação de edital de chamamento público, a propositura e a realização de estudos, investigações, levantamentos e projetos de soluções inovadoras que contribuam com questões de relevância pública, na forma de regulamento.
+    ementa: `Art. 81º A Administração poderá solicitar à iniciativa privada, mediante procedimento aberto de manifestação de interesse a ser iniciado com a publicação de edital de chamamento público, a propositura e a realização de estudos, investigações, levantamentos e projetos de soluções inovadoras que contribuam com questões de relevância pública, na forma de regulamento.
 
 § 1º Os estudos, as investigações, os levantamentos e os projetos vinculados à contratação e de utilidade para a licitação, realizados pela Administração ou com a sua autorização, estarão à disposição dos interessados, e o vencedor da licitação deverá ressarcir os dispêndios correspondentes, conforme especificado no edital.
 
@@ -2139,17 +2129,17 @@ VI - inclusão, em ata de registro de preços, do licitante que aceitar cotar os
   },
   "83": {
     numero: "83",
-    ementa: `Art. 83º . A existência de preços registrados implicará compromisso de fornecimento nas condições estabelecidas, mas não obrigará a Administração a contratar, facultada a realização de licitação específica para a aquisição pretendida, desde que devidamente motivada.`,
+    ementa: `Art. 83º A existência de preços registrados implicará compromisso de fornecimento nas condições estabelecidas, mas não obrigará a Administração a contratar, facultada a realização de licitação específica para a aquisição pretendida, desde que devidamente motivada.`,
     capitulo: "TÍTULO II - CAPÍTULO VI",
   },
   "84": {
     numero: "84",
-    ementa: `Art. 84º . O prazo de vigência da ata de registro de preços será de 1 (um) ano e poderá ser prorrogado, por igual período, desde que comprovado o preço vantajoso. Parágrafo único. O contrato decorrente da ata de registro de preços terá sua vigência estabelecida em conformidade com as disposições nela contidas.`,
+    ementa: `Art. 84º O prazo de vigência da ata de registro de preços será de 1 (um) ano e poderá ser prorrogado, por igual período, desde que comprovado o preço vantajoso. Parágrafo único. O contrato decorrente da ata de registro de preços terá sua vigência estabelecida em conformidade com as disposições nela contidas.`,
     capitulo: "TÍTULO II - CAPÍTULO VI",
   },
   "85": {
     numero: "85",
-    ementa: `Art. 85º . A Administração poderá contratar a execução de obras e serviços de engenharia pelo sistema de registro de preços, desde que atendidos os seguintes requisitos:
+    ementa: `Art. 85º A Administração poderá contratar a execução de obras e serviços de engenharia pelo sistema de registro de preços, desde que atendidos os seguintes requisitos:
 
 I - existência de projeto padronizado, sem complexidade técnica e operacional;
 
@@ -2219,16 +2209,12 @@ Do Registro Cadastral`,
 
 § 5º A qualquer tempo poderá ser alterado, suspenso ou cancelado o registro de inscrito que deixar de satisfazer exigências determinadas por esta Lei ou por regulamento.
 
-§ 6º O interessado que requerer o cadastro na forma do caput deste artigo poderá participar de processo licitatório até a decisão da Administração, e a celebração do contrato ficará condicionada à emissão do certificado referido no § 2º deste artigo.
-
-DOS CONTRATOS ADMINISTRATIVOS
-
-DA FORMALIZAÇÃO DOS CONTRATOS`,
+§ 6º O interessado que requerer o cadastro na forma do caput deste artigo poderá participar de processo licitatório até a decisão da Administração, e a celebração do contrato ficará condicionada à emissão do certificado referido no § 2º deste artigo.`,
     capitulo: "TÍTULO II - CAPÍTULO VII",
   },
   "89": {
     numero: "89",
-    ementa: `Art. 89º . Os contratos de que trata esta Lei regular-se-ão pelas suas cláusulas e pelos preceitos de direito público, e a eles serão aplicados, supletivamente, os princípios da teoria geral dos contratos e as disposições de direito privado.
+    ementa: `Art. 89º Os contratos de que trata esta Lei regular-se-ão pelas suas cláusulas e pelos preceitos de direito público, e a eles serão aplicados, supletivamente, os princípios da teoria geral dos contratos e as disposições de direito privado.
 
 § 1º Todo contrato deverá mencionar os nomes das partes e os de seus representantes, a finalidade, o ato que autorizou sua lavratura, o número do processo da licitação ou da contratação direta e a sujeição dos contratantes às normas desta Lei e às cláusulas contratuais.
 
@@ -2238,7 +2224,7 @@ DA FORMALIZAÇÃO DOS CONTRATOS`,
   },
   "90": {
     numero: "90",
-    ementa: `Art. 90º . A Administração convocará regularmente o licitante vencedor para assinar o termo de contrato ou para aceitar ou retirar o instrumento equivalente, dentro do prazo e nas condições estabelecidas no edital de licitação, sob pena de decair o direito à contratação, sem prejuízo das sanções previstas nesta Lei.
+    ementa: `Art. 90º A Administração convocará regularmente o licitante vencedor para assinar o termo de contrato ou para aceitar ou retirar o instrumento equivalente, dentro do prazo e nas condições estabelecidas no edital de licitação, sob pena de decair o direito à contratação, sem prejuízo das sanções previstas nesta Lei.
 
 § 1º O prazo de convocação poderá ser prorrogado 1 (uma) vez, por igual período, mediante solicitação da parte durante seu transcurso, devidamente justificada, e desde que o motivo apresentado seja aceito pela Administração.
 
@@ -2275,7 +2261,7 @@ II - adjudicar e celebrar o contrato nas condições ofertadas pelos licitantes 
   },
   "91": {
     numero: "91",
-    ementa: `Art. 91º . Os contratos e seus aditamentos terão forma escrita e serão juntados ao processo que tiver dado origem à contratação, divulgados e mantidos à disposição do público em sítio eletrônico oficial.
+    ementa: `Art. 91º Os contratos e seus aditamentos terão forma escrita e serão juntados ao processo que tiver dado origem à contratação, divulgados e mantidos à disposição do público em sítio eletrônico oficial.
 
 § 1º Será admitida a manutenção em sigilo de contratos e de termos aditivos quando imprescindível à segurança da sociedade e do Estado, nos termos da legislação que regula o acesso à informação.
 
@@ -2366,7 +2352,7 @@ II - repactuação, quando houver regime de dedicação exclusiva de mão de obr
   },
   "94": {
     numero: "94",
-    ementa: `Art. 94º . A divulgação no Portal Nacional de Contratações Públicas (PNCP) é condição indispensável para a eficácia do contrato e de seus aditamentos e deverá ocorrer nos seguintes prazos, contados da data de sua assinatura:
+    ementa: `Art. 94º A divulgação no Portal Nacional de Contratações Públicas (PNCP) é condição indispensável para a eficácia do contrato e de seus aditamentos e deverá ocorrer nos seguintes prazos, contados da data de sua assinatura:
 
 I - 20 (vinte) dias úteis, no caso de licitação;
 
@@ -2430,7 +2416,7 @@ Parágrafo único. Nos contratos de execução continuada ou de fornecimento con
   },
   "98": {
     numero: "98",
-    ementa: `Art. 98º . Nas contratações de obras, serviços e fornecimentos, a garantia poderá ser de até 5% (cinco por cento) do valor inicial do contrato, autorizada a majoração desse percentual para até 10% (dez por cento), desde que justificada mediante análise da complexidade técnica e dos riscos envolvidos. Parágrafo único. Nas contratações de serviços e fornecimentos contínuos com vigência superior a 1 (um) ano, assim como nas subsequentes prorrogações, será utilizado o valor anual do contrato para definição e aplicação dos percentuais previstos no caput deste artigo.`,
+    ementa: `Art. 98º Nas contratações de obras, serviços e fornecimentos, a garantia poderá ser de até 5% (cinco por cento) do valor inicial do contrato, autorizada a majoração desse percentual para até 10% (dez por cento), desde que justificada mediante análise da complexidade técnica e dos riscos envolvidos. Parágrafo único. Nas contratações de serviços e fornecimentos contínuos com vigência superior a 1 (um) ano, assim como nas subsequentes prorrogações, será utilizado o valor anual do contrato para definição e aplicação dos percentuais previstos no caput deste artigo.`,
     capitulo: "TÍTULO III - CAPÍTULO I",
   },
   "99": {
@@ -2440,12 +2426,12 @@ Parágrafo único. Nos contratos de execução continuada ou de fornecimento con
   },
   "100": {
     numero: "100",
-    ementa: `Art. 100º . A garantia prestada pelo contratado será liberada ou restituída após a fiel execução do contrato ou após a sua extinção por culpa exclusiva da Administração e, quando em dinheiro, atualizada monetariamente.`,
+    ementa: `Art. 100º A garantia prestada pelo contratado será liberada ou restituída após a fiel execução do contrato ou após a sua extinção por culpa exclusiva da Administração e, quando em dinheiro, atualizada monetariamente.`,
     capitulo: "TÍTULO III - CAPÍTULO I",
   },
   "101": {
     numero: "101",
-    ementa: `Art. 101º . Nos casos de contratos que impliquem a entrega de bens pela Administração, dos quais o contratado ficará depositário, o valor desses bens deverá ser acrescido ao valor da garantia.`,
+    ementa: `Art. 101º Nos casos de contratos que impliquem a entrega de bens pela Administração, dos quais o contratado ficará depositário, o valor desses bens deverá ser acrescido ao valor da garantia.`,
     capitulo: "TÍTULO III - CAPÍTULO I",
   },
   "102": {
@@ -2470,9 +2456,7 @@ Parágrafo único. Na hipótese de inadimplemento do contratado, serão observad
 
 I - caso a seguradora execute e conclua o objeto do contrato, estará isenta da obrigação de pagar a importância segurada indicada na apólice;
 
-II - caso a seguradora não assuma a execução do contrato, pagará a integralidade da importância segurada indicada na apólice.
-
-DA ALOCAÇÃO DE RISCOS`,
+II - caso a seguradora não assuma a execução do contrato, pagará a integralidade da importância segurada indicada na apólice.`,
     capitulo: "TÍTULO III - CAPÍTULO I",
   },
   "103": {
@@ -2493,14 +2477,12 @@ I - às alterações unilaterais determinadas pela Administração, nas hipótes
 
 II - ao aumento ou à redução, por legislação superveniente, dos tributos diretamente pagos pelo contratado em decorrência do contrato.
 
-§ 6º Na alocação de que trata o caput deste artigo, poderão ser adotados métodos e padrões usualmente utilizados por entidades públicas e privadas, e os ministérios e secretarias supervisores dos órgãos e das entidades da Administração Pública poderão definir os parâmetros e o detalhamento dos procedimentos necessários a sua identificação, alocação e quantificação financeira.
-
-DAS PRERROGATIVAS DA ADMINISTRAÇÃO`,
+§ 6º Na alocação de que trata o caput deste artigo, poderão ser adotados métodos e padrões usualmente utilizados por entidades públicas e privadas, e os ministérios e secretarias supervisores dos órgãos e das entidades da Administração Pública poderão definir os parâmetros e o detalhamento dos procedimentos necessários a sua identificação, alocação e quantificação financeira.`,
     capitulo: "TÍTULO III - CAPÍTULO I",
   },
   "104": {
     numero: "104",
-    ementa: `Art. 104º . O regime jurídico dos contratos instituído por esta Lei confere à Administração, em relação a eles, as prerrogativas de:
+    ementa: `Art. 104º O regime jurídico dos contratos instituído por esta Lei confere à Administração, em relação a eles, as prerrogativas de:
 
 I - modificá-los, unilateralmente, para melhor adequação às finalidades de interesse público, respeitados os direitos do contratado;
 
@@ -2518,7 +2500,7 @@ b) necessidade de acautelar apuração administrativa de faltas contratuais pelo
 
 § 1º As cláusulas econômico-financeiras e monetárias dos contratos não poderão ser alteradas sem prévia concordância do contratado.
 
-§ 2º Na hipótese prevista no inciso I do caput deste artigo, as cláusulas econômico-financeiras do contrato deverão ser revistas para que se mantenha o equilíbrio contratual. DA DURAÇÃO DOS CONTRATOS`,
+§ 2º Na hipótese prevista no inciso I do caput deste artigo, as cláusulas econômico-financeiras do contrato deverão ser revistas para que se mantenha o equilíbrio contratual.`,
     capitulo: "TÍTULO III - CAPÍTULO I",
   },
   "105": {
@@ -2530,7 +2512,7 @@ Parágrafo único. Não serão objeto de cancelamento automático os restos a pa
   },
   "106": {
     numero: "106",
-    ementa: `Art. 106º . A Administração poderá celebrar contratos com prazo de até 5 (cinco) anos nas hipóteses de serviços e fornecimentos contínuos, observadas as seguintes diretrizes:
+    ementa: `Art. 106º A Administração poderá celebrar contratos com prazo de até 5 (cinco) anos nas hipóteses de serviços e fornecimentos contínuos, observadas as seguintes diretrizes:
 
 I - a autoridade competente do órgão ou entidade contratante deverá atestar a maior vantagem econômica vislumbrada em razão da contratação plurianual;
 
@@ -2545,7 +2527,7 @@ III - a Administração terá a opção de extinguir o contrato, sem ônus, quan
   },
   "107": {
     numero: "107",
-    ementa: `Art. 107º . Os contratos de serviços e fornecimentos contínuos poderão ser prorrogados sucessivamente, respeitada a vigência máxima decenal, desde que haja previsão em edital e que a autoridade competente ateste que as condições e os preços permanecem vantajosos para a Administração, permitida a negociação com o contratado ou a extinção contratual sem ônus para qualquer das partes.`,
+    ementa: `Art. 107º Os contratos de serviços e fornecimentos contínuos poderão ser prorrogados sucessivamente, respeitada a vigência máxima decenal, desde que haja previsão em edital e que a autoridade competente ateste que as condições e os preços permanecem vantajosos para a Administração, permitida a negociação com o contratado ou a extinção contratual sem ônus para qualquer das partes.`,
     capitulo: "TÍTULO III - CAPÍTULO I",
   },
   "108": {
@@ -2555,12 +2537,12 @@ III - a Administração terá a opção de extinguir o contrato, sem ônus, quan
   },
   "109": {
     numero: "109",
-    ementa: `Art. 109º . A Administração poderá estabelecer a vigência por prazo indeterminado nos contratos em que seja usuária de serviço público oferecido em regime de monopólio, desde que comprovada, a cada exercício financeiro, a existência de créditos orçamentários vinculados à contratação.`,
+    ementa: `Art. 109º A Administração poderá estabelecer a vigência por prazo indeterminado nos contratos em que seja usuária de serviço público oferecido em regime de monopólio, desde que comprovada, a cada exercício financeiro, a existência de créditos orçamentários vinculados à contratação.`,
     capitulo: "TÍTULO III - CAPÍTULO I",
   },
   "110": {
     numero: "110",
-    ementa: `Art. 110º . Na contratação que gere receita e no contrato de eficiência que gere economia para a Administração, os prazos serão de:
+    ementa: `Art. 110º Na contratação que gere receita e no contrato de eficiência que gere economia para a Administração, os prazos serão de:
 
 I - até 10 (dez) anos, nos contratos sem investimento;
 
@@ -2569,7 +2551,7 @@ II - até 35 (trinta e cinco) anos, nos contratos com investimento, assim consid
   },
   "111": {
     numero: "111",
-    ementa: `Art. 111º . Na contratação que previr a conclusão de escopo predefinido, o prazo de vigência será automaticamente prorrogado quando seu objeto não for concluído no período firmado no contrato. Parágrafo único. Quando a não conclusão decorrer de culpa do contratado:
+    ementa: `Art. 111º Na contratação que previr a conclusão de escopo predefinido, o prazo de vigência será automaticamente prorrogado quando seu objeto não for concluído no período firmado no contrato. Parágrafo único. Quando a não conclusão decorrer de culpa do contratado:
 
 I - o contratado será constituído em mora, aplicáveis a ele as respectivas sanções administrativas;
 
@@ -2578,7 +2560,7 @@ II - a Administração poderá optar pela extinção do contrato e, nesse caso, 
   },
   "112": {
     numero: "112",
-    ementa: `Art. 112º . Os prazos contratuais previstos nesta Lei não excluem nem revogam os prazos contratuais previstos em lei especial.`,
+    ementa: `Art. 112º Os prazos contratuais previstos nesta Lei não excluem nem revogam os prazos contratuais previstos em lei especial.`,
     capitulo: "TÍTULO III - CAPÍTULO I",
   },
   "113": {
@@ -2588,12 +2570,12 @@ II - a Administração poderá optar pela extinção do contrato e, nesse caso, 
   },
   "114": {
     numero: "114",
-    ementa: `Art. 114º . O contrato que previr a operação continuada de sistemas estruturantes de tecnologia da informação poderá ter vigência máxima de 15 (quinze) anos. DA EXECUÇÃO DOS CONTRATOS`,
+    ementa: `Art. 114º O contrato que previr a operação continuada de sistemas estruturantes de tecnologia da informação poderá ter vigência máxima de 15 (quinze) anos.`,
     capitulo: "TÍTULO III - CAPÍTULO I",
   },
   "115": {
     numero: "115",
-    ementa: `Art. 115º . O contrato deverá ser executado fielmente pelas partes, de acordo com as cláusulas avençadas e as normas desta Lei, e cada parte responderá pelas consequências de sua inexecução total ou parcial.
+    ementa: `Art. 115º O contrato deverá ser executado fielmente pelas partes, de acordo com as cláusulas avençadas e as normas desta Lei, e cada parte responderá pelas consequências de sua inexecução total ou parcial.
 
 § 1º É proibido à Administração retardar imotivadamente a execução de obra ou serviço, ou de suas parcelas, inclusive na hipótese de posse do respectivo chefe do Poder Executivo ou de novo titular no órgão ou entidade contratante.
 
@@ -2619,7 +2601,7 @@ II - a Administração poderá optar pela extinção do contrato e, nesse caso, 
   },
   "116": {
     numero: "116",
-    ementa: `Art. 116º . Ao longo de toda a execução do contrato, o contratado deverá cumprir a reserva de cargos prevista em lei para pessoa com deficiência, para reabilitado da Previdência Social ou para aprendiz, bem como as reservas de cargos previstas em outras normas específicas. Parágrafo único. Sempre que solicitado pela Administração, o contratado deverá comprovar o cumprimento da reserva de cargos a que se refere o caput deste artigo, com a indicação dos empregados que preencherem as referidas vagas.`,
+    ementa: `Art. 116º Ao longo de toda a execução do contrato, o contratado deverá cumprir a reserva de cargos prevista em lei para pessoa com deficiência, para reabilitado da Previdência Social ou para aprendiz, bem como as reservas de cargos previstas em outras normas específicas. Parágrafo único. Sempre que solicitado pela Administração, o contratado deverá comprovar o cumprimento da reserva de cargos a que se refere o caput deste artigo, com a indicação dos empregados que preencherem as referidas vagas.`,
     capitulo: "TÍTULO III - CAPÍTULO II",
   },
   "117": {
@@ -2641,17 +2623,17 @@ II - a contratação de terceiros não eximirá de responsabilidade o fiscal do 
   },
   "118": {
     numero: "118",
-    ementa: `Art. 118º . O contratado deverá manter preposto aceito pela Administração no local da obra ou do serviço para representá-lo na execução do contrato.`,
+    ementa: `Art. 118º O contratado deverá manter preposto aceito pela Administração no local da obra ou do serviço para representá-lo na execução do contrato.`,
     capitulo: "TÍTULO III - CAPÍTULO II",
   },
   "119": {
     numero: "119",
-    ementa: `Art. 119º . O contratado será obrigado a reparar, corrigir, remover, reconstruir ou substituir, a suas expensas, no total ou em parte, o objeto do contrato em que se verificarem vícios, defeitos ou incorreções resultantes de sua execução ou de materiais nela empregados.`,
+    ementa: `Art. 119º O contratado será obrigado a reparar, corrigir, remover, reconstruir ou substituir, a suas expensas, no total ou em parte, o objeto do contrato em que se verificarem vícios, defeitos ou incorreções resultantes de sua execução ou de materiais nela empregados.`,
     capitulo: "TÍTULO III - CAPÍTULO II",
   },
   "120": {
     numero: "120",
-    ementa: `Art. 120º . O contratado será responsável pelos danos causados diretamente à Administração ou a terceiros em razão da execução do contrato, e não excluirá nem reduzirá essa responsabilidade a fiscalização ou o acompanhamento pelo contratante.`,
+    ementa: `Art. 120º O contratado será responsável pelos danos causados diretamente à Administração ou a terceiros em razão da execução do contrato, e não excluirá nem reduzirá essa responsabilidade a fiscalização ou o acompanhamento pelo contratante.`,
     capitulo: "TÍTULO III - CAPÍTULO II",
   },
   "121": {
@@ -2681,7 +2663,7 @@ V - estabelecer que os valores destinados a férias, a décimo terceiro salário
   },
   "122": {
     numero: "122",
-    ementa: `Art. 122º . Na execução do contrato e sem prejuízo das responsabilidades contratuais e legais, o contratado poderá subcontratar partes da obra, do serviço ou do fornecimento até o limite autorizado, em cada caso, pela Administração.
+    ementa: `Art. 122º Na execução do contrato e sem prejuízo das responsabilidades contratuais e legais, o contratado poderá subcontratar partes da obra, do serviço ou do fornecimento até o limite autorizado, em cada caso, pela Administração.
 
 § 1º O contratado apresentará à Administração documentação que comprove a capacidade técnica do subcontratado, que será avaliada e juntada aos autos do processo correspondente.
 
@@ -2692,7 +2674,7 @@ V - estabelecer que os valores destinados a férias, a décimo terceiro salário
   },
   "123": {
     numero: "123",
-    ementa: `Art. 123º . A Administração terá o dever de explicitamente emitir decisão sobre todas as solicitações e reclamações relacionadas à execução dos contratos regidos por esta Lei, ressalvados os requerimentos manifestamente impertinentes, meramente protelatórios ou de nenhum interesse para a boa execução do contrato. Parágrafo único. Salvo disposição legal ou cláusula contratual que estabeleça prazo específico, concluída a instrução do requerimento, a Administração terá o prazo de 1 (um) mês para decidir, admitida a prorrogação motivada por igual período. DA ALTERAÇÃO DOS CONTRATOS E DOS PREÇOS`,
+    ementa: `Art. 123º A Administração terá o dever de explicitamente emitir decisão sobre todas as solicitações e reclamações relacionadas à execução dos contratos regidos por esta Lei, ressalvados os requerimentos manifestamente impertinentes, meramente protelatórios ou de nenhum interesse para a boa execução do contrato. Parágrafo único. Salvo disposição legal ou cláusula contratual que estabeleça prazo específico, concluída a instrução do requerimento, a Administração terá o prazo de 1 (um) mês para decidir, admitida a prorrogação motivada por igual período.`,
     capitulo: "TÍTULO III - CAPÍTULO II",
   },
   "124": {
@@ -2738,17 +2720,17 @@ d) para restabelecer o equilíbrio econômico-financeiro inicial do contrato em 
   },
   "128": {
     numero: "128",
-    ementa: `Art. 128º . Nas contratações de obras e serviços de engenharia, a diferença percentual entre o valor global do contrato e o preço global de referência não poderá ser reduzida em favor do contratado em decorrência de aditamentos que modifiquem a planilha orçamentária.`,
+    ementa: `Art. 128º Nas contratações de obras e serviços de engenharia, a diferença percentual entre o valor global do contrato e o preço global de referência não poderá ser reduzida em favor do contratado em decorrência de aditamentos que modifiquem a planilha orçamentária.`,
     capitulo: "TÍTULO III - CAPÍTULO III",
   },
   "129": {
     numero: "129",
-    ementa: `Art. 129º . Nas alterações contratuais para supressão de obras, bens ou serviços, se o contratado já houver adquirido os materiais e os colocado no local dos trabalhos, estes deverão ser pagos pela Administração pelos custos de aquisição regularmente comprovados e monetariamente reajustados, podendo caber indenização por outros danos eventualmente decorrentes da supressão, desde que regularmente comprovados.`,
+    ementa: `Art. 129º Nas alterações contratuais para supressão de obras, bens ou serviços, se o contratado já houver adquirido os materiais e os colocado no local dos trabalhos, estes deverão ser pagos pela Administração pelos custos de aquisição regularmente comprovados e monetariamente reajustados, podendo caber indenização por outros danos eventualmente decorrentes da supressão, desde que regularmente comprovados.`,
     capitulo: "TÍTULO III - CAPÍTULO III",
   },
   "130": {
     numero: "130",
-    ementa: `Art. 130º . Caso haja alteração unilateral do contrato que aumente ou diminua os encargos do contratado, a Administração deverá restabelecer, no mesmo termo aditivo, o equilíbrio econômico-financeiro inicial.`,
+    ementa: `Art. 130º Caso haja alteração unilateral do contrato que aumente ou diminua os encargos do contratado, a Administração deverá restabelecer, no mesmo termo aditivo, o equilíbrio econômico-financeiro inicial.`,
     capitulo: "TÍTULO III - CAPÍTULO III",
   },
   "131": {
@@ -2760,7 +2742,7 @@ Parágrafo único. O pedido de restabelecimento do equilíbrio econômico-financ
   },
   "132": {
     numero: "132",
-    ementa: `Art. 132º . A formalização do termo aditivo é condição para a execução, pelo contratado, das prestações determinadas pela Administração no curso da execução do contrato, salvo nos casos de justificada necessidade de antecipação de seus efeitos, hipótese em que a formalização deverá ocorrer no prazo máximo de 1 (um) mês.`,
+    ementa: `Art. 132º A formalização do termo aditivo é condição para a execução, pelo contratado, das prestações determinadas pela Administração no curso da execução do contrato, salvo nos casos de justificada necessidade de antecipação de seus efeitos, hipótese em que a formalização deverá ocorrer no prazo máximo de 1 (um) mês.`,
     capitulo: "TÍTULO III - CAPÍTULO III",
   },
   "133": {
@@ -2778,7 +2760,7 @@ IV - por ocorrência de evento superveniente alocado na matriz de riscos como de
   },
   "134": {
     numero: "134",
-    ementa: `Art. 134º . Os preços contratados serão alterados, para mais ou para menos, conforme o caso, se houver, após a data da apresentação da proposta, criação, alteração ou extinção de quaisquer tributos ou encargos legais ou a superveniência de disposições legais, com comprovada repercussão sobre os preços contratados.`,
+    ementa: `Art. 134º Os preços contratados serão alterados, para mais ou para menos, conforme o caso, se houver, após a data da apresentação da proposta, criação, alteração ou extinção de quaisquer tributos ou encargos legais ou a superveniência de disposições legais, com comprovada repercussão sobre os preços contratados.`,
     capitulo: "TÍTULO III - CAPÍTULO III",
   },
   "135": {
@@ -2804,7 +2786,7 @@ II - ao acordo, à convenção coletiva ou ao dissídio coletivo ao qual a propo
   },
   "136": {
     numero: "136",
-    ementa: `Art. 136º . Registros que não caracterizam alteração do contrato podem ser realizados por simples apostila, dispensada a celebração de termo aditivo, como nas seguintes situações:
+    ementa: `Art. 136º Registros que não caracterizam alteração do contrato podem ser realizados por simples apostila, dispensada a celebração de termo aditivo, como nas seguintes situações:
 
 I - variação do valor contratual para fazer face ao reajuste ou à repactuação de preços previstos no próprio contrato;
 
@@ -2812,7 +2794,7 @@ II - atualizações, compensações ou penalizações financeiras decorrentes da
 
 III - alterações na razão ou na denominação social do contratado;
 
-IV - empenho de dotações orçamentárias. DAS HIPÓTESES DE EXTINÇÃO DOS CONTRATOS`,
+IV - empenho de dotações orçamentárias.`,
     capitulo: "TÍTULO III - CAPÍTULO III",
   },
   "137": {
@@ -2863,7 +2845,7 @@ II - assegurarão ao contratado o direito de optar pela suspensão do cumpriment
   },
   "138": {
     numero: "138",
-    ementa: `Art. 138º . A extinção do contrato poderá ser:
+    ementa: `Art. 138º A extinção do contrato poderá ser:
 
 I - determinada por ato unilateral e escrito da Administração, exceto no caso de descumprimento decorrente de sua própria conduta;
 
@@ -2884,7 +2866,7 @@ III - pagamento do custo da desmobilização.`,
   },
   "139": {
     numero: "139",
-    ementa: `Art. 139º . A extinção determinada por ato unilateral da Administração poderá acarretar, sem prejuízo das sanções previstas nesta Lei, as seguintes consequências:
+    ementa: `Art. 139º A extinção determinada por ato unilateral da Administração poderá acarretar, sem prejuízo das sanções previstas nesta Lei, as seguintes consequências:
 
 I - assunção imediata do objeto do contrato, no estado e local em que se encontrar, por ato próprio da Administração;
 
@@ -2904,12 +2886,12 @@ IV - retenção dos créditos decorrentes do contrato até o limite dos prejuíz
 
 § 1º A aplicação das medidas previstas nos incisos I e II do caput deste artigo ficará a critério da Administração, que poderá dar continuidade à obra ou ao serviço por execução direta ou indireta.
 
-§ 2º Na hipótese do inciso II do caput deste artigo, o ato deverá ser precedido de autorização expressa do ministro de Estado, do secretário estadual ou do secretário municipal competente, conforme o caso. DO RECEBIMENTO DO OBJETO DO CONTRATO`,
+§ 2º Na hipótese do inciso II do caput deste artigo, o ato deverá ser precedido de autorização expressa do ministro de Estado, do secretário estadual ou do secretário municipal competente, conforme o caso.`,
     capitulo: "TÍTULO III - CAPÍTULO IV",
   },
   "140": {
     numero: "140",
-    ementa: `Art. 140º . O objeto do contrato será recebido:
+    ementa: `Art. 140º O objeto do contrato será recebido:
 
 I - em se tratando de obras e serviços:
 
@@ -2933,13 +2915,13 @@ b) definitivamente, por servidor ou comissão designada pela autoridade competen
 
 § 5º Em se tratando de projeto de obra, o recebimento definitivo pela Administração não eximirá o projetista ou o consultor da responsabilidade objetiva por todos os danos causados por falha de projeto.
 
-§ 6º Em se tratando de obra, o recebimento definitivo pela Administração não eximirá o contratado, pelo prazo mínimo de 5 (cinco) anos, admitida a previsão de prazo de garantia superior no edital e no contrato, da responsabilidade objetiva pela solidez e pela segurança dos materiais e dos serviços executados e pela funcionalidade da construção, da reforma, da recuperação ou da ampliação do bem imóvel, e, em caso de vício, defeito ou incorreção identificados, o contratado ficará responsável pela reparação, pela correção, pela reconstrução ou pela substituição necessárias. DOS PAGAMENTOS`,
+§ 6º Em se tratando de obra, o recebimento definitivo pela Administração não eximirá o contratado, pelo prazo mínimo de 5 (cinco) anos, admitida a previsão de prazo de garantia superior no edital e no contrato, da responsabilidade objetiva pela solidez e pela segurança dos materiais e dos serviços executados e pela funcionalidade da construção, da reforma, da recuperação ou da ampliação do bem imóvel, e, em caso de vício, defeito ou incorreção identificados, o contratado ficará responsável pela reparação, pela correção, pela reconstrução ou pela substituição necessárias.`,
     capitulo: "TÍTULO III - CAPÍTULO V",
     secao: "Pagamentos",
   },
   "141": {
     numero: "141",
-    ementa: `Art. 141º . No dever de pagamento pela Administração, será observada a ordem cronológica para cada fonte diferenciada de recursos, subdividida nas seguintes categorias de contratos:
+    ementa: `Art. 141º No dever de pagamento pela Administração, será observada a ordem cronológica para cada fonte diferenciada de recursos, subdividida nas seguintes categorias de contratos:
 
 I - fornecimento de bens;
 
@@ -2968,17 +2950,17 @@ V - pagamento de contrato cujo objeto seja imprescindível para assegurar a inte
   },
   "142": {
     numero: "142",
-    ementa: `Art. 142º . Disposição expressa no edital ou no contrato poderá prever pagamento em conta vinculada ou pagamento pela efetiva comprovação do fato gerador. Parágrafo único. (VETADO).`,
+    ementa: `Art. 142º Disposição expressa no edital ou no contrato poderá prever pagamento em conta vinculada ou pagamento pela efetiva comprovação do fato gerador. Parágrafo único. (VETADO).`,
     capitulo: "TÍTULO III - CAPÍTULO V",
   },
   "143": {
     numero: "143",
-    ementa: `Art. 143º . No caso de controvérsia sobre a execução do objeto, quanto a dimensão, qualidade e quantidade, a parcela incontroversa deverá ser liberada no prazo previsto para pagamento.`,
+    ementa: `Art. 143º No caso de controvérsia sobre a execução do objeto, quanto a dimensão, qualidade e quantidade, a parcela incontroversa deverá ser liberada no prazo previsto para pagamento.`,
     capitulo: "TÍTULO III - CAPÍTULO V",
   },
   "144": {
     numero: "144",
-    ementa: `Art. 144º . Na contratação de obras, fornecimentos e serviços, inclusive de engenharia, poderá ser estabelecida remuneração variável vinculada ao desempenho do contratado, com base em metas, padrões de qualidade, critérios de sustentabilidade ambiental e prazos de entrega definidos no edital de licitação e no contrato.
+    ementa: `Art. 144º Na contratação de obras, fornecimentos e serviços, inclusive de engenharia, poderá ser estabelecida remuneração variável vinculada ao desempenho do contratado, com base em metas, padrões de qualidade, critérios de sustentabilidade ambiental e prazos de entrega definidos no edital de licitação e no contrato.
 
 § 1º O pagamento poderá ser ajustado em base percentual sobre o valor economizado em determinada despesa, quando o objeto do contrato visar à implantação de processo de racionalização, hipótese em que as despesas correrão à conta dos mesmos créditos orçamentários, na forma de regulamentação específica.
 
@@ -2987,7 +2969,7 @@ V - pagamento de contrato cujo objeto seja imprescindível para assegurar a inte
   },
   "145": {
     numero: "145",
-    ementa: `Art. 145º . Não será permitido pagamento antecipado, parcial ou total, relativo a parcelas contratuais vinculadas ao fornecimento de bens, à execução de obras ou à prestação de serviços.
+    ementa: `Art. 145º Não será permitido pagamento antecipado, parcial ou total, relativo a parcelas contratuais vinculadas ao fornecimento de bens, à execução de obras ou à prestação de serviços.
 
 § 1º A antecipação de pagamento somente será permitida se propiciar sensível economia de recursos ou se representar condição indispensável para a obtenção do bem ou para a prestação do serviço, hipótese que deverá ser previamente justificada no processo licitatório e expressamente prevista no edital de licitação ou instrumento formal de contratação direta.
 
@@ -2999,14 +2981,12 @@ V - pagamento de contrato cujo objeto seja imprescindível para assegurar a inte
   },
   "146": {
     numero: "146",
-    ementa: `Art. 146º No ato de liquidação da despesa, os serviços de contabilidade comunicarão aos órgãos da administração tributária as características da despesa e os valores pagos, conforme o disposto no art. 63 da Lei nº 4.320, de 17 de março de 1964.
-
-DA NULIDADE DOS CONTRATOS`,
+    ementa: `Art. 146º No ato de liquidação da despesa, os serviços de contabilidade comunicarão aos órgãos da administração tributária as características da despesa e os valores pagos, conforme o disposto no art. 63 da Lei nº 4.320, de 17 de março de 1964.`,
     capitulo: "TÍTULO III - CAPÍTULO VI",
   },
   "147": {
     numero: "147",
-    ementa: `Art. 147º . Constatada irregularidade no procedimento licitatório ou na execução contratual, caso não seja possível o saneamento, a decisão sobre a suspensão da execução ou sobre a declaração de nulidade do contrato somente será adotada na hipótese em que se revelar medida de interesse público, com avaliação, entre outros, dos seguintes aspectos:
+    ementa: `Art. 147º Constatada irregularidade no procedimento licitatório ou na execução contratual, caso não seja possível o saneamento, a decisão sobre a suspensão da execução ou sobre a declaração de nulidade do contrato somente será adotada na hipótese em que se revelar medida de interesse público, com avaliação, entre outros, dos seguintes aspectos:
 
 I - impactos econômicos e financeiros decorrentes do atraso na fruição dos benefícios do objeto do contrato;
 
@@ -3042,33 +3022,33 @@ XI - custo de oportunidade do capital durante o período de paralisação. Pará
   },
   "149": {
     numero: "149",
-    ementa: `Art. 149º . A nulidade não exonerará a Administração do dever de indenizar o contratado pelo que houver executado até a data em que for declarada ou tornada eficaz, bem como por outros prejuízos regularmente comprovados, desde que não lhe seja imputável, e será promovida a responsabilização de quem lhe tenha dado causa.`,
+    ementa: `Art. 149º A nulidade não exonerará a Administração do dever de indenizar o contratado pelo que houver executado até a data em que for declarada ou tornada eficaz, bem como por outros prejuízos regularmente comprovados, desde que não lhe seja imputável, e será promovida a responsabilização de quem lhe tenha dado causa.`,
     capitulo: "TÍTULO III - CAPÍTULO VI",
   },
   "150": {
     numero: "150",
-    ementa: `Art. 150º . Nenhuma contratação será feita sem a caracterização adequada de seu objeto e sem a indicação dos créditos orçamentários para pagamento das parcelas contratuais vincendas no exercício em que for realizada a contratação, sob pena de nulidade do ato e de responsabilização de quem lhe tiver dado causa. DOS MEIOS ALTERNATIVOS DE RESOLUÇÃO DE CONTROVÉRSIAS`,
+    ementa: `Art. 150º Nenhuma contratação será feita sem a caracterização adequada de seu objeto e sem a indicação dos créditos orçamentários para pagamento das parcelas contratuais vincendas no exercício em que for realizada a contratação, sob pena de nulidade do ato e de responsabilização de quem lhe tiver dado causa.`,
     capitulo: "TÍTULO III - CAPÍTULO VII",
     secao: "Intervenção",
   },
   "151": {
     numero: "151",
-    ementa: `Art. 151º . Nas contratações regidas por esta Lei, poderão ser utilizados meios alternativos de prevenção e resolução de controvérsias, notadamente a conciliação, a mediação, o comitê de resolução de disputas e a arbitragem. Parágrafo único. Será aplicado o disposto no caput deste artigo às controvérsias relacionadas a direitos patrimoniais disponíveis, como as questões relacionadas ao restabelecimento do equilíbrio econômico-financeiro do contrato, ao inadimplemento de obrigações contratuais por quaisquer das partes e ao cálculo de indenizações.`,
+    ementa: `Art. 151º Nas contratações regidas por esta Lei, poderão ser utilizados meios alternativos de prevenção e resolução de controvérsias, notadamente a conciliação, a mediação, o comitê de resolução de disputas e a arbitragem. Parágrafo único. Será aplicado o disposto no caput deste artigo às controvérsias relacionadas a direitos patrimoniais disponíveis, como as questões relacionadas ao restabelecimento do equilíbrio econômico-financeiro do contrato, ao inadimplemento de obrigações contratuais por quaisquer das partes e ao cálculo de indenizações.`,
     capitulo: "TÍTULO III - CAPÍTULO VII",
   },
   "152": {
     numero: "152",
-    ementa: `Art. 152º . A arbitragem será sempre de direito e observará o princípio da publicidade.`,
+    ementa: `Art. 152º A arbitragem será sempre de direito e observará o princípio da publicidade.`,
     capitulo: "TÍTULO III - CAPÍTULO VII",
   },
   "153": {
     numero: "153",
-    ementa: `Art. 153º . Os contratos poderão ser aditados para permitir a adoção dos meios alternativos de resolução de controvérsias.`,
+    ementa: `Art. 153º Os contratos poderão ser aditados para permitir a adoção dos meios alternativos de resolução de controvérsias.`,
     capitulo: "TÍTULO III - CAPÍTULO VII",
   },
   "154": {
     numero: "154",
-    ementa: `Art. 154º . O processo de escolha dos árbitros, dos colegiados arbitrais e dos comitês de resolução de disputas observará critérios isonômicos, técnicos e transparentes. DAS IRREGULARIDADES DAS INFRAÇÕES E SANÇÕES ADMINISTRATIVAS`,
+    ementa: `Art. 154º O processo de escolha dos árbitros, dos colegiados arbitrais e dos comitês de resolução de disputas observará critérios isonômicos, técnicos e transparentes.`,
     capitulo: "TÍTULO III - CAPÍTULO VII",
   },
   "155": {
@@ -3172,12 +3152,12 @@ III - suspensa por decisão judicial que inviabilize a conclusão da apuração 
   },
   "159": {
     numero: "159",
-    ementa: `Art. 159º . Os atos previstos como infrações administrativas nesta Lei ou em outras leis de licitações e contratos da Administração Pública que também sejam tipificados como atos lesivos na Lei nº 12.846, de 1º de agosto de 2013, serão apurados e julgados conjuntamente, nos mesmos autos, observados o rito procedimental e a autoridade competente definidos na referida Lei. Parágrafo único. (VETADO).`,
+    ementa: `Art. 159º Os atos previstos como infrações administrativas nesta Lei ou em outras leis de licitações e contratos da Administração Pública que também sejam tipificados como atos lesivos na Lei nº 12.846, de 1º de agosto de 2013, serão apurados e julgados conjuntamente, nos mesmos autos, observados o rito procedimental e a autoridade competente definidos na referida Lei. Parágrafo único. (VETADO).`,
     capitulo: "TÍTULO IV - CAPÍTULO I",
   },
   "160": {
     numero: "160",
-    ementa: `Art. 160º . A personalidade jurídica poderá ser desconsiderada sempre que utilizada com abuso do direito para facilitar, encobrir ou dissimular a prática dos atos ilícitos previstos nesta Lei ou para provocar confusão patrimonial, e, nesse caso, todos os efeitos das sanções aplicadas à pessoa jurídica serão estendidos aos seus administradores e sócios com poderes de administração, a pessoa jurídica sucessora ou a empresa do mesmo ramo com relação de coligação ou controle, de fato ou de direito, com o sancionado, observados, em todos os casos, o contraditório, a ampla defesa e a obrigatoriedade de análise jurídica prévia.`,
+    ementa: `Art. 160º A personalidade jurídica poderá ser desconsiderada sempre que utilizada com abuso do direito para facilitar, encobrir ou dissimular a prática dos atos ilícitos previstos nesta Lei ou para provocar confusão patrimonial, e, nesse caso, todos os efeitos das sanções aplicadas à pessoa jurídica serão estendidos aos seus administradores e sócios com poderes de administração, a pessoa jurídica sucessora ou a empresa do mesmo ramo com relação de coligação ou controle, de fato ou de direito, com o sancionado, observados, em todos os casos, o contraditório, a ampla defesa e a obrigatoriedade de análise jurídica prévia.`,
     capitulo: "TÍTULO IV - CAPÍTULO II",
     secao: "Processo Sancionador",
   },
@@ -3190,7 +3170,7 @@ Parágrafo único. Para fins de aplicação das sanções previstas nos i ncisos
   },
   "162": {
     numero: "162",
-    ementa: `Art. 162º . O atraso injustificado na execução do contrato sujeitará o contratado a multa de mora, na forma prevista em edital ou em contrato. Parágrafo único. A aplicação de multa de mora não impedirá que a Administração a converta em compensatória e promova a extinção unilateral do contrato com a aplicação cumulada de outras sanções previstas nesta Lei.`,
+    ementa: `Art. 162º O atraso injustificado na execução do contrato sujeitará o contratado a multa de mora, na forma prevista em edital ou em contrato. Parágrafo único. A aplicação de multa de mora não impedirá que a Administração a converta em compensatória e promova a extinção unilateral do contrato com a aplicação cumulada de outras sanções previstas nesta Lei.`,
     capitulo: "TÍTULO IV - CAPÍTULO II",
   },
   "163": {
@@ -3209,13 +3189,13 @@ V - análise jurídica prévia, com posicionamento conclusivo quanto ao cumprime
 
 Parágrafo único. A sanção pelas infrações previstas nos incisos VIII e XII do caput do art. 155 desta Lei exigirá, como condição de reabilitação do licitante ou contratado, a implantação ou aperfeiçoamento de programa de integridade pelo responsável. (Regulamento)
 
-DAS IMPUGNAÇÕES, DOS PEDIDOS DE ESCLARECIMENTO E DOS RECURSOS`,
+DAS IMPUGNAÇÕES,`,
     capitulo: "TÍTULO IV - CAPÍTULO III",
     secao: "Crimes e Infrações Penais",
   },
   "164": {
     numero: "164",
-    ementa: `Art. 164º . Qualquer pessoa é parte legítima para impugnar edital de licitação por irregularidade na aplicação desta Lei ou para solicitar esclarecimento sobre os seus termos, devendo protocolar o pedido até 3 (três) dias úteis antes da data de abertura do certame. Parágrafo único. A resposta à impugnação ou ao pedido de esclarecimento será divulgada em sítio eletrônico oficial no prazo de até 3 (três) dias úteis, limitado ao último dia útil anterior à data da abertura do certame.`,
+    ementa: `Art. 164º Qualquer pessoa é parte legítima para impugnar edital de licitação por irregularidade na aplicação desta Lei ou para solicitar esclarecimento sobre os seus termos, devendo protocolar o pedido até 3 (três) dias úteis antes da data de abertura do certame. Parágrafo único. A resposta à impugnação ou ao pedido de esclarecimento será divulgada em sítio eletrônico oficial no prazo de até 3 (três) dias úteis, limitado ao último dia útil anterior à data da abertura do certame.`,
     capitulo: "TÍTULO IV - CAPÍTULO III",
   },
   "165": {
@@ -3265,12 +3245,12 @@ Parágrafo único. O recurso de que trata o caput deste artigo será dirigido à
   },
   "168": {
     numero: "168",
-    ementa: `Art. 168º . O recurso e o pedido de reconsideração terão efeito suspensivo do ato ou da decisão recorrida até que sobrevenha decisão final da autoridade competente. Parágrafo único. Na elaboração de suas decisões, a autoridade competente será auxiliada pelo órgão de assessoramento jurídico, que deverá dirimir dúvidas e subsidiá-la com as informações necessárias. DO CONTROLE DAS CONTRATAÇÕES`,
+    ementa: `Art. 168º O recurso e o pedido de reconsideração terão efeito suspensivo do ato ou da decisão recorrida até que sobrevenha decisão final da autoridade competente. Parágrafo único. Na elaboração de suas decisões, a autoridade competente será auxiliada pelo órgão de assessoramento jurídico, que deverá dirimir dúvidas e subsidiá-la com as informações necessárias.`,
     capitulo: "TÍTULO IV - CAPÍTULO III",
   },
   "169": {
     numero: "169",
-    ementa: `Art. 169º . As contratações públicas deverão submeter-se a práticas contínuas e permanentes de gestão de riscos e de controle preventivo, inclusive mediante adoção de recursos de tecnologia da informação, e, além de estar subordinadas ao controle social, sujeitar-se-ão às seguintes linhas de defesa:
+    ementa: `Art. 169º As contratações públicas deverão submeter-se a práticas contínuas e permanentes de gestão de riscos e de controle preventivo, inclusive mediante adoção de recursos de tecnologia da informação, e, além de estar subordinadas ao controle social, sujeitar-se-ão às seguintes linhas de defesa:
 
 I - primeira linha de defesa, integrada por servidores e empregados públicos, agentes de licitação e autoridades que atuam na estrutura de governança do órgão ou entidade;
 
@@ -3304,7 +3284,7 @@ II - quando constatarem irregularidade que configure dano à Administração, se
   },
   "171": {
     numero: "171",
-    ementa: `Art. 171º . Na fiscalização de controle será observado o seguinte:
+    ementa: `Art. 171º Na fiscalização de controle será observado o seguinte:
 
 I - viabilização de oportunidade de manifestação aos gestores sobre possíveis propostas de encaminhamento que terão impacto significativo nas rotinas de trabalho dos órgãos e entidades fiscalizados, a fim de que eles disponibilizem subsídios para avaliação prévia da relação entre custo e benefício dessas possíveis proposições;
 
@@ -3344,7 +3324,7 @@ III - proceder à apuração de responsabilidade, se for o caso.
   },
   "173": {
     numero: "173",
-    ementa: `Art. 173º . Os tribunais de contas deverão, por meio de suas escolas de contas, promover eventos de capacitação para os servidores efetivos e empregados públicos designados para o desempenho das funções essenciais à execução desta Lei, incluídos cursos presenciais e a distância, redes de aprendizagem, seminários e congressos sobre contratações públicas. DISPOSIÇÕES GERAIS DO PORTAL NACIONAL DE CONTRATAÇÕES PÚBLICAS (PNCP)`,
+    ementa: `Art. 173º Os tribunais de contas deverão, por meio de suas escolas de contas, promover eventos de capacitação para os servidores efetivos e empregados públicos designados para o desempenho das funções essenciais à execução desta Lei, incluídos cursos presenciais e a distância, redes de aprendizagem, seminários e congressos sobre contratações públicas. DISPOSIÇÕES GERAIS DO PORTAL NACIONAL DE CONTRATAÇÕES PÚBLICAS (PNCP)`,
     capitulo: "TÍTULO IV - CAPÍTULO III",
   },
   "174": {
@@ -3432,22 +3412,20 @@ Parágrafo único. Enquanto não adotarem o PNCP, os Municípios a que se refere
 
 I - publicar, em diário oficial, as informações que esta Lei exige que sejam divulgadas em sítio eletrônico oficial, admitida a publicação de extrato;
 
-II - disponibilizar a versão física dos documentos em suas repartições, vedada a cobrança de qualquer valor, salvo o referente ao fornecimento de edital ou de cópia de documento, que não será superior ao custo de sua reprodução gráfica.
-
-DAS ALTERAÇÕES LEGISLATIVAS`,
+II - disponibilizar a versão física dos documentos em suas repartições, vedada a cobrança de qualquer valor, salvo o referente ao fornecimento de edital ou de cópia de documento, que não será superior ao custo de sua reprodução gráfica.`,
     capitulo: "TÍTULO V",
   },
   "177": {
     numero: "177",
     ementa: `Art. 177º O caput do art. 1.048 da Lei nº 13.105, de 16 de março de 2015 (Código de Processo Civil), passa a vigorar acrescido do seguinte inciso IV:
 
-Art.1.048. .......................................................................................................
+Art.1.048. […]
 
-..........................................................................................................................
+[…]
 
 IV - em que se discuta a aplicação do disposto nas normas gerais de licitação e contratação a que se refere o inciso XXVII do caput do art. 22 da Constituição Federal.
 
-................................................................................................................ (NR)`,
+[…] (NR)`,
     capitulo: "TÍTULO V",
   },
   "178": {
@@ -3465,15 +3443,15 @@ Contratação direta ilegal`,
     numero: "179",
     ementa: `Art. 179º Os incisos II e III do caput do art. 2º da Lei nº 8.987, de 13 de fevereiro de 1995 , passam a vigorar com a seguinte redação:
 
-Art. 2º  .............................................................................................................
+Art. 2º […]
 
-...........................................................................................................................
+[…]
 
 II - concessão de serviço público: a delegação de sua prestação, feita pelo poder concedente, mediante licitação, na modalidade concorrência ou diálogo competitivo, a pessoa jurídica ou consórcio de empresas que demonstre capacidade para seu desempenho, por sua conta e risco e por prazo determinado;
 
 III - concessão de serviço público precedida da execução de obra pública: a construção, total ou parcial, conservação, reforma, ampliação ou melhoramento de quaisquer obras de interesse público, delegados pelo poder concedente, mediante licitação, na modalidade concorrência ou diálogo competitivo, a pessoa jurídica ou consórcio de empresas que demonstre capacidade para a sua realização, por sua conta e risco, de forma que o investimento da concessionária seja remunerado e amortizado mediante a exploração do serviço ou da obra por prazo determinado;
 
-.................................................................................................................. (NR)`,
+[…] (NR)`,
     capitulo: "TÍTULO V",
   },
   "180": {
@@ -3486,18 +3464,18 @@ III - concessão de serviço público precedida da execução de obra pública: 
   },
   "181": {
     numero: "181",
-    ementa: `Art. 181º . Os entes federativos instituirão centrais de compras, com o objetivo de realizar compras em grande escala, para atender a diversos órgãos e entidades sob sua competência e atingir as finalidades desta Lei. Parágrafo único. No caso dos Municípios com até 10.000 (dez mil) habitantes, serão preferencialmente constituídos consórcios públicos para a realização das atividades previstas no caput deste artigo, nos termos da Lei nº 11.107, de 6 de abril de 2005.`,
+    ementa: `Art. 181º Os entes federativos instituirão centrais de compras, com o objetivo de realizar compras em grande escala, para atender a diversos órgãos e entidades sob sua competência e atingir as finalidades desta Lei. Parágrafo único. No caso dos Municípios com até 10.000 (dez mil) habitantes, serão preferencialmente constituídos consórcios públicos para a realização das atividades previstas no caput deste artigo, nos termos da Lei nº 11.107, de 6 de abril de 2005.`,
     capitulo: "TÍTULO VI",
   },
   "182": {
     numero: "182",
-    ementa: `Art. 182º . O Poder Executivo federal atualizará, a cada dia 1º de janeiro, pelo Índice Nacional de Preços ao Consumidor Amplo Especial (IPCA-E) ou por índice que venha a substituí-lo, os valores fixados por esta Lei, os quais serão divulgados no PNCP.`,
+    ementa: `Art. 182º O Poder Executivo federal atualizará, a cada dia 1º de janeiro, pelo Índice Nacional de Preços ao Consumidor Amplo Especial (IPCA-E) ou por índice que venha a substituí-lo, os valores fixados por esta Lei, os quais serão divulgados no PNCP.`,
     capitulo: "TÍTULO VII",
     secao: "Disposições Transitórias",
   },
   "183": {
     numero: "183",
-    ementa: `Art. 183º . Os prazos previstos nesta Lei serão contados com exclusão do dia do começo e inclusão do dia do vencimento e observarão as seguintes disposições:
+    ementa: `Art. 183º Os prazos previstos nesta Lei serão contados com exclusão do dia do começo e inclusão do dia do vencimento e observarão as seguintes disposições:
 
 I - os prazos expressos em dias corridos serão computados de modo contínuo;
 
@@ -3564,19 +3542,19 @@ IV - a verificação da execução do objeto ocorrerá mediante visita de consta
   },
   "185": {
     numero: "185",
-    ementa: `Art. 185º . Aplicam-se às licitações e aos contratos regidos pela Lei nº 13.303, de 30 de junho de 2016, as disposições do Capítulo
+    ementa: `Art. 185º Aplicam-se às licitações e aos contratos regidos pela Lei nº 13.303, de 30 de junho de 2016, as disposições do Capítulo
 
 II - B do Título XI da Parte Especial do Decreto-Lei nº 2.848, de 7 de dezembro de 1940 (Código Penal).`,
     capitulo: "TÍTULO VII",
   },
   "186": {
     numero: "186",
-    ementa: `Art. 186º . Aplicam-se as disposições desta Lei subsidiariamente à Lei nº 8.987, de 13 de fevereiro de 1995, à Lei nº 11.079, de 30 de dezembro de 2004, e à Lei nº 12.232, de 29 de abril de 2010.`,
+    ementa: `Art. 186º Aplicam-se as disposições desta Lei subsidiariamente à Lei nº 8.987, de 13 de fevereiro de 1995, à Lei nº 11.079, de 30 de dezembro de 2004, e à Lei nº 12.232, de 29 de abril de 2010.`,
     capitulo: "TÍTULO VII",
   },
   "187": {
     numero: "187",
-    ementa: `Art. 187º . Os Estados, o Distrito Federal e os Municípios poderão aplicar os regulamentos editados pela União para execução desta Lei.`,
+    ementa: `Art. 187º Os Estados, o Distrito Federal e os Municípios poderão aplicar os regulamentos editados pela União para execução desta Lei.`,
     capitulo: "TÍTULO VII",
   },
   "188": {
@@ -3586,12 +3564,12 @@ II - B do Título XI da Parte Especial do Decreto-Lei nº 2.848, de 7 de dezembr
   },
   "189": {
     numero: "189",
-    ementa: `Art. 189º . Aplica-se esta Lei às hipóteses previstas na legislação que façam referência expressa à Lei nº 8.666, de 21 de junho de 1993, à Lei nº 10.520, de 17 de julho de 2002, e aos arts. 1º a 47-A da Lei nº 12.462, de 4 de agosto de 2011.`,
+    ementa: `Art. 189º Aplica-se esta Lei às hipóteses previstas na legislação que façam referência expressa à Lei nº 8.666, de 21 de junho de 1993, à Lei nº 10.520, de 17 de julho de 2002, e aos arts. 1º a 47-A da Lei nº 12.462, de 4 de agosto de 2011.`,
     capitulo: "TÍTULO VII",
   },
   "190": {
     numero: "190",
-    ementa: `Art. 190º . O contrato cujo instrumento tenha sido assinado antes da entrada em vigor desta Lei continuará a ser regido de acordo com as regras previstas na legislação revogada.`,
+    ementa: `Art. 190º O contrato cujo instrumento tenha sido assinado antes da entrada em vigor desta Lei continuará a ser regido de acordo com as regras previstas na legislação revogada.`,
     capitulo: "TÍTULO VII",
   },
   "191": {
@@ -3604,7 +3582,7 @@ Parágrafo único. Na hipótese do caput deste artigo, se a Administração opta
   },
   "192": {
     numero: "192",
-    ementa: `Art. 192º . O contrato relativo a imóvel do patrimônio da União ou de suas autarquias e fundações continuará regido pela legislação pertinente, aplicada esta Lei subsidiariamente.`,
+    ementa: `Art. 192º O contrato relativo a imóvel do patrimônio da União ou de suas autarquias e fundações continuará regido pela legislação pertinente, aplicada esta Lei subsidiariamente.`,
     capitulo: "TÍTULO VII",
   },
   "193": {
@@ -3654,23 +3632,23 @@ André Luiz de Almeida Mendonça
 
 Este texto não substitui o publicado no DOU de 1º.4.2021 - Edição extra-F
 
- 
 
- 
 
- 
 
- 
 
- 
 
- 
 
- 
 
- 
 
- 
+
+
+
+
+
+
+
+
+
 
 Presidência da República Secretaria-Geral Subchefia para Assuntos Jurídicos
 
@@ -3678,37 +3656,37 @@ LEI Nº 14.133, DE 1º DE ABRIL DE 2021
 
 Lei de Licitações e Contratos Administrativos. O PRESIDENTE DA REPÚBLICA Faço saber que o Congresso Nacional decreta e eu promulgo, nos termos do parágrafo 5 o do art. 66 da Constituição Federal, as seguintes partes vetadas da Lei n o 14.133, de 1º de abril de 2021:
 
- Art. 37 .....................................................................................................................
+ Art. 37 […]
 
-...................................................................................................................................
+[…]
 
-§ 2º  Ressalvados os casos de inexigibilidade de licitação, na licitação para contratação dos serviços técnicos especializados de natureza predominantemente intelectual previstos nas alíneas a, d e h do inciso XVIII do caput do art. 6º desta Lei cujo valor estimado da contratação seja superior a R$ 300.000,00 (trezentos mil reais), o julgamento será por:
+§ 2º Ressalvados os casos de inexigibilidade de licitação, na licitação para contratação dos serviços técnicos especializados de natureza predominantemente intelectual previstos nas alíneas a, d e h do inciso XVIII do caput do art. 6º desta Lei cujo valor estimado da contratação seja superior a R$ 300.000,00 (trezentos mil reais), o julgamento será por:
 
 I - melhor técnica; ou
 
 II - técnica e preço, na proporção de 70% (setenta por cento) de valoração da proposta técnica.
 
- Art. 54 ....................................................................................................................
+ Art. 54 […]
 
 § 1º Sem prejuízo do disposto no caput , é obrigatória a publicação de extrato do edital no Diário Oficial da União, do Estado, do Distrito Federal ou do Município, ou, no caso de consórcio público, do ente de maior nível entre eles, bem como em jornal diário de grande circulação.
 
-.................................................................................................................................
+[…]
 
- Art. 115 ...................................................................................................................
+ Art. 115 […]
 
-....................................................................................................................................
+[…]
 
 § 4º Nas contratações de obras e serviços de engenharia, sempre que a responsabilidade pelo licenciamento ambiental for da Administração, a manifestação prévia ou licença prévia, quando cabíveis, deverão ser obtidas antes da divulgação do edital.
 
-...........................................................................................................................................
+[…]
 
- Art. 175  ...................................................................................................................
+ Art. 175 […]
 
-...................................................................................................................................
+[…]
 
 § 2º Até 31 de dezembro de 2023, os Municípios deverão realizar divulgação complementar de suas contratações mediante publicação de extrato de edital de licitação em jornal diário de grande circulação local.
 
-Brasília,  10  de junho de 2021; 200 o da Independência e 133 o da República.
+Brasília, 10 de junho de 2021; 200 o da Independência e 133 o da República.
 
 JAIR MESSIAS BOLSONARO
 
