@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { verifyAdmin } from '@/lib/api-middleware';
+import { safeParseArray } from '@/lib/utils';
 
 export const runtime = 'nodejs';
 
@@ -26,6 +27,7 @@ export async function GET(request: NextRequest) {
     editorialScore: { not: null },
   };
   if (ambiguousOnly) where.editorialAmbiguous = true;
+  // Spread preserves the baseline { not: null } from the where init above.
   if (minScore !== undefined) where.editorialScore = { ...(where.editorialScore || {}), gte: minScore };
   if (maxScore !== undefined) where.editorialScore = { ...(where.editorialScore || {}), lte: maxScore };
   if (actType) where.editorialActType = actType;
@@ -58,7 +60,7 @@ export async function GET(request: NextRequest) {
       score: s.editorialScore,
       reason: s.editorialReason,
       summary: s.editorialSummary,
-      affects: safeJsonArray(s.editorialAffects),
+      affects: safeParseArray(s.editorialAffects),
       actType: s.editorialActType,
       ambiguous: s.editorialAmbiguous,
       model: s.editorialModel,
@@ -72,14 +74,4 @@ export async function GET(request: NextRequest) {
     totalPages: Math.max(1, Math.ceil(total / pageSize)),
     lastCronAt: lastCron?.editorialClassifiedAt ?? null,
   });
-}
-
-function safeJsonArray(s: string | null): string[] {
-  if (!s) return [];
-  try {
-    const v = JSON.parse(s);
-    return Array.isArray(v) ? v.map(String) : [];
-  } catch {
-    return [];
-  }
 }
