@@ -48,4 +48,78 @@ describe('classifyEditorialBatch', () => {
     expect(result.classifications[1].score).toBe(15);
     expect(result.promptVersion).toBe(EDITORIAL_PROMPT_VERSION);
   });
+
+  it('retorna [] quando candidates é vazio sem chamar Gemini', async () => {
+    const fakeGenAI = { models: { generateContent: vi.fn() } };
+    const result = await classifyEditorialBatch(
+      [],
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      { genAI: fakeGenAI as any },
+    );
+    expect(result.classifications).toEqual([]);
+    expect(fakeGenAI.models.generateContent).not.toHaveBeenCalled();
+  });
+
+  it('clampa score fora do range [0,100]', async () => {
+    const fakeGenAI = {
+      models: {
+        generateContent: vi.fn().mockResolvedValue({
+          text: JSON.stringify({
+            items: [
+              { score: 150, reason: '', summary: '', affects: [], actType: 'null', ambiguous: false },
+              { score: -10, reason: '', summary: '', affects: [], actType: 'null', ambiguous: false },
+            ],
+          }),
+        }),
+      },
+    };
+    const result = await classifyEditorialBatch(
+      [
+        { title: 'a', abstract: '', hierarchyStr: '' },
+        { title: 'b', abstract: '', hierarchyStr: '' },
+      ],
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      { genAI: fakeGenAI as any },
+    );
+    expect(result.classifications[0].score).toBe(100);
+    expect(result.classifications[1].score).toBe(0);
+  });
+
+  it('lança erro se IA retornar quantidade diferente de items', async () => {
+    const fakeGenAI = {
+      models: {
+        generateContent: vi.fn().mockResolvedValue({
+          text: JSON.stringify({ items: [{ score: 80, reason: '', summary: '', affects: [], actType: 'null', ambiguous: false }] }),
+        }),
+      },
+    };
+    await expect(
+      classifyEditorialBatch(
+        [
+          { title: 'a', abstract: '', hierarchyStr: '' },
+          { title: 'b', abstract: '', hierarchyStr: '' },
+        ],
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        { genAI: fakeGenAI as any },
+      ),
+    ).rejects.toThrow(/1 items mas foram enviados 2/);
+  });
+
+  it('normaliza actType inválido pra null', async () => {
+    const fakeGenAI = {
+      models: {
+        generateContent: vi.fn().mockResolvedValue({
+          text: JSON.stringify({
+            items: [{ score: 80, reason: '', summary: '', affects: [], actType: 'resolução', ambiguous: false }],
+          }),
+        }),
+      },
+    };
+    const result = await classifyEditorialBatch(
+      [{ title: 'a', abstract: '', hierarchyStr: '' }],
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      { genAI: fakeGenAI as any },
+    );
+    expect(result.classifications[0].actType).toBeNull();
+  });
 });
