@@ -566,7 +566,7 @@ async function runV2(dryRun: boolean, maxResults: number): Promise<NextResponse>
     classificadosIA: 0,
     descartadosScoreBaixo: 0,
     enviadosParaStaging: 0,
-    ambíguos: 0,
+    ambiguos: 0,
     alteracoesDetectadas: 0,
     notasLeiCriadas: 0,
     erros: 0,
@@ -660,6 +660,37 @@ async function runV2(dryRun: boolean, maxResults: number): Promise<NextResponse>
       const cand = batch[j];
       const cls = result.classifications[j];
 
+      // 4. Detectar alterações em legislação existente (mesma lógica do legacy).
+      // Roda ANTES do score gate pra preservar semântica do fluxo legacy:
+      // todo item novo (deduped) é avaliado pra detectar alterações na Lei 14.133,
+      // independente do score editorial. Roda também ANTES do insert staging
+      // pra evitar duplicação de LeiArticleNote em race com cron concorrente
+      // (P2002 no insert staging cairia no catch e poderia rodar o detect 2x).
+      const modification = detectModifications(cand.cleanTitle, cand.raw.abstract);
+      if (modification) {
+        stats.alteracoesDetectadas++;
+        if (!dryRun && modification.modifiesLei14133 && modification.affectedArticles.length > 0) {
+          for (const artNumber of modification.affectedArticles) {
+            try {
+              await prisma.leiArticleNote.create({
+                data: {
+                  articleNumber: artNumber,
+                  type: CHANGE_TYPE_MAP[modification.changeType] || 'comentario',
+                  title: `${modification.changeType === 'altera' ? 'Alterado' : modification.changeType === 'revoga' ? 'Revogado' : 'Regulamentado'} por: ${cand.cleanTitle.substring(0, 100)}`,
+                  description: cand.cleanAbstract || null,
+                  detectedBy: 'auto-sync-dou-v2',
+                  isPublic: false,
+                  adminReviewed: false,
+                },
+              });
+              stats.notasLeiCriadas++;
+            } catch (e) {
+              console.error('[Sync DOU v2] Erro LeiArticleNote:', e);
+            }
+          }
+        }
+      }
+
       if (cls.score < EDITORIAL_AMBIGUOUS_FLOOR) {
         stats.descartadosScoreBaixo++;
         if (dryRun) {
@@ -669,7 +700,7 @@ async function runV2(dryRun: boolean, maxResults: number): Promise<NextResponse>
       }
 
       const isAmbiguous = cls.score < EDITORIAL_SCORE_THRESHOLD || cls.ambiguous;
-      if (isAmbiguous) stats.ambíguos++;
+      if (isAmbiguous) stats.ambiguos++;
 
       // Parse data
       let parsedDate: Date | undefined;
@@ -732,35 +763,11 @@ async function runV2(dryRun: boolean, maxResults: number): Promise<NextResponse>
         // Race com cron concorrente: douId @unique pode colidir
         if ((error as { code?: string }).code === 'P2002') {
           stats.duplicados++;
+          continue;
         } else {
           console.error('[Sync DOU v2] Erro insert staging:', error);
           stats.erros++;
-        }
-      }
-
-      // 4. Detectar alterações em legislação existente (mesma lógica do legacy)
-      const modification = detectModifications(cand.cleanTitle, cand.raw.abstract);
-      if (modification) {
-        stats.alteracoesDetectadas++;
-        if (!dryRun && modification.modifiesLei14133 && modification.affectedArticles.length > 0) {
-          for (const artNumber of modification.affectedArticles) {
-            try {
-              await prisma.leiArticleNote.create({
-                data: {
-                  articleNumber: artNumber,
-                  type: CHANGE_TYPE_MAP[modification.changeType] || 'comentario',
-                  title: `${modification.changeType === 'altera' ? 'Alterado' : modification.changeType === 'revoga' ? 'Revogado' : 'Regulamentado'} por: ${cand.cleanTitle.substring(0, 100)}`,
-                  description: cand.cleanAbstract || null,
-                  detectedBy: 'auto-sync-dou-v2',
-                  isPublic: false,
-                  adminReviewed: false,
-                },
-              });
-              stats.notasLeiCriadas++;
-            } catch (e) {
-              console.error('[Sync DOU v2] Erro LeiArticleNote:', e);
-            }
-          }
+          continue;
         }
       }
     }
@@ -786,7 +793,7 @@ async function runV2(dryRun: boolean, maxResults: number): Promise<NextResponse>
     version: 'v2',
     promptVersion: EDITORIAL_PROMPT_VERSION,
     model: PRIMARY_GEMINI_MODEL,
-    message: `Staging: ${stats.enviadosParaStaging} (${stats.ambíguos} ambíguos), descartados: ${stats.descartadosScoreBaixo}`,
+    message: `Staging: ${stats.enviadosParaStaging} (${stats.ambiguos} ambíguos), descartados: ${stats.descartadosScoreBaixo}`,
     stats,
     dryRun,
   });
