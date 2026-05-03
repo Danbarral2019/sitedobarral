@@ -732,6 +732,156 @@ export async function sendTcuHighlightAlert(
 }
 
 /**
+ * Item de destaque DOU pra `sendDouEditorialAlert`.
+ */
+export interface DouEditorialAlertItem {
+  id: string;
+  title: string;
+  score: number;
+  reason: string;
+  summary: string;
+  affects: string[];
+  actType: 'decreto' | 'portaria' | 'in' | 'lei' | 'mp' | 'on' | null;
+  issuer: string;
+  publishDate: string;
+  douUrl: string;
+  ambiguous: boolean;
+}
+
+const MAX_DOU_EMAIL_CARDS = 15;
+
+function escapeHtml(s: string): string {
+  return s
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
+/**
+ * Renderiza o HTML do email de destaque DOU. Pure function — útil pra testes
+ * sem disparar envio real.
+ */
+export function renderDouEditorialAlertEmail(items: DouEditorialAlertItem[]): string {
+  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://profbarral.com.br';
+  const visible = items.slice(0, MAX_DOU_EMAIL_CARDS);
+  const remaining = Math.max(0, items.length - MAX_DOU_EMAIL_CARDS);
+  const stagingIds = visible.map((i) => i.id).join(',');
+  const queueLink = `${baseUrl}/admin/clipping-dou?from=email&staging_ids=${encodeURIComponent(stagingIds)}`;
+
+  const cards = visible
+    .map((it) => {
+      const scoreColor = it.score >= 80 ? '#16a34a' : it.score >= 70 ? '#2563eb' : '#ca8a04';
+      const scoreBg = it.score >= 80 ? '#dcfce7' : it.score >= 70 ? '#dbeafe' : '#fef9c3';
+      const ambiguousBadge = it.ambiguous
+        ? `<span style="display:inline-block;background:#fef3c7;color:#92400e;padding:2px 8px;border-radius:10px;font-size:11px;margin-left:6px;">ambíguo</span>`
+        : '';
+      const affectsTags = (it.affects || [])
+        .map(
+          (a) =>
+            `<span style="display:inline-block;background:#fff7ed;color:#9a3412;padding:3px 10px;border-radius:12px;font-size:12px;margin:2px;">${escapeHtml(a)}</span>`,
+        )
+        .join(' ');
+
+      return `
+      <div style="background:white;border-radius:12px;padding:24px;margin:16px 0;border-left:4px solid ${scoreColor};box-shadow:0 1px 3px rgba(0,0,0,0.1);">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:12px;">
+          <div style="flex:1;">
+            <div style="font-size:11px;color:#9a3412;text-transform:uppercase;font-weight:600;margin-bottom:4px;">${escapeHtml(it.actType || 'ato')} · ${escapeHtml(it.issuer)} · ${escapeHtml(it.publishDate)}</div>
+            <h3 style="margin:0;color:#1f2937;font-size:16px;">${escapeHtml(it.title)}</h3>
+          </div>
+          <span style="background:${scoreBg};color:${scoreColor};padding:4px 12px;border-radius:20px;font-size:13px;font-weight:bold;white-space:nowrap;margin-left:12px;">${it.score}/100${ambiguousBadge}</span>
+        </div>
+
+        <div style="background:#f8fafc;padding:14px;border-radius:8px;margin:10px 0;">
+          <div style="font-weight:600;color:#475569;font-size:13px;margin-bottom:6px;">Resumo</div>
+          <div style="color:#334155;font-size:14px;">${escapeHtml(it.summary)}</div>
+        </div>
+
+        <div style="background:#fff7ed;padding:14px;border-radius:8px;margin:10px 0;border:1px solid #fed7aa;">
+          <div style="font-weight:600;color:#9a3412;font-size:13px;margin-bottom:6px;">Por que está aqui</div>
+          <div style="color:#7c2d12;font-size:14px;">${escapeHtml(it.reason)}</div>
+        </div>
+
+        ${affectsTags ? `<div style="margin:10px 0;">${affectsTags}</div>` : ''}
+
+        <div style="margin-top:14px;display:flex;gap:12px;">
+          <a href="${queueLink}" style="display:inline-block;background:linear-gradient(135deg,#f97316,#ea580c);color:white;padding:8px 18px;border-radius:6px;text-decoration:none;font-size:13px;font-weight:600;">Revisar na Fila</a>
+          <a href="${escapeHtml(it.douUrl)}" style="display:inline-block;background:#f1f5f9;color:#475569;padding:8px 18px;border-radius:6px;text-decoration:none;font-size:13px;" target="_blank" rel="noopener">Ver DOU</a>
+        </div>
+      </div>`;
+    })
+    .join('');
+
+  const moreFooter =
+    remaining > 0
+      ? `<p style="text-align:center;color:#9a3412;font-size:13px;margin-top:16px;">...e mais ${remaining} norma(s) — <a href="${baseUrl}/admin/clipping-dou" style="color:#ea580c;">ver na fila completa</a>.</p>`
+      : '';
+
+  return `
+    <!DOCTYPE html>
+    <html>
+      <head>
+        <style>
+          body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; margin: 0; padding: 0; }
+          .container { max-width: 640px; margin: 0 auto; padding: 20px; }
+        </style>
+      </head>
+      <body>
+        <div class="container">
+          <div style="background:linear-gradient(135deg,#f97316 0%,#ea580c 100%);color:white;padding:30px;text-align:center;border-radius:12px 12px 0 0;">
+            <h1 style="margin:0;font-size:22px;">Clipping DOU</h1>
+            <p style="margin:8px 0 0;opacity:0.9;font-size:15px;">${items.length} norma(s) nova(s) pra revisar</p>
+          </div>
+          <div style="background:#fff7ed;padding:24px;border-radius:0 0 12px 12px;">
+            <p style="color:#7c2d12;font-size:14px;">As normas abaixo foram identificadas pelo classificador editorial. Aprove ou rejeite na fila admin.</p>
+            ${cards}
+            ${moreFooter}
+            <div style="text-align:center;margin-top:24px;">
+              <a href="${baseUrl}/admin/clipping-dou" style="display:inline-block;background:linear-gradient(135deg,#f97316,#ea580c);color:white;padding:12px 32px;border-radius:8px;text-decoration:none;font-size:15px;font-weight:bold;">Ver Fila Completa</a>
+            </div>
+          </div>
+          <div style="text-align:center;margin-top:20px;color:#9ca3af;font-size:12px;">
+            <p>Notificação automática do Clipping DOU v2</p>
+          </div>
+        </div>
+      </body>
+    </html>
+  `;
+}
+
+/**
+ * Envia alerta editorial DOU pro admin. Retorna false se highlights vazio
+ * (não dispara email pra zero stagings novos).
+ */
+export async function sendDouEditorialAlert(
+  highlights: DouEditorialAlertItem[],
+): Promise<boolean> {
+  if (highlights.length === 0) return false;
+
+  const adminEmail = process.env.ADMIN_EMAIL || 'admin@profdanielbarral.com';
+  const html = renderDouEditorialAlertEmail(highlights);
+
+  const text = highlights
+    .slice(0, MAX_DOU_EMAIL_CARDS)
+    .map(
+      (h) =>
+        `=== ${h.title} (Score: ${h.score}/100${h.ambiguous ? ' AMBÍGUO' : ''}) ===\n${h.summary}\nPor quê: ${h.reason}\nDOU: ${h.douUrl}\n`,
+    )
+    .join('\n---\n\n');
+
+  const result = await sendEmail({
+    to: adminEmail,
+    subject: `[DOU] ${highlights.length} norma(s) nova(s) pra revisar`,
+    html,
+    text: `${highlights.length} NORMA(S) DOU PRA REVISAR\n\n${text}\n\nFila: ${process.env.NEXT_PUBLIC_BASE_URL || 'https://profbarral.com.br'}/admin/clipping-dou`,
+  });
+
+  return result.success;
+}
+
+/**
  * Envia alerta de destaques editoriais de TCEs (decisões estaduais)
  * Gradiente teal/emerald para diferenciar do TCU (purple)
  */

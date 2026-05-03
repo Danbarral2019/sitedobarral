@@ -1,0 +1,73 @@
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
+
+// Mock o sendEmail antes de importar email.ts
+vi.mock('resend', () => ({
+  Resend: vi.fn(() => ({
+    emails: { send: vi.fn().mockResolvedValue({ data: { id: 'fake' }, error: null }) },
+  })),
+}));
+
+import { renderDouEditorialAlertEmail, sendDouEditorialAlert } from '../email';
+
+describe('renderDouEditorialAlertEmail', () => {
+  const sample = (overrides: Partial<Parameters<typeof renderDouEditorialAlertEmail>[0][number]> = {}) => ({
+    id: 's1',
+    title: 'Portaria SEGES nº 8/2026',
+    score: 85,
+    reason: 'Regulamenta art. 23 da Lei 14.133.',
+    summary: 'Atualiza pesquisa de preços com painel mínimo de 3 fontes.',
+    affects: ['Lei 14.133', 'contratos vigentes'],
+    actType: 'portaria' as const,
+    issuer: 'SEGES',
+    publishDate: '03/05/2026',
+    douUrl: 'https://www.in.gov.br/web/dou/-/portaria-seges-8',
+    ambiguous: false,
+    ...overrides,
+  });
+
+  it('renderiza HTML com título, resumo e link', () => {
+    const html = renderDouEditorialAlertEmail([sample()]);
+    expect(html).toContain('Portaria SEGES nº 8/2026');
+    expect(html).toContain('Atualiza pesquisa de preços');
+    expect(html).toContain('Regulamenta art. 23');
+    expect(html).toContain('https://www.in.gov.br/web/dou/-/portaria-seges-8');
+  });
+
+  it('escapa HTML em campos do usuário pra evitar injection', () => {
+    const html = renderDouEditorialAlertEmail([
+      sample({ title: '<script>alert(1)</script>' }),
+    ]);
+    expect(html).not.toContain('<script>alert(1)</script>');
+    expect(html).toContain('&lt;script&gt;');
+  });
+
+  it('limita a 15 cards e adiciona footer "...e mais N"', () => {
+    const items = Array.from({ length: 20 }, (_, i) =>
+      sample({ id: `s${i}`, title: `Norma ${i}` }),
+    );
+    const html = renderDouEditorialAlertEmail(items);
+    expect((html.match(/Norma \d/g) || []).length).toBe(15);
+    expect(html).toMatch(/e mais 5/);
+  });
+
+  it('exibe badge de ambíguo quando ambiguous=true', () => {
+    const html = renderDouEditorialAlertEmail([sample({ score: 60, ambiguous: true })]);
+    expect(html.toLowerCase()).toContain('ambíguo');
+  });
+});
+
+describe('sendDouEditorialAlert', () => {
+  beforeEach(() => {
+    process.env.ADMIN_EMAIL = 'admin@test.local';
+    process.env.RESEND_API_KEY = 'fake';
+  });
+  afterEach(() => {
+    delete process.env.ADMIN_EMAIL;
+    delete process.env.RESEND_API_KEY;
+  });
+
+  it('retorna false sem disparar quando highlights vazio', async () => {
+    const ok = await sendDouEditorialAlert([]);
+    expect(ok).toBe(false);
+  });
+});
