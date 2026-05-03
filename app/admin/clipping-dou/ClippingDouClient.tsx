@@ -20,7 +20,6 @@ interface StagingItem {
   model: string | null;
   promptVersion: string | null;
   source: string | null;
-  createdAt: string;
 }
 
 interface ListResponse {
@@ -81,6 +80,8 @@ export default function ClippingDouClient() {
         const err = await res.json().catch(() => ({}));
         alert(`Erro: ${err.error || res.status}`);
       }
+    } catch (e) {
+      alert(`Erro de rede: ${e instanceof Error ? e.message : String(e)}`);
     } finally {
       setActing((prev) => { const n = new Set(prev); n.delete(id); return n; });
     }
@@ -120,6 +121,7 @@ export default function ClippingDouClient() {
           value={actType}
           onChange={(e) => { setActType(e.target.value); setPage(1); }}
           className="text-sm border border-orange-300 rounded-md px-2 py-1 bg-white"
+          aria-label="Filtrar por tipo de ato"
         >
           {ACT_TYPES.map((t) => (
             <option key={t} value={t}>{t || 'todos os tipos'}</option>
@@ -129,6 +131,7 @@ export default function ClippingDouClient() {
           value={source}
           onChange={(e) => { setSource(e.target.value); setPage(1); }}
           className="text-sm border border-orange-300 rounded-md px-2 py-1 bg-white"
+          aria-label="Filtrar por origem"
         >
           <option value="">cron + lookback</option>
           <option value="cron">só cron</option>
