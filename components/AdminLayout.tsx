@@ -6,7 +6,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import AdminBottomNav from '@/components/admin/AdminBottomNav';
 import {
-  QrCode, ChevronLeft, ChevronRight, BarChart3, Mail, MessageSquare, Send, GraduationCap, Globe, BookOpen, Menu, X, FileText, PenSquare, FileSpreadsheet, Filter, Scale, Star, Activity, Sparkles
+  QrCode, ChevronLeft, ChevronRight, BarChart3, Mail, MessageSquare, Send, GraduationCap, Globe, BookOpen, Menu, X, FileText, PenSquare, FileSpreadsheet, Filter, Inbox, Scale, Star, Activity, Sparkles
 } from 'lucide-react';
 
 interface AdminLayoutProps {
@@ -111,6 +111,11 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
       label: 'DOU Filtros',
       icon: Filter,
       badge: unreadCounts.douPending,
+    },
+    {
+      path: '/admin/clipping-dou',
+      label: 'Clipping DOU',
+      icon: Inbox,
     },
     {
       path: '/admin/tribunal-decisions',
