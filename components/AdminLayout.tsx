@@ -6,7 +6,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import AdminBottomNav from '@/components/admin/AdminBottomNav';
 import {
-  QrCode, ChevronLeft, ChevronRight, BarChart3, Mail, MessageSquare, Send, GraduationCap, Globe, BookOpen, Menu, X, FileText, PenSquare, FileSpreadsheet, Filter, Inbox, Scale, Activity, Sparkles
+  QrCode, ChevronLeft, ChevronRight, BarChart3, Mail, MessageSquare, Send, GraduationCap, Globe, BookOpen, Menu, X, FileText, PenSquare, FileSpreadsheet, Filter, Inbox, Scale, Activity, Sparkles, Network, Map, Grid3X3
 } from 'lucide-react';
 
 interface AdminLayoutProps {
@@ -137,6 +137,11 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
       label: 'Pareceres CONUNI',
       icon: FileText,
     },
+    {
+      path: '/admin/legislative-relations',
+      label: 'Relacoes entre atos',
+      icon: Network,
+    },
 
     // === DOCUMENTOS ===
     { divider: true, label: '\u{1F4C1} Documentos' },
@@ -153,6 +158,16 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
       path: '/admin/lms',
       label: 'Cursos & Licoes',
       icon: GraduationCap,
+    },
+    {
+      path: '/admin/planejamento/trilhas',
+      label: 'Planejamento — Trilhas',
+      icon: Map,
+    },
+    {
+      path: '/admin/planejamento/matriz',
+      label: 'Planejamento — Matriz',
+      icon: Grid3X3,
     },
 
     // === CONTEÚDO ===

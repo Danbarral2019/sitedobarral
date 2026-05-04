@@ -2,7 +2,7 @@
 
 Atualizado em **2026-05-04** após consolidação (plano em `docs/superpowers/plans/2026-05-04-admin-consolidation.md`).
 
-Estado: **6 seções / 16 entradas de menu** (era 5 seções / 21 entradas).
+Estado: **6 seções / 19 entradas de menu** (era 5 seções / 21 entradas).
 
 ## 📊 Visão geral
 - `/admin` — Dashboard (QR Codes, métricas)
@@ -24,12 +24,15 @@ Estado: **6 seções / 16 entradas de menu** (era 5 seções / 21 entradas).
 - `/admin/dou-filtros` — Filtros DOU com approve/reject
 - `/admin/clipping-dou` — Clipping diário DOU (alunos pagantes)
 - `/admin/pareceres-revisao` — Revisão CONUNI (pareceres/notas/despachos AGU)
+- `/admin/legislative-relations` — Fila editorial de relações entre atos normativos (consolidação)
 
 ## 📁 Documentos
 - `/admin/docs` — Hub documentos (central + gerenciar em abas, padrão pré-existente)
 
 ## 🎓 LMS
 - `/admin/lms` — Cursos / Lições / Quizzes / Certificados / Analytics LMS
+- `/admin/planejamento/trilhas` — `TrailsManager`: catálogo de trilhas ETP/TR que alimenta as sessões dos alunos
+- `/admin/planejamento/matriz` — Visualização read-only da matriz de decisão (modalidade/critério) usada pelas sessões
 
 ## ✍️ Conteúdo
 - `/admin/blog-social` — Blog + Social (hub pré-existente)
@@ -45,17 +48,10 @@ Estado: **6 seções / 16 entradas de menu** (era 5 seções / 21 entradas).
 
 ---
 
-## Páginas funcionais sem entrada de menu (apenas via URL direta)
+## Páginas sem entrada de menu (acessadas via links das telas-pai)
 
-Estas páginas existem e são úteis, mas não estão no sidebar — acessíveis via URL ou via links de outras telas:
-
-- `/admin/planejamento/matriz` — visualização read-only da matriz de decisão (modalidade/critério) usada pelas sessões de planejamento dos alunos. Útil pra debug/inspeção.
-- `/admin/planejamento/trilhas` — `TrailsManager`: gerencia catálogo de trilhas ETP/TR que alimenta as sessões dos alunos.
-- `/admin/legislative-relations` — fila de revisão editorial de relações entre atos normativos (consolidação).
 - `/admin/lei-14133/[numero]/edit` — editor por artigo (acessado via "Editar" na aba "Editor de artigos" do Hub Lei 14.133).
 - Sub-rotas de CRUD (`new`, `[id]/edit` em blog/publicacoes/glossario/depoimentos) — acessadas via os listings principais.
-
-Decidir se merecem entrada de menu é trabalho separado.
 
 ---
 
