@@ -48,6 +48,10 @@ const nextConfig: NextConfig = {
       { source: '/admin/assistente-social', destination: '/admin/blog-social?tab=social', permanent: false },
       { source: '/admin/videos', destination: '/admin/recursos?tab=videos', permanent: false },
       { source: '/admin/sites', destination: '/admin/recursos?tab=sites', permanent: false },
+      // Hub TCU (consolidação 2026-05-04)
+      { source: '/admin/tcu-highlights', destination: '/admin/tcu?tab=destaques', permanent: false },
+      { source: '/admin/tribunal-highlights', destination: '/admin/tcu?tab=tribunais', permanent: false },
+      { source: '/admin/tribunal-decisions', destination: '/admin/tcu?tab=tribunais', permanent: false },
     ];
   },
 
