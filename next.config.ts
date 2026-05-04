@@ -56,6 +56,8 @@ const nextConfig: NextConfig = {
       { source: '/admin/lei-14133/comentada', destination: '/admin/lei-14133?tab=comentada', permanent: false },
       { source: '/admin/lei-14133/analytics', destination: '/admin/lei-14133?tab=analytics', permanent: false },
       { source: '/admin/lei-14133/bulk-linker', destination: '/admin/lei-14133?tab=bulk-linker', permanent: false },
+      // Search Analytics no Analytics-hub (consolidação 2026-05-04)
+      { source: '/admin/search-analytics', destination: '/admin/analytics-hub?tab=busca-ia', permanent: false },
     ];
   },
 

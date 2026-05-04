@@ -21,6 +21,14 @@ const AnalyticsDocumentosContent = dynamic(() => import('../analytics-documentos
   ),
 });
 
+const SearchAnalyticsContent = dynamic(() => import('../search-analytics/page'), {
+  loading: () => (
+    <div className="flex items-center justify-center py-20">
+      <Loader2 className="w-8 h-8 animate-spin text-blue-600" />
+    </div>
+  ),
+});
+
 export default function AnalyticsHubPage() {
   const { activeTab, setTab } = useTabFromUrl('geral');
 
@@ -42,12 +50,16 @@ export default function AnalyticsHubPage() {
         <TabList>
           <Tab id="geral">Geral</Tab>
           <Tab id="catalogacao">Catalogação</Tab>
+          <Tab id="busca-ia">Busca IA</Tab>
         </TabList>
         <TabPanel id="geral">
           <AnalyticsContent />
         </TabPanel>
         <TabPanel id="catalogacao">
           <AnalyticsDocumentosContent />
+        </TabPanel>
+        <TabPanel id="busca-ia">
+          <SearchAnalyticsContent />
         </TabPanel>
       </Tabs>
     </div>
