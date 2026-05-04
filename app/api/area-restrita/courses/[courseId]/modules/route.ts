@@ -123,11 +123,21 @@ export async function GET(
       ? Math.round((completedLessons / totalLessons) * 100)
       : 0;
 
+    const status = await prisma.courseStatus.findUnique({ where: { courseId } });
+
     apiLogger.info({ courseId, userId: user.id }, 'Course modules fetched');
 
     return NextResponse.json({
       modules: modulesWithProgress,
       courseProgress: { totalLessons, completedLessons, percentage },
+      status: status
+        ? {
+            isSuspended: status.isSuspended,
+            suspensionReason: status.suspensionReason,
+            suspendedAt: status.suspendedAt,
+            plannedReturn: status.plannedReturn,
+          }
+        : null,
     });
   } catch (error) {
     return handleApiError(error);

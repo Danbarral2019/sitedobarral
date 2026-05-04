@@ -1169,6 +1169,20 @@ model Module {
   @@index([courseId, displayOrder])
 }
 
+// Status editorial do curso (suspensão, revisão). Course é estático em /data/courses.ts;
+// esta tabela é o overlay dinâmico controlando visibilidade do conteúdo.
+model CourseStatus {
+  id               String    @id @default(uuid())
+  courseId         String    @unique
+  isSuspended      Boolean   @default(false)
+  suspensionReason String?   @db.Text
+  suspendedAt      DateTime?
+  plannedReturn    DateTime?
+  updatedAt        DateTime  @updatedAt
+
+  @@index([isSuspended])
+}
+
 // Lição: unidade de aprendizagem dentro de um módulo
 model Lesson {
   id               String  @id @default(uuid())

@@ -15,6 +15,7 @@ import {
 } from 'lucide-react';
 import { getIdFromSlug, getCourseBySlug } from '@/lib/courses';
 import LessonProgressBar from '@/components/lms/LessonProgressBar';
+import CourseSuspensionBanner from '@/components/lms/CourseSuspensionBanner';
 
 interface LessonInfo {
   id: string;
@@ -37,6 +38,13 @@ interface ModuleInfo {
   lessons: LessonInfo[];
 }
 
+interface CourseStatusInfo {
+  isSuspended: boolean;
+  suspensionReason?: string | null;
+  suspendedAt?: string | null;
+  plannedReturn?: string | null;
+}
+
 export default function CourseLandingPage({
   params,
 }: {
@@ -46,6 +54,7 @@ export default function CourseLandingPage({
   const router = useRouter();
 
   const [modules, setModules] = useState<ModuleInfo[]>([]);
+  const [courseStatus, setCourseStatus] = useState<CourseStatusInfo | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -80,6 +89,7 @@ export default function CourseLandingPage({
 
         const data = await res.json();
         setModules(data.modules || []);
+        setCourseStatus(data.status || null);
       } catch (err) {
         console.error('Error loading course modules:', err);
         setError('Erro ao carregar o curso. Tente novamente.');
@@ -179,6 +189,15 @@ export default function CourseLandingPage({
       </header>
 
       <div className="max-w-4xl mx-auto px-4 py-6 lg:py-8">
+        {courseStatus?.isSuspended && (
+          <CourseSuspensionBanner
+            reason={courseStatus.suspensionReason}
+            suspendedAt={courseStatus.suspendedAt}
+            plannedReturn={courseStatus.plannedReturn}
+            variant="course"
+          />
+        )}
+
         {/* Course Info Card */}
         <div className="bg-white rounded-2xl border border-gray-200 p-6 lg:p-8 mb-6">
           <div className="flex items-start gap-4">

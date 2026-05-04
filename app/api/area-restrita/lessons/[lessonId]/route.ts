@@ -94,6 +94,10 @@ export async function GET(
       }
     }
 
+    // Course suspension status: blanks textual content but keeps docs/videos visible
+    const courseStatus = await prisma.courseStatus.findUnique({ where: { courseId } });
+    const isSuspended = !!courseStatus?.isSuspended && user.role !== 'admin';
+
     // Fetch user progress
     const progress = await prisma.lessonProgress.findUnique({
       where: { userId_lessonId: { userId: user.id, lessonId } },
@@ -128,11 +132,11 @@ export async function GET(
         id: lesson.id,
         title: lesson.title,
         slug: lesson.slug,
-        description: lesson.description,
-        content: lesson.content,
+        description: isSuspended ? null : lesson.description,
+        content: isSuspended ? null : lesson.content,
         estimatedMinutes: lesson.estimatedMinutes,
-        aiSummary: lesson.aiSummary,
-        aiKeyPoints: lesson.aiKeyPoints ? JSON.parse(lesson.aiKeyPoints) : null,
+        aiSummary: isSuspended ? null : lesson.aiSummary,
+        aiKeyPoints: isSuspended ? null : (lesson.aiKeyPoints ? JSON.parse(lesson.aiKeyPoints) : null),
         leiArticles: lesson.leiArticles ? JSON.parse(lesson.leiArticles) : null,
         module: {
           id: lesson.module.id,
@@ -168,6 +172,14 @@ export async function GET(
           ? { id: nextLesson.id, title: nextLesson.title, slug: nextLesson.slug, moduleTitle: nextLesson.moduleTitle }
           : null,
       },
+      courseStatus: courseStatus
+        ? {
+            isSuspended: courseStatus.isSuspended,
+            suspensionReason: courseStatus.suspensionReason,
+            suspendedAt: courseStatus.suspendedAt,
+            plannedReturn: courseStatus.plannedReturn,
+          }
+        : null,
     });
   } catch (error) {
     return handleApiError(error);

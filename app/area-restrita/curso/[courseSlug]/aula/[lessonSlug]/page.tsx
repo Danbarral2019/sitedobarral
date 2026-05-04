@@ -20,6 +20,7 @@ import LessonContent from '@/components/lms/LessonContent';
 import LessonDocuments from '@/components/lms/LessonDocuments';
 import LessonVideos from '@/components/lms/LessonVideos';
 import MarkCompleteButton from '@/components/lms/MarkCompleteButton';
+import CourseSuspensionBanner from '@/components/lms/CourseSuspensionBanner';
 
 const LessonAIAssistant = dynamic(() => import('@/components/lms/LessonAIAssistant'), {
   loading: () => <div className="flex justify-center py-8"><Loader2 className="w-6 h-6 animate-spin text-blue-500" /></div>,
@@ -93,6 +94,13 @@ interface NavigationData {
   next: { id: string; title: string; slug: string; moduleTitle: string } | null;
 }
 
+interface CourseStatusInfo {
+  isSuspended: boolean;
+  suspensionReason?: string | null;
+  suspendedAt?: string | null;
+  plannedReturn?: string | null;
+}
+
 interface ModuleData {
   id: string;
   title: string;
@@ -120,6 +128,7 @@ export default function LessonPage({
   const [progress, setProgress] = useState<ProgressData | null>(null);
   const [navigation, setNavigation] = useState<NavigationData | null>(null);
   const [modules, setModules] = useState<ModuleData[]>([]);
+  const [courseStatus, setCourseStatus] = useState<CourseStatusInfo | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -186,6 +195,7 @@ export default function LessonPage({
         setLesson(lessonData.lesson);
         setProgress(lessonData.progress);
         setNavigation(lessonData.navigation);
+        setCourseStatus(lessonData.courseStatus || null);
 
         // Check if admin
         fetch('/api/auth/verify')
@@ -389,8 +399,17 @@ export default function LessonPage({
             )}
           </div>
 
+          {courseStatus?.isSuspended && (
+            <CourseSuspensionBanner
+              reason={courseStatus.suspensionReason}
+              suspendedAt={courseStatus.suspendedAt}
+              plannedReturn={courseStatus.plannedReturn}
+              variant="lesson"
+            />
+          )}
+
           {/* Content */}
-          {lesson.content && (
+          {lesson.content && !courseStatus?.isSuspended && (
             <div className="bg-white rounded-2xl border border-gray-200 p-6 lg:p-8 mb-6">
               <LessonContent
                 content={lesson.content}
@@ -415,18 +434,22 @@ export default function LessonPage({
           )}
 
           {/* Quiz */}
-          <div className="mb-6">
-            <QuizPlayer lessonId={lesson.id} />
-          </div>
+          {!courseStatus?.isSuspended && (
+            <div className="mb-6">
+              <QuizPlayer lessonId={lesson.id} />
+            </div>
+          )}
 
           {/* AI Assistant */}
-          <div className="mb-6">
-            <LessonAIAssistant
-              lessonTitle={lesson.title}
-              courseId={lesson.module.courseId}
-              leiArticles={lesson.leiArticles}
-            />
-          </div>
+          {!courseStatus?.isSuspended && (
+            <div className="mb-6">
+              <LessonAIAssistant
+                lessonTitle={lesson.title}
+                courseId={lesson.module.courseId}
+                leiArticles={lesson.leiArticles}
+              />
+            </div>
+          )}
 
           {/* Discussion */}
           <div className="bg-white rounded-2xl border border-gray-200 p-6 mb-6">
