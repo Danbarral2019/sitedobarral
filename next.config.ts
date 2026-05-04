@@ -58,6 +58,9 @@ const nextConfig: NextConfig = {
       { source: '/admin/lei-14133/bulk-linker', destination: '/admin/lei-14133?tab=bulk-linker', permanent: false },
       // Search Analytics no Analytics-hub (consolidação 2026-05-04)
       { source: '/admin/search-analytics', destination: '/admin/analytics-hub?tab=busca-ia', permanent: false },
+      // Páginas TCU obsoletas removidas em 2026-05-04 (substituídas por /admin/importacao + /admin/tcu)
+      { source: '/admin/tcu-import', destination: '/admin/importacao?tab=tcu', permanent: false },
+      { source: '/admin/tcu-converter', destination: '/admin/importacao?tab=tcu', permanent: false },
     ];
   },
 
