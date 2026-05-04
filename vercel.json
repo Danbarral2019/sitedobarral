@@ -91,6 +91,14 @@
     {
       "path": "/api/cron/check-legislative-updates",
       "schedule": "0 3 * * 1"
+    },
+    {
+      "path": "/api/cron/daily-tcu-clipping",
+      "schedule": "0 12 * * 1-5"
+    },
+    {
+      "path": "/api/cron/clipping-health-check",
+      "schedule": "0 14 * * 1-5"
     }
   ]
 }

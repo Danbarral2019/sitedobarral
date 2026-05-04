@@ -14,7 +14,7 @@ datasource db {
 model QRCode {
   id          String   @id @default(uuid())
   code        String   @unique
-  qrCodeImage String?  // Imagem do QR Code em base64
+  qrCodeImage String? // Imagem do QR Code em base64
   courseId    String
   turma       String
   validUntil  DateTime
@@ -30,101 +30,133 @@ model QRCode {
 
 // Documentos dos cursos
 model Document {
-  id              String   @id @default(uuid())
+  id              String    @id @default(uuid())
   title           String
   description     String?
-  type            String   // pdf, doc, link, video
-  url             String   // URL principal do documento
-  alternativeUrls String?  // JSON array com URLs alternativas (ex: múltiplas fundamentações)
-  category        String   // apostila, acordao, parecer, edital, artigo, outro
-  courseId        String?  // NULL se isCommon=true (disponível para todos os cursos)
-  isPublic        Boolean  @default(false)
-  isCommon        Boolean  @default(false) // Se true, documento aparece em todos os cursos
-  tags            String?  // JSON array como string
-  leiArticles     String?  // JSON array com números de artigos da Lei 14.133/2021
-  content         String?  @db.Text // Conteúdo/trechos relevantes do documento para busca textual
+  type            String // pdf, doc, link, video
+  url             String // URL principal do documento
+  alternativeUrls String? // JSON array com URLs alternativas (ex: múltiplas fundamentações)
+  category        String // apostila, acordao, parecer, edital, artigo, outro
+  courseId        String? // NULL se isCommon=true (disponível para todos os cursos)
+  isPublic        Boolean   @default(false)
+  isCommon        Boolean   @default(false) // Se true, documento aparece em todos os cursos
+  tags            String? // JSON array como string
+  leiArticles     String? // JSON array com números de artigos da Lei 14.133/2021
+  content         String?   @db.Text // Conteúdo/trechos relevantes do documento para busca textual
   size            Int?
-  onNumber        Int?     // Número da ON (para ordenação numérica de Orientações Normativas)
-  onYear          Int?     // Ano da ON (para ordenação numérica de Orientações Normativas)
-  acordaoNumero   Int?     // Número do Acórdão TCU (para ordenação numérica de Acórdãos)
-  acordaoAno      Int?     // Ano do Acórdão TCU (para ordenação numérica de Acórdãos)
-  uploadedAt      DateTime @default(now())
-  updatedAt       DateTime @updatedAt
+  onNumber        Int? // Número da ON (para ordenação numérica de Orientações Normativas)
+  onYear          Int? // Ano da ON (para ordenação numérica de Orientações Normativas)
+  acordaoNumero   Int? // Número do Acórdão TCU (para ordenação numérica de Acórdãos)
+  acordaoAno      Int? // Ano do Acórdão TCU (para ordenação numérica de Acórdãos)
+  uploadedAt      DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
   notifiedAt      DateTime? // Data em que os alunos foram notificados sobre este documento
-  reviewed        Boolean  @default(false) // Se o documento já foi revisado por um humano
+  reviewed        Boolean   @default(false) // Se o documento já foi revisado por um humano
   reviewedAt      DateTime? // Data em que o documento foi revisado
-  reviewedBy      String?   // Email do admin que aprovou/rejeitou o documento (✅ FIX #5: Audit trail)
+  reviewedBy      String? // Email do admin que aprovou/rejeitou o documento (✅ FIX #5: Audit trail)
 
   // Sistema de Feedback de IA/ML (Fase 3D)
-  aiClassification    String?   // JSON com classificação da IA (category, courses, tags, confidence, reasoning)
-  feedbackRelevance   String?   // 'relevant' | 'irrelevant' | 'partially-relevant' (feedback do admin)
-  feedbackReasoning   String?   // Explicação do admin sobre a relevância
+  aiClassification    String? // JSON com classificação da IA (category, courses, tags, confidence, reasoning)
+  feedbackRelevance   String? // 'relevant' | 'irrelevant' | 'partially-relevant' (feedback do admin)
+  feedbackReasoning   String? // Explicação do admin sobre a relevância
   feedbackGivenAt     DateTime? // Data do feedback
-  feedbackGivenBy     String?   // Email do admin que deu o feedback
-  aiSuggestedArticles String?   // JSON array com artigos da Lei 14.133 sugeridos pela IA
+  feedbackGivenBy     String? // Email do admin que deu o feedback
+  aiSuggestedArticles String? // JSON array com artigos da Lei 14.133 sugeridos pela IA
 
   // Sistema de Resumos Automáticos (IA)
-  summary             String?   // Resumo executivo gerado pela IA
-  summaryHighlights   String?   // JSON array com destaques principais
-  summaryGeneratedAt  DateTime? // Data de geração do resumo
-  summaryEditedByAdmin Boolean @default(false) // Se o resumo foi editado manualmente pelo admin
-  summaryReviewedByAdmin Boolean @default(false) // Aprovação humana — badge "Resumo IA não revisado" some quando true
-  summaryReviewedAt   DateTime? // Quando o admin marcou o resumo como revisado/aprovado
-  summaryReviewedBy   String?   // Email do admin que aprovou o resumo
+  summary                String? // Resumo executivo gerado pela IA
+  summaryHighlights      String? // JSON array com destaques principais
+  summaryGeneratedAt     DateTime? // Data de geração do resumo
+  summaryEditedByAdmin   Boolean   @default(false) // Se o resumo foi editado manualmente pelo admin
+  summaryReviewedByAdmin Boolean   @default(false) // Aprovação humana — badge "Resumo IA não revisado" some quando true
+  summaryReviewedAt      DateTime? // Quando o admin marcou o resumo como revisado/aprovado
+  summaryReviewedBy      String? // Email do admin que aprovou o resumo
 
   // Sistema de Enunciados (IBDA, INCP, CJF)
-  entityType          String?   // Entidade responsável: "IBDA", "INCP", "CJF" (apenas para categoria="enunciados")
-  enunciadoNumber     String?   // Número do enunciado (formato flexível: "123", "123/2024", ou texto livre)
+  entityType      String? // Entidade responsável: "IBDA", "INCP", "CJF" (apenas para categoria="enunciados")
+  enunciadoNumber String? // Número do enunciado (formato flexível: "123", "123/2024", ou texto livre)
 
   // Classificação para boas práticas e filtros avançados
-  issuerOrg           String?   // Órgão emissor (para boa_pratica: "TCE-SP", "CGE-MG", etc.)
-  esfera              String?   // "federal" | "estadual"
-  themes              String?   // JSON array: ["planejamento","contratos"]
+  issuerOrg String? // Órgão emissor (para boa_pratica: "TCE-SP", "CGE-MG", etc.)
+  esfera    String? // "federal" | "estadual"
+  themes    String? // JSON array: ["planejamento","contratos"]
 
   // Sistema de Links DOU (Diário Oficial da União)
-  douUrl              String?   // URL da publicação no DOU (Diário Oficial da União)
-  douData             DateTime? // Data de publicação no DOU
-  douSecao            String?   // Seção do DOU (1, 2, 3)
-  douPagina           String?   // Página no DOU
-  douEdicao           String?   // Edição/número do DOU
+  douUrl    String? // URL da publicação no DOU (Diário Oficial da União)
+  douData   DateTime? // Data de publicação no DOU
+  douSecao  String? // Seção do DOU (1, 2, 3)
+  douPagina String? // Página no DOU
+  douEdicao String? // Edição/número do DOU
 
   // Sistema de Observações Estruturadas (para acórdãos e outros documentos)
-  adminNotes          String?   // Observações privadas do admin (não visíveis aos alunos)
-  publicNotes         String?   // Observações públicas (visíveis aos alunos)
-  notesImportance     String?   // 'baixa' | 'media' | 'alta' | 'critica'
-  notesRelatedDocs    String?   // JSON array com IDs de documentos relacionados
-  notesPracticalUse   String?   // Aplicação prática do documento
-  notesKeyPoints      String?   // Pontos-chave para destacar
-  notesUpdatedAt      DateTime? // Data da última atualização das observações
-  notesUpdatedBy      String?   // Email do admin que atualizou
+  adminNotes        String? // Observações privadas do admin (não visíveis aos alunos)
+  publicNotes       String? // Observações públicas (visíveis aos alunos)
+  notesImportance   String? // 'baixa' | 'media' | 'alta' | 'critica'
+  notesRelatedDocs  String? // JSON array com IDs de documentos relacionados
+  notesPracticalUse String? // Aplicação prática do documento
+  notesKeyPoints    String? // Pontos-chave para destacar
+  notesUpdatedAt    DateTime? // Data da última atualização das observações
+  notesUpdatedBy    String? // Email do admin que atualizou
 
   // Sistema de Dados TCU (importação enriquecida de acórdãos)
-  tcuNumeroAcordao    String?   // Número do acórdão (ex: AC-1106/24-P)
-  tcuAutorTese        String?   // Autor da tese (ex: AUGUSTO SHERMAN)
-  tcuArea             String?   // Área temática (ex: Contrato Administrativo)
-  tcuTema             String?   // Tema específico (ex: Formalização do contrato)
-  tcuSubtema          String?   // Subtema (ex: Cláusula obrigatória)
-  tcuLegislacao       String?   @db.Text // Legislação citada (pode ser longa)
-  tcuIndexadores      String?   // Indexadores/tags originais da planilha TCU
-  tcuTipoProcesso     String?   // Tipo do processo (ex: CONSULTA)
-  tcuDataJulgamento   DateTime? // Data do julgamento do acórdão
-  tcuLinkPDF          String?   // Link oficial do PDF no site do TCU
-  tcuEmentaCompleta   String?   @db.Text // Ementa oficial completa (pode ser longa)
-  tcuTextoCompleto    String?   @db.Text // Texto integral do acórdão (pode ser muito longo)
-  tcuRelator          String?   // Nome do relator
-  tcuOrgaoJulgador    String?   // Órgão julgador (Plenário, 1ª Câmara, etc)
+  tcuNumeroAcordao  String? // Número do acórdão (ex: AC-1106/24-P)
+  tcuAutorTese      String? // Autor da tese (ex: AUGUSTO SHERMAN)
+  tcuArea           String? // Área temática (ex: Contrato Administrativo)
+  tcuTema           String? // Tema específico (ex: Formalização do contrato)
+  tcuSubtema        String? // Subtema (ex: Cláusula obrigatória)
+  tcuLegislacao     String?   @db.Text // Legislação citada (pode ser longa)
+  tcuIndexadores    String? // Indexadores/tags originais da planilha TCU
+  tcuTipoProcesso   String? // Tipo do processo (ex: CONSULTA)
+  tcuDataJulgamento DateTime? // Data do julgamento do acórdão
+  tcuLinkPDF        String? // Link oficial do PDF no site do TCU
+  tcuEmentaCompleta String?   @db.Text // Ementa oficial completa (pode ser longa)
+  tcuTextoCompleto  String?   @db.Text // Texto integral do acórdão (pode ser muito longo)
+  tcuRelator        String? // Nome do relator
+  tcuOrgaoJulgador  String? // Órgão julgador (Plenário, 1ª Câmara, etc)
 
   // Metadados de processamento TCU
-  tcuEnriquecidoEm    DateTime? // Data do enriquecimento automático via scraper
+  tcuEnriquecidoEm        DateTime? // Data do enriquecimento automático via scraper
   tcuEnriquecimentoStatus String? // 'success' | 'failed' | 'pending'
-  tcuEnriquecimentoErro String? // Mensagem de erro caso o enriquecimento falhe
-  tcuClassificadoEm   DateTime? // Data da classificação pela IA
-  tcuRevisadoPorAdmin Boolean @default(false) // Se o documento foi revisado manualmente pelo admin após enriquecimento
+  tcuEnriquecimentoErro   String? // Mensagem de erro caso o enriquecimento falhe
+  tcuClassificadoEm       DateTime? // Data da classificação pela IA
+  tcuRevisadoPorAdmin     Boolean   @default(false) // Se o documento foi revisado manualmente pelo admin após enriquecimento
 
   // Cloudflare R2 Storage (Fase 8)
-  r2Key               String?   // Chave do arquivo no R2 (ex: "documents/1/uuid-filename.pdf")
-  r2UploadedAt        DateTime? // Data de upload para R2
-  r2MigratedFrom      String?   // Path original no filesystem (para auditoria de migração)
+  r2Key          String? // Chave do arquivo no R2 (ex: "documents/1/uuid-filename.pdf")
+  r2UploadedAt   DateTime? // Data de upload para R2
+  r2MigratedFrom String? // Path original no filesystem (para auditoria de migração)
+
+  // Sistema de Embeddings/Busca Semântica
+  extractedText   String?   @db.Text // Texto extraído do documento
+  textExtractedAt DateTime? // Data de extração do texto
+  embeddingStatus String?   @default("pending") // pending|processing|completed|failed
+  embeddingError  String? // Mensagem de erro de embedding (se houver)
+  chunkCount      Int? // Número de chunks gerados
+  embeddedAt      DateTime? // Data em que os embeddings foram gerados
+
+  // Relacionamento com versões históricas
+  versions DocumentVersion[]
+
+  // Relacionamento com chunks (embeddings)
+  chunks DocumentChunk[]
+
+  // Relacionamento com favoritos
+  favorites Favorite[]
+
+  // Relacionamento com lições (LMS)
+  lessonDocuments LessonDocument[]
+
+  // Relacionamento com destaques TCU
+  highlights TcuHighlight[]
+
+  // Relações 1:1 com tabelas satélite (vertical table splitting)
+  metaTcu         DocumentMetaTcu?
+  metaDou         DocumentMetaDou?
+  notes           DocumentNotes?
+  clippingExtract ClippingItemExtract?
+
+  // Full-Text Search (gerido via triggers SQL, não pelo Prisma)
+  search_vector Unsupported("tsvector")?
 
   @@index([courseId])
   @@index([category])
@@ -155,66 +187,34 @@ model Document {
   @@index([douSecao]) // Índice para filtrar por seção do DOU
   @@index([category, douData]) // Índice composto para buscar documentos por categoria e data DOU
   @@index([r2Key]) // Índice para buscar por chave R2
-
-  // Sistema de Embeddings/Busca Semântica
-  extractedText      String?   @db.Text // Texto extraído do documento
-  textExtractedAt    DateTime? // Data de extração do texto
-  embeddingStatus    String?   @default("pending") // pending|processing|completed|failed
-  embeddingError     String?   // Mensagem de erro de embedding (se houver)
-  chunkCount         Int?      // Número de chunks gerados
-  embeddedAt         DateTime? // Data em que os embeddings foram gerados
-
-  // Relacionamento com versões históricas
-  versions DocumentVersion[]
-
-  // Relacionamento com chunks (embeddings)
-  chunks DocumentChunk[]
-
-  // Relacionamento com favoritos
-  favorites Favorite[]
-
-  // Relacionamento com lições (LMS)
-  lessonDocuments LessonDocument[]
-
-  // Relacionamento com destaques TCU
-  highlights TcuHighlight[]
-
-  // Relações 1:1 com tabelas satélite (vertical table splitting)
-  metaTcu   DocumentMetaTcu?
-  metaDou   DocumentMetaDou?
-  notes     DocumentNotes?
-
-  // Full-Text Search (gerido via triggers SQL, não pelo Prisma)
-  search_vector Unsupported("tsvector")?
-
   @@index([embeddingStatus]) // Índice para buscar documentos por status de embedding
 }
 
 // Metadados TCU (tabela satélite 1:1 — vertical table splitting)
 model DocumentMetaTcu {
-  id                    String    @id @default(uuid())
-  documentId            String    @unique
-  document              Document  @relation(fields: [documentId], references: [id], onDelete: Cascade)
+  id         String   @id @default(uuid())
+  documentId String   @unique
+  document   Document @relation(fields: [documentId], references: [id], onDelete: Cascade)
 
-  numeroAcordao         String?
-  autorTese             String?
-  area                  String?
-  tema                  String?
-  subtema               String?
-  legislacao            String?   @db.Text
-  indexadores           String?
-  tipoProcesso          String?
-  dataJulgamento        DateTime?
-  linkPDF               String?
-  ementaCompleta        String?   @db.Text
-  textoCompleto         String?   @db.Text
-  relator               String?
-  orgaoJulgador         String?
-  enriquecidoEm         DateTime?
-  enriquecimentoStatus  String?
-  enriquecimentoErro    String?
-  classificadoEm        DateTime?
-  revisadoPorAdmin      Boolean   @default(false)
+  numeroAcordao        String?
+  autorTese            String?
+  area                 String?
+  tema                 String?
+  subtema              String?
+  legislacao           String?   @db.Text
+  indexadores          String?
+  tipoProcesso         String?
+  dataJulgamento       DateTime?
+  linkPDF              String?
+  ementaCompleta       String?   @db.Text
+  textoCompleto        String?   @db.Text
+  relator              String?
+  orgaoJulgador        String?
+  enriquecidoEm        DateTime?
+  enriquecimentoStatus String?
+  enriquecimentoErro   String?
+  classificadoEm       DateTime?
+  revisadoPorAdmin     Boolean   @default(false)
 
   @@index([numeroAcordao])
   @@index([autorTese])
@@ -224,15 +224,15 @@ model DocumentMetaTcu {
 
 // Metadados DOU (tabela satélite 1:1 — vertical table splitting)
 model DocumentMetaDou {
-  id          String    @id @default(uuid())
-  documentId  String    @unique
-  document    Document  @relation(fields: [documentId], references: [id], onDelete: Cascade)
+  id         String   @id @default(uuid())
+  documentId String   @unique
+  document   Document @relation(fields: [documentId], references: [id], onDelete: Cascade)
 
-  url         String?
-  data        DateTime?
-  secao       String?
-  pagina      String?
-  edicao      String?
+  url    String?
+  data   DateTime?
+  secao  String?
+  pagina String?
+  edicao String?
 
   @@index([data])
   @@index([secao])
@@ -240,70 +240,70 @@ model DocumentMetaDou {
 
 // Observações/Notas (tabela satélite 1:1 — vertical table splitting)
 model DocumentNotes {
-  id              String    @id @default(uuid())
-  documentId      String    @unique
-  document        Document  @relation(fields: [documentId], references: [id], onDelete: Cascade)
+  id         String   @id @default(uuid())
+  documentId String   @unique
+  document   Document @relation(fields: [documentId], references: [id], onDelete: Cascade)
 
-  adminNotes      String?
-  publicNotes     String?
-  importance      String?
-  relatedDocs     String?
-  practicalUse    String?
-  keyPoints       String?
-  updatedAt       DateTime?
-  updatedBy       String?
+  adminNotes   String?
+  publicNotes  String?
+  importance   String?
+  relatedDocs  String?
+  practicalUse String?
+  keyPoints    String?
+  updatedAt    DateTime?
+  updatedBy    String?
 
   @@index([importance])
 }
 
 // Chunks de documentos com embeddings (Busca Semântica)
 model DocumentChunk {
-  id          String   @id @default(uuid())
-  documentId  String
-  document    Document @relation(fields: [documentId], references: [id], onDelete: Cascade)
+  id         String   @id @default(uuid())
+  documentId String
+  document   Document @relation(fields: [documentId], references: [id], onDelete: Cascade)
 
-  chunkIndex  Int      // Posição no documento (0, 1, 2...)
-  content     String   @db.Text // Conteúdo do chunk
-  charStart   Int      // Posição inicial no texto original
-  charEnd     Int      // Posição final no texto original
-  embedding   Unsupported("vector(768)") // Embedding do Gemini text-embedding-004
+  chunkIndex Int // Posição no documento (0, 1, 2...)
+  content    String                     @db.Text // Conteúdo do chunk
+  charStart  Int // Posição inicial no texto original
+  charEnd    Int // Posição final no texto original
+  embedding  Unsupported("vector(768)") // Embedding do Gemini text-embedding-004
 
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@index([documentId])
 }
 
 // Histórico de versões de documentos (para rastreamento de mudanças)
 model DocumentVersion {
-  id              String   @id @default(uuid())
-  documentId      String
-  document        Document @relation(fields: [documentId], references: [id], onDelete: Cascade)
+  id         String   @id @default(uuid())
+  documentId String
+  document   Document @relation(fields: [documentId], references: [id], onDelete: Cascade)
 
   // Versão do documento
-  versionNumber   Int      // 1, 2, 3, etc
+  versionNumber Int // 1, 2, 3, etc
 
   // Snapshot dos dados nesta versão
-  title           String
-  description     String?  @db.Text  // Nullable: Document.description é nullable
-  url             String
-  urlPDF          String?
-  category        String
-  tags            String   // JSON array as string
+  title       String
+  description String? @db.Text // Nullable: Document.description é nullable
+  url         String
+  urlPDF      String?
+  category    String
+  tags        String // JSON array as string
 
   // Campos específicos AGU
   onNumber        Int?
   onYear          Int?
-  alternativeUrls String?  @db.Text // JSON array
+  alternativeUrls String? @db.Text // JSON array
 
   // Metadados de mudança
-  changeType      String   // 'created' | 'updated' | 'minor_update' | 'major_update'
-  changesSummary  String?  @db.Text // Resumo das mudanças desta versão
-  changeDetails   String?  @db.Text // JSON com diff detalhado
+  changeType     String // 'created' | 'updated' | 'minor_update' | 'major_update'
+  changesSummary String? @db.Text // Resumo das mudanças desta versão
+  changeDetails  String? @db.Text // JSON com diff detalhado
 
   // Rastreamento
-  detectedAt      DateTime @default(now())
-  detectedBy      String?  // 'scraper' | 'admin' | email do admin
+  detectedAt DateTime @default(now())
+  detectedBy String? // 'scraper' | 'admin' | email do admin
 
   // Flags
   isCurrentVersion Boolean @default(false) // Se é a versão atual
@@ -316,75 +316,78 @@ model DocumentVersion {
 
 // Usuários (admin e estudantes)
 model User {
-  id           String   @id @default(uuid())
-  email        String   @unique
+  id           String @id @default(uuid())
+  email        String @unique
   name         String
   passwordHash String
-  role         String   // admin, student
+  role         String // admin, student
 
   // Verificação de email
-  emailVerified         Boolean   @default(false)
-  verificationToken     String?   @unique
-  verificationExpiry    DateTime?
+  emailVerified      Boolean   @default(false)
+  verificationToken  String?   @unique
+  verificationExpiry DateTime?
 
   // Recuperação de senha
-  resetPasswordToken    String?   @unique
-  resetPasswordExpiry   DateTime?
+  resetPasswordToken  String?   @unique
+  resetPasswordExpiry DateTime?
 
   // Relacionamento com cursos (para estudantes)
-  enrollments  Enrollment[]
+  enrollments Enrollment[]
 
   // Pagamentos (Stripe)
-  stripeCustomerId     String?
-  subscriptions        Subscription[]
+  stripeCustomerId String?
+  subscriptions    Subscription[]
 
   // LMS
   lmsReminderSentAt DateTime? // Último lembrete de inatividade LMS enviado
+
+  // Clipping diário TCU (LGPD opt-out)
+  clippingOptOut   Boolean   @default(false)
+  clippingOptOutAt DateTime?
 
   // Push Notifications
   pushSubscriptions PushSubscription[]
 
   // Módulo Planejamento (ETP/TR/Matriz)
-  planningSessions        PlanningSession[]
-  planningSnippets        PlanningLibrarySnippet[]
-  planningTrailsAuthored  PlanningTrailTemplate[]  @relation("PlanningTrailAuthor")
+  planningSessions         PlanningSession[]
+  planningSnippets         PlanningLibrarySnippet[]
+  planningTrailsAuthored   PlanningTrailTemplate[]   @relation("PlanningTrailAuthor")
   planningVersionsAuthored PlanningDocumentVersion[] @relation("PlanningVersionAuthor")
 
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   // Índices para otimização de queries
-  @@index([role])                    // Para filtrar admins/students
-  @@index([email, role])             // Para queries de autenticação
-  @@index([emailVerified])           // Para filtrar usuários verificados
-  @@index([createdAt])               // Para ordenação por data
+  @@index([role]) // Para filtrar admins/students
+  @@index([email, role]) // Para queries de autenticação
+  @@index([emailVerified]) // Para filtrar usuários verificados
+  @@index([createdAt]) // Para ordenação por data
 }
 
 // Matrícula de aluno em curso (via QR Code)
 model Enrollment {
-  id                  String    @id @default(uuid())
-  userId              String
-  user                User      @relation(fields: [userId], references: [id], onDelete: Cascade)
-  courseId            String
-  turma               String?
-  qrCodeId            String?   // QR Code usado no primeiro acesso
-  enrolledAt          DateTime  @default(now())
-  expiresAt           DateTime? // Data de expiração (1 ano após criação do QR Code da turma)
-  isLifetime          Boolean   @default(false) // Acesso vitalício
-  lifetimeUpgradedAt  DateTime? // Data do upgrade para vitalício
-  lifetimePrice       Float?    // Valor pago pelo upgrade vitalício
-  notificationSentAt  DateTime? // Data em que notificação de expiração foi enviada
+  id                 String    @id @default(uuid())
+  userId             String
+  user               User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  courseId           String
+  turma              String?
+  qrCodeId           String? // QR Code usado no primeiro acesso
+  enrolledAt         DateTime  @default(now())
+  expiresAt          DateTime? // Data de expiração (1 ano após criação do QR Code da turma)
+  isLifetime         Boolean   @default(false) // Acesso vitalício
+  lifetimeUpgradedAt DateTime? // Data do upgrade para vitalício
+  lifetimePrice      Float? // Valor pago pelo upgrade vitalício
+  notificationSentAt DateTime? // Data em que notificação de expiração foi enviada
 
   @@unique([userId, courseId])
-
   // Índices para otimização de queries
-  @@index([userId])                                      // Para buscar matrículas por usuário
-  @@index([courseId])                                    // Para buscar matrículas por curso
-  @@index([userId, courseId, isLifetime])                // Para verificações de acesso
-  @@index([expiresAt, isLifetime])                        // Para queries de expiração
-  @@index([expiresAt, isLifetime, notificationSentAt])   // Para cron job de notificações
-  @@index([isLifetime])                                  // Para estatísticas de upgrades
-  @@index([enrolledAt])                                  // Para ordenação por data
+  @@index([userId]) // Para buscar matrículas por usuário
+  @@index([courseId]) // Para buscar matrículas por curso
+  @@index([userId, courseId, isLifetime]) // Para verificações de acesso
+  @@index([expiresAt, isLifetime]) // Para queries de expiração
+  @@index([expiresAt, isLifetime, notificationSentAt]) // Para cron job de notificações
+  @@index([isLifetime]) // Para estatísticas de upgrades
+  @@index([enrolledAt]) // Para ordenação por data
 }
 
 // Log de acessos (para auditoria)
@@ -393,8 +396,8 @@ model AccessLog {
   userId     String?
   qrCode     String?
   courseId   String?
-  documentId String?  // ID do documento acessado/baixado
-  action     String   // login, access, download, view
+  documentId String? // ID do documento acessado/baixado
+  action     String // login, access, download, view
   ip         String?
   userAgent  String?
   createdAt  DateTime @default(now())
@@ -408,18 +411,18 @@ model AccessLog {
 
 // Favoritos dos usuários
 model Favorite {
-  id                 String   @id @default(uuid())
-  userId             String
+  id     String @id @default(uuid())
+  userId String
 
   // Suporta dois tipos de favoritos: documentos OU atos normativos
-  documentId         String?  // ID do documento (se for documento)
-  document           Document? @relation(fields: [documentId], references: [id], onDelete: SetNull)
-  legislativeActId   String?  // ID do ato normativo (se for ato)
-  legislativeAct     LegislativeAct? @relation(fields: [legislativeActId], references: [id], onDelete: SetNull)
+  documentId       String? // ID do documento (se for documento)
+  document         Document?       @relation(fields: [documentId], references: [id], onDelete: SetNull)
+  legislativeActId String? // ID do ato normativo (se for ato)
+  legislativeAct   LegislativeAct? @relation(fields: [legislativeActId], references: [id], onDelete: SetNull)
 
-  courseId           String?  // Para facilitar filtros por curso (apenas para documentos)
-  annotation         String?  // Anotação de estudo do aluno
-  createdAt          DateTime @default(now())
+  courseId   String? // Para facilitar filtros por curso (apenas para documentos)
+  annotation String? // Anotação de estudo do aluno
+  createdAt  DateTime @default(now())
 
   // Unique constraints separados para documentos e atos legislativos
   // PostgreSQL permite múltiplos NULLs em unique constraints, então um único
@@ -432,22 +435,22 @@ model Favorite {
 
 // Posts do Blog
 model BlogPost {
-  id                 String             @id @default(uuid())
-  slug               String             @unique
-  title              String
-  excerpt            String
-  content            String             // Texto longo do artigo
-  author             String
-  publishedAt        DateTime
-  isPublished        Boolean            @default(false)
-  tags               String?            // JSON array como string
-  leiArticles        String?            // JSON array com números de artigos da Lei 14.133/2021
-  autoPublishSocial  Boolean            @default(true) // Publicar automaticamente nas redes sociais
-  socialMediaImage   String?            // URL da imagem gerada para OG/redes sociais
-  createdAt          DateTime           @default(now())
-  updatedAt          DateTime           @updatedAt
+  id                String   @id @default(uuid())
+  slug              String   @unique
+  title             String
+  excerpt           String
+  content           String // Texto longo do artigo
+  author            String
+  publishedAt       DateTime
+  isPublished       Boolean  @default(false)
+  tags              String? // JSON array como string
+  leiArticles       String? // JSON array com números de artigos da Lei 14.133/2021
+  autoPublishSocial Boolean  @default(true) // Publicar automaticamente nas redes sociais
+  socialMediaImage  String? // URL da imagem gerada para OG/redes sociais
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
 
-  socialMediaPosts   SocialMediaPost[]  // Relação com publicações sociais
+  socialMediaPosts SocialMediaPost[] // Relação com publicações sociais
 
   // Full-Text Search
   search_vector Unsupported("tsvector")?
@@ -461,17 +464,17 @@ model BlogPost {
 model SocialMediaPost {
   id          String    @id @default(uuid())
   blogPostId  String
-  platform    String    // 'instagram' | 'linkedin' | 'twitter'
-  postId      String?   // ID do post na rede social
-  postUrl     String?   // URL do post publicado
+  platform    String // 'instagram' | 'linkedin' | 'twitter'
+  postId      String? // ID do post na rede social
+  postUrl     String? // URL do post publicado
   status      String    @default("pending") // 'pending' | 'published' | 'failed'
-  error       String?   // Mensagem de erro se falhar
+  error       String? // Mensagem de erro se falhar
   retryCount  Int       @default(0) // Número de tentativas
   publishedAt DateTime?
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
 
-  blogPost    BlogPost  @relation(fields: [blogPostId], references: [id], onDelete: Cascade)
+  blogPost BlogPost @relation(fields: [blogPostId], references: [id], onDelete: Cascade)
 
   @@index([blogPostId])
   @@index([platform])
@@ -482,32 +485,32 @@ model SocialMediaPost {
 // Publicações Acadêmicas (Livros, Artigos, Notícias)
 model Publication {
   id          String   @id @default(uuid())
-  type        String   // livro, artigo, noticia
+  type        String // livro, artigo, noticia
   title       String
-  description String   // Resumo/descrição
-  content     String?  // Conteúdo completo (opcional para artigos externos)
+  description String // Resumo/descrição
+  content     String? // Conteúdo completo (opcional para artigos externos)
   author      String
   publishedAt DateTime
   isPublished Boolean  @default(false)
 
   // Campos específicos para livros
-  publisher   String?  // Editora
-  isbn        String?  // ISBN
-  coverImage  String?  // URL da imagem de capa
+  publisher  String? // Editora
+  isbn       String? // ISBN
+  coverImage String? // URL da imagem de capa
 
   // Campos para artigos/links externos
-  externalUrl String?  // Link para artigo externo
-  journal     String?  // Nome da revista/jornal
+  externalUrl String? // Link para artigo externo
+  journal     String? // Nome da revista/jornal
 
   // Campos para notícias/eventos
-  eventDate   DateTime? // Data do evento
-  location    String?   // Local do evento
+  eventDate DateTime? // Data do evento
+  location  String? // Local do evento
 
   // Catalogação por artigos da Lei 14.133/2021
-  leiArticles String?   // JSON array com números de artigos da Lei 14.133/2021
+  leiArticles String? // JSON array com números de artigos da Lei 14.133/2021
 
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@index([type])
   @@index([isPublished])
@@ -521,7 +524,7 @@ model ContactForm {
   name           String
   email          String
   phone          String?
-  courseInterest String?  // Nome do curso de interesse
+  courseInterest String? // Nome do curso de interesse
   message        String
   isRead         Boolean  @default(false)
   createdAt      DateTime @default(now())
@@ -532,12 +535,12 @@ model ContactForm {
 
 // Newsletter - Cadastro de Interessados
 model NewsletterSubscriber {
-  id             String   @id @default(uuid())
-  email          String   @unique
+  id             String    @id @default(uuid())
+  email          String    @unique
   name           String?
-  interests      String?  // JSON array com temas de interesse
-  isActive       Boolean  @default(true)
-  subscribedAt   DateTime @default(now())
+  interests      String? // JSON array com temas de interesse
+  isActive       Boolean   @default(true)
+  subscribedAt   DateTime  @default(now())
   unsubscribedAt DateTime?
 
   @@index([isActive])
@@ -546,30 +549,30 @@ model NewsletterSubscriber {
 
 // Depoimentos/Testemunhos de Alunos
 model Testimonial {
-  id             String   @id @default(uuid())
-  name           String
-  email          String
-  phone          String?
-  role           String   // Cargo/função da pessoa
-  text           String   // Texto do depoimento
-  rating         Int      @default(5) // Avaliação de 1-5 estrelas
-  avatar         String   @default("U") // Inicial para avatar
-  color          String   @default("from-blue-400 to-blue-600") // Cor do avatar
+  id     String  @id @default(uuid())
+  name   String
+  email  String
+  phone  String?
+  role   String // Cargo/função da pessoa
+  text   String // Texto do depoimento
+  rating Int     @default(5) // Avaliação de 1-5 estrelas
+  avatar String  @default("U") // Inicial para avatar
+  color  String  @default("from-blue-400 to-blue-600") // Cor do avatar
 
   // Status de moderação
-  status         String   @default("pending") // pending, approved, rejected
-  moderatedBy    String?  // ID do admin que moderou
-  moderatedAt    DateTime?
+  status          String    @default("pending") // pending, approved, rejected
+  moderatedBy     String? // ID do admin que moderou
+  moderatedAt     DateTime?
   rejectionReason String? // Motivo da rejeição (se aplicável)
 
   // Relacionamento com formulário de contato (opcional)
-  contactFormId  String?  @unique
+  contactFormId String? @unique
 
   // Relacionamento com usuário (se for um aluno logado)
-  userId         String?
+  userId String?
 
-  createdAt      DateTime @default(now())
-  updatedAt      DateTime @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@index([status])
   @@index([createdAt])
@@ -578,19 +581,19 @@ model Testimonial {
 
 // Sites Recomendados (compartilhados entre cursos)
 model RecommendedSite {
-  id          String   @id @default(uuid())
-  title       String   // Nome do site
-  description String   // Breve descrição do site
-  url         String   // URL completa do site
-  faviconUrl  String?  // URL do favicon (buscado automaticamente)
-  category    String?  // Categoria opcional (jurisprudência, legislação, etc.)
-  displayOrder Int     @default(0) // Ordem de exibição
-  isActive    Boolean  @default(true)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  id           String   @id @default(uuid())
+  title        String // Nome do site
+  description  String // Breve descrição do site
+  url          String // URL completa do site
+  faviconUrl   String? // URL do favicon (buscado automaticamente)
+  category     String? // Categoria opcional (jurisprudência, legislação, etc.)
+  displayOrder Int      @default(0) // Ordem de exibição
+  isActive     Boolean  @default(true)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
 
   // Relação many-to-many com cursos
-  courses     SiteToCourse[]
+  courses SiteToCourse[]
 
   // Full-Text Search
   search_vector Unsupported("tsvector")?
@@ -601,13 +604,13 @@ model RecommendedSite {
 
 // Tabela de junção: Sites x Cursos (many-to-many)
 model SiteToCourse {
-  id             String          @id @default(uuid())
-  siteId         String
-  courseId       String
-  displayOrder   Int             @default(0) // Ordem específica para este curso
-  createdAt      DateTime        @default(now())
+  id           String   @id @default(uuid())
+  siteId       String
+  courseId     String
+  displayOrder Int      @default(0) // Ordem específica para este curso
+  createdAt    DateTime @default(now())
 
-  site           RecommendedSite @relation(fields: [siteId], references: [id], onDelete: Cascade)
+  site RecommendedSite @relation(fields: [siteId], references: [id], onDelete: Cascade)
 
   @@unique([siteId, courseId])
   @@index([courseId])
@@ -616,17 +619,17 @@ model SiteToCourse {
 
 // Vídeos do YouTube por curso
 model CourseVideo {
-  id            String   @id @default(uuid())
-  courseId      String   // ID do curso (da lista estática)
-  title         String   // Título do vídeo
-  description   String?  // Descrição do vídeo
-  youtubeUrl    String   // URL completa do YouTube
-  youtubeId     String   // ID extraído do YouTube (para embed)
-  thumbnailUrl  String?  // URL da thumbnail (gerado automaticamente)
-  displayOrder  Int      @default(0) // Ordem de exibição
-  isActive      Boolean  @default(true)
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
+  id           String   @id @default(uuid())
+  courseId     String // ID do curso (da lista estática)
+  title        String // Título do vídeo
+  description  String? // Descrição do vídeo
+  youtubeUrl   String // URL completa do YouTube
+  youtubeId    String // ID extraído do YouTube (para embed)
+  thumbnailUrl String? // URL da thumbnail (gerado automaticamente)
+  displayOrder Int      @default(0) // Ordem de exibição
+  isActive     Boolean  @default(true)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
 
   // Relacionamento com lições (LMS)
   lessonVideos LessonVideo[]
@@ -641,31 +644,31 @@ model CourseVideo {
 
 // Analytics de análises automáticas de documentos
 model DocumentAnalysis {
-  id                String   @id @default(uuid())
-  documentId        String?  // ID do documento criado (null se ainda não criado)
-  documentTitle     String   // Título do documento analisado
-  documentType      String?  // Tipo de arquivo (pdf, docx, etc.)
+  id            String  @id @default(uuid())
+  documentId    String? // ID do documento criado (null se ainda não criado)
+  documentTitle String // Título do documento analisado
+  documentType  String? // Tipo de arquivo (pdf, docx, etc.)
 
   // Dados da análise
-  textLength        Int      // Quantidade de texto analisado
-  pageCount         Int?     // Número de páginas (se PDF)
-  citationsFound    Int      @default(0) // Artigos citados explicitamente
-  keywordsMatched   Int      @default(0) // Palavras-chave encontradas
+  textLength      Int // Quantidade de texto analisado
+  pageCount       Int? // Número de páginas (se PDF)
+  citationsFound  Int  @default(0) // Artigos citados explicitamente
+  keywordsMatched Int  @default(0) // Palavras-chave encontradas
 
   // Sugestões geradas
-  suggestedArticles String   // JSON array com artigos sugeridos
-  totalSuggestions  Int      @default(0) // Total de sugestões geradas
+  suggestedArticles String // JSON array com artigos sugeridos
+  totalSuggestions  Int    @default(0) // Total de sugestões geradas
 
   // Resultados (o que o usuário aceitou)
-  acceptedArticles  String?  // JSON array com artigos aceitos
-  acceptedCount     Int      @default(0) // Quantos foram aceitos
+  acceptedArticles String? // JSON array com artigos aceitos
+  acceptedCount    Int     @default(0) // Quantos foram aceitos
 
   // Métricas calculadas
-  precision         Float?   // % de sugestões aceitas (precision)
+  precision Float? // % de sugestões aceitas (precision)
 
   // Metadados
-  createdAt         DateTime @default(now())
-  userId            String?  // Quem fez a análise (opcional)
+  createdAt DateTime @default(now())
+  userId    String? // Quem fez a análise (opcional)
 
   @@index([createdAt])
   @@index([documentId])
@@ -674,18 +677,18 @@ model DocumentAnalysis {
 
 // Glossário de Termos Técnicos
 model GlossaryTerm {
-  id          String   @id @default(uuid())
+  id String @id @default(uuid())
 
   // Identificação
-  term        String   @unique // Ex: "Pregão Eletrônico"
-  slug        String   @unique // Ex: "pregao-eletronico"
+  term String @unique // Ex: "Pregão Eletrônico"
+  slug String @unique // Ex: "pregao-eletronico"
 
   // Conteúdo
-  definition  String   @db.Text // Definição completa
-  shortDef    String?  // Definição curta para tooltips
+  definition String  @db.Text // Definição completa
+  shortDef   String? // Definição curta para tooltips
 
   // Categorização
-  category    String?  // Ex: "Modalidade", "Fase", "Documento", "Legislação"
+  category String? // Ex: "Modalidade", "Fase", "Documento", "Legislação"
 
   // Relacionamentos (JSON arrays)
   relatedTerms String? // IDs de termos relacionados
@@ -693,18 +696,18 @@ model GlossaryTerm {
   relatedDocs  String? // IDs de documentos relacionados
 
   // Referências externas
-  externalUrl  String? // Link para legislação oficial
+  externalUrl String? // Link para legislação oficial
 
   // Analytics
-  viewCount    Int      @default(0)
+  viewCount Int @default(0)
 
   // Visibilidade
-  isPublic     Boolean  @default(true)
+  isPublic Boolean @default(true)
 
   // Auditoria
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
-  createdBy    String?  // Email do admin
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  createdBy String? // Email do admin
 
   // Full-Text Search
   search_vector Unsupported("tsvector")?
@@ -717,22 +720,22 @@ model GlossaryTerm {
 
 // Atos Normativos (Decretos, Portarias, INs, etc.)
 model LegislativeAct {
-  id          String   @id @default(uuid())
+  id String @id @default(uuid())
 
   // Identificação do ato
-  type        String   // "decreto" | "portaria" | "in" | "ordem-servico" | "lei" | "medida-provisoria"
-  number      String   // "10.024" (número do ato)
-  year        Int      // 2019 (ano do ato)
-  fullNumber  String   @unique // "Decreto 10.024/2019" (identificador completo único)
+  type       String // "decreto" | "portaria" | "in" | "ordem-servico" | "lei" | "medida-provisoria"
+  number     String // "10.024" (número do ato)
+  year       Int // 2019 (ano do ato)
+  fullNumber String @unique // "Decreto 10.024/2019" (identificador completo único)
 
   // Conteúdo
-  title       String   // Título oficial do ato
-  ementa      String   @db.Text // Ementa oficial
-  summary     String?  @db.Text // Resumo didático para alunos
+  title   String // Título oficial do ato
+  ementa  String  @db.Text // Ementa oficial
+  summary String? @db.Text // Resumo didático para alunos
 
   // Metadados estruturais
-  issuer      String   // "Presidência" | "MGI" | "SEGES" | "AGU" | "TCU" (órgão emissor)
-  publishDate DateTime // Data de publicação oficial
+  issuer        String // "Presidência" | "MGI" | "SEGES" | "AGU" | "TCU" (órgão emissor)
+  publishDate   DateTime // Data de publicação oficial
   effectiveDate DateTime? // Data de vigência (pode ser diferente da publicação)
 
   // Hierarquia normativa (1=mais alta, 5=mais baixa)
@@ -742,44 +745,44 @@ model LegislativeAct {
   leiArticles String? // JSON array com números de artigos regulamentados (ex: ["75", "76"])
 
   // Recursos e documentos
-  officialUrl  String? // Link para Planalto/DOU
-  pdfUrl       String? // Link para PDF do ato
-  content      String? @db.Text // Texto completo do ato (opcional)
-  annexesJson  String? @db.Text // JSON array: [{"name":"Anexo I","url":"https://...","type":"pdf"}]
+  officialUrl String? // Link para Planalto/DOU
+  pdfUrl      String? // Link para PDF do ato
+  content     String? @db.Text // Texto completo do ato (opcional)
+  annexesJson String? @db.Text // JSON array: [{"name":"Anexo I","url":"https://...","type":"pdf"}]
 
   // Classificação e filtros avançados
-  esfera      String  @default("federal")  // "federal" | "estadual"
-  themes      String?                       // JSON array: ["planejamento","contratos"]
+  esfera String  @default("federal") // "federal" | "estadual"
+  themes String? // JSON array: ["planejamento","contratos"]
 
   // Destaque editorial — espelha Document.notesImportance
   // 'baixa' | 'media' | 'alta' | 'critica'. Null = sem marcação (usa heurística).
   // Usado pelo /api/lei-14133/article-docs pra priorizar atos no Top 5 destaques
   // de cada artigo da Lei 14.133. Override forte sobre score automático.
-  importance  String?
+  importance String?
 
   // Analytics
-  viewCount   Int     @default(0)
+  viewCount Int @default(0)
 
   // Scraping e atualização automática
-  contentHash       String?   // Hash MD5 para detectar mudanças no texto
-  lastScrapedAt     DateTime? // Última tentativa de scraping
-  scrapeStatus      String?   // 'success' | 'failed' | 'pending' | 'unchanged' | 'manual'
-  scrapeError       String?   @db.Text // Mensagem de erro (se falhou)
-  changeDetectedAt  DateTime? // Quando uma mudança foi detectada
-  notifyOnChange    Boolean   @default(true) // Notificar admin sobre mudanças
+  contentHash      String? // Hash MD5 para detectar mudanças no texto
+  lastScrapedAt    DateTime? // Última tentativa de scraping
+  scrapeStatus     String? // 'success' | 'failed' | 'pending' | 'unchanged' | 'manual'
+  scrapeError      String?   @db.Text // Mensagem de erro (se falhou)
+  changeDetectedAt DateTime? // Quando uma mudança foi detectada
+  notifyOnChange   Boolean   @default(true) // Notificar admin sobre mudanças
 
   // Notificações
-  notifiedAt  DateTime? // Data em que alunos foram notificados sobre este ato
+  notifiedAt DateTime? // Data em que alunos foram notificados sobre este ato
 
   // Auditoria
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-  createdBy   String?  // Email do admin
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  createdBy String? // Email do admin
 
   // Sistema de Embeddings/Busca Semântica
-  embeddingStatus    String?   // pending|processing|completed|failed
-  chunkCount         Int       @default(0) // Número de chunks gerados
-  embeddedAt         DateTime? // Data em que os embeddings foram gerados
+  embeddingStatus String? // pending|processing|completed|failed
+  chunkCount      Int       @default(0) // Número de chunks gerados
+  embeddedAt      DateTime? // Data em que os embeddings foram gerados
 
   // Relacionamento com favoritos
   favorites Favorite[]
@@ -794,6 +797,12 @@ model LegislativeAct {
   // Full-Text Search
   search_vector Unsupported("tsvector")?
 
+  // Previne duplicatas do mesmo ato real-world quando o issuer aparece em
+  // formas diferentes ("SEGES" vs "SEGES/MGI" pós-2023). Antes desta
+  // restrição existiam 21 grupos duplicados — limpos via
+  // scripts/dedupe-legislative-acts.ts. Ver lib/legislative-scrapers/normalize.ts
+  // para a normalização que evita gerar novas duplicatas no scrape.
+  @@unique([type, number, year])
   // Índices para otimização
   @@index([type])
   @@index([issuer])
@@ -807,60 +816,53 @@ model LegislativeAct {
   @@index([lastScrapedAt])
   @@index([scrapeStatus])
   @@index([embeddingStatus])
-
-  // Previne duplicatas do mesmo ato real-world quando o issuer aparece em
-  // formas diferentes ("SEGES" vs "SEGES/MGI" pós-2023). Antes desta
-  // restrição existiam 21 grupos duplicados — limpos via
-  // scripts/dedupe-legislative-acts.ts. Ver lib/legislative-scrapers/normalize.ts
-  // para a normalização que evita gerar novas duplicatas no scrape.
-  @@unique([type, number, year])
 }
 
 // Chunks de atos legislativos com embeddings (Busca Semântica)
 model LegislativeActChunk {
-  id               String   @id @default(uuid())
+  id               String         @id @default(uuid())
   legislativeActId String
   legislativeAct   LegislativeAct @relation(fields: [legislativeActId], references: [id], onDelete: Cascade)
 
-  chunkIndex  Int      // Posição no documento (0, 1, 2...)
-  content     String   @db.Text // Conteúdo do chunk
-  charStart   Int      // Posição inicial no texto original
-  charEnd     Int      // Posição final no texto original
-  embedding   Unsupported("vector(768)") // Embedding do Gemini gemini-embedding-001
+  chunkIndex Int // Posição no documento (0, 1, 2...)
+  content    String                     @db.Text // Conteúdo do chunk
+  charStart  Int // Posição inicial no texto original
+  charEnd    Int // Posição final no texto original
+  embedding  Unsupported("vector(768)") // Embedding do Gemini gemini-embedding-001
 
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@index([legislativeActId])
 }
 
 // Perguntas Frequentes (FAQ)
 model FAQ {
-  id          String   @id @default(uuid())
+  id String @id @default(uuid())
 
   // Conteúdo
-  question    String   // Pergunta
-  answer      String   @db.Text // Resposta (suporta markdown)
+  question String // Pergunta
+  answer   String @db.Text // Resposta (suporta markdown)
 
   // Categorização
-  category    String   // Ex: "Acesso ao Site", "Documentos", "Certificados", "Cursos"
+  category String // Ex: "Acesso ao Site", "Documentos", "Certificados", "Cursos"
 
   // Ordem e destaque
   displayOrder Int     @default(0)
   isPinned     Boolean @default(false) // Perguntas destacadas no topo
 
   // Visibilidade
-  isPublished  Boolean @default(true)
+  isPublished Boolean @default(true)
 
   // Analytics
-  viewCount    Int     @default(0)
-  helpfulCount Int     @default(0)
-  notHelpfulCount Int  @default(0)
+  viewCount       Int @default(0)
+  helpfulCount    Int @default(0)
+  notHelpfulCount Int @default(0)
 
   // Relacionamentos (JSON arrays)
-  relatedFAQs  String? // IDs de FAQs relacionadas
-  relatedDocs  String? // IDs de documentos
-  keywords     String? // Palavras-chave para busca
+  relatedFAQs String? // IDs de FAQs relacionadas
+  relatedDocs String? // IDs de documentos
+  keywords    String? // Palavras-chave para busca
 
   // Relacionamento com feedbacks
   feedbacks FAQFeedback[]
@@ -869,9 +871,9 @@ model FAQ {
   search_vector Unsupported("tsvector")?
 
   // Auditoria
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
-  createdBy    String?  // Email do admin
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  createdBy String? // Email do admin
 
   @@index([category])
   @@index([isPublished])
@@ -881,18 +883,18 @@ model FAQ {
 
 // Feedback de FAQ
 model FAQFeedback {
-  id          String   @id @default(uuid())
-  faqId       String
-  faq         FAQ      @relation(fields: [faqId], references: [id], onDelete: Cascade)
+  id    String @id @default(uuid())
+  faqId String
+  faq   FAQ    @relation(fields: [faqId], references: [id], onDelete: Cascade)
 
-  wasHelpful  Boolean  // true = útil, false = não útil
-  comment     String?  // Feedback opcional do usuário
+  wasHelpful Boolean // true = útil, false = não útil
+  comment    String? // Feedback opcional do usuário
 
   // Identificação do usuário
-  userEmail   String?  // Se logado
-  ip          String?  // IP do usuário
+  userEmail String? // Se logado
+  ip        String? // IP do usuário
 
-  createdAt   DateTime @default(now())
+  createdAt DateTime @default(now())
 
   @@index([faqId])
   @@index([wasHelpful])
@@ -902,41 +904,41 @@ model FAQFeedback {
 // Perguntas sobre Artigos da Lei (IA Assistente - Fase 3)
 // Armazena histórico de perguntas para analytics e futuro treinamento
 model ArticleQuestion {
-  id              String   @id @default(uuid())
-  articleNumber   String   // Número do artigo (ex: "75")
+  id            String @id @default(uuid())
+  articleNumber String // Número do artigo (ex: "75")
 
   // Pergunta do usuário
-  question        String   @db.Text
+  question String @db.Text
 
   // Contexto usado para responder (IDs de documentos relevantes)
-  contextDocIds   String?  // JSON array com IDs de documentos
+  contextDocIds String? // JSON array com IDs de documentos
 
   // Resposta (vazio até IA ser ativada)
-  answer          String?  @db.Text
-  aiProvider      String?  // "anthropic-claude" | "openai" | "gemini" | null
+  answer     String? @db.Text
+  aiProvider String? // "anthropic-claude" | "openai" | "gemini" | null
 
   // Metadados do Gemini (quando gemini usado)
-  geminiModel     String?  // Modelo usado (ex: "gemini-2.5-flash")
-  geminiTokens    Int?     // Total de tokens usados
-  geminiLatency   Int?     // Latência em ms
-  geminiCached    Boolean? // Se resposta veio do cache
+  geminiModel   String? // Modelo usado (ex: "gemini-2.5-flash")
+  geminiTokens  Int? // Total de tokens usados
+  geminiLatency Int? // Latência em ms
+  geminiCached  Boolean? // Se resposta veio do cache
 
   // Conversa (para manter contexto entre mensagens)
-  conversationId  String?
+  conversationId String?
 
   // Analytics
   wasHelpful      Boolean? // Feedback do usuário
   feedbackComment String?
 
   // Identificação do usuário
-  userId          String?
-  userEmail       String?
-  ip              String?
+  userId    String?
+  userEmail String?
+  ip        String?
 
   // Controle
-  isPlaceholder   Boolean  @default(true) // true = IA não ativa ainda
-  createdAt       DateTime @default(now())
-  respondedAt     DateTime? // Quando a IA responder (futuro)
+  isPlaceholder Boolean   @default(true) // true = IA não ativa ainda
+  createdAt     DateTime  @default(now())
+  respondedAt   DateTime? // Quando a IA responder (futuro)
 
   @@index([articleNumber])
   @@index([conversationId])
@@ -965,45 +967,45 @@ model DOUStagingDocument {
   organ       String? @db.Text
 
   // Classificação automática
-  category         String // fonte_agu, ato_normativo, acordao_tcu, etc
-  approvalStatus   String // auto_approved, pending, auto_rejected, manually_approved, manually_rejected
-  confidence       Int // 0-100
-  reasoning        String @db.Text // JSON array de strings
-  isRelevant       Boolean
-  requiresReview   Boolean
+  category       String // fonte_agu, ato_normativo, acordao_tcu, etc
+  approvalStatus String // auto_approved, pending, auto_rejected, manually_approved, manually_rejected
+  confidence     Int // 0-100
+  reasoning      String  @db.Text // JSON array de strings
+  isRelevant     Boolean
+  requiresReview Boolean
 
   // Aprovação manual
-  reviewedBy   String? // ID do admin que revisou
-  reviewedAt   DateTime?
-  adminNotes   String? @db.Text
+  reviewedBy    String? // ID do admin que revisou
+  reviewedAt    DateTime?
+  adminNotes    String?   @db.Text
   finalDecision String? // approved ou rejected
 
   // Feedback loop (classificação)
   classificationCorrect Boolean? // true=classificação automática estava correta, false=incorreta
-  correctedCategory     String?  // Categoria correta quando admin discorda da classificação
+  correctedCategory     String? // Categoria correta quando admin discorda da classificação
 
   // Importação
-  imported      Boolean @default(false)
-  importedAt    DateTime?
-  documentId    String? // ID do Document criado após importação
+  imported   Boolean   @default(false)
+  importedAt DateTime?
+  documentId String? // ID do Document criado após importação
 
   // Controle
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
   // === Clipping v2 — enrichment IA editorial ===
-  editorialScore        Int?       // 0-100 do classificador IA editorial
-  editorialReason       String?    @db.Text  // 1-2 frases: "por que é relevante"
-  editorialSummary      String?    @db.Text  // 2-3 frases neutras: "o que o ato faz"
-  editorialAffects      String?    @db.Text  // JSON array: ["Lei 14.133", ...]
-  editorialActType      String?              // "decreto" | "portaria" | "in" | "lei" | "mp" | "on"
-  editorialAmbiguous    Boolean    @default(false)
-  editorialModel        String?              // ex: "gemini-3-flash-preview"
-  editorialPromptVer    String?              // "v1", "v2"...
+  editorialScore        Int? // 0-100 do classificador IA editorial
+  editorialReason       String?   @db.Text // 1-2 frases: "por que é relevante"
+  editorialSummary      String?   @db.Text // 2-3 frases neutras: "o que o ato faz"
+  editorialAffects      String?   @db.Text // JSON array: ["Lei 14.133", ...]
+  editorialActType      String? // "decreto" | "portaria" | "in" | "lei" | "mp" | "on"
+  editorialAmbiguous    Boolean   @default(false)
+  editorialModel        String? // ex: "gemini-3-flash-preview"
+  editorialPromptVer    String? // "v1", "v2"...
   editorialClassifiedAt DateTime?
 
   // Origem do staging (cron diário vs lookback CLI)
-  source                String?    @default("cron") // "cron" | "lookback"
+  source String? @default("cron") // "cron" | "lookback"
 
   @@index([approvalStatus])
   @@index([category])
@@ -1019,21 +1021,21 @@ model DOUStagingDocument {
 
 // Filtros personalizados salvos para DOU
 model DOUSavedFilter {
-  id          String   @id @default(uuid())
-  name        String   // Nome do filtro (ex: "AGU Última Semana", "TCU Alto Impacto")
-  description String?  // Descrição opcional
+  id          String  @id @default(uuid())
+  name        String // Nome do filtro (ex: "AGU Última Semana", "TCU Alto Impacto")
+  description String? // Descrição opcional
 
   // Configuração do filtro (JSON)
-  filterConfig String  @db.Text // JSON com todos os parâmetros do filtro
+  filterConfig String @db.Text // JSON com todos os parâmetros do filtro
 
   // Controle
-  createdBy   String   // ID do usuário que criou
-  isPublic    Boolean  @default(false) // Se true, todos os admins podem usar
-  usageCount  Int      @default(0) // Contador de uso
-  lastUsedAt  DateTime?
+  createdBy  String // ID do usuário que criou
+  isPublic   Boolean   @default(false) // Se true, todos os admins podem usar
+  usageCount Int       @default(0) // Contador de uso
+  lastUsedAt DateTime?
 
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@index([createdBy])
   @@index([isPublic])
@@ -1058,22 +1060,22 @@ model DOUSavedFilter {
 // Artigos da Lei 14.133/2021 - Nova Lei de Licitações
 // Armazena os 195 artigos (193 + Art. 184-A + Art. 194) para permitir edição via admin
 model LeiArticle {
-  id               String   @id @default(uuid())
-  numero           String   @unique // "1", "2", "3", etc.
-  titulo           String?  // "TÍTULO I - DISPOSIÇÕES PRELIMINARES"
-  capituloCompleto String?  // "CAPÍTULO I - DO ÂMBITO DE APLICAÇÃO DESTA LEI"
-  ementa           String   @db.Text // Texto completo do artigo
-  capitulo         String   // "TÍTULO I - CAPÍTULO I"
-  secao            String?  // "Disposições Preliminares"
+  id               String  @id @default(uuid())
+  numero           String  @unique // "1", "2", "3", etc.
+  titulo           String? // "TÍTULO I - DISPOSIÇÕES PRELIMINARES"
+  capituloCompleto String? // "CAPÍTULO I - DO ÂMBITO DE APLICAÇÃO DESTA LEI"
+  ementa           String  @db.Text // Texto completo do artigo
+  capitulo         String // "TÍTULO I - CAPÍTULO I"
+  secao            String? // "Disposições Preliminares"
 
-  professorComment String? @db.Text   // Markdown — bloco editorial do prof
+  professorComment String?   @db.Text // Markdown — bloco editorial do prof
   commentUpdatedAt DateTime?
 
   crossRefs         LeiArticleCrossRef[]
   suggestedReadings LeiArticleSuggestedReading[]
 
-  createdAt        DateTime @default(now())
-  updatedAt        DateTime @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@index([numero])
   @@index([capitulo])
@@ -1082,28 +1084,28 @@ model LeiArticle {
 // Histórico de Pesquisas IA (para alunos retomarem consultas)
 // Também serve como analytics de uso — consulte /api/admin/search-analytics.
 model SearchHistory {
-  id           String   @id @default(uuid())
+  id           String    @id @default(uuid())
   userId       String
   // 'documents' (busca geral no acervo via /api/documents/query)
   // 'jurisprudencia' (busca na aba de jurisprudência via /api/jurisprudencia/query)
-  type         String   @default("documents")
+  type         String    @default("documents")
   query        String
   // Filtros aplicados no momento da busca (courseId, category, tribunal, etc.).
   // JSON porque o shape varia por `type`. Essencial pra reproduzir queries
   // exatamente no eval do golden set.
-  filters      String?  @db.Text
-  aiAnswer     String?  @db.Text
-  sources      String?  // JSON: [{title, category, url}]
-  legalSources String?  // JSON: [{type, title, url}]
+  filters      String?   @db.Text
+  aiAnswer     String?   @db.Text
+  sources      String? // JSON: [{title, category, url}]
+  legalSources String? // JSON: [{type, title, url}]
   // Feedback do aluno: -1 (ruim), 1 (boa), null (não avaliou). Usado para
   // calibrar retrieval contra uso real e priorizar queries problemáticas
   // para anotação manual no golden set.
   feedback     Int?
-  feedbackNote String?  @db.Text
+  feedbackNote String?   @db.Text
   feedbackAt   DateTime?
-  isPublic     Boolean  @default(false)
-  shareId      String?  @unique
-  createdAt    DateTime @default(now())
+  isPublic     Boolean   @default(false)
+  shareId      String?   @unique
+  createdAt    DateTime  @default(now())
 
   @@index([userId, createdAt])
   @@index([userId])
@@ -1114,30 +1116,30 @@ model SearchHistory {
 // Fila de Indexação (Background Jobs para Embeddings)
 // Processa geração de embeddings de forma assíncrona
 model IndexJob {
-  id            String   @id @default(uuid())
+  id String @id @default(uuid())
 
   // Tipo de conteúdo a indexar
-  entityType    String   // 'document' | 'glossary' | 'lei-article' | 'blog-post'
-  entityId      String   // ID da entidade (Document, GlossaryTerm, LeiArticle, BlogPost)
+  entityType String // 'document' | 'glossary' | 'lei-article' | 'blog-post'
+  entityId   String // ID da entidade (Document, GlossaryTerm, LeiArticle, BlogPost)
 
   // Status do job
-  status        String   @default("pending") // 'pending' | 'processing' | 'completed' | 'failed'
-  priority      Int      @default(0) // Maior = mais prioritário (0-10)
+  status   String @default("pending") // 'pending' | 'processing' | 'completed' | 'failed'
+  priority Int    @default(0) // Maior = mais prioritário (0-10)
 
   // Dados para indexação
-  r2Key         String?  // Chave R2 do arquivo (para documents)
-  textContent   String?  @db.Text // Conteúdo textual já extraído (para otimização)
-  metadata      String?  @db.Text // Metadados adicionais em JSON
+  r2Key       String? // Chave R2 do arquivo (para documents)
+  textContent String? @db.Text // Conteúdo textual já extraído (para otimização)
+  metadata    String? @db.Text // Metadados adicionais em JSON
 
   // Controle de reprocessamento
-  attempts      Int      @default(0)
-  maxAttempts   Int      @default(3)
-  lastError     String?  @db.Text
+  attempts    Int     @default(0)
+  maxAttempts Int     @default(3)
+  lastError   String? @db.Text
 
   // Timestamps
-  createdAt     DateTime @default(now())
-  processedAt   DateTime? // Quando foi processado
-  scheduledFor  DateTime? // Para agendamento futuro (opcional)
+  createdAt    DateTime  @default(now())
+  processedAt  DateTime? // Quando foi processado
+  scheduledFor DateTime? // Para agendamento futuro (opcional)
 
   @@index([status])
   @@index([priority, status])
@@ -1153,7 +1155,7 @@ model IndexJob {
 // Módulo: subdivisão de um curso
 model Module {
   id           String   @id @default(uuid())
-  courseId      String
+  courseId     String
   title        String
   description  String?  @db.Text
   displayOrder Int      @default(0)
@@ -1169,17 +1171,17 @@ model Module {
 
 // Lição: unidade de aprendizagem dentro de um módulo
 model Lesson {
-  id               String   @id @default(uuid())
+  id               String  @id @default(uuid())
   moduleId         String
-  module           Module   @relation(fields: [moduleId], references: [id], onDelete: Cascade)
+  module           Module  @relation(fields: [moduleId], references: [id], onDelete: Cascade)
   title            String
   slug             String
-  description      String?  @db.Text
-  content          String?  @db.Text
-  displayOrder     Int      @default(0)
-  isPublished      Boolean  @default(false)
+  description      String? @db.Text
+  content          String? @db.Text
+  displayOrder     Int     @default(0)
+  isPublished      Boolean @default(false)
   estimatedMinutes Int?
-  requiresQuizPass Boolean  @default(false)
+  requiresQuizPass Boolean @default(false)
 
   // Pré-requisito: outra lição que precisa ser completada antes
   prerequisiteId String?
@@ -1208,15 +1210,15 @@ model Lesson {
 
 // Junction: Lesson ↔ Document
 model LessonDocument {
-  id          String   @id @default(uuid())
-  lessonId    String
-  lesson      Lesson   @relation(fields: [lessonId], references: [id], onDelete: Cascade)
-  documentId  String
-  document    Document @relation(fields: [documentId], references: [id], onDelete: Cascade)
-  displayOrder Int     @default(0)
-  isRequired  Boolean  @default(false)
-  note        String?
-  createdAt   DateTime @default(now())
+  id           String   @id @default(uuid())
+  lessonId     String
+  lesson       Lesson   @relation(fields: [lessonId], references: [id], onDelete: Cascade)
+  documentId   String
+  document     Document @relation(fields: [documentId], references: [id], onDelete: Cascade)
+  displayOrder Int      @default(0)
+  isRequired   Boolean  @default(false)
+  note         String?
+  createdAt    DateTime @default(now())
 
   @@unique([lessonId, documentId])
   @@index([lessonId])
@@ -1229,7 +1231,7 @@ model LessonVideo {
   lessonId      String
   lesson        Lesson       @relation(fields: [lessonId], references: [id], onDelete: Cascade)
   courseVideoId String?
-  courseVideo   CourseVideo?  @relation(fields: [courseVideoId], references: [id], onDelete: SetNull)
+  courseVideo   CourseVideo? @relation(fields: [courseVideoId], references: [id], onDelete: SetNull)
   title         String
   youtubeUrl    String
   youtubeId     String
@@ -1254,8 +1256,8 @@ model LessonProgress {
   lastAccessedAt   DateTime?
   timeSpentSeconds Int       @default(0)
   contentRead      Boolean   @default(false)
-  videosWatched    String?   // JSON array de videoIds
-  documentsViewed  String?   // JSON array de documentIds
+  videosWatched    String? // JSON array de videoIds
+  documentsViewed  String? // JSON array de documentIds
   createdAt        DateTime  @default(now())
   updatedAt        DateTime  @updatedAt
 
@@ -1267,20 +1269,20 @@ model LessonProgress {
 
 // Discussão por lição (threaded)
 model LessonComment {
-  id        String   @id @default(uuid())
-  lessonId  String
-  lesson    Lesson   @relation(fields: [lessonId], references: [id], onDelete: Cascade)
-  userId    String
-  parentId  String?
-  parent    LessonComment?  @relation("CommentReplies", fields: [parentId], references: [id], onDelete: Cascade)
-  replies   LessonComment[] @relation("CommentReplies")
-  content   String   @db.Text
-  isEdited  Boolean  @default(false)
-  isPinned  Boolean  @default(false)
-  isDeleted    Boolean  @default(false)
-  isBestAnswer Boolean  @default(false)
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
+  id           String          @id @default(uuid())
+  lessonId     String
+  lesson       Lesson          @relation(fields: [lessonId], references: [id], onDelete: Cascade)
+  userId       String
+  parentId     String?
+  parent       LessonComment?  @relation("CommentReplies", fields: [parentId], references: [id], onDelete: Cascade)
+  replies      LessonComment[] @relation("CommentReplies")
+  content      String          @db.Text
+  isEdited     Boolean         @default(false)
+  isPinned     Boolean         @default(false)
+  isDeleted    Boolean         @default(false)
+  isBestAnswer Boolean         @default(false)
+  createdAt    DateTime        @default(now())
+  updatedAt    DateTime        @updatedAt
 
   @@index([lessonId])
   @@index([userId])
@@ -1294,18 +1296,18 @@ model LessonComment {
 
 // Quiz vinculado a uma lição (1:1, opcional)
 model Quiz {
-  id                String   @id @default(uuid())
-  lessonId          String   @unique
-  lesson            Lesson   @relation(fields: [lessonId], references: [id], onDelete: Cascade)
-  title             String
-  description       String?  @db.Text
-  passingScore      Int      @default(60) // Nota mínima (0-100)
-  maxAttempts       Int?     // null = ilimitado
-  timeLimitMinutes  Int?     // null = sem tempo limite
-  shuffleQuestions  Boolean  @default(false)
-  isPublished       Boolean  @default(false)
-  createdAt         DateTime @default(now())
-  updatedAt         DateTime @updatedAt
+  id               String   @id @default(uuid())
+  lessonId         String   @unique
+  lesson           Lesson   @relation(fields: [lessonId], references: [id], onDelete: Cascade)
+  title            String
+  description      String?  @db.Text
+  passingScore     Int      @default(60) // Nota mínima (0-100)
+  maxAttempts      Int? // null = ilimitado
+  timeLimitMinutes Int? // null = sem tempo limite
+  shuffleQuestions Boolean  @default(false)
+  isPublished      Boolean  @default(false)
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
 
   questions QuizQuestion[]
   attempts  QuizAttempt[]
@@ -1318,7 +1320,7 @@ model QuizQuestion {
   id           String   @id @default(uuid())
   quizId       String
   quiz         Quiz     @relation(fields: [quizId], references: [id], onDelete: Cascade)
-  type         String   // multiple_choice | true_false
+  type         String // multiple_choice | true_false
   text         String   @db.Text
   options      String   @db.Text // JSON array: [{id, text, isCorrect}]
   explanation  String?  @db.Text
@@ -1338,7 +1340,7 @@ model QuizAttempt {
   quiz             Quiz      @relation(fields: [quizId], references: [id], onDelete: Cascade)
   userId           String
   answers          String    @db.Text // JSON: [{questionId, selectedOptionId}]
-  score            Float     // 0-100
+  score            Float // 0-100
   totalPoints      Int
   maxPoints        Int
   passed           Boolean
@@ -1356,10 +1358,10 @@ model QuizAttempt {
 model Certificate {
   id                String    @id @default(uuid())
   userId            String
-  courseId           String
+  courseId          String
   certificateNumber String    @unique // BARRAL-{ANO}-{SEQUENCIA}
   studentName       String
-  courseTitle        String
+  courseTitle       String
   estimatedHours    Int?
   issuedAt          DateTime  @default(now())
   emailSentAt       DateTime?
@@ -1379,9 +1381,9 @@ model Certificate {
 model Badge {
   id        String   @id @default(uuid())
   userId    String
-  courseId   String?
-  type      String   // first_lesson, first_quiz, module_complete, course_complete, streak_7, streak_30, contributor, best_answer
-  metadata  String?  // JSON: {moduleName, quizTitle, etc}
+  courseId  String?
+  type      String // first_lesson, first_quiz, module_complete, course_complete, streak_7, streak_30, contributor, best_answer
+  metadata  String? // JSON: {moduleName, quizTitle, etc}
   awardedAt DateTime @default(now())
 
   @@unique([userId, type, courseId])
@@ -1393,10 +1395,10 @@ model Badge {
 model UserStreak {
   id                String   @id @default(uuid())
   userId            String
-  courseId           String
+  courseId          String
   currentStreak     Int      @default(0)
   longestStreak     Int      @default(0)
-  lastActivityDate  String?  // YYYY-MM-DD (evita timezone issues)
+  lastActivityDate  String? // YYYY-MM-DD (evita timezone issues)
   totalXp           Int      @default(0)
   showOnLeaderboard Boolean  @default(true)
   createdAt         DateTime @default(now())
@@ -1409,30 +1411,30 @@ model UserStreak {
 
 // Destaques TCU - Acórdãos com potencial editorial identificados pela IA
 model TcuHighlight {
-  id                  String    @id @default(uuid())
-  documentId          String
-  document            Document  @relation(fields: [documentId], references: [id], onDelete: Cascade)
+  id         String   @id @default(uuid())
+  documentId String
+  document   Document @relation(fields: [documentId], references: [id], onDelete: Cascade)
 
   // Scores
-  keywordScore        Int       // Score original do analyzeRelevanceTCU
-  aiArticleWorthiness Int       // Score geral 0-100 da IA
+  keywordScore        Int // Score original do analyzeRelevanceTCU
+  aiArticleWorthiness Int // Score geral 0-100 da IA
 
   // Análise IA
-  aiThesisSummary     String    @db.Text  // Tese principal em linguagem acessível
-  aiWhyImportant      String    @db.Text  // Por que merece destaque
-  aiArticleAngle      String    @db.Text  // Sugestão de ângulo editorial
-  aiLeiConnections    String?             // JSON: [{article, connection}]
+  aiThesisSummary  String  @db.Text // Tese principal em linguagem acessível
+  aiWhyImportant   String  @db.Text // Por que merece destaque
+  aiArticleAngle   String  @db.Text // Sugestão de ângulo editorial
+  aiLeiConnections String? // JSON: [{article, connection}]
 
   // Workflow admin
-  status              String    @default("pending") // pending | dismissed | will_write | written
-  adminNotes          String?   @db.Text
-  blogPostId          String?   // Link ao post criado
+  status     String  @default("pending") // pending | dismissed | will_write | written
+  adminNotes String? @db.Text
+  blogPostId String? // Link ao post criado
 
   // Notificação
-  emailSentAt         DateTime?
+  emailSentAt DateTime?
 
-  createdAt           DateTime  @default(now())
-  updatedAt           DateTime  @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@index([status])
   @@index([status, createdAt])
@@ -1441,26 +1443,26 @@ model TcuHighlight {
 
 // Assinaturas (Stripe Checkout + Subscriptions)
 model Subscription {
-  id                        String   @id @default(uuid())
-  userId                    String
-  user                      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  id     String @id @default(uuid())
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  stripeCustomerId          String?
-  stripeSubscriptionId      String?  @unique
-  stripeCheckoutSessionId   String?  @unique
-  stripePriceId             String?
+  stripeCustomerId        String?
+  stripeSubscriptionId    String? @unique
+  stripeCheckoutSessionId String? @unique
+  stripePriceId           String?
 
-  paymentMethod             String?  // 'card' | 'pix'
-  plan                      String   // 'basico' | 'premium'
-  billingCycle              String?  // 'monthly' | 'yearly'
-  courseId                  String?
-  status                    String   // 'active' | 'processing' | 'canceled' | 'past_due' | 'unpaid' | 'incomplete'
-  currentPeriodStart        DateTime
-  currentPeriodEnd          DateTime
-  cancelAtPeriodEnd         Boolean  @default(false)
+  paymentMethod      String? // 'card' | 'pix'
+  plan               String // 'basico' | 'premium'
+  billingCycle       String? // 'monthly' | 'yearly'
+  courseId           String?
+  status             String // 'active' | 'processing' | 'canceled' | 'past_due' | 'unpaid' | 'incomplete'
+  currentPeriodStart DateTime
+  currentPeriodEnd   DateTime
+  cancelAtPeriodEnd  Boolean  @default(false)
 
-  createdAt                 DateTime @default(now())
-  updatedAt                 DateTime @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@index([userId])
   @@index([status])
@@ -1471,12 +1473,12 @@ model Subscription {
 // Embeddings pré-computados dos artigos da Lei 14.133/2021 (Fase 5B)
 // Permite busca semântica direta contra a query do usuário
 model LeiArticleEmbedding {
-  id            String   @id @default(uuid())
-  articleNumber String   @unique
-  content       String   @db.Text
+  id            String                     @id @default(uuid())
+  articleNumber String                     @unique
+  content       String                     @db.Text
   embedding     Unsupported("vector(768)")
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
+  createdAt     DateTime                   @default(now())
+  updatedAt     DateTime                   @updatedAt
 
   @@index([articleNumber])
 }
@@ -1484,28 +1486,60 @@ model LeiArticleEmbedding {
 // Notas de alteração em artigos da Lei 14.133/2021
 // Criadas automaticamente quando um novo ato (DOU) altera/regulamenta um artigo
 model LeiArticleNote {
-  id              String   @id @default(uuid())
-  articleNumber   String   // "75", "184-A"
-  type            String   // 'alteracao' | 'regulamentacao' | 'revogacao' | 'comentario'
-  title           String   // "Alterado pelo Decreto 11.878/2024"
-  description     String?  @db.Text
-  sourceDocId     String?  // FK para Document (ato que gerou a nota)
-  sourceLegActId  String?  // FK para LegislativeAct
-  detectedBy      String   // 'auto-sync-dou' | admin email
-  isPublic        Boolean  @default(false) // Visível aos alunos?
-  adminReviewed   Boolean  @default(false)
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
+  id             String   @id @default(uuid())
+  articleNumber  String // "75", "184-A"
+  type           String // 'alteracao' | 'regulamentacao' | 'revogacao' | 'comentario'
+  title          String // "Alterado pelo Decreto 11.878/2024"
+  description    String?  @db.Text
+  sourceDocId    String? // FK para Document (ato que gerou a nota)
+  sourceLegActId String? // FK para LegislativeAct
+  detectedBy     String // 'auto-sync-dou' | admin email
+  isPublic       Boolean  @default(false) // Visível aos alunos?
+  adminReviewed  Boolean  @default(false)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
 
   @@index([articleNumber])
   @@index([type])
   @@index([adminReviewed])
 }
 
+// Clipping diário TCU — tracking de envios (idempotência + analytics)
+model DailyClippingSend {
+  id                 String    @id @default(uuid())
+  sentDate           DateTime  @unique // 00:00 UTC do dia
+  status             String // 'success' | 'partial' | 'no_content' | 'failed'
+  totalRecipients    Int       @default(0)
+  totalSent          Int       @default(0)
+  totalFailed        Int       @default(0)
+  totalSkipped       Int       @default(0)
+  acordaoCount       Int       @default(0)
+  acordaoIdsIncluded String?   @db.Text // JSON array de Document.id
+  startedAt          DateTime  @default(now())
+  finishedAt         DateTime?
+  errorMessage       String?   @db.Text
+
+  @@index([sentDate])
+  @@index([status])
+}
+
+// Cache do dispositivo (itens 9.X) extraído por acórdão — evita re-baixar PDF
+model ClippingItemExtract {
+  id             String   @id @default(uuid())
+  documentId     String   @unique
+  document       Document @relation(fields: [documentId], references: [id], onDelete: Cascade)
+  dispositivos   String?  @db.Text // JSON: [{numero:"9.1", texto:"..."}]
+  extractMethod  String // 'ementa_regex' | 'pdf_parse' | 'failed'
+  pdfFetchFailed Boolean  @default(false)
+  extractedAt    DateTime @default(now())
+
+  @@index([extractMethod])
+}
+
 // Newsletter Send Tracking (Analytics)
 model NewsletterSend {
   id          String   @id @default(uuid())
-  type        String   // 'weekly' | 'monthly'
+  type        String // 'weekly' | 'monthly'
   subject     String
   sentAt      DateTime @default(now())
   totalSent   Int      @default(0)
@@ -1537,64 +1571,64 @@ model PushSubscription {
 
 // Decisões de Tribunais de Contas e Judiciais
 model TribunalDecision {
-  id              String   @id @default(uuid())
-  tribunalCode    String   // "TCE-SP", "TCE-MG", "STJ", "STF", etc.
-  tribunalName    String   // Nome completo
-  decisionType    String   // "acordao", "decisao", "parecer_previo", "sumula"
-  decisionNumber  String   // "1234/2024"
-  processNumber   String?
-  year            Int
-  fullIdentifier  String   @unique // "TCE-SP Acórdão 1234/2024" (chave de dedup)
+  id             String  @id @default(uuid())
+  tribunalCode   String // "TCE-SP", "TCE-MG", "STJ", "STF", etc.
+  tribunalName   String // Nome completo
+  decisionType   String // "acordao", "decisao", "parecer_previo", "sumula"
+  decisionNumber String // "1234/2024"
+  processNumber  String?
+  year           Int
+  fullIdentifier String  @unique // "TCE-SP Acórdão 1234/2024" (chave de dedup)
 
   // Conteúdo
-  title           String
-  ementa          String   @db.Text
-  fullText        String?  @db.Text
-  summary         String?  @db.Text  // Resumo IA
+  title    String
+  ementa   String  @db.Text
+  fullText String? @db.Text
+  summary  String? @db.Text // Resumo IA
 
   // Metadados
-  relator         String?
-  orgaoJulgador   String?
-  dataJulgamento  DateTime?
-  dataPublicacao  DateTime?
-  url             String?
-  pdfUrl          String?
+  relator        String?
+  orgaoJulgador  String?
+  dataJulgamento DateTime?
+  dataPublicacao DateTime?
+  url            String?
+  pdfUrl         String?
 
   // Classificação
-  isRelevant      Boolean  @default(true)
-  relevanceScore  Int      @default(0)   // 0-100
-  themes          String?  // JSON array: ["licitação", "contrato"]
-  leiArticles     String?  // JSON array de artigos da Lei 14.133
+  isRelevant       Boolean @default(true)
+  relevanceScore   Int     @default(0) // 0-100
+  themes           String? // JSON array: ["licitação", "contrato"]
+  leiArticles      String? // JSON array de artigos da Lei 14.133
   suggestedCourses String?
 
   // Fonte e rastreamento
-  sourceApi       String   // "tce-sp-web", "datajud", "tce-pr-viajuris"
-  sourceId        String?
-  sourceRawData   String?  @db.Text
+  sourceApi     String // "tce-sp-web", "datajud", "tce-pr-viajuris"
+  sourceId      String?
+  sourceRawData String? @db.Text
 
   // Pipeline de aprovação (padrão DOUStagingDocument)
-  approvalStatus  String   @default("pending")
-  confidence      Int      @default(0)
-  classificationReasoning String? @db.Text
-  reviewedBy      String?
-  reviewedAt      DateTime?
-  adminNotes      String?  @db.Text
+  approvalStatus          String    @default("pending")
+  confidence              Int       @default(0)
+  classificationReasoning String?   @db.Text
+  reviewedBy              String?
+  reviewedAt              DateTime?
+  adminNotes              String?   @db.Text
 
   // Embeddings
-  embeddingStatus String?  @default("pending")
-  chunkCount      Int      @default(0)
+  embeddingStatus String?   @default("pending")
+  chunkCount      Int       @default(0)
   embeddedAt      DateTime?
 
   // Notificação
-  notifiedAt      DateTime?
+  notifiedAt DateTime?
 
   // Controle
-  scrapedAt       DateTime @default(now())
-  scrapeError     String?
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
+  scrapedAt   DateTime @default(now())
+  scrapeError String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 
-  chunks TribunalDecisionChunk[]
+  chunks     TribunalDecisionChunk[]
   highlights TribunalHighlight[]
 
   @@index([tribunalCode])
@@ -1610,30 +1644,30 @@ model TribunalDecision {
 
 // Destaques editoriais de decisões TCE (espelha TcuHighlight)
 model TribunalHighlight {
-  id                    String   @id @default(uuid())
-  tribunalDecisionId    String
-  tribunalDecision      TribunalDecision @relation(fields: [tribunalDecisionId], references: [id], onDelete: Cascade)
+  id                 String           @id @default(uuid())
+  tribunalDecisionId String
+  tribunalDecision   TribunalDecision @relation(fields: [tribunalDecisionId], references: [id], onDelete: Cascade)
 
   // Scores
-  keywordScore          Int
-  aiArticleWorthiness   Int
+  keywordScore        Int
+  aiArticleWorthiness Int
 
   // Análise IA
-  aiThesisSummary       String   @db.Text
-  aiWhyImportant        String   @db.Text
-  aiArticleAngle        String   @db.Text
-  aiLeiConnections      String?
+  aiThesisSummary  String  @db.Text
+  aiWhyImportant   String  @db.Text
+  aiArticleAngle   String  @db.Text
+  aiLeiConnections String?
 
   // Workflow admin
-  status                String   @default("pending") // pending | dismissed | will_write | written
-  adminNotes            String?  @db.Text
-  blogPostId            String?
+  status     String  @default("pending") // pending | dismissed | will_write | written
+  adminNotes String? @db.Text
+  blogPostId String?
 
   // Notificação
-  emailSentAt           DateTime?
+  emailSentAt DateTime?
 
-  createdAt             DateTime @default(now())
-  updatedAt             DateTime @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@index([status])
   @@index([status, createdAt])
@@ -1642,16 +1676,16 @@ model TribunalHighlight {
 
 // Chunks de decisões com embeddings (Busca Semântica)
 model TribunalDecisionChunk {
-  id                  String   @id @default(uuid())
-  tribunalDecisionId  String
-  tribunalDecision    TribunalDecision @relation(fields: [tribunalDecisionId], references: [id], onDelete: Cascade)
-  chunkIndex          Int
-  content             String   @db.Text
-  charStart           Int
-  charEnd             Int
-  embedding           Unsupported("vector(768)")
-  createdAt           DateTime @default(now())
-  updatedAt           DateTime @updatedAt
+  id                 String                     @id @default(uuid())
+  tribunalDecisionId String
+  tribunalDecision   TribunalDecision           @relation(fields: [tribunalDecisionId], references: [id], onDelete: Cascade)
+  chunkIndex         Int
+  content            String                     @db.Text
+  charStart          Int
+  charEnd            Int
+  embedding          Unsupported("vector(768)")
+  createdAt          DateTime                   @default(now())
+  updatedAt          DateTime                   @updatedAt
 
   @@index([tribunalDecisionId])
 }
@@ -1660,11 +1694,11 @@ model TribunalDecisionChunk {
 model ScraperHealthLog {
   id           String   @id @default(uuid())
   scraperCode  String
-  status       String   // "success", "partial_failure", "failure"
+  status       String // "success", "partial_failure", "failure"
   itemsFound   Int      @default(0)
   itemsNew     Int      @default(0)
   itemsError   Int      @default(0)
-  duration     Int      // ms
+  duration     Int // ms
   errorMessage String?  @db.Text
   metadata     String?  @db.Text
   runAt        DateTime @default(now())
@@ -1702,24 +1736,24 @@ model ProcessedWebhookEvent {
 // authorKind: user | ai | system
 
 model PlanningSession {
-  id                String    @id @default(uuid())
+  id                String                 @id @default(uuid())
   userId            String
-  user              User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user              User                   @relation(fields: [userId], references: [id], onDelete: Cascade)
   titulo            String
-  natureza          String?   // definida após onboarding
+  natureza          String? // definida após onboarding
   trailTemplateId   String?
   trailTemplate     PlanningTrailTemplate? @relation(fields: [trailTemplateId], references: [id])
-  status            String    @default("ONBOARDING")
-  learningMode      Boolean   @default(true)
-  descricaoLivre    String?   @db.Text  // texto bruto do onboarding
-  classificacaoJson String?   @db.Text  // {naturezaSugerida, confianca, perguntasFollowUp[]}
-  createdAt         DateTime  @default(now())
-  updatedAt         DateTime  @updatedAt
+  status            String                 @default("ONBOARDING")
+  learningMode      Boolean                @default(true)
+  descricaoLivre    String?                @db.Text // texto bruto do onboarding
+  classificacaoJson String?                @db.Text // {naturezaSugerida, confianca, perguntasFollowUp[]}
+  createdAt         DateTime               @default(now())
+  updatedAt         DateTime               @updatedAt
   deletedAt         DateTime?
   archivedAt        DateTime?
 
-  documents     PlanningDocument[]
-  decisionRuns  PlanningDecisionRun[]
+  documents    PlanningDocument[]
+  decisionRuns PlanningDecisionRun[]
 
   @@index([userId, status])
   @@index([userId, deletedAt])
@@ -1727,15 +1761,15 @@ model PlanningSession {
 }
 
 model PlanningDocument {
-  id               String   @id @default(uuid())
+  id               String          @id @default(uuid())
   sessionId        String
   session          PlanningSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
-  type             String   // ETP | TR
-  status           String   @default("PENDING")
+  type             String // ETP | TR
+  status           String          @default("PENDING")
   currentVersionId String?
   decisionRunId    String?
-  createdAt        DateTime @default(now())
-  updatedAt        DateTime @updatedAt
+  createdAt        DateTime        @default(now())
+  updatedAt        DateTime        @updatedAt
 
   sections PlanningDocumentSection[]
   versions PlanningDocumentVersion[]
@@ -1746,29 +1780,29 @@ model PlanningDocument {
 }
 
 model PlanningDocumentSection {
-  id                    String   @id @default(uuid())
-  documentId            String
-  document              PlanningDocument @relation(fields: [documentId], references: [id], onDelete: Cascade)
-  sectionKey            String   // ex: "descricao-necessidade"
-  ordem                 Int
-  required              Boolean  @default(true)
-  discretionary         Boolean  @default(false)
-  status                String   @default("PENDING")
-  contentMd             String?  @db.Text
-  didacticCacheJson     String?  @db.Text  // {conceito, fundamento, excertos, articles, sources}
-  generationProvenance  String?  // RAG_ANCHORED | PARTIALLY_ANCHORED | NOT_ANCHORED | USER_WRITTEN
-  sourcesJson           String?  @db.Text  // [{type,title,url,articleNumber,chunkId,similarity}]
-  justificationSkipped  String?  @db.Text
-  sufficiencyScore      Float?
-  conceptualCheckPassed Boolean?
-  conceptualCheckAnswerMd   String?  @db.Text
+  id                        String                    @id @default(uuid())
+  documentId                String
+  document                  PlanningDocument          @relation(fields: [documentId], references: [id], onDelete: Cascade)
+  sectionKey                String // ex: "descricao-necessidade"
+  ordem                     Int
+  required                  Boolean                   @default(true)
+  discretionary             Boolean                   @default(false)
+  status                    String                    @default("PENDING")
+  contentMd                 String?                   @db.Text
+  didacticCacheJson         String?                   @db.Text // {conceito, fundamento, excertos, articles, sources}
+  generationProvenance      String? // RAG_ANCHORED | PARTIALLY_ANCHORED | NOT_ANCHORED | USER_WRITTEN
+  sourcesJson               String?                   @db.Text // [{type,title,url,articleNumber,chunkId,similarity}]
+  justificationSkipped      String?                   @db.Text
+  sufficiencyScore          Float?
+  conceptualCheckPassed     Boolean?
+  conceptualCheckAnswerMd   String?                   @db.Text
   conceptualCheckAnsweredAt DateTime?
-  derivedFromSectionId  String?  // para herança ETP→TR
-  derivedFrom           PlanningDocumentSection? @relation("PlanningSectionInheritance", fields: [derivedFromSectionId], references: [id], onDelete: SetNull)
-  derivedBy             PlanningDocumentSection[] @relation("PlanningSectionInheritance")
-  lastEditedAt          DateTime?
-  createdAt             DateTime @default(now())
-  updatedAt             DateTime @updatedAt
+  derivedFromSectionId      String? // para herança ETP→TR
+  derivedFrom               PlanningDocumentSection?  @relation("PlanningSectionInheritance", fields: [derivedFromSectionId], references: [id], onDelete: SetNull)
+  derivedBy                 PlanningDocumentSection[] @relation("PlanningSectionInheritance")
+  lastEditedAt              DateTime?
+  createdAt                 DateTime                  @default(now())
+  updatedAt                 DateTime                  @updatedAt
 
   @@unique([documentId, sectionKey])
   @@index([documentId, ordem])
@@ -1776,17 +1810,17 @@ model PlanningDocumentSection {
 }
 
 model PlanningDocumentVersion {
-  id            String   @id @default(uuid())
+  id            String           @id @default(uuid())
   documentId    String
   document      PlanningDocument @relation(fields: [documentId], references: [id], onDelete: Cascade)
   versionNumber Int
-  snapshotJson  String   @db.Text  // árvore de seções serializada
-  diffJson      String?  @db.Text  // diff vs. versão anterior
-  authorKind    String   // user | ai | system
+  snapshotJson  String           @db.Text // árvore de seções serializada
+  diffJson      String?          @db.Text // diff vs. versão anterior
+  authorKind    String // user | ai | system
   authorId      String?
-  author        User?    @relation("PlanningVersionAuthor", fields: [authorId], references: [id], onDelete: SetNull)
+  author        User?            @relation("PlanningVersionAuthor", fields: [authorId], references: [id], onDelete: SetNull)
   label         String?
-  createdAt     DateTime @default(now())
+  createdAt     DateTime         @default(now())
 
   @@unique([documentId, versionNumber])
   @@index([documentId, createdAt])
@@ -1799,7 +1833,7 @@ model PlanningLibrarySnippet {
   titulo          String
   corpoMd         String   @db.Text
   tagsJson        String?  @db.Text
-  sourceSectionId String?  // de onde foi salvo
+  sourceSectionId String? // de onde foi salvo
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
 
@@ -1808,18 +1842,18 @@ model PlanningLibrarySnippet {
 }
 
 model PlanningTrailTemplate {
-  id                   String   @id @default(uuid())
-  slug                 String   @unique      // ex: servico-comum-continuado-etp
-  natureza             String
-  documentType         String   // ETP | TR
-  version              Int      @default(1)
-  definitionJsonCache  String   @db.Text     // snapshot do TS na publicação
-  changelogMd          String?  @db.Text
-  authorId             String?
-  author               User?    @relation("PlanningTrailAuthor", fields: [authorId], references: [id], onDelete: SetNull)
-  publishedAt          DateTime?
-  createdAt            DateTime @default(now())
-  updatedAt            DateTime @updatedAt
+  id                  String    @id @default(uuid())
+  slug                String    @unique // ex: servico-comum-continuado-etp
+  natureza            String
+  documentType        String // ETP | TR
+  version             Int       @default(1)
+  definitionJsonCache String    @db.Text // snapshot do TS na publicação
+  changelogMd         String?   @db.Text
+  authorId            String?
+  author              User?     @relation("PlanningTrailAuthor", fields: [authorId], references: [id], onDelete: SetNull)
+  publishedAt         DateTime?
+  createdAt           DateTime  @default(now())
+  updatedAt           DateTime  @updatedAt
 
   sessions         PlanningSession[]
   sectionTemplates PlanningSectionTemplate[]
@@ -1829,54 +1863,54 @@ model PlanningTrailTemplate {
 }
 
 model PlanningSectionTemplate {
-  id              String   @id @default(uuid())
-  trailTemplateId String
-  trailTemplate   PlanningTrailTemplate @relation(fields: [trailTemplateId], references: [id], onDelete: Cascade)
-  sectionKey      String
-  promptTemplateMd String? @db.Text
-  ragFilterJson   String?  @db.Text
-  placeholderTextMd String? @db.Text
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
+  id                String                @id @default(uuid())
+  trailTemplateId   String
+  trailTemplate     PlanningTrailTemplate @relation(fields: [trailTemplateId], references: [id], onDelete: Cascade)
+  sectionKey        String
+  promptTemplateMd  String?               @db.Text
+  ragFilterJson     String?               @db.Text
+  placeholderTextMd String?               @db.Text
+  createdAt         DateTime              @default(now())
+  updatedAt         DateTime              @updatedAt
 
   @@unique([trailTemplateId, sectionKey])
 }
 
 model PlanningDecisionRun {
-  id            String   @id @default(uuid())
+  id            String          @id @default(uuid())
   sessionId     String
   session       PlanningSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
   matrixSlug    String
   matrixVersion Int
-  inputsJson    String   @db.Text
-  resultJson    String   @db.Text  // {recommendation,rationaleMd,citationsJson,matchedRuleIds}
-  executedAt    DateTime @default(now())
+  inputsJson    String          @db.Text
+  resultJson    String          @db.Text // {recommendation,rationaleMd,citationsJson,matchedRuleIds}
+  executedAt    DateTime        @default(now())
 
   @@index([sessionId, executedAt])
   @@index([matrixSlug, matrixVersion])
 }
 
 model PlanningExport {
-  id         String   @id @default(uuid())
+  id         String           @id @default(uuid())
   documentId String
   document   PlanningDocument @relation(fields: [documentId], references: [id], onDelete: Cascade)
-  format     String   // html-sei | docx | pdf | pncp-metadata
+  format     String // html-sei | docx | pdf | pncp-metadata
   r2Key      String
   sizeBytes  Int?
   checksum   String?
-  createdAt  DateTime @default(now())
+  createdAt  DateTime         @default(now())
 
   @@index([documentId, createdAt])
 }
 
 model LegislativeActRelation {
-  id            String   @id @default(uuid())
+  id String @id @default(uuid())
 
-  sourceActId   String   // ato que CAUSA a alteração (ex: Decreto 100 que altera Decreto 99)
-  sourceAct     LegislativeAct @relation("RelationSource", fields: [sourceActId], references: [id], onDelete: Cascade)
+  sourceActId String // ato que CAUSA a alteração (ex: Decreto 100 que altera Decreto 99)
+  sourceAct   LegislativeAct @relation("RelationSource", fields: [sourceActId], references: [id], onDelete: Cascade)
 
-  targetActId   String   // ato que É AFETADO (ex: Decreto 99)
-  targetAct     LegislativeAct @relation("RelationTarget", fields: [targetActId], references: [id], onDelete: Cascade)
+  targetActId String // ato que É AFETADO (ex: Decreto 99)
+  targetAct   LegislativeAct @relation("RelationTarget", fields: [targetActId], references: [id], onDelete: Cascade)
 
   // Tipo da relação
   // 'revoga'        — revoga total ou parcialmente (ex: "Revoga a Lei 8.666/93")
@@ -1884,22 +1918,22 @@ model LegislativeActRelation {
   // 'regulamenta'   — regulamenta dispositivo (ex: "Regulamenta o art. 8º da Lei 14.133")
   // 'complementa'   — complementa sem alterar (ex: anexos, planilhas)
   // 'modifica'      — modifica de forma genérica (fallback se outros não casam)
-  relationType  String
+  relationType String
 
   // Origem da detecção: 'heuristica' | 'ia' | 'manual'
-  source        String
+  source String
 
   // 0..1 — confiança da detecção (heurística sempre 0.7-0.9, IA varia, manual=1.0)
-  confidence    Float
+  confidence Float
 
   // Trecho do texto (ementa ou content) que originou a detecção. Útil pra debug e pra UI mostrar "por quê"
-  excerpt       String   @db.Text
+  excerpt String @db.Text
 
-  detectedAt    DateTime @default(now())
-  confirmedBy   String?  // email do admin que confirmou (ou marcou como falso positivo)
-  confirmedAt   DateTime?
+  detectedAt   DateTime  @default(now())
+  confirmedBy  String? // email do admin que confirmou (ou marcou como falso positivo)
+  confirmedAt  DateTime?
   // 'pending' | 'confirmed' | 'rejected' — workflow simples de revisão admin
-  reviewStatus  String   @default("pending")
+  reviewStatus String    @default("pending")
 
   @@unique([sourceActId, targetActId, relationType])
   @@index([targetActId])
@@ -1923,30 +1957,30 @@ model LeiArticleCrossRef {
 }
 
 model LeiArticleSuggestedReading {
-  id            String   @id @default(uuid())
+  id            String @id @default(uuid())
   articleNumber String
 
   // Discriminator: 'internal' (referência ao site) ou 'external' (URL livre)
-  kind          String
+  kind String
 
   // kind='internal': referência por ID/slug
   // internalType: 'blog' | 'glossary' | 'legislative-act' | 'document'
-  internalType  String?
-  internalId    String?
+  internalType String?
+  internalId   String?
 
   // kind='external': URL livre + categoria
   // externalType: 'video' | 'article' | 'book' | 'other'
-  externalUrl   String?
-  externalType  String?
+  externalUrl  String?
+  externalType String?
 
   // Comum
-  title         String?  // Override do título capturado da fonte interna
-  description   String?  @db.Text
-  author        String?
-  order         Int      @default(0)
+  title       String? // Override do título capturado da fonte interna
+  description String? @db.Text
+  author      String?
+  order       Int     @default(0)
 
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   article LeiArticle @relation(fields: [articleNumber], references: [numero], onDelete: Cascade)
 
