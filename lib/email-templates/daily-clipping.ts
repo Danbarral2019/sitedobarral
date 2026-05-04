@@ -148,7 +148,7 @@ export function renderDailyClipping(input: DailyClippingInput): RenderedEmail {
         <tr>
           <td style="padding:28px 32px;">
             <p style="margin:0 0 18px;font-size:14px;color:#334155;line-height:1.55;">
-              ${greeting} Decisões do TCU sobre licitações e contratos publicadas no último dia útil. O texto abaixo é extração literal — sem paráfrase de IA.
+              ${greeting} Seguem as decisões do TCU sobre licitações e contratos publicadas em <strong>${dataRef}</strong>. Os trechos abaixo vêm direto do inteiro teor do acórdão.
             </p>
             ${blocksHtml}
             <p style="margin:24px 0 0;font-size:12px;color:#64748b;line-height:1.5;">
@@ -178,7 +178,7 @@ export function renderDailyClipping(input: DailyClippingInput): RenderedEmail {
     `Clipping TCU — ${dataRef}`,
     `${acordaos.length} ${acordaos.length === 1 ? 'destaque' : 'destaques'}`,
     '',
-    `${recipientName ? `Olá, ${recipientName.split(' ')[0]}.` : 'Olá.'} Decisões do TCU sobre licitações e contratos publicadas no último dia útil. Extração literal — sem IA.`,
+    `${recipientName ? `Olá, ${recipientName.split(' ')[0]}.` : 'Olá.'} Seguem as decisões do TCU sobre licitações e contratos publicadas em ${dataRef}. Os trechos abaixo vêm direto do inteiro teor do acórdão.`,
     '',
     '────────────────────────────',
     '',
