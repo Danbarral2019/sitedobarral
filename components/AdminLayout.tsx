@@ -6,7 +6,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import AdminBottomNav from '@/components/admin/AdminBottomNav';
 import {
-  QrCode, ChevronLeft, ChevronRight, BarChart3, Mail, MessageSquare, Send, GraduationCap, Globe, BookOpen, Menu, X, FileText, PenSquare, FileSpreadsheet, Filter, Inbox, Scale, Star, Activity, Sparkles
+  QrCode, ChevronLeft, ChevronRight, BarChart3, Mail, MessageSquare, Send, GraduationCap, Globe, BookOpen, Menu, X, FileText, PenSquare, FileSpreadsheet, Filter, Inbox, Scale, Activity, Sparkles
 } from 'lucide-react';
 
 interface AdminLayoutProps {
@@ -83,28 +83,43 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
     return () => clearInterval(interval);
   }, []);
 
-  // Menus ORGANIZADOS POR CATEGORIA — Consolidado (14 itens)
+  // Menu reorganizado em 6 seções (consolidado 2026-05-04 — ver docs/ADMIN_NAVIGATION.md)
   const menuItems = [
-    // === JURISPRUDENCIA ===
-    { divider: true, label: '\u{1F4DA} Jurisprudencia' },
+    // === VISÃO GERAL ===
+    { divider: true, label: '\u{1F4CA} Visao geral' },
     {
-      path: '/admin/importacao',
-      label: 'Importacao de Atos',
-      icon: FileSpreadsheet,
+      path: '/admin',
+      label: 'Dashboard (QR Codes)',
+      icon: QrCode,
+    },
+    {
+      path: '/admin/monitoring',
+      label: 'Monitoramento',
+      icon: Activity,
+    },
+
+    // === JURISPRUDÊNCIA ===
+    { divider: true, label: '\u{2696}\u{FE0F} Jurisprudencia' },
+    {
+      path: '/admin/tcu',
+      label: 'TCU (Acordaos + Destaques)',
+      icon: Scale,
+      badge: unreadCounts.tcuHighlights,
+    },
+    {
+      path: '/admin/lei-14133',
+      label: 'Lei 14.133',
+      icon: Sparkles,
     },
     {
       path: '/admin/legislacao',
       label: 'Legislacao',
-      icon: (props: Record<string, unknown>) => (
-        <svg {...props} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 6l3 1m0 0l-3 9a5.002 5.002 0 006.001 0M6 7l3 9M6 7l6-2m6 2l3-1m-3 1l-3 9a5.002 5.002 0 006.001 0M18 7l3 9m-3-9l-6-2m0-2v2m0 16V5m0 16H9m3 0h3" />
-        </svg>
-      ),
+      icon: BookOpen,
     },
     {
-      path: '/admin/lei-14133/comentada',
-      label: 'Lei 14.133 Comentada',
-      icon: Sparkles,
+      path: '/admin/importacao',
+      label: 'Importacao (TCU/AGU)',
+      icon: FileSpreadsheet,
     },
     {
       path: '/admin/dou-filtros',
@@ -118,21 +133,9 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
       icon: Inbox,
     },
     {
-      path: '/admin/tribunal-decisions',
-      label: 'Jurisprudencia',
-      icon: Scale,
-    },
-    {
-      path: '/admin/tcu-highlights',
-      label: 'Destaques TCU',
-      icon: Star,
-      badge: unreadCounts.tcuHighlights,
-    },
-    {
-      path: '/admin/tribunal-highlights',
-      label: 'Destaques TCE',
-      icon: Star,
-      badge: unreadCounts.tribunalHighlights,
+      path: '/admin/pareceres-revisao',
+      label: 'Pareceres CONUNI',
+      icon: FileText,
     },
 
     // === DOCUMENTOS ===
@@ -143,26 +146,16 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
       icon: FileText,
       badge: unreadCounts.documentos,
     },
+
+    // === LMS ===
+    { divider: true, label: '\u{1F393} LMS' },
     {
-      path: '/admin/pareceres-revisao',
-      label: 'Revisao Pareceres CONUNI',
-      icon: FileText,
+      path: '/admin/lms',
+      label: 'Cursos & Licoes',
+      icon: GraduationCap,
     },
 
-    // === ANALYTICS ===
-    { divider: true, label: '\u{1F4CA} Analytics' },
-    {
-      path: '/admin/analytics-hub',
-      label: 'Analytics',
-      icon: BarChart3,
-    },
-    {
-      path: '/admin/monitoring',
-      label: 'Monitoramento',
-      icon: Activity,
-    },
-
-    // === CONTEUDO ===
+    // === CONTEÚDO ===
     { divider: true, label: '\u{270D}\u{FE0F} Conteudo' },
     {
       path: '/admin/blog-social',
@@ -172,11 +165,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
     {
       path: '/admin/publicacoes',
       label: 'Publicacoes',
-      icon: (props: Record<string, unknown>) => (
-        <svg {...props} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
-        </svg>
-      ),
+      icon: BookOpen,
     },
     {
       path: '/admin/glossario',
@@ -189,12 +178,12 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
       icon: Globe,
     },
 
-    // === GESTAO ===
+    // === GESTÃO ===
     { divider: true, label: '\u{2699}\u{FE0F} Gestao' },
     {
-      path: '/admin',
-      label: 'QR Codes',
-      icon: QrCode,
+      path: '/admin/analytics-hub',
+      label: 'Analytics',
+      icon: BarChart3,
     },
     {
       path: '/admin/contatos',
