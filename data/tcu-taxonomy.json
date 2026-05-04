@@ -1,0 +1,907 @@
+{
+  "Responsabilidade": {
+    "Multa": [
+      "Acumulação",
+      "Afastamento de pessoal",
+      "Agente privado",
+      "Circunstância atenuante",
+      "Diligência",
+      "Dosimetria",
+      "Falecimento de responsável",
+      "Incapacidade",
+      "Litigância de má-fé",
+      "Pessoa jurídica",
+      "Prescrição",
+      "Pressupostos"
+    ],
+    "Declaração de inidoneidade": [
+      "Abrangência",
+      "Acordo de leniência",
+      "Consórcio",
+      "Documento falso",
+      "Dosimetria",
+      "Garantia contratual",
+      "Inaplicabilidade",
+      "Princípio do non bis in idem",
+      "Requisito",
+      "Sobreposição de penas",
+      "Tratamento diferenciado"
+    ],
+    "Julgamento de contas": [
+      "Irregularidade",
+      "Prescrição",
+      "Processo conexo"
+    ],
+    "Entidade de direito privado": [
+      "Contrato administrativo",
+      "Empresário individual"
+    ],
+    "Convênio": [
+      "Concedente",
+      "Contrapartida",
+      "Delegação de competência",
+      "Desvio de finalidade",
+      "Desvio de objeto",
+      "Débito",
+      "Ente da Federação",
+      "Execução financeira",
+      "Execução física",
+      "FNDE",
+      "Gestor sucessor",
+      "Lei do Audiovisual",
+      "Obrigação de resultado"
+    ],
+    "Débito": [
+      "Agente privado",
+      "Capacidade econômica",
+      "Compensação",
+      "Correção monetária",
+      "Estimativa",
+      "Juros de mora",
+      "Parcelamento",
+      "Prescrição",
+      "Quitação ao responsável"
+    ],
+    "Culpa": [
+      "Erro grosseiro",
+      "Gestor substituto",
+      "Parecerista",
+      "Supervisão"
+    ],
+    "SUS": [
+      "Débito",
+      "Fundo Municipal de Saúde",
+      "Gestão",
+      "Medicamento"
+    ],
+    "Licitação": [
+      "Conduta omissiva",
+      "Fraude",
+      "Homologação",
+      "Inexigibilidade de licitação",
+      "Pregão",
+      "Revogação"
+    ],
+    "Contrato administrativo": [
+      "Consórcio",
+      "Fiscal",
+      "Formalização",
+      "Liquidação da despesa",
+      "Subcontratação",
+      "Superfaturamento"
+    ],
+    "Solidariedade": [
+      "Credor",
+      "Pagamento indevido"
+    ],
+    "Bolsa de estudo": [
+      "Débito",
+      "Multa"
+    ],
+    "Obras e serviços de engenharia": [
+      "Fiscalização"
+    ],
+    "Ordenador de despesas": [
+      "Supervisão"
+    ],
+    "Delegação de competência": [
+      "Abrangência"
+    ],
+    "Natureza jurídica": [
+      "Abrangência"
+    ],
+    "Inabilitação de responsável": [
+      "Abrangência",
+      "Fraude",
+      "Princípio do non bis in idem",
+      "Requisito"
+    ],
+    "Projeto de pesquisa": [
+      "Omissão no dever de prestar contas"
+    ],
+    "Ato sujeito a registro": [
+      "Débito"
+    ],
+    "Determinação": [
+      "Descumprimento"
+    ],
+    "Prestação de contas": [
+      "Mora"
+    ]
+  },
+  "Licitação": {
+    "RDC": [
+      "Contratação integrada",
+      "Garantia contratual"
+    ],
+    "Obras e serviços de engenharia": [
+      "BDI",
+      "Fiscalização",
+      "Orçamento estimativo",
+      "Planejamento",
+      "Preço"
+    ],
+    "Edital de licitação": [
+      "Alteração",
+      "Cláusula obrigatória",
+      "Especificação técnica",
+      "Formalização",
+      "Impugnação",
+      "Informação",
+      "Vedação",
+      "Veículo"
+    ],
+    "Projeto básico": [
+      "Obras e serviços de engenharia",
+      "Planejamento"
+    ],
+    "Qualificação técnica": [
+      "Atestado de capacidade técnica",
+      "Certificação",
+      "Conselho de fiscalização profissional",
+      "Documentação",
+      "Exigência",
+      "Licença ambiental"
+    ],
+    "Dispensa de licitação": [
+      "Bens imóveis",
+      "Emergência",
+      "Entidade sem fins lucrativos",
+      "Licitação fracassada",
+      "Remanescente de contrato"
+    ],
+    "Terceirização": [
+      "Atestado de capacidade técnica",
+      "Medição",
+      "Serviços advocatícios"
+    ],
+    "Pregão": [
+      "Intenção de recurso",
+      "Lance",
+      "Negociação",
+      "Obras e serviços de engenharia",
+      "Orçamento estimativo",
+      "Possibilidade",
+      "Pregoeiro",
+      "Princípio da publicidade",
+      "Princípio da segregação de funções",
+      "Proposta",
+      "Sanção administrativa"
+    ],
+    "Habilitação de licitante": [
+      "Declaração de inidoneidade",
+      "Documentação",
+      "Exigência",
+      "Vistoria"
+    ],
+    "Proposta": [
+      "BDI",
+      "Certificação",
+      "Composição",
+      "Desclassificação",
+      "Pequena empresa",
+      "Preço",
+      "Prova de conceito"
+    ],
+    "Inexigibilidade de licitação": [
+      "Artista consagrado",
+      "Credenciamento",
+      "Fornecedor exclusivo",
+      "Serviço técnico especializado",
+      "Serviços advocatícios"
+    ],
+    "Registro de preços": [
+      "Adesão à ata de registro de preços",
+      "Adjudicação",
+      "Ata de registro de preços",
+      "Cabimento",
+      "Obras e serviços de engenharia",
+      "Requisito"
+    ],
+    "Sistema S": [
+      "Auxílio-alimentação",
+      "Controle",
+      "Legislação",
+      "Pregão",
+      "Vedação"
+    ],
+    "Empresa estatal": [
+      "Atividade-fim",
+      "Contratação direta",
+      "Documentação",
+      "Edital de licitação",
+      "Obras e serviços de engenharia",
+      "Orçamento estimativo",
+      "Preço máximo",
+      "Qualificação técnica"
+    ],
+    "Locação (Licitação)": [
+      "Bens imóveis",
+      "Equipamentos"
+    ],
+    "Orçamento estimativo": [
+      "Elaboração",
+      "Preço"
+    ],
+    "Julgamento": [
+      "Critério",
+      "Princípio da vinculação ao instrumento convocatório",
+      "Proposta técnica"
+    ],
+    "Direito de preferência": [
+      "Pequena empresa"
+    ],
+    "Oscip": [
+      "Participação"
+    ],
+    "Bens e serviços de informática": [
+      "Medição",
+      "Planejamento"
+    ],
+    "Consórcio": [
+      "Poder discricionário"
+    ],
+    "Recurso": [
+      "Restrição"
+    ],
+    "Auxílio-alimentação": [
+      "Edital de licitação"
+    ],
+    "Propaganda e publicidade": [
+      "Edital de licitação",
+      "Julgamento"
+    ],
+    "Competitividade": [
+      "Restrição"
+    ],
+    "Estudo de viabilidade": [
+      "Locação (Licitação)"
+    ],
+    "Contratação direta": [
+      "Princípio da publicidade"
+    ],
+    "Documentação": [
+      "Apresentação",
+      "Autenticação"
+    ],
+    "Qualificação econômico-financeira": [
+      "Exigência",
+      "Garantia da proposta",
+      "Índice contábil"
+    ],
+    "Conselho de fiscalização profissional": [
+      "Contratação direta",
+      "Pregão",
+      "Serviços advocatícios"
+    ],
+    "Licitação de técnica e preço": [
+      "Requisito"
+    ],
+    "Pregão eletrônico": [
+      "Obrigatoriedade"
+    ],
+    "Parecer jurídico": [
+      "Conteúdo"
+    ],
+    "Participação": [
+      "Restrição"
+    ],
+    "Regulamentação": [
+      "Estrangeiro"
+    ],
+    "Convite (Licitação)": [
+      "Proposta"
+    ],
+    "Serviços contínuos": [
+      "Serviço de manutenção e reparos",
+      "Serviço de transporte"
+    ],
+    "Ato administrativo": [
+      "Revogação"
+    ],
+    "Sanção administrativa": [
+      "Obrigatoriedade"
+    ],
+    "Combustível": [
+      "Rede credenciada"
+    ],
+    "Licitação internacional": [
+      "Edital de licitação"
+    ],
+    "Parcelamento do objeto": [
+      "Obrigatoriedade"
+    ],
+    "Bens públicos": [
+      "Alienação"
+    ],
+    "Planejamento": [
+      "Modalidade de licitação"
+    ]
+  },
+  "Finanças Públicas": {
+    "Fundeb": [
+      "Aplicação"
+    ],
+    "Despesa pública": [
+      "Empresa estatal",
+      "Festividade",
+      "Liquidação da despesa",
+      "Sistema de Proteção Social dos Militares das Forças Armadas"
+    ],
+    "Responsabilidade fiscal": [
+      "Despesa com pessoal",
+      "Operação de crédito"
+    ],
+    "Renúncia de receita": [
+      "Medidas de compensação",
+      "Requisito"
+    ],
+    "Descentralização de crédito": [
+      "Termo de execução descentralizada"
+    ],
+    "Orçamento da União": [
+      "Concurso público",
+      "Crédito adicional",
+      "LOA",
+      "Receita orçamentária"
+    ],
+    "Conselho de fiscalização profissional": [
+      "Responsabilidade fiscal"
+    ],
+    "Execução orçamentária": [
+      "Assistência à saúde",
+      "Emenda parlamentar",
+      "Requisito"
+    ],
+    "Receita pública": [
+      "Aplicação",
+      "DPVAT"
+    ],
+    "Balanço patrimonial": [
+      "Conta vinculada"
+    ],
+    "SUS": [
+      "Recursos financeiros"
+    ],
+    "Exportação": [
+      "Financiamento"
+    ],
+    "Transferência de recursos": [
+      "COVID-19"
+    ],
+    "Sistema S": [
+      "Despesa"
+    ],
+    "FCDF": [
+      "Aplicação"
+    ],
+    "Fundo de Defesa de Direitos Difusos": [
+      "Aplicação"
+    ],
+    "Previdência complementar": [
+      "Contribuição"
+    ],
+    "Emenda parlamentar": [
+      "Natureza jurídica"
+    ],
+    "Concessionária": [
+      "Indenização"
+    ]
+  },
+  "Competência do TCU": {
+    "Princípio da independência das instâncias": [
+      "AGU",
+      "CADE"
+    ],
+    "Convênio": [
+      "Abrangência",
+      "Bens permanentes"
+    ],
+    "Fundos": [
+      "Fundeb",
+      "Fundo partidário",
+      "Transferências constitucionais e legais"
+    ],
+    "SUS": [
+      "Fundo Nacional de Saúde"
+    ],
+    "Contrato administrativo": [
+      "Abrangência"
+    ],
+    "Concurso de prognóstico": [
+      "Abrangência"
+    ],
+    "Administração federal": [
+      "Abrangência",
+      "Delação premiada",
+      "Termo de ajustamento de conduta"
+    ],
+    "Acesso à informação": [
+      "Abrangência"
+    ],
+    "Arrecadação da receita": [
+      "Tributo"
+    ],
+    "Determinação": [
+      "Natureza jurídica"
+    ],
+    "Recomendação": [
+      "Natureza jurídica"
+    ],
+    "Licitação": [
+      "Abrangência"
+    ],
+    "Previdência complementar": [
+      "Abrangência"
+    ],
+    "Desestatização": [
+      "Abrangência"
+    ],
+    "Ente da Federação": [
+      "Autonomia administrativa",
+      "Intervenção federal"
+    ],
+    "Conselho de fiscalização profissional": [
+      "Abrangência"
+    ],
+    "Renúncia de receita": [
+      "Abrangência"
+    ],
+    "Operação de crédito": [
+      "Abrangência"
+    ]
+  },
+  "Pessoal": {
+    "Conselho de fiscalização profissional": [
+      "Admissão de pessoal",
+      "Bolsa de estudo",
+      "Diárias",
+      "Indenização",
+      "Passagens",
+      "Remuneração",
+      "Serviços advocatícios",
+      "Teto constitucional"
+    ],
+    "Quintos": [
+      "Acumulação",
+      "Alteração",
+      "Instituição federal de ensino",
+      "Marco temporal",
+      "Requisito"
+    ],
+    "Ato sujeito a registro": [
+      "Alteração",
+      "Ato complexo",
+      "Decisão judicial",
+      "Princípio da ampla defesa",
+      "Princípio da insignificância",
+      "Registro tácito",
+      "Revisão de ofício"
+    ],
+    "Reforma (Pessoal)": [
+      "Reforma-prêmio"
+    ],
+    "Concurso público": [
+      "Aproveitamento",
+      "Validade"
+    ],
+    "Ressarcimento administrativo": [
+      "Decisão judicial",
+      "Dispensa"
+    ],
+    "Remuneração": [
+      "Decisão judicial",
+      "Equiparação",
+      "Gratificação de raios X",
+      "Hora extra",
+      "Irredutibilidade",
+      "Ministério Público",
+      "URP",
+      "Vantagem pecuniária"
+    ],
+    "Acumulação de cargo público": [
+      "Licença sem remuneração",
+      "Regime de dedicação exclusiva",
+      "Servidor público militar"
+    ],
+    "Subsídio": [
+      "Quintos"
+    ],
+    "Empresa estatal": [
+      "Remuneração"
+    ],
+    "Adicional por tempo de serviço": [
+      "Requisito"
+    ],
+    "Tempo de serviço": [
+      "Aluno-aprendiz",
+      "Pessoal militar",
+      "Tempo ficto"
+    ],
+    "Teto constitucional": [
+      "Pensão"
+    ],
+    "Admissão de pessoal": [
+      "Contratação temporária",
+      "Programa Saúde da Família"
+    ],
+    "Pensão civil": [
+      "Capacidade laboral",
+      "Concessão simultânea",
+      "Filha maior solteira",
+      "Paridade"
+    ],
+    "Jornada de trabalho": [
+      "Médico"
+    ],
+    "Aposentadoria especial": [
+      "Pessoa com deficiência"
+    ],
+    "Aposentadoria": [
+      "Aposentadoria-prêmio",
+      "Idade mínima",
+      "Proventos",
+      "Renúncia",
+      "Vantagem opção"
+    ],
+    "Transposição de regime jurídico": [
+      "Admissão de pessoal",
+      "Enquadramento"
+    ],
+    "Abono de permanência em serviço": [
+      "Requisito"
+    ],
+    "Acumulação de pensões": [
+      "Limite"
+    ],
+    "Cessão de pessoal": [
+      "Requisito"
+    ],
+    "Servidor público": [
+      "Vedação"
+    ],
+    "Auxílio-alimentação": [
+      "Requisito"
+    ],
+    "Cargo público": [
+      "Cargo isolado"
+    ],
+    "Férias": [
+      "Indenização"
+    ]
+  },
+  "Convênio": {
+    "Emenda parlamentar": [
+      "Requisito"
+    ],
+    "Prestação de contas": [
+      "Documentação",
+      "FNDE",
+      "Fundo Nacional de Assistência Social",
+      "Impossibilidade",
+      "Lei Rouanet",
+      "Requisito",
+      "Tomada de contas especial",
+      "Turismo"
+    ],
+    "Execução financeira": [
+      "Nexo de causalidade",
+      "Receita",
+      "Vedação"
+    ],
+    "Oscip": [
+      "Termo de parceria"
+    ],
+    "Formalização": [
+      "Requisito"
+    ],
+    "Bolsa de estudo": [
+      "Retorno ao Brasil"
+    ],
+    "Execução física": [
+      "Execução parcial",
+      "Substabelecimento"
+    ],
+    "Esporte": [
+      "Financiamento"
+    ],
+    "Entidade sem fins lucrativos": [
+      "Acesso à informação"
+    ],
+    "Sistema S": [
+      "Prestação de contas",
+      "Vedação"
+    ],
+    "Acordo de cooperação": [
+      "Exército",
+      "Requisito"
+    ],
+    "SUS": [
+      "Desvio de objeto"
+    ],
+    "Convenente": [
+      "Obrigação"
+    ],
+    "Licitação": [
+      "Entidade de direito privado"
+    ],
+    "Organização social": [
+      "Assistência à saúde"
+    ],
+    "Transferência de recursos": [
+      "Conexão (Tecnologia)",
+      "Vedação"
+    ],
+    "Bens imóveis": [
+      "Regularização fundiária"
+    ],
+    "Lei Rouanet": [
+      "Recursos financeiros"
+    ]
+  },
+  "Contrato Administrativo": {
+    "Anulação": [
+      "Avaliação"
+    ],
+    "Obras e serviços de engenharia": [
+      "Fiscalização",
+      "Medição",
+      "Obra atrasada",
+      "Projeto",
+      "Reajuste",
+      "Rodovia",
+      "Superfaturamento"
+    ],
+    "Aditivo": [
+      "Contratação integrada",
+      "Limite",
+      "Requisito",
+      "Sobrepreço"
+    ],
+    "Garantia contratual": [
+      "Exigência"
+    ],
+    "Princípio da publicidade": [
+      "Forma"
+    ],
+    "Liquidação da despesa": [
+      "Atestação"
+    ],
+    "RDC": [
+      "Contratação integrada"
+    ],
+    "Propaganda e publicidade": [
+      "Patrocínio",
+      "Subcontratação",
+      "Vedação"
+    ],
+    "Formalização do contrato": [
+      "Cláusula obrigatória",
+      "Contrato verbal",
+      "Emergência",
+      "Obrigatoriedade"
+    ],
+    "Superfaturamento": [
+      "BDI",
+      "Compensação financeira",
+      "Metodologia",
+      "Preço",
+      "Subcontratação"
+    ],
+    "Pagamento antecipado": [
+      "Requisito"
+    ],
+    "Reajuste": [
+      "Prazo"
+    ],
+    "Terceirização": [
+      "Vedação"
+    ],
+    "Equilíbrio econômico-financeiro": [
+      "Avaliação",
+      "Encargos trabalhistas",
+      "Orçamento da União",
+      "Preço"
+    ],
+    "Parlamentar": [
+      "Vedação"
+    ],
+    "Empreitada por preço global": [
+      "Pagamento"
+    ],
+    "Seguro": [
+      "Responsabilidade civil"
+    ],
+    "Emergência": [
+      "Vigência"
+    ],
+    "Fiscalização": [
+      "Exigência"
+    ],
+    "Sanção administrativa": [
+      "Inadimplência"
+    ],
+    "Execução de contrato": [
+      "Regularidade fiscal"
+    ]
+  },
+  "Direito Processual": {
+    "Recurso": [
+      "Admissibilidade",
+      "Efeito devolutivo",
+      "Efeito suspensivo",
+      "Prazo",
+      "Princípio da boa-fé"
+    ],
+    "Tomada de contas especial": [
+      "Julgamento",
+      "Pressuposto processual",
+      "Resolução consensual"
+    ],
+    "Sobrestamento de processo": [
+      "Acordo de leniência"
+    ],
+    "Prova (Direito)": [
+      "Depoimento",
+      "Documento fiscal",
+      "Indício",
+      "Perícia",
+      "Prova ilícita",
+      "Relatório de fiscalização",
+      "Ônus da prova"
+    ],
+    "Representação": [
+      "Admissibilidade",
+      "Perda de objeto"
+    ],
+    "Princípio da ampla defesa": [
+      "Determinação"
+    ],
+    "Embargos de declaração": [
+      "Admissibilidade",
+      "Omissão",
+      "Reiteração"
+    ],
+    "Princípio da independência das instâncias": [
+      "Decisão judicial"
+    ],
+    "Multa": [
+      "Pessoa jurídica"
+    ],
+    "Julgamento": [
+      "Colegiado",
+      "Fundamentação",
+      "Suspensão"
+    ],
+    "Citação": [
+      "Falecimento de responsável",
+      "Validade"
+    ],
+    "Processo de controle externo": [
+      "Legislação",
+      "Resolução consensual"
+    ],
+    "Recurso de revisão": [
+      "Admissibilidade",
+      "Documento novo",
+      "Efeito suspensivo"
+    ],
+    "Julgamento de contas": [
+      "Contas ordinárias"
+    ],
+    "Prazo": [
+      "Prorrogação"
+    ],
+    "Parte processual": [
+      "Interessado",
+      "Representante",
+      "Órgão público"
+    ],
+    "Cobrança executiva": [
+      "Requisito"
+    ],
+    "Coisa julgada": [
+      "Auditoria",
+      "Contas ordinárias"
+    ],
+    "Indisponibilidade de bens": [
+      "Requisito"
+    ],
+    "Revisão de ofício": [
+      "Matéria de ordem pública"
+    ],
+    "Comunicação processual": [
+      "Validade"
+    ],
+    "Relator": [
+      "Impedimento"
+    ],
+    "Consulta": [
+      "Admissibilidade"
+    ],
+    "Solicitação de informação": [
+      "Admissibilidade"
+    ],
+    "Acesso à informação": [
+      "Sigilo"
+    ]
+  },
+  "Desestatização": {
+    "Concessão pública": [
+      "Alienação",
+      "Autorização",
+      "Concessionária",
+      "Relicitação",
+      "Restrição"
+    ],
+    "Licitação": [
+      "Contratação direta",
+      "Edital de licitação"
+    ],
+    "Porto organizado": [
+      "Arrendamento de instalação portuária"
+    ],
+    "Rodovia": [
+      "Pedágio"
+    ]
+  },
+  "Gestão Administrativa": {
+    "Administração federal": [
+      "Acesso à informação",
+      "Assistência à saúde",
+      "Honorários advocatícios",
+      "PDV",
+      "Poder de polícia",
+      "Resolução consensual"
+    ],
+    "Controle interno": [
+      "Bens móveis"
+    ],
+    "Conselho de fiscalização profissional": [
+      "Competência"
+    ],
+    "AGU": [
+      "Defesa de responsável"
+    ],
+    "Empresa estatal": [
+      "Investimento",
+      "Preservação ambiental",
+      "Vedação"
+    ],
+    "Previdência complementar": [
+      "Legislação"
+    ],
+    "CGU": [
+      "Competência"
+    ],
+    "Serviços advocatícios": [
+      "Defesa de responsável"
+    ],
+    "Ato administrativo": [
+      "Validade"
+    ],
+    "Empresa público-privada": [
+      "Controle acionário"
+    ]
+  }
+}

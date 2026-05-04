@@ -10,6 +10,7 @@ import {
   callGemini,
   ENRICHMENT_DELAY_MS,
 } from '@/lib/tcu-enrichment';
+import { classifyTCUEditorial } from '@/lib/tcu-editorial-classifier';
 
 /**
  * Cron Job: Sincronização automática de acórdãos do TCU
@@ -79,10 +80,11 @@ function parseDateTCU(dataSessao: string | undefined): Date | null {
 async function enrichNewDocuments(docIds: string[]): Promise<{
   summaries: number;
   leiIndexed: number;
+  classified: number;
   enrichErrors: number;
 }> {
   if (docIds.length === 0 || !process.env.GEMINI_API_KEY) {
-    return { summaries: 0, leiIndexed: 0, enrichErrors: 0 };
+    return { summaries: 0, leiIndexed: 0, classified: 0, enrichErrors: 0 };
   }
 
   console.log(`[Sync TCU] Enriquecendo ${docIds.length} novos acórdãos...`);
@@ -97,6 +99,10 @@ async function enrichNewDocuments(docIds: string[]): Promise<{
       category: true,
       tags: true,
       leiArticles: true,
+      tcuNumeroAcordao: true,
+      tcuRelator: true,
+      tcuOrgaoJulgador: true,
+      tcuEmentaCompleta: true,
       metaTcu: {
         select: {
           ementaCompleta: true,
@@ -110,6 +116,7 @@ async function enrichNewDocuments(docIds: string[]): Promise<{
 
   let summaries = 0;
   let leiIndexed = 0;
+  let classified = 0;
   let enrichErrors = 0;
 
   for (const doc of docs) {
@@ -152,10 +159,56 @@ async function enrichNewDocuments(docIds: string[]): Promise<{
       enrichErrors++;
       console.error(`[Sync TCU] Erro resumo ${doc.title}:`, err instanceof Error ? err.message : err);
     }
+
+    // Fase 3: Classificação editorial (área/tema/subtema) via taxonomia oficial TCU
+    try {
+      const classification = await classifyTCUEditorial({
+        numeroAcordao: doc.tcuNumeroAcordao,
+        title: doc.title,
+        ementa: doc.tcuEmentaCompleta || doc.description || doc.title,
+        relator: doc.tcuRelator,
+        orgao: doc.tcuOrgaoJulgador,
+      });
+
+      const now = new Date();
+      await prisma.document.update({
+        where: { id: doc.id },
+        data: {
+          tcuArea: classification.area,
+          tcuTema: classification.tema,
+          tcuSubtema: classification.subtema,
+          tcuClassificadoEm: now,
+          tcuRevisadoPorAdmin: false,
+        },
+      });
+      await prisma.documentMetaTcu.upsert({
+        where: { documentId: doc.id },
+        create: {
+          documentId: doc.id,
+          area: classification.area,
+          tema: classification.tema,
+          subtema: classification.subtema,
+          classificadoEm: now,
+          revisadoPorAdmin: false,
+        },
+        update: {
+          area: classification.area,
+          tema: classification.tema,
+          subtema: classification.subtema,
+          classificadoEm: now,
+          revisadoPorAdmin: false,
+        },
+      });
+      classified++;
+      await new Promise(resolve => setTimeout(resolve, ENRICHMENT_DELAY_MS));
+    } catch (err) {
+      enrichErrors++;
+      console.error(`[Sync TCU] Erro classificação editorial ${doc.title}:`, err instanceof Error ? err.message : err);
+    }
   }
 
-  console.log(`[Sync TCU] Enriquecimento: ${summaries} resumos, ${leiIndexed} Lei-indexed, ${enrichErrors} erros`);
-  return { summaries, leiIndexed, enrichErrors };
+  console.log(`[Sync TCU] Enriquecimento: ${summaries} resumos, ${leiIndexed} Lei-indexed, ${classified} classificados, ${enrichErrors} erros`);
+  return { summaries, leiIndexed, classified, enrichErrors };
 }
 
 export async function GET(request: NextRequest) {
@@ -403,7 +456,7 @@ export async function GET(request: NextRequest) {
     console.log('[Sync TCU] Resultado:', result);
 
     return NextResponse.json({
-      message: `Sincronização TCU: ${imported} importados, ${enrichment.summaries} resumos, ${enrichment.leiIndexed} Lei-indexed`,
+      message: `Sincronização TCU: ${imported} importados, ${enrichment.summaries} resumos, ${enrichment.leiIndexed} Lei-indexed, ${enrichment.classified} classificados`,
       ...result,
     });
 
