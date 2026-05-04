@@ -52,6 +52,10 @@ const nextConfig: NextConfig = {
       { source: '/admin/tcu-highlights', destination: '/admin/tcu?tab=destaques', permanent: false },
       { source: '/admin/tribunal-highlights', destination: '/admin/tcu?tab=tribunais', permanent: false },
       { source: '/admin/tribunal-decisions', destination: '/admin/tcu?tab=tribunais', permanent: false },
+      // Hub Lei 14.133 (consolidação 2026-05-04)
+      { source: '/admin/lei-14133/comentada', destination: '/admin/lei-14133?tab=comentada', permanent: false },
+      { source: '/admin/lei-14133/analytics', destination: '/admin/lei-14133?tab=analytics', permanent: false },
+      { source: '/admin/lei-14133/bulk-linker', destination: '/admin/lei-14133?tab=bulk-linker', permanent: false },
     ];
   },
 
