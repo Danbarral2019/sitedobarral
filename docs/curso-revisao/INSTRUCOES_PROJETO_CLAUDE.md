@@ -131,9 +131,43 @@ REGRAS DURAS
 - Use a Lei 14.133/2021 como referência primária (Lei 8.666 só entra como
   comparativo histórico).
 
+PAPEL ADICIONAL: ESTRUTURADOR DE IMPORT
+Quando o autor terminar de redigir a versão final de uma aula (texto que ELE
+escreveu, depois das nossas trocas), ajude-o a montar o arquivo no formato
+esperado pelo script de import:
+
+  ---
+  courseId: "<id do curso>"
+  moduleSlug: "<slug-do-modulo>"
+  moduleTitle: "<Título do módulo>"
+  moduleDescription: "<descrição>"
+  moduleDisplayOrder: <int>
+  lessonSlug: "<slug-da-aula>"
+  title: "<Título da aula>"
+  description: "<descrição curta>"
+  displayOrder: <int>
+  estimatedMinutes: <int>
+  leiArticles: [<números>]
+  aiSummary: "<resumo curto>"
+  aiKeyPoints:
+    - "<ponto 1>"
+    - "<ponto 2>"
+  isPublished: true
+  ---
+
+  # <Título da aula>
+
+  <conteúdo Markdown completo escrito pelo autor>
+
+Você organiza o YAML, escolhe slugs estáveis em kebab-case, sugere
+`leiArticles` apropriados pelo conteúdo, propõe `aiSummary` e `aiKeyPoints`
+fiéis ao texto. NUNCA escreva o conteúdo principal da aula — você apenas
+estrutura o arquivo a partir do que o autor entregou. Se o autor não definiu
+uma `aiKeyPoints` ou `aiSummary`, pergunte se ele quer que você proponha.
+
 ABERTURA DE CADA CONVERSA
-Comece SEMPRE perguntando: "Quer começar pela primeira aula sem revisão ou
-focar em uma aula específica?" — para que o autor controle o ritmo da revisão.
+Comece SEMPRE perguntando: "Quer começar pela primeira aula sem revisão,
+focar em uma aula específica, ou estruturar uma versão final pro import?"
 ```
 
 ---
@@ -150,15 +184,49 @@ focar em uma aula específica?" — para que o autor controle o ritmo da revisã
 6. Para cada apontamento que você concorda, copie pra um arquivo `<slug>-correcoes-aceitas.md` local.
 7. Para cada apontamento que você discorda, conteste no chat. Se Claude defender com fonte sólida, reconsidere. Se a fonte for fraca, descarte.
 
-### Reaplicação no site (quando terminar a revisão)
+### Reaplicação no site (script de import)
 
-Opção A — manual:
-- Editar via `/admin/lms` (interface admin) lição por lição. Bom pra mudanças cirúrgicas.
+A reaplicação é via **script** (definida em 2026-05-04 — sem alunos pagantes ainda, sem necessidade de modo draft/snapshot).
 
-Opção B — script:
-- Criar `scripts/import-revised-course.ts` que lê um Markdown estruturado e atualiza `Lesson.content` via Prisma. Pra mudanças em volume.
+**Estrutura esperada de arquivos:**
 
-Quando o curso estiver revisado, **rodar `scripts/republish-course.ts <courseId>`** (ainda a criar) que faz `prisma.courseStatus.update({ data: { isSuspended: false } })`.
+```
+docs/curso-revisao/imports/
+  contratacao-direta/
+    01-conceito-contratacao-direta.md
+    02-dispensa-de-licitacao.md
+    03-inexigibilidade.md
+    ...
+  planejamento-contratacoes/
+    01-...
+```
+
+Cada arquivo é **uma aula**, com frontmatter YAML + conteúdo Markdown. Veja `docs/curso-revisao/imports/_template/01-exemplo-de-aula.md` e `_template/README.md`.
+
+**Fluxo de aplicação:**
+
+```bash
+# 1. Dry-run pra conferir o resumo de mudanças (sem escrever)
+npx dotenv -e .env.local -- tsx scripts/import-revised-course.ts contratacao-direta --dryRun
+
+# 2. Aplicar de verdade
+npx dotenv -e .env.local -- tsx scripts/import-revised-course.ts contratacao-direta
+
+# 3. Quando o curso inteiro estiver atualizado, republicar
+npx dotenv -e .env.local -- tsx scripts/republish-course.ts 10
+```
+
+**O que o import atualiza** (decisão de 2026-05-04):
+- `Lesson.title`, `description`, `content`
+- `Lesson.aiSummary`, `aiKeyPoints` (ou zera se omitidos)
+- `Lesson.leiArticles`
+- `Module.title`, `description`
+- Cria Lesson nova se `lessonSlug` não existir; cria Module novo se `moduleTitle` não bater com nenhum existente
+- **NÃO deleta** aulas/módulos antigos automaticamente — pra remover, usar `/admin/lms` ou query SQL direta
+
+**Importante:**
+- O import **sobrescreve direto** (sem snapshot, sem draft). Como não temos alunos pagantes, isso é OK. Se mudar de ideia depois, dá pra adicionar `LessonContentSnapshot` à schema.
+- Antes de cada onda de import, **commitar os `.md` da pasta de imports** pra ter histórico no git. Sugestão: `git tag pre-import-contratacao-direta` antes de aplicar.
 
 ---
 
@@ -228,8 +296,12 @@ npx dotenv -e .env.local -- tsx scripts/export-courses-for-review.ts
 # Suspender todos os cursos novamente (se algum foi republicado por engano):
 npx dotenv -e .env.local -- tsx scripts/suspend-all-courses.ts
 
-# Reativar UM curso (substitua <id> e rode no shell do tsx):
-npx dotenv -e .env.local -- tsx -e "import {prisma} from './lib/prisma'; (async () => { await prisma.courseStatus.update({ where: { courseId: '10' }, data: { isSuspended: false }}); console.log('OK'); await prisma.\$disconnect(); })()"
+# Importar aulas revisadas (dry-run primeiro, depois sem flag):
+npx dotenv -e .env.local -- tsx scripts/import-revised-course.ts <courseSlug> --dryRun
+npx dotenv -e .env.local -- tsx scripts/import-revised-course.ts <courseSlug>
+
+# Republicar UM curso (tira o banner "Em revisão"):
+npx dotenv -e .env.local -- tsx scripts/republish-course.ts <courseId>
 ```
 
 ---
