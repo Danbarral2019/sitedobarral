@@ -17,10 +17,10 @@ export interface ExtractResult {
 }
 
 const FETCH_TIMEOUT_MS = 30000;
-const MAX_DISPOSITIVOS_PER_ACORDAO = 3;
-const MAX_TEXTO_LENGTH = 1500;
+const MAX_DISPOSITIVOS_PER_ACORDAO = 15;
+const MAX_TEXTO_LENGTH = 5000;
 
-const DISPOSITIVO_REGEX = /(?:^|[\n\s;.])(9\.\d+(?:\.\d+)*)\s*\.?\s+([^\n][\s\S]*?)(?=\s+9\.\d+(?:\.\d+)*\s*\.?\s+|\s+(?:10|11|12)\.\s|\s+ACORD[AÃ]M|\s+Ata\s+n[°º]|\n\s*Senado|$)/g;
+const DISPOSITIVO_REGEX = /(?:^|[\n\s;.])(9\.\d+(?:\.\d+)*)\s*\.?\s+([^\n][\s\S]*?)(?=\s+9\.\d+(?:\.\d+)*\s*\.?\s+|\s+(?:10|11|12)\.\s+(?:Ata|Data|C[óo]digo)|\s+Ata\s+n[°º]|\n\s*Senado|$)/g;
 
 function cleanDispositivoText(raw: string): string {
   let cleaned = raw.replace(/\s+/g, ' ').trim();
@@ -30,18 +30,56 @@ function cleanDispositivoText(raw: string): string {
   return cleaned;
 }
 
+/**
+ * Isola o bloco "ACORDAM os Ministros... em: <dispositivos> 10. Ata"
+ * (ou similar) para evitar pegar citações de "9.X" no relatório/voto
+ * que precedem o dispositivo final do acórdão.
+ *
+ * Em alguns casos há múltiplos votos (relator + revisor) — preferimos o
+ * último bloco "ACORDAM" (que costuma ser a deliberação final do colegiado).
+ */
+function isolateAcordamBlock(text: string): string {
+  const re = /ACORDAM\s+os\s+[mM]inistros[\s\S]*?(?:em:|em\s*[—–-]?\s*)/g;
+  let lastIdx = -1;
+  let m: RegExpExecArray | null;
+  while ((m = re.exec(text)) !== null) {
+    lastIdx = m.index + m[0].length;
+  }
+  if (lastIdx < 0) return text;
+  // A partir de "em:", capturar até "10. Ata" / "Ata n°" / final
+  const tail = text.slice(lastIdx);
+  const endMatch = tail.match(/\s+(?:10|11|12)\.\s+(?:Ata|Data|C[óo]digo)|\s+Ata\s+n[°º]/);
+  return endMatch && endMatch.index !== undefined ? tail.slice(0, endMatch.index) : tail;
+}
+
+function compareNumeros(a: string, b: string): number {
+  const partsA = a.split('.').map(Number);
+  const partsB = b.split('.').map(Number);
+  for (let i = 0; i < Math.max(partsA.length, partsB.length); i++) {
+    const va = partsA[i] ?? 0;
+    const vb = partsB[i] ?? 0;
+    if (va !== vb) return va - vb;
+  }
+  return 0;
+}
+
 function runRegex(text: string): Dispositivo[] {
   if (!text) return [];
+  const block = isolateAcordamBlock(text);
   const dispositivos: Dispositivo[] = [];
-  const matches = text.matchAll(DISPOSITIVO_REGEX);
+  const seen = new Set<string>();
+  const matches = block.matchAll(DISPOSITIVO_REGEX);
   for (const m of matches) {
     const numero = m[1];
+    if (seen.has(numero)) continue;
     const texto = cleanDispositivoText(m[2]);
     if (texto.length < 20) continue;
     if (!/^[a-záéíóúâêôãõç]/i.test(texto)) continue;
+    seen.add(numero);
     dispositivos.push({ numero, texto });
     if (dispositivos.length >= MAX_DISPOSITIVOS_PER_ACORDAO) break;
   }
+  dispositivos.sort((a, b) => compareNumeros(a.numero, b.numero));
   return dispositivos;
 }
 
