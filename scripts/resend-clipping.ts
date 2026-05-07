@@ -61,7 +61,7 @@ async function main() {
       tcuOrgaoJulgador: true,
       tcuLinkPDF: true,
       tcuDataJulgamento: true,
-      clippingExtract: { select: { dispositivos: true, extractMethod: true } },
+      clippingExtract: { select: { dispositivos: true, extractMethod: true, aiBullets: true } },
     },
   });
 
@@ -80,6 +80,14 @@ async function main() {
       linkInternal: c.url,
       dispositivos: (c.clippingExtract?.dispositivos as ClippingAcordao['dispositivos'] | undefined) || [],
       extractMethod: (c.clippingExtract?.extractMethod as ClippingAcordao['extractMethod'] | undefined) || 'failed',
+      aiBullets: (() => {
+        const raw = c.clippingExtract?.aiBullets;
+        if (!raw) return undefined;
+        try {
+          const parsed = JSON.parse(raw);
+          return Array.isArray(parsed) ? parsed.filter((s: unknown): s is string => typeof s === 'string') : undefined;
+        } catch { return undefined; }
+      })(),
     }));
 
   const referenceDate = new Date(sentDateKey.getTime() - 24 * 60 * 60 * 1000);

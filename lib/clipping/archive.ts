@@ -46,6 +46,7 @@ type DocSelect = {
   clippingExtract: {
     dispositivos: unknown;
     extractMethod: string;
+    aiBullets?: string | null;
   } | null;
 };
 
@@ -60,8 +61,20 @@ export const ACORDAO_SELECT = {
   tcuOrgaoJulgador: true,
   tcuLinkPDF: true,
   tcuDataJulgamento: true,
-  clippingExtract: { select: { dispositivos: true, extractMethod: true } },
+  clippingExtract: { select: { dispositivos: true, extractMethod: true, aiBullets: true } },
 } as const;
+
+function parseAiBullets(raw: string | null | undefined): string[] | undefined {
+  if (!raw) return undefined;
+  try {
+    const parsed = JSON.parse(raw);
+    if (!Array.isArray(parsed)) return undefined;
+    const filtered = parsed.filter((s): s is string => typeof s === 'string');
+    return filtered.length > 0 ? filtered : undefined;
+  } catch {
+    return undefined;
+  }
+}
 
 export function mapDocToAcordao(doc: DocSelect): ClippingAcordao {
   return {
@@ -76,6 +89,7 @@ export function mapDocToAcordao(doc: DocSelect): ClippingAcordao {
     dispositivos: (doc.clippingExtract?.dispositivos as Dispositivo[] | undefined) ?? [],
     extractMethod:
       (doc.clippingExtract?.extractMethod as ClippingAcordao['extractMethod'] | undefined) ?? 'failed',
+    aiBullets: parseAiBullets(doc.clippingExtract?.aiBullets),
   };
 }
 

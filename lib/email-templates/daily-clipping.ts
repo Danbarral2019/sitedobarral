@@ -10,7 +10,8 @@ export interface ClippingAcordao {
   linkPdf: string | null;
   linkInternal: string | null;
   dispositivos: Dispositivo[];
-  extractMethod: 'ementa_regex' | 'pdf_parse' | 'cached' | 'failed';
+  extractMethod: 'ementa_regex' | 'rtf_parse' | 'pdf_parse' | 'cached' | 'failed';
+  aiBullets?: string[];
 }
 
 export interface DailyClippingInput {
@@ -72,8 +73,21 @@ function renderAcordaoBlockHtml(a: ClippingAcordao): string {
       <p style="margin:14px 0 6px;font-size:13px;color:#1f2937;"><strong style="color:#0f172a;">Dispositivos:</strong></p>
       <ul style="padding-left:18px;margin:0 0 12px;">${items}</ul>
     `;
-  } else if (a.extractMethod === 'failed') {
+  } else if (a.extractMethod === 'failed' && (!a.aiBullets || a.aiBullets.length === 0)) {
     dispositivosHtml = `<p style="margin:8px 0;font-size:12px;color:#94a3b8;font-style:italic;">Dispositivos não pôde ser extraído automaticamente — consulte o inteiro teor.</p>`;
+  }
+
+  let bulletsHtml = '';
+  if (a.aiBullets && a.aiBullets.length > 0) {
+    const items = a.aiBullets
+      .map((b) => `<li style="margin:0 0 6px;color:#334155;font-size:13.5px;line-height:1.55;">${escapeHtml(b)}</li>`)
+      .join('');
+    bulletsHtml = `
+      <div style="margin:14px 0 12px;padding:12px 14px;background:#f8fafc;border-left:3px solid #6366f1;border-radius:4px;">
+        <p style="margin:0 0 6px;font-size:12px;font-weight:600;color:#4f46e5;letter-spacing:0.04em;">CONTEXTO E TESE <span style="font-weight:400;color:#94a3b8;">(síntese editorial)</span></p>
+        <ul style="padding-left:18px;margin:0;">${items}</ul>
+      </div>
+    `;
   }
 
   const linkPdfHtml = a.linkPdf
@@ -91,6 +105,7 @@ function renderAcordaoBlockHtml(a: ClippingAcordao): string {
           <p style="margin:0;font-size:12px;color:#64748b;">${meta}</p>
           ${ementaHtml}
           ${dispositivosHtml}
+          ${bulletsHtml}
           <p style="margin:8px 0 0;">${linkPdfHtml}${linkInternalHtml}</p>
         </td>
       </tr>
@@ -114,6 +129,13 @@ function renderAcordaoBlockText(a: ClippingAcordao): string {
     lines.push('Dispositivos:');
     for (const d of a.dispositivos) {
       lines.push(`${d.numero}. ${d.texto}`);
+    }
+  }
+  if (a.aiBullets && a.aiBullets.length > 0) {
+    lines.push('');
+    lines.push('Contexto e tese (síntese editorial):');
+    for (const b of a.aiBullets) {
+      lines.push(`- ${b}`);
     }
   }
   if (a.linkPdf) lines.push(`Inteiro teor: ${a.linkPdf}`);

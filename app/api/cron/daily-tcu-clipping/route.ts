@@ -77,7 +77,7 @@ export async function GET(request: NextRequest) {
       tcuLinkPDF: true,
       tcuDataJulgamento: true,
       clippingExtract: {
-        select: { dispositivos: true, extractMethod: true, pdfFetchFailed: true },
+        select: { dispositivos: true, extractMethod: true, pdfFetchFailed: true, aiBullets: true },
       },
     },
     orderBy: [{ tcuDataJulgamento: 'desc' }, { uploadedAt: 'desc' }],
@@ -121,7 +121,7 @@ export async function GET(request: NextRequest) {
     clippingExtract: c.clippingExtract ?? null,
   }));
 
-  const extractResults = await extractMany(docsLike, 3);
+  const extractResults = await extractMany(docsLike, 1);
 
   const acordaos: ClippingAcordao[] = filtered.map((c) => {
     const ex = extractResults.get(c.id);
@@ -136,6 +136,7 @@ export async function GET(request: NextRequest) {
       linkInternal: c.url,
       dispositivos: ex?.dispositivos || [],
       extractMethod: ex?.method || 'failed',
+      aiBullets: ex?.aiBullets,
     };
   });
 

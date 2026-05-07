@@ -1539,13 +1539,15 @@ model DailyClippingSend {
 
 // Cache do dispositivo (itens 9.X) extraído por acórdão — evita re-baixar PDF
 model ClippingItemExtract {
-  id             String   @id @default(uuid())
-  documentId     String   @unique
-  document       Document @relation(fields: [documentId], references: [id], onDelete: Cascade)
-  dispositivos   String?  @db.Text // JSON: [{numero:"9.1", texto:"..."}]
-  extractMethod  String // 'ementa_regex' | 'pdf_parse' | 'failed'
-  pdfFetchFailed Boolean  @default(false)
-  extractedAt    DateTime @default(now())
+  id             String    @id @default(uuid())
+  documentId     String    @unique
+  document       Document  @relation(fields: [documentId], references: [id], onDelete: Cascade)
+  dispositivos   String?   @db.Text // JSON: [{numero:"9.1", texto:"..."}]
+  extractMethod  String // 'ementa_regex' | 'rtf_parse' | 'pdf_parse' | 'failed'
+  pdfFetchFailed Boolean   @default(false)
+  aiBullets      String?   @db.Text // JSON ["bullet 1", "bullet 2", ...] gerado por IA pra casos processuais secos
+  aiGeneratedAt  DateTime?
+  extractedAt    DateTime  @default(now())
 
   @@index([extractMethod])
 }

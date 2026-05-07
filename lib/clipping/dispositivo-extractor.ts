@@ -1,4 +1,5 @@
 import { prisma } from '@/lib/prisma';
+import { generateAiBullets, shouldEnrichWithAi } from './ai-bullets';
 
 export interface Dispositivo {
   numero: string;
@@ -7,15 +8,19 @@ export interface Dispositivo {
 
 export interface ExtractResult {
   dispositivos: Dispositivo[];
-  method: 'ementa_regex' | 'pdf_parse' | 'cached' | 'failed';
+  method: 'ementa_regex' | 'rtf_parse' | 'pdf_parse' | 'cached' | 'failed';
   pdfFetchFailed?: boolean;
+  /** Texto bruto extraído do inteiro teor (RTF/PDF), passado para a camada IA. */
+  inteiroTeorText?: string;
+  /** Bullets editoriais gerados por IA quando os dispositivos extraídos estão secos. */
+  aiBullets?: string[];
 }
 
-const PDF_FETCH_TIMEOUT_MS = 8000;
+const FETCH_TIMEOUT_MS = 30000;
 const MAX_DISPOSITIVOS_PER_ACORDAO = 3;
 const MAX_TEXTO_LENGTH = 1500;
 
-const DISPOSITIVO_REGEX = /(^|\n)\s*(9\.\d+(?:\.\d+)*)\s*\.?\s+([^\n][\s\S]*?)(?=\n\s*9\.\d+(?:\.\d+)*\s*\.?\s+|\n\s*ACORD[AÃ]M|\n\s*Ata\s|\n\s*Senado|\Z)/g;
+const DISPOSITIVO_REGEX = /(?:^|[\n\s;.])(9\.\d+(?:\.\d+)*)\s*\.?\s+([^\n][\s\S]*?)(?=\s+9\.\d+(?:\.\d+)*\s*\.?\s+|\s+(?:10|11|12)\.\s|\s+ACORD[AÃ]M|\s+Ata\s+n[°º]|\n\s*Senado|$)/g;
 
 function cleanDispositivoText(raw: string): string {
   let cleaned = raw.replace(/\s+/g, ' ').trim();
@@ -30,8 +35,8 @@ function runRegex(text: string): Dispositivo[] {
   const dispositivos: Dispositivo[] = [];
   const matches = text.matchAll(DISPOSITIVO_REGEX);
   for (const m of matches) {
-    const numero = m[2];
-    const texto = cleanDispositivoText(m[3]);
+    const numero = m[1];
+    const texto = cleanDispositivoText(m[2]);
     if (texto.length < 20) continue;
     if (!/^[a-záéíóúâêôãõç]/i.test(texto)) continue;
     dispositivos.push({ numero, texto });
@@ -42,15 +47,81 @@ function runRegex(text: string): Dispositivo[] {
 
 const BROWSER_UA = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36';
 
-function normalizeToPdfUrl(rawUrl: string): string {
+function toRtfUrl(rawUrl: string): string {
+  if (/SvlVisualizarRelVotoAcRtf(?=\?)/.test(rawUrl)) return rawUrl;
+  return rawUrl.replace(/SvlVisualizarRelVotoAc(?=\?)/, 'SvlVisualizarRelVotoAcRtf');
+}
+
+function toPdfUrl(rawUrl: string): string {
   return rawUrl.replace(/SvlVisualizarRelVotoAcRtf(?=\?)/, 'SvlVisualizarRelVotoAc');
+}
+
+function rtfToText(rtf: string): string {
+  let text = rtf;
+  // Symbol escapes: \~ (nbsp), \- (soft hyphen), \_ (nbsp hyphen), \: (subentry)
+  text = text.replace(/\\~/g, ' ').replace(/\\-/g, '').replace(/\\_/g, '-').replace(/\\:/g, ':');
+  // Hex escapes (cp1252): \'XX → char
+  text = text.replace(/\\'([0-9a-fA-F]{2})/g, (_, hex) => {
+    const code = parseInt(hex, 16);
+    // Map cp1252 specifics that diverge from latin1
+    const cp1252: Record<number, number> = {
+      0x80: 0x20ac, 0x82: 0x201a, 0x83: 0x0192, 0x84: 0x201e, 0x85: 0x2026,
+      0x86: 0x2020, 0x87: 0x2021, 0x88: 0x02c6, 0x89: 0x2030, 0x8a: 0x0160,
+      0x8b: 0x2039, 0x8c: 0x0152, 0x8e: 0x017d, 0x91: 0x2018, 0x92: 0x2019,
+      0x93: 0x201c, 0x94: 0x201d, 0x95: 0x2022, 0x96: 0x2013, 0x97: 0x2014,
+      0x98: 0x02dc, 0x99: 0x2122, 0x9a: 0x0161, 0x9b: 0x203a, 0x9c: 0x0153,
+      0x9e: 0x017e, 0x9f: 0x0178,
+    };
+    return String.fromCharCode(cp1252[code] ?? code);
+  });
+  // Unicode escapes \uNNNN? (RTF: signed int16; ? is fallback char)
+  text = text.replace(/\\u(-?\d+)\??/g, (_, n) => {
+    const code = Number(n);
+    return String.fromCharCode(code < 0 ? code + 65536 : code);
+  });
+  // Control words: \word optional digits, optional space
+  text = text.replace(/\\\*?[a-zA-Z]+-?\d*\s?/g, ' ');
+  // Escaped braces and backslashes
+  text = text.replace(/\\([{}\\])/g, '$1');
+  // Strip remaining braces
+  text = text.replace(/[{}]/g, ' ');
+  // Normalize whitespace
+  text = text.replace(/\s+/g, ' ').trim();
+  return text;
+}
+
+async function fetchRtfText(url: string): Promise<string | null> {
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), FETCH_TIMEOUT_MS);
+  try {
+    const rtfUrl = toRtfUrl(url);
+    const res = await fetch(rtfUrl, {
+      signal: controller.signal,
+      headers: {
+        'User-Agent': BROWSER_UA,
+        Accept: 'application/rtf,text/rtf,application/x-download,*/*',
+        'Accept-Language': 'pt-BR,pt;q=0.9',
+      },
+      redirect: 'follow',
+    });
+    if (!res.ok) return null;
+    const buf = Buffer.from(await res.arrayBuffer());
+    if (buf.length < 100) return null;
+    const head = buf.slice(0, 6).toString('latin1');
+    if (!head.startsWith('{\\rtf')) return null;
+    return rtfToText(buf.toString('latin1'));
+  } catch {
+    return null;
+  } finally {
+    clearTimeout(timeoutId);
+  }
 }
 
 async function fetchPdfText(url: string): Promise<string | null> {
   const controller = new AbortController();
-  const timeoutId = setTimeout(() => controller.abort(), PDF_FETCH_TIMEOUT_MS);
+  const timeoutId = setTimeout(() => controller.abort(), FETCH_TIMEOUT_MS);
   try {
-    const pdfUrl = normalizeToPdfUrl(url);
+    const pdfUrl = toPdfUrl(url);
     const res = await fetch(pdfUrl, {
       signal: controller.signal,
       headers: {
@@ -92,55 +163,131 @@ export interface DocumentLike {
     dispositivos: string | null;
     extractMethod: string;
     pdfFetchFailed: boolean;
+    aiBullets?: string | null;
   } | null;
 }
 
+function parseAiBullets(raw: string | null | undefined): string[] | undefined {
+  if (!raw) return undefined;
+  try {
+    const parsed = JSON.parse(raw);
+    return Array.isArray(parsed) ? parsed.filter((s): s is string => typeof s === 'string') : undefined;
+  } catch {
+    return undefined;
+  }
+}
+
+async function maybeEnrich(
+  documentId: string,
+  result: ExtractResult,
+  ementa: string,
+  cachedAiBullets: string[] | undefined,
+): Promise<ExtractResult> {
+  if (cachedAiBullets) {
+    return { ...result, aiBullets: cachedAiBullets };
+  }
+  const should = shouldEnrichWithAi({
+    dispositivos: result.dispositivos,
+    ementa,
+    hasInteiroTeor: Boolean(result.inteiroTeorText),
+  });
+  if (!should || !result.inteiroTeorText) return result;
+  const bullets = await generateAiBullets({
+    ementa,
+    inteiroTeor: result.inteiroTeorText,
+    dispositivos: result.dispositivos,
+  });
+  if (bullets.length > 0) {
+    await persistAiBullets(documentId, bullets);
+    return { ...result, aiBullets: bullets };
+  }
+  return result;
+}
+
 export async function extractDispositivos(doc: DocumentLike): Promise<ExtractResult> {
+  const ementa = doc.tcuEmentaCompleta || '';
+  const cachedAiBullets = parseAiBullets(doc.clippingExtract?.aiBullets);
+
   if (doc.clippingExtract) {
     const cached = doc.clippingExtract;
     if (cached.extractMethod !== 'failed' && cached.dispositivos) {
       try {
         const parsed: Dispositivo[] = JSON.parse(cached.dispositivos);
-        return { dispositivos: parsed, method: 'cached' };
+        return { dispositivos: parsed, method: 'cached', aiBullets: cachedAiBullets };
       } catch {
         // fallthrough to re-extract
       }
     }
     if (cached.pdfFetchFailed) {
-      const fromEmenta = runRegex(doc.tcuEmentaCompleta || '');
-      return { dispositivos: fromEmenta, method: fromEmenta.length ? 'ementa_regex' : 'failed', pdfFetchFailed: true };
+      const fromEmenta = runRegex(ementa);
+      return {
+        dispositivos: fromEmenta,
+        method: fromEmenta.length ? 'ementa_regex' : 'failed',
+        pdfFetchFailed: true,
+        aiBullets: cachedAiBullets,
+      };
     }
   }
 
-  const fromEmenta = runRegex(doc.tcuEmentaCompleta || '');
+  const fromEmenta = runRegex(ementa);
   if (fromEmenta.length > 0) {
     await persistExtract(doc.id, fromEmenta, 'ementa_regex', false);
-    return { dispositivos: fromEmenta, method: 'ementa_regex' };
+    return maybeEnrich(doc.id, { dispositivos: fromEmenta, method: 'ementa_regex' }, ementa, cachedAiBullets);
   }
 
   if (doc.tcuLinkPDF) {
-    const text = await fetchPdfText(doc.tcuLinkPDF);
-    if (text) {
-      const fromPdf = runRegex(text);
-      if (fromPdf.length > 0) {
-        await persistExtract(doc.id, fromPdf, 'pdf_parse', false);
-        return { dispositivos: fromPdf, method: 'pdf_parse' };
+    const rtf = await fetchRtfText(doc.tcuLinkPDF);
+    if (rtf && rtf.length > 200) {
+      const fromRtf = runRegex(rtf);
+      if (fromRtf.length > 0) {
+        await persistExtract(doc.id, fromRtf, 'rtf_parse', false);
+        return maybeEnrich(
+          doc.id,
+          { dispositivos: fromRtf, method: 'rtf_parse', inteiroTeorText: rtf },
+          ementa,
+          cachedAiBullets,
+        );
       }
       await persistExtract(doc.id, [], 'failed', false);
-      return { dispositivos: [], method: 'failed' };
+      return maybeEnrich(
+        doc.id,
+        { dispositivos: [], method: 'failed', inteiroTeorText: rtf },
+        ementa,
+        cachedAiBullets,
+      );
+    }
+    const pdf = await fetchPdfText(doc.tcuLinkPDF);
+    if (pdf) {
+      const fromPdf = runRegex(pdf);
+      if (fromPdf.length > 0) {
+        await persistExtract(doc.id, fromPdf, 'pdf_parse', false);
+        return maybeEnrich(
+          doc.id,
+          { dispositivos: fromPdf, method: 'pdf_parse', inteiroTeorText: pdf },
+          ementa,
+          cachedAiBullets,
+        );
+      }
+      await persistExtract(doc.id, [], 'failed', false);
+      return maybeEnrich(
+        doc.id,
+        { dispositivos: [], method: 'failed', inteiroTeorText: pdf },
+        ementa,
+        cachedAiBullets,
+      );
     }
     await persistExtract(doc.id, [], 'failed', true);
-    return { dispositivos: [], method: 'failed', pdfFetchFailed: true };
+    return { dispositivos: [], method: 'failed', pdfFetchFailed: true, aiBullets: cachedAiBullets };
   }
 
   await persistExtract(doc.id, [], 'failed', false);
-  return { dispositivos: [], method: 'failed' };
+  return { dispositivos: [], method: 'failed', aiBullets: cachedAiBullets };
 }
 
 async function persistExtract(
   documentId: string,
   dispositivos: Dispositivo[],
-  method: 'ementa_regex' | 'pdf_parse' | 'failed',
+  method: 'ementa_regex' | 'rtf_parse' | 'pdf_parse' | 'failed',
   pdfFetchFailed: boolean,
 ) {
   const payload = dispositivos.length > 0 ? JSON.stringify(dispositivos) : null;
@@ -161,9 +308,16 @@ async function persistExtract(
   });
 }
 
+async function persistAiBullets(documentId: string, bullets: string[]) {
+  await prisma.clippingItemExtract.update({
+    where: { documentId },
+    data: { aiBullets: JSON.stringify(bullets), aiGeneratedAt: new Date() },
+  });
+}
+
 export async function extractMany(
   docs: DocumentLike[],
-  concurrency = 3,
+  concurrency = 1,
 ): Promise<Map<string, ExtractResult>> {
   const results = new Map<string, ExtractResult>();
   const queue = [...docs];

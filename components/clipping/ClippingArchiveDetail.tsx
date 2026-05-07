@@ -47,10 +47,24 @@ function AcordaoBlock({ a }: { a: ClippingAcordao }) {
             ))}
           </ul>
         </>
-      ) : a.extractMethod === 'failed' ? (
+      ) : a.extractMethod === 'failed' && (!a.aiBullets || a.aiBullets.length === 0) ? (
         <p className="text-xs italic text-slate-400 my-2">
           Dispositivos não pôde ser extraído automaticamente — consulte o inteiro teor.
         </p>
+      ) : null}
+      {a.aiBullets && a.aiBullets.length > 0 ? (
+        <div className="my-3 px-4 py-3 bg-slate-50 border-l-4 border-indigo-500 rounded">
+          <p className="text-xs font-semibold tracking-wider text-indigo-600 mb-1">
+            CONTEXTO E TESE <span className="font-normal text-slate-400">(síntese editorial)</span>
+          </p>
+          <ul className="list-disc pl-5 m-0 space-y-1">
+            {a.aiBullets.map((b, i) => (
+              <li key={i} className="text-sm text-slate-700 leading-relaxed">
+                {b}
+              </li>
+            ))}
+          </ul>
+        </div>
       ) : null}
       <p className="text-sm mt-2 space-x-3">
         {a.linkPdf ? (
