@@ -19,6 +19,12 @@ export interface DailyClippingInput {
   unsubscribeToken: string;
   referenceDate: Date;
   acordaos: ClippingAcordao[];
+  /** Token assinado para "Ver no navegador" sem login. Se omitido, o link some. */
+  viewToken?: string;
+  /** YYYY-MM-DD do sentDate, usado pelos links de arquivo. Obrigatório se viewToken setado. */
+  sentDateParam?: string;
+  /** Banner temporário de novidade no topo. Controlado por env CLIPPING_NEW_FEATURE_BANNER. */
+  showArchiveBanner?: boolean;
 }
 
 export interface RenderedEmail {
@@ -115,16 +121,44 @@ function renderAcordaoBlockText(a: ClippingAcordao): string {
 }
 
 export function renderDailyClipping(input: DailyClippingInput): RenderedEmail {
-  const { sendId, recipientName, unsubscribeToken, referenceDate, acordaos } = input;
+  const {
+    sendId,
+    recipientName,
+    unsubscribeToken,
+    referenceDate,
+    acordaos,
+    viewToken,
+    sentDateParam,
+    showArchiveBanner,
+  } = input;
   const dataRef = fmtDate(referenceDate);
   const subject = `Clipping TCU — ${dataRef} (${acordaos.length} ${acordaos.length === 1 ? 'destaque' : 'destaques'})`;
 
   const unsubscribeUrl = `${baseUrl}/clipping/cancelar?token=${encodeURIComponent(unsubscribeToken)}`;
   const trackingUrl = `${baseUrl}/api/clipping/track?send=${encodeURIComponent(sendId)}`;
+  const archiveUrl = `${baseUrl}/area-restrita/clipping`;
+  const viewInBrowserUrl =
+    viewToken && sentDateParam
+      ? `${baseUrl}/clipping/ver/${sentDateParam}?token=${encodeURIComponent(viewToken)}`
+      : null;
   const greeting = recipientName ? `Olá, ${escapeHtml(recipientName.split(' ')[0])}.` : 'Olá.';
 
   const blocksHtml = acordaos.map(renderAcordaoBlockHtml).join('\n');
   const blocksText = acordaos.map(renderAcordaoBlockText).join('\n\n────────────────────────────\n\n');
+
+  const viewInBrowserHtml = viewInBrowserUrl
+    ? `<p style="margin:0 0 12px;font-size:11px;color:#94a3b8;text-align:right;"><a href="${viewInBrowserUrl}" style="color:#94a3b8;text-decoration:underline;">Ver no navegador</a></p>`
+    : '';
+
+  const bannerHtml = showArchiveBanner
+    ? `<div style="margin:0 0 18px;padding:12px 16px;background:#eff6ff;border-left:4px solid #2563eb;border-radius:6px;">
+         <p style="margin:0;font-size:13px;color:#1e3a8a;line-height:1.5;">
+           <strong>Novidade:</strong> agora você pode reler clippings anteriores em
+           <a href="${archiveUrl}" style="color:#1d4ed8;font-weight:600;text-decoration:underline;">/area-restrita/clipping</a>,
+           com busca por palavra-chave.
+         </p>
+       </div>`
+    : '';
 
   const html = `<!DOCTYPE html>
 <html lang="pt-BR">
@@ -147,6 +181,8 @@ export function renderDailyClipping(input: DailyClippingInput): RenderedEmail {
         </tr>
         <tr>
           <td style="padding:28px 32px;">
+            ${viewInBrowserHtml}
+            ${bannerHtml}
             <p style="margin:0 0 18px;font-size:14px;color:#334155;line-height:1.55;">
               ${greeting} Seguem as decisões do TCU sobre licitações e contratos publicadas em <strong>${dataRef}</strong>. Os trechos abaixo vêm direto do inteiro teor do acórdão.
             </p>
@@ -159,6 +195,8 @@ export function renderDailyClipping(input: DailyClippingInput): RenderedEmail {
         <tr>
           <td style="background:#f8fafc;padding:18px 32px;border-top:1px solid #e2e8f0;">
             <p style="margin:0;font-size:12px;color:#64748b;text-align:center;">
+              <a href="${archiveUrl}" style="color:#475569;text-decoration:underline;">Ver clippings anteriores</a>
+              &nbsp;&middot;&nbsp;
               <a href="${unsubscribeUrl}" style="color:#475569;text-decoration:underline;">Cancelar clipping diário</a>
               &nbsp;&middot;&nbsp;
               <a href="${baseUrl}" style="color:#475569;text-decoration:underline;">Acessar o site</a>
@@ -177,6 +215,8 @@ export function renderDailyClipping(input: DailyClippingInput): RenderedEmail {
   const text = [
     `Clipping TCU — ${dataRef}`,
     `${acordaos.length} ${acordaos.length === 1 ? 'destaque' : 'destaques'}`,
+    viewInBrowserUrl ? `Ver no navegador: ${viewInBrowserUrl}` : null,
+    showArchiveBanner ? 'NOVIDADE: arquivo de clippings em ' + archiveUrl : null,
     '',
     `${recipientName ? `Olá, ${recipientName.split(' ')[0]}.` : 'Olá.'} Seguem as decisões do TCU sobre licitações e contratos publicadas em ${dataRef}. Os trechos abaixo vêm direto do inteiro teor do acórdão.`,
     '',
@@ -186,11 +226,12 @@ export function renderDailyClipping(input: DailyClippingInput): RenderedEmail {
     '',
     '────────────────────────────',
     '',
+    `Ver clippings anteriores: ${archiveUrl}`,
     `Cancelar clipping: ${unsubscribeUrl}`,
     `Site: ${baseUrl}`,
     '',
     'Prof. Daniel Barral · profdanielbarral.com',
-  ].join('\n');
+  ].filter((l): l is string => l !== null).join('\n');
 
   return { subject, html, text };
 }

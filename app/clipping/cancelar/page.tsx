@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import { prisma } from '@/lib/prisma';
 import { verifyUnsubscribeToken } from '@/lib/clipping/unsubscribe-token';
+import { isAdminRecipientId } from '@/lib/clipping/recipients';
 
 export const dynamic = 'force-dynamic';
 
@@ -9,12 +10,17 @@ interface PageProps {
 }
 
 async function processOptOut(token: string | undefined): Promise<{
-  status: 'ok' | 'invalid' | 'already';
+  status: 'ok' | 'invalid' | 'already' | 'admin';
   email?: string;
 }> {
   if (!token) return { status: 'invalid' };
   const userId = verifyUnsubscribeToken(token);
   if (!userId) return { status: 'invalid' };
+
+  if (isAdminRecipientId(userId)) {
+    const email = userId.slice('admin:'.length);
+    return { status: 'admin', email };
+  }
 
   const user = await prisma.user.findUnique({
     where: { id: userId },
@@ -66,6 +72,14 @@ export default async function ClippingCancelarPage({ searchParams }: PageProps) 
       'Link inválido ou expirado',
       'Não foi possível validar este link. Se você quer cancelar o clipping diário, escreva para contato@profdanielbarral.com que cancelamos manualmente.',
       'error',
+    );
+  }
+
+  if (result.status === 'admin') {
+    return wrap(
+      'Conta administrativa',
+      `${result.email ?? 'Este email'} está na lista de administradores do clipping (env CLIPPING_ADMIN_RECIPIENTS) e não pode ser cancelado por este link. Edite a variável de ambiente para remover.`,
+      'info',
     );
   }
 

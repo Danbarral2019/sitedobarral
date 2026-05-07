@@ -15,6 +15,7 @@ import {
   List,
   Book,
   Library,
+  Mail,
   type LucideIcon,
 } from 'lucide-react';
 
@@ -78,6 +79,7 @@ export const NAV_SECTIONS: MenuSection[] = [
       { label: 'Orientações Normativas', href: '/base-conhecimento/orientacoes-normativas', icon: BookOpen },
       { label: 'Enunciados', href: '/base-conhecimento/enunciados', icon: List },
       { label: 'Manual TCU', href: '/base-conhecimento/manual-tcu', icon: Book },
+      { label: 'Clipping diário TCU', href: '/area-restrita/clipping', icon: Mail, badge: 'novo' },
       { label: 'Blog', href: '/blog', icon: Newspaper },
     ],
   },

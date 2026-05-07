@@ -66,3 +66,45 @@ export function applyBetaFilter(
   if (allow.size === 0) return recipients;
   return recipients.filter((r) => allow.has(r.email.toLowerCase()));
 }
+
+const ADMIN_USER_ID_PREFIX = 'admin:';
+
+export function isAdminRecipientId(userId: string): boolean {
+  return userId.startsWith(ADMIN_USER_ID_PREFIX);
+}
+
+export function getAdminRecipientsFromEnv(
+  envCsv: string | undefined = process.env.CLIPPING_ADMIN_RECIPIENTS,
+): ClippingRecipient[] {
+  if (!envCsv) return [];
+  const out: ClippingRecipient[] = [];
+  const seen = new Set<string>();
+  for (const raw of envCsv.split(',')) {
+    const entry = raw.trim();
+    if (!entry) continue;
+    const match = entry.match(/^(.*?)<([^>]+)>$/);
+    const name = match ? match[1].trim().replace(/^"|"$/g, '') : '';
+    const email = (match ? match[2] : entry).trim();
+    if (!email || !email.includes('@')) continue;
+    const key = email.toLowerCase();
+    if (seen.has(key)) continue;
+    seen.add(key);
+    out.push({ userId: `${ADMIN_USER_ID_PREFIX}${key}`, email, name: name || email });
+  }
+  return out;
+}
+
+export function mergeAdminRecipients(
+  recipients: ClippingRecipient[],
+  admins: ClippingRecipient[],
+): ClippingRecipient[] {
+  const seen = new Set(recipients.map((r) => r.email.toLowerCase()));
+  const out = [...recipients];
+  for (const a of admins) {
+    const key = a.email.toLowerCase();
+    if (seen.has(key)) continue;
+    seen.add(key);
+    out.push(a);
+  }
+  return out;
+}

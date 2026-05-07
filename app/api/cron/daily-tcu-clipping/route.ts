@@ -5,8 +5,10 @@ import { verifyCronAuth } from '@/lib/cron-auth';
 import { sendEmail } from '@/lib/email';
 import { analyzeRelevanceTCU } from '@/lib/tcu-module';
 import { extractMany, type DocumentLike } from '@/lib/clipping/dispositivo-extractor';
-import { getClippingRecipients, applyBetaFilter } from '@/lib/clipping/recipients';
+import { getClippingRecipients, applyBetaFilter, getAdminRecipientsFromEnv, mergeAdminRecipients } from '@/lib/clipping/recipients';
 import { signUnsubscribeToken } from '@/lib/clipping/unsubscribe-token';
+import { signViewToken } from '@/lib/clipping/view-token';
+import { formatSentDateParam } from '@/lib/clipping/archive';
 import { renderDailyClipping, type ClippingAcordao } from '@/lib/email-templates/daily-clipping';
 
 export const maxDuration = 300;
@@ -138,9 +140,15 @@ export async function GET(request: NextRequest) {
   });
 
   const allRecipients = await getClippingRecipients();
-  const recipients = applyBetaFilter(allRecipients, process.env.CLIPPING_BETA_EMAILS);
+  const filteredByBeta = applyBetaFilter(allRecipients, process.env.CLIPPING_BETA_EMAILS);
+  const adminRecipients = getAdminRecipientsFromEnv();
+  const recipients = mergeAdminRecipients(filteredByBeta, adminRecipients);
 
-  console.log(`[DailyClipping] ${recipients.length}/${allRecipients.length} destinatários (beta=${process.env.CLIPPING_BETA_EMAILS ? 'on' : 'off'})`);
+  console.log(`[DailyClipping] ${recipients.length} destinatários (alunos=${filteredByBeta.length}, admins=${adminRecipients.length}, beta=${process.env.CLIPPING_BETA_EMAILS ? 'on' : 'off'})`);
+
+  const sentDateParam = formatSentDateParam(sentDateKey);
+  const viewToken = signViewToken(sentDateParam);
+  const showArchiveBanner = process.env.CLIPPING_NEW_FEATURE_BANNER === 'true';
 
   if (dryRun) {
     const sample = recipients[0]
@@ -150,6 +158,9 @@ export async function GET(request: NextRequest) {
           unsubscribeToken: signUnsubscribeToken(recipients[0].userId),
           referenceDate,
           acordaos,
+          viewToken,
+          sentDateParam,
+          showArchiveBanner,
         })
       : null;
     return NextResponse.json({
@@ -207,6 +218,9 @@ export async function GET(request: NextRequest) {
         unsubscribeToken: token,
         referenceDate,
         acordaos,
+        viewToken,
+        sentDateParam,
+        showArchiveBanner,
       });
       const result = await sendEmail({
         to: r.email,
