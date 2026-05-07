@@ -20,7 +20,8 @@ const FETCH_TIMEOUT_MS = 30000;
 const MAX_DISPOSITIVOS_PER_ACORDAO = 15;
 const MAX_TEXTO_LENGTH = 5000;
 
-const DISPOSITIVO_REGEX = /(?:^|[\n\s;.])(9\.\d+(?:\.\d+)*)\s*\.?\s+([^\n][\s\S]*?)(?=\s+9\.\d+(?:\.\d+)*\s*\.?\s+|\s+(?:10|11|12)\.\s+(?:Ata|Data|C[óo]digo)|\s+Ata\s+n[°º]|\n\s*Senado|$)/g;
+// Aceita espaços extras dentro do número (TCU às vezes formata "9. 4 ." em vez de "9.4.")
+const DISPOSITIVO_REGEX = /(?:^|[\n\s;.])(9\.\s*\d+(?:\s*\.\s*\d+)*)\s*\.?\s+([^\n][\s\S]*?)(?=\s+9\.\s*\d+(?:\s*\.\s*\d+)*\s*\.?\s+|\s+(?:10|11|12)\.\s+(?:Ata|Data|C[óo]digo)|\s+Ata\s+n[°º]|\n\s*Senado|$)/g;
 
 function cleanDispositivoText(raw: string): string {
   let cleaned = raw.replace(/\s+/g, ' ').trim();
@@ -70,7 +71,7 @@ function runRegex(text: string): Dispositivo[] {
   const seen = new Set<string>();
   const matches = block.matchAll(DISPOSITIVO_REGEX);
   for (const m of matches) {
-    const numero = m[1];
+    const numero = m[1].replace(/\s+/g, ''); // normaliza "9. 4" → "9.4"
     if (seen.has(numero)) continue;
     const texto = cleanDispositivoText(m[2]);
     if (texto.length < 20) continue;
