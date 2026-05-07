@@ -78,7 +78,14 @@ async function main() {
       ementa: (c.tcuEmentaCompleta || c.description || '').trim(),
       linkPdf: c.tcuLinkPDF,
       linkInternal: c.url,
-      dispositivos: (c.clippingExtract?.dispositivos as ClippingAcordao['dispositivos'] | undefined) || [],
+      dispositivos: (() => {
+        const raw = c.clippingExtract?.dispositivos;
+        if (!raw) return [];
+        try {
+          const parsed = JSON.parse(raw);
+          return Array.isArray(parsed) ? (parsed as ClippingAcordao['dispositivos']) : [];
+        } catch { return []; }
+      })(),
       extractMethod: (c.clippingExtract?.extractMethod as ClippingAcordao['extractMethod'] | undefined) || 'failed',
       aiBullets: (() => {
         const raw = c.clippingExtract?.aiBullets;
