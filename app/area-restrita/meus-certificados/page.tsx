@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { Award, Download, ExternalLink, Linkedin, Loader2, ArrowLeft } from 'lucide-react';
+import { Award, Download, ExternalLink, Linkedin, Loader2, ArrowLeft, Ban } from 'lucide-react';
 import { useAuth } from '@/hooks/use-auth';
 
 interface Certificate {
@@ -12,6 +12,8 @@ interface Certificate {
   courseTitle: string;
   estimatedHours: number | null;
   issuedAt: string;
+  revokedAt: string | null;
+  revokeReason: string | null;
 }
 
 export default function MeusCertificadosPage() {
@@ -128,66 +130,93 @@ export default function MeusCertificadosPage() {
           </div>
         ) : (
           <div className="space-y-4">
-            {certificates.map((cert) => (
-              <div
-                key={cert.id}
-                className="bg-gradient-to-r from-amber-50 to-yellow-50 rounded-2xl border border-amber-200 p-6 hover:shadow-md transition-shadow"
-              >
-                <div className="flex items-start gap-4">
-                  <div className="w-12 h-12 bg-amber-100 rounded-lg flex items-center justify-center flex-shrink-0 text-amber-600">
-                    <Award className="w-6 h-6" />
-                  </div>
-
-                  <div className="flex-1 min-w-0">
-                    <h3 className="text-lg font-bold text-gray-900 mb-1">
-                      {cert.courseTitle}
-                    </h3>
-                    <p className="text-sm text-gray-600 mb-1">
-                      Numero: <span className="font-mono font-medium">{cert.certificateNumber}</span>
-                    </p>
-                    <div className="flex flex-wrap items-center gap-4 text-sm text-gray-600 mb-4">
-                      <span>
-                        Emitido em: {new Date(cert.issuedAt).toLocaleDateString('pt-BR')}
-                      </span>
-                      {cert.estimatedHours && (
-                        <span>Carga horaria: {cert.estimatedHours}h</span>
-                      )}
+            {certificates.map((cert) => {
+              const revoked = Boolean(cert.revokedAt);
+              return (
+                <div
+                  key={cert.id}
+                  className={`rounded-2xl p-6 transition-shadow ${
+                    revoked
+                      ? 'bg-gray-50 border-2 border-dashed border-red-200 opacity-80'
+                      : 'bg-gradient-to-r from-amber-50 to-yellow-50 border border-amber-200 hover:shadow-md'
+                  }`}
+                >
+                  <div className="flex items-start gap-4">
+                    <div
+                      className={`w-12 h-12 rounded-lg flex items-center justify-center flex-shrink-0 ${
+                        revoked ? 'bg-red-100 text-red-600' : 'bg-amber-100 text-amber-600'
+                      }`}
+                    >
+                      {revoked ? <Ban className="w-6 h-6" /> : <Award className="w-6 h-6" />}
                     </div>
 
-                    <div className="flex flex-wrap gap-3">
-                      <button
-                        onClick={() => handleDownload(cert)}
-                        disabled={downloadingId === cert.id}
-                        className="inline-flex items-center gap-2 bg-amber-600 text-white px-4 py-2 rounded-lg font-medium text-sm hover:bg-amber-700 transition-colors disabled:opacity-50"
-                      >
-                        {downloadingId === cert.id ? (
-                          <Loader2 className="w-4 h-4 animate-spin" />
-                        ) : (
-                          <Download className="w-4 h-4" />
+                    <div className="flex-1 min-w-0">
+                      <div className="flex flex-wrap items-center gap-2 mb-1">
+                        <h3 className="text-lg font-bold text-gray-900">{cert.courseTitle}</h3>
+                        {revoked && (
+                          <span className="inline-flex items-center gap-1 bg-red-100 text-red-800 px-2 py-0.5 rounded text-xs font-bold uppercase tracking-wide">
+                            <Ban className="w-3 h-3" />
+                            Revogado
+                          </span>
                         )}
-                        Download PDF
-                      </button>
-                      <a
-                        href={`/certificado/${cert.certificateNumber}`}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="inline-flex items-center gap-2 border border-amber-300 text-amber-700 px-4 py-2 rounded-lg font-medium text-sm hover:bg-amber-100 transition-colors"
-                      >
-                        <ExternalLink className="w-4 h-4" />
-                        Verificar
-                      </a>
-                      <button
-                        onClick={() => handleLinkedIn(cert)}
-                        className="inline-flex items-center gap-2 border border-blue-300 text-blue-700 px-4 py-2 rounded-lg font-medium text-sm hover:bg-blue-100 transition-colors"
-                      >
-                        <Linkedin className="w-4 h-4" />
-                        LinkedIn
-                      </button>
+                      </div>
+                      <p className="text-sm text-gray-600 mb-1">
+                        Numero: <span className="font-mono font-medium">{cert.certificateNumber}</span>
+                      </p>
+                      <div className="flex flex-wrap items-center gap-4 text-sm text-gray-600 mb-4">
+                        <span>Emitido em: {new Date(cert.issuedAt).toLocaleDateString('pt-BR')}</span>
+                        {cert.estimatedHours && <span>Carga horaria: {cert.estimatedHours}h</span>}
+                        {revoked && cert.revokedAt && (
+                          <span className="text-red-700">
+                            Revogado em: {new Date(cert.revokedAt).toLocaleDateString('pt-BR')}
+                          </span>
+                        )}
+                      </div>
+                      {revoked && cert.revokeReason && (
+                        <div className="bg-red-50 border border-red-200 rounded-lg p-3 mb-4 text-sm text-red-900">
+                          <strong>Motivo:</strong> {cert.revokeReason}
+                        </div>
+                      )}
+
+                      <div className="flex flex-wrap gap-3">
+                        {!revoked && (
+                          <>
+                            <button
+                              onClick={() => handleDownload(cert)}
+                              disabled={downloadingId === cert.id}
+                              className="inline-flex items-center gap-2 bg-amber-600 text-white px-4 py-2 rounded-lg font-medium text-sm hover:bg-amber-700 transition-colors disabled:opacity-50"
+                            >
+                              {downloadingId === cert.id ? <Loader2 className="w-4 h-4 animate-spin" /> : <Download className="w-4 h-4" />}
+                              Download PDF
+                            </button>
+                            <button
+                              onClick={() => handleLinkedIn(cert)}
+                              className="inline-flex items-center gap-2 border border-blue-300 text-blue-700 px-4 py-2 rounded-lg font-medium text-sm hover:bg-blue-100 transition-colors"
+                            >
+                              <Linkedin className="w-4 h-4" />
+                              LinkedIn
+                            </button>
+                          </>
+                        )}
+                        <a
+                          href={`/certificado/${cert.certificateNumber}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className={`inline-flex items-center gap-2 border px-4 py-2 rounded-lg font-medium text-sm transition-colors ${
+                            revoked
+                              ? 'border-gray-300 text-gray-600 hover:bg-gray-100'
+                              : 'border-amber-300 text-amber-700 hover:bg-amber-100'
+                          }`}
+                        >
+                          <ExternalLink className="w-4 h-4" />
+                          {revoked ? 'Ver registro público' : 'Verificar'}
+                        </a>
+                      </div>
                     </div>
                   </div>
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         )}
       </div>

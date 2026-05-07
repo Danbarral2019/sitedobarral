@@ -128,16 +128,20 @@ export async function generateCertificateNumber(): Promise<string> {
 }
 
 /**
- * Emite um certificado para o aluno (se elegível e não tiver um)
+ * Emite um certificado para o aluno.
+ *
+ * Por padrão exige elegibilidade (caller deve verificar antes). Quando
+ * `manual` é fornecido, registra o admin que emitiu e o motivo — uso pra
+ * casos especiais fora do critério padrão.
  */
 export async function issueCertificate(
   userId: string,
-  courseId: string
+  courseId: string,
+  manual?: { issuedById: string; reason?: string }
 ): Promise<{
   certificate: { id: string; certificateNumber: string; issuedAt: Date } | null;
   alreadyExists: boolean;
 }> {
-  // Verificar se já existe
   const existing = await prisma.certificate.findUnique({
     where: { userId_courseId: { userId, courseId } },
   });
@@ -145,7 +149,6 @@ export async function issueCertificate(
     return { certificate: existing, alreadyExists: true };
   }
 
-  // Buscar dados do aluno e curso
   const user = await prisma.user.findUnique({
     where: { id: userId },
     select: { name: true, email: true },
@@ -155,7 +158,6 @@ export async function issueCertificate(
   const course = getCourseById(courseId);
   if (!course) return { certificate: null, alreadyExists: false };
 
-  // Calcular carga horária estimada
   const modules = await prisma.module.findMany({
     where: { courseId, isPublished: true },
     include: {
@@ -170,7 +172,6 @@ export async function issueCertificate(
     .reduce((sum, l) => sum + (l.estimatedMinutes || 0), 0);
   const estimatedHours = totalMinutes > 0 ? Math.ceil(totalMinutes / 60) : null;
 
-  // Gerar número e criar certificado
   const certificateNumber = await generateCertificateNumber();
 
   const certificate = await prisma.certificate.create({
@@ -181,22 +182,102 @@ export async function issueCertificate(
       studentName: user.name,
       courseTitle: course.title,
       estimatedHours,
+      issuedById: manual?.issuedById ?? null,
+      issueReason: manual?.reason ?? null,
     },
   });
 
   apiLogger.info(
-    { certificateId: certificate.id, userId, courseId, certificateNumber },
+    { certificateId: certificate.id, userId, courseId, certificateNumber, manual: Boolean(manual) },
     'Certificate issued'
   );
   trackServerEvent('certificate_issued', { courseId });
 
-  // Enviar email (fire-and-forget)
   sendCertificateEmailAsync(user.email, user.name, course.title, certificateNumber).catch(() => {});
-
-  // Push notification (fire-and-forget)
   sendPushToUserAsync(userId, course.title).catch(() => {});
 
   return { certificate, alreadyExists: false };
+}
+
+/**
+ * Revoga um certificado (soft delete preservando histórico). Notifica aluno.
+ */
+export async function revokeCertificate(
+  certificateId: string,
+  revokedById: string,
+  reason?: string
+): Promise<{ ok: boolean; alreadyRevoked: boolean }> {
+  const cert = await prisma.certificate.findUnique({
+    where: { id: certificateId },
+    select: {
+      id: true,
+      userId: true,
+      courseTitle: true,
+      revokedAt: true,
+      certificateNumber: true,
+    },
+  });
+  if (!cert) return { ok: false, alreadyRevoked: false };
+  if (cert.revokedAt) return { ok: true, alreadyRevoked: true };
+
+  await prisma.certificate.update({
+    where: { id: certificateId },
+    data: {
+      revokedAt: new Date(),
+      revokedById,
+      revokeReason: reason ?? null,
+    },
+  });
+
+  apiLogger.warn(
+    { certificateId, revokedById, certificateNumber: cert.certificateNumber, reason },
+    'Certificate revoked'
+  );
+
+  const user = await prisma.user.findUnique({
+    where: { id: cert.userId },
+    select: { email: true, name: true },
+  });
+  if (user) {
+    sendCertificateRevocationAsync(user.email, user.name, cert.courseTitle, cert.certificateNumber, reason)
+      .catch(() => {});
+  }
+  return { ok: true, alreadyRevoked: false };
+}
+
+/**
+ * Restaura certificado revogado (corrige revogação por engano).
+ */
+export async function restoreCertificate(certificateId: string): Promise<{ ok: boolean }> {
+  const cert = await prisma.certificate.findUnique({
+    where: { id: certificateId },
+    select: { id: true, revokedAt: true },
+  });
+  if (!cert) return { ok: false };
+  if (!cert.revokedAt) return { ok: true };
+
+  await prisma.certificate.update({
+    where: { id: certificateId },
+    data: { revokedAt: null, revokedById: null, revokeReason: null },
+  });
+
+  apiLogger.info({ certificateId }, 'Certificate restored');
+  return { ok: true };
+}
+
+async function sendCertificateRevocationAsync(
+  email: string,
+  name: string,
+  courseTitle: string,
+  certificateNumber: string,
+  reason?: string,
+) {
+  try {
+    const { sendCertificateRevocation } = await import('@/lib/email');
+    await sendCertificateRevocation(email, name, courseTitle, certificateNumber, reason);
+  } catch (error) {
+    apiLogger.error({ email, certificateNumber, error }, 'Failed to send certificate revocation email');
+  }
 }
 
 /**

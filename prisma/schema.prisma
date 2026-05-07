@@ -354,6 +354,9 @@ model User {
   planningTrailsAuthored   PlanningTrailTemplate[]   @relation("PlanningTrailAuthor")
   planningVersionsAuthored PlanningDocumentVersion[] @relation("PlanningVersionAuthor")
 
+  // LMS
+  certificates Certificate[]
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
@@ -1372,6 +1375,7 @@ model QuizAttempt {
 model Certificate {
   id                String    @id @default(uuid())
   userId            String
+  user              User      @relation(fields: [userId], references: [id], onDelete: Cascade)
   courseId          String
   certificateNumber String    @unique // BARRAL-{ANO}-{SEQUENCIA}
   studentName       String
@@ -1381,10 +1385,24 @@ model Certificate {
   emailSentAt       DateTime?
   createdAt         DateTime  @default(now())
 
+  // Emissão manual (admin) — null = emissão automática pelo critério padrão
+  issuedById  String? // userId do admin que emitiu manualmente
+  issueReason String? @db.Text // Justificativa quando emissão manual
+
+  // Revogação — soft delete preservando histórico
+  revokedAt    DateTime?
+  revokedById  String?
+  revokeReason String?  @db.Text
+
+  // Tracking de visualização da página pública
+  viewCount  Int       @default(0)
+  lastViewAt DateTime?
+
   @@unique([userId, courseId])
   @@index([userId])
   @@index([courseId])
   @@index([certificateNumber])
+  @@index([revokedAt])
 }
 
 // ============================================================================

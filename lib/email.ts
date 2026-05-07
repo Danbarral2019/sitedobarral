@@ -1495,3 +1495,71 @@ Equipe Prof. Daniel Barral
     text,
   })).success;
 }
+
+/**
+ * Notifica o aluno que seu certificado foi revogado.
+ */
+export async function sendCertificateRevocation(
+  email: string,
+  name: string,
+  courseTitle: string,
+  certificateNumber: string,
+  reason?: string,
+): Promise<boolean> {
+  const reasonHtml = reason
+    ? `<p style="margin:18px 0 6px;font-size:13px;color:#475569;">Motivo informado:</p>
+       <p style="margin:0;font-size:14px;color:#1f2937;font-style:italic;background:#f1f5f9;padding:12px 14px;border-radius:6px;border-left:3px solid #b91c1c;">${reason}</p>`
+    : '';
+  const reasonText = reason ? `\nMotivo: ${reason}\n` : '';
+
+  const html = `<!DOCTYPE html>
+<html>
+  <head>
+    <style>
+      body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+      .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+      .header { background: linear-gradient(135deg, #991b1b 0%, #b91c1c 100%); color: white; padding: 28px; text-align: center; border-radius: 10px 10px 0 0; }
+      .content { background: #fefefe; padding: 28px; border: 1px solid #e5e7eb; border-top: 0; border-radius: 0 0 10px 10px; }
+      .footer { text-align: center; margin-top: 24px; color: #94a3b8; font-size: 12px; }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div class="header">
+        <h1 style="margin:0;font-size:20px;">Certificado Revogado</h1>
+      </div>
+      <div class="content">
+        <p>Olá, ${name}.</p>
+        <p>Informamos que o seguinte certificado foi <strong>revogado</strong>:</p>
+        <ul style="font-size:14px;color:#1f2937;">
+          <li>Curso: <strong>${courseTitle}</strong></li>
+          <li>Número: <code style="font-family:monospace;background:#f1f5f9;padding:2px 6px;border-radius:4px;">${certificateNumber}</code></li>
+        </ul>
+        ${reasonHtml}
+        <p style="margin-top:20px;font-size:13px;color:#64748b;">A página pública de verificação passa a indicar este certificado como revogado. Se você acredita que isto foi um engano, responda este email.</p>
+        <hr style="border:none;border-top:1px solid #e5e7eb;margin:24px 0;">
+        <p>Atenciosamente,<br><strong>Equipe Prof. Daniel Barral</strong></p>
+      </div>
+      <div class="footer">&copy; ${new Date().getFullYear()} Prof. Daniel Barral</div>
+    </div>
+  </body>
+</html>`;
+
+  const text = `Olá, ${name}.
+
+Informamos que o seguinte certificado foi REVOGADO:
+- Curso: ${courseTitle}
+- Número: ${certificateNumber}
+${reasonText}
+A página pública de verificação passa a indicar este certificado como revogado. Se você acredita que isto foi um engano, responda este email.
+
+Atenciosamente,
+Equipe Prof. Daniel Barral`;
+
+  return (await sendEmail({
+    to: email,
+    subject: `Certificado revogado — ${courseTitle}`,
+    html,
+    text,
+  })).success;
+}
