@@ -76,6 +76,24 @@ function parseAiBullets(raw: string | null | undefined): string[] | undefined {
   }
 }
 
+function parseDispositivos(raw: unknown): Dispositivo[] {
+  if (!raw) return [];
+  if (Array.isArray(raw)) {
+    return raw.filter(
+      (d): d is Dispositivo =>
+        typeof d === 'object' && d !== null && typeof (d as Dispositivo).numero === 'string' && typeof (d as Dispositivo).texto === 'string',
+    );
+  }
+  if (typeof raw === 'string') {
+    try {
+      return parseDispositivos(JSON.parse(raw));
+    } catch {
+      return [];
+    }
+  }
+  return [];
+}
+
 export function mapDocToAcordao(doc: DocSelect): ClippingAcordao {
   return {
     documentId: doc.id,
@@ -86,7 +104,7 @@ export function mapDocToAcordao(doc: DocSelect): ClippingAcordao {
     ementa: (doc.tcuEmentaCompleta || doc.description || '').trim(),
     linkPdf: doc.tcuLinkPDF,
     linkInternal: doc.url,
-    dispositivos: (doc.clippingExtract?.dispositivos as Dispositivo[] | undefined) ?? [],
+    dispositivos: parseDispositivos(doc.clippingExtract?.dispositivos),
     extractMethod:
       (doc.clippingExtract?.extractMethod as ClippingAcordao['extractMethod'] | undefined) ?? 'failed',
     aiBullets: parseAiBullets(doc.clippingExtract?.aiBullets),
@@ -210,11 +228,25 @@ export async function getArchiveEntry(sentDate: Date): Promise<ArchiveEntryDetai
     if (doc) acordaos.push(mapDocToAcordao(doc));
     else missingIds.push(id);
   }
+  // Dedup: envios antigos podem ter IDs de documentos duplicados (race condition
+  // no sync-tcu-acordaos). Mantém o mais completo: aiBullets > mais dispositivos.
+  const dedupKey = (a: ClippingAcordao) => `${a.numeroAcordao}|${a.colegiado}`;
+  const seen = new Map<string, ClippingAcordao>();
+  for (const a of acordaos) {
+    const key = dedupKey(a);
+    const existing = seen.get(key);
+    if (!existing) { seen.set(key, a); continue; }
+    const exHasAi = !!(existing.aiBullets && existing.aiBullets.length > 0);
+    const aHasAi = !!(a.aiBullets && a.aiBullets.length > 0);
+    if (aHasAi && !exHasAi) { seen.set(key, a); continue; }
+    if (exHasAi && !aHasAi) continue;
+    if (a.dispositivos.length > existing.dispositivos.length) seen.set(key, a);
+  }
   return {
     sentDate: send.sentDate,
     referenceDate: referenceDateFromSentDate(send.sentDate),
     status: send.status,
-    acordaos,
+    acordaos: Array.from(seen.values()),
     missingIds,
   };
 }

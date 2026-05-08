@@ -92,7 +92,38 @@ export async function GET(request: NextRequest) {
 
   console.log(`[DailyClipping] ${filtered.length}/${candidates.length} passaram score >= ${RELEVANCE_THRESHOLD}`);
 
-  if (filtered.length === 0) {
+  // Dedup: o sync-tcu-acordaos pode importar o mesmo acórdão duas vezes em race
+  // condition. Agrupa por número/ano/colegiado e escolhe o doc mais completo
+  // (com aiBullets > com mais dispositivos extraídos > mais recente).
+  const dedupedMap = new Map<string, typeof filtered[number]>();
+  for (const c of filtered) {
+    const num = c.tcuNumeroAcordao || c.title || c.id;
+    const colegiado = c.tcuOrgaoJulgador || 'TCU';
+    const key = `${num}|${colegiado}`;
+    const existing = dedupedMap.get(key);
+    if (!existing) {
+      dedupedMap.set(key, c);
+      continue;
+    }
+    const exHasAi = !!existing.clippingExtract?.aiBullets;
+    const cHasAi = !!c.clippingExtract?.aiBullets;
+    if (cHasAi && !exHasAi) { dedupedMap.set(key, c); continue; }
+    if (exHasAi && !cHasAi) continue;
+    const exDispLen = existing.clippingExtract?.dispositivos?.length || 0;
+    const cDispLen = c.clippingExtract?.dispositivos?.length || 0;
+    if (cDispLen > exDispLen) { dedupedMap.set(key, c); continue; }
+    if (cDispLen < exDispLen) continue;
+    // tiebreaker: mais recente
+    const exTime = existing.tcuDataJulgamento?.getTime() || 0;
+    const cTime = c.tcuDataJulgamento?.getTime() || 0;
+    if (cTime > exTime) dedupedMap.set(key, c);
+  }
+  const deduped = Array.from(dedupedMap.values());
+  if (deduped.length !== filtered.length) {
+    console.log(`[DailyClipping] Dedup removeu ${filtered.length - deduped.length} duplicatas (${filtered.length} → ${deduped.length})`);
+  }
+
+  if (deduped.length === 0) {
     if (!dryRun) {
       await prisma.dailyClippingSend.upsert({
         where: { sentDate: sentDateKey },
@@ -114,7 +145,7 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ ok: true, status: 'no_content', candidates: candidates.length });
   }
 
-  const docsLike: DocumentLike[] = filtered.map((c) => ({
+  const docsLike: DocumentLike[] = deduped.map((c) => ({
     id: c.id,
     tcuEmentaCompleta: c.tcuEmentaCompleta,
     tcuLinkPDF: c.tcuLinkPDF,
@@ -123,7 +154,7 @@ export async function GET(request: NextRequest) {
 
   const extractResults = await extractMany(docsLike, 1);
 
-  const acordaos: ClippingAcordao[] = filtered.map((c) => {
+  const acordaos: ClippingAcordao[] = deduped.map((c) => {
     const ex = extractResults.get(c.id);
     return {
       documentId: c.id,
@@ -169,6 +200,7 @@ export async function GET(request: NextRequest) {
       dryRun: true,
       candidates: candidates.length,
       filtered: filtered.length,
+      deduped: deduped.length,
       recipientCount: recipients.length,
       acordaos: acordaos.map((a) => ({
         numeroAcordao: a.numeroAcordao,

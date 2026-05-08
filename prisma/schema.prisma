@@ -188,6 +188,9 @@ model Document {
   @@index([category, douData]) // Índice composto para buscar documentos por categoria e data DOU
   @@index([r2Key]) // Índice para buscar por chave R2
   @@index([embeddingStatus]) // Índice para buscar documentos por status de embedding
+  // Previne duplicatas de acórdãos TCU criadas por race condition no sync-tcu-acordaos.
+  // Postgres trata NULL como distinto, então documentos não-TCU (com esses campos null) não conflitam.
+  @@unique([acordaoNumero, acordaoAno, tcuOrgaoJulgador], name: "tcu_acordao_dedup")
 }
 
 // Metadados TCU (tabela satélite 1:1 — vertical table splitting)

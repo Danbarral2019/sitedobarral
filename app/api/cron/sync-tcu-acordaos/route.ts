@@ -276,6 +276,7 @@ export async function GET(request: NextRequest) {
     // 5. Importar novos acórdãos
     let imported = 0;
     let errors = 0;
+    let skippedDuplicates = 0;
     const newDocIds: string[] = [];
 
     for (const item of newItems) {
@@ -391,9 +392,16 @@ export async function GET(request: NextRequest) {
             tdErr instanceof Error ? tdErr.message : tdErr);
         }
       } catch (err) {
-        errors++;
-        console.error(`[Sync TCU] Erro ao importar ${item.numeroAcordao}/${item.anoAcordao}:`,
-          err instanceof Error ? err.message : err);
+        // P2002 = unique constraint violation (race condition: outro run já criou).
+        // A unique [acordaoNumero, acordaoAno, tcuOrgaoJulgador] em Document garante idempotência.
+        if (err && typeof err === 'object' && 'code' in err && (err as { code?: string }).code === 'P2002') {
+          skippedDuplicates++;
+          console.log(`[Sync TCU] Pulado (já criado por execução concorrente): ${item.numeroAcordao}/${item.anoAcordao}`);
+        } else {
+          errors++;
+          console.error(`[Sync TCU] Erro ao importar ${item.numeroAcordao}/${item.anoAcordao}:`,
+            err instanceof Error ? err.message : err);
+        }
       }
     }
 
@@ -447,6 +455,7 @@ export async function GET(request: NextRequest) {
       alreadyExists: relevant.length - newItems.length,
       newFound: newItems.length,
       imported,
+      skippedDuplicates,
       errors,
       enrichment,
       highlights: highlightCount,
