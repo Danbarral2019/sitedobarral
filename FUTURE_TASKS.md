@@ -258,22 +258,36 @@ Sidebar reduzido de 21 para 14 itens agrupando páginas relacionadas com tabs UR
 
 ## NOVAS FUNCIONALIDADES
 
-### T7. Sistema de Certificações Digitais [Média]
+### T7. Sistema de Certificações Digitais ✅ CONCLUÍDO (2026-05-07)
 **Prioridade:** Média
-**Esforço:** 2-3 semanas
+**Status:** Entregue em 2026-05-07 (commit `4feed2d`).
 
-Sistema completo de certificados digitais ao concluir cursos:
+**Implementado:**
+- ✅ Schema `Certificate` com auditoria (issuedById, issueReason, revokedAt, revokedById, revokeReason, viewCount, lastViewAt) + relation User
+- ✅ Geração de número único `BARRAL-{ANO}-{SEQ}` (sequencial por ano)
+- ✅ PDF jsPDF com paleta navy + QR code (`generateCertificatePDF` em `lib/pdf-generator.ts`)
+- ✅ Verificação de elegibilidade (100% lições + 100% quizzes aprovados)
+- ✅ Emissão automática via `checkAndIssueCertificate`
+- ✅ **Emissão manual admin** (`POST /api/admin/certificates`) com motivo registrado
+- ✅ **Revogação** (`PATCH .../revoke`) com soft delete preservando histórico + email automático ao aluno
+- ✅ **Restauração** (`PATCH .../restore`) para corrigir revogação por engano
+- ✅ Email de notificação (`sendCertificateNotification`) + email de revogação (`sendCertificateRevocation`)
+- ✅ Push notification ao emitir
+- ✅ Galeria do aluno `/area-restrita/meus-certificados` (download PDF, share LinkedIn, banner revogado)
+- ✅ Página por curso `/area-restrita/curso/[slug]/certificado`
+- ✅ Admin `/admin/lms/certificates` com filtros (Todos/Válidos/Revogados/Manuais), modal de emissão manual (busca aluno + select curso + motivo), modal de revogação, badges (Manual/Revogado/ViewCount)
+- ✅ Endpoints auxiliares: `GET /api/admin/users/search`, `GET /api/admin/courses-list`
+- ✅ **Página pública premium** `/certificado/[numero]` com hero gradient navy, QR code visível, status banner (verde/vermelho), CTAs download+LinkedIn, footer marketing
+- ✅ **Open Graph image dinâmica** `/api/og/certificate/[numero]` via `@vercel/og` (1200×630, paleta navy)
+- ✅ ViewCount tracking SSR (fire-and-forget)
+- ✅ Compartilhamento LinkedIn via deep link CERTIFICATION_NAME
 
-**Funcionalidades:**
-- Geração de PDF (jsPDF + html2canvas) com logo, QR code, assinatura digital
-- Número único (BARRAL-2026-XXXXXX) + código de verificação
-- Página pública de validação (`/validar-certificado`)
-- Galeria do aluno (`/area-restrita/certificados`) — parcialmente implementada
-- Compartilhamento no LinkedIn
-- Admin: emissão manual + automática + revogação
-- Emissão automática ao completar 80% dos documentos do curso
+**Não implementado (decisão consciente):**
+- ~~CertificateTemplate (templates por curso)~~ — adiado; layout único atende; pode ser priorizado quando houver pluralidade de cursos com identidade visual distinta.
+- ~~Critério "80% dos documentos"~~ — mantido o critério rigoroso 100% lições + 100% quizzes (mais sólido juridicamente).
+- ~~Expiração / blockchain / hash anti-fraude~~ — fora de escopo.
 
-**Schema:** Certificate, CertificateTemplate (ver detalhes em PLANO_IMPLEMENTACAO_FEATURES.md — arquivado)
+**Arquivos relevantes:** `prisma/schema.prisma` (model Certificate), `lib/certificate.ts`, `lib/pdf-generator.ts`, `lib/email.ts` (sendCertificateNotification + sendCertificateRevocation), `app/admin/lms/certificates/`, `app/area-restrita/meus-certificados/page.tsx`, `app/certificado/[numero]/`, `app/api/admin/certificates/`, `app/api/og/certificate/[numero]/route.tsx`
 
 ### T8. LMS — Refinamentos [Baixa] ✅ CONCLUÍDO (2026-02-23)
 **Prioridade:** Baixa
