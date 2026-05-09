@@ -88,3 +88,6 @@ scripts/output/
 
 # CONUNI snapshot (3.7MB, regenerável via sync-conuni.ts --refetch)
 data/conuni-snapshot.json
+
+# Lighthouse reports (output de auditoria, não versionados)
+lighthouse-report.report.*

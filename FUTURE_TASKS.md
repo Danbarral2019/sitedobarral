@@ -358,6 +358,21 @@ Estudar viabilidade de criar aplicativo nativo ou usar PWA avançado:
 - ~~Server Components em `/area-restrita`~~: **Inviável** — todas as 10 páginas usam hooks/state/interatividade
 - ~~Virtual scrolling lei-comentada~~: **Deferido** — sidebar usa accordion (apenas itens expandidos no DOM, ~230 items max), complexidade alta para ganho marginal
 
+### T15. Performance — Fase 4 (Lighthouse home) [Baixa]
+**Prioridade:** Baixa — descoberto em auditoria Lighthouse de 2026-05-09 durante prep do app mobile (T10).
+
+**Contexto:** Lighthouse na home pública mediu Performance 58/100 (LCP 9,6 s). Auditoria revelou que parte do score baixo veio de **falsos positivos** do Lighthouse (savings teóricos exagerados em "redirects" — real é 663 ms) e **antivírus Kaspersky local** injetando 416 KB de scripts no test rig. Compressão Brotli já está ativa. GTM já é lazy via `requestIdleCallback`. PWA score: **100**.
+
+**Quick win aplicado em 2026-05-09:** removido `subsets: ["latin-ext"]` das fontes Source Serif 4 e Inter em `app/layout.tsx`. `latin` já cobre acentos do português; `latin-ext` adiciona apenas caracteres centro-europeus não usados. Estimado ~130 KB de fontes economizados.
+
+**Pendente (custo alto, ganho modesto):**
+- [ ] Investigar 280 KB de "Reduce unused JavaScript" reportados pelo Lighthouse — exige análise via `ANALYZE=true npm run build` e provavelmente refatoração de bundle splitting de `app/page.tsx`
+- [ ] Investigar 76 KB de "Minify JavaScript" — Vercel deveria minificar automaticamente; pode ser falso positivo ou third-party não minificado (ex: GTM)
+- [ ] Avaliar tornar JetBrains Mono lazy (usado em 25+ componentes, risco de regressão visual)
+- [ ] Re-rodar Lighthouse em ambiente sem Kaspersky para baseline limpo
+
+**Por que baixa prioridade:** A home pública é landing page. Aluno logado entra direto na área restrita, que já tem dynamic imports (T11) e bundle menor. O ganho percebido pelo público pagante é pequeno comparado ao custo.
+
 ### T13. Cache Redis Completo (Upstash) [Concluído ✅]
 **Status:** 100% concluído — código (964 linhas em `lib/cache/redis-client.ts`, 60+ rotas, 798 linhas de testes) + credenciais Upstash configuradas na Vercel (`UPSTASH_REDIS_REST_URL` + `UPSTASH_REDIS_REST_TOKEN` em Production/Preview/Development). Cache ativo em produção.
 

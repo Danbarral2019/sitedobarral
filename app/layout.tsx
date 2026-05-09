@@ -12,8 +12,10 @@ import { SpeedInsights } from "@vercel/speed-insights/next";
 import { Analytics as VercelAnalytics } from "@vercel/analytics/react";
 
 // Source Serif 4 — display + reading. Substitui Cinzel.
+// Subset "latin" cobre todos os acentos do português (ã, ç, ó etc.); latin-ext só adiciona caracteres
+// centro-europeus (polonês, tcheco) que não usamos — removido para cortar ~50% do payload da fonte.
 const sourceSerif = Source_Serif_4({
-  subsets: ["latin", "latin-ext"],
+  subsets: ["latin"],
   weight: ["400", "500", "600", "700"],
   variable: "--font-serif",
   display: "swap",
@@ -21,7 +23,7 @@ const sourceSerif = Source_Serif_4({
 
 // Inter — UI/sans. Substitui Poppins.
 const inter = Inter({
-  subsets: ["latin", "latin-ext"],
+  subsets: ["latin"],
   weight: ["400", "500", "600", "700"],
   variable: "--font-sans",
   display: "swap",
@@ -52,7 +54,12 @@ export const metadata: Metadata = {
       { url: '/brand/favicon-64.png', sizes: '64x64', type: 'image/png' },
     ],
     shortcut: '/brand/favicon-32.png',
-    apple: '/brand/favicon-180.png',
+    apple: [
+      { url: '/icons/apple-touch-icon-120.png', sizes: '120x120', type: 'image/png' },
+      { url: '/icons/apple-touch-icon-152.png', sizes: '152x152', type: 'image/png' },
+      { url: '/icons/apple-touch-icon-167.png', sizes: '167x167', type: 'image/png' },
+      { url: '/icons/apple-touch-icon-180.png', sizes: '180x180', type: 'image/png' },
+    ],
   },
   description: "Repositório especializado de materiais jurídicos em Direito Administrativo. Cursos sobre licitações, contratos administrativos, Nova Lei 14.133/2021 e mais.",
   keywords: [
