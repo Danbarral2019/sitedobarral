@@ -316,6 +316,86 @@ ${lesson.content || '*(sem conteúdo)*'}
 `;
 }
 
+/**
+ * Mapa de atos normativos relevantes por curso (caminhos relativos à raiz do vault).
+ * O usuário deve subir esses arquivos no "Project Knowledge" do Cowork.
+ */
+const ATOS_RELEVANTES_POR_CURSO: Record<string, string[]> = {
+  // Comum a todos
+  _comum: [
+    'Atos Normativos/AN - Lei 14.133-2021.md',
+    'Atos Normativos/AN - Decreto 11.246-2022.md',
+    'Atos Normativos/AN - Decreto 12.174-2024.md',
+  ],
+  '2': [
+    // Planejamento (ETP, TR, pesquisa de preços, IA)
+    'Atos Normativos/AN - IN SEGES 58-2022.md',
+    'Atos Normativos/AN - IN SEGES-ME 65-2021.md',
+    'Atos Normativos/AN - IN SEGES 81-2022.md',
+    'Atos Normativos/AN - IN SEGES-ME 98-2022.md',
+    'Atos Normativos/AN - Decreto 12.343-2024.md',
+  ],
+  '3': [
+    // Gestão e fiscalização
+    'Atos Normativos/AN - IN SEGES-MP 5-2017.md',
+    'Atos Normativos/AN - IN SEGES-ME 98-2022.md',
+    'Atos Normativos/AN - IN SEGES 73-2022.md',
+  ],
+  '4': [
+    // Sancionador
+    'Atos Normativos/AN - Decreto 11.317-2022.md',
+  ],
+  '7': [
+    // Assessoramento Jurídico
+  ],
+  '8': [
+    // Reajuste/Repactuação — sem regulamento específico marcante
+  ],
+  '9': [
+    // Alterações Contratuais
+  ],
+  '10': [
+    // Contratação Direta (dispensa eletrônica)
+    'Atos Normativos/AN - IN SEGES-ME 67-2021.md',
+  ],
+};
+
+function makeBibliografiaUpload(course: { id: string; title: string; bibliography: string[] }) {
+  const especificos = ATOS_RELEVANTES_POR_CURSO[course.id] || [];
+  return `# 📤 Project Knowledge — Curso ${course.id}: ${course.title}
+
+Faça upload destes arquivos na seção **"Project Knowledge"** do projeto Cowork. Eles ficam disponíveis para o assistente em todas as conversas do projeto.
+
+> ⚠️ Verifique se cada arquivo existe no vault antes de tentar upload. Use o explorador de arquivos do Windows para arrastá-los direto para o Cowork.
+
+## ⭐ Essenciais (subir em todos os 7 projetos)
+
+${ATOS_RELEVANTES_POR_CURSO._comum.map(p => `- \`${p}\``).join('\n')}
+
+## 📌 Específicos deste curso
+
+${especificos.length > 0 ? especificos.map(p => `- \`${p}\``).join('\n') : '_(sem regulamentação específica adicional além da essencial)_'}
+
+## 📚 Bibliografia da ementa (opcional)
+
+A ementa do curso cita estas obras. Se você tiver os PDFs no computador, suba-os também:
+
+${course.bibliography.map(b => `- ${b}`).join('\n')}
+
+> Os livros e manuais não estão no vault. Se não tiver os PDFs, o assistente trabalha apenas com a regulamentação acima — o que já é suficiente para a maior parte das revisões.
+
+## 💡 Como subir no Cowork
+
+1. Abra o projeto no Cowork (\`https://claude.ai/cowork\`)
+2. Localize a seção **"Project Knowledge"** (geralmente lateral direita ou aba separada)
+3. Clique em **"Upload file"** ou arraste os arquivos do explorador
+4. Repita para cada arquivo da lista acima
+5. Confirme que aparecem listados antes de iniciar a primeira conversa
+
+> Limite típico: ~25MB ou ~200K tokens por projeto. Os \`.md\` do vault são leves (~50-200KB cada) — cabem com folga.
+`;
+}
+
 function makeReadmeGeral(stats: Array<{ id: string; title: string; total: number; status: 'revisao' | 'esqueleto' }>) {
   const revisao = stats.filter(s => s.status === 'revisao');
   const esqueleto = stats.filter(s => s.status === 'esqueleto');
@@ -382,6 +462,13 @@ async function main() {
     const totalLicoes = mods.reduce((s, m) => s + m.lessons.length, 0);
     const courseDir = join(VAULT_REVISAO, `curso-${course.id}-${slugify(course.title)}`);
     await fs.mkdir(courseDir, { recursive: true });
+
+    // Bibliografia para upload no Project Knowledge (todos os cursos)
+    await fs.writeFile(
+      join(courseDir, '_BIBLIOGRAFIA_UPLOAD.md'),
+      makeBibliografiaUpload(course),
+      'utf8'
+    );
 
     if (totalLicoes > 0) {
       // Modo revisão
