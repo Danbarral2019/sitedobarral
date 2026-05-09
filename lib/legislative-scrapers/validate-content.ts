@@ -85,6 +85,40 @@ const PREAMBLE_PATTERNS = [
 const MIN_CONTENT_CHARS = 500;
 const MIN_CONTENT_CHARS_WARN = 1500;
 
+/**
+ * Marcadores de conclusão legítima do ato. Se o texto termina com qualquer um
+ * destes (na cauda dos últimos ~400 chars), o ato está completo mesmo se curto
+ * — caso típico de revogações/alterações pontuais que naturalmente têm 800-1300
+ * chars (ex: "Art. 1º Fica revogada a IN nº 75. Art. 2º Vigência. ASSINATURA").
+ */
+const COMPLETION_MARKERS: RegExp[] = [
+  /Este\s+texto\s+não\s+substitui\s+o\s+publicado\s+no\s+DOU/i,
+  /Este\s+conteúdo\s+não\s+substitui\s+o\s+publicado\s+no\s+Diário\s+Oficial/i,
+  /Este\s+conteúdo\s+não\s+substitui\s+o\s+publicado\s+no\s+DOU/i,
+  /Diário\s+Oficial\s+da\s+União\s*-?\s*DOU\s*$/i,
+  /\(NR\)\s*Art\.\s*\d+[ºo°]?\s+Esta\s+(Lei|Instrução|Portaria|Resolução|Decreto)\s+entra\s+em\s+vigor/i,
+];
+
+/**
+ * Detecta assinatura formal do ato no fim do texto (autoridade em CAIXA ALTA,
+ * opcionalmente seguida do cargo). Cobre INs antigas (anteriores a 2019) e
+ * decretos pré-2010 que não traziam o boilerplate "Este texto não substitui...".
+ *
+ * Regra prática: nos últimos 250 chars, encontrar uma linha (ou trecho) com 2+
+ * palavras em CAIXA ALTA consecutivas (≥4 letras cada) — padrão típico de
+ * "ANTONIO PAULO VOGEL DE MEDEIROS" / "LUIZ CARLOS BRESSER PEREIRA" /
+ * "JAIR MESSIAS BOLSONARO".
+ */
+const SIGNATURE_PATTERN = /(?:^|\s)([A-ZÁÉÍÓÚÂÊÔÃÕÇ]{4,}(?:\s+(?:DA|DE|DO|DAS|DOS)?\s*[A-ZÁÉÍÓÚÂÊÔÃÕÇ]{4,}){1,5})/m;
+
+function hasCompletionMarker(content: string): boolean {
+  const tail = content.slice(-500);
+  if (COMPLETION_MARKERS.some((p) => p.test(tail))) return true;
+  // Caso assinatura: olhar nos últimos 250 chars
+  const signTail = content.slice(-250);
+  return SIGNATURE_PATTERN.test(signTail);
+}
+
 export function validateActContent(input: ValidationInput): ValidationResult {
   const errors: string[] = [];
   const warnings: string[] = [];
@@ -114,7 +148,10 @@ export function validateActContent(input: ValidationInput): ValidationResult {
       `Conteúdo muito curto (${content.length} chars, mínimo ${MIN_CONTENT_CHARS}). ` +
         `Provável falha de scrape ou redirect.`,
     );
-  } else if (content.length < MIN_CONTENT_CHARS_WARN) {
+  } else if (content.length < MIN_CONTENT_CHARS_WARN && !hasCompletionMarker(content)) {
+    // Suprime warning quando o ato termina com marcador oficial de conclusão
+    // (ex: "Este texto não substitui..."). Revogações e alterações pontuais
+    // são legitimamente curtas — o warning só vale quando o texto pára no meio.
     warnings.push(
       `Conteúdo curto (${content.length} chars). Verificar se está completo.`,
     );

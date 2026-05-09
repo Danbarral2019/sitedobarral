@@ -1,0 +1,1339 @@
+{
+  "generatedAt": "2026-05-09T20:39:03.786Z",
+  "summary": {
+    "total": 83,
+    "ok": 83,
+    "errors": 0,
+    "warnings": 0
+  },
+  "entries": [
+    {
+      "id": "2ea417e4-fe43-4227-ae79-dd3be9f6cec0",
+      "fullNumber": "IN SEGES/MGI 148/2026",
+      "number": "148",
+      "year": 2026,
+      "title": "Altera IN 190/2024 — novos serviços com redução de jornada para 40h",
+      "issuer": "SEGES",
+      "officialUrl": "https://www.gov.br/compras/pt-br/acesso-a-informacao/legislacao/instrucoes-normativas/instrucao-normativa-seges-mgi-no-148-de-13-de-abril-de-2026",
+      "contentLength": 4199,
+      "publishDate": "2026-04-14",
+      "validation": {
+        "ok": true,
+        "errors": [],
+        "warnings": []
+      }
+    },
+    {
+      "id": "acbcac17-2bea-43d7-95db-3a95770237e2",
+      "fullNumber": "IN SEGES/MGI 147/2026",
+      "number": "147",
+      "year": 2026,
+      "title": "Reembolso-creche para trabalhadores terceirizados",
+      "issuer": "SEGES",
+      "officialUrl": "https://www.gov.br/compras/pt-br/acesso-a-informacao/legislacao/instrucoes-normativas/instrucao-normativa-seges-mgi-no-147-de-13-de-abril-de-2026",
+      "contentLength": 21519,
+      "publishDate": "2026-04-14",
+      "validation": {
+        "ok": true,
+        "errors": [],
+        "warnings": []
+      }
+    },
+    {
+      "id": "3bdcea96-827a-4a0f-af3f-be37831ff464",
+      "fullNumber": "IN SEGES/MGI 129/2026",
+      "number": "129",
+      "year": 2026,
+      "title": "Altera IN 512/2025 — adia entrada em vigor do regulamento de Diálogo Competitivo",
+      "issuer": "SEGES",
+      "officialUrl": "https://www.gov.br/compras/pt-br/acesso-a-informacao/legislacao/instrucoes-normativas/instrucao-normativa-seges-mgi-no-129-de-30-de-marco-de-2026",
+      "contentLength": 1087,
+      "publishDate": "2026-03-31",
+      "validation": {
+        "ok": true,
+        "errors": [],
+        "warnings": []
+      }
+    },
+    {
+      "id": "1d0a71db-c277-4dc6-bb75-427532e83855",
+      "fullNumber": "IN SGD/MGI nº 86/2025",
+      "number": "86",
+      "year": 2025,
+      "title": "Alteração das Regras de Aprovação de Contratações de TIC",
+      "issuer": "SGD/MGI",
+      "officialUrl": "https://www.in.gov.br/web/dou/-/instrucao-normativa-sgd/mgi-n-86-de-25-de-julho-de-2025-645137365",
+      "contentLength": 4477,
+      "publishDate": "2025-07-25",
+      "validation": {
+        "ok": true,
+        "errors": [],
+        "warnings": []
+      }
+    },
+    {
+      "id": "8d1e1201-5814-4a8b-8a26-a5ff6c362b77",
+      "fullNumber": "IN SEGES/MGI 82/2025",
+      "number": "82",
+      "year": 2025,
+      "title": "Antecipação de Crédito em Contratos Administrativos",
+      "issuer": "SEGES",
+      "officialUrl": "https://www.gov.br/compras/pt-br/acesso-a-informacao/legislacao/instrucoes-normativas/instrucao-normativa-seges-mgi-no-82-de-21-de-fevereiro-de-2025",
+      "contentLength": 14717,
+      "publishDate": "2025-02-24",
+      "validation": {
+        "ok": true,
+        "errors": [],
+        "warnings": []
+      }
+    },
+    {
+      "id": "7c7585f8-8bac-4e51-9e1c-779e2c61529a",
+      "fullNumber": "IN SEGES/MGI 52/2025",
+      "number": "52",
+      "year": 2025,
+      "title": "Plataforma de Negócios Públicos Contrata+Brasil",
+      "issuer": "SEGES",
+      "officialUrl": "https://www.gov.br/contratamaisbrasil/pt-br/central-de-conteudo/editais-e-regulamentacao/instrucoes-normativas/instrucao-normativa-seges-mgi-no-52-de-10-de-fevereiro-de-2025",
+      "contentLength": 28106,
+      "publishDate": "2025-02-10",
+      "validation": {
+        "ok": true,
+        "errors": [],
+        "warnings": []
+      }
+    },
+    {
+      "id": "aa182dbd-b77a-4238-82d6-4756604ab4b0",
+      "fullNumber": "IN SEGES/MGI 512/2025",
+      "number": "512",
+      "year": 2025,
+      "title": "Diálogo Competitivo na Administração Pública Federal",
+      "issuer": "SEGES",
+      "officialUrl": "https://www.gov.br/compras/pt-br/acesso-a-informacao/legislacao/instrucoes-normativas/instrucao-normativa-seges-mgi-no-512-de-3-de-dezembro-de-2025",
+      "contentLength": 29483,
+      "publishDate": "2025-12-03",
+      "validation": {
+        "ok": true,
+        "errors": [],
+        "warnings": []
+      }
+    },
+    {
+      "id": "596eb7cc-7b8d-4e9b-8f74-6d31e9441b2a",
+      "fullNumber": "IN SEGES 460/2025",
+      "number": "460",
+      "year": 2025,
+      "title": "Altera a Instrução Normativa SEGES/MGI nº 52, de 10 de fevereiro de 2025, sobre o Contrata+Brasil",
+      "issuer": "SEGES",
+      "officialUrl": "https://www.gov.br/contratamaisbrasil/pt-br/central-de-conteudo/editais-e-regulamentacao/instrucoes-normativas/instrucao-normativa-seges-mgi-no-460-de-31-de-outubro-de-2025",
+      "contentLength": 7907,
+      "publishDate": "2025-10-31",
+      "validation": {
+        "ok": true,
+        "errors": [],
+        "warnings": []
+      }
+    },
+    {
+      "id": "36ca80ab-7c22-43c6-a1ba-34be70624f5b",
+      "fullNumber": "IN SEGES 412/2025",
+      "number": "412",
+      "year": 2025,
+      "title": "Dispõe sobre a contratação de serviços de transporte terrestre administrativo",
+      "issuer": "SEGES",
+      "officialUrl": "https://www.gov.br/compras/pt-br/acesso-a-informacao/legislacao/instrucoes-normativas/instrucao-normativa-seges-mgi-no-412-de-1o-de-outubro-de-2025",
+      "contentLength": 23945,
+      "publishDate": "2025-10-01",
+      "validation": {
+        "ok": true,
+        "errors": [],
+        "warnings": []
+      }
+    },
+    {
+      "id": "bbc10ab9-8aad-41c2-a4a3-4abc27583b5f",
+      "fullNumber": "IN SEGES/MGI 382/2025",
+      "number": "382",
+      "year": 2025,
+      "title": "Equidade de Gênero em Licitações Públicas",
+      "issuer": "SEGES",
+      "officialUrl": "https://www.gov.br/compras/pt-br/acesso-a-informacao/legislacao/instrucoes-normativas/instrucao-normativa-seges-mgi-no-382-de-17-de-setembro-de-2025",
+      "contentLength": 9738,
+      "publishDate": "2025-09-17",
+      "validation": {
+        "ok": true,
+        "errors": [],
+        "warnings": []
+      }
+    },
+    {
+      "id": "a64fb652-2bb3-4c68-89e9-f70ddb35dbc2",
+      "fullNumber": "IN SEGES/MGI 381/2025",
+      "number": "381",
+      "year": 2025,
+      "title": "Serviços Contínuos com Redução de Jornada",
+      "issuer": "SEGES",
+      "officialUrl": "https://www.gov.br/compras/pt-br/acesso-a-informacao/legislacao/instrucoes-normativas/instrucao-normativa-seges-mgi-no-381-de-17-de-setembro-de-2025",
+      "contentLength": 1325,
+      "publishDate": "2025-09-17",
+      "validation": {
+        "ok": true,
+        "errors": [],
+        "warnings": []
+      }
+    },
+    {
+      "id": "127f0c57-1020-403f-a23f-914ab20fd2b5",
+      "fullNumber": "IN SEGES 213/2025",
+      "number": "213",
+      "year": 2025,
+      "title": "Dispõe sobre a previsibilidade do gozo de férias dos empregados terceirizados",
+      "issuer": "SEGES",
+      "officialUrl": "https://www.gov.br/compras/pt-br/acesso-a-informacao/legislacao/instrucoes-normativas/instrucao-normativa-seges-mgi-no-213-de-29-de-maio-de-2025",
+      "contentLength": 7732,
+      "publishDate": "2025-05-29",
+      "validation": {
+        "ok": true,
+        "errors": [],
+        "warnings": []
+      }
+    },
+    {
+      "id": "7b77b1cf-f5c5-4e73-86d0-a29573b748a6",
+      "fullNumber": "IN SEGES/MGI 81/2024",
+      "number": "81",
+      "year": 2024,
+      "title": "Compensação de Jornada em Serviços Contínuos",
+      "issuer": "SEGES",
+      "officialUrl": "https://www.gov.br/compras/pt-br/acesso-a-informacao/legislacao/instrucoes-normativas/instrucao-normativa-seges-mgi-no-81-de-12-de-setembro-de-2024",
+      "contentLength": 13485,
+      "publishDate": "2024-09-13",
+      "validation": {
+        "ok": true,
+        "errors": [],
+        "warnings": []
+      }
+    },
+    {
+      "id": "601ccdfe-6ab2-42be-84ef-005bb0fc131e",
+      "fullNumber": "IN SEGES/MGI 79/2024",
+      "number": "79",
+      "year": 2024,
+      "title": "Sorteio e Margens de Preferência em Licitações",
+      "issuer": "SEGES",
+      "officialUrl": "https://www.gov.br/compras/pt-br/acesso-a-informacao/legislacao/instrucoes-normativas/instrucao-normativa-seges-mgi-no-79-de-12-de-setembro-de-2024",
+      "contentLength": 4079,
+      "publishDate": "2024-10-14",
+      "validation": {
+        "ok": true,
+        "errors": [],
+        "warnings": []
+      }
+    },
+    {
+      "id": "8f12a269-4b1f-47ba-81e7-2c6f26c3c60b",
+      "fullNumber": "IN SEGES/MGI 190/2024",
+      "number": "190",
+      "year": 2024,
+      "title": "Serviços Contínuos com Redução de Jornada",
+      "issuer": "SEGES",
+      "officialUrl": "https://www.gov.br/compras/pt-br/acesso-a-informacao/legislacao/instrucoes-normativas/instrucao-normativa-seges-mgi-no-190-de-5-de-dezembro-de-2024",
+      "contentLength": 9783,
+      "publishDate": "2024-12-06",
+      "validation": {
+        "ok": true,
+        "errors": [],
+        "warnings": []
+      }
+    },
+    {
+      "id": "dd6139bd-ef12-41bd-b485-7d58e80a17a0",
+      "fullNumber": "IN SEGES/MGI 176/2024",
+      "number": "176",
+      "year": 2024,
+      "title": "Custos Mínimos em Contratos de Serviços Contínuos",
+      "issuer": "SEGES",
+      "officialUrl": "https://www.gov.br/compras/pt-br/acesso-a-informacao/legislacao/instrucoes-normativas/instrucao-normativa-seges-mgi-no-176-de-25-de-novembro-de-2024",
+      "contentLength": 16363,
+      "publishDate": "2024-11-26",
+      "validation": {
+        "ok": true,
+        "errors": [],
+        "warnings": []
+      }
+    },
+    {
+      "id": "612999f9-8b58-4437-b9bd-bf21523c5e0f",
+      "fullNumber": "IN SEGES 8/2023",
+      "number": "8",
+      "year": 2023,
+      "title": "Altera a Instrução Normativa SEGES/ME nº 67, de 8 de julho de 2021, que dispõe sobre a dispensa eletrônica",
+      "issuer": "SEGES",
+      "officialUrl": "https://www.gov.br/compras/pt-br/acesso-a-informacao/legislacao/instrucoes-normativas/instrucao-normativa-seges-mgi-no-8-de-23-de-marco-de-2023",
+      "contentLength": 1669,
+      "publishDate": "2023-03-23",
+      "validation": {
+        "ok": true,
+        "errors": [],
+        "warnings": []
+      }
+    },
+    {
+      "id": "8252d880-fd29-4b8f-8d96-7eccb6b1491a",
+      "fullNumber": "IN SGD/MGI nº 6/2023",
+      "number": "6",
+      "year": 2023,
+      "title": "Aprovação de Contratações de TIC",
+      "issuer": "SGD/MGI",
+      "officialUrl": "https://www.gov.br/governodigital/pt-br/contratacoes-de-tic/legislacao/analise-de-alcadas-regido-pela-lei-ndeg-14-333-de-2021/analise-de-alcadas-regido-pela-lei-ndeg-14-333-de-2021",
+      "contentLength": 9266,
+      "publishDate": "2023-06-13",
+      "validation": {
+        "ok": true,
+        "errors": [],
+        "warnings": []
+      }
+    },
+    {
+      "id": "659fcdb5-44f0-4c85-a413-448b98167350",
+      "fullNumber": "IN SEGES/MGI 53/2023",
+      "number": "53",
+      "year": 2023,
+      "title": "Sicaf para Habilitação de Empresas Estrangeiras",
+      "issuer": "SEGES",
+      "officialUrl": "https://www.gov.br/compras/pt-br/acesso-a-informacao/legislacao/instrucoes-normativas/instrucao-normativa-seges-mgi-no-53-de-28-de-dezembro-de-2023",
+      "contentLength": 1897,
+      "publishDate": "2023-12-29",
+      "validation": {
+        "ok": true,
+        "errors": [],
+        "warnings": []
+      }
+    },
+    {
+      "id": "eef30b2a-1fbf-4b1a-a0d4-fc29e38ce83f",
+      "fullNumber": "IN SEGES 4/2023",
+      "number": "4",
+      "year": 2023,
+      "title": "Dispõe sobre disposições complementares ao Decreto nº 10.818, de 27 de setembro de 2021",
+      "issuer": "SEGES",
+      "officialUrl": "https://www.gov.br/compras/pt-br/acesso-a-informacao/legislacao/instrucoes-normativas/instrucao-normativa-seges-mgi-no-4-de-2-de-fevereiro-de-2023",
+      "contentLength": 1792,
+      "publishDate": "2023-02-02",
+      "validation": {
+        "ok": true,
+        "errors": [],
+        "warnings": []
+      }
+    },
+    {
+      "id": "664151d0-cf48-4c3e-91ea-99a50d6f5465",
+      "fullNumber": "IN SEGES 2/2023",
+      "number": "2",
+      "year": 2023,
+      "title": "Dispõe sobre a licitação pelo critério de julgamento por técnica e preço na forma eletrônica",
+      "issuer": "SEGES",
+      "officialUrl": "https://www.gov.br/compras/pt-br/acesso-a-informacao/legislacao/instrucoes-normativas/instrucao-normativa-seges-mgi-no-2-de-7-de-fevereiro-de-2023",
+      "contentLength": 38691,
+      "publishDate": "2023-02-07",
+      "validation": {
+        "ok": true,
+        "errors": [],
+        "warnings": []
+      }
+    },
+    {
+      "id": "a96321cd-de61-4eef-b912-c92ba135d5c2",
+      "fullNumber": "IN SEGES/MGI 12/2023",
+      "number": "12",
+      "year": 2023,
+      "title": "Instrução Normativa SEGES/MGI nº 12, de 31 de março de 2023",
+      "issuer": "SEGES",
+      "officialUrl": "https://www.gov.br/compras/pt-br/acesso-a-informacao/legislacao/instrucoes-normativas/instrucao-normativa-seges-mgi-no-12-de-31-de-marco-de-2023",
+      "contentLength": 35059,
+      "publishDate": "2023-04-03",
+      "validation": {
+        "ok": true,
+        "errors": [],
+        "warnings": []
+      }
+    },
+    {
+      "id": "b1bceca3-98bd-4ef0-8180-cebae0528722",
+      "fullNumber": "IN SEGES/MGI 11/2023",
+      "number": "11",
+      "year": 2023,
+      "title": "Instrução Normativa SEGES/MGI nº 11, de 29 de março de 2023",
+      "issuer": "SEGES",
+      "officialUrl": "https://www.gov.br/compras/pt-br/acesso-a-informacao/legislacao/instrucoes-normativas/instrucao-normativa-seges-mgi-no-11-de-29-de-marco-de-2023ss",
+      "contentLength": 1555,
+      "publishDate": "2023-03-30",
+      "validation": {
+        "ok": true,
+        "errors": [],
+        "warnings": []
+      }
+    },
+    {
+      "id": "88e07a18-883d-41a1-8cd0-90b43e76da93",
+      "fullNumber": "IN SEGES/ME 98/2022",
+      "number": "98",
+      "year": 2022,
+      "title": "Contratação Indireta de Serviços na Administração Pública",
+      "issuer": "SEGES",
+      "officialUrl": "https://www.gov.br/compras/pt-br/acesso-a-informacao/legislacao/instrucoes-normativas/instrucao-normativa-seges-me-no-98-de-26-de-dezembro-de-2022",
+      "contentLength": 1233,
+      "publishDate": "2022-12-27",
+      "validation": {
+        "ok": true,
+        "errors": [],
+        "warnings": []
+      }
+    },
+    {
+      "id": "b8fab553-819d-4044-8f17-484f0c0dd8c6",
+      "fullNumber": "IN SEGES 96/2022",
+      "number": "96",
+      "year": 2022,
+      "title": "Dispõe sobre a licitação pelo critério de julgamento por maior retorno econômico",
+      "issuer": "SEGES",
+      "officialUrl": "https://www.gov.br/compras/pt-br/acesso-a-informacao/legislacao/instrucoes-normativas/instrucao-normativa-seges-me-no-96-de-23-de-dezembro-de-2022",
+      "contentLength": 42123,
+      "publishDate": "2022-12-23",
+      "validation": {
+        "ok": true,
+        "errors": [],
+        "warnings": []
+      }
+    },
+    {
+      "id": "8666e504-5945-480f-95fb-ac4f6ac8b96d",
+      "fullNumber": "IN SGD/ME nº 94/2022",
+      "number": "94",
+      "year": 2022,
+      "title": "Processo de Contratação de Soluções de TIC",
+      "issuer": "SGD/MGI",
+      "officialUrl": "https://www.gov.br/governodigital/pt-br/contratacoes-de-tic/legislacao/processo-de-contratacao-de-solucoes-de-tic-regido-pela-lei-ndeg-14-133-de-2021/processo-de-contratacao-de-solucoes-de-tic-regido-pela-lei-ndeg-14-133-de-2021",
+      "contentLength": 96333,
+      "publishDate": "2022-04-23",
+      "validation": {
+        "ok": true,
+        "errors": [],
+        "warnings": []
+      }
+    },
+    {
+      "id": "69ab916c-c526-4a5e-91d8-241611a7ecab",
+      "fullNumber": "IN SEGES/ME 91/2022",
+      "number": "91",
+      "year": 2022,
+      "title": "Valor Estimado em Obras e Serviços de Engenharia",
+      "issuer": "SEGES",
+      "officialUrl": "https://www.gov.br/compras/pt-br/acesso-a-informacao/legislacao/instrucoes-normativas/instrucao-normativa-seges-me-no-91-de-16-de-dezembro-de-2022",
+      "contentLength": 1484,
+      "publishDate": "2022-12-20",
+      "validation": {
+        "ok": true,
+        "errors": [],
+        "warnings": []
+      }
+    },
+    {
+      "id": "2dee7d63-0f24-445f-9219-275394f9550d",
+      "fullNumber": "IN SEGES 90/2022",
+      "number": "90",
+      "year": 2022,
+      "title": "Revoga a Instrução Normativa SEGES nº 75, de 8 de dezembro de 2021",
+      "issuer": "SEGES",
+      "officialUrl": "https://www.gov.br/compras/pt-br/acesso-a-informacao/legislacao/instrucoes-normativas/instrucao-normativa-seges-me-no-90-de-16-de-dezembro-de-2022",
+      "contentLength": 916,
+      "publishDate": "2022-12-16",
+      "validation": {
+        "ok": true,
+        "errors": [],
+        "warnings": []
+      }
+    },
+    {
+      "id": "85e2cbf7-273b-4893-8d53-4d110d9adf57",
+      "fullNumber": "IN SEGES 81/2022",
+      "number": "81",
+      "year": 2022,
+      "title": "Dispõe sobre a elaboração do Termo de Referência na forma digital",
+      "issuer": "SEGES",
+      "officialUrl": "https://www.gov.br/compras/pt-br/acesso-a-informacao/legislacao/instrucoes-normativas/instrucao-normativa-seges-me-no-81-de-25-de-novembro-de-2022",
+      "contentLength": 11155,
+      "publishDate": "2022-11-25",
+      "validation": {
+        "ok": true,
+        "errors": [],
+        "warnings": []
+      }
+    },
+    {
+      "id": "2bdcd5f1-6276-40a8-bc5e-7cffbbc7cc19",
+      "fullNumber": "IN SEGES 77/2022",
+      "number": "77",
+      "year": 2022,
+      "title": "Dispõe sobre a observância da ordem cronológica de pagamentos das obrigações",
+      "issuer": "SEGES",
+      "officialUrl": "https://www.gov.br/compras/pt-br/acesso-a-informacao/legislacao/instrucoes-normativas/instrucao-normativa-seges-me-no-77-de-4-de-novembro-de-2022",
+      "contentLength": 12613,
+      "publishDate": "2022-11-04",
+      "validation": {
+        "ok": true,
+        "errors": [],
+        "warnings": []
+      }
+    },
+    {
+      "id": "b011ef2f-2ff4-4a1c-a76f-96d022bb8225",
+      "fullNumber": "IN SEGES 73/2022",
+      "number": "73",
+      "year": 2022,
+      "title": "Dispõe sobre a licitação pelo critério de julgamento de menor preço ou maior desconto na forma eletrônica",
+      "issuer": "SEGES",
+      "officialUrl": "https://www.gov.br/compras/pt-br/acesso-a-informacao/legislacao/instrucoes-normativas/instrucao-normativa-seges-me-no-73-de-30-de-setembro-de-2022",
+      "contentLength": 45637,
+      "publishDate": "2022-09-30",
+      "validation": {
+        "ok": true,
+        "errors": [],
+        "warnings": []
+      }
+    },
+    {
+      "id": "45c05e96-7375-4953-ad49-a12ecd4f1c6c",
+      "fullNumber": "IN SEGES 58/2022",
+      "number": "58",
+      "year": 2022,
+      "title": "Dispõe sobre a elaboração dos Estudos Técnicos Preliminares - ETP, para a aquisição de bens e a contratação de serviços e obras",
+      "issuer": "SEGES",
+      "officialUrl": "https://www.gov.br/compras/pt-br/acesso-a-informacao/legislacao/instrucoes-normativas/instrucao-normativa-seges-no-58-de-8-de-agosto-de-2022",
+      "contentLength": 13616,
+      "publishDate": "2022-08-08",
+      "validation": {
+        "ok": true,
+        "errors": [],
+        "warnings": []
+      }
+    },
+    {
+      "id": "ca6d7ca8-d3dd-439d-baa7-2be691204ee0",
+      "fullNumber": "IN SEGES/ME 5/2022",
+      "number": "5",
+      "year": 2022,
+      "title": "Altera a Instrução Normativa nº 3, de 11 de fevereiro de 2015, que dispõe sobre passagens aéreas",
+      "issuer": "SEGES",
+      "officialUrl": "https://www.gov.br/compras/pt-br/acesso-a-informacao/legislacao/instrucoes-normativas/instrucao-normativa-seges-me-no-5-de-7-de-fevereiro-de-2022",
+      "contentLength": 1831,
+      "publishDate": "2022-02-07",
+      "validation": {
+        "ok": true,
+        "errors": [],
+        "warnings": []
+      }
+    },
+    {
+      "id": "053bfb87-c472-414f-89f5-0c3265d9b3bd",
+      "fullNumber": "IN SEGES 26/2022",
+      "number": "26",
+      "year": 2022,
+      "title": "Dispõe sobre a dispensa de licitação e a compensação de débitos de multa",
+      "issuer": "SEGES",
+      "officialUrl": "https://www.gov.br/compras/pt-br/acesso-a-informacao/legislacao/instrucoes-normativas/instrucao-normativa-seges-me-no-26-de-13-de-abril-de-2022",
+      "contentLength": 9572,
+      "publishDate": "2022-04-13",
+      "validation": {
+        "ok": true,
+        "errors": [],
+        "warnings": []
+      }
+    },
+    {
+      "id": "8ac149ab-2c7f-4d9c-a9d0-cf24fec0dec1",
+      "fullNumber": "IN SEGES 20/2022",
+      "number": "20",
+      "year": 2022,
+      "title": "Revoga instruções normativas anteriores no âmbito da SEGES",
+      "issuer": "SEGES",
+      "officialUrl": "https://www.gov.br/compras/pt-br/acesso-a-informacao/legislacao/instrucoes-normativas/instrucao-normativa-seges-me-no-20-de-04-de-abril-de-2022",
+      "contentLength": 936,
+      "publishDate": "2022-04-04",
+      "validation": {
+        "ok": true,
+        "errors": [],
+        "warnings": []
+      }
+    },
+    {
+      "id": "85fb6012-8f96-4432-b08e-4ceb561c5415",
+      "fullNumber": "IN SEGES 103/2022",
+      "number": "103",
+      "year": 2022,
+      "title": "Dispõe sobre a seleção de imóveis para locação pela administração pública federal",
+      "issuer": "SEGES",
+      "officialUrl": "https://www.gov.br/compras/pt-br/acesso-a-informacao/legislacao/instrucoes-normativas/instrucao-normtaiva-seges-me-no-103-de-30-de-dezembro-de-2022",
+      "contentLength": 20888,
+      "publishDate": "2022-12-30",
+      "validation": {
+        "ok": true,
+        "errors": [],
+        "warnings": []
+      }
+    },
+    {
+      "id": "5003d8d9-25d3-4317-9336-1fae51c80098",
+      "fullNumber": "IN SEGES/ME 67/2021",
+      "number": "67",
+      "year": 2021,
+      "title": "Dispensa Eletrônica na Administração Pública Federal",
+      "issuer": "SEGES",
+      "officialUrl": "https://www.gov.br/compras/pt-br/acesso-a-informacao/legislacao/instrucoes-normativas/instrucao-normativa-seges-me-no-67-de-8-de-julho-de-2021",
+      "contentLength": 19109,
+      "publishDate": "2021-07-09",
+      "validation": {
+        "ok": true,
+        "errors": [],
+        "warnings": []
+      }
+    },
+    {
+      "id": "9d62c0d1-0e4f-4bec-8423-8247d5b76cf3",
+      "fullNumber": "IN SEGES/ME 65/2021",
+      "number": "65",
+      "year": 2021,
+      "title": "Pesquisa de Preços na Administração Pública Federal",
+      "issuer": "SEGES",
+      "officialUrl": "https://www.gov.br/compras/pt-br/acesso-a-informacao/legislacao/instrucoes-normativas/instrucao-normativa-seges-me-no-65-de-7-de-julho-de-2021",
+      "contentLength": 11728,
+      "publishDate": "2021-07-08",
+      "validation": {
+        "ok": true,
+        "errors": [],
+        "warnings": []
+      }
+    },
+    {
+      "id": "54bb2441-828d-472c-b381-c1beae02f170",
+      "fullNumber": "IN AUTOR/ME 62/2021",
+      "number": "62",
+      "year": 2021,
+      "title": "Cessão Fiduciária de Créditos em Contratos Administrativos",
+      "issuer": "SEGES",
+      "officialUrl": "https://www.gov.br/compras/pt-br/acesso-a-informacao/legislacao/instrucoes-normativas/instrucao-normativa-autor-me-no-62-de-28-de-junho-de-2021",
+      "contentLength": 2015,
+      "publishDate": "2021-06-29",
+      "validation": {
+        "ok": true,
+        "errors": [],
+        "warnings": []
+      }
+    },
+    {
+      "id": "8627a4d9-d9d9-4ca8-a2cb-572a3c8f86c9",
+      "fullNumber": "IN SEGES/ME 51/2021",
+      "number": "51",
+      "year": 2021,
+      "title": "Estabelece procedimentos para utilização do Almoxarifado Virtual Nacional",
+      "issuer": "SEGES",
+      "officialUrl": "https://www.gov.br/compras/pt-br/acesso-a-informacao/legislacao/instrucoes-normativas/instrucao-normativa-seges-me-no-51-de-13-de-maio-de-2021",
+      "contentLength": 25675,
+      "publishDate": "2021-05-13",
+      "validation": {
+        "ok": true,
+        "errors": [],
+        "warnings": []
+      }
+    },
+    {
+      "id": "155e8ce7-af52-47bc-9333-9a5a018a9abd",
+      "fullNumber": "IN SEGES/ME 42/2021",
+      "number": "42",
+      "year": 2021,
+      "title": "Altera a Instrução Normativa nº 53, sobre operação de crédito com cessão fiduciária",
+      "issuer": "SEGES",
+      "officialUrl": "https://www.gov.br/compras/pt-br/acesso-a-informacao/legislacao/instrucoes-normativas/instrucao-normativa-seges-me-no-42-de-19-de-abril-de-2021",
+      "contentLength": 2983,
+      "publishDate": "2021-04-19",
+      "validation": {
+        "ok": true,
+        "errors": [],
+        "warnings": []
+      }
+    },
+    {
+      "id": "3fe21340-68d5-42cd-a6c9-16a173e52346",
+      "fullNumber": "IN SEGES/ME 116/2021",
+      "number": "116",
+      "year": 2021,
+      "title": "Participação de Pessoa Física em Licitações",
+      "issuer": "SEGES",
+      "officialUrl": "https://www.gov.br/compras/pt-br/acesso-a-informacao/legislacao/instrucoes-normativas/instrucao-normativa-seges-me-no-116-de-21-de-dezembro-de-2021",
+      "contentLength": 4311,
+      "publishDate": "2021-12-30",
+      "validation": {
+        "ok": true,
+        "errors": [],
+        "warnings": []
+      }
+    },
+    {
+      "id": "e5b8b2c0-4478-4f9d-b3fd-c41afbfbb5d6",
+      "fullNumber": "IN MP 96/2020",
+      "number": "96",
+      "year": 2020,
+      "title": "Altera a Instrução Normativa nº 6, de 12 de agosto de 2019, sobre recebimento de doações",
+      "issuer": "MPOG",
+      "officialUrl": "https://www.gov.br/compras/pt-br/acesso-a-informacao/legislacao/instrucoes-normativas/instrucao-normativa-no-96-de-02-de-outubro-de-2020",
+      "contentLength": 12484,
+      "publishDate": "2020-10-02",
+      "validation": {
+        "ok": true,
+        "errors": [],
+        "warnings": []
+      }
+    },
+    {
+      "id": "b0f7254c-bb16-430d-a0f1-72460d1c0286",
+      "fullNumber": "IN MP 76/2020",
+      "number": "76",
+      "year": 2020,
+      "title": "Altera o prazo de vigência da Instrução Normativa nº 53, de 8 de julho de 2020",
+      "issuer": "MPOG",
+      "officialUrl": "https://www.gov.br/compras/pt-br/acesso-a-informacao/legislacao/instrucoes-normativas/instrucao-normativa-no-76-de-11-de-agosto-de-2020",
+      "contentLength": 793,
+      "publishDate": "2020-08-11",
+      "validation": {
+        "ok": true,
+        "errors": [],
+        "warnings": []
+      }
+    },
+    {
+      "id": "1da6ea02-9b5e-4f76-8695-0a5ec15b895b",
+      "fullNumber": "IN MP 73/2020",
+      "number": "73",
+      "year": 2020,
+      "title": "Dispõe sobre procedimento administrativo para pesquisa de preços",
+      "issuer": "MPOG",
+      "officialUrl": "https://www.gov.br/compras/pt-br/acesso-a-informacao/legislacao/instrucoes-normativas/instrucao-normativa-no-73-de-5-de-agosto-de-2020",
+      "contentLength": 9489,
+      "publishDate": "2020-08-05",
+      "validation": {
+        "ok": true,
+        "errors": [],
+        "warnings": []
+      }
+    },
+    {
+      "id": "b72cd4a9-e24a-4916-ad65-858cd2188cb9",
+      "fullNumber": "IN MP 64/2020",
+      "number": "64",
+      "year": 2020,
+      "title": "Altera o prazo de vigência da Instrução Normativa nº 10, de 10 de fevereiro de 2020",
+      "issuer": "MPOG",
+      "officialUrl": "https://www.gov.br/compras/pt-br/acesso-a-informacao/legislacao/instrucoes-normativas/instrucao-normativa-no-64-de-29-de-julho-de-2020",
+      "contentLength": 1171,
+      "publishDate": "2020-07-29",
+      "validation": {
+        "ok": true,
+        "errors": [],
+        "warnings": []
+      }
+    },
+    {
+      "id": "223b19c6-620f-483a-ac2c-fab78b5813b2",
+      "fullNumber": "IN MP 50/2020",
+      "number": "50",
+      "year": 2020,
+      "title": "Altera prazo para atualização de informações da Instrução Normativa nº 13, de 2020",
+      "issuer": "MPOG",
+      "officialUrl": "https://www.gov.br/compras/pt-br/acesso-a-informacao/legislacao/instrucoes-normativas/instrucao-normativa-no-50-de-02-de-julho-de-2020",
+      "contentLength": 1261,
+      "publishDate": "2020-07-02",
+      "validation": {
+        "ok": true,
+        "errors": [],
+        "warnings": []
+      }
+    },
+    {
+      "id": "f5c085d1-7a85-4c79-ba23-a5531e28d996",
+      "fullNumber": "IN MP 49/2020",
+      "number": "49",
+      "year": 2020,
+      "title": "Altera a Instrução Normativa nº 5, de 26 de maio de 2017, sobre contratação de serviços",
+      "issuer": "MPOG",
+      "officialUrl": "https://www.gov.br/compras/pt-br/acesso-a-informacao/legislacao/instrucoes-normativas/instrucao-normativa-no-49-de-30-de-junho-de-2020",
+      "contentLength": 1949,
+      "publishDate": "2020-06-30",
+      "validation": {
+        "ok": true,
+        "errors": [],
+        "warnings": []
+      }
+    },
+    {
+      "id": "1c6bbeea-066f-4b9a-8b98-3cd056d4066a",
+      "fullNumber": "IN MP 40/2020",
+      "number": "40",
+      "year": 2020,
+      "title": "Dispõe sobre elaboração de Estudos Técnicos Preliminares e Sistema ETP digital",
+      "issuer": "MPOG",
+      "officialUrl": "https://www.gov.br/compras/pt-br/acesso-a-informacao/legislacao/instrucoes-normativas/instrucao-normativa-no-40-de-22-de-maio-de-2020",
+      "contentLength": 8046,
+      "publishDate": "2020-05-22",
+      "validation": {
+        "ok": true,
+        "errors": [],
+        "warnings": []
+      }
+    },
+    {
+      "id": "d3044be7-c54f-400e-a015-b4d74bd75f78",
+      "fullNumber": "IN MP 16/2020",
+      "number": "16",
+      "year": 2020,
+      "title": "Declara a revogação de Instruções Normativas",
+      "issuer": "MPOG",
+      "officialUrl": "https://www.gov.br/compras/pt-br/acesso-a-informacao/legislacao/instrucoes-normativas/instrucao-normativa-no-16-de-04-de-marco-de-2020",
+      "contentLength": 857,
+      "publishDate": "2020-01-01",
+      "validation": {
+        "ok": true,
+        "errors": [],
+        "warnings": []
+      }
+    },
+    {
+      "id": "2b0a6b4c-33d2-4a24-afab-20f6eca6371f",
+      "fullNumber": "IN MP 13/2020",
+      "number": "13",
+      "year": 2020,
+      "title": "Dispõe sobre atribuição de código e cadastramento de unidades protocolizadoras",
+      "issuer": "MPOG",
+      "officialUrl": "https://www.gov.br/compras/pt-br/acesso-a-informacao/legislacao/instrucoes-normativas/instrucao-normativa-no-13-de-27-de-fevereiro-de-2020-atualizada",
+      "contentLength": 10346,
+      "publishDate": "2020-02-27",
+      "validation": {
+        "ok": true,
+        "errors": [],
+        "warnings": []
+      }
+    },
+    {
+      "id": "4e3d68c4-e1d0-4751-9ee9-64e57a5d0159",
+      "fullNumber": "IN MP 12/2020",
+      "number": "12",
+      "year": 2020,
+      "title": "Declara a revogação de Instruções Normativas",
+      "issuer": "MPOG",
+      "officialUrl": "https://www.gov.br/compras/pt-br/acesso-a-informacao/legislacao/instrucoes-normativas/instrucao-normativa-no-12-de-20-de-fevereiro-de-2020",
+      "contentLength": 1687,
+      "publishDate": "2020-02-20",
+      "validation": {
+        "ok": true,
+        "errors": [],
+        "warnings": []
+      }
+    },
+    {
+      "id": "fa88acbe-1b02-4774-afb2-598f19163e28",
+      "fullNumber": "IN MP 107/2020",
+      "number": "107",
+      "year": 2020,
+      "title": "Altera a Instrução Normativa nº 3, de 26 de abril de 2018, sobre o Sicaf",
+      "issuer": "MPOG",
+      "officialUrl": "https://www.gov.br/compras/pt-br/acesso-a-informacao/legislacao/instrucoes-normativas/instrucao-normativa-no-107-de-28-de-outubro-de-2020",
+      "contentLength": 1888,
+      "publishDate": "2020-10-28",
+      "validation": {
+        "ok": true,
+        "errors": [],
+        "warnings": []
+      }
+    },
+    {
+      "id": "f79db5a0-5d24-4f8b-b53b-d9cb244d4a59",
+      "fullNumber": "IN SEGES 102/2020",
+      "number": "102",
+      "year": 2020,
+      "title": "Revoga Instruções Normativas e Orientações Normativas",
+      "issuer": "SEGES",
+      "officialUrl": "https://www.gov.br/compras/pt-br/acesso-a-informacao/legislacao/instrucoes-normativas/instrucao-normativa-seges-no-102-de-16-de-outubro-de-2020",
+      "contentLength": 1700,
+      "publishDate": "2020-10-16",
+      "validation": {
+        "ok": true,
+        "errors": [],
+        "warnings": []
+      }
+    },
+    {
+      "id": "8a1a2c95-79e2-4f3e-b5ba-9cf99f8adfcf",
+      "fullNumber": "IN MP 10/2020",
+      "number": "10",
+      "year": 2020,
+      "title": "Altera a Instrução Normativa nº 3, de 26 de abril de 2018, sobre o Sicaf",
+      "issuer": "MPOG",
+      "officialUrl": "https://www.gov.br/compras/pt-br/acesso-a-informacao/legislacao/instrucoes-normativas/instrucao-normativa-no-10-de-10-de-fevereiro-de-2020-atualizada",
+      "contentLength": 4999,
+      "publishDate": "2020-02-10",
+      "validation": {
+        "ok": true,
+        "errors": [],
+        "warnings": []
+      }
+    },
+    {
+      "id": "c15e188f-52f7-4bc3-929c-4f1f566ffc0e",
+      "fullNumber": "IN MP 6/2019",
+      "number": "6",
+      "year": 2019,
+      "title": "Regulamenta o Decreto nº 9.764, sobre recebimento de doações de bens móveis",
+      "issuer": "MPOG",
+      "officialUrl": "https://www.gov.br/compras/pt-br/acesso-a-informacao/legislacao/instrucoes-normativas/instrucao-normativa-no-6-de-12-de-agosto-de-2019",
+      "contentLength": 39860,
+      "publishDate": "2019-08-12",
+      "validation": {
+        "ok": true,
+        "errors": [],
+        "warnings": []
+      }
+    },
+    {
+      "id": "ff5a2154-eb13-4be5-8cf9-7a312d12ede0",
+      "fullNumber": "IN MP 3/2019",
+      "number": "3",
+      "year": 2019,
+      "title": "Altera a Instrução Normativa nº 2, sobre Compra Institucional de alimentos",
+      "issuer": "MPOG",
+      "officialUrl": "https://www.gov.br/compras/pt-br/acesso-a-informacao/legislacao/instrucoes-normativas/instrucao-normativa-no-3-de-27-de-maio-de-2019",
+      "contentLength": 2601,
+      "publishDate": "2019-05-27",
+      "validation": {
+        "ok": true,
+        "errors": [],
+        "warnings": []
+      }
+    },
+    {
+      "id": "cf35fb12-d234-4325-bd3b-d95f8134ed2a",
+      "fullNumber": "IN MP 210/2019",
+      "number": "210",
+      "year": 2019,
+      "title": "Revoga a Instrução Normativa nº 3, de 16 de dezembro de 2011, sobre pregão eletrônico",
+      "issuer": "MPOG",
+      "officialUrl": "https://www.gov.br/compras/pt-br/acesso-a-informacao/legislacao/instrucoes-normativas/instrucao-normativa-no-210-de-20-de-novembro-de-2019",
+      "contentLength": 964,
+      "publishDate": "2019-11-20",
+      "validation": {
+        "ok": true,
+        "errors": [],
+        "warnings": []
+      }
+    },
+    {
+      "id": "66143cfa-7d9f-414b-bf6c-8bdf5562ee03",
+      "fullNumber": "IN MP 206/2019",
+      "number": "206",
+      "year": 2019,
+      "title": "Estabelece prazos para uso obrigatório de pregão eletrônico e dispensa eletrônica",
+      "issuer": "MPOG",
+      "officialUrl": "https://www.gov.br/compras/pt-br/acesso-a-informacao/legislacao/instrucoes-normativas/instrucao-normativa-no-206-de-18-de-outubro-de-2019",
+      "contentLength": 5692,
+      "publishDate": "2019-10-18",
+      "validation": {
+        "ok": true,
+        "errors": [],
+        "warnings": []
+      }
+    },
+    {
+      "id": "bcc11577-9b28-4fee-8d72-479aff53763d",
+      "fullNumber": "IN MP 7/2018",
+      "number": "7",
+      "year": 2018,
+      "title": "Altera a Instrução Normativa nº 5, sobre contratação de serviços",
+      "issuer": "MPOG",
+      "officialUrl": "https://www.gov.br/compras/pt-br/acesso-a-informacao/legislacao/instrucoes-normativas/instrucao-normativa-no-07-de-20-de-setembro-de-2018",
+      "contentLength": 7601,
+      "publishDate": "2018-09-20",
+      "validation": {
+        "ok": true,
+        "errors": [],
+        "warnings": []
+      }
+    },
+    {
+      "id": "33d553f9-7105-4315-8dbe-88e00e533218",
+      "fullNumber": "IN MP 6/2018",
+      "number": "6",
+      "year": 2018,
+      "title": "Dispõe sobre cláusulas assecuratórias de direitos trabalhistas em obras públicas",
+      "issuer": "MPOG",
+      "officialUrl": "https://www.gov.br/compras/pt-br/acesso-a-informacao/legislacao/instrucoes-normativas/instrucao-normativa-no-6-de-6-de-julho-de-2018",
+      "contentLength": 5797,
+      "publishDate": "2018-07-06",
+      "validation": {
+        "ok": true,
+        "errors": [],
+        "warnings": []
+      }
+    },
+    {
+      "id": "17e3b236-27ae-40f6-a9e0-bd0eb2598afa",
+      "fullNumber": "IN MP 5/2018",
+      "number": "5",
+      "year": 2018,
+      "title": "Altera o art. 18 da Instrução Normativa nº 3, de 11 de fevereiro de 2015",
+      "issuer": "MPOG",
+      "officialUrl": "https://www.gov.br/compras/pt-br/acesso-a-informacao/legislacao/instrucoes-normativas/instrucao-normativa-no-5-de-05-de-julho-de-2018",
+      "contentLength": 1261,
+      "publishDate": "2018-07-05",
+      "validation": {
+        "ok": true,
+        "errors": [],
+        "warnings": []
+      }
+    },
+    {
+      "id": "9f574442-e3ed-43df-b377-da89f2e6be54",
+      "fullNumber": "IN MP 4/2018",
+      "number": "4",
+      "year": 2018,
+      "title": "Diretrizes e procedimentos para elaboração de atos normativos no MP",
+      "issuer": "MPOG",
+      "officialUrl": "https://www.gov.br/compras/pt-br/acesso-a-informacao/legislacao/instrucoes-normativas/instrucao-normativa-mp-no-4-de-24-de-julho-de-2018",
+      "contentLength": 11351,
+      "publishDate": "2018-07-24",
+      "validation": {
+        "ok": true,
+        "errors": [],
+        "warnings": []
+      }
+    },
+    {
+      "id": "15eb7cf8-5d1c-43dc-a7c5-d23a3facfc04",
+      "fullNumber": "IN MP 3/2018",
+      "number": "3",
+      "year": 2018,
+      "title": "Sicaf no âmbito do Poder Executivo Federal",
+      "issuer": "MPOG",
+      "officialUrl": "https://www.gov.br/compras/pt-br/acesso-a-informacao/legislacao/instrucoes-normativas/instrucao-normativa-no-3-de-26-de-abril-de-2018",
+      "contentLength": 28415,
+      "publishDate": "2018-04-26",
+      "validation": {
+        "ok": true,
+        "errors": [],
+        "warnings": []
+      }
+    },
+    {
+      "id": "0f0ae5cd-0c8a-4f84-8429-f8615e789a1e",
+      "fullNumber": "IN MP 2/2018",
+      "number": "2",
+      "year": 2018,
+      "title": "Compra Institucional de alimentos da agricultura familiar",
+      "issuer": "MPOG",
+      "officialUrl": "https://www.gov.br/compras/pt-br/acesso-a-informacao/legislacao/instrucoes-normativas/instrucao-normativa-no-2-de-29-de-marco-de-2018",
+      "contentLength": 25274,
+      "publishDate": "2018-01-01",
+      "validation": {
+        "ok": true,
+        "errors": [],
+        "warnings": []
+      }
+    },
+    {
+      "id": "6558775e-908d-4b4c-8e75-7e63f4b82061",
+      "fullNumber": "IN MP 11/2018",
+      "number": "11",
+      "year": 2018,
+      "title": "Dispõe sobre ferramenta informatizada de disponibilização de bens móveis inservíveis",
+      "issuer": "MPOG",
+      "officialUrl": "https://www.gov.br/compras/pt-br/acesso-a-informacao/legislacao/instrucoes-normativas/instrucao-normativa-no-11-de-29-de-novembro-de-2018",
+      "contentLength": 8890,
+      "publishDate": "2018-11-29",
+      "validation": {
+        "ok": true,
+        "errors": [],
+        "warnings": []
+      }
+    },
+    {
+      "id": "16184659-7248-4b8a-b34f-3f561fa723d4",
+      "fullNumber": "IN SEGES/MP 5/2017",
+      "number": "5",
+      "year": 2017,
+      "title": "Dispõe sobre as regras e diretrizes do procedimento de contratação de serviços sob o regime de execução indireta",
+      "issuer": "SEGES",
+      "officialUrl": "https://www.gov.br/compras/pt-br/acesso-a-informacao/legislacao/instrucoes-normativas/instrucao-normativa-no-5-de-26-de-maio-de-2017-atualizada",
+      "contentLength": 222109,
+      "publishDate": "2017-05-26",
+      "validation": {
+        "ok": true,
+        "errors": [],
+        "warnings": []
+      }
+    },
+    {
+      "id": "70105fda-44e5-4335-a578-19782f83de63",
+      "fullNumber": "IN MP 4/2017",
+      "number": "4",
+      "year": 2017,
+      "title": "Ressarcimento de bagagens despachadas em viagens a serviço",
+      "issuer": "MPOG",
+      "officialUrl": "https://www.gov.br/compras/pt-br/acesso-a-informacao/legislacao/instrucoes-normativas/instrucao-normativa-no-4-de-11-de-julho-de-2017",
+      "contentLength": 2322,
+      "publishDate": "2017-07-11",
+      "validation": {
+        "ok": true,
+        "errors": [],
+        "warnings": []
+      }
+    },
+    {
+      "id": "5390ad17-f314-4e76-9753-e7ee733b2d3b",
+      "fullNumber": "IN MP 2/2016",
+      "number": "2",
+      "year": 2016,
+      "title": "Ordem cronológica de pagamento das obrigações no Sisg",
+      "issuer": "MPOG",
+      "officialUrl": "https://www.gov.br/compras/pt-br/acesso-a-informacao/legislacao/instrucoes-normativas/instrucao-normativa-no-2-de-6-de-dezembro-de-2016",
+      "contentLength": 10982,
+      "publishDate": "2016-01-01",
+      "validation": {
+        "ok": true,
+        "errors": [],
+        "warnings": []
+      }
+    },
+    {
+      "id": "d910f8c6-12d0-4aad-a528-1d528059879d",
+      "fullNumber": "IN MP 3/2015",
+      "number": "3",
+      "year": 2015,
+      "title": "Diretrizes e procedimentos para aquisição de passagens aéreas",
+      "issuer": "MPOG",
+      "officialUrl": "https://www.gov.br/compras/pt-br/acesso-a-informacao/legislacao/instrucoes-normativas/instrucao-normativa-no-3-de-11-de-fevereiro-de-2015",
+      "contentLength": 19964,
+      "publishDate": "2015-02-11",
+      "validation": {
+        "ok": true,
+        "errors": [],
+        "warnings": []
+      }
+    },
+    {
+      "id": "0e40ad5e-8a2d-44e4-ad5e-b1be3a4cfa31",
+      "fullNumber": "IN MP 6/2014",
+      "number": "6",
+      "year": 2014,
+      "title": "Remanejamento das quantidades em Atas de Registro de Preços",
+      "issuer": "MPOG",
+      "officialUrl": "https://www.gov.br/compras/pt-br/acesso-a-informacao/legislacao/instrucoes-normativas/instrucao-normativa-no-6-de-25-de-julho-de-2014",
+      "contentLength": 4044,
+      "publishDate": "2014-01-01",
+      "validation": {
+        "ok": true,
+        "errors": [],
+        "warnings": []
+      }
+    },
+    {
+      "id": "21088b4a-36cc-4ee0-88ae-6c6e806e8c5c",
+      "fullNumber": "IN MP 2/2014",
+      "number": "2",
+      "year": 2014,
+      "title": "Aquisição/locação de máquinas com Etiqueta Nacional de Conservação de Energia (ENCE)",
+      "issuer": "MPOG",
+      "officialUrl": "https://www.gov.br/compras/pt-br/acesso-a-informacao/legislacao/instrucoes-normativas/instrucao-normativa-no-2-de-04-de-junho-de-2014",
+      "contentLength": 13800,
+      "publishDate": "2014-01-01",
+      "validation": {
+        "ok": true,
+        "errors": [],
+        "warnings": []
+      }
+    },
+    {
+      "id": "297979ba-fa57-4e5a-a7dd-a72d0e574d89",
+      "fullNumber": "IN MP 5/2013",
+      "number": "5",
+      "year": 2013,
+      "title": "RDC eletrônico (Lei nº 12.462/2011)",
+      "issuer": "MPOG",
+      "officialUrl": "https://www.gov.br/compras/pt-br/acesso-a-informacao/legislacao/instrucoes-normativas/instrucao-normativa-ndeg-5-de-7-de-novembro-de-2013",
+      "contentLength": 4382,
+      "publishDate": "2013-01-01",
+      "validation": {
+        "ok": true,
+        "errors": [],
+        "warnings": []
+      }
+    },
+    {
+      "id": "aa806f72-92fe-4170-b5f8-22eac26daff5",
+      "fullNumber": "IN MP 9/2012",
+      "number": "9",
+      "year": 2012,
+      "title": "Contenção de despesas (Decreto nº 99.188/1990)",
+      "issuer": "MPOG",
+      "officialUrl": "https://www.gov.br/compras/pt-br/acesso-a-informacao/legislacao/instrucoes-normativas/instrucao-normativa-no-9-de-3-de-outubro-de-2012",
+      "contentLength": 5618,
+      "publishDate": "2012-01-01",
+      "validation": {
+        "ok": true,
+        "errors": [],
+        "warnings": []
+      }
+    },
+    {
+      "id": "71a4d6d9-8da1-459a-8a6e-edd6eb0c15ff",
+      "fullNumber": "IN MP 10/2012",
+      "number": "10",
+      "year": 2012,
+      "title": "Planos de Gestão de Logística Sustentável",
+      "issuer": "MPOG",
+      "officialUrl": "https://www.gov.br/compras/pt-br/acesso-a-informacao/legislacao/instrucoes-normativas/instrucao-normativa-no-10-de-12-de-novembro-de-2012",
+      "contentLength": 41496,
+      "publishDate": "2012-01-01",
+      "validation": {
+        "ok": true,
+        "errors": [],
+        "warnings": []
+      }
+    },
+    {
+      "id": "536c778e-6cab-4f16-a922-e904bbbf046f",
+      "fullNumber": "IN MP 2/2011",
+      "number": "2",
+      "year": 2011,
+      "title": "Operacionalização do SIASG (módulos e subsistemas)",
+      "issuer": "MPOG",
+      "officialUrl": "https://www.gov.br/compras/pt-br/acesso-a-informacao/legislacao/instrucoes-normativas/instrucao-normativa-ndeg-2-de-16-de-agosto-de-2011",
+      "contentLength": 17124,
+      "publishDate": "2011-01-01",
+      "validation": {
+        "ok": true,
+        "errors": [],
+        "warnings": []
+      }
+    },
+    {
+      "id": "1500f11d-0535-4406-a200-e6c9c0838fa9",
+      "fullNumber": "IN MP 1/2010",
+      "number": "1",
+      "year": 2010,
+      "title": "Critérios de sustentabilidade ambiental em aquisições públicas",
+      "issuer": "MPOG",
+      "officialUrl": "https://www.gov.br/compras/pt-br/acesso-a-informacao/legislacao/instrucoes-normativas/instrucao-normativa-no-01-de-19-de-janeiro-de-2010",
+      "contentLength": 22096,
+      "publishDate": "2010-01-01",
+      "validation": {
+        "ok": true,
+        "errors": [],
+        "warnings": []
+      }
+    },
+    {
+      "id": "8fac1e34-e70a-45e2-9bd7-dae99619cb2e",
+      "fullNumber": "IN MP 3/2008",
+      "number": "3",
+      "year": 2008,
+      "title": "Classificação, utilização, identificação, aquisição e alienação de veículos oficiais",
+      "issuer": "MPOG",
+      "officialUrl": "https://www.gov.br/compras/pt-br/acesso-a-informacao/legislacao/instrucoes-normativas/instrucao-normativa-no-3-de-15-de-maio-de-2008",
+      "contentLength": 48064,
+      "publishDate": "2008-01-01",
+      "validation": {
+        "ok": true,
+        "errors": [],
+        "warnings": []
+      }
+    },
+    {
+      "id": "f4730d57-263e-4e28-8627-6f611db81c1b",
+      "fullNumber": "IN MP 12/1997",
+      "number": "12",
+      "year": 1997,
+      "title": "Aquisição, utilização, controle e manutenção de equipamentos de telefonia",
+      "issuer": "MPOG",
+      "officialUrl": "https://www.gov.br/compras/pt-br/acesso-a-informacao/legislacao/instrucoes-normativas/instrucao-normativa-ndeg-12-de-05-de-setembro-de-1997",
+      "contentLength": 1206,
+      "publishDate": "1997-01-01",
+      "validation": {
+        "ok": true,
+        "errors": [],
+        "warnings": []
+      }
+    },
+    {
+      "id": "9fdfc827-8bc6-4963-a323-5b0f429ce9f5",
+      "fullNumber": "IN MP 6/1995",
+      "number": "6",
+      "year": 1995,
+      "title": "Reciclagem de papel e outros resíduos",
+      "issuer": "MPOG",
+      "officialUrl": "https://www.gov.br/compras/pt-br/acesso-a-informacao/legislacao/instrucoes-normativas/instrucao-normativa-no-06-de-03-de-novembro-de-1995",
+      "contentLength": 10150,
+      "publishDate": "1995-01-01",
+      "validation": {
+        "ok": true,
+        "errors": [],
+        "warnings": []
+      }
+    },
+    {
+      "id": "058e3788-4d50-49a7-9530-d1f519b6a3d5",
+      "fullNumber": "IN MP 205/1988",
+      "number": "205",
+      "year": 1988,
+      "title": "Minimização de custos de uso de material no SISG",
+      "issuer": "MPOG",
+      "officialUrl": "https://www.gov.br/compras/pt-br/acesso-a-informacao/legislacao/instrucoes-normativas/instrucao-normativa-no-205-de-08-de-abril-de-1988",
+      "contentLength": 66844,
+      "publishDate": "1988-01-01",
+      "validation": {
+        "ok": true,
+        "errors": [],
+        "warnings": []
+      }
+    },
+    {
+      "id": "67118b61-7837-49fc-97eb-02dee64b3c2c",
+      "fullNumber": "IN MP 183/1986",
+      "number": "183",
+      "year": 1986,
+      "title": "Procedimentos em acidentes com veículos terrestres oficiais",
+      "issuer": "MPOG",
+      "officialUrl": "https://www.gov.br/compras/pt-br/acesso-a-informacao/legislacao/instrucoes-normativas/instrucao-normativa-ndeg-183-de-8-de-setembro-de-1986",
+      "contentLength": 16289,
+      "publishDate": "1986-09-08",
+      "validation": {
+        "ok": true,
+        "errors": [],
+        "warnings": []
+      }
+    },
+    {
+      "id": "a7a8cc7d-b206-4faf-9b7f-e31a3d4e9651",
+      "fullNumber": "IN MP 142/1983",
+      "number": "142",
+      "year": 1983,
+      "title": "IN nº 142, de 5 de agosto de 1983",
+      "issuer": "MPOG",
+      "officialUrl": "https://www.gov.br/compras/pt-br/acesso-a-informacao/legislacao/instrucoes-normativas/instrucao-normativa-n-o-142-de-05-de-agosto-de-1983",
+      "contentLength": 5002,
+      "publishDate": "1983-01-01",
+      "validation": {
+        "ok": true,
+        "errors": [],
+        "warnings": []
+      }
+    }
+  ]
+}

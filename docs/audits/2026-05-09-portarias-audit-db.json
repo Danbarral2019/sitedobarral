@@ -1,0 +1,877 @@
+{
+  "generatedAt": "2026-05-09T20:39:21.325Z",
+  "summary": {
+    "total": 54,
+    "ok": 53,
+    "errors": 0,
+    "warnings": 1
+  },
+  "entries": [
+    {
+      "id": "396b387c-bb61-4076-a140-a8126016bc49",
+      "fullNumber": "Portaria SEGES/MGI 7.604/2025",
+      "number": "7.604",
+      "year": 2025,
+      "title": "Adesão ao Portal AntecipaGov",
+      "issuer": "SEGES",
+      "officialUrl": "https://www.gov.br/compras/pt-br/acesso-a-informacao/legislacao/portarias/portaria-seges-mgi-no-7-604-de-8-de-setembro-de-2025",
+      "contentLength": 15060,
+      "publishDate": "2025-09-08",
+      "validation": {
+        "ok": true,
+        "errors": [],
+        "warnings": []
+      }
+    },
+    {
+      "id": "753d9752-0698-4901-956c-c9177f48435a",
+      "fullNumber": "Portaria SEGES/MGI 6.521/2025",
+      "number": "6.521",
+      "year": 2025,
+      "title": "Percentuais de Uso do Portal AntecipaGov",
+      "issuer": "SEGES",
+      "officialUrl": "https://www.gov.br/compras/pt-br/acesso-a-informacao/legislacao/portarias/portaria-seges-mgi-no-6-521-de-8-de-agosto-de-2025",
+      "contentLength": 2013,
+      "publishDate": "2025-08-11",
+      "validation": {
+        "ok": true,
+        "errors": [],
+        "warnings": []
+      }
+    },
+    {
+      "id": "2956f827-a91b-4043-8e3a-5336ba595dd1",
+      "fullNumber": "Portaria SGD/MGI nº 6.040/2025",
+      "number": "6.040",
+      "year": 2025,
+      "title": "Mapa de Pesquisa Salarial para TIC",
+      "issuer": "SGD/MGI",
+      "officialUrl": "https://www.in.gov.br/web/dou/-/portaria-sgd/mgi-n-6.040-de-11-de-agosto-de-2025-648006261",
+      "contentLength": 11450,
+      "publishDate": "2025-01-15",
+      "validation": {
+        "ok": true,
+        "errors": [],
+        "warnings": []
+      }
+    },
+    {
+      "id": "9b637cb3-c29e-47c8-936e-7812ca2411a6",
+      "fullNumber": "Portaria TCU 3/2025",
+      "number": "3",
+      "year": 2025,
+      "title": "Portaria-TCU nº 3, de 2 de janeiro de 2025",
+      "issuer": "TCU",
+      "officialUrl": "https://pesquisa.apps.tcu.gov.br/doc/norma/Portaria/TCU/3/2025/",
+      "contentLength": 22103,
+      "publishDate": "2025-01-02",
+      "validation": {
+        "ok": true,
+        "errors": [],
+        "warnings": []
+      }
+    },
+    {
+      "id": "9b305854-bfa7-4831-8adb-b923d47d5ec0",
+      "fullNumber": "Portaria SEGES 1.363/2025",
+      "number": "1.363",
+      "year": 2025,
+      "title": "PORTARIA SEGES/MGI Nº 1.363, DE 21 DE FEVEREIRO DE 2025",
+      "issuer": "SEGES",
+      "officialUrl": "https://www.gov.br/compras/pt-br/acesso-a-informacao/legislacao/portarias/portaria-seges-mgi-no-1-363-de-21-de-fevereiro-de-2025",
+      "contentLength": 5641,
+      "publishDate": "2025-02-21",
+      "validation": {
+        "ok": true,
+        "errors": [],
+        "warnings": []
+      }
+    },
+    {
+      "id": "e13d292c-16ee-4570-98dd-c4cb3e9bd8d3",
+      "fullNumber": "Portaria SEGES 9.598/2024",
+      "number": "9.598",
+      "year": 2024,
+      "title": "PORTARIA SEGES/MGI Nº 9.598, DE 17 DE DEZEMBRO DE 2024",
+      "issuer": "SEGES",
+      "officialUrl": "https://www.gov.br/compras/pt-br/acesso-a-informacao/legislacao/portarias/portaria-seges-mgi-no-9-598-de-17-de-dezembro-de-2024",
+      "contentLength": 1404,
+      "publishDate": "2024-12-17",
+      "validation": {
+        "ok": true,
+        "errors": [],
+        "warnings": []
+      }
+    },
+    {
+      "id": "95076c02-6a25-4283-9fad-1df723e2b64f",
+      "fullNumber": "Portaria SGD/MGI nº 6.680/2024",
+      "number": "6.680",
+      "year": 2024,
+      "title": "Alteração do Modelo de Infraestrutura e Atendimento de TIC",
+      "issuer": "SGD/MGI",
+      "officialUrl": "https://www.gov.br/governodigital/pt-br/contratacoes-de-tic/legislacao/modelo-de-contracao-de-servicos-de-operacao-de-infraestrutura-e-de-atendimento-a-usuarios-de-tic/portaria-sgd-mgi-no-6-680-de-4-de-outubro-de-2024",
+      "contentLength": 172108,
+      "publishDate": "2024-10-04",
+      "validation": {
+        "ok": true,
+        "errors": [],
+        "warnings": []
+      }
+    },
+    {
+      "id": "bf0c539f-da21-4d6e-a292-67d119ad32fd",
+      "fullNumber": "Portaria SGD/MGI nº 6.679/2024",
+      "number": "6.679",
+      "year": 2024,
+      "title": "Alteração do Modelo de Desenvolvimento de Software",
+      "issuer": "SGD/MGI",
+      "officialUrl": "https://www.gov.br/governodigital/pt-br/contratacoes-de-tic/legislacao/modelo-de-contratacao-de-servicos-de-desenvolvimento-manutencao-e-sustentacao-de-software/portaria-sgd-mgi-no-6679-de-17-de-setembro-de-2024",
+      "contentLength": 26294,
+      "publishDate": "2024-09-17",
+      "validation": {
+        "ok": true,
+        "errors": [],
+        "warnings": []
+      }
+    },
+    {
+      "id": "954c191e-5de9-436d-99cc-98f209bda127",
+      "fullNumber": "Portaria SGD/MGI nº 750/2023",
+      "number": "750",
+      "year": 2023,
+      "title": "Desenvolvimento e Manutenção de Software",
+      "issuer": "SGD/MGI",
+      "officialUrl": "https://www.gov.br/governodigital/pt-br/contratacoes-de-tic/legislacao/modelo-de-contratacao-de-servicos-de-desenvolvimento-manutencao-e-sustentacao-de-software/portaria-sgd-mgi-no-750-de-20-de-marco-de-2023",
+      "contentLength": 147151,
+      "publishDate": "2023-03-20",
+      "validation": {
+        "ok": true,
+        "errors": [],
+        "warnings": []
+      }
+    },
+    {
+      "id": "dd6a3376-6aae-4f3f-8da9-be79de07d440",
+      "fullNumber": "Portaria SEGES 7.911/2023",
+      "number": "7.911",
+      "year": 2023,
+      "title": "PORTARIA SEGES/MGI Nº 7.911, DE 30 DE NOVEMBRO DE 2023",
+      "issuer": "SEGES",
+      "officialUrl": "https://www.gov.br/compras/pt-br/acesso-a-informacao/legislacao/portarias/portaria-seges-mgi-no-7-911-de-30-de-novembro-de-2023",
+      "contentLength": 4489,
+      "publishDate": "2023-11-30",
+      "validation": {
+        "ok": true,
+        "errors": [],
+        "warnings": []
+      }
+    },
+    {
+      "id": "1df8b297-4dd7-4633-927d-043f75c7a300",
+      "fullNumber": "Portaria SEGES 6.238/2023",
+      "number": "6.238",
+      "year": 2023,
+      "title": "PORTARIA SEGES/MGI Nº 6.238, DE 11 DE OUTUBRO DE 2023",
+      "issuer": "SEGES",
+      "officialUrl": "https://www.gov.br/compras/pt-br/acesso-a-informacao/legislacao/portarias/portaria-seges-mgi-no-6-238-de-11-de-outubro-de-2023",
+      "contentLength": 3372,
+      "publishDate": "2023-10-11",
+      "validation": {
+        "ok": true,
+        "errors": [],
+        "warnings": []
+      }
+    },
+    {
+      "id": "81f78d22-b9b4-42ad-85d4-bc420ae76524",
+      "fullNumber": "Portaria SGD/MGI nº 5.950/2023",
+      "number": "5.950",
+      "year": 2023,
+      "title": "Contratação de Software e Nuvem",
+      "issuer": "SGD/MGI",
+      "officialUrl": "https://www.gov.br/governodigital/pt-br/contratacoes-de-tic/legislacao/modelo-de-contratacao-de-software-e-servicos-em-nuvem/vigentes/portaria-sgd-mgi-no-5-950-de-26-de-outubro-de-2023",
+      "contentLength": 209694,
+      "publishDate": "2023-10-26",
+      "validation": {
+        "ok": true,
+        "errors": [],
+        "warnings": []
+      }
+    },
+    {
+      "id": "a5c9939a-a46f-407c-8bf5-eabd2369b4a2",
+      "fullNumber": "Portaria SEGES/MGI 5.376/2023",
+      "number": "5.376",
+      "year": 2023,
+      "title": "Modelo de Referência para Plano de Logística Sustentável",
+      "issuer": "SEGES",
+      "officialUrl": "https://www.gov.br/compras/pt-br/acesso-a-informacao/legislacao/portarias/portaria-seges-mgi-no-5376-de-14-de-setembro-de-2023",
+      "contentLength": 2496,
+      "publishDate": "2023-09-15",
+      "validation": {
+        "ok": true,
+        "errors": [],
+        "warnings": []
+      }
+    },
+    {
+      "id": "1c16baeb-6bda-4702-a6fa-9f40b144e861",
+      "fullNumber": "Portaria SEGES/MGI 4.932/2023",
+      "number": "4.932",
+      "year": 2023,
+      "title": "Alteração do Regime de Transição da Lei nº 14.133/2021",
+      "issuer": "SEGES",
+      "officialUrl": "https://www.gov.br/compras/pt-br/acesso-a-informacao/legislacao/portarias/portaria-seges-mgi-no-4-932-de-30-de-agosto-de-2023",
+      "contentLength": 1145,
+      "publishDate": "2023-08-30",
+      "validation": {
+        "ok": true,
+        "errors": [],
+        "warnings": []
+      }
+    },
+    {
+      "id": "c7ed65e0-2a59-4c8d-ac62-56b162efbc07",
+      "fullNumber": "Portaria SEGES 4.111/2023",
+      "number": "4.111",
+      "year": 2023,
+      "title": "PORTARIA SEGES/MGI Nº 4.111, DE 28 DE JULHO DE 2023",
+      "issuer": "SEGES",
+      "officialUrl": "https://www.gov.br/compras/pt-br/acesso-a-informacao/legislacao/portarias/portaria-seges-mgi-no-4-111-de-28-de-julho-de-2023",
+      "contentLength": 735,
+      "publishDate": "2023-07-28",
+      "validation": {
+        "ok": true,
+        "errors": [],
+        "warnings": []
+      }
+    },
+    {
+      "id": "7c232c38-6259-4fb5-ab41-1c72b1f28886",
+      "fullNumber": "Portaria SGD/MGI nº 370/2023",
+      "number": "370",
+      "year": 2023,
+      "title": "Outsourcing de Impressão",
+      "issuer": "SGD/MGI",
+      "officialUrl": "https://www.gov.br/governodigital/pt-br/contratacoes-de-tic/legislacao/modelo-de-contratacao-de-servicos-de-outsourcing-de-impressao/anexos/portaria-sgd-mgi-no-370-de-8-de-marco-de-2023",
+      "contentLength": 82982,
+      "publishDate": "2023-02-01",
+      "validation": {
+        "ok": true,
+        "errors": [],
+        "warnings": []
+      }
+    },
+    {
+      "id": "e2595d75-da1e-4fe2-8e07-3e8f21c339a5",
+      "fullNumber": "Portaria SGD/MGI nº 2.715/2023",
+      "number": "2.715",
+      "year": 2023,
+      "title": "Contratação de Estações de Trabalho",
+      "issuer": "SGD/MGI",
+      "officialUrl": "https://www.gov.br/governodigital/pt-br/contratacoes-de-tic/legislacao/modelo-de-contratacao-e-gestao-de-estacoes-de-trabalho/vigente/portaria-sgd-mgi-no-2-715-de-21-de-junho-de-2023",
+      "contentLength": 69135,
+      "publishDate": "2023-06-30",
+      "validation": {
+        "ok": true,
+        "errors": [],
+        "warnings": [
+          "Detectadas tags HTML canônicas (br/p/div/span/etc) no texto — extração capturou markup. Limpar com cheerio."
+        ]
+      }
+    },
+    {
+      "id": "569023b8-09f3-4faf-8bc7-c3e495153a5a",
+      "fullNumber": "Portaria MPU 178/2023",
+      "number": "178",
+      "year": 2023,
+      "title": "Portaria PGR/MPU nº 178, de 13 de setembro de 2023",
+      "issuer": "MPU",
+      "officialUrl": "https://biblioteca.mpf.mp.br/repositorio/bitstreams/3741588e-1b76-46e7-b79f-a4fb48513346/download",
+      "contentLength": 57628,
+      "publishDate": "2023-09-15",
+      "validation": {
+        "ok": true,
+        "errors": [],
+        "warnings": []
+      }
+    },
+    {
+      "id": "5150eee6-0e15-42de-8e72-d401c04b782c",
+      "fullNumber": "Portaria SEGES/MGI 1.769/2023",
+      "number": "1.769",
+      "year": 2023,
+      "title": "Regime de Transição da Lei nº 14.133/2021",
+      "issuer": "SEGES",
+      "officialUrl": "https://www.gov.br/compras/pt-br/acesso-a-informacao/legislacao/portarias/portaria-seges-mgi-no-1-769-de-25-de-abril-de-2023",
+      "contentLength": 5733,
+      "publishDate": "2023-04-25",
+      "validation": {
+        "ok": true,
+        "errors": [],
+        "warnings": []
+      }
+    },
+    {
+      "id": "42115a75-b484-452d-8ca2-5e01a2b974c7",
+      "fullNumber": "Portaria Normativa MF 1.344/2023",
+      "number": "1.344",
+      "year": 2023,
+      "title": "PORTARIA NORMATIVA MF Nº 1.344, DE 31 DE OUTUBRO DE 2023",
+      "issuer": "MF",
+      "officialUrl": "https://www.gov.br/compras/pt-br/acesso-a-informacao/legislacao/portarias/portaria-normativa-mf-no-1-344-de-31-de-outubro-de-2023",
+      "contentLength": 4038,
+      "publishDate": "2023-10-31",
+      "validation": {
+        "ok": true,
+        "errors": [],
+        "warnings": []
+      }
+    },
+    {
+      "id": "34d11a88-cdfc-4c82-be5b-74cea0d2cfb2",
+      "fullNumber": "Portaria SGD/MGI nº 1.070/2023",
+      "number": "1.070",
+      "year": 2023,
+      "title": "Infraestrutura e Atendimento de TIC",
+      "issuer": "SGD/MGI",
+      "officialUrl": "https://www.gov.br/governodigital/pt-br/contratacoes-de-tic/legislacao/modelo-de-contracao-de-servicos-de-operacao-de-infraestrutura-e-de-atendimento-a-usuarios-de-tic/portaria-sgd-mgi-no-1-070-de-1o-de-junho-de-2023",
+      "contentLength": 186221,
+      "publishDate": "2023-04-05",
+      "validation": {
+        "ok": true,
+        "errors": [],
+        "warnings": []
+      }
+    },
+    {
+      "id": "3070adb5-0897-4436-bae3-831522f5868b",
+      "fullNumber": "Portaria SEGES/ME 938/2022",
+      "number": "938",
+      "year": 2022,
+      "title": "Catálogo Eletrônico de Padronização (Compras Públicas)",
+      "issuer": "SEGES",
+      "officialUrl": "https://www.gov.br/transferegov/pt-br/legislacao/portarias/portaria-seges-me-no-938-de-2-de-fevereiro-de-2022",
+      "contentLength": 8592,
+      "publishDate": "2022-02-03",
+      "validation": {
+        "ok": true,
+        "errors": [],
+        "warnings": []
+      }
+    },
+    {
+      "id": "97a153ea-634e-42f1-b0cc-267badb1eeb3",
+      "fullNumber": "Portaria SEGES 9.097/2022",
+      "number": "9.097",
+      "year": 2022,
+      "title": "PORTARIA SEGES/ME Nº 9.097, DE 3 DE NOVEMBRO DE 2022",
+      "issuer": "SEGES",
+      "officialUrl": "https://www.gov.br/compras/pt-br/acesso-a-informacao/legislacao/portarias/portaria-seges-me-no-9-097-de-3-de-novembro-de-2022",
+      "contentLength": 2667,
+      "publishDate": "2022-11-03",
+      "validation": {
+        "ok": true,
+        "errors": [],
+        "warnings": []
+      }
+    },
+    {
+      "id": "8321e87f-7f6c-4450-975b-a2a9dfd47c13",
+      "fullNumber": "Portaria ME 7.828/2022",
+      "number": "7.828",
+      "year": 2022,
+      "title": "Governança de Contratações e Gastos Federais",
+      "issuer": "SEGES",
+      "officialUrl": "https://www.gov.br/compras/pt-br/acesso-a-informacao/legislacao/portarias/portaria-me-no-7-828-de-30-de-agosto-de-2022",
+      "contentLength": 4791,
+      "publishDate": "2022-08-31",
+      "validation": {
+        "ok": true,
+        "errors": [],
+        "warnings": []
+      }
+    },
+    {
+      "id": "b220e1b2-1273-44a3-a08e-4b70394d8719",
+      "fullNumber": "Portaria SEGES 4.378/2022",
+      "number": "4.378",
+      "year": 2022,
+      "title": "PORTARIA ME Nº 4.378, DE 11 DE MAIO DE 2022",
+      "issuer": "SEGES",
+      "officialUrl": "https://www.gov.br/compras/pt-br/acesso-a-informacao/legislacao/portarias/portaria-me-no-4-378-de-11-de-maio-de-2022",
+      "contentLength": 1594,
+      "publishDate": "2022-05-11",
+      "validation": {
+        "ok": true,
+        "errors": [],
+        "warnings": []
+      }
+    },
+    {
+      "id": "19506c49-becb-45e8-b413-50f02dc63146",
+      "fullNumber": "Portaria TCU 175/2022",
+      "number": "175",
+      "year": 2022,
+      "title": "Portaria-TCU nº 175, de 28 de junho de 2022",
+      "issuer": "TCU",
+      "officialUrl": "https://pesquisa.apps.tcu.gov.br/doc/norma/Portaria/TCU/175/2022/",
+      "contentLength": 15602,
+      "publishDate": "2022-11-30",
+      "validation": {
+        "ok": true,
+        "errors": [],
+        "warnings": []
+      }
+    },
+    {
+      "id": "9d6f592d-08c5-46b7-8c71-85ebc76cd64a",
+      "fullNumber": "Portaria SEGES 10.988/2022",
+      "number": "10.988",
+      "year": 2022,
+      "title": "PORTARIA SEGES/ME Nº 10.988, DE 23 DE DEZEMBRO DE 2022",
+      "issuer": "SEGES",
+      "officialUrl": "https://www.gov.br/compras/pt-br/acesso-a-informacao/legislacao/portarias/portaria-seges-me-no-10-988-de-23-de-dezembro-de-2022",
+      "contentLength": 11273,
+      "publishDate": "2022-12-23",
+      "validation": {
+        "ok": true,
+        "errors": [],
+        "warnings": []
+      }
+    },
+    {
+      "id": "2cd49d0a-973a-4b99-a786-e417af5de987",
+      "fullNumber": "Portaria SEGES/ME 8.678/2021",
+      "number": "8.678",
+      "year": 2021,
+      "title": "Governança das Contratações Públicas Federais",
+      "issuer": "SEGES",
+      "officialUrl": "https://www.gov.br/compras/pt-br/acesso-a-informacao/legislacao/portarias/portaria-seges-me-no-8-678-de-19-de-julho-de-2021",
+      "contentLength": 18743,
+      "publishDate": "2021-07-20",
+      "validation": {
+        "ok": true,
+        "errors": [],
+        "warnings": []
+      }
+    },
+    {
+      "id": "8994b6c1-6216-402e-8b7d-6e4874fefad5",
+      "fullNumber": "Portaria SEGES 8.389/2021",
+      "number": "8.389",
+      "year": 2021,
+      "title": "PORTARIA SEGES/ME Nº 8.389, DE 12 DE JULHO DE 2021",
+      "issuer": "SEGES",
+      "officialUrl": "https://www.gov.br/compras/pt-br/acesso-a-informacao/legislacao/portarias/portaria-seges-me-no-8-389-de-12-de-julho-de-2021",
+      "contentLength": 2608,
+      "publishDate": "2021-07-12",
+      "validation": {
+        "ok": true,
+        "errors": [],
+        "warnings": []
+      }
+    },
+    {
+      "id": "c3a0ef22-f783-4d49-83b3-189e46d7740d",
+      "fullNumber": "Portaria SEGES 4.544/2021",
+      "number": "4.544",
+      "year": 2021,
+      "title": "PORTARIA SEGES/ME Nº 4.544, DE 5 DE MAIO DE 2021",
+      "issuer": "SEGES",
+      "officialUrl": "https://www.gov.br/compras/pt-br/acesso-a-informacao/legislacao/portarias/portaria-seges-me-no-4-544-de-5-de-maio-de-2021",
+      "contentLength": 2609,
+      "publishDate": "2021-05-05",
+      "validation": {
+        "ok": true,
+        "errors": [],
+        "warnings": []
+      }
+    },
+    {
+      "id": "73fb9d2f-df05-4adc-938f-dd4123d51784",
+      "fullNumber": "Portaria SEGES 15.496/2021",
+      "number": "15.496",
+      "year": 2021,
+      "title": "PORTARIA ME Nº 15.496, DE 29 DE DEZEMBRO DE 2021",
+      "issuer": "SEGES",
+      "officialUrl": "https://www.gov.br/pncp/pt-br/pncp/legislacao/portarias-revogadas/portaria-me-no-15-496-de-29-de-dezembro-de-2021-atualizada",
+      "contentLength": 2201,
+      "publishDate": "2021-12-29",
+      "validation": {
+        "ok": true,
+        "errors": [],
+        "warnings": []
+      }
+    },
+    {
+      "id": "a2c6aead-8ac5-4df8-8e92-0651705ef9f7",
+      "fullNumber": "Portaria MPOG 372/2020",
+      "number": "372",
+      "year": 2020,
+      "title": "PORTARIA Nº 372, DE 6 DE NOVEMBRO DE 2020",
+      "issuer": "MPOG",
+      "officialUrl": "https://www.gov.br/compras/pt-br/acesso-a-informacao/legislacao/portarias/portaria-no-372-de-6-de-novembro-de-2020",
+      "contentLength": 1254,
+      "publishDate": "2020-11-06",
+      "validation": {
+        "ok": true,
+        "errors": [],
+        "warnings": []
+      }
+    },
+    {
+      "id": "96ecef52-277f-4491-abec-7c218614b61d",
+      "fullNumber": "Portaria MPOG 232/2020",
+      "number": "232",
+      "year": 2020,
+      "title": "PORTARIA Nº 232, DE 2 DE JUNHO DE 2020",
+      "issuer": "MPOG",
+      "officialUrl": "https://www.gov.br/compras/pt-br/acesso-a-informacao/legislacao/portarias/portaria-no-232-de-2-de-junho-de-2020",
+      "contentLength": 7651,
+      "publishDate": "2020-06-02",
+      "validation": {
+        "ok": true,
+        "errors": [],
+        "warnings": []
+      }
+    },
+    {
+      "id": "61e746da-e11f-492c-83f7-8b37eb898ad5",
+      "fullNumber": "Portaria SEGES 23.888/2020",
+      "number": "23.888",
+      "year": 2020,
+      "title": "PORTARIA SEGES/ME Nº 23.888, DE 20 DE NOVEMBRO DE 2020",
+      "issuer": "SEGES",
+      "officialUrl": "https://www.gov.br/compras/pt-br/acesso-a-informacao/legislacao/portarias/portaria-seges-me-no-23888-de-20-de-novembro-de-2020",
+      "contentLength": 2496,
+      "publishDate": "2020-11-20",
+      "validation": {
+        "ok": true,
+        "errors": [],
+        "warnings": []
+      }
+    },
+    {
+      "id": "e4d97785-6a2f-4ce5-a6c9-628fa6ecd323",
+      "fullNumber": "Portaria SEGES 22.455/2020",
+      "number": "22.455",
+      "year": 2020,
+      "title": "PORTARIA SEGES Nº 22.455, DE 16 DE OUTUBRO DE 2020",
+      "issuer": "SEGES",
+      "officialUrl": "https://www.gov.br/compras/pt-br/acesso-a-informacao/legislacao/portarias/portaria-seges-no-22-455-de-16-de-outubro-de-2020",
+      "contentLength": 910,
+      "publishDate": "2020-10-16",
+      "validation": {
+        "ok": true,
+        "errors": [],
+        "warnings": []
+      }
+    },
+    {
+      "id": "41bc9e28-dd10-434f-8e8d-f2f9372212f0",
+      "fullNumber": "Portaria MPOG 21.262/2020",
+      "number": "21.262",
+      "year": 2020,
+      "title": "Portaria Nº 21.262, DE 23 DE SETEMBRO DE 2020",
+      "issuer": "MPOG",
+      "officialUrl": "https://www.gov.br/compras/pt-br/acesso-a-informacao/legislacao/portarias/portaria-no-21-262-de-23-de-setembro-de-2020",
+      "contentLength": 4363,
+      "publishDate": "2020-09-23",
+      "validation": {
+        "ok": true,
+        "errors": [],
+        "warnings": []
+      }
+    },
+    {
+      "id": "6e53e73c-e0dd-4ef2-806b-83ed57a3e931",
+      "fullNumber": "Portaria MPOG 17.405/2020",
+      "number": "17.405",
+      "year": 2020,
+      "title": "PORTARIA Nº 17.405, DE 20 DE JULHO DE 2020",
+      "issuer": "MPOG",
+      "officialUrl": "https://www.gov.br/compras/pt-br/acesso-a-informacao/legislacao/portarias/portaria-no-17-405-de-20-de-julho-de-2020",
+      "contentLength": 2556,
+      "publishDate": "2020-07-20",
+      "validation": {
+        "ok": true,
+        "errors": [],
+        "warnings": []
+      }
+    },
+    {
+      "id": "5c944164-95f9-4d67-bdb4-40720f28b4e2",
+      "fullNumber": "Portaria MPOG 12.395/2020",
+      "number": "12.395",
+      "year": 2020,
+      "title": "PORTARIA Nº 12.395, DE 15 DE MAIO DE 2020",
+      "issuer": "MPOG",
+      "officialUrl": "https://www.gov.br/compras/pt-br/acesso-a-informacao/legislacao/portarias/portaria-no-12-395-de-15-de-maio-de-2020",
+      "contentLength": 2559,
+      "publishDate": "2020-05-15",
+      "validation": {
+        "ok": true,
+        "errors": [],
+        "warnings": []
+      }
+    },
+    {
+      "id": "4528e825-39d7-431a-9698-a5c7dfed159e",
+      "fullNumber": "Portaria MPOG 406/2019",
+      "number": "406",
+      "year": 2019,
+      "title": "PORTARIA Nº 406, DE 23 DE AGOSTO DE 2019",
+      "issuer": "MPOG",
+      "officialUrl": "https://www.gov.br/compras/pt-br/acesso-a-informacao/legislacao/portarias/portaria-no-406-de-23-de-agosto-de-2019",
+      "contentLength": 8379,
+      "publishDate": "2019-08-23",
+      "validation": {
+        "ok": true,
+        "errors": [],
+        "warnings": []
+      }
+    },
+    {
+      "id": "a58e2023-0291-4a35-aa9c-b4f533c862fc",
+      "fullNumber": "Portaria MPOG 355/2019",
+      "number": "355",
+      "year": 2019,
+      "title": "PORTARIA Nº 355, DE 09 DE AGOSTO DE 2019",
+      "issuer": "MPOG",
+      "officialUrl": "https://www.gov.br/compras/pt-br/acesso-a-informacao/legislacao/portarias/portaria-no-355-de-09-de-agosto-de-2019",
+      "contentLength": 7905,
+      "publishDate": "2019-08-09",
+      "validation": {
+        "ok": true,
+        "errors": [],
+        "warnings": []
+      }
+    },
+    {
+      "id": "bf6c3343-4e21-4860-ae78-0ea629ebc40e",
+      "fullNumber": "Portaria MPOG 13.623/2019",
+      "number": "13.623",
+      "year": 2019,
+      "title": "PORTARIA Nº 13.623, DE 10 DE DEZEMBRO DE 2019",
+      "issuer": "MPOG",
+      "officialUrl": "https://www.gov.br/compras/pt-br/acesso-a-informacao/legislacao/portarias/portaria-no-13-623-de-10-de-dezembro-de-2019",
+      "contentLength": 3609,
+      "publishDate": "2019-12-10",
+      "validation": {
+        "ok": true,
+        "errors": [],
+        "warnings": []
+      }
+    },
+    {
+      "id": "801297bd-0f2f-4a5c-b4ec-e679882005ed",
+      "fullNumber": "Portaria MPOG 6/2018",
+      "number": "6",
+      "year": 2018,
+      "title": "PORTARIA Nº 6, DE 15 DE JANEIRO DE 2018",
+      "issuer": "MPOG",
+      "officialUrl": "https://www.gov.br/compras/pt-br/acesso-a-informacao/legislacao/portarias/portaria-no-6-de-15-de-janeiro-de-2018",
+      "contentLength": 2901,
+      "publishDate": "2018-01-15",
+      "validation": {
+        "ok": true,
+        "errors": [],
+        "warnings": []
+      }
+    },
+    {
+      "id": "e7de79cb-57c0-4e31-82aa-68cbf89fe30c",
+      "fullNumber": "Portaria MPOG 443/2018",
+      "number": "443",
+      "year": 2018,
+      "title": "PORTARIA Nº 443, DE 27 DE DEZEMBRO DE 2018",
+      "issuer": "MPOG",
+      "officialUrl": "https://www.gov.br/compras/pt-br/acesso-a-informacao/legislacao/portarias/portaria-no-443-de-27-de-dezembro-de-2018",
+      "contentLength": 3430,
+      "publishDate": "2018-12-27",
+      "validation": {
+        "ok": true,
+        "errors": [],
+        "warnings": []
+      }
+    },
+    {
+      "id": "7168a044-7784-403f-9979-61e6af0c5cff",
+      "fullNumber": "Portaria MPOG 295/2018",
+      "number": "295",
+      "year": 2018,
+      "title": "PORTARIA Nº 295, de 26 DE SETEMBRO DE 2018",
+      "issuer": "MPOG",
+      "officialUrl": "https://www.gov.br/compras/pt-br/acesso-a-informacao/legislacao/portarias/portaria-no-295-de-26-de-setembro-de-2018",
+      "contentLength": 4027,
+      "publishDate": "2018-09-26",
+      "validation": {
+        "ok": true,
+        "errors": [],
+        "warnings": []
+      }
+    },
+    {
+      "id": "21aaa473-8748-4c2d-acd0-2c8bc246bb6f",
+      "fullNumber": "Portaria Normativa MPOG 2/2018",
+      "number": "2",
+      "year": 2018,
+      "title": "PORTARIA NORMATIVA Nº 2, DE 30 DE JANEIRO DE 2018",
+      "issuer": "MPOG",
+      "officialUrl": "https://www.gov.br/compras/pt-br/acesso-a-informacao/legislacao/portarias/portaria-normativa-no-2-de-30-de-janeiro-de-2018",
+      "contentLength": 1500,
+      "publishDate": "2018-01-30",
+      "validation": {
+        "ok": true,
+        "errors": [],
+        "warnings": []
+      }
+    },
+    {
+      "id": "6495df44-0a8d-4e00-aab4-fa5930703024",
+      "fullNumber": "Portaria MPOG 165/2018",
+      "number": "165",
+      "year": 2018,
+      "title": "PORTARIA Nº 165, DE 18 DE JUNHO DE 2018",
+      "issuer": "MPOG",
+      "officialUrl": "https://www.gov.br/compras/pt-br/acesso-a-informacao/legislacao/portarias/portaria-no-165-de-18-de-junho-de-2018",
+      "contentLength": 9658,
+      "publishDate": "2018-06-18",
+      "validation": {
+        "ok": true,
+        "errors": [],
+        "warnings": []
+      }
+    },
+    {
+      "id": "eb1285c9-da2b-4e3c-845c-5241d78999e2",
+      "fullNumber": "Portaria MPOG 252/2017",
+      "number": "252",
+      "year": 2017,
+      "title": "PORTARIA Nº 252, DE 02 DE AGOSTO DE 2017",
+      "issuer": "MPOG",
+      "officialUrl": "https://www.gov.br/compras/pt-br/acesso-a-informacao/legislacao/portarias/portaria-no-252-de-02-de-agosto-de-2017",
+      "contentLength": 33680,
+      "publishDate": "2017-08-02",
+      "validation": {
+        "ok": true,
+        "errors": [],
+        "warnings": []
+      }
+    },
+    {
+      "id": "8230a56d-02b5-4b51-95d5-3953c0c6dcf4",
+      "fullNumber": "Portaria MPOG 194/2017",
+      "number": "194",
+      "year": 2017,
+      "title": "PORTARIA Nº 194, DE 26 DE JUNHO DE 2017",
+      "issuer": "MPOG",
+      "officialUrl": "https://www.gov.br/compras/pt-br/acesso-a-informacao/legislacao/portarias/portaria-no-194-de-26-de-junho-de-2017",
+      "contentLength": 2610,
+      "publishDate": "2017-06-26",
+      "validation": {
+        "ok": true,
+        "errors": [],
+        "warnings": []
+      }
+    },
+    {
+      "id": "077a6fdc-e73e-4ced-a3dd-27588760a6a5",
+      "fullNumber": "Portaria MPOG 80/2016",
+      "number": "80",
+      "year": 2016,
+      "title": "Portaria SLTI/MP nº 5, de 19 de dezembro de 2002",
+      "issuer": "MPOG",
+      "officialUrl": "https://www.gov.br/compras/pt-br/acesso-a-informacao/legislacao/portarias/portaria-no-80-de-25-de-abril-de-2016",
+      "contentLength": 1061,
+      "publishDate": "2016-01-01",
+      "validation": {
+        "ok": true,
+        "errors": [],
+        "warnings": []
+      }
+    },
+    {
+      "id": "f96a2f6a-059b-45cd-bc19-3810d9284a6d",
+      "fullNumber": "Portaria MPOG 90/2009",
+      "number": "90",
+      "year": 2009,
+      "title": "Portaria nº 90, de 2009",
+      "issuer": "MPOG",
+      "officialUrl": "https://www.gov.br/compras/pt-br/acesso-a-informacao/legislacao/portarias/portaria-no-90-de-24-de-abril-de-2009",
+      "contentLength": 5194,
+      "publishDate": "2009-01-01",
+      "validation": {
+        "ok": true,
+        "errors": [],
+        "warnings": []
+      }
+    },
+    {
+      "id": "2d87a497-a0f5-4c00-8f98-c93075a660b4",
+      "fullNumber": "Portaria MPOG 44/2006",
+      "number": "44",
+      "year": 2006,
+      "title": "Portaria nº 44, de 2006",
+      "issuer": "MPOG",
+      "officialUrl": "https://www.gov.br/compras/pt-br/acesso-a-informacao/legislacao/portarias/portaria-no-44-de-14-de-marco-de-2006",
+      "contentLength": 1606,
+      "publishDate": "2006-01-01",
+      "validation": {
+        "ok": true,
+        "errors": [],
+        "warnings": []
+      }
+    },
+    {
+      "id": "650f08c4-c20e-4d84-84fe-d0334ecaacf2",
+      "fullNumber": "Portaria MPOG 1/2006",
+      "number": "1",
+      "year": 2006,
+      "title": "PORTARIA Nº 1, DE 4 DE JANEIRO DE 2006",
+      "issuer": "MPOG",
+      "officialUrl": "https://www.gov.br/compras/pt-br/acesso-a-informacao/legislacao/portarias/portaria-no-1-de-4-de-janeiro-de-2006",
+      "contentLength": 2300,
+      "publishDate": "2006-01-04",
+      "validation": {
+        "ok": true,
+        "errors": [],
+        "warnings": []
+      }
+    },
+    {
+      "id": "658ec88f-d1c0-4d9b-9613-305067bd2cfb",
+      "fullNumber": "Portaria MPOG 41/2005",
+      "number": "41",
+      "year": 2005,
+      "title": "Portaria nº 41, de 2005",
+      "issuer": "MPOG",
+      "officialUrl": "https://www.gov.br/compras/pt-br/acesso-a-informacao/legislacao/portarias/portaria-no-41-de-4-de-marco-de-2005",
+      "contentLength": 9703,
+      "publishDate": "2005-01-25",
+      "validation": {
+        "ok": true,
+        "errors": [],
+        "warnings": []
+      }
+    },
+    {
+      "id": "bfcbfb18-5b7f-43ff-920a-dcbe83d2250d",
+      "fullNumber": "Portaria MPOG 306/2001",
+      "number": "306",
+      "year": 2001,
+      "title": "Portaria nº 306, de 2001",
+      "issuer": "MPOG",
+      "officialUrl": "https://www.gov.br/compras/pt-br/acesso-a-informacao/legislacao/portarias/portaria-no-306-de-13-de-dezembro-de-2001",
+      "contentLength": 56203,
+      "publishDate": "2001-07-04",
+      "validation": {
+        "ok": true,
+        "errors": [],
+        "warnings": []
+      }
+    }
+  ]
+}

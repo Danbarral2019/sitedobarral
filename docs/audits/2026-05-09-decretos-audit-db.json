@@ -1,0 +1,1021 @@
+{
+  "generatedAt": "2026-05-09T20:39:01.797Z",
+  "summary": {
+    "total": 63,
+    "ok": 62,
+    "errors": 0,
+    "warnings": 1
+  },
+  "entries": [
+    {
+      "id": "d6249c72-9277-4bf5-9f73-69432bf56037",
+      "fullNumber": "Decreto 12.926/2026",
+      "number": "12.926",
+      "year": 2026,
+      "title": "Altera o Decreto nº 12.174/2024 (garantias trabalhistas) e o Decreto nº 9.507/2018 (execução indireta)",
+      "issuer": "Presidência da República",
+      "officialUrl": "https://www.planalto.gov.br/ccivil_03/_ato2023-2026/2026/decreto/d12926.htm",
+      "contentLength": 3980,
+      "publishDate": "2026-04-14",
+      "validation": {
+        "ok": true,
+        "errors": [],
+        "warnings": []
+      }
+    },
+    {
+      "id": "0e770099-b45d-4659-8e0a-6bf5c5ffd773",
+      "fullNumber": "Decreto 12.807/2025",
+      "number": "12.807",
+      "year": 2025,
+      "title": "Atualização de Valores da Lei de Licitações",
+      "issuer": "Presidência da República",
+      "officialUrl": "https://www.planalto.gov.br/ccivil_03/_ato2023-2026/2025/decreto/d12807.htm",
+      "contentLength": 2498,
+      "publishDate": "2025-12-29",
+      "validation": {
+        "ok": true,
+        "errors": [],
+        "warnings": []
+      }
+    },
+    {
+      "id": "69226752-81ac-41f0-869e-c1eda1535a12",
+      "fullNumber": "Decreto 12.785/2025",
+      "number": "12.785",
+      "year": 2025,
+      "title": "Circularidade de Bens na Administração Pública Federal",
+      "issuer": "Presidência da República",
+      "officialUrl": "https://www.planalto.gov.br/ccivil_03/_ato2023-2026/2025/decreto/d12785.htm",
+      "contentLength": 13362,
+      "publishDate": "2025-12-19",
+      "validation": {
+        "ok": true,
+        "errors": [],
+        "warnings": []
+      }
+    },
+    {
+      "id": "e56c0d60-a121-4e10-9fd6-e010f2df5eb4",
+      "fullNumber": "Decreto 12.516/2025",
+      "number": "12.516",
+      "year": 2025,
+      "title": "Mão de Obra Feminina e Equidade em Licitações",
+      "issuer": "Presidência da República",
+      "officialUrl": "https://www.planalto.gov.br/ccivil_03/_ato2023-2026/2025/decreto/d12516.htm",
+      "contentLength": 5327,
+      "publishDate": "2025-06-18",
+      "validation": {
+        "ok": true,
+        "errors": [],
+        "warnings": []
+      }
+    },
+    {
+      "id": "49466691-cba3-4eef-81f0-e0f52311d165",
+      "fullNumber": "Decreto 12.343/2024",
+      "number": "12.343",
+      "year": 2024,
+      "title": "Atualização de Valores da Lei nº 14.133",
+      "issuer": "Presidência da República",
+      "officialUrl": "https://www.planalto.gov.br/ccivil_03/_ato2023-2026/2024/decreto/d12343.htm",
+      "contentLength": 2347,
+      "publishDate": "2024-12-31",
+      "validation": {
+        "ok": true,
+        "errors": [],
+        "warnings": []
+      }
+    },
+    {
+      "id": "3f429c13-08c6-44c8-abd6-c7f7417f8bcc",
+      "fullNumber": "Decreto 12.304/2024",
+      "number": "12.304",
+      "year": 2024,
+      "title": "Programas de Integridade em Contratações Públicas",
+      "issuer": "Presidência da República",
+      "officialUrl": "https://www.planalto.gov.br/ccivil_03/_ato2023-2026/2024/decreto/d12304.htm",
+      "contentLength": 22993,
+      "publishDate": "2024-12-10",
+      "validation": {
+        "ok": true,
+        "errors": [],
+        "warnings": []
+      }
+    },
+    {
+      "id": "2a7f5f45-bffe-437c-87c6-9b56c856e5fa",
+      "fullNumber": "Decreto 12.174/2024",
+      "number": "12.174",
+      "year": 2024,
+      "title": "Garantias trabalhistas em contratos administrativos federais",
+      "issuer": "Presidência da República",
+      "officialUrl": "https://www.planalto.gov.br/ccivil_03/_ato2023-2026/2024/decreto/d12174.htm",
+      "contentLength": 8066,
+      "publishDate": "2024-09-11",
+      "validation": {
+        "ok": true,
+        "errors": [],
+        "warnings": []
+      }
+    },
+    {
+      "id": "59c28570-290f-4a4c-8349-27dc8d66f700",
+      "fullNumber": "Decreto 12.124/2024",
+      "number": "12.124",
+      "year": 2024,
+      "title": "Regulamentação da Lei de Serviços Postais e Comunicação Multimídia",
+      "issuer": "Presidência da República",
+      "officialUrl": "https://www.planalto.gov.br/ccivil_03/_ato2023-2026/2024/decreto/d12124.htm",
+      "contentLength": 7708,
+      "publishDate": "2024-07-30",
+      "validation": {
+        "ok": true,
+        "errors": [],
+        "warnings": []
+      }
+    },
+    {
+      "id": "0b51395a-0cf2-441f-8723-26c49f9a8088",
+      "fullNumber": "Decreto 11.890/2024",
+      "number": "11.890",
+      "year": 2024,
+      "title": "Margem de Preferência e Contratações Sustentáveis",
+      "issuer": "Presidência da República",
+      "officialUrl": "https://www.planalto.gov.br/ccivil_03/_ato2023-2026/2024/decreto/d11890.htm",
+      "contentLength": 19457,
+      "publishDate": "2024-01-23",
+      "validation": {
+        "ok": true,
+        "errors": [],
+        "warnings": []
+      }
+    },
+    {
+      "id": "9a6f124c-16d3-4bef-9677-8453c48c9566",
+      "fullNumber": "Decreto 11.878/2024",
+      "number": "11.878",
+      "year": 2024,
+      "title": "Credenciamento para Contratação na Administração Pública Federal",
+      "issuer": "Presidência da República",
+      "officialUrl": "https://www.planalto.gov.br/ccivil_03/_ato2023-2026/2024/decreto/d11878.htm",
+      "contentLength": 17582,
+      "publishDate": "2024-01-10",
+      "validation": {
+        "ok": true,
+        "errors": [],
+        "warnings": []
+      }
+    },
+    {
+      "id": "5cc71295-1d77-44d6-9360-477a8121f351",
+      "fullNumber": "Decreto 11.871/2023",
+      "number": "11.871",
+      "year": 2023,
+      "title": "DECRETO Nº 11.871, DE 29 DE DEZEMBRO DE 2023",
+      "issuer": "Presidência da República",
+      "officialUrl": "https://www.planalto.gov.br/ccivil_03/_ato2023-2026/2023/decreto/d11871.htm",
+      "contentLength": 2160,
+      "publishDate": "2023-12-29",
+      "validation": {
+        "ok": true,
+        "errors": [],
+        "warnings": []
+      }
+    },
+    {
+      "id": "df2957c7-500a-44b5-a750-d294cf508adb",
+      "fullNumber": "Decreto 11.531/2023",
+      "number": "11.531",
+      "year": 2023,
+      "title": "Transferências da União: Convênios, Contratos e Parcerias",
+      "issuer": "Presidência da República",
+      "officialUrl": "https://www.planalto.gov.br/ccivil_03/_ato2023-2026/2023/decreto/d11531.htm",
+      "contentLength": 32630,
+      "publishDate": "2023-05-17",
+      "validation": {
+        "ok": true,
+        "errors": [],
+        "warnings": []
+      }
+    },
+    {
+      "id": "26448bdd-221d-42c3-8141-35b31d77721d",
+      "fullNumber": "Decreto 11.476/2023",
+      "number": "11.476",
+      "year": 2023,
+      "title": "DECRETO Nº 11.476, DE 6 DE ABRIL DE 2023",
+      "issuer": "Presidência da República",
+      "officialUrl": "http://www.planalto.gov.br/ccivil_03/_ato2023-2026/2023/decreto/d11476.htm",
+      "contentLength": 29278,
+      "publishDate": "2023-04-06",
+      "validation": {
+        "ok": true,
+        "errors": [],
+        "warnings": []
+      }
+    },
+    {
+      "id": "c988e281-bf21-4a92-aa7b-c1f845a99b01",
+      "fullNumber": "Decreto 11.462/2023",
+      "number": "11.462",
+      "year": 2023,
+      "title": "Regulamenta o Sistema de Registro de Preços",
+      "issuer": "Presidência da República",
+      "officialUrl": "https://www.planalto.gov.br/ccivil_03/_ato2023-2026/2023/decreto/d11462.htm",
+      "contentLength": 39985,
+      "publishDate": "2023-03-31",
+      "validation": {
+        "ok": true,
+        "errors": [],
+        "warnings": []
+      }
+    },
+    {
+      "id": "e4a656b2-9c29-431c-a7f9-b904b0fc2a62",
+      "fullNumber": "Decreto 11.461/2023",
+      "number": "11.461",
+      "year": 2023,
+      "title": "Decreto nº 11.461, de 31 de março de 2023",
+      "issuer": "Presidência da República",
+      "officialUrl": "https://www.planalto.gov.br/ccivil_03/_ato2023-2026/2023/decreto/d11461.htm",
+      "contentLength": 18678,
+      "publishDate": "2023-03-31",
+      "validation": {
+        "ok": true,
+        "errors": [],
+        "warnings": []
+      }
+    },
+    {
+      "id": "50e5e396-9b1e-4dd3-a998-b68edbf4aee3",
+      "fullNumber": "Decreto 11.430/2023",
+      "number": "11.430",
+      "year": 2023,
+      "title": "Decreto nº 11.430, de 8 de março de 2023",
+      "issuer": "Presidência da República",
+      "officialUrl": "https://www.planalto.gov.br/ccivil_03/_ato2023-2026/2023/decreto/d11430.htm",
+      "contentLength": 12390,
+      "publishDate": "2023-03-09",
+      "validation": {
+        "ok": true,
+        "errors": [],
+        "warnings": []
+      }
+    },
+    {
+      "id": "fc097cad-244e-4eff-a11f-aaf269abfe5b",
+      "fullNumber": "Decreto 11.345/2023",
+      "number": "11.345",
+      "year": 2023,
+      "title": "DECRETO Nº 11.345, DE 1º DE JANEIRO DE 2023",
+      "issuer": "Presidência da República",
+      "officialUrl": "https://www.planalto.gov.br/ccivil_03/_ato2023-2026/2023/decreto/d11345.htm",
+      "contentLength": 116512,
+      "publishDate": "2023-01-01",
+      "validation": {
+        "ok": true,
+        "errors": [],
+        "warnings": []
+      }
+    },
+    {
+      "id": "f04b43ad-c558-40bb-be8e-aae9c7368e90",
+      "fullNumber": "Decreto 11.317/2022",
+      "number": "11.317",
+      "year": 2022,
+      "title": "DECRETO Nº 11.317, DE 29 DE DEZEMBRO DE 2022",
+      "issuer": "Presidência da República",
+      "officialUrl": "https://www.planalto.gov.br/ccivil_03/_ato2019-2022/2022/decreto/d11317.htm",
+      "contentLength": 2223,
+      "publishDate": "2022-12-29",
+      "validation": {
+        "ok": true,
+        "errors": [],
+        "warnings": []
+      }
+    },
+    {
+      "id": "49a7191e-7396-40db-b3ef-05947e028874",
+      "fullNumber": "Decreto 11.246/2022",
+      "number": "11.246",
+      "year": 2022,
+      "title": "Regulamenta atuação de agentes em Contratações Públicas Federais",
+      "issuer": "Presidência da República",
+      "officialUrl": "https://www.planalto.gov.br/ccivil_03/_ato2019-2022/2022/decreto/d11246.htm",
+      "contentLength": 28470,
+      "publishDate": "2022-10-31",
+      "validation": {
+        "ok": true,
+        "errors": [],
+        "warnings": []
+      }
+    },
+    {
+      "id": "dad8429b-a9c2-404d-8b86-030b39cc4250",
+      "fullNumber": "Decreto 10.947/2022",
+      "number": "10.947",
+      "year": 2022,
+      "title": "Regulamenta o plano de contratações anual",
+      "issuer": "Presidência da República",
+      "officialUrl": "https://www.planalto.gov.br/ccivil_03/_ato2019-2022/2022/decreto/d10947.htm",
+      "contentLength": 15488,
+      "publishDate": "2022-01-26",
+      "validation": {
+        "ok": true,
+        "errors": [],
+        "warnings": []
+      }
+    },
+    {
+      "id": "abed5ab1-db68-4a28-a358-468632a986c3",
+      "fullNumber": "Decreto 10.929/2022",
+      "number": "10.929",
+      "year": 2022,
+      "title": "Consultas Públicas para Regulamentação da Nova Lei de Licitações",
+      "issuer": "Presidência da República",
+      "officialUrl": "https://www.planalto.gov.br/ccivil_03/_ato2019-2022/2022/decreto/d10929.htm",
+      "contentLength": 1676,
+      "publishDate": "2022-01-07",
+      "validation": {
+        "ok": true,
+        "errors": [],
+        "warnings": []
+      }
+    },
+    {
+      "id": "6aa775bf-3c5a-41af-b853-d90c124961ae",
+      "fullNumber": "Decreto 10.899/2021",
+      "number": "10.899",
+      "year": 2021,
+      "title": "Cadastro Integrado de Projetos de Investimento",
+      "issuer": "Presidência da República",
+      "officialUrl": "https://www.planalto.gov.br/ccivil_03/_ato2019-2022/2021/decreto/d10899.htm",
+      "contentLength": 2217,
+      "publishDate": "2021-12-17",
+      "validation": {
+        "ok": true,
+        "errors": [],
+        "warnings": []
+      }
+    },
+    {
+      "id": "18bcf78a-e1cb-46e9-a7a0-dc24e635d6cc",
+      "fullNumber": "Decreto 10.818/2021",
+      "number": "10.818",
+      "year": 2021,
+      "title": "Regulamenta a aquisição de bens de luxo",
+      "issuer": "Presidência da República",
+      "officialUrl": "https://www.planalto.gov.br/ccivil_03/_ato2019-2022/2021/decreto/d10818.htm",
+      "contentLength": 4571,
+      "publishDate": "2021-09-28",
+      "validation": {
+        "ok": true,
+        "errors": [],
+        "warnings": []
+      }
+    },
+    {
+      "id": "27a6a439-18d5-4b61-a68d-95f904078b82",
+      "fullNumber": "Decreto 10.764/2021",
+      "number": "10.764",
+      "year": 2021,
+      "title": "Dispõe sobre o Comitê Gestor da Rede Nacional de Contratações Públicas",
+      "issuer": "Presidência da República",
+      "officialUrl": "https://www.planalto.gov.br/ccivil_03/_ato2019-2022/2021/decreto/d10764.htm",
+      "contentLength": 4295,
+      "publishDate": "2021-08-10",
+      "validation": {
+        "ok": true,
+        "errors": [],
+        "warnings": []
+      }
+    },
+    {
+      "id": "ee293927-8bd9-4d0a-84f5-7a2cbfc52e02",
+      "fullNumber": "Decreto 10.667/2021",
+      "number": "10.667",
+      "year": 2021,
+      "title": "DECRETO Nº 10.667, DE 5 DE ABRIL DE 2021",
+      "issuer": "Presidência da República",
+      "officialUrl": "http://www.planalto.gov.br/ccivil_03/_ato2019-2022/2021/decreto/d10667.htm",
+      "contentLength": 5586,
+      "publishDate": "2021-04-05",
+      "validation": {
+        "ok": true,
+        "errors": [],
+        "warnings": []
+      }
+    },
+    {
+      "id": "7aa371df-09f5-428f-ab0d-c1dd8936567e",
+      "fullNumber": "Decreto 10.554/2020",
+      "number": "10.554",
+      "year": 2020,
+      "title": "DECRETO Nº 10.554, DE 26 DE NOVEMBRO DE 2020",
+      "issuer": "Presidência da República",
+      "officialUrl": "http://www.planalto.gov.br/ccivil_03/_ato2019-2022/2020/decreto/d10554.htm",
+      "contentLength": 22534,
+      "publishDate": "2020-11-26",
+      "validation": {
+        "ok": true,
+        "errors": [],
+        "warnings": []
+      }
+    },
+    {
+      "id": "6d2020cf-4b0c-41b4-8107-baacf89dcf42",
+      "fullNumber": "Decreto 10.496/2020",
+      "number": "10.496",
+      "year": 2020,
+      "title": "Cadastro Integrado de Projetos de Investimento",
+      "issuer": "Presidência da República",
+      "officialUrl": "https://www.planalto.gov.br/ccivil_03/_ato2019-2022/2020/decreto/d10496.htm",
+      "contentLength": 8589,
+      "publishDate": "2020-09-29",
+      "validation": {
+        "ok": true,
+        "errors": [],
+        "warnings": []
+      }
+    },
+    {
+      "id": "0a3dc592-6e0a-4cf8-991f-741acbd303d3",
+      "fullNumber": "Decreto 10.426/2020",
+      "number": "10.426",
+      "year": 2020,
+      "title": "DECRETO Nº 10.426, DE 16 DE JULHO DE 2020",
+      "issuer": "Presidência da República",
+      "officialUrl": "http://www.planalto.gov.br/ccivil_03/_ato2019-2022/2020/decreto/d10426.htm",
+      "contentLength": 33526,
+      "publishDate": "2020-07-16",
+      "validation": {
+        "ok": true,
+        "errors": [],
+        "warnings": []
+      }
+    },
+    {
+      "id": "1fcc5075-040d-45e0-845c-cc16bc7443d9",
+      "fullNumber": "Decreto 10.340/2020",
+      "number": "10.340",
+      "year": 2020,
+      "title": "DECRETO Nº 10.340, DE 6 DE MAIO DE 2020",
+      "issuer": "Presidência da República",
+      "officialUrl": "http://www.planalto.gov.br/ccivil_03/_ato2019-2022/2020/decreto/d10340.htm",
+      "contentLength": 3473,
+      "publishDate": "2020-05-06",
+      "validation": {
+        "ok": true,
+        "errors": [],
+        "warnings": []
+      }
+    },
+    {
+      "id": "c19ac076-730a-4c84-a45e-b0e98fd56c48",
+      "fullNumber": "Decreto 10.314/2020",
+      "number": "10.314",
+      "year": 2020,
+      "title": "DECRETO Nº 10.314, DE 6 DE ABRIL DE 2020",
+      "issuer": "Presidência da República",
+      "officialUrl": "http://www.planalto.gov.br/ccivil_03/_ato2019-2022/2020/decreto/d10314.htm",
+      "contentLength": 9994,
+      "publishDate": "2020-04-06",
+      "validation": {
+        "ok": true,
+        "errors": [],
+        "warnings": []
+      }
+    },
+    {
+      "id": "b0234d40-2799-48d3-827a-f8c1e5a0ffe9",
+      "fullNumber": "Decreto 10.309/2020",
+      "number": "10.309",
+      "year": 2020,
+      "title": "DECRETO Nº 10.309, DE 2 DE ABRIL DE 2020",
+      "issuer": "Presidência da República",
+      "officialUrl": "http://www.planalto.gov.br/ccivil_03/_ato2019-2022/2020/decreto/d10309.htm",
+      "contentLength": 1048,
+      "publishDate": "2020-04-02",
+      "validation": {
+        "ok": true,
+        "errors": [],
+        "warnings": []
+      }
+    },
+    {
+      "id": "0d4e2ab3-42bf-4efc-a9db-619c101a0617",
+      "fullNumber": "Decreto 10.278/2020",
+      "number": "10.278",
+      "year": 2020,
+      "title": "Decreto nº 10.278, de 2020",
+      "issuer": "Presidência da República",
+      "officialUrl": "http://www.planalto.gov.br/ccivil_03/_ato2019-2022/2020/decreto/d10278.htm",
+      "contentLength": 9893,
+      "publishDate": "2020-01-01",
+      "validation": {
+        "ok": true,
+        "errors": [],
+        "warnings": []
+      }
+    },
+    {
+      "id": "321f2bde-246f-4187-9d14-3fce80fdf493",
+      "fullNumber": "Decreto 10.273/2020",
+      "number": "10.273",
+      "year": 2020,
+      "title": "Decreto nº 8.538, de 6 de outubro de 2015",
+      "issuer": "Presidência da República",
+      "officialUrl": "http://www.planalto.gov.br/ccivil_03/_ato2019-2022/2020/decreto/d10273.htm",
+      "contentLength": 2999,
+      "publishDate": "2020-01-01",
+      "validation": {
+        "ok": true,
+        "errors": [],
+        "warnings": []
+      }
+    },
+    {
+      "id": "6ad262a3-e59f-48e8-b833-170607c243e0",
+      "fullNumber": "Decreto 9.764/2019",
+      "number": "9.764",
+      "year": 2019,
+      "title": "DECRETO Nº 9.764, DE 11 DE ABRIL DE 2019",
+      "issuer": "Presidência da República",
+      "officialUrl": "http://www.planalto.gov.br/ccivil_03/_ato2019-2022/2019/decreto/d9764.htm",
+      "contentLength": 34669,
+      "publishDate": "2019-04-11",
+      "validation": {
+        "ok": true,
+        "errors": [],
+        "warnings": []
+      }
+    },
+    {
+      "id": "84bb6525-86a1-4e4e-b92c-8015294a21eb",
+      "fullNumber": "Decreto 9.745/2019",
+      "number": "9.745",
+      "year": 2019,
+      "title": "Decreto nº 9.745, de 8 de abril de 2019",
+      "issuer": "Presidência da República",
+      "officialUrl": "https://www.planalto.gov.br/ccivil_03/_ato2019-2022/2019/decreto/d9745.htm",
+      "contentLength": 881,
+      "publishDate": "2019-04-08",
+      "validation": {
+        "ok": true,
+        "errors": [],
+        "warnings": [
+          "Conteúdo curto (881 chars). Verificar se está completo."
+        ]
+      }
+    },
+    {
+      "id": "acd0eb61-9aa3-4ee5-8e72-fc9b45c635d4",
+      "fullNumber": "Decreto 10.193/2019",
+      "number": "10.193",
+      "year": 2019,
+      "title": "Governança para Contratações de TIC",
+      "issuer": "Presidência da República",
+      "officialUrl": "https://www.planalto.gov.br/ccivil_03/_ato2019-2022/2019/decreto/d10193.htm",
+      "contentLength": 7040,
+      "publishDate": "2019-12-27",
+      "validation": {
+        "ok": true,
+        "errors": [],
+        "warnings": []
+      }
+    },
+    {
+      "id": "d02ee305-ea27-42bb-a490-e5eea95920e7",
+      "fullNumber": "Decreto 10.183/2019",
+      "number": "10.183",
+      "year": 2019,
+      "title": "DECRETO Nº 10.183, DE 20 DE DEZEMBRO DE 2019",
+      "issuer": "Presidência da República",
+      "officialUrl": "http://www.planalto.gov.br/ccivil_03/_ato2019-2022/2019/decreto/d10183.htm",
+      "contentLength": 1725,
+      "publishDate": "2019-12-20",
+      "validation": {
+        "ok": true,
+        "errors": [],
+        "warnings": []
+      }
+    },
+    {
+      "id": "74d7b817-c4b7-45b9-9d3a-6851dffb5a35",
+      "fullNumber": "Decreto 10.132/2019",
+      "number": "10.132",
+      "year": 2019,
+      "title": "DECRETO Nº 10.132, DE 25 DE NOVEMBRO DE 2019",
+      "issuer": "Presidência da República",
+      "officialUrl": "http://www.planalto.gov.br/ccivil_03/_ato2019-2022/2019/decreto/d10132.htm",
+      "contentLength": 3419,
+      "publishDate": "2019-11-25",
+      "validation": {
+        "ok": true,
+        "errors": [],
+        "warnings": []
+      }
+    },
+    {
+      "id": "81bab364-675a-4f03-bc87-3c2226c86113",
+      "fullNumber": "Decreto 10.024/2019",
+      "number": "10.024",
+      "year": 2019,
+      "title": "DECRETO Nº 10.024, DE 20 DE SETEMBRO DE 2019",
+      "issuer": "Presidência da República",
+      "officialUrl": "https://www.planalto.gov.br/ccivil_03/_ato2019-2022/2019/decreto/d10024.htm",
+      "contentLength": 46424,
+      "publishDate": "2019-09-20",
+      "validation": {
+        "ok": true,
+        "errors": [],
+        "warnings": []
+      }
+    },
+    {
+      "id": "4022ec4b-d773-415a-b6bd-995df22efe6f",
+      "fullNumber": "Decreto 9.507/2018",
+      "number": "9.507",
+      "year": 2018,
+      "title": "DECRETO Nº 9.507, DE 21 DE SETEMBRO DE 2018",
+      "issuer": "Presidência da República",
+      "officialUrl": "http://www.planalto.gov.br/ccivil_03/_ato2015-2018/2018/decreto/d9507.htm",
+      "contentLength": 15269,
+      "publishDate": "2018-09-21",
+      "validation": {
+        "ok": true,
+        "errors": [],
+        "warnings": []
+      }
+    },
+    {
+      "id": "af091471-2f8d-4dd0-bab3-ca96b29316e5",
+      "fullNumber": "Decreto 9.488/2018",
+      "number": "9.488",
+      "year": 2018,
+      "title": "DECRETO Nº 9.488, DE 30 DE AGOSTO DE 2018",
+      "issuer": "Presidência da República",
+      "officialUrl": "http://www.planalto.gov.br/ccivil_03/_ato2015-2018/2018/decreto/d9488.htm",
+      "contentLength": 6184,
+      "publishDate": "2018-08-30",
+      "validation": {
+        "ok": true,
+        "errors": [],
+        "warnings": []
+      }
+    },
+    {
+      "id": "ce1acdc1-6e94-40be-a81e-ab8a10cb0ade",
+      "fullNumber": "Decreto 9.412/2018",
+      "number": "9.412",
+      "year": 2018,
+      "title": "DECRETO Nº 9.412, DE 18 DE JUNHO DE 2018",
+      "issuer": "Presidência da República",
+      "officialUrl": "http://www.planalto.gov.br/ccivil_03/_ato2015-2018/2018/decreto/d9412.htm",
+      "contentLength": 1530,
+      "publishDate": "2018-06-18",
+      "validation": {
+        "ok": true,
+        "errors": [],
+        "warnings": []
+      }
+    },
+    {
+      "id": "4349cb43-1600-49e6-8b54-e0be6e3e43ef",
+      "fullNumber": "Decreto 9.373/2018",
+      "number": "9.373",
+      "year": 2018,
+      "title": "DECRETO Nº 9.373, DE 11 DE MAIO DE 2018",
+      "issuer": "Presidência da República",
+      "officialUrl": "https://www.planalto.gov.br/ccivil_03/_ato2015-2018/2018/decreto/d9373.htm",
+      "contentLength": 15484,
+      "publishDate": "2018-05-11",
+      "validation": {
+        "ok": true,
+        "errors": [],
+        "warnings": []
+      }
+    },
+    {
+      "id": "c543acc2-ab07-4480-bf3d-2bb6bfcc35a6",
+      "fullNumber": "Decreto 9.287/2018",
+      "number": "9.287",
+      "year": 2018,
+      "title": "DECRETO Nº 9.287, DE 15 DE FEVEREIRO DE 2018",
+      "issuer": "Presidência da República",
+      "officialUrl": "http://www.planalto.gov.br/ccivil_03/_ato2015-2018/2018/decreto/d9287.htm",
+      "contentLength": 8363,
+      "publishDate": "2018-02-15",
+      "validation": {
+        "ok": true,
+        "errors": [],
+        "warnings": []
+      }
+    },
+    {
+      "id": "62fa2575-0b01-4ed2-ac91-71e0fd53d137",
+      "fullNumber": "Decreto 9.046/2017",
+      "number": "9.046",
+      "year": 2017,
+      "title": "DECRETO Nº 9.046, DE 5 DE MAIO DE 2017",
+      "issuer": "Presidência da República",
+      "officialUrl": "http://www.planalto.gov.br/ccivil_03/_ato2015-2018/2017/decreto/d9046.htm",
+      "contentLength": 3653,
+      "publishDate": "2017-05-05",
+      "validation": {
+        "ok": true,
+        "errors": [],
+        "warnings": []
+      }
+    },
+    {
+      "id": "b8c5aec5-55d6-4eb9-860f-d8fd2488ffbb",
+      "fullNumber": "Decreto 8.539/2015",
+      "number": "8.539",
+      "year": 2015,
+      "title": "DECRETO Nº 8.539, DE 8 DE OUTUBRO DE 2015",
+      "issuer": "Presidência da República",
+      "officialUrl": "http://www.planalto.gov.br/ccivil_03/_ato2015-2018/2015/decreto/d8539.htm",
+      "contentLength": 12505,
+      "publishDate": "2015-10-08",
+      "validation": {
+        "ok": true,
+        "errors": [],
+        "warnings": []
+      }
+    },
+    {
+      "id": "d21edbaa-53df-4a53-8a1d-6b4d058d5a44",
+      "fullNumber": "Decreto 8.535/2015",
+      "number": "8.535",
+      "year": 2015,
+      "title": "DECRETO Nº 8.535, DE 1º DE OUTUBRO DE 2015",
+      "issuer": "Presidência da República",
+      "officialUrl": "http://www.planalto.gov.br/ccivil_03/_ato2015-2018/2015/decreto/d8535.htm",
+      "contentLength": 3698,
+      "publishDate": "2015-10-01",
+      "validation": {
+        "ok": true,
+        "errors": [],
+        "warnings": []
+      }
+    },
+    {
+      "id": "11dc7245-c231-4081-927f-b0df87d38770",
+      "fullNumber": "Decreto 8.241/2014",
+      "number": "8.241",
+      "year": 2014,
+      "title": "DECRETO Nº 8.241, DE 21 DE MAIO DE 2014",
+      "issuer": "Presidência da República",
+      "officialUrl": "http://www.planalto.gov.br/ccivil_03/_ato2011-2014/2014/decreto/d8241.htm",
+      "contentLength": 27413,
+      "publishDate": "2014-05-21",
+      "validation": {
+        "ok": true,
+        "errors": [],
+        "warnings": []
+      }
+    },
+    {
+      "id": "b45acb4f-0806-4e78-bf09-f0410de257bb",
+      "fullNumber": "Decreto 7.983/2013",
+      "number": "7.983",
+      "year": 2013,
+      "title": "DECRETO Nº 7.983, DE 8 DE ABRIL DE 2013",
+      "issuer": "Presidência da República",
+      "officialUrl": "http://www.planalto.gov.br/ccivil_03/_ato2011-2014/2013/decreto/d7983.htm",
+      "contentLength": 21401,
+      "publishDate": "2013-04-08",
+      "validation": {
+        "ok": true,
+        "errors": [],
+        "warnings": []
+      }
+    },
+    {
+      "id": "3c857b71-0a74-4894-a643-98284cb9b88c",
+      "fullNumber": "Decreto 7.930/2013",
+      "number": "7.930",
+      "year": 2013,
+      "title": "DECRETO Nº 7.930, DE 18 DE FEVEREIRO DE 2013",
+      "issuer": "Presidência da República",
+      "officialUrl": "https://www.planalto.gov.br/ccivil_03/_ato2011-2014/2013/decreto/d7930.htm",
+      "contentLength": 1243,
+      "publishDate": "2013-02-18",
+      "validation": {
+        "ok": true,
+        "errors": [],
+        "warnings": []
+      }
+    },
+    {
+      "id": "a4496762-cfc4-4943-8c62-126a63939d65",
+      "fullNumber": "Decreto 7.892/2013",
+      "number": "7.892",
+      "year": 2013,
+      "title": "DECRETO Nº 7.892, DE 23 DE JANEIRO DE 2013",
+      "issuer": "Presidência da República",
+      "officialUrl": "http://www.planalto.gov.br/ccivil_03/_ato2011-2014/2013/decreto/d7892.htm",
+      "contentLength": 33074,
+      "publishDate": "2013-01-23",
+      "validation": {
+        "ok": true,
+        "errors": [],
+        "warnings": []
+      }
+    },
+    {
+      "id": "5af8430d-6a03-4448-9c4e-182eae5b2709",
+      "fullNumber": "Decreto 7.746/2012",
+      "number": "7.746",
+      "year": 2012,
+      "title": "DECRETO Nº 7.746, DE 5 DE JUNHO DE 2012",
+      "issuer": "Presidência da República",
+      "officialUrl": "http://www.planalto.gov.br/ccivil_03/_ato2011-2014/2012/decreto/d7746.htm",
+      "contentLength": 16568,
+      "publishDate": "2012-06-05",
+      "validation": {
+        "ok": true,
+        "errors": [],
+        "warnings": []
+      }
+    },
+    {
+      "id": "edcfee39-ddc2-4169-a630-422020ea6d1a",
+      "fullNumber": "Decreto 7.581/2011",
+      "number": "7.581",
+      "year": 2011,
+      "title": "DECRETO Nº 7.581, DE 11 DE OUTUBRO DE 2011.",
+      "issuer": "Presidência da República",
+      "officialUrl": "http://www.planalto.gov.br/ccivil_03/_ato2011-2014/2011/decreto/d7581.htm",
+      "contentLength": 88882,
+      "publishDate": "2011-10-11",
+      "validation": {
+        "ok": true,
+        "errors": [],
+        "warnings": []
+      }
+    },
+    {
+      "id": "30cbd4a0-3381-46db-a553-e747df002e8c",
+      "fullNumber": "Decreto 7.546/2011",
+      "number": "7.546",
+      "year": 2011,
+      "title": "DECRETO Nº 7.546, DE 2 DE AGOSTO DE 2011.",
+      "issuer": "Presidência da República",
+      "officialUrl": "https://www.planalto.gov.br/ccivil_03/_ato2011-2014/2011/decreto/d7546.htm",
+      "contentLength": 15116,
+      "publishDate": "2011-08-02",
+      "validation": {
+        "ok": true,
+        "errors": [],
+        "warnings": []
+      }
+    },
+    {
+      "id": "a16868d2-b8f4-483b-8f2e-02a56a2167e0",
+      "fullNumber": "Decreto 7.404/2010",
+      "number": "7.404",
+      "year": 2010,
+      "title": "DECRETO Nº\n7.404,\nDE 23 DE DEZEMBRO DE 2010.",
+      "issuer": "Presidência da República",
+      "officialUrl": "http://www.planalto.gov.br/ccivil_03/_ato2007-2010/2010/decreto/d7404.htm",
+      "contentLength": 67235,
+      "publishDate": "2010-12-23",
+      "validation": {
+        "ok": true,
+        "errors": [],
+        "warnings": []
+      }
+    },
+    {
+      "id": "2ba0b2d6-4f5b-4b0d-94f2-472c211617ec",
+      "fullNumber": "Decreto 7.174/2010",
+      "number": "7.174",
+      "year": 2010,
+      "title": "Contratação de Bens e Serviços de Informática",
+      "issuer": "Presidência da República",
+      "officialUrl": "https://www.planalto.gov.br/ccivil_03/_ato2007-2010/2010/decreto/d7174.htm",
+      "contentLength": 12736,
+      "publishDate": "2010-05-12",
+      "validation": {
+        "ok": true,
+        "errors": [],
+        "warnings": []
+      }
+    },
+    {
+      "id": "5d3246eb-9b75-4a3d-bc6d-8230cf564424",
+      "fullNumber": "Decreto 5.906/2006",
+      "number": "5.906",
+      "year": 2006,
+      "title": "DECRETO Nº 5.906, DE 26 DE SETEMBRO DE 2006.",
+      "issuer": "Presidência da República",
+      "officialUrl": "https://www.planalto.gov.br/ccivil_03/_ato2004-2006/2006/decreto/d5906.htm",
+      "contentLength": 91225,
+      "publishDate": "2006-09-26",
+      "validation": {
+        "ok": true,
+        "errors": [],
+        "warnings": []
+      }
+    },
+    {
+      "id": "b107435f-1430-4c35-9556-d787ed531a50",
+      "fullNumber": "Decreto 3.555/2000",
+      "number": "3.555",
+      "year": 2000,
+      "title": "Decreto nº 3.555, de 8 de agosto de 2000 — Regulamento do Pregão (revogado)",
+      "issuer": "Presidência da República",
+      "officialUrl": "https://www.planalto.gov.br/ccivil_03/decreto/d3555.htm",
+      "contentLength": 29511,
+      "publishDate": "2000-08-08",
+      "validation": {
+        "ok": true,
+        "errors": [],
+        "warnings": []
+      }
+    },
+    {
+      "id": "2a7eadf4-fdbb-45e5-a90a-43b1b6e2b4bb",
+      "fullNumber": "Decreto 2.271/1997",
+      "number": "2.271",
+      "year": 1997,
+      "title": "DECRETO Nº 2.271, DE 7 DE JULHO DE",
+      "issuer": "Presidência da República",
+      "officialUrl": "https://www.planalto.gov.br/ccivil_03/decreto/d2271.htm",
+      "contentLength": 4989,
+      "publishDate": "1997-07-07",
+      "validation": {
+        "ok": true,
+        "errors": [],
+        "warnings": []
+      }
+    },
+    {
+      "id": "ee4af33a-c74a-4cc8-8ad8-6e7db3677053",
+      "fullNumber": "Decreto 1.819/1996",
+      "number": "1.819",
+      "year": 1996,
+      "title": "DECRETO Nº 1.819, DE 16 DE FEVEREIRO DE",
+      "issuer": "Presidência da República",
+      "officialUrl": "https://www.planalto.gov.br/ccivil_03/decreto/1996/d1819.htm",
+      "contentLength": 2814,
+      "publishDate": "1996-02-16",
+      "validation": {
+        "ok": true,
+        "errors": [],
+        "warnings": []
+      }
+    },
+    {
+      "id": "95dc2805-cb57-4614-bdb1-f9be61423090",
+      "fullNumber": "Decreto 1.094/1994",
+      "number": "1.094",
+      "year": 1994,
+      "title": "Decreto nº 1.094, de 1994",
+      "issuer": "Presidência da República",
+      "officialUrl": "http://www.planalto.gov.br/ccivil_03/decreto/antigos/d1094.htm",
+      "contentLength": 6898,
+      "publishDate": "1994-01-01",
+      "validation": {
+        "ok": true,
+        "errors": [],
+        "warnings": []
+      }
+    },
+    {
+      "id": "a85abd26-2c13-4a3e-b419-b3c0618fa66c",
+      "fullNumber": "Decreto-Lei 200/1967",
+      "number": "200",
+      "year": 1967,
+      "title": "Decreto-Lei 200/1967, de 25 de fevereiro de 1967 (Reforma Administrativa)",
+      "issuer": "Presidência da República",
+      "officialUrl": "https://www.planalto.gov.br/ccivil_03/decreto-lei/del0200.htm",
+      "contentLength": 155781,
+      "publishDate": "1967-02-25",
+      "validation": {
+        "ok": true,
+        "errors": [],
+        "warnings": []
+      }
+    },
+    {
+      "id": "2017f32f-492d-466b-b46e-f4ef7ebebd1b",
+      "fullNumber": "Decreto-Lei 4.657/1942",
+      "number": "4.657",
+      "year": 1942,
+      "title": "Decreto-Lei 4.657/1942, de 4 de setembro de 1942 (LINDB — Lei de Introdução às Normas)",
+      "issuer": "Presidência da República",
+      "officialUrl": "https://www.planalto.gov.br/ccivil_03/decreto-lei/del4657.htm",
+      "contentLength": 19874,
+      "publishDate": "1942-09-04",
+      "validation": {
+        "ok": true,
+        "errors": [],
+        "warnings": []
+      }
+    }
+  ]
+}
