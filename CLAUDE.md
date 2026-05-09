@@ -4,18 +4,19 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## ⚠️ CRITICAL REMINDERS
 
-1. **Working Directory:** SEMPRE rodar comandos de `/Users/danba/Site do Barral/sitedobarral/`
+1. **Working Directory:** SEMPRE rodar comandos de `C:\Users\User\projetos\sitedobarral\` (Windows desktop, desde 2026-05-08). Path antigo `/Users/danba/Site do Barral/sitedobarral/` (MacBook) está obsoleto.
 2. **Course IDs:** Database usa IDs numéricos (`'1'`, `'2'`), URLs usam slugs. Ver `COURSE_IDS_REFERENCE.md`
 3. **Documents:** NUNCA acessar `course.restrictedDocuments` - buscar via `/api/documents`
 4. **React Hooks:** Todos hooks ANTES de early returns
 5. **Prisma Engine:** Se der erro, matar Node.js e rodar `npx prisma generate`
 6. **Lei 14.133 Data:** 195 artigos (193 editados MANUALMENTE + Art. 184-A + Art. 194) - SEMPRE executar `node scripts/backup-lei-14133.js` antes de mudanças no model LeiArticle
+7. **Pagamentos:** Stack atual é **Stripe** (cartão + PIX), não Mercado Pago. A rota mantém o path `/api/pagamento/*` mas o backend é `lib/stripe.ts`. MP foi removido na branch `stripe-migration` (mergeada na main em abr/2026).
 
 ## Project Overview
 
 Site profissional do Prof. Daniel Barral especializado em Direito Administrativo, Licitações e Contratos. Repositório de materiais jurídicos com acesso público e área restrita via QR code.
 
-**Tech Stack:** Next.js 15.5.9 (App Router) • React 19.1.2 • TypeScript 5 • Prisma ORM 7.4 (PrismaNeon) • PostgreSQL (Neon) • Tailwind CSS 4 • Radix UI • JWT Auth • Mercado Pago (PIX + Cartão) • Resend Email • Sentry • Playwright/PostgreSQL/GitHub/Gemini MCP
+**Tech Stack:** Next.js 15.5.15 (App Router) • React 19.1.2 • TypeScript 5 • Prisma ORM 7.4 (PrismaNeon) • PostgreSQL (Neon) + pgvector • Tailwind CSS 4 • Radix UI • JWT Auth • **Stripe** (cartão + PIX) • Resend Email • Sentry • Upstash Redis • IA multi-provider (`lib/ai/` — Anthropic Claude 4.5/4.6 + Google Gemini 2.5 + Cohere) • Playwright/PostgreSQL/GitHub/Gemini MCP
 
 ## Quick Commands
 
@@ -72,31 +73,47 @@ export DATABASE_URL="<your-db-url>" && npx tsx scripts/fix-csv-tags.ts  # Conver
 - `scripts/` - Admin/import/scraping scripts
 - `lib/email-templates/` - Templates HTML de newsletter
 
-**Key Models (26 total):**
+**Key Models (70 total — fonte de verdade: `prisma/schema.prisma`):**
 
+Auth & Acesso:
+- `User`, `Enrollment` (1 mês trial via QR, ou gerenciado por Subscription), `QRCode`, `AccessLog`, `Favorite`
+- `Subscription` (Stripe — planos basico/premium, status, período, paymentMethod), `ProcessedWebhookEvent`
 
-- `User` - Admin/student accounts (+ `mercadopagoPayerId`)
-- `Enrollment` - Course access (1 mês trial via QR, ou gerenciado por Subscription)
-- `Subscription` - Assinaturas Mercado Pago (planos basico/premium, status, período, paymentMethod)
-- `TribunalDecision` - Decisões de TCEs estaduais + STJ/STF (scraping)
-- `TribunalDecisionChunk` - Embeddings para busca semântica de decisões
-- `ScraperHealthLog` - Health monitoring dos scrapers
-- `QRCode` - Enrollment codes
-- `Document` - PDFs/links/videos with versioning
-- `DocumentVersion` - Change tracking
-- `BlogPost`, `Publication`, `Testimonial`, `ContactForm`
-- `FAQ`, `FAQFeedback`, `GlossaryTerm`, `LegislativeAct`
-- `CourseVideo`, `SocialMediaPost`, `RecommendedSite`, `SiteToCourse`
-- `AccessLog` - Audit trail
-- `NewsletterSubscriber`, `NewsletterSend`, `Favorite`, `ArticleQuestion`
-- `DocumentAnalysis`, `DOUStagingDocument`, `DOUSavedFilter`
+Conteúdo & Documentos:
+- `Document` (+ `DocumentMetaTcu`, `DocumentMetaDou`, `DocumentNotes`, `DocumentChunk` para embeddings, `DocumentVersion`)
+- `BlogPost`, `Publication`, `Testimonial`, `ContactForm`, `RecommendedSite`, `SiteToCourse`, `SocialMediaPost`
+- `CourseVideo`, `FAQ`, `FAQFeedback`, `GlossaryTerm`, `ArticleQuestion`, `DocumentAnalysis`
+- `DOUStagingDocument`, `DOUSavedFilter`
+- `LegislativeAct` (+ `LegislativeActChunk`, `LegislativeActRelation`)
+- `LeiArticle` (Lei 14.133, 195 artigos), `LeiArticleEmbedding`, `LeiArticleNote`, `LeiArticleCrossRef`, `LeiArticleSuggestedReading`
+
+LMS (Cursos, gamification, certificados):
+- `Module`, `Lesson` (+ `LessonDocument`, `LessonVideo`, `LessonProgress`, `LessonComment`)
+- `Quiz`, `QuizQuestion`, `QuizAttempt`
+- `Certificate`, `Badge`, `UserStreak`, `CourseStatus`
+
+Jurisprudência & Scraping:
+- `TribunalDecision` (TCEs + STJ/STF), `TribunalDecisionChunk`, `TribunalHighlight`, `TcuHighlight`
+- `ScraperHealthLog`
+
+Clipping & Newsletter:
+- `DailyClippingSend`, `ClippingItemExtract`
+- `NewsletterSubscriber`, `NewsletterSend`, `PushSubscription`
+
+Planejamento (módulo `app/area-restrita/planejamento`):
+- `PlanningSession`, `PlanningDocument`, `PlanningDocumentSection`, `PlanningDocumentVersion`
+- `PlanningLibrarySnippet`, `PlanningTrailTemplate`, `PlanningSectionTemplate`
+- `PlanningDecisionRun`, `PlanningExport`
+
+Busca:
+- `SearchHistory`, `IndexJob`
 
 **Auth Flows:**
 
 1. QR Code → Registration → Enrollment (1 mês trial)
 2. Registro aberto (sem QR) → Verificação email → Login → Planos → Pagamento
 3. Email/Password → Login → JWT cookie
-4. Mercado Pago Checkout → Webhook IPN → Subscription + Enrollments
+4. Stripe Checkout (cartão) ou PIX → Webhook → Subscription + Enrollments
 
 **Document Access:**
 
@@ -111,33 +128,50 @@ export DATABASE_URL="<your-db-url>" && npx tsx scripts/fix-csv-tags.ts  # Conver
 
 ## Recent Features
 
-**🚀 Pré-Lançamento (2026-02-20):**
+**🎓 T7 — Certificados Digitais Premium (2026-05-07, commit `4feed2d`):**
+- ✅ Schema com auditoria: `issuedById`, `revokedAt`, `revokeReason`, `viewCount`
+- ✅ 6 APIs admin: emissão manual, revogação, restauração, listagem
+- ✅ Página pública premium navy + QR code SSR + OG image dinâmica via `@vercel/og`
+- ✅ Email automático na emissão e revogação
+- ✅ Galeria do aluno (`/area-restrita/meus-certificados`) respeita revogação
+- 📖 Ver memória `certificados-digitais.md`
+
+**📰 Clipping Diário TCU — em produção (2026-05-07):**
+- ✅ Arquivo público com busca + ver-no-navegador (`app/clipping`)
+- ✅ Admin recipients via env `CLIPPING_ADMIN_RECIPIENTS`
+- ✅ RTF como fonte primária + IA editorial para casos processuais
+- ✅ Cron diário 9h BRT
+- 📖 Ver memória `clipping-diario-tcu.md`, módulo `lib/clipping/`
+
+**🏛️ Hubs Admin Consolidados (2026-04-05):**
+- ✅ Hub TCU com 4 abas (commits `9acd084`+`4e6a434`)
+- ✅ Hub Lei 14.133 com 4 abas (commit `f770db0`)
+- ✅ Busca IA como aba do Analytics-hub (commit `be74857`)
+- ✅ Páginas TCU obsoletas removidas (`tcu-import`, `tcu-converter`)
+
+**💳 Pagamentos — Stripe (REVERTIDO de Mercado Pago em abr/2026):**
+
+> **Histórico:** O sistema saiu para produção em 2026-02-20 com Mercado Pago + PIX, mas foi revertido para Stripe na branch `stripe-migration` (mergeada na main em abr/2026). Modo TEST 100% configurado em 2026-04-24, Fase 3 LIVE com roadmap próprio.
+
+- ✅ `lib/stripe.ts`: lazy init via `getStripe()`, Checkout Sessions, PIX nativo Stripe, helpers de subscription
+- ✅ `POST /api/pagamento/checkout` — cria Checkout Session Stripe (recebe `{ plan, billingCycle, method, courseId? }`, retorna `{ url }`)
+- ✅ `POST /api/pagamento/webhook` — verifica assinatura via `STRIPE_WEBHOOK_SECRET` e processa eventos
+- ✅ `GET /api/pagamento/status` — consulta status de pagamento
+- ✅ Página `/planos` com seletor Cartão/PIX, callbacks `/assinatura/sucesso|cancelado|pendente`
+- ✅ Schema mantém colunas Stripe (`stripeCustomerId`, `stripeSubscriptionId`, `stripePriceId`); colunas MP (`mercadopagoPayerId`, `mercadopagoPreapprovalId`) ficaram no schema sem uso ativo
+- 🔑 Requer: `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`
+- 🔑 Webhook: configurar no Stripe Dashboard → `https://www.profdanielbarral.com/api/pagamento/webhook`
+
+**🚀 Pré-Lançamento (2026-02-20) — outros itens:**
 - ✅ Registro aberto sem QR Code obrigatório (`app/registro/page.tsx`, `lib/validation-schemas.ts`)
 - ✅ Verificação de email unificada (token hex em ambos os fluxos: registro + reenvio)
-- ✅ Input para colar token na página `/verificar-email` e `/registro/confirmacao`
-- ✅ Link "Criar conta" no login, redirect para `/registro` nos planos
 - ✅ Acentuação corrigida em todos os emails (boas-vindas, curso, módulo, inatividade, certificado)
 - ✅ `sendCourseWelcomeEmail()` integrado ao fluxo de enrollment no registro
-- ✅ **Stripe substituído por Mercado Pago + PIX** (ver seção Mercado Pago abaixo)
 - ✅ Newsletter redesenhada (weekly + monthly): header gradiente, ícones por categoria, "Dica da Semana", mini dashboard stats
 - ✅ Classifier paradigmático: threshold 55, keywords consulta/tese (+15/+8/+5), bônus Consulta (+20)
-- ✅ 4 novos scrapers TCE: SC, RJ, RS, PE (esqueletos)
+- ✅ 4 novos scrapers TCE: SC, RJ, RS, PE
 - ✅ DataJud CNJ scraper (STJ/STF) via Elasticsearch API + cron semanal
-- 📖 Ver `lib/mercadopago.ts`, `lib/email-templates/newsletter.ts`, `lib/tribunal-scrapers/datajud.ts`
-- ⚠️ **Pendente:** Configurar credenciais Mercado Pago (conta ainda não criada)
-
-**💳 Mercado Pago + PIX — Pagamento e Assinaturas (2026-02-20):**
-- ✅ Stripe totalmente removido (`lib/stripe.ts` deletado, package desinstalado)
-- ✅ `lib/mercadopago.ts`: lazy init via `getMPClient()`, checkout preference, PIX direto, enrollments
-- ✅ `POST /api/pagamento/checkout` — cria preferência MP (cartão/boleto), retorna URL redirect
-- ✅ `POST /api/pagamento/pix` — gera QR Code PIX + código copia-e-cola
-- ✅ `POST /api/pagamento/webhook` — processa IPN do MP (approved → Subscription + Enrollments)
-- ✅ Página `/planos` com seletor Cartão/PIX, QR Code inline, botão copiar código
-- ✅ Páginas callback: `/assinatura/sucesso`, `/assinatura/cancelado`, `/assinatura/pendente`
-- ✅ CSP atualizado: `mercadopago.com.br` (frame-src) + `sdk.mercadopago.com` (connect-src)
-- ✅ Schema: `mercadopagoPayerId` (User), `mercadopagoPreapprovalId` + `paymentMethod` (Subscription)
-- 🔑 Requer: `MERCADOPAGO_ACCESS_TOKEN`, `NEXT_PUBLIC_MERCADOPAGO_PUBLIC_KEY`
-- 🔑 Webhook: configurar no painel MP → `https://www.profdanielbarral.com/api/pagamento/webhook`
+- 📖 Ver `lib/email-templates/newsletter.ts`, `lib/tribunal-scrapers/datajud.ts`
 
 **📧 Newsletter Analytics + Templates (2026-02-17):**
 - ✅ Model `NewsletterSend` — tracking de envios (type, totalSent, opens, clicks)
@@ -179,10 +213,10 @@ export DATABASE_URL="<your-db-url>" && npx tsx scripts/fix-csv-tags.ts  # Conver
 - ✅ Script: `npx tsx scripts/index-legislative-acts.ts` (flags: `--dry-run`, `--force`, `--limit N`)
 - 📖 Ver `lib/embeddings/vector-search.ts`, `lib/embeddings/legislative-act-processor.ts`
 
-**💳 ~~Stripe~~ → Mercado Pago (2026-02-15 → 2026-02-20):**
-- ⚠️ Stripe foi **removido** em 2026-02-20 e substituído por Mercado Pago + PIX (ver seção acima)
-- Campos `stripeCustomerId`, `stripeSubscriptionId`, `stripePriceId` mantidos no schema por retrocompatibilidade
-- 📖 Ver `lib/mercadopago.ts`, `app/api/pagamento/`
+**💳 Histórico de pagamentos — Stripe → MP → Stripe:**
+- 2026-02-15: Stripe inicial
+- 2026-02-20: Substituído por Mercado Pago + PIX
+- 2026-04: **Revertido para Stripe** (branch `stripe-migration`, mergeada na main). Stripe agora suporta PIX nativamente, eliminando a necessidade do MP. Ver seção "Pagamentos — Stripe" acima.
 
 **🔤 Full-Text Search — PostgreSQL tsvector (2026-02-15):**
 - ✅ PostgreSQL FTS com stemming português (`portuguese_unaccent`) + `unaccent` extension
@@ -343,10 +377,10 @@ export async function GET(request: NextRequest) {
 
 - `RESEND_API_KEY`, `EMAIL_FROM`
 
-**Mercado Pago (Pagamentos):**
+**Stripe (Pagamentos):**
 
-- `MERCADOPAGO_ACCESS_TOKEN` - Token de acesso (production: `APP_USR-...`, teste: `TEST-...`)
-- `NEXT_PUBLIC_MERCADOPAGO_PUBLIC_KEY` - Chave pública (frontend)
+- `STRIPE_SECRET_KEY` - Secret key (production: `sk_live_...`, teste: `sk_test_...`)
+- `STRIPE_WEBHOOK_SECRET` - Secret usado pelo webhook handler para verificar assinatura (`whsec_...`)
 - `NEXT_PUBLIC_PRICE_BASICO` - Valor exibido no frontend (ex: `49,90`)
 - `NEXT_PUBLIC_PRICE_PREMIUM` - Valor exibido no frontend (ex: `89,90`)
 
@@ -512,10 +546,10 @@ function Header() {
 - `/api/newsletter` - Newsletter subscription
 - `/api/contact` - Contact form
 
-**Mercado Pago:** `/api/pagamento/*`
-- `POST /api/pagamento/checkout` - Cria preferência MP (withAuth, recebe `{ plan, courseId? }`, retorna `{ url }`)
-- `POST /api/pagamento/pix` - Gera QR Code PIX (withAuth, retorna `{ qrCode, qrCodeBase64, ticketUrl, paymentId }`)
-- `POST /api/pagamento/webhook` - IPN handler (sem auth, processa `payment.approved/refunded/cancelled`)
+**Pagamentos (Stripe):** `/api/pagamento/*` — path histórico mantido após reversão MP→Stripe
+- `POST /api/pagamento/checkout` - Cria Checkout Session Stripe (withAuth, recebe `{ plan, billingCycle, method, courseId? }`, retorna `{ url }`)
+- `GET /api/pagamento/status` - Consulta status da assinatura/pagamento
+- `POST /api/pagamento/webhook` - Webhook Stripe (sem auth, verifica via `STRIPE_WEBHOOK_SECRET`, idempotência via `ProcessedWebhookEvent`)
 
 **Newsletter:** `/api/newsletter/*`
 - `GET /api/newsletter/track` - Pixel tracking (opens) + redirect tracking (clicks)
@@ -553,7 +587,13 @@ Ver código para endpoints completos.
 - Fase 11: Monitoring (Sentry captureException em erros 500+, setUser após auth, tracking events server/client via Vercel Analytics)
 - Admin Versioning UI: histórico de versões (timeline), diff viewer, seção collapsible na página de edição
 - Full-Text Search: PostgreSQL tsvector + GIN + stemming português em 7 tabelas, FAQ e Blog na busca global
-- Mercado Pago + PIX: Checkout, PIX QR Code, Webhook IPN, 2 planos (Básico/Premium), QR Code trial 1 mês
+- Stripe (cartão + PIX nativo): Checkout Session, Webhook idempotente, 2 planos (Básico/Premium), QR Code trial 1 mês — mergeado de `stripe-migration` em abr/2026
+- Certificados Digitais Premium (T7): emissão manual + revogação + galeria + OG image dinâmica + auditoria — concluído 2026-05-07
+- Clipping Diário TCU: arquivo público + admin recipients + RTF + IA editorial — em produção desde 2026-05-07
+- Hub TCU + Hub Lei 14.133 + Busca IA no Analytics-hub (admin consolidado, abr/2026)
+- Módulo Planejamento (`app/area-restrita/planejamento`): sessões, documentos com seções/versões, biblioteca de snippets, trilhas
+- DOU Clipping v2 (atrás do flag `DOU_CLIPPING_V2_ENABLED`)
+- CONUNI sync (1.512 docs)
 - Registro aberto (sem QR Code), verificação email unificada (token hex)
 - Newsletter Analytics + Redesign: templates profissionais (weekly + monthly), tracking, dashboard admin
 - Tribunal Scrapers: TCE-SP, TCE-PR, TCE-MG + esqueletos TCE-SC/RJ/RS/PE + DataJud STJ/STF
@@ -563,23 +603,22 @@ Ver código para endpoints completos.
 - DOU Classifier: pipeline classificação (keyword + IA), admin UI, cron diário, 7 endpoints, 3 suítes de teste
 - Melhorias na Busca IA: reclassificação de artigos (4 categorias, 482 docs), consciência temporal, fidelidade ao texto, re-indexação embeddings
 
-**🚧 Pendente:**
-- Criar conta Mercado Pago + configurar credenciais na Vercel
-- Configurar webhook MP → `https://www.profdanielbarral.com/api/pagamento/webhook`
-- Scrapers TCE (SC/RJ/RS/PE) corrigidos com APIs reais (commit `f4aff87`)
-- DataJud: `DATAJUD_API_KEY` configurada na Vercel ✅
+**🚧 Pendente / Em andamento:**
+- Stripe Fase 3 LIVE: roadmap de migração de TEST→LIVE em produção (modo TEST 100% configurado em 2026-04-24)
+- Gemini Embedding 2 upgrade: ELIC reindexando; calibrar thresholds após reindexação completa (ver memória `MEMORY.md`)
+- Backlog completo em `FUTURE_TASKS.md`
 
 ## Important Architecture Patterns
 
-### Mercado Pago Subscription Flow
-1. User → `/planos` → escolhe plano + método (Cartão/PIX)
-2. **Cartão/Boleto:** `POST /api/pagamento/checkout` → redirect para Mercado Pago → callback `/assinatura/sucesso|cancelado|pendente`
-3. **PIX:** `POST /api/pagamento/pix` → QR Code exibido inline na página `/planos` → pagamento via app do banco
-4. MP envia webhook IPN → `POST /api/pagamento/webhook` → verifica `payment.status`
-5. `approved` → cria `Subscription` + `Enrollment(s)` no banco (1 mês de período)
-6. `refunded`/`cancelled` → cancela Subscription → remove enrollments (não-presenciais)
+### Stripe Subscription Flow
+1. User → `/planos` → escolhe plano + ciclo (mensal/anual) + método (Cartão/PIX)
+2. `POST /api/pagamento/checkout` (Zod-validado: `{ plan, billingCycle, method, courseId? }`) → cria Checkout Session Stripe → retorna `{ url }` para redirect
+3. Stripe processa pagamento → callback em `/assinatura/sucesso|cancelado|pendente`
+4. Stripe envia evento webhook → `POST /api/pagamento/webhook` → verifica assinatura via `STRIPE_WEBHOOK_SECRET` (registra em `ProcessedWebhookEvent` para idempotência)
+5. `checkout.session.completed` / `invoice.paid` → cria/renova `Subscription` + `Enrollment(s)` (1 mês ou 1 ano)
+6. `customer.subscription.deleted` / `invoice.payment_failed` → cancela Subscription → remove enrollments sem `qrCodeId` (preserva presenciais)
 7. Acesso: `hasActiveAccess()` verifica enrollment válido OU subscription `active`
-- 📖 Ver `lib/mercadopago.ts` (lazy init via `getMPClient()`), `lib/enrollment-utils.ts` (`checkSubscriptionAccess`)
+- 📖 Ver `lib/stripe.ts` (lazy init via `getStripe()`), `lib/enrollment-utils.ts` (`checkSubscriptionAccess`)
 
 ### Busca Global com IA (Composição no Frontend)
 1. Usuário digita no campo de busca
@@ -690,10 +729,11 @@ fica para fase futura.
 - Bibliografia SEMPRE pública
 - QR Code trial: 1 mês (antes era 1 ano) — enrollments existentes mantêm expiração original
 - Registro funciona com e sem QR Code (qrCodeId é opcional)
-- Subscription ativa → enrollments sem `expiresAt` (gerenciado pelo Mercado Pago)
+- Subscription ativa → enrollments sem `expiresAt` (gerenciado pelo Stripe)
 - Subscription cancelada → remove enrollments sem `qrCodeId` (preserva presenciais)
 - Acesso = enrollment válido OU subscription ativa (verificar ambos)
-- MP lazy init: `getMPClient()` evita erro no build — NUNCA instanciar MP client no top-level
+- Stripe lazy init: `getStripe()` evita erro no build — NUNCA instanciar Stripe client no top-level
+- Webhook Stripe é idempotente via tabela `ProcessedWebhookEvent` — não reprocessar `event.id` já visto
 - Enrollment expiration: lógica crítica (notificações, renovações)
 - Excel import: manter compatibilidade com templates
 - Multi-course docs: um documento pode pertencer a vários cursos
@@ -702,15 +742,17 @@ fica para fase futura.
 
 ---
 
-**First Time Setup:**
+**First Time Setup (Windows, ambiente atual):**
 
-```bash
-cd "/Users/danba/Site do Barral/sitedobarral"
+```powershell
+cd C:\Users\User\projetos\sitedobarral
 npm install
-cp .env.example .env.local  # Edit with your values
-npx prisma generate && npx prisma db push
+copy .env.example .env.local  # Editar com seus valores
+npx prisma generate; npx prisma db push
 node scripts/create-admin.js admin@email.com password123 "Admin Name"
 npm run dev
 ```
+
+**Workflow git:** trunk-based em `main` (branch `develop` deletada em abr/2026). Ritmo atual: ~13 commits/dia. Deploy Vercel é manual (`vercel --prod`) — GitHub não está conectado ao projeto Vercel.
 
 **Mais detalhes:** Ver arquivos de documentação listados acima.
