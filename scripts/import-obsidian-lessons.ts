@@ -31,7 +31,7 @@ function parseArgs() {
     courseSlug = args[courseIdx + 1];
   }
 
-  let vaultPath = '/Users/danba/Documents/Licitações-Obsidian';
+  let vaultPath = 'C:/Users/User/projetos/Cofre do obsidian/Site do Barral';
   const vaultIdx = args.indexOf('--vault');
   if (vaultIdx !== -1 && args[vaultIdx + 1]) {
     vaultPath = args[vaultIdx + 1];

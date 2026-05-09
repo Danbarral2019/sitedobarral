@@ -44,7 +44,7 @@ function parseArgs(): CliArgs {
   const dryRun = args.includes('--dry-run');
   const force = args.includes('--force');
 
-  let vaultPath = '/Users/danba/Documents/Licitações-Obsidian';
+  let vaultPath = 'C:/Users/User/projetos/Cofre do obsidian/Site do Barral';
   const vaultIdx = args.indexOf('--vault');
   if (vaultIdx !== -1 && args[vaultIdx + 1]) {
     vaultPath = resolve(args[vaultIdx + 1]);
