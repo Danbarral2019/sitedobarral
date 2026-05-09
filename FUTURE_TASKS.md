@@ -365,11 +365,14 @@ Estudar viabilidade de criar aplicativo nativo ou usar PWA avançado:
 
 **Quick win aplicado em 2026-05-09:** removido `subsets: ["latin-ext"]` das fontes Source Serif 4 e Inter em `app/layout.tsx`. `latin` já cobre acentos do português; `latin-ext` adiciona apenas caracteres centro-europeus não usados. Estimado ~130 KB de fontes economizados.
 
+**Aplicado em 2026-05-09 (commit `79b4d0f`):**
+- [x] Code splitting do `lei-14133-artigos.ts` (~329 KB): novo hook `useLeiArticles` com cache singleton, dynamic import como fallback. 9 callsites migrados. Resultado: `/artigos` 482 → 400 KB, `/glossario` 514 → 432 KB. Bundle compartilhado mantido em 184 KB.
+
 **Pendente (custo alto, ganho modesto):**
-- [ ] Investigar 280 KB de "Reduce unused JavaScript" reportados pelo Lighthouse — exige análise via `ANALYZE=true npm run build` e provavelmente refatoração de bundle splitting de `app/page.tsx`
 - [ ] Investigar 76 KB de "Minify JavaScript" — Vercel deveria minificar automaticamente; pode ser falso positivo ou third-party não minificado (ex: GTM)
 - [ ] Avaliar tornar JetBrains Mono lazy (usado em 25+ componentes, risco de regressão visual)
 - [ ] Re-rodar Lighthouse em ambiente sem Kaspersky para baseline limpo
+- [ ] Investigar restante de 280 KB de "Reduce unused JavaScript": após o code split do lei-14133-artigos, sobram ~200 KB ainda — provavelmente Stripe SDK, jspdf carregando antes do click, etc.
 
 **Por que baixa prioridade:** A home pública é landing page. Aluno logado entra direto na área restrita, que já tem dynamic imports (T11) e bundle menor. O ganho percebido pelo público pagante é pequeno comparado ao custo.
 
