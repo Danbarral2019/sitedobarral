@@ -3,7 +3,7 @@
 import { useState, useMemo, useEffect } from 'react';
 import Link from 'next/link';
 import { Search, BookOpen, ArrowRight, FileText, X, List, Hash } from 'lucide-react';
-import { LEI_14133_ARTIGOS as LEI_14133_ARTIGOS_FALLBACK, LeiArticle } from '@/data/lei-14133-artigos';
+import type { LeiArticle } from '@/data/lei-14133-artigos';
 import { LEI_14133_GRUPOS, getGroupById } from '@/data/lei-14133-grupos';
 import { formatArticleNumber } from '@/lib/article-utils';
 
@@ -27,30 +27,32 @@ function searchArticles(artigos: Record<string, LeiArticle>, searchTerm: string)
 }
 
 export default function ArtigosIndexPage() {
-  const [artigos, setArtigos] = useState<Record<string, LeiArticle>>(LEI_14133_ARTIGOS_FALLBACK);
+  const [artigos, setArtigos] = useState<Record<string, LeiArticle>>({});
+  const [isLoading, setIsLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [mode, setMode] = useState<NavigationMode>('articles');
   const [selectedGroup, setSelectedGroup] = useState<string | null>(null);
   const [articleSearch, setArticleSearch] = useState('');
   const [fetchError, setFetchError] = useState<string | null>(null);
 
-  // Buscar artigos do banco de dados ao montar componente
+  // Buscar artigos do banco. Fallback estático carrega dinamicamente apenas se a API falhar
+  // (caso contrário pesaria 329 KB no bundle inicial).
   useEffect(() => {
     async function fetchArtigos() {
       try {
         const response = await fetch('/api/lei-14133/artigos');
-        if (response.ok) {
-          const data = await response.json();
-          if (data.success && data.artigos) {
-            setArtigos(data.artigos);
-            setFetchError(null);
-          }
-        } else {
-          setFetchError('Não foi possível carregar os artigos do servidor. Exibindo dados locais.');
-        }
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+        const data = await response.json();
+        if (!data.success || !data.artigos) throw new Error('payload inválido');
+        setArtigos(data.artigos);
+        setFetchError(null);
       } catch (error) {
-        console.error('Erro ao buscar artigos:', error);
+        console.error('Erro ao buscar artigos, carregando fallback estático:', error);
+        const { LEI_14133_ARTIGOS } = await import('@/data/lei-14133-artigos');
+        setArtigos(LEI_14133_ARTIGOS);
         setFetchError('Não foi possível carregar os artigos do servidor. Exibindo dados locais.');
+      } finally {
+        setIsLoading(false);
       }
     }
     fetchArtigos();
@@ -81,6 +83,7 @@ export default function ArtigosIndexPage() {
   }, [articleSearch, artigos]);
 
   const hasSearch = searchTerm.trim().length > 0;
+  const showSkeleton = isLoading && Object.keys(artigos).length === 0;
 
   return (
     <main className="min-h-screen bg-gray-50">
@@ -141,8 +144,20 @@ export default function ArtigosIndexPage() {
           </div>
         )}
 
-        {/* Resultados de Busca */}
-        {hasSearch ? (
+        {/* Loading / Resultados */}
+        {showSkeleton ? (
+          <div className="bg-white rounded-2xl shadow-lg border-2 border-gray-200 p-8" aria-busy="true">
+            <div className="animate-pulse space-y-4">
+              <div className="h-6 w-1/3 bg-gray-200 rounded" />
+              <div className="h-12 w-full bg-gray-100 rounded-xl" />
+              <div className="space-y-3 pt-4">
+                {[...Array(6)].map((_, i) => (
+                  <div key={i} className="h-20 bg-gray-100 rounded-xl" />
+                ))}
+              </div>
+            </div>
+          </div>
+        ) : hasSearch ? (
           <div className="bg-white rounded-2xl shadow-lg border-2 border-gray-200 p-8">
             <div className="flex items-center justify-between mb-6">
               <h2 className="text-2xl font-bold text-gray-900">

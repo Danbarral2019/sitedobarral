@@ -9,7 +9,7 @@
 
 import { useEffect, useRef, useState } from 'react';
 import { Search, X } from 'lucide-react';
-import { LEI_14133_ARTIGOS } from '@/data/lei-14133-artigos';
+import { useLeiArticles } from '@/hooks/useLeiArticles';
 
 function normalize(s: string): string {
   return s.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '');
@@ -19,6 +19,7 @@ export function LegalSearchBar() {
   const [searchTerm, setSearchTerm] = useState('');
   const [matchCount, setMatchCount] = useState<number | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+  const { articles: artigos } = useLeiArticles();
 
   // Atalho `/` foca, Esc limpa
   useEffect(() => {
@@ -56,7 +57,7 @@ export function LegalSearchBar() {
 
     articles.forEach((a) => {
       const numero = a.id.replace('art-', '');
-      const article = LEI_14133_ARTIGOS[numero];
+      const article = artigos[numero];
       if (!article) {
         a.style.display = 'none';
         return;
@@ -92,7 +93,7 @@ export function LegalSearchBar() {
       const top = matchEl.getBoundingClientRect().top + window.scrollY - 100;
       window.scrollTo({ top, behavior: 'smooth' });
     }
-  }, [searchTerm]);
+  }, [searchTerm, artigos]);
 
   return (
     <div className="sticky top-0 z-20 bg-surface-page/95 backdrop-blur-sm border-b border-border-subtle">

@@ -11,7 +11,7 @@ import {
   List,
   Loader2
 } from 'lucide-react';
-import { LeiArticle } from '@/data/lei-14133-artigos';
+import type { LeiArticle } from '@/data/lei-14133-artigos';
 import { ArticleContentSections } from '@/components/ArticleContentSections';
 
 interface CollapsibleArticleProps {

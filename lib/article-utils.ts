@@ -1,13 +1,18 @@
 /**
  * Utilidades para trabalhar com artigos da Lei 14.133/2021
- * Fase 1 MVP: Sistema de busca e catalogação por artigos
+ *
+ * NOTA DE PERFORMANCE: este módulo NÃO importa LEI_14133_ARTIGOS no top-level
+ * porque o mapa pesa ~329 KB e seria incluído no bundle de qualquer rota que
+ * importasse este arquivo. Funções server-only que precisam do mapa fazem
+ * dynamic import internamente. Componentes client devem usar o hook
+ * `useLeiArticles()` de `hooks/useLeiArticles.ts`.
  */
 
-import { LEI_14133_ARTIGOS, type LeiArticle } from '@/data/lei-14133-artigos';
+import type { LeiArticle } from '@/data/lei-14133-artigos';
 import { prisma } from '@/lib/prisma';
 
 /**
- * Extrai números de artigos de um documento
+ * Extrai números de artigos de um documento (campo leiArticles em JSON)
  */
 export function extractArticleNumbers(leiArticlesJson: string | null): string[] {
   if (!leiArticlesJson) return [];
@@ -28,75 +33,11 @@ export function formatArticleNumber(numero: string): string {
 }
 
 /**
- * Formata artigo completo (número + ementa resumida)
- */
-export function formatArticleShort(numero: string): string {
-  const article = LEI_14133_ARTIGOS[numero];
-  if (!article) return formatArticleNumber(numero);
-
-  // Pega primeiras 50 caracteres da ementa
-  const shortEmenta = article.ementa.length > 50
-    ? article.ementa.substring(0, 50) + '...'
-    : article.ementa;
-
-  return `${formatArticleNumber(numero)} - ${shortEmenta}`;
-}
-
-/**
- * Obtém dados completos de um artigo
- */
-export function getArticleData(numero: string): LeiArticle | null {
-  return LEI_14133_ARTIGOS[numero] || null;
-}
-
-/**
- * Busca artigos por termo (para autocomplete)
- */
-export function searchArticles(searchTerm: string, limit: number = 10): LeiArticle[] {
-  if (!searchTerm || searchTerm.length < 1) return [];
-
-  const term = searchTerm.toLowerCase().trim();
-  const results: LeiArticle[] = [];
-
-  // Busca exata por número primeiro
-  if (/^\d+$/.test(term)) {
-    const article = LEI_14133_ARTIGOS[term];
-    if (article) {
-      results.push(article);
-    }
-  }
-
-  // Busca por números que começam com o termo
-  if (results.length < limit) {
-    Object.values(LEI_14133_ARTIGOS).forEach(article => {
-      if (article.numero.startsWith(term) && !results.find(r => r.numero === article.numero)) {
-        results.push(article);
-      }
-    });
-  }
-
-  // Busca na ementa
-  if (results.length < limit) {
-    Object.values(LEI_14133_ARTIGOS).forEach(article => {
-      if (
-        article.ementa.toLowerCase().includes(term) &&
-        !results.find(r => r.numero === article.numero)
-      ) {
-        results.push(article);
-      }
-    });
-  }
-
-  return results.slice(0, limit);
-}
-
-/**
  * Obtém cor do badge por seção da lei (para UI)
  */
 export function getArticleColor(numero: string): string {
   const num = parseInt(numero);
 
-  // Cores por seção conforme proposta
   if (num >= 1 && num <= 17) return 'blue';      // Disposições Gerais
   if (num >= 18 && num <= 71) return 'green';    // Licitações
   if (num >= 72 && num <= 88) return 'yellow';   // Contratação Direta + Aux
@@ -104,7 +45,7 @@ export function getArticleColor(numero: string): string {
   if (num >= 155 && num <= 173) return 'red';    // Sanções
   if (num >= 174 && num <= 193) return 'purple'; // Instrumentos Auxiliares + Finais
 
-  return 'gray'; // Fallback
+  return 'gray';
 }
 
 /**
@@ -115,7 +56,6 @@ export function getArticleBadgeClasses(numero: string, isPrimary: boolean = fals
   const base = 'inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium';
 
   if (isPrimary) {
-    // Badge de artigo principal (mais destacado)
     const colorClasses = {
       blue: 'bg-blue-600 text-white',
       green: 'bg-green-600 text-white',
@@ -127,7 +67,6 @@ export function getArticleBadgeClasses(numero: string, isPrimary: boolean = fals
     };
     return `${base} ${colorClasses[color as keyof typeof colorClasses]}`;
   } else {
-    // Badge de artigo relacionado (mais suave)
     const colorClasses = {
       blue: 'bg-blue-100 text-blue-800 hover:bg-blue-200',
       green: 'bg-green-100 text-green-800 hover:bg-green-200',
@@ -142,23 +81,33 @@ export function getArticleBadgeClasses(numero: string, isPrimary: boolean = fals
 }
 
 /**
- * Analytics: Conta quantos documentos existem por artigo
+ * Obtém ícone contextual baseado na seção do artigo
+ */
+export function getArticleIcon(numero: string): string {
+  const num = parseInt(numero);
+
+  if (num >= 1 && num <= 17) return '📋';
+  if (num >= 18 && num <= 71) return '🏛️';
+  if (num >= 72 && num <= 88) return '⚡';
+  if (num >= 89 && num <= 154) return '📝';
+  if (num >= 155 && num <= 173) return '⚖️';
+  if (num >= 174 && num <= 193) return '🔧';
+
+  return '📄';
+}
+
+/**
+ * Analytics (server-only): conta documentos por artigo
  */
 export async function getDocumentCountByArticle(): Promise<Record<string, number>> {
   const documents = await prisma.document.findMany({
-    where: {
-      leiArticles: { not: null },
-    },
-    select: {
-      leiArticles: true,
-    },
+    where: { leiArticles: { not: null } },
+    select: { leiArticles: true },
   });
 
   const counts: Record<string, number> = {};
-
   documents.forEach(doc => {
-    const articles = extractArticleNumbers(doc.leiArticles);
-    articles.forEach(articleNum => {
+    extractArticleNumbers(doc.leiArticles).forEach(articleNum => {
       counts[articleNum] = (counts[articleNum] || 0) + 1;
     });
   });
@@ -167,7 +116,8 @@ export async function getDocumentCountByArticle(): Promise<Record<string, number
 }
 
 /**
- * Analytics: Top N artigos mais consultados (baseado em AccessLog)
+ * Analytics (server-only): top N artigos mais consultados.
+ * Carrega LEI_14133_ARTIGOS dinamicamente para não inflar bundle.
  */
 export async function getTopArticles(limit: number = 10): Promise<Array<{
   numero: string;
@@ -175,21 +125,18 @@ export async function getTopArticles(limit: number = 10): Promise<Array<{
   documentCount: number;
   viewCount: number;
 }>> {
-  // Primeiro pega contagem de documentos por artigo
+  const { LEI_14133_ARTIGOS } = await import('@/data/lei-14133-artigos');
+
   const docCounts = await getDocumentCountByArticle();
 
-  // Depois pega visualizações de documentos com artigos
   const viewLogs = await prisma.accessLog.findMany({
     where: {
       action: { in: ['view', 'download'] },
       documentId: { not: null },
     },
-    select: {
-      documentId: true,
-    },
+    select: { documentId: true },
   });
 
-  // Mapeia documentId → contagem de views
   const docViews: Record<string, number> = {};
   viewLogs.forEach(log => {
     if (log.documentId) {
@@ -197,18 +144,11 @@ export async function getTopArticles(limit: number = 10): Promise<Array<{
     }
   });
 
-  // Pega documentos com leiArticles
   const documents = await prisma.document.findMany({
-    where: {
-      leiArticles: { not: null },
-    },
-    select: {
-      id: true,
-      leiArticles: true,
-    },
+    where: { leiArticles: { not: null } },
+    select: { id: true, leiArticles: true },
   });
 
-  // Conta views por artigo
   const articleViews: Record<string, number> = {};
   documents.forEach(doc => {
     const articles = extractArticleNumbers(doc.leiArticles);
@@ -218,44 +158,17 @@ export async function getTopArticles(limit: number = 10): Promise<Array<{
     });
   });
 
-  // Combina tudo e ordena
   const results = Object.entries(docCounts).map(([numero, count]) => ({
     numero,
     article: LEI_14133_ARTIGOS[numero],
     documentCount: count,
     viewCount: articleViews[numero] || 0,
-  })).filter(item => item.article); // Remove artigos não encontrados
+  })).filter(item => item.article);
 
-  // Ordena por views primeiro, depois por quantidade de docs
   results.sort((a, b) => {
-    if (b.viewCount !== a.viewCount) {
-      return b.viewCount - a.viewCount;
-    }
+    if (b.viewCount !== a.viewCount) return b.viewCount - a.viewCount;
     return b.documentCount - a.documentCount;
   });
 
   return results.slice(0, limit);
-}
-
-/**
- * Valida se um número de artigo existe
- */
-export function isValidArticle(numero: string): boolean {
-  return !!LEI_14133_ARTIGOS[numero];
-}
-
-/**
- * Obtém ícone contextual baseado na seção do artigo
- */
-export function getArticleIcon(numero: string): string {
-  const num = parseInt(numero);
-
-  if (num >= 1 && num <= 17) return '📋';      // Disposições Gerais
-  if (num >= 18 && num <= 71) return '🏛️';    // Licitações
-  if (num >= 72 && num <= 88) return '⚡';     // Contratação Direta
-  if (num >= 89 && num <= 154) return '📝';   // Contratos
-  if (num >= 155 && num <= 173) return '⚖️';  // Sanções
-  if (num >= 174 && num <= 193) return '🔧';  // Instrumentos
-
-  return '📄';
 }

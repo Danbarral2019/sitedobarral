@@ -31,8 +31,8 @@ import {
   ChevronRight,
 } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
-import { LEI_14133_ARTIGOS } from '@/data/lei-14133-artigos';
 import { formatArticleNumber } from '@/lib/article-utils';
+import { useLeiArticles } from '@/hooks/useLeiArticles';
 
 interface ArticleStats {
   [articleNum: string]: {
@@ -107,6 +107,7 @@ export function ArticleTreeNavigator({
 }: ArticleTreeNavigatorProps) {
   const [expandedTheme, setExpandedTheme] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
+  const { articles: artigos } = useLeiArticles();
 
   const filteredThemes = useMemo(() => {
     if (!searchTerm.trim()) return THEMES;
@@ -242,7 +243,7 @@ export function ArticleTreeNavigator({
               {isExpanded && (
                 <div className="mt-2 ml-2 mr-1 mb-1 space-y-1 border-l-2 border-gray-200 pl-3">
                   {theme.articles.map((articleNum) => {
-                    const article = LEI_14133_ARTIGOS[articleNum];
+                    const article = artigos[articleNum];
                     const docCount = stats[articleNum]?.documentCount || 0;
 
                     return (

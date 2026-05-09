@@ -2,7 +2,13 @@
 
 import { X, Trash2, FileText } from 'lucide-react';
 import { SearchFilters as SearchFiltersType } from '@/hooks/use-search';
-import { ARTIGOS_POPULARES, LEI_14133_ARTIGOS } from '@/data/lei-14133-artigos';
+import { useLeiArticles } from '@/hooks/useLeiArticles';
+
+// Inline para evitar import do data/lei-14133-artigos.ts (~329 KB)
+const ARTIGOS_POPULARES = [
+  '5', '6', '8', '12', '18', '22', '29', '30',
+  '72', '74', '75', '124', '137', '155', '160', '191',
+];
 
 interface Course {
   id: string;
@@ -61,6 +67,8 @@ export default function SearchFilters({
   onClearFilters,
   availableCourses,
 }: SearchFiltersProps) {
+  const { articles: artigos } = useLeiArticles();
+
   if (!isOpen) return null;
 
   const toggleCourse = (courseId: string) => {
@@ -214,7 +222,7 @@ export default function SearchFilters({
               <p className="text-xs font-semibold text-gray-700 mb-2">📌 Artigos Populares</p>
               <div className="flex flex-wrap gap-2">
                 {ARTIGOS_POPULARES.map(articleNum => {
-                  const article = LEI_14133_ARTIGOS[articleNum];
+                  const article = artigos[articleNum];
                   const isSelected = filters.leiArticles.includes(articleNum);
                   return (
                     <button
@@ -242,7 +250,7 @@ export default function SearchFilters({
                   {filters.leiArticles
                     .filter(a => !ARTIGOS_POPULARES.includes(a))
                     .map(articleNum => {
-                      const article = LEI_14133_ARTIGOS[articleNum];
+                      const article = artigos[articleNum];
                       return (
                         <button
                           key={articleNum}
@@ -272,7 +280,7 @@ export default function SearchFilters({
                     if (e.key === 'Enter') {
                       const input = e.target as HTMLInputElement;
                       const num = input.value.trim();
-                      if (num && LEI_14133_ARTIGOS[num] && !filters.leiArticles.includes(num)) {
+                      if (num && artigos[num] && !filters.leiArticles.includes(num)) {
                         toggleArticle(num);
                         input.value = '';
                       }
@@ -283,7 +291,7 @@ export default function SearchFilters({
                   onClick={(e) => {
                     const input = e.currentTarget.previousElementSibling as HTMLInputElement;
                     const num = input.value.trim();
-                    if (num && LEI_14133_ARTIGOS[num] && !filters.leiArticles.includes(num)) {
+                    if (num && artigos[num] && !filters.leiArticles.includes(num)) {
                       toggleArticle(num);
                       input.value = '';
                     }

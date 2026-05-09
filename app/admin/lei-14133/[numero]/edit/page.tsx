@@ -14,7 +14,7 @@ import {
   Copy,
   RefreshCw
 } from 'lucide-react';
-import { LEI_14133_ARTIGOS as LEI_14133_ARTIGOS_FALLBACK, LeiArticle } from '@/data/lei-14133-artigos';
+import type { LeiArticle } from '@/data/lei-14133-artigos';
 
 export default function EditArtigoPage() {
   const params = useParams();
@@ -51,21 +51,13 @@ export default function EditArtigoPage() {
             return;
           }
         }
-
-        // Fallback para arquivo se API falhar ou artigo não existir
-        const fallbackArticle = LEI_14133_ARTIGOS_FALLBACK[numero];
-        if (fallbackArticle) {
-          setFormData(fallbackArticle);
-          setOriginalData(fallbackArticle);
-        } else {
-          // Artigo não existe nem no banco nem no arquivo
-          router.push('/admin/lei-14133');
-        }
+        throw new Error('API não retornou artigo');
       } catch (error) {
-        console.error('Erro ao buscar artigo:', error);
-
-        // Fallback para arquivo em caso de erro
-        const fallbackArticle = LEI_14133_ARTIGOS_FALLBACK[numero];
+        console.error('Erro ao buscar artigo, carregando fallback estático:', error);
+        // Fallback estático carregado dinamicamente apenas em caso de falha
+        // (importar estaticamente pesava 329 KB no bundle do admin)
+        const { LEI_14133_ARTIGOS } = await import('@/data/lei-14133-artigos');
+        const fallbackArticle = LEI_14133_ARTIGOS[numero];
         if (fallbackArticle) {
           setFormData(fallbackArticle);
           setOriginalData(fallbackArticle);

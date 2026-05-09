@@ -91,3 +91,6 @@ data/conuni-snapshot.json
 
 # Lighthouse reports (output de auditoria, não versionados)
 lighthouse-report.report.*
+
+# Build logs (output local, não versionados)
+build-*.log

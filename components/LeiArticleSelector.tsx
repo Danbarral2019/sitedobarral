@@ -1,14 +1,16 @@
 'use client';
 
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, useMemo } from 'react';
 import { X, Search, Hash } from 'lucide-react';
-import {
-  LEI_14133_ARTIGOS,
-  LeiArticle,
-  formatArticleNumber,
-  searchLeiArticles,
-  ARTIGOS_POPULARES
-} from '@/data/lei-14133-artigos';
+import type { LeiArticle } from '@/data/lei-14133-artigos';
+import { useLeiArticles } from '@/hooks/useLeiArticles';
+
+// Inline para evitar pesar bundle com import do data/lei-14133-artigos.ts (~329 KB)
+const formatArticleNumber = (numero: string) => `Art. ${numero}º`;
+const ARTIGOS_POPULARES = [
+  '5', '6', '8', '12', '18', '22', '29', '30',
+  '72', '74', '75', '124', '137', '155', '160', '191',
+];
 
 interface LeiArticleSelectorProps {
   selectedArticles: string[]; // Array de números de artigos (ex: ["1", "6", "30"])
@@ -33,6 +35,19 @@ export default function LeiArticleSelector({
   const [highlightedIndex, setHighlightedIndex] = useState(0);
   const inputRef = useRef<HTMLInputElement>(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
+  const { articles: artigos } = useLeiArticles();
+
+  // Busca local nos artigos carregados pelo hook
+  const searchLeiArticles = useMemo(() => (searchTerm: string): LeiArticle[] => {
+    const term = searchTerm.toLowerCase();
+    return Object.values(artigos).filter(
+      (art) =>
+        art.numero.includes(term) ||
+        art.ementa.toLowerCase().includes(term) ||
+        art.capitulo.toLowerCase().includes(term) ||
+        art.secao?.toLowerCase().includes(term)
+    );
+  }, [artigos]);
 
   // Atualizar sugestões quando searchTerm mudar
   useEffect(() => {
@@ -50,7 +65,7 @@ export default function LeiArticleSelector({
     setFilteredArticles(results);
     setIsDropdownOpen(results.length > 0);
     setHighlightedIndex(0);
-  }, [searchTerm, selectedArticles]);
+  }, [searchTerm, selectedArticles, searchLeiArticles]);
 
   // Fechar dropdown ao clicar fora
   useEffect(() => {
@@ -133,7 +148,7 @@ export default function LeiArticleSelector({
       {selectedArticles.length > 0 && (
         <div className="flex flex-wrap gap-2 p-3 bg-gray-50 border-2 border-gray-200 rounded-lg">
           {selectedArticles.map((articleNumber) => {
-            const article = LEI_14133_ARTIGOS[articleNumber];
+            const article = artigos[articleNumber];
             if (!article) return null;
 
             return (
@@ -227,7 +242,7 @@ export default function LeiArticleSelector({
           <p className="text-xs text-gray-600 font-medium">Artigos populares:</p>
           <div className="flex flex-wrap gap-2">
             {ARTIGOS_POPULARES.slice(0, 6).map((articleNumber) => {
-              const article = LEI_14133_ARTIGOS[articleNumber];
+              const article = artigos[articleNumber];
               if (!article) return null;
 
               return (

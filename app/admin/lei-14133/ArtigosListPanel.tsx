@@ -13,10 +13,10 @@ import {
   AlertTriangle,
   TrendingUp
 } from 'lucide-react';
-import { LEI_14133_ARTIGOS as LEI_14133_ARTIGOS_FALLBACK, LeiArticle } from '@/data/lei-14133-artigos';
+import type { LeiArticle } from '@/data/lei-14133-artigos';
 
 export default function ArtigosListPanel() {
-  const [artigos, setArtigos] = useState<Record<string, LeiArticle>>(LEI_14133_ARTIGOS_FALLBACK);
+  const [artigos, setArtigos] = useState<Record<string, LeiArticle>>({});
   const [isLoadingArtigos, setIsLoadingArtigos] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [coverageStats, setCoverageStats] = useState<{articleStats: Record<string, number>; totalArticles: number; totalDocuments: number} | null>(null);
@@ -29,10 +29,16 @@ export default function ArtigosListPanel() {
           const data = await response.json();
           if (data.success && data.artigos) {
             setArtigos(data.artigos);
+            return;
           }
         }
+        throw new Error('API não retornou artigos');
       } catch (error) {
-        console.error('Erro ao buscar artigos:', error);
+        console.error('Erro ao buscar artigos, carregando fallback estático:', error);
+        // Fallback estático carregado dinamicamente apenas em caso de falha
+        // (importar estaticamente pesava 329 KB no bundle do admin)
+        const { LEI_14133_ARTIGOS } = await import('@/data/lei-14133-artigos');
+        setArtigos(LEI_14133_ARTIGOS);
       } finally {
         setIsLoadingArtigos(false);
       }

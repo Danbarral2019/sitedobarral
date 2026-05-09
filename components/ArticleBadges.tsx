@@ -4,8 +4,8 @@ import {
   extractArticleNumbers,
   formatArticleNumber,
   getArticleBadgeClasses,
-  getArticleData
 } from '@/lib/article-utils';
+import { useLeiArticles } from '@/hooks/useLeiArticles';
 
 interface ArticleBadgesProps {
   leiArticles: string | null;
@@ -20,6 +20,7 @@ export function ArticleBadges({
   primaryArticle,
   onArticleClick
 }: ArticleBadgesProps) {
+  const { getArticle } = useLeiArticles();
   const articles = extractArticleNumbers(leiArticles);
 
   if (articles.length === 0) return null;
@@ -44,7 +45,7 @@ export function ArticleBadges({
     <div className="flex flex-wrap items-center gap-1.5">
       {visibleArticles.map((articleNum) => {
         const isPrimary = articleNum === primaryArticle;
-        const article = getArticleData(articleNum);
+        const article = getArticle(articleNum);
         const classes = getArticleBadgeClasses(articleNum, isPrimary);
 
         return (
