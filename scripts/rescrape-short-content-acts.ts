@@ -95,13 +95,20 @@ async function main() {
       });
       const afterLen = after?.content?.length ?? 0;
       const delta = afterLen - before;
-      console.log(`  ✓ ${result.status} | ${before} → ${afterLen} chars (Δ ${delta >= 0 ? '+' : ''}${delta})`);
+      const status = result.error
+        ? `error: ${result.error}`
+        : result.indexed
+          ? 'scraped+indexed'
+          : result.scraped
+            ? 'scraped-only'
+            : 'noop';
+      console.log(`  ✓ ${status} | ${before} → ${afterLen} chars (Δ ${delta >= 0 ? '+' : ''}${delta})`);
       results.push({
         fullNumber: act.fullNumber,
         before,
         after: afterLen,
         delta,
-        verdict: result.status,
+        verdict: status,
       });
     } catch (e) {
       console.log(`  ✗ erro: ${(e as Error).message}`);
