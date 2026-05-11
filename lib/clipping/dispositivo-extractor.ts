@@ -95,8 +95,15 @@ function toPdfUrl(rawUrl: string): string {
   return rawUrl.replace(/SvlVisualizarRelVotoAcRtf(?=\?)/, 'SvlVisualizarRelVotoAc');
 }
 
-function rtfToText(rtf: string): string {
+export function rtfToText(rtf: string): string {
   let text = rtf;
+  // Strip RTF destination groups {\*\xxx ...} — bookmarks (bkmkstart/bkmkend),
+  // hyperlink field instructions (fldinst), comments (atnid), etc. Esses grupos
+  // são marcadores que leitores RTF devem ignorar; sem isso o resto do parser
+  // só remove o control word e deixa "\* _Hlk225536710" no texto final.
+  // Limitação: assume sem braces aninhadas (verdade para bookmarks/atnid; pode
+  // falhar pra picts/objetos OLE mas esses não aparecem em acórdão TCU).
+  text = text.replace(/\{\\\*[^{}]*\}/g, '');
   // Symbol escapes: \~ (nbsp), \- (soft hyphen), \_ (nbsp hyphen), \: (subentry)
   text = text.replace(/\\~/g, ' ').replace(/\\-/g, '').replace(/\\_/g, '-').replace(/\\:/g, ':');
   // Hex escapes (cp1252): \'XX → char
