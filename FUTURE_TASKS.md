@@ -392,6 +392,33 @@ Estudar viabilidade de criar aplicativo nativo ou usar PWA avançado:
 - [x] +1 client event: favorite_toggled (via trackClientEvent)
 - [x] Link "Monitoramento" no sidebar admin (ícone Activity)
 
+### T16. Clipping TCU — Size cap para RTFs gigantes [Baixa, condicional]
+**Prioridade:** Baixa — implementar apenas se um segundo caso aparecer.
+
+**Contexto (2026-05-11):** Acórdão 1144/2026 (Sercomtel, R$ 1,7 bi) gerou RTF de **51 MB** (Word embedou fontes/objetos pesados). O `FETCH_TIMEOUT_MS=30s` estourou no cron e marcou `pdfFetchFailed=true` sem chance de cair pro PDF, deixando o email com "Dispositivos não pôde ser extraído automaticamente". Fix aplicado em commit `d82704e`: timeout 30s → 90s + 1 retry. Reprocesso confirmou: 1144 agora extrai 5 dispositivos via `pdf_parse` em ~3 min (RTF estoura 90s × 2 → fallback PDF funciona).
+
+**Problema remanescente:** 3 min por acórdão gigante é OK quando isolado, mas crons Vercel têm timeout de 5 min. Se 2+ acórdãos gigantes caírem no mesmo clipping, o cron timeout pode ocorrer.
+
+**Solução proposta:** Inspecionar `Content-Length` do response RTF antes de ler o body. Se > MAX_RTF_BYTES (sugerido 20 MB conservador), abortar e cair direto pro PDF (já é fallback no pipeline). Falha-aberta segura: se header faltar, comportamento idêntico ao atual.
+
+```ts
+const res = await fetch(rtfUrl, { ... });
+const contentLength = parseInt(res.headers.get('content-length') ?? '0', 10);
+if (contentLength > MAX_RTF_BYTES) return null; // PDF fallback
+```
+
+**Por que NÃO implementar agora (decidido 2026-05-11):**
+- N=1 não justifica heurística — próximo caso pode ser 8 MB ou 100 MB, distribuição desconhecida
+- Fix atual (timeout 90s + retry + PDF fallback) já funciona
+- RTF tem qualidade superior a PDF (preserva numeração 9.1/9.2…) — cap muito agressivo perde qualidade desnecessariamente
+
+**Trigger pra implementar:** Aparecer um segundo acórdão > 20 MB em até 90 dias, OU um cron timeout efetivo causado por múltiplos acórdãos grandes no mesmo dia. Quando implementar, threshold inicial sugerido: **20 MB** (pega o 1144, conservador o suficiente pra não disparar em casos médios).
+
+**Sinais a monitorar:**
+- `ClippingItemExtract.extractMethod = 'pdf_parse'` (deveria ser raro; aumentou = mais acórdãos grandes)
+- `pdfFetchFailed = true` em entries recentes (cron estourando timeouts mesmo com 90s + retry)
+- Tempo total do cron `daily-tcu-clipping` (verificar logs Vercel)
+
 ---
 
 ## CÓDIGO ARQUIVADO (FUNCIONALIDADES_FUTURAS/)
