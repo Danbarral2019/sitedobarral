@@ -16,7 +16,8 @@ export interface ExtractResult {
   aiBullets?: string[];
 }
 
-const FETCH_TIMEOUT_MS = 30000;
+const FETCH_TIMEOUT_MS = 90000;
+const FETCH_RETRIES = 1;
 const MAX_DISPOSITIVOS_PER_ACORDAO = 15;
 const MAX_TEXTO_LENGTH = 5000;
 
@@ -101,9 +102,11 @@ export function rtfToText(rtf: string): string {
   // hyperlink field instructions (fldinst), comments (atnid), etc. Esses grupos
   // são marcadores que leitores RTF devem ignorar; sem isso o resto do parser
   // só remove o control word e deixa "\* _Hlk225536710" no texto final.
+  // \s* depois de { porque Word às vezes quebra a linha entre { e \* (visto no
+  // acórdão 1144/2026 da Sercomtel — RTF de 51 MB).
   // Limitação: assume sem braces aninhadas (verdade para bookmarks/atnid; pode
   // falhar pra picts/objetos OLE mas esses não aparecem em acórdão TCU).
-  text = text.replace(/\{\\\*[^{}]*\}/g, '');
+  text = text.replace(/\{\s*\\\*[^{}]*\}/g, '');
   // Symbol escapes: \~ (nbsp), \- (soft hyphen), \_ (nbsp hyphen), \: (subentry)
   text = text.replace(/\\~/g, ' ').replace(/\\-/g, '').replace(/\\_/g, '-').replace(/\\:/g, ':');
   // Hex escapes (cp1252): \'XX → char
@@ -136,7 +139,7 @@ export function rtfToText(rtf: string): string {
   return text;
 }
 
-async function fetchRtfText(url: string): Promise<string | null> {
+async function fetchRtfTextOnce(url: string): Promise<string | null> {
   const controller = new AbortController();
   const timeoutId = setTimeout(() => controller.abort(), FETCH_TIMEOUT_MS);
   try {
@@ -163,7 +166,19 @@ async function fetchRtfText(url: string): Promise<string | null> {
   }
 }
 
-async function fetchPdfText(url: string): Promise<string | null> {
+async function fetchRtfText(url: string): Promise<string | null> {
+  // Retry com backoff curto: acórdãos com RTFs grandes (e.g. 1144/2026 com 51 MB)
+  // podem demorar mais que o timeout numa rede congestionada, mas funcionam numa
+  // segunda tentativa.
+  for (let attempt = 0; attempt <= FETCH_RETRIES; attempt++) {
+    const result = await fetchRtfTextOnce(url);
+    if (result !== null) return result;
+    if (attempt < FETCH_RETRIES) await new Promise((r) => setTimeout(r, 1000));
+  }
+  return null;
+}
+
+async function fetchPdfTextOnce(url: string): Promise<string | null> {
   const controller = new AbortController();
   const timeoutId = setTimeout(() => controller.abort(), FETCH_TIMEOUT_MS);
   try {
@@ -199,6 +214,15 @@ async function fetchPdfText(url: string): Promise<string | null> {
   } finally {
     clearTimeout(timeoutId);
   }
+}
+
+async function fetchPdfText(url: string): Promise<string | null> {
+  for (let attempt = 0; attempt <= FETCH_RETRIES; attempt++) {
+    const result = await fetchPdfTextOnce(url);
+    if (result !== null) return result;
+    if (attempt < FETCH_RETRIES) await new Promise((r) => setTimeout(r, 1000));
+  }
+  return null;
 }
 
 export interface DocumentLike {

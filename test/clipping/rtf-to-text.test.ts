@@ -35,6 +35,17 @@ describe('rtfToText — sanitização de destination groups', () => {
     expect(out).toMatch(/sugerir aprimoramento/);
   });
 
+  it('remove destination group quebrado por \\r\\n entre { e \\* (caso real do acórdão 1144/2026)', () => {
+    // Word às vezes quebra a linha entre { e \*\bkmkstart — visto no RTF de 51 MB
+    // do acórdão da Sercomtel. O regex precisa permitir whitespace entre { e \*.
+    const rtf = `{\\rtf1 IV - }{\r\n\\*\\bkmkstart _Hlk170734280}{\\rtlch adaptação das outorgas}{\r\n\\*\\bkmkend _Hlk170734280} fim`;
+    const out = rtfToText(rtf);
+    expect(out).not.toMatch(/_Hlk/);
+    expect(out).not.toMatch(/\\\*/);
+    expect(out).toMatch(/IV -/);
+    expect(out).toMatch(/fim/);
+  });
+
   it('preserva texto comum e acentos cp1252', () => {
     // \'e7 = ç, \'e3 = ã em cp1252
     const rtf = `{\\rtf1 decis\\'e3o e revoga\\'e7\\'e3o}`;
