@@ -100,6 +100,79 @@ export function stripZeroWidthChars(text: string): string {
 }
 
 /**
+ * Junta quebras de linha "soft" — `\n` solo (não `\n\n`) que aparece no meio
+ * de frases por causa do HTML do Planalto servir `<br>` em qualquer ponto do
+ * texto. Sem tratamento, o texto fica cheio de quebras estranhas como:
+ *
+ *   "I –\n0,5% (cinco décimos por cento)..."
+ *   "§ 1º\nA penalidade será..."
+ *   "Art. 86.\nO auxílio-acidente..."
+ *   "texto\nimportante"  (wrap genérico de parágrafo)
+ *
+ * Estratégia (apenas `\n` SOLO; `\n\n` parágrafo preservado):
+ *
+ *  1. Junta linha que termina em en/em-dash com próxima ("I –\n0,5%").
+ *  2. Junta linha que termina em "Art. Nº" / "§ Nº" sozinho com próxima
+ *     (autoridade do enumerador, mas o texto continua).
+ *  3. Junta linha que termina em enumerador romano (I, II, III...) com
+ *     próxima que começa com dash ("III\n– texto").
+ *  4. WRAP GENÉRICO: linha termina em letra/dígito (não pontuação final)
+ *     E próxima começa em letra minúscula → wrap quebrado, junta.
+ *     Excluímos casos onde a próxima linha começa com marker de lista
+ *     ("a)", "b)", "1.", "1)") pra não fundir items de listas.
+ *
+ * Audit em 2026-05-13 (Daniel reportou): 44.698 wrap-meio-frase + ~2000
+ * outros padrões em 138 atos. Lei 14.973/2024 é caso canônico.
+ */
+export function joinSoftLineBreaks(text: string): string {
+  // 1) Linha termina em dash → unir com próxima (e remove espaços extras)
+  let result = text.replace(/([–—])\s*\n(?!\n)\s*/g, '$1 ');
+
+  // 2) "Art. Nº" / "Art. N." órfão antes de texto que começa maiúscula
+  result = result.replace(
+    /(\bArt\.\s*\d+(?:[ºo°])?\.?\s*)\n(?!\n)\s*(?=[A-ZÀ-ÝÂÊÎÔÛ"“])/g,
+    '$1 ',
+  );
+
+  // 3) "§ Nº" órfão antes de texto que começa maiúscula
+  result = result.replace(
+    /(§\s*\d+(?:[ºo°])?\s*)\n(?!\n)\s*(?=[A-ZÀ-ÝÂÊÎÔÛ"“])/g,
+    '$1 ',
+  );
+
+  // 4) Romano sozinho ("III") seguido de dash na próxima linha
+  result = result.replace(/(\b[IVX]+)\s*\n(?!\n)\s*(?=[–—])/g, '$1 ');
+
+  // 5) WRAP GENÉRICO: junta linha terminada em letra/dígito com próxima
+  //    que começa minúscula. Excluímos markers de lista pra não fundir items.
+  //    Approach line-by-line: mais robusto que regex pra excluir contexto.
+  const LIST_MARKER = /^\s*(?:[a-z]\)|\d+[.)])/i;
+  const ENDS_SOFT = /[a-záéíóúâêîôûãõç0-9]$/;
+  const STARTS_LOWER = /^[a-záéíóúâêîôûãõç]/;
+  const lines = result.split('\n');
+  const out: string[] = [];
+  for (let i = 0; i < lines.length; i++) {
+    const curr = lines[i];
+    const next = lines[i + 1];
+    // condição: curr não-vazia, next existe e não-vazia, e (curr+next) parece wrap
+    if (
+      curr !== '' &&
+      next !== undefined &&
+      next !== '' &&
+      ENDS_SOFT.test(curr) &&
+      STARTS_LOWER.test(next) &&
+      !LIST_MARKER.test(next)
+    ) {
+      out.push(curr + ' ' + next.trimStart());
+      i++; // consome a próxima
+    } else {
+      out.push(curr);
+    }
+  }
+  return out.join('\n');
+}
+
+/**
  * Mapeia chars de controle C1 (U+0080–U+009F) que aparecem por causa de
  * páginas Windows-1252 mal decodificadas. Em Unicode esses codepoints são
  * "reserved" e funcionam como caracteres invisíveis/inválidos. No cp1252
@@ -361,5 +434,9 @@ export function normalizeScrapedText(text: string | null | undefined): string {
   result = stripGovbrUiNoise(result);
   result = stripFormAnnex(result);
   result = dedupeBoilerplateFooter(result);
+  // joinSoftLineBreaks por último: precisa do texto já limpo de boilerplate
+  // (senão pode fundir lixo com conteúdo legítimo). Roda APÓS collapseWhitespace
+  // final implicitamente porque preserva \n\n (paragráfos) e só toca \n solo.
+  result = joinSoftLineBreaks(result);
   return collapseWhitespace(result);
 }
