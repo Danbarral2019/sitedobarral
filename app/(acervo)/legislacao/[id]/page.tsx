@@ -347,7 +347,11 @@ export default async function LegislativeActPage({ params }: PageProps) {
         )}
 
         {/* Histórico de relações (este ato altera / é alterado por outros) */}
-        <RelationHistory alters={relations.alters} alteredBy={relations.alteredBy} />
+        <RelationHistory
+          alters={relations.alters}
+          alteredBy={relations.alteredBy}
+          currentHierarchyLevel={act.hierarchyLevel ?? undefined}
+        />
 
         {/* Artigos Relacionados da Lei 14.133 */}
         {leiArticlesArray.length > 0 && (

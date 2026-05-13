@@ -9,6 +9,7 @@ import {
 import Link from 'next/link';
 import MarkdownContent from '@/components/MarkdownContent';
 import { TEMAS_LICITACOES, getThemeLabel } from '@/data/temas-licitacoes';
+import { HierarchyLegend } from '@/components/LegislativeActsPanel/HierarchyLegend';
 
 interface LegislativeAct {
   id: string;
@@ -358,6 +359,14 @@ export default function LegislacaoPage() {
 
         {/* Conteúdo Principal */}
         <section className="container mx-auto px-4 max-w-6xl py-8">
+          {/* Legenda de hierarquia normativa — só faz sentido na aba "atos" (onde hierarchyLevel existe);
+              "boas-praticas" e "orientacoes" são Documents sem nível, "tic" reaproveita o sistema mas é mais nichado. */}
+          {activeTab === 'atos' && (
+            <div className="mb-6">
+              <HierarchyLegend />
+            </div>
+          )}
+
           {/* Toolbar de Busca e Filtros */}
           <div className="mb-8">
             <div className="flex flex-col md:flex-row gap-4 mb-4">

@@ -18,6 +18,19 @@ const TYPE_COLORS: Record<string, string> = {
 };
 
 /**
+ * Tipos de relação onde a hierarquia importa: o source SÓ pode revogar/alterar
+ * um target de nível igual ou inferior (hierarchyLevel >= source.hierarchyLevel,
+ * já que números maiores são níveis mais baixos).
+ *
+ * Para `regulamenta` o sentido é INVERTIDO: source regulamenta target de nível
+ * SUPERIOR (decreto regulamenta lei). Anomalia: source.hl < target.hl.
+ *
+ * `complementa` e `modifica` têm semântica frouxa — não checamos.
+ */
+const HIERARCHY_SENSITIVE_DOWN = new Set(['revoga', 'altera']);
+const HIERARCHY_SENSITIVE_UP = new Set(['regulamenta']);
+
+/**
  * Prioridade entre relationTypes — usada para deduplicar quando o mesmo par
  * (sourceAct, targetAct) gera múltiplas relations (ex: detector heurístico
  * encontra "regulamenta" e "complementa" no mesmo ato em trechos distintos).
@@ -48,12 +61,38 @@ function dedupeRelations(rels: RelationView[], side: 'source' | 'target'): Relat
   return Array.from(byOtherId.values());
 }
 
+/**
+ * Determina se uma relação é hierarquicamente atípica.
+ * `direction`: 'down' = source revoga/altera target (source deveria ser >= target em força).
+ * 'up' = source regulamenta target (source deveria ser <= target em força — decreto regulamenta lei).
+ *
+ * Lembrando: hierarchyLevel 1=Lei, 2=Decreto, 3=Portaria, 4=IN, 5=OS (menor = mais forte).
+ */
+function isAtypical(
+  relationType: string,
+  sourceLevel: number | undefined,
+  targetLevel: number | undefined,
+): boolean {
+  if (sourceLevel == null || targetLevel == null) return false;
+  if (HIERARCHY_SENSITIVE_DOWN.has(relationType)) {
+    // source revoga/altera target → atípico se source é mais fraco (level maior) que target
+    return sourceLevel > targetLevel;
+  }
+  if (HIERARCHY_SENSITIVE_UP.has(relationType)) {
+    // source regulamenta target → atípico se source é MAIS FORTE que target (lei regulamenta decreto não faz sentido)
+    return sourceLevel < targetLevel;
+  }
+  return false;
+}
+
 export interface RelationHistoryProps {
   alters: RelationView[];
   alteredBy: RelationView[];
+  /** Nível hierárquico do ato corrente (necessário pra detectar incongruências). */
+  currentHierarchyLevel?: number;
 }
 
-export function RelationHistory({ alters, alteredBy }: RelationHistoryProps) {
+export function RelationHistory({ alters, alteredBy, currentHierarchyLevel }: RelationHistoryProps) {
   // Mesmo par (este ato, outro ato) pode ter múltiplas relations no DB quando
   // o detector encontrou verbos diferentes em trechos distintos do texto-fonte
   // (ex: ato cita Lei 14.133 dizendo "regulamenta" no preâmbulo e "complementa"
@@ -85,7 +124,12 @@ export function RelationHistory({ alters, alteredBy }: RelationHistoryProps) {
           </p>
           <ul className="space-y-3">
             {alters.map((rel) => (
-              <RelationItem key={rel.id} rel={rel} otherAct={rel.targetAct!} />
+              <RelationItem
+                key={rel.id}
+                rel={rel}
+                otherAct={rel.targetAct!}
+                atypical={isAtypical(rel.relationType, currentHierarchyLevel, rel.targetAct?.hierarchyLevel)}
+              />
             ))}
           </ul>
         </section>
@@ -102,7 +146,12 @@ export function RelationHistory({ alters, alteredBy }: RelationHistoryProps) {
           </p>
           <ul className="space-y-3">
             {alteredBy.map((rel) => (
-              <RelationItem key={rel.id} rel={rel} otherAct={rel.sourceAct!} />
+              <RelationItem
+                key={rel.id}
+                rel={rel}
+                otherAct={rel.sourceAct!}
+                atypical={isAtypical(rel.relationType, rel.sourceAct?.hierarchyLevel, currentHierarchyLevel)}
+              />
             ))}
           </ul>
         </section>
@@ -114,17 +163,27 @@ export function RelationHistory({ alters, alteredBy }: RelationHistoryProps) {
 function RelationItem({
   rel,
   otherAct,
+  atypical,
 }: {
   rel: RelationView;
   otherAct: { id: string; fullNumber: string; title: string };
+  atypical: boolean;
 }) {
   const typeColor = TYPE_COLORS[rel.relationType] ?? 'bg-gray-100 text-gray-700 border-gray-300';
   return (
-    <li className="border border-gray-200 rounded-lg p-3 hover:border-brand-300 transition-colors">
+    <li className={`border rounded-lg p-3 transition-colors ${atypical ? 'border-orange-300 bg-orange-50/50 hover:border-orange-400' : 'border-gray-200 hover:border-brand-300'}`}>
       <div className="flex items-start gap-2 flex-wrap">
         <span className={`inline-block px-2 py-0.5 text-xs font-semibold rounded border ${typeColor}`}>
           {TYPE_LABELS[rel.relationType] ?? rel.relationType}
         </span>
+        {atypical && (
+          <span
+            className="inline-block px-2 py-0.5 text-xs font-semibold rounded border bg-orange-100 text-orange-800 border-orange-300"
+            title="Relação hierarquicamente atípica: o ato de origem está em nível inferior ao ato afetado. Pode ser falso positivo do detector — verifique no texto."
+          >
+            ⚠️ atípico
+          </span>
+        )}
         {rel.reviewStatus === 'pending' && (
           <span className="inline-block px-2 py-0.5 text-xs font-semibold rounded border bg-yellow-50 text-yellow-700 border-yellow-300">
             ⏳ pendente revisão

@@ -117,8 +117,10 @@ export interface RelationView {
   reviewStatus: string;
   // `id` exposto para que a UI possa linkar para /legislacao/[id] (UUID),
   // não para fullNumber (que é texto livre e quebra a rota dinâmica).
-  sourceAct?: { id: string; fullNumber: string; title: string };
-  targetAct?: { id: string; fullNumber: string; title: string };
+  // `hierarchyLevel` permite que a UI sinalize relações hierarquicamente atípicas
+  // (ex: IN "altera" Lei) — ver RelationHistory.
+  sourceAct?: { id: string; fullNumber: string; title: string; hierarchyLevel: number };
+  targetAct?: { id: string; fullNumber: string; title: string; hierarchyLevel: number };
 }
 
 export interface RelationsForAct {
@@ -190,12 +192,12 @@ export async function getRelationsForAct(
   const [alters, alteredBy] = await Promise.all([
     prisma.legislativeActRelation.findMany({
       where: { sourceActId: actId, ...reviewFilter },
-      include: { targetAct: { select: { id: true, fullNumber: true, title: true } } },
+      include: { targetAct: { select: { id: true, fullNumber: true, title: true, hierarchyLevel: true } } },
       orderBy: { detectedAt: 'desc' },
     }),
     prisma.legislativeActRelation.findMany({
       where: { targetActId: actId, ...reviewFilter },
-      include: { sourceAct: { select: { id: true, fullNumber: true, title: true } } },
+      include: { sourceAct: { select: { id: true, fullNumber: true, title: true, hierarchyLevel: true } } },
       orderBy: { detectedAt: 'desc' },
     }),
   ]);
