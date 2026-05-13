@@ -1,0 +1,1746 @@
+{
+  "generatedAt": "2026-05-13T20:54:27.585Z",
+  "totalActs": 245,
+  "totalDetected": 442,
+  "totalResolved": 216,
+  "totalOrphanTargets": 167,
+  "orphans": [
+    {
+      "target": "Lei 8.212/1991",
+      "count": 6,
+      "citedBy": [
+        "Lei Complementar 123/2006",
+        "Lei 14.973/2024",
+        "Lei 11.488/2007"
+      ],
+      "relationTypes": [
+        "altera",
+        "regulamenta",
+        "complementa",
+        "revoga"
+      ]
+    },
+    {
+      "target": "Lei 10.406/2002",
+      "count": 5,
+      "citedBy": [
+        "Lei Complementar 123/2006",
+        "Lei Complementar 147/2014",
+        "Lei 13.146/2015",
+        "Lei 14.195/2021"
+      ],
+      "relationTypes": [
+        "altera",
+        "revoga"
+      ]
+    },
+    {
+      "target": "IN 53/2020",
+      "count": 4,
+      "citedBy": [
+        "IN AUTOR/ME 62/2021",
+        "IN SEGES/ME 42/2021",
+        "IN MP 76/2020"
+      ],
+      "relationTypes": [
+        "altera",
+        "revoga"
+      ]
+    },
+    {
+      "target": "Lei 10.973/2004",
+      "count": 4,
+      "citedBy": [
+        "Lei 14.133/2021",
+        "Lei 12.349/2010",
+        "Lei 13.243/2016"
+      ],
+      "relationTypes": [
+        "altera",
+        "revoga"
+      ]
+    },
+    {
+      "target": "Decreto 3.722/2001",
+      "count": 4,
+      "citedBy": [
+        "IN MP 2/2011",
+        "IN MP 10/2020",
+        "IN MP 64/2020",
+        "IN MP 107/2020"
+      ],
+      "relationTypes": [
+        "regulamenta",
+        "altera"
+      ]
+    },
+    {
+      "target": "Lei 8.213/1991",
+      "count": 3,
+      "citedBy": [
+        "Lei Complementar 123/2006",
+        "Lei 13.146/2015"
+      ],
+      "relationTypes": [
+        "altera",
+        "complementa"
+      ]
+    },
+    {
+      "target": "Lei 9.430/1996",
+      "count": 3,
+      "citedBy": [
+        "Lei Complementar 123/2006",
+        "Lei 11.488/2007",
+        "Lei 14.195/2021"
+      ],
+      "relationTypes": [
+        "altera"
+      ]
+    },
+    {
+      "target": "Lei 11.326/2006",
+      "count": 3,
+      "citedBy": [
+        "Lei Complementar 123/2006",
+        "Lei Complementar 147/2014",
+        "IN MP 3/2019"
+      ],
+      "relationTypes": [
+        "regulamenta",
+        "altera"
+      ]
+    },
+    {
+      "target": "Lei 12.546/2011",
+      "count": 3,
+      "citedBy": [
+        "Lei 14.973/2024",
+        "Lei 14.195/2021"
+      ],
+      "relationTypes": [
+        "altera",
+        "revoga"
+      ]
+    },
+    {
+      "target": "Lei 10.520/2002",
+      "count": 3,
+      "citedBy": [
+        "Decreto 7.581/2011",
+        "Decreto 9.488/2018",
+        "Decreto 10.024/2019"
+      ],
+      "relationTypes": [
+        "revoga",
+        "regulamenta"
+      ]
+    },
+    {
+      "target": "Lei 10.683/2003",
+      "count": 3,
+      "citedBy": [
+        "Lei 12.462/2011"
+      ],
+      "relationTypes": [
+        "revoga",
+        "altera",
+        "complementa"
+      ]
+    },
+    {
+      "target": "Lei 8.958/1994",
+      "count": 3,
+      "citedBy": [
+        "Lei 12.349/2010",
+        "Lei 13.243/2016",
+        "Decreto 8.241/2014"
+      ],
+      "relationTypes": [
+        "altera",
+        "regulamenta"
+      ]
+    },
+    {
+      "target": "Lei 9.074/1995",
+      "count": 3,
+      "citedBy": [
+        "Lei 11.488/2007"
+      ],
+      "relationTypes": [
+        "altera",
+        "regulamenta",
+        "complementa"
+      ]
+    },
+    {
+      "target": "Decreto 9.094/2017",
+      "count": 3,
+      "citedBy": [
+        "IN MP 10/2020",
+        "IN MP 64/2020",
+        "IN MP 107/2020"
+      ],
+      "relationTypes": [
+        "altera"
+      ]
+    },
+    {
+      "target": "Decreto 99.658/1990",
+      "count": 2,
+      "citedBy": [
+        "Decreto 9.373/2018",
+        "IN MP 1/2010"
+      ],
+      "relationTypes": [
+        "revoga",
+        "altera"
+      ]
+    },
+    {
+      "target": "Portaria SGD/MGI 6.055/2025",
+      "count": 2,
+      "citedBy": [
+        "Portaria SGD/MGI nº 1.070/2023"
+      ],
+      "relationTypes": [
+        "revoga",
+        "altera"
+      ]
+    },
+    {
+      "target": "Lei 11.101/2005",
+      "count": 2,
+      "citedBy": [
+        "Lei 10.522/2002",
+        "Lei Complementar 147/2014"
+      ],
+      "relationTypes": [
+        "revoga",
+        "altera"
+      ]
+    },
+    {
+      "target": "Lei 13.988/2020",
+      "count": 2,
+      "citedBy": [
+        "Lei 10.522/2002",
+        "Lei 14.973/2024"
+      ],
+      "relationTypes": [
+        "regulamenta",
+        "altera"
+      ]
+    },
+    {
+      "target": "Lei 10.189/2001",
+      "count": 2,
+      "citedBy": [
+        "Lei Complementar 123/2006"
+      ],
+      "relationTypes": [
+        "revoga",
+        "altera"
+      ]
+    },
+    {
+      "target": "Decreto 12.102/2024",
+      "count": 2,
+      "citedBy": [
+        "IN SGD/MGI nº 86/2025",
+        "IN SEGES 460/2025"
+      ],
+      "relationTypes": [
+        "altera"
+      ]
+    },
+    {
+      "target": "Lei 13.848/2019",
+      "count": 2,
+      "citedBy": [
+        "Lei 13.709/2018",
+        "Portaria Normativa MF 1.344/2023"
+      ],
+      "relationTypes": [
+        "revoga"
+      ]
+    },
+    {
+      "target": "Lei 8.934/1994",
+      "count": 2,
+      "citedBy": [
+        "Lei Complementar 147/2014",
+        "Lei 14.195/2021"
+      ],
+      "relationTypes": [
+        "altera"
+      ]
+    },
+    {
+      "target": "Lei 11.598/2007",
+      "count": 2,
+      "citedBy": [
+        "Lei Complementar 147/2014",
+        "Lei 14.195/2021"
+      ],
+      "relationTypes": [
+        "altera"
+      ]
+    },
+    {
+      "target": "Lei 8.112/1990",
+      "count": 2,
+      "citedBy": [
+        "Lei 12.527/2011",
+        "Lei 9.637/1998"
+      ],
+      "relationTypes": [
+        "altera"
+      ]
+    },
+    {
+      "target": "Lei 8.742/1993",
+      "count": 2,
+      "citedBy": [
+        "Lei 14.973/2024",
+        "Lei 13.146/2015"
+      ],
+      "relationTypes": [
+        "altera"
+      ]
+    },
+    {
+      "target": "Lei 11.182/2005",
+      "count": 2,
+      "citedBy": [
+        "Lei 12.462/2011"
+      ],
+      "relationTypes": [
+        "revoga",
+        "altera"
+      ]
+    },
+    {
+      "target": "Lei 11.273/2006",
+      "count": 2,
+      "citedBy": [
+        "Lei 12.349/2010"
+      ],
+      "relationTypes": [
+        "revoga",
+        "altera"
+      ]
+    },
+    {
+      "target": "Lei 1.593/1977",
+      "count": 2,
+      "citedBy": [
+        "Lei 11.488/2007"
+      ],
+      "relationTypes": [
+        "revoga",
+        "altera"
+      ]
+    },
+    {
+      "target": "Lei 10.666/2003",
+      "count": 2,
+      "citedBy": [
+        "Lei 11.488/2007"
+      ],
+      "relationTypes": [
+        "revoga",
+        "altera"
+      ]
+    },
+    {
+      "target": "Lei 10.833/2003",
+      "count": 2,
+      "citedBy": [
+        "Lei 11.488/2007"
+      ],
+      "relationTypes": [
+        "revoga",
+        "altera"
+      ]
+    },
+    {
+      "target": "Lei 4.502/1964",
+      "count": 2,
+      "citedBy": [
+        "Lei 11.488/2007"
+      ],
+      "relationTypes": [
+        "revoga",
+        "altera"
+      ]
+    },
+    {
+      "target": "Lei 9.427/1996",
+      "count": 2,
+      "citedBy": [
+        "Lei 11.488/2007"
+      ],
+      "relationTypes": [
+        "altera",
+        "regulamenta"
+      ]
+    },
+    {
+      "target": "Decreto 6.170/2007",
+      "count": 2,
+      "citedBy": [
+        "Decreto 10.426/2020"
+      ],
+      "relationTypes": [
+        "revoga",
+        "altera"
+      ]
+    },
+    {
+      "target": "Lei 13.874/2019",
+      "count": 2,
+      "citedBy": [
+        "Decreto 10.278/2020",
+        "Lei 14.195/2021"
+      ],
+      "relationTypes": [
+        "regulamenta",
+        "altera"
+      ]
+    },
+    {
+      "target": "Decreto 93.872/1986",
+      "count": 2,
+      "citedBy": [
+        "Portaria MPOG 1/2006",
+        "Portaria MPOG 41/2005"
+      ],
+      "relationTypes": [
+        "regulamenta"
+      ]
+    },
+    {
+      "target": "Decreto 9.035/2017",
+      "count": 2,
+      "citedBy": [
+        "IN MP 7/2018",
+        "IN MP 5/2018"
+      ],
+      "relationTypes": [
+        "altera"
+      ]
+    },
+    {
+      "target": "Decreto 3.800/2001",
+      "count": 2,
+      "citedBy": [
+        "Decreto 5.906/2006"
+      ],
+      "relationTypes": [
+        "altera",
+        "modifica"
+      ]
+    },
+    {
+      "target": "IN 2/2008",
+      "count": 1,
+      "citedBy": [
+        "IN SEGES/MP 5/2017"
+      ],
+      "relationTypes": [
+        "revoga"
+      ]
+    },
+    {
+      "target": "Lei 9.632/1998",
+      "count": 1,
+      "citedBy": [
+        "IN SEGES/MP 5/2017"
+      ],
+      "relationTypes": [
+        "regulamenta"
+      ]
+    },
+    {
+      "target": "Lei 10.931/2004",
+      "count": 1,
+      "citedBy": [
+        "Lei 10.522/2002"
+      ],
+      "relationTypes": [
+        "revoga"
+      ]
+    },
+    {
+      "target": "Lei 6.830/1980",
+      "count": 1,
+      "citedBy": [
+        "Lei 10.522/2002"
+      ],
+      "relationTypes": [
+        "revoga"
+      ]
+    },
+    {
+      "target": "Lei 352/1968",
+      "count": 1,
+      "citedBy": [
+        "Lei 10.522/2002"
+      ],
+      "relationTypes": [
+        "revoga"
+      ]
+    },
+    {
+      "target": "Lei 822/1969",
+      "count": 1,
+      "citedBy": [
+        "Lei 10.522/2002"
+      ],
+      "relationTypes": [
+        "altera"
+      ]
+    },
+    {
+      "target": "Lei 9.641/1998",
+      "count": 1,
+      "citedBy": [
+        "Lei 10.522/2002"
+      ],
+      "relationTypes": [
+        "altera"
+      ]
+    },
+    {
+      "target": "Lei 70/1991",
+      "count": 1,
+      "citedBy": [
+        "Lei 10.522/2002"
+      ],
+      "relationTypes": [
+        "altera"
+      ]
+    },
+    {
+      "target": "Lei 2.052/1983",
+      "count": 1,
+      "citedBy": [
+        "Lei 10.522/2002"
+      ],
+      "relationTypes": [
+        "altera"
+      ]
+    },
+    {
+      "target": "IN Seges/ME 53/2020",
+      "count": 1,
+      "citedBy": [
+        "IN SEGES/MGI 82/2025"
+      ],
+      "relationTypes": [
+        "revoga"
+      ]
+    },
+    {
+      "target": "Lei 9.317/1996",
+      "count": 1,
+      "citedBy": [
+        "Lei Complementar 123/2006"
+      ],
+      "relationTypes": [
+        "revoga"
+      ]
+    },
+    {
+      "target": "Lei 63/1990",
+      "count": 1,
+      "citedBy": [
+        "Lei Complementar 123/2006"
+      ],
+      "relationTypes": [
+        "altera"
+      ]
+    },
+    {
+      "target": "Lei 7.232/1984",
+      "count": 1,
+      "citedBy": [
+        "Lei 8.248/1991"
+      ],
+      "relationTypes": [
+        "revoga"
+      ]
+    },
+    {
+      "target": "Decreto 3.931/2001",
+      "count": 1,
+      "citedBy": [
+        "Decreto 7.892/2013"
+      ],
+      "relationTypes": [
+        "revoga"
+      ]
+    },
+    {
+      "target": "Portaria MGI 2.264/2023",
+      "count": 1,
+      "citedBy": [
+        "IN SGD/MGI nº 86/2025"
+      ],
+      "relationTypes": [
+        "revoga"
+      ]
+    },
+    {
+      "target": "Lei 10.861/2004",
+      "count": 1,
+      "citedBy": [
+        "Lei 13.709/2018"
+      ],
+      "relationTypes": [
+        "revoga"
+      ]
+    },
+    {
+      "target": "Lei 12.965/2014",
+      "count": 1,
+      "citedBy": [
+        "Lei 13.709/2018"
+      ],
+      "relationTypes": [
+        "altera"
+      ]
+    },
+    {
+      "target": "Portaria Seges 21.332/2020",
+      "count": 1,
+      "citedBy": [
+        "Portaria SEGES/MGI 7.604/2025"
+      ],
+      "relationTypes": [
+        "revoga"
+      ]
+    },
+    {
+      "target": "Lei 2.848/1940",
+      "count": 1,
+      "citedBy": [
+        "Lei 14.133/2021"
+      ],
+      "relationTypes": [
+        "altera"
+      ]
+    },
+    {
+      "target": "Lei 5.442/2024",
+      "count": 1,
+      "citedBy": [
+        "Lei 5.452/1943"
+      ],
+      "relationTypes": [
+        "revoga"
+      ]
+    },
+    {
+      "target": "Lei 11.111/2005",
+      "count": 1,
+      "citedBy": [
+        "Lei 12.527/2011"
+      ],
+      "relationTypes": [
+        "revoga"
+      ]
+    },
+    {
+      "target": "Decreto 2.031/1996",
+      "count": 1,
+      "citedBy": [
+        "Decreto 2.271/1997"
+      ],
+      "relationTypes": [
+        "revoga"
+      ]
+    },
+    {
+      "target": "Lei 11.943/2009",
+      "count": 1,
+      "citedBy": [
+        "Lei 13.303/2016"
+      ],
+      "relationTypes": [
+        "revoga"
+      ]
+    },
+    {
+      "target": "Lei 135/2010",
+      "count": 1,
+      "citedBy": [
+        "Lei 13.303/2016"
+      ],
+      "relationTypes": [
+        "altera"
+      ]
+    },
+    {
+      "target": "Portaria 409/2016",
+      "count": 1,
+      "citedBy": [
+        "Portaria MPOG 443/2018"
+      ],
+      "relationTypes": [
+        "revoga"
+      ]
+    },
+    {
+      "target": "Lei 11.539/2007",
+      "count": 1,
+      "citedBy": [
+        "Decreto 11.345/2023"
+      ],
+      "relationTypes": [
+        "revoga"
+      ]
+    },
+    {
+      "target": "Lei 8.186/1991",
+      "count": 1,
+      "citedBy": [
+        "Decreto 11.345/2023"
+      ],
+      "relationTypes": [
+        "complementa"
+      ]
+    },
+    {
+      "target": "Decreto 10.188/2019",
+      "count": 1,
+      "citedBy": [
+        "Decreto 11.345/2023"
+      ],
+      "relationTypes": [
+        "complementa"
+      ]
+    },
+    {
+      "target": "Lei 8.220/1991",
+      "count": 1,
+      "citedBy": [
+        "Lei 8.666/1993"
+      ],
+      "relationTypes": [
+        "revoga"
+      ]
+    },
+    {
+      "target": "Lei 9.760/1946",
+      "count": 1,
+      "citedBy": [
+        "Lei 8.666/1993"
+      ],
+      "relationTypes": [
+        "altera"
+      ]
+    },
+    {
+      "target": "IN 2/2009",
+      "count": 1,
+      "citedBy": [
+        "IN SEGES 102/2020"
+      ],
+      "relationTypes": [
+        "revoga"
+      ]
+    },
+    {
+      "target": "Portaria SEGES/ME 9.412/2022",
+      "count": 1,
+      "citedBy": [
+        "Portaria SEGES 1.363/2025"
+      ],
+      "relationTypes": [
+        "revoga"
+      ]
+    },
+    {
+      "target": "Lei 12.099/2009",
+      "count": 1,
+      "citedBy": [
+        "Lei 14.973/2024"
+      ],
+      "relationTypes": [
+        "revoga"
+      ]
+    },
+    {
+      "target": "Lei 1.737/1979",
+      "count": 1,
+      "citedBy": [
+        "Lei 14.973/2024"
+      ],
+      "relationTypes": [
+        "revoga"
+      ]
+    },
+    {
+      "target": "Decreto 11.158/2022",
+      "count": 1,
+      "citedBy": [
+        "Lei 14.973/2024"
+      ],
+      "relationTypes": [
+        "altera"
+      ]
+    },
+    {
+      "target": "Lei 5.172/1966",
+      "count": 1,
+      "citedBy": [
+        "Lei 14.973/2024"
+      ],
+      "relationTypes": [
+        "altera"
+      ]
+    },
+    {
+      "target": "Lei 10.779/2003",
+      "count": 1,
+      "citedBy": [
+        "Lei 14.973/2024"
+      ],
+      "relationTypes": [
+        "altera"
+      ]
+    },
+    {
+      "target": "Lei 13.254/2016",
+      "count": 1,
+      "citedBy": [
+        "Lei 14.973/2024"
+      ],
+      "relationTypes": [
+        "altera"
+      ]
+    },
+    {
+      "target": "Lei 4.737/1965",
+      "count": 1,
+      "citedBy": [
+        "Lei 13.146/2015"
+      ],
+      "relationTypes": [
+        "altera"
+      ]
+    },
+    {
+      "target": "Lei 7.853/1989",
+      "count": 1,
+      "citedBy": [
+        "Lei 13.146/2015"
+      ],
+      "relationTypes": [
+        "altera"
+      ]
+    },
+    {
+      "target": "Lei 8.078/1990",
+      "count": 1,
+      "citedBy": [
+        "Lei 13.146/2015"
+      ],
+      "relationTypes": [
+        "altera"
+      ]
+    },
+    {
+      "target": "Lei 8.313/1991",
+      "count": 1,
+      "citedBy": [
+        "Lei 13.146/2015"
+      ],
+      "relationTypes": [
+        "altera"
+      ]
+    },
+    {
+      "target": "Lei 9.029/1995",
+      "count": 1,
+      "citedBy": [
+        "Lei 13.146/2015"
+      ],
+      "relationTypes": [
+        "altera"
+      ]
+    },
+    {
+      "target": "Lei 10.741/2003",
+      "count": 1,
+      "citedBy": [
+        "Lei 13.146/2015"
+      ],
+      "relationTypes": [
+        "altera"
+      ]
+    },
+    {
+      "target": "Lei 9.503/1997",
+      "count": 1,
+      "citedBy": [
+        "Lei 13.146/2015"
+      ],
+      "relationTypes": [
+        "altera"
+      ]
+    },
+    {
+      "target": "Lei 10.048/2000",
+      "count": 1,
+      "citedBy": [
+        "Lei 13.146/2015"
+      ],
+      "relationTypes": [
+        "altera"
+      ]
+    },
+    {
+      "target": "Lei 10.098/2000",
+      "count": 1,
+      "citedBy": [
+        "Lei 13.146/2015"
+      ],
+      "relationTypes": [
+        "altera"
+      ]
+    },
+    {
+      "target": "Lei 10.257/2001",
+      "count": 1,
+      "citedBy": [
+        "Lei 13.146/2015"
+      ],
+      "relationTypes": [
+        "altera"
+      ]
+    },
+    {
+      "target": "Lei 11.126/2005",
+      "count": 1,
+      "citedBy": [
+        "Lei 13.146/2015"
+      ],
+      "relationTypes": [
+        "altera"
+      ]
+    },
+    {
+      "target": "Lei 12.587/2012",
+      "count": 1,
+      "citedBy": [
+        "Lei 13.146/2015"
+      ],
+      "relationTypes": [
+        "altera"
+      ]
+    },
+    {
+      "target": "Lei 9.649/1998",
+      "count": 1,
+      "citedBy": [
+        "Lei 12.462/2011"
+      ],
+      "relationTypes": [
+        "revoga"
+      ]
+    },
+    {
+      "target": "Lei 9.307/1996",
+      "count": 1,
+      "citedBy": [
+        "Lei 12.462/2011"
+      ],
+      "relationTypes": [
+        "revoga"
+      ]
+    },
+    {
+      "target": "Lei 9.825/1999",
+      "count": 1,
+      "citedBy": [
+        "Lei 12.462/2011"
+      ],
+      "relationTypes": [
+        "revoga"
+      ]
+    },
+    {
+      "target": "Lei 13.483/2017",
+      "count": 1,
+      "citedBy": [
+        "Lei 12.462/2011"
+      ],
+      "relationTypes": [
+        "revoga"
+      ]
+    },
+    {
+      "target": "Lei 5.862/1972",
+      "count": 1,
+      "citedBy": [
+        "Lei 12.462/2011"
+      ],
+      "relationTypes": [
+        "altera"
+      ]
+    },
+    {
+      "target": "Lei 8.399/1992",
+      "count": 1,
+      "citedBy": [
+        "Lei 12.462/2011"
+      ],
+      "relationTypes": [
+        "altera"
+      ]
+    },
+    {
+      "target": "Lei 11.526/2007",
+      "count": 1,
+      "citedBy": [
+        "Lei 12.462/2011"
+      ],
+      "relationTypes": [
+        "altera"
+      ]
+    },
+    {
+      "target": "Lei 12.350/2010",
+      "count": 1,
+      "citedBy": [
+        "Lei 12.462/2011"
+      ],
+      "relationTypes": [
+        "altera"
+      ]
+    },
+    {
+      "target": "Lei 10.356/2001",
+      "count": 1,
+      "citedBy": [
+        "Portaria TCU 3/2025"
+      ],
+      "relationTypes": [
+        "altera"
+      ]
+    },
+    {
+      "target": "Portaria 385/2018",
+      "count": 1,
+      "citedBy": [
+        "Portaria MPOG 232/2020"
+      ],
+      "relationTypes": [
+        "revoga"
+      ]
+    },
+    {
+      "target": "Lei 12.772/2012",
+      "count": 1,
+      "citedBy": [
+        "Lei 13.243/2016"
+      ],
+      "relationTypes": [
+        "altera"
+      ]
+    },
+    {
+      "target": "Lei 6.815/1980",
+      "count": 1,
+      "citedBy": [
+        "Lei 13.243/2016"
+      ],
+      "relationTypes": [
+        "altera"
+      ]
+    },
+    {
+      "target": "Lei 8.745/1993",
+      "count": 1,
+      "citedBy": [
+        "Lei 13.243/2016"
+      ],
+      "relationTypes": [
+        "altera"
+      ]
+    },
+    {
+      "target": "Lei 8.032/1990",
+      "count": 1,
+      "citedBy": [
+        "Lei 13.243/2016"
+      ],
+      "relationTypes": [
+        "altera"
+      ]
+    },
+    {
+      "target": "Lei 9.716/1998",
+      "count": 1,
+      "citedBy": [
+        "Lei 11.488/2007"
+      ],
+      "relationTypes": [
+        "revoga"
+      ]
+    },
+    {
+      "target": "Lei 1.437/1975",
+      "count": 1,
+      "citedBy": [
+        "Lei 11.488/2007"
+      ],
+      "relationTypes": [
+        "revoga"
+      ]
+    },
+    {
+      "target": "Lei 10.637/2002",
+      "count": 1,
+      "citedBy": [
+        "Lei 11.488/2007"
+      ],
+      "relationTypes": [
+        "altera"
+      ]
+    },
+    {
+      "target": "Lei 8.218/1991",
+      "count": 1,
+      "citedBy": [
+        "Lei 11.488/2007"
+      ],
+      "relationTypes": [
+        "altera"
+      ]
+    },
+    {
+      "target": "Lei 10.438/2002",
+      "count": 1,
+      "citedBy": [
+        "Lei 11.488/2007"
+      ],
+      "relationTypes": [
+        "altera"
+      ]
+    },
+    {
+      "target": "Lei 10.925/2004",
+      "count": 1,
+      "citedBy": [
+        "Lei 11.488/2007"
+      ],
+      "relationTypes": [
+        "altera"
+      ]
+    },
+    {
+      "target": "Lei 11.196/2005",
+      "count": 1,
+      "citedBy": [
+        "Lei 11.488/2007"
+      ],
+      "relationTypes": [
+        "altera"
+      ]
+    },
+    {
+      "target": "Lei 9.648/1998",
+      "count": 1,
+      "citedBy": [
+        "Lei 11.488/2007"
+      ],
+      "relationTypes": [
+        "modifica"
+      ]
+    },
+    {
+      "target": "Lei 11.356/2006",
+      "count": 1,
+      "citedBy": [
+        "Portaria MPOG 252/2017"
+      ],
+      "relationTypes": [
+        "altera"
+      ]
+    },
+    {
+      "target": "Decreto 8.915/2016",
+      "count": 1,
+      "citedBy": [
+        "Decreto 10.426/2020"
+      ],
+      "relationTypes": [
+        "revoga"
+      ]
+    },
+    {
+      "target": "Decreto 825/1993",
+      "count": 1,
+      "citedBy": [
+        "Decreto 10.426/2020"
+      ],
+      "relationTypes": [
+        "altera"
+      ]
+    },
+    {
+      "target": "IN 5/2014",
+      "count": 1,
+      "citedBy": [
+        "IN MP 73/2020"
+      ],
+      "relationTypes": [
+        "revoga"
+      ]
+    },
+    {
+      "target": "Lei 12.340/2010",
+      "count": 1,
+      "citedBy": [
+        "Decreto 11.476/2023"
+      ],
+      "relationTypes": [
+        "revoga"
+      ]
+    },
+    {
+      "target": "Lei 11.947/2009",
+      "count": 1,
+      "citedBy": [
+        "Decreto 11.476/2023"
+      ],
+      "relationTypes": [
+        "revoga"
+      ]
+    },
+    {
+      "target": "Decreto 8.473/2015",
+      "count": 1,
+      "citedBy": [
+        "Decreto 11.476/2023"
+      ],
+      "relationTypes": [
+        "revoga"
+      ]
+    },
+    {
+      "target": "Decreto 7.793/2012",
+      "count": 1,
+      "citedBy": [
+        "Decreto 8.535/2015"
+      ],
+      "relationTypes": [
+        "revoga"
+      ]
+    },
+    {
+      "target": "Lei 12.249/2010",
+      "count": 1,
+      "citedBy": [
+        "Lei 12.598/2012"
+      ],
+      "relationTypes": [
+        "altera"
+      ]
+    },
+    {
+      "target": "IN 72/2021",
+      "count": 1,
+      "citedBy": [
+        "IN SEGES/ME 91/2022"
+      ],
+      "relationTypes": [
+        "revoga"
+      ]
+    },
+    {
+      "target": "Lei 406/1968",
+      "count": 1,
+      "citedBy": [
+        "Lei Complementar 116/2003"
+      ],
+      "relationTypes": [
+        "revoga"
+      ]
+    },
+    {
+      "target": "Lei 1.081/1950",
+      "count": 1,
+      "citedBy": [
+        "Decreto 10.309/2020"
+      ],
+      "relationTypes": [
+        "altera"
+      ]
+    },
+    {
+      "target": "Lei 96/1999",
+      "count": 1,
+      "citedBy": [
+        "Lei Complementar 101/2000"
+      ],
+      "relationTypes": [
+        "revoga"
+      ]
+    },
+    {
+      "target": "Portaria 31/2012",
+      "count": 1,
+      "citedBy": [
+        "Portaria SEGES 22.455/2020"
+      ],
+      "relationTypes": [
+        "revoga"
+      ]
+    },
+    {
+      "target": "IN 2/2007",
+      "count": 1,
+      "citedBy": [
+        "IN MP 12/2020"
+      ],
+      "relationTypes": [
+        "revoga"
+      ]
+    },
+    {
+      "target": "Decreto 7.579/2011",
+      "count": 1,
+      "citedBy": [
+        "Decreto 9.488/2018"
+      ],
+      "relationTypes": [
+        "altera"
+      ]
+    },
+    {
+      "target": "Decreto 75.657/1975",
+      "count": 1,
+      "citedBy": [
+        "Decreto 1.094/1994"
+      ],
+      "relationTypes": [
+        "revoga"
+      ]
+    },
+    {
+      "target": "Lei 8.080/1990",
+      "count": 1,
+      "citedBy": [
+        "Lei 8.429/1992"
+      ],
+      "relationTypes": [
+        "revoga"
+      ]
+    },
+    {
+      "target": "Decreto 9.191/2017",
+      "count": 1,
+      "citedBy": [
+        "IN MP 4/2018"
+      ],
+      "relationTypes": [
+        "altera"
+      ]
+    },
+    {
+      "target": "Decreto 8.660/2016",
+      "count": 1,
+      "citedBy": [
+        "IN MP 3/2018"
+      ],
+      "relationTypes": [
+        "revoga"
+      ]
+    },
+    {
+      "target": "IN 7/2012",
+      "count": 1,
+      "citedBy": [
+        "IN MP 3/2015"
+      ],
+      "relationTypes": [
+        "revoga"
+      ]
+    },
+    {
+      "target": "Portaria MP 265/2001",
+      "count": 1,
+      "citedBy": [
+        "Portaria MPOG 41/2005"
+      ],
+      "relationTypes": [
+        "revoga"
+      ]
+    },
+    {
+      "target": "Decreto 10.922/2021",
+      "count": 1,
+      "citedBy": [
+        "Decreto 11.317/2022"
+      ],
+      "relationTypes": [
+        "revoga"
+      ]
+    },
+    {
+      "target": "Decreto 3.687/1939",
+      "count": 1,
+      "citedBy": [
+        "Decreto 10.554/2020"
+      ],
+      "relationTypes": [
+        "revoga"
+      ]
+    },
+    {
+      "target": "Decreto 95.728/1988",
+      "count": 1,
+      "citedBy": [
+        "Decreto 10.554/2020"
+      ],
+      "relationTypes": [
+        "revoga"
+      ]
+    },
+    {
+      "target": "Decreto 9.270/2018",
+      "count": 1,
+      "citedBy": [
+        "Decreto 10.554/2020"
+      ],
+      "relationTypes": [
+        "altera"
+      ]
+    },
+    {
+      "target": "IN Seges/ME 75/2021",
+      "count": 1,
+      "citedBy": [
+        "IN SEGES 90/2022"
+      ],
+      "relationTypes": [
+        "revoga"
+      ]
+    },
+    {
+      "target": "Lei 9.605/1998",
+      "count": 1,
+      "citedBy": [
+        "Lei 12.305/2010"
+      ],
+      "relationTypes": [
+        "altera"
+      ]
+    },
+    {
+      "target": "Lei 2.145/1953",
+      "count": 1,
+      "citedBy": [
+        "Lei 14.195/2021"
+      ],
+      "relationTypes": [
+        "revoga"
+      ]
+    },
+    {
+      "target": "Lei 6.404/1976",
+      "count": 1,
+      "citedBy": [
+        "Lei 14.195/2021"
+      ],
+      "relationTypes": [
+        "altera"
+      ]
+    },
+    {
+      "target": "Lei 7.913/1989",
+      "count": 1,
+      "citedBy": [
+        "Lei 14.195/2021"
+      ],
+      "relationTypes": [
+        "altera"
+      ]
+    },
+    {
+      "target": "Lei 12.514/2011",
+      "count": 1,
+      "citedBy": [
+        "Lei 14.195/2021"
+      ],
+      "relationTypes": [
+        "altera"
+      ]
+    },
+    {
+      "target": "Lei 4.886/1965",
+      "count": 1,
+      "citedBy": [
+        "Lei 14.195/2021"
+      ],
+      "relationTypes": [
+        "altera"
+      ]
+    },
+    {
+      "target": "Lei 6.385/1976",
+      "count": 1,
+      "citedBy": [
+        "Lei 14.195/2021"
+      ],
+      "relationTypes": [
+        "altera"
+      ]
+    },
+    {
+      "target": "Lei 140/2011",
+      "count": 1,
+      "citedBy": [
+        "Lei 14.195/2021"
+      ],
+      "relationTypes": [
+        "altera"
+      ]
+    },
+    {
+      "target": "Lei 666/1969",
+      "count": 1,
+      "citedBy": [
+        "Lei 14.195/2021"
+      ],
+      "relationTypes": [
+        "altera"
+      ]
+    },
+    {
+      "target": "Decreto 8.250/2014",
+      "count": 1,
+      "citedBy": [
+        "Decreto 11.462/2023"
+      ],
+      "relationTypes": [
+        "revoga"
+      ]
+    },
+    {
+      "target": "Lei 9.608/1998",
+      "count": 1,
+      "citedBy": [
+        "IN MP 6/2019"
+      ],
+      "relationTypes": [
+        "altera"
+      ]
+    },
+    {
+      "target": "Decreto 5.343/2005",
+      "count": 1,
+      "citedBy": [
+        "Decreto 5.906/2006"
+      ],
+      "relationTypes": [
+        "revoga"
+      ]
+    },
+    {
+      "target": "Lei 11.077/2004",
+      "count": 1,
+      "citedBy": [
+        "Decreto 5.906/2006"
+      ],
+      "relationTypes": [
+        "regulamenta"
+      ]
+    },
+    {
+      "target": "Decreto 6.514/2008",
+      "count": 1,
+      "citedBy": [
+        "Decreto 7.404/2010"
+      ],
+      "relationTypes": [
+        "altera"
+      ]
+    },
+    {
+      "target": "IN 10/2018",
+      "count": 1,
+      "citedBy": [
+        "IN SEGES 412/2025"
+      ],
+      "relationTypes": [
+        "revoga"
+      ]
+    },
+    {
+      "target": "IN 3/2011",
+      "count": 1,
+      "citedBy": [
+        "IN MP 210/2019"
+      ],
+      "relationTypes": [
+        "revoga"
+      ]
+    },
+    {
+      "target": "Portaria SEGES/MGI 1769/2023",
+      "count": 1,
+      "citedBy": [
+        "Portaria SEGES/MGI 4.932/2023"
+      ],
+      "relationTypes": [
+        "altera"
+      ]
+    },
+    {
+      "target": "Portaria 213/2017",
+      "count": 1,
+      "citedBy": [
+        "Portaria MPOG 21.262/2020"
+      ],
+      "relationTypes": [
+        "revoga"
+      ]
+    },
+    {
+      "target": "Lei 3.470/1958",
+      "count": 1,
+      "citedBy": [
+        "Decreto-Lei 200/1967"
+      ],
+      "relationTypes": [
+        "revoga"
+      ]
+    },
+    {
+      "target": "Lei 1.711/1952",
+      "count": 1,
+      "citedBy": [
+        "Decreto-Lei 200/1967"
+      ],
+      "relationTypes": [
+        "revoga"
+      ]
+    },
+    {
+      "target": "Portaria 205/2010",
+      "count": 1,
+      "citedBy": [
+        "Portaria MPOG 372/2020"
+      ],
+      "relationTypes": [
+        "revoga"
+      ]
+    },
+    {
+      "target": "Portaria 7/2016",
+      "count": 1,
+      "citedBy": [
+        "Portaria MPOG 372/2020"
+      ],
+      "relationTypes": [
+        "revoga"
+      ]
+    },
+    {
+      "target": "Portaria 3.065/2023",
+      "count": 1,
+      "citedBy": [
+        "Portaria MPOG 406/2019"
+      ],
+      "relationTypes": [
+        "revoga"
+      ]
+    },
+    {
+      "target": "Decreto 8.961/2017",
+      "count": 1,
+      "citedBy": [
+        "Portaria MPOG 194/2017"
+      ],
+      "relationTypes": [
+        "altera"
+      ]
+    },
+    {
+      "target": "Decreto 8.578/2015",
+      "count": 1,
+      "citedBy": [
+        "Portaria MPOG 80/2016"
+      ],
+      "relationTypes": [
+        "revoga"
+      ]
+    },
+    {
+      "target": "Portaria SLTI/MP 5/2002",
+      "count": 1,
+      "citedBy": [
+        "Portaria MPOG 80/2016"
+      ],
+      "relationTypes": [
+        "revoga"
+      ]
+    },
+    {
+      "target": "Decreto 5.450/2005",
+      "count": 1,
+      "citedBy": [
+        "Decreto 10.024/2019"
+      ],
+      "relationTypes": [
+        "revoga"
+      ]
+    },
+    {
+      "target": "IN 13/1997",
+      "count": 1,
+      "citedBy": [
+        "IN MP 16/2020"
+      ],
+      "relationTypes": [
+        "revoga"
+      ]
+    },
+    {
+      "target": "Decreto 9.662/2019",
+      "count": 1,
+      "citedBy": [
+        "IN MP 50/2020"
+      ],
+      "relationTypes": [
+        "altera"
+      ]
+    },
+    {
+      "target": "IN 1/2019",
+      "count": 1,
+      "citedBy": [
+        "IN SEGES 20/2022"
+      ],
+      "relationTypes": [
+        "revoga"
+      ]
+    },
+    {
+      "target": "Decreto 5.355/2005",
+      "count": 1,
+      "citedBy": [
+        "Portaria MPOG 44/2006"
+      ],
+      "relationTypes": [
+        "altera"
+      ]
+    }
+  ]
+}

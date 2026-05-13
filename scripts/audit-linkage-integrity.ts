@@ -92,6 +92,7 @@ async function auditLeiArticlesInTribunalDecisions(): Promise<BadLink[]> {
 
 async function auditRelationsExcerpts(): Promise<BadLink[]> {
   const relations = await prisma.legislativeActRelation.findMany({
+    where: { reviewStatus: { in: ['pending', 'confirmed'] } },
     select: {
       id: true,
       sourceActId: true,
@@ -111,8 +112,11 @@ async function auditRelationsExcerpts(): Promise<BadLink[]> {
     const haystack = (r.sourceAct.ementa || '') + '\n' + (r.sourceAct.content || '');
     // Normalize whitespace pra comparação (excerpt pode ter sido salvo com
     // formatação ligeiramente diferente do texto atual após backfill).
+    // Strip trailing "..." que o buildExcerpt adiciona quando trunca em 200 chars.
     const norm = (s: string) => s.replace(/\s+/g, ' ').trim();
-    if (!norm(haystack).includes(norm(r.excerpt))) {
+    const stripEllipsis = (s: string) => s.replace(/\.\.\.$/, '').trim();
+    const needle = stripEllipsis(norm(r.excerpt));
+    if (!norm(haystack).includes(needle)) {
       stale++;
       if (bad.length < 30) {
         bad.push({
