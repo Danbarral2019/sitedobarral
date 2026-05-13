@@ -13,7 +13,17 @@ export interface SaveResult {
   created: number;
   skipped: number;
   skippedTargets: string[];
+  /** Detecções descartadas por violação hierárquica (ato mais fraco "altera/revoga" mais forte). */
+  skippedHierarchy?: number;
 }
+
+/**
+ * Tipos onde a hierarquia importa de forma estrita: revogação e alteração
+ * só podem fluir top-down (Lei revoga Lei, Decreto altera Decreto/Portaria
+ * etc.). Decreto NUNCA altera lei — quando o detector encontra esse padrão
+ * é porque confundiu o verbo no texto.
+ */
+const HIERARCHY_STRICT_TYPES = new Set(['revoga', 'altera']);
 
 /**
  * Resolve um targetFullNumber pra id do LegislativeAct correspondente.
@@ -62,7 +72,14 @@ export async function saveDetectedRelations(
   detected: DetectedRelation[],
   source: 'heuristica' | 'ia' | 'manual' = 'heuristica',
 ): Promise<SaveResult> {
-  const result: SaveResult = { created: 0, skipped: 0, skippedTargets: [] };
+  const result: SaveResult = { created: 0, skipped: 0, skippedTargets: [], skippedHierarchy: 0 };
+
+  // Carrega hierarchyLevel do source uma vez (necessário pro guard hierárquico).
+  const sourceAct = await prisma.legislativeAct.findUnique({
+    where: { id: sourceActId },
+    select: { hierarchyLevel: true },
+  });
+  const sourceLevel = sourceAct?.hierarchyLevel ?? null;
 
   for (const rel of detected) {
     const targetId = await resolveTargetActId(rel.targetFullNumber);
@@ -78,6 +95,21 @@ export async function saveDetectedRelations(
       // Self-relation: ato menciona a si mesmo (raro, mas possível)
       result.skipped++;
       continue;
+    }
+
+    // Guard hierárquico: revoga/altera só faz sentido top-down. Ato mais
+    // fraco "alterando" mais forte é juridicamente impossível — descarta
+    // antes de gravar pra não poluir a fila de revisão com falsos positivos.
+    if (HIERARCHY_STRICT_TYPES.has(rel.relationType) && sourceLevel !== null) {
+      const targetAct = await prisma.legislativeAct.findUnique({
+        where: { id: target.id },
+        select: { hierarchyLevel: true },
+      });
+      const targetLevel = targetAct?.hierarchyLevel ?? null;
+      if (targetLevel !== null && sourceLevel > targetLevel) {
+        result.skippedHierarchy = (result.skippedHierarchy ?? 0) + 1;
+        continue;
+      }
     }
 
     await prisma.legislativeActRelation.upsert({

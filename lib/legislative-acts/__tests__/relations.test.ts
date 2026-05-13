@@ -32,7 +32,9 @@ import { saveDetectedRelations, getRelationsForAct, detectAndSaveRelationsHybrid
 
 describe('saveDetectedRelations', () => {
   beforeEach(() => {
-    vi.clearAllMocks();
+    // resetAllMocks (não clearAllMocks) pra garantir que a fila de
+    // mockResolvedValueOnce de testes anteriores não vaze pros próximos.
+    vi.resetAllMocks();
   });
 
   it('cria relação quando target existe no DB', async () => {
@@ -113,10 +115,62 @@ describe('saveDetectedRelations', () => {
 
     expect(mockUpsert).toHaveBeenCalledTimes(2); // 2 calls, mas Prisma upsert garante 1 row
   });
+
+  it('guard hierárquico: descarta Decreto "altera" Lei sem gravar', async () => {
+    // Ordem real das chamadas findUnique em saveDetectedRelations:
+    // 1) sourceAct lookup (hierarchyLevel) — ANTES do loop
+    // 2) resolveTargetActId (id por fullNumber) — dentro do loop
+    // 3) targetAct lookup (hierarchyLevel) — quando guard ativo
+    mockFindUnique
+      .mockResolvedValueOnce({ hierarchyLevel: 2 })   // source = Decreto
+      .mockResolvedValueOnce({ id: 'lei-14133-id' })  // target id resolvido
+      .mockResolvedValueOnce({ hierarchyLevel: 1 }); // target = Lei
+
+    const result = await saveDetectedRelations('decreto-src-id', [
+      { relationType: 'altera', targetFullNumber: 'Lei 14.133/2021', excerpt: 'x', confidence: 0.85 },
+    ]);
+
+    expect(mockUpsert).not.toHaveBeenCalled();
+    expect(result.created).toBe(0);
+    expect(result.skippedHierarchy).toBe(1);
+  });
+
+  it('guard hierárquico: permite Lei "revoga" Decreto (top-down OK)', async () => {
+    mockFindUnique
+      .mockResolvedValueOnce({ hierarchyLevel: 1 })   // source = Lei
+      .mockResolvedValueOnce({ id: 'decreto-tgt-id' }) // target id
+      .mockResolvedValueOnce({ hierarchyLevel: 2 }); // target = Decreto
+    mockUpsert.mockResolvedValue({ id: 'rel-1' });
+
+    const result = await saveDetectedRelations('lei-src-id', [
+      { relationType: 'revoga', targetFullNumber: 'Decreto 1.234/2020', excerpt: 'x', confidence: 0.9 },
+    ]);
+
+    expect(mockUpsert).toHaveBeenCalled();
+    expect(result.created).toBe(1);
+    expect(result.skippedHierarchy ?? 0).toBe(0);
+  });
+
+  it('guard hierárquico: NÃO checa "regulamenta" (semântica inversa)', async () => {
+    // Decreto regulamenta Lei é normal — não deve cair no guard (que só
+    // bloqueia revoga/altera). Pra regulamenta, terceira chamada nem ocorre.
+    mockFindUnique
+      .mockResolvedValueOnce({ hierarchyLevel: 2 })   // source = Decreto
+      .mockResolvedValueOnce({ id: 'lei-14133-id' }); // target id
+    mockUpsert.mockResolvedValue({ id: 'rel-1' });
+
+    const result = await saveDetectedRelations('decreto-src', [
+      { relationType: 'regulamenta', targetFullNumber: 'Lei 14.133/2021', excerpt: 'x', confidence: 0.85 },
+    ]);
+
+    expect(mockUpsert).toHaveBeenCalled();
+    expect(result.created).toBe(1);
+    expect(result.skippedHierarchy ?? 0).toBe(0);
+  });
 });
 
 describe('getRelationsForAct', () => {
-  beforeEach(() => vi.clearAllMocks());
+  beforeEach(() => vi.resetAllMocks());
 
   it('retorna alterações que este ato faz e que sofre', async () => {
     mockFindMany
@@ -150,7 +204,7 @@ describe('getRelationsForAct', () => {
 
 describe('detectAndSaveRelationsHybrid', () => {
   beforeEach(() => {
-    vi.clearAllMocks();
+    vi.resetAllMocks();
     mockFindUnique.mockResolvedValue({ id: 'target-1' });
     mockUpsert.mockResolvedValue({ id: 'rel-1' });
   });
