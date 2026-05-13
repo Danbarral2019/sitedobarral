@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
+import { useSearchParams, useRouter, usePathname } from 'next/navigation';
 import {
   Search, Filter, Scale, Calendar, Building, ChevronDown,
   ChevronUp, ExternalLink, Download, BookOpen, Eye,
@@ -11,6 +12,9 @@ import MarkdownContent from '@/components/MarkdownContent';
 import { TEMAS_LICITACOES, getThemeLabel } from '@/data/temas-licitacoes';
 import { HierarchyLegend } from '@/components/LegislativeActsPanel/HierarchyLegend';
 import { getHierarchyInfo } from '@/lib/legislative-acts/hierarchy';
+
+/** Valores aceitos no parâmetro ?sort= da URL. */
+const VALID_SORT_VALUES = new Set(['recent', 'oldest', 'hierarchy', 'number', 'alpha']);
 
 interface LegislativeAct {
   id: string;
@@ -89,7 +93,35 @@ export default function LegislacaoPage() {
   const [yearFilter, setYearFilter] = useState('');
   const [esferaFilter, setEsferaFilter] = useState('');
   const [themeFilter, setThemeFilter] = useState('');
-  const [sortFilter, setSortFilter] = useState('recent');
+
+  // sortFilter sincroniza com ?sort= na URL pra permitir link compartilhável
+  // (ex: /legislacao?sort=hierarchy ativa a vista pedagógica direto).
+  // Default 'recent' quando ausente; valores inválidos caem no default.
+  const searchParams = useSearchParams();
+  const router = useRouter();
+  const pathname = usePathname();
+  const initialSort = (() => {
+    const fromUrl = searchParams.get('sort');
+    return fromUrl && VALID_SORT_VALUES.has(fromUrl) ? fromUrl : 'recent';
+  })();
+  const [sortFilter, setSortFilter] = useState(initialSort);
+
+  // Sincroniza sortFilter -> URL sem disparar navegação cheia (router.replace
+  // com scroll: false). Removemos o parâmetro quando volta pro default 'recent'
+  // pra manter a URL limpa.
+  useEffect(() => {
+    const params = new URLSearchParams(searchParams.toString());
+    if (sortFilter === 'recent') {
+      params.delete('sort');
+    } else {
+      params.set('sort', sortFilter);
+    }
+    const qs = params.toString();
+    const newUrl = qs ? `${pathname}?${qs}` : pathname;
+    router.replace(newUrl, { scroll: false });
+    // searchParams é estável dentro do mesmo render; router/pathname idem
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [sortFilter]);
 
   // Paginação
   const [page, setPage] = useState(1);
