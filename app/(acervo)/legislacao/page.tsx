@@ -64,6 +64,16 @@ const ESFERA_LABELS: Record<string, string> = {
   'estadual': 'Estadual',
 };
 
+// Metadados de cada nível hierárquico — usados pra agrupar listagem quando
+// sort=hierarchy e pra montar tooltip detalhado nos badges de tipo dos cards.
+const HIERARCHY_META: Record<number, { label: string; pluralLabel: string; emoji: string; description: string }> = {
+  1: { label: 'Lei', pluralLabel: 'Leis', emoji: '📜', description: 'norma de hierarquia máxima' },
+  2: { label: 'Decreto', pluralLabel: 'Decretos', emoji: '📋', description: 'regulamenta lei' },
+  3: { label: 'Portaria', pluralLabel: 'Portarias', emoji: '📑', description: 'ato de Ministro ou autoridade equivalente' },
+  4: { label: 'IN / Resolução', pluralLabel: 'Instruções Normativas e Resoluções', emoji: '📝', description: 'detalha portaria ou decreto' },
+  5: { label: 'Ordem de Serviço', pluralLabel: 'Ordens de Serviço', emoji: '📌', description: 'ato interno operacional' },
+};
+
 export default function LegislacaoPage() {
   const [acts, setActs] = useState<LegislativeAct[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -224,6 +234,249 @@ export default function LegislacaoPage() {
   const isBoasPraticas = activeTab === 'boas-praticas';
   const isTic = activeTab === 'tic';
   const isOrientacoes = activeTab === 'orientacoes';
+
+  // Agrupamento por nível hierárquico — só quando o usuário escolheu "Hierarquia"
+  // na ordenação E está na aba 'atos' (boas-práticas/orientações são Documents
+  // sem hierarchyLevel). Mesmo dentro da página atual (limit=10) o agrupamento
+  // serve pra que os headers de seção marquem visualmente onde muda o nível.
+  const showGrouped = activeTab === 'atos' && sortFilter === 'hierarchy' && acts.length > 0;
+  const groupedActs = showGrouped
+    ? (() => {
+        const map = new Map<number, LegislativeAct[]>();
+        for (const a of acts) {
+          const lvl = a.hierarchyLevel ?? 99; // 99 = sem nível, vai pro fim
+          if (!map.has(lvl)) map.set(lvl, []);
+          map.get(lvl)!.push(a);
+        }
+        return [...map.entries()].sort((a, b) => a[0] - b[0]);
+      })()
+    : null;
+
+  /**
+   * Renderiza um card de ato. Extraído pra ser reusado tanto no fluxo plano
+   * (lista flat) quanto no fluxo agrupado por hierarquia. Closure sobre
+   * isOrientacoes/isTic/isBoasPraticas/expandedAct/toggleExpand.
+   */
+  const renderActCard = (act: LegislativeAct) => (
+    <article
+      key={act.id}
+      id={act.id}
+      className={`bg-white border-2 rounded-xl overflow-hidden transition-all ${
+        isOrientacoes
+          ? 'border-gray-200 hover:border-amber-300 hover:shadow-lg'
+          : isTic
+          ? 'border-gray-200 hover:border-cyan-300 hover:shadow-lg'
+          : isBoasPraticas
+          ? 'border-gray-200 hover:border-emerald-300 hover:shadow-lg'
+          : 'border-gray-200 hover:border-blue-300 hover:shadow-lg'
+      }`}
+    >
+      <div className="p-6">
+        <div className="flex items-start justify-between gap-4 mb-4">
+          <div className="flex-1">
+            <div className="flex flex-wrap items-center gap-2 mb-3">
+              {(() => {
+                const lvl = act.hierarchyLevel;
+                const lvlMeta = lvl ? HIERARCHY_META[lvl] : null;
+                const tooltip = lvlMeta
+                  ? `${TYPE_LABELS[act.type] || act.type} — nível ${lvl} (${lvlMeta.description})`
+                  : TYPE_LABELS[act.type] || act.type;
+                return (
+                  <span
+                    className={`px-3 py-1 text-sm font-bold rounded-lg border-2 ${TYPE_COLORS[act.type] || 'bg-gray-100 text-gray-800 border-gray-300'}`}
+                    title={tooltip}
+                  >
+                    {TYPE_LABELS[act.type] || act.type}
+                  </span>
+                );
+              })()}
+              {act.hierarchyLevel && (
+                <span
+                  className="px-1.5 py-0.5 text-[10px] font-mono font-semibold rounded text-gray-600 bg-gray-100 border border-gray-200"
+                  title={`Nível hierárquico ${act.hierarchyLevel} — ${HIERARCHY_META[act.hierarchyLevel]?.description ?? ''}`}
+                >
+                  nv. {act.hierarchyLevel}
+                </span>
+              )}
+              {act.esfera && (
+                <span className="px-2 py-0.5 text-xs font-semibold rounded border flex items-center gap-1 bg-gray-100 text-gray-700 border-gray-300">
+                  <Globe className="w-3 h-3" />
+                  {ESFERA_LABELS[act.esfera] || act.esfera}
+                </span>
+              )}
+              {act.fullNumber && (
+                <Link
+                  href={`/legislacao/${act.id}`}
+                  className="text-lg font-mono font-bold text-gray-900 hover:text-blue-700 transition-colors"
+                >
+                  {act.fullNumber}
+                </Link>
+              )}
+            </div>
+
+            <h2 className="text-2xl font-bold text-gray-900 mb-2 leading-tight">
+              <Link href={`/legislacao/${act.id}`} className="hover:text-blue-700 transition-colors">
+                {act.title}
+              </Link>
+            </h2>
+
+            <p className="text-gray-700 leading-relaxed mb-4">{act.ementa}</p>
+
+            <div className="flex flex-wrap items-center gap-4 text-sm text-gray-600">
+              <div className="flex items-center gap-1.5">
+                <Building className="w-4 h-4" />
+                {act.issuer}
+              </div>
+              <div className="flex items-center gap-1.5">
+                <Calendar className="w-4 h-4" />
+                {formatDate(act.publishDate)}
+              </div>
+              {act.viewCount !== undefined && (
+                <div className="flex items-center gap-1.5">
+                  <Eye className="w-4 h-4" />
+                  {act.viewCount} visualizações
+                </div>
+              )}
+            </div>
+
+            {act.themes && act.themes.length > 0 && (
+              <div className="flex flex-wrap gap-1.5 mt-3">
+                {act.themes.map(t => (
+                  <span
+                    key={t}
+                    className={`px-2 py-0.5 text-xs rounded-full ${
+                      isOrientacoes
+                        ? 'bg-amber-50 text-amber-700 border border-amber-200'
+                        : isTic
+                        ? 'bg-cyan-50 text-cyan-700 border border-cyan-200'
+                        : isBoasPraticas
+                        ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
+                        : 'bg-indigo-50 text-indigo-700 border border-indigo-200'
+                    }`}
+                  >
+                    {getThemeLabel(t)}
+                  </span>
+                ))}
+              </div>
+            )}
+          </div>
+
+          <button
+            onClick={() => toggleExpand(act.id)}
+            className="flex-shrink-0 p-3 text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
+            aria-label="Ver mais detalhes"
+          >
+            {expandedAct === act.id ? <ChevronUp className="w-6 h-6" /> : <ChevronDown className="w-6 h-6" />}
+          </button>
+        </div>
+
+        {act.leiArticles.length > 0 && (
+          <div className="flex flex-wrap items-center gap-2">
+            <span className="text-sm font-semibold text-gray-700 flex items-center gap-1">
+              <Scale className="w-4 h-4" />
+              Artigos:
+            </span>
+            {act.leiArticles.slice(0, 5).map(art => (
+              <span
+                key={art}
+                className="px-2 py-0.5 bg-blue-50 text-blue-800 text-xs font-semibold rounded border border-blue-200"
+              >
+                Art. {art}
+              </span>
+            ))}
+            {act.leiArticles.length > 5 && (
+              <span className="text-xs text-gray-500">+{act.leiArticles.length - 5} artigos</span>
+            )}
+          </div>
+        )}
+      </div>
+
+      {expandedAct === act.id && (
+        <div className="border-t-2 border-gray-200 bg-gray-50 p-6">
+          {act.summary && (
+            <div className={`mb-6 rounded-xl overflow-hidden shadow-sm ${
+              isOrientacoes
+                ? 'bg-gradient-to-br from-amber-50 via-orange-50 to-yellow-50'
+                : isTic
+                ? 'bg-gradient-to-br from-cyan-50 via-blue-50 to-indigo-50'
+                : isBoasPraticas
+                ? 'bg-gradient-to-br from-emerald-50 via-teal-50 to-green-50'
+                : 'bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50'
+            }`}>
+              <div className={`px-4 py-3 ${
+                isOrientacoes
+                  ? 'bg-gradient-to-r from-amber-600 to-orange-600'
+                  : isTic
+                  ? 'bg-gradient-to-r from-cyan-600 to-blue-600'
+                  : isBoasPraticas
+                  ? 'bg-gradient-to-r from-emerald-600 to-teal-600'
+                  : 'bg-gradient-to-r from-blue-600 to-indigo-600'
+              }`}>
+                <h3 className="flex items-center gap-2 text-sm font-bold text-white uppercase tracking-wide">
+                  <BookOpen className="w-5 h-5" />
+                  Resumo Didático
+                </h3>
+              </div>
+              <div className="p-4">
+                <MarkdownContent content={act.summary} />
+              </div>
+            </div>
+          )}
+
+          {act.leiArticles.length > 0 && (
+            <div className="mb-6">
+              <h3 className="text-sm font-bold text-gray-700 mb-3 uppercase tracking-wide">
+                Artigos Regulamentados da Lei 14.133/2021
+              </h3>
+              <div className="flex flex-wrap gap-2">
+                {act.leiArticles.map(art => (
+                  <span
+                    key={art}
+                    className="px-3 py-1.5 bg-blue-100 text-blue-900 text-sm font-semibold rounded-lg border-2 border-blue-300"
+                  >
+                    Art. {art}
+                  </span>
+                ))}
+              </div>
+            </div>
+          )}
+
+          <div className="flex flex-wrap gap-3">
+            {act.officialUrl && (
+              <a
+                href={act.officialUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className={`flex items-center gap-2 px-4 py-2.5 text-white rounded-lg transition-colors font-semibold ${
+                  isOrientacoes
+                    ? 'bg-amber-600 hover:bg-amber-700'
+                    : isTic
+                    ? 'bg-cyan-600 hover:bg-cyan-700'
+                    : isBoasPraticas
+                    ? 'bg-emerald-600 hover:bg-emerald-700'
+                    : 'bg-blue-600 hover:bg-blue-700'
+                }`}
+              >
+                <ExternalLink className="w-5 h-5" />
+                {isBoasPraticas || isOrientacoes ? 'Ver Fonte Original' : 'Ver Texto Oficial'}
+              </a>
+            )}
+            {act.pdfUrl && (
+              <a
+                href={act.pdfUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-2 px-4 py-2.5 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors font-semibold"
+              >
+                <Download className="w-5 h-5" />
+                Download PDF
+              </a>
+            )}
+          </div>
+        </div>
+      )}
+    </article>
+  );
 
   return (
     <main className="min-h-screen bg-gradient-to-b from-gray-50 to-white">
@@ -660,231 +913,32 @@ export default function LegislacaoPage() {
                 </p>
               </div>
 
-              {/* Cards */}
-              <div className="space-y-4">
-                {acts.map(act => (
-                  <article
-                    key={act.id}
-                    id={act.id}
-                    className={`bg-white border-2 rounded-xl overflow-hidden transition-all ${
-                      isOrientacoes
-                        ? 'border-gray-200 hover:border-amber-300 hover:shadow-lg'
-                        : isTic
-                        ? 'border-gray-200 hover:border-cyan-300 hover:shadow-lg'
-                        : isBoasPraticas
-                        ? 'border-gray-200 hover:border-emerald-300 hover:shadow-lg'
-                        : 'border-gray-200 hover:border-blue-300 hover:shadow-lg'
-                    }`}
-                  >
-                    {/* Header do Card */}
-                    <div className="p-6">
-                      <div className="flex items-start justify-between gap-4 mb-4">
-                        <div className="flex-1">
-                          {/* Tags e Meta */}
-                          <div className="flex flex-wrap items-center gap-2 mb-3">
-                            <span className={`px-3 py-1 text-sm font-bold rounded-lg border-2 ${TYPE_COLORS[act.type] || 'bg-gray-100 text-gray-800 border-gray-300'}`}>
-                              {TYPE_LABELS[act.type] || act.type}
-                            </span>
-                            {act.esfera && (
-                              <span className="px-2 py-0.5 text-xs font-semibold rounded border flex items-center gap-1 bg-gray-100 text-gray-700 border-gray-300">
-                                <Globe className="w-3 h-3" />
-                                {ESFERA_LABELS[act.esfera] || act.esfera}
-                              </span>
-                            )}
-                            {act.fullNumber && (
-                              <Link
-                                href={`/legislacao/${act.id}`}
-                                className="text-lg font-mono font-bold text-gray-900 hover:text-blue-700 transition-colors"
-                              >
-                                {act.fullNumber}
-                              </Link>
-                            )}
-                          </div>
-
-                          {/* Título */}
-                          <h2 className="text-2xl font-bold text-gray-900 mb-2 leading-tight">
-                            <Link
-                              href={`/legislacao/${act.id}`}
-                              className="hover:text-blue-700 transition-colors"
-                            >
-                              {act.title}
-                            </Link>
-                          </h2>
-
-                          {/* Ementa */}
-                          <p className="text-gray-700 leading-relaxed mb-4">
-                            {act.ementa}
-                          </p>
-
-                          {/* Metadados */}
-                          <div className="flex flex-wrap items-center gap-4 text-sm text-gray-600">
-                            <div className="flex items-center gap-1.5">
-                              <Building className="w-4 h-4" />
-                              {act.issuer}
-                            </div>
-                            <div className="flex items-center gap-1.5">
-                              <Calendar className="w-4 h-4" />
-                              {formatDate(act.publishDate)}
-                            </div>
-                            {act.viewCount !== undefined && (
-                              <div className="flex items-center gap-1.5">
-                                <Eye className="w-4 h-4" />
-                                {act.viewCount} visualizações
-                              </div>
-                            )}
-                          </div>
-
-                          {/* Temas mini-pills */}
-                          {act.themes && act.themes.length > 0 && (
-                            <div className="flex flex-wrap gap-1.5 mt-3">
-                              {act.themes.map(t => (
-                                <span
-                                  key={t}
-                                  className={`px-2 py-0.5 text-xs rounded-full ${
-                                    isOrientacoes
-                                      ? 'bg-amber-50 text-amber-700 border border-amber-200'
-                                      : isTic
-                                      ? 'bg-cyan-50 text-cyan-700 border border-cyan-200'
-                                      : isBoasPraticas
-                                      ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
-                                      : 'bg-indigo-50 text-indigo-700 border border-indigo-200'
-                                  }`}
-                                >
-                                  {getThemeLabel(t)}
-                                </span>
-                              ))}
-                            </div>
-                          )}
-                        </div>
-
-                        {/* Botão Expandir */}
-                        <button
-                          onClick={() => toggleExpand(act.id)}
-                          className="flex-shrink-0 p-3 text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
-                          aria-label="Ver mais detalhes"
-                        >
-                          {expandedAct === act.id ? (
-                            <ChevronUp className="w-6 h-6" />
-                          ) : (
-                            <ChevronDown className="w-6 h-6" />
-                          )}
-                        </button>
-                      </div>
-
-                      {/* Artigos Relacionados (Preview) */}
-                      {act.leiArticles.length > 0 && (
-                        <div className="flex flex-wrap items-center gap-2">
-                          <span className="text-sm font-semibold text-gray-700 flex items-center gap-1">
-                            <Scale className="w-4 h-4" />
-                            Artigos:
+              {/* Cards — flat ou agrupado por hierarquia */}
+              {showGrouped && groupedActs ? (
+                <div className="space-y-8">
+                  {groupedActs.map(([level, levelActs]) => {
+                    const meta = HIERARCHY_META[level];
+                    return (
+                      <section key={level}>
+                        <h3 className="flex items-baseline gap-3 mb-4 pb-2 border-b-2 border-gray-200">
+                          <span className="text-2xl" aria-hidden="true">{meta?.emoji ?? '📄'}</span>
+                          <span className="text-xl font-bold text-gray-900">
+                            {meta?.pluralLabel ?? `Nível ${level}`}
                           </span>
-                          {act.leiArticles.slice(0, 5).map(art => (
-                            <span
-                              key={art}
-                              className="px-2 py-0.5 bg-blue-50 text-blue-800 text-xs font-semibold rounded border border-blue-200"
-                            >
-                              Art. {art}
-                            </span>
-                          ))}
-                          {act.leiArticles.length > 5 && (
-                            <span className="text-xs text-gray-500">
-                              +{act.leiArticles.length - 5} artigos
-                            </span>
-                          )}
+                          <span className="text-sm font-normal text-gray-500">
+                            ({levelActs.length} {levelActs.length === 1 ? 'ato' : 'atos'} nesta página)
+                          </span>
+                        </h3>
+                        <div className="space-y-4">
+                          {levelActs.map(renderActCard)}
                         </div>
-                      )}
-                    </div>
-
-                    {/* Detalhes Expandidos */}
-                    {expandedAct === act.id && (
-                      <div className="border-t-2 border-gray-200 bg-gray-50 p-6">
-                        {act.summary && (
-                          <div className={`mb-6 rounded-xl overflow-hidden shadow-sm ${
-                            isOrientacoes
-                              ? 'bg-gradient-to-br from-amber-50 via-orange-50 to-yellow-50'
-                              : isTic
-                              ? 'bg-gradient-to-br from-cyan-50 via-blue-50 to-indigo-50'
-                              : isBoasPraticas
-                              ? 'bg-gradient-to-br from-emerald-50 via-teal-50 to-green-50'
-                              : 'bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50'
-                          }`}>
-                            <div className={`px-4 py-3 ${
-                              isOrientacoes
-                                ? 'bg-gradient-to-r from-amber-600 to-orange-600'
-                                : isTic
-                                ? 'bg-gradient-to-r from-cyan-600 to-blue-600'
-                                : isBoasPraticas
-                                ? 'bg-gradient-to-r from-emerald-600 to-teal-600'
-                                : 'bg-gradient-to-r from-blue-600 to-indigo-600'
-                            }`}>
-                              <h3 className="flex items-center gap-2 text-sm font-bold text-white uppercase tracking-wide">
-                                <BookOpen className="w-5 h-5" />
-                                Resumo Didático
-                              </h3>
-                            </div>
-                            <div className="p-4">
-                              <MarkdownContent content={act.summary} />
-                            </div>
-                          </div>
-                        )}
-
-                        {/* Todos os Artigos */}
-                        {act.leiArticles.length > 0 && (
-                          <div className="mb-6">
-                            <h3 className="text-sm font-bold text-gray-700 mb-3 uppercase tracking-wide">
-                              Artigos Regulamentados da Lei 14.133/2021
-                            </h3>
-                            <div className="flex flex-wrap gap-2">
-                              {act.leiArticles.map(art => (
-                                <span
-                                  key={art}
-                                  className="px-3 py-1.5 bg-blue-100 text-blue-900 text-sm font-semibold rounded-lg border-2 border-blue-300"
-                                >
-                                  Art. {art}
-                                </span>
-                              ))}
-                            </div>
-                          </div>
-                        )}
-
-                        {/* Links */}
-                        <div className="flex flex-wrap gap-3">
-                          {act.officialUrl && (
-                            <a
-                              href={act.officialUrl}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className={`flex items-center gap-2 px-4 py-2.5 text-white rounded-lg transition-colors font-semibold ${
-                                isOrientacoes
-                                  ? 'bg-amber-600 hover:bg-amber-700'
-                                  : isTic
-                                  ? 'bg-cyan-600 hover:bg-cyan-700'
-                                  : isBoasPraticas
-                                  ? 'bg-emerald-600 hover:bg-emerald-700'
-                                  : 'bg-blue-600 hover:bg-blue-700'
-                              }`}
-                            >
-                              <ExternalLink className="w-5 h-5" />
-                              {isBoasPraticas || isOrientacoes ? 'Ver Fonte Original' : 'Ver Texto Oficial'}
-                            </a>
-                          )}
-                          {act.pdfUrl && (
-                            <a
-                              href={act.pdfUrl}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="flex items-center gap-2 px-4 py-2.5 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors font-semibold"
-                            >
-                              <Download className="w-5 h-5" />
-                              Download PDF
-                            </a>
-                          )}
-                        </div>
-                      </div>
-                    )}
-                  </article>
-                ))}
-              </div>
+                      </section>
+                    );
+                  })}
+                </div>
+              ) : (
+                <div className="space-y-4">{acts.map(renderActCard)}</div>
+              )}
 
               {/* Paginação */}
               {totalPages > 1 && (
