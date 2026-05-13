@@ -11,22 +11,10 @@ import * as dotenv from 'dotenv';
 dotenv.config({ path: '.env.local' });
 import { PrismaClient } from '@prisma/client';
 import { PrismaNeon } from '@prisma/adapter-neon';
+import { getHierarchyLevelOrNull } from '../lib/legislative-acts/hierarchy';
 
 const adapter = new PrismaNeon({ connectionString: process.env.DATABASE_URL! });
 const prisma = new PrismaClient({ adapter });
-
-const HIERARCHY_MAP: Record<string, number> = {
-  lei: 1,
-  'lei-complementar': 1,
-  'medida-provisoria': 1,
-  decreto: 2,
-  'decreto-lei': 2,
-  portaria: 3,
-  in: 4,
-  'instrucao-normativa': 4,
-  resolucao: 4,
-  'ordem-servico': 5,
-};
 
 async function main() {
   const acts = await prisma.legislativeAct.findMany({
@@ -49,15 +37,15 @@ async function main() {
     console.log(`  ${k}: ${v}`);
   }
 
-  const unknownTypes = [...typesSeen].filter((t) => !(t in HIERARCHY_MAP));
+  const unknownTypes = [...typesSeen].filter((t) => getHierarchyLevelOrNull(t) === null);
   if (unknownTypes.length > 0) {
-    console.log(`\n⚠️  Tipos não mapeados em HIERARCHY_MAP: ${JSON.stringify(unknownTypes)}`);
+    console.log(`\n⚠️  Tipos não mapeados em HIERARCHY: ${JSON.stringify(unknownTypes)}`);
   }
 
   const bad: Array<{ id: string; fullNumber: string; type: string; has: number; expected: number }> = [];
   for (const a of acts) {
-    const expected = HIERARCHY_MAP[a.type];
-    if (expected !== undefined && expected !== a.hierarchyLevel) {
+    const expected = getHierarchyLevelOrNull(a.type);
+    if (expected !== null && expected !== a.hierarchyLevel) {
       bad.push({ id: a.id, fullNumber: a.fullNumber, type: a.type, has: a.hierarchyLevel, expected });
     }
   }

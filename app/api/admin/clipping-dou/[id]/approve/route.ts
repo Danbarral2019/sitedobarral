@@ -5,18 +5,12 @@ import { scrapeContent } from '@/lib/dou-scraper';
 import { LeiIndexer } from '@/lib/lei-indexer';
 import { scrapeAndIndexAct } from '@/lib/legislative-scrapers/scrape-and-index';
 import { extractIssuerFromDouHierarchy } from '@/lib/dou-issuer';
+import { getHierarchyLevel } from '@/lib/legislative-acts/hierarchy';
 
 export const runtime = 'nodejs';
 export const maxDuration = 120;
 
-const HIERARCHY_MAP: Record<string, number> = {
-  lei: 1,
-  mp: 1,
-  decreto: 2,
-  portaria: 3,
-  in: 4,
-  on: 5,
-};
+// hierarchyLevel via getHierarchyLevel() — fonte canônica.
 
 const VALID_ACT_TYPES = new Set(['decreto', 'portaria', 'in', 'lei', 'mp', 'on']);
 
@@ -115,7 +109,7 @@ export async function POST(
               ementa: staging.abstract || cleanTitle,
               issuer,
               publishDate: parsedDate || new Date(),
-              hierarchyLevel: HIERARCHY_MAP[safeActType] || 5,
+              hierarchyLevel: getHierarchyLevel(safeActType),
               officialUrl: staging.url,
               createdBy: 'clipping-dou-approve',
             },

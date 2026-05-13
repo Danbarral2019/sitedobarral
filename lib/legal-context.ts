@@ -8,6 +8,7 @@
 import { LEI_14133_ARTIGOS } from '@/data/lei-14133-artigos';
 import { prisma } from '@/lib/prisma';
 import { generateQueryEmbedding, embeddingToSql } from '@/lib/embeddings/gemini-embeddings';
+import { getHierarchyInfo } from '@/lib/legislative-acts/hierarchy';
 import type { SearchResult } from '@/lib/embeddings/vector-search';
 
 // ===========================
@@ -289,20 +290,13 @@ export function formatActsContext(
   maxLength: number = 2000
 ): string {
   let context = '';
-  const HIERARCHY_LABEL: Record<number, string> = {
-    1: '[Lei]',
-    2: '[Decreto]',
-    3: '[Portaria]',
-    4: '[IN]',
-    5: '[Ordem]',
-  };
 
   for (const act of acts) {
     const articles = act.leiArticles.length > 0
       ? ` (Art. ${act.leiArticles.slice(0, 5).join(', ')}${act.leiArticles.length > 5 ? '...' : ''})`
       : '';
-    const hierLabel = act.hierarchyLevel ? HIERARCHY_LABEL[act.hierarchyLevel] ?? '' : '';
-    const prefix = hierLabel ? `${hierLabel} ` : '';
+    const hierInfo = getHierarchyInfo(act.hierarchyLevel);
+    const prefix = hierInfo ? `[${hierInfo.label}] ` : '';
     const entry = `**${prefix}${act.title}**${articles}\n${act.ementa}\n\n`;
 
     if (context.length + entry.length > maxLength) break;

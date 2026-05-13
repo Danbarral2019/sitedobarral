@@ -5,6 +5,7 @@ import { CacheInvalidation } from '@/lib/cache/redis-client';
 import { scrapeAndIndexAct } from '@/lib/legislative-scrapers/scrape-and-index';
 import { validateActContent } from '@/lib/legislative-scrapers/validate-content';
 import { normalizeScrapedText } from '@/lib/legislative-scrapers/normalize';
+import { getHierarchyLevel } from '@/lib/legislative-acts/hierarchy';
 
 /**
  * GET /api/admin/legislative-acts
@@ -142,18 +143,12 @@ export async function POST(request: NextRequest) {
       fullNumber = `${typeLabel} ${body.number}/${body.year}`;
     }
 
-    // Calcular hierarchyLevel se não fornecido
+    // Calcular hierarchyLevel se não fornecido. Fonte canônica em
+    // lib/legislative-acts/hierarchy.ts (antes daqui um mapeamento inline
+    // marcava 'medida-provisoria: 2', errado — MP tem força de lei).
     let hierarchyLevel = body.hierarchyLevel;
     if (!hierarchyLevel) {
-      const hierarchy: Record<string, number> = {
-        'lei': 1,
-        'medida-provisoria': 2,
-        'decreto': 2,
-        'portaria': 3,
-        'in': 4,
-        'ordem-servico': 5
-      };
-      hierarchyLevel = hierarchy[body.type] || 5;
+      hierarchyLevel = getHierarchyLevel(body.type);
     }
 
     // Normalizar ementa + content ANTES de salvar — garante que NBSP,

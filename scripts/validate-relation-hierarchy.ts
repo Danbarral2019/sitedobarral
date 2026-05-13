@@ -25,6 +25,7 @@ dotenv.config({ path: '.env.local' });
 
 import { PrismaClient } from '@prisma/client';
 import { PrismaNeon } from '@prisma/adapter-neon';
+import { getHierarchyLabel } from '../lib/legislative-acts/hierarchy';
 
 const adapter = new PrismaNeon({ connectionString: process.env.DATABASE_URL! });
 const prisma = new PrismaClient({ adapter });
@@ -33,14 +34,6 @@ const args = process.argv.slice(2);
 const APPLY = args.includes('--apply');
 
 const FORBIDDEN_TYPES = new Set(['revoga', 'altera']);
-
-const HIERARCHY_LABEL: Record<number, string> = {
-  1: 'Lei',
-  2: 'Decreto',
-  3: 'Portaria',
-  4: 'IN',
-  5: 'Ordem de Serviço',
-};
 
 async function main() {
   console.log(`\n=== Validação hierárquica de relações ${APPLY ? '[APPLY]' : '[DRY-RUN]'} ===\n`);
@@ -70,8 +63,8 @@ async function main() {
 
   console.log(`⚠️  ${violations.length} violação(ões) hierárquica(s):\n`);
   for (const v of violations) {
-    const srcLbl = HIERARCHY_LABEL[v.sourceAct.hierarchyLevel] ?? `nivel-${v.sourceAct.hierarchyLevel}`;
-    const tgtLbl = HIERARCHY_LABEL[v.targetAct.hierarchyLevel] ?? `nivel-${v.targetAct.hierarchyLevel}`;
+    const srcLbl = getHierarchyLabel(v.sourceAct.hierarchyLevel);
+    const tgtLbl = getHierarchyLabel(v.targetAct.hierarchyLevel);
     console.log(
       `  ${v.sourceAct.fullNumber} [${srcLbl}] → ${v.relationType} → ${v.targetAct.fullNumber} [${tgtLbl}]`,
     );

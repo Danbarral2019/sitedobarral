@@ -36,6 +36,7 @@ import { classifyEditorialBatch, EDITORIAL_PROMPT_VERSION, type EditorialCandida
 import { sendDouEditorialAlert, type DouEditorialAlertItem } from '@/lib/email';
 import { PRIMARY_GEMINI_MODEL } from '@/lib/gemini/config';
 import { extractIssuerFromDouHierarchy } from '@/lib/dou-issuer';
+import { getHierarchyLevel } from '@/lib/legislative-acts/hierarchy';
 
 export const runtime = 'nodejs';
 export const maxDuration = 300;
@@ -89,10 +90,8 @@ const CATEGORY_MAP: Record<string, string> = {
   [DOUDocumentCategory.SUMULA]: 'sumula',
 };
 
-// Mapeamento de tipo → hierarchyLevel para LegislativeAct
-const HIERARCHY_MAP: Record<string, number> = {
-  lei: 1, mp: 1, decreto: 2, portaria: 3, in: 4, on: 5,
-};
+// hierarchyLevel via getHierarchyLevel() — fonte canônica em
+// lib/legislative-acts/hierarchy.ts (aceita aliases 'mp' e 'on' usados aqui).
 
 // Mapeamento de changeType → LeiArticleNote.type
 const CHANGE_TYPE_MAP: Record<string, string> = {
@@ -323,7 +322,7 @@ export async function GET(request: NextRequest) {
                     ementa: cleanAbstract || cleanTitle,
                     issuer,
                     publishDate: parsedDate || new Date(),
-                    hierarchyLevel: HIERARCHY_MAP[atoType] || 5,
+                    hierarchyLevel: getHierarchyLevel(atoType),
                     officialUrl: result.href,
                     createdBy: 'auto-sync-dou',
                   },

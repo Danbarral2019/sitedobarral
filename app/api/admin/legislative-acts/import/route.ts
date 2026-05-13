@@ -5,6 +5,7 @@ import { CacheInvalidation } from '@/lib/cache/redis-client';
 import { scrapeAndIndexAct } from '@/lib/legislative-scrapers/scrape-and-index';
 import { validateActContent } from '@/lib/legislative-scrapers/validate-content';
 import { normalizeScrapedText } from '@/lib/legislative-scrapers/normalize';
+import { getHierarchyLevel } from '@/lib/legislative-acts/hierarchy';
 
 /**
  * POST /api/admin/legislative-acts/import
@@ -35,20 +36,8 @@ export async function POST(request: NextRequest) {
       skipped: 0
     };
 
-    // Função auxiliar para calcular hierarchyLevel
-    const getHierarchyLevel = (type: string) => {
-      const hierarchy: Record<string, number> = {
-        'lei': 1,
-        'medida-provisoria': 2,
-        'decreto': 2,
-        'portaria': 3,
-        'in': 4,
-        'ordem-servico': 5
-      };
-      return hierarchy[type] || 5;
-    };
-
     // Processar cada linha do CSV (pular header)
+    // (hierarchyLevel calculado via getHierarchyLevel importada — fonte canônica.)
     for (let i = 1; i < csvData.length; i++) {
       const row = csvData[i];
 

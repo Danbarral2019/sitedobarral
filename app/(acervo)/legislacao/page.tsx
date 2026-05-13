@@ -10,6 +10,7 @@ import Link from 'next/link';
 import MarkdownContent from '@/components/MarkdownContent';
 import { TEMAS_LICITACOES, getThemeLabel } from '@/data/temas-licitacoes';
 import { HierarchyLegend } from '@/components/LegislativeActsPanel/HierarchyLegend';
+import { getHierarchyInfo } from '@/lib/legislative-acts/hierarchy';
 
 interface LegislativeAct {
   id: string;
@@ -64,15 +65,8 @@ const ESFERA_LABELS: Record<string, string> = {
   'estadual': 'Estadual',
 };
 
-// Metadados de cada nível hierárquico — usados pra agrupar listagem quando
-// sort=hierarchy e pra montar tooltip detalhado nos badges de tipo dos cards.
-const HIERARCHY_META: Record<number, { label: string; pluralLabel: string; emoji: string; description: string }> = {
-  1: { label: 'Lei', pluralLabel: 'Leis', emoji: '📜', description: 'norma de hierarquia máxima' },
-  2: { label: 'Decreto', pluralLabel: 'Decretos', emoji: '📋', description: 'regulamenta lei' },
-  3: { label: 'Portaria', pluralLabel: 'Portarias', emoji: '📑', description: 'ato de Ministro ou autoridade equivalente' },
-  4: { label: 'IN / Resolução', pluralLabel: 'Instruções Normativas e Resoluções', emoji: '📝', description: 'detalha portaria ou decreto' },
-  5: { label: 'Ordem de Serviço', pluralLabel: 'Ordens de Serviço', emoji: '📌', description: 'ato interno operacional' },
-};
+// Metadados de hierarquia agora vêm de lib/legislative-acts/hierarchy.ts
+// via HIERARCHY_LEVELS + getHierarchyInfo().
 
 export default function LegislacaoPage() {
   const [acts, setActs] = useState<LegislativeAct[]>([]);
@@ -277,7 +271,7 @@ export default function LegislacaoPage() {
             <div className="flex flex-wrap items-center gap-2 mb-3">
               {(() => {
                 const lvl = act.hierarchyLevel;
-                const lvlMeta = lvl ? HIERARCHY_META[lvl] : null;
+                const lvlMeta = getHierarchyInfo(lvl);
                 const tooltip = lvlMeta
                   ? `${TYPE_LABELS[act.type] || act.type} — nível ${lvl} (${lvlMeta.description})`
                   : TYPE_LABELS[act.type] || act.type;
@@ -293,7 +287,7 @@ export default function LegislacaoPage() {
               {act.hierarchyLevel && (
                 <span
                   className="px-1.5 py-0.5 text-[10px] font-mono font-semibold rounded text-gray-600 bg-gray-100 border border-gray-200"
-                  title={`Nível hierárquico ${act.hierarchyLevel} — ${HIERARCHY_META[act.hierarchyLevel]?.description ?? ''}`}
+                  title={`Nível hierárquico ${act.hierarchyLevel} — ${getHierarchyInfo(act.hierarchyLevel)?.description ?? ''}`}
                 >
                   nv. {act.hierarchyLevel}
                 </span>
@@ -917,14 +911,16 @@ export default function LegislacaoPage() {
               {showGrouped && groupedActs ? (
                 <div className="space-y-8">
                   {groupedActs.map(([level, levelActs]) => {
-                    const meta = HIERARCHY_META[level];
+                    const meta = getHierarchyInfo(level);
+                    // level=99 = sentinela pra atos sem hierarchyLevel definido
+                    // (boa_pratica/orientacao não têm; também cobre edge cases de import).
+                    const headerEmoji = meta?.emoji ?? '📄';
+                    const headerLabel = meta?.pluralLabel ?? 'Outros atos (sem nível definido)';
                     return (
                       <section key={level}>
                         <h3 className="flex items-baseline gap-3 mb-4 pb-2 border-b-2 border-gray-200">
-                          <span className="text-2xl" aria-hidden="true">{meta?.emoji ?? '📄'}</span>
-                          <span className="text-xl font-bold text-gray-900">
-                            {meta?.pluralLabel ?? `Nível ${level}`}
-                          </span>
+                          <span className="text-2xl" aria-hidden="true">{headerEmoji}</span>
+                          <span className="text-xl font-bold text-gray-900">{headerLabel}</span>
                           <span className="text-sm font-normal text-gray-500">
                             ({levelActs.length} {levelActs.length === 1 ? 'ato' : 'atos'} nesta página)
                           </span>

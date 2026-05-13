@@ -24,25 +24,13 @@ import * as dotenv from 'dotenv';
 dotenv.config({ path: '.env.local' });
 import { PrismaClient } from '@prisma/client';
 import { PrismaNeon } from '@prisma/adapter-neon';
+import { getHierarchyLevelOrNull } from '../lib/legislative-acts/hierarchy';
 
 const adapter = new PrismaNeon({ connectionString: process.env.DATABASE_URL! });
 const prisma = new PrismaClient({ adapter });
 
 const args = process.argv.slice(2);
 const APPLY = args.includes('--apply');
-
-const HIERARCHY_MAP: Record<string, number> = {
-  lei: 1,
-  'lei-complementar': 1,
-  'medida-provisoria': 1,
-  decreto: 2,
-  'decreto-lei': 2,
-  portaria: 3,
-  in: 4,
-  'instrucao-normativa': 4,
-  resolucao: 4,
-  'ordem-servico': 5,
-};
 
 async function main() {
   console.log(`\n=== Fix hierarchyLevel ${APPLY ? '[APPLY]' : '[DRY-RUN]'} ===\n`);
@@ -54,8 +42,8 @@ async function main() {
 
   const updates: Array<{ id: string; fullNumber: string; type: string; from: number; to: number }> = [];
   for (const a of acts) {
-    const expected = HIERARCHY_MAP[a.type];
-    if (expected !== undefined && expected !== a.hierarchyLevel) {
+    const expected = getHierarchyLevelOrNull(a.type);
+    if (expected !== null && expected !== a.hierarchyLevel) {
       updates.push({ id: a.id, fullNumber: a.fullNumber, type: a.type, from: a.hierarchyLevel, to: expected });
     }
   }

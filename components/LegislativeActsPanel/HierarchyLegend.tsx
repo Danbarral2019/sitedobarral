@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { ChevronDown, ChevronUp, Info } from 'lucide-react';
+import { HIERARCHY_LEVELS, HIERARCHY_LEVEL_ORDER } from '@/lib/legislative-acts/hierarchy';
 
 /**
  * Legenda visual da hierarquia normativa.
@@ -10,42 +11,35 @@ import { ChevronDown, ChevronUp, Info } from 'lucide-react';
  *   Lei (h=1) vermelho · Decreto (h=2) azul · Portaria (h=3) verde
  *   IN (h=4) roxo · OS (h=5) amarelo
  *
- * Mostra a pirâmide compacta por default; expandida traz descrição e
- * caveat sobre Lei Complementar e Medida Provisória.
+ * Mostra a pirâmide compacta por default; expandida traz descrição completa
+ * de cada nível.
  */
 
-const LEVELS = [
-  {
-    level: 1,
-    label: 'Lei',
-    color: 'bg-red-100 text-red-800 border-red-300',
-    description: 'Norma de hierarquia máxima. Inclui Lei Ordinária, Lei Complementar e Medida Provisória (que tem força de lei até conversão).',
-  },
-  {
-    level: 2,
-    label: 'Decreto',
-    color: 'bg-blue-100 text-blue-800 border-blue-300',
-    description: 'Regulamenta lei. Editado pelo chefe do Executivo (Presidente, Governador, Prefeito).',
-  },
-  {
-    level: 3,
-    label: 'Portaria',
-    color: 'bg-green-100 text-green-800 border-green-300',
-    description: 'Ato de Ministro ou autoridade equivalente. Não pode contrariar lei nem decreto.',
-  },
-  {
-    level: 4,
-    label: 'IN · Resolução',
-    color: 'bg-purple-100 text-purple-800 border-purple-300',
-    description: 'Instrução Normativa ou Resolução, geralmente de Secretaria ou órgão técnico. Detalha portaria/decreto.',
-  },
-  {
-    level: 5,
-    label: 'OS',
-    color: 'bg-yellow-100 text-yellow-800 border-yellow-300',
-    description: 'Ordem de Serviço. Ato interno operacional, menor amplitude.',
-  },
-];
+/** Cor de cada nível (espelha TYPE_COLORS dos badges de tipo). */
+const LEVEL_COLORS: Record<number, string> = {
+  1: 'bg-red-100 text-red-800 border-red-300',
+  2: 'bg-blue-100 text-blue-800 border-blue-300',
+  3: 'bg-green-100 text-green-800 border-green-300',
+  4: 'bg-purple-100 text-purple-800 border-purple-300',
+  5: 'bg-yellow-100 text-yellow-800 border-yellow-300',
+};
+
+/** Descrições completas (vs description curta em HIERARCHY_LEVELS). */
+const LEVEL_LONG_DESCRIPTIONS: Record<number, string> = {
+  1: 'Norma de hierarquia máxima. Inclui Lei Ordinária, Lei Complementar e Medida Provisória (que tem força de lei até conversão).',
+  2: 'Regulamenta lei. Editado pelo chefe do Executivo (Presidente, Governador, Prefeito).',
+  3: 'Ato de Ministro ou autoridade equivalente. Não pode contrariar lei nem decreto.',
+  4: 'Instrução Normativa ou Resolução, geralmente de Secretaria ou órgão técnico. Detalha portaria/decreto.',
+  5: 'Ordem de Serviço. Ato interno operacional, menor amplitude.',
+};
+
+const LEVELS = HIERARCHY_LEVEL_ORDER.map((level) => ({
+  level,
+  // Label compacto pra pirâmide (sobrescreve plural de HIERARCHY_LEVELS quando útil)
+  label: level === 4 ? 'IN · Resolução' : level === 5 ? 'OS' : HIERARCHY_LEVELS[level].label,
+  color: LEVEL_COLORS[level],
+  description: LEVEL_LONG_DESCRIPTIONS[level],
+}));
 
 export function HierarchyLegend() {
   const [expanded, setExpanded] = useState(false);
