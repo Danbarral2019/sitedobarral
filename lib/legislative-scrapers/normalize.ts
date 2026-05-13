@@ -100,6 +100,38 @@ export function stripZeroWidthChars(text: string): string {
 }
 
 /**
+ * Mapeia chars de controle C1 (U+0080–U+009F) que aparecem por causa de
+ * páginas Windows-1252 mal decodificadas. Em Unicode esses codepoints são
+ * "reserved" e funcionam como caracteres invisíveis/inválidos. No cp1252
+ * o mesmo range é populado por punctuation comum (aspas curvas, dashes,
+ * apóstrofes, bullet, reticências).
+ *
+ * Estratégia: substituir pelo equivalente Unicode adequado da cp1252.
+ * Os 4 slots reservados em cp1252 (0x81, 0x8D, 0x8F, 0x90, 0x9D) caem em
+ * espaço — não temos como saber o que era.
+ *
+ * Visto em prod (audit 2026-05-13): 68 atos afetados, ~1500 ocorrências.
+ * Top offenders: U+0094/U+0093 (aspas curvas — 535/530x), U+0096 (en dash
+ * — 411x), U+0092/U+0091 (apóstrofes — 22/14x), U+0085 (reticências — 10x).
+ * Lei 14.973/2024 sozinha tinha 338 (Daniel reportou em 2026-05-13).
+ */
+export function mapCp1252Punctuation(text: string): string {
+  // Map cp1252 byte → unicode codepoint correto
+  const map: Record<string, string> = {
+    '': '€', '': '‚', '': 'ƒ', '': '„', '': '…',
+    '': '†', '': '‡', '': 'ˆ', '': '‰', '': 'Š',
+    '': '‹', '': 'Œ', '': 'Ž',
+    '': '‘', '': '’', // ‘ ’
+    '': '“', '': '”', // “ ”
+    '': '•', '': '–', '': '—', // – —
+    '': '˜', '': '™', '': 'š',
+    '': '›', '': 'œ', '': 'ž', '': 'Ÿ',
+  };
+  // Slots reservados em cp1252 (0x81, 0x8D, 0x8F, 0x90, 0x9D) — viram espaço
+  return text.replace(/[-]/g, (ch) => map[ch] ?? ' ');
+}
+
+/**
  * Deduplica o rodapé "Este texto não substitui o publicado no DOU..." quando
  * aparece mais de uma vez no mesmo ato.
  *
@@ -323,6 +355,7 @@ export function stripFormAnnex(text: string): string {
 export function normalizeScrapedText(text: string | null | undefined): string {
   if (!text) return text ?? '';
   let result = stripZeroWidthChars(text);
+  result = mapCp1252Punctuation(result);
   result = collapseWhitespace(result);
   result = stripDouBoilerplate(result);
   result = stripGovbrUiNoise(result);
