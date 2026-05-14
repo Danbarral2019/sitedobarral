@@ -1,5 +1,6 @@
-import { describe, test, expect } from 'vitest';
+import { describe, test, expect, beforeAll } from 'vitest';
 import { isAllowlistedRoute } from '../coming-soon';
+import { hasValidPreviewCookie, hashPreviewKey } from '../coming-soon';
 
 describe('isAllowlistedRoute', () => {
   test('permite assets internos do Next', () => {
@@ -90,5 +91,59 @@ describe('isAllowlistedRoute', () => {
     expect(isAllowlistedRoute('/blogx')).toBe(false);
     expect(isAllowlistedRoute('/admin-fake')).toBe(false);
     expect(isAllowlistedRoute('/loginhack')).toBe(false);
+  });
+});
+
+describe('hashPreviewKey', () => {
+  test('retorna hash SHA-256 hex de 64 chars', async () => {
+    const hash = await hashPreviewKey('abc123');
+    expect(hash).toHaveLength(64);
+    expect(hash).toMatch(/^[0-9a-f]{64}$/);
+  });
+
+  test('retorna hash consistente para mesma input', async () => {
+    const a = await hashPreviewKey('chave-secreta');
+    const b = await hashPreviewKey('chave-secreta');
+    expect(a).toBe(b);
+  });
+
+  test('hashes diferentes para inputs diferentes', async () => {
+    const a = await hashPreviewKey('chave-a');
+    const b = await hashPreviewKey('chave-b');
+    expect(a).not.toBe(b);
+  });
+});
+
+describe('hasValidPreviewCookie', () => {
+  const KEY = 'chave-de-teste-com-entropia-suficiente';
+  let validCookie: string;
+
+  beforeAll(async () => {
+    validCookie = await hashPreviewKey(KEY);
+  });
+
+  test('retorna true quando cookie é hash da chave esperada', async () => {
+    const result = await hasValidPreviewCookie(validCookie, KEY);
+    expect(result).toBe(true);
+  });
+
+  test('retorna false quando cookie é string aleatória', async () => {
+    const result = await hasValidPreviewCookie('cookie-invalido', KEY);
+    expect(result).toBe(false);
+  });
+
+  test('retorna false quando cookie é undefined', async () => {
+    const result = await hasValidPreviewCookie(undefined, KEY);
+    expect(result).toBe(false);
+  });
+
+  test('retorna false quando key esperada é undefined', async () => {
+    const result = await hasValidPreviewCookie(validCookie, undefined);
+    expect(result).toBe(false);
+  });
+
+  test('retorna false quando cookie é a chave em plaintext (deve ser hash)', async () => {
+    const result = await hasValidPreviewCookie(KEY, KEY);
+    expect(result).toBe(false);
   });
 });
