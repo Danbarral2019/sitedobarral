@@ -13,6 +13,13 @@ export async function POST(request: NextRequest) {
     await enforceRateLimit(`form:newsletter:${ip}`, 10, 60);
     const { email, name, interests, source } = await request.json();
 
+    // Saneamento de source: aceita apenas string curta; demais valores viram null
+    // para evitar abuso (string gigante, tipo inesperado vindo do body).
+    const safeSource =
+      typeof source === 'string' && source.length > 0 && source.length <= 50
+        ? source
+        : null;
+
     // Validações básicas
     if (!email) {
       return NextResponse.json(
@@ -44,7 +51,7 @@ export async function POST(request: NextRequest) {
             isActive: true,
             name: name || existing.name,
             interests: interests ? JSON.stringify(interests) : existing.interests,
-            source: source || existing.source, // preserves original if no new value
+            source: safeSource ?? existing.source, // preserves original if no valid new value
             unsubscribedAt: null
           }
         });
@@ -84,7 +91,7 @@ export async function POST(request: NextRequest) {
         email,
         name: name || null,
         interests: interests ? JSON.stringify(interests) : null,
-        source: source || null,
+        source: safeSource,
       },
     });
 
