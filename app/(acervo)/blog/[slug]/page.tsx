@@ -4,6 +4,7 @@ import { ArrowLeft, Calendar, Clock, User, Tag } from 'lucide-react';
 import { prisma } from '@/lib/prisma';
 import MarkdownContent from '@/components/MarkdownContent';
 import ShareButtons from '@/components/ShareButtons';
+import NewsletterForm from '@/components/NewsletterForm';
 import { safeParseArray } from '@/lib/utils';
 import type { Metadata } from 'next';
 
@@ -206,6 +207,19 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
             </footer>
           </article>
 
+          {process.env.COMING_SOON_ENABLED === 'true' && (
+            <aside className="mt-12 border-t border-slate-200 pt-8">
+              <h2 className="text-2xl font-bold text-slate-900 mb-2">
+                Em breve, novidades
+              </h2>
+              <p className="text-slate-600 mb-6">
+                Estamos preparando um lançamento. Cadastre seu email para ser avisado
+                primeiro.
+              </p>
+              <NewsletterForm variant="default" source="blog-footer" />
+            </aside>
+          )}
+
           {relatedPosts.length > 0 && (
             <div className="mt-12">
               <h2 className="text-2xl font-bold mb-6">Artigos Relacionados</h2>
@@ -227,26 +241,28 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
             </div>
           )}
 
-          <div className="mt-12 bg-primary-50 rounded-lg p-8 text-center">
-            <h2 className="text-2xl font-bold mb-4">Gostou deste conteúdo?</h2>
-            <p className="text-gray-700 mb-6">
-              Cadastre-se para receber novos artigos e materiais exclusivos sobre 
-              Direito Administrativo diretamente em seu e-mail.
-            </p>
-            <form className="flex flex-col sm:flex-row gap-4 max-w-md mx-auto">
-              <input
-                type="email"
-                placeholder="Seu e-mail"
-                className="flex-1 px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:border-primary-500"
-              />
-              <button
-                type="submit"
-                className="bg-primary-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-primary-700 transition-colors"
-              >
-                Cadastrar
-              </button>
-            </form>
-          </div>
+          {process.env.COMING_SOON_ENABLED !== 'true' && (
+            <div className="mt-12 bg-primary-50 rounded-lg p-8 text-center">
+              <h2 className="text-2xl font-bold mb-4">Gostou deste conteúdo?</h2>
+              <p className="text-gray-700 mb-6">
+                Cadastre-se para receber novos artigos e materiais exclusivos sobre
+                Direito Administrativo diretamente em seu e-mail.
+              </p>
+              <form className="flex flex-col sm:flex-row gap-4 max-w-md mx-auto">
+                <input
+                  type="email"
+                  placeholder="Seu e-mail"
+                  className="flex-1 px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:border-primary-500"
+                />
+                <button
+                  type="submit"
+                  className="bg-primary-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-primary-700 transition-colors"
+                >
+                  Cadastrar
+                </button>
+              </form>
+            </div>
+          )}
         </div>
       </div>
     </main>
