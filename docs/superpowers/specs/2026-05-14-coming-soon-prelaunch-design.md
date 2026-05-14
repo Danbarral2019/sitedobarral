@@ -3,14 +3,14 @@
 **Data:** 2026-05-14
 **Status:** Draft (aprovado em brainstorming, aguardando review escrita)
 **Rotas afetadas:** raiz do site (`/`) + todas as rotas vitrine; nova rota `/coming-soon`; nova rota `/preview`; `middleware.ts`
-**Motivação:** Marketing solicitou que o site não seja divulgado publicamente antes do anúncio oficial. Em paralelo, é necessário começar a divulgar artigos do blog. Solução: bloquear rotas vitrine com página "em breve", mantendo blog (`/artigo/*` + `/artigos`) acessível por link direto, e operações intactas para alunos/admin existentes.
+**Motivação:** Marketing solicitou que o site não seja divulgado publicamente antes do anúncio oficial. Em paralelo, é necessário começar a divulgar artigos do blog. Solução: bloquear rotas vitrine com página "em breve", mantendo blog (`/blog` + `/blog/[slug]`) acessível por link direto, e operações intactas para alunos/admin existentes.
 
 ## Goal
 
 Construir um modo "pré-lançamento" do site que:
 
 1. Substitua a homepage e todas as rotas vitrine por uma página coming-soon para visitantes anônimos.
-2. Mantenha o blog 100% público (`/artigos` + `/artigo/*`) para que artigos possam ser divulgados livremente.
+2. Mantenha o blog 100% público (`/blog` listagem + `/blog/[slug]` posts, ambos servidos via route group `app/(acervo)/blog/`) para que artigos possam ser divulgados livremente.
 3. Mantenha todas as rotas operacionais (auth, área-restrita, admin, API, certificado público, pagamento) funcionando para que alunos pagantes e admins não sejam afetados.
 4. Permita bypass por (a) qualquer usuário logado e (b) URL secreta `/preview?key=XXX` para o time de marketing.
 5. Seja ativável/desativável via kill switch sem deploy, e rollback em ≤ 2 minutos.
@@ -20,7 +20,7 @@ Construir um modo "pré-lançamento" do site que:
 - **Não alterar `robots.ts` nem `sitemap.ts`.** Indexação fica intacta. Decisão consciente baseada no trade-off SEO discutido no brainstorming (cenário B: coming-soon servido com HTTP 200 mantém a URL no índice; o custo é o snippet da homepage possivelmente trocar para "Em breve" se a janela passar de ~3 semanas). Único noindex novo: a rota `/preview`.
 - **Não construir UI de gestão** (sem painel admin para criar múltiplas chaves nomeadas). Uma única chave em env var; trocar a chave revoga todos os cookies emitidos.
 - **Não tratar `/cursos/[slug]` (página de venda do curso individual) como operacional.** Continua na vitrine (bloqueada para anônimos). Aluno logado bypassa naturalmente.
-- **Não criar componente de design novo** para a coming-soon. Reusar `NewsletterSignup` existente, logo do header e tokens de `globals.css`.
+- **Não criar componente de design novo** para a coming-soon. Reusar `NewsletterForm` existente, logo do header e tokens de `globals.css`.
 - **Não migrar para `runtime: 'nodejs'`** no middleware. Mantém Edge runtime — usar Web Crypto (`crypto.subtle`) para hash.
 - **Não persistir métricas em DB.** Tráfego e conversões serão acompanhados via Vercel Analytics + logs estruturados existentes (pino).
 
@@ -32,9 +32,9 @@ Construir um modo "pré-lançamento" do site que:
 | Escopo de bloqueio | Toda rota de vitrine; rotas operacionais e blog intactos |
 | Indexação Google | Manter (cenário B) — snippet pode trocar se janela > 3 semanas, aceito |
 | Janela esperada | > 3 semanas (sem data definida pelo marketing) |
-| `/artigos` (listagem do blog) | Pública — visitante pode explorar todos os artigos |
-| CTA no fim dos artigos | Reusa `NewsletterSignup`, só visível com kill switch ligado |
-| Coming-soon contém | Teaser + captura email + link para `/artigos` |
+| `/blog` (listagem do blog) | Pública — visitante pode explorar todos os artigos |
+| CTA no fim dos artigos | Reusa `NewsletterForm` (já existente, `variant='default'`), só visível com kill switch ligado |
+| Coming-soon contém | Teaser + captura email (`NewsletterForm` `variant='inline'`) + link para `/blog` |
 | Bypass automático | Qualquer JWT válido (admin OU aluno) |
 | Bypass manual | URL `/preview?key=XXX`, chave em env var, cookie httpOnly 60d |
 | Cookie de preview | Valor = `sha256(key)`, troca de env var invalida todos |
@@ -59,7 +59,7 @@ Construir um modo "pré-lançamento" do site que:
        ▼                                              ▼
   Lógica atual                                  /coming-soon
   (jurisprudencia redirect,                     (server component,
-   /area-restrita, /admin)                       reuses NewsletterSignup)
+   /area-restrita, /admin)                       reuses NewsletterForm)
 
   ┌──────────────────────────────────────────────────────────┐
   │  /preview?key=XXX → Route Handler                        │
@@ -76,7 +76,7 @@ Construir um modo "pré-lançamento" do site que:
 2. **Rewrite, não redirect.** `NextResponse.rewrite("/coming-soon")` preserva a URL na barra do browser. Links compartilhados continuam válidos pós-lançamento; Google indexa as URLs vitrine reais (não `/coming-soon`).
 3. **Hash do segredo no cookie.** Cookie nunca contém a chave em plaintext. Trocar a env var invalida todos os cookies automaticamente.
 4. **Edge runtime preservado.** Web Crypto async é trivial e o middleware atual já é async (faz `jwtVerify`).
-5. **Componentes existentes reusados** (`NewsletterSignup`, logo, tokens CSS). Único trabalho de design real: layout da `/coming-soon`.
+5. **Componentes existentes reusados** (`NewsletterForm`, logo, tokens CSS). Único trabalho de design real: layout da `/coming-soon`.
 
 ## Allowlist (sete grupos)
 
@@ -98,17 +98,17 @@ Implementada em `isAllowlistedRoute(pathname: string): boolean`. Match exato OU 
 - Prefixo: `/certificado/` (caso de uso: alguém recebe link de certificado por email e precisa validar sem login)
 
 **Grupo E — Blog (vitrine permitida)**
-- Exato: `/artigos`
-- Prefixo: `/artigo/`
+- Exato: `/blog`
+- Prefixo: `/blog/`
 
 **Grupo F — Páginas legais**
 - Exatos: `/privacidade`, `/termos` (exigidos por LGPD; links em emails transacionais não podem cair em coming-soon)
 
 **Grupo G — Pagamento/upgrade**
-- Exato: `/upgrade`
-- Prefixo: `/assinatura/` (fluxo de checkout Stripe; alunos com link de upgrade não podem cair em coming-soon)
+- Exatos: `/upgrade`, `/planos` (página de seleção de plano linkada de `/area-restrita/meu-plano` e do botão "fazer upgrade")
+- Prefixos: `/assinatura/` (callbacks Stripe: `/assinatura/sucesso|cancelado|pendente`), `/upgrade/` (cobre `/upgrade/[courseId]`)
 
-**Bloqueado (resto):** `/`, `/sobre`, `/lei-14133` e subpaths, `(acervo)/*` (busca pública), `/busca`, `/contato`, `/novidades`, `/clipping` (listagem pública), `/cursos` raiz e `/cursos/[slug]`.
+**Bloqueado (resto):** `/`, `/sobre`, `/lei-14133` e subpaths, demais rotas em `(acervo)/*` (`/base-conhecimento`, `/glossario`, `/jurisprudencia`, `/legislacao`, `/publicacoes`), `/busca`, `/contato`, `/novidades`, `/clipping` (listagem pública), `/cursos` raiz e `/cursos/[slug]`, redirect `/artigo/[numero]` (que aponta pra `/lei-14133?artigo=N` — vitrine).
 
 **Normalização de pathname antes do match:** remover trailing slash (`/login/` → `/login`) para evitar miss de exact match.
 
@@ -120,8 +120,8 @@ Server component, sem `'use client'`. Layout enxuto reusando tokens do `globals.
 
 ```tsx
 // Esboço estrutural — microcopy é placeholder
-import { Metadata } from 'next';
-import { NewsletterSignup } from '@/components/NewsletterSignup';
+import type { Metadata } from 'next';
+import NewsletterForm from '@/components/NewsletterForm';
 import Link from 'next/link';
 
 export const metadata: Metadata = {
@@ -134,18 +134,15 @@ export default function ComingSoonPage() {
   return (
     <main className="min-h-screen flex items-center justify-center px-4">
       <div className="max-w-xl text-center">
-        {/* Logo SVG */}
+        {/* Logo SVG aqui */}
         <h1 className="text-4xl font-serif text-navy-900 mb-4">Em breve</h1>
         <p className="text-lg text-slate-600 mb-8">
           {/* Placeholder — Daniel revisa antes do deploy */}
           Algo novo está chegando para quem trabalha com licitações e contratos.
         </p>
-        <NewsletterSignup
-          source="coming-soon"
-          successMessage="Avisamos você no lançamento."
-        />
+        <NewsletterForm variant="inline" source="coming-soon" />
         <Link
-          href="/artigos"
+          href="/blog"
           className="inline-block mt-8 text-navy-700 underline"
         >
           Enquanto isso, leia nossos artigos →
@@ -157,7 +154,7 @@ export default function ComingSoonPage() {
 ```
 
 **Observações:**
-- Verificar no código existente se `NewsletterSignup` aceita prop `source`. Se não, adicionar (passada para `POST /api/newsletter` para gravar em `NewsletterSubscriber`).
+- `NewsletterForm` é o componente existente em `components/NewsletterForm.tsx` (export default). Aceita props `className`, `showInterests`, `variant: 'default' | 'inline'`. **Falta adicionar prop opcional `source?: string`** — incluída como passo no plano de implementação.
 - Microcopy é placeholder. Daniel revisa antes do deploy de produção.
 
 ### 2. `app/preview/route.ts` (NOVO)
@@ -259,16 +256,16 @@ import { authLogger } from '@/lib/logger';
 const ALLOWLIST_EXACT = new Set([
   '/login', '/registro', '/esqueci-senha', '/redefinir-senha',
   '/verificar-email', '/validar-acesso', '/cancelar-newsletter',
-  '/privacidade', '/termos', '/upgrade',
-  '/artigos', '/coming-soon', '/preview',
+  '/privacidade', '/termos', '/upgrade', '/planos',
+  '/blog', '/coming-soon', '/preview',
   '/favicon.ico', '/manifest.webmanifest', '/robots.txt',
   '/sitemap.xml', '/sitemap-artigos.xml',
 ]);
 
 const ALLOWLIST_PREFIXES = [
   '/_next/', '/api/',
-  '/artigo/', '/area-restrita/', '/admin/', '/certificado/',
-  '/assinatura/', '/icons/', '/images/',
+  '/blog/', '/area-restrita/', '/admin/', '/certificado/',
+  '/assinatura/', '/upgrade/', '/icons/', '/images/',
 ];
 
 function isAllowlistedRoute(pathname: string): boolean {
@@ -406,12 +403,12 @@ export const config = {
 4. Lógica existente (jurisprudencia, área-restrita, admin) **integralmente preservada**.
 5. Header `Cache-Control: private, no-cache, no-store, must-revalidate` no response do rewrite (crítico para rollback).
 
-### 5. CTA dos artigos — `app/artigo/[slug]/page.tsx` (MODIFICADO)
+### 5. CTA do blog — `app/(acervo)/blog/[slug]/page.tsx` (MODIFICADO)
 
-Adicionar bloco de CTA newsletter no fim do artigo, visível **só quando `COMING_SOON_ENABLED=true`**. Some automaticamente após o lançamento.
+Adicionar bloco de CTA newsletter no fim do post, visível **só quando `COMING_SOON_ENABLED=true`**. Some automaticamente após o lançamento.
 
 ```tsx
-// No fim do template do artigo, após o conteúdo
+// No fim do template do post, após o conteúdo
 {process.env.COMING_SOON_ENABLED === 'true' && (
   <aside className="mt-12 border-t pt-8">
     <h2 className="text-xl font-serif mb-2">Em breve, novidades</h2>
@@ -419,27 +416,35 @@ Adicionar bloco de CTA newsletter no fim do artigo, visível **só quando `COMIN
       {/* Placeholder — Daniel revisa antes do deploy */}
       Estamos preparando um lançamento. Cadastre seu email para ser avisado primeiro.
     </p>
-    <NewsletterSignup source="article-footer" />
+    <NewsletterForm variant="default" source="blog-footer" />
   </aside>
 )}
 ```
 
-**Atenção:** se o artigo já tem CTA de newsletter no fim, substituir/condicionalizar para não ter dois CTAs idênticos.
+**Atenção:** verificar no template atual se já existe outro CTA de newsletter no fim do post. Se sim, condicionalizar para não duplicar.
 
 ### 6. Schema — adicionar campo `source` em `NewsletterSubscriber`
 
-Migração Prisma (opcional, mas recomendada para diferenciar leads):
+Migração Prisma (opcional, mas recomendada para diferenciar leads). Campo atual do modelo (linhas 543-554 de `prisma/schema.prisma`):
 
 ```prisma
 model NewsletterSubscriber {
-  // ... campos existentes ...
-  source         String?   // 'coming-soon' | 'article-footer' | 'footer' | etc.
+  id             String    @id @default(uuid())
+  email          String    @unique
+  name           String?
+  interests      String?   // JSON array com temas de interesse
+  isActive       Boolean   @default(true)
+  subscribedAt   DateTime  @default(now())
+  unsubscribedAt DateTime?
+  source         String?   // NOVO: 'coming-soon' | 'blog-footer' | 'footer' | etc.
 
-  @@index([source])
+  @@index([isActive])
+  @@index([subscribedAt])
+  @@index([source])         // NOVO
 }
 ```
 
-API `POST /api/newsletter` aceita campo `source` opcional no body e grava no modelo.
+API `POST /api/newsletter` (atualmente em `app/api/newsletter/route.ts:14`) recebe `{ email, name, interests }` no body. **Adicionar `source` ao destructuring e ao `prisma.newsletterSubscriber.create()` data.** Reativação de subscriber inativo: atualizar `source` apenas se vier no body novo (preserva original se já existir).
 
 ### 7. `.env.example` (MODIFICADO)
 
@@ -480,8 +485,15 @@ describe('isAllowlistedRoute', () => {
   });
 
   test('permite blog', () => {
-    expect(isAllowlistedRoute('/artigos')).toBe(true);
-    expect(isAllowlistedRoute('/artigo/meu-slug')).toBe(true);
+    expect(isAllowlistedRoute('/blog')).toBe(true);
+    expect(isAllowlistedRoute('/blog/meu-slug')).toBe(true);
+  });
+
+  test('permite planos e upgrade (funil Stripe)', () => {
+    expect(isAllowlistedRoute('/planos')).toBe(true);
+    expect(isAllowlistedRoute('/upgrade')).toBe(true);
+    expect(isAllowlistedRoute('/upgrade/curso-id')).toBe(true);
+    expect(isAllowlistedRoute('/assinatura/sucesso')).toBe(true);
   });
 
   test('bloqueia vitrine', () => {
@@ -493,6 +505,11 @@ describe('isAllowlistedRoute', () => {
     expect(isAllowlistedRoute('/cursos/nova-lei')).toBe(false);
     expect(isAllowlistedRoute('/contato')).toBe(false);
     expect(isAllowlistedRoute('/clipping')).toBe(false);
+    expect(isAllowlistedRoute('/glossario')).toBe(false);
+    expect(isAllowlistedRoute('/legislacao')).toBe(false);
+    expect(isAllowlistedRoute('/publicacoes')).toBe(false);
+    expect(isAllowlistedRoute('/base-conhecimento')).toBe(false);
+    expect(isAllowlistedRoute('/artigo/1')).toBe(false); // redirect da Lei 14.133, vitrine
   });
 
   test('normaliza trailing slash', () => {
@@ -500,8 +517,7 @@ describe('isAllowlistedRoute', () => {
   });
 
   test('edge cases', () => {
-    expect(isAllowlistedRoute('/artigo')).toBe(false); // sem slash final, não casa prefixo
-    expect(isAllowlistedRoute('/artigosx')).toBe(false); // não confunde com /artigos
+    expect(isAllowlistedRoute('/blogx')).toBe(false); // não confunde com /blog
   });
 });
 ```
@@ -513,8 +529,8 @@ Roda contra `localhost:3000` com `COMING_SOON_ENABLED=true`. Três personas:
 **1. Anônimo (sem cookies):**
 - `GET /` → 200, h1 contém "Em breve", URL preservada (`/`)
 - `GET /sobre`, `/lei-14133`, `/cursos`, `/clipping`, `/contato` → todos coming-soon
-- `GET /login`, `/registro`, `/artigos`, `/privacidade`, `/termos`, `/upgrade` → 200, sem "Em breve"
-- `GET /artigo/<slug-real>` → renderiza artigo + CTA newsletter visível
+- `GET /login`, `/registro`, `/blog`, `/privacidade`, `/termos`, `/upgrade`, `/planos` → 200, sem "Em breve"
+- `GET /blog/<slug-real>` → renderiza artigo + CTA newsletter visível
 - `GET /api/newsletter` (POST) → funciona normal
 
 **2. Admin logado** (helper `loginAsAdmin` existente):
@@ -532,7 +548,7 @@ Roda contra `localhost:3000` com `COMING_SOON_ENABLED=true`. Três personas:
 Checklist a executar após cada deploy enquanto `COMING_SOON_ENABLED=true`:
 
 - [ ] Janela anônima → `https://www.profdanielbarral.com` → coming-soon
-- [ ] Janela anônima → `/artigo/<slug-conhecido>` → artigo + CTA
+- [ ] Janela anônima → `/blog/<slug-conhecido>` → artigo + CTA
 - [ ] Janela anônima → `/login` → tela de login normal
 - [ ] `https://www.profdanielbarral.com/preview?key=<chave>` → libera site
 - [ ] Login como admin (limpando cookie preview antes) → site completo
@@ -573,21 +589,21 @@ Acompanhar via canais existentes (sem novo dashboard):
 |---|---|---|
 | Coming-soon impressions | Logs Vercel | `apiLogger.info({ pathname }, 'coming-soon rewrite')` no middleware |
 | Email captures | Banco — `NewsletterSubscriber` agrupado por `source` | Query Prisma manual ou em `/admin/newsletter` |
-| Tráfego de artigos | Vercel Analytics em `/artigo/*` | Dashboard Vercel |
+| Tráfego de artigos | Vercel Analytics em `/blog/*` | Dashboard Vercel |
 | Bypass uses | Logs Vercel | `apiLogger.info` no Route Handler `/preview` em sucesso |
 
 ## Open questions / decisões deferidas
 
 1. **Microcopy final** da coming-soon (headline, parágrafo) e dos CTAs nos artigos. Marcado como placeholder; Daniel revisa antes do deploy de produção.
-2. **Se `NewsletterSignup` aceita prop `source`** — verificar no código existente; se não, adicionar (decisão trivial).
+2. **`NewsletterForm` (componente existente em `components/NewsletterForm.tsx`) não tem prop `source`** — adicionar como prop opcional `source?: string` e passar no fetch para `/api/newsletter`. Decisão trivial, incluída no plano.
 3. **Conteúdo atual de `app/robots.ts`** — verificar formato real antes da edição para preservar regras existentes (o esboço acima é ilustrativo).
 
 ## Critérios de pronto
 
 - [ ] `middleware.ts` modificado, allowlist em função pura testada
-- [ ] `app/coming-soon/page.tsx` criada, reusa `NewsletterSignup`, metadata indexável
+- [ ] `app/coming-soon/page.tsx` criada, reusa `NewsletterForm`, metadata indexável
 - [ ] `app/preview/route.ts` criada, valida chave com constant-time, seta cookie hash 60d, retorna 404 em inválido
-- [ ] CTA newsletter em `app/artigo/[slug]/page.tsx` condicional ao flag
+- [ ] CTA newsletter em `app/(acervo)/blog/[slug]/page.tsx` condicional ao flag
 - [ ] Schema — campo `source` em `NewsletterSubscriber` (migração + API atualizada)
 - [ ] Env vars documentadas em `.env.example` (não comitar valores reais)
 - [ ] Testes unitários da allowlist (≥ 10 casos)
