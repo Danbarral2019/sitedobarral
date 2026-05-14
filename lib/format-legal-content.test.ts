@@ -181,4 +181,34 @@ describe('formatLegalContent', () => {
       expect(sigMatch![1]).toContain('Esther');
     });
   });
+
+  describe('merge agressivo de quebras aberrantes', () => {
+    it('mergeia "Art. 1º O" + "Decreto nº 12.174"', () => {
+      const input = 'Art. 1º O\n\nDecreto nº 12.174, de 11 de setembro.';
+      const output = formatLegalContent(input);
+      // Não deve haver quebra entre "O" e "Decreto"
+      // Nota: após formatação o Art. fica em bold (**Art. 1º**), então o regex
+      // precisa tolerar os marcadores markdown entre "1º" e "O"
+      expect(output).toMatch(/Art\.\s+1º\S*\s+O\s+Decreto/);
+    });
+
+    it('mergeia preposição órfã: "no" + "art. 8º"', () => {
+      const input = 'observado o disposto no\n\nart. 8º do Decreto nº 9.507.';
+      const output = formatLegalContent(input);
+      expect(output).toMatch(/disposto no art\. 8º/);
+    });
+
+    it('mergeia palavra + número quebrado: "art." + "46 da Lei"', () => {
+      const input = 'trata o art.\n\n46 da Lei nº 14.133.';
+      const output = formatLegalContent(input);
+      expect(output).toMatch(/o art\.\s+46 da Lei/);
+    });
+
+    it('NÃO mergeia parágrafos terminados com pontuação completa', () => {
+      const input = 'Art. 1º Primeira frase.\n\nArt. 2º Segunda frase.';
+      const output = formatLegalContent(input);
+      // Os dois devem permanecer separados
+      expect(output).toMatch(/Art\.\s+1º[^\n]*\.[\s\n]+\*\*Art\.\s+2º\*\*/);
+    });
+  });
 });

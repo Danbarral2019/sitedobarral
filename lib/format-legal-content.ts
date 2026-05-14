@@ -78,23 +78,43 @@ export function formatLegalContent(rawContent: string): string {
     filtered.shift();
   }
 
-  // Step 3: Merge broken sentences
-  // Merge when prev doesn't end with terminal punctuation AND neither side is
-  // a heading AND the current paragraph doesn't start with Art/§/Parágrafo.
+  // Step 3: Merge broken sentences (reforçado)
   const merged: string[] = [];
   for (const p of filtered) {
     if (merged.length > 0) {
       const prev = merged[merged.length - 1];
-      const prevEndsClean = /[.;:!?)"']$/.test(prev.trim());
+      const prevTrim = prev.trim();
+      const prevEndsClean = /[.;:!?)"']$/.test(prevTrim);
       const prevIsHeading = isHeading(prev);
       const curIsHeading = isHeading(p);
       // Não mergear quando o atual começa com algum marcador estrutural
       // (artigo, parágrafo, inciso romano ou alínea) — caso contrário
       // "II - ... ; e III - ..." ficam grudados num único parágrafo.
+      // Nota: Art\. é case-sensitive para não bloquear "art. 8º" em continuações.
       const curIsStructural =
-        /^(Art\.\s|§\s*\d|Parágrafo único|[IVXLCDM]+\s*[-–—]\s|[a-z]\)\s)/i.test(p);
+        /^(Art\.\s|§\s*\d|Parágrafo único|[IVXLCDM]+\s*[-–—]\s|[a-z]\)\s)/.test(p) ||
+        /^parágrafo único/i.test(p);
 
-      if (!prevEndsClean && !prevIsHeading && !curIsHeading && !curIsStructural) {
+      // Sinais adicionais de continuação:
+      const prevEndsWithStopWord = /\b(no|na|do|da|dos|das|o|a|os|as|em|de|com|por|para|sob|que)$/i.test(prevTrim);
+      const prevEndsWithSingleLetter = /\s[A-Za-z]$/.test(prevTrim);
+      const prevEndsWithArtAbbrev = /\bart\.?$/i.test(prevTrim);
+      const curStartsLowercase = /^[a-záàâãéêíóôõúç]/.test(p);
+      const curStartsWithNumber = /^\d/.test(p);
+      const curStartsWithCrossRef = /^(art\.|inciso|Lei|Decreto|caput)/i.test(p);
+
+      const shouldMerge =
+        // regra antiga
+        (!prevEndsClean && !prevIsHeading && !curIsHeading && !curIsStructural) ||
+        // novas regras
+        prevEndsWithStopWord ||
+        prevEndsWithSingleLetter ||
+        prevEndsWithArtAbbrev ||
+        (curStartsLowercase && !prevEndsClean) ||
+        (curStartsWithNumber && prevEndsWithArtAbbrev) ||
+        (curStartsWithCrossRef && !prevEndsClean && !prevIsHeading);
+
+      if (shouldMerge && !curIsStructural) {
         merged[merged.length - 1] = prev + ' ' + p;
         continue;
       }
