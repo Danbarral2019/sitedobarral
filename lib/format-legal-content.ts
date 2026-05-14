@@ -107,6 +107,8 @@ export function formatLegalContent(rawContent: string): string {
   for (let p of merged) {
     // E — caput em itálico (word boundary)
     p = p.replace(/\bcaput\b/g, '*caput*');
+    // C — [...] (com ou sem espaços) vira :omitido
+    p = p.replace(/\[\s*\.{3,}\s*\]/g, ':omitido');
     p = p.replace(/\s{2,}/g, ' ').trim();
     if (!p) continue;
 

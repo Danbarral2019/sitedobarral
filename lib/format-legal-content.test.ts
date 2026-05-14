@@ -24,4 +24,25 @@ describe('formatLegalContent', () => {
       expect(output).toContain('capitular');
     });
   });
+
+  describe('[...] → :omitido', () => {
+    it('substitui [...] simples por marcador inline', () => {
+      const input = 'Art. 1º [...] Parágrafo único.';
+      const output = formatLegalContent(input);
+      expect(output).toContain(':omitido');
+      expect(output).not.toContain('[...]');
+    });
+
+    it('substitui [ ... ] com espaços', () => {
+      const input = 'Art. 1º [ ... ] fim';
+      const output = formatLegalContent(input);
+      expect(output).toContain(':omitido');
+    });
+
+    it('substitui múltiplas ocorrências no mesmo parágrafo', () => {
+      const input = 'Art. 1º [...] meio [...] fim';
+      const output = formatLegalContent(input);
+      expect(output.match(/:omitido/g)?.length).toBe(2);
+    });
+  });
 });
