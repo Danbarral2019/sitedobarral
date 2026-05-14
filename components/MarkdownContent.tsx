@@ -5,11 +5,15 @@ import remarkGfm from 'remark-gfm';
 
 interface MarkdownContentProps {
   content: string;
+  variant?: 'planalto';
 }
 
-export default function MarkdownContent({ content }: MarkdownContentProps) {
+export default function MarkdownContent({ content, variant }: MarkdownContentProps) {
+  const wrapperClassName = variant === 'planalto'
+    ? 'markdown-content markdown-content--planalto'
+    : 'markdown-content';
   return (
-    <div className="markdown-content">
+    <div className={wrapperClassName}>
       <style jsx>{`
         .markdown-content {
           font-size: 1.125rem;
