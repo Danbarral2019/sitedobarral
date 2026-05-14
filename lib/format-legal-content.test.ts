@@ -160,4 +160,25 @@ describe('formatLegalContent', () => {
       expect(output).toContain('**O CONGRESSO NACIONAL**');
     });
   });
+
+  describe('assinatura', () => {
+    it('envolve Brasília + assinantes em :::signature', () => {
+      const input = [
+        'Art. 1º texto final.',
+        '',
+        'Brasília, 13 de abril de 2026; 205º da Independência e 138º da República.',
+        '',
+        'LUIZ INÁCIO LULA DA SILVA',
+        '',
+        'Esther Dweck',
+      ].join('\n');
+      const output = formatLegalContent(input);
+      expect(output).toContain(':::signature');
+      const sigMatch = output.match(/:::signature([\s\S]*?):::/);
+      expect(sigMatch).toBeTruthy();
+      expect(sigMatch![1]).toContain('Brasília');
+      expect(sigMatch![1]).toContain('LULA');
+      expect(sigMatch![1]).toContain('Esther');
+    });
+  });
 });

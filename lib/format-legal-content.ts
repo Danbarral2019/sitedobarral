@@ -109,6 +109,7 @@ export function formatLegalContent(rawContent: string): string {
   // Step 4: Format each paragraph into markdown
   const result: string[] = [];
   let prevWasHeader = false;
+  let inSignatureZone = false;
 
   for (let p of withAlteracaoBlocks) {
     // E — caput em itálico (word boundary)
@@ -190,17 +191,9 @@ export function formatLegalContent(rawContent: string): string {
     p = p.replace(/^(Parágrafo único\.?)(\s*)/i, '**$1** ');
     p = p.replace(/\*\*\s{2,}/g, '** ');
 
-    // --- Signature and closing ---
-
+    // --- Signature zone detection ---
     if (/^Brasília,\s+\d+/i.test(p)) {
-      result.push('---');
-      result.push('*' + p + '*');
-      continue;
-    }
-
-    if (result.length > 0 && isAfterSignature(result) && p === p.toUpperCase() && p.length < 80) {
-      result.push('*' + p + '*');
-      continue;
+      inSignatureZone = true;
     }
 
     if (/^Este texto não substitui/i.test(p)) {
@@ -209,7 +202,8 @@ export function formatLegalContent(rawContent: string): string {
     }
 
     // All-caps short text within body (table headers, labels)
-    if (p === p.toUpperCase() && p.length > 10 && p.length < 200 && /[A-Z]/.test(p)) {
+    // Skip inside signature zone — signatories must remain as-is for wrapSignature
+    if (!inSignatureZone && p === p.toUpperCase() && p.length > 10 && p.length < 200 && /[A-Z]/.test(p)) {
       result.push('**' + toTitleCase(p) + '**');
       continue;
     }
@@ -217,7 +211,9 @@ export function formatLegalContent(rawContent: string): string {
     result.push(p);
   }
 
-  const body = result.join('\n\n');
+  // H — Envolver assinatura final (Brasília + assinantes) em :::signature
+  const withSignature = wrapSignature(result);
+  const body = withSignature.join('\n\n');
   return officialTitle ? `# ${officialTitle}\n\n${body}` : body;
 }
 
@@ -335,11 +331,18 @@ function isAllCapsShort(text: string): boolean {
   return text === text.toUpperCase() && text.length > 3 && text.length < 120 && /[A-Z]/.test(text);
 }
 
-function isAfterSignature(result: string[]): boolean {
-  for (let i = result.length - 1; i >= Math.max(0, result.length - 5); i--) {
-    if (/\*Brasília/.test(result[i])) return true;
-  }
-  return false;
+/**
+ * Localiza o parágrafo "Brasília, <data>..." e envolve dele até o final
+ * (incluindo assinantes em CAIXA ALTA ou Title Case) em :::signature.
+ */
+function wrapSignature(paragraphs: string[]): string[] {
+  const idx = paragraphs.findIndex(p => /^Brasília,\s+\d/i.test(p));
+  if (idx === -1) return paragraphs;
+
+  const before = paragraphs.slice(0, idx);
+  const sigBlock = paragraphs.slice(idx);
+
+  return [...before, ':::signature', ...sigBlock, ':::'];
 }
 
 function toTitleCase(text: string): string {
