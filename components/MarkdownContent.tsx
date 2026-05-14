@@ -2,6 +2,47 @@
 
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
+import remarkDirective from 'remark-directive';
+import { visit } from 'unist-util-visit';
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function extractFirstText(children: any): string {
+  if (typeof children === 'string') return children;
+  if (Array.isArray(children)) {
+    for (const c of children) {
+      const t = extractFirstText(c);
+      if (t) return t;
+    }
+  }
+  if (children?.props?.children) return extractFirstText(children.props.children);
+  return '';
+}
+
+/**
+ * remark plugin: transforma diretivas (:::alteracao, :omitido, :nr, :::signature)
+ * em nós HTML com data attributes que o renderer customizado abaixo intercepta.
+ */
+function remarkLegalDirectives() {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  return (tree: any) => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    visit(tree, (node: any) => {
+      if (
+        node.type === 'containerDirective' ||
+        node.type === 'leafDirective' ||
+        node.type === 'textDirective'
+      ) {
+        const data = node.data || (node.data = {});
+        const tagName =
+          node.type === 'textDirective' ? 'span' : 'div';
+        data.hName = tagName;
+        data.hProperties = {
+          className: `${node.name}-directive`,
+        };
+      }
+    });
+  };
+}
 
 interface MarkdownContentProps {
   content: string;
@@ -473,7 +514,7 @@ export default function MarkdownContent({ content, variant }: MarkdownContentPro
         }
       `}</style>
       <ReactMarkdown
-        remarkPlugins={[remarkGfm]}
+        remarkPlugins={[remarkGfm, remarkDirective, remarkLegalDirectives]}
         components={{
           // Customizar renderização de links para notas de rodapé
           a: ({ href, children, ...props }) => {
@@ -488,6 +529,38 @@ export default function MarkdownContent({ content, variant }: MarkdownContentPro
             }
             return <a href={href} {...props}>{children}</a>;
           },
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            div: ({ className, children, ...props }: any) => {
+              if (className?.includes('alteracao-directive')) {
+                return <div className="alteracao-block">{children}</div>;
+              }
+              if (className?.includes('signature-directive')) {
+                return <div className="signature-block">{children}</div>;
+              }
+              return <div className={className} {...props}>{children}</div>;
+            },
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            span: ({ className, children, ...props }: any) => {
+              if (className?.includes('omitido-directive')) {
+                return <span className="omitido-line" aria-label="Trecho não alterado" />;
+              }
+              if (className?.includes('nr-directive')) {
+                return <span className="nr">{children}</span>;
+              }
+              return <span className={className} {...props}>{children}</span>;
+            },
+            // Custom <p>: detecta inciso/alínea pelo primeiro filho de texto
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            p: ({ children, ...props }: any) => {
+              const firstText = extractFirstText(children);
+              let className: string | undefined;
+              if (/^[IVXLCDM]+\s*[-–—]\s/.test(firstText)) {
+                className = 'inciso';
+              } else if (/^[a-z]\)\s/.test(firstText)) {
+                className = 'alinea';
+              }
+              return <p className={className} {...props}>{children}</p>;
+            },
         }}
       >
         {content}
