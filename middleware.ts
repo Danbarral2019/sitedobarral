@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 import { jwtVerify } from 'jose';
 import { authLogger } from '@/lib/logger';
+import { isAllowlistedRoute, hasValidPreviewCookie } from '@/lib/middleware/coming-soon';
 
 // Rotas que requerem autenticação
 const protectedRoutes = ['/area-restrita'];
@@ -18,7 +19,6 @@ async function verifyAuth(token: string) {
     const { payload } = await jwtVerify(token, secret);
     return payload;
   } catch (error) {
-    // ✅ Log estruturado para debugging (campos sensíveis são redacted automaticamente)
     authLogger.debug({ err: error }, 'Falha ao verificar token JWT');
     return null;
   }
@@ -26,6 +26,40 @@ async function verifyAuth(token: string) {
 
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
+  const comingSoonEnabled = process.env.COMING_SOON_ENABLED === 'true';
+
+  // ========== COMING-SOON GATE (só ativa quando flag ligada) ==========
+  if (comingSoonEnabled && !isAllowlistedRoute(pathname)) {
+    // Tenta bypass por JWT (qualquer role: admin OU aluno)
+    const token = request.cookies.get('auth-token')?.value;
+    let hasJWTBypass = false;
+    if (token) {
+      const payload = await verifyAuth(token);
+      hasJWTBypass = !!payload;
+    }
+
+    // Tenta bypass por cookie de preview (URL secreta)
+    let hasPreviewBypass = false;
+    if (!hasJWTBypass) {
+      const cookie = request.cookies.get('preview-bypass')?.value;
+      hasPreviewBypass = await hasValidPreviewCookie(
+        cookie,
+        process.env.PREVIEW_BYPASS_KEY,
+      );
+    }
+
+    if (!hasJWTBypass && !hasPreviewBypass) {
+      const url = request.nextUrl.clone();
+      url.pathname = '/coming-soon';
+      const response = NextResponse.rewrite(url);
+      // Anti-cache: evita Vercel CDN servir coming-soon depois que o
+      // kill switch for desligado. Crítico para rollback rápido.
+      response.headers.set('Cache-Control', 'private, no-cache, no-store, must-revalidate');
+      return response;
+    }
+  }
+
+  // ========== LÓGICA EXISTENTE (preservada integralmente) ==========
 
   // Verifica se é rota pública de admin
   const isPublicAdminRoute = publicAdminRoutes.some(route =>
@@ -40,16 +74,12 @@ export async function middleware(request: NextRequest) {
   // o usuário está logado. Versão restrita tem TCU/STJ/STF + busca IA, e
   // o aluno espera consistência: clicar "Jurisprudência" no menu superior
   // deve abrir a versão completa, não a pública resumida.
-  // (A página pública continua acessível diretamente em /jurisprudencia
-  // pra usuários não logados, e via deep link em /jurisprudencia/[id] —
-  // só o root /jurisprudencia faz o redirect.)
   if (pathname === '/jurisprudencia') {
     const token = request.cookies.get('auth-token')?.value;
     if (token) {
       const payload = await verifyAuth(token);
       if (payload) {
         const url = new URL('/area-restrita/jurisprudencia', request.url);
-        // Preserva search params (filtros de tribunal/ano/busca) na transição
         url.search = request.nextUrl.search;
         return NextResponse.redirect(url);
       }
@@ -57,7 +87,7 @@ export async function middleware(request: NextRequest) {
     return NextResponse.next();
   }
 
-  // ✅ Verifica se é uma rota protegida (match exato ou subpath)
+  // Verifica rotas protegidas e admin
   const isProtectedRoute = protectedRoutes.some(route =>
     pathname === route || pathname.startsWith(route + '/')
   );
@@ -70,7 +100,6 @@ export async function middleware(request: NextRequest) {
     const token = request.cookies.get('auth-token')?.value;
 
     if (!token) {
-      // Redireciona para página apropriada
       if (isAdminRoute) {
         return NextResponse.redirect(new URL('/admin/login', request.url));
       }
@@ -80,14 +109,12 @@ export async function middleware(request: NextRequest) {
     const payload = await verifyAuth(token);
 
     if (!payload) {
-      // Token inválido ou expirado
       if (isAdminRoute) {
         return NextResponse.redirect(new URL('/admin/login?error=expired', request.url));
       }
       return NextResponse.redirect(new URL('/validar-acesso?error=expired', request.url));
     }
 
-    // Verifica se é rota admin e se usuário é admin
     if (isAdminRoute && payload.role !== 'admin') {
       return NextResponse.redirect(new URL('/admin/login', request.url));
     }
@@ -98,8 +125,7 @@ export async function middleware(request: NextRequest) {
 
 export const config = {
   matcher: [
-    '/area-restrita/:path*',
-    '/admin/:path*',
-    '/jurisprudencia',
+    // Cobre tudo, exceto assets estáticos servidos diretamente pelo Vercel
+    '/((?!_next/static|_next/image|favicon.ico|.*\\.(?:png|jpg|jpeg|gif|webp|svg|ico|woff|woff2|css|js|map)$).*)',
   ],
 };
