@@ -133,4 +133,31 @@ describe('formatLegalContent', () => {
       }
     });
   });
+
+  describe('preâmbulo e cláusula', () => {
+    it('DECRETA: vira **DECRETA:** sem régua horizontal', () => {
+      const input = 'preâmbulo.\n\nDECRETA:\n\nArt. 1º texto.';
+      const output = formatLegalContent(input);
+      expect(output).toContain('**DECRETA:**');
+      expect(output).not.toMatch(/^---$/m); // sem régua
+    });
+
+    it('RESOLVE: vira **RESOLVE:** sem régua', () => {
+      const input = '...\n\nRESOLVE:\n\nArt. 1º texto.';
+      const output = formatLegalContent(input);
+      expect(output).toContain('**RESOLVE:**');
+    });
+
+    it('O PRESIDENTE DA REPÚBLICA no início do preâmbulo vira bold', () => {
+      const input = 'O PRESIDENTE DA REPÚBLICA, no uso da atribuição que lhe confere...';
+      const output = formatLegalContent(input);
+      expect(output).toContain('**O PRESIDENTE DA REPÚBLICA**');
+    });
+
+    it('O CONGRESSO NACIONAL vira bold', () => {
+      const input = 'O CONGRESSO NACIONAL decreta:';
+      const output = formatLegalContent(input);
+      expect(output).toContain('**O CONGRESSO NACIONAL**');
+    });
+  });
 });

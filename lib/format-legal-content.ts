@@ -169,16 +169,17 @@ export function formatLegalContent(rawContent: string): string {
 
     prevWasHeader = false;
 
+    // G — Preâmbulo: "O <SUJEITO EM CAIXA ALTA>" vira bold parcial
+    p = p.replace(
+      /^(O\s+(?:PRESIDENTE\s+DA\s+REPÚBLICA|CONGRESSO\s+NACIONAL|MINISTRO\s+DE\s+ESTADO[^,]+|GOVERNADOR[^,]+|PREFEITO[^,]+))(,|\s)/i,
+      '**$1**$2'
+    );
+
     // --- Separator markers ---
 
-    if (/^(DECRETA|RESOLVE)\s*:?\s*$/i.test(p)) {
-      result.push('---');
-      continue;
-    }
-
-    if (/,\s*resolve\s*:\s*$/i.test(p)) {
-      result.push(p);
-      result.push('---');
+    if (/^(DECRETA|RESOLVE|PROMULGA)\s*:?\s*$/i.test(p)) {
+      const verb = p.replace(/[:\s]/g, '').toUpperCase();
+      result.push(`**${verb}:**`);
       continue;
     }
 
