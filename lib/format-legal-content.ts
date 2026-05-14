@@ -105,6 +105,8 @@ export function formatLegalContent(rawContent: string): string {
   let prevWasHeader = false;
 
   for (let p of merged) {
+    // E — caput em itálico (word boundary)
+    p = p.replace(/\bcaput\b/g, '*caput*');
     p = p.replace(/\s{2,}/g, ' ').trim();
     if (!p) continue;
 
