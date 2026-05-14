@@ -15,6 +15,7 @@
     "test:coverage": "vitest run --coverage",
     "test:ui": "vitest --ui",
     "test:watch": "vitest --watch",
+    "smoke:coming-soon": "node scripts/smoke-test-coming-soon.mjs",
     "eval:annotate": "dotenv -e .env.local -- tsx eval/cli/annotate.ts",
     "eval:run": "dotenv -e .env.local -- tsx eval/cli/run-baseline.ts",
     "eval:planejamento:decision": "tsx eval/planejamento/run-decision.ts",
