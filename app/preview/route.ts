@@ -10,12 +10,26 @@ import { hashPreviewKey } from '@/lib/middleware/coming-soon';
  *
  * Cookie value = sha256(PREVIEW_BYPASS_KEY) — trocar a env var
  * automaticamente invalida todos os cookies emitidos.
+ *
+ * Comparação constant-time via hash: hashea ambas as entradas e
+ * compara byte-a-byte com OR acumulado, fechando o vetor de timing
+ * attack mesmo num runtime onde o ganho é marginal.
  */
 export async function GET(request: NextRequest) {
   const key = request.nextUrl.searchParams.get('key');
   const expected = process.env.PREVIEW_BYPASS_KEY;
 
-  if (!key || !expected || key !== expected) {
+  if (!key || !expected) {
+    return new NextResponse(null, { status: 404 });
+  }
+
+  const encoder = new TextEncoder();
+  const [keyHash, expectedHash] = await Promise.all([
+    crypto.subtle.digest('SHA-256', encoder.encode(key)),
+    crypto.subtle.digest('SHA-256', encoder.encode(expected)),
+  ]);
+
+  if (!buffersEqual(keyHash, expectedHash)) {
     return new NextResponse(null, { status: 404 });
   }
 
@@ -30,4 +44,13 @@ export async function GET(request: NextRequest) {
     path: '/',
   });
   return response;
+}
+
+function buffersEqual(a: ArrayBuffer, b: ArrayBuffer): boolean {
+  if (a.byteLength !== b.byteLength) return false;
+  const va = new Uint8Array(a);
+  const vb = new Uint8Array(b);
+  let diff = 0;
+  for (let i = 0; i < va.length; i++) diff |= va[i] ^ vb[i];
+  return diff === 0;
 }
