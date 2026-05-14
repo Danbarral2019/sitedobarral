@@ -109,6 +109,8 @@ export function formatLegalContent(rawContent: string): string {
     p = p.replace(/\bcaput\b/g, '*caput*');
     // C — [...] (com ou sem espaços) vira :omitido
     p = p.replace(/\[\s*\.{3,}\s*\]/g, ':omitido');
+    // D — (NR) no fim do parágrafo vira diretiva inline
+    p = p.replace(/\s\(NR\)\s*$/, ' :nr[(NR)]');
     p = p.replace(/\s{2,}/g, ' ').trim();
     if (!p) continue;
 

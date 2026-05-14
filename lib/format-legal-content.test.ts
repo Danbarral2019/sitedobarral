@@ -45,4 +45,19 @@ describe('formatLegalContent', () => {
       expect(output.match(/:omitido/g)?.length).toBe(2);
     });
   });
+
+  describe('(NR) preserva e marca', () => {
+    it('envolve (NR) no fim de parágrafo em :nr[]', () => {
+      const input = 'Parágrafo único. O disposto no art. 2º... (NR)';
+      const output = formatLegalContent(input);
+      expect(output).toContain(':nr[(NR)]');
+    });
+
+    it('NÃO envolve (NR) no meio de parágrafo', () => {
+      const input = '(NR) é uma sigla. O texto continua.';
+      const output = formatLegalContent(input);
+      // (NR) no início não deve virar diretiva
+      expect(output).not.toContain(':nr[(NR)]');
+    });
+  });
 });
