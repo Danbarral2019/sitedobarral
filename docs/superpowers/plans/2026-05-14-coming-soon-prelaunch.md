@@ -1210,6 +1210,22 @@ Compartilhar `https://www.profdanielbarral.com/preview?key=<chave>` por canal pr
 
 ---
 
+## Trade-off conhecido: ISR no blog vs flag
+
+As páginas de blog (`/blog/[slug]`) usam ISR com revalidação periódica (~1h). O CTA "Em breve, novidades" aparece via `process.env.COMING_SOON_ENABLED === 'true'` lido **no momento da geração estática**, não a cada request. Implicações:
+
+- **Ao ATIVAR a flag** (deploy com `COMING_SOON_ENABLED=true`): Vercel força rebuild ao detectar mudança em env var → ISR regenera com CTA. Sem lag perceptível.
+- **Ao DESATIVAR a flag** (launch day): Vercel também força rebuild, mas páginas ISR antigas no edge cache podem servir o CTA por até ~60min para usuários que requisitarem antes da primeira revalidação pós-deploy.
+
+**Mitigações no launch day:**
+- Aguardar 1h após o deploy de `COMING_SOON_ENABLED=false` antes de divulgar amplamente (CTA já terá saído de páginas mais acessadas).
+- OU: chamar manualmente `/api/revalidate` (se existir endpoint) para invalidar `/blog/*` imediatamente.
+- OU: aceitar o lag — o CTA de "Em breve, novidades" depois do lançamento é um problema cosmético menor, não bug funcional.
+
+A middleware-side gate (rewrite para coming-soon nas rotas vitrine) NÃO sofre desse problema — corre por-request e responde imediatamente a mudança da flag.
+
+---
+
 ## Rollback procedures (referência)
 
 **"Algo quebrou":**
