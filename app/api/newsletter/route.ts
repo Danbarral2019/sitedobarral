@@ -11,7 +11,7 @@ export async function POST(request: NextRequest) {
     // Rate limiting: 10 cadastros por minuto (Redis)
     const ip = getClientIp(request);
     await enforceRateLimit(`form:newsletter:${ip}`, 10, 60);
-    const { email, name, interests } = await request.json();
+    const { email, name, interests, source } = await request.json();
 
     // Validações básicas
     if (!email) {
@@ -44,6 +44,7 @@ export async function POST(request: NextRequest) {
             isActive: true,
             name: name || existing.name,
             interests: interests ? JSON.stringify(interests) : existing.interests,
+            source: source || existing.source, // preserves original if no new value
             unsubscribedAt: null
           }
         });
@@ -83,6 +84,7 @@ export async function POST(request: NextRequest) {
         email,
         name: name || null,
         interests: interests ? JSON.stringify(interests) : null,
+        source: source || null,
       },
     });
 
