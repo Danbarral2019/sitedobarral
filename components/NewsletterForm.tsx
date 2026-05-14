@@ -7,12 +7,14 @@ interface NewsletterFormProps {
   className?: string;
   showInterests?: boolean;
   variant?: 'default' | 'inline';
+  source?: string;
 }
 
 export default function NewsletterForm({
   className = '',
   showInterests = false,
-  variant = 'default'
+  variant = 'default',
+  source,
 }: NewsletterFormProps) {
   const [email, setEmail] = useState('');
   const [name, setName] = useState('');
@@ -50,6 +52,7 @@ export default function NewsletterForm({
           email,
           name: name || null,
           interests: interests.length > 0 ? interests : null,
+          source: source || null,
         }),
       });
 

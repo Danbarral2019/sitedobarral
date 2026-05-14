@@ -125,6 +125,7 @@ describe('NewsletterForm', () => {
             email: 'test@example.com',
             name: 'John Doe',
             interests: null,
+            source: null,
           }),
         });
       });
@@ -151,6 +152,7 @@ describe('NewsletterForm', () => {
             email: 'test@example.com',
             name: null,
             interests: ['Lei 14.133/2021'],
+            source: null,
           }),
         });
       });
