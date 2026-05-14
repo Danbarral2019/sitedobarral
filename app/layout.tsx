@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { Source_Serif_4, Inter, JetBrains_Mono } from "next/font/google";
+import { Source_Serif_4, Inter, JetBrains_Mono, Lora } from "next/font/google";
 import "./globals.css";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
@@ -34,6 +34,15 @@ const jetbrainsMono = JetBrains_Mono({
   subsets: ["latin"],
   weight: ["400", "500"],
   variable: "--font-mono",
+  display: "swap",
+});
+
+// Lora — fonte serifada para variante Planalto (documentos legislativos).
+const lora = Lora({
+  subsets: ["latin", "latin-ext"],
+  weight: ["400", "600", "700"],
+  style: ["normal", "italic"],
+  variable: "--font-lora",
   display: "swap",
 });
 
@@ -136,7 +145,7 @@ export default function RootLayout({
         <link rel="dns-prefetch" href="https://vitals.vercel-insights.com" />
         <link rel="dns-prefetch" href="https://va.vercel-scripts.com" />
       </head>
-      <body className={`${sourceSerif.variable} ${inter.variable} ${jetbrainsMono.variable} font-sans antialiased`}>
+      <body className={`${sourceSerif.variable} ${inter.variable} ${jetbrainsMono.variable} ${lora.variable} font-sans antialiased`}>
         <Analytics />
         <VercelAnalytics />
         <SpeedInsights />

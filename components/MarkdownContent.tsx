@@ -312,6 +312,165 @@ export default function MarkdownContent({ content, variant }: MarkdownContentPro
         .markdown-content :global(strong):has-text("Portaria") {
           color: #1E40AF;
         }
+
+        /* === VARIANTE PLANALTO ===================================== */
+
+        .markdown-content--planalto {
+          --planalto-vinho: #7a1c1c;
+          --planalto-link:  #1d4ed8;
+          font-family: var(--font-lora), Georgia, 'Times New Roman', serif;
+          font-size: 1.0625rem;
+          line-height: 1.65;
+          color: #1f2937;
+        }
+
+        /* Título oficial (H1) — centralizado, vinho, underline */
+        .markdown-content--planalto :global(h1) {
+          text-align: center;
+          color: var(--planalto-vinho);
+          font-weight: 700;
+          text-decoration: underline;
+          text-decoration-thickness: 1px;
+          text-underline-offset: 4px;
+          font-size: 1.5rem;
+          margin: 2.5rem auto 2rem;
+          padding: 0;
+          border: none;
+          line-height: 1.4;
+        }
+
+        /* Ementa = primeiro <p> após H1 → lateral à direita, vinho itálico */
+        .markdown-content--planalto :global(h1 + p) {
+          width: 65%;
+          margin-left: auto;
+          margin-right: 0;
+          color: var(--planalto-vinho);
+          font-style: italic;
+          font-size: 0.95rem;
+          text-align: justify;
+          text-indent: 0;
+        }
+
+        /* H2 — CAPÍTULO/TÍTULO/ANEXO centralizado */
+        .markdown-content--planalto :global(h2) {
+          text-align: center;
+          text-transform: uppercase;
+          color: rgba(122, 28, 28, 0.85);
+          font-size: 1.15rem;
+          font-weight: 700;
+          margin-top: 2.5rem;
+          margin-bottom: 1rem;
+        }
+
+        /* H3/H4 — SEÇÃO/SUBSEÇÃO centralizado */
+        .markdown-content--planalto :global(h3),
+        .markdown-content--planalto :global(h4) {
+          text-align: center;
+          font-weight: 700;
+          color: #374151;
+          font-size: 1rem;
+          margin-top: 1.75rem;
+          margin-bottom: 0.75rem;
+        }
+
+        /* Parágrafos — recuo de primeira linha (Art./§) */
+        .markdown-content--planalto :global(p) {
+          text-indent: 2em;
+          text-align: justify;
+          hyphens: auto;
+          margin-bottom: 0.85rem;
+          line-height: 1.65;
+        }
+
+        /* Inciso (classe injetada pelo custom <p>) */
+        .markdown-content--planalto :global(p.inciso) {
+          padding-left: 2em;
+          text-indent: 0;
+        }
+
+        /* Alínea */
+        .markdown-content--planalto :global(p.alinea) {
+          padding-left: 4em;
+          text-indent: 0;
+        }
+
+        /* Bloco :::alteracao — recuo lateral + borda esquerda */
+        .markdown-content--planalto :global(.alteracao-block) {
+          margin: 1.25rem 0 1.25rem 2.5rem;
+          padding-left: 1rem;
+          border-left: 2px solid #d1d5db;
+          font-size: 0.97rem;
+        }
+        .markdown-content--planalto :global(.alteracao-block p) {
+          text-indent: 1.5em;
+        }
+        .markdown-content--planalto :global(.alteracao-block p.inciso) {
+          padding-left: 1.5em;
+        }
+        .markdown-content--planalto :global(.alteracao-block p.alinea) {
+          padding-left: 3em;
+        }
+
+        /* Omitido inline — linha pontilhada CSS */
+        .markdown-content--planalto :global(.omitido-line)::before {
+          content: '';
+          display: inline-block;
+          width: 60%;
+          border-bottom: 1px dotted #9ca3af;
+          vertical-align: middle;
+          margin: 0 0.25em;
+        }
+
+        /* (NR) discreto */
+        .markdown-content--planalto :global(.nr) {
+          font-size: 0.85em;
+          color: #6b7280;
+          margin-left: 0.25em;
+        }
+
+        /* Assinatura centralizada */
+        .markdown-content--planalto :global(.signature-block) {
+          text-align: center;
+          margin: 3rem 0;
+          line-height: 2;
+        }
+        .markdown-content--planalto :global(.signature-block p) {
+          text-indent: 0;
+          text-align: center;
+        }
+
+        /* Links no tom Planalto */
+        .markdown-content--planalto :global(a) {
+          color: var(--planalto-link);
+          text-decoration: underline;
+        }
+
+        /* Strong herda vinho discreto, sem ficar gritante */
+        .markdown-content--planalto :global(strong) {
+          color: #111827;
+        }
+
+        /* Mobile (< 640px) */
+        @media (max-width: 640px) {
+          .markdown-content--planalto :global(h1) {
+            font-size: 1.15rem;
+          }
+          .markdown-content--planalto :global(h1 + p) {
+            width: 100%;
+          }
+          .markdown-content--planalto :global(.alteracao-block) {
+            margin-left: 1rem;
+          }
+          .markdown-content--planalto :global(p.inciso) {
+            padding-left: 1.25em;
+          }
+          .markdown-content--planalto :global(p.alinea) {
+            padding-left: 2.5em;
+          }
+          .markdown-content--planalto :global(.omitido-line)::before {
+            width: 40%;
+          }
+        }
       `}</style>
       <ReactMarkdown
         remarkPlugins={[remarkGfm]}
