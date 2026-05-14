@@ -48,9 +48,9 @@ export function formatLegalContent(rawContent: string): string {
 
   // Step 2: Remove institutional header block BEFORE merging
   const headerPatterns = [
-    /^Presidência da República$/i,
+    /^Presidência da República(\s|$)/i,
     /^Brasão das Armas/i,
-    /^Casa Civil$/i,
+    /^Casa Civil(\s|$)/i,
     /^Secretaria (Especial|Geral|-)/i,
     /^Subchefia/i,
   ];
@@ -59,8 +59,10 @@ export function formatLegalContent(rawContent: string): string {
     startIdx++;
   }
 
+  let officialTitle: string | null = null;
   if (startIdx < rawParagraphs.length) {
-    if (/^(DECRETO|LEI|PORTARIA|INSTRUÇÃO NORMATIVA|MEDIDA PROVISÓRIA)\s+N[ºo°]\s/i.test(rawParagraphs[startIdx])) {
+    if (/^(DECRETO|LEI|PORTARIA|INSTRUÇÃO NORMATIVA|MEDIDA PROVISÓRIA|RESOLUÇÃO|ORDEM DE SERVIÇO)\s+N[ºo°]\s/i.test(rawParagraphs[startIdx])) {
+      officialTitle = rawParagraphs[startIdx];
       startIdx++;
     }
   }
@@ -214,7 +216,8 @@ export function formatLegalContent(rawContent: string): string {
     result.push(p);
   }
 
-  return result.join('\n\n');
+  const body = result.join('\n\n');
+  return officialTitle ? `# ${officialTitle}\n\n${body}` : body;
 }
 
 /**

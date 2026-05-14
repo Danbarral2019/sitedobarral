@@ -98,11 +98,39 @@ describe('formatLegalContent', () => {
     });
 
     it('aspa abrindo sem fechar: fail-safe (não cria bloco)', () => {
-      const input = '“texto sem fechamento até o fim do ato';
+      const input = '”texto sem fechamento até o fim do ato';
       const output = formatLegalContent(input);
       expect(output).not.toContain(':::alteracao');
       // Mas o conteúdo permanece
       expect(output).toContain('texto sem fechamento');
+    });
+  });
+
+  describe('título oficial → H1', () => {
+    it('promove DECRETO Nº … a # heading', () => {
+      const input = [
+        'Presidência da República',
+        'Casa Civil',
+        'DECRETO Nº 12.926, DE 13 DE ABRIL DE 2026',
+        '',
+        'Altera o Decreto nº 12.174...',
+      ].join('\n');
+      const output = formatLegalContent(input);
+      expect(output).toContain('# DECRETO Nº 12.926, DE 13 DE ABRIL DE 2026');
+    });
+
+    it('promove LEI Nº … a # heading', () => {
+      const input = 'LEI Nº 14.133, DE 1º DE ABRIL DE 2021\n\nDispõe sobre...';
+      const output = formatLegalContent(input);
+      expect(output).toContain('# LEI Nº 14.133');
+    });
+
+    it('promove PORTARIA / INSTRUÇÃO NORMATIVA / MEDIDA PROVISÓRIA', () => {
+      const tipos = ['PORTARIA Nº 1', 'INSTRUÇÃO NORMATIVA Nº 1', 'MEDIDA PROVISÓRIA Nº 1'];
+      for (const titulo of tipos) {
+        const output = formatLegalContent(`${titulo}, DE 1 DE JANEIRO\n\nEmenta.`);
+        expect(output).toContain(`# ${titulo}`);
+      }
     });
   });
 });
