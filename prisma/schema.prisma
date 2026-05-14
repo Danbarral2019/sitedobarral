@@ -548,9 +548,11 @@ model NewsletterSubscriber {
   isActive       Boolean   @default(true)
   subscribedAt   DateTime  @default(now())
   unsubscribedAt DateTime?
+  source         String?   // 'coming-soon' | 'blog-footer' | 'footer' | etc.
 
   @@index([isActive])
   @@index([subscribedAt])
+  @@index([source])
 }
 
 // Depoimentos/Testemunhos de Alunos
