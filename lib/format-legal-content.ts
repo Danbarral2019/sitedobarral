@@ -100,11 +100,15 @@ export function formatLegalContent(rawContent: string): string {
     merged.push(p);
   }
 
+  // Step 3.5 — Detectar blocos de alteração entre aspas curvas "…"
+  // Faz balanceamento de contador. Se não fechar até o fim, devolve original (fail-safe).
+  const withAlteracaoBlocks = wrapAlteracaoBlocks(merged);
+
   // Step 4: Format each paragraph into markdown
   const result: string[] = [];
   let prevWasHeader = false;
 
-  for (let p of merged) {
+  for (let p of withAlteracaoBlocks) {
     // E — caput em itálico (word boundary)
     p = p.replace(/\bcaput\b/g, '*caput*');
     // C — [...] (com ou sem espaços) vira :omitido
@@ -211,6 +215,72 @@ export function formatLegalContent(rawContent: string): string {
   }
 
   return result.join('\n\n');
+}
+
+/**
+ * Envolve sequências de parágrafos delimitadas por aspas curvas "…" em
+ * marcadores :::alteracao ... ::: para destaque visual no Planalto-like CSS.
+ * Tolera aspas aninhadas via contador. Se não fechar, devolve original.
+ */
+function wrapAlteracaoBlocks(paragraphs: string[]): string[] {
+  // Detecta se há aspas curvas no texto. Se não houver, retorna sem modificação.
+  const hasCurlyQuotes = paragraphs.some(p => /[“”]/.test(p));
+  if (!hasCurlyQuotes) return paragraphs;
+
+  // Verifica balanceamento total: número de " deve ser igual a número de ".
+  let opens = 0;
+  let closes = 0;
+  for (const p of paragraphs) {
+    opens += (p.match(/“/g) || []).length;
+    closes += (p.match(/”/g) || []).length;
+  }
+  if (opens !== closes || opens === 0) {
+    return paragraphs; // fail-safe
+  }
+
+  const result: string[] = [];
+  let buffer: string[] = [];
+  let depth = 0;
+
+  for (let i = 0; i < paragraphs.length; i++) {
+    const p = paragraphs[i];
+    const localOpens = (p.match(/“/g) || []).length;
+    const localCloses = (p.match(/”/g) || []).length;
+    const wasZero = depth === 0;
+
+    // Apply opens first (before checking entry)
+    depth += localOpens;
+
+    if (wasZero && localOpens > 0) {
+      // Abriu bloco neste parágrafo
+      result.push(':::alteracao');
+    }
+
+    // Remove as aspas curvas do texto agora dentro do bloco (visualmente o
+    // CSS já delimita o bloco; manter as aspas seria redundante).
+    const stripped = p.replace(/[“”]/g, '').trim();
+    if (stripped) {
+      if (depth > 0) {
+        buffer.push(stripped);
+      } else {
+        result.push(stripped);
+      }
+    }
+
+    // Apply closes after content (to detect exit)
+    depth -= localCloses;
+
+    if (depth === 0 && buffer.length > 0) {
+      // Fechou bloco neste parágrafo
+      result.push(...buffer);
+      result.push(':::');
+      buffer = [];
+    }
+  }
+
+  // Defesa final: se algo sobrou no buffer (não deveria, já validamos), devolve original.
+  if (buffer.length > 0) return paragraphs;
+  return result;
 }
 
 /** Checks if a line starts a new structural element in legal text */

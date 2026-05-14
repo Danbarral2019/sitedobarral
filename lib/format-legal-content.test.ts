@@ -60,4 +60,49 @@ describe('formatLegalContent', () => {
       expect(output).not.toContain(':nr[(NR)]');
     });
   });
+
+  describe('aspas curvas → :::alteracao', () => {
+    it('envolve bloco de aspas em um único parágrafo', () => {
+      const input = 'Art. 1º\n\nO Decreto X passa a vigorar:\n\n“Art. 1º novo texto.” (NR)';
+      const output = formatLegalContent(input);
+      expect(output).toContain(':::alteracao');
+      expect(output).toContain(':::');
+    });
+
+    it('envolve aspas atravessando múltiplos parágrafos', () => {
+      const input = [
+        'Texto base.',
+        '',
+        '“Art. 1º começo do bloco',
+        '',
+        'Parágrafo único. Continua.',
+        '',
+        'Mais texto fechamento.” (NR)',
+        '',
+        'Depois do bloco.',
+      ].join('\n');
+      const output = formatLegalContent(input);
+      expect(output).toContain(':::alteracao');
+      // O parágrafo "Mais texto fechamento" deve estar dentro do bloco
+      const blockMatch = output.match(/:::alteracao([\s\S]*?):::/);
+      expect(blockMatch).toBeTruthy();
+      expect(blockMatch![1]).toContain('Mais texto fechamento');
+      expect(blockMatch![1]).toContain('Parágrafo único');
+    });
+
+    it('aspas aninhadas: balanceamento de contador', () => {
+      const input = '“externo “interno” externo continua.” (NR)';
+      const output = formatLegalContent(input);
+      const blocos = output.match(/:::alteracao/g);
+      expect(blocos?.length).toBe(1);
+    });
+
+    it('aspa abrindo sem fechar: fail-safe (não cria bloco)', () => {
+      const input = '“texto sem fechamento até o fim do ato';
+      const output = formatLegalContent(input);
+      expect(output).not.toContain(':::alteracao');
+      // Mas o conteúdo permanece
+      expect(output).toContain('texto sem fechamento');
+    });
+  });
 });
