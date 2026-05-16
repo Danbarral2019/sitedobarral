@@ -133,14 +133,43 @@ const nextConfig: NextConfig = {
           },
         ],
       },
+      // no-store explícito para famílias de rotas sensíveis (user-specific / mutáveis).
+      // Substitui o blanket /api/:path* (removido em 2026-05) que impedia CDN cache
+      // até em rotas idempotentes públicas.
       {
-        source: '/api/:path*',
-        headers: [
-          {
-            key: 'Cache-Control',
-            value: 'no-store, must-revalidate',
-          },
-        ],
+        source: '/api/auth/:path*',
+        headers: [{ key: 'Cache-Control', value: 'no-store, must-revalidate' }],
+      },
+      {
+        source: '/api/admin/:path*',
+        headers: [{ key: 'Cache-Control', value: 'no-store, must-revalidate' }],
+      },
+      {
+        source: '/api/area-restrita/:path*',
+        headers: [{ key: 'Cache-Control', value: 'no-store, must-revalidate' }],
+      },
+      {
+        source: '/api/pagamento/:path*',
+        headers: [{ key: 'Cache-Control', value: 'no-store, must-revalidate' }],
+      },
+      // Cache CDN público para leituras idempotentes não-personalizadas.
+      // s-maxage=300 (5min na CDN) + SWR de 10min: ganho enorme de TTFB para usuários
+      // repetidos, com janela mínima de defasagem. NÃO usar em rotas que variam por auth.
+      {
+        source: '/api/testimonials',
+        headers: [{ key: 'Cache-Control', value: 'public, s-maxage=300, stale-while-revalidate=600' }],
+      },
+      {
+        source: '/api/glossary',
+        headers: [{ key: 'Cache-Control', value: 'public, s-maxage=300, stale-while-revalidate=600' }],
+      },
+      {
+        source: '/api/course-videos',
+        headers: [{ key: 'Cache-Control', value: 'public, s-maxage=300, stale-while-revalidate=600' }],
+      },
+      {
+        source: '/api/recommended-sites',
+        headers: [{ key: 'Cache-Control', value: 'public, s-maxage=300, stale-while-revalidate=600' }],
       },
       {
         source: '/sw.js',
