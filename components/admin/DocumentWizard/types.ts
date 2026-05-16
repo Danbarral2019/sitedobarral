@@ -83,6 +83,8 @@ export interface WizardStepProps {
   onNext: () => void;
   onPrevious: () => void;
   onSkip?: () => void;
+  /** ID do documento — presente quando o wizard abriu em modo edição. */
+  documentId?: string;
   isFirstStep?: boolean;
   isLastStep?: boolean;
 }
