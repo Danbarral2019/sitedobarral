@@ -5,6 +5,30 @@
 
 ---
 
+## 🗺️ Plano de Saneamento 2026-05 a 2026-08
+
+Consolida as ações para resolver os ~80 achados das duas auditorias abaixo em **6 ondas** executáveis sem travar desenvolvimento de features:
+
+**Plano completo:** [`docs/plans/2026-05-saneamento.md`](docs/plans/2026-05-saneamento.md)
+
+| Onda | Foco | Duração |
+|---|---|---|
+| 0. Preparação | Mergear PRs #8, #9, #10 + backfill | 1 dia |
+| 1. Observabilidade universal | Sentry + ScraperHealthLog em tudo | 3-5 dias |
+| 2. Wins rápidos | regions, Cache-Control, deps mortas, órfãos | 1 dia |
+| 3. Bugs P0 ativos | thinkingBudget, modelos antigos, crons parados | 3-5 dias |
+| 4. Padronização | 196 rotas → Fase 8, `lib/ai` adotado, JSON→String[] | 2 semanas |
+| 5. Podar features mortas | Decisões produto + arquivamento | 1 semana |
+| 6. Refactor estrutural | Componentes >800L, Server Components, CLAUDE.md | 2-3 semanas |
+
+**Total: ~6-8 semanas** (paralelo a desenvolvimento de features). Pode pausar a qualquer onda sem perda.
+
+**Princípios:** observabilidade antes de fix; cada PR ≤500 LOC; schema sempre backward-compat; mudanças atrás de env var; instrumentar baseline antes; trunk-based.
+
+**Decisões pendentes do PO** (registrar antes da Onda 5): destino de Planejamento, Quizzes, FAQ, Vídeos, Cross-refs, Social, colunas MP legacy.
+
+---
+
 ## 🚨 Auditoria de Dívida Estrutural (2026-05-16)
 
 Complementar à auditoria de falhas silenciosas — investiga "o que está pesando, duplicado ou inacabado" (não "o que está quebrado em silêncio"). Três agents auditaram arquitetura, performance e features inacabadas.
