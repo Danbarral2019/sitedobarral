@@ -101,8 +101,7 @@ export async function GET(request: NextRequest) {
         console.log(`[Sync TCU Info] Importado: ${item.titulo}`);
       } catch (err) {
         errors++;
-        apiLogger.error(`[Sync TCU Info] Erro ao importar "${item.titulo}":`,
-          err instanceof Error ? err.message : err);
+        apiLogger.error({ err: err instanceof Error ? err.message : err }, `[Sync TCU Info] Erro ao importar "${item.titulo}":`);
       }
     }
 
