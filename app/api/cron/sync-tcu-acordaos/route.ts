@@ -121,22 +121,35 @@ async function enrichNewDocuments(docIds: string[]): Promise<{
 
   for (const doc of docs) {
     // Fase 1: Indexar artigos da Lei 14.133 (roda primeiro para que o resumo possa citá-los)
+    // Sempre persiste leiIndexedAt (mesmo articles=[]) para diferenciar "processado
+    // sem matches" de "nunca processado" — habilita backfill idempotente.
+    const now = new Date();
     try {
       const analysis = await LeiIndexer.analyzeDocument(doc, { minConfidence: 40 });
-      if (analysis.articles.length > 0) {
-        const articles = LeiIndexer.resultToLeiArticles(analysis);
-        await prisma.document.update({
-          where: { id: doc.id },
-          data: { leiArticles: JSON.stringify(articles) },
-        });
+      const articles = analysis.articles.length > 0
+        ? LeiIndexer.resultToLeiArticles(analysis)
+        : null;
+      await prisma.document.update({
+        where: { id: doc.id },
+        data: {
+          ...(articles ? { leiArticles: JSON.stringify(articles) } : {}),
+          leiIndexedAt: now,
+          leiIndexerError: null,
+        },
+      });
+      if (articles) {
         leiIndexed++;
-        // Atualizar leiArticles local para o prompt do resumo
         doc.leiArticles = JSON.stringify(articles);
       }
       await new Promise(resolve => setTimeout(resolve, ENRICHMENT_DELAY_MS));
     } catch (err) {
       enrichErrors++;
-      console.error(`[Sync TCU] Erro Lei-index ${doc.title}:`, err instanceof Error ? err.message : err);
+      const errMsg = err instanceof Error ? err.message : String(err);
+      console.error(`[Sync TCU] Erro Lei-index ${doc.title}:`, errMsg);
+      await prisma.document.update({
+        where: { id: doc.id },
+        data: { leiIndexedAt: now, leiIndexerError: errMsg.slice(0, 500) },
+      }).catch(() => { /* update opcional, não bloqueia */ });
     }
 
     // Fase 2: Gerar resumo executivo via Gemini
