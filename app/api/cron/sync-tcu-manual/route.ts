@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import * as Sentry from '@sentry/nextjs';
 import { prisma } from '@/lib/prisma';
 import {
   MANUAL_SECTIONS,
@@ -8,6 +9,19 @@ import {
 import { verifyCronAuth } from '@/lib/cron-auth';
 import { withCronTelemetry } from '@/lib/cron-telemetry';
 import { apiLogger } from '@/lib/logger';
+
+/**
+ * Janela após a qual um manual "sem alterações" é suspeito.
+ *
+ * O TCU publica revisões do manual a cada 12-18 meses tipicamente. Se o
+ * cron rodar e ver a mesma `currentDate` por > 6 meses, pode ser:
+ *   (a) TCU realmente não atualizou — normal
+ *   (b) Scraper de data quebrou e retorna um valor stale
+ *
+ * Em vez de pausar o cron preventivamente (como sync-tcu-informativos),
+ * disparamos warning no Sentry para o admin investigar (a) vs (b).
+ */
+const STALE_MANUAL_WARN_DAYS = 180;
 
 /**
  * Cron Job: Sincronização mensal do Manual TCU "Licitações & Contratos"
@@ -67,6 +81,24 @@ export async function GET(request: NextRequest) {
     if (currentDate && storedVersion === currentDate && sampleDoc) {
       const elapsed = Math.round((Date.now() - startTime) / 1000);
       console.log(`[Sync TCU Manual] Manual não mudou, encerrando (${elapsed}s)`);
+
+      // Stale detection: currentDate vem em formato DD/MM/YYYY.
+      // Se passou > 6 meses sem nova versão, sinaliza para investigação.
+      const parsed = currentDate.match(/^(\d{2})\/(\d{2})\/(\d{4})$/);
+      if (parsed) {
+        const [, dd, mm, yyyy] = parsed;
+        const manualDate = new Date(`${yyyy}-${mm}-${dd}T00:00:00Z`);
+        const ageDays = (Date.now() - manualDate.getTime()) / (1000 * 60 * 60 * 24);
+        if (Number.isFinite(ageDays) && ageDays > STALE_MANUAL_WARN_DAYS) {
+          Sentry.captureMessage(
+            `sync-tcu-manual: manual sem atualização há ${Math.round(ageDays)} dias ` +
+            `(versão ${currentDate}). Verificar se o TCU não publicou nova revisão ` +
+            `ou se fetchManualUpdateDate() está retornando data stale.`,
+            'warning',
+          );
+        }
+      }
+
       responseBody = {
         success: true,
         unchanged: true,
