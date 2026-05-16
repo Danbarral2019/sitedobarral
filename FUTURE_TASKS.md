@@ -1,7 +1,29 @@
 # Tarefas Futuras — Site do Prof. Daniel Barral
 
 > **Repositório central de melhorias, pendências e novas funcionalidades.**
-> Atualizado em: 2026-04-19
+> Atualizado em: 2026-05-16
+
+---
+
+## 🚨 Auditoria de Falhas Silenciosas (2026-05-16)
+
+Investigação disparada pela descoberta de bug crítico no `LeiIndexer` (truncamento de JSON Gemini sabotando 80% da catalogação por meses sem alarme). Três agents auditaram modelos AI, saúde de crons e webhooks. **30+ problemas identificados** — alguns provavelmente quebrando em produção agora.
+
+**Relatório completo:** [`docs/audits/2026-05-16-silent-failures.md`](docs/audits/2026-05-16-silent-failures.md)
+
+**Top 5 P0 críticos:**
+
+1. **`thinkingBudget` faltando em 6 call-sites Gemini** — mesmo bug do LeiIndexer pode estar quebrando `dou-classifier`, `embeddings/reranker`, `tribunal-scrapers/classifier`, query expansion. Fix global: trocar default de `thinkingBudget = undefined` para `= 0` em `lib/gemini/cached-client.ts:233`.
+2. **Modelos Claude geração antiga em `tcu-classifier.ts:96` e `claude-classifier.ts:164`** — `claude-3-5-sonnet/haiku-20241022` (out/2024) com catch silencioso que cai em fallback heurístico. Classificações TCU podem estar 100% no fallback há semanas.
+3. **Crons parados há meses:** `sync-tcu-informativos` (89d), `sync-tcu-manual` (96d), `process-index-jobs` morto (372 `TribunalDecision` sem embedding desde fev), `summarize-conuni` não popula (1.669 docs CONUNI sem summary), `compute-streaks` parado 51d (gamificação LMS).
+4. **Webhook Resend sem validação Svix** (`app/api/webhooks/resend/route.ts`) — qualquer POST pode marcar subscribers como `isActive: false`.
+5. **Cron `monitoring-alerts` não checa erro do Resend** — ironicamente, o sistema que detecta falhas pode estar falhando sem alarme.
+
+**Observabilidade insuficiente:** 467 `console.error` vs 7 `Sentry.captureException` (ratio 67:1). Apenas 8/25 crons usam `ScraperHealthLog` — os outros 17 são opacos.
+
+**Lição transversal:** padronizar instrumentação (`ScraperHealthLog` + Sentry) em todos os crons evita 90% dos casos de "falha silenciosa por meses sem detectar".
+
+Ver relatório completo em `docs/audits/2026-05-16-silent-failures.md` para tabelas detalhadas, recomendações P0/P1/P2 e arquivos:linha específicos.
 
 ---
 
