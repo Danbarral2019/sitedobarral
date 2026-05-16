@@ -7,7 +7,16 @@ import { withCronTelemetry } from '@/lib/cron-telemetry';
 /**
  * Cron Job: Gera resumo IA pra pareceres relevantes recém-classificados.
  *
- * Roda dia 1 às 8h UTC (1h após o classify). Pega até 80 docs por execução.
+ * Roda toda segunda-feira às 8h UTC. Pega até 200 docs por execução.
+ *
+ * Schedule + limit calibrados pelo backlog: a auditoria 2026-05-16 P0.3
+ * detectou 1.669 docs CONUNI sem `summary`. Com schedule mensal + limit:80
+ * o cron drenava ~80/mês enquanto classify-conuni alimentava ~1.500/mês —
+ * backlog crescia indefinidamente. Semanal × 150 ≈ ~650/mês, supera o
+ * input e zera o backlog em ~13 semanas sem precisar de batch separado.
+ *
+ * Limit 150 conservador para o orçamento de 300s: cada chamada Gemini Flash
+ * ~1.5s + 200ms delay ≈ 1.7s/doc → ~175 docs/run no pior caso. 150 dá folga.
  *
  * Auth: Authorization: Bearer <CRON_SECRET>
  */
@@ -22,7 +31,7 @@ export async function GET(request: NextRequest) {
   try {
     await withCronTelemetry('summarize-conuni', async () => {
       const result = await summarizeRelevantPareceres(prisma, {
-        limit: 80,
+        limit: 150,
         delayMs: 200,
         logger: (msg) => console.log('[Summarize CONUNI]', msg),
       });
