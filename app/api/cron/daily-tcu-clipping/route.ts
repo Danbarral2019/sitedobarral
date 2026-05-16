@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { randomUUID } from 'node:crypto';
 import { prisma } from '@/lib/prisma';
 import { verifyCronAuth } from '@/lib/cron-auth';
+import { withCronTelemetry } from '@/lib/cron-telemetry';
 import { sendEmail } from '@/lib/email';
 import { analyzeRelevanceTCU } from '@/lib/tcu-module';
 import { extractMany, type DocumentLike } from '@/lib/clipping/dispositivo-extractor';
@@ -44,7 +45,10 @@ export async function GET(request: NextRequest) {
   const authError = verifyCronAuth(request);
   if (authError) return authError;
 
-  const dryRun = request.nextUrl.searchParams.get('dryRun') === 'true';
+  let responseBody: Record<string, unknown> = {};
+  try {
+    await withCronTelemetry('daily-tcu-clipping', async () => {
+      const dryRun = request.nextUrl.searchParams.get('dryRun') === 'true';
   const now = new Date();
   const { since, until, referenceDate } = getReferenceWindow(now);
   const sentDateKey = startOfBrasiliaDay(now);
@@ -56,7 +60,8 @@ export async function GET(request: NextRequest) {
     const existing = await prisma.dailyClippingSend.findUnique({ where: { sentDate: sentDateKey } });
     if (existing && existing.status === 'success') {
       console.log('[DailyClipping] Já enviado hoje — noop');
-      return NextResponse.json({ ok: true, skipped: 'already_sent', sendId: existing.id });
+      responseBody = { ok: true, skipped: 'already_sent', sendId: existing.id };
+      return { itemsFound: 0, metadata: { skipped: 'already_sent' } };
     }
   }
 
@@ -142,7 +147,8 @@ export async function GET(request: NextRequest) {
         },
       });
     }
-    return NextResponse.json({ ok: true, status: 'no_content', candidates: candidates.length });
+    responseBody = { ok: true, status: 'no_content', candidates: candidates.length };
+    return { itemsFound: candidates.length, metadata: { status: 'no_content' } };
   }
 
   const docsLike: DocumentLike[] = deduped.map((c) => ({
@@ -195,7 +201,7 @@ export async function GET(request: NextRequest) {
           showArchiveBanner,
         })
       : null;
-    return NextResponse.json({
+    responseBody = {
       ok: true,
       dryRun: true,
       candidates: candidates.length,
@@ -212,7 +218,8 @@ export async function GET(request: NextRequest) {
       })),
       sampleHtmlLength: sample?.html.length || 0,
       subject: sample?.subject,
-    });
+    };
+    return { itemsFound: candidates.length, metadata: { dryRun: true, acordaoCount: acordaos.length } };
   }
 
   const sendId = randomUUID();
@@ -289,13 +296,27 @@ export async function GET(request: NextRequest) {
 
   console.log(`[DailyClipping] Concluído: ${totalSent} enviados, ${totalFailed} falhas, status=${finalStatus}`);
 
-  return NextResponse.json({
-    ok: finalStatus !== 'failed',
-    status: finalStatus,
-    sendId: sendRecord.id,
-    acordaoCount: acordaos.length,
-    totalSent,
-    totalFailed,
-    totalRecipients: recipients.length,
-  });
+      responseBody = {
+        ok: finalStatus !== 'failed',
+        status: finalStatus,
+        sendId: sendRecord.id,
+        acordaoCount: acordaos.length,
+        totalSent,
+        totalFailed,
+        totalRecipients: recipients.length,
+      };
+      return {
+        itemsFound: candidates.length,
+        itemsNew: totalSent,
+        itemsError: totalFailed,
+        metadata: { sendId: sendRecord.id, status: finalStatus },
+      };
+    });
+    return NextResponse.json(responseBody);
+  } catch (error) {
+    return NextResponse.json(
+      { ok: false, error: error instanceof Error ? error.message : 'Erro desconhecido' },
+      { status: 500 },
+    );
+  }
 }

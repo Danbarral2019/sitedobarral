@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { revalidatePath } from 'next/cache';
 import { verifyCronAuth } from '@/lib/cron-auth';
+import { withCronTelemetry } from '@/lib/cron-telemetry';
 
 /**
  * Invalida cache ISR das páginas do acervo. Útil quando scripts CLI mudam
@@ -21,7 +22,16 @@ export async function GET(request: NextRequest) {
     '/base-conhecimento/manual-tcu',
   ];
 
-  for (const p of paths) revalidatePath(p);
-
-  return NextResponse.json({ revalidated: paths });
+  try {
+    await withCronTelemetry('revalidate-acervo', async () => {
+      for (const p of paths) revalidatePath(p);
+      return { itemsFound: paths.length, itemsNew: paths.length };
+    });
+    return NextResponse.json({ revalidated: paths });
+  } catch (error) {
+    return NextResponse.json(
+      { error: 'Erro ao revalidar', details: error instanceof Error ? error.message : 'Erro desconhecido' },
+      { status: 500 },
+    );
+  }
 }
