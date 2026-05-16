@@ -1,18 +1,24 @@
 /**
  * Scraper para Informativos de Jurisprudência Selecionada do TCU
  *
- * Os informativos do TCU estão disponíveis via a pesquisa textual em:
- * https://pesquisa.apps.tcu.gov.br/pesquisa/jurisprudencia-selecionada
+ * ⚠️ STATUS 2026-05-16: SCRAPER QUEBRADO. NÃO FUNCIONA EM PRODUÇÃO.
  *
- * A API subjacente usa um BFF (Backend For Frontend) com proteção WAF.
- * Este scraper usa a API REST do BFF encontrada no JS bundle da aplicação:
- *   POST /pesquisa/rest/relevar-busca-bff/api/v1
+ * O TCU migrou ambas as fontes para SPAs (Next.js / Angular renderizadas
+ * no cliente). Tanto a API BFF quanto o portal de jurisprudência agora
+ * devolvem HTML em vez de JSON/HTML-renderizado:
  *
- * Alternativa: scraping direto do portal de jurisprudência do TCU:
- *   https://portal.tcu.gov.br/jurisprudencia/
+ *   1. pesquisa.apps.tcu.gov.br/.../api/v1 — HTTP 200 mas retorna HTML
+ *      (SPA fallback). `response.json()` lança SyntaxError → catch
+ *      silencioso devolve {success:false, error:"..."} sem alarmar.
  *
- * NOTA: O site do TCU tem proteção anti-bot. Se a API falhar,
- * o scraper retorna um erro descritivo e o cron job registra o problema.
+ *   2. portal.tcu.gov.br/jurisprudencia → SPA Next.js (chunks `/_next/`).
+ *      Parse de HTML tradicional não encontra os dados.
+ *
+ * Consequência: o cron rodou semanalmente por 89+ dias devolvendo zero
+ * novos informativos (último import em 2026-02-16).
+ *
+ * Cron PAUSADO no `vercel.json` (PR Onda 3 3.4b). Reativar SOMENTE após
+ * refatoração: provavelmente Puppeteer ou descobrir nova API.
  *
  * Os informativos já existentes no banco foram importados de planilhas Excel
  * (1.973 enunciados) com category='informativo'.
