@@ -24,6 +24,7 @@ export default function Step2LeiArticles({
   updateForm,
   onNext,
   onPrevious,
+  documentId,
 }: WizardStepProps) {
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [aiSuggestion, setAiSuggestion] = useState<{
@@ -39,9 +40,14 @@ export default function Step2LeiArticles({
     setIsAnalyzing(true);
 
     try {
-      // Simular análise IA (em produção, chamaria a API real)
-      // POST /api/admin/documents/temp-enhance com dados do formState
-      const response = await fetch('/api/admin/documents/temp-enhance', {
+      // Em edição (documentId presente), usar /[id]/enhance — esse endpoint lê
+      // extractedText do banco, dando ao LeiIndexer o texto integral em vez de
+      // só title/category. Em criação (sem id), cai no temp-enhance.
+      const endpoint = documentId
+        ? `/api/admin/documents/${documentId}/enhance`
+        : '/api/admin/documents/temp-enhance';
+
+      const response = await fetch(endpoint, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

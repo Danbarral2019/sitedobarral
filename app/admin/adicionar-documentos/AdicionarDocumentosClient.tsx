@@ -18,7 +18,7 @@ import { MultiFileDropzone } from '@/components/ui/multi-file-dropzone';
 import LeiArticleSelector from '@/components/LeiArticleSelector';
 
 // Dynamic imports
-const DocumentAnalyzer = dynamic(() => import('@/components/DocumentAnalyzer'), {
+const WizardEnhanceButton = dynamic(() => import('@/components/admin/WizardEnhanceButton'), {
   loading: () => <div className="text-sm text-gray-600">Carregando analisador...</div>,
   ssr: false,
 });
@@ -547,10 +547,10 @@ export default function AdicionarDocumentosClient({
                     )}
 
                     {uploadMode === 'single' && (
-                      <DocumentAnalyzer
+                      <WizardEnhanceButton
                         title={formData.title}
                         description={formData.description}
-                        file={selectedFile}
+                        category={formData.category}
                         currentSelectedArticles={formData.leiArticles}
                         onApplySuggestions={(articles) => setFormData({ ...formData, leiArticles: articles })}
                         disabled={!formData.title}
