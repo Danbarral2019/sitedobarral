@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { verifyCronAuth } from '@/lib/cron-auth';
 import { classifyPendingPareceres } from '@/lib/conuni-classify';
+import { withCronTelemetry } from '@/lib/cron-telemetry';
 
 /**
  * Cron Job: Classifica novos pareceres CONUNI via Gemini.
@@ -22,29 +23,27 @@ export async function GET(request: NextRequest) {
   const authError = verifyCronAuth(request);
   if (authError) return authError;
 
-  console.log('[Classify CONUNI] Iniciando...');
-
+  let responseBody: Record<string, unknown> = {};
   try {
-    const result = await classifyPendingPareceres(prisma, {
-      limit: 80,
-      delayMs: 200,
-      logger: (msg) => console.log('[Classify CONUNI]', msg),
+    await withCronTelemetry('classify-conuni', async () => {
+      const result = await classifyPendingPareceres(prisma, {
+        limit: 80,
+        delayMs: 200,
+        logger: (msg) => console.log('[Classify CONUNI]', msg),
+      });
+      responseBody = {
+        message: `Classify CONUNI: ${result.processed} processados (${result.relevant} relevantes, ${result.irrelevant} irrelevantes) em ${result.elapsedSeconds}s`,
+        ...result,
+      };
+      return {
+        itemsFound: result.processed,
+        itemsNew: result.relevant,
+        itemsError: result.errors,
+        metadata: { irrelevant: result.irrelevant, elapsedSeconds: result.elapsedSeconds },
+      };
     });
-
-    console.log('[Classify CONUNI] Resultado:', JSON.stringify({
-      processed: result.processed,
-      relevant: result.relevant,
-      irrelevant: result.irrelevant,
-      errors: result.errors,
-      elapsedSeconds: result.elapsedSeconds,
-    }));
-
-    return NextResponse.json({
-      message: `Classify CONUNI: ${result.processed} processados (${result.relevant} relevantes, ${result.irrelevant} irrelevantes) em ${result.elapsedSeconds}s`,
-      ...result,
-    });
+    return NextResponse.json(responseBody);
   } catch (error) {
-    console.error('[Classify CONUNI] Erro fatal:', error);
     return NextResponse.json(
       {
         error: 'Erro ao classificar pareceres CONUNI',
