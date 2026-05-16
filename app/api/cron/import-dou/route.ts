@@ -35,6 +35,7 @@ import { prisma } from '@/lib/prisma';
 import { verifyCronAuth } from '@/lib/cron-auth';
 import { normalizeScrapedText } from '@/lib/legislative-scrapers/normalize';
 import { withCronTelemetry } from '@/lib/cron-telemetry';
+import { apiLogger } from '@/lib/logger';
 
 export const runtime = 'nodejs';
 export const maxDuration = 300; // 5 minutos (maximo para Vercel Pro)
@@ -73,7 +74,7 @@ export async function GET(request: NextRequest) {
     const periodParam = searchParams.get('period') || 'week';
 
     if (!ALLOWED_PERIODS.includes(periodParam as typeof ALLOWED_PERIODS[number])) {
-      console.error(`[Cron DOU Staging] Periodo invalido: ${periodParam}`);
+      apiLogger.error(`[Cron DOU Staging] Periodo invalido: ${periodParam}`);
       responseBody = { error: `Periodo invalido. Valores permitidos: ${ALLOWED_PERIODS.join(', ')}` };
       throw new Error(`Periodo invalido: ${periodParam}`);
     }
@@ -213,7 +214,7 @@ export async function GET(request: NextRequest) {
 
       } catch (error) {
         erros++;
-        console.error(`[Cron DOU Staging] Erro ao salvar documento:`, error);
+        apiLogger.error({ err: error }, `[Cron DOU Staging] Erro ao salvar documento:`);
       }
     }
 
@@ -258,7 +259,7 @@ export async function GET(request: NextRequest) {
           // Rate limiting entre scrapes
           await new Promise(resolve => setTimeout(resolve, 1000));
         } catch (error) {
-          console.error(`[Cron DOU Staging] Erro ao enriquecer ${doc.id}:`, error);
+          apiLogger.error({ err: error }, `[Cron DOU Staging] Erro ao enriquecer ${doc.id}:`);
         }
       }
 
@@ -352,7 +353,7 @@ async function cleanupOldStaging(): Promise<{ rejectedDeleted: number; importedD
       console.log(`[Cron DOU Staging] Limpeza: ${rejectedDeleted} rejeitados (>${REJECTED_CLEANUP_DAYS}d) + ${importedDeleted} importados (>${IMPORTED_CLEANUP_DAYS}d) removidos`);
     }
   } catch (error) {
-    console.error('[Cron DOU Staging] Erro na limpeza:', error);
+    apiLogger.error({ err: error }, '[Cron DOU Staging] Erro na limpeza:');
   }
 
   return { rejectedDeleted, importedDeleted };

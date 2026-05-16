@@ -3,6 +3,7 @@ import { prisma } from '@/lib/prisma';
 import { scrapeNewInformativos } from '@/lib/tcu-informativo-scraper';
 import { verifyCronAuth } from '@/lib/cron-auth';
 import { withCronTelemetry } from '@/lib/cron-telemetry';
+import { apiLogger } from '@/lib/logger';
 
 /**
  * Cron Job: Sincronização automática de Informativos de Jurisprudência Selecionada do TCU
@@ -100,10 +101,8 @@ export async function GET(request: NextRequest) {
         console.log(`[Sync TCU Info] Importado: ${item.titulo}`);
       } catch (err) {
         errors++;
-        console.error(
-          `[Sync TCU Info] Erro ao importar "${item.titulo}":`,
-          err instanceof Error ? err.message : err
-        );
+        apiLogger.error(`[Sync TCU Info] Erro ao importar "${item.titulo}":`,
+          err instanceof Error ? err.message : err);
       }
     }
 

@@ -37,6 +37,7 @@ import { sendDouEditorialAlert, type DouEditorialAlertItem } from '@/lib/email';
 import { PRIMARY_GEMINI_MODEL } from '@/lib/gemini/config';
 import { extractIssuerFromDouHierarchy } from '@/lib/dou-issuer';
 import { getHierarchyLevel } from '@/lib/legislative-acts/hierarchy';
+import { apiLogger } from '@/lib/logger';
 
 export const runtime = 'nodejs';
 export const maxDuration = 300;
@@ -150,7 +151,7 @@ export async function GET(request: NextRequest) {
           }
         }
       } catch (error) {
-        console.error(`[Sync DOU Normativos] Erro ao buscar "${term}":`, error);
+        apiLogger.error(`[Sync DOU Normativos] Erro ao buscar "${term}":`, error);
         stats.erros++;
       }
       // Rate limiting entre buscas
@@ -350,7 +351,7 @@ export async function GET(request: NextRequest) {
                 });
               }
             } catch (error) {
-              console.error(`[Sync DOU Normativos] Erro LeiIndexer para ${newDoc.id}:`, error);
+              apiLogger.error({ err: error }, `[Sync DOU Normativos] Erro LeiIndexer para ${newDoc.id}:`);
             }
           });
 
@@ -411,7 +412,7 @@ export async function GET(request: NextRequest) {
                   });
                   stats.notasLeiCriadas++;
                 } catch (error) {
-                  console.error(`[Sync DOU Normativos] Erro ao criar LeiArticleNote para art. ${artNumber}:`, error);
+                  apiLogger.error({ err: error }, `[Sync DOU Normativos] Erro ao criar LeiArticleNote para art. ${artNumber}:`);
                 }
               }
             }
@@ -439,7 +440,7 @@ export async function GET(request: NextRequest) {
                   }
                 }
               } catch (error) {
-                console.error('[Sync DOU Normativos] Erro ao buscar ato existente:', error);
+                apiLogger.error({ err: error }, '[Sync DOU Normativos] Erro ao buscar ato existente:');
               }
             }
           } else {
@@ -454,7 +455,7 @@ export async function GET(request: NextRequest) {
 
       } catch (error) {
         stats.erros++;
-        console.error('[Sync DOU Normativos] Erro ao processar documento:', error);
+        apiLogger.error({ err: error }, '[Sync DOU Normativos] Erro ao processar documento:');
       }
     }
 
@@ -482,7 +483,7 @@ export async function GET(request: NextRequest) {
           // Rate limiting entre scrapes
           await new Promise(resolve => setTimeout(resolve, 1000));
         } catch (error) {
-          console.error(`[Sync DOU Normativos] Erro ao enriquecer ${doc.id}:`, error);
+          apiLogger.error({ err: error }, `[Sync DOU Normativos] Erro ao enriquecer ${doc.id}:`);
         }
       }
 
@@ -502,7 +503,7 @@ export async function GET(request: NextRequest) {
 
           await new Promise(resolve => setTimeout(resolve, 2000));
         } catch (error) {
-          console.error(`[Sync DOU Normativos] Erro ao scrape+index act ${actId}:`, error);
+          apiLogger.error({ err: error }, `[Sync DOU Normativos] Erro ao scrape+index act ${actId}:`);
         }
       }
 
@@ -530,7 +531,7 @@ export async function GET(request: NextRequest) {
           }
         }
       } catch (error) {
-        console.error('[Sync DOU Normativos] Erro ao sincronizar staging:', error);
+        apiLogger.error({ err: error }, '[Sync DOU Normativos] Erro ao sincronizar staging:');
       }
     }
 
@@ -544,7 +545,7 @@ export async function GET(request: NextRequest) {
     });
 
   } catch (error) {
-    console.error('[Sync DOU Normativos] Erro fatal:', error);
+    apiLogger.error({ err: error }, '[Sync DOU Normativos] Erro fatal:');
     return NextResponse.json(
       { success: false, error: error instanceof Error ? error.message : 'Erro desconhecido' },
       { status: 500 }
@@ -582,7 +583,7 @@ async function runV2(dryRun: boolean, maxResults: number): Promise<NextResponse>
         if (!allResults.has(r.href)) allResults.set(r.href, r);
       }
     } catch (error) {
-      console.error(`[Sync DOU v2] Erro busca "${term}":`, error);
+      apiLogger.error(`[Sync DOU v2] Erro busca "${term}":`, error);
       stats.erros++;
     }
     await new Promise((res) => setTimeout(res, 1500));
@@ -651,7 +652,7 @@ async function runV2(dryRun: boolean, maxResults: number): Promise<NextResponse>
     } catch (error) {
       // Batch context na log pra rastrear quais items se perderam.
       const titles = batch.map((b) => b.cleanTitle.substring(0, 60)).join(' | ');
-      console.error(`[Sync DOU v2] Erro IA batch (${batch.length} items: ${titles}):`, error);
+      apiLogger.error({ err: error }, `[Sync DOU v2] Erro IA batch (${batch.length} items: ${titles}):`);
       stats.erros++;
       continue;
     }
@@ -685,7 +686,7 @@ async function runV2(dryRun: boolean, maxResults: number): Promise<NextResponse>
               });
               stats.notasLeiCriadas++;
             } catch (e) {
-              console.error('[Sync DOU v2] Erro LeiArticleNote:', e);
+              apiLogger.error({ err: e }, '[Sync DOU v2] Erro LeiArticleNote:');
             }
           }
         }
@@ -765,7 +766,7 @@ async function runV2(dryRun: boolean, maxResults: number): Promise<NextResponse>
           stats.duplicados++;
           continue;
         } else {
-          console.error('[Sync DOU v2] Erro insert staging:', error);
+          apiLogger.error({ err: error }, '[Sync DOU v2] Erro insert staging:');
           stats.erros++;
           continue;
         }
@@ -782,7 +783,7 @@ async function runV2(dryRun: boolean, maxResults: number): Promise<NextResponse>
       const sent = await sendDouEditorialAlert(newStagingItems);
       console.log(`[Sync DOU v2] Email ${sent ? 'enviado' : 'falhou'}: ${newStagingItems.length} itens`);
     } catch (e) {
-      console.error('[Sync DOU v2] Erro envio email:', e);
+      apiLogger.error({ err: e }, '[Sync DOU v2] Erro envio email:');
       stats.erros++;
     }
   }

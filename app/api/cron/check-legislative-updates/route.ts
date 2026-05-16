@@ -6,6 +6,7 @@ import { scrapeAndIndexAct } from '@/lib/legislative-scrapers/scrape-and-index';
 import { verifyCronAuth } from '@/lib/cron-auth';
 import { detectAndSaveRelationsHybrid } from '@/lib/legislative-acts/relations';
 import { withCronTelemetry } from '@/lib/cron-telemetry';
+import { apiLogger } from '@/lib/logger';
 
 /**
  * GET /api/cron/check-legislative-updates
@@ -142,7 +143,7 @@ export async function GET(request: NextRequest) {
           }
         }
       } catch (error) {
-        console.error(`[Cron Legislative] Erro em ${act.fullNumber}:`, error);
+        apiLogger.error({ err: error }, `[Cron Legislative] Erro em ${act.fullNumber}:`);
         results.push({
           id: act.id,
           fullNumber: act.fullNumber,
