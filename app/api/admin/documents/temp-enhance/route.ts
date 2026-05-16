@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { verifyAuth } from '@/lib/auth';
-import { enhanceDocumentWithAI } from '@/lib/ai/document-enhancer';
+import { wizardEnhance } from '@/lib/ai/wizard-enhance';
 
 /**
  * POST /api/admin/documents/temp-enhance
@@ -28,14 +28,15 @@ export async function POST(request: NextRequest) {
 
     console.log(`[Temp Enhance] Analisando: ${title}`);
 
-    // 2. Chamar IA para enriquecer
-    const enhancement = await enhanceDocumentWithAI({
+    // 2. Chamar orquestrador (LeiIndexer + Claude editorial em paralelo).
+    // Doc ainda não existe, sem extractedText — LeiIndexer opera só com title/category.
+    const enhancement = await wizardEnhance({
       title,
       description: description || undefined,
       category: category || 'outro',
     });
 
-    console.log(`[Temp Enhance] Sucesso! Confiança: ${enhancement.confidence}%`);
+    console.log(`[Temp Enhance] Sucesso (strategy: ${enhancement._meta.mergeStrategy}). Confiança: ${enhancement.confidence}%`);
 
     // 3. Retornar sugestões
     return NextResponse.json({

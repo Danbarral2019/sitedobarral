@@ -121,6 +121,13 @@ model Document {
   tcuClassificadoEm       DateTime? // Data da classificação pela IA
   tcuRevisadoPorAdmin     Boolean   @default(false) // Se o documento foi revisado manualmente pelo admin após enriquecimento
 
+  // Metadados de indexação Lei 14.133 via LeiIndexer (Gemini)
+  // leiIndexedAt populado SEMPRE que LeiIndexer roda — incluindo casos onde
+  // articles=[]. Diferencia "processado e sem matches" de "nunca processado",
+  // permitindo backfill idempotente. leiIndexerError captura falhas.
+  leiIndexedAt    DateTime? // Data da última análise via LeiIndexer
+  leiIndexerError String? // Mensagem de erro se a análise falhou
+
   // Cloudflare R2 Storage (Fase 8)
   r2Key          String? // Chave do arquivo no R2 (ex: "documents/1/uuid-filename.pdf")
   r2UploadedAt   DateTime? // Data de upload para R2

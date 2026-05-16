@@ -23,17 +23,12 @@ export interface DocumentToEnhance {
 }
 
 /**
- * Enriquece documento com IA (Claude Sonnet)
- *
- * Gera:
- * - Resumo executivo
- * - Destaques principais
- * - Pontos-chave para alunos
- * - Aplicação prática
- * - Observações educacionais
- * - Sugestão de importância
- * - Tags
- * - Artigos da Lei 14.133/2021 relacionados
+ * @deprecated Use `wizardEnhance` em `lib/ai/wizard-enhance.ts`. Esse módulo
+ * combina LeiIndexer (Gemini, lê texto, regras de domínio para Art. 6 e
+ * pareceres) com Claude editorial em paralelo — produz catalogação muito
+ * melhor para `leiArticles` e prepara o caminho para reduzir custos.
+ * Mantido apenas como referência histórica e por compatibilidade com
+ * eventuais imports externos. Sem call-sites internos em 2026-05-16.
  */
 export async function enhanceDocumentWithAI(
   document: DocumentToEnhance

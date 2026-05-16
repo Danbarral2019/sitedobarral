@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { verifyAuth } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
-import { enhanceDocumentWithAI } from '@/lib/ai/document-enhancer';
+import { wizardEnhance } from '@/lib/ai/wizard-enhance';
 
 /**
  * POST /api/admin/documents/[id]/enhance
@@ -42,6 +42,7 @@ export async function POST(
         url: true,
         summary: true,
         content: true,
+        extractedText: true,
       },
     });
 
@@ -54,20 +55,22 @@ export async function POST(
 
     console.log(`[Enhance] Enriquecendo documento: ${document.title}`);
 
-    // 3. Chamar IA para enriquecer
-    const enhancement = await enhanceDocumentWithAI({
+    // 3. Chamar orquestrador (LeiIndexer + Claude editorial em paralelo)
+    const enhancement = await wizardEnhance({
+      id: document.id,
       title: document.title,
       description: document.description || undefined,
       category: document.category,
       url: document.url || undefined,
       summary: document.summary || undefined,
       content: document.content || undefined,
+      extractedText: document.extractedText || undefined,
     });
 
-    console.log(`[Enhance] Sucesso! Confiança: ${enhancement.confidence}%`);
+    console.log(`[Enhance] Sucesso (strategy: ${enhancement._meta.mergeStrategy}). Confiança: ${enhancement.confidence}%`);
     console.log(`[Enhance] Artigos sugeridos: ${enhancement.leiArticles.join(', ')}`);
 
-    // 4. Retornar sugestões (não salvar automaticamente)
+    // 4. Retornar sugestões (não salvar automaticamente) — shape mantido para a UI
     return NextResponse.json({
       success: true,
       enhancement: {

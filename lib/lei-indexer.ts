@@ -19,6 +19,7 @@
  */
 
 import { Document } from '@prisma/client';
+import { PRIMARY_GEMINI_MODEL } from '@/lib/gemini/config';
 
 /**
  * Resultado da análise de um documento
@@ -124,7 +125,7 @@ export class LeiIndexer {
     minConfidence: 50,
     maxArticles: 10,
     includeReasoning: true,
-    geminiModel: 'gemini-3-flash-preview',
+    geminiModel: PRIMARY_GEMINI_MODEL,
   };
 
   /**
@@ -245,9 +246,14 @@ export class LeiIndexer {
       throw new Error('GEMINI_API_KEY não configurada no ambiente');
     }
 
-    const apiModel = model || 'gemini-3-flash-preview';
+    const apiModel = model || PRIMARY_GEMINI_MODEL;
     const url = `https://generativelanguage.googleapis.com/v1beta/models/${apiModel}:generateContent?key=${apiKey}`;
 
+    // thinkingBudget: 0 desliga o thinking mode dos modelos 2.5/3.x — senão
+    // ~1.5k tokens são consumidos em raciocínio interno antes do output visível,
+    // estourando maxOutputTokens e truncando o JSON (sintoma: SyntaxError no parse,
+    // catch silencioso devolve articles: [] e o doc fica sem leiArticles para sempre).
+    // Mesmo padrão usado em lib/tcu-enrichment.ts (SUMMARY_GENERATION_CONFIG).
     const response = await fetch(url, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -257,7 +263,8 @@ export class LeiIndexer {
           temperature: 0.2,
           topK: 40,
           topP: 0.95,
-          maxOutputTokens: 2048,
+          maxOutputTokens: 4096,
+          thinkingConfig: { thinkingBudget: 0 },
         },
       }),
     });
