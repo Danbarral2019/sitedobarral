@@ -1,7 +1,79 @@
 # Tarefas Futuras — Site do Prof. Daniel Barral
 
 > **Repositório central de melhorias, pendências e novas funcionalidades.**
-> Atualizado em: 2026-04-19
+> Atualizado em: 2026-05-16
+
+---
+
+## 🗺️ Plano de Saneamento 2026-05 a 2026-08
+
+Consolida as ações para resolver os ~80 achados das duas auditorias abaixo em **6 ondas** executáveis sem travar desenvolvimento de features:
+
+**Plano completo:** [`docs/plans/2026-05-saneamento.md`](docs/plans/2026-05-saneamento.md)
+
+| Onda | Foco | Duração |
+|---|---|---|
+| 0. Preparação | Mergear PRs #8, #9, #10 + backfill | 1 dia |
+| 1. Observabilidade universal | Sentry + ScraperHealthLog em tudo | 3-5 dias |
+| 2. Wins rápidos | regions, Cache-Control, deps mortas, órfãos | 1 dia |
+| 3. Bugs P0 ativos | thinkingBudget, modelos antigos, crons parados | 3-5 dias |
+| 4. Padronização | 196 rotas → Fase 8, `lib/ai` adotado, JSON→String[] | 2 semanas |
+| 5. Podar features mortas | Decisões produto + arquivamento | 1 semana |
+| 6. Refactor estrutural | Componentes >800L, Server Components, CLAUDE.md | 2-3 semanas |
+
+**Total: ~6-8 semanas** (paralelo a desenvolvimento de features). Pode pausar a qualquer onda sem perda.
+
+**Princípios:** observabilidade antes de fix; cada PR ≤500 LOC; schema sempre backward-compat; mudanças atrás de env var; instrumentar baseline antes; trunk-based.
+
+**Decisões pendentes do PO** (registrar antes da Onda 5): destino de Planejamento, Quizzes, FAQ, Vídeos, Cross-refs, Social, colunas MP legacy.
+
+---
+
+## 🚨 Auditoria de Dívida Estrutural (2026-05-16)
+
+Complementar à auditoria de falhas silenciosas — investiga "o que está pesando, duplicado ou inacabado" (não "o que está quebrado em silêncio"). Três agents auditaram arquitetura, performance e features inacabadas.
+
+**Relatório completo:** [`docs/audits/2026-05-16-structural-debt.md`](docs/audits/2026-05-16-structural-debt.md)
+
+**Top 5 padrões transversais:**
+1. **70% das rotas API não seguem o padrão Fase 8** (196 de 280 usam `NextResponse.json` cru; 45 sem try/catch)
+2. **Múltiplas implementações concorrentes:** 3 admins de documentos, 3 admins TCU, 3 admins analytics, 2 versões AGU scraper, classificadores TCU triplicados
+3. **`lib/ai/` tem 0 consumidores em produção** — 6 lugares continuam com SDK direto
+4. **Crons rodando à toa:** `process-index-jobs` a cada 15min sem dado novo desde Nov-25; `compute-streaks`, `lms-inactivity` sobre bases ridículas
+5. **~10 features 80% prontas mas inativas:** Planejamento (17 rotas + 6 models + 1 sessão), Quizzes (admin + player + 0 quizzes), FAQ, Vídeos, Cross-refs Lei 14.133, DOUSavedFilter
+
+**Top 5 wins rápidos (~3h total, baixo risco):**
+- `regions: ["gru1"]` no `vercel.json` (-100/-200ms por query DB)
+- Remover `Cache-Control: no-store` global de `/api/*` (TTFB 500ms→50ms via CDN)
+- Remover deps mortas (`video.js`, `docx`, `html2canvas`, `pino-pretty`)
+- Pausar `process-index-jobs`, `compute-streaks`, `lms-inactivity`
+- Apagar 14 componentes órfãos + 6 backups + 20+ JSONs no root
+
+**Plano de saneamento de médio prazo** (4 sprints) no relatório.
+
+Ver também: [`docs/audits/2026-05-16-silent-failures.md`](docs/audits/2026-05-16-silent-failures.md) (30+ falhas silenciosas, complementar)
+
+---
+
+## 🚨 Auditoria de Falhas Silenciosas (2026-05-16)
+
+Investigação disparada pela descoberta de bug crítico no `LeiIndexer` (truncamento de JSON Gemini sabotando 80% da catalogação por meses sem alarme). Três agents auditaram modelos AI, saúde de crons e webhooks. **30+ problemas identificados** — alguns provavelmente quebrando em produção agora.
+
+**Relatório completo:** [`docs/audits/2026-05-16-silent-failures.md`](docs/audits/2026-05-16-silent-failures.md)
+
+**Top 5 P0 críticos:**
+
+1. **`thinkingBudget` faltando em 6 call-sites Gemini** — mesmo bug do LeiIndexer pode estar quebrando `dou-classifier`, `embeddings/reranker`, `tribunal-scrapers/classifier`, query expansion. Fix global: trocar default de `thinkingBudget = undefined` para `= 0` em `lib/gemini/cached-client.ts:233`.
+2. **Modelos Claude geração antiga em `tcu-classifier.ts:96` e `claude-classifier.ts:164`** — `claude-3-5-sonnet/haiku-20241022` (out/2024) com catch silencioso que cai em fallback heurístico. Classificações TCU podem estar 100% no fallback há semanas.
+3. **Crons parados há meses:** `sync-tcu-informativos` (89d), `sync-tcu-manual` (96d), `process-index-jobs` morto (372 `TribunalDecision` sem embedding desde fev), `summarize-conuni` não popula (1.669 docs CONUNI sem summary), `compute-streaks` parado 51d (gamificação LMS).
+4. **Webhook Resend sem validação Svix** (`app/api/webhooks/resend/route.ts`) — qualquer POST pode marcar subscribers como `isActive: false`.
+5. **Cron `monitoring-alerts` não checa erro do Resend** — ironicamente, o sistema que detecta falhas pode estar falhando sem alarme.
+
+**Observabilidade insuficiente:** 467 `console.error` vs 7 `Sentry.captureException` (ratio 67:1). Apenas 8/25 crons usam `ScraperHealthLog` — os outros 17 são opacos.
+
+**Lição transversal:** padronizar instrumentação (`ScraperHealthLog` + Sentry) em todos os crons evita 90% dos casos de "falha silenciosa por meses sem detectar".
+
+Ver relatório completo em `docs/audits/2026-05-16-silent-failures.md` para tabelas detalhadas, recomendações P0/P1/P2 e arquivos:linha específicos.
 
 ---
 
