@@ -7,6 +7,7 @@ import {
 } from '@/lib/tcu-manual-scraper';
 import { verifyCronAuth } from '@/lib/cron-auth';
 import { withCronTelemetry } from '@/lib/cron-telemetry';
+import { apiLogger } from '@/lib/logger';
 
 /**
  * Cron Job: Sincronização mensal do Manual TCU "Licitações & Contratos"
@@ -166,10 +167,7 @@ export async function GET(request: NextRequest) {
         }
       } catch (err) {
         errors++;
-        console.error(
-          `[Sync TCU Manual] Erro ${section.sectionNumber}:`,
-          err instanceof Error ? err.message : err
-        );
+        apiLogger.error({ err: err instanceof Error ? err.message : err }, `[Sync TCU Manual] Erro ${section.sectionNumber}:`);
       }
 
       if (i < MANUAL_SECTIONS.length - 1) {

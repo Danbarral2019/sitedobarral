@@ -7,6 +7,7 @@ import { renderMonthlyNewsletter } from '@/lib/email-templates/newsletter';
 import { filterByRelevance, type DecisionInput } from '@/lib/newsletter/relevance-filter';
 import { generateNewsletterIntro } from '@/lib/newsletter/intro-generator';
 import { withCronTelemetry } from '@/lib/cron-telemetry';
+import { apiLogger } from '@/lib/logger';
 
 // Aumentado de 120s pra 300s em 2026-05-01 — newsletter de maio caiu por
 // FUNCTION_INVOCATION_TIMEOUT (504) com 5 chamadas Gemini de 8-10s cada
@@ -198,7 +199,7 @@ export async function GET(request: NextRequest) {
       filterResult = await filterByRelevance(allDecisions);
       console.log(`[Cron Newsletter v0.2] Filtro: ${filterResult.totalSelected}/${filterResult.totalEvaluated} decisões selecionadas`);
     } catch (err) {
-      console.error('[Cron Newsletter v0.2] filterByRelevance falhou — fallback sem IA:', err);
+      apiLogger.error({ err: err }, '[Cron Newsletter v0.2] filterByRelevance falhou — fallback sem IA:');
       // Fallback: pegar até 25 decisões mais recentes sem score IA
       const fallbackSelected = allDecisions.slice(0, 25).map((d) => ({
         id: d.id,
@@ -254,7 +255,7 @@ export async function GET(request: NextRequest) {
       });
       console.log('[Cron Newsletter v0.2] Texto introdutório gerado');
     } catch (err) {
-      console.error('[Cron Newsletter v0.2] generateNewsletterIntro falhou — fallback genérico:', err);
+      apiLogger.error({ err: err }, '[Cron Newsletter v0.2] generateNewsletterIntro falhou — fallback genérico:');
       introHtml = `<p>Olá, este é o panorama de <strong>${monthName}</strong> dos principais conteúdos de Licitações e Contratos publicados no portal: ${filterResult.totalSelected} decisões selecionadas, ${totalItems} documentos novos, ${newLegislativeActs.length} atos legislativos.</p>`;
     }
 
@@ -353,7 +354,7 @@ export async function GET(request: NextRequest) {
           errorCount++;
           const msg = JSON.stringify(result.error);
           errors.push({ email: subscriber.email, error: msg });
-          console.error(`[Cron Newsletter v0.2] Resend erro para ${subscriber.email}: ${msg}`);
+          apiLogger.error(`[Cron Newsletter v0.2] Resend erro para ${subscriber.email}: ${msg}`);
         } else {
           successCount++;
           console.log(`[Cron Newsletter v0.2] Enviado para ${subscriber.email} (id: ${result.data?.id})`);
@@ -362,7 +363,7 @@ export async function GET(request: NextRequest) {
         errorCount++;
         const msg = err instanceof Error ? err.message : String(err);
         errors.push({ email: subscriber.email, error: msg });
-        console.error(`[Cron Newsletter v0.2] Erro para ${subscriber.email}: ${msg}`);
+        apiLogger.error(`[Cron Newsletter v0.2] Erro para ${subscriber.email}: ${msg}`);
       }
 
       // Delay de 600ms entre envios para respeitar rate limit (2 req/s)

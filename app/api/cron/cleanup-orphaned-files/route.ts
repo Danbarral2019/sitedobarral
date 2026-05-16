@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { listR2FilesWithMetadata, deleteFromR2 } from '@/lib/storage/r2-client';
+import { apiLogger } from '@/lib/logger';
 
 // ===========================
 // Configuration
@@ -141,7 +142,7 @@ async function deleteOrphanedFiles(
         console.log(`✅ Deleted: ${file.key}`);
       }
     } catch (error) {
-      console.error(`❌ Error deleting ${file.key}:`, error);
+      apiLogger.error({ err: error }, `❌ Error deleting ${file.key}:`);
       errors++;
     }
   }
@@ -212,7 +213,7 @@ export async function GET(req: NextRequest) {
       totalSizeMB,
     });
   } catch (error) {
-    console.error('❌ Cleanup error:', error);
+    apiLogger.error({ err: error }, '❌ Cleanup error:');
     return NextResponse.json(
       {
         success: false,
@@ -268,7 +269,7 @@ export async function POST(req: NextRequest) {
       orphanedFiles: orphanedFiles.slice(0, 20), // Return first 20 for manual inspection
     });
   } catch (error) {
-    console.error('❌ Manual cleanup error:', error);
+    apiLogger.error({ err: error }, '❌ Manual cleanup error:');
     return NextResponse.json(
       {
         success: false,

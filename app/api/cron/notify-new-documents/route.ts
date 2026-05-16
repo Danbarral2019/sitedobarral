@@ -4,6 +4,7 @@ import { sendNewDocumentsNotification } from '@/lib/email';
 import { courses } from '@/data/courses';
 import { verifyCronAuth } from '@/lib/cron-auth';
 import { withCronTelemetry } from '@/lib/cron-telemetry';
+import { apiLogger } from '@/lib/logger';
 
 /**
  * API de Cron Job para notificar alunos sobre novos documentos
@@ -142,11 +143,11 @@ export async function GET(request: NextRequest) {
               console.log(`✅ [CRON] Email enviado para: ${user.email}`);
             } else {
               totalErrors++;
-              console.error(`❌ [CRON] Falha ao enviar para: ${user.email}`);
+              apiLogger.error(`❌ [CRON] Falha ao enviar para: ${user.email}`);
             }
           } catch (error) {
             totalErrors++;
-            console.error(`❌ [CRON] Erro ao enviar email para ${user.email}:`, error);
+            apiLogger.error({ err: error }, `❌ [CRON] Erro ao enviar email para ${user.email}:`);
           }
         }
 
@@ -163,7 +164,7 @@ export async function GET(request: NextRequest) {
 
         console.log(`✅ [CRON] ${documentIds.length} documento(s) marcado(s) como notificado(s)`);
       } catch (error) {
-        console.error(`❌ [CRON] Erro ao processar curso ${courseId}:`, error);
+        apiLogger.error({ err: error }, `❌ [CRON] Erro ao processar curso ${courseId}:`);
         totalErrors++;
       }
     }

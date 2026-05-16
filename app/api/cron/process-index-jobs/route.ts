@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { processDocument, getProcessingStats } from '@/lib/embeddings/document-processor';
 import { processTribunalDecision } from '@/lib/embeddings/tribunal-decision-processor';
+import { apiLogger } from '@/lib/logger';
 
 // ===========================
 // Configuration
@@ -61,7 +62,7 @@ async function processDocumentJob(job: {
       chunkCount: result.stats?.chunkCount,
     };
   } catch (error) {
-    console.error(`Error processing document job ${job.id}:`, error);
+    apiLogger.error({ err: error }, `Error processing document job ${job.id}:`);
     return {
       jobId: job.id,
       documentId: job.entityId,
@@ -106,7 +107,7 @@ async function processGlossaryJob(job: {
       status: 'completed',
     };
   } catch (error) {
-    console.error(`Error processing glossary job ${job.id}:`, error);
+    apiLogger.error({ err: error }, `Error processing glossary job ${job.id}:`);
     return {
       jobId: job.id,
       status: 'failed',
@@ -147,7 +148,7 @@ async function processBlogPostJob(job: {
       status: 'completed',
     };
   } catch (error) {
-    console.error(`Error processing blog post job ${job.id}:`, error);
+    apiLogger.error({ err: error }, `Error processing blog post job ${job.id}:`);
     return {
       jobId: job.id,
       status: 'failed',
@@ -188,7 +189,7 @@ async function processLeiArticleJob(job: {
       status: 'completed',
     };
   } catch (error) {
-    console.error(`Error processing lei article job ${job.id}:`, error);
+    apiLogger.error({ err: error }, `Error processing lei article job ${job.id}:`);
     return {
       jobId: job.id,
       status: 'failed',
@@ -469,7 +470,7 @@ export async function GET(req: NextRequest) {
 
     return NextResponse.json(summary);
   } catch (error) {
-    console.error('❌ Index job processor error:', error);
+    apiLogger.error({ err: error }, '❌ Index job processor error:');
     return NextResponse.json(
       {
         success: false,
@@ -551,7 +552,7 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json(summary);
   } catch (error) {
-    console.error('❌ Manual processing error:', error);
+    apiLogger.error({ err: error }, '❌ Manual processing error:');
     return NextResponse.json(
       {
         success: false,

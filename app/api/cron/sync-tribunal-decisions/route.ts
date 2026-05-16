@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { verifyCronAuth } from '@/lib/cron-auth';
+import { apiLogger } from '@/lib/logger';
 
 export const runtime = 'nodejs';
 export const maxDuration = 300;
@@ -50,7 +51,7 @@ export async function GET(request: NextRequest) {
         const duration = Date.now() - startTime;
         const errorMessage = error instanceof Error ? error.message : 'Unknown error';
 
-        console.error(`[Sync Tribunal Decisions] ${scraper.code} falhou:`, errorMessage);
+        apiLogger.error({ err: errorMessage }, `[Sync Tribunal Decisions] ${scraper.code} falhou:`);
 
         await prisma.scraperHealthLog.create({
           data: {
@@ -88,7 +89,7 @@ export async function GET(request: NextRequest) {
           console.log(`[Sync Tribunal Decisions] ${highlightsCreated} highlights editoriais criados`);
         }
       } catch (err) {
-        console.error('[Sync Tribunal Decisions] Erro ao analisar highlights:', err instanceof Error ? err.message : err);
+        apiLogger.error({ err: err instanceof Error ? err.message : err }, '[Sync Tribunal Decisions] Erro ao analisar highlights:');
       }
     }
 
@@ -103,7 +104,7 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json({ success: true, summary, results });
   } catch (error) {
-    console.error('[Sync Tribunal Decisions] Erro fatal:', error);
+    apiLogger.error({ err: error }, '[Sync Tribunal Decisions] Erro fatal:');
     return NextResponse.json(
       { error: error instanceof Error ? error.message : 'Internal server error' },
       { status: 500 }

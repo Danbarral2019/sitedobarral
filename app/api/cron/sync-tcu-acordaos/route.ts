@@ -12,6 +12,7 @@ import {
 } from '@/lib/tcu-enrichment';
 import { classifyTCUEditorial } from '@/lib/tcu-editorial-classifier';
 import { withCronTelemetry } from '@/lib/cron-telemetry';
+import { apiLogger } from '@/lib/logger';
 
 /**
  * Cron Job: Sincronização automática de acórdãos do TCU
@@ -146,7 +147,7 @@ async function enrichNewDocuments(docIds: string[]): Promise<{
     } catch (err) {
       enrichErrors++;
       const errMsg = err instanceof Error ? err.message : String(err);
-      console.error(`[Sync TCU] Erro Lei-index ${doc.title}:`, errMsg);
+      apiLogger.error({ err: errMsg }, `[Sync TCU] Erro Lei-index ${doc.title}:`);
       await prisma.document.update({
         where: { id: doc.id },
         data: { leiIndexedAt: now, leiIndexerError: errMsg.slice(0, 500) },
@@ -171,7 +172,7 @@ async function enrichNewDocuments(docIds: string[]): Promise<{
       await new Promise(resolve => setTimeout(resolve, ENRICHMENT_DELAY_MS));
     } catch (err) {
       enrichErrors++;
-      console.error(`[Sync TCU] Erro resumo ${doc.title}:`, err instanceof Error ? err.message : err);
+      apiLogger.error({ err: err instanceof Error ? err.message : err }, `[Sync TCU] Erro resumo ${doc.title}:`);
     }
 
     // Fase 3: Classificação editorial (área/tema/subtema) via taxonomia oficial TCU
@@ -217,7 +218,7 @@ async function enrichNewDocuments(docIds: string[]): Promise<{
       await new Promise(resolve => setTimeout(resolve, ENRICHMENT_DELAY_MS));
     } catch (err) {
       enrichErrors++;
-      console.error(`[Sync TCU] Erro classificação editorial ${doc.title}:`, err instanceof Error ? err.message : err);
+      apiLogger.error({ err: err instanceof Error ? err.message : err }, `[Sync TCU] Erro classificação editorial ${doc.title}:`);
     }
   }
 
@@ -405,8 +406,7 @@ export async function GET(request: NextRequest) {
             update: {}, // Idempotente: não sobrescreve se já existe
           });
         } catch (tdErr) {
-          console.error(`[Sync TCU] Erro dual-write TribunalDecision ${num}/${ano}:`,
-            tdErr instanceof Error ? tdErr.message : tdErr);
+          apiLogger.error({ err: tdErr instanceof Error ? tdErr.message : tdErr }, `[Sync TCU] Erro dual-write TribunalDecision ${num}/${ano}:`);
         }
       } catch (err) {
         // P2002 = unique constraint violation (race condition: outro run já criou).
@@ -416,8 +416,7 @@ export async function GET(request: NextRequest) {
           console.log(`[Sync TCU] Pulado (já criado por execução concorrente): ${item.numeroAcordao}/${item.anoAcordao}`);
         } else {
           errors++;
-          console.error(`[Sync TCU] Erro ao importar ${item.numeroAcordao}/${item.anoAcordao}:`,
-            err instanceof Error ? err.message : err);
+          apiLogger.error({ err: err instanceof Error ? err.message : err }, `[Sync TCU] Erro ao importar ${item.numeroAcordao}/${item.anoAcordao}:`);
         }
       }
     }
@@ -449,7 +448,7 @@ export async function GET(request: NextRequest) {
         }
         console.log(`[Sync TCU] Propagados summaries/leiArticles para TribunalDecision`);
       } catch (propErr) {
-        console.error('[Sync TCU] Erro propagação TribunalDecision:', propErr);
+        apiLogger.error({ err: propErr }, '[Sync TCU] Erro propagação TribunalDecision:');
       }
     }
 
@@ -459,7 +458,7 @@ export async function GET(request: NextRequest) {
       try {
         highlightCount = await identifyAndAlertHighlights(newDocIds);
       } catch (err) {
-        console.error('[Sync TCU] Erro na fase de highlights:', err);
+        apiLogger.error({ err: err }, '[Sync TCU] Erro na fase de highlights:');
       }
     }
 

@@ -4,6 +4,7 @@ import { fetchAcordaosTCU, type AcordaoTCU } from '@/lib/tcu-scraper';
 import { scrapeOrientacoesAGU, type OrientacaoNormativa } from '@/lib/agu-scraper';
 import { verifyCronAuth } from '@/lib/cron-auth';
 import { withCronTelemetry } from '@/lib/cron-telemetry';
+import { apiLogger } from '@/lib/logger';
 
 /**
  * Cron Job: Importacao Automatica de Documentos
@@ -103,7 +104,7 @@ export async function GET(request: NextRequest) {
       console.log(`[Cron Import] TCU: ${newAcordaos.length} novos documentos importados`);
 
     } catch (error) {
-      console.error('[Cron Import] Erro no scraper TCU:', error);
+      apiLogger.error({ err: error }, '[Cron Import] Erro no scraper TCU:');
       results.tcu.error = error instanceof Error ? error.message : 'Erro desconhecido';
     }
 
@@ -164,7 +165,7 @@ export async function GET(request: NextRequest) {
       console.log(`[Cron Import] AGU: ${newOns.length} novas ONs importadas`);
 
     } catch (error) {
-      console.error('[Cron Import] Erro no scraper AGU:', error);
+      apiLogger.error({ err: error }, '[Cron Import] Erro no scraper AGU:');
       results.agu.error = error instanceof Error ? error.message : 'Erro desconhecido';
     }
 
