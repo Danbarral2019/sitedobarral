@@ -9,6 +9,7 @@ import {
   DateRangePreset,
   RELEVANT_ORGAOS,
 } from '@/lib/dou-classifier';
+import { apiLogger } from "@/lib/logger";
 
 export async function POST(request: NextRequest) {
   try {
@@ -225,7 +226,7 @@ export async function POST(request: NextRequest) {
       filterStats,
     });
   } catch (error) {
-    console.error('[DOU Search Filtered] Erro:', error);
+    apiLogger.error({ err: error }, '[DOU Search Filtered] Erro:');
     return NextResponse.json(
       {
         error: 'Erro ao buscar documentos',

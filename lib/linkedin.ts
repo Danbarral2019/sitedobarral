@@ -1,3 +1,5 @@
+import { apiLogger } from "@/lib/logger";
+
 /**
  * Biblioteca de integração com LinkedIn Share API
  *
@@ -98,7 +100,7 @@ export async function createLinkedInTextPost(
 
     if (!response.ok) {
       const errorData = await response.json();
-      console.error('[LinkedIn] Erro ao criar post:', errorData);
+      apiLogger.error({ err: errorData }, '[LinkedIn] Erro ao criar post:');
       return {
         success: false,
         error: errorData.message || 'Erro ao criar post',
@@ -117,7 +119,7 @@ export async function createLinkedInTextPost(
       postUrl,
     };
   } catch (error: unknown) {
-    console.error('[LinkedIn] Erro inesperado:', error);
+    apiLogger.error({ err: error }, '[LinkedIn] Erro inesperado:');
     const err = error as Error;
     return {
       success: false,
@@ -195,7 +197,7 @@ export async function createLinkedInImagePost(
 
     if (!registerResponse.ok) {
       const errorData = await registerResponse.json();
-      console.error('[LinkedIn] Erro ao registrar upload:', errorData);
+      apiLogger.error({ err: errorData }, '[LinkedIn] Erro ao registrar upload:');
       return {
         success: false,
         error: errorData.message || 'Erro ao registrar upload',
@@ -220,7 +222,7 @@ export async function createLinkedInImagePost(
     });
 
     if (!uploadResponse.ok) {
-      console.error('[LinkedIn] Erro no upload da imagem');
+      apiLogger.error('[LinkedIn] Erro no upload da imagem');
       return {
         success: false,
         error: 'Erro no upload da imagem',
@@ -267,7 +269,7 @@ export async function createLinkedInImagePost(
 
     if (!postResponse.ok) {
       const errorData = await postResponse.json();
-      console.error('[LinkedIn] Erro ao criar post:', errorData);
+      apiLogger.error({ err: errorData }, '[LinkedIn] Erro ao criar post:');
       return {
         success: false,
         error: errorData.message || 'Erro ao criar post',
@@ -286,7 +288,7 @@ export async function createLinkedInImagePost(
       postUrl,
     };
   } catch (error: unknown) {
-    console.error('[LinkedIn] Erro inesperado:', error);
+    apiLogger.error({ err: error }, '[LinkedIn] Erro inesperado:');
     const err = error as Error;
     return {
       success: false,

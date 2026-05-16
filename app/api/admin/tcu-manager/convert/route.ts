@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { withAdminAuth } from '@/lib/api-middleware';
 import * as xlsx from 'xlsx';
+import { apiLogger } from "@/lib/logger";
 
 // Reutiliza a lógica do conversor TCU existente
 const CURSO_MAPPING: Record<string, string> = {
@@ -210,7 +211,7 @@ export const POST = withAdminAuth(async (request: NextRequest) => {
     });
 
   } catch (error) {
-    console.error('[TCU Manager Convert] Erro:', error);
+    apiLogger.error({ err: error }, '[TCU Manager Convert] Erro:');
     return NextResponse.json(
       {
         error: 'Erro ao converter arquivo',

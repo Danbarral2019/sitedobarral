@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { verifyAuth } from '@/lib/auth';
+import { apiLogger } from "@/lib/logger";
 
 /**
  * GET /api/admin/dou/auto-approved
@@ -67,7 +68,7 @@ export async function GET(request: NextRequest) {
     });
 
   } catch (error) {
-    console.error('[DOU Auto-Approved] Error:', error);
+    apiLogger.error({ err: error }, '[DOU Auto-Approved] Error:');
     return NextResponse.json(
       {
         error: 'Failed to fetch auto-approved documents',

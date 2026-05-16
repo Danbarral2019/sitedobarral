@@ -20,6 +20,7 @@
 
 import { Document } from '@prisma/client';
 import { PRIMARY_GEMINI_MODEL } from '@/lib/gemini/config';
+import { apiLogger } from "@/lib/logger";
 
 /**
  * Resultado da análise de um documento
@@ -180,7 +181,7 @@ export class LeiIndexer {
         reasoning: parsedResponse.summary || 'Análise automática via Gemini',
       };
     } catch (error) {
-      console.error(`[LeiIndexer] Erro ao analisar documento ${document.id}:`, error);
+      apiLogger.error({ err: error }, `[LeiIndexer] Erro ao analisar documento ${document.id}:`);
 
       // Retornar resultado vazio em caso de erro
       return {

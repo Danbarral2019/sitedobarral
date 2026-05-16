@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { verifyAdmin } from '@/lib/api-middleware';
 import { sendEmail } from '@/lib/email';
+import { apiLogger } from "@/lib/logger";
 
 /**
  * POST /api/admin/legislative-acts/notify
@@ -209,7 +210,7 @@ export async function POST(request: NextRequest) {
         await new Promise(resolve => setTimeout(resolve, 100));
 
       } catch (error) {
-        console.error(`Erro ao enviar email para ${user.email}:`, error);
+        apiLogger.error({ err: error }, `Erro ao enviar email para ${user.email}:`);
         failed++;
       }
     }
@@ -233,7 +234,7 @@ export async function POST(request: NextRequest) {
     });
 
   } catch (error) {
-    console.error('Erro ao enviar notificações:', error);
+    apiLogger.error({ err: error }, 'Erro ao enviar notificações:');
     return NextResponse.json(
       { error: 'Erro ao enviar notificações' },
       { status: 500 }

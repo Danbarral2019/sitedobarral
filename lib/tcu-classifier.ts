@@ -7,6 +7,7 @@
 
 import Anthropic from '@anthropic-ai/sdk';
 import type { TCUPlanilhaData, TCUEnrichmentResult } from './tcu-scraper';
+import { apiLogger } from "@/lib/logger";
 
 export interface TCUClassificationInput {
   // Dados da planilha (sempre disponível)
@@ -121,7 +122,7 @@ export async function classifyTCUAcordao(
 
   } catch (error) {
     const elapsedTime = Date.now() - startTime;
-    console.error(`[TCU Classifier] Erro após ${elapsedTime}ms:`, error);
+    apiLogger.error({ err: error }, `[TCU Classifier] Erro após ${elapsedTime}ms:`);
 
     // Fallback: classificação baseada em regras
     console.log(`[TCU Classifier] Usando classificação por regras como fallback`);
@@ -268,8 +269,8 @@ function parseClassificationResponse(
     };
 
   } catch (error) {
-    console.error('[TCU Classifier] Erro ao parsear resposta da IA:', error);
-    console.error('[TCU Classifier] Resposta original:', responseText);
+    apiLogger.error({ err: error }, '[TCU Classifier] Erro ao parsear resposta da IA:');
+    apiLogger.error({ err: responseText }, '[TCU Classifier] Resposta original:');
 
     throw new Error('Falha ao parsear resposta da IA: ' + (error instanceof Error ? error.message : String(error)));
   }

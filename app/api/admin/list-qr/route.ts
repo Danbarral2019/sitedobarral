@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { withAdminAuth } from '@/lib/api-middleware';
 import { prisma } from '@/lib/prisma';
+import { apiLogger } from "@/lib/logger";
 
 export const GET = withAdminAuth(async (request: NextRequest) => {
   try {
@@ -44,7 +45,7 @@ export const GET = withAdminAuth(async (request: NextRequest) => {
       },
     });
   } catch (error) {
-    console.error('Erro ao listar QR Codes:', error);
+    apiLogger.error({ err: error }, 'Erro ao listar QR Codes:');
     return NextResponse.json(
       { error: 'Erro ao listar QR Codes' },
       { status: 500 }

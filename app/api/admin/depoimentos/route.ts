@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { CacheInvalidation } from '@/lib/cache/redis-client';
+import { apiLogger } from "@/lib/logger";
 
 /**
  * GET /api/admin/depoimentos
@@ -51,7 +52,7 @@ export async function GET(request: NextRequest) {
       },
     });
   } catch (error) {
-    console.error('Erro ao buscar depoimentos:', error);
+    apiLogger.error({ err: error }, 'Erro ao buscar depoimentos:');
     return NextResponse.json(
       { error: 'Erro ao carregar depoimentos' },
       { status: 500 }
@@ -93,7 +94,7 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({ success: true, testimonial }, { status: 201 });
   } catch (error) {
-    console.error('Erro ao criar depoimento:', error);
+    apiLogger.error({ err: error }, 'Erro ao criar depoimento:');
     return NextResponse.json(
       { error: 'Erro ao criar depoimento' },
       { status: 500 }
@@ -136,7 +137,7 @@ export async function PATCH(request: NextRequest) {
       testimonial,
     });
   } catch (error) {
-    console.error('Erro ao atualizar depoimento:', error);
+    apiLogger.error({ err: error }, 'Erro ao atualizar depoimento:');
     return NextResponse.json(
       { error: 'Erro ao atualizar depoimento' },
       { status: 500 }
@@ -171,7 +172,7 @@ export async function DELETE(request: NextRequest) {
       message: 'Depoimento deletado com sucesso',
     });
   } catch (error) {
-    console.error('Erro ao deletar depoimento:', error);
+    apiLogger.error({ err: error }, 'Erro ao deletar depoimento:');
     return NextResponse.json(
       { error: 'Erro ao deletar depoimento' },
       { status: 500 }

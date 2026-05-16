@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { verifyAuth } from '@/lib/auth';
 import { withCache, CacheKeys, CACHE_TTL } from '@/lib/cache/redis-client';
+import { apiLogger } from "@/lib/logger";
 
 /**
  * GET /api/admin/dou/stats
@@ -72,7 +73,7 @@ export async function GET(request: NextRequest) {
       headers: { 'Cache-Control': 'private, max-age=300' },
     });
   } catch (error) {
-    console.error('[DOU Stats] Error:', error);
+    apiLogger.error({ err: error }, '[DOU Stats] Error:');
     return NextResponse.json(
       { error: 'Failed to fetch stats' },
       { status: 500 }

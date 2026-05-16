@@ -5,6 +5,7 @@
 
 import Anthropic from '@anthropic-ai/sdk';
 import { isLiteralSourceCategory } from './literal-sources';
+import { apiLogger } from "@/lib/logger";
 
 // Cliente Claude (lazy initialization)
 function getClaudeClient(): Anthropic | null {
@@ -84,7 +85,7 @@ export async function generateDocumentSummary(
     return result;
 
   } catch (error) {
-    console.error('[Summary Generator] Erro ao gerar resumo:', error);
+    apiLogger.error({ err: error }, '[Summary Generator] Erro ao gerar resumo:');
     return null;
   }
 }
@@ -212,8 +213,8 @@ function parseSummaryResponse(responseText: string): DocumentSummary {
       reasoning: parsed.reasoning || undefined,
     };
   } catch (error) {
-    console.error('[Summary Generator] Erro ao fazer parse da resposta:', error);
-    console.error('Resposta recebida:', responseText);
+    apiLogger.error({ err: error }, '[Summary Generator] Erro ao fazer parse da resposta:');
+    apiLogger.error({ err: responseText }, 'Resposta recebida:');
 
     // Retorna resultado padrão em caso de erro
     return {

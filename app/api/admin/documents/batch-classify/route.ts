@@ -4,6 +4,7 @@ import { verifyToken } from '@/lib/auth';
 import { classifyDocumentEnhanced, bulkClassify } from '@/lib/auto-classifier';
 import { courses } from '@/data/courses';
 import { CacheInvalidation } from '@/lib/cache/redis-client';
+import { apiLogger } from "@/lib/logger";
 
 /**
  * POST /api/admin/documents/batch-classify
@@ -150,7 +151,7 @@ export async function POST(request: NextRequest) {
         });
 
       } catch (error) {
-        console.error(`Erro ao classificar documento ${doc.id}:`, error);
+        apiLogger.error({ err: error }, `Erro ao classificar documento ${doc.id}:`);
         errors.push({
           documentId: doc.id,
           title: doc.title,
@@ -190,7 +191,7 @@ export async function POST(request: NextRequest) {
     });
 
   } catch (error) {
-    console.error('Erro ao classificar documentos em lote:', error);
+    apiLogger.error({ err: error }, 'Erro ao classificar documentos em lote:');
     return NextResponse.json(
       { error: 'Erro ao classificar documentos' },
       { status: 500 }

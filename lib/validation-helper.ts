@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { ZodSchema, ZodError } from 'zod';
+import { apiLogger } from "@/lib/logger";
 
 /**
  * Helper para validar body de requisições com Zod
@@ -53,7 +54,7 @@ export async function validateRequest<T>(
     }
 
     // Erro desconhecido
-    console.error('Erro ao validar requisição:', error);
+    apiLogger.error({ err: error }, 'Erro ao validar requisição:');
     return {
       data: null,
       error: NextResponse.json(
@@ -102,7 +103,7 @@ export function validateQueryParams<T>(
       error: null,
     };
   } catch (error) {
-    console.error('Erro ao validar query params:', error);
+    apiLogger.error({ err: error }, 'Erro ao validar query params:');
     return {
       data: null,
       error: NextResponse.json(

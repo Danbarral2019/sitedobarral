@@ -6,6 +6,7 @@ import { scrapeAndIndexAct } from '@/lib/legislative-scrapers/scrape-and-index';
 import { validateActContent } from '@/lib/legislative-scrapers/validate-content';
 import { normalizeScrapedText } from '@/lib/legislative-scrapers/normalize';
 import { getHierarchyLevel } from '@/lib/legislative-acts/hierarchy';
+import { apiLogger } from "@/lib/logger";
 
 /**
  * GET /api/admin/legislative-acts
@@ -93,7 +94,7 @@ export async function GET(request: NextRequest) {
     });
 
   } catch (error) {
-    console.error('Erro ao listar atos normativos:', error);
+    apiLogger.error({ err: error }, 'Erro ao listar atos normativos:');
     return NextResponse.json(
       { error: 'Erro ao listar atos normativos' },
       { status: 500 }
@@ -208,7 +209,7 @@ export async function POST(request: NextRequest) {
     // Scrape + index se tem officialUrl e não veio content no body
     if (act.officialUrl && !body.content) {
       scrapeAndIndexAct(act.id).catch(err =>
-        console.error(`[Admin LegActs] Erro scrape+index ${act.id}:`, err)
+        apiLogger.error({ err: err }, `[Admin LegActs] Erro scrape+index ${act.id}:`)
       );
     }
 
@@ -219,7 +220,7 @@ export async function POST(request: NextRequest) {
     }, { status: 201 });
 
   } catch (error: unknown) {
-    console.error('Erro ao criar ato normativo:', error);
+    apiLogger.error({ err: error }, 'Erro ao criar ato normativo:');
 
     // Erro de unique constraint (fullNumber duplicado)
     if (error && typeof error === 'object' && 'code' in error && error.code === 'P2002') {

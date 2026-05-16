@@ -7,6 +7,7 @@
 
 import { KEYWORDS_RELEVANCIA, CURSOS_KEYWORDS, detectTemas } from '@/lib/shared-keywords';
 import { queryGeminiText } from '@/lib/gemini/cached-client';
+import { apiLogger } from "@/lib/logger";
 
 // ===========================
 // Types
@@ -274,7 +275,7 @@ Responda APENAS com o resumo, sem prefixos como "Resumo:" ou marcação.`;
     if (summary.length < 30 || summary.startsWith('{')) return null;
     return summary;
   } catch (error) {
-    console.error('[classifier] Summary generation failed:', error instanceof Error ? error.message : error);
+    apiLogger.error({ err: error instanceof Error ? error.message : error }, '[classifier] Summary generation failed:');
     return null;
   }
 }

@@ -34,6 +34,7 @@ import {
   extractTextFromHTML,
 } from './utils';
 import { classifyDecision, generateDecisionSummary } from './classifier';
+import { apiLogger } from "@/lib/logger";
 
 // ===========================
 // Constants
@@ -158,7 +159,7 @@ class TCERSScraper implements TribunalScraper {
         } catch (error) {
           const msg = `JSON download failed for ${year}: ${error instanceof Error ? error.message : String(error)}`;
           result.errors.push(msg);
-          console.error(`[${SCRAPER_CODE}]`, msg);
+          apiLogger.error({ err: msg }, `[${SCRAPER_CODE}]`);
         }
       }
 

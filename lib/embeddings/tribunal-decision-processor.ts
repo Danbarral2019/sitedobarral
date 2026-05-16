@@ -8,6 +8,7 @@
 import { prisma } from '@/lib/prisma';
 import { chunkLegalDocument, type TextChunk } from './text-chunker';
 import { generateBatchEmbeddings, embeddingToSql } from './gemini-embeddings';
+import { apiLogger } from "@/lib/logger";
 
 // ===========================
 // Types
@@ -156,7 +157,7 @@ export async function processTribunalDecision(
     };
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-    console.error(`Error processing decision ${decisionId}:`, error);
+    apiLogger.error({ err: error }, `Error processing decision ${decisionId}:`);
 
     try {
       await prisma.tribunalDecision.update({

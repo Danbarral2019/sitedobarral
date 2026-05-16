@@ -20,6 +20,7 @@ import {
   extractDOUInfo,
 } from './helpers';
 import { findOrCreateWithVersioning } from './versioning';
+import { apiLogger } from "@/lib/logger";
 
 /**
  * Interface para dados brutos de uma ON extraída do HTML
@@ -159,7 +160,7 @@ export async function scrapeOrientacoesNormativas(
   } catch (error) {
     const errorMsg = error instanceof Error ? error.message : String(error);
     errors.push(errorMsg);
-    console.error('[AGU ONs] ❌ Erro:', errorMsg);
+    apiLogger.error({ err: errorMsg }, '[AGU ONs] ❌ Erro:');
 
     return {
       success: false,
@@ -488,7 +489,7 @@ export async function saveOrientacaoNormativaWithVersioning(
     };
 
   } catch (error) {
-    console.error('[AGU ONs] Erro ao salvar:', error);
+    apiLogger.error({ err: error }, '[AGU ONs] Erro ao salvar:');
     return {
       success: false,
       error: error instanceof Error ? error.message : String(error)
@@ -531,7 +532,7 @@ export async function importOrientacoesNormativasWithVersioning(
         status: 'erro',
         error: result.error
       });
-      console.error(`   ❌ ${doc.numero}: ${result.error}`);
+      apiLogger.error(`   ❌ ${doc.numero}: ${result.error}`);
       continue;
     }
 

@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { withAdminAuth } from '@/lib/api-middleware';
 import { generateExcelTemplate } from '@/lib/excel-processor';
+import { apiLogger } from "@/lib/logger";
 
 /**
  * GET /api/admin/import-excel/template
@@ -24,7 +25,7 @@ export const GET = withAdminAuth(async () => {
       }
     });
   } catch (error) {
-    console.error('Erro ao gerar template:', error);
+    apiLogger.error({ err: error }, 'Erro ao gerar template:');
     return NextResponse.json(
       { error: 'Erro ao gerar template Excel' },
       { status: 500 }

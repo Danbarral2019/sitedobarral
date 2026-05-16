@@ -17,6 +17,7 @@ import type { DOUSearchResult } from './dou-api';
 import { findOrCreateWithVersioning } from './agu-modules/versioning';
 import { KEYWORDS_RELEVANCIA, detectTemas, CURSOS_KEYWORDS } from './shared-keywords';
 import { extractDOUInfo } from './agu-modules/helpers';
+import { apiLogger } from "@/lib/logger";
 
 /**
  * Interface para resultado de importação
@@ -272,7 +273,7 @@ export async function importDOUDocument(
       hasChanges: result.hasChanges,
     };
   } catch (error) {
-    console.error(`[DOU Module] Erro ao importar documento ${excerpt.highlight}:`, error);
+    apiLogger.error({ err: error }, `[DOU Module] Erro ao importar documento ${excerpt.highlight}:`);
     return {
       success: false,
       error: error instanceof Error ? error.message : 'Erro desconhecido',
@@ -489,7 +490,7 @@ export async function importDOUResultOfficial(
       hasChanges: versioningResult.hasChanges,
     };
   } catch (error) {
-    console.error(`[DOU Module] Erro ao importar documento ${result.title}:`, error);
+    apiLogger.error({ err: error }, `[DOU Module] Erro ao importar documento ${result.title}:`);
     return {
       success: false,
       error: error instanceof Error ? error.message : 'Erro desconhecido',

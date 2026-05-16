@@ -14,6 +14,7 @@
  */
 
 import { analyzeRelevanceTCU, suggestCoursesTCU } from './tcu-module';
+import { apiLogger } from "@/lib/logger";
 
 export interface AcordaoTCU {
   key: string;                  // ID único no TCU
@@ -138,7 +139,7 @@ export async function fetchAcordaosTCU(options: TCUFetchOptions = {}): Promise<A
     return filtered;
 
   } catch (error) {
-    console.error('[TCU Scraper] Erro ao buscar acórdãos:', error);
+    apiLogger.error({ err: error }, '[TCU Scraper] Erro ao buscar acórdãos:');
     throw error;
   }
 }
@@ -382,7 +383,7 @@ export async function enrichTCUAcordao(
 
   } catch (error) {
     const elapsedTime = Date.now() - startTime;
-    console.error(`[TCU Enrichment] Erro após ${elapsedTime}ms:`, error);
+    apiLogger.error({ err: error }, `[TCU Enrichment] Erro após ${elapsedTime}ms:`);
 
     return {
       success: false,
@@ -451,7 +452,7 @@ async function tryEnrichFromAPI(numeroAcordao: string): Promise<TCUEnrichmentRes
     };
 
   } catch (error) {
-    console.error('[TCU Enrichment] Erro na API:', error);
+    apiLogger.error({ err: error }, '[TCU Enrichment] Erro na API:');
     return {
       success: false,
       numeroAcordao,
@@ -500,7 +501,7 @@ async function tryEnrichFromWebsite(
     */
 
   } catch (error) {
-    console.error('[TCU Enrichment] Erro no scraping:', error);
+    apiLogger.error({ err: error }, '[TCU Enrichment] Erro no scraping:');
     return {
       success: false,
       numeroAcordao,

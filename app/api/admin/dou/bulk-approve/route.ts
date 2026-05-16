@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { verifyAuth } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
 import { CacheInvalidation } from '@/lib/cache/redis-client';
+import { apiLogger } from "@/lib/logger";
 
 /**
  * POST /api/admin/dou/bulk-approve
@@ -104,7 +105,7 @@ export async function POST(request: NextRequest) {
       details,
     });
   } catch (error) {
-    console.error('[DOU Bulk] Error:', error);
+    apiLogger.error({ err: error }, '[DOU Bulk] Error:');
     return NextResponse.json(
       { error: 'Erro ao processar operação em lote' },
       { status: 500 }

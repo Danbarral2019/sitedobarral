@@ -37,6 +37,7 @@ import {
   sleep,
 } from './utils';
 import { classifyDecision, generateDecisionSummary } from './classifier';
+import { apiLogger } from "@/lib/logger";
 
 // ===========================
 // Constants
@@ -205,7 +206,7 @@ class TCERJScraper implements TribunalScraper {
         } catch (error) {
           const msg = `Fetch failed for ${source.endpoint}/${source.tipo}: ${error instanceof Error ? error.message : String(error)}`;
           result.errors.push(msg);
-          console.error(`[${SCRAPER_CODE}]`, msg);
+          apiLogger.error({ err: msg }, `[${SCRAPER_CODE}]`);
         }
       }
 

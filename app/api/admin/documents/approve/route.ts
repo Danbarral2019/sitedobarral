@@ -13,6 +13,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { verifyAuth } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
 import { CacheInvalidation } from '@/lib/cache/redis-client';
+import { apiLogger } from "@/lib/logger";
 
 export async function POST(request: NextRequest) {
   try {
@@ -21,7 +22,7 @@ export async function POST(request: NextRequest) {
     // Verificar autenticação admin
     const authResult = await verifyAuth(request);
     if (!authResult.valid || authResult.user?.role !== 'admin') {
-      console.error('[Aprovação] Autenticação falhou:', { valid: authResult.valid, role: authResult.user?.role });
+      apiLogger.error({ valid: authResult.valid, role: authResult.user?.role }, '[Aprovação] Autenticação falhou:');
       return NextResponse.json({ error: 'Não autorizado' }, { status: 401 });
     }
 
@@ -35,7 +36,7 @@ export async function POST(request: NextRequest) {
     console.log('[Aprovação] Request:', { documentIds: documentIds?.length, action, adminEmail });
 
     if (!documentIds || !Array.isArray(documentIds) || documentIds.length === 0) {
-      console.error('[Aprovação] IDs inválidos:', documentIds);
+      apiLogger.error({ err: documentIds }, '[Aprovação] IDs inválidos:');
       return NextResponse.json(
         { error: 'IDs de documentos não fornecidos' },
         { status: 400 }
@@ -43,7 +44,7 @@ export async function POST(request: NextRequest) {
     }
 
     if (action !== 'approve' && action !== 'reject') {
-      console.error('[Aprovação] Ação inválida:', action);
+      apiLogger.error({ err: action }, '[Aprovação] Ação inválida:');
       return NextResponse.json(
         { error: 'Ação inválida. Use "approve" ou "reject"' },
         { status: 400 }
@@ -138,8 +139,8 @@ export async function POST(request: NextRequest) {
     });
 
   } catch (error) {
-    console.error('[Aprovação] ❌ Erro fatal:', error);
-    console.error('[Aprovação] Stack:', error instanceof Error ? error.stack : 'N/A');
+    apiLogger.error({ err: error }, '[Aprovação] ❌ Erro fatal:');
+    apiLogger.error({ err: error instanceof Error ? error.stack : 'N/A' }, '[Aprovação] Stack:');
     return NextResponse.json(
       {
         success: false,

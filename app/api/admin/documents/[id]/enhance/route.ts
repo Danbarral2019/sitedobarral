@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { verifyAuth } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
 import { wizardEnhance } from '@/lib/ai/wizard-enhance';
+import { apiLogger } from "@/lib/logger";
 
 /**
  * POST /api/admin/documents/[id]/enhance
@@ -87,7 +88,7 @@ export async function POST(
       },
     });
   } catch (error) {
-    console.error('[Enhance] Erro ao enriquecer documento:', error);
+    apiLogger.error({ err: error }, '[Enhance] Erro ao enriquecer documento:');
 
     if (error instanceof Error) {
       return NextResponse.json(

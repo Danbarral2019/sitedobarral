@@ -4,6 +4,7 @@ import { prisma } from '@/lib/prisma';
 import { publishToSocialMedia } from '@/lib/social-publisher';
 import { CacheInvalidation, withCache, CacheKeys, CACHE_TTL } from '@/lib/cache/redis-client';
 import { broadcastPush } from '@/lib/push-notifications';
+import { apiLogger } from "@/lib/logger";
 
 // GET - Lista posts do blog com paginação
 export const GET = withAdminAuth(async (request: NextRequest) => {
@@ -45,7 +46,7 @@ export const GET = withAdminAuth(async (request: NextRequest) => {
       headers: { 'Cache-Control': 'private, max-age=60' },
     });
   } catch (error) {
-    console.error('Erro ao listar posts:', error);
+    apiLogger.error({ err: error }, 'Erro ao listar posts:');
     return NextResponse.json(
       { error: 'Erro ao listar posts' },
       { status: 500 }
@@ -103,7 +104,7 @@ export const POST = withAdminAuth(async (request: NextRequest) => {
           console.log('[BlogPost] Resultado publicação social:', result);
         })
         .catch((error) => {
-          console.error('[BlogPost] Erro ao publicar nas redes sociais:', error);
+          apiLogger.error({ err: error }, '[BlogPost] Erro ao publicar nas redes sociais:');
         });
     }
 
@@ -121,7 +122,7 @@ export const POST = withAdminAuth(async (request: NextRequest) => {
 
     return NextResponse.json({ post }, { status: 201 });
   } catch (error) {
-    console.error('Erro ao criar post:', error);
+    apiLogger.error({ err: error }, 'Erro ao criar post:');
     return NextResponse.json(
       { error: 'Erro ao criar post' },
       { status: 500 }

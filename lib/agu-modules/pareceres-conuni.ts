@@ -16,6 +16,7 @@ import {
   truncate,
   extractTags,
 } from './helpers';
+import { apiLogger } from "@/lib/logger";
 
 /**
  * Interface para dados brutos de um Parecer CONUNI extraído do sistema DECOR
@@ -169,7 +170,7 @@ export async function scrapeParecerCONUNI(
   } catch (error) {
     const errorMsg = error instanceof Error ? error.message : String(error);
     errors.push(errorMsg);
-    console.error('[AGU DECOR] ❌ Erro:', errorMsg);
+    apiLogger.error({ err: errorMsg }, '[AGU DECOR] ❌ Erro:');
 
     return {
       success: false,

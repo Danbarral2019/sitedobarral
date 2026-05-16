@@ -5,6 +5,7 @@
  */
 
 import { Resend } from 'resend';
+import { apiLogger } from "@/lib/logger";
 
 export interface EmailOptions {
   to: string;
@@ -68,7 +69,7 @@ export async function sendEmail(options: EmailOptions): Promise<SendEmailResult>
           continue;
         }
 
-        console.error('Erro ao enviar email:', { to, subject, error: errorMessage, attempt });
+        apiLogger.error({ to, subject, error: errorMessage, attempt }, 'Erro ao enviar email:');
         return { success: false, error: errorMessage, retryable: isRetryable };
       }
     }

@@ -10,6 +10,7 @@
 
 import { queryGeminiText } from '@/lib/gemini/cached-client';
 import { PRIMARY_GEMINI_MODEL } from '@/lib/gemini/config';
+import { apiLogger } from "@/lib/logger";
 
 // ===========================
 // Types
@@ -133,7 +134,7 @@ async function evaluateBatch(decisions: DecisionInput[]): Promise<Map<string, { 
       });
     }
   } catch (error) {
-    console.error('[Newsletter Filter] Gemini batch evaluation failed:', error);
+    apiLogger.error({ err: error }, '[Newsletter Filter] Gemini batch evaluation failed:');
     // On failure, mark all decisions with score 0 (will use fallback)
   }
 

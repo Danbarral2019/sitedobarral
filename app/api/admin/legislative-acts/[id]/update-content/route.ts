@@ -5,6 +5,7 @@ import { scrapeUrl, canScrapeUrl } from '@/lib/legislative-scrapers';
 import { hasHashChanged, generateChangeSummary } from '@/lib/legislative-scrapers/change-detector';
 import { CacheInvalidation } from '@/lib/cache/redis-client';
 import { validateActContent } from '@/lib/legislative-scrapers/validate-content';
+import { apiLogger } from "@/lib/logger";
 
 /**
  * POST /api/admin/legislative-acts/[id]/update-content
@@ -197,7 +198,7 @@ export async function POST(
       },
     });
   } catch (error) {
-    console.error('[Update Content] Erro:', error);
+    apiLogger.error({ err: error }, '[Update Content] Erro:');
     return NextResponse.json(
       {
         error: 'Erro interno',
@@ -274,7 +275,7 @@ export async function GET(
       },
     });
   } catch (error) {
-    console.error('[Update Content GET] Erro:', error);
+    apiLogger.error({ err: error }, '[Update Content GET] Erro:');
     return NextResponse.json(
       { error: 'Erro interno' },
       { status: 500 }

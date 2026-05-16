@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { verifyAuth } from '@/lib/auth';
+import { apiLogger } from "@/lib/logger";
 
 /**
  * GET /api/admin/dou/pending
@@ -58,7 +59,7 @@ export async function GET(request: NextRequest) {
     });
 
   } catch (error) {
-    console.error('[DOU Pending] Error:', error);
+    apiLogger.error({ err: error }, '[DOU Pending] Error:');
     return NextResponse.json(
       { error: 'Failed to fetch pending documents' },
       { status: 500 }

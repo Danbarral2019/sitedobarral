@@ -1,5 +1,6 @@
 import webpush from 'web-push';
 import { prisma } from '@/lib/prisma';
+import { apiLogger } from "@/lib/logger";
 
 // Configure VAPID
 const VAPID_PUBLIC_KEY = process.env.VAPID_PUBLIC_KEY || '';
@@ -42,7 +43,7 @@ async function sendToSubscription(
     if (statusCode === 404 || statusCode === 410) {
       await prisma.pushSubscription.delete({ where: { id: subscription.id } }).catch(() => {});
     }
-    console.error(`[Push] Failed to send to ${subscription.endpoint.slice(0, 50)}...:`, statusCode);
+    apiLogger.error({ err: statusCode }, `[Push] Failed to send to ${subscription.endpoint.slice(0, 50)}...:`);
     return false;
   }
 }

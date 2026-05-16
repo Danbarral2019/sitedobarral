@@ -3,6 +3,7 @@ import { cookies } from 'next/headers';
 import { verifyToken } from '@/lib/auth';
 import { getPublicR2Url, fileExistsInR2 } from '@/lib/storage/r2-client';
 import { prisma } from '@/lib/prisma';
+import { apiLogger } from "@/lib/logger";
 
 // ===========================
 // Types
@@ -116,7 +117,7 @@ export async function POST(req: NextRequest) {
       message: 'Upload confirmado e documento criado com sucesso',
     });
   } catch (error) {
-    console.error('Upload confirmation error:', error);
+    apiLogger.error({ err: error }, 'Upload confirmation error:');
 
     // If it's a Prisma error, provide more details
     if (error && typeof error === 'object' && 'code' in error) {

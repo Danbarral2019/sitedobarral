@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { withAdminAuth } from '@/lib/api-middleware';
 import { prisma } from '@/lib/prisma';
+import { apiLogger } from "@/lib/logger";
 
 /**
  * GET: Conta documentos auto-importados nos últimos 7 dias
@@ -19,7 +20,7 @@ export const GET = withAdminAuth(async () => {
 
     return NextResponse.json({ count });
   } catch (error) {
-    console.error('[Recent Auto Imports Count] Erro:', error);
+    apiLogger.error({ err: error }, '[Recent Auto Imports Count] Erro:');
     return NextResponse.json(
       { error: 'Erro ao contar importações automáticas' },
       { status: 500 }

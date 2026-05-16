@@ -4,6 +4,7 @@ import { verifyAdmin } from '@/lib/api-middleware';
 import { CacheInvalidation } from '@/lib/cache/redis-client';
 import { validateActContent } from '@/lib/legislative-scrapers/validate-content';
 import { normalizeScrapedText } from '@/lib/legislative-scrapers/normalize';
+import { apiLogger } from "@/lib/logger";
 
 /**
  * GET /api/admin/legislative-acts/[id]
@@ -36,7 +37,7 @@ export async function GET(
     return NextResponse.json({ act });
 
   } catch (error) {
-    console.error('Erro ao buscar ato normativo:', error);
+    apiLogger.error({ err: error }, 'Erro ao buscar ato normativo:');
     return NextResponse.json(
       { error: 'Erro ao buscar ato normativo' },
       { status: 500 }
@@ -149,7 +150,7 @@ export async function PUT(
     });
 
   } catch (error: unknown) {
-    console.error('Erro ao atualizar ato normativo:', error);
+    apiLogger.error({ err: error }, 'Erro ao atualizar ato normativo:');
 
     // Erro de unique constraint (fullNumber duplicado)
     if (error && typeof error === 'object' && 'code' in error && error.code === 'P2002') {
@@ -211,7 +212,7 @@ export async function DELETE(
     });
 
   } catch (error) {
-    console.error('Erro ao excluir ato normativo:', error);
+    apiLogger.error({ err: error }, 'Erro ao excluir ato normativo:');
     return NextResponse.json(
       { error: 'Erro ao excluir ato normativo' },
       { status: 500 }

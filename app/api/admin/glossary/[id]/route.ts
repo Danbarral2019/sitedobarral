@@ -3,6 +3,7 @@ import { prisma } from '@/lib/prisma';
 import { verifyAuth } from '@/lib/auth';
 import { Prisma } from '@prisma/client';
 import { CacheInvalidation } from '@/lib/cache/redis-client';
+import { apiLogger } from "@/lib/logger";
 
 // Função helper para gerar slug
 function generateSlug(term: string): string {
@@ -130,7 +131,7 @@ export async function PUT(
       message: 'Termo atualizado com sucesso',
     });
   } catch (error) {
-    console.error('Error updating glossary term:', error);
+    apiLogger.error({ err: error }, 'Error updating glossary term:');
     return NextResponse.json(
       { error: 'Erro ao atualizar termo' },
       { status: 500 }
@@ -176,7 +177,7 @@ export async function DELETE(
       message: 'Termo deletado com sucesso',
     });
   } catch (error) {
-    console.error('Error deleting glossary term:', error);
+    apiLogger.error({ err: error }, 'Error deleting glossary term:');
     return NextResponse.json(
       { error: 'Erro ao deletar termo' },
       { status: 500 }

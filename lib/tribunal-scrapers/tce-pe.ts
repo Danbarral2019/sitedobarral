@@ -38,6 +38,7 @@ import {
   extractTextFromHTML,
 } from './utils';
 import { classifyDecision, generateDecisionSummary } from './classifier';
+import { apiLogger } from "@/lib/logger";
 
 // ===========================
 // Constants
@@ -196,7 +197,7 @@ class TCEPEScraper implements TribunalScraper {
         } catch (error) {
           const msg = `Page ${page} fetch failed: ${error instanceof Error ? error.message : String(error)}`;
           result.errors.push(msg);
-          console.error(`[${SCRAPER_CODE}]`, msg);
+          apiLogger.error({ err: msg }, `[${SCRAPER_CODE}]`);
           break;
         }
       }
@@ -221,7 +222,7 @@ class TCEPEScraper implements TribunalScraper {
       } catch (error) {
         const msg = `Sumulas fetch failed: ${error instanceof Error ? error.message : String(error)}`;
         result.errors.push(msg);
-        console.error(`[${SCRAPER_CODE}]`, msg);
+        apiLogger.error({ err: msg }, `[${SCRAPER_CODE}]`);
       }
 
       if (allItems.length === 0) {

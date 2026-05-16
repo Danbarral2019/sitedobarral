@@ -37,6 +37,7 @@ import {
   sleep,
 } from './utils';
 import { classifyDecision, generateDecisionSummary } from './classifier';
+import { apiLogger } from "@/lib/logger";
 
 // ===========================
 // Constants
@@ -210,7 +211,7 @@ class TCESPScraper implements TribunalScraper {
         } catch (error) {
           const msg = `Search failed for "${term}": ${error instanceof Error ? error.message : String(error)}`;
           result.errors.push(msg);
-          console.error(`[${SCRAPER_CODE}]`, msg);
+          apiLogger.error({ err: msg }, `[${SCRAPER_CODE}]`);
         }
       }
 
@@ -233,7 +234,7 @@ class TCESPScraper implements TribunalScraper {
           result.itemsError++;
           const msg = `Error processing ${raw.decisionNumber}: ${error instanceof Error ? error.message : String(error)}`;
           result.errors.push(msg);
-          console.error(`[${SCRAPER_CODE}]`, msg);
+          apiLogger.error({ err: msg }, `[${SCRAPER_CODE}]`);
         }
       }
 

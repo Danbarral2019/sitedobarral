@@ -10,6 +10,7 @@ import { extractText, normalizeText } from '@/lib/text-extractor';
 import { chunkText, chunkLegalDocument, chunkTCUDocument, TextChunk } from './text-chunker';
 import { generateBatchEmbeddings, embeddingToSql } from './gemini-embeddings';
 import { PRIMARY_GEMINI_MODEL } from '@/lib/gemini/config';
+import { apiLogger } from "@/lib/logger";
 
 // ===========================
 // Types
@@ -246,7 +247,7 @@ export async function processDocument(
 
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-    console.error(`❌ Error processing document ${documentId}:`, error);
+    apiLogger.error({ err: error }, `❌ Error processing document ${documentId}:`);
 
     await updateDocumentStatus(documentId, 'failed', errorMessage);
 
@@ -384,7 +385,7 @@ async function extractTextWithFallback(
         return { success: true, text: ocrText };
       }
     } catch (error) {
-      console.error('Gemini Vision OCR failed:', error);
+      apiLogger.error({ err: error }, 'Gemini Vision OCR failed:');
       // Continua com o texto original (pode ser vazio)
     }
   }

@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { verifyAuth } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
 import { CacheInvalidation } from '@/lib/cache/redis-client';
+import { apiLogger } from "@/lib/logger";
 
 /**
  * PUT /api/admin/lei-14133/[numero]
@@ -66,11 +67,11 @@ export async function PUT(
       }
     });
   } catch (error) {
-    console.error('[Lei 14.133 Edit] Error details:', {
-      numero,
-      errorMessage: error instanceof Error ? error.message : 'Erro desconhecido',
-      errorStack: error instanceof Error ? error.stack : undefined,
-    });
+    apiLogger.error({
+            numero,
+            errorMessage: error instanceof Error ? error.message : 'Erro desconhecido',
+            errorStack: error instanceof Error ? error.stack : undefined,
+          }, '[Lei 14.133 Edit] Error details:');
     return NextResponse.json(
       {
         error: 'Erro ao atualizar artigo',
@@ -121,7 +122,7 @@ export async function GET(
       },
     });
   } catch (error) {
-    console.error('[Lei 14.133 Get] Error:', error);
+    apiLogger.error({ err: error }, '[Lei 14.133 Get] Error:');
     return NextResponse.json(
       { error: 'Erro ao buscar artigo' },
       { status: 500 }

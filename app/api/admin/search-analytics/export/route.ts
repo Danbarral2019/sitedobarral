@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { withAdminAuth } from '@/lib/api-middleware';
+import { apiLogger } from "@/lib/logger";
 
 /**
  * GET /api/admin/search-analytics/export?days=30
@@ -94,7 +95,7 @@ export const GET = withAdminAuth(async (req) => {
       },
     });
   } catch (error) {
-    console.error('Search analytics export error:', error);
+    apiLogger.error({ err: error }, 'Search analytics export error:');
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 },

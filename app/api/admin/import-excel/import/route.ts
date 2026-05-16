@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { withAdminAuth } from '@/lib/api-middleware';
 import { processExcelFile } from '@/lib/excel-processor';
 import { addDocument } from '@/lib/documents';
+import { apiLogger } from "@/lib/logger";
 
 /**
  * POST /api/admin/import-excel/import
@@ -94,7 +95,7 @@ export const POST = withAdminAuth(async (request: NextRequest) => {
           results.imported++;
         }
       } catch (error) {
-        console.error(`Erro ao importar documento "${doc.title}":`, error);
+        apiLogger.error({ err: error }, `Erro ao importar documento "${doc.title}":`);
         results.failed++;
         results.errors.push(
           `Falha ao importar "${doc.title}": ${error instanceof Error ? error.message : 'Erro desconhecido'}`
@@ -108,7 +109,7 @@ export const POST = withAdminAuth(async (request: NextRequest) => {
       validation
     });
   } catch (error) {
-    console.error('Erro ao importar Excel:', error);
+    apiLogger.error({ err: error }, 'Erro ao importar Excel:');
     return NextResponse.json(
       { error: 'Erro ao importar arquivo Excel' },
       { status: 500 }

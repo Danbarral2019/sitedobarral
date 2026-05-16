@@ -3,6 +3,7 @@ import { verifyAuth } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
 import { deleteTestimonial } from '@/lib/depoimentos';
 import { CacheInvalidation } from '@/lib/cache/redis-client';
+import { apiLogger } from "@/lib/logger";
 
 export async function GET(
   request: NextRequest,
@@ -22,7 +23,7 @@ export async function GET(
 
     return NextResponse.json({ testimonial });
   } catch (error) {
-    console.error('Error fetching testimonial:', error);
+    apiLogger.error({ err: error }, 'Error fetching testimonial:');
     return NextResponse.json({ error: 'Failed to fetch testimonial' }, { status: 500 });
   }
 }
@@ -69,7 +70,7 @@ export async function PUT(
 
     return NextResponse.json({ success: true, testimonial });
   } catch (error) {
-    console.error('Error updating testimonial:', error);
+    apiLogger.error({ err: error }, 'Error updating testimonial:');
     return NextResponse.json({ error: 'Failed to update testimonial' }, { status: 500 });
   }
 }
@@ -90,7 +91,7 @@ export async function DELETE(
 
     return NextResponse.json({ success: true });
   } catch (error) {
-    console.error('Error deleting testimonial:', error);
+    apiLogger.error({ err: error }, 'Error deleting testimonial:');
     return NextResponse.json({ error: 'Failed to delete testimonial' }, { status: 500 });
   }
 }

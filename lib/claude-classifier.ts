@@ -4,6 +4,7 @@
  */
 
 import Anthropic from '@anthropic-ai/sdk';
+import { apiLogger } from "@/lib/logger";
 
 // Função para obter cliente Claude (lazy initialization)
 function getClaudeClient(): Anthropic | null {
@@ -191,7 +192,7 @@ export async function classifyWithClaude(
     return result;
 
   } catch (error) {
-    console.error('[Claude Classifier] Erro ao classificar documento:', error);
+    apiLogger.error({ err: error }, '[Claude Classifier] Erro ao classificar documento:');
     return null;
   }
 }
@@ -290,8 +291,8 @@ function parseClaudeResponse(responseText: string): ClaudeClassificationResult {
       suggestedArticles,
     };
   } catch (error) {
-    console.error('[Claude Classifier] Erro ao fazer parse da resposta:', error);
-    console.error('Resposta recebida:', responseText);
+    apiLogger.error({ err: error }, '[Claude Classifier] Erro ao fazer parse da resposta:');
+    apiLogger.error({ err: responseText }, 'Resposta recebida:');
 
     // Retorna resultado padrão em caso de erro
     return {

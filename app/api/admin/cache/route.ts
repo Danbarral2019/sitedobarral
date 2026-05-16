@@ -6,6 +6,7 @@ import {
   healthCheck,
   isCacheEnabled,
 } from '@/lib/cache/redis-client';
+import { apiLogger } from "@/lib/logger";
 
 /**
  * GET /api/admin/cache
@@ -36,7 +37,7 @@ export async function GET(request: NextRequest) {
       },
     });
   } catch (error) {
-    console.error('Error getting cache status:', error);
+    apiLogger.error({ err: error }, 'Error getting cache status:');
     return NextResponse.json(
       { error: 'Erro ao verificar status do cache' },
       { status: 500 }
@@ -137,7 +138,7 @@ export async function POST(request: NextRequest) {
       ...result,
     });
   } catch (error) {
-    console.error('Error invalidating cache:', error);
+    apiLogger.error({ err: error }, 'Error invalidating cache:');
     return NextResponse.json(
       { error: 'Erro ao invalidar cache' },
       { status: 500 }

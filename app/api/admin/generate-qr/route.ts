@@ -3,6 +3,7 @@ import { withAdminAuth } from '@/lib/api-middleware';
 import { createQRCode } from '@/lib/qrcode';
 import { enforceRateLimit, getClientIp } from '@/lib/cache/rate-limit-helper';
 import { RateLimitError } from '@/lib/errors/api-error';
+import { apiLogger } from "@/lib/logger";
 
 // Aumenta timeout para 60 segundos (necessário para geração de QR code)
 export const maxDuration = 60;
@@ -46,7 +47,7 @@ export const POST = withAdminAuth(async (request: NextRequest) => {
         { status: 429 }
       );
     }
-    console.error('Erro ao gerar QR Code:', error);
+    apiLogger.error({ err: error }, 'Erro ao gerar QR Code:');
     return NextResponse.json(
       { error: error instanceof Error ? error.message : 'Erro ao gerar QR Code' },
       { status: 500 }

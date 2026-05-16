@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { withAdminAuth } from '@/lib/api-middleware';
 import { prisma } from '@/lib/prisma';
+import { apiLogger } from "@/lib/logger";
 
 /**
  * GET /api/admin/documents/[id]/notes
@@ -47,7 +48,7 @@ export const GET = withAdminAuth(async (
           });
         }
       } catch (e) {
-        console.error('Erro ao parsear relatedDocs:', e);
+        apiLogger.error({ err: e }, 'Erro ao parsear relatedDocs:');
       }
     }
 
@@ -71,7 +72,7 @@ export const GET = withAdminAuth(async (
     });
 
   } catch (error) {
-    console.error('[Documents Notes GET] Erro:', error);
+    apiLogger.error({ err: error }, '[Documents Notes GET] Erro:');
     return NextResponse.json(
       { error: 'Erro ao buscar observações' },
       { status: 500 }
@@ -176,7 +177,7 @@ export const PUT = withAdminAuth(async (
     });
 
   } catch (error) {
-    console.error('[Documents Notes PUT] Erro:', error);
+    apiLogger.error({ err: error }, '[Documents Notes PUT] Erro:');
     return NextResponse.json(
       { error: 'Erro ao atualizar observações' },
       { status: 500 }
@@ -223,7 +224,7 @@ export const DELETE = withAdminAuth(async (
     });
 
   } catch (error) {
-    console.error('[Documents Notes DELETE] Erro:', error);
+    apiLogger.error({ err: error }, '[Documents Notes DELETE] Erro:');
     return NextResponse.json(
       { error: 'Erro ao remover observações' },
       { status: 500 }

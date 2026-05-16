@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { withAdminAuth } from '@/lib/api-middleware';
 import { prisma } from '@/lib/prisma';
+import { apiLogger } from "@/lib/logger";
 
 export const PUT = withAdminAuth(async (request: NextRequest) => {
   try {
@@ -59,7 +60,7 @@ export const PUT = withAdminAuth(async (request: NextRequest) => {
       },
     });
   } catch (error) {
-    console.error('Erro ao atualizar QR Code:', error);
+    apiLogger.error({ err: error }, 'Erro ao atualizar QR Code:');
     return NextResponse.json(
       { error: 'Erro ao atualizar QR Code' },
       { status: 500 }

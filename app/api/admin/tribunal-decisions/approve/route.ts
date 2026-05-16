@@ -4,6 +4,7 @@ import { verifyAuth } from '@/lib/auth';
 import { handleApiError } from '@/lib/errors/error-handler';
 import { ValidationError, NotFoundError } from '@/lib/errors/api-error';
 import { generateDecisionSummary } from '@/lib/tribunal-scrapers/classifier';
+import { apiLogger } from "@/lib/logger";
 
 /**
  * POST /api/admin/tribunal-decisions/approve
@@ -44,7 +45,7 @@ export async function POST(request: NextRequest) {
           decisionType: decision.decisionType,
         });
       } catch (err) {
-        console.error('[approve] Failed to generate summary:', err);
+        apiLogger.error({ err: err }, '[approve] Failed to generate summary:');
       }
     }
 

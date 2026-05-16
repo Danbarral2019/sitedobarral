@@ -3,6 +3,7 @@ import { withAdminAuth } from '@/lib/api-middleware';
 import { prisma } from '@/lib/prisma';
 import { CacheInvalidation } from '@/lib/cache/redis-client';
 import { sendPushToCourse } from '@/lib/push-notifications';
+import { apiLogger } from "@/lib/logger";
 
 /**
  * POST /api/admin/documents/create-manual
@@ -106,7 +107,7 @@ export const POST = withAdminAuth(async (request: NextRequest) => {
       { status: 201 }
     );
   } catch (error) {
-    console.error('[Create Manual] Erro:', error);
+    apiLogger.error({ err: error }, '[Create Manual] Erro:');
     return NextResponse.json(
       { error: 'Erro ao criar documento' },
       { status: 500 }

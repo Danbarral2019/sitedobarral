@@ -3,6 +3,7 @@ import { prisma } from '@/lib/prisma';
 import { verifyAuth } from '@/lib/auth';
 import { Prisma } from '@prisma/client';
 import { CacheInvalidation } from '@/lib/cache/redis-client';
+import { apiLogger } from "@/lib/logger";
 
 // Função helper para gerar slug
 function generateSlug(term: string): string {
@@ -78,7 +79,7 @@ export async function GET(request: NextRequest) {
       categories,
     });
   } catch (error) {
-    console.error('Error fetching glossary terms (admin):', error);
+    apiLogger.error({ err: error }, 'Error fetching glossary terms (admin):');
     return NextResponse.json(
       { error: 'Erro ao buscar termos' },
       { status: 500 }
@@ -171,7 +172,7 @@ export async function POST(request: NextRequest) {
       { status: 201 }
     );
   } catch (error) {
-    console.error('Error creating glossary term:', error);
+    apiLogger.error({ err: error }, 'Error creating glossary term:');
     return NextResponse.json(
       { error: 'Erro ao criar termo' },
       { status: 500 }

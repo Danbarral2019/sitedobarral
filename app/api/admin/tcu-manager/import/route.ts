@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { withAdminAuth } from '@/lib/api-middleware';
 import { prisma } from '@/lib/prisma';
 import { courses } from '@/data/courses';
+import { apiLogger } from "@/lib/logger";
 
 interface DocumentToImport {
   title: string;
@@ -223,7 +224,7 @@ export const POST = withAdminAuth(async (request: NextRequest) => {
         console.log(`[TCU Manager Import] Importado: ${doc.title} (${courseIds.length} curso(s))`);
 
       } catch (error) {
-        console.error(`[TCU Manager Import] Erro ao importar "${doc.title}":`, error);
+        apiLogger.error({ err: error }, `[TCU Manager Import] Erro ao importar "${doc.title}":`);
         results.failed++;
         results.errors.push(
           `${doc.title}: ${error instanceof Error ? error.message : 'Erro desconhecido'}`
@@ -244,7 +245,7 @@ export const POST = withAdminAuth(async (request: NextRequest) => {
     });
 
   } catch (error) {
-    console.error('[TCU Manager Import] Erro:', error);
+    apiLogger.error({ err: error }, '[TCU Manager Import] Erro:');
     return NextResponse.json(
       {
         error: 'Erro ao importar documentos',

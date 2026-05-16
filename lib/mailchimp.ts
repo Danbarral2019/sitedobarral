@@ -1,5 +1,6 @@
 import mailchimp from '@mailchimp/mailchimp_marketing';
 import crypto from 'crypto';
+import { apiLogger } from "@/lib/logger";
 
 /**
  * Biblioteca de integração com MailChimp
@@ -129,7 +130,7 @@ export async function addSubscriber(
       message: `Inscrito adicionado com sucesso: ${response.email_address}`,
     };
   } catch (error: unknown) {
-    console.error('Erro ao adicionar inscrito no MailChimp:', error);
+    apiLogger.error({ err: error }, 'Erro ao adicionar inscrito no MailChimp:');
 
     // Tratamento de erros específicos
     const err = error as { status?: number; response?: { body?: { detail?: string } }; message?: string };
@@ -177,7 +178,7 @@ export async function unsubscribeSubscriber(
       message: 'Inscrito removido com sucesso',
     };
   } catch (error: unknown) {
-    console.error('Erro ao remover inscrito do MailChimp:', error);
+    apiLogger.error({ err: error }, 'Erro ao remover inscrito do MailChimp:');
     const err = error as { response?: { body?: { detail?: string } }; message?: string };
     return {
       success: false,
@@ -223,7 +224,7 @@ export async function updateSubscriberTags(
       message: 'Tags atualizadas com sucesso',
     };
   } catch (error: unknown) {
-    console.error('Erro ao atualizar tags no MailChimp:', error);
+    apiLogger.error({ err: error }, 'Erro ao atualizar tags no MailChimp:');
     const err = error as { response?: { body?: { detail?: string } }; message?: string };
     return {
       success: false,
@@ -259,7 +260,7 @@ export async function getSubscriber(
       data: response,
     };
   } catch (error: unknown) {
-    console.error('Erro ao buscar inscrito no MailChimp:', error);
+    apiLogger.error({ err: error }, 'Erro ao buscar inscrito no MailChimp:');
     const err = error as { response?: { body?: { detail?: string } }; message?: string };
     return {
       success: false,
@@ -365,7 +366,7 @@ export async function createCampaign(
       message: 'Campanha criada com sucesso. Use o ID para enviá-la.',
     };
   } catch (error: unknown) {
-    console.error('Erro ao criar campanha no MailChimp:', error);
+    apiLogger.error({ err: error }, 'Erro ao criar campanha no MailChimp:');
     const err = error as { response?: { body?: { detail?: string } }; message?: string };
     return {
       success: false,
@@ -395,7 +396,7 @@ export async function sendCampaign(
       message: 'Campanha enviada com sucesso',
     };
   } catch (error: unknown) {
-    console.error('Erro ao enviar campanha no MailChimp:', error);
+    apiLogger.error({ err: error }, 'Erro ao enviar campanha no MailChimp:');
     const err = error as { response?: { body?: { detail?: string } }; message?: string };
     return {
       success: false,

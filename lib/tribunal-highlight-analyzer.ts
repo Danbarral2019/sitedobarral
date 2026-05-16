@@ -16,6 +16,7 @@
 import { prisma } from '@/lib/prisma';
 import { sendTribunalHighlightAlert } from '@/lib/email';
 import { PRIMARY_GEMINI_MODEL } from '@/lib/gemini/config';
+import { apiLogger } from "@/lib/logger";
 
 const GEMINI_MODEL = PRIMARY_GEMINI_MODEL;
 const ANALYSIS_DELAY_MS = 800;
@@ -165,7 +166,7 @@ async function callGeminiForHighlight(prompt: string): Promise<HighlightAnalysis
 
   if (!response.ok) {
     const errorText = await response.text();
-    console.error(`[Tribunal Highlights] Gemini API error (${response.status}): ${errorText.slice(0, 200)}`);
+    apiLogger.error(`[Tribunal Highlights] Gemini API error (${response.status}): ${errorText.slice(0, 200)}`);
     return null;
   }
 
@@ -183,7 +184,7 @@ async function callGeminiForHighlight(prompt: string): Promise<HighlightAnalysis
       typeof parsed.whyImportant !== 'string' ||
       typeof parsed.articleAngle !== 'string'
     ) {
-      console.error('[Tribunal Highlights] Resposta IA com campos faltando');
+      apiLogger.error('[Tribunal Highlights] Resposta IA com campos faltando');
       return null;
     }
 
@@ -199,7 +200,7 @@ async function callGeminiForHighlight(prompt: string): Promise<HighlightAnalysis
       leiConnections: Array.isArray(parsed.leiConnections) ? parsed.leiConnections : [],
     };
   } catch (err) {
-    console.error('[Tribunal Highlights] Erro ao parsear resposta IA:', err instanceof Error ? err.message : err);
+    apiLogger.error({ err: err instanceof Error ? err.message : err }, '[Tribunal Highlights] Erro ao parsear resposta IA:');
     return null;
   }
 }
@@ -282,7 +283,7 @@ export async function identifyAndAlertTribunalHighlights(newDecisionIds: string[
 
       await new Promise(resolve => setTimeout(resolve, ANALYSIS_DELAY_MS));
     } catch (err) {
-      console.error(`[Tribunal Highlights] Erro ao analisar ${decision.title}:`, err instanceof Error ? err.message : err);
+      apiLogger.error({ err: err instanceof Error ? err.message : err }, `[Tribunal Highlights] Erro ao analisar ${decision.title}:`);
     }
   }
 
@@ -322,7 +323,7 @@ export async function identifyAndAlertTribunalHighlights(newDecisionIds: string[
 
       createdHighlights.push({ id: highlight.id, decision, keywordScore, analysis });
     } catch (err) {
-      console.error(`[Tribunal Highlights] Erro ao salvar highlight para ${decision.title}:`, err instanceof Error ? err.message : err);
+      apiLogger.error({ err: err instanceof Error ? err.message : err }, `[Tribunal Highlights] Erro ao salvar highlight para ${decision.title}:`);
     }
   }
 
@@ -350,7 +351,7 @@ export async function identifyAndAlertTribunalHighlights(newDecisionIds: string[
         });
       }
     } catch (err) {
-      console.error('[Tribunal Highlights] Erro ao enviar email:', err instanceof Error ? err.message : err);
+      apiLogger.error({ err: err instanceof Error ? err.message : err }, '[Tribunal Highlights] Erro ao enviar email:');
     }
   }
 

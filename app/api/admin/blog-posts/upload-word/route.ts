@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { withAdminAuth } from '@/lib/api-middleware';
 import mammoth from 'mammoth';
+import { apiLogger } from "@/lib/logger";
 
 /**
  * Processa arquivo Word e extrai:
@@ -77,7 +78,7 @@ export const POST = withAdminAuth(async (request: NextRequest) => {
     });
 
   } catch (error) {
-    console.error('[WordUpload] Erro ao processar arquivo:', error);
+    apiLogger.error({ err: error }, '[WordUpload] Erro ao processar arquivo:');
     return NextResponse.json(
       {
         error: error instanceof Error ? error.message : 'Erro ao processar arquivo Word'

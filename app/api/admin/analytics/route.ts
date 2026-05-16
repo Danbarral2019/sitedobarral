@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { withAdminAuth } from '@/lib/api-middleware';
-
+import { apiLogger } from "@/lib/logger";
 
 /**
  * GET /api/admin/analytics
@@ -120,7 +120,7 @@ export const GET = withAdminAuth(async () => {
         } : null;
       });
     } catch (error) {
-      console.error('Erro ao buscar documentos mais acessados:', error);
+      apiLogger.error({ err: error }, 'Erro ao buscar documentos mais acessados:');
     }
 
     // 5. Cursos com mais acessos (últimos 30 dias)
@@ -148,7 +148,7 @@ export const GET = withAdminAuth(async () => {
         accessCount: item._count.id,
       }));
     } catch (error) {
-      console.error('Erro ao buscar cursos mais acessados:', error);
+      apiLogger.error({ err: error }, 'Erro ao buscar cursos mais acessados:');
     }
 
     // 6. Acessos por dia (últimos 30 dias)
@@ -169,7 +169,7 @@ export const GET = withAdminAuth(async () => {
         count: Number(item.count),
       }));
     } catch (error) {
-      console.error('Erro ao buscar acessos por dia:', error);
+      apiLogger.error({ err: error }, 'Erro ao buscar acessos por dia:');
       // Continua sem os dados de acessos por dia
     }
 
@@ -223,7 +223,7 @@ export const GET = withAdminAuth(async () => {
         } : null;
       });
     } catch (error) {
-      console.error('Erro ao buscar usuários mais ativos:', error);
+      apiLogger.error({ err: error }, 'Erro ao buscar usuários mais ativos:');
     }
 
     // 8. Estatísticas de Ações (últimos 30 dias)
@@ -244,7 +244,7 @@ export const GET = withAdminAuth(async () => {
         count: item._count.id,
       }));
     } catch (error) {
-      console.error('Erro ao buscar estatísticas de ações:', error);
+      apiLogger.error({ err: error }, 'Erro ao buscar estatísticas de ações:');
     }
 
     // 9. Total de acessos (últimos 30 dias)
@@ -256,7 +256,7 @@ export const GET = withAdminAuth(async () => {
         },
       });
     } catch (error) {
-      console.error('Erro ao contar total de acessos:', error);
+      apiLogger.error({ err: error }, 'Erro ao contar total de acessos:');
     }
 
     // 10. Blog Posts
@@ -329,7 +329,7 @@ export const GET = withAdminAuth(async () => {
       },
     });
   } catch (error) {
-    console.error('Erro ao buscar analytics:', error);
+    apiLogger.error({ err: error }, 'Erro ao buscar analytics:');
     return NextResponse.json(
       { error: 'Erro ao buscar métricas' },
       { status: 500 }

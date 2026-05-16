@@ -1,3 +1,5 @@
+import { apiLogger } from "@/lib/logger";
+
 /**
  * Scraper para Orientações Normativas da AGU - VERSÃO MELHORADA v3
  * Extrai documentos de https://www.gov.br/agu/pt-br/composicao/cgu/cgu/onsagu
@@ -59,7 +61,7 @@ export async function scrapeOrientacoesAGU(): Promise<OrientacaoNormativa[]> {
 
     return orientacoes;
   } catch (error) {
-    console.error('[AGU Scraper v2] ❌ Erro ao fazer scraping:', error);
+    apiLogger.error({ err: error }, '[AGU Scraper v2] ❌ Erro ao fazer scraping:');
     throw error;
   }
 }

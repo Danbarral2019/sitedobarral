@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { verifyToken } from '@/lib/auth';
 import { retryFailedPost } from '@/lib/social-publisher';
+import { apiLogger } from "@/lib/logger";
 
 /**
  * POST /api/admin/social/retry
@@ -47,7 +48,7 @@ export async function POST(request: NextRequest) {
       message: 'Post republicado com sucesso!',
     });
   } catch (error) {
-    console.error('Erro ao republicar:', error);
+    apiLogger.error({ err: error }, 'Erro ao republicar:');
     return NextResponse.json(
       {
         error: 'Erro ao processar republicação',

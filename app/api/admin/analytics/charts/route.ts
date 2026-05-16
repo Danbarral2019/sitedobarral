@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { withAdminAuth } from '@/lib/api-middleware';
+import { apiLogger } from "@/lib/logger";
 
 /**
  * GET /api/admin/analytics/charts
@@ -59,7 +60,7 @@ export const GET = withAdminAuth(async () => {
       },
     });
   } catch (error) {
-    console.error('[Analytics Charts] Erro:', error);
+    apiLogger.error({ err: error }, '[Analytics Charts] Erro:');
     return NextResponse.json(
       { error: 'Erro ao buscar dados de gráficos' },
       { status: 500 }

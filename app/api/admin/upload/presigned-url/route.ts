@@ -5,6 +5,7 @@ import { generatePresignedUploadUrl } from '@/lib/storage/r2-client';
 import { randomUUID } from 'crypto';
 import { enforceRateLimit, getClientIp } from '@/lib/cache/rate-limit-helper';
 import { RateLimitError } from '@/lib/errors/api-error';
+import { apiLogger } from "@/lib/logger";
 
 // ===========================
 // Types
@@ -144,7 +145,7 @@ export async function POST(req: NextRequest) {
         { status: 429 }
       );
     }
-    console.error('Presigned URL generation error:', error);
+    apiLogger.error({ err: error }, 'Presigned URL generation error:');
     return NextResponse.json(
       {
         error: 'Erro ao gerar URL de upload',

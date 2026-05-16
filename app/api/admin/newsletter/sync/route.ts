@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server';
 import { withAdminAuth } from '@/lib/api-middleware';
 import { syncSubscribers, isMailChimpConfigured } from '@/lib/mailchimp';
 import { prisma } from '@/lib/prisma';
-
+import { apiLogger } from "@/lib/logger";
 
 /**
  * POST /api/admin/newsletter/sync
@@ -57,7 +57,7 @@ export const POST = withAdminAuth(async () => {
       total: subscribers.length,
     });
   } catch (error) {
-    console.error('Erro ao sincronizar inscritos:', error);
+    apiLogger.error({ err: error }, 'Erro ao sincronizar inscritos:');
     return NextResponse.json(
       { error: 'Erro ao sincronizar inscritos com MailChimp' },
       { status: 500 }

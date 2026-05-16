@@ -3,6 +3,7 @@ import { prisma } from '@/lib/prisma';
 import { withAdminAuth } from '@/lib/api-middleware';
 import { generateDocumentSummary, isSummaryServiceAvailable } from '@/lib/summary-generator';
 import { isLiteralSourceCategory } from '@/lib/literal-sources';
+import { apiLogger } from "@/lib/logger";
 
 /**
  * POST /api/admin/documents/[id]/generate-summary
@@ -108,7 +109,7 @@ export const POST = withAdminAuth(async (
     });
 
   } catch (error) {
-    console.error('[Generate Summary] Erro:', error);
+    apiLogger.error({ err: error }, '[Generate Summary] Erro:');
     return NextResponse.json(
       { error: 'Erro ao gerar resumo do documento' },
       { status: 500 }
@@ -148,7 +149,7 @@ export const DELETE = withAdminAuth(async (
     });
 
   } catch (error) {
-    console.error('[Delete Summary] Erro:', error);
+    apiLogger.error({ err: error }, '[Delete Summary] Erro:');
 
     if (error instanceof Error && error.message.includes('Record to update not found')) {
       return NextResponse.json(

@@ -8,6 +8,7 @@
 import { queryGeminiText } from '@/lib/gemini/cached-client';
 import { PRIMARY_GEMINI_MODEL } from '@/lib/gemini/config';
 import type { FilteredDecision } from './relevance-filter';
+import { apiLogger } from "@/lib/logger";
 
 // ===========================
 // Types
@@ -146,7 +147,7 @@ export async function generateNewsletterIntro(input: IntroGeneratorInput): Promi
     console.log(`[Newsletter Intro] AI intro generated (${text.length} chars, ${result.latency}ms)`);
     return text;
   } catch (error) {
-    console.error('[Newsletter Intro] Gemini generation failed, using fallback:', error);
+    apiLogger.error({ err: error }, '[Newsletter Intro] Gemini generation failed, using fallback:');
     return buildFallbackIntro(input);
   }
 }

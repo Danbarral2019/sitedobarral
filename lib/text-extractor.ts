@@ -1,3 +1,5 @@
+import { apiLogger } from "@/lib/logger";
+
 /**
  * Extracao de texto de documentos
  *
@@ -44,7 +46,7 @@ export async function extractTextFromPDF(fileBuffer: Buffer): Promise<TextExtrac
     };
 
   } catch (error) {
-    console.error('Erro ao extrair texto do PDF:', error);
+    apiLogger.error({ err: error }, 'Erro ao extrair texto do PDF:');
     return {
       success: false,
       text: '',
@@ -75,7 +77,7 @@ export async function extractTextFromDOCX(fileBuffer: Buffer): Promise<TextExtra
     };
 
   } catch (error) {
-    console.error('Erro ao extrair texto do DOCX:', error);
+    apiLogger.error({ err: error }, 'Erro ao extrair texto do DOCX:');
     return {
       success: false,
       text: '',
@@ -180,7 +182,7 @@ export async function extractTextWithGeminiVision(fileBuffer: Buffer): Promise<T
     };
 
   } catch (error) {
-    console.error('Erro no OCR via Gemini Vision:', error);
+    apiLogger.error({ err: error }, 'Erro no OCR via Gemini Vision:');
     return {
       success: false,
       text: '',

@@ -4,6 +4,7 @@ import {
   enrichTCUAcordaosBatch,
   type TCUPlanilhaData,
 } from '@/lib/tcu-scraper';
+import { apiLogger } from "@/lib/logger";
 
 /**
  * POST /api/admin/tcu-manager/enrich
@@ -78,7 +79,7 @@ export const POST = withAdminAuth(async (request: NextRequest) => {
     });
 
   } catch (error) {
-    console.error('[TCU Enrich API] Erro:', error);
+    apiLogger.error({ err: error }, '[TCU Enrich API] Erro:');
     return NextResponse.json(
       {
         error: 'Erro ao enriquecer documentos',

@@ -12,6 +12,7 @@ import { courses } from '../../data/courses';
 
 import type { ObsidianCourse } from './types';
 import type { ImportResult } from './types';
+import { apiLogger } from "@/lib/logger";
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -255,7 +256,7 @@ async function importCourse(
           stats.warnings.push(
             `[${obsidianCourse.slug}] Erro na licao ${obsLesson.slug}: ${msg}`,
           );
-          console.error(`${lessonLabel} -> ERRO: ${msg}`);
+          apiLogger.error(`${lessonLabel} -> ERRO: ${msg}`);
         }
       }
     } catch (err) {
@@ -263,7 +264,7 @@ async function importCourse(
       stats.warnings.push(
         `[${obsidianCourse.slug}] Erro no modulo "${obsMod.title}": ${msg}`,
       );
-      console.error(`  ${moduleLabel} -> ERRO: ${msg}`);
+      apiLogger.error(`  ${moduleLabel} -> ERRO: ${msg}`);
     }
   }
 

@@ -14,6 +14,7 @@
  */
 
 import { Redis } from '@upstash/redis';
+import { apiLogger } from "@/lib/logger";
 
 // ===========================
 // Configuration
@@ -416,7 +417,7 @@ export async function getCache<T>(key: string): Promise<T | null> {
     const value = await redis.get<T>(key);
     return value;
   } catch (error) {
-    console.error('Cache get error:', error);
+    apiLogger.error({ err: error }, 'Cache get error:');
     return null;
   }
 }
@@ -442,7 +443,7 @@ export async function setCache<T>(
       await registerCacheKey(prefix, key);
     }
   } catch (error) {
-    console.error('Cache set error:', error);
+    apiLogger.error({ err: error }, 'Cache set error:');
   }
 }
 
@@ -455,7 +456,7 @@ export async function deleteCache(key: string): Promise<void> {
   try {
     await redis.del(key);
   } catch (error) {
-    console.error('Cache delete error:', error);
+    apiLogger.error({ err: error }, 'Cache delete error:');
   }
 }
 
@@ -486,7 +487,7 @@ export async function deleteCachePattern(pattern: string): Promise<number> {
     }
     return totalDeleted;
   } catch (error) {
-    console.error('Cache pattern delete error:', error);
+    apiLogger.error({ err: error }, 'Cache pattern delete error:');
     return 0;
   }
 }
@@ -501,7 +502,7 @@ export async function existsCache(key: string): Promise<boolean> {
     const exists = await redis.exists(key);
     return exists === 1;
   } catch (error) {
-    console.error('Cache exists error:', error);
+    apiLogger.error({ err: error }, 'Cache exists error:');
     return false;
   }
 }
@@ -525,7 +526,7 @@ export async function incrementCache(
 
     return count;
   } catch (error) {
-    console.error('Cache increment error:', error);
+    apiLogger.error({ err: error }, 'Cache increment error:');
     return 0;
   }
 }
@@ -572,7 +573,7 @@ export async function checkRateLimit(
       reset,
     };
   } catch (error) {
-    console.error('Rate limit check error:', error);
+    apiLogger.error({ err: error }, 'Rate limit check error:');
     // Fail open on error
     return {
       allowed: true,
@@ -599,7 +600,7 @@ export async function registerCacheKey(prefix: string, fullKey: string): Promise
     await redis.sadd(registryKey, fullKey);
     // Registry never expires - cleaned on invalidation
   } catch (error) {
-    console.error('Cache registry error:', error);
+    apiLogger.error({ err: error }, 'Cache registry error:');
   }
 }
 
@@ -614,7 +615,7 @@ export async function getRegisteredKeys(prefix: string): Promise<string[]> {
     const keys = await redis.smembers(registryKey);
     return keys as string[];
   } catch (error) {
-    console.error('Cache registry get error:', error);
+    apiLogger.error({ err: error }, 'Cache registry get error:');
     return [];
   }
 }
@@ -645,7 +646,7 @@ export async function invalidateCacheByPrefix(prefix: string): Promise<number> {
     console.log(`🗑️ Invalidated ${keysArray.length} keys for prefix: ${prefix}`);
     return keysArray.length;
   } catch (error) {
-    console.error('Cache invalidation error:', error);
+    apiLogger.error({ err: error }, 'Cache invalidation error:');
     return 0;
   }
 }

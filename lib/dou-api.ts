@@ -9,6 +9,7 @@
  */
 
 import * as cheerio from 'cheerio';
+import { apiLogger } from "@/lib/logger";
 
 /**
  * Seções do DOU
@@ -246,7 +247,7 @@ export class DOUClient {
           jsonData = JSON.parse(scriptTag.html() || '{}');
           searchResults = jsonData.jsonArray;
         } catch (error) {
-          console.error(`[DOU API] ❌ Erro ao parsear JSON da página ${pageNum + 1}:`, error);
+          apiLogger.error({ err: error }, `[DOU API] ❌ Erro ao parsear JSON da página ${pageNum + 1}:`);
           continue;
         }
 
@@ -311,7 +312,7 @@ export class DOUClient {
       return allResults;
 
     } catch (error) {
-      console.error('[DOU API] ❌ Erro na busca:', error);
+      apiLogger.error({ err: error }, '[DOU API] ❌ Erro na busca:');
       throw error;
     }
   }

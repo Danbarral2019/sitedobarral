@@ -1,4 +1,5 @@
 import Anthropic from '@anthropic-ai/sdk';
+import { apiLogger } from "@/lib/logger";
 
 export interface DocumentEnhancementResult {
   summary: string;
@@ -146,7 +147,7 @@ Retorne SOMENTE o JSON, sem formatação markdown.`;
 
     return result;
   } catch (error) {
-    console.error('[Document Enhancer] Erro ao chamar IA:', error);
+    apiLogger.error({ err: error }, '[Document Enhancer] Erro ao chamar IA:');
 
     if (error instanceof Error && error.message.includes('JSON')) {
       throw new Error('Erro ao parsear resposta da IA. Tente novamente.');

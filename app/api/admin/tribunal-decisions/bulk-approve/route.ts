@@ -4,6 +4,7 @@ import { verifyAuth } from '@/lib/auth';
 import { handleApiError } from '@/lib/errors/error-handler';
 import { ValidationError } from '@/lib/errors/api-error';
 import { generateDecisionSummary } from '@/lib/tribunal-scrapers/classifier';
+import { apiLogger } from "@/lib/logger";
 
 /**
  * POST /api/admin/tribunal-decisions/bulk-approve
@@ -49,7 +50,7 @@ export async function POST(request: NextRequest) {
               decisionType: d.decisionType,
             });
           } catch (err) {
-            console.error(`[bulk-approve] Failed to generate summary for ${d.id}:`, err);
+            apiLogger.error({ err: err }, `[bulk-approve] Failed to generate summary for ${d.id}:`);
           }
         }
         await prisma.tribunalDecision.update({

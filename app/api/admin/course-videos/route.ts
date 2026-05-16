@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { verifyToken } from '@/lib/auth';
 import { CacheInvalidation } from '@/lib/cache/redis-client';
+import { apiLogger } from "@/lib/logger";
 
 // POST - Adicionar vídeo
 export async function POST(request: NextRequest) {
@@ -59,7 +60,7 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({ video }, { status: 201 });
   } catch (error) {
-    console.error('Erro ao adicionar vídeo:', error);
+    apiLogger.error({ err: error }, 'Erro ao adicionar vídeo:');
     return NextResponse.json(
       { error: 'Erro ao adicionar vídeo' },
       { status: 500 }

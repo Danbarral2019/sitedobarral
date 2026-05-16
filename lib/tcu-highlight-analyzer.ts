@@ -17,6 +17,7 @@ import { prisma } from '@/lib/prisma';
 import { analyzeRelevanceTCU } from '@/lib/tcu-module';
 import { sendTcuHighlightAlert } from '@/lib/email';
 import { PRIMARY_GEMINI_MODEL } from '@/lib/gemini/config';
+import { apiLogger } from "@/lib/logger";
 
 const GEMINI_MODEL = PRIMARY_GEMINI_MODEL;
 const ANALYSIS_DELAY_MS = 800;
@@ -118,7 +119,7 @@ async function callGeminiForHighlight(prompt: string): Promise<HighlightAnalysis
 
   if (!response.ok) {
     const errorText = await response.text();
-    console.error(`[TCU Highlights] Gemini API error (${response.status}): ${errorText.slice(0, 200)}`);
+    apiLogger.error(`[TCU Highlights] Gemini API error (${response.status}): ${errorText.slice(0, 200)}`);
     return null;
   }
 
@@ -138,7 +139,7 @@ async function callGeminiForHighlight(prompt: string): Promise<HighlightAnalysis
       typeof parsed.whyImportant !== 'string' ||
       typeof parsed.articleAngle !== 'string'
     ) {
-      console.error('[TCU Highlights] Resposta IA com campos faltando');
+      apiLogger.error('[TCU Highlights] Resposta IA com campos faltando');
       return null;
     }
 
@@ -154,7 +155,7 @@ async function callGeminiForHighlight(prompt: string): Promise<HighlightAnalysis
       leiConnections: Array.isArray(parsed.leiConnections) ? parsed.leiConnections : [],
     };
   } catch (err) {
-    console.error('[TCU Highlights] Erro ao parsear resposta IA:', err instanceof Error ? err.message : err);
+    apiLogger.error({ err: err instanceof Error ? err.message : err }, '[TCU Highlights] Erro ao parsear resposta IA:');
     return null;
   }
 }
@@ -242,7 +243,7 @@ export async function identifyAndAlertHighlights(newDocIds: string[]): Promise<n
 
       await new Promise(resolve => setTimeout(resolve, ANALYSIS_DELAY_MS));
     } catch (err) {
-      console.error(`[TCU Highlights] Erro ao analisar ${doc.title}:`, err instanceof Error ? err.message : err);
+      apiLogger.error({ err: err instanceof Error ? err.message : err }, `[TCU Highlights] Erro ao analisar ${doc.title}:`);
     }
   }
 
@@ -282,7 +283,7 @@ export async function identifyAndAlertHighlights(newDocIds: string[]): Promise<n
 
       createdHighlights.push({ id: highlight.id, document: doc, keywordScore, analysis });
     } catch (err) {
-      console.error(`[TCU Highlights] Erro ao salvar highlight para ${doc.title}:`, err instanceof Error ? err.message : err);
+      apiLogger.error({ err: err instanceof Error ? err.message : err }, `[TCU Highlights] Erro ao salvar highlight para ${doc.title}:`);
     }
   }
 
@@ -310,7 +311,7 @@ export async function identifyAndAlertHighlights(newDocIds: string[]): Promise<n
         });
       }
     } catch (err) {
-      console.error('[TCU Highlights] Erro ao enviar email:', err instanceof Error ? err.message : err);
+      apiLogger.error({ err: err instanceof Error ? err.message : err }, '[TCU Highlights] Erro ao enviar email:');
     }
   }
 

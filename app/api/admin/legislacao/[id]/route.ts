@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { verifyAuth } from '@/lib/auth';
 import { deleteLegislativeAct } from '@/lib/legislacao';
+import { apiLogger } from "@/lib/logger";
 
 export async function DELETE(
   request: NextRequest,
@@ -15,7 +16,7 @@ export async function DELETE(
     await deleteLegislativeAct(id);
     return NextResponse.json({ success: true });
   } catch (error) {
-    console.error('Error deleting legislative act:', error);
+    apiLogger.error({ err: error }, 'Error deleting legislative act:');
     return NextResponse.json({ error: 'Failed to delete legislative act' }, { status: 500 });
   }
 }

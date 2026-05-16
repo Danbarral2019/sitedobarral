@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { withAdminAuth } from '@/lib/api-middleware';
+import { apiLogger } from "@/lib/logger";
 
 /**
  * GET /api/admin/search-analytics
@@ -261,7 +262,7 @@ export const GET = withAdminAuth(async () => {
       },
     });
   } catch (error) {
-    console.error('Erro ao buscar search analytics:', error);
+    apiLogger.error({ err: error }, 'Erro ao buscar search analytics:');
     return NextResponse.json(
       { error: 'Erro ao buscar analytics de busca' },
       { status: 500 }

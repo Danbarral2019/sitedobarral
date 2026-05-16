@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { verifyToken } from '@/lib/auth';
 import { publishToSocialMedia } from '@/lib/social-publisher';
+import { apiLogger } from "@/lib/logger";
 
 /**
  * POST /api/admin/social/publish
@@ -55,7 +56,7 @@ export async function POST(request: NextRequest) {
       imageUrl: result.imageUrl,
     });
   } catch (error) {
-    console.error('Erro ao publicar nas redes sociais:', error);
+    apiLogger.error({ err: error }, 'Erro ao publicar nas redes sociais:');
     return NextResponse.json(
       {
         error: 'Erro ao processar publicação',

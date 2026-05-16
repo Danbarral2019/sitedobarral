@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { withAdminAuth } from '@/lib/api-middleware';
 import * as xlsx from 'xlsx';
+import { apiLogger } from "@/lib/logger";
 
 /**
  * POST /api/admin/analyze-tcu-file
@@ -75,7 +76,7 @@ export const POST = withAdminAuth(async (request: NextRequest) => {
     });
 
   } catch (error) {
-    console.error('[Analyze TCU] Erro:', error);
+    apiLogger.error({ err: error }, '[Analyze TCU] Erro:');
     return NextResponse.json(
       {
         error: 'Erro ao analisar arquivo',

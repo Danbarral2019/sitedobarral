@@ -22,11 +22,12 @@ vi.mock('resend', () => {
   };
 });
 
-// Mock console para não poluir output dos testes
+// Mock console e apiLogger para não poluir output dos testes
+import { apiLogger } from '@/lib/logger';
 const consoleSpy = {
   log: vi.spyOn(console, 'log').mockImplementation(() => {}),
   warn: vi.spyOn(console, 'warn').mockImplementation(() => {}),
-  error: vi.spyOn(console, 'error').mockImplementation(() => {}),
+  error: vi.spyOn(apiLogger, 'error').mockImplementation(() => {}),
 };
 
 import {

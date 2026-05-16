@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { withAdminAuth } from '@/lib/api-middleware';
+import { apiLogger } from "@/lib/logger";
 
 interface RouteContext {
   params: Promise<{ id: string }>;
@@ -55,7 +56,7 @@ export const POST = withAdminAuth(async (request: NextRequest, context: RouteCon
 
     return NextResponse.json({ success: true, document: updated });
   } catch (error) {
-    console.error('[Mark Summary Reviewed] Erro:', error);
+    apiLogger.error({ err: error }, '[Mark Summary Reviewed] Erro:');
     return NextResponse.json(
       { error: 'Erro ao atualizar status de revisão' },
       { status: 500 }

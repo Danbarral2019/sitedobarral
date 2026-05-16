@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { withAdminAuth } from '@/lib/api-middleware';
 import { CacheInvalidation, withCache, CacheKeys, CACHE_TTL } from '@/lib/cache/redis-client';
-
+import { apiLogger } from "@/lib/logger";
 
 // GET - Lista todas as publicações
 export const GET = withAdminAuth(async (request: NextRequest) => {
@@ -29,7 +29,7 @@ export const GET = withAdminAuth(async (request: NextRequest) => {
 
     return NextResponse.json(result);
   } catch (error) {
-    console.error('Erro ao listar publicações:', error);
+    apiLogger.error({ err: error }, 'Erro ao listar publicações:');
     return NextResponse.json(
       { error: 'Erro ao listar publicações' },
       { status: 500 }
@@ -97,7 +97,7 @@ export const POST = withAdminAuth(async (request: NextRequest) => {
 
     return NextResponse.json({ publication }, { status: 201 });
   } catch (error) {
-    console.error('Erro ao criar publicação:', error);
+    apiLogger.error({ err: error }, 'Erro ao criar publicação:');
     return NextResponse.json(
       { error: 'Erro ao criar publicação' },
       { status: 500 }

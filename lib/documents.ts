@@ -2,6 +2,7 @@ import { Document } from './types';
 import { prisma } from './prisma';
 import { Document as PrismaDocument } from '@prisma/client';
 import { safeParseArray } from './utils';
+import { apiLogger } from "@/lib/logger";
 
 /**
  * Adiciona um novo documento
@@ -196,7 +197,7 @@ export async function listDocuments(filters?: {
           onYear: doc.onYear || undefined,
         };
       } catch (error) {
-        console.error('[listDocuments] Erro ao mapear documento:', doc.id, error);
+        apiLogger.error({ err: error, docId: doc.id }, '[listDocuments] Erro ao mapear documento');
         throw error;
       }
     });
@@ -209,7 +210,7 @@ export async function listDocuments(filters?: {
       totalPages: Math.ceil(total / pageSize),
     };
   } catch (error) {
-    console.error('[listDocuments] Erro:', error);
+    apiLogger.error({ err: error }, '[listDocuments] Erro:');
     throw error;
   }
 }

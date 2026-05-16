@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { withAdminAuth } from '@/lib/api-middleware';
 import * as xlsx from 'xlsx';
+import { apiLogger } from "@/lib/logger";
 
 // Mapeamento inteligente de Area/Tema para Cursos
 const CURSO_MAPPING: Record<string, string> = {
@@ -216,7 +217,7 @@ export const POST = withAdminAuth(async (request: NextRequest) => {
         cellText: false,
       });
     } catch (error) {
-      console.error('[Convert TCU] Erro ao ler arquivo:', error);
+      apiLogger.error({ err: error }, '[Convert TCU] Erro ao ler arquivo:');
       return NextResponse.json(
         {
           error: 'Erro ao ler arquivo. Por favor, converta o arquivo .xls para .xlsx no Excel/LibreOffice antes de importar.',
@@ -329,7 +330,7 @@ export const POST = withAdminAuth(async (request: NextRequest) => {
     });
 
   } catch (error) {
-    console.error('[Convert TCU] Erro:', error);
+    apiLogger.error({ err: error }, '[Convert TCU] Erro:');
     return NextResponse.json(
       { error: 'Erro ao converter arquivo. Verifique se o formato está correto.' },
       { status: 500 }

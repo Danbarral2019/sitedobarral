@@ -13,7 +13,7 @@ export const POST = withAdminAuth(async (request: NextRequest, context?: Record<
     const user = context?.user as { id: string; email: string; role: string } | undefined;
 
     if (!user) {
-      console.error('[RECLASSIFY ERROR] User não encontrado no context!');
+      apiLogger.error('[RECLASSIFY ERROR] User não encontrado no context!');
       throw new AuthenticationError('Usuário não autenticado no contexto da rota');
     }
 
@@ -115,12 +115,12 @@ export const POST = withAdminAuth(async (request: NextRequest, context?: Record<
     });
 
   } catch (error) {
-    console.error('=== [RECLASSIFY POST] ERRO CAPTURADO ===');
-    console.error('Erro completo:', error);
-    console.error('Tipo do erro:', error instanceof Error ? error.constructor.name : typeof error);
-    console.error('Mensagem:', error instanceof Error ? error.message : String(error));
-    console.error('Stack trace:', error instanceof Error ? error.stack : 'N/A');
-    console.error('======================================');
+    apiLogger.error('=== [RECLASSIFY POST] ERRO CAPTURADO ===');
+    apiLogger.error({ err: error }, 'Erro completo:');
+    apiLogger.error({ err: error instanceof Error ? error.constructor.name : typeof error }, 'Tipo do erro:');
+    apiLogger.error({ err: error instanceof Error ? error.message : String(error) }, 'Mensagem:');
+    apiLogger.error({ err: error instanceof Error ? error.stack : 'N/A' }, 'Stack trace:');
+    apiLogger.error('======================================');
     return handleApiError(error);
   }
 });
@@ -203,12 +203,12 @@ export const GET = withAdminAuth(async (request: NextRequest, context?: Record<s
     });
 
   } catch (error) {
-    console.error('=== [RECLASSIFY GET] ERRO CAPTURADO ===');
-    console.error('Erro completo:', error);
-    console.error('Tipo do erro:', error instanceof Error ? error.constructor.name : typeof error);
-    console.error('Mensagem:', error instanceof Error ? error.message : String(error));
-    console.error('Stack trace:', error instanceof Error ? error.stack : 'N/A');
-    console.error('======================================');
+    apiLogger.error('=== [RECLASSIFY GET] ERRO CAPTURADO ===');
+    apiLogger.error({ err: error }, 'Erro completo:');
+    apiLogger.error({ err: error instanceof Error ? error.constructor.name : typeof error }, 'Tipo do erro:');
+    apiLogger.error({ err: error instanceof Error ? error.message : String(error) }, 'Mensagem:');
+    apiLogger.error({ err: error instanceof Error ? error.stack : 'N/A' }, 'Stack trace:');
+    apiLogger.error('======================================');
     return handleApiError(error);
   }
 });

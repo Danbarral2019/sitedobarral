@@ -5,6 +5,7 @@ import { prisma } from '@/lib/prisma';
 import { writeFile, mkdir } from 'fs/promises';
 import { join } from 'path';
 import { randomBytes } from 'crypto';
+import { apiLogger } from "@/lib/logger";
 
 /**
  * POST /api/admin/import-excel/upload-files
@@ -106,7 +107,7 @@ export const POST = withAdminAuth(async (request: NextRequest) => {
           documentTitle: document.title,
         });
       } catch (error) {
-        console.error(`Erro ao processar arquivo "${file.name}":`, error);
+        apiLogger.error({ err: error }, `Erro ao processar arquivo "${file.name}":`);
         results.errors.push(
           `Erro ao processar "${file.name}": ${error instanceof Error ? error.message : 'Erro desconhecido'}`
         );
@@ -118,7 +119,7 @@ export const POST = withAdminAuth(async (request: NextRequest) => {
       results,
     });
   } catch (error) {
-    console.error('Erro ao fazer upload em lote:', error);
+    apiLogger.error({ err: error }, 'Erro ao fazer upload em lote:');
     return NextResponse.json(
       { error: 'Erro ao processar upload em lote' },
       { status: 500 }

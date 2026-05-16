@@ -16,6 +16,7 @@ import {
   truncate,
   extractTags,
 } from './helpers';
+import { apiLogger } from "@/lib/logger";
 
 /**
  * Interface para dados brutos de um Parecer Vinculante extraído do HTML
@@ -152,7 +153,7 @@ export async function scrapeParecerVinculante(
   } catch (error) {
     const errorMsg = error instanceof Error ? error.message : String(error);
     errors.push(errorMsg);
-    console.error('[AGU Pareceres] ❌ Erro:', errorMsg);
+    apiLogger.error({ err: errorMsg }, '[AGU Pareceres] ❌ Erro:');
 
     return {
       success: false,

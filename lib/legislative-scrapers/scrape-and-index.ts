@@ -9,6 +9,7 @@ import { prisma } from '@/lib/prisma';
 import { scrapeUrl } from '@/lib/legislative-scrapers';
 import { processLegislativeAct } from '@/lib/embeddings/legislative-act-processor';
 import { validateActContent } from '@/lib/legislative-scrapers/validate-content';
+import { apiLogger } from "@/lib/logger";
 
 export interface ScrapeAndIndexResult {
   scraped: boolean;
@@ -53,7 +54,7 @@ export async function scrapeAndIndexAct(actId: string): Promise<ScrapeAndIndexRe
   });
   if (!validation.ok) {
     const errMsg = `Validação falhou: ${validation.errors.join('; ')}`;
-    console.error(`[ScrapeAndIndex] ${act.fullNumber}: ${errMsg}`);
+    apiLogger.error(`[ScrapeAndIndex] ${act.fullNumber}: ${errMsg}`);
     await prisma.legislativeAct.update({
       where: { id: actId },
       data: {
@@ -94,7 +95,7 @@ export async function scrapeAndIndexAct(actId: string): Promise<ScrapeAndIndexRe
       console.warn(`[ScrapeAndIndex] Embedding falhou para "${act.fullNumber}": ${embResult.error}`);
     }
   } catch (error) {
-    console.error(`[ScrapeAndIndex] Erro ao indexar "${act.fullNumber}":`, error);
+    apiLogger.error({ err: error }, `[ScrapeAndIndex] Erro ao indexar "${act.fullNumber}":`);
   }
 
   return { scraped: true, indexed, warnings: validation.warnings };

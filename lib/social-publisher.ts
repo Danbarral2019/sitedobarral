@@ -20,6 +20,7 @@ import {
   generateLinkedInText,
   isLinkedInConfigured,
 } from './linkedin';
+import { apiLogger } from "@/lib/logger";
 
 /**
  * Resultado de publicação individual
@@ -180,7 +181,7 @@ export async function publishToSocialMedia(
           : 'Falha ao publicar em todas as redes.',
     };
   } catch (error) {
-    console.error('[SocialPublisher] Erro inesperado:', error);
+    apiLogger.error({ err: error }, '[SocialPublisher] Erro inesperado:');
     return {
       success: false,
       results: [],
@@ -273,7 +274,7 @@ export async function retryFailedPost(
       error: result.error,
     };
   } catch (error) {
-    console.error('[SocialPublisher] Erro ao tentar republicar:', error);
+    apiLogger.error({ err: error }, '[SocialPublisher] Erro ao tentar republicar:');
     return {
       success: false,
       error: error instanceof Error ? error.message : 'Erro desconhecido',

@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { withAdminAuth } from '@/lib/api-middleware';
 import { prisma } from '@/lib/prisma';
 import { CacheInvalidation } from '@/lib/cache/redis-client';
+import { apiLogger } from "@/lib/logger";
 
 // GET - Busca uma publicação específica
 export const GET = withAdminAuth(async (
@@ -24,7 +25,7 @@ export const GET = withAdminAuth(async (
 
     return NextResponse.json({ publication });
   } catch (error) {
-    console.error('Erro ao buscar publicação:', error);
+    apiLogger.error({ err: error }, 'Erro ao buscar publicação:');
     return NextResponse.json(
       { error: 'Erro ao buscar publicação' },
       { status: 500 }
@@ -86,7 +87,7 @@ export const PUT = withAdminAuth(async (
 
     return NextResponse.json({ publication });
   } catch (error) {
-    console.error('Erro ao atualizar publicação:', error);
+    apiLogger.error({ err: error }, 'Erro ao atualizar publicação:');
     return NextResponse.json(
       { error: 'Erro ao atualizar publicação' },
       { status: 500 }
@@ -122,7 +123,7 @@ export const DELETE = withAdminAuth(async (
 
     return NextResponse.json({ success: true });
   } catch (error) {
-    console.error('Erro ao deletar publicação:', error);
+    apiLogger.error({ err: error }, 'Erro ao deletar publicação:');
     return NextResponse.json(
       { error: 'Erro ao deletar publicação' },
       { status: 500 }

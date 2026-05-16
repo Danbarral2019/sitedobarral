@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { verifyAuth } from '@/lib/auth';
+import { apiLogger } from "@/lib/logger";
 
 export const dynamic = 'force-dynamic';
 
@@ -268,7 +269,7 @@ export async function GET(request: NextRequest) {
       topUsers: topUsersWithDetails,
     });
   } catch (error) {
-    console.error('Erro ao buscar analytics:', error);
+    apiLogger.error({ err: error }, 'Erro ao buscar analytics:');
     return NextResponse.json(
       { error: 'Erro ao processar analytics' },
       { status: 500 }

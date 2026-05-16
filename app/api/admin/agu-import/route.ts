@@ -4,6 +4,7 @@ import { scrapeAGU, convertAGUDocumentsToImport } from '@/lib/agu-scraper-v4';
 import { addDocument } from '@/lib/documents';
 import { courses } from '@/data/courses';
 import { prisma } from '@/lib/prisma';
+import { apiLogger } from "@/lib/logger";
 
 /**
  * GET: Busca orientações da AGU usando AGU Scraper v4 (preview com detecção de novas)
@@ -79,7 +80,7 @@ export const GET = withAdminAuth(async () => {
       },
     });
   } catch (error) {
-    console.error('[AGU Import v4] Erro ao buscar orientações:', error);
+    apiLogger.error({ err: error }, '[AGU Import v4] Erro ao buscar orientações:');
     return NextResponse.json(
       {
         error: 'Erro ao buscar orientações da AGU',
@@ -238,7 +239,7 @@ export const POST = withAdminAuth(async (request: NextRequest) => {
             console.log(`[AGU Import] Processados ${totalOperations} de ${documents.length * targetCourses.length}...`);
           }
         } catch (error) {
-          console.error(`[AGU Import] Erro ao importar ${doc.title} para curso ${courseId}:`, error);
+          apiLogger.error({ err: error }, `[AGU Import] Erro ao importar ${doc.title} para curso ${courseId}:`);
           errorCount++;
         }
       }
@@ -266,7 +267,7 @@ export const POST = withAdminAuth(async (request: NextRequest) => {
     });
 
   } catch (error) {
-    console.error('[AGU Import v4] Erro na importação:', error);
+    apiLogger.error({ err: error }, '[AGU Import v4] Erro na importação:');
     return NextResponse.json(
       {
         error: 'Erro ao importar orientações da AGU (v4)',

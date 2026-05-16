@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { withAdminAuth } from '@/lib/api-middleware';
 import { processExcelFile } from '@/lib/excel-processor';
+import { apiLogger } from "@/lib/logger";
 
 /**
  * POST /api/admin/import-excel/validate
@@ -39,7 +40,7 @@ export const POST = withAdminAuth(async (request: NextRequest) => {
       validation: result
     });
   } catch (error) {
-    console.error('Erro ao validar Excel:', error);
+    apiLogger.error({ err: error }, 'Erro ao validar Excel:');
     return NextResponse.json(
       { error: 'Erro ao processar arquivo Excel' },
       { status: 500 }

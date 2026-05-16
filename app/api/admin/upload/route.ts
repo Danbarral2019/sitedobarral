@@ -8,6 +8,7 @@ import { courses } from '@/data/courses';
 import { enforceRateLimit, getClientIp } from '@/lib/cache/rate-limit-helper';
 import { RateLimitError } from '@/lib/errors/api-error';
 import { handleApiError } from '@/lib/errors/error-handler';
+import { apiLogger } from "@/lib/logger";
 
 export const POST = withAdminAuth(async (request: NextRequest) => {
   try {
@@ -109,7 +110,7 @@ export const POST = withAdminAuth(async (request: NextRequest) => {
     if (error instanceof RateLimitError) {
       return handleApiError(error);
     }
-    console.error('Erro ao fazer upload:', error);
+    apiLogger.error({ err: error }, 'Erro ao fazer upload:');
     return NextResponse.json(
       { error: 'Erro ao fazer upload do arquivo' },
       { status: 500 }

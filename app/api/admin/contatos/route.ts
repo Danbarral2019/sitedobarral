@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { withAdminAuth } from '@/lib/api-middleware';
+import { apiLogger } from "@/lib/logger";
 
 /**
  * GET /api/admin/contatos
@@ -51,7 +52,7 @@ export const GET = withAdminAuth(async (request: NextRequest) => {
       },
     });
   } catch (error) {
-    console.error('Erro ao buscar contatos:', error);
+    apiLogger.error({ err: error }, 'Erro ao buscar contatos:');
     return NextResponse.json(
       { error: 'Erro ao carregar contatos' },
       { status: 500 }
@@ -84,7 +85,7 @@ export const PATCH = withAdminAuth(async (request: NextRequest) => {
       contact,
     });
   } catch (error) {
-    console.error('Erro ao atualizar contato:', error);
+    apiLogger.error({ err: error }, 'Erro ao atualizar contato:');
     return NextResponse.json(
       { error: 'Erro ao atualizar contato' },
       { status: 500 }
@@ -116,7 +117,7 @@ export const DELETE = withAdminAuth(async (request: NextRequest) => {
       message: 'Contato deletado com sucesso',
     });
   } catch (error) {
-    console.error('Erro ao deletar contato:', error);
+    apiLogger.error({ err: error }, 'Erro ao deletar contato:');
     return NextResponse.json(
       { error: 'Erro ao deletar contato' },
       { status: 500 }

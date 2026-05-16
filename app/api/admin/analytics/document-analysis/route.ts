@@ -8,6 +8,7 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { safeParseArray } from '@/lib/utils';
+import { apiLogger } from "@/lib/logger";
 
 export async function GET() {
   try {
@@ -128,7 +129,7 @@ export async function GET() {
       recentAnalyses,
     });
   } catch (error) {
-    console.error('Erro ao buscar analytics:', error);
+    apiLogger.error({ err: error }, 'Erro ao buscar analytics:');
     return NextResponse.json(
       {
         success: false,

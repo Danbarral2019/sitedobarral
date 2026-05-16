@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { verifyAuth } from '@/lib/auth';
 import { wizardEnhance } from '@/lib/ai/wizard-enhance';
+import { apiLogger } from "@/lib/logger";
 
 /**
  * POST /api/admin/documents/temp-enhance
@@ -55,7 +56,7 @@ export async function POST(request: NextRequest) {
       },
     });
   } catch (error) {
-    console.error('[Temp Enhance] Erro:', error);
+    apiLogger.error({ err: error }, '[Temp Enhance] Erro:');
 
     return NextResponse.json(
       {

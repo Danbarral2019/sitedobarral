@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { verifyToken } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
 import { getSocialMediaStats } from '@/lib/social-publisher';
+import { apiLogger } from "@/lib/logger";
 
 /**
  * GET /api/admin/social/posts
@@ -59,7 +60,7 @@ export async function GET(request: NextRequest) {
       stats,
     });
   } catch (error) {
-    console.error('Erro ao listar publicações sociais:', error);
+    apiLogger.error({ err: error }, 'Erro ao listar publicações sociais:');
     return NextResponse.json(
       {
         error: 'Erro ao carregar publicações',

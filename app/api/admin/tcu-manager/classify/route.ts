@@ -4,6 +4,7 @@ import {
   classifyTCUAcordaosBatch,
   type TCUClassificationInput,
 } from '@/lib/tcu-classifier';
+import { apiLogger } from "@/lib/logger";
 
 /**
  * POST /api/admin/tcu-manager/classify
@@ -87,7 +88,7 @@ export const POST = withAdminAuth(async (request: NextRequest) => {
     });
 
   } catch (error) {
-    console.error('[TCU Classify API] Erro:', error);
+    apiLogger.error({ err: error }, '[TCU Classify API] Erro:');
     return NextResponse.json(
       {
         error: 'Erro ao classificar documentos',

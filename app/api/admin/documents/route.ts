@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { withAdminAuth } from '@/lib/api-middleware';
 import { listDocuments, deleteDocument } from '@/lib/documents';
 import { CacheInvalidation } from '@/lib/cache/redis-client';
+import { apiLogger } from "@/lib/logger";
 
 // GET - Lista todos os documentos (com filtros opcionais E paginação)
 // OTIMIZAÇÃO: Adicionado suporte a paginação server-side
@@ -31,8 +32,8 @@ export const GET = withAdminAuth(async (request: NextRequest) => {
       }
     });
   } catch (error) {
-    console.error('[API] Erro ao listar documentos:', error);
-    console.error('[API] Stack:', error instanceof Error ? error.stack : 'N/A');
+    apiLogger.error({ err: error }, '[API] Erro ao listar documentos:');
+    apiLogger.error({ err: error instanceof Error ? error.stack : 'N/A' }, '[API] Stack:');
     return NextResponse.json(
       {
         error: 'Erro ao listar documentos',
@@ -70,7 +71,7 @@ export const DELETE = withAdminAuth(async (request: NextRequest) => {
 
     return NextResponse.json({ success: true });
   } catch (error) {
-    console.error('Erro ao deletar documento:', error);
+    apiLogger.error({ err: error }, 'Erro ao deletar documento:');
     return NextResponse.json(
       { error: 'Erro ao deletar documento' },
       { status: 500 }

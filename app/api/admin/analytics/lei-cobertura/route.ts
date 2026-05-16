@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { verifyAuth } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
 import { safeParseArray } from '@/lib/utils';
+import { apiLogger } from "@/lib/logger";
 
 /**
  * GET /api/admin/analytics/lei-cobertura
@@ -151,7 +152,7 @@ export async function GET(request: NextRequest) {
       distribuicaoPorTitulo,
     });
   } catch (error) {
-    console.error('[Lei Cobertura] Erro ao calcular cobertura:', error);
+    apiLogger.error({ err: error }, '[Lei Cobertura] Erro ao calcular cobertura:');
 
     return NextResponse.json(
       {

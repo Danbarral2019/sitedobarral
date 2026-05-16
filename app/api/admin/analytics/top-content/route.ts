@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { withAdminAuth } from '@/lib/api-middleware';
+import { apiLogger } from "@/lib/logger";
 
 /**
  * GET /api/admin/analytics/top-content
@@ -134,7 +135,7 @@ export const GET = withAdminAuth(async () => {
       },
     });
   } catch (error) {
-    console.error('[Analytics Top Content] Erro:', error);
+    apiLogger.error({ err: error }, '[Analytics Top Content] Erro:');
     return NextResponse.json(
       { error: 'Erro ao buscar top content' },
       { status: 500 }

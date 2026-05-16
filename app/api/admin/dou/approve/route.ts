@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { verifyAuth } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
 import { CacheInvalidation } from '@/lib/cache/redis-client';
+import { apiLogger } from "@/lib/logger";
 
 /**
  * Type para DOUStagingDocument usado neste endpoint
@@ -136,18 +137,18 @@ export async function POST(request: NextRequest) {
     }
 
   } catch (error) {
-    console.error('[DOU Approve] ERRO CRÍTICO:', error);
+    apiLogger.error({ err: error }, '[DOU Approve] ERRO CRÍTICO:');
 
     // Log detalhado do erro
     if (error instanceof Error) {
-      console.error('[DOU Approve] Error name:', error.name);
-      console.error('[DOU Approve] Error message:', error.message);
-      console.error('[DOU Approve] Error stack:', error.stack);
+      apiLogger.error({ err: error.name }, '[DOU Approve] Error name:');
+      apiLogger.error({ err: error.message }, '[DOU Approve] Error message:');
+      apiLogger.error({ err: error.stack }, '[DOU Approve] Error stack:');
     }
 
     // Log do erro completo como objeto
     if (error && typeof error === 'object') {
-      console.error('[DOU Approve] Error object:', JSON.stringify(error, Object.getOwnPropertyNames(error), 2));
+      apiLogger.error({ err: JSON.stringify(error, Object.getOwnPropertyNames(error), 2) }, '[DOU Approve] Error object:');
     }
 
     return NextResponse.json(
@@ -305,11 +306,11 @@ async function handleApproval(
     });
 
   } catch (error) {
-    console.error('[DOU Approve] Approval error:', error);
+    apiLogger.error({ err: error }, '[DOU Approve] Approval error:');
 
     // Log completo do erro
     if (error && typeof error === 'object') {
-      console.error('[DOU Approve] Approval error details:', JSON.stringify(error, null, 2));
+      apiLogger.error({ err: JSON.stringify(error, null, 2) }, '[DOU Approve] Approval error details:');
     }
 
     throw error;
@@ -359,11 +360,11 @@ async function handleRejection(
     });
 
   } catch (error) {
-    console.error('[DOU Approve] Rejection error:', error);
+    apiLogger.error({ err: error }, '[DOU Approve] Rejection error:');
 
     // Log completo do erro
     if (error && typeof error === 'object') {
-      console.error('[DOU Approve] Rejection error details:', JSON.stringify(error, null, 2));
+      apiLogger.error({ err: JSON.stringify(error, null, 2) }, '[DOU Approve] Rejection error details:');
     }
 
     throw error;

@@ -10,6 +10,7 @@
 
 import * as cheerio from 'cheerio';
 import { normalizeScrapedText } from './legislative-scrapers/normalize';
+import { apiLogger } from "@/lib/logger";
 
 /**
  * Dados enriquecidos de uma publicacao DOU
@@ -131,7 +132,7 @@ export async function scrapeContent(url: string): Promise<DOUEnrichedContent | n
     console.log(`[DOU Scraper] Extraido: ${result.caracteres} caracteres, ${result.paragrafos} paragrafos`);
     return result;
   } catch (error) {
-    console.error(`[DOU Scraper] Erro ao extrair ${url}:`, error);
+    apiLogger.error({ err: error }, `[DOU Scraper] Erro ao extrair ${url}:`);
     return null;
   }
 }

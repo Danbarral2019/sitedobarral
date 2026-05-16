@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { withAdminAuth } from '@/lib/api-middleware';
-
+import { apiLogger } from "@/lib/logger";
 
 /**
  * GET /api/admin/testimonials
@@ -39,7 +39,7 @@ export const GET = withAdminAuth(async (request: NextRequest) => {
       stats,
     });
   } catch (error) {
-    console.error('Erro ao listar testimonials:', error);
+    apiLogger.error({ err: error }, 'Erro ao listar testimonials:');
     return NextResponse.json(
       { error: 'Erro ao carregar depoimentos' },
       { status: 500 }
@@ -124,7 +124,7 @@ export const PATCH = withAdminAuth(async (request: NextRequest) => {
       testimonial: updated,
     });
   } catch (error) {
-    console.error('[API Testimonials] Erro ao atualizar testimonial:', error);
+    apiLogger.error({ err: error }, '[API Testimonials] Erro ao atualizar testimonial:');
     return NextResponse.json(
       { error: 'Erro ao atualizar depoimento' },
       { status: 500 }
@@ -157,7 +157,7 @@ export const DELETE = withAdminAuth(async (request: NextRequest) => {
       message: 'Depoimento deletado com sucesso',
     });
   } catch (error) {
-    console.error('Erro ao deletar testimonial:', error);
+    apiLogger.error({ err: error }, 'Erro ao deletar testimonial:');
     return NextResponse.json(
       { error: 'Erro ao deletar depoimento' },
       { status: 500 }

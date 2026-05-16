@@ -34,6 +34,7 @@ import { scrapeOrientacoesNormativas } from './agu-modules/orientacoes-normativa
 import { scrapeSumulas } from './agu-modules/sumulas';
 import { scrapeParecerVinculante } from './agu-modules/pareceres-vinculantes';
 import { scrapeParecerCONUNI } from './agu-modules/pareceres-conuni';
+import { apiLogger } from "@/lib/logger";
 
 /**
  * ORQUESTRADOR PRINCIPAL
@@ -123,7 +124,7 @@ export async function scrapeAGU(config: AGUScraperConfig): Promise<{
     } catch (error) {
       const errorMsg = `Erro em ${tipo}: ${error instanceof Error ? error.message : String(error)}`;
       allErrors.push(errorMsg);
-      console.error(`[AGU Scraper v4] ❌ ${errorMsg}`);
+      apiLogger.error(`[AGU Scraper v4] ❌ ${errorMsg}`);
     }
   }
 

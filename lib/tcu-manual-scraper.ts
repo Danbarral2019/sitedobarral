@@ -10,6 +10,7 @@
 
 import * as cheerio from 'cheerio';
 import { computeHash } from '@/lib/legislative-scrapers/change-detector';
+import { apiLogger } from "@/lib/logger";
 
 const BASE_URL = 'https://licitacoesecontratos.tcu.gov.br';
 
@@ -323,7 +324,7 @@ export async function scrapeManualPage(
   });
 
   if (!response.ok) {
-    console.error(`[TCU Manual] HTTP ${response.status} for ${url}`);
+    apiLogger.error(`[TCU Manual] HTTP ${response.status} for ${url}`);
     return null;
   }
 

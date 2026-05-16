@@ -10,6 +10,7 @@
  */
 
 import { KEYWORDS_RELEVANCIA } from './shared-keywords';
+import { apiLogger } from "@/lib/logger";
 
 /**
  * Interface para resultados da API Querido Diário
@@ -137,7 +138,7 @@ export class QueridoDiarioClient {
       return data;
 
     } catch (error) {
-      console.error('[Querido Diário] ❌ Erro na busca:', error);
+      apiLogger.error({ err: error }, '[Querido Diário] ❌ Erro na busca:');
       throw error;
     }
   }

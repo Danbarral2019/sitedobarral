@@ -6,6 +6,7 @@ import { scrapeAndIndexAct } from '@/lib/legislative-scrapers/scrape-and-index';
 import { validateActContent } from '@/lib/legislative-scrapers/validate-content';
 import { normalizeScrapedText } from '@/lib/legislative-scrapers/normalize';
 import { getHierarchyLevel } from '@/lib/legislative-acts/hierarchy';
+import { apiLogger } from "@/lib/logger";
 
 /**
  * POST /api/admin/legislative-acts/import
@@ -159,14 +160,14 @@ export async function POST(request: NextRequest) {
             await scrapeAndIndexAct(newAct.id);
             await new Promise(resolve => setTimeout(resolve, 2000));
           } catch (err) {
-            console.error(`[Import CSV] Erro scrape+index ${newAct.id}:`, err);
+            apiLogger.error({ err: err }, `[Import CSV] Erro scrape+index ${newAct.id}:`);
           }
         }
 
         results.success++;
 
       } catch (error: unknown) {
-        console.error(`Erro na linha ${i + 1}:`, error);
+        apiLogger.error({ err: error }, `Erro na linha ${i + 1}:`);
         results.errors.push({
           row: i + 1,
           error: error instanceof Error ? error.message : 'Erro desconhecido',
@@ -192,7 +193,7 @@ export async function POST(request: NextRequest) {
     });
 
   } catch (error) {
-    console.error('Erro ao importar atos normativos:', error);
+    apiLogger.error({ err: error }, 'Erro ao importar atos normativos:');
     return NextResponse.json(
       { error: 'Erro ao importar atos normativos' },
       { status: 500 }

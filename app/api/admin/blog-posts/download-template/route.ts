@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { withAdminAuth } from '@/lib/api-middleware';
 import path from 'path';
 import fs from 'fs/promises';
+import { apiLogger } from "@/lib/logger";
 
 export const GET = withAdminAuth(async () => {
   try {
@@ -18,7 +19,7 @@ export const GET = withAdminAuth(async () => {
       },
     });
   } catch (error) {
-    console.error('[DownloadTemplate] Erro:', error);
+    apiLogger.error({ err: error }, '[DownloadTemplate] Erro:');
     return NextResponse.json(
       { error: 'Template não encontrado. Use o arquivo em public/templates/template-artigo-blog.docx' },
       { status: 404 }

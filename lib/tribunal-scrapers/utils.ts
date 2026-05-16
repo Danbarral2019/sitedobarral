@@ -7,6 +7,7 @@
 
 import * as cheerio from 'cheerio';
 import { prisma } from '@/lib/prisma';
+import { apiLogger } from "@/lib/logger";
 
 // ===========================
 // Sleep
@@ -231,7 +232,7 @@ export async function logScraperHealth(
     });
   } catch (error) {
     // Don't let health logging break the scraper
-    console.error(`[${scraperCode}] Failed to log health:`, error);
+    apiLogger.error({ err: error }, `[${scraperCode}] Failed to log health:`);
   }
 }
 

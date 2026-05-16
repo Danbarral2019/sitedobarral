@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { withAdminAuth } from '@/lib/api-middleware';
 import { prisma } from '@/lib/prisma';
+import { apiLogger } from "@/lib/logger";
 
 /**
  * GET: Retorna estatisticas de documentos AGU no banco
@@ -66,7 +67,7 @@ export const GET = withAdminAuth(async () => {
         : null,
     });
   } catch (error) {
-    console.error('[AGU Stats] Erro:', error);
+    apiLogger.error({ err: error }, '[AGU Stats] Erro:');
     return NextResponse.json(
       { error: 'Erro ao buscar estatisticas AGU' },
       { status: 500 }

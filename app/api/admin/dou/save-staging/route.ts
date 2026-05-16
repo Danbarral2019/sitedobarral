@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { verifyAuth } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
+import { apiLogger } from "@/lib/logger";
 
 /**
  * POST /api/admin/dou/save-staging
@@ -105,11 +106,11 @@ export async function POST(request: NextRequest) {
     });
 
   } catch (error) {
-    console.error('[DOU Save Staging] Error:', error);
+    apiLogger.error({ err: error }, '[DOU Save Staging] Error:');
 
     // Log completo do erro para debug
     if (error && typeof error === 'object') {
-      console.error('[DOU Save Staging] Error details:', JSON.stringify(error, null, 2));
+      apiLogger.error({ err: JSON.stringify(error, null, 2) }, '[DOU Save Staging] Error details:');
     }
 
     return NextResponse.json(

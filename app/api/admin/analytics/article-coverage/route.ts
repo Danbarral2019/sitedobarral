@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { verifyAuth } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
 import { safeParseArray } from '@/lib/utils';
+import { apiLogger } from "@/lib/logger";
 
 /**
  * GET /api/admin/analytics/article-coverage?articles=1,6,75
@@ -91,7 +92,7 @@ export async function GET(request: NextRequest) {
       total: requestedArticles.length,
     });
   } catch (error) {
-    console.error('[Article Coverage] Erro:', error);
+    apiLogger.error({ err: error }, '[Article Coverage] Erro:');
 
     return NextResponse.json(
       {

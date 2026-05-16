@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import { apiLogger } from "@/lib/logger";
 
 /**
  * GET /api/admin/legislative-acts/import/template
@@ -99,7 +100,7 @@ export async function GET() {
     });
 
   } catch (error) {
-    console.error('Erro ao gerar template:', error);
+    apiLogger.error({ err: error }, 'Erro ao gerar template:');
     return NextResponse.json(
       { error: 'Erro ao gerar template' },
       { status: 500 }

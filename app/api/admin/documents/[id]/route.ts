@@ -41,12 +41,12 @@ export const GET = withAdminAuth(async (request: NextRequest, context: { params:
 
     return NextResponse.json(parsedDocument);
   } catch (error) {
-    console.error('=== [DOCUMENT ROUTE] ERRO CAPTURADO ===');
-    console.error('Erro completo:', error);
-    console.error('Tipo do erro:', error instanceof Error ? error.constructor.name : typeof error);
-    console.error('Mensagem:', error instanceof Error ? error.message : String(error));
-    console.error('Stack trace:', error instanceof Error ? error.stack : 'N/A');
-    console.error('======================================');
+    apiLogger.error('=== [DOCUMENT ROUTE] ERRO CAPTURADO ===');
+    apiLogger.error({ err: error }, 'Erro completo:');
+    apiLogger.error({ err: error instanceof Error ? error.constructor.name : typeof error }, 'Tipo do erro:');
+    apiLogger.error({ err: error instanceof Error ? error.message : String(error) }, 'Mensagem:');
+    apiLogger.error({ err: error instanceof Error ? error.stack : 'N/A' }, 'Stack trace:');
+    apiLogger.error('======================================');
     return handleApiError(error);
   }
 });
@@ -189,12 +189,12 @@ export const PUT = withAdminAuth(async (request: NextRequest, context: { params:
       document: updated,
     });
   } catch (error) {
-    console.error('=== [DOCUMENT ROUTE] ERRO CAPTURADO ===');
-    console.error('Erro completo:', error);
-    console.error('Tipo do erro:', error instanceof Error ? error.constructor.name : typeof error);
-    console.error('Mensagem:', error instanceof Error ? error.message : String(error));
-    console.error('Stack trace:', error instanceof Error ? error.stack : 'N/A');
-    console.error('======================================');
+    apiLogger.error('=== [DOCUMENT ROUTE] ERRO CAPTURADO ===');
+    apiLogger.error({ err: error }, 'Erro completo:');
+    apiLogger.error({ err: error instanceof Error ? error.constructor.name : typeof error }, 'Tipo do erro:');
+    apiLogger.error({ err: error instanceof Error ? error.message : String(error) }, 'Mensagem:');
+    apiLogger.error({ err: error instanceof Error ? error.stack : 'N/A' }, 'Stack trace:');
+    apiLogger.error('======================================');
     return handleApiError(error);
   }
 });
@@ -258,12 +258,12 @@ export const PATCH = withAdminAuth(async (request: NextRequest, context: { param
       document: updated,
     });
   } catch (error) {
-    console.error('=== [DOCUMENT ROUTE] ERRO CAPTURADO ===');
-    console.error('Erro completo:', error);
-    console.error('Tipo do erro:', error instanceof Error ? error.constructor.name : typeof error);
-    console.error('Mensagem:', error instanceof Error ? error.message : String(error));
-    console.error('Stack trace:', error instanceof Error ? error.stack : 'N/A');
-    console.error('======================================');
+    apiLogger.error('=== [DOCUMENT ROUTE] ERRO CAPTURADO ===');
+    apiLogger.error({ err: error }, 'Erro completo:');
+    apiLogger.error({ err: error instanceof Error ? error.constructor.name : typeof error }, 'Tipo do erro:');
+    apiLogger.error({ err: error instanceof Error ? error.message : String(error) }, 'Mensagem:');
+    apiLogger.error({ err: error instanceof Error ? error.stack : 'N/A' }, 'Stack trace:');
+    apiLogger.error('======================================');
     return handleApiError(error);
   }
 });
@@ -306,12 +306,12 @@ export const DELETE = withAdminAuth(async (request: NextRequest, context: { para
       message: 'Documento deletado com sucesso',
     });
   } catch (error) {
-    console.error('=== [DOCUMENT ROUTE] ERRO CAPTURADO ===');
-    console.error('Erro completo:', error);
-    console.error('Tipo do erro:', error instanceof Error ? error.constructor.name : typeof error);
-    console.error('Mensagem:', error instanceof Error ? error.message : String(error));
-    console.error('Stack trace:', error instanceof Error ? error.stack : 'N/A');
-    console.error('======================================');
+    apiLogger.error('=== [DOCUMENT ROUTE] ERRO CAPTURADO ===');
+    apiLogger.error({ err: error }, 'Erro completo:');
+    apiLogger.error({ err: error instanceof Error ? error.constructor.name : typeof error }, 'Tipo do erro:');
+    apiLogger.error({ err: error instanceof Error ? error.message : String(error) }, 'Mensagem:');
+    apiLogger.error({ err: error instanceof Error ? error.stack : 'N/A' }, 'Stack trace:');
+    apiLogger.error('======================================');
     return handleApiError(error);
   }
 });

@@ -3,6 +3,7 @@ import { withAdminAuth } from '@/lib/api-middleware';
 import { prisma } from '@/lib/prisma';
 import * as xlsx from 'xlsx';
 import type { PrismaClient } from '@prisma/client';
+import { apiLogger } from "@/lib/logger";
 
 /**
  * Remove códigos HTML e tags de links dos textos da planilha TCU
@@ -328,7 +329,7 @@ export const POST = withAdminAuth(async (request: NextRequest) => {
     });
 
   } catch (error) {
-    console.error('[TCU Manager Validate] Erro:', error);
+    apiLogger.error({ err: error }, '[TCU Manager Validate] Erro:');
     return NextResponse.json(
       {
         error: 'Erro ao validar arquivo',

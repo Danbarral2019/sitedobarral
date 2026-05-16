@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import * as Sentry from '@sentry/nextjs';
 import { enforceRateLimit, getClientIp } from '@/lib/cache/rate-limit-helper';
 import { RateLimitError } from '@/lib/errors/api-error';
+import { apiLogger } from "@/lib/logger";
 
 /**
  * Tipo para funções de handler de API
@@ -53,14 +54,14 @@ export function withAdminAuth(handler: ApiHandler): ApiHandler {
         );
       }
       // Captura qualquer erro não tratado na autenticação
-      console.error('=== [withAdminAuth MIDDLEWARE] ERRO CAPTURADO ===');
-      console.error('URL:', request.url);
-      console.error('Method:', request.method);
-      console.error('Erro completo:', error);
-      console.error('Tipo do erro:', error instanceof Error ? error.constructor.name : typeof error);
-      console.error('Mensagem:', error instanceof Error ? error.message : String(error));
-      console.error('Stack trace:', error instanceof Error ? error.stack : 'N/A');
-      console.error('======================================');
+      apiLogger.error('=== [withAdminAuth MIDDLEWARE] ERRO CAPTURADO ===');
+      apiLogger.error({ err: request.url }, 'URL:');
+      apiLogger.error({ err: request.method }, 'Method:');
+      apiLogger.error({ err: error }, 'Erro completo:');
+      apiLogger.error({ err: error instanceof Error ? error.constructor.name : typeof error }, 'Tipo do erro:');
+      apiLogger.error({ err: error instanceof Error ? error.message : String(error) }, 'Mensagem:');
+      apiLogger.error({ err: error instanceof Error ? error.stack : 'N/A' }, 'Stack trace:');
+      apiLogger.error('======================================');
 
       return NextResponse.json(
         { error: 'Erro de autenticação interna' },
@@ -112,14 +113,14 @@ export function withAuth(handler: ApiHandler): ApiHandler {
         );
       }
       // Captura qualquer erro não tratado na autenticação
-      console.error('=== [withAuth MIDDLEWARE] ERRO CAPTURADO ===');
-      console.error('URL:', request.url);
-      console.error('Method:', request.method);
-      console.error('Erro completo:', error);
-      console.error('Tipo do erro:', error instanceof Error ? error.constructor.name : typeof error);
-      console.error('Mensagem:', error instanceof Error ? error.message : String(error));
-      console.error('Stack trace:', error instanceof Error ? error.stack : 'N/A');
-      console.error('======================================');
+      apiLogger.error('=== [withAuth MIDDLEWARE] ERRO CAPTURADO ===');
+      apiLogger.error({ err: request.url }, 'URL:');
+      apiLogger.error({ err: request.method }, 'Method:');
+      apiLogger.error({ err: error }, 'Erro completo:');
+      apiLogger.error({ err: error instanceof Error ? error.constructor.name : typeof error }, 'Tipo do erro:');
+      apiLogger.error({ err: error instanceof Error ? error.message : String(error) }, 'Mensagem:');
+      apiLogger.error({ err: error instanceof Error ? error.stack : 'N/A' }, 'Stack trace:');
+      apiLogger.error('======================================');
 
       return NextResponse.json(
         { error: 'Erro de autenticação interna' },

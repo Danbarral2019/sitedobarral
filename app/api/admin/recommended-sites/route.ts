@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { verifyToken } from '@/lib/auth';
 import { CacheInvalidation } from '@/lib/cache/redis-client';
+import { apiLogger } from "@/lib/logger";
 
 export async function GET(request: NextRequest) {
   try {
@@ -24,7 +25,7 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json({ sites });
   } catch (error) {
-    console.error('Erro ao listar sites:', error);
+    apiLogger.error({ err: error }, 'Erro ao listar sites:');
     return NextResponse.json({ error: 'Erro ao listar sites' }, { status: 500 });
   }
 }
@@ -80,7 +81,7 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({ site }, { status: 201 });
   } catch (error) {
-    console.error('Erro ao criar site:', error);
+    apiLogger.error({ err: error }, 'Erro ao criar site:');
     return NextResponse.json({ error: 'Erro ao criar site' }, { status: 500 });
   }
 }

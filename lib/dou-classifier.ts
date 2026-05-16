@@ -19,6 +19,7 @@ import { DOUSearchResult } from './dou-api';
 import { DOUEnrichedContent } from './dou-scraper';
 import { queryGeminiText } from './gemini/cached-client';
 import { isAtoNormativoGeral } from './dou-normative-filter';
+import { apiLogger } from "@/lib/logger";
 
 /**
  * Categorias de documentos DOU
@@ -536,7 +537,7 @@ Responda APENAS com JSON válido no formato:
         requiresReview,
       };
     } catch (error) {
-      console.error('[DOUClassifier] Erro na classificação com IA:', error);
+      apiLogger.error({ err: error }, '[DOUClassifier] Erro na classificação com IA:');
       // Retorna classificação original (OUTROS/baixa confiança)
       return {
         category: DOUDocumentCategory.OUTROS,

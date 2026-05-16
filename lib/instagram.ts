@@ -1,3 +1,5 @@
+import { apiLogger } from "@/lib/logger";
+
 /**
  * Biblioteca de integração com Instagram Graph API
  *
@@ -97,7 +99,7 @@ export async function createInstagramPost(
 
     if (!createContainerResponse.ok) {
       const errorData = await createContainerResponse.json();
-      console.error('[Instagram] Erro ao criar container:', errorData);
+      apiLogger.error({ err: errorData }, '[Instagram] Erro ao criar container:');
       return {
         success: false,
         error: errorData.error?.message || 'Erro ao criar container de mídia',
@@ -128,7 +130,7 @@ export async function createInstagramPost(
 
     if (!publishResponse.ok) {
       const errorData = await publishResponse.json();
-      console.error('[Instagram] Erro ao publicar:', errorData);
+      apiLogger.error({ err: errorData }, '[Instagram] Erro ao publicar:');
       return {
         success: false,
         error: errorData.error?.message || 'Erro ao publicar post',
@@ -159,7 +161,7 @@ export async function createInstagramPost(
       permalink,
     };
   } catch (error: unknown) {
-    console.error('[Instagram] Erro inesperado:', error);
+    apiLogger.error({ err: error }, '[Instagram] Erro inesperado:');
     const err = error as Error;
     return {
       success: false,

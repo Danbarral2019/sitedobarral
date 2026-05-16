@@ -18,6 +18,7 @@ import type { Document, Prisma } from '@prisma/client';
 import { findOrCreateWithVersioning } from './agu-modules/versioning';
 import { KEYWORDS_RELEVANCIA, CURSOS_KEYWORDS, detectTemas } from './shared-keywords';
 import type { AcordaoTCU } from './tcu-scraper';
+import { apiLogger } from "@/lib/logger";
 
 /**
  * Interface para resultado de importação
@@ -135,7 +136,7 @@ export async function saveTCUAcordaoWithVersioning(
       hasChanges: result.hasChanges,
     };
   } catch (error) {
-    console.error(`[TCU Module] Erro ao salvar acórdão ${acordao.numeroAcordao}/${acordao.anoAcordao}:`, error);
+    apiLogger.error({ err: error }, `[TCU Module] Erro ao salvar acórdão ${acordao.numeroAcordao}/${acordao.anoAcordao}:`);
     return {
       success: false,
       error: error instanceof Error ? error.message : 'Erro desconhecido',

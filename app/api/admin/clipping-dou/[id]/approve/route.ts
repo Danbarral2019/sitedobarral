@@ -6,6 +6,7 @@ import { LeiIndexer } from '@/lib/lei-indexer';
 import { scrapeAndIndexAct } from '@/lib/legislative-scrapers/scrape-and-index';
 import { extractIssuerFromDouHierarchy } from '@/lib/dou-issuer';
 import { getHierarchyLevel } from '@/lib/legislative-acts/hierarchy';
+import { apiLogger } from "@/lib/logger";
 
 export const runtime = 'nodejs';
 export const maxDuration = 120;
@@ -149,13 +150,13 @@ export async function POST(
           await prisma.document.update({ where: { id: documentId }, data: { content } });
         }
       })
-      .catch((e) => console.error('[clipping-dou approve] scrapeContent falhou:', e)),
+      .catch((e) => apiLogger.error({ err: e }, '[clipping-dou approve] scrapeContent falhou:')),
   );
 
   if (actIdToScrape) {
     runAfterResponse(
       scrapeAndIndexAct(actIdToScrape).catch((e) =>
-        console.error('[clipping-dou approve] scrapeAndIndexAct falhou:', e),
+        apiLogger.error({ err: e }, '[clipping-dou approve] scrapeAndIndexAct falhou:'),
       ),
     );
   }
@@ -179,7 +180,7 @@ export async function POST(
           });
         }
       } catch (e) {
-        console.error('[clipping-dou approve] LeiIndexer falhou:', e);
+        apiLogger.error({ err: e }, '[clipping-dou approve] LeiIndexer falhou:');
       }
     })(),
   );

@@ -4,6 +4,7 @@
 
 import * as XLSX from 'xlsx';
 import { autoClassifyDocument, suggestCategory, extractTags } from './auto-classifier';
+import { apiLogger } from "@/lib/logger";
 
 export interface ExcelDocumentRow {
   titulo: string;
@@ -383,7 +384,7 @@ export async function processExcelFile(
       errors: globalErrors
     };
   } catch (error) {
-    console.error('Erro ao processar Excel:', error);
+    apiLogger.error({ err: error }, 'Erro ao processar Excel:');
     return {
       isValid: false,
       totalRows: 0,

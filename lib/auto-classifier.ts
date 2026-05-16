@@ -5,6 +5,7 @@
  */
 
 import { classifyWithClaude, isClaudeAvailable } from './claude-classifier';
+import { apiLogger } from "@/lib/logger";
 
 interface ClassificationRule {
   pattern: string[];        // Palavras-chave (separadas por ; no SQL)
@@ -408,7 +409,7 @@ export async function classifyDocumentEnhanced(
     };
 
   } catch (error) {
-    console.error('[Enhanced Classifier] Erro ao usar Claude. Retornando análise básica:', error);
+    apiLogger.error({ err: error }, '[Enhanced Classifier] Erro ao usar Claude. Retornando análise básica:');
 
     // Em caso de erro, retorna análise básica
     return {

@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { verifyToken } from '@/lib/auth';
 import { CacheInvalidation } from '@/lib/cache/redis-client';
+import { apiLogger } from "@/lib/logger";
 
 export async function DELETE(
   request: NextRequest,
@@ -28,7 +29,7 @@ export async function DELETE(
 
     return NextResponse.json({ message: 'Site removido com sucesso' });
   } catch (error) {
-    console.error('Erro ao remover site:', error);
+    apiLogger.error({ err: error }, 'Erro ao remover site:');
     return NextResponse.json({ error: 'Erro ao remover site' }, { status: 500 });
   }
 }

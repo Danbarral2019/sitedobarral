@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { verifyAuth } from '@/lib/auth';
 import { deleteCourseVideo } from '@/lib/videos';
+import { apiLogger } from "@/lib/logger";
 
 export async function DELETE(
   request: NextRequest,
@@ -15,7 +16,7 @@ export async function DELETE(
     await deleteCourseVideo(id);
     return NextResponse.json({ success: true });
   } catch (error) {
-    console.error('Error deleting video:', error);
+    apiLogger.error({ err: error }, 'Error deleting video:');
     return NextResponse.json({ error: 'Failed to delete video' }, { status: 500 });
   }
 }
