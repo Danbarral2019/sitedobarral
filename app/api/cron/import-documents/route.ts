@@ -3,6 +3,7 @@ import { prisma } from '@/lib/prisma';
 import { fetchAcordaosTCU, type AcordaoTCU } from '@/lib/tcu-scraper';
 import { scrapeOrientacoesAGU, type OrientacaoNormativa } from '@/lib/agu-scraper';
 import { verifyCronAuth } from '@/lib/cron-auth';
+import { withCronTelemetry } from '@/lib/cron-telemetry';
 
 /**
  * Cron Job: Importacao Automatica de Documentos
@@ -15,12 +16,14 @@ import { verifyCronAuth } from '@/lib/cron-auth';
  * Agendamento: Configurado no vercel.json (semanal)
  */
 export async function GET(request: NextRequest) {
-  try {
-    // 1. Verificacao de seguranca - apenas cron jobs autorizados
-    const authError = verifyCronAuth(request);
-    if (authError) return authError;
+  // 1. Verificacao de seguranca - apenas cron jobs autorizados
+  const authError = verifyCronAuth(request);
+  if (authError) return authError;
 
-    console.log('[Cron Import] Iniciando importacao automatica de documentos...');
+  let responseBody: Record<string, unknown> = {};
+  try {
+    await withCronTelemetry('import-documents', async () => {
+      console.log('[Cron Import] Iniciando importacao automatica de documentos...');
 
     const results = {
       tcu: { success: false, count: 0, error: null as string | null },
@@ -167,18 +170,24 @@ export async function GET(request: NextRequest) {
 
     results.endTime = new Date().toISOString();
 
-    // 4. Log de execucao no console
-    console.log('[Cron Import] Importacao concluida:', results);
+      // 4. Log de execucao no console
+      console.log('[Cron Import] Importacao concluida:', results);
 
-    // 5. Retorna resumo
-    return NextResponse.json({
-      success: true,
-      message: 'Importacao automatica executada com sucesso',
-      results,
+      responseBody = {
+        success: true,
+        message: 'Importacao automatica executada com sucesso',
+        results,
+      };
+      const totalErrors = (results.tcu.error ? 1 : 0) + (results.agu.error ? 1 : 0);
+      return {
+        itemsFound: results.tcu.count + results.agu.count,
+        itemsNew: results.tcu.count + results.agu.count,
+        itemsError: totalErrors,
+        metadata: { tcu: results.tcu, agu: results.agu },
+      };
     });
-
+    return NextResponse.json(responseBody);
   } catch (error) {
-    console.error('[Cron Import] Erro fatal:', error);
     return NextResponse.json(
       {
         error: 'Erro ao executar importacao automatica',

@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { verifyCronAuth } from '@/lib/cron-auth';
 import { apiLogger } from '@/lib/logger';
+import { withCronTelemetry } from '@/lib/cron-telemetry';
 
 export const runtime = 'nodejs';
 export const maxDuration = 30;
@@ -18,11 +19,13 @@ export const maxDuration = 30;
 const FEEDBACK_RATIO_THRESHOLD = 0.30;
 const FEEDBACK_MIN_VOTES = 10;
 export async function GET(request: NextRequest) {
-  try {
-    const authError = verifyCronAuth(request);
-    if (authError) return authError;
+  const authError = verifyCronAuth(request);
+  if (authError) return authError;
 
-    const alerts: string[] = [];
+  let responseBody: Record<string, unknown> = {};
+  try {
+    await withCronTelemetry('monitoring-alerts', async () => {
+      const alerts: string[] = [];
     const twelveHoursAgo = new Date(Date.now() - 12 * 60 * 60 * 1000);
 
     // Check 1: Zero logins nas últimas 12h
@@ -133,18 +136,24 @@ export async function GET(request: NextRequest) {
       }
     }
 
-    apiLogger.info(
-      { alertCount: alerts.length },
-      `Monitoring alerts check: ${alerts.length} alert(s)`
-    );
+      apiLogger.info(
+        { alertCount: alerts.length },
+        `Monitoring alerts check: ${alerts.length} alert(s)`
+      );
 
-    return NextResponse.json({
-      success: true,
-      alertCount: alerts.length,
-      alerts,
+      responseBody = {
+        success: true,
+        alertCount: alerts.length,
+        alerts,
+      };
+      return {
+        itemsFound: alerts.length,
+        itemsError: alerts.length,
+        metadata: { alerts },
+      };
     });
+    return NextResponse.json(responseBody);
   } catch (error) {
-    apiLogger.error({ err: error }, 'Monitoring alerts cron error');
     return NextResponse.json(
       { error: error instanceof Error ? error.message : 'Internal server error' },
       { status: 500 }

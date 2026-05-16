@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { verifyCronAuth } from '@/lib/cron-auth';
 import { sendEmail } from '@/lib/email';
+import { withCronTelemetry } from '@/lib/cron-telemetry';
 
 export const maxDuration = 30;
 
@@ -24,15 +25,19 @@ export async function GET(request: NextRequest) {
   const authError = verifyCronAuth(request);
   if (authError) return authError;
 
-  const now = new Date();
-  if (isWeekend(now)) {
-    return NextResponse.json({ ok: true, skipped: 'weekend' });
-  }
+  let responseBody: Record<string, unknown> = {};
+  try {
+    await withCronTelemetry('clipping-health-check', async () => {
+      const now = new Date();
+      if (isWeekend(now)) {
+        responseBody = { ok: true, skipped: 'weekend' };
+        return { itemsFound: 0, metadata: { skipped: 'weekend' } };
+      }
 
-  const sentDateKey = startOfBrasiliaDay(now);
-  const alerts: string[] = [];
+      const sentDateKey = startOfBrasiliaDay(now);
+      const alerts: string[] = [];
 
-  const todaySend = await prisma.dailyClippingSend.findUnique({ where: { sentDate: sentDateKey } });
+      const todaySend = await prisma.dailyClippingSend.findUnique({ where: { sentDate: sentDateKey } });
 
   if (!todaySend) {
     alerts.push('Nenhum DailyClippingSend registrado para hoje. Cron daily-tcu-clipping pode não ter rodado.');
@@ -52,19 +57,29 @@ export async function GET(request: NextRequest) {
     alerts.push(`${noContentStreak} dias consecutivos sem conteúdo no clipping. Possível bug no filtro de relevância.`);
   }
 
-  if (alerts.length === 0) {
-    return NextResponse.json({ ok: true, status: 'healthy', todayStatus: todaySend?.status });
-  }
+      if (alerts.length === 0) {
+        responseBody = { ok: true, status: 'healthy', todayStatus: todaySend?.status };
+        return { itemsFound: 1, metadata: { healthy: true } };
+      }
 
-  const adminEmail = process.env.ADMIN_EMAIL || 'admin@profdanielbarral.com';
-  const subject = `[Clipping TCU] Alerta de saúde — ${alerts.length} ${alerts.length === 1 ? 'problema' : 'problemas'}`;
-  const body = `<h2>Alerta clipping diário TCU</h2>
+      const adminEmail = process.env.ADMIN_EMAIL || 'admin@profdanielbarral.com';
+      const subject = `[Clipping TCU] Alerta de saúde — ${alerts.length} ${alerts.length === 1 ? 'problema' : 'problemas'}`;
+      const body = `<h2>Alerta clipping diário TCU</h2>
 <p>Detectamos ${alerts.length} ${alerts.length === 1 ? 'problema' : 'problemas'}:</p>
 <ul>${alerts.map((a) => `<li>${a}</li>`).join('')}</ul>
 <p>Verifique <code>/admin/clipping</code> e os logs do cron <code>daily-tcu-clipping</code>.</p>`;
-  const text = `Alerta clipping diário TCU\n\n${alerts.map((a, i) => `${i + 1}. ${a}`).join('\n')}\n\nVerifique /admin/clipping.`;
+      const text = `Alerta clipping diário TCU\n\n${alerts.map((a, i) => `${i + 1}. ${a}`).join('\n')}\n\nVerifique /admin/clipping.`;
 
-  await sendEmail({ to: adminEmail, subject, html: body, text });
+      await sendEmail({ to: adminEmail, subject, html: body, text });
 
-  return NextResponse.json({ ok: false, alerts, alertSentTo: adminEmail });
+      responseBody = { ok: false, alerts, alertSentTo: adminEmail };
+      return { itemsFound: 1, itemsError: alerts.length, metadata: { alerts, alertSentTo: adminEmail } };
+    });
+    return NextResponse.json(responseBody);
+  } catch (error) {
+    return NextResponse.json(
+      { ok: false, error: error instanceof Error ? error.message : 'Erro desconhecido' },
+      { status: 500 },
+    );
+  }
 }
