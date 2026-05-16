@@ -21,10 +21,6 @@
       "schedule": "0 10 * * *"
     },
     {
-      "path": "/api/cron/process-index-jobs",
-      "schedule": "*/15 * * * *"
-    },
-    {
       "path": "/api/cron/cleanup-orphaned-files",
       "schedule": "0 3 * * *"
     },
@@ -47,14 +43,6 @@
     {
       "path": "/api/cron/summarize-conuni",
       "schedule": "0 8 1 * *"
-    },
-    {
-      "path": "/api/cron/lms-inactivity",
-      "schedule": "0 10 * * *"
-    },
-    {
-      "path": "/api/cron/compute-streaks",
-      "schedule": "0 1 * * *"
     },
     {
       "path": "/api/cron/sync-dou-atos-normativos",
