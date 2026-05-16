@@ -5,6 +5,32 @@
 
 ---
 
+## 🚨 Auditoria de Dívida Estrutural (2026-05-16)
+
+Complementar à auditoria de falhas silenciosas — investiga "o que está pesando, duplicado ou inacabado" (não "o que está quebrado em silêncio"). Três agents auditaram arquitetura, performance e features inacabadas.
+
+**Relatório completo:** [`docs/audits/2026-05-16-structural-debt.md`](docs/audits/2026-05-16-structural-debt.md)
+
+**Top 5 padrões transversais:**
+1. **70% das rotas API não seguem o padrão Fase 8** (196 de 280 usam `NextResponse.json` cru; 45 sem try/catch)
+2. **Múltiplas implementações concorrentes:** 3 admins de documentos, 3 admins TCU, 3 admins analytics, 2 versões AGU scraper, classificadores TCU triplicados
+3. **`lib/ai/` tem 0 consumidores em produção** — 6 lugares continuam com SDK direto
+4. **Crons rodando à toa:** `process-index-jobs` a cada 15min sem dado novo desde Nov-25; `compute-streaks`, `lms-inactivity` sobre bases ridículas
+5. **~10 features 80% prontas mas inativas:** Planejamento (17 rotas + 6 models + 1 sessão), Quizzes (admin + player + 0 quizzes), FAQ, Vídeos, Cross-refs Lei 14.133, DOUSavedFilter
+
+**Top 5 wins rápidos (~3h total, baixo risco):**
+- `regions: ["gru1"]` no `vercel.json` (-100/-200ms por query DB)
+- Remover `Cache-Control: no-store` global de `/api/*` (TTFB 500ms→50ms via CDN)
+- Remover deps mortas (`video.js`, `docx`, `html2canvas`, `pino-pretty`)
+- Pausar `process-index-jobs`, `compute-streaks`, `lms-inactivity`
+- Apagar 14 componentes órfãos + 6 backups + 20+ JSONs no root
+
+**Plano de saneamento de médio prazo** (4 sprints) no relatório.
+
+Ver também: [`docs/audits/2026-05-16-silent-failures.md`](docs/audits/2026-05-16-silent-failures.md) (30+ falhas silenciosas, complementar)
+
+---
+
 ## 🚨 Auditoria de Falhas Silenciosas (2026-05-16)
 
 Investigação disparada pela descoberta de bug crítico no `LeiIndexer` (truncamento de JSON Gemini sabotando 80% da catalogação por meses sem alarme). Três agents auditaram modelos AI, saúde de crons e webhooks. **30+ problemas identificados** — alguns provavelmente quebrando em produção agora.
