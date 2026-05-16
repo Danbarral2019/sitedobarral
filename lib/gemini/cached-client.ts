@@ -53,10 +53,20 @@ export interface GeminiQueryOptions {
   cacheTTL?: number;
   systemInstruction?: string;
   /**
-   * Desativa (0) ou limita o "thinking mode" do Gemini 2.5. Default do Google
-   * é deixar thinking ligado, o que pode consumir ~95% do maxOutputTokens em
-   * tarefas curtas e truncar a resposta. Passe 0 para resumos / classificação
-   * / extração simples. Deixe undefined para raciocínio complexo.
+   * Controla o "thinking mode" dos modelos Gemini 2.5+ / 3.x.
+   *
+   * **Default agora é `0` (thinking desativado)** — Gemini consome ~1.500 tokens
+   * em raciocínio interno antes do output visível e, com `maxOutputTokens`
+   * baixo, trunca JSON/texto silenciosamente. Esse default protege novos
+   * call-sites do bug que sabotou o `LeiIndexer` por meses (auditoria
+   * 2026-05-16, P0.1).
+   *
+   * Valores:
+   *   - `0` (default): desativa thinking. Use para classificação, extração,
+   *     resumo curto, parsing de JSON estruturado, expansão de queries.
+   *   - `-1`: ativa dynamic thinking (modelo decide o budget). Use em chat
+   *     conversacional e raciocínio multi-passo — ex.: chat artigos premium.
+   *   - `N > 0`: budget fixo em tokens. Raro. Use só em experimentação.
    */
   thinkingBudget?: number;
 }
@@ -234,7 +244,7 @@ export async function queryGeminiText(
     useCache = true,
     cacheTTL = CACHE_TTL.GEMINI_QUERY,
     systemInstruction,
-    thinkingBudget,
+    thinkingBudget = 0,
   } = options;
 
   const startTime = Date.now();

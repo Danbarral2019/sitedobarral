@@ -348,7 +348,10 @@ Responda agora:`;
       model: chatModel,
       temperature: 0.7,
       maxOutputTokens: 8192,
-      thinkingBudget: useGeminiPremium ? undefined : 0,
+      // Premium = dynamic thinking (-1): modelo decide quanto raciocinar.
+      // Default cached-client agora é 0 (off), então não dá para depender de
+      // undefined. Ver lib/gemini/cached-client.ts:GeminiQueryOptions.
+      thinkingBudget: useGeminiPremium ? -1 : 0,
       useCache: true,
       cacheTTL: 3600, // 1 hora
     });
