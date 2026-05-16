@@ -267,6 +267,7 @@ Responda APENAS com o resumo, sem prefixos como "Resumo:" ou marcação.`;
     const result = await queryGeminiText(prompt, {
       temperature: 0.3,
       maxOutputTokens: 300,
+      thinkingBudget: 0,
       useCache: false,
     });
 
@@ -316,6 +317,7 @@ Responda APENAS com JSON (sem markdown):
   const result = await queryGeminiText(prompt, {
     temperature: 0.2,
     maxOutputTokens: 512,
+    thinkingBudget: 0,
     useCache: false,
   });
 

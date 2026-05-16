@@ -210,6 +210,7 @@ Exemplo de resposta: ["variação 1", "variação 2"]`;
           const result = await queryGeminiText(expansionPrompt, {
             temperature: 0.5,
             maxOutputTokens: 256,
+            thinkingBudget: 0,
             useCache: false,
           });
 
