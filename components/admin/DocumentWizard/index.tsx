@@ -274,6 +274,7 @@ export default function DocumentWizard({ documentId, initialData }: DocumentWiza
               updateForm={updateForm}
               onNext={handleNext}
               onPrevious={handlePrevious}
+              documentId={documentId}
               isFirstStep={false}
               isLastStep={false}
             />
