@@ -183,6 +183,42 @@ describe('cached-client: queryGeminiText (SDK @google/genai)', () => {
         }),
       );
     });
+
+    it('deve aplicar thinkingBudget: 0 por default quando opção ausente (regressão LeiIndexer)', async () => {
+      // Auditoria 2026-05-16 P0.1: Gemini 2.5+/3.x trunca JSON sem
+      // thinkingBudget:0. Default global agora protege novos call-sites.
+      mockWithCache.mockImplementation(
+        async (_key: string, fn: () => Promise<unknown>) => fn(),
+      );
+      mockGenerateContent.mockResolvedValue(makeGeminiResponse('Default'));
+
+      await queryGeminiText('query sem thinkingBudget');
+
+      expect(mockGenerateContent).toHaveBeenCalledWith(
+        expect.objectContaining({
+          config: expect.objectContaining({
+            thinkingConfig: { thinkingBudget: 0 },
+          }),
+        }),
+      );
+    });
+
+    it('deve permitir dynamic thinking via thinkingBudget: -1 (opt-in premium)', async () => {
+      mockWithCache.mockImplementation(
+        async (_key: string, fn: () => Promise<unknown>) => fn(),
+      );
+      mockGenerateContent.mockResolvedValue(makeGeminiResponse('Thinking on'));
+
+      await queryGeminiText('query premium', { thinkingBudget: -1 });
+
+      expect(mockGenerateContent).toHaveBeenCalledWith(
+        expect.objectContaining({
+          config: expect.objectContaining({
+            thinkingConfig: { thinkingBudget: -1 },
+          }),
+        }),
+      );
+    });
   });
 
   describe('sem cache habilitado (useCache: false)', () => {
