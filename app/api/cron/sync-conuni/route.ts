@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { verifyCronAuth } from '@/lib/cron-auth';
 import { syncConuni } from '@/lib/conuni-sync';
+import { withCronTelemetry } from '@/lib/cron-telemetry';
 
 /**
  * Cron Job: Sincronização mensal do CONUNI (sucessor do DECOR/AGU)
@@ -20,18 +21,23 @@ export async function GET(request: NextRequest) {
   const authError = verifyCronAuth(request);
   if (authError) return authError;
 
-  console.log('[Sync CONUNI] Iniciando...');
-
+  let responseBody: Record<string, unknown> = {};
   try {
-    const result = await syncConuni(prisma);
-    console.log('[Sync CONUNI] Resultado:', JSON.stringify(result));
-
-    return NextResponse.json({
-      message: `Sync CONUNI: +${result.inserted} inseridos, ${result.updated} atualizados, ${result.skipped} sem mudança em ${result.elapsedSeconds}s`,
-      ...result,
+    await withCronTelemetry('sync-conuni', async () => {
+      const result = await syncConuni(prisma);
+      responseBody = {
+        message: `Sync CONUNI: +${result.inserted} inseridos, ${result.updated} atualizados, ${result.skipped} sem mudança em ${result.elapsedSeconds}s`,
+        ...result,
+      };
+      return {
+        itemsFound: result.inserted + result.updated + result.skipped,
+        itemsNew: result.inserted,
+        itemsError: 0,
+        metadata: { updated: result.updated, skipped: result.skipped, elapsedSeconds: result.elapsedSeconds },
+      };
     });
+    return NextResponse.json(responseBody);
   } catch (error) {
-    console.error('[Sync CONUNI] Erro fatal:', error);
     return NextResponse.json(
       {
         error: 'Erro ao sincronizar CONUNI',

@@ -6,6 +6,7 @@ import {
   fetchManualUpdateDate,
 } from '@/lib/tcu-manual-scraper';
 import { verifyCronAuth } from '@/lib/cron-auth';
+import { withCronTelemetry } from '@/lib/cron-telemetry';
 
 /**
  * Cron Job: Sincronização mensal do Manual TCU "Licitações & Contratos"
@@ -29,13 +30,15 @@ function sleep(ms: number) {
 export const maxDuration = 300; // 5 minutes max for Vercel
 
 export async function GET(request: NextRequest) {
-  try {
-    // 1. Auth check
-    const authError = verifyCronAuth(request);
-    if (authError) return authError;
+  // 1. Auth check (fora do telemetry — auth não conta como falha de cron)
+  const authError = verifyCronAuth(request);
+  if (authError) return authError;
 
-    console.log('[Sync TCU Manual] Iniciando sincronização...');
-    const startTime = Date.now();
+  let responseBody: Record<string, unknown> = {};
+  try {
+    await withCronTelemetry('sync-tcu-manual', async () => {
+      console.log('[Sync TCU Manual] Iniciando sincronização...');
+      const startTime = Date.now();
 
     // 2. Quick check: compare update date
     const currentDate = await fetchManualUpdateDate();
@@ -63,12 +66,13 @@ export async function GET(request: NextRequest) {
     if (currentDate && storedVersion === currentDate && sampleDoc) {
       const elapsed = Math.round((Date.now() - startTime) / 1000);
       console.log(`[Sync TCU Manual] Manual não mudou, encerrando (${elapsed}s)`);
-      return NextResponse.json({
+      responseBody = {
         success: true,
         unchanged: true,
         manualVersion: currentDate,
         elapsed: `${elapsed}s`,
-      });
+      };
+      return { itemsFound: 0, metadata: { unchanged: true, manualVersion: currentDate } };
     }
 
     // 3. Full sync: re-scrape all pages
@@ -220,14 +224,27 @@ export async function GET(request: NextRequest) {
       elapsed: `${elapsed}s`,
     };
 
-    console.log('[Sync TCU Manual] Resultado:', result);
+      console.log('[Sync TCU Manual] Resultado:', result);
+      responseBody = {
+        message: `Sync Manual TCU: ${created} criados, ${updated} atualizados, ${unchanged} sem mudança`,
+        ...result,
+      };
 
-    return NextResponse.json({
-      message: `Sync Manual TCU: ${created} criados, ${updated} atualizados, ${unchanged} sem mudança`,
-      ...result,
+      return {
+        itemsFound: MANUAL_SECTIONS.length,
+        itemsNew: created + updated,
+        itemsError: errors,
+        metadata: {
+          manualVersion: currentDate,
+          previousVersion: storedVersion,
+          contentUnchanged: unchanged,
+          removed,
+          elapsed: `${elapsed}s`,
+        },
+      };
     });
+    return NextResponse.json(responseBody);
   } catch (error) {
-    console.error('[Sync TCU Manual] Erro fatal:', error);
     return NextResponse.json(
       {
         error: 'Erro ao sincronizar Manual TCU',

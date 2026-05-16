@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { scrapeNewInformativos } from '@/lib/tcu-informativo-scraper';
 import { verifyCronAuth } from '@/lib/cron-auth';
+import { withCronTelemetry } from '@/lib/cron-telemetry';
 
 /**
  * Cron Job: Sincronização automática de Informativos de Jurisprudência Selecionada do TCU
@@ -20,20 +21,22 @@ import { verifyCronAuth } from '@/lib/cron-auth';
 export const maxDuration = 300;
 
 export async function GET(request: NextRequest) {
-  try {
-    // 1. Verificação de segurança
-    const authError = verifyCronAuth(request);
-    if (authError) return authError;
+  // 1. Verificação de segurança (fora do telemetry — auth não conta como falha de cron)
+  const authError = verifyCronAuth(request);
+  if (authError) return authError;
 
-    console.log('[Sync TCU Info] Iniciando sincronização de informativos...');
-    const startTime = Date.now();
+  let responseBody: Record<string, unknown> = {};
+  try {
+    await withCronTelemetry('sync-tcu-informativos', async () => {
+      console.log('[Sync TCU Info] Iniciando sincronização de informativos...');
+      const startTime = Date.now();
 
     // 2. Scrape informativos do TCU
     const scrapeResult = await scrapeNewInformativos({ limit: 50 });
 
     if (scrapeResult.error && scrapeResult.newItems.length === 0) {
       console.log(`[Sync TCU Info] Scraping falhou: ${scrapeResult.error}`);
-      return NextResponse.json({
+      responseBody = {
         message: `Scraping falhou: ${scrapeResult.error}`,
         success: false,
         source: scrapeResult.source,
@@ -42,7 +45,8 @@ export async function GET(request: NextRequest) {
         newFound: 0,
         imported: 0,
         duplicates: 0,
-      });
+      };
+      return { itemsError: 1, metadata: { source: scrapeResult.source, error: scrapeResult.error } };
     }
 
     console.log(`[Sync TCU Info] ${scrapeResult.totalScraped} scrapeados, ${scrapeResult.newItems.length} novos, ${scrapeResult.duplicates} duplicados`);
@@ -117,14 +121,26 @@ export async function GET(request: NextRequest) {
       elapsed: `${elapsed}s`,
     };
 
-    console.log('[Sync TCU Info] Resultado:', result);
+      console.log('[Sync TCU Info] Resultado:', result);
+      responseBody = {
+        message: `Sincronização Informativos TCU: ${imported} importados de ${scrapeResult.totalScraped} scrapeados`,
+        ...result,
+      };
 
-    return NextResponse.json({
-      message: `Sincronização Informativos TCU: ${imported} importados de ${scrapeResult.totalScraped} scrapeados`,
-      ...result,
+      return {
+        itemsFound: scrapeResult.totalScraped,
+        itemsNew: imported,
+        itemsError: errors,
+        metadata: {
+          source: scrapeResult.source,
+          duplicates: scrapeResult.duplicates,
+          newFound: scrapeResult.newItems.length,
+          elapsed: `${elapsed}s`,
+        },
+      };
     });
+    return NextResponse.json(responseBody);
   } catch (error) {
-    console.error('[Sync TCU Info] Erro fatal:', error);
     return NextResponse.json(
       {
         error: 'Erro ao sincronizar informativos do TCU',

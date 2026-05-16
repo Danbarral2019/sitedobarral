@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { verifyCronAuth } from '@/lib/cron-auth';
 import { summarizeRelevantPareceres } from '@/lib/conuni-summary';
+import { withCronTelemetry } from '@/lib/cron-telemetry';
 
 /**
  * Cron Job: Gera resumo IA pra pareceres relevantes recém-classificados.
@@ -17,24 +18,27 @@ export async function GET(request: NextRequest) {
   const authError = verifyCronAuth(request);
   if (authError) return authError;
 
-  console.log('[Summarize CONUNI] Iniciando...');
+  let responseBody: Record<string, unknown> = {};
   try {
-    const result = await summarizeRelevantPareceres(prisma, {
-      limit: 80,
-      delayMs: 200,
-      logger: (msg) => console.log('[Summarize CONUNI]', msg),
+    await withCronTelemetry('summarize-conuni', async () => {
+      const result = await summarizeRelevantPareceres(prisma, {
+        limit: 80,
+        delayMs: 200,
+        logger: (msg) => console.log('[Summarize CONUNI]', msg),
+      });
+      responseBody = {
+        message: `Summarize CONUNI: ${result.processed} resumos gerados em ${result.elapsedSeconds}s`,
+        ...result,
+      };
+      return {
+        itemsFound: result.processed,
+        itemsNew: result.processed - result.errors,
+        itemsError: result.errors,
+        metadata: { elapsedSeconds: result.elapsedSeconds },
+      };
     });
-    console.log('[Summarize CONUNI] Resultado:', JSON.stringify({
-      processed: result.processed,
-      errors: result.errors,
-      elapsedSeconds: result.elapsedSeconds,
-    }));
-    return NextResponse.json({
-      message: `Summarize CONUNI: ${result.processed} resumos gerados em ${result.elapsedSeconds}s`,
-      ...result,
-    });
+    return NextResponse.json(responseBody);
   } catch (error) {
-    console.error('[Summarize CONUNI] Erro:', error);
     return NextResponse.json(
       { error: 'Erro ao gerar resumos CONUNI', details: error instanceof Error ? error.message : 'Erro desconhecido' },
       { status: 500 },
