@@ -92,9 +92,11 @@ export async function classifyTCUAcordao(
 
     console.log(`[TCU Classifier] Enviando para Claude API (${prompt.length} chars)...`);
 
-    // Chama a API do Claude (usando modelo mais recente disponível)
+    // claude-3-5-sonnet-20241022 foi retirado em 2026-02-19 — chamadas
+    // viravam 404 mascarado pelo catch silencioso (auditoria 2026-05-16 P0.2).
+    // Migrado para Haiku 4.5 (mais capaz que Sonnet 3.5 e ~5× mais barato).
     const response = await anthropic.messages.create({
-      model: 'claude-3-5-sonnet-20241022',
+      model: 'claude-haiku-4-5-20251001',
       max_tokens: 1500, // Reduzido para resposta mais rápida
       temperature: 0.3, // Baixa temperatura para respostas mais consistentes
       messages: [
