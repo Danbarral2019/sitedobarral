@@ -494,6 +494,7 @@ Responda APENAS com JSON válido no formato:
       const result = await queryGeminiText(prompt, {
         temperature: 0.1,
         maxOutputTokens: 256,
+        thinkingBudget: 0,
         useCache: false,
       });
 

@@ -38,7 +38,11 @@ export const GET = withAuth(async (_request: NextRequest, context?: Record<strin
       {
         model: PRIMARY_GEMINI_MODEL,
         temperature: 0,
-        maxOutputTokens: 20,
+        // Auditoria 2026-05-16 P2.4: 20 tokens é menos que o footprint de
+        // thinking dos modelos 2.5+/3.x, então a resposta vinha vazia mesmo
+        // quando a API estava saudável. 1024 + thinkingBudget=0 é suficiente.
+        maxOutputTokens: 1024,
+        thinkingBudget: 0,
         useCache: false,
       }
     );

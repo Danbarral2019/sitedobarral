@@ -21,7 +21,10 @@ async function checkModel(model: string): Promise<ModelCheck> {
   try {
     const result = await queryGeminiText(
       'Responda em uma palavra: qual a capital do Brasil?',
-      { model, useCache: false, temperature: 0, maxOutputTokens: 10 },
+      // maxOutputTokens=10 + thinking ligado = sempre vazio nos modelos 2.5+/3.x
+      // (thinking consome ~1.5k tokens antes do primeiro caractere visível).
+      // 256 + thinkingBudget=0 garante resposta real, sem custo perceptível.
+      { model, useCache: false, temperature: 0, maxOutputTokens: 256, thinkingBudget: 0 },
     );
     const txt = (result.response || '').trim();
     return {

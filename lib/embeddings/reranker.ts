@@ -132,6 +132,7 @@ Ordene do mais relevante ao menos relevante. Inclua TODOS os ${candidates.length
     const response = await queryGeminiText(prompt, {
       temperature: 0.1,
       maxOutputTokens: 512,
+      thinkingBudget: 0,
       useCache: true,
     });
 
