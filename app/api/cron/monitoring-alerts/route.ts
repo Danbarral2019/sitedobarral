@@ -3,6 +3,7 @@ import { prisma } from '@/lib/prisma';
 import { verifyCronAuth } from '@/lib/cron-auth';
 import { apiLogger } from '@/lib/logger';
 import { withCronTelemetry } from '@/lib/cron-telemetry';
+import * as Sentry from '@sentry/nextjs';
 
 export const runtime = 'nodejs';
 export const maxDuration = 30;
@@ -114,7 +115,12 @@ export async function GET(request: NextRequest) {
         } else {
           const alertList = alerts.map((a, i) => `${i + 1}. ${a}`).join('\n');
 
-          await resend.emails.send({
+          // Resend SDK retorna { data, error } sem lançar exceção (CLAUDE.md).
+          // Sem checar `error` aqui, o cron logaria "Alert email sent" mesmo
+          // quando o envio falhasse — ironicamente, o monitor de alertas
+          // poderia estar quebrado sem disparar nenhum alerta (descoberto na
+          // auditoria silent-failures de 2026-05-16).
+          const result = await resend.emails.send({
             from: process.env.EMAIL_FROM || 'noreply@profdanielbarral.com',
             to: adminEmail,
             subject: `[Alerta] ${alerts.length} problema(s) detectado(s) — Site do Barral`,
@@ -129,10 +135,29 @@ export async function GET(request: NextRequest) {
             ].join('\n'),
           });
 
-          apiLogger.info({ to: adminEmail, alertCount: alerts.length }, 'Alert email sent');
+          if (result.error) {
+            // Fallback de último recurso: o canal Sentry (independente do Resend)
+            // garante que admin ainda fica sabendo, mesmo com o email caindo.
+            Sentry.captureMessage(
+              `monitoring-alerts: falha ao enviar email de alerta (${result.error.name}: ${result.error.message}). ${alerts.length} alerta(s) não notificado(s) por email — ver alerts no log do cron.`,
+              'error',
+            );
+            apiLogger.error(
+              { err: result.error, to: adminEmail, alertCount: alerts.length },
+              'Resend retornou erro ao enviar alert email — admin NÃO foi notificado',
+            );
+          } else {
+            apiLogger.info(
+              { to: adminEmail, alertCount: alerts.length, resendId: result.data?.id },
+              'Alert email sent',
+            );
+          }
         }
       } catch (emailError) {
-        apiLogger.error({ err: emailError }, 'Failed to send alert email');
+        // catch para exceções inesperadas (rede, init do SDK, etc) — Resend SDK
+        // em si não lança, mas await + import dinâmico podem.
+        Sentry.captureException(emailError, { tags: { cron: 'monitoring-alerts', stage: 'email' } });
+        apiLogger.error({ err: emailError }, 'Exceção ao tentar enviar alert email');
       }
     }
 
