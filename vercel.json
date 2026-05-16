@@ -43,7 +43,7 @@
     },
     {
       "path": "/api/cron/summarize-conuni",
-      "schedule": "0 8 1 * *"
+      "schedule": "0 8 * * 1"
     },
     {
       "path": "/api/cron/sync-dou-atos-normativos",

@@ -83,11 +83,53 @@ export function detectModifications(title: string, abstract: string): Modificati
     }
   }
 
-  // Revoga artigo/dispositivo da Lei 14.133
-  if (/revoga\s+(?:o\s+|a\s+)?(?:art(?:igo)?\.?\s*[\d]+[\w-]*\s+(?:da\s+)?)?lei\s+(?:n[ºo°]?\s*)?14\.?133/i.test(text)) {
+  // Acresce/inclui/insere artigo(s) na Lei 14.133
+  // Forma muito comum em decretos/leis novas: "Acresce o art. 184-A à Lei nº 14.133/2021"
+  // Aceita plural ("arts.", "artigos") e separadores "," ou " e " ("195 e 196")
+  const acresceArt = text.matchAll(
+    /(?:acresce|acrescenta|inclui|insere)\s+(?:o\s+|os?\s+|as?\s+)?art(?:igo|igos|s|\.)?\.?\s*([\d]+[\w-]*(?:\s*(?:,|e)\s*[\d]+[\w-]*)*)\s+(?:[àa]\s+|na\s+|[àa]o\s+|no\s+|da\s+)?lei\s+(?:n[ºo°]?\s*)?14\.?133/gi
+  );
+  for (const match of acresceArt) {
+    modifiesLei14133 = true;
+    if (changeType !== 'altera') changeType = 'altera'; // acréscimo = alteração
+    confidence = Math.max(confidence, 88);
+    const arts = match[1].split(/\s*(?:,|\be\b)\s*/);
+    for (const art of arts) {
+      const cleaned = art.trim();
+      if (cleaned && !affectedArticles.includes(cleaned)) {
+        affectedArticles.push(cleaned);
+      }
+    }
+  }
+
+  // Revoga artigo(s) específico(s) da Lei 14.133
+  // Bug histórico: regex anterior identificava "revoga" mas não extraía o número
+  // do artigo, fazendo affectedArticles=[] → route.ts:410 (`if (… && length > 0)`)
+  // pulava o create de LeiArticleNote. Resultado: tabela com 0 registros.
+  const revogaArt = text.matchAll(
+    /revoga(?:m|-se)?\s+(?:o\s+|os?\s+|as?\s+)?art(?:igo|\.)?\.?\s*([\d]+[\w-]*(?:\s*,\s*[\d]+[\w-]*)*)\s+(?:da\s+)?lei\s+(?:n[ºo°]?\s*)?14\.?133/gi
+  );
+  for (const match of revogaArt) {
     modifiesLei14133 = true;
     changeType = 'revoga';
-    confidence = Math.max(confidence, 85);
+    confidence = Math.max(confidence, 90);
+    const arts = match[1].split(/\s*,\s*/);
+    for (const art of arts) {
+      const cleaned = art.trim();
+      if (cleaned && !affectedArticles.includes(cleaned)) {
+        affectedArticles.push(cleaned);
+      }
+    }
+  }
+
+  // Revoga a Lei 14.133 (ou dispositivo dela sem artigo nominal — fallback)
+  if (
+    !modifiesLei14133 &&
+    /revoga\s+(?:o\s+|a\s+)?(?:dispositivo[s]?\s+(?:da\s+)?)?lei\s+(?:n[ºo°]?\s*)?14\.?133/i.test(text)
+  ) {
+    modifiesLei14133 = true;
+    changeType = 'revoga';
+    confidence = Math.max(confidence, 75);
   }
 
   // --- Detectar alterações em IN/Portaria/Decreto existente ---

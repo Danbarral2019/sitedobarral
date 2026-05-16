@@ -63,7 +63,7 @@ describe('dou-change-detector', () => {
       expect(result!.confidence).toBeGreaterThanOrEqual(85);
     });
 
-    it('deve detectar revogação de artigo da Lei 14.133', () => {
+    it('deve detectar revogação de artigo da Lei 14.133 (e extrair o número)', () => {
       const result = detectModifications(
         'Decreto nº 12.004',
         'Revoga o Art. 191 da Lei nº 14.133/2021',
@@ -71,7 +71,34 @@ describe('dou-change-detector', () => {
       expect(result).not.toBeNull();
       expect(result!.modifiesLei14133).toBe(true);
       expect(result!.changeType).toBe('revoga');
+      // Regressão: o detector identificava "revoga" mas não extraía o artigo,
+      // fazendo affectedArticles=[] e o cron nunca criar LeiArticleNote
+      // (auditoria 2026-05-16 P0.3: tabela com 0 registros).
+      expect(result!.affectedArticles).toContain('191');
       expect(result!.confidence).toBeGreaterThanOrEqual(85);
+    });
+
+    it('deve detectar acréscimo de artigo à Lei 14.133 (forma comum em decretos)', () => {
+      const result = detectModifications(
+        'Decreto nº 12.343',
+        'Acresce o art. 184-A à Lei nº 14.133, de 1º de abril de 2021',
+      );
+      expect(result).not.toBeNull();
+      expect(result!.modifiesLei14133).toBe(true);
+      expect(result!.changeType).toBe('altera');
+      expect(result!.affectedArticles).toContain('184-a');
+      expect(result!.confidence).toBeGreaterThanOrEqual(85);
+    });
+
+    it('deve detectar inclusão de múltiplos artigos na Lei 14.133', () => {
+      const result = detectModifications(
+        'Lei nº 14.500',
+        'Inclui os arts. 195 e 196 na Lei nº 14.133/2021',
+      );
+      expect(result).not.toBeNull();
+      expect(result!.modifiesLei14133).toBe(true);
+      expect(result!.affectedArticles).toContain('195');
+      expect(result!.affectedArticles).toContain('196');
     });
 
     it('deve detectar alteração de IN existente', () => {
