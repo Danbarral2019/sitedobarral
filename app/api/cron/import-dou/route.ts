@@ -34,6 +34,7 @@ import { scrapeContent } from '@/lib/dou-scraper';
 import { prisma } from '@/lib/prisma';
 import { verifyCronAuth } from '@/lib/cron-auth';
 import { normalizeScrapedText } from '@/lib/legislative-scrapers/normalize';
+import { withCronTelemetry } from '@/lib/cron-telemetry';
 
 export const runtime = 'nodejs';
 export const maxDuration = 300; // 5 minutos (maximo para Vercel Pro)
@@ -54,12 +55,15 @@ const IMPORTED_CLEANUP_DAYS = 90;
  * Busca e classifica documentos DOU, salvando no staging para validacao manual
  */
 export async function GET(request: NextRequest) {
+  // Validar secret do cron (fora do telemetry — auth não conta como falha de cron)
+  const authError = verifyCronAuth(request);
+  if (authError) return authError;
+
   console.log('[Cron DOU Staging] Iniciando importacao para staging...');
 
+  let responseBody: Record<string, unknown> = {};
   try {
-    // Validar secret do cron (seguranca)
-    const authError = verifyCronAuth(request);
-    if (authError) return authError;
+    await withCronTelemetry('import-dou', async () => {
 
     // Parametros da query string com validacao
     const { searchParams } = new URL(request.url);
@@ -70,10 +74,8 @@ export async function GET(request: NextRequest) {
 
     if (!ALLOWED_PERIODS.includes(periodParam as typeof ALLOWED_PERIODS[number])) {
       console.error(`[Cron DOU Staging] Periodo invalido: ${periodParam}`);
-      return NextResponse.json(
-        { error: `Periodo invalido. Valores permitidos: ${ALLOWED_PERIODS.join(', ')}` },
-        { status: 400 }
-      );
+      responseBody = { error: `Periodo invalido. Valores permitidos: ${ALLOWED_PERIODS.join(', ')}` };
+      throw new Error(`Periodo invalido: ${periodParam}`);
     }
     const period = periodParam as typeof ALLOWED_PERIODS[number];
 
@@ -108,7 +110,7 @@ export async function GET(request: NextRequest) {
       // Ainda executar limpeza mesmo sem novos resultados
       const cleanup = await cleanupOldStaging();
 
-      return NextResponse.json({
+      responseBody = {
         success: true,
         message: 'Nenhuma publicacao encontrada',
         stats: {
@@ -121,7 +123,8 @@ export async function GET(request: NextRequest) {
           erros: 0,
           cleanup,
         }
-      });
+      };
+      return { itemsFound: 0, metadata: { cleanup } };
     }
 
     // PASSO 2: Classificar documentos com DOUClassifier
@@ -268,27 +271,37 @@ export async function GET(request: NextRequest) {
     console.log('[Cron DOU Staging] Importacao para staging concluida!');
     console.log(`[Cron DOU Staging] Auto-aprovados: ${autoAprovados}, Pendentes: ${pendentes}, Rejeitados: ${autoRejeitados}, Enriquecidos: ${enriquecidos}`);
 
-    // Retornar estatisticas
-    return NextResponse.json({
-      success: true,
-      message: `Staging populado: ${autoAprovados} auto-aprovados, ${pendentes} pendentes, ${enriquecidos} enriquecidos`,
-      stats: {
-        buscados: results.length,
-        autoAprovados,
-        pendentes,
-        autoRejeitados,
-        duplicados,
-        enriquecidos,
-        erros,
-        cleanup,
-        aiClassified: aiStats.updated,
-        aiErrors: aiStats.errors,
-      },
+      // Retornar estatisticas
+      responseBody = {
+        success: true,
+        message: `Staging populado: ${autoAprovados} auto-aprovados, ${pendentes} pendentes, ${enriquecidos} enriquecidos`,
+        stats: {
+          buscados: results.length,
+          autoAprovados,
+          pendentes,
+          autoRejeitados,
+          duplicados,
+          enriquecidos,
+          erros,
+          cleanup,
+          aiClassified: aiStats.updated,
+          aiErrors: aiStats.errors,
+        },
+      };
+
+      return {
+        itemsFound: results.length,
+        itemsNew: autoAprovados + pendentes,
+        itemsError: erros + aiStats.errors,
+        metadata: { autoRejeitados, duplicados, enriquecidos, cleanup, aiClassified: aiStats.updated },
+      };
     });
-
+    return NextResponse.json(responseBody);
   } catch (error) {
-    console.error('[Cron DOU Staging] Erro fatal:', error);
-
+    // Caso "Periodo invalido" foi um throw para sair do callback — preserva o 400.
+    if (responseBody.error && typeof responseBody.error === 'string' && responseBody.error.startsWith('Periodo')) {
+      return NextResponse.json(responseBody, { status: 400 });
+    }
     return NextResponse.json(
       {
         success: false,
