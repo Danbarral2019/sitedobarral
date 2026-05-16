@@ -161,8 +161,11 @@ export async function classifyWithClaude(
 
     const prompt = await buildClassificationPrompt(title, description, feedbackExamples);
 
+    // claude-3-5-haiku-20241022 foi retirado em 2026-02-19 — chamadas
+    // viravam 404 mascarado pelo `return null` silencioso (auditoria
+    // 2026-05-16 P0.2). Migrado para Haiku 4.5 (mesma família, mais capaz).
     const message = await anthropic.messages.create({
-      model: 'claude-3-5-haiku-20241022', // Haiku: rápido e econômico (~$0.25/1M tokens)
+      model: 'claude-haiku-4-5-20251001',
       max_tokens: 1024,
       temperature: 0.3, // Baixa temperatura para respostas consistentes
       messages: [
