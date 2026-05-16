@@ -94,3 +94,11 @@ lighthouse-report.report.*
 
 # Build logs (output local, não versionados)
 build-*.log
+
+# JSONs na raiz: bloquear por default (snapshots, reports, dumps gerados por
+# scripts ad-hoc). Whitelist os arquivos legítimos do projeto.
+/*.json
+!/package.json
+!/package-lock.json
+!/tsconfig.json
+!/vercel.json
