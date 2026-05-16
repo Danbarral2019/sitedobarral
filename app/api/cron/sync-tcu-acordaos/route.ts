@@ -11,6 +11,7 @@ import {
   ENRICHMENT_DELAY_MS,
 } from '@/lib/tcu-enrichment';
 import { classifyTCUEditorial } from '@/lib/tcu-editorial-classifier';
+import { withCronTelemetry } from '@/lib/cron-telemetry';
 
 /**
  * Cron Job: Sincronização automática de acórdãos do TCU
@@ -225,13 +226,16 @@ async function enrichNewDocuments(docIds: string[]): Promise<{
 }
 
 export async function GET(request: NextRequest) {
-  try {
-    // 1. Verificação de segurança
-    const authError = verifyCronAuth(request);
-    if (authError) return authError;
+  // 1. Verificação de segurança (fora do telemetry — auth não conta como falha de cron)
+  const authError = verifyCronAuth(request);
+  if (authError) return authError;
 
-    console.log('[Sync TCU] Iniciando sincronização de acórdãos...');
-    const startTime = Date.now();
+  let responseBody: Record<string, unknown> = {};
+
+  try {
+    await withCronTelemetry('sync-tcu-acordaos', async () => {
+      console.log('[Sync TCU] Iniciando sincronização de acórdãos...');
+      const startTime = Date.now();
 
     // 2. Buscar os 500 acórdãos mais recentes da API do TCU
     const url = `${TCU_API_URL}?inicio=0&quantidade=${PAGE_SIZE}`;
@@ -475,15 +479,33 @@ export async function GET(request: NextRequest) {
       elapsed: `${elapsed}s`,
     };
 
-    console.log('[Sync TCU] Resultado:', result);
+      console.log('[Sync TCU] Resultado:', result);
+      responseBody = {
+        message: `Sincronização TCU: ${imported} importados, ${enrichment.summaries} resumos, ${enrichment.leiIndexed} Lei-indexed, ${enrichment.classified} classificados`,
+        ...result,
+      };
 
-    return NextResponse.json({
-      message: `Sincronização TCU: ${imported} importados, ${enrichment.summaries} resumos, ${enrichment.leiIndexed} Lei-indexed, ${enrichment.classified} classificados`,
-      ...result,
+      // Retorno para o wrapper de telemetria (vira ScraperHealthLog)
+      return {
+        itemsFound: relevant.length,
+        itemsNew: imported,
+        itemsError: errors,
+        metadata: {
+          apiTotal: apiData.length,
+          alreadyExists: relevant.length - newItems.length,
+          skippedDuplicates,
+          enrichment,
+          highlights: highlightCount,
+          elapsed: `${elapsed}s`,
+        },
+      };
     });
 
+    // Sucesso: devolve a response HTTP customizada construída dentro do callback.
+    return NextResponse.json(responseBody);
   } catch (error) {
-    console.error('[Sync TCU] Erro fatal:', error);
+    // withCronTelemetry já chamou Sentry.captureException e gravou ScraperHealthLog (failure).
+    // Aqui só formatamos a response HTTP de erro.
     return NextResponse.json(
       {
         error: 'Erro ao sincronizar acórdãos do TCU',
