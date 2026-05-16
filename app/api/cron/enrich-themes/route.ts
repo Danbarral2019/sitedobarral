@@ -5,6 +5,7 @@ import {
   classifyByHeuristic,
   classifyByAi,
 } from '@/lib/legislative-scrapers/theme-enricher';
+import { withCronTelemetry } from '@/lib/cron-telemetry';
 
 /**
  * GET /api/cron/enrich-themes
@@ -27,9 +28,12 @@ export async function GET(request: NextRequest) {
   const authError = verifyCronAuth(request);
   if (authError) return authError;
 
-  console.log('[Cron EnrichThemes] Iniciando enriquecimento...');
+  let responseBody: Record<string, unknown> = {};
+  try {
+    await withCronTelemetry('enrich-themes', async () => {
+      console.log('[Cron EnrichThemes] Iniciando enriquecimento...');
 
-  const acts = await prisma.legislativeAct.findMany({
+      const acts = await prisma.legislativeAct.findMany({
     where: { themes: null },
     select: { id: true, fullNumber: true, title: true, ementa: true, leiArticles: true, content: true },
     take: TAKE_LIMIT,
@@ -83,14 +87,28 @@ export async function GET(request: NextRequest) {
     console.log(`[EnrichThemes] ✓ ai ${act.fullNumber}: ${JSON.stringify(aiResult.themes)}`);
   }
 
-  const summary = {
-    processed: acts.length,
-    heuristicHits,
-    aiHits,
-    aiFailed,
-    aiEmpty,
-    tokens: { input: totalInputTokens, output: totalOutputTokens },
-  };
-  console.log('[Cron EnrichThemes] Resumo:', summary);
-  return NextResponse.json({ ok: true, ...summary });
+      const summary = {
+        processed: acts.length,
+        heuristicHits,
+        aiHits,
+        aiFailed,
+        aiEmpty,
+        tokens: { input: totalInputTokens, output: totalOutputTokens },
+      };
+      console.log('[Cron EnrichThemes] Resumo:', summary);
+      responseBody = { ok: true, ...summary };
+      return {
+        itemsFound: acts.length,
+        itemsNew: heuristicHits + aiHits,
+        itemsError: aiFailed,
+        metadata: { aiEmpty, tokens: summary.tokens },
+      };
+    });
+    return NextResponse.json(responseBody);
+  } catch (error) {
+    return NextResponse.json(
+      { ok: false, error: error instanceof Error ? error.message : 'Erro desconhecido' },
+      { status: 500 },
+    );
+  }
 }

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { verifyCronAuth } from '@/lib/cron-auth';
+import { withCronTelemetry } from '@/lib/cron-telemetry';
 
 export const runtime = 'nodejs';
 export const maxDuration = 60;
@@ -11,14 +12,16 @@ export const maxDuration = 60;
  * Schedule: "0 0 * * *" (meia-noite UTC)
  */
 export async function GET(request: NextRequest) {
+  const authError = verifyCronAuth(request);
+  if (authError) return authError;
+
   console.log('[Tribunal Scraper Health] Verificando saúde dos scrapers...');
 
+  let responseBody: Record<string, unknown> = {};
   try {
-    const authError = verifyCronAuth(request);
-    if (authError) return authError;
-
-    // Buscar últimos logs agrupados por scraper
-    const allLogs = await prisma.scraperHealthLog.findMany({
+    await withCronTelemetry('tribunal-scraper-health', async () => {
+      // Buscar últimos logs agrupados por scraper
+      const allLogs = await prisma.scraperHealthLog.findMany({
       orderBy: { runAt: 'desc' },
       take: 100,
     });
@@ -63,16 +66,23 @@ export async function GET(request: NextRequest) {
       console.warn('[Tribunal Scraper Health] WARNINGS:', warnings);
     }
 
-    console.log(`[Tribunal Scraper Health] ${scrapers.length} scrapers verificados, ${warnings.length} warnings`);
+      console.log(`[Tribunal Scraper Health] ${scrapers.length} scrapers verificados, ${warnings.length} warnings`);
 
-    return NextResponse.json({
-      success: true,
-      scrapers,
-      warnings,
-      hasWarnings: warnings.length > 0,
+      responseBody = {
+        success: true,
+        scrapers,
+        warnings,
+        hasWarnings: warnings.length > 0,
+      };
+
+      return {
+        itemsFound: scrapers.length,
+        itemsError: warnings.length,
+        metadata: { warnings },
+      };
     });
+    return NextResponse.json(responseBody);
   } catch (error) {
-    console.error('[Tribunal Scraper Health] Erro:', error);
     return NextResponse.json(
       { error: error instanceof Error ? error.message : 'Internal server error' },
       { status: 500 }

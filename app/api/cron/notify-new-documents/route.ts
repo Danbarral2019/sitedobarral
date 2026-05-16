@@ -3,6 +3,7 @@ import { prisma } from '@/lib/prisma';
 import { sendNewDocumentsNotification } from '@/lib/email';
 import { courses } from '@/data/courses';
 import { verifyCronAuth } from '@/lib/cron-auth';
+import { withCronTelemetry } from '@/lib/cron-telemetry';
 
 /**
  * API de Cron Job para notificar alunos sobre novos documentos
@@ -14,12 +15,14 @@ import { verifyCronAuth } from '@/lib/cron-auth';
  * Vercel Cron: 0 9 * * * (9h UTC = 6h BRT)
  */
 export async function GET(request: NextRequest) {
-  try {
-    // Verificar autenticação do cron (segurança)
-    const authError = verifyCronAuth(request);
-    if (authError) return authError;
+  // Verificar autenticação do cron (fora do telemetry — auth não conta como falha)
+  const authError = verifyCronAuth(request);
+  if (authError) return authError;
 
-    console.log('🔔 [CRON] Iniciando notificação de novos documentos...');
+  let responseBody: Record<string, unknown> = {};
+  try {
+    await withCronTelemetry('notify-new-documents', async () => {
+      console.log('🔔 [CRON] Iniciando notificação de novos documentos...');
 
     // Data de ontem (início e fim do dia)
     const yesterday = new Date();
@@ -46,11 +49,12 @@ export async function GET(request: NextRequest) {
 
     if (newDocuments.length === 0) {
       console.log('✅ [CRON] Nenhum documento novo para notificar');
-      return NextResponse.json({
+      responseBody = {
         success: true,
         message: 'Nenhum documento novo para notificar',
         sent: 0,
-      });
+      };
+      return { itemsFound: 0 };
     }
 
     let totalEmailsSent = 0;
@@ -164,17 +168,24 @@ export async function GET(request: NextRequest) {
       }
     }
 
-    console.log(`🎉 [CRON] Processo concluído! Enviados: ${totalEmailsSent} | Erros: ${totalErrors}`);
+      console.log(`🎉 [CRON] Processo concluído! Enviados: ${totalEmailsSent} | Erros: ${totalErrors}`);
 
-    return NextResponse.json({
-      success: true,
-      message: 'Notificações processadas com sucesso',
-      sent: totalEmailsSent,
-      errors: totalErrors,
-      coursesProcessed: newDocuments.length,
+      responseBody = {
+        success: true,
+        message: 'Notificações processadas com sucesso',
+        sent: totalEmailsSent,
+        errors: totalErrors,
+        coursesProcessed: newDocuments.length,
+      };
+      return {
+        itemsFound: newDocuments.length,
+        itemsNew: totalEmailsSent,
+        itemsError: totalErrors,
+        metadata: { coursesProcessed: newDocuments.length },
+      };
     });
+    return NextResponse.json(responseBody);
   } catch (error) {
-    console.error('❌ [CRON] Erro fatal:', error);
     return NextResponse.json(
       {
         success: false,

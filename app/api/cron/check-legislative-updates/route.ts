@@ -5,6 +5,7 @@ import { hasHashChanged } from '@/lib/legislative-scrapers/change-detector';
 import { scrapeAndIndexAct } from '@/lib/legislative-scrapers/scrape-and-index';
 import { verifyCronAuth } from '@/lib/cron-auth';
 import { detectAndSaveRelationsHybrid } from '@/lib/legislative-acts/relations';
+import { withCronTelemetry } from '@/lib/cron-telemetry';
 
 /**
  * GET /api/cron/check-legislative-updates
@@ -18,12 +19,14 @@ import { detectAndSaveRelationsHybrid } from '@/lib/legislative-acts/relations';
  * Schedule: 0 3 * * 1 (toda segunda-feira às 3h)
  */
 export async function GET(request: NextRequest) {
-  try {
-    // Verificar autenticação via CRON_SECRET
-    const authError = verifyCronAuth(request);
-    if (authError) return authError;
+  // Verificar autenticação via CRON_SECRET (fora do telemetry)
+  const authError = verifyCronAuth(request);
+  if (authError) return authError;
 
-    console.log('[Cron Legislative] Iniciando verificação de atualizações...');
+  let responseBody: Record<string, unknown> = {};
+  try {
+    await withCronTelemetry('check-legislative-updates', async () => {
+      console.log('[Cron Legislative] Iniciando verificação de atualizações...');
 
     // Buscar atos que não foram verificados há 7+ dias
     const sevenDaysAgo = new Date();
@@ -203,17 +206,24 @@ export async function GET(request: NextRequest) {
       },
     };
 
-    console.log('[Cron Legislative] Concluído:', stats);
+      console.log('[Cron Legislative] Concluído:', stats);
 
-    return NextResponse.json({
-      success: true,
-      timestamp: new Date().toISOString(),
-      stats,
-      results,
-      backlogResults,
+      responseBody = {
+        success: true,
+        timestamp: new Date().toISOString(),
+        stats,
+        results,
+        backlogResults,
+      };
+      return {
+        itemsFound: (stats as { checked?: number }).checked ?? 0,
+        itemsNew: (stats as { updated?: number }).updated ?? 0,
+        itemsError: (stats as { errors?: number }).errors ?? 0,
+        metadata: { backlogResults: backlogResults.length },
+      };
     });
+    return NextResponse.json(responseBody);
   } catch (error) {
-    console.error('[Cron Legislative] Erro geral:', error);
     return NextResponse.json(
       {
         error: 'Erro ao processar verificação',

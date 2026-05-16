@@ -4,6 +4,7 @@ import { sendInactivityReminderEmail } from '@/lib/email';
 import { sendPushToUser } from '@/lib/push-notifications';
 import { courses } from '@/data/courses';
 import { verifyCronAuth } from '@/lib/cron-auth';
+import { withCronTelemetry } from '@/lib/cron-telemetry';
 
 /**
  * Cron Job: Lembrete de inatividade LMS
@@ -27,7 +28,9 @@ export async function GET(request: NextRequest) {
   const sixtyDaysAgo = new Date(now.getTime() - 60 * 24 * 60 * 60 * 1000);
   const thirtyDaysAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
 
+  let responseBody: Record<string, unknown> = {};
   try {
+    await withCronTelemetry('lms-inactivity', async () => {
     // 1. Find users with active enrollments
     const activeEnrollments = await prisma.enrollment.findMany({
       where: {
@@ -151,16 +154,22 @@ export async function GET(request: NextRequest) {
       }
     }
 
-    console.log(`[lms-inactivity] Processed: ${toNotify.length}, Sent: ${sent}, Skipped: ${skipped}`);
+      console.log(`[lms-inactivity] Processed: ${toNotify.length}, Sent: ${sent}, Skipped: ${skipped}`);
 
-    return NextResponse.json({
-      processed: toNotify.length,
-      sent,
-      skipped,
-      limitReached: toNotify.length > limit,
+      responseBody = {
+        processed: toNotify.length,
+        sent,
+        skipped,
+        limitReached: toNotify.length > limit,
+      };
+      return {
+        itemsFound: toNotify.length,
+        itemsNew: sent,
+        metadata: { skipped, limitReached: toNotify.length > limit },
+      };
     });
+    return NextResponse.json(responseBody);
   } catch (error) {
-    console.error('[lms-inactivity] Error:', error);
     return NextResponse.json(
       { error: 'Internal error' },
       { status: 500 }

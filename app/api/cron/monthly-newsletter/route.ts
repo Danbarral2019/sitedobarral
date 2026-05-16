@@ -6,6 +6,7 @@ import { randomUUID } from 'crypto';
 import { renderMonthlyNewsletter } from '@/lib/email-templates/newsletter';
 import { filterByRelevance, type DecisionInput } from '@/lib/newsletter/relevance-filter';
 import { generateNewsletterIntro } from '@/lib/newsletter/intro-generator';
+import { withCronTelemetry } from '@/lib/cron-telemetry';
 
 // Aumentado de 120s pra 300s em 2026-05-01 — newsletter de maio caiu por
 // FUNCTION_INVOCATION_TIMEOUT (504) com 5 chamadas Gemini de 8-10s cada
@@ -28,10 +29,13 @@ export const maxDuration = 300;
  * Agendamento: Configurado no vercel.json (mensal - dia 1 às 9h)
  */
 export async function GET(request: NextRequest) {
+  // 1. Verificação de segurança (fora do telemetry)
+  const authError = verifyCronAuth(request);
+  if (authError) return authError;
+
+  let responseBody: Record<string, unknown> = {};
   try {
-    // 1. Verificação de segurança
-    const authError = verifyCronAuth(request);
-    if (authError) return authError;
+    await withCronTelemetry('monthly-newsletter', async () => {
 
     const dryRun = request.nextUrl.searchParams.get('dryRun') === 'true';
 
@@ -138,11 +142,12 @@ export async function GET(request: NextRequest) {
     // Se não houver conteúdo novo, não envia newsletter
     if (totalItems === 0 && newBlogPosts.length === 0 && newPublications.length === 0) {
       console.log('[Cron Newsletter v0.2] Nenhum conteúdo novo, newsletter não enviada');
-      return NextResponse.json({
+      responseBody = {
         success: true,
         message: 'Nenhum conteúdo novo para enviar na newsletter',
         documentCount: 0,
-      });
+      };
+      return { itemsFound: 0 };
     }
 
     // 3. Separar acórdãos dos demais documentos
@@ -263,11 +268,12 @@ export async function GET(request: NextRequest) {
 
     if (subscribers.length === 0) {
       console.log('[Cron Newsletter v0.2] Nenhum inscrito ativo');
-      return NextResponse.json({
+      responseBody = {
         success: true,
         message: 'Nenhum inscrito ativo para enviar newsletter',
         documentCount: totalItems,
-      });
+      };
+      return { itemsFound: totalItems, metadata: { noSubscribers: true } };
     }
 
     // 8. Gerar HTML da newsletter (sendId criado no passo 3b)
@@ -289,7 +295,7 @@ export async function GET(request: NextRequest) {
 
     // Dry run: return data without sending
     if (dryRun) {
-      return NextResponse.json({
+      responseBody = {
         success: true,
         dryRun: true,
         message: 'Newsletter gerada em modo dry run (não enviada)',
@@ -314,7 +320,8 @@ export async function GET(request: NextRequest) {
           introPreview: introHtml.substring(0, 300),
           subject,
         },
-      });
+      };
+      return { itemsFound: totalItems, metadata: { dryRun: true, subscribers: subscribers.length } };
     }
 
     // 9. Inicializar Resend e atualizar subject do registro criado no passo 3b
@@ -370,27 +377,33 @@ export async function GET(request: NextRequest) {
       data: { totalSent: successCount, totalFailed: errorCount },
     });
 
-    return NextResponse.json({
-      success: true,
-      message: 'Newsletter mensal v0.2 enviada com sucesso',
-      stats: {
-        totalDocuments: totalItems,
-        decisionsSelected: filterResult.totalSelected,
-        decisionsEvaluated: filterResult.totalEvaluated,
-        blogPosts: newBlogPosts.length,
-        publications: newPublications.length,
-        videos: newVideos.length,
-        legislativeChanges: newLegislativeActs.length,
-        subscribers: subscribers.length,
-        emailsSent: successCount,
-        emailsFailed: errorCount,
-        sendId,
-        errors: errors.length > 0 ? errors : undefined,
-      },
+      responseBody = {
+        success: true,
+        message: 'Newsletter mensal v0.2 enviada com sucesso',
+        stats: {
+          totalDocuments: totalItems,
+          decisionsSelected: filterResult.totalSelected,
+          decisionsEvaluated: filterResult.totalEvaluated,
+          blogPosts: newBlogPosts.length,
+          publications: newPublications.length,
+          videos: newVideos.length,
+          legislativeChanges: newLegislativeActs.length,
+          subscribers: subscribers.length,
+          emailsSent: successCount,
+          emailsFailed: errorCount,
+          sendId,
+          errors: errors.length > 0 ? errors : undefined,
+        },
+      };
+      return {
+        itemsFound: totalItems,
+        itemsNew: successCount,
+        itemsError: errorCount,
+        metadata: { subscribers: subscribers.length, sendId },
+      };
     });
-
+    return NextResponse.json(responseBody);
   } catch (error) {
-    console.error('[Cron Newsletter v0.2] Erro fatal:', error);
     return NextResponse.json(
       {
         error: 'Erro ao enviar newsletter mensal',
