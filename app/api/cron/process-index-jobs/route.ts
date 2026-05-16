@@ -3,6 +3,7 @@ import { prisma } from '@/lib/prisma';
 import { processDocument, getProcessingStats } from '@/lib/embeddings/document-processor';
 import { processTribunalDecision } from '@/lib/embeddings/tribunal-decision-processor';
 import { apiLogger } from '@/lib/logger';
+import { withCronTelemetry } from '@/lib/cron-telemetry';
 
 // ===========================
 // Configuration
@@ -232,25 +233,19 @@ async function processJob(job: {
 // ===========================
 
 export async function GET(req: NextRequest) {
+  // Auth fora do telemetry (auth != falha de cron)
+  const authHeader = req.headers.get('authorization');
+  if (!CRON_SECRET) {
+    return NextResponse.json({ error: 'Cron secret not configured' }, { status: 500 });
+  }
+  if (authHeader !== `Bearer ${CRON_SECRET}`) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  }
+
+  let responseBody: Record<string, unknown> = {};
   try {
-    // 1. Verify cron secret
-    const authHeader = req.headers.get('authorization');
-
-    if (!CRON_SECRET) {
-      return NextResponse.json(
-        { error: 'Cron secret not configured' },
-        { status: 500 }
-      );
-    }
-
-    if (authHeader !== `Bearer ${CRON_SECRET}`) {
-      return NextResponse.json(
-        { error: 'Unauthorized' },
-        { status: 401 }
-      );
-    }
-
-    console.log('🔄 Starting embedding job processor...');
+    await withCronTelemetry('process-index-jobs', async () => {
+      console.log('🔄 Starting embedding job processor...');
 
     // 2. Get processing stats
     const stats = await getProcessingStats();
@@ -313,12 +308,13 @@ export async function GET(req: NextRequest) {
     );
 
     if (totalPending === 0) {
-      return NextResponse.json({
+      responseBody = {
         success: true,
         message: 'No pending jobs',
         processed: 0,
         stats,
-      });
+      };
+      return { itemsFound: 0, metadata: { stats } };
     }
 
     // 5. Process IndexJob queue
@@ -466,11 +462,18 @@ export async function GET(req: NextRequest) {
       results,
     };
 
-    console.log(`✅ Processed ${summary.processed} items (${summary.completed} completed, ${summary.failed} failed, ${summary.totalChunksCreated} chunks created)`);
+      console.log(`✅ Processed ${summary.processed} items (${summary.completed} completed, ${summary.failed} failed, ${summary.totalChunksCreated} chunks created)`);
 
-    return NextResponse.json(summary);
+      responseBody = summary;
+      return {
+        itemsFound: totalPending,
+        itemsNew: summary.completed,
+        itemsError: summary.failed,
+        metadata: { totalChunksCreated: summary.totalChunksCreated, stats: summary.stats },
+      };
+    });
+    return NextResponse.json(responseBody);
   } catch (error) {
-    apiLogger.error({ err: error }, '❌ Index job processor error:');
     return NextResponse.json(
       {
         success: false,

@@ -3,6 +3,8 @@ import { prisma } from '@/lib/prisma';
 import { sendExpirationNotification } from '@/lib/email';
 import { shouldSendExpirationNotification } from '@/lib/enrollment-utils';
 import { verifyCronAuth } from '@/lib/cron-auth';
+import { withCronTelemetry } from '@/lib/cron-telemetry';
+import { apiLogger } from '@/lib/logger';
 
 
 /**
@@ -12,12 +14,14 @@ import { verifyCronAuth } from '@/lib/cron-auth';
  * Segurança: Requer Authorization: Bearer <CRON_SECRET>
  */
 export async function POST(request: NextRequest) {
-  try {
-    // Verificar token de autorização do cron
-    const authError = verifyCronAuth(request);
-    if (authError) return authError;
+  // Auth fora do telemetry (auth != falha de cron)
+  const authError = verifyCronAuth(request);
+  if (authError) return authError;
 
-    const now = new Date();
+  let responseBody: Record<string, unknown> = {};
+  try {
+    await withCronTelemetry('enrollment-check-expiration', async () => {
+      const now = new Date();
     const threeMonthsFromNow = new Date();
     threeMonthsFromNow.setMonth(threeMonthsFromNow.getMonth() + 3);
 
@@ -92,20 +96,24 @@ export async function POST(request: NextRequest) {
         results.errors.push(
           `Erro ao processar enrollment ${enrollment.id}: ${error instanceof Error ? error.message : 'Unknown error'}`
         );
-        console.error(`Erro ao processar enrollment ${enrollment.id}:`, error);
+        apiLogger.error({ err: error, enrollmentId: enrollment.id }, 'Erro ao processar enrollment');
       }
     }
 
-    return NextResponse.json(
-      {
-        success: true,
-        message: 'Verificação de expiração concluída',
-        results,
-      },
-      { status: 200 }
-    );
+    responseBody = {
+      success: true,
+      message: 'Verificação de expiração concluída',
+      results,
+    };
+    return {
+      itemsFound: results.total,
+      itemsNew: results.notified,
+      itemsError: results.failed,
+      metadata: { errorSamples: results.errors.slice(0, 3) },
+    };
+    });
+    return NextResponse.json(responseBody, { status: 200 });
   } catch (error) {
-    console.error('Check expiration error:', error);
     return NextResponse.json(
       { error: 'Erro ao verificar expirações' },
       { status: 500 }

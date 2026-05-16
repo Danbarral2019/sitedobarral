@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { listR2FilesWithMetadata, deleteFromR2 } from '@/lib/storage/r2-client';
 import { apiLogger } from '@/lib/logger';
+import { withCronTelemetry } from '@/lib/cron-telemetry';
 
 // ===========================
 // Configuration
@@ -155,22 +156,22 @@ async function deleteOrphanedFiles(
 // ===========================
 
 export async function GET(req: NextRequest) {
+  // Auth fora do telemetry (auth != falha de cron)
+  const authHeader = req.headers.get('authorization');
+  if (!CRON_SECRET) {
+    return NextResponse.json(
+      { error: 'Cron secret not configured' },
+      { status: 500 }
+    );
+  }
+  if (authHeader !== `Bearer ${CRON_SECRET}`) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  }
+
+  let responseBody: Record<string, unknown> = {};
   try {
-    // 1. Verify cron secret
-    const authHeader = req.headers.get('authorization');
-
-    if (!CRON_SECRET) {
-      return NextResponse.json(
-        { error: 'Cron secret not configured' },
-        { status: 500 }
-      );
-    }
-
-    if (authHeader !== `Bearer ${CRON_SECRET}`) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
-
-    console.log('🧹 Starting orphaned files cleanup...');
+    await withCronTelemetry('cleanup-orphaned-files', async () => {
+      console.log('🧹 Starting orphaned files cleanup...');
     console.log(`⚙️  Configuration:`);
     console.log(`   - Orphan threshold: ${ORPHAN_THRESHOLD_HOURS} hours`);
     console.log(`   - Max files per run: ${MAX_FILES_PER_RUN}`);
@@ -207,13 +208,20 @@ export async function GET(req: NextRequest) {
       console.log('💡 To actually delete files, set NODE_ENV=production or DRY_RUN=false');
     }
 
-    return NextResponse.json({
-      success: true,
-      ...result,
-      totalSizeMB,
+      responseBody = {
+        success: true,
+        ...result,
+        totalSizeMB,
+      };
+      return {
+        itemsFound: result.scanned,
+        itemsNew: result.deleted,
+        itemsError: result.errors,
+        metadata: { dryRun: DRY_RUN, totalSizeMB, orphaned: result.orphaned, skipped: result.skipped },
+      };
     });
+    return NextResponse.json(responseBody);
   } catch (error) {
-    apiLogger.error({ err: error }, '❌ Cleanup error:');
     return NextResponse.json(
       {
         success: false,

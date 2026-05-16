@@ -36,6 +36,7 @@ import { classifyEditorialBatch, EDITORIAL_PROMPT_VERSION, type EditorialCandida
 import { sendDouEditorialAlert, type DouEditorialAlertItem } from '@/lib/email';
 import { PRIMARY_GEMINI_MODEL } from '@/lib/gemini/config';
 import { extractIssuerFromDouHierarchy } from '@/lib/dou-issuer';
+import { withCronTelemetry } from '@/lib/cron-telemetry';
 import { getHierarchyLevel } from '@/lib/legislative-acts/hierarchy';
 import { apiLogger } from '@/lib/logger';
 
@@ -103,21 +104,30 @@ const CHANGE_TYPE_MAP: Record<string, string> = {
 };
 
 export async function GET(request: NextRequest) {
+  // Auth fora do telemetry (auth != falha de cron)
+  const authError = verifyCronAuth(request);
+  if (authError) return authError;
+
   console.log('[Sync DOU Normativos] Iniciando sincronização...');
 
+  const { searchParams } = new URL(request.url);
+  const dryRun = searchParams.get('dryRun') === 'true';
+  const limitParam = searchParams.get('limit');
+  const maxResults = limitParam ? Math.min(parseInt(limitParam, 10) || 100, 500) : 100;
+  const v2Enabled = process.env.DOU_CLIPPING_V2_ENABLED === 'true';
+
+  // capturedResponse: runV2 retorna NextResponse direto; o caminho legacy
+  // monta responseBody. Variável outer evita refator invasivo no runV2.
+  let capturedResponse: NextResponse | null = null;
+  let responseBody: Record<string, unknown> = {};
+
   try {
-    // 1. Auth
-    const authError = verifyCronAuth(request);
-    if (authError) return authError;
-
-    const { searchParams } = new URL(request.url);
-    const dryRun = searchParams.get('dryRun') === 'true';
-    const limitParam = searchParams.get('limit');
-    const maxResults = limitParam ? Math.min(parseInt(limitParam, 10) || 100, 500) : 100;
-
-    const v2Enabled = process.env.DOU_CLIPPING_V2_ENABLED === 'true';
+    await withCronTelemetry(v2Enabled ? 'sync-dou-atos-normativos-v2' : 'sync-dou-atos-normativos', async () => {
     if (v2Enabled) {
-      return await runV2(dryRun, maxResults);
+      capturedResponse = await runV2(dryRun, maxResults);
+      // Sucesso/falha do runV2 já está na response; aqui só registramos
+      // telemetria mínima (runV2 tem stats próprios mas não expostos).
+      return { metadata: { v2: true, dryRun } };
     }
     // ↓ fluxo legacy continua abaixo (sem alteração)
 
@@ -151,7 +161,7 @@ export async function GET(request: NextRequest) {
           }
         }
       } catch (error) {
-        apiLogger.error(`[Sync DOU Normativos] Erro ao buscar "${term}":`, error);
+        apiLogger.error({ err: error }, `[Sync DOU Normativos] Erro ao buscar "${term}":`);
         stats.erros++;
       }
       // Rate limiting entre buscas
@@ -163,7 +173,8 @@ export async function GET(request: NextRequest) {
     console.log(`[Sync DOU Normativos] ${results.length} resultados únicos encontrados`);
 
     if (results.length === 0) {
-      return NextResponse.json({ success: true, message: 'Nenhum resultado encontrado', stats, dryRun });
+      responseBody = { success: true, message: 'Nenhum resultado encontrado', stats, dryRun };
+      return { itemsFound: 0, metadata: { dryRun } };
     }
 
     // Docs auto-aprovados para enriquecer com scraper após o loop principal
@@ -537,15 +548,21 @@ export async function GET(request: NextRequest) {
 
     console.log('[Sync DOU Normativos] Sincronização concluída:', stats);
 
-    return NextResponse.json({
+    responseBody = {
       success: true,
       dryRun,
       message: `Processados: ${stats.autoAprovados} auto-aprovados, ${stats.enviadosParaStaging} para staging, ${stats.alteracoesDetectadas} alterações detectadas`,
       stats: { ...stats, aiClassified: aiStats.updated, aiErrors: aiStats.errors },
+    };
+    return {
+      itemsFound: stats.totalBuscados ?? 0,
+      itemsNew: (stats.autoAprovados ?? 0) + (stats.enviadosParaStaging ?? 0),
+      itemsError: aiStats.errors ?? 0,
+      metadata: { dryRun, alteracoesDetectadas: stats.alteracoesDetectadas },
+    };
     });
-
+    return capturedResponse ?? NextResponse.json(responseBody);
   } catch (error) {
-    apiLogger.error({ err: error }, '[Sync DOU Normativos] Erro fatal:');
     return NextResponse.json(
       { success: false, error: error instanceof Error ? error.message : 'Erro desconhecido' },
       { status: 500 }
@@ -583,7 +600,7 @@ async function runV2(dryRun: boolean, maxResults: number): Promise<NextResponse>
         if (!allResults.has(r.href)) allResults.set(r.href, r);
       }
     } catch (error) {
-      apiLogger.error(`[Sync DOU v2] Erro busca "${term}":`, error);
+      apiLogger.error({ err: error }, `[Sync DOU v2] Erro busca "${term}":`);
       stats.erros++;
     }
     await new Promise((res) => setTimeout(res, 1500));
