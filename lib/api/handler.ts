@@ -39,12 +39,17 @@ function createApiHandler<P>(
     try {
       const params = await nextCtx.params;
 
-      // Rate-limit key intencionalmente sem route — replica o comportamento
-      // do `lib/api-middleware.ts` antigo. Granularidade por-rota será revisitada
-      // após a Onda 4 (mudança de comportamento, não cabe nesta PR).
+      // Rate-limit key intencionalmente compartilhada com `lib/api-middleware.ts`
+      // antigo (prefixo `middleware:`) durante a janela de migração da Onda 4.
+      // Sem isso, o mesmo IP bate em dois buckets Redis distintos enquanto
+      // metade das rotas usa o helper novo e metade o middleware antigo,
+      // efetivamente dobrando o limite. PR 4.2.final (após remover
+      // api-middleware.ts) muda o prefixo para `api:` e revisita granularidade
+      // por-rota.
       const rl = options.rateLimit ?? ROLE_DEFAULTS[role].rateLimit;
       const ip = getClientIp(request);
-      await enforceRateLimit(`api:${role}:${ip}`, rl.max, rl.windowSec);
+      const rateLimitKeyRole = role === 'public' ? 'public' : role === 'admin' ? 'admin' : 'auth';
+      await enforceRateLimit(`middleware:${rateLimitKeyRole}:${ip}`, rl.max, rl.windowSec);
 
       let user: AuthPayload | null = null;
       if (role !== 'public') {

@@ -28,6 +28,8 @@
 - Migração de qualquer rota
 - Remoção de `lib/api-middleware.ts`
 
+**Nota para o codemod (PR 4.2.1+):** rotas que usam `verifyAdmin(request)` em handlers `export async function` (não-HOF) — ex.: `app/api/admin/recommended-sites/[id]/route.ts` — exigem reescrita de **shape** (mudar `export async function DELETE` para `export const DELETE = withAdminApi(...)`), não apenas troca de wrapper. Categoria adicional **T1.b** do codemod. Mapeamento: o early-return `if (verification.error) return verification.response` desaparece (o helper faz o throw); o `await params` desaparece (`ctx.params` já desempacotado).
+
 ---
 
 ## Task 1: Setup da branch e tipos públicos

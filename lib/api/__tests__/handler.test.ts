@@ -75,8 +75,9 @@ describe('lib/api/handler', () => {
       await handler(makeRequest(), makeNextCtx());
 
       const rl = await import('@/lib/cache/rate-limit-helper');
+      // Chave compartilhada com `lib/api-middleware.ts` legacy: prefixo `middleware:`
       expect(vi.mocked(rl.enforceRateLimit)).toHaveBeenCalledWith(
-        'api:admin:203.0.113.5',
+        'middleware:admin:203.0.113.5',
         30,
         60
       );
@@ -90,8 +91,9 @@ describe('lib/api/handler', () => {
       await handler(makeRequest(), makeNextCtx());
 
       const rl = await import('@/lib/cache/rate-limit-helper');
+      // Role 'user' mapeia para `middleware:auth:` (compat com withAuth legacy)
       expect(vi.mocked(rl.enforceRateLimit)).toHaveBeenCalledWith(
-        'api:user:203.0.113.5',
+        'middleware:auth:203.0.113.5',
         60,
         60
       );
@@ -103,7 +105,7 @@ describe('lib/api/handler', () => {
 
       const rl = await import('@/lib/cache/rate-limit-helper');
       expect(vi.mocked(rl.enforceRateLimit)).toHaveBeenCalledWith(
-        'api:public:203.0.113.5',
+        'middleware:public:203.0.113.5',
         30,
         60
       );
@@ -118,7 +120,7 @@ describe('lib/api/handler', () => {
 
       const rl = await import('@/lib/cache/rate-limit-helper');
       expect(vi.mocked(rl.enforceRateLimit)).toHaveBeenCalledWith(
-        'api:public:203.0.113.5',
+        'middleware:public:203.0.113.5',
         5,
         600
       );
