@@ -1,14 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { withAuth } from '@/lib/api-middleware';
+import { withUserApi } from '@/lib/api/handler';
 import { prisma } from '@/lib/prisma';
 import { BADGE_TYPES } from '@/lib/gamification';
 
-export const GET = withAuth(async (
+export const GET = withUserApi<{ courseId: string }>(async (
   request: NextRequest,
-  context?: Record<string, unknown>
+  ctx
 ) => {
-  const user = context?.user as { userId: string };
-  const { courseId } = await (context as { params: Promise<{ courseId: string }> }).params;
+  const { courseId } = ctx.params;
 
   // Top 20 by XP (opt-in only)
   const streaks = await prisma.userStreak.findMany({
@@ -44,7 +43,7 @@ export const GET = withAuth(async (
     xp: s.totalXp,
     streak: s.currentStreak,
     badgeCount: badgeCountMap.get(s.userId) || 0,
-    isCurrentUser: s.userId === user.userId,
+    isCurrentUser: s.userId === ctx.user.userId,
   }));
 
   // Find current user's position if not in top 20
@@ -52,7 +51,7 @@ export const GET = withAuth(async (
   const isInTop = leaderboard.some(l => l.isCurrentUser);
   if (!isInTop) {
     const userStreak = await prisma.userStreak.findUnique({
-      where: { userId_courseId: { userId: user.userId, courseId } },
+      where: { userId_courseId: { userId: ctx.user.userId, courseId } },
     });
     if (userStreak) {
       const ahead = await prisma.userStreak.count({
