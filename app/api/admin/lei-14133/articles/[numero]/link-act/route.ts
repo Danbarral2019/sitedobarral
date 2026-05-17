@@ -1,28 +1,23 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
-import { verifyAdmin } from '@/lib/api-middleware';
+import { withAdminApi } from '@/lib/api/handler';
+import { ApiError, NotFoundError } from '@/lib/errors/api-error';
 import { safeParseArray } from '@/lib/utils';
 import { CacheInvalidation } from '@/lib/cache/redis-client';
 
-export async function POST(
-  request: NextRequest,
-  { params }: { params: Promise<{ numero: string }> },
-) {
-  const adminCheck = await verifyAdmin(request);
-  if (adminCheck.error) return adminCheck.response;
-
-  const { numero } = await params;
+export const POST = withAdminApi<{ numero: string }>(async (request, { params }) => {
+  const { numero } = params;
   const body = await request.json();
   const actId = String(body?.actId || '').trim();
   if (!actId) {
-    return NextResponse.json({ error: 'actId obrigatório' }, { status: 422 });
+    throw new ApiError(422, 'actId obrigatório', 'VALIDATION_ERROR');
   }
 
   const act = await prisma.legislativeAct.findUnique({
     where: { id: actId },
     select: { id: true, leiArticles: true },
   });
-  if (!act) return NextResponse.json({ error: 'Ato não encontrado' }, { status: 404 });
+  if (!act) throw new NotFoundError('Ato');
 
   const current = safeParseArray(act.leiArticles).map(String);
   if (current.includes(numero)) {
@@ -41,4 +36,4 @@ export async function POST(
   ]);
 
   return NextResponse.json({ success: true });
-}
+});

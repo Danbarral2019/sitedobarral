@@ -1,10 +1,27 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { NextRequest } from 'next/server';
-import { GET } from '../route';
 
-vi.mock('@/lib/api-middleware', () => ({
-  verifyAdmin: vi.fn(async () => ({ error: null })),
-}));
+vi.mock('@/lib/api/handler', async () => {
+  const { handleApiError } = await import('@/lib/errors/error-handler');
+  return {
+    withAdminApi:
+      <P>(h: (req: NextRequest, ctx: { user: unknown; params: P; requestId: string; logger: unknown }) => Promise<Response>) =>
+      async (req: NextRequest, ctx: { params: Promise<P> }) => {
+        try {
+          const params = await ctx.params;
+          const mockCtx = {
+            user: { userId: 'test', email: 'admin@test.com', role: 'admin' as const },
+            params,
+            requestId: 'test',
+            logger: console,
+          };
+          return await h(req, mockCtx);
+        } catch (err) {
+          return handleApiError(err);
+        }
+      },
+  };
+});
 
 vi.mock('@/lib/prisma', () => ({
   prisma: {
@@ -15,6 +32,7 @@ vi.mock('@/lib/prisma', () => ({
 }));
 
 const { prisma } = await import('@/lib/prisma');
+const { GET } = await import('../route');
 
 describe('GET /api/admin/lei-14133/articles/[numero]', () => {
   beforeEach(() => {
