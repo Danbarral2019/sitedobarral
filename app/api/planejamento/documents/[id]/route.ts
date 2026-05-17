@@ -1,16 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
-import { withAuth } from "@/lib/api-middleware";
+import { withUserApi } from "@/lib/api/handler";
 import { prisma } from "@/lib/prisma";
 import { getTrailBySlug } from "@/data/planejamento/trails";
+import { NotFoundError } from "@/lib/errors/api-error";
+import type { ApiContext } from "@/lib/api/types";
 
-interface Ctx {
-  params: Promise<{ id: string }>;
-  user: { userId: string };
-}
-
-export const GET = withAuth(async (_request: NextRequest, context) => {
-  const { id } = await (context as Ctx).params;
-  const userId = (context as Ctx).user.userId;
+export const GET = withUserApi<{ id: string }>(async (_request: NextRequest, ctx: ApiContext<{ id: string }>) => {
+  const { id } = ctx.params;
+  const userId = ctx.user.userId;
 
   const doc = await prisma.planningDocument.findFirst({
     where: { id, session: { userId, deletedAt: null } },
@@ -21,7 +18,7 @@ export const GET = withAuth(async (_request: NextRequest, context) => {
   });
 
   if (!doc) {
-    return NextResponse.json({ error: "Documento não encontrado" }, { status: 404 });
+    throw new NotFoundError("Documento");
   }
 
   // Anexa metadata didática estática da trilha (conceito/fundamento) para o

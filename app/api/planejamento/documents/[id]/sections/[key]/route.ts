@@ -1,24 +1,18 @@
 import { NextRequest, NextResponse } from "next/server";
-import { withAuth } from "@/lib/api-middleware";
+import { withUserApi } from "@/lib/api/handler";
 import { prisma } from "@/lib/prisma";
 import { zUpdateSectionBody } from "@/data/planejamento/types";
 import { createVersion } from "@/lib/planejamento/versioning";
+import { ValidationError, NotFoundError } from "@/lib/errors/api-error";
+import type { ApiContext } from "@/lib/api/types";
 
-interface Ctx {
-  params: Promise<{ id: string; key: string }>;
-  user: { userId: string };
-}
-
-export const PATCH = withAuth(async (request: NextRequest, context) => {
-  const { id, key } = await (context as Ctx).params;
-  const userId = (context as Ctx).user.userId;
+export const PATCH = withUserApi<{ id: string; key: string }>(async (request: NextRequest, ctx: ApiContext<{ id: string; key: string }>) => {
+  const { id, key } = ctx.params;
+  const userId = ctx.user.userId;
   const body = await request.json().catch(() => ({}));
   const parsed = zUpdateSectionBody.safeParse(body);
   if (!parsed.success) {
-    return NextResponse.json(
-      { error: "Dados inválidos", issues: parsed.error.issues },
-      { status: 400 },
-    );
+    throw new ValidationError("Dados inválidos", parsed.error.issues);
   }
 
   // Verifica ownership: documento pertence a sessão do user
@@ -30,7 +24,7 @@ export const PATCH = withAuth(async (request: NextRequest, context) => {
     },
   });
   if (!section) {
-    return NextResponse.json({ error: "Seção não encontrada" }, { status: 404 });
+    throw new NotFoundError("Seção");
   }
 
   const nextStatus = parsed.data.status ?? (
