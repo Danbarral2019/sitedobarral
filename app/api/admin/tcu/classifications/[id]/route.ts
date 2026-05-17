@@ -1,13 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { withAdminAuth } from '@/lib/api-middleware';
+import { withAdminApi } from '@/lib/api/handler';
 import { prisma } from '@/lib/prisma';
+import { ValidationError } from '@/lib/errors/api-error';
 
-interface RouteContext {
-  params: Promise<{ id: string }>;
-}
-
-export const PATCH = withAdminAuth(async (request: NextRequest, context: RouteContext) => {
-  const { id } = await context.params;
+export const PATCH = withAdminApi<{ id: string }>(async (request: NextRequest, ctx) => {
+  const { id } = ctx.params;
   const body = await request.json();
   const { area, tema, subtema, markReviewed } = body as {
     area?: string;
@@ -17,7 +14,7 @@ export const PATCH = withAdminAuth(async (request: NextRequest, context: RouteCo
   };
 
   if (!area || !tema) {
-    return NextResponse.json({ error: 'area e tema sao obrigatorios' }, { status: 400 });
+    throw new ValidationError('area e tema sao obrigatorios');
   }
 
   const data: Record<string, unknown> = {
