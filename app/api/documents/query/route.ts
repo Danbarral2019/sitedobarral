@@ -17,6 +17,7 @@ import { queryGeminiText } from '@/lib/gemini/cached-client';
 import { PRIMARY_GEMINI_MODEL, FALLBACK_GEMINI_MODELS } from '@/lib/gemini/config';
 import { generateStream, LEGAL_SAFETY_SETTINGS } from '@/lib/ai';
 import { checkRateLimit, withCache, CACHE_TTL } from '@/lib/cache/redis-client';
+import { parseLeiArticles } from '@/lib/lei-articles';
 import { trackServerEvent } from '@/lib/monitoring/events';
 import { apiLogger } from '@/lib/logger';
 import {
@@ -423,7 +424,7 @@ Exemplo de resposta: ["variação 1", "variação 2"]`;
         if (ticActs.length > 0) {
           ticActsContext = '\nATOS NORMATIVOS DE TIC (SGD/MGI):\n' +
             ticActs.map(act => {
-              const arts = act.leiArticles ? JSON.parse(act.leiArticles) : [];
+              const arts = parseLeiArticles(act.leiArticles);
               const artsStr = arts.length > 0 ? ` (Art. ${arts.join(', ')})` : '';
               return `**${act.fullNumber}**${artsStr}\n${act.ementa}`;
             }).join('\n\n');

@@ -8,6 +8,7 @@ import {
   Link as LinkIcon, Unlink, Eye, EyeOff, Loader2, ChevronRight, Search, ClipboardCheck
 } from 'lucide-react';
 import { getCourseById } from '@/lib/courses';
+import { parseLeiArticles, stringifyLeiArticles } from '@/lib/lei-articles';
 import AdminLayout from '@/components/AdminLayout';
 
 interface LessonDocumentData {
@@ -117,15 +118,7 @@ export default function LessonEditorClient({ courseId, lessonId }: { courseId: s
       const l = data.lesson;
       setLesson(l);
       setContent(l.content || '');
-      let articles = '';
-      if (l.leiArticles) {
-        try {
-          const arr = JSON.parse(l.leiArticles);
-          articles = Array.isArray(arr) ? arr.join(', ') : l.leiArticles;
-        } catch {
-          articles = l.leiArticles;
-        }
-      }
+      const articles = parseLeiArticles(l.leiArticles).join(', ');
       setSettingsForm({
         title: l.title,
         slug: l.slug,

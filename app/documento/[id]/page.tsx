@@ -4,6 +4,7 @@ import { Metadata } from 'next';
 import Link from 'next/link';
 import { ExternalLink, Calendar, Tag } from 'lucide-react';
 import BackLink from './BackLink';
+import { parseLeiArticles } from '@/lib/lei-articles';
 
 const CATEGORY_LABELS: Record<string, string> = {
   acordao: 'Acórdão TCU',
@@ -91,13 +92,10 @@ export default async function DocumentoPage({ params }: PageProps) {
 
   // Parse tags and leiArticles safely
   let tags: string[] = [];
-  let leiArticles: string[] = [];
   try {
     if (doc.tags) tags = JSON.parse(doc.tags);
   } catch { /* ignore */ }
-  try {
-    if (doc.leiArticles) leiArticles = JSON.parse(doc.leiArticles);
-  } catch { /* ignore */ }
+  const leiArticles: string[] = parseLeiArticles(doc.leiArticles);
 
   const displayContent = doc.content || doc.description || '';
 

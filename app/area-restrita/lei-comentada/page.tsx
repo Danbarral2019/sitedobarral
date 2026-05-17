@@ -29,6 +29,7 @@ import { useAuth } from '@/hooks/use-auth';
 import { useFavorites } from '@/hooks/use-favorites';
 import { useLegislativeActFavorites } from '@/hooks/use-legislative-act-favorites';
 import { safeParseArray, normalizeTextContent } from '@/lib/utils';
+import { parseLeiArticles } from '@/lib/lei-articles';
 import { isLiteralSourceCategory } from '@/lib/literal-sources';
 import Link from 'next/link';
 import { CROSS_REFERENCES } from '@/data/lei-14133-cross-references';
@@ -280,7 +281,7 @@ function DocumentDetails({ documentId, documentType = 'document' }: { documentId
   }
 
   const tags = safeParseArray(document.tags);
-  const leiArticles = safeParseArray(document.leiArticles);
+  const leiArticles = parseLeiArticles(document.leiArticles);
   // Prefer satellite table values, fall back to flat fields
   const effectiveKeyPoints = document.notes?.keyPoints ?? document.keyPoints ?? document.notesKeyPoints;
   const effectivePracticalUse = document.notes?.practicalUse ?? document.practicalUse ?? document.notesPracticalUse;

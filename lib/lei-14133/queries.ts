@@ -8,6 +8,7 @@
 
 import { cache } from 'react';
 import { prisma } from '../prisma';
+import { parseLeiArticles } from '../lei-articles';
 import { LEI_14133_CAPITULOS, LEI_14133_STRUCTURE_STATS } from '../../data/lei-14133-capitulos';
 
 // Categorias de Document que contam como "jurisprudência relacionada"
@@ -58,14 +59,8 @@ export const getArticleCounts = cache(async (): Promise<Record<string, ArticleCo
     });
 
     for (const doc of docs) {
-      if (!doc.leiArticles) continue;
-      let articles: string[] = [];
-      try {
-        const parsed = JSON.parse(doc.leiArticles);
-        if (Array.isArray(parsed)) articles = parsed.map(String);
-      } catch {
-        continue;
-      }
+      const articles = parseLeiArticles(doc.leiArticles);
+      if (articles.length === 0) continue;
       const isAcordao = (ACORDAO_CATEGORIES as readonly string[]).includes(doc.category);
       for (const num of articles) {
         if (!result[num]) result[num] = { acordaos: 0, pareceresOns: 0 };
@@ -124,13 +119,7 @@ export const getLeiStats = cache(async (): Promise<LeiStats> => {
 
     // Filtra só docs que de fato referenciam ALGUM artigo (não apenas null/empty)
     for (const doc of docs) {
-      if (!doc.leiArticles) continue;
-      try {
-        const parsed = JSON.parse(doc.leiArticles);
-        if (!Array.isArray(parsed) || parsed.length === 0) continue;
-      } catch {
-        continue;
-      }
+      if (parseLeiArticles(doc.leiArticles).length === 0) continue;
       const isAcordao = (ACORDAO_CATEGORIES as readonly string[]).includes(doc.category);
       if (isAcordao) totalAcordaos++;
       else totalPareceresOns++;

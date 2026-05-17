@@ -35,16 +35,7 @@ function getCourseName(courseId: string): string {
   return course?.title || 'Curso';
 }
 
-// Safe JSON array parser
-function safeParseArray(value: string | null): string[] {
-  if (!value) return [];
-  try {
-    const parsed = JSON.parse(value);
-    return Array.isArray(parsed) ? parsed : [];
-  } catch {
-    return value.split(',').map(s => s.trim()).filter(s => s.length > 0);
-  }
-}
+import { parseLeiArticles } from '@/lib/lei-articles';
 
 export async function GET(request: NextRequest) {
   try {
@@ -348,7 +339,7 @@ export async function GET(request: NextRequest) {
                 issuer: act.issuer,
                 publishDate: new Date(act.publish_date).toISOString(),
                 hierarchyLevel: act.hierarchy_level,
-                leiArticles: safeParseArray(act.lei_articles),
+                leiArticles: parseLeiArticles(act.lei_articles),
                 officialUrl: act.official_url,
                 pdfUrl: act.pdf_url,
               } as LegislativeActResult,

@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { verifyAuth } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
-import { safeParseArray } from '@/lib/utils';
+import { parseLeiArticles } from '@/lib/lei-articles';
 import { ARTIGOS_ENUNCIADOS, ENUNCIADOS } from '@/data/enunciados';
 import { withCache, CacheKeys, CACHE_TTL } from '@/lib/cache/redis-client';
 
@@ -144,7 +144,7 @@ export async function GET(request: NextRequest) {
 
         // Adicionar documentos
         documentsWithArticles.forEach((doc) => {
-          const articles = safeParseArray(doc.leiArticles);
+          const articles = parseLeiArticles(doc.leiArticles);
           articles.forEach((artNum) => {
             const artStr = String(artNum);
             articleDocumentCount[artStr] = (articleDocumentCount[artStr] || 0) + 1;
@@ -165,7 +165,7 @@ export async function GET(request: NextRequest) {
 
         // Adicionar atos normativos (sempre públicos)
         legislativeActsWithArticles.forEach((act) => {
-          const articles = safeParseArray(act.leiArticles);
+          const articles = parseLeiArticles(act.leiArticles);
           articles.forEach((artNum) => {
             const artStr = String(artNum);
             articleDocumentCount[artStr] = (articleDocumentCount[artStr] || 0) + 1;

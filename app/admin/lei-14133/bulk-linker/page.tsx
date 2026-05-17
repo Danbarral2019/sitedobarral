@@ -34,16 +34,7 @@ const CATEGORIES = [
   { value: 'outro', label: 'Outro' },
 ];
 
-function parseLeiArticles(raw: string | null): string[] {
-  if (!raw) return [];
-  try {
-    const parsed = JSON.parse(raw);
-    return Array.isArray(parsed) ? parsed : [];
-  } catch {
-    // CSV fallback
-    return raw.split(',').map(s => s.trim()).filter(Boolean);
-  }
-}
+import { parseLeiArticles, stringifyLeiArticles } from '@/lib/lei-articles';
 
 export default function BulkLinkerPage() {
   const router = useRouter();
@@ -163,7 +154,7 @@ export default function BulkLinkerPage() {
           // Update local state to reflect the change
           setDocuments(prev => prev.map(d =>
             d.id === docId
-              ? { ...d, leiArticles: JSON.stringify(updatedArticles) }
+              ? { ...d, leiArticles: stringifyLeiArticles(updatedArticles) }
               : d
           ));
         } else {

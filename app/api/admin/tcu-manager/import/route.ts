@@ -3,6 +3,7 @@ import { withAdminApi } from '@/lib/api/handler';
 import { ValidationError } from '@/lib/errors/api-error';
 import { prisma } from '@/lib/prisma';
 import { courses } from '@/data/courses';
+import { setLeiArticles, stringifyLeiArticles } from '@/lib/lei-articles';
 import { apiLogger } from "@/lib/logger";
 
 interface DocumentToImport {
@@ -198,9 +199,9 @@ export const POST = withAdminApi(async (request) => {
             courseId,
             isPublic,
             tags: JSON.stringify(tagsArray),
-            leiArticles: JSON.stringify(leiArticlesArray), // Artigos da Lei 14.133/2021
+            ...setLeiArticles(leiArticlesArray), // Artigos da Lei 14.133/2021
             aiSuggestedArticles: doc.classification?.success
-              ? JSON.stringify(leiArticlesArray)
+              ? stringifyLeiArticles(leiArticlesArray)
               : undefined, // Salva sugestões da IA
             reviewed: true, // TCU docs já revisados
             // Dual-write: flat fields (transition) + satellite table

@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { verifyAuth } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
 import { CacheInvalidation } from '@/lib/cache/redis-client';
+import { setLeiArticles } from '@/lib/lei-articles';
 import { apiLogger } from "@/lib/logger";
 
 /**
@@ -183,7 +184,7 @@ async function processApproval(
         courseId: courseIds[0] || null,
         isPublic: false,
         tags: JSON.stringify(tags),
-        leiArticles: JSON.stringify([]),
+        ...setLeiArticles([]),
         content: doc.fullContent || doc.abstract,
         douUrl: doc.url,
         douData: parsedDate,

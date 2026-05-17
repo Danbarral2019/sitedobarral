@@ -7,7 +7,7 @@
 
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
-import { safeParseArray } from '@/lib/utils';
+import { parseLeiArticles } from '@/lib/lei-articles';
 import { apiLogger } from "@/lib/logger";
 
 export async function GET() {
@@ -52,7 +52,7 @@ export async function GET() {
         title: d.title,
         source: 'Document' as const,
         category: d.category || 'outro',
-        articles: safeParseArray(d.leiArticles),
+        articles: parseLeiArticles(d.leiArticles),
         updatedAt: d.updatedAt,
       })),
       ...legislativeActs.map(la => ({
@@ -60,7 +60,7 @@ export async function GET() {
         title: la.title,
         source: 'LegislativeAct' as const,
         category: la.type || 'legislacao',
-        articles: safeParseArray(la.leiArticles),
+        articles: parseLeiArticles(la.leiArticles),
         updatedAt: la.updatedAt,
       })),
     ].filter(item => item.articles.length > 0);

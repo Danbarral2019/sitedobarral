@@ -5,6 +5,7 @@ import { LeiIndexer } from '@/lib/lei-indexer';
 import { identifyAndAlertHighlights } from '@/lib/tcu-highlight-analyzer';
 import { verifyCronAuth } from '@/lib/cron-auth';
 import { classifyDecision } from '@/lib/tribunal-scrapers/classifier';
+import { setLeiArticles, stringifyLeiArticles } from '@/lib/lei-articles';
 import {
   buildSummaryPrompt,
   callGemini,
@@ -134,14 +135,14 @@ async function enrichNewDocuments(docIds: string[]): Promise<{
       await prisma.document.update({
         where: { id: doc.id },
         data: {
-          ...(articles ? { leiArticles: JSON.stringify(articles) } : {}),
+          ...(articles ? setLeiArticles(articles) : {}),
           leiIndexedAt: now,
           leiIndexerError: null,
         },
       });
       if (articles) {
         leiIndexed++;
-        doc.leiArticles = JSON.stringify(articles);
+        doc.leiArticles = stringifyLeiArticles(articles);
       }
       await new Promise(resolve => setTimeout(resolve, ENRICHMENT_DELAY_MS));
     } catch (err) {
@@ -394,7 +395,7 @@ export async function GET(request: NextRequest) {
               isRelevant: true,
               relevanceScore: classification.relevanceScore,
               themes: JSON.stringify(classification.themes),
-              leiArticles: JSON.stringify(classification.leiArticles),
+              ...setLeiArticles(classification.leiArticles),
               suggestedCourses: classification.suggestedCourses || null,
               sourceApi: 'tcu-dados-abertos',
               sourceId: item.key || null,

@@ -4,6 +4,7 @@ import { prisma } from '@/lib/prisma';
 import { NotFoundError } from '@/lib/errors/api-error';
 import { apiLogger } from '@/lib/logger';
 import { CreateLessonSchema } from '@/lib/validation-schemas';
+import { setLeiArticles } from '@/lib/lei-articles';
 
 /**
  * POST: Cria uma nova lição
@@ -40,7 +41,7 @@ export const POST = withAdminApi(async (request: NextRequest) => {
         displayOrder,
         isPublished: data.isPublished ?? false,
         estimatedMinutes: data.estimatedMinutes,
-        leiArticles: data.leiArticles ? JSON.stringify(data.leiArticles) : null,
+        ...setLeiArticles(data.leiArticles ?? null),
         prerequisiteId: data.prerequisiteId || null,
       },
     });

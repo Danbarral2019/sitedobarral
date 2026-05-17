@@ -7,6 +7,7 @@ import { randomBytes } from 'crypto';
 import { courses } from '@/data/courses';
 import { enforceRateLimit, getClientIp } from '@/lib/cache/rate-limit-helper';
 import { ValidationError } from '@/lib/errors/api-error';
+import { parseLeiArticles } from '@/lib/lei-articles';
 import { apiLogger } from "@/lib/logger";
 
 export const POST = withAdminApi(async (request: NextRequest) => {
@@ -81,7 +82,7 @@ export const POST = withAdminApi(async (request: NextRequest) => {
         fileUrl,
         file.size,
         tags ? tags.split(',').map(t => t.trim()) : [],
-        leiArticles ? JSON.parse(leiArticles) : [],
+        parseLeiArticles(leiArticles),
         undefined, // alternativeUrls
         undefined, // onNumber
         undefined, // onYear

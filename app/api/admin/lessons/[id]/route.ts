@@ -4,6 +4,7 @@ import { withAdminApi } from '@/lib/api/handler';
 import { NotFoundError } from '@/lib/errors/api-error';
 import { apiLogger } from '@/lib/logger';
 import { UpdateLessonSchema } from '@/lib/validation-schemas';
+import { stringifyLeiArticles } from '@/lib/lei-articles';
 
 /**
  * GET: Busca uma lição por ID com relacionamentos
@@ -55,7 +56,7 @@ export const PUT = withAdminApi<{ id: string }>(async (request, { params }) => {
   // Stringify arrays antes de salvar
   const updateData: Record<string, unknown> = { ...data };
   if (data.leiArticles !== undefined) {
-    updateData.leiArticles = data.leiArticles ? JSON.stringify(data.leiArticles) : null;
+    updateData.leiArticles = data.leiArticles ? stringifyLeiArticles(data.leiArticles) : null;
   }
   if (data.aiKeyPoints !== undefined) {
     updateData.aiKeyPoints = data.aiKeyPoints ? JSON.stringify(data.aiKeyPoints) : null;

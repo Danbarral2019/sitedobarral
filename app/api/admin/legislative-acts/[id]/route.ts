@@ -5,6 +5,7 @@ import { ApiError, ConflictError, NotFoundError } from '@/lib/errors/api-error';
 import { CacheInvalidation } from '@/lib/cache/redis-client';
 import { validateActContent } from '@/lib/legislative-scrapers/validate-content';
 import { normalizeScrapedText } from '@/lib/legislative-scrapers/normalize';
+import { stringifyLeiArticles } from '@/lib/lei-articles';
 
 /**
  * GET /api/admin/legislative-acts/[id]
@@ -88,7 +89,7 @@ export const PUT = withAdminApi<{ id: string }>(async (request, ctx) => {
   }
   if (body.hierarchyLevel !== undefined) updateData.hierarchyLevel = body.hierarchyLevel;
   if (body.leiArticles !== undefined) {
-    updateData.leiArticles = body.leiArticles ? JSON.stringify(body.leiArticles) : null;
+    updateData.leiArticles = body.leiArticles ? stringifyLeiArticles(body.leiArticles) : null;
   }
   if (body.officialUrl !== undefined) updateData.officialUrl = body.officialUrl || null;
   if (body.pdfUrl !== undefined) updateData.pdfUrl = body.pdfUrl || null;
