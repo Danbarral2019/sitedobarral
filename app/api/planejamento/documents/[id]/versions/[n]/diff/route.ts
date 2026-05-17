@@ -1,23 +1,19 @@
 import { NextRequest, NextResponse } from "next/server";
-import { withAuth } from "@/lib/api-middleware";
+import { withUserApi } from "@/lib/api/handler";
 import { prisma } from "@/lib/prisma";
 import { diffSnapshots, type DocumentSnapshot } from "@/lib/planejamento/versioning";
-
-interface Ctx {
-  params: Promise<{ id: string; n: string }>;
-  user: { userId: string };
-}
+import { ValidationError, NotFoundError } from "@/lib/errors/api-error";
 
 /**
  * GET /api/planejamento/documents/[id]/versions/[n]/diff
  * Retorna diff da versão N contra a imediatamente anterior (por versionNumber).
  */
-export const GET = withAuth(async (_request: NextRequest, context) => {
-  const { id, n } = await (context as Ctx).params;
-  const userId = (context as Ctx).user.userId;
+export const GET = withUserApi<{ id: string; n: string }>(async (_request: NextRequest, ctx) => {
+  const { id, n } = ctx.params;
+  const userId = ctx.user.userId;
   const version = Number.parseInt(n, 10);
   if (!Number.isFinite(version) || version < 1) {
-    return NextResponse.json({ error: "Versão inválida" }, { status: 400 });
+    throw new ValidationError("Versão inválida");
   }
 
   const doc = await prisma.planningDocument.findFirst({
@@ -25,14 +21,14 @@ export const GET = withAuth(async (_request: NextRequest, context) => {
     select: { id: true },
   });
   if (!doc) {
-    return NextResponse.json({ error: "Documento não encontrado" }, { status: 404 });
+    throw new NotFoundError("Documento");
   }
 
   const current = await prisma.planningDocumentVersion.findUnique({
     where: { documentId_versionNumber: { documentId: id, versionNumber: version } },
   });
   if (!current) {
-    return NextResponse.json({ error: "Versão não encontrada" }, { status: 404 });
+    throw new NotFoundError("Versão");
   }
   const previous = await prisma.planningDocumentVersion.findFirst({
     where: { documentId: id, versionNumber: { lt: version } },
