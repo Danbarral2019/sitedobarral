@@ -358,4 +358,114 @@ describe('lib/api/handler', () => {
       expect(typeof (logger as { error: unknown }).error).toBe('function');
     });
   });
+
+  describe('error handling via handleApiError', () => {
+    beforeEach(async () => {
+      const auth = await import('@/lib/auth');
+      vi.mocked(auth.getCurrentUser).mockResolvedValue({ userId: 'u1', role: 'admin' });
+    });
+
+    it('ValidationError vira 400 com code VALIDATION_ERROR', async () => {
+      const handler = withAdminApi(async () => {
+        const { ValidationError } = await import('@/lib/errors/api-error');
+        throw new ValidationError('campo X inválido');
+      });
+
+      const response = await handler(makeRequest(), makeNextCtx());
+      expect(response.status).toBe(400);
+      const body = await response.json();
+      expect(body.code).toBe('VALIDATION_ERROR');
+      expect(body.error).toBe('campo X inválido');
+    });
+
+    it('NotFoundError vira 404 com code NOT_FOUND', async () => {
+      const handler = withAdminApi(async () => {
+        const { NotFoundError } = await import('@/lib/errors/api-error');
+        throw new NotFoundError('Documento');
+      });
+
+      const response = await handler(makeRequest(), makeNextCtx());
+      expect(response.status).toBe(404);
+      const body = await response.json();
+      expect(body.code).toBe('NOT_FOUND');
+    });
+
+    it('Error genérico (não-operacional) vira 500 e é capturado no Sentry', async () => {
+      const Sentry = await import('@sentry/nextjs');
+      vi.mocked(Sentry.captureException).mockReset();
+
+      const handler = withAdminApi(async () => {
+        throw new Error('boom');
+      });
+
+      const response = await handler(makeRequest(), makeNextCtx());
+      expect(response.status).toBe(500);
+      expect(vi.mocked(Sentry.captureException)).toHaveBeenCalled();
+    });
+  });
+
+  describe('telemetry', () => {
+    beforeEach(async () => {
+      const Sentry = await import('@sentry/nextjs');
+      vi.mocked(Sentry.addBreadcrumb).mockReset();
+      vi.mocked(Sentry.setTag).mockReset();
+
+      const auth = await import('@/lib/auth');
+      vi.mocked(auth.getCurrentUser).mockResolvedValue({ userId: 'u1', role: 'admin' });
+    });
+
+    it('adiciona breadcrumb com método + path + requestId quando telemetry ON (default)', async () => {
+      const Sentry = await import('@sentry/nextjs');
+
+      const handler = withAdminApi(async () => NextResponse.json({}));
+      await handler(makeRequest('https://example.com/api/admin/foo', 'POST'), makeNextCtx());
+
+      expect(vi.mocked(Sentry.addBreadcrumb)).toHaveBeenCalledWith(
+        expect.objectContaining({
+          category: 'api',
+          message: 'POST /api/admin/foo',
+          data: expect.objectContaining({
+            role: 'admin',
+            userId: 'u1',
+            requestId: expect.stringMatching(/^[0-9a-f]{8}$/),
+          }),
+        })
+      );
+    });
+
+    it('seta tag requestId no Sentry quando telemetry ON', async () => {
+      const Sentry = await import('@sentry/nextjs');
+
+      const handler = withAdminApi(async () => NextResponse.json({}));
+      await handler(makeRequest(), makeNextCtx());
+
+      expect(vi.mocked(Sentry.setTag)).toHaveBeenCalledWith(
+        'requestId',
+        expect.stringMatching(/^[0-9a-f]{8}$/)
+      );
+    });
+
+    it('não adiciona breadcrumb quando telemetry: false', async () => {
+      const Sentry = await import('@sentry/nextjs');
+
+      const handler = withAdminApi(
+        async () => NextResponse.json({}),
+        { telemetry: false }
+      );
+      await handler(makeRequest(), makeNextCtx());
+
+      expect(vi.mocked(Sentry.addBreadcrumb)).not.toHaveBeenCalled();
+      expect(vi.mocked(Sentry.setTag)).not.toHaveBeenCalled();
+    });
+
+    it('header X-Request-Id continua presente mesmo com telemetry: false', async () => {
+      const handler = withAdminApi(
+        async () => NextResponse.json({}),
+        { telemetry: false }
+      );
+      const response = await handler(makeRequest(), makeNextCtx());
+
+      expect(response.headers.get('X-Request-Id')).toMatch(/^[0-9a-f]{8}$/);
+    });
+  });
 });
