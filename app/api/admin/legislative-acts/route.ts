@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
-import { verifyAdmin } from '@/lib/api-middleware';
+import { withAdminApi } from '@/lib/api/handler';
+import { ApiError, ConflictError, ValidationError } from '@/lib/errors/api-error';
 import { CacheInvalidation } from '@/lib/cache/redis-client';
 import { scrapeAndIndexAct } from '@/lib/legislative-scrapers/scrape-and-index';
 import { validateActContent } from '@/lib/legislative-scrapers/validate-content';
@@ -12,173 +13,148 @@ import { apiLogger } from "@/lib/logger";
  * GET /api/admin/legislative-acts
  * Lista todos os atos normativos com filtros e paginação
  */
-export async function GET(request: NextRequest) {
-  try {
-    // Verificar se é admin
-    const adminCheck = await verifyAdmin(request);
-    if (adminCheck.error) {
-      return adminCheck.response;
-    }
+export const GET = withAdminApi(async (request) => {
+  const { searchParams } = new URL(request.url);
 
-    const { searchParams } = new URL(request.url);
+  // Parâmetros de filtro
+  const type = searchParams.get('type'); // decreto, portaria, in, etc.
+  const issuer = searchParams.get('issuer'); // Presidência, SEGES, MGI, etc.
+  const year = searchParams.get('year');
+  const search = searchParams.get('search'); // Busca por título/ementa
 
-    // Parâmetros de filtro
-    const type = searchParams.get('type'); // decreto, portaria, in, etc.
-    const issuer = searchParams.get('issuer'); // Presidência, SEGES, MGI, etc.
-    const year = searchParams.get('year');
-    const search = searchParams.get('search'); // Busca por título/ementa
+  // Parâmetros de paginação
+  const page = parseInt(searchParams.get('page') || '1');
+  const limit = parseInt(searchParams.get('limit') || '50');
+  const skip = (page - 1) * limit;
 
-    // Parâmetros de paginação
-    const page = parseInt(searchParams.get('page') || '1');
-    const limit = parseInt(searchParams.get('limit') || '50');
-    const skip = (page - 1) * limit;
+  // Construir where clause
+  const where: Record<string, unknown> = {};
 
-    // Construir where clause
-    const where: Record<string, unknown> = {};
-
-    if (type) {
-      where.type = type;
-    }
-
-    if (issuer) {
-      where.issuer = issuer;
-    }
-
-    if (year) {
-      where.year = parseInt(year);
-    }
-
-    if (search) {
-      where.OR = [
-        { title: { contains: search, mode: 'insensitive' } },
-        { ementa: { contains: search, mode: 'insensitive' } },
-        { fullNumber: { contains: search, mode: 'insensitive' } }
-      ];
-    }
-
-    // Buscar atos
-    const [acts, total] = await Promise.all([
-      prisma.legislativeAct.findMany({
-        where,
-        orderBy: [
-          { year: 'desc' },
-          { hierarchyLevel: 'asc' },
-          { publishDate: 'desc' }
-        ],
-        skip,
-        take: limit
-      }),
-      prisma.legislativeAct.count({ where })
-    ]);
-
-    // Buscar estatísticas gerais
-    const stats = await prisma.legislativeAct.groupBy({
-      by: ['type'],
-      _count: true
-    });
-
-    const statsMap = stats.reduce((acc, stat) => {
-      acc[stat.type] = stat._count;
-      return acc;
-    }, {} as Record<string, number>);
-
-    return NextResponse.json({
-      acts,
-      pagination: {
-        page,
-        limit,
-        total,
-        pages: Math.ceil(total / limit)
-      },
-      stats: statsMap
-    });
-
-  } catch (error) {
-    apiLogger.error({ err: error }, 'Erro ao listar atos normativos:');
-    return NextResponse.json(
-      { error: 'Erro ao listar atos normativos' },
-      { status: 500 }
-    );
+  if (type) {
+    where.type = type;
   }
-}
+
+  if (issuer) {
+    where.issuer = issuer;
+  }
+
+  if (year) {
+    where.year = parseInt(year);
+  }
+
+  if (search) {
+    where.OR = [
+      { title: { contains: search, mode: 'insensitive' } },
+      { ementa: { contains: search, mode: 'insensitive' } },
+      { fullNumber: { contains: search, mode: 'insensitive' } }
+    ];
+  }
+
+  // Buscar atos
+  const [acts, total] = await Promise.all([
+    prisma.legislativeAct.findMany({
+      where,
+      orderBy: [
+        { year: 'desc' },
+        { hierarchyLevel: 'asc' },
+        { publishDate: 'desc' }
+      ],
+      skip,
+      take: limit
+    }),
+    prisma.legislativeAct.count({ where })
+  ]);
+
+  // Buscar estatísticas gerais
+  const stats = await prisma.legislativeAct.groupBy({
+    by: ['type'],
+    _count: true
+  });
+
+  const statsMap = stats.reduce((acc, stat) => {
+    acc[stat.type] = stat._count;
+    return acc;
+  }, {} as Record<string, number>);
+
+  return NextResponse.json({
+    acts,
+    pagination: {
+      page,
+      limit,
+      total,
+      pages: Math.ceil(total / limit)
+    },
+    stats: statsMap
+  });
+});
 
 /**
  * POST /api/admin/legislative-acts
  * Cria um novo ato normativo
  */
-export async function POST(request: NextRequest) {
-  try {
-    // Verificar se é admin
-    const adminCheck = await verifyAdmin(request);
-    if (adminCheck.error) {
-      return adminCheck.response;
+export const POST = withAdminApi(async (request, ctx) => {
+  const body = await request.json();
+
+  // Validar campos obrigatórios
+  const requiredFields = ['type', 'number', 'year', 'title', 'ementa', 'issuer', 'publishDate'];
+  for (const field of requiredFields) {
+    if (!body[field]) {
+      throw new ValidationError(`Campo obrigatório: ${field}`);
     }
+  }
 
-    const body = await request.json();
-    const { user } = adminCheck;
+  // Gerar fullNumber automaticamente se não fornecido
+  let fullNumber = body.fullNumber;
+  if (!fullNumber) {
+    const typeLabelMap: Record<string, string> = {
+      'decreto': 'Decreto',
+      'portaria': 'Portaria',
+      'in': 'IN SEGES',
+      'ordem-servico': 'Ordem de Serviço',
+      'lei': 'Lei',
+      'medida-provisoria': 'Medida Provisória'
+    };
+    const typeLabel = typeLabelMap[body.type as string] || body.type;
 
-    // Validar campos obrigatórios
-    const requiredFields = ['type', 'number', 'year', 'title', 'ementa', 'issuer', 'publishDate'];
-    for (const field of requiredFields) {
-      if (!body[field]) {
-        return NextResponse.json(
-          { error: `Campo obrigatório: ${field}` },
-          { status: 400 }
-        );
-      }
-    }
+    fullNumber = `${typeLabel} ${body.number}/${body.year}`;
+  }
 
-    // Gerar fullNumber automaticamente se não fornecido
-    let fullNumber = body.fullNumber;
-    if (!fullNumber) {
-      const typeLabelMap: Record<string, string> = {
-        'decreto': 'Decreto',
-        'portaria': 'Portaria',
-        'in': 'IN SEGES',
-        'ordem-servico': 'Ordem de Serviço',
-        'lei': 'Lei',
-        'medida-provisoria': 'Medida Provisória'
-      };
-      const typeLabel = typeLabelMap[body.type as string] || body.type;
+  // Calcular hierarchyLevel se não fornecido. Fonte canônica em
+  // lib/legislative-acts/hierarchy.ts (antes daqui um mapeamento inline
+  // marcava 'medida-provisoria: 2', errado — MP tem força de lei).
+  let hierarchyLevel = body.hierarchyLevel;
+  if (!hierarchyLevel) {
+    hierarchyLevel = getHierarchyLevel(body.type);
+  }
 
-      fullNumber = `${typeLabel} ${body.number}/${body.year}`;
-    }
+  // Normalizar ementa + content ANTES de salvar — garante que NBSP,
+  // zero-width chars, boilerplate residual nunca entrem no banco.
+  const normalizedEmenta = normalizeScrapedText(body.ementa as string);
+  const normalizedContent = body.content ? normalizeScrapedText(body.content as string) : null;
 
-    // Calcular hierarchyLevel se não fornecido. Fonte canônica em
-    // lib/legislative-acts/hierarchy.ts (antes daqui um mapeamento inline
-    // marcava 'medida-provisoria: 2', errado — MP tem força de lei).
-    let hierarchyLevel = body.hierarchyLevel;
-    if (!hierarchyLevel) {
-      hierarchyLevel = getHierarchyLevel(body.type);
-    }
-
-    // Normalizar ementa + content ANTES de salvar — garante que NBSP,
-    // zero-width chars, boilerplate residual nunca entrem no banco.
-    const normalizedEmenta = normalizeScrapedText(body.ementa as string);
-    const normalizedContent = body.content ? normalizeScrapedText(body.content as string) : null;
-
-    // Validar formatação. Errors bloqueiam o save (mojibake, FAQ no lugar
-    // do ato, ementa fragmento, title com U+FFFD, publishDate.year ≠ year).
-    // Warnings vão pro response mas não bloqueiam.
-    const validation = validateActContent({
-      url: body.officialUrl,
-      content: normalizedContent ?? '',
-      ementa: normalizedEmenta,
-      title: body.title,
-      year: parseInt(body.year),
-      publishDate: body.publishDate ? new Date(body.publishDate) : null,
+  // Validar formatação. Errors bloqueiam o save (mojibake, FAQ no lugar
+  // do ato, ementa fragmento, title com U+FFFD, publishDate.year ≠ year).
+  // Warnings vão pro response mas não bloqueiam.
+  const validation = validateActContent({
+    url: body.officialUrl,
+    content: normalizedContent ?? '',
+    ementa: normalizedEmenta,
+    title: body.title,
+    year: parseInt(body.year),
+    publishDate: body.publishDate ? new Date(body.publishDate) : null,
+  });
+  if (!validation.ok && normalizedContent) {
+    // Só bloqueia quando há content (criação só com ementa não tem content
+    // pra validar — usuário pode estar criando o esqueleto e o cron scrape
+    // depois).
+    throw new ApiError(422, 'Validação de formatação falhou', 'VALIDATION_ERROR', {
+      details: validation.errors,
+      warnings: validation.warnings,
     });
-    if (!validation.ok && normalizedContent) {
-      // Só bloqueia quando há content (criação só com ementa não tem content
-      // pra validar — usuário pode estar criando o esqueleto e o cron scrape
-      // depois).
-      return NextResponse.json(
-        { error: 'Validação de formatação falhou', details: validation.errors, warnings: validation.warnings },
-        { status: 422 },
-      );
-    }
+  }
 
-    // Criar ato normativo
+  // Criar ato normativo
+  try {
     const act = await prisma.legislativeAct.create({
       data: {
         type: body.type,
@@ -196,7 +172,7 @@ export async function POST(request: NextRequest) {
         officialUrl: body.officialUrl || null,
         pdfUrl: body.pdfUrl || null,
         content: normalizedContent,
-        createdBy: user.email
+        createdBy: ctx.user.email
       }
     });
 
@@ -218,21 +194,12 @@ export async function POST(request: NextRequest) {
       act,
       warnings: validation.warnings,
     }, { status: 201 });
-
   } catch (error: unknown) {
-    apiLogger.error({ err: error }, 'Erro ao criar ato normativo:');
-
-    // Erro de unique constraint (fullNumber duplicado)
+    // Erro de unique constraint (fullNumber duplicado) — converter para
+    // ConflictError; demais erros sobem para handleApiError.
     if (error && typeof error === 'object' && 'code' in error && error.code === 'P2002') {
-      return NextResponse.json(
-        { error: 'Já existe um ato normativo com este número/ano' },
-        { status: 409 }
-      );
+      throw new ConflictError('Já existe um ato normativo com este número/ano');
     }
-
-    return NextResponse.json(
-      { error: 'Erro ao criar ato normativo' },
-      { status: 500 }
-    );
+    throw error;
   }
-}
+});

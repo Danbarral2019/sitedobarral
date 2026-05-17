@@ -1,132 +1,87 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { withAdminAuth } from '@/lib/api-middleware';
+import { withAdminApi } from '@/lib/api/handler';
+import { NotFoundError, ValidationError } from '@/lib/errors/api-error';
 import { prisma } from '@/lib/prisma';
 import { CacheInvalidation } from '@/lib/cache/redis-client';
-import { apiLogger } from "@/lib/logger";
 
 // GET - Busca uma publicação específica
-export const GET = withAdminAuth(async (
-  request: NextRequest,
-  context: { params: Promise<{ id: string }> }
-) => {
-  try {
-    const { id } = await context.params;
+export const GET = withAdminApi<{ id: string }>(async (request, ctx) => {
+  const { id } = ctx.params;
 
-    const publication = await prisma.publication.findUnique({
-      where: { id }
-    });
+  const publication = await prisma.publication.findUnique({
+    where: { id }
+  });
 
-    if (!publication) {
-      return NextResponse.json(
-        { error: 'Publicação não encontrada' },
-        { status: 404 }
-      );
-    }
-
-    return NextResponse.json({ publication });
-  } catch (error) {
-    apiLogger.error({ err: error }, 'Erro ao buscar publicação:');
-    return NextResponse.json(
-      { error: 'Erro ao buscar publicação' },
-      { status: 500 }
-    );
+  if (!publication) {
+    throw new NotFoundError('Publicação');
   }
+
+  return NextResponse.json({ publication });
 });
 
 // PUT - Atualiza uma publicação
-export const PUT = withAdminAuth(async (
-  request: NextRequest,
-  context: { params: Promise<{ id: string }> }
-) => {
-  try {
-    const { id } = await context.params;
-    const data = await request.json();
+export const PUT = withAdminApi<{ id: string }>(async (request, ctx) => {
+  const { id } = ctx.params;
+  const data = await request.json();
 
-    // Verificar se a publicação existe
-    const existing = await prisma.publication.findUnique({
-      where: { id }
-    });
+  // Verificar se a publicação existe
+  const existing = await prisma.publication.findUnique({
+    where: { id }
+  });
 
-    if (!existing) {
-      return NextResponse.json(
-        { error: 'Publicação não encontrada' },
-        { status: 404 }
-      );
-    }
-
-    // Validar tipo se fornecido
-    if (data.type && !['livro', 'artigo', 'noticia'].includes(data.type)) {
-      return NextResponse.json(
-        { error: 'Tipo inválido. Use: livro, artigo ou noticia' },
-        { status: 400 }
-      );
-    }
-
-    const publication = await prisma.publication.update({
-      where: { id },
-      data: {
-        ...(data.type && { type: data.type }),
-        ...(data.title && { title: data.title }),
-        ...(data.description && { description: data.description }),
-        ...(data.content !== undefined && { content: data.content || null }),
-        ...(data.author && { author: data.author }),
-        ...(data.publishedAt && { publishedAt: new Date(data.publishedAt) }),
-        ...(typeof data.isPublished === 'boolean' && { isPublished: data.isPublished }),
-        ...(data.publisher !== undefined && { publisher: data.publisher || null }),
-        ...(data.isbn !== undefined && { isbn: data.isbn || null }),
-        ...(data.coverImage !== undefined && { coverImage: data.coverImage || null }),
-        ...(data.externalUrl !== undefined && { externalUrl: data.externalUrl || null }),
-        ...(data.journal !== undefined && { journal: data.journal || null }),
-        ...(data.eventDate !== undefined && { eventDate: data.eventDate ? new Date(data.eventDate) : null }),
-        ...(data.location !== undefined && { location: data.location || null }),
-      },
-    });
-
-    // Invalidate cache
-    CacheInvalidation.publications().catch(console.error);
-
-    return NextResponse.json({ publication });
-  } catch (error) {
-    apiLogger.error({ err: error }, 'Erro ao atualizar publicação:');
-    return NextResponse.json(
-      { error: 'Erro ao atualizar publicação' },
-      { status: 500 }
-    );
+  if (!existing) {
+    throw new NotFoundError('Publicação');
   }
+
+  // Validar tipo se fornecido
+  if (data.type && !['livro', 'artigo', 'noticia'].includes(data.type)) {
+    throw new ValidationError('Tipo inválido. Use: livro, artigo ou noticia');
+  }
+
+  const publication = await prisma.publication.update({
+    where: { id },
+    data: {
+      ...(data.type && { type: data.type }),
+      ...(data.title && { title: data.title }),
+      ...(data.description && { description: data.description }),
+      ...(data.content !== undefined && { content: data.content || null }),
+      ...(data.author && { author: data.author }),
+      ...(data.publishedAt && { publishedAt: new Date(data.publishedAt) }),
+      ...(typeof data.isPublished === 'boolean' && { isPublished: data.isPublished }),
+      ...(data.publisher !== undefined && { publisher: data.publisher || null }),
+      ...(data.isbn !== undefined && { isbn: data.isbn || null }),
+      ...(data.coverImage !== undefined && { coverImage: data.coverImage || null }),
+      ...(data.externalUrl !== undefined && { externalUrl: data.externalUrl || null }),
+      ...(data.journal !== undefined && { journal: data.journal || null }),
+      ...(data.eventDate !== undefined && { eventDate: data.eventDate ? new Date(data.eventDate) : null }),
+      ...(data.location !== undefined && { location: data.location || null }),
+    },
+  });
+
+  // Invalidate cache
+  CacheInvalidation.publications().catch(console.error);
+
+  return NextResponse.json({ publication });
 });
 
 // DELETE - Remove uma publicação
-export const DELETE = withAdminAuth(async (
-  request: NextRequest,
-  context: { params: Promise<{ id: string }> }
-) => {
-  try {
-    const { id } = await context.params;
+export const DELETE = withAdminApi<{ id: string }>(async (request, ctx) => {
+  const { id } = ctx.params;
 
-    const publication = await prisma.publication.findUnique({
-      where: { id }
-    });
+  const publication = await prisma.publication.findUnique({
+    where: { id }
+  });
 
-    if (!publication) {
-      return NextResponse.json(
-        { error: 'Publicação não encontrada' },
-        { status: 404 }
-      );
-    }
-
-    await prisma.publication.delete({
-      where: { id }
-    });
-
-    // Invalidate cache
-    CacheInvalidation.publications().catch(console.error);
-
-    return NextResponse.json({ success: true });
-  } catch (error) {
-    apiLogger.error({ err: error }, 'Erro ao deletar publicação:');
-    return NextResponse.json(
-      { error: 'Erro ao deletar publicação' },
-      { status: 500 }
-    );
+  if (!publication) {
+    throw new NotFoundError('Publicação');
   }
+
+  await prisma.publication.delete({
+    where: { id }
+  });
+
+  // Invalidate cache
+  CacheInvalidation.publications().catch(console.error);
+
+  return NextResponse.json({ success: true });
 });
