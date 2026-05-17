@@ -1,13 +1,14 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { withAdminAuth } from '@/lib/api-middleware';
+import { withAdminApi } from '@/lib/api/handler';
+import { ValidationError } from '@/lib/errors/api-error';
 import { prisma } from '@/lib/prisma';
 
-export const GET = withAdminAuth(async (request: NextRequest) => {
+export const GET = withAdminApi(async (request) => {
   const { searchParams } = new URL(request.url);
   const courseId = searchParams.get('courseId');
 
   if (!courseId) {
-    return NextResponse.json({ error: 'courseId obrigatorio' }, { status: 400 });
+    throw new ValidationError('courseId obrigatorio');
   }
 
   const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
