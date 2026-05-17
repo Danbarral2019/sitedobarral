@@ -14,22 +14,8 @@ import {
 } from '@/lib/embeddings/citation-validator';
 
 import { queryGeminiText } from '@/lib/gemini/cached-client';
-import { PRIMARY_GEMINI_MODEL } from '@/lib/gemini/config';
-import {
-  GoogleGenAI,
-  HarmCategory,
-  HarmBlockThreshold,
-  type GenerateContentResponse,
-} from '@google/genai';
-
-// Safety settings permissivos para contexto jurídico — o padrão bloqueia
-// termos como "sanção", "fraude", "ato ilícito" comuns em ementas.
-const LEGAL_SAFETY_SETTINGS = [
-  { category: HarmCategory.HARM_CATEGORY_HARASSMENT, threshold: HarmBlockThreshold.BLOCK_ONLY_HIGH },
-  { category: HarmCategory.HARM_CATEGORY_HATE_SPEECH, threshold: HarmBlockThreshold.BLOCK_ONLY_HIGH },
-  { category: HarmCategory.HARM_CATEGORY_SEXUALLY_EXPLICIT, threshold: HarmBlockThreshold.BLOCK_ONLY_HIGH },
-  { category: HarmCategory.HARM_CATEGORY_DANGEROUS_CONTENT, threshold: HarmBlockThreshold.BLOCK_ONLY_HIGH },
-];
+import { PRIMARY_GEMINI_MODEL, FALLBACK_GEMINI_MODELS } from '@/lib/gemini/config';
+import { generateStream, LEGAL_SAFETY_SETTINGS } from '@/lib/ai';
 import { checkRateLimit, withCache, CACHE_TTL } from '@/lib/cache/redis-client';
 import { trackServerEvent } from '@/lib/monitoring/events';
 import { apiLogger } from '@/lib/logger';
@@ -573,15 +559,9 @@ RESPOSTA:`;
         };
       });
 
-    // 13. Streaming response (SSE)
+    // 13. Streaming response (SSE) — via lib/ai generateStream com fallback
+    // cascade + safety + thinkingBudget=0 (Gemini 2.5/3 trunca sem isso).
     if (wantStream) {
-      const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
-      if (!GEMINI_API_KEY) {
-        return NextResponse.json({ success: false, error: 'Gemini API key not configured' }, { status: 500 });
-      }
-
-      const genAI = new GoogleGenAI({ apiKey: GEMINI_API_KEY });
-
       const encoder = new TextEncoder();
       const stream = new ReadableStream({
         async start(controller) {
@@ -596,61 +576,67 @@ RESPOSTA:`;
             });
             controller.enqueue(encoder.encode(`data: ${meta}\n\n`));
 
-            // Stream Gemini tokens
-            const streamResult = await genAI.models.generateContentStream({
+            // Stream Gemini tokens via lib/ai. finishReason chega no chunk
+            // terminal (lib/ai provider emite chunk final com finishReason +
+            // usage, separado dos chunks de texto).
+            const streamResult = await generateStream('chat', {
+              messages: [{ role: 'user', content: synthesisPrompt }],
+              provider: 'gemini',
               model: PRIMARY_GEMINI_MODEL,
-              contents: synthesisPrompt,
-              config: {
-                systemInstruction,
-                temperature: 0.5,
-                maxOutputTokens: 8192,
-                // Gemini 2.5-flash: sem thinkingBudget: 0, o raciocínio come o
-                // maxOutputTokens e a resposta trunca no meio. Síntese factual
-                // não precisa de thinking — só cita fontes.
-                thinkingConfig: { thinkingBudget: 0 },
-                safetySettings: LEGAL_SAFETY_SETTINGS,
-              },
+              fallbackModels: [...FALLBACK_GEMINI_MODELS].filter(
+                (m) => m !== PRIMARY_GEMINI_MODEL,
+              ),
+              systemPrompt: systemInstruction,
+              temperature: 0.5,
+              maxTokens: 8192,
+              // Sem thinkingBudget=0, o raciocínio come o maxTokens e a
+              // resposta trunca no meio. Síntese factual não precisa de
+              // thinking — só cita fontes.
+              thinkingBudget: 0,
+              safetySettings: LEGAL_SAFETY_SETTINGS,
             });
             let hasTokens = false;
-            let lastChunk: GenerateContentResponse | undefined;
             // Acumula tokens em buffer pra validação pós-stream de citações
             // entre aspas (anti-hallucination). Stream segue normal pro
             // cliente em paralelo — verificação é feita ao final.
             let fullAnswer = '';
+            let finishReason: string | undefined;
             for await (const chunk of streamResult) {
-              lastChunk = chunk;
-              const text = chunk.text;
-              if (text) {
+              if (chunk.text) {
                 hasTokens = true;
-                fullAnswer += text;
-                controller.enqueue(encoder.encode(`data: ${JSON.stringify({ type: 'token', text })}\n\n`));
+                fullAnswer += chunk.text;
+                controller.enqueue(
+                  encoder.encode(
+                    `data: ${JSON.stringify({ type: 'token', text: chunk.text })}\n\n`,
+                  ),
+                );
+              }
+              if (chunk.finishReason) {
+                finishReason = chunk.finishReason;
               }
             }
 
-            // Depois do stream, verifica finishReason. Gemini 2.5 aborta em
-            // meio de resposta quando detecta recitação literal (RECITATION)
-            // ou safety parcial. Sem esse check, UI exibe resposta truncada
-            // sem aviso. No SDK novo, o último chunk traz o finishReason.
-            try {
-              const finishReason = lastChunk?.candidates?.[0]?.finishReason;
-              if (
-                finishReason &&
-                finishReason !== 'STOP' &&
-                finishReason !== 'MAX_TOKENS'
-              ) {
-                apiLogger.warn(
-                  { finishReason, hasTokens },
-                  'Gemini stream interrupted before STOP',
-                );
-                const note = hasTokens
-                  ? `\n\n⚠️ (Resposta interrompida antes do final — motivo: ${finishReason}. Tente reformular a pergunta para evitar citação literal.)`
-                  : `Não consegui gerar uma síntese (motivo: ${finishReason}). Consulte as fontes abaixo.`;
-                controller.enqueue(
-                  encoder.encode(`data: ${JSON.stringify({ type: 'token', text: note })}\n\n`),
-                );
-              }
-            } catch {
-              /* ignora erro de metadata pós-stream */
+            // Verifica finishReason pós-stream. Gemini 2.5 aborta em meio
+            // de resposta quando detecta recitação literal (RECITATION) ou
+            // safety parcial. Sem esse check, UI exibe resposta truncada
+            // sem aviso.
+            if (
+              finishReason &&
+              finishReason !== 'STOP' &&
+              finishReason !== 'MAX_TOKENS'
+            ) {
+              apiLogger.warn(
+                { finishReason, hasTokens },
+                'Gemini stream interrupted before STOP',
+              );
+              const note = hasTokens
+                ? `\n\n⚠️ (Resposta interrompida antes do final — motivo: ${finishReason}. Tente reformular a pergunta para evitar citação literal.)`
+                : `Não consegui gerar uma síntese (motivo: ${finishReason}). Consulte as fontes abaixo.`;
+              controller.enqueue(
+                encoder.encode(
+                  `data: ${JSON.stringify({ type: 'token', text: note })}\n\n`,
+                ),
+              );
             }
 
             if (!hasTokens) {
