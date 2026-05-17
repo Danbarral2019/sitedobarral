@@ -1,24 +1,20 @@
 import { NextRequest, NextResponse } from "next/server";
-import { withAuth } from "@/lib/api-middleware";
+import { withUserApi } from "@/lib/api/handler";
 import { prisma } from "@/lib/prisma";
 import { enforceRateLimit } from "@/lib/cache/rate-limit-helper";
 import { buildSectionContext } from "@/lib/planejamento/rag";
 import { getTrailBySlug } from "@/data/planejamento/trails";
 import type { TrailDefinition } from "@/data/planejamento/types";
-
-interface Ctx {
-  params: Promise<{ id: string; key: string }>;
-  user: { userId: string };
-}
+import { NotFoundError, ConflictError } from "@/lib/errors/api-error";
 
 /**
  * Retorna o contexto didático (excertos, artigos, atos) para alimentar o
  * painel didático. Não chama LLM — só RAG + heurísticas. Cacheado no
  * `semanticSearch` via Redis.
  */
-export const GET = withAuth(async (_request: NextRequest, context) => {
-  const { id, key } = await (context as Ctx).params;
-  const userId = (context as Ctx).user.userId;
+export const GET = withUserApi<{ id: string; key: string }>(async (_request: NextRequest, ctx) => {
+  const { id, key } = ctx.params;
+  const userId = ctx.user.userId;
   await enforceRateLimit(`planejamento:context:${userId}`, 30, 60);
 
   const section = await prisma.planningDocumentSection.findFirst({
@@ -36,16 +32,16 @@ export const GET = withAuth(async (_request: NextRequest, context) => {
     },
   });
   if (!section) {
-    return NextResponse.json({ error: "Seção não encontrada" }, { status: 404 });
+    throw new NotFoundError("Seção");
   }
 
   const trail = resolveTrail(section);
   if (!trail) {
-    return NextResponse.json({ error: "Trilha não disponível" }, { status: 409 });
+    throw new ConflictError("Trilha não disponível");
   }
   const def = trail.sections.find((s) => s.key === key);
   if (!def) {
-    return NextResponse.json({ error: "Definição não encontrada" }, { status: 409 });
+    throw new ConflictError("Definição não encontrada");
   }
   const descricao = section.document.session.descricaoLivre ?? "";
   if (descricao.length < 20) {
@@ -59,18 +55,18 @@ export const GET = withAuth(async (_request: NextRequest, context) => {
     });
   }
 
-  const ctx = await buildSectionContext(def, {
+  const sectionCtx = await buildSectionContext(def, {
     descricaoLivre: descricao,
     contentMd: section.contentMd,
   });
 
   return NextResponse.json({
-    excerpts: ctx.excerpts,
-    articles: ctx.articles,
-    relatedActs: ctx.relatedActs,
-    sources: ctx.sources,
-    anchorageScore: ctx.anchorageScore,
-    topSimilarity: ctx.topSimilarity,
+    excerpts: sectionCtx.excerpts,
+    articles: sectionCtx.articles,
+    relatedActs: sectionCtx.relatedActs,
+    sources: sectionCtx.sources,
+    anchorageScore: sectionCtx.anchorageScore,
+    topSimilarity: sectionCtx.topSimilarity,
   });
 });
 

@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { withAuth } from '@/lib/api-middleware';
+import { withAdminApi } from '@/lib/api/handler';
 import { queryGeminiText } from '@/lib/gemini/cached-client';
 import { PRIMARY_GEMINI_MODEL } from '@/lib/gemini/config';
 
@@ -15,10 +15,7 @@ export const maxDuration = 60;
  *
  * Apenas admin.
  */
-export const GET = withAuth(async (_request: NextRequest, context?: Record<string, unknown>) => {
-  const _user = context?.user as { userId: string; role?: string };
-  void _user;
-
+export const GET = withAdminApi(async (_request: NextRequest) => {
   const hasKey = !!process.env.GEMINI_API_KEY;
   const hasRedisUrl = !!process.env.UPSTASH_REDIS_REST_URL;
   const hasRedisToken = !!process.env.UPSTASH_REDIS_REST_TOKEN;
