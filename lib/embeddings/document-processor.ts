@@ -10,6 +10,7 @@ import { extractText, normalizeText } from '@/lib/text-extractor';
 import { chunkText, chunkLegalDocument, chunkTCUDocument, TextChunk } from './text-chunker';
 import { generateBatchEmbeddings, embeddingToSql } from './gemini-embeddings';
 import { PRIMARY_GEMINI_MODEL } from '@/lib/gemini/config';
+import { parseLeiArticles } from '@/lib/lei-articles';
 import { apiLogger } from "@/lib/logger";
 
 // ===========================
@@ -183,15 +184,8 @@ export async function processDocument(
     const rawChunks = createChunksForDocument(extractedText, document.category, options);
 
     // 7b. Prefixar metadados nos chunks para enriquecer embeddings
-    let leiArticlesStr = '';
-    if (document.leiArticles) {
-      try {
-        const arts = JSON.parse(document.leiArticles);
-        if (Array.isArray(arts) && arts.length > 0) {
-          leiArticlesStr = arts.join(', ');
-        }
-      } catch { /* ignore */ }
-    }
+    const arts = parseLeiArticles(document.leiArticles);
+    const leiArticlesStr = arts.length > 0 ? arts.join(', ') : '';
     const metaPrefix = `[${document.title} | ${document.category}${leiArticlesStr ? ` | Arts. ${leiArticlesStr}` : ''}]\n`;
     const chunks = rawChunks.map(chunk => ({
       ...chunk,

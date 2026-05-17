@@ -10,19 +10,15 @@
 
 import type { LeiArticle } from '@/data/lei-14133-artigos';
 import { prisma } from '@/lib/prisma';
+import { parseLeiArticles } from './lei-articles';
 
 /**
- * Extrai números de artigos de um documento (campo leiArticles em JSON)
+ * Extrai números de artigos de um documento (campo leiArticles em JSON).
+ * Wrapper sobre `parseLeiArticles` mantido por retrocompatibilidade.
+ * @deprecated Use `parseLeiArticles` de `@/lib/lei-articles` diretamente.
  */
 export function extractArticleNumbers(leiArticlesJson: string | null): string[] {
-  if (!leiArticlesJson) return [];
-
-  try {
-    const parsed = JSON.parse(leiArticlesJson);
-    return Array.isArray(parsed) ? parsed : [];
-  } catch {
-    return [];
-  }
+  return parseLeiArticles(leiArticlesJson);
 }
 
 /**

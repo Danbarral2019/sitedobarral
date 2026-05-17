@@ -10,6 +10,7 @@
  */
 
 import { safeParseArray } from './utils';
+import { parseLeiArticles } from './lei-articles';
 import { PRIMARY_GEMINI_MODEL } from './gemini/config';
 
 export const ENRICHMENT_DELAY_MS = 50;
@@ -81,7 +82,7 @@ function labelForCategory(category: string | null | undefined, doc: DocumentForS
 export function buildGenericSummaryPrompt(doc: DocumentForSummary): string {
   const categoryLabel = labelForCategory(doc.category, doc);
 
-  const artigos = safeParseArray(doc.leiArticles);
+  const artigos = parseLeiArticles(doc.leiArticles);
   const artigosStr = artigos.length > 0
     ? `Artigos da Lei 14.133/2021 vinculados: ${artigos.map(a => `Art. ${a}`).join(', ')}`
     : 'Sem artigo da Lei 14.133 vinculado especificamente (se aplicável, sugira na explicação).';
@@ -186,7 +187,7 @@ export function buildLegislativeActPrompt(act: LegislativeActForSummary): string
   const typeLabel = legislativeActTypeLabel(act.type);
   const fullNumber = `${typeLabel} nº ${act.number}/${act.year}`;
 
-  const artigos = safeParseArray(act.leiArticles);
+  const artigos = parseLeiArticles(act.leiArticles);
   const artigosStr = artigos.length > 0
     ? `Artigos da Lei 14.133/2021 regulamentados/relacionados: ${artigos.map(a => `Art. ${a}`).join(', ')}`
     : 'Sem artigo específico da Lei 14.133 vinculado.';
