@@ -31,6 +31,7 @@ export {
   shouldTryFallbackModel,
 } from './error-detection'
 export { LEGAL_SAFETY_SETTINGS } from './safety'
+export { hashContent } from './cache-key'
 
 /**
  * Tenta executar `fn(modelId)` no modelo principal e, em caso de falha
