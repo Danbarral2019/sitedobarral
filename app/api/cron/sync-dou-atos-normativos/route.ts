@@ -36,6 +36,7 @@ import { classifyEditorialBatch, EDITORIAL_PROMPT_VERSION, type EditorialCandida
 import { sendDouEditorialAlert, type DouEditorialAlertItem } from '@/lib/email';
 import { PRIMARY_GEMINI_MODEL } from '@/lib/gemini/config';
 import { extractIssuerFromDouHierarchy } from '@/lib/dou-issuer';
+import { setLeiArticles } from '@/lib/lei-articles';
 import { withCronTelemetry } from '@/lib/cron-telemetry';
 import { getHierarchyLevel } from '@/lib/legislative-acts/hierarchy';
 import { apiLogger } from '@/lib/logger';
@@ -358,7 +359,7 @@ export async function GET(request: NextRequest) {
                 const articleNumbers = LeiIndexer.resultToLeiArticles(analysis);
                 await tx.document.update({
                   where: { id: newDoc.id },
-                  data: { leiArticles: JSON.stringify(articleNumbers) },
+                  data: { ...setLeiArticles(articleNumbers) },
                 });
               }
             } catch (error) {

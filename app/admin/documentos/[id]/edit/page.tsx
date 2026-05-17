@@ -7,6 +7,7 @@ import DocumentWizard from '@/components/admin/DocumentWizard';
 import { DocumentFormState } from '@/components/admin/DocumentWizard/types';
 import { Loader2, ChevronDown, ChevronRight, History, CheckCircle2, AlertTriangle } from 'lucide-react';
 import DocumentVersionHistory from '@/components/admin/DocumentVersionHistory';
+import { parseLeiArticles } from '@/lib/lei-articles';
 
 interface DocumentFromAPI {
   id: string;
@@ -81,11 +82,7 @@ export default function EditDocumentPage() {
           enunciadoNumber: doc.enunciadoNumber || '',
 
           // Step 2: Lei Articles & Tags
-          leiArticles: Array.isArray(doc.leiArticles)
-            ? doc.leiArticles
-            : typeof doc.leiArticles === 'string'
-            ? JSON.parse(doc.leiArticles || '[]')
-            : [],
+          leiArticles: parseLeiArticles(doc.leiArticles),
           tags: Array.isArray(doc.tags)
             ? doc.tags
             : typeof doc.tags === 'string'

@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { verifyAuth } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
-import { safeParseArray } from '@/lib/utils';
+import { parseLeiArticles } from '@/lib/lei-articles';
 
 /**
  * GET /api/lei-14133/article-docs/[numero]
@@ -209,7 +209,7 @@ export async function GET(
     const enriched: EnrichedDoc[] = [];
 
     for (const doc of documents) {
-      const articles = safeParseArray(doc.leiArticles);
+      const articles = parseLeiArticles(doc.leiArticles);
       if (!articles.map(String).includes(numeroStr)) continue;
 
       const baseScore = DOCUMENT_CATEGORY_SCORE[doc.category || ''] ?? 10;
@@ -236,7 +236,7 @@ export async function GET(
     }
 
     for (const act of acts) {
-      const articles = safeParseArray(act.leiArticles);
+      const articles = parseLeiArticles(act.leiArticles);
       if (!articles.map(String).includes(numeroStr)) continue;
 
       const score =

@@ -4,6 +4,7 @@ import { ValidationError } from '@/lib/errors/api-error';
 import { prisma } from '@/lib/prisma';
 import { CacheInvalidation } from '@/lib/cache/redis-client';
 import { sendPushToCourse } from '@/lib/push-notifications';
+import { setLeiArticles } from '@/lib/lei-articles';
 
 /**
  * POST /api/admin/documents/create-manual
@@ -66,7 +67,7 @@ export const POST = withAdminApi(async (request: NextRequest) => {
         courseId,
         isPublic: isPublic || false,
         tags: tags || JSON.stringify([entityType?.toLowerCase(), category].filter(Boolean)),
-        leiArticles: leiArticles ? JSON.stringify(leiArticles) : null,
+        ...setLeiArticles(leiArticles ?? null),
         content: notesContent,
         entityType: entityType || null,
         enunciadoNumber: enunciadoNumber || null,

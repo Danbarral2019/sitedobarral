@@ -5,6 +5,7 @@ import { publishToSocialMedia } from '@/lib/social-publisher';
 import { NotFoundError, ConflictError } from '@/lib/errors/api-error';
 import { apiLogger } from '@/lib/logger';
 import { CacheInvalidation } from '@/lib/cache/redis-client';
+import { setLeiArticles } from '@/lib/lei-articles';
 
 // GET - Busca um post específico
 export const GET = withAdminApi<{ id: string }>(async (
@@ -68,7 +69,7 @@ export const PUT = withAdminApi<{ id: string }>(async (
         ...(typeof isPublished === 'boolean' && { isPublished }),
         ...(typeof autoPublishSocial === 'boolean' && { autoPublishSocial }),
         ...(tags !== undefined && { tags: tags ? JSON.stringify(tags) : null }),
-        ...(leiArticles !== undefined && { leiArticles: leiArticles ? JSON.stringify(leiArticles) : null }),
+        ...(leiArticles !== undefined && setLeiArticles(leiArticles ?? null)),
       },
     });
 

@@ -4,6 +4,7 @@ import { withAdminApi } from '@/lib/api/handler';
 import { ApiError, NotFoundError } from '@/lib/errors/api-error';
 import { generateDocumentSummary, isSummaryServiceAvailable } from '@/lib/summary-generator';
 import { isLiteralSourceCategory } from '@/lib/literal-sources';
+import { setLeiArticles } from '@/lib/lei-articles';
 
 /**
  * POST /api/admin/documents/[id]/generate-summary
@@ -80,7 +81,7 @@ export const POST = withAdminApi<{ id: string }>(async (request, ctx) => {
       // Atualiza tags e artigos se confiança for alta
       ...(summaryResult.confidence >= 70 && {
         tags: summaryResult.tags.join(', '),
-        leiArticles: JSON.stringify(summaryResult.leiArticles),
+        ...setLeiArticles(summaryResult.leiArticles.map(String)),
       }),
     },
   });

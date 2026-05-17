@@ -37,6 +37,7 @@ import {
   sleep,
 } from './utils';
 import { classifyDecision, generateDecisionSummary } from './classifier';
+import { setLeiArticles } from '@/lib/lei-articles';
 import { apiLogger } from "@/lib/logger";
 
 // ===========================
@@ -539,7 +540,7 @@ class TCESPScraper implements TribunalScraper {
       isRelevant: classification.approvalStatus !== 'auto_rejected',
       relevanceScore: classification.relevanceScore,
       themes: JSON.stringify(classification.themes),
-      leiArticles: JSON.stringify(classification.leiArticles),
+      ...setLeiArticles(classification.leiArticles),
       suggestedCourses: classification.suggestedCourses,
       sourceApi: 'tce-sp-web',
       approvalStatus: classification.approvalStatus,

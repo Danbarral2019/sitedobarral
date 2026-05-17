@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { verifyAuth } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
 import { CacheInvalidation } from '@/lib/cache/redis-client';
+import { setLeiArticles } from '@/lib/lei-articles';
 import { apiLogger } from "@/lib/logger";
 
 /**
@@ -218,7 +219,7 @@ async function handleApproval(
           courseId: courseIds[0] || null, // Primeiro curso (principal)
           isPublic: true, // Documentos aprovados são públicos na aba "Outros Atos Normativos"
           tags: JSON.stringify(tags),
-          leiArticles: JSON.stringify([]),
+          ...setLeiArticles([]),
           content: stagingDoc.fullContent || stagingDoc.abstract,
           douUrl: stagingDoc.url,
           douData: parsedDate,

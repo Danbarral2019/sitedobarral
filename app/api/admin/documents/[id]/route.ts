@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { withAdminApi } from '@/lib/api/handler';
 import { prisma } from '@/lib/prisma';
 import { safeParseArray } from '@/lib/utils';
+import { parseLeiArticles, setLeiArticles, stringifyLeiArticles } from '@/lib/lei-articles';
 import { NotFoundError } from '@/lib/errors/api-error';
 import { apiLogger } from '@/lib/logger';
 import { CacheInvalidation } from '@/lib/cache/redis-client';
@@ -28,7 +29,7 @@ export const GET = withAdminApi<{ id: string }>(async (request: NextRequest, ctx
     const parsedDocument = {
       ...document,
       tags: safeParseArray(document.tags),
-      leiArticles: safeParseArray(document.leiArticles),
+      leiArticles: parseLeiArticles(document.leiArticles),
       alternativeUrls: document.alternativeUrls || null,
       // Prefer satellite table values, fall back to flat fields
       adminNotes: document.notes?.adminNotes ?? document.adminNotes,
@@ -111,7 +112,7 @@ export const PUT = withAdminApi<{ id: string }>(async (request: NextRequest, ctx
         category: category || existing.category,
         isPublic: isPublic !== undefined ? isPublic : existing.isPublic,
         tags: tags ? JSON.stringify(tags) : existing.tags,
-        leiArticles: leiArticles ? JSON.stringify(leiArticles) : existing.leiArticles,
+        leiArticles: leiArticles ? stringifyLeiArticles(leiArticles) : existing.leiArticles,
         alternativeUrls: alternativeUrls !== undefined
           ? (Array.isArray(alternativeUrls) ? JSON.stringify(alternativeUrls) : alternativeUrls)
           : existing.alternativeUrls,
@@ -199,7 +200,7 @@ export const PATCH = withAdminApi<{ id: string }>(async (request: NextRequest, c
     if (body.courseId !== undefined) allowedFields.courseId = body.courseId;
     if (body.category !== undefined) allowedFields.category = body.category;
     if (body.tags !== undefined) allowedFields.tags = Array.isArray(body.tags) ? JSON.stringify(body.tags) : body.tags;
-    if (body.leiArticles !== undefined) allowedFields.leiArticles = JSON.stringify(body.leiArticles);
+    if (body.leiArticles !== undefined) Object.assign(allowedFields, setLeiArticles(body.leiArticles));
     if (body.isPublic !== undefined) allowedFields.isPublic = body.isPublic;
     if (body.reviewed !== undefined) {
       allowedFields.reviewed = body.reviewed;

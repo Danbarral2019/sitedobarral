@@ -7,6 +7,7 @@ import { LeiIndexer } from '@/lib/lei-indexer';
 import { scrapeAndIndexAct } from '@/lib/legislative-scrapers/scrape-and-index';
 import { extractIssuerFromDouHierarchy } from '@/lib/dou-issuer';
 import { getHierarchyLevel } from '@/lib/legislative-acts/hierarchy';
+import { setLeiArticles } from '@/lib/lei-articles';
 import { apiLogger } from "@/lib/logger";
 
 export const runtime = 'nodejs';
@@ -171,7 +172,7 @@ export const POST = withAdminApi<{ id: string }>(async (_request, { params, user
           const articleNumbers = LeiIndexer.resultToLeiArticles(analysis);
           await prisma.document.update({
             where: { id: documentId },
-            data: { leiArticles: JSON.stringify(articleNumbers) },
+            data: { ...setLeiArticles(articleNumbers) },
           });
         }
       } catch (e) {

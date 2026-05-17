@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { withAdminApi } from '@/lib/api/handler';
 import { NotFoundError } from '@/lib/errors/api-error';
-import { safeParseArray } from '@/lib/utils';
+import { parseLeiArticles } from '@/lib/lei-articles';
 
 /**
  * GET /api/admin/lei-14133/articles/[numero]
@@ -29,7 +29,7 @@ export const GET = withAdminApi<{ numero: string }>(async (_request, { params })
     select: { id: true, title: true, leiArticles: true, category: true, isPublic: true, notesImportance: true },
   });
   const linkedDocuments = allDocs.filter((d) =>
-    safeParseArray(d.leiArticles).map(String).includes(numero),
+    parseLeiArticles(d.leiArticles).map(String).includes(numero),
   );
 
   // LegislativeActs que linkam este artigo
@@ -48,7 +48,7 @@ export const GET = withAdminApi<{ numero: string }>(async (_request, { params })
     },
   });
   const linkedActs = allActs.filter((a) =>
-    safeParseArray(a.leiArticles).map(String).includes(numero),
+    parseLeiArticles(a.leiArticles).map(String).includes(numero),
   );
 
   return NextResponse.json({ article, linkedDocuments, linkedActs });

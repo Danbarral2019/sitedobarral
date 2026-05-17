@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { withCache, CacheKeys, CACHE_TTL } from '@/lib/cache/redis-client';
+import { parseLeiArticles } from '@/lib/lei-articles';
 
 // GET /api/glossary/[slug] - Obter termo específico por slug
 export async function GET(
@@ -89,14 +90,7 @@ export async function GET(
           }
         }
 
-        let leiArticles: string[] = [];
-        if (term.leiArticles) {
-          try {
-            leiArticles = JSON.parse(term.leiArticles);
-          } catch (e) {
-            console.error('Error parsing leiArticles:', e);
-          }
-        }
+        const leiArticles: string[] = parseLeiArticles(term.leiArticles);
 
         return { relatedTerms, relatedDocuments, leiArticles };
       },

@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { withAdminApi } from '@/lib/api/handler';
 import { ApiError, NotFoundError } from '@/lib/errors/api-error';
-import { safeParseArray } from '@/lib/utils';
+import { parseLeiArticles, setLeiArticles } from '@/lib/lei-articles';
 import { CacheInvalidation } from '@/lib/cache/redis-client';
 
 export const POST = withAdminApi<{ numero: string }>(async (request, { params }) => {
@@ -19,7 +19,7 @@ export const POST = withAdminApi<{ numero: string }>(async (request, { params })
   });
   if (!doc) throw new NotFoundError('Documento');
 
-  const current = safeParseArray(doc.leiArticles).map(String);
+  const current = parseLeiArticles(doc.leiArticles);
   if (current.includes(numero)) {
     return NextResponse.json({ success: true, alreadyLinked: true });
   }
@@ -27,7 +27,7 @@ export const POST = withAdminApi<{ numero: string }>(async (request, { params })
 
   await prisma.document.update({
     where: { id: documentId },
-    data: { leiArticles: JSON.stringify(next) },
+    data: { ...setLeiArticles(next) },
   });
 
   await Promise.all([

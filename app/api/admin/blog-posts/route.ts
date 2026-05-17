@@ -5,6 +5,7 @@ import { prisma } from '@/lib/prisma';
 import { publishToSocialMedia } from '@/lib/social-publisher';
 import { CacheInvalidation, withCache, CacheKeys, CACHE_TTL } from '@/lib/cache/redis-client';
 import { broadcastPush } from '@/lib/push-notifications';
+import { setLeiArticles } from '@/lib/lei-articles';
 import { apiLogger } from "@/lib/logger";
 
 // GET - Lista posts do blog com paginação
@@ -78,7 +79,7 @@ export const POST = withAdminApi(async (request) => {
       isPublished: isPublished ?? false,
       autoPublishSocial: autoPublishSocial ?? true,
       tags: tags ? JSON.stringify(tags) : null,
-      leiArticles: leiArticles ? JSON.stringify(leiArticles) : null,
+      ...setLeiArticles(leiArticles ?? null),
     },
   });
 

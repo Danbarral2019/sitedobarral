@@ -3,6 +3,7 @@ import { prisma } from '@/lib/prisma';
 import { verifyAuth } from '@/lib/auth';
 import { Prisma } from '@prisma/client';
 import { CacheInvalidation } from '@/lib/cache/redis-client';
+import { stringifyLeiArticles } from '@/lib/lei-articles';
 import { apiLogger } from "@/lib/logger";
 
 // Função helper para gerar slug
@@ -107,7 +108,7 @@ export async function PUT(
 
     if (leiArticles !== undefined) {
       data.leiArticles = Array.isArray(leiArticles)
-        ? JSON.stringify(leiArticles)
+        ? stringifyLeiArticles(leiArticles)
         : null;
     }
 

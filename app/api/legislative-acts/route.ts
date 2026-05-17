@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { withCache, CacheKeys, CACHE_TTL, CacheInvalidation } from '@/lib/cache/redis-client';
+import { parseLeiArticles } from '@/lib/lei-articles';
 
 /**
  * GET /api/legislative-acts
@@ -174,7 +175,7 @@ async function fetchAtosNormativos(params: AtosParams) {
   // Processar leiArticles e themes (parsear JSON)
   const actsWithParsedData = acts.map(act => ({
     ...act,
-    leiArticles: act.leiArticles ? JSON.parse(act.leiArticles) : [],
+    leiArticles: parseLeiArticles(act.leiArticles),
     themes: act.themes ? JSON.parse(act.themes) : [],
   }));
 
@@ -347,7 +348,7 @@ async function fetchBoasPraticas(params: BoasPraticasParams) {
     publishDate: doc.metaDou?.data ?? doc.douData ?? doc.uploadedAt,
     esfera: doc.esfera || 'federal',
     themes: doc.themes ? JSON.parse(doc.themes) : [],
-    leiArticles: doc.leiArticles ? JSON.parse(doc.leiArticles) : [],
+    leiArticles: parseLeiArticles(doc.leiArticles),
     officialUrl: doc.metaDou?.url ?? doc.douUrl ?? doc.url,
     url: doc.url,
     viewCount: 0,

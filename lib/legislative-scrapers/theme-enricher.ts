@@ -11,6 +11,7 @@
  */
 
 import { generate } from '@/lib/ai';
+import { parseLeiArticles } from '@/lib/lei-articles';
 import { CANONICAL_THEMES, validateThemes } from './theme-validator';
 
 /**
@@ -89,14 +90,8 @@ export function classifyByHeuristic(act: ActForClassification): string[] {
   };
 
   // 1. Artigos
-  if (act.leiArticles) {
-    let articles: string[] = [];
-    try {
-      const parsed = JSON.parse(act.leiArticles);
-      if (Array.isArray(parsed)) articles = parsed.filter((x): x is string => typeof x === 'string');
-    } catch {
-      /* ignore malformed */
-    }
+  {
+    const articles = parseLeiArticles(act.leiArticles);
     for (const art of articles) {
       for (const tema of TEMAS_LICITACOES) {
         if (tema.articles.includes(art)) add(tema.value);

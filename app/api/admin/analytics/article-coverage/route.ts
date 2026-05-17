@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { verifyAuth } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
-import { safeParseArray } from '@/lib/utils';
+import { parseLeiArticles } from '@/lib/lei-articles';
 import { apiLogger } from "@/lib/logger";
 
 /**
@@ -51,7 +51,7 @@ export async function GET(request: NextRequest) {
     const articleDocumentCount: Record<string, number> = {};
 
     documentsWithArticles.forEach((doc) => {
-      const articles = safeParseArray(doc.leiArticles);
+      const articles = parseLeiArticles(doc.leiArticles);
       articles.forEach((artNum) => {
         const artStr = String(artNum);
         articleDocumentCount[artStr] = (articleDocumentCount[artStr] || 0) + 1;

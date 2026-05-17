@@ -7,6 +7,7 @@ import { scrapeAndIndexAct } from '@/lib/legislative-scrapers/scrape-and-index';
 import { validateActContent } from '@/lib/legislative-scrapers/validate-content';
 import { normalizeScrapedText } from '@/lib/legislative-scrapers/normalize';
 import { getHierarchyLevel } from '@/lib/legislative-acts/hierarchy';
+import { setLeiArticles } from '@/lib/lei-articles';
 import { apiLogger } from "@/lib/logger";
 
 /**
@@ -137,7 +138,7 @@ export const POST = withAdminApi(async (request, ctx) => {
           publishDate: new Date(publishDate),
           effectiveDate: effectiveDate ? new Date(effectiveDate) : null,
           hierarchyLevel: getHierarchyLevel(type.toLowerCase()),
-          leiArticles: leiArticlesArray ? JSON.stringify(leiArticlesArray) : null,
+          ...setLeiArticles(leiArticlesArray ?? null),
           officialUrl: officialUrl?.trim() || null,
           pdfUrl: pdfUrl?.trim() || null,
           createdBy: ctx.user.email

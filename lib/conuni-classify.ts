@@ -1,6 +1,7 @@
 import type { PrismaClient } from '@prisma/client';
 import { generate } from './ai';
 import { PRIMARY_GEMINI_MODEL } from './gemini/config';
+import { setLeiArticles } from './lei-articles';
 
 export interface ClassificationOutput {
   licitacoesContratos: boolean;
@@ -170,7 +171,7 @@ export async function classifyPendingPareceres(
         where: { id: doc.id },
         data: {
           aiClassification: JSON.stringify(merged),
-          ...(cls.leiArticles.length > 0 ? { leiArticles: JSON.stringify(cls.leiArticles) } : {}),
+          ...(cls.leiArticles.length > 0 ? setLeiArticles(cls.leiArticles) : {}),
         },
       });
 
