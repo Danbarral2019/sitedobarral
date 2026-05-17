@@ -275,4 +275,87 @@ describe('lib/api/handler', () => {
       expect(vi.mocked(Sentry.setUser)).not.toHaveBeenCalled();
     });
   });
+
+  describe('requestId + header X-Request-Id', () => {
+    it('gera requestId de 8 chars hex e expõe em ctx.requestId', async () => {
+      let captured: string | undefined;
+      const handler = withPublicApi(async (_req, ctx) => {
+        captured = ctx.requestId;
+        return NextResponse.json({});
+      });
+
+      await handler(makeRequest(), makeNextCtx());
+      expect(captured).toMatch(/^[0-9a-f]{8}$/);
+    });
+
+    it('inclui X-Request-Id no header de resposta com sucesso', async () => {
+      const handler = withPublicApi(async () => NextResponse.json({ ok: true }));
+      const response = await handler(makeRequest(), makeNextCtx());
+
+      const headerValue = response.headers.get('X-Request-Id');
+      expect(headerValue).toMatch(/^[0-9a-f]{8}$/);
+    });
+
+    it('inclui X-Request-Id no header de resposta de erro', async () => {
+      const handler = withPublicApi(async () => {
+        const { NotFoundError } = await import('@/lib/errors/api-error');
+        throw new NotFoundError('Recurso');
+      });
+      const response = await handler(makeRequest(), makeNextCtx());
+
+      expect(response.status).toBe(404);
+      expect(response.headers.get('X-Request-Id')).toMatch(/^[0-9a-f]{8}$/);
+    });
+
+    it('ctx.requestId é o mesmo valor que vai no header', async () => {
+      let ctxId: string | undefined;
+      const handler = withPublicApi(async (_req, ctx) => {
+        ctxId = ctx.requestId;
+        return NextResponse.json({});
+      });
+
+      const response = await handler(makeRequest(), makeNextCtx());
+      expect(response.headers.get('X-Request-Id')).toBe(ctxId);
+    });
+  });
+
+  describe('ctx.params (desempacotado)', () => {
+    it('aplica await em nextCtx.params e passa resolvido ao handler', async () => {
+      const handler = withPublicApi<{ id: string }>(async (_req, ctx) => {
+        expect(ctx.params.id).toBe('abc');
+        return NextResponse.json({ id: ctx.params.id });
+      });
+
+      const response = await handler(makeRequest(), { params: Promise.resolve({ id: 'abc' }) });
+      expect(response.status).toBe(200);
+      const body = await response.json();
+      expect(body.id).toBe('abc');
+    });
+
+    it('passa objeto vazio quando params resolve para undefined', async () => {
+      const handler = withPublicApi(async (_req, ctx) => {
+        expect(ctx.params).toBeDefined();
+        return NextResponse.json({});
+      });
+
+      const response = await handler(makeRequest(), makeNextCtx());
+      expect(response.status).toBe(200);
+    });
+  });
+
+  describe('ctx.logger', () => {
+    it('expõe um logger child com requestId e route', async () => {
+      let logger: unknown;
+      const handler = withPublicApi(async (_req, ctx) => {
+        logger = ctx.logger;
+        return NextResponse.json({});
+      });
+
+      await handler(makeRequest('https://example.com/api/foo', 'POST'), makeNextCtx());
+
+      expect(logger).toBeDefined();
+      expect(typeof (logger as { info: unknown }).info).toBe('function');
+      expect(typeof (logger as { error: unknown }).error).toBe('function');
+    });
+  });
 });
