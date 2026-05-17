@@ -1,18 +1,17 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { withAdminAuth } from '@/lib/api-middleware';
+import { withAdminApi } from '@/lib/api/handler';
 import { prisma } from '@/lib/prisma';
 import { safeParseArray } from '@/lib/utils';
-import { handleApiError } from '@/lib/errors/error-handler';
 import { NotFoundError } from '@/lib/errors/api-error';
 import { apiLogger } from '@/lib/logger';
 import { CacheInvalidation } from '@/lib/cache/redis-client';
+import type { ApiContext } from '@/lib/api/types';
 
 /**
  * GET: Busca um documento por ID
  */
-export const GET = withAdminAuth(async (request: NextRequest, context: { params: Promise<{ id: string }>; user?: { id: string; email: string; role: string } }) => {
-  try {
-    const { id } = await context.params;
+export const GET = withAdminApi<{ id: string }>(async (request: NextRequest, ctx: ApiContext<{ id: string }>) => {
+    const { id } = ctx.params;
 
     const document = await prisma.document.findUnique({
       where: { id },
@@ -40,27 +39,14 @@ export const GET = withAdminAuth(async (request: NextRequest, context: { params:
     };
 
     return NextResponse.json(parsedDocument);
-  } catch (error) {
-    apiLogger.error('=== [DOCUMENT ROUTE] ERRO CAPTURADO ===');
-    apiLogger.error({ err: error }, 'Erro completo:');
-    apiLogger.error({ err: error instanceof Error ? error.constructor.name : typeof error }, 'Tipo do erro:');
-    apiLogger.error({ err: error instanceof Error ? error.message : String(error) }, 'Mensagem:');
-    apiLogger.error({ err: error instanceof Error ? error.stack : 'N/A' }, 'Stack trace:');
-    apiLogger.error('======================================');
-    return handleApiError(error);
-  }
 });
 
 /**
  * PUT: Atualiza um documento
  */
-export const PUT = withAdminAuth(async (request: NextRequest, context: { params: Promise<{ id: string }>; user?: { id: string; email: string; role: string } }) => {
-  try {
-    console.log('[DOCUMENT PUT DEBUG] Context recebido:', context);
-    const { id } = await context.params;
-    console.log('[DOCUMENT PUT DEBUG] Document ID:', id);
+export const PUT = withAdminApi<{ id: string }>(async (request: NextRequest, ctx: ApiContext<{ id: string }>) => {
+    const { id } = ctx.params;
     const body = await request.json();
-    console.log('[DOCUMENT PUT DEBUG] Body recebido (primeiras 500 chars):', JSON.stringify(body).substring(0, 500));
 
     const {
       title,
@@ -107,7 +93,7 @@ export const PUT = withAdminAuth(async (request: NextRequest, context: { params:
     if (feedbackRelevance !== undefined) {
       feedbackData.feedbackRelevance = feedbackRelevance;
       feedbackData.feedbackGivenAt = new Date();
-      feedbackData.feedbackGivenBy = context.user?.email || 'admin';
+      feedbackData.feedbackGivenBy = ctx.user.email || 'admin';
     }
     if (feedbackReasoning !== undefined) {
       feedbackData.feedbackReasoning = feedbackReasoning;
@@ -149,7 +135,7 @@ export const PUT = withAdminAuth(async (request: NextRequest, context: { params:
         adminNotes: adminNotes !== undefined ? (adminNotes === '' ? null : adminNotes) : existing.adminNotes,
         publicNotes: publicNotes !== undefined ? (publicNotes === '' ? null : publicNotes) : existing.publicNotes,
         notesUpdatedAt: new Date(),
-        notesUpdatedBy: context.user?.email || 'admin',
+        notesUpdatedBy: ctx.user.email || 'admin',
         // Satellite table (dual-write)
         notes: {
           upsert: {
@@ -160,7 +146,7 @@ export const PUT = withAdminAuth(async (request: NextRequest, context: { params:
               adminNotes: adminNotes !== undefined ? (adminNotes === '' ? null : adminNotes) : existing.adminNotes,
               publicNotes: publicNotes !== undefined ? (publicNotes === '' ? null : publicNotes) : existing.publicNotes,
               updatedAt: new Date(),
-              updatedBy: context.user?.email || 'admin',
+              updatedBy: ctx.user.email || 'admin',
             },
             update: {
               keyPoints: keyPoints !== undefined ? (keyPoints === '' ? null : keyPoints) : undefined,
@@ -169,7 +155,7 @@ export const PUT = withAdminAuth(async (request: NextRequest, context: { params:
               adminNotes: adminNotes !== undefined ? (adminNotes === '' ? null : adminNotes) : undefined,
               publicNotes: publicNotes !== undefined ? (publicNotes === '' ? null : publicNotes) : undefined,
               updatedAt: new Date(),
-              updatedBy: context.user?.email || 'admin',
+              updatedBy: ctx.user.email || 'admin',
             },
           },
         },
@@ -188,23 +174,13 @@ export const PUT = withAdminAuth(async (request: NextRequest, context: { params:
       success: true,
       document: updated,
     });
-  } catch (error) {
-    apiLogger.error('=== [DOCUMENT ROUTE] ERRO CAPTURADO ===');
-    apiLogger.error({ err: error }, 'Erro completo:');
-    apiLogger.error({ err: error instanceof Error ? error.constructor.name : typeof error }, 'Tipo do erro:');
-    apiLogger.error({ err: error instanceof Error ? error.message : String(error) }, 'Mensagem:');
-    apiLogger.error({ err: error instanceof Error ? error.stack : 'N/A' }, 'Stack trace:');
-    apiLogger.error('======================================');
-    return handleApiError(error);
-  }
 });
 
 /**
  * PATCH: Atualização parcial de um documento (para classificação em lote)
  */
-export const PATCH = withAdminAuth(async (request: NextRequest, context: { params: Promise<{ id: string }>; user?: { id: string; email: string; role: string } }) => {
-  try {
-    const { id } = await context.params;
+export const PATCH = withAdminApi<{ id: string }>(async (request: NextRequest, ctx: ApiContext<{ id: string }>) => {
+    const { id } = ctx.params;
     const body = await request.json();
 
     // Verifica se documento existe
@@ -257,23 +233,13 @@ export const PATCH = withAdminAuth(async (request: NextRequest, context: { param
       success: true,
       document: updated,
     });
-  } catch (error) {
-    apiLogger.error('=== [DOCUMENT ROUTE] ERRO CAPTURADO ===');
-    apiLogger.error({ err: error }, 'Erro completo:');
-    apiLogger.error({ err: error instanceof Error ? error.constructor.name : typeof error }, 'Tipo do erro:');
-    apiLogger.error({ err: error instanceof Error ? error.message : String(error) }, 'Mensagem:');
-    apiLogger.error({ err: error instanceof Error ? error.stack : 'N/A' }, 'Stack trace:');
-    apiLogger.error('======================================');
-    return handleApiError(error);
-  }
 });
 
 /**
  * DELETE: Deleta um documento
  */
-export const DELETE = withAdminAuth(async (request: NextRequest, context: { params: Promise<{ id: string }>; user?: { id: string; email: string; role: string } }) => {
-  try {
-    const { id } = await context.params;
+export const DELETE = withAdminApi<{ id: string }>(async (request: NextRequest, ctx: ApiContext<{ id: string }>) => {
+    const { id } = ctx.params;
 
     // Verifica se existe
     const existing = await prisma.document.findUnique({
@@ -305,13 +271,4 @@ export const DELETE = withAdminAuth(async (request: NextRequest, context: { para
       success: true,
       message: 'Documento deletado com sucesso',
     });
-  } catch (error) {
-    apiLogger.error('=== [DOCUMENT ROUTE] ERRO CAPTURADO ===');
-    apiLogger.error({ err: error }, 'Erro completo:');
-    apiLogger.error({ err: error instanceof Error ? error.constructor.name : typeof error }, 'Tipo do erro:');
-    apiLogger.error({ err: error instanceof Error ? error.message : String(error) }, 'Mensagem:');
-    apiLogger.error({ err: error instanceof Error ? error.stack : 'N/A' }, 'Stack trace:');
-    apiLogger.error('======================================');
-    return handleApiError(error);
-  }
 });

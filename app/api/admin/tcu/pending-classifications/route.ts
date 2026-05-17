@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import * as fs from 'fs';
 import * as path from 'path';
-import { withAdminAuth } from '@/lib/api-middleware';
+import { withAdminApi } from '@/lib/api/handler';
 import { prisma } from '@/lib/prisma';
 
 const PAGE_SIZE = 50;
@@ -14,7 +14,7 @@ function loadTaxonomy() {
   return cachedTaxonomy!;
 }
 
-export const GET = withAdminAuth(async (request: NextRequest) => {
+export const GET = withAdminApi(async (request: NextRequest) => {
   const { searchParams } = new URL(request.url);
   const page = Math.max(1, parseInt(searchParams.get('page') || '1'));
   const area = searchParams.get('area') || undefined;

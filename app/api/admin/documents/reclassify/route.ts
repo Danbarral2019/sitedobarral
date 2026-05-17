@@ -1,24 +1,14 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
-import { handleApiError } from '@/lib/errors/error-handler';
-import { ValidationError, NotFoundError, AuthenticationError } from '@/lib/errors/api-error';
+import { ValidationError, NotFoundError } from '@/lib/errors/api-error';
 import { apiLogger } from '@/lib/logger';
-import { withAdminAuth } from '@/lib/api-middleware';
+import { withAdminApi } from '@/lib/api/handler';
+import type { ApiContext } from '@/lib/api/types';
 
-export const POST = withAdminAuth(async (request: NextRequest, context?: Record<string, unknown>) => {
-  try {
-    console.log('[RECLASSIFY DEBUG] Context recebido:', context);
-    console.log('[RECLASSIFY DEBUG] User:', context?.user);
-
-    const user = context?.user as { id: string; email: string; role: string } | undefined;
-
-    if (!user) {
-      apiLogger.error('[RECLASSIFY ERROR] User não encontrado no context!');
-      throw new AuthenticationError('Usuário não autenticado no contexto da rota');
-    }
+export const POST = withAdminApi(async (request: NextRequest, ctx: ApiContext) => {
+    const user = ctx.user;
 
     const body = await request.json();
-    console.log('[RECLASSIFY DEBUG] Body recebido:', body);
 
     const { documentIds, action, courseId, isCommon } = body;
 
@@ -36,7 +26,7 @@ export const POST = withAdminAuth(async (request: NextRequest, context?: Record<
     }
 
     apiLogger.info({
-      userId: user?.id,
+      userId: user.userId,
       action,
       documentCount: documentIds.length,
       courseId,
@@ -101,7 +91,7 @@ export const POST = withAdminAuth(async (request: NextRequest, context?: Record<
     });
 
     apiLogger.info({
-      userId: user?.id,
+      userId: user.userId,
       updatedCount: result.count,
       action,
       courseId,
@@ -113,22 +103,11 @@ export const POST = withAdminAuth(async (request: NextRequest, context?: Record<
       message: updateMessage,
       updatedCount: result.count
     });
-
-  } catch (error) {
-    apiLogger.error('=== [RECLASSIFY POST] ERRO CAPTURADO ===');
-    apiLogger.error({ err: error }, 'Erro completo:');
-    apiLogger.error({ err: error instanceof Error ? error.constructor.name : typeof error }, 'Tipo do erro:');
-    apiLogger.error({ err: error instanceof Error ? error.message : String(error) }, 'Mensagem:');
-    apiLogger.error({ err: error instanceof Error ? error.stack : 'N/A' }, 'Stack trace:');
-    apiLogger.error('======================================');
-    return handleApiError(error);
-  }
 });
 
 // GET - Listar documentos com filtros para reclassificação
-export const GET = withAdminAuth(async (request: NextRequest, context?: Record<string, unknown>) => {
-  try {
-    const user = context?.user as { id: string; email: string; role: string } | undefined;
+export const GET = withAdminApi(async (request: NextRequest, ctx: ApiContext) => {
+    const user = ctx.user;
     const { searchParams } = new URL(request.url);
     const category = searchParams.get('category');
     const courseId = searchParams.get('courseId');
@@ -160,7 +139,7 @@ export const GET = withAdminAuth(async (request: NextRequest, context?: Record<s
     }
 
     apiLogger.info({
-      userId: user?.id,
+      userId: user.userId,
       filters: { category, courseId, isCommon, search }
     }, 'Listando documentos para reclassificação');
 
@@ -191,7 +170,7 @@ export const GET = withAdminAuth(async (request: NextRequest, context?: Record<s
     const total = await prisma.document.count({ where });
 
     apiLogger.info({
-      userId: user?.id,
+      userId: user.userId,
       count: documents.length,
       total
     }, 'Documentos listados para reclassificação');
@@ -201,14 +180,4 @@ export const GET = withAdminAuth(async (request: NextRequest, context?: Record<s
       total,
       showing: documents.length
     });
-
-  } catch (error) {
-    apiLogger.error('=== [RECLASSIFY GET] ERRO CAPTURADO ===');
-    apiLogger.error({ err: error }, 'Erro completo:');
-    apiLogger.error({ err: error instanceof Error ? error.constructor.name : typeof error }, 'Tipo do erro:');
-    apiLogger.error({ err: error instanceof Error ? error.message : String(error) }, 'Mensagem:');
-    apiLogger.error({ err: error instanceof Error ? error.stack : 'N/A' }, 'Stack trace:');
-    apiLogger.error('======================================');
-    return handleApiError(error);
-  }
 });

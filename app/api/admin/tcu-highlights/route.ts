@@ -1,13 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
-import { withAdminAuth } from '@/lib/api-middleware';
+import { withAdminApi } from '@/lib/api/handler';
 
 /**
  * GET /api/admin/tcu-highlights
  * Lista destaques TCU com filtros e paginação
  * Query: status, page, pageSize, countOnly
  */
-export const GET = withAdminAuth(async (request: NextRequest) => {
+export const GET = withAdminApi(async (request: NextRequest) => {
   const { searchParams } = new URL(request.url);
   const status = searchParams.get('status');
   const countOnly = searchParams.get('countOnly') === 'true';
