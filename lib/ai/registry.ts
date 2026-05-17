@@ -46,11 +46,22 @@ export interface ResolvedTask {
   modelId: string
 }
 
-export function resolveTask(task: AiTask): ResolvedTask {
+export interface ResolveTaskOverride {
+  provider?: AiProviderName
+  model?: string
+}
+
+/**
+ * Resolve task -> { provider, modelId }. Ordem de precedencia:
+ * 1. `override` (per-call) — vence sobre tudo
+ * 2. env vars `AI_<TASK>_PROVIDER` / `AI_<TASK>_MODEL`
+ * 3. defaults do registry (DEFAULTS)
+ */
+export function resolveTask(task: AiTask, override?: ResolveTaskOverride): ResolvedTask {
   const env = ENV_KEYS[task]
   const def = DEFAULTS[task]
-  const providerName = (process.env[env.providerKey] || def.provider) as AiProviderName
-  const modelId = process.env[env.modelKey] || def.model
+  const providerName = (override?.provider || process.env[env.providerKey] || def.provider) as AiProviderName
+  const modelId = override?.model || process.env[env.modelKey] || def.model
 
   const provider = PROVIDERS[providerName]
   if (!provider) {

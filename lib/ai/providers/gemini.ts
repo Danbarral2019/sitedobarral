@@ -13,12 +13,17 @@ export const geminiProvider: AiProvider = {
       parts: [{ text: m.content }],
     }))
 
+    // responseSchema implica JSON output mesmo sem jsonMode explicito — alinha
+    // com o comportamento padrao da SDK @google/genai (presenca do schema ja
+    // forca application/json).
+    const wantsJson = req.jsonMode || req.responseSchema !== undefined
     const body: Record<string, unknown> = {
       contents,
       generationConfig: {
         temperature: req.temperature ?? 0.3,
         maxOutputTokens: req.maxTokens ?? 4096,
-        ...(req.jsonMode ? { responseMimeType: 'application/json' } : {}),
+        ...(wantsJson ? { responseMimeType: 'application/json' } : {}),
+        ...(req.responseSchema !== undefined && { responseSchema: req.responseSchema }),
         ...(req.thinkingBudget !== undefined && {
           thinkingConfig: { thinkingBudget: req.thinkingBudget },
         }),
