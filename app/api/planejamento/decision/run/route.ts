@@ -1,27 +1,25 @@
 import { NextRequest, NextResponse } from "next/server";
-import { withAuth } from "@/lib/api-middleware";
+import { withUserApi } from "@/lib/api/handler";
 import { prisma } from "@/lib/prisma";
 import { enforceRateLimit } from "@/lib/cache/rate-limit-helper";
 import { zDecisionRunBody } from "@/data/planejamento/types";
 import { getDecisionMatrixBySlug } from "@/data/planejamento/decision-matrix/modalidade-julgamento-v1";
 import { runDecisionMatrix } from "@/lib/planejamento/decision-engine";
+import { ValidationError, NotFoundError } from "@/lib/errors/api-error";
 
 /**
  * POST /api/planejamento/decision/run
  * Body: { sessionId, matrixSlug, inputs }
  * Executa a matriz determinística e grava PlanningDecisionRun.
  */
-export const POST = withAuth(async (request: NextRequest, context) => {
-  const userId = (context!.user as { userId: string }).userId;
+export const POST = withUserApi(async (request: NextRequest, ctx) => {
+  const userId = ctx.user.userId;
   await enforceRateLimit(`planejamento:decision:${userId}`, 20, 60);
 
   const body = await request.json().catch(() => ({}));
   const parsed = zDecisionRunBody.safeParse(body);
   if (!parsed.success) {
-    return NextResponse.json(
-      { error: "Dados inválidos", issues: parsed.error.issues },
-      { status: 400 },
-    );
+    throw new ValidationError("Dados inválidos", parsed.error.issues);
   }
 
   const session = await prisma.planningSession.findFirst({
@@ -29,12 +27,12 @@ export const POST = withAuth(async (request: NextRequest, context) => {
     select: { id: true },
   });
   if (!session) {
-    return NextResponse.json({ error: "Sessão não encontrada" }, { status: 404 });
+    throw new NotFoundError("Sessão");
   }
 
   const matrix = getDecisionMatrixBySlug(parsed.data.matrixSlug);
   if (!matrix) {
-    return NextResponse.json({ error: "Matriz não encontrada" }, { status: 404 });
+    throw new NotFoundError("Matriz");
   }
 
   const result = runDecisionMatrix(matrix, parsed.data.inputs);

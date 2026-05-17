@@ -1,23 +1,19 @@
 import { NextRequest, NextResponse } from "next/server";
-import { withAuth } from "@/lib/api-middleware";
+import { withUserApi } from "@/lib/api/handler";
 import { prisma } from "@/lib/prisma";
 import { createVersion } from "@/lib/planejamento/versioning";
+import { NotFoundError } from "@/lib/errors/api-error";
 
-interface Ctx {
-  params: Promise<{ id: string }>;
-  user: { userId: string };
-}
-
-export const GET = withAuth(async (_request: NextRequest, context) => {
-  const { id } = await (context as Ctx).params;
-  const userId = (context as Ctx).user.userId;
+export const GET = withUserApi<{ id: string }>(async (_request: NextRequest, ctx) => {
+  const { id } = ctx.params;
+  const userId = ctx.user.userId;
 
   const doc = await prisma.planningDocument.findFirst({
     where: { id, session: { userId, deletedAt: null } },
     select: { id: true, currentVersionId: true },
   });
   if (!doc) {
-    return NextResponse.json({ error: "Documento não encontrado" }, { status: 404 });
+    throw new NotFoundError("Documento");
   }
 
   const versions = await prisma.planningDocumentVersion.findMany({
@@ -40,9 +36,9 @@ export const GET = withAuth(async (_request: NextRequest, context) => {
   });
 });
 
-export const POST = withAuth(async (request: NextRequest, context) => {
-  const { id } = await (context as Ctx).params;
-  const userId = (context as Ctx).user.userId;
+export const POST = withUserApi<{ id: string }>(async (request: NextRequest, ctx) => {
+  const { id } = ctx.params;
+  const userId = ctx.user.userId;
   const body = await request.json().catch(() => ({}));
   const label = typeof body.label === "string" ? body.label.slice(0, 200) : undefined;
 
@@ -51,7 +47,7 @@ export const POST = withAuth(async (request: NextRequest, context) => {
     select: { id: true },
   });
   if (!doc) {
-    return NextResponse.json({ error: "Documento não encontrado" }, { status: 404 });
+    throw new NotFoundError("Documento");
   }
 
   const { version, reused } = await createVersion({

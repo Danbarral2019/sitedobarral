@@ -1,28 +1,21 @@
 import { NextRequest, NextResponse } from "next/server";
-import { withAuth } from "@/lib/api-middleware";
+import { withUserApi } from "@/lib/api/handler";
 import { prisma } from "@/lib/prisma";
 import { zCheckpointAnswerBody } from "@/data/planejamento/types";
-
-interface Ctx {
-  params: Promise<{ id: string; key: string }>;
-  user: { userId: string };
-}
+import { ValidationError, NotFoundError } from "@/lib/errors/api-error";
 
 /**
  * POST /api/planejamento/documents/[id]/sections/[key]/checkpoint
  * Registra resposta conceitual do aluno. Informativa (sem gatekeeping).
  */
-export const POST = withAuth(async (request: NextRequest, context) => {
-  const { id, key } = await (context as Ctx).params;
-  const userId = (context as Ctx).user.userId;
+export const POST = withUserApi<{ id: string; key: string }>(async (request: NextRequest, ctx) => {
+  const { id, key } = ctx.params;
+  const userId = ctx.user.userId;
 
   const body = await request.json().catch(() => ({}));
   const parsed = zCheckpointAnswerBody.safeParse(body);
   if (!parsed.success) {
-    return NextResponse.json(
-      { error: "Dados inválidos", issues: parsed.error.issues },
-      { status: 400 },
-    );
+    throw new ValidationError("Dados inválidos", parsed.error.issues);
   }
 
   const section = await prisma.planningDocumentSection.findFirst({
@@ -34,7 +27,7 @@ export const POST = withAuth(async (request: NextRequest, context) => {
     select: { id: true },
   });
   if (!section) {
-    return NextResponse.json({ error: "Seção não encontrada" }, { status: 404 });
+    throw new NotFoundError("Seção");
   }
 
   const updated = await prisma.planningDocumentSection.update({

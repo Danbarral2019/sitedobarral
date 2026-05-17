@@ -1,56 +1,42 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { withAdminAuth } from '@/lib/api-middleware';
+import { withAdminApi } from '@/lib/api/handler';
 import { createQRCode } from '@/lib/qrcode';
 import { enforceRateLimit, getClientIp } from '@/lib/cache/rate-limit-helper';
-import { RateLimitError } from '@/lib/errors/api-error';
-import { apiLogger } from "@/lib/logger";
+import { ValidationError } from '@/lib/errors/api-error';
 
 // Aumenta timeout para 60 segundos (necessário para geração de QR code)
 export const maxDuration = 60;
 
-export const POST = withAdminAuth(async (request: NextRequest) => {
-  try {
-    // Rate limiting: 3 gerações de QR Code por hora (Redis, window=3600s)
-    const ip = getClientIp(request);
-    await enforceRateLimit(`admin:qr:${ip}`, 3, 3600);
-    const { courseId, turma, validDays, maxUses } = await request.json();
+export const POST = withAdminApi(async (request: NextRequest) => {
+  // Rate limiting: 3 gerações de QR Code por hora (Redis, window=3600s)
+  // Granular para QR (mais restritivo que o padrão de admin), por isso chama
+  // enforceRateLimit diretamente com chave própria em vez de depender do
+  // rate-limit do handler.
+  const ip = getClientIp(request);
+  await enforceRateLimit(`admin:qr:${ip}`, 3, 3600);
 
-    if (!courseId || !turma || !validDays) {
-      return NextResponse.json(
-        { error: 'Parâmetros inválidos' },
-        { status: 400 }
-      );
-    }
+  const { courseId, turma, validDays, maxUses } = await request.json();
 
-    // Calcula data de validade
-    const validUntil = new Date();
-    validUntil.setDate(validUntil.getDate() + parseInt(validDays));
-
-    // Gera QR Code
-    const { code, qrCodeImage } = await createQRCode(
-      courseId,
-      turma,
-      validUntil,
-      maxUses ? parseInt(maxUses) : undefined
-    );
-
-    return NextResponse.json({
-      success: true,
-      code,
-      qrCodeImage,
-      validUntil: validUntil.toISOString(),
-    });
-  } catch (error) {
-    if (error instanceof RateLimitError) {
-      return NextResponse.json(
-        { error: 'Limite de geração de QR Codes atingido. Tente novamente mais tarde.' },
-        { status: 429 }
-      );
-    }
-    apiLogger.error({ err: error }, 'Erro ao gerar QR Code:');
-    return NextResponse.json(
-      { error: error instanceof Error ? error.message : 'Erro ao gerar QR Code' },
-      { status: 500 }
-    );
+  if (!courseId || !turma || !validDays) {
+    throw new ValidationError('Parâmetros inválidos');
   }
+
+  // Calcula data de validade
+  const validUntil = new Date();
+  validUntil.setDate(validUntil.getDate() + parseInt(validDays));
+
+  // Gera QR Code
+  const { code, qrCodeImage } = await createQRCode(
+    courseId,
+    turma,
+    validUntil,
+    maxUses ? parseInt(maxUses) : undefined
+  );
+
+  return NextResponse.json({
+    success: true,
+    code,
+    qrCodeImage,
+    validUntil: validUntil.toISOString(),
+  });
 });
