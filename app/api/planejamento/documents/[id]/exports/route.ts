@@ -1,6 +1,7 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 import crypto from "node:crypto";
-import { withAuth } from "@/lib/api-middleware";
+import { withUserApi } from "@/lib/api/handler";
+import { ApiError, NotFoundError, ValidationError } from "@/lib/errors/api-error";
 import { prisma } from "@/lib/prisma";
 import { enforceRateLimit } from "@/lib/cache/rate-limit-helper";
 import { zExportBody } from "@/data/planejamento/types";
@@ -9,20 +10,15 @@ import { getTrailBySlug } from "@/data/planejamento/trails";
 import type { TrailDefinition } from "@/data/planejamento/types";
 import { uploadToR2, getSignedR2Url } from "@/lib/storage/r2-client";
 
-interface Ctx {
-  params: Promise<{ id: string }>;
-  user: { userId: string };
-}
-
-export const GET = withAuth(async (_request: NextRequest, context) => {
-  const { id } = await (context as Ctx).params;
-  const userId = (context as Ctx).user.userId;
+export const GET = withUserApi<{ id: string }>(async (_request, { params, user, logger }) => {
+  const { id } = params;
+  const userId = user.userId;
   const doc = await prisma.planningDocument.findFirst({
     where: { id, session: { userId, deletedAt: null } },
     select: { id: true },
   });
   if (!doc) {
-    return NextResponse.json({ error: "Documento não encontrado" }, { status: 404 });
+    throw new NotFoundError("Documento");
   }
   const exports = await prisma.planningExport.findMany({
     where: { documentId: id },
@@ -35,24 +31,21 @@ export const GET = withAuth(async (_request: NextRequest, context) => {
       format: e.format,
       sizeBytes: e.sizeBytes,
       createdAt: e.createdAt,
-      signedUrl: await safeSignedUrl(e.r2Key),
+      signedUrl: await safeSignedUrl(e.r2Key, logger),
     })),
   );
   return NextResponse.json({ exports: withUrls });
 });
 
-export const POST = withAuth(async (request: NextRequest, context) => {
-  const { id } = await (context as Ctx).params;
-  const userId = (context as Ctx).user.userId;
+export const POST = withUserApi<{ id: string }>(async (request, { params, user, logger }) => {
+  const { id } = params;
+  const userId = user.userId;
   await enforceRateLimit(`planejamento:export:${userId}`, 5, 60);
 
   const body = await request.json().catch(() => ({}));
   const parsed = zExportBody.safeParse(body);
   if (!parsed.success) {
-    return NextResponse.json(
-      { error: "Dados inválidos", issues: parsed.error.issues },
-      { status: 400 },
-    );
+    throw new ValidationError("Dados inválidos", parsed.error.issues);
   }
 
   const doc = await prisma.planningDocument.findFirst({
@@ -68,7 +61,7 @@ export const POST = withAuth(async (request: NextRequest, context) => {
     },
   });
   if (!doc) {
-    return NextResponse.json({ error: "Documento não encontrado" }, { status: 404 });
+    throw new NotFoundError("Documento");
   }
 
   const trail = resolveTrail(
@@ -134,19 +127,18 @@ export const POST = withAuth(async (request: NextRequest, context) => {
       });
       records.push({
         ...rec,
-        signedUrl: await safeSignedUrl(key),
+        signedUrl: await safeSignedUrl(key, logger),
       });
     } catch (err) {
-      console.error("[planejamento/exports] falhou upload", art.format, err);
-      return NextResponse.json(
-        {
-          error:
-            err instanceof Error && err.message.includes("R2")
-              ? "Cloudflare R2 não configurado — defina R2_ACCOUNT_ID, R2_ACCESS_KEY_ID, R2_SECRET_ACCESS_KEY e R2_BUCKET_NAME para habilitar exportação."
-              : `Falha ao exportar formato ${art.format}`,
-        },
-        { status: 500 },
-      );
+      logger.error({ err, format: art.format }, "[planejamento/exports] falhou upload");
+      if (err instanceof Error && err.message.includes("R2")) {
+        throw new ApiError(
+          500,
+          "Cloudflare R2 não configurado — defina R2_ACCOUNT_ID, R2_ACCESS_KEY_ID, R2_SECRET_ACCESS_KEY e R2_BUCKET_NAME para habilitar exportação.",
+          "R2_NOT_CONFIGURED",
+        );
+      }
+      throw new ApiError(500, `Falha ao exportar formato ${art.format}`, "EXPORT_FAILED");
     }
   }
 
@@ -182,10 +174,14 @@ function resolveTrail(
   return null;
 }
 
-async function safeSignedUrl(key: string): Promise<string | null> {
+async function safeSignedUrl(
+  key: string,
+  logger?: { warn: (obj: unknown, msg?: string) => void },
+): Promise<string | null> {
   try {
     return await getSignedR2Url(key, 60 * 60, "GET");
-  } catch {
+  } catch (err) {
+    logger?.warn({ err, key }, "[planejamento/exports] signedUrl falhou");
     return null;
   }
 }
@@ -194,7 +190,7 @@ function slugify(s: string) {
   return s
     .toLowerCase()
     .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/[̀-ͯ]/g, "")
     .replace(/[^a-z0-9]+/g, "-")
     .replace(/^-|-$/g, "");
 }
