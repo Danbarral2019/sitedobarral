@@ -6,9 +6,13 @@
  * por um julgamento semântico via Gemini structured output.
  *
  * Spec: docs/superpowers/specs/2026-05-03-dou-clipping-v2-design.md
+ *
+ * Provider/modelo resolvidos via `lib/ai` (task=classification + provider
+ * forçado para Gemini). Combina as 3 features de #55: responseSchema,
+ * systemPrompt (instrução de sistema), per-call model override.
  */
 
-import { GoogleGenAI, Type } from '@google/genai';
+import { generate } from './ai';
 import { PRIMARY_GEMINI_MODEL } from './gemini/config';
 
 export const EDITORIAL_PROMPT_VERSION = 'v1';
@@ -34,23 +38,26 @@ export interface EditorialBatchResult {
   promptVersion: string;
 }
 
+// Schema JSON puro (literais 'OBJECT'/'ARRAY'/'NUMBER'/'STRING'/'BOOLEAN' —
+// valores dos antigos `Type` enums da SDK @google/genai). lib/ai/providers/
+// gemini.ts repassa este objeto em `generationConfig.responseSchema`.
 export const RESPONSE_SCHEMA = {
-  type: Type.OBJECT,
+  type: 'OBJECT',
   properties: {
     items: {
-      type: Type.ARRAY,
+      type: 'ARRAY',
       items: {
-        type: Type.OBJECT,
+        type: 'OBJECT',
         properties: {
-          score: { type: Type.NUMBER },
-          reason: { type: Type.STRING },
-          summary: { type: Type.STRING },
-          affects: { type: Type.ARRAY, items: { type: Type.STRING } },
+          score: { type: 'NUMBER' },
+          reason: { type: 'STRING' },
+          summary: { type: 'STRING' },
+          affects: { type: 'ARRAY', items: { type: 'STRING' } },
           actType: {
-            type: Type.STRING,
+            type: 'STRING',
             enum: ['decreto', 'portaria', 'in', 'lei', 'mp', 'on', 'null'],
           },
-          ambiguous: { type: Type.BOOLEAN },
+          ambiguous: { type: 'BOOLEAN' },
         },
         required: ['score', 'reason', 'summary', 'affects', 'actType', 'ambiguous'],
       },
@@ -120,15 +127,6 @@ Abstract: ${c.abstract || 'n/d'}`,
   return `Classifique os ${candidates.length} item(ns) abaixo. Retorne items[] na mesma ordem.\n\n${items}`;
 }
 
-let _defaultGenAI: GoogleGenAI | null = null;
-function getDefaultGenAI(): GoogleGenAI {
-  if (_defaultGenAI) return _defaultGenAI;
-  const apiKey = process.env.GEMINI_API_KEY;
-  if (!apiKey) throw new Error('GEMINI_API_KEY not configured');
-  _defaultGenAI = new GoogleGenAI({ apiKey });
-  return _defaultGenAI;
-}
-
 function normalizeActType(raw: string | null | undefined): EditorialClassification['actType'] {
   if (!raw || raw === 'null') return null;
   const valid: EditorialClassification['actType'][] = ['decreto', 'portaria', 'in', 'lei', 'mp', 'on'];
@@ -137,32 +135,28 @@ function normalizeActType(raw: string | null | undefined): EditorialClassificati
 
 export async function classifyEditorialBatch(
   candidates: EditorialCandidate[],
-  opts?: { genAI?: GoogleGenAI; model?: string },
+  opts?: { model?: string },
 ): Promise<EditorialBatchResult> {
+  const model = opts?.model || PRIMARY_GEMINI_MODEL;
+
   if (candidates.length === 0) {
     return {
       classifications: [],
-      model: opts?.model || PRIMARY_GEMINI_MODEL,
+      model,
       promptVersion: EDITORIAL_PROMPT_VERSION,
     };
   }
 
-  const genAI = opts?.genAI || getDefaultGenAI();
-  const model = opts?.model || PRIMARY_GEMINI_MODEL;
-
-  const result = await genAI.models.generateContent({
+  const { text } = await generate('classification', {
+    messages: [{ role: 'user', content: buildUserPrompt(candidates) }],
+    provider: 'gemini',
     model,
-    contents: [{ text: buildUserPrompt(candidates) }],
-    config: {
-      systemInstruction: SYSTEM_PROMPT,
-      responseMimeType: 'application/json',
-      responseSchema: RESPONSE_SCHEMA,
-      temperature: 0,
-      thinkingConfig: { thinkingBudget: 0 },
-    },
+    systemPrompt: SYSTEM_PROMPT,
+    responseSchema: RESPONSE_SCHEMA,
+    temperature: 0,
+    thinkingBudget: 0,
   });
 
-  const text = result.text;
   if (!text) throw new Error('Gemini retornou texto vazio');
 
   let parsed: { items?: Array<Partial<EditorialClassification> & { actType?: string }> };
