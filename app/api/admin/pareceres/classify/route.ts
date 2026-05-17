@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { withAdminAuth } from '@/lib/api-middleware';
-import { handleApiError } from '@/lib/errors/error-handler';
+import { withAdminApi } from '@/lib/api/handler';
 import { prisma } from '@/lib/prisma';
 import { revalidatePath } from 'next/cache';
 
@@ -14,13 +13,11 @@ import { revalidatePath } from 'next/cache';
  * Body: { docId: string, licitacoesContratos: boolean }
  *   ou:  { docId: string, clearOverride: true } pra desfazer e voltar à IA
  */
-export const POST = withAdminAuth(async (
+export const POST = withAdminApi(async (
   request: NextRequest,
-  context?: Record<string, unknown>,
+  ctx,
 ) => {
-  try {
-    const user = context?.user as { email: string };
-    const body = await request.json();
+  const body = await request.json();
     const docId = String(body.docId || '').trim();
     if (!docId) {
       return NextResponse.json({ error: 'docId obrigatório' }, { status: 400 });
@@ -55,7 +52,7 @@ export const POST = withAdminAuth(async (
         ai.licitacoesContratosAi = ai.licitacoesContratos ?? null;
       }
       ai.licitacoesContratos = newValue;
-      ai.licitacoesContratosManualBy = user.email;
+      ai.licitacoesContratosManualBy = ctx.user.email;
       ai.licitacoesContratosManualAt = new Date().toISOString();
     }
 
@@ -69,9 +66,6 @@ export const POST = withAdminAuth(async (
     revalidatePath('/base-conhecimento');
 
     return NextResponse.json({ success: true, aiClassification: ai });
-  } catch (error) {
-    return handleApiError(error);
-  }
 });
 
 function safeParseJson(s: string): Record<string, unknown> & {

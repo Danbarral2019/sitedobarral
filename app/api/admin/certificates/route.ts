@@ -1,22 +1,16 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { withAdminAuth } from '@/lib/api-middleware';
+import { withAdminApi } from '@/lib/api/handler';
 import { prisma } from '@/lib/prisma';
-import { handleApiError } from '@/lib/errors/error-handler';
 import { ValidationError, NotFoundError, ConflictError } from '@/lib/errors/api-error';
 import { issueCertificate } from '@/lib/certificate';
 import { getCourseById } from '@/lib/courses';
-
-interface AdminContext {
-  user: { userId: string; email: string; role: string };
-}
 
 /**
  * GET: Listar todos os certificados emitidos.
  * Suporta filtro por status: all (default) | active | revoked | manual
  */
-export const GET = withAdminAuth(async (request: NextRequest) => {
-  try {
-    const { searchParams } = new URL(request.url);
+export const GET = withAdminApi(async (request: NextRequest) => {
+  const { searchParams } = new URL(request.url);
     const courseId = searchParams.get('courseId');
     const search = searchParams.get('search');
     const status = searchParams.get('status') || 'all';
@@ -68,19 +62,14 @@ export const GET = withAdminAuth(async (request: NextRequest) => {
       page,
       totalPages: Math.ceil(total / pageSize),
     });
-  } catch (error) {
-    return handleApiError(error);
-  }
 });
 
 /**
  * POST: Emite um certificado manualmente (skip elegibilidade).
  * Body: { userId: string, courseId: string, reason?: string }
  */
-export const POST = withAdminAuth(async (request: NextRequest, context?: Record<string, unknown>) => {
-  try {
-    const ctx = context as unknown as AdminContext;
-    const body = await request.json().catch(() => null);
+export const POST = withAdminApi(async (request: NextRequest, ctx) => {
+  const body = await request.json().catch(() => null);
     if (!body || typeof body !== 'object') throw new ValidationError('Body JSON inválido');
 
     const userId = typeof body.userId === 'string' ? body.userId.trim() : '';
@@ -107,7 +96,4 @@ export const POST = withAdminAuth(async (request: NextRequest, context?: Record<
     }
 
     return NextResponse.json({ ok: true, certificate: result.certificate }, { status: 201 });
-  } catch (error) {
-    return handleApiError(error);
-  }
 });

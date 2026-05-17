@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { withAdminAuth } from '@/lib/api-middleware';
+import { withAdminApi } from '@/lib/api/handler';
 import { prisma } from '@/lib/prisma';
-import { handleApiError } from '@/lib/errors/error-handler';
 import { NotFoundError } from '@/lib/errors/api-error';
 import { apiLogger } from '@/lib/logger';
 import { CreateQuizSchema } from '@/lib/validation-schemas';
@@ -9,10 +8,9 @@ import { CreateQuizSchema } from '@/lib/validation-schemas';
 /**
  * POST: Cria um novo quiz vinculado a uma lição
  */
-export const POST = withAdminAuth(async (request: NextRequest) => {
-  try {
-    const body = await request.json();
-    const data = CreateQuizSchema.parse(body);
+export const POST = withAdminApi(async (request: NextRequest) => {
+  const body = await request.json();
+  const data = CreateQuizSchema.parse(body);
 
     // Verificar se a lição existe
     const lesson = await prisma.lesson.findUnique({
@@ -44,17 +42,13 @@ export const POST = withAdminAuth(async (request: NextRequest) => {
 
     apiLogger.info({ quizId: quiz.id, lessonId: data.lessonId }, 'Quiz created');
     return NextResponse.json({ quiz }, { status: 201 });
-  } catch (error) {
-    return handleApiError(error);
-  }
 });
 
 /**
  * GET: Listar quizzes (filtro por lessonId opcional)
  */
-export const GET = withAdminAuth(async (request: NextRequest) => {
-  try {
-    const { searchParams } = new URL(request.url);
+export const GET = withAdminApi(async (request: NextRequest) => {
+  const { searchParams } = new URL(request.url);
     const lessonId = searchParams.get('lessonId');
 
     const quizzes = await prisma.quiz.findMany({
@@ -67,7 +61,4 @@ export const GET = withAdminAuth(async (request: NextRequest) => {
     });
 
     return NextResponse.json({ quizzes });
-  } catch (error) {
-    return handleApiError(error);
-  }
 });
