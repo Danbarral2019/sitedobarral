@@ -1,23 +1,13 @@
 /**
  * Serviço de Classificação Avançada com Claude AI
  * Usado como fallback quando análise básica tem baixa confiança
+ *
+ * Provider/modelo resolvidos via `lib/ai` (task=classification). Override por
+ * env: `AI_CLASSIFICATION_PROVIDER` / `AI_CLASSIFICATION_MODEL`.
  */
 
-import Anthropic from '@anthropic-ai/sdk';
+import { generate } from '@/lib/ai';
 import { apiLogger } from "@/lib/logger";
-
-// Função para obter cliente Claude (lazy initialization)
-function getClaudeClient(): Anthropic | null {
-  const apiKey = process.env.ANTHROPIC_API_KEY;
-
-  if (!apiKey) {
-    return null;
-  }
-
-  return new Anthropic({
-    apiKey,
-  });
-}
 
 // Cursos disponíveis para o Claude sugerir
 const AVAILABLE_COURSES = [
@@ -147,10 +137,7 @@ export async function classifyWithClaude(
   title: string,
   description: string = ''
 ): Promise<ClaudeClassificationResult | null> {
-  // Obtém cliente Claude (verifica API key em runtime)
-  const anthropic = getClaudeClient();
-
-  if (!anthropic) {
+  if (!isClaudeAvailable()) {
     console.warn('[Claude Classifier] API key não configurada. Pulando análise avançada.');
     return null;
   }
@@ -161,25 +148,14 @@ export async function classifyWithClaude(
 
     const prompt = await buildClassificationPrompt(title, description, feedbackExamples);
 
-    // claude-3-5-haiku-20241022 foi retirado em 2026-02-19 — chamadas
-    // viravam 404 mascarado pelo `return null` silencioso (auditoria
-    // 2026-05-16 P0.2). Migrado para Haiku 4.5 (mesma família, mais capaz).
-    const message = await anthropic.messages.create({
-      model: 'claude-haiku-4-5-20251001',
-      max_tokens: 1024,
-      temperature: 0.3, // Baixa temperatura para respostas consistentes
-      messages: [
-        {
-          role: 'user',
-          content: prompt,
-        },
-      ],
+    // Modelo default da task=classification em lib/ai é claude-haiku-4-5;
+    // override via env AI_CLASSIFICATION_MODEL. claude-3-5-haiku-20241022
+    // foi retirado em 2026-02-19 — auditoria 2026-05-16 P0.2.
+    const { text: responseText } = await generate('classification', {
+      messages: [{ role: 'user', content: prompt }],
+      maxTokens: 1024,
+      temperature: 0.3,
     });
-
-    // Extrai resposta
-    const responseText = message.content[0].type === 'text'
-      ? message.content[0].text
-      : '';
 
     // Parse da resposta JSON
     const result = parseClaudeResponse(responseText);
