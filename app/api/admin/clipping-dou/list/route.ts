@@ -1,14 +1,11 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
-import { verifyAdmin } from '@/lib/api-middleware';
+import { withAdminApi } from '@/lib/api/handler';
 import { safeParseArray } from '@/lib/utils';
 
 export const runtime = 'nodejs';
 
-export async function GET(request: NextRequest) {
-  const adminCheck = await verifyAdmin(request);
-  if (adminCheck.error) return adminCheck.response;
-
+export const GET = withAdminApi(async (request) => {
   const { searchParams } = new URL(request.url);
   const page = Math.max(1, parseInt(searchParams.get('page') || '1', 10));
   const pageSize = Math.min(50, Math.max(1, parseInt(searchParams.get('pageSize') || '20', 10)));
@@ -74,4 +71,4 @@ export async function GET(request: NextRequest) {
     totalPages: Math.max(1, Math.ceil(total / pageSize)),
     lastCronAt: lastCron?.editorialClassifiedAt ?? null,
   });
-}
+});

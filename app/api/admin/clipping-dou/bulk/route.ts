@@ -1,25 +1,23 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { verifyAdmin } from '@/lib/api-middleware';
+import { NextResponse } from 'next/server';
+import { withAdminApi } from '@/lib/api/handler';
+import { ApiError } from '@/lib/errors/api-error';
 
 export const runtime = 'nodejs';
 export const maxDuration = 300;
 
 const MAX_BULK_IDS = 20;
 
-export async function POST(request: NextRequest) {
-  const adminCheck = await verifyAdmin(request);
-  if (adminCheck.error) return adminCheck.response;
-
+export const POST = withAdminApi(async (request) => {
   const body = await request.json().catch(() => ({}));
   const action = String(body?.action || '');
   const ids: string[] = Array.isArray(body?.ids) ? body.ids.map(String).filter(Boolean) : [];
   const reason = String(body?.reason || '').trim() || undefined;
 
   if (action !== 'approve' && action !== 'reject') {
-    return NextResponse.json({ error: 'action deve ser approve ou reject' }, { status: 422 });
+    throw new ApiError(422, 'action deve ser approve ou reject', 'VALIDATION_ERROR');
   }
   if (ids.length === 0 || ids.length > MAX_BULK_IDS) {
-    return NextResponse.json({ error: `ids deve ter entre 1 e ${MAX_BULK_IDS}` }, { status: 422 });
+    throw new ApiError(422, `ids deve ter entre 1 e ${MAX_BULK_IDS}`, 'VALIDATION_ERROR');
   }
 
   // Reusa endpoints individuais sequencialmente (não satura Gemini/scraper)
@@ -48,4 +46,4 @@ export async function POST(request: NextRequest) {
 
   const okCount = results.filter((r) => r.ok).length;
   return NextResponse.json({ success: true, action, processed: ids.length, ok: okCount, results });
-}
+});
