@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { withAdminApi } from '@/lib/api/handler';
+import { ValidationError } from '@/lib/errors/api-error';
 import { prisma } from '@/lib/prisma';
-import { withAdminAuth } from '@/lib/api-middleware';
-import { apiLogger } from "@/lib/logger";
 
 /**
  * GET /api/admin/contatos
@@ -14,113 +14,83 @@ import { apiLogger } from "@/lib/logger";
  * - page: number (padrão: 1)
  * - pageSize: number (padrão: 50, máx: 100)
  */
-export const GET = withAdminAuth(async (request: NextRequest) => {
-  try {
-    const { searchParams } = new URL(request.url);
-    const unreadOnly = searchParams.get('unreadOnly') === 'true';
+export const GET = withAdminApi(async (request: NextRequest) => {
+  const { searchParams } = new URL(request.url);
+  const unreadOnly = searchParams.get('unreadOnly') === 'true';
 
-    // ✅ Paginação
-    const page = Math.max(1, parseInt(searchParams.get('page') || '1'));
-    const pageSize = Math.min(100, Math.max(1, parseInt(searchParams.get('pageSize') || '50')));
-    const skip = (page - 1) * pageSize;
+  // ✅ Paginação
+  const page = Math.max(1, parseInt(searchParams.get('page') || '1'));
+  const pageSize = Math.min(100, Math.max(1, parseInt(searchParams.get('pageSize') || '50')));
+  const skip = (page - 1) * pageSize;
 
-    const where = unreadOnly ? { isRead: false } : {};
+  const where = unreadOnly ? { isRead: false } : {};
 
-    // ✅ Buscar com LIMITE (evita carregar milhares de contatos)
-    const [contacts, total] = await Promise.all([
-      prisma.contactForm.findMany({
-        where,
-        orderBy: {
-          createdAt: 'desc',
-        },
-        take: pageSize,
-        skip,
-      }),
-      prisma.contactForm.count({ where }),
-    ]);
-
-    return NextResponse.json({
-      success: true,
-      contacts,
-      pagination: {
-        page,
-        pageSize,
-        total,
-        totalPages: Math.ceil(total / pageSize),
-        hasNext: skip + pageSize < total,
-        hasPrev: page > 1,
+  // ✅ Buscar com LIMITE (evita carregar milhares de contatos)
+  const [contacts, total] = await Promise.all([
+    prisma.contactForm.findMany({
+      where,
+      orderBy: {
+        createdAt: 'desc',
       },
-    });
-  } catch (error) {
-    apiLogger.error({ err: error }, 'Erro ao buscar contatos:');
-    return NextResponse.json(
-      { error: 'Erro ao carregar contatos' },
-      { status: 500 }
-    );
-  }
+      take: pageSize,
+      skip,
+    }),
+    prisma.contactForm.count({ where }),
+  ]);
+
+  return NextResponse.json({
+    success: true,
+    contacts,
+    pagination: {
+      page,
+      pageSize,
+      total,
+      totalPages: Math.ceil(total / pageSize),
+      hasNext: skip + pageSize < total,
+      hasPrev: page > 1,
+    },
+  });
 });
 
 /**
  * PATCH /api/admin/contatos
  * Marca mensagem como lida/não lida
  */
-export const PATCH = withAdminAuth(async (request: NextRequest) => {
-  try {
-    const { id, isRead } = await request.json();
+export const PATCH = withAdminApi(async (request: NextRequest) => {
+  const { id, isRead } = await request.json();
 
-    if (!id || typeof isRead !== 'boolean') {
-      return NextResponse.json(
-        { error: 'ID e isRead são obrigatórios' },
-        { status: 400 }
-      );
-    }
-
-    const contact = await prisma.contactForm.update({
-      where: { id },
-      data: { isRead },
-    });
-
-    return NextResponse.json({
-      success: true,
-      contact,
-    });
-  } catch (error) {
-    apiLogger.error({ err: error }, 'Erro ao atualizar contato:');
-    return NextResponse.json(
-      { error: 'Erro ao atualizar contato' },
-      { status: 500 }
-    );
+  if (!id || typeof isRead !== 'boolean') {
+    throw new ValidationError('ID e isRead são obrigatórios');
   }
+
+  const contact = await prisma.contactForm.update({
+    where: { id },
+    data: { isRead },
+  });
+
+  return NextResponse.json({
+    success: true,
+    contact,
+  });
 });
 
 /**
  * DELETE /api/admin/contatos
  * Deleta uma mensagem de contato
  */
-export const DELETE = withAdminAuth(async (request: NextRequest) => {
-  try {
-    const { id } = await request.json();
+export const DELETE = withAdminApi(async (request: NextRequest) => {
+  const { id } = await request.json();
 
-    if (!id) {
-      return NextResponse.json(
-        { error: 'ID é obrigatório' },
-        { status: 400 }
-      );
-    }
-
-    await prisma.contactForm.delete({
-      where: { id },
-    });
-
-    return NextResponse.json({
-      success: true,
-      message: 'Contato deletado com sucesso',
-    });
-  } catch (error) {
-    apiLogger.error({ err: error }, 'Erro ao deletar contato:');
-    return NextResponse.json(
-      { error: 'Erro ao deletar contato' },
-      { status: 500 }
-    );
+  if (!id) {
+    throw new ValidationError('ID é obrigatório');
   }
+
+  await prisma.contactForm.delete({
+    where: { id },
+  });
+
+  return NextResponse.json({
+    success: true,
+    message: 'Contato deletado com sucesso',
+  });
 });
