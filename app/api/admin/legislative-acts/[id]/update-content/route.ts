@@ -1,11 +1,11 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
-import { verifyToken } from '@/lib/auth';
+import { withAdminApi } from '@/lib/api/handler';
+import { ApiError, NotFoundError, ValidationError } from '@/lib/errors/api-error';
 import { scrapeUrl, canScrapeUrl } from '@/lib/legislative-scrapers';
 import { hasHashChanged, generateChangeSummary } from '@/lib/legislative-scrapers/change-detector';
 import { CacheInvalidation } from '@/lib/cache/redis-client';
 import { validateActContent } from '@/lib/legislative-scrapers/validate-content';
-import { apiLogger } from "@/lib/logger";
 
 /**
  * POST /api/admin/legislative-acts/[id]/update-content
@@ -15,29 +15,8 @@ import { apiLogger } from "@/lib/logger";
  * - Compara com o conteúdo atual usando hash MD5
  * - Atualiza o registro se houver mudanças
  */
-export async function POST(
-  request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
-) {
-  try {
-    // Verificar autenticação admin
-    const token = request.cookies.get('auth_token')?.value;
-    if (!token) {
-      return NextResponse.json(
-        { error: 'Não autenticado' },
-        { status: 401 }
-      );
-    }
-
-    const payload = await verifyToken(token);
-    if (!payload || payload.role !== 'admin') {
-      return NextResponse.json(
-        { error: 'Acesso negado - requer privilégios de administrador' },
-        { status: 403 }
-      );
-    }
-
-    const { id } = await params;
+export const POST = withAdminApi<{ id: string }>(async (request, ctx) => {
+    const { id } = ctx.params;
 
     // Buscar o ato normativo
     const act = await prisma.legislativeAct.findUnique({
@@ -53,27 +32,17 @@ export async function POST(
     });
 
     if (!act) {
-      return NextResponse.json(
-        { error: 'Ato normativo não encontrado' },
-        { status: 404 }
-      );
+      throw new NotFoundError('Ato normativo');
     }
 
     if (!act.officialUrl) {
-      return NextResponse.json(
-        { error: 'Ato não possui URL oficial configurada' },
-        { status: 400 }
-      );
+      throw new ValidationError('Ato não possui URL oficial configurada');
     }
 
     // Verificar se temos um scraper para esta URL
     if (!canScrapeUrl(act.officialUrl)) {
-      return NextResponse.json(
-        {
-          error: 'URL não suportada',
-          message: 'Não há scraper disponível para esta URL. URLs suportadas: planalto.gov.br, gov.br/compras, in.gov.br',
-        },
-        { status: 400 }
+      throw new ValidationError(
+        'URL não suportada. Não há scraper disponível para esta URL. URLs suportadas: planalto.gov.br, gov.br/compras, in.gov.br',
       );
     }
 
@@ -92,13 +61,10 @@ export async function POST(
         },
       });
 
-      return NextResponse.json(
-        {
-          success: false,
-          error: result.error,
-          message: 'Falha ao extrair conteúdo da URL oficial',
-        },
-        { status: 500 }
+      throw new ApiError(
+        502,
+        result.error || 'Falha ao extrair conteúdo da URL oficial',
+        'SCRAPE_FAILED',
       );
     }
 
@@ -122,16 +88,11 @@ export async function POST(
             scrapeError: errMsg.slice(0, 500),
           },
         });
-        return NextResponse.json(
-          {
-            success: false,
-            error: 'Validação de formatação falhou',
-            details: validation.errors,
-            warnings: validation.warnings,
-            message: 'Scrape executou mas o conteúdo extraído não passou na validação. ' +
-              'Conteúdo atual no banco preservado.',
-          },
-          { status: 422 },
+        throw new ApiError(
+          422,
+          'Validação de formatação falhou. Scrape executou mas o conteúdo extraído não passou na validação. Conteúdo atual no banco preservado.',
+          'VALIDATION_ERROR',
+          { details: validation.errors, warnings: validation.warnings },
         );
       }
       validationWarnings = validation.warnings;
@@ -197,46 +158,15 @@ export async function POST(
         changeSummary,
       },
     });
-  } catch (error) {
-    apiLogger.error({ err: error }, '[Update Content] Erro:');
-    return NextResponse.json(
-      {
-        error: 'Erro interno',
-        details: error instanceof Error ? error.message : String(error),
-      },
-      { status: 500 }
-    );
-  }
-}
+});
 
 /**
  * GET /api/admin/legislative-acts/[id]/update-content
  *
  * Retorna o status de scraping do ato normativo.
  */
-export async function GET(
-  request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
-) {
-  try {
-    // Verificar autenticação admin
-    const token = request.cookies.get('auth_token')?.value;
-    if (!token) {
-      return NextResponse.json(
-        { error: 'Não autenticado' },
-        { status: 401 }
-      );
-    }
-
-    const payload = await verifyToken(token);
-    if (!payload || payload.role !== 'admin') {
-      return NextResponse.json(
-        { error: 'Acesso negado' },
-        { status: 403 }
-      );
-    }
-
-    const { id } = await params;
+export const GET = withAdminApi<{ id: string }>(async (_request, ctx) => {
+    const { id } = ctx.params;
 
     const act = await prisma.legislativeAct.findUnique({
       where: { id },
@@ -254,10 +184,7 @@ export async function GET(
     });
 
     if (!act) {
-      return NextResponse.json(
-        { error: 'Ato normativo não encontrado' },
-        { status: 404 }
-      );
+      throw new NotFoundError('Ato normativo');
     }
 
     return NextResponse.json({
@@ -274,11 +201,4 @@ export async function GET(
         notifyOnChange: act.notifyOnChange,
       },
     });
-  } catch (error) {
-    apiLogger.error({ err: error }, '[Update Content GET] Erro:');
-    return NextResponse.json(
-      { error: 'Erro interno' },
-      { status: 500 }
-    );
-  }
-}
+});

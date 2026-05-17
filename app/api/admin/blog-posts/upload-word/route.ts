@@ -1,7 +1,7 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { withAdminAuth } from '@/lib/api-middleware';
+import { NextResponse } from 'next/server';
+import { withAdminApi } from '@/lib/api/handler';
+import { ValidationError } from '@/lib/errors/api-error';
 import mammoth from 'mammoth';
-import { apiLogger } from "@/lib/logger";
 
 /**
  * Processa arquivo Word e extrai:
@@ -11,24 +11,17 @@ import { apiLogger } from "@/lib/logger";
  * - Referências bibliográficas
  * - Imagens
  */
-export const POST = withAdminAuth(async (request: NextRequest) => {
-  try {
+export const POST = withAdminApi(async (request) => {
     const formData = await request.formData();
     const file = formData.get('file') as File;
 
     if (!file) {
-      return NextResponse.json(
-        { error: 'Nenhum arquivo foi enviado' },
-        { status: 400 }
-      );
+      throw new ValidationError('Nenhum arquivo foi enviado');
     }
 
     // Validar tipo de arquivo
     if (!file.name.endsWith('.docx') && !file.name.endsWith('.doc')) {
-      return NextResponse.json(
-        { error: 'Apenas arquivos .doc ou .docx são aceitos' },
-        { status: 400 }
-      );
+      throw new ValidationError('Apenas arquivos .doc ou .docx são aceitos');
     }
 
     // Converter File para Buffer
@@ -76,16 +69,6 @@ export const POST = withAdminAuth(async (request: NextRequest) => {
       references: extracted.references,
       images: images,
     });
-
-  } catch (error) {
-    apiLogger.error({ err: error }, '[WordUpload] Erro ao processar arquivo:');
-    return NextResponse.json(
-      {
-        error: error instanceof Error ? error.message : 'Erro ao processar arquivo Word'
-      },
-      { status: 500 }
-    );
-  }
 });
 
 /**

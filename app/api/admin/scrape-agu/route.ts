@@ -1,5 +1,6 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { withAdminAuth } from '@/lib/api-middleware';
+import { NextResponse } from 'next/server';
+import { withAdminApi } from '@/lib/api/handler';
+import { ValidationError } from '@/lib/errors/api-error';
 import { scrapeAGU, convertAGUDocumentsToImport } from '@/lib/agu-scraper-v4';
 import { addDocument } from '@/lib/documents';
 import { courses } from '@/data/courses';
@@ -16,8 +17,7 @@ import { apiLogger } from "@/lib/logger";
  * - anoFim: Ano final (opcional)
  * - filtroRelevancia: "true" ou "false" (default: true)
  */
-export const GET = withAdminAuth(async (request: NextRequest) => {
-  try {
+export const GET = withAdminApi(async (request) => {
     const { searchParams } = new URL(request.url);
 
     // Parse e validar tipos (allow-list para segurança)
@@ -38,10 +38,7 @@ export const GET = withAdminAuth(async (request: NextRequest) => {
 
     if (tipos.length === 0) {
       apiLogger.error(`[AGU Scrape v4] ❌ Nenhum tipo válido fornecido: ${tiposParam}`);
-      return NextResponse.json(
-        { error: 'Nenhum tipo de documento válido fornecido' },
-        { status: 400 }
-      );
+      throw new ValidationError('Nenhum tipo de documento válido fornecido');
     }
 
     // Validar anos (proteção contra DoS)
@@ -54,10 +51,7 @@ export const GET = withAdminAuth(async (request: NextRequest) => {
 
     if (isNaN(anoInicio) || anoInicio < MIN_YEAR || anoInicio > currentYear) {
       apiLogger.error(`[AGU Scrape v4] ❌ anoInicio inválido: ${anoInicioParam}`);
-      return NextResponse.json(
-        { error: `anoInicio deve estar entre ${MIN_YEAR} e ${currentYear}` },
-        { status: 400 }
-      );
+      throw new ValidationError(`anoInicio deve estar entre ${MIN_YEAR} e ${currentYear}`);
     }
 
     const anoFimParam = searchParams.get('anoFim');
@@ -66,18 +60,12 @@ export const GET = withAdminAuth(async (request: NextRequest) => {
     if (anoFim !== undefined) {
       if (isNaN(anoFim) || anoFim > currentYear || anoFim < anoInicio) {
         apiLogger.error(`[AGU Scrape v4] ❌ anoFim inválido: ${anoFimParam}`);
-        return NextResponse.json(
-          { error: 'anoFim inválido ou anterior a anoInicio' },
-          { status: 400 }
-        );
+        throw new ValidationError('anoFim inválido ou anterior a anoInicio');
       }
 
       if (anoFim - anoInicio > MAX_YEAR_RANGE) {
         apiLogger.error(`[AGU Scrape v4] ❌ Range muito grande: ${anoFim - anoInicio} anos`);
-        return NextResponse.json(
-          { error: `Range máximo permitido: ${MAX_YEAR_RANGE} anos (proteção DoS)` },
-          { status: 400 }
-        );
+        throw new ValidationError(`Range máximo permitido: ${MAX_YEAR_RANGE} anos (proteção DoS)`);
       }
     }
 
@@ -155,16 +143,6 @@ export const GET = withAdminAuth(async (request: NextRequest) => {
         tempoExecucao: `${(result.executionTime / 1000).toFixed(2)}s`,
       },
     });
-  } catch (error) {
-    // Log detalhado no servidor (para debugging)
-    apiLogger.error({ err: error }, '[AGU Scrape v4] Erro ao buscar documentos:');
-
-    // Retorno genérico para o cliente (segurança - não vazar detalhes internos)
-    return NextResponse.json(
-      { error: 'Erro interno ao processar scraping da AGU' },
-      { status: 500 }
-    );
-  }
 });
 
 /**
@@ -186,8 +164,7 @@ export const GET = withAdminAuth(async (request: NextRequest) => {
  * - completo: Reimporta tudo (ignora duplicatas existentes)
  * - atualizar: Atualiza dados de documentos existentes
  */
-export const POST = withAdminAuth(async (request: NextRequest) => {
-  try {
+export const POST = withAdminApi(async (request) => {
     const body = await request.json();
     const {
       tipos = ['orientacao-normativa'],
@@ -227,10 +204,7 @@ export const POST = withAdminAuth(async (request: NextRequest) => {
       : []; // Se não for todos, retorna vazio (não importa)
 
     if (targetCourses.length === 0) {
-      return NextResponse.json({
-        success: false,
-        error: 'Nenhum curso selecionado para importação',
-      }, { status: 400 });
+      throw new ValidationError('Nenhum curso selecionado para importação');
     }
 
     // 4. Busca documentos existentes de uma vez (otimização)
@@ -363,15 +337,4 @@ export const POST = withAdminAuth(async (request: NextRequest) => {
       },
       documents: createdDocuments.slice(0, 5), // Retorna primeiros 5 como exemplo
     });
-
-  } catch (error) {
-    apiLogger.error({ err: error }, '[AGU Import v4] Erro na importação:');
-    return NextResponse.json(
-      {
-        error: 'Erro ao importar documentos da AGU (v4)',
-        details: error instanceof Error ? error.message : 'Erro desconhecido'
-      },
-      { status: 500 }
-    );
-  }
 });

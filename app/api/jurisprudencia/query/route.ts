@@ -1,5 +1,6 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { withAuth } from '@/lib/api-middleware';
+import { NextResponse } from 'next/server';
+import { withUserApi } from '@/lib/api/handler';
+import { ApiError } from '@/lib/errors/api-error';
 import { semanticSearch } from '@/lib/embeddings/vector-search';
 import {
   mapFiltersToSemanticOptions,
@@ -12,7 +13,6 @@ import {
 import { countUnifiedApproved } from '@/lib/jurisprudencia/unified-query';
 import type { JurisprudenciaFilters } from '@/lib/jurisprudencia/unified-query';
 import { queryGeminiText } from '@/lib/gemini/cached-client';
-import { handleApiError } from '@/lib/errors/error-handler';
 import { apiLogger } from '@/lib/logger';
 import { prisma } from '@/lib/prisma';
 import { z } from 'zod';
@@ -183,27 +183,25 @@ async function persistJurisprudenciaSearch(params: {
   }
 }
 
-export const POST = withAuth(
-  async (request: NextRequest, context?: Record<string, unknown>) => {
-    try {
-      const user = context?.user as { userId: string; role?: string };
+export const POST = withUserApi(async (request, ctx) => {
+      const user = ctx.user;
 
       const json = await request.json();
       const parsed = bodySchema.safeParse(json);
       if (!parsed.success) {
-        return NextResponse.json(
-          { error: 'Requisição inválida', details: parsed.error.flatten() },
-          { status: 400 }
+        throw new ApiError(
+          422,
+          'Validação falhou',
+          'VALIDATION_ERROR',
+          { issues: parsed.error.flatten() },
         );
       }
 
       if (!process.env.GEMINI_API_KEY) {
-        return NextResponse.json(
-          {
-            error:
-              'Serviço de IA não está configurado neste ambiente. A pesquisa com IA requer a variável GEMINI_API_KEY — peça ao administrador para provisioná-la.',
-          },
-          { status: 503 }
+        throw new ApiError(
+          503,
+          'Serviço de IA não está configurado neste ambiente. A pesquisa com IA requer a variável GEMINI_API_KEY — peça ao administrador para provisioná-la.',
+          'SERVICE_UNAVAILABLE',
         );
       }
 
@@ -345,8 +343,4 @@ export const POST = withAuth(
         cached,
         searchHistoryId,
       });
-    } catch (error) {
-      return handleApiError(error);
-    }
-  }
-);
+});
