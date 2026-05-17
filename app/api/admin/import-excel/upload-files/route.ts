@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { withAdminAuth } from '@/lib/api-middleware';
+import { withAdminApi } from '@/lib/api/handler';
+import { ValidationError } from '@/lib/errors/api-error';
 import { updateDocument } from '@/lib/documents';
 import { prisma } from '@/lib/prisma';
 import { writeFile, mkdir } from 'fs/promises';
@@ -11,16 +12,12 @@ import { apiLogger } from "@/lib/logger";
  * POST /api/admin/import-excel/upload-files
  * Faz upload em lote de arquivos e faz matching com documentos existentes
  */
-export const POST = withAdminAuth(async (request: NextRequest) => {
-  try {
+export const POST = withAdminApi(async (request: NextRequest) => {
     const formData = await request.formData();
     const files = formData.getAll('files') as File[];
 
     if (!files || files.length === 0) {
-      return NextResponse.json(
-        { error: 'Nenhum arquivo fornecido' },
-        { status: 400 }
-      );
+      throw new ValidationError('Nenhum arquivo fornecido');
     }
 
     const results = {
@@ -118,11 +115,4 @@ export const POST = withAdminAuth(async (request: NextRequest) => {
       success: results.errors.length === 0,
       results,
     });
-  } catch (error) {
-    apiLogger.error({ err: error }, 'Erro ao fazer upload em lote:');
-    return NextResponse.json(
-      { error: 'Erro ao processar upload em lote' },
-      { status: 500 }
-    );
-  }
 });

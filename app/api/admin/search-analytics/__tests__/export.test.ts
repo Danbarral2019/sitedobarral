@@ -20,8 +20,8 @@ vi.mock('@/lib/prisma', () => ({
   },
 }));
 
-vi.mock('@/lib/api-middleware', () => ({
-  withAdminAuth: (handler: any) => handler,
+vi.mock('@/lib/api/handler', () => ({
+  withAdminApi: (handler: any) => handler,
 }));
 
 import { GET } from '@/app/api/admin/search-analytics/export/route';

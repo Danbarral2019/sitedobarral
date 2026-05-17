@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { withAdminAuth } from '@/lib/api-middleware';
+import { withAdminApi } from '@/lib/api/handler';
+import { ValidationError } from '@/lib/errors/api-error';
 import { processExcelFile } from '@/lib/excel-processor';
 import { addDocument } from '@/lib/documents';
 import { apiLogger } from "@/lib/logger";
@@ -8,16 +9,12 @@ import { apiLogger } from "@/lib/logger";
  * POST /api/admin/import-excel/import
  * Importa documentos do Excel para o banco de dados
  */
-export const POST = withAdminAuth(async (request: NextRequest) => {
-  try {
+export const POST = withAdminApi(async (request: NextRequest) => {
     const formData = await request.formData();
     const file = formData.get('file') as File;
 
     if (!file) {
-      return NextResponse.json(
-        { error: 'Nenhum arquivo fornecido' },
-        { status: 400 }
-      );
+      throw new ValidationError('Nenhum arquivo fornecido');
     }
 
     // Converte para buffer
@@ -28,13 +25,7 @@ export const POST = withAdminAuth(async (request: NextRequest) => {
     const validation = await processExcelFile(buffer);
 
     if (!validation.isValid) {
-      return NextResponse.json(
-        {
-          error: 'Arquivo contém erros',
-          validation
-        },
-        { status: 400 }
-      );
+      throw new ValidationError('Arquivo contém erros', { validation });
     }
 
     // Importa apenas documentos válidos
@@ -108,11 +99,4 @@ export const POST = withAdminAuth(async (request: NextRequest) => {
       results,
       validation
     });
-  } catch (error) {
-    apiLogger.error({ err: error }, 'Erro ao importar Excel:');
-    return NextResponse.json(
-      { error: 'Erro ao importar arquivo Excel' },
-      { status: 500 }
-    );
-  }
 });

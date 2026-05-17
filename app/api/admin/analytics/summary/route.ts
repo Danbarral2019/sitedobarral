@@ -1,14 +1,12 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
-import { withAdminAuth } from '@/lib/api-middleware';
-import { apiLogger } from "@/lib/logger";
+import { withAdminApi } from '@/lib/api/handler';
 
 /**
  * GET /api/admin/analytics/summary
  * Retorna apenas métricas principais (carregamento rápido)
  */
-export const GET = withAdminAuth(async () => {
-  try {
+export const GET = withAdminApi(async () => {
     // Executar queries em paralelo para otimizar
     const [
       totalUsers,
@@ -119,11 +117,4 @@ export const GET = withAdminAuth(async () => {
         'Cache-Control': 'public, s-maxage=60, stale-while-revalidate=120',
       },
     });
-  } catch (error) {
-    apiLogger.error({ err: error }, '[Analytics Summary] Erro:');
-    return NextResponse.json(
-      { error: 'Erro ao buscar métricas' },
-      { status: 500 }
-    );
-  }
 });
