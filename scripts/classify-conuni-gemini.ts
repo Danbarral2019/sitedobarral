@@ -8,7 +8,6 @@
  *   npx dotenv -e .env.local -- npx tsx scripts/classify-conuni-gemini.ts --apply               # full run
  */
 
-import { GoogleGenAI } from '@google/genai';
 import { prisma } from '../lib/prisma';
 import { PRIMARY_GEMINI_MODEL } from '../lib/gemini/config';
 import { classifyOne, classifyPendingPareceres } from '../lib/conuni-classify';
@@ -34,9 +33,7 @@ async function main() {
   }
 
   // Dry-run: classify sem persistir, só pra calibrar prompt
-  const apiKey = process.env.GEMINI_API_KEY;
-  if (!apiKey) throw new Error('GEMINI_API_KEY não configurado');
-  const genAI = new GoogleGenAI({ apiKey });
+  if (!process.env.GEMINI_API_KEY) throw new Error('GEMINI_API_KEY não configurado');
 
   const candidates = await prisma.document.findMany({
     where: {
@@ -58,7 +55,7 @@ async function main() {
     const doc = candidates[i];
     process.stdout.write(`[${i + 1}/${candidates.length}] [${doc.category}] ${doc.title.slice(0, 70)}... `);
     try {
-      const cls = await classifyOne(genAI, doc);
+      const cls = await classifyOne(doc);
       const flag = cls.licitacoesContratos ? '✓' : '✗';
       const cursos = cls.cursosRelevantes.length > 0 ? ` cursos=[${cls.cursosRelevantes.join(',')}]` : '';
       const arts = cls.leiArticles.length > 0 ? ` arts=[${cls.leiArticles.slice(0, 3).join(',')}]` : '';
