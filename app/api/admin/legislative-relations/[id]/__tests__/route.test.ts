@@ -6,11 +6,11 @@ const { mockUpdate, mockDelete } = vi.hoisted(() => ({
   mockDelete: vi.fn(),
 }));
 
-// Mock withAdminAuth como identity — testes focam na lógica do handler,
+// Mock withAdminApi como identity — testes focam na lógica do handler,
 // não na autenticação (essa é coberta pelo middleware testes próprios).
-// O context.user é injetado direto pelo teste.
-vi.mock('@/lib/api-middleware', () => ({
-  withAdminAuth: (handler: unknown) => handler,
+// O ctx.user e ctx.params são injetados direto pelo teste.
+vi.mock('@/lib/api/handler', () => ({
+  withAdminApi: (handler: unknown) => handler,
 }));
 
 vi.mock('@/lib/prisma', () => ({
@@ -25,6 +25,10 @@ vi.mock('@/lib/errors/error-handler', () => ({
   },
 }));
 
+vi.mock('@/lib/logger', () => ({
+  apiLogger: { child: () => ({ info: vi.fn(), warn: vi.fn(), error: vi.fn() }), info: vi.fn(), warn: vi.fn(), error: vi.fn() },
+}));
+
 import { PATCH, DELETE } from '../route';
 
 function makeRequest(body: object): Request {
@@ -35,9 +39,12 @@ function makeRequest(body: object): Request {
   });
 }
 
+// withAdminApi resolves params before calling the handler, so ctx.params is already the resolved object
 const adminContext = (id: string) => ({
-  params: Promise.resolve({ id }),
+  params: { id },
   user: { userId: 'admin-1', email: 'admin@test.com', role: 'admin' as const },
+  requestId: 'test-req-id',
+  logger: { info: vi.fn(), warn: vi.fn(), error: vi.fn() },
 });
 
 describe('PATCH /api/admin/legislative-relations/[id]', () => {

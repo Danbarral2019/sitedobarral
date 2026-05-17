@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { withAdminAuth } from '@/lib/api-middleware';
-import { handleApiError } from '@/lib/errors/error-handler';
+import { withAdminApi } from '@/lib/api/handler';
 import { prisma } from '@/lib/prisma';
 
 /**
@@ -14,9 +13,8 @@ import { prisma } from '@/lib/prisma';
  *   - overrides:    aqueles com override manual — pra desfazer se quiser
  *   - todos:        sem filtro de classificação
  */
-export const GET = withAdminAuth(async (request: NextRequest) => {
-  try {
-    const sp = request.nextUrl.searchParams;
+export const GET = withAdminApi(async (request: NextRequest) => {
+  const sp = request.nextUrl.searchParams;
     const filter = sp.get('filter') || 'irrelevantes';
     const page = Math.max(1, parseInt(sp.get('page') || '1', 10));
     const pageSize = Math.min(100, Math.max(10, parseInt(sp.get('pageSize') || '30', 10)));
@@ -104,9 +102,6 @@ export const GET = withAdminAuth(async (request: NextRequest) => {
       pageSize,
       totalPages: Math.max(1, Math.ceil(total / pageSize)),
     });
-  } catch (error) {
-    return handleApiError(error);
-  }
 });
 
 function safeJson(s: string): Record<string, unknown> & {

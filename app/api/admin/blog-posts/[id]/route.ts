@@ -1,43 +1,37 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
-import { withAdminAuth } from '@/lib/api-middleware';
+import { withAdminApi } from '@/lib/api/handler';
 import { publishToSocialMedia } from '@/lib/social-publisher';
-import { handleApiError } from '@/lib/errors/error-handler';
 import { NotFoundError, ConflictError } from '@/lib/errors/api-error';
 import { apiLogger } from '@/lib/logger';
 import { CacheInvalidation } from '@/lib/cache/redis-client';
 
 // GET - Busca um post específico
-export const GET = withAdminAuth(async (
+export const GET = withAdminApi<{ id: string }>(async (
   request: NextRequest,
-  context: { params: Promise<{ id: string }> }
+  ctx
 ) => {
-  try {
-    const { id } = await context.params;
+  const { id } = ctx.params;
 
-    const post = await prisma.blogPost.findUnique({
-      where: { id }
-    });
+  const post = await prisma.blogPost.findUnique({
+    where: { id }
+  });
 
-    if (!post) {
-      apiLogger.warn({ postId: id }, 'Blog post not found');
-      throw new NotFoundError('Post');
-    }
-
-    return NextResponse.json({ post });
-  } catch (error) {
-    return handleApiError(error);
+  if (!post) {
+    apiLogger.warn({ postId: id }, 'Blog post not found');
+    throw new NotFoundError('Post');
   }
+
+  return NextResponse.json({ post });
 });
 
 // PUT - Atualiza um post
-export const PUT = withAdminAuth(async (
+export const PUT = withAdminApi<{ id: string }>(async (
   request: NextRequest,
-  context: { params: Promise<{ id: string }> }
+  ctx
 ) => {
-  try {
-    const { id } = await context.params;
-    const data = await request.json();
+  const { id } = ctx.params;
+  const data = await request.json();
     const { title, slug, excerpt, content, author, publishedAt, isPublished, autoPublishSocial, tags, leiArticles } = data;
 
     // Verificar se o post existe
@@ -102,39 +96,32 @@ export const PUT = withAdminAuth(async (
     CacheInvalidation.blogPosts().catch(console.error);
 
     return NextResponse.json({ post });
-  } catch (error) {
-    return handleApiError(error);
-  }
 });
 
 // DELETE - Remove um post
-export const DELETE = withAdminAuth(async (
+export const DELETE = withAdminApi<{ id: string }>(async (
   request: NextRequest,
-  context: { params: Promise<{ id: string }> }
+  ctx
 ) => {
-  try {
-    const { id } = await context.params;
+  const { id } = ctx.params;
 
-    const post = await prisma.blogPost.findUnique({
-      where: { id }
-    });
+  const post = await prisma.blogPost.findUnique({
+    where: { id }
+  });
 
-    if (!post) {
-      apiLogger.warn({ postId: id }, 'Blog post not found for deletion');
-      throw new NotFoundError('Post');
-    }
-
-    await prisma.blogPost.delete({
-      where: { id }
-    });
-
-    apiLogger.info({ postId: id, title: post.title }, 'Blog post deleted successfully');
-
-    // Invalidate cache
-    CacheInvalidation.blogPosts().catch(console.error);
-
-    return NextResponse.json({ success: true });
-  } catch (error) {
-    return handleApiError(error);
+  if (!post) {
+    apiLogger.warn({ postId: id }, 'Blog post not found for deletion');
+    throw new NotFoundError('Post');
   }
+
+  await prisma.blogPost.delete({
+    where: { id }
+  });
+
+  apiLogger.info({ postId: id, title: post.title }, 'Blog post deleted successfully');
+
+  // Invalidate cache
+  CacheInvalidation.blogPosts().catch(console.error);
+
+  return NextResponse.json({ success: true });
 });

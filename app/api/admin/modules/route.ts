@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { withAdminAuth } from '@/lib/api-middleware';
+import { withAdminApi } from '@/lib/api/handler';
 import { prisma } from '@/lib/prisma';
-import { handleApiError } from '@/lib/errors/error-handler';
 import { apiLogger } from '@/lib/logger';
 import { CreateModuleSchema } from '@/lib/validation-schemas';
 
@@ -9,9 +8,8 @@ import { CreateModuleSchema } from '@/lib/validation-schemas';
  * GET: Lista modules de um curso
  * Query param: courseId (obrigatório)
  */
-export const GET = withAdminAuth(async (request: NextRequest) => {
-  try {
-    const { searchParams } = new URL(request.url);
+export const GET = withAdminApi(async (request: NextRequest) => {
+  const { searchParams } = new URL(request.url);
     const courseId = searchParams.get('courseId');
 
     if (!courseId) {
@@ -57,17 +55,13 @@ export const GET = withAdminAuth(async (request: NextRequest) => {
 
     apiLogger.info({ courseId, count: modules.length }, 'Modules listed');
     return NextResponse.json({ modules: modulesResponse });
-  } catch (error) {
-    return handleApiError(error);
-  }
 });
 
 /**
  * POST: Cria um novo módulo
  */
-export const POST = withAdminAuth(async (request: NextRequest) => {
-  try {
-    const body = await request.json();
+export const POST = withAdminApi(async (request: NextRequest) => {
+  const body = await request.json();
     const data = CreateModuleSchema.parse(body);
 
     // Auto-set displayOrder se não fornecido
@@ -95,7 +89,4 @@ export const POST = withAdminAuth(async (request: NextRequest) => {
 
     apiLogger.info({ moduleId: createdModule.id, courseId: data.courseId }, 'Module created');
     return NextResponse.json({ module: createdModule }, { status: 201 });
-  } catch (error) {
-    return handleApiError(error);
-  }
 });

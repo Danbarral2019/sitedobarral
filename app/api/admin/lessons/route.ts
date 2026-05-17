@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { withAdminAuth } from '@/lib/api-middleware';
+import { withAdminApi } from '@/lib/api/handler';
 import { prisma } from '@/lib/prisma';
-import { handleApiError } from '@/lib/errors/error-handler';
 import { NotFoundError } from '@/lib/errors/api-error';
 import { apiLogger } from '@/lib/logger';
 import { CreateLessonSchema } from '@/lib/validation-schemas';
@@ -9,9 +8,8 @@ import { CreateLessonSchema } from '@/lib/validation-schemas';
 /**
  * POST: Cria uma nova lição
  */
-export const POST = withAdminAuth(async (request: NextRequest) => {
-  try {
-    const body = await request.json();
+export const POST = withAdminApi(async (request: NextRequest) => {
+  const body = await request.json();
     const data = CreateLessonSchema.parse(body);
 
     // Verificar se o módulo existe
@@ -49,7 +47,4 @@ export const POST = withAdminAuth(async (request: NextRequest) => {
 
     apiLogger.info({ lessonId: lesson.id, moduleId: data.moduleId }, 'Lesson created');
     return NextResponse.json({ lesson }, { status: 201 });
-  } catch (error) {
-    return handleApiError(error);
-  }
 });
