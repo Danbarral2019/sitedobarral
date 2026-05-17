@@ -1,23 +1,14 @@
 /**
  * Serviço de Geração de Resumos com Claude AI
  * Gera resumos executivos de documentos jurídicos
+ *
+ * Provider/modelo resolvidos via `lib/ai` (task=summarization). Override por
+ * env: `AI_SUMMARIZATION_PROVIDER` / `AI_SUMMARIZATION_MODEL`.
  */
 
-import Anthropic from '@anthropic-ai/sdk';
+import { generate } from '@/lib/ai';
 import { isLiteralSourceCategory } from './literal-sources';
 import { apiLogger } from "@/lib/logger";
-
-// Cliente Claude (lazy initialization)
-function getClaudeClient(): Anthropic | null {
-  const apiKey = process.env.ANTHROPIC_API_KEY;
-
-  if (!apiKey) {
-    console.warn('[Summary Generator] ANTHROPIC_API_KEY não configurada');
-    return null;
-  }
-
-  return new Anthropic({ apiKey });
-}
 
 export interface DocumentSummary {
   summary: string; // Resumo executivo (2-3 parágrafos)
@@ -46,31 +37,22 @@ export async function generateDocumentSummary(
     return null;
   }
 
-  const anthropic = getClaudeClient();
-
-  if (!anthropic) {
+  if (!isSummaryServiceAvailable()) {
+    console.warn('[Summary Generator] ANTHROPIC_API_KEY não configurada');
     return null;
   }
 
   try {
     const prompt = buildSummaryPrompt(title, description, fullText, category);
 
-    const message = await anthropic.messages.create({
-      model: 'claude-haiku-4-5-20251001', // Haiku 4.5 — substitui o 3-5-haiku (EOL fev/2026)
-      max_tokens: 2048,
-      temperature: 0.3, // Baixa temperatura para consistência
-      messages: [
-        {
-          role: 'user',
-          content: prompt,
-        },
-      ],
+    // Modelo default da task=summarization em lib/ai é claude-haiku-4-5
+    // (substitui o 3-5-haiku EOL fev/2026); override via
+    // AI_SUMMARIZATION_MODEL.
+    const { text: responseText } = await generate('summarization', {
+      messages: [{ role: 'user', content: prompt }],
+      maxTokens: 2048,
+      temperature: 0.3,
     });
-
-    // Extrai resposta
-    const responseText = message.content[0].type === 'text'
-      ? message.content[0].text
-      : '';
 
     // Parse da resposta JSON
     const result = parseSummaryResponse(responseText);
