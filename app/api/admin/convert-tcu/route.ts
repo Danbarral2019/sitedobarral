@@ -1,5 +1,6 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { withAdminAuth } from '@/lib/api-middleware';
+import { NextResponse } from 'next/server';
+import { withAdminApi } from '@/lib/api/handler';
+import { ValidationError } from '@/lib/errors/api-error';
 import * as xlsx from 'xlsx';
 import { apiLogger } from "@/lib/logger";
 
@@ -187,153 +188,136 @@ function converterLinha(row: Record<string, unknown>, index: number) {
  * POST /api/admin/convert-tcu
  * Converte Excel do TCU para formato do sistema
  */
-export const POST = withAdminAuth(async (request: NextRequest) => {
+export const POST = withAdminApi(async (request) => {
+  // Pega o arquivo do form data
+  const formData = await request.formData();
+  const file = formData.get('file') as File;
+
+  if (!file) {
+    throw new ValidationError('Nenhum arquivo enviado');
+  }
+
+  console.log('[Convert TCU] Processando arquivo:', file.name);
+
+  // Converte file para buffer
+  const arrayBuffer = await file.arrayBuffer();
+  const buffer = Buffer.from(arrayBuffer);
+
+  // Lê o Excel com configuração para arquivos antigos (.xls)
+  let workbook;
   try {
-    // Pega o arquivo do form data
-    const formData = await request.formData();
-    const file = formData.get('file') as File;
-
-    if (!file) {
-      return NextResponse.json(
-        { error: 'Nenhum arquivo enviado' },
-        { status: 400 }
-      );
-    }
-
-    console.log('[Convert TCU] Processando arquivo:', file.name);
-
-    // Converte file para buffer
-    const arrayBuffer = await file.arrayBuffer();
-    const buffer = Buffer.from(arrayBuffer);
-
-    // Lê o Excel com configuração para arquivos antigos (.xls)
-    let workbook;
-    try {
-      // Tenta ler com suporte a arquivos .xls antigos (CFB)
-      workbook = xlsx.read(buffer, {
-        type: 'buffer',
-        cellDates: true,
-        cellNF: false,
-        cellText: false,
-      });
-    } catch (error) {
-      apiLogger.error({ err: error }, '[Convert TCU] Erro ao ler arquivo:');
-      return NextResponse.json(
-        {
-          error: 'Erro ao ler arquivo. Por favor, converta o arquivo .xls para .xlsx no Excel/LibreOffice antes de importar.',
-          details: error instanceof Error ? error.message : String(error)
-        },
-        { status: 400 }
-      );
-    }
-    const sheetName = workbook.SheetNames[0];
-    const worksheet = workbook.Sheets[sheetName];
-
-    // Converte para JSON
-    let data = xlsx.utils.sheet_to_json(worksheet) as Record<string, unknown>[];
-
-    console.log(`[Convert TCU] Total de linhas: ${data.length}`);
-
-    // Limpar nomes de colunas (trim) e normalizar
-    data = data.map(row => {
-      const cleanedRow: Record<string, unknown> = {};
-      Object.entries(row).forEach(([key, value]) => {
-        const cleanKey = key.trim(); // Remove espaços extras
-        cleanedRow[cleanKey] = value;
-      });
-      return cleanedRow;
+    // Tenta ler com suporte a arquivos .xls antigos (CFB)
+    workbook = xlsx.read(buffer, {
+      type: 'buffer',
+      cellDates: true,
+      cellNF: false,
+      cellText: false,
     });
-
-    if (data.length === 0) {
-      return NextResponse.json(
-        { error: 'Nenhum dado encontrado na planilha' },
-        { status: 400 }
-      );
-    }
-
-    // Converte linhas
-    const linhasConvertidas = data.map((row, index) => converterLinha(row, index));
-
-    // Estatísticas
-    const stats = {
-      total: linhasConvertidas.length,
-      porCurso: {} as Record<string, number>,
-      comUrl: linhasConvertidas.filter(l => l.URL).length,
-      semUrl: linhasConvertidas.filter(l => !l.URL).length,
-    };
-
-    linhasConvertidas.forEach(linha => {
-      const cursos = linha.Curso.split(',');
-      cursos.forEach(curso => {
-        stats.porCurso[curso] = (stats.porCurso[curso] || 0) + 1;
-      });
-    });
-
-    // Cria novo workbook
-    const newWorkbook = xlsx.utils.book_new();
-
-    // Aba 1: Instruções
-    const instrucoes = [
-      ['INSTRUCOES PARA IMPORTACAO'],
-      [''],
-      ['Este arquivo foi gerado automaticamente a partir do Excel do TCU.'],
-      [''],
-      ['PROXIMOS PASSOS:'],
-      ['1. Baixe este arquivo'],
-      ['2. Revise os dados na aba "Dados"'],
-      ['3. Importe em /admin/importar'],
-      [''],
-      ['COLUNAS:'],
-      ['- Titulo: Numero do acordao'],
-      ['- Descricao: Enunciado da tese'],
-      ['- Categoria: Sempre "acordao"'],
-      ['- Curso: Cursos identificados automaticamente'],
-      ['- Tags: Tags geradas dos metadados'],
-      ['- Publico: SIM (acordaos sao publicos)'],
-      ['- URL: Link para o acordao no site do TCU'],
-    ];
-    const wsInstrucoes = xlsx.utils.aoa_to_sheet(instrucoes);
-    xlsx.utils.book_append_sheet(newWorkbook, wsInstrucoes, 'Instrucoes');
-
-    // Aba 2: Dados
-    const wsDados = xlsx.utils.json_to_sheet(linhasConvertidas);
-    xlsx.utils.book_append_sheet(newWorkbook, wsDados, 'Dados');
-
-    // Aba 3: Estatísticas
-    const estatisticas = [
-      ['ESTATISTICAS DA CONVERSAO'],
-      [''],
-      ['Total de acordaos:', stats.total],
-      ['Com URL:', stats.comUrl],
-      ['Sem URL:', stats.semUrl],
-      [''],
-      ['DISTRIBUICAO POR CURSO:'],
-      ...Object.entries(stats.porCurso)
-        .sort((a, b) => b[1] - a[1])
-        .map(([curso, count]) => [CURSO_NAMES[curso] || curso, count]),
-    ];
-    const wsStats = xlsx.utils.aoa_to_sheet(estatisticas);
-    xlsx.utils.book_append_sheet(newWorkbook, wsStats, 'Estatisticas');
-
-    // Gera buffer do Excel convertido
-    const outputBuffer = xlsx.write(newWorkbook, { type: 'buffer', bookType: 'xlsx' });
-
-    console.log('[Convert TCU] Conversão concluída. Stats:', stats);
-
-    // Retorna o arquivo Excel
-    return new NextResponse(outputBuffer, {
-      status: 200,
-      headers: {
-        'Content-Type': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-        'Content-Disposition': `attachment; filename="TCU_Convertido_${new Date().toISOString().split('T')[0]}.xlsx"`,
-      },
-    });
-
   } catch (error) {
-    apiLogger.error({ err: error }, '[Convert TCU] Erro:');
-    return NextResponse.json(
-      { error: 'Erro ao converter arquivo. Verifique se o formato está correto.' },
-      { status: 500 }
+    apiLogger.error({ err: error }, '[Convert TCU] Erro ao ler arquivo:');
+    throw new ValidationError(
+      'Erro ao ler arquivo. Por favor, converta o arquivo .xls para .xlsx no Excel/LibreOffice antes de importar.',
+      { details: error instanceof Error ? error.message : String(error) }
     );
   }
+  const sheetName = workbook.SheetNames[0];
+  const worksheet = workbook.Sheets[sheetName];
+
+  // Converte para JSON
+  let data = xlsx.utils.sheet_to_json(worksheet) as Record<string, unknown>[];
+
+  console.log(`[Convert TCU] Total de linhas: ${data.length}`);
+
+  // Limpar nomes de colunas (trim) e normalizar
+  data = data.map(row => {
+    const cleanedRow: Record<string, unknown> = {};
+    Object.entries(row).forEach(([key, value]) => {
+      const cleanKey = key.trim(); // Remove espaços extras
+      cleanedRow[cleanKey] = value;
+    });
+    return cleanedRow;
+  });
+
+  if (data.length === 0) {
+    throw new ValidationError('Nenhum dado encontrado na planilha');
+  }
+
+  // Converte linhas
+  const linhasConvertidas = data.map((row, index) => converterLinha(row, index));
+
+  // Estatísticas
+  const stats = {
+    total: linhasConvertidas.length,
+    porCurso: {} as Record<string, number>,
+    comUrl: linhasConvertidas.filter(l => l.URL).length,
+    semUrl: linhasConvertidas.filter(l => !l.URL).length,
+  };
+
+  linhasConvertidas.forEach(linha => {
+    const cursos = linha.Curso.split(',');
+    cursos.forEach(curso => {
+      stats.porCurso[curso] = (stats.porCurso[curso] || 0) + 1;
+    });
+  });
+
+  // Cria novo workbook
+  const newWorkbook = xlsx.utils.book_new();
+
+  // Aba 1: Instruções
+  const instrucoes = [
+    ['INSTRUCOES PARA IMPORTACAO'],
+    [''],
+    ['Este arquivo foi gerado automaticamente a partir do Excel do TCU.'],
+    [''],
+    ['PROXIMOS PASSOS:'],
+    ['1. Baixe este arquivo'],
+    ['2. Revise os dados na aba "Dados"'],
+    ['3. Importe em /admin/importar'],
+    [''],
+    ['COLUNAS:'],
+    ['- Titulo: Numero do acordao'],
+    ['- Descricao: Enunciado da tese'],
+    ['- Categoria: Sempre "acordao"'],
+    ['- Curso: Cursos identificados automaticamente'],
+    ['- Tags: Tags geradas dos metadados'],
+    ['- Publico: SIM (acordaos sao publicos)'],
+    ['- URL: Link para o acordao no site do TCU'],
+  ];
+  const wsInstrucoes = xlsx.utils.aoa_to_sheet(instrucoes);
+  xlsx.utils.book_append_sheet(newWorkbook, wsInstrucoes, 'Instrucoes');
+
+  // Aba 2: Dados
+  const wsDados = xlsx.utils.json_to_sheet(linhasConvertidas);
+  xlsx.utils.book_append_sheet(newWorkbook, wsDados, 'Dados');
+
+  // Aba 3: Estatísticas
+  const estatisticas = [
+    ['ESTATISTICAS DA CONVERSAO'],
+    [''],
+    ['Total de acordaos:', stats.total],
+    ['Com URL:', stats.comUrl],
+    ['Sem URL:', stats.semUrl],
+    [''],
+    ['DISTRIBUICAO POR CURSO:'],
+    ...Object.entries(stats.porCurso)
+      .sort((a, b) => b[1] - a[1])
+      .map(([curso, count]) => [CURSO_NAMES[curso] || curso, count]),
+  ];
+  const wsStats = xlsx.utils.aoa_to_sheet(estatisticas);
+  xlsx.utils.book_append_sheet(newWorkbook, wsStats, 'Estatisticas');
+
+  // Gera buffer do Excel convertido
+  const outputBuffer = xlsx.write(newWorkbook, { type: 'buffer', bookType: 'xlsx' });
+
+  console.log('[Convert TCU] Conversão concluída. Stats:', stats);
+
+  // Retorna o arquivo Excel
+  return new NextResponse(outputBuffer, {
+    status: 200,
+    headers: {
+      'Content-Type': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+      'Content-Disposition': `attachment; filename="TCU_Convertido_${new Date().toISOString().split('T')[0]}.xlsx"`,
+    },
+  });
+
 });

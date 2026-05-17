@@ -1,7 +1,7 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { withAdminAuth } from '@/lib/api-middleware';
+import { NextResponse } from 'next/server';
+import { withAdminApi } from '@/lib/api/handler';
+import { ValidationError } from '@/lib/errors/api-error';
 import * as xlsx from 'xlsx';
-import { apiLogger } from "@/lib/logger";
 
 // Reutiliza a lógica do conversor TCU existente
 const CURSO_MAPPING: Record<string, string> = {
@@ -141,83 +141,65 @@ function converterLinha(row: Record<string, unknown>, index: number) {
  * POST /api/admin/tcu-manager/convert
  * Converte Excel do TCU para formato do sistema (retorna JSON em vez de arquivo)
  */
-export const POST = withAdminAuth(async (request: NextRequest) => {
-  try {
-    const formData = await request.formData();
-    const file = formData.get('file') as File;
+export const POST = withAdminApi(async (request) => {
+  const formData = await request.formData();
+  const file = formData.get('file') as File;
 
-    if (!file) {
-      return NextResponse.json(
-        { error: 'Nenhum arquivo enviado' },
-        { status: 400 }
-      );
-    }
-
-    console.log('[TCU Manager Convert] Processando arquivo:', file.name);
-
-    const arrayBuffer = await file.arrayBuffer();
-    const buffer = Buffer.from(arrayBuffer);
-
-    const workbook = xlsx.read(buffer, {
-      type: 'buffer',
-      cellDates: true,
-    });
-
-    const sheetName = workbook.SheetNames[0];
-    const worksheet = workbook.Sheets[sheetName];
-
-    let data = xlsx.utils.sheet_to_json(worksheet) as Record<string, unknown>[];
-
-    // Limpar nomes de colunas (trim)
-    data = data.map(row => {
-      const cleanedRow: Record<string, unknown> = {};
-      Object.entries(row).forEach(([key, value]) => {
-        cleanedRow[key.trim()] = value;
-      });
-      return cleanedRow;
-    });
-
-    console.log(`[TCU Manager Convert] Total de linhas: ${data.length}`);
-
-    if (data.length === 0) {
-      return NextResponse.json(
-        { error: 'Nenhum dado encontrado na planilha' },
-        { status: 400 }
-      );
-    }
-
-    const linhasConvertidas = data.map((row, index) => converterLinha(row, index));
-
-    const stats = {
-      total: linhasConvertidas.length,
-      porCurso: {} as Record<string, number>,
-      comUrl: linhasConvertidas.filter(l => l.URL).length,
-      semUrl: linhasConvertidas.filter(l => !l.URL).length,
-    };
-
-    linhasConvertidas.forEach(linha => {
-      const cursos = linha.Curso.split(',');
-      cursos.forEach(curso => {
-        stats.porCurso[curso] = (stats.porCurso[curso] || 0) + 1;
-      });
-    });
-
-    console.log('[TCU Manager Convert] Conversão concluída. Stats:', stats);
-
-    return NextResponse.json({
-      success: true,
-      stats,
-      documents: linhasConvertidas,
-    });
-
-  } catch (error) {
-    apiLogger.error({ err: error }, '[TCU Manager Convert] Erro:');
-    return NextResponse.json(
-      {
-        error: 'Erro ao converter arquivo',
-        details: error instanceof Error ? error.message : String(error)
-      },
-      { status: 500 }
-    );
+  if (!file) {
+    throw new ValidationError('Nenhum arquivo enviado');
   }
+
+  console.log('[TCU Manager Convert] Processando arquivo:', file.name);
+
+  const arrayBuffer = await file.arrayBuffer();
+  const buffer = Buffer.from(arrayBuffer);
+
+  const workbook = xlsx.read(buffer, {
+    type: 'buffer',
+    cellDates: true,
+  });
+
+  const sheetName = workbook.SheetNames[0];
+  const worksheet = workbook.Sheets[sheetName];
+
+  let data = xlsx.utils.sheet_to_json(worksheet) as Record<string, unknown>[];
+
+  // Limpar nomes de colunas (trim)
+  data = data.map(row => {
+    const cleanedRow: Record<string, unknown> = {};
+    Object.entries(row).forEach(([key, value]) => {
+      cleanedRow[key.trim()] = value;
+    });
+    return cleanedRow;
+  });
+
+  console.log(`[TCU Manager Convert] Total de linhas: ${data.length}`);
+
+  if (data.length === 0) {
+    throw new ValidationError('Nenhum dado encontrado na planilha');
+  }
+
+  const linhasConvertidas = data.map((row, index) => converterLinha(row, index));
+
+  const stats = {
+    total: linhasConvertidas.length,
+    porCurso: {} as Record<string, number>,
+    comUrl: linhasConvertidas.filter(l => l.URL).length,
+    semUrl: linhasConvertidas.filter(l => !l.URL).length,
+  };
+
+  linhasConvertidas.forEach(linha => {
+    const cursos = linha.Curso.split(',');
+    cursos.forEach(curso => {
+      stats.porCurso[curso] = (stats.porCurso[curso] || 0) + 1;
+    });
+  });
+
+  console.log('[TCU Manager Convert] Conversão concluída. Stats:', stats);
+
+  return NextResponse.json({
+    success: true,
+    stats,
+    documents: linhasConvertidas,
+  });
 });
