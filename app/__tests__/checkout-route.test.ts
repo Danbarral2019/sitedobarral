@@ -8,9 +8,24 @@ const { mockSubscriptionFindFirst, mockCreateCheckoutSession } = vi.hoisted(() =
   mockCreateCheckoutSession: vi.fn(),
 }));
 
-vi.mock('@/lib/api-middleware', () => ({
-  withAuth: (h: any) => async (req: Request) => h(req, { user: mockUser }),
-}));
+vi.mock('@/lib/api/handler', async () => {
+  const { handleApiError } = await import('@/lib/errors/error-handler');
+  return {
+    withUserApi: (h: any) => async (req: Request, nextCtx?: any) => {
+      const ctx = {
+        params: nextCtx?.params ? await nextCtx.params : {},
+        user: mockUser,
+        requestId: 'test-req-id',
+        logger: { info: vi.fn(), warn: vi.fn(), error: vi.fn(), debug: vi.fn() },
+      };
+      try {
+        return await h(req, ctx);
+      } catch (err) {
+        return handleApiError(err);
+      }
+    },
+  };
+});
 
 vi.mock('@/lib/prisma', () => ({
   prisma: {

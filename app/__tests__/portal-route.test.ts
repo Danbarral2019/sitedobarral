@@ -9,11 +9,25 @@ const {
   mockCreateBillingPortalSession: vi.fn(),
 }));
 
-// Pass-through withAuth with an injected user — we don't test auth here.
-vi.mock('@/lib/api-middleware', () => ({
-  withAuth: (handler: any) => (req: any, ctx?: any) =>
-    handler(req, { ...ctx, user: { userId: 'user-1', email: 'u@x.com', role: 'student' } }),
-}));
+// Pass-through withUserApi with an injected ctx + handleApiError on throw.
+vi.mock('@/lib/api/handler', async () => {
+  const { handleApiError } = await import('@/lib/errors/error-handler');
+  return {
+    withUserApi: (handler: any) => async (req: any, nextCtx?: any) => {
+      const ctx = {
+        params: nextCtx?.params ? await nextCtx.params : {},
+        user: { userId: 'user-1', email: 'u@x.com', role: 'student' },
+        requestId: 'test-req-id',
+        logger: { info: vi.fn(), warn: vi.fn(), error: vi.fn(), debug: vi.fn() },
+      };
+      try {
+        return await handler(req, ctx);
+      } catch (err) {
+        return handleApiError(err);
+      }
+    },
+  };
+});
 
 vi.mock('@/lib/stripe', () => ({
   createBillingPortalSession: (...args: any[]) => mockCreateBillingPortalSession(...args),
