@@ -23,7 +23,8 @@
     "sync:obsidian": "tsx scripts/sync-obsidian.ts",
     "sync:obsidian:full": "tsx scripts/sync-obsidian.ts --full",
     "export:obsidian": "tsx scripts/sync-obsidian.ts --export-only",
-    "import:obsidian": "tsx scripts/sync-obsidian.ts --import-only"
+    "import:obsidian": "tsx scripts/sync-obsidian.ts --import-only",
+    "migration:api:status": "tsx scripts/api-migration-status.ts"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.78.0",
