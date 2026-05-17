@@ -1,21 +1,16 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
-import { verifyAdmin } from '@/lib/api-middleware';
+import { withAdminApi } from '@/lib/api/handler';
+import { ApiError } from '@/lib/errors/api-error';
 import { ReorderSchema } from '@/lib/lei-14133/admin-validators';
 import { CacheInvalidation } from '@/lib/cache/redis-client';
 
-export async function POST(
-  request: NextRequest,
-  { params }: { params: Promise<{ numero: string }> },
-) {
-  const adminCheck = await verifyAdmin(request);
-  if (adminCheck.error) return adminCheck.response;
-
-  const { numero } = await params;
+export const POST = withAdminApi<{ numero: string }>(async (request, { params }) => {
+  const { numero } = params;
   const body = await request.json();
   const parsed = ReorderSchema.safeParse(body);
   if (!parsed.success) {
-    return NextResponse.json({ error: 'Validação falhou', issues: parsed.error.issues }, { status: 422 });
+    throw new ApiError(422, 'Validação falhou', 'VALIDATION_ERROR', parsed.error.issues);
   }
 
   const items = await prisma.leiArticleSuggestedReading.findMany({
@@ -23,7 +18,7 @@ export async function POST(
     select: { id: true },
   });
   if (items.length !== parsed.data.ids.length) {
-    return NextResponse.json({ error: 'IDs inválidos' }, { status: 422 });
+    throw new ApiError(422, 'IDs inválidos', 'VALIDATION_ERROR');
   }
 
   await prisma.$transaction(
@@ -38,4 +33,4 @@ export async function POST(
   ]);
 
   return NextResponse.json({ success: true });
-}
+});
