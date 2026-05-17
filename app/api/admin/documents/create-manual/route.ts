@@ -1,17 +1,16 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { withAdminAuth } from '@/lib/api-middleware';
+import { withAdminApi } from '@/lib/api/handler';
+import { ValidationError } from '@/lib/errors/api-error';
 import { prisma } from '@/lib/prisma';
 import { CacheInvalidation } from '@/lib/cache/redis-client';
 import { sendPushToCourse } from '@/lib/push-notifications';
-import { apiLogger } from "@/lib/logger";
 
 /**
  * POST /api/admin/documents/create-manual
  * Cria um documento manualmente (sem upload de arquivo)
  * Específico para enunciados e súmulas
  */
-export const POST = withAdminAuth(async (request: NextRequest) => {
-  try {
+export const POST = withAdminApi(async (request: NextRequest) => {
     const body = await request.json();
     const {
       courseId,
@@ -29,17 +28,11 @@ export const POST = withAdminAuth(async (request: NextRequest) => {
 
     // Validações
     if (!courseId || !title) {
-      return NextResponse.json(
-        { error: 'Curso e título são obrigatórios' },
-        { status: 400 }
-      );
+      throw new ValidationError('Curso e título são obrigatórios');
     }
 
     if (!textContent) {
-      return NextResponse.json(
-        { error: 'Texto do documento é obrigatório' },
-        { status: 400 }
-      );
+      throw new ValidationError('Texto do documento é obrigatório');
     }
 
     console.log('[Create Manual] Criando documento:', {
@@ -106,11 +99,4 @@ export const POST = withAdminAuth(async (request: NextRequest) => {
       },
       { status: 201 }
     );
-  } catch (error) {
-    apiLogger.error({ err: error }, '[Create Manual] Erro:');
-    return NextResponse.json(
-      { error: 'Erro ao criar documento' },
-      { status: 500 }
-    );
-  }
 });

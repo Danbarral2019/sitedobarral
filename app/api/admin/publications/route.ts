@@ -1,12 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
-import { withAdminAuth } from '@/lib/api-middleware';
+import { withAdminApi } from '@/lib/api/handler';
+import { ValidationError } from '@/lib/errors/api-error';
 import { CacheInvalidation, withCache, CacheKeys, CACHE_TTL } from '@/lib/cache/redis-client';
-import { apiLogger } from "@/lib/logger";
 
 // GET - Lista todas as publicações
-export const GET = withAdminAuth(async (request: NextRequest) => {
-  try {
+export const GET = withAdminApi(async (request: NextRequest) => {
     const { searchParams } = new URL(request.url);
     const type = searchParams.get('type'); // livro, artigo, noticia
 
@@ -28,18 +27,10 @@ export const GET = withAdminAuth(async (request: NextRequest) => {
     );
 
     return NextResponse.json(result);
-  } catch (error) {
-    apiLogger.error({ err: error }, 'Erro ao listar publicações:');
-    return NextResponse.json(
-      { error: 'Erro ao listar publicações' },
-      { status: 500 }
-    );
-  }
 });
 
 // POST - Cria nova publicação
-export const POST = withAdminAuth(async (request: NextRequest) => {
-  try {
+export const POST = withAdminApi(async (request: NextRequest) => {
     const data = await request.json();
     const {
       type,
@@ -59,18 +50,12 @@ export const POST = withAdminAuth(async (request: NextRequest) => {
     } = data;
 
     if (!type || !title || !description || !author) {
-      return NextResponse.json(
-        { error: 'Campos obrigatórios não fornecidos' },
-        { status: 400 }
-      );
+      throw new ValidationError('Campos obrigatórios não fornecidos');
     }
 
     // Validar tipo
     if (!['livro', 'artigo', 'noticia'].includes(type)) {
-      return NextResponse.json(
-        { error: 'Tipo inválido. Use: livro, artigo ou noticia' },
-        { status: 400 }
-      );
+      throw new ValidationError('Tipo inválido. Use: livro, artigo ou noticia');
     }
 
     const publication = await prisma.publication.create({
@@ -96,11 +81,4 @@ export const POST = withAdminAuth(async (request: NextRequest) => {
     CacheInvalidation.publications().catch(console.error);
 
     return NextResponse.json({ publication }, { status: 201 });
-  } catch (error) {
-    apiLogger.error({ err: error }, 'Erro ao criar publicação:');
-    return NextResponse.json(
-      { error: 'Erro ao criar publicação' },
-      { status: 500 }
-    );
-  }
 });

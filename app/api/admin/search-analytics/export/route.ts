@@ -1,7 +1,6 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
-import { withAdminAuth } from '@/lib/api-middleware';
-import { apiLogger } from "@/lib/logger";
+import { withAdminApi } from '@/lib/api/handler';
 
 /**
  * GET /api/admin/search-analytics/export?days=30
@@ -10,8 +9,7 @@ import { apiLogger } from "@/lib/logger";
  * Inclui email do usuário (join), query, tipo, filtros, feedback, nota,
  * timestamps. Usado pelo botão "Exportar CSV" no admin.
  */
-export const GET = withAdminAuth(async (req) => {
-  try {
+export const GET = withAdminApi(async (req) => {
     const url = new URL(req.url);
     const daysParam = url.searchParams.get('days');
     const days = (() => {
@@ -94,13 +92,6 @@ export const GET = withAdminAuth(async (req) => {
         'Cache-Control': 'no-store',
       },
     });
-  } catch (error) {
-    apiLogger.error({ err: error }, 'Search analytics export error:');
-    return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 },
-    );
-  }
 });
 
 function csvField(value: string): string {
