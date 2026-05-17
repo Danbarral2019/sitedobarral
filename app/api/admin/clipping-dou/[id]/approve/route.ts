@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse, after } from 'next/server';
 import { prisma } from '@/lib/prisma';
-import { verifyAdmin } from '@/lib/api-middleware';
+import { withAdminApi } from '@/lib/api/handler';
+import { ConflictError, NotFoundError } from '@/lib/errors/api-error';
 import { scrapeContent } from '@/lib/dou-scraper';
 import { LeiIndexer } from '@/lib/lei-indexer';
 import { scrapeAndIndexAct } from '@/lib/legislative-scrapers/scrape-and-index';
@@ -32,18 +33,13 @@ function runAfterResponse(promise: Promise<unknown>): void {
   }
 }
 
-export async function POST(
-  request: NextRequest,
-  { params }: { params: Promise<{ id: string }> },
-) {
-  const adminCheck = await verifyAdmin(request);
-  if (adminCheck.error) return adminCheck.response;
-
-  const { id } = await params;
+export const POST = withAdminApi<{ id: string }>(async (request, ctx) => {
+  const { id } = ctx.params;
+  const adminEmail = ctx.user.email;
   const staging = await prisma.dOUStagingDocument.findUnique({ where: { id } });
-  if (!staging) return NextResponse.json({ error: 'Staging não encontrado' }, { status: 404 });
+  if (!staging) throw new NotFoundError('Staging');
   if (staging.finalDecision || staging.imported) {
-    return NextResponse.json({ error: `Já ${staging.finalDecision || 'importado'}` }, { status: 409 });
+    throw new ConflictError(`Já ${staging.finalDecision || 'importado'}`);
   }
 
   let parsedDate: Date | undefined;
@@ -81,7 +77,7 @@ export async function POST(
         douSecao: staging.section,
         reviewed: true,
         reviewedAt: new Date(),
-        reviewedBy: adminCheck.user.email,
+        reviewedBy: adminEmail,
         embeddingStatus: 'pending',
         metaDou: { create: { url: staging.url, data: parsedDate, secao: staging.section } },
       },
@@ -129,7 +125,7 @@ export async function POST(
         importedAt: new Date(),
         documentId: newDoc.id,
         reviewedAt: new Date(),
-        reviewedBy: adminCheck.user.email,
+        reviewedBy: adminEmail,
         classificationCorrect: true,
       },
     });
@@ -186,4 +182,4 @@ export async function POST(
   );
 
   return NextResponse.json({ success: true, documentId, actId: actIdToScrape });
-}
+});

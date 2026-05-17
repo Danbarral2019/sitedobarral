@@ -1,24 +1,20 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
-import { verifyAdmin } from '@/lib/api-middleware';
+import { withAdminApi } from '@/lib/api/handler';
+import { ConflictError, NotFoundError } from '@/lib/errors/api-error';
 
 export const runtime = 'nodejs';
 
-export async function POST(
-  request: NextRequest,
-  { params }: { params: Promise<{ id: string }> },
-) {
-  const adminCheck = await verifyAdmin(request);
-  if (adminCheck.error) return adminCheck.response;
-
-  const { id } = await params;
+export const POST = withAdminApi<{ id: string }>(async (request, ctx) => {
+  const { id } = ctx.params;
+  const adminEmail = ctx.user.email;
   const body = await request.json().catch(() => ({}));
   const reason = String(body?.reason || '').trim().substring(0, 1000) || null;
 
   const staging = await prisma.dOUStagingDocument.findUnique({ where: { id } });
-  if (!staging) return NextResponse.json({ error: 'Staging não encontrado' }, { status: 404 });
+  if (!staging) throw new NotFoundError('Staging');
   if (staging.finalDecision) {
-    return NextResponse.json({ error: `Já ${staging.finalDecision}` }, { status: 409 });
+    throw new ConflictError(`Já ${staging.finalDecision}`);
   }
 
   await prisma.dOUStagingDocument.update({
@@ -26,11 +22,11 @@ export async function POST(
     data: {
       finalDecision: 'rejected',
       reviewedAt: new Date(),
-      reviewedBy: adminCheck.user.email,
+      reviewedBy: adminEmail,
       adminNotes: reason,
       classificationCorrect: false,
     },
   });
 
   return NextResponse.json({ success: true });
-}
+});
