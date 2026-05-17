@@ -3,10 +3,8 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 
 const { mockGenerate } = vi.hoisted(() => ({ mockGenerate: vi.fn() }));
 
-vi.mock('@google/genai', () => ({
-  GoogleGenAI: class {
-    models = { generateContent: mockGenerate };
-  },
+vi.mock('@/lib/ai', () => ({
+  generate: mockGenerate,
 }));
 
 import { detectAmendmentsAI } from '../amendment-detector-ai';
@@ -70,5 +68,17 @@ describe('detectAmendmentsAI', () => {
     const result = await detectAmendmentsAI('texto', '');
     expect(result).toEqual([]);
     expect(mockGenerate).not.toHaveBeenCalled();
+  });
+
+  it('passa provider=gemini e model adequado ao lib/ai', async () => {
+    mockGenerate.mockResolvedValue({ text: JSON.stringify({ relations: [] }) });
+    await detectAmendmentsAI('texto', '');
+    expect(mockGenerate).toHaveBeenCalledWith(
+      'extraction',
+      expect.objectContaining({
+        provider: 'gemini',
+        jsonMode: true,
+      }),
+    );
   });
 });
