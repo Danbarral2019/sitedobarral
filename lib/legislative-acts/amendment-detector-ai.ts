@@ -3,9 +3,14 @@
  * pra casos sutis que regex não pega (ex: "no que tange aos prazos da norma anterior").
  *
  * Roda só se opt-in (caller passa decisão de quando chamar). Retorna mesma forma
- * que detectAmendments. Modelo: gemini-2.5-flash com response JSON.
+ * que detectAmendments.
+ *
+ * Provider/modelo resolvidos via `lib/ai` (task=extraction, provider=gemini
+ * forçado por chamada). Modelo default vem do registry / env
+ * AI_EXTRACTION_MODEL; override por chamada via `opts.model` (útil para
+ * scripts comparativos premium vs flash em scripts/compare-detector-models.ts).
  */
-import { GoogleGenAI } from '@google/genai';
+import { generate } from '@/lib/ai';
 import {
   PREMIUM_GEMINI_MODEL,
   isPremiumDetectorEnabled,
@@ -42,11 +47,12 @@ export async function detectAmendmentsAI(
   content: string,
   opts: DetectAmendmentsAIOptions = {},
 ): Promise<DetectedRelation[]> {
-  const apiKey = process.env.GEMINI_API_KEY;
-  if (!apiKey) return [];
+  // Guard pré-call: lib/ai lança quando GEMINI_API_KEY ausente; este detector
+  // é opt-in e silenciosamente retorna [] para callers (heurística regex roda
+  // como fallback). Manter o early-return preserva contrato.
+  if (!process.env.GEMINI_API_KEY) return [];
 
   const text = `${ementa}\n\n${content.slice(0, 8000)}`; // Limita pra evitar custo
-  const ai = new GoogleGenAI({ apiKey });
 
   // Premium opt-in (Gemini 3.1 Pro): mais caro, mas captura mais casos sutis
   // de citação anafórica / verbo não-padrão. Default Flash mantém custo baixo
@@ -58,17 +64,15 @@ export async function detectAmendmentsAI(
   const isPremium = model === PREMIUM_GEMINI_MODEL;
 
   try {
-    const response = await ai.models.generateContent({
+    const { text: raw } = await generate('extraction', {
+      messages: [{ role: 'user', content: PROMPT.replace('{TEXT}', text) }],
+      provider: 'gemini', // força Gemini independente de AI_EXTRACTION_PROVIDER
       model,
-      contents: PROMPT.replace('{TEXT}', text),
-      config: {
-        responseMimeType: 'application/json',
-        ...(isPremium ? {} : { thinkingConfig: { thinkingBudget: 0 } }),
-      },
+      jsonMode: true,
+      ...(isPremium ? {} : { thinkingBudget: 0 }),
     });
 
-    const raw = response.text || '';
-    const parsed = JSON.parse(raw) as { relations?: Array<{ type: string; target: string; excerpt: string; confidence: number }> };
+    const parsed = JSON.parse(raw || '') as { relations?: Array<{ type: string; target: string; excerpt: string; confidence: number }> };
     const relations = parsed.relations ?? [];
 
     return relations
