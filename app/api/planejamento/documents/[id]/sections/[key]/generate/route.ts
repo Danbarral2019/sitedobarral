@@ -1,21 +1,17 @@
-import { NextRequest, NextResponse } from "next/server";
-import { withAuth } from "@/lib/api-middleware";
+import { NextResponse } from "next/server";
+import { withUserApi } from "@/lib/api/handler";
+import { ApiError, ConflictError, NotFoundError, ValidationError } from "@/lib/errors/api-error";
 import { prisma } from "@/lib/prisma";
 import { enforceRateLimit } from "@/lib/cache/rate-limit-helper";
 import { generateSectionText } from "@/lib/planejamento/section-generator";
 import { getTrailBySlug } from "@/data/planejamento/trails";
 import type { TrailDefinition } from "@/data/planejamento/types";
 
-interface Ctx {
-  params: Promise<{ id: string; key: string }>;
-  user: { userId: string };
-}
-
 const MAX_CONTENT = 40_000;
 
-export const POST = withAuth(async (request: NextRequest, context) => {
-  const { id, key } = await (context as Ctx).params;
-  const userId = (context as Ctx).user.userId;
+export const POST = withUserApi<{ id: string; key: string }>(async (request, { params, user, logger }) => {
+  const { id, key } = params;
+  const userId = user.userId;
 
   // Rate-limit dedicado (10/min) para geração — mais caro que edição
   await enforceRateLimit(`planejamento:generate:${userId}`, 10, 60);
@@ -43,32 +39,22 @@ export const POST = withAuth(async (request: NextRequest, context) => {
     },
   });
   if (!section) {
-    return NextResponse.json({ error: "Seção não encontrada" }, { status: 404 });
+    throw new NotFoundError("Seção");
   }
 
   const trail = resolveTrail(section);
   if (!trail) {
-    return NextResponse.json(
-      { error: "Trilha da sessão não disponível." },
-      { status: 409 },
-    );
+    throw new ConflictError("Trilha da sessão não disponível.");
   }
   const def = trail.sections.find((s) => s.key === key);
   if (!def) {
-    return NextResponse.json(
-      { error: "Definição de seção não encontrada na trilha." },
-      { status: 409 },
-    );
+    throw new ConflictError("Definição de seção não encontrada na trilha.");
   }
 
   const session = section.document.session;
   if (!session.descricaoLivre || session.descricaoLivre.length < 20) {
-    return NextResponse.json(
-      {
-        error:
-          "Sessão sem descrição suficiente. Refaça o onboarding antes de gerar texto.",
-      },
-      { status: 400 },
+    throw new ValidationError(
+      "Sessão sem descrição suficiente. Refaça o onboarding antes de gerar texto.",
     );
   }
 
@@ -108,10 +94,11 @@ export const POST = withAuth(async (request: NextRequest, context) => {
       },
     });
   } catch (err) {
-    console.error("[planejamento/generate] falhou", err);
-    return NextResponse.json(
-      { error: err instanceof Error ? err.message : "Erro ao gerar texto" },
-      { status: 500 },
+    logger.error({ err }, "[planejamento/generate] falhou");
+    throw new ApiError(
+      500,
+      err instanceof Error ? err.message : "Erro ao gerar texto",
+      "GENERATION_FAILED",
     );
   }
 });

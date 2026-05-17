@@ -48,13 +48,26 @@ vi.mock('@/lib/gemini/cached-client', () => ({
   queryGeminiText: (...args: any[]) => mockQueryGeminiText(...args),
 }));
 
-vi.mock('@/lib/api-middleware', () => ({
-  withAuth: (handler: any) => (req: any, ctx?: any) =>
-    handler(req, {
-      ...ctx,
-      user: { userId: 'u1', email: 'u@x.com', role: 'student' },
-    }),
-}));
+vi.mock('@/lib/api/handler', async () => {
+  const { handleApiError } = await import('@/lib/errors/error-handler');
+  return {
+    withUserApi:
+      (handler: any) =>
+      async (req: any, ctx?: { params?: Promise<unknown> }) => {
+        try {
+          const params = ctx?.params ? await ctx.params : {};
+          return await handler(req, {
+            user: { userId: 'u1', email: 'u@x.com', role: 'student' },
+            params,
+            requestId: 'test',
+            logger: { info: vi.fn(), warn: vi.fn(), error: vi.fn(), debug: vi.fn() },
+          });
+        } catch (err) {
+          return handleApiError(err);
+        }
+      },
+  };
+});
 
 vi.mock('@/lib/logger', () => ({
   apiLogger: { info: vi.fn(), warn: vi.fn(), error: vi.fn(), debug: vi.fn() },
