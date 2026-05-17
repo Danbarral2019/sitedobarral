@@ -1,26 +1,21 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { prisma } from '@/lib/prisma';
-import { verifyAdmin } from '@/lib/api-middleware';
+import { withAdminApi } from '@/lib/api/handler';
 import { ReadingUpdateSchema } from '@/lib/lei-14133/admin-validators';
+import { prisma } from '@/lib/prisma';
+import { ApiError, NotFoundError } from '@/lib/errors/api-error';
 import { CacheInvalidation } from '@/lib/cache/redis-client';
 
-export async function PUT(
-  request: NextRequest,
-  { params }: { params: Promise<{ numero: string; id: string }> },
-) {
-  const adminCheck = await verifyAdmin(request);
-  if (adminCheck.error) return adminCheck.response;
-
-  const { numero, id } = await params;
+export const PUT = withAdminApi<{ numero: string; id: string }>(async (request, ctx) => {
+  const { numero, id } = ctx.params;
   const body = await request.json();
   const parsed = ReadingUpdateSchema.safeParse(body);
   if (!parsed.success) {
-    return NextResponse.json({ error: 'Validação falhou', issues: parsed.error.issues }, { status: 422 });
+    throw new ApiError(422, 'Validação falhou', 'VALIDATION_ERROR', { issues: parsed.error.issues });
   }
 
   const existing = await prisma.leiArticleSuggestedReading.findUnique({ where: { id } });
   if (!existing || existing.articleNumber !== numero) {
-    return NextResponse.json({ error: 'Reading não encontrado' }, { status: 404 });
+    throw new NotFoundError('Reading');
   }
 
   const updated = await prisma.leiArticleSuggestedReading.update({
@@ -44,19 +39,13 @@ export async function PUT(
   ]);
 
   return NextResponse.json({ success: true, reading: updated });
-}
+});
 
-export async function DELETE(
-  request: NextRequest,
-  { params }: { params: Promise<{ numero: string; id: string }> },
-) {
-  const adminCheck = await verifyAdmin(request);
-  if (adminCheck.error) return adminCheck.response;
-
-  const { numero, id } = await params;
+export const DELETE = withAdminApi<{ numero: string; id: string }>(async (_request, ctx) => {
+  const { numero, id } = ctx.params;
   const existing = await prisma.leiArticleSuggestedReading.findUnique({ where: { id } });
   if (!existing || existing.articleNumber !== numero) {
-    return NextResponse.json({ error: 'Reading não encontrado' }, { status: 404 });
+    throw new NotFoundError('Reading');
   }
 
   await prisma.leiArticleSuggestedReading.delete({ where: { id } });
@@ -67,4 +56,4 @@ export async function DELETE(
   ]);
 
   return NextResponse.json({ success: true });
-}
+});

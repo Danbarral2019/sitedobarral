@@ -1,26 +1,21 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { prisma } from '@/lib/prisma';
-import { verifyAdmin } from '@/lib/api-middleware';
+import { withAdminApi } from '@/lib/api/handler';
 import { CommentSchema } from '@/lib/lei-14133/admin-validators';
+import { prisma } from '@/lib/prisma';
+import { ApiError, NotFoundError } from '@/lib/errors/api-error';
 import { CacheInvalidation } from '@/lib/cache/redis-client';
 
-export async function PUT(
-  request: NextRequest,
-  { params }: { params: Promise<{ numero: string }> },
-) {
-  const adminCheck = await verifyAdmin(request);
-  if (adminCheck.error) return adminCheck.response;
-
-  const { numero } = await params;
+export const PUT = withAdminApi<{ numero: string }>(async (request, ctx) => {
+  const { numero } = ctx.params;
   const body = await request.json();
   const parsed = CommentSchema.safeParse(body);
   if (!parsed.success) {
-    return NextResponse.json({ error: 'Validação falhou', issues: parsed.error.issues }, { status: 422 });
+    throw new ApiError(422, 'Validação falhou', 'VALIDATION_ERROR', { issues: parsed.error.issues });
   }
 
   const article = await prisma.leiArticle.findUnique({ where: { numero } });
   if (!article) {
-    return NextResponse.json({ error: 'Artigo não encontrado' }, { status: 404 });
+    throw new NotFoundError('Artigo');
   }
 
   const updated = await prisma.leiArticle.update({
@@ -37,4 +32,4 @@ export async function PUT(
   ]);
 
   return NextResponse.json({ success: true, article: updated });
-}
+});

@@ -1,40 +1,29 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { prisma } from '@/lib/prisma';
-import { verifyAdmin } from '@/lib/api-middleware';
+import { withAdminApi } from '@/lib/api/handler';
 import { ReadingSchema } from '@/lib/lei-14133/admin-validators';
+import { prisma } from '@/lib/prisma';
+import { ApiError, NotFoundError } from '@/lib/errors/api-error';
 import { CacheInvalidation } from '@/lib/cache/redis-client';
 
-export async function GET(
-  request: NextRequest,
-  { params }: { params: Promise<{ numero: string }> },
-) {
-  const adminCheck = await verifyAdmin(request);
-  if (adminCheck.error) return adminCheck.response;
-
-  const { numero } = await params;
+export const GET = withAdminApi<{ numero: string }>(async (_request, ctx) => {
+  const { numero } = ctx.params;
   const list = await prisma.leiArticleSuggestedReading.findMany({
     where: { articleNumber: numero },
     orderBy: { order: 'asc' },
   });
   return NextResponse.json({ readings: list });
-}
+});
 
-export async function POST(
-  request: NextRequest,
-  { params }: { params: Promise<{ numero: string }> },
-) {
-  const adminCheck = await verifyAdmin(request);
-  if (adminCheck.error) return adminCheck.response;
-
-  const { numero } = await params;
+export const POST = withAdminApi<{ numero: string }>(async (request, ctx) => {
+  const { numero } = ctx.params;
   const body = await request.json();
   const parsed = ReadingSchema.safeParse(body);
   if (!parsed.success) {
-    return NextResponse.json({ error: 'Validação falhou', issues: parsed.error.issues }, { status: 422 });
+    throw new ApiError(422, 'Validação falhou', 'VALIDATION_ERROR', { issues: parsed.error.issues });
   }
 
   const article = await prisma.leiArticle.findUnique({ where: { numero }, select: { numero: true } });
-  if (!article) return NextResponse.json({ error: 'Artigo não encontrado' }, { status: 404 });
+  if (!article) throw new NotFoundError('Artigo');
 
   let order = parsed.data.order;
   if (order === undefined) {
@@ -67,4 +56,4 @@ export async function POST(
   ]);
 
   return NextResponse.json({ success: true, reading: created });
-}
+});

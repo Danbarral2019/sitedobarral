@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { withAdminApi } from '@/lib/api/handler';
 import { prisma } from '@/lib/prisma';
-import { verifyAdmin } from '@/lib/api-middleware';
+import { NotFoundError } from '@/lib/errors/api-error';
 import { safeParseArray } from '@/lib/utils';
 
 /**
@@ -8,14 +9,8 @@ import { safeParseArray } from '@/lib/utils';
  * Retorna artigo + comentário + crossRefs + suggestedReadings
  * + Documents/LegislativeActs vinculados (filtrando por leiArticles JSON).
  */
-export async function GET(
-  request: NextRequest,
-  { params }: { params: Promise<{ numero: string }> },
-) {
-  const adminCheck = await verifyAdmin(request);
-  if (adminCheck.error) return adminCheck.response;
-
-  const { numero } = await params;
+export const GET = withAdminApi<{ numero: string }>(async (_request, ctx) => {
+  const { numero } = ctx.params;
   const article = await prisma.leiArticle.findUnique({
     where: { numero },
     include: {
@@ -25,7 +20,7 @@ export async function GET(
   });
 
   if (!article) {
-    return NextResponse.json({ error: 'Artigo não encontrado' }, { status: 404 });
+    throw new NotFoundError('Artigo');
   }
 
   // Documents que linkam este artigo
@@ -57,4 +52,4 @@ export async function GET(
   );
 
   return NextResponse.json({ article, linkedDocuments, linkedActs });
-}
+});
