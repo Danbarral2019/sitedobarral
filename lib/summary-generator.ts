@@ -6,9 +6,14 @@
  * env: `AI_SUMMARIZATION_PROVIDER` / `AI_SUMMARIZATION_MODEL`.
  */
 
-import { generate } from '@/lib/ai';
+import { generate, hashContent } from '@/lib/ai';
 import { isLiteralSourceCategory } from './literal-sources';
 import { apiLogger } from "@/lib/logger";
+
+/** TTL default do cache: 1 dia. Resumos sÃ£o estaveis enquanto o documento
+ * (title + description + fullText + category) nÃ£o muda. Cache key inclui
+ * hash do prompt — invalida automaticamente quando qualquer input muda. */
+const DEFAULT_CACHE_TTL_SEC = 24 * 60 * 60;
 
 export interface DocumentSummary {
   summary: string; // Resumo executivo (2-3 parágrafos)
@@ -21,12 +26,19 @@ export interface DocumentSummary {
 
 /**
  * Gera resumo de um documento usando Claude AI
+ *
+ * @param options.useCache Quando true, cacheia resultado em Redis. Cache key
+ * inclui hash do prompt completo — invalida automaticamente quando
+ * title/description/fullText/category mudar. Default: false (admin geralmente
+ * espera resultado fresco ao clicar "regenerar resumo").
+ * @param options.cacheTTL TTL em segundos. Default: 86400 (1 dia).
  */
 export async function generateDocumentSummary(
   title: string,
   description?: string,
   fullText?: string,
-  category?: string
+  category?: string,
+  options: { useCache?: boolean; cacheTTL?: number } = {}
 ): Promise<DocumentSummary | null> {
   // Defesa em profundidade: fontes literais (enunciados etc.) jamais são parafraseadas.
   // O guard primário está na rota /api/admin/documents/[id]/generate-summary.
@@ -45,6 +57,13 @@ export async function generateDocumentSummary(
   try {
     const prompt = buildSummaryPrompt(title, description, fullText, category);
 
+    const cache = options.useCache
+      ? {
+          key: `claude:summary:${hashContent(prompt)}`,
+          ttl: options.cacheTTL ?? DEFAULT_CACHE_TTL_SEC,
+        }
+      : undefined;
+
     // Modelo default da task=summarization em lib/ai é claude-haiku-4-5
     // (substitui o 3-5-haiku EOL fev/2026); override via
     // AI_SUMMARIZATION_MODEL.
@@ -52,6 +71,7 @@ export async function generateDocumentSummary(
       messages: [{ role: 'user', content: prompt }],
       maxTokens: 2048,
       temperature: 0.3,
+      cache,
     });
 
     // Parse da resposta JSON

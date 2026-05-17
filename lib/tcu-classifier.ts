@@ -8,9 +8,14 @@
  * env: `AI_CLASSIFICATION_PROVIDER` / `AI_CLASSIFICATION_MODEL`.
  */
 
-import { generate } from '@/lib/ai';
+import { generate, hashContent } from '@/lib/ai';
 import type { TCUPlanilhaData, TCUEnrichmentResult } from './tcu-scraper';
 import { apiLogger } from "@/lib/logger";
+
+/** TTL default do cache: 30 dias. ClassificaÃ§Ã£o de acÃ³rdÃ£o TCU Ã© estavel —
+ * mesmo input (planilha + enrichment) sempre produz mesma classificaÃ§Ã£o.
+ * Acordaos sÃ£o batch-imported uma vez e cacheable por longos perÃ­odos. */
+const DEFAULT_CACHE_TTL_SEC = 30 * 24 * 60 * 60;
 
 export interface TCUClassificationInput {
   // Dados da planilha (sempre disponível)
@@ -57,9 +62,16 @@ const CURSOS_DISPONIVEIS = [
 
 /**
  * Classifica um acórdão usando IA
+ *
+ * @param options.useCache Quando true, cacheia resultado em Redis. Cache key
+ * inclui hash do prompt (planilha + enrichment) — invalida automaticamente
+ * quando inputs mudam. Default: false. Recomendado true em batch import.
+ * @param options.cacheTTL TTL em segundos. Default: 2592000 (30 dias —
+ * classificações de acórdão são estaveis a longo prazo).
  */
 export async function classifyTCUAcordao(
-  input: TCUClassificationInput
+  input: TCUClassificationInput,
+  options: { useCache?: boolean; cacheTTL?: number } = {}
 ): Promise<TCUClassificationResult> {
   const startTime = Date.now();
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -88,6 +100,13 @@ export async function classifyTCUAcordao(
 
     console.log(`[TCU Classifier] Enviando para Claude (${prompt.length} chars)...`);
 
+    const cache = options.useCache
+      ? {
+          key: `claude:tcu:${hashContent(prompt)}`,
+          ttl: options.cacheTTL ?? DEFAULT_CACHE_TTL_SEC,
+        }
+      : undefined;
+
     // Modelo default da task=classification em lib/ai é claude-haiku-4-5
     // (substitui o sonnet-3-5 retirado em 2026-02-19 — auditoria P0.2);
     // override via AI_CLASSIFICATION_MODEL.
@@ -95,6 +114,7 @@ export async function classifyTCUAcordao(
       messages: [{ role: 'user', content: prompt }],
       maxTokens: 1500,
       temperature: 0.3,
+      cache,
     });
 
     const elapsedTime = Date.now() - startTime;

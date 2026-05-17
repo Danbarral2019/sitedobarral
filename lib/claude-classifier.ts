@@ -6,8 +6,13 @@
  * env: `AI_CLASSIFICATION_PROVIDER` / `AI_CLASSIFICATION_MODEL`.
  */
 
-import { generate } from '@/lib/ai';
+import { generate, hashContent } from '@/lib/ai';
 import { apiLogger } from "@/lib/logger";
+
+/** TTL default do cache: 1 dia. ClassificaÃ§Ãµes sÃ£o estaveis enquanto o prompt
+ * (title + description + feedback few-shot) nÃ£o muda. Como a cache key inclui
+ * hash do prompt inteiro, novos feedbacks invalidam automaticamente. */
+const DEFAULT_CACHE_TTL_SEC = 24 * 60 * 60;
 
 // Cursos disponíveis para o Claude sugerir
 const AVAILABLE_COURSES = [
@@ -132,10 +137,16 @@ RACIOCÍNIO: ${ex.feedbackReasoning}`;
 /**
  * Classifica documento usando Claude AI (análise semântica avançada)
  * NOVO: Inclui aprendizado baseado em feedbacks históricos (few-shot learning)
+ *
+ * @param options.useCache Quando true, cacheia resultado em Redis. Cache key
+ * inclui hash do prompt completo (title + description + feedback examples) —
+ * invalida automaticamente quando QUALQUER input muda. Default: false.
+ * @param options.cacheTTL TTL em segundos. Default: 86400 (1 dia).
  */
 export async function classifyWithClaude(
   title: string,
-  description: string = ''
+  description: string = '',
+  options: { useCache?: boolean; cacheTTL?: number } = {}
 ): Promise<ClaudeClassificationResult | null> {
   if (!isClaudeAvailable()) {
     console.warn('[Claude Classifier] API key não configurada. Pulando análise avançada.');
@@ -148,6 +159,13 @@ export async function classifyWithClaude(
 
     const prompt = await buildClassificationPrompt(title, description, feedbackExamples);
 
+    const cache = options.useCache
+      ? {
+          key: `claude:classify:${hashContent(prompt)}`,
+          ttl: options.cacheTTL ?? DEFAULT_CACHE_TTL_SEC,
+        }
+      : undefined;
+
     // Modelo default da task=classification em lib/ai é claude-haiku-4-5;
     // override via env AI_CLASSIFICATION_MODEL. claude-3-5-haiku-20241022
     // foi retirado em 2026-02-19 — auditoria 2026-05-16 P0.2.
@@ -155,6 +173,7 @@ export async function classifyWithClaude(
       messages: [{ role: 'user', content: prompt }],
       maxTokens: 1024,
       temperature: 0.3,
+      cache,
     });
 
     // Parse da resposta JSON
