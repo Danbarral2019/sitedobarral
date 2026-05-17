@@ -1,19 +1,14 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
-import { verifyAdmin } from '@/lib/api-middleware';
+import { withAdminApi } from '@/lib/api/handler';
+import { NotFoundError, ValidationError } from '@/lib/errors/api-error';
 
 /**
  * GET /api/admin/tribunal-highlights/[id]
  * Busca highlight individual com dados da decisão
  */
-export async function GET(
-  request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
-) {
-  const auth = await verifyAdmin(request);
-  if (auth.error) return auth.response;
-
-  const { id } = await params;
+export const GET = withAdminApi<{ id: string }>(async (_request, { params }) => {
+  const { id } = params;
 
   const highlight = await prisma.tribunalHighlight.findUnique({
     where: { id },
@@ -39,24 +34,18 @@ export async function GET(
   });
 
   if (!highlight) {
-    return NextResponse.json({ error: 'Destaque não encontrado' }, { status: 404 });
+    throw new NotFoundError('Destaque');
   }
 
   return NextResponse.json({ highlight });
-}
+});
 
 /**
  * PATCH /api/admin/tribunal-highlights/[id]
  * Atualiza status e notas de um destaque TCE
  */
-export async function PATCH(
-  request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
-) {
-  const auth = await verifyAdmin(request);
-  if (auth.error) return auth.response;
-
-  const { id } = await params;
+export const PATCH = withAdminApi<{ id: string }>(async (request, { params }) => {
+  const { id } = params;
 
   const body = await request.json();
   const { status, adminNotes, blogPostId } = body;
@@ -64,16 +53,13 @@ export async function PATCH(
   // Validar status
   const validStatuses = ['pending', 'dismissed', 'will_write', 'written'];
   if (status && !validStatuses.includes(status)) {
-    return NextResponse.json(
-      { error: `Status inválido. Valores aceitos: ${validStatuses.join(', ')}` },
-      { status: 400 }
-    );
+    throw new ValidationError(`Status inválido. Valores aceitos: ${validStatuses.join(', ')}`);
   }
 
   // Verificar se existe
   const existing = await prisma.tribunalHighlight.findUnique({ where: { id } });
   if (!existing) {
-    return NextResponse.json({ error: 'Destaque não encontrado' }, { status: 404 });
+    throw new NotFoundError('Destaque');
   }
 
   const updateData: Record<string, unknown> = {};
@@ -97,4 +83,4 @@ export async function PATCH(
   });
 
   return NextResponse.json({ highlight: updated });
-}
+});
