@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { withAuth } from '@/lib/api-middleware';
-import { handleApiError } from '@/lib/errors/error-handler';
+import { withUserApi } from '@/lib/api/handler';
 import {
   checkCertificateEligibility,
   issueCertificate,
@@ -9,61 +8,51 @@ import {
 /**
  * GET: Verificar elegibilidade e retornar certificado existente (se houver)
  */
-export const GET = withAuth(async (
-  request: NextRequest,
-  context?: Record<string, unknown>
+export const GET = withUserApi<{ courseId: string }>(async (
+  _request: NextRequest,
+  ctx
 ) => {
-  try {
-    const user = context?.user as { userId: string };
-    const { courseId } = await (context as { params: Promise<{ courseId: string }> }).params;
+  const { courseId } = ctx.params;
 
-    const eligibility = await checkCertificateEligibility(user.userId, courseId);
+  const eligibility = await checkCertificateEligibility(ctx.user.userId, courseId);
 
-    return NextResponse.json({
-      ...eligibility,
-      certificate: eligibility.existingCertificate,
-    });
-  } catch (error) {
-    return handleApiError(error);
-  }
+  return NextResponse.json({
+    ...eligibility,
+    certificate: eligibility.existingCertificate,
+  });
 });
 
 /**
  * POST: Gerar certificado (se elegível)
  */
-export const POST = withAuth(async (
-  request: NextRequest,
-  context?: Record<string, unknown>
+export const POST = withUserApi<{ courseId: string }>(async (
+  _request: NextRequest,
+  ctx
 ) => {
-  try {
-    const user = context?.user as { userId: string };
-    const { courseId } = await (context as { params: Promise<{ courseId: string }> }).params;
+  const { courseId } = ctx.params;
 
-    // Verificar elegibilidade primeiro
-    const eligibility = await checkCertificateEligibility(user.userId, courseId);
-    if (!eligibility.eligible) {
-      return NextResponse.json(
-        {
-          error: 'Você ainda não completou todos os requisitos para o certificado.',
-          ...eligibility,
-        },
-        { status: 400 }
-      );
-    }
-
-    const result = await issueCertificate(user.userId, courseId);
-    if (!result.certificate) {
-      return NextResponse.json(
-        { error: 'Erro ao gerar certificado.' },
-        { status: 500 }
-      );
-    }
-
-    return NextResponse.json({
-      certificate: result.certificate,
-      alreadyExists: result.alreadyExists,
-    }, { status: result.alreadyExists ? 200 : 201 });
-  } catch (error) {
-    return handleApiError(error);
+  // Verificar elegibilidade primeiro
+  const eligibility = await checkCertificateEligibility(ctx.user.userId, courseId);
+  if (!eligibility.eligible) {
+    return NextResponse.json(
+      {
+        error: 'Você ainda não completou todos os requisitos para o certificado.',
+        ...eligibility,
+      },
+      { status: 400 }
+    );
   }
+
+  const result = await issueCertificate(ctx.user.userId, courseId);
+  if (!result.certificate) {
+    return NextResponse.json(
+      { error: 'Erro ao gerar certificado.' },
+      { status: 500 }
+    );
+  }
+
+  return NextResponse.json({
+    certificate: result.certificate,
+    alreadyExists: result.alreadyExists,
+  }, { status: result.alreadyExists ? 200 : 201 });
 });
