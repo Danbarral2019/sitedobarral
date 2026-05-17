@@ -32,7 +32,10 @@ export async function generate(
   task: AiTask,
   req: AiGenerateRequest
 ): Promise<AiGenerateResponse> {
-  const { provider, modelId } = resolveTask(task)
+  const { provider, modelId } = resolveTask(task, {
+    provider: req.provider,
+    model: req.model,
+  })
   const start = Date.now()
   try {
     const result = await withRetry(() => provider.generate(modelId, req), {
