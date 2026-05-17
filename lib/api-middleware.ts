@@ -13,16 +13,12 @@ import { apiLogger } from "@/lib/logger";
 type ApiHandler = (request: NextRequest, context?: any) => Promise<NextResponse>;
 
 /**
- * Middleware que protege rotas de API para admin apenas
- * ✅ Inclui rate limiting automático (30 req/min)
+ * @deprecated Use `withAdminApi` from `@/lib/api/handler` instead.
+ * Esta função será removida na PR 4.2.final da Onda 4. Migração tracking:
+ * `docs/superpowers/plans/2026-05-16-api-handler-helper.md`.
  *
- * Uso:
- *
- * export const GET = withAdminAuth(async (request, context) => {
- *   // Código que só admin pode acessar
- *   // context.user contém dados do admin autenticado
- *   return NextResponse.json({ data: 'secret' });
- * });
+ * Middleware que protege rotas de API para admin apenas.
+ * Inclui rate limiting automático (30 req/min).
  */
 export function withAdminAuth(handler: ApiHandler): ApiHandler {
   return async (request: NextRequest, context?: Record<string, unknown>) => {
@@ -72,16 +68,11 @@ export function withAdminAuth(handler: ApiHandler): ApiHandler {
 }
 
 /**
- * Middleware que protege rotas de API para usuários autenticados
- * ✅ Inclui rate limiting automático (60 req/min)
+ * @deprecated Use `withUserApi` from `@/lib/api/handler` instead.
+ * Esta função será removida na PR 4.2.final da Onda 4.
  *
- * Uso:
- *
- * export const GET = withAuth(async (request, context) => {
- *   // Código que qualquer usuário autenticado pode acessar
- *   // context.user contém dados do usuário autenticado
- *   return NextResponse.json({ data: 'content' });
- * });
+ * Middleware que protege rotas de API para usuários autenticados.
+ * Inclui rate limiting automático (60 req/min).
  */
 export function withAuth(handler: ApiHandler): ApiHandler {
   return async (request: NextRequest, context?: Record<string, unknown>) => {
@@ -131,9 +122,12 @@ export function withAuth(handler: ApiHandler): ApiHandler {
 }
 
 /**
- * Helper function para verificar admin em APIs
- * Retorna { error: true, response } se não for admin
- * Retorna { error: false, user } se for admin
+ * @deprecated Use `withAdminApi` from `@/lib/api/handler` instead.
+ * Esta função será removida na PR 4.2.final da Onda 4.
+ *
+ * Helper function para verificar admin em APIs.
+ * Retorna { error: true, response } se não for admin.
+ * Retorna { error: false, user } se for admin.
  */
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 export async function verifyAdmin(request: NextRequest): Promise<
@@ -155,3 +149,21 @@ export async function verifyAdmin(request: NextRequest): Promise<
 
   return { error: false, user };
 }
+
+// ============================================================
+// DEPRECATED — Re-exports para retrocompat durante Onda 4
+// ============================================================
+
+/**
+ * @deprecated Use `withAdminApi` from `@/lib/api/handler` instead.
+ * Este alias existe apenas para permitir migração incremental das ~196 rotas
+ * legadas. Será removido na PR 4.2.final quando `grep -rl "api-middleware"`
+ * retornar 0. Ver `docs/superpowers/specs/2026-05-16-api-pattern-design.md`.
+ */
+export { withAdminApi as withAdminAuthV2 } from '@/lib/api/handler';
+
+/**
+ * @deprecated Use `withUserApi` from `@/lib/api/handler` instead.
+ * Idem `withAdminAuthV2`.
+ */
+export { withUserApi as withAuthV2 } from '@/lib/api/handler';
