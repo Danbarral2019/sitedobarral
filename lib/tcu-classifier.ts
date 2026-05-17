@@ -1,11 +1,14 @@
 /**
  * Classificador IA para Acórdãos do TCU
  *
- * Usa IA (Claude via Anthropic API) para classificar acórdãos da planilha TCU
+ * Usa IA (Claude via lib/ai) para classificar acórdãos da planilha TCU
  * de forma contextualizada, usando TODOS os dados disponíveis.
+ *
+ * Provider/modelo resolvidos via `lib/ai` (task=classification). Override por
+ * env: `AI_CLASSIFICATION_PROVIDER` / `AI_CLASSIFICATION_MODEL`.
  */
 
-import Anthropic from '@anthropic-ai/sdk';
+import { generate } from '@/lib/ai';
 import type { TCUPlanilhaData, TCUEnrichmentResult } from './tcu-scraper';
 import { apiLogger } from "@/lib/logger";
 
@@ -80,43 +83,24 @@ export async function classifyTCUAcordao(
       return classifyWithRules(input);
     }
 
-    console.log('[TCU Classifier] ✅ API key válida, iniciando cliente Anthropic...');
-
-    // Inicializa cliente Anthropic
-    const anthropic = new Anthropic({
-      apiKey: apiKey,
-    });
-
     // Constrói o prompt com TODOS os dados disponíveis
     const prompt = buildClassificationPrompt(input);
 
-    console.log(`[TCU Classifier] Enviando para Claude API (${prompt.length} chars)...`);
+    console.log(`[TCU Classifier] Enviando para Claude (${prompt.length} chars)...`);
 
-    // claude-3-5-sonnet-20241022 foi retirado em 2026-02-19 — chamadas
-    // viravam 404 mascarado pelo catch silencioso (auditoria 2026-05-16 P0.2).
-    // Migrado para Haiku 4.5 (mais capaz que Sonnet 3.5 e ~5× mais barato).
-    const response = await anthropic.messages.create({
-      model: 'claude-haiku-4-5-20251001',
-      max_tokens: 1500, // Reduzido para resposta mais rápida
-      temperature: 0.3, // Baixa temperatura para respostas mais consistentes
-      messages: [
-        {
-          role: 'user',
-          content: prompt,
-        },
-      ],
+    // Modelo default da task=classification em lib/ai é claude-haiku-4-5
+    // (substitui o sonnet-3-5 retirado em 2026-02-19 — auditoria P0.2);
+    // override via AI_CLASSIFICATION_MODEL.
+    const { text: responseText } = await generate('classification', {
+      messages: [{ role: 'user', content: prompt }],
+      maxTokens: 1500,
+      temperature: 0.3,
     });
 
     const elapsedTime = Date.now() - startTime;
     console.log(`[TCU Classifier] Resposta recebida em ${elapsedTime}ms`);
 
-    // Parse da resposta
-    const textContent = response.content[0];
-    if (textContent.type !== 'text') {
-      throw new Error('Resposta da API não é texto');
-    }
-
-    const result = parseClassificationResponse(textContent.text, planilha.acordao);
+    const result = parseClassificationResponse(responseText, planilha.acordao);
 
     console.log(`[TCU Classifier] Classificação concluída: ${result.cursos.length} cursos, confiança ${result.confianca}%`);
 
