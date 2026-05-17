@@ -11,9 +11,27 @@ const { stagingMock, documentMock, legislativeActMock } = vi.hoisted(() => ({
   legislativeActMock: { create: vi.fn(), findUnique: vi.fn() },
 }));
 
-vi.mock('@/lib/api-middleware', () => ({
-  verifyAdmin: vi.fn().mockResolvedValue({ error: false, user: { email: 'admin@test', role: 'admin' } }),
-}));
+vi.mock('@/lib/api/handler', async () => {
+  const { handleApiError } = await import('@/lib/errors/error-handler');
+  return {
+    withAdminApi:
+      <P>(h: (req: NextRequest, ctx: { user: unknown; params: P; requestId: string; logger: unknown }) => Promise<Response>) =>
+      async (req: NextRequest, ctx: { params: Promise<P> }) => {
+        try {
+          const params = await ctx.params;
+          const mockCtx = {
+            user: { userId: 'admin', email: 'admin@test', role: 'admin' as const },
+            params,
+            requestId: 'test',
+            logger: console,
+          };
+          return await h(req, mockCtx);
+        } catch (err) {
+          return handleApiError(err);
+        }
+      },
+  };
+});
 
 vi.mock('@/lib/prisma', () => ({
   prisma: {
@@ -30,7 +48,7 @@ vi.mock('@/lib/dou-scraper', () => ({ scrapeContent: vi.fn().mockResolvedValue(n
 vi.mock('@/lib/lei-indexer', () => ({ LeiIndexer: { analyzeDocument: vi.fn().mockResolvedValue({ articles: [] }) } }));
 vi.mock('@/lib/legislative-scrapers/scrape-and-index', () => ({ scrapeAndIndexAct: vi.fn().mockResolvedValue({ scraped: false, indexed: false }) }));
 
-import { POST } from '../[id]/approve/route';
+const { POST } = await import('../[id]/approve/route');
 
 const fakeStaging = {
   id: 'staging-1',
