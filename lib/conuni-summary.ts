@@ -1,5 +1,5 @@
 import type { PrismaClient } from '@prisma/client';
-import { GoogleGenAI, Type } from '@google/genai';
+import { generate } from './ai';
 import { PRIMARY_GEMINI_MODEL } from './gemini/config';
 
 export interface SummaryOutput {
@@ -15,11 +15,15 @@ export interface SummaryResult {
   elapsedSeconds: number;
 }
 
+// Schema JSON puro (compatível com Gemini structured output); valores literais
+// dos antigos `Type.OBJECT`/`Type.STRING` da SDK @google/genai. Definindo aqui
+// evita acoplamento com a SDK do Google — `lib/ai/providers/gemini.ts` apenas
+// repassa este objeto no `generationConfig.responseSchema`.
 const responseSchema = {
-  type: Type.OBJECT,
+  type: 'OBJECT',
   properties: {
     summary: {
-      type: Type.STRING,
+      type: 'STRING',
       description: 'Resumo didático em 2-3 frases (max 350 caracteres) contextualizado para licitações e contratos. Linguagem clara, sem juridiquês excessivo. Sempre cite o tema central, a tese fixada e o(s) artigo(s) da Lei 14.133 quando aplicável.',
     },
   },
@@ -50,20 +54,22 @@ ${fullText}
 """`;
 }
 
+/**
+ * Gera resumo de um parecer via lib/ai (provider gemini forçado por chamada;
+ * task=extraction; structured output via responseSchema).
+ *
+ * Assinatura simplificada (antes recebia `genAI` por reuso de cliente —
+ * desnecessário com `lib/ai`, que cuida do client/keep-alive internamente).
+ */
 export async function summarizeOne(
-  genAI: GoogleGenAI,
   doc: { title: string; description: string | null; content: string | null },
 ): Promise<SummaryOutput> {
-  const result = await genAI.models.generateContent({
-    model: PRIMARY_GEMINI_MODEL,
-    contents: [{ text: buildPrompt(doc) }],
-    config: {
-      responseMimeType: 'application/json',
-      responseSchema,
-      thinkingConfig: { thinkingBudget: 0 },
-    },
+  const { text } = await generate('extraction', {
+    messages: [{ role: 'user', content: buildPrompt(doc) }],
+    provider: 'gemini',
+    responseSchema,
+    thinkingBudget: 0,
   });
-  const text = result.text;
   if (!text) throw new Error('Gemini retornou texto vazio');
   const parsed = JSON.parse(text) as SummaryOutput;
   if (!parsed.summary || typeof parsed.summary !== 'string') {
@@ -86,9 +92,9 @@ export async function summarizeRelevantPareceres(
   const { limit, delayMs = 200, logger = () => {} } = opts;
   const startedAt = new Date();
 
-  const apiKey = process.env.GEMINI_API_KEY;
-  if (!apiKey) throw new Error('GEMINI_API_KEY não configurado');
-  const genAI = new GoogleGenAI({ apiKey });
+  // Pré-check explícito — lib/ai lançaria per-call (em loop seria barulhento);
+  // este guard mantém o fail-fast original de operações em lote.
+  if (!process.env.GEMINI_API_KEY) throw new Error('GEMINI_API_KEY não configurado');
 
   const candidates = await prisma.document.findMany({
     where: {
@@ -118,7 +124,7 @@ export async function summarizeRelevantPareceres(
   for (let i = 0; i < candidates.length; i++) {
     const doc = candidates[i];
     try {
-      const out = await summarizeOne(genAI, doc);
+      const out = await summarizeOne(doc);
       const existing = doc.aiClassification ? safeJson(doc.aiClassification) : {};
       const merged = {
         ...existing,
