@@ -59,4 +59,83 @@ describe('lib/api/handler', () => {
       expect(response.headers.get('X-Request-Id')).toMatch(/^[0-9a-f]{8}$/);
     });
   });
+
+  describe('rate-limit', () => {
+    beforeEach(async () => {
+      const rl = await import('@/lib/cache/rate-limit-helper');
+      vi.mocked(rl.enforceRateLimit).mockReset().mockResolvedValue(undefined);
+      vi.mocked(rl.getClientIp).mockReturnValue('203.0.113.5');
+    });
+
+    it('usa default admin (30/60s) quando sem override', async () => {
+      const auth = await import('@/lib/auth');
+      vi.mocked(auth.getCurrentUser).mockResolvedValue({ userId: 'u1', role: 'admin' });
+
+      const handler = withAdminApi(async () => NextResponse.json({}));
+      await handler(makeRequest(), makeNextCtx());
+
+      const rl = await import('@/lib/cache/rate-limit-helper');
+      expect(vi.mocked(rl.enforceRateLimit)).toHaveBeenCalledWith(
+        'api:admin:203.0.113.5',
+        30,
+        60
+      );
+    });
+
+    it('usa default user (60/60s) quando sem override', async () => {
+      const auth = await import('@/lib/auth');
+      vi.mocked(auth.getCurrentUser).mockResolvedValue({ userId: 'u1', role: 'student' });
+
+      const handler = withUserApi(async () => NextResponse.json({}));
+      await handler(makeRequest(), makeNextCtx());
+
+      const rl = await import('@/lib/cache/rate-limit-helper');
+      expect(vi.mocked(rl.enforceRateLimit)).toHaveBeenCalledWith(
+        'api:user:203.0.113.5',
+        60,
+        60
+      );
+    });
+
+    it('usa default public (30/60s) quando sem override', async () => {
+      const handler = withPublicApi(async () => NextResponse.json({}));
+      await handler(makeRequest(), makeNextCtx());
+
+      const rl = await import('@/lib/cache/rate-limit-helper');
+      expect(vi.mocked(rl.enforceRateLimit)).toHaveBeenCalledWith(
+        'api:public:203.0.113.5',
+        30,
+        60
+      );
+    });
+
+    it('aplica override quando passado em options.rateLimit', async () => {
+      const handler = withPublicApi(
+        async () => NextResponse.json({}),
+        { rateLimit: { max: 5, windowSec: 600 } }
+      );
+      await handler(makeRequest(), makeNextCtx());
+
+      const rl = await import('@/lib/cache/rate-limit-helper');
+      expect(vi.mocked(rl.enforceRateLimit)).toHaveBeenCalledWith(
+        'api:public:203.0.113.5',
+        5,
+        600
+      );
+    });
+
+    it('RateLimitError vira 429 via handleApiError', async () => {
+      const { RateLimitError } = await import('@/lib/errors/api-error');
+      const rl = await import('@/lib/cache/rate-limit-helper');
+      vi.mocked(rl.enforceRateLimit).mockRejectedValueOnce(new RateLimitError());
+
+      const handler = withPublicApi(async () => NextResponse.json({}));
+      const response = await handler(makeRequest(), makeNextCtx());
+
+      expect(response.status).toBe(429);
+      const body = await response.json();
+      expect(body.code).toBe('RATE_LIMIT_EXCEEDED');
+      expect(response.headers.get('X-Request-Id')).toMatch(/^[0-9a-f]{8}$/);
+    });
+  });
 });
