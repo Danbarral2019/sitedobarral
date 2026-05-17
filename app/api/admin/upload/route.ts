@@ -1,17 +1,15 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { withAdminAuth } from '@/lib/api-middleware';
+import { withAdminApi } from '@/lib/api/handler';
 import { addDocument } from '@/lib/documents';
 import { writeFile, mkdir } from 'fs/promises';
 import { join } from 'path';
 import { randomBytes } from 'crypto';
 import { courses } from '@/data/courses';
 import { enforceRateLimit, getClientIp } from '@/lib/cache/rate-limit-helper';
-import { RateLimitError } from '@/lib/errors/api-error';
-import { handleApiError } from '@/lib/errors/error-handler';
+import { ValidationError } from '@/lib/errors/api-error';
 import { apiLogger } from "@/lib/logger";
 
-export const POST = withAdminAuth(async (request: NextRequest) => {
-  try {
+export const POST = withAdminApi(async (request: NextRequest) => {
     const ip = getClientIp(request);
     await enforceRateLimit(`upload:${ip}`, 10, 60);
 
@@ -29,10 +27,7 @@ export const POST = withAdminAuth(async (request: NextRequest) => {
     const enunciadoNumber = formData.get('enunciadoNumber') as string | null;
 
     if (!file || !courseId || !title || !category) {
-      return NextResponse.json(
-        { error: 'Parâmetros inválidos' },
-        { status: 400 }
-      );
+      throw new ValidationError('Parâmetros inválidos');
     }
 
     // Determina o tipo do arquivo
@@ -106,14 +101,4 @@ export const POST = withAdminAuth(async (request: NextRequest) => {
       count: createdDocuments.length,
       isAllCourses,
     });
-  } catch (error) {
-    if (error instanceof RateLimitError) {
-      return handleApiError(error);
-    }
-    apiLogger.error({ err: error }, 'Erro ao fazer upload:');
-    return NextResponse.json(
-      { error: 'Erro ao fazer upload do arquivo' },
-      { status: 500 }
-    );
-  }
 });

@@ -1,9 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { withAdminAuth } from '@/lib/api-middleware';
+import { withAdminApi } from '@/lib/api/handler';
 import { prisma } from '@/lib/prisma';
 import { courses } from '@/data/courses';
 
-export const GET = withAdminAuth(async (request: NextRequest) => {
+export const GET = withAdminApi(async (request: NextRequest) => {
   const { searchParams } = new URL(request.url);
   const courseId = searchParams.get('courseId');
   const now = new Date();
