@@ -1,20 +1,16 @@
 import { NextRequest, NextResponse } from "next/server";
-import { withAuth } from "@/lib/api-middleware";
+import { withUserApi } from "@/lib/api/handler";
 import { prisma } from "@/lib/prisma";
+import { NotFoundError } from "@/lib/errors/api-error";
 
-interface Ctx {
-  params: Promise<{ id: string }>;
-  user: { userId: string };
-}
-
-export const DELETE = withAuth(async (_request: NextRequest, context) => {
-  const { id } = await (context as Ctx).params;
-  const userId = (context as Ctx).user.userId;
+export const DELETE = withUserApi<{ id: string }>(async (_request: NextRequest, ctx) => {
+  const { id } = ctx.params;
+  const userId = ctx.user.userId;
   const res = await prisma.planningLibrarySnippet.deleteMany({
     where: { id, userId },
   });
   if (res.count === 0) {
-    return NextResponse.json({ error: "Snippet não encontrado" }, { status: 404 });
+    throw new NotFoundError("Snippet");
   }
   return NextResponse.json({ deleted: true });
 });

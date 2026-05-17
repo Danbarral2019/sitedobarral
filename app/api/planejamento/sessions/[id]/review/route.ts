@@ -1,12 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
-import { withAuth } from "@/lib/api-middleware";
+import { withUserApi } from "@/lib/api/handler";
 import { prisma } from "@/lib/prisma";
 import { runReview } from "@/lib/planejamento/review";
-
-interface Ctx {
-  params: Promise<{ id: string }>;
-  user: { userId: string };
-}
+import { NotFoundError } from "@/lib/errors/api-error";
 
 /**
  * POST /api/planejamento/sessions/[id]/review
@@ -14,15 +10,15 @@ interface Ctx {
  * um relatório estruturado. Não altera nada no DB — chamadas repetidas são
  * seguras e baratas.
  */
-export const POST = withAuth(async (_request: NextRequest, context) => {
-  const { id } = await (context as Ctx).params;
-  const userId = (context as Ctx).user.userId;
+export const POST = withUserApi<{ id: string }>(async (_request: NextRequest, ctx) => {
+  const { id } = ctx.params;
+  const userId = ctx.user.userId;
   const session = await prisma.planningSession.findFirst({
     where: { id, userId, deletedAt: null },
     select: { id: true },
   });
   if (!session) {
-    return NextResponse.json({ error: "Sessão não encontrada" }, { status: 404 });
+    throw new NotFoundError("Sessão");
   }
   const report = await runReview(id);
   return NextResponse.json({ report });
