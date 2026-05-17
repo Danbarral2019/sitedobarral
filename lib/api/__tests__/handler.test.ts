@@ -138,4 +138,141 @@ describe('lib/api/handler', () => {
       expect(response.headers.get('X-Request-Id')).toMatch(/^[0-9a-f]{8}$/);
     });
   });
+
+  describe('auth — withAdminApi', () => {
+    beforeEach(async () => {
+      const auth = await import('@/lib/auth');
+      vi.mocked(auth.getCurrentUser).mockReset();
+    });
+
+    it('responde 401 quando getCurrentUser retorna null', async () => {
+      const auth = await import('@/lib/auth');
+      vi.mocked(auth.getCurrentUser).mockResolvedValue(null);
+      const handlerFn = vi.fn();
+
+      const handler = withAdminApi(handlerFn);
+      const response = await handler(makeRequest(), makeNextCtx());
+
+      expect(response.status).toBe(401);
+      expect(handlerFn).not.toHaveBeenCalled();
+    });
+
+    it('responde 403 quando user.role !== "admin"', async () => {
+      const auth = await import('@/lib/auth');
+      vi.mocked(auth.getCurrentUser).mockResolvedValue({ userId: 'u1', role: 'student' });
+      const handlerFn = vi.fn();
+
+      const handler = withAdminApi(handlerFn);
+      const response = await handler(makeRequest(), makeNextCtx());
+
+      expect(response.status).toBe(403);
+      expect(handlerFn).not.toHaveBeenCalled();
+    });
+
+    it('invoca handler com ctx.user populado quando user é admin', async () => {
+      const auth = await import('@/lib/auth');
+      const adminUser = { userId: 'admin-1', role: 'admin' as const, email: 'a@b.com' };
+      vi.mocked(auth.getCurrentUser).mockResolvedValue(adminUser);
+
+      const handler = withAdminApi(async (_req, ctx) => {
+        expect(ctx.user).toEqual(adminUser);
+        return NextResponse.json({ userId: ctx.user.userId });
+      });
+
+      const response = await handler(makeRequest(), makeNextCtx());
+      expect(response.status).toBe(200);
+      const body = await response.json();
+      expect(body.userId).toBe('admin-1');
+    });
+
+    it('chama Sentry.setUser com dados do admin', async () => {
+      const Sentry = await import('@sentry/nextjs');
+      const auth = await import('@/lib/auth');
+      vi.mocked(auth.getCurrentUser).mockResolvedValue({
+        userId: 'admin-1',
+        role: 'admin',
+        email: 'a@b.com',
+      });
+
+      const handler = withAdminApi(async () => NextResponse.json({}));
+      await handler(makeRequest(), makeNextCtx());
+
+      expect(vi.mocked(Sentry.setUser)).toHaveBeenCalledWith({
+        id: 'admin-1',
+        email: 'a@b.com',
+        role: 'admin',
+      });
+    });
+  });
+
+  describe('auth — withUserApi', () => {
+    beforeEach(async () => {
+      const auth = await import('@/lib/auth');
+      vi.mocked(auth.getCurrentUser).mockReset();
+    });
+
+    it('responde 401 quando user é null', async () => {
+      const auth = await import('@/lib/auth');
+      vi.mocked(auth.getCurrentUser).mockResolvedValue(null);
+
+      const handler = withUserApi(async () => NextResponse.json({}));
+      const response = await handler(makeRequest(), makeNextCtx());
+
+      expect(response.status).toBe(401);
+    });
+
+    it('aceita user com role "student"', async () => {
+      const auth = await import('@/lib/auth');
+      vi.mocked(auth.getCurrentUser).mockResolvedValue({ userId: 's-1', role: 'student' });
+
+      const handler = withUserApi(async (_req, ctx) => NextResponse.json({ id: ctx.user.userId }));
+      const response = await handler(makeRequest(), makeNextCtx());
+
+      expect(response.status).toBe(200);
+      const body = await response.json();
+      expect(body.id).toBe('s-1');
+    });
+
+    it('aceita user com role "admin"', async () => {
+      const auth = await import('@/lib/auth');
+      vi.mocked(auth.getCurrentUser).mockResolvedValue({ userId: 'a-1', role: 'admin' });
+
+      const handler = withUserApi(async () => NextResponse.json({}));
+      const response = await handler(makeRequest(), makeNextCtx());
+
+      expect(response.status).toBe(200);
+    });
+  });
+
+  describe('auth — withPublicApi', () => {
+    it('não chama getCurrentUser', async () => {
+      const auth = await import('@/lib/auth');
+      vi.mocked(auth.getCurrentUser).mockReset();
+
+      const handler = withPublicApi(async () => NextResponse.json({}));
+      await handler(makeRequest(), makeNextCtx());
+
+      expect(vi.mocked(auth.getCurrentUser)).not.toHaveBeenCalled();
+    });
+
+    it('passa ctx.user como null para o handler', async () => {
+      const handler = withPublicApi(async (_req, ctx) => {
+        expect(ctx.user).toBeNull();
+        return NextResponse.json({ ok: true });
+      });
+      const response = await handler(makeRequest(), makeNextCtx());
+
+      expect(response.status).toBe(200);
+    });
+
+    it('não chama Sentry.setUser', async () => {
+      const Sentry = await import('@sentry/nextjs');
+      vi.mocked(Sentry.setUser).mockReset();
+
+      const handler = withPublicApi(async () => NextResponse.json({}));
+      await handler(makeRequest(), makeNextCtx());
+
+      expect(vi.mocked(Sentry.setUser)).not.toHaveBeenCalled();
+    });
+  });
 });
