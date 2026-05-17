@@ -1,14 +1,12 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
-import { withAdminAuth } from '@/lib/api-middleware';
-import { apiLogger } from "@/lib/logger";
+import { withAdminApi } from '@/lib/api/handler';
 
 /**
  * GET /api/admin/search-analytics
  * Retorna analytics de buscas do assistente IA
  */
-export const GET = withAdminAuth(async () => {
-  try {
+export const GET = withAdminApi(async () => {
     const thirtyDaysAgo = new Date();
     thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
 
@@ -261,11 +259,4 @@ export const GET = withAdminAuth(async () => {
         },
       },
     });
-  } catch (error) {
-    apiLogger.error({ err: error }, 'Erro ao buscar search analytics:');
-    return NextResponse.json(
-      { error: 'Erro ao buscar analytics de busca' },
-      { status: 500 }
-    );
-  }
 });

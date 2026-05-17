@@ -1,15 +1,13 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
-import { withAdminAuth } from '@/lib/api-middleware';
+import { withAdminApi } from '@/lib/api/handler';
 import { apiLogger } from "@/lib/logger";
 
 /**
  * GET /api/admin/analytics
  * Retorna métricas agregadas para o dashboard do admin
  */
-export const GET = withAdminAuth(async () => {
-  try {
-
+export const GET = withAdminApi(async () => {
     // 1. Estatísticas de Usuários
     const totalUsers = await prisma.user.count();
     const totalStudents = await prisma.user.count({
@@ -328,11 +326,4 @@ export const GET = withAdminAuth(async () => {
         },
       },
     });
-  } catch (error) {
-    apiLogger.error({ err: error }, 'Erro ao buscar analytics:');
-    return NextResponse.json(
-      { error: 'Erro ao buscar métricas' },
-      { status: 500 }
-    );
-  }
 });
