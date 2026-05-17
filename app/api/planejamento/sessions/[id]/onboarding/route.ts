@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { withAuth } from "@/lib/api-middleware";
+import { withUserApi } from "@/lib/api/handler";
 import { prisma } from "@/lib/prisma";
 import { zOnboardingBody } from "@/data/planejamento/types";
 import { classifyNatureza } from "@/lib/planejamento/onboarding-classifier";
@@ -7,29 +7,23 @@ import {
   materializeDocumentFromTrail,
   resolveDefaultTrailSlug,
 } from "@/lib/planejamento/session-manager";
+import { ValidationError, NotFoundError } from "@/lib/errors/api-error";
+import type { ApiContext } from "@/lib/api/types";
 
-interface Ctx {
-  params: Promise<{ id: string }>;
-  user: { userId: string };
-}
-
-export const POST = withAuth(async (request: NextRequest, context) => {
-  const { id } = await (context as Ctx).params;
-  const userId = (context as Ctx).user.userId;
+export const POST = withUserApi<{ id: string }>(async (request: NextRequest, ctx: ApiContext<{ id: string }>) => {
+  const { id } = ctx.params;
+  const userId = ctx.user.userId;
   const body = await request.json().catch(() => ({}));
   const parsed = zOnboardingBody.safeParse(body);
   if (!parsed.success) {
-    return NextResponse.json(
-      { error: "Dados inválidos", issues: parsed.error.issues },
-      { status: 400 },
-    );
+    throw new ValidationError("Dados inválidos", parsed.error.issues);
   }
 
   const session = await prisma.planningSession.findFirst({
     where: { id, userId, deletedAt: null },
   });
   if (!session) {
-    return NextResponse.json({ error: "Sessão não encontrada" }, { status: 404 });
+    throw new NotFoundError("Sessão");
   }
 
   const classification = classifyNatureza(parsed.data.descricaoLivre);

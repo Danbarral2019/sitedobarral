@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { withAuth } from "@/lib/api-middleware";
+import { withUserApi } from "@/lib/api/handler";
 import { prisma } from "@/lib/prisma";
 import { zUpdateSessionBody } from "@/data/planejamento/types";
 import {
@@ -7,39 +7,33 @@ import {
   softDeleteSession,
   hardDeleteSession,
 } from "@/lib/planejamento/session-manager";
+import { NotFoundError, ValidationError } from "@/lib/errors/api-error";
+import type { ApiContext } from "@/lib/api/types";
 
-interface Ctx {
-  params: Promise<{ id: string }>;
-  user: { userId: string };
-}
-
-export const GET = withAuth(async (_request: NextRequest, context) => {
-  const { id } = await (context as Ctx).params;
-  const userId = (context as Ctx).user.userId;
+export const GET = withUserApi<{ id: string }>(async (_request: NextRequest, ctx: ApiContext<{ id: string }>) => {
+  const { id } = ctx.params;
+  const userId = ctx.user.userId;
   const session = await getSessionForUser(id, userId);
   if (!session) {
-    return NextResponse.json({ error: "Sessão não encontrada" }, { status: 404 });
+    throw new NotFoundError("Sessão");
   }
   return NextResponse.json({ session });
 });
 
-export const PATCH = withAuth(async (request: NextRequest, context) => {
-  const { id } = await (context as Ctx).params;
-  const userId = (context as Ctx).user.userId;
+export const PATCH = withUserApi<{ id: string }>(async (request: NextRequest, ctx: ApiContext<{ id: string }>) => {
+  const { id } = ctx.params;
+  const userId = ctx.user.userId;
   const body = await request.json().catch(() => ({}));
   const parsed = zUpdateSessionBody.safeParse(body);
   if (!parsed.success) {
-    return NextResponse.json(
-      { error: "Dados inválidos", issues: parsed.error.issues },
-      { status: 400 },
-    );
+    throw new ValidationError("Dados inválidos", parsed.error.issues);
   }
   const owned = await prisma.planningSession.findFirst({
     where: { id, userId, deletedAt: null },
     select: { id: true },
   });
   if (!owned) {
-    return NextResponse.json({ error: "Sessão não encontrada" }, { status: 404 });
+    throw new NotFoundError("Sessão");
   }
   const session = await prisma.planningSession.update({
     where: { id },
@@ -63,21 +57,21 @@ export const PATCH = withAuth(async (request: NextRequest, context) => {
   return NextResponse.json({ session });
 });
 
-export const DELETE = withAuth(async (request: NextRequest, context) => {
-  const { id } = await (context as Ctx).params;
-  const userId = (context as Ctx).user.userId;
+export const DELETE = withUserApi<{ id: string }>(async (request: NextRequest, ctx: ApiContext<{ id: string }>) => {
+  const { id } = ctx.params;
+  const userId = ctx.user.userId;
   const { searchParams } = new URL(request.url);
   const hard = searchParams.get("hard") === "1";
   if (hard) {
     const res = await hardDeleteSession(id, userId);
     if (res.count === 0) {
-      return NextResponse.json({ error: "Sessão não encontrada" }, { status: 404 });
+      throw new NotFoundError("Sessão");
     }
     return NextResponse.json({ deleted: "hard", count: res.count });
   }
   const res = await softDeleteSession(id, userId);
   if (res.count === 0) {
-    return NextResponse.json({ error: "Sessão não encontrada" }, { status: 404 });
+    throw new NotFoundError("Sessão");
   }
   return NextResponse.json({ deleted: "soft", count: res.count });
 });
