@@ -1,20 +1,19 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { withAuth } from '@/lib/api-middleware';
+import { withUserApi } from '@/lib/api/handler';
 import { prisma } from '@/lib/prisma';
 
-export const PATCH = withAuth(async (
+export const PATCH = withUserApi<{ courseId: string }>(async (
   request: NextRequest,
-  context?: Record<string, unknown>
+  ctx
 ) => {
-  const user = context?.user as { userId: string };
-  const { courseId } = await (context as { params: Promise<{ courseId: string }> }).params;
+  const { courseId } = ctx.params;
 
   const body = await request.json();
   const showOnLeaderboard = Boolean(body.showOnLeaderboard);
 
   const streak = await prisma.userStreak.upsert({
-    where: { userId_courseId: { userId: user.userId, courseId } },
-    create: { userId: user.userId, courseId, showOnLeaderboard },
+    where: { userId_courseId: { userId: ctx.user.userId, courseId } },
+    create: { userId: ctx.user.userId, courseId, showOnLeaderboard },
     update: { showOnLeaderboard },
   });
 

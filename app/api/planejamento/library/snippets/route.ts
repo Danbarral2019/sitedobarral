@@ -1,10 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
-import { withAuth } from "@/lib/api-middleware";
+import { withUserApi } from "@/lib/api/handler";
 import { prisma } from "@/lib/prisma";
 import { zCreateSnippetBody } from "@/data/planejamento/types";
 
-export const GET = withAuth(async (request: NextRequest, context) => {
-  const userId = (context!.user as { userId: string }).userId;
+export const GET = withUserApi(async (request: NextRequest, ctx) => {
+  const userId = ctx.user.userId;
   const { searchParams } = new URL(request.url);
   const q = searchParams.get("q")?.trim() ?? "";
 
@@ -26,8 +26,8 @@ export const GET = withAuth(async (request: NextRequest, context) => {
   return NextResponse.json({ snippets });
 });
 
-export const POST = withAuth(async (request: NextRequest, context) => {
-  const userId = (context!.user as { userId: string }).userId;
+export const POST = withUserApi(async (request: NextRequest, ctx) => {
+  const userId = ctx.user.userId;
   const body = await request.json().catch(() => ({}));
   const parsed = zCreateSnippetBody.safeParse(body);
   if (!parsed.success) {

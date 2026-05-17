@@ -1,15 +1,14 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { withAuth } from '@/lib/api-middleware';
+import { withUserApi } from '@/lib/api/handler';
 import { getUserGamificationData } from '@/lib/gamification';
 
-export const GET = withAuth(async (
+export const GET = withUserApi<{ courseId: string }>(async (
   request: NextRequest,
-  context?: Record<string, unknown>
+  ctx
 ) => {
-  const user = context?.user as { userId: string };
-  const { courseId } = await (context as { params: Promise<{ courseId: string }> }).params;
+  const { courseId } = ctx.params;
 
-  const data = await getUserGamificationData(user.userId, courseId);
+  const data = await getUserGamificationData(ctx.user.userId, courseId);
 
   return NextResponse.json(data);
 });

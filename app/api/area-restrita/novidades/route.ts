@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
-import { withAuth } from '@/lib/api-middleware';
+import { withUserApi } from '@/lib/api/handler';
 
 const FOURTEEN_DAYS_AGO = 14 * 24 * 60 * 60 * 1000;
 const THIRTY_DAYS_AGO = 30 * 24 * 60 * 60 * 1000;
@@ -160,4 +160,4 @@ async function handler() {
   });
 }
 
-export const GET = withAuth(handler);
+export const GET = withUserApi(handler);
