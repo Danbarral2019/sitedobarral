@@ -1,6 +1,7 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
-import { verifyAdmin } from '@/lib/api-middleware';
+import { withAdminApi } from '@/lib/api/handler';
+import { ApiError } from '@/lib/errors/api-error';
 
 const VALID_TYPES = ['blog', 'glossary', 'legislative-act', 'document'] as const;
 type InternalType = (typeof VALID_TYPES)[number];
@@ -12,17 +13,14 @@ interface Result {
   snippet?: string;
 }
 
-export async function GET(request: NextRequest) {
-  const adminCheck = await verifyAdmin(request);
-  if (adminCheck.error) return adminCheck.response;
-
+export const GET = withAdminApi(async (request) => {
   const { searchParams } = new URL(request.url);
   const type = searchParams.get('type') as InternalType | null;
   const q = (searchParams.get('q') || '').trim();
   const limit = Math.min(parseInt(searchParams.get('limit') || '15', 10) || 15, 50);
 
   if (!type || !VALID_TYPES.includes(type)) {
-    return NextResponse.json({ error: 'type inválido', valid: VALID_TYPES }, { status: 422 });
+    throw new ApiError(422, 'type inválido', 'VALIDATION_ERROR', { valid: VALID_TYPES });
   }
 
   let results: Result[] = [];
@@ -83,4 +81,4 @@ export async function GET(request: NextRequest) {
   }
 
   return NextResponse.json({ type, query: q, results });
-}
+});

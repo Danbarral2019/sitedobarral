@@ -1,6 +1,7 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextResponse } from 'next/server';
 import { revalidatePath, revalidateTag } from 'next/cache';
-import { verifyAdmin } from '@/lib/api-middleware';
+import { withAdminApi } from '@/lib/api/handler';
+import { ValidationError } from '@/lib/errors/api-error';
 
 /**
  * POST /api/admin/revalidate
@@ -16,10 +17,7 @@ import { verifyAdmin } from '@/lib/api-middleware';
  *   { "path": "/base-conhecimento/enunciados" }
  *   { "tag": "documents" }
  */
-export async function POST(request: NextRequest) {
-  const adminCheck = await verifyAdmin(request);
-  if (adminCheck.error) return adminCheck.response;
-
+export const POST = withAdminApi(async (request, { logger }) => {
   const body = await request.json().catch(() => ({}));
   const { path, tag, type } = body as {
     path?: string;
@@ -28,10 +26,7 @@ export async function POST(request: NextRequest) {
   };
 
   if (!path && !tag) {
-    return NextResponse.json(
-      { error: 'Forneça "path" (ex: "/base-conhecimento") ou "tag".' },
-      { status: 400 }
-    );
+    throw new ValidationError('Forneça "path" (ex: "/base-conhecimento") ou "tag".');
   }
 
   const revalidated: { paths: string[]; tags: string[] } = { paths: [], tags: [] };
@@ -45,7 +40,7 @@ export async function POST(request: NextRequest) {
     revalidated.tags.push(tag);
   }
 
-  console.log('[Admin Revalidate]', revalidated);
+  logger.info({ revalidated }, 'Admin revalidate');
 
   return NextResponse.json({ success: true, revalidated });
-}
+});
