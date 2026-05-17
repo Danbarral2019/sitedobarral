@@ -167,6 +167,8 @@ Estender `backfill-lei-articles-orphans.ts` (script criado na PR #8) para inclui
 ### PR 4.1 — Documento de design "Padrão API" (1 dia, sem código)
 Definir formalmente: `lib/api-middleware.withAdminAuth` vs `lib/errors/handleApiError` — escolher um. Sugestão: criar `withAdminApiHandler` que combina ambos (auth + erros semânticos + Sentry). Sem código ainda — apenas alinhamento e exemplo de migração.
 
+📄 **Spec finalizado:** [`docs/superpowers/specs/2026-05-16-api-pattern-design.md`](../superpowers/specs/2026-05-16-api-pattern-design.md). Decide por 3 HOFs (`withAdminApi`/`withUserApi`/`withPublicApi`) em `lib/api/handler.ts`, formato de erro unificado via `handleApiError`, `requestId` com header `X-Request-Id`, ~12 PRs de migração ordenados por risco (T1+T2+T4 automáticos → T5 manual).
+
 ### PR 4.2 — Codemod das 196 rotas (4 dias)
 Script automatizado convertendo `NextResponse.json({error}, {status})` em `throw new XError() + handleApiError`. Aplicar em **20 rotas por PR** (10 PRs pequenas) para revisão incremental.
 
