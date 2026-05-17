@@ -1,54 +1,48 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { withAuth } from '@/lib/api-middleware';
+import { withUserApi } from '@/lib/api/handler';
 import { prisma } from '@/lib/prisma';
-import { handleApiError } from '@/lib/errors/error-handler';
 import { NotFoundError } from '@/lib/errors/api-error';
 
 /**
  * GET: Retorna as tentativas anteriores do aluno para o quiz desta lição
  */
-export const GET = withAuth(async (
-  request: NextRequest,
-  context?: Record<string, unknown>
+export const GET = withUserApi<{ lessonId: string }>(async (
+  _request: NextRequest,
+  ctx
 ) => {
-  try {
-    const user = context?.user as { userId: string };
-    const { lessonId } = await (context as { params: Promise<{ lessonId: string }> }).params;
+  const { lessonId } = ctx.params;
 
-    const quiz = await prisma.quiz.findUnique({
-      where: { lessonId },
-    });
+  const quiz = await prisma.quiz.findUnique({
+    where: { lessonId },
+  });
 
-    if (!quiz) {
-      throw new NotFoundError('Quiz');
-    }
-
-    const attempts = await prisma.quizAttempt.findMany({
-      where: {
-        quizId: quiz.id,
-        userId: user.userId,
-      },
-      orderBy: { createdAt: 'desc' },
-      select: {
-        id: true,
-        score: true,
-        totalPoints: true,
-        maxPoints: true,
-        passed: true,
-        startedAt: true,
-        completedAt: true,
-        timeSpentSeconds: true,
-        createdAt: true,
-      },
-    });
-
-    return NextResponse.json({
-      attempts,
-      quizId: quiz.id,
-      passingScore: quiz.passingScore,
-      maxAttempts: quiz.maxAttempts,
-    });
-  } catch (error) {
-    return handleApiError(error);
+  if (!quiz) {
+    throw new NotFoundError('Quiz');
   }
+
+  const attempts = await prisma.quizAttempt.findMany({
+    where: {
+      quizId: quiz.id,
+      userId: ctx.user.userId,
+    },
+    orderBy: { createdAt: 'desc' },
+    select: {
+      id: true,
+      score: true,
+      totalPoints: true,
+      maxPoints: true,
+      passed: true,
+      startedAt: true,
+      completedAt: true,
+      timeSpentSeconds: true,
+      createdAt: true,
+    },
+  });
+
+  return NextResponse.json({
+    attempts,
+    quizId: quiz.id,
+    passingScore: quiz.passingScore,
+    maxAttempts: quiz.maxAttempts,
+  });
 });
