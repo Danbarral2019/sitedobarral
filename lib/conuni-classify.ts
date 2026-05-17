@@ -1,5 +1,5 @@
 import type { PrismaClient } from '@prisma/client';
-import { GoogleGenAI, Type } from '@google/genai';
+import { generate } from './ai';
 import { PRIMARY_GEMINI_MODEL } from './gemini/config';
 
 export interface ClassificationOutput {
@@ -36,15 +36,18 @@ const COURSES_DESCRIPTION = `
 - "10": Contratação Direta (dispensa, inexigibilidade, requisitos e procedimentos)
 `.trim();
 
+// Schema JSON puro (valores literais dos antigos `Type.OBJECT`/`Type.STRING`
+// da SDK @google/genai). `lib/ai/providers/gemini.ts` apenas repassa este
+// objeto no `generationConfig.responseSchema`.
 const responseSchema = {
-  type: Type.OBJECT,
+  type: 'OBJECT',
   properties: {
-    licitacoesContratos: { type: Type.BOOLEAN },
-    subtemas: { type: Type.ARRAY, items: { type: Type.STRING } },
-    cursosRelevantes: { type: Type.ARRAY, items: { type: Type.STRING } },
-    leiArticles: { type: Type.ARRAY, items: { type: Type.STRING } },
-    confidence: { type: Type.STRING, enum: ['high', 'medium', 'low'] },
-    reasoning: { type: Type.STRING },
+    licitacoesContratos: { type: 'BOOLEAN' },
+    subtemas: { type: 'ARRAY', items: { type: 'STRING' } },
+    cursosRelevantes: { type: 'ARRAY', items: { type: 'STRING' } },
+    leiArticles: { type: 'ARRAY', items: { type: 'STRING' } },
+    confidence: { type: 'STRING', enum: ['high', 'medium', 'low'] },
+    reasoning: { type: 'STRING' },
   },
   required: ['licitacoesContratos', 'subtemas', 'cursosRelevantes', 'leiArticles', 'confidence', 'reasoning'],
 };
@@ -71,20 +74,23 @@ ${fullText}
 """`;
 }
 
+/**
+ * Classifica um parecer via lib/ai (provider gemini forçado por chamada;
+ * task=classification — default seria anthropic, mas este classifier usa
+ * structured output via responseSchema, que é feature Gemini).
+ *
+ * Assinatura simplificada (antes recebia `genAI` por reuso de cliente —
+ * desnecessário com `lib/ai`).
+ */
 export async function classifyOne(
-  genAI: GoogleGenAI,
   doc: { title: string; description: string | null; content: string | null },
 ): Promise<ClassificationOutput> {
-  const result = await genAI.models.generateContent({
-    model: PRIMARY_GEMINI_MODEL,
-    contents: [{ text: buildPrompt(doc) }],
-    config: {
-      responseMimeType: 'application/json',
-      responseSchema,
-      thinkingConfig: { thinkingBudget: 0 },
-    },
+  const { text } = await generate('classification', {
+    messages: [{ role: 'user', content: buildPrompt(doc) }],
+    provider: 'gemini',
+    responseSchema,
+    thinkingBudget: 0,
   });
-  const text = result.text;
   if (!text) throw new Error('Gemini retornou texto vazio');
   const parsed = JSON.parse(text) as ClassificationOutput;
   parsed.cursosRelevantes = (parsed.cursosRelevantes || []).filter((c) => VALID_COURSE_IDS.includes(c));
@@ -106,9 +112,9 @@ export async function classifyPendingPareceres(
   const { limit, delayMs = 200, logger = () => {} } = opts;
   const startedAt = new Date();
 
-  const apiKey = process.env.GEMINI_API_KEY;
-  if (!apiKey) throw new Error('GEMINI_API_KEY não configurado');
-  const genAI = new GoogleGenAI({ apiKey });
+  // Pré-check explícito — lib/ai lançaria per-call (em loop seria barulhento);
+  // este guard mantém o fail-fast original de operações em lote.
+  if (!process.env.GEMINI_API_KEY) throw new Error('GEMINI_API_KEY não configurado');
 
   const candidates = await prisma.document.findMany({
     where: {
@@ -142,7 +148,7 @@ export async function classifyPendingPareceres(
   for (let i = 0; i < candidates.length; i++) {
     const doc = candidates[i];
     try {
-      const cls = await classifyOne(genAI, doc);
+      const cls = await classifyOne(doc);
       result.processed++;
       if (cls.licitacoesContratos) result.relevant++; else result.irrelevant++;
       result.byConfidence[cls.confidence]++;
