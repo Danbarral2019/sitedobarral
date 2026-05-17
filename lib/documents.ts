@@ -2,6 +2,7 @@ import { Document } from './types';
 import { prisma } from './prisma';
 import { Document as PrismaDocument } from '@prisma/client';
 import { safeParseArray } from './utils';
+import { parseLeiArticles, setLeiArticles, stringifyLeiArticles } from './lei-articles';
 import { apiLogger } from "@/lib/logger";
 
 /**
@@ -38,7 +39,7 @@ export async function addDocument(
       url,
       size: size || null,
       tags: JSON.stringify(tags),
-      leiArticles: JSON.stringify(leiArticles),
+      ...setLeiArticles(leiArticles),
       alternativeUrls: alternativeUrls || null,
       onNumber: onNumber || null,
       onYear: onYear || null,
@@ -61,7 +62,7 @@ export async function addDocument(
     courseId: dbDocument.courseId ?? '',
     isPublic: dbDocument.isPublic,
     tags: safeParseArray(dbDocument.tags),
-    leiArticles: safeParseArray(dbDocument.leiArticles),
+    leiArticles: parseLeiArticles(dbDocument.leiArticles),
     uploadedAt: dbDocument.uploadedAt,
     size: dbDocument.size || undefined,
   };
@@ -186,7 +187,7 @@ export async function listDocuments(filters?: {
           isPublic: doc.isPublic,
           isCommon: doc.isCommon || false,
           tags: safeParseArray(doc.tags),
-          leiArticles: safeParseArray(doc.leiArticles),
+          leiArticles: parseLeiArticles(doc.leiArticles),
           uploadedAt: doc.uploadedAt,
           size: doc.size || undefined,
           reviewed: doc.reviewed || false,
@@ -239,7 +240,7 @@ export async function getDocumentsByCourse(courseId: string): Promise<{
     courseId: doc.courseId ?? '',
     isPublic: doc.isPublic,
     tags: safeParseArray(doc.tags),
-    leiArticles: safeParseArray(doc.leiArticles),
+    leiArticles: parseLeiArticles(doc.leiArticles),
     uploadedAt: doc.uploadedAt,
     size: doc.size || undefined,
   });
@@ -272,7 +273,7 @@ export async function getDocumentById(id: string): Promise<Document | null> {
     courseId: doc.courseId ?? '',
     isPublic: doc.isPublic,
     tags: safeParseArray(doc.tags),
-    leiArticles: safeParseArray(doc.leiArticles),
+    leiArticles: parseLeiArticles(doc.leiArticles),
     uploadedAt: doc.uploadedAt,
     size: doc.size || undefined,
   };
@@ -310,7 +311,7 @@ export async function updateDocument(
     if (updates.url !== undefined) data.url = updates.url;
     if (updates.size !== undefined) data.size = updates.size || null;
     if (updates.tags !== undefined) data.tags = JSON.stringify(updates.tags);
-    if (updates.leiArticles !== undefined) data.leiArticles = JSON.stringify(updates.leiArticles);
+    if (updates.leiArticles !== undefined) data.leiArticles = stringifyLeiArticles(updates.leiArticles);
 
     const doc = await prisma.document.update({
       where: { id },
@@ -327,7 +328,7 @@ export async function updateDocument(
       courseId: doc.courseId ?? '',
       isPublic: doc.isPublic,
       tags: safeParseArray(doc.tags),
-      leiArticles: safeParseArray(doc.leiArticles),
+      leiArticles: parseLeiArticles(doc.leiArticles),
       uploadedAt: doc.uploadedAt,
       size: doc.size || undefined,
     };

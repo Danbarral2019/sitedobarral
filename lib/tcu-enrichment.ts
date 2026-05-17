@@ -9,6 +9,7 @@
  */
 
 import { safeParseArray } from './utils';
+import { parseLeiArticles } from './lei-articles';
 
 // Família 3.x cobre billing pago (3-flash-preview é sucessor direto de 2.5-flash).
 // gemini-2.5-flash continua até 17/jun/2026 como fallback (ver lib/gemini/config.ts).
@@ -46,7 +47,7 @@ export interface SummaryPromptDoc {
 }
 
 export function buildSummaryPrompt(doc: SummaryPromptDoc): string {
-  const artigos = safeParseArray(doc.leiArticles);
+  const artigos = parseLeiArticles(doc.leiArticles);
   const artigosStr = artigos.length > 0
     ? `Artigos da Lei 14.133/2021 vinculados: ${artigos.map((a: string) => `Art. ${a}`).join(', ')}`
     : 'Nenhum artigo da Lei 14.133 vinculado especificamente.';

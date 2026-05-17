@@ -16,6 +16,7 @@
 import { prisma } from '@/lib/prisma';
 import { sendTribunalHighlightAlert } from '@/lib/email';
 import { PRIMARY_GEMINI_MODEL } from '@/lib/gemini/config';
+import { parseLeiArticles } from '@/lib/lei-articles';
 import { apiLogger } from "@/lib/logger";
 
 const GEMINI_MODEL = PRIMARY_GEMINI_MODEL;
@@ -97,13 +98,9 @@ function buildHighlightPrompt(decision: {
   fullText: string | null;
 }): string {
   let artigosStr = 'Nenhum artigo da Lei 14.133 vinculado.';
-  if (decision.leiArticles) {
-    try {
-      const arts = JSON.parse(decision.leiArticles);
-      if (Array.isArray(arts) && arts.length > 0) {
-        artigosStr = `Artigos da Lei 14.133/2021 vinculados: ${arts.map((a: string) => `Art. ${a}`).join(', ')}`;
-      }
-    } catch { /* ignore */ }
+  const arts = parseLeiArticles(decision.leiArticles);
+  if (arts.length > 0) {
+    artigosStr = `Artigos da Lei 14.133/2021 vinculados: ${arts.map((a) => `Art. ${a}`).join(', ')}`;
   }
 
   return `Você é um especialista em Direito Administrativo, Licitações e Contratos Públicos, e também um editor jurídico experiente que avalia decisões de Tribunais de Contas Estaduais para potencial de publicação em blog jurídico.
