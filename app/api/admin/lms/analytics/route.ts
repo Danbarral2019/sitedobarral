@@ -28,39 +28,39 @@ async function getGlobalAnalytics(
   thirtyDaysAgo: Date,
   sevenDaysAgo: Date
 ) {
-  // Active enrollments (not expired or lifetime)
-  const activeEnrollments = await prisma.enrollment.findMany({
-    where: {
-      OR: [
-        { isLifetime: true },
-        { expiresAt: { gte: now } },
-      ],
-    },
-    select: { userId: true, courseId: true },
-  });
+  // Active enrollments, lesson/certificate/quiz counts, and activity — all in parallel
+  const [
+    activeEnrollments,
+    completedLessons,
+    totalCertificates,
+    quizzesApproved,
+    activityRaw,
+  ] = await Promise.all([
+    prisma.enrollment.findMany({
+      where: {
+        OR: [
+          { isLifetime: true },
+          { expiresAt: { gte: now } },
+        ],
+      },
+      select: { userId: true, courseId: true },
+    }),
+    prisma.lessonProgress.count({
+      where: { status: 'completed' },
+    }),
+    prisma.certificate.count(),
+    prisma.quizAttempt.count({
+      where: { passed: true },
+    }),
+    prisma.lessonProgress.findMany({
+      where: {
+        lastAccessedAt: { gte: thirtyDaysAgo },
+      },
+      select: { lastAccessedAt: true },
+    }),
+  ]);
 
   const uniqueStudentIds = [...new Set(activeEnrollments.map(e => e.userId))];
-
-  // Lessons completed
-  const completedLessons = await prisma.lessonProgress.count({
-    where: { status: 'completed' },
-  });
-
-  // Certificates
-  const totalCertificates = await prisma.certificate.count();
-
-  // Quizzes passed
-  const quizzesApproved = await prisma.quizAttempt.count({
-    where: { passed: true },
-  });
-
-  // Activity last 30 days (grouped by day)
-  const activityRaw = await prisma.lessonProgress.findMany({
-    where: {
-      lastAccessedAt: { gte: thirtyDaysAgo },
-    },
-    select: { lastAccessedAt: true },
-  });
 
   const activityByDay: Record<string, number> = {};
   for (let i = 0; i < 30; i++) {
