@@ -47,4 +47,33 @@ describe('withTiming', () => {
     await withTiming('lms.test.fast', async () => 'ok');
     expect(mockSentryBreadcrumb).not.toHaveBeenCalled();
   });
+
+  it('chama Sentry breadcrumb quando ms > 500', async () => {
+    // Simulamos lentidão sem usar setTimeout real (deixaria o teste flaky)
+    let n = 0;
+    const originalNow = performance.now.bind(performance);
+    const nowSpy = vi.spyOn(performance, 'now').mockImplementation(() => {
+      n += 1;
+      // 1ª chamada (start) retorna 0; 2ª (end) retorna 800ms
+      return n === 1 ? 0 : 800;
+    });
+
+    await withTiming('lms.test.slow', async () => 'ok');
+
+    expect(mockSentryBreadcrumb).toHaveBeenCalledTimes(1);
+    expect(mockSentryBreadcrumb).toHaveBeenCalledWith({
+      category: 'lms.slow',
+      level: 'warning',
+      message: 'lms.test.slow',
+      data: { ms: 800 },
+    });
+    expect(mockLoggerInfo).toHaveBeenCalledWith(
+      expect.objectContaining({ lms_query: 'lms.test.slow', ms_total: 800 }),
+      'lms.query',
+    );
+
+    nowSpy.mockRestore();
+    // restaurar referência caso outros testes mexam
+    performance.now = originalNow;
+  });
 });
