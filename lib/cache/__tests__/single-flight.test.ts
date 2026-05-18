@@ -168,4 +168,50 @@ describe('withCache single-flight', () => {
     expect(fn).toHaveBeenCalledTimes(3);
     expect(results).toEqual([1, 2, 3]);
   });
+
+  it('emite warning Sentry quando inFlight.size >= MAX_IN_FLIGHT (amostrado)', async () => {
+    // Mock Math.random para forçar amostragem (sempre dispara o warning quando atingir threshold)
+    const randomSpy = vi.spyOn(Math, 'random').mockReturnValue(0.005); // < 0.01
+
+    const { apiLogger } = await import('@/lib/logger');
+    const Sentry = await import('@sentry/nextjs');
+
+    // Bloquear todas as fn() retornadas para encher o Map
+    const blockedPromises: ((v: unknown) => void)[] = [];
+    const fn = vi.fn(() => new Promise<number>((resolve) => {
+      blockedPromises.push(resolve as (v: unknown) => void);
+    }));
+
+    // Encher inFlight com 1001 entries para cruzar o threshold
+    const callers: Promise<unknown>[] = [];
+    for (let i = 0; i < 1001; i++) {
+      callers.push(withCache(`test:leak:${i}`, fn, 60).catch(() => null));
+    }
+
+    // Micro-yield para registrar promises
+    await Promise.resolve();
+    await Promise.resolve();
+
+    // Warning Sentry deve ter sido chamado ao menos 1x (com Math.random < 0.01 forçado)
+    expect(apiLogger.warn).toHaveBeenCalledWith(
+      expect.objectContaining({
+        cache_in_flight_size: expect.any(Number),
+        max: 1000,
+      }),
+      'cache.single_flight.high_water_mark',
+    );
+    expect(Sentry.captureMessage).toHaveBeenCalledWith(
+      'cache.in_flight.exceeded_threshold',
+      expect.objectContaining({
+        level: 'warning',
+        extra: expect.objectContaining({ max: 1000 }),
+      }),
+    );
+
+    // Resolver todas para limpar
+    for (const resolve of blockedPromises) resolve(0);
+    await Promise.all(callers);
+
+    randomSpy.mockRestore();
+  });
 });
