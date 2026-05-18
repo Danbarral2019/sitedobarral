@@ -64,4 +64,38 @@ describe('withCache single-flight', () => {
     expect(fn).toHaveBeenCalledTimes(1);
     expect(mockSetex).toHaveBeenCalledWith('test:single', 60, 42);
   });
+
+  it('de-duplica 3 callers concorrentes para a mesma key (fn chamado 1 vez)', async () => {
+    let resolveFn: (value: number) => void = () => {};
+    const fn = vi.fn(() => new Promise<number>((resolve) => {
+      resolveFn = resolve;
+    }));
+
+    // Dispara 3 callers concorrentes
+    const a = withCache('test:stampede', fn, 60);
+    const b = withCache('test:stampede', fn, 60);
+    const c = withCache('test:stampede', fn, 60);
+
+    // Micro-yield para garantir que todas as 3 promises registraram
+    await Promise.resolve();
+    await Promise.resolve();
+
+    // fn() ainda não resolveu — fn deve ter sido chamado apenas 1 vez
+    expect(fn).toHaveBeenCalledTimes(1);
+
+    // Resolve fn()
+    resolveFn(42);
+
+    // Todos os 3 awaiters recebem o mesmo valor
+    expect(await a).toBe(42);
+    expect(await b).toBe(42);
+    expect(await c).toBe(42);
+
+    // setCache chamado apenas 1 vez (única execução de fn)
+    expect(mockSetex).toHaveBeenCalledTimes(1);
+    expect(mockSetex).toHaveBeenCalledWith('test:stampede', 60, 42);
+
+    // fn ainda só chamado 1 vez
+    expect(fn).toHaveBeenCalledTimes(1);
+  });
 });
