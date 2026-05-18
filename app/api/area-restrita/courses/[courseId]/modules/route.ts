@@ -5,6 +5,7 @@ import { AuthenticationError, AuthorizationError } from '@/lib/errors/api-error'
 import { apiLogger } from '@/lib/logger';
 import { prisma } from '@/lib/prisma';
 import { withTiming } from '@/lib/lms/query-timing';
+import { getPassedQuizIds } from '@/lib/lms/analytics-queries';
 
 export async function GET(
   request: NextRequest,
@@ -79,15 +80,7 @@ export async function GET(
         m.lessons.filter((l) => l.quiz?.isPublished).map((l) => l.quiz!)
       );
       const quizIds = allPublishedQuizzes.map((q) => q.id);
-      let passedQuizIds = new Set<string>();
-      if (quizIds.length > 0) {
-        const passedAttempts = await prisma.quizAttempt.findMany({
-          where: { userId: user.id, quizId: { in: quizIds }, passed: true },
-          distinct: ['quizId'],
-          select: { quizId: true },
-        });
-        passedQuizIds = new Set(passedAttempts.map((a) => a.quizId));
-      }
+      const passedQuizIds = await getPassedQuizIds(user.id, quizIds);
 
       // Build response with progress and quiz status
       const modulesWithProgress = modules.map((mod) => ({

@@ -3,6 +3,7 @@ import { withAdminApi } from '@/lib/api/handler';
 import { ValidationError } from '@/lib/errors/api-error';
 import { prisma } from '@/lib/prisma';
 import { withTiming } from '@/lib/lms/query-timing';
+import { getQuizStatsBatch } from '@/lib/lms/analytics-queries';
 
 export const GET = withAdminApi(async (request) => {
   const { searchParams } = new URL(request.url);
@@ -63,6 +64,18 @@ export const GET = withAdminApi(async (request) => {
       },
     });
 
+    const lessonByQuizId = new Map<string, string>();
+    const allQuizIds: string[] = [];
+    for (const mod of modules) {
+      for (const lesson of mod.lessons) {
+        if (lesson.quiz) {
+          lessonByQuizId.set(lesson.quiz.id, lesson.title);
+          allQuizIds.push(lesson.quiz.id);
+        }
+      }
+    }
+
+    const statsByQuiz = await getQuizStatsBatch(allQuizIds);
     const quizAlerts: Array<{
       lessonTitle: string;
       passRate: number;
@@ -70,33 +83,17 @@ export const GET = withAdminApi(async (request) => {
       totalAttempts: number;
     }> = [];
 
-    for (const mod of modules) {
-      for (const lesson of mod.lessons) {
-        if (!lesson.quiz) continue;
-
-        const attempts = await prisma.quizAttempt.findMany({
-          where: { quizId: lesson.quiz.id },
-          select: { score: true, passed: true },
-        });
-
-        if (attempts.length < 3) continue; // Need minimum attempts for meaningful data
-
-        const passRate = Math.round(
-          (attempts.filter(a => a.passed).length / attempts.length) * 100
-        );
-        const avgScore = Math.round(
-          attempts.reduce((s, a) => s + a.score, 0) / attempts.length
-        );
-
-        if (passRate < 60) {
-          quizAlerts.push({
-            lessonTitle: lesson.title,
-            passRate,
-            avgScore,
-            totalAttempts: attempts.length,
-          });
-        }
-      }
+    for (const [quizId, stats] of statsByQuiz) {
+      if (stats.totalAttempts < 3) continue;
+      if (stats.passRate >= 60) continue;
+      const lessonTitle = lessonByQuizId.get(quizId);
+      if (!lessonTitle) continue;
+      quizAlerts.push({
+        lessonTitle,
+        passRate: stats.passRate,
+        avgScore: stats.avgScore,
+        totalAttempts: stats.totalAttempts,
+      });
     }
 
     quizAlerts.sort((a, b) => a.passRate - b.passRate);
