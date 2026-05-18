@@ -96,21 +96,24 @@ export function getLeiArticles<T extends LeiArticlesRecord>(record: T): string[]
 }
 
 /**
- * Produz o objeto `data` pra Prisma create/update do campo leiArticles.
+ * Produz o objeto `data` pra Prisma create/update dos campos leiArticles.
  *
- * Hoje: `{ leiArticles: JSON.stringify(arr) }`
- * Pós-PR 4.5.3 dual-write: `{ leiArticles, leiArticlesArr }`
- * Pós-PR 4.5.5: `{ leiArticlesArr }` (drop coluna antiga em 4.5.6)
+ * Estado atual (Onda 4.5.3 — dual-write): escreve em AMBAS as colunas:
+ *   - `leiArticles` (legado JSON-em-String) — pra queries não-migradas continuarem funcionando
+ *   - `leiArticlesArr` (array nativo Postgres) — alvo da migração
  *
- * Semântica preservada do pattern dominante `arr ? JSON.stringify(arr) : null`:
- *   - `null`/`undefined` → `{ leiArticles: null }` (limpa campo)
- *   - `[]` (array vazio) → `{ leiArticles: '[]' }` (preserva JSON array string)
- *   - `['75']` → `{ leiArticles: '["75"]' }`
+ * Roteiro:
+ *   - 4.5.3 ⬅ ESTE (dual-write)
+ *   - 4.5.4 — dual-read + GIN indexes
+ *   - 4.5.5 — drop coluna legada → retorna só { leiArticlesArr }
  *
- * Decisão sobre `[]`: callers existentes que passam `[] ? JSON.stringify([]) : null`
- * gravam `'[]'` (porque `[]` é truthy em JS). Helper preserva esse comportamento
- * pra não mudar valores na coluna sob queries existentes (`WHERE leiArticles IS NULL`
- * vs `WHERE leiArticles = '[]'`). Pra limpar de fato, passe `null`.
+ * Semântica:
+ *   - `['75']` → `{ leiArticles: '["75"]', leiArticlesArr: ['75'] }`
+ *   - `[]` → `{ leiArticles: '[]', leiArticlesArr: [] }`
+ *     (preserva pattern dominante `arr ? JSON.stringify(arr) : null` no campo legado)
+ *   - `null`/`undefined` → `{ leiArticles: null, leiArticlesArr: [] }`
+ *     leiArticlesArr SEMPRE é escrito (mesmo no clear) pra evitar staleness após
+ *     update parcial — Prisma só sobrescreve campos presentes no `data`.
  *
  * @example
  * ```ts
@@ -122,9 +125,13 @@ export function getLeiArticles<T extends LeiArticlesRecord>(record: T): string[]
  */
 export function setLeiArticles(
   arr: string[] | null | undefined,
-): { leiArticles: string | null } {
+): { leiArticles: string | null; leiArticlesArr: string[] } {
   if (arr === null || arr === undefined) {
-    return { leiArticles: null }
+    return { leiArticles: null, leiArticlesArr: [] }
   }
-  return { leiArticles: stringifyLeiArticles(arr) }
+  const normalized = arr.map(String)
+  return {
+    leiArticles: stringifyLeiArticles(normalized),
+    leiArticlesArr: normalized,
+  }
 }
