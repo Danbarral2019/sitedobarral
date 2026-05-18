@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { withAdminApi } from '@/lib/api/handler';
 import { prisma } from '@/lib/prisma';
 import { courses } from '@/data/courses';
+import { withTiming } from '@/lib/lms/query-timing';
 
 export const GET = withAdminApi(async (request: NextRequest) => {
   const { searchParams } = new URL(request.url);
@@ -11,10 +12,14 @@ export const GET = withAdminApi(async (request: NextRequest) => {
   const sevenDaysAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
 
   if (courseId) {
-    return getCourseAnalytics(courseId, now, thirtyDaysAgo, sevenDaysAgo);
+    return withTiming(`lms.analytics.course.${courseId}`, () =>
+      getCourseAnalytics(courseId, now, thirtyDaysAgo, sevenDaysAgo),
+    );
   }
 
-  return getGlobalAnalytics(now, thirtyDaysAgo, sevenDaysAgo);
+  return withTiming('lms.analytics.global', () =>
+    getGlobalAnalytics(now, thirtyDaysAgo, sevenDaysAgo),
+  );
 });
 
 async function getGlobalAnalytics(
