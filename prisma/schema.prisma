@@ -199,6 +199,7 @@ model Document {
   @@index([category, douData]) // Índice composto para buscar documentos por categoria e data DOU
   @@index([r2Key]) // Índice para buscar por chave R2
   @@index([embeddingStatus]) // Índice para buscar documentos por status de embedding
+  @@index([leiArticlesArr], type: Gin) // Onda 4.5.4: GIN p/ queries `'75' = ANY(leiArticlesArr)` rápidas
 }
 
 // Metadados TCU (tabela satélite 1:1 — vertical table splitting)
@@ -473,6 +474,7 @@ model BlogPost {
   @@index([slug])
   @@index([isPublished])
   @@index([publishedAt])
+  @@index([leiArticlesArr], type: Gin) // Onda 4.5.4
 }
 
 // Publicações em Redes Sociais
@@ -532,6 +534,7 @@ model Publication {
   @@index([isPublished])
   @@index([publishedAt])
   @@index([type, isPublished])
+  @@index([leiArticlesArr], type: Gin) // Onda 4.5.4
 }
 
 // Formulário de Contato
@@ -735,6 +738,7 @@ model GlossaryTerm {
   @@index([slug])
   @@index([category])
   @@index([isPublic])
+  @@index([leiArticlesArr], type: Gin) // Onda 4.5.4
 }
 
 // Atos Normativos (Decretos, Portarias, INs, etc.)
@@ -836,6 +840,7 @@ model LegislativeAct {
   @@index([lastScrapedAt])
   @@index([scrapeStatus])
   @@index([embeddingStatus])
+  @@index([leiArticlesArr], type: Gin) // Onda 4.5.4
 }
 
 // Chunks de atos legislativos com embeddings (Busca Semântica)
@@ -1241,6 +1246,7 @@ model Lesson {
   @@index([moduleId])
   @@index([moduleId, displayOrder])
   @@index([prerequisiteId])
+  @@index([leiArticlesArr], type: Gin) // Onda 4.5.4
 }
 
 // Junction: Lesson ↔ Document
@@ -1693,6 +1699,7 @@ model TribunalDecision {
   @@index([embeddingStatus])
   @@index([sourceApi])
   @@index([year])
+  @@index([leiArticlesArr], type: Gin) // Onda 4.5.4
 }
 
 // Destaques editoriais de decisões TCE (espelha TcuHighlight)

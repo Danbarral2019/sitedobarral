@@ -28,6 +28,7 @@
 
 type LeiArticlesRecord = {
   leiArticles?: string | null
+  leiArticlesArr?: string[] | null
 }
 
 /**
@@ -85,13 +86,25 @@ export function stringifyLeiArticles(arr: string[]): string {
 }
 
 /**
- * Lê o campo `leiArticles` de um record Prisma. Wrapper sobre `parseLeiArticles`
- * que facilita migração futura pra `leiArticlesArr` (Postgres array).
+ * Lê o campo lei-articles de um record Prisma, preferindo o array nativo
+ * `leiArticlesArr` (rápido, sem parse) com fallback pro JSON-em-string
+ * `leiArticles` (legado).
  *
- * Pós-PR 4.5.4, esta função vai preferir `record.leiArticlesArr` quando
- * disponível, com fallback pro `record.leiArticles` (JSON string).
+ * Onda 4.5.4 — dual-read:
+ *   - Se `leiArticlesArr` está presente E não-vazio → usa ele direto
+ *   - Caso contrário → fallback `parseLeiArticles(leiArticles)`
+ *
+ * Fallback é defensivo: cobre (a) callers que fazem `select` apenas do campo
+ * legado, (b) rows escritas por scripts que bypassam `setLeiArticles` e só
+ * populam o legado, (c) qualquer cenário de drift inesperado.
+ *
+ * Após PR 4.5.5 (drop coluna legada), o fallback vira no-op.
  */
 export function getLeiArticles<T extends LeiArticlesRecord>(record: T): string[] {
+  const arr = record.leiArticlesArr
+  if (Array.isArray(arr) && arr.length > 0) {
+    return arr.map(String)
+  }
   return parseLeiArticles(record.leiArticles)
 }
 
