@@ -37,7 +37,7 @@ export async function GET(request: NextRequest) {
     }
 
     if (artigo) {
-      where.leiArticles = { contains: artigo, mode: 'insensitive' };
+      where.leiArticlesArr = { has: artigo }; // Onda 4.5.5c: GIN match exato; antes ILIKE %X% sem índice
     }
 
     if (q) {
