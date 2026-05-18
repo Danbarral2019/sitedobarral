@@ -13,7 +13,7 @@ const TCUManagerContent = dynamic(() => import('../tcu-manager/page'), {
   ),
 });
 
-const AGUImportContent = dynamic(() => import('../agu-import/page'), {
+const AGUImportContent = dynamic(() => import('../scraper-agu/page'), {
   loading: () => (
     <div className="flex items-center justify-center py-20">
       <Loader2 className="w-8 h-8 animate-spin text-blue-600" />
