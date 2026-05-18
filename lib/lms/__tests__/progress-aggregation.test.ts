@@ -1,6 +1,6 @@
 // @vitest-environment node
 import { describe, it, expect } from 'vitest';
-import { groupProgressByUserModule } from '@/lib/lms/progress-aggregation';
+import { groupProgressByUserModule, computeModuleAvgCompletion } from '@/lib/lms/progress-aggregation';
 
 describe('groupProgressByUserModule', () => {
   it('retorna Map vazio para inputs vazios', () => {
@@ -55,5 +55,26 @@ describe('groupProgressByUserModule', () => {
     const result = groupProgressByUserModule(progress, lessonModule);
     expect(result.get('u1')?.get('m1')).toEqual({ completed: 1, total: 1 });
     expect(result.get('u1')?.size).toBe(1);
+  });
+});
+
+describe('computeModuleAvgCompletion', () => {
+  it('calcula média de completion% por módulo a partir de buckets', () => {
+    // u1 completou 2/4 = 50% do módulo m1; u2 completou 4/4 = 100%
+    const grouped = new Map([
+      ['u1', new Map([['m1', { completed: 2, total: 4 }]])],
+      ['u2', new Map([['m1', { completed: 4, total: 4 }]])],
+    ]);
+
+    const result = computeModuleAvgCompletion(grouped, ['m1']);
+    expect(result).toEqual([{ moduleId: 'm1', avgCompletion: 75 }]); // (50+100)/2
+  });
+
+  it('módulo sem users tem avgCompletion 0', () => {
+    const result = computeModuleAvgCompletion(new Map(), ['m1', 'm2']);
+    expect(result).toEqual([
+      { moduleId: 'm1', avgCompletion: 0 },
+      { moduleId: 'm2', avgCompletion: 0 },
+    ]);
   });
 });

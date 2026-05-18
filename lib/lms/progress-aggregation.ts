@@ -49,3 +49,28 @@ export function groupProgressByUserModule(
 
   return result;
 }
+
+/**
+ * Calcula avgCompletion% por módulo a partir do output de `groupProgressByUserModule`.
+ * Média aritmética das porcentagens dos users que têm progresso no módulo.
+ * Módulos sem users no `grouped` retornam 0.
+ */
+export function computeModuleAvgCompletion(
+  grouped: Map<string, Map<string, ModuleCompletionBucket>>,
+  moduleIds: string[],
+): Array<{ moduleId: string; avgCompletion: number }> {
+  return moduleIds.map(moduleId => {
+    let sumPct = 0;
+    let users = 0;
+    for (const userMap of grouped.values()) {
+      const bucket = userMap.get(moduleId);
+      if (!bucket || bucket.total === 0) continue;
+      sumPct += (bucket.completed / bucket.total) * 100;
+      users += 1;
+    }
+    return {
+      moduleId,
+      avgCompletion: users > 0 ? Math.round(sumPct / users) : 0,
+    };
+  });
+}
