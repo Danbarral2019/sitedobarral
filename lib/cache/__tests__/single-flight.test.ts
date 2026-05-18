@@ -128,4 +128,22 @@ describe('withCache single-flight', () => {
     // setCache NÃO foi chamado (erro impede)
     expect(mockSetex).not.toHaveBeenCalled();
   });
+
+  it('após erro, próxima chamada com mesma key executa fn() fresh', async () => {
+    // Primeira call: erro
+    const failingFn = vi.fn(async () => {
+      throw new Error('First call fails');
+    });
+
+    await expect(withCache('test:retry', failingFn, 60)).rejects.toThrow('First call fails');
+    expect(failingFn).toHaveBeenCalledTimes(1);
+
+    // Segunda call: sucesso (deve executar fresh)
+    const successFn = vi.fn(async () => 100);
+    const result = await withCache('test:retry', successFn, 60);
+
+    expect(result).toBe(100);
+    expect(successFn).toHaveBeenCalledTimes(1);
+    expect(mockSetex).toHaveBeenCalledWith('test:retry', 60, 100);
+  });
 });
