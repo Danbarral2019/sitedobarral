@@ -6,6 +6,7 @@ import { AuthenticationError } from '@/lib/errors/api-error';
 import { courses } from '@/data/courses';
 import { BADGE_TYPES, type BadgeType } from '@/lib/gamification';
 import { withTiming } from '@/lib/lms/query-timing';
+import { getEnrolledUserQuizPassRates } from '@/lib/lms/analytics-queries';
 
 export async function GET(req: NextRequest) {
   try {
@@ -104,17 +105,10 @@ export async function GET(req: NextRequest) {
           })
         : [];
       const totalQuizzes = publishedQuizzes.length;
-
-      let passedQuizzes = 0;
-      if (totalQuizzes > 0) {
-        const quizIds = publishedQuizzes.map(q => q.id);
-        const passed = await prisma.quizAttempt.findMany({
-          where: { userId, quizId: { in: quizIds }, passed: true },
-          distinct: ['quizId'],
-          select: { quizId: true },
-        });
-        passedQuizzes = passed.length;
-      }
+      const passedQuizzes = await getEnrolledUserQuizPassRates(
+        userId,
+        publishedQuizzes.map(q => q.id),
+      );
 
       const streak = streaks.find(s => s.courseId === courseId);
 
