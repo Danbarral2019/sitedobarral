@@ -177,7 +177,7 @@ export function buildTribunalDecisionWhere(
   }
   if (filters.artigo) {
     fragments.push(
-      Prisma.sql`"leiArticles" ILIKE ${'%' + filters.artigo + '%'}`
+      Prisma.sql`"leiArticlesArr" @> ARRAY[${filters.artigo}]::text[]` // Onda 4.5.5b: GIN; ILIKE buggy
     );
   }
   if (filters.decisionType) {
@@ -246,7 +246,7 @@ export function buildDocumentTcuWhere(
   }
   if (filters.artigo) {
     fragments.push(
-      Prisma.sql`"leiArticles" ILIKE ${'%' + filters.artigo + '%'}`
+      Prisma.sql`"leiArticlesArr" @> ARRAY[${filters.artigo}]::text[]` // Onda 4.5.5b: GIN; ILIKE buggy
     );
   }
   if (filters.relator) {
