@@ -78,16 +78,60 @@ describe('round-trip parse + stringify', () => {
   })
 })
 
-describe('getLeiArticles', () => {
-  it('lê o campo leiArticles de um record', () => {
+describe('getLeiArticles (dual-read — Onda 4.5.4)', () => {
+  it('prefere leiArticlesArr quando disponível e não-vazio', () => {
+    // Pós-dual-write (#76), todo record consistente tem ambos preenchidos.
+    // leiArticlesArr é o caminho rápido (sem parse JSON).
+    expect(
+      getLeiArticles({ leiArticles: '["75","18"]', leiArticlesArr: ['75', '18'] }),
+    ).toEqual(['75', '18'])
+  })
+
+  it('usa leiArticlesArr mesmo quando leiArticles é null/legado-vazio', () => {
+    // Cenário: row criada após cutover quando leiArticles deixou de ser populado
+    expect(getLeiArticles({ leiArticles: null, leiArticlesArr: ['75'] })).toEqual(['75'])
+  })
+
+  it('fallback pra leiArticles quando leiArticlesArr ausente do select', () => {
+    // Cenário: caller fez findMany({ select: { leiArticles: true } }) sem o novo campo
     expect(getLeiArticles({ leiArticles: '["75","18"]' })).toEqual(['75', '18'])
+  })
+
+  it('fallback pra leiArticles quando leiArticlesArr é array vazio', () => {
+    // Cenário pré-backfill ou row legada não-tocada: leiArticlesArr=[], leiArticles populado
+    // Defensivo: prefere o que tem dados
+    expect(
+      getLeiArticles({ leiArticles: '["75"]', leiArticlesArr: [] }),
+    ).toEqual(['75'])
+  })
+
+  it('retorna [] quando ambos vazios/ausentes', () => {
+    expect(getLeiArticles({ leiArticles: null, leiArticlesArr: [] })).toEqual([])
     expect(getLeiArticles({ leiArticles: null })).toEqual([])
     expect(getLeiArticles({ leiArticles: undefined })).toEqual([])
     expect(getLeiArticles({})).toEqual([])
   })
 
+  it('retorna [] quando ambos são [] / "[]"', () => {
+    expect(getLeiArticles({ leiArticles: '[]', leiArticlesArr: [] })).toEqual([])
+  })
+
+  it('coerce qualquer item de leiArticlesArr pra string (defesa contra schema drift)', () => {
+    expect(
+      getLeiArticles({
+        leiArticlesArr: [75 as unknown as string, 18 as unknown as string],
+      } as unknown as { leiArticlesArr: string[] }),
+    ).toEqual(['75', '18'])
+  })
+
   it('funciona com records que têm outros campos', () => {
-    const doc = { id: 'd1', title: 'Doc', leiArticles: '["75"]', isPublic: true }
+    const doc = {
+      id: 'd1',
+      title: 'Doc',
+      leiArticles: '["75"]',
+      leiArticlesArr: ['75'],
+      isPublic: true,
+    }
     expect(getLeiArticles(doc)).toEqual(['75'])
   })
 })
