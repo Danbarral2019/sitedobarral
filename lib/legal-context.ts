@@ -168,8 +168,9 @@ export async function findRelatedActs(
 ): Promise<Array<{ title: string; ementa: string; url: string; leiArticles: string[]; hierarchyLevel: number }>> {
   if (articleNumbers.length === 0) return [];
 
+  // Onda 4.5.5b: array nativo + GIN. Bug fix de brinde — `LIKE '%"75"%'` matchava "175"/"750".
   const articleConditions = articleNumbers.map(art =>
-    `"leiArticles"::text LIKE '%"${art.replace(/'/g, "''")}"%'`
+    `"leiArticlesArr" @> ARRAY['${art.replace(/'/g, "''")}']::text[]`
   ).join(' OR ');
 
   const excludeTitles = alreadyFoundTitles.length > 0
@@ -186,8 +187,7 @@ export async function findRelatedActs(
     SELECT "fullNumber" as full_number, ementa, "officialUrl" as official_url,
            "leiArticles" as lei_articles, "hierarchyLevel" as hierarchy_level
     FROM "LegislativeAct"
-    WHERE "leiArticles" IS NOT NULL
-      AND (${articleConditions})
+    WHERE (${articleConditions})
       AND "fullNumber" NOT IN (${excludeTitles})
     LIMIT ${limit * 3}
   `);

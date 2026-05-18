@@ -50,7 +50,7 @@ function buildDocumentExtraWhere(
   }
   if (filters.artigo) {
     fragments.push(
-      Prisma.sql`"leiArticles" ILIKE ${'%' + filters.artigo + '%'}`
+      Prisma.sql`"leiArticlesArr" @> ARRAY[${filters.artigo}]::text[]` // Onda 4.5.5b: GIN; ILIKE buggy ("75" casava "175")
     );
   }
   if (filters.relator) {
@@ -98,7 +98,7 @@ function buildTribunalDecisionExtraWhere(
   }
   if (filters.artigo) {
     fragments.push(
-      Prisma.sql`"leiArticles" ILIKE ${'%' + filters.artigo + '%'}`
+      Prisma.sql`"leiArticlesArr" @> ARRAY[${filters.artigo}]::text[]` // Onda 4.5.5b: GIN; ILIKE buggy ("75" casava "175")
     );
   }
   if (filters.decisionType) {
