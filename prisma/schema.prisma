@@ -41,7 +41,8 @@ model Document {
   isPublic        Boolean   @default(false)
   isCommon        Boolean   @default(false) // Se true, documento aparece em todos os cursos
   tags            String? // JSON array como string
-  leiArticles     String? // JSON array com números de artigos da Lei 14.133/2021
+  leiArticles     String? // JSON array com números de artigos da Lei 14.133/2021 (legado — drop em PR 4.5.5)
+  leiArticlesArr  String[]  @default([]) // Onda 4.5: array nativo Postgres. Backfill em 4.5.2; dual-write 4.5.3; cutover 4.5.4.
   content         String?   @db.Text // Conteúdo/trechos relevantes do documento para busca textual
   size            Int?
   onNumber        Int? // Número da ON (para ordenação numérica de Orientações Normativas)
@@ -165,6 +166,9 @@ model Document {
   // Full-Text Search (gerido via triggers SQL, não pelo Prisma)
   search_vector Unsupported("tsvector")?
 
+  // Previne duplicatas de acórdãos TCU criadas por race condition no sync-tcu-acordaos.
+  // Postgres trata NULL como distinto, então documentos não-TCU (com esses campos null) não conflitam.
+  @@unique([acordaoNumero, acordaoAno, tcuOrgaoJulgador], name: "tcu_acordao_dedup")
   @@index([courseId])
   @@index([category])
   @@index([courseId, isPublic])
@@ -195,9 +199,6 @@ model Document {
   @@index([category, douData]) // Índice composto para buscar documentos por categoria e data DOU
   @@index([r2Key]) // Índice para buscar por chave R2
   @@index([embeddingStatus]) // Índice para buscar documentos por status de embedding
-  // Previne duplicatas de acórdãos TCU criadas por race condition no sync-tcu-acordaos.
-  // Postgres trata NULL como distinto, então documentos não-TCU (com esses campos null) não conflitam.
-  @@unique([acordaoNumero, acordaoAno, tcuOrgaoJulgador], name: "tcu_acordao_dedup")
 }
 
 // Metadados TCU (tabela satélite 1:1 — vertical table splitting)
@@ -457,7 +458,8 @@ model BlogPost {
   publishedAt       DateTime
   isPublished       Boolean  @default(false)
   tags              String? // JSON array como string
-  leiArticles       String? // JSON array com números de artigos da Lei 14.133/2021
+  leiArticles       String? // JSON array com números de artigos da Lei 14.133/2021 (legado — drop em PR 4.5.5)
+  leiArticlesArr    String[] @default([]) // Onda 4.5: array nativo Postgres. Backfill em 4.5.2; dual-write 4.5.3; cutover 4.5.4.
   autoPublishSocial Boolean  @default(true) // Publicar automaticamente nas redes sociais
   socialMediaImage  String? // URL da imagem gerada para OG/redes sociais
   createdAt         DateTime @default(now())
@@ -520,7 +522,8 @@ model Publication {
   location  String? // Local do evento
 
   // Catalogação por artigos da Lei 14.133/2021
-  leiArticles String? // JSON array com números de artigos da Lei 14.133/2021
+  leiArticles    String? // JSON array com números de artigos da Lei 14.133/2021 (legado — drop em PR 4.5.5)
+  leiArticlesArr String[] @default([]) // Onda 4.5: array nativo Postgres. Backfill em 4.5.2; dual-write 4.5.3; cutover 4.5.4.
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -555,7 +558,7 @@ model NewsletterSubscriber {
   isActive       Boolean   @default(true)
   subscribedAt   DateTime  @default(now())
   unsubscribedAt DateTime?
-  source         String?   // 'coming-soon' | 'blog-footer' | 'footer' | etc.
+  source         String? // 'coming-soon' | 'blog-footer' | 'footer' | etc.
 
   @@index([isActive])
   @@index([subscribedAt])
@@ -706,9 +709,10 @@ model GlossaryTerm {
   category String? // Ex: "Modalidade", "Fase", "Documento", "Legislação"
 
   // Relacionamentos (JSON arrays)
-  relatedTerms String? // IDs de termos relacionados
-  leiArticles  String? // Artigos da Lei 14.133/2021
-  relatedDocs  String? // IDs de documentos relacionados
+  relatedTerms   String? // IDs de termos relacionados
+  leiArticles    String? // Artigos da Lei 14.133/2021 (legado — drop em PR 4.5.5)
+  leiArticlesArr String[] @default([]) // Onda 4.5: array nativo Postgres. Backfill em 4.5.2; dual-write 4.5.3; cutover 4.5.4.
+  relatedDocs    String? // IDs de documentos relacionados
 
   // Referências externas
   externalUrl String? // Link para legislação oficial
@@ -757,7 +761,8 @@ model LegislativeAct {
   hierarchyLevel Int // 1=Lei, 2=Decreto, 3=Portaria, 4=IN, 5=Ordem de Serviço
 
   // Relacionamento com Lei 14.133/2021
-  leiArticles String? // JSON array com números de artigos regulamentados (ex: ["75", "76"])
+  leiArticles    String? // JSON array com números de artigos regulamentados (ex: ["75", "76"]) (legado — drop em PR 4.5.5)
+  leiArticlesArr String[] @default([]) // Onda 4.5: array nativo Postgres. Backfill em 4.5.2; dual-write 4.5.3; cutover 4.5.4.
 
   // Recursos e documentos
   officialUrl String? // Link para Planalto/DOU
@@ -1218,9 +1223,10 @@ model Lesson {
   dependents     Lesson[] @relation("LessonPrereq")
 
   // Campos IA
-  aiSummary   String? @db.Text
-  aiKeyPoints String? // JSON array
-  leiArticles String? // JSON array com números de artigos da Lei 14.133/2021
+  aiSummary      String?  @db.Text
+  aiKeyPoints    String? // JSON array
+  leiArticles    String? // JSON array com números de artigos da Lei 14.133/2021 (legado — drop em PR 4.5.5)
+  leiArticlesArr String[] @default([]) // Onda 4.5: array nativo Postgres. Backfill em 4.5.2; dual-write 4.5.3; cutover 4.5.4.
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -1404,7 +1410,7 @@ model Certificate {
   // Revogação — soft delete preservando histórico
   revokedAt    DateTime?
   revokedById  String?
-  revokeReason String?  @db.Text
+  revokeReason String?   @db.Text
 
   // Tracking de visualização da página pública
   viewCount  Int       @default(0)
@@ -1641,10 +1647,11 @@ model TribunalDecision {
   pdfUrl         String?
 
   // Classificação
-  isRelevant       Boolean @default(true)
-  relevanceScore   Int     @default(0) // 0-100
+  isRelevant       Boolean  @default(true)
+  relevanceScore   Int      @default(0) // 0-100
   themes           String? // JSON array: ["licitação", "contrato"]
-  leiArticles      String? // JSON array de artigos da Lei 14.133
+  leiArticles      String? // JSON array de artigos da Lei 14.133 (legado — drop em PR 4.5.5)
+  leiArticlesArr   String[] @default([]) // Onda 4.5: array nativo Postgres. Backfill em 4.5.2; dual-write 4.5.3; cutover 4.5.4.
   suggestedCourses String?
 
   // Fonte e rastreamento
