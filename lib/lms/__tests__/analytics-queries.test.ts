@@ -24,7 +24,7 @@ vi.mock('@/lib/logger', () => ({
 
 // ── Tests ──────────────────────────────────────────────────────────────────
 
-import { getQuizStatsBatch, getAttemptScoresByUser } from '@/lib/lms/analytics-queries';
+import { getQuizStatsBatch, getAttemptScoresByUser, getEnrolledUserQuizPassRates } from '@/lib/lms/analytics-queries';
 
 describe('getQuizStatsBatch', () => {
   beforeEach(() => {
@@ -113,5 +113,31 @@ describe('getAttemptScoresByUser', () => {
     });
     expect(result.get('u1')).toEqual([80, 90]);
     expect(result.get('u2')).toEqual([50]);
+  });
+});
+
+describe('getEnrolledUserQuizPassRates', () => {
+  beforeEach(() => mockFindMany.mockReset());
+
+  it('retorna 0 sem chamar prisma quando quizIds = []', async () => {
+    expect(await getEnrolledUserQuizPassRates('u1', [])).toBe(0);
+    expect(mockFindMany).not.toHaveBeenCalled();
+  });
+
+  it('conta quizzes distintos que o user passou', async () => {
+    mockFindMany.mockResolvedValue([
+      { quizId: 'q1' },
+      { quizId: 'q3' },
+    ]);
+
+    const count = await getEnrolledUserQuizPassRates('u1', ['q1', 'q2', 'q3']);
+
+    expect(mockFindMany).toHaveBeenCalledTimes(1);
+    expect(mockFindMany).toHaveBeenCalledWith({
+      where: { userId: 'u1', quizId: { in: ['q1', 'q2', 'q3'] }, passed: true },
+      distinct: ['quizId'],
+      select: { quizId: true },
+    });
+    expect(count).toBe(2);
   });
 });

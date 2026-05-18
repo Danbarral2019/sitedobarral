@@ -90,3 +90,20 @@ export async function getAttemptScoresByUser(
   }
   return byUser;
 }
+
+/**
+ * Conta quantos quizzes distintos (de um conjunto) o usuário aprovou.
+ * Usado em `/area-restrita/progress` para agregação por curso.
+ */
+export async function getEnrolledUserQuizPassRates(
+  userId: string,
+  quizIds: string[],
+): Promise<number> {
+  if (quizIds.length === 0) return 0;
+  const rows = await prisma.quizAttempt.findMany({
+    where: { userId, quizId: { in: quizIds }, passed: true },
+    distinct: ['quizId'],
+    select: { quizId: true },
+  });
+  return rows.length;
+}
