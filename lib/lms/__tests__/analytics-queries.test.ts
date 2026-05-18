@@ -63,4 +63,27 @@ describe('getQuizStatsBatch', () => {
       uniqueUsers: 3,
     });
   });
+
+  it('separa stats por quizId em batch multi-quiz', async () => {
+    mockFindMany.mockResolvedValue([
+      { quizId: 'q1', score: 100, passed: true, userId: 'u1' },
+      { quizId: 'q2', score: 30, passed: false, userId: 'u1' },
+      { quizId: 'q2', score: 70, passed: true, userId: 'u2' },
+    ]);
+
+    const result = await getQuizStatsBatch(['q1', 'q2', 'q3']);
+
+    expect(result.size).toBe(3);
+    expect(result.get('q1')).toMatchObject({ totalAttempts: 1, passedAttempts: 1, passRate: 100, avgScore: 100, uniqueUsers: 1 });
+    expect(result.get('q2')).toMatchObject({ totalAttempts: 2, passedAttempts: 1, passRate: 50, avgScore: 50, uniqueUsers: 2 });
+    expect(result.get('q3')).toMatchObject({ totalAttempts: 0, passedAttempts: 0, passRate: 0, avgScore: 0, uniqueUsers: 0 });
+  });
+
+  it('chama prisma.quizAttempt.findMany EXATAMENTE uma vez para N quizIds', async () => {
+    mockFindMany.mockResolvedValue([]);
+
+    await getQuizStatsBatch(['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j']);
+
+    expect(mockFindMany).toHaveBeenCalledTimes(1);
+  });
 });
