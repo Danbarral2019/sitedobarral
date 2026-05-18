@@ -107,3 +107,21 @@ export async function getEnrolledUserQuizPassRates(
   });
   return rows.length;
 }
+
+/**
+ * Retorna o conjunto de quizIds que o user passou, dentre os quizzes informados.
+ * Variante de `getEnrolledUserQuizPassRates` que retorna o Set em vez da contagem,
+ * útil quando o caller precisa testar `has(quizId)` (ex: rota `courses/modules`).
+ */
+export async function getPassedQuizIds(
+  userId: string,
+  quizIds: string[],
+): Promise<Set<string>> {
+  if (quizIds.length === 0) return new Set();
+  const rows = await prisma.quizAttempt.findMany({
+    where: { userId, quizId: { in: quizIds }, passed: true },
+    distinct: ['quizId'],
+    select: { quizId: true },
+  });
+  return new Set(rows.map(r => r.quizId));
+}
