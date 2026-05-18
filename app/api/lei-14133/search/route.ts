@@ -174,7 +174,7 @@ Regras:
         OR: [
           // Documentos vinculados aos artigos encontrados
           ...articleNumbers.map(num => ({
-            leiArticles: { contains: num }
+            leiArticlesArr: { has: num } // Onda 4.5.5: GIN; antes contains buggy ("75" casava "175")
           })),
           // Documentos que contenham termos de busca no título
           ...searchTerms.map((term: string) => ({
@@ -208,7 +208,7 @@ Regras:
         OR: [
           // Atos vinculados aos artigos encontrados
           ...articleNumbers.map(num => ({
-            leiArticles: { contains: num }
+            leiArticlesArr: { has: num } // Onda 4.5.5: GIN; antes contains buggy
           })),
           // Atos que contenham termos de busca no título
           ...searchTerms.map((term: string) => ({

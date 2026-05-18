@@ -138,7 +138,7 @@ export async function POST(
             AND: [
               {
                 OR: relatedArticleNumbers.map(num => ({
-                  leiArticles: { contains: num },
+                  leiArticlesArr: { has: num }, // Onda 4.5.5: usa GIN — antes era contains: num que fazia LIKE buggy ("75" casava "175")
                 })),
               },
               {
@@ -166,7 +166,7 @@ export async function POST(
         prisma.legislativeAct.findMany({
           where: {
             OR: relatedArticleNumbers.map(num => ({
-              leiArticles: { contains: `"${num}"` },
+              leiArticlesArr: { has: num }, // Onda 4.5.5: usa GIN (Bitmap Index Scan); antes era LIKE %"X"% sem índice
             })),
           },
           select: {

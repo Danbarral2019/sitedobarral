@@ -153,7 +153,7 @@ export const getRelatedForArticle = cache(
       const docs = await prisma.document.findMany({
         where: {
           isPublic: true,
-          leiArticles: { contains: `"${articleNumber}"` },
+          leiArticlesArr: { has: articleNumber }, // Onda 4.5.5: GIN Bitmap Index Scan
           category: { in: [...ACORDAO_CATEGORIES, ...PARECER_ON_CATEGORIES] },
         },
         select: {
