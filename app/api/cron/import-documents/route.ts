@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { fetchAcordaosTCU, type AcordaoTCU } from '@/lib/tcu-scraper';
-import { scrapeOrientacoesAGU, type OrientacaoNormativa } from '@/lib/agu-scraper';
+import { scrapeAGU } from '@/lib/agu-scraper-v4';
+import type { AGUDocument } from '@/lib/agu-types';
 import { verifyCronAuth } from '@/lib/cron-auth';
 import { withCronTelemetry } from '@/lib/cron-telemetry';
 import { apiLogger } from '@/lib/logger';
@@ -112,16 +113,20 @@ export async function GET(request: NextRequest) {
     try {
       console.log('[Cron Import] Executando scraper AGU...');
 
-      const aguOrientacoes = await scrapeOrientacoesAGU();
+      const aguResult = await scrapeAGU({
+        tipos: ['orientacao-normativa'],
+        filtroRelevancia: false, // cron importa tudo; admin filtra depois
+      });
+      const aguOrientacoes: AGUDocument[] = aguResult.results[0]?.documentos ?? [];
 
       // Filtra apenas ONs que ainda nao existem
-      const newOns: OrientacaoNormativa[] = [];
+      const newOns: AGUDocument[] = [];
       for (const on of aguOrientacoes) {
         const exists = await prisma.document.findFirst({
           where: {
             OR: [
-              { url: on.linkFundamentacao },
-              { title: on.numero },
+              { url: on.urlPDF ?? on.url },
+              { title: on.numero ?? '' },
             ],
           },
         });
@@ -135,9 +140,9 @@ export async function GET(request: NextRequest) {
       for (const on of newOns) {
         await prisma.document.create({
           data: {
-            title: on.numero,
+            title: on.numero ?? '',
             description: on.descricao || '',
-            url: on.linkFundamentacao || '',
+            url: on.urlPDF ?? on.url ?? '',
             type: 'pdf',
             category: 'orientacao-normativa',
             isPublic: false, // Privado ate admin revisar
@@ -150,11 +155,11 @@ export async function GET(request: NextRequest) {
               'AGU',
             ]),
             aiClassification: JSON.stringify({
-              source: 'agu-scraper',
+              source: 'agu-scraper-v4',
               orgao: 'AGU',
               data: on.ano,
-              onNumber: on.onNumber,
-              onYear: on.onYear,
+              onNumber: on.numeroInt,
+              onYear: on.ano,
             }),
           },
         });
