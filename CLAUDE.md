@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## ⚠️ CRITICAL REMINDERS
 
-1. **Working Directory:** SEMPRE rodar comandos de `C:\Users\User\projetos\sitedobarral\` (Windows desktop, desde 2026-05-08). Path antigo `/Users/danba/Site do Barral/sitedobarral/` (MacBook) está obsoleto.
+1. **Working Directory:** SEMPRE rodar comandos de `/Users/danba/Site do Barral/sitedobarral/` (MacBook).
 2. **Course IDs:** Database usa IDs numéricos (`'1'`, `'2'`), URLs usam slugs. Ver `COURSE_IDS_REFERENCE.md`
 3. **Documents:** NUNCA acessar `course.restrictedDocuments` - buscar via `/api/documents`
 4. **React Hooks:** Todos hooks ANTES de early returns
@@ -68,8 +68,9 @@ export DATABASE_URL="<your-db-url>" && npx tsx scripts/fix-csv-tags.ts  # Conver
 - `app/` - Next.js routes (public, `/area-restrita`, `/admin`)
 - `lib/` - Core utilities (auth, email, scrapers, versioning)
 - `lib/agu-modules/` - AGU scrapers (ONs, Pareceres, DECOR, Súmulas)
+- `lib/lms/` - Helpers LMS analytics (query-timing, analytics-queries, progress-aggregation) — criado na Onda 4.6
 - `components/` - React components
-- `prisma/schema.prisma` - Database schema (26 models)
+- `prisma/schema.prisma` - Database schema (70 models)
 - `scripts/` - Admin/import/scraping scripts
 - `lib/email-templates/` - Templates HTML de newsletter
 
@@ -574,6 +575,10 @@ Ver código para endpoints completos.
 ## Development Status
 
 **✅ Completed:**
+- **Onda 4.5 — JSON → String[] nativo PG (2026-05-17/18):** `leiArticles` migrado para `leiArticlesArr String[]` em 11 modelos Prisma + 7 GIN indexes. 5x speedup medido em prod. 9 PRs #72-#80. Drop coluna legada programado pra ~2026-06-01.
+- **Onda 4.6 — Performance LMS analytics (2026-05-18):** `lib/lms/` subdir com 3 arquivos (`query-timing.ts`, `analytics-queries.ts`, `progress-aggregation.ts`) + 6 helpers. N+1 eliminado em 4 endpoints LMS. 3 PRs #82-#84.
+- **Onda 4.7 — Single-flight em `withCache` (2026-05-18):** Dedup in-memory de chamadas concorrentes via `Map<key, Promise>` em `lib/cache/redis-client.ts`. 24 call sites herdam automaticamente. Leak protection `MAX_IN_FLIGHT=1000`. 2 PRs #85-#86.
+- **Onda 5 — Podar features mortas (2026-05-18):** ~1500 LOC removidas. Flag `DOU_CLIPPING_V2_ENABLED` + 440 LOC legacy dropadas, pages AGU admin duplicadas consolidadas (545 LOC), cron migrado de `agu-scraper.ts` v1 → v4 e v1 dropado (496 LOC). 3 PRs #87-#89.
 - Auth (JWT, QR codes, enrollment system)
 - Document management (versioning, Excel import, safe parsing)
 - Blog, publications, newsletter, social media
@@ -582,7 +587,7 @@ Ver código para endpoints completos.
 - Chat RAG with semantic search (Gemini)
 - Busca global com IA integrada (busca textual + semântica em paralelo)
 - Indexação pgvector completa: 428/429 docs, 1.598 chunks (DECOR, ONs, enunciados, pareceres vinculantes, acórdãos)
-- Fase 9: Automated testing (Vitest, 577 tests, 84%+ coverage)
+- Fase 9: Automated testing (Vitest 4, **1473+ tests**, ~73% global coverage — threshold global de 80% é pré-existente da campanha, não bloqueia merges com `--squash` direto)
 - Fase 10: Redis caching extensão e padronização (+50 rotas)
 - Fase 11: Monitoring (Sentry captureException em erros 500+, setUser após auth, tracking events server/client via Vercel Analytics)
 - Admin Versioning UI: histórico de versões (timeline), diff viewer, seção collapsible na página de edição
@@ -592,7 +597,6 @@ Ver código para endpoints completos.
 - Clipping Diário TCU: arquivo público + admin recipients + RTF + IA editorial — em produção desde 2026-05-07
 - Hub TCU + Hub Lei 14.133 + Busca IA no Analytics-hub (admin consolidado, abr/2026)
 - Módulo Planejamento (`app/area-restrita/planejamento`): sessões, documentos com seções/versões, biblioteca de snippets, trilhas
-- DOU Clipping v2 (atrás do flag `DOU_CLIPPING_V2_ENABLED`)
 - CONUNI sync (1.512 docs)
 - Registro aberto (sem QR Code), verificação email unificada (token hex)
 - Newsletter Analytics + Redesign: templates profissionais (weekly + monthly), tracking, dashboard admin
@@ -652,6 +656,14 @@ Ver código para endpoints completos.
 7. Script: `npx tsx scripts/migrate-to-embeddings.ts` (flags: `--dry-run`, `--limit N`, `--force`, `--concurrency N`)
 8. Stats: 428/429 docs indexados, 1.598 chunks, 1 falha (ON 41/2014 — texto insuficiente)
 - 📖 Ver `lib/embeddings/document-processor.ts`, `lib/embeddings/gemini-embeddings.ts`, `lib/embeddings/text-chunker.ts`
+
+### Single-flight em `withCache` (Onda 4.7)
+1. `withCache(key, fn, ttl, options)` consulta `inFlight: Map<string, Promise<unknown>>` antes de executar `fn()`
+2. Se já há promise registrada para a key: retorna ela compartilhada (todos callers concorrentes recebem mesmo resultado)
+3. `try/finally` garante `inFlight.delete(key)` em sucesso OU erro — sem cache poisoning
+4. Default-on; `options.singleFlight: false` opt-out disponível (nenhum caller atual usa)
+5. Leak protection: warning amostrado 1:100 quando `inFlight.size >= 1000`
+- 📖 Ver `lib/cache/redis-client.ts`, `lib/cache/__tests__/single-flight.test.ts`
 
 ### Atos Legislativos — Embeddings Separados
 1. `processLegislativeAct()` busca ato, monta texto (fullNumber + ementa + content)
@@ -723,6 +735,7 @@ fica para fase futura.
 - Usar padrão de error handling estabelecido (Fase 8) em todas novas rotas
 - Atualizar este CLAUDE.md quando adicionar features
 - Manter tom formal e profissional (contexto jurídico)
+- **Campanha de saneamento 2026-05:** 60 PRs em 6 ondas. Padrões consolidados: `withAdminApi`/`withUserApi`/`withPublicApi` em rotas (Onda 4), `lib/ai/index.ts` `generate()` como porta única para LLM (Onda 4.4), `lib/lms/` helpers (Onda 4.6), single-flight em `withCache` (Onda 4.7), `leiArticlesArr` array nativo (Onda 4.5). Antes de adicionar nova rota/feature, verificar se existe helper consolidado.
 
 **Business Rules:**
 
@@ -742,17 +755,17 @@ fica para fase futura.
 
 ---
 
-**First Time Setup (Windows, ambiente atual):**
+**First Time Setup (Mac, ambiente atual):**
 
-```powershell
-cd C:\Users\User\projetos\sitedobarral
+```bash
+cd "/Users/danba/Site do Barral/sitedobarral"
 npm install
-copy .env.example .env.local  # Editar com seus valores
-npx prisma generate; npx prisma db push
+cp .env.example .env.local  # Editar com seus valores
+npx prisma generate && npx prisma db push
 node scripts/create-admin.js admin@email.com password123 "Admin Name"
 npm run dev
 ```
 
-**Workflow git:** trunk-based em `main` (branch `develop` deletada em abr/2026). Ritmo atual: ~13 commits/dia. Deploy Vercel é manual (`vercel --prod`) — GitHub não está conectado ao projeto Vercel.
+**Workflow git:** trunk-based em `main` (branch `develop` deletada em abr/2026). Ritmo atual: ~13 commits/dia. **Auto-deploy ATIVO** (GitHub conectado ao projeto Vercel, ~4min build/deploy típico). PRs aprovadas e merged em main disparam deploy automaticamente.
 
 **Mais detalhes:** Ver arquivos de documentação listados acima.
