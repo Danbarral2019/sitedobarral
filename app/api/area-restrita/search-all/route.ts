@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { verifyAuth } from '@/lib/auth';
+import { apiLogger } from "@/lib/logger";
 
 export async function GET(request: NextRequest) {
   try {
@@ -93,7 +94,7 @@ export async function GET(request: NextRequest) {
       query,
     });
   } catch (error) {
-    console.error('Error searching:', error);
+    apiLogger.error({ err: error }, 'Error searching:');
     return NextResponse.json(
       { error: 'Erro ao buscar' },
       { status: 500 }

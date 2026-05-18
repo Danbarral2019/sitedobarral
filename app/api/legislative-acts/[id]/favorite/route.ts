@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { cookies } from 'next/headers';
 import { verifyToken } from '@/lib/auth';
+import { apiLogger } from "@/lib/logger";
 
 /**
  * POST /api/legislative-acts/[id]/favorite
@@ -84,7 +85,7 @@ export async function POST(
     }
 
   } catch (error) {
-    console.error('Erro ao favoritar ato:', error);
+    apiLogger.error({ err: error }, 'Erro ao favoritar ato:');
     return NextResponse.json(
       { error: 'Erro ao processar favorito' },
       { status: 500 }
@@ -129,7 +130,7 @@ export async function GET(
     });
 
   } catch (error) {
-    console.error('Erro ao verificar favorito:', error);
+    apiLogger.error({ err: error }, 'Erro ao verificar favorito:');
     return NextResponse.json({ isFavorite: false });
   }
 }

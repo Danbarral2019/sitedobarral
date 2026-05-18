@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { withCache, CacheKeys, CACHE_TTL } from '@/lib/cache/redis-client';
+import { apiLogger } from "@/lib/logger";
 
 interface TimelinePeriod {
   period: string;
@@ -164,7 +165,7 @@ export async function GET(
 
     return NextResponse.json(result);
   } catch (error) {
-    console.error('Erro ao buscar timeline:', error);
+    apiLogger.error({ err: error }, 'Erro ao buscar timeline:');
     return NextResponse.json(
       { error: 'Erro ao buscar timeline do artigo' },
       { status: 500 }

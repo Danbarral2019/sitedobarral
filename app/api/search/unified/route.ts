@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { verifyAuth } from '@/lib/auth';
+import { apiLogger } from "@/lib/logger";
 
 // ===========================
 // Types
@@ -366,7 +367,7 @@ export async function POST(req: NextRequest) {
     });
 
   } catch (error) {
-    console.error('❌ Unified search error:', error);
+    apiLogger.error({ err: error }, '❌ Unified search error:');
 
     return NextResponse.json<SearchResponse>(
       {

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { ENUNCIADOS, getEnunciadosPorArtigo, getEnunciadosPorOrgao, buscarEnunciados, ENUNCIADOS_METADATA } from '@/data/enunciados';
 import { withCache, CacheKeys, CACHE_TTL } from '@/lib/cache/redis-client';
+import { apiLogger } from "@/lib/logger";
 
 /**
  * GET /api/enunciados
@@ -49,7 +50,7 @@ export async function GET(request: NextRequest) {
     });
 
   } catch (error) {
-    console.error('[Enunciados API] Erro:', error);
+    apiLogger.error({ err: error }, '[Enunciados API] Erro:');
     return NextResponse.json(
       { error: 'Erro ao buscar enunciados' },
       { status: 500 }

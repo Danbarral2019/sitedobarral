@@ -1,6 +1,7 @@
 import { Metadata } from 'next';
 import { prisma } from '@/lib/prisma';
 import { LEI_14133_ARTIGOS as LEI_14133_ARTIGOS_FALLBACK } from '@/data/lei-14133-artigos';
+import { apiLogger } from "@/lib/logger";
 
 export async function generateMetadata({
   params,
@@ -26,7 +27,7 @@ export async function generateMetadata({
       };
     }
   } catch (error) {
-    console.error('Error fetching article for metadata:', error);
+    apiLogger.error({ err: error }, 'Error fetching article for metadata:');
   }
 
   // Fallback para arquivo se banco falhar

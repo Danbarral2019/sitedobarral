@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getTopArticles, getDocumentCountByArticle } from '@/lib/article-utils';
 import { prisma } from '@/lib/prisma';
 import { withCache, CacheKeys, CACHE_TTL } from '@/lib/cache/redis-client';
+import { apiLogger } from "@/lib/logger";
 
 export async function GET(request: NextRequest) {
   try {
@@ -42,7 +43,7 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json(result);
   } catch (error) {
-    console.error('Erro ao buscar top artigos:', error);
+    apiLogger.error({ err: error }, 'Erro ao buscar top artigos:');
     return NextResponse.json(
       { error: 'Erro ao buscar top artigos' },
       { status: 500 }

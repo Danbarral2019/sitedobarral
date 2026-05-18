@@ -5,6 +5,7 @@ import { zUpdateSectionBody } from "@/data/planejamento/types";
 import { createVersion } from "@/lib/planejamento/versioning";
 import { ValidationError, NotFoundError } from "@/lib/errors/api-error";
 import type { ApiContext } from "@/lib/api/types";
+import { apiLogger } from "@/lib/logger";
 
 export const PATCH = withUserApi<{ id: string; key: string }>(async (request: NextRequest, ctx: ApiContext<{ id: string; key: string }>) => {
   const { id, key } = ctx.params;
@@ -69,7 +70,7 @@ export const PATCH = withUserApi<{ id: string; key: string }>(async (request: Ne
         skipIfIdentical: true,
       });
     } catch (err) {
-      console.error("[planejamento/section] falhou auto-snapshot", err);
+      apiLogger.error({ err: err }, "[planejamento/section] falhou auto-snapshot");
     }
   }
 

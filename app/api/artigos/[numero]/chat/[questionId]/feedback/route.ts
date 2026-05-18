@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
+import { apiLogger } from "@/lib/logger";
 
 interface FeedbackRequest {
   wasHelpful: boolean;
@@ -62,7 +63,7 @@ export async function PATCH(
     });
 
   } catch (error) {
-    console.error('Erro ao salvar feedback:', error);
+    apiLogger.error({ err: error }, 'Erro ao salvar feedback:');
     return NextResponse.json(
       { error: 'Erro ao processar feedback' },
       { status: 500 }

@@ -5,7 +5,7 @@ import { cookies } from 'next/headers';
 import bcrypt from 'bcryptjs';
 import { enforceRateLimit, getClientIp } from '@/lib/cache/rate-limit-helper';
 import { RateLimitError } from '@/lib/errors/api-error';
-
+import { apiLogger } from "@/lib/logger";
 
 export async function POST(request: NextRequest) {
   try {
@@ -78,7 +78,7 @@ export async function POST(request: NextRequest) {
         { status: 429 }
       );
     }
-    console.error('Erro no login admin:', error);
+    apiLogger.error({ err: error }, 'Erro no login admin:');
     return NextResponse.json(
       { error: 'Erro ao processar login' },
       { status: 500 }

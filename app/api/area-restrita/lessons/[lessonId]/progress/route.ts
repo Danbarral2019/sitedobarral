@@ -141,7 +141,7 @@ export async function POST(
         });
         if (count === 1) {
           sendCourseWelcomeEmail(user.email, user.name, courseData.title, courseData.slug).catch(err =>
-            console.error('[lms-notification] Welcome email error:', err)
+            apiLogger.error({ err: err }, '[lms-notification] Welcome email error:')
           );
         }
       }
@@ -161,7 +161,7 @@ export async function POST(
           });
           if (mod) {
             sendModuleCompletionEmail(user.email, user.name, courseData.title, mod.title, courseData.slug).catch(err =>
-              console.error('[lms-notification] Module completion email error:', err)
+              apiLogger.error({ err: err }, '[lms-notification] Module completion email error:')
             );
           }
 

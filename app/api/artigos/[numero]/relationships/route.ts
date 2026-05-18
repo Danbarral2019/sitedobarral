@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { withCache, CacheKeys, CACHE_TTL } from '@/lib/cache/redis-client';
 import { parseLeiArticles } from '@/lib/lei-articles';
+import { apiLogger } from "@/lib/logger";
 
 interface ArticleRelationship {
   articleNumber: string;
@@ -89,7 +90,7 @@ export async function GET(
 
     return NextResponse.json(result);
   } catch (error) {
-    console.error('Erro ao calcular relacionamentos:', error);
+    apiLogger.error({ err: error }, 'Erro ao calcular relacionamentos:');
     return NextResponse.json(
       { error: 'Erro ao calcular relacionamentos entre artigos' },
       { status: 500 }

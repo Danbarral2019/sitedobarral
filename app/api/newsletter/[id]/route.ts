@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { getCurrentUser } from '@/lib/auth';
+import { apiLogger } from "@/lib/logger";
 
 /**
  * DELETE /api/newsletter/[id]
@@ -45,7 +46,7 @@ export async function DELETE(
       message: `Inscrito ${subscriber.email} deletado com sucesso`,
     });
   } catch (error) {
-    console.error('Erro ao deletar inscrito da newsletter:', error);
+    apiLogger.error({ err: error }, 'Erro ao deletar inscrito da newsletter:');
     return NextResponse.json(
       { error: 'Erro ao deletar inscrito' },
       { status: 500 }

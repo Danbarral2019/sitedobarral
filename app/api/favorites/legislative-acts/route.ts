@@ -3,6 +3,7 @@ import { prisma } from '@/lib/prisma';
 import { cookies } from 'next/headers';
 import { verifyToken } from '@/lib/auth';
 import { parseLeiArticles } from '@/lib/lei-articles';
+import { apiLogger } from "@/lib/logger";
 
 /**
  * GET /api/favorites/legislative-acts
@@ -78,7 +79,7 @@ export async function GET() {
     });
 
   } catch (error) {
-    console.error('Erro ao buscar favoritos:', error);
+    apiLogger.error({ err: error }, 'Erro ao buscar favoritos:');
     return NextResponse.json(
       { error: 'Erro ao buscar favoritos' },
       { status: 500 }

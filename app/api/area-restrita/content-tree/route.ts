@@ -4,6 +4,7 @@ import { verifyToken } from '@/lib/auth';
 import { courses } from '@/data/courses';
 import { LEI_14133_ARTIGOS } from '@/data/lei-14133-artigos';
 import type { ContentType, ContentTreeNode, ContentTreeResponse } from '@/lib/types/global-search';
+import { apiLogger } from "@/lib/logger";
 
 // Categorias que devem ser agrupadas sob "Pareceres"
 const PARECER_CATEGORIES = ['parecer', 'parecer-vinculante', 'decor'];
@@ -380,7 +381,7 @@ export async function GET(request: NextRequest) {
       totalCount,
     } as ContentTreeResponse);
   } catch (error) {
-    console.error('[Content Tree] Error:', error);
+    apiLogger.error({ err: error }, '[Content Tree] Error:');
     return NextResponse.json({ error: 'Failed to build content tree' }, { status: 500 });
   }
 }

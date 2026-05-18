@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { withCache, CacheKeys, CACHE_TTL, CacheInvalidation } from '@/lib/cache/redis-client';
 import { parseLeiArticles } from '@/lib/lei-articles';
+import { apiLogger } from "@/lib/logger";
 
 /**
  * GET /api/legislative-acts
@@ -69,7 +70,7 @@ export async function GET(request: NextRequest) {
     });
 
   } catch (error) {
-    console.error('Erro ao listar atos normativos:', error);
+    apiLogger.error({ err: error }, 'Erro ao listar atos normativos:');
     return NextResponse.json(
       { error: 'Erro ao listar atos normativos' },
       { status: 500 }

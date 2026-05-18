@@ -3,6 +3,7 @@ import { prisma } from '@/lib/prisma';
 import { withCache, CacheKeys, CACHE_TTL } from '@/lib/cache/redis-client';
 
 import { Prisma } from '@prisma/client';
+import { apiLogger } from "@/lib/logger";
 
 // GET /api/glossary - Listar todos os termos (com filtros opcionais)
 export async function GET(request: NextRequest) {
@@ -122,7 +123,7 @@ export async function GET(request: NextRequest) {
       headers: { 'Cache-Control': 'public, s-maxage=3600, stale-while-revalidate=7200' },
     });
   } catch (error) {
-    console.error('Error fetching glossary terms:', error);
+    apiLogger.error({ err: error }, 'Error fetching glossary terms:');
     return NextResponse.json(
       { error: 'Erro ao buscar termos do glossário' },
       { status: 500 }

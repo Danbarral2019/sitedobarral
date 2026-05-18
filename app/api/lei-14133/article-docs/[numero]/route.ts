@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { verifyAuth } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
 import { parseLeiArticles } from '@/lib/lei-articles';
+import { apiLogger } from "@/lib/logger";
 
 /**
  * GET /api/lei-14133/article-docs/[numero]
@@ -303,7 +304,7 @@ export async function GET(
       byCategory: orderedByCategory,
     });
   } catch (error) {
-    console.error('[article-docs] Erro:', error);
+    apiLogger.error({ err: error }, '[article-docs] Erro:');
     return NextResponse.json(
       { error: 'Erro ao buscar documentos do artigo' },
       { status: 500 }

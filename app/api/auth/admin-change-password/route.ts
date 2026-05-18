@@ -4,7 +4,7 @@ import { verifyAuth } from '@/lib/auth';
 import { enforceRateLimit, getClientIp } from '@/lib/cache/rate-limit-helper';
 import { RateLimitError } from '@/lib/errors/api-error';
 import bcrypt from 'bcryptjs';
-
+import { apiLogger } from "@/lib/logger";
 
 export async function POST(request: NextRequest) {
   try {
@@ -81,7 +81,7 @@ export async function POST(request: NextRequest) {
         { status: 429 }
       );
     }
-    console.error('Erro ao alterar senha:', error);
+    apiLogger.error({ err: error }, 'Erro ao alterar senha:');
     return NextResponse.json(
       { error: 'Erro ao processar solicitação' },
       { status: 500 }

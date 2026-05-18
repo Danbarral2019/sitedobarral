@@ -34,7 +34,7 @@ export async function GET(
     prisma.legislativeAct.update({
       where: { id: actId },
       data: { viewCount: { increment: 1 } }
-    }).catch(err => console.error('Erro ao incrementar viewCount:', err));
+    }).catch(err => apiLogger.error({ err: err }, 'Erro ao incrementar viewCount:'));
 
     // Cache the formatted response
     const formattedResponse = await withCache(

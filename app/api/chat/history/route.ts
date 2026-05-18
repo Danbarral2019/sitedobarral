@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { verifyToken } from '@/lib/auth';
+import { apiLogger } from "@/lib/logger";
 
 type QuestionSource = 'article' | 'assistant';
 
@@ -154,7 +155,7 @@ export async function GET(request: NextRequest) {
       data: { questions: grouped, stats },
     });
   } catch (error) {
-    console.error('Erro ao buscar histórico:', error);
+    apiLogger.error({ err: error }, 'Erro ao buscar histórico:');
     return NextResponse.json(
       { error: 'Erro ao buscar histórico' },
       { status: 500 }
@@ -211,7 +212,7 @@ export async function DELETE(request: NextRequest) {
       deleted: a.count + b.count,
     });
   } catch (error) {
-    console.error('Erro ao deletar histórico:', error);
+    apiLogger.error({ err: error }, 'Erro ao deletar histórico:');
     return NextResponse.json(
       { error: 'Erro ao deletar histórico' },
       { status: 500 }

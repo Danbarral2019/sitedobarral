@@ -2,6 +2,7 @@ import { notFound } from 'next/navigation';
 import Link from 'next/link';
 import ReactMarkdown from 'react-markdown';
 import { Home, ChevronRight, Eye, FileText, Tag } from 'lucide-react';
+import { apiLogger } from "@/lib/logger";
 
 interface RelatedDocument {
   id: string;
@@ -33,7 +34,7 @@ async function getTermBySlug(slug: string) {
     const data = await response.json();
     return data.term;
   } catch (error) {
-    console.error('Error fetching term:', error);
+    apiLogger.error({ err: error }, 'Error fetching term:');
     return null;
   }
 }

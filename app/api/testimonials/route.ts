@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { withCache, CacheKeys, CACHE_TTL } from '@/lib/cache/redis-client';
+import { apiLogger } from "@/lib/logger";
 
 /**
  * GET /api/testimonials
@@ -47,7 +48,7 @@ export async function GET() {
       headers: { 'Cache-Control': 'public, s-maxage=3600, stale-while-revalidate=7200' },
     });
   } catch (error) {
-    console.error('Erro ao buscar testimonials:', error);
+    apiLogger.error({ err: error }, 'Erro ao buscar testimonials:');
     return NextResponse.json(
       { error: 'Erro ao carregar depoimentos' },
       { status: 500 }

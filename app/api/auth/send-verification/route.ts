@@ -4,6 +4,7 @@ import crypto from 'crypto';
 import { enforceRateLimit, getClientIp } from '@/lib/cache/rate-limit-helper';
 import { RateLimitError } from '@/lib/errors/api-error';
 import { sendVerificationEmail } from '@/lib/email';
+import { apiLogger } from "@/lib/logger";
 
 /**
  * POST /api/auth/send-verification
@@ -85,7 +86,7 @@ export async function POST(request: NextRequest) {
         { status: 429 }
       );
     }
-    console.error('Erro ao enviar código de verificação:', error);
+    apiLogger.error({ err: error }, 'Erro ao enviar código de verificação:');
     return NextResponse.json(
       { error: 'Erro ao processar solicitação' },
       { status: 500 }

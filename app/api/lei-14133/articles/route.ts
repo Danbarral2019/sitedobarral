@@ -4,6 +4,7 @@ import { prisma } from '@/lib/prisma';
 import { parseLeiArticles } from '@/lib/lei-articles';
 import { ARTIGOS_ENUNCIADOS, ENUNCIADOS } from '@/data/enunciados';
 import { withCache, CacheKeys, CACHE_TTL } from '@/lib/cache/redis-client';
+import { apiLogger } from "@/lib/logger";
 
 /**
  * GET /api/lei-14133/articles
@@ -272,7 +273,7 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json(result);
   } catch (error) {
-    console.error('[Lei Articles API] Erro:', error);
+    apiLogger.error({ err: error }, '[Lei Articles API] Erro:');
 
     return NextResponse.json(
       {

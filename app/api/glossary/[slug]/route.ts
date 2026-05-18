@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { withCache, CacheKeys, CACHE_TTL } from '@/lib/cache/redis-client';
 import { parseLeiArticles } from '@/lib/lei-articles';
+import { apiLogger } from "@/lib/logger";
 
 // GET /api/glossary/[slug] - Obter termo específico por slug
 export async function GET(
@@ -35,7 +36,7 @@ export async function GET(
         where: { id: term.id },
         data: { viewCount: { increment: 1 } },
       })
-      .catch((err) => console.error('Error updating view count:', err));
+      .catch((err) => apiLogger.error({ err: err }, 'Error updating view count:'));
 
     // Cache the enriched term data (related terms, docs, etc.)
     const enrichedData = await withCache(
@@ -61,7 +62,7 @@ export async function GET(
               });
             }
           } catch (e) {
-            console.error('Error parsing relatedTerms:', e);
+            apiLogger.error({ err: e }, 'Error parsing relatedTerms:');
           }
         }
 
@@ -86,7 +87,7 @@ export async function GET(
               });
             }
           } catch (e) {
-            console.error('Error parsing relatedDocs:', e);
+            apiLogger.error({ err: e }, 'Error parsing relatedDocs:');
           }
         }
 
@@ -109,7 +110,7 @@ export async function GET(
       headers: { 'Cache-Control': 'public, s-maxage=3600, stale-while-revalidate=7200' },
     });
   } catch (error) {
-    console.error('Error fetching glossary term:', error);
+    apiLogger.error({ err: error }, 'Error fetching glossary term:');
     return NextResponse.json(
       { error: 'Erro ao buscar termo' },
       { status: 500 }

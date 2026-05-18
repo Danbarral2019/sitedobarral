@@ -4,6 +4,7 @@ import { randomBytes } from 'crypto';
 import { enforceRateLimit, getClientIp } from '@/lib/cache/rate-limit-helper';
 import { RateLimitError } from '@/lib/errors/api-error';
 import { sendPasswordResetEmail } from '@/lib/email';
+import { apiLogger } from "@/lib/logger";
 
 /**
  * POST /api/auth/request-reset
@@ -76,7 +77,7 @@ export async function POST(request: NextRequest) {
         { status: 429 }
       );
     }
-    console.error('Erro ao solicitar reset de senha:', error);
+    apiLogger.error({ err: error }, 'Erro ao solicitar reset de senha:');
     return NextResponse.json(
       { error: 'Erro ao processar solicitação' },
       { status: 500 }

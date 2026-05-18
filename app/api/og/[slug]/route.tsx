@@ -1,6 +1,7 @@
 import { ImageResponse } from '@vercel/og';
 import { NextRequest } from 'next/server';
 import { prisma } from '@/lib/prisma';
+import { apiLogger } from "@/lib/logger";
 
 // Mudado de 'edge' para 'nodejs' devido ao limite de tamanho (1MB) em Edge Functions
 // Node.js runtime não tem limite de tamanho
@@ -159,7 +160,7 @@ export async function GET(
       }
     );
   } catch (error) {
-    console.error('Erro ao gerar imagem OG:', error);
+    apiLogger.error({ err: error }, 'Erro ao gerar imagem OG:');
     return new Response('Erro ao gerar imagem', { status: 500 });
   }
 }

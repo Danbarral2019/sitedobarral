@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { verifyToken } from '@/lib/auth';
+import { apiLogger } from "@/lib/logger";
 
 /**
  * GET /api/area-restrita/batch-data
@@ -130,7 +131,7 @@ export async function GET(request: NextRequest) {
       console.log('[Batch-Data] Documentos encontrados:', documents.length);
       console.log('[Batch-Data] Documentos comuns:', documents.filter(d => d.isCommon).length);
     } catch (error) {
-      console.error('[Batch-Data] ERRO ao buscar documentos:', error);
+      apiLogger.error({ err: error }, '[Batch-Data] ERRO ao buscar documentos:');
       // Relança erro pois documentos são essenciais
       throw error;
     }
@@ -160,7 +161,7 @@ export async function GET(request: NextRequest) {
       });
       console.log('[Batch-Data] Vídeos encontrados:', videos.length);
     } catch (error) {
-      console.error('[Batch-Data] AVISO: Erro ao buscar vídeos (continuando sem vídeos):', error);
+      apiLogger.error({ err: error }, '[Batch-Data] AVISO: Erro ao buscar vídeos (continuando sem vídeos):');
       videos = []; // Continua sem vídeos
     }
 
@@ -190,7 +191,7 @@ export async function GET(request: NextRequest) {
       });
       console.log('[Batch-Data] Sites encontrados:', siteToCourse.length);
     } catch (error) {
-      console.error('[Batch-Data] AVISO: Erro ao buscar sites (continuando sem sites):', error);
+      apiLogger.error({ err: error }, '[Batch-Data] AVISO: Erro ao buscar sites (continuando sem sites):');
       siteToCourse = []; // Continua sem sites
     }
 
@@ -208,7 +209,7 @@ export async function GET(request: NextRequest) {
       });
       console.log('[Batch-Data] Module data:', Object.entries(moduleData).map(([id, d]) => `${id}:${d.moduleCount}m/${d.lessonCount}l`).join(', '));
     } catch (error) {
-      console.error('[Batch-Data] Warning: could not fetch module counts:', error);
+      apiLogger.error({ err: error }, '[Batch-Data] Warning: could not fetch module counts:');
     }
 
     // Otimizar payload: truncar description, remover tags e aiClassification.
@@ -285,7 +286,7 @@ export async function GET(request: NextRequest) {
     });
 
   } catch (error) {
-    console.error('Erro ao buscar dados batch da área restrita:', error);
+    apiLogger.error({ err: error }, 'Erro ao buscar dados batch da área restrita:');
     return NextResponse.json(
       { error: 'Erro ao buscar dados' },
       { status: 500 }

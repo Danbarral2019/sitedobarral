@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { verifyToken } from '@/lib/auth';
-
+import { apiLogger } from "@/lib/logger";
 
 // GET /api/favorites - Listar favoritos do usuário
 export async function GET(request: NextRequest) {
@@ -33,7 +33,7 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json({ favorites });
   } catch (error) {
-    console.error('Erro ao listar favoritos:', error);
+    apiLogger.error({ err: error }, 'Erro ao listar favoritos:');
     return NextResponse.json({ error: 'Erro ao listar favoritos' }, { status: 500 });
   }
 }
@@ -85,7 +85,7 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({ favorite }, { status: 201 });
   } catch (error) {
-    console.error('Erro ao adicionar favorito:', error);
+    apiLogger.error({ err: error }, 'Erro ao adicionar favorito:');
     return NextResponse.json({ error: 'Erro ao adicionar favorito' }, { status: 500 });
   }
 }
@@ -120,7 +120,7 @@ export async function DELETE(request: NextRequest) {
 
     return NextResponse.json({ message: 'Favorito removido com sucesso' });
   } catch (error) {
-    console.error('Erro ao remover favorito:', error);
+    apiLogger.error({ err: error }, 'Erro ao remover favorito:');
     return NextResponse.json({ error: 'Erro ao remover favorito' }, { status: 500 });
   }
 }

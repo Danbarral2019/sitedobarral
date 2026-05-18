@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { withCache, CacheKeys, CACHE_TTL } from '@/lib/cache/redis-client';
+import { apiLogger } from "@/lib/logger";
 
 /**
  * GET /api/artigos/[numero]/documents
@@ -129,7 +130,7 @@ export async function GET(
 
     return NextResponse.json(result);
   } catch (error) {
-    console.error('Erro ao buscar documentos do artigo:', error);
+    apiLogger.error({ err: error }, 'Erro ao buscar documentos do artigo:');
     return NextResponse.json(
       { error: 'Erro ao buscar documentos' },
       { status: 500 }

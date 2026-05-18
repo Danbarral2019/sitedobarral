@@ -1,6 +1,7 @@
 import { redirect } from 'next/navigation';
 import { prisma } from '@/lib/prisma';
 import ValidarAcessoForm from './ValidarAcessoForm';
+import { apiLogger } from "@/lib/logger";
 
 /**
  * Valida QR Code no servidor
@@ -31,7 +32,7 @@ async function validateQRCodeServer(code: string) {
       qrCode: code,
     };
   } catch (error) {
-    console.error('Erro ao validar QR code:', error);
+    apiLogger.error({ err: error }, 'Erro ao validar QR code:');
     return null;
   }
 }

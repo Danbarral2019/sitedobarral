@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { withCache, CacheKeys, CACHE_TTL } from '@/lib/cache/redis-client';
+import { apiLogger } from "@/lib/logger";
 
 export async function GET(request: NextRequest) {
   try {
@@ -45,7 +46,7 @@ export async function GET(request: NextRequest) {
       headers: { 'Cache-Control': 'public, s-maxage=1800, stale-while-revalidate=3600' },
     });
   } catch (error) {
-    console.error('Erro ao buscar vídeos do curso:', error);
+    apiLogger.error({ err: error }, 'Erro ao buscar vídeos do curso:');
     return NextResponse.json(
       { error: 'Erro ao buscar vídeos do curso' },
       { status: 500 }

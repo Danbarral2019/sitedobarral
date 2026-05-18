@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { withCache, CacheKeys, CACHE_TTL } from '@/lib/cache/redis-client';
 import { parseLeiArticles } from '@/lib/lei-articles';
+import { apiLogger } from "@/lib/logger";
 
 // GET /api/analytics/article-stats - Estatísticas de documentos por artigo
 export async function GET() {
@@ -38,7 +39,7 @@ export async function GET() {
               articleCounts[normalized]++;
             });
           } catch (error) {
-            console.error('Erro ao parsear leiArticles:', doc.id, error);
+            apiLogger.error({ docId: doc.id, err: error }, 'Erro ao parsear leiArticles');
           }
         });
 
@@ -78,7 +79,7 @@ export async function GET() {
               viewCounts[normalized] = (viewCounts[normalized] || 0) + viewCount;
             });
           } catch (error) {
-            console.error('Erro ao parsear leiArticles para views:', doc.id, error);
+            apiLogger.error({ docId: doc.id, err: error }, 'Erro ao parsear leiArticles para views');
           }
         });
 
@@ -117,7 +118,7 @@ export async function GET() {
 
     return NextResponse.json(result);
   } catch (error) {
-    console.error('Erro ao buscar estatísticas de artigos:', error);
+    apiLogger.error({ err: error }, 'Erro ao buscar estatísticas de artigos:');
     return NextResponse.json(
       { error: 'Erro ao buscar estatísticas' },
       { status: 500 }

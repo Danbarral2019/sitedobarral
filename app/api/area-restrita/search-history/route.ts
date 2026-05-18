@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { verifyAuth } from '@/lib/auth';
+import { apiLogger } from "@/lib/logger";
 
 export async function GET(req: NextRequest) {
   try {
@@ -17,7 +18,7 @@ export async function GET(req: NextRequest) {
 
     return NextResponse.json({ history });
   } catch (error) {
-    console.error('Error fetching search history:', error);
+    apiLogger.error({ err: error }, 'Error fetching search history:');
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }
@@ -56,7 +57,7 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json({ id: entry.id }, { status: 201 });
   } catch (error) {
-    console.error('Error saving search history:', error);
+    apiLogger.error({ err: error }, 'Error saving search history:');
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }
@@ -85,7 +86,7 @@ export async function DELETE(req: NextRequest) {
 
     return NextResponse.json({ success: true });
   } catch (error) {
-    console.error('Error deleting search history:', error);
+    apiLogger.error({ err: error }, 'Error deleting search history:');
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }

@@ -2,7 +2,7 @@ import { getCurrentUser } from '@/lib/auth';
 import { NextResponse } from 'next/server';
 import { checkAccessStatus } from '@/lib/enrollment-utils';
 import { prisma } from '@/lib/prisma';
-
+import { apiLogger } from "@/lib/logger";
 
 export async function GET() {
   try {
@@ -64,7 +64,7 @@ export async function GET() {
       },
     });
   } catch (error) {
-    console.error('Erro ao verificar autenticação:', error);
+    apiLogger.error({ err: error }, 'Erro ao verificar autenticação:');
     return NextResponse.json(
       { authenticated: false, error: 'Erro ao verificar acesso' },
       { status: 500 }

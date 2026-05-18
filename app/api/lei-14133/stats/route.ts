@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { extractArticleNumbers } from '@/lib/article-utils';
+import { apiLogger } from "@/lib/logger";
 
 export async function GET() {
   try {
@@ -39,7 +40,7 @@ export async function GET() {
       }
     );
   } catch (error) {
-    console.error('Error fetching article stats:', error);
+    apiLogger.error({ err: error }, 'Error fetching article stats:');
     return NextResponse.json(
       { error: 'Failed to fetch article statistics' },
       { status: 500 }

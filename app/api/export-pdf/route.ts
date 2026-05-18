@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { jwtVerify } from 'jose';
 import { prisma } from '@/lib/prisma';
 import jsPDF from 'jspdf';
+import { apiLogger } from "@/lib/logger";
 
 const JWT_SECRET = new TextEncoder().encode(process.env.JWT_SECRET || 'your-secret-key');
 
@@ -416,7 +417,7 @@ Email: contato@profdanielbarral.com.br
     });
 
   } catch (error) {
-    console.error('[Export PDF] Erro:', error);
+    apiLogger.error({ err: error }, '[Export PDF] Erro:');
     return NextResponse.json(
       { error: 'Erro ao gerar PDF' },
       { status: 500 }

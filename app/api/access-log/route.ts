@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { verifyToken } from '@/lib/auth';
-
+import { apiLogger } from "@/lib/logger";
 
 // POST /api/access-log - Registrar um acesso/download
 export async function POST(request: NextRequest) {
@@ -41,7 +41,7 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({ accessLog }, { status: 201 });
   } catch (error) {
-    console.error('Erro ao registrar acesso:', error);
+    apiLogger.error({ err: error }, 'Erro ao registrar acesso:');
     return NextResponse.json({ error: 'Erro ao registrar acesso' }, { status: 500 });
   }
 }
@@ -77,7 +77,7 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json({ logs });
   } catch (error) {
-    console.error('Erro ao listar acessos:', error);
+    apiLogger.error({ err: error }, 'Erro ao listar acessos:');
     return NextResponse.json({ error: 'Erro ao listar acessos' }, { status: 500 });
   }
 }

@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
+import { apiLogger } from "@/lib/logger";
 
 /**
  * GET /api/lei-14133/artigos
@@ -39,7 +40,7 @@ export async function GET() {
       artigos: artigosMap,
     });
   } catch (error) {
-    console.error('[Lei 14.133 Artigos API] Error:', error);
+    apiLogger.error({ err: error }, '[Lei 14.133 Artigos API] Error:');
     return NextResponse.json(
       {
         success: false,

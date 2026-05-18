@@ -9,6 +9,7 @@ import {
 } from "@/lib/planejamento/session-manager";
 import { ValidationError, NotFoundError } from "@/lib/errors/api-error";
 import type { ApiContext } from "@/lib/api/types";
+import { apiLogger } from "@/lib/logger";
 
 export const POST = withUserApi<{ id: string }>(async (request: NextRequest, ctx: ApiContext<{ id: string }>) => {
   const { id } = ctx.params;
@@ -44,7 +45,7 @@ export const POST = withUserApi<{ id: string }>(async (request: NextRequest, ctx
     try {
       document = await materializeDocumentFromTrail(id, trailSlug);
     } catch (err) {
-      console.error("[planejamento/onboarding] falhou ao materializar ETP", err);
+      apiLogger.error({ err: err }, "[planejamento/onboarding] falhou ao materializar ETP");
     }
   }
 

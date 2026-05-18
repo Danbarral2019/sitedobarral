@@ -4,6 +4,7 @@ import { RateLimitError } from '@/lib/errors/api-error';
 import { addSubscriber, unsubscribeSubscriber, isMailChimpConfigured } from '@/lib/mailchimp';
 import { prisma } from '@/lib/prisma';
 import { trackServerEvent } from '@/lib/monitoring/events';
+import { apiLogger } from "@/lib/logger";
 
 // POST - Cadastrar na newsletter
 export async function POST(request: NextRequest) {
@@ -65,10 +66,10 @@ export async function POST(request: NextRequest) {
             await addSubscriber(email, firstName, lastName, interests);
           } catch (err: unknown) {
             const error = err as Error;
-            console.error('[MailChimp] ERRO na reativação:', {
-              message: error.message,
-              error: error
-            });
+            apiLogger.error({
+                            message: error.message,
+                            error: error
+                          }, '[MailChimp] ERRO na reativação:');
             // Não falha a requisição se MailChimp falhar - email já foi reativado no BD
           }
         }
@@ -104,11 +105,11 @@ export async function POST(request: NextRequest) {
         await addSubscriber(email, firstName, lastName, interests);
       } catch (err: unknown) {
         const error = err as Error;
-        console.error('[MailChimp] ERRO DETALHADO:', {
-          message: error.message,
-          error: error,
-          stack: error.stack
-        });
+        apiLogger.error({
+                    message: error.message,
+                    error: error,
+                    stack: error.stack
+                  }, '[MailChimp] ERRO DETALHADO:');
         // Não falha a requisição se MailChimp falhar - email já foi salvo no BD
       }
     }
@@ -132,7 +133,7 @@ export async function POST(request: NextRequest) {
         { status: 429 }
       );
     }
-    console.error('Erro ao cadastrar newsletter:', error);
+    apiLogger.error({ err: error }, 'Erro ao cadastrar newsletter:');
     return NextResponse.json(
       { error: 'Erro ao cadastrar. Tente novamente.' },
       { status: 500 }
@@ -167,7 +168,7 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json({ subscribers });
   } catch (error) {
-    console.error('Erro ao listar inscritos:', error);
+    apiLogger.error({ err: error }, 'Erro ao listar inscritos:');
     return NextResponse.json(
       { error: 'Erro ao carregar inscritos' },
       { status: 500 }
@@ -203,7 +204,7 @@ export async function DELETE(request: NextRequest) {
         await unsubscribeSubscriber(email);
       } catch (err: unknown) {
         const error = err as Error;
-        console.error('[MailChimp] Erro ao cancelar inscrição:', error);
+        apiLogger.error({ err: error }, '[MailChimp] Erro ao cancelar inscrição:');
         // Não falha a requisição se MailChimp falhar - email já foi desativado no BD
       }
     }
@@ -212,7 +213,7 @@ export async function DELETE(request: NextRequest) {
       message: 'Inscrição cancelada com sucesso'
     });
   } catch (error) {
-    console.error('Erro ao cancelar inscrição:', error);
+    apiLogger.error({ err: error }, 'Erro ao cancelar inscrição:');
     return NextResponse.json(
       { error: 'Erro ao cancelar inscrição' },
       { status: 500 }

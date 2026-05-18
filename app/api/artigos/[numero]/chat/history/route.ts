@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { verifyAuth } from '@/lib/auth';
+import { apiLogger } from "@/lib/logger";
 
 interface HistoryMessage {
   id: string;
@@ -92,7 +93,7 @@ export async function GET(
     });
 
   } catch (error) {
-    console.error('Erro ao buscar histórico:', error);
+    apiLogger.error({ err: error }, 'Erro ao buscar histórico:');
     return NextResponse.json(
       { error: 'Erro ao buscar histórico' },
       { status: 500 }

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { verifyAuth } from '@/lib/auth';
+import { apiLogger } from "@/lib/logger";
 
 /**
  * PATCH /api/area-restrita/search-history/[id]/feedback
@@ -64,7 +65,7 @@ export async function PATCH(
 
     return NextResponse.json({ success: true });
   } catch (error) {
-    console.error('Error updating search history feedback:', error);
+    apiLogger.error({ err: error }, 'Error updating search history feedback:');
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 },

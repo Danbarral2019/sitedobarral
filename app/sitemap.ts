@@ -1,6 +1,8 @@
 import { MetadataRoute } from 'next';
 import { prisma } from '@/lib/prisma';
 import { courses } from '@/data/courses';
+import { apiLogger } from "@/lib/logger";
+
 const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || 'https://profdanielbarral.com';
 
 export const dynamic = 'force-dynamic';
@@ -87,7 +89,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       priority: 0.7,
     }));
   } catch (error) {
-    console.error('Erro ao gerar sitemap do blog:', error);
+    apiLogger.error({ err: error }, 'Erro ao gerar sitemap do blog:');
   }
 
   // Publicações não têm páginas individuais, apenas listagem em /publicacoes
@@ -107,7 +109,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       priority: 0.7,
     }));
   } catch (error) {
-    console.error('Erro ao gerar sitemap dos artigos:', error);
+    apiLogger.error({ err: error }, 'Erro ao gerar sitemap dos artigos:');
   }
 
   return [...staticPages, ...coursesPages, ...blogPages, ...articlePages];
