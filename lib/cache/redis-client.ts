@@ -652,6 +652,30 @@ export async function invalidateCacheByPrefix(prefix: string): Promise<number> {
 }
 
 // ===========================
+// Single-flight de-duplication (in-memory, per-process)
+// ===========================
+
+/**
+ * Mapa de promises em andamento para de-duplicar chamadas concorrentes
+ * com a mesma key. Vive no escopo do módulo (per-process).
+ *
+ * Quando 2+ callers ativam `withCache` para a mesma key durante um cache miss,
+ * apenas o primeiro registra a promise e executa `fn()`; os demais recebem
+ * a mesma promise via `inFlight.get(key)` e compartilham o resultado.
+ *
+ * O Map é limpo via `try/finally` na função wrappper. Não polui o cache em erro.
+ */
+const inFlight = new Map<string, Promise<unknown>>();
+
+/**
+ * @internal — usado apenas por testes. Limpa o registry de promises
+ * em andamento entre casos de teste.
+ */
+export function __resetInFlightForTesting(): void {
+  inFlight.clear();
+}
+
+// ===========================
 // Cache Wrapper
 // ===========================
 
@@ -661,6 +685,17 @@ export async function invalidateCacheByPrefix(prefix: string): Promise<number> {
 export interface WithCacheOptions {
   /** Prefix for registry (enables prefix-based invalidation) */
   prefix?: string;
+
+  /**
+   * Default: true. Single-flight de-duplica chamadas concorrentes para a
+   * mesma key dentro deste processo. Quando 2+ requests disparam cache miss
+   * para a mesma key simultaneamente, apenas uma roda `fn()`; as demais
+   * aguardam a mesma Promise e compartilham o resultado.
+   *
+   * Defina como false para optar por NÃO dedupar (raro — nenhum caller atual
+   * precisa). Útil apenas se `fn()` tiver side effects que devem ocorrer N vezes.
+   */
+  singleFlight?: boolean;
 }
 
 /**
@@ -690,17 +725,41 @@ export async function withCache<T>(
     return cached;
   }
 
-  // Execute function and cache result
   console.log(`❌ Cache MISS: ${key}`);
-  const result = await fn();
-  await setCache(key, result, ttl);
 
-  // Register key in prefix registry if specified
-  if (options?.prefix) {
-    await registerCacheKey(options.prefix, key);
+  // Single-flight: check if another caller is already computing this key
+  const singleFlightEnabled = options?.singleFlight !== false; // default true
+  if (singleFlightEnabled) {
+    const inProgress = inFlight.get(key) as Promise<T> | undefined;
+    if (inProgress) {
+      return inProgress;
+    }
   }
 
-  return result;
+  // First caller (or single-flight disabled): execute and cache
+  const promise = (async (): Promise<T> => {
+    try {
+      const result = await fn();
+      await setCache(key, result, ttl);
+
+      // Register key in prefix registry if specified
+      if (options?.prefix) {
+        await registerCacheKey(options.prefix, key);
+      }
+
+      return result;
+    } finally {
+      if (singleFlightEnabled) {
+        inFlight.delete(key);
+      }
+    }
+  })();
+
+  if (singleFlightEnabled) {
+    inFlight.set(key, promise);
+  }
+
+  return promise;
 }
 
 // ===========================
