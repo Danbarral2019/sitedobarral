@@ -4,6 +4,10 @@ import { prisma } from '@/lib/prisma';
 import { courses } from '@/data/courses';
 import { withTiming } from '@/lib/lms/query-timing';
 import { getQuizStatsBatch, getAttemptScoresByUser } from '@/lib/lms/analytics-queries';
+import {
+  groupProgressByUserModule,
+  computeModuleAvgCompletion,
+} from '@/lib/lms/progress-aggregation';
 
 export const GET = withAdminApi(async (request: NextRequest) => {
   const { searchParams } = new URL(request.url);
@@ -234,32 +238,28 @@ async function getCourseAnalytics(
   };
 
   // Progress per module
-  const moduleProgress = modules.map(m => {
-    const lessonIds = m.lessons.map(l => l.id);
-    const totalInModule = lessonIds.length;
-    if (totalInModule === 0) {
-      return { moduleId: m.id, title: m.title, avgCompletion: 0, totalLessons: 0 };
+  const lessonModuleMap = new Map<string, string>();
+  for (const m of modules) {
+    for (const l of m.lessons) {
+      lessonModuleMap.set(l.id, m.id);
     }
+  }
 
-    let totalCompletion = 0;
-    let usersWithProgress = 0;
+  const grouped = groupProgressByUserModule(
+    progress.map(p => ({ userId: p.userId, lessonId: p.lessonId, status: p.status })),
+    lessonModuleMap,
+  );
+  const avgByModule = new Map(
+    computeModuleAvgCompletion(grouped, modules.map(m => m.id))
+      .map(r => [r.moduleId, r.avgCompletion]),
+  );
 
-    for (const userId of enrolledUserIds) {
-      const userLessons = progress.filter(p => p.userId === userId && lessonIds.includes(p.lessonId));
-      const completedInModule = userLessons.filter(p => p.status === 'completed').length;
-      if (userLessons.length > 0) {
-        usersWithProgress++;
-        totalCompletion += (completedInModule / totalInModule) * 100;
-      }
-    }
-
-    return {
-      moduleId: m.id,
-      title: m.title,
-      avgCompletion: usersWithProgress > 0 ? Math.round(totalCompletion / usersWithProgress) : 0,
-      totalLessons: totalInModule,
-    };
-  });
+  const moduleProgress = modules.map(m => ({
+    moduleId: m.id,
+    title: m.title,
+    avgCompletion: avgByModule.get(m.id) ?? 0,
+    totalLessons: m.lessons.length,
+  }));
 
   // Quiz stats
   const quizIds = modules.flatMap(m =>
