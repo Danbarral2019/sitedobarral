@@ -132,7 +132,7 @@ async function fetchAtosNormativos(params: AtosParams) {
   }
 
   if (articleNumber) {
-    where.leiArticles = { contains: `"${articleNumber}"` };
+    where.leiArticlesArr = { has: articleNumber }; // Onda 4.5.5: GIN; antes LIKE %"X"%
   }
 
   if (theme) {

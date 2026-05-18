@@ -273,9 +273,9 @@ Exemplo de resposta: ["variação 1", "variação 2"]`;
 
     let complementaryResults: SearchResult[] = [];
     if (citedArticlesFromSemantic.length > 0) {
-      // Use exact JSON match: '"23"' matches ["23","75"] but not ["123","456"]
+      // Onda 4.5.5: leiArticlesArr usa GIN — match exato sem precisar do hack '"X"'
       const exactArticleMatches = citedArticlesFromSemantic.slice(0, 12).map(art => ({
-        leiArticles: { contains: `"${art}"` },
+        leiArticlesArr: { has: art },
       }));
 
       // Also search by description/content keywords from the query
