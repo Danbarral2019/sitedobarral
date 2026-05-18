@@ -76,4 +76,24 @@ describe('withTiming', () => {
     // restaurar referência caso outros testes mexam
     performance.now = originalNow;
   });
+
+  it('loga erro e re-throws o erro original em falha', async () => {
+    const original = new Error('boom');
+    let caught: unknown;
+    try {
+      await withTiming('lms.test.fail', async () => {
+        throw original;
+      });
+    } catch (e) {
+      caught = e;
+    }
+
+    expect(caught).toBe(original);
+    expect(mockLoggerError).toHaveBeenCalledTimes(1);
+    expect(mockLoggerError).toHaveBeenCalledWith(
+      expect.objectContaining({ lms_query: 'lms.test.fail', err: original }),
+      'lms.query.failed',
+    );
+    expect(mockLoggerInfo).not.toHaveBeenCalled();
+  });
 });
