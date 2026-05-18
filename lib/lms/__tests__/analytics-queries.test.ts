@@ -24,7 +24,7 @@ vi.mock('@/lib/logger', () => ({
 
 // ── Tests ──────────────────────────────────────────────────────────────────
 
-import { getQuizStatsBatch } from '@/lib/lms/analytics-queries';
+import { getQuizStatsBatch, getAttemptScoresByUser } from '@/lib/lms/analytics-queries';
 
 describe('getQuizStatsBatch', () => {
   beforeEach(() => {
@@ -85,5 +85,33 @@ describe('getQuizStatsBatch', () => {
     await getQuizStatsBatch(['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j']);
 
     expect(mockFindMany).toHaveBeenCalledTimes(1);
+  });
+});
+
+describe('getAttemptScoresByUser', () => {
+  beforeEach(() => mockFindMany.mockReset());
+
+  it('retorna Map vazio quando quizIds ou userIds vazios', async () => {
+    expect((await getAttemptScoresByUser([], ['u1'])).size).toBe(0);
+    expect((await getAttemptScoresByUser(['q1'], [])).size).toBe(0);
+    expect(mockFindMany).not.toHaveBeenCalled();
+  });
+
+  it('agrupa scores por userId em uma única query', async () => {
+    mockFindMany.mockResolvedValue([
+      { userId: 'u1', score: 80 },
+      { userId: 'u1', score: 90 },
+      { userId: 'u2', score: 50 },
+    ]);
+
+    const result = await getAttemptScoresByUser(['q1', 'q2'], ['u1', 'u2']);
+
+    expect(mockFindMany).toHaveBeenCalledTimes(1);
+    expect(mockFindMany).toHaveBeenCalledWith({
+      where: { quizId: { in: ['q1', 'q2'] }, userId: { in: ['u1', 'u2'] } },
+      select: { userId: true, score: true },
+    });
+    expect(result.get('u1')).toEqual([80, 90]);
+    expect(result.get('u2')).toEqual([50]);
   });
 });

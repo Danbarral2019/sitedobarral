@@ -63,3 +63,30 @@ export async function getQuizStatsBatch(
 
   return byQuiz;
 }
+
+/**
+ * Retorna scores agrupados por userId para um conjunto de quizzes.
+ * Substitui o padrão `prisma.quizAttempt.findMany({ quizId: {in}, userId: {in} })`
+ * em rota + agrupamento manual.
+ *
+ * Retorna Map vazio se qualquer array de entrada for vazio (curto-circuito).
+ */
+export async function getAttemptScoresByUser(
+  quizIds: string[],
+  userIds: string[],
+): Promise<Map<string, number[]>> {
+  if (quizIds.length === 0 || userIds.length === 0) return new Map();
+
+  const attempts = await prisma.quizAttempt.findMany({
+    where: { quizId: { in: quizIds }, userId: { in: userIds } },
+    select: { userId: true, score: true },
+  });
+
+  const byUser = new Map<string, number[]>();
+  for (const a of attempts) {
+    const list = byUser.get(a.userId);
+    if (list) list.push(a.score);
+    else byUser.set(a.userId, [a.score]);
+  }
+  return byUser;
+}
