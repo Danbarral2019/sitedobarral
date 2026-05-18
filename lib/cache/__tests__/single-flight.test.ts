@@ -146,4 +146,26 @@ describe('withCache single-flight', () => {
     expect(successFn).toHaveBeenCalledTimes(1);
     expect(mockSetex).toHaveBeenCalledWith('test:retry', 60, 100);
   });
+
+  it('singleFlight: false permite execução concorrente de fn() (escape hatch)', async () => {
+    let count = 0;
+    const fn = vi.fn(async () => {
+      const myCount = ++count;
+      // Yield para garantir intercalação
+      await Promise.resolve();
+      await Promise.resolve();
+      return myCount;
+    });
+
+    // 3 callers concorrentes COM escape hatch
+    const results = await Promise.all([
+      withCache('test:no-sf', fn, 60, { singleFlight: false }),
+      withCache('test:no-sf', fn, 60, { singleFlight: false }),
+      withCache('test:no-sf', fn, 60, { singleFlight: false }),
+    ]);
+
+    // Sem single-flight: fn chamado 3x, cada um retorna seu próprio número
+    expect(fn).toHaveBeenCalledTimes(3);
+    expect(results).toEqual([1, 2, 3]);
+  });
 });
