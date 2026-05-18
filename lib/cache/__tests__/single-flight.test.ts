@@ -98,4 +98,34 @@ describe('withCache single-flight', () => {
     // fn ainda só chamado 1 vez
     expect(fn).toHaveBeenCalledTimes(1);
   });
+
+  it('erro em fn() é propagado para todos os awaiters e não polui cache', async () => {
+    const originalError = new Error('Gemini timeout');
+    let rejectFn: (err: Error) => void = () => {};
+    const fn = vi.fn(() => new Promise<number>((_resolve, reject) => {
+      rejectFn = reject;
+    }));
+
+    // 2 callers concorrentes
+    const a = withCache('test:error', fn, 60).catch((e) => e);
+    const b = withCache('test:error', fn, 60).catch((e) => e);
+
+    await Promise.resolve();
+    await Promise.resolve();
+
+    rejectFn(originalError);
+
+    const resultA = await a;
+    const resultB = await b;
+
+    // Ambos recebem o mesmo erro original (mesma instância)
+    expect(resultA).toBe(originalError);
+    expect(resultB).toBe(originalError);
+
+    // fn() chamado apenas 1 vez (single-flight ativo)
+    expect(fn).toHaveBeenCalledTimes(1);
+
+    // setCache NÃO foi chamado (erro impede)
+    expect(mockSetex).not.toHaveBeenCalled();
+  });
 });
