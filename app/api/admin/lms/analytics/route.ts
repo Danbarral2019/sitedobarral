@@ -3,6 +3,7 @@ import { withAdminApi } from '@/lib/api/handler';
 import { prisma } from '@/lib/prisma';
 import { courses } from '@/data/courses';
 import { withTiming } from '@/lib/lms/query-timing';
+import { getQuizStatsBatch, getAttemptScoresByUser } from '@/lib/lms/analytics-queries';
 
 export const GET = withAdminApi(async (request: NextRequest) => {
   const { searchParams } = new URL(request.url);
@@ -265,31 +266,19 @@ async function getCourseAnalytics(
     m.lessons.filter(l => l.quiz).map(l => ({ lessonTitle: l.title, quizId: l.quiz!.id }))
   );
 
-  const quizStats = await Promise.all(
-    quizIds.map(async ({ lessonTitle, quizId }) => {
-      const attempts = await prisma.quizAttempt.findMany({
-        where: { quizId },
-        select: { score: true, passed: true, userId: true },
-      });
-
-      const totalAttempts = attempts.length;
-      const passedAttempts = attempts.filter(a => a.passed).length;
-      const avgScore = totalAttempts > 0
-        ? Math.round(attempts.reduce((sum, a) => sum + a.score, 0) / totalAttempts)
-        : 0;
-      const uniqueUsers = new Set(attempts.map(a => a.userId)).size;
-
-      return {
-        lessonTitle,
-        quizId,
-        totalAttempts,
-        passedAttempts,
-        passRate: totalAttempts > 0 ? Math.round((passedAttempts / totalAttempts) * 100) : 0,
-        avgScore,
-        uniqueUsers,
-      };
-    })
-  );
+  const statsByQuiz = await getQuizStatsBatch(quizIds.map(q => q.quizId));
+  const quizStats = quizIds.map(({ lessonTitle, quizId }) => {
+    const stats = statsByQuiz.get(quizId);
+    return {
+      lessonTitle,
+      quizId,
+      totalAttempts: stats?.totalAttempts ?? 0,
+      passedAttempts: stats?.passedAttempts ?? 0,
+      passRate: stats?.passRate ?? 0,
+      avgScore: stats?.avgScore ?? 0,
+      uniqueUsers: stats?.uniqueUsers ?? 0,
+    };
+  });
 
   // Student table
   const userDetails = enrolledUserIds.length > 0
@@ -300,19 +289,10 @@ async function getCourseAnalytics(
     : [];
 
   // Quiz scores by user
-  const allQuizAttempts = quizIds.length > 0
-    ? await prisma.quizAttempt.findMany({
-        where: { quizId: { in: quizIds.map(q => q.quizId) }, userId: { in: enrolledUserIds } },
-        select: { userId: true, score: true },
-      })
-    : [];
-
-  const quizScoresByUser = new Map<string, number[]>();
-  for (const a of allQuizAttempts) {
-    const scores = quizScoresByUser.get(a.userId) || [];
-    scores.push(a.score);
-    quizScoresByUser.set(a.userId, scores);
-  }
+  const quizScoresByUser = await getAttemptScoresByUser(
+    quizIds.map(q => q.quizId),
+    enrolledUserIds,
+  );
 
   const students = userDetails.map(u => {
     const userProgress = progressByUser.get(u.id) || { started: 0, completed: 0, lastAccess: null };
