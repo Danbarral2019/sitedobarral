@@ -15,6 +15,7 @@
 
 import { Redis } from '@upstash/redis';
 import { apiLogger } from "@/lib/logger";
+import * as Sentry from '@sentry/nextjs';
 
 // ===========================
 // Configuration
@@ -668,6 +669,30 @@ export async function invalidateCacheByPrefix(prefix: string): Promise<number> {
 const inFlight = new Map<string, Promise<unknown>>();
 
 /**
+ * Threshold informacional. Em condições normais `inFlight.size` é < 10.
+ * Atingir este valor indica vazamento provável (try/finally falhou em algum lugar).
+ * Não recusa novas entradas — apenas alerta com sampling 1:100 para não floodar.
+ */
+const MAX_IN_FLIGHT = 1000;
+
+function registerInFlight<T>(key: string, promise: Promise<T>): void {
+  if (inFlight.size >= MAX_IN_FLIGHT) {
+    // Sampling 1:100 para evitar flood Sentry/logs em vazamento contínuo
+    if (Math.random() < 0.01) {
+      apiLogger.warn(
+        { cache_in_flight_size: inFlight.size, max: MAX_IN_FLIGHT },
+        'cache.single_flight.high_water_mark',
+      );
+      Sentry.captureMessage('cache.in_flight.exceeded_threshold', {
+        level: 'warning',
+        extra: { size: inFlight.size, max: MAX_IN_FLIGHT },
+      });
+    }
+  }
+  inFlight.set(key, promise);
+}
+
+/**
  * @internal — usado apenas por testes. Limpa o registry de promises
  * em andamento entre casos de teste.
  */
@@ -756,7 +781,7 @@ export async function withCache<T>(
   })();
 
   if (singleFlightEnabled) {
-    inFlight.set(key, promise);
+    registerInFlight(key, promise);
   }
 
   return promise;
