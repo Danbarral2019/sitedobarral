@@ -92,30 +92,59 @@ describe('getLeiArticles', () => {
   })
 })
 
-describe('setLeiArticles', () => {
-  it('produz objeto Prisma data pra array não-vazio', () => {
-    expect(setLeiArticles(['75', '18'])).toEqual({ leiArticles: '["75","18"]' })
+describe('setLeiArticles (dual-write — Onda 4.5.3)', () => {
+  it('produz ambas as colunas pra array não-vazio', () => {
+    expect(setLeiArticles(['75', '18'])).toEqual({
+      leiArticles: '["75","18"]',
+      leiArticlesArr: ['75', '18'],
+    })
   })
 
-  it('preserva [] como JSON empty string (mantém compat com pattern dominante)', () => {
+  it('preserva [] como JSON empty string + array nativo vazio', () => {
     // Pattern dominante existente: `arr ? JSON.stringify(arr) : null`
     // → `[] ? JSON.stringify([]) : null` → '[]' (porque [] é truthy)
-    expect(setLeiArticles([])).toEqual({ leiArticles: '[]' })
+    expect(setLeiArticles([])).toEqual({ leiArticles: '[]', leiArticlesArr: [] })
   })
 
-  it('retorna leiArticles: null pra null', () => {
-    expect(setLeiArticles(null)).toEqual({ leiArticles: null })
+  it('null → leiArticles null + leiArticlesArr vazio (clear semantics)', () => {
+    // leiArticlesArr SEMPRE escrito (mesmo no clear) pra evitar staleness pós-update parcial
+    expect(setLeiArticles(null)).toEqual({ leiArticles: null, leiArticlesArr: [] })
   })
 
-  it('retorna leiArticles: null pra undefined', () => {
-    expect(setLeiArticles(undefined)).toEqual({ leiArticles: null })
+  it('undefined → leiArticles null + leiArticlesArr vazio', () => {
+    expect(setLeiArticles(undefined)).toEqual({ leiArticles: null, leiArticlesArr: [] })
   })
 
-  it('uso com spread em Prisma update', () => {
+  it('uso com spread em Prisma update — popula ambos os campos', () => {
     const data = {
       title: 'Doc',
       ...setLeiArticles(['75']),
     }
-    expect(data).toEqual({ title: 'Doc', leiArticles: '["75"]' })
+    expect(data).toEqual({
+      title: 'Doc',
+      leiArticles: '["75"]',
+      leiArticlesArr: ['75'],
+    })
+  })
+
+  it('coerce números pra string em ambos os campos', () => {
+    // Defesa contra callers legados que passam number[] (ex: scripts/sync-tcu-manual)
+    const result = setLeiArticles([75 as unknown as string, 18 as unknown as string])
+    expect(result).toEqual({
+      leiArticles: '["75","18"]',
+      leiArticlesArr: ['75', '18'],
+    })
+  })
+
+  it('leiArticles e leiArticlesArr são semanticamente equivalentes (round-trip)', () => {
+    const input = ['75', '18', '184-A']
+    const { leiArticles, leiArticlesArr } = setLeiArticles(input)
+    expect(JSON.parse(leiArticles!)).toEqual(leiArticlesArr)
+  })
+
+  it('preserva ordem dos elementos em ambos os campos', () => {
+    const result = setLeiArticles(['18', '75', '6'])
+    expect(result.leiArticles).toBe('["18","75","6"]')
+    expect(result.leiArticlesArr).toEqual(['18', '75', '6'])
   })
 })
