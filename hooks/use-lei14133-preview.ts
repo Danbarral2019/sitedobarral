@@ -12,6 +12,26 @@ export interface EnunciadoResumo {
   url?: string;
 }
 
+export interface CuratedCrossRef {
+  id: string;
+  targetNumber: string;
+  note: string;
+  order: number;
+}
+
+export interface SuggestedReading {
+  id: string;
+  kind: 'internal' | 'external';
+  internalType?: string | null;
+  internalId?: string | null;
+  externalUrl?: string | null;
+  externalType?: string | null;
+  title?: string | null;
+  description?: string | null;
+  author?: string | null;
+  order: number;
+}
+
 export interface LeiArticle {
   id: string;
   numero: string;
@@ -24,6 +44,11 @@ export interface LeiArticle {
   documents: { id: string; title: string; isPublic: boolean; category: string | null; type?: string }[];
   enunciadoCount?: number;
   enunciados?: EnunciadoResumo[];
+  // Campos opcionais usados pela /lei-14133 (publica) — preview nao consome
+  professorComment?: string | null;
+  commentUpdatedAt?: string | null;
+  crossRefs?: CuratedCrossRef[];
+  suggestedReadings?: SuggestedReading[];
 }
 
 export interface HierarchyCapitulo {
