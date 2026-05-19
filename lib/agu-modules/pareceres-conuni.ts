@@ -17,6 +17,7 @@ import {
   extractTags,
 } from './helpers';
 import { apiLogger } from "@/lib/logger";
+import { fetchWithRetry } from '../tribunal-scrapers/utils';
 
 /**
  * Interface para dados brutos de um Parecer CONUNI extraído do sistema DECOR
@@ -66,12 +67,7 @@ export async function scrapeParecerCONUNI(
     // (limitado - pode não pegar conteúdo JavaScript)
     console.log('[AGU DECOR] Tentando fallback com fetch HTTP...');
 
-    const response = await fetch('https://cgu.agu.gov.br/decor/', {
-      headers: {
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
-        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
-      },
-    });
+    const response = await fetchWithRetry('https://cgu.agu.gov.br/decor/');
 
     if (!response.ok) {
       throw new Error(`HTTP ${response.status}: ${response.statusText}`);

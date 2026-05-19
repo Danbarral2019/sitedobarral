@@ -145,6 +145,8 @@ export async function fetchConuniApi(): Promise<ConuniItem[]> {
     method: 'POST',
     headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
     body: API_BODY,
+    // 30s timeout — server CONUNI travado bloqueava o cron até timeout do runtime
+    signal: AbortSignal.timeout(30000),
   });
   if (!res.ok) throw new Error(`CONUNI API HTTP ${res.status}`);
   const data = (await res.json()) as { erro: string; info: ConuniItem[] };
