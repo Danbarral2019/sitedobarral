@@ -4,6 +4,7 @@ import { cookies } from "next/headers";
 import { verifyToken } from "@/lib/auth";
 import { listSessions } from "@/lib/planejamento/session-manager";
 import { FileText, Plus, Clock } from "lucide-react";
+import PlanningOnboardingBanner from "@/components/planejamento/PlanningOnboardingBanner";
 
 export const dynamic = "force-dynamic";
 
@@ -39,6 +40,8 @@ export default async function PlanejamentoListPage() {
           Nova contratação
         </Link>
       </header>
+
+      <PlanningOnboardingBanner showByDefault={sessions.length === 0} />
 
       {sessions.length === 0 ? (
         <div className="rounded-xl border-2 border-dashed border-gray-200 p-12 text-center">
