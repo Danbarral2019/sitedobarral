@@ -328,6 +328,75 @@ Sidebar reduzido de 21 para 14 itens agrupando páginas relacionadas com tabs UR
 
 ---
 
+## 🎯 Onda 7.4 — Decisões de Produto (2026-05-19)
+
+Decisões coletadas para 14 features dormentes da campanha de saneamento.
+
+### ✅ Dropadas (Onda 7.4 PR técnica)
+- **DocumentAnalysis** — drop model (vinculado a Sistema D removido na PR #9)
+- **LessonComment** — drop model + LessonDiscussion.tsx + 2 rotas + Contributor badge
+
+### ⏳ Ativar (depende de você)
+
+#### A1. Gamificação — popular Badges + ativar UserStreak [Média]
+- Models prontos: Badge, UserStreak
+- Tarefas:
+  - Popular 6-10 badges iniciais via admin (first_lesson, first_quiz, module_complete, course_complete, streak_7, streak_30)
+  - Reativar cron `compute-streaks` no `vercel.json` (atualmente pausado)
+  - Validar fluxo end-to-end: aluno completa aula → recebe XP → eventual badge
+
+#### A2. SocialMediaPost — reativar publicação em redes [Média]
+- APIs prontas: `/api/admin/social/{posts,publish,retry}`
+- Tarefas:
+  - Validar credentials INSTAGRAM_* e LINKEDIN_* no .env
+  - Ativar cron de publicação no vercel.json
+  - Criar 2-3 posts piloto via admin
+
+#### A3. Quiz LMS — criar quizzes pros cursos [Alta]
+- Models prontos: Quiz, QuizQuestion, QuizAttempt
+- Componente pronto: QuizPlayer.tsx
+- Tarefas:
+  - Criar 1-2 quizzes piloto via admin (`/admin/lms/{courseId}/lessons/{lessonId}/quiz`)
+  - Validar fluxo: aluno responde quiz → XP/badge correto
+
+#### A4. CourseVideo/LessonVideo — hostear vídeos próprios [Alta]
+- Pipeline pronto: admin upload + R2 storage configurado
+- Tarefas:
+  - Gravar aulas
+  - Upload via admin LMS
+  - Decidir resolução/codec target
+
+#### A5. LeiArticleCrossRef — popular cross-refs entre artigos [Média]
+- Admin pronto: `CrossRefsEditor.tsx`
+- Componente público pronto: `LeiCuratedCrossRefs.tsx` (PR #94)
+- Tarefas: trabalho manual de curadoria, popular ~50 cross-refs entre artigos relacionados
+
+#### A6. LeiArticleSuggestedReading — popular leituras sugeridas [Média]
+- Admin pronto
+- Componente público pronto: `LeiSuggestedReadings.tsx` (PR #94)
+- Tarefas: popular leituras (blog posts, doutrina externa, glossário) por artigo
+
+#### A7. FAQ — construir frontend + popular 30 perguntas [Alta]
+- Backend pronto: models FAQ + FAQFeedback, full-text-search integrado
+- Tarefas:
+  - **Frontend novo:** página `/faq` pública + admin de perguntas (~1.5d dev)
+  - Redigir 30 perguntas iniciais
+  - Validar integração com busca global
+
+#### A8. Planning sub-system — onboarding pros alunos [Média]
+- 17 rotas + 6 models prontos
+- Tarefas:
+  - Criar tutorial em vídeo/texto explicando módulo planejamento
+  - Email pra alunos comunicando feature
+  - Acompanhar adoção (atualmente: 1 sessão real em 7 meses)
+
+### 🟡 Mantidas dormentes (sem ação)
+- **LeiArticleNote** — anotações do aluno (UI não construída, aguardar pedido)
+- **Publication** — publicações acadêmicas (admin pronto, popular quando tiver)
+- **DOUSavedFilter** — filtros DOU salvos (admin pronto, usar quando quiser)
+
+---
+
 ## NOVAS FUNCIONALIDADES
 
 ### T7. Sistema de Certificações Digitais ✅ CONCLUÍDO (2026-05-07)

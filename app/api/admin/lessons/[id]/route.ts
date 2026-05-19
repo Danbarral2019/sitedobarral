@@ -26,7 +26,6 @@ export const GET = withAdminApi<{ id: string }>(async (_request, { params }) => 
       _count: {
         select: {
           progress: true,
-          comments: true,
         },
       },
     },

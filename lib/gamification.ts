@@ -8,8 +8,6 @@ export const XP_VALUES = {
   COMPLETE_LESSON: 10,
   PASS_QUIZ: 25,
   PERFECT_QUIZ: 50,
-  POST_COMMENT: 5,
-  BEST_ANSWER: 20,
   COMPLETE_MODULE: 50,
   COMPLETE_COURSE: 200,
   STREAK_7: 30,
@@ -27,8 +25,6 @@ export const BADGE_TYPES = {
   course_complete:  { type: 'course_complete',   label: 'Curso Completo',   icon: '\u{1F393}', description: 'Concluiu 100% do curso' },
   streak_7:         { type: 'streak_7',          label: '7 Dias Seguidos',  icon: '\u{1F525}', description: 'Estudou 7 dias consecutivos' },
   streak_30:        { type: 'streak_30',         label: '30 Dias Seguidos', icon: '\u26A1',     description: 'Estudou 30 dias consecutivos' },
-  contributor:      { type: 'contributor',       label: 'Contribuidor',     icon: '\u{1F4AC}', description: 'Fez 10+ comentarios' },
-  best_answer:      { type: 'best_answer',       label: 'Melhor Resposta',  icon: '\u2B50',     description: 'Teve uma resposta marcada como melhor' },
 } as const;
 
 export type BadgeType = keyof typeof BADGE_TYPES;
@@ -151,7 +147,7 @@ export async function awardBadge(
 export async function checkAndAwardBadges(
   userId: string,
   courseId: string,
-  event: 'lesson_complete' | 'quiz_pass' | 'module_complete' | 'course_complete' | 'comment'
+  event: 'lesson_complete' | 'quiz_pass' | 'module_complete' | 'course_complete'
 ) {
   switch (event) {
     case 'lesson_complete': {
@@ -187,16 +183,6 @@ export async function checkAndAwardBadges(
       break;
     }
 
-    case 'comment': {
-      // Contributor badge (10+ comments)
-      const commentCount = await prisma.lessonComment.count({
-        where: { userId, isDeleted: false },
-      });
-      if (commentCount >= 10) {
-        await awardBadge(userId, 'contributor', courseId);
-      }
-      break;
-    }
   }
 }
 
