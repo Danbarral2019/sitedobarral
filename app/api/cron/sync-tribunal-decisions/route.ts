@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import * as Sentry from '@sentry/nextjs';
 import { prisma } from '@/lib/prisma';
 import { verifyCronAuth } from '@/lib/cron-auth';
 import { apiLogger } from '@/lib/logger';
@@ -104,6 +105,7 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json({ success: true, summary, results });
   } catch (error) {
+    Sentry.captureException(error, { tags: { cron: 'sync-tribunal-decisions' } });
     apiLogger.error({ err: error }, '[Sync Tribunal Decisions] Erro fatal:');
     return NextResponse.json(
       { error: error instanceof Error ? error.message : 'Internal server error' },

@@ -6,6 +6,7 @@
 
 import type { AGUDocument, AGUScraperConfig, AGUScraperResult } from '../agu-types';
 import type { Document as PrismaDocument } from '@prisma/client';
+import { fetchWithRetry } from '../tribunal-scrapers/utils';
 import {
   analyzeRelevancia,
   suggestCursos,
@@ -62,12 +63,7 @@ export async function scrapeOrientacoesNormativas(
     // const page = await playwright.newPage();
     // await page.goto('https://www.gov.br/agu/pt-br/composicao/cgu/cgu/onsagu');
 
-    const response = await fetch('https://www.gov.br/agu/pt-br/composicao/cgu/cgu/onsagu', {
-      headers: {
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
-        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
-      },
-    });
+    const response = await fetchWithRetry('https://www.gov.br/agu/pt-br/composicao/cgu/cgu/onsagu');
 
     if (!response.ok) {
       throw new Error(`HTTP ${response.status}: ${response.statusText}`);

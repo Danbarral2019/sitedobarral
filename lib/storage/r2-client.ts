@@ -33,6 +33,7 @@ import {
   HeadObjectCommand,
 } from '@aws-sdk/client-s3';
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
+import * as Sentry from '@sentry/nextjs';
 
 // ===========================
 // Configuration
@@ -49,6 +50,11 @@ const hasR2Config = Boolean(R2_ACCOUNT_ID && R2_ACCESS_KEY_ID && R2_SECRET_ACCES
 
 function validateR2Config() {
   if (!hasR2Config) {
+    // Alerta admin no Sentry — config faltando em prod só aparecia no primeiro request real (P2.7)
+    Sentry.captureMessage('R2 config faltando: storage chamado sem env vars configuradas', {
+      level: 'error',
+      tags: { component: 'r2-client' },
+    });
     throw new Error('Missing R2 environment variables. Check .env.local for R2_ACCOUNT_ID, R2_ACCESS_KEY_ID, R2_SECRET_ACCESS_KEY, and R2_BUCKET_NAME');
   }
 }

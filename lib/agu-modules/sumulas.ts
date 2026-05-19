@@ -14,6 +14,7 @@ import {
   extractTags,
 } from './helpers';
 import { apiLogger } from "@/lib/logger";
+import { fetchWithRetry } from '../tribunal-scrapers/utils';
 
 /**
  * Interface para dados brutos de uma Súmula extraída do HTML
@@ -43,12 +44,7 @@ export async function scrapeSumulas(
   console.log('[AGU Súmulas] Iniciando scraping de Súmulas AGU...');
 
   try {
-    const response = await fetch('https://www.gov.br/agu/pt-br/composicao/cgu/cgu/sumula', {
-      headers: {
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
-        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
-      },
-    });
+    const response = await fetchWithRetry('https://www.gov.br/agu/pt-br/composicao/cgu/cgu/sumula');
 
     if (!response.ok) {
       throw new Error(`HTTP ${response.status}: ${response.statusText}`);
