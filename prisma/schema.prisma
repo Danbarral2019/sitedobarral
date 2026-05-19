@@ -663,39 +663,6 @@ model CourseVideo {
   @@index([courseId, isActive, displayOrder])
 }
 
-// Analytics de análises automáticas de documentos
-model DocumentAnalysis {
-  id            String  @id @default(uuid())
-  documentId    String? // ID do documento criado (null se ainda não criado)
-  documentTitle String // Título do documento analisado
-  documentType  String? // Tipo de arquivo (pdf, docx, etc.)
-
-  // Dados da análise
-  textLength      Int // Quantidade de texto analisado
-  pageCount       Int? // Número de páginas (se PDF)
-  citationsFound  Int  @default(0) // Artigos citados explicitamente
-  keywordsMatched Int  @default(0) // Palavras-chave encontradas
-
-  // Sugestões geradas
-  suggestedArticles String // JSON array com artigos sugeridos
-  totalSuggestions  Int    @default(0) // Total de sugestões geradas
-
-  // Resultados (o que o usuário aceitou)
-  acceptedArticles String? // JSON array com artigos aceitos
-  acceptedCount    Int     @default(0) // Quantos foram aceitos
-
-  // Métricas calculadas
-  precision Float? // % de sugestões aceitas (precision)
-
-  // Metadados
-  createdAt DateTime @default(now())
-  userId    String? // Quem fez a análise (opcional)
-
-  @@index([createdAt])
-  @@index([documentId])
-  @@index([userId])
-}
-
 // Glossário de Termos Técnicos
 model GlossaryTerm {
   id String @id @default(uuid())
@@ -1239,7 +1206,6 @@ model Lesson {
   documents LessonDocument[]
   videos    LessonVideo[]
   progress  LessonProgress[]
-  comments  LessonComment[]
   quiz      Quiz?
 
   @@unique([moduleId, slug])
@@ -1308,28 +1274,6 @@ model LessonProgress {
   @@index([userId, status])
 }
 
-// Discussão por lição (threaded)
-model LessonComment {
-  id           String          @id @default(uuid())
-  lessonId     String
-  lesson       Lesson          @relation(fields: [lessonId], references: [id], onDelete: Cascade)
-  userId       String
-  parentId     String?
-  parent       LessonComment?  @relation("CommentReplies", fields: [parentId], references: [id], onDelete: Cascade)
-  replies      LessonComment[] @relation("CommentReplies")
-  content      String          @db.Text
-  isEdited     Boolean         @default(false)
-  isPinned     Boolean         @default(false)
-  isDeleted    Boolean         @default(false)
-  isBestAnswer Boolean         @default(false)
-  createdAt    DateTime        @default(now())
-  updatedAt    DateTime        @updatedAt
-
-  @@index([lessonId])
-  @@index([userId])
-  @@index([parentId])
-  @@index([lessonId, isPinned])
-}
 
 // ============================================================================
 // LMS — Quizzes e Certificados (Fase 2)

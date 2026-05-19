@@ -241,15 +241,6 @@ export const UpdateLessonProgressSchema = z.object({
 });
 
 // ============================================================================
-// LMS — COMENTÁRIOS
-// ============================================================================
-
-export const CreateLessonCommentSchema = z.object({
-  content: z.string().min(1, 'Comentário não pode ser vazio').max(5000, 'Comentário muito longo'),
-  parentId: z.string().optional(),
-});
-
-// ============================================================================
 // LMS — VÍNCULOS
 // ============================================================================
 
@@ -363,7 +354,6 @@ export type UpdateModuleInput = z.infer<typeof UpdateModuleSchema>;
 export type CreateLessonInput = z.infer<typeof CreateLessonSchema>;
 export type UpdateLessonInput = z.infer<typeof UpdateLessonSchema>;
 export type UpdateLessonProgressInput = z.infer<typeof UpdateLessonProgressSchema>;
-export type CreateLessonCommentInput = z.infer<typeof CreateLessonCommentSchema>;
 export type LinkLessonDocumentInput = z.infer<typeof LinkLessonDocumentSchema>;
 export type LinkLessonVideoInput = z.infer<typeof LinkLessonVideoSchema>;
 export type ReorderInput = z.infer<typeof ReorderSchema>;

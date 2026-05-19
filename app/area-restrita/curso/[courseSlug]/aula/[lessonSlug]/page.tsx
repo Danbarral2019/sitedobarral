@@ -34,10 +34,6 @@ const GamificationSidebar = dynamic(() => import('@/components/lms/GamificationS
   loading: () => <div className="flex justify-center py-8"><Loader2 className="w-6 h-6 animate-spin text-blue-500" /></div>,
 });
 
-const LessonDiscussion = dynamic(() => import('@/components/lms/LessonDiscussion'), {
-  loading: () => <div className="flex justify-center py-8"><Loader2 className="w-6 h-6 animate-spin text-blue-500" /></div>,
-});
-
 interface LessonData {
   id: string;
   title: string;
@@ -450,11 +446,6 @@ export default function LessonPage({
               />
             </div>
           )}
-
-          {/* Discussion */}
-          <div className="bg-white rounded-2xl border border-gray-200 p-6 mb-6">
-            <LessonDiscussion lessonId={lesson.id} isAdmin={isAdmin} />
-          </div>
 
           {/* Prev/Next Navigation */}
           {navigation && (navigation.prev || navigation.next) && (
