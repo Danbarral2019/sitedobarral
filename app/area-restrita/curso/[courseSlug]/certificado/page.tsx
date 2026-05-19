@@ -1,19 +1,16 @@
-'use client';
-
-import { use, useMemo } from 'react';
 import { ArrowLeft } from 'lucide-react';
 import Link from 'next/link';
 import { getCourseBySlug, getIdFromSlug } from '@/lib/courses';
 import CertificateCard from '@/components/lms/CertificateCard';
 
-export default function CertificatePage({
+export default async function CertificatePage({
   params,
 }: {
   params: Promise<{ courseSlug: string }>;
 }) {
-  const { courseSlug } = use(params);
-  const courseId = useMemo(() => getIdFromSlug(courseSlug), [courseSlug]);
-  const course = useMemo(() => getCourseBySlug(courseSlug), [courseSlug]);
+  const { courseSlug } = await params;
+  const courseId = getIdFromSlug(courseSlug);
+  const course = getCourseBySlug(courseSlug);
 
   if (!courseId || !course) {
     return (

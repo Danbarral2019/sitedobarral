@@ -1,4 +1,4 @@
-'use client'
+import { ReloadButton } from './ReloadButton';
 
 export default function OfflinePage() {
   return (
@@ -17,12 +17,7 @@ export default function OfflinePage() {
       <p className="text-gray-600 mb-8 text-center max-w-md">
         Verifique sua conexão com a internet e tente novamente.
       </p>
-      <button
-        onClick={() => window.location.reload()}
-        className="bg-[#20364e] text-white px-6 py-2.5 rounded-lg font-medium hover:bg-[#2a4a6a] transition-colors"
-      >
-        Tentar novamente
-      </button>
+      <ReloadButton />
     </div>
-  )
+  );
 }
