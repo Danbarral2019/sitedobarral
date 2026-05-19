@@ -15,9 +15,6 @@ vi.mock('@/data/lei-14133-artigos', () => ({
   } as Record<string, { ementa: string }>,
 }));
 
-// Mock do hook (apenas tipos, não a implementação)
-vi.mock('@/hooks/use-search', () => ({}));
-
 import {
   normalizeText,
   matchesSearchTerm,
@@ -26,8 +23,9 @@ import {
   sortDocuments,
   searchAndFilterDocuments,
   highlightSearchTerms,
+  type DocumentType,
+  type SearchFilters,
 } from '../search-utils';
-import type { DocumentType, SearchFilters } from '@/hooks/use-search';
 
 function makeDoc(overrides: Partial<DocumentType> = {}): DocumentType {
   return {

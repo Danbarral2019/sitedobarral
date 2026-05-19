@@ -1,6 +1,48 @@
-import { DocumentType, SearchFilters } from '@/hooks/use-search';
 import { LEI_14133_ARTIGOS } from '@/data/lei-14133-artigos';
 import { parseLeiArticles } from './lei-articles';
+
+/**
+ * Tipos compartilhados de busca. Originalmente em hooks/use-search.ts (hook
+ * removido na Onda 7.3 por estar órfão — apenas os tipos eram consumidos
+ * por componentes search-results e este arquivo).
+ */
+export type DocumentType = {
+  id: string;
+  title: string;
+  description?: string;
+  content?: string;
+  type: string;
+  category: string;
+  courseId?: string;
+  tags?: string;
+  leiArticles?: string;
+  uploadedAt?: string;
+  url?: string;
+};
+
+export type GlossaryTermType = {
+  id: string;
+  term: string;
+  slug: string;
+  definition: string;
+  shortDef?: string | null;
+  category?: string | null;
+  viewCount: number;
+};
+
+export type SearchFilters = {
+  courseIds: string[];
+  categories: string[];
+  types: string[];
+  leiArticles: string[];
+  dateRange: 'all' | '7days' | '30days' | '90days' | 'custom';
+  customDateStart?: Date;
+  customDateEnd?: Date;
+  favoritesOnly: boolean;
+  sortBy: 'relevance' | 'newest' | 'oldest' | 'az' | 'za';
+};
+
+export type SearchScope = 'current' | 'all';
 
 /**
  * Remove acentos de uma string para busca case-insensitive
