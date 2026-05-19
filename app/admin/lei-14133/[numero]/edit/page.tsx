@@ -15,8 +15,6 @@ import {
   RefreshCw
 } from 'lucide-react';
 import type { LeiArticle } from '@/data/lei-14133-artigos';
-import CrossRefsManager from '@/components/admin/lei-14133/CrossRefsManager';
-import SuggestedReadingsManager from '@/components/admin/lei-14133/SuggestedReadingsManager';
 
 export default function EditArtigoPage() {
   const params = useParams();
@@ -366,12 +364,6 @@ export default function EditArtigoPage() {
               </div>
             )}
           </div>
-        </div>
-
-        {/* Referências cruzadas e leituras sugeridas */}
-        <div className="mt-6 grid gap-6 lg:grid-cols-2">
-          <CrossRefsManager numero={numero} />
-          <SuggestedReadingsManager numero={numero} />
         </div>
 
         {/* Ações */}
