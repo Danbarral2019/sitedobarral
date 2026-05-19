@@ -84,6 +84,10 @@
     {
       "path": "/api/cron/clipping-health-check",
       "schedule": "0 14 * * 1-5"
+    },
+    {
+      "path": "/api/cron/compute-streaks",
+      "schedule": "0 3 * * *"
     }
   ]
 }
