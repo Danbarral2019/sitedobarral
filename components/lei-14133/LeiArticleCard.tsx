@@ -2,7 +2,7 @@
 
 import { normalizeTextContent } from '@/lib/utils';
 import { EmentaParagraph } from '@/components/lei-14133/EmentaParagraph';
-import { getArticleStatus } from '@/lib/lei-14133/article-status';
+import { getArticleStatus, type ArticleStatusVariant } from '@/lib/lei-14133/article-status';
 
 interface LeiArticleCardProps {
   numero: string;
@@ -10,10 +10,18 @@ interface LeiArticleCardProps {
   capituloCompleto: string | null;
   ementa: string;
   documentCount: number;
+  statusVariant?: ArticleStatusVariant;
 }
 
-export function LeiArticleCard({ numero, titulo, capituloCompleto, ementa, documentCount }: LeiArticleCardProps) {
-  const status = getArticleStatus(documentCount);
+export function LeiArticleCard({
+  numero,
+  titulo,
+  capituloCompleto,
+  ementa,
+  documentCount,
+  statusVariant = 'reader',
+}: LeiArticleCardProps) {
+  const status = getArticleStatus(documentCount, statusVariant);
   const Icon = status.icon;
 
   return (

@@ -44,4 +44,23 @@ describe('getArticleStatus', () => {
     expect(getArticleStatus(5).icon).toBeDefined();
     expect(getArticleStatus(20).icon).toBeDefined();
   });
+
+  describe('variant editorial', () => {
+    it('retorna "Órfão" para count 0 (vermelho)', () => {
+      const s = getArticleStatus(0, 'editorial');
+      expect(s.label).toBe('Órfão');
+      expect(s.color).toContain('red');
+    });
+
+    it('retorna "Escasso" para count 1-2 (laranja)', () => {
+      expect(getArticleStatus(1, 'editorial').label).toBe('Escasso');
+      expect(getArticleStatus(2, 'editorial').label).toBe('Escasso');
+    });
+
+    it('mantem labels Medio/Bom/Excelente para counts >= 3', () => {
+      expect(getArticleStatus(3, 'editorial').label).toBe('Médio');
+      expect(getArticleStatus(10, 'editorial').label).toBe('Bom');
+      expect(getArticleStatus(20, 'editorial').label).toBe('Excelente');
+    });
+  });
 });
