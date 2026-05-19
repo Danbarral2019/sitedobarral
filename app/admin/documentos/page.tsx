@@ -1,6 +1,5 @@
 'use client';
 
-import { useState, useEffect, useCallback, useRef } from 'react';
 import dynamic from 'next/dynamic';
 import {
   FileText, Loader2, Search, Filter, X, Download,
@@ -12,9 +11,7 @@ import { useToast } from '@/hooks/use-toast';
 import { AlertDialog } from '@/components/ui/alert-dialog';
 import { DocumentPreview } from '@/components/ui/document-preview';
 import { Pagination } from '@/components/ui/pagination';
-
-import { DocumentCard, type DocumentData } from '@/components/admin/DocumentCard';
-import { getDocCompletionStatus } from '@/lib/admin/document-status';
+import { DocumentCard } from '@/components/admin/DocumentCard';
 import {
   documentsToJson,
   documentsToCsv,
@@ -22,8 +19,8 @@ import {
   filterDocumentsBySelection,
   downloadTextFile,
 } from '@/lib/admin/document-export';
+import { useDocumentosAdmin } from '@/hooks/use-documentos-admin';
 
-// Dynamic imports for heavy components
 const BatchClassifyPanel = dynamic(() => import('@/components/BatchClassifyPanel'), {
   loading: () => <Loader2 className="w-8 h-8 animate-spin text-blue-600" />,
   ssr: false,
@@ -35,231 +32,11 @@ const LeiCoverageDashboard = dynamic(() => import('@/components/admin/LeiCoverag
 });
 
 export default function DocumentosPage() {
-  const { success, error: errorToast } = useToast();
-  const [isLoading, setIsLoading] = useState(true);
-  const [isLoadingDocs, setIsLoadingDocs] = useState(true);
-  const [documents, setDocuments] = useState<DocumentData[]>([]);
-  const [serverPagination, setServerPagination] = useState<{
-    total: number;
-    page: number;
-    pageSize: number;
-    totalPages: number;
-  } | null>(null);
-  const [isDeleting, setIsDeleting] = useState(false);
-  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
-  const [documentToDelete, setDocumentToDelete] = useState<string | null>(null);
-  const [previewOpen, setPreviewOpen] = useState(false);
-  const [documentToPreview, setDocumentToPreview] = useState<DocumentData | null>(null);
+  const { success } = useToast();
+  const docs = useDocumentosAdmin();
 
-  // Filters and search
-  const [searchTerm, setSearchTerm] = useState('');
-  const [filterCourse, setFilterCourse] = useState('');
-  const [filterCategory, setFilterCategory] = useState('');
-  const [filterType, setFilterType] = useState('');
-  const [filterVisibility, setFilterVisibility] = useState('');
-  const [filterEntity, setFilterEntity] = useState('');
-  const [filterStatus, setFilterStatus] = useState(''); // New: completion status filter
-
-  // Pagination
-  const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 50; // Larger page size with server-side filtering
-
-  // Bulk operations
-  const [selectedDocuments, setSelectedDocuments] = useState<Set<string>>(new Set());
-  const [bulkAction, setBulkAction] = useState('');
-  const [, setBulkCategory] = useState('');
-  const [showClassifyPanel, setShowClassifyPanel] = useState(false);
-
-  // Stats
-  const [stats, setStats] = useState({
-    total: 0,
-    complete: 0,
-    warning: 0,
-    critical: 0,
-  });
-
-  // Ref to prevent multiple simultaneous fetches
-  const isFetchingRef = useRef(false);
-  const hasLoadedRef = useRef(false);
-
-  const verifyAdmin = useCallback(async () => {
-    try {
-      const response = await fetch('/api/auth/verify');
-      if (!response.ok) {
-        window.location.href = '/admin/login';
-        return;
-      }
-
-      const data = await response.json();
-      if (data.user.role !== 'admin') {
-        window.location.href = '/admin/login';
-        return;
-      }
-    } catch (error) {
-      console.error('Erro ao verificar admin:', error);
-      window.location.href = '/admin/login';
-    } finally {
-      setIsLoading(false);
-    }
-  }, []);
-
-  const loadDocuments = useCallback(async (force = false) => {
-    // Prevent concurrent fetches and repeated calls on error
-    if (isFetchingRef.current) return;
-    if (hasLoadedRef.current && !force) return;
-
-    isFetchingRef.current = true;
-    setIsLoadingDocs(true);
-
-    try {
-      const params = new URLSearchParams({
-        page: currentPage.toString(),
-        pageSize: itemsPerPage.toString(),
-      });
-
-      // Send category filter to server for proper server-side filtering
-      if (filterCategory) {
-        params.set('category', filterCategory);
-      }
-
-      const response = await fetch(`/api/admin/documents?${params}`);
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.error || data.details || 'Erro ao carregar documentos');
-      }
-
-      setDocuments(data.documents || []);
-      setServerPagination(data.pagination || null);
-      hasLoadedRef.current = true;
-
-      // Calculate stats
-      const docs = data.documents || [];
-      const statsCalc = { total: docs.length, complete: 0, warning: 0, critical: 0 };
-
-      docs.forEach((doc: DocumentData) => {
-        const status = getDocCompletionStatus(doc);
-        if (status === 'complete') statsCalc.complete++;
-        else if (status === 'warning') statsCalc.warning++;
-        else statsCalc.critical++;
-      });
-
-      setStats(statsCalc);
-    } catch (error) {
-      console.error('Erro ao carregar documentos:', error);
-      // Only show toast once, don't retry automatically
-      if (!hasLoadedRef.current) {
-        errorToast('Erro ao carregar documentos', error instanceof Error ? error.message : 'Erro desconhecido');
-      }
-    } finally {
-      isFetchingRef.current = false;
-      setIsLoadingDocs(false);
-    }
-  }, [currentPage, itemsPerPage, filterCategory, errorToast]); // Server-side filters need to trigger refetch
-
-  useEffect(() => {
-    verifyAdmin();
-  }, [verifyAdmin]);
-
-  // Reset loaded ref when page or category changes to allow new fetch
-  useEffect(() => {
-    hasLoadedRef.current = false;
-  }, [currentPage, filterCategory]);
-
-  useEffect(() => {
-    if (!isLoading) {
-      loadDocuments();
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isLoading, currentPage, filterCategory]); // Server-side filters trigger refetch
-
-  // Document selection
-  const toggleDocumentSelection = (id: string) => {
-    const newSelection = new Set(selectedDocuments);
-    if (newSelection.has(id)) {
-      newSelection.delete(id);
-    } else {
-      newSelection.add(id);
-    }
-    setSelectedDocuments(newSelection);
-  };
-
-  const toggleSelectAll = () => {
-    if (selectedDocuments.size === filteredDocuments.length) {
-      setSelectedDocuments(new Set());
-    } else {
-      setSelectedDocuments(new Set(filteredDocuments.map(doc => doc.id)));
-    }
-  };
-
-  // Bulk operations
-  const handleBulkAction = async () => {
-    if (selectedDocuments.size === 0) {
-      errorToast('Nenhum documento selecionado', 'Selecione ao menos um documento');
-      return;
-    }
-
-    if (bulkAction === 'classify') {
-      setShowClassifyPanel(true);
-      setBulkAction('');
-      return;
-    }
-
-    if (bulkAction === 'delete') {
-      setIsDeleting(true);
-      try {
-        const deletePromises = Array.from(selectedDocuments).map(id =>
-          fetch('/api/admin/documents', {
-            method: 'DELETE',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ id }),
-          })
-        );
-
-        await Promise.all(deletePromises);
-        success(
-          `${selectedDocuments.size} documento${selectedDocuments.size !== 1 ? 's' : ''} removido${selectedDocuments.size !== 1 ? 's' : ''}!`,
-          'Documentos excluidos com sucesso'
-        );
-        setSelectedDocuments(new Set());
-        loadDocuments();
-      } catch {
-        errorToast('Erro ao deletar', 'Nao foi possivel remover os documentos');
-      } finally {
-        setIsDeleting(false);
-      }
-    } else if (bulkAction === 'markReviewed') {
-      setIsDeleting(true);
-      try {
-        const reviewPromises = Array.from(selectedDocuments).map(id =>
-          fetch(`/api/admin/documents/${id}`, {
-            method: 'PATCH',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ reviewed: true }),
-          })
-        );
-
-        await Promise.all(reviewPromises);
-        success(
-          `${selectedDocuments.size} documento${selectedDocuments.size !== 1 ? 's' : ''} marcado${selectedDocuments.size !== 1 ? 's' : ''} como revisado!`,
-          'Documentos atualizados com sucesso'
-        );
-        setSelectedDocuments(new Set());
-        loadDocuments();
-      } catch {
-        errorToast('Erro ao marcar', 'Nao foi possivel atualizar os documentos');
-      } finally {
-        setIsDeleting(false);
-      }
-    }
-
-    setBulkAction('');
-    setBulkCategory('');
-  };
-
-  // Export
   const exportDocuments = (format: 'json' | 'csv') => {
-    const docsToExport = filterDocumentsBySelection(documents, selectedDocuments);
+    const docsToExport = filterDocumentsBySelection(docs.documents, docs.selectedDocuments);
     const filename = buildExportFilename(format);
 
     if (format === 'json') {
@@ -271,91 +48,7 @@ export default function DocumentosPage() {
     success('Exportacao concluida!', `${docsToExport.length} documentos exportados em ${format.toUpperCase()}`);
   };
 
-  const clearFilters = () => {
-    setSearchTerm('');
-    setFilterCourse('');
-    setFilterCategory('');
-    setFilterType('');
-    setFilterVisibility('');
-    setFilterEntity('');
-    setFilterStatus('');
-    setCurrentPage(1);
-  };
-
-  // Filter documents
-  const filteredDocuments = documents.filter((doc) => {
-    const matchesSearch =
-      doc.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      (doc.description?.toLowerCase().includes(searchTerm.toLowerCase()) ?? false);
-
-    // Course filter - also include isCommon documents
-    const matchesCourse = !filterCourse || doc.courseId === filterCourse || doc.isCommon;
-
-    const matchesCategory = !filterCategory || doc.category === filterCategory;
-    const matchesType = !filterType || doc.type === filterType;
-
-    const matchesVisibility =
-      !filterVisibility ||
-      (filterVisibility === 'public' && doc.isPublic) ||
-      (filterVisibility === 'private' && !doc.isPublic);
-
-    const matchesEntity = !filterEntity || doc.entityType === filterEntity;
-
-    // Completion status filter
-    const docStatus = getDocCompletionStatus(doc);
-    const matchesStatus = !filterStatus || docStatus === filterStatus;
-
-    return matchesSearch && matchesCourse && matchesCategory && matchesType && matchesVisibility && matchesEntity && matchesStatus;
-  });
-
-  const activeFiltersCount = [filterCourse, filterCategory, filterType, filterVisibility, filterEntity, filterStatus].filter(Boolean).length;
-
-  const totalPages = serverPagination?.totalPages || 1;
-  const totalItems = serverPagination?.total || filteredDocuments.length;
-
-  useEffect(() => {
-    setCurrentPage(1);
-  }, [searchTerm, filterCourse, filterCategory, filterType, filterVisibility, filterStatus]);
-
-  const handleDeleteClick = (id: string) => {
-    setDocumentToDelete(id);
-    setDeleteDialogOpen(true);
-  };
-
-  const handleDeleteConfirm = async () => {
-    if (!documentToDelete) return;
-
-    setIsDeleting(true);
-
-    try {
-      const response = await fetch('/api/admin/documents', {
-        method: 'DELETE',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ id: documentToDelete }),
-      });
-
-      if (!response.ok) {
-        throw new Error('Erro ao deletar documento');
-      }
-
-      success('Documento removido!', 'O documento foi excluido com sucesso.');
-      setDeleteDialogOpen(false);
-      setDocumentToDelete(null);
-      loadDocuments();
-    } catch (error) {
-      console.error('Erro ao deletar:', error);
-      errorToast('Erro ao deletar', 'Nao foi possivel remover o documento.');
-    } finally {
-      setIsDeleting(false);
-    }
-  };
-
-  const handlePreviewClick = (doc: DocumentData) => {
-    setDocumentToPreview(doc);
-    setPreviewOpen(true);
-  };
-
-  if (isLoading) {
+  if (docs.isLoading) {
     return (
       <main className="min-h-screen flex items-center justify-center">
         <Loader2 className="w-12 h-12 animate-spin text-blue-600" />
@@ -382,7 +75,6 @@ export default function DocumentosPage() {
             </a>
           </div>
 
-          {/* Lei Coverage Dashboard */}
           <LeiCoverageDashboard />
 
           {/* Stats Cards */}
@@ -393,55 +85,55 @@ export default function DocumentosPage() {
                   <FileText className="w-5 h-5 text-blue-600" />
                 </div>
                 <div>
-                  <p className="text-2xl font-bold text-gray-900">{serverPagination?.total || 0}</p>
+                  <p className="text-2xl font-bold text-gray-900">{docs.serverPagination?.total || 0}</p>
                   <p className="text-xs text-gray-500">Total</p>
                 </div>
               </div>
             </div>
             <div
               className={`bg-white rounded-xl p-4 border-2 cursor-pointer transition-all ${
-                filterStatus === 'complete' ? 'border-green-500 bg-green-50' : 'border-gray-200 hover:border-green-300'
+                docs.filters.status === 'complete' ? 'border-green-500 bg-green-50' : 'border-gray-200 hover:border-green-300'
               }`}
-              onClick={() => setFilterStatus(filterStatus === 'complete' ? '' : 'complete')}
+              onClick={() => docs.setFilter('status', docs.filters.status === 'complete' ? '' : 'complete')}
             >
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center">
                   <CheckCircle className="w-5 h-5 text-green-600" />
                 </div>
                 <div>
-                  <p className="text-2xl font-bold text-gray-900">{stats.complete}</p>
+                  <p className="text-2xl font-bold text-gray-900">{docs.stats.complete}</p>
                   <p className="text-xs text-gray-500">Completos</p>
                 </div>
               </div>
             </div>
             <div
               className={`bg-white rounded-xl p-4 border-2 cursor-pointer transition-all ${
-                filterStatus === 'warning' ? 'border-yellow-500 bg-yellow-50' : 'border-gray-200 hover:border-yellow-300'
+                docs.filters.status === 'warning' ? 'border-yellow-500 bg-yellow-50' : 'border-gray-200 hover:border-yellow-300'
               }`}
-              onClick={() => setFilterStatus(filterStatus === 'warning' ? '' : 'warning')}
+              onClick={() => docs.setFilter('status', docs.filters.status === 'warning' ? '' : 'warning')}
             >
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 bg-yellow-100 rounded-lg flex items-center justify-center">
                   <AlertCircle className="w-5 h-5 text-yellow-600" />
                 </div>
                 <div>
-                  <p className="text-2xl font-bold text-gray-900">{stats.warning}</p>
+                  <p className="text-2xl font-bold text-gray-900">{docs.stats.warning}</p>
                   <p className="text-xs text-gray-500">Incompletos</p>
                 </div>
               </div>
             </div>
             <div
               className={`bg-white rounded-xl p-4 border-2 cursor-pointer transition-all ${
-                filterStatus === 'critical' ? 'border-red-500 bg-red-50' : 'border-gray-200 hover:border-red-300'
+                docs.filters.status === 'critical' ? 'border-red-500 bg-red-50' : 'border-gray-200 hover:border-red-300'
               }`}
-              onClick={() => setFilterStatus(filterStatus === 'critical' ? '' : 'critical')}
+              onClick={() => docs.setFilter('status', docs.filters.status === 'critical' ? '' : 'critical')}
             >
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 bg-red-100 rounded-lg flex items-center justify-center">
                   <AlertTriangle className="w-5 h-5 text-red-600" />
                 </div>
                 <div>
-                  <p className="text-2xl font-bold text-gray-900">{stats.critical}</p>
+                  <p className="text-2xl font-bold text-gray-900">{docs.stats.critical}</p>
                   <p className="text-xs text-gray-500">Criticos</p>
                 </div>
               </div>
@@ -461,12 +153,12 @@ export default function DocumentosPage() {
 
               <div className="flex gap-2">
                 <button
-                  onClick={() => loadDocuments(true)}
+                  onClick={() => docs.loadDocuments(true)}
                   className="px-3 py-2 border-2 border-gray-300 rounded-lg font-medium text-sm text-gray-700 hover:bg-gray-50 transition-colors flex items-center gap-1"
                   title="Recarregar"
-                  disabled={isLoadingDocs}
+                  disabled={docs.isLoadingDocs}
                 >
-                  <RefreshCw className={`w-4 h-4 ${isLoadingDocs ? 'animate-spin' : ''}`} />
+                  <RefreshCw className={`w-4 h-4 ${docs.isLoadingDocs ? 'animate-spin' : ''}`} />
                 </button>
                 <button
                   onClick={() => exportDocuments('json')}
@@ -488,16 +180,16 @@ export default function DocumentosPage() {
             </div>
 
             {/* Bulk Action Bar */}
-            {selectedDocuments.size > 0 && (
+            {docs.selectedDocuments.size > 0 && (
               <div className="mb-4 p-4 bg-blue-50 border-2 border-blue-200 rounded-xl">
                 <div className="flex flex-wrap items-center gap-3">
                   <span className="text-sm font-bold text-blue-900">
-                    {selectedDocuments.size} selecionado{selectedDocuments.size !== 1 ? 's' : ''}
+                    {docs.selectedDocuments.size} selecionado{docs.selectedDocuments.size !== 1 ? 's' : ''}
                   </span>
 
                   <select
-                    value={bulkAction}
-                    onChange={(e) => setBulkAction(e.target.value)}
+                    value={docs.bulkAction}
+                    onChange={(e) => docs.setBulkAction(e.target.value)}
                     className="px-3 py-1.5 border-2 border-blue-300 rounded-lg text-sm font-medium text-gray-900 focus:ring-2 focus:ring-blue-500"
                   >
                     <option value="">Selecione uma acao</option>
@@ -507,15 +199,15 @@ export default function DocumentosPage() {
                   </select>
 
                   <button
-                    onClick={handleBulkAction}
-                    disabled={!bulkAction}
+                    onClick={docs.handleBulkAction}
+                    disabled={!docs.bulkAction}
                     className="px-4 py-1.5 bg-blue-600 text-white rounded-lg font-bold hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed text-sm"
                   >
                     Aplicar
                   </button>
 
                   <button
-                    onClick={() => setSelectedDocuments(new Set())}
+                    onClick={docs.clearSelection}
                     className="ml-auto text-sm font-medium text-blue-600 hover:text-blue-700 hover:underline"
                   >
                     Limpar selecao
@@ -526,23 +218,21 @@ export default function DocumentosPage() {
 
             {/* Search and Filters */}
             <div className="mb-6 space-y-4">
-              {/* Search */}
               <div className="relative">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
                 <input
                   type="text"
                   placeholder="Buscar por titulo ou descricao..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
+                  value={docs.searchTerm}
+                  onChange={(e) => docs.setSearchTerm(e.target.value)}
                   className="w-full pl-10 pr-4 py-2 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-600 text-gray-900"
                 />
               </div>
 
-              {/* Filters */}
               <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
                 <select
-                  value={filterCourse}
-                  onChange={(e) => setFilterCourse(e.target.value)}
+                  value={docs.filters.course}
+                  onChange={(e) => docs.setFilter('course', e.target.value)}
                   className="px-3 py-2 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-600 text-gray-900 text-sm"
                 >
                   <option value="">Todos os cursos</option>
@@ -554,8 +244,8 @@ export default function DocumentosPage() {
                 </select>
 
                 <select
-                  value={filterCategory}
-                  onChange={(e) => setFilterCategory(e.target.value)}
+                  value={docs.filters.category}
+                  onChange={(e) => docs.setFilter('category', e.target.value)}
                   className="px-3 py-2 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-600 text-gray-900 text-sm"
                 >
                   <option value="">Todas categorias</option>
@@ -571,8 +261,8 @@ export default function DocumentosPage() {
                 </select>
 
                 <select
-                  value={filterType}
-                  onChange={(e) => setFilterType(e.target.value)}
+                  value={docs.filters.type}
+                  onChange={(e) => docs.setFilter('type', e.target.value)}
                   className="px-3 py-2 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-600 text-gray-900 text-sm"
                 >
                   <option value="">Todos os tipos</option>
@@ -583,8 +273,8 @@ export default function DocumentosPage() {
                 </select>
 
                 <select
-                  value={filterVisibility}
-                  onChange={(e) => setFilterVisibility(e.target.value)}
+                  value={docs.filters.visibility}
+                  onChange={(e) => docs.setFilter('visibility', e.target.value)}
                   className="px-3 py-2 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-600 text-gray-900 text-sm"
                 >
                   <option value="">Todas visibilidades</option>
@@ -593,8 +283,8 @@ export default function DocumentosPage() {
                 </select>
 
                 <select
-                  value={filterStatus}
-                  onChange={(e) => setFilterStatus(e.target.value)}
+                  value={docs.filters.status}
+                  onChange={(e) => docs.setFilter('status', e.target.value)}
                   className="px-3 py-2 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-600 text-gray-900 text-sm"
                 >
                   <option value="">Todos os status</option>
@@ -604,12 +294,11 @@ export default function DocumentosPage() {
                 </select>
               </div>
 
-              {/* Entity filter (for enunciados) */}
-              {filterCategory === 'enunciados' && (
+              {docs.filters.category === 'enunciados' && (
                 <div className="mt-3">
                   <select
-                    value={filterEntity}
-                    onChange={(e) => setFilterEntity(e.target.value)}
+                    value={docs.filters.entity}
+                    onChange={(e) => docs.setFilter('entity', e.target.value)}
                     className="w-full px-3 py-2 border-2 border-blue-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-600 text-gray-900 text-sm bg-blue-50"
                   >
                     <option value="">Todas as entidades</option>
@@ -620,17 +309,16 @@ export default function DocumentosPage() {
                 </div>
               )}
 
-              {/* Active filters indicator */}
-              {(activeFiltersCount > 0 || searchTerm) && (
+              {(docs.activeFiltersCount > 0 || docs.searchTerm) && (
                 <div className="flex items-center justify-between bg-purple-50 border-2 border-purple-200 rounded-lg p-3">
                   <div className="flex items-center gap-2">
                     <Filter className="w-4 h-4 text-purple-600" />
                     <span className="text-sm font-medium text-purple-900">
-                      {filteredDocuments.length} documento{filteredDocuments.length !== 1 ? 's' : ''} encontrado{filteredDocuments.length !== 1 ? 's' : ''}
+                      {docs.filteredDocuments.length} documento{docs.filteredDocuments.length !== 1 ? 's' : ''} encontrado{docs.filteredDocuments.length !== 1 ? 's' : ''}
                     </span>
                   </div>
                   <button
-                    onClick={clearFilters}
+                    onClick={docs.clearFilters}
                     className="flex items-center gap-1 text-sm font-medium text-purple-600 hover:text-purple-700 hover:bg-purple-100 px-3 py-1 rounded-lg transition-colors"
                   >
                     <X className="w-4 h-4" />
@@ -639,26 +327,25 @@ export default function DocumentosPage() {
                 </div>
               )}
 
-              {/* Select All */}
-              {filteredDocuments.length > 0 && (
+              {docs.filteredDocuments.length > 0 && (
                 <div className="flex flex-wrap items-center gap-3">
                   <button
-                    onClick={toggleSelectAll}
+                    onClick={docs.toggleSelectAll}
                     className="flex items-center gap-2 text-sm font-medium text-gray-700 hover:text-gray-900 transition-colors"
                   >
-                    {selectedDocuments.size === filteredDocuments.length ? (
+                    {docs.selectedDocuments.size === docs.filteredDocuments.length ? (
                       <CheckSquare className="w-5 h-5 text-blue-600" />
                     ) : (
                       <Square className="w-5 h-5" />
                     )}
-                    Selecionar todos ({filteredDocuments.length})
+                    Selecionar todos ({docs.filteredDocuments.length})
                   </button>
 
-                  {selectedDocuments.size > 0 && (
+                  {docs.selectedDocuments.size > 0 && (
                     <>
                       <span className="text-gray-400">|</span>
                       <button
-                        onClick={() => setSelectedDocuments(new Set())}
+                        onClick={docs.clearSelection}
                         className="flex items-center gap-2 text-sm font-medium text-red-600 hover:text-red-700 transition-colors"
                       >
                         <Square className="w-5 h-5" />
@@ -671,13 +358,13 @@ export default function DocumentosPage() {
             </div>
 
             {/* Document List */}
-            {isLoadingDocs ? (
+            {docs.isLoadingDocs ? (
               <div className="space-y-4">
                 {[1, 2, 3, 4].map((i) => (
                   <div key={i} className="h-24 bg-gray-100 animate-pulse rounded-xl" />
                 ))}
               </div>
-            ) : documents.length === 0 ? (
+            ) : docs.documents.length === 0 ? (
               <div className="text-center py-12 text-gray-500">
                 <FileText className="w-16 h-16 mx-auto mb-4 opacity-30" />
                 <p>Nenhum documento cadastrado ainda</p>
@@ -689,7 +376,7 @@ export default function DocumentosPage() {
                   Adicionar primeiro documento
                 </a>
               </div>
-            ) : filteredDocuments.length === 0 ? (
+            ) : docs.filteredDocuments.length === 0 ? (
               <div className="text-center py-12 text-gray-500">
                 <Search className="w-16 h-16 mx-auto mb-4 opacity-30" />
                 <p className="font-medium">Nenhum documento encontrado</p>
@@ -698,24 +385,24 @@ export default function DocumentosPage() {
             ) : (
               <>
                 <div className="space-y-3">
-                  {filteredDocuments.map((doc) => (
+                  {docs.filteredDocuments.map((doc) => (
                     <DocumentCard
                       key={doc.id}
                       document={doc}
-                      isSelected={selectedDocuments.has(doc.id)}
-                      onSelect={toggleDocumentSelection}
-                      onPreview={handlePreviewClick}
-                      onDelete={handleDeleteClick}
+                      isSelected={docs.selectedDocuments.has(doc.id)}
+                      onSelect={docs.toggleDocumentSelection}
+                      onPreview={docs.handlePreviewClick}
+                      onDelete={docs.handleDeleteClick}
                     />
                   ))}
                 </div>
 
                 <Pagination
-                  currentPage={currentPage}
-                  totalPages={totalPages}
-                  onPageChange={setCurrentPage}
-                  itemsPerPage={itemsPerPage}
-                  totalItems={totalItems}
+                  currentPage={docs.currentPage}
+                  totalPages={docs.totalPages}
+                  onPageChange={docs.setCurrentPage}
+                  itemsPerPage={docs.itemsPerPage}
+                  totalItems={docs.totalItems}
                 />
               </>
             )}
@@ -724,39 +411,38 @@ export default function DocumentosPage() {
       </div>
 
       <DocumentPreview
-        open={previewOpen}
-        onOpenChange={setPreviewOpen}
-        document={documentToPreview ? {
-          title: documentToPreview.title,
-          description: documentToPreview.description,
-          type: documentToPreview.type,
-          url: documentToPreview.url,
-          size: documentToPreview.size,
+        open={docs.previewDialog.open}
+        onOpenChange={docs.previewDialog.onOpenChange}
+        document={docs.previewDialog.doc ? {
+          title: docs.previewDialog.doc.title,
+          description: docs.previewDialog.doc.description,
+          type: docs.previewDialog.doc.type,
+          url: docs.previewDialog.doc.url,
+          size: docs.previewDialog.doc.size,
         } : null}
       />
 
-      {/* AI Classify Panel */}
-      {showClassifyPanel && (
+      {docs.showClassifyPanel && (
         <BatchClassifyPanel
-          selectedDocuments={selectedDocuments}
-          onClose={() => setShowClassifyPanel(false)}
+          selectedDocuments={docs.selectedDocuments}
+          onClose={() => docs.setShowClassifyPanel(false)}
           onSuccess={() => {
-            loadDocuments();
-            setSelectedDocuments(new Set());
+            docs.loadDocuments(true);
+            docs.clearSelection();
           }}
         />
       )}
 
       <AlertDialog
-        open={deleteDialogOpen}
-        onOpenChange={setDeleteDialogOpen}
+        open={docs.deleteDialog.open}
+        onOpenChange={docs.deleteDialog.onOpenChange}
         title="Excluir documento?"
         description="Esta acao nao pode ser desfeita. O documento sera permanentemente removido do sistema."
         confirmText="Sim, excluir"
         cancelText="Cancelar"
-        onConfirm={handleDeleteConfirm}
+        onConfirm={docs.deleteDialog.onConfirm}
         variant="danger"
-        isLoading={isDeleting}
+        isLoading={docs.isProcessing}
       />
     </>
   );
