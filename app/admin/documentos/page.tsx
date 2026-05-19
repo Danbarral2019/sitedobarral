@@ -14,6 +14,14 @@ import { DocumentPreview } from '@/components/ui/document-preview';
 import { Pagination } from '@/components/ui/pagination';
 
 import { DocumentCard, type DocumentData } from '@/components/admin/DocumentCard';
+import { getDocCompletionStatus } from '@/lib/admin/document-status';
+import {
+  documentsToJson,
+  documentsToCsv,
+  buildExportFilename,
+  filterDocumentsBySelection,
+  downloadTextFile,
+} from '@/lib/admin/document-export';
 
 // Dynamic imports for heavy components
 const BatchClassifyPanel = dynamic(() => import('@/components/BatchClassifyPanel'), {
@@ -165,39 +173,6 @@ export default function DocumentosPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isLoading, currentPage, filterCategory]); // Server-side filters trigger refetch
 
-  // Completion status helper
-  function getDocCompletionStatus(doc: DocumentData): 'complete' | 'warning' | 'critical' {
-    if (!doc.title || !doc.category) return 'critical';
-
-    if (doc.category === 'orientacao-normativa' && (!doc.onNumber || !doc.onYear)) {
-      return 'critical';
-    }
-
-    if ((doc.category === 'enunciados' || doc.category === 'sumula') && !doc.entityType) {
-      return 'critical';
-    }
-
-    // Parse arrays safely (handles both array and string formats)
-    const parseArray = (value: string | string[] | undefined | null): string[] => {
-      if (!value) return [];
-      if (Array.isArray(value)) return value;
-      try {
-        const parsed = JSON.parse(value);
-        return Array.isArray(parsed) ? parsed : [];
-      } catch {
-        return value.split(',').filter(Boolean);
-      }
-    };
-
-    const tags = parseArray(doc.tags);
-    const articles = parseArray(doc.leiArticles);
-
-    if (tags.length === 0 && articles.length === 0) return 'warning';
-    if (!doc.description) return 'warning';
-
-    return 'complete';
-  }
-
   // Document selection
   const toggleDocumentSelection = (id: string) => {
     const newSelection = new Set(selectedDocuments);
@@ -284,44 +259,13 @@ export default function DocumentosPage() {
 
   // Export
   const exportDocuments = (format: 'json' | 'csv') => {
-    const docsToExport = selectedDocuments.size > 0
-      ? documents.filter(doc => selectedDocuments.has(doc.id))
-      : documents;
+    const docsToExport = filterDocumentsBySelection(documents, selectedDocuments);
+    const filename = buildExportFilename(format);
 
     if (format === 'json') {
-      const dataStr = JSON.stringify(docsToExport, null, 2);
-      const dataBlob = new Blob([dataStr], { type: 'application/json' });
-      const url = URL.createObjectURL(dataBlob);
-      const link = document.createElement('a');
-      link.href = url;
-      link.download = `documentos-${new Date().toISOString().split('T')[0]}.json`;
-      link.click();
+      downloadTextFile(documentsToJson(docsToExport), filename, 'application/json');
     } else {
-      const headers = ['Titulo', 'Descricao', 'Curso', 'Categoria', 'Tipo', 'Publico', 'Data'];
-      const rows = docsToExport.map(doc => {
-        const course = doc.courseId ? courses.find(c => c.id === doc.courseId) : null;
-        return [
-          doc.title,
-          doc.description || '',
-          course?.title || (doc.isCommon ? 'Todos os cursos' : ''),
-          doc.category,
-          doc.type,
-          doc.isPublic ? 'Sim' : 'Nao',
-          new Date(doc.uploadedAt).toLocaleDateString('pt-BR'),
-        ];
-      });
-
-      const csvContent = [
-        headers.join(','),
-        ...rows.map(row => row.map(cell => `"${cell}"`).join(',')),
-      ].join('\n');
-
-      const dataBlob = new Blob([csvContent], { type: 'text/csv' });
-      const url = URL.createObjectURL(dataBlob);
-      const link = document.createElement('a');
-      link.href = url;
-      link.download = `documentos-${new Date().toISOString().split('T')[0]}.csv`;
-      link.click();
+      downloadTextFile(documentsToCsv(docsToExport, courses), filename, 'text/csv');
     }
 
     success('Exportacao concluida!', `${docsToExport.length} documentos exportados em ${format.toUpperCase()}`);
