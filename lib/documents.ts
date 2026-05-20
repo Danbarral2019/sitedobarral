@@ -159,7 +159,7 @@ export async function listDocuments(filters?: {
           isPublic: true,
           isCommon: true,
           tags: true,
-          leiArticles: true, leiArticlesArr: true,
+          leiArticlesArr: true,
           uploadedAt: true,
           size: true,
           reviewed: true,
@@ -311,7 +311,11 @@ export async function updateDocument(
     if (updates.url !== undefined) data.url = updates.url;
     if (updates.size !== undefined) data.size = updates.size || null;
     if (updates.tags !== undefined) data.tags = JSON.stringify(updates.tags);
-    if (updates.leiArticles !== undefined) data.leiArticles = stringifyLeiArticles(updates.leiArticles);
+    if (updates.leiArticles !== undefined) {
+      data.leiArticlesArr = Array.isArray(updates.leiArticles)
+        ? updates.leiArticles.map(String)
+        : [];
+    }
 
     const doc = await prisma.document.update({
       where: { id },

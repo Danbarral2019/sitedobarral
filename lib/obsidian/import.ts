@@ -176,8 +176,8 @@ async function importCourse(
                   displayOrder: obsLesson.displayOrder,
                   isPublished: obsLesson.isPublished ?? false,
                   estimatedMinutes: obsLesson.estimatedMinutes ?? undefined,
-                  leiArticles: obsLesson.leiArticles
-                    ? JSON.stringify(obsLesson.leiArticles)
+                  leiArticlesArr: Array.isArray(obsLesson.leiArticles)
+                    ? obsLesson.leiArticles.map(String)
                     : undefined,
                 },
               });
@@ -200,9 +200,9 @@ async function importCourse(
                   displayOrder: obsLesson.displayOrder,
                   isPublished: obsLesson.isPublished ?? false,
                   estimatedMinutes: obsLesson.estimatedMinutes ?? null,
-                  leiArticles: obsLesson.leiArticles
-                    ? JSON.stringify(obsLesson.leiArticles)
-                    : null,
+                  leiArticlesArr: Array.isArray(obsLesson.leiArticles)
+                    ? obsLesson.leiArticles.map(String)
+                    : [],
                 },
               });
               touchedLessonIds.add(created.id);

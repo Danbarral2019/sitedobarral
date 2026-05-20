@@ -153,7 +153,7 @@ export async function POST(request: NextRequest) {
     }
 
     if (leiArticles && Array.isArray(leiArticles)) {
-      data.leiArticles = stringifyLeiArticles(leiArticles);
+      data.leiArticlesArr = leiArticles.map(String);
     }
 
     if (relatedDocs && Array.isArray(relatedDocs)) {

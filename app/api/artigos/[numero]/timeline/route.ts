@@ -64,8 +64,8 @@ export async function GET(
 
         const documents = await prisma.document.findMany({
           where: {
-            leiArticles: {
-              contains: articleNumber,
+            leiArticlesArr: {
+              has: articleNumber,
             },
             ...(dateFilter && {
               uploadedAt: {

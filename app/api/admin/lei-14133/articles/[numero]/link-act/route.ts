@@ -15,7 +15,7 @@ export const POST = withAdminApi<{ numero: string }>(async (request, { params })
 
   const act = await prisma.legislativeAct.findUnique({
     where: { id: actId },
-    select: { id: true, leiArticles: true, leiArticlesArr: true },
+    select: { id: true, leiArticlesArr: true },
   });
   if (!act) throw new NotFoundError('Ato');
 

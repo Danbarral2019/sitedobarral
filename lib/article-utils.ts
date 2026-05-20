@@ -97,13 +97,13 @@ export function getArticleIcon(numero: string): string {
  */
 export async function getDocumentCountByArticle(): Promise<Record<string, number>> {
   const documents = await prisma.document.findMany({
-    where: { leiArticles: { not: null } },
-    select: { leiArticles: true, leiArticlesArr: true },
+    where: { leiArticlesArr: { isEmpty: false } },
+    select: { leiArticlesArr: true },
   });
 
   const counts: Record<string, number> = {};
   documents.forEach(doc => {
-    extractArticleNumbers(doc.leiArticles).forEach(articleNum => {
+    doc.leiArticlesArr.forEach(articleNum => {
       counts[articleNum] = (counts[articleNum] || 0) + 1;
     });
   });
@@ -141,15 +141,14 @@ export async function getTopArticles(limit: number = 10): Promise<Array<{
   });
 
   const documents = await prisma.document.findMany({
-    where: { leiArticles: { not: null } },
-    select: { id: true, leiArticles: true, leiArticlesArr: true },
+    where: { leiArticlesArr: { isEmpty: false } },
+    select: { id: true, leiArticlesArr: true },
   });
 
   const articleViews: Record<string, number> = {};
   documents.forEach(doc => {
-    const articles = extractArticleNumbers(doc.leiArticles);
     const views = docViews[doc.id] || 0;
-    articles.forEach(articleNum => {
+    doc.leiArticlesArr.forEach(articleNum => {
       articleViews[articleNum] = (articleViews[articleNum] || 0) + views;
     });
   });

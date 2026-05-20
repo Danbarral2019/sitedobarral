@@ -30,13 +30,13 @@ export async function GET(
       async () => {
         const documentsWithThisArticle = await prisma.document.findMany({
           where: {
-            leiArticles: {
-              contains: articleNumber,
+            leiArticlesArr: {
+              has: articleNumber,
             },
           },
           select: {
             id: true,
-            leiArticles: true, leiArticlesArr: true,
+            leiArticlesArr: true,
           },
         });
 

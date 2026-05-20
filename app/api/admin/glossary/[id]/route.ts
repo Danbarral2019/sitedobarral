@@ -107,9 +107,7 @@ export async function PUT(
     }
 
     if (leiArticles !== undefined) {
-      data.leiArticles = Array.isArray(leiArticles)
-        ? stringifyLeiArticles(leiArticles)
-        : null;
+      data.leiArticlesArr = Array.isArray(leiArticles) ? leiArticles.map(String) : [];
     }
 
     if (relatedDocs !== undefined) {

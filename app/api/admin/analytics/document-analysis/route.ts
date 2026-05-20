@@ -15,22 +15,22 @@ export async function GET() {
     // Buscar todos os documentos que têm leiArticles (foram analisados pela IA)
     const [documents, legislativeActs] = await Promise.all([
       prisma.document.findMany({
-        where: { leiArticles: { not: null } },
+        where: { leiArticlesArr: { isEmpty: false } },
         select: {
           id: true,
           title: true,
           category: true,
-          leiArticles: true, leiArticlesArr: true,
+          leiArticlesArr: true,
           updatedAt: true,
         },
       }),
       prisma.legislativeAct.findMany({
-        where: { leiArticles: { not: null } },
+        where: { leiArticlesArr: { isEmpty: false } },
         select: {
           id: true,
           title: true,
           type: true,
-          leiArticles: true, leiArticlesArr: true,
+          leiArticlesArr: true,
           updatedAt: true,
         },
       }),

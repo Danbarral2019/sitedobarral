@@ -28,8 +28,8 @@ export async function GET(
         const posts = await prisma.blogPost.findMany({
           where: {
             isPublished: true,
-            leiArticles: {
-              contains: `"${numero}"`
+            leiArticlesArr: {
+              has: numero
             }
           },
           orderBy: {

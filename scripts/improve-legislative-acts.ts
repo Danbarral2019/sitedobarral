@@ -57,7 +57,7 @@ async function main() {
       ementa: true,
       content: true,
       issuer: true,
-      leiArticles: true, leiArticlesArr: true,
+      leiArticlesArr: true,
       themes: true,
     },
     orderBy: { publishDate: 'desc' },

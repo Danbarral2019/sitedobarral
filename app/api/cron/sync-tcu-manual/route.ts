@@ -151,7 +151,7 @@ export async function GET(request: NextRequest) {
 
         const docTitle = `Manual TCU - ${section.sectionNumber} ${section.title}`;
         const tags = JSON.stringify(['TCU', 'Manual', '5ª Edição', section.sectionNumber]);
-        const leiArticlesJson = stringifyLeiArticles(scraped.leiArticles.map(String));
+        const leiArticlesArr = scraped.leiArticles.map(String);
         const aiClassification = JSON.stringify({
           source: 'tcu-manual-scraper',
           contentHash: scraped.contentHash,
@@ -171,7 +171,7 @@ export async function GET(request: NextRequest) {
               description: scraped.description,
               content: scraped.content,
               tags,
-              leiArticles: leiArticlesJson,
+              leiArticlesArr,
               aiClassification,
               embeddingStatus: 'pending',
             },
@@ -191,7 +191,7 @@ export async function GET(request: NextRequest) {
               isPublic: false,
               reviewed: false,
               tags,
-              leiArticles: leiArticlesJson,
+              leiArticlesArr,
               aiClassification,
               embeddingStatus: 'pending',
             },

@@ -215,7 +215,7 @@ async function main() {
         title: true,
         description: true,
         content: true,
-        leiArticles: true, leiArticlesArr: true,
+        leiArticlesArr: true,
         entityType: true,
       },
       orderBy: { title: 'asc' },

@@ -58,7 +58,7 @@ export interface DocumentTcuRaw {
   tcuSubtema: string | null;
   acordaoAno: number | null;
   themes: string | null;
-  leiArticles: string | null;
+  leiArticlesArr: string[];
   summary: string | null;
   douData: Date | null;
   uploadedAt: Date;
@@ -133,7 +133,8 @@ export function mapDocumentTcuToDecision(doc: DocumentTcuRaw): UnifiedDecision {
     dataJulgamento: doc.tcuDataJulgamento,
     dataPublicacao: doc.douData,
     themes: deriveThemesFromTcu(doc),
-    leiArticles: doc.leiArticles,
+    leiArticles:
+      doc.leiArticlesArr.length > 0 ? JSON.stringify(doc.leiArticlesArr) : null,
     url: doc.url,
     pdfUrl: doc.tcuLinkPDF,
     isRelevant: true,
@@ -304,7 +305,7 @@ function tribunalDecisionSelect(where: Prisma.Sql): Prisma.Sql {
       "dataJulgamento",
       "dataPublicacao",
       themes,
-      "leiArticles",
+      to_jsonb("leiArticlesArr")::text AS "leiArticles",
       url,
       "pdfUrl",
       "isRelevant",
@@ -347,7 +348,7 @@ function documentTcuSelect(where: Prisma.Sql): Prisma.Sql {
           to_jsonb(ARRAY_REMOVE(ARRAY["tcuArea", "tcuTema", "tcuSubtema"], NULL))::text
         ELSE NULL
       END AS themes,
-      "leiArticles",
+      to_jsonb("leiArticlesArr")::text AS "leiArticles",
       url,
       "tcuLinkPDF" AS "pdfUrl",
       TRUE AS "isRelevant",

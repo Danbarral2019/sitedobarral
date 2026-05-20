@@ -250,7 +250,7 @@ async function main() {
         title: true,
         description: true,
         content: true,
-        leiArticles: true, leiArticlesArr: true,
+        leiArticlesArr: true,
       },
       orderBy: { title: 'asc' },
       ...(limit ? { take: limit } : {}),

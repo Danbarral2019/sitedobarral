@@ -52,10 +52,10 @@ export const getArticleCounts = cache(async (): Promise<Record<string, ArticleCo
     const docs = await prisma.document.findMany({
       where: {
         isPublic: true,
-        leiArticles: { not: null },
+        leiArticlesArr: { isEmpty: false },
         category: { in: [...ACORDAO_CATEGORIES, ...PARECER_ON_CATEGORIES] },
       },
-      select: { category: true, leiArticles: true, leiArticlesArr: true },
+      select: { category: true, leiArticlesArr: true },
     });
 
     for (const doc of docs) {
@@ -111,10 +111,10 @@ export const getLeiStats = cache(async (): Promise<LeiStats> => {
     const docs = await prisma.document.findMany({
       where: {
         isPublic: true,
-        leiArticles: { not: null },
+        leiArticlesArr: { isEmpty: false },
         category: { in: [...ACORDAO_CATEGORIES, ...PARECER_ON_CATEGORIES] },
       },
-      select: { id: true, category: true, leiArticles: true, leiArticlesArr: true },
+      select: { id: true, category: true, leiArticlesArr: true },
     });
 
     // Filtra só docs que de fato referenciam ALGUM artigo (não apenas null/empty)

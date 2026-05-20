@@ -52,7 +52,7 @@ export async function GET(request: NextRequest) {
             shortDef: true,
             category: true,
             viewCount: true,
-            leiArticles: true, leiArticlesArr: true,
+            leiArticlesArr: true,
             relatedTerms: true,
           },
           orderBy: [

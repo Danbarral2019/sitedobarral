@@ -25,8 +25,8 @@ export const GET = withAdminApi<{ numero: string }>(async (_request, { params })
 
   // Documents que linkam este artigo
   const allDocs = await prisma.document.findMany({
-    where: { leiArticles: { not: null } },
-    select: { id: true, title: true, leiArticles: true, leiArticlesArr: true, category: true, isPublic: true, notesImportance: true },
+    where: { leiArticlesArr: { isEmpty: false } },
+    select: { id: true, title: true, leiArticlesArr: true, category: true, isPublic: true, notesImportance: true },
   });
   const linkedDocuments = allDocs.filter((d) =>
     getLeiArticles(d).map(String).includes(numero),
@@ -34,7 +34,7 @@ export const GET = withAdminApi<{ numero: string }>(async (_request, { params })
 
   // LegislativeActs que linkam este artigo
   const allActs = await prisma.legislativeAct.findMany({
-    where: { leiArticles: { not: null } },
+    where: { leiArticlesArr: { isEmpty: false } },
     select: {
       id: true,
       fullNumber: true,
@@ -44,7 +44,7 @@ export const GET = withAdminApi<{ numero: string }>(async (_request, { params })
       hierarchyLevel: true,
       esfera: true,
       importance: true,
-      leiArticles: true, leiArticlesArr: true,
+      leiArticlesArr: true,
     },
   });
   const linkedActs = allActs.filter((a) =>

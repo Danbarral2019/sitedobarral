@@ -9,7 +9,7 @@ export const DELETE = withAdminApi<{ numero: string; documentId: string }>(async
   const { numero, documentId } = params;
   const doc = await prisma.document.findUnique({
     where: { id: documentId },
-    select: { id: true, leiArticles: true, leiArticlesArr: true },
+    select: { id: true, leiArticlesArr: true },
   });
   if (!doc) throw new NotFoundError('Documento');
 

@@ -138,7 +138,7 @@ export async function GET(
         estimatedMinutes: lesson.estimatedMinutes,
         aiSummary: isSuspended ? null : lesson.aiSummary,
         aiKeyPoints: isSuspended ? null : (lesson.aiKeyPoints ? JSON.parse(lesson.aiKeyPoints) : null),
-        leiArticles: lesson.leiArticles ? getLeiArticles(lesson) : null,
+        leiArticles: lesson.leiArticlesArr.length > 0 ? getLeiArticles(lesson) : null,
         module: {
           id: lesson.module.id,
           title: lesson.module.title,

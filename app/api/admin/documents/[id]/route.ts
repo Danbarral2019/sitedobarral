@@ -112,7 +112,7 @@ export const PUT = withAdminApi<{ id: string }>(async (request: NextRequest, ctx
         category: category || existing.category,
         isPublic: isPublic !== undefined ? isPublic : existing.isPublic,
         tags: tags ? JSON.stringify(tags) : existing.tags,
-        leiArticles: leiArticles ? stringifyLeiArticles(leiArticles) : existing.leiArticles,
+        leiArticlesArr: leiArticles ? leiArticles.map(String) : existing.leiArticlesArr,
         alternativeUrls: alternativeUrls !== undefined
           ? (Array.isArray(alternativeUrls) ? JSON.stringify(alternativeUrls) : alternativeUrls)
           : existing.alternativeUrls,
@@ -263,8 +263,8 @@ export const DELETE = withAdminApi<{ id: string }>(async (request: NextRequest, 
     if (existing.courseId) {
       await CacheInvalidation.courseDocuments(existing.courseId);
     }
-    // If document had leiArticles, invalidate that cache too
-    if (existing.leiArticles) {
+    // If document had leiArticlesArr, invalidate that cache too
+    if (existing.leiArticlesArr.length > 0) {
       await CacheInvalidation.leiArticles();
     }
 

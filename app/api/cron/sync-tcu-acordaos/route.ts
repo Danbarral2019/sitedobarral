@@ -101,7 +101,7 @@ async function enrichNewDocuments(docIds: string[]): Promise<{
       content: true,
       category: true,
       tags: true,
-      leiArticles: true, leiArticlesArr: true,
+      leiArticlesArr: true,
       tcuNumeroAcordao: true,
       tcuRelator: true,
       tcuOrgaoJulgador: true,
@@ -142,7 +142,7 @@ async function enrichNewDocuments(docIds: string[]): Promise<{
       });
       if (articles) {
         leiIndexed++;
-        doc.leiArticles = stringifyLeiArticles(articles);
+        doc.leiArticlesArr = articles.map(String);
       }
       await new Promise(resolve => setTimeout(resolve, ENRICHMENT_DELAY_MS));
     } catch (err) {
@@ -430,7 +430,7 @@ export async function GET(request: NextRequest) {
       try {
         const enrichedDocs = await prisma.document.findMany({
           where: { id: { in: newDocIds } },
-          select: { acordaoNumero: true, acordaoAno: true, summary: true, leiArticles: true, leiArticlesArr: true },
+          select: { acordaoNumero: true, acordaoAno: true, summary: true, leiArticlesArr: true },
         });
 
         for (const doc of enrichedDocs) {
@@ -438,7 +438,7 @@ export async function GET(request: NextRequest) {
           const fullId = `TCU Acordao ${doc.acordaoNumero}/${doc.acordaoAno}`;
           const updateData: Record<string, unknown> = {};
           if (doc.summary) updateData.summary = doc.summary;
-          if (doc.leiArticles) updateData.leiArticles = doc.leiArticles;
+          if (doc.leiArticlesArr.length > 0) updateData.leiArticlesArr = doc.leiArticlesArr;
 
           if (Object.keys(updateData).length > 0) {
             await prisma.tribunalDecision.update({

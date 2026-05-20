@@ -8,7 +8,7 @@ function act(overrides: Partial<Parameters<typeof classifyByHeuristic>[0]> = {})
     fullNumber: 'Test 1/2024',
     title: null,
     ementa: null,
-    leiArticles: null,
+    leiArticlesArr: [],
     content: null,
     ...overrides,
   };
@@ -17,38 +17,38 @@ function act(overrides: Partial<Parameters<typeof classifyByHeuristic>[0]> = {})
 describe('classifyByHeuristic', () => {
   describe('mapeamento de artigos', () => {
     it('artigo 18 → planejamento', () => {
-      expect(classifyByHeuristic(act({ leiArticles: '["18"]' }))).toContain('planejamento');
+      expect(classifyByHeuristic(act({ leiArticlesArr: ["18"] }))).toContain('planejamento');
     });
 
     it('artigo 23 → planejamento e pesquisa-precos (aparece em ambos)', () => {
-      const themes = classifyByHeuristic(act({ leiArticles: '["23"]' }));
+      const themes = classifyByHeuristic(act({ leiArticlesArr: ["23"] }));
       expect(themes).toContain('planejamento');
       expect(themes).toContain('pesquisa-precos');
     });
 
     it('artigo 89 → contratos', () => {
-      expect(classifyByHeuristic(act({ leiArticles: '["89"]' }))).toContain('contratos');
+      expect(classifyByHeuristic(act({ leiArticlesArr: ["89"] }))).toContain('contratos');
     });
 
     it('artigo 155 → sancoes', () => {
-      expect(classifyByHeuristic(act({ leiArticles: '["155"]' }))).toContain('sancoes');
+      expect(classifyByHeuristic(act({ leiArticlesArr: ["155"] }))).toContain('sancoes');
     });
 
     it('múltiplos artigos retornam todos os temas aplicáveis', () => {
-      const themes = classifyByHeuristic(act({ leiArticles: '["18","89","155"]' }));
+      const themes = classifyByHeuristic(act({ leiArticlesArr: ["18","89","155"] }));
       expect(themes).toEqual(expect.arrayContaining(['planejamento', 'contratos', 'sancoes']));
     });
 
     it('artigo não mapeado (ex: 191) retorna [] (do lado articles)', () => {
-      expect(classifyByHeuristic(act({ leiArticles: '["191"]' }))).toEqual([]);
+      expect(classifyByHeuristic(act({ leiArticlesArr: ["191"] }))).toEqual([]);
     });
 
     it('leiArticles malformado → ignora, retorna []', () => {
-      expect(classifyByHeuristic(act({ leiArticles: 'not-json' }))).toEqual([]);
+      expect(classifyByHeuristic(act({ leiArticlesArr: [] }))).toEqual([]);
     });
 
     it('leiArticles null → retorna []', () => {
-      expect(classifyByHeuristic(act({ leiArticles: null }))).toEqual([]);
+      expect(classifyByHeuristic(act({ leiArticlesArr: [] }))).toEqual([]);
     });
   });
 
@@ -82,7 +82,7 @@ describe('classifyByHeuristic', () => {
     it('inclui temas de ambas as fontes sem duplicar', () => {
       const themes = classifyByHeuristic(
         act({
-          leiArticles: '["89"]',
+          leiArticlesArr: ["89"],
           title: 'Regulamenta pregão eletrônico',
           ementa: 'relativo a contratos administrativos',
         })
@@ -96,7 +96,7 @@ describe('classifyByHeuristic', () => {
     it('preserva ordem de inserção (articles primeiro, keywords depois)', () => {
       const themes = classifyByHeuristic(
         act({
-          leiArticles: '["18"]',               // planejamento
+          leiArticlesArr: ["18"],               // planejamento
           title: 'Regulamenta obras e engenharia', // obras-engenharia
         })
       );

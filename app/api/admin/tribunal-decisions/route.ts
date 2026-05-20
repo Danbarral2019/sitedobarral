@@ -64,7 +64,7 @@ export async function GET(request: NextRequest) {
           orgaoJulgador: true,
           dataJulgamento: true,
           themes: true,
-          leiArticles: true, leiArticlesArr: true,
+          leiArticlesArr: true,
           url: true,
           approvalStatus: true,
           relevanceScore: true,

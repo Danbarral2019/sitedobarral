@@ -64,7 +64,8 @@ async function getLegislativeAct(id: string) {
       publishDate: doc.douData || doc.uploadedAt,
       effectiveDate: null,
       hierarchyLevel: null,
-      leiArticles: doc.leiArticles || '[]',
+      leiArticles:
+        doc.leiArticlesArr.length > 0 ? JSON.stringify(doc.leiArticlesArr) : '[]',
       officialUrl: doc.douUrl || doc.url || null,
       pdfUrl: doc.url || null,
       viewCount: 0,

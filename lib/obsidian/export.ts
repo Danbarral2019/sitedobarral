@@ -24,7 +24,7 @@ export interface DbDocument {
   category: string;
   url: string;
   tags: string | null;
-  leiArticles: string | null;
+  leiArticlesArr: string[];
   summary: string | null;
   adminNotes: string | null;
   publicNotes: string | null;
@@ -52,7 +52,7 @@ export interface DbLegislativeAct {
   issuer: string;
   publishDate: Date;
   hierarchyLevel: number;
-  leiArticles: string | null;
+  leiArticlesArr: string[];
   themes: string | null;
   officialUrl: string | null;
 }
@@ -70,7 +70,7 @@ export interface DbTribunalDecision {
   relator: string | null;
   orgaoJulgador: string | null;
   themes: string | null;
-  leiArticles: string | null;
+  leiArticlesArr: string[];
   url: string | null;
   relevanceScore: number;
 }
@@ -81,7 +81,7 @@ export interface DbTribunalDecision {
 
 export const EXPORT_DOC_SELECT = {
   id: true, title: true, description: true, category: true, url: true,
-  tags: true, leiArticles: true, leiArticlesArr: true, summary: true,
+  tags: true, leiArticlesArr: true, summary: true,
   adminNotes: true, publicNotes: true, notesImportance: true,
   notesKeyPoints: true, notesPracticalUse: true,
   tcuNumeroAcordao: true, tcuArea: true, tcuTema: true,
@@ -92,7 +92,7 @@ export const EXPORT_DOC_SELECT = {
 export const EXPORT_ACT_SELECT = {
   id: true, fullNumber: true, type: true, title: true,
   ementa: true, summary: true, issuer: true, publishDate: true,
-  hierarchyLevel: true, leiArticles: true, leiArticlesArr: true, themes: true, officialUrl: true,
+  hierarchyLevel: true, leiArticlesArr: true, themes: true, officialUrl: true,
 } as const;
 
 export const EXPORT_DECISION_SELECT = {
@@ -100,7 +100,7 @@ export const EXPORT_DECISION_SELECT = {
   decisionType: true, decisionNumber: true, year: true,
   title: true, ementa: true, summary: true,
   relator: true, orgaoJulgador: true,
-  themes: true, leiArticles: true, leiArticlesArr: true, url: true, relevanceScore: true,
+  themes: true, leiArticlesArr: true, url: true, relevanceScore: true,
 } as const;
 
 export const EXPORT_DECISION_WHERE = {
@@ -250,7 +250,7 @@ export function buildLinkGraph(
   const articleToCrossRefs = new Map<string, CrossReference[]>();
 
   for (const doc of documents) {
-    for (const artNum of parseJsonArray(doc.leiArticles)) {
+    for (const artNum of doc.leiArticlesArr) {
       const list = articleToDocuments.get(artNum) || [];
       list.push(doc);
       articleToDocuments.set(artNum, list);
@@ -258,7 +258,7 @@ export function buildLinkGraph(
   }
 
   for (const act of acts) {
-    for (const artNum of parseJsonArray(act.leiArticles)) {
+    for (const artNum of act.leiArticlesArr) {
       const list = articleToActs.get(artNum) || [];
       list.push(act);
       articleToActs.set(artNum, list);
@@ -266,7 +266,7 @@ export function buildLinkGraph(
   }
 
   for (const dec of decisions) {
-    for (const artNum of parseJsonArray(dec.leiArticles)) {
+    for (const artNum of dec.leiArticlesArr) {
       const list = articleToDecisions.get(artNum) || [];
       list.push(dec);
       articleToDecisions.set(artNum, list);
@@ -410,7 +410,7 @@ export function generateArticleMd(
 }
 
 export function generateDocumentMd(doc: DbDocument): string {
-  const articles = parseJsonArray(doc.leiArticles);
+  const articles = doc.leiArticlesArr;
   const tags = parseJsonArray(doc.tags);
   const lines: string[] = [];
 
@@ -487,7 +487,7 @@ export function generateDocumentMd(doc: DbDocument): string {
 }
 
 export function generateActMd(act: DbLegislativeAct): string {
-  const articles = parseJsonArray(act.leiArticles);
+  const articles = act.leiArticlesArr;
   const themes = parseJsonArray(act.themes);
   const lines: string[] = [];
 
@@ -543,7 +543,7 @@ export function generateActMd(act: DbLegislativeAct): string {
 }
 
 export function generateDecisionMd(dec: DbTribunalDecision): string {
-  const articles = parseJsonArray(dec.leiArticles);
+  const articles = dec.leiArticlesArr;
   const themes = parseJsonArray(dec.themes);
   const tags = [dec.tribunalCode.toLowerCase(), ...themes];
   const lines: string[] = [];
@@ -664,7 +664,7 @@ export function generateTemaMd(
 
   const themeDocs = documents.filter(doc => {
     const docTags = parseJsonArray(doc.tags);
-    const docArticles = parseJsonArray(doc.leiArticles);
+    const docArticles = doc.leiArticlesArr;
     return docTags.includes(tema.value) ||
       docArticles.some(a => (tema.articles as readonly string[]).includes(a));
   });
@@ -679,7 +679,7 @@ export function generateTemaMd(
 
   const themeActs = acts.filter(act => {
     const actThemes = parseJsonArray(act.themes);
-    const actArticles = parseJsonArray(act.leiArticles);
+    const actArticles = act.leiArticlesArr;
     return actThemes.includes(tema.value) ||
       actArticles.some(a => (tema.articles as readonly string[]).includes(a));
   });
@@ -692,7 +692,7 @@ export function generateTemaMd(
   }
 
   const themeDecs = decisions.filter(dec => {
-    const decArticles = parseJsonArray(dec.leiArticles);
+    const decArticles = dec.leiArticlesArr;
     return decArticles.some(a => (tema.articles as readonly string[]).includes(a));
   });
   if (themeDecs.length > 0) {

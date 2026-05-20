@@ -24,7 +24,7 @@ async function main() {
       summary: true,
       description: true,
       summaryGeneratedAt: true,
-      leiArticles: true, leiArticlesArr: true,
+      leiArticlesArr: true,
       embeddingStatus: true,
     },
     orderBy: { uploadedAt: 'desc' },

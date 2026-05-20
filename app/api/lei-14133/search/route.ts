@@ -193,7 +193,7 @@ Regras:
         category: true,
         type: true,
         summary: true,
-        leiArticles: true, leiArticlesArr: true,
+        leiArticlesArr: true,
       },
       take: 10,
       orderBy: [
@@ -226,7 +226,7 @@ Regras:
         type: true,
         fullNumber: true,
         summary: true,
-        leiArticles: true, leiArticlesArr: true,
+        leiArticlesArr: true,
       },
       take: 5,
     });
@@ -236,7 +236,7 @@ Regras:
       ...documents.map(doc => {
         // Determinar relevância baseada na correspondência
         let relevance = '';
-        const leiArticles = doc.leiArticles ? doc.leiArticles.split(',').map(a => a.trim()) : [];
+        const leiArticles = doc.leiArticlesArr ?? [];
         const matchedArticles = leiArticles.filter(a => articleNumbers.includes(a));
 
         if (matchedArticles.length > 0) {
@@ -256,7 +256,7 @@ Regras:
         };
       }),
       ...legislativeActs.map(act => {
-        const linkedArticles = act.leiArticles ? act.leiArticles.split(',').map((a: string) => a.trim()) : [];
+        const linkedArticles = act.leiArticlesArr ?? [];
         const matchedArticles = linkedArticles.filter((a: string) => articleNumbers.includes(a));
 
         let relevance = '';

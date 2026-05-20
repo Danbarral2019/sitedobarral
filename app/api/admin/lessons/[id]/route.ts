@@ -55,7 +55,11 @@ export const PUT = withAdminApi<{ id: string }>(async (request, { params }) => {
   // Stringify arrays antes de salvar
   const updateData: Record<string, unknown> = { ...data };
   if (data.leiArticles !== undefined) {
-    updateData.leiArticles = data.leiArticles ? stringifyLeiArticles(data.leiArticles) : null;
+    // Body recebe `leiArticles` por compatibilidade da API; persiste como array nativo
+    delete updateData.leiArticles;
+    updateData.leiArticlesArr = Array.isArray(data.leiArticles)
+      ? data.leiArticles.map(String)
+      : [];
   }
   if (data.aiKeyPoints !== undefined) {
     updateData.aiKeyPoints = data.aiKeyPoints ? JSON.stringify(data.aiKeyPoints) : null;

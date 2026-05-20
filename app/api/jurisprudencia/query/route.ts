@@ -112,15 +112,12 @@ function buildPrompt(
         e.source.kind === 'tribunal-decision'
           ? e.source.data.themes
           : e.source.data.themes;
-      const leiArticles =
-        e.source.kind === 'tribunal-decision'
-          ? e.source.data.leiArticles
-          : e.source.data.leiArticles;
+      const leiArticles = e.source.data.leiArticlesArr;
       const similarityPct = (e.similarity * 100).toFixed(0);
       return `[${idx + 1}] ${id} — ${dateStr}
 Título: ${p.title}
 Órgão: ${p.orgaoJulgador || 'n/d'} | Relator: ${p.relator || 'n/d'}
-Temas: ${themes || 'n/d'} | Artigos Lei 14.133: ${leiArticles || 'n/d'}
+Temas: ${themes || 'n/d'} | Artigos Lei 14.133: ${leiArticles.length > 0 ? leiArticles.join(', ') : 'n/d'}
 Ementa: ${truncate(ementa, MAX_EMENTA_CHARS)}
 Trecho relevante (similaridade ${similarityPct}%): ${truncate(e.chunkContent, MAX_CHUNK_CHARS)}
 Resumo IA: ${truncate(summary, MAX_SUMMARY_CHARS)}`;

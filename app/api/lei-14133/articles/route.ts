@@ -106,8 +106,8 @@ export async function GET(request: NextRequest) {
         // 3. Buscar todos os documentos com leiArticles (filtrando por público se não autenticado)
         const documentsWithArticles = await prisma.document.findMany({
           where: {
-            leiArticles: {
-              not: null,
+            leiArticlesArr: {
+              isEmpty: false,
             },
             // Se não autenticado, mostrar apenas documentos públicos
             ...(!isAuthenticated && { isPublic: true }),
@@ -115,7 +115,7 @@ export async function GET(request: NextRequest) {
           select: {
             id: true,
             title: true,
-            leiArticles: true, leiArticlesArr: true,
+            leiArticlesArr: true,
             isPublic: true,
             category: true,
           },
@@ -124,15 +124,15 @@ export async function GET(request: NextRequest) {
         // 3.1 Buscar todos os atos normativos (LegislativeAct) com leiArticles
         const legislativeActsWithArticles = await prisma.legislativeAct.findMany({
           where: {
-            leiArticles: {
-              not: null,
+            leiArticlesArr: {
+              isEmpty: false,
             },
           },
           select: {
             id: true,
             fullNumber: true,
             title: true,
-            leiArticles: true, leiArticlesArr: true,
+            leiArticlesArr: true,
             type: true,
             officialUrl: true,
           },

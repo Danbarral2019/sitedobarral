@@ -15,7 +15,7 @@ export const POST = withAdminApi<{ numero: string }>(async (request, { params })
 
   const doc = await prisma.document.findUnique({
     where: { id: documentId },
-    select: { id: true, leiArticles: true, leiArticlesArr: true },
+    select: { id: true, leiArticlesArr: true },
   });
   if (!doc) throw new NotFoundError('Documento');
 

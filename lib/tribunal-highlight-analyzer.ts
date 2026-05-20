@@ -94,7 +94,7 @@ function buildHighlightPrompt(decision: {
   orgaoJulgador: string | null;
   tribunalName: string;
   tribunalCode: string;
-  leiArticles: string | null;
+  leiArticlesArr: string[];
   fullText: string | null;
 }): string {
   let artigosStr = 'Nenhum artigo da Lei 14.133 vinculado.';
@@ -229,7 +229,7 @@ export async function identifyAndAlertTribunalHighlights(newDecisionIds: string[
       tribunalCode: true,
       decisionNumber: true,
       year: true,
-      leiArticles: true, leiArticlesArr: true,
+      leiArticlesArr: true,
       url: true,
       dataJulgamento: true,
     },

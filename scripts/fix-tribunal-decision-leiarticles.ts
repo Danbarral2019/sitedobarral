@@ -75,7 +75,7 @@ async function main() {
   const apply = process.argv.includes('--apply');
   const decisions = await prisma.tribunalDecision.findMany({
     where: { leiArticles: { not: null } },
-    select: { id: true, tribunalCode: true, decisionNumber: true, leiArticles: true, leiArticlesArr: true },
+    select: { id: true, tribunalCode: true, decisionNumber: true, leiArticlesArr: true },
   });
 
   const diffs: DecisionDiff[] = [];
