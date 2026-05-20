@@ -1,0 +1,31 @@
+name: Cleanup Neon Preview Branch
+
+# Dispara quando uma PR é fechada (com ou sem merge) e remove a
+# Neon branch preview criada automaticamente pela integração
+# Vercel-managed. Sem isso, branches preview ficam retidas por 6 meses
+# (política padrão da Vercel) e acumulam custo de $1,50/mês cada.
+#
+# Histórico: 2026-05-20 — campanha de saneamento maio acumulou 107
+# branches (~$160/mês) em ~3 semanas. Workflow é a solução automatizada.
+
+on:
+  pull_request:
+    types: [closed]
+
+jobs:
+  delete-neon-branch:
+    # Só roda em PRs do próprio repositório (não de forks)
+    # Evita que um fork malicioso force delete em branches sensíveis.
+    if: github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Delete Neon preview branch
+        # Continua mesmo se a branch não existir — PRs fechadas antes
+        # do primeiro deploy preview não geram branch Neon.
+        continue-on-error: true
+        uses: neondatabase/delete-branch-action@v3
+        with:
+          project_id: ${{ vars.NEON_PROJECT_ID }}
+          branch: preview/${{ github.head_ref }}
+          api_key: ${{ secrets.NEON_API_KEY }}
