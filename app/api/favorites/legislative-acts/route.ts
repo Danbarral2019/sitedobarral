@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { cookies } from 'next/headers';
 import { verifyToken } from '@/lib/auth';
-import { parseLeiArticles } from '@/lib/lei-articles';
+import { parseLeiArticles, getLeiArticles } from '@/lib/lei-articles';
 
 /**
  * GET /api/favorites/legislative-acts
@@ -61,7 +61,7 @@ export async function GET() {
       const favorite = favorites.find(f => f.legislativeActId === act.id);
       return {
         ...act,
-        leiArticles: parseLeiArticles(act.leiArticles),
+        leiArticles: getLeiArticles(act),
         favoritedAt: favorite?.createdAt
       };
     });

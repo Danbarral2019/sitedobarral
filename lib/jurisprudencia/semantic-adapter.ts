@@ -264,7 +264,7 @@ export async function enrichSources(
             tcuLinkPDF: true,
             summary: true,
             themes: true,
-            leiArticles: true,
+            leiArticles: true, leiArticlesArr: true,
             url: true,
             douData: true,
             uploadedAt: true,
@@ -290,7 +290,7 @@ export async function enrichSources(
             orgaoJulgador: true,
             dataJulgamento: true,
             themes: true,
-            leiArticles: true,
+            leiArticles: true, leiArticlesArr: true,
             url: true,
           },
         })

@@ -4,7 +4,7 @@ import { Metadata } from 'next';
 import Link from 'next/link';
 import { ExternalLink, Calendar, Tag } from 'lucide-react';
 import BackLink from './BackLink';
-import { parseLeiArticles } from '@/lib/lei-articles';
+import { parseLeiArticles, getLeiArticles } from '@/lib/lei-articles';
 
 const CATEGORY_LABELS: Record<string, string> = {
   acordao: 'Acórdão TCU',
@@ -65,7 +65,7 @@ export default async function DocumentoPage({ params }: PageProps) {
       url: true,
       uploadedAt: true,
       tags: true,
-      leiArticles: true,
+      leiArticles: true, leiArticlesArr: true,
       isPublic: true,
       aiClassification: true,
     },
@@ -95,7 +95,7 @@ export default async function DocumentoPage({ params }: PageProps) {
   try {
     if (doc.tags) tags = JSON.parse(doc.tags);
   } catch { /* ignore */ }
-  const leiArticles: string[] = parseLeiArticles(doc.leiArticles);
+  const leiArticles: string[] = getLeiArticles(doc);
 
   const displayContent = doc.content || doc.description || '';
 

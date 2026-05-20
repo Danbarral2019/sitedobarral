@@ -34,7 +34,7 @@ const CATEGORIES = [
   { value: 'outro', label: 'Outro' },
 ];
 
-import { parseLeiArticles, stringifyLeiArticles } from '@/lib/lei-articles';
+import { parseLeiArticles, stringifyLeiArticles, getLeiArticles } from '@/lib/lei-articles';
 
 export default function BulkLinkerPage() {
   const router = useRouter();
@@ -90,7 +90,7 @@ export default function BulkLinkerPage() {
   const filteredDocs = useMemo(() => {
     if (!articleNumber) return [];
     return documents.filter(doc => {
-      const existing = parseLeiArticles(doc.leiArticles);
+      const existing = getLeiArticles(doc);
       if (existing.includes(articleNumber)) return false;
       if (filterCategory && doc.category !== filterCategory) return false;
       if (searchTerm) {
@@ -105,7 +105,7 @@ export default function BulkLinkerPage() {
   const alreadyLinkedCount = useMemo(() => {
     if (!articleNumber) return 0;
     return documents.filter(doc => {
-      const existing = parseLeiArticles(doc.leiArticles);
+      const existing = getLeiArticles(doc);
       return existing.includes(articleNumber);
     }).length;
   }, [documents, articleNumber]);
@@ -140,7 +140,7 @@ export default function BulkLinkerPage() {
         const doc = documents.find(d => d.id === docId);
         if (!doc) { failed++; continue; }
 
-        const existingArticles = parseLeiArticles(doc.leiArticles);
+        const existingArticles = getLeiArticles(doc);
         const updatedArticles = [...existingArticles, articleNumber];
 
         const res = await fetch(`/api/admin/documents/${docId}`, {
@@ -308,7 +308,7 @@ export default function BulkLinkerPage() {
                 </thead>
                 <tbody className="divide-y divide-gray-200">
                   {filteredDocs.slice(0, 200).map(doc => {
-                    const existing = parseLeiArticles(doc.leiArticles);
+                    const existing = getLeiArticles(doc);
                     return (
                       <tr
                         key={doc.id}

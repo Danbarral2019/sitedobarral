@@ -17,7 +17,7 @@ import { prisma } from '@/lib/prisma';
 import { analyzeRelevanceTCU } from '@/lib/tcu-module';
 import { sendTcuHighlightAlert } from '@/lib/email';
 import { PRIMARY_GEMINI_MODEL } from '@/lib/gemini/config';
-import { parseLeiArticles } from '@/lib/lei-articles';
+import { parseLeiArticles, getLeiArticles } from '@/lib/lei-articles';
 import { apiLogger } from "@/lib/logger";
 
 const GEMINI_MODEL = PRIMARY_GEMINI_MODEL;
@@ -52,7 +52,7 @@ function buildHighlightPrompt(doc: {
   } | null;
 }): string {
   let artigosStr = 'Nenhum artigo da Lei 14.133 vinculado.';
-  const arts = parseLeiArticles(doc.leiArticles);
+  const arts = getLeiArticles(doc);
   if (arts.length > 0) {
     artigosStr = `Artigos da Lei 14.133/2021 vinculados: ${arts.map((a) => `Art. ${a}`).join(', ')}`;
   }
@@ -178,7 +178,7 @@ export async function identifyAndAlertHighlights(newDocIds: string[]): Promise<n
       id: true,
       title: true,
       description: true,
-      leiArticles: true,
+      leiArticles: true, leiArticlesArr: true,
       url: true,
       acordaoNumero: true,
       acordaoAno: true,

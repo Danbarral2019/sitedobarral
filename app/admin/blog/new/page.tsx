@@ -8,7 +8,7 @@ import { Loader2, Save, ArrowLeft, Plus, X } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
 import LeiArticleSelector from '@/components/LeiArticleSelector';
-import { parseLeiArticles } from '@/lib/lei-articles';
+import { parseLeiArticles, getLeiArticles } from '@/lib/lei-articles';
 
 // Lazy load do editor Markdown (150KB+ economia)
 const MarkdownEditor = dynamic(() => import('@/components/MarkdownEditor'), {
@@ -150,7 +150,7 @@ function NewBlogPostPageInner() {
         setTags(newTags);
 
         // Lei Articles do documento
-        const articles = parseLeiArticles(doc.leiArticles);
+        const articles = getLeiArticles(doc);
         if (articles.length > 0) setLeiArticles(articles);
       } catch (err) {
         console.error('Erro ao carregar highlight:', err);
@@ -243,7 +243,7 @@ function NewBlogPostPageInner() {
         setTags(newTags);
 
         // Lei Articles da decisão
-        const decArticles = parseLeiArticles(dec.leiArticles);
+        const decArticles = getLeiArticles(dec);
         if (decArticles.length > 0) setLeiArticles(decArticles);
       } catch (err) {
         console.error('Erro ao carregar tribunal highlight:', err);

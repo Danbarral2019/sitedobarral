@@ -9,7 +9,7 @@ export async function GET() {
         leiArticles: { not: null },
       },
       select: {
-        leiArticles: true,
+        leiArticles: true, leiArticlesArr: true,
       },
     });
 

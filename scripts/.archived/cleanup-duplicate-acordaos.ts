@@ -37,7 +37,7 @@ async function main() {
         isCommon: true,
         summary: true,
         embeddingStatus: true,
-        leiArticles: true,
+        leiArticles: true, leiArticlesArr: true,
         uploadedAt: true,
         metaTcu: {
           select: {

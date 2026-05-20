@@ -68,7 +68,7 @@ async function main() {
 
   const decisions = await prisma.tribunalDecision.findMany({
     where: { leiArticles: { not: null } },
-    select: { id: true, tribunalCode: true, decisionNumber: true, leiArticles: true },
+    select: { id: true, tribunalCode: true, decisionNumber: true, leiArticles: true, leiArticlesArr: true },
   });
   console.log(`Decisões com leiArticles: ${decisions.length}`);
 

@@ -282,7 +282,7 @@ async function queryMetadataCompleteness(): Promise<MetadataRow[]> {
       officialUrl: true,
       content: true,
       themes: true,
-      leiArticles: true,
+      leiArticles: true, leiArticlesArr: true,
     },
   });
 

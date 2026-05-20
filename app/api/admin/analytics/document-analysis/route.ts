@@ -7,7 +7,7 @@
 
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
-import { parseLeiArticles } from '@/lib/lei-articles';
+import { parseLeiArticles, getLeiArticles } from '@/lib/lei-articles';
 import { apiLogger } from "@/lib/logger";
 
 export async function GET() {
@@ -20,7 +20,7 @@ export async function GET() {
           id: true,
           title: true,
           category: true,
-          leiArticles: true,
+          leiArticles: true, leiArticlesArr: true,
           updatedAt: true,
         },
       }),
@@ -30,7 +30,7 @@ export async function GET() {
           id: true,
           title: true,
           type: true,
-          leiArticles: true,
+          leiArticles: true, leiArticlesArr: true,
           updatedAt: true,
         },
       }),
@@ -52,7 +52,7 @@ export async function GET() {
         title: d.title,
         source: 'Document' as const,
         category: d.category || 'outro',
-        articles: parseLeiArticles(d.leiArticles),
+        articles: getLeiArticles(d),
         updatedAt: d.updatedAt,
       })),
       ...legislativeActs.map(la => ({
@@ -60,7 +60,7 @@ export async function GET() {
         title: la.title,
         source: 'LegislativeAct' as const,
         category: la.type || 'legislacao',
-        articles: parseLeiArticles(la.leiArticles),
+        articles: getLeiArticles(la),
         updatedAt: la.updatedAt,
       })),
     ].filter(item => item.articles.length > 0);

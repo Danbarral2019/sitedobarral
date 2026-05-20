@@ -13,7 +13,7 @@ import {
 } from 'lucide-react';
 import Link from 'next/link';
 import { safeParseArray } from '@/lib/utils';
-import { parseLeiArticles } from '@/lib/lei-articles';
+import { parseLeiArticles, getLeiArticles } from '@/lib/lei-articles';
 import { getImportanceBadge } from './utils';
 import MetadataGrid from './MetadataGrid';
 import DouPublicationBox from './DouPublicationBox';
@@ -218,7 +218,7 @@ export default function DocumentDetailModal({
   }
 
   const tags = parseTags(document.tags);
-  const leiArticles = parseLeiArticles(document.leiArticles);
+  const leiArticles = getLeiArticles(document);
   const keyPoints = parseKeyPoints(document.notes?.keyPoints ?? null);
   const importanceBadge = getImportanceBadge(document.notes?.importance ?? null);
 

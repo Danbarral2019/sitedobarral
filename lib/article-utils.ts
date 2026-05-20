@@ -98,7 +98,7 @@ export function getArticleIcon(numero: string): string {
 export async function getDocumentCountByArticle(): Promise<Record<string, number>> {
   const documents = await prisma.document.findMany({
     where: { leiArticles: { not: null } },
-    select: { leiArticles: true },
+    select: { leiArticles: true, leiArticlesArr: true },
   });
 
   const counts: Record<string, number> = {};
@@ -142,7 +142,7 @@ export async function getTopArticles(limit: number = 10): Promise<Array<{
 
   const documents = await prisma.document.findMany({
     where: { leiArticles: { not: null } },
-    select: { id: true, leiArticles: true },
+    select: { id: true, leiArticles: true, leiArticlesArr: true },
   });
 
   const articleViews: Record<string, number> = {};

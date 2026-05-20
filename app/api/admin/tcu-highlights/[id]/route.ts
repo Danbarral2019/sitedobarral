@@ -21,7 +21,7 @@ export const GET = withAdminApi<{ id: string }>(async (_request, { params }) => 
           description: true,
           acordaoNumero: true,
           acordaoAno: true,
-          leiArticles: true,
+          leiArticles: true, leiArticlesArr: true,
           metaTcu: {
             select: {
               relator: true,

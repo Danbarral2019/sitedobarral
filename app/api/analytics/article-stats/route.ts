@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { withCache, CacheKeys, CACHE_TTL } from '@/lib/cache/redis-client';
-import { parseLeiArticles } from '@/lib/lei-articles';
+import { parseLeiArticles, getLeiArticles } from '@/lib/lei-articles';
 
 // GET /api/analytics/article-stats - Estatísticas de documentos por artigo
 export async function GET() {
@@ -17,7 +17,7 @@ export async function GET() {
           },
           select: {
             id: true,
-            leiArticles: true,
+            leiArticles: true, leiArticlesArr: true,
           },
         });
 
@@ -27,7 +27,7 @@ export async function GET() {
           if (!doc.leiArticles) return;
 
           try {
-            const articles: string[] = parseLeiArticles(doc.leiArticles);
+            const articles: string[] = getLeiArticles(doc);
 
             articles.forEach((articleNum) => {
               const normalized = articleNum.replace(/^art\.?\s*/i, '').trim();
@@ -72,7 +72,7 @@ export async function GET() {
           if (viewCount === 0) return;
 
           try {
-            const articles: string[] = parseLeiArticles(doc.leiArticles);
+            const articles: string[] = getLeiArticles(doc);
             articles.forEach((articleNum) => {
               const normalized = articleNum.replace(/^art\.?\s*/i, '').trim();
               viewCounts[normalized] = (viewCounts[normalized] || 0) + viewCount;

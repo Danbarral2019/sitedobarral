@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { withAdminApi } from '@/lib/api/handler';
 import { ApiError, NotFoundError } from '@/lib/errors/api-error';
-import { parseLeiArticles, setLeiArticles } from '@/lib/lei-articles';
+import { parseLeiArticles, setLeiArticles, getLeiArticles } from '@/lib/lei-articles';
 import { CacheInvalidation } from '@/lib/cache/redis-client';
 
 export const POST = withAdminApi<{ numero: string }>(async (request, { params }) => {
@@ -15,11 +15,11 @@ export const POST = withAdminApi<{ numero: string }>(async (request, { params })
 
   const act = await prisma.legislativeAct.findUnique({
     where: { id: actId },
-    select: { id: true, leiArticles: true },
+    select: { id: true, leiArticles: true, leiArticlesArr: true },
   });
   if (!act) throw new NotFoundError('Ato');
 
-  const current = parseLeiArticles(act.leiArticles);
+  const current = getLeiArticles(act);
   if (current.includes(numero)) {
     return NextResponse.json({ success: true, alreadyLinked: true });
   }

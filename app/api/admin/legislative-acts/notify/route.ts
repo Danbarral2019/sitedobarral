@@ -3,7 +3,7 @@ import { prisma } from '@/lib/prisma';
 import { withAdminApi } from '@/lib/api/handler';
 import { NotFoundError, ValidationError } from '@/lib/errors/api-error';
 import { sendEmail } from '@/lib/email';
-import { parseLeiArticles } from '@/lib/lei-articles';
+import { parseLeiArticles, getLeiArticles } from '@/lib/lei-articles';
 import { apiLogger } from "@/lib/logger";
 
 /**
@@ -54,7 +54,7 @@ export const POST = withAdminApi(async (request, ctx) => {
   // Gerar HTML do email
   const generateEmailHTML = (userName: string) => {
     const actsHTML = acts.map(act => {
-      const leiArticles = parseLeiArticles(act.leiArticles);
+      const leiArticles = getLeiArticles(act);
 
       return `
         <div style="background: #f9fafb; border: 2px solid #e5e7eb; border-radius: 8px; padding: 16px; margin-bottom: 16px;">

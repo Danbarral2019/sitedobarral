@@ -2,18 +2,18 @@ import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { withAdminApi } from '@/lib/api/handler';
 import { NotFoundError } from '@/lib/errors/api-error';
-import { parseLeiArticles, setLeiArticles } from '@/lib/lei-articles';
+import { parseLeiArticles, setLeiArticles, getLeiArticles } from '@/lib/lei-articles';
 import { CacheInvalidation } from '@/lib/cache/redis-client';
 
 export const DELETE = withAdminApi<{ numero: string; documentId: string }>(async (_request, { params }) => {
   const { numero, documentId } = params;
   const doc = await prisma.document.findUnique({
     where: { id: documentId },
-    select: { id: true, leiArticles: true },
+    select: { id: true, leiArticles: true, leiArticlesArr: true },
   });
   if (!doc) throw new NotFoundError('Documento');
 
-  const current = parseLeiArticles(doc.leiArticles);
+  const current = getLeiArticles(doc);
   const next = current.filter((n) => n !== numero);
 
   await prisma.document.update({

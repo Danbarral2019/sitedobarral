@@ -43,7 +43,7 @@ function parseLeiArticles(json: string | null): string[] {
 async function auditLeiArticlesInLegislativeActs(): Promise<BadLink[]> {
   const acts = await prisma.legislativeAct.findMany({
     where: { leiArticles: { not: null } },
-    select: { id: true, fullNumber: true, leiArticles: true },
+    select: { id: true, fullNumber: true, leiArticles: true, leiArticlesArr: true },
   });
   const bad: BadLink[] = [];
   for (const a of acts) {
@@ -68,7 +68,7 @@ async function auditLeiArticlesInLegislativeActs(): Promise<BadLink[]> {
 async function auditLeiArticlesInTribunalDecisions(): Promise<BadLink[]> {
   const decisions = await prisma.tribunalDecision.findMany({
     where: { leiArticles: { not: null } },
-    select: { id: true, tribunalCode: true, decisionNumber: true, leiArticles: true },
+    select: { id: true, tribunalCode: true, decisionNumber: true, leiArticles: true, leiArticlesArr: true },
   });
   const bad: BadLink[] = [];
   for (const d of decisions) {

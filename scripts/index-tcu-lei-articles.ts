@@ -195,7 +195,7 @@ async function main() {
       tags: true,
       content: true,
       description: true,
-      leiArticles: true,
+      leiArticles: true, leiArticlesArr: true,
       courseId: true,
     },
     orderBy: { uploadedAt: 'asc' },

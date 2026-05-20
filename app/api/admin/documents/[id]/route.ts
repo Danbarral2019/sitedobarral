@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { withAdminApi } from '@/lib/api/handler';
 import { prisma } from '@/lib/prisma';
 import { safeParseArray } from '@/lib/utils';
-import { parseLeiArticles, setLeiArticles, stringifyLeiArticles } from '@/lib/lei-articles';
+import { parseLeiArticles, setLeiArticles, stringifyLeiArticles, getLeiArticles } from '@/lib/lei-articles';
 import { NotFoundError } from '@/lib/errors/api-error';
 import { apiLogger } from '@/lib/logger';
 import { CacheInvalidation } from '@/lib/cache/redis-client';
@@ -29,7 +29,7 @@ export const GET = withAdminApi<{ id: string }>(async (request: NextRequest, ctx
     const parsedDocument = {
       ...document,
       tags: safeParseArray(document.tags),
-      leiArticles: parseLeiArticles(document.leiArticles),
+      leiArticles: getLeiArticles(document),
       alternativeUrls: document.alternativeUrls || null,
       // Prefer satellite table values, fall back to flat fields
       adminNotes: document.notes?.adminNotes ?? document.adminNotes,

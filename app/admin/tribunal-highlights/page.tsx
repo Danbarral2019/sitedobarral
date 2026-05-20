@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
+import { getLeiArticles } from '@/lib/lei-articles';
 import { Star, ChevronDown, ChevronUp, ExternalLink, X, Pencil, Eye, PenLine } from 'lucide-react';
 
 interface TribunalDecisionData {
@@ -163,16 +164,6 @@ export default function TribunalHighlightsPage() {
     }
   };
 
-  const parseLeiArticles = (json: string | null): string[] => {
-    if (!json) return [];
-    try {
-      const parsed = JSON.parse(json);
-      return Array.isArray(parsed) ? parsed : [];
-    } catch {
-      return [];
-    }
-  };
-
   const formatDate = (dateStr: string | null) => {
     if (!dateStr) return '-';
     return new Date(dateStr).toLocaleDateString('pt-BR');
@@ -250,7 +241,7 @@ export default function TribunalHighlightsPage() {
           {highlights.map(h => {
             const expanded = expandedIds.has(h.id);
             const leiConnections = parseLeiConnections(h.aiLeiConnections);
-            const leiArticles = parseLeiArticles(h.tribunalDecision.leiArticles);
+            const leiArticles = getLeiArticles(h.tribunalDecision);
             const scoreColor = h.aiArticleWorthiness >= 85 ? 'text-green-700 bg-green-100 border-green-300' : 'text-yellow-700 bg-yellow-100 border-yellow-300';
             const borderColor = h.aiArticleWorthiness >= 85 ? 'border-l-green-500' : 'border-l-yellow-500';
 

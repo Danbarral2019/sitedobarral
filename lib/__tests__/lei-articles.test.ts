@@ -93,7 +93,7 @@ describe('getLeiArticles (dual-read — Onda 4.5.4)', () => {
   })
 
   it('fallback pra leiArticles quando leiArticlesArr ausente do select', () => {
-    // Cenário: caller fez findMany({ select: { leiArticles: true } }) sem o novo campo
+    // Cenário: caller fez findMany({ select: { leiArticles: true, leiArticlesArr: true } }) sem o novo campo
     expect(getLeiArticles({ leiArticles: '["75","18"]' })).toEqual(['75', '18'])
   })
 

@@ -9,7 +9,7 @@ import {
   ExternalLink
 } from 'lucide-react';
 import { courses } from '@/data/courses';
-import { parseLeiArticles } from '@/lib/lei-articles';
+import { parseLeiArticles, getLeiArticles } from '@/lib/lei-articles';
 
 // Types
 export interface DocumentData {
@@ -95,7 +95,7 @@ function getCompletionStatus(doc: DocumentData): { status: CompletionStatus; iss
 
   // Warning: missing optional but recommended fields
   const tags = safeParseArray(doc.tags);
-  const articles = parseLeiArticles(doc.leiArticles);
+  const articles = getLeiArticles(doc);
 
   if (tags.length === 0 && articles.length === 0) {
     issues.push('Sem tags ou artigos');
@@ -132,7 +132,7 @@ export function DocumentCard({ document, isSelected, onSelect, onPreview, onDele
   const StatusIcon = STATUS_CONFIG[completion.status].icon;
 
   const tags = safeParseArray(document.tags);
-  const leiArticles = parseLeiArticles(document.leiArticles);
+  const leiArticles = getLeiArticles(document);
 
   return (
     <div

@@ -48,7 +48,7 @@ async function main() {
       description: true,
       content: true,
       tags: true,
-      leiArticles: true,
+      leiArticles: true, leiArticlesArr: true,
     },
   });
 

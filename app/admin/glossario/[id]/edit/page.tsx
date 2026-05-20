@@ -2,6 +2,7 @@
 
 import { useEffect, useState, useCallback } from 'react';
 import { useRouter, useParams } from 'next/navigation';
+import { getLeiArticles } from '@/lib/lei-articles';
 
 import {
   Save, X, Eye, BookOpen, Grid,
@@ -51,17 +52,7 @@ export default function EditGlossaryTermPage() {
       if (response.ok) {
         const data = await response.json();
         setTerm(data.term);
-        // Parse JSON arrays to comma-separated strings for form display
-        const parseLeiArticles = (str?: string) => {
-          if (!str) return '';
-          try {
-            const arr = JSON.parse(str);
-            return Array.isArray(arr) ? arr.join(', ') : '';
-          } catch {
-            return '';
-          }
-        };
-
+        // Parse JSON array (relatedTerms ainda é JSON-string) para CSV de form
         const parseRelatedTerms = (str?: string) => {
           if (!str) return '';
           try {
@@ -78,7 +69,7 @@ export default function EditGlossaryTermPage() {
           shortDef: data.term.shortDef || '',
           longDef: data.term.longDef,
           category: data.term.category,
-          leiArticles: parseLeiArticles(data.term.leiArticles),
+          leiArticles: getLeiArticles(data.term).join(', '),
           relatedTerms: parseRelatedTerms(data.term.relatedTerms),
           isPublished: data.term.isPublished,
         });

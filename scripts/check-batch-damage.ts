@@ -43,7 +43,7 @@ async function main() {
 
     const db = await prisma.legislativeAct.findUnique({
       where: { fullNumber: a.fullNumber },
-      select: { themes: true, leiArticles: true, content: true },
+      select: { themes: true, leiArticles: true, leiArticlesArr: true, content: true },
     });
     if (!db) continue;
 
@@ -78,7 +78,7 @@ async function main() {
   // Confirma se Decreto 12.174 (atualizado pelo batch atos-pendentes-2026-04.json) tem themes
   const dec = await prisma.legislativeAct.findUnique({
     where: { fullNumber: 'Decreto 12.174/2024' },
-    select: { themes: true, content: true, leiArticles: true },
+    select: { themes: true, content: true, leiArticles: true, leiArticlesArr: true },
   });
   console.log(`\nDecreto 12.174/2024 (sample do outro batch):`);
   console.log(`  themes:      ${dec?.themes ?? 'null'}`);

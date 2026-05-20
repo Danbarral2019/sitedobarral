@@ -81,7 +81,7 @@ export interface DbTribunalDecision {
 
 export const EXPORT_DOC_SELECT = {
   id: true, title: true, description: true, category: true, url: true,
-  tags: true, leiArticles: true, summary: true,
+  tags: true, leiArticles: true, leiArticlesArr: true, summary: true,
   adminNotes: true, publicNotes: true, notesImportance: true,
   notesKeyPoints: true, notesPracticalUse: true,
   tcuNumeroAcordao: true, tcuArea: true, tcuTema: true,
@@ -92,7 +92,7 @@ export const EXPORT_DOC_SELECT = {
 export const EXPORT_ACT_SELECT = {
   id: true, fullNumber: true, type: true, title: true,
   ementa: true, summary: true, issuer: true, publishDate: true,
-  hierarchyLevel: true, leiArticles: true, themes: true, officialUrl: true,
+  hierarchyLevel: true, leiArticles: true, leiArticlesArr: true, themes: true, officialUrl: true,
 } as const;
 
 export const EXPORT_DECISION_SELECT = {
@@ -100,7 +100,7 @@ export const EXPORT_DECISION_SELECT = {
   decisionType: true, decisionNumber: true, year: true,
   title: true, ementa: true, summary: true,
   relator: true, orgaoJulgador: true,
-  themes: true, leiArticles: true, url: true, relevanceScore: true,
+  themes: true, leiArticles: true, leiArticlesArr: true, url: true, relevanceScore: true,
 } as const;
 
 export const EXPORT_DECISION_WHERE = {
