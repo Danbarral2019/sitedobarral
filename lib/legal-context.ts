@@ -185,7 +185,7 @@ export async function findRelatedActs(
     hierarchy_level: number;
   }>>(`
     SELECT "fullNumber" as full_number, ementa, "officialUrl" as official_url,
-           "leiArticles" as lei_articles, "hierarchyLevel" as hierarchy_level
+           to_jsonb("leiArticlesArr")::text as lei_articles, "hierarchyLevel" as hierarchy_level
     FROM "LegislativeAct"
     WHERE (${articleConditions})
       AND "fullNumber" NOT IN (${excludeTitles})

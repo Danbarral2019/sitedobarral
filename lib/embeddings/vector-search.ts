@@ -307,7 +307,7 @@ async function executeVectorSearch(
         d."courseId" as course_id,
         d."isCommon" as is_common,
         d.tags,
-        d."leiArticles" as lei_articles,
+        to_jsonb(d."leiArticlesArr")::text as lei_articles,
         NULL::int as hierarchy_level,
         'document' as source_type,
         d."uploadedAt" as uploaded_at
@@ -350,7 +350,7 @@ async function executeVectorSearch(
         NULL as course_id,
         true as is_common,
         la.themes as tags,
-        la."leiArticles" as lei_articles,
+        to_jsonb(la."leiArticlesArr")::text as lei_articles,
         la."hierarchyLevel" as hierarchy_level,
         'legislative-act' as source_type,
         la."publishDate" as uploaded_at
@@ -390,7 +390,7 @@ async function executeVectorSearch(
         NULL as course_id,
         true as is_common,
         td.themes as tags,
-        td."leiArticles" as lei_articles,
+        to_jsonb(td."leiArticlesArr")::text as lei_articles,
         NULL::int as hierarchy_level,
         'tribunal-decision' as source_type,
         td."dataJulgamento" as uploaded_at
