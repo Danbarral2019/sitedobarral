@@ -197,6 +197,24 @@ class PDFBuilder {
   }
 
   // ═══════════════════════════════════════════════════
+  // SANITIZE — remove caracteres que helvetica não renderiza
+  // (emojis, símbolos multibyte, zero-width) para evitar overflow no splitTextToSize
+  // ═══════════════════════════════════════════════════
+  sanitize(text: string): string {
+    return text
+      // remove emojis e pictogramas (Misc Symbols, Dingbats, Supplementary Pictographic)
+      .replace(
+        /[\u{1F300}-\u{1FAFF}\u{1F000}-\u{1F2FF}\u{2600}-\u{27BF}\u{2300}-\u{23FF}\u{FE00}-\u{FE0F}\u{200D}]/gu,
+        ''
+      )
+      // remove zero-width e separadores invisíveis (BMP)
+      .replace(/[\u200B-\u200F\u2028-\u202F\u2060-\u206F\uFEFF]/g, '')
+      // colapsa espaços resultantes da remoção
+      .replace(/[ \t]{2,}/g, ' ')
+      .trim();
+  }
+
+  // ═══════════════════════════════════════════════════
   // RENDER MARKDOWN — parágrafos, bullets, subtítulos
   // ═══════════════════════════════════════════════════
   renderMarkdown(text: string, baseFontSize: number = 9.5) {
@@ -216,10 +234,62 @@ class PDFBuilder {
 
       this.newPageIfNeeded(6);
 
+      // Detectar header markdown (# até ######)
+      const headerMatch = trimmed.match(/^(#{1,6})\s+(.*)/);
+      if (headerMatch) {
+        const level = headerMatch[1].length;
+        const headerText = this.sanitize(headerMatch[2].replace(/\*\*/g, '').replace(/[#:]+\s*$/, ''));
+        if (!headerText) continue;
+
+        // Tamanho do header diminui com o nível (h1 > h2 > h3 ...)
+        const headerSize = Math.max(baseFontSize + 0.5, baseFontSize + 3 - level * 0.7);
+        const headerLh = headerSize * 0.5;
+
+        this.y += level <= 2 ? 4 : 2.5;
+        this.newPageIfNeeded(headerLh + 4);
+
+        this.font('bold', headerSize);
+        this.color(C.navy);
+        const wrapped = this.wrap(headerText, innerW);
+        for (const wl of wrapped) {
+          this.newPageIfNeeded(headerLh);
+          this.doc.text(wl, this.ml + 1, this.y);
+          this.y += headerLh;
+        }
+        this.y += 2;
+        continue;
+      }
+
+      // Detectar blockquote (> texto) — usado para alertas/destaques
+      const quoteMatch = trimmed.match(/^>\s*(.*)/);
+      if (quoteMatch) {
+        const quoteText = this.sanitize(quoteMatch[1].replace(/\*\*/g, ''));
+        if (!quoteText) continue;
+
+        this.font('italic', baseFontSize);
+        const wrapped = this.wrap(quoteText, innerW - 10);
+        const blockH = wrapped.length * lh + 4;
+
+        this.newPageIfNeeded(blockH + 4);
+
+        // Barra lateral amber
+        this.fill(C.amber);
+        this.doc.rect(this.ml, this.y - 3, 2, blockH, 'F');
+
+        this.color(C.textSoft);
+        for (const wl of wrapped) {
+          this.newPageIfNeeded(lh + 1);
+          this.doc.text(wl, this.ml + 6, this.y);
+          this.y += lh;
+        }
+        this.y += 2.5;
+        continue;
+      }
+
       // Detectar bullet (- ou * no início)
       const bulletMatch = trimmed.match(/^[-*•]\s+(.*)/);
       if (bulletMatch) {
-        const bulletText = bulletMatch[1].replace(/\*\*/g, '');
+        const bulletText = this.sanitize(bulletMatch[1].replace(/\*\*/g, ''));
         this.font('normal', baseFontSize);
         const wrapped = this.wrap(bulletText, innerW - 8);
         this.color(C.text);
@@ -240,7 +310,7 @@ class PDFBuilder {
       // Detectar item numerado
       const numMatch = trimmed.match(/^(\d+)[.)]\s+(.*)/);
       if (numMatch) {
-        const numText = numMatch[2].replace(/\*\*/g, '');
+        const numText = this.sanitize(numMatch[2].replace(/\*\*/g, ''));
         this.font('bold', baseFontSize);
         this.color(C.navy);
         this.doc.text(`${numMatch[1]}.`, this.ml + 2, this.y);
@@ -266,7 +336,8 @@ class PDFBuilder {
         this.newPageIfNeeded(8);
         this.font('bold', baseFontSize + 0.5);
         this.color(C.navy);
-        const clean = trimmed.replace(/\*\*/g, '');
+        const clean = this.sanitize(trimmed.replace(/\*\*/g, ''));
+        if (!clean) continue;
         const wrapped = this.wrap(clean, innerW);
         for (const wl of wrapped) {
           this.doc.text(wl, this.ml + 1, this.y);
@@ -277,7 +348,8 @@ class PDFBuilder {
       }
 
       // Parágrafo normal
-      const clean = trimmed.replace(/\*\*/g, '');
+      const clean = this.sanitize(trimmed.replace(/\*\*/g, ''));
+      if (!clean) continue;
       this.font('normal', baseFontSize);
       this.color(C.text);
       const wrapped = this.wrap(clean, innerW);
@@ -291,12 +363,9 @@ class PDFBuilder {
   }
 
   // ═══════════════════════════════════════════════════
-  // DISCLAIMER — box aviso legal
+  // DISCLAIMER — box destaque no topo
   // ═══════════════════════════════════════════════════
   drawDisclaimer() {
-    this.newPageIfNeeded(28);
-    this.y += 6;
-
     const disclaimerText =
       'Este documento foi gerado automaticamente pelo sistema de Consulta IA do Prof. Daniel Barral. ' +
       'As respostas são baseadas em Inteligência Artificial e podem conter imprecisões. ' +
@@ -304,32 +373,47 @@ class PDFBuilder {
       'ser utilizada para instruir processos administrativos ou requerimentos a órgãos públicos. ' +
       'Sempre consulte a legislação oficial e fontes primárias.';
 
-    this.font('italic', 7);
-    const textLines = this.wrap(disclaimerText, this.cw - 14);
-    const boxH = textLines.length * 3.2 + 10;
+    const bodySize = 8;
+    const lineH = 3.7;
+    const labelGap = 5.5;
+    const padX = 9;
+    const padTop = 5.5;
+    const padBottom = 5.5;
 
+    this.font('normal', bodySize);
+    const textLines = this.wrap(disclaimerText, this.cw - padX - 6);
+    const boxH = padTop + labelGap + textLines.length * lineH + padBottom;
+
+    this.newPageIfNeeded(boxH + 4);
+
+    // Fundo amber claro
     this.fill(C.amberBg);
-    this.doc.roundedRect(this.ml, this.y, this.cw, boxH, 1.5, 1.5, 'F');
+    this.doc.roundedRect(this.ml, this.y, this.cw, boxH, 1.8, 1.8, 'F');
 
-    // Barra amber
+    // Borda amber mais visível que a barra anterior
+    this.draw(C.amber);
+    this.doc.setLineWidth(0.4);
+    this.doc.roundedRect(this.ml, this.y, this.cw, boxH, 1.8, 1.8, 'S');
+
+    // Barra lateral mais grossa pra destacar
     this.fill(C.amber);
-    this.doc.rect(this.ml, this.y, 2.5, boxH, 'F');
+    this.doc.rect(this.ml, this.y, 3.5, boxH, 'F');
 
-    // Label
-    this.font('bold', 6.5);
+    // Label — "AVISO IMPORTANTE" maior e mais visível
+    this.font('bold', 9);
     this.doc.setTextColor(C.amber[0], C.amber[1], C.amber[2]);
-    this.doc.text('AVISO', this.ml + 6, this.y + 4.5);
+    this.doc.text('AVISO IMPORTANTE  ·  RESPOSTA GERADA POR IA', this.ml + padX, this.y + padTop + 2);
 
-    // Texto
-    this.font('italic', 7);
-    this.color(C.light);
-    let dy = this.y + 9;
+    // Texto do disclaimer
+    this.font('normal', bodySize);
+    this.color(C.text);
+    let dy = this.y + padTop + labelGap + 3.5;
     for (const line of textLines) {
-      this.doc.text(line, this.ml + 6, dy);
-      dy += 3.2;
+      this.doc.text(line, this.ml + padX, dy);
+      dy += lineH;
     }
 
-    this.y += boxH + 4;
+    this.y += boxH + 6;
   }
 
   save(fileName: string) {
@@ -378,6 +462,9 @@ export function generateSearchResultPDF(options: SearchResultPDFOptions): void {
 
   // ── HEADER ──
   pdf.drawHeader('Consulta IA', dateStr);
+
+  // ── AVISO IMPORTANTE (topo, em destaque) ──
+  pdf.drawDisclaimer();
 
   // ── CONSULTA ──
   pdf.sectionLabel('Consulta');
@@ -526,9 +613,6 @@ export function generateSearchResultPDF(options: SearchResultPDFOptions): void {
     }
   }
 
-  // ── DISCLAIMER ──
-  pdf.drawDisclaimer();
-
   // ── SALVAR ──
   pdf.save(`ConsultaIA_${new Date().toISOString().split('T')[0]}.pdf`);
 }
@@ -564,6 +648,9 @@ export function generateConversationPDF(options: PDFExportOptions): void {
 
   // Header
   pdf.drawHeader(`Chat IA  ·  Artigo ${articleNumber}`, dateStr);
+
+  // Aviso em destaque no topo
+  pdf.drawDisclaimer();
 
   // Info box do artigo
   const titleText = articleTitle || `Artigo ${articleNumber} da Lei 14.133/2021`;
@@ -614,9 +701,6 @@ export function generateConversationPDF(options: PDFExportOptions): void {
       pdf.y += 6;
     }
   });
-
-  // Disclaimer
-  pdf.drawDisclaimer();
 
   // Save
   pdf.save(`Lei14133_Art${articleNumber}_Conversa_${new Date().toISOString().split('T')[0]}.pdf`);
