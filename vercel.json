@@ -2,16 +2,76 @@
   "regions": ["gru1"],
   "crons": [
     {
+      "path": "/api/cron/import-documents",
+      "schedule": "0 2 * * 2"
+    },
+    {
+      "path": "/api/cron/check-legislative-updates",
+      "schedule": "0 3 * * 1"
+    },
+    {
+      "path": "/api/cron/cleanup-orphaned-files",
+      "schedule": "0 3 * * *"
+    },
+    {
+      "path": "/api/cron/compute-streaks",
+      "schedule": "0 3 * * *"
+    },
+    {
+      "path": "/api/cron/sync-tcu-manual",
+      "schedule": "0 4 1 * *"
+    },
+    {
+      "path": "/api/cron/enrich-themes",
+      "schedule": "0 4 * * 2"
+    },
+    {
+      "path": "/api/cron/gemini-health",
+      "schedule": "0 5 * * *"
+    },
+    {
+      "path": "/api/cron/tribunal-scraper-health",
+      "schedule": "0 5 * * *"
+    },
+    {
+      "path": "/api/cron/sync-tcu-acordaos",
+      "schedule": "0 6 * * *"
+    },
+    {
+      "path": "/api/cron/sync-conuni",
+      "schedule": "0 6 1 * *"
+    },
+    {
+      "path": "/api/cron/sync-datajud",
+      "schedule": "0 6 * * 3"
+    },
+    {
+      "path": "/api/cron/sync-tribunal-decisions",
+      "schedule": "0 7 * * 1"
+    },
+    {
+      "path": "/api/cron/classify-conuni",
+      "schedule": "0 7 1 * *"
+    },
+    {
+      "path": "/api/cron/sync-dou-atos-normativos",
+      "schedule": "0 8 * * *"
+    },
+    {
+      "path": "/api/cron/summarize-conuni",
+      "schedule": "0 8 * * 1"
+    },
+    {
+      "path": "/api/cron/monitoring-alerts",
+      "schedule": "0 8,20 * * *"
+    },
+    {
       "path": "/api/enrollment/check-expiration",
       "schedule": "0 9 * * *"
     },
     {
       "path": "/api/cron/notify-new-documents",
       "schedule": "0 9 * * *"
-    },
-    {
-      "path": "/api/cron/import-documents",
-      "schedule": "0 2 * * 2"
     },
     {
       "path": "/api/cron/monthly-newsletter",
@@ -22,76 +82,16 @@
       "schedule": "0 10 * * *"
     },
     {
-      "path": "/api/cron/cleanup-orphaned-files",
-      "schedule": "0 3 * * *"
-    },
-    {
-      "path": "/api/cron/sync-tcu-acordaos",
-      "schedule": "0 6 * * *"
-    },
-    {
-      "path": "/api/cron/sync-tcu-manual",
-      "schedule": "0 4 1 * *"
-    },
-    {
-      "path": "/api/cron/sync-conuni",
-      "schedule": "0 6 1 * *"
-    },
-    {
-      "path": "/api/cron/classify-conuni",
-      "schedule": "0 7 1 * *"
-    },
-    {
-      "path": "/api/cron/summarize-conuni",
-      "schedule": "0 8 * * 1"
-    },
-    {
-      "path": "/api/cron/sync-dou-atos-normativos",
-      "schedule": "0 8 * * *"
-    },
-    {
-      "path": "/api/cron/enrich-themes",
-      "schedule": "0 4 * * 2"
-    },
-    {
-      "path": "/api/cron/sync-tribunal-decisions",
-      "schedule": "0 7 * * 1"
-    },
-    {
-      "path": "/api/cron/tribunal-scraper-health",
-      "schedule": "0 0 * * *"
-    },
-    {
-      "path": "/api/cron/sync-datajud",
-      "schedule": "0 6 * * 3"
-    },
-    {
-      "path": "/api/cron/monitoring-alerts",
-      "schedule": "0 */6 * * *"
-    },
-    {
-      "path": "/api/cron/gemini-health",
-      "schedule": "0 5 * * *"
-    },
-    {
-      "path": "/api/cron/check-legislative-updates",
-      "schedule": "0 3 * * 1"
-    },
-    {
       "path": "/api/cron/daily-tcu-clipping",
       "schedule": "0 12 * * 1-5"
     },
     {
+      "path": "/api/cron/social-publish",
+      "schedule": "0 13,17 * * 1-5"
+    },
+    {
       "path": "/api/cron/clipping-health-check",
       "schedule": "0 14 * * 1-5"
-    },
-    {
-      "path": "/api/cron/compute-streaks",
-      "schedule": "0 3 * * *"
-    },
-    {
-      "path": "/api/cron/social-publish",
-      "schedule": "0 */2 * * *"
     }
   ]
 }
