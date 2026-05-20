@@ -6,7 +6,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import AdminBottomNav from '@/components/admin/AdminBottomNav';
 import {
-  QrCode, ChevronLeft, ChevronRight, BarChart3, Mail, MessageSquare, Send, GraduationCap, Globe, BookOpen, Menu, X, FileText, PenSquare, FileSpreadsheet, Filter, Inbox, Scale, Activity, Sparkles, Network, Map, Grid3X3
+  QrCode, ChevronLeft, ChevronRight, BarChart3, Mail, MessageSquare, Send, GraduationCap, Globe, BookOpen, Menu, X, FileText, PenSquare, FileSpreadsheet, Filter, Inbox, Scale, Activity, Sparkles, Network, Map, Grid3X3, Award, HelpCircle, Megaphone
 } from 'lucide-react';
 
 interface AdminLayoutProps {
@@ -160,6 +160,11 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
       icon: GraduationCap,
     },
     {
+      path: '/admin/badges',
+      label: 'Badges (Gamificacao)',
+      icon: Award,
+    },
+    {
       path: '/admin/planejamento/trilhas',
       label: 'Planejamento — Trilhas',
       icon: Map,
@@ -168,6 +173,11 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
       path: '/admin/planejamento/matriz',
       label: 'Planejamento — Matriz',
       icon: Grid3X3,
+    },
+    {
+      path: '/admin/planejamento/anunciar',
+      label: 'Planejamento — Anunciar',
+      icon: Megaphone,
     },
 
     // === CONTEÚDO ===
@@ -186,6 +196,11 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
       path: '/admin/glossario',
       label: 'Glossario',
       icon: BookOpen,
+    },
+    {
+      path: '/admin/faq',
+      label: 'FAQ',
+      icon: HelpCircle,
     },
     {
       path: '/admin/recursos',

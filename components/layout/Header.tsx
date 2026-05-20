@@ -4,7 +4,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { useState, memo, useEffect, useRef } from 'react';
 import { usePathname } from 'next/navigation';
-import { Menu, X, ChevronDown, Home, User, FileText, Mail, LogIn, BookOpen, Scale, CreditCard, Gavel, BookMarked, Library } from 'lucide-react';
+import { Menu, X, ChevronDown, Home, User, FileText, Mail, LogIn, BookOpen, Scale, CreditCard, Gavel, BookMarked, Library, HelpCircle } from 'lucide-react';
 import { courses } from '@/data/courses';
 
 export const Header = memo(function Header() {
@@ -165,6 +165,15 @@ export const Header = memo(function Header() {
             </Link>
 
             <Link
+              href="/faq"
+              aria-current={isActive('/faq') ? 'page' : undefined}
+              className={`flex items-center space-x-1 transition-colors font-poppins text-sm focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-brand-600 rounded ${isActive('/faq') ? 'text-white font-semibold' : 'text-white/90 hover:text-white'}`}
+            >
+              <HelpCircle className="w-4 h-4" />
+              <span>FAQ</span>
+            </Link>
+
+            <Link
               href="/planos"
               aria-current={isActive('/planos') ? 'page' : undefined}
               className={`flex items-center space-x-1 transition-colors font-poppins text-sm focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-brand-600 rounded ${isActive('/planos') ? 'text-white font-semibold' : 'text-white/90 hover:text-white'}`}
@@ -192,6 +201,7 @@ export const Header = memo(function Header() {
           </div>
 
           <button
+            type="button"
             onClick={() => setIsMenuOpen(!isMenuOpen)}
             className="md:hidden p-2 flex-shrink-0 text-white"
             aria-label={isMenuOpen ? 'Fechar menu' : 'Abrir menu'}
@@ -211,6 +221,7 @@ export const Header = memo(function Header() {
               { href: '/jurisprudencia', label: 'Jurisprudência' },
               { href: '/blog', label: 'Blog' },
               { href: '/glossario', label: 'Glossário' },
+              { href: '/faq', label: 'FAQ' },
               { href: '/planos', label: 'Planos' },
               { href: '/contato', label: 'Contato' },
             ].map(({ href, label }) => (
