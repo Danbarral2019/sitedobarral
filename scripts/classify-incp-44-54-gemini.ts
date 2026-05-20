@@ -107,7 +107,7 @@ async function main() {
   for (const n of NUMEROS_ALVO) {
     const doc = await prisma.document.findFirst({
       where: { category: 'enunciados', entityType: 'INCP', enunciadoNumber: String(n) },
-      select: { id: true, title: true, leiArticles: true, leiArticlesArr: true },
+      select: { id: true, title: true, leiArticlesArr: true },
     });
     if (!doc) {
       console.log(`  ❌ nº ${n}: não encontrado no DB. Pulando.`);

@@ -475,7 +475,7 @@ async function main(): Promise<void> {
       description: true,
       content: true,
       category: true,
-      leiArticles: true, leiArticlesArr: true,
+      leiArticlesArr: true,
     },
     orderBy: { title: 'asc' },
   });

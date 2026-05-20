@@ -41,8 +41,7 @@ model Document {
   isPublic        Boolean   @default(false)
   isCommon        Boolean   @default(false) // Se true, documento aparece em todos os cursos
   tags            String? // JSON array como string
-  leiArticles     String? // JSON array com números de artigos da Lei 14.133/2021 (legado — drop em PR 4.5.5)
-  leiArticlesArr  String[]  @default([]) // Onda 4.5: array nativo Postgres. Backfill em 4.5.2; dual-write 4.5.3; cutover 4.5.4.
+  leiArticlesArr  String[]  @default([]) // Onda 4.5: array nativo Postgres (única coluna pós-4.5.6 — JSON legada dropada)
   content         String?   @db.Text // Conteúdo/trechos relevantes do documento para busca textual
   size            Int?
   onNumber        Int? // Número da ON (para ordenação numérica de Orientações Normativas)
@@ -199,7 +198,7 @@ model Document {
   @@index([category, douData]) // Índice composto para buscar documentos por categoria e data DOU
   @@index([r2Key]) // Índice para buscar por chave R2
   @@index([embeddingStatus]) // Índice para buscar documentos por status de embedding
-  @@index([leiArticlesArr], type: Gin) // Onda 4.5.4: GIN p/ queries `'75' = ANY(leiArticlesArr)` rápidas
+  @@index([leiArticlesArr], type: Gin) // Onda 4.5: GIN p/ queries `'75' = ANY(leiArticlesArr)` rápidas
 }
 
 // Metadados TCU (tabela satélite 1:1 — vertical table splitting)
@@ -459,8 +458,7 @@ model BlogPost {
   publishedAt       DateTime
   isPublished       Boolean  @default(false)
   tags              String? // JSON array como string
-  leiArticles       String? // JSON array com números de artigos da Lei 14.133/2021 (legado — drop em PR 4.5.5)
-  leiArticlesArr    String[] @default([]) // Onda 4.5: array nativo Postgres. Backfill em 4.5.2; dual-write 4.5.3; cutover 4.5.4.
+  leiArticlesArr    String[] @default([]) // Onda 4.5: array nativo Postgres (única coluna pós-4.5.6 — JSON legada dropada)
   autoPublishSocial Boolean  @default(true) // Publicar automaticamente nas redes sociais
   socialMediaImage  String? // URL da imagem gerada para OG/redes sociais
   createdAt         DateTime @default(now())
@@ -474,7 +472,7 @@ model BlogPost {
   @@index([slug])
   @@index([isPublished])
   @@index([publishedAt])
-  @@index([leiArticlesArr], type: Gin) // Onda 4.5.4
+  @@index([leiArticlesArr], type: Gin) // Onda 4.5 (GIN)
 }
 
 // Publicações em Redes Sociais
@@ -524,8 +522,7 @@ model Publication {
   location  String? // Local do evento
 
   // Catalogação por artigos da Lei 14.133/2021
-  leiArticles    String? // JSON array com números de artigos da Lei 14.133/2021 (legado — drop em PR 4.5.5)
-  leiArticlesArr String[] @default([]) // Onda 4.5: array nativo Postgres. Backfill em 4.5.2; dual-write 4.5.3; cutover 4.5.4.
+  leiArticlesArr String[] @default([]) // Onda 4.5: array nativo Postgres (única coluna pós-4.5.6 — JSON legada dropada)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -534,7 +531,7 @@ model Publication {
   @@index([isPublished])
   @@index([publishedAt])
   @@index([type, isPublished])
-  @@index([leiArticlesArr], type: Gin) // Onda 4.5.4
+  @@index([leiArticlesArr], type: Gin) // Onda 4.5 (GIN)
 }
 
 // Formulário de Contato
@@ -680,8 +677,7 @@ model GlossaryTerm {
 
   // Relacionamentos (JSON arrays)
   relatedTerms   String? // IDs de termos relacionados
-  leiArticles    String? // Artigos da Lei 14.133/2021 (legado — drop em PR 4.5.5)
-  leiArticlesArr String[] @default([]) // Onda 4.5: array nativo Postgres. Backfill em 4.5.2; dual-write 4.5.3; cutover 4.5.4.
+  leiArticlesArr String[] @default([]) // Onda 4.5: array nativo Postgres (única coluna pós-4.5.6 — JSON legada dropada)
   relatedDocs    String? // IDs de documentos relacionados
 
   // Referências externas
@@ -705,7 +701,7 @@ model GlossaryTerm {
   @@index([slug])
   @@index([category])
   @@index([isPublic])
-  @@index([leiArticlesArr], type: Gin) // Onda 4.5.4
+  @@index([leiArticlesArr], type: Gin) // Onda 4.5 (GIN)
 }
 
 // Atos Normativos (Decretos, Portarias, INs, etc.)
@@ -732,8 +728,7 @@ model LegislativeAct {
   hierarchyLevel Int // 1=Lei, 2=Decreto, 3=Portaria, 4=IN, 5=Ordem de Serviço
 
   // Relacionamento com Lei 14.133/2021
-  leiArticles    String? // JSON array com números de artigos regulamentados (ex: ["75", "76"]) (legado — drop em PR 4.5.5)
-  leiArticlesArr String[] @default([]) // Onda 4.5: array nativo Postgres. Backfill em 4.5.2; dual-write 4.5.3; cutover 4.5.4.
+  leiArticlesArr String[] @default([]) // Onda 4.5: array nativo Postgres (única coluna pós-4.5.6 — JSON legada dropada)
 
   // Recursos e documentos
   officialUrl String? // Link para Planalto/DOU
@@ -807,7 +802,7 @@ model LegislativeAct {
   @@index([lastScrapedAt])
   @@index([scrapeStatus])
   @@index([embeddingStatus])
-  @@index([leiArticlesArr], type: Gin) // Onda 4.5.4
+  @@index([leiArticlesArr], type: Gin) // Onda 4.5 (GIN)
 }
 
 // Chunks de atos legislativos com embeddings (Busca Semântica)
@@ -1197,8 +1192,7 @@ model Lesson {
   // Campos IA
   aiSummary      String?  @db.Text
   aiKeyPoints    String? // JSON array
-  leiArticles    String? // JSON array com números de artigos da Lei 14.133/2021 (legado — drop em PR 4.5.5)
-  leiArticlesArr String[] @default([]) // Onda 4.5: array nativo Postgres. Backfill em 4.5.2; dual-write 4.5.3; cutover 4.5.4.
+  leiArticlesArr String[] @default([]) // Onda 4.5: array nativo Postgres (única coluna pós-4.5.6 — JSON legada dropada)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -1212,7 +1206,7 @@ model Lesson {
   @@index([moduleId])
   @@index([moduleId, displayOrder])
   @@index([prerequisiteId])
-  @@index([leiArticlesArr], type: Gin) // Onda 4.5.4
+  @@index([leiArticlesArr], type: Gin) // Onda 4.5 (GIN)
 }
 
 // Junction: Lesson ↔ Document
@@ -1600,8 +1594,7 @@ model TribunalDecision {
   isRelevant       Boolean  @default(true)
   relevanceScore   Int      @default(0) // 0-100
   themes           String? // JSON array: ["licitação", "contrato"]
-  leiArticles      String? // JSON array de artigos da Lei 14.133 (legado — drop em PR 4.5.5)
-  leiArticlesArr   String[] @default([]) // Onda 4.5: array nativo Postgres. Backfill em 4.5.2; dual-write 4.5.3; cutover 4.5.4.
+  leiArticlesArr   String[] @default([]) // Onda 4.5: array nativo Postgres (única coluna pós-4.5.6 — JSON legada dropada)
   suggestedCourses String?
 
   // Fonte e rastreamento
@@ -1643,7 +1636,7 @@ model TribunalDecision {
   @@index([embeddingStatus])
   @@index([sourceApi])
   @@index([year])
-  @@index([leiArticlesArr], type: Gin) // Onda 4.5.4
+  @@index([leiArticlesArr], type: Gin) // Onda 4.5 (GIN)
 }
 
 // Destaques editoriais de decisões TCE (espelha TcuHighlight)

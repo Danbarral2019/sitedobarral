@@ -39,7 +39,7 @@ export const GET = withAdminApi(async (request: NextRequest) => {
             description: true,
             acordaoNumero: true,
             acordaoAno: true,
-            leiArticles: true, leiArticlesArr: true,
+            leiArticlesArr: true,
             metaTcu: {
               select: {
                 relator: true,

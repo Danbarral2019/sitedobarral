@@ -117,7 +117,7 @@ export async function GET(request: NextRequest) {
           isPublic: true,
           isCommon: true,
           tags: true,
-          leiArticles: true, leiArticlesArr: true,
+          leiArticlesArr: true,
           onNumber: true,
           onYear: true,
           uploadedAt: true,

@@ -9,7 +9,7 @@ export const DELETE = withAdminApi<{ numero: string; actId: string }>(async (_re
   const { numero, actId } = params;
   const act = await prisma.legislativeAct.findUnique({
     where: { id: actId },
-    select: { id: true, leiArticles: true, leiArticlesArr: true },
+    select: { id: true, leiArticlesArr: true },
   });
   if (!act) throw new NotFoundError('Ato');
 

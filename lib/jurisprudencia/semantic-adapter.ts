@@ -200,7 +200,7 @@ export interface EnrichedDocument {
   tcuLinkPDF: string | null;
   summary: string | null;
   themes: string | null;
-  leiArticles: string | null;
+  leiArticlesArr: string[];
   url: string | null;
   douData: Date | null;
   uploadedAt: Date;
@@ -222,7 +222,7 @@ export interface EnrichedTribunalDecision {
   orgaoJulgador: string | null;
   dataJulgamento: Date | null;
   themes: string | null;
-  leiArticles: string | null;
+  leiArticlesArr: string[];
   url: string | null;
 }
 
@@ -264,7 +264,7 @@ export async function enrichSources(
             tcuLinkPDF: true,
             summary: true,
             themes: true,
-            leiArticles: true, leiArticlesArr: true,
+            leiArticlesArr: true,
             url: true,
             douData: true,
             uploadedAt: true,
@@ -290,7 +290,7 @@ export async function enrichSources(
             orgaoJulgador: true,
             dataJulgamento: true,
             themes: true,
-            leiArticles: true, leiArticlesArr: true,
+            leiArticlesArr: true,
             url: true,
           },
         })

@@ -34,16 +34,16 @@ export async function GET(request: NextRequest) {
 
     console.log(`[Article Coverage] Analisando ${requestedArticles.length} artigos...`);
 
-    // 3. Buscar todos os documentos com leiArticles
+    // 3. Buscar todos os documentos com leiArticlesArr não-vazio
     const documentsWithArticles = await prisma.document.findMany({
       where: {
-        leiArticles: {
-          not: null,
+        leiArticlesArr: {
+          isEmpty: false,
         },
       },
       select: {
         id: true,
-        leiArticles: true, leiArticlesArr: true,
+        leiArticlesArr: true,
       },
     });
 

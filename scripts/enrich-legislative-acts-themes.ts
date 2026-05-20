@@ -43,7 +43,7 @@ async function main() {
       fullNumber: true,
       title: true,
       ementa: true,
-      leiArticles: true, leiArticlesArr: true,
+      leiArticlesArr: true,
       esfera: true,
       themes: true,
     },

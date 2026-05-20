@@ -37,7 +37,7 @@ export interface SummaryPromptDoc {
   title: string;
   description: string | null;
   content: string | null;
-  leiArticles: string | null;
+  leiArticlesArr: string[];
   metaTcu?: {
     ementaCompleta?: string | null;
     area?: string | null;

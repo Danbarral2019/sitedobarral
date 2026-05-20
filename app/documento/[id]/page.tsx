@@ -65,7 +65,7 @@ export default async function DocumentoPage({ params }: PageProps) {
       url: true,
       uploadedAt: true,
       tags: true,
-      leiArticles: true, leiArticlesArr: true,
+      leiArticlesArr: true,
       isPublic: true,
       aiClassification: true,
     },

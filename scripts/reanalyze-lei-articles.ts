@@ -151,7 +151,7 @@ async function main() {
         tags: true,
         content: true,
         description: true,
-        leiArticles: true, leiArticlesArr: true,
+        leiArticlesArr: true,
       },
       orderBy: { uploadedAt: 'asc' },
     });
@@ -177,7 +177,7 @@ async function main() {
         type: true,
         ementa: true,
         summary: true,
-        leiArticles: true, leiArticlesArr: true,
+        leiArticlesArr: true,
         content: true,
       },
       orderBy: { createdAt: 'asc' },

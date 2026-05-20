@@ -11,20 +11,20 @@ export async function GET() {
       async () => {
         const documents = await prisma.document.findMany({
           where: {
-            leiArticles: {
-              not: null,
+            leiArticlesArr: {
+              isEmpty: false,
             },
           },
           select: {
             id: true,
-            leiArticles: true, leiArticlesArr: true,
+            leiArticlesArr: true,
           },
         });
 
         const articleCounts: Record<string, number> = {};
 
         documents.forEach((doc) => {
-          if (!doc.leiArticles) return;
+          if (doc.leiArticlesArr.length === 0) return;
 
           try {
             const articles: string[] = getLeiArticles(doc);
@@ -65,9 +65,9 @@ export async function GET() {
           }
         });
 
-        // Map views to articles via document leiArticles
+        // Map views to articles via document leiArticlesArr
         documents.forEach((doc) => {
-          if (!doc.leiArticles) return;
+          if (doc.leiArticlesArr.length === 0) return;
           const viewCount = docViewMap[doc.id] || 0;
           if (viewCount === 0) return;
 

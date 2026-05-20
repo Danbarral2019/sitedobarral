@@ -171,7 +171,7 @@ export async function GET(
     // Busca todos os Documents que linkam este artigo
     const documents = await prisma.document.findMany({
       where: {
-        leiArticles: { not: null },
+        leiArticlesArr: { isEmpty: false },
         ...(!isAuthenticated && { isPublic: true }),
       },
       select: {
@@ -183,13 +183,13 @@ export async function GET(
         summary: true,
         description: true,
         notesImportance: true,
-        leiArticles: true, leiArticlesArr: true,
+        leiArticlesArr: true,
       },
     });
 
     // Busca todos os LegislativeActs que linkam este artigo (sempre públicos)
     const acts = await prisma.legislativeAct.findMany({
-      where: { leiArticles: { not: null } },
+      where: { leiArticlesArr: { isEmpty: false } },
       select: {
         id: true,
         fullNumber: true,
@@ -201,7 +201,7 @@ export async function GET(
         esfera: true,
         issuer: true,
         officialUrl: true,
-        leiArticles: true, leiArticlesArr: true,
+        leiArticlesArr: true,
         importance: true,
       },
     });

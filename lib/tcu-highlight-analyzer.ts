@@ -42,7 +42,7 @@ interface HighlightAnalysis {
 function buildHighlightPrompt(doc: {
   title: string;
   description: string | null;
-  leiArticles: string | null;
+  leiArticlesArr: string[];
   metaTcu?: {
     ementaCompleta?: string | null;
     area?: string | null;
@@ -178,7 +178,7 @@ export async function identifyAndAlertHighlights(newDocIds: string[]): Promise<n
       id: true,
       title: true,
       description: true,
-      leiArticles: true, leiArticlesArr: true,
+      leiArticlesArr: true,
       url: true,
       acordaoNumero: true,
       acordaoAno: true,

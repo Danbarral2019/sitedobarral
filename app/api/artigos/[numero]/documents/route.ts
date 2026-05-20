@@ -29,8 +29,8 @@ export async function GET(
         const [documents, legislativeActs] = await Promise.all([
           prisma.document.findMany({
             where: {
-              leiArticles: {
-                contains: `"${numero}"`
+              leiArticlesArr: {
+                has: numero
               }
             },
             include: {
@@ -43,8 +43,8 @@ export async function GET(
           }),
           prisma.legislativeAct.findMany({
             where: {
-              leiArticles: {
-                contains: `"${numero}"`
+              leiArticlesArr: {
+                has: numero
               }
             },
             orderBy: [
@@ -63,7 +63,8 @@ export async function GET(
           isPublic: doc.isPublic,
           url: doc.url,
           uploadedAt: doc.uploadedAt,
-          leiArticles: doc.leiArticles,
+          leiArticles:
+            doc.leiArticlesArr.length > 0 ? JSON.stringify(doc.leiArticlesArr) : null,
           sourceType: 'document' as const,
           // Campos TCU enriquecidos (via metaTcu satellite table)
           ...(doc.category === 'acordao' ? {
@@ -94,7 +95,8 @@ export async function GET(
           isPublic: true,
           url: `/legislacao/${act.id}`,
           uploadedAt: act.publishDate,
-          leiArticles: act.leiArticles,
+          leiArticles:
+            act.leiArticlesArr.length > 0 ? JSON.stringify(act.leiArticlesArr) : null,
           sourceType: 'legislative-act' as const,
           fullNumber: act.fullNumber,
           issuer: act.issuer,

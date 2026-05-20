@@ -70,7 +70,7 @@ export interface ActForClassification {
   fullNumber: string;
   title: string | null;
   ementa: string | null;
-  leiArticles: string | null; // JSON array de strings
+  leiArticlesArr: string[];
   content?: string | null;
 }
 

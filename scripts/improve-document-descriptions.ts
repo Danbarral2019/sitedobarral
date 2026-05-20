@@ -89,7 +89,7 @@ async function main() {
       content: true,
       category: true,
       tags: true,
-      leiArticles: true, leiArticlesArr: true,
+      leiArticlesArr: true,
       issuerOrg: true,
       themes: true,
       entityType: true,

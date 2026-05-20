@@ -32,7 +32,7 @@ const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 async function main() {
   const targets = await prisma.legislativeAct.findMany({
     where: { themes: null },
-    select: { id: true, fullNumber: true, title: true, ementa: true, leiArticles: true, leiArticlesArr: true, content: true },
+    select: { id: true, fullNumber: true, title: true, ementa: true, leiArticlesArr: true, content: true },
   });
   const toProcess = targets.slice(0, LIMIT);
   console.log(`Encontrados ${targets.length} atos sem themes.`);

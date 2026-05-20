@@ -6,10 +6,10 @@ export async function GET() {
   try {
     const documents = await prisma.document.findMany({
       where: {
-        leiArticles: { not: null },
+        leiArticlesArr: { isEmpty: false },
       },
       select: {
-        leiArticles: true, leiArticlesArr: true,
+        leiArticlesArr: true,
       },
     });
 
@@ -17,8 +17,7 @@ export async function GET() {
     let totalDocuments = 0;
 
     for (const doc of documents) {
-      const articles = extractArticleNumbers(doc.leiArticles);
-      for (const article of articles) {
+      for (const article of doc.leiArticlesArr) {
         articleCounts[article] = (articleCounts[article] || 0) + 1;
         totalDocuments++;
       }

@@ -18,7 +18,7 @@ export interface LegislativeAct {
   publishDate: Date;
   effectiveDate: Date | null;
   hierarchyLevel: number;
-  leiArticles: string | null;
+  leiArticlesArr: string[];
   officialUrl: string | null;
   pdfUrl: string | null;
   viewCount: number;

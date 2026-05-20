@@ -44,7 +44,7 @@ export const GET = withAdminApi(async (request: NextRequest) => {
             relator: true,
             orgaoJulgador: true,
             dataJulgamento: true,
-            leiArticles: true, leiArticlesArr: true,
+            leiArticlesArr: true,
             themes: true,
           },
         },

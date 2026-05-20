@@ -74,7 +74,7 @@ async function main() {
       description: true,
       summary: true,
       content: true, // usado em buildSummaryPrompt como "Conteúdo integral do acórdão"
-      leiArticles: true, leiArticlesArr: true,
+      leiArticlesArr: true,
       metaTcu: {
         select: {
           ementaCompleta: true,

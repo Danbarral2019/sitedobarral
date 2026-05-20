@@ -45,13 +45,13 @@ export async function GET(request: NextRequest) {
     // 3. Buscar todos os documentos que têm leiArticles vinculados
     const documentsWithArticles = await prisma.document.findMany({
       where: {
-        leiArticles: {
-          not: null,
+        leiArticlesArr: {
+          isEmpty: false,
         },
       },
       select: {
         id: true,
-        leiArticles: true, leiArticlesArr: true,
+        leiArticlesArr: true,
       },
     });
 

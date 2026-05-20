@@ -3,7 +3,7 @@ import { prisma } from '../lib/prisma';
 async function main() {
   const docs = await prisma.document.findMany({
     where: { aiClassification: { contains: 'licitacoesContratos' } },
-    select: { title: true, aiClassification: true, leiArticles: true, leiArticlesArr: true },
+    select: { title: true, aiClassification: true, leiArticlesArr: true },
     take: 3,
   });
   for (const d of docs) {

@@ -299,7 +299,7 @@ Exemplo de resposta: ["variação 1", "variação 2"]`;
           courseId: true,
           isCommon: true,
           tags: true,
-          leiArticles: true, leiArticlesArr: true,
+          leiArticlesArr: true,
         },
         // No take limit — we fetch all candidates and rank by relevance scoring
       });
@@ -334,7 +334,8 @@ Exemplo de resposta: ["variação 1", "variação 2"]`;
         courseId: doc.courseId || undefined,
         isCommon: doc.isCommon,
         tags: doc.tags ? JSON.parse(doc.tags) : undefined,
-        leiArticles: doc.leiArticles,
+        leiArticles:
+          doc.leiArticlesArr.length > 0 ? JSON.stringify(doc.leiArticlesArr) : null,
         sourceType: 'document' as const,
       }));
 
@@ -417,7 +418,7 @@ Exemplo de resposta: ["variação 1", "variação 2"]`;
       try {
         const ticActs = await prisma.legislativeAct.findMany({
           where: { themes: { contains: '"tic"' } },
-          select: { fullNumber: true, ementa: true, officialUrl: true, leiArticles: true, leiArticlesArr: true },
+          select: { fullNumber: true, ementa: true, officialUrl: true, leiArticlesArr: true },
           orderBy: { hierarchyLevel: 'asc' },
           take: 10,
         });

@@ -26,7 +26,7 @@ export const GET = withAdminApi<{ id: string }>(async (_request, { params }) => 
           relator: true,
           orgaoJulgador: true,
           dataJulgamento: true,
-          leiArticles: true, leiArticlesArr: true,
+          leiArticlesArr: true,
           themes: true,
         },
       },

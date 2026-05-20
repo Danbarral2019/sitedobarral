@@ -65,7 +65,7 @@ export async function processDocument(
         extractedText: true,
         content: true,
         description: true,
-        leiArticles: true, leiArticlesArr: true,
+        leiArticlesArr: true,
       },
     });
 

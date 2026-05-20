@@ -89,7 +89,9 @@ export const PUT = withAdminApi<{ id: string }>(async (request, ctx) => {
   }
   if (body.hierarchyLevel !== undefined) updateData.hierarchyLevel = body.hierarchyLevel;
   if (body.leiArticles !== undefined) {
-    updateData.leiArticles = body.leiArticles ? stringifyLeiArticles(body.leiArticles) : null;
+    updateData.leiArticlesArr = Array.isArray(body.leiArticles)
+      ? body.leiArticles.map(String)
+      : [];
   }
   if (body.officialUrl !== undefined) updateData.officialUrl = body.officialUrl || null;
   if (body.pdfUrl !== undefined) updateData.pdfUrl = body.pdfUrl || null;

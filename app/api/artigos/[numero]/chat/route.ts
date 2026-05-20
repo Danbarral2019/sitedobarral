@@ -72,8 +72,8 @@ export async function POST(
         where: {
           AND: [
             {
-              leiArticles: {
-                contains: articleNumber,
+              leiArticlesArr: {
+                has: articleNumber,
               },
             },
             {
@@ -90,7 +90,7 @@ export async function POST(
           category: true,
           summary: true,
           description: true,
-          leiArticles: true, leiArticlesArr: true,
+          leiArticlesArr: true,
         },
         take: 5,
         orderBy: [
@@ -100,8 +100,8 @@ export async function POST(
       }),
       prisma.legislativeAct.findMany({
         where: {
-          leiArticles: {
-            contains: `"${articleNumber}"`,
+          leiArticlesArr: {
+            has: articleNumber,
           },
         },
         select: {
@@ -112,7 +112,7 @@ export async function POST(
           summary: true,
           issuer: true,
           type: true,
-          leiArticles: true, leiArticlesArr: true,
+          leiArticlesArr: true,
         },
         take: 5,
         orderBy: { publishDate: 'desc' },
@@ -155,7 +155,7 @@ export async function POST(
             category: true,
             summary: true,
             description: true,
-            leiArticles: true, leiArticlesArr: true,
+            leiArticlesArr: true,
           },
           take: 3,
           orderBy: [
@@ -177,7 +177,7 @@ export async function POST(
             summary: true,
             issuer: true,
             type: true,
-            leiArticles: true, leiArticlesArr: true,
+            leiArticlesArr: true,
           },
           take: 3,
           orderBy: { publishDate: 'desc' },
@@ -248,7 +248,7 @@ ${allRelevantActs.map((act) => `
 **${act.fullNumber}** (${act.issuer})
 ${act.title}
 ${act.summary || act.ementa.substring(0, 300)}${(!act.summary && act.ementa.length > 300) ? '...' : ''}
-Artigos regulamentados: ${act.leiArticles || 'N/A'}
+Artigos regulamentados: ${act.leiArticlesArr.length > 0 ? act.leiArticlesArr.join(', ') : 'N/A'}
 `).join('\n')}`
       : '';
 
@@ -275,7 +275,7 @@ Texto: ${art.ementa.substring(0, 1000)}${art.ementa.length > 1000 ? '...' : ''}
 ${crossReferenceDocs.map((doc, i) => `
 **Documento Adicional ${i + 1}: ${doc.title}**
 Categoria: ${doc.category}
-Artigos vinculados: ${doc.leiArticles || 'N/A'}
+Artigos vinculados: ${doc.leiArticlesArr.length > 0 ? doc.leiArticlesArr.join(', ') : 'N/A'}
 ${doc.summary ? `Resumo: ${doc.summary}` : doc.description ? `Descrição: ${doc.description}` : ''}
 `).join('\n')}`;
     }

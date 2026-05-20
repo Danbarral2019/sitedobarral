@@ -77,7 +77,7 @@ async function main() {
         id: true,
         title: true,
         tags: true,
-        leiArticles: true, leiArticlesArr: true
+        leiArticlesArr: true
       }
     });
 
