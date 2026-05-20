@@ -230,7 +230,7 @@ export async function searchLegislativeActs(
       summary, issuer,
       "publishDate" as publish_date,
       "hierarchyLevel" as hierarchy_level,
-      "leiArticles" as lei_articles,
+      to_jsonb("leiArticlesArr")::text as lei_articles,
       "officialUrl" as official_url,
       "pdfUrl" as pdf_url,
       ts_rank(search_vector, ${buildTsQueryExpr(1)}) as rank
