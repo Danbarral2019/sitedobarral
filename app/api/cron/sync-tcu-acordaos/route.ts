@@ -101,7 +101,7 @@ async function enrichNewDocuments(docIds: string[]): Promise<{
       content: true,
       category: true,
       tags: true,
-      leiArticles: true,
+      leiArticles: true, leiArticlesArr: true,
       tcuNumeroAcordao: true,
       tcuRelator: true,
       tcuOrgaoJulgador: true,
@@ -430,7 +430,7 @@ export async function GET(request: NextRequest) {
       try {
         const enrichedDocs = await prisma.document.findMany({
           where: { id: { in: newDocIds } },
-          select: { acordaoNumero: true, acordaoAno: true, summary: true, leiArticles: true },
+          select: { acordaoNumero: true, acordaoAno: true, summary: true, leiArticles: true, leiArticlesArr: true },
         });
 
         for (const doc of enrichedDocs) {

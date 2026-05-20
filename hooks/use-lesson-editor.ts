@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
-import { parseLeiArticles } from '@/lib/lei-articles';
+import { parseLeiArticles, getLeiArticles } from '@/lib/lei-articles';
 import { extractYoutubeId } from '@/lib/admin/lesson-youtube';
 
 export interface LessonDocumentData {
@@ -118,7 +118,7 @@ export function useLessonEditor(courseId: string, lessonId: string) {
       const l: LessonData = data.lesson;
       setLesson(l);
       setContent(l.content || '');
-      const articles = parseLeiArticles(l.leiArticles).join(', ');
+      const articles = getLeiArticles(l).join(', ');
       setSettingsForm({
         title: l.title,
         slug: l.slug,

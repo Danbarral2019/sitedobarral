@@ -1,5 +1,5 @@
 import { LEI_14133_ARTIGOS } from '@/data/lei-14133-artigos';
-import { parseLeiArticles } from './lei-articles';
+import { parseLeiArticles, getLeiArticles } from './lei-articles';
 
 /**
  * Tipos compartilhados de busca. Originalmente em hooks/use-search.ts (hook
@@ -80,7 +80,7 @@ export function matchesSearchTerm(doc: DocumentType, searchTerm: string): boolea
   // Busca em artigos da Lei 14.133/2021
   if (doc.leiArticles) {
     try {
-      const docArticles: string[] = parseLeiArticles(doc.leiArticles);
+      const docArticles: string[] = getLeiArticles(doc);
       // Busca no número do artigo (ex: "artigo 72", "art 72", "72")
       if (normalizedTerm.match(/\d+/)) {
         const searchNumber = normalizedTerm.match(/\d+/)?.[0];
@@ -127,7 +127,7 @@ export function matchesFilters(
     if (!doc.leiArticles) return false;
 
     try {
-      const docArticles: string[] = parseLeiArticles(doc.leiArticles);
+      const docArticles: string[] = getLeiArticles(doc);
       // Verifica se o documento tem pelo menos um dos artigos selecionados
       const hasMatchingArticle = filters.leiArticles.some(filterArticle =>
         docArticles.includes(filterArticle)
@@ -206,7 +206,7 @@ export function calculateRelevanceScore(doc: DocumentType, searchTerm: string): 
   // Pontuação por match em artigos da Lei 14.133/2021
   if (doc.leiArticles) {
     try {
-      const docArticles: string[] = parseLeiArticles(doc.leiArticles);
+      const docArticles: string[] = getLeiArticles(doc);
       // Bonus se buscar por número de artigo e encontrar match
       if (normalizedTerm.match(/\d+/)) {
         const searchNumber = normalizedTerm.match(/\d+/)?.[0];

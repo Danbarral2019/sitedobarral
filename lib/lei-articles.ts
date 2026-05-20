@@ -27,7 +27,8 @@
  */
 
 type LeiArticlesRecord = {
-  leiArticles?: string | null
+  // Aceita string JSON (legado), array já parseado (responses de API admin) ou null
+  leiArticles?: string | string[] | null
   leiArticlesArr?: string[] | null
 }
 

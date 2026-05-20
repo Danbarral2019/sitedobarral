@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import MarkdownContent from '@/components/MarkdownContent';
-import { parseLeiArticles } from '@/lib/lei-articles';
+import { parseLeiArticles, getLeiArticles } from '@/lib/lei-articles';
 import {
   Save, X, Scale, Calendar, Building, FileText,
   Link as LinkIcon, Bold, List, Heading2, Eye,
@@ -80,7 +80,7 @@ export default function EditLegislativeActPage() {
       const act = data.act;
 
       // Processar leiArticles (de JSON para CSV)
-      const leiArticlesStr = parseLeiArticles(act.leiArticles).join(', ');
+      const leiArticlesStr = getLeiArticles(act).join(', ');
 
       // Processar datas (de ISO para YYYY-MM-DD)
       const formatDate = (isoStr: string) => {

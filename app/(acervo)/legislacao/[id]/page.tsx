@@ -16,7 +16,7 @@ import {
 } from 'lucide-react';
 import MarkdownContent from '@/components/MarkdownContent';
 import { normalizeTextContent } from '@/lib/utils';
-import { parseLeiArticles } from '@/lib/lei-articles';
+import { parseLeiArticles, getLeiArticles } from '@/lib/lei-articles';
 import { formatLegalContent } from '@/lib/format-legal-content';
 import { getRelationsForAct } from '@/lib/legislative-acts/relations';
 import { RelationHistory } from '@/components/LegislativeActsPanel/RelationHistory';
@@ -130,7 +130,7 @@ export default async function LegislativeActPage({ params }: PageProps) {
   const typeColor = TYPE_COLORS[act.type] || 'bg-gray-100 text-gray-800 border-gray-300';
 
   // Parse leiArticles JSON string to array
-  const leiArticlesArray: string[] = parseLeiArticles(act.leiArticles);
+  const leiArticlesArray: string[] = getLeiArticles(act);
 
   // Buscar relações entre atos (revoga/altera/regulamenta/etc.)
   // Se vier do fallback Document (não LegislativeAct), retorna vazio sem custo significativo

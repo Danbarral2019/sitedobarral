@@ -17,7 +17,7 @@ import {
 import { useFavorites } from '@/hooks/use-favorites';
 import { useLegislativeActFavorites } from '@/hooks/use-legislative-act-favorites';
 import { safeParseArray, normalizeTextContent } from '@/lib/utils';
-import { parseLeiArticles } from '@/lib/lei-articles';
+import { parseLeiArticles, getLeiArticles } from '@/lib/lei-articles';
 import { isLiteralSourceCategory } from '@/lib/literal-sources';
 
 interface DocumentNotes {
@@ -120,7 +120,7 @@ export function LeiDocumentDetails({ documentId, documentType = 'document' }: Le
   }
 
   const tags = safeParseArray(document.tags);
-  const leiArticles = parseLeiArticles(document.leiArticles);
+  const leiArticles = getLeiArticles(document);
   const effectiveKeyPoints = document.notes?.keyPoints ?? document.keyPoints ?? document.notesKeyPoints;
   const effectivePracticalUse = document.notes?.practicalUse ?? document.practicalUse ?? document.notesPracticalUse;
   const effectivePublicNotes = document.notes?.publicNotes ?? document.publicNotes;

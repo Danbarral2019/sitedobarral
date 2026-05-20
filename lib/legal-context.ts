@@ -8,7 +8,7 @@
 import { LEI_14133_ARTIGOS } from '@/data/lei-14133-artigos';
 import { prisma } from '@/lib/prisma';
 import { generateQueryEmbedding, embeddingToSql } from '@/lib/embeddings/gemini-embeddings';
-import { parseLeiArticles } from '@/lib/lei-articles';
+import { parseLeiArticles, getLeiArticles } from '@/lib/lei-articles';
 import { getHierarchyInfo } from '@/lib/legislative-acts/hierarchy';
 import type { SearchResult } from '@/lib/embeddings/vector-search';
 
@@ -41,7 +41,7 @@ export function extractCitedArticles(
   for (const result of results) {
     if (!result.leiArticles) continue;
 
-    const articles: string[] = parseLeiArticles(result.leiArticles);
+    const articles: string[] = getLeiArticles(result);
 
     for (const art of articles) {
       const key = String(art);

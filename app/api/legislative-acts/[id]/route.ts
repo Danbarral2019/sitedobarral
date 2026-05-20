@@ -3,7 +3,7 @@ import { prisma } from '@/lib/prisma';
 import { handleApiError } from '@/lib/errors/error-handler';
 import { NotFoundError } from '@/lib/errors/api-error';
 import { apiLogger } from '@/lib/logger';
-import { parseLeiArticles } from '@/lib/lei-articles';
+import { parseLeiArticles, getLeiArticles } from '@/lib/lei-articles';
 import { withCache, CacheKeys, CACHE_TTL } from '@/lib/cache/redis-client';
 
 /**
@@ -56,7 +56,7 @@ export async function GET(
         publishDate: act.publishDate,
         effectiveDate: act.effectiveDate,
         hierarchyLevel: act.hierarchyLevel,
-        leiArticles: parseLeiArticles(act.leiArticles),
+        leiArticles: getLeiArticles(act),
         isPublic: true,
         keyPoints: null,
         tags: '[]',

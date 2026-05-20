@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { verifyAuth } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
-import { parseLeiArticles } from '@/lib/lei-articles';
+import { parseLeiArticles, getLeiArticles } from '@/lib/lei-articles';
 import { ARTIGOS_ENUNCIADOS, ENUNCIADOS } from '@/data/enunciados';
 import { withCache, CacheKeys, CACHE_TTL } from '@/lib/cache/redis-client';
 
@@ -115,7 +115,7 @@ export async function GET(request: NextRequest) {
           select: {
             id: true,
             title: true,
-            leiArticles: true,
+            leiArticles: true, leiArticlesArr: true,
             isPublic: true,
             category: true,
           },
@@ -132,7 +132,7 @@ export async function GET(request: NextRequest) {
             id: true,
             fullNumber: true,
             title: true,
-            leiArticles: true,
+            leiArticles: true, leiArticlesArr: true,
             type: true,
             officialUrl: true,
           },
@@ -144,7 +144,7 @@ export async function GET(request: NextRequest) {
 
         // Adicionar documentos
         documentsWithArticles.forEach((doc) => {
-          const articles = parseLeiArticles(doc.leiArticles);
+          const articles = getLeiArticles(doc);
           articles.forEach((artNum) => {
             const artStr = String(artNum);
             articleDocumentCount[artStr] = (articleDocumentCount[artStr] || 0) + 1;
@@ -165,7 +165,7 @@ export async function GET(request: NextRequest) {
 
         // Adicionar atos normativos (sempre públicos)
         legislativeActsWithArticles.forEach((act) => {
-          const articles = parseLeiArticles(act.leiArticles);
+          const articles = getLeiArticles(act);
           articles.forEach((artNum) => {
             const artStr = String(artNum);
             articleDocumentCount[artStr] = (articleDocumentCount[artStr] || 0) + 1;

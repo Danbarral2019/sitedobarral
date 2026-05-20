@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { withCache, CacheKeys, CACHE_TTL, CacheInvalidation } from '@/lib/cache/redis-client';
-import { parseLeiArticles } from '@/lib/lei-articles';
+import { parseLeiArticles, getLeiArticles } from '@/lib/lei-articles';
 
 /**
  * GET /api/legislative-acts
@@ -156,7 +156,7 @@ async function fetchAtosNormativos(params: AtosParams) {
         publishDate: true,
         effectiveDate: true,
         hierarchyLevel: true,
-        leiArticles: true,
+        leiArticles: true, leiArticlesArr: true,
         officialUrl: true,
         pdfUrl: true,
         viewCount: true,
@@ -175,7 +175,7 @@ async function fetchAtosNormativos(params: AtosParams) {
   // Processar leiArticles e themes (parsear JSON)
   const actsWithParsedData = acts.map(act => ({
     ...act,
-    leiArticles: parseLeiArticles(act.leiArticles),
+    leiArticles: getLeiArticles(act),
     themes: act.themes ? JSON.parse(act.themes) : [],
   }));
 
@@ -326,7 +326,7 @@ async function fetchBoasPraticas(params: BoasPraticasParams) {
         issuerOrg: true,
         esfera: true,
         themes: true,
-        leiArticles: true,
+        leiArticles: true, leiArticlesArr: true,
         uploadedAt: true,
       },
       orderBy: getBoasOrderBy(sort),
@@ -348,7 +348,7 @@ async function fetchBoasPraticas(params: BoasPraticasParams) {
     publishDate: doc.metaDou?.data ?? doc.douData ?? doc.uploadedAt,
     esfera: doc.esfera || 'federal',
     themes: doc.themes ? JSON.parse(doc.themes) : [],
-    leiArticles: parseLeiArticles(doc.leiArticles),
+    leiArticles: getLeiArticles(doc),
     officialUrl: doc.metaDou?.url ?? doc.douUrl ?? doc.url,
     url: doc.url,
     viewCount: 0,

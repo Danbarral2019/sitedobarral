@@ -11,7 +11,7 @@
  */
 
 import { generate } from '@/lib/ai';
-import { parseLeiArticles } from '@/lib/lei-articles';
+import { parseLeiArticles, getLeiArticles } from '@/lib/lei-articles';
 import { CANONICAL_THEMES, validateThemes } from './theme-validator';
 
 /**
@@ -91,7 +91,7 @@ export function classifyByHeuristic(act: ActForClassification): string[] {
 
   // 1. Artigos
   {
-    const articles = parseLeiArticles(act.leiArticles);
+    const articles = getLeiArticles(act);
     for (const art of articles) {
       for (const tema of TEMAS_LICITACOES) {
         if (tema.articles.includes(art)) add(tema.value);

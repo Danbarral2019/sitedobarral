@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { withCache, CacheKeys, CACHE_TTL } from '@/lib/cache/redis-client';
-import { parseLeiArticles } from '@/lib/lei-articles';
+import { parseLeiArticles, getLeiArticles } from '@/lib/lei-articles';
 
 interface ArticleRelationship {
   articleNumber: string;
@@ -36,7 +36,7 @@ export async function GET(
           },
           select: {
             id: true,
-            leiArticles: true,
+            leiArticles: true, leiArticlesArr: true,
           },
         });
 
@@ -51,7 +51,7 @@ export async function GET(
         const coOccurrenceMap = new Map<string, number>();
 
         documentsWithThisArticle.forEach((doc) => {
-          const articles = parseLeiArticles(doc.leiArticles);
+          const articles = getLeiArticles(doc);
           articles.forEach((otherArticle) => {
             const normalized = String(otherArticle).trim();
             if (normalized === articleNumber) return;

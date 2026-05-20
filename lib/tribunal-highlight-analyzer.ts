@@ -16,7 +16,7 @@
 import { prisma } from '@/lib/prisma';
 import { sendTribunalHighlightAlert } from '@/lib/email';
 import { PRIMARY_GEMINI_MODEL } from '@/lib/gemini/config';
-import { parseLeiArticles } from '@/lib/lei-articles';
+import { parseLeiArticles, getLeiArticles } from '@/lib/lei-articles';
 import { apiLogger } from "@/lib/logger";
 
 const GEMINI_MODEL = PRIMARY_GEMINI_MODEL;
@@ -98,7 +98,7 @@ function buildHighlightPrompt(decision: {
   fullText: string | null;
 }): string {
   let artigosStr = 'Nenhum artigo da Lei 14.133 vinculado.';
-  const arts = parseLeiArticles(decision.leiArticles);
+  const arts = getLeiArticles(decision);
   if (arts.length > 0) {
     artigosStr = `Artigos da Lei 14.133/2021 vinculados: ${arts.map((a) => `Art. ${a}`).join(', ')}`;
   }
@@ -229,7 +229,7 @@ export async function identifyAndAlertTribunalHighlights(newDecisionIds: string[
       tribunalCode: true,
       decisionNumber: true,
       year: true,
-      leiArticles: true,
+      leiArticles: true, leiArticlesArr: true,
       url: true,
       dataJulgamento: true,
     },

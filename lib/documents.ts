@@ -2,7 +2,7 @@ import { Document } from './types';
 import { prisma } from './prisma';
 import { Document as PrismaDocument } from '@prisma/client';
 import { safeParseArray } from './utils';
-import { parseLeiArticles, setLeiArticles, stringifyLeiArticles } from './lei-articles';
+import { parseLeiArticles, setLeiArticles, stringifyLeiArticles, getLeiArticles } from './lei-articles';
 import { apiLogger } from "@/lib/logger";
 
 /**
@@ -62,7 +62,7 @@ export async function addDocument(
     courseId: dbDocument.courseId ?? '',
     isPublic: dbDocument.isPublic,
     tags: safeParseArray(dbDocument.tags),
-    leiArticles: parseLeiArticles(dbDocument.leiArticles),
+    leiArticles: getLeiArticles(dbDocument),
     uploadedAt: dbDocument.uploadedAt,
     size: dbDocument.size || undefined,
   };
@@ -159,7 +159,7 @@ export async function listDocuments(filters?: {
           isPublic: true,
           isCommon: true,
           tags: true,
-          leiArticles: true,
+          leiArticles: true, leiArticlesArr: true,
           uploadedAt: true,
           size: true,
           reviewed: true,
@@ -187,7 +187,7 @@ export async function listDocuments(filters?: {
           isPublic: doc.isPublic,
           isCommon: doc.isCommon || false,
           tags: safeParseArray(doc.tags),
-          leiArticles: parseLeiArticles(doc.leiArticles),
+          leiArticles: getLeiArticles(doc),
           uploadedAt: doc.uploadedAt,
           size: doc.size || undefined,
           reviewed: doc.reviewed || false,
@@ -240,7 +240,7 @@ export async function getDocumentsByCourse(courseId: string): Promise<{
     courseId: doc.courseId ?? '',
     isPublic: doc.isPublic,
     tags: safeParseArray(doc.tags),
-    leiArticles: parseLeiArticles(doc.leiArticles),
+    leiArticles: getLeiArticles(doc),
     uploadedAt: doc.uploadedAt,
     size: doc.size || undefined,
   });
@@ -273,7 +273,7 @@ export async function getDocumentById(id: string): Promise<Document | null> {
     courseId: doc.courseId ?? '',
     isPublic: doc.isPublic,
     tags: safeParseArray(doc.tags),
-    leiArticles: parseLeiArticles(doc.leiArticles),
+    leiArticles: getLeiArticles(doc),
     uploadedAt: doc.uploadedAt,
     size: doc.size || undefined,
   };
@@ -328,7 +328,7 @@ export async function updateDocument(
       courseId: doc.courseId ?? '',
       isPublic: doc.isPublic,
       tags: safeParseArray(doc.tags),
-      leiArticles: parseLeiArticles(doc.leiArticles),
+      leiArticles: getLeiArticles(doc),
       uploadedAt: doc.uploadedAt,
       size: doc.size || undefined,
     };

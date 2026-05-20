@@ -193,7 +193,7 @@ Regras:
         category: true,
         type: true,
         summary: true,
-        leiArticles: true,
+        leiArticles: true, leiArticlesArr: true,
       },
       take: 10,
       orderBy: [
@@ -226,7 +226,7 @@ Regras:
         type: true,
         fullNumber: true,
         summary: true,
-        leiArticles: true,
+        leiArticles: true, leiArticlesArr: true,
       },
       take: 5,
     });

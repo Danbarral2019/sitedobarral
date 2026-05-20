@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { verifyAuth } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
-import { parseLeiArticles } from '@/lib/lei-articles';
+import { parseLeiArticles, getLeiArticles } from '@/lib/lei-articles';
 import { apiLogger } from "@/lib/logger";
 
 /**
@@ -43,7 +43,7 @@ export async function GET(request: NextRequest) {
       },
       select: {
         id: true,
-        leiArticles: true,
+        leiArticles: true, leiArticlesArr: true,
       },
     });
 
@@ -51,7 +51,7 @@ export async function GET(request: NextRequest) {
     const articleDocumentCount: Record<string, number> = {};
 
     documentsWithArticles.forEach((doc) => {
-      const articles = parseLeiArticles(doc.leiArticles);
+      const articles = getLeiArticles(doc);
       articles.forEach((artNum) => {
         const artStr = String(artNum);
         articleDocumentCount[artStr] = (articleDocumentCount[artStr] || 0) + 1;

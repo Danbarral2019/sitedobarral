@@ -35,7 +35,7 @@ export async function GET(request: NextRequest) {
 
       const acts = await prisma.legislativeAct.findMany({
     where: { themes: null },
-    select: { id: true, fullNumber: true, title: true, ementa: true, leiArticles: true, content: true },
+    select: { id: true, fullNumber: true, title: true, ementa: true, leiArticles: true, leiArticlesArr: true, content: true },
     take: TAKE_LIMIT,
   });
 

@@ -4,7 +4,7 @@ import { handleApiError } from '@/lib/errors/error-handler';
 import { AuthenticationError, AuthorizationError, NotFoundError } from '@/lib/errors/api-error';
 import { apiLogger } from '@/lib/logger';
 import { prisma } from '@/lib/prisma';
-import { parseLeiArticles } from '@/lib/lei-articles';
+import { parseLeiArticles, getLeiArticles } from '@/lib/lei-articles';
 
 export async function GET(
   request: NextRequest,
@@ -138,7 +138,7 @@ export async function GET(
         estimatedMinutes: lesson.estimatedMinutes,
         aiSummary: isSuspended ? null : lesson.aiSummary,
         aiKeyPoints: isSuspended ? null : (lesson.aiKeyPoints ? JSON.parse(lesson.aiKeyPoints) : null),
-        leiArticles: lesson.leiArticles ? parseLeiArticles(lesson.leiArticles) : null,
+        leiArticles: lesson.leiArticles ? getLeiArticles(lesson) : null,
         module: {
           id: lesson.module.id,
           title: lesson.module.title,
