@@ -129,6 +129,23 @@ Busca:
 
 ## Recent Features
 
+**⚖️ Livro completo TST 2025 — Súmulas + OJs + Precedentes Normativos (2026-05-23):**
+- ✅ **1292 documentos canônicos do TST** importados a partir do RTF oficial do Livro de Súmulas, OJs e PNs (Res. 225/2025, DEJT 30/6, 1º e 2/7/2025) — fonte vinculante única
+- ✅ Cobertura de **6 séries**: 463 Súmulas + 13 OJ-TP/OE + 421 OJ-SDI-I + 79 OJ-SDI-I Transitória + 158 OJ-SDI-II + 38 OJ-SDC + 120 PN
+- ✅ Modelagem: estende `TribunalDecision` com 2 novos `decisionType`s — `orientacao_jurisprudencial` (todas as 5 séries de OJ) e `precedente_normativo` (PN). Subsérie em `themes` (`oj-sdi1`, `oj-sdi1t`, `oj-sdi2`, `oj-sdc`, `oj-tp-oe`, `pn`) e em `sourceRawData.serie`. Zero migração de schema, reuso da infraestrutura existente
+- ✅ Parser dedicado `lib/tst/parser-livro.ts` para o formato 2025 (cabeçalho `SUM-N\tTÍTULO`, situação inline em parênteses, sem tokens `Tese:`/`Observação:`/`Situação:`). 24 testes em `lib/tst/__tests__/parser-livro.test.ts` cobrindo as 6 séries
+- ✅ Extrator `lib/tst/extract-rtf.ts` (wrapper para `textutil` macOS) — RTF não tem hyperlinks embarcados, URLs gravadas anteriormente (Súmulas) são preservadas pelo upsert idempotente
+- ✅ CLI `scripts/import-tst-livro.ts` (flags `--dry-run`, `--limit N`, `--force`, `--serie sumula|sbdi1|sbdi1t|sbdi2|sdc|pn|tp-oe|all`). Importação: 829 criados + 463 atualizados (Súmulas re-validadas contra RTF 2025), 0 falhas
+- ✅ UI pública: 3 cards no hub `/base-conhecimento` — "Súmulas do TST" (existente), "Orientações Jurisprudenciais (TST)" (novo, BookMarked icon), "Precedentes Normativos (TST)" (novo, Gavel icon). JurisprudenciaClient ganha 2 `<option>`s (orientacao_jurisprudencial, precedente_normativo) + sub-filtro de série visível quando decisionType=orientacao_jurisprudencial (5 séries de OJ)
+- ✅ Toggle "Mostrar canceladas/revistas" estendido para os 3 tipos canônicos (Súmulas + OJs + PNs). Badge de situação no card e no detail page idem
+- ✅ Detail page: helper `formatDecisionBadge` produz rótulos corretos por série ("Súmula nº N", "OJ-SBDI-I nº N", "OJ-SDC nº N", "Precedente Normativo nº N", etc.). Banner amarelo para canceladas/revistas vale para todos os 3 tipos
+- ✅ **Crítico (lição #116):** filtro `excludeInactiveSumulas` em `lib/embeddings/vector-search.ts:379` generalizado de `decisionType = 'sumula'` para `decisionType IN ('sumula','orientacao_jurisprudencial','precedente_normativo')`. Evita que precedente superado vaze para RAG
+- ✅ RAG: `tribunalKeywords` em `/api/documents/query` ganhou 18 termos novos (OJ, SBDI-I/II, SDC, PN, dissídio coletivo, negociação coletiva, etc.); detector de query histórica (`citesSpecificCanonical`) cobre os 3 tipos canônicos por regex. System prompt instrui LLM a alertar sobre canceladas em qualquer tipo canônico
+- ✅ Enums DECISION_TYPES atualizados em `app/api/jurisprudencia/route.ts` e `query/route.ts`
+- ✅ Contadores cached: `getCachedTstOjCount` + `getCachedTstPnCount` em `lib/cached-queries.ts`
+- ✅ Tests: 58/58 (parser-livro 24 + parser PDF antigo 22 + vector-search 12)
+- 📖 Ver `lib/tst/parser-livro.ts`, `scripts/import-tst-livro.ts`, https://www.tst.jus.br/livro-de-sumulas-ojs-e-pns
+
 **⚖️ Súmulas do TST — nova categoria de conteúdo (2026-05-23):**
 - ✅ 463 Súmulas do TST importadas a partir do PDF oficial (`Súmulas TST.pdf`) — 117 CRIADA + 185 ALTERADA + 161 CANCELADA
 - ✅ Modelagem: estende `TribunalDecision` com `tribunalCode='TST'`, `decisionType='sumula'`, evitando criar tabela nova (aprende com lição #116). Itens romanos, IRRs, resoluções e histórico ficam em `sourceRawData` JSON

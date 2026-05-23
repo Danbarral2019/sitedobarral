@@ -39,6 +39,8 @@ const DECISION_TYPES = [
   'decisao',
   'parecer_previo',
   'sumula',
+  'orientacao_jurisprudencial',
+  'precedente_normativo',
 ] as const;
 
 const filtersSchema = z

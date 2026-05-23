@@ -128,9 +128,14 @@ export default function JurisprudenciaClient() {
     () => searchParams?.get('decisionType') ?? '',
   );
   const [sort, setSort] = useState<'recent' | 'oldest' | 'numero' | 'relevance'>('recent');
-  // Default: esconde súmulas inativas (CANCELADA/REVISTA) — toggle abaixo.
+  // Default: esconde documentos canônicos inativos (CANCELADA/REVISTA) — toggle abaixo.
+  // Aplica-se a Súmulas, OJs e PNs (todos têm tag `situacao:*` em themes).
   const [showInactive, setShowInactive] = useState(false);
-  const isSumulaView = decisionType === 'sumula';
+  // Sub-filtro por série dentro de OJ (SBDI-I / SBDI-I Transitória / SBDI-II / SDC / Tribunal Pleno).
+  const [ojSerie, setOjSerie] = useState('');
+  const CANONICAL_TYPES = ['sumula', 'orientacao_jurisprudencial', 'precedente_normativo'];
+  const isCanonicalView = CANONICAL_TYPES.includes(decisionType);
+  const isOjView = decisionType === 'orientacao_jurisprudencial';
 
   const pageSize = 12;
   const [currentYear] = useState(() => new Date().getFullYear());
@@ -147,11 +152,14 @@ export default function JurisprudenciaClient() {
       if (year) params.set('ano', year);
       if (search) params.set('q', search);
       if (selectedTheme) params.set('tema', selectedTheme);
+      // Sub-filtro de série de OJ é passado como `tema` adicional — o
+      // importador grava em themes como `oj-sbdi-1` etc.
+      else if (isOjView && ojSerie) params.set('tema', ojSerie);
       if (decisionType) params.set('decisionType', decisionType);
       if (sort && sort !== 'recent') params.set('sort', sort);
-      // Só faz sentido filtrar inativas em visualização de súmulas; outros
-      // tipos de decisão não carregam tag `situacao:*` em themes.
-      if (decisionType === 'sumula' && !showInactive) {
+      // Filtra inativas para tipos canônicos (Súmulas, OJs, PNs) — todos
+      // carregam tag `situacao:*` em themes. Acórdãos TCE/TCU não têm.
+      if (isCanonicalView && !showInactive) {
         params.set('excludeInactive', 'true');
       }
 
@@ -167,7 +175,7 @@ export default function JurisprudenciaClient() {
     } finally {
       setLoading(false);
     }
-  }, [tribunal, year, search, selectedTheme, decisionType, sort, showInactive]);
+  }, [tribunal, year, search, selectedTheme, decisionType, sort, showInactive, isOjView, ojSerie, isCanonicalView]);
 
   // Fetch when page changes
   useEffect(() => {
@@ -177,7 +185,12 @@ export default function JurisprudenciaClient() {
   // Reset to page 1 when filters change (fetchDecisions dep change triggers the fetch above)
   useEffect(() => {
     setCurrentPage(1);
-  }, [tribunal, year, search, selectedTheme, decisionType, sort, showInactive]);
+  }, [tribunal, year, search, selectedTheme, decisionType, sort, showInactive, ojSerie]);
+
+  // Quando muda decisionType para algo que não é OJ, limpa a sub-série.
+  useEffect(() => {
+    if (!isOjView && ojSerie) setOjSerie('');
+  }, [isOjView, ojSerie]);
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
@@ -248,8 +261,29 @@ export default function JurisprudenciaClient() {
                 <option value="decisao">Decisão</option>
                 <option value="parecer_previo">Parecer prévio</option>
                 <option value="sumula">Súmula</option>
+                <option value="orientacao_jurisprudencial">Orientação Jurisprudencial</option>
+                <option value="precedente_normativo">Precedente Normativo</option>
               </select>
             </div>
+
+            {/* Sub-filtro de série de OJ — visível só quando decisionType=orientacao_jurisprudencial */}
+            {isOjView && (
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Série</label>
+                <select
+                  value={ojSerie}
+                  onChange={(e) => setOjSerie(e.target.value)}
+                  className="px-3 py-2 border rounded-lg text-sm bg-white min-w-[170px]"
+                >
+                  <option value="">Todas</option>
+                  <option value="oj-sbdi-1">SBDI-I</option>
+                  <option value="oj-sbdi-1t">SBDI-I Transitória</option>
+                  <option value="oj-sbdi-2">SBDI-II</option>
+                  <option value="oj-sdc">SDC</option>
+                  <option value="oj-tp-oe">Tribunal Pleno / OE</option>
+                </select>
+              </div>
+            )}
 
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">Ordenar</label>
@@ -280,8 +314,9 @@ export default function JurisprudenciaClient() {
             </form>
           </div>
 
-          {/* Toggle de súmulas inativas — visível só na visualização de súmulas */}
-          {isSumulaView && (
+          {/* Toggle de documentos inativos — visível em qualquer visualização canônica
+              (Súmulas, OJs, PNs). Acórdãos/decisões não têm tag situacao em themes. */}
+          {isCanonicalView && (
             <div className="flex items-center gap-2 mt-4">
               <label className="inline-flex items-center gap-2 text-sm text-gray-700 cursor-pointer select-none">
                 <input
@@ -290,7 +325,7 @@ export default function JurisprudenciaClient() {
                   onChange={(e) => setShowInactive(e.target.checked)}
                   className="w-4 h-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
                 />
-                Mostrar súmulas canceladas/revistas (texto preservado por valor histórico)
+                Mostrar canceladas/revistas (texto preservado por valor histórico)
               </label>
             </div>
           )}
@@ -369,7 +404,7 @@ export default function JurisprudenciaClient() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {decisions.map((decision) => {
                 const themes = parseJsonArray(decision.themes);
-                const situacao = decision.decisionType === 'sumula' ? extractSituacao(themes) : null;
+                const situacao = CANONICAL_TYPES.includes(decision.decisionType) ? extractSituacao(themes) : null;
                 const sitBadge = situacao ? situacaoBadge(situacao) : null;
 
                 return (

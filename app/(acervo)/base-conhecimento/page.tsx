@@ -1,11 +1,13 @@
 import Link from 'next/link';
-import { Scale, FileText, BookOpen, List, Book, Landmark, Sparkles, Library, Briefcase } from 'lucide-react';
+import { Scale, FileText, BookOpen, List, Book, Landmark, Sparkles, Library, Briefcase, BookMarked, Gavel } from 'lucide-react';
 import {
   getCachedDocumentCountByCategory,
   getCachedTribunalDecisionCount,
   getCachedLeiArticleCount,
   getCachedGlossaryTermCount,
   getCachedTstSumulaCount,
+  getCachedTstOjCount,
+  getCachedTstPnCount,
 } from '@/lib/cached-queries';
 
 // 60s: contadores mudam quando admin classifica/sync roda — atualiza rápido
@@ -83,23 +85,35 @@ export default async function BaseConhecimentoPage() {
   let leiArticleCount = 195;
   let glossaryCount = 95;
   let tstSumulaCount = 0;
+  let tstOjCount = 0;
+  let tstPnCount = 0;
 
   try {
-    [categoryCounts, tribunalDecisionCount, leiArticleCount, glossaryCount, tstSumulaCount] =
-      await Promise.all([
-        getCachedDocumentCountByCategory(),
-        getCachedTribunalDecisionCount(),
-        getCachedLeiArticleCount(),
-        getCachedGlossaryTermCount(),
-        getCachedTstSumulaCount(),
-      ]);
+    [
+      categoryCounts,
+      tribunalDecisionCount,
+      leiArticleCount,
+      glossaryCount,
+      tstSumulaCount,
+      tstOjCount,
+      tstPnCount,
+    ] = await Promise.all([
+      getCachedDocumentCountByCategory(),
+      getCachedTribunalDecisionCount(),
+      getCachedLeiArticleCount(),
+      getCachedGlossaryTermCount(),
+      getCachedTstSumulaCount(),
+      getCachedTstOjCount(),
+      getCachedTstPnCount(),
+    ]);
   } catch {
     // DB indisponível (ex.: build CI) — usa defaults
   }
 
-  // `tribunalDecisionCount` inclui TST. Subtrai para evitar dupla-contagem
-  // (TST tem card próprio abaixo).
-  const tribunalOthersCount = Math.max(0, tribunalDecisionCount - tstSumulaCount);
+  // `tribunalDecisionCount` inclui todos os tipos TST (Súmulas + OJs + PNs).
+  // Subtraímos para evitar dupla-contagem (cada série tem card próprio).
+  const tstTotal = tstSumulaCount + tstOjCount + tstPnCount;
+  const tribunalOthersCount = Math.max(0, tribunalDecisionCount - tstTotal);
 
   const cardsWithCounts = CATEGORIES.map((cat) => {
     if (cat.key === 'lei-14133') {
@@ -197,6 +211,48 @@ export default async function BaseConhecimentoPage() {
               <p className="text-xs font-semibold text-brand-700">
                 {tstSumulaCount.toLocaleString('pt-BR')}{' '}
                 {tstSumulaCount === 1 ? 'súmula' : 'súmulas'}
+              </p>
+            </Link>
+          )}
+
+          {tstOjCount > 0 && (
+            <Link
+              href="/jurisprudencia?tribunal=TST&decisionType=orientacao_jurisprudencial"
+              className="bg-white border border-gray-200 rounded-2xl p-6 hover:border-brand-400 hover:shadow-md transition-all group focus-visible:ring-2 focus-visible:ring-brand-500 focus-visible:ring-offset-2"
+            >
+              <div className="w-12 h-12 bg-brand-100 rounded-xl flex items-center justify-center mb-4 group-hover:bg-brand-200 transition-colors">
+                <BookMarked className="w-6 h-6 text-brand-700" />
+              </div>
+              <h2 className="text-lg font-bold text-gray-900 mb-1 group-hover:text-brand-700 transition-colors">
+                Orientações Jurisprudenciais (TST)
+              </h2>
+              <p className="text-sm text-gray-600 mb-2 leading-relaxed">
+                OJs das subseções SBDI-I, SBDI-I Transitória, SBDI-II e SDC, mais o Tribunal Pleno/Órgão Especial — jurisprudência consolidada das subseções especializadas.
+              </p>
+              <p className="text-xs font-semibold text-brand-700">
+                {tstOjCount.toLocaleString('pt-BR')}{' '}
+                {tstOjCount === 1 ? 'orientação' : 'orientações'}
+              </p>
+            </Link>
+          )}
+
+          {tstPnCount > 0 && (
+            <Link
+              href="/jurisprudencia?tribunal=TST&decisionType=precedente_normativo"
+              className="bg-white border border-gray-200 rounded-2xl p-6 hover:border-brand-400 hover:shadow-md transition-all group focus-visible:ring-2 focus-visible:ring-brand-500 focus-visible:ring-offset-2"
+            >
+              <div className="w-12 h-12 bg-brand-100 rounded-xl flex items-center justify-center mb-4 group-hover:bg-brand-200 transition-colors">
+                <Gavel className="w-6 h-6 text-brand-700" />
+              </div>
+              <h2 className="text-lg font-bold text-gray-900 mb-1 group-hover:text-brand-700 transition-colors">
+                Precedentes Normativos (TST)
+              </h2>
+              <p className="text-sm text-gray-600 mb-2 leading-relaxed">
+                Decisões vinculantes da Seção de Dissídios Coletivos — negociação coletiva, cláusulas normativas e dissídios.
+              </p>
+              <p className="text-xs font-semibold text-brand-700">
+                {tstPnCount.toLocaleString('pt-BR')}{' '}
+                {tstPnCount === 1 ? 'precedente' : 'precedentes'}
               </p>
             </Link>
           )}

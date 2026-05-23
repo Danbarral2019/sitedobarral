@@ -182,3 +182,32 @@ export const getCachedTstSumulaCount = cache(async () => {
     },
   });
 });
+
+/**
+ * Conta Orientações Jurisprudenciais (OJs) do TST aprovadas. Agrupa todas as
+ * 5 séries (SBDI-I, SBDI-I Transitória, SBDI-II, SDC, Tribunal Pleno/OE).
+ * Usada pelo card "Orientações Jurisprudenciais (TST)" no hub.
+ */
+export const getCachedTstOjCount = cache(async () => {
+  return await prisma.tribunalDecision.count({
+    where: {
+      tribunalCode: 'TST',
+      decisionType: 'orientacao_jurisprudencial',
+      approvalStatus: { in: ['auto_approved', 'manually_approved'] },
+    },
+  });
+});
+
+/**
+ * Conta Precedentes Normativos do TST. Usada pelo card "Precedentes
+ * Normativos (TST)" no hub.
+ */
+export const getCachedTstPnCount = cache(async () => {
+  return await prisma.tribunalDecision.count({
+    where: {
+      tribunalCode: 'TST',
+      decisionType: 'precedente_normativo',
+      approvalStatus: { in: ['auto_approved', 'manually_approved'] },
+    },
+  });
+});

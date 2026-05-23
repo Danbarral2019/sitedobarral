@@ -63,7 +63,7 @@ describe('semanticSearch — retrocompatibilidade', () => {
 });
 
 describe('semanticSearch — excludeInactiveSumulas (filtro de súmulas TST)', () => {
-  it('default (true) + includeTribunalDecisions: filtra CANCELADA/REVISTA no ramo TribunalDecisionChunk', async () => {
+  it('default (true) + includeTribunalDecisions: filtra CANCELADA/REVISTA dos 3 tipos canônicos TST', async () => {
     mockQueryRawUnsafe.mockResolvedValue([]);
     await semanticSearch('intervalo intrajornada', {
       useCache: false,
@@ -72,7 +72,10 @@ describe('semanticSearch — excludeInactiveSumulas (filtro de súmulas TST)', (
 
     const sql = getLastSql();
     expect(sql).toMatch(/FROM "TribunalDecisionChunk"/);
-    expect(sql).toMatch(/NOT \(td\."decisionType" = 'sumula' AND \(td\.themes ILIKE '%situacao:CANCELADA%' OR td\.themes ILIKE '%situacao:REVISTA%'\)\)/);
+    // Filtro deve cobrir 3 tipos canônicos: sumula, orientacao_jurisprudencial, precedente_normativo
+    expect(sql).toMatch(
+      /NOT \(td\."decisionType" IN \('sumula', 'orientacao_jurisprudencial', 'precedente_normativo'\) AND \(td\.themes ILIKE '%situacao:CANCELADA%' OR td\.themes ILIKE '%situacao:REVISTA%'\)\)/,
+    );
   });
 
   it('excludeInactiveSumulas=false (pergunta histórica): NÃO aplica o filtro', async () => {

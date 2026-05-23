@@ -384,11 +384,16 @@ async function executeVectorSearch(
       params.push(tribunalCodeFilter);
     }
 
-    // Filtra sumulas TST com situacao CANCELADA/REVISTA por default — evita
-    // que precedente superado apareca em resposta IA. Acordaos (TCE/STJ) nao
-    // tem `situacao:*` em themes, entao a clausula NOT atinge so sumulas.
+    // Filtra documentos canonicos TST com situacao CANCELADA/REVISTA por
+    // default — evita que precedente superado apareca em resposta IA.
+    // Cobre os 3 tipos canonicos: Sumulas, OJs (orientacao_jurisprudencial)
+    // e PNs (precedente_normativo). Acordaos (TCE/STJ) nao tem `situacao:*`
+    // em themes, entao a clausula NOT atinge apenas os tipos canonicos.
+    // Lição #116 (hotfix de 2026-05-20): manter a lista de decisionTypes
+    // canonicos em sincronia com a campanha TST. Quando adicionar tipo novo
+    // (ex.: enunciado_TST), incluir aqui também.
     if (excludeInactiveSumulas) {
-      decisionWhere += ` AND NOT (td."decisionType" = 'sumula' AND (td.themes ILIKE '%situacao:CANCELADA%' OR td.themes ILIKE '%situacao:REVISTA%'))`;
+      decisionWhere += ` AND NOT (td."decisionType" IN ('sumula', 'orientacao_jurisprudencial', 'precedente_normativo') AND (td.themes ILIKE '%situacao:CANCELADA%' OR td.themes ILIKE '%situacao:REVISTA%'))`;
     }
 
     const finalDecisionWhere = appendExtraWhere(decisionWhere, extraWhere?.tribunalDecision, params, nextParam);

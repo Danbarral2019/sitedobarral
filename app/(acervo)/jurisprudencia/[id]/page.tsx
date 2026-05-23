@@ -29,6 +29,7 @@ interface DecisionDetail {
   leiArticles: string;
   suggestedCourses: string | null;
   sourceRawData: string | null;
+  fullIdentifier?: string;
 }
 
 interface SumulaItem {
@@ -69,6 +70,32 @@ function parseSumulaPayload(raw: string | null): SumulaPayload | null {
   } catch {
     return null;
   }
+}
+
+/**
+ * Formata o badge "Súmula nº N", "OJ-SBDI-I nº N", "Precedente Normativo nº N" etc.
+ * conforme o decisionType + fullIdentifier do documento.
+ */
+function formatDecisionBadge(
+  fullIdentifier: string,
+  decisionType: string,
+  decisionNumber: string,
+): string {
+  if (decisionType === 'sumula') {
+    return `Súmula nº ${decisionNumber}`;
+  }
+  if (decisionType === 'precedente_normativo') {
+    return `Precedente Normativo nº ${decisionNumber}`;
+  }
+  if (decisionType === 'orientacao_jurisprudencial') {
+    // fullIdentifier ex.: "TST OJ-SBDI-I 31" / "TST OJ-SDC 5" / "TST OJ-TP/OE 1"
+    // Extrai a série após "TST " e antes do número final.
+    const m = /^TST\s+(OJ-[A-Z0-9/IT-]+(?:\s+Transitória)?)\s+\d+$/i.exec(fullIdentifier);
+    if (m) return `${m[1]} nº ${decisionNumber}`;
+    return `OJ nº ${decisionNumber}`;
+  }
+  // Outros tipos (acórdão, decisão, parecer prévio) usam decisionType + número
+  return `${decisionType} ${decisionNumber}`;
 }
 
 const SITUACAO_BADGES: Record<SumulaPayload['situacao'], { label: string; cls: string }> = {
@@ -186,8 +213,13 @@ export default function JurisprudenciaDetailPage() {
   const leiArticles = parseJsonArray(decision.leiArticles);
   const articleNumbers = extractArticleNumbers(leiArticles);
   const sourceUrl = decision.pdfUrl || decision.url;
-  const isSumula = decision.decisionType === 'sumula';
-  const sumula = isSumula ? parseSumulaPayload(decision.sourceRawData) : null;
+  // Documentos canônicos do TST (Súmulas, OJs, PNs) usam o mesmo render
+  // condicional: badge de situação, banner amarelo p/ canceladas, itens
+  // romanos com strike, timeline de resoluções, IRRs (quando houver).
+  const CANONICAL_TYPES = ['sumula', 'orientacao_jurisprudencial', 'precedente_normativo'];
+  const isCanonical = CANONICAL_TYPES.includes(decision.decisionType);
+  const isSumula = decision.decisionType === 'sumula'; // mantido por compatibilidade local
+  const sumula = isCanonical ? parseSumulaPayload(decision.sourceRawData) : null;
   const sitBadge = sumula ? SITUACAO_BADGES[sumula.situacao] : null;
 
   return (
@@ -217,7 +249,9 @@ export default function JurisprudenciaDetailPage() {
               {tribunalLabel(decision.tribunalCode)}
             </span>
             <span className="px-3 py-1 bg-white/20 backdrop-blur-sm text-sm font-medium rounded-full">
-              {isSumula ? `Súmula nº ${decision.decisionNumber}` : decision.decisionType}
+              {isCanonical
+                ? formatDecisionBadge(decision.fullIdentifier ?? '', decision.decisionType, decision.decisionNumber)
+                : decision.decisionType}
             </span>
             {sitBadge && (
               <span className={`px-3 py-1 text-sm font-semibold rounded-full border ${sitBadge.cls}`}>
@@ -309,7 +343,7 @@ export default function JurisprudenciaDetailPage() {
         {/* Ementa (ou Tese, para súmulas) */}
         <div className="bg-white rounded-xl shadow-sm border p-6 mb-8">
           <h2 className="text-lg font-bold text-gray-900 mb-3">
-            {isSumula ? 'Tese' : 'Ementa'}
+            {isCanonical ? 'Tese' : 'Ementa'}
           </h2>
           {sumula && sumula.itens.length > 0 ? (
             <ol className="space-y-3 text-gray-700 leading-relaxed">
@@ -433,7 +467,7 @@ export default function JurisprudenciaDetailPage() {
               className="inline-flex items-center gap-2 px-6 py-3 bg-blue-600 text-white rounded-xl font-bold hover:bg-blue-700 transition-colors shadow-lg"
             >
               <ExternalLink className="w-5 h-5" />
-              {isSumula ? 'Inteiro teor no site do TST' : 'Ver decisão original'}
+              {isCanonical ? 'Inteiro teor no site do TST' : 'Ver decisão original'}
             </a>
           </div>
         )}

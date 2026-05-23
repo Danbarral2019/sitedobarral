@@ -237,6 +237,17 @@ Exemplo de resposta: ["variação 1", "variação 2"]`;
       'repactuação', 'repactuacao', 'planilha de custos',
       'vínculo empregatício', 'vinculo empregaticio',
       'responsabilidade subsidiária', 'responsabilidade subsidiaria',
+      // OJs do TST (Orientações Jurisprudenciais) — séries SBDI-I/I-T/II/SDC + TP/OE
+      'orientação jurisprudencial', 'orientacao jurisprudencial',
+      'orientações jurisprudenciais', 'orientacoes jurisprudenciais',
+      'oj-sbdi', 'oj sbdi', 'sbdi-1', 'sbdi-i', 'sbdi-2', 'sbdi-ii',
+      'oj-sdc', 'sdc', 'subseção', 'subsecao',
+      'tribunal pleno', 'órgão especial', 'orgao especial',
+      // Precedentes Normativos (PN) — vinculantes do Pleno em dissídios coletivos
+      'precedente normativo', 'precedentes normativos',
+      'dissídio coletivo', 'dissidio coletivo', 'dissídios coletivos',
+      'negociação coletiva', 'negociacao coletiva',
+      'cláusula normativa', 'clausula normativa', 'convenção coletiva',
     ];
     const queryLowerForTribunal = query.toLowerCase();
     const includeTribunalDecisions = tribunalKeywords.some(kw => queryLowerForTribunal.includes(kw));
@@ -256,13 +267,14 @@ Exemplo de resposta: ["variação 1", "variação 2"]`;
       'precedente revogado', 'antiga redação', 'antiga redacao',
     ];
     // Também ativa quando a pergunta cita o número de uma súmula específica
-    // (ex.: "súmula 437"), pois nesse caso o usuário sabe o que quer ver.
-    const citesSpecificSumula = /(?:sumula|s[uú]mula|enunciado)\s*(?:tst)?\s*(?:n[º°]?\s*)?\d+/i.test(query);
+    // (ex.: "súmula 437", "OJ-SBDI-1 123", "PN 5"), pois nesse caso o usuário
+    // sabe exatamente o que quer ver — não faz sentido esconder cancelados.
+    const citesSpecificCanonical = /(?:s[uú]mula|enunciado|oj[\s-]*(?:sbdi|sdc|tp\/?oe)?|orienta[çc][ãa]o\s+jurisprudencial|precedente\s+normativo|pn)\s*(?:tst)?\s*(?:n[º°]?\s*)?\d+/i.test(query);
     const isHistoricalQuery =
-      historicalKeywords.some(kw => queryLowerForTribunal.includes(kw)) || citesSpecificSumula;
+      historicalKeywords.some(kw => queryLowerForTribunal.includes(kw)) || citesSpecificCanonical;
     const excludeInactiveSumulas = !isHistoricalQuery;
     if (isHistoricalQuery) {
-      apiLogger.info('Query histórica detectada — incluindo súmulas TST canceladas/revistas');
+      apiLogger.info('Query histórica detectada — incluindo documentos canônicos TST canceladas/revistas no contexto');
     }
 
     // 5a. Hybrid search: combina busca semântica (vetor) + FTS (BM25) via RRF.
@@ -524,7 +536,7 @@ INSTRUÇÕES:
    c) Quando citar precedentes, acórdãos ou informativos baseados na Lei 8.666/1993, SEMPRE alerte: "⚠️ Precedente anterior à Lei 14.133/2021 — verificar aplicabilidade sob o novo regime"
    d) Se houver EVOLUÇÃO normativa entre a lei antiga e a nova, EXPLIQUE a mudança
    e) Ordene as fontes cronologicamente: mais recentes primeiro
-   f) **Súmulas do TST**: quando uma súmula do Tribunal Superior do Trabalho aparecer no contexto, observe o campo \`themes\`. Se contiver \`situacao:CANCELADA\` ou \`situacao:REVISTA\`, **avise explicitamente** que aquela súmula está cancelada/revista e por isso só serve como referência histórica — não pode ser usada como precedente vigente. Para súmulas \`situacao:CRIADA\` ou \`situacao:ALTERADA\`, cite normalmente como jurisprudência consolidada do TST.
+   f) **Documentos canônicos do TST** (Súmulas, Orientações Jurisprudenciais — SBDI-I/I-T/II/SDC/Tribunal Pleno — e Precedentes Normativos da SDC): quando aparecerem no contexto, observe o campo \`themes\`. Se contiver \`situacao:CANCELADA\` ou \`situacao:REVISTA\`, **avise explicitamente** que aquele documento está cancelado/revisto e por isso só serve como referência histórica — não pode ser usado como precedente vigente. Para \`situacao:CRIADA\` ou \`situacao:ALTERADA\`, cite normalmente como jurisprudência consolidada do TST. Refira-se pelo rótulo correto: "Súmula nº N do TST", "OJ-SBDI-I nº N", "OJ-SDC nº N", "Precedente Normativo nº N", etc.
 10. FIDELIDADE ABSOLUTA AO CONTEÚDO DAS FONTES (regra crítica — viola = resposta inválida):
     a) Para enunciados, pareceres e orientações normativas: indique o número/origem e explique o entendimento com suas PRÓPRIAS PALAVRAS, fielmente ao que a fonte literalmente dispõe no contexto fornecido.
     b) **PROIBIDO usar aspas duplas ("...") a menos que o trecho EXATO esteja literalmente presente no contexto fornecido acima.** Aspas implicam citação literal; conteúdo entre aspas que não aparece no contexto é HALUCINAÇÃO e quebra a confiança do aluno em prova/peça processual. Se você quer transmitir uma ideia da fonte mas não tem o trecho literal, parafraseie SEM aspas.
