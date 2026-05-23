@@ -429,7 +429,11 @@ export function useGlobalSearch(options: UseGlobalSearchOptions = {}): UseGlobal
         return;
       }
 
-      // Set loading state immediately for UX
+      // Liga loading imediato para que o skeleton/AI placeholder apareça assim
+      // que isSearchActive vira true, evitando ~300ms de tela em branco entre
+      // a Home sumir e a primeira response chegar. O "piscar" do ícone search
+      // foi resolvido em GlobalSearchBar, que agora não troca o ícone — o
+      // feedback visual fica nos skeletons abaixo, mais estáveis ao olho.
       if (newQuery.length >= minQueryLength) {
         setIsLoading(true);
       }

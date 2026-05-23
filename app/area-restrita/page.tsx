@@ -322,8 +322,16 @@ function AreaRestritaContent() {
           )}
         </DashboardHero>
 
-        {/* Content Area */}
-        {search.isSearchActive ? (
+        {/* Content Area
+         *
+         * Importante: a Home e as Inline Views ficam SEMPRE montadas e são
+         * apenas escondidas via `hidden` quando há busca ativa. Sem isto, a
+         * árvore Home/Inline desmonta e remonta a cada caractere entre 1→2
+         * chars (limite `isSearchActive`), causando o flash visual que o
+         * usuário relatou ao digitar. SearchResultsList continua condicional
+         * pois é caro e sem estado a preservar quando fechado.
+         */}
+        {search.isSearchActive && (
           <SearchResultsList
             results={search.results}
             query={search.query}
@@ -345,59 +353,61 @@ function AreaRestritaContent() {
             }}
             aiConversationHistory={search.aiConversationHistory}
           />
-        ) : inlineView === 'home' ? (
-          <>
-            {/* Quick Access Pills */}
-            <QuickAccessBar
-              onShowInlineView={(view) => setInlineView(view)}
-            />
-
-            {/* Continue Studying */}
-            <RecentActivity onDocumentClick={handleDocumentClick} />
-
-            {/* Course Cards */}
-            {!isDataLoading && (
-              <DashboardCourseCard
-                documents={courseDocuments}
-                enrolledCourseIds={enrolledCourseIds}
-                modulesData={modulesData}
-                onDocumentClick={handleDocumentClick}
-              />
-            )}
-
-            {/* Important Notice */}
-            <div className="bg-orange-50 border-l-4 border-orange-500 p-4 lg:p-6 rounded-r-xl">
-              <h3 className="text-base font-bold text-orange-900 mb-1">Importante</h3>
-              <p className="text-sm text-orange-800">
-                Este material é de uso exclusivo dos alunos matriculados. O compartilhamento não
-                autorizado pode resultar na suspensão do acesso.
-              </p>
-            </div>
-          </>
-        ) : (
-          /* Inline Content Views (Atos Normativos, Glossário, Category) */
-          <div>
-            <button
-              onClick={() => setInlineView('home')}
-              className="flex items-center gap-2 text-sm font-medium text-gray-600 hover:text-brand-600 mb-4 transition-colors"
-            >
-              <ArrowLeft className="w-4 h-4" />
-              Voltar ao Início
-            </button>
-
-            {inlineView === 'legislative-acts' && <LegislativeActsPanel />}
-            {inlineView === 'glossary' && <GlossaryPanel articleBasePath="/area-restrita/artigo" />}
-            {typeof inlineView === 'object' && inlineView.type === 'category' && (
-              <DocumentsByCategory
-                documents={categoryDocuments}
-                courseId={enrolledCourseIds[0] || ''}
-                onDocumentClick={handleDocumentClick}
-                isFavorite={isFavorite}
-                toggleFavorite={(docId) => toggleFavorite(docId, enrolledCourseIds[0] || '')}
-              />
-            )}
-          </div>
         )}
+
+        {/* Home (mantida montada — escondida durante busca ou em inline view) */}
+        <div
+          hidden={search.isSearchActive || inlineView !== 'home'}
+          className="space-y-6"
+        >
+          {/* Quick Access Pills */}
+          <QuickAccessBar onShowInlineView={(view) => setInlineView(view)} />
+
+          {/* Continue Studying */}
+          <RecentActivity onDocumentClick={handleDocumentClick} />
+
+          {/* Course Cards */}
+          {!isDataLoading && (
+            <DashboardCourseCard
+              documents={courseDocuments}
+              enrolledCourseIds={enrolledCourseIds}
+              modulesData={modulesData}
+              onDocumentClick={handleDocumentClick}
+            />
+          )}
+
+          {/* Important Notice */}
+          <div className="bg-orange-50 border-l-4 border-orange-500 p-4 lg:p-6 rounded-r-xl">
+            <h3 className="text-base font-bold text-orange-900 mb-1">Importante</h3>
+            <p className="text-sm text-orange-800">
+              Este material é de uso exclusivo dos alunos matriculados. O compartilhamento não
+              autorizado pode resultar na suspensão do acesso.
+            </p>
+          </div>
+        </div>
+
+        {/* Inline Content Views (escondidas durante busca ou em home) */}
+        <div hidden={search.isSearchActive || inlineView === 'home'}>
+          <button
+            onClick={() => setInlineView('home')}
+            className="flex items-center gap-2 text-sm font-medium text-gray-600 hover:text-brand-600 mb-4 transition-colors"
+          >
+            <ArrowLeft className="w-4 h-4" />
+            Voltar ao Início
+          </button>
+
+          {inlineView === 'legislative-acts' && <LegislativeActsPanel />}
+          {inlineView === 'glossary' && <GlossaryPanel articleBasePath="/area-restrita/artigo" />}
+          {typeof inlineView === 'object' && inlineView.type === 'category' && (
+            <DocumentsByCategory
+              documents={categoryDocuments}
+              courseId={enrolledCourseIds[0] || ''}
+              onDocumentClick={handleDocumentClick}
+              isFavorite={isFavorite}
+              toggleFavorite={(docId) => toggleFavorite(docId, enrolledCourseIds[0] || '')}
+            />
+          )}
+        </div>
       </div>
 
       {/* Document Detail Modal */}

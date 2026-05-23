@@ -68,7 +68,10 @@ export function SearchResultsList({
 }: SearchResultsListProps) {
   const showAiCard = isAiLoading || aiError || aiAnswer;
 
-  if (isLoading && !showAiCard) {
+  // Skeleton só quando AINDA não há resultados do request anterior. Se já há
+  // resultados (busca prévia), eles permanecem visíveis durante o novo fetch
+  // — evita o "piscar" entre query change e nova response chegando.
+  if (isLoading && results.length === 0 && !showAiCard) {
     return (
       <div className="space-y-4">
         {[1, 2, 3].map((i) => (
@@ -86,7 +89,7 @@ export function SearchResultsList({
     );
   }
 
-  if (results.length === 0 && !showAiCard) {
+  if (results.length === 0 && !showAiCard && !isLoading) {
     return null;
   }
 
