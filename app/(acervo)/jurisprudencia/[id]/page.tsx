@@ -28,7 +28,55 @@ interface DecisionDetail {
   themes: string;
   leiArticles: string;
   suggestedCourses: string | null;
+  sourceRawData: string | null;
 }
+
+interface SumulaItem {
+  ordem: string;
+  texto: string;
+  cancelled: boolean;
+}
+interface SumulaIrr {
+  numero: string;
+  rrNumero: string | null;
+  publicadoEm: string | null;
+  relator: string | null;
+  titulo: string;
+  tese: string;
+}
+interface SumulaResolucao {
+  numero: string;
+  ano: number | null;
+  tipo: string | null;
+  divulgadoEm: string | null;
+}
+interface SumulaPayload {
+  situacao: 'CRIADA' | 'ALTERADA' | 'CANCELADA' | 'REVISTA';
+  situacaoMotivo: string | null;
+  observacao: string;
+  tese: string;
+  itens: SumulaItem[];
+  irrs: SumulaIrr[];
+  resolucoes: SumulaResolucao[];
+  leiArticles: string[];
+  cltArticles: string[];
+}
+
+function parseSumulaPayload(raw: string | null): SumulaPayload | null {
+  if (!raw) return null;
+  try {
+    return JSON.parse(raw) as SumulaPayload;
+  } catch {
+    return null;
+  }
+}
+
+const SITUACAO_BADGES: Record<SumulaPayload['situacao'], { label: string; cls: string }> = {
+  CRIADA: { label: 'Criada', cls: 'bg-emerald-100 text-emerald-800 border-emerald-200' },
+  ALTERADA: { label: 'Alterada', cls: 'bg-amber-100 text-amber-800 border-amber-200' },
+  CANCELADA: { label: 'Cancelada', cls: 'bg-red-100 text-red-800 border-red-200' },
+  REVISTA: { label: 'Revista', cls: 'bg-gray-200 text-gray-800 border-gray-300' },
+};
 
 function parseJsonArray(val: string | null | undefined): string[] {
   if (!val) return [];
@@ -59,6 +107,7 @@ function tribunalLabel(code: string): string {
     'tce-rs': 'TCE-RS',
     'tce-pe': 'TCE-PE',
     'datajud-stj': 'DataJud (STJ)',
+    tst: 'TST',
   };
   return map[code] || code.toUpperCase();
 }
@@ -73,6 +122,7 @@ function tribunalColor(code: string): string {
     'tce-rs': 'bg-violet-100 text-violet-800',
     'tce-pe': 'bg-teal-100 text-teal-800',
     'datajud-stj': 'bg-red-100 text-red-800',
+    tst: 'bg-pink-100 text-pink-800',
   };
   return colors[code] || 'bg-gray-100 text-gray-800';
 }
@@ -136,6 +186,9 @@ export default function JurisprudenciaDetailPage() {
   const leiArticles = parseJsonArray(decision.leiArticles);
   const articleNumbers = extractArticleNumbers(leiArticles);
   const sourceUrl = decision.pdfUrl || decision.url;
+  const isSumula = decision.decisionType === 'sumula';
+  const sumula = isSumula ? parseSumulaPayload(decision.sourceRawData) : null;
+  const sitBadge = sumula ? SITUACAO_BADGES[sumula.situacao] : null;
 
   return (
     <main className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
@@ -159,13 +212,18 @@ export default function JurisprudenciaDetailPage() {
             Voltar para Jurisprudência
           </Link>
 
-          <div className="flex items-center gap-3 mb-4">
+          <div className="flex items-center gap-3 mb-4 flex-wrap">
             <span className={`px-3 py-1 text-sm font-medium rounded-full ${tribunalColor(decision.tribunalCode)}`}>
               {tribunalLabel(decision.tribunalCode)}
             </span>
             <span className="px-3 py-1 bg-white/20 backdrop-blur-sm text-sm font-medium rounded-full">
-              {decision.decisionType}
+              {isSumula ? `Súmula nº ${decision.decisionNumber}` : decision.decisionType}
             </span>
+            {sitBadge && (
+              <span className={`px-3 py-1 text-sm font-semibold rounded-full border ${sitBadge.cls}`}>
+                {sitBadge.label}
+              </span>
+            )}
           </div>
 
           <h1 className="text-3xl md:text-4xl font-bold mb-2">
@@ -233,11 +291,88 @@ export default function JurisprudenciaDetailPage() {
           </div>
         )}
 
-        {/* Ementa */}
+        {/* Aviso de súmula cancelada/revista — preserva valor histórico */}
+        {sumula && (sumula.situacao === 'CANCELADA' || sumula.situacao === 'REVISTA') && (
+          <div className="bg-amber-50 border border-amber-300 rounded-xl p-5 mb-6">
+            <p className="text-amber-900 font-semibold mb-1">
+              ⚠ Esta súmula encontra-se {sumula.situacao === 'CANCELADA' ? 'cancelada' : 'revista'}.
+            </p>
+            <p className="text-sm text-amber-800">
+              O texto integral é preservado por valor histórico e jurisprudencial. Verifique sempre a versão vigente no site do TST antes de utilizar.
+            </p>
+            {sumula.situacaoMotivo && (
+              <p className="text-sm text-amber-700 mt-2 italic">{sumula.situacaoMotivo}</p>
+            )}
+          </div>
+        )}
+
+        {/* Ementa (ou Tese, para súmulas) */}
         <div className="bg-white rounded-xl shadow-sm border p-6 mb-8">
-          <h2 className="text-lg font-bold text-gray-900 mb-3">Ementa</h2>
-          <p className="text-gray-700 leading-relaxed whitespace-pre-line">{decision.ementa}</p>
+          <h2 className="text-lg font-bold text-gray-900 mb-3">
+            {isSumula ? 'Tese' : 'Ementa'}
+          </h2>
+          {sumula && sumula.itens.length > 0 ? (
+            <ol className="space-y-3 text-gray-700 leading-relaxed">
+              {sumula.itens.map((it) => (
+                <li key={it.ordem} className="flex gap-3">
+                  <span className={`font-bold shrink-0 ${it.cancelled ? 'line-through text-gray-400' : 'text-gray-900'}`}>
+                    {it.ordem} -
+                  </span>
+                  <span className={it.cancelled ? 'line-through text-gray-500' : ''}>
+                    {it.texto}
+                  </span>
+                </li>
+              ))}
+            </ol>
+          ) : (
+            <p className="text-gray-700 leading-relaxed whitespace-pre-line">{decision.ementa}</p>
+          )}
         </div>
+
+        {/* IRRs (Incidentes de Recursos Repetitivos) — quando houver */}
+        {sumula && sumula.irrs.length > 0 && (
+          <div className="bg-white rounded-xl shadow-sm border p-6 mb-8">
+            <h2 className="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
+              <Scale className="w-5 h-5" />
+              Incidente(s) de Recursos Repetitivos (IRR)
+            </h2>
+            <div className="space-y-4">
+              {sumula.irrs.map((irr) => (
+                <div key={irr.numero} className="border-l-4 border-blue-300 pl-4">
+                  <p className="font-semibold text-gray-900">IRR nº {irr.numero} — {irr.titulo}</p>
+                  {irr.rrNumero && (
+                    <p className="text-sm text-gray-600 mt-1">
+                      {irr.rrNumero}
+                      {irr.publicadoEm && ` · publicado em ${irr.publicadoEm}`}
+                      {irr.relator && ` · rel. ${irr.relator}`}
+                    </p>
+                  )}
+                  {irr.tese && <p className="text-sm text-gray-700 mt-2">{irr.tese}</p>}
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Resoluções (histórico) */}
+        {sumula && sumula.resolucoes.length > 0 && (
+          <div className="bg-white rounded-xl shadow-sm border p-6 mb-8">
+            <h2 className="text-lg font-bold text-gray-900 mb-3 flex items-center gap-2">
+              <Calendar className="w-5 h-5" />
+              Histórico de resoluções
+            </h2>
+            <ul className="space-y-1 text-sm text-gray-700">
+              {sumula.resolucoes.map((r, i) => (
+                <li key={`${r.numero}-${i}`}>
+                  <span className="font-mono font-medium">Res. {r.numero}</span>
+                  {r.tipo && r.divulgadoEm && (
+                    <span className="text-gray-600"> — {r.tipo} {r.divulgadoEm}</span>
+                  )}
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
 
         {/* CTA Teaser */}
         <div className="bg-gradient-to-r from-amber-50 to-blue-50 border border-amber-200 rounded-xl p-5 mb-8 flex items-center gap-4">
@@ -298,7 +433,7 @@ export default function JurisprudenciaDetailPage() {
               className="inline-flex items-center gap-2 px-6 py-3 bg-blue-600 text-white rounded-xl font-bold hover:bg-blue-700 transition-colors shadow-lg"
             >
               <ExternalLink className="w-5 h-5" />
-              Ver decisão original
+              {isSumula ? 'Inteiro teor no site do TST' : 'Ver decisão original'}
             </a>
           </div>
         )}

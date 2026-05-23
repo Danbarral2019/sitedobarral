@@ -60,6 +60,7 @@ function getCategoryLabel(category: string): string {
     'tribunal-tce-rs': 'TCE-RS',
     'tribunal-tce-pe': 'TCE-PE',
     'tribunal-stj': 'STJ (DataJud)',
+    'tribunal-tst': 'Súmula TST',
   };
   if (category.startsWith('tribunal-')) {
     return labels[category] || category.replace('tribunal-', '').toUpperCase();

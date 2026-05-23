@@ -18,6 +18,7 @@ const TRIBUNAL_CODES = [
   'TCE-PE',
   'STJ',
   'STF',
+  'TST',
 ] as const;
 
 const DECISION_TYPES = [
@@ -38,6 +39,7 @@ const querySchema = z.object({
   dataFrom: z.coerce.date().optional(),
   dataTo: z.coerce.date().optional(),
   q: z.string().min(1).max(200).optional(),
+  excludeInactive: z.coerce.boolean().optional(),
   page: z.coerce.number().int().min(1).default(1),
   pageSize: z.coerce.number().int().min(1).default(10).transform(v => Math.min(v, 50)),
   sort: z.enum(['recent', 'oldest', 'numero', 'relevance']).optional(),

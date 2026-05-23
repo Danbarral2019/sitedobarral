@@ -62,6 +62,18 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       changeFrequency: 'monthly',
       priority: 0.7,
     },
+    {
+      url: `${BASE_URL}/base-conhecimento`,
+      lastModified: new Date(),
+      changeFrequency: 'weekly',
+      priority: 0.85,
+    },
+    {
+      url: `${BASE_URL}/jurisprudencia`,
+      lastModified: new Date(),
+      changeFrequency: 'daily',
+      priority: 0.85,
+    },
   ];
 
   // Páginas de cursos (estáticas)
@@ -110,5 +122,27 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     console.error('Erro ao gerar sitemap dos artigos:', error);
   }
 
-  return [...staticPages, ...coursesPages, ...blogPages, ...articlePages];
+  // Decisões e súmulas individuais (dinâmicos) — inclui TST, TCE, STJ etc.
+  let decisionPages: MetadataRoute.Sitemap = [];
+  try {
+    const decisions = await prisma.tribunalDecision.findMany({
+      where: {
+        approvalStatus: { in: ['auto_approved', 'manually_approved'] },
+        isRelevant: true,
+      },
+      select: { id: true, updatedAt: true, decisionType: true },
+    });
+
+    decisionPages = decisions.map((d) => ({
+      url: `${BASE_URL}/jurisprudencia/${d.id}`,
+      lastModified: d.updatedAt,
+      // Súmulas são canônicas e raramente mudam — frequência menor
+      changeFrequency: d.decisionType === 'sumula' ? 'yearly' : 'monthly',
+      priority: 0.6,
+    }));
+  } catch (error) {
+    console.error('Erro ao gerar sitemap das decisões:', error);
+  }
+
+  return [...staticPages, ...coursesPages, ...blogPages, ...articlePages, ...decisionPages];
 }

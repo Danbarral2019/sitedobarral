@@ -46,6 +46,18 @@ export interface SearchOptions {
   skipDocumentBranch?: boolean;       // Omitir o ramo DocumentChunk (default: false)
   skipLegislativeActBranch?: boolean; // Omitir o ramo LegislativeActChunk (default: false)
   tribunalCodeFilter?: string;        // Filtrar TribunalDecisionChunk por tribunalCode
+  /**
+   * Exclui sumulas do TST com situacao CANCELADA/REVISTA do resultado, evitando
+   * que precedentes superados apareçam na resposta IA. Default: true.
+   *
+   * O caller deve setar false apenas quando a pergunta tem interesse historico
+   * (ex.: "qual era o entendimento antes da Reforma Trabalhista?"). O detector
+   * de keywords historicas vive em /api/documents/query.
+   *
+   * O filtro afeta SO TribunalDecision com decisionType='sumula' — acordaos de
+   * TCE/STJ nao sao filtrados (nao tem o conceito de "situacao" nessa coluna).
+   */
+  excludeInactiveSumulas?: boolean;
   extraWhere?: {                      // Fragmentos WHERE extras compostos pelo chamador
     document?: Prisma.Sql;
     tribunalDecision?: Prisma.Sql;
@@ -110,7 +122,7 @@ export async function semanticSearch(
     ? `${ewDocSql}|${ewDocVals}|${ewTdSql}|${ewTdVals}`
     : '';
 
-  const cacheKey = `vector-search:${hashQuery(query)}:${courseId || 'all'}:${category || 'all'}:${limit}:${threshold}:${(options.excludeCategories || []).join(',')}:td=${options.includeTribunalDecisions ? '1' : '0'}:cin=${(options.categoryIn || []).join(',')}:sd=${options.skipDocumentBranch ? '1' : '0'}:sl=${options.skipLegislativeActBranch ? '1' : '0'}:tc=${options.tribunalCodeFilter || ''}:ew=${ewKey}`;
+  const cacheKey = `vector-search:${hashQuery(query)}:${courseId || 'all'}:${category || 'all'}:${limit}:${threshold}:${(options.excludeCategories || []).join(',')}:td=${options.includeTribunalDecisions ? '1' : '0'}:cin=${(options.categoryIn || []).join(',')}:sd=${options.skipDocumentBranch ? '1' : '0'}:sl=${options.skipLegislativeActBranch ? '1' : '0'}:tc=${options.tribunalCodeFilter || ''}:eis=${options.excludeInactiveSumulas === false ? '0' : '1'}:ew=${ewKey}`;
 
   // Tenta usar cache
   if (useCache) {
@@ -223,6 +235,7 @@ async function executeVectorSearch(
     threshold,
     includeChunkContent = true,
     includeTribunalDecisions = false,
+    excludeInactiveSumulas = true,
     skipDocumentBranch = false,
     skipLegislativeActBranch = false,
     tribunalCodeFilter,
@@ -369,6 +382,13 @@ async function executeVectorSearch(
     if (tribunalCodeFilter) {
       decisionWhere += ` AND td."tribunalCode" = $${nextParam()}`;
       params.push(tribunalCodeFilter);
+    }
+
+    // Filtra sumulas TST com situacao CANCELADA/REVISTA por default — evita
+    // que precedente superado apareca em resposta IA. Acordaos (TCE/STJ) nao
+    // tem `situacao:*` em themes, entao a clausula NOT atinge so sumulas.
+    if (excludeInactiveSumulas) {
+      decisionWhere += ` AND NOT (td."decisionType" = 'sumula' AND (td.themes ILIKE '%situacao:CANCELADA%' OR td.themes ILIKE '%situacao:REVISTA%'))`;
     }
 
     const finalDecisionWhere = appendExtraWhere(decisionWhere, extraWhere?.tribunalDecision, params, nextParam);

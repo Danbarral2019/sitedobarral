@@ -31,6 +31,7 @@ const TRIBUNAL_CODES = [
   'TCE-PE',
   'STJ',
   'STF',
+  'TST',
 ] as const;
 
 const DECISION_TYPES = [

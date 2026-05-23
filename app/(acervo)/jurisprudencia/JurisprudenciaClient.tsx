@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
+import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { Search, Scale, Calendar, ArrowRight, ChevronLeft, ChevronRight, Sparkles } from 'lucide-react';
 
@@ -41,7 +42,29 @@ const TRIBUNALS = [
   { code: 'TCE-RS', label: 'TCE-RS' },
   { code: 'TCE-PE', label: 'TCE-PE' },
   { code: 'STJ', label: 'STJ' },
+  { code: 'TST', label: 'TST (Súmulas)' },
 ];
+
+/** Códigos de situação que aparecem em `themes` (gerados pelo importador TST). */
+function extractSituacao(themes: string[]): string | null {
+  const tag = themes.find((t) => t.startsWith('situacao:'));
+  return tag ? tag.slice('situacao:'.length) : null;
+}
+
+function situacaoBadge(situacao: string): { label: string; className: string } {
+  switch (situacao) {
+    case 'CRIADA':
+      return { label: 'Criada', className: 'bg-emerald-100 text-emerald-800' };
+    case 'ALTERADA':
+      return { label: 'Alterada', className: 'bg-amber-100 text-amber-800' };
+    case 'CANCELADA':
+      return { label: 'Cancelada', className: 'bg-red-100 text-red-800' };
+    case 'REVISTA':
+      return { label: 'Revista', className: 'bg-gray-200 text-gray-700' };
+    default:
+      return { label: situacao, className: 'bg-gray-100 text-gray-700' };
+  }
+}
 
 const COMMON_THEMES = [
   'Licitação',
@@ -81,25 +104,33 @@ function tribunalColor(code: string): string {
     'TCE-PE': 'bg-teal-100 text-teal-800',
     'STJ': 'bg-red-100 text-red-800',
     'STF': 'bg-rose-100 text-rose-800',
+    'TST': 'bg-pink-100 text-pink-800',
   };
   return colors[code.toUpperCase()] || 'bg-gray-100 text-gray-800';
 }
 
 export default function JurisprudenciaClient() {
+  const searchParams = useSearchParams();
   const [decisions, setDecisions] = useState<Decision[]>([]);
   const [loading, setLoading] = useState(true);
   const [total, setTotal] = useState(0);
   const [totalPages, setTotalPages] = useState(1);
   const [currentPage, setCurrentPage] = useState(1);
 
-  // Filters
-  const [tribunal, setTribunal] = useState('');
-  const [year, setYear] = useState('');
+  // Filters — inicializados a partir da query string para suportar deep-link
+  // do hub `/base-conhecimento` (ex.: ?tribunal=TST&decisionType=sumula).
+  const [tribunal, setTribunal] = useState(() => searchParams?.get('tribunal') ?? '');
+  const [year, setYear] = useState(() => searchParams?.get('ano') ?? '');
   const [search, setSearch] = useState('');
   const [searchInput, setSearchInput] = useState('');
   const [selectedTheme, setSelectedTheme] = useState('');
-  const [decisionType, setDecisionType] = useState('');
+  const [decisionType, setDecisionType] = useState(
+    () => searchParams?.get('decisionType') ?? '',
+  );
   const [sort, setSort] = useState<'recent' | 'oldest' | 'numero' | 'relevance'>('recent');
+  // Default: esconde súmulas inativas (CANCELADA/REVISTA) — toggle abaixo.
+  const [showInactive, setShowInactive] = useState(false);
+  const isSumulaView = decisionType === 'sumula';
 
   const pageSize = 12;
   const [currentYear] = useState(() => new Date().getFullYear());
@@ -118,6 +149,11 @@ export default function JurisprudenciaClient() {
       if (selectedTheme) params.set('tema', selectedTheme);
       if (decisionType) params.set('decisionType', decisionType);
       if (sort && sort !== 'recent') params.set('sort', sort);
+      // Só faz sentido filtrar inativas em visualização de súmulas; outros
+      // tipos de decisão não carregam tag `situacao:*` em themes.
+      if (decisionType === 'sumula' && !showInactive) {
+        params.set('excludeInactive', 'true');
+      }
 
       const res = await fetch(`/api/jurisprudencia?${params}`);
       if (res.ok) {
@@ -131,7 +167,7 @@ export default function JurisprudenciaClient() {
     } finally {
       setLoading(false);
     }
-  }, [tribunal, year, search, selectedTheme, decisionType, sort]);
+  }, [tribunal, year, search, selectedTheme, decisionType, sort, showInactive]);
 
   // Fetch when page changes
   useEffect(() => {
@@ -141,7 +177,7 @@ export default function JurisprudenciaClient() {
   // Reset to page 1 when filters change (fetchDecisions dep change triggers the fetch above)
   useEffect(() => {
     setCurrentPage(1);
-  }, [tribunal, year, search, selectedTheme, decisionType, sort]);
+  }, [tribunal, year, search, selectedTheme, decisionType, sort, showInactive]);
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
@@ -244,6 +280,21 @@ export default function JurisprudenciaClient() {
             </form>
           </div>
 
+          {/* Toggle de súmulas inativas — visível só na visualização de súmulas */}
+          {isSumulaView && (
+            <div className="flex items-center gap-2 mt-4">
+              <label className="inline-flex items-center gap-2 text-sm text-gray-700 cursor-pointer select-none">
+                <input
+                  type="checkbox"
+                  checked={showInactive}
+                  onChange={(e) => setShowInactive(e.target.checked)}
+                  className="w-4 h-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                />
+                Mostrar súmulas canceladas/revistas (texto preservado por valor histórico)
+              </label>
+            </div>
+          )}
+
           {/* Theme tags */}
           <div className="flex flex-wrap gap-2 mt-4">
             {COMMON_THEMES.map(theme => (
@@ -318,6 +369,8 @@ export default function JurisprudenciaClient() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {decisions.map((decision) => {
                 const themes = parseJsonArray(decision.themes);
+                const situacao = decision.decisionType === 'sumula' ? extractSituacao(themes) : null;
+                const sitBadge = situacao ? situacaoBadge(situacao) : null;
 
                 return (
                   <Link
@@ -325,13 +378,18 @@ export default function JurisprudenciaClient() {
                     href={`/jurisprudencia/${decision.id}`}
                     className="bg-white rounded-xl shadow-sm border p-6 hover:shadow-md hover:border-blue-200 transition-all group"
                   >
-                    <div className="flex items-center gap-2 mb-3">
+                    <div className="flex items-center gap-2 mb-3 flex-wrap">
                       <span className={`px-2 py-0.5 text-xs font-medium rounded-full ${tribunalColor(decision.tribunalCode)}`}>
                         {tribunalLabel(decision.tribunalCode)}
                       </span>
                       <span className="px-2 py-0.5 text-xs font-medium rounded bg-gray-100 text-gray-700">
                         {decision.decisionType}
                       </span>
+                      {sitBadge && (
+                        <span className={`px-2 py-0.5 text-xs font-semibold rounded-full ${sitBadge.className}`}>
+                          {sitBadge.label}
+                        </span>
+                      )}
                       {decision.dataJulgamento && (
                         <span className="text-xs text-gray-500 flex items-center gap-1">
                           <Calendar className="w-3 h-3" />
@@ -358,20 +416,33 @@ export default function JurisprudenciaClient() {
                       </div>
                     )}
 
-                    {themes.length > 0 && (
-                      <div className="flex flex-wrap gap-1 mb-3">
-                        {themes.slice(0, 4).map((theme, i) => (
-                          <span key={i} className="px-2 py-0.5 bg-blue-50 text-blue-700 text-xs rounded-full">
-                            {theme}
-                          </span>
-                        ))}
-                        {themes.length > 4 && (
-                          <span className="px-2 py-0.5 bg-gray-50 text-gray-500 text-xs rounded-full">
-                            +{themes.length - 4}
-                          </span>
-                        )}
-                      </div>
-                    )}
+                    {(() => {
+                      // Esconde tags internas (situacao:*, tst, clt, clt-art-*) que
+                      // alimentam filtros mas não interessam ao leitor — só temas
+                      // semânticos viram chips visíveis.
+                      const visibleThemes = themes.filter(
+                        (t) =>
+                          !t.startsWith('situacao:') &&
+                          t !== 'tst' &&
+                          t !== 'clt' &&
+                          !t.startsWith('clt-art-'),
+                      );
+                      if (visibleThemes.length === 0) return null;
+                      return (
+                        <div className="flex flex-wrap gap-1 mb-3">
+                          {visibleThemes.slice(0, 4).map((theme, i) => (
+                            <span key={i} className="px-2 py-0.5 bg-blue-50 text-blue-700 text-xs rounded-full">
+                              {theme}
+                            </span>
+                          ))}
+                          {visibleThemes.length > 4 && (
+                            <span className="px-2 py-0.5 bg-gray-50 text-gray-500 text-xs rounded-full">
+                              +{visibleThemes.length - 4}
+                            </span>
+                          )}
+                        </div>
+                      );
+                    })()}
 
                     <div className="flex items-center text-blue-600 text-sm font-medium group-hover:gap-2 gap-1 transition-all">
                       Ver detalhes <ArrowRight className="w-4 h-4" />

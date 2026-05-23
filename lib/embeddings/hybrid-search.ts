@@ -25,6 +25,8 @@ export interface HybridSearchOptions {
   alpha?: number;  // Peso do vetor vs FTS (0.6 = 60% vetor, 40% FTS)
   useCache?: boolean;
   includeTribunalDecisions?: boolean; // Incluir decisoes de TCEs estaduais (default: false)
+  /** Quando true (default), exclui Súmulas TST com situação CANCELADA/REVISTA do contexto. */
+  excludeInactiveSumulas?: boolean;
   rerank?: boolean; // Aplicar reranking nos resultados (default: false)
 }
 
@@ -60,6 +62,7 @@ export async function hybridSearch(
     alpha = 0.6,
     useCache = true,
     includeTribunalDecisions = false,
+    excludeInactiveSumulas = true,
     rerank = false,
   } = options;
 
@@ -71,6 +74,7 @@ export async function hybridSearch(
     useCache,
     includeChunkContent: true,
     includeTribunalDecisions,
+    excludeInactiveSumulas,
   };
 
   const ftsOptions: DocumentFTSOptions = {

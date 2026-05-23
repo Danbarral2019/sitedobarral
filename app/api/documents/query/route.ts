@@ -222,17 +222,47 @@ Exemplo de resposta: ["variação 1", "variação 2"]`;
     }
 
     // 5a. Detect if user explicitly asks for state tribunal decisions (TCEs)
+    // ou para temas que tipicamente despertam Súmulas do TST (terceirização,
+    // CLT, fiscalização de contratos de prestação de serviços, repactuação).
     const tribunalKeywords = [
       'tce', 'tribunal de contas estadual', 'tribunais de contas estaduais',
       'tce-sp', 'tce-mg', 'tce-pr', 'tce-sc', 'tce-rj', 'tce-rs', 'tce-pe',
       'tribunal estadual', 'decisão estadual', 'decisões estaduais',
       'jurisprudência estadual', 'corte de contas estadual',
+      // Súmulas TST — sinaliza interesse em jurisprudência trabalhista
+      'tst', 'súmula tst', 'sumula tst', 'súmula do tst', 'sumula do tst',
+      'tribunal superior do trabalho', 'jurisprudência trabalhista',
+      'jurisprudencia trabalhista', 'clt', 'consolidação das leis do trabalho',
+      'terceirização', 'terceirizacao', 'tomador de serviço', 'tomador de servicos',
+      'repactuação', 'repactuacao', 'planilha de custos',
+      'vínculo empregatício', 'vinculo empregaticio',
+      'responsabilidade subsidiária', 'responsabilidade subsidiaria',
     ];
     const queryLowerForTribunal = query.toLowerCase();
     const includeTribunalDecisions = tribunalKeywords.some(kw => queryLowerForTribunal.includes(kw));
 
     if (includeTribunalDecisions) {
       apiLogger.info('Tribunal decisions included (user explicitly requested)');
+    }
+
+    // Súmulas TST canceladas/revistas: por padrão ficam fora do contexto IA
+    // (precedente superado induz erro). Aparecem só quando a pergunta
+    // explicitamente indicar interesse histórico ou por súmula específica.
+    const historicalKeywords = [
+      'histórico', 'historico', 'cancelada', 'cancelado', 'cancelamento',
+      'revista', 'revisão', 'revisao', 'revogada', 'revogado',
+      'antes da reforma', 'reforma trabalhista', 'lei 13.467', '13.467/2017',
+      'entendimento anterior', 'redação anterior', 'redacao anterior',
+      'precedente revogado', 'antiga redação', 'antiga redacao',
+    ];
+    // Também ativa quando a pergunta cita o número de uma súmula específica
+    // (ex.: "súmula 437"), pois nesse caso o usuário sabe o que quer ver.
+    const citesSpecificSumula = /(?:sumula|s[uú]mula|enunciado)\s*(?:tst)?\s*(?:n[º°]?\s*)?\d+/i.test(query);
+    const isHistoricalQuery =
+      historicalKeywords.some(kw => queryLowerForTribunal.includes(kw)) || citesSpecificSumula;
+    const excludeInactiveSumulas = !isHistoricalQuery;
+    if (isHistoricalQuery) {
+      apiLogger.info('Query histórica detectada — incluindo súmulas TST canceladas/revistas');
     }
 
     // 5a. Hybrid search: combina busca semântica (vetor) + FTS (BM25) via RRF.
@@ -248,6 +278,7 @@ Exemplo de resposta: ["variação 1", "variação 2"]`;
       alpha: 0.6,
       useCache,
       includeTribunalDecisions,
+      excludeInactiveSumulas,
       rerank: false,
     });
 
@@ -493,6 +524,7 @@ INSTRUÇÕES:
    c) Quando citar precedentes, acórdãos ou informativos baseados na Lei 8.666/1993, SEMPRE alerte: "⚠️ Precedente anterior à Lei 14.133/2021 — verificar aplicabilidade sob o novo regime"
    d) Se houver EVOLUÇÃO normativa entre a lei antiga e a nova, EXPLIQUE a mudança
    e) Ordene as fontes cronologicamente: mais recentes primeiro
+   f) **Súmulas do TST**: quando uma súmula do Tribunal Superior do Trabalho aparecer no contexto, observe o campo \`themes\`. Se contiver \`situacao:CANCELADA\` ou \`situacao:REVISTA\`, **avise explicitamente** que aquela súmula está cancelada/revista e por isso só serve como referência histórica — não pode ser usada como precedente vigente. Para súmulas \`situacao:CRIADA\` ou \`situacao:ALTERADA\`, cite normalmente como jurisprudência consolidada do TST.
 10. FIDELIDADE ABSOLUTA AO CONTEÚDO DAS FONTES (regra crítica — viola = resposta inválida):
     a) Para enunciados, pareceres e orientações normativas: indique o número/origem e explique o entendimento com suas PRÓPRIAS PALAVRAS, fielmente ao que a fonte literalmente dispõe no contexto fornecido.
     b) **PROIBIDO usar aspas duplas ("...") a menos que o trecho EXATO esteja literalmente presente no contexto fornecido acima.** Aspas implicam citação literal; conteúdo entre aspas que não aparece no contexto é HALUCINAÇÃO e quebra a confiança do aluno em prova/peça processual. Se você quer transmitir uma ideia da fonte mas não tem o trecho literal, parafraseie SEM aspas.

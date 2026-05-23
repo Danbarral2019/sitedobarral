@@ -85,6 +85,7 @@ const tribunalColors: Record<string, string> = {
   'STJ': 'bg-red-100 text-red-800',
   'STF': 'bg-red-100 text-red-900',
   'CNJ': 'bg-indigo-100 text-indigo-800',
+  'TST': 'bg-rose-100 text-rose-800',
 };
 
 function formatDate(date: Date | string): string {

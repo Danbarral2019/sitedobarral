@@ -106,3 +106,4 @@ build-*.log
 # AGU scraper test outputs
 agu-scraper-v4-import.json
 agu-scraper-v4-report.csv
+dev.log

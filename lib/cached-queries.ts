@@ -168,3 +168,17 @@ export const getCachedTribunalDecisionCount = cache(async () => {
     where: { approvalStatus: { in: ['auto_approved', 'manually_approved'] } },
   });
 });
+
+/**
+ * Conta súmulas do TST aprovadas (cached). Usada pelo card "Súmulas do TST"
+ * no hub /base-conhecimento.
+ */
+export const getCachedTstSumulaCount = cache(async () => {
+  return await prisma.tribunalDecision.count({
+    where: {
+      tribunalCode: 'TST',
+      decisionType: 'sumula',
+      approvalStatus: { in: ['auto_approved', 'manually_approved'] },
+    },
+  });
+});

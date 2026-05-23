@@ -129,6 +129,21 @@ Busca:
 
 ## Recent Features
 
+**⚖️ Súmulas do TST — nova categoria de conteúdo (2026-05-23):**
+- ✅ 463 Súmulas do TST importadas a partir do PDF oficial (`Súmulas TST.pdf`) — 117 CRIADA + 185 ALTERADA + 161 CANCELADA
+- ✅ Modelagem: estende `TribunalDecision` com `tribunalCode='TST'`, `decisionType='sumula'`, evitando criar tabela nova (aprende com lição #116). Itens romanos, IRRs, resoluções e histórico ficam em `sourceRawData` JSON
+- ✅ Parser puro em `lib/tst/parser.ts` + extração de hyperlinks via pdfjs-dist em `lib/tst/extract-pdf.ts` — 463 URLs `https://jurisprudencia-backend2.tst.jus.br/rest/documentos/<id>` extraídas 1-a-1 do PDF (zero fallback necessário)
+- ✅ CLI `scripts/import-tst-sumulas.ts` (flags `--dry-run`, `--limit`, `--force`) — idempotente via `fullIdentifier`
+- ✅ UI pública: card "Súmulas do TST" no hub `/base-conhecimento` linka para `/jurisprudencia?tribunal=TST&decisionType=sumula`. JurisprudenciaClient inicia filtros via `useSearchParams`, mostra badge de situação (CRIADA verde, ALTERADA amarelo, CANCELADA vermelho), toggle "Mostrar súmulas inativas" (default OFF), e filtros internos `situacao:*`, `tst`, `clt` ficam escondidos dos chips visíveis
+- ✅ Detail page renderiza itens romanos com `<s>→<del>`, banner amarelo para canceladas/revistas, timeline de resoluções e bloco de IRRs (quando aplicável). Botão linka direto para "Inteiro teor no site do TST"
+- ✅ Backend: filtro `excludeInactive` em `JurisprudenciaFilters` aplica `themes NOT ILIKE %situacao:CANCELADA%` na consulta. Campo `sourceRawData` adicionado ao SELECT do `fetchUnifiedById` para o detail page consumir o JSON estruturado
+- ✅ Busca semântica/RAG: `tribunalKeywords` em `/api/documents/query` ganhou termos TST/CLT/trabalho/terceirização/repactuação/responsabilidade subsidiária; system prompt instrui a LLM a alertar quando citar súmulas com `situacao:CANCELADA`/`REVISTA`
+- ✅ Cores TST adicionadas em todos os 10 pontos hardcoded de tribunais (newsletter, novidades home/área restrita, admin highlights, admin tribunal-decisions/format, JurisprudenciaClient público e área restrita, etc.) — evita o tipo de grep perdido da Onda 4.5.6
+- ✅ Enum de tribunais TST adicionado em `app/api/jurisprudencia/route.ts`, `app/api/jurisprudencia/query/route.ts`
+- ✅ Sitemap: agora inclui hub, `/jurisprudencia` e cada decisão individual (TST + TCE + STJ) — `changeFrequency=yearly` para súmulas (canônicas)
+- ✅ Tests: 22/22 em `lib/tst/__tests__/parser.test.ts` (cobre Súmulas 1, 6, 8, 331, 437 — situações, IRR, itens com `<s>`, cross-refs CLT)
+- 📖 Ver `lib/tst/`, `scripts/import-tst-sumulas.ts`, `app/(acervo)/jurisprudencia/[id]/page.tsx`
+
 **🎓 T7 — Certificados Digitais Premium (2026-05-07, commit `4feed2d`):**
 - ✅ Schema com auditoria: `issuedById`, `revokedAt`, `revokeReason`, `viewCount`
 - ✅ 6 APIs admin: emissão manual, revogação, restauração, listagem

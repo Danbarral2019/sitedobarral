@@ -29,6 +29,7 @@ const TRIBUNAL_COLORS: Record<string, string> = {
   'TCE-PE': 'bg-teal-100 text-teal-800',
   TCU: 'bg-red-100 text-red-800',
   'DATAJUD-STJ': 'bg-red-100 text-red-800',
+  TST: 'bg-rose-100 text-rose-800',
 };
 
 export function tribunalColor(tribunal: string): string {

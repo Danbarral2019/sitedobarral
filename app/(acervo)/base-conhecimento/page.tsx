@@ -1,10 +1,11 @@
 import Link from 'next/link';
-import { Scale, FileText, BookOpen, List, Book, Landmark, Sparkles, Library } from 'lucide-react';
+import { Scale, FileText, BookOpen, List, Book, Landmark, Sparkles, Library, Briefcase } from 'lucide-react';
 import {
   getCachedDocumentCountByCategory,
   getCachedTribunalDecisionCount,
   getCachedLeiArticleCount,
   getCachedGlossaryTermCount,
+  getCachedTstSumulaCount,
 } from '@/lib/cached-queries';
 
 // 60s: contadores mudam quando admin classifica/sync roda — atualiza rápido
@@ -81,17 +82,24 @@ export default async function BaseConhecimentoPage() {
   let tribunalDecisionCount = 0;
   let leiArticleCount = 195;
   let glossaryCount = 95;
+  let tstSumulaCount = 0;
 
   try {
-    [categoryCounts, tribunalDecisionCount, leiArticleCount, glossaryCount] = await Promise.all([
-      getCachedDocumentCountByCategory(),
-      getCachedTribunalDecisionCount(),
-      getCachedLeiArticleCount(),
-      getCachedGlossaryTermCount(),
-    ]);
+    [categoryCounts, tribunalDecisionCount, leiArticleCount, glossaryCount, tstSumulaCount] =
+      await Promise.all([
+        getCachedDocumentCountByCategory(),
+        getCachedTribunalDecisionCount(),
+        getCachedLeiArticleCount(),
+        getCachedGlossaryTermCount(),
+        getCachedTstSumulaCount(),
+      ]);
   } catch {
     // DB indisponível (ex.: build CI) — usa defaults
   }
+
+  // `tribunalDecisionCount` inclui TST. Subtrai para evitar dupla-contagem
+  // (TST tem card próprio abaixo).
+  const tribunalOthersCount = Math.max(0, tribunalDecisionCount - tstSumulaCount);
 
   const cardsWithCounts = CATEGORIES.map((cat) => {
     if (cat.key === 'lei-14133') {
@@ -151,7 +159,7 @@ export default async function BaseConhecimentoPage() {
             );
           })}
 
-          {tribunalDecisionCount > 0 && (
+          {tribunalOthersCount > 0 && (
             <Link
               href="/jurisprudencia"
               className="bg-white border border-gray-200 rounded-2xl p-6 hover:border-brand-400 hover:shadow-md transition-all group focus-visible:ring-2 focus-visible:ring-brand-500 focus-visible:ring-offset-2"
@@ -166,8 +174,29 @@ export default async function BaseConhecimentoPage() {
                 Decisões selecionadas dos Tribunais de Contas estaduais e do CNJ.
               </p>
               <p className="text-xs font-semibold text-brand-700">
-                {tribunalDecisionCount.toLocaleString('pt-BR')}{' '}
-                {tribunalDecisionCount === 1 ? 'decisão' : 'decisões'}
+                {tribunalOthersCount.toLocaleString('pt-BR')}{' '}
+                {tribunalOthersCount === 1 ? 'decisão' : 'decisões'}
+              </p>
+            </Link>
+          )}
+
+          {tstSumulaCount > 0 && (
+            <Link
+              href="/jurisprudencia?tribunal=TST&decisionType=sumula"
+              className="bg-white border border-gray-200 rounded-2xl p-6 hover:border-brand-400 hover:shadow-md transition-all group focus-visible:ring-2 focus-visible:ring-brand-500 focus-visible:ring-offset-2"
+            >
+              <div className="w-12 h-12 bg-brand-100 rounded-xl flex items-center justify-center mb-4 group-hover:bg-brand-200 transition-colors">
+                <Briefcase className="w-6 h-6 text-brand-700" />
+              </div>
+              <h2 className="text-lg font-bold text-gray-900 mb-1 group-hover:text-brand-700 transition-colors">
+                Súmulas do TST
+              </h2>
+              <p className="text-sm text-gray-600 mb-2 leading-relaxed">
+                Jurisprudência consolidada do Tribunal Superior do Trabalho — relevante em terceirização, fiscalização de contratos e repactuação.
+              </p>
+              <p className="text-xs font-semibold text-brand-700">
+                {tstSumulaCount.toLocaleString('pt-BR')}{' '}
+                {tstSumulaCount === 1 ? 'súmula' : 'súmulas'}
               </p>
             </Link>
           )}

@@ -104,6 +104,7 @@ const tribunalColors: Record<string, string> = {
   'STJ': '#b91c1c',
   'STF': '#991b1b',
   'CNJ': '#4f46e5',
+  'TST': '#be185d',
 };
 
 // ===========================

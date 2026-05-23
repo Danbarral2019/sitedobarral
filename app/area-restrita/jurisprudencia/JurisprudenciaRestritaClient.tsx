@@ -81,6 +81,7 @@ const TRIBUNAIS = [
   { code: 'TCE-RS', label: 'TCE-RS — Tribunal de Contas do RS' },
   { code: 'STJ', label: 'STJ — Superior Tribunal de Justiça' },
   { code: 'STF', label: 'STF — Supremo Tribunal Federal' },
+  { code: 'TST', label: 'TST — Tribunal Superior do Trabalho (Súmulas)' },
 ];
 
 const TIPOS_DECISAO = [

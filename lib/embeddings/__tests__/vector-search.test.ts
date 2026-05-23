@@ -62,6 +62,43 @@ describe('semanticSearch — retrocompatibilidade', () => {
   });
 });
 
+describe('semanticSearch — excludeInactiveSumulas (filtro de súmulas TST)', () => {
+  it('default (true) + includeTribunalDecisions: filtra CANCELADA/REVISTA no ramo TribunalDecisionChunk', async () => {
+    mockQueryRawUnsafe.mockResolvedValue([]);
+    await semanticSearch('intervalo intrajornada', {
+      useCache: false,
+      includeTribunalDecisions: true,
+    });
+
+    const sql = getLastSql();
+    expect(sql).toMatch(/FROM "TribunalDecisionChunk"/);
+    expect(sql).toMatch(/NOT \(td\."decisionType" = 'sumula' AND \(td\.themes ILIKE '%situacao:CANCELADA%' OR td\.themes ILIKE '%situacao:REVISTA%'\)\)/);
+  });
+
+  it('excludeInactiveSumulas=false (pergunta histórica): NÃO aplica o filtro', async () => {
+    mockQueryRawUnsafe.mockResolvedValue([]);
+    await semanticSearch('qual o entendimento antes da Reforma Trabalhista?', {
+      useCache: false,
+      includeTribunalDecisions: true,
+      excludeInactiveSumulas: false,
+    });
+
+    const sql = getLastSql();
+    expect(sql).toMatch(/FROM "TribunalDecisionChunk"/);
+    expect(sql).not.toMatch(/situacao:CANCELADA/);
+    expect(sql).not.toMatch(/situacao:REVISTA/);
+  });
+
+  it('sem TribunalDecisions: a flag não tem efeito (sem ramo C)', async () => {
+    mockQueryRawUnsafe.mockResolvedValue([]);
+    await semanticSearch('busca normal', { useCache: false });
+
+    const sql = getLastSql();
+    expect(sql).not.toMatch(/FROM "TribunalDecisionChunk"/);
+    expect(sql).not.toMatch(/situacao:CANCELADA/);
+  });
+});
+
 describe('semanticSearch — categoryIn', () => {
   it('gera cláusula IN com valores da lista', async () => {
     mockQueryRawUnsafe.mockResolvedValue([]);

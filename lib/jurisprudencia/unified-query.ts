@@ -34,6 +34,13 @@ export interface UnifiedDecision {
   processNumber: string | null;
   fullIdentifier: string;
   sourceType: 'tribunal-decision' | 'document-tcu';
+  /**
+   * JSON cru com estrutura específica da fonte. Para Súmulas TST contém
+   * { situacao, itens, irrs, resolucoes, ... } — usado pelo detail page para
+   * renderizar itens romanos com `<s>`, timeline e badge de situação.
+   * NULL para TCU.
+   */
+  sourceRawData: string | null;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -90,6 +97,12 @@ export interface JurisprudenciaFilters {
   dataFrom?: Date;
   dataTo?: Date;
   q?: string;
+  /**
+   * Quando true, exclui resultados cujo campo `themes` contenha
+   * `situacao:CANCELADA` ou `situacao:REVISTA`. Usado para esconder súmulas
+   * inativas do TST por padrão. Aplica-se apenas a `TribunalDecision`.
+   */
+  excludeInactive?: boolean;
 }
 
 export function shouldIncludeTribunalDecisionBranch(
@@ -144,6 +157,7 @@ export function mapDocumentTcuToDecision(doc: DocumentTcuRaw): UnifiedDecision {
     processNumber: null,
     fullIdentifier: `TCU Acórdão ${decisionNumber}`,
     sourceType: 'document-tcu',
+    sourceRawData: null,
     createdAt: doc.uploadedAt,
     updatedAt: doc.updatedAt,
   };
@@ -206,6 +220,11 @@ export function buildTribunalDecisionWhere(
     const term = '%' + filters.q + '%';
     fragments.push(
       Prisma.sql`(title ILIKE ${term} OR ementa ILIKE ${term})`
+    );
+  }
+  if (filters.excludeInactive) {
+    fragments.push(
+      Prisma.sql`themes NOT ILIKE ${'%situacao:CANCELADA%'} AND themes NOT ILIKE ${'%situacao:REVISTA%'}`
     );
   }
 
@@ -315,6 +334,7 @@ function tribunalDecisionSelect(where: Prisma.Sql): Prisma.Sql {
       "processNumber",
       "fullIdentifier",
       'tribunal-decision' AS "sourceType",
+      "sourceRawData",
       "createdAt",
       "updatedAt"
     FROM "TribunalDecision"
@@ -358,6 +378,7 @@ function documentTcuSelect(where: Prisma.Sql): Prisma.Sql {
       NULL::text AS "processNumber",
       'TCU Acórdão ' || COALESCE("tcuNumeroAcordao", title) AS "fullIdentifier",
       'document-tcu' AS "sourceType",
+      NULL::text AS "sourceRawData",
       "uploadedAt" AS "createdAt",
       "updatedAt"
     FROM "Document"
