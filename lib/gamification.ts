@@ -1,4 +1,5 @@
 import { prisma } from './prisma';
+import { apiLogger } from './logger';
 
 // ═══════════════════════════════════════════════════════
 // XP Values
@@ -136,7 +137,15 @@ export async function awardBadge(
             url: '/area-restrita/meu-progresso',
           })
         )
-        .catch(() => {});
+        .catch((err) => {
+          // Push é best-effort (aluno pode não ter inscrição válida). Logamos pra
+          // detectar falhas sistêmicas (push-notifications module quebrado, fila
+          // travada) sem bloquear awarding do badge.
+          apiLogger.warn(
+            { userId, badgeType: type, badgeLabel, err },
+            'awardBadge: push notification failed (badge still awarded in DB)'
+          );
+        });
     }
 
     return true; // New badge awarded

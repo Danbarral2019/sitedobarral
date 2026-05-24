@@ -10,6 +10,7 @@
 import { semanticSearch, multiQuerySearch, type SearchResult, type SearchOptions } from './vector-search';
 import { searchDocuments, type DocumentFTSOptions } from '../search/full-text-search';
 import { rerankResults } from './reranker';
+import { apiLogger } from '../logger';
 
 // ===========================
 // Types
@@ -113,7 +114,18 @@ export async function hybridSearch(
       ? multiQuerySearch(expandedQueries, vectorOptions)
           .then(results => ({ results, query, totalFound: results.length, latency: 0, cached: false }))
       : semanticSearch(query, vectorOptions),
-    skipFts ? Promise.resolve([]) : searchDocuments(query, ftsOptions).catch(() => []),
+    skipFts
+      ? Promise.resolve([])
+      : searchDocuments(query, ftsOptions).catch((err) => {
+          // FTS pode falhar por timeout, índice GIN corrompido, ou vacuum atrasado.
+          // Caímos para semantic-only (degradação graciosa) mas logamos para não
+          // mascarar problemas reais de Postgres.
+          apiLogger.warn(
+            { err, queryPreview: query.slice(0, 200) },
+            'hybrid-search: FTS failed, falling back to semantic-only'
+          );
+          return [];
+        }),
   ]);
 
   // Mapear rankings vetoriais (documentId → rank)

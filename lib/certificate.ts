@@ -193,8 +193,21 @@ export async function issueCertificate(
   );
   trackServerEvent('certificate_issued', { courseId });
 
-  sendCertificateEmailAsync(user.email, user.name, course.title, certificateNumber).catch(() => {});
-  sendPushToUserAsync(userId, course.title).catch(() => {});
+  // Funções internas já fazem try/catch + apiLogger.error. O .catch aqui só captura
+  // rejeições inesperadas (ex.: erro síncrono antes do try interno) que escapariam
+  // como UnhandledPromiseRejection. Logamos com contexto para não engolir silenciosamente.
+  sendCertificateEmailAsync(user.email, user.name, course.title, certificateNumber).catch((err) => {
+    apiLogger.error(
+      { certificateId: certificate.id, userId, courseId, err },
+      'sendCertificateEmailAsync rejected unexpectedly'
+    );
+  });
+  sendPushToUserAsync(userId, course.title).catch((err) => {
+    apiLogger.error(
+      { certificateId: certificate.id, userId, courseId, err },
+      'sendPushToUserAsync rejected unexpectedly'
+    );
+  });
 
   return { certificate, alreadyExists: false };
 }
