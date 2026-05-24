@@ -274,6 +274,57 @@ Exemplo de resposta: ["variação 1", "variação 2"]`;
       /\bgratifica[çc][ãa]o\s+natalina\b/i,
       /\bfgts\b/i,
 
+      // ── Rodada 2 (expansão pós-validação 2026-05-24, Q2 falhou) ──
+      // Estas perguntas trabalhistas não usavam termos-gatilho institucionais
+      // (TST/CLT) nem temas específicos da lista anterior. Adicionamos
+      // radicais conservadores que só casam contextos inequivocamente
+      // trabalhistas — evitando falsos positivos em queries Lei 14.133/AGU.
+
+      // Relações do contrato de trabalho
+      /\bempregad(?:o|or|a|ora)\b/i,              // empregado/empregador
+      /\bempregat[íi]cio\b/i,
+      /\bcontrato\s+de\s+trabalho\b/i,
+      /\brela[çc][ãa]o\s+de\s+emprego\b/i,
+      /\bcarteira\s+(?:de\s+trabalho|profissional|assinada)\b/i,
+      /\bctps\b/i,                                // CTPS (Carteira de Trabalho)
+
+      // Salário / remuneração / descontos
+      /\bdesconto(?:s)?\s+(?:no|do|em)\s+sal[áa]rio\b/i,
+      /\bdano(?:s)?\s+causad[oa]s?\s+(?:pelo\s+)?empregad/i,
+      /\bsal[áa]ri[oa](?:l|s)?\b(?=.*(?:trabalh|empregad|patron|sindical|categoria|m[íi]nimo|piso))/i,
+      /\bremunera[çc][ãa]o\s+(?:do\s+empregado|do\s+trabalhador)\b/i,
+      /\bpiso\s+salarial\b/i,
+      /\bsal[áa]rio\s+m[íi]nimo\b/i,
+      /\bsal[áa]rio[\s-]+(?:fam[íi]lia|maternidade)\b/i,
+
+      // Rescisão e demissão
+      /\brescis[ãa]o(?:\s+(?:contratual|indireta|do\s+contrato))?\b/i,
+      /\bjusta\s+causa\b/i,
+      /\bdemiss[ãa]o\b/i,
+      /\bdispensa\s+(?:imotivada|sem\s+justa\s+causa|por\s+justa\s+causa|discrimin)/i,
+      /\bjusti[çc]a\s+do\s+trabalho\b/i,
+      /\breclama[çc][ãa]o\s+trabalhista\b/i,
+      /\binqu[ée]rito\s+judicial\b/i,
+
+      // Saúde, segurança e benefícios
+      /\bacidente\s+(?:de\s+|do\s+)?trabalho\b/i,
+      /\bdoen[çc]a\s+(?:ocupacional|profissional|do\s+trabalho)\b/i,
+      /\baux[íi]lio[\s-]+doen[çc]a\b/i,
+      /\baposentadoria\s+por\s+invalidez\b/i,
+      /\bvale[\s-]?(?:transporte|refei[çc][ãa]o|alimenta[çc][ãa]o)\b/i,
+      /\bsobreaviso\b/i,
+      /\bbanco\s+de\s+horas\b/i,
+      /\bcompensa[çc][ãa]o\s+de\s+jornada\b/i,
+      /\bperiodo\s+noturno\b/i,
+
+      // Categorias e organização sindical
+      /\bsindicato\b/i,
+      /\bsindical\b/i,
+      /\bcategoria\s+profissional\b/i,
+      /\bbanc[áa]ri[ao]s?\b/i,
+      /\bferrovi[áa]ri[ao]s?\b/i,
+      /\bmotorista(?:s)?\s+(?:profissional|de\s+caminh|de\s+carga)/i,
+
       // ── OJs do TST (Orientações Jurisprudenciais) ──
       /\borienta[çc](?:[ãa]o|[õo]es)\s+jurisprudencia(?:l|is)\b/i,
       /\boj[-\s]?sbdi[-\s]?[i12]+t?\b/i,  // OJ-SBDI-I, OJ-SBDI-II, OJ-SBDI-1T
