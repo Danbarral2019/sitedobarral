@@ -27,6 +27,8 @@ export interface HybridSearchOptions {
   includeTribunalDecisions?: boolean; // Incluir decisoes de TCEs estaduais (default: false)
   /** Quando true (default), exclui Súmulas TST com situação CANCELADA/REVISTA do contexto. */
   excludeInactiveSumulas?: boolean;
+  /** Boost por tribunalCode aplicado dentro do ramo TribunalDecisionChunk. Ver vector-search.SearchOptions.tribunalBoost. */
+  tribunalBoost?: { code: string; factor: number };
   rerank?: boolean; // Aplicar reranking nos resultados (default: false)
 }
 
@@ -63,6 +65,7 @@ export async function hybridSearch(
     useCache = true,
     includeTribunalDecisions = false,
     excludeInactiveSumulas = true,
+    tribunalBoost,
     rerank = false,
   } = options;
 
@@ -75,6 +78,7 @@ export async function hybridSearch(
     includeChunkContent: true,
     includeTribunalDecisions,
     excludeInactiveSumulas,
+    tribunalBoost,
   };
 
   const ftsOptions: DocumentFTSOptions = {

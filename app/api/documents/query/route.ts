@@ -343,10 +343,106 @@ Exemplo de resposta: ["variação 1", "variação 2"]`;
       /\bacordo\s+coletivo\b/i,
     ];
     const queryLowerForTribunal = query.toLowerCase();
-    const includeTribunalDecisions = tribunalPatterns.some((re) => re.test(query));
+    const tribunalMatchCount = tribunalPatterns.reduce(
+      (n, re) => (re.test(query) ? n + 1 : n),
+      0,
+    );
+    const includeTribunalDecisions = tribunalMatchCount > 0;
 
     if (includeTribunalDecisions) {
-      apiLogger.info('Tribunal decisions included (matched tribunalPatterns)');
+      apiLogger.info({ tribunalMatchCount }, 'Tribunal decisions included (matched tribunalPatterns)');
+    }
+
+    // Strong-labor: ativa boost de similarity no ramo TST (factor 1.20).
+    // Critério é satisfeito quando QUALQUER um destes ocorre:
+    //   (a) match em um padrão institucional forte (TST/CLT/Justiça do Trabalho/
+    //       Reforma Trabalhista/Reclamação Trabalhista) — esses sinais por si só
+    //       fixam o domínio sem ambiguidade;
+    //   (b) match em um padrão "tier-2 forte" (ex.: rescisão indireta, justa
+    //       causa, FGTS, intervalo intrajornada, dissídio coletivo, verbas
+    //       trabalhistas) — termos cuja presença isolada não tem leitura em
+    //       Lei 14.133/AGU;
+    //   (c) match em 2+ padrões temáticos quaisquer da lista geral — quando
+    //       vários elementos trabalhistas convivem na mesma query, a chance
+    //       dela ser genuinamente trabalhista (e não Lei 14.133 tangenciando)
+    //       sobe muito.
+    //
+    // Diagnóstico que motivou (2026-05-24, sessão anterior):
+    // - Q3 "rescisão indireta por descumprimento de norma coletiva" — TST não
+    //   entrou no top-10 mesmo com `includeTribunalDecisions=true`; competidores
+    //   Lei 14.133 ganharam ranking por similaridade pura. "Rescisão indireta"
+    //   isolado é tier-2 forte (não há rescisão indireta em Lei 14.133).
+    // - Q9 (mista) — IA citou Súmula 331 "de cabeça" porque o documento canônico
+    //   não passou no contexto formal.
+    //
+    // Calibração: factor 1.20 inverte derrotas por margem ≤ 18%, sem derrubar
+    // documentos Lei/Decreto genuinamente mais relevantes. Acima de 1.30 começa
+    // a haver over-boost (Súmula tangencial vence acórdão diretamente sobre o
+    // tema). Conservador, controlado, e fácil de reverter via env futura.
+    const strongInstitutionalLaborPatterns: RegExp[] = [
+      /\btst\b/i,
+      /\btribunal\s+superior\s+do\s+trabalho\b/i,
+      /\bjustiça\s+do\s+trabalho\b/i,
+      /\bclt\b/i,
+      /\bconsolida[çc][ãa]o\s+das\s+leis\s+do\s+trabalho\b/i,
+      /\breforma\s+trabalhista\b/i,
+      /\bjurisprud[êe]ncia\s+trabalhista\b/i,
+      /\breclama[çc][ãa]o\s+trabalhista\b/i,
+    ];
+    // Tier-2 forte: padrões cuja presença isolada já fixa domínio trabalhista
+    // (não têm leitura em Lei 14.133/AGU/TCU). Ativam strong-labor sozinhos.
+    // Mantemos enxuto e auditável — adicionar com critério, não automaticamente.
+    const tier2StrongLaborPatterns: RegExp[] = [
+      /\brescis[ãa]o\s+indireta\b/i,
+      /\bjusta\s+causa\b/i,
+      /\bdispensa\s+(?:imotivada|sem\s+justa\s+causa|por\s+justa\s+causa|discrimin)/i,
+      /\baviso[\s-]+pr[ée]vio\b/i,
+      /\bfgts\b/i,
+      /\b13[ºo]?\s+sal[áa]rio\b/i,
+      /\bgratifica[çc][ãa]o\s+natalina\b/i,
+      /\bintervalo\s+intrajornada\b/i,
+      /\bjornada\s+de\s+trabalho\b/i,
+      /\bhoras?\s+extras?\b/i,
+      /\badicional\s+(?:de\s+)?(?:periculosidade|insalubridade|noturno)\b/i,
+      /\bpericulosidade\b/i,
+      /\binsalubridade\b/i,
+      /\bequipara[çc][ãa]o\s+salarial\b/i,
+      /\bv[íi]nculo\s+(?:de\s+emprego|empregat[íi]cio)\b/i,
+      /\bcarteira\s+(?:de\s+trabalho|profissional|assinada)\b/i,
+      /\bctps\b/i,
+      /\bdiss[íi]dio(?:s)?\s+coletivo(?:s)?\b/i,
+      /\bnorma\s+coletiva\b/i,
+      /\bconven[çc][ãa]o\s+coletiva\b/i,
+      /\bacordo\s+coletivo\b/i,
+      /\bnegocia[çc][ãa]o\s+coletiva\b/i,
+      /\bcl[áa]usula\s+normativa\b/i,
+      /\bprecedente(?:s)?\s+normativo(?:s)?\b/i,
+      /\borienta[çc](?:[ãa]o|[õo]es)\s+jurisprudencia(?:l|is)\b/i,
+      /\bestabilidade\s+(?:provis[óo]ria|gestante|cipeiro|acidentado)\b/i,
+      /\bf[ée]rias\s+(?:proporcionais|vencidas|indenizadas)\b/i,
+      /\bverbas?\s+trabalhista/i,
+      /\bacidente\s+(?:de\s+|do\s+)?trabalho\b/i,
+      /\bdoen[çc]a\s+(?:ocupacional|profissional|do\s+trabalho)\b/i,
+      /\bsobreaviso\b/i,
+      /\bbanco\s+de\s+horas\b/i,
+      /\bempresa\s+interposta\b/i,
+      /\bequipara[çc][ãa]o\s+salarial\b/i,
+    ];
+    const hasInstitutionalLaborSignal = strongInstitutionalLaborPatterns.some((re) => re.test(query));
+    const hasTier2LaborSignal = tier2StrongLaborPatterns.some((re) => re.test(query));
+    const isStronglyLabor =
+      hasInstitutionalLaborSignal || hasTier2LaborSignal || tribunalMatchCount >= 2;
+    const tribunalBoost = isStronglyLabor ? { code: 'TST', factor: 1.2 } : undefined;
+    if (tribunalBoost) {
+      apiLogger.info(
+        {
+          hasInstitutionalLaborSignal,
+          hasTier2LaborSignal,
+          tribunalMatchCount,
+          factor: tribunalBoost.factor,
+        },
+        'Strong-labor query — aplicando boost de similarity no ramo TST',
+      );
     }
 
     // Súmulas TST canceladas/revistas: por padrão ficam fora do contexto IA
@@ -384,6 +480,7 @@ Exemplo de resposta: ["variação 1", "variação 2"]`;
       useCache,
       includeTribunalDecisions,
       excludeInactiveSumulas,
+      tribunalBoost,
       rerank: false,
     });
 

@@ -58,6 +58,19 @@ export interface SearchOptions {
    * TCE/STJ nao sao filtrados (nao tem o conceito de "situacao" nessa coluna).
    */
   excludeInactiveSumulas?: boolean;
+  /**
+   * Multiplica a similarity de TribunalDecisionChunk quando `td."tribunalCode" = code`,
+   * fazendo documentos do tribunal alvo (tipicamente TST) ganharem peso no ranking
+   * final. Aplicado dentro do CTE `decision_scores`, antes do `WHERE similarity >=
+   * threshold` e do `ORDER BY similarity DESC LIMIT`, de modo que o boost reflete
+   * em todos os estágios subsequentes (incluindo no RRF do hybrid-search).
+   *
+   * Caller decide se ativar (ex.: query é inequivocamente trabalhista). Factor 1.0
+   * é no-op; ~1.20 reverte derrotas por margem pequena (cosine TST 0.72 perdendo
+   * pra Lei 14.133 0.85 → boostado vira 0.864, vence). Acima de 1.30 corre risco
+   * de over-boost.
+   */
+  tribunalBoost?: { code: string; factor: number };
   extraWhere?: {                      // Fragmentos WHERE extras compostos pelo chamador
     document?: Prisma.Sql;
     tribunalDecision?: Prisma.Sql;
@@ -122,7 +135,10 @@ export async function semanticSearch(
     ? `${ewDocSql}|${ewDocVals}|${ewTdSql}|${ewTdVals}`
     : '';
 
-  const cacheKey = `vector-search:${hashQuery(query)}:${courseId || 'all'}:${category || 'all'}:${limit}:${threshold}:${(options.excludeCategories || []).join(',')}:td=${options.includeTribunalDecisions ? '1' : '0'}:cin=${(options.categoryIn || []).join(',')}:sd=${options.skipDocumentBranch ? '1' : '0'}:sl=${options.skipLegislativeActBranch ? '1' : '0'}:tc=${options.tribunalCodeFilter || ''}:eis=${options.excludeInactiveSumulas === false ? '0' : '1'}:ew=${ewKey}`;
+  const tbKey = options.tribunalBoost
+    ? `${options.tribunalBoost.code}@${options.tribunalBoost.factor}`
+    : '';
+  const cacheKey = `vector-search:${hashQuery(query)}:${courseId || 'all'}:${category || 'all'}:${limit}:${threshold}:${(options.excludeCategories || []).join(',')}:td=${options.includeTribunalDecisions ? '1' : '0'}:cin=${(options.categoryIn || []).join(',')}:sd=${options.skipDocumentBranch ? '1' : '0'}:sl=${options.skipLegislativeActBranch ? '1' : '0'}:tc=${options.tribunalCodeFilter || ''}:eis=${options.excludeInactiveSumulas === false ? '0' : '1'}:tb=${tbKey}:ew=${ewKey}`;
 
   // Tenta usar cache
   if (useCache) {
@@ -239,6 +255,7 @@ async function executeVectorSearch(
     skipDocumentBranch = false,
     skipLegislativeActBranch = false,
     tribunalCodeFilter,
+    tribunalBoost,
     extraWhere,
   } = options;
 
@@ -410,6 +427,18 @@ async function executeVectorSearch(
     // RRF tem chance de selecionar a mais relevante.
     params.push(limit * 4);
 
+    // Boost de tribunal (opcional): quando caller marca a query como
+    // fortemente trabalhista, multiplicamos a similarity dos documentos do
+    // tribunalCode alvo. Análogo ao boost de hierarquia em act_scores.
+    let similarityExpr = `1 - (tc.embedding <=> '${embeddingStr}'::vector)`;
+    if (tribunalBoost) {
+      const boostCodeIdx = nextParam();
+      params.push(tribunalBoost.code);
+      const boostFactorIdx = nextParam();
+      params.push(tribunalBoost.factor);
+      similarityExpr = `(1 - (tc.embedding <=> '${embeddingStr}'::vector)) * CASE WHEN td."tribunalCode" = $${boostCodeIdx} THEN $${boostFactorIdx} ELSE 1.00 END`;
+    }
+
     ctes.push(`decision_scores AS (
       SELECT
         td.id as document_id,
@@ -417,7 +446,7 @@ async function executeVectorSearch(
         td."decisionType" as category,
         tc.content as chunk_content,
         tc."chunkIndex" as chunk_index,
-        1 - (tc.embedding <=> '${embeddingStr}'::vector) as similarity,
+        ${similarityExpr} as similarity,
         td.url,
         NULL as course_id,
         true as is_common,

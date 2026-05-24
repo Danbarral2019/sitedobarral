@@ -178,6 +178,52 @@ describe('semanticSearch — tribunalCodeFilter', () => {
   });
 });
 
+describe('semanticSearch — tribunalBoost', () => {
+  it('sem tribunalBoost: SQL do decision_scores não tem multiplicador CASE', async () => {
+    mockQueryRawUnsafe.mockResolvedValue([]);
+    await semanticSearch('intervalo intrajornada', {
+      useCache: false,
+      includeTribunalDecisions: true,
+    });
+
+    const sql = getLastSql();
+    expect(sql).toMatch(/decision_scores AS/);
+    // Sem boost, similarity = 1 - cosine (sem multiplicação por CASE)
+    expect(sql).not.toMatch(/td\."tribunalCode" = \$\d+ THEN/);
+  });
+
+  it('com tribunalBoost: aplica CASE WHEN td."tribunalCode" = $code THEN $factor', async () => {
+    mockQueryRawUnsafe.mockResolvedValue([]);
+    await semanticSearch('rescisão indireta por descumprimento de norma coletiva', {
+      useCache: false,
+      includeTribunalDecisions: true,
+      tribunalBoost: { code: 'TST', factor: 1.2 },
+    });
+
+    const sql = getLastSql();
+    const params = mockQueryRawUnsafe.mock.calls.at(-1)!.slice(1);
+    expect(sql).toMatch(/decision_scores AS/);
+    expect(sql).toMatch(/CASE WHEN td\."tribunalCode" = \$\d+ THEN \$\d+ ELSE 1/);
+    expect(params).toContain('TST');
+    expect(params).toContain(1.2);
+  });
+
+  it('tribunalBoost sem includeTribunalDecisions: SQL não tem o CASE (ramo não existe)', async () => {
+    mockQueryRawUnsafe.mockResolvedValue([]);
+    await semanticSearch('query qualquer', {
+      useCache: false,
+      tribunalBoost: { code: 'TST', factor: 1.2 },
+    });
+
+    const sql = getLastSql();
+    expect(sql).not.toMatch(/FROM "TribunalDecisionChunk"/);
+    expect(sql).not.toMatch(/td\."tribunalCode" = \$\d+ THEN/);
+    // Garante que o code não vazou para os params
+    const params = mockQueryRawUnsafe.mock.calls.at(-1)!.slice(1);
+    expect(params).not.toContain('TST');
+  });
+});
+
 describe('semanticSearch — extraWhere', () => {
   it('extraWhere.document adiciona fragmento ao WHERE do ramo DocumentChunk', async () => {
     mockQueryRawUnsafe.mockResolvedValue([]);
