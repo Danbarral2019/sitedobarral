@@ -234,6 +234,7 @@ describe('enrichSources', () => {
         decisionNumber: '1234/2024',
         title: 'TD 1',
         ementa: 'ementa td',
+        fullText: null,
         summary: null,
         relator: 'Rel TD',
         orgaoJulgador: 'Pleno',
@@ -274,7 +275,7 @@ describe('enrichSources', () => {
     ]);
     mockTribunalDecisionFindMany.mockResolvedValueOnce([
       { id: 'td-1', tribunalCode: 'STJ', tribunalName: 'STJ', decisionType: 'decisao',
-        decisionNumber: '9/24', title: 'T', ementa: 'e', summary: null, relator: null,
+        decisionNumber: '9/24', title: 'T', ementa: 'e', fullText: null, summary: null, relator: null,
         orgaoJulgador: null, dataJulgamento: null, themes: null, leiArticles: null, url: null },
     ]);
 
@@ -306,6 +307,7 @@ describe('adaptToSourcesPayload — TribunalDecision', () => {
             decisionNumber: '1234/2024',
             title: 'Acórdão TCE-SP',
             ementa: 'Ementa completa',
+            fullText: null,
             summary: null,
             relator: 'Ministro X',
             orgaoJulgador: 'Plenário',

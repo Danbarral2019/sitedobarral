@@ -7,6 +7,7 @@ const {
   mockAdaptToSourcesPayload,
   mockMapFiltersToSemanticOptions,
   mockResolveEmenta,
+  mockResolveFullText,
   mockCountUnifiedApproved,
   mockQueryGeminiText,
   mockSearchHistoryCreate,
@@ -16,6 +17,7 @@ const {
   mockAdaptToSourcesPayload: vi.fn(),
   mockMapFiltersToSemanticOptions: vi.fn(),
   mockResolveEmenta: vi.fn(),
+  mockResolveFullText: vi.fn(),
   mockCountUnifiedApproved: vi.fn(),
   mockQueryGeminiText: vi.fn(),
   mockSearchHistoryCreate: vi.fn(),
@@ -30,6 +32,7 @@ vi.mock('@/lib/jurisprudencia/semantic-adapter', () => ({
   enrichSources: (...args: any[]) => mockEnrichSources(...args),
   adaptToSourcesPayload: (...args: any[]) => mockAdaptToSourcesPayload(...args),
   resolveEmenta: (...args: any[]) => mockResolveEmenta(...args),
+  resolveFullText: (...args: any[]) => mockResolveFullText(...args),
 }));
 
 vi.mock('@/lib/jurisprudencia/unified-query', () => ({
@@ -95,6 +98,7 @@ beforeEach(() => {
   mockAdaptToSourcesPayload.mockReset();
   mockMapFiltersToSemanticOptions.mockReset();
   mockResolveEmenta.mockReset();
+  mockResolveFullText.mockReset();
   mockCountUnifiedApproved.mockReset();
   mockQueryGeminiText.mockReset();
   mockSearchHistoryCreate.mockReset();
@@ -105,6 +109,7 @@ beforeEach(() => {
     includeTribunalDecisions: true,
   });
   mockResolveEmenta.mockReturnValue('ementa mock');
+  mockResolveFullText.mockReturnValue(null);
   mockSearchHistoryCreate.mockResolvedValue({ id: 'sh-mock' });
 });
 
@@ -138,7 +143,7 @@ describe('POST /api/jurisprudencia/query', () => {
         documentId: 'td-1',
         similarity: 0.8,
         chunkContent: 'trecho',
-        source: { kind: 'tribunal-decision', data: { id: 'td-1', tribunalCode: 'TCE-SP', tribunalName: 'TCE-SP', decisionType: 'acordao', decisionNumber: '1/24', title: 't', ementa: 'e', summary: null, relator: null, orgaoJulgador: null, dataJulgamento: null, themes: null, leiArticles: null, url: null } },
+        source: { kind: 'tribunal-decision', data: { id: 'td-1', tribunalCode: 'TCE-SP', tribunalName: 'TCE-SP', decisionType: 'acordao', decisionNumber: '1/24', title: 't', ementa: 'e', summary: null, relator: null, orgaoJulgador: null, dataJulgamento: null, themes: null, leiArticlesArr: [], url: null } },
       },
     ]);
     mockAdaptToSourcesPayload.mockReturnValueOnce([
@@ -215,7 +220,7 @@ describe('POST /api/jurisprudencia/query', () => {
     });
     mockEnrichSources.mockResolvedValueOnce([{
       documentId: 'td-1', similarity: 0.8, chunkContent: 'c',
-      source: { kind: 'tribunal-decision', data: { id: 'td-1', tribunalCode: 'TCE-SP', tribunalName: 'T', decisionType: 'acordao', decisionNumber: '1', title: 't', ementa: 'e', summary: null, relator: null, orgaoJulgador: null, dataJulgamento: null, themes: null, leiArticles: null, url: null } },
+      source: { kind: 'tribunal-decision', data: { id: 'td-1', tribunalCode: 'TCE-SP', tribunalName: 'T', decisionType: 'acordao', decisionNumber: '1', title: 't', ementa: 'e', summary: null, relator: null, orgaoJulgador: null, dataJulgamento: null, themes: null, leiArticlesArr: [], url: null } },
     }]);
     mockAdaptToSourcesPayload.mockReturnValueOnce([{
       id: 'td-1', tribunalCode: 'TCE-SP', tribunalName: 'T', decisionType: 'acordao',
@@ -243,7 +248,7 @@ describe('POST /api/jurisprudencia/query', () => {
         tcuNumeroAcordao: null, tcuEmentaCompleta: null, description: 'resumo', content: null,
         tcuRelator: null, tcuAutorTese: null, tcuOrgaoJulgador: null,
         tcuDataJulgamento: null, tcuLinkPDF: null, summary: null, themes: null,
-        leiArticles: null, url: null, douData: null,
+        leiArticlesArr: [], url: null, douData: null,
         uploadedAt: new Date(), updatedAt: new Date(), entityType: null, enunciadoNumber: null,
       }},
     }]);
@@ -287,7 +292,7 @@ describe('POST /api/jurisprudencia/query', () => {
     });
     mockEnrichSources.mockResolvedValueOnce([{
       documentId: 'td-1', similarity: 0.8, chunkContent: 'c',
-      source: { kind: 'tribunal-decision', data: { id: 'td-1', tribunalCode: 'TCE-SP', tribunalName: 'T', decisionType: 'acordao', decisionNumber: '1', title: 't', ementa: 'e', summary: null, relator: null, orgaoJulgador: null, dataJulgamento: null, themes: null, leiArticles: null, url: null } },
+      source: { kind: 'tribunal-decision', data: { id: 'td-1', tribunalCode: 'TCE-SP', tribunalName: 'T', decisionType: 'acordao', decisionNumber: '1', title: 't', ementa: 'e', summary: null, relator: null, orgaoJulgador: null, dataJulgamento: null, themes: null, leiArticlesArr: [], url: null } },
     }]);
     mockAdaptToSourcesPayload.mockReturnValueOnce([{
       id: 'td-1', tribunalCode: 'TCE-SP', tribunalName: 'T', decisionType: 'acordao',
@@ -312,6 +317,60 @@ describe('POST /api/jurisprudencia/query', () => {
       }),
     );
     expect(body.searchHistoryId).toBe('sh-123');
+  });
+
+  it('inclui janela do inteiro teor no prompt quando resolveFullText retorna >= 500 chars', async () => {
+    const longFullText = 'A '.repeat(1500) + 'PRINCÍPIO DA SEGREGAÇÃO DE FUNÇÕES — exige separação entre quem ordena, executa e fiscaliza despesa pública. ' + 'B '.repeat(1500);
+    const chunkContent = 'PRINCÍPIO DA SEGREGAÇÃO DE FUNÇÕES — exige separação entre quem ordena, executa e fiscaliza despesa pública.';
+
+    mockSemanticSearch.mockResolvedValueOnce({
+      results: [{ documentId: 'td-pe', documentTitle: 't', category: 'acordao', chunkContent, chunkIndex: 0, similarity: 0.9, url: null, courseId: null, isCommon: true, tags: null, leiArticles: null, uploadedAt: '2024-01-01', sourceType: 'tribunal-decision' }],
+      query: 'q', totalFound: 1, latency: 10, cached: false,
+    });
+    mockEnrichSources.mockResolvedValueOnce([{
+      documentId: 'td-pe', similarity: 0.9, chunkContent,
+      source: { kind: 'tribunal-decision', data: { id: 'td-pe', tribunalCode: 'TCE-PE', tribunalName: 'TCE-PE', decisionType: 'acordao', decisionNumber: '698/26', title: 't', ementa: 'ementa curta', fullText: longFullText, summary: null, relator: null, orgaoJulgador: null, dataJulgamento: null, themes: null, leiArticlesArr: [], url: null } },
+    }]);
+    mockAdaptToSourcesPayload.mockReturnValueOnce([{
+      id: 'td-pe', tribunalCode: 'TCE-PE', tribunalName: 'TCE-PE', decisionType: 'acordao',
+      decisionNumber: '698/26', title: 't', relator: null, orgaoJulgador: null,
+      dataJulgamento: null, url: null, sourceType: 'tribunal-decision', similarity: 0.9,
+    }]);
+    mockResolveFullText.mockReturnValueOnce(longFullText);
+    mockQueryGeminiText.mockResolvedValueOnce({ response: 'r', cached: false, latency: 10 });
+
+    await POST(makeReq({ query: 'segregação de funções', filters: { tribunal: 'TCE-PE' } }));
+
+    expect(mockQueryGeminiText).toHaveBeenCalled();
+    const promptArg = mockQueryGeminiText.mock.calls[0][0] as string;
+    expect(promptArg).toContain('Trecho do inteiro teor');
+    expect(promptArg).toContain('PRINCÍPIO DA SEGREGAÇÃO DE FUNÇÕES');
+    expect(promptArg).toContain('Use o trecho do inteiro teor quando disponível');
+  });
+
+  it('usa chunkContent como fallback quando resolveFullText retorna null', async () => {
+    mockSemanticSearch.mockResolvedValueOnce({
+      results: [{ documentId: 'td-sp', documentTitle: 't', category: 'acordao', chunkContent: 'apenas o chunk pequeno', chunkIndex: 0, similarity: 0.8, url: null, courseId: null, isCommon: true, tags: null, leiArticles: null, uploadedAt: '2024-01-01', sourceType: 'tribunal-decision' }],
+      query: 'q', totalFound: 1, latency: 10, cached: false,
+    });
+    mockEnrichSources.mockResolvedValueOnce([{
+      documentId: 'td-sp', similarity: 0.8, chunkContent: 'apenas o chunk pequeno',
+      source: { kind: 'tribunal-decision', data: { id: 'td-sp', tribunalCode: 'TCE-SP', tribunalName: 'TCE-SP', decisionType: 'acordao', decisionNumber: '1/24', title: 't', ementa: 'e', fullText: null, summary: null, relator: null, orgaoJulgador: null, dataJulgamento: null, themes: null, leiArticlesArr: [], url: null } },
+    }]);
+    mockAdaptToSourcesPayload.mockReturnValueOnce([{
+      id: 'td-sp', tribunalCode: 'TCE-SP', tribunalName: 'TCE-SP', decisionType: 'acordao',
+      decisionNumber: '1/24', title: 't', relator: null, orgaoJulgador: null,
+      dataJulgamento: null, url: null, sourceType: 'tribunal-decision', similarity: 0.8,
+    }]);
+    mockResolveFullText.mockReturnValueOnce(null);
+    mockQueryGeminiText.mockResolvedValueOnce({ response: 'r', cached: false, latency: 10 });
+
+    await POST(makeReq({ query: 'pregão', filters: { tribunal: 'TCE-SP' } }));
+
+    const promptArg = mockQueryGeminiText.mock.calls[0][0] as string;
+    expect(promptArg).toContain('Trecho relevante');
+    expect(promptArg).toContain('apenas o chunk pequeno');
+    expect(promptArg).not.toContain('Trecho do inteiro teor');
   });
 
   it('persiste SearchHistory mesmo quando semanticSearch=[] (analytics de falhas)', async () => {
