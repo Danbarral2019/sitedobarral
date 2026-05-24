@@ -221,39 +221,81 @@ Exemplo de resposta: ["variação 1", "variação 2"]`;
       apiLogger.warn({ error: err instanceof Error ? err.message : String(err) }, 'Query expansion failed');
     }
 
-    // 5a. Detect if user explicitly asks for state tribunal decisions (TCEs)
-    // ou para temas que tipicamente despertam Súmulas do TST (terceirização,
-    // CLT, fiscalização de contratos de prestação de serviços, repactuação).
-    const tribunalKeywords = [
-      'tce', 'tribunal de contas estadual', 'tribunais de contas estaduais',
-      'tce-sp', 'tce-mg', 'tce-pr', 'tce-sc', 'tce-rj', 'tce-rs', 'tce-pe',
-      'tribunal estadual', 'decisão estadual', 'decisões estaduais',
-      'jurisprudência estadual', 'corte de contas estadual',
-      // Súmulas TST — sinaliza interesse em jurisprudência trabalhista
-      'tst', 'súmula tst', 'sumula tst', 'súmula do tst', 'sumula do tst',
-      'tribunal superior do trabalho', 'jurisprudência trabalhista',
-      'jurisprudencia trabalhista', 'clt', 'consolidação das leis do trabalho',
-      'terceirização', 'terceirizacao', 'tomador de serviço', 'tomador de servicos',
-      'repactuação', 'repactuacao', 'planilha de custos',
-      'vínculo empregatício', 'vinculo empregaticio',
-      'responsabilidade subsidiária', 'responsabilidade subsidiaria',
-      // OJs do TST (Orientações Jurisprudenciais) — séries SBDI-I/I-T/II/SDC + TP/OE
-      'orientação jurisprudencial', 'orientacao jurisprudencial',
-      'orientações jurisprudenciais', 'orientacoes jurisprudenciais',
-      'oj-sbdi', 'oj sbdi', 'sbdi-1', 'sbdi-i', 'sbdi-2', 'sbdi-ii',
-      'oj-sdc', 'sdc', 'subseção', 'subsecao',
-      'tribunal pleno', 'órgão especial', 'orgao especial',
-      // Precedentes Normativos (PN) — vinculantes do Pleno em dissídios coletivos
-      'precedente normativo', 'precedentes normativos',
-      'dissídio coletivo', 'dissidio coletivo', 'dissídios coletivos',
-      'negociação coletiva', 'negociacao coletiva',
-      'cláusula normativa', 'clausula normativa', 'convenção coletiva',
+    // 5a. Detecta se a pergunta envolve jurisprudência de TCEs ou TST (Súmulas,
+    // OJs, PNs). Usamos regex com RADICAIS em vez de `string.includes(kw)` —
+    // a versão antiga só ativava com palavras-chave literais e perdia
+    // variações comuns ("terceirizar" não casava "terceirização", "tomador"
+    // sozinho não casava "tomador de serviço"). Auditoria via simulação RAG
+    // em 2026-05-24 mostrou que 5 de 7 perguntas trabalhistas não ativavam.
+    //
+    // Regex em ordem temática para legibilidade. Use \b nas extremidades e
+    // alternativas explícitas onde o radical pode ambiguar com outras palavras.
+    const tribunalPatterns: RegExp[] = [
+      // ── Tribunais de Contas Estaduais ──
+      /\btce\b/i,
+      /\btribuna(?:l|is)\s+de\s+contas\s+estadua(?:l|is)\b/i,
+      /\btce-(?:sp|mg|pr|sc|rj|rs|pe)\b/i,
+      /\btribunal\s+estadual\b/i,
+      /\bdecis(?:ão|ões)\s+estadua(?:l|is)\b/i,
+      /\bjurisprud[êe]ncia\s+estadual\b/i,
+      /\bcorte\s+de\s+contas\s+estadual\b/i,
+
+      // ── TST / Justiça do Trabalho — termos-chave de instituição ──
+      /\btst\b/i,
+      /\btribunal\s+superior\s+do\s+trabalho\b/i,
+      /\bjustiça\s+do\s+trabalho\b/i,
+      /\bjurisprud[êe]ncia\s+trabalhista\b/i,
+      /\bclt\b/i,
+      /\bconsolida[çc][ãa]o\s+das\s+leis\s+do\s+trabalho\b/i,
+      /\breforma\s+trabalhista\b/i,
+      /\blei\s+13\.?467(?:\/2017)?\b/i,
+
+      // ── Temas trabalhistas (radicais) ──
+      /\bterceiriz/i,                    // terceirizar, terceirização, terceirizado
+      /\btomador\b/i,                    // tomador de serviço (e variações)
+      /\bempresa\s+interposta\b/i,
+      /\bv[íi]nculo(?:\s+(?:de\s+emprego|empregat[íi]cio))?\b/i,
+      /\bsubsidi[áa]ri/i,                // responsabilidade subsidiária
+      /\bsolidari[ea]/i,                 // responsabilidade solidária
+      /\baviso[\s-]+pr[ée]vio\b/i,
+      /\bequipara[çc][ãa]o\s+salarial\b/i,
+      /\bpericulosidade\b/i,
+      /\binsalubridade\b/i,
+      /\badicional\s+(?:de\s+)?(?:periculosidade|insalubridade|noturno)\b/i,
+      /\bhoras?\s+extras?\b/i,
+      /\bintervalo\s+intrajornada\b/i,
+      /\bjornada\s+de\s+trabalho\b/i,
+      /\brepactua[çc][ãa]o\b/i,
+      /\bplanilha\s+de\s+custos\b/i,
+      /\bverbas?\s+trabalhista/i,
+      /\bf[ée]rias\s+(?:proporcionais|vencidas|indenizadas)\b/i,
+      /\bestabilidade\s+(?:provis[óo]ria|de\s+emprego|gestante|cipeiro|acidentado)\b/i,
+      /\b13[ºo]?\s+sal[áa]rio\b/i,
+      /\bgratifica[çc][ãa]o\s+natalina\b/i,
+      /\bfgts\b/i,
+
+      // ── OJs do TST (Orientações Jurisprudenciais) ──
+      /\borienta[çc](?:[ãa]o|[õo]es)\s+jurisprudencia(?:l|is)\b/i,
+      /\boj[-\s]?sbdi[-\s]?[i12]+t?\b/i,  // OJ-SBDI-I, OJ-SBDI-II, OJ-SBDI-1T
+      /\boj[-\s]?sdc\b/i,
+      /\bsbdi[-\s]?[i12]+\b/i,            // SBDI-I, SBDI-II
+      /\bsubse[çc][ãa]o\b/i,
+      /\btribunal\s+pleno\b/i,
+      /\b[óo]rg[ãa]o\s+especial\b/i,
+
+      // ── Precedentes Normativos (PN) — SDC ──
+      /\bprecedente(?:s)?\s+normativo(?:s)?\b/i,
+      /\bdiss[íi]dio(?:s)?\s+coletivo(?:s)?\b/i,
+      /\bnegocia[çc][ãa]o\s+coletiva\b/i,
+      /\bcl[áa]usula\s+normativa\b/i,
+      /\bconven[çc][ãa]o\s+coletiva\b/i,
+      /\bacordo\s+coletivo\b/i,
     ];
     const queryLowerForTribunal = query.toLowerCase();
-    const includeTribunalDecisions = tribunalKeywords.some(kw => queryLowerForTribunal.includes(kw));
+    const includeTribunalDecisions = tribunalPatterns.some((re) => re.test(query));
 
     if (includeTribunalDecisions) {
-      apiLogger.info('Tribunal decisions included (user explicitly requested)');
+      apiLogger.info('Tribunal decisions included (matched tribunalPatterns)');
     }
 
     // Súmulas TST canceladas/revistas: por padrão ficam fora do contexto IA
@@ -536,7 +578,14 @@ INSTRUÇÕES:
    c) Quando citar precedentes, acórdãos ou informativos baseados na Lei 8.666/1993, SEMPRE alerte: "⚠️ Precedente anterior à Lei 14.133/2021 — verificar aplicabilidade sob o novo regime"
    d) Se houver EVOLUÇÃO normativa entre a lei antiga e a nova, EXPLIQUE a mudança
    e) Ordene as fontes cronologicamente: mais recentes primeiro
-   f) **Documentos canônicos do TST** (Súmulas, Orientações Jurisprudenciais — SBDI-I/I-T/II/SDC/Tribunal Pleno — e Precedentes Normativos da SDC): quando aparecerem no contexto, observe o campo \`themes\`. Se contiver \`situacao:CANCELADA\` ou \`situacao:REVISTA\`, **avise explicitamente** que aquele documento está cancelado/revisto e por isso só serve como referência histórica — não pode ser usado como precedente vigente. Para \`situacao:CRIADA\` ou \`situacao:ALTERADA\`, cite normalmente como jurisprudência consolidada do TST. Refira-se pelo rótulo correto: "Súmula nº N do TST", "OJ-SBDI-I nº N", "OJ-SDC nº N", "Precedente Normativo nº N", etc.
+   f) **Documentos canônicos do TST** (Súmulas, Orientações Jurisprudenciais — SBDI-I/I-T/II/SDC/Tribunal Pleno — e Precedentes Normativos da SDC):
+      - **Quando aparecerem no contexto, CITE TODOS os relevantes para a pergunta.** Não escolha apenas o mais conhecido (ex.: se o contexto traz Precedente Normativo nº 37 + OJ-SBDI-I nº 322 + Súmula nº 190 sobre cláusulas normativas, cite os TRÊS — eles têm pesos jurídicos distintos: PN vincula no dissídio coletivo, OJ uniformiza, Súmula consolida).
+      - **Hierarquia de fontes do TST a explicitar na resposta**:
+        1. *Precedentes Normativos* (vinculantes em dissídios coletivos da SDC) — cite com "Precedente Normativo nº N do TST" e explique que vincula a SDC.
+        2. *Súmulas* (consolidação oficial do entendimento da Corte) — cite com "Súmula nº N do TST".
+        3. *OJs SBDI-I / SBDI-I Transitória / SBDI-II / SDC / TP-OE* (uniformização das subseções especializadas) — cite indicando a série exata.
+      - **Situação canônica** (campo \`themes\` no contexto): se contiver \`situacao:CANCELADA\` ou \`situacao:REVISTA\`, **avise explicitamente** que aquele documento foi cancelado/revisto e só serve como referência histórica — não pode ser usado como precedente vigente. Para \`situacao:CRIADA\` ou \`situacao:ALTERADA\`, cite como jurisprudência consolidada vigente.
+      - **Refira-se pelo rótulo doutrinário correto**: "Súmula nº N do TST", "OJ-SBDI-I nº N", "OJ-SBDI-II nº N", "OJ-SDC nº N", "OJ-SBDI-I Transitória nº N", "OJ-TP/OE nº N", "Precedente Normativo nº N". Esses rótulos aparecem no campo \`title\` do contexto começando com "TST ".
 10. FIDELIDADE ABSOLUTA AO CONTEÚDO DAS FONTES (regra crítica — viola = resposta inválida):
     a) Para enunciados, pareceres e orientações normativas: indique o número/origem e explique o entendimento com suas PRÓPRIAS PALAVRAS, fielmente ao que a fonte literalmente dispõe no contexto fornecido.
     b) **PROIBIDO usar aspas duplas ("...") a menos que o trecho EXATO esteja literalmente presente no contexto fornecido acima.** Aspas implicam citação literal; conteúdo entre aspas que não aparece no contexto é HALUCINAÇÃO e quebra a confiança do aluno em prova/peça processual. Se você quer transmitir uma ideia da fonte mas não tem o trecho literal, parafraseie SEM aspas.

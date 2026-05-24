@@ -401,7 +401,14 @@ async function executeVectorSearch(
     const decThresholdIdx = nextParam();
     params.push(threshold);
     const decLimitIdx = nextParam();
-    params.push(limit * 2);
+    // Aumentado de `limit * 2` para `limit * 4`: o TST tem 1292 documentos
+    // canônicos (Súmulas + OJs + PNs) que competem entre si por similaridade
+    // semântica. Com limit baixo, a Súmula principal sobre o tema
+    // frequentemente perde para Súmulas tangenciais (ex.: query "intervalo
+    // intrajornada" trazia Súm 446 — maquinista — mas não Súm 437 — a
+    // principal). Recuperando 4x mais candidatos no ramo TST, o reranker
+    // RRF tem chance de selecionar a mais relevante.
+    params.push(limit * 4);
 
     ctes.push(`decision_scores AS (
       SELECT
