@@ -40,7 +40,9 @@ export async function fetchTribunalItems(
 
   const rows = await prisma.tribunalDecision.findMany({
     where: {
-      tribunalCode,
+      // Case-insensitive: defesa em profundidade contra split de case histórico
+      // no tribunalCode (decisões legadas minúsculas vs canônico maiúsculo).
+      tribunalCode: { equals: tribunalCode, mode: 'insensitive' },
       approvalStatus: { in: APPROVED_STATUSES },
       createdAt: { gte: since },
       relevanceScore: { gte: minRelevanceScore },

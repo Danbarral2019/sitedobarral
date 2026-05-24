@@ -111,10 +111,20 @@ describe('fetchTribunalItems', () => {
     await fetchTribunalItems({ tribunalCode: 'TCE-PE', windowDays: 14 });
 
     const callArg = mockTribunalDecisionFindMany.mock.calls[0][0];
-    expect(callArg.where.tribunalCode).toBe('TCE-PE');
+    // Defesa em profundidade: match case-insensitive protege contra split de
+    // case histórico no tribunalCode (decisões legadas minúsculas vs maiúsculas).
+    expect(callArg.where.tribunalCode).toEqual({ equals: 'TCE-PE', mode: 'insensitive' });
     expect(callArg.where.approvalStatus).toEqual({ in: ['auto_approved', 'manually_approved'] });
     expect(callArg.where.createdAt).toHaveProperty('gte');
     expect(callArg.where.relevanceScore).toEqual({ gte: 55 });
+  });
+
+  it('match de tribunalCode é case-insensitive (aceita código minúsculo legado)', async () => {
+    mockTribunalDecisionFindMany.mockResolvedValueOnce([]);
+    await fetchTribunalItems({ tribunalCode: 'tce-pe', windowDays: 14 });
+
+    const callArg = mockTribunalDecisionFindMany.mock.calls[0][0];
+    expect(callArg.where.tribunalCode).toEqual({ equals: 'tce-pe', mode: 'insensitive' });
   });
 
   it('ordena por relevanceScore desc, depois dataJulgamento desc', async () => {

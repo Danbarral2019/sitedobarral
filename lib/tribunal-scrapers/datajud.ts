@@ -18,7 +18,7 @@
  */
 import { prisma } from '@/lib/prisma';
 import type { TribunalScraper, TribunalScrapeOptions, TribunalScrapeResult, ScraperHealthStatus } from './index';
-import { normalizeDecisionNumber, buildFullIdentifier, logScraperHealth } from './utils';
+import { normalizeDecisionNumber, buildFullIdentifier, normalizeTribunalCode, logScraperHealth } from './utils';
 import { classifyDecision, generateDecisionSummary } from './classifier';
 import { setLeiArticles } from '@/lib/lei-articles';
 
@@ -275,7 +275,7 @@ class DataJudScraper implements TribunalScraper {
 
     await prisma.tribunalDecision.create({
       data: {
-        tribunalCode: this.code,
+        tribunalCode: normalizeTribunalCode(this.code),
         tribunalName: this.fullName,
         decisionType: 'decisao',
         decisionNumber: normalized,
