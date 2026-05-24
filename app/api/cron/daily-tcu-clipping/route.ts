@@ -1,3 +1,9 @@
+/**
+ * @deprecated 2026-05-24 — substituído por `app/api/cron/daily-clipping/route.ts`
+ * (clipping multi-tribunal: TCU + TCE-PE + outros). Este cron permanece como
+ * fallback enquanto validamos o novo em produção. Remoção planejada após 2
+ * semanas em produção sem regressões. `vercel.json` já aponta para o novo path.
+ */
 import { NextRequest, NextResponse } from 'next/server';
 import { randomUUID } from 'node:crypto';
 import { prisma } from '@/lib/prisma';

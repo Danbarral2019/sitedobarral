@@ -82,7 +82,7 @@
       "schedule": "0 10 * * *"
     },
     {
-      "path": "/api/cron/daily-tcu-clipping",
+      "path": "/api/cron/daily-clipping",
       "schedule": "0 12 * * 1-5"
     },
     {

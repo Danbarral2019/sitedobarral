@@ -1,4 +1,6 @@
 import type { Dispositivo } from '@/lib/clipping/dispositivo-extractor';
+import type { ClippingItem } from '@/lib/clipping/sources/types';
+import { getTribunalBrand } from '@/lib/clipping/tribunal-branding';
 
 export interface ClippingAcordao {
   documentId: string;
@@ -245,6 +247,296 @@ export function renderDailyClipping(input: DailyClippingInput): RenderedEmail {
     '────────────────────────────',
     '',
     blocksText,
+    '',
+    '────────────────────────────',
+    '',
+    `Ver clippings anteriores: ${archiveUrl}`,
+    `Cancelar clipping: ${unsubscribeUrl}`,
+    `Site: ${baseUrl}`,
+    '',
+    'Prof. Daniel Barral · profdanielbarral.com',
+  ].filter((l): l is string => l !== null).join('\n');
+
+  return { subject, html, text };
+}
+
+// ──────────────────────────────────────────────────────────────────────────
+// V2 — Layout multi-tribunal igualitário, agrupado por tribunal
+// ──────────────────────────────────────────────────────────────────────────
+
+export interface ClippingItemRendered {
+  item: ClippingItem;
+  /** Bullets editoriais IA (TCU usa pipeline próprio; TribunalDecision via generateAiBulletsForTribunal). */
+  aiBullets?: string[];
+  /** Dispositivos numerados (só TCU). */
+  dispositivos?: Dispositivo[];
+}
+
+export interface ClippingGroup {
+  tribunalCode: string;
+  tribunalName: string;
+  items: ClippingItemRendered[];
+}
+
+export interface DailyClippingInputV2 {
+  sendId: string;
+  recipientName: string;
+  unsubscribeToken: string;
+  referenceDate: Date;
+  groups: ClippingGroup[];
+  viewToken?: string;
+  sentDateParam?: string;
+  showArchiveBanner?: boolean;
+}
+
+function renderItemHtmlV2(rendered: ClippingItemRendered): string {
+  const { item, aiBullets, dispositivos } = rendered;
+  const dataStr = item.dataJulgamento ? fmtDate(item.dataJulgamento) : '';
+  const tipoLabel = item.decisionType.charAt(0).toUpperCase() + item.decisionType.slice(1);
+  const cabecalho = `${tipoLabel} ${escapeHtml(item.decisionNumber)}`;
+  const meta = [
+    item.orgaoJulgador ? escapeHtml(item.orgaoJulgador) : null,
+    item.relator ? `Relator: ${escapeHtml(item.relator)}` : null,
+    dataStr ? `Sessão: ${dataStr}` : null,
+  ].filter(Boolean).join(' &middot; ');
+
+  const ementaHtml = item.ementa
+    ? `<p style="margin:12px 0 6px;font-size:13px;color:#1f2937;line-height:1.5;"><strong style="color:#0f172a;">Ementa:</strong></p>
+       <p style="margin:0 0 12px;font-size:14px;color:#334155;line-height:1.55;font-style:italic;">${escapeHtml(item.ementa)}</p>`
+    : '';
+
+  let dispositivosHtml = '';
+  if (dispositivos && dispositivos.length > 0) {
+    const items = dispositivos.map((d) => `
+      <li style="margin:0 0 8px;color:#1f2937;font-size:14px;line-height:1.5;">
+        <strong style="color:#0f172a;">${escapeHtml(d.numero)}.</strong> ${escapeHtml(d.texto)}
+      </li>
+    `).join('');
+    dispositivosHtml = `
+      <p style="margin:12px 0 6px;font-size:13px;color:#1f2937;"><strong style="color:#0f172a;">Dispositivos:</strong></p>
+      <ul style="padding-left:18px;margin:0 0 12px;">${items}</ul>
+    `;
+  }
+
+  let bulletsHtml = '';
+  if (aiBullets && aiBullets.length > 0) {
+    const items = aiBullets
+      .map((b) => `<li style="margin:0 0 6px;color:#334155;font-size:13.5px;line-height:1.55;">${escapeHtml(b)}</li>`)
+      .join('');
+    bulletsHtml = `
+      <div style="margin:14px 0 12px;padding:12px 14px;background:#f8fafc;border-left:3px solid #6366f1;border-radius:4px;">
+        <p style="margin:0 0 6px;font-size:12px;font-weight:600;color:#4f46e5;letter-spacing:0.04em;">CONTEXTO E TESE <span style="font-weight:400;color:#94a3b8;">(síntese editorial)</span></p>
+        <ul style="padding-left:18px;margin:0;">${items}</ul>
+      </div>
+    `;
+  }
+
+  const linkPdfHtml = item.linkPdf
+    ? `<a href="${escapeHtml(item.linkPdf)}" style="color:#1d4ed8;text-decoration:none;font-weight:600;font-size:13px;">Inteiro teor (PDF) →</a>`
+    : '';
+  const linkExternalHtml = item.linkExternal
+    ? `${linkPdfHtml ? ' &middot; ' : ''}<a href="${escapeHtml(item.linkExternal)}" style="color:#64748b;text-decoration:none;font-size:13px;">Ver no site oficial</a>`
+    : '';
+
+  return `
+    <table width="100%" cellpadding="0" cellspacing="0" style="margin:0 0 16px;border-bottom:1px solid #e2e8f0;padding-bottom:16px;">
+      <tr>
+        <td>
+          <h3 style="margin:0 0 4px;font-size:15px;color:#0f172a;font-weight:700;">${cabecalho}</h3>
+          ${meta ? `<p style="margin:0;font-size:12px;color:#64748b;">${meta}</p>` : ''}
+          ${ementaHtml}
+          ${dispositivosHtml}
+          ${bulletsHtml}
+          <p style="margin:8px 0 0;">${linkPdfHtml}${linkExternalHtml}</p>
+        </td>
+      </tr>
+    </table>
+  `;
+}
+
+function renderItemTextV2(rendered: ClippingItemRendered): string {
+  const { item, aiBullets, dispositivos } = rendered;
+  const lines: string[] = [];
+  const tipoLabel = item.decisionType.charAt(0).toUpperCase() + item.decisionType.slice(1);
+  lines.push(`${tipoLabel.toUpperCase()} ${item.decisionNumber}`);
+  const dataStr = item.dataJulgamento ? fmtDate(item.dataJulgamento) : '';
+  const meta = [
+    item.orgaoJulgador,
+    item.relator ? `Relator: ${item.relator}` : null,
+    dataStr ? `Sessão: ${dataStr}` : null,
+  ].filter(Boolean).join(' · ');
+  if (meta) lines.push(meta);
+  if (item.ementa) {
+    lines.push('');
+    lines.push('Ementa:');
+    lines.push(item.ementa);
+  }
+  if (dispositivos && dispositivos.length > 0) {
+    lines.push('');
+    lines.push('Dispositivos:');
+    for (const d of dispositivos) lines.push(`${d.numero}. ${d.texto}`);
+  }
+  if (aiBullets && aiBullets.length > 0) {
+    lines.push('');
+    lines.push('Contexto e tese (síntese editorial):');
+    for (const b of aiBullets) lines.push(`- ${b}`);
+  }
+  if (item.linkPdf) lines.push(`Inteiro teor: ${item.linkPdf}`);
+  return lines.join('\n');
+}
+
+function renderGroupHtml(group: ClippingGroup): string {
+  const brand = getTribunalBrand(group.tribunalCode);
+  const count = group.items.length;
+  const countLabel = `${count} ${count === 1 ? 'decisão' : 'decisões'}`;
+
+  const headerHtml = `
+    <table width="100%" cellpadding="0" cellspacing="0" style="margin:24px 0 16px;">
+      <tr>
+        <td style="background:${brand.color};border-radius:6px;padding:10px 14px;">
+          <table width="100%" cellpadding="0" cellspacing="0">
+            <tr>
+              <td style="color:#ffffff;font-size:14px;font-weight:700;letter-spacing:0.03em;">
+                ${escapeHtml(brand.code)}
+              </td>
+              <td align="right" style="color:#ffffff;font-size:12px;opacity:0.85;">
+                ${countLabel}
+              </td>
+            </tr>
+          </table>
+        </td>
+      </tr>
+    </table>
+  `;
+
+  const itemsHtml = group.items.map(renderItemHtmlV2).join('\n');
+  return headerHtml + itemsHtml;
+}
+
+function renderGroupText(group: ClippingGroup): string {
+  const brand = getTribunalBrand(group.tribunalCode);
+  const count = group.items.length;
+  const head = `═══ ${brand.code} — ${count} ${count === 1 ? 'decisão' : 'decisões'} ═══`;
+  return [head, '', ...group.items.map(renderItemTextV2)].join('\n');
+}
+
+function buildSubject(referenceDate: Date, groups: ClippingGroup[]): string {
+  const dataRef = fmtDate(referenceDate);
+  const totalItems = groups.reduce((acc, g) => acc + g.items.length, 0);
+  if (groups.length === 1) {
+    const g = groups[0];
+    return `Clipping Jurídico — ${dataRef} — ${g.tribunalCode}, ${totalItems} ${totalItems === 1 ? 'decisão' : 'decisões'}`;
+  }
+  return `Clipping Jurídico — ${dataRef} — ${groups.length} tribunais, ${totalItems} decisões`;
+}
+
+export function renderDailyClippingV2(input: DailyClippingInputV2): RenderedEmail {
+  const {
+    sendId,
+    recipientName,
+    unsubscribeToken,
+    referenceDate,
+    groups,
+    viewToken,
+    sentDateParam,
+    showArchiveBanner,
+  } = input;
+
+  const dataRef = fmtDate(referenceDate);
+  const totalItems = groups.reduce((acc, g) => acc + g.items.length, 0);
+  const subject = buildSubject(referenceDate, groups);
+
+  const unsubscribeUrl = `${baseUrl}/clipping/cancelar?token=${encodeURIComponent(unsubscribeToken)}`;
+  const trackingUrl = `${baseUrl}/api/clipping/track?send=${encodeURIComponent(sendId)}`;
+  const archiveUrl = `${baseUrl}/area-restrita/clipping`;
+  const viewInBrowserUrl =
+    viewToken && sentDateParam
+      ? `${baseUrl}/clipping/ver/${sentDateParam}?token=${encodeURIComponent(viewToken)}`
+      : null;
+  const greeting = recipientName ? `Olá, ${escapeHtml(recipientName.split(' ')[0])}.` : 'Olá.';
+
+  const groupsHtml = groups.map(renderGroupHtml).join('\n');
+  const groupsText = groups.map(renderGroupText).join('\n\n────────────────────────────\n\n');
+
+  const viewInBrowserHtml = viewInBrowserUrl
+    ? `<p style="margin:0 0 12px;font-size:11px;color:#94a3b8;text-align:right;"><a href="${viewInBrowserUrl}" style="color:#94a3b8;text-decoration:underline;">Ver no navegador</a></p>`
+    : '';
+
+  const bannerHtml = showArchiveBanner
+    ? `<div style="margin:0 0 18px;padding:12px 16px;background:#eff6ff;border-left:4px solid #2563eb;border-radius:6px;">
+         <p style="margin:0;font-size:13px;color:#1e3a8a;line-height:1.5;">
+           <strong>Novidade:</strong> o clipping agora cobre múltiplos tribunais (TCU, TCEs, STJ). Arquivo em
+           <a href="${archiveUrl}" style="color:#1d4ed8;font-weight:600;text-decoration:underline;">/area-restrita/clipping</a>.
+         </p>
+       </div>`
+    : '';
+
+  const tribunaisLabel = groups.length === 1
+    ? groups[0].tribunalCode
+    : `${groups.length} tribunais`;
+
+  const html = `<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>${escapeHtml(subject)}</title>
+</head>
+<body style="margin:0;padding:0;background:#f1f5f9;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;">
+<table width="100%" cellpadding="0" cellspacing="0" style="background:#f1f5f9;padding:24px 0;">
+  <tr>
+    <td align="center">
+      <table width="640" cellpadding="0" cellspacing="0" style="max-width:640px;background:#ffffff;border-radius:8px;overflow:hidden;box-shadow:0 1px 3px rgba(15,23,42,0.08);">
+        <tr>
+          <td style="background:linear-gradient(135deg,#0f172a 0%,#1e3a8a 100%);padding:28px 32px;color:#f8fafc;">
+            <p style="margin:0 0 4px;font-size:12px;letter-spacing:0.08em;text-transform:uppercase;color:#94a3b8;">Prof. Daniel Barral</p>
+            <h1 style="margin:0;font-size:22px;font-weight:700;color:#ffffff;">Clipping Jurídico</h1>
+            <p style="margin:6px 0 0;font-size:14px;color:#cbd5e1;">${dataRef} &middot; ${tribunaisLabel} &middot; ${totalItems} ${totalItems === 1 ? 'decisão' : 'decisões'}</p>
+          </td>
+        </tr>
+        <tr>
+          <td style="padding:28px 32px;">
+            ${viewInBrowserHtml}
+            ${bannerHtml}
+            <p style="margin:0 0 4px;font-size:14px;color:#334155;line-height:1.55;">
+              ${greeting} Seguem as decisões recentes sobre licitações e contratos públicos selecionadas pelo classificador editorial.
+            </p>
+            ${groupsHtml}
+            <p style="margin:24px 0 0;font-size:12px;color:#64748b;line-height:1.5;">
+              Você recebe este clipping porque é aluno ativo. O cancelamento abaixo afeta apenas o clipping diário — não a newsletter mensal nem comunicações da plataforma.
+            </p>
+          </td>
+        </tr>
+        <tr>
+          <td style="background:#f8fafc;padding:18px 32px;border-top:1px solid #e2e8f0;">
+            <p style="margin:0;font-size:12px;color:#64748b;text-align:center;">
+              <a href="${archiveUrl}" style="color:#475569;text-decoration:underline;">Ver clippings anteriores</a>
+              &nbsp;&middot;&nbsp;
+              <a href="${unsubscribeUrl}" style="color:#475569;text-decoration:underline;">Cancelar clipping diário</a>
+              &nbsp;&middot;&nbsp;
+              <a href="${baseUrl}" style="color:#475569;text-decoration:underline;">Acessar o site</a>
+            </p>
+            <p style="margin:8px 0 0;font-size:11px;color:#94a3b8;text-align:center;">Prof. Daniel Barral &middot; profdanielbarral.com</p>
+          </td>
+        </tr>
+      </table>
+    </td>
+  </tr>
+</table>
+<img src="${trackingUrl}" width="1" height="1" alt="" style="display:block;border:0;outline:none;" />
+</body>
+</html>`;
+
+  const text = [
+    `Clipping Jurídico — ${dataRef}`,
+    `${groups.length === 1 ? groups[0].tribunalCode : `${groups.length} tribunais`} · ${totalItems} ${totalItems === 1 ? 'decisão' : 'decisões'}`,
+    viewInBrowserUrl ? `Ver no navegador: ${viewInBrowserUrl}` : null,
+    '',
+    `${recipientName ? `Olá, ${recipientName.split(' ')[0]}.` : 'Olá.'} Seguem as decisões recentes sobre licitações e contratos públicos.`,
+    '',
+    '────────────────────────────',
+    '',
+    groupsText,
     '',
     '────────────────────────────',
     '',
