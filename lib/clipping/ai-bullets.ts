@@ -10,7 +10,9 @@
  *   (preferimos não mostrar nada a alucinar).
  */
 
+import * as Sentry from '@sentry/nextjs';
 import { PRIMARY_GEMINI_MODEL } from '@/lib/gemini/config';
+import { apiLogger } from '@/lib/logger';
 import type { Dispositivo } from './dispositivo-extractor';
 import type { ClippingItem } from './sources/types';
 
@@ -179,7 +181,10 @@ export async function generateAiBulletsForTribunal(item: ClippingItem): Promise<
 
   const apiKey = process.env.GEMINI_API_KEY;
   if (!apiKey) {
-    console.warn('[Clipping AI] GEMINI_API_KEY ausente — pulando enriquecimento (tribunal)');
+    apiLogger.warn(
+      { tribunalCode: item.tribunalCode, sourceId: item.sourceId },
+      '[Clipping AI] GEMINI_API_KEY ausente — pulando enriquecimento (tribunal)'
+    );
     return [];
   }
 
@@ -203,20 +208,43 @@ export async function generateAiBulletsForTribunal(item: ClippingItem): Promise<
 
     if (!response.ok) {
       const errText = await response.text().catch(() => '');
-      console.warn(`[Clipping AI] Gemini ${response.status} (${item.tribunalCode}): ${errText.slice(0, 200)}`);
+      apiLogger.error(
+        { status: response.status, tribunalCode: item.tribunalCode, sourceId: item.sourceId, errText: errText.slice(0, 500) },
+        '[Clipping AI] Gemini retornou erro HTTP — bullets vazios'
+      );
+      Sentry.captureMessage('[Clipping AI] Gemini HTTP error (tribunal)', {
+        level: 'error',
+        tags: { feature: 'clipping-ai', tribunalCode: item.tribunalCode, httpStatus: String(response.status) },
+        extra: { errText: errText.slice(0, 500), sourceId: item.sourceId },
+      });
       return [];
     }
 
     const data = (await response.json()) as GeminiResponse;
     if (data.promptFeedback?.blockReason) {
-      console.warn(`[Clipping AI] Gemini bloqueou (${item.tribunalCode}): ${data.promptFeedback.blockReason}`);
+      apiLogger.error(
+        { tribunalCode: item.tribunalCode, sourceId: item.sourceId, blockReason: data.promptFeedback.blockReason },
+        '[Clipping AI] Gemini bloqueou por safety — bullets vazios'
+      );
+      Sentry.captureMessage('[Clipping AI] Gemini safety block (tribunal)', {
+        level: 'warning',
+        tags: { feature: 'clipping-ai', tribunalCode: item.tribunalCode, blockReason: data.promptFeedback.blockReason },
+        extra: { sourceId: item.sourceId },
+      });
       return [];
     }
     const text = data.candidates?.[0]?.content?.parts?.[0]?.text;
     if (!text) return [];
     return parseBullets(text);
   } catch (e) {
-    console.warn(`[Clipping AI] Erro (${item.tribunalCode}):`, e instanceof Error ? e.message : String(e));
+    apiLogger.error(
+      { tribunalCode: item.tribunalCode, sourceId: item.sourceId, err: e },
+      '[Clipping AI] Erro inesperado — bullets vazios (tribunal)'
+    );
+    Sentry.captureException(e, {
+      tags: { feature: 'clipping-ai', tribunalCode: item.tribunalCode },
+      extra: { sourceId: item.sourceId },
+    });
     return [];
   }
 }
@@ -228,7 +256,7 @@ export async function generateAiBullets(input: {
 }): Promise<string[]> {
   const apiKey = process.env.GEMINI_API_KEY;
   if (!apiKey) {
-    console.warn('[Clipping AI] GEMINI_API_KEY ausente — pulando enriquecimento');
+    apiLogger.warn('[Clipping AI] GEMINI_API_KEY ausente — pulando enriquecimento (TCU)');
     return [];
   }
 
@@ -253,20 +281,41 @@ export async function generateAiBullets(input: {
 
     if (!response.ok) {
       const errText = await response.text().catch(() => '');
-      console.warn(`[Clipping AI] Gemini ${response.status}: ${errText.slice(0, 200)}`);
+      apiLogger.error(
+        { status: response.status, errText: errText.slice(0, 500) },
+        '[Clipping AI] Gemini retornou erro HTTP — bullets vazios (TCU)'
+      );
+      Sentry.captureMessage('[Clipping AI] Gemini HTTP error (TCU)', {
+        level: 'error',
+        tags: { feature: 'clipping-ai', tribunalCode: 'TCU', httpStatus: String(response.status) },
+        extra: { errText: errText.slice(0, 500) },
+      });
       return [];
     }
 
     const data = (await response.json()) as GeminiResponse;
     if (data.promptFeedback?.blockReason) {
-      console.warn(`[Clipping AI] Gemini bloqueou: ${data.promptFeedback.blockReason}`);
+      apiLogger.error(
+        { blockReason: data.promptFeedback.blockReason },
+        '[Clipping AI] Gemini bloqueou por safety — bullets vazios (TCU)'
+      );
+      Sentry.captureMessage('[Clipping AI] Gemini safety block (TCU)', {
+        level: 'warning',
+        tags: { feature: 'clipping-ai', tribunalCode: 'TCU', blockReason: data.promptFeedback.blockReason },
+      });
       return [];
     }
     const text = data.candidates?.[0]?.content?.parts?.[0]?.text;
     if (!text) return [];
     return parseBullets(text);
   } catch (e) {
-    console.warn('[Clipping AI] Erro:', e instanceof Error ? e.message : String(e));
+    apiLogger.error(
+      { err: e },
+      '[Clipping AI] Erro inesperado — bullets vazios (TCU)'
+    );
+    Sentry.captureException(e, {
+      tags: { feature: 'clipping-ai', tribunalCode: 'TCU' },
+    });
     return [];
   }
 }

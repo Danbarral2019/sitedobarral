@@ -1,3 +1,4 @@
+import * as Sentry from '@sentry/nextjs';
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { verifyCronAuth } from '@/lib/cron-auth';
@@ -55,6 +56,15 @@ export async function GET(request: NextRequest) {
   const noContentStreak = last5.filter((s) => s.status === 'no_content').length;
   if (noContentStreak >= 3 && (!todaySend || todaySend.status === 'no_content')) {
     alerts.push(`${noContentStreak} dias consecutivos sem conteúdo no clipping. Possível bug no filtro de relevância.`);
+    // Escalada pra Sentry quando streak passa de 5 dias — admin pode não ler email
+    // a tempo, mas Sentry tem alerta configurável.
+    if (noContentStreak >= 5) {
+      Sentry.captureMessage('Clipping diário sem conteúdo há 5+ dias', {
+        level: 'error',
+        tags: { feature: 'clipping', subsystem: 'health-check' },
+        extra: { noContentStreak, todayStatus: todaySend?.status ?? 'no_record' },
+      });
+    }
   }
 
       if (alerts.length === 0) {
