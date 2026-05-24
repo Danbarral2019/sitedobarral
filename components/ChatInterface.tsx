@@ -2,7 +2,7 @@
 
 import { useState, useRef, useEffect } from 'react';
 import Link from 'next/link';
-import { Send, Loader2, Sparkles, FileText, AlertCircle, Scale, Gavel, ExternalLink, Download, Share2, Check, ThumbsUp, ThumbsDown } from 'lucide-react';
+import { Send, Loader2, Sparkles, FileText, AlertCircle, Scale, Gavel, ExternalLink, Download, Share2, Check, ThumbsUp, ThumbsDown, Filter } from 'lucide-react';
 import { trackClientEvent } from '@/lib/monitoring/track-client';
 import ArticleAwareMarkdown from './ArticleAwareMarkdown';
 
@@ -37,6 +37,8 @@ interface DocumentSource {
   url?: string;
 }
 
+type Scope = 'all' | 'tst-only' | 'no-tst';
+
 interface ChatInterfaceProps {
   courseId?: string;
   maxResults?: number;
@@ -44,6 +46,12 @@ interface ChatInterfaceProps {
   suggestions?: string[];
   className?: string;
 }
+
+const SCOPE_OPTIONS: Array<{ value: Scope; label: string; help: string }> = [
+  { value: 'all', label: 'Tudo', help: 'Inclui Lei 14.133, atos normativos, acórdãos do TCU, AGU e TST' },
+  { value: 'tst-only', label: 'Só TST', help: 'Restringe às Súmulas, OJs e Precedentes Normativos do TST' },
+  { value: 'no-tst', label: 'Sem TST', help: 'Foca em Lei 14.133, atos normativos, TCU e AGU — útil pra complementar uma busca prévia em TST' },
+];
 
 // ===========================
 // Main Component
@@ -68,6 +76,7 @@ export default function ChatInterface({
   const [exportingPdf, setExportingPdf] = useState<string | null>(null);
   const [sharingId, setSharingId] = useState<string | null>(null);
   const [sharedUrl, setSharedUrl] = useState<string | null>(null);
+  const [scope, setScope] = useState<Scope>('all');
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const abortControllerRef = useRef<AbortController | null>(null);
   const didMountRef = useRef(false);
@@ -176,12 +185,15 @@ export default function ChatInterface({
       });
 
       // Call API with streaming
+      const filtersPayload: Record<string, unknown> = {};
+      if (courseId) filtersPayload.courseId = courseId;
+      if (scope !== 'all') filtersPayload.scope = scope;
       const response = await fetch('/api/documents/query', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           query,
-          filters: courseId ? { courseId } : {},
+          filters: filtersPayload,
           maxResults,
           useCache: true,
           conversationHistory,
@@ -338,6 +350,7 @@ export default function ChatInterface({
 
   const clearHistory = () => {
     setMessages([]);
+    setScope('all');
     localStorage.removeItem('chat-history');
   };
 
@@ -751,7 +764,40 @@ export default function ChatInterface({
       </div>
 
       {/* Input Area */}
-      <div className="border-t border-gray-200 p-4">
+      <div className="border-t border-gray-200 p-4 space-y-3">
+        {/* Scope chips: aluno controla o foco da pesquisa */}
+        <div className="flex items-center gap-2 flex-wrap">
+          <span className="inline-flex items-center gap-1 text-xs text-gray-500" title="Escopo da pesquisa">
+            <Filter className="w-3 h-3" aria-hidden="true" />
+            <span>Escopo:</span>
+          </span>
+          <div className="inline-flex rounded-md border border-gray-200 bg-white p-0.5" role="group" aria-label="Escopo da pesquisa">
+            {SCOPE_OPTIONS.map((opt) => {
+              const active = scope === opt.value;
+              return (
+                <button
+                  key={opt.value}
+                  type="button"
+                  onClick={() => setScope(opt.value)}
+                  disabled={isLoading}
+                  aria-pressed={active}
+                  title={opt.help}
+                  className={
+                    'px-3 py-1 text-xs font-medium rounded transition-colors disabled:opacity-50 disabled:cursor-not-allowed ' +
+                    (active
+                      ? 'bg-blue-600 text-white shadow-sm'
+                      : 'text-gray-600 hover:bg-gray-100')
+                  }
+                >
+                  {opt.label}
+                </button>
+              );
+            })}
+          </div>
+          {scope !== 'all' && (
+            <span className="text-xs text-gray-500 italic">{SCOPE_OPTIONS.find((o) => o.value === scope)?.help}</span>
+          )}
+        </div>
         <form
           onSubmit={(e) => {
             e.preventDefault();

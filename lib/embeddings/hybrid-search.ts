@@ -29,6 +29,19 @@ export interface HybridSearchOptions {
   excludeInactiveSumulas?: boolean;
   /** Boost por tribunalCode aplicado dentro do ramo TribunalDecisionChunk. Ver vector-search.SearchOptions.tribunalBoost. */
   tribunalBoost?: { code: string; factor: number };
+  /** Omite o ramo DocumentChunk no vector search (encaminhado para semanticSearch). */
+  skipDocumentBranch?: boolean;
+  /** Omite o ramo LegislativeActChunk no vector search (encaminhado para semanticSearch). */
+  skipLegislativeActBranch?: boolean;
+  /** Filtra o ramo TribunalDecisionChunk por tribunalCode específico (ex.: 'TST'). */
+  tribunalCodeFilter?: string;
+  /**
+   * Pula o ramo Full-Text Search (BM25/tsvector). Quando true, o resultado vem
+   * apenas do vector, sem fusão RRF. Útil para scopes de pesquisa que devem
+   * permanecer estritamente dentro do conjunto retornado pelo vetor — por
+   * exemplo, "Só TST", onde misturar FTS de Document contamina o ranking.
+   */
+  skipFts?: boolean;
   rerank?: boolean; // Aplicar reranking nos resultados (default: false)
 }
 
@@ -66,6 +79,10 @@ export async function hybridSearch(
     includeTribunalDecisions = false,
     excludeInactiveSumulas = true,
     tribunalBoost,
+    skipDocumentBranch,
+    skipLegislativeActBranch,
+    tribunalCodeFilter,
+    skipFts = false,
     rerank = false,
   } = options;
 
@@ -79,6 +96,9 @@ export async function hybridSearch(
     includeTribunalDecisions,
     excludeInactiveSumulas,
     tribunalBoost,
+    skipDocumentBranch,
+    skipLegislativeActBranch,
+    tribunalCodeFilter,
   };
 
   const ftsOptions: DocumentFTSOptions = {
@@ -86,13 +106,14 @@ export async function hybridSearch(
     excludeCategories,
   };
 
-  // Executar ambas as buscas em paralelo
+  // Executar buscas em paralelo. Quando skipFts, FTS é trocado por array vazio
+  // (RRF degenera para ranking puramente vetorial).
   const [vectorResults, ftsResults] = await Promise.all([
     expandedQueries && expandedQueries.length > 1
       ? multiQuerySearch(expandedQueries, vectorOptions)
           .then(results => ({ results, query, totalFound: results.length, latency: 0, cached: false }))
       : semanticSearch(query, vectorOptions),
-    searchDocuments(query, ftsOptions).catch(() => []),
+    skipFts ? Promise.resolve([]) : searchDocuments(query, ftsOptions).catch(() => []),
   ]);
 
   // Mapear rankings vetoriais (documentId → rank)

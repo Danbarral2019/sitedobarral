@@ -35,6 +35,8 @@ import {
 // Types
 // ===========================
 
+type QueryScope = 'all' | 'tst-only' | 'no-tst';
+
 interface QueryFilters {
   courseId?: string;
   category?: string;
@@ -43,6 +45,13 @@ interface QueryFilters {
   tags?: string[];
   isPublic?: boolean;
   ticMode?: boolean;
+  /**
+   * Escopo da pesquisa controlado pelo aluno via chips no ChatInterface:
+   * - 'all' (default): comportamento padrão, detector strong-labor decide o boost TST
+   * - 'tst-only': apenas TribunalDecision com tribunalCode=TST (skipDocument + skipLegAct + skipFts)
+   * - 'no-tst': sem ramo TST (Document + LegislativeAct apenas), sem boost
+   */
+  scope?: QueryScope;
 }
 
 interface ConversationMessage {
@@ -466,7 +475,52 @@ Exemplo de resposta: ["variação 1", "variação 2"]`;
       apiLogger.info('Query histórica detectada — incluindo documentos canônicos TST canceladas/revistas no contexto');
     }
 
-    // 5a. Hybrid search: combina busca semântica (vetor) + FTS (BM25) via RRF.
+    // 5a. Scope override: chips no chat permitem ao aluno forçar o foco.
+    //   - 'tst-only'  → só TribunalDecision TST (skip Document + LegAct + FTS)
+    //   - 'no-tst'    → sem ramo TST e sem boost (cobertura Document+LegAct)
+    //   - 'all'/undef → comportamento padrão (detector + branches normais)
+    // O scope sobrepõe o detector strong-labor: se aluno marca 'no-tst', boost
+    // é descartado mesmo em query trabalhista. Se marca 'tst-only', forçamos
+    // ramo TST mesmo que a query não tenha casado tribunalPatterns.
+    const scope: QueryScope = filters.scope ?? 'all';
+    const scopedOptions = (() => {
+      if (scope === 'tst-only') {
+        return {
+          includeTribunalDecisions: true,
+          excludeInactiveSumulas,
+          tribunalBoost: undefined,
+          skipDocumentBranch: true,
+          skipLegislativeActBranch: true,
+          tribunalCodeFilter: 'TST',
+          skipFts: true,
+        } as const;
+      }
+      if (scope === 'no-tst') {
+        return {
+          includeTribunalDecisions: false,
+          excludeInactiveSumulas,
+          tribunalBoost: undefined,
+          skipDocumentBranch: undefined,
+          skipLegislativeActBranch: undefined,
+          tribunalCodeFilter: undefined,
+          skipFts: false,
+        } as const;
+      }
+      return {
+        includeTribunalDecisions,
+        excludeInactiveSumulas,
+        tribunalBoost,
+        skipDocumentBranch: undefined,
+        skipLegislativeActBranch: undefined,
+        tribunalCodeFilter: undefined,
+        skipFts: false,
+      } as const;
+    })();
+    if (scope !== 'all') {
+      apiLogger.info({ scope }, 'Pesquisa com scope override (chip do chat)');
+    }
+
+    // 5b. Hybrid search: combina busca semântica (vetor) + FTS (BM25) via RRF.
     // Reranking desligado em 2026-04-23 após Fase 2 provar regressão de
     // −15pp a −25pp em recall@5 com Gemini e Cohere. Ver ROADMAP_BUSCA_QUALIDADE.md.
     const searchResponse = await hybridSearch({
@@ -478,9 +532,7 @@ Exemplo de resposta: ["variação 1", "variação 2"]`;
       limit: Math.max(maxResults * 5, 60),
       alpha: 0.6,
       useCache,
-      includeTribunalDecisions,
-      excludeInactiveSumulas,
-      tribunalBoost,
+      ...scopedOptions,
       rerank: false,
     });
 
