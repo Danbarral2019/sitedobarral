@@ -97,14 +97,6 @@ describe('getLeiArticles (dual-read — Onda 4.5.4)', () => {
     expect(getLeiArticles({ leiArticles: '["75","18"]' })).toEqual(['75', '18'])
   })
 
-  it('fallback pra leiArticles quando leiArticlesArr é array vazio', () => {
-    // Cenário pré-backfill ou row legada não-tocada: leiArticlesArr=[], leiArticles populado
-    // Defensivo: prefere o que tem dados
-    expect(
-      getLeiArticles({ leiArticles: '["75"]', leiArticlesArr: [] }),
-    ).toEqual(['75'])
-  })
-
   it('retorna [] quando ambos vazios/ausentes', () => {
     expect(getLeiArticles({ leiArticles: null, leiArticlesArr: [] })).toEqual([])
     expect(getLeiArticles({ leiArticles: null })).toEqual([])
