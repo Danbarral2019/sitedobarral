@@ -31,6 +31,7 @@ import {
   fetchWithRetry,
   normalizeDecisionNumber,
   buildFullIdentifier,
+  normalizeTribunalCode,
   extractYear,
   parseBRDate,
   logScraperHealth,
@@ -503,7 +504,7 @@ class TCEPEScraper implements TribunalScraper {
     }
 
     const data = {
-      tribunalCode: SCRAPER_CODE,
+      tribunalCode: normalizeTribunalCode(SCRAPER_CODE),
       tribunalName: this.fullName,
       decisionType,
       decisionNumber: normalized,

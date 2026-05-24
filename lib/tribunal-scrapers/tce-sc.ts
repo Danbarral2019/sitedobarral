@@ -27,6 +27,7 @@ import {
   fetchWithRetry,
   normalizeDecisionNumber,
   buildFullIdentifier,
+  normalizeTribunalCode,
   extractYear,
   parseBRDate,
   logScraperHealth,
@@ -289,7 +290,7 @@ class TCESCScraper implements TribunalScraper {
       : null;
 
     const data = {
-      tribunalCode: SCRAPER_CODE,
+      tribunalCode: normalizeTribunalCode(SCRAPER_CODE),
       tribunalName: this.fullName,
       decisionType: 'prejulgado',
       decisionNumber: normalized,

@@ -139,6 +139,23 @@ export function normalizeDecisionNumber(raw: string): string {
 }
 
 // ===========================
+// Tribunal code normalization
+// ===========================
+
+/**
+ * Forma canônica do `tribunalCode` persistido em TribunalDecision: UPPERCASE.
+ *
+ * Esta é a ÚNICA autoridade de normalização. Os scrapers definem seu `code`
+ * em lowercase (chave do registry / `canHandle`), mas TUDO que é gravado no
+ * banco — e consumido por API pública (z.enum), branding e clipping — usa
+ * MAIÚSCULO. Aplicar no ponto de escrita evita o split de case recorrente
+ * que uma migração pontual (`scripts/normalize-tribunal-codes.ts`) não resolve.
+ */
+export function normalizeTribunalCode(code: string): string {
+  return code.trim().toUpperCase();
+}
+
+// ===========================
 // Full identifier builder
 // ===========================
 
@@ -157,7 +174,7 @@ export function buildFullIdentifier(
 
   const typeName = typeMap[decisionType] || decisionType;
   const normalized = normalizeDecisionNumber(decisionNumber);
-  return `${tribunalCode.toUpperCase()} ${typeName} ${normalized}`;
+  return `${normalizeTribunalCode(tribunalCode)} ${typeName} ${normalized}`;
 }
 
 // ===========================
