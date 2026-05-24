@@ -12,9 +12,17 @@
 
 import { PRIMARY_GEMINI_MODEL } from '@/lib/gemini/config';
 import type { Dispositivo } from './dispositivo-extractor';
+import type { ClippingItem } from './sources/types';
 
 const MAX_INTEIRO_TEOR_CHARS = 18000;
 const MAX_OUTPUT_TOKENS = 700;
+
+/**
+ * Tamanho mínimo de fullText para acionar AI bullets em TribunalDecision.
+ * Abaixo disso (ex.: TCE-RS médio 97 chars), bullets ficariam alucinados ou
+ * vazios — preferimos mostrar só ementa.
+ */
+const TRIBUNAL_FULLTEXT_MIN_LENGTH = 800;
 
 const PROCESSUAL_KEYWORDS = [
   'EMBARGOS DE DECLARAÇÃO',
@@ -108,6 +116,107 @@ function parseBullets(rawText: string): string[] {
       .filter((b: string) => b.length >= 20 && b.length <= 400)
       .slice(0, 4);
   } catch {
+    return [];
+  }
+}
+
+/**
+ * Decide se vale a pena gerar AI bullets para um item de TribunalDecision.
+ *
+ * TCE-PE → sempre (tem inteiro teor rico).
+ * TCE-RS → só se fullText >= 800 chars (avg histórico é ~97, então quase nunca).
+ * TCE-SP/PR/SC/RJ + STJ DataJud → nunca (não capturam fullText).
+ *
+ * TCU não passa por aqui — usa `generateAiBullets` clássico via dispositivos.
+ */
+export function shouldGenerateBulletsForTribunal(item: ClippingItem): boolean {
+  if (item.sourceKind !== 'tribunal-decision') return false;
+  if (!item.fullText) return false;
+  return item.fullText.length >= TRIBUNAL_FULLTEXT_MIN_LENGTH;
+}
+
+function buildPromptForTribunal(item: ClippingItem): string {
+  const fullText = item.fullText || '';
+  const teor = fullText.length > MAX_INTEIRO_TEOR_CHARS
+    ? fullText.slice(0, MAX_INTEIRO_TEOR_CHARS) + ' [...truncado]'
+    : fullText;
+
+  return `Você é assistente editorial de um curso de Direito Administrativo. Sua tarefa é extrair, do texto integral abaixo, 2 a 4 bullets curtos que ajudem um aluno (servidor público) a entender O QUE o ${item.tribunalName} decidiu e POR QUÊ.
+
+REGRAS RÍGIDAS:
+1. Use APENAS informação presente no texto fornecido. Não invente. Não infira além do que está escrito.
+2. Cada bullet tem entre 12 e 35 palavras, em português brasileiro claro, sem juridiquês desnecessário.
+3. Foque em: ratio decidendi, tese consolidada, e — se houver — implicação prática para gestores/fiscais.
+4. Se o texto não tem informação suficiente para gerar bullets seguros, retorne lista vazia.
+5. NÃO use marcadores como "•" ou "-" no início. NÃO use markdown.
+
+DECISÃO: ${item.tribunalCode} ${item.decisionType} ${item.decisionNumber}
+
+EMENTA OFICIAL:
+${item.ementa}
+
+TEXTO INTEGRAL DA DECISÃO:
+${teor}
+
+Responda EXCLUSIVAMENTE com JSON válido no formato:
+{"bullets": ["frase 1", "frase 2", "frase 3"]}
+
+Se não houver informação segura, responda exatamente:
+{"bullets": []}`;
+}
+
+/**
+ * Versão para TribunalDecision (TCE-PE, TCE-RS): recebe o ClippingItem e
+ * gera bullets a partir do `fullText`. Sem seção de dispositivos (que
+ * não existe fora do TCU).
+ *
+ * Para tribunais sem fullText suficiente, retorna [] sem chamar Gemini.
+ */
+export async function generateAiBulletsForTribunal(item: ClippingItem): Promise<string[]> {
+  if (!shouldGenerateBulletsForTribunal(item)) {
+    return [];
+  }
+
+  const apiKey = process.env.GEMINI_API_KEY;
+  if (!apiKey) {
+    console.warn('[Clipping AI] GEMINI_API_KEY ausente — pulando enriquecimento (tribunal)');
+    return [];
+  }
+
+  const prompt = buildPromptForTribunal(item);
+  const url = `https://generativelanguage.googleapis.com/v1beta/models/${PRIMARY_GEMINI_MODEL}:generateContent?key=${apiKey}`;
+
+  try {
+    const response = await fetch(url, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        contents: [{ parts: [{ text: prompt }] }],
+        generationConfig: {
+          temperature: 0.2,
+          maxOutputTokens: MAX_OUTPUT_TOKENS,
+          thinkingConfig: { thinkingBudget: 0 },
+          responseMimeType: 'application/json',
+        },
+      }),
+    });
+
+    if (!response.ok) {
+      const errText = await response.text().catch(() => '');
+      console.warn(`[Clipping AI] Gemini ${response.status} (${item.tribunalCode}): ${errText.slice(0, 200)}`);
+      return [];
+    }
+
+    const data = (await response.json()) as GeminiResponse;
+    if (data.promptFeedback?.blockReason) {
+      console.warn(`[Clipping AI] Gemini bloqueou (${item.tribunalCode}): ${data.promptFeedback.blockReason}`);
+      return [];
+    }
+    const text = data.candidates?.[0]?.content?.parts?.[0]?.text;
+    if (!text) return [];
+    return parseBullets(text);
+  } catch (e) {
+    console.warn(`[Clipping AI] Erro (${item.tribunalCode}):`, e instanceof Error ? e.message : String(e));
     return [];
   }
 }

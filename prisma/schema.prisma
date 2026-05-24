@@ -1615,6 +1615,11 @@ model TribunalDecision {
   chunkCount      Int       @default(0)
   embeddedAt      DateTime?
 
+  // Cache de AI bullets para Clipping Diário multi-tribunal.
+  // Preenchido on-demand pelo cron quando a decisão entra numa edição.
+  aiBullets     String?   @db.Text // JSON: string[]
+  aiGeneratedAt DateTime?
+
   // Notificação
   notifiedAt DateTime?
 

@@ -7,6 +7,7 @@ import {
   enrichSources,
   adaptToSourcesPayload,
   resolveEmenta,
+  resolveFullText,
   type EnrichedSource,
   type JurisprudenciaSource,
 } from '@/lib/jurisprudencia/semantic-adapter';
@@ -67,6 +68,10 @@ const bodySchema = z.object({
 const MAX_EMENTA_CHARS = 800;
 const MAX_CHUNK_CHARS = 600;
 const MAX_SUMMARY_CHARS = 600;
+const MAX_FULLTEXT_CHARS_PER_SOURCE = 4000;
+const MAX_TOTAL_CONTEXT_CHARS = 18000;
+const FULLTEXT_MIN_LENGTH = 500;
+const FULLTEXT_WINDOW = 1500;
 const DEFAULT_TOP_K = 6;
 
 type Filters = z.infer<typeof filtersSchema>;
@@ -92,50 +97,138 @@ function truncate(value: string | null | undefined, limit: number): string {
   return value.length > limit ? value.slice(0, limit) + '...' : value;
 }
 
+/**
+ * Extrai uma janela de contexto de ±FULLTEXT_WINDOW chars ao redor do
+ * chunkContent dentro do fullText. Se não encontrar o chunk (ex.: chunk
+ * normalizado vs fullText cru), fallback para primeiros MAX_FULLTEXT_CHARS
+ * do fullText.
+ */
+function extractContextWindow(fullText: string, chunkContent: string): string {
+  if (fullText.length <= MAX_FULLTEXT_CHARS_PER_SOURCE) {
+    return fullText;
+  }
+  const anchor = chunkContent.slice(0, Math.min(120, chunkContent.length)).trim();
+  const idx = anchor.length > 30 ? fullText.indexOf(anchor) : -1;
+  if (idx === -1) {
+    return fullText.slice(0, MAX_FULLTEXT_CHARS_PER_SOURCE) + '...';
+  }
+  const start = Math.max(0, idx - FULLTEXT_WINDOW);
+  const end = Math.min(fullText.length, idx + chunkContent.length + FULLTEXT_WINDOW);
+  let window = fullText.slice(start, end);
+  if (start > 0) window = '...' + window;
+  if (end < fullText.length) window = window + '...';
+  return window;
+}
+
+interface PerSourceTelemetry {
+  sourceId: string;
+  kind: string;
+  charsUsed: number;
+  hasFullText: boolean;
+  skipped: boolean;
+}
+
+interface ContextTelemetry {
+  sources: number;
+  fullTextCount: number;
+  ementaOnlyCount: number;
+  skippedCount: number;
+  totalChars: number;
+  perSource: PerSourceTelemetry[];
+}
+
 function buildPrompt(
   question: string,
   enriched: EnrichedSource[],
   payload: JurisprudenciaSource[]
-): string {
-  const header = `Você é um assistente jurídico especializado em licitações, contratos públicos e Lei 14.133/2021. Responda à pergunta do aluno exclusivamente com base nos trechos de decisões de tribunais fornecidos abaixo. Cite as decisões pelo identificador (ex.: [TCE-SP Acórdão 1234/2024]). Se os trechos não forem suficientes, diga isso com clareza e sugira ajustar os filtros.`;
+): { prompt: string; telemetry: ContextTelemetry } {
+  const header = `Você é um assistente jurídico especializado em licitações, contratos públicos e Lei 14.133/2021. Responda à pergunta do aluno exclusivamente com base nos trechos de decisões de tribunais fornecidos abaixo. Use o trecho do inteiro teor quando disponível; só recorra à ementa quando o trecho não cobrir a pergunta. Cite as decisões pelo identificador (ex.: [TCE-SP Acórdão 1234/2024]). Se os trechos não forem suficientes, diga isso com clareza e sugira ajustar os filtros.`;
 
-  const blocks = enriched
-    .map((e, idx) => {
-      const p = payload[idx];
-      const id = `${p.tribunalCode} ${p.decisionType} ${p.decisionNumber}`;
-      const dateStr = p.dataJulgamento
-        ? new Date(p.dataJulgamento).toLocaleDateString('pt-BR')
-        : 'data não informada';
-      const ementa = resolveEmenta(e);
-      const summary =
-        e.source.kind === 'tribunal-decision'
-          ? e.source.data.summary
-          : e.source.data.summary;
-      const themes =
-        e.source.kind === 'tribunal-decision'
-          ? e.source.data.themes
-          : e.source.data.themes;
-      const leiArticles = e.source.data.leiArticlesArr;
-      const similarityPct = (e.similarity * 100).toFixed(0);
-      return `[${idx + 1}] ${id} — ${dateStr}
+  const ordered = enriched
+    .map((e, idx) => ({ e, idx, p: payload[idx] }))
+    .sort((a, b) => b.e.similarity - a.e.similarity);
+
+  let totalChars = 0;
+  const perSource: PerSourceTelemetry[] = [];
+  const blocks: { idx: number; content: string }[] = [];
+
+  for (const { e, idx, p } of ordered) {
+    const id = `${p.tribunalCode} ${p.decisionType} ${p.decisionNumber}`;
+    const dateStr = p.dataJulgamento
+      ? new Date(p.dataJulgamento).toLocaleDateString('pt-BR')
+      : 'data não informada';
+    const ementa = resolveEmenta(e);
+    const fullText = resolveFullText(e);
+    const summary = e.source.data.summary;
+    const themes = e.source.data.themes;
+    const leiArticles = e.source.data.leiArticlesArr;
+    const similarityPct = (e.similarity * 100).toFixed(0);
+
+    let trechoLabel: string;
+    let trechoContent: string;
+    const hasFullText = !!fullText && fullText.length >= FULLTEXT_MIN_LENGTH;
+
+    if (hasFullText && fullText) {
+      trechoLabel = `Trecho do inteiro teor (similaridade ${similarityPct}%)`;
+      trechoContent = extractContextWindow(fullText, e.chunkContent);
+    } else {
+      trechoLabel = `Trecho relevante (similaridade ${similarityPct}%)`;
+      trechoContent = truncate(e.chunkContent, MAX_CHUNK_CHARS);
+    }
+
+    const block = `[${idx + 1}] ${id} — ${dateStr}
 Título: ${p.title}
 Órgão: ${p.orgaoJulgador || 'n/d'} | Relator: ${p.relator || 'n/d'}
 Temas: ${themes || 'n/d'} | Artigos Lei 14.133: ${leiArticles.length > 0 ? leiArticles.join(', ') : 'n/d'}
 Ementa: ${truncate(ementa, MAX_EMENTA_CHARS)}
-Trecho relevante (similaridade ${similarityPct}%): ${truncate(e.chunkContent, MAX_CHUNK_CHARS)}
+${trechoLabel}: ${trechoContent}
 Resumo IA: ${truncate(summary, MAX_SUMMARY_CHARS)}`;
-    })
-    .join('\n\n---\n\n');
 
-  return `${header}
+    if (totalChars + block.length > MAX_TOTAL_CONTEXT_CHARS) {
+      perSource.push({
+        sourceId: e.documentId,
+        kind: e.source.kind,
+        charsUsed: 0,
+        hasFullText,
+        skipped: true,
+      });
+      continue;
+    }
+
+    blocks.push({ idx, content: block });
+    totalChars += block.length;
+    perSource.push({
+      sourceId: e.documentId,
+      kind: e.source.kind,
+      charsUsed: block.length,
+      hasFullText,
+      skipped: false,
+    });
+  }
+
+  blocks.sort((a, b) => a.idx - b.idx);
+  const blocksStr = blocks.map(b => b.content).join('\n\n---\n\n');
+
+  const prompt = `${header}
 
 PERGUNTA DO ALUNO:
 ${question}
 
 DECISÕES CONSULTADAS:
-${blocks}
+${blocksStr}
 
 Sua resposta (em português, estruturada, com citações no formato [Tribunal Tipo Número]):`;
+
+  const telemetry: ContextTelemetry = {
+    sources: enriched.length,
+    fullTextCount: perSource.filter(s => s.hasFullText && !s.skipped).length,
+    ementaOnlyCount: perSource.filter(s => !s.hasFullText && !s.skipped).length,
+    skippedCount: perSource.filter(s => s.skipped).length,
+    totalChars,
+    perSource,
+  };
+
+  return { prompt, telemetry };
 }
 
 function countBySourceType(payload: JurisprudenciaSource[]) {
@@ -262,7 +355,21 @@ export const POST = withUserApi(async (request, ctx) => {
 
       const sourcesPayload = adaptToSourcesPayload(enriched);
 
-      const prompt = buildPrompt(query, enriched, sourcesPayload);
+      const { prompt, telemetry } = buildPrompt(query, enriched, sourcesPayload);
+
+      apiLogger.info(
+        {
+          event: 'jurisprudencia.context_built',
+          userId: user.userId,
+          sources: telemetry.sources,
+          fullTextCount: telemetry.fullTextCount,
+          ementaOnlyCount: telemetry.ementaOnlyCount,
+          skippedCount: telemetry.skippedCount,
+          totalChars: telemetry.totalChars,
+          perSource: telemetry.perSource,
+        },
+        'jurisprudencia/query context assembled'
+      );
 
       const avgSimilarity =
         enriched.reduce((sum, e) => sum + e.similarity, 0) / enriched.length;

@@ -217,6 +217,7 @@ export interface EnrichedTribunalDecision {
   decisionNumber: string;
   title: string;
   ementa: string;
+  fullText: string | null;
   summary: string | null;
   relator: string | null;
   orgaoJulgador: string | null;
@@ -285,6 +286,7 @@ export async function enrichSources(
             decisionNumber: true,
             title: true,
             ementa: true,
+            fullText: true,
             summary: true,
             relator: true,
             orgaoJulgador: true,
@@ -486,4 +488,21 @@ export function resolveEmenta(e: EnrichedSource): string {
     doc.content ??
     ''
   );
+}
+
+/**
+ * Resolve o texto completo (inteiro teor) da fonte. Para TribunalDecision,
+ * usa o campo `fullText` (capturado pelo scraper). Para Document TCU,
+ * usa `content` (que carrega o inteiro teor extraído de RTF/PDF).
+ *
+ * Bug histórico: pipeline RAG só usava ementa truncada + chunkContent
+ * (~2K chars total). LLM dizia "conteúdo literal não foi fornecido" e
+ * caía em jurisprudência geral. Este helper alimenta o buildPrompt
+ * com o material textual real disponível.
+ */
+export function resolveFullText(e: EnrichedSource): string | null {
+  if (e.source.kind === 'tribunal-decision') {
+    return e.source.data.fullText ?? null;
+  }
+  return e.source.data.content ?? null;
 }

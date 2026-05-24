@@ -169,11 +169,16 @@ Busca:
 - ✅ Galeria do aluno (`/area-restrita/meus-certificados`) respeita revogação
 - 📖 Ver memória `certificados-digitais.md`
 
-**📰 Clipping Diário TCU — em produção (2026-05-07):**
+**📰 Clipping Diário Multi-Tribunal — em produção (TCU desde 2026-05-07; multi-tribunal 2026-05-24):**
 - ✅ Arquivo público com busca + ver-no-navegador (`app/clipping`)
 - ✅ Admin recipients via env `CLIPPING_ADMIN_RECIPIENTS`
-- ✅ RTF como fonte primária + IA editorial para casos processuais
-- ✅ Cron diário 9h BRT
+- ✅ Camada unificada `lib/clipping/sources/` (`ClippingItem`) abstrai `Document` TCU e `TribunalDecision` (TCE-PE, TCE-RS, TCE-SP, TCE-PR, TCE-SC, TCE-RJ, STJ).
+- ✅ TCU: pipeline RTF + dispositivos numerados + IA editorial (mantido).
+- ✅ TribunalDecision: AI bullets via `generateAiBulletsForTribunal` quando `fullText >= 800` chars; senão ementa-only.
+- ✅ Histórico polimórfico em `DailyClippingSend.acordaoIdsIncluded` (`{ v: 2, items: [{kind,id}] }`) + leitura tolerante a payload legado. `getSentIdsInWindow(14)` evita repetir itens em 14 dias.
+- ✅ Template `renderDailyClippingV2` agrupa decisões por tribunal com badge colorido (`lib/clipping/tribunal-branding.ts`).
+- ✅ Cron `app/api/cron/daily-clipping/route.ts` (substitui `daily-tcu-clipping`, deprecated). Schedule 9h BRT (seg-sex).
+- 🔑 Env vars: `CLIPPING_TRIBUNAIS_ENABLED` (CSV), `CLIPPING_WINDOW_DAYS=14`, `CLIPPING_MAX_ITEMS_PER_TRIBUNAL=5`, `CLIPPING_MAX_ITEMS_TOTAL=15`.
 - 📖 Ver memória `clipping-diario-tcu.md`, módulo `lib/clipping/`
 
 **🏛️ Hubs Admin Consolidados (2026-04-05):**
