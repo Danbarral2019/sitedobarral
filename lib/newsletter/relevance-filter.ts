@@ -50,6 +50,10 @@ const BATCH_SIZE = 10;
 const MIN_SCORE = 50;
 const MIN_DECISIONS = 10;
 const MAX_DECISIONS = 30;
+// Concorrência paralela de batches Gemini. Aumentado de 1 (sequencial) para
+// 3 em 2026-06-02 após newsletter de junho estourar 300s (FUNCTION_INVOCATION_TIMEOUT).
+// Gemini 2.5 Flash aguenta 3 RPS folgado; o gargalo era serialização desnecessária.
+const BATCH_CONCURRENCY = 3;
 
 const SYSTEM_INSTRUCTION = `Você é um especialista em Direito Administrativo brasileiro, especificamente em Licitações e Contratos Públicos regidos pela Lei nº 14.133/2021.`;
 
@@ -175,22 +179,29 @@ export async function filterByRelevance(decisions: DecisionInput[]): Promise<Rel
     batches.push(decisions.slice(i, i + BATCH_SIZE));
   }
 
-  console.log(`[Newsletter Filter] Evaluating ${decisions.length} decisions in ${batches.length} batches`);
+  console.log(`[Newsletter Filter] Evaluating ${decisions.length} decisions in ${batches.length} batches (concurrency=${BATCH_CONCURRENCY})`);
 
   const allEvaluations = new Map<string, { relevanceScore: number; aiSummary: string; themes: string[]; leiArticles: string[] }>();
 
-  // Process batches sequentially to avoid rate limits
-  for (let i = 0; i < batches.length; i++) {
-    console.log(`[Newsletter Filter] Processing batch ${i + 1}/${batches.length}`);
-    const batchResults = await evaluateBatch(batches[i]);
-    for (const [id, eval_] of batchResults) {
-      allEvaluations.set(id, eval_);
+  // Pool de concorrência: workers paralelos consomem da fila de batches.
+  // Mantém ordem dos batches na atribuição mas resultado final é por id (Map),
+  // então paralelismo é seguro. Substituiu loop sequencial que estourava
+  // maxDuration quando havia muitos batches (newsletter de junho/2026).
+  let nextBatchIndex = 0;
+  const worker = async (workerId: number): Promise<void> => {
+    while (true) {
+      const i = nextBatchIndex++;
+      if (i >= batches.length) return;
+      console.log(`[Newsletter Filter] Worker ${workerId} processing batch ${i + 1}/${batches.length}`);
+      const batchResults = await evaluateBatch(batches[i]);
+      for (const [id, eval_] of batchResults) {
+        allEvaluations.set(id, eval_);
+      }
     }
-    // Small delay between batches
-    if (i < batches.length - 1) {
-      await new Promise(r => setTimeout(r, 500));
-    }
-  }
+  };
+
+  const workerCount = Math.min(BATCH_CONCURRENCY, batches.length);
+  await Promise.all(Array.from({ length: workerCount }, (_, i) => worker(i + 1)));
 
   // Build results, using fallback for decisions that weren't evaluated
   const scored: FilteredDecision[] = decisions.map(d => {
