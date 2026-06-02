@@ -9,12 +9,13 @@ import { generateNewsletterIntro } from '@/lib/newsletter/intro-generator';
 import { withCronTelemetry } from '@/lib/cron-telemetry';
 import { apiLogger } from '@/lib/logger';
 
-// Aumentado de 120s pra 300s em 2026-05-01 — newsletter de maio caiu por
-// FUNCTION_INVOCATION_TIMEOUT (504) com 5 chamadas Gemini de 8-10s cada
-// somando ~50s só de IA, mais Prisma + Resend rate-limit (600ms × N).
-// Vercel Pro permite até 800s. Conjuntamente colocamos try/catch com
-// fallbacks na IA pra newsletter sair mesmo se Gemini estiver caído.
-export const maxDuration = 300;
+// Aumentado para 800s (limite Vercel Pro) em 2026-06-02 — newsletter de
+// junho caiu por FUNCTION_INVOCATION_TIMEOUT (504) novamente com 300s,
+// volume cresceu desde maio. Combinado com paralelização do filterByRelevance
+// (lib/newsletter/relevance-filter.ts) e try/finally que sempre atualiza o
+// NewsletterSend mesmo em crash/timeout — evita registros órfãos.
+// Histórico: 120s (original) → 300s (2026-05-01) → 800s (2026-06-02).
+export const maxDuration = 800;
 
 /**
  * Cron Job: Newsletter Mensal v0.2
@@ -35,6 +36,12 @@ export async function GET(request: NextRequest) {
   if (authError) return authError;
 
   let responseBody: Record<string, unknown> = {};
+  // sendId / completedNormally vivem no escopo externo para que o catch consiga
+  // marcar o registro NewsletterSend como [crash:*] caso o pipeline morra.
+  // Sem isso, falha silenciosa deixava `[em processamento]` órfão no banco
+  // (newsletter de junho/2026 — TIMEOUT 504 deixou registro sem update final).
+  let sendId: string | null = null;
+  let completedNormally = false;
   try {
     await withCronTelemetry('monthly-newsletter', async () => {
 
@@ -178,8 +185,9 @@ export async function GET(request: NextRequest) {
 
     // 3b. Criar registro NewsletterSend com status 'started' já — assim
     // qualquer falha silenciosa adiante deixa pista no DB. Atualizado
-    // depois com totalSent/totalFailed reais.
-    const sendId = randomUUID();
+    // depois com totalSent/totalFailed reais. sendId vive no escopo externo
+    // para que o catch consiga marcar como [crash] em falha.
+    sendId = randomUUID();
     if (!dryRun) {
       await prisma.newsletterSend.create({
         data: {
@@ -378,6 +386,10 @@ export async function GET(request: NextRequest) {
       data: { totalSent: successCount, totalFailed: errorCount },
     });
 
+    // Marca como completo APÓS update final — assim qualquer crash entre 3b e 11
+    // cai no catch externo e marca o registro como [crash].
+    completedNormally = true;
+
       responseBody = {
         success: true,
         message: 'Newsletter mensal v0.2 enviada com sucesso',
@@ -412,5 +424,23 @@ export async function GET(request: NextRequest) {
       },
       { status: 500 }
     );
+  } finally {
+    // Defesa contra registros NewsletterSend órfãos como `[em processamento]`:
+    // se o pipeline criou sendId mas crashou/timeout antes do update final
+    // (passo 11), marcamos o registro como [crash] com a mensagem do erro.
+    // Best-effort: se o próprio update falhar (ex: conexão Neon perdida),
+    // logamos e seguimos — não queremos mascarar o erro original. Causa raiz
+    // da defesa: newsletter de junho/2026 ficou órfã após FUNCTION_INVOCATION_TIMEOUT.
+    if (sendId && !completedNormally) {
+      try {
+        await prisma.newsletterSend.update({
+          where: { id: sendId },
+          data: { subject: '[crash] Newsletter mensal — pipeline interrompido (ver logs)' },
+        });
+        apiLogger.warn({ sendId }, '[Cron Newsletter v0.2] Pipeline interrompido — registro marcado como [crash]');
+      } catch (updateErr) {
+        apiLogger.error({ err: updateErr, sendId }, '[Cron Newsletter v0.2] Falha ao marcar registro como [crash]');
+      }
+    }
   }
 }
