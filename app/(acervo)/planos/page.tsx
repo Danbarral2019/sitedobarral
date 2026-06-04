@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { useAuth } from '@/hooks/use-auth';
 import Link from 'next/link';
 import { courses } from '@/data/courses';
+import { PIX_ENABLED } from '@/lib/payments/config';
 
 const COURSES = courses.map(c => ({ id: c.id, name: c.title }));
 
@@ -140,31 +141,34 @@ export default function PlanosPage() {
           </div>
         </div>
 
-        {/* Seletor de método de pagamento */}
-        <div className="mb-8 flex justify-center">
-          <div className="inline-flex bg-white rounded-xl shadow-sm border border-gray-200 p-1">
-            <button
-              onClick={() => { setPaymentMethod('cartao');}}
-              className={`px-6 py-2.5 rounded-lg text-sm font-medium transition-colors ${
-                paymentMethod === 'cartao'
-                  ? 'bg-gray-800 text-white shadow-sm'
-                  : 'text-gray-600 hover:text-gray-900'
-              }`}
-            >
-              Cartão / Boleto
-            </button>
-            <button
-              onClick={() => { setPaymentMethod('pix');}}
-              className={`px-6 py-2.5 rounded-lg text-sm font-medium transition-colors ${
-                paymentMethod === 'pix'
-                  ? 'bg-green-600 text-white shadow-sm'
-                  : 'text-gray-600 hover:text-gray-900'
-              }`}
-            >
-              PIX
-            </button>
+        {/* Seletor de método de pagamento — só aparece quando há mais de uma opção.
+            PIX (Pix Automático) está desabilitado até a Stripe liberar — ver lib/payments/config.ts. */}
+        {PIX_ENABLED && (
+          <div className="mb-8 flex justify-center">
+            <div className="inline-flex bg-white rounded-xl shadow-sm border border-gray-200 p-1">
+              <button
+                onClick={() => { setPaymentMethod('cartao');}}
+                className={`px-6 py-2.5 rounded-lg text-sm font-medium transition-colors ${
+                  paymentMethod === 'cartao'
+                    ? 'bg-gray-800 text-white shadow-sm'
+                    : 'text-gray-600 hover:text-gray-900'
+                }`}
+              >
+                Cartão / Boleto
+              </button>
+              <button
+                onClick={() => { setPaymentMethod('pix');}}
+                className={`px-6 py-2.5 rounded-lg text-sm font-medium transition-colors ${
+                  paymentMethod === 'pix'
+                    ? 'bg-green-600 text-white shadow-sm'
+                    : 'text-gray-600 hover:text-gray-900'
+                }`}
+              >
+                PIX
+              </button>
+            </div>
           </div>
-        </div>
+        )}
 
         {/* Cards de planos */}
         <div className="grid md:grid-cols-2 gap-8 mb-16">
@@ -336,7 +340,7 @@ export default function PlanosPage() {
             </div>
             <div>
               <p className="font-medium text-gray-900 mb-1">Quais formas de pagamento?</p>
-              <p className="text-gray-600">Cartão de crédito e Pix Automático (débito recorrente autorizado no app do seu banco).</p>
+              <p className="text-gray-600">{PIX_ENABLED ? 'Cartão de crédito e Pix Automático (débito recorrente autorizado no app do seu banco).' : 'Cartão de crédito e boleto bancário.'}</p>
             </div>
             <div>
               <p className="font-medium text-gray-900 mb-1">O pagamento é seguro?</p>

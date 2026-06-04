@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 import { withUserApi } from '@/lib/api/handler';
 import { createCheckoutSession } from '@/lib/stripe';
+import { PIX_ENABLED } from '@/lib/payments/config';
 import { prisma } from '@/lib/prisma';
 import { ValidationError, ConflictError } from '@/lib/errors/api-error';
 import { apiLogger } from '@/lib/logger';
@@ -25,6 +26,12 @@ export const POST = withUserApi(async (request: NextRequest, ctx) => {
   }
 
   const { plan, billingCycle, method, courseId } = parsed.data;
+
+  // PIX (Pix Automático) ainda não liberado pela Stripe — ver lib/payments/config.ts.
+  // Defesa server-side: mesmo que o frontend esconda a opção, rejeitamos aqui.
+  if (method === 'pix' && !PIX_ENABLED) {
+    throw new ValidationError('Pagamento via PIX está temporariamente indisponível. Use cartão de crédito.');
+  }
 
   const existing = await prisma.subscription.findFirst({
     where: {
