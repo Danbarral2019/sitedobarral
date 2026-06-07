@@ -1,10 +1,10 @@
 import Link from 'next/link';
-import Image from 'next/image';
 import dynamic from 'next/dynamic';
 import { Suspense } from 'react';
 import { ArrowRight, BookOpen, Star, Scale, BookMarked, FileCheck, Landmark, ScrollText, Gavel, FileText, Building2 } from 'lucide-react';
 import NewsletterForm from '@/components/NewsletterForm';
 import HomeNovidadesSection from '@/components/HomeNovidadesSection';
+import HomeHeroSearch from '@/components/HomeHeroSearch';
 import {
   getCachedDocumentCountByCategory,
   getCachedLeiArticleCount,
@@ -106,56 +106,40 @@ export default async function Home() {
   return (
     <main>
       {/* 1. Hero Section */}
-      <section className="text-white py-20 relative overflow-hidden bg-gradient-to-b from-brand-600 via-brand-600 to-brand-700">
+      <section className="text-white py-20 md:py-24 relative overflow-hidden bg-gradient-to-b from-brand-600 via-brand-600 to-brand-700">
         <div className="container mx-auto px-4">
-          <div className="relative max-w-7xl mx-auto">
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-0 items-center">
-              <div className="lg:col-span-8 relative z-10 text-center lg:text-left">
-                <div className="bg-gradient-to-r from-brand-700/95 via-brand-700/90 to-transparent lg:py-12 lg:pl-8 lg:pr-16 rounded-2xl lg:backdrop-blur-sm">
-                  <h1 className="text-4xl md:text-5xl font-cinzel font-semibold mb-6 tracking-wide">
-                    Prof. Daniel Barral
-                  </h1>
-                  <p className="text-xl md:text-2xl mb-4 font-poppins font-normal">
-                    Professor | Mestre em Direito Público
-                  </p>
-                  <p className="text-lg mb-8 text-brand-100 font-poppins">
-                    Especialista em Licitações e Contratos Administrativos
-                  </p>
-                  <p className="text-lg mb-10 max-w-2xl mx-auto lg:mx-0 text-brand-100/90 font-poppins leading-relaxed">
-                    Repositório especializado de materiais jurídicos em Direito Administrativo,
-                    com foco em fortalecer seu conhecimento e aprimorar suas atividades funcionais.
-                  </p>
-                  <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
-                    <Link
-                      href="/cursos"
-                      className="bg-white text-brand-700 px-8 py-3 rounded-lg font-poppins font-semibold hover:bg-brand-50 transition-colors inline-flex items-center justify-center gap-2"
-                    >
-                      <BookOpen className="w-5 h-5" />
-                      Explorar Cursos
-                    </Link>
-                    <Link
-                      href="/login"
-                      className="bg-blue-600 text-white px-8 py-3 rounded-lg font-poppins font-semibold hover:bg-blue-700 transition-colors inline-flex items-center justify-center gap-2 border border-blue-500"
-                    >
-                      Área do Aluno
-                      <ArrowRight className="w-5 h-5 text-white" />
-                    </Link>
-                  </div>
-                </div>
-              </div>
+          <div className="max-w-3xl mx-auto text-center">
+            <h1 className="text-4xl md:text-5xl font-cinzel font-semibold mb-6 tracking-wide">
+              Prof. Daniel Barral
+            </h1>
+            <p className="text-xl md:text-2xl mb-4 font-poppins font-normal">
+              Professor | Mestre em Direito Público
+            </p>
+            <p className="text-lg mb-8 text-brand-100 font-poppins">
+              Especialista em Licitações e Contratos Administrativos
+            </p>
+            <p className="text-lg mb-10 max-w-2xl mx-auto text-brand-100/90 font-poppins leading-relaxed">
+              Repositório especializado de materiais jurídicos em Direito Administrativo,
+              com foco em fortalecer seu conhecimento e aprimorar suas atividades funcionais.
+            </p>
 
-              <div className="lg:col-span-5 relative lg:absolute lg:right-0 lg:top-1/2 lg:-translate-y-1/2 lg:w-[55%] hidden lg:block">
-                <div className="relative h-[600px] w-full rounded-2xl overflow-hidden shadow-2xl">
-                  <Image
-                    src="/images/professor/banner-home.jpg"
-                    alt="Prof. Daniel Barral"
-                    fill
-                    className="object-cover object-[40%_center]"
-                    sizes="(max-width: 1023px) 0px, 55vw"
-                    loading="eager"
-                  />
-                </div>
-              </div>
+            <HomeHeroSearch className="max-w-xl mx-auto mb-10" />
+
+            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+              <Link
+                href="/cursos"
+                className="bg-white text-brand-700 px-8 py-3 rounded-lg font-poppins font-semibold hover:bg-brand-50 transition-colors inline-flex items-center justify-center gap-2"
+              >
+                <BookOpen className="w-5 h-5" />
+                Explorar Cursos
+              </Link>
+              <Link
+                href="/login"
+                className="bg-blue-600 text-white px-8 py-3 rounded-lg font-poppins font-semibold hover:bg-blue-700 transition-colors inline-flex items-center justify-center gap-2 border border-blue-500"
+              >
+                Área do Aluno
+                <ArrowRight className="w-5 h-5 text-white" />
+              </Link>
             </div>
           </div>
         </div>
