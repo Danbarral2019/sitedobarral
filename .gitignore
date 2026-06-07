@@ -107,3 +107,6 @@ build-*.log
 agu-scraper-v4-import.json
 agu-scraper-v4-report.csv
 dev.log
+
+# Superpowers brainstorm (visual companion)
+.superpowers/
