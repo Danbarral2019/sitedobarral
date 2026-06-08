@@ -61,7 +61,7 @@ describe('withGeminiKeyFallback', () => {
     expect(fn).toHaveBeenNthCalledWith(1, 'primary-key');
     expect(fn).toHaveBeenNthCalledWith(2, 'backup-key');
     expect(apiLogger.warn).toHaveBeenCalledWith(
-      expect.objectContaining({ keyIndex: 0, nextIndex: 1 }),
+      expect.objectContaining({ attempt: 1, totalKeys: 2 }),
       expect.stringContaining('quota-exhausted'),
     );
   });
@@ -75,6 +75,7 @@ describe('withGeminiKeyFallback', () => {
 
     await expect(withGeminiKeyFallback(fn)).rejects.toBe(backupErr);
     expect(fn).toHaveBeenCalledTimes(2);
+    expect(apiLogger.warn).toHaveBeenCalledTimes(1);
   });
 
   it('propaga erro não-quota direto sem tentar backup', async () => {

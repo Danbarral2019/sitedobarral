@@ -38,7 +38,7 @@ export async function withGeminiKeyFallback<T>(
       const isLast = i === keys.length - 1;
       if (isLast || !isRateLimitError(err)) throw err;
       apiLogger.warn(
-        { keyIndex: i, nextIndex: i + 1 },
+        { attempt: i + 1, totalKeys: keys.length },
         'gemini.key.quota-exhausted, trying backup',
       );
     }
