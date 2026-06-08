@@ -9,27 +9,18 @@
  */
 
 import { GoogleGenAI } from '@google/genai';
+import { withGeminiKeyFallback } from '@/lib/gemini/api-key-fallback';
 
 // ===========================
 // Configuration
 // ===========================
 
-const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
 const EMBEDDING_MODEL = process.env.EMBEDDING_MODEL || 'gemini-embedding-2-preview';
 const EMBEDDING_DIMENSION = 768; // Nosso banco usa vector(768); Matryoshka truncation
 
-// Lazy-loaded client
-let genAI: GoogleGenAI | null = null;
-
-function getGenAI(): GoogleGenAI {
-  if (!GEMINI_API_KEY) {
-    throw new Error('GEMINI_API_KEY not configured');
-  }
-  if (!genAI) {
-    genAI = new GoogleGenAI({ apiKey: GEMINI_API_KEY });
-  }
-  return genAI;
-}
+// Cliente instanciado por chamada via withGeminiKeyFallback (sem cache em
+// memória) para suportar fallback entre GEMINI_API_KEY e GEMINI_API_KEY_BACKUP.
+// Custo desprezível: SDK só abre conexão na primeira chamada de método.
 
 // ===========================
 // Types
@@ -63,26 +54,28 @@ export async function generateEmbedding(text: string): Promise<EmbeddingResult> 
     throw new Error('Text cannot be empty');
   }
 
-  const ai = getGenAI();
+  return withGeminiKeyFallback(async (apiKey) => {
+    const ai = new GoogleGenAI({ apiKey });
 
-  const result = await ai.models.embedContent({
-    model: EMBEDDING_MODEL,
-    contents: text,
-    config: {
-      outputDimensionality: EMBEDDING_DIMENSION,
-    },
+    const result = await ai.models.embedContent({
+      model: EMBEDDING_MODEL,
+      contents: text,
+      config: {
+        outputDimensionality: EMBEDDING_DIMENSION,
+      },
+    });
+
+    const embedding = result.embeddings?.[0]?.values;
+    if (!embedding) {
+      throw new Error('No embedding returned from Gemini API');
+    }
+
+    return {
+      embedding,
+      model: EMBEDDING_MODEL,
+      dimension: EMBEDDING_DIMENSION,
+    };
   });
-
-  const embedding = result.embeddings?.[0]?.values;
-  if (!embedding) {
-    throw new Error('No embedding returned from Gemini API');
-  }
-
-  return {
-    embedding,
-    model: EMBEDDING_MODEL,
-    dimension: EMBEDDING_DIMENSION,
-  };
 }
 
 // ===========================
@@ -112,43 +105,47 @@ export async function generateBatchEmbeddings(
     throw new Error('All texts are empty');
   }
 
-  const ai = getGenAI();
-
   // Gemini API limita BatchEmbedContentsRequest a 100 requests por call (limite hard,
   // independente do tier). Tentativa de 250 falhava com 400 INVALID_ARGUMENT em
   // atos grandes (Portaria SGD/MGI 1.070/2023 e 5.950/2023, ~200 chunks cada).
   // Fix descoberto em 2026-04-25 quando rodando index-legislative-acts.
   const BATCH_SIZE = 100;
-  const allEmbeddings: number[][] = [];
 
-  for (let i = 0; i < validTexts.length; i += BATCH_SIZE) {
-    const batch = validTexts.slice(i, i + BATCH_SIZE);
+  const allEmbeddings = await withGeminiKeyFallback(async (apiKey) => {
+    const ai = new GoogleGenAI({ apiKey });
+    const result: number[][] = [];
 
-    // embedContent com contents como array retorna multiple embeddings
-    const result = await ai.models.embedContent({
-      model: EMBEDDING_MODEL,
-      contents: batch.map(text => ({ role: 'user' as const, parts: [{ text }] })),
-      config: {
-        outputDimensionality: EMBEDDING_DIMENSION,
-      },
-    });
+    for (let i = 0; i < validTexts.length; i += BATCH_SIZE) {
+      const batch = validTexts.slice(i, i + BATCH_SIZE);
 
-    if (!result.embeddings || result.embeddings.length !== batch.length) {
-      throw new Error(`Expected ${batch.length} embeddings, got ${result.embeddings?.length ?? 0}`);
-    }
+      // embedContent com contents como array retorna multiple embeddings
+      const response = await ai.models.embedContent({
+        model: EMBEDDING_MODEL,
+        contents: batch.map(text => ({ role: 'user' as const, parts: [{ text }] })),
+        config: {
+          outputDimensionality: EMBEDDING_DIMENSION,
+        },
+      });
 
-    for (const emb of result.embeddings) {
-      if (!emb.values) {
-        throw new Error('No embedding values returned from Gemini API in batch');
+      if (!response.embeddings || response.embeddings.length !== batch.length) {
+        throw new Error(`Expected ${batch.length} embeddings, got ${response.embeddings?.length ?? 0}`);
       }
-      allEmbeddings.push(emb.values);
+
+      for (const emb of response.embeddings) {
+        if (!emb.values) {
+          throw new Error('No embedding values returned from Gemini API in batch');
+        }
+        result.push(emb.values);
+      }
+
+      // Small delay between batches to avoid rate limiting (tier pago, ROADMAP_GEMINI_PAGO.md Fase 4)
+      if (i + BATCH_SIZE < validTexts.length) {
+        await new Promise(resolve => setTimeout(resolve, 25));
+      }
     }
 
-    // Small delay between batches to avoid rate limiting (tier pago, ROADMAP_GEMINI_PAGO.md Fase 4)
-    if (i + BATCH_SIZE < validTexts.length) {
-      await new Promise(resolve => setTimeout(resolve, 25));
-    }
-  }
+    return result;
+  });
 
   return {
     embeddings: allEmbeddings,
