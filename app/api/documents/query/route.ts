@@ -1027,6 +1027,11 @@ RESPOSTA:`;
       synthesizedAnswer = geminiResult.response;
     } catch (error) {
       apiLogger.error({ error }, 'Gemini synthesis failed');
+      // Quota Gemini esgotada durante a síntese: re-lança pra o outer catch
+      // classificar como 503 + code='QUOTA_EXHAUSTED'. Outros erros (safety,
+      // network) ficam silenciosos — endpoint ainda retorna documentos no
+      // resultado, só sem síntese IA.
+      if (isRateLimitError(error)) throw error;
     }
 
     const latency = Date.now() - startTime;

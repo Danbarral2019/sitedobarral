@@ -166,4 +166,37 @@ describe('/api/documents/query — quota exhausted', () => {
     expect(text).toContain('"code":"QUOTA_EXHAUSTED"');
     expect(text).toContain('data: [DONE]');
   });
+
+  it('non-stream: retorna 503 também quando queryGeminiText (síntese) lança 429', async () => {
+    // hybridSearch sucesso para que o pipeline chegue até o step 14 (synthesis)
+    mockHybridSearch.mockResolvedValue({
+      results: [
+        {
+          documentId: 'd1',
+          documentTitle: 'Doc',
+          category: 'apostila',
+          chunkContent: 'conteúdo',
+          chunkIndex: 0,
+          similarity: 0.7,
+          isCommon: true,
+          sourceType: 'document',
+          leiArticles: null,
+        },
+      ],
+      totalFound: 1,
+      cached: false,
+    });
+    // Primeira chamada (query expansion no step 5) retorna OK pra deixar
+    // o pipeline seguir; segunda chamada (synthesis no step 14) lança 429.
+    mockQueryGeminiText
+      .mockResolvedValueOnce({ response: '[]' })
+      .mockRejectedValueOnce(new Error('429 RESOURCE_EXHAUSTED quota'));
+
+    const res = await POST(makeReq({ query: 'dispensa de licitação', stream: false }));
+    expect(res.status).toBe(503);
+
+    const body = await res.json();
+    expect(body.code).toBe('QUOTA_EXHAUSTED');
+    expect(body.error).toMatch(/temporariamente indisponível/i);
+  });
 });
