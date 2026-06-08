@@ -212,6 +212,25 @@ export function useGlobalSearch(options: UseGlobalSearchOptions = {}): UseGlobal
           return;
         }
 
+        if (response.status === 503) {
+          // 503 do nosso endpoint pode ser quota Gemini esgotada (com
+          // code='QUOTA_EXHAUSTED') ou 503 de infraestrutura (Vercel timeout,
+          // Neon connection exhaustion, proxy upstream). Só tratamos como
+          // quota quando o body confirma — senão deixamos cair no throw
+          // genérico abaixo, que aciona o reporting de erro normal.
+          const body = await response.json().catch(() => ({} as { code?: string; error?: string }));
+          if (body.code === 'QUOTA_EXHAUSTED') {
+            if (!controller.signal.aborted) {
+              setAiError(body.error || 'Síntese IA indisponível no momento. Tente novamente em alguns minutos.');
+              setAiAnswer(null);
+              setAiSources([]);
+              setAiLegalSources([]);
+            }
+            return;
+          }
+          // Fall through: 503 não-quota cai no `if (!response.ok)` abaixo.
+        }
+
         if (!response.ok) {
           throw new Error('Falha na busca com IA');
         }
@@ -259,6 +278,18 @@ export function useGlobalSearch(options: UseGlobalSearchOptions = {}): UseGlobal
                 if (!controller.signal.aborted) {
                   setAiAnswer(fullAnswer);
                 }
+              } else if (parsed.type === 'error' && parsed.code === 'QUOTA_EXHAUSTED') {
+                // Quota Gemini esgotada mid-stream. Esconde card IA e mostra
+                // mensagem amigável. Resultados textuais continuam intactos
+                // via /api/area-restrita/global-search.
+                if (!controller.signal.aborted) {
+                  setAiError(parsed.message || 'Síntese IA indisponível no momento. Tente novamente em alguns minutos.');
+                  setAiAnswer(null);
+                  setAiSources([]);
+                  setAiLegalSources([]);
+                }
+                // Para de processar este stream (próximo [DONE] vai sair sozinho).
+                return;
               }
             } catch { /* ignore parse errors */ }
           }

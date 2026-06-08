@@ -20,6 +20,7 @@ import { checkRateLimit, withCache, CACHE_TTL } from '@/lib/cache/redis-client';
 import { parseLeiArticles, getLeiArticles } from '@/lib/lei-articles';
 import { trackServerEvent } from '@/lib/monitoring/events';
 import { apiLogger } from '@/lib/logger';
+import { isRateLimitError } from '@/lib/ai/error-detection';
 import {
   extractCitedArticles,
   selectRelevantArticles,
@@ -90,6 +91,9 @@ interface QueryResponse {
   latency: number;
   query: string;
   error?: string;
+  /** Código machine-readable para classificação de falhas pelo frontend.
+   *  'QUOTA_EXHAUSTED' = Gemini sem cota em todas as keys configuradas. */
+  code?: 'QUOTA_EXHAUSTED';
   synthesizedAnswer?: string;
   legalSources?: LegalSource[];
 }
@@ -970,8 +974,25 @@ RESPOSTA:`;
             controller.enqueue(encoder.encode('data: [DONE]\n\n'));
           } catch (err) {
             apiLogger.error({ error: err }, 'SSE streaming error');
-            const fallback = 'Não consegui sintetizar uma resposta agora. Consulte as fontes abaixo — elas contêm a informação relevante para sua pergunta.';
-            controller.enqueue(encoder.encode(`data: ${JSON.stringify({ type: 'token', text: fallback })}\n\n`));
+
+            // Quota Gemini esgotada mid-stream (ou na iniciação do stream).
+            // Emite evento de erro estruturado em vez do token genérico — o
+            // frontend distingue por code='QUOTA_EXHAUSTED' e mostra mensagem
+            // amigável + esconde o card de síntese IA.
+            if (isRateLimitError(err)) {
+              controller.enqueue(
+                encoder.encode(
+                  `data: ${JSON.stringify({
+                    type: 'error',
+                    code: 'QUOTA_EXHAUSTED',
+                    message: 'Síntese IA temporariamente indisponível por excesso de uso. A busca textual segue funcionando — tente novamente em alguns minutos.',
+                  })}\n\n`,
+                ),
+              );
+            } else {
+              const fallback = 'Não consegui sintetizar uma resposta agora. Consulte as fontes abaixo — elas contêm a informação relevante para sua pergunta.';
+              controller.enqueue(encoder.encode(`data: ${JSON.stringify({ type: 'token', text: fallback })}\n\n`));
+            }
             controller.enqueue(encoder.encode('data: [DONE]\n\n'));
           } finally {
             controller.close();
@@ -1006,6 +1027,11 @@ RESPOSTA:`;
       synthesizedAnswer = geminiResult.response;
     } catch (error) {
       apiLogger.error({ error }, 'Gemini synthesis failed');
+      // Quota Gemini esgotada durante a síntese: re-lança pra o outer catch
+      // classificar como 503 + code='QUOTA_EXHAUSTED'. Outros erros (safety,
+      // network) ficam silenciosos — endpoint ainda retorna documentos no
+      // resultado, só sem síntese IA.
+      if (isRateLimitError(error)) throw error;
     }
 
     const latency = Date.now() - startTime;
@@ -1026,6 +1052,26 @@ RESPOSTA:`;
 
   } catch (error) {
     apiLogger.error({ error }, 'Document query failed');
+
+    // Quota Gemini esgotada em todas as keys configuradas — degrada
+    // graciosamente. Frontend trata 503 + code='QUOTA_EXHAUSTED' para
+    // esconder card IA e mostrar mensagem amigável; resultados textuais
+    // via /api/area-restrita/global-search seguem funcionando.
+    if (isRateLimitError(error)) {
+      return NextResponse.json<QueryResponse>(
+        {
+          success: false,
+          code: 'QUOTA_EXHAUSTED',
+          error: 'Síntese IA temporariamente indisponível por excesso de uso. A busca textual segue funcionando — tente novamente em alguns minutos.',
+          results: [],
+          totalDocuments: 0,
+          cached: false,
+          latency: Date.now() - startTime,
+          query: '',
+        },
+        { status: 503 }
+      );
+    }
 
     return NextResponse.json<QueryResponse>(
       {

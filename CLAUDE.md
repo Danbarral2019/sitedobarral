@@ -426,6 +426,7 @@ export async function GET(request: NextRequest) {
 
 - `ANTHROPIC_API_KEY` - AI summaries
 - `GEMINI_API_KEY` - Chat RAG e busca semântica
+- `GEMINI_API_KEY_BACKUP` - chave Gemini de backup (opcional). Quando a primária retorna 429/RESOURCE_EXHAUSTED, sistema tenta a backup antes de degradar para FTS-only. Recomendado em produção. Implementação: `lib/gemini/api-key-fallback.ts`.
 - `MAILCHIMP_*` - Newsletter
 - `INSTAGRAM_*`, `LINKEDIN_*` - Social media
 - `CRON_SECRET` - Cron job protection
