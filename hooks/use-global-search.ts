@@ -213,17 +213,22 @@ export function useGlobalSearch(options: UseGlobalSearchOptions = {}): UseGlobal
         }
 
         if (response.status === 503) {
-          // Quota Gemini esgotada em todas as keys configuradas. Resultados
-          // textuais via /api/area-restrita/global-search continuam normais —
-          // só escondemos o card de síntese IA.
+          // 503 do nosso endpoint pode ser quota Gemini esgotada (com
+          // code='QUOTA_EXHAUSTED') ou 503 de infraestrutura (Vercel timeout,
+          // Neon connection exhaustion, proxy upstream). Só tratamos como
+          // quota quando o body confirma — senão deixamos cair no throw
+          // genérico abaixo, que aciona o reporting de erro normal.
           const body = await response.json().catch(() => ({} as { code?: string; error?: string }));
-          if (!controller.signal.aborted) {
-            setAiError(body.error || 'Síntese IA indisponível no momento. Tente novamente em alguns minutos.');
-            setAiAnswer(null);
-            setAiSources([]);
-            setAiLegalSources([]);
+          if (body.code === 'QUOTA_EXHAUSTED') {
+            if (!controller.signal.aborted) {
+              setAiError(body.error || 'Síntese IA indisponível no momento. Tente novamente em alguns minutos.');
+              setAiAnswer(null);
+              setAiSources([]);
+              setAiLegalSources([]);
+            }
+            return;
           }
-          return;
+          // Fall through: 503 não-quota cai no `if (!response.ok)` abaixo.
         }
 
         if (!response.ok) {
