@@ -188,8 +188,9 @@ export async function GET(
     });
 
     // Busca todos os LegislativeActs que linkam este artigo (sempre públicos)
+    // revoked: false → atos revogados não entram nos "atos relacionados" do artigo
     const acts = await prisma.legislativeAct.findMany({
-      where: { leiArticlesArr: { isEmpty: false } },
+      where: { leiArticlesArr: { isEmpty: false }, revoked: false },
       select: {
         id: true,
         fullNumber: true,

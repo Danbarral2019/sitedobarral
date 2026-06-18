@@ -387,6 +387,7 @@ async function executeVectorSearch(
       FROM "LegislativeActChunk" lc
       JOIN "LegislativeAct" la ON lc."legislativeActId" = la.id
       WHERE la."embeddingStatus" = 'completed'
+        AND la."revoked" = false
     )`);
 
     unions.push(`(SELECT * FROM act_scores WHERE similarity >= $${actThresholdIdx} ORDER BY similarity DESC LIMIT $${actLimitIdx})`);

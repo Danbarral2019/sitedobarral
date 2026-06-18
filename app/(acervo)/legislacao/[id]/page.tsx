@@ -70,6 +70,8 @@ async function getLegislativeAct(id: string) {
       pdfUrl: doc.url || null,
       viewCount: 0,
       status: 'active',
+      revoked: false,
+      revokedNote: null,
       annexesJson: null,
       createdAt: doc.uploadedAt,
       updatedAt: doc.uploadedAt,
@@ -136,6 +138,7 @@ export default async function LegislativeActPage({ params }: PageProps) {
   // Buscar relações entre atos (revoga/altera/regulamenta/etc.)
   // Se vier do fallback Document (não LegislativeAct), retorna vazio sem custo significativo
   const relations = await getRelationsForAct(act.id);
+  const hasRelations = relations.alters.length > 0 || relations.alteredBy.length > 0;
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50">
@@ -148,6 +151,22 @@ export default async function LegislativeActPage({ params }: PageProps) {
           <ArrowLeft className="w-4 h-4" />
           Voltar para Legislação
         </Link>
+
+        {/* Banner de ato revogado — o ato continua acessível por link direto,
+            mas com aviso destacado (não aparece em buscas/listagens públicas). */}
+        {act.revoked && (
+          <div className="mb-6 rounded-xl border-2 border-red-300 bg-red-50 p-5 flex items-start gap-3">
+            <span className="text-2xl leading-none" aria-hidden="true">🚫</span>
+            <div>
+              <p className="font-bold text-red-800">Ato revogado</p>
+              <p className="text-sm text-red-700 mt-1">
+                {act.revokedNote
+                  ? act.revokedNote
+                  : 'Este ato normativo foi revogado e não está mais em vigor. Mantido na base apenas para consulta histórica.'}
+              </p>
+            </div>
+          </div>
+        )}
 
         {/* Header */}
         <div className="bg-white rounded-xl shadow-lg p-8 mb-6">
@@ -232,6 +251,16 @@ export default async function LegislativeActPage({ params }: PageProps) {
             </div>
           )}
         </div>
+
+        {/* Relações com outros atos — exibidas no topo para destaque imediato
+            (revogações, alterações, regulamentações etc.). Só renderiza se houver. */}
+        {hasRelations && (
+          <RelationHistory
+            alters={relations.alters}
+            alteredBy={relations.alteredBy}
+            currentHierarchyLevel={act.hierarchyLevel ?? undefined}
+          />
+        )}
 
         {/* Ementa */}
         <div className="bg-white rounded-xl shadow-lg p-8 mb-6">
@@ -345,13 +374,6 @@ export default async function LegislativeActPage({ params }: PageProps) {
             </div>
           </div>
         )}
-
-        {/* Histórico de relações (este ato altera / é alterado por outros) */}
-        <RelationHistory
-          alters={relations.alters}
-          alteredBy={relations.alteredBy}
-          currentHierarchyLevel={act.hierarchyLevel ?? undefined}
-        />
 
         {/* Artigos Relacionados da Lei 14.133 */}
         {leiArticlesArray.length > 0 && (

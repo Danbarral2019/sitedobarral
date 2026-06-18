@@ -236,6 +236,7 @@ export async function searchLegislativeActs(
       ts_rank(search_vector, ${buildTsQueryExpr(1)}) as rank
     FROM "LegislativeAct"
     WHERE search_vector @@ ${buildTsQueryExpr(1)}
+      AND "revoked" = false
     ORDER BY rank DESC, "hierarchyLevel" ASC, year DESC
     LIMIT ${limit}
   `;

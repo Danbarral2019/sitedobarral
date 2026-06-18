@@ -147,8 +147,8 @@ export async function GET(request: NextRequest) {
         });
       })(),
 
-      // 6. Legislative Acts count
-      prisma.legislativeAct.count(),
+      // 6. Legislative Acts count (exclui revogados das visões públicas)
+      prisma.legislativeAct.count({ where: { revoked: false } }),
 
       // 7. LMS modules count by course
       prisma.module.groupBy({

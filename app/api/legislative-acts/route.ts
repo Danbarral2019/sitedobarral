@@ -116,7 +116,8 @@ async function fetchAtosNormativos(params: AtosParams) {
   const { type, issuer, year, search, articleNumber, esfera, theme, page, limit, skip, ticOnly, sort } = params;
 
   // Construir where clause
-  const where: Record<string, unknown> = {};
+  // revoked: false → atos totalmente revogados não aparecem nas visões públicas
+  const where: Record<string, unknown> = { revoked: false };
 
   if (type) where.type = type;
   if (issuer) where.issuer = issuer;
@@ -180,7 +181,9 @@ async function fetchAtosNormativos(params: AtosParams) {
   }));
 
   // Buscar estatísticas de filtros disponíveis (respeitando filtro TIC)
-  const statsWhere = ticOnly ? { themes: { contains: '"tic"' } } : {};
+  const statsWhere: Record<string, unknown> = ticOnly
+    ? { revoked: false, themes: { contains: '"tic"' } }
+    : { revoked: false };
   const [typeStats, issuerStats, yearStats, esferaStats] = await Promise.all([
     prisma.legislativeAct.groupBy({
       by: ['type'],

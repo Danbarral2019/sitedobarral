@@ -749,6 +749,13 @@ model LegislativeAct {
   // Analytics
   viewCount Int @default(0)
 
+  // Revogação — atos totalmente revogados são ocultados das visões públicas
+  // (listagem, busca textual/semântica, novidades, atos relacionados) mas
+  // preservados no banco e acessíveis por link direto com aviso. Curadoria
+  // manual: as relações 'revoga' têm muito falso positivo (revogação parcial).
+  revoked     Boolean @default(false)
+  revokedNote String? // Texto opcional p/ o banner (ex: "Revogado pelo Decreto 11.951/2024")
+
   // Scraping e atualização automática
   contentHash      String? // Hash MD5 para detectar mudanças no texto
   lastScrapedAt    DateTime? // Última tentativa de scraping
@@ -802,6 +809,7 @@ model LegislativeAct {
   @@index([lastScrapedAt])
   @@index([scrapeStatus])
   @@index([embeddingStatus])
+  @@index([revoked])
   @@index([leiArticlesArr], type: Gin) // Onda 4.5 (GIN)
 }
 

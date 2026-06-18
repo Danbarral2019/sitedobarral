@@ -124,7 +124,7 @@ export default async function NovidadesPage({ searchParams }: { searchParams: Pr
         select: { title: true, courseId: true, youtubeUrl: true, createdAt: true },
       }),
       prisma.legislativeAct.findMany({
-        where: { publishDate: { gte: startDate, lte: endDate } },
+        where: { publishDate: { gte: startDate, lte: endDate }, revoked: false },
         orderBy: { publishDate: 'desc' },
         select: { fullNumber: true, title: true, ementa: true, publishDate: true },
       }),
