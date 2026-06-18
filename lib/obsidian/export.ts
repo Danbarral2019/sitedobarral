@@ -55,6 +55,8 @@ export interface DbLegislativeAct {
   leiArticlesArr: string[];
   themes: string | null;
   officialUrl: string | null;
+  revoked: boolean;
+  revokedNote: string | null;
 }
 
 export interface DbTribunalDecision {
@@ -93,6 +95,7 @@ export const EXPORT_ACT_SELECT = {
   id: true, fullNumber: true, type: true, title: true,
   ementa: true, summary: true, issuer: true, publishDate: true,
   hierarchyLevel: true, leiArticlesArr: true, themes: true, officialUrl: true,
+  revoked: true, revokedNote: true,
 } as const;
 
 export const EXPORT_DECISION_SELECT = {
@@ -209,6 +212,83 @@ export function decisionSlug(dec: DbTribunalDecision): string {
     : dec.decisionType === 'parecer_previo' ? 'Parecer'
     : dec.decisionType;
   return sanitizeFilename(`JUR - ${code} ${typeLabel} ${dec.decisionNumber}`);
+}
+
+/**
+ * Resolve um slug único, distinguindo duplicatas reais de colisões entre
+ * registros distintos. Retorna o slug-base quando livre; null quando o slug já
+ * pertence a um registro com MESMO título e MESMA url (duplicata real, deve ser
+ * colapsada); ou um slug desambiguado de forma determinística (ano e, se ainda
+ * colidir, id curto) para registros distintos que compartilham o slug-base.
+ * Não renomeia slugs já únicos.
+ */
+export function resolveUniqueSlug(
+  baseSlug: string,
+  rec: { id: string; title: string; url: string | null; year?: number },
+  used: Map<string, { title: string; url: string | null }>,
+): string | null {
+  const norm = (s: string | null | undefined) => (s ?? '').trim();
+  const existing = used.get(baseSlug);
+  if (!existing) {
+    used.set(baseSlug, { title: rec.title, url: rec.url });
+    return baseSlug;
+  }
+  if (norm(existing.title) === norm(rec.title) && norm(existing.url) === norm(rec.url)) {
+    return null; // duplicata real → colapsar
+  }
+  const candidates: string[] = [];
+  if (rec.year) candidates.push(sanitizeFilename(`${baseSlug} (${rec.year})`));
+  candidates.push(sanitizeFilename(`${baseSlug} (${rec.id.slice(0, 8)})`));
+  candidates.push(sanitizeFilename(`${baseSlug} (${rec.id})`));
+  for (const c of candidates) {
+    if (!used.has(c)) {
+      used.set(c, { title: rec.title, url: rec.url });
+      return c;
+    }
+  }
+  const fb = sanitizeFilename(`${baseSlug} (${rec.id})`);
+  used.set(fb, { title: rec.title, url: rec.url });
+  return fb;
+}
+
+/**
+ * Registro global de slugs resolvidos (recordId → slug único), populado por
+ * assignSlugs. Os geradores de wikilink consultam este registro para apontar
+ * para a nota desambiguada correta; na ausência de entrada, recaem no slug-base.
+ */
+const RESOLVED_SLUG_BY_ID = new Map<string, string>();
+
+/**
+ * Atribui slugs únicos a uma coleção inteira, de forma estável (ordenada por
+ * id). Retorna mapa recordId → slug; registros duplicados (colapsados) ficam de
+ * fora do mapa. Também popula RESOLVED_SLUG_BY_ID. Usado tanto no export
+ * completo quanto no incremental, para que nomes de arquivo e wikilinks
+ * coincidam entre os dois modos.
+ */
+export function assignSlugs<T extends { id: string; title: string; url: string | null; year?: number }>(
+  records: T[],
+  baseSlugOf: (r: T) => string,
+): Map<string, string> {
+  const used = new Map<string, { title: string; url: string | null }>();
+  const out = new Map<string, string>();
+  for (const r of [...records].sort((a, b) => a.id.localeCompare(b.id))) {
+    const slug = resolveUniqueSlug(baseSlugOf(r), r, used);
+    if (slug) {
+      out.set(r.id, slug);
+      RESOLVED_SLUG_BY_ID.set(r.id, slug);
+    }
+  }
+  return out;
+}
+
+/** Slug do documento para wikilink: usa o slug único resolvido, se houver. */
+export function documentSlugFor(doc: DbDocument): string {
+  return RESOLVED_SLUG_BY_ID.get(doc.id) ?? documentSlug(doc);
+}
+
+/** Slug da decisão para wikilink: usa o slug único resolvido, se houver. */
+export function decisionSlugFor(dec: DbTribunalDecision): string {
+  return RESOLVED_SLUG_BY_ID.get(dec.id) ?? decisionSlug(dec);
 }
 
 export function enunciadoSlug(en: Enunciado): string {
@@ -368,7 +448,7 @@ export function generateArticleMd(
   if (docs.length > 0) {
     lines.push('## Documentos Vinculados');
     for (const doc of docs) {
-      lines.push(`- ${wikilink(documentSlug(doc))}`);
+      lines.push(`- ${wikilink(documentSlugFor(doc))}`);
     }
     lines.push('');
   }
@@ -384,7 +464,7 @@ export function generateArticleMd(
   if (decs.length > 0) {
     lines.push('## Jurisprudência');
     for (const dec of decs) {
-      lines.push(`- ${wikilink(decisionSlug(dec))}`);
+      lines.push(`- ${wikilink(decisionSlugFor(dec))}`);
     }
     lines.push('');
   }
@@ -497,13 +577,25 @@ export function generateActMd(act: DbLegislativeAct): string {
   lines.push(`issuer: ${yamlStr(act.issuer)}`);
   lines.push(`hierarchy: ${act.hierarchyLevel}`);
   lines.push(`publishDate: ${act.publishDate.toISOString().slice(0, 10)}`);
+  lines.push(`situacao: ${act.revoked ? 'revogado' : 'vigente'}`);
+  if (act.revoked && act.revokedNote) lines.push(`revogadoPor: ${yamlStr(act.revokedNote)}`);
   if (act.officialUrl) lines.push(`url: ${yamlStr(act.officialUrl)}`);
-  if (themes.length > 0) lines.push(`tags: ${yamlArray([act.type, ...themes])}`);
+  if (themes.length > 0) {
+    const baseTags = [act.type, ...themes];
+    lines.push(`tags: ${yamlArray(act.revoked ? [...baseTags, 'revogado'] : baseTags)}`);
+  }
   lines.push('---');
   lines.push('');
 
   lines.push(`# ${act.fullNumber}`);
   lines.push('');
+
+  if (act.revoked) {
+    const motivo = act.revokedNote ? ` (${act.revokedNote})` : '';
+    lines.push(`> [!warning] Ato revogado${motivo}`);
+    lines.push('> Não vigente. Oculto da busca do site; mantido no acervo apenas para referência histórica.');
+    lines.push('');
+  }
 
   lines.push(`> ${act.ementa}`);
   lines.push('');
@@ -671,7 +763,7 @@ export function generateTemaMd(
   if (themeDocs.length > 0) {
     lines.push('## Documentos sobre este tema');
     for (const doc of themeDocs.slice(0, 30)) {
-      lines.push(`- ${wikilink(documentSlug(doc))}`);
+      lines.push(`- ${wikilink(documentSlugFor(doc))}`);
     }
     if (themeDocs.length > 30) lines.push(`- *(+${themeDocs.length - 30} documentos)*`);
     lines.push('');
@@ -698,7 +790,7 @@ export function generateTemaMd(
   if (themeDecs.length > 0) {
     lines.push('## Jurisprudência');
     for (const dec of themeDecs.slice(0, 20)) {
-      lines.push(`- ${wikilink(decisionSlug(dec))}`);
+      lines.push(`- ${wikilink(decisionSlugFor(dec))}`);
     }
     if (themeDecs.length > 20) lines.push(`- *(+${themeDecs.length - 20} decisões)*`);
     lines.push('');
@@ -798,6 +890,10 @@ export function generateAllFiles(
   const files: FileEntry[] = [];
   const articleEntries = Object.entries(LEI_14133_ARTIGOS);
 
+  // Resolve slugs únicos antes de gerar wikilinks (artigos referenciam docs/decisões)
+  const docSlugById = assignSlugs(documents, documentSlug);
+  const decSlugById = assignSlugs(decisions, decisionSlug);
+
   // Articles
   for (const [, art] of articleEntries) {
     files.push({
@@ -806,12 +902,10 @@ export function generateAllFiles(
     });
   }
 
-  // Documents (deduplicate by slug)
-  const docSlugs = new Set<string>();
+  // Documents (collapse true duplicates, disambiguate distinct collisions)
   for (const doc of documents) {
-    const slug = documentSlug(doc);
-    if (docSlugs.has(slug)) continue;
-    docSlugs.add(slug);
+    const slug = docSlugById.get(doc.id);
+    if (!slug) continue;
     files.push({
       path: join('Documentos', `${slug}.md`),
       content: generateDocumentMd(doc),
@@ -826,12 +920,10 @@ export function generateAllFiles(
     });
   }
 
-  // Decisions (deduplicate by slug)
-  const decSlugs = new Set<string>();
+  // Decisions (collapse true duplicates, disambiguate distinct collisions)
   for (const dec of decisions) {
-    const slug = decisionSlug(dec);
-    if (decSlugs.has(slug)) continue;
-    decSlugs.add(slug);
+    const slug = decSlugById.get(dec.id);
+    if (!slug) continue;
     files.push({
       path: join('Jurisprudência', `${slug}.md`),
       content: generateDecisionMd(dec),

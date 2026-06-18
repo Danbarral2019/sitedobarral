@@ -34,6 +34,7 @@ import {
   documentSlug,
   actSlug,
   decisionSlug,
+  assignSlugs,
   enunciadoSlug,
   temaSlug,
   writeVault,
@@ -164,6 +165,10 @@ export async function runIncrementalExport(
         const graph = buildLinkGraph(allDocuments, allActs, allDecisions);
         files = [];
 
+        // Resolve slugs únicos antes dos wikilinks (artigos referenciam docs/decisões)
+        const docSlugById = assignSlugs(allDocuments, documentSlug);
+        const decSlugById = assignSlugs(allDecisions, decisionSlug);
+
         // All articles (backlinks may have changed)
         for (const [, art] of Object.entries(LEI_14133_ARTIGOS)) {
           files.push({
@@ -174,12 +179,10 @@ export async function runIncrementalExport(
 
         // Changed documents
         const changedDocSet = new Set(changedDocIds);
-        const docSlugs = new Set<string>();
         for (const doc of allDocuments) {
           if (!changedDocSet.has(doc.id)) continue;
-          const slug = documentSlug(doc);
-          if (docSlugs.has(slug)) continue;
-          docSlugs.add(slug);
+          const slug = docSlugById.get(doc.id);
+          if (!slug) continue;
           files.push({
             path: join('Documentos', `${slug}.md`),
             content: generateDocumentMd(doc),
@@ -198,12 +201,10 @@ export async function runIncrementalExport(
 
         // Changed decisions
         const changedDecSet = new Set(changedDecisionIds);
-        const decSlugs = new Set<string>();
         for (const dec of allDecisions) {
           if (!changedDecSet.has(dec.id)) continue;
-          const slug = decisionSlug(dec);
-          if (decSlugs.has(slug)) continue;
-          decSlugs.add(slug);
+          const slug = decSlugById.get(dec.id);
+          if (!slug) continue;
           files.push({
             path: join('Jurisprudência', `${slug}.md`),
             content: generateDecisionMd(dec),
@@ -258,6 +259,10 @@ function generateStaticFiles(
   acts: DbLegislativeAct[],
   decisions: DbTribunalDecision[],
 ): FileEntry[] {
+  // Garante o registro de slugs únicos populado para os wikilinks de temas/MOC
+  assignSlugs(documents, documentSlug);
+  assignSlugs(decisions, decisionSlug);
+
   const files: FileEntry[] = [];
 
   for (const en of ENUNCIADOS) {
