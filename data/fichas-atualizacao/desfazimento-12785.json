@@ -1,0 +1,31 @@
+{
+  "homologadoPor": "danbarral@gmail.com",
+  "_origem": "Ficha homologada em 2026-06-18 (cofre: _Atualizacoes/desfazimento-bens_ficha-atualizacao_2026-06-18.md)",
+  "act": {
+    "type": "decreto",
+    "number": "12.785",
+    "year": 2025,
+    "title": "Decreto nº 12.785, de 19 de dezembro de 2025",
+    "ementa": "Dispõe sobre mecanismos para promoção da circularidade de bens móveis, no âmbito da administração pública federal direta, autárquica e fundacional.",
+    "summary": "Estabelece o regime de desfazimento de bens móveis inservíveis na Administração Pública Federal sob lógica de economia circular: classificação dos bens (em uso regular, ocioso, recuperável, antieconômico, irrecuperável), movimentação por cessão e transferência, alienação por leilão, doação e permuta, e descarte com destinação ambientalmente adequada. Revoga os Decretos nº 9.373/2018 e nº 10.340/2020. Editado com base na Lei nº 12.305/2010 (Política Nacional de Resíduos Sólidos) e na Lei nº 14.133/2021.",
+    "issuer": "Presidência da República",
+    "publishDate": "2025-12-22",
+    "effectiveDate": "2025-12-22",
+    "leiArticles": ["76", "77"],
+    "officialUrl": "https://www.planalto.gov.br/ccivil_03/_ato2023-2026/2025/decreto/d12785.htm",
+    "esfera": "federal",
+    "themes": ["sustentabilidade", "contratacao-direta"]
+  },
+  "revoga": [
+    { "type": "decreto", "number": "9.373", "year": 2018 },
+    { "type": "decreto", "number": "10.340", "year": 2020 }
+  ],
+  "altera": [],
+  "relacoesExtras": [
+    {
+      "sourceRef": { "type": "decreto", "number": "9.373", "year": 2018 },
+      "targetRef": { "type": "decreto", "number": "99.658", "year": 1990 },
+      "relationType": "revoga"
+    }
+  ]
+}

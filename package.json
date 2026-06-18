@@ -25,7 +25,8 @@
     "export:obsidian": "tsx scripts/sync-obsidian.ts --export-only",
     "import:obsidian": "tsx scripts/sync-obsidian.ts --import-only",
     "migration:api:status": "tsx scripts/api-migration-status.ts",
-    "migration:lei-articles:backfill": "tsx scripts/backfill-lei-articles-arr.ts"
+    "migration:lei-articles:backfill": "tsx scripts/backfill-lei-articles-arr.ts",
+    "ficha:aplicar": "dotenv -e .env.local -- tsx scripts/aplicar-ficha-atualizacao.ts"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.78.0",
