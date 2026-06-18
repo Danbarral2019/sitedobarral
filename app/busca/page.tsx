@@ -1,6 +1,7 @@
 'use client';
 
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, Suspense } from 'react';
+import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import {
   Search, Gavel, Scale, FileText, Lock, ArrowRight,
@@ -83,9 +84,11 @@ const CATEGORY_LABELS: Record<string, string> = {
 
 type TabType = 'all' | 'lei' | 'acts' | 'docs' | 'glossary' | 'blog' | 'faq';
 
-export default function BuscaIntegradaPage() {
-  const [searchTerm, setSearchTerm] = useState('');
-  const [debouncedSearch, setDebouncedSearch] = useState('');
+function BuscaIntegradaContent() {
+  const searchParams = useSearchParams();
+  const initialQuery = searchParams.get('q') ?? '';
+  const [searchTerm, setSearchTerm] = useState(initialQuery);
+  const [debouncedSearch, setDebouncedSearch] = useState(initialQuery);
   const [results, setResults] = useState<SearchResults | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [activeTab, setActiveTab] = useState<TabType>('all');
@@ -760,5 +763,13 @@ export default function BuscaIntegradaPage() {
         </div>
       </div>
     </main>
+  );
+}
+
+export default function BuscaIntegradaPage() {
+  return (
+    <Suspense fallback={<main className="min-h-screen bg-gray-50" />}>
+      <BuscaIntegradaContent />
+    </Suspense>
   );
 }
