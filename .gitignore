@@ -95,6 +95,9 @@ lighthouse-report.report.*
 # Build logs (output local, não versionados)
 build-*.log
 
+# Superpowers framework — artefatos locais de brainstorm (screenshots, previews HTML, server.pid)
+.superpowers/
+
 # JSONs na raiz: bloquear por default (snapshots, reports, dumps gerados por
 # scripts ad-hoc). Whitelist os arquivos legítimos do projeto.
 /*.json
