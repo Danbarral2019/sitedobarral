@@ -78,10 +78,13 @@ vi.mock('@/lib/logger', () => ({
 
 process.env.GEMINI_API_KEY = 'test-key';
 
+import { NextRequest } from 'next/server';
 import { POST } from '@/app/api/jurisprudencia/query/route';
 
-function makeReq(body: unknown): Request {
-  return new Request('http://localhost/api/jurisprudencia/query', {
+const routeCtx = { params: Promise.resolve({}) };
+
+function makeReq(body: unknown): NextRequest {
+  return new NextRequest('http://localhost/api/jurisprudencia/query', {
     method: 'POST',
     headers: { 'content-type': 'application/json' },
     body: JSON.stringify(body),
@@ -168,7 +171,7 @@ describe('POST /api/jurisprudencia/query', () => {
       latency: 50,
     });
 
-    const res = await POST(makeReq({ query: 'pregão eletrônico', filters: { tribunal: 'TCE-SP' } }));
+    const res = await POST(makeReq({ query: 'pregão eletrônico', filters: { tribunal: 'TCE-SP' } }), routeCtx);
     expect(res.status).toBe(200);
 
     expect(mockMapFiltersToSemanticOptions).toHaveBeenCalledWith(
@@ -191,7 +194,7 @@ describe('POST /api/jurisprudencia/query', () => {
     });
     mockCountUnifiedApproved.mockResolvedValueOnce(0);
 
-    const res = await POST(makeReq({ query: 'qualquer coisa' }));
+    const res = await POST(makeReq({ query: 'qualquer coisa' }), routeCtx);
     const body = await readJson(res);
 
     expect(body.sources).toEqual([]);
@@ -206,7 +209,7 @@ describe('POST /api/jurisprudencia/query', () => {
     });
     mockCountUnifiedApproved.mockResolvedValueOnce(500);
 
-    const res = await POST(makeReq({ query: 'qualquer coisa' }));
+    const res = await POST(makeReq({ query: 'qualquer coisa' }), routeCtx);
     const body = await readJson(res);
 
     expect(body.totalInDatabase).toBe(500);
@@ -229,7 +232,7 @@ describe('POST /api/jurisprudencia/query', () => {
     }]);
     mockQueryGeminiText.mockRejectedValueOnce(new Error('gemini down'));
 
-    const res = await POST(makeReq({ query: 'pergunta' }));
+    const res = await POST(makeReq({ query: 'pergunta' }), routeCtx);
     const body = await readJson(res);
 
     expect(body.sources).toHaveLength(1);
@@ -260,7 +263,7 @@ describe('POST /api/jurisprudencia/query', () => {
     }]);
     mockQueryGeminiText.mockResolvedValueOnce({ response: 'r', cached: false, latency: 10 });
 
-    const res = await POST(makeReq({ query: 'segregação de funções' }));
+    const res = await POST(makeReq({ query: 'segregação de funções' }), routeCtx);
     const body = await readJson(res);
 
     expect(body.sources[0].decisionType).toBe('informativo');
@@ -274,7 +277,7 @@ describe('POST /api/jurisprudencia/query', () => {
     await POST(makeReq({
       query: 'teste',
       filters: { year: 2024, theme: 'pregão', dataFrom: '2024-01-01' },
-    }));
+    }), routeCtx);
 
     expect(mockMapFiltersToSemanticOptions).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -302,7 +305,7 @@ describe('POST /api/jurisprudencia/query', () => {
     mockQueryGeminiText.mockResolvedValueOnce({ response: 'r', cached: false, latency: 10 });
     mockSearchHistoryCreate.mockResolvedValueOnce({ id: 'sh-123' });
 
-    const res = await POST(makeReq({ query: 'pregão', filters: { tribunal: 'TCE-SP' } }));
+    const res = await POST(makeReq({ query: 'pregão', filters: { tribunal: 'TCE-SP' } }), routeCtx);
     const body = await readJson(res);
 
     expect(mockSearchHistoryCreate).toHaveBeenCalledWith(
@@ -339,7 +342,7 @@ describe('POST /api/jurisprudencia/query', () => {
     mockResolveFullText.mockReturnValueOnce(longFullText);
     mockQueryGeminiText.mockResolvedValueOnce({ response: 'r', cached: false, latency: 10 });
 
-    await POST(makeReq({ query: 'segregação de funções', filters: { tribunal: 'TCE-PE' } }));
+    await POST(makeReq({ query: 'segregação de funções', filters: { tribunal: 'TCE-PE' } }), routeCtx);
 
     expect(mockQueryGeminiText).toHaveBeenCalled();
     const promptArg = mockQueryGeminiText.mock.calls[0][0] as string;
@@ -365,7 +368,7 @@ describe('POST /api/jurisprudencia/query', () => {
     mockResolveFullText.mockReturnValueOnce(null);
     mockQueryGeminiText.mockResolvedValueOnce({ response: 'r', cached: false, latency: 10 });
 
-    await POST(makeReq({ query: 'pregão', filters: { tribunal: 'TCE-SP' } }));
+    await POST(makeReq({ query: 'pregão', filters: { tribunal: 'TCE-SP' } }), routeCtx);
 
     const promptArg = mockQueryGeminiText.mock.calls[0][0] as string;
     expect(promptArg).toContain('Trecho relevante');
@@ -380,7 +383,7 @@ describe('POST /api/jurisprudencia/query', () => {
     mockCountUnifiedApproved.mockResolvedValueOnce(500);
     mockSearchHistoryCreate.mockResolvedValueOnce({ id: 'sh-empty' });
 
-    const res = await POST(makeReq({ query: 'tese obscura' }));
+    const res = await POST(makeReq({ query: 'tese obscura' }), routeCtx);
     const body = await readJson(res);
 
     expect(mockSearchHistoryCreate).toHaveBeenCalledWith(

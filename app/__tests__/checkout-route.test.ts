@@ -61,10 +61,13 @@ vi.mock('@/lib/logger', () => ({
   apiLogger: { info: vi.fn(), warn: vi.fn(), error: vi.fn(), debug: vi.fn() },
 }));
 
+import { NextRequest } from 'next/server';
 import { POST } from '@/app/api/pagamento/checkout/route';
 
-function makeRequest(body: Record<string, unknown>): Request {
-  return new Request('http://localhost/api/pagamento/checkout', {
+const routeCtx = { params: Promise.resolve({}) };
+
+function makeRequest(body: Record<string, unknown>): NextRequest {
+  return new NextRequest('http://localhost/api/pagamento/checkout', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(body),
@@ -81,7 +84,7 @@ describe('POST /api/pagamento/checkout', () => {
 
   it('returns 400 for method=pix when PIX is disabled', async () => {
     pixFlag.enabled = false;
-    const res = await POST(makeRequest({ plan: 'premium', method: 'pix' }));
+    const res = await POST(makeRequest({ plan: 'premium', method: 'pix' }), routeCtx);
     expect(res.status).toBe(400);
     const data = await res.json();
     expect(data.error).toContain('PIX');
@@ -90,7 +93,7 @@ describe('POST /api/pagamento/checkout', () => {
 
   it('allows method=pix when PIX is enabled (re-enable path)', async () => {
     pixFlag.enabled = true;
-    const res = await POST(makeRequest({ plan: 'premium', method: 'pix' }));
+    const res = await POST(makeRequest({ plan: 'premium', method: 'pix' }), routeCtx);
     expect(res.status).toBe(200);
     expect(mockCreateCheckoutSession).toHaveBeenCalledWith(
       expect.objectContaining({ plan: 'premium', method: 'pix' }),
@@ -98,12 +101,12 @@ describe('POST /api/pagamento/checkout', () => {
   });
 
   it('returns 400 for invalid schema (e.g. plan=foo)', async () => {
-    const res = await POST(makeRequest({ plan: 'foo', method: 'card' }));
+    const res = await POST(makeRequest({ plan: 'foo', method: 'card' }), routeCtx);
     expect(res.status).toBe(400);
   });
 
   it('returns 400 for basico without courseId', async () => {
-    const res = await POST(makeRequest({ plan: 'basico', method: 'card' }));
+    const res = await POST(makeRequest({ plan: 'basico', method: 'card' }), routeCtx);
     expect(res.status).toBe(400);
     const data = await res.json();
     expect(data.error).toContain('courseId');
@@ -116,14 +119,14 @@ describe('POST /api/pagamento/checkout', () => {
       currentPeriodEnd: new Date(Date.now() + 86400000),
     });
 
-    const res = await POST(makeRequest({ plan: 'premium', method: 'card' }));
+    const res = await POST(makeRequest({ plan: 'premium', method: 'card' }), routeCtx);
     expect(res.status).toBe(409);
     const data = await res.json();
     expect(data.error).toContain('assinatura ativa');
   });
 
   it('returns 200 + url for valid checkout (card + basico + courseId)', async () => {
-    const res = await POST(makeRequest({ plan: 'basico', method: 'card', courseId: 'course-1' }));
+    const res = await POST(makeRequest({ plan: 'basico', method: 'card', courseId: 'course-1' }), routeCtx);
     expect(res.status).toBe(200);
     const data = await res.json();
     expect(data.url).toBe('https://checkout.stripe.com/session_123');

@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
-import { listR2FilesWithMetadata, deleteFromR2 } from '@/lib/storage/r2-client';
+import { listR2FilesWithMetadata, deleteFromR2, isR2Configured } from '@/lib/storage/r2-client';
 import { apiLogger } from '@/lib/logger';
 import { withCronTelemetry } from '@/lib/cron-telemetry';
 
@@ -166,6 +166,19 @@ export async function GET(req: NextRequest) {
   }
   if (authHeader !== `Bearer ${CRON_SECRET}`) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  }
+
+  // R2 não configurado (ex.: ambiente sem storage): não há nada para limpar.
+  // Pula graciosamente em vez de lançar erro a cada execução (evita falha diária ruidosa).
+  if (!isR2Configured()) {
+    apiLogger.warn('cleanup-orphaned-files: R2 não configurado — pulando limpeza (nenhum arquivo para varrer).');
+    await withCronTelemetry('cleanup-orphaned-files', async () => ({
+      itemsFound: 0,
+      itemsNew: 0,
+      itemsError: 0,
+      metadata: { skipped: 'r2-not-configured' },
+    }));
+    return NextResponse.json({ success: true, skipped: 'r2-not-configured' });
   }
 
   let responseBody: Record<string, unknown> = {};

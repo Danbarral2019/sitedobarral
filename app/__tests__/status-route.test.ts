@@ -61,19 +61,21 @@ async function readJson(res: Response) {
   return JSON.parse(await res.text());
 }
 
+const routeCtx = { params: Promise.resolve({}) };
+
 describe('GET /api/pagamento/status', () => {
   beforeEach(() => {
     vi.clearAllMocks();
   });
 
   it('retorna 400 quando session_id está ausente', async () => {
-    const res = await GET(makeRequest() as any);
+    const res = await GET(makeRequest() as any, routeCtx);
     expect(res.status).toBe(400);
   });
 
   it('retorna 404 quando a session não existe no Stripe', async () => {
     mockSessionsRetrieve.mockRejectedValue(new Error('No such session'));
-    const res = await GET(makeRequest('cs_bogus') as any);
+    const res = await GET(makeRequest('cs_bogus') as any, routeCtx);
     expect(res.status).toBe(404);
     expect(mockSubscriptionFindUnique).not.toHaveBeenCalled();
   });
@@ -83,7 +85,7 @@ describe('GET /api/pagamento/status', () => {
       metadata: { userId: 'user-OTHER' },
       subscription: 'sub_abc',
     });
-    const res = await GET(makeRequest('cs_foreign') as any);
+    const res = await GET(makeRequest('cs_foreign') as any, routeCtx);
     expect(res.status).toBe(403);
     expect(mockSubscriptionFindUnique).not.toHaveBeenCalled();
   });
@@ -93,7 +95,7 @@ describe('GET /api/pagamento/status', () => {
       metadata: { userId: 'user-1' },
       subscription: null,
     });
-    const res = await GET(makeRequest('cs_pending') as any);
+    const res = await GET(makeRequest('cs_pending') as any, routeCtx);
     expect(res.status).toBe(200);
     expect(await readJson(res)).toEqual({ subscription: null });
     expect(mockSubscriptionFindUnique).not.toHaveBeenCalled();
@@ -106,7 +108,7 @@ describe('GET /api/pagamento/status', () => {
     });
     mockSubscriptionFindUnique.mockResolvedValue(null);
 
-    const res = await GET(makeRequest('cs_123') as any);
+    const res = await GET(makeRequest('cs_123') as any, routeCtx);
     expect(res.status).toBe(200);
     expect(await readJson(res)).toEqual({ subscription: null });
     expect(mockSubscriptionFindUnique).toHaveBeenCalledWith(
@@ -128,7 +130,7 @@ describe('GET /api/pagamento/status', () => {
       paymentMethod: 'card',
     });
 
-    const res = await GET(makeRequest('cs_123') as any);
+    const res = await GET(makeRequest('cs_123') as any, routeCtx);
     expect(res.status).toBe(200);
     const body = await readJson(res);
     expect(body.subscription.status).toBe('active');
@@ -143,7 +145,7 @@ describe('GET /api/pagamento/status', () => {
     });
     mockSubscriptionFindUnique.mockResolvedValue(null);
 
-    await GET(makeRequest('cs_123') as any);
+    await GET(makeRequest('cs_123') as any, routeCtx);
     expect(mockSubscriptionFindUnique).toHaveBeenCalledWith(
       expect.objectContaining({ where: { stripeSubscriptionId: 'sub_expanded' } }),
     );

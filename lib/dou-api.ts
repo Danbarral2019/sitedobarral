@@ -101,7 +101,11 @@ export class DOUClient {
         clearTimeout(timeout);
 
         if (!response.ok) {
-          if (attempt < retries && response.status >= 500) {
+          // O portal in.gov.br retorna 404 de forma intermitente para buscas válidas
+          // (instabilidade do portlet), não só para "não encontrado". Tratamos 404 como
+          // transiente e re-tentamos com backoff, junto dos 5xx.
+          const isTransient = response.status >= 500 || response.status === 404;
+          if (attempt < retries && isTransient) {
             const delay = Math.min(1000 * Math.pow(2, attempt - 1), 8000);
             console.warn(`[DOU API] Tentativa ${attempt}/${retries} falhou (HTTP ${response.status}), aguardando ${delay}ms...`);
             await new Promise(resolve => setTimeout(resolve, delay));

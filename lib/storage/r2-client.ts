@@ -48,6 +48,15 @@ const R2_PUBLIC_URL = process.env.R2_PUBLIC_URL; // Optional
 // Validate required environment variables (only when actually used, not during import)
 const hasR2Config = Boolean(R2_ACCOUNT_ID && R2_ACCESS_KEY_ID && R2_SECRET_ACCESS_KEY && R2_BUCKET_NAME);
 
+/**
+ * Indica se o R2 está configurado (todas as env vars presentes).
+ * Permite que jobs opcionais (ex.: limpeza de órfãos) pulem graciosamente
+ * em ambientes sem R2, em vez de lançar erro a cada execução.
+ */
+export function isR2Configured(): boolean {
+  return hasR2Config;
+}
+
 function validateR2Config() {
   if (!hasR2Config) {
     // Alerta admin no Sentry — config faltando em prod só aparecia no primeiro request real (P2.7)
