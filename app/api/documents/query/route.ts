@@ -9,6 +9,7 @@ import { buildContextForLLM } from '@/lib/embeddings/vector-search';
 import type { SearchResult } from '@/lib/embeddings/vector-search';
 import { hybridSearch } from '@/lib/embeddings/hybrid-search';
 import { hashQueryStr, diversifyResults, generateExcerpt } from '@/lib/rag/util';
+import { detectQueryDomain, type QueryScope } from '@/lib/rag/domain-detection';
 import {
   validateQuotedCitations,
   buildCitationWarning,
@@ -36,8 +37,6 @@ import {
 // ===========================
 // Types
 // ===========================
-
-type QueryScope = 'all' | 'tst-only' | 'no-tst';
 
 interface QueryFilters {
   courseId?: string;
@@ -235,292 +234,28 @@ Exemplo de resposta: ["variação 1", "variação 2"]`;
       apiLogger.warn({ error: err instanceof Error ? err.message : String(err) }, 'Query expansion failed');
     }
 
-    // 5a. Detecta se a pergunta envolve jurisprudência de TCEs ou TST (Súmulas,
-    // OJs, PNs). Usamos regex com RADICAIS em vez de `string.includes(kw)` —
-    // a versão antiga só ativava com palavras-chave literais e perdia
-    // variações comuns ("terceirizar" não casava "terceirização", "tomador"
-    // sozinho não casava "tomador de serviço"). Auditoria via simulação RAG
-    // em 2026-05-24 mostrou que 5 de 7 perguntas trabalhistas não ativavam.
-    //
-    // Regex em ordem temática para legibilidade. Use \b nas extremidades e
-    // alternativas explícitas onde o radical pode ambiguar com outras palavras.
-    const tribunalPatterns: RegExp[] = [
-      // ── Tribunais de Contas Estaduais ──
-      /\btce\b/i,
-      /\btribuna(?:l|is)\s+de\s+contas\s+estadua(?:l|is)\b/i,
-      /\btce-(?:sp|mg|pr|sc|rj|rs|pe)\b/i,
-      /\btribunal\s+estadual\b/i,
-      /\bdecis(?:ão|ões)\s+estadua(?:l|is)\b/i,
-      /\bjurisprud[êe]ncia\s+estadual\b/i,
-      /\bcorte\s+de\s+contas\s+estadual\b/i,
-
-      // ── TST / Justiça do Trabalho — termos-chave de instituição ──
-      /\btst\b/i,
-      /\btribunal\s+superior\s+do\s+trabalho\b/i,
-      /\bjustiça\s+do\s+trabalho\b/i,
-      /\bjurisprud[êe]ncia\s+trabalhista\b/i,
-      /\bclt\b/i,
-      /\bconsolida[çc][ãa]o\s+das\s+leis\s+do\s+trabalho\b/i,
-      /\breforma\s+trabalhista\b/i,
-      /\blei\s+13\.?467(?:\/2017)?\b/i,
-
-      // ── Temas trabalhistas (radicais) ──
-      /\bterceiriz/i,                    // terceirizar, terceirização, terceirizado
-      /\btomador\b/i,                    // tomador de serviço (e variações)
-      /\bempresa\s+interposta\b/i,
-      /\bv[íi]nculo(?:\s+(?:de\s+emprego|empregat[íi]cio))?\b/i,
-      /\bsubsidi[áa]ri/i,                // responsabilidade subsidiária
-      /\bsolidari[ea]/i,                 // responsabilidade solidária
-      /\baviso[\s-]+pr[ée]vio\b/i,
-      /\bequipara[çc][ãa]o\s+salarial\b/i,
-      /\bpericulosidade\b/i,
-      /\binsalubridade\b/i,
-      /\badicional\s+(?:de\s+)?(?:periculosidade|insalubridade|noturno)\b/i,
-      /\bhoras?\s+extras?\b/i,
-      /\bintervalo\s+intrajornada\b/i,
-      /\bjornada\s+de\s+trabalho\b/i,
-      /\brepactua[çc][ãa]o\b/i,
-      /\bplanilha\s+de\s+custos\b/i,
-      /\bverbas?\s+trabalhista/i,
-      /\bf[ée]rias\s+(?:proporcionais|vencidas|indenizadas)\b/i,
-      /\bestabilidade\s+(?:provis[óo]ria|de\s+emprego|gestante|cipeiro|acidentado)\b/i,
-      /\b13[ºo]?\s+sal[áa]rio\b/i,
-      /\bgratifica[çc][ãa]o\s+natalina\b/i,
-      /\bfgts\b/i,
-
-      // ── Rodada 2 (expansão pós-validação 2026-05-24, Q2 falhou) ──
-      // Estas perguntas trabalhistas não usavam termos-gatilho institucionais
-      // (TST/CLT) nem temas específicos da lista anterior. Adicionamos
-      // radicais conservadores que só casam contextos inequivocamente
-      // trabalhistas — evitando falsos positivos em queries Lei 14.133/AGU.
-
-      // Relações do contrato de trabalho
-      /\bempregad(?:o|or|a|ora)\b/i,              // empregado/empregador
-      /\bempregat[íi]cio\b/i,
-      /\bcontrato\s+de\s+trabalho\b/i,
-      /\brela[çc][ãa]o\s+de\s+emprego\b/i,
-      /\bcarteira\s+(?:de\s+trabalho|profissional|assinada)\b/i,
-      /\bctps\b/i,                                // CTPS (Carteira de Trabalho)
-
-      // Salário / remuneração / descontos
-      /\bdesconto(?:s)?\s+(?:no|do|em)\s+sal[áa]rio\b/i,
-      /\bdano(?:s)?\s+causad[oa]s?\s+(?:pelo\s+)?empregad/i,
-      /\bsal[áa]ri[oa](?:l|s)?\b(?=.*(?:trabalh|empregad|patron|sindical|categoria|m[íi]nimo|piso))/i,
-      /\bremunera[çc][ãa]o\s+(?:do\s+empregado|do\s+trabalhador)\b/i,
-      /\bpiso\s+salarial\b/i,
-      /\bsal[áa]rio\s+m[íi]nimo\b/i,
-      /\bsal[áa]rio[\s-]+(?:fam[íi]lia|maternidade)\b/i,
-
-      // Rescisão e demissão
-      /\brescis[ãa]o(?:\s+(?:contratual|indireta|do\s+contrato))?\b/i,
-      /\bjusta\s+causa\b/i,
-      /\bdemiss[ãa]o\b/i,
-      /\bdispensa\s+(?:imotivada|sem\s+justa\s+causa|por\s+justa\s+causa|discrimin)/i,
-      /\bjusti[çc]a\s+do\s+trabalho\b/i,
-      /\breclama[çc][ãa]o\s+trabalhista\b/i,
-      /\binqu[ée]rito\s+judicial\b/i,
-
-      // Saúde, segurança e benefícios
-      /\bacidente\s+(?:de\s+|do\s+)?trabalho\b/i,
-      /\bdoen[çc]a\s+(?:ocupacional|profissional|do\s+trabalho)\b/i,
-      /\baux[íi]lio[\s-]+doen[çc]a\b/i,
-      /\baposentadoria\s+por\s+invalidez\b/i,
-      /\bvale[\s-]?(?:transporte|refei[çc][ãa]o|alimenta[çc][ãa]o)\b/i,
-      /\bsobreaviso\b/i,
-      /\bbanco\s+de\s+horas\b/i,
-      /\bcompensa[çc][ãa]o\s+de\s+jornada\b/i,
-      /\bperiodo\s+noturno\b/i,
-
-      // Categorias e organização sindical
-      /\bsindicato\b/i,
-      /\bsindical\b/i,
-      /\bcategoria\s+profissional\b/i,
-      /\bbanc[áa]ri[ao]s?\b/i,
-      /\bferrovi[áa]ri[ao]s?\b/i,
-      /\bmotorista(?:s)?\s+(?:profissional|de\s+caminh|de\s+carga)/i,
-
-      // ── OJs do TST (Orientações Jurisprudenciais) ──
-      /\borienta[çc](?:[ãa]o|[õo]es)\s+jurisprudencia(?:l|is)\b/i,
-      /\boj[-\s]?sbdi[-\s]?[i12]+t?\b/i,  // OJ-SBDI-I, OJ-SBDI-II, OJ-SBDI-1T
-      /\boj[-\s]?sdc\b/i,
-      /\bsbdi[-\s]?[i12]+\b/i,            // SBDI-I, SBDI-II
-      /\bsubse[çc][ãa]o\b/i,
-      /\btribunal\s+pleno\b/i,
-      /\b[óo]rg[ãa]o\s+especial\b/i,
-
-      // ── Precedentes Normativos (PN) — SDC ──
-      /\bprecedente(?:s)?\s+normativo(?:s)?\b/i,
-      /\bdiss[íi]dio(?:s)?\s+coletivo(?:s)?\b/i,
-      /\bnegocia[çc][ãa]o\s+coletiva\b/i,
-      /\bcl[áa]usula\s+normativa\b/i,
-      /\bconven[çc][ãa]o\s+coletiva\b/i,
-      /\bacordo\s+coletivo\b/i,
-    ];
-    const queryLowerForTribunal = query.toLowerCase();
-    const tribunalMatchCount = tribunalPatterns.reduce(
-      (n, re) => (re.test(query) ? n + 1 : n),
-      0,
-    );
-    const includeTribunalDecisions = tribunalMatchCount > 0;
-
-    if (includeTribunalDecisions) {
-      apiLogger.info({ tribunalMatchCount }, 'Tribunal decisions included (matched tribunalPatterns)');
+    // 5a. Detecção de domínio (TCEs/TST) + boost strong-labor + consciência de
+    // canônicos cancelados/revistos + scope override — ver lib/rag/domain-detection.
+    const scope: QueryScope = filters.scope ?? 'all';
+    const domain = detectQueryDomain(query, scope);
+    const { scopedOptions } = domain;
+    if (domain.includeTribunalDecisions) {
+      apiLogger.info({ tribunalMatchCount: domain.tribunalMatchCount }, 'Tribunal decisions included (matched tribunalPatterns)');
     }
-
-    // Strong-labor: ativa boost de similarity no ramo TST (factor 1.20).
-    // Critério é satisfeito quando QUALQUER um destes ocorre:
-    //   (a) match em um padrão institucional forte (TST/CLT/Justiça do Trabalho/
-    //       Reforma Trabalhista/Reclamação Trabalhista) — esses sinais por si só
-    //       fixam o domínio sem ambiguidade;
-    //   (b) match em um padrão "tier-2 forte" (ex.: rescisão indireta, justa
-    //       causa, FGTS, intervalo intrajornada, dissídio coletivo, verbas
-    //       trabalhistas) — termos cuja presença isolada não tem leitura em
-    //       Lei 14.133/AGU;
-    //   (c) match em 2+ padrões temáticos quaisquer da lista geral — quando
-    //       vários elementos trabalhistas convivem na mesma query, a chance
-    //       dela ser genuinamente trabalhista (e não Lei 14.133 tangenciando)
-    //       sobe muito.
-    //
-    // Diagnóstico que motivou (2026-05-24, sessão anterior):
-    // - Q3 "rescisão indireta por descumprimento de norma coletiva" — TST não
-    //   entrou no top-10 mesmo com `includeTribunalDecisions=true`; competidores
-    //   Lei 14.133 ganharam ranking por similaridade pura. "Rescisão indireta"
-    //   isolado é tier-2 forte (não há rescisão indireta em Lei 14.133).
-    // - Q9 (mista) — IA citou Súmula 331 "de cabeça" porque o documento canônico
-    //   não passou no contexto formal.
-    //
-    // Calibração: factor 1.20 inverte derrotas por margem ≤ 18%, sem derrubar
-    // documentos Lei/Decreto genuinamente mais relevantes. Acima de 1.30 começa
-    // a haver over-boost (Súmula tangencial vence acórdão diretamente sobre o
-    // tema). Conservador, controlado, e fácil de reverter via env futura.
-    const strongInstitutionalLaborPatterns: RegExp[] = [
-      /\btst\b/i,
-      /\btribunal\s+superior\s+do\s+trabalho\b/i,
-      /\bjustiça\s+do\s+trabalho\b/i,
-      /\bclt\b/i,
-      /\bconsolida[çc][ãa]o\s+das\s+leis\s+do\s+trabalho\b/i,
-      /\breforma\s+trabalhista\b/i,
-      /\bjurisprud[êe]ncia\s+trabalhista\b/i,
-      /\breclama[çc][ãa]o\s+trabalhista\b/i,
-    ];
-    // Tier-2 forte: padrões cuja presença isolada já fixa domínio trabalhista
-    // (não têm leitura em Lei 14.133/AGU/TCU). Ativam strong-labor sozinhos.
-    // Mantemos enxuto e auditável — adicionar com critério, não automaticamente.
-    const tier2StrongLaborPatterns: RegExp[] = [
-      /\brescis[ãa]o\s+indireta\b/i,
-      /\bjusta\s+causa\b/i,
-      /\bdispensa\s+(?:imotivada|sem\s+justa\s+causa|por\s+justa\s+causa|discrimin)/i,
-      /\baviso[\s-]+pr[ée]vio\b/i,
-      /\bfgts\b/i,
-      /\b13[ºo]?\s+sal[áa]rio\b/i,
-      /\bgratifica[çc][ãa]o\s+natalina\b/i,
-      /\bintervalo\s+intrajornada\b/i,
-      /\bjornada\s+de\s+trabalho\b/i,
-      /\bhoras?\s+extras?\b/i,
-      /\badicional\s+(?:de\s+)?(?:periculosidade|insalubridade|noturno)\b/i,
-      /\bpericulosidade\b/i,
-      /\binsalubridade\b/i,
-      /\bequipara[çc][ãa]o\s+salarial\b/i,
-      /\bv[íi]nculo\s+(?:de\s+emprego|empregat[íi]cio)\b/i,
-      /\bcarteira\s+(?:de\s+trabalho|profissional|assinada)\b/i,
-      /\bctps\b/i,
-      /\bdiss[íi]dio(?:s)?\s+coletivo(?:s)?\b/i,
-      /\bnorma\s+coletiva\b/i,
-      /\bconven[çc][ãa]o\s+coletiva\b/i,
-      /\bacordo\s+coletivo\b/i,
-      /\bnegocia[çc][ãa]o\s+coletiva\b/i,
-      /\bcl[áa]usula\s+normativa\b/i,
-      /\bprecedente(?:s)?\s+normativo(?:s)?\b/i,
-      /\borienta[çc](?:[ãa]o|[õo]es)\s+jurisprudencia(?:l|is)\b/i,
-      /\bestabilidade\s+(?:provis[óo]ria|gestante|cipeiro|acidentado)\b/i,
-      /\bf[ée]rias\s+(?:proporcionais|vencidas|indenizadas)\b/i,
-      /\bverbas?\s+trabalhista/i,
-      /\bacidente\s+(?:de\s+|do\s+)?trabalho\b/i,
-      /\bdoen[çc]a\s+(?:ocupacional|profissional|do\s+trabalho)\b/i,
-      /\bsobreaviso\b/i,
-      /\bbanco\s+de\s+horas\b/i,
-      /\bempresa\s+interposta\b/i,
-      /\bequipara[çc][ãa]o\s+salarial\b/i,
-    ];
-    const hasInstitutionalLaborSignal = strongInstitutionalLaborPatterns.some((re) => re.test(query));
-    const hasTier2LaborSignal = tier2StrongLaborPatterns.some((re) => re.test(query));
-    const isStronglyLabor =
-      hasInstitutionalLaborSignal || hasTier2LaborSignal || tribunalMatchCount >= 2;
-    const tribunalBoost = isStronglyLabor ? { code: 'TST', factor: 1.2 } : undefined;
-    if (tribunalBoost) {
+    if (domain.tribunalBoost) {
       apiLogger.info(
         {
-          hasInstitutionalLaborSignal,
-          hasTier2LaborSignal,
-          tribunalMatchCount,
-          factor: tribunalBoost.factor,
+          hasInstitutionalLaborSignal: domain.hasInstitutionalLaborSignal,
+          hasTier2LaborSignal: domain.hasTier2LaborSignal,
+          tribunalMatchCount: domain.tribunalMatchCount,
+          factor: domain.tribunalBoost.factor,
         },
         'Strong-labor query — aplicando boost de similarity no ramo TST',
       );
     }
-
-    // Súmulas TST canceladas/revistas: por padrão ficam fora do contexto IA
-    // (precedente superado induz erro). Aparecem só quando a pergunta
-    // explicitamente indicar interesse histórico ou por súmula específica.
-    const historicalKeywords = [
-      'histórico', 'historico', 'cancelada', 'cancelado', 'cancelamento',
-      'revista', 'revisão', 'revisao', 'revogada', 'revogado',
-      'antes da reforma', 'reforma trabalhista', 'lei 13.467', '13.467/2017',
-      'entendimento anterior', 'redação anterior', 'redacao anterior',
-      'precedente revogado', 'antiga redação', 'antiga redacao',
-    ];
-    // Também ativa quando a pergunta cita o número de uma súmula específica
-    // (ex.: "súmula 437", "OJ-SBDI-1 123", "PN 5"), pois nesse caso o usuário
-    // sabe exatamente o que quer ver — não faz sentido esconder cancelados.
-    const citesSpecificCanonical = /(?:s[uú]mula|enunciado|oj[\s-]*(?:sbdi|sdc|tp\/?oe)?|orienta[çc][ãa]o\s+jurisprudencial|precedente\s+normativo|pn)\s*(?:tst)?\s*(?:n[º°]?\s*)?\d+/i.test(query);
-    const isHistoricalQuery =
-      historicalKeywords.some(kw => queryLowerForTribunal.includes(kw)) || citesSpecificCanonical;
-    const excludeInactiveSumulas = !isHistoricalQuery;
-    if (isHistoricalQuery) {
+    if (domain.isHistoricalQuery) {
       apiLogger.info('Query histórica detectada — incluindo documentos canônicos TST canceladas/revistas no contexto');
     }
-
-    // 5a. Scope override: chips no chat permitem ao aluno forçar o foco.
-    //   - 'tst-only'  → só TribunalDecision TST (skip Document + LegAct + FTS)
-    //   - 'no-tst'    → sem ramo TST e sem boost (cobertura Document+LegAct)
-    //   - 'all'/undef → comportamento padrão (detector + branches normais)
-    // O scope sobrepõe o detector strong-labor: se aluno marca 'no-tst', boost
-    // é descartado mesmo em query trabalhista. Se marca 'tst-only', forçamos
-    // ramo TST mesmo que a query não tenha casado tribunalPatterns.
-    const scope: QueryScope = filters.scope ?? 'all';
-    const scopedOptions = (() => {
-      if (scope === 'tst-only') {
-        return {
-          includeTribunalDecisions: true,
-          excludeInactiveSumulas,
-          tribunalBoost: undefined,
-          skipDocumentBranch: true,
-          skipLegislativeActBranch: true,
-          tribunalCodeFilter: 'TST',
-          skipFts: true,
-        } as const;
-      }
-      if (scope === 'no-tst') {
-        return {
-          includeTribunalDecisions: false,
-          excludeInactiveSumulas,
-          tribunalBoost: undefined,
-          skipDocumentBranch: undefined,
-          skipLegislativeActBranch: undefined,
-          tribunalCodeFilter: undefined,
-          skipFts: false,
-        } as const;
-      }
-      return {
-        includeTribunalDecisions,
-        excludeInactiveSumulas,
-        tribunalBoost,
-        skipDocumentBranch: undefined,
-        skipLegislativeActBranch: undefined,
-        tribunalCodeFilter: undefined,
-        skipFts: false,
-      } as const;
-    })();
     if (scope !== 'all') {
       apiLogger.info({ scope }, 'Pesquisa com scope override (chip do chat)');
     }
