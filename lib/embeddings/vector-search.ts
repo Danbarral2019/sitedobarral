@@ -398,7 +398,10 @@ async function executeVectorSearch(
     let decisionWhere = `td."embeddingStatus" = 'completed' AND td."approvalStatus" IN ('auto_approved', 'manually_approved')`;
 
     if (tribunalCodeFilter) {
-      decisionWhere += ` AND td."tribunalCode" = $${nextParam()}`;
+      // Fase 2.4: comparação case-insensitive — a origem grava tanto 'TCU'
+      // quanto 'tcu' (154 legadas), e o exact-match deixava essas de fora do
+      // filtro/boost. UPPER() em ambos os lados cobre qualquer variação de caixa.
+      decisionWhere += ` AND UPPER(td."tribunalCode") = UPPER($${nextParam()})`;
       params.push(tribunalCodeFilter);
     }
 
@@ -437,7 +440,7 @@ async function executeVectorSearch(
       params.push(tribunalBoost.code);
       const boostFactorIdx = nextParam();
       params.push(tribunalBoost.factor);
-      similarityExpr = `(1 - (tc.embedding <=> '${embeddingStr}'::vector)) * CASE WHEN td."tribunalCode" = $${boostCodeIdx} THEN $${boostFactorIdx} ELSE 1.00 END`;
+      similarityExpr = `(1 - (tc.embedding <=> '${embeddingStr}'::vector)) * CASE WHEN UPPER(td."tribunalCode") = UPPER($${boostCodeIdx}) THEN $${boostFactorIdx} ELSE 1.00 END`;
     }
 
     ctes.push(`decision_scores AS (

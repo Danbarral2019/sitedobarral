@@ -52,6 +52,13 @@ export interface HybridSearchResponse {
   totalFound: number;
   latency: number;
   cached: boolean;
+  /**
+   * Maior similaridade de COSINE bruta (0..1) do ramo vetorial, ANTES da fusão
+   * RRF. Fase 2.5: o `similarity` dos results é o score RRF (~0.01) após a fusão,
+   * incomensurável com um limiar de cosine. Este campo dá o sinal real de
+   * "a base tem material semanticamente próximo?" para o banner de cobertura baixa.
+   */
+  topVectorSimilarity: number;
 }
 
 // ===========================
@@ -136,6 +143,10 @@ export async function hybridSearch(
     vectorResultMap.set(r.documentId, r);
   });
 
+  // Fase 2.5: maior cosine bruto (semanticSearch retorna ordenado por cosine
+  // desc, então o 1º é o teto). Capturado ANTES do RRF sobrescrever `similarity`.
+  const topVectorSimilarity = vectorResults.results[0]?.similarity ?? 0;
+
   // Mapear rankings FTS (id → rank)
   const ftsRanks = new Map<string, number>();
   ftsResults.forEach((r, i) => {
@@ -213,6 +224,7 @@ export async function hybridSearch(
     totalFound: finalResults.length,
     latency: Date.now() - startTime,
     cached: false,
+    topVectorSimilarity,
   };
 }
 

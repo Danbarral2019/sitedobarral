@@ -419,9 +419,11 @@ INSTRUÇÕES:
     // sub-0.60, a base não tem material claramente sobre o tema. Avisamos
     // o LLM para usar linguagem cautelosa e evitar inventar conteúdo nas
     // fontes "raspadas" do top-K (ver regra 10f do systemInstruction).
-    const maxSimilarity = allDisplayResults.length > 0
-      ? Math.max(...allDisplayResults.map((r) => r.similarity))
-      : 0;
+    // Fase 2.5: sinal de cobertura = MAIOR COSINE BRUTO do ramo vetorial
+    // (searchResponse.topVectorSimilarity), não o `similarity` dos results — que
+    // após o RRF vira score de fusão (~0.01) misturado com scores heurísticos
+    // dos complementares (0.5-0.7), tornando o limiar de 0.6 (cosine) sem sentido.
+    const maxSimilarity = searchResponse.topVectorSimilarity ?? 0;
     const lowCoverageBanner =
       maxSimilarity < 0.6
         ? `⚠️ COBERTURA BAIXA: o melhor match nas fontes recuperadas tem ${(maxSimilarity * 100).toFixed(0)}% de similaridade (abaixo de 60%). A base provavelmente NÃO contém material direto sobre essa pergunta. Aplique a regra 10f do systemInstruction: avise o aluno e use linguagem cautelosa. NÃO INVENTE conteúdo de enunciados, súmulas ou pareceres só porque seus títulos apareceram aqui — eles podem ter sido recuperados por correspondência fraca.\n\n`
