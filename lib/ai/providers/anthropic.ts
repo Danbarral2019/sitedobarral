@@ -4,7 +4,60 @@ import type {
   AiGenerateResponse,
   AiProvider,
   AiStreamChunk,
+  AiCitation,
 } from '../types'
+
+/**
+ * Monta os `messages` da API. Quando `req.documents` está presente (Citations
+ * API), anexa os documentos como blocos `document` com `citations: enabled` na
+ * PRIMEIRA mensagem do usuário, seguidos do texto original (a pergunta/prompt).
+ */
+function buildMessages(req: AiGenerateRequest): Anthropic.MessageParam[] {
+  const docs = req.documents
+  let attached = false
+  return req.messages.map((m): Anthropic.MessageParam => {
+    if (docs && docs.length > 0 && m.role === 'user' && !attached) {
+      attached = true
+      return {
+        role: 'user',
+        content: [
+          ...docs.map((d) => ({
+            type: 'document' as const,
+            source: {
+              type: 'text' as const,
+              media_type: 'text/plain' as const,
+              data: d.text,
+            },
+            title: d.title,
+            citations: { enabled: true },
+          })),
+          { type: 'text' as const, text: m.content },
+        ],
+      }
+    }
+    return { role: m.role, content: m.content }
+  })
+}
+
+/** Extrai as citações `char_location` dos blocos de texto da resposta. */
+export function extractCitations(content: Anthropic.ContentBlock[]): AiCitation[] {
+  const out: AiCitation[] = []
+  for (const block of content) {
+    if (block.type !== 'text' || !block.citations) continue
+    for (const c of block.citations) {
+      if (c.type === 'char_location') {
+        out.push({
+          citedText: c.cited_text,
+          documentIndex: c.document_index,
+          documentTitle: c.document_title ?? undefined,
+          startCharIndex: c.start_char_index,
+          endCharIndex: c.end_char_index,
+        })
+      }
+    }
+  }
+  return out
+}
 
 let client: Anthropic | null = null
 
@@ -34,11 +87,7 @@ export const anthropicProvider: AiProvider = {
   async generate(modelId: string, req: AiGenerateRequest): Promise<AiGenerateResponse> {
     const c = getClient()
     const system = buildSystem(req)
-
-    const messages = req.messages.map((m) => ({
-      role: m.role,
-      content: m.content,
-    }))
+    const messages = buildMessages(req)
 
     const resp = await c.messages.create({
       model: modelId,
@@ -56,12 +105,17 @@ export const anthropicProvider: AiProvider = {
       .map((b) => b.text)
       .join('')
 
+    const citations = req.documents?.length
+      ? extractCitations(resp.content)
+      : undefined
+
     return {
       text,
       inputTokens: resp.usage?.input_tokens,
       outputTokens: resp.usage?.output_tokens,
       provider: 'anthropic',
       modelId,
+      ...(citations ? { citations } : {}),
     }
   },
 
@@ -71,11 +125,7 @@ export const anthropicProvider: AiProvider = {
   ): Promise<AsyncIterable<AiStreamChunk>> {
     const c = getClient()
     const system = buildSystem(req)
-
-    const messages = req.messages.map((m) => ({
-      role: m.role,
-      content: m.content,
-    }))
+    const messages = buildMessages(req)
 
     // Anthropic SDK .stream() retorna MessageStream com async iterator de
     // eventos e .finalMessage() para metadata terminal.
