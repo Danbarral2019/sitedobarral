@@ -1,0 +1,106 @@
+{
+  "runAt": "2026-07-06T21:36:30.290Z",
+  "answerModel": "default (task chat)",
+  "judgeModel": "claude-opus-4-8",
+  "results": [
+    {
+      "id": "q-data-a-data",
+      "query": "sistema data a data",
+      "empty": false,
+      "sourceCount": 5,
+      "verdict": {
+        "faithfulness": 0.7,
+        "citationAccuracy": 0.8,
+        "completeness": 0.7,
+        "overall": 0.74,
+        "issues": [
+          "A pergunta 'sistema data a data' refere-se a método de reajuste/contagem de prazos pro rata die, mas a resposta expande excessivamente para medição/pagamento sem que o material trate especificamente de 'data a data'",
+          "O Enunciado INCP nº 14 trata de termo inicial do reajuste (data do orçamento), não de 'sistema data a data' propriamente dito — associação parcialmente forçada",
+          "Afirmação de que Decretos 12.174/2024 e 12.926/2026 tratam de 'medição' dos contratos extrapola o material, que só menciona garantias trabalhistas",
+          "Inclusão de ON AGU 103/2026 e IN 65/2021 pouco pertinentes à pergunta, indicando preenchimento genérico"
+        ],
+        "rationale": "A resposta é majoritariamente ancorada no material, mas força a associação da pergunta ('data a data') com temas de medição e reajuste, e atribui a alguns decretos conteúdo (medição) não sustentado. As citações existem no material, mas com relevância limitada ao real objeto da pergunta."
+      },
+      "latencyMs": 18624
+    },
+    {
+      "id": "q-dispensa-valor",
+      "query": "dispensa de licitação por valor",
+      "empty": false,
+      "sourceCount": 5,
+      "verdict": {
+        "faithfulness": 0.9,
+        "citationAccuracy": 0.8,
+        "completeness": 0.95,
+        "overall": 0.87,
+        "issues": [
+          "A preferência a ME/EPP até R$ 80.000 é atribuída ao Manual do TCU corretamente, mas vinculá-la ao Art. 4º é impreciso — o Art. 4º trata da aplicação da LC 123, não do teto de R$ 80.000",
+          "Duplicação de valores: cita R$ 125.451,18 no texto do Manual mas o próprio Manual traz R$ 125.451,15 no primeiro limite (inconsistência do material, mas foi reproduzida com o valor arredondado)",
+          "Menção à IN SEGES/ME 67/2021 procede do Manual; correto"
+        ],
+        "rationale": "A resposta é bem fundamentada e fiel ao material, com citações majoritariamente corretas. A principal falha é a vinculação imprecisa da preferência ME/EPP (até R$ 80.000) ao Art. 4º, cujo conteúdo no material trata de outro tema."
+      },
+      "latencyMs": 35412
+    },
+    {
+      "id": "q-inexigibilidade-notoria",
+      "query": "inexigibilidade notória especialização",
+      "empty": false,
+      "sourceCount": 5,
+      "verdict": {
+        "faithfulness": 0.9,
+        "citationAccuracy": 1,
+        "completeness": 1,
+        "overall": 0.96,
+        "issues": [
+          "Menciona substituição do contrato por 'nota de empenho' como exemplo, detalhe não presente no Enunciado IBDA 36",
+          "Afirma que ON 18/2009 exige 'natureza singular do serviço', mas o texto da ON foca em inviabilidade de competição por ausência de critério objetivo/exclusividade",
+          "Cita Art. 95 do IBDA sem que a Lei traga esse dispositivo no material (apenas referenciado pelo enunciado, aceitável)"
+        ],
+        "rationale": "A resposta é fiel e cita corretamente todas as fontes existentes no material, cobrindo bem os pontos-chave. Pequenos acréscimos interpretativos (nota de empenho, singularidade na ON 18) não são literais ao material mas são marginais."
+      },
+      "latencyMs": 19113
+    },
+    {
+      "id": "q-pregao-bens-comuns",
+      "query": "pregão bens e serviços comuns",
+      "empty": false,
+      "sourceCount": 5,
+      "verdict": {
+        "faithfulness": 0.9,
+        "citationAccuracy": 0.9,
+        "completeness": 1,
+        "overall": 0.92,
+        "issues": [
+          "Art. 6º XLI cita 'menor preço ou maior desconto', mas foi usado como fonte para 'critérios admitidos' — aceitável, pois o material o traz explicitamente",
+          "Decreto 10.818/2021: a menção a 'proibindo a aquisição de artigos de luxo' extrapola levemente o material, que fala em enquadramento em qualidade comum/luxo, não em proibição expressa"
+        ],
+        "rationale": "A resposta é altamente fiel e bem citada, cobrindo todas as fontes relevantes do material. Pequeno excesso interpretativo quanto à 'proibição' de bens de luxo no Decreto 10.818/2021."
+      },
+      "latencyMs": 18806
+    },
+    {
+      "id": "q-dialogo-competitivo",
+      "query": "diálogo competitivo hipóteses cabimento",
+      "empty": false,
+      "sourceCount": 5,
+      "verdict": {
+        "faithfulness": 1,
+        "citationAccuracy": 1,
+        "completeness": 1,
+        "overall": 1,
+        "issues": [],
+        "rationale": "A resposta é integralmente fiel ao material, com citações corretas de artigos, enunciado, ON, parecer e informativo. Cobre todas as fontes relevantes e adverte adequadamente sobre a base legal distinta do Inf. 486/2024."
+      },
+      "latencyMs": 18343
+    }
+  ],
+  "summary": {
+    "evaluated": 5,
+    "empty": 0,
+    "faithfulness": 0.8800000000000001,
+    "citationAccuracy": 0.9,
+    "completeness": 0.93,
+    "overall": 0.898
+  }
+}

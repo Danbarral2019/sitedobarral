@@ -9,7 +9,7 @@
  * sobre exatamente o mesmo contexto (base para a Fase 3).
  */
 import { generate, LEGAL_SAFETY_SETTINGS } from '@/lib/ai';
-import type { AiProviderName } from '@/lib/ai/types';
+import type { AiProviderName, AiCitation } from '@/lib/ai/types';
 import { assembleAnswerContext } from './answerContext';
 import type { AssembleAnswerInput, AnswerContext } from './types';
 
@@ -46,7 +46,9 @@ export async function generateAnswer(
     fallbackModels: opts.fallbackModels,
     systemPrompt: context.systemInstruction,
     messages: [{ role: 'user', content: context.synthesisPrompt }],
-    temperature: 0.5,
+    // Sonnet 5 / Opus 4.x DEPRECARAM `temperature` (rejeitam a requisição).
+    // Só passamos temperature no caminho Gemini; o Claude usa seu default.
+    temperature: opts.provider === 'anthropic' ? undefined : 0.5,
     maxTokens: 8192,
     // Gemini 2.5/3 trunca sem thinkingBudget=0; ignorado pelo Anthropic.
     thinkingBudget: 0,
@@ -54,4 +56,40 @@ export async function generateAnswer(
   });
 
   return { answer: text, context };
+}
+
+export interface GenerateAnswerWithCitationsResult {
+  answer: string;
+  /** Citações verificadas (cited_text ancorado nas fontes) — Citations API. */
+  citations: AiCitation[];
+  context: AnswerContext;
+}
+
+/**
+ * Fase 3 (Citations API): sintetiza a resposta passando as fontes como blocos
+ * `document` com citações habilitadas, em vez do contexto embutido no prompt.
+ * O Claude retorna citações VERIFICADAS por afirmação (cited_text ∈ fonte),
+ * eliminando alucinação de citação por construção. Só faz sentido no Anthropic.
+ */
+export async function generateAnswerWithCitations(
+  input: AssembleAnswerInput,
+  opts: { model?: string } = {},
+): Promise<GenerateAnswerWithCitationsResult> {
+  const context = await assembleAnswerContext(input);
+  if (context.empty || context.citationDocuments.length === 0) {
+    return { answer: '', citations: [], context };
+  }
+
+  const { text, citations } = await generate('chat', {
+    provider: 'anthropic',
+    model: opts.model ?? 'claude-sonnet-5',
+    systemPrompt: context.systemInstruction,
+    // As fontes vão como `documents`; o prompt do usuário fica enxuto (só a
+    // pergunta), evitando duplicar o contexto e maximizando a ancoragem.
+    messages: [{ role: 'user', content: `PERGUNTA DO USUÁRIO:\n${input.query}` }],
+    documents: context.citationDocuments,
+    maxTokens: 8192,
+  });
+
+  return { answer: text, citations: citations ?? [], context };
 }

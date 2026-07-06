@@ -76,6 +76,7 @@ vi.mock('@/lib/legal-context', () => ({
   extractCitedArticles: () => [],
   selectRelevantArticles: async () => [],
   buildLeiContext: () => '',
+  buildLeiDocuments: () => [],
   findRelatedActs: async () => [],
   buildLayeredContext: () => '',
   formatActsContext: () => '',

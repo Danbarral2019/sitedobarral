@@ -23,6 +23,7 @@ const baseCtx: AnswerContext = {
   legalSources: [],
   allDisplayResults: [],
   maxSimilarity: 0.8,
+  citationDocuments: [],
 };
 
 describe('generateAnswer', () => {

@@ -1,0 +1,104 @@
+{
+  "runAt": "2026-07-06T21:39:35.004Z",
+  "answerModel": "claude-sonnet-5",
+  "judgeModel": "claude-opus-4-8",
+  "results": [
+    {
+      "id": "q-data-a-data",
+      "query": "sistema data a data",
+      "empty": false,
+      "sourceCount": 5,
+      "verdict": {
+        "faithfulness": 0.7,
+        "citationAccuracy": 0.6,
+        "completeness": 0.8,
+        "overall": 0.68,
+        "issues": [
+          "Cita 'Súmula TCU nº 45' que não consta do material (citação externa, embora ressalvada como não presente)",
+          "Conceituação de 'sistema data a data' é extrapolação doutrinária não sustentada literalmente pelo Enunciado INCP nº 14",
+          "Excesso de inferências sobre contagem 'dia a dia' não presentes no contexto"
+        ],
+        "rationale": "A resposta usa corretamente o Enunciado INCP nº 14 como base e é transparente sobre limitações, mas introduz conceitos e citações externas (Súmula TCU 45) não constantes do material."
+      },
+      "latencyMs": 43059
+    },
+    {
+      "id": "q-dispensa-valor",
+      "query": "dispensa de licitação por valor",
+      "empty": false,
+      "sourceCount": 5,
+      "verdict": {
+        "faithfulness": 0.95,
+        "citationAccuracy": 1,
+        "completeness": 1,
+        "overall": 0.98,
+        "issues": [
+          "Afirma que Decreto 12.807/2025 é o vigente e sugere que Manual reflete 2024, mas o material não confirma qual valor corresponde a qual decreto - leve especulação",
+          "Duplicação: cita R$125.451,18 para consórcio em outros serviços, replicando possível erro do Manual (deveria ser ~R$125.451,15)"
+        ],
+        "rationale": "Resposta altamente fiel e completa, cobrindo todas as fontes relevantes do material com citações corretas. Pequena especulação sobre correspondência entre decretos e valores atualizados, mas devidamente sinalizada como recomendação de conferência."
+      },
+      "latencyMs": 37494
+    },
+    {
+      "id": "q-inexigibilidade-notoria",
+      "query": "inexigibilidade notória especialização",
+      "empty": false,
+      "sourceCount": 5,
+      "verdict": {
+        "faithfulness": 0.95,
+        "citationAccuracy": 1,
+        "completeness": 1,
+        "overall": 0.98,
+        "issues": [
+          "Afirma que o requisito da singularidade 'tende a permanecer relevante' sob a nova lei — inferência não sustentada pelo material, embora bem sinalizada como ressalva"
+        ],
+        "rationale": "A resposta é fiel ao material, cita corretamente todos os artigos, súmula, acórdão, parecer e enunciado presentes, e cobre todas as fontes relevantes. Faz ressalvas adequadas sobre precedentes formados sob a Lei 8.666/93."
+      },
+      "latencyMs": 35520
+    },
+    {
+      "id": "q-pregao-bens-comuns",
+      "query": "pregão bens e serviços comuns",
+      "empty": false,
+      "sourceCount": 5,
+      "verdict": {
+        "faithfulness": 0.95,
+        "citationAccuracy": 1,
+        "completeness": 1,
+        "overall": 0.98,
+        "issues": [
+          "Art. 29 caput é citado no material apenas de forma truncada; a resposta atribui a ele detalhes de rito/inversão de fases que no material vêm do Manual TCU, não do texto do Art. 29"
+        ],
+        "rationale": "A resposta é altamente fiel e usa corretamente todas as fontes relevantes do material, com citações precisas. Pequena imprecisão ao vincular ao Art. 29 detalhes procedimentais que o material atribui ao Manual TCU."
+      },
+      "latencyMs": 35707
+    },
+    {
+      "id": "q-dialogo-competitivo",
+      "query": "diálogo competitivo hipóteses cabimento",
+      "empty": false,
+      "sourceCount": 5,
+      "verdict": {
+        "faithfulness": 0.9,
+        "citationAccuracy": 1,
+        "completeness": 1,
+        "overall": 0.96,
+        "issues": [
+          "Afirma que o Parecer DECOR fixa entendimento 'vinculante', qualificação não presente no material",
+          "Atribui critérios de pré-seleção ao inciso II ao citar o Enunciado INCP 8, mas o enunciado refere-se ao inciso II do §1º do art. 32 — consistente, porém a resposta mistura com 'critérios de habilitação' de forma levemente ampliada"
+        ],
+        "rationale": "A resposta é fiel e completa, cobrindo todas as fontes relevantes com citações corretas; o único desvio relevante é a atribuição de caráter 'vinculante' ao parecer, não amparada pelo material."
+      },
+      "latencyMs": 30419
+    }
+  ],
+  "summary": {
+    "evaluated": 5,
+    "empty": 0,
+    "faithfulness": 0.89,
+    "citationAccuracy": 0.9199999999999999,
+    "completeness": 0.96,
+    "overall": 0.916
+  }
+}

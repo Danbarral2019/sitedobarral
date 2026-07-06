@@ -23,9 +23,17 @@ interface Message {
   content: string;
   sources?: DocumentSource[];
   legalSources?: LegalSourceItem[];
+  /** Citações verificadas (Citations API) — trecho-fonte por afirmação. */
+  citations?: CitationItem[];
   searchHistoryId?: string;
   feedback?: 1 | -1 | null;
   timestamp: Date;
+}
+
+interface CitationItem {
+  citedText: string;
+  documentIndex: number;
+  documentTitle?: string;
 }
 
 interface DocumentSource {
@@ -263,6 +271,20 @@ export default function ChatInterface({
               setMessages((prev) => prev.map(m =>
                 m.id === assistantId ? { ...m, content: fullContent } : m
               ));
+            } else if (parsed.type === 'citation' && parsed.citation) {
+              // Citations API: trecho-fonte verificado por afirmação. Acumula
+              // (dedup por citedText) e anexa à mensagem do assistente.
+              const cit: CitationItem = {
+                citedText: parsed.citation.citedText,
+                documentIndex: parsed.citation.documentIndex,
+                documentTitle: parsed.citation.documentTitle,
+              };
+              setMessages((prev) => prev.map(m => {
+                if (m.id !== assistantId) return m;
+                const existing = m.citations ?? [];
+                if (existing.some(c => c.citedText === cit.citedText)) return m;
+                return { ...m, citations: [...existing, cit] };
+              }));
             }
           } catch { /* ignore parse errors */ }
         }
@@ -472,6 +494,12 @@ export default function ChatInterface({
     }
   };
 
+  // Fase 3: durante a pausa do thinking do Claude, a mensagem do assistente
+  // ainda está vazia — mostramos "Analisando as fontes…" em vez do spinner cru.
+  const streamingMsg = messages[messages.length - 1];
+  const isAnalyzing =
+    isLoading && streamingMsg?.role === 'assistant' && !streamingMsg?.content;
+
   return (
     <div className={`flex flex-col h-full ${className}`}>
       {/* Header */}
@@ -550,6 +578,29 @@ export default function ChatInterface({
                   <ArticleAwareMarkdown content={message.content} />
                 ) : (
                   <div className="whitespace-pre-wrap">{message.content}</div>
+                )}
+
+                {/* Citações verificadas (Citations API) — trecho-fonte por afirmação */}
+                {message.citations && message.citations.length > 0 && (
+                  <div className="mt-4 pt-3 border-t border-emerald-200 space-y-1.5">
+                    <p className="text-xs font-semibold text-emerald-700 flex items-center gap-1">
+                      <Check className="w-3.5 h-3.5" />
+                      {message.citations.length} {message.citations.length === 1 ? 'citação verificada' : 'citações verificadas'} nas fontes
+                    </p>
+                    <div className="space-y-1.5">
+                      {message.citations.map((c, i) => (
+                        <details key={`${c.citedText.slice(0, 40)}-${i}`} className="group text-xs">
+                          <summary className="cursor-pointer list-none flex items-start gap-1.5 text-emerald-800 hover:text-emerald-900">
+                            <span className="text-emerald-400 mt-0.5">▸</span>
+                            <span className="truncate font-medium">{c.documentTitle ?? 'Fonte'}</span>
+                          </summary>
+                          <blockquote className="ml-4 mt-1 pl-2 border-l-2 border-emerald-300 text-gray-600 italic">
+                            &ldquo;{c.citedText}&rdquo;
+                          </blockquote>
+                        </details>
+                      ))}
+                    </div>
+                  </div>
                 )}
 
                 {/* Legal Sources */}
@@ -742,9 +793,11 @@ export default function ChatInterface({
         <div aria-live="polite" aria-atomic="true">
           {isLoading && (
             <div className="flex justify-start">
-              <div className="bg-gray-100 rounded-lg p-4">
-                <Loader2 className="w-5 h-5 animate-spin text-gray-600" aria-label="Processando sua pergunta" />
-                <span className="sr-only">Processando sua pergunta...</span>
+              <div className="bg-gray-100 rounded-lg px-4 py-3 flex items-center gap-2">
+                <Loader2 className="w-4 h-4 animate-spin text-indigo-500" aria-hidden="true" />
+                <span className="text-sm text-gray-600">
+                  {isAnalyzing ? 'Analisando as fontes…' : 'Sintetizando a resposta…'}
+                </span>
               </div>
             </div>
           )}

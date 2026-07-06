@@ -119,6 +119,31 @@ export interface AiGenerateRequest {
   cache?: AiCacheOptions
   /** Opcional: usuario que disparou a chamada (uso futuro p/ auditoria). */
   userId?: string
+  /**
+   * Fontes para a Citations API da Anthropic (Fase 3). Quando presente, cada
+   * documento vira um bloco `document` com `citations: {enabled: true}`, e o
+   * modelo retorna citações verificadas (`cited_text`) por afirmação — grounding
+   * estrutural. Ignorado pelo provider Gemini (que não tem Citations nativa).
+   * INCOMPATÍVEL com structured outputs (jsonMode/responseSchema) no Anthropic.
+   */
+  documents?: AiDocument[]
+}
+
+/** Documento-fonte para a Citations API. */
+export interface AiDocument {
+  title: string
+  text: string
+}
+
+/** Uma citação verificada retornada pela Citations API (char_location). */
+export interface AiCitation {
+  /** Trecho literal da fonte que sustenta a afirmação. */
+  citedText: string
+  /** Índice do documento na lista `documents` enviada. */
+  documentIndex: number
+  documentTitle?: string
+  startCharIndex?: number
+  endCharIndex?: number
 }
 
 export interface AiGenerateResponse {
@@ -128,6 +153,8 @@ export interface AiGenerateResponse {
   /** Provider e modelo efetivamente usados — util para auditoria/billing. */
   provider: AiProviderName
   modelId: string
+  /** Citações verificadas quando `documents` foi enviado (Citations API). */
+  citations?: AiCitation[]
 }
 
 /**
@@ -156,6 +183,11 @@ export interface AiStreamChunk {
     inputTokens?: number
     outputTokens?: number
   }
+  /**
+   * Citação verificada emitida incrementalmente (Citations API, Anthropic).
+   * Chega em chunks próprios (citations_delta) intercalados com o texto.
+   */
+  citation?: AiCitation
   provider: AiProviderName
   modelId: string
 }

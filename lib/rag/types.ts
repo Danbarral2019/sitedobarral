@@ -8,6 +8,7 @@
 import type { QueryScope } from './domain-detection';
 import type { LegalSource } from '@/lib/legal-context';
 import type { SearchResult } from '@/lib/embeddings/vector-search';
+import type { AiDocument } from '@/lib/ai/types';
 
 export interface QueryFilters {
   courseId?: string;
@@ -69,4 +70,10 @@ export interface AnswerContext {
   legalSources: LegalSource[];
   allDisplayResults: SearchResult[];
   maxSimilarity: number;
+  /**
+   * Fontes discretas para a Citations API (Fase 3): chunks recuperados +
+   * artigos da Lei + atos, cada um como {title, text} citável. O índice em
+   * `documents` é o que a citação referencia (documentIndex).
+   */
+  citationDocuments: AiDocument[];
 }
