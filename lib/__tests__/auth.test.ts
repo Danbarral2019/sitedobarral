@@ -635,7 +635,7 @@ describe('Auth Module', () => {
 
     it('deve setar secure:true em producao', async () => {
       const originalEnv = process.env.NODE_ENV;
-      process.env.NODE_ENV = 'production';
+      (process.env as Record<string, string>).NODE_ENV = 'production';
 
       const { createAuthSession } = await import('../auth');
       await createAuthSession({
@@ -649,7 +649,7 @@ describe('Auth Module', () => {
         expect.objectContaining({ secure: true }),
       );
 
-      process.env.NODE_ENV = originalEnv;
+      (process.env as Record<string, string | undefined>).NODE_ENV = originalEnv;
     });
 
     it('deve rejeitar payload invalido', async () => {

@@ -13,10 +13,11 @@ vi.mock('@/lib/logger', () => ({
   apiLogger: { info: vi.fn(), warn: vi.fn(), error: vi.fn(), debug: vi.fn() },
 }));
 
+import { NextRequest } from 'next/server';
 import { GET } from '@/app/api/jurisprudencia/route';
 
-function makeReq(qs: string): Request {
-  return new Request(`http://localhost/api/jurisprudencia?${qs}`, {
+function makeReq(qs: string): NextRequest {
+  return new NextRequest(`http://localhost/api/jurisprudencia?${qs}`, {
     method: 'GET',
   });
 }

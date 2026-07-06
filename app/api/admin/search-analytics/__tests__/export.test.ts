@@ -33,6 +33,8 @@ function makeReq(qs = ''): any {
   );
 }
 
+const routeCtx = { params: Promise.resolve({}) };
+
 beforeEach(() => {
   mockSearchHistoryFindMany.mockReset();
   mockUserFindMany.mockReset();
@@ -42,7 +44,7 @@ beforeEach(() => {
 
 describe('GET /api/admin/search-analytics/export', () => {
   it('retorna CSV vazio (apenas header) quando não há dados', async () => {
-    const res = await GET(makeReq());
+    const res = await GET(makeReq(), routeCtx);
     expect(res.status).toBe(200);
     expect(res.headers.get('Content-Type')).toContain('text/csv');
     expect(res.headers.get('Content-Disposition')).toContain('attachment');
@@ -69,7 +71,7 @@ describe('GET /api/admin/search-analytics/export', () => {
     ]);
     mockUserFindMany.mockResolvedValue([{ id: 'u-1', email: 'aluno@x.com' }]);
 
-    const res = await GET(makeReq());
+    const res = await GET(makeReq(), routeCtx);
     const body = await res.text();
     const lines = body.split('\n');
     expect(lines).toHaveLength(2);
@@ -98,7 +100,7 @@ describe('GET /api/admin/search-analytics/export', () => {
     ]);
     mockUserFindMany.mockResolvedValue([{ id: 'u-1', email: 'a@b.com' }]);
 
-    const res = await GET(makeReq());
+    const res = await GET(makeReq(), routeCtx);
     const body = await res.text();
     expect(body).toContain('"lei 14.133, art. 75"');
     expect(body).toContain('"A resposta tinha ""erro"""');
@@ -123,7 +125,7 @@ describe('GET /api/admin/search-analytics/export', () => {
     ]);
     mockUserFindMany.mockResolvedValue([{ id: 'u-1', email: 'a@b.com' }]);
 
-    const res = await GET(makeReq());
+    const res = await GET(makeReq(), routeCtx);
     const body = await res.text();
     expect(body).toMatch(/"=cmd\|""\/c calc""!A1"/);
   });
@@ -132,7 +134,7 @@ describe('GET /api/admin/search-analytics/export', () => {
     mockSearchHistoryFindMany.mockResolvedValue([]);
     mockUserFindMany.mockResolvedValue([]);
 
-    await GET(makeReq('?days=7'));
+    await GET(makeReq('?days=7'), routeCtx);
     let call = mockSearchHistoryFindMany.mock.calls[0][0];
     let since: Date = call.where.createdAt.gte;
     let diffDays = (Date.now() - since.getTime()) / (24 * 3600 * 1000);
@@ -140,7 +142,7 @@ describe('GET /api/admin/search-analytics/export', () => {
     expect(diffDays).toBeLessThan(7.01);
 
     mockSearchHistoryFindMany.mockClear();
-    await GET(makeReq('?days=abc'));
+    await GET(makeReq('?days=abc'), routeCtx);
     call = mockSearchHistoryFindMany.mock.calls[0][0];
     since = call.where.createdAt.gte;
     diffDays = (Date.now() - since.getTime()) / (24 * 3600 * 1000);
@@ -148,7 +150,7 @@ describe('GET /api/admin/search-analytics/export', () => {
     expect(diffDays).toBeLessThan(30.01);
 
     mockSearchHistoryFindMany.mockClear();
-    await GET(makeReq('?days=999')); // > 365 → default 30
+    await GET(makeReq('?days=999'), routeCtx); // > 365 → default 30
     call = mockSearchHistoryFindMany.mock.calls[0][0];
     since = call.where.createdAt.gte;
     diffDays = (Date.now() - since.getTime()) / (24 * 3600 * 1000);
@@ -157,7 +159,7 @@ describe('GET /api/admin/search-analytics/export', () => {
   });
 
   it('inclui filename com data e dias no Content-Disposition', async () => {
-    const res = await GET(makeReq('?days=7'));
+    const res = await GET(makeReq('?days=7'), routeCtx);
     const cd = res.headers.get('Content-Disposition');
     expect(cd).toMatch(/search-analytics-\d{4}-\d{2}-\d{2}-7d\.csv/);
   });

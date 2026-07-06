@@ -55,6 +55,8 @@ function makeRequest(): Request {
   return new Request('https://profdanielbarral.com/api/conta/portal', { method: 'GET' });
 }
 
+const routeCtx = { params: Promise.resolve({}) };
+
 describe('GET /api/conta/portal', () => {
   beforeEach(() => {
     vi.clearAllMocks();
@@ -64,7 +66,7 @@ describe('GET /api/conta/portal', () => {
   it('redireciona para /planos quando usuário não tem subscription', async () => {
     mockSubscriptionFindFirst.mockResolvedValue(null);
 
-    const res = await GET(makeRequest() as any);
+    const res = await GET(makeRequest() as any, routeCtx);
 
     expect(res.status).toBe(303);
     expect(res.headers.get('location')).toBe('https://profdanielbarral.com/planos');
@@ -77,7 +79,7 @@ describe('GET /api/conta/portal', () => {
       url: 'https://billing.stripe.com/session/abc',
     });
 
-    const res = await GET(makeRequest() as any);
+    const res = await GET(makeRequest() as any, routeCtx);
 
     expect(res.status).toBe(303);
     expect(res.headers.get('location')).toBe('https://billing.stripe.com/session/abc');
@@ -90,7 +92,7 @@ describe('GET /api/conta/portal', () => {
   it('busca a subscription pelo userId do contexto autenticado', async () => {
     mockSubscriptionFindFirst.mockResolvedValue(null);
 
-    await GET(makeRequest() as any);
+    await GET(makeRequest() as any, routeCtx);
 
     expect(mockSubscriptionFindFirst).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -103,7 +105,7 @@ describe('GET /api/conta/portal', () => {
     mockSubscriptionFindFirst.mockResolvedValue({ id: 'sub-123' });
     mockCreateBillingPortalSession.mockRejectedValue(new Error('Stripe down'));
 
-    const res = await GET(makeRequest() as any);
+    const res = await GET(makeRequest() as any, routeCtx);
 
     expect(res.status).toBe(500);
   });
