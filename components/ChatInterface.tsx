@@ -494,6 +494,12 @@ export default function ChatInterface({
     }
   };
 
+  // Fase 3: durante a pausa do thinking do Claude, a mensagem do assistente
+  // ainda está vazia — mostramos "Analisando as fontes…" em vez do spinner cru.
+  const streamingMsg = messages[messages.length - 1];
+  const isAnalyzing =
+    isLoading && streamingMsg?.role === 'assistant' && !streamingMsg?.content;
+
   return (
     <div className={`flex flex-col h-full ${className}`}>
       {/* Header */}
@@ -787,9 +793,11 @@ export default function ChatInterface({
         <div aria-live="polite" aria-atomic="true">
           {isLoading && (
             <div className="flex justify-start">
-              <div className="bg-gray-100 rounded-lg p-4">
-                <Loader2 className="w-5 h-5 animate-spin text-gray-600" aria-label="Processando sua pergunta" />
-                <span className="sr-only">Processando sua pergunta...</span>
+              <div className="bg-gray-100 rounded-lg px-4 py-3 flex items-center gap-2">
+                <Loader2 className="w-4 h-4 animate-spin text-indigo-500" aria-hidden="true" />
+                <span className="text-sm text-gray-600">
+                  {isAnalyzing ? 'Analisando as fontes…' : 'Sintetizando a resposta…'}
+                </span>
               </div>
             </div>
           )}
