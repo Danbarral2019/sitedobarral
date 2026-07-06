@@ -44,12 +44,18 @@ export async function runSynthesisEval(
     const sample = await synthesizeForQuery(q.query, opts.answer);
     let verdict: SynthesisVerdict | null = null;
     if (!sample.empty && sample.answer) {
-      verdict = await judgeSynthesis({
-        query: q.query,
-        answer: sample.answer,
-        context: sample.context,
-        model: opts.judgeModel,
-      });
+      // Resiliência: uma falha de juiz (parse/API) numa query não pode abortar
+      // o baseline inteiro — registra verdict=null e segue.
+      try {
+        verdict = await judgeSynthesis({
+          query: q.query,
+          answer: sample.answer,
+          context: sample.context,
+          model: opts.judgeModel,
+        });
+      } catch (err) {
+        console.warn(`[synthesis-runner] juiz falhou em ${q.id}: ${err instanceof Error ? err.message : String(err)}`);
+      }
     }
     results.push({
       id: q.id,

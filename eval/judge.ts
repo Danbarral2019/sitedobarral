@@ -58,7 +58,7 @@ Pontue de 0.0 a 1.0 (uma casa decimal) cada dimensão:
 - citationAccuracy: 1.0 = todas as citações (números de artigo, súmula, acórdão, enunciado) existem no material e são atribuídas corretamente; penalize citações inventadas ou trocadas.
 - completeness: 1.0 = usa as fontes RELEVANTES presentes no material e cobre os pontos-chave da pergunta; penalize omissão de fontes claramente pertinentes que estavam no material.
 
-Liste em "issues" os problemas concretos (alucinações, citações erradas, omissões). Em "rationale", 1-3 frases justificando.
+Liste em "issues" os problemas concretos (máx. 5 itens curtos). Em "rationale", NO MÁXIMO 2 frases. Seja conciso.
 
 Responda SOMENTE com um objeto JSON válido, sem texto ao redor, no formato:
 {"faithfulness":0.0,"citationAccuracy":0.0,"completeness":0.0,"issues":["..."],"rationale":"..."}`;
@@ -81,7 +81,12 @@ export function parseVerdict(text: string): SynthesisVerdict {
     if (start >= 0 && end > start) raw = raw.slice(start, end + 1);
   }
 
-  const parsed = JSON.parse(raw) as Record<string, unknown>;
+  let parsed: Record<string, unknown>;
+  try {
+    parsed = JSON.parse(raw) as Record<string, unknown>;
+  } catch (e) {
+    throw new Error(`parseVerdict JSON inválido (${(e as Error).message}). RAW[len=${raw.length}]: ${JSON.stringify(raw.slice(0, 400))}`);
+  }
   const faithfulness = clamp01(parsed.faithfulness);
   const citationAccuracy = clamp01(parsed.citationAccuracy);
   const completeness = clamp01(parsed.completeness);
@@ -106,8 +111,11 @@ export async function judgeSynthesis(params: JudgeParams): Promise<SynthesisVerd
     model: params.model ?? 'claude-sonnet-5',
     systemPrompt: JUDGE_SYSTEM,
     messages: [{ role: 'user', content: buildPrompt(params) }],
-    temperature: 0,
-    maxTokens: 1024,
+    // Sem temperature: Sonnet 5 deprecou o parâmetro. maxTokens FOLGADO: o
+    // Sonnet 5 raciocina antes de responder e o thinking consome orçamento
+    // (o provider filtra os blocos de thinking); com pouco maxTokens o texto
+    // final vem vazio. 8192 deixa espaço para thinking + o JSON do veredito.
+    maxTokens: 8192,
     jsonMode: true,
   });
   return parseVerdict(text);

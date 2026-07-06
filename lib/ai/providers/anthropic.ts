@@ -43,7 +43,10 @@ export const anthropicProvider: AiProvider = {
     const resp = await c.messages.create({
       model: modelId,
       max_tokens: req.maxTokens ?? 4096,
-      temperature: req.temperature ?? 0.3,
+      // Modelos recentes (Sonnet 5, Opus 4.x) DEPRECARAM `temperature` e
+      // rejeitam a requisição se ele for enviado. Só incluímos quando o caller
+      // passa explicitamente — senão deixamos o modelo usar seu default.
+      ...(req.temperature !== undefined ? { temperature: req.temperature } : {}),
       ...(system ? { system } : {}),
       messages,
     })
@@ -79,7 +82,10 @@ export const anthropicProvider: AiProvider = {
     const stream = c.messages.stream({
       model: modelId,
       max_tokens: req.maxTokens ?? 4096,
-      temperature: req.temperature ?? 0.3,
+      // Modelos recentes (Sonnet 5, Opus 4.x) DEPRECARAM `temperature` e
+      // rejeitam a requisição se ele for enviado. Só incluímos quando o caller
+      // passa explicitamente — senão deixamos o modelo usar seu default.
+      ...(req.temperature !== undefined ? { temperature: req.temperature } : {}),
       ...(system ? { system } : {}),
       messages,
     })
