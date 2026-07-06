@@ -1,0 +1,211 @@
+{
+  "runAt": "2026-07-06T20:51:49.587Z",
+  "answerModel": "default (task chat)",
+  "judgeModel": "claude-sonnet-5",
+  "results": [
+    {
+      "id": "q-data-a-data",
+      "query": "sistema data a data",
+      "empty": false,
+      "sourceCount": 5,
+      "verdict": {
+        "faithfulness": 0.3,
+        "citationAccuracy": 0.4,
+        "completeness": 0.5,
+        "overall": 0.38,
+        "issues": [
+          "Cita 'Art. 25, § 7º da Lei 14.133/2021' que não consta nas fontes/artigos disponíveis no contexto — citação inventada",
+          "O termo 'sistema data a data' não é definido no material fornecido; a resposta constrói uma interpretação especulativa não sustentada diretamente pelas fontes",
+          "Mistura indevidamente conceitos de reajustamento (INCP 14) com critérios de medição de contratos (Manual TCU), sem base clara que uni-los sob 'sistema data a data'",
+          "Uso do Decreto 12.174/2024 para tema trabalhista é forçado e não conectado logicamente ao termo perguntado",
+          "Resposta apresenta alta confiança/estrutura elaborada sobre um termo que o material não define, mascarando a fragilidade da fonte"
+        ],
+        "rationale": "A resposta constrói uma interpretação extensa para um termo que o material não define claramente, incluindo uma citação de artigo (Art. 25, §7º) fora do escopo de fontes disponíveis, comprometendo fidelidade e precisão de citação, ainda que utilize corretamente várias fontes relevantes disponíveis."
+      },
+      "latencyMs": 26710
+    },
+    {
+      "id": "q-dispensa-valor",
+      "query": "dispensa de licitação por valor",
+      "empty": false,
+      "sourceCount": 5,
+      "verdict": {
+        "faithfulness": 0.7,
+        "citationAccuracy": 0.7,
+        "completeness": 0.7,
+        "overall": 0.7,
+        "issues": [
+          "Cita Decreto 12.343/2024 como referência de valores atualizados sem mencionar que foi revogado pelo Decreto 12.807/2025 (que consta no material)",
+          "Atribui ao 'Art. 4º da Lei 14.133' a preferência para ME/EPP até R$80.000, mas o material não faz essa ligação (é citação [[9]] do Manual TCU, sem art. específico)",
+          "Não cita o Decreto 12.807/2025, que é o normativo vigente sobre atualização de valores conforme o material",
+          "Omite o Acórdão TCU 119/2021, embora seja de relevância marginal (trata de emergência, não de valor)"
+        ],
+        "rationale": "A resposta é estruturada e majoritariamente fiel ao material, incluindo aviso de baixa cobertura, mas comete erro de atribuição normativa (Art. 4º) e desatualiza a referência ao decreto vigente sobre valores, ignorando a revogação expressa no material."
+      },
+      "latencyMs": 37791
+    },
+    {
+      "id": "q-inexigibilidade-notoria",
+      "query": "inexigibilidade notória especialização",
+      "empty": false,
+      "sourceCount": 5,
+      "verdict": {
+        "faithfulness": 0.9,
+        "citationAccuracy": 1,
+        "completeness": 0.9,
+        "overall": 0.94,
+        "issues": [
+          "Menciona 'nota de empenho ou documento equivalente' ao explicar o Enunciado IBDA nº 36, detalhe não explicitado no material",
+          "Pequena extrapolação ao ligar ON AGU 18/2009 diretamente ao art. 74 da nova lei, embora plausível dado os artigos indicados no material"
+        ],
+        "rationale": "A resposta reflete fielmente o conteúdo do Art. 74, 72, 73, Súmula 39, Parecer AGU, ON 18/2009 e Enunciado IBDA nº 36, com avisos adequados de precedentes anteriores à Lei 14.133 e alerta de baixa cobertura. Há apenas pequenas extrapolações não totalmente ancoradas no material, mas sem inventar conteúdo relevante."
+      },
+      "latencyMs": 36470
+    },
+    {
+      "id": "q-pregao-bens-comuns",
+      "query": "pregão bens e serviços comuns",
+      "empty": false,
+      "sourceCount": 5,
+      "verdict": {
+        "faithfulness": 0.9,
+        "citationAccuracy": 0.9,
+        "completeness": 0.85,
+        "overall": 0.89,
+        "issues": [
+          "Inclui observação inferida ('precedente anterior à Lei 14.133') que não consta explicitamente no material, embora seja logicamente correta",
+          "Cita atos normativos de baixa relevância direta ao tema (Decreto 10.818/2021, IN SEGES/MGI 52/2025) com conexão vaga à pergunta",
+          "Não menciona Art. 28 (modalidades) nem Art. 46 (critérios de julgamento gerais), embora sejam de baixa relevância no material",
+          "Simplifica a regra da ON 107/2026 sobre técnica e preço sem detalhar a exceção de menor preço com clareza total"
+        ],
+        "rationale": "A resposta é predominantemente fiel e bem fundamentada nas fontes fornecidas, com citações corretas de artigos, manual TCU, orientações normativas e parecer; a completude é boa, cobrindo quase todas as fontes relevantes, mas inclui alguns elementos de baixa relevância direta e pequenas inferências não expressamente sustentadas."
+      },
+      "latencyMs": 44309
+    },
+    {
+      "id": "q-dialogo-competitivo",
+      "query": "diálogo competitivo hipóteses cabimento",
+      "empty": false,
+      "sourceCount": 5,
+      "verdict": {
+        "faithfulness": 0.9,
+        "citationAccuracy": 0.9,
+        "completeness": 0.9,
+        "overall": 0.9,
+        "issues": [
+          "Pequena paráfrase não literal em 'tecnologia de ponta' sem base direta no texto citado",
+          "Não menciona prazos específicos de pré-seleção (25 dias) e fase competitiva (60 dias) que constam no Manual TCU",
+          "Inf. 486/2024 foi corretamente omitido por baixa pertinência ao tema"
+        ],
+        "rationale": "A resposta reproduz fielmente o conteúdo do material fornecido, com citações corretas ao art. 32 e às fontes normativas/jurisprudenciais listadas, incluindo o aviso de baixa cobertura. Cobertura das fontes é boa, mas poderia detalhar mais o procedimento (prazos) para completude total."
+      },
+      "latencyMs": 20446
+    },
+    {
+      "id": "q-srp-adesao-carona",
+      "query": "adesão ata registro de preços carona",
+      "empty": false,
+      "sourceCount": 5,
+      "verdict": {
+        "faithfulness": 0.9,
+        "citationAccuracy": 0.9,
+        "completeness": 0.9,
+        "overall": 0.9,
+        "issues": [
+          "Seção sobre obras/engenharia (Art. 82 §5º) é tangencial à pergunta específica sobre 'carona', embora presente no material",
+          "Não menciona explicitamente o Art. 82, VIII (vedação a participar de mais de uma ata), que é diretamente pertinente ao tema de adesão",
+          "Não cita ON 88/2024 item II sobre órgão não participante que aparece truncado no material, poderia ter explorado mais"
+        ],
+        "rationale": "A resposta é bem fundamentada, com citações corretas e atribuídas fielmente ao material (Art. 82, Manual TCU, Informativo 242/2015, Parecer AGU, Enunciado IBDA 61, ON 88/2024). Cobre a maioria das fontes relevantes disponíveis, com pequenas omissões pontuais e leve dispersão para tópico correlato (obras/engenharia)."
+      },
+      "latencyMs": 45168
+    },
+    {
+      "id": "q-reequilibrio-economico",
+      "query": "reequilíbrio econômico-financeiro do contrato",
+      "empty": false,
+      "sourceCount": 5,
+      "verdict": {
+        "faithfulness": 0.8,
+        "citationAccuracy": 0.9,
+        "completeness": 0.9,
+        "overall": 0.86,
+        "issues": [
+          "Generaliza o Parecer 003/2015/DECOR/CGU/AGU (específico de concessão de transmissão de energia elétrica) para contratos administrativos em geral, sem mencionar o contexto específico do parecer",
+          "Extrapola o conteúdo do Informativo 50/2011 ao afirmar que eventos 'devem ser objeto de pleito de reequilíbrio no momento oportuno', quando o texto original apenas trata da vedação de dotações genéricas antecipadas",
+          "Não explora Art. 92, §§4º e 6º sobre repactuação/reajuste que também se relacionam ao tema de equilíbrio econômico-financeiro em contratos contínuos"
+        ],
+        "rationale": "A resposta é tecnicamente sólida e as citações existem no material, mas há pequenas extrapolações interpretativas (especialmente sobre o Parecer 003/2015, cujo contexto específico não é mencionado) e algumas inferências além do texto literal do Informativo 50/2011."
+      },
+      "latencyMs": 35243
+    },
+    {
+      "id": "q-sancoes-impedimento-licitar",
+      "query": "sanções impedimento de licitar e contratar",
+      "empty": false,
+      "sourceCount": 5,
+      "verdict": {
+        "faithfulness": 0.85,
+        "citationAccuracy": 0.85,
+        "completeness": 0.9,
+        "overall": 0.86,
+        "issues": [
+          "Acrescenta 'Plenário' ao Acórdão TCU 2530/2023 sem que isso conste no material",
+          "Trata fontes de relevância baixíssima (1%) como 'precedentes importantes' sem reforçar a ressalva de baixa confiabilidade",
+          "Simplifica 'ente federativo' com exemplos (União/Estado) não explicitados no material, ainda que coerentes com o texto legal",
+          "Não menciona art. 157 nem 159, embora sejam de relevância secundária para a pergunta específica"
+        ],
+        "rationale": "A resposta é majoritariamente fiel ao material, com citações de artigos corretas e uso adequado das fontes relevantes (CJF 51, Manual TCU, Parecer AGU, Informativo 399, Acórdão 2530), mas comete pequenas imprecisões de atribuição (ex: 'Plenário') e trata fontes de relevância mínima como mais robustas do que o aviso de baixa cobertura sugeriria."
+      },
+      "latencyMs": 47435
+    },
+    {
+      "id": "q-fiscal-contrato-responsabilidade",
+      "query": "responsabilidades do fiscal de contrato",
+      "empty": false,
+      "sourceCount": 5,
+      "verdict": {
+        "faithfulness": 0.7,
+        "citationAccuracy": 0.6,
+        "completeness": 0.8,
+        "overall": 0.68,
+        "issues": [
+          "Cita Art. 8º, §4º como base para 'apoio de terceiros à fiscalização', mas esse parágrafo trata de assessoria à condução da licitação, não da execução do contrato",
+          "Acrescenta 'Plenário' ao Acórdão TCU 3053/2025 sem que isso conste no material",
+          "Atribui ao Art. 8º, §3º um 'direito' do fiscal a apoio jurídico, quando o texto fala em previsão futura por regulamento",
+          "Enunciado IBDA nº 57 trata de controle interno organizacional, uso como 'apoio técnico ao fiscal' é uma extrapolação forçada"
+        ],
+        "rationale": "A resposta é majoritariamente fiel e bem organizada, cobrindo as principais fontes do material, mas contém erros de atribuição de dispositivos (especialmente Art. 8º) e pequenas adições não sustentadas pelo texto."
+      },
+      "latencyMs": 33860
+    },
+    {
+      "id": "q-etp-obrigatoriedade",
+      "query": "estudo técnico preliminar obrigatório",
+      "empty": false,
+      "sourceCount": 5,
+      "verdict": {
+        "faithfulness": 0.8,
+        "citationAccuracy": 0.8,
+        "completeness": 0.9,
+        "overall": 0.82,
+        "issues": [
+          "Acrescenta 'Plenário' ao Acórdão TCU 2450/2025 sem essa informação constar no material",
+          "Infere 'adesão a atas de registro de preços' na ON 102/2025, que não menciona esse termo explicitamente",
+          "Atribui conteúdo específico de governança à Portaria SEGES/ME 8.678/2021 sem que o material detalhe seu teor além do título/artigos",
+          "Não menciona Art. 40 nem outros artigos listados como disponíveis (Art. 44, 59, 80), embora de relevância marginal ao tema"
+        ],
+        "rationale": "A resposta é majoritariamente fiel e bem estruturada, cobrindo as principais fontes do material sobre ETP, mas contém pequenas extrapolações não comprovadas textualmente (ex.: 'Plenário', 'atas de registro de preços') que fragilizam a precisão das citações."
+      },
+      "latencyMs": 31695
+    }
+  ],
+  "summary": {
+    "evaluated": 10,
+    "empty": 0,
+    "faithfulness": 0.7749999999999999,
+    "citationAccuracy": 0.7949999999999999,
+    "completeness": 0.825,
+    "overall": 0.793
+  }
+}
