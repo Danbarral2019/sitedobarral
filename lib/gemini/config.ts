@@ -20,13 +20,15 @@ export const PRIMARY_GEMINI_MODEL =
  * disponibilidade OU 429, o cliente tenta cada um em ordem.
  * Manter do mais capaz para o menos capaz.
  *
- * gemini-2.5-flash é o fallback de transição até 17/jun/2026 — depois disso
- * vira 404 e a cascata pula direto para 2.5-flash-lite.
+ * Saneado 2026-07-06 (Fase 2.3): `gemini-1.5-flash` e `gemini-2.0-flash` foram
+ * APOSENTADOS pela Google (404 confirmado por probe). `gemini-2.5-flash` e
+ * `-lite` seguem vivos. `gemini-flash-latest` é um ALIAS que aponta sempre para
+ * o Flash estável mais recente — nunca 404, serve de rede de segurança final.
  */
 export const FALLBACK_GEMINI_MODELS: ReadonlyArray<string> = [
   'gemini-2.5-flash',
   'gemini-2.5-flash-lite',
-  'gemini-1.5-flash',
+  'gemini-flash-latest',
 ];
 
 /**

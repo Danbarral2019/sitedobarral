@@ -286,9 +286,13 @@ Exemplo de resposta: ["variação 1", "variação 2"]`;
       n => !leiResultArticleNums.includes(n)
     );
 
-    // Build lei context from semantic results + extra cited articles
-    const semanticLeiContext = buildContextForLLM(leiResults, 2000);
-    const extraLeiContext = buildLeiContext(missingArticles, 1500);
+    // Build lei context from semantic results + extra cited articles.
+    // Fase 2.2: caps elevados — com LeiArticleEmbedding populada (Fase 2.1), a
+    // seleção semântica traz os artigos certos, mas o cap antigo (1500) truncava
+    // ANTES do 1º artigo longo (ex.: Art. 156 de sanções tem ~2k chars), fazendo
+    // o modelo INVENTAR o teor. 10000 comporta ~5 artigos integrais.
+    const semanticLeiContext = buildContextForLLM(leiResults, 4000);
+    const extraLeiContext = buildLeiContext(missingArticles, 10000);
     const fullLeiContext = [semanticLeiContext, extraLeiContext].filter(Boolean).join('\n\n');
 
     // 8. Find related legislative acts not already in results
@@ -304,12 +308,12 @@ Exemplo de resposta: ["variação 1", "variação 2"]`;
 
     // Build acts context (includes Document-based acts + semantic LegislativeAct acts)
     const allActContextResults = [...actResults, ...cappedLegActs];
-    const semanticActsContext = buildContextForLLM(allActContextResults, 2500);
-    const extraActsFormatted = formatActsContext(extraActs, 2000);
+    const semanticActsContext = buildContextForLLM(allActContextResults, 5000);
+    const extraActsFormatted = formatActsContext(extraActs, 4000);
     const fullActsContext = [semanticActsContext, extraActsFormatted].filter(Boolean).join('\n\n');
 
     // Build docs context (increased to fit more diverse results)
-    const docsContext = buildContextForLLM(docResults, 10000);
+    const docsContext = buildContextForLLM(docResults, 20000);
 
     // 8b. TIC mode: enrich acts context with TIC-specific legislative acts
     let ticActsContext = '';
@@ -335,11 +339,14 @@ Exemplo de resposta: ["variação 1", "variação 2"]`;
       }
     }
 
-    // 9. Build layered context (increased from 15000 to 20000 for richer answers)
+    // 9. Build layered context. Fase 2.2: 20000 → 60000 chars (~15k tokens, custo
+    // desprezível no Gemini 1M / Claude). O total antigo estrangulava a resposta
+    // a ~5 trechos truncados; com 60k a camada Lei (30%=18k) comporta os artigos
+    // integrais que a Fase 2.1 passou a encontrar.
     const combinedActsContext = ticActsContext
       ? `${fullActsContext}\n\n${ticActsContext}`
       : fullActsContext;
-    const fullContext = buildLayeredContext(fullLeiContext, combinedActsContext, docsContext, 20000);
+    const fullContext = buildLayeredContext(fullLeiContext, combinedActsContext, docsContext, 60000);
 
     // 10. Build conversation history context
     let historyContext = '';
@@ -412,9 +419,11 @@ INSTRUÇÕES:
     // sub-0.60, a base não tem material claramente sobre o tema. Avisamos
     // o LLM para usar linguagem cautelosa e evitar inventar conteúdo nas
     // fontes "raspadas" do top-K (ver regra 10f do systemInstruction).
-    const maxSimilarity = allDisplayResults.length > 0
-      ? Math.max(...allDisplayResults.map((r) => r.similarity))
-      : 0;
+    // Fase 2.5: sinal de cobertura = MAIOR COSINE BRUTO do ramo vetorial
+    // (searchResponse.topVectorSimilarity), não o `similarity` dos results — que
+    // após o RRF vira score de fusão (~0.01) misturado com scores heurísticos
+    // dos complementares (0.5-0.7), tornando o limiar de 0.6 (cosine) sem sentido.
+    const maxSimilarity = searchResponse.topVectorSimilarity ?? 0;
     const lowCoverageBanner =
       maxSimilarity < 0.6
         ? `⚠️ COBERTURA BAIXA: o melhor match nas fontes recuperadas tem ${(maxSimilarity * 100).toFixed(0)}% de similaridade (abaixo de 60%). A base provavelmente NÃO contém material direto sobre essa pergunta. Aplique a regra 10f do systemInstruction: avise o aluno e use linguagem cautelosa. NÃO INVENTE conteúdo de enunciados, súmulas ou pareceres só porque seus títulos apareceram aqui — eles podem ter sido recuperados por correspondência fraca.\n\n`

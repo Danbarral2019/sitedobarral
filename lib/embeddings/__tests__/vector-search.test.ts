@@ -173,7 +173,8 @@ describe('semanticSearch — tribunalCodeFilter', () => {
 
     const sql = getLastSql();
     const params = mockQueryRawUnsafe.mock.calls.at(-1)!.slice(1);
-    expect(sql).toMatch(/td\."tribunalCode" = \$/);
+    // Fase 2.4: comparação case-insensitive via UPPER() em ambos os lados.
+    expect(sql).toMatch(/UPPER\(td\."tribunalCode"\) = UPPER\(\$/);
     expect(params).toContain('TCE-SP');
   });
 });
@@ -203,7 +204,7 @@ describe('semanticSearch — tribunalBoost', () => {
     const sql = getLastSql();
     const params = mockQueryRawUnsafe.mock.calls.at(-1)!.slice(1);
     expect(sql).toMatch(/decision_scores AS/);
-    expect(sql).toMatch(/CASE WHEN td\."tribunalCode" = \$\d+ THEN \$\d+ ELSE 1/);
+    expect(sql).toMatch(/CASE WHEN UPPER\(td\."tribunalCode"\) = UPPER\(\$\d+\) THEN \$\d+ ELSE 1/);
     expect(params).toContain('TST');
     expect(params).toContain(1.2);
   });

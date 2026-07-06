@@ -21,7 +21,8 @@ interface TaskDefault {
  * em 2026-04-22.
  *
  * Anthropic: claude-haiku-4-5 para classificacao/sumarizacao,
- * claude-sonnet-4 para enhancement.
+ * claude-sonnet-5 para enhancement (Fase 2.3: claude-sonnet-4-20250514 foi
+ * APOSENTADO em 15/06/2026 e retornava 404).
  */
 const DEFAULTS: Record<AiTask, TaskDefault> = {
   'search': { provider: 'gemini', model: PRIMARY_GEMINI_MODEL },
@@ -29,7 +30,7 @@ const DEFAULTS: Record<AiTask, TaskDefault> = {
   'extraction': { provider: 'gemini', model: PRIMARY_GEMINI_MODEL },
   'classification': { provider: 'anthropic', model: 'claude-haiku-4-5-20251001' },
   'summarization': { provider: 'anthropic', model: 'claude-haiku-4-5-20251001' },
-  'enhancement': { provider: 'anthropic', model: 'claude-sonnet-4-20250514' },
+  'enhancement': { provider: 'anthropic', model: 'claude-sonnet-5' },
 }
 
 const ENV_KEYS: Record<AiTask, { providerKey: string; modelKey: string }> = {

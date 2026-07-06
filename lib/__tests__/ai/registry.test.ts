@@ -64,10 +64,10 @@ describe('lib/ai/registry', () => {
     expect(r.modelId).toBe('claude-haiku-4-5-20251001')
   })
 
-  it('enhancement default e Claude Sonnet 4', () => {
+  it('enhancement default e Claude Sonnet 5', () => {
     const r = resolveTask('enhancement')
     expect(r.provider.name).toBe('anthropic')
-    expect(r.modelId).toBe('claude-sonnet-4-20250514')
+    expect(r.modelId).toBe('claude-sonnet-5')
   })
 
   it('permite trocar search para Gemini 2.5 Pro via env', () => {
