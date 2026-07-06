@@ -21,6 +21,7 @@ import {
   extractCitedArticles,
   selectRelevantArticles,
   buildLeiContext,
+  buildLeiDocuments,
   findRelatedActs,
   buildLayeredContext,
   formatActsContext,
@@ -160,6 +161,7 @@ Exemplo de resposta: ["variação 1", "variação 2"]`;
         legalSources: [],
         allDisplayResults: [],
         maxSimilarity: 0,
+        citationDocuments: [],
       };
     }
 
@@ -371,6 +373,15 @@ Exemplo de resposta: ["variação 1", "variação 2"]`;
       .sort((a, b) => b.similarity - a.similarity)
       .slice(0, maxResults);
 
+    // Fase 3 (Citations API): fontes discretas e citáveis — chunks recuperados
+    // + artigos da Lei (texto integral) + atos regulamentadores. Cada uma vira
+    // um bloco `document` para o Claude ancorar cited_text na fonte exata.
+    const citationDocuments = [
+      ...allDisplayResults.map((r) => ({ title: r.documentTitle, text: r.chunkContent })),
+      ...buildLeiDocuments(allLeiArticleNums),
+      ...extraActs.map((a) => ({ title: a.title, text: a.ementa })),
+    ].filter((d) => d.text && d.text.trim().length > 0);
+
     // 12. Synthesize answer with enhanced prompt
     const sourcesList = allDisplayResults.map(r => `- ${r.documentTitle} (${r.category})`).join('\n');
     const articlesList = allLeiArticleNums.map(n => `Art. ${n}`).join(', ');
@@ -488,5 +499,6 @@ RESPOSTA:`;
     legalSources,
     allDisplayResults,
     maxSimilarity,
+    citationDocuments,
   };
 }

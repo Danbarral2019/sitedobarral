@@ -147,6 +147,22 @@ export function buildLeiContext(articleNumbers: string[], maxLength: number = 30
   return context.trim();
 }
 
+/**
+ * Fase 3 (Citations API): expõe os artigos da Lei 14.133 como documentos
+ * DISCRETOS ({title, text}) — cada artigo vira uma fonte citável separada, para
+ * o Claude ancorar `cited_text` no dispositivo exato. `text` é o texto integral
+ * (campo `ementa` = texto completo do artigo).
+ */
+export function buildLeiDocuments(articleNumbers: string[]): Array<{ title: string; text: string }> {
+  const docs: Array<{ title: string; text: string }> = [];
+  for (const num of articleNumbers) {
+    const artigo = LEI_14133_ARTIGOS[num];
+    if (!artigo) continue;
+    docs.push({ title: `Lei 14.133/2021 — Art. ${num}`, text: artigo.ementa });
+  }
+  return docs;
+}
+
 // ===========================
 // Find related legislative acts
 // ===========================

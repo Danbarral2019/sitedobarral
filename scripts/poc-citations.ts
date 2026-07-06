@@ -1,8 +1,9 @@
 /**
- * POC da Citations API (Fase 3): prova que o Claude Sonnet 5 retorna citações
- * VERIFICADAS (cited_text ancorado por trecho) contra as fontes reais do acervo.
- * Monta os documentos a partir de assembleAnswerContext e imprime resposta +
- * citações resolvidas. Read-only.
+ * POC/smoke da Citations API integrada (Fase 3): exercita
+ * generateAnswerWithCitations ponta-a-ponta e prova que o Claude cita as fontes
+ * — inclusive ARTIGOS DA LEI — com cited_text ancorado literalmente. Usa uma
+ * pergunta de sanções (o caso onde o modelo antes INVENTAVA o teor dos artigos).
+ * Read-only no banco.
  *
  * Uso: npx tsx scripts/poc-citations.ts
  */
@@ -10,48 +11,38 @@ import 'dotenv/config';
 import { config } from 'dotenv';
 config({ path: '.env.local' });
 
-import { assembleAnswerContext } from '../lib/rag/answerContext';
-import { generate } from '../lib/ai';
+import { generateAnswerWithCitations } from '../lib/rag/answerService';
 
-const QUERY = 'Quais os requisitos para dispensa de licitação por valor na Lei 14.133?';
+const QUERY = 'Quais as sanções de impedimento de licitar e contratar na Lei 14.133 e seus prazos?';
 
 async function main() {
-  const ctx = await assembleAnswerContext({ query: QUERY, filters: {}, maxResults: 8, useCache: false });
-  if (ctx.empty) {
-    console.log('contexto vazio — sem fontes');
-    return;
-  }
+  const { answer, citations, context } = await generateAnswerWithCitations(
+    { query: QUERY, filters: {}, maxResults: 8, useCache: false },
+  );
 
-  const documents = ctx.allDisplayResults.map((r) => ({
-    title: r.documentTitle,
-    text: r.chunkContent,
-  }));
-  console.log(`Fontes enviadas como documentos citáveis: ${documents.length}`);
+  console.log(`Documentos citáveis montados: ${context.citationDocuments.length}`);
+  console.log(`  (chunks + artigos da Lei + atos)`);
+  const artigos = context.citationDocuments.filter((d) => d.title.startsWith('Lei 14.133/2021 — Art.'));
+  console.log(`  artigos da Lei como documentos: ${artigos.length} → ${artigos.map((a) => a.title.replace('Lei 14.133/2021 — ', '')).join(', ')}`);
 
-  const { text, citations, inputTokens, outputTokens } = await generate('chat', {
-    provider: 'anthropic',
-    model: 'claude-sonnet-5',
-    systemPrompt:
-      'Você é um assistente jurídico especializado em licitações (Lei 14.133/2021). Responda à pergunta do aluno usando SOMENTE os documentos fornecidos. Cite as fontes ao afirmar algo — a API registrará a citação automaticamente. Se os documentos não bastarem, diga isso.',
-    messages: [{ role: 'user', content: `PERGUNTA: ${QUERY}` }],
-    documents,
-    maxTokens: 8192,
-  });
+  console.log(`\n===== RESPOSTA (${answer.length} chars) =====`);
+  console.log(answer.slice(0, 1000) + (answer.length > 1000 ? '…' : ''));
 
-  console.log(`\n===== RESPOSTA (${text.length} chars) =====`);
-  console.log(text.slice(0, 1200) + (text.length > 1200 ? '…' : ''));
-
-  console.log(`\n===== CITAÇÕES VERIFICADAS: ${citations?.length ?? 0} =====`);
-  for (const c of (citations ?? []).slice(0, 10)) {
-    const src = documents[c.documentIndex];
-    console.log(`  • [doc ${c.documentIndex}] ${c.documentTitle ?? src?.title}`);
-    console.log(`      "${c.citedText.slice(0, 120)}${c.citedText.length > 120 ? '…' : ''}"`);
-    // Sanidade: o cited_text deve existir literalmente na fonte
+  console.log(`\n===== CITAÇÕES VERIFICADAS: ${citations.length} =====`);
+  let ancoradas = 0;
+  let artigosLeicitados = 0;
+  for (const c of citations) {
+    const src = context.citationDocuments[c.documentIndex];
     const ok = src ? src.text.includes(c.citedText) : false;
-    console.log(`      ancoragem literal na fonte: ${ok ? '✅' : '❌'}`);
+    if (ok) ancoradas++;
+    if (src?.title.startsWith('Lei 14.133/2021 — Art.')) artigosLeicitados++;
   }
-
-  console.log(`\ntokens in/out: ${inputTokens}/${outputTokens}`);
+  console.log(`  ancoradas literalmente na fonte: ${ancoradas}/${citations.length}`);
+  console.log(`  citações de ARTIGOS DA LEI: ${artigosLeicitados}`);
+  for (const c of citations.slice(0, 8)) {
+    const src = context.citationDocuments[c.documentIndex];
+    console.log(`  • [${c.documentTitle ?? src?.title}] "${c.citedText.slice(0, 90)}…"`);
+  }
 }
 
 main()
