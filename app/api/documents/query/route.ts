@@ -140,7 +140,12 @@ export async function POST(req: NextRequest) {
       legalSources,
       allDisplayResults,
       maxSimilarity,
+      citationDocuments,
     } = ctx;
+
+    // Fase 3: sintetizador padrão = Claude Sonnet 5 com Citations API (fontes
+    // verificadas por afirmação). Env AI_SYNTHESIS_MODEL permite override/rollback.
+    const CITATIONS_MODEL = (process.env.AI_SYNTHESIS_MODEL || 'claude-sonnet-5').trim();
 
     // 13. Streaming response (SSE) — via lib/ai generateStream com fallback
     // cascade + safety + thinkingBudget=0 (Gemini 2.5/3 trunca sem isso).
@@ -159,67 +164,76 @@ export async function POST(req: NextRequest) {
             });
             controller.enqueue(encoder.encode(`data: ${meta}\n\n`));
 
-            // Stream Gemini tokens via lib/ai. finishReason chega no chunk
-            // terminal (lib/ai provider emite chunk final com finishReason +
-            // usage, separado dos chunks de texto).
-            const streamResult = await generateStream('chat', {
-              messages: [{ role: 'user', content: synthesisPrompt }],
-              provider: 'gemini',
-              model: PRIMARY_GEMINI_MODEL,
-              fallbackModels: [...FALLBACK_GEMINI_MODELS].filter(
-                (m) => m !== PRIMARY_GEMINI_MODEL,
-              ),
-              systemPrompt: systemInstruction,
-              temperature: 0.5,
-              maxTokens: 8192,
-              // Sem thinkingBudget=0, o raciocínio come o maxTokens e a
-              // resposta trunca no meio. Síntese factual não precisa de
-              // thinking — só cita fontes.
-              thinkingBudget: 0,
-              safetySettings: LEGAL_SAFETY_SETTINGS,
-            });
+            // 13. Síntese padrão (Fase 3): Claude Sonnet 5 + Citations API —
+            // fontes verificadas por afirmação (cited_text ∈ fonte). Fallback
+            // para Gemini (sem citações) se o Claude falhar ANTES de emitir tokens.
             let hasTokens = false;
-            // Acumula tokens em buffer pra validação pós-stream de citações
-            // entre aspas (anti-hallucination). Stream segue normal pro
-            // cliente em paralelo — verificação é feita ao final.
             let fullAnswer = '';
             let finishReason: string | undefined;
-            for await (const chunk of streamResult) {
-              if (chunk.text) {
-                hasTokens = true;
-                fullAnswer += chunk.text;
-                controller.enqueue(
-                  encoder.encode(
-                    `data: ${JSON.stringify({ type: 'token', text: chunk.text })}\n\n`,
-                  ),
-                );
+            let usedCitations = false;
+
+            const pump = async (
+              streamResult: Awaited<ReturnType<typeof generateStream>>,
+            ) => {
+              for await (const chunk of streamResult) {
+                if (chunk.text) {
+                  hasTokens = true;
+                  fullAnswer += chunk.text;
+                  controller.enqueue(
+                    encoder.encode(`data: ${JSON.stringify({ type: 'token', text: chunk.text })}\n\n`),
+                  );
+                }
+                if (chunk.citation) {
+                  controller.enqueue(
+                    encoder.encode(`data: ${JSON.stringify({ type: 'citation', citation: chunk.citation })}\n\n`),
+                  );
+                }
+                if (chunk.finishReason) finishReason = chunk.finishReason;
               }
-              if (chunk.finishReason) {
-                finishReason = chunk.finishReason;
-              }
+            };
+
+            try {
+              usedCitations = true;
+              await pump(
+                await generateStream('chat', {
+                  provider: 'anthropic',
+                  model: CITATIONS_MODEL,
+                  systemPrompt: systemInstruction,
+                  messages: [{ role: 'user', content: `PERGUNTA DO USUÁRIO:\n${query}` }],
+                  documents: citationDocuments,
+                  maxTokens: 8192,
+                }),
+              );
+            } catch (claudeErr) {
+              if (hasTokens) throw claudeErr; // mid-stream: não dá pra trocar de provider
+              usedCitations = false;
+              apiLogger.warn(
+                { err: claudeErr instanceof Error ? claudeErr.message : String(claudeErr) },
+                'Síntese Claude falhou antes de tokens — fallback para Gemini (sem citações)',
+              );
+              await pump(
+                await generateStream('chat', {
+                  provider: 'gemini',
+                  model: PRIMARY_GEMINI_MODEL,
+                  fallbackModels: [...FALLBACK_GEMINI_MODELS].filter((m) => m !== PRIMARY_GEMINI_MODEL),
+                  systemPrompt: systemInstruction,
+                  messages: [{ role: 'user', content: synthesisPrompt }],
+                  temperature: 0.5,
+                  maxTokens: 8192,
+                  thinkingBudget: 0,
+                  safetySettings: LEGAL_SAFETY_SETTINGS,
+                }),
+              );
             }
 
-            // Verifica finishReason pós-stream. Gemini 2.5 aborta em meio
-            // de resposta quando detecta recitação literal (RECITATION) ou
-            // safety parcial. Sem esse check, UI exibe resposta truncada
-            // sem aviso.
-            if (
-              finishReason &&
-              finishReason !== 'STOP' &&
-              finishReason !== 'MAX_TOKENS'
-            ) {
-              apiLogger.warn(
-                { finishReason, hasTokens },
-                'Gemini stream interrupted before STOP',
-              );
+            // finishReason anormal (Gemini RECITATION/SAFETY; Claude refusal).
+            const NORMAL_FINISH = ['STOP', 'MAX_TOKENS', 'end_turn', 'max_tokens', 'stop_sequence'];
+            if (finishReason && !NORMAL_FINISH.includes(finishReason)) {
+              apiLogger.warn({ finishReason, hasTokens, usedCitations }, 'Síntese interrompida antes do fim normal');
               const note = hasTokens
-                ? `\n\n⚠️ (Resposta interrompida antes do final — motivo: ${finishReason}. Tente reformular a pergunta para evitar citação literal.)`
+                ? `\n\n⚠️ (Resposta interrompida antes do final — motivo: ${finishReason}.)`
                 : `Não consegui gerar uma síntese (motivo: ${finishReason}). Consulte as fontes abaixo.`;
-              controller.enqueue(
-                encoder.encode(
-                  `data: ${JSON.stringify({ type: 'token', text: note })}\n\n`,
-                ),
-              );
+              controller.enqueue(encoder.encode(`data: ${JSON.stringify({ type: 'token', text: note })}\n\n`));
             }
 
             if (!hasTokens) {
@@ -227,11 +241,10 @@ export async function POST(req: NextRequest) {
               controller.enqueue(encoder.encode(`data: ${JSON.stringify({ type: 'token', text: fallback })}\n\n`));
             }
 
-            // Validação anti-hallucination: detecta citações entre aspas que
-            // não existem nos chunks do contexto e adiciona aviso ao final.
-            // Defesa em camadas — independe de o LLM ter respeitado o prompt.
-            // Caso fundador: 2026-04-26, Enunciado IBDA 29 com aspas inventadas.
-            if (hasTokens && fullAnswer.length > 0) {
+            // Validador anti-alucinação de aspas: só no caminho SEM Citations
+            // (fallback Gemini). Com Claude+Citations as aspas já são verificadas
+            // estruturalmente pela API (cited_text ∈ fonte).
+            if (!usedCitations && hasTokens && fullAnswer.length > 0) {
               try {
                 const contextChunks = allDisplayResults.map((r) => r.chunkContent);
                 const validation = validateQuotedCitations(fullAnswer, contextChunks);
@@ -246,9 +259,7 @@ export async function POST(req: NextRequest) {
                     'Citation validation: aspas não encontradas nos chunks de contexto',
                   );
                   const warning = buildCitationWarning(validation.invalidQuotes);
-                  controller.enqueue(
-                    encoder.encode(`data: ${JSON.stringify({ type: 'token', text: warning })}\n\n`),
-                  );
+                  controller.enqueue(encoder.encode(`data: ${JSON.stringify({ type: 'token', text: warning })}\n\n`));
                 }
               } catch (err) {
                 apiLogger.error({ err }, 'Citation validator falhou — segue sem aviso');
