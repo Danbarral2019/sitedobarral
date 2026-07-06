@@ -46,7 +46,9 @@ export async function generateAnswer(
     fallbackModels: opts.fallbackModels,
     systemPrompt: context.systemInstruction,
     messages: [{ role: 'user', content: context.synthesisPrompt }],
-    temperature: 0.5,
+    // Sonnet 5 / Opus 4.x DEPRECARAM `temperature` (rejeitam a requisição).
+    // Só passamos temperature no caminho Gemini; o Claude usa seu default.
+    temperature: opts.provider === 'anthropic' ? undefined : 0.5,
     maxTokens: 8192,
     // Gemini 2.5/3 trunca sem thinkingBudget=0; ignorado pelo Anthropic.
     thinkingBudget: 0,
