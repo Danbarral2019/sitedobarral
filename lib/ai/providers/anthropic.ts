@@ -39,21 +39,26 @@ function buildMessages(req: AiGenerateRequest): Anthropic.MessageParam[] {
   })
 }
 
+/** Mapeia uma citação `char_location` do SDK para o formato interno. */
+export function mapCitation(c: Anthropic.TextCitation): AiCitation | null {
+  if (c.type !== 'char_location') return null
+  return {
+    citedText: c.cited_text,
+    documentIndex: c.document_index,
+    documentTitle: c.document_title ?? undefined,
+    startCharIndex: c.start_char_index,
+    endCharIndex: c.end_char_index,
+  }
+}
+
 /** Extrai as citações `char_location` dos blocos de texto da resposta. */
 export function extractCitations(content: Anthropic.ContentBlock[]): AiCitation[] {
   const out: AiCitation[] = []
   for (const block of content) {
     if (block.type !== 'text' || !block.citations) continue
     for (const c of block.citations) {
-      if (c.type === 'char_location') {
-        out.push({
-          citedText: c.cited_text,
-          documentIndex: c.document_index,
-          documentTitle: c.document_title ?? undefined,
-          startCharIndex: c.start_char_index,
-          endCharIndex: c.end_char_index,
-        })
-      }
+      const mapped = mapCitation(c)
+      if (mapped) out.push(mapped)
     }
   }
   return out
@@ -142,11 +147,14 @@ export const anthropicProvider: AiProvider = {
 
     return (async function* (): AsyncGenerator<AiStreamChunk> {
       for await (const event of stream) {
-        if (
-          event.type === 'content_block_delta' &&
-          event.delta.type === 'text_delta'
-        ) {
+        if (event.type !== 'content_block_delta') continue
+        if (event.delta.type === 'text_delta') {
           yield { text: event.delta.text, provider: 'anthropic', modelId }
+        } else if (event.delta.type === 'citations_delta') {
+          // Citations API: cada citação verificada chega em seu próprio delta,
+          // intercalada com o texto. Emitimos como chunk `citation`.
+          const mapped = mapCitation(event.delta.citation)
+          if (mapped) yield { citation: mapped, provider: 'anthropic', modelId }
         }
       }
       // Final metadata (stop_reason + usage).

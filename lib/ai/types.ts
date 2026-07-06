@@ -183,6 +183,11 @@ export interface AiStreamChunk {
     inputTokens?: number
     outputTokens?: number
   }
+  /**
+   * Citação verificada emitida incrementalmente (Citations API, Anthropic).
+   * Chega em chunks próprios (citations_delta) intercalados com o texto.
+   */
+  citation?: AiCitation
   provider: AiProviderName
   modelId: string
 }

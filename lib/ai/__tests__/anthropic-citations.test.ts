@@ -1,6 +1,30 @@
 import { describe, it, expect } from 'vitest';
 import type Anthropic from '@anthropic-ai/sdk';
-import { extractCitations } from '../providers/anthropic';
+import { extractCitations, mapCitation } from '../providers/anthropic';
+
+describe('mapCitation', () => {
+  it('mapeia char_location para o formato interno', () => {
+    const m = mapCitation({
+      type: 'char_location',
+      cited_text: 'trecho literal',
+      document_index: 3,
+      document_title: 'Fonte X',
+      start_char_index: 0,
+      end_char_index: 14,
+    } as never);
+    expect(m).toEqual({
+      citedText: 'trecho literal',
+      documentIndex: 3,
+      documentTitle: 'Fonte X',
+      startCharIndex: 0,
+      endCharIndex: 14,
+    });
+  });
+
+  it('retorna null para tipos de citação não suportados (ex.: page_location)', () => {
+    expect(mapCitation({ type: 'page_location' } as never)).toBeNull();
+  });
+});
 
 /** Constrói um ContentBlock[] mínimo com citações char_location. */
 function content(blocks: unknown[]): Anthropic.ContentBlock[] {
