@@ -2828,6 +2828,42 @@
         ],
         "candidates_pending_review": []
       }
+    },
+    {
+      "id": "q-dragagem-licenciamento-ambiental",
+      "query": "dragagem sem licenciamento ambiental prévio e consulta a povos tradicionais",
+      "description": "Contratação de serviços de dragagem de manutenção sem licenciamento ambiental prévio, sem elaboração de EIA/RIMA e sem consulta prévia aos povos tradicionais (CPLI) — Acórdão TCU 1736/2026-Plenário.",
+      "category": "tese-especifica",
+      "difficulty": "hard",
+      "annotations": {
+        "relevant": [
+          "8b74e1b2-a3b8-47f9-8cec-4991c9f37a9b"
+        ],
+        "highlyRelevant": [
+          "8b74e1b2-a3b8-47f9-8cec-4991c9f37a9b"
+        ],
+        "annotatedAt": "2026-07-07T20:10:00.000Z",
+        "annotatedBy": "claude",
+        "notes": "Anotado a partir da EMENTA OFICIAL do acórdão (canon), NÃO do top-K do pipeline — evita ground-truth tautológico (ver feedback_eval_ground_truth_bias). Query cobre um dos 171 acórdãos TCU indexados pela ementa oficial em 2026-07-07, para proteger o ganho de indexação contra regressão. Revisar/validar com Daniel."
+      }
+    },
+    {
+      "id": "q-fraude-pesquisa-precos-segregacao",
+      "query": "fraude na pesquisa de preços e ausência de segregação de funções",
+      "description": "Certame para contratação de mobiliário com fraude na pesquisa de preços, ausência de segregação de funções e agrupamento injustificado de itens heterogêneos — Acórdão TCU 1733/2026-Plenário.",
+      "category": "tese-especifica",
+      "difficulty": "hard",
+      "annotations": {
+        "relevant": [
+          "9bcfe134-6828-4960-b75f-ccf7ab1d4569"
+        ],
+        "highlyRelevant": [
+          "9bcfe134-6828-4960-b75f-ccf7ab1d4569"
+        ],
+        "annotatedAt": "2026-07-07T20:10:00.000Z",
+        "annotatedBy": "claude",
+        "notes": "Anotado a partir da EMENTA OFICIAL do acórdão (canon), NÃO do top-K do pipeline — evita ground-truth tautológico (ver feedback_eval_ground_truth_bias). Query cobre um dos 171 acórdãos TCU indexados pela ementa oficial em 2026-07-07, para proteger o ganho de indexação contra regressão. Revisar/validar com Daniel."
+      }
     }
   ]
 }
