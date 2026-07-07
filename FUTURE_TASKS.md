@@ -86,6 +86,68 @@ Ver relatório completo em `docs/audits/2026-05-16-silent-failures.md` para tabe
 
 ---
 
+## 🔎 BUSCA IA — Plano de melhorias pós-teto de retrieval (2026-07-07)
+
+**Contexto:** a trilha de *retrieval* (recall@5 ~65-66%) está **near-ceiling** para este dataset — ver `docs/ROADMAP_BUSCA_QUALIDADE.md` (topo). Já **descartadas com evidência** (não reabrir sem dado novo): reranking, HyDE, dimensão de embedding (4.1), chunking estrutural (4.2), regime/vigência (Fase 8). Os ganhos restantes **não vêm de mais tuning de retrieval** — vêm de medir/melhorar a **resposta gerada** e de wins pontuais. As 7 frentes abaixo (BIA-1..7) são o plano. Muitas já têm infra parcial da retomada de jul/2026.
+
+**Infra existente relevante:**
+- Régua LLM-as-judge de síntese: `eval/judge.ts` (dims `faithfulness`, `citationAccuracy`, `completeness`; overall = (faith·2+cit·2+compl)/5), runner `eval/synthesis-runner.ts`, CLI `npm run eval:synthesis` (flags `--answer-provider/-model`, `--judge-model`, `--limit`, `--label`). Baselines de jul/2026 em `eval/reports/*synthesis*`.
+- Montagem de contexto: `lib/rag/answerContext.ts` (`assembleAnswerContext`, compartilhada API↔eval); já expandida p/ 60k chars em camadas (Lei/atos/chunks) e já com **query expansion via LLM** (2 queries extras).
+- Retrieval: `lib/embeddings/hybrid-search.ts` (RRF, `alpha=0.6` vetor/FTS, `RRF_K=60`), `lib/embeddings/vector-search.ts` (boost de hierarquia de atos +15%/+10%..., filtro `revoked=false`, exclusão de súmula CANCELADA/REVISTA).
+- Métricas: `eval/metrics.ts` (`recallAtK(pred, rel, k)` **parametrizável**, `reciprocalRank`, `ndcgAtK`). Golden: `eval/golden-set.json` (55 anotadas).
+
+**Ordem sugerida:** BIA-3 e BIA-4 (wins baratos, ~1 dia cada) → BIA-1 (maior alavanca) → BIA-2 → BIA-5/6/7 (pontuais).
+
+---
+
+### BIA-1. Régua de resposta ampliada + otimização da síntese [Alta] — MAIOR ALAVANCA
+**Objetivo:** subir a qualidade PERCEBIDA da resposta (o que o usuário lê), que o recall@5 não mede. `recall@5=66%` diz que o doc certo está no top-5; não diz se a resposta é correta, completa, bem-citada e sem alucinação.
+**Estado atual:** régua com 3 dimensões já existe e roda. Baselines de jul/2026 registrados.
+**Passos:**
+1. **Ampliar a régua** (`eval/judge.ts`): adicionar dimensões faltantes — (a) `utilidade/relevância` (responde de fato a pergunta?), (b) `regimeAwareness` (deixa claro o regime vigente 14.133 vs 8.666 quando pertinente), (c) opcional `clareza/concisão`. Recalibrar o `overall`.
+2. **Ancorar com respostas de referência:** anotar ~15-20 queries do golden com uma "resposta-ouro" (pontos-chave + citações corretas) p/ o juiz comparar contra referência (reduz variância). ⚠️ ancorar em **fonte oficial**, nunca no output do próprio pipeline — [[feedback_eval_ground_truth_bias]].
+3. **Baseline atual:** `npm run eval:synthesis -- --label baseline-2026-07` — medir por dimensão.
+4. **Iterar a SÍNTESE contra a régua:** system prompt (`systemInstruction` em `app/api/documents/query/route.ts` + `assembleAnswerContext`), política de citação, ordenação do contexto, escolha de modelo (`--answer-provider anthropic --answer-model claude-sonnet-5` já suportado). Uma variável por vez.
+5. **Estabilidade do juiz:** rodar 2 modelos-juiz (ou 2×) e exigir concordância antes de aceitar ganho.
+**Validação:** `npm run eval:synthesis`. **Gate:** overall sobe; **`faithfulness` NUNCA regride** (correção acima de tudo). **Esforço:** 1-2 semanas (iterativo).
+
+### BIA-2. Contexto de geração: documento inteiro nos top resultados [Média]
+**Objetivo:** menos truncamento → respostas mais completas/fiéis, sem tocar no retrieval.
+**Estado atual:** contexto já expandido p/ 60k chars (fase 2.2), mas alimenta **chunks/trechos**, não o `Document.content` inteiro dos top-N.
+**Passos:** em `assembleAnswerContext`, para os 2-3 top `Document` results, injetar o `content` INTEIRO (cap por doc, respeitando o budget de 60k) em vez da fatia; medir `completeness`/`faithfulness` na régua. Vigiar custo/latência (60k já é o teto de custo aceito).
+**Validação:** régua (BIA-1). **Gate:** `completeness` sobe, `faithfulness` estável, custo/latência aceitáveis. **Esforço:** 3-5 dias. **Depende de:** BIA-1 (para medir).
+
+### BIA-3. Tuning da fusão FTS×vetor (alpha, RRF_K) [Baixa] — win barato
+**Objetivo:** puxar parte dos 30 docs relevantes indexados mas fora do top-K.
+**Estado atual:** `alpha=0.6`, `RRF_K=60` em `hybrid-search.ts` (nunca varridos sistematicamente).
+**Passos:** varrer `alpha` ∈ {0.4..0.8} e `RRF_K` ∈ {30..100} rodando `npm run eval:run` por combinação; escolher o par que maximiza recall@5/@10 sem regredir MRR. Determinístico, sem custo de LLM. Parametrizar via env/flag para o sweep.
+**Validação:** `npm run eval:run`. **Gate:** recall@5 sobe (mesmo 1-2pp) sem regressão de MRR/nDCG. **Esforço:** ~1 dia.
+
+### BIA-4. Higiene da métrica/golden [Baixa]
+**Objetivo:** sinal de eval mais fiel (hoje 19 queries têm >5 relevantes → recall@5 capado por construção).
+**Passos:** (a) reportar **recall@10** ao lado de recall@5 no `run-baseline` (`metrics.ts` já suporta `k`); (b) revisar as 19 queries super-anotadas — enxugar `relevant` para os centrais ou tratar `highlyRelevant` como alvo primário; documentar decisão. ⚠️ [[feedback_eval_ground_truth_bias]].
+**Validação:** comparar recall@5 vs @10 no baseline. **Gate:** sinal mais claro (pode revelar headroom real ou confirmar teto). **Esforço:** ~1 dia.
+
+### BIA-5. Cobrir buracos de dados (scraper gaps) [Média]
+**Objetivo:** indexar docs de alto valor referenciados mas ausentes no DB.
+**Estado atual:** roadmap notou ausentes (ex.: Inf. 44/2010, Inf. 50/2011, Enunciado IBDA nº 5) — indício de falha de scraper/indexação.
+**Passos:** auditar referências (golden + uso real) vs DB; listar ausentes de alto valor; corrigir scraper ou importar. Seguir [[document-inclusion-workflow]] (regra do usuário).
+**Validação:** presença + indexação; recall nos tópicos afetados. **Gate:** docs de alto valor presentes. **Esforço:** 3-5 dias (depende da fonte).
+
+### BIA-6. Expansão de query determinística (dicionário jurídico) [Baixa]
+**Objetivo:** complementar a query expansion via LLM (já existente, mas cara/variável) com dicionário determinístico de siglas/sinônimos aplicado ao FTS.
+**Estado atual:** `assembleAnswerContext` já expande via LLM; `key-terms.ts` (failure-analysis) não pega multi-palavra ("data a data", "dedicação exclusiva").
+**Passos:** curar dicionário (SRP↔Sistema de Registro de Preços, ETP, TR, "dedicação exclusiva", etc.); expandir termos na query FTS antes da busca; medir `eval:run`. Barato, sem LLM.
+**Validação:** `npm run eval:run` (queries com siglas). **Gate:** recall sobe nessas queries sem regressão geral. **Esforço:** 2-3 dias.
+
+### BIA-7. Boost de autoridade editorial [Baixa]
+**Objetivo:** priorizar fontes de maior autoridade quando pertinente.
+**Estado atual:** já há boost de hierarquia de atos, filtro `revoked=false` e exclusão de súmula cancelada. **Falta:** boost por autoridade editorial (parecer **vinculante** > comum; súmula > acórdão isolado).
+**Passos:** boost multiplicativo pequeno por autoridade (`category='parecer-vinculante'`, súmulas) no scoring de `Document`, análogo ao boost de hierarquia dos atos em `vector-search.ts`. ⚠️ boost >1.30 arrisca over-boost (já documentado no arquivo).
+**Validação:** `eval:run`. **Gate:** sem regressão; melhora queries onde a fonte vinculante devia liderar. **Esforço:** 2-3 dias.
+
+---
+
 ## PENDÊNCIAS DE LANÇAMENTO
 
 ### P1. Conta Stripe [BLOQUEANTE]
