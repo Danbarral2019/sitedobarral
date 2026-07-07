@@ -33,8 +33,9 @@ export interface SearchResult {
   category: string;
   chunkContent: string;
   chunkIndex: number;
-  similarity: number; // 0-1 (1 = identico). Para legislative-act, já vem
-                      // com boost de hierarquia aplicado (ver act_scores).
+  similarity: number; // 0-1 (1 = identico). Cosseno cru em todas as fontes,
+                      // incl. legislative-act (hierarquia é só tiebreaker
+                      // intra-atos no ORDER BY, não afeta este valor).
   url?: string;
   courseId?: string;
   isCommon: boolean;
@@ -378,10 +379,15 @@ async function executeVectorSearch(
     const actLimitIdx = nextParam();
     params.push(limit * 2);
 
-    // Boost por hierarquia (R4): atos de hierarquia mais alta sobem no ranking.
-    // hierarchyLevel: 1=Lei, 2=Decreto, 3=Portaria, 4=IN, 5=Ordem. Multiplicador
-    // calibrado p/ não dominar similarity puro (level 1 ganha +15%, level 2 +10%,
-    // level 3 +5%, level 4 +0%, level 5 −5%). hierarchyLevel é exposto pro caller.
+    // Hierarquia (R4) como TIEBREAKER apenas ENTRE atos, não cross-source.
+    // `similarity` aqui é o cosseno CRU — comparável de igual para igual com
+    // DocumentChunk/TribunalDecisionChunk no `ORDER BY similarity DESC` final.
+    // O peso de hierarquia (1=Lei +15%, 2=Decreto +10%, 3=Portaria +5%, 4=IN 0%,
+    // 5=Ordem −5%) é aplicado SÓ no ORDER BY do ramo de atos (ver unions.push
+    // abaixo), decidindo quais atos entram e a ordem entre eles — sem inflar a
+    // similarity que compete contra os documentos. (Antes multiplicava a
+    // similarity cross-source e leis amplas inundavam o top-5; ver
+    // fase4-embedding-dim-e-regressao-retrieval.)
     ctes.push(`act_scores AS (
       SELECT
         la.id as document_id,
@@ -389,15 +395,7 @@ async function executeVectorSearch(
         la.type as category,
         lc.content as chunk_content,
         lc."chunkIndex" as chunk_index,
-        (1 - (lc.${vcol} <=> '${embeddingStr}'::vector)) *
-          CASE la."hierarchyLevel"
-            WHEN 1 THEN 1.15
-            WHEN 2 THEN 1.10
-            WHEN 3 THEN 1.05
-            WHEN 4 THEN 1.00
-            WHEN 5 THEN 0.95
-            ELSE 1.00
-          END as similarity,
+        (1 - (lc.${vcol} <=> '${embeddingStr}'::vector)) as similarity,
         la."officialUrl" as url,
         NULL as course_id,
         true as is_common,
@@ -412,7 +410,11 @@ async function executeVectorSearch(
         AND la."revoked" = false
     )`);
 
-    unions.push(`(SELECT * FROM act_scores WHERE similarity >= $${actThresholdIdx} ORDER BY similarity DESC LIMIT $${actLimitIdx})`);
+    // Tiebreaker de hierarquia SÓ aqui (intra-atos): decide quais atos entram no
+    // top e a ordem entre eles. A coluna `similarity` retornada permanece o
+    // cosseno cru, então o ORDER BY cross-source final é justo (ver comentário
+    // do act_scores acima).
+    unions.push(`(SELECT * FROM act_scores WHERE similarity >= $${actThresholdIdx} ORDER BY similarity * CASE hierarchy_level WHEN 1 THEN 1.15 WHEN 2 THEN 1.10 WHEN 3 THEN 1.05 WHEN 4 THEN 1.00 WHEN 5 THEN 0.95 ELSE 1.00 END DESC LIMIT $${actLimitIdx})`);
   }
 
   // ---- Ramo C: TribunalDecisionChunk ----
