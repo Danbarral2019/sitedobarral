@@ -9,6 +9,7 @@ export function formatLegalContent(rawContent: string): string {
   // Step 1: Smart paragraph building
   const rawParagraphs: string[] = [];
   let current: string[] = [];
+  let inSignatureZoneBuild = false;
 
   for (const line of lines) {
     if (line === '') {
@@ -16,6 +17,25 @@ export function formatLegalContent(rawContent: string): string {
         rawParagraphs.push(current.join(' '));
         current = [];
       }
+      continue;
+    }
+
+    // Detecta o início da zona de assinatura ("Brasília, <data>...").
+    if (!inSignatureZoneBuild && /^Brasília,\s+\d/i.test(line)) {
+      inSignatureZoneBuild = true;
+    }
+
+    // Na zona de assinatura, cada linha é um parágrafo próprio (um signatário por
+    // linha), EXCETO continuações que começam em minúscula (ex.: o rodapé do DOU
+    // quebrado em "Este texto não substitui o" + "publicado no DOU..."). Sem isto,
+    // ministros consecutivos e o rodapé eram grudados numa única linha.
+    if (
+      inSignatureZoneBuild &&
+      current.length > 0 &&
+      !/^[a-záàâãéêíóôõúç]/.test(line)
+    ) {
+      rawParagraphs.push(current.join(' '));
+      current = [line];
       continue;
     }
 
@@ -69,6 +89,8 @@ export function formatLegalContent(rawContent: string): string {
 
   let filtered = rawParagraphs.slice(startIdx);
   filtered = filtered.filter(p => !/^Vigência$/i.test(p));
+  // Remove asteriscos soltos (ruído do rodapé do DOU, ex.: "* ").
+  filtered = filtered.filter(p => !/^\*+$/.test(p.trim()));
 
   while (
     filtered.length > 0 &&
@@ -80,7 +102,11 @@ export function formatLegalContent(rawContent: string): string {
 
   // Step 3: Merge broken sentences (reforçado)
   const merged: string[] = [];
+  let inSignatureZoneMerge = false;
   for (const p of filtered) {
+    if (!inSignatureZoneMerge && /^Brasília,\s+\d/i.test(p)) {
+      inSignatureZoneMerge = true;
+    }
     if (merged.length > 0) {
       const prev = merged[merged.length - 1];
       const prevTrim = prev.trim();
@@ -103,16 +129,22 @@ export function formatLegalContent(rawContent: string): string {
       const curStartsWithNumber = /^\d/.test(p);
       const curStartsWithCrossRef = /^(art\.|inciso|Lei|Decreto|caput)/i.test(p);
 
-      const shouldMerge =
-        // regra antiga
-        (!prevEndsClean && !prevIsHeading && !curIsHeading && !curIsStructural) ||
-        // novas regras
-        prevEndsWithStopWord ||
-        prevEndsWithSingleLetter ||
-        prevEndsWithArtAbbrev ||
-        (curStartsLowercase && !prevEndsClean) ||
-        (curStartsWithNumber && prevEndsWithArtAbbrev) ||
-        (curStartsWithCrossRef && !prevEndsClean && !prevIsHeading);
+      // Na zona de assinatura, só mescla continuações que começam em minúscula
+      // (ex.: rodapé do DOU quebrado). Signatários (maiúsculos) ficam em linhas
+      // próprias — evita "Esther Dweck Luiz Marinho Este texto não substitui...".
+      const shouldMerge = inSignatureZoneMerge
+        ? (curStartsLowercase && !prevEndsClean)
+        : (
+            // regra antiga
+            (!prevEndsClean && !prevIsHeading && !curIsHeading && !curIsStructural) ||
+            // novas regras
+            prevEndsWithStopWord ||
+            prevEndsWithSingleLetter ||
+            prevEndsWithArtAbbrev ||
+            (curStartsLowercase && !prevEndsClean) ||
+            (curStartsWithNumber && prevEndsWithArtAbbrev) ||
+            (curStartsWithCrossRef && !prevEndsClean && !prevIsHeading)
+          );
 
       if (shouldMerge && !curIsStructural) {
         merged[merged.length - 1] = prev + ' ' + p;

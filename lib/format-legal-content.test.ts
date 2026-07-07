@@ -261,6 +261,38 @@ describe('snapshots (golden cases)', () => {
   });
 });
 
+describe('regressão: assinatura não mescla signatários nem rodapé DOU', () => {
+  // Bug real (Decreto 12.926, Lei 12.598, etc.): ministros em linhas consecutivas
+  // (sem linha em branco) eram grudados entre si e com o rodapé do DOU numa única
+  // linha ("Esther Dweck Luiz Marinho Este texto não substitui...").
+  it('mantém cada signatário em sua linha e o rodapé DOU separado e íntegro', () => {
+    const input = [
+      'Art. 18. Esta Lei entra em vigor na data de sua publicação.',
+      '',
+      'Brasília, 13 de abril de 2026; 205º da Independência e 138º da República.',
+      '',
+      'LUIZ INÁCIO LULA DA SILVA',
+      'Esther Dweck',
+      'Luiz Marinho',
+      '',
+      'Este texto não substitui o',
+      'publicado no DOU de 14.4.2026',
+    ].join('\n');
+
+    const out = formatLegalContent(input);
+
+    // Signatários não podem estar grudados
+    expect(out).not.toMatch(/Esther Dweck Luiz Marinho/);
+    // Nem o nome do ministro grudado no rodapé
+    expect(out).not.toMatch(/Marinho\s+Este texto/);
+    // Cada signatário em sua própria linha (parágrafo)
+    expect(out).toMatch(/(^|\n)Esther Dweck(\n|$)/);
+    expect(out).toMatch(/(^|\n)Luiz Marinho(\n|$)/);
+    // O rodapé DOU permanece uma frase única e íntegra
+    expect(out).toMatch(/Este texto não substitui o publicado no DOU de 14\.4\.2026/);
+  });
+});
+
 describe('regressão: marcadores de diretiva não devem ser reformatados', () => {
   // Bug real (Lei 12.598/2012, LC 147/2014): quando um bloco :::alteracao termina
   // com um heading (ex.: CAPÍTULO), o loop de formatação tratava o ":::" de
