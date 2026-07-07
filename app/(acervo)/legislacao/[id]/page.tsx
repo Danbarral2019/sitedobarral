@@ -299,7 +299,10 @@ export default async function LegislativeActPage({ params }: PageProps) {
               <Scale className="w-5 h-5 text-blue-600" />
               Texto Integral
             </h3>
-            <MarkdownContent content={formatLegalContent(act.content)} />
+            <MarkdownContent
+              content={formatLegalContent(act.content)}
+              variant="planalto"
+            />
 
             {/* Anexos */}
             {(() => {
