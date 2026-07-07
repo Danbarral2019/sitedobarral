@@ -146,6 +146,13 @@ Ver relatório completo em `docs/audits/2026-05-16-silent-failures.md` para tabe
 **Passos:** boost multiplicativo pequeno por autoridade (`category='parecer-vinculante'`, súmulas) no scoring de `Document`, análogo ao boost de hierarquia dos atos em `vector-search.ts`. ⚠️ boost >1.30 arrisca over-boost (já documentado no arquivo).
 **Validação:** `eval:run`. **Gate:** sem regressão; melhora queries onde a fonte vinculante devia liderar. **Esforço:** 2-3 dias.
 
+### BIA-8. [EXPLORAÇÃO CONDICIONAL] GraphRAG sobre o acervo jurídico [a decidir]
+**⚠️ Condicionado à BIA-1 — NÃO construir no escuro.** O domínio jurídico é um grafo natural (leis → artigos → revoga/altera; pareceres → citam artigos; jurisprudência → aplica teses; súmulas → consolidam). GraphRAG (retrieval aumentado por grafo de conhecimento) permitiria raciocínio **multi-hop** e respostas cientes de relações (ex.: "parecer sobre o art. X considerando que foi alterado pelo decreto Y").
+**Por que condicional:** o retrieval está *near-ceiling* e as falhas atuais são teto-de-métrica + ranking de `Document`, **não** lacunas multi-hop (mesmo perfil de risco da 4.2/Fase 8 — ver `docs/ROADMAP_BUSCA_QUALIDADE.md`). O valor potencial é em **correção/raciocínio da RESPOSTA**, que a régua da BIA-1 vai começar a medir. **Só explorar se a BIA-1 mostrar que os erros de resposta são relacionais/multi-hop.**
+**Antes de qualquer dependência externa, aproveitar a infra de grafo que JÁ existe** (subutilizada): `LegislativeActRelation` (alterações/revogações), `LeiArticleCrossRef`, `LeiArticleSuggestedReading`, `leiArticlesArr` (doc→artigos), flag `revoked`.
+**Nota sobre Graphify.net** (sugerido 2026-07-07): é uma skill open-source de knowledge graph para **assistentes de CÓDIGO** (Claude Code/Codex) — ferramenta de DX para navegar o repositório, **não** um componente de RAG jurídico. Não confundir com GraphRAG sobre o acervo. Como ferramenta de dev: nice-to-have de baixa prioridade (repo é médio/navegável).
+**Gate para promover de "exploração" a "task":** evidência (via régua BIA-1) de que respostas erram por falta de contexto relacional/multi-hop. **Esforço (se aprovado):** grande (R&D) — escopar com brainstorming próprio.
+
 ---
 
 ## PENDÊNCIAS DE LANÇAMENTO
