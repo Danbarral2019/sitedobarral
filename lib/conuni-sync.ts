@@ -114,6 +114,25 @@ export function buildTitle(item: ConuniItem): string {
 
 export function matchExisting(item: ConuniItem, candidates: ExistingDoc[]): ExistingDoc | null {
   if (candidates.length === 0) return null;
+
+  // Match primário por chaves ESTÁVEIS. A heurística de título abaixo é frágil
+  // (o `orgao` da API — ex.: CNMLC — costuma diferir do segmento no título — ex.:
+  // CONJUR-CGU), o que fazia o cron mensal recriar duplicatas. conuniId (id único
+  // da API, persistido em aiClassification) e a URL específica do Sapiens/DECOR
+  // identificam o doc sem ambiguidade.
+  for (const c of candidates) {
+    if (!c.aiClassification) continue;
+    try {
+      const ai = JSON.parse(c.aiClassification) as { conuniId?: number | string };
+      if (ai && ai.conuniId != null && Number(ai.conuniId) === item.id) return c;
+    } catch { /* aiClassification inválido — ignora */ }
+  }
+  const url = buildExternalUrl(item);
+  if (url && url !== 'https://cgu.agu.gov.br/conuni/') {
+    const byUrl = candidates.find((c) => c.url === url);
+    if (byUrl) return byUrl;
+  }
+
   const numStrs = [
     String(item.numero),
     String(item.numero).padStart(3, '0'),
