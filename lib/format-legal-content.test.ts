@@ -212,3 +212,51 @@ describe('formatLegalContent', () => {
     });
   });
 });
+
+describe('snapshots (golden cases)', () => {
+  // Caso real (abreviado) do Decreto 12.926/2026 — inclui a assinatura oficial
+  // completa (presidente + ministros + rodapé DOU) para travar o comportamento
+  // de formatação ponta a ponta.
+  it('Decreto 12.926/2026 — formato completo', () => {
+    const input = [
+      'Presidência da República',
+      'Casa Civil',
+      'Secretaria Especial para Assuntos Jurídicos',
+      '',
+      'DECRETO Nº 12.926, DE 13 DE ABRIL DE 2026',
+      '',
+      'Altera o Decreto nº 12.174, de 11 de setembro de 2024, que dispõe sobre as garantias trabalhistas.',
+      '',
+      'O PRESIDENTE DA REPÚBLICA, no uso da atribuição que lhe confere o art. 84, caput, inciso IV, da Constituição,',
+      '',
+      'DECRETA:',
+      '',
+      'Art. 1º O Decreto nº 12.174, de 11 de setembro de 2024, passa a vigorar com as seguintes alterações:',
+      '',
+      '“Art. 1º [...]',
+      '',
+      'Parágrafo único. O disposto no art. 2º deste Decreto aplica-se aos contratos.” (NR)',
+      '',
+      '“Art. 3º [...]',
+      '',
+      'I - a previsibilidade da época de gozo de suas férias;',
+      '',
+      'II - [...]',
+      '',
+      'b) necessidade eventual de caráter pessoal;',
+      '',
+      'III - a concessão do benefício de reembolso-creche.” (NR)',
+      '',
+      'Brasília, 13 de abril de 2026; 205º da Independência e 138º da República.',
+      '',
+      'LUIZ INÁCIO LULA DA SILVA',
+      'Esther Dweck',
+      'Luiz Marinho',
+      '',
+      'Este texto não substitui o',
+      'publicado no DOU de 14.4.2026',
+    ].join('\n');
+
+    expect(formatLegalContent(input)).toMatchSnapshot();
+  });
+});
