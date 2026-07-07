@@ -278,6 +278,7 @@ model DocumentChunk {
   charStart  Int // Posição inicial no texto original
   charEnd    Int // Posição final no texto original
   embedding  Unsupported("vector(768)") // Embedding do Gemini text-embedding-004
+  embedding1536 Unsupported("vector(1536)")? // Shadow A/B Fase 4.1 — nullable, ignorado em prod
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -824,6 +825,7 @@ model LegislativeActChunk {
   charStart  Int // Posição inicial no texto original
   charEnd    Int // Posição final no texto original
   embedding  Unsupported("vector(768)") // Embedding do Gemini gemini-embedding-001
+  embedding1536 Unsupported("vector(1536)")? // Shadow A/B Fase 4.1 — nullable, ignorado em prod
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -1694,6 +1696,7 @@ model TribunalDecisionChunk {
   charStart          Int
   charEnd            Int
   embedding          Unsupported("vector(768)")
+  embedding1536      Unsupported("vector(1536)")? // Shadow A/B Fase 4.1 — nullable, ignorado em prod
   createdAt          DateTime                   @default(now())
   updatedAt          DateTime                   @updatedAt
 
