@@ -12,6 +12,7 @@ import { generateBatchEmbeddings, embeddingToSql } from './gemini-embeddings';
 import { PRIMARY_GEMINI_MODEL } from '@/lib/gemini/config';
 import { parseLeiArticles, getLeiArticles } from '@/lib/lei-articles';
 import { apiLogger } from "@/lib/logger";
+import { selectSourceText } from './source-text';
 
 // ===========================
 // Types
@@ -65,6 +66,7 @@ export async function processDocument(
         extractedText: true,
         content: true,
         description: true,
+        tcuEmentaCompleta: true,
         leiArticlesArr: true,
       },
     });
@@ -153,7 +155,7 @@ export async function processDocument(
     } else {
       // 4b. Sem R2 — usar texto já disponível (content, description, etc.)
       if (!extractedText || options.forceReprocess) {
-        const fallbackText = document.content || document.description || '';
+        const fallbackText = selectSourceText(document);
         if (fallbackText.length < 50) {
           await updateDocumentStatus(documentId, 'failed', 'No R2 key and no text content available');
           return {
@@ -308,6 +310,7 @@ export async function processPendingDocuments(
       OR: [
         { r2Key: { not: null } },
         { content: { not: null } },
+        { tcuEmentaCompleta: { not: null } },
         { description: { not: null } },
         { extractedText: { not: null } },
       ],
@@ -527,6 +530,7 @@ export async function getProcessingStats(): Promise<{
         OR: [
           { r2Key: { not: null } },
           { content: { not: null } },
+          { tcuEmentaCompleta: { not: null } },
           { description: { not: null } },
           { extractedText: { not: null } },
         ],
