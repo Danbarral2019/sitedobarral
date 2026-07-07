@@ -13,18 +13,15 @@
           "ce817fb1-7e5f-417a-bdd8-5aa44a6f089d",
           "ae92b5a7-11e8-4c28-8001-251f8c79a35a",
           "6c690202-8ddb-4431-935d-826d0c0a4594",
-          "f29d4d7b-f104-4fa3-9a63-5ca73d781fb2",
           "0eb5c8f1-089b-4a56-a279-a6b864565421",
-          "1935bfc2-4322-4e46-b5c6-98868058d4de",
-          "a476d950-07c8-4857-9118-11d3f2f2c816",
-          "c22e52f4-16a3-4ad0-abdc-1228e3923893"
+          "1935bfc2-4322-4e46-b5c6-98868058d4de"
         ],
         "highlyRelevant": [
           "0eb5c8f1-089b-4a56-a279-a6b864565421"
         ],
         "annotatedAt": "2026-04-23T20:43:04.341Z",
         "annotatedBy": "daniel",
-        "notes": "Hoje a busca devolve resposta sobre reajuste de preços (art. 134, 182, 124) — completamente fora do tópico. O documento certo é o art. 183 II da Lei 14.133. Anotar via CLI eval:annotate quando o framework estiver pronto. [Fase 6A — 2026-04-23]"
+        "notes": "Hoje a busca devolve resposta sobre reajuste de preços (art. 134, 182, 124) — completamente fora do tópico. O documento certo é o art. 183 II da Lei 14.133. Anotar via CLI eval:annotate quando o framework estiver pronto. [Fase 6A — 2026-04-23]\n[Higiene 2026-07-07] Removidos 3 documentId(s) excluídos do acervo (irrecuperáveis): f29d4d7b-f104-4fa3-9a63-5ca73d781fb2, a476d950-07c8-4857-9118-11d3f2f2c816, c22e52f4-16a3-4ad0-abdc-1228e3923893."
       }
     },
     {
@@ -131,7 +128,6 @@
           "7f7803f8-811b-4ff3-a3f6-395379fb6541",
           "3b067048-6e66-4e1c-b221-693179e4dcc9",
           "0b941f4f-e370-4e06-bd1e-40bc59e5031d",
-          "29c68b6c-cde9-456a-9b9b-e7c31598cfe4",
           "aa182dbd-b77a-4238-82d6-4756604ab4b0",
           "3e1c9b59-f7da-4149-9ae4-9558f9f44213"
         ],
@@ -145,7 +141,7 @@
         ],
         "annotatedAt": "2026-04-12T19:45:25.410Z",
         "annotatedBy": "daniel",
-        "notes": "Esperado: art. 32 da Lei 14.133 e orientações AGU/TCU sobre a modalidade."
+        "notes": "Esperado: art. 32 da Lei 14.133 e orientações AGU/TCU sobre a modalidade.\n[Higiene 2026-07-07] Removidos 1 documentId(s) excluídos do acervo (irrecuperáveis): 29c68b6c-cde9-456a-9b9b-e7c31598cfe4."
       }
     },
     {
@@ -166,21 +162,17 @@
           "e993f778-ce05-4db8-b834-ef05a5b9ae98",
           "d0720d82-19dd-4f12-aca5-e3c79156b1ef",
           "f16d1227-1f6a-468b-9fae-6dafb7f2a5af",
-          "c71859e3-146e-469f-9d35-4df123747844",
-          "a3e8ea6a-710d-49ab-b075-535675328fdb",
           "439bfdc0-a49a-4b1b-9e86-116595c42d58",
           "124a6e34-fe34-4017-adc9-5ffcb8e09d60"
         ],
         "highlyRelevant": [
           "dce83597-9282-4f44-8544-27fe6b9cd473",
-          "c71859e3-146e-469f-9d35-4df123747844",
-          "a3e8ea6a-710d-49ab-b075-535675328fdb",
           "439bfdc0-a49a-4b1b-9e86-116595c42d58",
           "124a6e34-fe34-4017-adc9-5ffcb8e09d60"
         ],
         "annotatedAt": "2026-04-23T20:43:04.342Z",
         "annotatedBy": "daniel",
-        "notes": "Esperado: art. 86 e Decreto 11.462/2023 (regulamento federal de SRP). [Fase 6A — 2026-04-23]"
+        "notes": "Esperado: art. 86 e Decreto 11.462/2023 (regulamento federal de SRP). [Fase 6A — 2026-04-23]\n[Higiene 2026-07-07] Removidos 2 documentId(s) excluídos do acervo (irrecuperáveis): c71859e3-146e-469f-9d35-4df123747844, a3e8ea6a-710d-49ab-b075-535675328fdb."
       }
     },
     {
@@ -200,19 +192,15 @@
           "059126cc-6a22-49c8-b801-a5116304c07f",
           "3bb9bf5f-e673-4a08-9545-0ef508effc09",
           "b1f42954-a814-410b-a0b7-624da413faac",
-          "3b086e9f-d79f-44f4-a8f6-6324a5663d1c",
-          "64a7e603-5479-4a2d-9ad3-6b3e6a6f73dc",
-          "9b29a1fb-9d04-462b-b9f0-4008d04a1921"
+          "3b086e9f-d79f-44f4-a8f6-6324a5663d1c"
         ],
         "highlyRelevant": [
           "4b024873-8de5-4642-8f9a-7ae834f55b3e",
-          "9b73c3e8-639b-453c-ab21-af1542162905",
-          "64a7e603-5479-4a2d-9ad3-6b3e6a6f73dc",
-          "9b29a1fb-9d04-462b-b9f0-4008d04a1921"
+          "9b73c3e8-639b-453c-ab21-af1542162905"
         ],
         "annotatedAt": "2026-04-12T20:08:42.741Z",
         "annotatedBy": "daniel",
-        "notes": "Esperado: art. 124 II d, art. 134, e distinção entre reajuste, repactuação e revisão."
+        "notes": "Esperado: art. 124 II d, art. 134, e distinção entre reajuste, repactuação e revisão.\n[Higiene 2026-07-07] Removidos 2 documentId(s) excluídos do acervo (irrecuperáveis): 64a7e603-5479-4a2d-9ad3-6b3e6a6f73dc, 9b29a1fb-9d04-462b-b9f0-4008d04a1921."
       }
     },
     {
@@ -490,7 +478,6 @@
       "difficulty": "easy",
       "annotations": {
         "relevant": [
-          "a71e7ed0-3627-414a-aba7-b5df490f2520",
           "303e0c55-bf9e-4ec7-84a0-45392c1d537b",
           "8a98fb73-3f60-45e0-b921-ca51276508cc",
           "8e56d9eb-9971-4d8f-ada9-a568322c0780",
@@ -500,13 +487,12 @@
           "191ee78d-c72b-4d97-8e4d-068d4707a8e9"
         ],
         "highlyRelevant": [
-          "a71e7ed0-3627-414a-aba7-b5df490f2520",
           "303e0c55-bf9e-4ec7-84a0-45392c1d537b",
           "191ee78d-c72b-4d97-8e4d-068d4707a8e9"
         ],
         "annotatedAt": "2026-04-23T20:43:04.342Z",
         "annotatedBy": "daniel",
-        "notes": "Fundamentos curados: Lei 8.666/1993, arts. 29 e 55, XIII; Lei 14.133/2021, arts. 68 e 92, XVI; Instrução Normativa nº 3, de 26 de abril de 2018, art. 34.. Nao encontrados no indice: Instrução Normativa nº 3, de 26 de abril de 2018, art. 34. [Fase 6A — 2026-04-23]"
+        "notes": "Fundamentos curados: Lei 8.666/1993, arts. 29 e 55, XIII; Lei 14.133/2021, arts. 68 e 92, XVI; Instrução Normativa nº 3, de 26 de abril de 2018, art. 34.. Nao encontrados no indice: Instrução Normativa nº 3, de 26 de abril de 2018, art. 34. [Fase 6A — 2026-04-23]\n[Higiene 2026-07-07] Removidos 1 documentId(s) excluídos do acervo (irrecuperáveis): a71e7ed0-3627-414a-aba7-b5df490f2520."
       },
       "_elic": {
         "source": "transversal",
@@ -1365,8 +1351,7 @@
         "relevant": [
           "5dc5ae72-3e91-49ec-86d7-caac64ba77fd",
           "597e7ec0-cf45-4d7d-8879-ec5673642cd9",
-          "6f7efd0d-52c4-4888-a9c6-51efe3e930a9",
-          "e1ec5d77-f165-46f0-ba2f-d0671367ae5c"
+          "6f7efd0d-52c4-4888-a9c6-51efe3e930a9"
         ],
         "highlyRelevant": [
           "5dc5ae72-3e91-49ec-86d7-caac64ba77fd",
@@ -1374,7 +1359,7 @@
         ],
         "annotatedAt": "2026-04-23T23:02:17.578Z",
         "annotatedBy": "elic-import",
-        "notes": "Fundamentos curados: IN SEGES/MP nº 05/2017, art. 19, §§ 1º e 2º, e Anexo V; Lei 14.133/2021, art. 63, IV; Parecer 92/2019/DECOR/CGU/AGU; Orientação Normativa AGU nº 63/2020.. Nao encontrados no indice: IN SEGES/MP nº 05/2017, art. 19, §§ 1º e 2º, e Anexo V; Parecer 92/2019/DECOR/CGU/AGU [Fase 6B — audit]"
+        "notes": "Fundamentos curados: IN SEGES/MP nº 05/2017, art. 19, §§ 1º e 2º, e Anexo V; Lei 14.133/2021, art. 63, IV; Parecer 92/2019/DECOR/CGU/AGU; Orientação Normativa AGU nº 63/2020.. Nao encontrados no indice: IN SEGES/MP nº 05/2017, art. 19, §§ 1º e 2º, e Anexo V; Parecer 92/2019/DECOR/CGU/AGU [Fase 6B — audit]\n[Higiene 2026-07-07] Removidos 1 documentId(s) excluídos do acervo (irrecuperáveis): e1ec5d77-f165-46f0-ba2f-d0671367ae5c."
       },
       "_elic": {
         "source": "transversal",
