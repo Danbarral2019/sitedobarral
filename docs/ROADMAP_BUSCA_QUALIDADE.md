@@ -2,8 +2,38 @@
 
 **Criado em:** 2026-04-23
 **Autor:** Daniel Barral + Claude (sessão de execução do reprocessamento)
-**Status atual (2026-04-24):** Fases 0, 1, 2, 6 e 9 concluídas. **Teto prático aceito em 66,3% recall@5.** Bugs 1 e 2 (descobertos em 2026-04-23 à noite) **FECHADOS em 2026-04-24** — ver seção abaixo. Pendência aberta nova: backfill de embeddings em `TribunalDecision`.
-**Prioridade:** Média — produto funciona, recall@5 atual 66,3% é razoável para busca jurídica.
+**Status atual (2026-07-07): TRILHA DE RETRIEVAL CONSIDERADA ESGOTADA / NEAR-CEILING.** recall@5 ~65-66% é o teto prático deste dataset. Detalhes datados no Histórico ao fim.
+
+**Concluído (deployado):**
+- Fases 0, 1 (HyDE), 2 (rerank), 6 (anotação), 9 concluídas (abr/2026). Bugs 1 e 2 (thinking budget, jurisprudência multi-tribunal) fechados.
+- **2026-07 (esta trilha):** regressão de ranking (boost de hierarquia) corrigida; Fase 4.1 (A/B dimensão embedding) testada = **NO-GO**; **Fase 7 (dedup estrutural)** concluída — 88 pareceres CONUNI duplicados removidos + fix do write-point (`sync-conuni` parou de recriar).
+
+**Decidido NÃO perseguir (com evidência registrada — não reabrir sem dado novo):**
+- **Fase 2 — reranking** (Gemini/Cohere): 3 experimentos, todos regrediram. Rerankers veem só 500 chars do chunk e perdem o sinal léxico. Arquivada permanentemente.
+- **Fase 1 — HyDE**: dilui sinal léxico (−4,9pp). Arquivada.
+- **Fase 4.1 — dimensão de embedding 1536**: +1,7pp < gate. NO-GO.
+- **Fase 4.2/5 — chunking estrutural**: diagnóstico mostrou que as falhas de recall@5 são teto-de-métrica (19 queries >5 relevantes) + docs `Document` não-rankeados; a 4.2 só afeta `LegislativeAct` → fora de escopo.
+- **Fase 8 — regime/vigência (8.666 vs 14.133)**: sonda achou 0 confusão de regime nos top-5 (229/236 docs já são 14.133-ish). Sem payoff. `leiArticlesArr` já sinaliza regime.
+
+**Onde ainda há headroom real (próximas linhas — ver seção "Linhas remanescentes" abaixo):** medir/melhorar a QUALIDADE DA RESPOSTA gerada (não o retrieval), tuning de fusão FTS×vetor para o long-tail não-recuperado, e revisão da métrica/golden (recall@10). **Prioridade da trilha:** Baixa — produto funciona; ganhos exigem novo tipo de eval, não mais tuning.
+
+---
+
+## Linhas remanescentes para melhorar a busca IA (registrado 2026-07-07)
+
+O **retrieval** (recall@5) está no teto. Mas a busca IA é um pipeline maior:
+`query → retrieval híbrido (RRF vetor + FTS) → chunks → síntese LLM (Claude Sonnet + Citations) → resposta`.
+recall@5 mede só o 2º passo. Os ganhos restantes estão nos outros passos e na medição:
+
+1. **[ALAVANCA MAIOR — não medido hoje] Qualidade da RESPOSTA gerada, não do retrieval.** recall@5=66% diz que o doc certo está no top-5; não diz se a resposta que o usuário lê é correta, completa, bem-citada e sem alucinação. Já existe uma régua LLM-as-judge (retomada Jul/2026, levou overall 45→80%). **Ação:** expandir essa régua (fidelidade às fontes, completude, precisão das citações, "não sei" gracioso) e otimizar a SÍNTESE (prompt, ordenação de contexto, enforcement de citação) contra ela. É onde vive o valor percebido pelo usuário agora.
+2. **[médio-alto] Contexto para a GERAÇÃO (≠ chunking p/ retrieval).** Mesmo com o doc certo no top-5, o LLM/reranker via só ~500 chars do chunk (foi o que matou o reranking). Alimentar o LLM com o documento casado INTEIRO (ou mais chunks) pode melhorar a resposta sem mexer no retrieval.
+3. **[médio, ~2h, barato] Tuning da fusão FTS×vetor para o long-tail.** 30 docs relevantes estão indexados mas não entram no top-K. Ajustar pesos do RRF / config do FTS pode puxar alguns. Incremental.
+4. **[médio, barato — revela a verdade] Higiene da métrica/golden.** 19 queries são capadas por terem >5 relevantes (teto de recall@5 por construção). Migrar para recall@10 ou enxugar anotações dá sinal mais fiel — revela headroom real ou confirma o teto.
+5. **[médio] Cobrir buracos de dados.** Docs referenciados ausentes no DB (buracos de scraper) — indexar os de alto valor melhora recall nesses tópicos.
+6. **[pontual] Expansão de query determinística** (dicionário de siglas/sinônimos jurídicos: SRP, ETP, TR, "dedicação exclusiva"). Diferente do HyDE (que diluiu). Ajuda queries específicas.
+7. **[pontual, principiado] Boost de autoridade/vigência.** Priorizar súmulas/pareceres vinculantes; despriorizar atos `revoked` (flag já existe em `LegislativeAct`). Boost pequeno.
+
+**Ordem sugerida:** (1) régua de resposta + síntese é o maior salto de qualidade percebida; (3) e (4) são wins baratos de retrieval que sobraram; (2) melhora a resposta sem tocar no retrieval. Reranking (arquivado) só valeria revisitar se alimentado com contexto INTEIRO, não fatias de 500 chars.
 
 ---
 
