@@ -132,6 +132,15 @@ export function formatLegalContent(rawContent: string): string {
   let inSignatureZone = false;
 
   for (let p of withAlteracaoBlocks) {
+    // Marcadores de diretiva (:::alteracao / :::signature / :::) são estruturais,
+    // não conteúdo — passam intactos. Sem esta guarda, um ":::" de fechamento logo
+    // após um heading (ex.: CAPÍTULO) era reformatado como "#### :::" pela regra de
+    // "subtítulo após header", quebrando o balanceamento do bloco.
+    if (p === ':::alteracao' || p === ':::signature' || p === ':::') {
+      result.push(p);
+      prevWasHeader = false;
+      continue;
+    }
     // E — caput em itálico (word boundary)
     p = p.replace(/\bcaput\b/g, '*caput*');
     // C — [...] (com ou sem espaços) vira :omitido

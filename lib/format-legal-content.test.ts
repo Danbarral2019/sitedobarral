@@ -260,3 +260,27 @@ describe('snapshots (golden cases)', () => {
     expect(formatLegalContent(input)).toMatchSnapshot();
   });
 });
+
+describe('regressão: marcadores de diretiva não devem ser reformatados', () => {
+  // Bug real (Lei 12.598/2012, LC 147/2014): quando um bloco :::alteracao termina
+  // com um heading (ex.: CAPÍTULO), o loop de formatação tratava o ":::" de
+  // fechamento como "subtítulo curto após header" e o corrompia em "#### :::",
+  // deixando o bloco aberto (desbalanço).
+  it('não corrompe o "::" de fechamento quando o bloco termina em CAPÍTULO', () => {
+    const input = [
+      'Art. 1º A Lei nº 12.598, de 2012, passa a vigorar com as seguintes alterações:',
+      '',
+      '“CAPÍTULO V DO REGIME ESPECIAL PARA A INDÚSTRIA AEROESPACIAL - RETAERO” (NR)',
+    ].join('\n');
+
+    const out = formatLegalContent(input);
+    const opens = (out.match(/^:::alteracao$/gm) || []).length;
+    const closes = (out.match(/^:::$/gm) || []).length;
+
+    // O fechamento não pode ter sido corrompido em "#### :::"
+    expect(out).not.toMatch(/####\s+:::/);
+    // Exatamente 1 abertura e 1 fechamento balanceados
+    expect(opens).toBe(1);
+    expect(closes).toBe(1);
+  });
+});
