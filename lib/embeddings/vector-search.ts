@@ -10,6 +10,20 @@ import { withCache, CACHE_TTL } from '@/lib/cache/redis-client';
 import type { Prisma } from '@prisma/client';
 
 // ===========================
+// Whitelist: coluna de vetor (anti-injeção)
+// ===========================
+
+/**
+ * Whitelist anti-injeção: só as duas colunas de vetor conhecidas são aceitas.
+ * O valor retornado é interpolado diretamente em SQL raw (ver executeVectorSearch),
+ * então esta função NUNCA deve repassar entrada não sanitizada — qualquer valor
+ * fora da whitelist cai no default seguro 'embedding'.
+ */
+export function resolveEmbeddingColumn(col: string | undefined): 'embedding' | 'embedding1536' {
+  return col === 'embedding1536' ? 'embedding1536' : 'embedding';
+}
+
+// ===========================
 // Types
 // ===========================
 
@@ -75,6 +89,10 @@ export interface SearchOptions {
     document?: Prisma.Sql;
     tribunalDecision?: Prisma.Sql;
   };
+  /** Coluna de vetor a usar (A/B Fase 4.1). Default 'embedding'. */
+  embeddingColumn?: 'embedding' | 'embedding1536';
+  /** Dimensão do embedding da query (deve casar com a coluna). Default 768. */
+  queryDimension?: number;
 }
 
 export interface SearchResponse {
@@ -268,8 +286,12 @@ async function executeVectorSearch(
   }
 
   // 1. Gera embedding da query
-  const { embedding } = await generateQueryEmbedding(query);
+  const { embedding } = await generateQueryEmbedding(query, options.queryDimension);
   const embeddingStr = embeddingToSql(embedding);
+
+  // Coluna de vetor a usar nas 3 expressões de similaridade abaixo (A/B Fase 4.1).
+  // Resolvida uma única vez via whitelist — nunca interpolar options.embeddingColumn direto.
+  const vcol = resolveEmbeddingColumn(options.embeddingColumn);
 
   // 2. Constrói filtros SQL com parâmetros posicionais (previne SQL injection)
   const params: unknown[] = [];
@@ -332,7 +354,7 @@ async function executeVectorSearch(
         d.category,
         c.content as chunk_content,
         c."chunkIndex" as chunk_index,
-        1 - (c.embedding <=> '${embeddingStr}'::vector) as similarity,
+        1 - (c.${vcol} <=> '${embeddingStr}'::vector) as similarity,
         d.url,
         d."courseId" as course_id,
         d."isCommon" as is_common,
@@ -367,7 +389,7 @@ async function executeVectorSearch(
         la.type as category,
         lc.content as chunk_content,
         lc."chunkIndex" as chunk_index,
-        (1 - (lc.embedding <=> '${embeddingStr}'::vector)) *
+        (1 - (lc.${vcol} <=> '${embeddingStr}'::vector)) *
           CASE la."hierarchyLevel"
             WHEN 1 THEN 1.15
             WHEN 2 THEN 1.10
@@ -434,13 +456,13 @@ async function executeVectorSearch(
     // Boost de tribunal (opcional): quando caller marca a query como
     // fortemente trabalhista, multiplicamos a similarity dos documentos do
     // tribunalCode alvo. Análogo ao boost de hierarquia em act_scores.
-    let similarityExpr = `1 - (tc.embedding <=> '${embeddingStr}'::vector)`;
+    let similarityExpr = `1 - (tc.${vcol} <=> '${embeddingStr}'::vector)`;
     if (tribunalBoost) {
       const boostCodeIdx = nextParam();
       params.push(tribunalBoost.code);
       const boostFactorIdx = nextParam();
       params.push(tribunalBoost.factor);
-      similarityExpr = `(1 - (tc.embedding <=> '${embeddingStr}'::vector)) * CASE WHEN UPPER(td."tribunalCode") = UPPER($${boostCodeIdx}) THEN $${boostFactorIdx} ELSE 1.00 END`;
+      similarityExpr = `(1 - (tc.${vcol} <=> '${embeddingStr}'::vector)) * CASE WHEN UPPER(td."tribunalCode") = UPPER($${boostCodeIdx}) THEN $${boostFactorIdx} ELSE 1.00 END`;
     }
 
     ctes.push(`decision_scores AS (

@@ -44,6 +44,10 @@ export interface HybridSearchOptions {
    */
   skipFts?: boolean;
   rerank?: boolean; // Aplicar reranking nos resultados (default: false)
+  /** Coluna de vetor a usar (A/B Fase 4.1). Encaminhado para vector-search.SearchOptions. Default 'embedding'. */
+  embeddingColumn?: 'embedding' | 'embedding1536';
+  /** Dimensão do embedding da query (deve casar com a coluna). Encaminhado para vector-search.SearchOptions. Default 768. */
+  queryDimension?: number;
 }
 
 export interface HybridSearchResponse {
@@ -92,6 +96,8 @@ export async function hybridSearch(
     tribunalCodeFilter,
     skipFts = false,
     rerank = false,
+    embeddingColumn,
+    queryDimension,
   } = options;
 
   const vectorOptions: SearchOptions = {
@@ -107,6 +113,8 @@ export async function hybridSearch(
     skipDocumentBranch,
     skipLegislativeActBranch,
     tribunalCodeFilter,
+    embeddingColumn,
+    queryDimension,
   };
 
   const ftsOptions: DocumentFTSOptions = {
