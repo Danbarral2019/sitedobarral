@@ -34,6 +34,24 @@ export const baselineSearch: SearchFn = async (query: string) => {
 }
 
 /**
+ * Adapter A/B Fase 4.1: hybridSearch usando a coluna shadow embedding1536.
+ * Mesmos parâmetros do baseline (limit 20, alpha 0.6, sem cache) para
+ * isolar a variável "dimensão do embedding".
+ */
+export const shadowSearch1536: SearchFn = async (query: string) => {
+  const start = Date.now()
+  const response = await hybridSearch({
+    query,
+    limit: 20,
+    alpha: 0.6,
+    useCache: false,
+    embeddingColumn: 'embedding1536',
+    queryDimension: 1536,
+  })
+  return { documentIds: dedup(response.results), latencyMs: Date.now() - start }
+}
+
+/**
  * Adapter com reranking Gemini: hybridSearch + rerankResults.
  * Pede 40 resultados do RRF para que o reranker tenha candidatos suficientes
  * para reordenar e cortar nos top 20.

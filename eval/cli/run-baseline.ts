@@ -7,7 +7,7 @@
  */
 import { writeFileSync, readFileSync, mkdirSync } from 'node:fs'
 import { join } from 'node:path'
-import { baselineSearch, rerankSearch, hydeSearch } from '../search-adapter'
+import { baselineSearch, rerankSearch, hydeSearch, shadowSearch1536 } from '../search-adapter'
 import { runEval } from '../runner'
 import { formatReport } from '../report'
 import type { GoldenSet } from '../types'
@@ -15,10 +15,11 @@ import type { GoldenSet } from '../types'
 async function main() {
   const args = process.argv.slice(2)
   const labelIdx = args.indexOf('--label')
-  const label = labelIdx >= 0 ? args[labelIdx + 1] : 'baseline'
   const useRerank = args.includes('--rerank')
   const useCohere = args.includes('--cohere')
   const useHyde = args.includes('--hyde')
+  const useShadow = args.includes('--shadow')
+  const label = labelIdx >= 0 ? args[labelIdx + 1] : (useShadow ? 'shadow-1536' : 'baseline')
 
   // --cohere seta RERANK_PROVIDER para o reranker usar Cohere em vez de Gemini
   if (useCohere) process.env.RERANK_PROVIDER = 'cohere'
@@ -27,8 +28,22 @@ async function main() {
   const raw = readFileSync(goldenSetPath, 'utf8')
   const goldenSet: GoldenSet = JSON.parse(raw)
 
-  const searchFn = useHyde ? hydeSearch : (useRerank || useCohere) ? rerankSearch : baselineSearch
-  const mode = useHyde ? 'hybrid + HyDE + rerank' : useCohere ? 'hybrid + rerank (Cohere 3.5)' : useRerank ? 'hybrid + rerank (Gemini)' : 'hybrid baseline'
+  const searchFn = useShadow
+    ? shadowSearch1536
+    : useHyde
+      ? hydeSearch
+      : (useRerank || useCohere)
+        ? rerankSearch
+        : baselineSearch
+  const mode = useShadow
+    ? 'shadow-1536 (embedding1536, A/B Fase 4.1)'
+    : useHyde
+      ? 'hybrid + HyDE + rerank'
+      : useCohere
+        ? 'hybrid + rerank (Cohere 3.5)'
+        : useRerank
+          ? 'hybrid + rerank (Gemini)'
+          : 'hybrid baseline'
   console.log(`[eval] Loaded ${goldenSet.queries.length} queries`)
   console.log(`[eval] Search mode: ${mode}`)
   console.log(`[eval] Running search adapter against each annotated query...`)
