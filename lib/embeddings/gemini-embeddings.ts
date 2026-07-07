@@ -47,9 +47,13 @@ export interface BatchEmbeddingResult {
  * Gera embedding para um texto
  *
  * @param text - Texto para gerar embedding (max ~8000 tokens)
- * @returns Embedding como array de numeros (768 dimensoes)
+ * @param dimension - Dimensao do embedding (default 768; Matryoshka permite truncar p/ 1536 etc.)
+ * @returns Embedding como array de numeros
  */
-export async function generateEmbedding(text: string): Promise<EmbeddingResult> {
+export async function generateEmbedding(
+  text: string,
+  dimension: number = EMBEDDING_DIMENSION,
+): Promise<EmbeddingResult> {
   if (!text || text.trim().length === 0) {
     throw new Error('Text cannot be empty');
   }
@@ -61,7 +65,7 @@ export async function generateEmbedding(text: string): Promise<EmbeddingResult> 
       model: EMBEDDING_MODEL,
       contents: text,
       config: {
-        outputDimensionality: EMBEDDING_DIMENSION,
+        outputDimensionality: dimension,
       },
     });
 
@@ -73,7 +77,7 @@ export async function generateEmbedding(text: string): Promise<EmbeddingResult> 
     return {
       embedding,
       model: EMBEDDING_MODEL,
-      dimension: EMBEDDING_DIMENSION,
+      dimension,
     };
   });
 }
@@ -89,10 +93,12 @@ export async function generateEmbedding(text: string): Promise<EmbeddingResult> 
  * Rate limit: ~10k req/min (paid tier)
  *
  * @param texts - Array de textos para gerar embeddings
+ * @param dimension - Dimensao do embedding (default 768; Matryoshka permite truncar p/ 1536 etc.)
  * @returns Array de embeddings (mesma ordem dos textos)
  */
 export async function generateBatchEmbeddings(
-  texts: string[]
+  texts: string[],
+  dimension: number = EMBEDDING_DIMENSION,
 ): Promise<BatchEmbeddingResult> {
   if (!texts || texts.length === 0) {
     throw new Error('Texts array cannot be empty');
@@ -123,7 +129,7 @@ export async function generateBatchEmbeddings(
         model: EMBEDDING_MODEL,
         contents: batch.map(text => ({ role: 'user' as const, parts: [{ text }] })),
         config: {
-          outputDimensionality: EMBEDDING_DIMENSION,
+          outputDimensionality: dimension,
         },
       });
 
@@ -150,7 +156,7 @@ export async function generateBatchEmbeddings(
   return {
     embeddings: allEmbeddings,
     model: EMBEDDING_MODEL,
-    dimension: EMBEDDING_DIMENSION,
+    dimension,
     count: allEmbeddings.length,
   };
 }
@@ -166,12 +172,16 @@ export async function generateBatchEmbeddings(
  * mas esta funcao adiciona prefixo de contexto para melhorar resultados
  *
  * @param query - Texto da pergunta/busca
+ * @param dimension - Dimensao do embedding (default 768; Matryoshka permite truncar p/ 1536 etc.)
  * @returns Embedding da query
  */
-export async function generateQueryEmbedding(query: string): Promise<EmbeddingResult> {
+export async function generateQueryEmbedding(
+  query: string,
+  dimension: number = EMBEDDING_DIMENSION,
+): Promise<EmbeddingResult> {
   // Adiciona contexto de busca para melhorar relevancia
   const contextualQuery = `search_query: ${query}`;
-  return generateEmbedding(contextualQuery);
+  return generateEmbedding(contextualQuery, dimension);
 }
 
 // ===========================
