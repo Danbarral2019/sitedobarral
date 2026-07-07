@@ -6,8 +6,7 @@
  */
 import type { GoldenQuery } from './types';
 import { judgeSynthesis, type SynthesisVerdict } from './judge';
-import { synthesizeForQuery } from './answer-adapter';
-import type { GenerateAnswerOptions } from '@/lib/rag/answerService';
+import { synthesizeForQuery, type SynthesizeOptions } from './answer-adapter';
 
 export interface SynthesisEvalResult {
   id: string;
@@ -35,7 +34,7 @@ export interface SynthesisEvalRun {
 
 export async function runSynthesisEval(
   queries: GoldenQuery[],
-  opts: { answer?: GenerateAnswerOptions; judgeModel?: string } = {},
+  opts: { answer?: SynthesizeOptions; judgeModel?: string } = {},
 ): Promise<SynthesisEvalRun> {
   const results: SynthesisEvalResult[] = [];
 
@@ -73,7 +72,9 @@ export async function runSynthesisEval(
 
   return {
     runAt: new Date().toISOString(),
-    answerModel: opts.answer?.model ?? 'default (task chat)',
+    answerModel: opts.answer?.useCitations
+      ? `${opts.answer?.model ?? 'claude-sonnet-5'} + Citations API`
+      : (opts.answer?.model ?? 'default (task chat)'),
     judgeModel: opts.judgeModel ?? 'claude-sonnet-5',
     results,
     summary: {

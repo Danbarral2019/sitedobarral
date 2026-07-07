@@ -9,7 +9,8 @@
  *
  * Flags:
  *   --limit N            avalia só as N primeiras queries (default: todas)
- *   --answer-provider    gemini | anthropic (override do sintetizador)
+ *   --citations          usa Claude + Citations API (SINTETIZADOR PADRÃO DE PRODUÇÃO)
+ *   --answer-provider    gemini | anthropic (override; ignorado com --citations)
  *   --answer-model       modelo do sintetizador
  *   --judge-model        modelo do juiz (default claude-sonnet-5)
  *   --label TXT          rótulo no nome do arquivo
@@ -31,6 +32,7 @@ async function main() {
   const answerProvider = arg('--answer-provider') as AiProviderName | undefined;
   const answerModel = arg('--answer-model');
   const judgeModel = arg('--judge-model');
+  const useCitations = process.argv.includes('--citations');
 
   const goldenSet: GoldenSet = JSON.parse(
     readFileSync(join(process.cwd(), 'eval/golden-set.json'), 'utf8'),
@@ -38,10 +40,10 @@ async function main() {
   const queries = limit ? goldenSet.queries.slice(0, limit) : goldenSet.queries;
 
   console.log(`[eval-synthesis] ${queries.length} queries`);
-  console.log(`[eval-synthesis] answer: ${answerProvider ?? 'default'}/${answerModel ?? 'default'} | judge: ${judgeModel ?? 'claude-sonnet-5'}`);
+  console.log(`[eval-synthesis] answer: ${useCitations ? 'claude+Citations (produção)' : `${answerProvider ?? 'default'}/${answerModel ?? 'default'}`} | judge: ${judgeModel ?? 'claude-sonnet-5'}`);
 
   const run = await runSynthesisEval(queries, {
-    answer: { provider: answerProvider, model: answerModel },
+    answer: { provider: answerProvider, model: answerModel, useCitations },
     judgeModel,
   });
 
