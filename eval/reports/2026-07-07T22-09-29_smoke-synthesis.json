@@ -1,0 +1,71 @@
+{
+  "runAt": "2026-07-07T22:09:29.949Z",
+  "answerModel": "default (task chat)",
+  "judgeModel": "claude-sonnet-5",
+  "results": [
+    {
+      "id": "q-data-a-data",
+      "query": "sistema data a data",
+      "empty": false,
+      "sourceCount": 5,
+      "verdict": {
+        "faithfulness": 1,
+        "citationAccuracy": 1,
+        "completeness": 0.8,
+        "overall": 0.96,
+        "issues": [
+          "Não menciona Orientação Normativa AGU 38/2011 nem Enunciado INCP nº 15, disponíveis no material sobre prazos/prorrogação",
+          "Observação sobre 'precedente anterior à Lei 14.133' é inferência do assistente, não expressa no material, embora plausível"
+        ],
+        "rationale": "A resposta é fiel ao material, com citações corretas de artigos (183, 106, 107, 110, 114) e documentos (Parecer AGU, Inf. TCU 199/2014); apenas deixou de citar duas fontes disponíveis (ON AGU 38/2011 e Enunciado INCP 15) que poderiam complementar o tema."
+      },
+      "latencyMs": 32543
+    },
+    {
+      "id": "q-dispensa-valor",
+      "query": "dispensa de licitação por valor",
+      "empty": false,
+      "sourceCount": 5,
+      "verdict": {
+        "faithfulness": 0.9,
+        "citationAccuracy": 0.85,
+        "completeness": 0.9,
+        "overall": 0.88,
+        "issues": [
+          "Atribui a preferência para ME/EPP (até R$80.000,00) ao Art. 4º da Lei 14.133/2021, mas o material só vincula essa regra ao Manual TCU, não ao art. 4º especificamente",
+          "Poderia detalhar melhor a duplicação de valores citando os números específicos (R$250.902,30 e R$125.451,18) presentes no manual, mas omite isso"
+        ],
+        "rationale": "A resposta é bem fundamentada e fiel ao material, cobrindo praticamente todas as fontes relevantes disponíveis, com pequena imprecisão na atribuição da regra de ME/EPP ao art. 4º. Citações de artigos, enunciado e pareceres estão corretas e bem contextualizadas."
+      },
+      "latencyMs": 34070
+    },
+    {
+      "id": "q-inexigibilidade-notoria",
+      "query": "inexigibilidade notória especialização",
+      "empty": false,
+      "sourceCount": 5,
+      "verdict": {
+        "faithfulness": 0.7,
+        "citationAccuracy": 0.9,
+        "completeness": 0.85,
+        "overall": 0.81,
+        "issues": [
+          "Não alerta que ON AGU 18/2009 e Parecer 141/2011/DECOR/AGU se baseiam no art. 25 da Lei 8.666/93 (revogada), criando falsa impressão de aplicação direta à Lei 14.133/2021",
+          "Ressalva de desatualização foi feita só para a Súmula TCU 39, tratamento inconsistente com as demais fontes na mesma situação",
+          "Lista apenas 4 dos 8 incisos do Art. 72 sem indicar que é rol parcial",
+          "Demais citações (Art. 74, §3º, §4º, Art. 72, Art. 73, Enunciado IBDA 24, Informativo 59/2011) estão corretas e fiéis ao material"
+        ],
+        "rationale": "A resposta é tecnicamente correta e bem estruturada, mas mistura sem ressalva fontes baseadas na Lei 8.666/93 revogada com o regime da Lei 14.133/2021, exceto para a Súmula 39, gerando inconsistência de tratamento; a instrução do Art. 72 é apresentada de forma incompleta sem sinalizar isso."
+      },
+      "latencyMs": 34314
+    }
+  ],
+  "summary": {
+    "evaluated": 3,
+    "empty": 0,
+    "faithfulness": 0.8666666666666666,
+    "citationAccuracy": 0.9166666666666666,
+    "completeness": 0.8500000000000001,
+    "overall": 0.8833333333333333
+  }
+}

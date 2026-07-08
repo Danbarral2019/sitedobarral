@@ -1,0 +1,71 @@
+{
+  "runAt": "2026-07-07T22:18:12.432Z",
+  "answerModel": "claude-sonnet-5 + Citations API",
+  "judgeModel": "claude-sonnet-5",
+  "results": [
+    {
+      "id": "q-data-a-data",
+      "query": "sistema data a data",
+      "empty": false,
+      "sourceCount": 21,
+      "verdict": {
+        "faithfulness": 0.85,
+        "citationAccuracy": 1,
+        "completeness": 0.9,
+        "overall": 0.92,
+        "issues": [
+          "Afirma que a Lei 14.133 'internalizou'/'absorveu' a lógica do parecer da AGU, conexão não expressamente sustentada pelo material",
+          "Tabela comparativa é construção interpretativa do assistente, apresentada como fato consolidado sem ressalva de que é dedução própria",
+          "Rótulo de 'precedente histórico' e observações de aplicabilidade são inferências razoáveis mas extrapolam o texto fornecido"
+        ],
+        "rationale": "A resposta cita corretamente art. 183 e o Parecer 035/2013/DECOR/CGU/AGU, sem inventar dispositivos, mas constrói comparações e conclusões de 'evolução normativa' que são inferências do assistente não expressamente respaldadas pelo material. Cobertura das fontes relevantes é boa e focada no tema perguntado."
+      },
+      "latencyMs": 55415
+    },
+    {
+      "id": "q-dispensa-valor",
+      "query": "dispensa de licitação por valor",
+      "empty": false,
+      "sourceCount": 23,
+      "verdict": {
+        "faithfulness": 0.9,
+        "citationAccuracy": 0.95,
+        "completeness": 1,
+        "overall": 0.94,
+        "issues": [
+          "Atribui ao Decreto 12.807/2025 a origem exata dos valores atualizados do Manual TCU, conexão causal não explicitada no material",
+          "Resposta extensa, mas sem afirmações claramente inventadas ou fora do contexto"
+        ],
+        "rationale": "A resposta é extremamente completa, cobrindo praticamente todas as fontes relevantes do material (Lei, Manual TCU, Enunciado CJF 50, ONs AGU 69/2021, 87/2024, 105/2026, Parecer CGU/AGU, Informativo 377/2019, IN Seges/ME 65/2021 e 67/2021) com citações fiéis e corretamente atribuídas. A única fragilidade é uma inferência causal não comprovada explicitamente sobre a origem dos valores atualizados via Decreto 12.807/2025."
+      },
+      "latencyMs": 84179
+    },
+    {
+      "id": "q-inexigibilidade-notoria",
+      "query": "inexigibilidade notória especialização",
+      "empty": false,
+      "sourceCount": 23,
+      "verdict": {
+        "faithfulness": 0.9,
+        "citationAccuracy": 0.9,
+        "completeness": 0.9,
+        "overall": 0.9,
+        "issues": [
+          "Completa a citação truncada da ON/AGU 18/2009 com a palavra 'singularidade', que não aparece literalmente no trecho fornecido (cortado)",
+          "Pequenos comentários interpretativos do assistente (ex.: sobre subcontratação e justificativa de preço) não são citações diretas, mas estão devidamente distinguidos do texto legal",
+          "Não há erros de atribuição de citações a fontes erradas"
+        ],
+        "rationale": "A resposta é fiel e bem fundamentada, com citações corretas dos artigos, súmula, informativo, parecer e enunciado, cobrindo todas as fontes relevantes do material com boas ressalvas sobre a vigência da Lei 8.666/1993."
+      },
+      "latencyMs": 65106
+    }
+  ],
+  "summary": {
+    "evaluated": 3,
+    "empty": 0,
+    "faithfulness": 0.8833333333333333,
+    "citationAccuracy": 0.9500000000000001,
+    "completeness": 0.9333333333333332,
+    "overall": 0.9199999999999999
+  }
+}
