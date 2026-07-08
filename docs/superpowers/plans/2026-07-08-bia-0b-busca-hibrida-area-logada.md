@@ -8,6 +8,23 @@
 
 **Tech Stack:** Next.js 15 App Router (route handlers), TypeScript, Prisma (PrismaNeon), Vitest, `lib/embeddings/hybrid-search`, `lib/embeddings/vector-search`.
 
+## ✅ STATUS DE EXECUÇÃO — 2026-07-08 (via subagent-driven development)
+
+**Todas as 7 tasks + fix wave concluídas. Branch `feat/bia-0b-busca-hibrida`, PR #132 ABERTA (não mergeada — aguarda OK do Daniel; merge = produção).**
+
+- **T1** helpers puros (`lib/search/hybrid-documents.ts`): `filterByEnrollment`, `dedupeByDocument`, `TYPE_PRIORITY`, `sortByTypePriority` (estável). Review pegou Critical: helper de teste sem `chunkIndex` (quebrava build) → corrigido.
+- **T2** mapeadores Prisma→shape. Review pegou Critical **e o plano estava errado**: `LegislativeAct` usa coluna nativa `leiArticlesArr String[]`, não a `leiArticles` JSON (dropada na Onda 4.5.6) → plano E código corrigidos p/ `leiArticlesArr`.
+- **T3** `mergeHybridIntoResults` (substitui só document/legislative-act, preserva relevância). Approved.
+- **T4** endpoint `GET /api/area-restrita/global-search/hybrid` (auth → hybridSearch → **pós-filtro de matrícula ANTES da hidratação** → dedupe → hidrata → responde; fallback 200 `{results:[]}`). Review verificou os 3 riscos de segurança limpos. Approved.
+- **T5** wire no hook (`use-global-search.ts`): debounce 800ms + Enter + merge via functional setState. Implementer pegou bug de **TDZ** (reordenou `searchHybrid`). Approved.
+- **T6** registrou **BIA-0c** no `FUTURE_TASKS.md` (card de IA não filtra por matrícula — item separado).
+- **Review final de branch (opus): "With fixes"** — 1 Important: **race de resposta híbrida obsoleta** (setQuery não abortava o controller em voo → resposta antiga sobrescrevia a lista ~1s). **Fix wave (commit `0e6e54ad`):** aborta híbrido ao trocar query + `restoreSnapshot` limpa refs + padrão de erro Fase 8 na rota (fallback raw preservado).
+- **11 testes verdes, `npm run build` OK.**
+- **T7 VERIFICADO no preview de produção:** rede `FTS→HYBRID→AICARD` (endpoint dispara); documentos semânticos na lista (Orientação Normativa AGU, Inf. Contratação Direta, Parecer Vinculante) com scores de similaridade para "quando posso contratar **sem licitação**" — sem keyword match; `suspense_flash=0`, foco intacto (BIA-0a sem regressão); acesso OK.
+- **Deferidos (Minor, ver ledger `.superpowers/sdd/progress.md`):** T3a (merge não filtra `hybrid` por tipo defensivamente), T3b (asserção redundante), T4a (branch q<2 sem teste), T5b (ordem check/abort), **#3 counts desync** (badge do tipo document não recomputa após o upgrade — visível, fácil), #4 multi-curso over-restriction (pré-existente).
+
+**PRÓXIMO:** Daniel decide o merge da #132. Ao mergear: atualizar o painel de frentes ([[painel-frentes-control-tower]]) marcando BIA-0b entregue (fecha o BIA-0 inteiro: 0a piscar + 0b motor híbrido).
+
 ## Global Constraints
 
 - **Acesso (INEGOCIÁVEL):** documentos só aparecem se `isCommon === true` OU `courseId` vazio OU `enrolledCourseIds.includes(courseId)`. Admin vê tudo (`enrolledCourseIds = todos os cursos`), como no `global-search`.
