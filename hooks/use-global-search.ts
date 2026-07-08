@@ -7,6 +7,7 @@ import type {
   GlobalSearchFilters,
   SearchResultItem,
 } from '@/lib/types/global-search';
+import { mergeHybridIntoResults } from '@/lib/search/hybrid-documents';
 
 export interface LegalSource {
   type: 'lei-article' | 'legislative-act';
@@ -147,6 +148,9 @@ export function useGlobalSearch(options: UseGlobalSearchOptions = {}): UseGlobal
   const debounceTimerRef = useRef<NodeJS.Timeout | null>(null);
   const aiAbortControllerRef = useRef<AbortController | null>(null);
   const aiDebounceTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const hybridAbortControllerRef = useRef<AbortController | null>(null);
+  const hybridDebounceTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const HYBRID_DEBOUNCE_MS = 800;
   const aiConversationHistoryRef = useRef<ConversationMessage[]>([]);
 
   // Keep ref in sync with state
@@ -420,6 +424,25 @@ export function useGlobalSearch(options: UseGlobalSearchOptions = {}): UseGlobal
     [filters.types, minQueryLength]
   );
 
+  // Fase 2 (BIA-0b): upgrade híbrido da seção document/legislative-act da lista.
+  // Reaproveita o embedding cacheado (custo ~0). Falha = mantém o FTS (zero regressão).
+  const searchHybrid = useCallback(async (searchQuery: string) => {
+    if (searchQuery.length < minQueryLength) return;
+    if (hybridAbortControllerRef.current) hybridAbortControllerRef.current.abort();
+    const controller = new AbortController();
+    hybridAbortControllerRef.current = controller;
+    try {
+      const params = new URLSearchParams({ q: searchQuery });
+      const response = await fetch(`/api/area-restrita/global-search/hybrid?${params}`, { signal: controller.signal });
+      if (!response.ok) return; // fallback: mantém FTS
+      const data: { results: SearchResultItem[] } = await response.json();
+      if (controller.signal.aborted || !data.results?.length) return;
+      setResults((prev) => mergeHybridIntoResults(prev, data.results));
+    } catch {
+      // AbortError ou rede: mantém FTS silenciosamente
+    }
+  }, [minQueryLength]);
+
   // Trigger AI search immediately (e.g. on Enter)
   const triggerAISearch = useCallback(() => {
     if (!aiEnabled || query.length < minQueryLength) return;
@@ -431,7 +454,11 @@ export function useGlobalSearch(options: UseGlobalSearchOptions = {}): UseGlobal
     }
 
     searchAI(query);
-  }, [aiEnabled, query, minQueryLength, searchAI]);
+
+    // Enter também dispara o upgrade híbrido da lista imediatamente (BIA-0b)
+    if (hybridDebounceTimerRef.current) clearTimeout(hybridDebounceTimerRef.current);
+    if (query.length >= minQueryLength) searchHybrid(query);
+  }, [aiEnabled, query, minQueryLength, searchAI, searchHybrid]);
 
   // Send a follow-up question using conversation history
   const sendFollowUp = useCallback(
@@ -469,6 +496,8 @@ export function useGlobalSearch(options: UseGlobalSearchOptions = {}): UseGlobal
         if (aiAbortControllerRef.current) {
           aiAbortControllerRef.current.abort();
         }
+        if (hybridDebounceTimerRef.current) clearTimeout(hybridDebounceTimerRef.current);
+        if (hybridAbortControllerRef.current) hybridAbortControllerRef.current.abort();
         return;
       }
 
@@ -493,8 +522,16 @@ export function useGlobalSearch(options: UseGlobalSearchOptions = {}): UseGlobal
           searchAI(newQuery);
         }, aiDebounceMs);
       }
+
+      // Debounce do upgrade híbrido da lista (800ms) — BIA-0b
+      if (hybridDebounceTimerRef.current) clearTimeout(hybridDebounceTimerRef.current);
+      if (newQuery.length >= minQueryLength) {
+        hybridDebounceTimerRef.current = setTimeout(() => {
+          searchHybrid(newQuery);
+        }, HYBRID_DEBOUNCE_MS);
+      }
     },
-    [debounceMs, aiDebounceMs, minQueryLength, search, searchAI, aiEnabled]
+    [debounceMs, aiDebounceMs, minQueryLength, search, searchAI, aiEnabled, searchHybrid]
   );
 
   // Clear search
@@ -510,6 +547,12 @@ export function useGlobalSearch(options: UseGlobalSearchOptions = {}): UseGlobal
     }
     if (aiAbortControllerRef.current) {
       aiAbortControllerRef.current.abort();
+    }
+    if (hybridDebounceTimerRef.current) {
+      clearTimeout(hybridDebounceTimerRef.current);
+    }
+    if (hybridAbortControllerRef.current) {
+      hybridAbortControllerRef.current.abort();
     }
     setQueryState('');
     setResults([]);
@@ -611,6 +654,12 @@ export function useGlobalSearch(options: UseGlobalSearchOptions = {}): UseGlobal
       }
       if (aiAbortControllerRef.current) {
         aiAbortControllerRef.current.abort();
+      }
+      if (hybridDebounceTimerRef.current) {
+        clearTimeout(hybridDebounceTimerRef.current);
+      }
+      if (hybridAbortControllerRef.current) {
+        hybridAbortControllerRef.current.abort();
       }
     };
   }, []);
