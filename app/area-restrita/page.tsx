@@ -182,6 +182,15 @@ function AreaRestritaContent() {
     return () => clearTimeout(t);
   }, [search.query, router, urlSearchParams]);
 
+  // Pré-carrega o chunk do PdfExportBar (next/dynamic) logo após a montagem.
+  // Assim ele já está em cache quando surgem resultados de busca e a montagem
+  // NÃO suspende — evitando que a suspensão suba ao <Suspense> de topo e dispare
+  // o fallback de tela cheia que desfocava o campo de busca (o "piscar"
+  // diagnosticado 2026-07-08). Defesa dupla com o <Suspense> local na barra.
+  useEffect(() => {
+    void import('@/components/area-restrita/PdfExportBar');
+  }, []);
+
   // Cursos do usuário (fonte única — sidebar, header e dashboard)
   const enrolledCourses = useEnrolledCourses();
   const enrolledCourseIds = useMemo(
@@ -430,16 +439,27 @@ function AreaRestritaContent() {
         />
       )}
 
-      {/* PDF Export Bar - available during search */}
+      {/* PDF Export Bar - available during search.
+       *
+       * ⚠️ Suspense LOCAL obrigatório: PdfExportBar é um next/dynamic e monta
+       * quando surgem resultados de busca. Sem este boundary, o carregamento do
+       * chunk suspende e a suspensão SOBE para o <Suspense> de topo da página,
+       * cujo fallback de tela cheia aplica display:none no <main> — escondendo
+       * o campo de busca e DESFOCANDO o input no meio da digitação (o "piscar"
+       * relatado, diagnosticado 2026-07-08). fallback={null} contém a suspensão
+       * aqui: a barra aparece um instante depois sem afetar o resto da página.
+       * Combinado com o preload do chunk na montagem (ver useEffect acima). */}
       {search.isSearchActive && pdfExport.documentResults.length > 0 && (
-        <PdfExportBar
-          selectedCount={pdfExport.selectedDocIds.size}
-          totalDocumentCount={pdfExport.documentResults.length}
-          onSelectAll={pdfExport.selectAllDocs}
-          onClearSelection={pdfExport.clearDocSelection}
-          onExport={pdfExport.handleExportPdf}
-          isExporting={pdfExport.isExporting}
-        />
+        <Suspense fallback={null}>
+          <PdfExportBar
+            selectedCount={pdfExport.selectedDocIds.size}
+            totalDocumentCount={pdfExport.documentResults.length}
+            onSelectAll={pdfExport.selectAllDocs}
+            onClearSelection={pdfExport.clearDocSelection}
+            onExport={pdfExport.handleExportPdf}
+            isExporting={pdfExport.isExporting}
+          />
+        </Suspense>
       )}
 
       <MobileBottomNav onLogout={handleLogout} />
