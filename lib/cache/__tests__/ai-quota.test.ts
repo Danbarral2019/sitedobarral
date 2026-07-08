@@ -1,15 +1,33 @@
 // @vitest-environment node
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 
-const { mockFindMany, cacheStore, mockIncrementCache, mockCaptureMessage } = vi.hoisted(() => ({
+const {
+  mockFindMany,
+  cacheStore,
+  mockIncrementCache,
+  mockCaptureMessage,
+  mockLoggerInfo,
+  mockLoggerWarn,
+} = vi.hoisted(() => ({
   mockFindMany: vi.fn(),
   cacheStore: new Map<string, unknown>(),
   mockIncrementCache: vi.fn(),
   mockCaptureMessage: vi.fn(),
+  mockLoggerInfo: vi.fn(),
+  mockLoggerWarn: vi.fn(),
 }));
 
 vi.mock('@sentry/nextjs', () => ({
   captureMessage: (...args: unknown[]) => mockCaptureMessage(...args),
+}));
+
+vi.mock('@/lib/logger', () => ({
+  apiLogger: {
+    info: (...args: unknown[]) => mockLoggerInfo(...args),
+    warn: (...args: unknown[]) => mockLoggerWarn(...args),
+    error: vi.fn(),
+    debug: vi.fn(),
+  },
 }));
 
 vi.mock('@/lib/prisma', () => ({
@@ -264,6 +282,95 @@ describe('enforceGlobalAiCap (rotas públicas — só Camada C)', () => {
     counters.set(GLOBAL, 5);
     const decision = await enforceGlobalAiCap(NOW);
     expect(decision).toEqual({ action: 'degrade-search', reason: 'global' });
+  });
+});
+
+describe('observabilidade da degradação (T9)', () => {
+  const NOW = new Date('2026-07-08T12:00:00.000Z');
+  const DAILY = 'ai:quota:d:u1:2026-07-08';
+  const MONTHLY = 'ai:quota:m:u1:2026-07';
+  const GLOBAL = 'ai:quota:global:2026-07-08';
+  let counters: Map<string, number>;
+  const originalCap = process.env.AI_DAILY_GLOBAL_CAP;
+
+  beforeEach(() => {
+    vi.clearAllMocks();
+    cacheStore.clear();
+    delete process.env.AI_DAILY_GLOBAL_CAP;
+    mockFindMany.mockResolvedValue([]); // trial
+    counters = new Map<string, number>();
+    mockIncrementCache.mockImplementation(async (key: string) => {
+      const n = (counters.get(key) ?? 0) + 1;
+      counters.set(key, n);
+      return n;
+    });
+  });
+
+  afterEach(() => {
+    if (originalCap === undefined) delete process.env.AI_DAILY_GLOBAL_CAP;
+    else process.env.AI_DAILY_GLOBAL_CAP = originalCap;
+  });
+
+  /** Filtra chamadas de log pelo evento estruturado de degradação. */
+  function degradedLogs(mock: typeof mockLoggerInfo) {
+    return mock.mock.calls.filter(
+      (c) => (c[0] as { event?: string })?.event === 'ai.quota.degraded',
+    );
+  }
+
+  it('loga (info, uma vez) ao CRUZAR o teto diário do tier', async () => {
+    counters.set(DAILY, 30); // próximo incr = 31 = limite trial + 1 (cruzamento)
+    await enforceAiQuota('u1', 'student', NOW);
+
+    const logs = degradedLogs(mockLoggerInfo);
+    expect(logs).toHaveLength(1);
+    expect(logs[0][0]).toMatchObject({
+      event: 'ai.quota.degraded',
+      action: 'degrade-gemini',
+      reason: 'daily',
+      userId: 'u1',
+      tier: 'trial',
+    });
+  });
+
+  it('NÃO re-loga em requisições já acima do teto diário', async () => {
+    counters.set(DAILY, 31); // próximo incr = 32 (já cruzou antes)
+    await enforceAiQuota('u1', 'student', NOW);
+    expect(degradedLogs(mockLoggerInfo)).toHaveLength(0);
+  });
+
+  it('loga (info, uma vez) ao cruzar o teto mensal', async () => {
+    counters.set(MONTHLY, 100); // próximo incr = 101 = limite + 1
+    await enforceAiQuota('u1', 'student', NOW);
+    const logs = degradedLogs(mockLoggerInfo);
+    expect(logs).toHaveLength(1);
+    expect(logs[0][0]).toMatchObject({ action: 'degrade-gemini', reason: 'monthly' });
+  });
+
+  it('loga (warn, uma vez) ao cruzar o kill-switch global', async () => {
+    counters.set(GLOBAL, 2000); // próximo incr = 2001 = cap + 1
+    await enforceAiQuota('u1', 'student', NOW);
+    const logs = degradedLogs(mockLoggerWarn);
+    expect(logs).toHaveLength(1);
+    expect(logs[0][0]).toMatchObject({ action: 'degrade-search', reason: 'global' });
+  });
+
+  it('NÃO re-loga o kill-switch global além do cruzamento', async () => {
+    counters.set(GLOBAL, 2001); // próximo incr = 2002
+    await enforceAiQuota('u1', 'student', NOW);
+    expect(degradedLogs(mockLoggerWarn)).toHaveLength(0);
+  });
+
+  it('decisão allow não gera log de degradação', async () => {
+    await enforceAiQuota('u1', 'student', NOW);
+    expect(degradedLogs(mockLoggerInfo)).toHaveLength(0);
+    expect(degradedLogs(mockLoggerWarn)).toHaveLength(0);
+  });
+
+  it('enforceGlobalAiCap loga warn ao cruzar (rotas públicas)', async () => {
+    counters.set(GLOBAL, 2000);
+    await enforceGlobalAiCap(NOW);
+    expect(degradedLogs(mockLoggerWarn)).toHaveLength(1);
   });
 });
 

@@ -18,6 +18,7 @@
 
 import { prisma } from '@/lib/prisma';
 import { getCache, setCache, incrementCache } from '@/lib/cache/redis-client';
+import { apiLogger } from '@/lib/logger';
 import * as Sentry from '@sentry/nextjs';
 
 // ===========================
@@ -167,6 +168,13 @@ export async function enforceGlobalAiCap(
     });
   }
   if (globalCount > cap) {
+    // Loga só no cruzamento (uma vez/dia), não a cada request degradada.
+    if (globalCount === cap + 1) {
+      apiLogger.warn(
+        { event: 'ai.quota.degraded', action: 'degrade-search', reason: 'global', globalCount, cap },
+        'Kill-switch global de custo acionado — síntese IA degradada para busca no site inteiro',
+      );
+    }
     return { action: 'degrade-search', reason: 'global' };
   }
   return { action: 'allow' };
@@ -202,11 +210,23 @@ export async function enforceAiQuota(
 
   const dailyCount = await incrementCache(dayKey(userId, now), secondsUntilEndOfUtcDay(now));
   if (dailyCount > limits.daily) {
+    if (dailyCount === limits.daily + 1) {
+      apiLogger.info(
+        { event: 'ai.quota.degraded', action: 'degrade-gemini', reason: 'daily', userId, tier, count: dailyCount, limit: limits.daily },
+        'Quota diária do tier atingida — resposta degradada para Gemini',
+      );
+    }
     return { action: 'degrade-gemini', reason: 'daily' };
   }
 
   const monthlyCount = await incrementCache(monthKey(userId, now), secondsUntilEndOfUtcMonth(now));
   if (monthlyCount > limits.monthly) {
+    if (monthlyCount === limits.monthly + 1) {
+      apiLogger.info(
+        { event: 'ai.quota.degraded', action: 'degrade-gemini', reason: 'monthly', userId, tier, count: monthlyCount, limit: limits.monthly },
+        'Quota mensal do tier atingida — resposta degradada para Gemini',
+      );
+    }
     return { action: 'degrade-gemini', reason: 'monthly' };
   }
 
