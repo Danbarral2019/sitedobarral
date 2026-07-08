@@ -218,7 +218,7 @@ describe('mapActRowToResult', () => {
       id: 'a1', type: 'decreto', fullNumber: 'Decreto 12.000/2024', title: 'T',
       ementa: 'E', summary: null, issuer: 'Presidência',
       publishDate: new Date('2024-02-02T00:00:00Z'), hierarchyLevel: 2,
-      leiArticles: '["6","7"]', officialUrl: null, pdfUrl: null,
+      leiArticlesArr: ['6', '7'], officialUrl: null, pdfUrl: null,
     };
     const out = mapActRowToResult(row);
     expect(out.id).toBe('a1');
@@ -238,7 +238,6 @@ Expected: FAIL — `mapDocumentRowToResult is not a function`.
 
 ```typescript
 import type { DocumentResult, LegislativeActResult } from '@/lib/types/global-search';
-import { parseLeiArticles } from '@/lib/lei-articles';
 import { courses } from '@/data/courses';
 
 export interface DocRow {
@@ -250,7 +249,7 @@ export interface DocRow {
 export interface ActRow {
   id: string; type: string; fullNumber: string; title: string; ementa: string;
   summary: string | null; issuer: string; publishDate: Date; hierarchyLevel: number;
-  leiArticles: string | null; officialUrl: string | null; pdfUrl: string | null;
+  leiArticlesArr: string[]; officialUrl: string | null; pdfUrl: string | null;
 }
 
 function courseName(courseId: string | null): string | undefined {
@@ -285,7 +284,7 @@ export function mapActRowToResult(row: ActRow): LegislativeActResult {
     issuer: row.issuer,
     publishDate: row.publishDate.toISOString(),
     hierarchyLevel: row.hierarchyLevel,
-    leiArticles: parseLeiArticles(row.leiArticles),
+    leiArticles: row.leiArticlesArr, // LegislativeAct usa coluna nativa String[] (Onda 4.5.6; JSON legada dropada)
     officialUrl: row.officialUrl,
     pdfUrl: row.pdfUrl,
   };
@@ -573,7 +572,7 @@ export async function GET(request: NextRequest) {
       actIds.length
         ? prisma.legislativeAct.findMany({
             where: { id: { in: actIds } },
-            select: { id: true, type: true, fullNumber: true, title: true, ementa: true, summary: true, issuer: true, publishDate: true, hierarchyLevel: true, leiArticles: true, officialUrl: true, pdfUrl: true },
+            select: { id: true, type: true, fullNumber: true, title: true, ementa: true, summary: true, issuer: true, publishDate: true, hierarchyLevel: true, leiArticlesArr: true, officialUrl: true, pdfUrl: true },
           })
         : Promise.resolve([]),
     ]);
