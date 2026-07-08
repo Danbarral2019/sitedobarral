@@ -147,6 +147,12 @@ Ver relatório completo em `docs/audits/2026-05-16-silent-failures.md` para tabe
 **Passos:** boost multiplicativo pequeno por autoridade (`category='parecer-vinculante'`, súmulas) no scoring de `Document`, análogo ao boost de hierarquia dos atos em `vector-search.ts`. ⚠️ boost >1.30 arrisca over-boost (já documentado no arquivo).
 **Validação:** `eval:run`. **Gate:** sem regressão; melhora queries onde a fonte vinculante devia liderar. **Esforço:** 2-3 dias.
 
+### BIA-0. [CONFIRMADO 2026-07-07] Uniformizar o campo de busca da área logada com o motor híbrido [Alta]
+**Achado (verificado):** o campo de busca da área logada tem DOIS motores distintos:
+- Card "Análise IA" → `/api/documents/query` → `assembleAnswerContext`→`hybridSearch` (vetor+FTS+RRF) — **recebe todas as melhorias** (acórdãos, dedup, recall@5 66%).
+- **Lista de resultados tradicionais → `/api/area-restrita/global-search` → `lib/search/full-text-search` = FTS PURO (palavra-chave)** — **NÃO recebe nada** semântico. É o "cartão de visitas" do site e está no motor velho.
+**Fix:** apontar a busca de documentos do `global-search` para `hybridSearch` (ou um variante retrieval-only). **Nuance de custo/latência:** global-search é busca enquanto-digita (debounce 300ms); `hybridSearch` precisa de embedding da query — mas embedding é BARATO (Gemini, centavos/1M tokens); a síntese cara (Claude) continua só no card de IA (debounce 1500ms). Uniformizar NÃO dispara custo de Claude. Mitigar latência: híbrido no Enter/submit, ou FTS-first + upgrade híbrido. Auditar quais tipos (docs/atos/pareceres/jurisprudência) valem migrar. **Prioridade Alta — é a primeira impressão do produto.**
+
 ### BIA-8. [EXPLORAÇÃO CONDICIONAL] GraphRAG sobre o acervo jurídico [a decidir]
 **⚠️ Condicionado à BIA-1 — NÃO construir no escuro.** O domínio jurídico é um grafo natural (leis → artigos → revoga/altera; pareceres → citam artigos; jurisprudência → aplica teses; súmulas → consolidam). GraphRAG (retrieval aumentado por grafo de conhecimento) permitiria raciocínio **multi-hop** e respostas cientes de relações (ex.: "parecer sobre o art. X considerando que foi alterado pelo decreto Y").
 **Por que condicional:** o retrieval está *near-ceiling* e as falhas atuais são teto-de-métrica + ranking de `Document`, **não** lacunas multi-hop (mesmo perfil de risco da 4.2/Fase 8 — ver `docs/ROADMAP_BUSCA_QUALIDADE.md`). O valor potencial é em **correção/raciocínio da RESPOSTA**, que a régua da BIA-1 vai começar a medir. **Só explorar se a BIA-1 mostrar que os erros de resposta são relacionais/multi-hop.**
