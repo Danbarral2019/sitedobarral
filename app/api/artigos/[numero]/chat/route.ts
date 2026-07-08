@@ -10,6 +10,7 @@ import {
 import { LEI_14133_ARTIGOS } from '@/data/lei-14133-artigos';
 import { findRelatedArticles } from '@/data/lei-14133-cross-references';
 import { enforceRateLimit, getClientIp } from '@/lib/cache/rate-limit-helper';
+import { enforceGlobalAiCap } from '@/lib/cache/ai-quota';
 import { ValidationError, NotFoundError } from '@/lib/errors/api-error';
 import { handleApiError } from '@/lib/errors/error-handler';
 import { apiLogger } from '@/lib/logger';
@@ -41,6 +42,19 @@ export async function POST(
 
     if (!body.question || body.question.trim().length === 0) {
       throw new ValidationError('Pergunta e obrigatoria');
+    }
+
+    // Kill-switch global de custo: rota pública (sem usuário/tier). Ao estourar
+    // o cap diário, não sintetiza — responde com mensagem amigável e sem DB/LLM.
+    const globalCap = await enforceGlobalAiCap();
+    if (globalCap.action === 'degrade-search') {
+      return NextResponse.json({
+        conversationId: body.conversationId || randomUUID(),
+        answer:
+          'O Assistente IA está em alta demanda no momento e não consegui responder agora. Tente novamente em alguns minutos — o conteúdo do artigo segue disponível na página.',
+        sources: [],
+        degraded: true,
+      });
     }
 
     // Gerar ou usar conversationId existente

@@ -53,18 +53,29 @@
 - **`lib/errors/error-handler.ts`:** mapear `QuotaExceededError` → 429 com corpo amigável.
 - **Frontend (`AIAnswerCard`/`useGlobalSearch`):** tratar o 429 de quota exibindo a mensagem amigável + (trial) CTA de upgrade; opcionalmente mostrar "X perguntas restantes hoje".
 
+## ⚠️ Refinamento de desenho (2026-07-08, confirmado com Daniel)
+
+Duas mudanças em relação ao plano original, decididas na sessão de execução:
+
+1. **Tetos alinhados à margem** (não os defaults generosos): Admin ∞ · **Premium 40/d·250/m** · **Básico 20/d·100/m** · **Trial/QR 30/d·100/m**.
+2. **Ao estourar NÃO bloqueia — degrada** numa escada de 3 degraus. Logo `enforceAiQuota` **retorna uma decisão** (`AiQuotaDecision`) em vez de lançar `QuotaExceededError`:
+   - `allow` → caminho premium (Claude Sonnet 5 + Citations).
+   - `degrade-gemini` (reason `daily`|`monthly`) → estourou o tier → responde via **fallback Gemini** (10-20× mais barato; puxa a Fase 2 para agora).
+   - `degrade-search` (reason `global`) → kill-switch global → busca crua (FTS), sem card de IA.
+   - Consequência: **não** é preciso `QuotaExceededError` nem mapeamento 429 (evita também colisão com o `code=QUOTA_EXHAUSTED` já existente, que é a quota da API do Gemini). Kill-switch global default = **2000/dia** (conservador), alerta Sentry em 80%.
+
 ## Plano de implementação (tarefas)
 
-- [ ] **T1 — Config + tier resolver.** `lib/cache/ai-quota.ts`: `AI_QUOTA_LIMITS` + `resolveUserAiTier(userId)` (com cache 60s). Teste: cada combinação (admin/premium/basico/trial) resolve o tier certo. *(1 arquivo + teste)*
-- [ ] **T2 — Núcleo `enforceAiQuota` (TDD).** Contadores diária+mensal via Redis `incr`+`expire` (chaves `ai:quota:d:${userId}:${YYYY-MM-DD}` e `:m:${userId}:${YYYY-MM}`); lança `QuotaExceededError` com scope+resetAt; admin bypass. Novo erro em `api-error.ts` + mapeamento 429 em `error-handler.ts`. Testes: dentro do limite passa; no limite+1 lança; diária vs mensal; admin ilimitado. *(Redis mockado nos testes, como em `quota-exhausted.test.ts`.)*
-- [ ] **T3 — Kill-switch global (TDD).** Contador global diário + `AI_DAILY_GLOBAL_CAP` (env); ao exceder, `enforceAiQuota` sinaliza degradação global; alerta Sentry em 80%. Testes: abaixo do cap ok; acima degrada; alerta dispara.
-- [ ] **T4 — Wire em `/documents/query`.** Chamar `enforceAiQuota` após o 10/min. Manter o burst. Ajustar o teste existente.
-- [ ] **T5 — Wire em `/jurisprudencia/query`** (adicionar 10/min **e** `enforceAiQuota` — hoje 100% desprotegido).
-- [ ] **T6 — Wire em `/artigos/[numero]/chat` e `/lei-14133/search`** (`enforceAiQuota` + manter burst).
-- [ ] **T7 — Resposta amigável ao estourar.** 429 + mensagem PT por tier (+ CTA upgrade p/ trial). Definir default: bloqueio vs degradar-para-busca.
-- [ ] **T8 — Frontend.** `AIAnswerCard`/hook: tratar 429 de quota (mensagem + CTA); opcional "N restantes hoje".
-- [ ] **T9 — Observabilidade.** Log estruturado de quota-hit; alerta Sentry no kill-switch; (opcional) endpoint admin de top consumidores do dia.
-- [ ] **T10 — Deploy + smoke.** Setar `AI_DAILY_GLOBAL_CAP` na Vercel; validar em prod (usuário de teste estoura quota e vê a mensagem; admin não é limitado).
+- [x] **T1 — Config + tier resolver.** ✅ `lib/cache/ai-quota.ts`: `AI_QUOTA_LIMITS` + `resolveUserAiTier(userId, role)` (cache 60s, consulta `Subscription` — `getActivePlanType` do plano não existe; admin via `role` do JWT). 10 testes.
+- [x] **T2 — Núcleo `enforceAiQuota` (TDD).** ✅ Contadores diária+mensal via `incrementCache` (chaves `ai:quota:d:${userId}:${YYYY-MM-DD}` e `:m:${userId}:${YYYY-MM}`, TTL até fim do dia/mês UTC). Retorna `AiQuotaDecision` (não lança). Diário estourado não consome mensal. Admin bypass. +6 testes.
+- [x] **T3 — Kill-switch global (TDD).** ✅ Contador global diário `ai:quota:global:${YYYY-MM-DD}` + `AI_DAILY_GLOBAL_CAP` (env, default 2000); ao exceder → `degrade-search`; alerta Sentry em 80% (uma vez). Admin bypassa. +6 testes. **Total: 22 testes verdes, TS limpo.**
+- [x] **T4 — Wire em `/documents/query`.** ✅ `enforceAiQuota` após o 10/min; `allow`→Claude+Citations, `degrade-gemini`→Gemini direto (pula Claude), `degrade-search`→evento SSE `AI_QUOTA_DEGRADED` + sem síntese. Teste existente ajustado (mock `enforceAiQuota`) + 5 testes novos de degradação.
+- [x] **T5 — Wire em `/jurisprudencia/query`.** ✅ Adicionado 10/min (antes 0) + `enforceAiQuota`; `degrade-search` retorna sources sem Gemini (aiAnswer null). +2 testes.
+- [x] **T6 — Wire em `/artigos/[numero]/chat` e `/lei-14133/search`.** ✅ Rotas PÚBLICAS (sem usuário/tier) → `enforceGlobalAiCap()` (só Camada C, extraído em refactor). `degrade-search` → mensagem amigável sem LLM/DB. +3 testes. **Total quota: 50 testes verdes.**
+- [x] **T7 — Resposta amigável ao estourar.** ✅ Feito inline (mensagens PT por rota). NÃO usa 429 (degrada, não bloqueia). CTA de upgrade p/ trial fica pro frontend (T8).
+- [x] **T8 — Frontend.** ✅ `hooks/use-global-search.ts` trata o evento SSE `type:'degraded'`/`AI_QUOTA_DEGRADED` (espelha o branch `QUOTA_EXHAUSTED`: esconde o card com mensagem amigável, mantém a busca textual). `degrade-gemini` é transparente (tokens normais). CTA upgrade p/ trial = opcional/dispensável (trial não é bloqueado, recebe Gemini). Sem teste (hook de streaming sem harness — exceção consciente ao TDD; núcleo 100% testado).
+- [~] **T9 — Observabilidade.** Parcial: Sentry no kill-switch (80%) ✅ já em `enforceGlobalAiCap`. Falta (opcional): log estruturado de cada degradação + endpoint admin de top consumidores.
+- [ ] **T10 — Deploy + smoke.** Requer OK do Daniel (auto-deploy ativo). `AI_DAILY_GLOBAL_CAP` opcional na Vercel (default 2000 já embutido). Rodar `npm run build` antes. Smoke: admin não limita; trial estourado recebe Gemini; kill-switch degrada.
 
 ## Fase 2 (opcional, maior impacto de custo — decidir depois)
 - **Roteamento de modelo por tier:** Gemini Flash (~10-20× mais barato) como padrão para **trial**, Claude Sonnet 5 + Citations para **pagantes**. Reduz o custo por resposta do público sem receita. Reaproveita a camada `lib/ai/` (porta única `generate`). Mede impacto na régua (BIA-1) para garantir que a qualidade do trial segue aceitável.

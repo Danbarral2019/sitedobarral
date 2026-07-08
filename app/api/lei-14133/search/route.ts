@@ -5,6 +5,7 @@ import { PRIMARY_GEMINI_MODEL } from '@/lib/gemini/config';
 import { prisma } from '@/lib/prisma';
 import { ENUNCIADOS, buscarEnunciados } from '@/data/enunciados';
 import { enforceRateLimit, getClientIp } from '@/lib/cache/rate-limit-helper';
+import { enforceGlobalAiCap } from '@/lib/cache/ai-quota';
 import { ValidationError } from '@/lib/errors/api-error';
 import { handleApiError } from '@/lib/errors/error-handler';
 import { apiLogger } from '@/lib/logger';
@@ -79,6 +80,22 @@ export async function POST(request: NextRequest) {
     }
 
     const searchQuery = query.trim();
+
+    // Kill-switch global de custo: rota pública (sem usuário/tier). Ao estourar
+    // o cap diário, não sintetiza — retorna o mesmo shape do fallback sem-IA.
+    const globalCap = await enforceGlobalAiCap();
+    if (globalCap.action === 'degrade-search') {
+      return NextResponse.json<SearchResponse>({
+        query: searchQuery,
+        results: [],
+        documents: [],
+        enunciados: [],
+        summary: 'Assistente IA em alta demanda no momento. Tente novamente em alguns minutos — a navegação pela Lei segue disponível.',
+        isAISearch: false,
+        cached: false,
+        latency: Date.now() - startTime,
+      });
+    }
 
     // Construir prompt para o Gemini
     const prompt = `Voce e um especialista em Direito Administrativo e Licitacoes, especificamente na Lei 14.133/2021 (Nova Lei de Licitacoes).
