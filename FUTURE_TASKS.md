@@ -609,6 +609,17 @@ Estudar viabilidade de criar aplicativo nativo ou usar PWA avançado:
 - [x] +1 client event: favorite_toggled (via trackClientEvent)
 - [x] Link "Monitoramento" no sidebar admin (ícone Activity)
 
+### Q1. Painel admin de "top consumidores de IA do dia" [Baixa]
+**Prioridade:** Baixa — nice-to-have proativo. **Aberta em 2026-07-08** (na entrega da quota anti-abuso, PR #130).
+
+**Contexto:** a quota anti-abuso (`lib/cache/ai-quota.ts`) já mantém contadores diários por usuário em Redis (chaves `ai:quota:d:${userId}:${YYYY-MM-DD}`) e um contador global (`ai:quota:global:${YYYY-MM-DD}`). Hoje a visibilidade vem do **log estruturado** `event:'ai.quota.degraded'` (emitido no cruzamento do teto) + alerta Sentry em 80% do cap global. Isso cobre o essencial reativamente.
+
+**Proposta:** endpoint admin + card em `/admin/monitoring` que lista os **top-N consumidores de IA do dia** (userId + contagem), lendo os contadores via `SCAN ai:quota:d:*:${hoje}` no Upstash (padrão já usado em `deleteCachePattern`). Permite ver proativamente quem está no limite/abusando antes de o kill-switch disparar.
+
+**Por que baixa:** o log estruturado + Sentry já dão o sinal de abuso; o painel é monitoramento proativo, não proteção (a proteção já está no ar). Fazer só se sentir falta de visibilidade.
+
+**Esforço:** ~0,5-1 dia (rota admin com SCAN + join com `User` p/ nome/email + card no monitoring). **Arquivos:** `lib/cache/ai-quota.ts` (helper de leitura), `app/api/admin/monitoring/`, `app/admin/monitoring/`.
+
 ### T16. Clipping TCU — Size cap para RTFs gigantes [Baixa, condicional]
 **Prioridade:** Baixa — implementar apenas se um segundo caso aparecer.
 
