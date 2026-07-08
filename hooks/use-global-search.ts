@@ -525,6 +525,7 @@ export function useGlobalSearch(options: UseGlobalSearchOptions = {}): UseGlobal
 
       // Debounce do upgrade híbrido da lista (800ms) — BIA-0b
       if (hybridDebounceTimerRef.current) clearTimeout(hybridDebounceTimerRef.current);
+      if (hybridAbortControllerRef.current) hybridAbortControllerRef.current.abort();
       if (newQuery.length >= minQueryLength) {
         hybridDebounceTimerRef.current = setTimeout(() => {
           searchHybrid(newQuery);
@@ -625,6 +626,8 @@ export function useGlobalSearch(options: UseGlobalSearchOptions = {}): UseGlobal
     if (aiDebounceTimerRef.current) clearTimeout(aiDebounceTimerRef.current);
     if (abortControllerRef.current) abortControllerRef.current.abort();
     if (aiAbortControllerRef.current) aiAbortControllerRef.current.abort();
+    if (hybridDebounceTimerRef.current) clearTimeout(hybridDebounceTimerRef.current);
+    if (hybridAbortControllerRef.current) hybridAbortControllerRef.current.abort();
 
     setQueryState(snapshot.query);
     setResults(snapshot.results);
