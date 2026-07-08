@@ -1,7 +1,7 @@
 // @vitest-environment node
 import { describe, it, expect } from 'vitest';
 import type { SearchResult } from '@/lib/embeddings/vector-search';
-import { filterByEnrollment, dedupeByDocument, sortByTypePriority, mapDocumentRowToResult, mapActRowToResult } from '../hybrid-documents';
+import { filterByEnrollment, dedupeByDocument, sortByTypePriority, mapDocumentRowToResult, mapActRowToResult, mergeHybridIntoResults } from '../hybrid-documents';
 
 function sr(over: Partial<SearchResult>): SearchResult {
   return {
@@ -89,5 +89,35 @@ describe('mapActRowToResult', () => {
     expect(out.hierarchyLevel).toBe(2);
     expect(out.leiArticles).toEqual(['6', '7']);
     expect(out.publishDate).toBe('2024-02-02T00:00:00.000Z');
+  });
+});
+
+describe('mergeHybridIntoResults', () => {
+  it('substitui só document + legislative-act pelos híbridos, mantém os outros tipos, ordena por prioridade preservando a ordem do híbrido', () => {
+    const fts = [
+      { type: 'glossary', data: { id: 'g1' } },
+      { type: 'document', data: { id: 'ftsDocA' } },
+      { type: 'document', data: { id: 'ftsDocB' } },
+      { type: 'legislative-act', data: { id: 'ftsAct' } },
+      { type: 'lei', data: { numero: '75' } },
+    ] as any;
+    const hybrid = [
+      { type: 'document', data: { id: 'hybDoc1' } },       // relevância 1º
+      { type: 'legislative-act', data: { id: 'hybAct1' } },
+      { type: 'document', data: { id: 'hybDoc2' } },       // relevância 2º
+    ] as any;
+
+    const out = mergeHybridIntoResults(fts, hybrid).map((i: any) => i.data.id ?? i.data.numero);
+    // glossary(1), depois documents do HÍBRIDO na ordem hybDoc1, hybDoc2, depois act híbrido, depois lei
+    expect(out).toEqual(['g1', 'hybDoc1', 'hybDoc2', 'hybAct1', '75']);
+    // nenhum documento/ato do FTS sobrou
+    expect(out).not.toContain('ftsDocA');
+    expect(out).not.toContain('ftsAct');
+  });
+
+  it('híbrido vazio → devolve o FTS ordenado (fallback do merge é neutro)', () => {
+    const fts = [{ type: 'document', data: { id: 'ftsDocA' } }] as any;
+    const out = mergeHybridIntoResults(fts, []).map((i: any) => i.data.id);
+    expect(out).toEqual(['ftsDocA']);
   });
 });

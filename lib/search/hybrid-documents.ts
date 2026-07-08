@@ -104,3 +104,19 @@ export function mapActRowToResult(row: ActRow): LegislativeActResult {
     pdfUrl: row.pdfUrl,
   };
 }
+
+/**
+ * Mescla a lista FTS com os resultados híbridos: substitui TODAS as seções
+ * document + legislative-act pelas híbridas (na ordem de relevância do híbrido),
+ * mantém os demais tipos do FTS e reordena por prioridade de tipo (estável).
+ * Se `hybrid` estiver vazio, devolve o FTS ordenado (sem esvaziar nada).
+ */
+export function mergeHybridIntoResults(
+  fts: SearchResultItem[],
+  hybrid: SearchResultItem[],
+): SearchResultItem[] {
+  if (hybrid.length === 0) return sortByTypePriority(fts);
+  const HYBRID_TYPES = new Set(['document', 'legislative-act']);
+  const kept = fts.filter((i) => !HYBRID_TYPES.has(i.type));
+  return sortByTypePriority([...kept, ...hybrid]);
+}
