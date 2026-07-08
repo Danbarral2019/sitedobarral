@@ -110,6 +110,7 @@ Ver relatório completo em `docs/audits/2026-05-16-silent-failures.md` para tabe
 4. **Iterar a SÍNTESE contra a régua:** system prompt (`systemInstruction` em `app/api/documents/query/route.ts` + `assembleAnswerContext`), política de citação, ordenação do contexto, escolha de modelo (`--answer-provider anthropic --answer-model claude-sonnet-5` já suportado). Uma variável por vez.
 5. **Estabilidade do juiz:** rodar 2 modelos-juiz (ou 2×) e exigir concordância antes de aceitar ganho.
 **Validação:** `npm run eval:synthesis`. **Gate:** overall sobe; **`faithfulness` NUNCA regride** (correção acima de tudo). **Esforço:** 1-2 semanas (iterativo).
+**📊 Baseline medido (2026-07-07, consolidado de relatórios de jul):** caminho de PRODUÇÃO (Claude S5 + Citations, via flag `--citations`, commit `79b4f032`) ≈ overall 87-92%; Gemini (fallback) ≈ 79,6%. **Dimensão MAIS FRACA = `faithfulness` (~85-88%)** em todos os cortes (plain Claude N=10, juiz Opus N=5, Citations N=3); citações (89-95%) e completude (87-96%) já fortes. **Gargalo a atacar = fidelidade/anti-alucinação.** Amostras pequenas — reconfirmar com subconjunto maior quando o orçamento permitir. ⚠️ evals de síntese são CAROS (síntese Claude + juiz Claude por query); estimar custo antes de rodar N grande.
 
 ### BIA-2. Contexto de geração: documento inteiro nos top resultados [Média]
 **Objetivo:** menos truncamento → respostas mais completas/fiéis, sem tocar no retrieval.
