@@ -1,5 +1,8 @@
 import type { SearchResult } from '@/lib/embeddings/vector-search';
 import type { SearchResultItem } from '@/lib/types/global-search';
+import type { DocumentResult, LegislativeActResult } from '@/lib/types/global-search';
+import { parseLeiArticles } from '@/lib/lei-articles';
+import { courses } from '@/data/courses';
 
 /** Pós-filtro de acesso: documento aparece se comum, sem curso, ou de curso matriculado. */
 export function filterByEnrollment(
@@ -51,4 +54,54 @@ export function sortByTypePriority(items: SearchResultItem[]): SearchResultItem[
       return pa !== pb ? pa - pb : a.i - b.i; // desempate por índice = estável
     })
     .map(({ item }) => item);
+}
+
+export interface DocRow {
+  id: string; title: string; description: string | null; category: string;
+  type: string; url: string | null; courseId: string | null; tags: string | null;
+  uploadedAt: Date; isPublic: boolean;
+}
+
+export interface ActRow {
+  id: string; type: string; fullNumber: string; title: string; ementa: string;
+  summary: string | null; issuer: string; publishDate: Date; hierarchyLevel: number;
+  leiArticles: string | null; officialUrl: string | null; pdfUrl: string | null;
+}
+
+function courseName(courseId: string | null): string | undefined {
+  if (!courseId) return undefined;
+  return courses.find((c) => c.id === courseId)?.title || 'Curso';
+}
+
+export function mapDocumentRowToResult(row: DocRow): DocumentResult {
+  return {
+    id: row.id,
+    title: row.title,
+    description: row.description,
+    category: row.category,
+    type: row.type,
+    url: row.url,
+    courseId: row.courseId,
+    courseName: courseName(row.courseId),
+    tags: row.tags,
+    uploadedAt: row.uploadedAt.toISOString(),
+    isPublic: row.isPublic,
+  };
+}
+
+export function mapActRowToResult(row: ActRow): LegislativeActResult {
+  return {
+    id: row.id,
+    type: row.type,
+    fullNumber: row.fullNumber,
+    title: row.title,
+    ementa: row.ementa,
+    summary: row.summary,
+    issuer: row.issuer,
+    publishDate: row.publishDate.toISOString(),
+    hierarchyLevel: row.hierarchyLevel,
+    leiArticles: parseLeiArticles(row.leiArticles),
+    officialUrl: row.officialUrl,
+    pdfUrl: row.pdfUrl,
+  };
 }

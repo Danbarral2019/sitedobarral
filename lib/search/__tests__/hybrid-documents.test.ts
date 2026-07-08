@@ -1,7 +1,7 @@
 // @vitest-environment node
 import { describe, it, expect } from 'vitest';
 import type { SearchResult } from '@/lib/embeddings/vector-search';
-import { filterByEnrollment, dedupeByDocument, sortByTypePriority } from '../hybrid-documents';
+import { filterByEnrollment, dedupeByDocument, sortByTypePriority, mapDocumentRowToResult, mapActRowToResult } from '../hybrid-documents';
 
 function sr(over: Partial<SearchResult>): SearchResult {
   return {
@@ -47,5 +47,36 @@ describe('sortByTypePriority', () => {
     const out = sortByTypePriority(items).map((i: any) => i.data.id);
     // glossary(1) < document(3) < legislative-act(4); docs mantêm ordem doc2, doc1
     expect(out).toEqual(['g1', 'doc2', 'doc1', 'act1']);
+  });
+});
+
+describe('mapDocumentRowToResult', () => {
+  it('mapeia linha do Document para DocumentResult com courseName resolvido', () => {
+    const row = {
+      id: 'd1', title: 'Apostila', description: 'desc', category: 'apostila',
+      type: 'material', url: null, courseId: '3', tags: '["a"]',
+      uploadedAt: new Date('2024-01-01T00:00:00Z'), isPublic: false,
+    };
+    const out = mapDocumentRowToResult(row);
+    expect(out.id).toBe('d1');
+    expect(out.uploadedAt).toBe('2024-01-01T00:00:00.000Z');
+    expect(out.isPublic).toBe(false);
+    expect(typeof out.courseName === 'string' || out.courseName === undefined).toBe(true);
+  });
+});
+
+describe('mapActRowToResult', () => {
+  it('mapeia linha do LegislativeAct para LegislativeActResult (leiArticles parseado)', () => {
+    const row = {
+      id: 'a1', type: 'decreto', fullNumber: 'Decreto 12.000/2024', title: 'T',
+      ementa: 'E', summary: null, issuer: 'Presidência',
+      publishDate: new Date('2024-02-02T00:00:00Z'), hierarchyLevel: 2,
+      leiArticles: '["6","7"]', officialUrl: null, pdfUrl: null,
+    };
+    const out = mapActRowToResult(row);
+    expect(out.id).toBe('a1');
+    expect(out.fullNumber).toBe('Decreto 12.000/2024');
+    expect(out.leiArticles).toEqual(['6', '7']);
+    expect(out.publishDate).toBe('2024-02-02T00:00:00.000Z');
   });
 });
