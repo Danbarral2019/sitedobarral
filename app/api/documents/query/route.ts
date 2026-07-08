@@ -15,6 +15,7 @@ import { queryGeminiText } from '@/lib/gemini/cached-client';
 import { PRIMARY_GEMINI_MODEL, FALLBACK_GEMINI_MODELS } from '@/lib/gemini/config';
 import { generateStream, LEGAL_SAFETY_SETTINGS } from '@/lib/ai';
 import { checkRateLimit } from '@/lib/cache/redis-client';
+import { enforceAiQuota, type AiQuotaDecision } from '@/lib/cache/ai-quota';
 import { trackServerEvent } from '@/lib/monitoring/events';
 import { apiLogger } from '@/lib/logger';
 import { isRateLimitError } from '@/lib/ai/error-detection';
@@ -84,6 +85,16 @@ export async function POST(req: NextRequest) {
         );
       }
     }
+
+    // 2b. Quota anti-abuso por tier (Camada B) + kill-switch global (Camada C).
+    // Não bloqueia: retorna decisão de degradação consumida abaixo pela síntese.
+    // - allow: Claude Sonnet 5 + Citations (fallback Gemini).
+    // - degrade-gemini: pula o Claude → responde direto pelo Gemini (mais barato).
+    // - degrade-search: pula a síntese → só resultados de busca (sem card de IA).
+    const quotaDecision: AiQuotaDecision = await enforceAiQuota(
+      userId,
+      authResult.user.role,
+    );
 
     // 3. Parse request body
     const body: QueryRequest = await req.json();
@@ -164,6 +175,24 @@ export async function POST(req: NextRequest) {
             });
             controller.enqueue(encoder.encode(`data: ${meta}\n\n`));
 
+            // Kill-switch global (Camada C): degrada para busca-sem-IA. Emite
+            // evento estruturado (frontend esconde o card de síntese) e encerra
+            // sem chamar LLM nenhum. Os resultados de busca já foram no `meta`.
+            if (quotaDecision.action === 'degrade-search') {
+              controller.enqueue(
+                encoder.encode(
+                  `data: ${JSON.stringify({
+                    type: 'degraded',
+                    code: 'AI_QUOTA_DEGRADED',
+                    scope: quotaDecision.reason,
+                    message: 'Assistente IA em alta demanda no momento. A busca segue funcionando normalmente.',
+                  })}\n\n`,
+                ),
+              );
+              controller.enqueue(encoder.encode('data: [DONE]\n\n'));
+              return;
+            }
+
             // 13. Síntese padrão (Fase 3): Claude Sonnet 5 + Citations API —
             // fontes verificadas por afirmação (cited_text ∈ fonte). Fallback
             // para Gemini (sem citações) se o Claude falhar ANTES de emitir tokens.
@@ -192,25 +221,10 @@ export async function POST(req: NextRequest) {
               }
             };
 
-            try {
-              usedCitations = true;
-              await pump(
-                await generateStream('chat', {
-                  provider: 'anthropic',
-                  model: CITATIONS_MODEL,
-                  systemPrompt: systemInstruction,
-                  messages: [{ role: 'user', content: `PERGUNTA DO USUÁRIO:\n${query}` }],
-                  documents: citationDocuments,
-                  maxTokens: 8192,
-                }),
-              );
-            } catch (claudeErr) {
-              if (hasTokens) throw claudeErr; // mid-stream: não dá pra trocar de provider
+            // Síntese via Gemini (sem citações). Usada como fallback do Claude
+            // e como caminho direto quando a quota do tier degrada para Gemini.
+            const runGemini = async () => {
               usedCitations = false;
-              apiLogger.warn(
-                { err: claudeErr instanceof Error ? claudeErr.message : String(claudeErr) },
-                'Síntese Claude falhou antes de tokens — fallback para Gemini (sem citações)',
-              );
               await pump(
                 await generateStream('chat', {
                   provider: 'gemini',
@@ -224,6 +238,33 @@ export async function POST(req: NextRequest) {
                   safetySettings: LEGAL_SAFETY_SETTINGS,
                 }),
               );
+            };
+
+            if (quotaDecision.action === 'degrade-gemini') {
+              // Estourou a quota do tier: responde direto pelo Gemini (barato),
+              // sem gastar Claude+Citations.
+              await runGemini();
+            } else {
+              try {
+                usedCitations = true;
+                await pump(
+                  await generateStream('chat', {
+                    provider: 'anthropic',
+                    model: CITATIONS_MODEL,
+                    systemPrompt: systemInstruction,
+                    messages: [{ role: 'user', content: `PERGUNTA DO USUÁRIO:\n${query}` }],
+                    documents: citationDocuments,
+                    maxTokens: 8192,
+                  }),
+                );
+              } catch (claudeErr) {
+                if (hasTokens) throw claudeErr; // mid-stream: não dá pra trocar de provider
+                apiLogger.warn(
+                  { err: claudeErr instanceof Error ? claudeErr.message : String(claudeErr) },
+                  'Síntese Claude falhou antes de tokens — fallback para Gemini (sem citações)',
+                );
+                await runGemini();
+              }
             }
 
             // finishReason anormal (Gemini RECITATION/SAFETY; Claude refusal).
@@ -310,6 +351,21 @@ export async function POST(req: NextRequest) {
 
     // 14. Non-streaming response (JSON)
     let synthesizedAnswer: string | undefined;
+
+    // Kill-switch global: não sintetiza, retorna só os resultados de busca.
+    if (quotaDecision.action === 'degrade-search') {
+      const latency = Date.now() - startTime;
+      trackServerEvent('ai_search', { resultCount: formattedResults.length });
+      return NextResponse.json<QueryResponse>({
+        success: true,
+        results: formattedResults,
+        totalDocuments: ctx.totalFound,
+        cached: ctx.cached,
+        latency,
+        query,
+        legalSources: legalSources.length > 0 ? legalSources : undefined,
+      });
+    }
 
     try {
       const geminiResult = await queryGeminiText(synthesisPrompt, {

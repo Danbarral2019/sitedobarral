@@ -290,6 +290,18 @@ export function useGlobalSearch(options: UseGlobalSearchOptions = {}): UseGlobal
                 }
                 // Para de processar este stream (próximo [DONE] vai sair sozinho).
                 return;
+              } else if (parsed.type === 'degraded' && parsed.code === 'AI_QUOTA_DEGRADED') {
+                // Kill-switch global de custo (quota anti-abuso): a síntese IA foi
+                // desligada temporariamente no site inteiro. Esconde o card de IA
+                // com mensagem amigável; a busca textual segue intacta via
+                // /api/area-restrita/global-search.
+                if (!controller.signal.aborted) {
+                  setAiError(parsed.message || 'Assistente IA em alta demanda no momento. A busca segue funcionando normalmente.');
+                  setAiAnswer(null);
+                  setAiSources([]);
+                  setAiLegalSources([]);
+                }
+                return;
               }
             } catch { /* ignore parse errors */ }
           }

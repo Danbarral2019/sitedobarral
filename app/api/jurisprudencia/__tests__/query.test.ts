@@ -11,6 +11,7 @@ const {
   mockCountUnifiedApproved,
   mockQueryGeminiText,
   mockSearchHistoryCreate,
+  mockEnforceAiQuota,
 } = vi.hoisted(() => ({
   mockSemanticSearch: vi.fn(),
   mockEnrichSources: vi.fn(),
@@ -21,6 +22,11 @@ const {
   mockCountUnifiedApproved: vi.fn(),
   mockQueryGeminiText: vi.fn(),
   mockSearchHistoryCreate: vi.fn(),
+  mockEnforceAiQuota: vi.fn(),
+}));
+
+vi.mock('@/lib/cache/ai-quota', () => ({
+  enforceAiQuota: (...args: any[]) => mockEnforceAiQuota(...args),
 }));
 
 vi.mock('@/lib/embeddings/vector-search', () => ({
@@ -105,6 +111,8 @@ beforeEach(() => {
   mockCountUnifiedApproved.mockReset();
   mockQueryGeminiText.mockReset();
   mockSearchHistoryCreate.mockReset();
+  mockEnforceAiQuota.mockReset();
+  mockEnforceAiQuota.mockResolvedValue({ action: 'allow' });
 
   // Default: adapter passes options through
   mockMapFiltersToSemanticOptions.mockReturnValue({
@@ -395,5 +403,56 @@ describe('POST /api/jurisprudencia/query', () => {
       }),
     );
     expect(body.searchHistoryId).toBe('sh-empty');
+  });
+
+  it('degrade-search: retorna sources SEM chamar o Gemini (kill-switch global)', async () => {
+    mockEnforceAiQuota.mockResolvedValue({ action: 'degrade-search', reason: 'global' });
+    mockSemanticSearch.mockResolvedValueOnce({
+      results: [{ documentId: 'td-1', documentTitle: 't', category: 'acordao', chunkContent: 'c', chunkIndex: 0, similarity: 0.8, url: null, courseId: null, isCommon: true, tags: null, leiArticles: null, uploadedAt: '2024-01-01', sourceType: 'tribunal-decision' }],
+      query: 'q', totalFound: 1, latency: 10, cached: false,
+    });
+    mockEnrichSources.mockResolvedValueOnce([{
+      documentId: 'td-1', similarity: 0.8, chunkContent: 'c',
+      source: { kind: 'tribunal-decision', data: { id: 'td-1', tribunalCode: 'TCE-SP', tribunalName: 'T', decisionType: 'acordao', decisionNumber: '1', title: 't', ementa: 'e', summary: null, relator: null, orgaoJulgador: null, dataJulgamento: null, themes: null, leiArticlesArr: [], url: null } },
+    }]);
+    mockAdaptToSourcesPayload.mockReturnValueOnce([{
+      id: 'td-1', tribunalCode: 'TCE-SP', tribunalName: 'T', decisionType: 'acordao',
+      decisionNumber: '1', title: 't', relator: null, orgaoJulgador: null,
+      dataJulgamento: null, url: null, sourceType: 'tribunal-decision', similarity: 0.8,
+    }]);
+
+    const res = await POST(makeReq({ query: 'pregão', filters: { tribunal: 'TCE-SP' } }), routeCtx);
+    const body = await readJson(res);
+
+    expect(res.status).toBe(200);
+    expect(mockQueryGeminiText).not.toHaveBeenCalled();
+    expect(body.sources).toHaveLength(1);
+    expect(body.answer).toMatch(/alta demanda/i);
+  });
+
+  it('degrade-search: persiste SearchHistory com aiAnswer null', async () => {
+    mockEnforceAiQuota.mockResolvedValue({ action: 'degrade-search', reason: 'global' });
+    mockSemanticSearch.mockResolvedValueOnce({
+      results: [{ documentId: 'td-1', documentTitle: 't', category: 'acordao', chunkContent: 'c', chunkIndex: 0, similarity: 0.8, url: null, courseId: null, isCommon: true, tags: null, leiArticles: null, uploadedAt: '2024-01-01', sourceType: 'tribunal-decision' }],
+      query: 'q', totalFound: 1, latency: 10, cached: false,
+    });
+    mockEnrichSources.mockResolvedValueOnce([{
+      documentId: 'td-1', similarity: 0.8, chunkContent: 'c',
+      source: { kind: 'tribunal-decision', data: { id: 'td-1', tribunalCode: 'TCE-SP', tribunalName: 'T', decisionType: 'acordao', decisionNumber: '1', title: 't', ementa: 'e', summary: null, relator: null, orgaoJulgador: null, dataJulgamento: null, themes: null, leiArticlesArr: [], url: null } },
+    }]);
+    mockAdaptToSourcesPayload.mockReturnValueOnce([{
+      id: 'td-1', tribunalCode: 'TCE-SP', tribunalName: 'T', decisionType: 'acordao',
+      decisionNumber: '1', title: 't', relator: null, orgaoJulgador: null,
+      dataJulgamento: null, url: null, sourceType: 'tribunal-decision', similarity: 0.8,
+    }]);
+    mockSearchHistoryCreate.mockResolvedValueOnce({ id: 'sh-degraded' });
+
+    const res = await POST(makeReq({ query: 'pregão', filters: { tribunal: 'TCE-SP' } }), routeCtx);
+    const body = await readJson(res);
+
+    expect(mockSearchHistoryCreate).toHaveBeenCalledWith(
+      expect.objectContaining({ data: expect.objectContaining({ aiAnswer: null }) }),
+    );
+    expect(body.searchHistoryId).toBe('sh-degraded');
   });
 });

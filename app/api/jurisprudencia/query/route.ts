@@ -14,6 +14,8 @@ import {
 import { countUnifiedApproved } from '@/lib/jurisprudencia/unified-query';
 import type { JurisprudenciaFilters } from '@/lib/jurisprudencia/unified-query';
 import { queryGeminiText } from '@/lib/gemini/cached-client';
+import { enforceRateLimit } from '@/lib/cache/rate-limit-helper';
+import { enforceAiQuota } from '@/lib/cache/ai-quota';
 import { apiLogger } from '@/lib/logger';
 import { prisma } from '@/lib/prisma';
 import { z } from 'zod';
@@ -298,6 +300,13 @@ export const POST = withUserApi(async (request, ctx) => {
         );
       }
 
+      // Anti-burst 10/min (antes desprotegido) + quota anti-abuso por tier.
+      // Admin faz bypass. A decisão de quota é consumida na síntese abaixo.
+      if (user.role !== 'admin') {
+        await enforceRateLimit(`juris-query:${user.userId}`, 10, 60);
+      }
+      const quotaDecision = await enforceAiQuota(user.userId, user.role);
+
       const { query, filters, topK } = parsed.data;
       const limit = topK ?? DEFAULT_TOP_K;
 
@@ -377,6 +386,26 @@ export const POST = withUserApi(async (request, ctx) => {
 
       let answerText: string;
       let cached = false;
+
+      // Kill-switch global de custo: não sintetiza (economiza LLM), mas ainda
+      // entrega as decisões relevantes encontradas.
+      if (quotaDecision.action === 'degrade-search') {
+        const searchHistoryId = await persistJurisprudenciaSearch({
+          userId: user.userId,
+          query,
+          filters,
+          aiAnswer: null,
+          sources: sourcesPayload,
+        });
+        return NextResponse.json({
+          answer:
+            'Assistente IA em alta demanda no momento — não gerei uma síntese agora. As decisões relevantes estão listadas abaixo; consulte-as diretamente ou tente novamente em alguns minutos.',
+          sources: sourcesPayload,
+          consulted: enriched.length,
+          cached: false,
+          searchHistoryId,
+        });
+      }
 
       try {
         const result = await queryGeminiText(prompt, {

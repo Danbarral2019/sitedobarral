@@ -27,6 +27,12 @@ vi.mock('@/lib/cache/redis-client', () => ({
   CACHE_TTL: { GEMINI_QUERY: 86400, SEARCH_RESULTS: 3600 },
 }));
 
+// Quota de usuário (anti-abuso) desativada aqui: este teste cobre a quota da
+// API do Gemini (RESOURCE_EXHAUSTED), não a quota por tier.
+vi.mock('@/lib/cache/ai-quota', () => ({
+  enforceAiQuota: async () => ({ action: 'allow' }),
+}));
+
 vi.mock('@/lib/embeddings/hybrid-search', () => ({
   hybridSearch: (...args: unknown[]) => mockHybridSearch(...args),
 }));
