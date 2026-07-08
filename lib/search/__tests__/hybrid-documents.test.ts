@@ -1,11 +1,12 @@
 // @vitest-environment node
 import { describe, it, expect } from 'vitest';
+import type { SearchResult } from '@/lib/embeddings/vector-search';
 import { filterByEnrollment, dedupeByDocument, sortByTypePriority } from '../hybrid-documents';
 
-function sr(over: Partial<import('@/lib/embeddings/vector-search').SearchResult>) {
+function sr(over: Partial<SearchResult>): SearchResult {
   return {
     documentId: 'd1', documentTitle: 't', category: 'apostila', chunkContent: 'c',
-    similarity: 0.5, isCommon: false, sourceType: 'document' as const, ...over,
+    chunkIndex: 0, similarity: 0.5, isCommon: false, sourceType: 'document' as const, ...over,
   };
 }
 
