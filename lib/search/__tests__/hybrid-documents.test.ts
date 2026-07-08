@@ -59,9 +59,15 @@ describe('mapDocumentRowToResult', () => {
     };
     const out = mapDocumentRowToResult(row);
     expect(out.id).toBe('d1');
+    expect(out.description).toBe('desc');
+    expect(out.category).toBe('apostila');
+    expect(out.type).toBe('material');
+    expect(out.courseId).toBe('3');
+    expect(out.tags).toBe('["a"]');
     expect(out.uploadedAt).toBe('2024-01-01T00:00:00.000Z');
     expect(out.isPublic).toBe(false);
-    expect(typeof out.courseName === 'string' || out.courseName === undefined).toBe(true);
+    expect(typeof out.courseName).toBe('string');
+    expect(out.courseName!.length).toBeGreaterThan(0);
   });
 });
 
@@ -71,11 +77,16 @@ describe('mapActRowToResult', () => {
       id: 'a1', type: 'decreto', fullNumber: 'Decreto 12.000/2024', title: 'T',
       ementa: 'E', summary: null, issuer: 'Presidência',
       publishDate: new Date('2024-02-02T00:00:00Z'), hierarchyLevel: 2,
-      leiArticles: '["6","7"]', officialUrl: null, pdfUrl: null,
+      leiArticlesArr: ['6', '7'], officialUrl: null, pdfUrl: null,
     };
     const out = mapActRowToResult(row);
     expect(out.id).toBe('a1');
+    expect(out.type).toBe('decreto');
     expect(out.fullNumber).toBe('Decreto 12.000/2024');
+    expect(out.ementa).toBe('E');
+    expect(out.summary).toBeNull();
+    expect(out.issuer).toBe('Presidência');
+    expect(out.hierarchyLevel).toBe(2);
     expect(out.leiArticles).toEqual(['6', '7']);
     expect(out.publishDate).toBe('2024-02-02T00:00:00.000Z');
   });

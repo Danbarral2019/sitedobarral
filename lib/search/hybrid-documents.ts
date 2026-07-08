@@ -1,7 +1,6 @@
 import type { SearchResult } from '@/lib/embeddings/vector-search';
 import type { SearchResultItem } from '@/lib/types/global-search';
 import type { DocumentResult, LegislativeActResult } from '@/lib/types/global-search';
-import { parseLeiArticles } from '@/lib/lei-articles';
 import { courses } from '@/data/courses';
 
 /** Pós-filtro de acesso: documento aparece se comum, sem curso, ou de curso matriculado. */
@@ -65,7 +64,7 @@ export interface DocRow {
 export interface ActRow {
   id: string; type: string; fullNumber: string; title: string; ementa: string;
   summary: string | null; issuer: string; publishDate: Date; hierarchyLevel: number;
-  leiArticles: string | null; officialUrl: string | null; pdfUrl: string | null;
+  leiArticlesArr: string[]; officialUrl: string | null; pdfUrl: string | null;
 }
 
 function courseName(courseId: string | null): string | undefined {
@@ -100,7 +99,7 @@ export function mapActRowToResult(row: ActRow): LegislativeActResult {
     issuer: row.issuer,
     publishDate: row.publishDate.toISOString(),
     hierarchyLevel: row.hierarchyLevel,
-    leiArticles: parseLeiArticles(row.leiArticles),
+    leiArticles: row.leiArticlesArr,
     officialUrl: row.officialUrl,
     pdfUrl: row.pdfUrl,
   };
