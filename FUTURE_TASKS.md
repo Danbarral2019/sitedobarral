@@ -147,11 +147,8 @@ Ver relatório completo em `docs/audits/2026-05-16-silent-failures.md` para tabe
 **Validação:** `npm run eval:run` (queries com siglas). **Gate:** recall sobe nessas queries sem regressão geral. **Esforço:** 2-3 dias.
 </details>
 
-### BIA-7. Boost de autoridade editorial [Baixa]
-**Objetivo:** priorizar fontes de maior autoridade quando pertinente.
-**Estado atual:** já há boost de hierarquia de atos, filtro `revoked=false` e exclusão de súmula cancelada. **Falta:** boost por autoridade editorial (parecer **vinculante** > comum; súmula > acórdão isolado).
-**Passos:** boost multiplicativo pequeno por autoridade (`category='parecer-vinculante'`, súmulas) no scoring de `Document`, análogo ao boost de hierarquia dos atos em `vector-search.ts`. ⚠️ boost >1.30 arrisca over-boost (já documentado no arquivo).
-**Validação:** `eval:run`. **Gate:** sem regressão; melhora queries onde a fonte vinculante devia liderar. **Esforço:** 2-3 dias.
+### BIA-7. Boost de autoridade editorial [Baixa] — ❌ TESTADO 2026-07-09 = NO-GO (no-op)
+**Resultado:** boost pequeno (parecer-vinculante ×1.10, súmula ×1.08) no ORDER BY final do `vector-search.ts`, medido por `eval:run`: **0 de 55 queries mudaram** (recall-neutro exato, mas inócuo). Causa: a fusão **RRF do hybrid-search rankeia por POSIÇÃO, não por cosine** — o boost no cosine do ramo vetorial não sobrevive à fusão. Headroom era ~1 query (as 13 com alvo súmula/vinculante já tinham recall@5 = média; parecer-vinculante sem cobertura no golden). Fazer valer exigiria boostar na fusão RRF (mudança grande) → não vale. Código revertido. Detalhe em `docs/ROADMAP_BUSCA_QUALIDADE.md`. **Fecha a trilha de retrieval.**
 
 ### BIA-0. [CONFIRMADO 2026-07-07] Uniformizar o campo de busca da área logada com o motor híbrido [Alta]
 **Achado (verificado):** o campo de busca da área logada tem DOIS motores distintos:
