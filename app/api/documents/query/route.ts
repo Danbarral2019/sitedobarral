@@ -4,6 +4,8 @@ export const runtime = 'nodejs';
 export const maxDuration = 60;
 
 import { verifyAuth } from '@/lib/auth';
+import { prisma } from '@/lib/prisma';
+import { courses } from '@/data/courses';
 import { assembleAnswerContext } from '@/lib/rag/answerContext';
 import type { QueryFilters, ConversationMessage, DocumentResult } from '@/lib/rag/types';
 import {
@@ -128,10 +130,23 @@ export async function POST(req: NextRequest) {
       );
     }
 
+    // 4a. BIA-0c: matrículas do usuário para pós-filtrar o retrieval por acesso
+    // (mesmo gate do BIA-0b na lista). Admin recebe todos os cursos. Sem isso, o
+    // card de IA citaria material restrito de cursos não matriculados.
+    const isAdmin = authResult.user.role === 'admin';
+    const enrolledCourseIds = isAdmin
+      ? courses.map((c) => c.id)
+      : (
+          await prisma.user.findUnique({
+            where: { id: userId },
+            select: { enrollments: { select: { courseId: true } } },
+          })
+        )?.enrollments.map((e) => e.courseId) ?? [];
+
     // 4b-12b. Montagem do contexto (retrieval + contexto em camadas + prompt +
     // fontes) extraída para lib/rag/answerContext — mesma função usada pelo eval.
-    apiLogger.info({ userId, query, filters }, 'Document query started');
-    const ctx = await assembleAnswerContext({ query, filters, maxResults, conversationHistory, useCache });
+    apiLogger.info({ userId, query, filters, enrolledCourseCount: enrolledCourseIds.length }, 'Document query started');
+    const ctx = await assembleAnswerContext({ query, filters, maxResults, conversationHistory, useCache, enrolledCourseIds });
 
     if (ctx.empty) {
       return NextResponse.json<QueryResponse>({

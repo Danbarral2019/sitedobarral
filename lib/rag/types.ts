@@ -52,6 +52,16 @@ export interface AssembleAnswerInput {
   maxResults: number;
   conversationHistory?: ConversationMessage[];
   useCache: boolean;
+  /**
+   * IDs dos cursos em que o usuário está matriculado (BIA-0c). Quando fornecido,
+   * os resultados de retrieval são pós-filtrados por matrícula antes de montar
+   * as fontes/contexto — mesma regra do BIA-0b na lista (`filterByEnrollment`):
+   * mantém documentos comuns/públicos e os do(s) curso(s) matriculado(s),
+   * removendo material restrito de cursos não matriculados. Admin recebe todos
+   * os cursos. Quando OMITIDO (ex.: harness de eval), nenhum filtro é aplicado —
+   * preserva o comportamento de medição de retrieval.
+   */
+  enrolledCourseIds?: string[];
 }
 
 /**

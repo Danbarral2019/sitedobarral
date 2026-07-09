@@ -35,6 +35,12 @@ vi.mock('@/lib/rag/answerContext', () => ({
   assembleAnswerContext: (...args: unknown[]) => mockAssembleAnswerContext(...args),
 }));
 
+// BIA-0c: a rota busca matrículas (prisma.user.findUnique) para pós-filtrar.
+// Mock hermético para não depender de banco real em teste.
+vi.mock('@/lib/prisma', () => ({
+  prisma: { user: { findUnique: async () => ({ enrollments: [] }) } },
+}));
+
 vi.mock('@/lib/embeddings/citation-validator', () => ({
   validateQuotedCitations: () => ({ invalidQuotes: [], totalQuotes: 0 }),
   buildCitationWarning: () => '',
