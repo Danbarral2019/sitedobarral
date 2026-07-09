@@ -27,6 +27,7 @@ import {
   formatActsContext,
   buildLegalSources,
 } from '@/lib/legal-context';
+import { filterByEnrollment } from '@/lib/search/hybrid-documents';
 import { hashQueryStr, diversifyResults, generateExcerpt } from './util';
 import { detectQueryDomain, type QueryScope } from './domain-detection';
 import type { AssembleAnswerInput, AnswerContext, DocumentResult } from './types';
@@ -37,7 +38,7 @@ import type { AssembleAnswerInput, AnswerContext, DocumentResult } from './types
  * Retorna `{ empty: true }` quando a busca não encontra nenhum resultado.
  */
 export async function assembleAnswerContext(input: AssembleAnswerInput): Promise<AnswerContext> {
-  const { query, filters, maxResults, conversationHistory, useCache } = input;
+  const { query, filters, maxResults, conversationHistory, useCache, enrolledCourseIds } = input;
 
     // 4b. Enrich query with conversation context for better semantic retrieval
     let semanticQuery = query;
@@ -244,7 +245,17 @@ Exemplo de resposta: ["variação 1", "variação 2"]`;
     }
 
     // 6. Separate results by type
-    const allResults = [...searchResponse.results, ...complementaryResults];
+    // BIA-0c: pós-filtro por matrícula. Quando enrolledCourseIds é fornecido
+    // (rota de produção), remove documentos restritos de cursos não matriculados
+    // ANTES de montar fontes/contexto — mesmo gate do BIA-0b na lista. Cobre o
+    // card de IA inteiro (allDisplayResults → citationDocuments/sourcesList/
+    // formattedResults) num só ponto. Atos/lei/jurisprudência (sem courseId) e
+    // documentos comuns/sem curso são mantidos por filterByEnrollment. Omitido
+    // no eval → sem filtro (preserva a medição de retrieval).
+    const combinedResults = [...searchResponse.results, ...complementaryResults];
+    const allResults = enrolledCourseIds
+      ? filterByEnrollment(combinedResults, enrolledCourseIds)
+      : combinedResults;
     const leiResults = allResults.filter(r => r.category === 'lei-artigo');
     const actResults = allResults.filter(r => r.category === 'ato-normativo');
     // Semantic legislative acts from LegislativeActChunk (via UNION ALL)
