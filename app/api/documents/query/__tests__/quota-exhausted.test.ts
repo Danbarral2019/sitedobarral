@@ -95,6 +95,8 @@ vi.mock('@/lib/prisma', () => ({
     legislativeAct: { findMany: async () => [] },
     // BIA-0c: a rota busca matrículas (prisma.user.findUnique) para pós-filtrar.
     user: { findUnique: async () => ({ enrollments: [] }) },
+    // BIA-2: expansão de documentos consulta chunks dos top docs.
+    documentChunk: { findMany: async () => [] },
   },
 }));
 

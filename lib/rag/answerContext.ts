@@ -32,6 +32,13 @@ import { hashQueryStr, diversifyResults, generateExcerpt } from './util';
 import { detectQueryDomain, type QueryScope } from './domain-detection';
 import type { AssembleAnswerInput, AnswerContext, DocumentResult } from './types';
 
+// BIA-2: expansão de contexto de geração. Para os TOP N Documents, alimenta a
+// Citations API com o texto reassemblado dos chunks do doc (janela centrada no
+// chunk recuperado, cap por doc) em vez de um único trecho — deixando o Claude
+// ancorar a passagem exata em mais do documento. Docs single-chunk não mudam.
+const BIA2_TOP_DOCS = 3;
+const BIA2_CAP_PER_DOC = 12000;
+
 /**
  * Executa retrieval + montagem de contexto + construção do prompt para uma
  * pergunta, retornando tudo o que o caller precisa para gerar a resposta.
@@ -384,11 +391,58 @@ Exemplo de resposta: ["variação 1", "variação 2"]`;
       .sort((a, b) => b.similarity - a.similarity)
       .slice(0, maxResults);
 
+    // BIA-2: reassembla o texto dos top Documents a partir dos seus chunks,
+    // numa janela centrada no chunk recuperado (mais relevante) e expandindo
+    // para os vizinhos até BIA2_CAP_PER_DOC. Docs single-chunk (maioria dos
+    // acórdãos) ficam inalterados. Falha graciosamente para o chunk único.
+    const expandedTextById = new Map<string, string>();
+    const topDocsToExpand = allDisplayResults
+      .filter((r) => (r.sourceType ?? 'document') === 'document')
+      .slice(0, BIA2_TOP_DOCS);
+    if (topDocsToExpand.length > 0) {
+      try {
+        const chunkRows = await prisma.documentChunk.findMany({
+          where: { documentId: { in: topDocsToExpand.map((r) => r.documentId) } },
+          select: { documentId: true, chunkIndex: true, content: true },
+        });
+        const chunksByDoc = new Map<string, { idx: number; content: string }[]>();
+        for (const c of chunkRows) {
+          const arr = chunksByDoc.get(c.documentId) ?? [];
+          arr.push({ idx: c.chunkIndex, content: c.content });
+          chunksByDoc.set(c.documentId, arr);
+        }
+        for (const r of topDocsToExpand) {
+          const arr = chunksByDoc.get(r.documentId);
+          if (!arr || arr.length <= 1) continue; // single-chunk: nada a expandir
+          const center = r.chunkIndex ?? 0;
+          // Prioriza os chunks mais próximos do recuperado até o cap...
+          const selected = [...arr]
+            .sort((a, b) => Math.abs(a.idx - center) - Math.abs(b.idx - center))
+            .reduce<{ idx: number; content: string }[]>((acc, c) => {
+              const total = acc.reduce((s, x) => s + x.content.length, 0);
+              if (total + c.content.length <= BIA2_CAP_PER_DOC || acc.length === 0) acc.push(c);
+              return acc;
+            }, [])
+            .sort((a, b) => a.idx - b.idx); // ...e reordena para leitura coerente
+          const text = selected.map((c) => c.content).join('\n\n');
+          if (text.length > (r.chunkContent?.length ?? 0)) {
+            expandedTextById.set(r.documentId, text);
+          }
+        }
+      } catch (err) {
+        apiLogger.warn({ error: err instanceof Error ? err.message : String(err) }, 'BIA-2: expansão de chunks falhou — usando chunk único');
+      }
+    }
+
     // Fase 3 (Citations API): fontes discretas e citáveis — chunks recuperados
-    // + artigos da Lei (texto integral) + atos regulamentadores. Cada uma vira
-    // um bloco `document` para o Claude ancorar cited_text na fonte exata.
+    // (ou o doc expandido do BIA-2) + artigos da Lei (texto integral) + atos
+    // regulamentadores. Cada uma vira um bloco `document` para o Claude ancorar
+    // cited_text na fonte exata.
     const citationDocuments = [
-      ...allDisplayResults.map((r) => ({ title: r.documentTitle, text: r.chunkContent })),
+      ...allDisplayResults.map((r) => ({
+        title: r.documentTitle,
+        text: expandedTextById.get(r.documentId) ?? r.chunkContent,
+      })),
       ...buildLeiDocuments(allLeiArticleNums),
       ...extraActs.map((a) => ({ title: a.title, text: a.ementa })),
     ].filter((d) => d.text && d.text.trim().length > 0);
