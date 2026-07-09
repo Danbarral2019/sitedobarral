@@ -28,6 +28,7 @@ function arg(name: string): string | undefined {
 
 async function main() {
   const limit = arg('--limit') ? parseInt(arg('--limit')!, 10) : undefined;
+  const offset = arg('--offset') ? parseInt(arg('--offset')!, 10) : 0;
   const label = arg('--label') ?? 'synthesis';
   const answerProvider = arg('--answer-provider') as AiProviderName | undefined;
   const answerModel = arg('--answer-model');
@@ -37,7 +38,7 @@ async function main() {
   const goldenSet: GoldenSet = JSON.parse(
     readFileSync(join(process.cwd(), 'eval/golden-set.json'), 'utf8'),
   );
-  const queries = limit ? goldenSet.queries.slice(0, limit) : goldenSet.queries;
+  const queries = goldenSet.queries.slice(offset, limit ? offset + limit : undefined);
 
   console.log(`[eval-synthesis] ${queries.length} queries`);
   console.log(`[eval-synthesis] answer: ${useCitations ? 'claude+Citations (produção)' : `${answerProvider ?? 'default'}/${answerModel ?? 'default'}`} | judge: ${judgeModel ?? 'claude-sonnet-5'}`);

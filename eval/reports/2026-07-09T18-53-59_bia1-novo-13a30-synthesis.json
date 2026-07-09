@@ -1,0 +1,361 @@
+{
+  "runAt": "2026-07-09T18:53:59.093Z",
+  "answerModel": "claude-sonnet-5 + Citations API",
+  "judgeModel": "claude-sonnet-5",
+  "results": [
+    {
+      "id": "t-cadin-01",
+      "query": "inscrição da contratada no CADIN, posteriormente a 16 de setembro de 2024, impede a celebração de contratos, convênios,",
+      "empty": false,
+      "sourceCount": 23,
+      "verdict": {
+        "faithfulness": 0.9,
+        "citationAccuracy": 0.85,
+        "completeness": 0.9,
+        "overall": 0.88,
+        "issues": [
+          "Completa a data da Portaria Conjunta MGI/MF/CGU nº 33 como '2024', mas o material está truncado ('202'), sem confirmação exata",
+          "Pequena inferência própria ('impede a celebração do ajuste') não é citação literal, mas está alinhada ao item IV do parecer",
+          "Não menciona a ON 82/2024 (irrelevante para a pergunta, não prejudica muito)",
+          "Uso extensivo de citações literais é bem fiel, mas mistura paráfrase com aspas de forma que pode confundir o que é citação exata"
+        ],
+        "rationale": "A resposta é fiel e bem fundamentada no Parecer CGU/AGU, cobrindo vigência, marco temporal, aditivos, OSCs e exceções, com citações majoritariamente corretas. Pequena falha ao completar data truncada da Portaria Conjunta sem indicar incerteza."
+      },
+      "latencyMs": 57473
+    },
+    {
+      "id": "t-sancao-exnunc-01",
+      "query": "sanções de suspensão, impedimento e declaração de inidoneidade produzem efeitos ex nunc, não afetam por si os contratos",
+      "empty": false,
+      "sourceCount": 23,
+      "verdict": {
+        "faithfulness": 0.95,
+        "citationAccuracy": 1,
+        "completeness": 0.85,
+        "overall": 0.95,
+        "issues": [
+          "Omite a ressalva do Manual TCU sobre Sistema de Registro de Preços (vedação a novos contratos/empenhos após trânsito em julgado, mesmo com efeito ex nunc)",
+          "Afirma que o raciocínio do Inf. 187/2014 foi 'expressamente estendido' pela ON AGU 49/2014, formulação um pouco além do que o material diz literalmente (a ON apenas cita o art. 156 da Lei 14.133, sem menção expressa ao precedente do Inf. 187)",
+          "Não menciona o art. 55, XIII, da Lei 8.666/93 citado no Manual TCU sobre manutenção das condições de habilitação, embora seja tangencial"
+        ],
+        "rationale": "As citações e trechos entre aspas conferem fielmente com o material fornecido, mas a resposta deixa de citar uma nuance relevante (exceção do SRP) que limitaria a generalização do efeito ex nunc."
+      },
+      "latencyMs": 54985
+    },
+    {
+      "id": "t-garantia-modalidade-01",
+      "query": "garantia contratual só pode ser prestada nas modalidades de caução (em dinheiro ou títulos da dívida pública),",
+      "empty": false,
+      "sourceCount": 24,
+      "verdict": {
+        "faithfulness": 1,
+        "citationAccuracy": 1,
+        "completeness": 0.9,
+        "overall": 0.98,
+        "issues": [
+          "Não menciona o prazo mínimo de 1 mês do §3º do art. 96 para prestação de seguro-garantia, que também é ponto relevante sobre modalidades",
+          "Não cita art. 100 sobre devolução/atualização da garantia, embora seja secundário à pergunta"
+        ],
+        "rationale": "A resposta é fiel ao material, cita corretamente o art. 96 §1º, o Manual TCU e o Enunciado INCP nº 31, refutando adequadamente a afirmação do aluno. Cobertura é praticamente completa, faltando apenas detalhes acessórios sobre prazos."
+      },
+      "latencyMs": 34879
+    },
+    {
+      "id": "t-habilitacao-manutencao-01",
+      "query": "contratada deve manter, durante toda a execução do contrato, as condições de habilitação exigidas na licitação, o que",
+      "empty": false,
+      "sourceCount": 23,
+      "verdict": {
+        "faithfulness": 0.9,
+        "citationAccuracy": 0.9,
+        "completeness": 0.8,
+        "overall": 0.88,
+        "issues": [
+          "Não menciona o Acórdão 534/2020-TCU-Primeira Câmara nem o Acórdão 2784/2019, que também tratam de tema correlato (ocorrências impeditivas/SICAF) presentes no mesmo bloco do Manual TCU",
+          "Reconhece corretamente a lacuna quanto ao dispositivo específico da Lei 14.133/2021, mas não cita o art. 62 (habilitação) do material como possível ponto de conexão, mesmo que tangencial",
+          "Repetição excessiva de trechos longos quase idênticos ao material, o que é fiel mas reduz a síntese exigida"
+        ],
+        "rationale": "A resposta é fiel ao material, cita corretamente as fontes (Inf. 391/2020, Manual TCU, Acórdão 1246/2020) e é transparente sobre a base legal ser da Lei 8.666/1993, não da 14.133/2021. Cobre os pontos-chave da pergunta, mas omite fontes correlatas presentes no material (Acórdãos 534/2020 e 2784/2019)."
+      },
+      "latencyMs": 42203
+    },
+    {
+      "id": "t-empenho-previo-01",
+      "query": "celebração de contrato ou de aditivo com impacto orçamentário pressupõe a prévia expedição de nota de empenho, com",
+      "empty": false,
+      "sourceCount": 23,
+      "verdict": {
+        "faithfulness": 0.8,
+        "citationAccuracy": 0.9,
+        "completeness": 0.5,
+        "overall": 0.78,
+        "issues": [
+          "Não destaca que o Parecer DECOR/AGU determina que o contrato precede o empenho (obrigação primeiro, depois empenho), ponto central da pergunta sobre 'prévia expedição de nota de empenho' — a resposta apenas cita o trecho sem confrontar a tese implícita da pergunta",
+          "Resposta dispersa em temas correlatos (art.132, ON 90/2024, art.145) que desviam do foco específico da pergunta sobre sequência contrato-empenho",
+          "Não menciona regra básica de que o empenho é ato que precede a despesa (Lei 4.320) de forma articulada com a pergunta, perdendo oportunidade de esclarecer a real relação cronológica"
+        ],
+        "rationale": "As citações são fiéis e corretamente atribuídas ao material, mas a resposta não aborda o ponto nuclear da pergunta — a ordem correta entre celebração do contrato/aditivo e expedição do empenho conforme o Parecer DECOR/AGU — ficando genérica e dispersiva."
+      },
+      "latencyMs": 60104
+    },
+    {
+      "id": "t-publicacao-extrato-01",
+      "query": "contrato e seus aditivos dependem de publicação do respectivo extrato na imprensa oficial para produzir",
+      "empty": false,
+      "sourceCount": 23,
+      "verdict": {
+        "faithfulness": 0.9,
+        "citationAccuracy": 0.9,
+        "completeness": 0.85,
+        "overall": 0.89,
+        "issues": [
+          "Inclui Acórdão 5820/2014 que trata de análise jurídica, não de publicação/eficácia — tangencial, embora a resposta reconheça isso",
+          "Não menciona expressamente que Acórdão 1336/2006 trata apenas de dispensa/inexigibilidade (art. 26), não de contratos em geral, podendo gerar confusão sobre abrangência",
+          "Não explora o §3º do art. 94 (obras) nem detalha implicações práticas adicionais, mas isso é secundário à pergunta"
+        ],
+        "rationale": "Citações e trechos entre aspas correspondem fielmente ao material fornecido, sem invenções perceptíveis. A resposta é completa e bem estruturada, cobrindo regime atual (Art. 94) e histórico (Lei 8.666/93via TCU), com pequenas imprecisões de enquadramento tangencial."
+      },
+      "latencyMs": 51331
+    },
+    {
+      "id": "t-competencia-elic-bpc7-01",
+      "query": "análise jurídica da ELIC restringe-se aos aspectos estritamente jurídicos do procedimento, excluídas as questões de",
+      "empty": false,
+      "sourceCount": 23,
+      "verdict": {
+        "faithfulness": 0.9,
+        "citationAccuracy": 0.9,
+        "completeness": 0.7,
+        "overall": 0.86,
+        "issues": [
+          "Reconhece corretamente a ausência da formulação exata sobre 'questões excluídas' no material, o que é honesto",
+          "Poderia ter mencionado que a delimitação negativa (técnica vs jurídica) é tema conhecido na doutrina/jurisprudência do TCU mesmo não estando no material, apenas para contextualizar melhor a lacuna",
+          "Não citou o Enunciado CJF nº 53 nem o Acórdão 521/2013, que tratam do tema de forma correlata e poderiam enriquecer a resposta sobre o papel do parecer jurídico",
+          "A resposta é longa e repete várias vezes o mesmo ponto sobre 'controle prévio de legalidade' sem avançar na delimitação de escopo"
+        ],
+        "rationale": "A resposta é fiel ao material e evita inventar conteúdo, admitindo corretamente que a formulação exata não está nas fontes, mas poderia ter explorado mais fontes correlatas disponíveis (Enunciado CJF 53, Acórdão 521/2013) para completude."
+      },
+      "latencyMs": 35035
+    },
+    {
+      "id": "t-sancao-abrangencia-01",
+      "query": "penalidade de suspensão temporária do art. 87, III, da Lei 8.666/1993 restringe seus efeitos ao ente responsável pela",
+      "empty": false,
+      "sourceCount": 23,
+      "verdict": {
+        "faithfulness": 0.9,
+        "citationAccuracy": 0.9,
+        "completeness": 0.9,
+        "overall": 0.9,
+        "issues": [
+          "Trata o 'Acórdão TCU 2530/2023' (texto com tom de nota didática, não ementa oficial) como jurisprudência consolidada sem qualquer ressalva sobre sua natureza atípica",
+          "Afirma que a Lei 14.133/2021 'positivou expressamente' a distinção jurisprudencial, o que é uma inferência do assistente não explicitada literalmente no material",
+          "Não menciona o Manual TCU 6.1.8, embora este seja de relevância marginal ao tema específico da pergunta"
+        ],
+        "rationale": "A resposta reproduz fielmente os trechos do material (Inf. 149/2013, Parecer AGU, arts. 155/156, ON 49/2014) com citações corretas, mas aceita acriticamente uma fonte de formato duvidoso (Acórdão 2530/2023) como jurisprudência consolidada e extrapola levemente ao afirmar 'positivação expressa' pela nova lei."
+      },
+      "latencyMs": 71070
+    },
+    {
+      "id": "t-lrf-art16-01",
+      "query": "Despesas qualificáveis como atividades rotineiras e ordinárias dispensam o atendimento das exigências do art. 16, I e",
+      "empty": false,
+      "sourceCount": 23,
+      "verdict": {
+        "faithfulness": 0.9,
+        "citationAccuracy": 1,
+        "completeness": 0.9,
+        "overall": 0.94,
+        "issues": [
+          "A explicação do conteúdo dos incisos I e II do art. 16 da LC 101/2000 não consta no material fornecido, sendo acréscimo do assistente sem base explícita na fonte",
+          "Poderia ter mencionado o Parecer AGU 00008/2021 como contexto correlato, embora não seja diretamente sobre o art.16 da LRF"
+        ],
+        "rationale": "A resposta cita corretamente a ON 52/2014 e reproduz fielmente seu teor, mas acrescenta detalhamento sobre os incisos do art. 16 da LRF que não está no material fornecido, extrapolando a fonte."
+      },
+      "latencyMs": 19809
+    },
+    {
+      "id": "t-minuta-cnmlc-01",
+      "query": "instrumentos contratuais e seus aditivos devem adotar, com os ajustes necessários ao caso concreto, as minutas",
+      "empty": false,
+      "sourceCount": 23,
+      "verdict": {
+        "faithfulness": 0.9,
+        "citationAccuracy": 1,
+        "completeness": 0.8,
+        "overall": 0.92,
+        "issues": [
+          "Não menciona art. 91 (forma escrita dos aditivos) que poderia complementar o tema, embora não seja essencial",
+          "A resposta reconhece corretamente a lacuna quanto à extensão explícita da exigência a 'termos aditivos', o que é honesto mas limita a completude",
+          "Poderia ter buscado outras fontes do material sobre publicidade/processo único de aditivos (ON 2/2009) para reforçar contexto"
+        ],
+        "rationale": "As citações (Art. 19, IV e §2º; Art. 25, §1º; Inf. 57/2011) são fiéis e corretamente atribuídas, e o assistente é transparente sobre a ausência de fonte específica que trate literalmente de 'termos aditivos' e 'ajustes ao caso concreto', evitando invenção."
+      },
+      "latencyMs": 47324
+    },
+    {
+      "id": "t-lgpd-signatarios-01",
+      "query": "minutas de contratos e aditivos não devem conter números de documentos pessoais dos signatários, cabendo a",
+      "empty": false,
+      "sourceCount": 23,
+      "verdict": {
+        "faithfulness": 0.9,
+        "citationAccuracy": 0.9,
+        "completeness": 0.9,
+        "overall": 0.9,
+        "issues": [
+          "Todas as citações (Parecer AGU, Art. 89 §1º) conferem com o material fornecido",
+          "A ressalva sobre art. 61 da Lei 8.666/93 é pertinente e bem contextualizada",
+          "Poderia mencionar explicitamente que a fonte é indireta (citação dentro do Manual TCU, não o parecer original)"
+        ],
+        "rationale": "Resposta fiel ao material, citações corretas e completude adequada cobrindo os pontos-chave da pergunta sobre identificação de signatários."
+      },
+      "latencyMs": 22877
+    },
+    {
+      "id": "t-bpc5-nao-fiscalizacao-01",
+      "query": "manifestação da ELIC limita-se ao exame da minuta e dos elementos jurídicos do ato submetido a parecer, não lhe",
+      "empty": false,
+      "sourceCount": 23,
+      "verdict": {
+        "faithfulness": 0.7,
+        "citationAccuracy": 0.9,
+        "completeness": 0.7,
+        "overall": 0.78,
+        "issues": [
+          "Assume sem base textual que 'ELIC' corresponde à assessoria jurídica, extrapolando o material que não menciona esse termo",
+          "Adiciona observação sobre datas dos Acórdãos 181/2015 e 186/2010 não presente no material",
+          "Não menciona o Acórdão TCU 1521/2025, que trata da responsabilização do parecerista e seria pertinente para nuançar os limites da manifestação jurídica",
+          "Estabelece nexo causal entre escopo do parecer e proteção do art. 10 que é inferência do assistente, não explicitação direta do material"
+        ],
+        "rationale": "A resposta cita corretamente as fontes disponíveis e não inventa conteúdo textual, mas parte de uma premissa (ELIC = assessoria jurídica) não sustentada explicitamente pelo material, além de omitir o Acórdão 1521/2025 que seria relevante para completude."
+      },
+      "latencyMs": 56161
+    },
+    {
+      "id": "t-publicacao-lai-01",
+      "query": "Além da publicação resumida do extrato na imprensa oficial, condição de eficácia do instrumento, a Administração deve",
+      "empty": false,
+      "sourceCount": 23,
+      "verdict": {
+        "faithfulness": 0.7,
+        "citationAccuracy": 0.7,
+        "completeness": 0.4,
+        "overall": 0.64,
+        "issues": [
+          "Cita 'art. 61, parágrafo único' da Lei 8.666/93 como referência histórica, mas esse dispositivo não consta do material fornecido",
+          "Omite o Inf. 212/2014, que trata exatamente das informações obrigatórias em extratos de contrato/dispensa/inexigibilidade - diretamente pertinente à pergunta",
+          "Omite a Orientação Normativa AGU 43/2014, que trata de publicação de extrato como condição de eficácia, tema central da pergunta",
+          "Omite o Enunciado CJF nº 52, embora menos diretamente relacionado, mas presente no material sobre contratação direta",
+          "Resposta extensa e dispersiva, cobrindo tópicos genéricos de publicidade sem focar no ponto específico de 'extrato' mencionado na pergunta"
+        ],
+        "rationale": "As citações da Lei 14.133/2021 (arts. 94, 91, 72, 5, 13) e do Manual TCU são fiéis ao material, mas a menção ao art. 61 da Lei 8.666/93 extrapola o contexto fornecido; a resposta ignora fontes centrais e diretamente relevantes (Inf. 212/2014 e ON 43/2014) que tratam especificamente de extratos e condição de eficácia, tema exato da pergunta."
+      },
+      "latencyMs": 65408
+    },
+    {
+      "id": "t-ipp-destaques-01",
+      "query": "análise jurídica da ELIC pressupõe a adoção dos modelos padronizados da AGU e o uso do Instrumento de Padronização dos",
+      "empty": false,
+      "sourceCount": 23,
+      "verdict": {
+        "faithfulness": 0.9,
+        "citationAccuracy": 0.9,
+        "completeness": 0.8,
+        "overall": 0.88,
+        "issues": [
+          "Não identifica se 'ELIC' corresponde a algum termo do material (correto, pois não consta)",
+          "Poderia ter mencionado o Enunciado CJF 18 como contexto correlato sobre análise de riscos, embora não seja central",
+          "Resposta reconhece adequadamente a lacuna sobre AGU/Instrumento de Padronização, evitando invenção"
+        ],
+        "rationale": "A resposta cita corretamente art. 53 e art. 19 da Lei 14.133/2021 e o Informativo TCU 57/2011, sem inventar conteúdo, e reconhece honestamente a ausência de 'ELIC' e 'Instrumento de Padronização' no material. Poderia ter citado o Enunciado CJF 18 como pano de fundo, mas a omissão não compromete a fidelidade."
+      },
+      "latencyMs": 96435
+    },
+    {
+      "id": "t-srp-contratacao-unica-01",
+      "query": "Sistema de Registro de Preços não se presta a contratação única e exauriente previamente definida; nesses casos, a ata",
+      "empty": false,
+      "sourceCount": 23,
+      "verdict": {
+        "faithfulness": 0.9,
+        "citationAccuracy": 0.9,
+        "completeness": 0.85,
+        "overall": 0.89,
+        "issues": [
+          "Pequena inferência interpretativa sobre o art. 82 (lógica de múltiplas contratações) não é citação literal, mas é paráfrase razoável do dispositivo",
+          "Não menciona o Acórdão 1794/2023 ou outros acórdãos sobre adesão que poderiam complementar, embora sejam menos centrais à pergunta",
+          "Poderia ter citado art. 83 (faculdade de licitação específica) para reforçar a lógica de não obrigatoriedade e o caráter multiuso da ata"
+        ],
+        "rationale": "A resposta é fiel ao material, com citações precisas dos Informativos e Acórdãos do TCU e da Lei 14.133/2021, cobrindo bem os pontos centrais da pergunta sobre uso indevido do SRP em contratação única e exauriente."
+      },
+      "latencyMs": 53682
+    },
+    {
+      "id": "t-etp-obrigatorio-01",
+      "query": "estudo técnico preliminar é obrigatório e deve contemplar, no mínimo, os elementos dos incisos I, IV, VI, VIII e XIII",
+      "empty": false,
+      "sourceCount": 23,
+      "verdict": {
+        "faithfulness": 0.9,
+        "citationAccuracy": 0.9,
+        "completeness": 0.9,
+        "overall": 0.9,
+        "issues": [
+          "Acórdão 925/2022 citado como 'Plenário' sem essa qualificação constar no material",
+          "Poderia mencionar a fonte Enunciado CJF nº 35 sobre elaboração conjunta do ETP, embora não seja central à pergunta"
+        ],
+        "rationale": "A resposta é fiel ao material, cita corretamente o art. 18 §1º e §2º e as exceções do art. 75, além de usar o Manual TCU e o Acórdão 925/2022 de forma consistente. Pequena imprecisão na qualificação do acórdão como 'Plenário', não confirmada no texto fornecido."
+      },
+      "latencyMs": 23753
+    },
+    {
+      "id": "t-me-epp-80k-01",
+      "query": "processo licitatório deve ser destinado exclusivamente à participação de microempresas, empresas de pequeno porte e",
+      "empty": false,
+      "sourceCount": 23,
+      "verdict": {
+        "faithfulness": 0.85,
+        "citationAccuracy": 0.9,
+        "completeness": 0.6,
+        "overall": 0.82,
+        "issues": [
+          "Não menciona os §§1º, 2º e 3º do art. 4º da Lei 14.133/2021, que trazem as exceções vigentes mais atuais (mais relevantes que o art. 49 da LC 123/2006, que cita a Lei 8.666/93 já revogada)",
+          "Infere que a redação do art. 48,I mudou de 'poderá' para 'deverá' pela LC 147/2014 sem que o material comprove explicitamente o teor da redação anterior",
+          "Não alerta que o art. 49, IV cita a Lei 8.666/93, já revogada pela 14.133/2021, o que compromete a atualidade da 'exceção' apresentada",
+          "Não explora a nota '(Vide Lei nº 14.133, de 2021)' presente nos artigos da LC 123/2006 reproduzidos no material, que sinaliza possível reinterpretação sob a nova lei",
+          "Resposta é longa mas foca demasiado no precedente de 2011, relativizando-o com base em inferência própria não totalmente amparada no texto"
+        ],
+        "rationale": "A resposta é majoritariamente fiel e cita corretamente os dispositivos da LC 123/2006, ON AGU 47/2014 e Lei 14.133/2021, mas deixa de cobrir as exceções mais atuais do art. 4º da 14.133/2021 e faz uma inferência sobre mudança de redação não totalmente comprovada pelo material, reduzindo a completude e a segurança da fidelidade."
+      },
+      "latencyMs": 74514
+    },
+    {
+      "id": "t-atestados-limites-01",
+      "query": "exigências de qualificação técnica por meio de atestados submetem-se a limites cumulativos: quantitativos mínimos até",
+      "empty": false,
+      "sourceCount": 22,
+      "verdict": {
+        "faithfulness": 0.9,
+        "citationAccuracy": 0.9,
+        "completeness": 0.9,
+        "overall": 0.9,
+        "issues": [
+          "Especulação não totalmente sustentada de que os Acórdãos 2291/2021 e 825/2019 seriam 'majoritariamente sob a Lei 8.666/1993', sem base explícita no material para esses dois casos",
+          "Resposta extrapola bastante o escopo da pergunta (curta, tipo 'completar frase'), trazendo material extenso além do necessário, embora relevante",
+          "Não menciona a Súmula-TCU 263 citada no material, que é diretamente pertinente ao tema de atestados"
+        ],
+        "rationale": "A resposta é fiel ao art. 67 §§1º e 2º e reproduz corretamente trechos do Informativo 346/2018, Manual TCU 5.5.2 e Acórdão 1466/2025, com atribuições de acórdãos corretas conforme a estrutura do material. Pequenas especulações sobre a base legal dos precedentes e extensão além do escopo da pergunta reduzem levemente a nota."
+      },
+      "latencyMs": 56945
+    }
+  ],
+  "summary": {
+    "evaluated": 18,
+    "empty": 0,
+    "faithfulness": 0.8777777777777778,
+    "citationAccuracy": 0.9083333333333334,
+    "completeness": 0.7861111111111112,
+    "overall": 0.8716666666666668
+  }
+}
