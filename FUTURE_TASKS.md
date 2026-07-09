@@ -118,16 +118,21 @@ Ver relatório completo em `docs/audits/2026-05-16-silent-failures.md` para tabe
 **Passos:** em `assembleAnswerContext`, para os 2-3 top `Document` results, injetar o `content` INTEIRO (cap por doc, respeitando o budget de 60k) em vez da fatia; medir `completeness`/`faithfulness` na régua. Vigiar custo/latência (60k já é o teto de custo aceito).
 **Validação:** régua (BIA-1). **Gate:** `completeness` sobe, `faithfulness` estável, custo/latência aceitáveis. **Esforço:** 3-5 dias. **Depende de:** BIA-1 (para medir).
 
-### BIA-3. Tuning da fusão FTS×vetor (alpha, RRF_K) [Baixa] — win barato
+### BIA-3. Tuning da fusão FTS×vetor (alpha, RRF_K) [Baixa] — ✅ CONCLUÍDO 2026-07-09 = NO-GO
+**Resultado:** sweep de 15 combinações (`alpha` ∈ {0.4..0.8} × `rrfK` ∈ {30,60,100}) via `npm run eval:sweep`. **Nenhuma bate o baseline** — `alpha=0.6, rrfK=60` (65,2%) já é o pico; desviar o alpha piora (0.4=55%, 0.5=60,5%, 0.8=64%) e o RRF_K move <1pp. Gate não atingido → **fusão no ótimo, nada a promover.** `rrfK` ficou parametrizável (`HybridSearchOptions.rrfK`/`DEFAULT_RRF_K`) para sweeps futuros. Relatório: `eval/reports/2026-07-09T12-30-45_bia3-fusion-2026-07-09.md`. Detalhe em `docs/ROADMAP_BUSCA_QUALIDADE.md`.
+
+<details><summary>Plano original (executado)</summary>
+
 **Objetivo:** puxar parte dos 30 docs relevantes indexados mas fora do top-K.
 **Estado atual:** `alpha=0.6`, `RRF_K=60` em `hybrid-search.ts` (nunca varridos sistematicamente).
 **Passos:** varrer `alpha` ∈ {0.4..0.8} e `RRF_K` ∈ {30..100} rodando `npm run eval:run` por combinação; escolher o par que maximiza recall@5/@10 sem regredir MRR. Determinístico, sem custo de LLM. Parametrizar via env/flag para o sweep.
 **Validação:** `npm run eval:run`. **Gate:** recall@5 sobe (mesmo 1-2pp) sem regressão de MRR/nDCG. **Esforço:** ~1 dia.
 
-### BIA-4. Higiene da métrica/golden [Baixa]
-**Objetivo:** sinal de eval mais fiel (hoje 19 queries têm >5 relevantes → recall@5 capado por construção).
-**Passos:** (a) reportar **recall@10** ao lado de recall@5 no `run-baseline` (`metrics.ts` já suporta `k`); (b) revisar as 19 queries super-anotadas — enxugar `relevant` para os centrais ou tratar `highlyRelevant` como alvo primário; documentar decisão. ⚠️ [[feedback_eval_ground_truth_bias]].
-**Validação:** comparar recall@5 vs @10 no baseline. **Gate:** sinal mais claro (pode revelar headroom real ou confirmar teto). **Esforço:** ~1 dia.
+</details>
+
+### BIA-4. Higiene da métrica/golden [Baixa] — ✅ CONCLUÍDO 2026-07-09
+**(a) recall@10 ✅:** reportado ao lado de recall@5 em `metrics`/`runner`/`report` + CLI (`eval:run` e `eval:sweep`). Baseline: **recall@5 65,2% · recall@10 79,2%** (55 anotadas / 93 total).
+**(b) alvo primário `highlyRelevant` ✅** (decisão do PO 2026-07-09: opção não-destrutiva): nova métrica `recallAt5Primary` = recall@5 contra `highlyRelevant` (grade 2), `null` quando a query não tem alvo primário (ignorada no agregado, à la nDCG). **Nada foi apagado do golden** — preserva `relevant` para recall@10/nDCG. Baseline: **recall@5-primário 54,2%** (55/55 queries têm alvo primário). É barra mais estrita que o recall@5 amplo (mede se o essencial curado entra no top-5); lente complementar, não substituta. Diagnóstico em `eval/scripts/analyze-overannotated.ts` (19/55 super-anotadas, teto médio recall@5 = 86,8%). ⚠️ [[feedback_eval_ground_truth_bias]] respeitado — sem re-anotação a partir do pipeline.
 
 ### BIA-5. Cobrir buracos de dados (scraper gaps) [Média]
 **Objetivo:** indexar docs de alto valor referenciados mas ausentes no DB.

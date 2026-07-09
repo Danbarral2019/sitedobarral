@@ -18,6 +18,7 @@
     "smoke:coming-soon": "node scripts/smoke-test-coming-soon.mjs",
     "eval:annotate": "dotenv -e .env.local -- tsx eval/cli/annotate.ts",
     "eval:run": "dotenv -e .env.local -- tsx eval/cli/run-baseline.ts",
+    "eval:sweep": "dotenv -e .env.local -- tsx eval/cli/sweep-fusion.ts",
     "eval:synthesis": "dotenv -e .env.local -- tsx eval/cli/run-synthesis.ts",
     "eval:planejamento:decision": "tsx eval/planejamento/run-decision.ts",
     "analyze": "ANALYZE=true next build",

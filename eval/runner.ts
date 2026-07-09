@@ -28,6 +28,8 @@ async function evalQuery(q: GoldenQuery, search: SearchFn): Promise<QueryEvalRes
     difficulty: q.difficulty,
     predicted: documentIds,
     recallAt5: recallAtK(documentIds, relevant, 5),
+    recallAt10: recallAtK(documentIds, relevant, 10),
+    recallAt5Primary: highlyRelevant.size > 0 ? recallAtK(documentIds, highlyRelevant, 5) : null,
     reciprocalRank: reciprocalRank(documentIds, relevant),
     ndcgAt10: ndcgAtK(documentIds, relevant, highlyRelevant, 10),
     latencyMs,
@@ -68,6 +70,7 @@ function aggregate(
 
   const avg = (xs: number[]) => (xs.length === 0 ? 0 : xs.reduce((a, b) => a + b, 0) / xs.length)
   const ndcgValues = results.map((r) => r.ndcgAt10).filter((v): v is number => v !== null)
+  const primaryValues = results.map((r) => r.recallAt5Primary).filter((v): v is number => v !== null)
 
   const byDifficulty = {
     easy: subset(results, 'easy'),
@@ -80,6 +83,9 @@ function aggregate(
     queriesAnnotated: annotated,
     queriesSkipped: skipped,
     recallAt5_avg: avg(results.map((r) => r.recallAt5)),
+    recallAt10_avg: avg(results.map((r) => r.recallAt10)),
+    recallAt5Primary_avg: avg(primaryValues),
+    primaryTargetQueries: primaryValues.length,
     mrr: avg(results.map((r) => r.reciprocalRank)),
     ndcgAt10_avg: avg(ndcgValues),
     byDifficulty,
@@ -93,6 +99,7 @@ function subset(results: QueryEvalResult[], d: Difficulty) {
   return {
     count: filtered.length,
     recallAt5_avg: avg(filtered.map((r) => r.recallAt5)),
+    recallAt10_avg: avg(filtered.map((r) => r.recallAt10)),
     mrr: avg(filtered.map((r) => r.reciprocalRank)),
     ndcgAt10_avg: avg(ndcgValues),
   }
