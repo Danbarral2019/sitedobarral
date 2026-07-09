@@ -48,6 +48,12 @@ export interface HybridSearchOptions {
   embeddingColumn?: 'embedding' | 'embedding1536';
   /** Dimensão do embedding da query (deve casar com a coluna). Encaminhado para vector-search.SearchOptions. Default 768. */
   queryDimension?: number;
+  /**
+   * Constante de suavização do Reciprocal Rank Fusion. Default DEFAULT_RRF_K (60,
+   * padrão da literatura). Exposto para o sweep de tuning da fusão (BIA-3) —
+   * valores menores dão mais peso às primeiras posições, maiores achatam a curva.
+   */
+  rrfK?: number;
 }
 
 export interface HybridSearchResponse {
@@ -69,7 +75,7 @@ export interface HybridSearchResponse {
 // Constants
 // ===========================
 
-const RRF_K = 60; // Constante de suavização RRF (padrão na literatura)
+export const DEFAULT_RRF_K = 60; // Constante de suavização RRF (padrão na literatura)
 
 // ===========================
 // Main Function
@@ -98,6 +104,7 @@ export async function hybridSearch(
     rerank = false,
     embeddingColumn,
     queryDimension,
+    rrfK = DEFAULT_RRF_K,
   } = options;
 
   const vectorOptions: SearchOptions = {
@@ -174,8 +181,8 @@ export async function hybridSearch(
     const vRank = vectorRanks.get(docId);
     const fRank = ftsRanks.get(docId);
 
-    const vectorScore = vRank ? alpha / (RRF_K + vRank) : 0;
-    const ftsScore = fRank ? (1 - alpha) / (RRF_K + fRank) : 0;
+    const vectorScore = vRank ? alpha / (rrfK + vRank) : 0;
+    const ftsScore = fRank ? (1 - alpha) / (rrfK + fRank) : 0;
 
     scored.push({
       docId,

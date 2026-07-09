@@ -51,7 +51,7 @@ async function main() {
   const run = await runEval(goldenSet, searchFn)
 
   console.log(`[eval] ${run.summary.queriesAnnotated} evaluated, ${run.summary.queriesSkipped} skipped (not annotated)`)
-  console.log(`[eval] recall@5=${(run.summary.recallAt5_avg * 100).toFixed(1)}% mrr=${run.summary.mrr.toFixed(3)} ndcg@10=${run.summary.ndcgAt10_avg.toFixed(3)}`)
+  console.log(`[eval] recall@5=${(run.summary.recallAt5_avg * 100).toFixed(1)}% recall@10=${(run.summary.recallAt10_avg * 100).toFixed(1)}% recall@5-primário=${(run.summary.recallAt5Primary_avg * 100).toFixed(1)}% (${run.summary.primaryTargetQueries}q) mrr=${run.summary.mrr.toFixed(3)} ndcg@10=${run.summary.ndcgAt10_avg.toFixed(3)}`)
 
   const reportsDir = join(process.cwd(), 'eval/reports')
   mkdirSync(reportsDir, { recursive: true })
