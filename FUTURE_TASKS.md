@@ -112,11 +112,8 @@ Ver relatório completo em `docs/audits/2026-05-16-silent-failures.md` para tabe
 **Validação:** `npm run eval:synthesis`. **Gate:** overall sobe; **`faithfulness` NUNCA regride** (correção acima de tudo). **Esforço:** 1-2 semanas (iterativo).
 **📊 Baseline medido (2026-07-07, consolidado de relatórios de jul):** caminho de PRODUÇÃO (Claude S5 + Citations, via flag `--citations`, commit `79b4f032`) ≈ overall 87-92%; Gemini (fallback) ≈ 79,6%. **Dimensão MAIS FRACA = `faithfulness` (~85-88%)** em todos os cortes (plain Claude N=10, juiz Opus N=5, Citations N=3); citações (89-95%) e completude (87-96%) já fortes. **Gargalo a atacar = fidelidade/anti-alucinação.** Amostras pequenas — reconfirmar com subconjunto maior quando o orçamento permitir. ⚠️ evals de síntese são CAROS (síntese Claude + juiz Claude por query); estimar custo antes de rodar N grande.
 
-### BIA-2. Contexto de geração: documento inteiro nos top resultados [Média]
-**Objetivo:** menos truncamento → respostas mais completas/fiéis, sem tocar no retrieval.
-**Estado atual:** contexto já expandido p/ 60k chars (fase 2.2), mas alimenta **chunks/trechos**, não o `Document.content` inteiro dos top-N.
-**Passos:** em `assembleAnswerContext`, para os 2-3 top `Document` results, injetar o `content` INTEIRO (cap por doc, respeitando o budget de 60k) em vez da fatia; medir `completeness`/`faithfulness` na régua. Vigiar custo/latência (60k já é o teto de custo aceito).
-**Validação:** régua (BIA-1). **Gate:** `completeness` sobe, `faithfulness` estável, custo/latência aceitáveis. **Esforço:** 3-5 dias. **Depende de:** BIA-1 (para medir).
+### BIA-2. Contexto de geração: documento expandido nos top resultados [Média] — ❌ TESTADO 2026-07-09 = NO-GO
+**Resultado:** implementado (expansão dos top-3 Documents reassemblando chunks numa janela centrada no trecho recuperado, cap 12k/doc — `Document.content` é vazio p/ acórdãos, texto vive em `DocumentChunk`) e medido na régua (A/B N=12, `--citations`). Completude **+1,3pp** e faithfulness **+1,3pp**, MAS **citações −2,5pp** (6/12 queries, nas de doc expandido) e **overall PLANO (−0,3pp)**. Mais texto → citação menos precisa, degradando o diferencial da Citations API sem ganho líquido. Gate não atingido (overall não melhora). **PR #136 fechado sem merge.** Gate de viabilidade `eval/scripts/bia2-addressable.ts` (62% endereçável) e relatórios do A/B mantidos. Detalhe em `docs/ROADMAP_BUSCA_QUALIDADE.md`. Não reabrir sem abordagem que preserve a precisão de citação.
 
 ### BIA-3. Tuning da fusão FTS×vetor (alpha, RRF_K) [Baixa] — ✅ CONCLUÍDO 2026-07-09 = NO-GO
 **Resultado:** sweep de 15 combinações (`alpha` ∈ {0.4..0.8} × `rrfK` ∈ {30,60,100}) via `npm run eval:sweep`. **Nenhuma bate o baseline** — `alpha=0.6, rrfK=60` (65,2%) já é o pico; desviar o alpha piora (0.4=55%, 0.5=60,5%, 0.8=64%) e o RRF_K move <1pp. Gate não atingido → **fusão no ótimo, nada a promover.** `rrfK` ficou parametrizável (`HybridSearchOptions.rrfK`/`DEFAULT_RRF_K`) para sweeps futuros. Relatório: `eval/reports/2026-07-09T12-30-45_bia3-fusion-2026-07-09.md`. Detalhe em `docs/ROADMAP_BUSCA_QUALIDADE.md`.
@@ -140,11 +137,15 @@ Ver relatório completo em `docs/audits/2026-05-16-silent-failures.md` para tabe
 **Passos:** auditar referências (golden + uso real) vs DB; listar ausentes de alto valor; corrigir scraper ou importar. Seguir [[document-inclusion-workflow]] (regra do usuário).
 **Validação:** presença + indexação; recall nos tópicos afetados. **Gate:** docs de alto valor presentes. **Esforço:** 3-5 dias (depende da fonte).
 
-### BIA-6. Expansão de query determinística (dicionário jurídico) [Baixa]
+### BIA-6. Expansão de query determinística (dicionário jurídico) [Baixa] — ⏸️ ADIADO 2026-07-09 (sem headroom mensurável)
+**Achado (sonda R$0):** só **2/55** queries do golden usam siglas, ambas já com recall@5 **73% > média 65%** (o ramo vetorial já faz a ponte semântica); nas buscas reais (`SearchHistory`, 161 no total), só **3,1%** usam sigla. Sem massa endereçável e **sem como validar** no golden atual → implementar seria construir no escuro, com risco de over-expansion de siglas ambíguas (TR/OJ) no FTS. Reabrir só com mais tráfego real de siglas OU golden ampliado com queries de sigla anotadas. Detalhe em `docs/ROADMAP_BUSCA_QUALIDADE.md`.
+<details><summary>Plano original</summary>
+
 **Objetivo:** complementar a query expansion via LLM (já existente, mas cara/variável) com dicionário determinístico de siglas/sinônimos aplicado ao FTS.
 **Estado atual:** `assembleAnswerContext` já expande via LLM; `key-terms.ts` (failure-analysis) não pega multi-palavra ("data a data", "dedicação exclusiva").
 **Passos:** curar dicionário (SRP↔Sistema de Registro de Preços, ETP, TR, "dedicação exclusiva", etc.); expandir termos na query FTS antes da busca; medir `eval:run`. Barato, sem LLM.
 **Validação:** `npm run eval:run` (queries com siglas). **Gate:** recall sobe nessas queries sem regressão geral. **Esforço:** 2-3 dias.
+</details>
 
 ### BIA-7. Boost de autoridade editorial [Baixa]
 **Objetivo:** priorizar fontes de maior autoridade quando pertinente.
