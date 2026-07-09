@@ -137,11 +137,15 @@ Ver relatório completo em `docs/audits/2026-05-16-silent-failures.md` para tabe
 **Passos:** auditar referências (golden + uso real) vs DB; listar ausentes de alto valor; corrigir scraper ou importar. Seguir [[document-inclusion-workflow]] (regra do usuário).
 **Validação:** presença + indexação; recall nos tópicos afetados. **Gate:** docs de alto valor presentes. **Esforço:** 3-5 dias (depende da fonte).
 
-### BIA-6. Expansão de query determinística (dicionário jurídico) [Baixa]
+### BIA-6. Expansão de query determinística (dicionário jurídico) [Baixa] — ⏸️ ADIADO 2026-07-09 (sem headroom mensurável)
+**Achado (sonda R$0):** só **2/55** queries do golden usam siglas, ambas já com recall@5 **73% > média 65%** (o ramo vetorial já faz a ponte semântica); nas buscas reais (`SearchHistory`, 161 no total), só **3,1%** usam sigla. Sem massa endereçável e **sem como validar** no golden atual → implementar seria construir no escuro, com risco de over-expansion de siglas ambíguas (TR/OJ) no FTS. Reabrir só com mais tráfego real de siglas OU golden ampliado com queries de sigla anotadas. Detalhe em `docs/ROADMAP_BUSCA_QUALIDADE.md`.
+<details><summary>Plano original</summary>
+
 **Objetivo:** complementar a query expansion via LLM (já existente, mas cara/variável) com dicionário determinístico de siglas/sinônimos aplicado ao FTS.
 **Estado atual:** `assembleAnswerContext` já expande via LLM; `key-terms.ts` (failure-analysis) não pega multi-palavra ("data a data", "dedicação exclusiva").
 **Passos:** curar dicionário (SRP↔Sistema de Registro de Preços, ETP, TR, "dedicação exclusiva", etc.); expandir termos na query FTS antes da busca; medir `eval:run`. Barato, sem LLM.
 **Validação:** `npm run eval:run` (queries com siglas). **Gate:** recall sobe nessas queries sem regressão geral. **Esforço:** 2-3 dias.
+</details>
 
 ### BIA-7. Boost de autoridade editorial [Baixa]
 **Objetivo:** priorizar fontes de maior autoridade quando pertinente.
