@@ -26,6 +26,10 @@
       "schedule": "0 4 1 * *"
     },
     {
+      "path": "/api/cron/sync-tcu-informativos",
+      "schedule": "0 5 * * 1"
+    },
+    {
       "path": "/api/cron/enrich-themes",
       "schedule": "0 4 * * 2"
     },

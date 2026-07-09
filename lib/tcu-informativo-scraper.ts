@@ -1,27 +1,20 @@
 /**
  * Scraper para Informativos de Jurisprudência Selecionada do TCU
  *
- * ⚠️ STATUS 2026-05-16: SCRAPER QUEBRADO. NÃO FUNCIONA EM PRODUÇÃO.
+ * ✅ STATUS 2026-07-09 (BIA-5): REFATORADO para a FONTE DE DADOS ABERTOS do TCU.
  *
- * O TCU migrou ambas as fontes para SPAs (Next.js / Angular renderizadas
- * no cliente). Tanto a API BFF quanto o portal de jurisprudência agora
- * devolvem HTML em vez de JSON/HTML-renderizado:
+ * Histórico: o TCU migrou o portal e a API BFF para SPAs (Angular/Next), então
+ * ambas passaram a devolver HTML em vez de dados. O cron rodou 89+ dias
+ * devolvendo zero (último import 2026-02-16) e foi pausado.
  *
- *   1. pesquisa.apps.tcu.gov.br/.../api/v1 — HTTP 200 mas retorna HTML
- *      (SPA fallback). `response.json()` lança SyntaxError → catch
- *      silencioso devolve {success:false, error:"..."} sem alarmar.
+ * Solução: o TCU publica um CSV de DADOS ABERTOS, estável e completo, com todos
+ * os itens do "Informativo de Licitações e Contratos" (KEY|TITULO|COLEGIADO|
+ * TEXTOACORDAO|ENUNCIADO|NUMERO|TEXTOINFO, um registro por linha). É a fonte
+ * primária agora (`fetchFromDadosAbertosCSV`); BFF/Portal ficam como fallback
+ * histórico. Dedup por NÚMERO do informativo (robusto contra diferença de
+ * formato de título — os 1.970 itens antigos vieram de planilhas Excel).
  *
- *   2. portal.tcu.gov.br/jurisprudencia → SPA Next.js (chunks `/_next/`).
- *      Parse de HTML tradicional não encontra os dados.
- *
- * Consequência: o cron rodou semanalmente por 89+ dias devolvendo zero
- * novos informativos (último import em 2026-02-16).
- *
- * Cron PAUSADO no `vercel.json` (PR Onda 3 3.4b). Reativar SOMENTE após
- * refatoração: provavelmente Puppeteer ou descobrir nova API.
- *
- * Os informativos já existentes no banco foram importados de planilhas Excel
- * (1.973 enunciados) com category='informativo'.
+ * Fonte: sites.tcu.gov.br/dados-abertos/jurisprudencia/arquivos/boletim-informativo-lc/
  */
 
 import { prisma } from '@/lib/prisma';
@@ -29,19 +22,20 @@ import { prisma } from '@/lib/prisma';
 // ─── Tipos ───────────────────────────────────────────────────────────────────
 
 export interface InformativoItem {
-  titulo: string;           // Ex: "Informativo de Licitações e Contratos nº 500/2024"
+  titulo: string;           // Ex: "Inf. 520/2026 — <resumo da tese>"
   enunciado: string;        // Tese/enunciado do informativo
-  numero?: string;          // Número do informativo (ex: "500/2024")
+  numero?: string;          // Número do informativo (ex: "520/2026")
   linkPdf?: string;         // Link para download do PDF
   dataPublicacao?: string;  // Data de publicação (DD/MM/YYYY ou ISO)
   url?: string;             // URL da página do informativo
+  sourceKey?: string;       // KEY estável do CSV de dados abertos (dedup futuro)
 }
 
 export interface ScrapeResult {
   success: boolean;
   items: InformativoItem[];
   error?: string;
-  source: 'tcu-bff-api' | 'tcu-portal-rss' | 'mock';
+  source: 'tcu-dados-abertos-csv' | 'tcu-bff-api' | 'tcu-portal-rss' | 'mock';
 }
 
 export interface ScrapeOptions {
@@ -61,6 +55,16 @@ export interface NewInformativo {
 
 // ─── URLs e constantes ───────────────────────────────────────────────────────
 
+// Fonte PRIMÁRIA (BIA-5): CSV de dados abertos do TCU — estável e completo.
+const TCU_DADOS_ABERTOS_CSV_URL =
+  'https://sites.tcu.gov.br/dados-abertos/jurisprudencia/arquivos/boletim-informativo-lc/boletim-informativo-lc.csv';
+
+// Página oficial do informativo — usada como `url` de origem dos itens (o CSV
+// não traz URL por item; esta página lista/apresenta a série e valida 200).
+const TCU_INFORMATIVO_PORTAL_URL =
+  'https://portal.tcu.gov.br/jurisprudencia/boletins-e-informativos/informativo-de-licitacoes-e-contratos.htm';
+
+// Fallbacks históricos (SPAs — atualmente sem dados; ver cabeçalho).
 const TCU_BFF_API_URL = 'https://pesquisa.apps.tcu.gov.br/pesquisa/rest/relevar-busca-bff/api/v1';
 
 const TCU_PORTAL_JURISPRUDENCIA_URL = 'https://portal.tcu.gov.br/jurisprudencia/';
@@ -110,6 +114,116 @@ function extractNumero(titulo: string): string | undefined {
   if (match2) return match2[1];
 
   return undefined;
+}
+
+// ─── Estratégia PRIMÁRIA: CSV de dados abertos do TCU ───────────────────────
+
+/**
+ * Parseia UMA linha de CSV pipe-delimitado com campos entre aspas e escape `""`.
+ * O CSV do TCU tem um registro por linha (sem quebras dentro de campos).
+ */
+export function parseCsvLine(line: string): string[] {
+  const fields: string[] = [];
+  let cur = '';
+  let inQuotes = false;
+  for (let i = 0; i < line.length; i++) {
+    const ch = line[i];
+    if (inQuotes) {
+      if (ch === '"') {
+        if (line[i + 1] === '"') { cur += '"'; i++; } // aspa escapada ""
+        else inQuotes = false;
+      } else {
+        cur += ch;
+      }
+    } else if (ch === '"') {
+      inQuotes = true;
+    } else if (ch === '|') {
+      fields.push(cur);
+      cur = '';
+    } else {
+      cur += ch;
+    }
+  }
+  fields.push(cur);
+  return fields;
+}
+
+/**
+ * Gera um título curto a partir do enunciado (a tese completa), no formato dos
+ * itens existentes ("Inf. NNN/YYYY — <resumo>"). Corta na 1ª frase ou ~110 chars
+ * em fronteira de palavra.
+ */
+export function buildInformativoShortTitle(numero: string, enunciado: string): string {
+  const clean = enunciado.replace(/\s+/g, ' ').trim();
+  let short = clean;
+  const firstSentence = clean.match(/^(.{15,130}?[.;!])(?:\s|$)/);
+  if (firstSentence) {
+    short = firstSentence[1];
+  } else if (clean.length > 120) {
+    short = clean.slice(0, 120).replace(/\s+\S*$/, '') + '…';
+  }
+  return `Inf. ${numero} — ${short}`;
+}
+
+/** Chave de ordenação decrescente por recência (ano*1000 + número). */
+function informativoOrder(numero?: string): number {
+  if (!numero) return 0;
+  const m = numero.match(/(\d+)\/(\d{4})/);
+  if (!m) return 0;
+  return parseInt(m[2]) * 1000 + parseInt(m[1]);
+}
+
+/**
+ * Baixa e parseia o CSV de dados abertos do TCU. Colunas:
+ * KEY | TITULO | COLEGIADO | TEXTOACORDAO | ENUNCIADO | NUMERO | TEXTOINFO
+ * Retorna os itens ordenados por recência (mais novos primeiro), limitados a `limit`.
+ */
+async function fetchFromDadosAbertosCSV(limit: number): Promise<ScrapeResult> {
+  try {
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), FETCH_TIMEOUT_MS);
+    const response = await fetch(TCU_DADOS_ABERTOS_CSV_URL, {
+      headers: { 'Accept': 'text/csv', 'User-Agent': USER_AGENT },
+      signal: controller.signal,
+    });
+    clearTimeout(timeout);
+
+    if (!response.ok) {
+      return { success: false, items: [], error: `CSV dados abertos retornou ${response.status}`, source: 'tcu-dados-abertos-csv' };
+    }
+
+    const text = await response.text();
+    const lines = text.split(/\r?\n/).filter(l => l.startsWith('"INFORMATIVO-LC'));
+    if (lines.length === 0) {
+      return { success: false, items: [], error: 'CSV sem registros de informativo (formato inesperado)', source: 'tcu-dados-abertos-csv' };
+    }
+
+    const items: InformativoItem[] = [];
+    for (const line of lines) {
+      const [key, titulo, colegiado, textoAcordao, enunciado] = parseCsvLine(line);
+      const m = (titulo || '').match(/Contratos\s+(\d+)\/(\d{4})/i);
+      const tese = (enunciado || '').trim();
+      if (!m || !tese) continue;
+      const numero = `${m[1]}/${m[2]}`;
+      // Anexa a referência do acórdão (ex.: "Acórdão 28/2026 Plenário") ao conteúdo.
+      const acordaoRef = (textoAcordao || '').replace(/<[^>]+>/g, '').replace(/\s+/g, ' ').trim();
+      const enriched = acordaoRef ? `${tese}\n\n(${acordaoRef})` : tese;
+      items.push({
+        titulo: buildInformativoShortTitle(numero, tese),
+        enunciado: enriched,
+        numero,
+        url: TCU_INFORMATIVO_PORTAL_URL,
+        sourceKey: (key || '').replace(/^"|"$/g, '') || undefined,
+      });
+    }
+
+    // Mais recentes primeiro; limita.
+    items.sort((a, b) => informativoOrder(b.numero) - informativoOrder(a.numero));
+    return { success: true, items: items.slice(0, limit), source: 'tcu-dados-abertos-csv' };
+  } catch (error) {
+    const msg = error instanceof Error ? error.message : 'Erro desconhecido';
+    return { success: false, items: [], error: `Erro ao baixar/parsear CSV: ${msg}`, source: 'tcu-dados-abertos-csv' };
+  }
 }
 
 // ─── Estratégia 1: API BFF do TCU ───────────────────────────────────────────
@@ -342,30 +456,35 @@ function extractFromRSCPayload(scripts: string[], limit: number): InformativoIte
 
 // ─── Deduplicação contra banco ───────────────────────────────────────────────
 
+/** Extrai o número "NNN/YYYY" de um título de informativo (vários formatos). */
+function extractNumeroFromTitle(title: string): string | undefined {
+  const m = title.match(/Inf\.?\s*(\d+\/\d{4})/i) || title.match(/Contratos\s+(\d+\/\d{4})/i);
+  return m ? m[1] : undefined;
+}
+
 async function deduplicateAgainstDB(items: InformativoItem[]): Promise<NewInformativo[]> {
-  // Buscar títulos existentes de informativos no banco
   const existingDocs = await prisma.document.findMany({
     where: { category: 'informativo' },
     select: { title: true },
   });
 
-  // Criar set de títulos normalizados para comparação
-  const existingTitles = new Set(
-    existingDocs.map(d => normalizeTitle(d.title))
-  );
+  // Dedup por NÚMERO do informativo (robusto: os itens antigos vieram de Excel
+  // com formato de título diferente, mas o número "NNN/YYYY" é estável). Cada
+  // número traz múltiplas teses; se o número já existe no banco, toda a série
+  // dele já foi importada — então tratamos como duplicado.
+  const existingNumbers = new Set<string>();
+  for (const d of existingDocs) {
+    const n = extractNumeroFromTitle(d.title);
+    if (n) existingNumbers.add(n);
+  }
+  // Fallback (itens sem número): comparação por título normalizado.
+  const existingTitlesNorm = new Set(existingDocs.map(d => normalizeTitle(d.title)));
 
   return items.map(item => {
     const titulo = item.titulo || `Informativo TCU - ${item.enunciado.slice(0, 80)}`;
-    const normalized = normalizeTitle(titulo);
-
-    // Verificar duplicata por título normalizado
-    const isDuplicate = existingTitles.has(normalized);
-
-    // Verificar também por enunciado (mais flexível)
-    const enunciadoNorm = normalizeTitle(item.enunciado);
-    const isDuplicateByEnunciado = !isDuplicate && Array.from(existingTitles).some(
-      t => t.includes(enunciadoNorm.slice(0, 50)) || enunciadoNorm.includes(t.slice(0, 50))
-    );
+    const isDuplicate = item.numero
+      ? existingNumbers.has(item.numero)
+      : existingTitlesNorm.has(normalizeTitle(titulo));
 
     return {
       titulo,
@@ -374,7 +493,7 @@ async function deduplicateAgainstDB(items: InformativoItem[]): Promise<NewInform
       linkPdf: item.linkPdf,
       dataPublicacao: parseDateBR(item.dataPublicacao),
       url: item.url,
-      isDuplicate: isDuplicate || isDuplicateByEnunciado,
+      isDuplicate,
     };
   });
 }
@@ -403,11 +522,17 @@ export async function scrapeNewInformativos(options: ScrapeOptions = {}): Promis
 
   console.log(`[Sync TCU Info] Iniciando scraping de informativos (limit: ${limit})...`);
 
-  // Estratégia 1: API BFF
-  console.log('[Sync TCU Info] Tentando API BFF...');
-  let result = await fetchFromBFF(limit);
+  // Estratégia PRIMÁRIA (BIA-5): CSV de dados abertos do TCU (estável e completo).
+  console.log('[Sync TCU Info] Tentando CSV de dados abertos...');
+  let result = await fetchFromDadosAbertosCSV(limit);
 
-  // Estratégia 2: Portal
+  // Fallback histórico 1: API BFF (SPA — atualmente sem dados).
+  if (!result.success || result.items.length === 0) {
+    console.log(`[Sync TCU Info] CSV falhou (${result.error}). Tentando API BFF...`);
+    result = await fetchFromBFF(limit);
+  }
+
+  // Fallback histórico 2: Portal.
   if (!result.success || result.items.length === 0) {
     console.log(`[Sync TCU Info] API BFF falhou (${result.error}). Tentando portal...`);
     result = await fetchFromPortal(limit);
