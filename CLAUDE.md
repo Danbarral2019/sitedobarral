@@ -74,40 +74,14 @@ export DATABASE_URL="<your-db-url>" && npx tsx scripts/fix-csv-tags.ts  # Conver
 - `scripts/` - Admin/import/scraping scripts
 - `lib/email-templates/` - Templates HTML de newsletter
 
-**Key Models (70 total — fonte de verdade: `prisma/schema.prisma`):**
-
-Auth & Acesso:
-- `User`, `Enrollment` (1 mês trial via QR, ou gerenciado por Subscription), `QRCode`, `AccessLog`, `Favorite`
-- `Subscription` (Stripe — planos basico/premium, status, período, paymentMethod), `ProcessedWebhookEvent`
-
-Conteúdo & Documentos:
-- `Document` (+ `DocumentMetaTcu`, `DocumentMetaDou`, `DocumentNotes`, `DocumentChunk` para embeddings, `DocumentVersion`)
-- `BlogPost`, `Publication`, `Testimonial`, `ContactForm`, `RecommendedSite`, `SiteToCourse`, `SocialMediaPost`
-- `CourseVideo`, `FAQ`, `FAQFeedback`, `GlossaryTerm`, `ArticleQuestion`, `DocumentAnalysis`
-- `DOUStagingDocument`, `DOUSavedFilter`
-- `LegislativeAct` (+ `LegislativeActChunk`, `LegislativeActRelation`)
-- `LeiArticle` (Lei 14.133, 195 artigos), `LeiArticleEmbedding`, `LeiArticleNote`, `LeiArticleCrossRef`, `LeiArticleSuggestedReading`
-
-LMS (Cursos, gamification, certificados):
-- `Module`, `Lesson` (+ `LessonDocument`, `LessonVideo`, `LessonProgress`, `LessonComment`)
-- `Quiz`, `QuizQuestion`, `QuizAttempt`
-- `Certificate`, `Badge`, `UserStreak`, `CourseStatus`
-
-Jurisprudência & Scraping:
-- `TribunalDecision` (TCEs + STJ/STF), `TribunalDecisionChunk`, `TribunalHighlight`, `TcuHighlight`
-- `ScraperHealthLog`
-
-Clipping & Newsletter:
-- `DailyClippingSend`, `ClippingItemExtract`
-- `NewsletterSubscriber`, `NewsletterSend`, `PushSubscription`
-
-Planejamento (módulo `app/area-restrita/planejamento`):
-- `PlanningSession`, `PlanningDocument`, `PlanningDocumentSection`, `PlanningDocumentVersion`
-- `PlanningLibrarySnippet`, `PlanningTrailTemplate`, `PlanningSectionTemplate`
-- `PlanningDecisionRun`, `PlanningExport`
-
-Busca:
-- `SearchHistory`, `IndexJob`
+**Key Models** (fonte de verdade: `prisma/schema.prisma` — ~70 models; ver o schema para o conjunto completo e campos). Por área:
+- **Auth/Acesso:** `User`, `Enrollment` (trial 1 mês via QR ou Subscription), `Subscription` (Stripe), `QRCode`, `AccessLog`, `ProcessedWebhookEvent`.
+- **Conteúdo:** `Document` (+ `DocumentChunk` p/ embeddings, `DocumentVersion`, `DocumentMetaTcu/Dou`), `LegislativeAct` (+ `LegislativeActChunk`, `LegislativeActRelation`), `LeiArticle` (Lei 14.133, 195 arts. + embeddings/cross-refs), `BlogPost`, `FAQ`, `GlossaryTerm`, `DOUStagingDocument`.
+- **LMS:** `Module`, `Lesson` (+ progress/comments), `Quiz*`, `Certificate`, `Badge`, `UserStreak`, `CourseStatus`.
+- **Jurisprudência:** `TribunalDecision` (+ `TribunalDecisionChunk`), `ScraperHealthLog`.
+- **Clipping/Newsletter:** `DailyClippingSend`, `NewsletterSubscriber/Send`, `PushSubscription`.
+- **Planejamento:** `Planning*` (Session, Document, Templates, DecisionRun…).
+- **Busca:** `SearchHistory`, `IndexJob`.
 
 **Auth Flows:**
 
@@ -310,11 +284,7 @@ cd ~/.claude-mcp-servers/gemini
 ./setup-global.sh   # Linux/Mac
 ```
 
-**Modelo Gemini — histórico de mudanças:**
-- ⚠️ `gemini-2.0-flash-exp` foi removido pela Google em 2025 (404 Not Found).
-- ⚠️ `gemini-2.0-flash` está **deprecado** pela Google: acesso restrito desde 2026-03-06, shutdown em **2026-06-01**. Ver comentário em `lib/gemini/config.ts`.
-- ✅ **Usar `gemini-2.5-flash`** (definido em `PRIMARY_GEMINI_MODEL`, `lib/gemini/config.ts`). Para tarefas curtas (resumo/classificação), passar também `thinkingBudget: 0` — senão o thinking mode do 2.5 consome ~95% do `maxOutputTokens` e trunca a resposta.
-- Migração dos 24 arquivos que hardcodavam `gemini-2.0-flash` registrada em `docs/ROADMAP_GEMINI_MODELO_25.md` (abril/2026).
+**Modelo Gemini:** usar `gemini-2.5-flash` (`PRIMARY_GEMINI_MODEL` em `lib/gemini/config.ts`). Em tarefas curtas (resumo/classificação) passar `thinkingBudget: 0` — senão o thinking mode do 2.5 consome ~95% do `maxOutputTokens` e trunca. (Os `gemini-2.0-flash*` foram desligados pela Google em 2026; histórico em `docs/ROADMAP_GEMINI_MODELO_25.md`.)
 
 **React Hydration Errors:**
 
@@ -377,44 +347,18 @@ function Header() {
 
 ## API Routes Summary
 
-**Public:**
-- `/api/auth/*` - Login, register, logout
-- `/api/documents` - Document queries (requires auth)
-- `/api/documents/query` - Semantic search with Gemini (NEW)
-- `/api/newsletter` - Newsletter subscription
-- `/api/contact` - Contact form
-
-**Pagamentos (Stripe):** `/api/pagamento/*` — path histórico mantido após reversão MP→Stripe
-- `POST /api/pagamento/checkout` - Cria Checkout Session Stripe (withAuth, recebe `{ plan, billingCycle, method, courseId? }`, retorna `{ url }`)
-- `GET /api/pagamento/status` - Consulta status da assinatura/pagamento
-- `POST /api/pagamento/webhook` - Webhook Stripe (sem auth, verifica via `STRIPE_WEBHOOK_SECRET`, idempotência via `ProcessedWebhookEvent`)
-
-**Newsletter:** `/api/newsletter/*`
-- `GET /api/newsletter/track` - Pixel tracking (opens) + redirect tracking (clicks)
-
-**Webhooks:**
-- `POST /api/webhooks/resend` - Resend webhooks (bounce, open, click)
-
-**Área Restrita:** `/api/area-restrita/*`
-- `GET /api/area-restrita/certificates` - Certificados do aluno
-- `GET /api/area-restrita/progress` - Dados agregados de progresso LMS
-
-**Admin:** `/api/admin/*` (QR codes, documents, blog, publications, analytics)
-
-**Cron:** `/api/enrollment/check-expiration`, `/api/cron/import-documents`, `/api/cron/monthly-newsletter`, `/api/cron/lms-inactivity`, `/api/cron/sync-tribunal-decisions`, `/api/cron/tribunal-scraper-health`, `/api/cron/sync-datajud`
-
-**Jurisprudência:** `/api/jurisprudencia`
-- `GET /api/jurisprudencia` - Lista decisões aprovadas (filtros: tribunal, search, year, theme)
-- `GET /api/jurisprudencia/[id]` - Detalhe de decisão
+- **Public:** `/api/auth/*`, `/api/documents` (+ `/query` = busca semântica/RAG Gemini), `/api/newsletter` (+ `/track`), `/api/contact`.
+- **Pagamentos (Stripe):** `/api/pagamento/{checkout,status,webhook}` (path histórico após reversão MP→Stripe). Checkout Zod-validado `{plan,billingCycle,method,courseId?}` → `{url}`; webhook sem auth, verifica `STRIPE_WEBHOOK_SECRET`, idempotência via `ProcessedWebhookEvent`.
+- **Área Restrita:** `/api/area-restrita/*` (certificates, progress, global-search, global-search/hybrid). **Admin:** `/api/admin/*`. **Jurisprudência:** `/api/jurisprudencia[/id]`. **Webhooks:** `/api/webhooks/resend`.
+- **Crons:** lista completa + schedules em `vercel.json`. Demais endpoints: ver o código.
 
 Ver código para endpoints completos.
 
 ## Development Status
 
-**🚧 Pendente / Em andamento:**
-- **Retomada Jul/2026:** Fase 0 (hardening) em PR #129 — plano completo em `docs/PLANO_RETOMADA_2026-07.md` (Fases 1-5 focam na qualidade da IA).
-- **Stripe Fase 3 LIVE:** migração TEST→LIVE em produção (roadmap `docs/ROADMAP_STRIPE_FASE3.md`).
-- **Backlog completo:** `FUTURE_TASKS.md`. **Concluídos/changelog:** `docs/PROJECT_HISTORY.md`.
+**Estado atual (jul/2026):** produto em produção. Assistente de IA usa **Claude Sonnet 5 + Citations API**; síntese (BIA-1) e cobertura de dados (BIA-5) melhoradas. **Trilha de tuning de retrieval FECHADA com evidência** — recall@5 ~65% é o teto do dataset; próximos ganhos de busca vêm de answer-quality ou mais dados, não tuning (ver `docs/ROADMAP_BUSCA_QUALIDADE.md`).
+- **Pendente (depende do PO):** Stripe TEST→LIVE (`docs/ROADMAP_STRIPE_FASE3.md`) + PIX; coming-soon flag.
+- **Backlog:** `FUTURE_TASKS.md` · **Changelog:** `docs/PROJECT_HISTORY.md` + git.
 
 ## Important Architecture Patterns
 
@@ -457,34 +401,14 @@ Ver código para endpoints completos.
 4. Texto é dividido em chunks (chunker legal para decor/parecer/on, genérico para outros)
 5. Embeddings gerados via Gemini `gemini-embedding-001` (768 dimensões, batch de 100)
 6. Chunks + embeddings salvos na tabela `DocumentChunk` com `vector(768)`
-7. Script: `npx tsx scripts/migrate-to-embeddings.ts` (flags: `--dry-run`, `--limit N`, `--force`, `--concurrency N`)
-8. Stats: 428/429 docs indexados, 1.598 chunks, 1 falha (ON 41/2014 — texto insuficiente)
+7. Script: `npx tsx scripts/migrate-to-embeddings.ts` (flags: `--dry-run`, `--limit N`, `--category X`, `--force`, `--concurrency N`; sem `--force` indexa só `pending`/`failed`)
 - 📖 Ver `lib/embeddings/document-processor.ts`, `lib/embeddings/gemini-embeddings.ts`, `lib/embeddings/text-chunker.ts`
 
-### Single-flight em `withCache` (Onda 4.7)
-1. `withCache(key, fn, ttl, options)` consulta `inFlight: Map<string, Promise<unknown>>` antes de executar `fn()`
-2. Se já há promise registrada para a key: retorna ela compartilhada (todos callers concorrentes recebem mesmo resultado)
-3. `try/finally` garante `inFlight.delete(key)` em sucesso OU erro — sem cache poisoning
-4. Default-on; `options.singleFlight: false` opt-out disponível (nenhum caller atual usa)
-5. Leak protection: warning amostrado 1:100 quando `inFlight.size >= 1000`
-- 📖 Ver `lib/cache/redis-client.ts`, `lib/cache/__tests__/single-flight.test.ts`
-
-### Atos Legislativos — Embeddings Separados
-1. `processLegislativeAct()` busca ato, monta texto (fullNumber + ementa + content)
-2. Chunka com `chunkLegalDocument()` (1200 chars, overlap 200)
-3. Embeddings gerados via Gemini `gemini-embedding-001` (768 dimensões)
-4. Chunks salvos na tabela `LegislativeActChunk` (separada de `DocumentChunk`)
-5. Busca semântica usa UNION ALL entre `DocumentChunk` e `LegislativeActChunk`
-6. Campo `sourceType` ('document' | 'legislative-act') diferencia a origem
-7. Script: `npx tsx scripts/index-legislative-acts.ts` (flags: `--dry-run`, `--force`, `--limit N`)
-8. Stats: 53 atos indexados, 801 chunks
-- 📖 Ver `lib/embeddings/legislative-act-processor.ts`, `scripts/index-legislative-acts.ts`
-
-### Document Versioning
-- Each document update creates a `DocumentVersion` record
-- Significance scoring (0-100) determines notification priority
-- Change detection compares fields (title, content, url, etc.)
-- Admin can review changes before publishing to students
+### Outros padrões (detalhes no código)
+- **Single-flight em `withCache`** (`lib/cache/redis-client.ts`): promises concorrentes p/ a mesma key são compartilhadas (`inFlight` Map + try/finally) — default-on, sem cache poisoning.
+- **Atos Legislativos — embeddings separados** (`lib/embeddings/legislative-act-processor.ts`, `scripts/index-legislative-acts.ts`): `LegislativeActChunk` é separada de `DocumentChunk`; a busca semântica faz UNION ALL entre as duas e `sourceType` ('document' | 'legislative-act' | 'tribunal-decision') diferencia a origem.
+- **Document Versioning** (`DocumentVersion`): cada update cria uma versão; significance scoring (0-100) prioriza a notificação; admin revisa antes de publicar aos alunos.
+- **Informativos TCU** (`lib/tcu-informativo-scraper.ts`, cron `sync-tcu-informativos`): fonte canônica = **CSV de dados abertos do TCU** (`sites.tcu.gov.br/dados-abertos/.../boletim-informativo-lc.csv`), NÃO o portal SPA. Dedup por número.
 
 ## Camada de IA (`lib/ai/`)
 
@@ -522,15 +446,12 @@ Esta camada inclui retry com backoff exponencial em erros transitórios (429/5xx
 
 ## Eval framework (`eval/`)
 
-Framework de avaliação de qualidade de retrieval da busca jurídica.
+Framework de avaliação da busca jurídica. Golden set em `eval/golden-set.json`; reports versionados em `eval/reports/`.
 
-- Golden set em `eval/golden-set.json`
-- Métricas: recall@5, MRR, nDCG@10
-- CLIs: `npm run eval:annotate` (interativo) e `npm run eval:run` (gera relatório)
-- Reports versionados em `eval/reports/`
+- **Retrieval:** `npm run eval:run` (recall@5/@10, recall@5-primário, MRR, nDCG@10) · `npm run eval:sweep` (varredura alpha×RRF_K) · `npm run eval:annotate` (interativo). R$0 (embeddings/FTS).
+- **Síntese (régua LLM-as-judge):** `npm run eval:synthesis` (faithfulness/citações/completude/overall via juiz Claude). ⚠️ **CARO** (Claude por query) — estimar custo e autorizar antes de N grande.
 
-Ver `eval/README.md` para detalhes. Esta fase mede só retrieval — síntese da LLM
-fica para fase futura.
+Ver `eval/README.md`. ⚠️ **Trilha de tuning de retrieval FECHADA** (`docs/ROADMAP_BUSCA_QUALIDADE.md`) — não reabrir experimentos de retrieval sem dado novo.
 
 ## Notes for Future Claude Instances
 
