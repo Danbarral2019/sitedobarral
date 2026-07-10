@@ -639,21 +639,24 @@ model SiteToCourse {
 // Vídeos do YouTube por curso
 model CourseVideo {
   id           String   @id @default(uuid())
-  courseId     String // ID do curso (da lista estática)
-  title        String // Título do vídeo
-  description  String? // Descrição do vídeo
-  youtubeUrl   String // URL completa do YouTube
-  youtubeId    String // ID extraído do YouTube (para embed)
-  thumbnailUrl String? // URL da thumbnail (gerado automaticamente)
-  displayOrder Int      @default(0) // Ordem de exibição
+  courseId     String
+  title        String
+  description  String?
+  storageType  String   @default("youtube") // 'youtube' | 'r2'
+  youtubeUrl   String?  // opcional: só para storageType='youtube'
+  youtubeId    String?
+  r2Key        String?  // só para storageType='r2'
+  contentType  String?  // MIME do vídeo R2
+  sizeBytes    String?  // bytes como string (evita BigInt na serialização)
+  durationSeconds Int?
+  thumbnailUrl String?
+  displayOrder Int      @default(0)
   isActive     Boolean  @default(true)
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
 
-  // Relacionamento com lições (LMS)
   lessonVideos LessonVideo[]
 
-  // Full-Text Search
   search_vector Unsupported("tsvector")?
 
   @@index([courseId])
@@ -1244,8 +1247,8 @@ model LessonVideo {
   courseVideoId String?
   courseVideo   CourseVideo? @relation(fields: [courseVideoId], references: [id], onDelete: SetNull)
   title         String
-  youtubeUrl    String
-  youtubeId     String
+  youtubeUrl    String?
+  youtubeId     String?
   description   String?
   displayOrder  Int          @default(0)
   isRequired    Boolean      @default(false)
