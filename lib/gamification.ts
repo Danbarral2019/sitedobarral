@@ -204,6 +204,30 @@ export async function checkAndAwardBadges(
 }
 
 /**
+ * Orquestra a concessão de XP/badge quando um aluno PASSA num quiz.
+ * Deve ser agendada via `runAfterResponse` no handler de submit (o trabalho
+ * roda após a resposta e a Vercel mantém a função viva). Deps injetáveis
+ * para teste; o default usa as funções reais deste módulo.
+ */
+export async function awardQuizPass(
+  userId: string,
+  courseId: string,
+  score: number,
+  deps: {
+    addXp: typeof addXp;
+    updateStreak: typeof updateStreak;
+    checkAndAwardBadges: typeof checkAndAwardBadges;
+  } = { addXp, updateStreak, checkAndAwardBadges }
+): Promise<void> {
+  await deps.addXp(userId, courseId, XP_VALUES.PASS_QUIZ);
+  if (score === 100) {
+    await deps.addXp(userId, courseId, XP_VALUES.PERFECT_QUIZ);
+  }
+  await deps.updateStreak(userId, courseId);
+  await deps.checkAndAwardBadges(userId, courseId, 'quiz_pass');
+}
+
+/**
  * Get full gamification data for a user in a course
  */
 export async function getUserGamificationData(userId: string, courseId: string) {

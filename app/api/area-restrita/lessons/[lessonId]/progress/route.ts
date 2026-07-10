@@ -7,6 +7,7 @@ import { prisma } from '@/lib/prisma';
 import { UpdateLessonProgressSchema } from '@/lib/validation-schemas';
 import { sendCourseWelcomeEmail, sendModuleCompletionEmail } from '@/lib/email';
 import { addXp, updateStreak, checkAndAwardBadges, XP_VALUES } from '@/lib/gamification';
+import { runAfterResponse } from '@/lib/api/after-response';
 import { courses } from '@/data/courses';
 
 export async function POST(
@@ -165,22 +166,35 @@ export async function POST(
             );
           }
 
-          // Gamification: module complete
-          addXp(userId, courseId, XP_VALUES.COMPLETE_MODULE).catch(() => {});
-          checkAndAwardBadges(userId, courseId, 'module_complete').catch(() => {});
+          // Gamification: module complete (agendado após a resposta via after())
+          runAfterResponse(
+            Promise.all([
+              addXp(userId, courseId, XP_VALUES.COMPLETE_MODULE),
+              checkAndAwardBadges(userId, courseId, 'module_complete'),
+            ]).catch((err) => console.error('[gamification] module_complete error:', err))
+          );
         }
       }
     }
 
-    // Fire-and-forget: Gamification triggers
+    // Gamification triggers — agendados após a resposta via after()
+    // (fire-and-forget sem after() é descartado no congelamento serverless).
     if (data.status === 'completed') {
       const gamifCourseId = lesson.module.courseId;
-      addXp(user.id, gamifCourseId, XP_VALUES.COMPLETE_LESSON).catch(() => {});
-      updateStreak(user.id, gamifCourseId).catch(() => {});
-      checkAndAwardBadges(user.id, gamifCourseId, 'lesson_complete').catch(() => {});
+      runAfterResponse(
+        Promise.all([
+          addXp(user.id, gamifCourseId, XP_VALUES.COMPLETE_LESSON),
+          updateStreak(user.id, gamifCourseId),
+          checkAndAwardBadges(user.id, gamifCourseId, 'lesson_complete'),
+        ]).catch((err) => console.error('[gamification] lesson_complete error:', err))
+      );
     } else if (!existing) {
       // First interaction — at least update streak
-      updateStreak(user.id, lesson.module.courseId).catch(() => {});
+      runAfterResponse(
+        updateStreak(user.id, lesson.module.courseId).catch((err) =>
+          console.error('[gamification] streak error:', err)
+        )
+      );
     }
 
     return NextResponse.json({

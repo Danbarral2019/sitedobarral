@@ -4,6 +4,8 @@ import { prisma } from '@/lib/prisma';
 import { NotFoundError, AuthorizationError } from '@/lib/errors/api-error';
 import { apiLogger } from '@/lib/logger';
 import { SubmitQuizAttemptSchema } from '@/lib/validation-schemas';
+import { runAfterResponse } from '@/lib/api/after-response';
+import { awardQuizPass } from '@/lib/gamification';
 
 /**
  * POST: Submete uma tentativa de quiz com correção automática
@@ -114,27 +116,23 @@ export const POST = withUserApi<{ lessonId: string }>(async (
     'Quiz attempt submitted'
   );
 
-  // Se passou, verificar elegibilidade para certificado (fire-and-forget)
+  // Se passou, agenda gamificação + verificação de certificado para rodar
+  // APÓS a resposta, via runAfterResponse/after() — garantido em serverless
+  // (fire-and-forget sem after() é descartado quando a função congela).
+  // courseId já está carregado em quiz.lesson.module.courseId (sem re-query).
   if (passed) {
-    checkCertificateEligibilityAsync(ctx.user.userId, quiz, lessonId).catch(() => {});
-
-    // Gamification: quiz pass
-    import('@/lib/gamification').then(({ addXp, checkAndAwardBadges, updateStreak, XP_VALUES }) => {
-      // Determine courseId
-      prisma.lesson.findUnique({
-        where: { id: lessonId },
-        include: { module: { select: { courseId: true } } },
-      }).then(lesson => {
-        if (!lesson) return;
-        const courseId = lesson.module.courseId;
-        addXp(ctx.user.userId, courseId, XP_VALUES.PASS_QUIZ).catch(() => {});
-        if (score === 100) {
-          addXp(ctx.user.userId, courseId, XP_VALUES.PERFECT_QUIZ).catch(() => {});
-        }
-        updateStreak(ctx.user.userId, courseId).catch(() => {});
-        checkAndAwardBadges(ctx.user.userId, courseId, 'quiz_pass').catch(() => {});
-      }).catch(() => {});
-    }).catch(() => {});
+    const courseId = quiz.lesson.module.courseId;
+    runAfterResponse(
+      awardQuizPass(ctx.user.userId, courseId, score).catch((err) =>
+        apiLogger.error(
+          { err, userId: ctx.user.userId, courseId, quizId: quiz.id },
+          'Falha ao conceder XP/badge de quiz'
+        )
+      )
+    );
+    runAfterResponse(
+      checkCertificateEligibilityAsync(ctx.user.userId, quiz, lessonId).catch(() => {})
+    );
   }
 
   return NextResponse.json({
