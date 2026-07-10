@@ -58,17 +58,7 @@
 **Interfaces:**
 - Produces: campos `CourseVideo.storageType: string`, `CourseVideo.r2Key: string?`, `CourseVideo.contentType: string?`, `CourseVideo.sizeBytes: string?`, `CourseVideo.durationSeconds: int?`; `CourseVideo.youtubeUrl/youtubeId` e `LessonVideo.youtubeUrl/youtubeId` passam a `String?`.
 
-- [ ] **Step 1: Snapshot do banco antes da migração**
-
-Puxar env de produção e exportar as tabelas de vídeo como backup JSON (prudência — regra do projeto para models sensíveis):
-
-```bash
-vercel env pull .env.prod.local --environment production
-npx dotenv -e .env.prod.local -- npx tsx -e "import{PrismaClient}from'@prisma/client';import{PrismaNeon}from'@prisma/adapter-neon';import{writeFileSync}from'fs';const p=new PrismaClient({adapter:new PrismaNeon({connectionString:process.env.DATABASE_URL})});(async()=>{const cv=await p.courseVideo.findMany();const lv=await p.lessonVideo.findMany();writeFileSync('backup-videos-2026-07-10.json',JSON.stringify({cv,lv},null,2));console.log('backup:',cv.length,'courseVideos,',lv.length,'lessonVideos');process.exit(0)})()"
-rm .env.prod.local
-```
-
-Expected: imprime a contagem e cria `backup-videos-2026-07-10.json`.
+> **DECISÃO DO PO (2026-07-10): NÃO rodar `prisma db push` nesta task.** A mudança é aditiva/não-destrutiva e o push de produção acontece no `vercel-build` (`prisma generate && prisma db push && next build`) quando a branch for deployada. Esta task **só edita o schema e roda `prisma generate`** (que não toca o banco). Não puxar env de produção, não fazer backup, não contar linhas — nada que exija conexão com o banco.
 
 - [ ] **Step 2: Editar `CourseVideo` no schema**
 
@@ -112,21 +102,22 @@ Trocar as duas linhas:
   youtubeId     String?
 ```
 
-- [ ] **Step 4: Aplicar schema e regenerar client**
+- [ ] **Step 4: Validar schema e regenerar client (SEM tocar o banco)**
 
 Run:
 ```bash
-npx prisma validate && npx prisma db push && npx prisma generate
+npx prisma validate && npx prisma generate
 ```
-Expected: `The database is now in sync with your Prisma schema.` e `Generated Prisma Client`. Se der erro de engine no Windows: `taskkill //F //IM node.exe` e repetir `npx prisma generate`.
+Expected: `The schema at prisma/schema.prisma is valid` e `Generated Prisma Client`. **NÃO rodar `prisma db push`** (adiado para o deploy, decisão do PO). Se der erro de engine no Windows: `taskkill //F //IM node.exe` e repetir `npx prisma generate`.
 
-- [ ] **Step 5: Verificar que dados existentes ficaram intactos**
+- [ ] **Step 5: Verificar que os tipos gerados refletem os campos novos**
 
-Run:
+Confirmar que o Prisma Client regenerado expõe os campos R2 (verificação isolada — NÃO rodar `tsc` de projeto inteiro, pois consumidores que assumem `youtubeUrl` não-nulável só são ajustados na Task 7 e gerariam ruído aqui):
+
 ```bash
-npx tsx -e "import{prisma}from'./lib/prisma';(async()=>{const n=await prisma.courseVideo.count({where:{storageType:'youtube'}});const t=await prisma.courseVideo.count();console.log('youtube:',n,'/ total:',t);process.exit(0)})()"
+grep -E "storageType|r2Key|sizeBytes|durationSeconds" node_modules/.prisma/client/index.d.ts | head
 ```
-Expected: `youtube: N / total: N` (todos os existentes com `storageType='youtube'`).
+Expected: as linhas de tipo de `CourseVideo` com `storageType: string`, `r2Key: string | null`, `sizeBytes: string | null`, `durationSeconds: number | null` aparecem.
 
 - [ ] **Step 6: Commit**
 
@@ -249,7 +240,7 @@ export function generateVideoKey(
 ): string {
   const sanitized = fileName
     .normalize('NFD')
-    .replace(/[̀-ͯ]/g, '') // remove acentos
+    .replace(/[̀-ͯ]/g, '') // remove acentos (combining marks)
     .toLowerCase()
     .replace(/[^a-z0-9.-]/g, '-')
     .replace(/-+/g, '-')
