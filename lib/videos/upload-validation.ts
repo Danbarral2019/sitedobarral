@@ -36,7 +36,7 @@ export function generateVideoKey(
 ): string {
   const sanitized = fileName
     .normalize('NFD')
-    .replace(/[̀-ͯ]/g, '') // remove acentos (combining marks)
+    .replace(/\p{Diacritic}/gu, '') // remove acentos (diacríticos combinantes)
     .toLowerCase()
     .replace(/[^a-z0-9.-]/g, '-')
     .replace(/-+/g, '-')
