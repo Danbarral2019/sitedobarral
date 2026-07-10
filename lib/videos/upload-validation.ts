@@ -20,7 +20,7 @@ export function validateVideoUpload(input: {
   if (input.fileSize > MAX_VIDEO_SIZE_BYTES) {
     return { valid: false, error: 'Arquivo muito grande (máximo: 5GB)' };
   }
-  if (!input.fileType || !ALLOWED_VIDEO_MIME_TYPES.includes(input.fileType as never)) {
+  if (!input.fileType || !(ALLOWED_VIDEO_MIME_TYPES as readonly string[]).includes(input.fileType)) {
     return {
       valid: false,
       error: 'Tipo de arquivo não permitido (aceitos: MP4, WebM, MOV)',
