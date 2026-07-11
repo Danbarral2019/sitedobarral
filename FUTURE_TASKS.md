@@ -171,8 +171,12 @@ Ao implementar o BIA-0b, verificou-se que `assembleAnswerContext` chama `hybridS
 
 ## PENDÊNCIAS DE LANÇAMENTO
 
-### P1. Conta Stripe [BLOQUEANTE]
-**Prioridade:** BLOQUEANTE
+### P1. Conta Stripe [RESOLVIDO — cartão em LIVE]
+**Prioridade:** ~~BLOQUEANTE~~ → resolvido para cartão
+**Status (2026-07-11):** ✅ **LIVE e cobrando.** Virada TEST→LIVE feita em 2026-06-04 (chaves `sk_live`/`pk_live` + webhook live no Vercel — é config de ambiente, não código versionado). **Smoke E2E validado em produção 2026-07-10** com pagamento real de R$89,90 (cartão) → webhook live criou Subscription Premium + 7 matrículas → reembolso `succeeded` na hora → ambiente limpo. Conta sem pendências (charges/payouts/details ✓), webhook live saudável, 4 prices live corretos. 🔴 **Único gap remanescente = PIX** (Pix Automático é "invite only" no Brasil; código pronto atrás da flag `NEXT_PUBLIC_PIX_ENABLED`, aguarda convite da Stripe — não é trabalho nosso). O histórico da configuração TEST abaixo fica como referência.
+
+<details><summary>Histórico — Status original (2026-04-24)</summary>
+
 **Status (2026-04-24):** Modo teste **100% configurado e validado**. Modo live depende de KYC da Stripe (análise em andamento) + repetir os passos de configuração com chaves live. Teste end-to-end com cartão 4242 ainda pendente.
 
 **Fase 1 — Modo TESTE (concluída 2026-04-24):**
@@ -218,6 +222,10 @@ Ao implementar o BIA-0b, verificou-se que `assembleAnswerContext` chama `hybridS
 - [ ] Redeploy production
 - [ ] Teste final com cartão real pequeno valor (ex: R$ 49,90 básico mensal) → validar cobrança efetiva + webhook → reembolso imediato via dashboard Stripe
 - [ ] Customer Billing Portal: repetir config em live mode
+
+</details>
+
+> **Nota (2026-07-11):** os checklists das Fases 2 e 3 acima ficaram como histórico. A virada LIVE + smoke E2E com cartão real já foram concluídos (ver Status no topo desta seção). O único item vivo é o PIX (bloqueio externo).
 
 **Arquivos relevantes:** `lib/stripe.ts`, `app/api/pagamento/{checkout,status,webhook}/route.ts`, `scripts/stripe-bootstrap.ts`
 
