@@ -73,10 +73,11 @@ export async function GET(request: NextRequest) {
       courseId: string;
       title: string;
       description: string | null;
-      youtubeUrl: string;
+      youtubeUrl: string | null;
       youtubeId: string | null;
       thumbnailUrl: string | null;
       displayOrder: number;
+      storageType: string;
     }[] = [];
     let siteToCourse: {
       courseId: string;
@@ -156,6 +157,7 @@ export async function GET(request: NextRequest) {
           youtubeId: true,
           thumbnailUrl: true,
           displayOrder: true,
+          storageType: true,
         },
       });
       console.log('[Batch-Data] Vídeos encontrados:', videos.length);

@@ -83,7 +83,7 @@ export default async function NovidadesPage({ searchParams }: { searchParams: Pr
   let videos: Array<{
     title: string;
     courseId: string;
-    youtubeUrl: string;
+    youtubeUrl: string | null;
     createdAt: Date;
   }> = [];
   let legislativeActs: Array<{
@@ -119,7 +119,11 @@ export default async function NovidadesPage({ searchParams }: { searchParams: Pr
         select: { title: true, type: true, description: true, externalUrl: true, publishedAt: true },
       }),
       prisma.courseVideo.findMany({
-        where: { createdAt: { gte: startDate, lte: endDate }, isActive: true },
+        where: {
+          createdAt: { gte: startDate, lte: endDate },
+          isActive: true,
+          storageType: 'youtube', // /novidades é surface de embed YouTube; vídeos R2 não pertencem aqui
+        },
         orderBy: { createdAt: 'desc' },
         select: { title: true, courseId: true, youtubeUrl: true, createdAt: true },
       }),

@@ -122,6 +122,7 @@ export async function GET(request: NextRequest) {
         where: {
           createdAt: { gte: thirtyDaysAgo },
           isActive: true,
+          storageType: 'youtube', // newsletter é surface de embed YouTube; vídeos R2 não pertencem aqui
         },
         orderBy: { createdAt: 'desc' },
         select: {

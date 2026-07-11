@@ -39,7 +39,7 @@ interface NovidadesClientProps {
   videos: Array<{
     title: string;
     courseId: string;
-    youtubeUrl: string;
+    youtubeUrl: string | null;
     createdAt: Date;
   }>;
   legislativeActs: Array<{
@@ -210,7 +210,7 @@ export default function NovidadesClient({
               <div key={i} className="p-4 border border-amber-100 rounded-lg bg-amber-50 mb-3">
                 <span className="text-xs font-semibold text-amber-700 uppercase tracking-wider flex items-center gap-1"><Video className="w-3 h-3" /> Vídeo</span>
                 <h4 className="font-semibold text-gray-900 mt-1">{video.title}</h4>
-                <a href={video.youtubeUrl} target="_blank" rel="noopener noreferrer" className="text-sm text-amber-700 font-medium hover:underline mt-1 inline-block">Assistir &rarr;</a>
+                <a href={video.youtubeUrl ?? ''} target="_blank" rel="noopener noreferrer" className="text-sm text-amber-700 font-medium hover:underline mt-1 inline-block">Assistir &rarr;</a>
               </div>
             ))}
           </Section>

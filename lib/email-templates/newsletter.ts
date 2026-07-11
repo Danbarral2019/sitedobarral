@@ -25,7 +25,7 @@ export interface MonthlyNewsletterData {
   authorContent: {
     blogPosts: Array<{ title: string; slug: string; excerpt: string; publishedAt: Date }>;
     publications: Array<{ title: string; type: string; description: string; externalUrl: string | null; publishedAt: Date }>;
-    videos: Array<{ title: string; courseId: string; youtubeUrl: string }>;
+    videos: Array<{ title: string; courseId: string; youtubeUrl: string | null }>;
   };
   selectedDecisions: FilteredDecision[];
   documentsByCategory: Record<string, Array<{
@@ -309,7 +309,7 @@ function renderAuthorContentSection(authorContent: MonthlyNewsletterData['author
           <td style="padding:14px 16px;">
             <p style="margin:0 0 2px 0;font-size:11px;color:#92400e;font-family:Arial,Helvetica,sans-serif;text-transform:uppercase;letter-spacing:0.5px;font-weight:600;">&#127909; V&#237;deo</p>
             <h3 style="margin:0 0 6px 0;font-size:15px;color:#1e293b;font-family:Arial,Helvetica,sans-serif;font-weight:600;">${video.title}</h3>
-            <a href="${video.youtubeUrl}" style="color:#d97706;font-size:13px;font-weight:600;font-family:Arial,Helvetica,sans-serif;text-decoration:none;">Assistir &rarr;</a>
+            <a href="${video.youtubeUrl ?? ''}" style="color:#d97706;font-size:13px;font-weight:600;font-family:Arial,Helvetica,sans-serif;text-decoration:none;">Assistir &rarr;</a>
           </td>
         </tr>
       </table>`;

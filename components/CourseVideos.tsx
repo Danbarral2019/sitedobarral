@@ -3,14 +3,16 @@
 import { useState } from 'react';
 import Image from 'next/image';
 import { Play, Youtube, ExternalLink } from 'lucide-react';
+import HostedVideoPlayer from '@/components/lms/HostedVideoPlayer';
 
 interface CourseVideo {
   id: string;
   title: string;
   description?: string | null;
-  youtubeUrl: string;
-  youtubeId: string;
+  youtubeUrl?: string | null;
+  youtubeId?: string | null;
   thumbnailUrl?: string | null;
+  storageType?: 'youtube' | 'r2';
 }
 
 interface CourseVideosProps {
@@ -29,7 +31,8 @@ export default function CourseVideos({ videos, displayMode = 'thumbnails' }: Cou
   // Função para obter URL da thumbnail do YouTube
   const getThumbnailUrl = (video: CourseVideo): string => {
     if (video.thumbnailUrl) return video.thumbnailUrl;
-    return `https://img.youtube.com/vi/${video.youtubeId}/maxresdefault.jpg`;
+    if (video.youtubeId) return `https://img.youtube.com/vi/${video.youtubeId}/maxresdefault.jpg`;
+    return '';
   };
 
   // Função para obter URL de embed do YouTube
@@ -118,15 +121,19 @@ export default function CourseVideos({ videos, displayMode = 'thumbnails' }: Cou
                 key={video.id}
                 className="bg-white rounded-xl border-2 border-gray-200 overflow-hidden hover:shadow-lg transition-shadow"
               >
-                {/* Player do YouTube */}
+                {/* Player */}
                 <div className="relative aspect-video bg-black">
-                  <iframe
-                    src={getEmbedUrl(video.youtubeId)}
-                    title={video.title}
-                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                    allowFullScreen
-                    className="absolute inset-0 w-full h-full"
-                  />
+                  {video.storageType === 'r2' ? (
+                    <HostedVideoPlayer videoId={video.id} title={video.title} />
+                  ) : (
+                    <iframe
+                      src={getEmbedUrl(video.youtubeId ?? '')}
+                      title={video.title}
+                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                      allowFullScreen
+                      className="absolute inset-0 w-full h-full"
+                    />
+                  )}
                 </div>
 
                 {/* Informações abaixo do player */}
@@ -135,15 +142,17 @@ export default function CourseVideos({ videos, displayMode = 'thumbnails' }: Cou
                     <h3 className="font-bold text-gray-900 flex-1">
                       {video.title}
                     </h3>
-                    <a
-                      href={video.youtubeUrl}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="flex items-center gap-1 text-xs text-red-600 hover:text-red-700 font-medium whitespace-nowrap"
-                    >
-                      <ExternalLink className="w-3 h-3" />
-                      Abrir no YouTube
-                    </a>
+                    {video.storageType !== 'r2' && video.youtubeUrl && (
+                      <a
+                        href={video.youtubeUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex items-center gap-1 text-xs text-red-600 hover:text-red-700 font-medium whitespace-nowrap"
+                      >
+                        <ExternalLink className="w-3 h-3" />
+                        Abrir no YouTube
+                      </a>
+                    )}
                   </div>
                   {video.description && (
                     <p className="text-sm text-gray-600">
@@ -193,13 +202,17 @@ export default function CourseVideos({ videos, displayMode = 'thumbnails' }: Cou
 
             {/* Player */}
             <div className="relative aspect-video bg-black">
-              <iframe
-                src={getEmbedUrl(selectedVideo.youtubeId)}
-                title={selectedVideo.title}
-                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                allowFullScreen
-                className="absolute inset-0 w-full h-full"
-              />
+              {selectedVideo.storageType === 'r2' ? (
+                <HostedVideoPlayer videoId={selectedVideo.id} title={selectedVideo.title} />
+              ) : (
+                <iframe
+                  src={getEmbedUrl(selectedVideo.youtubeId ?? '')}
+                  title={selectedVideo.title}
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                  allowFullScreen
+                  className="absolute inset-0 w-full h-full"
+                />
+              )}
             </div>
 
             {/* Informações */}
@@ -212,15 +225,17 @@ export default function CourseVideos({ videos, displayMode = 'thumbnails' }: Cou
               )}
 
               <div className="flex gap-3">
-                <a
-                  href={selectedVideo.youtubeUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex-1 bg-red-600 text-white px-6 py-3 rounded-xl font-bold hover:bg-red-700 transition-colors flex items-center justify-center gap-2"
-                >
-                  <ExternalLink className="w-5 h-5" />
-                  Abrir no YouTube
-                </a>
+                {selectedVideo.storageType !== 'r2' && selectedVideo.youtubeUrl && (
+                  <a
+                    href={selectedVideo.youtubeUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex-1 bg-red-600 text-white px-6 py-3 rounded-xl font-bold hover:bg-red-700 transition-colors flex items-center justify-center gap-2"
+                  >
+                    <ExternalLink className="w-5 h-5" />
+                    Abrir no YouTube
+                  </a>
+                )}
                 <button
                   onClick={handleCloseModal}
                   className="px-6 py-3 bg-gray-200 text-gray-800 rounded-xl font-bold hover:bg-gray-300 transition-colors"

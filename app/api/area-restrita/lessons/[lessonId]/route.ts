@@ -51,6 +51,13 @@ export async function GET(
             description: true,
             displayOrder: true,
             isRequired: true,
+            courseVideoId: true,
+            courseVideo: {
+              select: {
+                storageType: true,
+                youtubeId: true,
+              },
+            },
           },
         },
       },
@@ -151,7 +158,22 @@ export async function GET(
           note: ld.note,
           document: ld.document,
         })),
-        videos: lesson.videos,
+        videos: lesson.videos.map((lv) => {
+          const cv = lv.courseVideo; // pode ser null
+          const isR2 = cv?.storageType === 'r2';
+          return {
+            id: lv.id,
+            title: lv.title,
+            description: lv.description ?? null,
+            displayOrder: lv.displayOrder,
+            isRequired: lv.isRequired,
+            storageType: isR2 ? ('r2' as const) : ('youtube' as const),
+            // R2: id do CourseVideo mestre p/ o player buscar a URL assinada
+            courseVideoId: isR2 ? lv.courseVideoId : null,
+            // YouTube: id próprio da lesson OU do courseVideo referenciado
+            youtubeId: lv.youtubeId ?? cv?.youtubeId ?? null,
+          };
+        }),
       },
       progress: progress
         ? {

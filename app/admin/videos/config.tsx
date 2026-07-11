@@ -135,7 +135,9 @@ export function createVideosConfig({ courses: coursesList }: VideosConfigProps):
         icon: ExternalLink,
         color: 'text-red-600',
         action: (video) => {
-          window.open(video.youtubeUrl, '_blank', 'noopener,noreferrer');
+          if (video.youtubeUrl) {
+            window.open(video.youtubeUrl, '_blank', 'noopener,noreferrer');
+          }
         },
       },
       {

@@ -10,11 +10,16 @@ export interface CourseVideo {
   courseId: string;
   title: string;
   description: string | null;
-  youtubeUrl: string;
-  youtubeId: string;
+  youtubeUrl: string | null;
+  youtubeId: string | null;
   thumbnailUrl: string | null;
   displayOrder: number;
   isActive: boolean;
+  storageType: string;
+  r2Key: string | null;
+  contentType: string | null;
+  sizeBytes: string | null;
+  durationSeconds: number | null;
   createdAt: Date;
   updatedAt: Date;
 }

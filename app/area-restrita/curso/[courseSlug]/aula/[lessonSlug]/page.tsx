@@ -66,11 +66,12 @@ interface LessonData {
   videos: Array<{
     id: string;
     title: string;
-    youtubeUrl: string;
-    youtubeId: string;
     description?: string | null;
     displayOrder: number;
     isRequired: boolean;
+    storageType: 'youtube' | 'r2';
+    courseVideoId?: string | null;
+    youtubeId?: string | null;
   }>;
 }
 
