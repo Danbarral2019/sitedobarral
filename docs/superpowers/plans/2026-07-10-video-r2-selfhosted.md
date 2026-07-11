@@ -910,14 +910,21 @@ git commit -m "feat(videos): HostedVideoPlayer (video HTML5 + URL assinada)"
 ## Task 7: Branch de render por storageType (queries + componentes)
 
 **Files:**
+- Modify: `lib/videos.ts` (interface `CourseVideo`: youtube nulável + campos R2)
 - Modify: `app/api/area-restrita/lessons/[lessonId]/route.ts` (select de vídeos da lição)
 - Modify: `app/api/area-restrita/batch-data/route.ts` (~L141-156, select de courseVideo)
 - Modify: `components/lms/LessonVideos.tsx`
 - Modify: `components/CourseVideos.tsx`
+- Modify: `app/api/cron/monthly-newsletter/route.ts` (~L297) e `app/novidades/page.tsx` (~L97) — consumidores de YouTube que quebram com youtubeUrl nulável
 
 **Interfaces:**
 - Consumes: `HostedVideoPlayer` (Task 6).
 - Produces: cada item de vídeo entregue ao componente ganha `storageType: 'youtube' | 'r2'` e, para R2, o `id` do CourseVideo a passar ao player.
+
+> **META DE VERIFICAÇÃO DESTA TASK: `npx tsc --noEmit -p tsconfig.json` sai LIMPO** (0 erros). A Task 1 tornou `youtubeUrl/youtubeId` nuláveis, o que hoje gera **7 erros** de tipo em consumidores que assumiam não-nulo. Esta task resolve TODOS. Lista dos 7 (arquivo:linha):
+> 1. `lib/videos.ts:61` — interface `CourseVideo` hand-written tem `youtubeUrl: string`; **atualizar** para `youtubeUrl: string | null; youtubeId: string | null;` e **adicionar** `storageType: string; r2Key: string | null; contentType: string | null; sizeBytes: string | null; durationSeconds: number | null;`. Isso cascata-corrige `app/admin/recursos/page.tsx:32`, `app/admin/videos/page.tsx:36`, `app/admin/videos/VideosClient.tsx:33` (todos usam essa interface).
+> 2. `app/api/area-restrita/batch-data/route.ts:141` — corrigido no Step 4 (widen do tipo local + `storageType`).
+> 3. `app/api/cron/monthly-newsletter/route.ts:297` e `app/novidades/page.tsx:97` — superfícies **YouTube**. Adicionar `where: { storageType: 'youtube' }` (ou `youtubeId: { not: null }`) ao `courseVideo.findMany` desses arquivos (vídeos R2 não pertencem a essas superfícies públicas de embed) **e** widen a anotação local do array para `youtubeUrl: string | null` onde o TS exigir. Se `youtubeUrl` for usado para montar link/embed, garantir não-nulo via o filtro acima (ou `?? ''`).
 
 - [ ] **Step 1: Inspecionar o select de vídeos da lição**
 
@@ -1035,15 +1042,17 @@ export default function LessonVideos({ videos }: LessonVideosProps) {
 
 Em `app/api/area-restrita/batch-data/route.ts` (~L141-156), adicionar `storageType: true` ao `select` do `courseVideo.findMany`. Em `components/CourseVideos.tsx`, aplicar o mesmo branch: `storageType==='r2'` → `<HostedVideoPlayer videoId={video.id} title={video.title} />`; senão iframe/thumbnail YouTube existente. Ajustar a interface de props do componente para incluir `storageType: 'youtube' | 'r2'` (default tratado como youtube quando ausente).
 
-- [ ] **Step 5: Verificar build e typecheck**
+- [ ] **Step 5: Corrigir a interface `lib/videos.ts` e os consumidores YouTube; tsc limpo**
+
+Atualizar `lib/videos.ts` (interface `CourseVideo`: youtube nulável + campos R2, conforme a META no topo da task) e os dois consumidores YouTube (`monthly-newsletter/route.ts`, `novidades/page.tsx` — filtrar `storageType:'youtube'` + widen do tipo local).
 
 Run: `npx tsc --noEmit -p tsconfig.json`
-Expected: sem erros. (Se algum consumidor de `CourseVideos`/`LessonVideos` reclamar de tipo, incluir `storageType` no mapeamento daquela query.)
+Expected: **0 erros** (os 7 erros listados na META resolvidos). Rodar também `npm run test:run` para garantir que nada regrediu.
 
 - [ ] **Step 6: Commit**
 
 ```bash
-git add app/api/area-restrita/lessons app/api/area-restrita/batch-data components/lms/LessonVideos.tsx components/CourseVideos.tsx "app/area-restrita/curso/[courseSlug]/aula/[lessonSlug]/page.tsx"
+git add lib/videos.ts app/api/area-restrita/lessons app/api/area-restrita/batch-data components/lms/LessonVideos.tsx components/CourseVideos.tsx "app/area-restrita/curso/[courseSlug]/aula/[lessonSlug]/page.tsx" app/api/cron/monthly-newsletter/route.ts app/novidades/page.tsx
 git commit -m "feat(videos): render ramifica YouTube vs R2 por storageType"
 ```
 
