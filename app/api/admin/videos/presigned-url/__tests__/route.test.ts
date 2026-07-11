@@ -1,6 +1,5 @@
 // @vitest-environment node
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { NextRequest } from 'next/server';
 
 const { mockGetCurrentUser, mockPresign, mockRateLimit } = vi.hoisted(() => ({
   mockGetCurrentUser: vi.fn(),
@@ -16,15 +15,19 @@ vi.mock('@/lib/cache/rate-limit-helper', () => ({
   enforceRateLimit: (...a: any[]) => mockRateLimit(...a),
   getClientIp: () => '127.0.0.1',
 }));
+vi.mock('@/lib/logger', () => ({
+  apiLogger: { child: () => ({ info: vi.fn(), warn: vi.fn(), error: vi.fn() }), info: vi.fn(), warn: vi.fn(), error: vi.fn() },
+  authLogger: { info: vi.fn(), warn: vi.fn(), error: vi.fn() },
+}));
 
-const { POST } = await import('@/app/api/admin/videos/presigned-url/route');
+import { POST } from '@/app/api/admin/videos/presigned-url/route';
 
 function req(body: unknown) {
-  return new NextRequest('http://localhost/api/admin/videos/presigned-url', {
+  return new Request('http://localhost/api/admin/videos/presigned-url', {
     method: 'POST',
     headers: { 'content-type': 'application/json' },
     body: JSON.stringify(body),
-  });
+  }) as any;
 }
 
 beforeEach(() => {
