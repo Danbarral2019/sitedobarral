@@ -277,14 +277,13 @@ Ao implementar o BIA-0b, verificou-se que `assembleAnswerContext` chama `hybridS
 
 **Arquivos relevantes:** `scripts/scrape-legislative-acts-content.ts`, `scripts/audit-legislative-acts.ts`, `lib/tribunal-scrapers/`, `docs/audits/2026-04-19-legislative-acts-audit.md`, `docs/audits/2026-04-19-legislative-acts-audit.json`
 
-### T2. Verificar Redação Atualizada da ON 45 [Média]
-**Prioridade:** Média
+### T2. Verificar Redação Atualizada da ON 45 [Média] — ✅ CONCLUÍDO (2026-06-18)
 
-Confirmar se a Orientação Normativa nº 45 da AGU está com a redação mais recente no banco de dados, comparando com o texto oficial disponível no site da AGU.
+**Resolvido:** a ON 45/2014 foi atualizada para a redação consolidada mais recente (Portaria AGU 50, 26/01/2026, DOU 28/01) via `scripts/update-ons-revisadas.ts` (commit `e7d00eb7`), junto com outras 5 ONs revisadas por Portaria (04, 47, 60, 61, 86) + DocumentVersion + reembedding. Ver memória `import-ons-agu-dou`.
 
-**Arquivos relevantes:** `lib/agu-modules/`, banco de dados (tabela Document)
+**Arquivos relevantes:** `scripts/update-ons-revisadas.ts`, `lib/agu-modules/`, banco de dados (tabela Document)
 
-### T2c. Auditoria de autenticidade dos enunciados (✅ parcial concluída 2026-04-30)
+### T2c. Auditoria de autenticidade dos enunciados (✅ CONCLUÍDA — INCP fechado em 2026-05-01)
 
 | Ente | Total DB | Auditado | Resultado |
 |---|---|---|---|
@@ -292,15 +291,17 @@ Confirmar se a Orientação Normativa nº 45 da AGU está com a redação mais r
 | **IBDA** | 61 | ✅ 61/61 | match perfeito com PDF oficial `ibda.com.br/wp-content/uploads/2025/03/ENUNCIADOS-_-DIGITAL.pdf` (III Jornada, Lei 14.133/2021). Texto integral validado |
 | **INCP** | 43 | ✅ 22/43 + 11 site-only | 22 enunciados (1-22 da 1ª Reunião Técnica) auditados via `incpbrasil.com.br/enunciados-aprovados/` (4 atualizados, 18 já idênticos). Outros 21 (números 23-43) NÃO foram localizados no site público do INCP |
 
-**Pendente pra próxima sessão:**
+**Fechamento (✅ concluído em 2026-05-01):**
 
-- [ ] **INCP 23-43 (21 enunciados)**: estão no DB mas não estão no site público do INCP. Investigar: (a) se foram apagados/movidos, (b) se estão em outra URL/PDF, (c) contato direto INCP. Hoje continuam com texto do upload original — pode ser legítimo, mas precisa validar.
-- [ ] **INCP 44-54 (11 enunciados site-only)**: estão no `incpbrasil.com.br/informativo-enunciados-2a-edicao/` mas NÃO no DB. Avaliar se vale importar (talvez sejam da 3ª Reunião Técnica?).
+- [x] **INCP 23-43** — validados contra o **PDF oficial da 2ª edição** (`data/incp-enunciados-2a-edicao-pdf-reference.json`, commit `5b173877`) + correção do texto da 3ª edição. A fonte canônica passou a ser o PDF, não o site público (que não os listava). Autenticidade resolvida.
+- [x] **INCP 44-54 (site-only)** — **importados no DB** em 2026-05-01 (`scripts/import-incp-2a-reuniao.ts` + classificação Gemini + endpoint revalidate, commit `c191ff85`; URLs CJF/IBDA também atualizadas em `c91daa2e`).
 
 **Scripts permanentes** (em `scripts/`): `scrape-cjf-enunciados.ts`, `import-cjf-enunciados.ts`, `scrape-ibda-pdf.ts`, `apply-ibda-enunciados.ts`, `scrape-incp-enunciados.ts`, `apply-incp-enunciados.ts`, `audit-enunciados-autenticidade.ts`.
 
-### T2b. Substituir paráfrase IA por texto oficial em todas as ONs [Alta]
-**Prioridade:** Alta · **Aberta em 2026-04-30** · **Leva 1 concluída em 2026-04-30**
+### T2b. Substituir paráfrase IA por texto oficial em todas as ONs — ✅ NÚCLEO CONCLUÍDO; resta só polimento
+**Prioridade:** Baixa (rebaixada) · **Aberta em 2026-04-30** · **Núcleo concluído 2026-04-30** · **Verificado no banco 2026-07-11**
+
+> **Verificação no banco de produção (2026-07-11):** 108 ONs públicas; enunciado (`description`) oficial auditado a 90,5% em abril; ON 45 + revisadas atualizadas em junho. **Bug de versionamento: SEM impacto real** — dos 57 pares com versão histórica, **0** têm a pública desatualizada vs. uma versão oculta com texto oficial (o `sync-on-public-versions` de abril já reconciliou). Resta apenas polimento de baixo valor: (a) texto integral/`content` só em 38/108 (o resto tem só o enunciado); (b) revisão humana marcada em 7/108; (c) as 7 ONs da CNU (ver abaixo) são de tema de pessoal, fora do escopo.
 
 Inspeção em 2026-04-30 (ON 102) revelou que a base de ONs tinha `description` populada com paráfrase IA, não texto oficial.
 
@@ -341,16 +342,16 @@ Auditoria comparativa DB × DOU (`scripts/audit-ons-vs-agu.ts`, removido após u
 - [x] `fix-final-stragglers.ts` tratou 5 casos especiais (ONs revogadas, substituídas, e ON 56/2018 com formato resolutivo).
 - [x] **Audit final: 95 de 105 match exato (90.5%); 3 "não-match" são falsos positivos (DB tem texto correto explicando revogação/substituição); 7 ONs antigas CNU sem fonte na listagem atual.**
 
-**Bug a corrigir em sessão futura:** scripts `apply-ons-update.ts` e `apply-ons-dou-urls.ts` usam Map por `(numero, ano)` que pode colidir com versões históricas. Deveriam filtrar `isPublic=true` na query inicial.
+**Bug de versionamento (scripts) — ✅ sem impacto vivo (verificado 2026-07-11):** os scripts `apply-ons-update.ts`/`apply-ons-dou-urls.ts` usam Map por `(numero, ano)` que poderia colidir com versões históricas. Query no banco de produção confirmou **0 ONs públicas desatualizadas** vs. versão oculta com texto oficial (57 pares checados). O `sync-on-public-versions` de abril reconciliou tudo. Se for mexer nesses scripts de novo, filtrar `isPublic=true` na query inicial por segurança — mas hoje não há dado corrompido.
 
 **Leva 4 — revisão humana (pendente):**
 
 - [ ] Admin UI já tem fluxo `reviewed=true` (botão revisar). Workflow: ler ON na rota pública → comparar com DOU oficial → marcar revisado.
 - [ ] Quando 100% revisadas, remover marca `reviewed=false` que ficou após Leva 1.
 
-**ONs intocadas pelo script (não estão na listagem atual da AGU):**
+**7 ONs antigas da CNU (1-8/2016-2018) — reavaliadas 2026-07-11:**
 
-7 ONs antigas (1-8/2016-2018) da extinta CNU/CGU. Continuam no DB com paráfrase IA até alguém adicionar manualmente o texto oficial.
+Todas as 7 estão no banco (1/2016, 2/2016, 3/2016, 4/2016, 6/2017, 7/2017, 8/2018), **`reviewed=true`**, com enunciado preenchido (não estão mais como "paráfrase pendente"). Observação importante: **várias são de tema de PESSOAL** — cessão de imóveis a servidores, estágio probatório/licença gestante, autodeclaração de cotistas em concurso — ou seja, **fora do escopo de licitações/contratos** (mesmo motivo que levou à exclusão das ON 104/106 em jun/2026). Decisão a tomar por você: manter, ou remover do acervo por estarem fora de escopo. Não é dívida de qualidade de dado.
 
 **Arquivos relevantes:** `scripts/scrape-ons-oficial.ts`, `scripts/fix-and-diff-ons.ts`, `scripts/apply-ons-update.ts`, `lib/agu-modules/orientacoes-normativas.ts`, `app/(acervo)/base-conhecimento/[categoria]/page.tsx`, banco (tabela `Document` filtrada por `category='orientacao-normativa'`).
 
