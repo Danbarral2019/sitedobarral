@@ -349,9 +349,11 @@ Auditoria comparativa DB × DOU (`scripts/audit-ons-vs-agu.ts`, removido após u
 - [ ] Admin UI já tem fluxo `reviewed=true` (botão revisar). Workflow: ler ON na rota pública → comparar com DOU oficial → marcar revisado.
 - [ ] Quando 100% revisadas, remover marca `reviewed=false` que ficou após Leva 1.
 
-**7 ONs antigas da CNU (1-8/2016-2018) — reavaliadas 2026-07-11:**
+**7 ONs antigas da CNU (1-8/2016-2018) — reavaliadas e triadas 2026-07-11 ✅:**
 
-Todas as 7 estão no banco (1/2016, 2/2016, 3/2016, 4/2016, 6/2017, 7/2017, 8/2018), **`reviewed=true`**, com enunciado preenchido (não estão mais como "paráfrase pendente"). Observação importante: **várias são de tema de PESSOAL** — cessão de imóveis a servidores, estágio probatório/licença gestante, autodeclaração de cotistas em concurso — ou seja, **fora do escopo de licitações/contratos** (mesmo motivo que levou à exclusão das ON 104/106 em jun/2026). Decisão a tomar por você: manter, ou remover do acervo por estarem fora de escopo. Não é dívida de qualidade de dado.
+Leitura do texto integral das 7 mostrou que **NÃO** eram todas de pessoal (a avaliação inicial pela descrição truncada errou). Triagem final:
+- **MANTIDAS (licitações — em escopo):** ON 01/2016 (cessão de uso via pregão), 02/2016 (dispensa p/ remanescente de obra, substituída pela ON 80/2024), 04/2016 (pesquisa de preços). E 06/2017 (competência da CNU — limítrofe/meta, mantida por ora).
+- **EXCLUÍDAS (tema de pessoal, fora de escopo — 2026-07-11):** ON 03/2016 (estágio probatório + licença gestante), 07/2017 (estágio probatório/Lei 8.112), 08/2018 (heteroidentificação de cotistas em concurso). Removidas via `scripts/delete-ons-cnu-pessoal.ts --apply` (mesmo critério das ON 104/106). Total de ONs públicas: 108 → **105**.
 
 **Arquivos relevantes:** `scripts/scrape-ons-oficial.ts`, `scripts/fix-and-diff-ons.ts`, `scripts/apply-ons-update.ts`, `lib/agu-modules/orientacoes-normativas.ts`, `app/(acervo)/base-conhecimento/[categoria]/page.tsx`, banco (tabela `Document` filtrada por `category='orientacao-normativa'`).
 
