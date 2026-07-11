@@ -294,6 +294,11 @@ vi.mock('@/lib/cache/rate-limit-helper', () => ({
   enforceRateLimit: (...a: any[]) => mockRateLimit(...a),
   getClientIp: () => '127.0.0.1',
 }));
+// withAdminApi chama apiLogger.child(); o mock global de test/setup.ts NÃO tem .child.
+vi.mock('@/lib/logger', () => ({
+  apiLogger: { child: () => ({ info: vi.fn(), warn: vi.fn(), error: vi.fn() }), info: vi.fn(), warn: vi.fn(), error: vi.fn() },
+  authLogger: { info: vi.fn(), warn: vi.fn(), error: vi.fn() },
+}));
 
 import { POST } from '@/app/api/admin/videos/presigned-url/route';
 
@@ -541,6 +546,12 @@ vi.mock('@/lib/storage/r2-client', () => ({ getSignedR2Url: (...a: any[]) => moc
 vi.mock('@/lib/cache/rate-limit-helper', () => ({
   enforceRateLimit: (...a: any[]) => mockRateLimit(...a),
   getClientIp: () => '127.0.0.1',
+}));
+// withUserApi chama apiLogger.child(); o mock global de test/setup.ts NÃO tem .child.
+// Sobrescrever localmente com .child (padrão de app/api/admin/legislative-relations/.../route.test.ts).
+vi.mock('@/lib/logger', () => ({
+  apiLogger: { child: () => ({ info: vi.fn(), warn: vi.fn(), error: vi.fn() }), info: vi.fn(), warn: vi.fn(), error: vi.fn() },
+  authLogger: { info: vi.fn(), warn: vi.fn(), error: vi.fn() },
 }));
 
 import { GET } from '@/app/api/area-restrita/videos/[id]/url/route';
