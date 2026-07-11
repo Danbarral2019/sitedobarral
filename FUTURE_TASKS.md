@@ -443,11 +443,9 @@ Decisões coletadas para 14 features dormentes da campanha de saneamento.
   - Validar fluxo: aluno responde quiz → XP/badge correto
 
 #### A4. CourseVideo/LessonVideo — hostear vídeos próprios [Alta]
-- Pipeline pronto: admin upload + R2 storage configurado
-- Tarefas:
-  - Gravar aulas
-  - Upload via admin LMS
-  - Decidir resolução/codec target
+- **Correção (2026-07-10):** o "pipeline pronto" era impreciso — o vídeo do LMS era **embed de YouTube** (fura paywall). O `r2-client` só servia documentos.
+- **Vídeo privado no R2 CONSTRUÍDO (branch `feat/video-r2-selfhosted`, 2026-07-10):** modelo híbrido `CourseVideo.storageType` (`youtube`|`r2`); upload direto-pro-R2 via presigned PUT (`/api/admin/videos/presigned-url` + `/confirm`); playback protegido por matrícula com URL assinada 2h (`/api/area-restrita/videos/[id]/url`); player `<video>` (`HostedVideoPlayer`); página admin de upload. Spec/plano em `docs/superpowers/`. Decisão-mãe: R2-puro (não Cloudflare Stream — egress grátis). MVP progressivo, sem HLS (YAGNI).
+- **Pendente:** merge → deploy (dispara o `prisma db push` das colunas R2) → **E2E em produção** (admin sobe MP4 → anexa à lição → aluno matriculado assiste / não-matriculado bloqueado / URL expira) → gravar aulas + exportar MP4 H.264/AAC.
 
 #### A5. LeiArticleCrossRef — popular cross-refs entre artigos [Média]
 - Admin pronto: `CrossRefsEditor.tsx`

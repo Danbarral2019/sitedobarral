@@ -405,6 +405,7 @@ Ver código para endpoints completos.
 - 📖 Ver `lib/embeddings/document-processor.ts`, `lib/embeddings/gemini-embeddings.ts`, `lib/embeddings/text-chunker.ts`
 
 ### Outros padrões (detalhes no código)
+- **Vídeo LMS híbrido YouTube/R2** (branch `feat/video-r2-selfhosted`, 2026-07-10): `CourseVideo.storageType` (`'youtube'|'r2'`) discrimina a origem; youtube fields são nuláveis. Vídeo R2 = upload direto-pro-R2 via presigned PUT (`/api/admin/videos/{presigned-url,confirm}`, admin) e playback protegido por matrícula com URL assinada 2h (`GET /api/area-restrita/videos/[id]/url` — checa enrollment/subscription antes de `getSignedR2Url`). `LessonVideo` referencia o `CourseVideo` mestre via `courseVideoId`. `sizeBytes` é `String?` (evita BigInt na serialização). Superfícies públicas de embed (novidades/newsletter) filtram `storageType:'youtube'`.
 - **Single-flight em `withCache`** (`lib/cache/redis-client.ts`): promises concorrentes p/ a mesma key são compartilhadas (`inFlight` Map + try/finally) — default-on, sem cache poisoning.
 - **Atos Legislativos — embeddings separados** (`lib/embeddings/legislative-act-processor.ts`, `scripts/index-legislative-acts.ts`): `LegislativeActChunk` é separada de `DocumentChunk`; a busca semântica faz UNION ALL entre as duas e `sourceType` ('document' | 'legislative-act' | 'tribunal-decision') diferencia a origem.
 - **Document Versioning** (`DocumentVersion`): cada update cria uma versão; significance scoring (0-100) prioriza a notificação; admin revisa antes de publicar aos alunos.
