@@ -4,6 +4,7 @@ import { NotFoundError, ValidationError } from '@/lib/errors/api-error';
 import { fileExistsInR2 } from '@/lib/storage/r2-client';
 import { prisma } from '@/lib/prisma';
 import { CacheInvalidation } from '@/lib/cache/redis-client';
+import { apiLogger } from '@/lib/logger';
 
 interface Body {
   courseId: string;
@@ -55,7 +56,9 @@ export const POST = withAdminApi(async (request) => {
     },
   });
 
-  CacheInvalidation.courseVideos().catch(() => {});
+  CacheInvalidation.courseVideos().catch((err) =>
+    apiLogger.error({ err }, 'Falha ao invalidar cache de vídeos após confirm R2')
+  );
 
   return NextResponse.json({ video }, { status: 201 });
 });
