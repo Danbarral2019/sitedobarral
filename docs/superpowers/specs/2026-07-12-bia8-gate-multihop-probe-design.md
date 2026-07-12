@@ -1,6 +1,6 @@
 # Probe multi-hop para o gate do BIA-8 (GraphRAG)
 
-**Data:** 2026-07-12 · **Status:** desenho aprovado, aguardando plano de implementação
+**Data:** 2026-07-12 · **Status:** ✅ **VEREDITO: NO-GO** — probe executado, gate não abriu. BIA-8 arquivado (ver "Resultado do probe").
 
 ## Contexto
 
@@ -112,6 +112,16 @@ Ao instanciar as 6 perguntas validadas pelo Daniel contra o acervo, dois achados
 2. **Bug de produção corrigido — Decreto 11.890/2024.** As perguntas 3 (art. 26) e 6 (margem de preferência) pareciam depender de um decreto ausente (12.218), mas a investigação mostrou que o 12.218 apenas **altera** o 11.890 (que segue vigente — foi inclusive alterado de novo em 2025 pelo 12.771). O 11.890 estava marcado `revoked=true` por **falso positivo** do detector de revogação (leu nota de revogação parcial de um inciso como revogação total). Como a busca filtra `la.revoked = false` (`lib/embeddings/vector-search.ts:410`), a **norma vigente de margem de preferência estava invisível para a BIA**. Corrigido para `revoked=false` (`scripts/audit-revogados-falsos-positivos.ts --apply`); auditoria dos 18 confirmou o bug **isolado** (só 1 falso positivo; os outros 17 são revogações totais legítimas).
 
 **Implicação para o gate:** reforça o **NO-GO**. Parte da aparente "necessidade multi-hop" (perguntas 3 e 6) era, na verdade, um documento escondido por erro de curadoria — resolvido sem nenhum GraphRAG, exatamente o Nível 1 da escada (dado presente, filtrado por flag errada). O 12.218 será importado depois (decreto alterador, não bloqueante). As perguntas 3 e 6, pós-correção, viraram efetivamente single-hop (o 11.890 responde direto), então o núcleo multi-hop do probe se concentra nas perguntas 1, 2, 4, 5.
+
+## Resultado do probe (12/07/2026) — NO-GO
+
+Rodadas as 4 perguntas multi-hop remanescentes (P1 valores, P2 SRP, P4 terceirização, P5 desfazimento) contra a busca real (`hybridSearch`, o mesmo motor da BIA). Em **todas as 4**, a norma vigente correta apareceu no topo do retrieval (P2/P4/P5 em #1; P1 em #3), acompanhada de contexto pertinente (Manual TCU, art. 75). Os decretos revogados não aparecem — a busca já os filtra (`la.revoked=false`).
+
+Aplicando a escada de remédios: nenhuma das 4 chega ao Nível 2, quanto mais ao Nível 3. O retrieval entrega o contexto relacional certo (a norma vigente que substituiu a antiga) **sem GraphRAG**, porque o design "filtrar revogados + similaridade" já resolve o salto de revogação. As perguntas 3 e 6 eram bug de dado (Nível 1), corrigido.
+
+**Conclusão:** o gate **não abriu**. Não há evidência de que as respostas erram por falta de contexto relacional/multi-hop. **BIA-8 arquivado.** Reabertura só com o critério objetivo desta spec (queries multi-hop reais que cheguem ao Nível 3) — que este probe não encontrou. Ganhos de qualidade seguem em síntese (BIA-1) e dados/curadoria.
+
+Ressalva de escopo: o probe mediu **retrieval** (o contexto certo aparece?), que é exatamente o que o gate do BIA-8 questiona. Se a resposta final ainda errar com o contexto certo em mãos, é falha de **síntese** (BIA-1 / Nível 0), não de grafo.
 
 ## Referências
 
