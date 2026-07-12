@@ -12,6 +12,16 @@ Este documento desenha o experimento que **decide o gate de forma auditável**: 
 
 **Objetivo:** montar um subconjunto multi-hop na régua e um procedimento de decisão (a "escada de remédios") que classifique cada falha pela causa-raiz, isolando o subconjunto de falhas que **somente** o GraphRAG resolveria.
 
+### Estado da infra de grafo (achado 12/07/2026)
+
+Consulta ao banco (`scripts/list-multihop-triggers.ts`) revelou que a "infra de grafo que já existe", que o card do BIA-8 mandava aproveitar, está **crua**:
+- `LegislativeActRelation`: **0 relações `confirmed`**, **274 `pending`** (100% heurística; 186 com confiança ≥0.9; 58 tocam a Lei 14.133). Distribuição: regulamenta 99, altera 92, revoga 44, complementa 33, modifica 6.
+- 18 atos com `revoked=true`, mas o salto está só como **texto livre** em `revokedNote` (ex.: "Revogado pelo Decreto nº 12.807, de 2025") — não é FK navegável.
+
+**Decisão (12/07):** estruturar o grafo **antes** do probe (confirmar as pending relevantes), em vez de extrair saltos do `revokedNote`. Isso deixa a infra 3a pronta de fato e é reaproveitável se o gate abrir. Ver **Fase 0**.
+
+A curadoria não parte do zero — já existem: validador `scripts/validate-relation-chronology.ts --apply` (auto-rejeita `revoga`/`altera` cronologicamente impossíveis), UI `/admin/legislative-relations` (filtro por tipo/confiança/busca) e endpoint `POST /api/admin/legislative-relations/[id]` `{action}`.
+
 **Não-objetivos (YAGNI):**
 - **Não** construir o expansor de grafo / GraphRAG em si. Isso é o próprio BIA-8 e só começa se este probe abrir o gate.
 - **Não** minerar logs de uso (decisão: fonte = experiência de domínio do Daniel).
@@ -47,10 +57,20 @@ Para **cada** query multi-hop que não é bem respondida, aplico os níveis em o
 | **3 — Grafo** | O alvo existe mas **só** é encontrável seguindo uma relação entre documentos; nenhuma busca por similaridade o traz porque o texto da pergunta não se parece com o texto do alvo. | Confirmar que o alvo não aparece em nenhum `n` razoável E que a única forma de alcançá-lo é por relação. Distinguir os dois sub-casos abaixo. | **Abre o BIA-8.** |
 
 O Nível 3 tem **dois sub-casos**, ambos justificam o BIA-8 mas com custos diferentes:
-- **3a — relação já estruturada** (saltos de legislação: `revoga`/`altera`/`regulamenta`, via `LegislativeActRelation` com `reviewStatus='confirmed'`). O grafo é "usar o que já temos" — GraphRAG relativamente barato, aproveita a infra existente.
+- **3a — relação estruturável** (saltos de legislação: `revoga`/`altera`/`regulamenta`, via `LegislativeActRelation`). A tabela e o detector existem, mas o grafo está vazio (0 confirmadas) — a **Fase 0** o popula. Depois disso, GraphRAG relativamente barato, sobre infra própria.
 - **3b — relação ainda não estruturada** (citações entre acórdãos: hoje só texto em `tcuLegislacao`, sem tabela de relação). Justifica o BIA-8 também, mas exige **primeiro** extrair/estruturar o grafo de citações — custo maior, deve ser sinalizado como pré-requisito no relatório de decisão.
 
 O Nível 0 é explícito e no topo justamente porque a evidência do BIA-1 mostra que é o vencedor mais provável (ex.: `t-publicacao-lai-01` omitiu o Inf. 212/2014 que estava no material). Sem ele, uma query multi-hop que "não citou a fonte" seria erroneamente creditada a multi-hop.
+
+## Fase 0 — estruturar o grafo de legislação (pré-requisito)
+
+Decisão de 12/07: precede o probe. Usa só ferramentas existentes.
+
+1. **Triagem automática:** rodar `scripts/validate-relation-chronology.ts --apply` (e o de hierarquia) para auto-rejeitar as `revoga`/`altera` impossíveis. Reduz o volume sem esforço manual.
+2. **Curadoria focada (Daniel):** na UI `/admin/legislative-relations`, filtrar por `revoga` + busca "14.133" + confiança ≥0.9 e confirmar/rejeitar. Prioridade = as ~58 que tocam a Lei 14.133 e os elos das cadeias temáticas de licitação (valores/dispensa, SRP, art. 26, terceirização, desfazimento, margem de preferência). **Não** precisa varrer as 274 — só o que serve às queries multi-hop.
+3. **Saída:** grafo com relações `confirmed` suficientes para instanciar o ground truth `hop1/hop2Targets` das queries. Só então o probe (Fases seguintes) tem sobre o que rodar.
+
+Gatilhos concretos já extraídos (cadeias de revogação reais do acervo) estão em `scripts/list-multihop-triggers.ts` e foram enviados ao Daniel para marcar quais viram query.
 
 ## Componentes / entregáveis
 
