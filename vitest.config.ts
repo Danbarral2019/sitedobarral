@@ -36,10 +36,10 @@ export default defineConfig({
       // vivo (bloqueia regressão) sem quebrar pela flutuação do denominador.
       // A cada lote de testes, SUBIR estes números. Meta de longo prazo: 80/70.
       thresholds: {
-        lines: 73,
-        functions: 69,
-        branches: 62,
-        statements: 72,
+        lines: 74,
+        functions: 70,
+        branches: 63,
+        statements: 73,
       },
     },
     // Timeout maior para testes assíncronos
