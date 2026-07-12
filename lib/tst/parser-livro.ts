@@ -37,8 +37,6 @@ const PREFIX_TO_SERIE: Record<string, TstLivroSerie> = {
   PN: 'pn',
 };
 
-const PREFIX_ORDER = ['OJ-SDI1T', 'OJ-SDI1', 'OJ-SDI2', 'OJ-SDC', 'OJ-TP/OE', 'SUM', 'PN'];
-
 // Regex que casa TODOS os cabeçalhos no início de linha. Captura o prefixo e
 // o número. O lookahead garante boundary (TAB, espaço, fim de linha).
 const HEADER_RE =
@@ -77,17 +75,6 @@ export function splitLivroBlocks(rawText: string): Map<string, string> {
     }
   }
   return out;
-}
-
-function parsePrefix(rotulo: string): { prefix: string; numero: number } {
-  // Encontra o prefixo conhecido mais longo que prefixa `rotulo`.
-  for (const p of PREFIX_ORDER) {
-    if (rotulo.startsWith(`${p}-`)) {
-      const n = Number(rotulo.slice(p.length + 1));
-      return { prefix: p, numero: n };
-    }
-  }
-  throw new Error(`prefixo desconhecido em rotulo=${rotulo}`);
 }
 
 /**
