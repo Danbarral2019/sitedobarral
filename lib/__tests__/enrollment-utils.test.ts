@@ -11,8 +11,11 @@ import {
   getAccessStatusMessage,
   getAccessStatusColor,
   shouldSendExpirationNotification,
+  checkSubscriptionAccess,
+  getActivePlan,
   Enrollment,
   AccessStatus,
+  SubscriptionInfo,
 } from '../enrollment-utils';
 
 // Helper para criar datas relativas ao hoje
@@ -309,5 +312,72 @@ describe('enrollment-utils', () => {
       const enrollment = makeEnrollment({ expiresAt: daysFromNow(90) });
       expect(shouldSendExpirationNotification(enrollment, null)).toBe(true);
     });
+  });
+});
+
+// Helper para criar SubscriptionInfo com defaults
+function makeSub(partial: Partial<SubscriptionInfo> = {}): SubscriptionInfo {
+  return {
+    id: 'sub_1',
+    plan: 'basico',
+    courseId: null,
+    billingCycle: 'monthly',
+    status: 'active',
+    currentPeriodEnd: new Date(),
+    cancelAtPeriodEnd: false,
+    ...partial,
+  };
+}
+
+describe('checkSubscriptionAccess', () => {
+  it('nega acesso sem subscriptions', () => {
+    expect(checkSubscriptionAccess(undefined, '1')).toBe(false);
+    expect(checkSubscriptionAccess([], '1')).toBe(false);
+  });
+
+  it('Premium ativo dá acesso a qualquer curso', () => {
+    const subs = [makeSub({ plan: 'premium' })];
+    expect(checkSubscriptionAccess(subs, '1')).toBe(true);
+    expect(checkSubscriptionAccess(subs, '99')).toBe(true);
+  });
+
+  it('Básico ativo dá acesso apenas ao curso contratado', () => {
+    const subs = [makeSub({ plan: 'basico', courseId: '3' })];
+    expect(checkSubscriptionAccess(subs, '3')).toBe(true);
+    expect(checkSubscriptionAccess(subs, '5')).toBe(false);
+  });
+
+  it('subscription não-ativa nunca dá acesso', () => {
+    const subs = [makeSub({ plan: 'premium', status: 'canceled' })];
+    expect(checkSubscriptionAccess(subs, '1')).toBe(false);
+  });
+
+  it('plano diferente de premium/basico é negado', () => {
+    const subs = [makeSub({ plan: 'trial', courseId: '1' })];
+    expect(checkSubscriptionAccess(subs, '1')).toBe(false);
+  });
+});
+
+describe('getActivePlan', () => {
+  it('retorna null sem subscriptions', () => {
+    expect(getActivePlan(undefined)).toBeNull();
+    expect(getActivePlan([])).toBeNull();
+  });
+
+  it('prioriza premium quando há premium ativo', () => {
+    const subs = [makeSub({ plan: 'basico' }), makeSub({ plan: 'premium' })];
+    expect(getActivePlan(subs)).toBe('premium');
+  });
+
+  it('retorna basico quando só há básico ativo', () => {
+    expect(getActivePlan([makeSub({ plan: 'basico' })])).toBe('basico');
+  });
+
+  it('ignora subscriptions não-ativas e retorna null', () => {
+    const subs = [
+      makeSub({ plan: 'premium', status: 'canceled' }),
+      makeSub({ plan: 'basico', status: 'past_due' }),
+    ];
+    expect(getActivePlan(subs)).toBeNull();
   });
 });
