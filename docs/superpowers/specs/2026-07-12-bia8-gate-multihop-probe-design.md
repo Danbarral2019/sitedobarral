@@ -104,6 +104,15 @@ Limiar sugerido para GO: **≥ 30% das queries multi-hop** (≥ ~4 de ~12) param
 - **Sanidade da escada:** ao menos uma query deve, por construção, cair em Nível 0 e outra em Nível 3 (casos-controle), para provar que o diagnóstico discrimina. Se tudo cai no mesmo nível, o instrumento não está medindo.
 - **Reprodutibilidade:** `eval:run` no bloco multi-hop deve ser determinístico o suficiente para regressão futura (mesma régua que serve de baseline no dia em que o BIA-8 rodar).
 
+## Achados durante a preparação (12/07/2026)
+
+Ao instanciar as 6 perguntas validadas pelo Daniel contra o acervo, dois achados relevantes:
+
+1. **5/6 cadeias estão no acervo e indexadas** (perguntas 1, 2, 4, 5 prontas para o probe).
+2. **Bug de produção corrigido — Decreto 11.890/2024.** As perguntas 3 (art. 26) e 6 (margem de preferência) pareciam depender de um decreto ausente (12.218), mas a investigação mostrou que o 12.218 apenas **altera** o 11.890 (que segue vigente — foi inclusive alterado de novo em 2025 pelo 12.771). O 11.890 estava marcado `revoked=true` por **falso positivo** do detector de revogação (leu nota de revogação parcial de um inciso como revogação total). Como a busca filtra `la.revoked = false` (`lib/embeddings/vector-search.ts:410`), a **norma vigente de margem de preferência estava invisível para a BIA**. Corrigido para `revoked=false` (`scripts/audit-revogados-falsos-positivos.ts --apply`); auditoria dos 18 confirmou o bug **isolado** (só 1 falso positivo; os outros 17 são revogações totais legítimas).
+
+**Implicação para o gate:** reforça o **NO-GO**. Parte da aparente "necessidade multi-hop" (perguntas 3 e 6) era, na verdade, um documento escondido por erro de curadoria — resolvido sem nenhum GraphRAG, exatamente o Nível 1 da escada (dado presente, filtrado por flag errada). O 12.218 será importado depois (decreto alterador, não bloqueante). As perguntas 3 e 6, pós-correção, viraram efetivamente single-hop (o 11.890 responde direto), então o núcleo multi-hop do probe se concentra nas perguntas 1, 2, 4, 5.
+
 ## Referências
 
 - Memória: `bia-8-graphrag-gate.md` (veredito + critério), `busca-retrieval-trilha-fechada.md` (retrieval no teto), `feedback_eval_ground_truth_bias.md` (anti-viés de anotação), `legislacao-revogados-vinculacao.md` (flag `revoked`).
