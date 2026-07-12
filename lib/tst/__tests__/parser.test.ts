@@ -99,6 +99,113 @@ prevista no art. 71, caput e § 4º da CLT.Situação: CANCELADA
 Inteiro teor no formato HTML
 `;
 
+// Súmula mínima: só header + título, sem Observação/Tese/Situação.
+const SUMULA_MINIMA = `Súmula nº 900 do TST
+TÍTULO MÍNIMO.
+Inteiro teor no formato HTML
+`;
+
+// Situação fora do conjunto canônico (exercita o fallback heurístico).
+const SUMULA_SITUACAO_DESCONHECIDA = `Súmula nº 901 do TST
+TÍTULO X.
+Observação: (nota) - Res. 10/2010, DJ 01.01.2010Tese: Texto simples da tese.Situação: SUSPENSA
+Inteiro teor no formato HTML
+`;
+
+// Resolução sem DJ/DEJT (tipo e divulgadoEm nulos).
+const SUMULA_RES_SEM_DJ = `Súmula nº 902 do TST
+TÍTULO Y.
+Observação: (mantida) - Res. 50/2005Tese: Alguma tese aqui.Situação: CRIADA
+Inteiro teor no formato HTML
+`;
+
+// Dois artigos CLT com mesmo número base (461 e 461-A) para o desempate localeCompare.
+const SUMULA_CLT_DESEMPATE = `Súmula nº 903 do TST
+JORNADA.
+Observação: (mantida) - Res. 20/2020, DJ 01.01.2020Tese: Aplica-se o art. 461 da CLT e também o art. 461-A da CLT ao caso concreto.Situação: CRIADA
+Inteiro teor no formato HTML
+`;
+
+// Cita Lei 14.133 e dois artigos CLT distintos (exercita extractLeiArticles e
+// o ramo na≠nb do sort de extractCltArticles).
+const SUMULA_REFS_LEGAIS = `Súmula nº 904 do TST
+LICITAÇÃO E JORNADA.
+Observação: (mantida) - Res. 30/2030, DJ 01.01.2030Tese: Conforme a Lei nº 14.133, art. 18, e a Lei nº 14.133, art. 6, e ainda o art. 71 da CLT e o art. 461 da CLT, decide-se.Situação: CRIADA
+Inteiro teor no formato HTML
+`;
+
+// Observação presente, mas SEM "Tese:" (obsEnd cai em Situação).
+const SUMULA_OBS_SEM_TESE = `Súmula nº 905 do TST
+TÍTULO OBS.
+Observação: (cancelada) - Res. 40/2040, DJ 01.01.2040Situação: CANCELADA
+Inteiro teor no formato HTML
+`;
+
+// "Tese:" presente, mas SEM "Situação:" (teseEnd cai no rodapé).
+const SUMULA_TESE_SEM_SITUACAO = `Súmula nº 906 do TST
+TÍTULO TESE.
+Observação: (mantida) - Res. 50/2050, DJ 01.01.2050Tese: Uma tese sem marcador de situação ao final.
+Inteiro teor no formato HTML
+`;
+
+describe('parseSumulaBlock — campos ausentes e variações', () => {
+  it('súmula mínima (sem Observação/Tese/Situação) usa defaults conservadores', () => {
+    const p = parseSumulaBlock(SUMULA_MINIMA, 900, null);
+    expect(p.titulo).toBe('TÍTULO MÍNIMO.');
+    expect(p.observacao).toBe('');
+    expect(p.tese).toBe('');
+    expect(p.situacao).toBe('CRIADA'); // default quando não há "Situação:"
+    expect(p.situacaoMotivo).toBeNull();
+    expect(p.resolucoes).toEqual([]);
+    expect(p.ano).toBeNull();
+    expect(p.itens).toEqual([]);
+    // Markdown cai no ramo "tese única" (sem itens) e sem seções opcionais
+    expect(p.fullTextMarkdown).toContain('# Súmula nº 900 do TST');
+    expect(p.fullTextMarkdown).not.toContain('## Resoluções');
+  });
+
+  it('situação não-canônica cai no default CRIADA', () => {
+    const p = parseSumulaBlock(SUMULA_SITUACAO_DESCONHECIDA, 901, null);
+    expect(p.situacao).toBe('CRIADA');
+  });
+
+  it('resolução sem DJ/DEJT resulta em tipo e divulgadoEm nulos', () => {
+    const p = parseSumulaBlock(SUMULA_RES_SEM_DJ, 902, null);
+    expect(p.resolucoes.length).toBe(1);
+    expect(p.resolucoes[0].numero).toBe('50/2005');
+    expect(p.resolucoes[0].tipo).toBeNull();
+    expect(p.resolucoes[0].divulgadoEm).toBeNull();
+    // No markdown, a resolução aparece sem o sufixo de divulgação
+    expect(p.fullTextMarkdown).toContain('- Res. 50/2005');
+  });
+
+  it('ordena artigos CLT com desempate por localeCompare (461 vs 461-A)', () => {
+    const p = parseSumulaBlock(SUMULA_CLT_DESEMPATE, 903, null);
+    expect(p.cltArticles).toEqual(['461', '461-A']);
+  });
+
+  it('extrai artigos da Lei 14.133 e ordena CLT com números distintos', () => {
+    const p = parseSumulaBlock(SUMULA_REFS_LEGAIS, 904, null);
+    // Ordenado numericamente (6 antes de 18) e deduplicado
+    expect(p.leiArticles).toEqual(['6', '18']);
+    expect(p.cltArticles).toEqual(['71', '461']);
+  });
+
+  it('observação sem "Tese:" delimita a observação até "Situação:"', () => {
+    const p = parseSumulaBlock(SUMULA_OBS_SEM_TESE, 905, null);
+    expect(p.observacao).toContain('cancelada');
+    expect(p.tese).toBe('');
+    expect(p.situacao).toBe('CANCELADA');
+  });
+
+  it('tese sem "Situação:" delimita a tese até o rodapé e usa default CRIADA', () => {
+    const p = parseSumulaBlock(SUMULA_TESE_SEM_SITUACAO, 906, null);
+    expect(p.tese).toContain('Uma tese sem marcador de situação');
+    expect(p.tese).not.toContain('Inteiro teor');
+    expect(p.situacao).toBe('CRIADA');
+  });
+});
+
 describe('splitIntoSumulaBlocks', () => {
   it('separa múltiplas súmulas no mesmo texto', () => {
     const text = `${SUMULA_1}\n${SUMULA_8}\n${SUMULA_331}`;

@@ -216,3 +216,77 @@ describe('parseLivroText — integração com mapa de URLs', () => {
     expect(all.find((b) => b.rotulo === 'OJ-TP/OE-1')!.url).toBeNull();
   });
 });
+
+describe('parseLivroBlock — situação REVISTA', () => {
+  it('detecta status "(revista)" no cabeçalho', () => {
+    const bloco = `SUM-100\tTÍTULO QUALQUER (revista) – Res. 10/2010, DJ 01.01.2010
+Tese da súmula revista.
+Histórico:
+Redação original - RA 1/1970`;
+    const p = parseLivroBlock(bloco);
+    expect(p.situacao).toBe('REVISTA');
+    expect(p.situacaoMotivo).toBe('revista');
+  });
+});
+
+describe('parseLivroBlock — extração de referências legais', () => {
+  it('extrai e ordena artigos da Lei 14.133 citados', () => {
+    const bloco = `SUM-200\tCONTRATAÇÃO PÚBLICA – Res. 20/2020
+Aplica-se a Lei 14.133, art. 18, bem como a Lei 14.133, art. 6, à espécie.
+Histórico:
+Redação original`;
+    const p = parseLivroBlock(bloco);
+    // Set deduplica e o retorno vem ordenado numericamente
+    expect(p.leiArticles).toEqual(['6', '18']);
+  });
+
+  it('extrai e ordena artigos da CLT, com desempate por localeCompare', () => {
+    const bloco = `SUM-201\tJORNADA. ART. 71 DA CLT
+Conforme o art. 71 da CLT e o art. 461 da CLT, além do art. 461-A da CLT.
+Histórico:
+Redação original`;
+    const p = parseLivroBlock(bloco);
+    // Ordena numericamente (71 < 461) e, no empate 461 vs 461-A, por localeCompare
+    expect(p.cltArticles).toEqual(['71', '461', '461-A']);
+  });
+});
+
+describe('parseLivroBlock — bloco inválido', () => {
+  it('lança erro quando o cabeçalho não casa o padrão', () => {
+    expect(() => parseLivroBlock('linha sem rótulo válido\ncorpo qualquer')).toThrow(
+      /bloco sem cabeçalho válido/,
+    );
+  });
+});
+
+describe('parseLivroBlock — bloco de uma linha (sem corpo)', () => {
+  it('trata cabeçalho sem quebra de linha (rest vazio)', () => {
+    const p = parseLivroBlock('SUM-300\tTÍTULO CURTO – Res. 30/2030, DJ 01.01.2030');
+    expect(p.rotulo).toBe('SUM-300');
+    expect(p.tese).toBe('');
+    expect(p.itens).toEqual([]);
+    expect(p.historico).toEqual([]);
+  });
+});
+
+describe('splitLivroBlocks — dedup mantém o bloco mais longo', () => {
+  it('quando o mesmo rótulo aparece duas vezes, guarda o trecho maior', () => {
+    const curto = `SUM-400\tref curta`;
+    const longo = `SUM-400\tVERSÃO COMPLETA E MAIS LONGA DO MESMO VERBETE – Res. 40/2040
+Tese detalhada com bastante conteúdo para superar o comprimento do bloco curto.`;
+    // O bloco longo aparece depois; o dedup deve preferi-lo por ser maior.
+    const map = splitLivroBlocks(`${curto}\n${longo}`);
+    expect(map.size).toBe(1);
+    expect(map.get('SUM-400')!.length).toBeGreaterThan(curto.length);
+  });
+
+  it('não substitui quando o bloco repetido é menor que o já guardado', () => {
+    const curto = `SUM-401\tref curta`;
+    const longo = `SUM-401\tVERSÃO COMPLETA E MAIS LONGA DO MESMO VERBETE – Res. 40/2040
+Tese detalhada com bastante conteúdo para superar o comprimento do bloco curto.`;
+    // Agora o longo vem primeiro; o curto seguinte não deve sobrescrevê-lo.
+    const map = splitLivroBlocks(`${longo}\n${curto}`);
+    expect(map.size).toBe(1);
+    expect(map.get('SUM-401')!).toContain('VERSÃO COMPLETA');
+  });
+});
