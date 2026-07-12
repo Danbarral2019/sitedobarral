@@ -49,7 +49,10 @@ export function detectLeiArticles(text: string): string[] {
     while ((match = pattern.exec(text)) !== null) {
       const num = match[1].replace(/^0+/, '');
       if (num) {
-        articles.add(`Art. ${num}`);
+        // Número puro ("75"), sem prefixo — formato canônico do índice
+        // LEI_14133_ARTIGOS e dos campos leiArticlesArr de Document/
+        // LegislativeAct. Gravar "Art. 75" quebra o cruzamento decisão↔artigo.
+        articles.add(num);
       }
     }
   }

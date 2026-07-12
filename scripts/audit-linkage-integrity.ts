@@ -30,24 +30,14 @@ interface BadLink {
 
 const VALID_ARTICLES = new Set(Object.keys(LEI_14133_ARTIGOS));
 
-function parseLeiArticles(json: string | null): string[] {
-  if (!json) return [];
-  try {
-    const arr = JSON.parse(json);
-    return Array.isArray(arr) ? arr.map(String) : [];
-  } catch {
-    return [];
-  }
-}
-
 async function auditLeiArticlesInLegislativeActs(): Promise<BadLink[]> {
   const acts = await prisma.legislativeAct.findMany({
-    where: { leiArticles: { not: null } },
+    where: { leiArticlesArr: { isEmpty: false } },
     select: { id: true, fullNumber: true, leiArticlesArr: true },
   });
   const bad: BadLink[] = [];
   for (const a of acts) {
-    const arts = parseLeiArticles(a.leiArticles);
+    const arts = a.leiArticlesArr;
     for (const num of arts) {
       if (!VALID_ARTICLES.has(num)) {
         bad.push({
@@ -67,12 +57,12 @@ async function auditLeiArticlesInLegislativeActs(): Promise<BadLink[]> {
 
 async function auditLeiArticlesInTribunalDecisions(): Promise<BadLink[]> {
   const decisions = await prisma.tribunalDecision.findMany({
-    where: { leiArticles: { not: null } },
+    where: { leiArticlesArr: { isEmpty: false } },
     select: { id: true, tribunalCode: true, decisionNumber: true, leiArticlesArr: true },
   });
   const bad: BadLink[] = [];
   for (const d of decisions) {
-    const arts = parseLeiArticles(d.leiArticles);
+    const arts = d.leiArticlesArr;
     for (const num of arts) {
       if (!VALID_ARTICLES.has(num)) {
         bad.push({
