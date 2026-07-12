@@ -12,6 +12,11 @@ import { Metadata } from 'next';
 import { prisma } from '@/lib/prisma';
 import { LegislativeRelationsClient } from './LegislativeRelationsClient';
 
+// Página de admin que consulta o banco a cada acesso (fila de revisão viva).
+// Sem isto, o Next tenta prerenderizá-la no build e a query Prisma falha
+// quando o DB não está acessível no ambiente de build (Build Check do CI).
+export const dynamic = 'force-dynamic';
+
 export const metadata: Metadata = {
   title: 'Fila de relações pendentes — Admin',
   robots: { index: false, follow: false },
