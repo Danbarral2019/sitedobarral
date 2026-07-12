@@ -551,6 +551,95 @@ describe('Documents Module', () => {
     });
   });
 
+  describe('cobertura de filtros de período e campos', () => {
+    it('listDocuments: período desconhecido cai no default (sem filtro de data)', async () => {
+      mockPrisma.document.count.mockResolvedValue(0 as never);
+      mockPrisma.document.findMany.mockResolvedValue([] as never);
+      await listDocuments({ period: 'periodo-invalido' });
+      // default usa new Date(0) → o filtro uploadedAt.gte fica no início dos tempos
+      const call = mockPrisma.document.findMany.mock.calls[0][0];
+      expect(call.where.uploadedAt.gte.getTime()).toBe(0);
+    });
+
+    it('updateDocument: atualiza todos os campos suportados', async () => {
+      mockPrisma.document.update.mockResolvedValue(mockDocument as never);
+      await updateDocument('doc-123', {
+        title: 'Novo',
+        description: '',
+        type: 'link',
+        category: 'parecer',
+        isPublic: false,
+        url: 'https://nova.url',
+        size: 0,
+        tags: ['a', 'b'],
+        leiArticles: ['1', '2'],
+      });
+      const data = mockPrisma.document.update.mock.calls[0][0].data;
+      expect(data.title).toBe('Novo');
+      expect(data.description).toBeNull(); // '' → null
+      expect(data.category).toBe('parecer');
+      expect(data.isPublic).toBe(false);
+      expect(data.size).toBeNull(); // 0 → null
+      expect(data.tags).toBe(JSON.stringify(['a', 'b']));
+      expect(data.leiArticlesArr).toEqual(['1', '2']);
+    });
+
+    it('updateDocument: leiArticles não-array vira lista vazia', async () => {
+      mockPrisma.document.update.mockResolvedValue(mockDocument as never);
+      await updateDocument('doc-123', { leiArticles: 'nao-e-array' as never });
+      const data = mockPrisma.document.update.mock.calls[0][0].data;
+      expect(data.leiArticlesArr).toEqual([]);
+    });
+
+    it('fetchPendingDocuments: aplica períodos week/month e default', async () => {
+      for (const period of ['week', 'month', 'periodo-invalido']) {
+        mockPrisma.document.findMany.mockResolvedValue([] as never);
+        await fetchPendingDocuments({ period });
+        const call = mockPrisma.document.findMany.mock.calls.at(-1)[0];
+        expect(call.where.uploadedAt.gte).toBeInstanceOf(Date);
+      }
+    });
+
+    it('fetchPendingDocumentsPaginated: aplica category e período today/week/month', async () => {
+      for (const period of ['today', 'week', 'month', 'xpto']) {
+        mockPrisma.document.count.mockResolvedValue(0 as never);
+        mockPrisma.document.findMany.mockResolvedValue([] as never);
+        await fetchPendingDocumentsPaginated({ category: 'apostila', period });
+        const call = mockPrisma.document.findMany.mock.calls.at(-1)[0];
+        expect(call.where.category).toBe('apostila');
+        expect(call.where.uploadedAt.gte).toBeInstanceOf(Date);
+      }
+    });
+
+    it('listDocuments: propaga erro ao mapear um documento malformado', async () => {
+      // Documento cujo acesso a `tags` lança — exercita o catch do .map e o
+      // catch externo (re-throw), sem mascarar falhas de dados.
+      const evilDoc: any = {
+        id: 'evil', title: 't', description: null, type: 'pdf', url: 'u',
+        category: 'apostila', courseId: 'c', isPublic: true, isCommon: false,
+        get tags() { throw new Error('boom'); },
+      };
+      mockPrisma.document.count.mockResolvedValue(1 as never);
+      mockPrisma.document.findMany.mockResolvedValue([evilDoc] as never);
+      await expect(listDocuments({})).rejects.toThrow('boom');
+    });
+
+    it('fetchPendingDocumentsPaginated: mapeia metaDou quando presente', async () => {
+      const docWithDou = {
+        id: 'd1', title: 'Ato', description: null, category: 'ato',
+        type: 'link', url: 'u', uploadedAt: new Date('2026-01-01'),
+        tags: null, courseId: null,
+        metaDou: { data: new Date('2026-01-02'), secao: 'DO1', edicao: '5' },
+      };
+      mockPrisma.document.count.mockResolvedValue(1 as never);
+      mockPrisma.document.findMany.mockResolvedValue([docWithDou] as never);
+      const res = await fetchPendingDocumentsPaginated({});
+      expect(res.items[0].douSecao).toBe('DO1');
+      expect(res.items[0].douEdicao).toBe('5');
+      expect(res.items[0].douData).toBe(new Date('2026-01-02').toISOString());
+    });
+  });
+
   describe('Edge Cases', () => {
     it('deve lidar com tags em formato CSV', async () => {
       const docWithCSVTags = {
