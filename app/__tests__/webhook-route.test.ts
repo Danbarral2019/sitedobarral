@@ -17,6 +17,7 @@ const {
   mockSubscriptionUpdate,
   mockSubscriptionUpdateMany,
   mockUserFindUnique,
+  mockCreateBillingPortal,
 } = vi.hoisted(() => ({
   mockConstructEvent: vi.fn(),
   mockInvoicesRetrieve: vi.fn(),
@@ -31,6 +32,7 @@ const {
   mockSubscriptionUpdate: vi.fn(),
   mockSubscriptionUpdateMany: vi.fn(),
   mockUserFindUnique: vi.fn(),
+  mockCreateBillingPortal: vi.fn(),
 }));
 
 vi.mock('@/lib/stripe', () => ({
@@ -42,6 +44,7 @@ vi.mock('@/lib/stripe', () => ({
   createEnrollmentsForSubscription: (...args: any[]) => mockCreateEnrollments(...args),
   removeEnrollmentsForSubscription: (...args: any[]) => mockRemoveEnrollments(...args),
   calculatePeriodEnd: (...args: any[]) => mockCalculatePeriodEnd(...args),
+  createBillingPortalSession: (...args: any[]) => mockCreateBillingPortal(...args),
 }));
 
 vi.mock('@/lib/prisma', () => ({
@@ -118,6 +121,7 @@ describe('POST /api/pagamento/webhook', () => {
     mockProcessedCreate.mockResolvedValue({});
     mockProcessedDelete.mockResolvedValue({});
     mockCalculatePeriodEnd.mockReturnValue(new Date('2026-05-16'));
+    mockCreateBillingPortal.mockResolvedValue({ url: 'https://portal.stripe/session' });
   });
 
   afterAll(() => {
@@ -305,5 +309,170 @@ describe('POST /api/pagamento/webhook', () => {
     expect(mockProcessedDelete).toHaveBeenCalledWith({
       where: { stripeEventId: 'evt_test_123' },
     });
+  });
+
+  // 8. invoice.payment_failed → marca past_due + envia email de falha
+  it('marks subscription past_due and emails on invoice.payment_failed', async () => {
+    const failedEvent = makeEvent('invoice.payment_failed', {
+      id: 'in_fail_1',
+      parent: { subscription_details: { subscription: 'sub_stripe_1' } },
+    });
+    mockConstructEvent.mockReturnValue(failedEvent);
+    mockSubscriptionFindUnique.mockResolvedValue({
+      userId: 'user-1',
+      paymentMethod: 'card',
+      user: { email: 'user@test.com', name: 'User' },
+    });
+    mockSubscriptionUpdate.mockResolvedValue({});
+
+    const res = await POST(makeRequest('{}', 'valid_sig') as any);
+    expect(res.status).toBe(200);
+    expect(mockSubscriptionUpdate).toHaveBeenCalledWith({
+      where: { stripeSubscriptionId: 'sub_stripe_1' },
+      data: { status: 'past_due' },
+    });
+    // Deve resolver a URL do portal de cobrança para o email
+    expect(mockCreateBillingPortal).toHaveBeenCalledWith('user-1', expect.stringContaining('/area-restrita'));
+  });
+
+  it('no-ops on invoice.payment_failed when subscription is unknown', async () => {
+    const failedEvent = makeEvent('invoice.payment_failed', {
+      id: 'in_fail_2',
+      parent: { subscription_details: { subscription: 'sub_unknown' } },
+    });
+    mockConstructEvent.mockReturnValue(failedEvent);
+    mockSubscriptionFindUnique.mockResolvedValue(null);
+
+    const res = await POST(makeRequest('{}', 'valid_sig') as any);
+    expect(res.status).toBe(200);
+    expect(mockSubscriptionUpdate).not.toHaveBeenCalled();
+  });
+
+  // 9. charge.refunded → cancela e remove enrollments
+  it('cancels subscription and removes enrollments on charge.refunded', async () => {
+    const refundEvent = makeEvent('charge.refunded', {
+      id: 'ch_1',
+      invoice: 'in_1',
+    });
+    mockConstructEvent.mockReturnValue(refundEvent);
+    mockInvoicesRetrieve.mockResolvedValue({
+      parent: { subscription_details: { subscription: 'sub_stripe_1' } },
+    });
+    mockSubscriptionUpdateMany.mockResolvedValue({ count: 1 });
+    mockRemoveEnrollments.mockResolvedValue(undefined);
+
+    const res = await POST(makeRequest('{}', 'valid_sig') as any);
+    expect(res.status).toBe(200);
+    expect(mockSubscriptionUpdateMany).toHaveBeenCalledWith({
+      where: { stripeSubscriptionId: 'sub_stripe_1' },
+      data: { status: 'canceled' },
+    });
+    expect(mockRemoveEnrollments).toHaveBeenCalledWith('sub_stripe_1');
+  });
+
+  it('no-ops on charge.refunded when charge has no invoice', async () => {
+    const refundEvent = makeEvent('charge.refunded', { id: 'ch_2' }); // sem invoice
+    mockConstructEvent.mockReturnValue(refundEvent);
+
+    const res = await POST(makeRequest('{}', 'valid_sig') as any);
+    expect(res.status).toBe(200);
+    expect(mockInvoicesRetrieve).not.toHaveBeenCalled();
+    expect(mockSubscriptionUpdateMany).not.toHaveBeenCalled();
+  });
+
+  // 10. charge.dispute.created → cancela, remove e alerta no Sentry
+  it('cancels subscription and removes enrollments on charge.dispute.created', async () => {
+    const disputeEvent = makeEvent('charge.dispute.created', {
+      id: 'dp_1',
+      charge: 'ch_1', // string → força charges.retrieve
+    });
+    mockConstructEvent.mockReturnValue(disputeEvent);
+    mockChargesRetrieve.mockResolvedValue({ id: 'ch_1', invoice: 'in_1' });
+    mockInvoicesRetrieve.mockResolvedValue({
+      parent: { subscription_details: { subscription: 'sub_stripe_1' } },
+    });
+    mockSubscriptionUpdateMany.mockResolvedValue({ count: 1 });
+    mockRemoveEnrollments.mockResolvedValue(undefined);
+
+    const res = await POST(makeRequest('{}', 'valid_sig') as any);
+    expect(res.status).toBe(200);
+    expect(mockChargesRetrieve).toHaveBeenCalledWith('ch_1');
+    expect(mockSubscriptionUpdateMany).toHaveBeenCalledWith({
+      where: { stripeSubscriptionId: 'sub_stripe_1' },
+      data: { status: 'canceled' },
+    });
+    expect(mockRemoveEnrollments).toHaveBeenCalledWith('sub_stripe_1');
+  });
+
+  it('no-ops on charge.dispute.created when dispute has no charge', async () => {
+    const disputeEvent = makeEvent('charge.dispute.created', { id: 'dp_2', charge: null });
+    mockConstructEvent.mockReturnValue(disputeEvent);
+
+    const res = await POST(makeRequest('{}', 'valid_sig') as any);
+    expect(res.status).toBe(200);
+    expect(mockChargesRetrieve).not.toHaveBeenCalled();
+  });
+
+  // 11. subscription.updated com subscription desconhecida → warn + no-op
+  it('no-ops on subscription.updated when subscription is unknown', async () => {
+    const updateEvent = makeEvent('customer.subscription.updated', {
+      id: 'sub_unknown',
+      status: 'active',
+      items: { data: [{ current_period_end: 1779999999 }] },
+    });
+    mockConstructEvent.mockReturnValue(updateEvent);
+    mockSubscriptionFindUnique.mockResolvedValue(null);
+
+    const res = await POST(makeRequest('{}', 'valid_sig') as any);
+    expect(res.status).toBe(200);
+    expect(mockSubscriptionUpdate).not.toHaveBeenCalled();
+  });
+
+  it('no-ops on invoice.payment_failed when invoice has no subscription', async () => {
+    const failedEvent = makeEvent('invoice.payment_failed', { id: 'in_fail_3' }); // sem parent
+    mockConstructEvent.mockReturnValue(failedEvent);
+
+    const res = await POST(makeRequest('{}', 'valid_sig') as any);
+    expect(res.status).toBe(200);
+    expect(mockSubscriptionFindUnique).not.toHaveBeenCalled();
+  });
+
+  it('no-ops on charge.refunded when the invoice has no subscription', async () => {
+    const refundEvent = makeEvent('charge.refunded', { id: 'ch_3', invoice: 'in_x' });
+    mockConstructEvent.mockReturnValue(refundEvent);
+    mockInvoicesRetrieve.mockResolvedValue({}); // invoice sem subscription_details
+
+    const res = await POST(makeRequest('{}', 'valid_sig') as any);
+    expect(res.status).toBe(200);
+    expect(mockSubscriptionUpdateMany).not.toHaveBeenCalled();
+  });
+
+  it('no-ops on charge.dispute.created when the charge has no invoice', async () => {
+    const disputeEvent = makeEvent('charge.dispute.created', { id: 'dp_3', charge: 'ch_x' });
+    mockConstructEvent.mockReturnValue(disputeEvent);
+    mockChargesRetrieve.mockResolvedValue({ id: 'ch_x' }); // charge sem invoice
+
+    const res = await POST(makeRequest('{}', 'valid_sig') as any);
+    expect(res.status).toBe(200);
+    expect(mockSubscriptionUpdateMany).not.toHaveBeenCalled();
+  });
+
+  // 12. Eventos ignorados → 200 silencioso, sem despachar handler
+  it('returns 200 and ignores events in IGNORED_EVENTS', async () => {
+    mockConstructEvent.mockReturnValue(makeEvent('customer.created', { id: 'cus_1' }));
+    const res = await POST(makeRequest('{}', 'valid_sig') as any);
+    expect(res.status).toBe(200);
+    const data = await res.json();
+    expect(data.received).toBe(true);
+    expect(mockSubscriptionCreate).not.toHaveBeenCalled();
+  });
+
+  // 13. Evento desconhecido (não ignorado, sem handler) → 200
+  it('returns 200 for unknown event types without a handler', async () => {
+    mockConstructEvent.mockReturnValue(makeEvent('some.unhandled.event', {}));
+    const res = await POST(makeRequest('{}', 'valid_sig') as any);
+    expect(res.status).toBe(200);
+    const data = await res.json();
+    expect(data.received).toBe(true);
   });
 });
