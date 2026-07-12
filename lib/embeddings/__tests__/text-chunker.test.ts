@@ -5,7 +5,7 @@
  */
 
 import { describe, it, expect } from 'vitest';
-import { chunkText, chunkLegalDocument } from '../text-chunker';
+import { chunkText, chunkLegalDocument, chunkTCUDocument } from '../text-chunker';
 
 describe('text-chunker', () => {
   describe('chunkText', () => {
@@ -127,6 +127,83 @@ describe('text-chunker', () => {
         `Art. ${i + 1}º Dispositivo legal.`
       ).join('\n');
       const chunks = chunkLegalDocument(text, { maxChunkSize: 200 });
+      expect(chunks.length).toBeGreaterThanOrEqual(1);
+    });
+  });
+
+  describe('chunkText - divisão por tamanho fixo (fallback)', () => {
+    it('deve dividir parágrafo longo sem pontuação via tamanho fixo (preserveSentences: false)', () => {
+      // Um único parágrafo (sem \n\n) sem pontuação de sentença força o
+      // caminho chunkLongParagraph → chunkBySize.
+      const text = Array(200).fill('licitacao').join('-'); // longo, sem espaço/pontuação
+      const chunks = chunkText(text, {
+        maxChunkSize: 200,
+        overlapSize: 40,
+        minChunkSize: 50,
+        preserveSentences: false,
+      });
+      expect(chunks.length).toBeGreaterThan(1);
+      // Índices sequenciais mesmo no caminho de tamanho fixo
+      for (let i = 0; i < chunks.length; i++) {
+        expect(chunks[i].index).toBe(i);
+      }
+    });
+
+    it('deve gerar overlap bruto quando não há espaço nem fim de sentença', () => {
+      // Dois parágrafos sem espaços internos nem pontuação: ao emendar o
+      // segundo, getOverlap não encontra limite de sentença nem de espaço e
+      // devolve o trecho bruto (fallback).
+      const p = 'x'.repeat(120);
+      const text = `${p}\n\n${p}`;
+      const chunks = chunkText(text, {
+        maxChunkSize: 200,
+        overlapSize: 100,
+        minChunkSize: 50,
+      });
+      expect(chunks.length).toBeGreaterThan(1);
+      // O segundo chunk começa com o overlap de 'x' herdado do primeiro
+      expect(chunks[1].content.startsWith('x')).toBe(true);
+    });
+
+    it('deve gerar chunks contíguos com overlap no fallback de tamanho fixo', () => {
+      const text = 'a'.repeat(1000); // sem espaços, sem pontuação
+      const chunks = chunkText(text, {
+        maxChunkSize: 200,
+        overlapSize: 40,
+        minChunkSize: 50,
+        preserveSentences: false,
+      });
+      expect(chunks.length).toBeGreaterThan(1);
+      // Cada chunk não deve exceder muito o maxChunkSize
+      for (const chunk of chunks) {
+        expect(chunk.content.length).toBeLessThanOrEqual(200);
+      }
+    });
+  });
+
+  describe('chunkTCUDocument', () => {
+    it('deve marcar seções do acórdão e retornar chunk único para texto curto', () => {
+      const text = 'EMENTA: Trata-se de licitação. VOTO: Conheço do recurso. ACÓRDÃO: Negado provimento.';
+      const chunks = chunkTCUDocument(text);
+      expect(chunks).toHaveLength(1);
+      expect(chunks[0].content).toContain('EMENTA');
+      expect(chunks[0].content).toContain('VOTO');
+    });
+
+    it('deve dividir acórdão longo preservando seções', () => {
+      const secao = 'RELATÓRIO: ' + Array(30).fill('Analisa-se o mérito do processo administrativo.').join(' ');
+      const text = Array(20).fill(secao).join('\n\n');
+      const chunks = chunkTCUDocument(text, { maxChunkSize: 800 });
+      expect(chunks.length).toBeGreaterThan(1);
+    });
+
+    it('deve funcionar com texto vazio', () => {
+      expect(chunkTCUDocument('')).toEqual([]);
+    });
+
+    it('deve aceitar maxChunkSize customizado', () => {
+      const text = 'VISTOS, relatados e discutidos os autos. ' + Array(40).fill('Fundamentação extensa.').join(' ');
+      const chunks = chunkTCUDocument(text, { maxChunkSize: 300 });
       expect(chunks.length).toBeGreaterThanOrEqual(1);
     });
   });

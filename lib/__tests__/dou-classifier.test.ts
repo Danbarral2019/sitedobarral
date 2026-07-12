@@ -4,13 +4,20 @@
  * Testa o DOUClassifier e suas classificações automáticas.
  */
 
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, vi, beforeEach } from 'vitest';
 import {
   DOUClassifier,
   DOUDocumentCategory,
   ApprovalStatus,
   DateRangePreset,
 } from '../dou-classifier';
+
+// Mock do cliente Gemini usado por classifyWithAI/classifyBatchWithAI.
+// Permite exercitar o fallback de IA sem chamada de rede real.
+const queryGeminiTextMock = vi.fn();
+vi.mock('../gemini/cached-client', () => ({
+  queryGeminiText: (...args: unknown[]) => queryGeminiTextMock(...args),
+}));
 
 describe('DOUClassifier', () => {
   describe('classify — Fontes AGU', () => {
@@ -170,6 +177,43 @@ describe('DOUClassifier', () => {
     });
   });
 
+  describe('classify — Extrato (sem casar contrato)', () => {
+    it('deve classificar extrato de apostilamento como EXTRATO', () => {
+      const result = DOUClassifier.classify(
+        'Extrato de Apostilamento nº 5',
+        'Extrato de apostilamento de valor',
+      );
+      expect(result.category).toBe(DOUDocumentCategory.EXTRATO);
+      expect(result.status).toBe(ApprovalStatus.AUTO_REJECTED);
+    });
+  });
+
+  describe('classify — PASSO 5 (filtro normativo)', () => {
+    it('deve auto-rejeitar ato concreto detectado pelo filtro normativo', () => {
+      // "Despacho" bate CONCRETE_TITLE_PATTERNS mas não as IRRELEVANT_KEYWORDS,
+      // então chega ao PASSO 5 e é classificado como concreto (auto-rejeitado).
+      const result = DOUClassifier.classify(
+        'Despacho do Secretário-Executivo',
+        'Determina o arquivamento do processo',
+      );
+      expect(result.category).toBe(DOUDocumentCategory.OUTROS);
+      expect(result.status).toBe(ApprovalStatus.AUTO_REJECTED);
+      expect(result.isRelevant).toBe(false);
+    });
+
+    it('deve marcar ato normativo geral como ATO_NORMATIVO pendente de revisão', () => {
+      // "regulamenta" é indicador geral e nenhuma keyword direta casa,
+      // então cai no PASSO 5 como 'geral'.
+      const result = DOUClassifier.classify(
+        'Estabelece diretrizes de governança',
+        'Regulamenta procedimentos internos de gestão',
+      );
+      expect(result.category).toBe(DOUDocumentCategory.ATO_NORMATIVO);
+      expect(result.status).toBe(ApprovalStatus.PENDING);
+      expect(result.requiresReview).toBe(true);
+    });
+  });
+
   describe('classify — Documentos não classificados', () => {
     it('deve retornar OUTROS com revisão pendente para texto genérico', () => {
       const result = DOUClassifier.classify(
@@ -297,6 +341,11 @@ describe('DOUClassifier', () => {
       const filtered = DOUClassifier.filterByOrgao(results, undefined, 'gestão|saúde');
       expect(filtered).toHaveLength(2);
     });
+
+    it('deve excluir todos quando o pattern válido não casa', () => {
+      const filtered = DOUClassifier.filterByOrgao(results, undefined, 'orgao-inexistente');
+      expect(filtered).toHaveLength(0);
+    });
   });
 
   describe('filterByDate', () => {
@@ -372,6 +421,11 @@ describe('DOUClassifier', () => {
       const { from, to } = DOUClassifier.getDateRangeFromPreset(DateRangePreset.ULTIMO_ANO);
       const diff = to.getTime() - from.getTime();
       expect(diff).toBeGreaterThanOrEqual(364 * 24 * 60 * 60 * 1000);
+    });
+
+    it('deve tratar preset desconhecido como HOJE (default)', () => {
+      const { from, to } = DOUClassifier.getDateRangeFromPreset('preset-invalido' as never);
+      expect(from.getTime()).toBe(to.getTime());
     });
   });
 
@@ -463,6 +517,198 @@ describe('DOUClassifier', () => {
       // do1 tem Lei (AUTO_APPROVED) e Acórdão (PENDING); status filtra só o aprovado
       expect(filtered.map((r) => (r as { title: string }).title)).toContain('Lei nº 15.000');
       expect(filtered.map((r) => (r as { title: string }).title)).not.toContain('Edital nº 01');
+    });
+
+    it('compõe filtro por órgão', () => {
+      const comOrgao = [
+        { title: 'Lei nº 15.000', abstract: 'normas gerais', href: '/1', section: 'do1', date: '01/01/2025', hierarchyStr: 'Ministério da Gestão' },
+        { title: 'Lei nº 16.000', abstract: 'normas gerais', href: '/2', section: 'do1', date: '01/01/2025', hierarchyStr: 'Ministério da Saúde' },
+      ] as never[];
+      const cls = DOUClassifier.classifyBatch(comOrgao);
+      const filtered = DOUClassifier.applyAdvancedFilters(comOrgao, cls, {
+        orgaos: ['ministério da gestão'],
+      });
+      expect(filtered).toHaveLength(1);
+    });
+
+    it('compõe filtro por range de datas', () => {
+      const filtered = DOUClassifier.applyAdvancedFilters(results as never, classifications, {
+        dateFrom: new Date(2024, 0, 1),
+        dateTo: new Date(2025, 11, 31),
+      });
+      expect(filtered).toHaveLength(3);
+    });
+
+    it('compõe filtro por keywords de inclusão/exclusão', () => {
+      const filtered = DOUClassifier.applyAdvancedFilters(results as never, classifications, {
+        includeKeywords: ['licitação'],
+      });
+      expect(filtered.map((r) => (r as { title: string }).title)).toContain('Acórdão TCU nº 100');
+      expect(filtered.map((r) => (r as { title: string }).title)).not.toContain('Lei nº 15.000');
+    });
+
+    it('compõe filtro por confiança mínima', () => {
+      // minConfidence undefined é ignorado; 0 mantém todos
+      const todos = DOUClassifier.applyAdvancedFilters(results as never, classifications, {
+        minConfidence: 0,
+      });
+      expect(todos).toHaveLength(3);
+      const nenhum = DOUClassifier.applyAdvancedFilters(results as never, classifications, {
+        minConfidence: 999,
+      });
+      expect(nenhum).toHaveLength(0);
+    });
+  });
+
+  describe('filterByOrgao — regex inválido', () => {
+    it('não deve lançar e mantém o resultado quando o pattern é inválido', () => {
+      const results = [
+        { title: 'Doc', abstract: '', href: '/1', section: 'do1', date: '01/01/2025', hierarchyStr: 'Ministério X' },
+      ] as never[];
+      // '[' é regex malformado → cai no catch (console.warn) e o item permanece
+      const filtered = DOUClassifier.filterByOrgao(results, undefined, '[');
+      expect(filtered).toHaveLength(1);
+    });
+  });
+
+  describe('filterByDate — limites isolados', () => {
+    const results = [
+      { title: 'Doc 1', abstract: '', href: '/1', section: 'do1', date: '01/01/2025', hierarchyStr: '' },
+      { title: 'Doc 2', abstract: '', href: '/2', section: 'do1', date: '15/06/2025', hierarchyStr: '' },
+      { title: 'Doc 3', abstract: '', href: '/3', section: 'do1', date: '31/12/2025', hierarchyStr: '' },
+    ] as never[];
+
+    it('filtra apenas com dateFrom (limite inferior)', () => {
+      const filtered = DOUClassifier.filterByDate(results, new Date(2025, 5, 1));
+      // 15/06 e 31/12 passam; 01/01 é anterior
+      expect(filtered).toHaveLength(2);
+    });
+
+    it('filtra apenas com dateTo (limite superior)', () => {
+      const filtered = DOUClassifier.filterByDate(results, undefined, new Date(2025, 5, 30));
+      // 01/01 e 15/06 passam; 31/12 é posterior
+      expect(filtered).toHaveLength(2);
+    });
+  });
+
+  describe('classifyWithAI (fallback IA)', () => {
+    beforeEach(() => {
+      queryGeminiTextMock.mockReset();
+    });
+
+    it('classifica via IA e auto-aprova categoria relevante com alta confiança', async () => {
+      queryGeminiTextMock.mockResolvedValue({
+        response: '{"category":"ato_normativo","confidence":95,"reasoning":"norma geral","isRelevant":true}',
+      });
+      const result = await DOUClassifier.classifyWithAI('Título ambíguo', 'Resumo');
+      expect(result.category).toBe(DOUDocumentCategory.ATO_NORMATIVO);
+      expect(result.status).toBe(ApprovalStatus.AUTO_APPROVED);
+      expect(result.reasoning[0]).toContain('[IA]');
+    });
+
+    it('auto-rejeita categoria irrelevante com alta confiança', async () => {
+      queryGeminiTextMock.mockResolvedValue({
+        response: '{"category":"edital","confidence":90,"reasoning":"edital","isRelevant":false}',
+      });
+      const result = await DOUClassifier.classifyWithAI('Edital', 'Pregão');
+      expect(result.category).toBe(DOUDocumentCategory.EDITAL);
+      expect(result.status).toBe(ApprovalStatus.AUTO_REJECTED);
+    });
+
+    it('marca como pendente quando confiança é baixa', async () => {
+      queryGeminiTextMock.mockResolvedValue({
+        response: '{"category":"ato_normativo","confidence":50,"reasoning":"incerto","isRelevant":true}',
+      });
+      const result = await DOUClassifier.classifyWithAI('Doc', 'Resumo');
+      expect(result.status).toBe(ApprovalStatus.PENDING);
+      expect(result.requiresReview).toBe(true);
+    });
+
+    it('trata categoria desconhecida como OUTROS', async () => {
+      queryGeminiTextMock.mockResolvedValue({
+        response: '{"category":"inexistente","confidence":80,"reasoning":"x","isRelevant":true}',
+      });
+      const result = await DOUClassifier.classifyWithAI('Doc', 'Resumo');
+      expect(result.category).toBe(DOUDocumentCategory.OUTROS);
+    });
+
+    it('usa conteúdo enriquecido no prompt quando fornecido', async () => {
+      queryGeminiTextMock.mockResolvedValue({
+        response: '{"category":"outros","confidence":50,"reasoning":"x","isRelevant":true}',
+      });
+      await DOUClassifier.classifyWithAI('Doc', 'Resumo', { conteudo: 'texto completo do ato' } as never);
+      const prompt = queryGeminiTextMock.mock.calls[0][0] as string;
+      expect(prompt).toContain('texto completo do ato');
+    });
+
+    it('degrada para PENDING quando a resposta não tem JSON', async () => {
+      queryGeminiTextMock.mockResolvedValue({ response: 'resposta sem json' });
+      const result = await DOUClassifier.classifyWithAI('Doc', 'Resumo');
+      expect(result.category).toBe(DOUDocumentCategory.OUTROS);
+      expect(result.status).toBe(ApprovalStatus.PENDING);
+      expect(result.confidence).toBe(40);
+    });
+
+    it('degrada para PENDING quando o cliente lança erro', async () => {
+      queryGeminiTextMock.mockRejectedValue(new Error('timeout'));
+      const result = await DOUClassifier.classifyWithAI('Doc', 'Resumo');
+      expect(result.status).toBe(ApprovalStatus.PENDING);
+      expect(result.reasoning[0]).toContain('IA falhou');
+    });
+  });
+
+  describe('classifyBatchWithAI', () => {
+    beforeEach(() => {
+      queryGeminiTextMock.mockReset();
+    });
+
+    it('chama IA apenas para itens de baixa confiança/OUTROS e atualiza os promovidos', async () => {
+      // Documento genérico → classify() dá OUTROS/baixa confiança → elegível para IA
+      const results = [
+        { title: 'Comunicado Geral', abstract: 'Informamos', href: '/1', section: 'do1', date: '01/01/2025', hierarchyStr: '' },
+        { title: 'Lei nº 15.000', abstract: 'normas gerais', href: '/2', section: 'do1', date: '01/01/2025', hierarchyStr: '' },
+      ] as never[];
+      const classifications = DOUClassifier.classifyBatch(results);
+
+      // IA promove o OUTROS para ato_normativo com confiança > 70
+      queryGeminiTextMock.mockResolvedValue({
+        response: '{"category":"ato_normativo","confidence":95,"reasoning":"norma","isRelevant":true}',
+      });
+
+      const { updated, errors } = await DOUClassifier.classifyBatchWithAI(results, classifications);
+      expect(errors).toBe(0);
+      expect(updated).toBe(1);
+      // Só o item de baixa confiança deve ter acionado a IA (a Lei já era alta confiança)
+      expect(queryGeminiTextMock).toHaveBeenCalledTimes(1);
+    });
+
+    it('conta erro quando a chamada de IA lança', async () => {
+      const results = [
+        { title: 'Comunicado Geral', abstract: 'Informamos', href: '/1', section: 'do1', date: '01/01/2025', hierarchyStr: '' },
+      ] as never[];
+      const classifications = DOUClassifier.classifyBatch(results);
+      queryGeminiTextMock.mockRejectedValue(new Error('falha'));
+
+      const { updated, errors } = await DOUClassifier.classifyBatchWithAI(results, classifications);
+      // classifyWithAI captura o erro internamente e devolve PENDING (confidence 40),
+      // portanto não promove (updated 0) e não relança (errors 0).
+      expect(updated).toBe(0);
+      expect(errors).toBe(0);
+    });
+
+    it('respeita o teto de chamadas de IA (maxAICalls)', async () => {
+      const results = [
+        { title: 'Comunicado A', abstract: 'Info', href: '/1', section: 'do1', date: '01/01/2025', hierarchyStr: '' },
+        { title: 'Comunicado B', abstract: 'Info', href: '/2', section: 'do1', date: '01/01/2025', hierarchyStr: '' },
+        { title: 'Comunicado C', abstract: 'Info', href: '/3', section: 'do1', date: '01/01/2025', hierarchyStr: '' },
+      ] as never[];
+      const classifications = DOUClassifier.classifyBatch(results);
+      queryGeminiTextMock.mockResolvedValue({
+        response: '{"category":"outros","confidence":50,"reasoning":"x","isRelevant":true}',
+      });
+
+      await DOUClassifier.classifyBatchWithAI(results, classifications, undefined, 2);
+      expect(queryGeminiTextMock).toHaveBeenCalledTimes(2);
     });
   });
 });
