@@ -400,4 +400,69 @@ describe('DOUClassifier', () => {
       expect(stats.appliedFilters).toHaveLength(0);
     });
   });
+
+  describe('filterByCategory / filterByStatus / filterByConfidence', () => {
+    const results = [
+      { title: 'Lei nº 15.000', abstract: 'Institui normas gerais', href: '/1', section: 'do1', date: '01/01/2025', hierarchyStr: '' },
+      { title: 'Edital nº 01', abstract: 'Pregão eletrônico para aquisição', href: '/2', section: 'do3', date: '01/01/2025', hierarchyStr: '' },
+      { title: 'Acórdão TCU nº 100', abstract: 'O TCU decide sobre licitação', href: '/3', section: 'do1', date: '01/01/2025', hierarchyStr: '' },
+    ] as Array<{ title: string; abstract: string; href: string; section: string; date: string; hierarchyStr: string }>;
+    const classifications = DOUClassifier.classifyBatch(results as never);
+
+    it('filterByCategory inclui a categoria pedida e exclui as demais', () => {
+      const filtered = DOUClassifier.filterByCategory(classifications, [DOUDocumentCategory.ATO_NORMATIVO]);
+      expect(filtered.map((r) => r.title)).toContain('Lei nº 15.000');
+      expect(filtered.map((r) => r.title)).not.toContain('Edital nº 01');
+    });
+
+    it('filterByCategory sem categorias devolve todos', () => {
+      expect(DOUClassifier.filterByCategory(classifications, [])).toHaveLength(3);
+    });
+
+    it('filterByStatus filtra pelo status de aprovação', () => {
+      const rejected = DOUClassifier.filterByStatus(classifications, [ApprovalStatus.AUTO_REJECTED]);
+      expect(rejected.map((r) => r.title)).toContain('Edital nº 01');
+      expect(rejected.map((r) => r.title)).not.toContain('Lei nº 15.000');
+    });
+
+    it('filterByStatus sem status devolve todos', () => {
+      expect(DOUClassifier.filterByStatus(classifications, [])).toHaveLength(3);
+    });
+
+    it('filterByConfidence respeita o piso de confiança', () => {
+      expect(DOUClassifier.filterByConfidence(classifications, 0)).toHaveLength(3);
+      expect(DOUClassifier.filterByConfidence(classifications, 999)).toHaveLength(0);
+    });
+  });
+
+  describe('applyAdvancedFilters', () => {
+    const results = [
+      { title: 'Lei nº 15.000', abstract: 'Institui normas gerais', href: '/1', section: 'do1', date: '01/01/2025', hierarchyStr: '' },
+      { title: 'Edital nº 01', abstract: 'Pregão eletrônico', href: '/2', section: 'do3', date: '01/01/2025', hierarchyStr: '' },
+      { title: 'Acórdão TCU nº 100', abstract: 'O TCU decide sobre licitação', href: '/3', section: 'do1', date: '01/01/2025', hierarchyStr: '' },
+    ] as Array<{ title: string; abstract: string; href: string; section: string; date: string; hierarchyStr: string }>;
+    const classifications = DOUClassifier.classifyBatch(results as never);
+
+    it('sem filtros devolve todos os resultados', () => {
+      expect(DOUClassifier.applyAdvancedFilters(results as never, classifications, {})).toHaveLength(3);
+    });
+
+    it('compõe filtro por categoria', () => {
+      const filtered = DOUClassifier.applyAdvancedFilters(results as never, classifications, {
+        categories: [DOUDocumentCategory.ATO_NORMATIVO],
+      });
+      expect(filtered.map((r) => (r as { title: string }).title)).toContain('Lei nº 15.000');
+      expect(filtered.map((r) => (r as { title: string }).title)).not.toContain('Edital nº 01');
+    });
+
+    it('compõe filtro por seção e status simultaneamente', () => {
+      const filtered = DOUClassifier.applyAdvancedFilters(results as never, classifications, {
+        sections: ['do1'],
+        statuses: [ApprovalStatus.AUTO_APPROVED],
+      });
+      // do1 tem Lei (AUTO_APPROVED) e Acórdão (PENDING); status filtra só o aprovado
+      expect(filtered.map((r) => (r as { title: string }).title)).toContain('Lei nº 15.000');
+      expect(filtered.map((r) => (r as { title: string }).title)).not.toContain('Edital nº 01');
+    });
+  });
 });
