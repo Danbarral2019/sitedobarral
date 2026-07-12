@@ -121,6 +121,34 @@ describe('diversifyResults', () => {
     expect(manualCount).toBe(2);
   });
 
+  it('interrompe a Fase 1 quando há mais categorias que maxResults', () => {
+    // 6 categorias distintas, maxResults 4: a Fase 1 preenche 4 e sai pelo break.
+    const results = [
+      mk({ documentId: 'ap1', category: 'apostila', similarity: 0.9 }),
+      mk({ documentId: 'en1', category: 'enunciados', similarity: 0.85 }),
+      mk({ documentId: 'su1', category: 'sumula', similarity: 0.84 }),
+      mk({ documentId: 'ac1', category: 'acordao', similarity: 0.8 }),
+      mk({ documentId: 'de1', category: 'decor', similarity: 0.75 }),
+      mk({ documentId: 'in1', category: 'informativo', similarity: 0.7 }),
+    ];
+    const out = diversifyResults(results, 4);
+    expect(out).toHaveLength(4);
+    // Sem repetição de categoria (uma de cada, priorizando tiers altos)
+    expect(new Set(out.map((r) => r.category)).size).toBe(4);
+  });
+
+  it('trata categoria desconhecida com o tier default (5, menor prioridade)', () => {
+    const results = [
+      mk({ documentId: 'x1', category: 'categoria-inexistente', similarity: 0.99 }),
+      mk({ documentId: 'ap1', category: 'apostila', similarity: 0.5 }),
+      mk({ documentId: 'x2', category: 'categoria-inexistente', similarity: 0.98 }),
+    ];
+    const out = diversifyResults(results, 2);
+    // apostila (tier 1) tem prioridade sobre a desconhecida (tier 5), apesar da
+    // similaridade menor.
+    expect(out.map((r) => r.documentId)).toContain('ap1');
+  });
+
   it('não repete documentos', () => {
     const results = Array.from({ length: 8 }, (_, i) =>
       mk({ documentId: String(i), category: i % 2 === 0 ? 'acordao' : 'enunciados', similarity: 0.9 - i * 0.01 })
