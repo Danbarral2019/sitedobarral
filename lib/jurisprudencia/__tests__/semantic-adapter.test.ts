@@ -602,3 +602,83 @@ describe('resolveFullText', () => {
     expect(resolveFullText({ source: { kind: 'document', data: {} } } as never)).toBeNull();
   });
 });
+
+describe('adaptToSourcesPayload — fallbacks de campo', () => {
+  const mkDoc = (category: string, over: Record<string, unknown> = {}) => ({
+    documentId: 'd', similarity: 0.7, chunkContent: 'c',
+    source: {
+      kind: 'document' as const,
+      category,
+      data: {
+        id: 'd', title: 'Título Doc', category,
+        tcuNumeroAcordao: null, tcuEmentaCompleta: null, description: null, content: null,
+        tcuRelator: null, tcuAutorTese: null, tcuOrgaoJulgador: null, tcuDataJulgamento: null,
+        tcuLinkPDF: null, summary: null, themes: null, leiArticlesArr: [], url: null, douData: null,
+        uploadedAt: new Date(), updatedAt: new Date(), entityType: null, enunciadoNumber: null,
+        ...over,
+      },
+    },
+  });
+
+  it('consulta_tcu sem número usa o título e sourceType consulta', async () => {
+    const { adaptToSourcesPayload } = await import('../semantic-adapter');
+    const p = adaptToSourcesPayload([mkDoc('consulta_tcu')] as never)[0];
+    expect(p.decisionNumber).toBe('Título Doc'); // fallback do tcuNumeroAcordao
+    expect(p.sourceType).toBe('document-tcu-consulta');
+  });
+
+  it('enunciado sem entityType/número usa IBDA e o título', async () => {
+    const { adaptToSourcesPayload } = await import('../semantic-adapter');
+    const p = adaptToSourcesPayload([mkDoc('enunciados')] as never)[0];
+    expect(p.tribunalCode).toBe('IBDA');
+    expect(p.decisionNumber).toBe('Título Doc'); // fallback do enunciadoNumber
+  });
+
+  it('enunciado com entityType desconhecido ecoa o próprio código como nome', async () => {
+    const { adaptToSourcesPayload } = await import('../semantic-adapter');
+    const p = adaptToSourcesPayload([mkDoc('enunciados', { entityType: 'ZZZ', enunciadoNumber: '5' })] as never)[0];
+    expect(p.tribunalCode).toBe('ZZZ');
+    expect(p.tribunalName).toBe('ZZZ'); // ENTITY_TRIBUNAL_NAMES[code] ?? code
+    expect(p.decisionNumber).toBe('5');
+  });
+
+  it('categoria desconhecida cai no fallback genérico', async () => {
+    const { adaptToSourcesPayload } = await import('../semantic-adapter');
+    const p = adaptToSourcesPayload([mkDoc('categoria-nova')] as never)[0];
+    expect(p.decisionType).toBe('categoria-nova');
+    expect(p.sourceType).toBe('document-categoria-nova');
+  });
+});
+
+describe('enrichSources — órfãos e informativo sem número', () => {
+  it('descarta tribunal-decision órfã (sem linha no banco)', async () => {
+    const { enrichSources } = await import('../semantic-adapter');
+    mockTribunalDecisionFindMany.mockResolvedValueOnce([]); // nenhuma TD encontrada
+    const results = [{
+      documentId: 'td-x', documentTitle: 'TD', category: 'acordao', chunkContent: 'c',
+      chunkIndex: 0, similarity: 0.7, url: undefined, courseId: undefined, isCommon: true,
+      tags: undefined, leiArticles: null, uploadedAt: '2024-01-01', sourceType: 'tribunal-decision' as const,
+    }];
+    const enriched = await enrichSources(results as never);
+    expect(enriched).toHaveLength(0); // órfã → descartada
+  });
+
+  it('informativo sem número no título usa o título inteiro como decisionNumber', async () => {
+    const { adaptToSourcesPayload } = await import('../semantic-adapter');
+    const enriched = [{
+      documentId: 'inf', similarity: 0.7, chunkContent: 'c',
+      source: {
+        kind: 'document' as const, category: 'informativo',
+        data: {
+          id: 'inf', title: 'Boletim de Jurisprudência sem numeração', category: 'informativo',
+          tcuNumeroAcordao: null, tcuEmentaCompleta: null, description: null, content: null,
+          tcuRelator: null, tcuAutorTese: null, tcuOrgaoJulgador: null, tcuDataJulgamento: null,
+          tcuLinkPDF: null, summary: null, themes: null, leiArticlesArr: [], url: null, douData: null,
+          uploadedAt: new Date(), updatedAt: new Date(), entityType: null, enunciadoNumber: null,
+        },
+      },
+    }];
+    const p = adaptToSourcesPayload(enriched as never)[0];
+    expect(p.decisionNumber).toBe('Boletim de Jurisprudência sem numeração');
+  });
+});
