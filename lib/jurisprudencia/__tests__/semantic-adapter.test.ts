@@ -1,7 +1,11 @@
 // @vitest-environment node
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { Prisma } from '@prisma/client';
-import { mapFiltersToSemanticOptions } from '../semantic-adapter';
+import {
+  mapFiltersToSemanticOptions,
+  resolveEmenta,
+  resolveFullText,
+} from '../semantic-adapter';
 
 const { mockDocumentFindMany, mockTribunalDecisionFindMany } = vi.hoisted(() => ({
   mockDocumentFindMany: vi.fn(),
@@ -548,5 +552,53 @@ describe('adaptToSourcesPayload — enunciados', () => {
       decisionNumber: '10',
       sourceType: 'document-tcu-enunciado',
     });
+  });
+});
+
+describe('mapFiltersToSemanticOptions — todos os filtros estruturais', () => {
+  it('TCU: aplica todos os filtros no extraWhere de Document', () => {
+    const opts = mapFiltersToSemanticOptions({
+      tribunal: 'TCU',
+      ano: 2024, tema: 'terceirização', artigo: '75', relator: 'Fulano',
+      orgao: 'Plenário', dataFrom: '2024-01-01', dataTo: '2024-12-31', q: 'pregão',
+    });
+    const vals = (opts.extraWhere!.document as { values: unknown[] }).values;
+    expect(vals).toEqual(expect.arrayContaining(['75', '%Plenário%', '2024-01-01', '2024-12-31', 2024]));
+  });
+
+  it('TCE: aplica todos os filtros no extraWhere de TribunalDecision', () => {
+    const opts = mapFiltersToSemanticOptions({
+      tribunal: 'TCE-SP',
+      ano: 2024, tema: 'terceirização', artigo: '75', decisionType: 'consulta',
+      relator: 'Fulano', orgao: 'Plenário', dataFrom: '2024-01-01', dataTo: '2024-12-31', q: 'pregão',
+    });
+    const vals = (opts.extraWhere!.tribunalDecision as { values: unknown[] }).values;
+    expect(vals).toEqual(expect.arrayContaining(['75', 'consulta', '%Fulano%', 2024]));
+  });
+});
+
+describe('resolveEmenta', () => {
+  it('tribunal-decision: usa data.ementa (ou string vazia)', () => {
+    expect(resolveEmenta({ source: { kind: 'tribunal-decision', data: { ementa: 'ementa TD' } } } as never)).toBe('ementa TD');
+    expect(resolveEmenta({ source: { kind: 'tribunal-decision', data: {} } } as never)).toBe('');
+  });
+
+  it('document: cai em tcuEmentaCompleta -> description -> content -> vazio', () => {
+    expect(resolveEmenta({ source: { kind: 'document', data: { tcuEmentaCompleta: 'ementa TCU' } } } as never)).toBe('ementa TCU');
+    expect(resolveEmenta({ source: { kind: 'document', data: { description: 'desc' } } } as never)).toBe('desc');
+    expect(resolveEmenta({ source: { kind: 'document', data: { content: 'conteúdo' } } } as never)).toBe('conteúdo');
+    expect(resolveEmenta({ source: { kind: 'document', data: {} } } as never)).toBe('');
+  });
+});
+
+describe('resolveFullText', () => {
+  it('tribunal-decision: usa data.fullText (ou null)', () => {
+    expect(resolveFullText({ source: { kind: 'tribunal-decision', data: { fullText: 'inteiro teor' } } } as never)).toBe('inteiro teor');
+    expect(resolveFullText({ source: { kind: 'tribunal-decision', data: {} } } as never)).toBeNull();
+  });
+
+  it('document: usa data.content (ou null)', () => {
+    expect(resolveFullText({ source: { kind: 'document', data: { content: 'conteúdo doc' } } } as never)).toBe('conteúdo doc');
+    expect(resolveFullText({ source: { kind: 'document', data: {} } } as never)).toBeNull();
   });
 });
