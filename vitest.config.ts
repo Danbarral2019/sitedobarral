@@ -37,7 +37,7 @@ export default defineConfig({
       // A cada lote de testes, SUBIR estes números. Meta de longo prazo: 80/70.
       thresholds: {
         lines: 79,
-        functions: 76,
+        functions: 77,
         branches: 68,
         statements: 78,
       },
