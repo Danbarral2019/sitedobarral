@@ -9,7 +9,42 @@ import {
   stripZeroWidthChars,
   dedupeBoilerplateFooter,
   normalizeScrapedText,
+  detectCharsetFromResponse,
 } from '../../lib/legislative-scrapers/normalize';
+
+function buf(str: string): ArrayBuffer {
+  const u8 = new TextEncoder().encode(str);
+  return u8.buffer.slice(u8.byteOffset, u8.byteOffset + u8.byteLength);
+}
+
+describe('detectCharsetFromResponse', () => {
+  it('lê o charset do header Content-Type e normaliza aliases', () => {
+    expect(detectCharsetFromResponse('text/html; charset=latin1', buf(''))).toBe('iso-8859-1');
+    expect(detectCharsetFromResponse('text/html; charset=cp1252', buf(''))).toBe('windows-1252');
+    expect(detectCharsetFromResponse('text/html; charset=UTF8', buf(''))).toBe('utf-8');
+    // charset desconhecido volta em minúsculo, sem mapeamento
+    expect(detectCharsetFromResponse('text/html; charset=shift_jis', buf(''))).toBe('shift_jis');
+  });
+
+  it('sem charset no header, lê do <meta charset>', () => {
+    expect(detectCharsetFromResponse(null, buf('<html><head><meta charset="iso-8859-1"></head>'))).toBe('iso-8859-1');
+  });
+
+  it('sem charset no header, lê do <meta http-equiv content-type>', () => {
+    const html = '<meta http-equiv="content-type" content="text/html; charset=windows-1252">';
+    expect(detectCharsetFromResponse(null, buf(html))).toBe('windows-1252');
+  });
+
+  it('sem pistas: sniff UTF-8 válido retorna utf-8', () => {
+    expect(detectCharsetFromResponse(null, buf('conteúdo válido em UTF-8 ção'))).toBe('utf-8');
+  });
+
+  it('sem pistas: bytes inválidos em UTF-8 caem para iso-8859-1', () => {
+    // 0xE9 0xF3 = "éó" em latin1, sequência inválida em UTF-8 estrito
+    const ab = new Uint8Array([0x61, 0xe9, 0xf3, 0x62]).buffer;
+    expect(detectCharsetFromResponse(null, ab)).toBe('iso-8859-1');
+  });
+});
 
 describe('collapseWhitespace', () => {
   it('colapsa múltiplas quebras de linha em \\n\\n', () => {
