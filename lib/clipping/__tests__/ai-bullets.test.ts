@@ -22,6 +22,20 @@ describe('shouldEnrichWithAi', () => {
     const dispositivos = [disp('a'.repeat(50)), disp('b'.repeat(50))];
     expect(shouldEnrichWithAi({ dispositivos, ementa: 'x', hasInteiroTeor: true })).toBe(true);
   });
+
+  it('enriquece quando a ementa indica caso processual (palavra-chave)', () => {
+    const dispositivos = [disp('a'.repeat(200)), disp('b'.repeat(200))];
+    expect(
+      shouldEnrichWithAi({ dispositivos, ementa: 'EMBARGOS DE DECLARAÇÃO. rejeição.', hasInteiroTeor: true }),
+    ).toBe(true);
+  });
+
+  it('NÃO enriquece quando há 2 dispositivos longos, texto >= 250 e ementa não-processual', () => {
+    const dispositivos = [disp('a'.repeat(200)), disp('b'.repeat(200))];
+    expect(
+      shouldEnrichWithAi({ dispositivos, ementa: 'DISPENSA DE LICITAÇÃO POR VALOR', hasInteiroTeor: true }),
+    ).toBe(false);
+  });
 });
 
 describe('shouldGenerateBulletsForTribunal', () => {
