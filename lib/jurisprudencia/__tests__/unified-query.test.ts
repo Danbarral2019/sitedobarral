@@ -257,6 +257,33 @@ describe('buildTribunalDecisionWhere', () => {
     expect(where.sql).toMatch(/ementa ILIKE/);
     expect(where.values).toContain('%pregão%');
   });
+
+  it('aplica todos os filtros simultaneamente (tema/artigo/tipo/relator/órgão/datas/inativos)', () => {
+    const where = buildTribunalDecisionWhere({
+      tribunal: 'TCE-SP',
+      ano: 2024,
+      tema: 'terceirização',
+      artigo: '75',
+      decisionType: 'consulta',
+      relator: 'Fulano',
+      orgao: 'Plenário',
+      dataFrom: '2024-01-01',
+      dataTo: '2024-12-31',
+      q: 'pregão',
+      excludeInactive: true,
+    });
+    // valores dos filtros textuais/diretos presentes
+    expect(where.values).toEqual(
+      expect.arrayContaining([
+        'TCE-SP', 2024, '%terceirização%', '75', 'consulta',
+        '%Fulano%', '%Plenário%', '2024-01-01', '2024-12-31',
+      ]),
+    );
+    // exclui situações inativas (CANCELADA/REVISTA) — literais ficam em .values
+    expect(where.values).toEqual(
+      expect.arrayContaining(['%situacao:CANCELADA%', '%situacao:REVISTA%']),
+    );
+  });
 });
 
 describe('buildDocumentTcuWhere', () => {
@@ -294,6 +321,24 @@ describe('buildDocumentTcuWhere', () => {
     const where = buildDocumentTcuWhere({ q: 'contrato' });
     expect(where.sql).toMatch(/title ILIKE/);
     expect(where.sql).toMatch(/"tcuEmentaCompleta" ILIKE/);
+  });
+
+  it('aplica todos os filtros simultaneamente (artigo/órgão/datas)', () => {
+    const where = buildDocumentTcuWhere({
+      ano: 2024,
+      tema: 'terceirização',
+      artigo: '75',
+      relator: 'Fulano',
+      orgao: 'Plenário',
+      dataFrom: '2024-01-01',
+      dataTo: '2024-12-31',
+      q: 'contrato',
+    });
+    expect(where.values).toEqual(
+      expect.arrayContaining(['75', '%Plenário%', '2024-01-01', '2024-12-31']),
+    );
+    expect(where.sql).toMatch(/"leiArticlesArr" @>/);
+    expect(where.sql).toMatch(/"tcuOrgaoJulgador" ILIKE/);
   });
 });
 

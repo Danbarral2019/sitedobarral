@@ -63,6 +63,25 @@ describe('renderDouEditorialAlertEmail', () => {
     expect(html).not.toContain('javascript:alert');
     expect(html).toMatch(/href="#"[^>]*>Ver DOU/);
   });
+
+  it('usa a cor de score do tier intermediário (70-79)', () => {
+    const html = renderDouEditorialAlertEmail([sample({ score: 75 })]);
+    // #2563eb é a cor do tier 70-79 (azul)
+    expect(html).toContain('#2563eb');
+  });
+
+  it('omite as tags de "afeta" quando affects está vazio ou ausente', () => {
+    const vazio = renderDouEditorialAlertEmail([sample({ affects: [] })]);
+    const ausente = renderDouEditorialAlertEmail([sample({ affects: undefined })]);
+    // sem tags de afeta (o container só aparece quando há tags)
+    expect(vazio).not.toContain('background:#fff7ed;color:#9a3412;padding:3px 10px');
+    expect(ausente).not.toContain('background:#fff7ed;color:#9a3412;padding:3px 10px');
+  });
+
+  it('usa "ato" como fallback quando actType está ausente', () => {
+    const html = renderDouEditorialAlertEmail([sample({ actType: undefined })]);
+    expect(html.toLowerCase()).toContain('ato ·');
+  });
 });
 
 describe('sendDouEditorialAlert', () => {

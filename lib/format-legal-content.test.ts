@@ -316,3 +316,42 @@ describe('regressão: marcadores de diretiva não devem ser reformatados', () =>
     expect(closes).toBe(1);
   });
 });
+
+  describe('cabeçalhos estruturais', () => {
+    it('marca TÍTULO curto como h2', () => {
+      const out = formatLegalContent('TÍTULO I\n\nDAS DISPOSIÇÕES GERAIS');
+      expect(out).toContain('## TÍTULO I');
+    });
+
+    it('marca ANEXO como h2', () => {
+      const out = formatLegalContent('ANEXO I\n\nTabela de valores de referência');
+      expect(out).toContain('## ANEXO I');
+    });
+
+    it('marca seção all-caps (DAS/DOS/DISPOSIÇÕES) como h3 em title case', () => {
+      const out = formatLegalContent('DAS DISPOSIÇÕES PRELIMINARES');
+      expect(out).toMatch(/### Das Disposições Preliminares/);
+    });
+
+    it('destaca texto curto em caixa alta no corpo (rótulos/tabelas)', () => {
+      const out = formatLegalContent('Texto introdutório normal aqui.\n\nTABELA DE PENALIDADES APLICÁVEIS');
+      // toTitleCase mantém preposições ("de") em minúsculo
+      expect(out).toContain('**Tabela de Penalidades Aplicáveis**');
+    });
+
+    it('NÃO trata TÍTULO longo (>= 80 chars) como cabeçalho', () => {
+      const longTitulo = 'TÍTULO ' + 'X'.repeat(90);
+      const out = formatLegalContent(longTitulo);
+      expect(out).not.toContain('## ' + longTitulo);
+    });
+
+    it('reconhece SEÇÃO e SUBSEÇÃO como h3/h4', () => {
+      expect(formatLegalContent('SEÇÃO II')).toContain('### SEÇÃO II');
+      expect(formatLegalContent('SUBSEÇÃO III')).toContain('#### SUBSEÇÃO III');
+    });
+
+    it('marca verbos separadores (DECRETA/RESOLVE) em negrito', () => {
+      const out = formatLegalContent('O PRESIDENTE DA REPÚBLICA\n\nDECRETA:');
+      expect(out).toContain('**DECRETA:**');
+    });
+  });
