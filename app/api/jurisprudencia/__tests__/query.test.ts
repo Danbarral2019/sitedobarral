@@ -455,4 +455,116 @@ describe('POST /api/jurisprudencia/query', () => {
     );
     expect(body.searchHistoryId).toBe('sh-degraded');
   });
+
+  // --- Cobertura de branches de montagem de prompt e guardas ---
+  function setupOne(
+    over: { payload?: Record<string, unknown>; data?: Record<string, unknown> } = {},
+    opts: { fullText?: string | null; chunk?: string } = {},
+  ) {
+    const chunk = opts.chunk ?? 'trecho relevante do acórdão';
+    mockSemanticSearch.mockResolvedValueOnce({
+      results: [{ documentId: 'x', documentTitle: 't', category: 'acordao', chunkContent: chunk, chunkIndex: 0, similarity: 0.9, url: null, courseId: null, isCommon: true, tags: null, leiArticles: null, uploadedAt: '2024-01-01', sourceType: 'tribunal-decision' }],
+      query: 'q', totalFound: 1, latency: 10, cached: false,
+    });
+    mockEnrichSources.mockResolvedValueOnce([{
+      documentId: 'x', similarity: 0.9, chunkContent: chunk,
+      source: { kind: 'tribunal-decision', data: { id: 'x', summary: null, themes: null, leiArticlesArr: [], ...over.data } },
+    }]);
+    mockAdaptToSourcesPayload.mockReturnValueOnce([{
+      id: 'x', tribunalCode: 'TCU', tribunalName: 'TCU', decisionType: 'acordao', decisionNumber: '1/24',
+      title: 't', relator: 'Rel', orgaoJulgador: 'Plenário', dataJulgamento: null, url: null,
+      sourceType: 'tribunal-decision', similarity: 0.9, ...over.payload,
+    }]);
+    mockResolveFullText.mockReturnValueOnce(opts.fullText ?? null);
+    mockQueryGeminiText.mockResolvedValueOnce({ response: 'resposta', cached: false, latency: 10 });
+  }
+
+  it('rejeita corpo inválido com 422 (validação Zod)', async () => {
+    const res = await POST(makeReq({ semQuery: true }), routeCtx);
+    expect(res.status).toBe(422);
+    expect(mockSemanticSearch).not.toHaveBeenCalled();
+  });
+
+  it('inclui data de julgamento e artigos da Lei no bloco de contexto', async () => {
+    setupOne({ payload: { dataJulgamento: new Date('2024-05-20') }, data: { leiArticlesArr: ['75', '6'] } });
+    await POST(makeReq({ query: 'dispensa', filters: { dataTo: '2024-12-31' } }), routeCtx);
+    const prompt = mockQueryGeminiText.mock.calls[0][0] as string;
+    expect(prompt).toMatch(/Artigos Lei 14\.133:.*75/);
+  });
+
+  it('inteiro teor abaixo do limite entra inteiro, sem janela de corte', async () => {
+    // >= FULLTEXT_MIN_LENGTH (para virar "inteiro teor") e <= MAX (sem janela)
+    const ft = 'Inteiro teor completo do acórdão. ' + 'palavra '.repeat(120);
+    setupOne({}, { fullText: ft });
+    await POST(makeReq({ query: 'dispensa' }), routeCtx);
+    const prompt = mockQueryGeminiText.mock.calls[0][0] as string;
+    expect(prompt).toContain('Trecho do inteiro teor');
+    expect(prompt).toContain('Inteiro teor completo do acórdão');
+  });
+
+  it('inteiro teor longo sem âncora no chunk usa o início truncado', async () => {
+    // fullText > 4000 chars mas o chunk não aparece nele → idx === -1 → slice(0, MAX)
+    const longo = 'Z'.repeat(5000);
+    setupOne({}, { fullText: longo, chunk: 'ancora que nao existe no inteiro teor longo aqui' });
+    await POST(makeReq({ query: 'dispensa' }), routeCtx);
+    const prompt = mockQueryGeminiText.mock.calls[0][0] as string;
+    expect(prompt).toContain('ZZZ');
+    expect(prompt).toContain('...');
+  });
+
+  it('inteiro teor longo com chunk curto (âncora <30) usa o início truncado', async () => {
+    // chunk < 30 chars → não tenta ancorar (anchor.length > 30 falso) → slice(0, MAX)
+    setupOne({}, { fullText: 'Q'.repeat(6000), chunk: 'abc' });
+    await POST(makeReq({ query: 'dispensa' }), routeCtx);
+    const prompt = mockQueryGeminiText.mock.calls[0][0] as string;
+    expect(prompt).toContain('QQQ');
+    expect(prompt).toContain('...');
+  });
+
+  it('trunca ementa longa com reticências no bloco de contexto', async () => {
+    setupOne();
+    mockResolveEmenta.mockReset();
+    mockResolveEmenta.mockReturnValue('E'.repeat(3000)); // > MAX_EMENTA_CHARS
+    await POST(makeReq({ query: 'dispensa' }), routeCtx);
+    const prompt = mockQueryGeminiText.mock.calls[0][0] as string;
+    expect(prompt).toContain('...');
+  });
+
+  it('todos os resultados órfãos (enriched vazio) retorna sem sintetizar', async () => {
+    mockSemanticSearch.mockResolvedValueOnce({
+      results: [{ documentId: 'x', documentTitle: 't', category: 'acordao', chunkContent: 'c', chunkIndex: 0, similarity: 0.8, url: null, courseId: null, isCommon: true, tags: null, leiArticles: null, uploadedAt: '2024-01-01', sourceType: 'tribunal-decision' }],
+      query: 'q', totalFound: 1, latency: 10, cached: false,
+    });
+    mockEnrichSources.mockResolvedValueOnce([]); // todos órfãos
+    const res = await POST(makeReq({ query: 'dispensa' }), routeCtx);
+    expect(res.status).toBe(200);
+    expect(mockQueryGeminiText).not.toHaveBeenCalled();
+  });
+
+  it('janela do inteiro teor com âncora no meio recebe reticências dos dois lados', async () => {
+    const anchor = 'PRINCÍPIO DA SEGREGAÇÃO DE FUNÇÕES na administração pública';
+    const ft = 'X'.repeat(3000) + anchor + 'Y'.repeat(3000); // > 4000, âncora no meio
+    setupOne({}, { fullText: ft, chunk: anchor });
+    await POST(makeReq({ query: 'segregação' }), routeCtx);
+    const prompt = mockQueryGeminiText.mock.calls[0][0] as string;
+    // âncora encontrada no meio → janela com '...' antes e depois
+    expect(prompt).toContain(anchor);
+    expect(prompt).toContain('...');
+  });
+
+  it('resposta vazia do Gemini cai no fallback (sources presentes, aiAnswer nula no histórico)', async () => {
+    setupOne();
+    // sobrescreve o mock de resposta para vir vazio (só espaços) → empty-response
+    mockQueryGeminiText.mockReset();
+    mockQueryGeminiText.mockResolvedValueOnce({ response: '   ', cached: false, latency: 10 });
+    const res = await POST(makeReq({ query: 'dispensa' }), routeCtx);
+    expect(res.status).toBe(200);
+    const body = await readJson(res);
+    expect(body.sources).toHaveLength(1);
+    expect(body.answer).toMatch(/Não consegui gerar uma síntese/i);
+    // histórico persiste com aiAnswer null
+    expect(mockSearchHistoryCreate).toHaveBeenCalledWith(
+      expect.objectContaining({ data: expect.objectContaining({ aiAnswer: null }) }),
+    );
+  });
 });
