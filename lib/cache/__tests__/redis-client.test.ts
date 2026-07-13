@@ -28,6 +28,7 @@ const mockExpire = vi.hoisted(() => vi.fn());
 const mockPing = vi.hoisted(() => vi.fn());
 const mockSadd = vi.hoisted(() => vi.fn());
 const mockSmembers = vi.hoisted(() => vi.fn());
+const mockScan = vi.hoisted(() => vi.fn());
 
 vi.mock('@upstash/redis', () => {
   return {
@@ -41,6 +42,7 @@ vi.mock('@upstash/redis', () => {
       ping = mockPing;
       sadd = mockSadd;
       smembers = mockSmembers;
+      scan = mockScan;
     },
   };
 });
@@ -63,10 +65,12 @@ import {
   registerCacheKey,
   getRegisteredKeys,
   invalidateCacheByPrefix,
+  deleteCachePattern,
   withCache,
   healthCheck,
   isCacheEnabled,
   getCacheStats,
+  CacheInvalidation,
 } from '../redis-client';
 
 describe('Redis Cache Client', () => {
@@ -444,6 +448,14 @@ describe('Redis Cache Client', () => {
       mockSetex.mockRejectedValue(new Error('Redis error'));
       await expect(setCache('key', 'value')).resolves.toBeUndefined();
     });
+
+    it('deve registrar a chave no registry quando prefix é fornecido', async () => {
+      mockSetex.mockResolvedValue('OK');
+      mockSadd.mockResolvedValue(1);
+      await setCache('faq:list:all', { data: 'x' }, 60, 'faq');
+      // registerCacheKey grava a chave no set do registry do prefixo
+      expect(mockSadd).toHaveBeenCalledWith(CacheKeys.registry('faq'), 'faq:list:all');
+    });
   });
 
   describe('deleteCache', () => {
@@ -792,6 +804,62 @@ describe('Redis Cache Client', () => {
       const stats = await getCacheStats();
 
       expect(stats.connected).toBe(false);
+    });
+  });
+
+  describe('deleteCachePattern', () => {
+    it('varre com SCAN e deleta as chaves casadas (múltiplos cursores)', async () => {
+      // 1º SCAN devolve cursor != 0 com 2 chaves; 2º devolve cursor 0 com 1 chave
+      mockScan
+        .mockResolvedValueOnce(['5', ['faq:a', 'faq:b']])
+        .mockResolvedValueOnce(['0', ['faq:c']]);
+      mockDel.mockResolvedValue(1);
+
+      const deleted = await deleteCachePattern('faq:*');
+      expect(deleted).toBe(3);
+      expect(mockScan).toHaveBeenCalledTimes(2);
+      expect(mockDel).toHaveBeenCalledWith('faq:a');
+      expect(mockDel).toHaveBeenCalledWith('faq:c');
+    });
+
+    it('retorna 0 quando não há chaves casadas', async () => {
+      mockScan.mockResolvedValueOnce(['0', []]);
+      expect(await deleteCachePattern('none:*')).toBe(0);
+    });
+
+    it('retorna 0 e não lança em caso de erro no SCAN', async () => {
+      mockScan.mockRejectedValueOnce(new Error('scan boom'));
+      expect(await deleteCachePattern('err:*')).toBe(0);
+    });
+  });
+
+  describe('CacheInvalidation', () => {
+    beforeEach(() => {
+      // Cada invalidateCacheByPrefix lê o registry (smembers) e deleta (del)
+      mockSmembers.mockResolvedValue(['k1']);
+      mockDel.mockResolvedValue(1);
+    });
+
+    it('leiArticle(numero) deleta a chave específica do editor', async () => {
+      mockDel.mockResolvedValue(1);
+      const n = await CacheInvalidation.leiArticle('75');
+      expect(n).toBe(1);
+      expect(mockDel).toHaveBeenCalledWith(CacheKeys.leiArticleEditor('75'));
+    });
+
+    it('courseDocuments(courseId) invalida o prefixo específico do curso', async () => {
+      await CacheInvalidation.courseDocuments('3');
+      // registry do prefixo docs:course:3
+      expect(mockSmembers).toHaveBeenCalledWith(CacheKeys.registry('docs:course:3'));
+    });
+
+    it('all() invoca todos os invalidadores e agrega total + detalhes', async () => {
+      const res = await CacheInvalidation.all();
+      expect(res).toHaveProperty('total');
+      expect(res.details).toHaveProperty('faq');
+      expect(res.details).toHaveProperty('adminAnalytics');
+      // sanity: total é a soma dos counts numéricos
+      expect(typeof res.total).toBe('number');
     });
   });
 });
