@@ -84,3 +84,36 @@ describe('hybridSearch — passthrough de filtros vector', () => {
     expect(calledOptions.tribunalBoost).toEqual({ code: 'TST', factor: 1.2 });
   });
 });
+
+describe('hybridSearch — merge RRF de vetor + FTS', () => {
+  it('combina resultados de vetor e FTS, inclui doc só-FTS e parseia tags', async () => {
+    mockSemanticSearch.mockResolvedValue({
+      results: [{
+        documentId: 'd1', documentTitle: 'Vetor 1', category: 'acordao', chunkContent: 'trecho vetor',
+        chunkIndex: 0, similarity: 0.9, isCommon: true, sourceType: 'document',
+      }],
+      query: 'q', totalFound: 1, latency: 0, cached: false,
+    });
+    mockSearchDocuments.mockResolvedValue([
+      { data: { id: 'd2', title: 'FTS Doc', category: 'parecer', description: 'resumo fts', url: 'http://u', course_id: null, tags: '["a","b"]' } },
+    ]);
+
+    const res = await hybridSearch({ query: 'dispensa de licitação', useCache: false });
+    const ids = res.results.map((r) => r.documentId);
+    expect(ids).toContain('d1'); // veio do vetor
+    expect(ids).toContain('d2'); // só-FTS, montado do lado FTS
+    const d2 = res.results.find((r) => r.documentId === 'd2')!;
+    expect(d2.tags).toEqual(['a', 'b']); // safeParseArray
+    expect(d2.chunkContent).toBe('resumo fts');
+  });
+
+  it('degrada para semantic-only quando o FTS lança erro', async () => {
+    mockSemanticSearch.mockResolvedValue({
+      results: [{ documentId: 'd1', documentTitle: 'V', category: 'acordao', chunkContent: 'c', chunkIndex: 0, similarity: 0.8, isCommon: true, sourceType: 'document' }],
+      query: 'q', totalFound: 1, latency: 0, cached: false,
+    });
+    mockSearchDocuments.mockRejectedValue(new Error('GIN index down'));
+    const res = await hybridSearch({ query: 'pregão eletrônico', useCache: false });
+    expect(res.results.map((r) => r.documentId)).toContain('d1');
+  });
+});

@@ -37,9 +37,9 @@ export default defineConfig({
       // A cada lote de testes, SUBIR estes números. Meta de longo prazo: 80/70.
       thresholds: {
         lines: 80,
-        functions: 77,
+        functions: 79,
         branches: 70,
-        statements: 79,
+        statements: 80,
       },
     },
     // Timeout maior para testes assíncronos
