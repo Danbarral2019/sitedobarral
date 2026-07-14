@@ -104,6 +104,10 @@
     {
       "path": "/api/cron/data-health",
       "schedule": "0 6 * * 1"
+    },
+    {
+      "path": "/api/cron/ons-monitor",
+      "schedule": "0 6 1 * *"
     }
   ]
 }
