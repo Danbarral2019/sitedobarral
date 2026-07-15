@@ -12,6 +12,7 @@ import {
   ChevronRight,
   Download,
   ExternalLink,
+  FileText,
   Heart,
 } from 'lucide-react';
 import { useFavorites } from '@/hooks/use-favorites';
@@ -32,6 +33,8 @@ interface DocumentData {
   id: string;
   title: string;
   description: string | null;
+  /** Texto integral da fonte. `description` costuma ser só um extrato/curadoria. */
+  content: string | null;
   category: string;
   type: 'pdf' | 'doc' | 'link' | 'video';
   url: string;
@@ -71,6 +74,7 @@ export function LeiDocumentDetails({ documentId, documentType = 'document' }: Le
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [document, setDocument] = useState<DocumentData | null>(null);
+  const [showFullText, setShowFullText] = useState(false);
 
   const docFavorites = useFavorites();
   const actFavorites = useLegislativeActFavorites();
@@ -126,6 +130,12 @@ export function LeiDocumentDetails({ documentId, documentType = 'document' }: Le
   const effectivePublicNotes = document.notes?.publicNotes ?? document.publicNotes;
   const keyPoints = effectiveKeyPoints ? effectiveKeyPoints.split('\n').filter((p) => p.trim()) : [];
   const isLiteral = isLiteralSourceCategory(document.category);
+
+  // Só oferece a íntegra quando ela acrescenta algo: em muitos registros o
+  // `content` é a própria `description` (o scraper da AGU grava os dois iguais).
+  const fullText = document.content?.trim() ?? '';
+  const hasFullText =
+    fullText.length > 0 && fullText !== (document.description ?? '').trim();
 
   const isExternalLikeDoc =
     document.url &&
@@ -208,6 +218,39 @@ export function LeiDocumentDetails({ documentId, documentType = 'document' }: Le
         <div className="bg-blue-50 border-l-4 border-blue-500 p-4 rounded-r-lg">
           <h4 className="font-bold text-gray-900 text-sm mb-2">Descrição</h4>
           <p className="text-gray-800 text-sm leading-relaxed">{document.description}</p>
+        </div>
+      )}
+
+      {/*
+        Texto integral. Antes, esta tela só mostrava `description` — que para as
+        ONs é um extrato (a ON 94/2024 exibia apenas o inciso I, embora o texto
+        completo estivesse no banco). Colapsado por padrão: `content` pode passar
+        de 30 mil caracteres em acórdãos.
+        Ref.: docs/audits/2026-07-15-lei-comentada-RESULTADOS.md
+      */}
+      {hasFullText && (
+        <div className="bg-white border-l-4 border-gray-400 p-4 rounded-r-lg">
+          <button
+            type="button"
+            onClick={() => setShowFullText((v) => !v)}
+            aria-expanded={showFullText}
+            className="flex items-center gap-2 w-full text-left group"
+          >
+            <FileText className="w-4 h-4 text-gray-600" />
+            <h4 className="font-bold text-gray-900 text-sm flex-1 group-hover:text-blue-700 transition-colors">
+              Texto integral
+            </h4>
+            <ChevronRight
+              className={`w-4 h-4 text-gray-500 transition-transform ${showFullText ? 'rotate-90' : ''}`}
+            />
+          </button>
+          {showFullText && (
+            <div className="mt-3 max-h-96 overflow-y-auto pr-2">
+              <p className="text-gray-800 text-sm leading-relaxed whitespace-pre-line">
+                {document.content}
+              </p>
+            </div>
+          )}
         </div>
       )}
 
