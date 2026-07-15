@@ -137,6 +137,15 @@ describe('antônimos não invertem o sinal (bug crítico)', () => {
     const a = analisarAcordao(t, ['5']);
     expect(a.termos['5']['segurança jurídica'].fraco.voto).toBe(1);
   });
+
+  it('"improbidade administrativa" (Lei 8.429/1992, 3x) NÃO marca o art. 5º como debatido, nem conta em "probidade administrativa"', () => {
+    const t = ['RELATÓRIO', 'nada', 'VOTO',
+      'Viola a Lei 8.429/1992 sobre improbidade administrativa. Configura-se improbidade administrativa grave. A improbidade administrativa é patente.',
+      'ACÓRDÃO', 'ACORDAM.'].join('\n');
+    const a = analisarAcordao(t, ['5']);
+    expect(a.termos['5']?.['probidade administrativa']?.fraco.voto ?? 0).toBe(0);
+    expect(artigosDebatidos(a)).not.toContain('5');
+  });
 });
 
 describe('espaço flexível em termos multi-palavra (quebra de linha / espaço duplo)', () => {
