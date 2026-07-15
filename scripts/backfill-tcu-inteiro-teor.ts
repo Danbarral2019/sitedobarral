@@ -11,6 +11,17 @@
  *      npx tsx scripts/backfill-tcu-inteiro-teor.ts --execute --force
  *
  * Estimativa: ~1.835 acórdãos, ~50 min, ~640 MB de tráfego.
+ * Falha esperada: amostra de 20 (--limit=20) deu 15% de falha (3/20) — projeta
+ * ~275 falhas no total. Causas conhecidas: RTF malformado ("empty control
+ * word", determinístico — ex. 1204/2024), stack overflow do rtf-parser
+ * (ex. 1359/2024) e timeout de rede (ex. 456/2026). Falhas não têm mitigação
+ * automática; ficam registradas em tcuEnriquecimentoErro para triagem manual.
+ *
+ * ⚠️ Script one-shot para rodar manualmente. NÃO agendar em cron: documentos
+ * que falham nunca recebem `tcuAnalise.v`, então são retentados a cada
+ * execução (comportamento correto para uma rodada manual, mas viraria loop
+ * de retentativa infinita em cron, pois não há marcação de "falha permanente").
+ *
  * Ref.: docs/superpowers/specs/2026-07-15-tcu-inteiro-teor-relevancia-design.md
  */
 import { prisma } from '../lib/prisma';
@@ -24,7 +35,7 @@ const limitArg = process.argv.find((a) => a.startsWith('--limit='));
 const LIMIT = limitArg ? parseInt(limitArg.split('=')[1], 10) : undefined;
 
 const CONCORRENCIA = 3;   // mesmo padrão de lib/tcu-scraper.ts:524-527
-const DELAY_MS = 1000;    // 1 req/s — o TCU não documenta rate limit
+const DELAY_MS = 1000;    // 1 req/s — o TCU não documenta rate limit (escalonado dentro do lote, não rajada)
 const TETO_CHARS = 500_000;
 
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
@@ -105,13 +116,21 @@ async function main() {
 
   for (let i = 0; i < alvos.length; i += CONCORRENCIA) {
     const lote = alvos.slice(i, i + CONCORRENCIA);
-    const rs = await Promise.all(lote.map((d) => processar(d as Alvo)));
+    // Delay progressivo dentro do lote (item 0 imediato, item 1 em +1s, item 2 em +2s)
+    // — mesmo padrão de lib/tcu-scraper.ts:544-547, evita rajada simultânea.
+    const rs = await Promise.all(
+      lote.map(async (d, idx) => {
+        if (idx > 0) await sleep(DELAY_MS * idx);
+        return processar(d as Alvo);
+      })
+    );
     for (const r of rs) r === 'ok' ? ok++ : r === 'falha' ? falha++ : pulado++;
 
     const feitos = i + lote.length;
     const eta = Math.round(((Date.now() - t0) / feitos) * (alvos.length - feitos) / 1000 / 60);
     console.log(`   [${feitos}/${alvos.length}] ok=${ok} falha=${falha} pulado=${pulado} · ETA ~${eta}min`);
-    await sleep(DELAY_MS);
+    // Delay entre lotes — não roda após o último.
+    if (i + CONCORRENCIA < alvos.length) await sleep(DELAY_MS);
   }
 
   console.log(`\n${'─'.repeat(60)}`);
