@@ -1,0 +1,538 @@
+{
+  "a01_counts": {
+    "doc": 5516,
+    "act": 81,
+    "trib": 832,
+    "blog": 0,
+    "pub": 0,
+    "gloss": 64,
+    "lesson": 101,
+    "totalDocs": 6486
+  },
+  "a01_topDocument": [
+    {
+      "art": "5",
+      "n": 1140
+    },
+    {
+      "art": "156",
+      "n": 814
+    },
+    {
+      "art": "147",
+      "n": 779
+    },
+    {
+      "art": "11",
+      "n": 766
+    },
+    {
+      "art": "18",
+      "n": 718
+    },
+    {
+      "art": "72",
+      "n": 709
+    },
+    {
+      "art": "6",
+      "n": 621
+    },
+    {
+      "art": "17",
+      "n": 620
+    },
+    {
+      "art": "92",
+      "n": 571
+    },
+    {
+      "art": "155",
+      "n": 565
+    },
+    {
+      "art": "75",
+      "n": 486
+    },
+    {
+      "art": "115",
+      "n": 478
+    },
+    {
+      "art": "169",
+      "n": 436
+    },
+    {
+      "art": "12",
+      "n": 423
+    },
+    {
+      "art": "23",
+      "n": 415
+    },
+    {
+      "art": "74",
+      "n": 395
+    },
+    {
+      "art": "149",
+      "n": 383
+    },
+    {
+      "art": "137",
+      "n": 367
+    },
+    {
+      "art": "140",
+      "n": 355
+    },
+    {
+      "art": "124",
+      "n": 334
+    },
+    {
+      "art": "67",
+      "n": 328
+    },
+    {
+      "art": "62",
+      "n": 321
+    },
+    {
+      "art": "158",
+      "n": 306
+    },
+    {
+      "art": "59",
+      "n": 302
+    },
+    {
+      "art": "117",
+      "n": 277
+    },
+    {
+      "art": "25",
+      "n": 276
+    },
+    {
+      "art": "28",
+      "n": 256
+    },
+    {
+      "art": "40",
+      "n": 247
+    },
+    {
+      "art": "82",
+      "n": 244
+    },
+    {
+      "art": "1",
+      "n": 230
+    }
+  ],
+  "a01_topAct": [
+    {
+      "art": "75",
+      "n": 12
+    },
+    {
+      "art": "6",
+      "n": 12
+    },
+    {
+      "art": "18",
+      "n": 12
+    },
+    {
+      "art": "115",
+      "n": 11
+    },
+    {
+      "art": "1",
+      "n": 10
+    },
+    {
+      "art": "117",
+      "n": 10
+    },
+    {
+      "art": "17",
+      "n": 9
+    },
+    {
+      "art": "19",
+      "n": 9
+    },
+    {
+      "art": "72",
+      "n": 9
+    },
+    {
+      "art": "92",
+      "n": 9
+    },
+    {
+      "art": "74",
+      "n": 8
+    },
+    {
+      "art": "180",
+      "n": 7
+    },
+    {
+      "art": "26",
+      "n": 7
+    },
+    {
+      "art": "12",
+      "n": 6
+    },
+    {
+      "art": "11",
+      "n": 5
+    }
+  ],
+  "a01_merged": [
+    [
+      "5",
+      1140
+    ],
+    [
+      "156",
+      814
+    ],
+    [
+      "147",
+      779
+    ],
+    [
+      "11",
+      771
+    ],
+    [
+      "18",
+      730
+    ],
+    [
+      "72",
+      718
+    ],
+    [
+      "6",
+      633
+    ],
+    [
+      "17",
+      629
+    ],
+    [
+      "92",
+      580
+    ],
+    [
+      "155",
+      565
+    ],
+    [
+      "75",
+      498
+    ],
+    [
+      "115",
+      489
+    ]
+  ],
+  "a01_leakingCategories": [
+    {
+      "cat": "lei-artigo",
+      "n": 183
+    },
+    {
+      "cat": "enunciados",
+      "n": 169
+    },
+    {
+      "cat": "manual-tcu",
+      "n": 154
+    },
+    {
+      "cat": "orientacao_procedimento",
+      "n": 56
+    },
+    {
+      "cat": "ato-normativo",
+      "n": 53
+    },
+    {
+      "cat": "boa_pratica",
+      "n": 9
+    },
+    {
+      "cat": "outro",
+      "n": 6
+    },
+    {
+      "cat": "bibliografia",
+      "n": 1
+    }
+  ],
+  "a02_stats": [
+    {
+      "n": 162,
+      "nulos": 64,
+      "min": 85,
+      "p50": 602,
+      "p90": 1752,
+      "max": 4189,
+      "avg": 851
+    }
+  ],
+  "a02_noTeto": 4,
+  "a02_semPontuacao": 9,
+  "a02_semPreambulo": 67,
+  "a02_amostra": [
+    {
+      "id": "86135790-b20c-4a95-b6fb-430792317094",
+      "title": "Orientação Normativa AGU nº 103/2026",
+      "len": 4189,
+      "tail": "ntra em vigor na data de sua publicação.\n\nJORGE RODRIGO ARAÚJO MESSIAS"
+    },
+    {
+      "id": "74fa4ba6-9045-47e4-b690-bbcdc6d96caf",
+      "title": "Orientação Normativa AGU nº 107/2026",
+      "len": 2070,
+      "tail": "entra em vigor na data de sua publicação.\nJORGE RODRIGO ARAÚJO MESSIAS"
+    },
+    {
+      "id": "f7dd7f54-7a6e-4d58-ad1e-7e6595961a5c",
+      "title": "Orientação Normativa AGU nº 105/2026",
+      "len": 1473,
+      "tail": "entra em vigor na data de sua publicação.\nJORGE RODRIGO ARAÚJO MESSIAS"
+    },
+    {
+      "id": "a35fffa9-10d8-47f2-8b6c-e82432cdffb7",
+      "title": "Orientação Normativa AGU nº 83/2024",
+      "len": 1375,
+      "tail": "GU (02/02/2024)\n\nProcesso: 00688.000760/2024-11 e 00688.008892/2023-18"
+    },
+    {
+      "id": "a02a5d70-91aa-4e4a-9d7f-61c2187bbbcc",
+      "title": "Orientação Normativa AGU nº 85/2024",
+      "len": 850,
+      "tail": ": PARECER nº 00001/2024/CNLCA/CGU/AGU.\n\nProcesso: 00688.000994/2024-68"
+    },
+    {
+      "id": "969d0180-087c-4c6e-bf0d-1a16c95a9379",
+      "title": "Orientação Normativa AGU nº 55/2014",
+      "len": 803,
+      "tail": "a partir da simples conferência de documentos. * retificação do número"
+    },
+    {
+      "id": "8e751eb3-33f8-40eb-8a1a-9315e0a74c04",
+      "title": "Orientação Normativa AGU nº 92/2024",
+      "len": 787,
+      "tail": " como reforçar a ideia da proibição de prazo de vigência indeterminado"
+    },
+    {
+      "id": "22638e25-6862-4b00-a6cf-7708f1028402",
+      "title": "Orientação Normativa AGU nº 34/2011",
+      "len": 588,
+      "tail": "do-se o fundamento jurídico que amparou a dispensa e a inexigibilidade"
+    },
+    {
+      "id": "9ede9ff3-c85c-46af-91aa-d997b53facde",
+      "title": "Orientação Normativa AGU nº 30/2010",
+      "len": 339,
+      "tail": "cadastramento no SICONV, salvo se houver dúvida fundada. Fundamentação"
+    }
+  ],
+  "a02_on94": [
+    {
+      "id": "1137ba35-2376-4e4c-aa41-66842fd02a34",
+      "title": "ON 94/2024",
+      "len": null,
+      "url": "",
+      "tail": null
+    },
+    {
+      "id": "b1db68da-f471-4de4-8711-713486697cb2",
+      "title": "Orientação Normativa AGU nº 94/2024",
+      "len": 2969,
+      "url": "https://www.in.gov.br/web/dou/-/orientacao-normativa-n-94-de-4-de-abril-de-2024-622221787",
+      "tail": "Turma).\n\nFonte : Parecer nº 7/2025/CONSUNIAO/CGU/AGU e respectivos despachos de aprovação."
+    }
+  ],
+  "a03_semContent": 64,
+  "a03_iaish": [
+    {
+      "id": "97c257fc-8942-4464-b2a1-3b72cc21fe31",
+      "title": "Orientação Normativa AGU nº 41/2014",
+      "description": "Orientação Normativa substituída. A nova redação está na Orientação Normativa nº 77/2023. Consulte h"
+    },
+    {
+      "id": "773b551b-5902-463a-8921-2459962d6e44",
+      "title": "ON 82/2024",
+      "description": "A Orientação Normativa 82/2024 da AGU esclarece que editais de pré-seleção para o Diálogo Competitiv"
+    },
+    {
+      "id": "6e3c29e3-f007-49df-b23d-b656a49ac645",
+      "title": "ON 44/2014",
+      "description": "Esta orientação estabelece que a duração de convênios e instrumentos similares deve ser definida pel"
+    },
+    {
+      "id": "86f76629-21af-41ce-8a8f-02509d2558d1",
+      "title": "ON 93/2024",
+      "description": "A Orientação Normativa 93/2024 esclarece que os contratos de aluguel de imóveis pela Administração P"
+    },
+    {
+      "id": "487bac16-c488-4975-a697-3bdb700aadb7",
+      "title": "ON 2/2012",
+      "description": "A Orientação Normativa nº 2/2012 da AGU instrui as unidades de contencioso a não recorrerem ao Supre"
+    },
+    {
+      "id": "a7fccc8b-02d9-4c59-99cd-586a43d4e8b5",
+      "title": "ON 1/2012",
+      "description": "Esta Orientação Normativa da AGU direciona os órgãos jurídicos a reconhecerem a procedência de pedid"
+    },
+    {
+      "id": "4cd4ffec-c290-43b8-bcd7-b8b9d2636565",
+      "title": "ON 57/2019",
+      "description": "Esta orientação estabelece que membros das carreiras jurídicas da AGU, PGF e PGFN não podem atuar em"
+    },
+    {
+      "id": "658c99ad-3146-44c2-9cda-93cc1b06ee2c",
+      "title": "ON 76/2023",
+      "description": "Esta Orientação Normativa estabelece que, nos contratos administrativos regidos pela Lei nº 14.133/2"
+    },
+    {
+      "id": "cbebc355-cd21-418e-969f-a4bfcceedbe1",
+      "title": "ON 88/2024",
+      "description": "A Orientação Normativa 88/2024 esclarece que a análise jurídica dos processos de contratação no Sist"
+    },
+    {
+      "id": "ff005d74-0e9d-4a1b-b121-8a021f5b484b",
+      "title": "ON 89/2024",
+      "description": "A Orientação Normativa esclarece que a ata de registro de preços tem vigência inicial obrigatória de"
+    },
+    {
+      "id": "bcd057f0-8e13-43bf-bfa1-1fc4756e9dac",
+      "title": "ON 96/2025",
+      "description": "Esta Orientação Normativa esclarece que, na cessão de uso de imóveis da União, autarquias e fundaçõe"
+    },
+    {
+      "id": "9965a316-1cf9-45e6-a197-cc28110926e1",
+      "title": "ON 30/2010",
+      "description": "A Orientação Normativa nº 30/2010 da AGU estabelece que as informações registradas no SICONV (Sistem"
+    },
+    {
+      "id": "eef867af-8ac2-4edf-ab77-bb90f6a10189",
+      "title": "Orientação Normativa CNU/CGU/AGU nº 02/2016",
+      "description": "Esta Orientação Normativa, embora substituída pela ON AGU nº 80/2024, tratava da dispensa de licitaç"
+    },
+    {
+      "id": "51408116-cd48-48f5-b51f-a9cadbe572c5",
+      "title": "ON 31/2010",
+      "description": "A Orientação Normativa 31/2010 da AGU, embora cancelada, tratava da impossibilidade de se exigir que"
+    },
+    {
+      "id": "8f13d9ec-a4d2-4a0e-877c-97d19b9578c4",
+      "title": "ON 87/2024",
+      "description": "A Orientação Normativa 87/2024 da AGU esclarece que, para contratos de fornecimento ou serviço conti"
+    }
+  ],
+  "a04_actsSemUrl": 0,
+  "a04_docsUrlVazia": 99,
+  "a04_docsLocal": {
+    "n": 190,
+    "comR2": 0
+  },
+  "a04_fallbackAgu": 32,
+  "a04_on2": [
+    {
+      "id": "487bac16-c488-4975-a697-3bdb700aadb7",
+      "title": "ON 2/2012",
+      "url": "",
+      "type": "pdf",
+      "isPublic": false,
+      "r2Key": null,
+      "len": null
+    },
+    {
+      "id": "30c92cd0-c1a3-40a9-844c-2565517c1e7a",
+      "title": "Orientação Normativa AGU nº 2/2012",
+      "url": "https://www.gov.br/agu/pt-br/composicao/cgu/cgu/onsagu",
+      "type": "link",
+      "isPublic": true,
+      "r2Key": null,
+      "len": 252
+    }
+  ],
+  "a04_quadro": [
+    {
+      "id": "487c1978-93a5-4364-aaae-d45585d6e688",
+      "title": "Quadro Comparativo: Lei 8.666/93 x Lei 14.133/2021",
+      "category": "outro",
+      "type": "pdf",
+      "url": "#teste-quadro-comparativo",
+      "r2Key": null
+    }
+  ],
+  "a05": [
+    {
+      "artigo": "1",
+      "total": 230,
+      "cita (14.133)": 41,
+      "ambíguo": 15,
+      "NÃO cita": 174,
+      "% cita": "18%"
+    },
+    {
+      "artigo": "5",
+      "total": 1140,
+      "cita (14.133)": 442,
+      "ambíguo": 46,
+      "NÃO cita": 652,
+      "% cita": "39%"
+    },
+    {
+      "artigo": "6",
+      "total": 621,
+      "cita (14.133)": 396,
+      "ambíguo": 65,
+      "NÃO cita": 160,
+      "% cita": "64%"
+    },
+    {
+      "artigo": "75",
+      "total": 484,
+      "cita (14.133)": 166,
+      "ambíguo": 27,
+      "NÃO cita": 291,
+      "% cita": "34%"
+    },
+    {
+      "artigo": "107",
+      "total": 84,
+      "cita (14.133)": 13,
+      "ambíguo": 0,
+      "NÃO cita": 71,
+      "% cita": "15%"
+    }
+  ],
+  "a06_padroes": [
+    {
+      "padrao": "1. canônico",
+      "n": 100
+    },
+    {
+      "padrao": "2. abreviado (cron import-documents:143)",
+      "n": 58
+    },
+    {
+      "padrao": "4. CNU/CGU zero-padded",
+      "n": 4
+    }
+  ],
+  "a06_invisiveisFiltroAno": 0
+}
