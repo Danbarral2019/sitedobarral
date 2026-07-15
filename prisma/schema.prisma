@@ -42,6 +42,13 @@ model Document {
   isCommon        Boolean   @default(false) // Se true, documento aparece em todos os cursos
   tags            String? // JSON array como string
   leiArticlesArr  String[]  @default([]) // Onda 4.5: array nativo Postgres (única coluna pós-4.5.6 — JSON legada dropada)
+  /// Artigos que o documento CITA textualmente, detectado por regex sobre o texto
+  /// (lib/lei-14133/citation-extractor.ts). Subconjunto de leiArticlesArr, que
+  /// também contém vínculo TEMÁTICO inferido por LLM — o indexador calcula
+  /// confidence/mentions e descarta ambos, então esta é a única evidência
+  /// verificável de que o documento fala mesmo do artigo. Popular com
+  /// scripts/backfill-article-citations.ts. Ref.: docs/audits/2026-07-15-*.
+  leiArticlesCited String[] @default([])
   content         String?   @db.Text // Conteúdo/trechos relevantes do documento para busca textual
   size            Int?
   onNumber        Int? // Número da ON (para ordenação numérica de Orientações Normativas)
@@ -199,6 +206,7 @@ model Document {
   @@index([r2Key]) // Índice para buscar por chave R2
   @@index([embeddingStatus]) // Índice para buscar documentos por status de embedding
   @@index([leiArticlesArr], type: Gin) // Onda 4.5: GIN p/ queries `'75' = ANY(leiArticlesArr)` rápidas
+  @@index([leiArticlesCited], type: Gin) // idem, p/ separar "cita" de "tema" na Lei Comentada
 }
 
 // Metadados TCU (tabela satélite 1:1 — vertical table splitting)

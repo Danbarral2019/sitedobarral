@@ -12,6 +12,9 @@ interface LeiArticleDocumentsProps {
   onToggleCategory: (name: string) => void;
 }
 
+/** Chave da seção temática no set de expandidos — não é uma categoria real. */
+const THEME_SECTION = '__tema__';
+
 export function LeiArticleDocuments({ loading, data, expandedCategories, onToggleCategory }: LeiArticleDocumentsProps) {
   return (
     <div className="bg-white rounded-lg shadow-md p-6">
@@ -41,7 +44,7 @@ export function LeiArticleDocuments({ loading, data, expandedCategories, onToggl
           <section>
             <h3 className="text-base font-semibold text-gray-700 mb-3 flex items-center gap-2">
               <FileText className="w-4 h-4 text-gray-500" />
-              Todos os documentos relacionados ({data.total})
+              Documentos que citam este artigo ({data.total})
             </h3>
             <div className="space-y-2">
               {Object.entries(data.byCategory).map(([displayName, docs]) => (
@@ -55,6 +58,29 @@ export function LeiArticleDocuments({ loading, data, expandedCategories, onToggl
               ))}
             </div>
           </section>
+
+          {/*
+            Vinculados por tema, não por citação. Ficam à parte e rotulados pelo
+            que são: o vínculo vem de um LLM instruído a incluir artigos
+            relacionados ao tema mesmo sem menção. Misturá-los aos que citam
+            inflava o art. 5º para 1.134 documentos, dos quais só 39% o citam —
+            número que faz o aluno duvidar de todos os outros.
+            Ref.: docs/audits/2026-07-15-lei-comentada-RESULTADOS.md
+          */}
+          {data.relatedByTheme?.length > 0 && (
+            <section className="mt-6 pt-6 border-t border-gray-200">
+              <CategoryAccordion
+                displayName="Relacionados por tema (não citam o artigo)"
+                docs={data.relatedByTheme}
+                expanded={expandedCategories.has(THEME_SECTION)}
+                onToggle={() => onToggleCategory(THEME_SECTION)}
+              />
+              <p className="mt-2 text-xs text-gray-500 leading-relaxed">
+                Tratam de assunto próximo ao do artigo, mas não o mencionam. Sugeridos
+                automaticamente — confira a pertinência antes de citar.
+              </p>
+            </section>
+          )}
         </>
       ) : (
         <p className="text-sm text-gray-500 text-center py-4">

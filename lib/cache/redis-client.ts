@@ -181,8 +181,18 @@ export const CacheKeys = {
    * Format: lei:articles:{auth|public}:{filterHash}
    * Separated by auth state because documents differ
    */
-  leiArticles: (isAuth: boolean, filters?: { withDocuments?: boolean; titulo?: string }): string => {
-    const authKey = isAuth ? 'auth' : 'public';
+  /**
+   * ⚠️ A flag deve ser `isAdmin`, NÃO `isAuthenticated`.
+   *
+   * A rota só mostra documento privado para admin — aluno logado e anônimo veem
+   * o mesmo conjunto. Se a chave separasse por "autenticado", admin e aluno
+   * cairiam no mesmo balde e o aluno receberia o cache do admin, com os
+   * privados. Chavear pelo que de fato muda a resposta.
+   *
+   * O nome do balde segue 'auth' por compatibilidade com chaves já em Redis.
+   */
+  leiArticles: (isAdmin: boolean, filters?: { withDocuments?: boolean; titulo?: string }): string => {
+    const authKey = isAdmin ? 'auth' : 'public';
     const filterHash = filters ? hashString(JSON.stringify(filters)) : 'all';
     return `lei:articles:${authKey}:${filterHash}`;
   },

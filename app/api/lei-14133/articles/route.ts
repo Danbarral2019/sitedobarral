@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { verifyAuth } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
 import { parseLeiArticles, getLeiArticles } from '@/lib/lei-articles';
+import { INTERNAL_ONLY_CATEGORIES } from '@/lib/document-categories';
 import { ARTIGOS_ENUNCIADOS, ENUNCIADOS } from '@/data/enunciados';
 import { withCache, CacheKeys, CACHE_TTL } from '@/lib/cache/redis-client';
 
@@ -22,6 +23,9 @@ export async function GET(request: NextRequest) {
     // 1. Verificar autenticação (opcional - permite acesso público)
     const authResult = await verifyAuth(request);
     const isAuthenticated = authResult.valid;
+    // Só admin vê documento privado — e é isto que a chave de cache precisa
+    // separar, senão o aluno logado recebe o balde do admin.
+    const isAdminUser = authResult.valid && authResult.user?.role === 'admin';
 
     const { searchParams } = new URL(request.url);
     const withDocumentsOnly = searchParams.get('withDocuments') === 'true';
@@ -32,7 +36,7 @@ export async function GET(request: NextRequest) {
       withDocuments: withDocumentsOnly || undefined,
       titulo: tituloFilter || undefined,
     };
-    const cacheKey = CacheKeys.leiArticles(isAuthenticated, filters);
+    const cacheKey = CacheKeys.leiArticles(isAdminUser, filters);
 
     // Use cached result or fetch from database
     const result = await withCache(
@@ -109,13 +113,16 @@ export async function GET(request: NextRequest) {
             leiArticlesArr: {
               isEmpty: false,
             },
-            // Se não autenticado, mostrar apenas documentos públicos
-            ...(!isAuthenticated && { isPublic: true }),
+            // `lei-artigo` é o texto da própria Lei indexado para busca, não documento.
+            category: { notIn: [...INTERNAL_ONLY_CATEGORIES] },
+            // Só admin vê documento privado (curadoria) — ver article-docs/[numero].
+            ...(!isAdminUser && { isPublic: true }),
           },
           select: {
             id: true,
             title: true,
             leiArticlesArr: true,
+            leiArticlesCited: true,
             isPublic: true,
             category: true,
           },
@@ -142,11 +149,18 @@ export async function GET(request: NextRequest) {
         const articleDocumentCount: Record<string, number> = {};
         const articleDocuments: Record<string, { id: string; title: string; isPublic: boolean; category: string | null; type?: string }[]> = {};
 
-        // Adicionar documentos
+        // Adicionar documentos.
+        // Conta apenas os que CITAM o artigo, para o número bater com o que a
+        // página mostra. Antes contava todo vínculo, inclusive o temático que o
+        // LLM inferiu sem menção — daí o art. 1º exibir "240 documentos" quando
+        // só 41 o citam. Os temáticos seguem acessíveis na página, em seção
+        // própria. Ref.: docs/audits/2026-07-15-lei-comentada-RESULTADOS.md
         documentsWithArticles.forEach((doc) => {
           const articles = getLeiArticles(doc);
           articles.forEach((artNum) => {
             const artStr = String(artNum);
+            if (!doc.leiArticlesCited.includes(artStr)) return;
+
             articleDocumentCount[artStr] = (articleDocumentCount[artStr] || 0) + 1;
 
             if (!articleDocuments[artStr]) {
