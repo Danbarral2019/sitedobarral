@@ -140,17 +140,43 @@ O termo nu gera falso positivo (*"eficiência"* aparece em qualquer texto admini
 - **forte** — `/princ[íi]pios?\s+(?:d[aeo]s?\s+)?<termo>/i`. É o princípio sendo nomeado como tal.
 - **fraco** — o termo isolado. Serve de sinal secundário, nunca sozinho.
 
-**Limiar inicial** (calibrável, mora em constante, não no dado): `forte.voto >= 2` → o artigo entra em `leiArticlesDebated`.
+**Limiar inicial** (calibrável, mora em constante, não no dado):
 
-Justificativa do 2: uma menção é a citação ornamental que o Daniel descreveu; repetição no Voto indica desdobramento. **Este número precisa de calibração com os dados reais** — a ser feita quando o backfill rodar, comparando amostra manual.
+```ts
+forte.voto >= 1 || fraco.voto >= 3   → o artigo entra em `leiArticlesDebated`
+```
 
-### 4.4 Extração de RTF — precisa de spike próprio
+⚠️ **Corrigido após medição.** A proposta original era `forte.voto >= 2` — e o spike mostrou que **nenhum acórdão passaria**. Dados reais do Acórdão 1135/2026:
 
-O extrator do spike foi **rudimentar** e não serve para produção: quebrou palavras (`TRIBUNAL DE CONTAS DA UNIÃ\nO`) e deixou lixo (`shapeType202fFlipH0…`).
+| Princípio | forte | fraco | no Voto? |
+|---|---|---|---|
+| julgamento objetivo | **1** | **11** | ✅ ← a razão de decidir do caso |
+| segurança jurídica | 0 | 6 | ✅ |
+| impessoalidade | 0 | 6 | ✅ |
+| razoabilidade | 1 | 1 | — |
 
-**Requisitos:** não quebrar palavras; remover metadados/imagens; preservar quebras de parágrafo (o seccionamento depende delas); lidar com `\'hh` (cp1252) e `\uN`.
+Os julgadores **nomeiam o princípio uma vez** ("princípio do julgamento objetivo") e depois discutem o tema pelo **nome nu** ("julgamento objetivo") ao longo do voto. Logo:
+- `forte >= 1` no Voto já é sinal: nomear o princípio no voto é ato deliberado
+- `fraco >= 3` capta o desdobramento — que é exatamente o que distingue a citação ornamental descrita pelo Daniel
 
-**Ação:** avaliar `rtf-parser` e `@iarna/rtf-to-html` contra 5 RTFs reais antes de escolher. Se nenhuma servir, extrator próprio com testes sobre RTFs reais fixados. **Não prosseguir para o backfill sem isso** — texto sujo corrompe o seccionamento e, por consequência, toda a análise.
+Ainda assim **é palpite calibrado em 1 acórdão**. O golden set de 10 casos (§5) é o que valida ou substitui estes números.
+
+### 4.4 Extração de RTF — RESOLVIDO no spike
+
+**Biblioteca escolhida: `rtf-parser@1.3.3`** (+ filtro de binário próprio).
+
+Testadas contra o RTF real do Acórdão 1135/2026 (522 KB):
+
+| Biblioteca | Resultado |
+|---|---|
+| **`rtf-parser@1.3.3`** | ✅ **passou nos 8 critérios** (com o filtro abaixo) |
+| `rtf-stream-parser@3.8.1` | ❌ `Not encapsulated HTML or text file` — é para RTF encapsulado de e-mail, não RTF nativo do Word |
+| `unrtf@0.2.1` | ❌ descartada sem teste: wrapper de binário do SO, não roda na Vercel |
+| `@iarna/rtf-to-html` | ❌ não testada: gera HTML, exigiria um segundo passo de strip |
+
+**O filtro é necessário:** `rtf-parser` devolve o dump hexadecimal das imagens embutidas (EMF/WMF) como se fosse texto — 134.824 chars com lixo vs. **72.087 limpos** depois do filtro. A regra: parágrafo com mais de 80 chars e >92% de dígitos hexadecimais é imagem, não texto.
+
+**Resultado verificado:** acentuação cp1252 correta (2.472 acentos), as três seções preservadas, sem control words residuais, sem `shapeType`, e sem o bug de quebra de palavra (`TRIBUNAL DE CONTAS DA UNIÃ\nO`) que o extrator do spike inicial produzia.
 
 ### 4.5 Seccionamento
 
@@ -200,7 +226,8 @@ O cron `sync-tcu-acordaos` (diário, 6h) passa a buscar o inteiro teor dos acór
 
 | Risco | Mitigação |
 |---|---|
-| Extração de RTF ruim corrompe tudo | §4.4 — spike de biblioteca antes do backfill; sem isso, não prosseguir |
+| ~~Extração de RTF ruim~~ | ✅ **Resolvido no spike** — `rtf-parser` + filtro de binário, verificado contra RTF real |
+| Limiar calibrado em 1 acórdão | Golden set de 10 casos (§5) antes de confiar; contagens ficam no JSON, limiar recomputável |
 | Alguém indexa `tcuTextoCompleto` depois | Comentário no schema + este doc; `source-text.ts` não lê o campo |
 | TCU muda/derruba o endpoint | Backfill é one-shot; cron degrada para `failed` sem quebrar |
 | Rate limit do TCU (não documentado) | 1 req/s, concorrência 3, User-Agent identificado. Se 429: parar e reavaliar |
@@ -240,11 +267,11 @@ O requisito é novo. A ementa oficial segue sendo a fonte do **retrieval**; o in
 ## 9. Sequência
 
 ```
-1. Spike de biblioteca RTF (§4.4)          ← trava tudo; sem texto limpo, nada funciona
+1. ✅ Spike de biblioteca RTF (§4.4)       ← FEITO: rtf-parser + filtro de binário
 2. lib/tcu/* + testes
 3. Migration: tcuAnalise, leiArticlesDebated
 4. Backfill (dry-run → execute)            ← ~50 min
-5. Golden set manual (10 acórdãos)         ← calibra o limiar
+5. Golden set manual (10 acórdãos)         ← calibra o limiar (§4.3)
 6. UI: hierarquia debatido > citado > IA   ← junta com a Frente A
 7. Cron: novos acórdãos
 ```
