@@ -16,10 +16,21 @@ export interface Secoes {
   acordao: [number, number] | null;
 }
 
-/** Marcador de seção: em linha própria, em caixa alta. */
+/**
+ * Marcador de seção: em linha própria, em caixa alta.
+ *
+ * O dispositivo real do TCU NUNCA é a palavra isolada "ACÓRDÃO" — vem
+ * sempre com número e colegiado na mesma linha, ex.:
+ * "ACÓRDÃO Nº 1135/2026 – TCU – Plenário" (o travessão é en dash "–", não
+ * hífen). Por isso o grupo opcional depois de AC[ÓO]RD[ÃA]O aceita "Nº"
+ * (e variantes "N°"/"No"/"NO") seguido do resto da linha. A âncora de
+ * linha inteira (^...$) continua obrigatória: uma citação no meio do
+ * voto ("Conforme o Acórdão 1.211/2021-TCU-Plenário, decido.") tem
+ * prefixo antes de "ACÓRDÃO" e não casa.
+ */
 const RE_RELATORIO = /^\s*RELAT[ÓO]RIO\s*$/m;
 const RE_VOTO = /^\s*VOTO\s*$/m;
-const RE_ACORDAO = /^\s*AC[ÓO]RD[ÃA]O\s*$/gm;
+const RE_ACORDAO = /^\s*AC[ÓO]RD[ÃA]O(\s+N[º°oO].*)?\s*$/gm;
 
 export function seccionarAcordao(texto: string): Secoes | null {
   if (!texto) return null;
@@ -30,12 +41,14 @@ export function seccionarAcordao(texto: string): Secoes | null {
   // Acórdãos curtos (multa, citação) só têm dispositivo — não é erro.
   if (iRel < 0 || iVoto < 0 || iVoto <= iRel) return null;
 
-  // "ACÓRDÃO" também aparece no cabeçalho ("ACÓRDÃO Nº 1135/2026"). O
-  // dispositivo é a última ocorrência isolada, e vem depois do voto.
+  // Um voto pode citar/transcrever outro acórdão em bloco próprio; o
+  // dispositivo de fato é sempre o ÚLTIMO bloco "ACÓRDÃO Nº ..." do
+  // texto — por isso percorremos todas as ocorrências após o voto e
+  // ficamos com a última, não a primeira.
   let iAc = -1;
   RE_ACORDAO.lastIndex = 0;
   for (const m of texto.matchAll(RE_ACORDAO)) {
-    if (m.index !== undefined && m.index > iVoto) { iAc = m.index; break; }
+    if (m.index !== undefined && m.index > iVoto) { iAc = m.index; }
   }
 
   const fim = texto.length;
