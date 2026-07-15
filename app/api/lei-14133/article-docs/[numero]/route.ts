@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { verifyAuth } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
 import { parseLeiArticles, getLeiArticles } from '@/lib/lei-articles';
+import { INTERNAL_ONLY_CATEGORIES } from '@/lib/document-categories';
 
 /**
  * GET /api/lei-14133/article-docs/[numero]
@@ -166,13 +167,17 @@ export async function GET(
     }
 
     const authResult = await verifyAuth(request);
-    const isAuthenticated = authResult.valid;
+    // Só admin enxerga documento privado (curadoria). Aluno logado, não:
+    // o `isPublic=false` aqui marca registro incompleto/de teste, não conteúdo premium.
+    const isAdminUser = authResult.valid && authResult.user?.role === 'admin';
 
     // Busca todos os Documents que linkam este artigo
     const documents = await prisma.document.findMany({
       where: {
         leiArticlesArr: { isEmpty: false },
-        ...(!isAuthenticated && { isPublic: true }),
+        // `lei-artigo` é o texto da própria Lei indexado para busca, não documento.
+        category: { notIn: [...INTERNAL_ONLY_CATEGORIES] },
+        ...(!isAdminUser && { isPublic: true }),
       },
       select: {
         id: true,
