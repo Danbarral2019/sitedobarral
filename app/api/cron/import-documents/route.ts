@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { fetchAcordaosTCU, type AcordaoTCU } from '@/lib/tcu-scraper';
 import { scrapeAGU } from '@/lib/agu-scraper-v4';
+import { importOrientacoesNormativasWithVersioning } from '@/lib/agu-modules/orientacoes-normativas';
 import type { AGUDocument } from '@/lib/agu-types';
 import { verifyCronAuth } from '@/lib/cron-auth';
 import { withCronTelemetry } from '@/lib/cron-telemetry';
@@ -119,55 +120,25 @@ export async function GET(request: NextRequest) {
       });
       const aguOrientacoes: AGUDocument[] = aguResult.results[0]?.documentos ?? [];
 
-      // Filtra apenas ONs que ainda nao existem
-      const newOns: AGUDocument[] = [];
-      for (const on of aguOrientacoes) {
-        const exists = await prisma.document.findFirst({
-          where: {
-            OR: [
-              { url: on.urlPDF ?? on.url },
-              { title: on.numero ?? '' },
-            ],
-          },
-        });
-
-        if (!exists) {
-          newOns.push(on);
-        }
-      }
-
-      // Importa automaticamente ONs novas
-      for (const on of newOns) {
-        await prisma.document.create({
-          data: {
-            title: on.numero ?? '',
-            description: on.descricao || '',
-            url: on.urlPDF ?? on.url ?? '',
-            type: 'pdf',
-            category: 'orientacao-normativa',
-            isPublic: false, // Privado ate admin revisar
-            reviewed: false, // Marca como nao revisado
-            courseId: '2', // Planejamento das Contratacoes (padrao)
-            isCommon: true,
-            tags: JSON.stringify([
-              'AGU',
-              'Orientacao Normativa',
-              'AGU',
-            ]),
-            aiClassification: JSON.stringify({
-              source: 'agu-scraper-v4',
-              orgao: 'AGU',
-              data: on.ano,
-              onNumber: on.numeroInt,
-              onYear: on.ano,
-            }),
-          },
-        });
-      }
+      // Delega ao helper com versionamento: ele deduplica por onNumber+onYear
+      // (regra do projeto), grava o titulo canonico e o content, e mantem o
+      // historico de versoes. Nao reimplementar a importacao aqui: a versao
+      // anterior deduplicava por `title: on.numero` (abreviado), que nunca casa
+      // com o titulo canonico do import do admin -- e por isso criava um
+      // registro-fantasma por ON, sem content e sem url (57 em producao,
+      // removidos em 15/07). Ver docs/audits/2026-07-15-lei-comentada-RESULTADOS.md
+      const importResult = await importOrientacoesNormativasWithVersioning(
+        aguOrientacoes,
+        // Cron importa sem curadoria: ON entra privada ate o admin revisar.
+        { isPublic: false, reviewed: false, courseId: '2', isCommon: true },
+      );
 
       results.agu.success = true;
-      results.agu.count = newOns.length;
-      console.log(`[Cron Import] AGU: ${newOns.length} novas ONs importadas`);
+      results.agu.count = importResult.novos;
+      console.log(
+        `[Cron Import] AGU: ${importResult.novos} novas, ${importResult.atualizados} atualizadas, ` +
+        `${importResult.semMudancas} sem mudancas, ${importResult.erros} erros`
+      );
 
     } catch (error) {
       apiLogger.error({ err: error }, '[Cron Import] Erro no scraper AGU:');

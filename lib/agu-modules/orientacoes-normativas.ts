@@ -451,10 +451,27 @@ function parseDateBR(dataBR: string): Date | undefined {
 }
 
 /**
- * Salva ou atualiza uma Orientação Normativa no banco com versionamento
+ * Campos que um chamador pode sobrescrever ao salvar uma ON.
+ * Existe para o cron, que importa sem curadoria e por isso mantém a ON
+ * privada até revisão do admin — sem ter que reimplementar a importação.
+ */
+export type OrientacaoNormativaOverrides = Partial<{
+  isPublic: boolean;
+  reviewed: boolean;
+  courseId: string;
+  isCommon: boolean;
+}>;
+
+/**
+ * Salva ou atualiza uma Orientação Normativa no banco com versionamento.
+ *
+ * Deduplica por `onNumber + onYear` — nunca por título. O scraper expõe dois
+ * campos parecidos (`titulo` canônico e `numero` abreviado) e deduplicar pelo
+ * segundo gera registro duplicado (ver docs/audits/2026-07-15-lei-comentada-RESULTADOS.md).
  */
 export async function saveOrientacaoNormativaWithVersioning(
-  aguDoc: AGUDocument
+  aguDoc: AGUDocument,
+  overrides?: OrientacaoNormativaOverrides
 ): Promise<{
   success: boolean;
   document?: PrismaDocument;
@@ -473,7 +490,7 @@ export async function saveOrientacaoNormativaWithVersioning(
     // Usa sistema de versionamento
     const result = await findOrCreateWithVersioning(
       { onNumber: aguDoc.numeroInt, onYear: aguDoc.ano },
-      convertToDocumentData(aguDoc),
+      { ...convertToDocumentData(aguDoc), ...overrides },
       'scraper-ons-agu'
     );
 
@@ -497,7 +514,8 @@ export async function saveOrientacaoNormativaWithVersioning(
  * Importa todas as ONs extraídas com versionamento automático
  */
 export async function importOrientacoesNormativasWithVersioning(
-  documentos: AGUDocument[]
+  documentos: AGUDocument[],
+  overrides?: OrientacaoNormativaOverrides
 ): Promise<{
   total: number;
   novos: number;
@@ -519,7 +537,7 @@ export async function importOrientacoesNormativasWithVersioning(
   const detalhes: Array<{ numero: string; status: 'novo' | 'atualizado' | 'sem_mudancas' | 'erro'; error?: string }> = [];
 
   for (const doc of documentos) {
-    const result = await saveOrientacaoNormativaWithVersioning(doc);
+    const result = await saveOrientacaoNormativaWithVersioning(doc, overrides);
 
     if (!result.success) {
       erros++;
