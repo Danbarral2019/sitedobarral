@@ -39,12 +39,28 @@ export interface TcuAnalise {
 
 const escapar = (s: string) => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 
+/**
+ * Escapa o termo e: (1) troca espaço simples por `\s+`, porque o texto
+ * extraído de RTF traz quebras de linha e espaços duplos entre as palavras de
+ * termos compostos ("segurança jurídica", "vinculação ao edital"); (2) cerca
+ * com lookaround `(?<!\p{L})...(?!\p{L})` para exigir borda de palavra.
+ *
+ * Por que não `\b`: 8 dos 22 princípios do art. 5º estão contidos no próprio
+ * antônimo ("legalidade" dentro de "ilegalidade", "segurança jurídica" dentro
+ * de "insegurança jurídica" etc.) — sem borda, a regex casava o antônimo e
+ * invertia o sinal (contava como se o princípio tivesse sido afirmado). `\b`
+ * do JS não serve porque não reconhece acentuação (`ç`, `ã`, `í`) como letra;
+ * `\p{L}` (com a flag `u`) reconhece.
+ */
+const termoComBorda = (termo: string) =>
+  `(?<!\\p{L})${escapar(termo).replace(/ /g, '\\s+')}(?!\\p{L})`;
+
 /** "princípio da economicidade" — o princípio sendo nomeado como tal. */
 const reForte = (termo: string) =>
-  new RegExp(`princ[íi]pios?\\s+(?:d[aeo]s?\\s+)?${escapar(termo)}`, 'gi');
+  new RegExp(`princ[íi]pios?\\s+(?:d[aeo]s?\\s+)?${termoComBorda(termo)}`, 'giu');
 
 /** O termo isolado. Sinal secundário: sozinho não decide nada. */
-const reFraco = (termo: string) => new RegExp(escapar(termo), 'gi');
+const reFraco = (termo: string) => new RegExp(termoComBorda(termo), 'giu');
 
 function contarPorSecao(texto: string, re: RegExp, secoes: Secoes | null): ContagemSecao {
   const out: ContagemSecao = {};

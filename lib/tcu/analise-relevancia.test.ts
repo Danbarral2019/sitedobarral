@@ -89,3 +89,63 @@ describe('artigosDebatidos', () => {
     expect(artigosDebatidos(analisarAcordao(t, ['5']))).toEqual([]);
   });
 });
+
+describe('antônimos não invertem o sinal (bug crítico)', () => {
+  // Prova: "insegurança jurídica" 3x no voto cruzava o LIMIAR_DEBATIDO.fracoVoto
+  // porque a regex antiga casava "segurança jurídica" como substring dentro do
+  // antônimo. O termo positivo nunca foi dito — o artigo não pode ser marcado
+  // como debatido, e a contagem do termo positivo deve ficar zerada/ausente.
+  it('"insegurança jurídica" (3x) NÃO marca o art. 5º como debatido, nem conta em "segurança jurídica"', () => {
+    const t = ['RELATÓRIO', 'nada', 'VOTO',
+      'Há insegurança jurídica no caso. A insegurança jurídica persiste. Reitero: insegurança jurídica.',
+      'ACÓRDÃO', 'ACORDAM.'].join('\n');
+    const a = analisarAcordao(t, ['5']);
+    expect(a.termos['5']?.['segurança jurídica']?.fraco.voto ?? 0).toBe(0);
+    expect(artigosDebatidos(a)).not.toContain('5');
+  });
+
+  it('"ilegalidade" (3x) NÃO marca o art. 5º como debatido, nem conta em "legalidade"', () => {
+    const t = ['RELATÓRIO', 'nada', 'VOTO',
+      'Configurada a ilegalidade do ato. Trata-se de flagrante ilegalidade. A ilegalidade é patente.',
+      'ACÓRDÃO', 'ACORDAM.'].join('\n');
+    const a = analisarAcordao(t, ['5']);
+    expect(a.termos['5']?.['legalidade']?.fraco.voto ?? 0).toBe(0);
+    expect(artigosDebatidos(a)).not.toContain('5');
+  });
+
+  it.each([
+    ['igualdade', 'desigualdade'],
+    ['moralidade', 'imoralidade'],
+    ['eficácia', 'ineficácia'],
+    ['eficiência', 'ineficiência'],
+    ['proporcionalidade', 'desproporcionalidade'],
+    ['razoabilidade', 'irrazoabilidade'],
+  ])('"%s" não é contado quando só o antônimo "%s" aparece (3x) no voto', (positivo, antonimo) => {
+    const t = ['RELATÓRIO', 'nada', 'VOTO',
+      `Há ${antonimo} evidente. Configura-se ${antonimo} no processo. Persiste a ${antonimo}.`,
+      'ACÓRDÃO', 'ACORDAM.'].join('\n');
+    const a = analisarAcordao(t, ['5']);
+    expect(a.termos['5']?.[positivo]?.fraco.voto ?? 0).toBe(0);
+    expect(artigosDebatidos(a)).not.toContain('5');
+  });
+
+  it('o termo positivo continua contando normalmente quando de fato aparece', () => {
+    // "insegurança jurídica" 2x (não deve contar) + "segurança jurídica" 1x (deve contar)
+    const t = ['RELATÓRIO', 'nada', 'VOTO',
+      'Há insegurança jurídica no caso. Reitero a insegurança jurídica. Busca-se a segurança jurídica das relações.',
+      'ACÓRDÃO', 'ACORDAM.'].join('\n');
+    const a = analisarAcordao(t, ['5']);
+    expect(a.termos['5']['segurança jurídica'].fraco.voto).toBe(1);
+  });
+});
+
+describe('espaço flexível em termos multi-palavra (quebra de linha / espaço duplo)', () => {
+  it('conta "segurança\\njurídica" (quebra de linha) e "vinculação  ao  edital" (espaço duplo)', () => {
+    const t = ['RELATÓRIO', 'nada', 'VOTO',
+      'Prevalece a segurança\njurídica do ato. Observada a vinculação  ao  edital no certame.',
+      'ACÓRDÃO', 'ACORDAM.'].join('\n');
+    const a = analisarAcordao(t, ['5']);
+    expect(a.termos['5']['segurança jurídica'].fraco.voto).toBe(1);
+    expect(a.termos['5']['vinculação ao edital'].fraco.voto).toBe(1);
+  });
+});
