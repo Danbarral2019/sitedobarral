@@ -85,13 +85,20 @@ export interface EnrichedDoc {
   leiArticlesCount: number;
   score: number;
   highlightReason: string;
+  /** O documento cita o artigo textualmente, ou só se relaciona por tema? */
+  citesArticle: boolean;
 }
 
 export interface ArticleDocsResponse {
   articleNumber: string;
+  /** Documentos que CITAM o artigo (o que vai nos accordions). */
   total: number;
+  totalCited: number;
+  /** Vinculados só por tema pelo LLM — exibidos à parte, sem se passarem por citação. */
+  totalRelated: number;
   highlights: EnrichedDoc[];
   byCategory: Record<string, EnrichedDoc[]>;
+  relatedByTheme: EnrichedDoc[];
 }
 
 export function useLei14133Preview(basePath: string = '/lei-14133/preview') {

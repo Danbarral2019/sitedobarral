@@ -35,6 +35,12 @@ interface EnrichedDoc {
   leiArticlesCount: number;
   score: number;
   highlightReason: string;
+  /**
+   * O documento CITA este artigo textualmente (evidência de regex sobre o texto,
+   * em `Document.leiArticlesCited`), ou está aqui só por vínculo temático do LLM?
+   * Atos normativos são sempre `true`: a relação "regulamenta" é curada.
+   */
+  citesArticle: boolean;
 }
 
 const CATEGORY_DISPLAY: Record<string, string> = {
@@ -189,6 +195,7 @@ export async function GET(
         description: true,
         notesImportance: true,
         leiArticlesArr: true,
+        leiArticlesCited: true,
       },
     });
 
@@ -236,6 +243,7 @@ export async function GET(
         leiArticlesCount: articles.length,
         score,
         highlightReason: '',
+        citesArticle: doc.leiArticlesCited.includes(numeroStr),
       };
       item.highlightReason = buildHighlightReason(item);
       enriched.push(item);
@@ -268,6 +276,8 @@ export async function GET(
         leiArticlesCount: articles.length,
         score,
         highlightReason: '',
+        // A relação ato↔artigo ("regulamenta") é curada, não inferida por tema.
+        citesArticle: true,
       };
       item.highlightReason = buildHighlightReason(item);
       enriched.push(item);
@@ -276,14 +286,29 @@ export async function GET(
     enriched.sort((a, b) => b.score - a.score);
 
     const HIGHLIGHTS_COUNT = 5;
-    const highlights = enriched.slice(0, HIGHLIGHTS_COUNT);
+    // Destaque só entre quem cita: é o que sustenta a promessa da vitrine.
+    const highlights = enriched.filter((d) => d.citesArticle).slice(0, HIGHLIGHTS_COUNT);
 
-    // Agrupa por categoria — exclui 'enunciados' (tem seção dedicada na página).
-    // Total mostrado em "Todos os documentos" reflete só o que está nos accordions.
+    /**
+     * Separa "cita este artigo" de "relacionado por tema".
+     *
+     * O vínculo vem de um LLM instruído a incluir artigos relacionados ao tema
+     * mesmo sem menção, com corte de confiança 40 — daí o art. 5º ter 1.134
+     * documentos dos quais só 39% o citam. Números assim fazem o aluno duvidar
+     * de todos os outros.
+     *
+     * Nada é desvinculado: os temáticos continuam acessíveis, numa seção à parte
+     * e honesta sobre o que são. Ref.: docs/audits/2026-07-15-*
+     */
     const byCategory: Record<string, EnrichedDoc[]> = {};
+    const relatedByTheme: EnrichedDoc[] = [];
     let totalCategorized = 0;
     for (const doc of enriched) {
-      if (doc.category === 'enunciados') continue;
+      if (doc.category === 'enunciados') continue; // seção dedicada na página
+      if (!doc.citesArticle) {
+        relatedByTheme.push(doc);
+        continue;
+      }
       const display = CATEGORY_DISPLAY[doc.category || ''] || 'Outros Documentos';
       if (!byCategory[display]) byCategory[display] = [];
       byCategory[display].push(doc);
@@ -303,10 +328,13 @@ export async function GET(
 
     return NextResponse.json({
       articleNumber: numeroStr,
-      total: totalCategorized, // exclui enunciados — eles aparecem em seção dedicada
+      total: totalCategorized, // só os que CITAM (exclui enunciados, que têm seção dedicada)
       totalAll: enriched.length,
+      totalCited: enriched.filter((d) => d.citesArticle).length,
+      totalRelated: relatedByTheme.length,
       highlights,
       byCategory: orderedByCategory,
+      relatedByTheme,
     });
   } catch (error) {
     console.error('[article-docs] Erro:', error);

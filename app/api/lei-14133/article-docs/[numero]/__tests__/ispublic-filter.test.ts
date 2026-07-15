@@ -96,3 +96,71 @@ describe('article-docs — categorias-substrato', () => {
     expect(whereArg()).toMatchObject({ category: { notIn: ['lei-artigo'] } });
   });
 });
+
+/**
+ * O vínculo documento↔artigo vem de um LLM instruído a incluir artigos
+ * relacionados ao tema mesmo sem menção, com corte de confiança 40. O art. 5º
+ * juntou 1.132 documentos dos quais só 39% o citam. `leiArticlesCited` guarda a
+ * evidência determinística (regex sobre o texto) e permite separar os dois.
+ */
+describe('article-docs — separa citação de tema', () => {
+  const doc = (id: string, cited: string[]) => ({
+    id,
+    title: `Doc ${id}`,
+    category: 'acordao',
+    isPublic: true,
+    url: 'https://x',
+    summary: null,
+    description: null,
+    notesImportance: null,
+    leiArticlesArr: ['5'],
+    leiArticlesCited: cited,
+  });
+
+  beforeEach(() => {
+    vi.clearAllMocks();
+    mockVerifyAuth.mockResolvedValue({ valid: false });
+    mockLegislativeActFindMany.mockResolvedValue([]);
+    // 'cita' menciona o art. 5º; 'tema' está vinculado mas não o cita.
+    mockDocumentFindMany.mockResolvedValue([doc('cita', ['5']), doc('tema', [])]);
+  });
+
+  const body = async () => (await GET(req(), ctx)).json();
+
+  it('conta em `total` apenas quem cita', async () => {
+    const b = await body();
+    expect(b.total).toBe(1);
+    expect(b.totalCited).toBe(1);
+    expect(b.totalRelated).toBe(1);
+  });
+
+  it('só quem cita entra nos accordions por categoria', async () => {
+    const b = await body();
+    const ids = Object.values(b.byCategory).flat().map((d: { id: string }) => d.id);
+    expect(ids).toEqual(['cita']);
+  });
+
+  it('quem não cita vai para relatedByTheme — e não some', async () => {
+    const b = await body();
+    expect(b.relatedByTheme.map((d: { id: string }) => d.id)).toEqual(['tema']);
+  });
+
+  it('destaque nunca traz documento que não cita', async () => {
+    const b = await body();
+    expect(b.highlights.every((d: { citesArticle: boolean }) => d.citesArticle)).toBe(true);
+  });
+
+  it('ato normativo conta como citação (relação curada, não inferida)', async () => {
+    mockDocumentFindMany.mockResolvedValue([]);
+    mockLegislativeActFindMany.mockResolvedValue([
+      {
+        id: 'ato', fullNumber: 'Decreto 1', title: 'Decreto 1', ementa: null, summary: null,
+        type: 'decreto', hierarchyLevel: 1, esfera: 'federal', issuer: 'x',
+        officialUrl: 'https://x', leiArticlesArr: ['5'], importance: null,
+      },
+    ]);
+    const b = await body();
+    expect(b.totalRelated).toBe(0);
+    expect(b.totalCited).toBe(1);
+  });
+});
