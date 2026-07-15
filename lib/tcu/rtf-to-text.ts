@@ -12,12 +12,23 @@
  */
 import * as rtfParser from 'rtf-parser';
 
-/** Parágrafo que é dump hexadecimal de imagem (EMF/WMF), não texto. */
+/**
+ * Parágrafo que é dump hexadecimal de imagem (EMF/WMF), não texto.
+ *
+ * Heurística: um run CONTÍGUO de 100+ caracteres em `[0-9a-f]`, sem espaço
+ * nem pontuação no meio. Um dump EMF/WMF é uma sequência ininterrupta de
+ * milhares desses caracteres; texto legítimo nunca produz um run tão longo
+ * sem quebra — nem tabelas de valores (um CNPJ tem só 14 dígitos seguidos).
+ *
+ * A implementação anterior media DENSIDADE de `[0-9a-f]` no parágrafo
+ * inteiro (>92%) — mas essa classe inclui os dígitos decimais (0-9), não só
+ * hexadecimais. Acórdãos do TCU têm parágrafos inteiros de tabelas de
+ * valores, quantitativos e CNPJs, que são dominados por dígitos decimais e
+ * ultrapassavam os 92% mesmo sendo texto legítimo — a densidade de dígitos
+ * não é a mesma coisa que densidade de hexadecimal.
+ */
 function ehDumpBinario(s: string): boolean {
-  const t = s.trim();
-  if (t.length < 80) return false; // texto curto com hex é legítimo (ex.: nº de processo)
-  const hex = (t.match(/[0-9a-f]/gi) ?? []).length;
-  return hex / t.length > 0.92;
+  return /[0-9a-f]{100,}/i.test(s.trim());
 }
 
 export async function rtfToText(buf: Buffer): Promise<string> {
