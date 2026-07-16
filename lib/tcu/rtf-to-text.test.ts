@@ -43,6 +43,20 @@ const CNPJS = [
 ].join(' ');
 const RTF_TABELA_VALORES = `{\\rtf1\\ansi\\ansicpg1252\\deff0\n\\pard ${CNPJS}\\par\n}`;
 
+/**
+ * Citação de precedente no formato real do TCU, com hífen e espaço
+ * inquebráveis (\_ e \~): "Acórdão 4851/2017 – TCU – 1ª Câmara". O
+ * rtf-parser@1.3.3 processa os control symbols \_ e \- sem resetar o estado
+ * do parser (os ramos de \~, \*, \' resetam; \_ e \- esquecem), então o \
+ * seguinte é lido como "empty control word" e a extração inteira falha.
+ * Era a causa de ~28% dos acórdãos "malformados" no primeiro backfill —
+ * quase todo acórdão cita um precedente nesse formato.
+ */
+const RTF_CITACAO_PRECEDENTE = String.raw`{\rtf1\ansi\ansicpg1252\deff0
+\pard VOTO\par
+\pard Reitero o entendimento do Ac\'f3rd\~4851/2017\~\_\~TCU\~\_\~1\'aa C\'e2mara.\par
+}`;
+
 describe('rtfToText', () => {
   it('extrai o texto com acentuação cp1252 correta', async () => {
     const t = await rtfToText(Buffer.from(RTF_SIMPLES, 'latin1'));
@@ -98,5 +112,16 @@ describe('rtfToText', () => {
     // espaço — não é dump binário, é uma tabela de valores legítima.
     const t = await rtfToText(Buffer.from(RTF_TABELA_VALORES, 'latin1'));
     expect(t).toContain(CNPJS);
+  });
+
+  it('extrai citação de precedente com hífen/espaço inquebráveis (\\_ \\~)', async () => {
+    // Sem o sanitize, o rtf-parser lança "empty control word" e a extração
+    // inteira falha — era a causa de ~28% dos acórdãos "malformados".
+    const t = await rtfToText(Buffer.from(RTF_CITACAO_PRECEDENTE, 'latin1'));
+    expect(t).toContain('VOTO');
+    expect(t).toContain('4851/2017');
+    expect(t).toContain('1ª Câmara');
+    // O texto tem que sair contíguo, não interrompido no ponto do \_.
+    expect(t).toMatch(/4851\/2017[\s\S]*TCU[\s\S]*1ª C[âa]mara/);
   });
 });

@@ -31,9 +31,32 @@ function ehDumpBinario(s: string): boolean {
   return /[0-9a-f]{100,}/i.test(s.trim());
 }
 
+/**
+ * Neutraliza os control symbols `\_` (hífen inquebrável) e `\-` (hífen
+ * discricionário) antes de entregar o RTF ao parser.
+ *
+ * Por quê: `rtf-parser@1.3.3` tem um bug no `parseControlSymbol` — os ramos
+ * de `\~`, `\*` e `\'` resetam o estado do parser de volta para texto, mas os
+ * de `\_` e `\-` esquecem. O resultado é que a `\` imediatamente seguinte é
+ * lida como "empty control word" e a extração inteira falha (rejeita a
+ * promise). O TCU usa `\_`/`\~` justamente nas citações de precedente —
+ * "Acórdão 4851/2017 – TCU – 1ª Câmara" — presentes em quase todo acórdão,
+ * o que fazia ~28% deles falharem como se fossem "RTF malformado". Não eram:
+ * o RTF do TCU é válido; o parser é que tropeça.
+ *
+ * A regex consome `\\` (barra literal) como par ANTES de examinar os símbolos,
+ * então `\\_` (barra literal + underscore de texto) é preservado, e só o
+ * control symbol `\_` de fato é reescrito.
+ *   `\_` → `-`  (hífen inquebrável vira hífen comum; a nuance não afeta a análise)
+ *   `\-` → ''   (hífen discricionário: ponto de quebra invisível fora da margem)
+ */
+function neutralizarHifensInquebráveis(rtf: string): string {
+  return rtf.replace(/\\\\|\\[_-]/g, (m) => (m === '\\\\' ? m : m === '\\_' ? '-' : ''));
+}
+
 export async function rtfToText(buf: Buffer): Promise<string> {
   // O RTF do TCU é cp1252; latin1 preserva os bytes para a lib decodificar \'hh.
-  const rtf = buf.toString('latin1');
+  const rtf = neutralizarHifensInquebráveis(buf.toString('latin1'));
 
   // rtf-parser não valida o formato: para entrada sem cabeçalho RTF, ele
   // devolve doc.content com o texto cru (sem erro), o que mascararia um

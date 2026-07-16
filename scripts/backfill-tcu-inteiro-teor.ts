@@ -10,12 +10,15 @@
  *      npx tsx scripts/backfill-tcu-inteiro-teor.ts --execute --limit=20
  *      npx tsx scripts/backfill-tcu-inteiro-teor.ts --execute --force
  *
- * Estimativa: ~1.835 acórdãos, ~50 min, ~640 MB de tráfego.
- * Falha esperada: amostra de 20 (--limit=20) deu 15% de falha (3/20) — projeta
- * ~275 falhas no total. Causas conhecidas: RTF malformado ("empty control
- * word", determinístico — ex. 1204/2024), stack overflow do rtf-parser
- * (ex. 1359/2024) e timeout de rede (ex. 456/2026). Falhas não têm mitigação
- * automática; ficam registradas em tcuEnriquecimentoErro para triagem manual.
+ * Estimativa: ~1.835 acórdãos, ~3-4h (1 req/s escalonado), ~640 MB de tráfego.
+ * Falha esperada: baixa depois do fix do "empty control word". O primeiro
+ * backfill (370 docs antes de a conexão cair) deu 28%, mas 64 desses eram o
+ * bug do `\_`/`\~` no rtf-parser — já corrigido em lib/tcu/rtf-to-text.ts, os
+ * 15 testados reprocessaram 15/15. Sobram: arquivos acima do teto de 20 MB
+ * (atas de sessão inteiras), stack overflow do rtf-parser, encoding não
+ * reconhecido e timeouts. Falhas ficam em tcuEnriquecimentoErro p/ triagem.
+ * Retry de conexão embutido (comRetryDB) para o WebSocket do Neon não derrubar
+ * o run — o primeiro morreu no doc ~370 com um ErrorEvent de socket.
  *
  * ⚠️ Script one-shot para rodar manualmente. NÃO agendar em cron: documentos
  * que falham nunca recebem `tcuAnalise.v`, então são retentados a cada
@@ -40,6 +43,33 @@ const TETO_CHARS = 500_000;
 
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
+/**
+ * Executa uma operação de banco com retry em erro transitório de conexão.
+ *
+ * O adapter é PrismaNeon (WebSocket). Num processo de ~4h, o Neon derruba
+ * sockets ociosos — o primeiro backfill morreu no doc ~370 com um `ErrorEvent`
+ * de WebSocket. Aqui: até 4 tentativas com backoff (1s, 2s, 4s), e só para
+ * erros que parecem de conexão, não de dado (um `where` inválido não deve
+ * retentar 4 vezes). Se esgotar, propaga — aí o run realmente falhou.
+ */
+async function comRetryDB<T>(op: () => Promise<T>, rotulo: string): Promise<T> {
+  const TENTATIVAS = 4;
+  for (let i = 1; i <= TENTATIVAS; i++) {
+    try {
+      return await op();
+    } catch (e) {
+      const msg = (e as Error).message ?? String(e);
+      const transitorio =
+        /ErrorEvent|WebSocket|socket|ECONNRESET|ETIMEDOUT|Connection|terminat|closed|P1001|P1017|fetch failed/i.test(msg);
+      if (!transitorio || i === TENTATIVAS) throw e;
+      const espera = 1000 * 2 ** (i - 1);
+      console.log(`   ⏳ conexão caiu em "${rotulo}" (tentativa ${i}/${TENTATIVAS}): ${msg.slice(0, 60)} — retry em ${espera}ms`);
+      await sleep(espera);
+    }
+  }
+  throw new Error('inalcançável');
+}
+
 interface Alvo { id: string; title: string; tcuLinkPDF: string | null; leiArticlesArr: string[]; tcuAnalise: unknown }
 
 /**
@@ -61,10 +91,10 @@ async function processar(d: Alvo): Promise<Resultado> {
   if (!r.ok) {
     console.log(`   ❌ ${d.title.slice(0, 40)} — ${r.erro}`);
     if (EXECUTE) {
-      await prisma.document.update({
+      await comRetryDB(() => prisma.document.update({
         where: { id: d.id },
         data: { tcuEnriquecimentoStatus: 'failed', tcuEnriquecimentoErro: r.erro },
-      });
+      }), `update failed ${d.id}`);
     }
     return 'falha';
   }
@@ -76,10 +106,10 @@ async function processar(d: Alvo): Promise<Resultado> {
     const erro = `extração RTF: ${(e as Error).message.slice(0, 80)}`;
     console.log(`   ❌ ${d.title.slice(0, 40)} — ${erro}`);
     if (EXECUTE) {
-      await prisma.document.update({
+      await comRetryDB(() => prisma.document.update({
         where: { id: d.id },
         data: { tcuEnriquecimentoStatus: 'failed', tcuEnriquecimentoErro: erro },
-      });
+      }), `update RTF-fail ${d.id}`);
     }
     return 'falha';
   }
@@ -96,7 +126,7 @@ async function processar(d: Alvo): Promise<Resultado> {
   );
 
   if (EXECUTE) {
-    await prisma.document.update({
+    await comRetryDB(() => prisma.document.update({
       where: { id: d.id },
       data: {
         tcuTextoCompleto: final,
@@ -106,7 +136,7 @@ async function processar(d: Alvo): Promise<Resultado> {
         tcuEnriquecimentoErro: null,
         tcuEnriquecidoEm: new Date(),
       },
-    });
+    }), `update ok ${d.id}`);
   }
   return analise.secoes === null ? 'ok-sem-secoes' : 'ok';
 }
@@ -114,12 +144,12 @@ async function processar(d: Alvo): Promise<Resultado> {
 async function main() {
   console.log(EXECUTE ? '🔴 EXECUÇÃO\n' : '🔵 DRY-RUN — nada será gravado (use --execute)\n');
 
-  const alvos = await prisma.document.findMany({
+  const alvos = await comRetryDB(() => prisma.document.findMany({
     where: { category: 'acordao', tcuLinkPDF: { not: null } },
     select: { id: true, title: true, tcuLinkPDF: true, leiArticlesArr: true, tcuAnalise: true },
     orderBy: { id: 'asc' },
     ...(LIMIT ? { take: LIMIT } : {}),
-  });
+  }), 'findMany alvos');
   console.log(`Acórdãos com link: ${alvos.length}\n`);
 
   const t0 = Date.now();
