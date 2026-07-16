@@ -42,7 +42,18 @@ const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
 interface Alvo { id: string; title: string; tcuLinkPDF: string | null; leiArticlesArr: string[]; tcuAnalise: unknown }
 
-async function processar(d: Alvo): Promise<'ok' | 'falha' | 'pulado'> {
+/**
+ * Resultado de `processar`. `'ok-sem-secoes'` é um subcaso de sucesso
+ * (`status: 'success'` gravado normalmente, `secoes: null` no `tcuAnalise`)
+ * — acórdão curto que só tem dispositivo, sem Relatório/Voto (~13% da
+ * amostra). Separado de `'ok'` só para o sumário do run não confundir
+ * "não debatido" (analisado, sem seções, `leiArticlesDebated: []`) com
+ * "não consegui seccionar" — quem olha a coluna sem abrir o JSON não vê
+ * a diferença; quem olha o log do run, vê.
+ */
+type Resultado = 'ok' | 'ok-sem-secoes' | 'falha' | 'pulado';
+
+async function processar(d: Alvo): Promise<Resultado> {
   const jaFeito = (d.tcuAnalise as { v?: number } | null)?.v === ANALISE_VERSAO;
   if (jaFeito && !FORCE) return 'pulado';
 
@@ -97,7 +108,7 @@ async function processar(d: Alvo): Promise<'ok' | 'falha' | 'pulado'> {
       },
     });
   }
-  return 'ok';
+  return analise.secoes === null ? 'ok-sem-secoes' : 'ok';
 }
 
 async function main() {
@@ -112,7 +123,7 @@ async function main() {
   console.log(`Acórdãos com link: ${alvos.length}\n`);
 
   const t0 = Date.now();
-  let ok = 0, falha = 0, pulado = 0;
+  let ok = 0, falha = 0, pulado = 0, semSecoes = 0;
 
   for (let i = 0; i < alvos.length; i += CONCORRENCIA) {
     const lote = alvos.slice(i, i + CONCORRENCIA);
@@ -124,7 +135,12 @@ async function main() {
         return processar(d as Alvo);
       })
     );
-    for (const r of rs) r === 'ok' ? ok++ : r === 'falha' ? falha++ : pulado++;
+    for (const r of rs) {
+      if (r === 'ok') ok++;
+      else if (r === 'ok-sem-secoes') { ok++; semSecoes++; }
+      else if (r === 'falha') falha++;
+      else pulado++;
+    }
 
     const feitos = i + lote.length;
     const eta = Math.round(((Date.now() - t0) / feitos) * (alvos.length - feitos) / 1000 / 60);
@@ -134,7 +150,7 @@ async function main() {
   }
 
   console.log(`\n${'─'.repeat(60)}`);
-  console.log(`ok: ${ok} · falha: ${falha} · pulado: ${pulado}`);
+  console.log(`ok: ${ok} · falha: ${falha} · pulado: ${pulado} · sem seções: ${semSecoes}`);
   console.log(`tempo: ${Math.round((Date.now() - t0) / 1000 / 60)} min`);
   if (!EXECUTE) console.log('\n🔵 DRY-RUN — nada gravado.');
   await prisma.$disconnect();
