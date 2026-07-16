@@ -66,6 +66,12 @@ model Document {
   /// Formato: TcuAnalise em lib/tcu/analise-relevancia.ts.
   tcuAnalise Json?
 
+  /// Quantas vezes a catalogação do inteiro teor falhou para este acórdão.
+  /// O cron catalog-tcu-inteiro-teor exclui da fila quem chega a 3 — impede
+  /// retentar eternamente falhas permanentes (ata >20 MB, não-RTF). Um fix de
+  /// extração que possa recuperar os afetados reseta o contador deles.
+  tcuAnaliseTentativas Int @default(0)
+
   content         String?   @db.Text // Conteúdo/trechos relevantes do documento para busca textual
   size            Int?
   onNumber        Int? // Número da ON (para ordenação numérica de Orientações Normativas)
