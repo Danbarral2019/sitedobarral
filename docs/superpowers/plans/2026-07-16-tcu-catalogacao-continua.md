@@ -55,7 +55,7 @@ Expected: `Your database is now in sync with your Prisma schema.` Se mencionar p
 
 Run:
 ```bash
-npx tsx -e "import {prisma} from './lib/prisma'; prisma.document.count({where:{category:'acordao',tcuLinkPDF:{not:null},tcuAnalise:{equals:null},tcuAnaliseTentativas:{lt:3}}}).then(n=>{console.log('na fila:',n);return prisma.\$disconnect()})"
+npx tsx -e "import {prisma} from './lib/prisma'; import {Prisma} from '@prisma/client'; prisma.document.count({where:{category:'acordao',tcuLinkPDF:{not:null},tcuAnalise:{equals:Prisma.DbNull},tcuAnaliseTentativas:{lt:3}}}).then(n=>{console.log('na fila:',n);return prisma.\$disconnect()})"
 ```
 Expected: um número > 100 (os 154 que falharam + os que o backfill nunca alcançou, todos com `tcuAnaliseTentativas = 0`).
 
@@ -374,9 +374,9 @@ Expected: 5 linhas de resultado (✅/❌ conforme o estado), `🔵 DRY-RUN — n
 
 - [ ] **Step 4: Confirmar que o dry-run não escreveu**
 
-Run:
+Run (conta por `tcuTextoCompleto`, campo Text — `not: null` funciona direto; em `tcuAnalise`, que é Json, `not: null` teria semântica traiçoeira):
 ```bash
-npx tsx -e "import {prisma} from './lib/prisma'; prisma.document.count({where:{tcuAnalise:{not:null}}}).then(n=>{console.log('analisados:',n);return prisma.\$disconnect()})"
+npx tsx -e "import {prisma} from './lib/prisma'; prisma.document.count({where:{tcuTextoCompleto:{not:null}}}).then(n=>{console.log('catalogados:',n);return prisma.\$disconnect()})"
 ```
 Expected: o mesmo número de antes (o backfill já rodou; o dry-run não altera). Anote o número; ele não pode ter subido por causa do dry-run.
 
@@ -439,6 +439,7 @@ vi.mock('@/lib/logger', () => ({ apiLogger: { info: vi.fn(), warn: vi.fn(), erro
 
 import { GET } from '../route';
 import { NextRequest } from 'next/server';
+import { Prisma } from '@prisma/client';
 
 const req = () => new NextRequest('http://localhost/api/cron/catalog-tcu-inteiro-teor');
 const alvo = (id: string) => ({ id, title: `Acórdão ${id}`, tcuLinkPDF: `https://x/${id}.rtf`, leiArticlesArr: ['5'] });
@@ -464,7 +465,8 @@ describe('cron catalog-tcu-inteiro-teor', () => {
     const arg = mockFindMany.mock.calls[0][0];
     expect(arg.where).toMatchObject({
       category: 'acordao',
-      tcuAnalise: null,
+      // Json null exige Prisma.DbNull — `tcuAnalise: null` casaria 0 registros.
+      tcuAnalise: { equals: Prisma.DbNull },
       tcuLinkPDF: { not: null },
       tcuAnaliseTentativas: { lt: 3 },
     });
@@ -513,6 +515,7 @@ Criar `app/api/cron/catalog-tcu-inteiro-teor/route.ts`:
 
 ```ts
 import { NextRequest, NextResponse } from 'next/server';
+import { Prisma } from '@prisma/client';
 import { prisma } from '@/lib/prisma';
 import { catalogarAcordao } from '@/lib/tcu/catalogar-acordao';
 import { verifyCronAuth } from '@/lib/cron-auth';
@@ -555,7 +558,9 @@ export async function GET(request: NextRequest) {
     const alvos = await prisma.document.findMany({
       where: {
         category: 'acordao',
-        tcuAnalise: null,
+        // ⚠️ `tcuAnalise` é Json?. Em filtro de nulo de campo Json, `null` puro
+        // NÃO casa o NULL do banco (retorna 0). Tem que ser `Prisma.DbNull`.
+        tcuAnalise: { equals: Prisma.DbNull },
         tcuLinkPDF: { not: null },
         tcuAnaliseTentativas: { lt: MAX_TENTATIVAS },
       },
@@ -576,7 +581,7 @@ export async function GET(request: NextRequest) {
     const restamNaFila = await prisma.document.count({
       where: {
         category: 'acordao',
-        tcuAnalise: null,
+        tcuAnalise: { equals: Prisma.DbNull }, // idem: Json null exige Prisma.DbNull
         tcuLinkPDF: { not: null },
         tcuAnaliseTentativas: { lt: MAX_TENTATIVAS },
       },
