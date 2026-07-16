@@ -40,6 +40,8 @@ export interface ResultadoCatalogacao {
   erro?: string;
   debatidos?: string[];
   chars?: number;
+  /** Texto cortado no teto de 500.000 chars (TETO_CHARS_CATALOGO). Ausente nos caminhos de falha. */
+  truncado?: boolean;
 }
 
 async function marcarFalha(id: string, erro: string): Promise<void> {
@@ -95,5 +97,6 @@ export async function catalogarAcordao(doc: AcordaoParaCatalogar): Promise<Resul
     status: analise.secoes === null ? 'ok-sem-secoes' : 'ok',
     debatidos,
     chars: final.length,
+    truncado,
   };
 }

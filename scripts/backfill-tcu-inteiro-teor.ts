@@ -108,7 +108,7 @@ async function processar(d: Alvo): Promise<Resultado> {
     console.log(`   ❌ ${d.title.slice(0, 40)} — ${res.erro}`);
     return 'falha';
   }
-  console.log(`   ✅ ${d.title.slice(0, 40)} — ${res.chars} chars${res.status === 'ok-sem-secoes' ? ' (sem seções)' : ''}${res.debatidos?.length ? ` → debate: ${res.debatidos.join(',')}` : ''}`);
+  console.log(`   ✅ ${d.title.slice(0, 40)} — ${res.chars} chars${res.status === 'ok-sem-secoes' ? ' (sem seções)' : ''}${res.truncado ? ' [truncado]' : ''}${res.debatidos?.length ? ` → debate: ${res.debatidos.join(',')}` : ''}`);
   return res.status;
 }
 

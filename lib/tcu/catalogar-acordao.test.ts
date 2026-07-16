@@ -38,6 +38,7 @@ describe('catalogarAcordao', () => {
 
     expect(r.status).toBe('ok');
     expect(r.debatidos).toContain('5');
+    expect(r.truncado).toBeFalsy();
     const data = mockUpdate.mock.calls[0][0].data;
     expect(data.tcuAnalise).toBeDefined();
     expect(data.leiArticlesDebated).toContain('5');
@@ -97,6 +98,7 @@ describe('catalogarAcordao', () => {
     const r = await catalogarAcordao(doc);
 
     expect(r.status).not.toBe('falha');
+    expect(r.truncado).toBe(true);
     const data = mockUpdate.mock.calls[0][0].data;
     expect(data.tcuTextoCompleto.length).toBe(500_000);
     expect(data.tcuAnalise.truncado).toBe(true);
