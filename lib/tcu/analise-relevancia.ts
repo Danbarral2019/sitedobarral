@@ -12,8 +12,16 @@ import { seccionarAcordao, secaoDe, type Secoes } from './seccionar-acordao';
 import { TERMOS_POR_ARTIGO } from '../../data/lei-14133-termos';
 import { extractCitations } from '../lei-14133/citation-extractor';
 
-/** Suba ao mudar a semântica da análise: o backfill reprocessa quem estiver defasado. */
-export const ANALISE_VERSAO = 1;
+/**
+ * Suba ao mudar a semântica da análise: o backfill reprocessa quem estiver
+ * defasado (compara com `tcuAnalise.v`).
+ *
+ * v2 (15/07): `seccionar-acordao.ts` passou a exigir "Nº" no marcador do
+ * dispositivo (RE_ACORDAO) — uma linha "ACÓRDÃO" solta deixou de fechar a
+ * seção do voto. Os 66 acórdãos já processados em produção têm `v: 1`
+ * (seccionamento antigo) e precisam ser reprocessados.
+ */
+export const ANALISE_VERSAO = 2;
 
 /**
  * Limiar provisório. Calibrado em UM acórdão (1135/2026) no spike de 15/07:

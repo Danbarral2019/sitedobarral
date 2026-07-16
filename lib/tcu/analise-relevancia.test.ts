@@ -3,7 +3,6 @@ import { analisarAcordao, artigosDebatidos, ANALISE_VERSAO } from './analise-rel
 
 const TEXTO = [
   'TRIBUNAL DE CONTAS DA UNIÃO',
-  'ACÓRDÃO Nº 1135/2026 - TCU - Plenário',
   'RELATÓRIO',
   'A representante alega ofensa à economicidade do certame.',
   'VOTO',
@@ -11,7 +10,7 @@ const TEXTO = [
   'A economicidade exige a proposta mais vantajosa.',
   'Reitero: economicidade não se presume.',
   'Cito ainda o art. 15 da Lei 14.133.',
-  'ACÓRDÃO',
+  'ACÓRDÃO Nº 1135/2026 – TCU – Plenário',
   'Os Ministros ACORDAM em conhecer.',
 ].join('\n');
 

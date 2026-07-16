@@ -22,15 +22,16 @@ export interface Secoes {
  * O dispositivo real do TCU NUNCA é a palavra isolada "ACÓRDÃO" — vem
  * sempre com número e colegiado na mesma linha, ex.:
  * "ACÓRDÃO Nº 1135/2026 – TCU – Plenário" (o travessão é en dash "–", não
- * hífen). Por isso o grupo opcional depois de AC[ÓO]RD[ÃA]O aceita "Nº"
- * (e variantes "N°"/"No"/"NO") seguido do resto da linha. A âncora de
- * linha inteira (^...$) continua obrigatória: uma citação no meio do
- * voto ("Conforme o Acórdão 1.211/2021-TCU-Plenário, decido.") tem
- * prefixo antes de "ACÓRDÃO" e não casa.
+ * hífen). Por isso o "Nº" (e variantes "N°"/"No"/"NO") depois de
+ * AC[ÓO]RD[ÃA]O é OBRIGATÓRIO, não opcional — uma linha "ACÓRDÃO" solta
+ * não é o dispositivo e não deve casar. A âncora de linha inteira (^...$)
+ * continua obrigatória: uma citação no meio do voto ("Conforme o Acórdão
+ * 1.211/2021-TCU-Plenário, decido.") tem prefixo antes de "ACÓRDÃO" e não
+ * casa.
  */
 const RE_RELATORIO = /^\s*RELAT[ÓO]RIO\s*$/m;
 const RE_VOTO = /^\s*VOTO\s*$/m;
-const RE_ACORDAO = /^\s*AC[ÓO]RD[ÃA]O(\s+N[º°oO].*)?\s*$/gm;
+const RE_ACORDAO = /^\s*AC[ÓO]RD[ÃA]O\s+N[º°oO].*$/gm;
 
 export function seccionarAcordao(texto: string): Secoes | null {
   if (!texto) return null;
