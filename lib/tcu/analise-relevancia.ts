@@ -81,6 +81,18 @@ function contarPorSecao(texto: string, re: RegExp, secoes: Secoes | null): Conta
   return out;
 }
 
+/**
+ * ⚠️ `artigosVinculados` é um FILTRO, não uma varredura independente: só os
+ * termos dos artigos que já estão em `artigosVinculados` (no backfill,
+ * `d.leiArticlesArr` — atribuído pela IA) entram em `termos`/`artigosDebatidos`.
+ * Um acórdão que debata economicidade por páginas mas que a IA nunca marcou
+ * com o art. 5º é invisível para esta análise. Intencional (o caso de uso é
+ * triar os documentos que já reivindicam o artigo), mas quem consome
+ * `leiArticlesDebated` precisa saber que a hierarquia
+ * `leiArticlesDebated > leiArticlesCited > leiArticlesArr` (ver
+ * prisma/schema.prisma) não é independente: `leiArticlesDebated` é sempre
+ * um subconjunto de `leiArticlesArr`, nunca maior.
+ */
 export function analisarAcordao(
   texto: string,
   artigosVinculados: string[],

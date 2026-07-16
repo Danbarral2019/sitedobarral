@@ -54,6 +54,11 @@ model Document {
   /// citação de passagem. Derivado de `tcuAnalise` pelo limiar de
   /// lib/tcu/analise-relevancia.ts (LIMIAR_DEBATIDO); recomputável sem rede.
   /// Hierarquia: leiArticlesDebated > leiArticlesCited > leiArticlesArr.
+  /// ⚠️ NÃO é um nível independente: `analisarAcordao()` só conta termos dos
+  /// artigos que já estão em leiArticlesArr (vínculo por LLM) — é um FILTRO
+  /// sobre essa lista, não uma varredura própria do texto. leiArticlesDebated
+  /// é sempre subconjunto de leiArticlesArr; um artigo debatido por páginas
+  /// que a IA nunca vinculou fica invisível aqui.
   leiArticlesDebated String[] @default([])
 
   /// Contagens da análise do inteiro teor (seções, citações e termos por
