@@ -31,6 +31,7 @@ import { prisma } from '../lib/prisma';
 import { fetchInteiroTeor } from '../lib/tcu/inteiro-teor-fetch';
 import { rtfToText } from '../lib/tcu/rtf-to-text';
 import { analisarAcordao, artigosDebatidos, ANALISE_VERSAO } from '../lib/tcu/analise-relevancia';
+import { catalogarAcordao, TETO_CHARS_CATALOGO } from '../lib/tcu/catalogar-acordao';
 
 const EXECUTE = process.argv.includes('--execute');
 const FORCE = process.argv.includes('--force');
@@ -39,7 +40,6 @@ const LIMIT = limitArg ? parseInt(limitArg.split('=')[1], 10) : undefined;
 
 const CONCORRENCIA = 3;   // mesmo padrão de lib/tcu-scraper.ts:524-527
 const DELAY_MS = 1000;    // 1 req/s — o TCU não documenta rate limit (escalonado dentro do lote, não rajada)
-const TETO_CHARS = 500_000;
 
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
@@ -87,58 +87,29 @@ async function processar(d: Alvo): Promise<Resultado> {
   const jaFeito = (d.tcuAnalise as { v?: number } | null)?.v === ANALISE_VERSAO;
   if (jaFeito && !FORCE) return 'pulado';
 
-  const r = await fetchInteiroTeor(d.tcuLinkPDF!);
-  if (!r.ok) {
-    console.log(`   ❌ ${d.title.slice(0, 40)} — ${r.erro}`);
-    if (EXECUTE) {
-      await comRetryDB(() => prisma.document.update({
-        where: { id: d.id },
-        data: { tcuEnriquecimentoStatus: 'failed', tcuEnriquecimentoErro: r.erro },
-      }), `update failed ${d.id}`);
-    }
+  if (!EXECUTE) {
+    // Dry-run: baixa e analisa para o log, sem persistir. Reusa o núcleo? Não —
+    // catalogarAcordao persiste sempre. No dry-run só reportamos a intenção.
+    const r = await fetchInteiroTeor(d.tcuLinkPDF!);
+    if (!r.ok) { console.log(`   ❌ ${d.title.slice(0, 40)} — ${r.erro}`); return 'falha'; }
+    let texto: string;
+    try { texto = await rtfToText(r.buf); }
+    catch (e) { console.log(`   ❌ ${d.title.slice(0, 40)} — extração RTF: ${(e as Error).message.slice(0, 80)}`); return 'falha'; }
+    const truncado = texto.length > TETO_CHARS_CATALOGO;
+    const analise = analisarAcordao(truncado ? texto.slice(0, TETO_CHARS_CATALOGO) : texto, d.leiArticlesArr, { truncado });
+    const debatidos = artigosDebatidos(analise);
+    console.log(`   ✅ ${d.title.slice(0, 40)} — ${Math.min(texto.length, TETO_CHARS_CATALOGO)} chars${analise.secoes ? '' : ' (sem seções)'}${debatidos.length ? ` → debate: ${debatidos.join(',')}` : ''}`);
+    return analise.secoes === null ? 'ok-sem-secoes' : 'ok';
+  }
+
+  // Execução real: o núcleo persiste; comRetryDB reconecta em queda do WebSocket.
+  const res = await comRetryDB(() => catalogarAcordao(d), `catalogar ${d.id}`);
+  if (res.status === 'falha') {
+    console.log(`   ❌ ${d.title.slice(0, 40)} — ${res.erro}`);
     return 'falha';
   }
-
-  let texto: string;
-  try {
-    texto = await rtfToText(r.buf);
-  } catch (e) {
-    const erro = `extração RTF: ${(e as Error).message.slice(0, 80)}`;
-    console.log(`   ❌ ${d.title.slice(0, 40)} — ${erro}`);
-    if (EXECUTE) {
-      await comRetryDB(() => prisma.document.update({
-        where: { id: d.id },
-        data: { tcuEnriquecimentoStatus: 'failed', tcuEnriquecimentoErro: erro },
-      }), `update RTF-fail ${d.id}`);
-    }
-    return 'falha';
-  }
-
-  const truncado = texto.length > TETO_CHARS;
-  const final = truncado ? texto.slice(0, TETO_CHARS) : texto;
-  const analise = analisarAcordao(final, d.leiArticlesArr, { truncado });
-  const debatidos = artigosDebatidos(analise);
-
-  console.log(
-    `   ✅ ${d.title.slice(0, 40)} — ${final.length} chars` +
-    `${analise.secoes ? '' : ' (sem seções)'}${truncado ? ' [truncado]' : ''}` +
-    `${debatidos.length ? ` → debate: ${debatidos.join(',')}` : ''}`
-  );
-
-  if (EXECUTE) {
-    await comRetryDB(() => prisma.document.update({
-      where: { id: d.id },
-      data: {
-        tcuTextoCompleto: final,
-        tcuAnalise: analise as never,
-        leiArticlesDebated: debatidos,
-        tcuEnriquecimentoStatus: 'success',
-        tcuEnriquecimentoErro: null,
-        tcuEnriquecidoEm: new Date(),
-      },
-    }), `update ok ${d.id}`);
-  }
-  return analise.secoes === null ? 'ok-sem-secoes' : 'ok';
+  console.log(`   ✅ ${d.title.slice(0, 40)} — ${res.chars} chars${res.status === 'ok-sem-secoes' ? ' (sem seções)' : ''}${res.debatidos?.length ? ` → debate: ${res.debatidos.join(',')}` : ''}`);
+  return res.status;
 }
 
 async function main() {
