@@ -4,8 +4,16 @@
  * `leiArticlesDebated`). Núcleo compartilhado pelo backfill
  * (scripts/backfill-tcu-inteiro-teor.ts) e pelo cron catalog-tcu-inteiro-teor.
  *
- * NUNCA lança: falha vira { status: 'falha', erro } + incremento de
- * tcuAnaliseTentativas, para um acórdão problemático não derrubar o lote.
+ * Falha de CONTEÚDO (download com { ok: false }, tcuLinkPDF ausente, ou
+ * rtfToText que lança) NUNCA propaga: vira { status: 'falha', erro } +
+ * incremento de tcuAnaliseTentativas — é determinística e conta para o
+ * limite de 3 tentativas, para um acórdão problemático não derrubar o lote.
+ *
+ * Falha de INFRAESTRUTURA (o prisma.document.update lança, ex.: WebSocket do
+ * Neon caiu) PROPAGA de propósito, sem incrementar tentativa: um soluço de
+ * rede é transitório e não deve gastar uma tentativa nem empurrar um
+ * acórdão bom rumo ao limite de 3. O chamador trata (o backfill envolve em
+ * comRetryDB; o cron deixa o run terminar e retoma no próximo).
  *
  * A política do chamador (retry de conexão, delay entre downloads, log) fica
  * FORA daqui — o backfill roda em loop shell, o cron tem lote e maxDuration.
@@ -46,7 +54,12 @@ async function marcarFalha(id: string, erro: string): Promise<void> {
 }
 
 export async function catalogarAcordao(doc: AcordaoParaCatalogar): Promise<ResultadoCatalogacao> {
-  const r = await fetchInteiroTeor(doc.tcuLinkPDF!);
+  if (!doc.tcuLinkPDF) {
+    await marcarFalha(doc.id, 'tcuLinkPDF ausente');
+    return { status: 'falha', erro: 'tcuLinkPDF ausente' };
+  }
+
+  const r = await fetchInteiroTeor(doc.tcuLinkPDF);
   if (!r.ok) {
     await marcarFalha(doc.id, r.erro);
     return { status: 'falha', erro: r.erro };

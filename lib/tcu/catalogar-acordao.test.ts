@@ -55,6 +55,17 @@ describe('catalogarAcordao', () => {
     expect(r.debatidos).toEqual([]);
   });
 
+  it('tcuLinkPDF ausente: status falha, incrementa tentativas, NÃO chama fetchInteiroTeor', async () => {
+    const r = await catalogarAcordao({ ...doc, tcuLinkPDF: null });
+
+    expect(r.status).toBe('falha');
+    expect(r.erro).toBe('tcuLinkPDF ausente');
+    const data = mockUpdate.mock.calls[0][0].data;
+    expect(data.tcuEnriquecimentoStatus).toBe('failed');
+    expect(data.tcuAnaliseTentativas).toEqual({ increment: 1 });
+    expect(mockFetch).not.toHaveBeenCalled();
+  });
+
   it('falha de download: status falha, NÃO lança, incrementa tentativas', async () => {
     mockFetch.mockResolvedValue({ ok: false, erro: 'timeout' });
 
