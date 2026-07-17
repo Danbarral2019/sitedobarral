@@ -69,6 +69,35 @@ describe('seccionarAcordao', () => {
     expect(secaoDe(s, texto.indexOf('Conforme o ACÓRDÃO'))).toBe('voto');
   });
 
+  it('VOTO transcrito no relatório não rouba a seção do voto real', () => {
+    // Padrão REAL (confirmado em 14 dos 1.685 acórdãos, ex. 4030/2020): em
+    // pedidos de reexame/recursos, o TCU transcreve a decisão anterior INTEIRA
+    // dentro do Relatório — inclusive a linha "VOTO" daquela decisão. O voto
+    // real do relator é o ÚLTIMO "VOTO" antes do dispositivo, não o primeiro.
+    // Pegar o primeiro (o transcrito) rotularia trechos do relatório como voto
+    // e inflaria forte.voto — o sinal central do projeto (razão de decidir).
+    const texto = [
+      'RELATÓRIO',
+      'Cuido de recurso. Transcrevo a decisão recorrida:',
+      'VOTO',                                                    // ← transcrito (da decisão anterior)
+      'O princípio da economicidade foi o fundamento da condenação. Economicidade, economicidade.',
+      'Encerrada a transcrição da decisão recorrida.',
+      'VOTO',                                                    // ← o voto REAL do relator
+      'Trata-se de recurso de revisão. Passo ao mérito.',
+      'ACÓRDÃO Nº 4030/2020 – TCU – Plenário',
+      'Os Ministros ACORDAM em negar provimento.',
+    ].join('\n');
+
+    const s = seccionarAcordao(texto)!;
+    // O voto começa no SEGUNDO "VOTO" (o real), não no primeiro (o transcrito).
+    expect(s.voto![0]).toBe(texto.lastIndexOf('VOTO'));
+    // A economicidade transcrita está no RELATÓRIO (alegação/decisão anterior),
+    // não no voto do relator — senão contaria como razão de decidir.
+    expect(secaoDe(s, texto.indexOf('princípio da economicidade'))).toBe('relatorio');
+    // O trecho do voto real continua sendo voto.
+    expect(secaoDe(s, texto.indexOf('Passo ao mérito'))).toBe('voto');
+  });
+
   it('dois blocos ACÓRDÃO Nº após o voto: usa o último (dispositivo real)', () => {
     // Um voto pode transcrever/citar acórdão anterior em bloco próprio; o
     // dispositivo de fato é sempre o ÚLTIMO bloco "ACÓRDÃO Nº ..." do texto.

@@ -20,8 +20,14 @@ import { extractCitations } from '../lei-14133/citation-extractor';
  * dispositivo (RE_ACORDAO) — uma linha "ACÓRDÃO" solta deixou de fechar a
  * seção do voto. Os 66 acórdãos já processados em produção têm `v: 1`
  * (seccionamento antigo) e precisam ser reprocessados.
+ *
+ * v3 (17/07): o voto real passou a ser o ÚLTIMO "VOTO" antes do dispositivo,
+ * não o primeiro. O TCU transcreve a decisão recorrida (com sua própria linha
+ * "VOTO") dentro do relatório; pegar o primeiro rotulava trecho do relatório
+ * como voto e inflava `forte.voto`. Afetava 14 dos 1.685 acórdãos. Reprocessar
+ * a partir do texto guardado (sem re-baixar) via scripts/reanalyze-tcu.ts.
  */
-export const ANALISE_VERSAO = 2;
+export const ANALISE_VERSAO = 3;
 
 /**
  * Limiar provisório. Calibrado em UM acórdão (1135/2026) no spike de 15/07:

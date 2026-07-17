@@ -30,27 +30,41 @@ export interface Secoes {
  * casa.
  */
 const RE_RELATORIO = /^\s*RELAT[ÓO]RIO\s*$/m;
-const RE_VOTO = /^\s*VOTO\s*$/m;
+const RE_VOTO = /^\s*VOTO\s*$/gm;
 const RE_ACORDAO = /^\s*AC[ÓO]RD[ÃA]O\s+N[º°oO].*$/gm;
+
+/** Última ocorrência de `re` (global) dentro de (min, max]; -1 se nenhuma. */
+function ultimaEntre(texto: string, re: RegExp, min: number, max: number): number {
+  let achado = -1;
+  re.lastIndex = 0;
+  for (const m of texto.matchAll(re)) {
+    if (m.index !== undefined && m.index > min && (max < 0 || m.index < max)) {
+      achado = m.index;
+    }
+  }
+  return achado;
+}
 
 export function seccionarAcordao(texto: string): Secoes | null {
   if (!texto) return null;
 
   const iRel = texto.search(RE_RELATORIO);
-  const iVoto = texto.search(RE_VOTO);
+  if (iRel < 0) return null;
+
+  // O dispositivo é sempre o ÚLTIMO bloco "ACÓRDÃO Nº ..." do texto — em
+  // pedidos de reexame, a decisão anterior é transcrita inteira (com seu
+  // próprio "ACÓRDÃO Nº"), mas ela fica no relatório, antes do dispositivo
+  // real. Achá-lo PRIMEIRO permite depois delimitar o voto por ele.
+  const iAc = ultimaEntre(texto, RE_ACORDAO, iRel, -1);
+
+  // O voto real é o ÚLTIMO "VOTO" entre o relatório e o dispositivo, NÃO o
+  // primeiro. O TCU transcreve a decisão recorrida dentro do relatório —
+  // inclusive a linha "VOTO" daquela decisão. Pegar o primeiro rotularia
+  // trecho do relatório como voto e inflaria forte.voto (o sinal central).
+  const iVoto = ultimaEntre(texto, RE_VOTO, iRel, iAc);
 
   // Acórdãos curtos (multa, citação) só têm dispositivo — não é erro.
-  if (iRel < 0 || iVoto < 0 || iVoto <= iRel) return null;
-
-  // Um voto pode citar/transcrever outro acórdão em bloco próprio; o
-  // dispositivo de fato é sempre o ÚLTIMO bloco "ACÓRDÃO Nº ..." do
-  // texto — por isso percorremos todas as ocorrências após o voto e
-  // ficamos com a última, não a primeira.
-  let iAc = -1;
-  RE_ACORDAO.lastIndex = 0;
-  for (const m of texto.matchAll(RE_ACORDAO)) {
-    if (m.index !== undefined && m.index > iVoto) { iAc = m.index; }
-  }
+  if (iVoto < 0) return null;
 
   const fim = texto.length;
   return {
