@@ -1,7 +1,8 @@
 'use client';
 
-import { Star, FileText, Loader2 } from 'lucide-react';
+import { Star, FileText, Loader2, Scale } from 'lucide-react';
 import { HighlightCard } from './HighlightCard';
+import { DebatedVotoCard } from './DebatedVotoCard';
 import { CategoryAccordion } from './CategoryAccordion';
 import type { ArticleDocsResponse } from '@/hooks/use-lei14133-preview';
 
@@ -24,6 +25,27 @@ export function LeiArticleDocuments({ loading, data, expandedCategories, onToggl
         </div>
       ) : data ? (
         <>
+          {data.debatedInVoto?.length > 0 && (
+            <section className="mb-8">
+              <div className="flex items-center gap-2 mb-1">
+                <Scale className="w-5 h-5 text-indigo-600" />
+                <h3 className="text-lg font-bold text-gray-900">Debatido no voto</h3>
+                <span className="text-sm text-gray-500">
+                  ({data.debatedInVoto.length} {data.debatedInVoto.length === 1 ? 'acórdão' : 'acórdãos'})
+                </span>
+              </div>
+              <p className="text-sm text-gray-500 mb-4">
+                Acórdãos do TCU em que este artigo foi <strong>razão de decidir</strong> — aplicado no voto,
+                não citado de passagem.
+              </p>
+              <div className="space-y-3">
+                {data.debatedInVoto.map((doc) => (
+                  <DebatedVotoCard key={doc.id} doc={doc} />
+                ))}
+              </div>
+            </section>
+          )}
+
           {data.highlights.length > 0 && (
             <section className="mb-8">
               <div className="flex items-center gap-2 mb-4">

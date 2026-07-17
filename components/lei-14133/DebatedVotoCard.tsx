@@ -1,0 +1,45 @@
+'use client';
+
+import { Scale, ExternalLink } from 'lucide-react';
+import type { EnrichedDoc } from '@/hooks/use-lei14133-preview';
+import { getDocHref } from './HighlightCard';
+
+/**
+ * Card do tier "debatido no voto" — o acórdão em que o artigo foi RAZÃO DE
+ * DECIDIR (aplicado no voto do TCU), não citação de passagem. É o sinal mais
+ * forte da jurisprudência; ganha destaque próprio, acima dos demais.
+ */
+export function DebatedVotoCard({ doc }: { doc: EnrichedDoc }) {
+  return (
+    <a
+      href={getDocHref(doc)}
+      target={doc.url ? '_blank' : undefined}
+      rel={doc.url ? 'noopener noreferrer' : undefined}
+      className="block border-2 border-indigo-300 bg-indigo-50/40 rounded-xl p-4 hover:shadow-md transition-all group"
+    >
+      <div className="flex items-start gap-3">
+        <div className="flex-shrink-0 w-10 h-10 bg-white rounded-lg flex items-center justify-center shadow-sm">
+          <Scale className="w-5 h-5 text-indigo-600" />
+        </div>
+        <div className="flex-1 min-w-0">
+          <div className="flex items-center gap-2 mb-1 flex-wrap">
+            <span className="px-2 py-0.5 bg-indigo-100 text-indigo-700 text-[11px] font-bold uppercase rounded tracking-wide">
+              Debatido no voto
+            </span>
+            {doc.isPublic && (
+              <span className="px-2 py-0.5 bg-green-50 text-green-700 text-[10px] font-medium rounded">Público</span>
+            )}
+          </div>
+          <h4 className="font-semibold text-gray-900 text-base leading-snug mb-1 group-hover:text-indigo-700 transition-colors">
+            {doc.title}
+          </h4>
+          {doc.summary && (
+            <p className="text-sm text-gray-600 leading-relaxed line-clamp-2 mb-2">{doc.summary}</p>
+          )}
+          <p className="text-xs text-indigo-700/80 italic">Razão de decidir — o artigo foi aplicado no voto.</p>
+        </div>
+        <ExternalLink className="w-4 h-4 text-gray-400 flex-shrink-0 mt-1 group-hover:text-indigo-600 transition-colors" />
+      </div>
+    </a>
+  );
+}

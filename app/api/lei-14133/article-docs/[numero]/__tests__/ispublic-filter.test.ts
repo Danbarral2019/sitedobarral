@@ -115,6 +115,7 @@ describe('article-docs — separa citação de tema', () => {
     notesImportance: null,
     leiArticlesArr: ['5'],
     leiArticlesCited: cited,
+    leiArticlesDebated: [],
   });
 
   beforeEach(() => {
@@ -136,7 +137,7 @@ describe('article-docs — separa citação de tema', () => {
 
   it('só quem cita entra nos accordions por categoria', async () => {
     const b = await body();
-    const ids = Object.values(b.byCategory).flat().map((d: { id: string }) => d.id);
+    const ids = (Object.values(b.byCategory).flat() as Array<{ id: string }>).map((d) => d.id);
     expect(ids).toEqual(['cita']);
   });
 
@@ -162,5 +163,67 @@ describe('article-docs — separa citação de tema', () => {
     const b = await body();
     expect(b.totalRelated).toBe(0);
     expect(b.totalCited).toBe(1);
+  });
+});
+
+/**
+ * "Debatido no voto" (razão de decidir) é o tier mais forte da jurisprudência —
+ * o artigo foi APLICADO no voto do acórdão, não só mencionado. Vem de
+ * `Document.leiArticlesDebated` (lib/tcu/analise-relevancia.ts, v5), que NÃO é
+ * subconjunto de `leiArticlesArr`: a IA sub-vincula regra concreta e a citação
+ * no voto é prova própria. Por isso a rota tem de buscar por leiArticlesDebated
+ * também, senão 64% desses acórdãos não chegam à página.
+ */
+describe('article-docs — debatido no voto (razão de decidir)', () => {
+  const acordao = (
+    id: string,
+    o: { arr?: string[]; cited?: string[]; debated?: string[] },
+  ) => ({
+    id, title: `Acórdão ${id}`, category: 'acordao', isPublic: true, url: 'https://x',
+    summary: null, description: null, notesImportance: null,
+    leiArticlesArr: o.arr ?? [], leiArticlesCited: o.cited ?? [], leiArticlesDebated: o.debated ?? [],
+  });
+
+  beforeEach(() => {
+    vi.clearAllMocks();
+    mockVerifyAuth.mockResolvedValue({ valid: false });
+    mockLegislativeActFindMany.mockResolvedValue([]);
+  });
+  const body = async () => (await GET(req(), ctx)).json();
+
+  it('a busca inclui documentos por leiArticlesDebated (não só leiArticlesArr)', async () => {
+    mockDocumentFindMany.mockResolvedValue([]);
+    await GET(req(), ctx);
+    expect(JSON.stringify(whereArg())).toContain('leiArticlesDebated');
+  });
+
+  it('acórdão debatido no voto SEM vínculo da IA aparece no tier (o caso dos 64%)', async () => {
+    mockDocumentFindMany.mockResolvedValue([acordao('deb', { arr: [], debated: ['5'] })]);
+    const b = await body();
+    expect(b.debatedInVoto.map((d: { id: string }) => d.id)).toEqual(['deb']);
+    expect(b.debatedInVoto[0].debatedInVoto).toBe(true);
+    expect(b.totalDebated).toBe(1);
+  });
+
+  it('acórdão debatido NÃO é duplicado nos accordions por categoria', async () => {
+    mockDocumentFindMany.mockResolvedValue([acordao('deb', { arr: ['5'], cited: ['5'], debated: ['5'] })]);
+    const b = await body();
+    const catIds = (Object.values(b.byCategory).flat() as Array<{ id: string }>).map((d) => d.id);
+    expect(catIds).not.toContain('deb');
+    expect(b.debatedInVoto.map((d: { id: string }) => d.id)).toEqual(['deb']);
+  });
+
+  it('acórdão citado mas NÃO debatido fica no accordion, fora do tier', async () => {
+    mockDocumentFindMany.mockResolvedValue([acordao('cit', { arr: ['5'], cited: ['5'], debated: [] })]);
+    const b = await body();
+    expect(b.debatedInVoto).toEqual([]);
+    const catIds = (Object.values(b.byCategory).flat() as Array<{ id: string }>).map((d) => d.id);
+    expect(catIds).toContain('cit');
+  });
+
+  it('debatido não polui os destaques (regulamentação)', async () => {
+    mockDocumentFindMany.mockResolvedValue([acordao('deb', { arr: ['5'], cited: ['5'], debated: ['5'] })]);
+    const b = await body();
+    expect(b.highlights.map((d: { id: string }) => d.id)).not.toContain('deb');
   });
 });

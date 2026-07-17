@@ -87,6 +87,8 @@ export interface EnrichedDoc {
   highlightReason: string;
   /** O documento cita o artigo textualmente, ou só se relaciona por tema? */
   citesArticle: boolean;
+  /** O artigo foi razão de decidir no voto do acórdão (só acórdãos). */
+  debatedInVoto?: boolean;
 }
 
 export interface ArticleDocsResponse {
@@ -94,8 +96,12 @@ export interface ArticleDocsResponse {
   /** Documentos que CITAM o artigo (o que vai nos accordions). */
   total: number;
   totalCited: number;
+  /** Acórdãos em que o artigo foi razão de decidir no voto — exibidos no topo. */
+  totalDebated: number;
   /** Vinculados só por tema pelo LLM — exibidos à parte, sem se passarem por citação. */
   totalRelated: number;
+  /** Tier "debatido no voto" — o sinal mais forte da jurisprudência. */
+  debatedInVoto: EnrichedDoc[];
   highlights: EnrichedDoc[];
   byCategory: Record<string, EnrichedDoc[]>;
   relatedByTheme: EnrichedDoc[];

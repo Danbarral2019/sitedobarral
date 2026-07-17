@@ -49,6 +49,29 @@ model Document {
   /// verificável de que o documento fala mesmo do artigo. Popular com
   /// scripts/backfill-article-citations.ts. Ref.: docs/audits/2026-07-15-*.
   leiArticlesCited String[] @default([])
+
+  /// Artigos que são razão de decidir no Voto do acórdão — não citação de
+  /// passagem. Derivado de `tcuAnalise` por `artigosDebatidos()`, recomputável
+  /// sem rede. Duas vias: (a) art. 5º pelo princípio NOMEADO no voto
+  /// (LIMIAR_DEBATIDO), filtrado por leiArticlesArr; (b) artigo de regra
+  /// concreta CITADO no voto, via própria — NÃO filtrada pela IA (a citação no
+  /// voto é prova objetiva; a IA sub-vincula regra concreta). ⚠️ Desde o v5,
+  /// por causa de (b), leiArticlesDebated NÃO é mais subconjunto de
+  /// leiArticlesArr. A hierarquia debatido>citado>vinculado vale só para a via
+  /// de termos (art. 5º). Ver lib/tcu/analise-relevancia.ts.
+  leiArticlesDebated String[] @default([])
+
+  /// Contagens da análise do inteiro teor (seções, citações e termos por
+  /// seção). Fonte da verdade, SEM veredito — o limiar mora no código.
+  /// Formato: TcuAnalise em lib/tcu/analise-relevancia.ts.
+  tcuAnalise Json?
+
+  /// Quantas vezes a catalogação do inteiro teor falhou para este acórdão.
+  /// O cron catalog-tcu-inteiro-teor exclui da fila quem chega a 3 — impede
+  /// retentar eternamente falhas permanentes (ata >20 MB, não-RTF). Um fix de
+  /// extração que possa recuperar os afetados reseta o contador deles.
+  tcuAnaliseTentativas Int @default(0)
+
   content         String?   @db.Text // Conteúdo/trechos relevantes do documento para busca textual
   size            Int?
   onNumber        Int? // Número da ON (para ordenação numérica de Orientações Normativas)
@@ -117,6 +140,11 @@ model Document {
   tcuDataJulgamento DateTime? // Data do julgamento do acórdão
   tcuLinkPDF        String? // Link oficial do PDF no site do TCU
   tcuEmentaCompleta String?   @db.Text // Ementa oficial completa (pode ser longa)
+  /// ⚠️ NÃO INDEXAR. Este campo NÃO é lido por lib/embeddings/source-text.ts
+  /// (que usa [content, tcuEmentaCompleta, description]) e NÃO PODE passar a
+  /// ser: indexá-lo somaria ~116k chunks e traria o flooding do top-5 recusado
+  /// no design de 2026-07-07. O inteiro teor está aqui para ANÁLISE
+  /// (lib/tcu/analise-relevancia.ts), não para retrieval.
   tcuTextoCompleto  String?   @db.Text // Texto integral do acórdão (pode ser muito longo)
   tcuRelator        String? // Nome do relator
   tcuOrgaoJulgador  String? // Órgão julgador (Plenário, 1ª Câmara, etc)
@@ -207,6 +235,7 @@ model Document {
   @@index([embeddingStatus]) // Índice para buscar documentos por status de embedding
   @@index([leiArticlesArr], type: Gin) // Onda 4.5: GIN p/ queries `'75' = ANY(leiArticlesArr)` rápidas
   @@index([leiArticlesCited], type: Gin) // idem, p/ separar "cita" de "tema" na Lei Comentada
+  @@index([leiArticlesDebated], type: Gin) // idem leiArticlesArr: filtro por artigo
 }
 
 // Metadados TCU (tabela satélite 1:1 — vertical table splitting)

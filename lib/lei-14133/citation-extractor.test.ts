@@ -102,3 +102,43 @@ describe('citesArticle', () => {
     expect(r.ambiguous).toBe(true);
   });
 });
+
+describe('amarração à norma (a ligação imediata vence a proximidade)', () => {
+  // Um "art. N" seguido de "da/do ‹outra norma›" pertence àquela norma, mesmo
+  // que "14.133" apareça na janela — em geral de uma citação vizinha legítima.
+  // Casos reais do acervo TCU (inteiro teor).
+
+  it('art. amarrado à Resolução-TCU não conta como 14.133, mesmo com a 14.133 por perto', () => {
+    // Acórdão 183/2026: o art. 103 é da Resolução-TCU 259; o "14.133" ao lado
+    // vem do art. 170 — citação vizinha e genuína.
+    const t =
+      'conheço da representação com fundamento no art. 103, § 1º, da Resolução-TCU 259/2014 e no art. 170, § 4º, da Lei 14.133/2021.';
+    expect(citesArticle(t, '103').cites).toBe(false);
+    expect(citesArticle(t, '170').cites).toBe(true); // a ligação legítima é preservada
+  });
+
+  it('art. amarrado ao Regimento Interno não conta como 14.133', () => {
+    // Padrão do art. 169 (20 acórdãos): "art. 169 do Regimento Interno do TCU".
+    const t =
+      'nos termos do art. 169 do Regimento Interno do TCU, aplica-se subsidiariamente a Lei 14.133/2021.';
+    expect(citesArticle(t, '169').cites).toBe(false);
+  });
+
+  it('art. amarrado a outra Lei (8.666) não conta, ainda que a 14.133 venha depois', () => {
+    const t = 'o art. 30 da Lei 8.666/93, cujo teor foi mantido pela Lei 14.133/2021, exigia atestados.';
+    expect(citesArticle(t, '30').cites).toBe(false);
+  });
+
+  it('a citação genuína da 14.133 no mesmo texto continua contando', () => {
+    const t = 'o art. 59, caput, da Lei 14.133/2021 impõe a desclassificação da proposta.';
+    expect(citesArticle(t, '59').cites).toBe(true);
+  });
+
+  it('extractCitations marca boundToOtherNorm só na ocorrência amarrada a outra norma', () => {
+    const cs = extractCitations(
+      'o art. 103, § 1º, da Resolução-TCU 259/2014 e o art. 170 da Lei 14.133/2021'
+    );
+    expect(cs.find((c) => c.article === '103')?.boundToOtherNorm).toBe(true);
+    expect(cs.find((c) => c.article === '170')?.boundToOtherNorm).toBe(false);
+  });
+});

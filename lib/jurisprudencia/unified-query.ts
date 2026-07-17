@@ -45,6 +45,18 @@ export interface UnifiedDecision {
   updatedAt: Date;
 }
 
+/**
+ * Shape de listagem: igual a `UnifiedDecision` sem `fullText`.
+ *
+ * `fullText` é o inteiro teor — depois do backfill do TCU, ~76 KB em média
+ * (máx. ~437 KB) por linha. A listagem (`fetchUnifiedList`/`fetchUnifiedTopK`)
+ * nunca usa esse campo (a página de listagem só mostra a ementa truncada);
+ * só a página de detalhe (`fetchUnifiedById`) precisa do inteiro teor. Buscar
+ * `fullText` do Neon em toda paginação inflaria o payload por page view à
+ * toa — daí o tipo separado, para o TypeScript pegar quem tentar usá-lo.
+ */
+export type UnifiedDecisionListItem = Omit<UnifiedDecision, 'fullText'>;
+
 /** Shape mínimo do `Document` necessário para o mapping. */
 export interface DocumentTcuRaw {
   id: string;
@@ -306,8 +318,12 @@ export function buildDocumentTcuWhere(
 
 /**
  * SELECT normalizado do ramo A (TribunalDecision) — alinha com UnifiedDecision.
+ *
+ * `includeFullText` controla se a coluna pesada `fullText` é projetada. A
+ * listagem passa `false` (ver `UnifiedDecisionListItem`); a página de
+ * detalhe (`fetchUnifiedById`) passa `true`.
  */
-function tribunalDecisionSelect(where: Prisma.Sql): Prisma.Sql {
+function tribunalDecisionSelect(where: Prisma.Sql, includeFullText: boolean): Prisma.Sql {
   return Prisma.sql`
     SELECT
       id,
@@ -317,7 +333,7 @@ function tribunalDecisionSelect(where: Prisma.Sql): Prisma.Sql {
       "decisionNumber",
       title,
       ementa,
-      "fullText",
+      ${includeFullText ? Prisma.sql`"fullText"` : Prisma.sql`NULL::text AS "fullText"`},
       summary,
       relator,
       "orgaoJulgador",
@@ -345,8 +361,13 @@ function tribunalDecisionSelect(where: Prisma.Sql): Prisma.Sql {
 /**
  * SELECT normalizado do ramo B (Document TCU) — mesmos campos do ramo A,
  * derivando a partir dos campos tcu*.
+ *
+ * `includeFullText` (ver `tribunalDecisionSelect`): quando `false`, não
+ * calcula `COALESCE("tcuTextoCompleto", content)` — o inteiro teor do TCU,
+ * ~76 KB médios/437 KB máx. por acórdão após o backfill. `content` também é
+ * pesado (texto bruto do Document), então nem ele deve ser lido à toa.
  */
-function documentTcuSelect(where: Prisma.Sql): Prisma.Sql {
+function documentTcuSelect(where: Prisma.Sql, includeFullText: boolean): Prisma.Sql {
   return Prisma.sql`
     SELECT
       id,
@@ -356,7 +377,7 @@ function documentTcuSelect(where: Prisma.Sql): Prisma.Sql {
       COALESCE("tcuNumeroAcordao", title) AS "decisionNumber",
       title,
       COALESCE("tcuEmentaCompleta", description, content, '') AS ementa,
-      COALESCE("tcuTextoCompleto", content) AS "fullText",
+      ${includeFullText ? Prisma.sql`COALESCE("tcuTextoCompleto", content) AS "fullText"` : Prisma.sql`NULL::text AS "fullText"`},
       summary,
       COALESCE("tcuRelator", "tcuAutorTese") AS relator,
       "tcuOrgaoJulgador" AS "orgaoJulgador",
@@ -389,9 +410,13 @@ function documentTcuSelect(where: Prisma.Sql): Prisma.Sql {
 /**
  * Monta o corpo do UNION ALL baseado no short-circuit.
  * Retorna `null` quando ambos os ramos são excluídos.
+ *
+ * `includeFullText` repassa para os dois SELECTs (ver `tribunalDecisionSelect`
+ * / `documentTcuSelect`).
  */
 function composeUnifiedBody(
-  filters: JurisprudenciaFilters
+  filters: JurisprudenciaFilters,
+  includeFullText: boolean
 ): Prisma.Sql | null {
   const includeA = shouldIncludeTribunalDecisionBranch(filters);
   const includeB = shouldIncludeDocumentTcuBranch(filters);
@@ -400,16 +425,16 @@ function composeUnifiedBody(
 
   if (includeA && includeB) {
     return Prisma.sql`
-      (${tribunalDecisionSelect(buildTribunalDecisionWhere(filters))})
+      (${tribunalDecisionSelect(buildTribunalDecisionWhere(filters), includeFullText)})
       UNION ALL
-      (${documentTcuSelect(buildDocumentTcuWhere(filters))})
+      (${documentTcuSelect(buildDocumentTcuWhere(filters), includeFullText)})
     `;
   }
   if (includeA) {
-    return tribunalDecisionSelect(buildTribunalDecisionWhere(filters));
+    return tribunalDecisionSelect(buildTribunalDecisionWhere(filters), includeFullText);
   }
   // includeB only
-  return documentTcuSelect(buildDocumentTcuWhere(filters));
+  return documentTcuSelect(buildDocumentTcuWhere(filters), includeFullText);
 }
 
 // ──────────────────────────────────────────────────────────────────────────
@@ -425,9 +450,45 @@ export interface PaginationOptions {
 }
 
 export interface UnifiedListResult {
-  items: UnifiedDecision[];
+  items: UnifiedDecisionListItem[];
   total: number;
 }
+
+/**
+ * Colunas projetadas na listagem/top-K — todos os campos de `UnifiedDecision`
+ * MENOS `fullText` (inteiro teor, ver `UnifiedDecisionListItem`). Lista
+ * explícita em vez de `SELECT *` para que o corte de `fullText` seja
+ * garantido também no SELECT externo (o `composeUnifiedBody(..., false)` já
+ * garante que a subquery nem calcula o valor).
+ */
+const LIST_ITEM_COLUMNS = Prisma.sql`
+  id,
+  "tribunalCode",
+  "tribunalName",
+  "decisionType",
+  "decisionNumber",
+  title,
+  ementa,
+  summary,
+  relator,
+  "orgaoJulgador",
+  "dataJulgamento",
+  "dataPublicacao",
+  themes,
+  "leiArticles",
+  url,
+  "pdfUrl",
+  "isRelevant",
+  "relevanceScore",
+  "approvalStatus",
+  year,
+  "processNumber",
+  "fullIdentifier",
+  "sourceType",
+  "sourceRawData",
+  "createdAt",
+  "updatedAt"
+`;
 
 function getOrderClause(sort: SortOption | undefined): Prisma.Sql {
   switch (sort) {
@@ -447,13 +508,14 @@ export async function fetchUnifiedList(
   filters: JurisprudenciaFilters,
   { page, pageSize, sort }: PaginationOptions
 ): Promise<UnifiedListResult> {
-  const body = composeUnifiedBody(filters);
+  // false: listagem não usa o inteiro teor — ver `LIST_ITEM_COLUMNS`.
+  const body = composeUnifiedBody(filters, false);
   if (!body) return { items: [], total: 0 };
 
   const offset = (page - 1) * pageSize;
 
   const itemsSql = Prisma.sql`
-    SELECT * FROM (${body}) unified
+    SELECT ${LIST_ITEM_COLUMNS} FROM (${body}) unified
     ${getOrderClause(sort)}
     LIMIT ${pageSize} OFFSET ${offset}
   `;
@@ -462,7 +524,7 @@ export async function fetchUnifiedList(
   `;
 
   const [items, countRows] = await Promise.all([
-    prisma.$queryRaw<UnifiedDecision[]>(itemsSql),
+    prisma.$queryRaw<UnifiedDecisionListItem[]>(itemsSql),
     prisma.$queryRaw<Array<{ total: number }>>(countSql),
   ]);
 
@@ -472,26 +534,29 @@ export async function fetchUnifiedList(
 export async function fetchUnifiedTopK(
   filters: JurisprudenciaFilters,
   topK: number
-): Promise<UnifiedDecision[]> {
-  const body = composeUnifiedBody(filters);
+): Promise<UnifiedDecisionListItem[]> {
+  // false: top-K alimenta cards/telemetria, não o inteiro teor — ver `LIST_ITEM_COLUMNS`.
+  const body = composeUnifiedBody(filters, false);
   if (!body) return [];
 
   const sql = Prisma.sql`
-    SELECT * FROM (${body}) unified
+    SELECT ${LIST_ITEM_COLUMNS} FROM (${body}) unified
     ORDER BY "relevanceScore" DESC NULLS LAST, "dataJulgamento" DESC NULLS LAST
     LIMIT ${topK}
   `;
 
-  return prisma.$queryRaw<UnifiedDecision[]>(sql);
+  return prisma.$queryRaw<UnifiedDecisionListItem[]>(sql);
 }
 
 export async function fetchUnifiedById(
   id: string
 ): Promise<UnifiedDecision | null> {
+  // true: página de detalhe precisa do inteiro teor.
   // Tenta ramo A primeiro (filtros equivalentes ao default)
   const tribA = await prisma.$queryRaw<UnifiedDecision[]>(Prisma.sql`
     SELECT * FROM (${tribunalDecisionSelect(
-      buildTribunalDecisionWhere({})
+      buildTribunalDecisionWhere({}),
+      true
     )}) unified
     WHERE id = ${id}
     LIMIT 1
@@ -500,7 +565,8 @@ export async function fetchUnifiedById(
 
   const tribB = await prisma.$queryRaw<UnifiedDecision[]>(Prisma.sql`
     SELECT * FROM (${documentTcuSelect(
-      buildDocumentTcuWhere({})
+      buildDocumentTcuWhere({}),
+      true
     )}) unified
     WHERE id = ${id}
     LIMIT 1
@@ -511,7 +577,8 @@ export async function fetchUnifiedById(
 }
 
 export async function countUnifiedApproved(): Promise<number> {
-  const body = composeUnifiedBody({});
+  // false: só conta linhas, nunca lê o inteiro teor.
+  const body = composeUnifiedBody({}, false);
   if (!body) return 0;
   const rows = await prisma.$queryRaw<Array<{ total: number }>>(Prisma.sql`
     SELECT COUNT(*)::int AS total FROM (${body}) sub

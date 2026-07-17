@@ -17,58 +17,19 @@
  *      npx tsx scripts/audit-lei-comentada-integridade.ts --json=out.json
  */
 import { prisma } from '../lib/prisma';
-import { LEI_14133_ARTIGOS } from '../data/lei-14133-artigos';
+import { citesArticle } from '../lib/lei-14133/citation-extractor';
 import { writeFileSync } from 'fs';
 
-const VALID_ARTICLES = new Set(Object.keys(LEI_14133_ARTIGOS));
 const AGU_FALLBACK_URL = 'https://www.gov.br/agu/pt-br/composicao/cgu/cgu/onsagu';
 
 const report: Record<string, unknown> = {};
 const h = (s: string) => console.log(`\n${'='.repeat(72)}\n${s}\n${'='.repeat(72)}`);
 const sub = (s: string) => console.log(`\n--- ${s} ---`);
 
-// ─────────────────────────────────────────────────────────────────────────────
-// EXTRATOR DE CITAÇÃO POR REGEX — protótipo da Fase 3.2 (custo zero, sem LLM)
-// ─────────────────────────────────────────────────────────────────────────────
-
-/** Casa "art. 5º", "artigo 5", "arts. 5º e 6º", "art. 184-A". Captura posição. */
-const ART_RE = /\bart(?:igos?|s?\.)?\s*(\d{1,3})\s*[ºo°]?(?:\s*-\s*([A-Z]))?/gi;
-/** Proximidade: a citação é da 14.133? */
-const LEI_14133_RE = /14\.?133/;
-/** Ruído: citação de OUTRA lei (8.666, 10.520, CF/88...) na mesma janela. */
-const OUTRA_LEI_RE = /8\.?666|10\.?520|12\.?462|13\.?303|9\.?784|constitui[çc][ãa]o|CF\/88/i;
-
-const WINDOW = 250;
-
-interface Citation { article: string; nearLei14133: boolean; nearOutraLei: boolean; }
-
-function extractCitations(text: string): Citation[] {
-  const out: Citation[] = [];
-  if (!text) return out;
-  ART_RE.lastIndex = 0;
-  let m: RegExpExecArray | null;
-  while ((m = ART_RE.exec(text)) !== null) {
-    const num = m[2] ? `${m[1]}-${m[2]}` : m[1];
-    if (!VALID_ARTICLES.has(num)) continue; // descarta artigo inexistente na Lei
-    const from = Math.max(0, m.index - WINDOW);
-    const win = text.slice(from, m.index + m[0].length + WINDOW);
-    out.push({
-      article: num,
-      nearLei14133: LEI_14133_RE.test(win),
-      nearOutraLei: OUTRA_LEI_RE.test(win),
-    });
-  }
-  return out;
-}
-
-/** Um doc "cita" o artigo se há citação do número perto de "14.133". */
-function citesArticle(text: string | null, article: string): { cites: boolean; mentions: number; ambiguous: boolean } {
-  if (!text) return { cites: false, mentions: 0, ambiguous: false };
-  const cits = extractCitations(text).filter((c) => c.article === article);
-  const strong = cits.filter((c) => c.nearLei14133);
-  const ambiguous = strong.length === 0 && cits.some((c) => !c.nearOutraLei);
-  return { cites: strong.length > 0, mentions: strong.length, ambiguous };
-}
+// A extração de citação usa o extrator compartilhado (lib/lei-14133/
+// citation-extractor.ts) — a mesma lógica do write-path (backfill/análise),
+// incl. `boundToOtherNorm`. Antes havia aqui uma cópia inline que divergiu e
+// virou auditor cego; ver docs/audits/2026-07-15-*.
 
 // ─────────────────────────────────────────────────────────────────────────────
 // A0.1 — Volume e contadores
