@@ -41,6 +41,11 @@ interface EnrichedDoc {
    * Atos normativos são sempre `true`: a relação "regulamenta" é curada.
    */
   citesArticle: boolean;
+  /**
+   * O artigo foi RAZÃO DE DECIDIR no voto do acórdão (`leiArticlesDebated`, via
+   * inteiro teor). Só acórdãos têm; é o tier mais forte da jurisprudência.
+   */
+  debatedInVoto: boolean;
 }
 
 const CATEGORY_DISPLAY: Record<string, string> = {
@@ -177,10 +182,16 @@ export async function GET(
     // o `isPublic=false` aqui marca registro incompleto/de teste, não conteúdo premium.
     const isAdminUser = authResult.valid && authResult.user?.role === 'admin';
 
-    // Busca todos os Documents que linkam este artigo
+    // Busca Documents vinculados por tema (leiArticlesArr) OU debatidos no voto
+    // (leiArticlesDebated). O segundo NÃO é subconjunto do primeiro — a IA
+    // sub-vincula regra concreta —, então sem o OR os acórdãos debatidos-mas-
+    // não-vinculados (64%) não chegariam à página.
     const documents = await prisma.document.findMany({
       where: {
-        leiArticlesArr: { isEmpty: false },
+        OR: [
+          { leiArticlesArr: { isEmpty: false } },
+          { leiArticlesDebated: { isEmpty: false } },
+        ],
         // `lei-artigo` é o texto da própria Lei indexado para busca, não documento.
         category: { notIn: [...INTERNAL_ONLY_CATEGORIES] },
         ...(!isAdminUser && { isPublic: true }),
@@ -196,6 +207,7 @@ export async function GET(
         notesImportance: true,
         leiArticlesArr: true,
         leiArticlesCited: true,
+        leiArticlesDebated: true,
       },
     });
 
@@ -223,7 +235,9 @@ export async function GET(
 
     for (const doc of documents) {
       const articles = getLeiArticles(doc);
-      if (!articles.map(String).includes(numeroStr)) continue;
+      const debatedInVoto = doc.leiArticlesDebated.includes(numeroStr);
+      // Entra se vinculado por tema OU debatido no voto (fonte própria).
+      if (!articles.map(String).includes(numeroStr) && !debatedInVoto) continue;
 
       const baseScore = DOCUMENT_CATEGORY_SCORE[doc.category || ''] ?? 10;
       const score =
@@ -243,7 +257,9 @@ export async function GET(
         leiArticlesCount: articles.length,
         score,
         highlightReason: '',
-        citesArticle: doc.leiArticlesCited.includes(numeroStr),
+        // Debatido no voto é a forma mais forte de citar — não cai em "por tema".
+        citesArticle: doc.leiArticlesCited.includes(numeroStr) || debatedInVoto,
+        debatedInVoto,
       };
       item.highlightReason = buildHighlightReason(item);
       enriched.push(item);
@@ -278,6 +294,7 @@ export async function GET(
         highlightReason: '',
         // A relação ato↔artigo ("regulamenta") é curada, não inferida por tema.
         citesArticle: true,
+        debatedInVoto: false, // "debatido no voto" é sinal de acórdão, não de ato
       };
       item.highlightReason = buildHighlightReason(item);
       enriched.push(item);
@@ -285,9 +302,17 @@ export async function GET(
 
     enriched.sort((a, b) => b.score - a.score);
 
+    // Tier "debatido no voto" (razão de decidir) — jurisprudência aplicada, o
+    // sinal mais forte. Fica acima de tudo e sai dos accordions/destaques para
+    // não duplicar.
+    const debatedInVoto = enriched.filter((d) => d.debatedInVoto);
+
     const HIGHLIGHTS_COUNT = 5;
-    // Destaque só entre quem cita: é o que sustenta a promessa da vitrine.
-    const highlights = enriched.filter((d) => d.citesArticle).slice(0, HIGHLIGHTS_COUNT);
+    // Destaque só entre quem cita e não é debatido (esse tem tier próprio): é o
+    // que sustenta a promessa da vitrine de regulamentação.
+    const highlights = enriched
+      .filter((d) => d.citesArticle && !d.debatedInVoto)
+      .slice(0, HIGHLIGHTS_COUNT);
 
     /**
      * Separa "cita este artigo" de "relacionado por tema".
@@ -305,6 +330,7 @@ export async function GET(
     let totalCategorized = 0;
     for (const doc of enriched) {
       if (doc.category === 'enunciados') continue; // seção dedicada na página
+      if (doc.debatedInVoto) continue; // já exibido no tier próprio, não duplica
       if (!doc.citesArticle) {
         relatedByTheme.push(doc);
         continue;
@@ -328,10 +354,12 @@ export async function GET(
 
     return NextResponse.json({
       articleNumber: numeroStr,
-      total: totalCategorized, // só os que CITAM (exclui enunciados, que têm seção dedicada)
+      total: totalCategorized, // só os que CITAM (exclui enunciados e debatidos, que têm seção dedicada)
       totalAll: enriched.length,
       totalCited: enriched.filter((d) => d.citesArticle).length,
+      totalDebated: debatedInVoto.length,
       totalRelated: relatedByTheme.length,
+      debatedInVoto,
       highlights,
       byCategory: orderedByCategory,
       relatedByTheme,
