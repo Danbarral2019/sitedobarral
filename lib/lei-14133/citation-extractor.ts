@@ -47,6 +47,28 @@ const LEI_14133_RE = /14\.?133/;
 /** Outra lei citada na mesma janela — sinal de que o artigo não é da 14.133. */
 const OUTRA_LEI_RE = /8\.?666|10\.?520|12\.?462|13\.?303|9\.?784|14\.?600|lei complementar|constitui[çc][ãa]o|CF\/88/i;
 
+/**
+ * Ligação imediata do artigo a OUTRA norma: "art. 103, § 1º, da Resolução-TCU
+ * 259", "art. 169 do Regimento Interno", "art. 30 da Lei 8.666". Ancorada logo
+ * após o número (pulando §/inciso/caput/alínea), exige "d(a|o)(s) ‹norma›" e só
+ * dispara quando a norma é explicitamente outra — "da Lei 14.133" NÃO casa.
+ *
+ * Por que existe: `nearLei14133` é por proximidade (janela de ±250). Quando um
+ * artigo de outra norma aparece ao lado de uma citação legítima da 14.133, a
+ * proximidade sozinha o carimba como 14.133 (medido: 72 acórdãos, 2026-07-17).
+ * A amarração imediata é o sinal correto e vence a proximidade.
+ */
+const BIND_OUTRA_NORMA = new RegExp(
+  '^[ºo°]?' +
+    '(?:[\\s,]*(?:§|par[áa]grafo|inc(?:iso)?\\.?|caput|al[íi]nea|item)[^,.;\\n]{0,20})*' +
+    '[\\s,]*d[ao]s?\\s+' +
+    '(?:resolu[çc][ãa]o|regimento|decreto|portaria|instru[çc][ãa]o\\s+normativa|' +
+    'orienta[çc][ãa]o\\s+normativa|lei\\s+complementar|constitui[çc][ãa]o|s[úu]mula|' +
+    'medida\\s+provis[óo]ria|emenda\\s+constitucional|' +
+    'lei\\s+n?[º°.\\s]*(?:8\\.?666|10\\.?520|12\\.?462|13\\.?303|9\\.?784|14\\.?600|4\\.?320|11\\.?079|13\\.?709))',
+  'i'
+);
+
 /** Janela de contexto, em caracteres, para cada lado da citação. */
 const WINDOW = 250;
 
@@ -57,6 +79,11 @@ export interface Citation {
   nearLei14133: boolean;
   /** Há menção a OUTRA lei na janela ao redor? */
   nearOutraLei: boolean;
+  /**
+   * O artigo está amarrado logo depois a OUTRA norma ("art. 103 da Resolução")?
+   * Se sim, não é citação da 14.133, por mais que a lei apareça na janela.
+   */
+  boundToOtherNorm: boolean;
   /** Posição da citação no texto — útil para destacar o trecho na UI. */
   index: number;
 }
@@ -79,10 +106,13 @@ export function extractCitations(text: string): Citation[] {
     if (!VALID_ARTICLES.has(article)) return;
     const from = Math.max(0, index - WINDOW);
     const win = text.slice(from, index + matchLen + WINDOW);
+    // Amarração imediata: o que vem logo após o número decide a norma.
+    const after = text.slice(index + matchLen, index + matchLen + 60);
     out.push({
       article,
       nearLei14133: LEI_14133_RE.test(win),
       nearOutraLei: OUTRA_LEI_RE.test(win),
+      boundToOtherNorm: BIND_OUTRA_NORMA.test(after),
       index,
     });
   };
@@ -124,8 +154,11 @@ export function citesArticle(text: string | null | undefined, article: string): 
   if (!text) return { cites: false, mentions: 0, ambiguous: false };
 
   const cits = extractCitations(text).filter((c) => c.article === article);
-  const fortes = cits.filter((c) => c.nearLei14133);
-  const ambiguous = fortes.length === 0 && cits.some((c) => !c.nearOutraLei);
+  // Uma ocorrência amarrada a outra norma nunca conta — nem como citação forte,
+  // nem como suporte à ambiguidade.
+  const fortes = cits.filter((c) => c.nearLei14133 && !c.boundToOtherNorm);
+  const ambiguous =
+    fortes.length === 0 && cits.some((c) => !c.nearOutraLei && !c.boundToOtherNorm);
 
   return { cites: fortes.length > 0, mentions: fortes.length, ambiguous };
 }

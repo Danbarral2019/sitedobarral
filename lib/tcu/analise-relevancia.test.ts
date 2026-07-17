@@ -45,6 +45,22 @@ describe('analisarAcordao', () => {
     expect(a.artigosCitados['15'].voto).toBe(1);
   });
 
+  it('não conta artigo amarrado a outra norma, mesmo com a 14.133 por perto', () => {
+    // Caso real (Resolução-TCU 259): o art. 103 é da Resolução, e a 14.133 ao
+    // lado vem do art. 170 — a citação legítima é preservada, a outra descartada.
+    const t = [
+      'RELATÓRIO',
+      'A parte alega vício no certame.',
+      'VOTO',
+      'Com fundamento no art. 103, § 1º, da Resolução-TCU 259/2014 e no art. 170 da Lei 14.133/2021, conheço.',
+      'ACÓRDÃO Nº 5/2026 – TCU – Plenário',
+      'ACORDAM os Ministros.',
+    ].join('\n');
+    const x = analisarAcordao(t, ['103', '170']);
+    expect(x.artigosCitados['103']).toBeUndefined();
+    expect(x.artigosCitados['170'].voto).toBe(1);
+  });
+
   it('só analisa termos dos artigos vinculados', () => {
     expect(Object.keys(a.termos)).toEqual(['5']);
   });
@@ -86,6 +102,33 @@ describe('artigosDebatidos', () => {
       'A parte alega celeridade, celeridade e mais celeridade.',
       'VOTO', 'Rejeito por outros motivos.', 'ACÓRDÃO', 'ACORDAM.'].join('\n');
     expect(artigosDebatidos(analisarAcordao(t, ['5']))).toEqual([]);
+  });
+
+  // Sinal do voto para artigos de REGRA CONCRETA (confirmado em art. 59 e 67,
+  // 20/20): citado no voto = razão de decidir. Fonte própria, independente do
+  // vínculo temático da IA.
+  it('artigo concreto citado no VOTO entra — mesmo sem a IA tê-lo vinculado', () => {
+    const t = ['RELATÓRIO', 'A parte alega vício no certame.',
+      'VOTO', 'Aplico o art. 59 da Lei 14.133/2021 para desclassificar a proposta.',
+      'ACÓRDÃO Nº 9/2026 – TCU – Plenário', 'ACORDAM os Ministros.'].join('\n');
+    // vinculados VAZIO: a IA não linkou o art. 59, mas o voto o aplica.
+    expect(artigosDebatidos(analisarAcordao(t, []))).toContain('59');
+  });
+
+  it('artigo concreto citado só no RELATÓRIO não é debatido', () => {
+    const t = ['RELATÓRIO', 'A parte invoca o art. 59 da Lei 14.133/2021.',
+      'VOTO', 'Rejeito a alegação por outros fundamentos.',
+      'ACÓRDÃO Nº 9/2026 – TCU – Plenário', 'ACORDAM.'].join('\n');
+    expect(artigosDebatidos(analisarAcordao(t, []))).not.toContain('59');
+  });
+
+  it('art. 5º permanece SÓ por termos — citação nua do número no voto não basta', () => {
+    // Decisão do Daniel: o limiar do art. 5º está congelado; ele não entra pela
+    // via concreta (senão o princípio-adorno voltaria pela porta dos fundos).
+    const t = ['RELATÓRIO', 'nada',
+      'VOTO', 'Menciono o art. 5º da Lei 14.133 sem nomear qualquer princípio.',
+      'ACÓRDÃO Nº 1/2026', 'ACORDAM.'].join('\n');
+    expect(artigosDebatidos(analisarAcordao(t, ['5']))).not.toContain('5');
   });
 });
 

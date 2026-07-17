@@ -26,8 +26,20 @@ import { extractCitations } from '../lei-14133/citation-extractor';
  * "VOTO") dentro do relatório; pegar o primeiro rotulava trecho do relatório
  * como voto e inflava `forte.voto`. Afetava 14 dos 1.685 acórdãos. Reprocessar
  * a partir do texto guardado (sem re-baixar) via scripts/reanalyze-tcu.ts.
+ *
+ * v4 (17/07): `artigosCitados` passou a descartar artigos amarrados a outra
+ * norma ("art. 103 da Resolução-TCU 259"), que a proximidade da 14.133 na
+ * janela carimbava indevidamente. Removeu 444 pares (art,seção) em 190 dos
+ * 1.685 acórdãos, 0 adicionados — art. 103 (Resolução 259), 37 (CF), 43/50
+ * (Lei 8.666/9.784) à frente. Ver lib/lei-14133/citation-extractor.ts.
+ *
+ * v5 (17/07): sinal do voto para regra concreta. `artigosDebatidos` passou a
+ * marcar "debatido" todo artigo NÃO-por-termos citado no voto (razão de
+ * decidir), independente do vínculo da IA. `leiArticlesDebated` deixou de ser
+ * subconjunto de `leiArticlesArr`. Só a lista derivada muda; o JSON de
+ * contagens é o mesmo do v4.
  */
-export const ANALISE_VERSAO = 3;
+export const ANALISE_VERSAO = 5;
 
 /**
  * Limiar provisório. Calibrado em UM acórdão (1135/2026) no spike de 15/07:
@@ -88,16 +100,17 @@ function contarPorSecao(texto: string, re: RegExp, secoes: Secoes | null): Conta
 }
 
 /**
- * ⚠️ `artigosVinculados` é um FILTRO, não uma varredura independente: só os
- * termos dos artigos que já estão em `artigosVinculados` (no backfill,
- * `d.leiArticlesArr` — atribuído pela IA) entram em `termos`/`artigosDebatidos`.
- * Um acórdão que debata economicidade por páginas mas que a IA nunca marcou
- * com o art. 5º é invisível para esta análise. Intencional (o caso de uso é
- * triar os documentos que já reivindicam o artigo), mas quem consome
- * `leiArticlesDebated` precisa saber que a hierarquia
- * `leiArticlesDebated > leiArticlesCited > leiArticlesArr` (ver
- * prisma/schema.prisma) não é independente: `leiArticlesDebated` é sempre
- * um subconjunto de `leiArticlesArr`, nunca maior.
+ * ⚠️ `artigosVinculados` filtra APENAS os `termos` (a via do art. 5º): só os
+ * termos dos artigos já em `artigosVinculados` (no backfill, `d.leiArticlesArr`
+ * — atribuído pela IA) entram em `termos`. Um acórdão que debata economicidade
+ * por páginas mas que a IA nunca marcou com o art. 5º é invisível por essa via.
+ *
+ * `artigosCitados` NÃO é filtrado por `artigosVinculados` — é a citação textual
+ * lida do inteiro teor. Por isso, desde o v5, `leiArticlesDebated` (que inclui
+ * artigo concreto citado no voto) NÃO é mais subconjunto de `leiArticlesArr`:
+ * a IA sub-vincula regra concreta, e a citação no voto é prova própria. A
+ * hierarquia `debatido > citado > vinculado` de prisma/schema.prisma vale para
+ * a via de TERMOS (art. 5º), não para a via de citação no voto.
  */
 export function analisarAcordao(
   texto: string,
@@ -108,7 +121,9 @@ export function analisarAcordao(
 
   const artigosCitados: Record<string, ContagemSecao> = {};
   for (const c of extractCitations(texto)) {
-    if (!c.nearLei14133) continue;
+    // Exige proximidade da 14.133 e descarta o que está amarrado a outra norma
+    // ("art. 103 da Resolução-TCU 259"), que a proximidade sozinha carimbaria.
+    if (!c.nearLei14133 || c.boundToOtherNorm) continue;
     const s = secaoDe(secoes, c.index);
     if (!s) continue;
     artigosCitados[c.article] ??= {};
@@ -139,16 +154,37 @@ export function analisarAcordao(
   };
 }
 
-/** Aplica o limiar. Derivado — recomputável a partir do JSON, sem rede. */
+/**
+ * Aplica o limiar. Derivado — recomputável a partir do JSON, sem rede.
+ *
+ * Dois sinais, por natureza do artigo:
+ *  - Artigos com lista de termos (só o art. 5º): debatido = princípio NOMEADO
+ *    no voto (limiar `LIMIAR_DEBATIDO`). Congelado — o art. 5º é o caso difícil
+ *    (princípio vira adorno retórico), calibrado e mantido por decisão do Daniel.
+ *  - Artigos de regra concreta (todos os demais): debatido = CITADO NO VOTO
+ *    (razão de decidir). Confirmado em golden dos arts. 59 e 67 (20/20). É fonte
+ *    própria — NÃO filtra por `leiArticlesArr`: a citação no voto é prova
+ *    objetiva, e a IA sub-vincula regra concreta (perde 64% dessas citações).
+ *
+ * ⚠️ Por isso `leiArticlesDebated` já NÃO é subconjunto de `leiArticlesArr`
+ * (ver nota em analisarAcordao e prisma/schema.prisma).
+ */
 export function artigosDebatidos(a: TcuAnalise): string[] {
-  const out: string[] = [];
+  const out = new Set<string>();
+
   for (const [art, termos] of Object.entries(a.termos)) {
     const debatido = Object.values(termos).some(
       (t) =>
         (t.forte.voto ?? 0) >= LIMIAR_DEBATIDO.forteVoto ||
         (t.fraco.voto ?? 0) >= LIMIAR_DEBATIDO.fracoVoto
     );
-    if (debatido) out.push(art);
+    if (debatido) out.add(art);
   }
-  return out.sort();
+
+  for (const [art, secs] of Object.entries(a.artigosCitados)) {
+    if (TERMOS_POR_ARTIGO[art]) continue; // artigo por-termos tratado acima
+    if ((secs.voto ?? 0) >= 1) out.add(art);
+  }
+
+  return [...out].sort();
 }
