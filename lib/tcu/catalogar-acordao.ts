@@ -13,7 +13,10 @@
  * Neon caiu) PROPAGA de propósito, sem incrementar tentativa: um soluço de
  * rede é transitório e não deve gastar uma tentativa nem empurrar um
  * acórdão bom rumo ao limite de 3. O chamador trata (o backfill envolve em
- * comRetryDB; o cron deixa o run terminar e retoma no próximo).
+ * comRetryDB; o cron captura a exceção por item — resiliente a um blip
+ * passageiro —, conta como falha na telemetria do run e segue para o
+ * próximo acórdão; como a tentativa não foi incrementada, o item continua
+ * na fila e é retentado no próximo run).
  *
  * A política do chamador (retry de conexão, delay entre downloads, log) fica
  * FORA daqui — o backfill roda em loop shell, o cron tem lote e maxDuration.
