@@ -32,6 +32,7 @@ Fase 3 — Retrieval (usa o grafo na busca/IA, com eval)
 - **Ponderação por seção = "tudo conta, voto pesa mais".** Toda citação vira uma aresta, mas cada aresta guarda **em que seção caiu** (voto / relatório / dispositivo) e a autoridade pondera com peso maior para as do voto. Nada é descartado. O **peso exato é calibrado depois**, olhando a distribuição que o probe reporta (mesmo método que validou a razão de decidir — ver [[feedback-formato-golden-julgamento]]).
 - **Fase 0 não persiste nada.** Só lê `tcuTextoCompleto` e produz um relatório. Sem migração, sem escrita no banco, sem rede (não re-baixa RTF).
 - **Decomposição por sub-spec.** Fase 0 é autocontida e é um *gate*. Persistência (Json em `tcuAnalise` vs. model de arestas), tratamento de nós externos e superfícies de UI são decisões da Fase 1+, informadas pelos números — não desenhadas no escuro agora.
+- **Fluxo contínuo é requisito de primeira classe (não opcional).** A extração de citações tem de funcionar tanto para o **passivo** (acervo já existente, catalogado ou não) quanto para as **futuras inclusões** de acórdãos — a base não pode voltar a crescer descatalogada, do mesmo modo que fechamos o fluxo no inteiro teor do TCU (ver [[rede-precedentes-tcu-ideia]] item 2 e a catalogação contínua). Isso é responsabilidade da **Fase 1** (a Fase 0 não persiste), mas condiciona uma decisão tomada **já na Fase 0**: o extrator é **um único módulo** (`lib/tcu/acordao-citation-extractor.ts`), usado no probe e depois reaproveitado no núcleo — o que é provado no probe é exatamente o que roda em produção, sem divergência probe↔prod.
 
 ## 3. Infraestrutura existente reaproveitada (mapa verificado no código)
 
@@ -56,6 +57,7 @@ Fase 3 — Retrieval (usa o grafo na busca/IA, com eval)
 - Retorna `Citation[]` com `{ numeroRaw, numero, ano, colegiado?, index }` (o `index` é o offset no texto, para o `secaoDe`).
 - **Testes** (`acordao-citation-extractor.test.ts`) com um corpus de formatos reais + casos que NÃO devem casar (ex.: "acórdão recorrido", "o presente acórdão", datas soltas).
 - **Guarda contra auto-citação:** descartar citações cujo `(numero, ano[, colegiado])` = o próprio acórdão sendo analisado.
+- **Módulo único, reaproveitado na Fase 1.** Este é o mesmo módulo que o núcleo `lib/tcu/catalogar-acordao.ts` chamará em produção (ver §5, Fase 1). Ele nasce puro (recebe texto, devolve `Citation[]`, sem acesso a banco/rede) justamente para servir aos dois consumidores — probe e pipeline — sem divergir. **O que o probe validar é o que rodará no fluxo contínuo.**
 
 **b) Script do probe** — `scripts/probe-precedentes-tcu.ts` (molde `reanalyze-tcu.ts`, sem escrita).
 - Lê os `Document` com `category='acordao'` e `tcuTextoCompleto not null` (~1.685).
@@ -84,7 +86,14 @@ Se GO, a Fase 1 abre com seu próprio spec (modelo de dados: nós externos, ares
 
 ## 5. Roadmap das fases seguintes (esboço — NÃO neste spec)
 
-- **Fase 1 — Autoridade.** Persistir o grafo (decisão Json-em-`tcuAnalise` vs. model relacional de arestas fica para o spec da fase, conforme o probe). Contagem de entrada ponderada por seção. Integrar a extração no núcleo `lib/tcu/catalogar-acordao.ts` + reprocessar via `reanalyze-tcu.ts` bumpando `ANALISE_VERSAO`. Tratar nós externos (acórdãos citados que não temos) — o probe diz se valem a pena.
+- **Fase 1 — Autoridade + fluxo contínuo.** Persistir o grafo (decisão Json-em-`tcuAnalise` vs. model relacional de arestas fica para o spec da fase, conforme o probe). Contagem de entrada ponderada por seção. Tratar nós externos (acórdãos citados que não temos) — o probe diz se valem a pena.
+
+  **Fluxo contínuo (obrigatório — espelha a catalogação contínua do inteiro teor):** a extração entra **no núcleo compartilhado** `lib/tcu/catalogar-acordao.ts`, que já é o caminho único de cron e backfill. Um só ponto de escrita cobre os três casos:
+  - **Passivo já catalogado** (`tcuAnalise` numa versão antiga): bumpar `ANALISE_VERSAO` e rodar `scripts/reanalyze-tcu.ts` uma vez — reprocessa do `tcuTextoCompleto` já guardado, sem rede.
+  - **Passivo ainda não catalogado** (`tcuAnalise IS NULL`): já é a fila do cron `catalog-tcu-inteiro-teor`; com a extração no núcleo, sai catalogado **com** as citações na primeira passada.
+  - **Futuras inclusões:** o cron `sync-tcu-acordaos` cria o `Document`; o `catalog-tcu-inteiro-teor` cataloga — e agora extrai as citações no mesmo passo. Nada entra descatalogado.
+
+  ⚠️ **Armadilha conhecida (já anotada):** o cron filtra `tcuAnalise IS NULL`; ao subir a `ANALISE_VERSAO`, os acórdãos já catalogados em versão anterior **não** são repescados pelo cron — **só o backfill reprocessa por versão**. Por isso o `reanalyze-tcu.ts` do passivo é passo obrigatório do rollout, não opcional. Cobrir com os auditores nos dois sentidos (ver [[feedback-auditores-cegos]]).
 - **Fase 2 — Navegação/curadoria.** Superfície para o Daniel ver a cadeia de precedentes (por acórdão e/ou por artigo).
 - **Fase 3 — Retrieval.** Usar o grafo na busca/IA, provado por `eval:run`/`eval:synthesis` (a trilha de retrieval está "fechada com evidência" — só reabre com ganho medido).
 
