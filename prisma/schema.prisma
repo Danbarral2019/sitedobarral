@@ -72,6 +72,13 @@ model Document {
   /// extração que possa recuperar os afetados reseta o contador deles.
   tcuAnaliseTentativas Int @default(0)
 
+  /// Versão do algoritmo de extração de precedentes que gerou as arestas
+  /// AcordaoCitacao deste documento (origem). NULL = ainda não processado.
+  precedentesVersao Int?
+  /// Arestas da rede de precedentes em que este documento é a ORIGEM
+  /// (acórdãos que ele cita).
+  citacoesDeAcordao AcordaoCitacao[] @relation("CitacoesDeAcordao")
+
   content         String?   @db.Text // Conteúdo/trechos relevantes do documento para busca textual
   size            Int?
   onNumber        Int? // Número da ON (para ordenação numérica de Orientações Normativas)
@@ -1483,6 +1490,25 @@ model TcuHighlight {
   @@index([status])
   @@index([status, createdAt])
   @@index([documentId])
+}
+
+/// Aresta da rede de precedentes: um acórdão (origem) cita outro (alvo).
+/// O alvo é identificado por número/ano — pode não existir como Document
+/// (nó externo). Uma linha por par (origem, alvo), deduplicada.
+model AcordaoCitacao {
+  id            String   @id @default(cuid())
+  origemId      String
+  origem        Document @relation("CitacoesDeAcordao", fields: [origemId], references: [id], onDelete: Cascade)
+  numeroAlvo    Int
+  anoAlvo       Int
+  colegiadoAlvo String?
+  noVoto        Boolean  @default(false)
+  ocorrencias   Int      @default(1)
+  criadoEm      DateTime @default(now())
+
+  @@unique([origemId, numeroAlvo, anoAlvo])
+  @@index([numeroAlvo, anoAlvo])
+  @@index([origemId])
 }
 
 // Assinaturas (Stripe Checkout + Subscriptions)
