@@ -50,4 +50,20 @@ describe('extractAcordaoCitations', () => {
   it('descarta ano implausível', () => {
     expect(extractAcordaoCitations('Acórdão 1/0007 sem sentido')).toHaveLength(0);
   });
+
+  it('reconhece "Acórdão TCU 1234/2020" (TCU antes do número)', () => {
+    const [c] = extractAcordaoCitations('conforme o Acórdão TCU 1234/2020, de relatoria...');
+    expect(c).toMatchObject({ numero: 1234, ano: 2020 });
+  });
+
+  it('reconhece "Acórdão TCU nº 4.851/2017-Plenário"', () => {
+    const [c] = extractAcordaoCitations('vide Acórdão TCU nº 4.851/2017-Plenário');
+    expect(c).toMatchObject({ numero: 4851, ano: 2017, colegiado: 'Plenário' });
+  });
+
+  it('continua reconhecendo "TCU" depois do número (não conta duas vezes)', () => {
+    const cs = extractAcordaoCitations('o Acórdão 5.429/2025-TCU-1ª Câmara decidiu');
+    expect(cs).toHaveLength(1);
+    expect(cs[0]).toMatchObject({ numero: 5429, ano: 2025, colegiado: 'Primeira Câmara' });
+  });
 });

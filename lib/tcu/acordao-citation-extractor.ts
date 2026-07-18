@@ -31,7 +31,7 @@ const COLEG =
  * (sem número) não casam.
  */
 const AC_RE = new RegExp(
-  '\\b(?:ac[óo]rd[ãa]os?|ac\\.?)\\s+(?:n[.ºo°]*\\s*)?(\\d[\\d.]*)\\s*\\/\\s*(\\d{4})' + COLEG,
+  '\\b(?:ac[óo]rd[ãa]os?|ac\\.?)\\s+(?:tcu\\s+)?(?:n[.ºo°]*\\s*)?(\\d[\\d.]*)\\s*\\/\\s*(\\d{4})' + COLEG,
   'gi'
 );
 
