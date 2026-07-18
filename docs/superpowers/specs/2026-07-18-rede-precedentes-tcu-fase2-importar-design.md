@@ -31,7 +31,10 @@ A rota BFF antiga do código (`relevar-busca-bff`) está **quebrada** (retorna a
 
 Restam dois pontos técnicos a fechar com evidência (R$0, 2-3 casos da wishlist), no molde probe-first que já usamos:
 
-1. **URL do inteiro teor.** Capturar como o RTF é obtido a partir do KEY/página do documento — se resolve para a mesma URL SAGAS (`SvlVisualizarRelVotoAcRtf?...`) que o nosso `catalogarAcordao` já consome (então reusamos o pipeline inteiro sem mudança), ou se é outro formato/endpoint. Se o download for o RTF SAGAS, o inteiro teor é grátis via `rtf-to-text` + `seccionar` existentes.
+1. **Inteiro teor — dois caminhos (probe parcial 18/07).** A página do documento **já renderiza o inteiro teor completo** (medido ~390k chars, com Relatório/Voto/Acórdão detectados no DOM), então o texto integral está garantido por ao menos um caminho. Falta escolher o mais leve:
+   - **(a) RTF via download** — preferível: capturar a URL do botão "Download" (a SPA a constrói via JS; não é um `<a href>` simples — capturar com inspeção focada ou interceptando a chamada no clique, no início da implementação). Se resolver para a URL SAGAS (`SvlVisualizarRelVotoAcRtf?...`) que o nosso `catalogarAcordao` já consome, reusamos o pipeline inteiro (`rtf-to-text` + `seccionar`) sem mudança — este é o alvo.
+   - **(b) texto da página renderizada** — fallback garantido: extrair o `innerText` da página do documento (exige renderizar a SPA — browser/headless, mais pesado). Usar só se (a) não resolver.
+   *O que ficou pendente do probe: a URL exata do RTF (o breadcrumb não navegou client-side para reinstrumentar; a SPA constrói o download via JS). Não é bloqueio — a Fase 2.0 fecha isso com uma inspeção do clique de Download.*
 2. **Desambiguação.** O mesmo número retorna **várias entidades** (ex.: `2622/2013 ATA 37 - Plenário`, `ATA 15 - Segunda Câmara`, `Acórdão de Relação ...`). Validar o critério de escolha (ver §5) contra casos reais.
 
 Só depois desse probe (GO) se constrói o importador. Se o inteiro teor não for acessível de forma confiável, cai-se para o **nível ementa** (§4, ainda melhora a busca).
