@@ -1,0 +1,485 @@
+{
+  "geradoEm": "2026-07-18",
+  "totalAcordaosAnalisados": 1685,
+  "densidade": {
+    "acordaosComCitacao": 1510,
+    "totalCitacoes": 40107,
+    "media": 23.802373887240357,
+    "mediana": 15
+  },
+  "porSecao": {
+    "relatorio": 25797,
+    "voto": 9208,
+    "acordao": 1619,
+    "semSecao": 3483
+  },
+  "matching": {
+    "internas": 3412,
+    "externas": 36695,
+    "taxa": 0.08507243124641584
+  },
+  "topLeadingCases": [
+    {
+      "chave": "1441/2016",
+      "alvoId": null,
+      "citadoPor": 185,
+      "noVoto": 80
+    },
+    {
+      "chave": "534/2023",
+      "alvoId": null,
+      "citadoPor": 157,
+      "noVoto": 11
+    },
+    {
+      "chave": "2391/2018",
+      "alvoId": null,
+      "citadoPor": 155,
+      "noVoto": 11
+    },
+    {
+      "chave": "1689/2019",
+      "alvoId": null,
+      "citadoPor": 122,
+      "noVoto": 6
+    },
+    {
+      "chave": "2219/2023",
+      "alvoId": null,
+      "citadoPor": 121,
+      "noVoto": 2
+    },
+    {
+      "chave": "1009/2018",
+      "alvoId": null,
+      "citadoPor": 114,
+      "noVoto": 3
+    },
+    {
+      "chave": "2064/2011",
+      "alvoId": null,
+      "citadoPor": 112,
+      "noVoto": 0
+    },
+    {
+      "chave": "3648/2013",
+      "alvoId": null,
+      "citadoPor": 105,
+      "noVoto": 4
+    },
+    {
+      "chave": "1019/2008",
+      "alvoId": null,
+      "citadoPor": 105,
+      "noVoto": 3
+    },
+    {
+      "chave": "1526/2007",
+      "alvoId": null,
+      "citadoPor": 101,
+      "noVoto": 1
+    },
+    {
+      "chave": "2924/2018",
+      "alvoId": null,
+      "citadoPor": 100,
+      "noVoto": 7
+    },
+    {
+      "chave": "11762/2018",
+      "alvoId": null,
+      "citadoPor": 100,
+      "noVoto": 2
+    },
+    {
+      "chave": "2012/2022",
+      "alvoId": "5dc4a321-0abc-4d7e-8e86-6ee0f4b7ed45",
+      "citadoPor": 96,
+      "noVoto": 3
+    },
+    {
+      "chave": "1264/2019",
+      "alvoId": null,
+      "citadoPor": 89,
+      "noVoto": 2
+    },
+    {
+      "chave": "957/2019",
+      "alvoId": null,
+      "citadoPor": 85,
+      "noVoto": 3
+    },
+    {
+      "chave": "7936/2018",
+      "alvoId": null,
+      "citadoPor": 54,
+      "noVoto": 4
+    },
+    {
+      "chave": "2622/2013",
+      "alvoId": null,
+      "citadoPor": 45,
+      "noVoto": 21
+    },
+    {
+      "chave": "2285/2022",
+      "alvoId": null,
+      "citadoPor": 38,
+      "noVoto": 10
+    },
+    {
+      "chave": "4851/2017",
+      "alvoId": null,
+      "citadoPor": 37,
+      "noVoto": 0
+    },
+    {
+      "chave": "2643/2022",
+      "alvoId": "f48572a8-6626-42e1-8527-ec4efe245601",
+      "citadoPor": 31,
+      "noVoto": 4
+    },
+    {
+      "chave": "1211/2021",
+      "alvoId": "de26758e-2d96-4445-ab33-24c093eac167",
+      "citadoPor": 29,
+      "noVoto": 14
+    },
+    {
+      "chave": "1072/2017",
+      "alvoId": null,
+      "citadoPor": 29,
+      "noVoto": 8
+    },
+    {
+      "chave": "459/2022",
+      "alvoId": null,
+      "citadoPor": 26,
+      "noVoto": 16
+    },
+    {
+      "chave": "122/2021",
+      "alvoId": "30d3fac9-960b-4631-9bec-5adf027cb6b0",
+      "citadoPor": 26,
+      "noVoto": 14
+    },
+    {
+      "chave": "587/2011",
+      "alvoId": null,
+      "citadoPor": 24,
+      "noVoto": 6
+    },
+    {
+      "chave": "13732/2019",
+      "alvoId": null,
+      "citadoPor": 24,
+      "noVoto": 2
+    },
+    {
+      "chave": "1772/2017",
+      "alvoId": null,
+      "citadoPor": 23,
+      "noVoto": 0
+    },
+    {
+      "chave": "2860/2018",
+      "alvoId": null,
+      "citadoPor": 21,
+      "noVoto": 5
+    },
+    {
+      "chave": "243/2010",
+      "alvoId": null,
+      "citadoPor": 20,
+      "noVoto": 3
+    },
+    {
+      "chave": "2463/2019",
+      "alvoId": null,
+      "citadoPor": 19,
+      "noVoto": 0
+    }
+  ],
+  "amostra": [
+    {
+      "origem": "Acórdão TCU 1502/2026 - Plenário",
+      "raw": "ACÓRDÃO 663/2026-PLENÁRIO",
+      "secao": null,
+      "matched": false,
+      "trecho": "OBRE A CONFORMIDADE DA EXECUÇÃO DO PROGRAMA PÉ-DE-MEIA. INSPEÇÃO NO PROGRAMA JULGADA PELO ACÓRDÃO 663/2026-PLENÁRIO. ATENDIMENTO DA SOLICITAÇÃO. COMUNICAÇÃO À CFFC/CD. RELATÓRIO"
+    },
+    {
+      "origem": "Acórdão TCU 1502/2026 - Plenário",
+      "raw": "Acórdão 663/2026-TCU-Plenário",
+      "secao": "relatorio",
+      "matched": false,
+      "trecho": "l se propôs o sobrestamento destes autos até a conclusão daquela inspeção. 3. Sobreveio o Acórdão 663/2026-TCU-Plenário, proferido nos autos do TC 005.592/2025-9, relator Min. Benj"
+    },
+    {
+      "origem": "Acórdão TCU 1502/2026 - Plenário",
+      "raw": "Acórdão 297/2025-TCU-Plenário",
+      "secao": "relatorio",
+      "matched": false,
+      "trecho": "strumento de execução. 8. Como resultado dessa atuação, o Tribunal deliberou, por meio do Acórdão 297/2025-TCU-Plenário (relator Ministro Augusto Nardes), no sentido de permitir a"
+    },
+    {
+      "origem": "Acórdão TCU 1502/2026 - Plenário",
+      "raw": "Acórdão 1980/2025-TCU-Plenário",
+      "secao": "relatorio",
+      "matched": true,
+      "trecho": "m previamente informadas ao Congresso Nacional, no âmbito desta SCN, conforme item 9.3 do Acórdão 1980/2025-TCU-Plenário (relator Min. Jorge Oliveira). 9. Restava pendente o encami"
+    },
+    {
+      "origem": "Acórdão TCU 1502/2026 - Plenário",
+      "raw": "Acórdão 1980/2025-TCU-Plenário",
+      "secao": "relatorio",
+      "matched": true,
+      "trecho": "s falhas nos critérios de elegibilidade do programa, o que foi noticiado no item 9.2.2 do Acórdão 1980/2025-TCU-Plenário. 10. A inspeção mencionada foi apreciada por meio do Acórdã"
+    },
+    {
+      "origem": "Acórdão TCU 1502/2026 - Plenário",
+      "raw": "Acórdão 663/2026-TCU-Plenário",
+      "secao": "relatorio",
+      "matched": false,
+      "trecho": ".2 do Acórdão 1980/2025-TCU-Plenário. 10. A inspeção mencionada foi apreciada por meio do Acórdão 663/2026-TCU-Plenário (relator Min. Benjamin Zylmer), pemitindo o prosseguimento d"
+    },
+    {
+      "origem": "Acórdão TCU 1502/2026 - Plenário",
+      "raw": "Acórdão 663/2026-TCU-Plenário",
+      "secao": "relatorio",
+      "matched": false,
+      "trecho": "de validação e crítica dos dados informados pelas redes de ensino (itens 9.2.1 e 9.2.2 do Acórdão 663/2026-TCU-Plenário). 17. Em relação aos mecanismos de verificação de elegibilid"
+    },
+    {
+      "origem": "Acórdão TCU 1502/2026 - Plenário",
+      "raw": "Acórdão 663/2026-TCU-Plenário",
+      "secao": "relatorio",
+      "matched": false,
+      "trecho": "ssegurar a observância dos critérios de elegibilidade do programa (itens 9.2.3 e 9.2.4 do Acórdão 663/2026-TCU-Plenário). 19. Além disso, foi determinado que o MEC suspenda imediat"
+    },
+    {
+      "origem": "Acórdão TCU 1502/2026 - Plenário",
+      "raw": "Acórdão 663/2026-TCU-Plenário",
+      "secao": "relatorio",
+      "matched": false,
+      "trecho": "e tome as providências para corrigir e atualizar o Cadastro Único (itens 9.3.1 e 9.4.1 do Acórdão 663/2026-TCU-Plenário). 20. Para as vulnerabilidades na checagem de renda, foi det"
+    },
+    {
+      "origem": "Acórdão TCU 1502/2026 - Plenário",
+      "raw": "Acórdão 663/2026-TCU-Plenário",
+      "secao": "relatorio",
+      "matched": false,
+      "trecho": "ando os dados que servem de base para os programas sociais (itens 9.3.2, 9.3.3 e 9.4.2 do Acórdão 663/2026-TCU-Plenário). 21. Quanto a possíveis falhas nos filtros de famílias unip"
+    },
+    {
+      "origem": "Acórdão TCU 1502/2026 - Plenário",
+      "raw": "Acórdão 663/2026-TCU-Plenário",
+      "secao": "relatorio",
+      "matched": false,
+      "trecho": "s unipessoais que recebem o Bolsa Família e o Pé-de-Meia concomitantemente (item 9.3.4 do Acórdão 663/2026-TCU-Plenário). 22. Por fim, para os casos específicos apontados pela mídi"
+    },
+    {
+      "origem": "Acórdão TCU 1502/2026 - Plenário",
+      "raw": "Acórdão 663/2026-TCU-Plenário",
+      "secao": "relatorio",
+      "matched": false,
+      "trecho": "arcimento ao erário de benefícios sociais indevidamente recebidos (itens 9.3.5 e 9.4.3 do Acórdão 663/2026-TCU-Plenário). 23. Portanto, verifica-se que todos os questionamentos for"
+    },
+    {
+      "origem": "Acórdão TCU 1502/2026 - Plenário",
+      "raw": "Acórdão 663/2026-TCU-Plenário",
+      "secao": "relatorio",
+      "matched": false,
+      "trecho": "Ministério da Educação (MEC) e ao Ministério do Desenvolvimento Social (MDS) no âmbito do Acórdão 663/2026-TCU-Plenário, as quais serão monitoradas. Espera-se que o encaminhamento"
+    },
+    {
+      "origem": "Acórdão TCU 1502/2026 - Plenário",
+      "raw": "Acórdão 663/2026-TCU-Plenário",
+      "secao": "relatorio",
+      "matched": false,
+      "trecho": "mara dos Deputados, em atendimento à presente Solicitação do Congresso Nacional, cópia do Acórdão 663/2026-TCU-Plenário, acompanhado dos respectivos Relatório e Voto, que tratam da"
+    },
+    {
+      "origem": "Acórdão TCU 1502/2026 - Plenário",
+      "raw": "Acórdão 663/2026-TCU-Plenário",
+      "secao": "relatorio",
+      "matched": false,
+      "trecho": "ios e o quantitativo de matrículas no ensino médio; e as determinações e recomendações do Acórdão 663/2026-TCU-Plenário a respeito das discrepâncias pontuais identificadas e das po"
+    },
+    {
+      "origem": "Acórdão TCU 1502/2026 - Plenário",
+      "raw": "Acórdãos 61/2025",
+      "secao": "voto",
+      "matched": false,
+      "trecho": "iscais do Pé-de-Meia estavam em análise no TC 024.312/2024-0, no qual foram proferidos os Acórdãos 61/2025 e 297/2025, do Plenário, da relatoria do Ministro Augusto Nardes. Na últi"
+    },
+    {
+      "origem": "Acórdão TCU 1502/2026 - Plenário",
+      "raw": "e 297/2025",
+      "secao": "voto",
+      "matched": false,
+      "trecho": "Meia estavam em análise no TC 024.312/2024-0, no qual foram proferidos os Acórdãos 61/2025 e 297/2025, do Plenário, da relatoria do Ministro Augusto Nardes. Na última decisão, o Tr"
+    },
+    {
+      "origem": "Acórdão TCU 1502/2026 - Plenário",
+      "raw": "Acórdão 1.980/2025-Plenário",
+      "secao": "voto",
+      "matched": true,
+      "trecho": "iação do TC 005.592/2025-9. 6. Acolhendo a proposta da unidade especializada, por meio do Acórdão 1.980/2025-Plenário, esta SCN foi conhecida e considerada parcialmente atendida, c"
+    },
+    {
+      "origem": "Acórdão TCU 1502/2026 - Plenário",
+      "raw": "Acórdão 1.980/2025-Plenário",
+      "secao": "voto",
+      "matched": true,
+      "trecho": "por este Tribunal no bojo do TC 024.312/2024-0 já foram encaminhados à CFFC, por meio do Acórdão 1.980/2025-Plenário. 10. Com relação aos questionamentos da solicitante acerca da"
+    },
+    {
+      "origem": "Acórdão TCU 1502/2026 - Plenário",
+      "raw": "Acórdão 663/2026-Plenário",
+      "secao": "voto",
+      "matched": false,
+      "trecho": "validação e crítica dos dados informados pelas redes de ensino (subitens 9.2.1 e 9.2.2 do Acórdão 663/2026-Plenário). 13. Quanto ao processo de verificação de elegibilidade dos ben"
+    },
+    {
+      "origem": "Acórdão TCU 1502/2026 - Plenário",
+      "raw": "Acórdão 663/2026-Plenário",
+      "secao": "voto",
+      "matched": false,
+      "trecho": "siderada atendida integralmente, devendo ser informada à CFFC/CD, juntamente com cópia do Acórdão 663/2026-Plenário, que o Tribunal avaliou a consistência entre os dados escolares"
+    },
+    {
+      "origem": "Acórdão TCU 1502/2026 - Plenário",
+      "raw": "Acórdão 663/2026-Plenário",
+      "secao": "acordao",
+      "matched": false,
+      "trecho": "aminhar à Comissão de Fiscalização Financeira e Controle da Câmara dos Deputados cópia do Acórdão 663/2026-Plenário, acompanhado dos respectivos relatório e voto, que tratam da Ins"
+    },
+    {
+      "origem": "Acórdão TCU 1502/2026 - Plenário",
+      "raw": "Acórdão 663/2026-Plenário",
+      "secao": "acordao",
+      "matched": false,
+      "trecho": "tativo de matrículas no ensino médio; 9.2.2. as determinações e recomendações contidas no Acórdão 663/2026-Plenário, a respeito das discrepâncias pontuais identificadas e das possi"
+    },
+    {
+      "origem": "Acórdão TCU 1204/2024 - Proposta - Desclassi",
+      "raw": "Acórdão 2036/2022-TCU-Plenário",
+      "secao": "relatorio",
+      "matched": true,
+      "trecho": "(peça 4, p. 75) eram passíveis de saneamento através de diligências, conforme previsto no Acórdão 2036/2022-TCU-Plenário, Relator Ministro Bruno Dantas; b) em sede de recurso (peç"
+    },
+    {
+      "origem": "Acórdão TCU 1204/2024 - Proposta - Desclassi",
+      "raw": "Acórdão 36/2024-TCU-Plenário",
+      "secao": "relatorio",
+      "matched": false,
+      "trecho": "2023 até que o Tribunal deliberasse sobre o mérito da matéria foi referendada por meio do Acórdão 36/2024-TCU-Plenário (peça 35). EXAME TÉCNICO 9. Em 28/12/2023, foram encaminhados"
+    },
+    {
+      "origem": "Acórdão TCU 1204/2024 - Proposta - Desclassi",
+      "raw": "Acórdãos 2036/2022-TCU-Plenário",
+      "secao": "relatorio",
+      "matched": true,
+      "trecho": "o do formalismo moderado, aos itens 7.12 a 7.14 e 14.8 do edital do Convite 511/2023, aos Acórdãos 2036/2022-TCU-Plenário, 4063/2020-TCU-Plenário, 2272/2020-TCU-Plenário, 2096/2023"
+    },
+    {
+      "origem": "Acórdão TCU 1204/2024 - Proposta - Desclassi",
+      "raw": ", 4063/2020-TCU-Plenário",
+      "secao": "relatorio",
+      "matched": false,
+      "trecho": "tens 7.12 a 7.14 e 14.8 do edital do Convite 511/2023, aos Acórdãos 2036/2022-TCU-Plenário, 4063/2020-TCU-Plenário, 2272/2020-TCU-Plenário, 2096/2023-TCU-Plenário e 1211/2021-TCU-P"
+    },
+    {
+      "origem": "Acórdão TCU 1204/2024 - Proposta - Desclassi",
+      "raw": ", 2272/2020-TCU-Plenário",
+      "secao": "relatorio",
+      "matched": false,
+      "trecho": "do edital do Convite 511/2023, aos Acórdãos 2036/2022-TCU-Plenário, 4063/2020-TCU-Plenário, 2272/2020-TCU-Plenário, 2096/2023-TCU-Plenário e 1211/2021-TCU-Plenário e, ainda, ao obj"
+    },
+    {
+      "origem": "Acórdão TCU 1204/2024 - Proposta - Desclassi",
+      "raw": ", 2096/2023-TCU-Plenário",
+      "secao": "relatorio",
+      "matched": false,
+      "trecho": "/2023, aos Acórdãos 2036/2022-TCU-Plenário, 4063/2020-TCU-Plenário, 2272/2020-TCU-Plenário, 2096/2023-TCU-Plenário e 1211/2021-TCU-Plenário e, ainda, ao objetivo de seleção da prop"
+    },
+    {
+      "origem": "Acórdão TCU 1204/2024 - Proposta - Desclassi",
+      "raw": "e 1211/2021-TCU-Plenário",
+      "secao": "relatorio",
+      "matched": true,
+      "trecho": "/2022-TCU-Plenário, 4063/2020-TCU-Plenário, 2272/2020-TCU-Plenário, 2096/2023-TCU-Plenário e 1211/2021-TCU-Plenário e, ainda, ao objetivo de seleção da proposta mais vantajosa e ao"
+    },
+    {
+      "origem": "Acórdão TCU 1204/2024 - Proposta - Desclassi",
+      "raw": "Acórdãos 918/2014-TCU-Plenário",
+      "secao": "relatorio",
+      "matched": false,
+      "trecho": "as praxes essenciais à proteção das prerrogativas dos licitantes. 14. Nesse sentido, os Acórdãos 918/2014-TCU-Plenário, relator Ministro Aroldo Cedraz; 1.795/2015-TCU-Plenário, r"
+    },
+    {
+      "origem": "Acórdão TCU 1204/2024 - Proposta - Desclassi",
+      "raw": "Acórdão 1.211/2021-TCU-Plenário",
+      "secao": "relatorio",
+      "matched": true,
+      "trecho": "spectos jurídicos da licitação, 5ª ed. São Paulo: Saraiva, 2000, p. 13). Nesse sentido, o Acórdão 1.211/2021-TCU-Plenário, relator Ministro Walton Alencar: Admitir a juntada de doc"
+    },
+    {
+      "origem": "Acórdão TCU 1204/2024 - Proposta - Desclassi",
+      "raw": "Acórdão 36/2024-TCU-Plenário",
+      "secao": "relatorio",
+      "matched": false,
+      "trecho": "esentação procedente, confirmando o fundamento da medida cautelar referendada por meio do Acórdão 36/2024-TCU-Plenário; 40.3. determinar ao Departamento Regional do SENAI no Estado"
+    },
+    {
+      "origem": "Acórdão TCU 1204/2024 - Proposta - Desclassi",
+      "raw": "Acórdão 36/2024-TCU-Plenário",
+      "secao": "voto",
+      "matched": false,
+      "trecho": "execução de eventual contrato já assinado. 4. A decisão cautelar foi referendada conforme Acórdão 36/2024-TCU-Plenário. 5. Realizadas as oitivas do Departamento Regional do Senai"
+    },
+    {
+      "origem": "Acórdão TCU 1204/2024 - Proposta - Desclassi",
+      "raw": "Acórdão 11907/2011-Segunda Câmara",
+      "secao": "voto",
+      "matched": false,
+      "trecho": "rincípio do formalismo moderado e da obtenção da proposta mais vantajosa à Administração. Acórdão 11907/2011-Segunda Câmara, Relator: Ministro-Substituto Augusto Sherman O disposto"
+    },
+    {
+      "origem": "Acórdão TCU 1204/2024 - Proposta - Desclassi",
+      "raw": "Acórdão 3381/2013-Plenário",
+      "secao": "voto",
+      "matched": false,
+      "trecho": "norteiam o procedimento licitatório, dentre eles o da seleção da proposta mais vantajosa. Acórdão 3381/2013-Plenário, Relator: Ministro Valmir Campelo 18. No próprio edital, em seu"
+    },
+    {
+      "origem": "Acórdão TCU 1204/2024 - Proposta - Desclassi",
+      "raw": "Acórdão 36/2024-TCU-Plenário",
+      "secao": "acordao",
+      "matched": false,
+      "trecho": "esentação procedente, confirmando o fundamento da medida cautelar referendada por meio do Acórdão 36/2024-TCU-Plenário; 9.3. determinar ao Departamento Regional do Senai no Estado"
+    },
+    {
+      "origem": "Acórdão TCU 1409/2021 - Coisa julgada - Audi",
+      "raw": "Acórdão 1292/2018-Plenário",
+      "secao": "relatorio",
+      "matched": false,
+      "trecho": "0) e pelo ex-reitor Antonio Cesar Gonçalves Borges (peças 112, 113 e 131 a 138), contra o Acórdão 1292/2018-Plenário, da relatoria do Ministro Vital do Rêgo (peça 65), retificado,"
+    },
+    {
+      "origem": "Acórdão TCU 1409/2021 - Coisa julgada - Audi",
+      "raw": "Acórdão 2563/2018-Plenário",
+      "secao": "relatorio",
+      "matched": false,
+      "trecho": "relatoria do Ministro Vital do Rêgo (peça 65), retificado, por inexatidão material, pelo Acórdão 2563/2018-Plenário (peça 75), com o seguinte teor (destacando-se os itens impugnad"
+    },
+    {
+      "origem": "Acórdão TCU 1409/2021 - Coisa julgada - Audi",
+      "raw": "Acórdão 1318/2016-Plenário",
+      "secao": "relatorio",
+      "matched": false,
+      "trecho": "a pela Secretaria de Controle Externo no Rio Grande do Sul (Secex/RS) por determinação do Acórdão 1318/2016-Plenário, Rel. Min. Vital do Rêgo (TC 016.319/21012-5), com o fito de ap"
+    }
+  ]
+}
