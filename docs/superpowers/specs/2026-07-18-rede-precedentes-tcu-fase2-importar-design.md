@@ -1,7 +1,7 @@
 # Rede de precedentes do TCU — Fase 2 (Importar leading cases) — Design
 
 **Data:** 2026-07-18
-**Status:** rascunho autônomo (a pedido do Daniel, em modo autônomo). As **decisões de produto** estão marcadas com 🟨 **A VALIDAR** — o Daniel confirma/ajusta antes da implementação.
+**Status:** aprovado — o Daniel validou as 3 decisões de produto (18/07): (1) importar em 2 níveis (ementa garantida + inteiro teor quando resolver); (2) desambiguação por heurística + relatório de ambíguos; (3) seleção dos top ~30-50 por autoridade (priorizando voto), curadoria semi-automática.
 **Antecede:** Fase 1 (grafo persistido) — `docs/superpowers/specs/2026-07-18-rede-precedentes-tcu-fase1-grafo-design.md`.
 **Depende de:** a wishlist da Fase 1 (`docs/audits/2026-07-18-wishlist-precedentes-tcu.json`).
 
@@ -41,7 +41,7 @@ Só depois desse probe (GO) se constrói o importador. Se o inteiro teor não fo
 - **Nível 1 — ementa (garantido):** cria o `Document` (`category='acordao'`) com número/ano/colegiado/relator/ementa (`tcuEmentaCompleta`). Isso basta para **entrar na busca** (o `selectSourceText` usa `tcuEmentaCompleta`; ≥50 chars) e para as arestas casarem. Sem inteiro teor, sem razão de decidir.
 - **Nível 2 — inteiro teor (quando acessível):** além do acima, grava o `tcuLinkPDF` (RTF) e deixa o acórdão na fila do `catalog-tcu-inteiro-teor` + `sync-precedentes-tcu` — que o catalogam (seções, artigos debatidos) e extraem SUAS arestas. Reusa 100% do pipeline existente.
 
-🟨 **A VALIDAR:** importar também os que só têm ementa (Nível 1), ou só os que dá para trazer com inteiro teor (Nível 2)? *Recomendação: importar sempre em Nível 1 e promover a Nível 2 quando o RTF resolver — nada se perde.*
+✅ **Decidido (Daniel, 18/07):** importar **sempre em Nível 1** e **promover a Nível 2** quando o RTF resolver — nada se perde.
 
 ## 5. Desambiguação de colegiado
 
@@ -50,13 +50,13 @@ A citação nem sempre traz colegiado; a wishlist agrega por (número, ano). Mas
 2. Se a aresta que mais aponta para esse alvo trouxe colegiado explícito, casar por ele.
 3. Senão, pegar o **1º resultado por relevância** da BFF e **registrar o colegiado escolhido** para auditoria.
 
-🟨 **A VALIDAR:** aceita a heurística, ou prefere que a importação **peça sua confirmação** por caso quando houver ambiguidade real? *Recomendação: heurística + um relatório de "ambíguos" para você revisar os poucos casos duvidosos.*
+✅ **Decidido (Daniel, 18/07):** heurística automática **+ um relatório de "ambíguos"** para o Daniel revisar os poucos casos duvidosos (não confirmação caso a caso).
 
 ## 6. Seleção — quantos e quais importar
 
-🟨 **A VALIDAR (decisão de produto):**
-- **Quantidade:** todos os 100 da wishlist? só os top-N? só os com citação no voto (razão de decidir)? *Recomendação: começar por um lote inicial dos **top ~30-50 por autoridade**, priorizando os com `citadoNoVoto` alto (leading cases de fundamentação, não de passagem) — ex.: 1441/2016 (185, voto 80), 2622/2013 (45, voto 21), 459/2022 (26, voto 16).*
-- **Curadoria:** importação automática dos top-N, ou você revisa/aprova a lista antes? *Recomendação: semi-automática — o script gera a lista candidata (a wishlist já rankeada), você marca as que quer, o importador roda sobre as aprovadas. Você é o curador editorial.*
+✅ **Decidido (Daniel, 18/07):**
+- **Quantidade:** lote inicial dos **top ~30-50 por autoridade**, priorizando os com `citadoNoVoto` alto (leading cases de fundamentação, não de passagem) — ex.: 1441/2016 (185, voto 80), 2622/2013 (45, voto 21), 459/2022 (26, voto 16).
+- **Curadoria semi-automática:** o script gera a lista candidata a partir da wishlist já rankeada; o Daniel marca as que quer; o importador roda sobre as aprovadas. O Daniel é o curador editorial.
 
 ## 7. Arquitetura da importação
 
