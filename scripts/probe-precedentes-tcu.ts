@@ -33,14 +33,19 @@ async function main() {
   });
   console.log(`Acórdãos com texto guardado: ${docs.length}\n`);
 
-  // Índice de casamento: "numero/ano" -> id do primeiro Document com esse par.
+  // Índice de casamento sobre TODO o acervo de acórdãos (não só os com inteiro
+  // teor): senão uma citação a um acórdão que já temos, mas ainda não catalogado,
+  // contaria como "externa" e inflaria a taxa de externas / a lacuna do acervo.
+  const todosAcordaos = await prisma.document.findMany({
+    where: { category: 'acordao', acordaoNumero: { not: null }, acordaoAno: { not: null } },
+    select: { id: true, acordaoNumero: true, acordaoAno: true },
+  });
   const indice = new Map<string, string>();
-  for (const d of docs) {
-    if (d.acordaoNumero != null && d.acordaoAno != null) {
-      const chave = `${d.acordaoNumero}/${d.acordaoAno}`;
-      if (!indice.has(chave)) indice.set(chave, d.id);
-    }
+  for (const a of todosAcordaos) {
+    const chave = `${a.acordaoNumero}/${a.acordaoAno}`;
+    if (!indice.has(chave)) indice.set(chave, a.id);
   }
+  console.log(`Acervo de acórdãos no índice de casamento: ${todosAcordaos.length}\n`);
 
   const cits: CitacaoProcessada[] = [];
   // Um candidato de amostra por DOCUMENTO (a 1ª citação de cada acórdão), para
@@ -81,6 +86,7 @@ async function main() {
   const resumo = {
     geradoEm: '2026-07-18',
     totalAcordaosAnalisados: docs.length,
+    acordaosNoIndice: todosAcordaos.length,
     densidade: densidade(cits, docs.length),
     porSecao: porSecao(cits),
     matching: taxaMatching(cits),

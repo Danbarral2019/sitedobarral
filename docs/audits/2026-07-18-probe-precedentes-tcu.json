@@ -1,6 +1,7 @@
 {
   "geradoEm": "2026-07-18",
   "totalAcordaosAnalisados": 1685,
+  "acordaosNoIndice": 1863,
   "densidade": {
     "acordaosComCitacao": 1510,
     "totalCitacoes": 40107,
@@ -14,9 +15,9 @@
     "semSecao": 3483
   },
   "matching": {
-    "internas": 3412,
-    "externas": 36695,
-    "taxa": 0.08507243124641584
+    "internas": 4069,
+    "externas": 36038,
+    "taxa": 0.10145361158899943
   },
   "topLeadingCases": [
     {
@@ -359,7 +360,7 @@
       "origem": "Acórdão TCU 1564/2025 - Registro de preços -",
       "raw": "Acórdão 1917/2024-TCU-Plenário",
       "secao": "relatorio",
-      "matched": false,
+      "matched": true,
       "trecho": "ção. e) Não houve impugnações ao edital. f) Em consonância com o contido no item 9.6 do Acórdão 1917/2024-TCU-Plenário, relator Ministro Benjamin Zymler, e à orientação presente"
     },
     {
@@ -443,7 +444,7 @@
       "origem": "Acórdão TCU 2819/2026 - Primeira Câmara",
       "raw": "Acórdão 2.331/2025-TCU-1ª Câmara",
       "secao": "relatorio",
-      "matched": false,
+      "matched": true,
       "trecho": "forma tecnológica de biossensor para diagnóstico point-of-care da dengue’. 2. Por meio do Acórdão 2.331/2025-TCU-1ª Câmara, o Tribunal julgou irregulares as contas do Instituto de"
     },
     {
