@@ -50,6 +50,10 @@
       "schedule": "30 6 * * *"
     },
     {
+      "path": "/api/cron/sync-precedentes-tcu",
+      "schedule": "45 6 * * *"
+    },
+    {
       "path": "/api/cron/sync-conuni",
       "schedule": "0 6 1 * *"
     },
