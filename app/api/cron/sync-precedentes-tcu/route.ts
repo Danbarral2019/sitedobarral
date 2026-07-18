@@ -14,6 +14,14 @@ import { apiLogger } from '@/lib/logger';
  * Fila: category='acordao' + tcuTextoCompleto NOT NULL + (precedentesVersao IS
  * NULL OR < PRECEDENTES_VERSAO). Como cada item marca a versão ao terminar, a
  * fila drena e não há retentativa infinita.
+ *
+ * SEM cap de tentativas (ao contrário do catalog-tcu-inteiro-teor, que usa
+ * tcuAnaliseTentativas < 3): omissão deliberada. Aqui o passo é só regex +
+ * escrita no banco — não há a classe de falha permanente (RTF gigante,
+ * não-RTF) que motivou o cap lá. Um doc que sempre falhasse seria re-selecionado
+ * todo run, mas o try/catch por item não deixa isso travar o lote (os outros
+ * 199 drenam), e o custo é 1 slot/dia — aceitável. Se surgir falha permanente
+ * recorrente, aí sim vale um cap.
  */
 export const maxDuration = 300;
 

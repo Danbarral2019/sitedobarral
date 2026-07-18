@@ -9,6 +9,14 @@
  *      npx tsx scripts/backfill-precedentes-tcu.ts --execute --limit=50
  *      npx tsx scripts/backfill-precedentes-tcu.ts --execute --force
  *
+ * ⚠️ Com --force, RERODE ATÉ COMPLETAR se cair no meio: --force desliga a guarda
+ * de versão e reprocessa docs já na versão corrente. Como persistir grava em
+ * sequência (deleteMany → createMany → marca versão), um crash entre o delete e
+ * o createMany deixaria o doc na versão corrente com as arestas apagadas — e um
+ * run normal (sem --force) NÃO o repesca (versão == corrente, não nula). Rerodar
+ * --force até o fim reprocessa tudo e autocorrige. (Sem --force não há esse buraco:
+ * o doc fica com versão nula e volta à fila.)
+ *
  * Ref.: docs/superpowers/specs/2026-07-18-rede-precedentes-tcu-fase1-grafo-design.md
  */
 import { prisma } from '../lib/prisma';
