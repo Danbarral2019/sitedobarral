@@ -61,9 +61,17 @@ export function arestasDeAcordao(
 }
 
 /**
- * Persiste as arestas de um acórdão, idempotente: apaga as arestas antigas
- * daquela origem, insere as novas e marca `precedentesVersao`. Tudo numa
- * transação — reprocessar é seguro. Retorna o nº de arestas gravadas.
+ * Persiste as arestas de um acórdão, idempotente. Retorna o nº de arestas
+ * gravadas.
+ *
+ * Operações em SEQUÊNCIA, não numa transação: um acórdão que cita muitos outros
+ * gera um deleteMany + createMany grandes que, somados à latência do Neon
+ * (sa-east-1, WebSocket), passam do timeout default de transação de 5s (medido:
+ * 17s num doc pesado no backfill). A atomicidade estrita não é necessária aqui:
+ * a ORDEM garante a consistência — `precedentesVersao` é marcada POR ÚLTIMO, só
+ * depois de as arestas estarem no lugar. Se o processo morrer no meio, o doc
+ * fica com `precedentesVersao` nula e o backfill/cron o reprocessa do zero
+ * (deleteMany apaga o parcial, createMany reinsere) — sem duplicar.
  */
 export async function persistirArestasDeAcordao(p: {
   origemId: string;
@@ -72,12 +80,10 @@ export async function persistirArestasDeAcordao(p: {
   texto: string;
 }): Promise<number> {
   const arestas = arestasDeAcordao(p.texto, { numero: p.numeroSelf, ano: p.anoSelf });
-  await prisma.$transaction([
-    prisma.acordaoCitacao.deleteMany({ where: { origemId: p.origemId } }),
-    ...(arestas.length
-      ? [prisma.acordaoCitacao.createMany({ data: arestas.map((a) => ({ origemId: p.origemId, ...a })) })]
-      : []),
-    prisma.document.update({ where: { id: p.origemId }, data: { precedentesVersao: PRECEDENTES_VERSAO } }),
-  ]);
+  await prisma.acordaoCitacao.deleteMany({ where: { origemId: p.origemId } });
+  if (arestas.length) {
+    await prisma.acordaoCitacao.createMany({ data: arestas.map((a) => ({ origemId: p.origemId, ...a })) });
+  }
+  await prisma.document.update({ where: { id: p.origemId }, data: { precedentesVersao: PRECEDENTES_VERSAO } });
   return arestas.length;
 }
