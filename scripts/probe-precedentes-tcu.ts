@@ -43,19 +43,26 @@ async function main() {
   }
 
   const cits: CitacaoProcessada[] = [];
-  const amostra: Array<{ origem: string; raw: string; secao: string | null; matched: boolean; trecho: string }> = [];
+  // Um candidato de amostra por DOCUMENTO (a 1ª citação de cada acórdão), para
+  // depois amostrar sistematicamente ao longo do corpus. Senão os 40 primeiros
+  // viriam todos dos 2-3 primeiros documentos e a amostra não representaria a
+  // diversidade de formatos que a folha de calibração precisa fazer o Daniel julgar.
+  type ItemAmostra = { origem: string; raw: string; secao: string | null; matched: boolean; trecho: string };
+  const candidatos: ItemAmostra[] = [];
 
   for (const d of docs) {
     const texto = d.tcuTextoCompleto ?? '';
     const secoes = seccionarAcordao(texto);
+    let candidatoDoDoc = false;
     for (const c of extractAcordaoCitations(texto)) {
       // Descarta auto-citação (o próprio acórdão no cabeçalho/dispositivo).
       if (d.acordaoNumero === c.numero && d.acordaoAno === c.ano) continue;
       const alvoId = indice.get(`${c.numero}/${c.ano}`) ?? null;
       const secao = secaoDe(secoes, c.index);
       cits.push({ origemId: d.id, numero: c.numero, ano: c.ano, secao, matched: alvoId !== null, alvoId });
-      if (amostra.length < AMOSTRA_N) {
-        amostra.push({
+      if (!candidatoDoDoc) {
+        candidatoDoDoc = true;
+        candidatos.push({
           origem: d.title.slice(0, 44),
           raw: c.raw,
           secao,
@@ -65,6 +72,11 @@ async function main() {
       }
     }
   }
+
+  // Amostragem sistemática: ~AMOSTRA_N itens espalhados uniformemente pelos
+  // documentos que citam, cobrindo formatos variados (determinístico).
+  const step = Math.max(1, Math.floor(candidatos.length / AMOSTRA_N));
+  const amostra = candidatos.filter((_, i) => i % step === 0).slice(0, AMOSTRA_N);
 
   const resumo = {
     geradoEm: '2026-07-18',
@@ -76,7 +88,7 @@ async function main() {
     amostra,
   };
 
-  writeFileSync(SAIDA, JSON.stringify(resumo, null, 2), 'utf8');
+  writeFileSync(SAIDA, JSON.stringify(resumo, null, 2) + '\n', 'utf8');
 
   console.log('Densidade:', resumo.densidade);
   console.log('Por seção:', resumo.porSecao);
