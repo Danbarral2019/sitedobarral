@@ -1,0 +1,706 @@
+{
+  "geradoEm": "2026-07-18",
+  "total": 100,
+  "wishlist": [
+    {
+      "chave": "1441/2016",
+      "numero": 1441,
+      "ano": 2016,
+      "citadoPor": 185,
+      "citadoNoVoto": 80
+    },
+    {
+      "chave": "534/2023",
+      "numero": 534,
+      "ano": 2023,
+      "citadoPor": 157,
+      "citadoNoVoto": 11
+    },
+    {
+      "chave": "2391/2018",
+      "numero": 2391,
+      "ano": 2018,
+      "citadoPor": 155,
+      "citadoNoVoto": 11
+    },
+    {
+      "chave": "1689/2019",
+      "numero": 1689,
+      "ano": 2019,
+      "citadoPor": 122,
+      "citadoNoVoto": 6
+    },
+    {
+      "chave": "2219/2023",
+      "numero": 2219,
+      "ano": 2023,
+      "citadoPor": 121,
+      "citadoNoVoto": 2
+    },
+    {
+      "chave": "1009/2018",
+      "numero": 1009,
+      "ano": 2018,
+      "citadoPor": 114,
+      "citadoNoVoto": 3
+    },
+    {
+      "chave": "2064/2011",
+      "numero": 2064,
+      "ano": 2011,
+      "citadoPor": 112,
+      "citadoNoVoto": 0
+    },
+    {
+      "chave": "3648/2013",
+      "numero": 3648,
+      "ano": 2013,
+      "citadoPor": 105,
+      "citadoNoVoto": 4
+    },
+    {
+      "chave": "1019/2008",
+      "numero": 1019,
+      "ano": 2008,
+      "citadoPor": 105,
+      "citadoNoVoto": 3
+    },
+    {
+      "chave": "1526/2007",
+      "numero": 1526,
+      "ano": 2007,
+      "citadoPor": 101,
+      "citadoNoVoto": 1
+    },
+    {
+      "chave": "11762/2018",
+      "numero": 11762,
+      "ano": 2018,
+      "citadoPor": 100,
+      "citadoNoVoto": 2
+    },
+    {
+      "chave": "2924/2018",
+      "numero": 2924,
+      "ano": 2018,
+      "citadoPor": 100,
+      "citadoNoVoto": 7
+    },
+    {
+      "chave": "1264/2019",
+      "numero": 1264,
+      "ano": 2019,
+      "citadoPor": 89,
+      "citadoNoVoto": 2
+    },
+    {
+      "chave": "957/2019",
+      "numero": 957,
+      "ano": 2019,
+      "citadoPor": 85,
+      "citadoNoVoto": 3
+    },
+    {
+      "chave": "7936/2018",
+      "numero": 7936,
+      "ano": 2018,
+      "citadoPor": 54,
+      "citadoNoVoto": 4
+    },
+    {
+      "chave": "2622/2013",
+      "numero": 2622,
+      "ano": 2013,
+      "citadoPor": 45,
+      "citadoNoVoto": 21
+    },
+    {
+      "chave": "2285/2022",
+      "numero": 2285,
+      "ano": 2022,
+      "citadoPor": 38,
+      "citadoNoVoto": 10
+    },
+    {
+      "chave": "4851/2017",
+      "numero": 4851,
+      "ano": 2017,
+      "citadoPor": 37,
+      "citadoNoVoto": 0
+    },
+    {
+      "chave": "1072/2017",
+      "numero": 1072,
+      "ano": 2017,
+      "citadoPor": 30,
+      "citadoNoVoto": 8
+    },
+    {
+      "chave": "459/2022",
+      "numero": 459,
+      "ano": 2022,
+      "citadoPor": 26,
+      "citadoNoVoto": 16
+    },
+    {
+      "chave": "13732/2019",
+      "numero": 13732,
+      "ano": 2019,
+      "citadoPor": 25,
+      "citadoNoVoto": 2
+    },
+    {
+      "chave": "587/2011",
+      "numero": 587,
+      "ano": 2011,
+      "citadoPor": 24,
+      "citadoNoVoto": 6
+    },
+    {
+      "chave": "1772/2017",
+      "numero": 1772,
+      "ano": 2017,
+      "citadoPor": 23,
+      "citadoNoVoto": 0
+    },
+    {
+      "chave": "2860/2018",
+      "numero": 2860,
+      "ano": 2018,
+      "citadoPor": 21,
+      "citadoNoVoto": 5
+    },
+    {
+      "chave": "243/2010",
+      "numero": 243,
+      "ano": 2010,
+      "citadoPor": 20,
+      "citadoNoVoto": 3
+    },
+    {
+      "chave": "2463/2019",
+      "numero": 2463,
+      "ano": 2019,
+      "citadoPor": 19,
+      "citadoNoVoto": 0
+    },
+    {
+      "chave": "4447/2020",
+      "numero": 4447,
+      "ano": 2020,
+      "citadoPor": 18,
+      "citadoNoVoto": 6
+    },
+    {
+      "chave": "348/2016",
+      "numero": 348,
+      "ano": 2016,
+      "citadoPor": 18,
+      "citadoNoVoto": 8
+    },
+    {
+      "chave": "635/2017",
+      "numero": 635,
+      "ano": 2017,
+      "citadoPor": 18,
+      "citadoNoVoto": 3
+    },
+    {
+      "chave": "2469/2019",
+      "numero": 2469,
+      "ano": 2019,
+      "citadoPor": 18,
+      "citadoNoVoto": 2
+    },
+    {
+      "chave": "3246/2024",
+      "numero": 3246,
+      "ano": 2024,
+      "citadoPor": 18,
+      "citadoNoVoto": 1
+    },
+    {
+      "chave": "8969/2016",
+      "numero": 8969,
+      "ano": 2016,
+      "citadoPor": 17,
+      "citadoNoVoto": 0
+    },
+    {
+      "chave": "5259/2018",
+      "numero": 5259,
+      "ano": 2018,
+      "citadoPor": 17,
+      "citadoNoVoto": 3
+    },
+    {
+      "chave": "2677/2018",
+      "numero": 2677,
+      "ano": 2018,
+      "citadoPor": 17,
+      "citadoNoVoto": 7
+    },
+    {
+      "chave": "96/2008",
+      "numero": 96,
+      "ano": 2008,
+      "citadoPor": 17,
+      "citadoNoVoto": 7
+    },
+    {
+      "chave": "9579/2015",
+      "numero": 9579,
+      "ano": 2015,
+      "citadoPor": 17,
+      "citadoNoVoto": 1
+    },
+    {
+      "chave": "1744/2018",
+      "numero": 1744,
+      "ano": 2018,
+      "citadoPor": 16,
+      "citadoNoVoto": 7
+    },
+    {
+      "chave": "1214/2013",
+      "numero": 1214,
+      "ano": 2013,
+      "citadoPor": 16,
+      "citadoNoVoto": 6
+    },
+    {
+      "chave": "1522/2016",
+      "numero": 1522,
+      "ano": 2016,
+      "citadoPor": 16,
+      "citadoNoVoto": 3
+    },
+    {
+      "chave": "3336/2024",
+      "numero": 3336,
+      "ano": 2024,
+      "citadoPor": 15,
+      "citadoNoVoto": 0
+    },
+    {
+      "chave": "620/2024",
+      "numero": 620,
+      "ano": 2024,
+      "citadoPor": 15,
+      "citadoNoVoto": 2
+    },
+    {
+      "chave": "2914/2019",
+      "numero": 2914,
+      "ano": 2019,
+      "citadoPor": 15,
+      "citadoNoVoto": 10
+    },
+    {
+      "chave": "1824/2017",
+      "numero": 1824,
+      "ano": 2017,
+      "citadoPor": 15,
+      "citadoNoVoto": 9
+    },
+    {
+      "chave": "325/2007",
+      "numero": 325,
+      "ano": 2007,
+      "citadoPor": 15,
+      "citadoNoVoto": 5
+    },
+    {
+      "chave": "1563/2012",
+      "numero": 1563,
+      "ano": 2012,
+      "citadoPor": 15,
+      "citadoNoVoto": 0
+    },
+    {
+      "chave": "1599/2019",
+      "numero": 1599,
+      "ano": 2019,
+      "citadoPor": 14,
+      "citadoNoVoto": 10
+    },
+    {
+      "chave": "5236/2020",
+      "numero": 5236,
+      "ano": 2020,
+      "citadoPor": 14,
+      "citadoNoVoto": 10
+    },
+    {
+      "chave": "4667/2017",
+      "numero": 4667,
+      "ano": 2017,
+      "citadoPor": 14,
+      "citadoNoVoto": 2
+    },
+    {
+      "chave": "300/2018",
+      "numero": 300,
+      "ano": 2018,
+      "citadoPor": 14,
+      "citadoNoVoto": 6
+    },
+    {
+      "chave": "1414/2021",
+      "numero": 1414,
+      "ano": 2021,
+      "citadoPor": 14,
+      "citadoNoVoto": 2
+    },
+    {
+      "chave": "341/2004",
+      "numero": 341,
+      "ano": 2004,
+      "citadoPor": 14,
+      "citadoNoVoto": 6
+    },
+    {
+      "chave": "344/2015",
+      "numero": 344,
+      "ano": 2015,
+      "citadoPor": 13,
+      "citadoNoVoto": 3
+    },
+    {
+      "chave": "3224/2020",
+      "numero": 3224,
+      "ano": 2020,
+      "citadoPor": 13,
+      "citadoNoVoto": 4
+    },
+    {
+      "chave": "3327/2019",
+      "numero": 3327,
+      "ano": 2019,
+      "citadoPor": 13,
+      "citadoNoVoto": 2
+    },
+    {
+      "chave": "414/2018",
+      "numero": 414,
+      "ano": 2018,
+      "citadoPor": 13,
+      "citadoNoVoto": 8
+    },
+    {
+      "chave": "2135/2018",
+      "numero": 2135,
+      "ano": 2018,
+      "citadoPor": 13,
+      "citadoNoVoto": 7
+    },
+    {
+      "chave": "5520/2023",
+      "numero": 5520,
+      "ano": 2023,
+      "citadoPor": 13,
+      "citadoNoVoto": 3
+    },
+    {
+      "chave": "2262/2015",
+      "numero": 2262,
+      "ano": 2015,
+      "citadoPor": 12,
+      "citadoNoVoto": 2
+    },
+    {
+      "chave": "483/2017",
+      "numero": 483,
+      "ano": 2017,
+      "citadoPor": 12,
+      "citadoNoVoto": 7
+    },
+    {
+      "chave": "1435/2017",
+      "numero": 1435,
+      "ano": 2017,
+      "citadoPor": 12,
+      "citadoNoVoto": 8
+    },
+    {
+      "chave": "2781/2016",
+      "numero": 2781,
+      "ano": 2016,
+      "citadoPor": 12,
+      "citadoNoVoto": 0
+    },
+    {
+      "chave": "321/2019",
+      "numero": 321,
+      "ano": 2019,
+      "citadoPor": 12,
+      "citadoNoVoto": 4
+    },
+    {
+      "chave": "2076/2005",
+      "numero": 2076,
+      "ano": 2005,
+      "citadoPor": 12,
+      "citadoNoVoto": 6
+    },
+    {
+      "chave": "1723/2016",
+      "numero": 1723,
+      "ano": 2016,
+      "citadoPor": 12,
+      "citadoNoVoto": 2
+    },
+    {
+      "chave": "2355/2018",
+      "numero": 2355,
+      "ano": 2018,
+      "citadoPor": 12,
+      "citadoNoVoto": 7
+    },
+    {
+      "chave": "1895/2014",
+      "numero": 1895,
+      "ano": 2014,
+      "citadoPor": 11,
+      "citadoNoVoto": 2
+    },
+    {
+      "chave": "56/2024",
+      "numero": 56,
+      "ano": 2024,
+      "citadoPor": 11,
+      "citadoNoVoto": 6
+    },
+    {
+      "chave": "3036/2015",
+      "numero": 3036,
+      "ano": 2015,
+      "citadoPor": 11,
+      "citadoNoVoto": 1
+    },
+    {
+      "chave": "7391/2024",
+      "numero": 7391,
+      "ano": 2024,
+      "citadoPor": 11,
+      "citadoNoVoto": 0
+    },
+    {
+      "chave": "1620/2019",
+      "numero": 1620,
+      "ano": 2019,
+      "citadoPor": 11,
+      "citadoNoVoto": 0
+    },
+    {
+      "chave": "2037/2019",
+      "numero": 2037,
+      "ano": 2019,
+      "citadoPor": 11,
+      "citadoNoVoto": 3
+    },
+    {
+      "chave": "1221/2018",
+      "numero": 1221,
+      "ano": 2018,
+      "citadoPor": 11,
+      "citadoNoVoto": 4
+    },
+    {
+      "chave": "732/2003",
+      "numero": 732,
+      "ano": 2003,
+      "citadoPor": 11,
+      "citadoNoVoto": 0
+    },
+    {
+      "chave": "1527/2019",
+      "numero": 1527,
+      "ano": 2019,
+      "citadoPor": 11,
+      "citadoNoVoto": 5
+    },
+    {
+      "chave": "1962/2017",
+      "numero": 1962,
+      "ano": 2017,
+      "citadoPor": 11,
+      "citadoNoVoto": 6
+    },
+    {
+      "chave": "1106/2020",
+      "numero": 1106,
+      "ano": 2020,
+      "citadoPor": 10,
+      "citadoNoVoto": 5
+    },
+    {
+      "chave": "9004/2018",
+      "numero": 9004,
+      "ano": 2018,
+      "citadoPor": 10,
+      "citadoNoVoto": 0
+    },
+    {
+      "chave": "10042/2015",
+      "numero": 10042,
+      "ano": 2015,
+      "citadoPor": 10,
+      "citadoNoVoto": 0
+    },
+    {
+      "chave": "61/2019",
+      "numero": 61,
+      "ano": 2019,
+      "citadoPor": 10,
+      "citadoNoVoto": 6
+    },
+    {
+      "chave": "2491/2016",
+      "numero": 2491,
+      "ano": 2016,
+      "citadoPor": 10,
+      "citadoNoVoto": 3
+    },
+    {
+      "chave": "2866/2018",
+      "numero": 2866,
+      "ano": 2018,
+      "citadoPor": 10,
+      "citadoNoVoto": 5
+    },
+    {
+      "chave": "2835/2016",
+      "numero": 2835,
+      "ano": 2016,
+      "citadoPor": 10,
+      "citadoNoVoto": 3
+    },
+    {
+      "chave": "1960/2015",
+      "numero": 1960,
+      "ano": 2015,
+      "citadoPor": 10,
+      "citadoNoVoto": 1
+    },
+    {
+      "chave": "1464/2013",
+      "numero": 1464,
+      "ano": 2013,
+      "citadoPor": 10,
+      "citadoNoVoto": 4
+    },
+    {
+      "chave": "11219/2023",
+      "numero": 11219,
+      "ano": 2023,
+      "citadoPor": 10,
+      "citadoNoVoto": 0
+    },
+    {
+      "chave": "2369/2011",
+      "numero": 2369,
+      "ano": 2011,
+      "citadoPor": 10,
+      "citadoNoVoto": 2
+    },
+    {
+      "chave": "1559/2014",
+      "numero": 1559,
+      "ano": 2014,
+      "citadoPor": 10,
+      "citadoNoVoto": 1
+    },
+    {
+      "chave": "974/2018",
+      "numero": 974,
+      "ano": 2018,
+      "citadoPor": 10,
+      "citadoNoVoto": 0
+    },
+    {
+      "chave": "1280/2018",
+      "numero": 1280,
+      "ano": 2018,
+      "citadoPor": 9,
+      "citadoNoVoto": 2
+    },
+    {
+      "chave": "3336/2011",
+      "numero": 3336,
+      "ano": 2011,
+      "citadoPor": 9,
+      "citadoNoVoto": 0
+    },
+    {
+      "chave": "721/2016",
+      "numero": 721,
+      "ano": 2016,
+      "citadoPor": 9,
+      "citadoNoVoto": 4
+    },
+    {
+      "chave": "462/2010",
+      "numero": 462,
+      "ano": 2010,
+      "citadoPor": 9,
+      "citadoNoVoto": 6
+    },
+    {
+      "chave": "3513/2016",
+      "numero": 3513,
+      "ano": 2016,
+      "citadoPor": 9,
+      "citadoNoVoto": 0
+    },
+    {
+      "chave": "2806/2014",
+      "numero": 2806,
+      "ano": 2014,
+      "citadoPor": 9,
+      "citadoNoVoto": 0
+    },
+    {
+      "chave": "4711/2014",
+      "numero": 4711,
+      "ano": 2014,
+      "citadoPor": 9,
+      "citadoNoVoto": 4
+    },
+    {
+      "chave": "80/2020",
+      "numero": 80,
+      "ano": 2020,
+      "citadoPor": 9,
+      "citadoNoVoto": 0
+    },
+    {
+      "chave": "1529/2019",
+      "numero": 1529,
+      "ano": 2019,
+      "citadoPor": 9,
+      "citadoNoVoto": 2
+    },
+    {
+      "chave": "173/2019",
+      "numero": 173,
+      "ano": 2019,
+      "citadoPor": 9,
+      "citadoNoVoto": 7
+    },
+    {
+      "chave": "1214/2018",
+      "numero": 1214,
+      "ano": 2018,
+      "citadoPor": 9,
+      "citadoNoVoto": 4
+    },
+    {
+      "chave": "2637/2015",
+      "numero": 2637,
+      "ano": 2015,
+      "citadoPor": 9,
+      "citadoNoVoto": 3
+    }
+  ]
+}
