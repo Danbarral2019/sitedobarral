@@ -1,0 +1,486 @@
+{
+  "geradoEm": "2026-07-18",
+  "totalAcordaosAnalisados": 1685,
+  "acordaosNoIndice": 1863,
+  "densidade": {
+    "acordaosComCitacao": 1510,
+    "totalCitacoes": 40107,
+    "media": 23.802373887240357,
+    "mediana": 15
+  },
+  "porSecao": {
+    "relatorio": 25797,
+    "voto": 9208,
+    "acordao": 1619,
+    "semSecao": 3483
+  },
+  "matching": {
+    "internas": 4069,
+    "externas": 36038,
+    "taxa": 0.10145361158899943
+  },
+  "topLeadingCases": [
+    {
+      "chave": "1441/2016",
+      "alvoId": null,
+      "citadoPor": 185,
+      "noVoto": 80
+    },
+    {
+      "chave": "534/2023",
+      "alvoId": null,
+      "citadoPor": 157,
+      "noVoto": 11
+    },
+    {
+      "chave": "2391/2018",
+      "alvoId": null,
+      "citadoPor": 155,
+      "noVoto": 11
+    },
+    {
+      "chave": "1689/2019",
+      "alvoId": null,
+      "citadoPor": 122,
+      "noVoto": 6
+    },
+    {
+      "chave": "2219/2023",
+      "alvoId": null,
+      "citadoPor": 121,
+      "noVoto": 2
+    },
+    {
+      "chave": "1009/2018",
+      "alvoId": null,
+      "citadoPor": 114,
+      "noVoto": 3
+    },
+    {
+      "chave": "2064/2011",
+      "alvoId": null,
+      "citadoPor": 112,
+      "noVoto": 0
+    },
+    {
+      "chave": "3648/2013",
+      "alvoId": null,
+      "citadoPor": 105,
+      "noVoto": 4
+    },
+    {
+      "chave": "1019/2008",
+      "alvoId": null,
+      "citadoPor": 105,
+      "noVoto": 3
+    },
+    {
+      "chave": "1526/2007",
+      "alvoId": null,
+      "citadoPor": 101,
+      "noVoto": 1
+    },
+    {
+      "chave": "2924/2018",
+      "alvoId": null,
+      "citadoPor": 100,
+      "noVoto": 7
+    },
+    {
+      "chave": "11762/2018",
+      "alvoId": null,
+      "citadoPor": 100,
+      "noVoto": 2
+    },
+    {
+      "chave": "2012/2022",
+      "alvoId": "5dc4a321-0abc-4d7e-8e86-6ee0f4b7ed45",
+      "citadoPor": 96,
+      "noVoto": 3
+    },
+    {
+      "chave": "1264/2019",
+      "alvoId": null,
+      "citadoPor": 89,
+      "noVoto": 2
+    },
+    {
+      "chave": "957/2019",
+      "alvoId": null,
+      "citadoPor": 85,
+      "noVoto": 3
+    },
+    {
+      "chave": "7936/2018",
+      "alvoId": null,
+      "citadoPor": 54,
+      "noVoto": 4
+    },
+    {
+      "chave": "2622/2013",
+      "alvoId": null,
+      "citadoPor": 45,
+      "noVoto": 21
+    },
+    {
+      "chave": "2285/2022",
+      "alvoId": null,
+      "citadoPor": 38,
+      "noVoto": 10
+    },
+    {
+      "chave": "4851/2017",
+      "alvoId": null,
+      "citadoPor": 37,
+      "noVoto": 0
+    },
+    {
+      "chave": "2643/2022",
+      "alvoId": "f48572a8-6626-42e1-8527-ec4efe245601",
+      "citadoPor": 31,
+      "noVoto": 4
+    },
+    {
+      "chave": "1211/2021",
+      "alvoId": "de26758e-2d96-4445-ab33-24c093eac167",
+      "citadoPor": 29,
+      "noVoto": 14
+    },
+    {
+      "chave": "1072/2017",
+      "alvoId": null,
+      "citadoPor": 29,
+      "noVoto": 8
+    },
+    {
+      "chave": "459/2022",
+      "alvoId": null,
+      "citadoPor": 26,
+      "noVoto": 16
+    },
+    {
+      "chave": "122/2021",
+      "alvoId": "30d3fac9-960b-4631-9bec-5adf027cb6b0",
+      "citadoPor": 26,
+      "noVoto": 14
+    },
+    {
+      "chave": "587/2011",
+      "alvoId": null,
+      "citadoPor": 24,
+      "noVoto": 6
+    },
+    {
+      "chave": "13732/2019",
+      "alvoId": null,
+      "citadoPor": 24,
+      "noVoto": 2
+    },
+    {
+      "chave": "1772/2017",
+      "alvoId": null,
+      "citadoPor": 23,
+      "noVoto": 0
+    },
+    {
+      "chave": "2860/2018",
+      "alvoId": null,
+      "citadoPor": 21,
+      "noVoto": 5
+    },
+    {
+      "chave": "243/2010",
+      "alvoId": null,
+      "citadoPor": 20,
+      "noVoto": 3
+    },
+    {
+      "chave": "2463/2019",
+      "alvoId": null,
+      "citadoPor": 19,
+      "noVoto": 0
+    }
+  ],
+  "amostra": [
+    {
+      "origem": "Acórdão TCU 1502/2026 - Plenário",
+      "raw": "ACÓRDÃO 663/2026-PLENÁRIO",
+      "secao": null,
+      "matched": false,
+      "trecho": "OBRE A CONFORMIDADE DA EXECUÇÃO DO PROGRAMA PÉ-DE-MEIA. INSPEÇÃO NO PROGRAMA JULGADA PELO ACÓRDÃO 663/2026-PLENÁRIO. ATENDIMENTO DA SOLICITAÇÃO. COMUNICAÇÃO À CFFC/CD. RELATÓRIO"
+    },
+    {
+      "origem": "Acórdão TCU 284/2025 - Terceirização - Atest",
+      "raw": "Acórdãos 1.443/2014-TCU-Plenário",
+      "secao": "relatorio",
+      "matched": false,
+      "trecho": "nc. II, da Lei 14.133/2021, além de afrontar a jurisprudência do TCU, consubstanciada nos Acórdãos 1.443/2014-TCU-Plenário, 449/2017-TCU-Plenário, 553/2016-TCU-Plenário, 914/2019-T"
+    },
+    {
+      "origem": "Acórdão TCU 64/2023 - Projeto de pesquisa - ",
+      "raw": "Acórdãos 1.214/2013-Plenário",
+      "secao": null,
+      "matched": false,
+      "trecho": "o se houver a devida e prévia motivação, consoante a jurisprudência do TCU, a exemplo dos Acórdãos 1.214/2013-Plenário, 1.443/2014-Plenário, 744/2015-2ª Câmara e 668/2005-Plenário;"
+    },
+    {
+      "origem": "Acórdão TCU 728/2026 - Plenário",
+      "raw": "Acórdão 5.429/2025-TCU-1ª Câmara",
+      "secao": "relatorio",
+      "matched": false,
+      "trecho": "a defesa apresentada pela responsável (peças 99 a 103), este Tribunal decidiu, mediante o Acórdão 5.429/2025-TCU-1ª Câmara, da relatoria do Ministro Jhonatan de Jesus, pela irregul"
+    },
+    {
+      "origem": "Acórdão TCU 2244/2023 - Convênio - Execução ",
+      "raw": "Acórdão 864/2020- TCU-Plenário",
+      "secao": null,
+      "matched": false,
+      "trecho": "244/2023 - TCU Plenário Trata-se de representação autuada em cumprimento ao item 9.8 do Acórdão 864/2020- TCU-Plenário, de minha relatoria, que determinou a autuação de processo"
+    },
+    {
+      "origem": "Acórdão TCU 556/2026 - Plenário",
+      "raw": "Acórdãos 2.443/2021-TCU-Plenário",
+      "secao": "relatorio",
+      "matched": true,
+      "trecho": "/PREFCAM, de 19/9/2025. Fundamento legal ou jurisprudencial: art. 64 da Lei 14.133/2021; Acórdãos 2.443/2021-TCU-Plenário (rel. Min. Augusto Sherman), 2.049/2023-TCU-Plenário (rel"
+    },
+    {
+      "origem": "Acórdão TCU 3930/2022 - Execução financeira ",
+      "raw": "Acórdãos 6777/2014",
+      "secao": "relatorio",
+      "matched": false,
+      "trecho": "ção requer a avaliação e aprovação dos órgãos responsáveis’ (Jurisprudência Selecionada – Acórdãos 6777/2014 e 12788/2016, ambos 2ª Câmara). 15. Por conseguinte, foi proposta a cit"
+    },
+    {
+      "origem": "Acórdão TCU 300/2026 - Plenário",
+      "raw": "Acórdão 5.429/2025-TCU-1ª Câmara",
+      "secao": "relatorio",
+      "matched": false,
+      "trecho": "o de revisão interposto por Maria do Socorro de Paula Oliveira (peças 130 a 133) contra o Acórdão 5.429/2025-TCU-1ª Câmara, Relator Ministro Jhonatan de Jesus (peça 116), abaixo tr"
+    },
+    {
+      "origem": "Acórdão TCU 122/2021 - Ato sujeito a registr",
+      "raw": "Acórdão 587/2011-Plenário",
+      "secao": "relatorio",
+      "matched": false,
+      "trecho": "que pode ser apreciado sem a necessidade de prévia oitiva das interessadas, nos termos do Acórdão 587/2011-Plenário. III 7. No que se refere ao ato de peça 3, que trata da reversão"
+    },
+    {
+      "origem": "Acórdão TCU 2492/2024 - Ato sujeito a regist",
+      "raw": "Acórdão 1.132/2009-TCU-Plenário",
+      "secao": "relatorio",
+      "matched": false,
+      "trecho": "ontra-se sedimentado na jurisprudência desta Corte de Contas. Leia-se, v.g., o sumário do Acórdão 1.132/2009-TCU-Plenário, Relator Ministro Aroldo Cedraz, que analisou de forma acu"
+    },
+    {
+      "origem": "Acórdão TCU 1588/2023 - Abono de permanência",
+      "raw": "Acórdão 1.078/2013-TCU-Plenário",
+      "secao": "relatorio",
+      "matched": false,
+      "trecho": "ocasião então amparado em mandado de injunção (MI 3.989/DF, rel. Min. Luiz Fux), conforme Acórdão 1.078/2013-TCU-Plenário, da relatoria do Ministro Benjamin Zymler, cujo excerto do"
+    },
+    {
+      "origem": "Acórdão TCU 2331/2021 - RDC - Contratação in",
+      "raw": "Acórdão 2.540/2015-TCU-Plenário",
+      "secao": "relatorio",
+      "matched": false,
+      "trecho": "do regime de contratação integrada do RDC. 4. Diante dessas irregularidades, por meio do Acórdão 2.540/2015-TCU-Plenário, da relatoria do Ministro-Substituto Augusto Sherman Caval"
+    },
+    {
+      "origem": "Acórdão TCU 2541/2022 - Citação - Validade",
+      "raw": "Acórdão 1.750/2021-TCU-Plenário",
+      "secao": "relatorio",
+      "matched": false,
+      "trecho": "(VaR) histórico para um grau de confiança de 95%, em linha com a recomendação exarada no Acórdão 1.750/2021-TCU-Plenário, de relatoria do Min. Raimundo Carreiro. Pesquisa de preço"
+    },
+    {
+      "origem": "Acórdão TCU 2822/2021 - Registro de preços -",
+      "raw": "Acórdão 2.155/2012-TCU-Plenário",
+      "secao": null,
+      "matched": false,
+      "trecho": "meter a política de austeridade que deve ser seguida pela Administração, como disposto no Acórdão 2.155/2012-TCU-Plenário, Relator Ministro Raimundo Carreiro, a exemplo do rol elen"
+    },
+    {
+      "origem": "Acórdão TCU 2121/2026 - Primeira Câmara",
+      "raw": "Acórdão 4.771/2019-TCU-1ª Câmara",
+      "secao": "relatorio",
+      "matched": false,
+      "trecho": "Wilson Pereira dos Santos (peça 251) e Luiz Estevão Torquato da Silva (peça 313) contra o Acórdão 4.771/2019-TCU-1ª Câmara (peça 200, Rel. Min. Benjamin Zymler). 1.1. A deliberação"
+    },
+    {
+      "origem": "Acórdão TCU 12607/2023 - Habilitação de lici",
+      "raw": "Acórdãos 1.595/2006",
+      "secao": "relatorio",
+      "matched": false,
+      "trecho": "eram pessoalmente o contratado, não devendo ser repassados ao preço do contrato, conforme Acórdãos 1.595/2006, 950/2007 e 2.251/2007 - TCU - PLENÁRIO e, ainda, Informativo de Juris"
+    },
+    {
+      "origem": "Acórdão TCU 477/2022 - Serviços advocatícios",
+      "raw": "Acórdão 213/2022 – Plenário",
+      "secao": "relatorio",
+      "matched": false,
+      "trecho": "souro Nacional, e Marcus Pereira Aucélio, ex-Subsecretário de Política Fiscal, em face do Acórdão 213/2022 – Plenário, que conheceu e rejeitou embargos de declaração apresentados a"
+    },
+    {
+      "origem": "Acórdão TCU 1381/2022 - Habilitação de licit",
+      "raw": "Acórdãos 983/2008",
+      "secao": "relatorio",
+      "matched": false,
+      "trecho": "mparecimento em data e horário determinado (Cláusula 5.1.19). Esta cláusula contraria os Acórdãos 983/2008 (Relatoria Valmir Campelo), 2.395/2010 (Relatoria Raimundo Carreiro), 2."
+    },
+    {
+      "origem": "Acórdão TCU 1275/2026 - Segunda Câmara",
+      "raw": "Acórdão 2435/2021-TCU-Plenário",
+      "secao": "relatorio",
+      "matched": true,
+      "trecho": "tação apresentada estava em conformidade com os artigos 27 a 31 da Lei 8.666/1993 e com o Acórdão 2435/2021-TCU-Plenário (peça 119, p. 1); c) após a interposição de recurso pela e"
+    },
+    {
+      "origem": "Acórdão TCU 1562/2025 - Exportação - Financi",
+      "raw": "ACÓRDÃO 1.031/2018-PLENÁRIO",
+      "secao": null,
+      "matched": false,
+      "trecho": "a do Tesouro Nacional (STN) SUMÁRIO: REPRESENTAÇÃO AUTUADA EM CUMPRIMENTO AO ITEM 9.7 DO ACÓRDÃO 1.031/2018-PLENÁRIO. INDÍCIOS DE IRREGULARIDADES NA CONCESSÃO DE EQUALIZAÇÃO DE JU"
+    },
+    {
+      "origem": "Acórdão TCU 4410/2025 - Convênio - Desvio de",
+      "raw": "Acórdão 2.219/2023-TCU-2ª Câmara",
+      "secao": "relatorio",
+      "matched": false,
+      "trecho": "da inércia do poder público em investigar determinado fato. 21. No âmbito dessa Corte, o Acórdão 2.219/2023-TCU-2ª Câmara (Rel. Min. Jhonatan de Jesus) destacou que o ato inequívo"
+    },
+    {
+      "origem": "Acórdão TCU 1607/2023 - Declaração de inidon",
+      "raw": "Acórdão 2162/2022-TCU-Plenário",
+      "secao": "relatorio",
+      "matched": false,
+      "trecho": "pedido de reexame interposto por Sulminas Suplementos e Nutrição Ltda. (peça 59) contra o Acórdão 2162/2022-TCU-Plenário (peça 54, Rel. Min. Benjamin Zymler). 1.1. A deliberação r"
+    },
+    {
+      "origem": "Acórdão TCU 1564/2025 - Registro de preços -",
+      "raw": "Acórdão 1917/2024-TCU-Plenário",
+      "secao": "relatorio",
+      "matched": true,
+      "trecho": "ção. e) Não houve impugnações ao edital. f) Em consonância com o contido no item 9.6 do Acórdão 1917/2024-TCU-Plenário, relator Ministro Benjamin Zymler, e à orientação presente"
+    },
+    {
+      "origem": "Acórdão TCU 2378/2024 - Proposta - Preço",
+      "raw": "Acórdão 1.867/2024",
+      "secao": "relatorio",
+      "matched": false,
+      "trecho": "ensão do andamento da execução dos lotes 2 e 3 do pregão eletrônico nos seguintes termos (Acórdão 1.867/2024-Plneário). “Como bem apontado pela unidade técnica, a ausência de dili"
+    },
+    {
+      "origem": "Acórdão TCU 3307/2026 - Segunda Câmara",
+      "raw": "Acórdão 2.692/2025-TCU-2ª Câmara",
+      "secao": "relatorio",
+      "matched": false,
+      "trecho": "rso de reconsideração (peça 401) interposto por Luciano Henrique Sordine Pereira contra o Acórdão 2.692/2025-TCU-2ª Câmara, de relatoria do Ministro João Augusto Ribeiro Nardes (pe"
+    },
+    {
+      "origem": "Acórdão TCU 1157/2026 - Plenário",
+      "raw": "Acórdão 725/2026-Plenário",
+      "secao": "relatorio",
+      "matched": true,
+      "trecho": "Solutions Científica Ltda. e Alfatec Serviços Ltda. (peças 178 e 181, respectivamente) ao Acórdão 725/2026-Plenário (peça 170), que negou provimento aos pedidos de reexame interpos"
+    },
+    {
+      "origem": "Acórdão TCU 788/2026 - Plenário",
+      "raw": "Acórdão 5383/2016-TCU-Segunda Câmara",
+      "secao": "relatorio",
+      "matched": false,
+      "trecho": "isprudencial: item 10.32. do Termo de Referência; art. 67, inciso V, da Lei 14.133/2021; Acórdão 5383/2016-TCU-Segunda Câmara, relatoria do Ministro Vital do Rêgo; e Súmula - TCU"
+    },
+    {
+      "origem": "Acórdão TCU 793/2026 - Primeira Câmara",
+      "raw": "Acórdão 2.219/2023-TCU-Segunda Câmara",
+      "secao": "relatorio",
+      "matched": false,
+      "trecho": "da inércia do Poder Público em investigar determinado fato. 22. No âmbito dessa Corte, o Acórdão 2.219/2023-TCU-Segunda Câmara (Relator Min. Jhonatan de Jesus) destacou que o ato"
+    },
+    {
+      "origem": "Acórdão TCU 2713/2025 - Prova (Direito) - De",
+      "raw": "Acórdão 2.101/2020-Plenário",
+      "secao": null,
+      "matched": false,
+      "trecho": "riais acima do piso salarial da categoria, desde que atendidos os requisitos dispostos no Acórdão 2.101/2020-Plenário (relator: Ministro Augusto Nardes); considerando que restou ev"
+    },
+    {
+      "origem": "Acórdão TCU 1279/2026 - Segunda Câmara",
+      "raw": "Acórdão 5.071/2025-TCU-Segunda Câmara",
+      "secao": "relatorio",
+      "matched": false,
+      "trecho": "7), à época dos fatos Prefeito do Município de Barreirinhas, Estado do Maranhão, contra o Acórdão 5.071/2025-TCU-Segunda Câmara (peça 73), relatado pelo Ministro Antonio Anastasia"
+    },
+    {
+      "origem": "Acórdão TCU 1148/2026 - Plenário",
+      "raw": "Acórdãos 1285/2015",
+      "secao": "voto",
+      "matched": false,
+      "trecho": "va de direito ao signatário, não lhe conferindo nenhum direito subjetivo à contratação” – Acórdãos 1285/2015 e 2537/2020, ambos do Plenário, sob relatoria do Ministro Benjamin Zyml"
+    },
+    {
+      "origem": "Acórdão TCU 1620/2026 - Plenário",
+      "raw": "Acórdão 1493/2026-Plenário",
+      "secao": "relatorio",
+      "matched": false,
+      "trecho": "ão ao texto, o projeto normativo foi aprovado por este Colegiado por meio do recentíssimo Acórdão 1493/2026-Plenário, prolatado na Sessão de 10 de junho de 2026. 4. Logo em seguida"
+    },
+    {
+      "origem": "Acórdão TCU 5927/2024 - SUS - Gestão",
+      "raw": "Acórdão 7030/2022-TCU-2ª Câmara",
+      "secao": "relatorio",
+      "matched": false,
+      "trecho": "63) interposto por Erno Inacio Engster - na condição de empresário individual - contra o Acórdão 7030/2022-TCU-2ª Câmara, rel. Ministro BRUNO DANTAS. A deliberação recorrida apres"
+    },
+    {
+      "origem": "Acórdão TCU 1371/2025 - Declaração de inidon",
+      "raw": "Acórdão 4531/2020-TCU-Plenário",
+      "secao": "relatorio",
+      "matched": false,
+      "trecho": "ações e Contratos (RLC) do Senai/MT e do Sesi/MT. 5. No referido processo, foi expedido o Acórdão 4531/2020-TCU-Plenário (cópia à peça 8 destes autos), Relator Ministro Benjamin Zy"
+    },
+    {
+      "origem": "Acórdão TCU 2819/2026 - Primeira Câmara",
+      "raw": "Acórdão 2.331/2025-TCU-1ª Câmara",
+      "secao": "relatorio",
+      "matched": true,
+      "trecho": "forma tecnológica de biossensor para diagnóstico point-of-care da dengue’. 2. Por meio do Acórdão 2.331/2025-TCU-1ª Câmara, o Tribunal julgou irregulares as contas do Instituto de"
+    },
+    {
+      "origem": "Acórdão TCU 755/2025 - Culpa - Erro grosseir",
+      "raw": "Acórdão 13.260/2020-TCU-2ª Câmara",
+      "secao": "relatorio",
+      "matched": false,
+      "trecho": "na sessão de 24/11/2020, ao apreciar a referida proposta da Unidade Técnica, por meio do Acórdão 13.260/2020-TCU-2ª Câmara, deliberou no sentido de: … conhecer da presente represe"
+    },
+    {
+      "origem": "Acórdão TCU 117/2023 - Administração federal",
+      "raw": "Acórdão 2.285/2022 – Plenário",
+      "secao": "voto",
+      "matched": false,
+      "trecho": "te o documento opinativo da PFE/AGU. 20. Neste Tribunal, recentemente, foi aprovada, pelo Acórdão 2.285/2022 – Plenário (rel. min. Antonio Anastasia) a Resolução/TCU 344/2022, que"
+    },
+    {
+      "origem": "Acórdão TCU 935/2026 - Segunda Câmara",
+      "raw": "Acórdão 6.129/2025",
+      "secao": "relatorio",
+      "matched": false,
+      "trecho": "rumental Brasileira” (Pronac 09-2892). 2. Na Sessão de 21/10/2025, esta Câmara proferiu o Acórdão 6.129/2025 (sob a minha relatoria), mediante o qual, no que interessa no presente"
+    },
+    {
+      "origem": "Acórdão TCU 1250/2026 - Segunda Câmara",
+      "raw": "ACÓRDÃO 4.516/2023 - 2ª CÂMARA",
+      "secao": null,
+      "matched": false,
+      "trecho": "UNITIVA E RESSARCITÓRIA. JULGAMENTO PELA IRREGULARIDADE DAS CONTAS DA EMPRESA CONTRATADA (ACÓRDÃO 4.516/2023 - 2ª CÂMARA). RECURSO DE RECONSIDERAÇÃO. CONHECIMENTO. ARGUMENTOS INSUF"
+    },
+    {
+      "origem": "Acórdão TCU 1576/2022 - Projeto básico - Obr",
+      "raw": "Acórdão 2150/2021 – TCU – Plenário",
+      "secao": "relatorio",
+      "matched": false,
+      "trecho": "de reexame (peça 178) interposto por João Carlos Grilo Carletti (740.938.867-68) contra o Acórdão 2150/2021 – TCU – Plenário (peça 161). 1.1. A deliberação recorrida apresenta o se"
+    }
+  ]
+}
