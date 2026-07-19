@@ -48,4 +48,16 @@ describe('escolherCandidato', () => {
     const completo = mk('Plenário', 'ACORDAO-COMPLETO-1');
     expect(escolherCandidato([relacao, completo])!.key).toBe('ACORDAO-COMPLETO-1');
   });
+
+  it('acórdão de relação preserva a KEY real e marca isRelacao', () => {
+    const c = parseEntidade({
+      titulo: 'ACÓRDÃO DE RELAÇÃO 2622/2013 - PRIMEIRA CÂMARA',
+      subtitulo: 'Relator: Y',
+      texto: '',
+      link: 'https://pesquisa.apps.tcu.gov.br/documento/acordao-completo/*/KEY:ACORDAO-COMPLETO-3/NUMACORDAOINT asc/0',
+    })!;
+    expect(c.isRelacao).toBe(true);
+    expect(c.key).toBe('ACORDAO-COMPLETO-3'); // KEY real preservada, não fabricada
+    expect(c.link).toBe('https://pesquisa.apps.tcu.gov.br/documento/acordao-completo-3');
+  });
 });

@@ -18,6 +18,8 @@ export interface CandidatoAcordao {
   ementa: string;
   key: string;
   link: string;
+  /** Título traz "Acórdão de Relação" (decisão simplificada) — preferimos o acórdão completo. */
+  isRelacao: boolean;
 }
 
 const TITULO_RE = /(\d[\d.]*)\s*\/\s*(\d{4})(?:\s+ATA\s+\d+\/\d{4})?\s*-\s*(.+)$/i;
@@ -39,28 +41,25 @@ export function parseEntidade(e: { titulo: string; subtitulo?: string; texto?: s
   const ano = parseInt(tm[2], 10);
   if (!Number.isFinite(numero) || numero <= 0 || ano < 1990 || ano > 2100) return null;
 
-  // Detecta se é "acórdão de relação" e marca na chave
-  const isRelacao = ehRelacao(e.titulo);
-  const finalKey = isRelacao ? key.replace('ACORDAO-COMPLETO-', 'ACORDAO-RELACAO-') : key;
-
   return {
     numero,
     ano,
     colegiado: canonColegiado(tm[3]),
     relator: /relator:\s*(.+)$/i.exec(e.subtitulo || '')?.[1]?.trim() || null,
     ementa: (e.texto || '').trim(),
-    key: finalKey,
-    link: `https://pesquisa.apps.tcu.gov.br/documento/${finalKey.toLowerCase()}`,
+    key,
+    link: `https://pesquisa.apps.tcu.gov.br/documento/${key.toLowerCase()}`,
+    isRelacao: ehRelacao(e.titulo),
   };
 }
 
 export function escolherCandidato(cands: CandidatoAcordao[], colegiadoPreferido?: string): CandidatoAcordao | null {
   if (!cands.length) return null;
   if (colegiadoPreferido) {
-    const c = cands.find((x) => x.colegiado === colegiadoPreferido && !x.key.startsWith('ACORDAO-RELACAO-'));
+    const c = cands.find((x) => x.colegiado === colegiadoPreferido && !x.isRelacao);
     if (c) return c;
   }
-  const completos = cands.filter((c) => !c.key.startsWith('ACORDAO-RELACAO-'));
+  const completos = cands.filter((c) => !c.isRelacao);
   return (completos[0] ?? cands[0]) || null;
 }
 
