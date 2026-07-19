@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { recortarTrechos } from './trechos-de-citacao';
+import { recortarTrechos, montarDossie } from './trechos-de-citacao';
 
 const VOTO = 'VOTO';
 // Texto sintético com relatório + voto. A citação ao alvo 1441/2016 cai no voto.
@@ -32,8 +32,6 @@ describe('recortarTrechos', () => {
     expect(recortarTrechos('', { numero: 1441, ano: 2016 }, 'x')).toEqual([]);
   });
 });
-
-import { montarDossie } from './trechos-de-citacao';
 
 describe('montarDossie', () => {
   const t = (origemChave: string, noVoto: boolean, trecho: string): import('./trechos-de-citacao').TrechoCitacao =>

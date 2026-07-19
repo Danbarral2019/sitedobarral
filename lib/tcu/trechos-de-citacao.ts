@@ -62,9 +62,9 @@ export interface DossieUso {
   trechos: TrechoCitacao[];
 }
 
-/** Chave de dedup: miolo normalizado (colapsa espaços, minúsculas, 160 chars). */
+/** Chave de dedup: trecho normalizado por inteiro (colapsa espaços, minúsculas). Dedup só de idênticos, para não colapsar trechos distintos que compartilham só o início boilerplate. */
 function chaveDedup(trecho: string): string {
-  return trecho.toLowerCase().replace(/\s+/g, ' ').trim().slice(0, 160);
+  return trecho.toLowerCase().replace(/\s+/g, ' ').trim();
 }
 
 export function montarDossie(
