@@ -55,3 +55,43 @@ export function recortarTrechos(
   }
   return out;
 }
+
+export interface DossieUso {
+  alvo: { numero: number; ano: number };
+  contagem: { citantesDistintos: number; noVoto: number; ocorrenciasTotal: number };
+  trechos: TrechoCitacao[];
+}
+
+/** Chave de dedup: miolo normalizado (colapsa espaços, minúsculas, 160 chars). */
+function chaveDedup(trecho: string): string {
+  return trecho.toLowerCase().replace(/\s+/g, ' ').trim().slice(0, 160);
+}
+
+export function montarDossie(
+  alvo: { numero: number; ano: number },
+  trechos: TrechoCitacao[],
+  limite = 40
+): DossieUso {
+  const vistos = new Set<string>();
+  const dedup: TrechoCitacao[] = [];
+  for (const t of trechos) {
+    const k = chaveDedup(t.trecho);
+    if (vistos.has(k)) continue;
+    vistos.add(k);
+    dedup.push(t);
+  }
+  // Voto primeiro; dentro de cada grupo, trechos mais longos (mais informativos).
+  dedup.sort((a, b) => Number(b.noVoto) - Number(a.noVoto) || b.trecho.length - a.trecho.length);
+
+  const citantes = new Set(trechos.map((t) => t.origemChave));
+  const citantesVoto = new Set(trechos.filter((t) => t.noVoto).map((t) => t.origemChave));
+  return {
+    alvo,
+    contagem: {
+      citantesDistintos: citantes.size,
+      noVoto: citantesVoto.size,
+      ocorrenciasTotal: trechos.length,
+    },
+    trechos: dedup.slice(0, limite),
+  };
+}

@@ -32,3 +32,37 @@ describe('recortarTrechos', () => {
     expect(recortarTrechos('', { numero: 1441, ano: 2016 }, 'x')).toEqual([]);
   });
 });
+
+import { montarDossie } from './trechos-de-citacao';
+
+describe('montarDossie', () => {
+  const t = (origemChave: string, noVoto: boolean, trecho: string): import('./trechos-de-citacao').TrechoCitacao =>
+    ({ origemChave, secao: noVoto ? 'voto' : 'relatorio', noVoto, trecho, offset: 0 });
+
+  it('prioriza trechos no voto e conta citantes distintos', () => {
+    const d = montarDossie({ numero: 1441, ano: 2016 }, [
+      t('1/2020', false, 'menção de rotina no relatório sobre o tema aqui'),
+      t('2/2021', true, 'no voto: o prazo prescricional é de cinco anos conforme o precedente'),
+      t('2/2021', true, 'no voto: segunda ocorrência no mesmo acórdão citante distinta'),
+    ]);
+    expect(d.trechos[0].noVoto).toBe(true); // voto vem primeiro
+    expect(d.contagem.citantesDistintos).toBe(2); // 1/2020 e 2/2021
+    expect(d.contagem.noVoto).toBe(1); // só 2/2021 tem trecho no voto
+    expect(d.contagem.ocorrenciasTotal).toBe(3);
+  });
+
+  it('deduplica trechos boilerplate quase idênticos', () => {
+    const boiler = 'No mesmo sentido, os Acórdãos 1441/2016 e 534/2023, ambos do Plenário.';
+    const d = montarDossie({ numero: 1441, ano: 2016 }, [
+      t('1/2020', true, boiler),
+      t('2/2020', true, boiler + ' '), // idêntico após normalizar
+    ]);
+    expect(d.trechos).toHaveLength(1);
+  });
+
+  it('respeita o limite de trechos', () => {
+    const muitos = Array.from({ length: 60 }, (_, i) => t(`${i}/2020`, true, `trecho único número ${i} com conteúdo`));
+    const d = montarDossie({ numero: 1441, ano: 2016 }, muitos, 40);
+    expect(d.trechos).toHaveLength(40);
+  });
+});
