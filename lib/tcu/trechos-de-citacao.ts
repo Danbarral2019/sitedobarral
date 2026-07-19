@@ -6,6 +6,7 @@
  */
 import { extractAcordaoCitations } from './acordao-citation-extractor';
 import { seccionarAcordao, secaoDe } from './seccionar-acordao';
+import { prisma } from '../prisma';
 
 /** Caracteres de contexto de cada lado da citação. */
 const JANELA = 400;
@@ -94,4 +95,36 @@ export function montarDossie(
     },
     trechos: dedup.slice(0, limite),
   };
+}
+
+/**
+ * Coleta o dossiê de uso de um alvo a partir do grafo: arestas (quem cita) +
+ * inteiro teor dos citantes. A CONTAGEM vem das arestas (fonte da verdade da
+ * Fase 1), não dos trechos recortados. Toca banco — não é puro.
+ */
+export async function coletarTrechosDoAlvo(alvo: { numero: number; ano: number }): Promise<DossieUso> {
+  const arestas = await prisma.acordaoCitacao.findMany({
+    where: { numeroAlvo: alvo.numero, anoAlvo: alvo.ano },
+    select: { origemId: true, noVoto: true, ocorrencias: true },
+  });
+  const docs = await prisma.document.findMany({
+    where: { id: { in: arestas.map((a) => a.origemId) } },
+    select: { id: true, acordaoNumero: true, acordaoAno: true, tcuTextoCompleto: true },
+  });
+  const porId = new Map(docs.map((d) => [d.id, d]));
+  const trechos: TrechoCitacao[] = [];
+  for (const a of arestas) {
+    const d = porId.get(a.origemId);
+    if (!d?.tcuTextoCompleto) continue;
+    const origemChave = d.acordaoNumero && d.acordaoAno ? `${d.acordaoNumero}/${d.acordaoAno}` : d.id;
+    trechos.push(...recortarTrechos(d.tcuTextoCompleto, alvo, origemChave));
+  }
+  const dossie = montarDossie(alvo, trechos);
+  // Contagem fidedigna = arestas do grafo (não os trechos recasados).
+  dossie.contagem = {
+    citantesDistintos: arestas.length,
+    noVoto: arestas.filter((a) => a.noVoto).length,
+    ocorrenciasTotal: arestas.reduce((s, a) => s + a.ocorrencias, 0),
+  };
+  return dossie;
 }

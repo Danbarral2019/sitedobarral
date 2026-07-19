@@ -89,7 +89,9 @@ export async function destilarTese(caso: CasoDestilacao): Promise<TeseDestilada>
     systemPrompt,
     messages: [{ role: 'user', content: userContent }],
     jsonMode: true,
-    temperature: 0.2,
+    // Sem `temperature`: o modelo de 'enhancement' (claude-sonnet-5) deprecou
+    // o parâmetro e rejeita a requisição (400) se ele for enviado — ver
+    // lib/ai/providers/anthropic.ts e o mesmo padrão em lib/rag/answerService.ts.
     maxTokens: 2048,
   });
   if (!text) throw new Error(`destilarTese: resposta vazia para ${caso.chave}`);
