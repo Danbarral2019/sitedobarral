@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { Prisma } from '@prisma/client';
 import { prisma } from '@/lib/prisma';
 import { catalogarAcordao } from '@/lib/tcu/catalogar-acordao';
+import { CATEGORIAS_ACORDAO } from '@/lib/tcu/categorias';
 import { verifyCronAuth } from '@/lib/cron-auth';
 import { withCronTelemetry } from '@/lib/cron-telemetry';
 import { apiLogger } from '@/lib/logger';
@@ -45,7 +46,7 @@ export async function GET(request: NextRequest) {
   await withCronTelemetry('catalog-tcu-inteiro-teor', async () => {
     const alvos = await prisma.document.findMany({
       where: {
-        category: 'acordao',
+        category: { in: [...CATEGORIAS_ACORDAO] },
         // ⚠️ `tcuAnalise` é Json?. Em filtro de nulo de campo Json, `null` puro
         // NÃO casa o NULL do banco (retorna 0). Tem que ser `Prisma.DbNull`.
         tcuAnalise: { equals: Prisma.DbNull },
@@ -95,7 +96,7 @@ export async function GET(request: NextRequest) {
 
     const restamNaFila = await prisma.document.count({
       where: {
-        category: 'acordao',
+        category: { in: [...CATEGORIAS_ACORDAO] },
         tcuAnalise: { equals: Prisma.DbNull }, // idem: Json null exige Prisma.DbNull
         tcuLinkPDF: { not: null },
         tcuAnaliseTentativas: { lt: MAX_TENTATIVAS },

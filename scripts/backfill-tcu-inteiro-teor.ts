@@ -32,6 +32,7 @@ import { fetchInteiroTeor } from '../lib/tcu/inteiro-teor-fetch';
 import { rtfToText } from '../lib/tcu/rtf-to-text';
 import { analisarAcordao, artigosDebatidos, ANALISE_VERSAO } from '../lib/tcu/analise-relevancia';
 import { catalogarAcordao, TETO_CHARS_CATALOGO } from '../lib/tcu/catalogar-acordao';
+import { CATEGORIAS_ACORDAO } from '../lib/tcu/categorias';
 
 const EXECUTE = process.argv.includes('--execute');
 const FORCE = process.argv.includes('--force');
@@ -116,7 +117,7 @@ async function main() {
   console.log(EXECUTE ? '🔴 EXECUÇÃO\n' : '🔵 DRY-RUN — nada será gravado (use --execute)\n');
 
   const alvos = await comRetryDB(() => prisma.document.findMany({
-    where: { category: 'acordao', tcuLinkPDF: { not: null } },
+    where: { category: { in: [...CATEGORIAS_ACORDAO] }, tcuLinkPDF: { not: null } },
     select: { id: true, title: true, tcuLinkPDF: true, leiArticlesArr: true, tcuAnalise: true },
     orderBy: { id: 'asc' },
     ...(LIMIT ? { take: LIMIT } : {}),

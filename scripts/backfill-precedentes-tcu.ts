@@ -25,6 +25,7 @@ import {
   persistirArestasDeAcordao,
   PRECEDENTES_VERSAO,
 } from '../lib/tcu/extrair-arestas-precedentes';
+import { CATEGORIAS_ACORDAO } from '../lib/tcu/categorias';
 
 const EXECUTE = process.argv.includes('--execute');
 const FORCE = process.argv.includes('--force');
@@ -36,7 +37,7 @@ async function main() {
 
   const docs = await prisma.document.findMany({
     where: {
-      category: 'acordao',
+      category: { in: [...CATEGORIAS_ACORDAO] },
       tcuTextoCompleto: { not: null },
       ...(FORCE ? {} : { OR: [{ precedentesVersao: null }, { precedentesVersao: { lt: PRECEDENTES_VERSAO } }] }),
     },
