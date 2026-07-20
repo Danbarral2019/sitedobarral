@@ -77,6 +77,22 @@ O limiar de 30% não é arbitrário: abaixo dele, mesmo uma colheita perfeita au
 
 Este é o número mais informativo do probe inteiro e custa uma consulta HTTP mais um `SELECT`. Precisa ser medido e reportado **antes** de qualquer destilação, para os três casos.
 
+### 3.3 Portão 3 — dá para obter o inteiro teor de um citante arbitrário?
+
+**Descoberto ao detalhar o plano de implementação (2026-07-20); o desenho original assumia que sim, sem base.**
+
+O download do inteiro teor (`lib/tcu/inteiro-teor-fetch.ts`) exige a URL guardada em `Document.tcuLinkPDF`, que aponta para `contas.tcu.gov.br/sagas/SvlVisualizarRelVotoAcRtf?...&item0=910941` (ou `ObterDocumentoSisdoc?...&codArqCatalogado=…`). Esse identificador é **interno e opaco**: não é derivável de número/ano.
+
+Ele chega ao banco pela API de dados abertos (`dados-abertos.apps.tcu.gov.br/api/acordao/recupera-acordaos`, campo `urlArquivoPDF`/`urlArquivo`), que o cron `sync-tcu-acordaos` consome como **feed dos mais recentes** (`?inicio=0&quantidade=500`) — sem consulta por número/ano. Para um citante histórico arbitrário, portanto, **não há rota conhecida hoje** para chegar ao RTF.
+
+Duas rotas candidatas, a testar nesta ordem:
+1. **Payload da busca** — a entidade retornada pela busca pode já trazer campos além dos que `parseEntidade` consome (que hoje usa só `titulo`, `subtitulo`, `texto`, `link`). Mais barato de verificar.
+2. **Página do documento** — `https://pesquisa.apps.tcu.gov.br/documento/acordao-completo-NNNN` tem botão de download do RTF; extrair a URL de lá.
+
+**Reprova o portão se** nenhuma das duas rotas produzir o inteiro teor de um acórdão histórico escolhido ao acaso. Sem inteiro teor do citante não há seccionamento, não há recorte de trecho e não há dossiê — a opção C fica sem meio de execução, independentemente dos portões 1 e 2.
+
+Este é o portão mais provável de reprovar e o mais barato de testar. Deve ser o **primeiro** a rodar.
+
 ## 4. Seleção dos casos — regra mecânica, travada antes do resultado
 
 A regra foi fixada e executada contra o grafo **antes** de qualquer destilação, e os casos resultantes estão nomeados abaixo. Nomear os casos na spec elimina a possibilidade de re-selecionar depois de ver o resultado — é a lição de `feedback_eval_ground_truth_bias` aplicada a este experimento: escolher os casos depois de saber quais funcionam transforma o probe em profecia autorrealizável.
@@ -140,7 +156,8 @@ Na Fase 2-A os cards vinham rotulados e isso era inofensivo, porque não havia c
 
 | Componente | Responsabilidade | Estado |
 |---|---|---|
-| `lib/tcu/colher-citantes.ts` | **Novo.** Dada a chave de um acórdão, consultar a busca do TCU, paginar e devolver as chaves dos citantes. Puro na formatação, I/O isolado e testável com resposta gravada. | a criar |
+| `lib/tcu/colher-citantes.ts` | **Novo.** Dada a chave de um acórdão, consultar a busca do TCU, paginar e devolver as chaves dos citantes. Puro na formatação, I/O isolado e testável com resposta gravada. ⚠️ **Não pode reusar `buscarAcordaoPorNumero`**: aquela função filtra o resultado por `numero === alvo && ano === alvo`, descartando exatamente as outras entidades — que são os citantes. | a criar |
+| `lib/tcu/inteiro-teor-por-chave.ts` | **Novo.** Dada a chave/link de um acórdão, resolver a URL do RTF pela rota aprovada no portão 3 (§3.3) e devolver o texto. Só existe se o portão 3 passar. | a criar |
 | `lib/tcu/buscar-acordao-tcu.ts` | Busca na API do TCU (`text/plain`) | existe |
 | `lib/tcu/inteiro-teor-fetch.ts`, `rtf-to-text.ts`, `seccionar-acordao.ts` | Obter e seccionar o inteiro teor | existe |
 | `lib/tcu/extrair-arestas-precedentes.ts` | Extrair citações do texto seccionado | existe |
