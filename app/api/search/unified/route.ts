@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { verifyAuth } from '@/lib/auth';
+import { CATEGORIA_GRAFO } from '@/lib/tcu/backfill-retroativo';
 
 // ===========================
 // Types
@@ -172,7 +173,13 @@ export async function POST(req: NextRequest) {
     let documentResults: DocumentSearchResult[] = [];
 
     if (shouldSearchDocuments) {
-      const documentWhere: Record<string, unknown> = {};
+      // Combustivel do grafo (acordao-grafo) nunca sai daqui: o ramo de
+      // administrador abaixo ignora isPublic, entao a categoria e a unica
+      // protecao. Aplicado via AND para nao ser sobrescrito pelo filtro de
+      // categoria explicito do usuario (linha abaixo).
+      const documentWhere: Record<string, unknown> = {
+        AND: [{ category: { not: CATEGORIA_GRAFO } }],
+      };
 
       // Apply filters
       if (filters.courseId) {

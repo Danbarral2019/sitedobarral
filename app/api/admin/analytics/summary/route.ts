@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { withAdminApi } from '@/lib/api/handler';
+import { CATEGORIA_GRAFO } from '@/lib/tcu/backfill-retroativo';
 
 /**
  * GET /api/admin/analytics/summary
@@ -51,10 +52,11 @@ export const GET = withAdminApi(async () => {
       }),
       prisma.enrollment.count({ where: { isLifetime: true } }),
 
-      // Documentos
-      prisma.document.count(),
-      prisma.document.count({ where: { isPublic: true } }),
-      prisma.document.count({ where: { isPublic: false } }),
+      // Documentos: exclui a categoria 'acordao-grafo' (combustivel do grafo
+      // de precedentes do TCU) para os cards nao saltarem em 10 mil
+      prisma.document.count({ where: { category: { not: CATEGORIA_GRAFO } } }),
+      prisma.document.count({ where: { isPublic: true, category: { not: CATEGORIA_GRAFO } } }),
+      prisma.document.count({ where: { isPublic: false, category: { not: CATEGORIA_GRAFO } } }),
       prisma.document.count({ where: { category: 'enunciados' } }),
 
       // Acessos
