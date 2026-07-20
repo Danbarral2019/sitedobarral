@@ -46,6 +46,7 @@ export async function GET(request: NextRequest) {
     let inseridos = 0, ignorados = 0, duplicados = 0, erros = 0, lidos = 0;
     let ultimoAcordao = cursor.ultimoAcordao, ultimaData = cursor.ultimaData;
     let concluido = false;
+    const itensComErro: string[] = [];
 
     while (Date.now() - inicio < TIME_BUDGET_MS && !concluido) {
       const res = await fetch(`${API}?inicio=${offset}&quantidade=${PAGINA}`, {
@@ -59,6 +60,7 @@ export async function GET(request: NextRequest) {
       }
       const itens = (await res.json()) as ItemFeed[];
       if (!Array.isArray(itens) || itens.length === 0) {
+        await prisma.backfillCursor.update({ where: { id: CURSOR_ID }, data: { concluido: true } });
         concluido = true;
         break;
       }
@@ -76,7 +78,7 @@ export async function GET(request: NextRequest) {
           ultimaData = String(item.dataSessao ?? '');
         } catch (e) {
           if (e instanceof Prisma.PrismaClientKnownRequestError && e.code === 'P2002') duplicados++;
-          else erros++;
+          else { erros++; itensComErro.push(`${item.numeroAcordao}/${item.anoAcordao}`); }
         }
       }
 
@@ -102,12 +104,20 @@ export async function GET(request: NextRequest) {
       totalInserido: final?.totalInserido, totalIgnorado: final?.totalIgnorado,
       ultimoAcordao: final?.ultimoAcordao, ultimaData: final?.ultimaData,
       lidosNesteRun: lidos, duplicados, erros,
+      totalItensComErro: itensComErro.length,
+      itensComErro: itensComErro.slice(0, 50),
     };
     return {
       itemsFound: lidos,
       itemsNew: final?.totalInserido ?? 0,
       itemsError: erros,
-      metadata: { offset: final?.offset, duplicados, concluido: final?.concluido },
+      metadata: {
+        offset: final?.offset,
+        duplicados,
+        concluido: final?.concluido,
+        totalItensComErro: itensComErro.length,
+        itensComErro: itensComErro.slice(0, 50),
+      },
     };
   });
 
