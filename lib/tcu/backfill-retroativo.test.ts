@@ -22,6 +22,21 @@ describe('ehAproveitavel', () => {
     expect(ehAproveitavel({ ...comum, urlArquivo: undefined, urlArquivoPDF: undefined })).toBe(false));
   it('rejeita item sem numero ou ano', () =>
     expect(ehAproveitavel({ ...comum, numeroAcordao: undefined })).toBe(false));
+
+  // Whitelist (nao blacklist): so tipo === 'ACORDAO' normalizado passa.
+  // Endpoint do TCU tem outros valores de tipo alem de "Acordao de Relacao"
+  // (ver lib/tcu-scraper.ts:21) — uma blacklist deixa passar qualquer coisa
+  // que nao contenha "RELACAO", inclusive "Decisao" ou tipo ausente.
+  it('rejeita tipo "Decisao" (nao e blacklist de relacao, e whitelist de acordao)', () =>
+    expect(ehAproveitavel({ ...comum, tipo: 'Decisão' })).toBe(false));
+  it('rejeita item sem tipo (undefined)', () =>
+    expect(ehAproveitavel({ ...comum, tipo: undefined })).toBe(false));
+  it('aceita tipo em minusculas ("acórdão")', () =>
+    expect(ehAproveitavel({ ...comum, tipo: 'acórdão' })).toBe(true));
+  it('aceita tipo sem acento ("ACORDAO")', () =>
+    expect(ehAproveitavel({ ...comum, tipo: 'ACORDAO' })).toBe(true));
+  it('aceita tipo com espacos nas bordas ("  ACÓRDÃO  ")', () =>
+    expect(ehAproveitavel({ ...comum, tipo: '  ACÓRDÃO  ' })).toBe(true));
 });
 
 describe('montarDadosDocument', () => {

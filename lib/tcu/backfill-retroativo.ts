@@ -43,9 +43,25 @@ function mapearColegiado(colegiado: string | null | undefined): string {
   return 'Plenário';
 }
 
+// Normaliza o campo `tipo` para comparação: remove acentos (NFD + strip de
+// diacríticos), maiuscula e tira espaços nas bordas. Precisa lidar com
+// acento e com caixa porque o feed do TCU não é consistente nisso.
+function normalizarTipo(tipo: string | undefined): string {
+  return (tipo ?? '')
+    .normalize('NFD') // separa a letra base da marca de acento (ex.: "Ã" -> "A" + combining tilde)
+    .replace(/[̀-ͯ]/g, '') // remove as marcas diacríticas combinantes (acentos)
+    .toUpperCase()
+    .trim();
+}
+
 export function ehAproveitavel(item: ItemFeed): boolean {
-  const tipo = (item.tipo ?? '').toUpperCase();
-  if (tipo.includes('RELAÇÃO') || tipo.includes('RELACAO')) return false;
+  // Whitelist, não blacklist: só ACÓRDÃO (normalizado) entra. O endpoint do
+  // TCU tem outros valores de `tipo` além de "Acórdão de Relação" (ver
+  // lib/tcu-scraper.ts:21) — uma blacklist de "RELAÇÃO" deixaria passar
+  // "Decisão", tipo ausente, ou qualquer valor futuro não previsto.
+  // "ACÓRDÃO DE RELAÇÃO" normalizado vira "ACORDAO DE RELACAO", que a
+  // igualdade estrita já rejeita.
+  if (normalizarTipo(item.tipo) !== 'ACORDAO') return false;
   if (!linkRtf(item)) return false;
   const num = Number(item.numeroAcordao);
   const ano = Number(item.anoAcordao);
