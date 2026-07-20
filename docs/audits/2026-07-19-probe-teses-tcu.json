@@ -1,0 +1,1242 @@
+{
+  "geradoEm": "2026-07-19",
+  "casos": [
+    {
+      "chave": "1441/2016",
+      "assunto": "Prazo prescricional da pretensão punitiva do TCU",
+      "teses": [
+        {
+          "enunciado": "A pretensão punitiva do TCU subordina-se ao prazo geral de prescrição de dez anos previsto no art. 205 do Código Civil, contado a partir da data de ocorrência da irregularidade sancionada, interrompido por uma única vez pelo ato que ordenar a citação, a audiência ou a oitiva do responsável, com reinício da contagem do prazo decenal a partir desse ato interruptivo.",
+          "inovacao": "Fixou, em incidente de uniformização de jurisprudência, critério objetivo e uniforme para contagem da prescrição da pretensão punitiva do TCU, aplicando subsidiariamente o Código Civil, com regra única de interrupção, superando divergências anteriores sobre o tema.",
+          "trechosFonte": [
+            7,
+            9,
+            10,
+            11,
+            12,
+            14,
+            17,
+            20,
+            21,
+            24,
+            29,
+            30,
+            32,
+            33,
+            34,
+            35,
+            36,
+            37,
+            38,
+            39
+          ]
+        },
+        {
+          "enunciado": "O Tribunal pode reconhecer, inclusive de ofício, a ocorrência da prescrição da pretensão punitiva, a qualquer tempo em que a matéria ainda seja processualmente oportuna.",
+          "inovacao": "Estabeleceu a possibilidade de conhecimento ex officio da prescrição pelo TCU, independentemente de provocação da parte.",
+          "trechosFonte": [
+            0
+          ]
+        },
+        {
+          "enunciado": "A prescrição da pretensão punitiva pode ser suspensa quando a mora na tramitação do processo for imputável ao próprio jurisdicionado.",
+          "inovacao": "Definiu hipótese de suspensão do prazo prescricional vinculada à conduta do responsável no processo.",
+          "trechosFonte": [
+            3,
+            21
+          ]
+        }
+      ],
+      "sinaisQualitativos": [
+        {
+          "origemChave": "10",
+          "trecho": "o paradigmático Acórdão 1.441/2016-TCU-Plenário estabeleceu que, para os processos que tramitam neste Tribunal, incide a regra dos arts. 202 e 205 do Código Civil",
+          "tipo": "precedente paradigmático"
+        },
+        {
+          "origemChave": "23",
+          "trecho": "o paradigmático Acórdão 1.441/2016 – TCU – Plenário",
+          "tipo": "precedente paradigmático"
+        }
+      ],
+      "divergencias": [
+        {
+          "origemChave": "9",
+          "precedenteApontado": "MS 32.201/DF (STF)",
+          "trecho": "O argumento de que esta Corte de Contas deveria adotar como paradigma a deliberação do STF constante do MS 32.201/DF, com a inaplicabilidade do Código Civil para determinação do prazo prescricional de sanções aplicáveis pelo TCU, já foi rechaçado em diversas deliberações",
+          "natureza": "tese rival rejeitada"
+        },
+        {
+          "origemChave": "27",
+          "precedenteApontado": "Resolução TCU 344/2022 e RE 636.886 (Tema 899 STF)",
+          "trecho": "não há retroatividade prejudicial na incidência da referida resolução ao caso... que submetia a pretensão punitiva ao prazo decenal do art. 205 do Código Civil, enquanto, no campo ressarcitório, ainda prevalecia o entendimento pela imprescritibilidade",
+          "natureza": "superação normativa posterior"
+        }
+      ],
+      "confianca": "alta"
+    },
+    {
+      "chave": "2622/2013",
+      "assunto": "Parâmetros de BDI (Bonificação e Despesas Indiretas) e tratamento de despesas indiretas (administração local, administração central) em orçamentos de obras públicas para fins de apuração de sobrepreço/superfaturamento pelo TCU",
+      "teses": [
+        {
+          "enunciado": "Os valores referenciais de BDI (mínimo, médio e 3º quartil) fixados por tipo de obra ou serviço de engenharia no Acórdão 2.622/2013-Plenário substituem os parâmetros anteriores do Acórdão 325/2007-Plenário e devem ser utilizados como parâmetro estatístico de referência para aferição de sobrepreço/economicidade nos contratos de obras públicas.",
+          "inovacao": "Fixação de tabela de valores referenciais de BDI (mínimo, médio, 3º quartil) segmentados por tipo de obra/serviço, obtidos por tratamento empírico-estatístico de contratos executados, substituindo o critério até então vigente.",
+          "trechosFonte": [
+            6,
+            7,
+            14,
+            33,
+            35
+          ]
+        },
+        {
+          "enunciado": "Os custos de administração local, canteiro de obras e mobilização/desmobilização, por serem passíveis de identificação, mensuração e discriminação individualizada, devem ser apropriados como custo direto na planilha orçamentária, e não incluídos na composição do BDI.",
+          "inovacao": "Estabelecimento da regra de que administração local não integra o BDI, devendo ser tratada como custo direto sujeito a medição e pagamento individualizados, com percentuais máximos de referência por faixa de valor da obra.",
+          "trechosFonte": [
+            8,
+            18,
+            20,
+            23,
+            29,
+            31,
+            39
+          ]
+        },
+        {
+          "enunciado": "É estatisticamente incorreto compor um BDI de referência utilizando simultaneamente os valores do 3º quartil (ou de qualquer faixa superior) de cada uma das rubricas que o compõem, pois tais valores não ocorrem conjuntamente no mesmo contrato segundo o estudo empírico que fundamentou o Acórdão 2.622/2013-Plenário; deve-se utilizar o BDI médio representativo ou o percentual total da faixa, e não a soma das faixas máximas de cada rubrica.",
+          "inovacao": "Vedação ao uso combinado dos valores máximos de cada componente do BDI para simular um percentual total artificialmente elevado, com base na metodologia estatística subjacente ao acórdão.",
+          "trechosFonte": [
+            2,
+            12,
+            13,
+            21,
+            26,
+            27,
+            30,
+            32,
+            37
+          ]
+        }
+      ],
+      "sinaisQualitativos": [
+        {
+          "origemChave": "1735/2026",
+          "trecho": "esse acórdão paradigmático estabeleceu diretrizes orientadoras para orçamentos elaborados após a sua publicação",
+          "tipo": "precedente paradigmático"
+        }
+      ],
+      "divergencias": [],
+      "confianca": "alta"
+    },
+    {
+      "chave": "414/2018",
+      "assunto": "Dosimetria da sanção de declaração de inidoneidade aplicada a empresas participantes de cartel/fraude em licitações da Petrobras (caso Refinaria Abreu e Lima/Rnest), e critérios de detração de penalidade já aplicada pela CGU",
+      "teses": [
+        {
+          "enunciado": "Na dosimetria da pena de declaração de inidoneidade para licitar aplicada a empresas integrantes de cartel em licitações públicas, a sanção deve ser graduada conforme o grau de culpabilidade evidenciado pela conduta de cada empresa no esquema fraudulento, reservando-se a pena máxima (cinco anos) às condutas mais gravosas (como vencer a licitação fraudada) e penas intermediárias (três anos) às condutas de menor gravidade relativa (como apresentação de proposta de cobertura), não devendo a pena máxima recair indistintamente sobre todas as participantes do conluio.",
+          "inovacao": "Estabeleceu critério de escalonamento da pena de inidoneidade em função do papel desempenhado por cada empresa no cartel, evitando a aplicação automática e uniforme da sanção máxima a todas as envolvidas.",
+          "trechosFonte": [
+            1,
+            3,
+            4,
+            5,
+            9,
+            10,
+            15,
+            20,
+            23
+          ]
+        },
+        {
+          "enunciado": "É cabível a detração, no cômputo do prazo da sanção de declaração de inidoneidade aplicada pelo TCU, do período em que a empresa já esteve impedida de licitar por força de penalidade de mesma natureza aplicada por outro órgão de controle (CGU) com base nos mesmos fatos, com fundamento no princípio da razoabilidade e no § 3º do art. 22 da LINDB, ressalvada a inidoneidade para licitações estaduais/municipais custeadas com recursos federais não abrangidas pela sanção do órgão de controle interno.",
+          "inovacao": "Fixou o entendimento de que a detração do tempo de penalidade já cumprido perante a CGU é adequada e aderente ao princípio da razoabilidade, desde que verificada a coincidência de fundamentos entre as sanções, sem configurar bis in idem em razão da independência das instâncias.",
+          "trechosFonte": [
+            0,
+            2,
+            12,
+            14,
+            16,
+            17,
+            18,
+            19
+          ]
+        }
+      ],
+      "sinaisQualitativos": [],
+      "divergencias": [],
+      "confianca": "alta"
+    },
+    {
+      "chave": "2914/2019",
+      "assunto": "Sanção de declaração de inidoneidade (art. 46 da Lei 8.443/1992) aplicada a empresas por fraude/formação de cartel em licitações da Petrobras (Refinaria Abreu e Lima), incluindo independência de instâncias sancionadoras, alcance da sanção a sócios/sucessoras e critérios de dosimetria",
+      "teses": [
+        {
+          "enunciado": "As sanções aplicadas pelo TCU (declaração de inidoneidade, art. 46 da Lei 8.443/1992) e pela CGU/outros órgãos de controle (com base na Lei 8.666/1993 ou 8.443/1992) têm natureza distinta e decorrem de esferas de competência independentes, de modo que a aplicação cumulativa de ambas as sanções não configura violação ao princípio do non bis in idem, e o controle externo exercido pelo TCU não é subsidiário ao controle interno da CGU.",
+          "inovacao": "Fixa que a coexistência de sanções de inidoneidade aplicadas por TCU e CGU pelo mesmo fato não viola o non bis in idem, autorizando a manutenção de ambas as penalidades e a extensão da inidoneidade mesmo para contratações estaduais/municipais custeadas com recursos federais.",
+          "trechosFonte": [
+            0,
+            20,
+            15
+          ]
+        },
+        {
+          "enunciado": "A declaração de inidoneidade para participar de licitação na Administração Pública Federal (art. 46 da Lei 8.443/1992) não pode ser aplicada a sócios e administradores de empresas licitantes, por falta de previsão legal; contudo, se restar comprovado que nova sociedade empresária foi constituída pelos mesmos sócios, com o mesmo objeto, com o propósito de dar continuidade às atividades da empresa apenada e assim burlar a sanção (sucessão fraudulenta), cabe estender os efeitos da inidoneidade à nova empresa, mediante processo administrativo específico que assegure contraditório e ampla defesa.",
+          "inovacao": "Estabelece o critério para diferenciar a impossibilidade de sanção pessoal a sócios/administradores da possibilidade de extensão da penalidade a sucessoras fraudulentas constituídas para burlar a inidoneidade.",
+          "trechosFonte": [
+            3,
+            7,
+            14,
+            23
+          ]
+        },
+        {
+          "enunciado": "A conduta de obter vantagens indevidas em licitações mediante supressão da livre concorrência e elevação artificial de preços (formação de cartel) configura, simultaneamente, infração à ordem econômica sujeita à competência do Cade e ilícito administrativo-financeiro sujeito à competência do TCU, de modo que a atuação de um órgão não exclui a competência do outro.",
+          "inovacao": "Consolida o entendimento de competências concorrentes entre TCU e Cade para apuração da mesma conduta de cartelização em licitações públicas.",
+          "trechosFonte": [
+            9,
+            31
+          ]
+        },
+        {
+          "enunciado": "Na dosimetria da sanção de inidoneidade aplicada a participantes de cartel em licitações, observa-se gradação conforme o papel desempenhado no esquema: pena de 5 anos para a empresa vencedora do certame fraudado, e pena de 3 anos para a empresa que apresentou proposta de cobertura.",
+          "inovacao": "Serve de parâmetro de referência para a dosimetria da pena de inidoneidade em casos análogos de cartel em licitações, distinguindo o grau de reprovabilidade conforme a função exercida no conluio.",
+          "trechosFonte": [
+            11,
+            13
+          ]
+        }
+      ],
+      "sinaisQualitativos": [],
+      "divergencias": [],
+      "confianca": "alta"
+    }
+  ],
+  "dossies": [
+    {
+      "alvo": {
+        "numero": 1441,
+        "ano": 2016
+      },
+      "contagem": {
+        "citantesDistintos": 185,
+        "noVoto": 80,
+        "ocorrenciasTotal": 686
+      },
+      "trechos": [
+        {
+          "origemChave": "420/2021",
+          "secao": "voto",
+          "noVoto": true,
+          "trecho": "… dada a presunção de liquidez e certeza de que se reveste o título condenatório; nesse caso, as defesas que o responsável queira opor à execução (e a prescrição é uma das defesas possíveis, como referido adiante) devem ser postuladas perante o juízo competente. III Justificando as conclusões acima, destaca-se que o Tribunal pode aferir a ocorrência de prescrição até mesmo de ofício (item 9.1.6 do Acórdão 1.441/2016-TCU-Plenário). Logo, por maior razão, deve fazê-lo quando provocado pelo interessado, independentemente de a provocação ocorrer em sede de recurso e, nesse caso, independentemente de o recurso ser ou não conhecido (Acórdão 993/2017-TCU-Plenário, rel. min. Augusto Nardes). O relevante, porém, é que o exame – de ofício ou por provocação da parte – se dê em momento ainda oportuno, entendendo-se que a iniciativa…",
+          "offset": 52643
+        },
+        {
+          "origemChave": "3897/2022",
+          "secao": "voto",
+          "noVoto": true,
+          "trecho": "… objeto e dos objetivos do projeto cultural, limitando-se a reapresentação de argumentos anteriormente formulados e refutados nesta TCE, rejeito as alegações que buscam comprovar que os recursos captados por meio do referido projeto cultural foram devidamente aplicados. III 19. Em relação à ocorrência da prescrição, conforme bem pontuou a Serur, esta não ocorreu, seja pelo regime do Código Civil (Acórdão 1.441/2016-TCU-Plenário), seja pelo critério da Lei 9.873/1999 (MS 32.201). 20. Sobre a questão, pertinente deixar registrado que nos termos do recente Acórdão 459/2022-TCU-Plenário, este Tribunal deliberou por manter a jurisprudência atual quanto à imprescritibilidade do dano ao erário ao tempo em que ordenou à Secretaria-Geral de Controle Externo (Segecex) a formação de grupo técnico de trabalho para que, em processo…",
+          "offset": 60881
+        },
+        {
+          "origemChave": "405/2026",
+          "secao": "voto",
+          "noVoto": true,
+          "trecho": "… da Bacia de Campos (UN/BC), este Tribunal de Contas da União (TCU) julgou irregulares as contas dos recorrentes, condenando-os ao ressarcimento de débito em razão de pagamentos em duplicidade por serviços de planejamento de projeto nos Contratos 160.2.072.03-0 e 160.2.075.03-9, celebrados com a Petróleo Brasileiro S/A (Petrobras). 2. Na ocasião desse julgamento, seguindo exame realizado à luz do Acórdão 1.441/2016-TCU-Plenário pela então denominada Secretaria de Fiscalização de Infraestrutura de Petróleo e Gás Natural (SeinfraPetróleo) – atual Unidade de Auditoria Especializada em Petróleo, Gás Natural e Mineração (AudPetróleo) – acerca da prescrição do exercício da pretensão punitiva nos presentes autos, concluiu-se pela impossibilidade de apenação dos gestores, tendo sido aplicada multa, por conseguinte, apenas ao…",
+          "offset": 117743
+        },
+        {
+          "origemChave": "254/2023",
+          "secao": "voto",
+          "noVoto": true,
+          "trecho": "… da participação da recorrente nas fraudes discutidas nestes autos até a demonstração de que a sociedade cumpriu suas obrigações no acordo de leniência; d) suspender a prescrição da pretensão punitiva desta Corte de Contas, com relação aos fatos em análise neste processo, até que haja manifestação dos órgãos signatários do acordo quanto ao cumprimento das obrigações (com base no subitem 9.1.5 do Acórdão 1.441/2016-TCU-Plenário, redator Ministro Walton Alencar Rodrigues); e) determinar à SeinfraOperações que promova o acompanhamento periódico do caso, assim como a imediata instrução da matéria, quando não mais persistir a condição para o sobrestamento. 12. Quanto à admissibilidade dos recursos, ratifico a decisão monocrática do antigo relator (peça 92) no sentido de conhecer dos pedidos de reexame, porquanto cumpridos…",
+          "offset": 184039
+        },
+        {
+          "origemChave": "1339/2022",
+          "secao": "voto",
+          "noVoto": true,
+          "trecho": "… manifestação da Suprema Corte diz respeito apenas à prescrição da execução dos títulos executivos expedidos pelo TCU. Sendo assim, em homenagem ao princípio do Colegiado, aplico ao presente caso a jurisprudência pacífica desta Corte sobre a imprescritibilidade do dano ao Erário (Súmula TCU 282), bem como sobre a aplicabilidade do prazo decenal para a contagem da prescrição da pretensão punitiva (Acórdão 1441/2016-TCU-Plenário, por mim redigido). Especificamente em relação à pretensão punitiva, não ocorreu a prescrição decenal pois, embora os recursos do PNAE tenham sido repassados à municipalidade em 2006, a Administração somente tomou ciência das ilicitudes que inquinaram de irregularidade a prestação de contas, em nome do responsável, após a conclusão das fiscalizações da CGU, em 4/3/2009, cujas evidências foram…",
+          "offset": 53859
+        },
+        {
+          "origemChave": "2729/2023",
+          "secao": "voto",
+          "noVoto": true,
+          "trecho": "…demonstra os gastos do convênio. As demais despesas, a exemplo dos suprimentos de fundos, devem ser abatidos do débito pois não cabia ao então Reitor tal fiscalização. 11. O Ministério Público junto a este Tribunal manifestou concordância com a proposta da então Serur. 12. Inicialmente, observo que a unidade técnica analisou a possibilidade de ocorrência de prescrição aplicando os parâmetros do Acórdão 1441/2016-TCU-Plenário para a pretensão punitiva e reconhecendo a imprescritibilidade das ações de ressarcimento ao Erário. Entretanto, em razão da entrada em vigor da Resolução TCU 344/2022, que regulamenta, no âmbito do Tribunal de Contas da União, a prescrição para o exercício das pretensões punitiva e de ressarcimento, necessário se faz a reanálise da matéria, agora à luz do novo normativo. 13. Nos termos do art.…",
+          "offset": 77830
+        },
+        {
+          "origemChave": "3074/2022",
+          "secao": "voto",
+          "noVoto": true,
+          "trecho": "…do controle externo. 11. Portanto, enquanto tal projeto normativo não sobrevém, julgo adequado manter, como medida de prudência e no legítimo espaço de atuação constitucional deste Tribunal, bem como em homenagem ao princípio do colegiado, a jurisprudência dominante desta Corte quanto à imprescritibilidade do dano ao Erário e quanto à prescrição da pretensão punitiva do Tribunal nos termos do Acórdão 1.441/2016-TCU-Plenário. 12. Dessa forma, considerando os elementos constantes dos autos, não ocorreu a prescrição da pretensão punitiva e ressarcitória do Tribunal. II.2 13. Melhor sorte não socorre a recorrente Lucicleide Xavier Ferreira dos Santos quanto aos argumentos no sentido de que não seria possível a ex-prefeita identificar as fraudes perpetradas pelos seus subordinados na emissão de cheques. 14. Conforme bem…",
+          "offset": 46679
+        },
+        {
+          "origemChave": "7264/2021",
+          "secao": "voto",
+          "noVoto": true,
+          "trecho": "… ao gestor, associada ao encaminhamento do extrato bancário, documento de fácil acesso junto às respectivas instituições, já teria proporcionado elementos para avaliar o atendimento dos objetivos do programa. 65. Nessa linha de raciocínio, rejeito as razões de justificativa apresentadas pelo sucessor, entendendo cabível a aplicação de multa àquele gestor. 66. Por fim, registro que, nos termos do Acórdão 1.441/2016-TCU-Plenário, não ocorreu a prescrição da pretensão punitiva deste Tribunal, tendo em vista que a data da prestação de contas se encerrou em 21/8/2017 e o ato que determinou a citação foi expedido em 2/7/2020, antes, portanto, do interregno de dez anos previsto no art. 205 do Código Civil, utilizado subsidiariamente por este Tribunal. Com essas considerações, VOTO para que seja adotada a minuta de acórdão…",
+          "offset": 82924
+        },
+        {
+          "origemChave": "1967/2022",
+          "secao": "voto",
+          "noVoto": true,
+          "trecho": "…não sobrevém o projeto normativo determinado pelo Acórdão 459/2022-TCU-Plenário, julgo adequado manter, como medida de prudência e no legítimo espaço de atuação constitucional deste Tribunal, bem como em homenagem ao princípio do colegiado, a jurisprudência dominante desta Corte quanto à imprescritibilidade do dano ao Erário e quanto à prescrição da pretensão punitiva do Tribunal nos termos do Acórdão 1.441/2016-TCU-Plenário. Inexiste, portanto, qualquer omissão ou contradição a ser saneada a respeito. 19. Pelas razões descritas neste voto, entendo que não merecem ser acolhidos os embargos de declaração apresentados por Enecon S/A - Engenheiros e Economistas Consultores e pelos Srs. Alexandre de Oliveira, Normando Lima de Oliveira Filho e Luís Munhoz Prosel Junior, em face do Acórdão 1.002/2022-TCU-Plenário. Ante o…",
+          "offset": 44423
+        },
+        {
+          "origemChave": "1136/2022",
+          "secao": "voto",
+          "noVoto": true,
+          "trecho": "…oportunidade em que foi fixada a tese da imprescritibilidade das ações de ressarcimento ao erário, e a Súmula TCU 282, cujo conteúdo é no mesmo sentido. 75. Quanto à prescrição da pretensão punitiva, destaco que a jurisprudência desta Corte ainda é pacífica no sentido de que esta se subordina ao prazo geral de prescrição indicado no art. 205 da Lei 10.406/2002, de dez anos, conforme firmado no Acórdão 1441/2016-TCU-Plenário, Redator o Ministro Walton Alencar Rodrigues. O argumento de que esta Corte de Contas deveria adotar como paradigma a deliberação do STF constante do MS 32.201/DF, com a inaplicabilidade do Código Civil para determinação do prazo prescricional de sanções aplicáveis pelo TCU, já foi rechaçado em diversas deliberações deste Tribunal, a exemplo dos Acórdãos 2559/2019-Plenário, da minha relatoria, e…",
+          "offset": 276959
+        },
+        {
+          "origemChave": "2295/2021",
+          "secao": "voto",
+          "noVoto": true,
+          "trecho": "…externo. 12. Portanto, entendo que, por ora, deve ser mantida a jurisprudência pacífica desta Corte de Contas pela imprescritibilidade da pretensão de ressarcimento ao erário, sem prejuízo de que a questão possa ser objeto de novo entendimento a ser construído por esta Corte a partir de decisões do Supremo Tribunal Federal. 13. Ainda, quanto à prescrição da pretensão punitiva, o paradigmático Acórdão 1.441/2016-TCU-Plenário estabeleceu que, para os processos que tramitam neste Tribunal, incide a regra dos arts. 202 e 205 do Código Civil, ou seja, a prescrição geral de dez anos a partir da ocorrência dos fatos, e a interrupção do prazo prescricional pelo ato que ordena a citação no âmbito do TCU. Após a interrupção, reinicia-se a contagem do prazo de dez anos para que o processo seja julgado. 14. Conforme consta dos…",
+          "offset": 48555
+        },
+        {
+          "origemChave": "2092/2021",
+          "secao": "voto",
+          "noVoto": true,
+          "trecho": "…pela CGU deve ser deduzida da eventual penalidade que venha a ser aplicada, no presente processo, pelo período efetivamente cumprido. III 18. Feito este breve resgate do histórico processual, passo ao exame das alegações preliminares. 19. No tocante à alegação de prescrição da pretensão punitiva, informo que, no âmbito deste Tribunal, é pacífico o entendimento, especialmente após a prolação do Acórdão 1.441/2016-TCU-Plenário (Exmo. Min. Benjamin Zymler), de que o prazo prescricional da pretensão punitiva do TCU segue o prazo geral de prescrição, indicado no art. 205 do Código Civil, ou seja, de dez anos. 20. Essa prescrição é contada a partir da data da ocorrência da irregularidade e é interrompida pelo ato que ordenar a citação, a audiência ou a oitiva da parte. Desse modo, considerando que a conduta mais gravosa,…",
+          "offset": 134057
+        },
+        {
+          "origemChave": "3524/2021",
+          "secao": "voto",
+          "noVoto": true,
+          "trecho": "…de prazo como sendo as datas para a apresentação das respectivas contas. Defende que o CNPq, na fase interna do processo, não logrou êxito em notificá-la acerca das impropriedades a ela imputadas, em prejuízo à sua defesa. 12. Tais argumentos merecem acolhida parcial. 13. Reconheço, no caso concreto, a ocorrência da prescrição da pretensão punitiva pelo TCU, nos termos do que restou decido pelo Acórdão 1.441/2016-TCU-Plenário, que apreciou incidente de uniformização de jurisprudência quanto ao tema. Conforme o julgado em menção, a prescrição punitiva ocorre em dez anos contados a partir da ocorrência da irregularidade, seguindo disposição geral que integra o art. 205 do Código Civil, entre outros, pelo ato que ordenar a citação do responsável. 14. In casu, as irregularidades noticiadas referem-se à não prestação de…",
+          "offset": 99272
+        },
+        {
+          "origemChave": "1885/2022",
+          "secao": "voto",
+          "noVoto": true,
+          "trecho": "…pelo então Relator, entendo que não deve ser conhecido o presente recurso, ante a vedação prevista no artigo 278, § 4º, do Regimento Interno do TCU. 8. Entretanto, no que se refere à preliminar suscitada, por se tratar de questão de ordem pública, concordo com a análise empreendida pela Serur e proponho reconhecer, de ofício, que restou prescrita a pretensão punitiva desta Corte, nos termos do Acórdão 1.441/2016-TCU-Plenário, haja vista que a audiência fora ordenada em 2008 e a multa só veio a ser aplicada por acórdão proferido em 2020. 9. Nesse contexto, reitero o que tenho deixado registrado em minhas manifestações sobre o tema da prescrição, no sentido de aplicar a jurisprudência remansosa desta Corte até que se concluam os estudos acerca da temática, nas perspectivas punitiva e ressarcitória, pelo grupo técnico…",
+          "offset": 50486
+        },
+        {
+          "origemChave": "899/2021",
+          "secao": "voto",
+          "noVoto": true,
+          "trecho": "…de dar provimento parcial aos seus recursos de reconsideração, uma vez que houve a prescrição da pretensão punitiva referente às irregularidades identificadas na Dispensa de Licitação 4/2003 para esses recorrentes. 20. Os fatos tidos como irregulares ocorreram na vigência do novo Código Civil, que entrou em vigor em 11/1/2003, de maneira que se recorre à orientação proferida por intermédio do Acórdão nº 1.441/2016-Plenário (Rel. Min. Benjamin Zymler), a qual prevê que a prescrição da pretensão punitiva do TCU subordina-se ao prazo geral de prescrição disposto no novo Código Civil (dez anos), contado a partir da data da ocorrência da irregularidade e interrompido pelo ato que ordenar a citação, a audiência ou a oitiva da parte. 21. No caso desses ex-gestores, as irregularidades ocorreram no ano de 2003 (Dispensa de…",
+          "offset": 263235
+        },
+        {
+          "origemChave": "3463/2025",
+          "secao": "voto",
+          "noVoto": true,
+          "trecho": "…344/2022, e requerem o reconhecimento da prescrição punitiva em relação a eles, o que afastaria a aplicação de multa ou qualquer penalidade. 19. Conforme observado nos pareceres precedentes, tanto a unidade técnica quanto o Ministério Público junto ao Tribunal reconheceram a inexistência de pretensões ressarcitórias e punitivas por parte deste Tribunal, aplicando os parâmetros estabelecidos no Acórdão 1.441/2016-TCU-Plenário, na Lei 9.873/1999 e em decisões do Supremo Tribunal Federal vigentes à época. Contudo, com a entrada em vigor da Resolução TCU 344/2022, o MPTCU, em nova manifestação, registrou que a análise realizada pela Procuradora-Geral, embora anterior à referida norma, está em conformidade com suas disposições, sendo suficiente para afastar a ocorrência de prescrição neste processo. 20. Foi considerado…",
+          "offset": 67793
+        },
+        {
+          "origemChave": "3191/2022",
+          "secao": "voto",
+          "noVoto": true,
+          "trecho": "… que aprovou o citado Acórdão 459/2022 – Plenário, tendo em vista que meu antecessor no cargo de Ministro desta Corte de Contas, o Ministro Raimundo Carreiro, na condição de relator do aludido processo, já havia votado. 16. Consequentemente, este Tribunal de Contas continua a aplicar o prazo de 10 anos, a contar da data do fato, para a prescrição da pretensão punitiva, conforme decidido no citado Acórdão 1.441/2016 – Plenário, e a imprescritibilidade no tocante à pretensão de ressarcimento ao erário, nos termos decididos no Acórdão 2.709/2008 – Plenário, ratificado pelo recente Acórdão 459/2022 - Plenário. 17. Desse modo, não obstante a minha convicção quanto à aplicação do entendimento do STF constante da ADI 5509, curvo-me ao mencionado posicionamento jurisprudencial predominante nesta Corte de Contas, até que o…",
+          "offset": 41151
+        },
+        {
+          "origemChave": "785/2021",
+          "secao": "voto",
+          "noVoto": true,
+          "trecho": "…de 2006 e que ele só teria sido citado em 31/10/2017, mais de dez anos depois. 13. Contudo, observa-se que as medições questionadas foram atestadas entre novembro/2009 e janeiro/2010 e a citação data de 2017, de modo que não houve o transcurso do prazo de dez anos entre os atos inquinados e o chamamento aos autos. Assim, em consonância com a jurisprudência desta Corte de Contas, consolidada no Acórdão 1.441/2016-TCU-Plenário, de acordo com a qual a pretensão punitiva do TCU subordina-se ao prazo geral de prescrição indicado no art. 205 do Código Civil, de dez anos, a preliminar deve ser rejeitada. 14. Quanto ao Tema 899 do STF, cuja repercussão geral foi reconhecida no âmbito do RE 636.886, relembro que a decisão ainda não transitou em julgado naquela Corte, estando pendente de apreciação de embargos de declaração…",
+          "offset": 227046
+        },
+        {
+          "origemChave": "11471/2023",
+          "secao": "voto",
+          "noVoto": true,
+          "trecho": "…no AREsp n. 169.272/GO, relator Ministro Napoleão Nunes Maia Filho, Primeira Turma, julgado em 15/9/2016, DJe de 23/9/2016.) 11. Fixados o iter processual, as análises de mérito e os desfechos divergentes, passo ao exame da matéria, principiando pela defesa apresentada ao Tribunal. 12. O Sr. Roberto Jorge Cruz de Aragão alegou que: a) houve a prescrição da pretensão punitiva do TCU, com base no Acórdão 1.441/2016 – Plenário; b) esta TCE deveria ser arquivada ou sobrestada, porque há recurso administrativo interposto pelo responsável contra sindicância, remetido à instância superior para apreciação e julgamento; c) não agiu de má-fé e não percebeu os recebimentos a maior de adicional de compensação orgânica; d) não concorreu para a prática do ato administrativo que concedeu o adicional em percentual maior do que o…",
+          "offset": 45554
+        },
+        {
+          "origemChave": "1483/2022",
+          "secao": "voto",
+          "noVoto": true,
+          "trecho": "…e dificuldades reais enfrentados pelo gestor; 4.8. dada a ausência da prática de atos ilícitos, impossibilidade de reprovação de suas contas por ocorrências de índole singelas. 5. Por suas implicações e complexidade, o primeiro ponto suscitado pelo recorrente, concernente à possível prescrição da pretensão judicante do TCU, demanda considerações mais abrangentes. 6. Em 2016, por intermédio do Acórdão 1.441/2016 – Plenário, esta Corte, em observância ao art. 205 do Código Civil, reconheceu a prescrição decenal de sua pretensão punitiva. 7. Todavia, no tocante à pretensão indenizatória, este Tribunal afastava a hipótese de prescrição, dado o entendimento firmado pelo Supremo Tribunal Federal – STF, em 2008, no Mandado de Segurança – MS 26.210, no qual foi reconhecida a imprescritibilidade das ações de ressarcimento…",
+          "offset": 90156
+        },
+        {
+          "origemChave": "4587/2021",
+          "secao": "voto",
+          "noVoto": true,
+          "trecho": "… nestes autos foram ordenadas em 2/4/2012, com base no pronunciamento do secretário da unidade (peça 16), menos de dez anos depois da entrada em vigor do novo código, e que, antes dessa comunicação, o responsável já havia sido citado pelos mesmos fatos no âmbito do TC 020.419/2007-9, não se operou a prescrição da pretensão punitiva no âmbito deste Tribunal, nos termos das definições trazidas pelo Acórdão 1.441/2016-TCU-Plenário. 39. Assim, interrompido o prazo prescricional iniciou-se em 11/1/2003 e foi interrompido em 11/4/2012, data do conhecimento do processo por meio da citação (peças 24 e 26). Dessa forma, a prolação do Acórdão recorrido, ocorrida em 27/6/2017, não ultrapassou o prazo prescricional decenal nos moldes do Código Civil. 40. Feitas essas considerações, portanto, não há argumentos com o condão de…",
+          "offset": 95559
+        },
+        {
+          "origemChave": "2929/2021",
+          "secao": "voto",
+          "noVoto": true,
+          "trecho": "… Consórcio TUC Construções, tendo em vista que as citações ocorrem no processo originador desta representação, TC 034.902/2015-5. Os efeitos jurídicos possíveis desta decisão estão, portanto, adstritos à função sancionatória do TCU, a qual pode ser afetada pela prescrição da pretensão punitiva, e não ressarcitória, tal como aduz o responsável. 51. Como se sabe, a partir das premissas fixadas pelo Acórdão 1.441/2016-TCU-Plenário, prolatado pelo Tribunal em incidente de uniformização de jurisprudência, a pretensão punitiva do TCU se subordina ao prazo decenal previsto no art. 205 do Código Civil. Esse prazo é contado a partir da data de ocorrência da irregularidade sancionada, interrompido pelo ato que ordenar a audiência e suspenso sempre que o responsável apresentar elementos adicionais de defesa. 52. No caso sob…",
+          "offset": 375444
+        },
+        {
+          "origemChave": "1885/2022",
+          "secao": "voto",
+          "noVoto": true,
+          "trecho": "… perspectivas punitiva e ressarcitória, pelo grupo técnico de trabalho constituído recentemente por determinação do Acórdão 459/2022-TCU-Plenário (redator Ministro Walton Alencar Rodrigues) que resultou na instauração do TC 008.702/2022-5. 10. Dessa forma, até a finalização desses trabalhos, reputo que permanece vigente, em relação à prescrição da pretensão sancionatória, as regras do mencionado Acórdão 1.441/2016-TCU-Plenário. 11. Especificamente no que se refere à interrupção da prescrição, cumpre rememorar que restou consignado, tanto no voto condutor do mencionado precedente, quanto nas declarações de voto apresentadas, como registrou a unidade instrutora, que só se verificaria uma única vez. 12. No presente caso, as irregularidades que ensejaram a responsabilização do recorrente ocorreram em 30/04/2008 e foi…",
+          "offset": 51257
+        },
+        {
+          "origemChave": "2643/2022",
+          "secao": "voto",
+          "noVoto": true,
+          "trecho": "…a provocar o reexame da matéria então analisada no relatório precedente pela unidade instrutiva, o qual se deu ainda sob os contornos da aplicação dos precedentes julgados havidos no âmbito do Supremo Tribunal Federal, sejam eles invocados pelas partes, ou ventilados na instrução, os quais foram sopesados à luz do entendimento anterior de prevalência da Súmula TCU 282 e do paradigmático Acórdão 1.441/2016 – TCU – Plenário, principio por realizar este breve histórico da origem e das apurações que resultaram nesta tomada de contas especial. 3. O Contrato de Repasse em questão foi celebrado em 31 de dezembro de 2007, sendo previstos recursos no valor de R$ 933.135,00 para a execução do objeto, dos quais R$ 888.700,00 provenientes da União e R$ 44.435,00 de contrapartida do município. A vigência se estendeu até o dia…",
+          "offset": 100198
+        },
+        {
+          "origemChave": "3602/2022",
+          "secao": "voto",
+          "noVoto": true,
+          "trecho": "…adoto como minhas próprias razões de decidir. 6. Esta Corte, recentemente, reafirmou a aplicabilidade, por ora, da tese da imprescritibilidade do dano ao erário, até que seja aprovado projeto normativo com regulamentação da temática da prescrição, nos termos do Acórdão 459/2022-Plenário (min. rev. Walton Alencar). Ademais, até nova deliberação, entendo que a pretensão punitiva do TCU, conforme Acórdão 1.441/2016–TCU–Plenário, subordina-se ao prazo geral de prescrição indicado no art. 205 do Código Civil, que é de dez anos contados da data de ocorrência da irregularidade sancionada, nos termos do art. 189 do Código Civil, sendo este prazo interrompido pelo ato que ordenar a citação, a audiência ou a oitiva dos responsáveis. 7. Nos processos do TCU, a revelia não leva à presunção de que seriam verdadeiras todas as…",
+          "offset": 28673
+        },
+        {
+          "origemChave": "1148/2022",
+          "secao": "voto",
+          "noVoto": true,
+          "trecho": "…para R$7,96. 17. Sendo assim, anuo às conclusões da unidade técnica de que nem a variação cambial, tampouco as notas fiscais com a variação de preços dos medicamentos seriam justificativas que pudessem embasar o realinhamento de preços concedido pela Secretaria Municipal de Saúde de Barcarena. 18. Por último, destaco que não foi caracterizada a prescrição da pretensão punitiva sob a regra do Acórdão 1.441/2016-TCU-Plenário. Assim, considerando que, a despeito da decisão do Supremo Tribunal Federal no RE 636.886 (Tema 889 de repercussão geral), nos termos do recente Acórdão 459/2022-TCU-Plenário, este Tribunal deliberou por manter a jurisprudência atual quanto à imprescritibilidade do dano ao erário e quanto à prescrição da pretensão punitiva decenal, ao tempo em que ordenou à Secretaria-Geral de Controle Externo…",
+          "offset": 45006
+        },
+        {
+          "origemChave": "3897/2022",
+          "secao": "voto",
+          "noVoto": true,
+          "trecho": "…do controle externo. 21. Portanto, enquanto tal projeto normativo não sobrevém, julgo adequado manter, como medida de prudência e no legítimo espaço de atuação constitucional deste Tribunal, bem como em homenagem ao princípio do colegiado, a jurisprudência dominante desta Corte quanto à imprescritibilidade do dano ao Erário e quanto à prescrição da pretensão punitiva do Tribunal nos termos do Acórdão 1.441/2016-TCU-Plenário. IV 22. No tocante à retificação do acórdão recorrido por inexatidão material, uma vez que já consta dos autos parecer favorável do MP/TCU, consoante peça 77, autorizo a retificação do item 9.2 do Acórdão 5.871/2021-TCU-2ª Câmara (Relator Ministro Aroldo Cedraz), de modo que onde se lê: “condená-los ao pagamento”, leia-se: “condená-los, solidariamente, ao pagamento”. 23. Por fim, conforme bem…",
+          "offset": 61892
+        },
+        {
+          "origemChave": "1189/2026",
+          "secao": "voto",
+          "noVoto": true,
+          "trecho": "…636.886 (Tema 899), afastou a compreensão prevalecente nesta seara quanto à imprescritibilidade da pretensão ressarcitória fundada em decisão de tribunal de contas. 13. Não há, portanto, retroatividade prejudicial na incidência da referida resolução ao caso. Ao contrário, o regime atual se revela mais favorável aos responsáveis do que a orientação anteriormente adotada pelo TCU, consolidada no Acórdão 1.441/2016-Plenário, que submetia a pretensão punitiva ao prazo decenal do art. 205 do Código Civil, enquanto, no campo ressarcitório, ainda prevalecia o entendimento pela imprescritibilidade. 14. Também não procede a alegação de que o marco inicial da contagem deva coincidir com a data dos fatos objeto de imputação. Apenas ajusto, nesse ponto, a referência normativa mencionada na instrução e reproduzida no acórdão…",
+          "offset": 74986
+        },
+        {
+          "origemChave": "947/2025",
+          "secao": "voto",
+          "noVoto": true,
+          "trecho": "…Santos da Silva, Jorge Luiz Gonçalves Farias, Washington Rodrigues de Miranda e Construtora Ceará Mendes Ltda.; e o não provimento dos recursos de Roble Serviços Ltda., 2MS - Engenharia Ltda., Elite Engenharia Ltda., e Emajo Empreendimentos Ltda. - considerando-se que: a) não ocorreu prescrição do dano ao erário seja com base no regime da Lei 9.873/1999, seja com fundamento nos critérios do Acórdão 1441/2016-TCU-Plenário; b) a empresa Construtora Ceará Mendes Ltda. elidiu o indício de conluio ‘desistência de propostas nos lotes I, II, III e V da Concorrência 120019 após a fase de entrega dos envelopes’, de modo que sua situação ficou semelhante à observada para a empresa Metro Engenharia (excluída do rol de empresas apenadas); c) as empresas Roble Serviços Ltda., 2MS - Engenharia Ltda., Elite Engenharia Ltda., e…",
+          "offset": 134272
+        },
+        {
+          "origemChave": "3147/2022",
+          "secao": "voto",
+          "noVoto": true,
+          "trecho": "…entrega da prestação de contas final ou a data da efetiva entrega antecipada assinala o marco inicial da contagem do prazo de prescrição da pretensão punitiva do TCU.” 18. Tendo em vista que o prazo para o encaminhamento da prestação de contas era a data de 2/2/2019 e o ato de ordenação da citação se deu em 1º/2/2022 (peça 39), ou seja, em interregno menor que os dez anos fixados no mencionado Acórdão 1.441/2016 – Plenário, contado da forma disposta no Acórdão 2.278/2019 – Primeira Câmara, não há incidência da prescrição da pretensão punitiva. 19. Ainda acerca da multa, acolho a sugestão da Secex/TCE de que a punição seja fundamentada, de forma exclusiva, no art. 57 da Lei 8.443/1992, pois o entendimento do Tribunal é no sentido de que, havendo omissão no dever de prestar contas, há relação de subordinação entre…",
+          "offset": 28795
+        },
+        {
+          "origemChave": "6058/2022",
+          "secao": "voto",
+          "noVoto": true,
+          "trecho": "…que toca à suscitada alegação de prescrição, esta Corte, recentemente, reafirmou a aplicabilidade, por ora, da tese da imprescritibilidade do dano ao Erário, até que seja aprovado projeto normativo com regulamentação da temática da prescrição, nos termos do Acórdão 459/2022-Plenário (min. rev. Walton Alencar). Ademais, até nova deliberação, entendo que a pretensão punitiva do TCU, conforme Acórdão 1.441/2016–TCU–Plenário, subordina-se ao prazo geral de prescrição indicado no art. 205 do Código Civil, que é de dez anos, contado da data de ocorrência da irregularidade sancionada, nos termos do art. 189 do Código Civil, sendo este prazo interrompido pelo ato que ordenar a citação, a audiência ou a oitiva dos responsáveis. 12. Em relação às demais preliminares suscitadas pelos responsáveis acerca de suposta violação…",
+          "offset": 172521
+        },
+        {
+          "origemChave": "1885/2022",
+          "secao": "voto",
+          "noVoto": true,
+          "trecho": "…à luz do Código Civil como da Lei 9.873/1999; e (ii) seria indevida sua responsabilização pela adoção de preços em desacordo com o referencial oficial, por ter registrado formalmente ressalvas quanto a este ponto em diversas oportunidades. 4. Após examinar as razões recursais, a Secretaria de Recursos concluiu ter se operado a prescrição da pretensão punitiva pelos critérios estabelecidos no Acórdão 1.441/2016-TCU-Plenário, segundo posição majoritária neste Tribunal. Entretanto, registrou que à luz das regras previstas na Lei 9.873/1999, a prescrição da pretensão sancionatória não teria ocorrido. 5. Superada a preliminar, a Serur concorda com os argumentos apresentados pelo recorrente, no sentido de reconhecer que teria, na sua alçada, consignado as devidas ressalvas, subsidiando, assim, as decisões posteriores.…",
+          "offset": 49271
+        },
+        {
+          "origemChave": "1409/2021",
+          "secao": "voto",
+          "noVoto": true,
+          "trecho": "…Câmara, 6.707/2020-2ª Câmara, 6.473/2020-1ª Câmara, 6.466/2020-1ª Câmara, 6.465/2020-1ª Câmara, dentre outros), opto por seguir a mesma linha nestes autos, aplicando a tese da imprescritibilidade do débito e mantendo a posição vigente nesta Casa quanto ao prazo prescricional da pretensão punitiva, nos termos do que restou decidido no incidente de uniformização de jurisprudência apreciado pelo Acórdão 1.441/2016- Plenário. 73. Ainda que restasse decidido pela incidência do Código Civil ou da Lei 9.873/1999, no caso concreto não teria havido a prescrição da ação de ressarcimento ao Erário, tampouco da multa. As irregularidades se consumaram em 15/3/2012, enquanto que a citação dos recorrentes foi autorizada em 15/9/2016, ou seja, menos de cinco anos a contar dos fatos. 74. Nego provimento, portanto, ao recurso de…",
+          "offset": 123984
+        },
+        {
+          "origemChave": "26/2022",
+          "secao": "voto",
+          "noVoto": true,
+          "trecho": "…a respeito da nova deliberação do STF, e tendo em vista o princípio da independência das instâncias, persiste, a rigor, o nosso atual entendimento jurisprudencial – a imprescritibilidade das condenações em débito e a prescrição da pretensão punitiva no prazo de dez anos, que se interrompe com a emissão do ato que ordena a citação ou a audiência, de acordo com o entendimento firmado por meio Acórdão 1.441/2016-TCU-Plenário, redator Ministro Walton Alencar Rodrigues, com base no art. 205 do Código Civil. 11. Diante da inexistência de lei específica tratando do tema, para estabelecer seu novo entendimento, este Tribunal terá necessariamente que suprir essa lacuna legislativa definindo as consequências da decisão do STF pela prescritibilidade – em especial, o prazo prescricional, o início da contagem e as causas de…",
+          "offset": 30957
+        },
+        {
+          "origemChave": "2096/2021",
+          "secao": "voto",
+          "noVoto": true,
+          "trecho": "…a prolação do acórdão. 10. Assim, continuam hígidos o posicionamento fixado pelo STF, em 2008, no Mandado de Segurança - MS 26.210, oportunidade em que foi fixada a tese da imprescritibilidade das ações de ressarcimento ao erário, e a Súmula TCU 282, cujo conteúdo é no mesmo sentido. 11. No tocante à prescrição sancionatória, apego-me ao vigente entendimento firmado por esta Casa, por meio do Acórdão 1.441/2016-Plenário, em incidente de uniformização de jurisprudência, no sentido de que a prescrição da pena é regida pelo prazo geral indicado no art. 205 do Código Civil, que é de 10 anos. 12. No caso em análise tampouco se verificou a prescrição da pretensão punitiva, pois o termo inicial para a contagem da prescrição deve ser a data limite para a apresentação da prestação de contas final do ajuste, nos casos de…",
+          "offset": 57449
+        },
+        {
+          "origemChave": "1957/2022",
+          "secao": "voto",
+          "noVoto": true,
+          "trecho": "… porquanto preenchidos os requisitos de admissibilidade previstos nos artigos 32, inciso I, e 33, ambos da Lei 8.443/1992. 22. Quanto à preliminar do presente recurso, data maxima venia, tenho entendimento diverso ao manifestado pela unidade instrutiva e pelo Parquet, pois observo que, no tocante à prescrição da pretensão punitiva, esta Corte de Contas continua aplicando o entendimento fixado no Acórdão 1.441/2016-Plenário, no sentido de que se subordina ao prazo geral de prescrição indicado no art. 205 do Código Civil, a contar da data do fato, com uma única causa interruptiva, que é a citação ou audiência. 23. Por outro lado, quanto à prescrição da pretensão ressarcitória, o TCU continua aplicando a tese fixada no Acórdão 2.709/2008-Plenário, de minha própria relatoria, que se alinhou ao entendimento então em…",
+          "offset": 85386
+        },
+        {
+          "origemChave": "3592/2022",
+          "secao": "voto",
+          "noVoto": true,
+          "trecho": "… Contas, com ajustes que explicito mais adiante. 6. Esta Corte, recentemente, reafirmou a aplicabilidade, por ora, da tese da imprescritibilidade do dano ao erário, até que seja aprovado projeto normativo com regulamentação da temática da prescrição, nos termos do Acórdão 459/2022-Plenário (min. rev. Walton Alencar). Ademais, até nova deliberação, entendo que a pretensão punitiva do TCU, conforme Acórdão 1.441/2016–TCU–Plenário (min. rel. Benjamin Zymler), subordina-se ao prazo geral de prescrição indicado no art. 205 do Código Civil, que é de dez anos, contado da data de ocorrência da irregularidade sancionada, nos termos do art. 189 do Código Civil, sendo este prazo interrompido pelo ato que ordenar a citação, a audiência ou a oitiva dos responsáveis. 7. Os responsáveis citados mantiveram-se inertes, e assim,…",
+          "offset": 40448
+        },
+        {
+          "origemChave": "1576/2022",
+          "secao": "voto",
+          "noVoto": true,
+          "trecho": "…a Lei de Execuções Fiscais, diploma legal evidentemente inaplicável à fase que antecede a formação do título executivo extrajudicial, caracterizada pela atuação do órgão de controle externo até a prolação do acórdão. 18. No que tange à prescrição da pretensão punitiva, a jurisprudência desta Corte permanece uníssona acerca da aplicabilidade do prazo decenal para sua contagem, com fulcro no Acórdão 1.441/2016-TCU-Plenário, relator Ministro Benjamin Zymler. Assim esta Corte de Contas tem decidido até que se pronuncie em definitivo acerca do tema, com base nos resultados apresentados pelo grupo técnico de trabalho conforme restou decidido no subitem 9.8 do Acórdão 459/2022-TCU-Plenário. 19. Quanto ao mérito das razões recursais, é relevante compreender o contexto fático em que ocorreram as modificações ao Contrato…",
+          "offset": 46645
+        },
+        {
+          "origemChave": "894/2021",
+          "secao": "voto",
+          "noVoto": true,
+          "trecho": "…norma. Sendo assim, torna-se irrelevante a confirmação junto aos municípios aderentes dos itens e quantitativos contratados. 33. A intenção da norma foi impedir modificações significativas nos quantitativos previstos, evitando-se ganhos excessivos decorrentes dos ganhos de escala, sem que esse aumento de receita seja repassado, ao menos em parte, para o poder público. 34. Por fim, por meio do Acórdão 1.441/2016-Plenário, este Colegiado decidiu incidente de uniformização de jurisprudência, fixando-se o prazo decenal, com fundamento no art. 205 do Código Civil, para a prescrição da pretensão punitiva do Tribunal. Sendo assim, considerando que a publicação do edital ocorreu em 19/2/2013, quando se decidiu pela realização do certame na forma presencial; que a ata de registro de preços foi publicada em 3/4/2013, que…",
+          "offset": 73340
+        },
+        {
+          "origemChave": "8463/2021",
+          "secao": "voto",
+          "noVoto": true,
+          "trecho": "…de falhas nos processos de implementação de mecanismos de controle dos serviços prestados pelos profissionais de saúde no âmbito do convênio, entende-se que o ex-diretor e os ex-prefeitos respondem pelo débito apontado”. 45. Sobre a questão da prescrição, abordada nas defesas dos responsáveis, cabe esclarecer que a pretensão punitiva por parte do TCU, nos termos do entendimento firmado no Acórdão 1441/2016-TCU-Plenário (Relator Ministro Benjamin Zymler, Redator Ministro Walton Alencar Rodrigues), subordina-se ao prazo geral de prescrição indicado no art. 205 do Código Civil, qual seja, dez anos contados a partir da data de ocorrência da irregularidade sancionada, nos termos do art. 189 do Código Civil”. 46. Como as irregularidades apuradas neste processo se referem a pagamentos efetuados entre os exercícios de…",
+          "offset": 171268
+        }
+      ]
+    },
+    {
+      "alvo": {
+        "numero": 2622,
+        "ano": 2013
+      },
+      "contagem": {
+        "citantesDistintos": 45,
+        "noVoto": 21,
+        "ocorrenciasTotal": 260
+      },
+      "trechos": [
+        {
+          "origemChave": "2340/2024",
+          "secao": "voto",
+          "noVoto": true,
+          "trecho": "…creditados em uma única parcela no dia 18/8/2009, com devolução para os cofres federais de R$ 1.398.407,78 e R$ 221.111,44 em 30/4/2014. I – Contextualização do prejuízo e rol de responsáveis 5. No que se refere ao sobrepreço calculado pelo tomador de contas, a quantificação do prejuízo tomou por base os preços referenciais da época da contratação da obra, bem como os “BDI máximos permitidos no Acórdão 2.622/2013-TCU-Plenário, respectivamente 35,76% e 22,07% para fornecimento de equipamentos e materiais” (peça 392, item 61). Tal critério teve como respaldo as análises deste Tribunal no bojo do Acórdão 1.802/2019-Plenário, de eminente relatoria do Min. Vital do Rêgo, ocasião em que se determinou a abertura da presente TCE. 6. Ainda de acordo com os pareceres produzidos na fase interna, “diante do método adotado, foram…",
+          "offset": 60076
+        },
+        {
+          "origemChave": "1735/2026",
+          "secao": "voto",
+          "noVoto": true,
+          "trecho": "… o emprego de BDI referencial para fins de controle, pois o TCU examina a aderência global dos preços contratados aos preços de mercado. Nessa perspectiva, a soma dos custos diretos com o BDI contratados não pode superar a dos custos referenciais com o BDI referencial, sob pena de configuração de sobrepreço. 17. Nessa esteira, rechaço a pretensão de utilizar, de forma retroativa, os parâmetros do Acórdão 2.622/2013-TCU-Plenário para legitimar os preços globais, sobretudo na tentativa de inflar a rubrica de Administração Local com base nas faixas de seu 3º quartil. Como consignei nos referidos julgados da ferrovia, esse acórdão paradigmático estabeleceu diretrizes orientadoras para orçamentos elaborados após a sua publicação. O contrato ora em exame possui orçamento com data-base de abril de 2007, momento em que o BDI…",
+          "offset": 292043
+        },
+        {
+          "origemChave": "741/2021",
+          "secao": "voto",
+          "noVoto": true,
+          "trecho": "… 39,5% sobre os itens 2, 3 e 4 (1,395 x R$ 882.042,11), muito embora tal percentual se encontrasse destituído de detalhamento de sua composição, o valor obtido (R$ 1.230.448,74) seria próximo ao contratado (R$ 1.283.303,78). 7. Em posição divergente à da SeinfraPortoFerrovia, o Rel. Min. Benjamin Zymler adotou em seu voto a taxa de BDI de 16,80%, percentual constante do 3º quartil referenciado no Acórdão 2622/2013 – Plenário. Considerou se tratar de mera subcontratação de fornecimento de materiais e equipamentos, o que não justificaria a aplicação do BDI integral. Por consequência, o valor de referência de mercado/Paulo Brígido elevou-se de R$ 882.042,11 para R$ 1.030.225,18 (1,1680 x R$ 882.042,11), e reduziu-se o débito original de R$ 401.261,66 para R$ 253.078,60 (peça 57, p. 14). 8. Da breve contextualização dos…",
+          "offset": 96685
+        },
+        {
+          "origemChave": "2460/2021",
+          "secao": "voto",
+          "noVoto": true,
+          "trecho": "…conclusão da unidade instrutora e do parquet pela rejeição da concessão de benefícios processuais pleiteados pela empresa. IV 55. Passo ao exame das questões relacionadas especificamente à apuração do débito. 56. A empresa alega que foram considerados valores subestimados em diversos itens que compõem o BDI e que o valor adotado seria incompatível com a jurisprudência desta Corte, em especial o Acórdão 2.622/2013-TCU-Plenário (rel. Ministro-substituto Marcos Bemquerer). Questiona especificamente os valores atribuídos às rubricas Administração Local, Administração Central e “seguros, garantias e riscos”, os quais não teriam sido considerados no BDI de referência. 57. Desse modo, pleiteia a utilização de alguns parâmetros extraídos do mencionado acórdão, notadamente valores relativos ao limite situado no 3° quartil em…",
+          "offset": 168434
+        },
+        {
+          "origemChave": "296/2025",
+          "secao": "voto",
+          "noVoto": true,
+          "trecho": "…forma, a Andrade Gutierrez trouxe memorial, no qual alega a incidência da prescrição intercorrente no curso do TC 006.981/2011-9, processo supostamente originador da presente TCE, ante o transcurso de prazo superior a três anos no período de paralisação processual entre 1º/12/2011 e 13/4/2016; alternativamente, quanto ao mérito, repisa a insuficiência do BDI de 23,9% e a imperiosa utilização do Acórdão 2.622/2013-TCU-Plenário (peça 182). 12. Feito o necessário resumo, passo a decidir. 13. Inicialmente, informo que o Contrato CT 36/07 (Lote 13), que é idêntico ao contrato atualmente em análise (Lote 14), foi examinado no julgamento do TC 036.183/2016-4, ocasião em que foi prolatado o Acórdão 1.883/2024-TCU-Plenário, sob minha relatoria. Assim, em observância ao princípio da segurança jurídica, bem como à uniformidade…",
+          "offset": 242507
+        },
+        {
+          "origemChave": "2340/2024",
+          "secao": "voto",
+          "noVoto": true,
+          "trecho": "… o valor de mercado para esse item, razão pela qual refuto a argumentação de defesa sobre a justeza do valor empregado no contrato. Se examinado analiticamente o custo necessário para dispor os equipamentos da estrutura pré-moldada na obra – como o que fiz –, o sobrepreço tenderia a ser muito maior. 48. No que concerne à discussão sobre a composição do BDI, inicialmente com relação à adequação do Acórdão 2.622/2013-Plenário para referenciar contratos anteriores a sua edição, além do dissertado pela unidade instrutiva, rememoro que os parâmetros estabelecidos naquele decisum foram obtidos por meio de um tratamento empírico-estatístico de avenças contratadas e executadas entre 2007 e 2011, contemporâneos, portanto, à obra analisada. 49. Na realidade, caso se utilizassem, por parâmetro de “pesquisas de preço”, a média…",
+          "offset": 86488
+        },
+        {
+          "origemChave": "2460/2021",
+          "secao": "voto",
+          "noVoto": true,
+          "trecho": "…execução. Ou seja, encontrar uma base de rateio que torne consistente a alocação desses gastos entre as obras, com o cuidado de assegurar que cada obra assuma uma parcela proporcional à sua efetiva utilização. 91. Até mesmo porque o critério meramente contábil apresenta uma série de dificuldades e limitações na sua aplicação. Nesse sentido, cito algumas elencadas no relatório que fundamentou o Acórdão 2.622/2013-TCU-Plenário: a. distorções e dificuldades de comparação de dados em empresas que operam em diversos ramos de atividade, distintos portes e complexidade de obras, mas que apresentam demonstrações contábeis consolidadas; b. existência de gastos compreendidos como despesas operacionais que não são efetivamente relacionados com as atividades de execução de contratos de obras públicas (propaganda e publicidade,…",
+          "offset": 187449
+        },
+        {
+          "origemChave": "2628/2021",
+          "secao": "voto",
+          "noVoto": true,
+          "trecho": "… de recursos que porventura venha a ocorrer ao final da obra –, acompanho o parecerista no que diz respeito à necessidade de devolução dos referidos recursos, ante a inexistência de disposição legal contrária e a legitimidade da providência sugerida.” (grifos acrescidos) 14. Cumpre destacar, contudo, que os referenciais contidos no Acórdão 325/2007 foram substituídos pelos parâmetros indicados no Acórdão 2.622/2013 – Plenário, de tal forma que essas premissas que embasaram o voto acima transcrito estão ultrapassadas, sendo necessário proceder a uma nova análise da adequabilidade dessas despesas indiretas adotadas nos orçamentos elaborados pelo Exército, sob a ótica da jurisprudência atual desta Corte de Contas. 15. Importante alertar, ainda, no tocante às despesas com adestramento que tinham sido aceitas, no âmbito…",
+          "offset": 95610
+        },
+        {
+          "origemChave": "296/2025",
+          "secao": "voto",
+          "noVoto": true,
+          "trecho": "… pela construtora para justificar os custos não era adequada, pois dissociava a análise do custo direto do BDI de forma estanque, o que não é aceito pelo TCU. De mais a mais, a análise sinalizou a possibilidade de duplicidade de várias despesas apresentadas com a inclusão de custos que já estariam contemplados nos custos diretos da obra (TC 010.493/2010-7, peça 62). 41. Com relação à aplicação do Acórdão 2.622/2013-Plenário, o valor médio de BDI sugerido pelo estudo para obras de ferrovia é de 20,97% (subitem 9.1). Contudo, a Administração Local não integra essa taxa, uma vez que tal rubrica deve ser apropriada pelas empresas como custo direto no orçamento. Portanto, os percentuais de Administração Local sugeridos no referido acórdão, e mencionados pela defesa, servem para que o TCU obtenha um referencial do custo…",
+          "offset": 264827
+        },
+        {
+          "origemChave": "2340/2024",
+          "secao": "voto",
+          "noVoto": true,
+          "trecho": "…o que majorou artificialmente o sobrepreço apontado;  sobre o BDI, alega-se que os parâmetros de 47,03% e 37% utilizados para obras e equipamentos, respectivamente, eram usuais à época no Deop/MG, e que a inclusão das taxas de 6,50% e 5,00% na composição das despesas indiretas para administração local e gerenciamento não proporcionaram benefício à contratada;  somente em 2013, com a edição do Acórdão 2.622/2013-Plenário, o Tribunal fixou os valores referenciais para as taxas de BDI. Não se poderia utilizar tal parâmetro retroativamente;  o sobrepreço seria de pequena monta, pouco mais de 8% do valor total do contrato; e  em muitos casos a planilha Sinapi não contempla os serviços licitados, sendo necessário o uso de outras planilhas referenciais, e o Deop/MG utilizou a tabela de referência Setop/MG como a que…",
+          "offset": 79351
+        },
+        {
+          "origemChave": "741/2021",
+          "secao": "voto",
+          "noVoto": true,
+          "trecho": "…dolphin de atracação”), o débito utilizado como parâmetro para a citação dos responsáveis se baseou na análise do perito judicial, o qual utilizou, como referência de mercado, os preços contratados junto à empresa Probase Ltda., não havendo, portanto, superfaturamento imputado nesses itens. 43. A SeinfraPortoFerrovia, com a utilização de preços de insumos do Sinapi e do BDI paradigma oriundo do Acórdão 2.622/2013-Plenário, identificou preços acima dos de referência nos subitens 5.1.1 e 6.1.1, destinados ao fornecimento, confecção e cravação de camisa metálica com diâmetro de 80cm, resultando em dano de R$ 22.245,89. 44. O voto condutor apresentou novas referências para os dois serviços, indicando haver superfaturamento ainda superior ao apontado pela unidade instrutiva, mas tal fato ensejaria nova oportunidade de…",
+          "offset": 141771
+        },
+        {
+          "origemChave": "2460/2021",
+          "secao": "voto",
+          "noVoto": true,
+          "trecho": "…devendo servir como referência principal a ser buscada nas contratações públicas.’ (grifo acrescido). 12. Assim, considero correto o entendimento manifestado no despacho do Diretor da 2ª DT da SeinfraOperações, não vislumbrando alguma particularidade do caso em exame que recomendasse a utilização do 3º quartil das referências para obras rodoviárias/ferroviárias constante da parte dispositiva do Acórdão 2.622/2013-Plenário, que apresenta a tabela reproduzida a seguir: <<<QUADRO CONSTA DO ORIGINAL>>> 13. A utilização do BDI médio para obras de rodovias e ferrovias indicados na tabela acima resultaria em um valor do débito ainda mais gravoso para a embargante, de forma que o valor referencial adotado (23,9%) poderia ser tido inclusive como conservador, notadamente em obras de grande porte como a que ora se examina.”…",
+          "offset": 171068
+        },
+        {
+          "origemChave": "2460/2021",
+          "secao": "voto",
+          "noVoto": true,
+          "trecho": "… examina.” (destaques acrescidos) 61. Transcrevo também as conclusões do eminente relator acerca da utilização de todos os parâmetros de uma determinada faixa para cada uma das rubricas que compõem o BDI (Acórdão 2.002/2020-TCU-Plenário, rel. Ministro Benjamin Zymler): “15. Ocorre que o cálculo realizado pela embargante é estatisticamente incorreto e se encontra em desacordo com o dispositivo do Acórdão 2.622/2013-Plenário, pois utiliza os parâmetros máximos como se estes fossem observados simultaneamente em um único BDI. A própria estatística do valor global consolidado do BDI, mostra que o valor do 3º quartil, ainda que admitido, seria de 24,23%, e não 39,5% como calculado pela embargante, visto que os parâmetros do terceiro quartil indicados nas duas tabelas acima não ocorrem simultaneamente. 16. Dito de outra…",
+          "offset": 171884
+        },
+        {
+          "origemChave": "2460/2021",
+          "secao": "voto",
+          "noVoto": true,
+          "trecho": "… em uma faixa referencial entre 19,6% e 24,23% para obras ferroviárias.” (destaques acrescidos) 62. Voltando ao presente caso, ao pleitear a utilização dos valores do 3° quartil em determinadas rubricas sem demonstrar em que medida as peculiaridades da obra em exame justificariam assim o fazer, esse cálculo estaria incorreto. 63. É justamente a utilização do valor indicado na parte dispositiva do Acórdão 2.622/2013-TCU-Plenário que nos leva a adotar um BDI médio representativo, uma vez que ele considera no seu cálculo a probabilidade de ocorrência daquele conjunto de fatores. 64. Ocorre que o BDI médio representativo para rodovias e ferrovias previsto no Acórdão 2.622/2013-TCU-Plenário (20,97%) é inferior ao utilizado no exame de economicidade nestes autos (23,90%) e sua adoção acarretaria situação desfavorável à…",
+          "offset": 172939
+        },
+        {
+          "origemChave": "2533/2023",
+          "secao": "voto",
+          "noVoto": true,
+          "trecho": "…de Declaração a discussão acerca do mérito da decisão recorrida. 13. Relembro que os embargos de declaração não se prestam para rediscussão de mérito e reafirmo o posicionamento contido no Voto que proferi e que embasou o Acórdão 2.628/2021 – Plenário, no sentido de que, tendo em vista que os referenciais contidos no Acórdão 325/2007 – Plenário foram substituídos pelos parâmetros indicados no Acórdão 2.622/2013 – Plenário, as premissas que embasaram o Acórdão 1.399/2010 – Plenário estão ultrapassadas, sendo necessário proceder a uma nova análise da adequabilidade das despesas indiretas adotadas nos orçamentos elaborados pelo Exército, sob a ótica da jurisprudência atual desta Corte de Contas. 14. Restou devidamente caracterizada, portanto, a necessidade de este Tribunal constituir um grupo de trabalho objetivando…",
+          "offset": 12916
+        },
+        {
+          "origemChave": "1932/2024",
+          "secao": "voto",
+          "noVoto": true,
+          "trecho": "… foram realizadas de forma adequada e efetiva. 10. Além disso, verificou-se que, no edital do pregão eletrônico DAN.A/PE – 157/2021, não constou dispositivo requerendo a apresentação de demonstrativo de apuração das alíquotas efetivas (médias) do PIS e da Cofins das empresas sujeitas ao regime de tributação não cumulativa desses tributos, em desacordo com orientação disposta no subitem 9.3.2.4 do Acórdão 2.622/2013-Plenário, de relatoria do Ministro Marcos Bemquerer Costa. II 11. Feita a devida contextualização dos fatos, passo a tratar dos achados da fiscalização. O primeiro achado relata problemas na execução e fiscalização do Contrato DAI.A/CT 4500032949, firmado entre a Eletronuclear e a Westinghouse Electric Company LLC. O contrato, que visa apoiar o programa de operação de longo prazo da usina nuclear Angra…",
+          "offset": 73003
+        },
+        {
+          "origemChave": "1142/2022",
+          "secao": "voto",
+          "noVoto": true,
+          "trecho": "…dia 26/01/2022, no qual foi afastada a incidência retroativa da Súmula 253/2010 para balizar o BDI diferenciado nos fornecimentos havidos em contrato assinado em 2004. Também me refiro ao TC 017.647/2014-2, ainda pendente de apreciação devido ao meu pedido de vistas formulado na sessão da Primeira Câmara do dia 8/3/2022, em que também se discutia a aplicação retroativa das referências de BDI do Acórdão 2.622/2013-Plenário a contrato celebrado em 2009. 50. Tanto nos casos acima como no ora em apreciação, entendo que o princípio da segurança jurídica, insculpido no art. 24 da LINDB, está sendo invocado de forma equivocada pelas instâncias instrutivas desta Corte de Contas. 51. A discussão sobre a aplicação do princípio da segurança jurídica nos contratos administrativos auditados pelo TCU não é inédita no âmbito do…",
+          "offset": 262596
+        },
+        {
+          "origemChave": "1450/2022",
+          "secao": "voto",
+          "noVoto": true,
+          "trecho": "…que se possa afastar a possibilidade de ocorrência de falhas de estimativas similares às verificadas em relação a outros itens orçamentários da Concorrência 02/2019. 9.2.3. inclusão de cláusula no edital de licitação que estipule a proporcionalidade do pagamento de itens da administração local à execução físico-financeira global do empreendimento, nos moldes determinados pelo item 9.3.2.2 do Acórdão 2.622/2013-TCU-Plenário. 3. Além dessas determinações, foi exarada recomendação direcionada ao SAAE, ao Ministério do Desenvolvimento Regional (MDR) e à Caixa Econômica Federal (CEF) para a adoção de medidas de redução dos riscos relativos à funcionalidade do empreendimento ante a incerteza sobre a capacidade daquela autarquia municipal de arcar com a contrapartida prevista no Termo de Compromisso 0424.405/2014 (item…",
+          "offset": 30015
+        },
+        {
+          "origemChave": "1175/2021",
+          "secao": "voto",
+          "noVoto": true,
+          "trecho": "…esses serviços, pois estavam vinculados às unidades de tempo “mês” ou “hora”. 12. 26. Em consequência, a SeinfraUrbana identificou risco de que eventuais atrasos na execução contratual poderiam resultar em reinvindicações de pagamentos por itens que compõem o quesito administração local de forma dissociada da evolução física das obras civis, o que estaria em desacordo com o estabelecido pelo Acórdão 2.622/2013 – Plenário, de minha relatoria. 27. Mediante o precitado decisum, este Tribunal determinou ao antigo Ministério do Planejamento, Orçamento e Gestão que orientasse os órgãos e entidades da Administração Pública Federal a discriminar os custos de administração local, canteiro de obras e mobilização e desmobilização na planilha orçamentária de custos diretos, “por serem passíveis de identificação, mensuração…",
+          "offset": 45366
+        },
+        {
+          "origemChave": "1735/2026",
+          "secao": "voto",
+          "noVoto": true,
+          "trecho": "…inclusive, a realização de prova pericial técnica. Sustentaram que a adoção da Taxa de Bonificação e Despesas Indiretas (BDI) de 23,90% do Sicro seria insuficiente para cobrir os custos de Administração Local de obra ferroviária, requerendo a validação do percentual de 42% previsto na sua proposta comercial ou, subsidiariamente, a aplicação retroativa dos parâmetros do 3º quartil fixados no Acórdão 2.622/2013-TCU-Plenário, rel. Ministro-Substituto Marcos Bemquerer. 14. Rejeito, de início, a alegação de cerceamento de defesa por ausência de prova pericial produzida pelo Tribunal. No processo de controle externo, compete ao responsável trazer aos autos, no tempo oportuno, os elementos probatórios destinados a amparar sua defesa, inclusive laudos técnicos particulares se assim entender pertinente. Nesses termos, a…",
+          "offset": 290301
+        },
+        {
+          "origemChave": "2628/2021",
+          "secao": "voto",
+          "noVoto": true,
+          "trecho": "…de licitação, deve constar previsão que as empresas optantes do Simples Nacional apresentem os percentuais de ISS, PIS e COFINS discriminados na composição do BDI, em compatibilidade com as alíquotas a que a empresa está obrigada a recolher, bem como que a composição de seus encargos sociais não inclua os gastos relativos às contribuições que essas empresas estão dispensadas de recolhimento.” Acórdão 2.622/2013 – Plenário (de minha relatoria) “Os custos de administração local, canteiro de obras e mobilização e desmobilização devem estar discriminados na planilha orçamentária de custos diretos, por serem passíveis de identificação, mensuração e discriminação, bem como por estarem sujeitos a controle, medição e pagamento individualizados por parte da Administração Pública.” Acórdão 2.622/2013 – Plenário (de minha…",
+          "offset": 89368
+        },
+        {
+          "origemChave": "741/2021",
+          "secao": "voto",
+          "noVoto": true,
+          "trecho": "…que a adoção do BDI diferenciado sobre os serviços subcontratados não foi feita de ofício pelo relator, supostamente inovando na metodologia de apuração do dano, e sim acolhendo parcialmente as alegações de defesa da Probase. 60. Assim, foi aplicada a taxa de BDI de 16,8% sobre o valor dos serviços subcontratados com a empresa Paulo Brígido, percentual que representa o valor do 3º quartil do Acórdão 2.622/2013-Plenário para itens de mero fornecimento de materiais e equipamentos. Com isto o valor de referência de mercado para os itens 2, 3 e 4 foi elevado de R$ 882.042,11 para R$ 1.030.225,18, reduzindo o valor do superfaturamento imputado de R$ 401.261,66 para R$ 253.078,60 (ou R$ 1.282.303,78 - R$ 1.030.225,18), em favor dos responsáveis. 61. Observa-se nas alegações de defesa da Probase (peça 30, fls. 10/11)…",
+          "offset": 152462
+        },
+        {
+          "origemChave": "544/2021",
+          "secao": "voto",
+          "noVoto": true,
+          "trecho": "… primeiro aditamento são indevidos, como ressaltei alhures neste voto, o que por si só torna questionável a magnitude do valor acrescido a título de gerenciamento. Além disso, houve uma apropriação indevida do valor do aditivo sob a forma de percentual, o que se assemelha à situação de inclusão da administração local no BDI, a qual é repudiada pela jurisprudência predominante do TCU, a exemplo do Acórdão 2622/2013-TCU-Plenário. Isso se deve ao fato de as despesas de gerenciamento da obra, baseada em serviços administrativos e técnicos na administração do empreendimento, não terem necessariamente correlação direta com o acréscimo de serviços e mão de obra, como demonstrado no voto condutor da deliberação recorrida. Conquanto, no caso concreto, a rubrica de gerenciamento do projeto tenha sido inclusa na planilha…",
+          "offset": 107504
+        },
+        {
+          "origemChave": "2628/2021",
+          "secao": "voto",
+          "noVoto": true,
+          "trecho": "… incidindo sobre o custo direto dos serviços: 22.1.1. adestramento: Faixa de custo direto (R$)PercentualAté R$ 75.000.000,005,00%De R$ 75.000.000,01 até R$ 120.000.000,004,50%De R$ 120.000.000,01 até R$ 210.000.000,004,00%De R$ 210.000.000,01 até R$ 300.000.000,003,50%Acima de R$ 300.000.000,013,00% 22.1.2. administração local: usando como parâmetro os percentuais constantes do subitem 9.2.2 do Acórdão 2.622/2013 – Plenário, sem prejuízo do disposto no subitem 22.3 abaixo; 22.2. deixar assente que os percentuais de \"administração\" constantes do subitem 9.1.5 do Acórdão 1.399/2010-Plenário se referem exclusivamente aos dispêndios com a \"administração local\", sendo defeso ao Exército incorporar a administração central nos seus orçamentos, haja vista que os supostos gastos com a administração central em obras por…",
+          "offset": 103626
+        },
+        {
+          "origemChave": "1913/2025",
+          "secao": "voto",
+          "noVoto": true,
+          "trecho": "…utilizado como parâmetro para as contratações públicas e que, nessa condição, gozam de presunção relativa de validade e regularidade. 82. A recorrente também contestou a utilização do percentual de 23,90% de BDI, derivado do Sicro-2, sob o argumento de que tal índice não refletiria adequadamente os custos indiretos de uma obra ferroviária. Propôs, como alternativa, a adoção dos parâmetros do Acórdão 2.622/2013-Plenário, acrescidos dos custos com administração local, que, segundo sua interpretação, justificaria a aplicação de um BDI de até 30,90%. 83. Ocorre que, no caso concreto, há custos que deveriam compor a administração local espalhados por outras rubricas do orçamento contratual, não sendo razoável a correlação sugerida pela recorrente. Estão, portanto, em conformidade com a jurisprudência há longa data…",
+          "offset": 241865
+        },
+        {
+          "origemChave": "296/2025",
+          "secao": "voto",
+          "noVoto": true,
+          "trecho": "…dos percentuais de BDI comparados se encontra no item Administração Local (2,5% Sicro/Dnit e 18,5% contrato); - os custos de Administração Local apurados pela Reage Auditoria para os Lotes 13 e 14, no valor de R$ 68.491.670,42, são, inclusive, superiores aos R$ 64.544.968,73 pagos pela Valec à Andrade Gutierrez no mesmo período, outubro/2009 a setembro/2011; - as orientações constantes no Acórdão 2.622/2013-TCU-Plenário não teriam sido observadas na análise empreendida pelo TCU, seja em relação aos percentuais de Administração Local inseridos no Custo Direto (para rodovias e ferrovias – 1º quartil = 1,98%, Médio = 6,99%, 3º quartil = 10,68%), seja em relação ao dever da equipe de auditoria de proceder ao exame pormenorizado dos itens que compõem a taxa de BDI quando esta estiver fora dos patamares estipulados…",
+          "offset": 256294
+        },
+        {
+          "origemChave": "1957/2022",
+          "secao": "voto",
+          "noVoto": true,
+          "trecho": "…em vigor. A referida tabela é reproduzida a seguir: DescriçãoMínimoMáximoMédiaGarantia0,000,420,21Risco0,002,050,97Despesas Financeiras0,001,200,59Administração Central0,118,034,07Lucro3,839,966,90Tributos6,039,037,65COFINS3,003,003,00PIS0,650,650,65ISS2,005,003,62CPMF0,380,380,38Total16,3628,8722,6134. Verifico também que a composição de BDI elaborada pela recorrente com base nos parâmetros do Acórdão 2.622/2013-Plenário, por meio da qual chegou a um percentual de 32,31%, utilizou os valores do terceiro quartil para as rubricas apuradas pelo TCU para obras de construção de redes de abastecimento de água e coleta de esgoto. Assim, o novo BDI referencial aduzido pela recorrente adotou os percentuais de 4,67% (administração central), 0,75% (seguros e garantias), 1,74% (risco), 1,17% (despesa financeira) e 9,40%…",
+          "offset": 90867
+        },
+        {
+          "origemChave": "1957/2022",
+          "secao": "voto",
+          "noVoto": true,
+          "trecho": "…financeira) e 9,40% (lucro). 35. Todavia, o terceiro quartil da taxa de BDI total para obras de saneamento apontado pelo Acórdão 2.622/2013-Plenário é de 26,44%, abaixo do parâmetro utilizado como referência para o cálculo de sobrepreço nesta tomada de contas especial (28,87%). 36. É inadequado compor a referência do BDI utilizando para todas as suas rubricas os valores da faixa superior do Acórdão 2.622/2013-Plenário, pois no estudo conduzido pelo TCU elas não ocorreram simultaneamente no mesmo contrato. Dito de outra forma, o percentual total do terceiro quartil para obras de saneamento do Acórdão 2.622/2013-Plenário (26,44%) não é resultante do cálculo do BDI usando os valores do terceiro quartil de cada uma das rubricas apontadas na parte dispositiva do referido decisum, de acordo com a equação de cálculo…",
+          "offset": 91665
+        },
+        {
+          "origemChave": "2628/2021",
+          "secao": "voto",
+          "noVoto": true,
+          "trecho": "…com treinamento de pessoal. 16. Outro aspecto que, a meu ver, deve ser melhor avaliado, em consonância com a evolução do entendimento jurisprudencial desta Corte de Contas, é a questão do pagamento de taxas de administração central para obras executadas pelo Exército Brasileiro. 17. Acerca dessa questão, considero pertinente trazer à baila as definições contidas no Relatório que embasou o Acórdão 2.622/2013 – Plenário2: “56. A taxa de administração central é uma das parcelas mais complexas de se precificar, dentre os componentes que integram o BDI dos orçamentos de obras públicas, pois consiste em uma estimativa média de gastos que não são facilmente identificados e mensurados em relação a uma obra específica, mas que são indispensáveis para manter em operação a estrutura central das empresa e em andamento os…",
+          "offset": 96746
+        },
+        {
+          "origemChave": "2628/2021",
+          "secao": "voto",
+          "noVoto": true,
+          "trecho": "…utilizada metodologia diferenciada, elaborar orçamento detalhado das atividades de mobilização e desmobilização, de canteiro de obras e acampamento e de administração local, efetuando seu registro como custo direto, sendo que, com relação a esta última atividade: 22.3.1. caso o impacto do valor orçado em relação ao valor total do orçamento superar o percentual médio constante do item 9.2.2 do Acórdão 2.622/2013 – Plenário, os quantitativos considerados na sua composição unitária devem ser devidamente justificados e demonstrados mediante memória de cálculo analítica; 22.3.2. deve ser adotado critério objetivo de medição e pagamento, estipulando pagamentos proporcionais à execução financeira da obra, abstendo-se de utilizar como critério o pagamento de valor fixo mensal; 22.4. é permitido ao Exército incluir no…",
+          "offset": 104786
+        },
+        {
+          "origemChave": "2460/2021",
+          "secao": "voto",
+          "noVoto": true,
+          "trecho": "…justificariam assim o fazer, esse cálculo estaria incorreto. 63. É justamente a utilização do valor indicado na parte dispositiva do Acórdão 2.622/2013-TCU-Plenário que nos leva a adotar um BDI médio representativo, uma vez que ele considera no seu cálculo a probabilidade de ocorrência daquele conjunto de fatores. 64. Ocorre que o BDI médio representativo para rodovias e ferrovias previsto no Acórdão 2.622/2013-TCU-Plenário (20,97%) é inferior ao utilizado no exame de economicidade nestes autos (23,90%) e sua adoção acarretaria situação desfavorável à Construtora Norberto Odebrecht S.A. 65. Quanto ao argumento de que o BDI referencial não abrange valores para cobertura de “seguros, garantias e riscos”, entendo que os valores relativos às rubricas de “CPMF” (0,38%), extinta em 2007, “IRPJ” (1,48% - incluso na…",
+          "offset": 173202
+        },
+        {
+          "origemChave": "1764/2026",
+          "secao": "voto",
+          "noVoto": true,
+          "trecho": "…relevante é a aderência do preço final pago pela Administração ao preço justo de mercado, compreensão reafirmada pelos já citados Acórdãos 1.883/2024 e 296/2025. 20. Tampouco procede a tentativa de justificar o percentual de 45,67% com a inclusão, no BDI, de despesas de administração local. Os dois recentes acórdãos, em sintonia com a jurisprudência consolidada desta Casa — notadamente o Acórdão 2.622/2013-TCU-Plenário —, reafirmam que a administração local deve ser apropriada como custo direto, e não embutida indistintamente no BDI. O Acórdão 1.745/2023-TCU-Plenário, de minha relatoria, embora em contexto recursal distinto, reforça essa moldura interpretativa ao evidenciar que a discussão metodológica sobre o BDI não autoriza a incorporação indiscriminada dessa rubrica nem a adoção automática de percentuais…",
+          "offset": 449828
+        },
+        {
+          "origemChave": "1957/2022",
+          "secao": "voto",
+          "noVoto": true,
+          "trecho": "…rubricas apuradas pelo TCU para obras de construção de redes de abastecimento de água e coleta de esgoto. Assim, o novo BDI referencial aduzido pela recorrente adotou os percentuais de 4,67% (administração central), 0,75% (seguros e garantias), 1,74% (risco), 1,17% (despesa financeira) e 9,40% (lucro). 35. Todavia, o terceiro quartil da taxa de BDI total para obras de saneamento apontado pelo Acórdão 2.622/2013-Plenário é de 26,44%, abaixo do parâmetro utilizado como referência para o cálculo de sobrepreço nesta tomada de contas especial (28,87%). 36. É inadequado compor a referência do BDI utilizando para todas as suas rubricas os valores da faixa superior do Acórdão 2.622/2013-Plenário, pois no estudo conduzido pelo TCU elas não ocorreram simultaneamente no mesmo contrato. Dito de outra forma, o percentual…",
+          "offset": 91392
+        },
+        {
+          "origemChave": "2628/2021",
+          "secao": "voto",
+          "noVoto": true,
+          "trecho": "…Geral da União, há que se ponderar em que medida retirar parte da verba destinada às obras públicas executadas por aquela força armada, para pagamento de despesas com administração central, poderia representar um bis in idem nos gastos do Governo Federal. 19. Diante de todo esse contexto, entendo ser fundamental que este Tribunal, para manter o mesmo rigor técnico adotado para prolação do Acórdão 2.622/2013 – Plenário e a abrangência do Acórdão 1.399/2010 – Plenário, constitua um grupo de trabalho objetivando definir quais são as particularidades das obras públicas executadas pelo Exército Brasileiro que justificam a utilização de metodologia diferenciada de apropriação de custos em relação àquela empregada nos orçamentos elaborados por órgãos públicos para contratos pactuados com empreiteiras, especialmente…",
+          "offset": 101049
+        },
+        {
+          "origemChave": "1932/2024",
+          "secao": "voto",
+          "noVoto": true,
+          "trecho": "…auditoria analisou o pregão eletrônico DAN.A/PE – 157/2021, que teve como objetivo a contratação de serviços técnicos especializados de engenharia para o projeto de Extensão de Vida Útil de Angra 1. A auditoria identificou que o edital não exigiu a apresentação de um demonstrativo de apuração das alíquotas efetivas do PIS e da Cofins pelas empresas participantes, o que contraria a orientação do Acórdão 2.622/2013-Plenário, de relatoria do Ministro-Substituto Marcos Bemquerer Costa, reproduzida a seguir (grifo acrescido): “9.3. determinar ao Ministério do Planejamento, Orçamento e Gestão que: [...] 9.3.2. oriente os órgãos e entidades da Administração Pública Federal a: [...] 9.3.2.4. estabelecer, nos editais de licitação, que as empresas sujeitas ao regime de tributação de incidência não cumulativa de PIS e…",
+          "offset": 77769
+        },
+        {
+          "origemChave": "2628/2021",
+          "secao": "voto",
+          "noVoto": true,
+          "trecho": "…logística do Exército Brasileiro. 22. Com base nos argumentos acima apresentados, considero adequado que este Tribunal envie resposta ao consulente informando sobre a constituição de grupo de trabalho, com a finalidade de realizar os estudos necessários para que seja proferida nova deliberação em substituição ao Acórdão 1.399/2010 – Plenário, levando em consideração os parâmetros indicados no Acórdão 2.622/2013 – Plenário, bem como informando que, provisoriamente, até o posicionamento definitivo desta Corte de Contas sobre as conclusões dessa equipe multidisciplinar, o Exército Brasileiro deve adotar os seguintes procedimentos de apropriação de custos nos orçamentos das obras sob sua execução: 22.1. nos orçamentos de obras de cooperação executadas com recursos da União, ressalvados os casos excepcionalmente…",
+          "offset": 102737
+        },
+        {
+          "origemChave": "2340/2024",
+          "secao": "voto",
+          "noVoto": true,
+          "trecho": "…valor de R$ 574.681,64;  à época da elaboração dos editais, o Deop/MG utilizava na composição das planilhas de custos os preços unitários fornecidos pela Setop/MG, que até hoje permanece sendo a recomendada pelo Governo de Minas Gerais;  a taxa de BDI utilizada no Contrato 052/2011 não se apresentava excessiva, em especial porque não se pode aplicar retroativamente o entendimento constante do Acórdão 2.622/2013-Plenário. Os critérios adotados pelo contratante refletem o que determina o Manual Deop/MG;  apresentou-se o demonstrativo da composição do BDI, argumentando-se, em seguida, que tal rubrica a ser utilizada é de responsabilidade do órgão, conforme indica o Manual de Obras Públicas do Deop/MG; e  ainda sobre o BDI, afirma-se que a adoção de parâmetro superior ao permitido refere-se à incidência de…",
+          "offset": 71020
+        },
+        {
+          "origemChave": "2460/2021",
+          "secao": "voto",
+          "noVoto": true,
+          "trecho": "…Local estimada em 17,13%, que, se adotada nestes autos, reduziria ainda mais o débito remanescente (R$ 9.192.018,62). 59. No Acórdão 721/2021-TCU-Plenário, apreciei argumento semelhante. Na ocasião, mencionei que o eminente Ministro Benjamin Zymler tinha examinado argumento análogo, de forma lapidar. 60. Em relação à utilização de dados do terceiro quartil do estudo realizado pelo TCU (Acórdão 2.622/2013-TCU-Plenário), o eminente relator asseverou no voto condutor do Acórdão 2.002/2020-TCU-Plenário (rel. Ministro Benjamin Zymler): “11. (...). O uso do terceiro quartil da faixa referencial de BDI aprovada pelo Acórdão 2.622/2013-Plenário não estaria aderente com o estudo que embasou aquela decisão nem com o voto condutor que fundamentou a aludida deliberação. Nesse sentido, permito-me transcrever excerto do…",
+          "offset": 169677
+        },
+        {
+          "origemChave": "741/2021",
+          "secao": "voto",
+          "noVoto": true,
+          "trecho": "…contratual, a avaliação de superfaturamento é mais indicada pelo método da limitação dos preços unitários (MLPU), que considera apenas os serviços com preço unitário acima do referencial, sem compensação com itens subavaliados.” (Acórdão 1.727/2018-1ª Câmara, rel. min. Benjamin Zymler) 18. Ademais, como destaca o auditor da Serur, deve ser acatada a argumentação de aplicação indevida do Acórdão 2.622/2013 - Plenário aos itens 2, 3 e 4 da planilha orçamentária do Contrato 44/2004. Em suas palavras: “9.21. A confrontação do orçamento contratado com outro elaborado com parâmetros de custo obtidos depois de vários anos é, pois, imprópria para aferição de adequação da proposta contratada com valores de mercado. As correções de preços por índices em datas demasiadamente longas não conseguem reproduzir as exatas…",
+          "offset": 104381
+        },
+        {
+          "origemChave": "1548/2026",
+          "secao": "voto",
+          "noVoto": true,
+          "trecho": "…para as três colunas, ou seja, o valor total não foi acrescido do BDI declarado de 24,23%. Assim, em síntese, a planilha orçamentária do edital considerou como zero o BDI para esse item do custo direto das obras. 16. A prefeitura esclareceu ter adotado BDI igual a zero para o item “administração local” em atendimento à orientação da Caixa Econômica Federal, com vistas à suposta observância do acórdão 2622/2013-Plenário Relator ministro-substituto Marcos Bemquerer Costa., que recomenda que os custos desse item não ultrapassem 10,68% do valor total da contratação. 17. Ocorre que a falha não reside no percentual global de BDI, considerado aceitável, mas na supressão de sua incidência sobre item que, por ser classificado como custo direto da obra, deve integrar a planilha orçamentária acrescido dessa parcela.…",
+          "offset": 50699
+        }
+      ]
+    },
+    {
+      "alvo": {
+        "numero": 414,
+        "ano": 2018
+      },
+      "contagem": {
+        "citantesDistintos": 13,
+        "noVoto": 8,
+        "ocorrenciasTotal": 28
+      },
+      "trechos": [
+        {
+          "origemChave": "977/2023",
+          "secao": "voto",
+          "noVoto": true,
+          "trecho": "…(Seproc) para a inscrição da entidade indicada no item 9.1 deste acórdão no Cadastro Nacional de Empresas Inidôneas e Suspensas (CEIS) , considerando a detração do tempo efetivamente cumprido em razão da penalidade aplicada à empresa por aquela controladoria, com base no § 3º do art. 22 da Lei de Introdução às Normas do Direito Brasileiro (LINDB) e nas ponderações do MPTCU no relatório do Acórdão 414/2018-TCU-Plenário, tendo em vista que, no caso concreto, as sanções da CGU e do TCU são de mesma natureza e relativas ao mesmo fato, com exceção da inidoneidade para participar de licitações em certames promovidos na esfera estadual e municipal cujos objetos sejam custeados com recursos federais repassados por força de convênios ou instrumentos congêneres;” 13. Cito o Acórdão 1.236/2022-Plenário, de relatoria do…",
+          "offset": 40799
+        },
+        {
+          "origemChave": "234/2023",
+          "secao": "voto",
+          "noVoto": true,
+          "trecho": "…realizada. V 52. Em relação à dosimetria da pena, deixo de trazer maiores considerações, em razão da proposta de sobrestamento, sem prejuízo de manifestar minha posição de alinhamento com os últimos precedentes desta Corte envolvendo casos semelhantes. 53. Cito, por ser bastante esclarecedor, trecho do parecer do Ministério Público junto ao TCU, acolhido parcialmente no voto que fundamentou o Acórdão 414/2018-TCU-Plenário, em que se discutiu a matéria: Contudo, a pena máxima não deve recair igualmente sobre todas as empreiteiras, mas somente sobre as que praticaram as condutas mais graves em cada fraude. Proponho, então, os critérios seguintes para que se possa sopesar o grau de culpabilidade em função das condutas empregadas. A conduta mais gravosa corresponde à apresentação de proposta próxima ao limite…",
+          "offset": 218340
+        },
+        {
+          "origemChave": "2216/2023",
+          "secao": "voto",
+          "noVoto": true,
+          "trecho": "…(Seproc) para a inscrição da entidade indicada no item 9.1 deste acórdão no Cadastro Nacional de Empresas Inidôneas e Suspensas (CEIS), considerando a detração do tempo efetivamente cumprido em razão da penalidade aplicada à empresa por aquela controladoria, com base no § 3º do art. 22 da Lei de Introdução às Normas do Direito Brasileiro (LINDB) e nas ponderações do MPTCU no relatório do Acórdão 414/2018-Plenário, tendo em vista que, no caso concreto, as sanções da CGU e do TCU são de mesma natureza e relativas ao mesmo fato, com exceção da inidoneidade para participar de licitações em certames promovidos na esfera estadual e municipal cujos objetos sejam custeados com recursos federais repassados por força de convênios ou instrumentos congêneres. 2. Presentes os requisitos de admissibilidade fixados no…",
+          "offset": 32050
+        },
+        {
+          "origemChave": "2092/2021",
+          "secao": "voto",
+          "noVoto": true,
+          "trecho": "…incorporo às minhas razões de decidir. V 59. Passo a tratar da dosimetria da pena. Para tanto, considero a jurisprudência que vem se consolidando nesta Corte de Contas, em especial nos processos relativos aos empreendimentos da Refinaria do Nordeste. 60. Cito, por ser bastante esclarecedor, trecho do parecer do Ministério Público junto ao TCU, acolhido parcialmente no voto que fundamentou o Acórdão 414/2018-TCU-Plenário, em que se discutiu a matéria: Contudo, a pena máxima não deve recair igualmente sobre todas as empreiteiras, mas somente sobre as que praticaram as condutas mais graves em cada fraude. Proponho, então, os critérios seguintes para que se possa sopesar o grau de culpabilidade em função das condutas empregadas. A conduta mais gravosa corresponde à apresentação de proposta próxima ao limite…",
+          "offset": 152290
+        },
+        {
+          "origemChave": "921/2021",
+          "secao": "voto",
+          "noVoto": true,
+          "trecho": "…nas fraudes licitatórias ocorridas no âmbito das obras de implantação da Rnest. Em linha de concordância, a SeinfraOperações e o MP/TCU manifestaram-se, por argumentos distintos, pela declaração de inidoneidade da empresa pelo período de cinco anos. O Relator a quo destacou que a situação tratada no processo era bastante similar aos casos por ele apreciados nos Acórdãos 300/2018 - Plenário, 414/2018 - Plenário e 2.135/2018 - Plenário, nos quais houve a aplicação de sanções de inidoneidade pelo prazo de três anos e a pena máxima de cinco anos deveria ser reservada às empresas Odebrecht, Camargo Corrêa, Andrade Gutierrez e Queiroz Galvão. Examinadas as alegações recursais, a Serur propõe, em pareceres uniformes, negar provimento ao recurso. Acolho as conclusões da unidade técnica e as adoto como razões…",
+          "offset": 94202
+        },
+        {
+          "origemChave": "2294/2021",
+          "secao": "voto",
+          "noVoto": true,
+          "trecho": "…o prazo de três anos constante do acórdão recorrido pelo qual a Iesa foi considerada inidônea para participar de licitação na administração federal. A respeito, consoante bem apontado pela unidade técnica, cito os seguintes precedentes desta Corte em relação à Refinaria Abreu e Lima: Empresas que apresentaram proposta de coberturaDeliberação do TCUSançãoMendes Júnior Trading e Engenharia S/A Acórdão 414/2018-P e 2.638/2019-P 3 anosEngevix Engenharia e Projetos S.A. Acórdão 2.135/2018-P 3 anosMPE Montagens e Projetos Especiais S/A Acórdão 300/2018-P e 825/2018-P 3 anosTechint Engenharia e Construção Acórdão 2.914/2019-P 3 anos VII 40. Passo a tratar do pleito da Iesa de aplicação por analogia do instituto da detração, de forma a ser considerado o período em que ela ficou impedida de participar de…",
+          "offset": 142392
+        },
+        {
+          "origemChave": "2092/2021",
+          "secao": "voto",
+          "noVoto": true,
+          "trecho": "…e nas provas da participação da Iesa Óleo e Gás S.A. nos atos ilícitos descortinados. Entendo que, ao presente momento, já resta suficientemente comprovada a existência do cartel e de seu modo de atuação, inclusive nas licitações do Comperj. Somente no âmbito desta Corte de Contas, ao menos outras dez empresas já foram tornadas inidôneas por fraude a licitação da Petrobras (Acórdãos 300/2018, 414/2018, 1.221/2018, 1.744/2018, 2.135/2018, 2.355/2018, 1.256/2019, 1.527/2019, 2.914/2019, 424/2019 e 2.134/2020, todos do Plenário). 30. Desse modo, uma vez comprovada a existência do Clube e de sua atuação também nas contratações do Comperj, passo a analisar aquelas que seriam as evidências da participação da Iesa nas fraudes em comento. Considero aqui todo o acervo probatório compartilhado com este…",
+          "offset": 138781
+        },
+        {
+          "origemChave": "309/2023",
+          "secao": "voto",
+          "noVoto": true,
+          "trecho": "…da SOG - Óleo e Gás S.A. (antiga Setal Óleo e Gás S.A.) nos atos ilícitos descortinados. Considero que, ao presente momento, já resta suficientemente comprovada a existência do cartel e de seu modo de atuação, inclusive nas licitações do Comperj. Somente no âmbito desta Corte de Contas, outras quinze empresas já foram tornadas inidôneas por fraudes às licitações da Petrobras (Acórdãos 300/2018, 414/2018, 1.221/2018, 1.744/2018, 2.135/2018, 2.355/2018, 424/2019, 1.256/2019, 1.527/2019, 2.914/2019, 1.900/2020, 2.134/2020, 2.687/2020, 2.841/2020, 3.163/2020, 3.175/2020, 82/2021, 416/2021, 497/2021, 1.042/2021, 1.177/2021, 1.313/2021, 2.092/2021, 2.320/2021, 2.531/2021, 2.586/2021, 1.236/2022, 2.461/2022, todos do Plenário). 17. Desse modo, uma vez comprovada a existência do “Clube” e de sua…",
+          "offset": 83305
+        },
+        {
+          "origemChave": "234/2023",
+          "secao": "voto",
+          "noVoto": true,
+          "trecho": "…da participação da Engevix Engenharia e Projetos S.A. nos atos ilícitos descortinados. Considero que, ao presente momento, já resta suficientemente comprovada a existência do cartel e de seu modo de atuação, inclusive nas licitações do Comperj. Somente no âmbito desta Corte de Contas, outras quinze empresas já foram tornadas inidôneas por fraudes às licitações da Petrobras (Acórdãos 300/2018, 414/2018, 1.221/2018, 1.744/2018, 2.135/2018, 2.355/2018, 424/2019, 1.256/2019, 1.527/2019, 2.914/2019, 1.900/2020, 2.134/2020, 2.687/2020, 2.841/2020, 3.163/2020, 3.175/2020, 82/2021, 416/2021, 497/2021, 1.042/2021, 1.177/2021, 1.313/2021, 2.092/2021, 2.320/2021, 2.531/2021, 2.586/2021, 1.236/2022, 2.461/2022, todos do Plenário). 17. Desse modo, uma vez comprovada a existência do “Clube” e de sua…",
+          "offset": 203009
+        },
+        {
+          "origemChave": "995/2022",
+          "secao": "voto",
+          "noVoto": true,
+          "trecho": "…à dosimetria, compreendo que ela se mostra coerente com as decisões proferidas nos demais processos que tratam de fraude comprovada à licitação – penas de 5 anos para a empresa que venceu licitação (Acórdãos 1.221/2018, 1.744/2018, 2.355/2018, 2.638/2019, 2.914/2019 e 2.531/2021, todos do Plenário, dentre outros) e de 3 anos para quem apresentou proposta de cobertura (Acórdãos 300/2018, 414/2018, 2.135/2018, 2.914/2019, todos do Plenário, dentre outros). 47. Sendo assim, não há motivo para alterar o quantum das sanções estipulado na decisão recorrida. 48. Diante de todo o exposto, VOTO para que seja adotada a deliberação que ora submeto a este Colegiado. TCU, Sala das Sessões, em 11 de maio de 2022. BENJAMIN ZYMLER Relator ACÓRDÃO Nº 995/2022 – TCU – Plenário 1. Processo nº TC…",
+          "offset": 132176
+        },
+        {
+          "origemChave": "995/2022",
+          "secao": "relatorio",
+          "noVoto": false,
+          "trecho": "…dar, de forma simulada e fraudulenta, aparência de legalidade àquele certame, nos termos do voto condutor do acórdão recorrido (peça 191, p. 9), verbis: ‘(...) 36. Ainda no que diz respeito à referida licitante, deve-se ajustar a dosimetria da sanção de inidoneidade para três anos, em vez dos cinco anos propostos pela secretaria instrutora, na linha do entendimento adotado por este Tribunal no Acórdão 414/2018-TCU-Plenário, que considero aplicável ao caso em exame: ‘Contudo, a pena máxima não deve recair igualmente sobre todas as empreiteiras, mas somente sobre as que praticaram as condutas mais graves em cada fraude. Proponho, então, os critérios seguintes para que se possa sopesar o grau de culpabilidade em função das condutas empregadas. A conduta mais gravosa corresponde à apresentação de proposta próxima ao…",
+          "offset": 75624
+        },
+        {
+          "origemChave": "254/2023",
+          "secao": "relatorio",
+          "noVoto": false,
+          "trecho": "…transitado em julgado: observância do devido processo legal e autorização da utilização dos documentos pelo juízo competente. 66. No que se refere ao devido processo legal, ‘a processualística do TCU é baseada, em essência, em provas documentais’ e ‘o exercício do direito de defesa acontece (...) dando-se à parte a possibilidade de questionar os documentos acostados nos autos’ (voto condutor do Acórdão 414/2018-Plenário, Rel. Min. Benjamin Zymler). No caso vertente, concedeu-se à Engevix a oportunidade de se manifestar sobre todos os fatos tratados ao longo das instruções procedidas nos autos. Logo, não se ventila qualquer nulidade ou ofensa processual. 67. Por conseguinte, relativamente ao critério de observância ao devido processo legal, no âmbito do presente processo, todos os elementos constantes dos autos…",
+          "offset": 29204
+        },
+        {
+          "origemChave": "2216/2023",
+          "secao": "relatorio",
+          "noVoto": false,
+          "trecho": "…específica nesse sentido; b) a desoneração de responsabilidade aplicada pela Petrobras não vincula o entendimento deste TCU, conforme o já mencionado princípio da independência das instâncias; c) por questão de isonomia, não há como expurgar a penalidade imputada, uma vez que, no tocante às sanções de declaração de inidoneidade, o Tribunal tem se balizado pelos seguintes parâmetros indicados Acórdão 414/2018-TCU-Plenário, da relatoria do Ministro Benjamin Zymler. Lista-se a seguir, alguns julgados, todos do Plenário, onde tais parâmetros foram sopesados: Empresas que venceram licitação mediante fraudeDeliberação do TCUSançãoIesa Óleo & Gás S.A.Acórdão 2.355/2018-P5 anosConstrutora Queiroz Galvão S.A.Acórdão 1.221/2018-P5 anosConstrutora OAS S.A.Acórdão 1.744/2018-P e 2.453/2019-P5 anosMendes Júnior Trading e…",
+          "offset": 28176
+        },
+        {
+          "origemChave": "995/2022",
+          "secao": "relatorio",
+          "noVoto": false,
+          "trecho": "…encaminhamento dá a correta aplicação do devido processo legal e a da observância ao princípio da proporcionalidade quanto à aplicação das respectivas penas (adequando-as às circunstâncias de cada caso concreto), nos termos das disposições previstas na Lei 9.874/199 (art. 2º) e no Decreto-Lei 4.657/1942 (§ 3º do art. 22), bem como ao que foi adotado como parâmetro norteador o que se extrai do Acórdão 414/2018-TCU-Plenário (item 36 do voto condutor do acórdão recorrido, peça 191, p. 9, item 36). 6.3.4. Também é importante mencionar que a discussão atinente à prova, que dá suporte à aplicação das penas às recorrentes, se materializa por um conjunto de ocorrências indiciárias, dentro do contexto em que se deu a audiência dos recorrentes, e, em seu conjunto, faz prova suficiente para a ocorrência de fraude e de…",
+          "offset": 67016
+        },
+        {
+          "origemChave": "2216/2023",
+          "secao": "relatorio",
+          "noVoto": false,
+          "trecho": "…(Seproc) para a inscrição da entidade indicada no item 9.1 deste acórdão no Cadastro Nacional de Empresas Inidôneas e Suspensas (CEIS), considerando a detração do tempo efetivamente cumprido em razão da penalidade aplicada à empresa por aquela controladoria, com base no § 3º do art. 22 da Lei de Introdução às Normas do Direito Brasileiro (LINDB) e nas ponderações do MPTCU no relatório do Acórdão 414/2018-Plenário, tendo em vista que, no caso concreto, as sanções da CGU e do TCU são de mesma natureza e relativas ao mesmo fato, com exceção da inidoneidade para participar de licitações em certames promovidos na esfera estadual e municipal cujos objetos sejam custeados com recursos federais repassados por força de convênios ou instrumentos congêneres; 9.3. encaminhar cópia desta deliberação à responsável, à…",
+          "offset": 2452
+        },
+        {
+          "origemChave": "254/2023",
+          "secao": "relatorio",
+          "noVoto": false,
+          "trecho": "…aquiesceu à proposta de aplicação da sanção no patamar máximo, mas ressaltou a necessidade de individualização das condutas praticadas pela empresa (peça 75). 12. O Relator a quo (peça 80), por concordar com os fundamentos do Acórdão 348/2016-TCU-Plenário, reputou que a pena máxima aplicável aos casos de inidoneidade limita-se temporalmente a cinco anos. Tal como nos Acórdãos 300/2018-Plenário e 414/2018-Plenário, ambos de sua relatoria, que trataram de situações bastante similares, acolheu a argumentação do Ministério Público junto ao TCU no sentido de que a pena máxima deve ser reservada àqueles que praticaram conduta de maior gravidade em cada fraude perpetrada contra a Rnest. Nesse sentido, realçou que o cartel era dominado pelas empresas Odebrecht, Camargo Corrêa, Andrade Gutierrez e Queiroz Galvão…",
+          "offset": 8688
+        },
+        {
+          "origemChave": "977/2023",
+          "secao": "relatorio",
+          "noVoto": false,
+          "trecho": "…da empresa indicada no item 9.1 deste acórdão no Sistema de Cadastro Unificado de Fornecedores (Sicaf) e no Cadastro Nacional de Empresas Inidôneas e Suspensas (CEIS), considerando a detração do tempo da penalidade aplicada à empresa por aquela controladoria, com base no § 3º do art. 22 da Lei de Introdução às Normas do Direito Brasileiro (LINDB) e nas ponderações do MPTCU no relatório do Acórdão 414/2018-Plenário, tendo em vista que no caso concreto as sanções da CGU e do TCU são de mesma natureza e relativas ao mesmo fato, com exceção da inidoneidade para participar de licitações em certames promovidos na esfera estadual e municipal cujos objetos sejam custeados com recursos federais repassados por força de convênios ou instrumentos congêneres [Grifei.]. (...). 9. Tal deliberação resultou de proposta…",
+          "offset": 12401
+        },
+        {
+          "origemChave": "977/2023",
+          "secao": "relatorio",
+          "noVoto": false,
+          "trecho": "…a inidoneidade para licitar e contratar possuíam fundamentos e competências distintas, não configurando violação ao princípio do non bis in idem, pois o TCU se baseia no art. 46 da Lei 8.443/1992 e a CGU no art. 87, inciso IV, da Lei 8.666/1993, havendo, na verdade, o princípio da independência das instâncias. 14. Por outro lado, cumpre transcrever o entendimento do MPTCU do relatório do Acórdão 414/2018-Plenário: A proposta de detração, na execução da pena, do período em que a Mendes Júnior esteve impedida de licitar por força da inidoneidade declarada pela CGU mostra-se adequada e aderente ao princípio da razoabilidade. Todavia, deve-se certificar se os fundamentos da sanção aplicada pelo órgão de controle interno coincidem com os destes autos, conforme bem pontuou a SeinfraOperações em sua proposta.…",
+          "offset": 16572
+        },
+        {
+          "origemChave": "2092/2021",
+          "secao": "relatorio",
+          "noVoto": false,
+          "trecho": "…dezembro de 2016. Como a empresa foi notificada no ano de 2019, a pretensão punitiva permanece perfeitamente vigente. Acerca da proposta complementar do titular da unidade técnica, peça 88, no sentido de determinar à CGU que considere a detração do tempo da penalidade aplicada à empresa por aquela controladoria, com base no § 3º do art. 22 da LINDB e nas ponderações deste MPTCU no relatório do Acórdão 414/2018-Plenário, considero que o objetivo de evitar o bis in idem se cumpra com a detração do tempo da penalidade efetivamente cumprido pela empresa apenada, e não meramente pelo tempo da penalidade aplicada, que pode ser reduzido mediante a interposição de recursos ou por intervenção judicial. É o relatório. VOTO Trata-se de processo apartado do TC 010.816/2017-8, autuado para verificar a ocorrência de…",
+          "offset": 125086
+        },
+        {
+          "origemChave": "2092/2021",
+          "secao": "relatorio",
+          "noVoto": false,
+          "trecho": "…para participar de licitações no âmbito estadual, distrital ou municipal, custeadas com recursos federais, uma vez que a sanção aplicada pela CGU não contemplou tais casos. 4. A conclusão exarada pelo Secretário da SeinfraOperações, em seu parecer (peça 88), se fundamenta no §3º do art. 22 da Lei de Introdução às Normas do Direito Brasileiro (LINDB) e nas ponderações do MPTCU no relatório do Acórdão 414/2018-Plenário, da relatoria do Ministro Benjamin Zymler. 5. O Ministério Público junto ao TCU, representado nos autos pelo Procurador Marinus Eduardo De Vries Marsico, registrou sua aquiescência às propostas da SeinfraOperações (peça 98): Manifesto-me de acordo com a proposta oferecida pelo auditor à peça 86 e também com a proposta complementar apresentada pelo titular da unidade técnica à peça 89, sem…",
+          "offset": 120579
+        },
+        {
+          "origemChave": "2216/2023",
+          "secao": "relatorio",
+          "noVoto": false,
+          "trecho": "…do Ministro Benjamin Zymler. Lista-se a seguir, alguns julgados, todos do Plenário, onde tais parâmetros foram sopesados: Empresas que venceram licitação mediante fraudeDeliberação do TCUSançãoIesa Óleo & Gás S.A.Acórdão 2.355/2018-P5 anosConstrutora Queiroz Galvão S.A.Acórdão 1.221/2018-P5 anosConstrutora OAS S.A.Acórdão 1.744/2018-P e 2.453/2019-P5 anosMendes Júnior Trading e Engenharia S/A Acórdão 414/2018-P e 2.638/2019-P 3 anosEngevix Engenharia e Projetos S.A. Acórdão 2.135/2018-P 3 anosMPE Montagens e Projetos Especiais S/A Acórdão 300/2018-P e 825/2018-P 3 anosTechint Engenharia e Construção Acórdão 2.914/2019-P 3 anos Skanska Brasil Ltda.Acórdão 1.256/2019-P1 anoUTC Engenharia S.A.Acórdão 1.527/2019-P1 ano23. Dessarte, rejeitam-se as razões recursais ofertadas pela empresa Iesa Óleo e Gás…",
+          "offset": 28617
+        },
+        {
+          "origemChave": "2316/2021",
+          "secao": "relatorio",
+          "noVoto": false,
+          "trecho": "… DO LUCRO ILÍCITO 155. Já é entendimento firmado pelo TCU de que a licitação que deu origem o contrato para a execução da terraplenagem da Rnest foi contaminado pelas fraudes perpetradas pelo cartel de empreiteiras denomina ‘Clube’ e que afetou diversos certames da Petrobras. Algumas das empresas integrantes do cartel já foram condenadas por tais fraudes, conforme se verifica nos Acórdãos 300/2018, 414/2018, 2.135/2018, 1.221/2018 e 1.744/2018, todos do Plenário. 156. Conforme disposição da Lei 8.666/1993, art. 59, Parágrafo único, a nulidade do contrato implica em que o pagamento ao contratado pelo serviço prestado deve ser feito mediante indenização, ou seja, pelos custos incorridos. O art. 49 estipula que o procedimento licitatório deve ser anulado por ilegalidade e que a nulidade da licitação…",
+          "offset": 191460
+        },
+        {
+          "origemChave": "667/2026",
+          "secao": "relatorio",
+          "noVoto": false,
+          "trecho": "…qual se destacou o seguinte entendimento, in verbis: 60. Pois bem. Nos termos do voto condutor proferido pelo Ministro Vital do Rêgo, restou ‘suficientemente comprovada a existência do cartel e de seu modo de atuação, inclusive nas licitações do Comperj. Somente no âmbito desta Corte de Contas, outras dez empresas já foram tornadas inidôneas por fraude a licitação da Petrobras (Acórdãos 300/2018, 414/2018, 1.221/2018, 1.744/2018, 2.135/2018, 2.355/2018, 1.256/2019, 1.527/2019, 2.914/2019, 424/2019 e 2.134/2020, todos do Plenário)’ (vide peça 83, p. 4, item 20). 61. Também se entende que há elementos de provas bastantes nos autos para comprovar a participação de Galvão Engenharia S/A no cartel, tais como: a) o e-mail da Andrade Gutierrez de 11/3/2008 (vide itens 24 e 25 do voto); b) o Histórico da…",
+          "offset": 46825
+        },
+        {
+          "origemChave": "2294/2021",
+          "secao": "relatorio",
+          "noVoto": false,
+          "trecho": "…até o momento segundo os critérios citados. Empresas que venceram licitação mediante fraudeDeliberação do TCUSançãoIesa Óleo & Gás S.A.Acórdão 2.355/2018-P5 anosConstrutora Queiroz Galvão S.A.Acórdão 1.221/2018-P5 anosConstrutora OAS S.A.Acórdão 1.744/2018-P e 2.453/2019-P5 anos Empresas que apresentaram proposta de coberturaDeliberação do TCUSançãoMendes Júnior Trading e Engenharia S/A Acórdão 414/2018-P e 2.638/2019-P 3 anosEngevix Engenharia e Projetos S.A. Acórdão 2.135/2018-P 3 anosMPE Montagens e Projetos Especiais S/A Acórdão 300/2018-P e 825/2018-P 3 anosTechint Engenharia e Construção Acórdão 2.914/2019-P 3 anos Empresa que suprimiu propostaDeliberação do TCUSançãoSkanska Brasil Ltda. Acórdão 1.256/2019-P 1 ano Empresas com acordo de leniênciaDeliberação do TCUSançãoUTC Engenharia…",
+          "offset": 99770
+        },
+        {
+          "origemChave": "1574/2023",
+          "secao": "relatorio",
+          "noVoto": false,
+          "trecho": "…análises incorporo às minhas razões de decidir.’ 60. Pois bem. Nos termos do voto condutor proferido pelo Ministro Vital do Rêgo, restou ‘suficientemente comprovada a existência do cartel e de seu modo de atuação, inclusive nas licitações do Comperj. Somente no âmbito desta Corte de Contas, outras dez empresas já foram tornadas inidôneas por fraude a licitação da Petrobras (Acórdãos 300/2018, 414/2018, 1.221/2018, 1.744/2018, 2.135/2018, 2.355/2018, 1.256/2019, 1.527/2019, 2.914/2019, 424/2019 e 2.134/2020, todos do Plenário)’ (vide peça 83, p. 4, item 20). 61. Também se entende que há elementos de provas bastantes nos autos para comprovar a participação de Galvão Engenharia S/A no cartel, tais como: a) o e-mail da Andrade Gutierrez de 11/3/2008 (vide itens 24 e 25 do voto); b) o Histórico…",
+          "offset": 45192
+        },
+        {
+          "origemChave": "2316/2021",
+          "secao": "relatorio",
+          "noVoto": false,
+          "trecho": "…e Comércio Camargo Corrêa S.A. (61.522.512/0001-02) e Galvão Engenharia S.A. (01.340.937/0001-79), por auferirem lucro em contrato eivado de nulidade em decorrência de sua origem em licitação fraudada e, portanto, igualmente nula, afrontando o arts. 49 e 59 da Lei 8.666/1993; c) com fundamento no art. 45 da Lei 8.443/1992 c/c os arts. 49 e 59 da Lei 8.666/1993, bem como nos Acórdãos 300/2018, 414/2018, 2.135/2018, 1.221/2018 e 1.744/2018 do Plenário do TCU, fixar prazo de quinze dias para que a Petrobras tome as providências para dar início aos procedimentos administrativos para declarar a nulidade do Convite 0322573078 e dos contratos dele decorrentes, informando regularmente a este Tribunal o andamento do processo até a sua conclusão; d) informar aos responsáveis que, caso venham a ser…",
+          "offset": 246806
+        },
+        {
+          "origemChave": "587/2022",
+          "secao": "relatorio",
+          "noVoto": false,
+          "trecho": "…(peça 128, p. 5). 83.8. A aplicação da sanção deve ser determinada objetivamente em função das irregularidades cometidas, sem restrição quanto a máximo temporal, mesmo que seja limitado o prazo de cumprimento da penalidade. Este entendimento integrou a motivação para a interposição de pedidos de reexame pelo Ministério Público/TCU nos processos conexos, movidos contra os Acórdãos 300/2018, 414/2018, 1744/2018, 2135/2018 e 2355/2018, todos do Plenário (peça 128, p. 6). Continuidade delitiva 83.9. A sanção imposta a um agente que tenha cometido delitos múltiplos deve ser mais severa que a imputada a quem agiu ilicitamente uma única vez. Caso contrário, estar-se-á indiretamente beneficiando o delinquente contumaz. No caso, a prática de fraudes em oito procedimentos licitatórios (aspecto…",
+          "offset": 61577
+        }
+      ]
+    },
+    {
+      "alvo": {
+        "numero": 2914,
+        "ano": 2019
+      },
+      "contagem": {
+        "citantesDistintos": 15,
+        "noVoto": 10,
+        "ocorrenciasTotal": 34
+      },
+      "trechos": [
+        {
+          "origemChave": "977/2023",
+          "secao": "voto",
+          "noVoto": true,
+          "trecho": "… que tornaria ainda mais evidente a necessidade de se adotar a mesma medida nos casos em que já houve o trânsito em julgado, nos quais seguramente não se aplicou o citado dispositivo legal. 16. Quanto ao pedido de extinção da pena formulado pela Techint, o MP/TCU asseverou que a superveniente reabilitação da empresa junto à CGU não ensejaria a extinção da pena de inidoneidade aplicada por meio do Acórdão 2.914/2019-Plenário, tendo em vista a ausência de amparo legal e regulamentar. Afinal, mantendo o entendimento consolidado desta Corte de Contas no sentido de que as instâncias são independentes, inexistindo infração ao princípio do non bis in idem quando a CGU e o TCU aplicam ao licitante fraudador a sanção de inidoneidade no âmbito de suas esferas de competência. 17. Assim, evoluindo em meu entendimento anterior…",
+          "offset": 42255
+        },
+        {
+          "origemChave": "977/2023",
+          "secao": "voto",
+          "noVoto": true,
+          "trecho": "…anterior sobre o tema e adotando como fundamento o art. 22, § 3º, da LINDB, bem como o parecer de lavra do Subprocurador-Geral Paulo Bugarin, cujas análises adoto como razões de decidir, considero que o TCU possa adotar desde logo um dispositivo ligeiramente diverso daquele empregado pelos Acórdãos Plenários 2.092/2021 e 1.236/2022, pois não há dúvidas de que a sanção de três anos aplicada pelo Acórdão 2.914/2019-Plenário já foi integralmente cumprida, caso também computada a sanção aplicada pela CGU. Além disso, é o próprio TCU que tem realizado os registros pertinentes para incluir os registros no CEIS. Portanto proponho: a) reconhecer a detração do tempo da penalidade aplicada pela Controladoria-Geral da União à empresa Techint Engenharia e Construção S.A., com base no § 3º do art. 22 da Lei de Introdução às…",
+          "offset": 43070
+        },
+        {
+          "origemChave": "921/2021",
+          "secao": "voto",
+          "noVoto": true,
+          "trecho": "…S.A. e, no mérito, negar-lhe provimento; b) dar ciência da deliberação que vier a ser proferida por esta Corte à recorrente, à Controladoria-Geral da União, à Força-Tarefa do Ministério Público Federal no Paraná e à Força-Tarefa da Advocacia-Geral da União no Paraná. É o relatório. VOTO Trata-se de pedido de reexame interposto pela Techint Engenharia e Construção S.A (Techint) em face do Acórdão 2914/2019-Plenário, da relatoria do E. Ministro Benjamin Zymler, que declarou a inidoneidade da empresa, pelo prazo de três anos, para participar de licitações na Administração Pública Federal, bem como em certames promovidos nas esferas estadual e municipal, com objetos custeados com recursos federais repassados por força de convênio ou instrumentos congêneres. O processo cuida de apartado, constituído a partir…",
+          "offset": 91842
+        },
+        {
+          "origemChave": "1257/2023",
+          "secao": "voto",
+          "noVoto": true,
+          "trecho": "…administrativa restritiva de direito, transferem o seu acervo técnico a outra empresa do mesmo grupo econômico com o objetivo específico de continuar as atividades da primeira, resta caracterizada a hipótese de sucessão fraudulenta, cabendo estender à sucessora os efeitos da penalidade aplicada à sucedida.” 458. Outra linha de entendimento semelhante é consubstanciada no enunciado extraído do Acórdão 2.914/2019-Plenário, também de minha relatoria: “A declaração de inidoneidade para participar de licitação na Administração Pública Federal (art. 46 da Lei 8.443/1992) não pode ser aplicada a sócios e administradores de empresas licitantes, por falta de previsão legal. No entanto, se após consulta ao Sistema de Cadastramento Unificado de Fornecedores (Sicaf), constatar-se que nova sociedade empresária foi…",
+          "offset": 319130
+        },
+        {
+          "origemChave": "977/2023",
+          "secao": "voto",
+          "noVoto": true,
+          "trecho": "…pela Petrobras, relacionadas a certames para obras de implantação da Refinaria Abreu e Lima em Ipojuca/PE, também denominada de Refinaria do Nordeste (Rnest). 2. No atual estágio processual, é apreciada petição apresentada pela sociedade Techint Engenharia e Construção S.A., por meio da qual requer a extinção da referida pena de declaração de inidoneidade que lhe foi aplicada por meio do Acórdão 2.914/2019-Plenário, tendo em vista a informação de que, no âmbito do Processo Administrativo de Responsabilização (PAR) 00190.004159/2015-06, a CGU declarou sua reabilitação. 3. Conforme historiado, por meio do Acórdão 2.914/2019-Plenário, de minha relatoria, a empresa Techint Engenharia e Construção S.A. foi declarada inidônea pelo prazo de 3 (três) anos para participar de licitações com recursos federais em…",
+          "offset": 32983
+        },
+        {
+          "origemChave": "921/2021",
+          "secao": "voto",
+          "noVoto": true,
+          "trecho": "…a Serur propõe, em pareceres uniformes, negar provimento ao recurso. Acolho as conclusões da unidade técnica e as adoto como razões de decidir, sem prejuízo das considerações que tecerei a seguir. Conheço do pedido de reexame, tendo em vista o preenchimento dos requisitos previstos no artigo 48 c/c os artigos 32 e 33 da Lei 8.443/1992. Não merece prosperar o argumento da nulidade do Acórdão 2.914/2019-Plenário em virtude da ausência do deferimento do pedido de produção de provas, porquanto tanto a legislação como a jurisprudência desta Corte de Contas são pacíficas no sentido de que não cabe ao TCU produzir provas, realizar perícias ou convocar testemunhas. No âmbito do controle externo, a produção de provas rege-se pela Lei 8.443/1992 e pelo RI/TCU. A prova é documental, sob a forma escrita, sendo…",
+          "offset": 94879
+        },
+        {
+          "origemChave": "234/2023",
+          "secao": "voto",
+          "noVoto": true,
+          "trecho": "… Considero que, ao presente momento, já resta suficientemente comprovada a existência do cartel e de seu modo de atuação, inclusive nas licitações do Comperj. Somente no âmbito desta Corte de Contas, outras quinze empresas já foram tornadas inidôneas por fraudes às licitações da Petrobras (Acórdãos 300/2018, 414/2018, 1.221/2018, 1.744/2018, 2.135/2018, 2.355/2018, 424/2019, 1.256/2019, 1.527/2019, 2.914/2019, 1.900/2020, 2.134/2020, 2.687/2020, 2.841/2020, 3.163/2020, 3.175/2020, 82/2021, 416/2021, 497/2021, 1.042/2021, 1.177/2021, 1.313/2021, 2.092/2021, 2.320/2021, 2.531/2021, 2.586/2021, 1.236/2022, 2.461/2022, todos do Plenário). 17. Desse modo, uma vez comprovada a existência do “Clube” e de sua atuação também nas contratações do Comperj, passo a analisar aquelas que seriam as evidências da…",
+          "offset": 203101
+        },
+        {
+          "origemChave": "1761/2021",
+          "secao": "voto",
+          "noVoto": true,
+          "trecho": "…dos sócios das pessoas jurídicas, assunto sobre o qual começo a discorrer na sequência. 11. Apesar de louvável a posição da Selog, que busca impedir a formação de novas empresas pelos mesmos sócios para atuar em segmentos econômicos semelhantes ou idênticos, em clara burla à sanção de inidoneidade, anoto que a matéria já foi discutida pelo Plenário deste Tribunal em outras três oportunidades (Acórdãos 2.914/2019, 1.592/2019 e 495/2013). Nesses julgados, restou assentado que a declaração de inidoneidade para participar de licitação na administração pública federal (art. 46 da Lei 8.443/1992) não pode ser aplicada a sócios e administradores de empresas licitantes, por falta de previsão legal. 12. No entanto, foi entendido que, caso nova sociedade empresária seja constituída, com o mesmo objeto, por…",
+          "offset": 39160
+        },
+        {
+          "origemChave": "2294/2021",
+          "secao": "voto",
+          "noVoto": true,
+          "trecho": "…os seguintes precedentes desta Corte em relação à Refinaria Abreu e Lima: Empresas que apresentaram proposta de coberturaDeliberação do TCUSançãoMendes Júnior Trading e Engenharia S/A Acórdão 414/2018-P e 2.638/2019-P 3 anosEngevix Engenharia e Projetos S.A. Acórdão 2.135/2018-P 3 anosMPE Montagens e Projetos Especiais S/A Acórdão 300/2018-P e 825/2018-P 3 anosTechint Engenharia e Construção Acórdão 2.914/2019-P 3 anos VII 40. Passo a tratar do pleito da Iesa de aplicação por analogia do instituto da detração, de forma a ser considerado o período em que ela ficou impedida de participar de licitações em razão de penalidades aplicadas pela Controladoria-Geral da União e pela Petrobras. 41. Mediante o voto condutor do Acórdão 414/2010-Plenário, foram efetuadas as seguintes considerações: “Quanto ao…",
+          "offset": 142603
+        },
+        {
+          "origemChave": "1574/2023",
+          "secao": "voto",
+          "noVoto": true,
+          "trecho": "…obter vantagens indevidas em licitações por meio de supressão da livre concorrência e de elevação artificial de preços constitui, simultaneamente, infração à ordem econômica sujeita à competência do Cade e ilícito administrativo-financeiro sujeito à competência do TCU, na sua função de apreciar a regularidade da aplicação de recursos federais, conforme dispõem os acórdãos 2.355/2018, 1.256/2019 e 2.914/2019, todos do Plenário e de relatoria do Ministro Benjamin Zymler. 19. Anoto, ademais, que o controle externo exercido pelo TCU atua de maneira independente e não é subsidiário ao controle interno, que é de responsabilidade da CGU. A sanção de inidoneidade aplicável por aquele órgão, com fulcro no inciso IV do art. 87 da Lei 8.666/1993 ou nos incisos II e III do art. 88, tem natureza distinta da…",
+          "offset": 97703
+        },
+        {
+          "origemChave": "977/2023",
+          "secao": "voto",
+          "noVoto": true,
+          "trecho": "…pela sociedade Techint Engenharia e Construção S.A., por meio da qual requer a extinção da referida pena de declaração de inidoneidade que lhe foi aplicada por meio do Acórdão 2.914/2019-Plenário, tendo em vista a informação de que, no âmbito do Processo Administrativo de Responsabilização (PAR) 00190.004159/2015-06, a CGU declarou sua reabilitação. 3. Conforme historiado, por meio do Acórdão 2.914/2019-Plenário, de minha relatoria, a empresa Techint Engenharia e Construção S.A. foi declarada inidônea pelo prazo de 3 (três) anos para participar de licitações com recursos federais em virtude das fraudes observadas nos certames da Rnest. Especificamente, a aludida companhia foi sancionada por apresentar proposta de cobertura da licitação da UHDT-UGH e de se abster dolosamente de apresenta-la nas…",
+          "offset": 33204
+        },
+        {
+          "origemChave": "995/2022",
+          "secao": "voto",
+          "noVoto": true,
+          "trecho": "…compreendo que ela se mostra coerente com as decisões proferidas nos demais processos que tratam de fraude comprovada à licitação – penas de 5 anos para a empresa que venceu licitação (Acórdãos 1.221/2018, 1.744/2018, 2.355/2018, 2.638/2019, 2.914/2019 e 2.531/2021, todos do Plenário, dentre outros) e de 3 anos para quem apresentou proposta de cobertura (Acórdãos 300/2018, 414/2018, 2.135/2018, 2.914/2019, todos do Plenário, dentre outros). 47. Sendo assim, não há motivo para alterar o quantum das sanções estipulado na decisão recorrida. 48. Diante de todo o exposto, VOTO para que seja adotada a deliberação que ora submeto a este Colegiado. TCU, Sala das Sessões, em 11 de maio de 2022. BENJAMIN ZYMLER Relator ACÓRDÃO Nº 995/2022 – TCU – Plenário 1. Processo nº TC 018.771/2018-1. 2. Grupo II…",
+          "offset": 132198
+        },
+        {
+          "origemChave": "2092/2021",
+          "secao": "voto",
+          "noVoto": true,
+          "trecho": "…Entendo que, ao presente momento, já resta suficientemente comprovada a existência do cartel e de seu modo de atuação, inclusive nas licitações do Comperj. Somente no âmbito desta Corte de Contas, ao menos outras dez empresas já foram tornadas inidôneas por fraude a licitação da Petrobras (Acórdãos 300/2018, 414/2018, 1.221/2018, 1.744/2018, 2.135/2018, 2.355/2018, 1.256/2019, 1.527/2019, 2.914/2019, 424/2019 e 2.134/2020, todos do Plenário). 30. Desse modo, uma vez comprovada a existência do Clube e de sua atuação também nas contratações do Comperj, passo a analisar aquelas que seriam as evidências da participação da Iesa nas fraudes em comento. Considero aqui todo o acervo probatório compartilhado com este Tribunal pela Polícia Federal (PF), pelo Ministério Público Federal (MPF) e pelo…",
+          "offset": 138863
+        },
+        {
+          "origemChave": "995/2022",
+          "secao": "voto",
+          "noVoto": true,
+          "trecho": "… anteriores, entendo haver fundamento para a aplicação da sanção catalogada no art. 46 da Lei 8.443/1992 às empresas supramencionadas. 46. Quanto à dosimetria, compreendo que ela se mostra coerente com as decisões proferidas nos demais processos que tratam de fraude comprovada à licitação – penas de 5 anos para a empresa que venceu licitação (Acórdãos 1.221/2018, 1.744/2018, 2.355/2018, 2.638/2019, 2.914/2019 e 2.531/2021, todos do Plenário, dentre outros) e de 3 anos para quem apresentou proposta de cobertura (Acórdãos 300/2018, 414/2018, 2.135/2018, 2.914/2019, todos do Plenário, dentre outros). 47. Sendo assim, não há motivo para alterar o quantum das sanções estipulado na decisão recorrida. 48. Diante de todo o exposto, VOTO para que seja adotada a deliberação que ora submeto a este…",
+          "offset": 132042
+        },
+        {
+          "origemChave": "2326/2024",
+          "secao": "relatorio",
+          "noVoto": false,
+          "trecho": "… que não é o caso; e) em situações análogas, o próprio TCU já se manifestou no sentido de que a declaração de inidoneidade para participar de licitações na Administração Pública Federal, conforme o artigo 46 da Lei 8.443/1992, não pode ser estendida a sócios e administradores de empresas declaradas inidôneas, devido à ausência de previsão legal específica para tal aplicação, conforme enunciados: Acórdão 2.914/2019-TCU-Plenário, Rel. Min. Benjamin Zymler A declaração de inidoneidade para participar de licitação na Administração Pública Federal (art. 46 da Lei 8.443/1992) não pode ser aplicada a sócios e administradores de empresas licitantes, por falta de previsão legal. No entanto, se após consulta ao Sistema de Cadastramento Unificado de Fornecedores (Sicaf), constatar-se que nova sociedade empresária foi constituída…",
+          "offset": 9625
+        },
+        {
+          "origemChave": "2216/2023",
+          "secao": "relatorio",
+          "noVoto": false,
+          "trecho": "…enfrentada a responsabilização dos três gestores envolvidos nas ilicitudes, não tendo, portanto, qualquer aproveitamento para o deslinde destes autos. 20.4 Em complemento, convém assinalar que, ao contrário do aduzido, este Tribunal tem declarado a inidoneidade para contratar com estados e municípios, mesmo quando se depara com a aplicação de sanção semelhante pela CGU, consoante se observa dos Acórdãos 2914/2019-TCU-Plenário e 917/2022-TCU-Plenário, da relatoria do Min. Benjamin Zymler, Acórdão 12/2023- TCU-Plenário, rel. Min. Jorge Oliveira e Acórdão 82/2021-TCU-Plenário, rel. Min. Subst.. André de Carvalho, entre outros. 21. No que tange às provas emprestadas a estes autos, não assiste razão à suplicante evocar a imprestabilidade, porquanto: a) foram apresentadas na forma documental, conforme determina o art. 162…",
+          "offset": 22156
+        },
+        {
+          "origemChave": "1605/2023",
+          "secao": "relatorio",
+          "noVoto": false,
+          "trecho": "…anterior sobre o tema e adotando como fundamento o art. 22, § 3º, da LINDB, bem como o parecer de lavra do Subprocurador-Geral Paulo Bugarin, cujas análises adoto como razões de decidir, considero que o TCU possa adotar desde logo um dispositivo ligeiramente diverso daquele empregado pelos Acórdãos Plenários 2.092/2021 e 1.236/2022, pois não há dúvidas de que a sanção de três anos aplicada pelo Acórdão 2.914/2019-Plenário já foi integralmente cumprida, caso também computada a sanção aplicada pela CGU.’ 22. Portanto, de forma a dar tratamento idêntico à Iesa, a detração seria possível no caso de identidade dos fatos que embasaram as penalidades, de modo que resta verificar se a declaração de inidoneidade aplicada pela CGU foi decorrente dos mesmos fatos que ensejaram a sanção de inidoneidade cominada pelo TCU, nos…",
+          "offset": 8719
+        },
+        {
+          "origemChave": "977/2023",
+          "secao": "relatorio",
+          "noVoto": false,
+          "trecho": "… caso, o prazo inicial de cinco anos dataria de 14/5/2019, quando a CGU declarou a Techint inidônea, de maneira que o fim do prazo ‘unificado’ seria em 14/5/2024, próxima ao término da sanção de inidoneidade aplicada por este Tribunal. 7. Ao final de sua análise, a unidade instrutiva propõe negar provimento ao pedido da Techint, mantendo-se a sanção de inidoneidade aplicada à empresa por meio do Acórdão 2914/2019-Plenário, em face das conclusões abaixo indicadas: 47. No âmbito deste processo, a Techint foi responsabilizada por fraudes em licitações conduzidas pela Petrobras na implantação da Rnest, especificamente, nos contratos da UCR, UHDT, UGH, Tubovias e UDA. Já consoante o PAR 00190.004159/2015-06, instaurado no âmbito da CGU, a empresa foi declarada inidônea por fraude e conluio em certames licitatórios da…",
+          "offset": 9576
+        },
+        {
+          "origemChave": "977/2023",
+          "secao": "relatorio",
+          "noVoto": false,
+          "trecho": "… mesma medida nos casos em que já houve o trânsito em julgado, nos quais seguramente não se aplicou o citado dispositivo legal. 25. Desse modo, entendo cabível, neste caso concreto, aplicar-se a detração entre as penas aplicadas pelo TCU e a CGU. 26. Por outro lado, considero que a superveniente reabilitação da empresa junto à CGU não enseja a extinção da pena de inidoneidade aplicada por meio do Acórdão 2914/2019-Plenário, tendo em vista a ausência de amparo legal e regulamentar. 27. Sobre o assunto, consta na petição ora examinada que, em resposta ao argumento da defesa de que a Techint já estava na iminência de ser reabilitada pela CGU, apresentado na sustentação oral realizada na Sessão Plenária de 1º/6/2022, quando do julgamento do TC 008.365/2020-2, o eminente Ministro Bruno Dantas suscitou a possibilidade…",
+          "offset": 30164
+        },
+        {
+          "origemChave": "921/2021",
+          "secao": "relatorio",
+          "noVoto": false,
+          "trecho": "…participar de licitações na Administração Pública Federal, bem como em certames promovidos na esfera estadual e municipal cujos objetos sejam custeados com recursos federais repassados por força de convênios ou instrumentos congêneres. EXAME DE ADMISSIBILIDADE 11. O Exmo. Ministro Walton Alencar Rodrigues conheceu do pedido de reexame e suspendeu os efeitos dos itens 9.1, 9.2, 9.3 e 9.3.1 do Acórdão 2.914/2019-TCU-Plenário, com fundamento no art. 48 da Lei 8.443/92 c/c arts. 285 e 286, parágrafo único, do Regimento Interno/TCU (vide pela 97). MÉRITO Delimitação 12. Constitui, então, objeto do recurso definir: a) se houve nulidade do decisum em face do indeferimento do pedido de produção de provas; b) se ocorreu fraude à licitação (formação de cartel) nos 4 (quatro) contratos referentes à Rnest (vide item 5 desta…",
+          "offset": 7747
+        },
+        {
+          "origemChave": "1605/2023",
+          "secao": "relatorio",
+          "noVoto": false,
+          "trecho": "…tornaria ainda mais evidente a necessidade de se adotar a mesma medida nos casos em que já houve o trânsito em julgado, nos quais seguramente não se aplicou o citado dispositivo legal. 16. Quanto ao pedido de extinção da pena formulado pela Techint, o MP/TCU asseverou que a superveniente reabilitação da empresa junto à CGU não ensejaria a extinção da pena de inidoneidade aplicada por meio do Acórdão 2.914/2019-Plenário, tendo em vista a ausência de amparo legal e regulamentar. Afinal, mantendo o entendimento consolidado desta Corte de Contas no sentido de que as instâncias são independentes, inexistindo infração ao princípio do non bis in idem quando a CGU e o TCU aplicam ao licitante fraudador a sanção de inidoneidade no âmbito de suas esferas de competência. 17. Assim, evoluindo em meu entendimento anterior…",
+          "offset": 7904
+        },
+        {
+          "origemChave": "977/2023",
+          "secao": "acordao",
+          "noVoto": false,
+          "trecho": "…e outros, representando Petróleo Brasileiro S.A.; Luís Inácio Lucena Adams (29.512/OAB-RJ), Alessandra Martins Gualberto Ribeiro (37.838/OAB-DF), Louise Dias Portes (203.612/OAB-RJ) e outros, representando Techint Engenharia e Construção S.A. 9. Acórdão: VISTOS, relatados e discutidos estes autos de representação, em que se aprecia pedido de detração da declaração de inidoneidade imposta pelo Acórdão 2.914/2019-Plenário à empresa Techint Engenharia e Construção S.A., para participar de licitações na administração pública federal, ACORDAM os Ministros do Tribunal de Contas da União, reunidos em sessão do Plenário, ante as razões expostas pelo Relator, em: 9.1. reconhecer a detração do tempo da penalidade aplicada pela Controladoria-Geral da União à empresa Techint Engenharia e Construção S.A., com base no § 3º…",
+          "offset": 45854
+        },
+        {
+          "origemChave": "977/2023",
+          "secao": "relatorio",
+          "noVoto": false,
+          "trecho": "…todo o exposto, e na linha do precedente acima indicado, este representante do Ministério Público de Contas, com as devidas vênias por divergir da proposta formulada pela AudPetroleo, manifesta-se no sentido de que seja informado à CGU que considere como período de detração do cumprimento da sanção de inidoneidade aplicada pelo TCU à empresa Techint Engenharia e Construção S.A., por meio do Acórdão 2914/2019-Plenário, o prazo efetivamente cumprido referente à sanção de inidoneidade declarada pela CGU, tendo em vista que neste caso concreto as sanções da CGU e do TCU são de mesma natureza e relativas ao mesmo fato. 32. Adicionalmente, sugere-se que seja determinado à SecexConsenso que examine, em conjunto com a CGU, as possíveis repercussões que as decisões que concluam pela reabilitação de empresas que foram…",
+          "offset": 31626
+        },
+        {
+          "origemChave": "1912/2024",
+          "secao": "relatorio",
+          "noVoto": false,
+          "trecho": "…um dos sócios e/ou administradores de empresas declaradas inidôneas, após a aplicação dessa sanção e no prazo de sua vigência, exige da Administração as providências necessárias à inibição de sua participação em licitações, em processo administrativo específico, assegurado o contraditório e a ampla defesa aos interessados, conforme entendimentos já expressos nos Acórdãos 1986/2013-TCU-Plenário e 2.914/2019-TCU-Plenário. 127. Entretanto, com a promulgação da Lei 14.133/2021 passou-se a admitir, em tese ao menos, dada a inexistência de precedentes no TCU, a possibilidade de se estender a sanção de declaração de inidoneidade aos sócios da empresa fraudadora por via da desconsideração da personalidade jurídica, ao dispor em seu art. 160, in verbis: Art. 160. A personalidade jurídica poderá ser desconsiderada…",
+          "offset": 101963
+        },
+        {
+          "origemChave": "921/2021",
+          "secao": "relatorio",
+          "noVoto": false,
+          "trecho": "…DA REFINARIA ABREU E LIMA. CONLUIO E FRAUDE À LICITAÇÃO. PEDIDO DE REEXAME. CONHECIMENTO. Não Provimento. CIÊNCIA. RELATÓRIO Adoto, como Relatório, a instrução à peça 108, que contou com a anuência do corpo diretivo da Secretaria de Recursos (peças 109 e 110). INTRODUÇÃO 1. Trata-se de pedido de reexame interposto pela empresa Techint Engenharia e Construção S.A., (peças 90) contra o Acórdão 2914/2019 – TCU – Plenário, Rel. Benjamin Zymler, prolatado nos seguintes termos (peça 79): ACORDAM os Ministros do Tribunal de Contas da União, reunidos em sessão Plenária, ante as razões expostas pelo Relator, em: 9.1. rejeitar as razões de justificativa apresentadas pela Techint Engenharia e Construção S.A.; 9.2. com fundamento no art. 46 da Lei 8.443/1992, declarar a inidoneidade da empresa Techint Engenharia e…",
+          "offset": 920
+        },
+        {
+          "origemChave": "977/2023",
+          "secao": "relatorio",
+          "noVoto": false,
+          "trecho": "…como relatório o parecer de lavra do Subprocurador-Geral Paulo Soares Bugarin (peça 147), in verbis: “Trata-se de processo apartado de representação acerca de fraudes em licitações conduzidas pela Petróleo Brasileiro S.A. (Petrobras), relacionadas a licitações para as obras de implantação da Refinaria Abreu e Lima, também denominada de Refinaria do Nordeste (Rnest). 2. Por meio do Acórdão 2914/2019-Plenário, esta Corte declarou a inidoneidade da empresa Techint Engenharia e Construção S.A. pelo prazo de três anos para participar de licitações na Administração Pública Federal e certames na esfera federal e municipal custeados com recursos federais (peça 79). 3. Examina-se, nesta fase processual, petição apresentada pela Techint, mediante a qual solicita a extinção da referida pena, tendo em vista a…",
+          "offset": 1575
+        },
+        {
+          "origemChave": "667/2026",
+          "secao": "relatorio",
+          "noVoto": false,
+          "trecho": "… voto condutor proferido pelo Ministro Vital do Rêgo, restou ‘suficientemente comprovada a existência do cartel e de seu modo de atuação, inclusive nas licitações do Comperj. Somente no âmbito desta Corte de Contas, outras dez empresas já foram tornadas inidôneas por fraude a licitação da Petrobras (Acórdãos 300/2018, 414/2018, 1.221/2018, 1.744/2018, 2.135/2018, 2.355/2018, 1.256/2019, 1.527/2019, 2.914/2019, 424/2019 e 2.134/2020, todos do Plenário)’ (vide peça 83, p. 4, item 20). 61. Também se entende que há elementos de provas bastantes nos autos para comprovar a participação de Galvão Engenharia S/A no cartel, tais como: a) o e-mail da Andrade Gutierrez de 11/3/2008 (vide itens 24 e 25 do voto); b) o Histórico da Conduta do Acordo de Leniência 1/2015, celebrado entre a SOG Óleo e Gás S.A., a…",
+          "offset": 46907
+        },
+        {
+          "origemChave": "2216/2023",
+          "secao": "relatorio",
+          "noVoto": false,
+          "trecho": "…S.A.Acórdão 2.355/2018-P5 anosConstrutora Queiroz Galvão S.A.Acórdão 1.221/2018-P5 anosConstrutora OAS S.A.Acórdão 1.744/2018-P e 2.453/2019-P5 anosMendes Júnior Trading e Engenharia S/A Acórdão 414/2018-P e 2.638/2019-P 3 anosEngevix Engenharia e Projetos S.A. Acórdão 2.135/2018-P 3 anosMPE Montagens e Projetos Especiais S/A Acórdão 300/2018-P e 825/2018-P 3 anosTechint Engenharia e Construção Acórdão 2.914/2019-P 3 anos Skanska Brasil Ltda.Acórdão 1.256/2019-P1 anoUTC Engenharia S.A.Acórdão 1.527/2019-P1 ano23. Dessarte, rejeitam-se as razões recursais ofertadas pela empresa Iesa Óleo e Gás S/A. contra o Acórdão 2092/2021-TCU-Plenário. CONCLUSÃO 24. Do exame, é possível concluir que: a) os argumentos apresentados pela Iesa Óleo e Gás S/A foram considerados inaptos para elidir a declaração de…",
+          "offset": 28828
+        },
+        {
+          "origemChave": "2294/2021",
+          "secao": "relatorio",
+          "noVoto": false,
+          "trecho": "…anosConstrutora OAS S.A.Acórdão 1.744/2018-P e 2.453/2019-P5 anos Empresas que apresentaram proposta de coberturaDeliberação do TCUSançãoMendes Júnior Trading e Engenharia S/A Acórdão 414/2018-P e 2.638/2019-P 3 anosEngevix Engenharia e Projetos S.A. Acórdão 2.135/2018-P 3 anosMPE Montagens e Projetos Especiais S/A Acórdão 300/2018-P e 825/2018-P 3 anosTechint Engenharia e Construção Acórdão 2.914/2019-P 3 anos Empresa que suprimiu propostaDeliberação do TCUSançãoSkanska Brasil Ltda. Acórdão 1.256/2019-P 1 ano Empresas com acordo de leniênciaDeliberação do TCUSançãoUTC Engenharia S.A. Acórdão 1.527/2019-P 1 anoCamargo Corrêa Construções e Comércio S.A. Acórdão 2.446-2018-P sobrestada 75. No presente processo foram respeitados os princípios da proporcionalidade e da razoabilidade, de forma que…",
+          "offset": 99981
+        },
+        {
+          "origemChave": "921/2021",
+          "secao": "acordao",
+          "noVoto": false,
+          "trecho": "…de Operações Especiais em Infraestrutura (SeinfraOpe). 8. Representação legal: 8.1. Luis Inacio Lucena Adams (29512/OAB-RJ) e outros, representando Techint Engenharia e Construcao S/A. 8.2. Marco Aurelio Ferreira Martins (194.793/OAB-SP) e outros, representando Petróleo Brasileiro S.A. 9. Acórdão: VISTOS, relatados e discutidos estes autos de pedido de reexame interpostos contra o Acórdão 2914/2019-Plenário que declarou a inidoneidade da empresa Techint Engenharia e Construção S.A, pelo prazo de três anos, para participar de licitações na Administração Pública Federal. ACORDAM os Ministros do Tribunal de Contas da União, reunidos em sessão do Plenário, ante as razões expostas pelo Relator, em: 9.1 conhecer do pedido de reexame interposto por Techint Engenharia e Construção S.A. e, no mérito,…",
+          "offset": 106565
+        },
+        {
+          "origemChave": "921/2021",
+          "secao": "relatorio",
+          "noVoto": false,
+          "trecho": "…Odebrecht, Camargo Corrêa, Andrade Gutierrez e Queiroz Galvão e que à Techint Engenharia e Construção S.A coube um papel secundário que, em princípio, não lhe resultou qualquer benefício direto decorrente das contratações (peça 80, p. 18-19, itens 74-81). 10. Nesta oportunidade, compete-nos examinar o pedido de reexame interposto pela Techint Engenharia e Construção S.A (peça 90) em face do Acórdão 2914/2019-Plenário (peça 79), que, no item 9.2, declarou a inidoneidade da empresa Techint Engenharia e Construção S.A. pelo prazo de 3 (três) anos, para participar de licitações na Administração Pública Federal, bem como em certames promovidos na esfera estadual e municipal cujos objetos sejam custeados com recursos federais repassados por força de convênios ou instrumentos congêneres. EXAME DE…",
+          "offset": 7190
+        },
+        {
+          "origemChave": "1574/2023",
+          "secao": "relatorio",
+          "noVoto": false,
+          "trecho": "…à ordem econômica sujeita à competência do Conselho Administrativo de Defesa Econômica - Cade (art. 36, § 3º, inciso I, alínea d, da Lei 12.529/2011) e ilícito administrativo-financeiro sujeito à competência do TCU, na sua função de apreciar a regularidade da aplicação de recursos federais (art. 70 da Constituição Federal), conforme entendimento consagrado nos Acórdãos 2355/2018, 1256/2019 e 2914/2019, todos do Plenário e sob a relatoria do Ministro Benjamin Zymler. 27. Nesse sentido, a aplicação de sanção pelo Cade em decorrência de conduta anticoncorrencial infringente à ordem econômica não obsta a que o TCU declare a inidoneidade da empresa sancionada para participar de licitações na Administração Pública Federal (art. 46 da Lei 8.443/1992), quando a mesma conduta caracterizar fraude à…",
+          "offset": 21314
+        }
+      ]
+    }
+  ]
+}
