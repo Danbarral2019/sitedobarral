@@ -45,9 +45,11 @@ O gargalo é o **download do RTF** em `catalog-tcu-inteiro-teor`: `LOTE = 30` po
 | a cada 10 min | 4.320 | 12 dias |
 | a cada 5 min | 8.640 | 6 dias |
 
-**Decisão:** elevar a frequência a cada 10 minutos durante a campanha, e voltar ao ritmo diário quando a fila drenar. 12 dias de execução desassistida é compatível com o "aguardo o tempo que for necessário" do Daniel, sem prender nenhuma sessão.
+**Decisão:** elevar a frequência a cada 10 minutos durante a campanha, e voltar ao ritmo diário quando a fila drenar.
 
-**Custo a nomear:** ~111 horas de execução de função na Vercel ao longo da campanha (50.000 × 8 s). É um gasto de compute pontual, na casa de dezenas de dólares, não de centavos como o storage. Deve ser confirmado com o consumo real medido na onda W1 antes de liberar a campanha inteira.
+**A tabela acima supõe 50 mil itens catalogados. Com o filtro de tipo (§5.4), a fila real é de ~10 mil**, e a campanha cai para **~2,5 dias** a cada 10 minutos. Execução desassistida em qualquer um dos ritmos — nenhuma sessão fica presa.
+
+**Custo a nomear:** ~22 horas de execução de função na Vercel ao longo da campanha (10.000 × 8 s). É um gasto de compute pontual, na casa de poucas dezenas de dólares, não de centavos como o storage. Deve ser confirmado com o consumo real medido na onda W1 antes de liberar a campanha inteira.
 
 ## 4. Arquitetura
 
@@ -103,17 +105,31 @@ Cada uma destas é uma armadilha real, não higiene teórica.
 
 **5.2 Não marcar `embeddingStatus: 'pending'`.** O `sync-tcu-acordaos` marca assim. Hoje é inócuo, porque `process-index-jobs` não está agendado no `vercel.json` — mas deixar 50 mil documentos marcados como "pendentes de embedding" é plantar uma mina para quem reativar aquele cron um dia. O backfill grava **`embeddingStatus: 'skipped'`**, que é uma declaração explícita de intenção e não entra em nenhuma fila.
 
-**5.3 Não deixar os acórdãos aparecerem nas superfícies do site.** São combustível; 50 mil acórdãos não curados nas listagens afogariam a interface. Marcador dedicado:
+**5.3 Não deixar os acórdãos aparecerem nas superfícies do site.** São combustível; 50 mil registros não curados afogariam a interface — e, num caso, iriam por e-mail.
 
-```prisma
-tcuCombustivel Boolean @default(false)   // em Document
-```
+Uma enumeração exaustiva das consultas a `Document` encontrou **11 superfícies que obrigatoriamente precisariam de filtro** e mais 6 prováveis. As duas mais graves:
+- `lib/clipping/sources/tcu.ts:28-32` — fonte do **clipping diário enviado por e-mail e push aos assinantes**. Filtra `category: 'acordao'` e janela de `uploadedAt`. Uma importação em massa cairia direto no envio.
+- `lib/obsidian/incremental-export.ts:100` — `findMany` **sem `where` nenhum**: exporta 100% da tabela.
 
-`true` para tudo que o backfill inserir. As superfícies que listam documentos filtram `tcuCombustivel: false`; as filas dos crons de catalogação e de precedentes **não** filtram — é justamente esse material que elas devem processar.
+**Um marcador booleano dedicado (`tcuCombustivel`) foi projetado e descartado.** Ele é *fail-open*: protege apenas os pontos que alguém lembrou de alterar, e toda consulta futura nasce vazando. Com 17 pontos a tocar e o produto em produção, a chance de esquecer um é alta, e o custo do esquecimento é um e-mail com lixo para a base de assinantes.
 
-Não se usa `category` diferente de `'acordao'` para isso: a fila do `sync-precedentes-tcu` casa exatamente por `category: 'acordao'`, e mudar a categoria excluiria os documentos do grafo — que é o único motivo de eles existirem.
+**Decisão: defesa em camadas, segura por construção.** O combustível é inserido com três marcas que as consultas existentes **já** respeitam:
 
-O plano de implementação deve **enumerar as superfícies** que precisam do filtro (listagens de documentos, busca global, jurisprudência, contadores do admin) e cobrir cada uma com teste. Uma superfície esquecida é um vazamento de 50 mil registros na interface.
+| Marca | Valor no backfill | O que fecha sozinho |
+|---|---|---|
+| `category` | `'acordao-grafo'` (em vez de `'acordao'`) | Toda consulta que casa `category: 'acordao'` — jurisprudência unificada, clipping, listagens por categoria |
+| `isPublic` | `false` (com `isCommon: false`, `courseId: null`) | Busca full-text, árvore de conteúdo, novidades, página pública `/documento/[id]`, rota de download |
+| `reviewedBy` | `'backfill-grafo'` (não `'auto-sync-tcu'`) | Contador de auto-importações recentes do admin |
+
+Com isso a superfície de vazamento colapsa de 17 pontos para os poucos que não filtram por nada — que o plano trata explicitamente e cobre com teste. O ganho decisivo é o inverso do booleano: **consulta nova nasce segura**, porque o padrão do repositório é filtrar por `category` e por visibilidade.
+
+O preço é tocar as duas filas que devem continuar enxergando esse material — `catalog-tcu-inteiro-teor` e `sync-precedentes-tcu` passam a aceitar `category IN ('acordao', 'acordao-grafo')`. São dois pontos sob nosso controle, alterados junto com a feature e cobertos por teste, contra dezessete espalhados pelo produto.
+
+O plano deve ainda tratar caso a caso: `lib/obsidian/incremental-export.ts` (sem `where`), os contadores de `analytics/summary` e `getCachedDocumentCountByCategory` (inflam totais de admin/hub), e `app/api/search/unified` + `area-restrita/search-all` (o ramo de admin ignora `isPublic`).
+
+**5.4 Não ingerir acórdãos de relação.** Medido em amostra do próprio feed: são **80% dos registros**, têm de 1 a 6 kB e **nenhuma seção** — sem Relatório, Voto ou Acórdão. Como o dossiê se alimenta de trechos *no voto*, eles não rendem nada, e ingeri-los custaria download e conversão de ~40 mil documentos inúteis.
+
+O backfill ingere apenas `tipo === 'ACÓRDÃO'`. Consequência para o alcance: caminhar o feed até dez/2023 (~50 mil posições) rende **~10 mil acórdãos aproveitáveis**, não 50 mil. Isso é uma melhora, não uma perda: são 7× o acervo atual de 1.685, com ~80% menos tempo de execução e de custo de compute. A projeção de campanha cai de ~111 h para ~22 h de função.
 
 ## 6. As ondas
 
@@ -133,7 +149,11 @@ Entregas: model `BackfillCursor`, campo `tcuCombustivel`, cron `backfill-tcu-ret
 | Casos da faixa magra (2–4 no voto) que subiram de faixa | O efeito que se quer |
 | Tempo médio por acórdão e consumo de função | Valida a projeção de 12 dias e o custo |
 
-**Critério de GO, fixado agora:** os 1.000 acórdãos precisam render **≥ 400 citações novas no voto** (o acervo atual tem 9.208 no voto em 1.685 acórdãos, ou ~5,5 por acórdão; exigir ≥0,4 por acórdão é ~7% do rendimento histórico, um piso deliberadamente baixo, já que o backfill pega acórdãos de qualquer natureza, não a amostra curada de hoje). Abaixo disso, a campanha não se paga e a frente C1 encerra, seguindo só a frente A.
+**Critério de GO, fixado agora:** os 1.000 acórdãos ingeridos (já sem os de relação, §5.4) precisam render **≥ 1.000 arestas novas com `noVoto = true`** em `AcordaoCitacao`.
+
+A régua vem do acervo atual: 1.685 acórdãos comuns produziram 5.644 arestas no voto, ou **3,35 por acórdão**. Exigir 1,0 é **30% do rendimento histórico** — piso deliberadamente baixo, porque o acervo de hoje é uma amostra curada por relevância temática (licitações/contratos, score ≥10) e o backfill pega acórdãos comuns de qualquer assunto, que devem render menos.
+
+Abaixo disso, a campanha não se paga e a frente C1 encerra, seguindo só a frente A.
 
 ### W2 — campanha
 
@@ -147,7 +167,9 @@ Quando a fila drenar: remedir a distribuição de citações-no-voto e reportar 
 
 ## 7. Riscos
 
-**7.1 O rendimento pode ser baixo.** Acórdãos de relação e decisões simplificadas quase não citam precedente em voto. É exatamente o que W1 mede, e por isso o portão existe antes da campanha.
+**7.1 O rendimento pode ser baixo.** O risco dos acórdãos de relação foi medido e eliminado por desenho (§5.4). Resta o risco de que acórdãos comuns **fora do tema de licitações** citem menos precedentes no voto do que a amostra curada de hoje. É exatamente o que W1 mede, e por isso o portão existe antes da campanha.
+
+**7.6 Nem todo acórdão tem RTF.** Em amostra do feed, 88% a 100% traziam `urlArquivo` conforme o trecho do histórico. Os sem link ficam com `tcuLinkPDF: null` e são descartados pela fila de `catalog-tcu-inteiro-teor` (que exige `tcuLinkPDF IS NOT NULL`), sem travar nada. W1 mede a taxa real.
 
 **7.2 Duplicatas de ATA.** O mesmo número/ano aparece em ATAs e colegiados diferentes. A constraint inclui `tcuOrgaoJulgador`, então convivem como linhas distintas — comportamento já existente, não regressão.
 
