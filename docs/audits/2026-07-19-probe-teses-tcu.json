@@ -6,25 +6,22 @@
       "assunto": "Prazo prescricional da pretensão punitiva do TCU",
       "teses": [
         {
-          "enunciado": "A prescrição da pretensão punitiva do TCU subordina-se ao prazo geral de prescrição de dez anos previsto no art. 205 do Código Civil, contado a partir da data de ocorrência da irregularidade sancionada, interrompendo-se, por uma única vez, pelo ato que ordenar a citação, a audiência ou a oitiva do responsável, com reinício da contagem a partir desse ato, podendo o Tribunal reconhecer a prescrição inclusive de ofício.",
-          "inovacao": "Fixou, em incidente de uniformização de jurisprudência, regra uniforme e vinculante para todo o Tribunal sobre o prazo, o termo inicial, a interrupção (única vez) e o reinício da contagem da prescrição da pretensão punitiva, aplicável subsidiariamente com base no Código Civil, na ausência de lei específica.",
+          "enunciado": "A pretensão punitiva do TCU subordina-se ao prazo geral de prescrição de dez anos previsto no art. 205 do Código Civil, contado a partir da data de ocorrência da irregularidade sancionada, interrompido por uma única vez pelo ato que ordenar a citação, a audiência ou a oitiva do responsável, com reinício da contagem do prazo decenal a partir desse ato interruptivo.",
+          "inovacao": "Fixou, em incidente de uniformização de jurisprudência, critério objetivo e uniforme para contagem da prescrição da pretensão punitiva do TCU, aplicando subsidiariamente o Código Civil, com regra única de interrupção, superando divergências anteriores sobre o tema.",
           "trechosFonte": [
-            0,
             7,
             9,
             10,
             11,
             12,
-            13,
             14,
             17,
-            19,
             20,
             21,
-            22,
             24,
             29,
             30,
+            32,
             33,
             34,
             35,
@@ -33,75 +30,92 @@
             38,
             39
           ]
+        },
+        {
+          "enunciado": "O Tribunal pode reconhecer, inclusive de ofício, a ocorrência da prescrição da pretensão punitiva, a qualquer tempo em que a matéria ainda seja processualmente oportuna.",
+          "inovacao": "Estabeleceu a possibilidade de conhecimento ex officio da prescrição pelo TCU, independentemente de provocação da parte.",
+          "trechosFonte": [
+            0
+          ]
+        },
+        {
+          "enunciado": "A prescrição da pretensão punitiva pode ser suspensa quando a mora na tramitação do processo for imputável ao próprio jurisdicionado.",
+          "inovacao": "Definiu hipótese de suspensão do prazo prescricional vinculada à conduta do responsável no processo.",
+          "trechosFonte": [
+            3,
+            21
+          ]
         }
       ],
       "sinaisQualitativos": [
         {
-          "origemChave": "2295/2021",
+          "origemChave": "10",
           "trecho": "o paradigmático Acórdão 1.441/2016-TCU-Plenário estabeleceu que, para os processos que tramitam neste Tribunal, incide a regra dos arts. 202 e 205 do Código Civil",
-          "tipo": "paradigmático"
+          "tipo": "precedente paradigmático"
         },
         {
-          "origemChave": "2643/2022",
-          "trecho": "à luz do entendimento anterior de prevalência da Súmula TCU 282 e do paradigmático Acórdão 1.441/2016 – TCU – Plenário",
-          "tipo": "paradigmático"
+          "origemChave": "23",
+          "trecho": "o paradigmático Acórdão 1.441/2016 – TCU – Plenário",
+          "tipo": "precedente paradigmático"
         }
       ],
-      "divergencias": [],
+      "divergencias": [
+        {
+          "origemChave": "9",
+          "precedenteApontado": "MS 32.201/DF (STF)",
+          "trecho": "O argumento de que esta Corte de Contas deveria adotar como paradigma a deliberação do STF constante do MS 32.201/DF, com a inaplicabilidade do Código Civil para determinação do prazo prescricional de sanções aplicáveis pelo TCU, já foi rechaçado em diversas deliberações",
+          "natureza": "tese rival rejeitada"
+        },
+        {
+          "origemChave": "27",
+          "precedenteApontado": "Resolução TCU 344/2022 e RE 636.886 (Tema 899 STF)",
+          "trecho": "não há retroatividade prejudicial na incidência da referida resolução ao caso... que submetia a pretensão punitiva ao prazo decenal do art. 205 do Código Civil, enquanto, no campo ressarcitório, ainda prevalecia o entendimento pela imprescritibilidade",
+          "natureza": "superação normativa posterior"
+        }
+      ],
       "confianca": "alta"
     },
     {
       "chave": "2622/2013",
-      "assunto": "Parâmetros referenciais de BDI (Bonificação e Despesas Indiretas) para obras e serviços de engenharia, incluindo tratamento da administração local, aplicação temporal dos parâmetros e forma correta de composição estatística do índice",
+      "assunto": "Parâmetros de BDI (Bonificação e Despesas Indiretas) e tratamento de despesas indiretas (administração local, administração central) em orçamentos de obras públicas para fins de apuração de sobrepreço/superfaturamento pelo TCU",
       "teses": [
         {
-          "enunciado": "Os custos de administração local, canteiro de obras e mobilização/desmobilização devem ser discriminados na planilha orçamentária como custos diretos, por serem passíveis de identificação, mensuração e controle individualizados, não devendo integrar o percentual de BDI.",
-          "inovacao": "Fixa regra de classificação orçamentária vedando a inclusão de administração local no BDI, tornando-a parâmetro de referência para exame de sobrepreço em obras públicas.",
+          "enunciado": "Os valores referenciais de BDI (mínimo, médio e 3º quartil) fixados por tipo de obra ou serviço de engenharia no Acórdão 2.622/2013-Plenário substituem os parâmetros anteriores do Acórdão 325/2007-Plenário e devem ser utilizados como parâmetro estatístico de referência para aferição de sobrepreço/economicidade nos contratos de obras públicas.",
+          "inovacao": "Fixação de tabela de valores referenciais de BDI (mínimo, médio, 3º quartil) segmentados por tipo de obra/serviço, obtidos por tratamento empírico-estatístico de contratos executados, substituindo o critério até então vigente.",
           "trechosFonte": [
             6,
+            7,
+            14,
+            33,
+            35
+          ]
+        },
+        {
+          "enunciado": "Os custos de administração local, canteiro de obras e mobilização/desmobilização, por serem passíveis de identificação, mensuração e discriminação individualizada, devem ser apropriados como custo direto na planilha orçamentária, e não incluídos na composição do BDI.",
+          "inovacao": "Estabelecimento da regra de que administração local não integra o BDI, devendo ser tratada como custo direto sujeito a medição e pagamento individualizados, com percentuais máximos de referência por faixa de valor da obra.",
+          "trechosFonte": [
             8,
-            17,
             18,
             20,
-            22,
             23,
-            25,
             29,
-            31
+            31,
+            39
           ]
         },
         {
-          "enunciado": "Os parâmetros de BDI fixados no Acórdão 2.622/2013-Plenário (faixas mínima, média e de 3º quartil por tipo de obra) constituem diretriz orientadora prospectiva, não se aplicando retroativamente para legitimar ou aferir preços de contratos/orçamentos anteriores à sua publicação (2013).",
-          "inovacao": "Delimita a eficácia temporal do precedente, afastando sua invocação retroativa como parâmetro de defesa em contratos com data-base anterior à decisão.",
-          "trechosFonte": [
-            1,
-            9,
-            16,
-            24,
-            36,
-            38
-          ]
-        },
-        {
-          "enunciado": "A composição do BDI de referência para fins de comparação com o BDI contratado deve utilizar o valor médio representativo (ou faixa consistente estatisticamente) de cada rubrica, sendo estatisticamente incorreto somar os valores do 3º quartil de todas as rubricas simultaneamente, pois tais valores máximos não ocorrem ao mesmo tempo em um único contrato.",
-          "inovacao": "Estabelece metodologia estatística vinculante para o cálculo do BDI de referência, coibindo o uso combinado e simultâneo dos percentuais máximos (3º quartil) de cada componente para inflar artificialmente o parâmetro.",
+          "enunciado": "É estatisticamente incorreto compor um BDI de referência utilizando simultaneamente os valores do 3º quartil (ou de qualquer faixa superior) de cada uma das rubricas que o compõem, pois tais valores não ocorrem conjuntamente no mesmo contrato segundo o estudo empírico que fundamentou o Acórdão 2.622/2013-Plenário; deve-se utilizar o BDI médio representativo ou o percentual total da faixa, e não a soma das faixas máximas de cada rubrica.",
+          "inovacao": "Vedação ao uso combinado dos valores máximos de cada componente do BDI para simular um percentual total artificialmente elevado, com base na metodologia estatística subjacente ao acórdão.",
           "trechosFonte": [
             2,
             12,
             13,
+            21,
             26,
             27,
             30,
             32,
             37
-          ]
-        },
-        {
-          "enunciado": "Nos editais de licitação, deve constar exigência de demonstrativo de apuração das alíquotas efetivas de PIS e Cofins para empresas sujeitas ao regime de tributação não cumulativa, compatibilizando tais alíquotas com a composição do BDI.",
-          "inovacao": "Impõe obrigação editalícia específica quanto à transparência tributária na composição do BDI para o regime não cumulativo de PIS/Cofins.",
-          "trechosFonte": [
-            15,
-            34
           ]
         }
       ],
@@ -116,127 +130,80 @@
       "confianca": "alta"
     },
     {
-      "chave": "1211/2021",
-      "assunto": "Formalismo moderado em licitações: juntada posterior de documentos de habilitação/proposta que atestem condição preexistente à sessão pública do certame",
+      "chave": "414/2018",
+      "assunto": "Dosimetria da sanção de declaração de inidoneidade aplicada a empresas participantes de cartel/fraude em licitações da Petrobras (caso Refinaria Abreu e Lima/Rnest), e critérios de detração de penalidade já aplicada pela CGU",
       "teses": [
         {
-          "enunciado": "Não fere os princípios da isonomia e da igualdade entre licitantes admitir a juntada, em sede de diligência ou saneamento, de documentos de habilitação e/ou proposta que apenas venham a comprovar condição ou situação fática preexistente à abertura da sessão pública do certame; ao contrário, a desclassificação ou inabilitação do licitante sem que lhe seja oportunizado sanear tais documentos configura excesso de formalismo, dissociado do interesse público e da busca pela proposta mais vantajosa.",
-          "inovacao": "O acórdão estabeleceu que a vedação à inclusão de novo documento (art. 43, §3º da Lei 8.666/1993 e art. 64 da Lei 14.133/2021) não alcança documentos ausentes por equívoco ou falha que comprovem condição já atendida antes da sessão pública, cabendo ao pregoeiro solicitá-los e avaliá-los, sanando erros que não alterem a substância das propostas.",
+          "enunciado": "Na dosimetria da pena de declaração de inidoneidade para licitar aplicada a empresas integrantes de cartel em licitações públicas, a sanção deve ser graduada conforme o grau de culpabilidade evidenciado pela conduta de cada empresa no esquema fraudulento, reservando-se a pena máxima (cinco anos) às condutas mais gravosas (como vencer a licitação fraudada) e penas intermediárias (três anos) às condutas de menor gravidade relativa (como apresentação de proposta de cobertura), não devendo a pena máxima recair indistintamente sobre todas as participantes do conluio.",
+          "inovacao": "Estabeleceu critério de escalonamento da pena de inidoneidade em função do papel desempenhado por cada empresa no cartel, evitando a aplicação automática e uniforme da sanção máxima a todas as envolvidas.",
           "trechosFonte": [
-            0,
             1,
-            2,
             3,
             4,
             5,
-            6,
-            7,
-            8,
             9,
             10,
-            11,
-            12,
-            13,
-            14,
             15,
+            20,
+            23
+          ]
+        },
+        {
+          "enunciado": "É cabível a detração, no cômputo do prazo da sanção de declaração de inidoneidade aplicada pelo TCU, do período em que a empresa já esteve impedida de licitar por força de penalidade de mesma natureza aplicada por outro órgão de controle (CGU) com base nos mesmos fatos, com fundamento no princípio da razoabilidade e no § 3º do art. 22 da LINDB, ressalvada a inidoneidade para licitações estaduais/municipais custeadas com recursos federais não abrangidas pela sanção do órgão de controle interno.",
+          "inovacao": "Fixou o entendimento de que a detração do tempo de penalidade já cumprido perante a CGU é adequada e aderente ao princípio da razoabilidade, desde que verificada a coincidência de fundamentos entre as sanções, sem configurar bis in idem em razão da independência das instâncias.",
+          "trechosFonte": [
+            0,
+            2,
+            12,
+            14,
             16,
             17,
             18,
-            19,
-            20,
-            21,
-            22,
-            23,
-            24,
-            25,
-            26,
-            27,
-            28,
-            29,
-            30,
-            31,
-            32,
-            33,
-            34,
-            35,
-            36,
-            37,
-            38,
-            39
+            19
           ]
         }
       ],
-      "sinaisQualitativos": [
-        {
-          "origemChave": "2585/2024",
-          "trecho": "Acórdão 1.211/2021-TCU-Plenário (relator Ministro Walton Alencar Rodrigues)",
-          "tipo": "referência recorrente como precedente consolidado"
-        },
-        {
-          "origemChave": "2351/2023",
-          "trecho": "a jurisprudência do TCU se consolidou no sentido das conclusões da ementa do paradigmático Acórdão 1.211/2021-Plenário",
-          "tipo": "paradigmático"
-        },
-        {
-          "origemChave": "641/2025",
-          "trecho": "a jurisprudência desta Corte de Contas (a exemplo do paradigmático Acórdão 1.211/2021-TCU-Plenário, relator Ministro Walton Alencar)",
-          "tipo": "paradigmático"
-        }
-      ],
+      "sinaisQualitativos": [],
       "divergencias": [],
       "confianca": "alta"
     },
     {
-      "chave": "2391/2018",
-      "assunto": "Definição do conceito de erro grosseiro/culpa grave (art. 28 da LINDB, Decreto-lei 4.657/1942, com redação da Lei 13.655/2018) para fins de responsabilização e aplicação de multa pelo TCU, e distinção quanto ao regime da responsabilidade por débito (dolo ou culpa, sem gradação)",
+      "chave": "2914/2019",
+      "assunto": "Sanção de declaração de inidoneidade (art. 46 da Lei 8.443/1992) aplicada a empresas por fraude/formação de cartel em licitações da Petrobras (Refinaria Abreu e Lima), incluindo independência de instâncias sancionadoras, alcance da sanção a sócios/sucessoras e critérios de dosimetria",
       "teses": [
         {
-          "enunciado": "Para fins do exercício do poder sancionatório do TCU, considera-se erro grosseiro (equiparado à culpa grave, nos termos do art. 28 da LINDB) aquele que resulta de grave inobservância do dever de cuidado e zelo com a coisa pública, ou seja, a conduta que se distancia daquela esperada de um administrador médio/diligente, seria percebida por pessoa com diligência abaixo do normal.",
-          "inovacao": "O acórdão fixou parâmetro objetivo/conceitual para diferenciar erro simples de erro grosseiro à luz do art. 28 da LINDB, servindo de referência para aplicação (ou não) de multa aos responsáveis.",
+          "enunciado": "As sanções aplicadas pelo TCU (declaração de inidoneidade, art. 46 da Lei 8.443/1992) e pela CGU/outros órgãos de controle (com base na Lei 8.666/1993 ou 8.443/1992) têm natureza distinta e decorrem de esferas de competência independentes, de modo que a aplicação cumulativa de ambas as sanções não configura violação ao princípio do non bis in idem, e o controle externo exercido pelo TCU não é subsidiário ao controle interno da CGU.",
+          "inovacao": "Fixa que a coexistência de sanções de inidoneidade aplicadas por TCU e CGU pelo mesmo fato não viola o non bis in idem, autorizando a manutenção de ambas as penalidades e a extensão da inidoneidade mesmo para contratações estaduais/municipais custeadas com recursos federais.",
           "trechosFonte": [
-            1,
-            2,
-            3,
-            7,
-            8,
-            9,
-            10,
-            11,
-            12,
-            13,
-            15,
-            16,
-            17,
-            18,
-            19,
+            0,
             20,
-            21,
-            22,
-            23,
-            25,
-            26,
-            27,
-            28,
-            29,
-            30,
-            31,
-            32,
-            33,
-            34,
-            35,
-            36,
-            37,
-            38,
-            39
+            15
           ]
         },
         {
-          "enunciado": "As alterações promovidas pela Lei 13.655/2018 no Decreto-lei 4.657/1942 (LINDB), notadamente a inclusão do art. 28, não modificam os requisitos da responsabilidade financeira por débito perante o TCU: o dever de indenizar o Erário permanece sujeito à comprovação de dolo ou culpa, sem qualquer gradação, tal como na responsabilidade civil aquiliana, distinguindo-se do exame de erro grosseiro que é pressuposto apenas para a aplicação de sanções (multa).",
-          "inovacao": "O acórdão separou, de forma paradigmática, o regime jurídico aplicável ao débito (responsabilidade subjetiva por dolo ou culpa simples) do regime aplicável à multa (que exige erro grosseiro/culpa grave), tese que passou a ser citada para afastar a exigência de erro grosseiro na imputação de débito.",
+          "enunciado": "A declaração de inidoneidade para participar de licitação na Administração Pública Federal (art. 46 da Lei 8.443/1992) não pode ser aplicada a sócios e administradores de empresas licitantes, por falta de previsão legal; contudo, se restar comprovado que nova sociedade empresária foi constituída pelos mesmos sócios, com o mesmo objeto, com o propósito de dar continuidade às atividades da empresa apenada e assim burlar a sanção (sucessão fraudulenta), cabe estender os efeitos da inidoneidade à nova empresa, mediante processo administrativo específico que assegure contraditório e ampla defesa.",
+          "inovacao": "Estabelece o critério para diferenciar a impossibilidade de sanção pessoal a sócios/administradores da possibilidade de extensão da penalidade a sucessoras fraudulentas constituídas para burlar a inidoneidade.",
           "trechosFonte": [
+            3,
             7,
-            24,
-            39
+            14,
+            23
+          ]
+        },
+        {
+          "enunciado": "A conduta de obter vantagens indevidas em licitações mediante supressão da livre concorrência e elevação artificial de preços (formação de cartel) configura, simultaneamente, infração à ordem econômica sujeita à competência do Cade e ilícito administrativo-financeiro sujeito à competência do TCU, de modo que a atuação de um órgão não exclui a competência do outro.",
+          "inovacao": "Consolida o entendimento de competências concorrentes entre TCU e Cade para apuração da mesma conduta de cartelização em licitações públicas.",
+          "trechosFonte": [
+            9,
+            31
+          ]
+        },
+        {
+          "enunciado": "Na dosimetria da sanção de inidoneidade aplicada a participantes de cartel em licitações, observa-se gradação conforme o papel desempenhado no esquema: pena de 5 anos para a empresa vencedora do certame fraudado, e pena de 3 anos para a empresa que apresentou proposta de cobertura.",
+          "inovacao": "Serve de parâmetro de referência para a dosimetria da pena de inidoneidade em casos análogos de cartel em licitações, distinguindo o grau de reprovabilidade conforme a função exercida no conluio.",
+          "trechosFonte": [
+            11,
+            13
           ]
         }
       ],
@@ -834,587 +801,440 @@
     },
     {
       "alvo": {
-        "numero": 1211,
-        "ano": 2021
+        "numero": 414,
+        "ano": 2018
       },
       "contagem": {
-        "citantesDistintos": 29,
-        "noVoto": 14,
-        "ocorrenciasTotal": 132
+        "citantesDistintos": 13,
+        "noVoto": 8,
+        "ocorrenciasTotal": 28
       },
       "trechos": [
         {
-          "origemChave": "2049/2023",
+          "origemChave": "977/2023",
           "secao": "voto",
           "noVoto": true,
-          "trecho": "…documento, prevista no art. 43, § 3º, da Lei 8.666/1993 e no art. 64 da Lei 14.133/2021 (nova Lei de Licitações) , não alcança documento ausente, comprobatório de condição atendida pelo licitante quando apresentou sua proposta, que não foi juntado com os demais comprovantes de habilitação e da proposta, por equívoco ou falha, o qual deverá ser solicitado e avaliado pelo pregoeiro” (grifou-se) – Acórdão 1.211/2021-Plenário. “A vedação à inclusão de novo documento, prevista no art. 43, § 3º, da Lei 8.666/1993 e no art. 64 da Lei 14.133/2021 (nova Lei de Licitações e Contratos Administrativos) , não alcança documento destinado a atestar condição de habilitação preexistente à abertura da sessão pública, apresentado em sede de diligência.” (grifou-se) – Acórdão 2.443/2021-Plenário. 12. Veja-se que com essa conduta foi…",
-          "offset": 16373
+          "trecho": "…(Seproc) para a inscrição da entidade indicada no item 9.1 deste acórdão no Cadastro Nacional de Empresas Inidôneas e Suspensas (CEIS) , considerando a detração do tempo efetivamente cumprido em razão da penalidade aplicada à empresa por aquela controladoria, com base no § 3º do art. 22 da Lei de Introdução às Normas do Direito Brasileiro (LINDB) e nas ponderações do MPTCU no relatório do Acórdão 414/2018-TCU-Plenário, tendo em vista que, no caso concreto, as sanções da CGU e do TCU são de mesma natureza e relativas ao mesmo fato, com exceção da inidoneidade para participar de licitações em certames promovidos na esfera estadual e municipal cujos objetos sejam custeados com recursos federais repassados por força de convênios ou instrumentos congêneres;” 13. Cito o Acórdão 1.236/2022-Plenário, de relatoria do…",
+          "offset": 40799
         },
         {
-          "origemChave": "1445/2022",
+          "origemChave": "234/2023",
           "secao": "voto",
           "noVoto": true,
-          "trecho": "…concreto, por entender que não se tratou da apresentação de documento que atestaria uma situação preexistente. Conforme argumentado, o produto oferecido não seria o mesmo que fora objeto de certificação e, portanto, não havia comprovação de atendimento às exigências do TR. 6. Após examinar a documentação reunida nos autos, a Selog entendeu que, apesar de haver dúvidas sobre a aplicabilidade do Acórdão 1.211/2021-TCU-Plenário, subsistiam os seguintes aspectos: “a) constatado que o laudo Relatório de Biomecânica 331/2020 se referia a produto distinto da amostra apresentada, seja por erro ou juízo equivocado da licitante, poderia o pregoeiro ter fixado prazo à licitante Palmilhado para apresentar o devido laudo relativo à amostra, em caráter de diligência, em vez de proceder de forma inexorável à desclassificação da…",
-          "offset": 62136
+          "trecho": "…realizada. V 52. Em relação à dosimetria da pena, deixo de trazer maiores considerações, em razão da proposta de sobrestamento, sem prejuízo de manifestar minha posição de alinhamento com os últimos precedentes desta Corte envolvendo casos semelhantes. 53. Cito, por ser bastante esclarecedor, trecho do parecer do Ministério Público junto ao TCU, acolhido parcialmente no voto que fundamentou o Acórdão 414/2018-TCU-Plenário, em que se discutiu a matéria: Contudo, a pena máxima não deve recair igualmente sobre todas as empreiteiras, mas somente sobre as que praticaram as condutas mais graves em cada fraude. Proponho, então, os critérios seguintes para que se possa sopesar o grau de culpabilidade em função das condutas empregadas. A conduta mais gravosa corresponde à apresentação de proposta próxima ao limite…",
+          "offset": 218340
         },
         {
-          "origemChave": "966/2022",
+          "origemChave": "2216/2023",
           "secao": "voto",
           "noVoto": true,
-          "trecho": "…para que a empresa optasse pela elaboração da declaração referida no parágrafo 9 desta instrução [necessidade de licença de exportação para compartilhar o conteúdo dos laudos], em vez da apresentação dos próprios certificados, caso não houvesse impedimento para tanto.” (grifei) 17. Nessa assunção, em prestígio ao valor máximo licitatório e em paralelismo com o julgado por esta Corte mediante o Acórdão 1.211/2021-Plenário, a admissão da juntada de documentos, durante a classificação e habilitação dos certames licitatórios, que venham a atestar condição pré-existente à abertura da sessão pública do certame é plenamente lícita, e não afronta os princípios da isonomia e igualdade entre as licitantes. Em verdade, o oposto – ou seja, a inabilitação do licitante, sem que lhe seja conferida oportunidade para sanear os…",
-          "offset": 66682
+          "trecho": "…(Seproc) para a inscrição da entidade indicada no item 9.1 deste acórdão no Cadastro Nacional de Empresas Inidôneas e Suspensas (CEIS), considerando a detração do tempo efetivamente cumprido em razão da penalidade aplicada à empresa por aquela controladoria, com base no § 3º do art. 22 da Lei de Introdução às Normas do Direito Brasileiro (LINDB) e nas ponderações do MPTCU no relatório do Acórdão 414/2018-Plenário, tendo em vista que, no caso concreto, as sanções da CGU e do TCU são de mesma natureza e relativas ao mesmo fato, com exceção da inidoneidade para participar de licitações em certames promovidos na esfera estadual e municipal cujos objetos sejam custeados com recursos federais repassados por força de convênios ou instrumentos congêneres. 2. Presentes os requisitos de admissibilidade fixados no…",
+          "offset": 32050
         },
         {
-          "origemChave": "988/2022",
+          "origemChave": "2092/2021",
           "secao": "voto",
           "noVoto": true,
-          "trecho": "…prevista no art. 43, § 3º, da Lei 8.666/1993 e no art. 64 da Nova Lei de Licitações (Lei 14.133/2021), não alcança documento ausente, comprobatório de condição atendida pelo licitante quando apresentou sua proposta, que não foi juntado com os demais comprovantes de habilitação e/ou da proposta, por equívoco ou falha, o qual deverá ser solicitado e avaliado pelo pregoeiro.” (Voto condutor do Acórdão 1.211/2021-TCU-Plenário, relator Ministro Walton Alencar Rodrigues). 18. É exatamente essa hipótese que se percebe no caso em apreço. Ambas as declarações ausentes retratariam condição anterior à sessão do pregão e poderiam ser prontamente elaboradas e entregues. 19. Outro ponto importante foi mencionado no despacho do Ministro Raimundo Carreiro (peça 23). O art. 47 do Decreto 10.024/2019 prevê a possibilidade de o…",
-          "offset": 45157
+          "trecho": "…incorporo às minhas razões de decidir. V 59. Passo a tratar da dosimetria da pena. Para tanto, considero a jurisprudência que vem se consolidando nesta Corte de Contas, em especial nos processos relativos aos empreendimentos da Refinaria do Nordeste. 60. Cito, por ser bastante esclarecedor, trecho do parecer do Ministério Público junto ao TCU, acolhido parcialmente no voto que fundamentou o Acórdão 414/2018-TCU-Plenário, em que se discutiu a matéria: Contudo, a pena máxima não deve recair igualmente sobre todas as empreiteiras, mas somente sobre as que praticaram as condutas mais graves em cada fraude. Proponho, então, os critérios seguintes para que se possa sopesar o grau de culpabilidade em função das condutas empregadas. A conduta mais gravosa corresponde à apresentação de proposta próxima ao limite…",
+          "offset": 152290
         },
         {
-          "origemChave": "966/2022",
+          "origemChave": "921/2021",
           "secao": "voto",
           "noVoto": true,
-          "trecho": "…Técnicas, que trata dos “Requisitos de Qualificação Técnica”. A qualificação técnica é exigência relativa à fase de habilitação, conforme inciso II do art. 27 da Lei 8.666/1993, inciso XIII do art. 4º da Lei 10.520/2002 e inciso II do art. 62 da Lei 14.133/2021; i) defende-se a impossibilidade de diligência para documento que devia constar originalmente da proposta e a inaplicabilidade do Acórdão 1.211/2021-TCU-Plenário ao caso em análise (peça 69, p. 13-16): porque se trata de documento de qualificação técnica não juntado por equívoco/falha do licitante, mas do qual ele já dispunha; e a Galvion não dispunha da documentação faltante e sequer sabia quando poderia apresentá-la, uma vez que dependia de autorização governamental do seu país sede; j) a exigência do documento no tempo devido não é mero formalismo,…",
-          "offset": 62052
+          "trecho": "…nas fraudes licitatórias ocorridas no âmbito das obras de implantação da Rnest. Em linha de concordância, a SeinfraOperações e o MP/TCU manifestaram-se, por argumentos distintos, pela declaração de inidoneidade da empresa pelo período de cinco anos. O Relator a quo destacou que a situação tratada no processo era bastante similar aos casos por ele apreciados nos Acórdãos 300/2018 - Plenário, 414/2018 - Plenário e 2.135/2018 - Plenário, nos quais houve a aplicação de sanções de inidoneidade pelo prazo de três anos e a pena máxima de cinco anos deveria ser reservada às empresas Odebrecht, Camargo Corrêa, Andrade Gutierrez e Queiroz Galvão. Examinadas as alegações recursais, a Serur propõe, em pareceres uniformes, negar provimento ao recurso. Acolho as conclusões da unidade técnica e as adoto como razões…",
+          "offset": 94202
         },
         {
-          "origemChave": "966/2022",
+          "origemChave": "2294/2021",
           "secao": "voto",
           "noVoto": true,
-          "trecho": "…fundamentos, julgo que se deva conhecer da presente representação para, no mérito, considerá-la parcialmente procedente. Decorre-se a necessidade de determinar à SR/PF/RJ que, caso entenda pertinente levar adiante a contratação dos itens 30 e 31 do Pregão Eletrônico 45/2020, adote as medidas necessárias ao retorno do certame à fase recursal e, com base no entendimento evidenciado na ementa do Acórdão 1.211/2021-TCU-Plenário, promova a análise dos relatórios dos testes dos capacetes ofertados na proposta do licitante Galvion Ballistics LTD., com vistas a verificar a compatibilidade dos equipamentos ofertados aos requisitos estabelecidos no instrumento convocatório. Conveniente, também, dar ciência à jurisdicionada sobre a impropriedade identificada no Pregão Eletrônico 45/2020, para que sejam adotadas medidas…",
-          "offset": 70698
+          "trecho": "…o prazo de três anos constante do acórdão recorrido pelo qual a Iesa foi considerada inidônea para participar de licitação na administração federal. A respeito, consoante bem apontado pela unidade técnica, cito os seguintes precedentes desta Corte em relação à Refinaria Abreu e Lima: Empresas que apresentaram proposta de coberturaDeliberação do TCUSançãoMendes Júnior Trading e Engenharia S/A Acórdão 414/2018-P e 2.638/2019-P 3 anosEngevix Engenharia e Projetos S.A. Acórdão 2.135/2018-P 3 anosMPE Montagens e Projetos Especiais S/A Acórdão 300/2018-P e 825/2018-P 3 anosTechint Engenharia e Construção Acórdão 2.914/2019-P 3 anos VII 40. Passo a tratar do pleito da Iesa de aplicação por analogia do instituto da detração, de forma a ser considerado o período em que ela ficou impedida de participar de…",
+          "offset": 142392
         },
         {
-          "origemChave": "970/2022",
+          "origemChave": "2092/2021",
           "secao": "voto",
           "noVoto": true,
-          "trecho": "…desclassificação das empresas Ecos Energia Solar Fotovoltaica Ltda e Ferreira Silva Energia Solar e Engenharia Eireli, sem que lhes fosse oportunizada a chance de sanear os documentos eventualmente faltantes de sua proposta, com potencial prejuízo de até R$ 602.458,00 (16,53% de desconto em relação à proposta classificada em primeiro lugar), em afronta ao disposto na jurisprudência do TCU (Acórdão 1211/2021-TCU-Plenário, Ministro Relator Walton Alencar Rodrigues); e b) demais informações que julgar necessárias.” 8. Em resposta, o TRT/GO limitou-se a afirmar que a decisão de não permitir às empresas Ecos Energia e Ferreira Silva Energia a apresentação de documentação complementar, quando do retorno à fase de análise das propostas, teve como fundamento o art. 31, §§ 3º, 4º e 5º da Lei 8.666/1993 c/c o art. 26,…",
-          "offset": 21665
+          "trecho": "…e nas provas da participação da Iesa Óleo e Gás S.A. nos atos ilícitos descortinados. Entendo que, ao presente momento, já resta suficientemente comprovada a existência do cartel e de seu modo de atuação, inclusive nas licitações do Comperj. Somente no âmbito desta Corte de Contas, ao menos outras dez empresas já foram tornadas inidôneas por fraude a licitação da Petrobras (Acórdãos 300/2018, 414/2018, 1.221/2018, 1.744/2018, 2.135/2018, 2.355/2018, 1.256/2019, 1.527/2019, 2.914/2019, 424/2019 e 2.134/2020, todos do Plenário). 30. Desse modo, uma vez comprovada a existência do Clube e de sua atuação também nas contratações do Comperj, passo a analisar aquelas que seriam as evidências da participação da Iesa nas fraudes em comento. Considero aqui todo o acervo probatório compartilhado com este…",
+          "offset": 138781
         },
         {
-          "origemChave": "2585/2024",
+          "origemChave": "309/2023",
           "secao": "voto",
           "noVoto": true,
-          "trecho": "…pátria, leciona que o exame realizado pelo pregoeiro na fase de verificação inicial das propostas (art. 22, § 2º, do Decreto 5.450/2005) deve ser sumário e sintético, dada a natureza dinâmica do pregão, sendo que ‘não cabe disputa mais aprofundada nessa etapa’ e que ‘o pregoeiro deverá examinar a proposta e verificar se a descrição ali contida corresponde àquela adotada no edital’.’; e - Acórdão 1.211/2021-TCU-Plenário (relator Ministro Walton Alencar Rodrigues), segundo o qual ‘Admitir a juntada de documentos que apenas venham a atestar condição pré-existente à abertura da sessão pública do certame não fere os princípios da isonomia e igualdade entre as licitantes e o oposto, ou seja, a desclassificação do licitante, sem que lhe seja conferida oportunidade para sanear os seus documentos de habilitação e/ou…",
-          "offset": 76757
+          "trecho": "…da SOG - Óleo e Gás S.A. (antiga Setal Óleo e Gás S.A.) nos atos ilícitos descortinados. Considero que, ao presente momento, já resta suficientemente comprovada a existência do cartel e de seu modo de atuação, inclusive nas licitações do Comperj. Somente no âmbito desta Corte de Contas, outras quinze empresas já foram tornadas inidôneas por fraudes às licitações da Petrobras (Acórdãos 300/2018, 414/2018, 1.221/2018, 1.744/2018, 2.135/2018, 2.355/2018, 424/2019, 1.256/2019, 1.527/2019, 2.914/2019, 1.900/2020, 2.134/2020, 2.687/2020, 2.841/2020, 3.163/2020, 3.175/2020, 82/2021, 416/2021, 497/2021, 1.042/2021, 1.177/2021, 1.313/2021, 2.092/2021, 2.320/2021, 2.531/2021, 2.586/2021, 1.236/2022, 2.461/2022, todos do Plenário). 17. Desse modo, uma vez comprovada a existência do “Clube” e de sua…",
+          "offset": 83305
         },
         {
-          "origemChave": "1445/2022",
+          "origemChave": "234/2023",
           "secao": "voto",
           "noVoto": true,
-          "trecho": "…do laudo correspondente, caberia ao pregoeiro apontar expressamente a desconformidade e diligenciar para que fosse apresentado o documento correto. Nesse caso, não haveria alteração na substância da proposta, pois o novo laudo viria apenas atestar condição preexistente do produto ofertado, que se encontrava corporificado na amostra. Essa situação se afigura bastante próxima daquela descrita no Acórdão 1.211/2021-TCU-Plenário. 37. Ainda que não fosse assim, o interesse público também justificaria seguir por uma linha de ação mais assertiva por parte do pregoeiro ante a considerável economia de recursos que se poderia obter na contratação. 38. Por conseguinte, há que se adotar as providências necessárias para saneamento da situação. 39. Em resposta à oitiva realizada no âmbito da construção participativa das…",
-          "offset": 84965
+          "trecho": "…da participação da Engevix Engenharia e Projetos S.A. nos atos ilícitos descortinados. Considero que, ao presente momento, já resta suficientemente comprovada a existência do cartel e de seu modo de atuação, inclusive nas licitações do Comperj. Somente no âmbito desta Corte de Contas, outras quinze empresas já foram tornadas inidôneas por fraudes às licitações da Petrobras (Acórdãos 300/2018, 414/2018, 1.221/2018, 1.744/2018, 2.135/2018, 2.355/2018, 424/2019, 1.256/2019, 1.527/2019, 2.914/2019, 1.900/2020, 2.134/2020, 2.687/2020, 2.841/2020, 3.163/2020, 3.175/2020, 82/2021, 416/2021, 497/2021, 1.042/2021, 1.177/2021, 1.313/2021, 2.092/2021, 2.320/2021, 2.531/2021, 2.586/2021, 1.236/2022, 2.461/2022, todos do Plenário). 17. Desse modo, uma vez comprovada a existência do “Clube” e de sua…",
+          "offset": 203009
         },
         {
-          "origemChave": "1363/2023",
+          "origemChave": "995/2022",
           "secao": "voto",
           "noVoto": true,
-          "trecho": "…se coaduna, e com o qual perfilho, com recentes deliberações do Plenário do TCU, a exemplo dos Acórdãos do Plenário: 2.673/2021 (relator Ministro Jorge Oliveira), 2.528/2021 (relator Ministro Raimundo Carreiro), 1.636/2021 (relator Ministro-Substituto Augusto Sherman) e 1.211/2021 (relator Ministro Walton Alencar Rodrigues), que tem se posicionado no seguinte sentido: Voto condutor do Acórdão 1211/2021-TCU-Plenário (relator Ministro Walton Alencar Rodrigues): Admitir a juntada de documentos que apenas venham a atestar condição pré-existente à abertura da sessão pública do certame não fere os princípios da isonomia e igualdade entre as licitantes e o oposto, ou seja, a desclassificação do licitante, sem que lhe seja conferida oportunidade para sanear os seus documentos de habilitação e/ou proposta, resulta…",
-          "offset": 88545
+          "trecho": "…à dosimetria, compreendo que ela se mostra coerente com as decisões proferidas nos demais processos que tratam de fraude comprovada à licitação – penas de 5 anos para a empresa que venceu licitação (Acórdãos 1.221/2018, 1.744/2018, 2.355/2018, 2.638/2019, 2.914/2019 e 2.531/2021, todos do Plenário, dentre outros) e de 3 anos para quem apresentou proposta de cobertura (Acórdãos 300/2018, 414/2018, 2.135/2018, 2.914/2019, todos do Plenário, dentre outros). 47. Sendo assim, não há motivo para alterar o quantum das sanções estipulado na decisão recorrida. 48. Diante de todo o exposto, VOTO para que seja adotada a deliberação que ora submeto a este Colegiado. TCU, Sala das Sessões, em 11 de maio de 2022. BENJAMIN ZYMLER Relator ACÓRDÃO Nº 995/2022 – TCU – Plenário 1. Processo nº TC…",
+          "offset": 132176
         },
         {
-          "origemChave": "2585/2024",
-          "secao": "voto",
-          "noVoto": true,
-          "trecho": "…anos, em desacordo com a jurisprudência deste Tribunal, a exemplo do Acórdão 503/2021-TCU-Plenário, relator Ministro Augusto Sherman, não obstante a vigência inicial da contratação ser de 12 meses; c) desclassificação sumária de 24 das 27 licitantes participantes do certame, antes da fase de lances, em desacordo com a jurisprudência deste Tribunal, a exemplo dos Acórdãos 2.154/2011-TCU-Plenário e 1.211/2021-TCU-Plenário, ambos da relatoria do Ministro Walton Alencar Rodrigues, uma vez que o exame realizado pelo pregoeiro na fase de verificação inicial das propostas deve ser sumário e sintético, dada a natureza dinâmica do pregão, sendo que não cabe disputa mais aprofundada nessa etapa e que o pregoeiro deverá examinar a proposta e verificar se a descrição ali contida corresponde àquela adotada no edital,…",
-          "offset": 68482
-        },
-        {
-          "origemChave": "988/2022",
-          "secao": "voto",
-          "noVoto": true,
-          "trecho": "…(peça 38). 10. Em linhas gerais, o pregoeiro defende terem sido regulares os procedimentos adotados. Descreve-os com detalhes, afirmando terem seguido fielmente o edital e a legislação pertinente ao caso, sobretudo os arts. 26, § 9º, 38, § 2º, e 43, § 2º, do Decreto 10.024/2019, que, segundo ele, vedam a anexação extemporânea de documentos de habilitação. Teria observado também o referido Acórdão 1.211/2021-TCU-Plenário, que tratou da minutas e editais padrão do Poder Executivo, e o aludido parecer da Advocacia-Geral da União. 11. Como bem mostra a auditora da SeinfraPortoFerrovia (peça 56), cuja análise da manifestação do pregoeiro incorporo aos fundamentos que ora apresento, havia três documentos faltantes para a Spectrah, mas um deles, o Certificado de Inscrição no Cadastro de Entidades Executantes de…",
-          "offset": 40209
-        },
-        {
-          "origemChave": "1467/2022",
-          "secao": "voto",
-          "noVoto": true,
-          "trecho": "…Cleiton Táxi Aéreo foi ilegal, por excesso de rigor formal e por se basear em exigência de habilitação que extrapola o rol exaustivo previsto na legislação, afrontando os art. 27 e 43, §3º da Lei 8.666/1993, os arts. 8º, inciso XII, alínea h; 17, inciso VI; e 47 do Decreto 10.024/2019, assim como a jurisprudência do Tribunal (Acórdão 2.302/2012-TCU-Plenário, Acórdão 1.170/2013-TCU-Plenário e Acórdão 1.211/2021-TCU-Plenário). 12. Dessa forma, propõe que o Tribunal determine à 12ª RM que adote providências com vistas a anular a referida decisão e todos os atos subsequentes e diretamente dependentes da inabilitação da mencionada empresa, inclusive o Contrato 14/2021 e a Ata de Registro de Preços. 13. Adicionalmente, propõe o retorno do processamento da licitação ao estágio em que o certame se encontrava, e,…",
-          "offset": 52776
-        },
-        {
-          "origemChave": "1795/2026",
-          "secao": "voto",
-          "noVoto": true,
-          "trecho": "…negativa de falência constitui requisito essencial de qualificação econômico-financeira (art. 69, II, da Lei 14.133/2021) e que sua ausência total não configuraria falha formal sanável, mas ausência de documento obrigatório, insuscetível de diligência (art. 64 da Lei 14.133/2021). 12. Argumentou que a certidão foi emitida cerca de uma hora após a decisão de inabilitação, razão pela qual o Acórdão 1.211/2021-Plenário seria inaplicável, por versar sobre documento preexistente. Sustentou, ainda, inexistência de violação à isonomia, por serem distintas as situações invocadas pela representante. 13. Em seu exame de mérito, a AudContratações concluiu que a representação é procedente e que restou prejudicado, por perda de objeto, o pedido de concessão de medida cautelar, ante a decisão da Prefeitura Militar de…",
-          "offset": 30217
-        },
-        {
-          "origemChave": "1445/2022",
-          "secao": "voto",
-          "noVoto": true,
-          "trecho": "…acerca dos pressupostos para adoção de medida cautelar, bem como sobre: “desclassificação de proposta da empresa Palmilhado Boots Indústria e Comércio Ltda. sem que lhe fosse oportunizada, em sede de diligência, a apresentação de laudo técnico que comprovasse o atendimento, pela sua amostra, dos requisitos de desempenho constantes da tabela 6 do termo de referência, em desacordo com o Acórdão 1.211/2021-TCU-Plenário, relator Ministro Walton Alencar Rodrigues, visto que tal laudo apenas atestaria uma situação preexistente da amostra, qual seja, atendimento ou não de requisitos exigidos pelo edital”. 5. Em resumo, a resposta do MJSP contestou a aplicação do Acórdão 1.211/2021-TCU-Plenário ao caso concreto, por entender que não se tratou da apresentação de documento que atestaria uma situação preexistente.…",
-          "offset": 61422
-        },
-        {
-          "origemChave": "1633/2026",
-          "secao": "voto",
-          "noVoto": true,
-          "trecho": "…Valiant Ltda. Ademais, a unidade técnica destacou que os novos documentos juntados não caracterizam atestado novo, mas legítimos elementos esclarecedores de documento preexistente. Alinhada a esse entendimento, a instrução técnica relembrou que a jurisprudência pacífica deste Tribunal de Contas autoriza o saneamento de informações sobre fatos preexistentes à abertura da sessão, nos termos dos Acórdãos 1.211/2021, 988/2022 e 602/2025, todos do Plenário. 11. Noutra vertente, a representante insurge-se contra a suficiência material do atestado, asseverando que os serviços pertinentes ao projeto ‘Casa Brasil Paris 2024’ foram executados por meio de consórcio constituído entre as empresas EA/Valiant e M/Checon. Argumenta que o atestado sob exame não discrimina o quinhão de serviços efetivamente prestado por…",
-          "offset": 30806
-        },
-        {
-          "origemChave": "1795/2026",
-          "secao": "voto",
-          "noVoto": true,
-          "trecho": "…de modo que sua emissão após a sessão pública não implica, necessariamente, inovação da realidade fática existente à época da habilitação. O aspecto juridicamente relevante não é a data de emissão do documento, mas a existência anterior da condição jurídica certificada: no caso, a ausência de decretação de falência. 17. Nesse sentido, a jurisprudência consolidada desta Corte, notadamente o Acórdão 1.211/2021-Plenário (relator: Ministro Walton Alencar Rodrigues), prestigia o princípio do formalismo moderado, admitindo a juntada posterior de documentos destinados exclusivamente a comprovar condição preexistente à abertura da sessão pública, desde que inexistente alteração da situação fática do licitante. Assim, não prospera a tese de inaplicabilidade do precedente ao caso concreto pelo simples fato de a…",
-          "offset": 31842
-        },
-        {
-          "origemChave": "988/2022",
-          "secao": "voto",
-          "noVoto": true,
-          "trecho": "…a Delfos Assessoria e Serviços Ltda., antes, portanto, da data em que a representação foi apresentada ao TCU, 11/11/2021. Por certo, trata-se de premissa inafastável para o presente exame. *** 9. Em resposta à oitiva, a autoridade portuária apresenta basicamente a manifestação do pregoeiro (peça 36). Como anexos à resposta foram incluídos também o Parecer 6/2021/CNMLC/CGU/AGU (peça 37) e o Acórdão 1.211/2021-TCU-Plenário, relator Ministro Walton Alencar Rodrigues (peça 38). 10. Em linhas gerais, o pregoeiro defende terem sido regulares os procedimentos adotados. Descreve-os com detalhes, afirmando terem seguido fielmente o edital e a legislação pertinente ao caso, sobretudo os arts. 26, § 9º, 38, § 2º, e 43, § 2º, do Decreto 10.024/2019, que, segundo ele, vedam a anexação extemporânea de documentos de…",
-          "offset": 39742
-        },
-        {
-          "origemChave": "2351/2023",
-          "secao": "voto",
-          "noVoto": true,
-          "trecho": "…no ato da sessão, conforme autorizado pela pregoeira, no exercício de suas regulares atribuições, tratadas nos incisos XIII e XIV, do art. 11, do Decreto 3.555/2000.” 31. A partir de 2021, com a experimentação da sistemática de habilitação no pregão eletrônico disciplinada pelo Decreto 10.024/2019, a jurisprudência do TCU se consolidou no sentido das conclusões da ementa do paradigmático Acórdão 1.211/2021-Plenário: “Admitir a juntada de documentos que apenas venham a atestar condição pré-existente à abertura da sessão pública do certame não fere os princípios da isonomia e igualdade entre as licitantes e o oposto, ou seja, a desclassificação do licitante, sem que lhe seja conferida oportunidade para sanear os seus documentos de habilitação e/ou proposta, resulta em objetivo dissociado do interesse…",
-          "offset": 42738
-        },
-        {
-          "origemChave": "1445/2022",
-          "secao": "voto",
-          "noVoto": true,
-          "trecho": "…pela sua amostra, dos requisitos de desempenho constantes da tabela 6 do termo de referência, em desacordo com o Acórdão 1.211/2021-TCU-Plenário, relator Ministro Walton Alencar Rodrigues, visto que tal laudo apenas atestaria uma situação preexistente da amostra, qual seja, atendimento ou não de requisitos exigidos pelo edital”. 5. Em resumo, a resposta do MJSP contestou a aplicação do Acórdão 1.211/2021-TCU-Plenário ao caso concreto, por entender que não se tratou da apresentação de documento que atestaria uma situação preexistente. Conforme argumentado, o produto oferecido não seria o mesmo que fora objeto de certificação e, portanto, não havia comprovação de atendimento às exigências do TR. 6. Após examinar a documentação reunida nos autos, a Selog entendeu que, apesar de haver dúvidas sobre a…",
-          "offset": 61699
-        },
-        {
-          "origemChave": "1788/2026",
-          "secao": "voto",
-          "noVoto": true,
-          "trecho": "…à luz da jurisprudência consolidada deste Tribunal, que há muito prestigia os princípios da razoabilidade, da busca da proposta mais vantajosa e do formalismo moderado. Nessa linha, a Corte tem admitido a juntada extemporânea de documentos destinados exclusivamente a atestar condição material já existente quando da apresentação da proposta. Tal compreensão encontra expressão, entre outros, nos Acórdãos 1.211/2021, 2.443/2021 e 2.673/2021, todos do Plenário. 10. No caso em exame, o TRE-RS promoveu diligência para oportunizar o envio do balanço patrimonial referente ao exercício de 2024. Em resposta, a licitante providenciou o registro do balanço e o encaminhou, oportunidade em que o documento foi submetido à análise da Assessoria Técnica Contábil e Financeira do órgão, cuja análise concluiu pelo…",
-          "offset": 37123
-        },
-        {
-          "origemChave": "1633/2026",
+          "origemChave": "995/2022",
           "secao": "relatorio",
           "noVoto": false,
-          "trecho": "… declaração à peça 10, entende-se que se trata não de um novo atestado técnico, mas de uma declaração que visou esclarecer documento apresentado pela licitante Valiant. E ainda que fosse a apresentação de novo atestado técnico, a jurisprudência deste Tribunal é no sentido de que isso é possível, caso se refira a situações ocorridas antes da abertura da sessão do certame licitatório, a exemplo dos Acórdãos 1.211/2021-TCU-Plenário - relator Min. Walton Rodrigues, 988/2022-TCU-Plenário - relator Min. Antônio Anastasia, 4.370/2023-TCU-1ª Câmara - relator Min. Jhonatan de Jesus, 602/2025-TCU-Plenário - relator Min. Antonio Anastasia, 8108/2025-TCU-1ª Câmara – relator Min. Bruno Dantas, e 656/2026-TCU-Plenário – relator Min. Marcos Bemquerer. 17.7. Assim, a par desses elementos e das matérias reportadas no subtópico seguinte,…",
-          "offset": 11981
+          "trecho": "…dar, de forma simulada e fraudulenta, aparência de legalidade àquele certame, nos termos do voto condutor do acórdão recorrido (peça 191, p. 9), verbis: ‘(...) 36. Ainda no que diz respeito à referida licitante, deve-se ajustar a dosimetria da sanção de inidoneidade para três anos, em vez dos cinco anos propostos pela secretaria instrutora, na linha do entendimento adotado por este Tribunal no Acórdão 414/2018-TCU-Plenário, que considero aplicável ao caso em exame: ‘Contudo, a pena máxima não deve recair igualmente sobre todas as empreiteiras, mas somente sobre as que praticaram as condutas mais graves em cada fraude. Proponho, então, os critérios seguintes para que se possa sopesar o grau de culpabilidade em função das condutas empregadas. A conduta mais gravosa corresponde à apresentação de proposta próxima ao…",
+          "offset": 75624
         },
         {
-          "origemChave": "1467/2022",
-          "secao": "acordao",
-          "noVoto": false,
-          "trecho": "… o ato em questão foi praticado com excesso de rigor formal e se baseou em exigência de habilitação que extrapola o rol exaustivo previsto na legislação, em desrespeito aos art. 27 e 43, §3º da Lei 8.666/1993, aos arts. 8º, inciso XII, alínea ‘h’; 17, inciso VI; e 47 do Decreto 10.024/2019, assim como à jurisprudência do Tribunal (Acórdão 2.302/2012-TCU-Plenário, Acórdão 1.170/2013-TCU-Plenário e Acórdão 1.211/2021-TCU-Plenário); 9.3.2. com fundamento no art. 45 da Lei 8.443/1992, c/c o art. 71, inciso IX, da Constituição Federal, anule a decisão do pregoeiro de inabilitar as licitantes classificadas nos 2º, 3º e 4º lugares no âmbito do PE/SRP 1/2021, tendo em vista que o ato em questão foi praticado sem a devida motivação e antes da abertura das propostas comerciais das respectivas empresas, em desrespeito aos art. 38…",
-          "offset": 68776
-        },
-        {
-          "origemChave": "966/2022",
+          "origemChave": "254/2023",
           "secao": "relatorio",
           "noVoto": false,
-          "trecho": "… de diligência para documento que devia constar originalmente da proposta e inaplicabilidade do Acórdão 1.211/2021-TCU-Plenário 24. A Ultramar defende a impossibilidade de diligência para documento que devia constar originalmente da proposta e a inaplicabilidade do Acórdão 1.211/2021-TCU-Plenário ao caso em análise (peça 69, p. 13-16): a) a situação da Galvion não se enquadra ao caso analisado no Acórdão 1.211/2021-TCU-Plenário, que tratou de documento de qualificação técnica não juntado por equívoco/falha do licitante, mas do qual ele já dispunha; b) no caso, a Galvion não dispunha da documentação faltante e sequer sabia quando poderia apresentá-la, uma vez que dependia de autorização governamental do seu país sede; c) a Galvion quer seguir norma própria e diversa daquela que informa os procedimentos licitatórios no…",
-          "offset": 39500
+          "trecho": "…transitado em julgado: observância do devido processo legal e autorização da utilização dos documentos pelo juízo competente. 66. No que se refere ao devido processo legal, ‘a processualística do TCU é baseada, em essência, em provas documentais’ e ‘o exercício do direito de defesa acontece (...) dando-se à parte a possibilidade de questionar os documentos acostados nos autos’ (voto condutor do Acórdão 414/2018-Plenário, Rel. Min. Benjamin Zymler). No caso vertente, concedeu-se à Engevix a oportunidade de se manifestar sobre todos os fatos tratados ao longo das instruções procedidas nos autos. Logo, não se ventila qualquer nulidade ou ofensa processual. 67. Por conseguinte, relativamente ao critério de observância ao devido processo legal, no âmbito do presente processo, todos os elementos constantes dos autos…",
+          "offset": 29204
         },
         {
-          "origemChave": "1467/2022",
+          "origemChave": "2216/2023",
           "secao": "relatorio",
           "noVoto": false,
-          "trecho": "… o ato em questão foi praticado com excesso de rigor formal e se baseou em exigência de habilitação que extrapola o rol exaustivo previsto na legislação, em desrespeito aos art. 27 e 43, §3º da Lei 8.666/1993, aos arts. 8º, inciso XII, alínea ‘h’; 17, inciso VI; e 47 do Decreto 10.024/2019, assim como à jurisprudência do Tribunal (Acórdão 2.302/2012-TCU-Plenário, Acórdão 1.170/2013-TCU-Plenário e Acórdão 1.211/2021-TCU-Plenário); b) com fundamento no art. 45 da Lei 8.443/1992, c/c o art. 71, inciso IX, da Constituição Federal, anule a decisão do pregoeiro de inabilitar as licitantes classificadas nos 2º, 3º e 4º lugares no âmbito do PE/SRP 1/2021, tendo em vista que o ato em questão foi praticado sem a devida motivação e antes da abertura das propostas comerciais das respectivas empresas, em desrespeito aos art. 38 e…",
-          "offset": 39643
+          "trecho": "…específica nesse sentido; b) a desoneração de responsabilidade aplicada pela Petrobras não vincula o entendimento deste TCU, conforme o já mencionado princípio da independência das instâncias; c) por questão de isonomia, não há como expurgar a penalidade imputada, uma vez que, no tocante às sanções de declaração de inidoneidade, o Tribunal tem se balizado pelos seguintes parâmetros indicados Acórdão 414/2018-TCU-Plenário, da relatoria do Ministro Benjamin Zymler. Lista-se a seguir, alguns julgados, todos do Plenário, onde tais parâmetros foram sopesados: Empresas que venceram licitação mediante fraudeDeliberação do TCUSançãoIesa Óleo & Gás S.A.Acórdão 2.355/2018-P5 anosConstrutora Queiroz Galvão S.A.Acórdão 1.221/2018-P5 anosConstrutora OAS S.A.Acórdão 1.744/2018-P e 2.453/2019-P5 anosMendes Júnior Trading e…",
+          "offset": 28176
         },
         {
-          "origemChave": "1278/2023",
+          "origemChave": "995/2022",
           "secao": "relatorio",
           "noVoto": false,
-          "trecho": "…A Prefeitura de Boa Vista/RR desclassificou a proposta de melhor preço de empresa já tecnicamente habilitada por não apresentar unicamente a composição de encargos sociais da proposta, o que se configura em formalismo exacerbado, uma vez que se trata de pendência que poderia ser sanada com a realização de uma diligência, conforme previsão do art. 43, § 3º, da Lei 8.666/1993 e o entendimento dos Acórdãos 1.211/2021-TCU-Plenário, 444/2021-TCU-Plenário e 5.181/2012-TCU-1ª Câmara. Em outra esfera, a prefeitura incluiu previsão no Edital de Licitação da Concorrência Pública n. 9/2020 de exigência para habilitação técnica de que as licitantes possuíssem usina de CBUQ ou já tivessem contrato com empresa de usinagem de CBUQ previamente firmado e inabilitou indevidamente licitante do procedimento licitatório por essa razão, o…",
-          "offset": 4986
+          "trecho": "…encaminhamento dá a correta aplicação do devido processo legal e a da observância ao princípio da proporcionalidade quanto à aplicação das respectivas penas (adequando-as às circunstâncias de cada caso concreto), nos termos das disposições previstas na Lei 9.874/199 (art. 2º) e no Decreto-Lei 4.657/1942 (§ 3º do art. 22), bem como ao que foi adotado como parâmetro norteador o que se extrai do Acórdão 414/2018-TCU-Plenário (item 36 do voto condutor do acórdão recorrido, peça 191, p. 9, item 36). 6.3.4. Também é importante mencionar que a discussão atinente à prova, que dá suporte à aplicação das penas às recorrentes, se materializa por um conjunto de ocorrências indiciárias, dentro do contexto em que se deu a audiência dos recorrentes, e, em seu conjunto, faz prova suficiente para a ocorrência de fraude e de…",
+          "offset": 67016
         },
         {
-          "origemChave": "2467/2024",
+          "origemChave": "2216/2023",
           "secao": "relatorio",
           "noVoto": false,
-          "trecho": "…chegou à integralidade, e a intenção da lei não é exigir, para comprovação da qualificação técnica, a propriedade prévia da licitante de todos os equipamentos a serem utilizados. O acervo da contratada pode ser complementado por subcontratação, admitida no edital. A jurisprudência do TCU admite correção de erro material e outros, com a apresentação de documentos novos para fins de habilitação (Acórdão 1.211/2021-TCU-Plenário, Rel. Min. Walton Alencar), na linha da redução do formalismo e prestigiar o objetivo da licitação sem ferir a isonomia. O 2º atestado, referente ao período de 1º/3 a 31/5/2022, Contrato Executive Class (Contrato 18/2022): faltaram assinatura e data de emissão, descumprindo os mesmos itens editalícios citados; em sede de diligência, outra versão do atestado foi apresentada assinada, mas sem data…",
-          "offset": 16629
+          "trecho": "…(Seproc) para a inscrição da entidade indicada no item 9.1 deste acórdão no Cadastro Nacional de Empresas Inidôneas e Suspensas (CEIS), considerando a detração do tempo efetivamente cumprido em razão da penalidade aplicada à empresa por aquela controladoria, com base no § 3º do art. 22 da Lei de Introdução às Normas do Direito Brasileiro (LINDB) e nas ponderações do MPTCU no relatório do Acórdão 414/2018-Plenário, tendo em vista que, no caso concreto, as sanções da CGU e do TCU são de mesma natureza e relativas ao mesmo fato, com exceção da inidoneidade para participar de licitações em certames promovidos na esfera estadual e municipal cujos objetos sejam custeados com recursos federais repassados por força de convênios ou instrumentos congêneres; 9.3. encaminhar cópia desta deliberação à responsável, à…",
+          "offset": 2452
         },
         {
-          "origemChave": "966/2022",
+          "origemChave": "254/2023",
           "secao": "relatorio",
           "noVoto": false,
-          "trecho": "…(Súmula TCU 272). 32. Apesar dos precedentes acima, que reputam indevida a exigência de laudos sobre o produto para fins de habilitação do licitante, no caso concreto, considerando o avançado estágio do certame, entende-se suficiente cientificar o órgão sobre a impropriedade detectada. Impossibilidade de diligência para documento que devia constar originalmente da proposta e inaplicabilidade do Acórdão 1.211/2021-TCU-Plenário 24. A Ultramar defende a impossibilidade de diligência para documento que devia constar originalmente da proposta e a inaplicabilidade do Acórdão 1.211/2021-TCU-Plenário ao caso em análise (peça 69, p. 13-16): a) a situação da Galvion não se enquadra ao caso analisado no Acórdão 1.211/2021-TCU-Plenário, que tratou de documento de qualificação técnica não juntado por equívoco/falha do licitante,…",
-          "offset": 39196
+          "trecho": "…aquiesceu à proposta de aplicação da sanção no patamar máximo, mas ressaltou a necessidade de individualização das condutas praticadas pela empresa (peça 75). 12. O Relator a quo (peça 80), por concordar com os fundamentos do Acórdão 348/2016-TCU-Plenário, reputou que a pena máxima aplicável aos casos de inidoneidade limita-se temporalmente a cinco anos. Tal como nos Acórdãos 300/2018-Plenário e 414/2018-Plenário, ambos de sua relatoria, que trataram de situações bastante similares, acolheu a argumentação do Ministério Público junto ao TCU no sentido de que a pena máxima deve ser reservada àqueles que praticaram conduta de maior gravidade em cada fraude perpetrada contra a Rnest. Nesse sentido, realçou que o cartel era dominado pelas empresas Odebrecht, Camargo Corrêa, Andrade Gutierrez e Queiroz Galvão…",
+          "offset": 8688
         },
         {
-          "origemChave": "2443/2021",
-          "secao": null,
-          "noVoto": false,
-          "trecho": "… Administração sem controvérsias, a fim de classificar a empresa com a proposta mais vantajosa. Análise: 10. Em relação aos pareceres jurídicos que, segundo o órgão, pautaram a decisão do Ordenador de Despesas em reverter a habilitação da empresa Delurb, realizada pelo pregoeiro, entende-se que, com as devidas vênias, tais pareceres ignoram a jurisprudência mais recente do Tribunal, notadamente o Acórdão 1.211/2021-TCU-Plenário, Relator Ministro Walton Alencar Rodrigues. 11. Percebe-se, ainda, que o segundo parecer, solicitado pelo GAP-BR após a intervenção desta Corte de Contas, não leva em conta o que foi consignado pelo Ministro Relator dos presentes autos em seu Despacho (peça 30), onde consta o seguinte: 16. Observo que a Certidão de Registro de Pessoa Jurídica 44881/2020, emitida pelo CREA-RJ em nome da Delurb…",
-          "offset": 8056
-        },
-        {
-          "origemChave": "1410/2026",
+          "origemChave": "977/2023",
           "secao": "relatorio",
           "noVoto": false,
-          "trecho": "…hipótese, à prorrogação da ata de registro de preços: i. desclassificação das propostas de licitantes em razão de vícios possivelmente sanáveis, qual seja, a anexação de garantia de proposta em campo diverso do previsto na plataforma eletrônica, sem a realização de diligência, o que contraria o art. 59, inciso V, da Lei 14.133/2021, bem como a jurisprudência desta Corte de Contas (a exemplo do Acórdão 1.211/2021-TCU-Plenário, relator Ministro Walton Alencar); ii. ausência de motivação para a exigência de anonimato quanto à autoria das propostas apresentadas no certame, conforme item 7.2.1 do edital, em descumprimento ao art. 18, inciso IX, da Lei 14.133/2021, que exige nos certames licitatórios a motivação circunstanciada das condições do edital; iii. exigência de garantia da proposta baseada no valor total estimado…",
-          "offset": 24800
+          "trecho": "…da empresa indicada no item 9.1 deste acórdão no Sistema de Cadastro Unificado de Fornecedores (Sicaf) e no Cadastro Nacional de Empresas Inidôneas e Suspensas (CEIS), considerando a detração do tempo da penalidade aplicada à empresa por aquela controladoria, com base no § 3º do art. 22 da Lei de Introdução às Normas do Direito Brasileiro (LINDB) e nas ponderações do MPTCU no relatório do Acórdão 414/2018-Plenário, tendo em vista que no caso concreto as sanções da CGU e do TCU são de mesma natureza e relativas ao mesmo fato, com exceção da inidoneidade para participar de licitações em certames promovidos na esfera estadual e municipal cujos objetos sejam custeados com recursos federais repassados por força de convênios ou instrumentos congêneres [Grifei.]. (...). 9. Tal deliberação resultou de proposta…",
+          "offset": 12401
         },
         {
-          "origemChave": "2993/2026",
+          "origemChave": "977/2023",
           "secao": "relatorio",
           "noVoto": false,
-          "trecho": "… do Despacho do Relator: Desclassificação da proposta técnica da licitante Central IT Tecnologia da Informação S/A sem motivação específica e sem realização de diligência prévia, com tratamento desigual entre licitantes e em afronta ao item 17.4 do edital Fundamento legal ou jurisprudencial: inciso I do parágrafo único do art. 39 do Regulamento de Licitações e Contratos do Serpro (RLC/Serpro); Acórdão 1.211/2021-TCU-Plenário, de relatoria do Ministro Walton Alencar Rodrigues Contextualização: 18. O representante sustenta que sua proposta técnica foi desclassificada de forma irregular, sem a realização de diligências e sem tratamento isonômico em relação às demais licitantes. Alega que as empresas MCR Sistemas e Consultoria Ltda. e Lotus ICT Empreendimentos S.A. foram submetidas a diligências técnicas, negociações e…",
-          "offset": 9069
+          "trecho": "…a inidoneidade para licitar e contratar possuíam fundamentos e competências distintas, não configurando violação ao princípio do non bis in idem, pois o TCU se baseia no art. 46 da Lei 8.443/1992 e a CGU no art. 87, inciso IV, da Lei 8.666/1993, havendo, na verdade, o princípio da independência das instâncias. 14. Por outro lado, cumpre transcrever o entendimento do MPTCU do relatório do Acórdão 414/2018-Plenário: A proposta de detração, na execução da pena, do período em que a Mendes Júnior esteve impedida de licitar por força da inidoneidade declarada pela CGU mostra-se adequada e aderente ao princípio da razoabilidade. Todavia, deve-se certificar se os fundamentos da sanção aplicada pelo órgão de controle interno coincidem com os destes autos, conforme bem pontuou a SeinfraOperações em sua proposta.…",
+          "offset": 16572
         },
         {
-          "origemChave": "1363/2023",
+          "origemChave": "2092/2021",
           "secao": "relatorio",
           "noVoto": false,
-          "trecho": "… (seguro garantia), dentro do prazo previsto de 12/12/2022. O edital cita no capítulo V, item 24, que a sessão pública para o recebimento dos envelopes seria realizada em 12/12/2022, das 9 horas às 12 horas (peça 19, p. 2). 25. Deveriam ser entregues três envelopes nesta data e hora (envelope de garantia de proposta; envelope de proposta econômica; e envelope de documentos de habilitação). 26. O Acórdão 1211/2021-TCU-Plenário, de relatoria do Ministro Walton Alencar Rodrigues, possibilita admitir a juntada de documentos que apenas venham a atestar condição pré-existente à abertura da sessão pública do certame, uma vez que, tal conduta não estaria ferindo os princípios da isonomia e igualdade entre as licitantes e o oposto, ou seja, a desclassificação do licitante, sem que lhe seja conferida oportunidade para sanear…",
-          "offset": 33009
+          "trecho": "…dezembro de 2016. Como a empresa foi notificada no ano de 2019, a pretensão punitiva permanece perfeitamente vigente. Acerca da proposta complementar do titular da unidade técnica, peça 88, no sentido de determinar à CGU que considere a detração do tempo da penalidade aplicada à empresa por aquela controladoria, com base no § 3º do art. 22 da LINDB e nas ponderações deste MPTCU no relatório do Acórdão 414/2018-Plenário, considero que o objetivo de evitar o bis in idem se cumpra com a detração do tempo da penalidade efetivamente cumprido pela empresa apenada, e não meramente pelo tempo da penalidade aplicada, que pode ser reduzido mediante a interposição de recursos ou por intervenção judicial. É o relatório. VOTO Trata-se de processo apartado do TC 010.816/2017-8, autuado para verificar a ocorrência de…",
+          "offset": 125086
         },
         {
-          "origemChave": "1414/2023",
+          "origemChave": "2092/2021",
           "secao": "relatorio",
           "noVoto": false,
-          "trecho": "…enseja a desclassificação antecipada das respectivas propostas, devendo a Administração contratante realizar diligências junto às licitantes para a devida correção das falhas, desde que não seja alterado o valor global proposto. Cabe à licitante suportar o ônus decorrente do seu erro, no caso de a Administração considerar exequível a proposta apresentada. 72. Além disso, conforme consignado no Acórdão 1211/2021-TCU-Plenário, relator Ministro Walton Alencar, admitir a juntada de documentos que apenas venham a atestar condição pré-existente à abertura da sessão pública do certame não fere os princípios da isonomia e igualdade entre as licitantes e o oposto, ou seja, a desclassificação do licitante, sem que lhe seja conferida oportunidade para sanear os seus documentos de habilitação e/ou proposta, resulta em objetivo…",
-          "offset": 43740
+          "trecho": "…para participar de licitações no âmbito estadual, distrital ou municipal, custeadas com recursos federais, uma vez que a sanção aplicada pela CGU não contemplou tais casos. 4. A conclusão exarada pelo Secretário da SeinfraOperações, em seu parecer (peça 88), se fundamenta no §3º do art. 22 da Lei de Introdução às Normas do Direito Brasileiro (LINDB) e nas ponderações do MPTCU no relatório do Acórdão 414/2018-Plenário, da relatoria do Ministro Benjamin Zymler. 5. O Ministério Público junto ao TCU, representado nos autos pelo Procurador Marinus Eduardo De Vries Marsico, registrou sua aquiescência às propostas da SeinfraOperações (peça 98): Manifesto-me de acordo com a proposta oferecida pelo auditor à peça 86 e também com a proposta complementar apresentada pelo titular da unidade técnica à peça 89, sem…",
+          "offset": 120579
         },
         {
-          "origemChave": "970/2022",
+          "origemChave": "2216/2023",
           "secao": "relatorio",
           "noVoto": false,
-          "trecho": "…aos possíveis impactos de: i) determinação para o TRT/GO retornar o PE SRP 73/2021 à fase de análise de propostas, de forma que possa ser oportunizada às empresas Ecos Energia Solar Fotovoltaica Ltda e Ferreira Silva Energia Solar e Engenharia Eireli o saneamento de suas propostas, obedecendo à ordem de classificação. Fundamento legal ou jurisprudencial: jurisprudência do Tribunal, a exemplo do Acórdão 1.211/2021-TCU-Plenário, Ministro Relator Walton Alencar Rodrigues. Manifestação da Unidade Jurisdicionada sobre os indícios de irregularidades: a) após a análise dos recursos administrativos interpostos na licitação, houve reconsideração da decisão que havia declarado a empresa HCC vencedora do certame e retorno à fase de análise das propostas para convocação, com fundamento no subitem 4.16 do Edital, das licitantes…",
-          "offset": 6013
+          "trecho": "…do Ministro Benjamin Zymler. Lista-se a seguir, alguns julgados, todos do Plenário, onde tais parâmetros foram sopesados: Empresas que venceram licitação mediante fraudeDeliberação do TCUSançãoIesa Óleo & Gás S.A.Acórdão 2.355/2018-P5 anosConstrutora Queiroz Galvão S.A.Acórdão 1.221/2018-P5 anosConstrutora OAS S.A.Acórdão 1.744/2018-P e 2.453/2019-P5 anosMendes Júnior Trading e Engenharia S/A Acórdão 414/2018-P e 2.638/2019-P 3 anosEngevix Engenharia e Projetos S.A. Acórdão 2.135/2018-P 3 anosMPE Montagens e Projetos Especiais S/A Acórdão 300/2018-P e 825/2018-P 3 anosTechint Engenharia e Construção Acórdão 2.914/2019-P 3 anos Skanska Brasil Ltda.Acórdão 1.256/2019-P1 anoUTC Engenharia S.A.Acórdão 1.527/2019-P1 ano23. Dessarte, rejeitam-se as razões recursais ofertadas pela empresa Iesa Óleo e Gás…",
+          "offset": 28617
         },
         {
-          "origemChave": "1135/2026",
+          "origemChave": "2316/2021",
           "secao": "relatorio",
           "noVoto": false,
-          "trecho": "…de Licitação reputou insuficiente a diligência saneadora, ainda que a documentação tenha sido apresentada sem alteração do preço global ofertado, especialmente diante do potencial prejuízo ao erário estimado em aproximadamente R$ 10 milhões. Fundamento legal ou jurisprudencial: princípio do formalismo moderado, com a busca da verdade material e com a jurisprudência deste Tribunal (a exemplo do Acórdão 1.211/2021-TCU-Plenário). Manifestação da Unidade Jurisdicionada sobre o indício de irregularidade: 11. A Autoridade Portuária de Santos (APS) esclareceu que a desclassificação da proposta da Etesco decorreu da não apresentação, na proposta inicial, da planilha de composição de custos e do demonstrativo analítico de BDI, documentos considerados essenciais para a análise da consistência interna, da exequibilidade e da…",
-          "offset": 9331
+          "trecho": "… DO LUCRO ILÍCITO 155. Já é entendimento firmado pelo TCU de que a licitação que deu origem o contrato para a execução da terraplenagem da Rnest foi contaminado pelas fraudes perpetradas pelo cartel de empreiteiras denomina ‘Clube’ e que afetou diversos certames da Petrobras. Algumas das empresas integrantes do cartel já foram condenadas por tais fraudes, conforme se verifica nos Acórdãos 300/2018, 414/2018, 2.135/2018, 1.221/2018 e 1.744/2018, todos do Plenário. 156. Conforme disposição da Lei 8.666/1993, art. 59, Parágrafo único, a nulidade do contrato implica em que o pagamento ao contratado pelo serviço prestado deve ser feito mediante indenização, ou seja, pelos custos incorridos. O art. 49 estipula que o procedimento licitatório deve ser anulado por ilegalidade e que a nulidade da licitação…",
+          "offset": 191460
         },
         {
-          "origemChave": "1135/2026",
+          "origemChave": "667/2026",
           "secao": "relatorio",
           "noVoto": false,
-          "trecho": "…à proposta da sociedade empresária Etesco Construções e Comércio Ltda., mesmo após a apresentação tempestiva da documentação em sede de diligência, em afronta aos princípios da isonomia, da impessoalidade e do julgamento objetivo, bem como ao entendimento desta Corte quanto ao dever de realização de diligências para saneamento de falhas que não alterem a substância das propostas (a exemplo do Acórdão 1.211/2021-TCU-Plenário, relator Walton Alencar Rodrigues); 80.5. deferir o pedido formulado pela Autoridade Portuária de Santos S.A - APS, de solicitação de vistas das peças 85 a 88 dos autos, por ser parte no processo, por meio de acesso aos autos eletrônicos, nos termos dos art. 88, 91, 92 e 93 da Resolução - TCU 259/2014, alterada pela Resolução - TCU 316/2020; 80.6. informar à Autoridade Portuária de Santos S.A -…",
-          "offset": 55134
+          "trecho": "…qual se destacou o seguinte entendimento, in verbis: 60. Pois bem. Nos termos do voto condutor proferido pelo Ministro Vital do Rêgo, restou ‘suficientemente comprovada a existência do cartel e de seu modo de atuação, inclusive nas licitações do Comperj. Somente no âmbito desta Corte de Contas, outras dez empresas já foram tornadas inidôneas por fraude a licitação da Petrobras (Acórdãos 300/2018, 414/2018, 1.221/2018, 1.744/2018, 2.135/2018, 2.355/2018, 1.256/2019, 1.527/2019, 2.914/2019, 424/2019 e 2.134/2020, todos do Plenário)’ (vide peça 83, p. 4, item 20). 61. Também se entende que há elementos de provas bastantes nos autos para comprovar a participação de Galvão Engenharia S/A no cartel, tais como: a) o e-mail da Andrade Gutierrez de 11/3/2008 (vide itens 24 e 25 do voto); b) o Histórico da…",
+          "offset": 46825
         },
         {
-          "origemChave": "924/2022",
+          "origemChave": "2294/2021",
           "secao": "relatorio",
           "noVoto": false,
-          "trecho": "…tecnicamente, na respectiva ordem de classificação, a fim de lhes oportunizar, mediante diligência, que apresentem documentos complementares a comprovar que atendem aos requisitos de habilitação técnica exigidos pelo edital, considerando-se que: a) o pregoeiro deixou de realizar a referida diligência para as licitantes In.Pacto, Partners e Apex, contrariando o entendimento do TCU, a exemplo dos Acórdãos 1.211/2021-TCU-Plenário e 2.443/2021-TCU-Plenário; e b) tal possibilidade foi concedida à licitante In Press e não às demais, ferindo os princípios da isonomia e da economicidade; 42.5. dar ciência ao Ministério da Saúde, com fundamento no art. 9º, inciso I, da Resolução – TCU 315/2020, sobre as seguintes impropriedades/falhas, identificadas no Pregão Eletrônico 20/2021, para que sejam adotadas medidas internas com…",
-          "offset": 45000
+          "trecho": "…até o momento segundo os critérios citados. Empresas que venceram licitação mediante fraudeDeliberação do TCUSançãoIesa Óleo & Gás S.A.Acórdão 2.355/2018-P5 anosConstrutora Queiroz Galvão S.A.Acórdão 1.221/2018-P5 anosConstrutora OAS S.A.Acórdão 1.744/2018-P e 2.453/2019-P5 anos Empresas que apresentaram proposta de coberturaDeliberação do TCUSançãoMendes Júnior Trading e Engenharia S/A Acórdão 414/2018-P e 2.638/2019-P 3 anosEngevix Engenharia e Projetos S.A. Acórdão 2.135/2018-P 3 anosMPE Montagens e Projetos Especiais S/A Acórdão 300/2018-P e 825/2018-P 3 anosTechint Engenharia e Construção Acórdão 2.914/2019-P 3 anos Empresa que suprimiu propostaDeliberação do TCUSançãoSkanska Brasil Ltda. Acórdão 1.256/2019-P 1 ano Empresas com acordo de leniênciaDeliberação do TCUSançãoUTC Engenharia…",
+          "offset": 99770
         },
         {
-          "origemChave": "641/2025",
+          "origemChave": "1574/2023",
           "secao": "relatorio",
           "noVoto": false,
-          "trecho": "…com a desclassificação sumária de sua proposta, sem a realização de diligências que poderiam sanar vícios considerados sanáveis, em afronta aos princípios da isonomia, da competitividade e da economicidade, além do disposto no art. 64, inciso I e § 1º, da Lei 14.133/2021, o arts. 39, § 7º, e 41 da IN Seges/ME 73/2022, bem como a jurisprudência desta Corte de Contas (a exemplo do paradigmático Acórdão 1.211/2021-TCU-Plenário, relator Ministro Walton Alencar). CONCLUSÃO 28. Diante do exposto, propõe-se o conhecimento da representação, satisfeitos os requisitos de admissibilidade constantes no art. 170, § 4º, da Lei 14.133/2021, c/c os arts. 235 e 237, VII, do Regimento Interno/TCU, e no art. 103, § 1º, da Resolução - TCU 259/2014. 29. Quanto aos indícios de irregularidades, os elementos constantes dos autos permitem…",
-          "offset": 23315
+          "trecho": "…análises incorporo às minhas razões de decidir.’ 60. Pois bem. Nos termos do voto condutor proferido pelo Ministro Vital do Rêgo, restou ‘suficientemente comprovada a existência do cartel e de seu modo de atuação, inclusive nas licitações do Comperj. Somente no âmbito desta Corte de Contas, outras dez empresas já foram tornadas inidôneas por fraude a licitação da Petrobras (Acórdãos 300/2018, 414/2018, 1.221/2018, 1.744/2018, 2.135/2018, 2.355/2018, 1.256/2019, 1.527/2019, 2.914/2019, 424/2019 e 2.134/2020, todos do Plenário)’ (vide peça 83, p. 4, item 20). 61. Também se entende que há elementos de provas bastantes nos autos para comprovar a participação de Galvão Engenharia S/A no cartel, tais como: a) o e-mail da Andrade Gutierrez de 11/3/2008 (vide itens 24 e 25 do voto); b) o Histórico…",
+          "offset": 45192
         },
         {
-          "origemChave": "117/2024",
+          "origemChave": "2316/2021",
           "secao": "relatorio",
           "noVoto": false,
-          "trecho": "… 9. Segue a análise do ponto questionado (peça 14, p. 2). Item 9.1: inabilitação da primeira classificada, Arkus Propaganda Ltda (CNPJ 20.491.368/0001-07), em razão de inconformidade da documentação com a exigência do item 8.8.2 do edital, diante da apresentação de documento novo, sem a realização de diligência, em afronta ao princípio do formalismo moderado e do entendimento consubstanciado no Acórdão 1.211/2021-TCU-Plenário Manifestação das unidades jurisdicionadas sobre o indício de irregularidade (peça 35): a) iniciam argumentando que, ao contrário do alegado pelo representante, as entidades teriam oportunizado, mediante a realização de diligências posteriores, a regularização dos vícios na apresentação dos documentos - 1ª diligência (peça 8, p. 59) e nova diligência (peça 8, p. 69); b) aduzem que as respostas…",
-          "offset": 5299
+          "trecho": "…e Comércio Camargo Corrêa S.A. (61.522.512/0001-02) e Galvão Engenharia S.A. (01.340.937/0001-79), por auferirem lucro em contrato eivado de nulidade em decorrência de sua origem em licitação fraudada e, portanto, igualmente nula, afrontando o arts. 49 e 59 da Lei 8.666/1993; c) com fundamento no art. 45 da Lei 8.443/1992 c/c os arts. 49 e 59 da Lei 8.666/1993, bem como nos Acórdãos 300/2018, 414/2018, 2.135/2018, 1.221/2018 e 1.744/2018 do Plenário do TCU, fixar prazo de quinze dias para que a Petrobras tome as providências para dar início aos procedimentos administrativos para declarar a nulidade do Convite 0322573078 e dos contratos dele decorrentes, informando regularmente a este Tribunal o andamento do processo até a sua conclusão; d) informar aos responsáveis que, caso venham a ser…",
+          "offset": 246806
         },
         {
-          "origemChave": "1410/2026",
+          "origemChave": "587/2022",
           "secao": "relatorio",
           "noVoto": false,
-          "trecho": "…a oitiva das partes pelas seguintes irregularidades: a) desclassificação das propostas de licitantes em razão de vícios possivelmente sanáveis, qual seja, a anexação de garantia de proposta em campo diverso do previsto na plataforma eletrônica, sem a realização de diligência, o que contraria o art. 59, inciso V, da Lei 14.133/2021, bem como a jurisprudência desta Corte de Contas (a exemplo do Acórdão 1.211/2021-TCU-Plenário, relator Ministro Walton Alencar); b) ausência de motivação para a exigência de anonimato quanto à autoria das propostas apresentadas no certame, conforme item 7.2.1 do edital, em descumprimento ao art. 18, inciso IX, da Lei 14.133/2021, que exige nos certames licitatórios a motivação circunstanciada das condições do edital; e c) exigência de garantia da proposta baseada no valor total estimado…",
-          "offset": 7092
+          "trecho": "…(peça 128, p. 5). 83.8. A aplicação da sanção deve ser determinada objetivamente em função das irregularidades cometidas, sem restrição quanto a máximo temporal, mesmo que seja limitado o prazo de cumprimento da penalidade. Este entendimento integrou a motivação para a interposição de pedidos de reexame pelo Ministério Público/TCU nos processos conexos, movidos contra os Acórdãos 300/2018, 414/2018, 1744/2018, 2135/2018 e 2355/2018, todos do Plenário (peça 128, p. 6). Continuidade delitiva 83.9. A sanção imposta a um agente que tenha cometido delitos múltiplos deve ser mais severa que a imputada a quem agiu ilicitamente uma única vez. Caso contrário, estar-se-á indiretamente beneficiando o delinquente contumaz. No caso, a prática de fraudes em oito procedimentos licitatórios (aspecto…",
+          "offset": 61577
         }
       ]
     },
     {
       "alvo": {
-        "numero": 2391,
-        "ano": 2018
+        "numero": 2914,
+        "ano": 2019
       },
       "contagem": {
-        "citantesDistintos": 155,
-        "noVoto": 11,
-        "ocorrenciasTotal": 276
+        "citantesDistintos": 15,
+        "noVoto": 10,
+        "ocorrenciasTotal": 34
       },
       "trechos": [
         {
-          "origemChave": "864/2022",
+          "origemChave": "977/2023",
           "secao": "voto",
           "noVoto": true,
-          "trecho": "…ao preposto da empresa que oficiaria junto à Funasa, buscando providências ou orientações. 60. A empresa descumpriu regras contratuais, fez parte do nexo causal da irregularidade, motivo pelo qual se encontra caracterizada sua responsabilidade com os agentes públicos envolvidos. 61. Com relação à eventual responsabilização dos diretores usuários dos serviços, vale ressaltar que o subitem 9.9 do Acórdão 2.391/2018-TCU-Plenário determinou à SecexSaúde que apurasse, em apartado, a conduta deles e eventual participação na consumação das irregularidades em tela. 62. O afastamento do prejuízo por motivos alheios à atuação da empresa recorrente permite que seja dado provimento parcial ao seu recurso, de forma a afastar o débito que lhe foi imposto nos acórdãos recorridos. 63. Em relação ao Sr. Carlos Luiz Barroso Júnior,…",
-          "offset": 120396
+          "trecho": "… que tornaria ainda mais evidente a necessidade de se adotar a mesma medida nos casos em que já houve o trânsito em julgado, nos quais seguramente não se aplicou o citado dispositivo legal. 16. Quanto ao pedido de extinção da pena formulado pela Techint, o MP/TCU asseverou que a superveniente reabilitação da empresa junto à CGU não ensejaria a extinção da pena de inidoneidade aplicada por meio do Acórdão 2.914/2019-Plenário, tendo em vista a ausência de amparo legal e regulamentar. Afinal, mantendo o entendimento consolidado desta Corte de Contas no sentido de que as instâncias são independentes, inexistindo infração ao princípio do non bis in idem quando a CGU e o TCU aplicam ao licitante fraudador a sanção de inidoneidade no âmbito de suas esferas de competência. 17. Assim, evoluindo em meu entendimento anterior…",
+          "offset": 42255
         },
         {
-          "origemChave": "447/2026",
+          "origemChave": "977/2023",
           "secao": "voto",
           "noVoto": true,
-          "trecho": "…do responsável se distancia daquela que seria esperada de um administrador público com atenção normal, num claro exemplo de erro grosseiro a que alude o art. 28 do Decreto-lei 4.657/1942 (Lei de Introdução às Normas do Direito Brasileiro), incluído pela Lei 13.655/2018 (Acórdão 1689/2019-TCU-Plenário, Relator Min. Augusto Nardes; Acórdão 2924/2018-TCU-Plenário, Relator Min. José Mucio Monteiro; Acórdão 2391/2018-TCU-Plenário, Relator Min. Benjamin Zymler). 31. Ainda, reforçando a tese acima, de acordo com o Acórdão 11674/2023-Primeira Câmara - Relator(a) Ministro(a) Jhonatan De Jesus, a inexecução parcial sem aproveitamento útil da etapa executada é considerada, por este Tribunal, como erro grosseiro. [...] 33. Tendo em vista que não houve prescrição e que não constam dos autos elementos que permitam reconhecer a…",
-          "offset": 58695
+          "trecho": "…anterior sobre o tema e adotando como fundamento o art. 22, § 3º, da LINDB, bem como o parecer de lavra do Subprocurador-Geral Paulo Bugarin, cujas análises adoto como razões de decidir, considero que o TCU possa adotar desde logo um dispositivo ligeiramente diverso daquele empregado pelos Acórdãos Plenários 2.092/2021 e 1.236/2022, pois não há dúvidas de que a sanção de três anos aplicada pelo Acórdão 2.914/2019-Plenário já foi integralmente cumprida, caso também computada a sanção aplicada pela CGU. Além disso, é o próprio TCU que tem realizado os registros pertinentes para incluir os registros no CEIS. Portanto proponho: a) reconhecer a detração do tempo da penalidade aplicada pela Controladoria-Geral da União à empresa Techint Engenharia e Construção S.A., com base no § 3º do art. 22 da Lei de Introdução às…",
+          "offset": 43070
         },
         {
-          "origemChave": "6637/2025",
+          "origemChave": "921/2021",
           "secao": "voto",
           "noVoto": true,
-          "trecho": "…Depreende-se, portanto, que a conduta da responsável se distanciou daquela que seria esperada de um administrador médio, a revelar grave inobservância no dever de cuidado no trato com a coisa pública, num claro exemplo de erro grosseiro a que alude o art. 28 da LINDB (Acórdão 1.689/2019-TCU-Plenário, Rel. Min. Augusto Nardes; Acórdão 2.924/2018-TCU-Plenário, Rel. Min. José Mucio Monteiro; e Acórdão 2.391/2018-TCU-Plenário, Rel. Min. Benjamin Zymler). 19. Portanto, não havendo elementos que permitam reconhecer a ocorrência de boa-fé na conduta de Cátia Regina de Souza Rosa, deve este Tribunal, desde logo, proferir o julgamento de mérito pela irregularidade de suas contas, conforme o § 6º do art. 202 do Regimento Interno do TCU, com imputação do débito apurado nos autos e com aplicação da multa prevista no art. 57…",
-          "offset": 91836
+          "trecho": "…S.A. e, no mérito, negar-lhe provimento; b) dar ciência da deliberação que vier a ser proferida por esta Corte à recorrente, à Controladoria-Geral da União, à Força-Tarefa do Ministério Público Federal no Paraná e à Força-Tarefa da Advocacia-Geral da União no Paraná. É o relatório. VOTO Trata-se de pedido de reexame interposto pela Techint Engenharia e Construção S.A (Techint) em face do Acórdão 2914/2019-Plenário, da relatoria do E. Ministro Benjamin Zymler, que declarou a inidoneidade da empresa, pelo prazo de três anos, para participar de licitações na Administração Pública Federal, bem como em certames promovidos nas esferas estadual e municipal, com objetos custeados com recursos federais repassados por força de convênio ou instrumentos congêneres. O processo cuida de apartado, constituído a partir…",
+          "offset": 91842
         },
         {
-          "origemChave": "2160/2022",
+          "origemChave": "1257/2023",
           "secao": "voto",
           "noVoto": true,
-          "trecho": "…militar. 39. Ressalto que, na atribuição de conduta irregular ao responsável, o TCU examina a correspondente responsabilidade subjetiva, que tem como um de seus pressupostos a existência de culpa lato sensu. Esta é constituída pelo dolo (ação voluntária) e pela culpa stricto sensu (violação a um dever jurídico por imprudência, imperícia ou negligência). 40. A jurisprudência do Tribunal evoluiu (Acórdão 2.391/2018-TCU-Plenário, de relatoria do Ministro Benjamin Zymler; 5.864/2021-TCU-Segunda Câmara, de relatoria do Ministro Aroldo Cedraz; 4.771/2019-TCU-Primeira Câmara, de relatoria do Ministro Benjamin Zymler) para considerar, no exame da culpabilidade, as inovações trazidas ao ordenamento jurídico por meio da Lei 13.655/2018, que deu novos contornos ao Decreto-Lei 4.657, de 1942 (Lei de Introdução às Normas do…",
-          "offset": 83287
+          "trecho": "…administrativa restritiva de direito, transferem o seu acervo técnico a outra empresa do mesmo grupo econômico com o objetivo específico de continuar as atividades da primeira, resta caracterizada a hipótese de sucessão fraudulenta, cabendo estender à sucessora os efeitos da penalidade aplicada à sucedida.” 458. Outra linha de entendimento semelhante é consubstanciada no enunciado extraído do Acórdão 2.914/2019-Plenário, também de minha relatoria: “A declaração de inidoneidade para participar de licitação na Administração Pública Federal (art. 46 da Lei 8.443/1992) não pode ser aplicada a sócios e administradores de empresas licitantes, por falta de previsão legal. No entanto, se após consulta ao Sistema de Cadastramento Unificado de Fornecedores (Sicaf), constatar-se que nova sociedade empresária foi…",
+          "offset": 319130
         },
         {
-          "origemChave": "864/2022",
+          "origemChave": "977/2023",
           "secao": "voto",
           "noVoto": true,
-          "trecho": "…Roberto de Albuquerque Garcia Coelho e Carlos Luiz Barroso Júnior, respectivamente, Coordenador-Geral e Substituto da Coordenação-Geral de Recursos Logísticos do Departamento de Administração da Presidência da Fundação Nacional de Saúde (CGLOG/Funasa), Eduardo Tarcísio Brito Targino, ex-Assessor Técnico do Departamento de Administração, e pela empresa Ágil Serviços Especiais Ltda. contra os Acórdãos 2.391/2018-TCU-Plenário e 472/2019-TCU-Plenário, por meio dos quais este Tribunal julgou irregulares suas contas, condenou-os solidariamente ao pagamento do débito apurado e aplicou-lhes multa fundada no art. 57 da Lei 8.443/1992. 2. Originalmente, este processo tratou de tomada de contas especial (TCE) instaurada pela Funasa em razão de supostas irregularidades na execução do Contrato 7/2006, firmado com a empresa…",
-          "offset": 98868
+          "trecho": "…pela Petrobras, relacionadas a certames para obras de implantação da Refinaria Abreu e Lima em Ipojuca/PE, também denominada de Refinaria do Nordeste (Rnest). 2. No atual estágio processual, é apreciada petição apresentada pela sociedade Techint Engenharia e Construção S.A., por meio da qual requer a extinção da referida pena de declaração de inidoneidade que lhe foi aplicada por meio do Acórdão 2.914/2019-Plenário, tendo em vista a informação de que, no âmbito do Processo Administrativo de Responsabilização (PAR) 00190.004159/2015-06, a CGU declarou sua reabilitação. 3. Conforme historiado, por meio do Acórdão 2.914/2019-Plenário, de minha relatoria, a empresa Techint Engenharia e Construção S.A. foi declarada inidônea pelo prazo de 3 (três) anos para participar de licitações com recursos federais em…",
+          "offset": 32983
         },
         {
-          "origemChave": "864/2022",
+          "origemChave": "921/2021",
           "secao": "voto",
           "noVoto": true,
-          "trecho": "…e setembro/2007, conforme consignado nas Notas Explicativas constantes à peça 12, p. 124-156, 196 e 341-349. A Funasa concluiu pela existência de débito no montante de R$ 678.415,01, correspondentes a 56,23% dos valores pagos à empresa contratada, conforme conclusões registradas no Relatório de Tomada de Contas Especial. 4. Posteriormente, foi reconhecida a nulidade do julgamento proferido pelo Acórdão 2.391/2018-TCU-Plenário (peça 117) em relação ao Sr. Paulo Roberto Albuquerque Garcia Coelho, uma vez que a pauta da correspondente sessão não incluiu o nome do advogado por ele regularmente constituído. As contas do referido responsável foram novamente julgadas por intermédio do Acórdão 472/2019-TCU-Plenário. 5. A Secretaria de Recursos (Serur), após examinar as peças recursais, propôs o provimento parcial dos…",
-          "offset": 100209
+          "trecho": "…a Serur propõe, em pareceres uniformes, negar provimento ao recurso. Acolho as conclusões da unidade técnica e as adoto como razões de decidir, sem prejuízo das considerações que tecerei a seguir. Conheço do pedido de reexame, tendo em vista o preenchimento dos requisitos previstos no artigo 48 c/c os artigos 32 e 33 da Lei 8.443/1992. Não merece prosperar o argumento da nulidade do Acórdão 2.914/2019-Plenário em virtude da ausência do deferimento do pedido de produção de provas, porquanto tanto a legislação como a jurisprudência desta Corte de Contas são pacíficas no sentido de que não cabe ao TCU produzir provas, realizar perícias ou convocar testemunhas. No âmbito do controle externo, a produção de provas rege-se pela Lei 8.443/1992 e pelo RI/TCU. A prova é documental, sob a forma escrita, sendo…",
+          "offset": 94879
         },
         {
-          "origemChave": "864/2022",
+          "origemChave": "234/2023",
           "secao": "voto",
           "noVoto": true,
-          "trecho": "…prestação dos serviços, nos moldes constantes das respectivas notas fiscais. 38. Entretanto, vejo problemas na quantificação do referido débito. 39. Conquanto reconheça o esforço do relator a quo para a apuração do débito oriundo das irregularidades constantes dos autos, entendo que há uma imprecisão na metodologia adotada que torna inalcançável a cobrança exigida nos moldes fixados pelos Acórdãos 2.391/2018-TCU-Plenário e 472/2019-TCU-Plenário, ora recorridos. 40. Não há nenhuma dúvida quanto à efetiva prestação dos serviços contratados. Em nenhum momento a fiscalização ou as instruções produzidas nos autos questionaram a execução, em alguma medida, dos serviços contratados. 41. Ainda que o contrato previsse a possibilidade de prestação dos serviços além da franquia estabelecida, o descontrole verificado na…",
-          "offset": 113466
+          "trecho": "… Considero que, ao presente momento, já resta suficientemente comprovada a existência do cartel e de seu modo de atuação, inclusive nas licitações do Comperj. Somente no âmbito desta Corte de Contas, outras quinze empresas já foram tornadas inidôneas por fraudes às licitações da Petrobras (Acórdãos 300/2018, 414/2018, 1.221/2018, 1.744/2018, 2.135/2018, 2.355/2018, 424/2019, 1.256/2019, 1.527/2019, 2.914/2019, 1.900/2020, 2.134/2020, 2.687/2020, 2.841/2020, 3.163/2020, 3.175/2020, 82/2021, 416/2021, 497/2021, 1.042/2021, 1.177/2021, 1.313/2021, 2.092/2021, 2.320/2021, 2.531/2021, 2.586/2021, 1.236/2022, 2.461/2022, todos do Plenário). 17. Desse modo, uma vez comprovada a existência do “Clube” e de sua atuação também nas contratações do Comperj, passo a analisar aquelas que seriam as evidências da…",
+          "offset": 203101
         },
         {
-          "origemChave": "510/2024",
+          "origemChave": "1761/2021",
           "secao": "voto",
           "noVoto": true,
-          "trecho": "…de itens com sobrepreço, extrapolando as previsões de quantitativos contratuais. Carlos Alberto Guimarães Simon e Marcos Antônio Adami Vayego participaram de todas essas fases e detinham o domínio completo sobre o contexto da contratação e respectiva execução. Por fim, quanto à aplicação da Lei de Introdução às Normas do Direito Brasileiro ao caso concreto, alinho-me à assertiva consignada no Acórdão 2.391/2018-TCU-Plenário, de relatoria do E. Ministro Benjamin Zymler, no sentido de que “o dever de indenizar os prejuízos ao Erário permanece sujeito à comprovação de dolo ou culpa, sem qualquer gradação, como é de praxe no âmbito da responsabilidade aquiliana, inclusive para fins do direito de regresso (art. 37, § 6º, da Constituição Federal). As alterações promovidas na Lei de Introdução às Normas do Direito…",
-          "offset": 200054
+          "trecho": "…dos sócios das pessoas jurídicas, assunto sobre o qual começo a discorrer na sequência. 11. Apesar de louvável a posição da Selog, que busca impedir a formação de novas empresas pelos mesmos sócios para atuar em segmentos econômicos semelhantes ou idênticos, em clara burla à sanção de inidoneidade, anoto que a matéria já foi discutida pelo Plenário deste Tribunal em outras três oportunidades (Acórdãos 2.914/2019, 1.592/2019 e 495/2013). Nesses julgados, restou assentado que a declaração de inidoneidade para participar de licitação na administração pública federal (art. 46 da Lei 8.443/1992) não pode ser aplicada a sócios e administradores de empresas licitantes, por falta de previsão legal. 12. No entanto, foi entendido que, caso nova sociedade empresária seja constituída, com o mesmo objeto, por…",
+          "offset": 39160
         },
         {
-          "origemChave": "1332/2022",
+          "origemChave": "2294/2021",
           "secao": "voto",
           "noVoto": true,
-          "trecho": "…em relação ao Sr. Jayme Verissimo, não verifico a ocorrência de prática de erro grosseiro, nos termos do art. 28 do Decreto-Lei 4.657/1942, alterado pela Lei 13.665/2018, ou seja, aquele praticado com culpa grave, que poderia ser percebido por pessoa com diligência abaixo do normal, decorrente de grave inobservância de dever de cuidado, conforme restou muito bem balizado no voto condutor do Acórdão 2.391/2018-TCU-Plenário, de relatoria do Ministro Benjamin Zymler. 62. Relativamente à responsabilização dos demais envolvidos (agentes do DNER e empresa), acompanho o entendimento das instâncias técnicas. 63. No tocante ao ex-gestores no âmbito do extinto DNER, as condutas imputadas dizem respeito à análise (Sr. Desideri) e aprovação (Srs. Hasenclever e Soublihe) das composições de custo da proposta da empresa…",
-          "offset": 75663
+          "trecho": "…os seguintes precedentes desta Corte em relação à Refinaria Abreu e Lima: Empresas que apresentaram proposta de coberturaDeliberação do TCUSançãoMendes Júnior Trading e Engenharia S/A Acórdão 414/2018-P e 2.638/2019-P 3 anosEngevix Engenharia e Projetos S.A. Acórdão 2.135/2018-P 3 anosMPE Montagens e Projetos Especiais S/A Acórdão 300/2018-P e 825/2018-P 3 anosTechint Engenharia e Construção Acórdão 2.914/2019-P 3 anos VII 40. Passo a tratar do pleito da Iesa de aplicação por analogia do instituto da detração, de forma a ser considerado o período em que ela ficou impedida de participar de licitações em razão de penalidades aplicadas pela Controladoria-Geral da União e pela Petrobras. 41. Mediante o voto condutor do Acórdão 414/2010-Plenário, foram efetuadas as seguintes considerações: “Quanto ao…",
+          "offset": 142603
         },
         {
-          "origemChave": "22/2021",
+          "origemChave": "1574/2023",
           "secao": "voto",
           "noVoto": true,
-          "trecho": "…na condução do Convênio 00845/2010, o que justifica a aplicação de multa a esse responsável, em consonância com julgados deste Tribunal de Contas proferidos à luz do art. 28 do Decreto-Lei 4.657, de 4/9/1942 (Lei de Introdução às Normas do Direito Brasileiro – LINDB), com a redação dada pela Lei 13.655, de 25/4/2018, a exemplo dos Acórdãos 2.872/2019, 2.659/2019, 957/2019, 2.924/2018, 2.860/2018 e 2.391/2018 de Plenário, 14.130/2019 e 2.699/2019 de 1ª Câmara e 11.762/2018 de 2ª Câmara, relatados, respectivamente, por mim e pelos Ministros André Luís de Carvalho, Augusto Nardes, José Múcio Monteiro, Augusto Sherman Cavalcanti, Benjamin Zymler, Walton Alencar Rodrigues, Vital do Rêgo e Marcos Bemquerer Costa. 25. Segundo esses precedentes, o erro grosseiro a que se refere o Decreto-Lei 4.657/1942 em…",
-          "offset": 62774
+          "trecho": "…obter vantagens indevidas em licitações por meio de supressão da livre concorrência e de elevação artificial de preços constitui, simultaneamente, infração à ordem econômica sujeita à competência do Cade e ilícito administrativo-financeiro sujeito à competência do TCU, na sua função de apreciar a regularidade da aplicação de recursos federais, conforme dispõem os acórdãos 2.355/2018, 1.256/2019 e 2.914/2019, todos do Plenário e de relatoria do Ministro Benjamin Zymler. 19. Anoto, ademais, que o controle externo exercido pelo TCU atua de maneira independente e não é subsidiário ao controle interno, que é de responsabilidade da CGU. A sanção de inidoneidade aplicável por aquele órgão, com fulcro no inciso IV do art. 87 da Lei 8.666/1993 ou nos incisos II e III do art. 88, tem natureza distinta da…",
+          "offset": 97703
         },
         {
-          "origemChave": "610/2021",
+          "origemChave": "977/2023",
           "secao": "voto",
           "noVoto": true,
-          "trecho": "…de erro grosseiro, apta, portanto, a justificar a aplicação de multa aos responsáveis, em consonância com julgados deste Tribunal de Contas proferidos à luz do art. 28 do Decreto-Lei 4.657, de 4/9/1942 (Lei de Introdução às Normas do Direito Brasileiro – LINDB), com a redação dada pela Lei 13.655, de 25/4/2018, a exemplo dos Acórdãos 2.872/2019, 2.659/2019, 957/2019, 2.924/2018, 2.860/2018 e 2.391/2018 de Plenário, 14.130/2019 e 2.699/2019 de 1ª Câmara e 11.762/2018 de 2ª Câmara, relatados, respectivamente, por mim e pelos Ministros André Luís de Carvalho, Augusto Nardes, José Múcio Monteiro, Augusto Sherman Cavalcanti, Benjamin Zymler, Walton Alencar Rodrigues, Vital do Rêgo e Marcos Bemquerer Costa. 13. Segundo esses precedentes, o erro grosseiro a que se refere o Decreto-Lei 4.657/1942 em…",
-          "offset": 71193
+          "trecho": "…pela sociedade Techint Engenharia e Construção S.A., por meio da qual requer a extinção da referida pena de declaração de inidoneidade que lhe foi aplicada por meio do Acórdão 2.914/2019-Plenário, tendo em vista a informação de que, no âmbito do Processo Administrativo de Responsabilização (PAR) 00190.004159/2015-06, a CGU declarou sua reabilitação. 3. Conforme historiado, por meio do Acórdão 2.914/2019-Plenário, de minha relatoria, a empresa Techint Engenharia e Construção S.A. foi declarada inidônea pelo prazo de 3 (três) anos para participar de licitações com recursos federais em virtude das fraudes observadas nos certames da Rnest. Especificamente, a aludida companhia foi sancionada por apresentar proposta de cobertura da licitação da UHDT-UGH e de se abster dolosamente de apresenta-la nas…",
+          "offset": 33204
         },
         {
-          "origemChave": "3972/2023",
+          "origemChave": "995/2022",
           "secao": "voto",
           "noVoto": true,
-          "trecho": "…o que justifica a aplicação da multa prevista no art. 58, inciso II, da Lei 8.443/1992, em consonância com julgados deste Tribunal de Contas proferidos à luz do art. 28 do Decreto-Lei 4.657, de 4/9/1942 (Lei de Introdução às Normas do Direito Brasileiro – LINDB), com a redação dada pela Lei 13.655, de 25/4/2018, a exemplo dos Acórdãos 2.872/2019, 2.659/2019, 957/2019, 2.924/2018, 2.860/2018 e 2.391/2018 de Plenário, 14.130/2019 e 2.699/2019 de 1ª Câmara e 11.762/2018 de 2ª Câmara, relatados, respectivamente, por mim e pelos eminentes Ministros André Luís de Carvalho, Augusto Nardes, José Múcio Monteiro, Augusto Sherman Cavalcanti, Benjamin Zymler, Walton Alencar Rodrigues, Vital do Rêgo e Marcos Bemquerer Costa. 22. Segundo esses precedentes, o erro grosseiro a que se refere o Decreto-Lei…",
-          "offset": 138846
+          "trecho": "…compreendo que ela se mostra coerente com as decisões proferidas nos demais processos que tratam de fraude comprovada à licitação – penas de 5 anos para a empresa que venceu licitação (Acórdãos 1.221/2018, 1.744/2018, 2.355/2018, 2.638/2019, 2.914/2019 e 2.531/2021, todos do Plenário, dentre outros) e de 3 anos para quem apresentou proposta de cobertura (Acórdãos 300/2018, 414/2018, 2.135/2018, 2.914/2019, todos do Plenário, dentre outros). 47. Sendo assim, não há motivo para alterar o quantum das sanções estipulado na decisão recorrida. 48. Diante de todo o exposto, VOTO para que seja adotada a deliberação que ora submeto a este Colegiado. TCU, Sala das Sessões, em 11 de maio de 2022. BENJAMIN ZYMLER Relator ACÓRDÃO Nº 995/2022 – TCU – Plenário 1. Processo nº TC 018.771/2018-1. 2. Grupo II…",
+          "offset": 132198
         },
         {
-          "origemChave": "2047/2026",
+          "origemChave": "2092/2021",
           "secao": "voto",
           "noVoto": true,
-          "trecho": "…no art. 57 da Lei 8.443/1922. 7. Ademais, os elementos constantes nos autos indicam que as condutas dos responsáveis se distanciaram daquela que seria esperada de um administrador médio num claro exemplo de erro grosseiro a que alude o art. 28 da LINDB (Acórdão 1689/2019-TCU-Plenário, relator Ministro Augusto Nardes; Acórdão 2924/2018-TCU-Plenário, relator Ministro José Mucio Monteiro; e Acórdão 2391/2018-TCU-Plenário, relator Ministro Benjamin Zymler). 8. Ante o exposto, voto no sentido de que o Tribunal adote a minuta de acórdão que ora submeto à apreciação deste Colegiado. TCU, Sala das Sessões, em 5 de maio de 2026. ANTONIO ANASTASIA Relator ACÓRDÃO Nº 2047/2026 – TCU – 2ª Câmara 1. Processo nº TC 017.620/2024-4. 2. Grupo I – Classe de Assunto: II – Tomada de Contas Especial. 3.…",
-          "offset": 44325
+          "trecho": "…Entendo que, ao presente momento, já resta suficientemente comprovada a existência do cartel e de seu modo de atuação, inclusive nas licitações do Comperj. Somente no âmbito desta Corte de Contas, ao menos outras dez empresas já foram tornadas inidôneas por fraude a licitação da Petrobras (Acórdãos 300/2018, 414/2018, 1.221/2018, 1.744/2018, 2.135/2018, 2.355/2018, 1.256/2019, 1.527/2019, 2.914/2019, 424/2019 e 2.134/2020, todos do Plenário). 30. Desse modo, uma vez comprovada a existência do Clube e de sua atuação também nas contratações do Comperj, passo a analisar aquelas que seriam as evidências da participação da Iesa nas fraudes em comento. Considero aqui todo o acervo probatório compartilhado com este Tribunal pela Polícia Federal (PF), pelo Ministério Público Federal (MPF) e pelo…",
+          "offset": 138863
         },
         {
-          "origemChave": "1083/2026",
+          "origemChave": "995/2022",
           "secao": "voto",
           "noVoto": true,
-          "trecho": "…indicam que as condutas dos responsáveis se distanciaram daquela que seria esperada de um administrador médio, a revelar grave inobservância no dever de cuidado no trato com a coisa pública, num claro exemplo de erro grosseiro a que alude o art. 28 da LINDB (Acórdão 1689/2019-TCU-Plenário, relator Ministro Augusto Nardes; Acórdão 2924/2018-TCU-Plenário, relator Ministro José Mucio Monteiro; e Acórdão 2391/2018-TCU-Plenário, relator Ministro Benjamin Zymler). 8. Ante o exposto, voto por que o Tribunal adote a minuta de acórdão que ora submeto à apreciação deste Colegiado. TCU, Sala das Sessões, em 10 de março de 2026. ANTONIO ANASTASIA Relator ACÓRDÃO Nº 1083/2026 – TCU – 2ª Câmara 1. Processo nº TC 017.402/2024-7. 2. Grupo I – Classe de Assunto: II – Tomada de Contas Especial 3.…",
-          "offset": 53169
+          "trecho": "… anteriores, entendo haver fundamento para a aplicação da sanção catalogada no art. 46 da Lei 8.443/1992 às empresas supramencionadas. 46. Quanto à dosimetria, compreendo que ela se mostra coerente com as decisões proferidas nos demais processos que tratam de fraude comprovada à licitação – penas de 5 anos para a empresa que venceu licitação (Acórdãos 1.221/2018, 1.744/2018, 2.355/2018, 2.638/2019, 2.914/2019 e 2.531/2021, todos do Plenário, dentre outros) e de 3 anos para quem apresentou proposta de cobertura (Acórdãos 300/2018, 414/2018, 2.135/2018, 2.914/2019, todos do Plenário, dentre outros). 47. Sendo assim, não há motivo para alterar o quantum das sanções estipulado na decisão recorrida. 48. Diante de todo o exposto, VOTO para que seja adotada a deliberação que ora submeto a este…",
+          "offset": 132042
         },
         {
-          "origemChave": "864/2022",
+          "origemChave": "2326/2024",
           "secao": "relatorio",
           "noVoto": false,
-          "trecho": "… ato representado pela Procuradora-Geral Cristina Machado da Costa e Silva, discordou parcialmente da proposta de encaminhamento sugerida pela unidade técnica, conforme manifestação a seguir transcrita (peça 257): Cuidam os autos de Recursos de Reconsideração interpostos pelos Senhores Carlos Luiz Barroso Júnior, Eduardo Tarcísio Brito Targino e pela empresa Ágil Serviços Especiais Ltda. contra o Acórdão n.º 2.391/2018-TCU-Plenário, assim como pelo Senhor Paulo Roberto de Albuquerque Garcia Coelho contra o Acórdão n.º 472/2019-TCU-Plenário. 2. Por meio das referidas deliberações, o Tribunal julgou irregulares as contas dos responsáveis, condenou-os em débito e aplicou-lhes individualmente a multa prevista no art. 57 da Lei n.º 8.443/92, dentre outras medidas, em razão de supostas irregularidades na execução do Contrato…",
-          "offset": 89279
+          "trecho": "… que não é o caso; e) em situações análogas, o próprio TCU já se manifestou no sentido de que a declaração de inidoneidade para participar de licitações na Administração Pública Federal, conforme o artigo 46 da Lei 8.443/1992, não pode ser estendida a sócios e administradores de empresas declaradas inidôneas, devido à ausência de previsão legal específica para tal aplicação, conforme enunciados: Acórdão 2.914/2019-TCU-Plenário, Rel. Min. Benjamin Zymler A declaração de inidoneidade para participar de licitação na Administração Pública Federal (art. 46 da Lei 8.443/1992) não pode ser aplicada a sócios e administradores de empresas licitantes, por falta de previsão legal. No entanto, se após consulta ao Sistema de Cadastramento Unificado de Fornecedores (Sicaf), constatar-se que nova sociedade empresária foi constituída…",
+          "offset": 9625
         },
         {
-          "origemChave": "2192/2026",
+          "origemChave": "2216/2023",
           "secao": "relatorio",
           "noVoto": false,
-          "trecho": "… aos responsáveis. 44. Acerca da jurisprudência que vem se firmado sobre o tema, as decisões até o momento proferidas parecem se inclinar majoritariamente para a equiparação conceitual do ‘erro grosseiro’ à ‘culpa grave’. Para fins do exercício do poder sancionatório do TCU, tem-se considerado como erro grosseiro o que resulta de grave inobservância do dever de cuidado e zelo com a coisa pública (Acórdão 2.391/2018-TCU-Plenário, Rel. Min. Benjamin Zymler; Acórdão 2.924/2018-Plenário, Rel. Min. José Mucio Monteiro; Acórdão 11.762/2018-Segunda Câmara, Rel. Min.-Substituto Marcos Bemquerer; e Acórdãos 957/2019, 1.264/2019 e 1.689/2019, todos do Plenário, Rel. Min. Augusto Nardes). 45. Quanto ao alcance da expressão ‘erro grosseiro’, o Ministro Antônio Anastasia defende que o correto seria considerar ‘o erro grosseiro como…",
-          "offset": 23637
+          "trecho": "…enfrentada a responsabilização dos três gestores envolvidos nas ilicitudes, não tendo, portanto, qualquer aproveitamento para o deslinde destes autos. 20.4 Em complemento, convém assinalar que, ao contrário do aduzido, este Tribunal tem declarado a inidoneidade para contratar com estados e municípios, mesmo quando se depara com a aplicação de sanção semelhante pela CGU, consoante se observa dos Acórdãos 2914/2019-TCU-Plenário e 917/2022-TCU-Plenário, da relatoria do Min. Benjamin Zymler, Acórdão 12/2023- TCU-Plenário, rel. Min. Jorge Oliveira e Acórdão 82/2021-TCU-Plenário, rel. Min. Subst.. André de Carvalho, entre outros. 21. No que tange às provas emprestadas a estes autos, não assiste razão à suplicante evocar a imprestabilidade, porquanto: a) foram apresentadas na forma documental, conforme determina o art. 162…",
+          "offset": 22156
         },
         {
-          "origemChave": "2844/2026",
+          "origemChave": "1605/2023",
           "secao": "relatorio",
           "noVoto": false,
-          "trecho": "… introduzido pela Lei 13.655/2018, estabelece a possibilidade de responsabilização dos agentes públicos no caso de erro grosseiro. A jurisprudência do TCU tem igualado o conceito de “erro grosseiro” ao de “culpa grave” para fins do exercício do poder sancionatório. 9.7. Tem-se considerado como erro grosseiro o que resulta de grave inobservância do dever de cuidado e zelo com a coisa pública, vide Acórdãos 2.391/2018-TCU-Plenário, relator Min. Benjamin Zymler, 2.924/2018-TCU-Plenário, relator Min. José Mucio Monteiro, 11.762/2018-TCU-2ª Câmara, relator Min. Marcos Bemquerer, bem como Acórdãos 957/2019, 1.264/2019 e 1.689/2019, todos do Plenário, relator Min. Augusto Nardes. 9.8. Sobre a definição de “erro grosseiro”, o Min. Antônio Anastasia argumentou ser mais adequado interpretá-lo como “culpa grave”, “mas mantendo o…",
-          "offset": 40065
+          "trecho": "…anterior sobre o tema e adotando como fundamento o art. 22, § 3º, da LINDB, bem como o parecer de lavra do Subprocurador-Geral Paulo Bugarin, cujas análises adoto como razões de decidir, considero que o TCU possa adotar desde logo um dispositivo ligeiramente diverso daquele empregado pelos Acórdãos Plenários 2.092/2021 e 1.236/2022, pois não há dúvidas de que a sanção de três anos aplicada pelo Acórdão 2.914/2019-Plenário já foi integralmente cumprida, caso também computada a sanção aplicada pela CGU.’ 22. Portanto, de forma a dar tratamento idêntico à Iesa, a detração seria possível no caso de identidade dos fatos que embasaram as penalidades, de modo que resta verificar se a declaração de inidoneidade aplicada pela CGU foi decorrente dos mesmos fatos que ensejaram a sanção de inidoneidade cominada pelo TCU, nos…",
+          "offset": 8719
         },
         {
-          "origemChave": "463/2026",
+          "origemChave": "977/2023",
           "secao": "relatorio",
           "noVoto": false,
-          "trecho": "… introduzido pela Lei 13.655/2018, estabelece a possibilidade de responsabilização dos agentes públicos no caso de erro grosseiro. A jurisprudência do TCU tem igualado o conceito de ‘erro grosseiro’ ao de ‘culpa grave’ para fins do exercício do poder sancionatório. 7.4. Tem-se considerado como erro grosseiro o que resulta de grave inobservância do dever de cuidado e zelo com a coisa pública, vide Acórdãos 2.391/2018-TCU-Plenário, relator Min. Benjamin Zymler, 2.924/2018-TCU-Plenário, relator Min. José Mucio Monteiro, 11.762/2018-TCU-2ª Câmara, relator Min. Marcos Bemquerer, bem como Acórdãos 957/2019, 1.264/2019 e 1.689/2019, todos do Plenário, relator Min. Augusto Nardes. 7.5. Sobre a definição de ‘erro grosseiro’, o Min. Antônio Anastasia argumentou ser mais adequado interpretá-lo como ‘culpa grave’, ‘mas mantendo o…",
-          "offset": 22912
+          "trecho": "… caso, o prazo inicial de cinco anos dataria de 14/5/2019, quando a CGU declarou a Techint inidônea, de maneira que o fim do prazo ‘unificado’ seria em 14/5/2024, próxima ao término da sanção de inidoneidade aplicada por este Tribunal. 7. Ao final de sua análise, a unidade instrutiva propõe negar provimento ao pedido da Techint, mantendo-se a sanção de inidoneidade aplicada à empresa por meio do Acórdão 2914/2019-Plenário, em face das conclusões abaixo indicadas: 47. No âmbito deste processo, a Techint foi responsabilizada por fraudes em licitações conduzidas pela Petrobras na implantação da Rnest, especificamente, nos contratos da UCR, UHDT, UGH, Tubovias e UDA. Já consoante o PAR 00190.004159/2015-06, instaurado no âmbito da CGU, a empresa foi declarada inidônea por fraude e conluio em certames licitatórios da…",
+          "offset": 9576
         },
         {
-          "origemChave": "12436/2021",
+          "origemChave": "977/2023",
           "secao": "relatorio",
           "noVoto": false,
-          "trecho": "… do responsável se distancia daquela que seria esperada de um administrador público minimante diligente, num claro exemplo de erro grosseiro a que alude o art. 28 do Decreto-lei 4.657/1942 (Lei de Introdução às Normas do Direito Brasileiro), incluído pela Lei 13.655/2018 (Acórdão 1689/2019-TCU-Plenário, Relator Min. Augusto Nardes; Acórdão 2924/2018-TCU-Plenário, Relator Min. José Mucio Monteiro; Acórdão 2391/2018-TCU-Plenário, Relator Min. Benjamin Zymler). CONCLUSÃO 61. Em face da análise promovida na seção “Exame Técnico”, verifica-se que o responsável Manoel Claudio Pessoa Cardoso não logrou comprovar a boa e regular aplicação dos recursos e, instado a se manifestar, optou pelo silêncio, configurando a revelia, nos termos do § 3º, do art. 12, da Lei 8.443/1992. Ademais, inexistem nos autos elementos que demonstrem…",
-          "offset": 43688
+          "trecho": "… mesma medida nos casos em que já houve o trânsito em julgado, nos quais seguramente não se aplicou o citado dispositivo legal. 25. Desse modo, entendo cabível, neste caso concreto, aplicar-se a detração entre as penas aplicadas pelo TCU e a CGU. 26. Por outro lado, considero que a superveniente reabilitação da empresa junto à CGU não enseja a extinção da pena de inidoneidade aplicada por meio do Acórdão 2914/2019-Plenário, tendo em vista a ausência de amparo legal e regulamentar. 27. Sobre o assunto, consta na petição ora examinada que, em resposta ao argumento da defesa de que a Techint já estava na iminência de ser reabilitada pela CGU, apresentado na sustentação oral realizada na Sessão Plenária de 1º/6/2022, quando do julgamento do TC 008.365/2020-2, o eminente Ministro Bruno Dantas suscitou a possibilidade…",
+          "offset": 30164
         },
         {
-          "origemChave": "9007/2023",
+          "origemChave": "921/2021",
           "secao": "relatorio",
           "noVoto": false,
-          "trecho": "…responsáveis. 38. Acerca da jurisprudência que vem se firmado sobre o tema, as decisões até o momento proferidas parecem se inclinar majoritariamente para a equiparação conceitual do ‘erro grosseiro’ à ’culpa grave’. Para fins do exercício do poder sancionatório do TCU, tem-se considerado, como erro grosseiro, o que resulta de grave inobservância do dever de cuidado e zelo com a coisa pública (Acórdãos 2391/2018 – TCU – Plenário, Relator Benjamin Zymler, 2.924/2018 – TCU – Plenário, Relator José Mucio Monteiro, Acórdão 11.762/2018 – TCU – 2ª Câmara, Relator Marcos Bemquerer, e Acórdãos 957/2019, 1.264/2019 e 1.689/2019, todos do Plenário, Relator Augusto Nardes). 39. Quanto ao alcance da expressão ‘erro grosseiro’, o Ministro Antônio Anastasia defende que o correto seria considerar ‘o erro grosseiro como culpa grave,…",
-          "offset": 13704
+          "trecho": "…participar de licitações na Administração Pública Federal, bem como em certames promovidos na esfera estadual e municipal cujos objetos sejam custeados com recursos federais repassados por força de convênios ou instrumentos congêneres. EXAME DE ADMISSIBILIDADE 11. O Exmo. Ministro Walton Alencar Rodrigues conheceu do pedido de reexame e suspendeu os efeitos dos itens 9.1, 9.2, 9.3 e 9.3.1 do Acórdão 2.914/2019-TCU-Plenário, com fundamento no art. 48 da Lei 8.443/92 c/c arts. 285 e 286, parágrafo único, do Regimento Interno/TCU (vide pela 97). MÉRITO Delimitação 12. Constitui, então, objeto do recurso definir: a) se houve nulidade do decisum em face do indeferimento do pedido de produção de provas; b) se ocorreu fraude à licitação (formação de cartel) nos 4 (quatro) contratos referentes à Rnest (vide item 5 desta…",
+          "offset": 7747
         },
         {
-          "origemChave": "3387/2026",
+          "origemChave": "1605/2023",
           "secao": "relatorio",
           "noVoto": false,
-          "trecho": "… introduzido pela Lei 13.655/2018, estabelece a possibilidade de responsabilização dos agentes públicos no caso de erro grosseiro. A jurisprudência do TCU tem igualado o conceito de ‘erro grosseiro’ ao de ‘culpa grave’ para fins do exercício do poder sancionatório. 6.7. Tem-se considerado como erro grosseiro o que resulta de grave inobservância do dever de cuidado e zelo com a coisa pública, vide Acórdão 2.391/2018-TCU-Plenário, Rel. Min. Benjamin Zymler, 2.924/2018-TCU-Plenário, Rel. Min. José Mucio Monteiro, 11.762/2018-TCU-2ª Câmara, Rel. Min. Marcos Bemquerer, bem como Acórdãos 957/2019, 1.264/2019 e 1.689/2019, todos do Plenário, Rel. Min. Augusto Nardes. 6.8. Sobre a definição de ‘erro grosseiro’, o Min. Antônio Anastasia argumentou ser mais adequado interpretá-lo como ‘culpa grave’, ‘mas mantendo o referencial…",
-          "offset": 19740
+          "trecho": "…tornaria ainda mais evidente a necessidade de se adotar a mesma medida nos casos em que já houve o trânsito em julgado, nos quais seguramente não se aplicou o citado dispositivo legal. 16. Quanto ao pedido de extinção da pena formulado pela Techint, o MP/TCU asseverou que a superveniente reabilitação da empresa junto à CGU não ensejaria a extinção da pena de inidoneidade aplicada por meio do Acórdão 2.914/2019-Plenário, tendo em vista a ausência de amparo legal e regulamentar. Afinal, mantendo o entendimento consolidado desta Corte de Contas no sentido de que as instâncias são independentes, inexistindo infração ao princípio do non bis in idem quando a CGU e o TCU aplicam ao licitante fraudador a sanção de inidoneidade no âmbito de suas esferas de competência. 17. Assim, evoluindo em meu entendimento anterior…",
+          "offset": 7904
         },
         {
-          "origemChave": "2677/2026",
+          "origemChave": "977/2023",
+          "secao": "acordao",
+          "noVoto": false,
+          "trecho": "…e outros, representando Petróleo Brasileiro S.A.; Luís Inácio Lucena Adams (29.512/OAB-RJ), Alessandra Martins Gualberto Ribeiro (37.838/OAB-DF), Louise Dias Portes (203.612/OAB-RJ) e outros, representando Techint Engenharia e Construção S.A. 9. Acórdão: VISTOS, relatados e discutidos estes autos de representação, em que se aprecia pedido de detração da declaração de inidoneidade imposta pelo Acórdão 2.914/2019-Plenário à empresa Techint Engenharia e Construção S.A., para participar de licitações na administração pública federal, ACORDAM os Ministros do Tribunal de Contas da União, reunidos em sessão do Plenário, ante as razões expostas pelo Relator, em: 9.1. reconhecer a detração do tempo da penalidade aplicada pela Controladoria-Geral da União à empresa Techint Engenharia e Construção S.A., com base no § 3º…",
+          "offset": 45854
+        },
+        {
+          "origemChave": "977/2023",
           "secao": "relatorio",
           "noVoto": false,
-          "trecho": "… da empresa Bossa Nova Films Criações e Produções S/A, se distanciou daquela que seria esperada de um administrador médio, a revelar grave inobservância no dever de cuidado no trato com a coisa pública, num claro exemplo de erro grosseiro a que alude o art. 28 da LINDB (Acórdão 1.689/2019-TCU-Plenário, Relator Min. Augusto Nardes; Acórdão 2.924/2018-TCU-Plenário, Relator Min. José Mucio Monteiro; Acórdão 2.391/2018-TCU-Plenário, Relator Min. Benjamin Zymler). CONCLUSÃO 84. Em face da análise promovida na seção ‘Exame Técnico’, verifica-se que, apesar de regularmente citados, os responsáveis Denise Tibiriçá Machado e Willians Biondani optaram pelo silêncio, configurando a revelia, nos termos do § 3º, do art. 12, da Lei 8.443/1992. 85. Por sua vez, as alegações de defesa apresentadas por Eduardo Tibiriçá Machado e pela…",
-          "offset": 55871
+          "trecho": "…todo o exposto, e na linha do precedente acima indicado, este representante do Ministério Público de Contas, com as devidas vênias por divergir da proposta formulada pela AudPetroleo, manifesta-se no sentido de que seja informado à CGU que considere como período de detração do cumprimento da sanção de inidoneidade aplicada pelo TCU à empresa Techint Engenharia e Construção S.A., por meio do Acórdão 2914/2019-Plenário, o prazo efetivamente cumprido referente à sanção de inidoneidade declarada pela CGU, tendo em vista que neste caso concreto as sanções da CGU e do TCU são de mesma natureza e relativas ao mesmo fato. 32. Adicionalmente, sugere-se que seja determinado à SecexConsenso que examine, em conjunto com a CGU, as possíveis repercussões que as decisões que concluam pela reabilitação de empresas que foram…",
+          "offset": 31626
         },
         {
-          "origemChave": "823/2024",
-          "secao": null,
-          "noVoto": false,
-          "trecho": "… com mais frequência sobre a inteligência do art. 28 da LINDB. No ponto, as decisões até o momento proferidas parecem se inclinar majoritariamente para a equiparação conceitual do “erro grosseiro” à “culpa grave”, isto é, para fins do exercício do poder sancionatório do TCU, tem-se considerado como erro grosseiro o que resulta de grave inobservância do dever de cuidado e zelo com a coisa pública (Acórdão 2391/2018-TCU-Plenário, Relator: Benjamin Zymler, Acórdão 2.924/2018-Plenário, Relator: José Mucio Monteiro, Acórdão 11.762/2018-2ª Câmara, Relator: Marcos Bemquerer, e Acórdãos 957/2019, 1.264/2019 e 1.689/2019, todos do Plenário, Relator Augusto Nardes). 6.2 Acerca da incipiente jurisprudência que vem se firmando sobre o tema, merece registro o esclarecimento consignado no Voto que fundamentou o Acórdão 2012/2022 –…",
-          "offset": 98177
-        },
-        {
-          "origemChave": "2393/2025",
+          "origemChave": "1912/2024",
           "secao": "relatorio",
           "noVoto": false,
-          "trecho": "… com mais frequência sobre a inteligência do art. 28 da LINDB. No ponto, as decisões até o momento proferidas parecem se inclinar majoritariamente para a equiparação conceitual do “erro grosseiro” à “culpa grave”, isto é, para fins do exercício do poder sancionatório do TCU, tem-se considerado como erro grosseiro o que resulta de grave inobservância do dever de cuidado e zelo com a coisa pública (Acórdão 2391/2018-TCU-Plenário, Relator: Benjamin Zymler, Acórdão 2.924/2018-Plenário, Relator: José Mucio Monteiro, Acórdão 11.762/2018-2ª Câmara, Relator: Marcos Bemquerer, e Acórdãos 957/2019, 1.264/2019 e 1.689/2019, todos do Plenário, Relator Augusto Nardes). 54. Acerca da incipiente jurisprudência que vem se firmando sobre o tema, merece registro o esclarecimento consignado no Voto que fundamentou o Acórdão 2012/2022 –…",
-          "offset": 36989
+          "trecho": "…um dos sócios e/ou administradores de empresas declaradas inidôneas, após a aplicação dessa sanção e no prazo de sua vigência, exige da Administração as providências necessárias à inibição de sua participação em licitações, em processo administrativo específico, assegurado o contraditório e a ampla defesa aos interessados, conforme entendimentos já expressos nos Acórdãos 1986/2013-TCU-Plenário e 2.914/2019-TCU-Plenário. 127. Entretanto, com a promulgação da Lei 14.133/2021 passou-se a admitir, em tese ao menos, dada a inexistência de precedentes no TCU, a possibilidade de se estender a sanção de declaração de inidoneidade aos sócios da empresa fraudadora por via da desconsideração da personalidade jurídica, ao dispor em seu art. 160, in verbis: Art. 160. A personalidade jurídica poderá ser desconsiderada…",
+          "offset": 101963
         },
         {
-          "origemChave": "3413/2026",
+          "origemChave": "921/2021",
           "secao": "relatorio",
           "noVoto": false,
-          "trecho": "… Normas do Direito Brasileiro - Lindb), cabe assinalar que as alterações promovidas pela norma legal, em especial a inclusão do art. 28, não provocam modificação nos requisitos necessários à responsabilidade financeira pelo débito - o dever de indenizar os prejuízos ao erário permanece sujeito à comprovação de dolo ou culpa (conforme jurisprudência majoritária desta Corte de Contas, a exemplo dos Acórdãos 2.391/2018-TCU-Plenário, rel. Ministro Benjamin Zymler; e 5.547/2019-TCU-1ª Câmara, rel. Ministro Benjamin Zymler; 2.768/2019-TCU-Plenário, rel. Ministro Benjamin Zymler; 1.958/2022-TCU-Plenário, rel. Ministro Benjamin Zymler; 1.740/2023-TCU-Plenário, rel. Ministro Walton Alencar Rodrigues). 6.19. Para fins do exercício do poder sancionatório do TCU, erro grosseiro é o que decorreu de grave inobservância do dever de…",
-          "offset": 24618
+          "trecho": "…DA REFINARIA ABREU E LIMA. CONLUIO E FRAUDE À LICITAÇÃO. PEDIDO DE REEXAME. CONHECIMENTO. Não Provimento. CIÊNCIA. RELATÓRIO Adoto, como Relatório, a instrução à peça 108, que contou com a anuência do corpo diretivo da Secretaria de Recursos (peças 109 e 110). INTRODUÇÃO 1. Trata-se de pedido de reexame interposto pela empresa Techint Engenharia e Construção S.A., (peças 90) contra o Acórdão 2914/2019 – TCU – Plenário, Rel. Benjamin Zymler, prolatado nos seguintes termos (peça 79): ACORDAM os Ministros do Tribunal de Contas da União, reunidos em sessão Plenária, ante as razões expostas pelo Relator, em: 9.1. rejeitar as razões de justificativa apresentadas pela Techint Engenharia e Construção S.A.; 9.2. com fundamento no art. 46 da Lei 8.443/1992, declarar a inidoneidade da empresa Techint Engenharia e…",
+          "offset": 920
         },
         {
-          "origemChave": "282/2026",
+          "origemChave": "977/2023",
           "secao": "relatorio",
           "noVoto": false,
-          "trecho": "…Depreende-se, portanto, que a conduta do responsável se distanciou daquela que seria esperada de um administrador médio, a revelar grave inobservância no dever de cuidado no trato com a coisa pública, num claro exemplo de erro grosseiro a que alude o art. 28 da Lindb (Acórdão 1.689/2019-TCU-Plenário, Relator Min. Augusto Nardes; Acórdão 2.924/2018-TCU-Plenário, Relator Min. José Mucio Monteiro; Acórdão 2.391/2018-TCU-Plenário, Relator Min. Benjamin Zymler). 6. Ausência de locupletamento por parte do responsável 6.1. O recorrente alega que não restou comprovado que ele teria se beneficiado com as operações de crédito por ele realizadas, com efeito (peça 668, p. 15-17): a) foram apresentados contratos e comprovantes de relações jurídicas alheias a seu ofício na Caixa; b) conforme documentos anexos, houve a venda de um…",
-          "offset": 90606
+          "trecho": "…como relatório o parecer de lavra do Subprocurador-Geral Paulo Soares Bugarin (peça 147), in verbis: “Trata-se de processo apartado de representação acerca de fraudes em licitações conduzidas pela Petróleo Brasileiro S.A. (Petrobras), relacionadas a licitações para as obras de implantação da Refinaria Abreu e Lima, também denominada de Refinaria do Nordeste (Rnest). 2. Por meio do Acórdão 2914/2019-Plenário, esta Corte declarou a inidoneidade da empresa Techint Engenharia e Construção S.A. pelo prazo de três anos para participar de licitações na Administração Pública Federal e certames na esfera federal e municipal custeados com recursos federais (peça 79). 3. Examina-se, nesta fase processual, petição apresentada pela Techint, mediante a qual solicita a extinção da referida pena, tendo em vista a…",
+          "offset": 1575
         },
         {
-          "origemChave": "1095/2026",
+          "origemChave": "667/2026",
           "secao": "relatorio",
           "noVoto": false,
-          "trecho": "…Depreende-se, portanto, que a conduta do responsável se distanciou daquela que seria esperada de um administrador médio, a revelar grave inobservância no dever de cuidado no trato com a coisa pública, num claro exemplo de erro grosseiro a que alude o art. 28 da LINDB (Acórdão 1.689/2019-TCU-Plenário, Relator Min. Augusto Nardes; Acórdão 2.924/2018-TCU-Plenário, Relator Min. José Mucio Monteiro; Acórdão 2.391/2018-TCU-Plenário, Relator Min. Benjamin Zymler). 177. Vale registrar que a inexecução parcial constitui erro grosseiro, nos termos da jurisprudência selecionada a seguir indicada: Acórdão 6.486/2020-Primeira Câmara | Relator: VITAL DO RÊGO Para fins de responsabilização perante o TCU, considera-se erro grosseiro (art. 28 do Decreto-lei 4.657/1942 - Lindb) a execução de objeto conveniado em desacordo com o plano…",
-          "offset": 128632
+          "trecho": "… voto condutor proferido pelo Ministro Vital do Rêgo, restou ‘suficientemente comprovada a existência do cartel e de seu modo de atuação, inclusive nas licitações do Comperj. Somente no âmbito desta Corte de Contas, outras dez empresas já foram tornadas inidôneas por fraude a licitação da Petrobras (Acórdãos 300/2018, 414/2018, 1.221/2018, 1.744/2018, 2.135/2018, 2.355/2018, 1.256/2019, 1.527/2019, 2.914/2019, 424/2019 e 2.134/2020, todos do Plenário)’ (vide peça 83, p. 4, item 20). 61. Também se entende que há elementos de provas bastantes nos autos para comprovar a participação de Galvão Engenharia S/A no cartel, tais como: a) o e-mail da Andrade Gutierrez de 11/3/2008 (vide itens 24 e 25 do voto); b) o Histórico da Conduta do Acordo de Leniência 1/2015, celebrado entre a SOG Óleo e Gás S.A., a…",
+          "offset": 46907
         },
         {
-          "origemChave": "920/2026",
+          "origemChave": "2216/2023",
           "secao": "relatorio",
           "noVoto": false,
-          "trecho": "…responsáveis. 22.11. Acerca da jurisprudência que vem se firmado sobre o tema, as decisões até o momento proferidas parecem se inclinar majoritariamente para a equiparação conceitual do ‘erro grosseiro’ à ‘culpa grave’. Para fins do exercício do poder sancionatório do TCU, tem-se considerado como erro grosseiro o que resulta de grave inobservância do dever de cuidado e zelo com a coisa pública (Acórdão 2.391/2018-TCU-Plenário, Relator: Benjamin Zymler, Acórdão 2.924/2018-Plenário, Relator: José Mucio Monteiro, Acórdão 11.762/2018-2ª Câmara, Relator: Marcos Bemquerer, e Acórdãos 957/2019, 1.264/2019 e 1.689/2019, todos do Plenário, Relator Augusto Nardes). 22.12. Quanto ao alcance da expressão ‘erro grosseiro’, o Ministro Antônio Anastasia defende que o correto seria considerar ‘o erro grosseiro como culpa grave, mas…",
-          "offset": 44126
+          "trecho": "…S.A.Acórdão 2.355/2018-P5 anosConstrutora Queiroz Galvão S.A.Acórdão 1.221/2018-P5 anosConstrutora OAS S.A.Acórdão 1.744/2018-P e 2.453/2019-P5 anosMendes Júnior Trading e Engenharia S/A Acórdão 414/2018-P e 2.638/2019-P 3 anosEngevix Engenharia e Projetos S.A. Acórdão 2.135/2018-P 3 anosMPE Montagens e Projetos Especiais S/A Acórdão 300/2018-P e 825/2018-P 3 anosTechint Engenharia e Construção Acórdão 2.914/2019-P 3 anos Skanska Brasil Ltda.Acórdão 1.256/2019-P1 anoUTC Engenharia S.A.Acórdão 1.527/2019-P1 ano23. Dessarte, rejeitam-se as razões recursais ofertadas pela empresa Iesa Óleo e Gás S/A. contra o Acórdão 2092/2021-TCU-Plenário. CONCLUSÃO 24. Do exame, é possível concluir que: a) os argumentos apresentados pela Iesa Óleo e Gás S/A foram considerados inaptos para elidir a declaração de…",
+          "offset": 28828
         },
         {
-          "origemChave": "2677/2026",
+          "origemChave": "2294/2021",
           "secao": "relatorio",
           "noVoto": false,
-          "trecho": "… aos responsáveis. 80. Acerca da jurisprudência que vem se firmado sobre o tema, as decisões até o momento proferidas parecem se inclinar majoritariamente para a equiparação conceitual do ‘erro grosseiro’ à ‘culpa grave’. Para fins do exercício do poder sancionatório do TCU, tem-se considerado como erro grosseiro o que resulta de grave inobservância do dever de cuidado e zelo com a coisa pública (Acórdão 2.391/2018-TCU-Plenário, Relator: Benjamin Zymler, Acórdão 2.924/2018-Plenário, Relator: José Mucio Monteiro, Acórdão 11.762/2018-Segunda Câmara, Relator: Marcos Bemquerer, e Acórdãos 957/2019, 1.264/2019 e 1.689/2019, todos do Plenário, Relator Augusto Nardes). 81. Quanto ao alcance da expressão ‘erro grosseiro’, o Ministro Antônio Anastasia defende que o correto seria considerar ‘o erro grosseiro como culpa grave,…",
-          "offset": 53982
+          "trecho": "…anosConstrutora OAS S.A.Acórdão 1.744/2018-P e 2.453/2019-P5 anos Empresas que apresentaram proposta de coberturaDeliberação do TCUSançãoMendes Júnior Trading e Engenharia S/A Acórdão 414/2018-P e 2.638/2019-P 3 anosEngevix Engenharia e Projetos S.A. Acórdão 2.135/2018-P 3 anosMPE Montagens e Projetos Especiais S/A Acórdão 300/2018-P e 825/2018-P 3 anosTechint Engenharia e Construção Acórdão 2.914/2019-P 3 anos Empresa que suprimiu propostaDeliberação do TCUSançãoSkanska Brasil Ltda. Acórdão 1.256/2019-P 1 ano Empresas com acordo de leniênciaDeliberação do TCUSançãoUTC Engenharia S.A. Acórdão 1.527/2019-P 1 anoCamargo Corrêa Construções e Comércio S.A. Acórdão 2.446-2018-P sobrestada 75. No presente processo foram respeitados os princípios da proporcionalidade e da razoabilidade, de forma que…",
+          "offset": 99981
         },
         {
-          "origemChave": "447/2026",
+          "origemChave": "921/2021",
+          "secao": "acordao",
+          "noVoto": false,
+          "trecho": "…de Operações Especiais em Infraestrutura (SeinfraOpe). 8. Representação legal: 8.1. Luis Inacio Lucena Adams (29512/OAB-RJ) e outros, representando Techint Engenharia e Construcao S/A. 8.2. Marco Aurelio Ferreira Martins (194.793/OAB-SP) e outros, representando Petróleo Brasileiro S.A. 9. Acórdão: VISTOS, relatados e discutidos estes autos de pedido de reexame interpostos contra o Acórdão 2914/2019-Plenário que declarou a inidoneidade da empresa Techint Engenharia e Construção S.A, pelo prazo de três anos, para participar de licitações na Administração Pública Federal. ACORDAM os Ministros do Tribunal de Contas da União, reunidos em sessão do Plenário, ante as razões expostas pelo Relator, em: 9.1 conhecer do pedido de reexame interposto por Techint Engenharia e Construção S.A. e, no mérito,…",
+          "offset": 106565
+        },
+        {
+          "origemChave": "921/2021",
           "secao": "relatorio",
           "noVoto": false,
-          "trecho": "… com mais frequência sobre a inteligência do art. 28 da LINDB. No ponto, as decisões até o momento proferidas parecem se inclinar majoritariamente para a equiparação conceitual do “erro grosseiro” à “culpa grave”, isto é, para fins do exercício do poder sancionatório do TCU, tem-se considerado como erro grosseiro o que resulta de grave inobservância do dever de cuidado e zelo com a coisa pública (Acórdão 2391/2018-TCU-Plenário, Relator: Benjamin Zymler, Acórdão 2.924/2018-Plenário, Relator: José Mucio Monteiro, Acórdão 11.762/2018-2ª Câmara, Relator: Marcos Bemquerer, e Acórdãos 957/2019, 1.264/2019 e 1.689/2019, todos do Plenário, Relator Augusto Nardes). 25. Acerca da incipiente jurisprudência que vem se firmado sobre o tema, merece registro o esclarecimento consignado no Voto que fundamentou o Acórdão 2012/2022 –…",
-          "offset": 40629
+          "trecho": "…Odebrecht, Camargo Corrêa, Andrade Gutierrez e Queiroz Galvão e que à Techint Engenharia e Construção S.A coube um papel secundário que, em princípio, não lhe resultou qualquer benefício direto decorrente das contratações (peça 80, p. 18-19, itens 74-81). 10. Nesta oportunidade, compete-nos examinar o pedido de reexame interposto pela Techint Engenharia e Construção S.A (peça 90) em face do Acórdão 2914/2019-Plenário (peça 79), que, no item 9.2, declarou a inidoneidade da empresa Techint Engenharia e Construção S.A. pelo prazo de 3 (três) anos, para participar de licitações na Administração Pública Federal, bem como em certames promovidos na esfera estadual e municipal cujos objetos sejam custeados com recursos federais repassados por força de convênios ou instrumentos congêneres. EXAME DE…",
+          "offset": 7190
         },
         {
-          "origemChave": "2676/2026",
+          "origemChave": "1574/2023",
           "secao": "relatorio",
           "noVoto": false,
-          "trecho": "… aos responsáveis. 64. Acerca da jurisprudência que vem se firmado sobre o tema, as decisões até o momento proferidas parecem se inclinar majoritariamente para a equiparação conceitual do ‘erro grosseiro’ à ‘culpa grave’. Para fins do exercício do poder sancionatório do TCU, tem-se considerado como erro grosseiro o que resulta de grave inobservância do dever de cuidado e zelo com a coisa pública (Acórdão 2.391/2018-TCU-Plenário, Relator: Benjamin Zymler, Acórdão 2.924/2018-Plenário, Relator: José Mucio Monteiro, Acórdão 11.762/2018-Segunda Câmara, Relator: Marcos Bemquerer, e acórdãos 957/2019, 1.264/2019 e 1.689/2019, todos do Plenário, Relator Augusto Nardes). 65. Quanto ao alcance da expressão ‘erro grosseiro’, o Ministro Antônio Anastasia defende que o correto seria considerar ‘o erro grosseiro como culpa grave,…",
-          "offset": 31016
-        },
-        {
-          "origemChave": "1209/2021",
-          "secao": "relatorio",
-          "noVoto": false,
-          "trecho": "… se desprezar um dos pilares do regime jurídico-administrativo, que o princípio da indisponibilidade pela Administração Pública do interesse público. Dentro desse alicerce, encontra-se a indisponibilidade do patrimônio público. 14.7. Outrossim, é preciso conceituar o que vem a ser erro grosseiro para o exercício do poder sancionatório desta Corte de Contas, o que foi realizado no voto condutor do Acórdão 2391/2018-TCU-Plenário, da relatoria do Ministro Benjamin Zymler, cujo trecho transcreve-se a seguir: (...) Segundo o art. 138 do Código Civil, o erro, sem nenhum tipo de qualificação quanto à sua gravidade, é aquele “que poderia ser percebido por pessoa de diligência normal, em face das circunstâncias do negócio” (grifos acrescidos). Se ele for substancial, nos termos do art. 139, torna anulável o negócio jurídico.…",
-          "offset": 116864
-        },
-        {
-          "origemChave": "2271/2026",
-          "secao": "relatorio",
-          "noVoto": false,
-          "trecho": "…responsáveis. 14.12. Acerca da jurisprudência que vem se firmado sobre o tema, as decisões até o momento proferidas parecem se inclinar majoritariamente para a equiparação conceitual do ‘erro grosseiro’ à ‘culpa grave’. Para fins do exercício do poder sancionatório do TCU, tem-se considerado como erro grosseiro o que resulta de grave inobservância do dever de cuidado e zelo com a coisa pública (Acórdão 2391/2018-TCU-Plenário, Relator: Benjamin Zymler, Acórdão 2.924/2018-Plenário, Relator: José Mucio Monteiro, Acórdão 11.762/2018-2ª Câmara, Relator: Marcos Bemquerer, e Acórdãos 957/2019, 1.264/2019 e 1.689/2019, todos do Plenário, Relator Augusto Nardes). 14.13. Quanto ao alcance da expressão ‘erro grosseiro’, o Ministro Antônio Anastasia defende que o correto seria considerar ‘o erro grosseiro como culpa grave, mas…",
-          "offset": 46551
-        },
-        {
-          "origemChave": "408/2026",
-          "secao": "relatorio",
-          "noVoto": false,
-          "trecho": "… gestor público a necessária caracterização, no caso concreto, do dolo ou erro grosseiro para fins de responsabilização (art. 28 da LINDB). 12.5. Nesse sentido, as decisões proferidas por esta Corte têm majoritariamente equiparado o conceito de erro grosseiro à culpa grave. 12.6. Considera-se erro grosseiro aquele que decorre de grave inobservância do dever de cuidado e zelo com a coisa pública (Acórdãos 2.391/2018-TCU-Plenário, Relator: Ministro Benjamin Zymler, 2.924/2018-TCU-Plenário, Relator: Ministro José Mucio Monteiro, 11.762/2018-TCU-2ª Câmara, Relator: Ministro Substituto Marcos Bemquerer, 957/2019, 1.264/2019 e 1.689/2019, todos do Plenário do TCU, Relator: Ministro Augusto Nardes). 12.7. Assim, incorre em erro grosseiro o gestor que, diante das circunstâncias concretas, falha gravemente onde não falharia…",
-          "offset": 67415
-        },
-        {
-          "origemChave": "2599/2025",
-          "secao": null,
-          "noVoto": false,
-          "trecho": "…Isto porque os quantitativos de licenças de software demandados estavam superdimensionados, levando à aquisição desnecessária, fato que poderia ser percebido por pessoa com diligência abaixo do normal ou, dito de outra forma, poderia ser evitado por pessoa com nível de atenção aquém do ordinário, decorrente de grave inobservância de dever de cuidado, conforme restou balizado no voto condutor do Acórdão 2.391/2018-TCU-Plenário, de relatoria do Ministro Benjamin Zymler. 21.15. Ademais, conforme já abordado na presente instrução (parágrafos 18.11 a 18.14), ficou caracterizado o descontrole administrativo notório e prolongado no âmbito da Codesp, com base na qual a jurisprudência do TCU possibilita a responsabilização do gestor, e não é dado a nenhum servidor beneficiar-se da própria torpeza em detrimento do erário, ou…",
-          "offset": 236213
-        },
-        {
-          "origemChave": "1421/2026",
-          "secao": "relatorio",
-          "noVoto": false,
-          "trecho": "… que a conduta do responsável José Maria Bessa de Oliveira se distanciou daquela que seria esperada de um administrador médio, a revelar grave inobservância no dever de cuidado no trato com a coisa pública, num claro exemplo de erro grosseiro a que alude o art. 28 da LINDB (Acórdão 1.689/2019-TCU-Plenário, Rel. Min. Augusto Nardes; Acórdão 2.924/2018-TCU-Plenário, Rel. Min. José Mucio Monteiro; e Acórdão 2.391/2018-TCU-Plenário, Rel. Min. Benjamin Zymler). CONCLUSÃO 51. Em face da análise promovida na seção “Exame Técnico”, verifica-se que o município de Porto Grande/AP não logrou comprovar a boa e regular aplicação dos recursos, instados a se manifestar, optou pelo silêncio, configurando a revelia, nos termos do § 3º, do art. 12, da Lei 8.443/1992. 52. Ademais, inexistem nos autos elementos que demonstrem a boa-fé…",
-          "offset": 32655
-        },
-        {
-          "origemChave": "793/2026",
-          "secao": "relatorio",
-          "noVoto": false,
-          "trecho": "… aos responsáveis. 42. Acerca da jurisprudência que vem se firmado sobre o tema, as decisões até o momento proferidas parecem se inclinar majoritariamente para a equiparação conceitual do ‘erro grosseiro’ à ‘culpa grave’. Para fins do exercício do poder sancionatório do TCU, tem-se considerado como erro grosseiro o que resulta de grave inobservância do dever de cuidado e zelo com a coisa pública (Acórdão 2.391/2018-TCU-Plenário, Relator: Benjamin Zymler, Acórdão 2.924/2018-Plenário, Relator: José Mucio Monteiro, Acórdão 11.762/2018-2ª Câmara, Relator: Marcos Bemquerer, e Acórdãos 957/2019, 1.264/2019 e 1.689/2019, todos do Plenário, Relator Augusto Nardes). 43. Quanto ao alcance da expressão ‘erro grosseiro’, o Ministro Antônio Anastasia defende que o correto seria considerar ‘o erro grosseiro como culpa grave, mas…",
-          "offset": 25838
-        },
-        {
-          "origemChave": "2393/2025",
-          "secao": "relatorio",
-          "noVoto": false,
-          "trecho": "…do responsável se distancia daquela que seria esperada de um administrador público com atenção normal, num claro exemplo de erro grosseiro a que alude o art. 28 do Decreto-lei 4.657/1942 (Lei de Introdução às Normas do Direito Brasileiro), incluído pela Lei 13.655/2018 (Acórdão 1689/2019-TCU-Plenário, Relator Min. Augusto Nardes; Acórdão 2924/2018-TCU-Plenário, Relator Min. José Mucio Monteiro; Acórdão 2391/2018-TCU-Plenário, Relator Min. Benjamin Zymler). CONCLUSÃO 60. Em face da análise promovida na seção “Exame Técnico”, verifica-se que deve ser considerada revel a responsável Iris da Silva Borges (CPF 614.462.542-91), nos termos do § 3º do art. 12 da Lei 8.443/1992, uma vez que, instada a se manifestar, optou pelo silêncio. 61. Entende-se, também, que devam ser rejeitadas as alegações de defesa apresentadas por…",
-          "offset": 43700
-        },
-        {
-          "origemChave": "599/2026",
-          "secao": "relatorio",
-          "noVoto": false,
-          "trecho": "…Depreende-se, portanto, que a conduta dos responsáveis se distanciou daquela que seria esperada de um administrador médio, a revelar grave inobservância no dever de cuidado no trato com a coisa pública, num claro exemplo de erro grosseiro a que alude o art. 28 da LINDB (Acórdão 1689/2019-TCU-Plenário, Relator Min. Augusto Nardes; Acórdão 2924/2018-TCU-Plenário, Relator Min. José Mucio Monteiro; Acórdão 2391/2018-TCU-Plenário, Relator Min. Benjamin Zymler). CONCLUSÃO 58. Em face da análise promovida na seção “Exame Técnico”, verifica-se que o responsável Construtora Ramalho Ltda - Me não logrou comprovar a boa e regular aplicação dos recursos; instado a se manifestar, optou pelo silêncio, configurando a revelia, nos termos do § 3º, do art. 12, da Lei 8.443/1992. Além disso, propõe-se rejeitar as alegações de defesa…",
-          "offset": 43653
-        },
-        {
-          "origemChave": "1065/2024",
-          "secao": null,
-          "noVoto": false,
-          "trecho": "…grave ou erro grosseiro por parte do Sr. João Carlos Sobral das Chagas quanto à conduta de assinar o edital e aprovar o TR com preço de referência superestimado. 255. Ante o exposto, no concernente ao dano apurado, com base em entendimentos desta Corte de Contas, subsistindo a culpa em sentido estrito, sem qualquer gradação, o dever do responsável de indenizar o prejuízo ao erário se configura (Acórdão 2391/2018-TCU-Plenário, Acórdão 11289/2021-TCU-Primeira Câmara, Acórdão 5547/2019-TCU-Primeira Câmara). Em contraste, consoante o art. 28 da LINDB, entende-se não caber sanção para a conduta apurada, haja vista a ausência de erro grosseiro. 256. Sobre os pagamentos à contratada que ensejaram o superfaturamento, o defendente apresentou boletim publicando passagem do encargo de OD ao Cel. João Wayner da Costa Silva no…",
-          "offset": 150226
+          "trecho": "…à ordem econômica sujeita à competência do Conselho Administrativo de Defesa Econômica - Cade (art. 36, § 3º, inciso I, alínea d, da Lei 12.529/2011) e ilícito administrativo-financeiro sujeito à competência do TCU, na sua função de apreciar a regularidade da aplicação de recursos federais (art. 70 da Constituição Federal), conforme entendimento consagrado nos Acórdãos 2355/2018, 1256/2019 e 2914/2019, todos do Plenário e sob a relatoria do Ministro Benjamin Zymler. 27. Nesse sentido, a aplicação de sanção pelo Cade em decorrência de conduta anticoncorrencial infringente à ordem econômica não obsta a que o TCU declare a inidoneidade da empresa sancionada para participar de licitações na Administração Pública Federal (art. 46 da Lei 8.443/1992), quando a mesma conduta caracterizar fraude à…",
+          "offset": 21314
         }
       ]
     }

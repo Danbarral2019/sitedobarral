@@ -13,15 +13,50 @@ import type { DossieUso } from '../lib/tcu/trechos-de-citacao';
 const FIXOS = [{ numero: 1441, ano: 2016 }, { numero: 2622, ano: 2013 }];
 const SAIDA = 'docs/audits/2026-07-19-probe-teses-tcu.json';
 
-/** Acha um par de alvos fortes com muitos citantes em comum (candidato a divergência). */
+/**
+ * Acha um par de alvos que COMPETEM pelo mesmo assunto: muitos acórdãos citam os DOIS
+ * (mesmo origemId) no voto. Sobreposição de citantes é o sinal de que os dois leading
+ * cases disputam o mesmo tema — é aí que a divergência (se existir) aparece, quando um
+ * voto posterior cita um em vez do outro para a mesma questão. Ranquear só por contagem
+ * individual (como antes) pega dois leading cases populares mas desconectados; ranquear
+ * por overlap de citantes pega o par que efetivamente compete.
+ */
 async function descobrirParConcorrente(): Promise<Array<{ numero: number; ano: number }>> {
-  // Dois alvos citados no voto por muitos acórdãos, com sobreposição de citantes.
+  const pares = await prisma.$queryRaw<
+    Array<{ n1: number; y1: number; n2: number; y2: number; overlap: bigint }>
+  >`
+    SELECT a."numeroAlvo" AS n1, a."anoAlvo" AS y1,
+           b."numeroAlvo" AS n2, b."anoAlvo" AS y2,
+           COUNT(*) AS overlap
+    FROM "AcordaoCitacao" a
+    JOIN "AcordaoCitacao" b
+      ON a."origemId" = b."origemId"
+     AND (a."numeroAlvo", a."anoAlvo") < (b."numeroAlvo", b."anoAlvo")
+    WHERE a."noVoto" = true AND b."noVoto" = true
+    GROUP BY a."numeroAlvo", a."anoAlvo", b."numeroAlvo", b."anoAlvo"
+    HAVING COUNT(*) >= 5
+    ORDER BY overlap DESC
+    LIMIT 20;`;
+
+  const ehFixo = (numero: number, ano: number) => FIXOS.some((f) => f.numero === numero && f.ano === ano);
+  const candidato = pares.find((p) => !ehFixo(p.n1, p.y1) && !ehFixo(p.n2, p.y2));
+
+  if (candidato) {
+    console.log(
+      `Par concorrente descoberto: ${candidato.n1}/${candidato.y1} × ${candidato.n2}/${candidato.y2} (overlap de citantes no voto: ${candidato.overlap})`,
+    );
+    return [
+      { numero: candidato.n1, ano: candidato.y1 },
+      { numero: candidato.n2, ano: candidato.y2 },
+    ];
+  }
+
+  console.log('⚠️ Nenhum par com overlap de citantes >= 5 encontrado (fora dos FIXOS) — caindo no fallback: top-2 alvos mais citados no voto (sem garantia de disputa de tema).');
   const topAlvos = await prisma.$queryRaw<Array<{ numeroAlvo: number; anoAlvo: number; n: bigint }>>`
     SELECT "numeroAlvo", "anoAlvo", COUNT(*) AS n
     FROM "AcordaoCitacao" WHERE "noVoto" = true
     GROUP BY "numeroAlvo", "anoAlvo" ORDER BY n DESC LIMIT 15;`;
-  // Heurística simples: pega o 3º e 4º mais citados no voto como par (fora dos FIXOS).
-  const cands = topAlvos.filter((a) => !FIXOS.some((f) => f.numero === a.numeroAlvo && f.ano === a.anoAlvo));
+  const cands = topAlvos.filter((a) => !ehFixo(a.numeroAlvo, a.anoAlvo));
   return cands.slice(2, 4).map((a) => ({ numero: a.numeroAlvo, ano: a.anoAlvo }));
 }
 

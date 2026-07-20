@@ -288,7 +288,7 @@ textarea{width:100%;height:260px;font-family:var(--mono);font-size:12.5px;line-h
 <div class="wrap">
   <div class="list" id="list"></div>
   <div class="foot-note">
-    <b>Como ler estes cards.</b> <b>No voto</b> = ocorrências de citação dentro da fundamentação do voto (razão de decidir); <b>citantes distintos</b> = quantos acórdãos diferentes citam este caso; <b>ocorrências totais</b> = todas as menções, em qualquer seção. A barra mostra o peso do "no voto" entre as ocorrências totais. Os trechos-fonte listados em cada tese são o texto literal dos acórdãos citantes — nenhuma paráfrase — indexados de volta ao dossiê original; se um índice não resolveu para um trecho real, ele foi descartado na geração (aviso no console). Probe gerado em ${GERADO_EM}.
+    <b>Como ler estes cards.</b> <b>No voto</b> = ocorrências de citação dentro da fundamentação do voto (razão de decidir); <b>citantes distintos</b> = quantos acórdãos diferentes citam este caso; <b>ocorrências totais</b> = todas as menções, em qualquer seção. A barra mostra, dos citantes distintos, qual fração cita no voto (razão de decidir) em vez de só mencionar de passagem. Os trechos-fonte listados em cada tese são o texto literal dos acórdãos citantes — nenhuma paráfrase — indexados de volta ao dossiê original; se um índice não resolveu para um trecho real, ele foi descartado na geração (aviso no console). Probe gerado em ${GERADO_EM}.
   </div>
 </div>
 
@@ -326,8 +326,11 @@ function esc(s) {
   });
 }
 
+// Fração dos CITANTES DISTINTOS que citam no voto (razão de decidir), não das ocorrências
+// totais — misturar "citantes distintos" (denominador de pessoas) com "ocorrências totais"
+// (denominador de menções) produzia uma métrica sem unidade coerente.
 function pctNoVoto(d) {
-  const total = d.contagem.ocorrenciasTotal || 0;
+  const total = d.contagem.citantesDistintos || 0;
   if (!total) return 0;
   return Math.max(2, Math.min(100, Math.round((100 * d.contagem.noVoto) / total)));
 }
@@ -409,7 +412,7 @@ function renderCard(d, order) {
   html += '<div class="metric"><span class="n">' + d.contagem.noVoto + '</span><span class="l">No voto</span></div>';
   html += '<div class="metric"><span class="n">' + d.contagem.citantesDistintos + '</span><span class="l">Citantes distintos</span></div>';
   html += '<div class="metric"><span class="n">' + d.contagem.ocorrenciasTotal + '</span><span class="l">Ocorrências totais</span></div>';
-  html += '<div class="votobar"><div class="cap"><span>Peso no voto</span><b>' + pctNoVoto(d) + '%</b></div>';
+  html += '<div class="votobar"><div class="cap"><span>Dos citantes, % no voto</span><b>' + pctNoVoto(d) + '%</b></div>';
   html += '<div class="track"><div class="fill" style="width:' + pctNoVoto(d) + '%"></div></div></div>';
   html += '</div>';
 

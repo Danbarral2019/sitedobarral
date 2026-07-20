@@ -92,7 +92,10 @@ export async function destilarTese(caso: CasoDestilacao): Promise<TeseDestilada>
     // Sem `temperature`: o modelo de 'enhancement' (claude-sonnet-5) deprecou
     // o parâmetro e rejeita a requisição (400) se ele for enviado — ver
     // lib/ai/providers/anthropic.ts e o mesmo padrão em lib/rag/answerService.ts.
-    maxTokens: 2048,
+    // 4096 (não 2048): dossiês maiores (muitos trechos/teses/divergências) truncavam
+    // o JSON exatamente no limite de saída, quebrando o parser (visto no probe real
+    // após a Fix 1 trazer um par com dossiês mais ricos).
+    maxTokens: 4096,
   });
   if (!text) throw new Error(`destilarTese: resposta vazia para ${caso.chave}`);
   return parseRespostaTese(caso.chave, text);
