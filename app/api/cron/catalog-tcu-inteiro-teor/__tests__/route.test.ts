@@ -34,6 +34,7 @@ vi.mock('@/lib/logger', () => ({ apiLogger: { info: vi.fn(), warn: vi.fn(), erro
 import { GET } from '../route';
 import { NextRequest } from 'next/server';
 import { Prisma } from '@prisma/client';
+import { CATEGORIAS_ACORDAO } from '@/lib/tcu/categorias';
 
 const req = () => new NextRequest('http://localhost/api/cron/catalog-tcu-inteiro-teor');
 const alvo = (id: string) => ({ id, title: `Acórdão ${id}`, tcuLinkPDF: `https://x/${id}.rtf`, leiArticlesArr: ['5'] });
@@ -61,12 +62,21 @@ describe('cron catalog-tcu-inteiro-teor', () => {
     await GET(req());
     const arg = mockFindMany.mock.calls[0][0];
     expect(arg.where).toMatchObject({
-      category: 'acordao',
+      // A fila cobre acervo curado ('acordao') E combustível do grafo de
+      // precedentes ('acordao-grafo') — importado de CATEGORIAS_ACORDAO
+      // para acompanhar a constante se ela mudar.
+      category: { in: [...CATEGORIAS_ACORDAO] },
       // Json null exige Prisma.DbNull — `tcuAnalise: null` casaria 0 registros.
       tcuAnalise: { equals: Prisma.DbNull },
       tcuLinkPDF: { not: null },
       tcuAnaliseTentativas: { lt: 3 },
     });
+    // Reforço deliberado: se alguém reverter a fila para só 'acordao', os
+    // ~10 mil acórdãos de combustível do grafo nunca entram na catalogação
+    // e o teste acima (toMatchObject com CATEGORIAS_ACORDAO) não pegaria
+    // a regressão sozinho, porque compararia a constante com ela mesma.
+    // Esta asserção afirma o valor concreto esperado, não só o formato.
+    expect(arg.where.category.in).toContain('acordao-grafo');
     expect(typeof arg.take).toBe('number');
     expect(arg.take).toBeGreaterThan(0);
     // prioriza quem tentou menos

@@ -2065,3 +2065,18 @@ model LeiArticleSuggestedReading {
 
   @@index([articleNumber, order])
 }
+
+/// Cursor de campanhas de backfill que caminham um feed EXTERNO paginado.
+/// Os demais backfills do repo derivam a fila de colunas do próprio Document
+/// (precedentesVersao, tcuAnalise, embeddingStatus); aqui o estado é um offset
+/// numa API de terceiro, que não é derivável do nosso acervo.
+model BackfillCursor {
+  id            String   @id
+  offset        Int      @default(0)
+  ultimoAcordao String?
+  ultimaData    String?
+  totalInserido Int      @default(0)
+  totalIgnorado Int      @default(0)
+  concluido     Boolean  @default(false)
+  atualizadoEm  DateTime @updatedAt
+}

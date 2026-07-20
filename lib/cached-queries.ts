@@ -3,6 +3,7 @@
 
 import { cache } from 'react';
 import { prisma } from '@/lib/prisma';
+import { CATEGORIA_GRAFO } from '@/lib/tcu/backfill-retroativo';
 
 /**
  * Busca todos os posts do blog publicados (cached)
@@ -130,7 +131,12 @@ export const getCachedDocumentCountByCategory = cache(async () => {
     }),
     prisma.document.groupBy({
       by: ['category'],
-      where: { category: { notIn: CONUNI_CATEGORIES } },
+      // Exclui 'acordao-grafo' (combustivel do backfill retroativo do grafo
+      // de precedentes do TCU): senao o hub /base-conhecimento ganha um
+      // card fantasma e o total do hero fica errado.
+      where: {
+        category: { notIn: CONUNI_CATEGORIES, not: CATEGORIA_GRAFO },
+      },
       _count: { id: true },
     }),
   ]);

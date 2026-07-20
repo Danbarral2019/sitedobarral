@@ -12,6 +12,8 @@
 
 import { join } from 'path';
 
+import { CATEGORIA_GRAFO } from '@/lib/tcu/backfill-retroativo';
+
 import {
   type DbDocument,
   type DbLegislativeAct,
@@ -97,7 +99,11 @@ export async function runIncrementalExport(
     // -----------------------------------------------------------------------
     // Fetch ALL data (needed for link graph regardless of mode)
     // -----------------------------------------------------------------------
+    // Exclui a categoria 'acordao-grafo' (combustivel do backfill retroativo
+    // do grafo de precedentes do TCU): esse export escreve o cofre do
+    // Obsidian, que nao pode virar dossie de 10 mil acordaos invisiveis.
     const allDocuments: DbDocument[] = await prisma.document.findMany({
+      where: { category: { not: CATEGORIA_GRAFO } },
       select: EXPORT_DOC_SELECT,
     });
 

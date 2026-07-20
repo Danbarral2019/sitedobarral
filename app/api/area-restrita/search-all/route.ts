@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { verifyAuth } from '@/lib/auth';
+import { CATEGORIA_GRAFO } from '@/lib/tcu/backfill-retroativo';
 
 export async function GET(request: NextRequest) {
   try {
@@ -26,7 +27,11 @@ export async function GET(request: NextRequest) {
     const searchTerms = query.toLowerCase();
 
     // Buscar documentos
+    // Esta rota nao filtra por isPublic (nenhum ramo, admin ou aluno), entao
+    // excluir a categoria 'acordao-grafo' (combustivel do grafo de
+    // precedentes do TCU) e a unica protecao.
     const whereDocuments = {
+      category: { not: CATEGORIA_GRAFO },
       OR: [
         { title: { contains: searchTerms, mode: 'insensitive' as const } },
         { description: { contains: searchTerms, mode: 'insensitive' as const } },

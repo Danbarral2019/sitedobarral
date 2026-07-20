@@ -1,0 +1,26 @@
+{
+  "chavesDoEnvelope": [
+    "entidades"
+  ],
+  "totalEntidades": 3,
+  "chavesDaEntidade": [
+    "titulo",
+    "subtitulo",
+    "texto",
+    "link"
+  ],
+  "primeiraEntidade": {
+    "titulo": "ACÓRDÃO 2219/2023 ATA 46/2023 - PLENÁRIO",
+    "subtitulo": "Relator: Antonio Anastasia",
+    "texto": "Solicitação do Congresso Nacional Referente a Pedido de Auditoria sobre a Compatibilidade ou Não de Decretos Não Numerados que Abriram o Orçamento Fiscal da União no Ano de 2015, Editados pela Presidente da República e pelo Vice-Presidente da República, À Época, em Relação À Lei de Diretrizes Orçamentárias (ldo), À Lei de Responsabilidade Fiscal (lrf) e À Constituição Federal. Matéria Apreciada pelo TCU em Outros Processos. Solicitação do Congresso Nacional Atendida. Arquivamento.",
+    "link": "https://pesquisa.apps.tcu.gov.br/documento/acordao-completo/*/KEY:ACORDAO-COMPLETO-2631778/NUMACORDAOINT asc/0"
+  },
+  "rota1_temCampoArquivo": false,
+  "rota2_paginaTestada": "https://pesquisa.apps.tcu.gov.br/documento/acordao-completo/*/KEY:ACORDAO-COMPLETO-2631778/NUMACORDAOINT asc/0",
+  "rota2_urlsCandidatas": [],
+  "rota2_htmlEhSpa": false,
+  "portao1_paginacaoTestada": "inicio/quantidade na querystring",
+  "portao1_totalComOffset": 3,
+  "portao1_primeiroTituloBase": "ACÓRDÃO 2219/2023 ATA 46/2023 - PLENÁRIO",
+  "portao1_primeiroTituloOffset": "ACÓRDÃO 2219/2023 ATA 46/2023 - PLENÁRIO"
+}

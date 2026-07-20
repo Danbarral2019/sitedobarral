@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { persistirArestasDeAcordao, PRECEDENTES_VERSAO } from '@/lib/tcu/extrair-arestas-precedentes';
+import { CATEGORIAS_ACORDAO } from '@/lib/tcu/categorias';
 import { verifyCronAuth } from '@/lib/cron-auth';
 import { withCronTelemetry } from '@/lib/cron-telemetry';
 import { apiLogger } from '@/lib/logger';
@@ -36,7 +37,7 @@ export async function GET(request: NextRequest) {
 
   await withCronTelemetry('sync-precedentes-tcu', async () => {
     const filaWhere = {
-      category: 'acordao' as const,
+      category: { in: [...CATEGORIAS_ACORDAO] },
       tcuTextoCompleto: { not: null },
       OR: [{ precedentesVersao: null }, { precedentesVersao: { lt: PRECEDENTES_VERSAO } }],
     };
