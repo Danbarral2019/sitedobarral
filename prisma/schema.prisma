@@ -2080,3 +2080,69 @@ model BackfillCursor {
   concluido     Boolean  @default(false)
   atualizadoEm  DateTime @updatedAt
 }
+
+/// Uma rodada de destilacao de um leading case do TCU. É a unidade versionada:
+/// as teses de um acordao NESTA data, geradas por ESTE dossiê. Versionar o
+/// conjunto (e não cada tese) elimina o problema de identidade entre versões —
+/// o motor pode reordenar, fundir ou dividir teses entre uma rodada e outra.
+model TeseDestilacao {
+  id            String   @id @default(cuid())
+  numeroAlvo    Int
+  anoAlvo       Int
+  chave         String
+  assunto       String   @db.Text
+  confianca     String
+  versaoMotor   Int
+  /// Retrato do dossiê que gerou esta versão. Sem ele não há como saber depois
+  /// se o dossiê cresceu o bastante para justificar redestilar.
+  dossieTrechos Int
+  dossieNoVoto  Int
+  sinais        Json?
+  atual         Boolean  @default(true)
+  criadoEm      DateTime @default(now())
+
+  enunciados   TeseEnunciado[]
+  divergencias TeseDivergencia[]
+
+  @@index([numeroAlvo, anoAlvo, atual])
+  @@index([chave])
+}
+
+/// Uma tese dentro de uma destilacao. O veredito do Daniel vive aqui, colado
+/// ao texto exato que ele leu.
+model TeseEnunciado {
+  id           String    @id @default(cuid())
+  destilacaoId String
+  destilacao   TeseDestilacao @relation(fields: [destilacaoId], references: [id], onDelete: Cascade)
+  ordem        Int
+  enunciado    String    @db.Text
+  inovacao     String    @db.Text
+  trechosFonte Json
+  veredito     String?
+  julgadoEm    DateTime?
+  julgadoPor   String?
+  /// Id do enunciado da versão anterior de onde o veredito foi herdado por
+  /// texto idêntico. Null = julgado diretamente nesta versão.
+  herdadoDe    String?
+
+  @@index([destilacaoId])
+  @@index([veredito])
+}
+
+/// Uma divergencia apontada nos votos: outro precedente indicado como o de
+/// referencia para o mesmo assunto.
+model TeseDivergencia {
+  id                 String    @id @default(cuid())
+  destilacaoId       String
+  destilacao         TeseDestilacao @relation(fields: [destilacaoId], references: [id], onDelete: Cascade)
+  origemChave        String
+  precedenteApontado String
+  trecho             String    @db.Text
+  natureza           String
+  veredito           String?
+  julgadoEm          DateTime?
+  julgadoPor         String?
+  herdadoDe          String?
+
+  @@index([destilacaoId])
+}

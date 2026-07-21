@@ -58,6 +58,10 @@
       "schedule": "45 6 * * *"
     },
     {
+      "path": "/api/cron/destilar-teses-tcu",
+      "schedule": "15 7 * * *"
+    },
+    {
       "path": "/api/cron/sync-conuni",
       "schedule": "0 6 1 * *"
     },
