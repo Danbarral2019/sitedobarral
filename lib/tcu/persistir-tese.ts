@@ -129,9 +129,21 @@ export async function persistirDestilacao(
   });
 
   const criada = await prisma.$transaction(async (tx) => {
-    if (anterior) {
-      await tx.teseDestilacao.update({ where: { id: anterior.id }, data: { atual: false } });
-    }
+    // `updateMany` condicional por (numeroAlvo, anoAlvo, atual), reavaliado no
+    // momento do commit — NÃO `update` pelo `id` de `anterior`, capturado antes
+    // da transação. Se o cron e o backfill destilarem o mesmo alvo em paralelo,
+    // um `update` por id fixo deixaria as duas transações desmarcarem a MESMA
+    // linha antiga (idempotente, sem erro) e cada uma criar a sua com
+    // `atual: true` — duas versões atuais para o mesmo caso. O `updateMany`
+    // condicional reconsulta `atual: true` dentro da transação, então a segunda
+    // a commitar também desmarca a que a primeira acabou de criar.
+    // (Um índice único parcial em `(numeroAlvo, anoAlvo) WHERE atual` reforçaria
+    // isso no banco, mas o deploy usa `prisma db push`, que remove objetos fora
+    // do schema — índice criado via SQL cru seria apagado no próximo push.)
+    await tx.teseDestilacao.updateMany({
+      where: { numeroAlvo: alvo.numero, anoAlvo: alvo.ano, atual: true },
+      data: { atual: false },
+    });
     return tx.teseDestilacao.create({
       data: {
         numeroAlvo: alvo.numero,
