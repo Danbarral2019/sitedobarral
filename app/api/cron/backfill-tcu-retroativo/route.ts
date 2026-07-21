@@ -43,7 +43,7 @@ export async function GET(request: NextRequest) {
     }
 
     let offset = cursor.offset;
-    let inseridos = 0, ignorados = 0, duplicados = 0, erros = 0, lidos = 0;
+    let inseridos = 0, ignorados = 0, duplicados = 0, erros = 0, lidos = 0, respostaVazia = 0;
     let ultimoAcordao = cursor.ultimoAcordao, ultimaData = cursor.ultimaData;
     let concluido = false;
     const itensComErro: string[] = [];
@@ -60,8 +60,18 @@ export async function GET(request: NextRequest) {
       }
       const itens = (await res.json()) as ItemFeed[];
       if (!Array.isArray(itens) || itens.length === 0) {
-        await prisma.backfillCursor.update({ where: { id: CURSOR_ID }, data: { concluido: true } });
-        concluido = true;
+        // Resposta vazia ou inesperada é AMBÍGUA: pode ser o fim do feed, mas
+        // também um soluço transitório da API (HTTP 200 com corpo vazio ou
+        // não-array). Marcar `concluido` aqui é destrutivo e irreversível —
+        // encerrou a campanha em 21/07 no offset 16500, ainda em ago/2025,
+        // longe do alvo de dez/2023. O único sinal confiável de fim é a DATA
+        // (`atingiuAlvo`), que é determinística e vem do dado.
+        //
+        // Então aqui: para o run, NÃO avança o cursor e NÃO conclui. Se for
+        // soluço, o próximo run retoma do mesmo offset. Se o feed tiver
+        // realmente acabado antes do alvo, o cursor fica parado e visível no
+        // `scripts/status-campanha-tcu.ts` — falha visível, não terminal.
+        respostaVazia++;
         break;
       }
       lidos += itens.length;
@@ -103,7 +113,7 @@ export async function GET(request: NextRequest) {
       offset: final?.offset, concluido: final?.concluido,
       totalInserido: final?.totalInserido, totalIgnorado: final?.totalIgnorado,
       ultimoAcordao: final?.ultimoAcordao, ultimaData: final?.ultimaData,
-      lidosNesteRun: lidos, duplicados, erros,
+      lidosNesteRun: lidos, duplicados, erros, respostaVazia,
       totalItensComErro: itensComErro.length,
       itensComErro: itensComErro.slice(0, 50),
     };
@@ -114,6 +124,7 @@ export async function GET(request: NextRequest) {
       metadata: {
         offset: final?.offset,
         duplicados,
+        respostaVazia,
         concluido: final?.concluido,
         totalItensComErro: itensComErro.length,
         itensComErro: itensComErro.slice(0, 50),
