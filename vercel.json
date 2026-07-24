@@ -47,7 +47,7 @@
     },
     {
       "path": "/api/cron/backfill-tcu-retroativo",
-      "schedule": "15 */3 * * *"
+      "schedule": "15 6 * * *"
     },
     {
       "path": "/api/cron/catalog-tcu-inteiro-teor",
