@@ -132,18 +132,25 @@ export function formatLegalContent(rawContent: string): string {
       // Na zona de assinatura, só mescla continuações que começam em minúscula
       // (ex.: rodapé do DOU quebrado). Signatários (maiúsculos) ficam em linhas
       // próprias — evita "Esther Dweck Luiz Marinho Este texto não substitui...".
+      // Um heading nunca é continuação de frase, nem para trás nem para frente.
+      // Sem esta guarda, "CAPÍTULO I" disparava `prevEndsWithSingleLetter` (o
+      // numeral romano I/V/X é uma letra só) e engolia o bloco seguinte:
+      // "## CAPÍTULO I DISPOSIÇÕES PRELIMINARES". "CAPÍTULO II" não reproduzia,
+      // o que mascarou o bug. Vale igual para SEÇÃO/TÍTULO/ANEXO I, V e X.
+      const headingBoundary = prevIsHeading || curIsHeading;
+
       const shouldMerge = inSignatureZoneMerge
         ? (curStartsLowercase && !prevEndsClean)
-        : (
+        : !headingBoundary && (
             // regra antiga
-            (!prevEndsClean && !prevIsHeading && !curIsHeading && !curIsStructural) ||
+            (!prevEndsClean && !curIsStructural) ||
             // novas regras
             prevEndsWithStopWord ||
             prevEndsWithSingleLetter ||
             prevEndsWithArtAbbrev ||
             (curStartsLowercase && !prevEndsClean) ||
             (curStartsWithNumber && prevEndsWithArtAbbrev) ||
-            (curStartsWithCrossRef && !prevEndsClean && !prevIsHeading)
+            (curStartsWithCrossRef && !prevEndsClean)
           );
 
       if (shouldMerge && !curIsStructural) {

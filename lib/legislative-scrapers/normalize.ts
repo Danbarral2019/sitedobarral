@@ -3,6 +3,8 @@
  *
  * Funções puras, sem I/O, sem state global.
  * Cada função aceita string e retorna string transformada.
+ * (Exceção: `blockAwareText` recebe um nó Cheerio — é a fronteira entre o HTML
+ * e o texto, e opera sobre um clone, sem mutar o documento de entrada.)
  */
 
 /**
@@ -51,6 +53,35 @@ function normalizeCharsetName(c: string): string {
   if (lower === 'windows-1252' || lower === 'cp1252' || lower === 'win1252') return 'windows-1252';
   if (lower === 'utf-8' || lower === 'utf8') return 'utf-8';
   return lower;
+}
+
+/**
+ * Elementos que representam quebra de bloco no HTML. O texto de dois destes,
+ * lado a lado, NUNCA pode sair concatenado.
+ */
+const BLOCK_LEVEL_SELECTOR =
+  'p,div,br,li,tr,section,article,blockquote,h1,h2,h3,h4,h5,h6,dt,dd,pre,figcaption';
+
+/**
+ * Extrai o texto de um elemento preservando as fronteiras de bloco.
+ *
+ * `Cheerio.text()` concatena o textContent de todos os descendentes SEM
+ * separador nenhum, de modo que `<p>CAPÍTULO I</p><p>DISPOSIÇÕES</p>` vira
+ * "CAPÍTULO IDISPOSIÇÕES". Em texto normativo isso é destrutivo: funde o
+ * título do capítulo com o subtítulo, o subtítulo com o `Art. 1º`, e um inciso
+ * com o seguinte — e o texto fundido ainda contamina o chunking dos embeddings.
+ *
+ * Aqui, cada elemento de bloco recebe uma quebra antes e depois, num CLONE
+ * desanexado (o documento original não é mutado, então chamadas repetidas
+ * sobre o mesmo `$` são idempotentes). Elementos inline (`<em>`, `<strong>`,
+ * `<a>`) continuam sem quebra — não são fronteira de parágrafo.
+ *
+ * O `collapseWhitespace` a jusante reduz os runs de `\n` resultantes.
+ */
+export function blockAwareText(el: cheerio.Cheerio): string {
+  const clone = el.clone();
+  clone.find(BLOCK_LEVEL_SELECTOR).before('\n').after('\n');
+  return clone.text();
 }
 
 /**

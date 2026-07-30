@@ -7,7 +7,7 @@
 
 import * as cheerio from 'cheerio';
 import { computeHash } from './change-detector';
-import { stripDouBoilerplate, stripFormAnnex, stripGovbrUiNoise, collapseWhitespace, detectCharsetFromResponse } from './normalize';
+import { stripDouBoilerplate, stripFormAnnex, stripGovbrUiNoise, collapseWhitespace, detectCharsetFromResponse, blockAwareText } from './normalize';
 import type { LegislativeScraper, ScraperResult } from './index';
 
 /**
@@ -169,7 +169,7 @@ export class GovBrComprasScraper implements LegislativeScraper {
     for (const selector of PRIMARY_SELECTORS) {
       const el = $(selector);
       if (el.length === 0) continue;
-      const text = this.cleanText(el.text());
+      const text = this.cleanText(blockAwareText(el));
       if (text.length > best.length) {
         best = text;
       }
@@ -191,12 +191,12 @@ export class GovBrComprasScraper implements LegislativeScraper {
     for (const selector of FALLBACK_SELECTORS) {
       const el = $(selector);
       if (el.length === 0) continue;
-      const text = this.cleanText(el.text());
+      const text = this.cleanText(blockAwareText(el));
       if (text.length > 100) return text;
     }
 
     // Último recurso: body inteiro
-    return this.cleanText($('body').text());
+    return this.cleanText(blockAwareText($('body')));
   }
 
   /**

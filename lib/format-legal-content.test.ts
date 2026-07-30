@@ -355,3 +355,42 @@ describe('regressão: marcadores de diretiva não devem ser reformatados', () =>
       expect(out).toContain('**DECRETA:**');
     });
   });
+
+  /**
+   * Regressão: headings terminados em numeral romano de UMA letra (I, V, X)
+   * disparavam a heurística `prevEndsWithSingleLetter` do merge e engoliam o
+   * bloco seguinte — "## CAPÍTULO I DISPOSIÇÕES PRELIMINARES" em vez de dois
+   * headings. "CAPÍTULO II" não reproduzia (duas letras), o que mascarou o bug.
+   */
+  describe('heading terminado em numeral romano de uma letra', () => {
+    it('não funde CAPÍTULO I com o subtítulo seguinte', () => {
+      const out = formatLegalContent('CAPÍTULO I\n\nDISPOSIÇÕES PRELIMINARES');
+      expect(out).not.toContain('CAPÍTULO I DISPOSIÇÕES');
+      expect(out).toContain('## CAPÍTULO I');
+    });
+
+    it('trata CAPÍTULO I igual a CAPÍTULO II', () => {
+      const um = formatLegalContent('CAPÍTULO I\n\nDAS DISPOSIÇÕES');
+      const dois = formatLegalContent('CAPÍTULO II\n\nDAS DISPOSIÇÕES');
+      expect(um.replace('CAPÍTULO I', 'CAPÍTULO N')).toBe(dois.replace('CAPÍTULO II', 'CAPÍTULO N'));
+    });
+
+    it('vale para SEÇÃO I, TÍTULO I, TÍTULO V e ANEXO X', () => {
+      expect(formatLegalContent('SEÇÃO I\n\nDO OBJETO')).not.toContain('SEÇÃO I DO OBJETO');
+      expect(formatLegalContent('TÍTULO I\n\nDAS NORMAS')).not.toContain('TÍTULO I DAS NORMAS');
+      expect(formatLegalContent('TÍTULO V\n\nDAS NORMAS')).not.toContain('TÍTULO V DAS NORMAS');
+      expect(formatLegalContent('ANEXO X\n\nDOS MODELOS')).not.toContain('ANEXO X DOS MODELOS');
+    });
+
+    it('não funde CAPÍTULO I com o Art. 1º que o segue', () => {
+      const out = formatLegalContent('CAPÍTULO I\n\nDISPOSIÇÕES PRELIMINARES\n\nArt. 1º Esta norma dispõe sobre algo.');
+      expect(out).toContain('**Art. 1º**');
+      expect(out).not.toMatch(/##[^\n]*Art\. 1º/);
+    });
+
+    it('ainda mescla continuação real terminada em letra única', () => {
+      // "alínea a" quebrado no meio da frase continua sendo remontado
+      const out = formatLegalContent('nos termos da alínea a\ndo inciso II do art. 5º.');
+      expect(out).toContain('alínea a do inciso II');
+    });
+  });

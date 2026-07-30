@@ -8,7 +8,7 @@
 import * as cheerio from 'cheerio';
 import { computeHash } from './change-detector';
 import type { LegislativeScraper, ScraperResult } from './index';
-import { collapseWhitespace, detectCharsetFromResponse } from './normalize';
+import { collapseWhitespace, detectCharsetFromResponse, blockAwareText } from './normalize';
 
 /**
  * Patterns de URL do Planalto
@@ -145,7 +145,7 @@ export class PlanaltoScraper implements LegislativeScraper {
     for (const selector of CONTENT_SELECTORS) {
       const element = $(selector);
       if (element.length > 0) {
-        const text = this.cleanText(element.text());
+        const text = this.cleanText(blockAwareText(element));
         if (text.length > 100) {
           return text;
         }
@@ -153,7 +153,7 @@ export class PlanaltoScraper implements LegislativeScraper {
     }
 
     // Fallback: pegar todo o body
-    return this.cleanText($('body').text());
+    return this.cleanText(blockAwareText($('body')));
   }
 
   /**
