@@ -137,40 +137,38 @@ export function extractTextFromTxt(fileBuffer: Buffer): TextExtractionResult {
  * Usado como fallback quando pdf-parse retorna pouco texto
  */
 export async function extractTextWithGeminiVision(fileBuffer: Buffer): Promise<TextExtractionResult> {
-  const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
-
-  if (!GEMINI_API_KEY) {
-    return {
-      success: false,
-      text: '',
-      error: 'GEMINI_API_KEY not configured for OCR',
-    };
-  }
-
   try {
     const { GoogleGenAI } = await import('@google/genai');
     const { PRIMARY_GEMINI_MODEL } = await import('@/lib/gemini/config');
-    const genAI = new GoogleGenAI({ apiKey: GEMINI_API_KEY });
+    const { withGeminiKeyFallback } = await import('@/lib/gemini/api-key-fallback');
 
     // Converte buffer para base64
     const base64 = fileBuffer.toString('base64');
 
-    const result = await genAI.models.generateContent({
-      model: PRIMARY_GEMINI_MODEL,
-      contents: [
-        {
-          inlineData: {
-            mimeType: 'application/pdf',
-            data: base64,
+    // OCR é multimodal (PDF via inlineData), então não pode passar pelo gateway
+    // text-only `generate()`. Usamos o SDK direto, mas dentro de
+    // withGeminiKeyFallback para herdar o fallback primária→backup em quota
+    // (429/RESOURCE_EXHAUSTED) da PR #128. Se nenhuma key estiver configurada,
+    // o wrapper lança e o catch abaixo converte para um resultado de falha.
+    const result = await withGeminiKeyFallback((apiKey) => {
+      const genAI = new GoogleGenAI({ apiKey });
+      return genAI.models.generateContent({
+        model: PRIMARY_GEMINI_MODEL,
+        contents: [
+          {
+            inlineData: {
+              mimeType: 'application/pdf',
+              data: base64,
+            },
           },
-        },
-        {
-          text: `Extraia todo o texto deste documento PDF escaneado.
+          {
+            text: `Extraia todo o texto deste documento PDF escaneado.
                Mantenha a formatacao original (paragrafos, listas, numeracao).
                Preserve a estrutura de artigos, paragrafos e incisos se for documento juridico.
                Retorne apenas o texto extraido, sem comentarios adicionais.`,
-        },
-      ],
+          },
+        ],
+      });
     });
 
     const text = result.text ?? '';
