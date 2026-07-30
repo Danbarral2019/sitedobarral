@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## ⚠️ CRITICAL REMINDERS
 
-1. **Working Directory:** `C:\Users\User\projetos\sitedobarral\` (Windows — ambiente atual). Shell primário: PowerShell; Bash (Git Bash) também disponível.
+1. **Working Directory:** macOS → `/Users/danba/Site do Barral/sitedobarral/` (shell: zsh). Windows → `C:\Users\User\projetos\sitedobarral\` (PowerShell ou Git Bash). SEMPRE rodar os comandos da raiz do projeto.
 2. **Course IDs:** Database usa IDs numéricos (`'1'`, `'2'`), URLs usam slugs. Ver `COURSE_IDS_REFERENCE.md`
 3. **Documents:** NUNCA acessar `course.restrictedDocuments` - buscar via `/api/documents`
 4. **React Hooks:** Todos hooks ANTES de early returns
@@ -29,9 +29,6 @@ npx prisma studio              # Database GUI
 
 # Admin
 node scripts/create-admin.js email@example.com senha "Nome"
-
-# MCP
-claude mcp list                # List MCPs (playwright, postgresql, github, gemini)
 
 # AGU/TCU Scrapers
 npx tsx scripts/test-versioning.ts
@@ -149,7 +146,7 @@ export async function GET(request: NextRequest) {
 **Stripe:** `STRIPE_SECRET_KEY` (`sk_live_`/`sk_test_`), `STRIPE_WEBHOOK_SECRET` (`whsec_`), `NEXT_PUBLIC_PRICE_BASICO`, `NEXT_PUBLIC_PRICE_PREMIUM`.
 **Optional:** `ANTHROPIC_API_KEY`, `GEMINI_API_KEY`, `GEMINI_API_KEY_BACKUP` (fallback em 429/RESOURCE_EXHAUSTED antes de degradar p/ FTS — ver `lib/gemini/api-key-fallback.ts`), `MAILCHIMP_*`, `INSTAGRAM_*`/`LINKEDIN_*`, `CRON_SECRET`.
 
-Ver `.env.example` e `SETUP.md`. Chat RAG: Gemini key via MCP global (`~/.claude-mcp-servers/gemini/`); `claude mcp list` deve mostrar "gemini: ✓ Connected".
+Ver `.env.example` e `SETUP.md`. Chat RAG lê a `GEMINI_API_KEY` do ambiente (`.env.local` em dev, Vercel em prod) — não depende de nenhum MCP server.
 
 ## API Routes Summary
 
@@ -173,7 +170,7 @@ Padrões não-óbvios; o passo-a-passo completo se deriva do código apontado.
 - **Busca Global com IA** (composição no frontend, hook `useGlobalSearch` c/ AbortController): 300ms debounce → `GET /api/area-restrita/global-search` (resultados tradicionais) · 1500ms/Enter → `POST /api/documents/query` (card "Análise IA"). Toggle IA no `GlobalSearchBar`; `AIAnswerCard` renderiza no `SearchResultsList`.
 - **Chat RAG** (`/api/documents/query`): Gemini (`gemini-2.5-flash`) com query + contexto → resposta estruturada com relevance scores → cache por query-hash (60s TTL) → fontes citadas.
 - **Error Handling** (Fase 8): rota lança erro semântico → `handleApiError()` classifica (Prisma/Zod/JWT → HTTP) → log estruturado → JSON padronizado.
-- **Embeddings/pgvector** (`lib/embeddings/document-processor.ts`, `gemini-embeddings.ts`, `text-chunker.ts`): doc c/ `r2Key` → download R2 + extração; senão `content`/`description` (mín. 50 chars). Chunker legal (decor/parecer/on) vs genérico. Gemini `gemini-embedding-001` (768d, batch 100) → `DocumentChunk` `vector(768)`. Script `scripts/migrate-to-embeddings.ts` (`--dry-run`/`--limit`/`--category`/`--force`/`--concurrency`; sem `--force` só `pending`/`failed`).
+- **Embeddings/pgvector** (`lib/embeddings/document-processor.ts`, `gemini-embeddings.ts`, `text-chunker.ts`): doc c/ `r2Key` → download R2 + extração; senão `content`/`description` (mín. 50 chars). Chunker legal (decor/parecer/on) vs genérico. Gemini `gemini-embedding-2-preview` (768d Matryoshka, batch 100; configurável via `EMBEDDING_MODEL`) → `DocumentChunk` `vector(768)`. Script `scripts/migrate-to-embeddings.ts` (`--dry-run`/`--limit`/`--category`/`--force`/`--concurrency`; sem `--force` só `pending`/`failed`).
 - **Vídeo LMS híbrido YouTube/R2** (2026-07): `CourseVideo.storageType` (`'youtube'|'r2'`) discrimina origem (youtube fields nuláveis). R2 = upload direto via presigned PUT (`/api/admin/videos/{presigned-url,confirm}`, admin) + playback com URL assinada 2h (`GET /api/area-restrita/videos/[id]/url` checa enrollment antes de `getSignedR2Url`). `LessonVideo.courseVideoId` referencia o mestre. `sizeBytes` é `String?` (evita BigInt na serialização). Superfícies públicas de embed filtram `storageType:'youtube'`.
 - **Single-flight em `withCache`** (`lib/cache/redis-client.ts`): promises concorrentes p/ a mesma key compartilhadas (`inFlight` Map + try/finally), default-on.
 - **Atos Legislativos — embeddings separados** (`lib/embeddings/legislative-act-processor.ts`): `LegislativeActChunk` separada de `DocumentChunk`; busca faz UNION ALL e `sourceType` (`document`|`legislative-act`|`tribunal-decision`) diferencia a origem.
@@ -227,10 +224,10 @@ Ver `eval/README.md`. ⚠️ **Trilha de tuning de retrieval FECHADA** (`docs/RO
 
 ---
 
-**First Time Setup (Windows):**
+**First Time Setup** (macOS; no Windows trocar o `cd` por `C:/Users/User/projetos/sitedobarral`):
 
 ```bash
-cd "C:/Users/User/projetos/sitedobarral"
+cd "/Users/danba/Site do Barral/sitedobarral"
 npm install
 cp .env.example .env.local  # editar com seus valores
 npx prisma generate && npx prisma db push

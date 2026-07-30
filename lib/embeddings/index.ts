@@ -5,7 +5,7 @@
  * semantica baseado em embeddings armazenados no PostgreSQL com pgvector.
  *
  * Componentes:
- * - gemini-embeddings: Gera embeddings via Gemini text-embedding-004
+ * - gemini-embeddings: Gera embeddings via Gemini (default gemini-embedding-2-preview, env EMBEDDING_MODEL)
  * - text-chunker: Divide textos em chunks com overlap
  * - document-processor: Pipeline completo de processamento
  * - vector-search: Busca por similaridade coseno
