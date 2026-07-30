@@ -12,6 +12,7 @@ const {
   mockQueryGeminiText,
   mockSearchHistoryCreate,
   mockEnforceAiQuota,
+  mockUserRole,
 } = vi.hoisted(() => ({
   mockSemanticSearch: vi.fn(),
   mockEnrichSources: vi.fn(),
@@ -23,6 +24,8 @@ const {
   mockQueryGeminiText: vi.fn(),
   mockSearchHistoryCreate: vi.fn(),
   mockEnforceAiQuota: vi.fn(),
+  // Role injetada no ctx.user — mutável para testar o gate RBAC do bloco `debug`.
+  mockUserRole: { value: 'student' },
 }));
 
 vi.mock('@/lib/cache/ai-quota', () => ({
@@ -66,7 +69,7 @@ vi.mock('@/lib/api/handler', async () => {
         try {
           const params = ctx?.params ? await ctx.params : {};
           return await handler(req, {
-            user: { userId: 'u1', email: 'u@x.com', role: 'student' },
+            user: { userId: 'u1', email: 'u@x.com', role: mockUserRole.value },
             params,
             requestId: 'test',
             logger: { info: vi.fn(), warn: vi.fn(), error: vi.fn(), debug: vi.fn() },
@@ -113,6 +116,7 @@ beforeEach(() => {
   mockSearchHistoryCreate.mockReset();
   mockEnforceAiQuota.mockReset();
   mockEnforceAiQuota.mockResolvedValue({ action: 'allow' });
+  mockUserRole.value = 'student';
 
   // Default: adapter passes options through
   mockMapFiltersToSemanticOptions.mockReturnValue({
@@ -245,6 +249,33 @@ describe('POST /api/jurisprudencia/query', () => {
 
     expect(body.sources).toHaveLength(1);
     expect(body.answer).toMatch(/Não consegui gerar uma síntese/);
+    // RBAC: aluno NÃO recebe a mensagem/stack de erro do Gemini no payload.
+    expect(body.debug).toBeUndefined();
+  });
+
+  it('expõe debug do erro do Gemini apenas para admin', async () => {
+    mockUserRole.value = 'admin';
+    mockSemanticSearch.mockResolvedValueOnce({
+      results: [{ documentId: 'td-1', documentTitle: 't', category: 'acordao', chunkContent: 'c', chunkIndex: 0, similarity: 0.8, url: null, courseId: null, isCommon: true, tags: null, leiArticles: null, uploadedAt: '2024-01-01', sourceType: 'tribunal-decision' }],
+      query: 'q', totalFound: 1, latency: 10, cached: false,
+    });
+    mockEnrichSources.mockResolvedValueOnce([{
+      documentId: 'td-1', similarity: 0.8, chunkContent: 'c',
+      source: { kind: 'tribunal-decision', data: { id: 'td-1', tribunalCode: 'TCE-SP', tribunalName: 'T', decisionType: 'acordao', decisionNumber: '1', title: 't', ementa: 'e', summary: null, relator: null, orgaoJulgador: null, dataJulgamento: null, themes: null, leiArticlesArr: [], url: null } },
+    }]);
+    mockAdaptToSourcesPayload.mockReturnValueOnce([{
+      id: 'td-1', tribunalCode: 'TCE-SP', tribunalName: 'T', decisionType: 'acordao',
+      decisionNumber: '1', title: 't', relator: null, orgaoJulgador: null,
+      dataJulgamento: null, url: null, sourceType: 'tribunal-decision', similarity: 0.8,
+    }]);
+    mockQueryGeminiText.mockRejectedValueOnce(new Error('gemini down'));
+
+    const res = await POST(makeReq({ query: 'pergunta' }), routeCtx);
+    const body = await readJson(res);
+
+    expect(body.answer).toMatch(/Não consegui gerar uma síntese/);
+    expect(body.debug).toBeDefined();
+    expect(body.debug.geminiError).toBe('gemini down');
   });
 
   it('cita informativo TCU quando semanticSearch retorna informativo', async () => {
