@@ -1,9 +1,21 @@
 name: Cleanup Neon Preview Branch
 
-# Dispara quando uma PR é fechada (com ou sem merge) e remove a
-# Neon branch preview criada automaticamente pela integração
+# Remove a Neon branch preview criada automaticamente pela integração
 # Vercel-managed. Sem isso, branches preview ficam retidas por 6 meses
-# (política padrão da Vercel) e acumulam custo de $1,50/mês cada.
+# (política padrão da Vercel) e acumulam custo de armazenamento — na
+# ordem de $1,50/mês cada, cobrado mesmo com o compute idle.
+#
+# Dois gatilhos, porque uma branch Neon pode ficar órfã de dois jeitos:
+#   1. pull_request closed — PR fechada, com ou sem merge;
+#   2. delete — branch git apagada direto, SEM nunca ter tido PR.
+#
+# O gatilho (2) foi acrescentado em 2026-07-30: três branches
+# (preview/fase-1-answerservice, preview/fase-2-lei-embeddings,
+# preview/fase-3-claude-synthesis) nunca tiveram PR, escaparam do
+# gatilho (1) e ficaram órfãs até serem achadas no painel do Neon.
+#
+# Mergear uma PR com --delete-branch dispara os DOIS eventos; a segunda
+# execução não acha mais a branch e é absorvida pelo continue-on-error.
 #
 # Histórico: 2026-05-20 — campanha de saneamento maio acumulou 107
 # branches (~$160/mês) em ~3 semanas. Workflow é a solução automatizada.
@@ -11,21 +23,29 @@ name: Cleanup Neon Preview Branch
 on:
   pull_request:
     types: [closed]
+  delete:
 
 jobs:
   delete-neon-branch:
-    # Só roda em PRs do próprio repositório (não de forks)
-    # Evita que um fork malicioso force delete em branches sensíveis.
-    if: github.event.pull_request.head.repo.full_name == github.repository
+    # PRs: só do próprio repositório (não de forks) — evita que um fork
+    # malicioso force delete em branches sensíveis.
+    # delete: só branches, nunca tags (ref_type distingue os dois).
+    if: >-
+      (github.event_name == 'pull_request' &&
+       github.event.pull_request.head.repo.full_name == github.repository) ||
+      (github.event_name == 'delete' && github.event.ref_type == 'branch')
     runs-on: ubuntu-latest
 
     steps:
       - name: Delete Neon preview branch
-        # Continua mesmo se a branch não existir — PRs fechadas antes
-        # do primeiro deploy preview não geram branch Neon.
+        # Continua mesmo se a branch não existir — branches fechadas antes
+        # do primeiro deploy preview não geram branch Neon, e o segundo
+        # gatilho de um mesmo merge sempre cai neste caso.
         continue-on-error: true
         uses: neondatabase/delete-branch-action@v3
         with:
           project_id: ${{ vars.NEON_PROJECT_ID }}
-          branch: preview/${{ github.head_ref }}
+          # No evento delete o nome vem em github.event.ref; em
+          # pull_request, em github.head_ref.
+          branch: preview/${{ github.event_name == 'delete' && github.event.ref || github.head_ref }}
           api_key: ${{ secrets.NEON_API_KEY }}
