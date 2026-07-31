@@ -351,8 +351,17 @@ export function stripGovbrUiNoise(text: string): string {
   while ((m = re.exec(result)) !== null) {
     lastShareIdx = m.index;
   }
+  // Guarda semântica: no Plone 6/Volto (gov.br/contratamaisbrasil, gov.br/pncp)
+  // o bloco de compartilhamento vem logo após os metadados, ANTES do corpo —
+  // cortar dali decepa os artigos. O piso de 10% não protege: numa portaria
+  // curta o corte leva ~89,7% e passa raspando. Se o trecho a descartar ainda
+  // contém articulação (Art. N / § N), não é rodapé, é o ato.
   if (lastShareIdx >= 0 && lastShareIdx >= text.length * 0.1) {
-    result = result.slice(0, lastShareIdx).trimEnd();
+    const descartado = result.slice(lastShareIdx);
+    const temArticulacao = /(^|\n)\s*(Art\.\s*\d|§\s*\d|Parágrafo único)/.test(descartado);
+    if (!temArticulacao) {
+      result = result.slice(0, lastShareIdx).trimEnd();
+    }
   }
 
   // Resíduo do header (linhas isoladas tipo "Compartilhe por Facebook" sem
@@ -369,6 +378,14 @@ export function stripGovbrUiNoise(text: string): string {
     .replace(/^\s*Copiar para área de transferência.*$/gim, '')
     .replace(/^\s*Publicado em\s*$/gim, '')
     .replace(/^\s*Publicado em\s+\d{1,2}\/\d{1,2}\/\d{2,4}(?:\s+\d{1,2}h\d{1,2})?\s*$/gim, '')
+    // Volto emite "Publicado em 10/02/2025 10:02Modificado em 15/07/2026 11:59"
+    // numa linha só (spans inline no mesmo <p>), com hora em HH:MM e o verbo
+    // "Modificado". Qualquer uma das duas metades pode aparecer sozinha.
+    .replace(
+      /^\s*(?:Publicado em\s*\d{1,2}\/\d{1,2}\/\d{2,4}(?:\s*\d{1,2}[:h]\d{2})?\s*)?(?:Modificado em\s*\d{1,2}\/\d{1,2}\/\d{2,4}(?:\s*\d{1,2}[:h]\d{2})?\s*)\s*$/gim,
+      '',
+    )
+    .replace(/^\s*Publicado em\s+\d{1,2}\/\d{1,2}\/\d{2,4}\s+\d{1,2}:\d{2}\s*$/gim, '')
     .replace(/^\s*Atualizado em\s*$/gim, '')
     .replace(/^\s*Atualizado em\s+\d{1,2}\/\d{1,2}\/\d{2,4}(?:\s+\d{1,2}h\d{1,2})?\s*$/gim, '')
     .replace(/^\s*\d{1,2}\/\d{1,2}\/\d{2,4}\s+\d{1,2}h\d{1,2}\s*$/gim, '') // só a data/hora solta

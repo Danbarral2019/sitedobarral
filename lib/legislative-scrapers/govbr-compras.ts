@@ -19,6 +19,8 @@ const GOVBR_PATTERNS = [
   /gov\.br\/mgi/i,
   /gov\.br\/seges/i,
   /gov\.br\/governodigital/i,
+  /gov\.br\/contratamaisbrasil/i,
+  /gov\.br\/pncp/i,
   /in\.gov\.br/i,
 ];
 
@@ -155,6 +157,7 @@ export class GovBrComprasScraper implements LegislativeScraper {
     // Primários = seletores que capturam o corpo completo do ato.
     const PRIMARY_SELECTORS = [
       '#parent-fieldname-text', // Plone body (gov.br/compras, gov.br/gestao) — geralmente o mais longo
+      '#page-document',          // Plone 6 / Volto (gov.br/contratamaisbrasil, gov.br/pncp)
       '.materia',                // DOU materia
       '#content-core',           // Plone content wrapper (pode conter body ou só metadados)
       'article',                 // HTML5 article
