@@ -62,11 +62,37 @@ const CONCAT_SIGNATURES: { name: string; re: RegExp }[] = [
 
 /**
  * Rótulos cuja numeração é SEMPRE romana (ou "ÚNICO/ÚNICA"). ANEXO fica de
- * fora de propósito: admite letra ("ANEXO A") e título descritivo ("ANEXO
+ * fora aqui de propósito: admite letra ("ANEXO A") e título descritivo ("ANEXO
  * QUADRO DE PREÇOS"), então um token não-romano ali é legítimo, não cola.
+ * O caso de ANEXO tem regra própria em `detectAnexoGlue`.
  */
-const ROMAN_LABELED = /\b(CAPÍTULO|SEÇÃO|SECÇÃO|TÍTULO|SUBSEÇÃO)\s+([A-ZÀ-Ú]+)/g;
+const ROMAN_LABELED = /\b(CAPÍTULO|SEÇÃO|SECÇÃO|TÍTULO|SUBSEÇÃO)[ \t]+([A-ZÀ-Ú]+)/g;
 const VALID_ORDINAL = /^([IVXLCDM]+|ÚNICO|ÚNICA)$/;
+const ROMAN_ONLY = /^[IVXLCDM]+$/;
+
+/**
+ * "ANEXO IDEFINIÇÕES" = "ANEXO I" + "DEFINIÇÕES" fundidos.
+ *
+ * Excluir ANEXO por completo do teste de rótulo (como se fazia) criava um FALSO
+ * NEGATIVO: a IN SEGES/MP 5/2017 — a mais consultada do acervo — carregava esse
+ * defeito sem ser detectada. A regra aqui é mais estreita que a dos outros
+ * rótulos: o token precisa COMEÇAR com numeral romano e ainda sobrar uma palavra
+ * de 4+ letras. Assim "ANEXO A", "ANEXO VIII" e "ANEXO QUADRO" (que não começa
+ * por romano) seguem passando.
+ */
+function detectAnexoGlue(content: string): string | null {
+  const re = /\bANEXO[ \t]+([A-ZÀ-Ú]{5,})\b/g;
+  let m: RegExpExecArray | null;
+  while ((m = re.exec(content)) !== null) {
+    const tok = m[1];
+    if (ROMAN_ONLY.test(tok)) continue;
+    const prefixo = tok.match(/^[IVXLCDM]+/)?.[0] ?? '';
+    if (prefixo && tok.length - prefixo.length >= 4) {
+      return `ANEXO colado ("${tok.slice(0, 24)}")`;
+    }
+  }
+  return null;
+}
 
 /**
  * "CAPÍTULO IDISPOSIÇÕES" — o token após o rótulo não é numeral romano válido,
@@ -94,6 +120,10 @@ function detect(content: string): string | null {
     }
     const glue = detectHeadingGlue(content);
     if (glue) return glue;
+    const anexo = detectAnexoGlue(content);
+    if (anexo) return anexo;
+    // "1. Do ato convocatório:1.1. O ato…" — item numerado colado no anterior
+    if (/:\d+\.\d+\.\s*[A-ZÀ-Úa-zà-ú]/.test(content)) return 'item numerado colado após ":"';
   }
   if (ALVO === 'dup' || ALVO === 'ambos') {
     const dup = detectDuplicado(content);
