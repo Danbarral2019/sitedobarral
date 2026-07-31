@@ -357,6 +357,31 @@ describe('regressão: marcadores de diretiva não devem ser reformatados', () =>
   });
 
   /**
+   * Textos antigos do Planalto trazem grafias fora do padrão — "Art.1º" (sem
+   * espaço) e "Art . 8º" (espaço antes do ponto). O regex só aceitava "Art. N",
+   * então nesses 10 atos (incluindo a LGPD e o Decreto-Lei 200/1967) o artigo
+   * não virava negrito e podia ser tratado como texto corrido.
+   */
+  describe('grafias não padronizadas de artigo', () => {
+    it('reconhece "Art.1º" sem espaço', () => {
+      expect(formatLegalContent('Art.1º Esta lei dispõe sobre a proteção de dados.')).toContain('**Art.1º**');
+    });
+
+    it('reconhece "Art . 8º" com espaço antes do ponto', () => {
+      expect(formatLegalContent('Art . 8º Os Ministérios são os seguintes.')).toContain('**Art . 8º**');
+    });
+
+    it('continua reconhecendo a grafia padrão', () => {
+      expect(formatLegalContent('Art. 5º Todos são iguais.')).toContain('**Art. 5º**');
+    });
+
+    it('não marca menção a artigo no meio da frase', () => {
+      const out = formatLegalContent('nos termos do art. 5º da Constituição, aplica-se a regra.');
+      expect(out).not.toContain('**art. 5º**');
+    });
+  });
+
+  /**
    * Regressão: uma MENÇÃO a capítulo/seção no corpo do texto virava título.
    * "…nos termos do Capítulo VI do Decreto nº 9.191…" começava uma linha e a
    * regra `/^CAPÍTULO\s+/i` (case-insensitive, sem limite de tamanho) promovia
