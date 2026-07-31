@@ -34,6 +34,39 @@ describe('portais Volto (contratamaisbrasil, pncp)', () => {
     });
   });
 
+  /**
+   * Várias páginas do gov.br/compras trazem o MESMO id duas vezes (HTML
+   * inválido — Plone servindo versão tela + versão print). `$('#id')` casa os
+   * dois e o texto sai duplicado: o leitor lê a norma inteira duas vezes, e os
+   * embeddings ganham chunks repetidos. Id deve ser único; o primeiro é o
+   * canônico. Seletores de classe/tag seguem concatenando, porque ali vários
+   * elementos são partes distintas do conteúdo.
+   */
+  describe('id duplicado no HTML', () => {
+    // O corpo precisa passar dos 500 chars do seletor primário; abaixo disso o
+    // scraper cai no fallback do <body>, que é outro caminho.
+    const bloco = `<div id="parent-fieldname-text">
+        <p>Art. 1º Esta Instrução Normativa dispõe sobre a matéria de que trata o Decreto nº 1.094, de 23 de março de 1994, no âmbito da administração pública federal direta, autárquica e fundacional, observados os princípios da legalidade e da eficiência.</p>
+        <p>Art. 2º Os órgãos e entidades integrantes do Sistema de Serviços Gerais observarão as diretrizes estabelecidas nesta Instrução Normativa para fins de padronização dos procedimentos internos de contratação, de instrução processual e de designação dos agentes responsáveis pela fiscalização dos contratos administrativos celebrados.</p>
+        <p>Art. 3º Entra em vigor na data de sua publicação.</p>
+      </div>`;
+    const htmlIdDuplicado = `<html><body><div>${bloco}</div><div>${bloco}</div></body></html>`;
+
+    it('não duplica o texto quando o id aparece duas vezes', () => {
+      const $ = cheerio.load(htmlIdDuplicado);
+      const out = blockAwareText($('#parent-fieldname-text').first());
+      expect((out.match(/Art\. 1º Esta Instrução/g) || []).length).toBe(1);
+      expect((out.match(/Art\. 3º Entra em vigor/g) || []).length).toBe(1);
+    });
+
+    it('o scraper devolve o conteúdo uma única vez', async () => {
+      const conteudo = (scraper as unknown as {
+        extractContent: (html: string) => string;
+      }).extractContent.call(scraper, htmlIdDuplicado);
+      expect((conteudo.match(/Art\. 1º Esta Instrução/g) || []).length).toBe(1);
+    });
+  });
+
   describe('seletor #page-document', () => {
     it('extrai o corpo servido pelo Volto', () => {
       const $ = cheerio.load(`

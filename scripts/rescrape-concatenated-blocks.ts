@@ -28,8 +28,27 @@ const prisma = new PrismaClient({ adapter });
 
 const DRY_RUN = process.argv.includes('--dry-run');
 const LIMIT = Number(process.argv.find(a => a.startsWith('--limit='))?.split('=')[1] ?? 0);
+/** concat = blocos fundidos · dup = conteúdo repetido · ambos = os dois */
+const ALVO = (process.argv.find(a => a.startsWith('--alvo='))?.split('=')[1] ?? 'ambos') as 'concat' | 'dup' | 'ambos';
 const DELAY_MS = 2000;
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
+
+/**
+ * Conteúdo repetido: páginas do gov.br/compras que trazem o mesmo id duas vezes
+ * faziam o extrator concatenar as duas cópias (corrigido por `pickOne`).
+ */
+function detectDuplicado(c: string): string | null {
+  const t = c.replace(/\s+/g, ' ').trim();
+  if (t.length < 200) return null;
+  const meio = Math.floor(t.length / 2);
+  const prim = t.slice(0, meio).trim();
+  if (prim.length > 100 && t.slice(meio).trim().startsWith(prim.slice(0, Math.min(300, prim.length - 1)))) {
+    return 'texto repetido 2x';
+  }
+  const amostra = t.slice(0, 250);
+  const idx = t.indexOf(amostra, 250);
+  return idx > 0 ? `bloco inicial reaparece na posição ${idx}` : null;
+}
 
 /** Assinaturas de dois blocos irmãos fundidos sem separador. */
 const CONCAT_SIGNATURES: { name: string; re: RegExp }[] = [
@@ -37,6 +56,8 @@ const CONCAT_SIGNATURES: { name: string; re: RegExp }[] = [
   { name: 'ponto-e-vírgula colado em inciso', re: /;[IVXLC]+\s*[-–]\s/ },
   { name: 'texto colado em CAPÍTULO/SEÇÃO/TÍTULO/ANEXO', re: /[a-zà-ú0-9)](CAPÍTULO|SEÇÃO|TÍTULO|ANEXO)\s/ },
   { name: 'texto colado em "Parágrafo único"', re: /[a-zà-ú0-9)]Parágrafo único/ },
+  // "ANTONIO PAULO VOGEL DE MEDEIROSSecretário de Gestão" — <p>NOME</p><p>Cargo</p> fundidos
+  { name: 'assinatura colada no cargo', re: /[A-ZÀ-Ú]{3,}(Secretári|Ministr|Diretor|President|Coordenador|Chefe|Superintendent|Procurador|Advogad|Assessor)[aoe]/ },
 ];
 
 /**
@@ -67,10 +88,18 @@ function detectHeadingGlue(content: string): string | null {
 }
 
 function detect(content: string): string | null {
-  for (const s of CONCAT_SIGNATURES) {
-    if (s.re.test(content)) return s.name;
+  if (ALVO === 'concat' || ALVO === 'ambos') {
+    for (const s of CONCAT_SIGNATURES) {
+      if (s.re.test(content)) return s.name;
+    }
+    const glue = detectHeadingGlue(content);
+    if (glue) return glue;
   }
-  return detectHeadingGlue(content);
+  if (ALVO === 'dup' || ALVO === 'ambos') {
+    const dup = detectDuplicado(content);
+    if (dup) return `conteúdo duplicado — ${dup}`;
+  }
+  return null;
 }
 
 async function main() {

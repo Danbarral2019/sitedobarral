@@ -118,7 +118,7 @@ export function formatLegalContent(rawContent: string): string {
       // "II - ... ; e III - ..." ficam grudados num único parágrafo.
       // Nota: Art\. é case-sensitive para não bloquear "art. 8º" em continuações.
       const curIsStructural =
-        /^(Art\.\s|§\s*\d|Parágrafo único|[IVXLCDM]+\s*[-–—]\s|[a-z]\)\s)/.test(p) ||
+        /^(Art\s*\.\s*\d|§\s*\d|Parágrafo único|[IVXLCDM]+\s*[-–—]\s|[a-z]\)\s)/.test(p) ||
         /^parágrafo único/i.test(p);
 
       // Sinais adicionais de continuação:
@@ -191,25 +191,25 @@ export function formatLegalContent(rawContent: string): string {
 
     // --- Structural headers ---
 
-    if (/^CAPÍTULO\s+/i.test(p)) {
+    if (isStructuralLabel(p, 'CAPÍTULO')) {
       result.push('## ' + p);
       prevWasHeader = true;
       continue;
     }
 
-    if (/^TÍTULO\s+/i.test(p) && p.length < 80) {
+    if (isStructuralLabel(p, 'TÍTULO') && p.length < 80) {
       result.push('## ' + p);
       prevWasHeader = true;
       continue;
     }
 
-    if (/^SEÇÃO\s+/i.test(p)) {
+    if (isStructuralLabel(p, 'SEÇÃO')) {
       result.push('### ' + p);
       prevWasHeader = true;
       continue;
     }
 
-    if (/^SUBSEÇÃO\s+/i.test(p)) {
+    if (isStructuralLabel(p, 'SUBSEÇÃO')) {
       result.push('#### ' + p);
       prevWasHeader = true;
       continue;
@@ -230,7 +230,7 @@ export function formatLegalContent(rawContent: string): string {
     }
 
     // Short mixed-case subtitle right after a header
-    if (prevWasHeader && p.length < 100 && !/^Art\.\s/.test(p) && !p.startsWith('§') && !/^\d/.test(p) && !p.startsWith('O ') && !p.startsWith('A ')) {
+    if (prevWasHeader && p.length < 100 && !/^Art\s*\.\s*\d/.test(p) && !p.startsWith('§') && !/^\d/.test(p) && !p.startsWith('O ') && !p.startsWith('A ')) {
       result.push('#### ' + p);
       prevWasHeader = false;
       continue;
@@ -254,7 +254,7 @@ export function formatLegalContent(rawContent: string): string {
 
     // --- Articles and paragraphs (case-sensitive: "Art." not "art.") ---
 
-    p = p.replace(/^(Art\.\s*\d+[ºo°]?(?:-[A-Z])?\.?)(\s*)/, '**$1** ');
+    p = p.replace(/^(Art\s*\.\s*\d+[ºo°]?(?:-[A-Z])?\.?)(\s*)/, '**$1** ');
     p = p.replace(/^(§\s*\d+[ºo°]?\.?)(\s*)/, '**$1** ');
     p = p.replace(/^(Parágrafo único\.?)(\s*)/i, '**$1** ');
     p = p.replace(/\*\*\s{2,}/g, '** ');
@@ -351,6 +351,29 @@ function wrapAlteracaoBlocks(paragraphs: string[]): string[] {
   return result;
 }
 
+/**
+ * O parágrafo é REALMENTE um rótulo estrutural ("CAPÍTULO III", "SEÇÃO II - Das
+ * Contratações"), e não uma frase que apenas MENCIONA um deles?
+ *
+ * Sem esta checagem, "Capítulo VI do Decreto nº 9.191, de 2017, se a matéria
+ * for relevante..." — uma citação que calhou de iniciar um parágrafo — virava
+ * `## Capítulo VI do Decreto…`, jogando um pedaço de frase como título no meio
+ * do ato. Um rótulo de verdade traz numeral romano (ou ÚNICO/ÚNICA) logo após
+ * a palavra, e o que vem depois é um título curto, não a continuação da frase.
+ */
+function isStructuralLabel(p: string, label: string): boolean {
+  const m = new RegExp(`^${label}\\s+([A-Za-zÀ-Úà-ú]+)(.*)$`, 'i').exec(p);
+  if (!m) return false;
+  const ordinal = m[1].toUpperCase();
+  if (!/^([IVXLCDM]+|ÚNICO|ÚNICA|ÚNICAS)$/.test(ordinal)) return false;
+  // Depois do numeral só pode vir um título curto — normalmente após traço ou
+  // dois-pontos. Uma frase que continua ("VI do Decreto nº 9.191, de 2017, …")
+  // é citação, não rótulo.
+  const resto = m[2].trim();
+  if (resto === '') return true;
+  return resto.length < 80 && /^[-–—:.]/.test(resto);
+}
+
 /** Checks if a line starts a new structural element in legal text */
 function isStructuralStart(line: string): boolean {
   const patterns = [
@@ -358,7 +381,7 @@ function isStructuralStart(line: string): boolean {
     /^SEÇÃO\s/i,
     /^SUBSEÇÃO\s/i,
     /^TÍTULO\s/i,
-    /^Art\.\s/,             // Case-sensitive
+    /^Art\s*\.\s*\d/,       // Case-sensitive; tolera \"Art.1º\" e \"Art . 8º\" (grafias antigas do Planalto)
     /^§\s*\d/,              // §1º, §2º, §10 (com ou sem espaço entre § e dígito)
     /^Parágrafo único/i,
     /^[IVXLCDM]+\s*[-–]/,  // Roman numeral items

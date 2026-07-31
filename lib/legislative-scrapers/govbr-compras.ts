@@ -42,6 +42,22 @@ const ELEMENTS_TO_REMOVE = [
   'iframe',
 ];
 
+/**
+ * Resolve um seletor respeitando a unicidade de `id`.
+ *
+ * Várias páginas do gov.br/compras trazem o MESMO id duas vezes (HTML inválido
+ * — Plone servindo versão tela + versão print). `$('#id')` casa as duas e o
+ * texto sai DUPLICADO: o leitor lê a norma inteira em dobro e os embeddings
+ * ganham chunks repetidos. Como `id` deve ser único, o primeiro é o canônico.
+ *
+ * Seletores de classe/tag seguem casando todos os elementos — ali cada um é
+ * uma parte distinta do conteúdo e concatenar é o comportamento correto.
+ */
+function pickOne($: cheerio.Root, selector: string): cheerio.Cheerio {
+  const el = $(selector);
+  return selector.startsWith('#') && el.length > 1 ? el.first() : el;
+}
+
 export class GovBrComprasScraper implements LegislativeScraper {
   name = 'govbr-compras';
 
@@ -170,7 +186,7 @@ export class GovBrComprasScraper implements LegislativeScraper {
 
     let best = '';
     for (const selector of PRIMARY_SELECTORS) {
-      const el = $(selector);
+      const el = pickOne($, selector);
       if (el.length === 0) continue;
       const text = this.cleanText(blockAwareText(el));
       if (text.length > best.length) {
@@ -192,7 +208,7 @@ export class GovBrComprasScraper implements LegislativeScraper {
     ];
 
     for (const selector of FALLBACK_SELECTORS) {
-      const el = $(selector);
+      const el = pickOne($, selector);
       if (el.length === 0) continue;
       const text = this.cleanText(blockAwareText(el));
       if (text.length > 100) return text;
