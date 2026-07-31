@@ -148,7 +148,7 @@ const CHECKS: Check[] = [
   {
     id: 'D3', sev: 'MÉDIA', titulo: 'Caracteres de controle C1',
     run: (c) => {
-      const re = /[-]/;
+      const re = /[\u0080-\u009F]/;
       return re.test(c) ? { detalhe: 'bytes de controle no texto', amostra: JSON.stringify(redor(c, re, 40)) } : null;
     },
   },
