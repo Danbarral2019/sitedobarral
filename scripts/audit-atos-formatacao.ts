@@ -123,10 +123,19 @@ const CHECKS: Check[] = [
     },
   },
   {
-    id: 'C2', sev: 'MÉDIA', titulo: 'Placeholder de formulário-modelo',
+    id: 'C2', sev: 'MÉDIA', titulo: 'Placeholder de formulário-modelo no corpo normativo',
     run: (c) => {
       const re = /<NOME DO [A-ZÇÃÉ ]+>|<CARGO>|<ÓRGÃO>/;
-      return re.test(c) ? { detalhe: 'anexo de formulário vazou para o corpo', amostra: redor(c, re) } : null;
+      const m = c.match(re);
+      if (!m || m.index === undefined) return null;
+      // Um placeholder DENTRO de um "ANEXO … MODELO DE …" no fim do ato é
+      // legítimo — é a minuta que o gestor preenche, parte da norma. Só é
+      // defeito quando aparece no corpo articulado, antes dos anexos.
+      const anexoModelo = /ANEXO[^\n]{0,40}\n+\s*MODELO DE |MODELO DE (TERMO|CONTRATO|DECLARAÇÃO|ATA)/i;
+      const mAnexo = c.match(anexoModelo);
+      const dentroDeAnexo = mAnexo?.index !== undefined && mAnexo.index < m.index;
+      if (dentroDeAnexo) return null;
+      return { detalhe: 'placeholder fora de anexo-modelo — formulário vazou para o corpo', amostra: redor(c, re) };
     },
   },
 
