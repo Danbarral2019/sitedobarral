@@ -357,6 +357,36 @@ describe('regressão: marcadores de diretiva não devem ser reformatados', () =>
   });
 
   /**
+   * Regressão: uma MENÇÃO a capítulo/seção no corpo do texto virava título.
+   * "…nos termos do Capítulo VI do Decreto nº 9.191…" começava uma linha e a
+   * regra `/^CAPÍTULO\s+/i` (case-insensitive, sem limite de tamanho) promovia
+   * a frase inteira a `##`. Um rótulo de verdade é seguido de numeral romano e
+   * é curto.
+   */
+  describe('menção a capítulo/seção não vira título', () => {
+    it('não promove frase que apenas cita um capítulo', () => {
+      const out = formatLegalContent('Capítulo VI do Decreto nº 9.191, de 1º de novembro de 2017, se a matéria objeto de consulta pública for relevante.');
+      expect(out).not.toMatch(/^#{1,4} /m);
+    });
+
+    it('não promove frase que apenas cita uma seção', () => {
+      const out = formatLegalContent('Seção de Dissídios Individuais do Tribunal Superior do Trabalho, ou contrariarem súmula de jurisprudência.');
+      expect(out).not.toMatch(/^#{1,4} /m);
+    });
+
+    it('continua reconhecendo rótulos de verdade', () => {
+      expect(formatLegalContent('CAPÍTULO III')).toContain('## CAPÍTULO III');
+      expect(formatLegalContent('SEÇÃO II')).toContain('### SEÇÃO II');
+      expect(formatLegalContent('CAPÍTULO ÚNICO')).toContain('## CAPÍTULO ÚNICO');
+      expect(formatLegalContent('SUBSEÇÃO IV')).toContain('#### SUBSEÇÃO IV');
+    });
+
+    it('reconhece rótulo com título na mesma linha', () => {
+      expect(formatLegalContent('CAPÍTULO II - DAS CONTRATAÇÕES')).toContain('## CAPÍTULO II - DAS CONTRATAÇÕES');
+    });
+  });
+
+  /**
    * Regressão: headings terminados em numeral romano de UMA letra (I, V, X)
    * disparavam a heurística `prevEndsWithSingleLetter` do merge e engoliam o
    * bloco seguinte — "## CAPÍTULO I DISPOSIÇÕES PRELIMINARES" em vez de dois

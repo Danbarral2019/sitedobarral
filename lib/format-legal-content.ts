@@ -191,25 +191,25 @@ export function formatLegalContent(rawContent: string): string {
 
     // --- Structural headers ---
 
-    if (/^CAPÍTULO\s+/i.test(p)) {
+    if (isStructuralLabel(p, 'CAPÍTULO')) {
       result.push('## ' + p);
       prevWasHeader = true;
       continue;
     }
 
-    if (/^TÍTULO\s+/i.test(p) && p.length < 80) {
+    if (isStructuralLabel(p, 'TÍTULO') && p.length < 80) {
       result.push('## ' + p);
       prevWasHeader = true;
       continue;
     }
 
-    if (/^SEÇÃO\s+/i.test(p)) {
+    if (isStructuralLabel(p, 'SEÇÃO')) {
       result.push('### ' + p);
       prevWasHeader = true;
       continue;
     }
 
-    if (/^SUBSEÇÃO\s+/i.test(p)) {
+    if (isStructuralLabel(p, 'SUBSEÇÃO')) {
       result.push('#### ' + p);
       prevWasHeader = true;
       continue;
@@ -349,6 +349,29 @@ function wrapAlteracaoBlocks(paragraphs: string[]): string[] {
   // Defesa final: se algo sobrou no buffer (não deveria, já validamos), devolve original.
   if (buffer.length > 0) return paragraphs;
   return result;
+}
+
+/**
+ * O parágrafo é REALMENTE um rótulo estrutural ("CAPÍTULO III", "SEÇÃO II - Das
+ * Contratações"), e não uma frase que apenas MENCIONA um deles?
+ *
+ * Sem esta checagem, "Capítulo VI do Decreto nº 9.191, de 2017, se a matéria
+ * for relevante..." — uma citação que calhou de iniciar um parágrafo — virava
+ * `## Capítulo VI do Decreto…`, jogando um pedaço de frase como título no meio
+ * do ato. Um rótulo de verdade traz numeral romano (ou ÚNICO/ÚNICA) logo após
+ * a palavra, e o que vem depois é um título curto, não a continuação da frase.
+ */
+function isStructuralLabel(p: string, label: string): boolean {
+  const m = new RegExp(`^${label}\\s+([A-Za-zÀ-Úà-ú]+)(.*)$`, 'i').exec(p);
+  if (!m) return false;
+  const ordinal = m[1].toUpperCase();
+  if (!/^([IVXLCDM]+|ÚNICO|ÚNICA|ÚNICAS)$/.test(ordinal)) return false;
+  // Depois do numeral só pode vir um título curto — normalmente após traço ou
+  // dois-pontos. Uma frase que continua ("VI do Decreto nº 9.191, de 2017, …")
+  // é citação, não rótulo.
+  const resto = m[2].trim();
+  if (resto === '') return true;
+  return resto.length < 80 && /^[-–—:.]/.test(resto);
 }
 
 /** Checks if a line starts a new structural element in legal text */
