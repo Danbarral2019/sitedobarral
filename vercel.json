@@ -51,7 +51,7 @@
     },
     {
       "path": "/api/cron/catalog-tcu-inteiro-teor",
-      "schedule": "*/10 * * * *"
+      "schedule": "30 6 * * *"
     },
     {
       "path": "/api/cron/sync-precedentes-tcu",
