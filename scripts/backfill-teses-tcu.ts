@@ -13,9 +13,10 @@
  *   npx dotenv-cli -e .env.local -- npx tsx scripts/backfill-teses-tcu.ts --min-no-voto=10 --dry-run
  *   npx dotenv-cli -e .env.local -- npx tsx scripts/backfill-teses-tcu.ts --min-no-voto=10 --limite=3
  *   npx dotenv-cli -e .env.local -- npx tsx scripts/backfill-teses-tcu.ts --min-no-voto=10
+ *   npx dotenv-cli -e .env.local -- npx tsx scripts/backfill-teses-tcu.ts --min-no-voto=10 --realinhar
  */
 import { prisma } from '../lib/prisma';
-import { selecionarElegiveis, persistirDestilacao, MIN_NO_VOTO } from '../lib/tcu/persistir-tese';
+import { selecionarElegiveis, persistirDestilacao, MIN_NO_VOTO, type Candidato } from '../lib/tcu/persistir-tese';
 import { coletarTrechosDoAlvo } from '../lib/tcu/trechos-de-citacao';
 import { montarPromptTese, parseRespostaTese } from '../lib/tcu/destilar-tese';
 import { buscarAcordaoPorNumero, escolherCandidato } from '../lib/tcu/buscar-acordao-tcu';
@@ -41,18 +42,60 @@ function flagNumero(nome: string, padrao: number): number {
   return n;
 }
 
+/**
+ * Casos cuja destilação atual não é mais auditável: o dossiê gravado tem um
+ * número de trechos diferente do que o grafo produz hoje, então os índices de
+ * `trechosFonte` não apontam mais para os trechos que o modelo leu e a folha de
+ * calibração não pode exibir a evidência. Acontece com o que o cron destilou
+ * enquanto a fila de catalogação ainda drenava e o grafo crescia por baixo.
+ *
+ * Redestilar é seguro: `persistirDestilacao` versiona e `carregarVeredito`
+ * transporta o julgamento do Daniel para todo enunciado de texto idêntico.
+ */
+async function selecionarDesalinhados(limite: number, minNoVoto: number): Promise<Candidato[]> {
+  const atuais = await prisma.teseDestilacao.findMany({
+    where: { atual: true },
+    select: { numeroAlvo: true, anoAlvo: true, chave: true, dossieTrechos: true },
+  });
+  const contagens = await prisma.$queryRaw<Array<{ numero: number; ano: number; no_voto: number }>>`
+    SELECT "numeroAlvo" AS numero, "anoAlvo" AS ano,
+           count(DISTINCT "origemId") FILTER (WHERE "noVoto")::int AS no_voto
+    FROM "AcordaoCitacao"
+    GROUP BY 1, 2
+    HAVING count(DISTINCT "origemId") FILTER (WHERE "noVoto") >= ${minNoVoto}`;
+  const noVotoPorChave = new Map(contagens.map((c) => [`${c.numero}/${c.ano}`, c.no_voto]));
+
+  const out: Candidato[] = [];
+  for (const a of atuais) {
+    const noVoto = noVotoPorChave.get(a.chave);
+    if (noVoto === undefined) continue;
+    const dossie = await coletarTrechosDoAlvo({ numero: a.numeroAlvo, ano: a.anoAlvo });
+    if (dossie.trechos.length === a.dossieTrechos) continue;
+    out.push({ numero: a.numeroAlvo, ano: a.anoAlvo, chave: a.chave, noVoto });
+    if (out.length >= limite) break;
+  }
+  return out.sort((x, y) => y.noVoto - x.noVoto);
+}
+
 async function main() {
   const minNoVoto = flagNumero('min-no-voto', MIN_NO_VOTO);
   const limite = flagNumero('limite', 10_000);
   const dryRun = process.argv.includes('--dry-run');
+  const realinhar = process.argv.includes('--realinhar');
 
-  const candidatos = await selecionarElegiveis(limite, minNoVoto);
+  const candidatos = realinhar
+    ? await selecionarDesalinhados(limite, minNoVoto)
+    : await selecionarElegiveis(limite, minNoVoto);
 
-  console.log(`=== BACKFILL DE TESES DO TCU (onda A-W2) ===`);
+  console.log(`=== BACKFILL DE TESES DO TCU (onda A-W2)${realinhar ? ' — MODO REALINHAMENTO' : ''} ===`);
   console.log(`  limiar:      >= ${minNoVoto} citações no voto`);
   console.log(`  candidatos:  ${candidatos.length}${dryRun ? '  (DRY-RUN — nada será destilado)' : ''}`);
   if (candidatos.length === 0) {
-    console.log('\nNada a destilar: todos os casos acima do limiar já têm versão atual.');
+    console.log(
+      realinhar
+        ? '\nNada a realinhar: toda destilação atual bate com o dossiê do grafo.'
+        : '\nNada a destilar: todos os casos acima do limiar já têm versão atual.'
+    );
     return;
   }
   const faixaA = candidatos.filter((c) => c.noVoto >= 20).length;

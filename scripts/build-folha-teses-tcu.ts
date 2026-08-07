@@ -43,12 +43,23 @@ async function main() {
   });
   console.log(`destilações atuais no banco: ${destilacoes.length}`);
 
+  // Filtra ANTES de montar dossiê: `coletarTrechosDoAlvo` baixa o inteiro teor
+  // de cada citante, e os casos fortes têm centenas deles.
+  const contagens = await prisma.$queryRaw<Array<{ numero: number; ano: number; no_voto: number }>>`
+    SELECT "numeroAlvo" AS numero, "anoAlvo" AS ano,
+           count(DISTINCT "origemId") FILTER (WHERE "noVoto")::int AS no_voto
+    FROM "AcordaoCitacao"
+    GROUP BY 1, 2
+    HAVING count(DISTINCT "origemId") FILTER (WHERE "noVoto") >= ${minNoVoto}`;
+  const acimaDoLimiar = new Set(contagens.map((c) => `${c.numero}/${c.ano}`));
+  const selecionadas = destilacoes.filter((d) => acimaDoLimiar.has(`${d.numeroAlvo}/${d.anoAlvo}`));
+  console.log(`acima de ${minNoVoto} citações no voto: ${selecionadas.length}`);
+
   const cards: Array<CasoCard & { _ordem: number }> = [];
   let semTrechos = 0;
 
-  for (const d of destilacoes) {
+  for (const d of selecionadas) {
     const dossie = await coletarTrechosDoAlvo({ numero: d.numeroAlvo, ano: d.anoAlvo });
-    if (dossie.contagem.noVoto < minNoVoto) continue;
 
     // O dossiê recomposto só é intercambiável com o original se tiver o mesmo
     // tamanho — mesmo tamanho não prova mesma ordem, mas tamanho diferente
