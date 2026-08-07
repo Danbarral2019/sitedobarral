@@ -101,11 +101,20 @@ async function main() {
 
   // O sinal mais forte de leading case primeiro: citações na razão de decidir.
   cards.sort((a, b) => b._ordem - a._ordem);
+
+  // O inteiro teor de alguns acórdãos chega do TCU com bytes mal decodificados,
+  // que sobrevivem como U+FFFD ("Exp<?>e" no lugar de "Expõe"). São poucos, mas
+  // o publicador de artifacts rejeita a página inteira por causa deles. Trocar
+  // por "?" preserva o resto da citação literal e deixa a lacuna visível — não
+  // adivinhamos a letra que faltou dentro de um texto que é prova.
+  const serializado = JSON.stringify(cards);
+  const corrompidos = (serializado.match(/�/g) ?? []).length;
+  const limpos = JSON.parse(serializado.replace(/�/g, '?')) as typeof cards;
   const semTese = cards.filter((c) => c.teses.length === 0).length;
   const enunciados = cards.reduce((s, c) => s + c.teses.length, 0);
 
   const html = renderFolha({
-    cards: cards.map(({ _ordem, ...c }) => c),
+    cards: limpos.map(({ _ordem, ...c }) => c),
     geradoEm: new Date().toISOString().slice(0, 10),
     eyebrow: `Rede de precedentes · onda A-W2 · ${cards.length} leading cases (>=${minNoVoto} no voto)`,
     notaRodape: semTrechos
@@ -118,6 +127,7 @@ async function main() {
 
   console.log(`\ncards: ${cards.length}  ·  enunciados: ${enunciados}  ·  sem tese: ${semTese}`);
   console.log(`sem trechos-fonte confiáveis: ${semTrechos}`);
+  console.log(`caracteres corrompidos no inteiro teor de origem, trocados por "?": ${corrompidos}`);
   console.log(`OK — ${out} (${(html.length / 1024).toFixed(0)} KB)`);
 }
 
