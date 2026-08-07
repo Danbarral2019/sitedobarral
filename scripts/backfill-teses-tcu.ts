@@ -98,8 +98,13 @@ async function main() {
     );
     return;
   }
-  const faixaA = candidatos.filter((c) => c.noVoto >= 20).length;
-  console.log(`  faixa A (>=20 no voto): ${faixaA}  ·  faixa B (10-19): ${candidatos.length - faixaA}`);
+  // Mesmas faixas de status-campanha-tcu.ts, para os dois relatórios casarem.
+  const naFaixa = (min: number, max: number) =>
+    candidatos.filter((c) => c.noVoto >= min && c.noVoto <= max).length;
+  console.log(
+    `  faixa A (>=20): ${naFaixa(20, Infinity)}  ·  B (10-19): ${naFaixa(10, 19)}  ·  ` +
+      `C (5-9): ${naFaixa(5, 9)}  ·  abaixo de 5: ${naFaixa(0, 4)}`
+  );
   console.log(`  primeiro: ${candidatos[0].chave} (${candidatos[0].noVoto} no voto)`);
   console.log(`  último:   ${candidatos.at(-1)!.chave} (${candidatos.at(-1)!.noVoto} no voto)\n`);
 
