@@ -32,9 +32,10 @@ export interface Candidato {
 export function ehElegivel(
   noVotoAtual: number,
   versaoAtual: { dossieNoVoto: number; criadoEm: Date } | null,
-  agora: Date
+  agora: Date,
+  minNoVoto: number = MIN_NO_VOTO
 ): boolean {
-  if (versaoAtual === null) return noVotoAtual >= MIN_NO_VOTO;
+  if (versaoAtual === null) return noVotoAtual >= minNoVoto;
   const cresceu = noVotoAtual >= versaoAtual.dossieNoVoto * FATOR_CRESCIMENTO;
   const dias = (agora.getTime() - versaoAtual.criadoEm.getTime()) / (24 * 60 * 60 * 1000);
   return cresceu && dias > DIAS_MINIMOS;
@@ -43,8 +44,16 @@ export function ehElegivel(
 /**
  * Candidatos à destilação. A contagem de citantes-no-voto vem do grafo
  * (`AcordaoCitacao`), que é a fonte da verdade da Fase 1.
+ *
+ * `minNoVoto` acima do padrão restringe a onda às faixas mais fortes — o
+ * backfill da A-W2 destila primeiro os casos com ≥10 citações no voto e deixa a
+ * cauda para depois. O limiar vai ao `HAVING`, não a um filtro em memória:
+ * o grafo tem dezenas de milhares de alvos e quase todos ficariam de fora.
  */
-export async function selecionarElegiveis(limite: number): Promise<Candidato[]> {
+export async function selecionarElegiveis(
+  limite: number,
+  minNoVoto: number = MIN_NO_VOTO
+): Promise<Candidato[]> {
   const agora = new Date();
 
   const alvos = await prisma.$queryRaw<Array<{ numero: number; ano: number; no_voto: number }>>`
@@ -52,7 +61,7 @@ export async function selecionarElegiveis(limite: number): Promise<Candidato[]> 
            count(DISTINCT "origemId") FILTER (WHERE "noVoto")::int AS no_voto
     FROM "AcordaoCitacao"
     GROUP BY 1, 2
-    HAVING count(DISTINCT "origemId") FILTER (WHERE "noVoto") >= ${MIN_NO_VOTO}
+    HAVING count(DISTINCT "origemId") FILTER (WHERE "noVoto") >= ${minNoVoto}
     ORDER BY no_voto DESC`;
 
   const atuais = await prisma.teseDestilacao.findMany({
@@ -68,7 +77,7 @@ export async function selecionarElegiveis(limite: number): Promise<Candidato[]> 
     const atual = porChave.get(chave) ?? null;
     // Versão de motor antiga força redestilação, independente do crescimento.
     const motorDesatualizado = atual !== null && atual.versaoMotor < VERSAO_MOTOR;
-    if (motorDesatualizado || ehElegivel(alvo.no_voto, atual, agora)) {
+    if (motorDesatualizado || ehElegivel(alvo.no_voto, atual, agora, minNoVoto)) {
       out.push({ numero: alvo.numero, ano: alvo.ano, chave, noVoto: alvo.no_voto });
     }
   }
