@@ -17,6 +17,11 @@
  * Uso:
  *   npx dotenv-cli -e .env.local -- npx tsx scripts/build-folha-teses-tcu.ts
  *   npx dotenv-cli -e .env.local -- npx tsx scripts/build-folha-teses-tcu.ts --min-no-voto=10 --out=/tmp/folha.html
+ *   npx dotenv-cli -e .env.local -- npx tsx scripts/build-folha-teses-tcu.ts --min-no-voto=5 --amostra=45 --seed=20260810
+ *
+ * `--amostra=N` gera uma folha de calibração amostral em vez do acervo inteiro:
+ * sorteia N casos para medir a taxa de acerto do motor sem julgar tudo. O
+ * sorteio é determinístico (`--seed`), então a mesma folha pode ser regerada.
  */
 import { writeFileSync, mkdirSync } from 'fs';
 import { dirname } from 'path';
@@ -30,8 +35,36 @@ function flag(nome: string): string | undefined {
   return process.argv.find((a) => a.startsWith(`--${nome}=`))?.split('=')[1];
 }
 
+/**
+ * PRNG determinístico (mulberry32). `Math.random` serviria para sortear, mas
+ * não para REGERAR a mesma amostra: o veredito do Daniel vale por caso julgado,
+ * e uma folha que não pode ser reproduzida a partir da semente vira evidência
+ * sem procedência.
+ */
+function prng(seed: number): () => number {
+  let a = seed >>> 0;
+  return () => {
+    a = (a + 0x6d2b79f5) >>> 0;
+    let t = Math.imul(a ^ (a >>> 15), 1 | a);
+    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+}
+
+/** Fisher-Yates com o PRNG semeado — embaralha uma cópia, não a lista de origem. */
+function embaralhar<T>(itens: T[], rand: () => number): T[] {
+  const out = itens.slice();
+  for (let i = out.length - 1; i > 0; i--) {
+    const j = Math.floor(rand() * (i + 1));
+    [out[i], out[j]] = [out[j], out[i]];
+  }
+  return out;
+}
+
 async function main() {
   const minNoVoto = Number(flag('min-no-voto') ?? 10);
+  const amostra = flag('amostra') ? Number(flag('amostra')) : null;
+  const seed = Number(flag('seed') ?? 20260810);
   const out = flag('out') ?? OUT_PADRAO;
 
   const destilacoes = await prisma.teseDestilacao.findMany({
@@ -55,10 +88,23 @@ async function main() {
   const selecionadas = destilacoes.filter((d) => acimaDoLimiar.has(`${d.numeroAlvo}/${d.anoAlvo}`));
   console.log(`acima de ${minNoVoto} citações no voto: ${selecionadas.length}`);
 
+  // Na folha amostral, o universo do sorteio exclui as destilações em que o
+  // motor se calou (`teses: []`): elas são um resultado a auditar em separado,
+  // mas não têm enunciado para o julgador marcar fiel/imprecisa/errada — entrar
+  // no sorteio só consumiria vaga da amostra.
+  const universo = amostra ? selecionadas.filter((d) => d.enunciados.length > 0) : selecionadas;
+  const ordemVisita = amostra ? embaralhar(universo, prng(seed)) : universo;
+  if (amostra) {
+    console.log(`universo do sorteio (com ao menos uma tese): ${universo.length}`);
+    console.log(`sorteando ${amostra} · seed ${seed}`);
+  }
+
   const cards: Array<CasoCard & { _ordem: number }> = [];
   let semTrechos = 0;
+  let puladosSemTrechos = 0;
 
-  for (const d of selecionadas) {
+  for (const d of ordemVisita) {
+    if (amostra !== null && cards.length >= amostra) break;
     const dossie = await coletarTrechosDoAlvo({ numero: d.numeroAlvo, ano: d.anoAlvo });
 
     // O dossiê recomposto só é intercambiável com o original se tiver o mesmo
@@ -66,6 +112,15 @@ async function main() {
     // prova que os índices se deslocaram.
     const trechosConfiaveis = dossie.trechos.length === d.dossieTrechos;
     if (!trechosConfiaveis) semTrechos++;
+
+    // Numa folha amostral o card sem trechos-fonte é inútil: o pedido é julgar a
+    // tese CONTRA a prova literal, e sem ela não há julgamento — só opinião.
+    // Pula e segue sorteando. Isso enviesa a amostra para casos de dossiê
+    // estável, então o total pulado é reportado, não escondido.
+    if (amostra !== null && !trechosConfiaveis) {
+      puladosSemTrechos++;
+      continue;
+    }
 
     const resolve = (indices: unknown) =>
       (Array.isArray(indices) ? (indices as number[]) : [])
@@ -113,13 +168,27 @@ async function main() {
   const semTese = cards.filter((c) => c.teses.length === 0).length;
   const enunciados = cards.reduce((s, c) => s + c.teses.length, 0);
 
+  const eyebrow = amostra
+    ? `Rede de precedentes · amostra aleatória de ${cards.length} de ${universo.length} leading cases destilados (>=${minNoVoto} no voto) · seed ${seed}`
+    : `Rede de precedentes · onda A-W2 · ${cards.length} leading cases (>=${minNoVoto} no voto)`;
+
+  const notas = [
+    amostra && puladosSemTrechos
+      ? `${puladosSemTrechos} caso(s) sorteado(s) foram descartados por terem o dossiê alterado após a destilação (sem trechos-fonte confiáveis) e substituídos pelo próximo do sorteio.`
+      : '',
+    amostra
+      ? `Amostra determinística: seed ${seed} sobre as ${universo.length} destilações vigentes com ao menos uma tese. Regerar com --amostra=${amostra} --seed=${seed} --min-no-voto=${minNoVoto} reproduz exatamente estes cards.`
+      : '',
+    !amostra && semTrechos
+      ? `${semTrechos} caso(s) tiveram o dossiê alterado após a destilação e aparecem sem trechos-fonte.`
+      : '',
+  ].filter(Boolean);
+
   const html = renderFolha({
     cards: limpos.map(({ _ordem, ...c }) => c),
     geradoEm: new Date().toISOString().slice(0, 10),
-    eyebrow: `Rede de precedentes · onda A-W2 · ${cards.length} leading cases (>=${minNoVoto} no voto)`,
-    notaRodape: semTrechos
-      ? `${semTrechos} caso(s) tiveram o dossiê alterado após a destilação e aparecem sem trechos-fonte.`
-      : '',
+    eyebrow,
+    notaRodape: notas.join(' '),
   });
 
   mkdirSync(dirname(out), { recursive: true });
@@ -127,6 +196,13 @@ async function main() {
 
   console.log(`\ncards: ${cards.length}  ·  enunciados: ${enunciados}  ·  sem tese: ${semTese}`);
   console.log(`sem trechos-fonte confiáveis: ${semTrechos}`);
+  if (amostra !== null) {
+    console.log(`sorteados e descartados por dossiê alterado: ${puladosSemTrechos}`);
+    if (cards.length < amostra) {
+      console.log(`⚠️ amostra INCOMPLETA: pedidos ${amostra}, obtidos ${cards.length} — o universo se esgotou.`);
+    }
+    console.log(`casos: ${cards.map((c) => c.chave).join(', ')}`);
+  }
   console.log(`caracteres corrompidos no inteiro teor de origem, trocados por "?": ${corrompidos}`);
   console.log(`OK — ${out} (${(html.length / 1024).toFixed(0)} KB)`);
 }
