@@ -52,7 +52,8 @@ export function ehElegivel(
  */
 export async function selecionarElegiveis(
   limite: number,
-  minNoVoto: number = MIN_NO_VOTO
+  minNoVoto: number = MIN_NO_VOTO,
+  opcoes: { temas?: readonly string[] } = {}
 ): Promise<Candidato[]> {
   const agora = new Date();
 
@@ -70,10 +71,26 @@ export async function selecionarElegiveis(
   });
   const porChave = new Map(atuais.map((a) => [`${a.numeroAlvo}/${a.anoAlvo}`, a]));
 
+  // Recorte por matéria (`AcordaoTema`): destilar por volume de citação sozinho
+  // enche a base de pessoal, que é a matéria que mais reincide. Quem ainda não
+  // tem tema fica de fora deste recorte — classificar antes é barato, destilar
+  // à toa não é.
+  const noTema = opcoes.temas
+    ? new Set(
+        (
+          await prisma.acordaoTema.findMany({
+            where: { tema: { in: [...opcoes.temas] } },
+            select: { chave: true },
+          })
+        ).map((t) => t.chave)
+      )
+    : null;
+
   const out: Candidato[] = [];
   for (const alvo of alvos) {
     if (out.length >= limite) break;
     const chave = `${alvo.numero}/${alvo.ano}`;
+    if (noTema && !noTema.has(chave)) continue;
     const atual = porChave.get(chave) ?? null;
     // Versão de motor antiga força redestilação, independente do crescimento.
     const motorDesatualizado = atual !== null && atual.versaoMotor < VERSAO_MOTOR;

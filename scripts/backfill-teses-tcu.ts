@@ -82,13 +82,23 @@ async function main() {
   const limite = flagNumero('limite', 10_000);
   const dryRun = process.argv.includes('--dry-run');
   const realinhar = process.argv.includes('--realinhar');
+  // `--tema=licitacoes-contratos,obras-engenharia` destila por MATÉRIA em vez de
+  // por volume de citação. Exige AcordaoTema populado
+  // (scripts/classificar-temas-acordaos-tcu.ts).
+  const temas = process.argv
+    .find((a) => a.startsWith('--tema='))
+    ?.split('=')[1]
+    .split(',')
+    .map((t) => t.trim())
+    .filter(Boolean);
 
   const candidatos = realinhar
     ? await selecionarDesalinhados(limite, minNoVoto)
-    : await selecionarElegiveis(limite, minNoVoto);
+    : await selecionarElegiveis(limite, minNoVoto, { temas });
 
   console.log(`=== BACKFILL DE TESES DO TCU (onda A-W2)${realinhar ? ' — MODO REALINHAMENTO' : ''} ===`);
   console.log(`  limiar:      >= ${minNoVoto} citações no voto`);
+  if (temas) console.log(`  matéria:     ${temas.join(', ')}`);
   console.log(`  candidatos:  ${candidatos.length}${dryRun ? '  (DRY-RUN — nada será destilado)' : ''}`);
   if (candidatos.length === 0) {
     console.log(

@@ -23,14 +23,13 @@
  * sorteia N casos para medir a taxa de acerto do motor sem julgar tudo. O
  * sorteio é determinístico (`--seed`), então a mesma folha pode ser regerada.
  */
-import { writeFileSync, mkdirSync, readFileSync, existsSync } from 'fs';
+import { writeFileSync, mkdirSync } from 'fs';
 import { dirname } from 'path';
 import { prisma } from '../lib/prisma';
 import { coletarTrechosDoAlvo } from '../lib/tcu/trechos-de-citacao';
 import { renderFolha, type CasoCard } from './lib/folha-teses-template.mjs';
 
 const OUT_PADRAO = 'docs/audits/folha-teses-tcu.html';
-const ARQ_TEMAS = 'docs/audits/temas-teses-tcu.json';
 
 function flag(nome: string): string | undefined {
   return process.argv.find((a) => a.startsWith(`--${nome}=`))?.split('=')[1];
@@ -68,15 +67,14 @@ async function main() {
   const seed = Number(flag('seed') ?? 20260810);
   const out = flag('out') ?? OUT_PADRAO;
   // Folha por matéria: julgar 68 teses de aposentadoria e licitação embaralhadas
-  // cansa o julgador à toa. `--tema` recorta pelo mapa de
-  // scripts/classificar-temas-teses-tcu.ts; `--casos` aceita chaves na mão.
+  // cansa o julgador à toa. `--tema` recorta pela tabela `AcordaoTema`;
+  // `--casos` restringe a chaves na mão; `--mais-casos` ACRESCENTA chaves ao
+  // recorte temático (é assim que entram os fronteiriços — inidoneidade,
+  // leniência — que a taxonomia manda para responsabilização mas que são
+  // matéria de licitação para quem julga).
   const temas = flag('tema')?.split(',').map((t) => t.trim()).filter(Boolean) ?? null;
   const casosExplicitos = flag('casos')?.split(',').map((c) => c.trim()).filter(Boolean) ?? null;
-  const mapaTemas: Record<string, { tema: string; subtema: string }> =
-    temas && existsSync(ARQ_TEMAS) ? JSON.parse(readFileSync(ARQ_TEMAS, 'utf-8')) : {};
-  if (temas && !existsSync(ARQ_TEMAS)) {
-    throw new Error(`--tema exige ${ARQ_TEMAS}; rode scripts/classificar-temas-teses-tcu.ts antes.`);
-  }
+  const maisCasos = flag('mais-casos')?.split(',').map((c) => c.trim()).filter(Boolean) ?? null;
 
   const destilacoes = await prisma.teseDestilacao.findMany({
     where: { atual: true },
@@ -100,12 +98,28 @@ async function main() {
   console.log(`acima de ${minNoVoto} citações no voto: ${selecionadas.length}`);
 
   if (temas) {
+    const classificados = await prisma.acordaoTema.findMany({
+      where: { chave: { in: selecionadas.map((d) => d.chave) } },
+      select: { chave: true, tema: true },
+    });
+    const temaPorChave = new Map(classificados.map((c) => [c.chave, c.tema]));
+    const extras = new Set(maisCasos ?? []);
+
     // Caso destilado depois da última classificação não tem tema e ficaria fora
     // em silêncio — avisa, porque some da folha sem aparecer em lugar nenhum.
-    const semTema = selecionadas.filter((d) => !mapaTemas[d.chave]).map((d) => d.chave);
+    const semTema = selecionadas.filter((d) => !temaPorChave.has(d.chave)).map((d) => d.chave);
     if (semTema.length) console.log(`⚠️ sem tema atribuído (fora do recorte): ${semTema.join(', ')}`);
-    selecionadas = selecionadas.filter((d) => temas.includes(mapaTemas[d.chave]?.tema));
-    console.log(`no(s) tema(s) ${temas.join(', ')}: ${selecionadas.length}`);
+
+    selecionadas = selecionadas.filter(
+      (d) => temas.includes(temaPorChave.get(d.chave) ?? '') || extras.has(d.chave)
+    );
+    console.log(`no(s) tema(s) ${temas.join(', ')}${extras.size ? ` + ${extras.size} caso(s) avulso(s)` : ''}: ${selecionadas.length}`);
+
+    if (maisCasos) {
+      const presentes = new Set(selecionadas.map((d) => d.chave));
+      const ausentes = maisCasos.filter((c) => !presentes.has(c));
+      if (ausentes.length) console.log(`⚠️ --mais-casos sem destilação vigente acima do limiar: ${ausentes.join(', ')}`);
+    }
   }
   if (casosExplicitos) {
     const achados = new Set(selecionadas.map((d) => d.chave));

@@ -5,6 +5,13 @@
  *
  * Lote pequeno de propósito: cada destilação é uma chamada de LLM, e o
  * comportamento em regime ainda não foi observado.
+ *
+ * FILTRO POR MATÉRIA (11/08/2026): o candidato só é destilado se o tema estiver
+ * na base do site (lib/tcu/tema-acordao.ts). O limiar de citação no voto, usado
+ * sozinho, seleciona matéria repetitiva — 95 das 177 primeiras destilações
+ * saíram de pessoal, que não é a matéria da ferramenta. A classificação usa a
+ * ementa que este mesmo fluxo já busca no TCU, então custa uma chamada curta e
+ * economiza a destilação inteira quando a matéria não interessa.
  */
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
@@ -14,11 +21,18 @@ import { selecionarElegiveis, persistirDestilacao } from '@/lib/tcu/persistir-te
 import { coletarTrechosDoAlvo } from '@/lib/tcu/trechos-de-citacao';
 import { montarPromptTese, parseRespostaTese } from '@/lib/tcu/destilar-tese';
 import { buscarAcordaoPorNumero, escolherCandidato } from '@/lib/tcu/buscar-acordao-tcu';
+import { garantirTemaDeAlvo, naBase } from '@/lib/tcu/tema-acordao';
 import { generate } from '@/lib/ai';
 
 export const maxDuration = 300;
 
 const LOTE = 5;
+/**
+ * A seleção traz mais candidatos do que o lote porque a maioria será descartada
+ * por matéria (pessoal domina o topo do ranking de citações). Sem essa folga o
+ * cron destilaria zero caso por dia e a base pararia de crescer em silêncio.
+ */
+const CANDIDATOS_POR_RODADA = LOTE * 8;
 const TIME_BUDGET_MS = 240_000;
 const dorme = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
@@ -30,19 +44,34 @@ export async function GET(request: NextRequest) {
 
   await withCronTelemetry('destilar-teses-tcu', async () => {
     const inicio = Date.now();
-    const candidatos = await selecionarElegiveis(LOTE);
+    const candidatos = await selecionarElegiveis(CANDIDATOS_POR_RODADA);
 
     let ok = 0, semTese = 0, erros = 0, herdadosTotal = 0;
+    let foraDaBase = 0, semTema = 0;
     const processados: string[] = [];
 
     for (const c of candidatos) {
       if (Date.now() - inicio > TIME_BUDGET_MS) break;
+      if (ok + semTese >= LOTE) break;
       try {
-        const dossie = await coletarTrechosDoAlvo({ numero: c.numero, ano: c.ano });
-
         const cands = await buscarAcordaoPorNumero(c.numero, c.ano);
         await dorme(1000); // rate limit de 1 req/s contra o TCU
         const proprio = escolherCandidato(cands);
+
+        // Antes de gastar a destilação: a matéria interessa à base?
+        const tema = await garantirTemaDeAlvo(c, proprio?.ementa ?? null);
+        if (tema === null) {
+          // Sem ementa não há como decidir a matéria. Não destila — deixar
+          // passar seria voltar a encher a base do que o Daniel tirou dela.
+          semTema++;
+          continue;
+        }
+        if (!naBase(tema)) {
+          foraDaBase++;
+          continue;
+        }
+
+        const dossie = await coletarTrechosDoAlvo({ numero: c.numero, ano: c.ano });
 
         const { systemPrompt, userContent } = montarPromptTese({
           chave: c.chave,
@@ -74,13 +103,19 @@ export async function GET(request: NextRequest) {
     }
 
     const restam = await prisma.teseDestilacao.count({ where: { atual: true } });
-    corpo = { candidatos: candidatos.length, ok, semTese, erros, herdadosTotal, processados, totalComTeseAtual: restam };
+    corpo = {
+      candidatos: candidatos.length,
+      ok, semTese, erros, herdadosTotal, foraDaBase, semTema, processados,
+      totalComTeseAtual: restam,
+    };
 
     return {
       itemsFound: candidatos.length,
       itemsNew: ok,
       itemsError: erros,
-      metadata: { semTese, herdadosTotal, totalComTeseAtual: restam },
+      // `foraDaBase`/`semTema` na telemetria: se um dia o cron parar de produzir,
+      // é aqui que se vê se acabou o material ou se o filtro está barrando tudo.
+      metadata: { semTese, herdadosTotal, foraDaBase, semTema, totalComTeseAtual: restam },
     };
   });
 
