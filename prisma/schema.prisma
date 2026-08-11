@@ -2146,3 +2146,36 @@ model TeseDivergencia {
 
   @@index([destilacaoId])
 }
+
+/// Bloco temático de um acórdão-ALVO do grafo de precedentes (não da
+/// destilação): é o que permite decidir ANTES de gastar uma destilação se a
+/// matéria interessa à base do site. Sem isso o limiar de citação no voto
+/// seleciona sozinho, e ele privilegia matéria repetitiva — pessoal domina
+/// porque a mesma tese reincide em milhares de atos de aposentadoria.
+///
+/// Um alvo pode nem ter Document ingerido (só existe como destino de citação);
+/// por isso a chave é (numeroAlvo, anoAlvo) e não um documentId.
+model AcordaoTema {
+  id         String @id @default(cuid())
+  numeroAlvo Int
+  anoAlvo    Int
+  chave      String
+
+  /// Bloco em lib/tcu/tema-acordao.ts. Fora dessa lista o valor é inválido.
+  tema    String
+  subtema String
+  /// Caberia de forma defensável em outro bloco — útil para revisar a fronteira
+  /// entre licitação e responsabilização, que é onde a classificação erra.
+  fronteirico Boolean @default(false)
+  /// 'area-oficial' (mapeado de DocumentMetaTcu.area, que vem do TCU) ou 'llm'.
+  /// A procedência importa: o que veio do TCU não deve ser sobrescrito por
+  /// palpite de modelo numa reclassificação futura.
+  fonte     String
+  /// Texto que o classificador leu, para auditar uma classificação estranha.
+  insumo    String? @db.Text
+  criadoEm  DateTime @default(now())
+
+  @@unique([numeroAlvo, anoAlvo])
+  @@index([tema])
+  @@index([chave])
+}

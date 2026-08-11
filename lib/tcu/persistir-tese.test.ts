@@ -315,4 +315,44 @@ describe('selecionarElegiveis', () => {
 
     expect(out).toHaveLength(0);
   });
+
+  // A onda A-W2 destila primeiro as faixas mais fortes (>=10 no voto). O limiar
+  // precisa viajar ate o SQL: filtrar so em memoria traria o acervo inteiro do
+  // grafo para descartar a maior parte dele.
+  it('repassa o limiar recebido para o HAVING da consulta ao grafo', async () => {
+    mockQueryRaw.mockResolvedValue([]);
+    mockFindMany.mockResolvedValue([]);
+
+    await selecionarElegiveis(500, 10);
+
+    expect(mockQueryRaw.mock.calls[0][1]).toBe(10);
+  });
+
+  it('usa MIN_NO_VOTO quando o limiar nao e informado — o cron diario nao muda', async () => {
+    mockQueryRaw.mockResolvedValue([]);
+    mockFindMany.mockResolvedValue([]);
+
+    await selecionarElegiveis(5);
+
+    expect(mockQueryRaw.mock.calls[0][1]).toBe(MIN_NO_VOTO);
+  });
+
+  it('nao destila caso abaixo do limiar elevado que o SQL por engano devolveu', async () => {
+    mockQueryRaw.mockResolvedValue([
+      { numero: 1, ano: 2026, no_voto: 12 },
+      { numero: 2, ano: 2026, no_voto: 7 },
+    ]);
+    mockFindMany.mockResolvedValue([]);
+
+    const out = await selecionarElegiveis(10, 10);
+
+    expect(out.map((c) => c.numero)).toEqual([1]);
+  });
+});
+
+describe('ehElegivel — limiar informado pelo chamador', () => {
+  it('NAO entra com 9 quando o limiar e 10', () => expect(ehElegivel(9, null, agora, 10)).toBe(false));
+  it('entra com exatamente 10 quando o limiar e 10', () => expect(ehElegivel(10, null, agora, 10)).toBe(true));
+  it('o limiar elevado nao afeta a regra de redestilacao', () =>
+    expect(ehElegivel(15, { dossieNoVoto: 10, criadoEm: diasAtras(8) }, agora, 10)).toBe(true));
 });
