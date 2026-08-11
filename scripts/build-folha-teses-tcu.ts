@@ -23,13 +23,14 @@
  * sorteia N casos para medir a taxa de acerto do motor sem julgar tudo. O
  * sorteio é determinístico (`--seed`), então a mesma folha pode ser regerada.
  */
-import { writeFileSync, mkdirSync } from 'fs';
+import { writeFileSync, mkdirSync, readFileSync, existsSync } from 'fs';
 import { dirname } from 'path';
 import { prisma } from '../lib/prisma';
 import { coletarTrechosDoAlvo } from '../lib/tcu/trechos-de-citacao';
 import { renderFolha, type CasoCard } from './lib/folha-teses-template.mjs';
 
 const OUT_PADRAO = 'docs/audits/folha-teses-tcu.html';
+const ARQ_TEMAS = 'docs/audits/temas-teses-tcu.json';
 
 function flag(nome: string): string | undefined {
   return process.argv.find((a) => a.startsWith(`--${nome}=`))?.split('=')[1];
@@ -66,6 +67,16 @@ async function main() {
   const amostra = flag('amostra') ? Number(flag('amostra')) : null;
   const seed = Number(flag('seed') ?? 20260810);
   const out = flag('out') ?? OUT_PADRAO;
+  // Folha por matéria: julgar 68 teses de aposentadoria e licitação embaralhadas
+  // cansa o julgador à toa. `--tema` recorta pelo mapa de
+  // scripts/classificar-temas-teses-tcu.ts; `--casos` aceita chaves na mão.
+  const temas = flag('tema')?.split(',').map((t) => t.trim()).filter(Boolean) ?? null;
+  const casosExplicitos = flag('casos')?.split(',').map((c) => c.trim()).filter(Boolean) ?? null;
+  const mapaTemas: Record<string, { tema: string; subtema: string }> =
+    temas && existsSync(ARQ_TEMAS) ? JSON.parse(readFileSync(ARQ_TEMAS, 'utf-8')) : {};
+  if (temas && !existsSync(ARQ_TEMAS)) {
+    throw new Error(`--tema exige ${ARQ_TEMAS}; rode scripts/classificar-temas-teses-tcu.ts antes.`);
+  }
 
   const destilacoes = await prisma.teseDestilacao.findMany({
     where: { atual: true },
@@ -85,8 +96,24 @@ async function main() {
     GROUP BY 1, 2
     HAVING count(DISTINCT "origemId") FILTER (WHERE "noVoto") >= ${minNoVoto}`;
   const acimaDoLimiar = new Set(contagens.map((c) => `${c.numero}/${c.ano}`));
-  const selecionadas = destilacoes.filter((d) => acimaDoLimiar.has(`${d.numeroAlvo}/${d.anoAlvo}`));
+  let selecionadas = destilacoes.filter((d) => acimaDoLimiar.has(`${d.numeroAlvo}/${d.anoAlvo}`));
   console.log(`acima de ${minNoVoto} citações no voto: ${selecionadas.length}`);
+
+  if (temas) {
+    // Caso destilado depois da última classificação não tem tema e ficaria fora
+    // em silêncio — avisa, porque some da folha sem aparecer em lugar nenhum.
+    const semTema = selecionadas.filter((d) => !mapaTemas[d.chave]).map((d) => d.chave);
+    if (semTema.length) console.log(`⚠️ sem tema atribuído (fora do recorte): ${semTema.join(', ')}`);
+    selecionadas = selecionadas.filter((d) => temas.includes(mapaTemas[d.chave]?.tema));
+    console.log(`no(s) tema(s) ${temas.join(', ')}: ${selecionadas.length}`);
+  }
+  if (casosExplicitos) {
+    const achados = new Set(selecionadas.map((d) => d.chave));
+    const ausentes = casosExplicitos.filter((c) => !achados.has(c));
+    if (ausentes.length) console.log(`⚠️ --casos sem destilação vigente acima do limiar: ${ausentes.join(', ')}`);
+    selecionadas = selecionadas.filter((d) => casosExplicitos.includes(d.chave));
+    console.log(`após --casos: ${selecionadas.length}`);
+  }
 
   // Na folha amostral, o universo do sorteio exclui as destilações em que o
   // motor se calou (`teses: []`): elas são um resultado a auditar em separado,
@@ -168,9 +195,10 @@ async function main() {
   const semTese = cards.filter((c) => c.teses.length === 0).length;
   const enunciados = cards.reduce((s, c) => s + c.teses.length, 0);
 
+  const rotuloTema = temas ? `${temas.join(' + ')} · ` : '';
   const eyebrow = amostra
-    ? `Rede de precedentes · amostra aleatória de ${cards.length} de ${universo.length} leading cases destilados (>=${minNoVoto} no voto) · seed ${seed}`
-    : `Rede de precedentes · onda A-W2 · ${cards.length} leading cases (>=${minNoVoto} no voto)`;
+    ? `Rede de precedentes · ${rotuloTema}amostra aleatória de ${cards.length} de ${universo.length} leading cases destilados (>=${minNoVoto} no voto) · seed ${seed}`
+    : `Rede de precedentes · ${rotuloTema}${cards.length} leading cases (>=${minNoVoto} no voto)`;
 
   const notas = [
     amostra && puladosSemTrechos
