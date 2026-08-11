@@ -52,11 +52,29 @@ function flagNumero(nome: string, padrao: number): number {
  * Redestilar é seguro: `persistirDestilacao` versiona e `carregarVeredito`
  * transporta o julgamento do Daniel para todo enunciado de texto idêntico.
  */
-async function selecionarDesalinhados(limite: number, minNoVoto: number): Promise<Candidato[]> {
-  const atuais = await prisma.teseDestilacao.findMany({
-    where: { atual: true },
-    select: { numeroAlvo: true, anoAlvo: true, chave: true, dossieTrechos: true },
-  });
+async function selecionarDesalinhados(
+  limite: number,
+  minNoVoto: number,
+  temas?: readonly string[],
+  casos?: readonly string[]
+): Promise<Candidato[]> {
+  // O recorte por matéria vale também aqui: realinhar é redestilar, e redestilar
+  // o que saiu da base é pagar duas vezes por algo que não vai aparecer.
+  const chavesNoTema = temas
+    ? new Set(
+        (await prisma.acordaoTema.findMany({ where: { tema: { in: [...temas] } }, select: { chave: true } }))
+          .map((t) => t.chave)
+      )
+    : null;
+
+  const atuais = (
+    await prisma.teseDestilacao.findMany({
+      where: { atual: true },
+      select: { numeroAlvo: true, anoAlvo: true, chave: true, dossieTrechos: true },
+    })
+  ).filter(
+    (a) => (!chavesNoTema || chavesNoTema.has(a.chave)) && (!casos?.length || casos.includes(a.chave))
+  );
   const contagens = await prisma.$queryRaw<Array<{ numero: number; ano: number; no_voto: number }>>`
     SELECT "numeroAlvo" AS numero, "anoAlvo" AS ano,
            count(DISTINCT "origemId") FILTER (WHERE "noVoto")::int AS no_voto
@@ -92,8 +110,17 @@ async function main() {
     .map((t) => t.trim())
     .filter(Boolean);
 
+  // `--casos` só faz sentido no realinhamento: fora dele, a seleção já é por
+  // elegibilidade e uma lista na mão contornaria as regras de versionamento.
+  const casos = process.argv
+    .find((a) => a.startsWith('--casos='))
+    ?.split('=')[1]
+    .split(',')
+    .map((c) => c.trim())
+    .filter(Boolean);
+
   const candidatos = realinhar
-    ? await selecionarDesalinhados(limite, minNoVoto)
+    ? await selecionarDesalinhados(limite, minNoVoto, temas, casos)
     : await selecionarElegiveis(limite, minNoVoto, { temas });
 
   console.log(`=== BACKFILL DE TESES DO TCU (onda A-W2)${realinhar ? ' — MODO REALINHAMENTO' : ''} ===`);
