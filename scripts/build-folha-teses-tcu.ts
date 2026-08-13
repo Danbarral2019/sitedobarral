@@ -80,7 +80,9 @@ async function main() {
     where: { atual: true },
     include: {
       enunciados: { orderBy: { ordem: 'asc' } },
-      divergencias: true,
+      // Ordenado: a posição que o card exibe é a chave por onde o veredito
+      // exportado volta para a linha certa em `importar-veredito-teses`.
+      divergencias: { orderBy: { ordem: 'asc' } },
     },
   });
   console.log(`destilações atuais no banco: ${destilacoes.length}`);

@@ -142,10 +142,11 @@ export async function persistirDestilacao(
     };
   });
 
-  const divergencias = (tese.divergencias ?? []).map((d) => {
+  const divergencias = (tese.divergencias ?? []).map((d, i) => {
     const h = carregarVeredito(d.trecho, anterioresDivergencias);
     if (h.veredito !== null) herdados++;
     return {
+      ordem: i,
       origemChave: d.origemChave,
       precedenteApontado: d.precedenteApontado,
       trecho: d.trecho,
