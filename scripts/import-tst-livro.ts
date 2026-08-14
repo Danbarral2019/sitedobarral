@@ -20,6 +20,9 @@
  *   TST_LIVRO_RTF=/caminho/custom.rtf npx tsx scripts/import-tst-livro.ts
  */
 
+import { config } from 'dotenv';
+config({ path: '.env.local' });
+
 import { PrismaClient } from '@prisma/client';
 import { PrismaNeon } from '@prisma/adapter-neon';
 import path from 'node:path';
@@ -53,6 +56,7 @@ const SERIE_FLAG_MAP: Record<string, TstLivroSerie | 'all'> = {
   'sdi2': 'oj-sdi2',
   sdc: 'oj-sdc',
   pn: 'pn',
+  irr: 'irr',
 };
 
 function parseArgs(argv: string[]): Options {
@@ -88,6 +92,7 @@ const SERIE_TO_DECISION_TYPE: Record<TstLivroSerie, string> = {
   'oj-sdi2': 'orientacao_jurisprudencial',
   'oj-sdc': 'orientacao_jurisprudencial',
   pn: 'precedente_normativo',
+  irr: 'incidente_recursos_repetitivos',
 };
 
 const SERIE_TO_FULL_ID_PREFIX: Record<TstLivroSerie, string> = {
@@ -97,6 +102,7 @@ const SERIE_TO_FULL_ID_PREFIX: Record<TstLivroSerie, string> = {
   'oj-sdi1t': 'TST OJ-SBDI-I Transitória',
   'oj-sdi2': 'TST OJ-SBDI-II',
   'oj-sdc': 'TST OJ-SDC',
+  irr: 'TST IRR',
   pn: 'TST Precedente Normativo',
 };
 
@@ -240,12 +246,11 @@ async function upsertBlock(
     scrapeError: null,
   };
 
-  if (options.dryRun) {
-    stats.created++;
-    return;
-  }
-
   try {
+    // O ensaio consulta o banco e nao escreve. Ate 14 de agosto de 2026 ele
+    // saia antes da consulta e contava tudo como criacao, de modo que o
+    // relatorio dizia "1349 criadas" com 1292 ja gravadas: nao servia para
+    // conferir o que mudaria, que e a unica razao de existir do ensaio.
     const existing = await prisma.tribunalDecision.findUnique({
       where: { fullIdentifier },
       select: {
@@ -258,7 +263,7 @@ async function upsertBlock(
     });
 
     if (!existing) {
-      await prisma.tribunalDecision.create({ data });
+      if (!options.dryRun) await prisma.tribunalDecision.create({ data });
       stats.created++;
       return;
     }
@@ -276,6 +281,11 @@ async function upsertBlock(
       existing.url === dataWithUrl.url
     ) {
       stats.unchanged++;
+      return;
+    }
+
+    if (options.dryRun) {
+      stats.updated++;
       return;
     }
 
@@ -314,7 +324,7 @@ async function main() {
   }
   console.log(`📄 RTF: ${path.basename(options.rtfPath)}`);
 
-  console.log('Extraindo texto via textutil...');
+  console.log('Extraindo texto do arquivo de origem...');
   const { rawText } = await extractTstLivroRtf(options.rtfPath);
   console.log(`  rawText: ${rawText.length} chars`);
 
