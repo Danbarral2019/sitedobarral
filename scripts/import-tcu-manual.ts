@@ -15,13 +15,17 @@ import { config } from 'dotenv';
 config({ path: '.env.local' });
 
 import { PrismaClient } from '@prisma/client';
+import { PrismaNeon } from '@prisma/adapter-neon';
 import {
   MANUAL_SECTIONS,
   scrapeManualPage,
   fetchManualUpdateDate,
 } from '../lib/tcu-manual-scraper';
 
-const prisma = new PrismaClient();
+// A versao corrente do Prisma exige adaptador; sem ele o script morria na
+// construcao do cliente, como se apurou em 14 de agosto de 2026.
+const adapter = new PrismaNeon({ connectionString: process.env.DATABASE_URL! });
+const prisma = new PrismaClient({ adapter, log: ['error', 'warn'] });
 
 // Parse CLI args
 const args = process.argv.slice(2);
@@ -88,9 +92,14 @@ async function main() {
         continue;
       }
 
-      const docTitle = `Manual TCU - ${section.sectionNumber} ${section.title}`;
-      const tags = JSON.stringify(['TCU', 'Manual', '5ª Edição', section.sectionNumber]);
-      const leiArticlesJson = JSON.stringify(scraped.leiArticles);
+      const docTitle = section.sectionNumber
+        ? `Manual TCU - ${section.sectionNumber} ${section.title}`
+        : `Manual TCU - ${section.title}`;
+      const tags = JSON.stringify(['TCU', 'Manual', '5ª Edição', section.sectionNumber].filter(Boolean));
+      // A coluna JSON `leiArticles` foi derrubada na onda 4.5 em favor do array
+      // nativo `leiArticlesArr`. O script continuava gravando a antiga, e por
+      // isso toda criacao falhava, com mensagem vazia, ate 14 de agosto de 2026.
+      const leiArticlesArr = scraped.leiArticles.map(String);
       const aiClassification = JSON.stringify({
         source: 'tcu-manual-scraper',
         contentHash: scraped.contentHash,
@@ -99,6 +108,12 @@ async function main() {
       });
 
       if (DRY_RUN) {
+        // O ensaio conta o que faria. Ate 14 de agosto de 2026 ele apenas
+        // imprimia a linha e nao incrementava contador algum, de modo que o
+        // resumo dizia "criados: 0" com 48 secoes por criar: nao servia para
+        // conferir o que mudaria, que e a unica razao de existir do ensaio.
+        if (existing) updated++;
+        else created++;
         console.log(
           `${progress} 📝  ${docTitle}` +
           ` (${scraped.content.length} chars, ${scraped.leiArticles.length} artigos: [${scraped.leiArticles.join(', ')}])`
@@ -112,7 +127,7 @@ async function main() {
             description: scraped.description,
             content: scraped.content,
             tags,
-            leiArticles: leiArticlesJson,
+            leiArticlesArr,
             aiClassification,
             embeddingStatus: 'pending',
           },
@@ -133,7 +148,7 @@ async function main() {
             isPublic: false,
             reviewed: false,
             tags,
-            leiArticles: leiArticlesJson,
+            leiArticlesArr,
             aiClassification,
             embeddingStatus: 'pending',
           },
@@ -143,7 +158,7 @@ async function main() {
       }
     } catch (err) {
       console.error(
-        `${progress} ❌  ${section.sectionNumber} ${section.title}: ${err instanceof Error ? err.message : err}`
+        `${progress} ❌  ${section.sectionNumber} ${section.title}: ${err instanceof Error ? (err.message || err.name) : err}`, err
       );
       errors++;
     }
