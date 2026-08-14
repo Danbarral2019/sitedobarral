@@ -2135,6 +2135,11 @@ model TeseDivergencia {
   id                 String    @id @default(cuid())
   destilacaoId       String
   destilacao         TeseDestilacao @relation(fields: [destilacaoId], references: [id], onDelete: Cascade)
+  /// Posição da divergência dentro da destilação, como o card da folha de
+  /// calibração a exibe. Sem ela o veredito do Daniel não tem como ser gravado
+  /// na linha certa: o julgamento chega da folha identificado por posição, e a
+  /// ordem que o Postgres devolve sem ORDER BY não é estável.
+  ordem              Int       @default(0)
   origemChave        String
   precedenteApontado String
   trecho             String    @db.Text

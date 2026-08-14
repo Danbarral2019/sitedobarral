@@ -93,7 +93,7 @@ export async function runIncrementalExport(
     const exportTimestamp = new Date().toISOString();
 
     // Read sync state
-    const state = await readSyncState(opts.projectRoot);
+    const state = await readSyncState(opts.projectRoot, opts.outputDir);
     const lastExportAt = state.lastExportAt;
 
     // -----------------------------------------------------------------------
@@ -233,7 +233,7 @@ export async function runIncrementalExport(
 
     // Update sync state
     if (!opts.dryRun) {
-      await writeSyncState(opts.projectRoot, {
+      await writeSyncState(opts.projectRoot, opts.outputDir, {
         lastExportAt: exportTimestamp,
         exportStats: {
           documents: allDocuments.length,
