@@ -35,15 +35,16 @@ const PREFIX_TO_SERIE: Record<string, TstLivroSerie> = {
   'OJ-SDI2': 'oj-sdi2',
   'OJ-SDC': 'oj-sdc',
   PN: 'pn',
+  IRR: 'irr',
 };
 
 // Regex que casa TODOS os cabeçalhos no início de linha. Captura o prefixo e
 // o número. O lookahead garante boundary (TAB, espaço, fim de linha).
 const HEADER_RE =
-  /^(SUM|OJ-TP\/OE|OJ-SDI1T|OJ-SDI1|OJ-SDI2|OJ-SDC|PN)-(\d+)(?=\s|\t|$)/m;
+  /^(SUM|OJ-TP\/OE|OJ-SDI1T|OJ-SDI1|OJ-SDI2|OJ-SDC|PN|IRR)-(\d+)(?=\s|\t|$)/m;
 
 const HEADER_RE_GLOBAL =
-  /^(SUM|OJ-TP\/OE|OJ-SDI1T|OJ-SDI1|OJ-SDI2|OJ-SDC|PN)-(\d+)(?=\s|\t|$)/gm;
+  /^(SUM|OJ-TP\/OE|OJ-SDI1T|OJ-SDI1|OJ-SDI2|OJ-SDC|PN|IRR)-(\d+)(?=\s|\t|$)/gm;
 
 /**
  * Quebra o texto plano do livro em blocos por documento. Cada chave do Map é
@@ -307,7 +308,7 @@ export function parseLivroText(
     const url = urls.get(rotulo) ?? null;
     out.push(parseLivroBlock(block, url));
   }
-  // Ordena: SUM → OJ-TP/OE → OJ-SDI1 → OJ-SDI1T → OJ-SDI2 → OJ-SDC → PN, dentro por número
+  // Ordena: SUM → OJ-TP/OE → OJ-SDI1 → OJ-SDI1T → OJ-SDI2 → OJ-SDC → PN → IRR, dentro por número
   const serieOrder: TstLivroSerie[] = [
     'sumula',
     'oj-tp-oe',
@@ -316,6 +317,7 @@ export function parseLivroText(
     'oj-sdi2',
     'oj-sdc',
     'pn',
+    'irr',
   ];
   out.sort((a, b) => {
     const sa = serieOrder.indexOf(a.serie);

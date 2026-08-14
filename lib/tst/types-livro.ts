@@ -12,7 +12,8 @@ export type TstLivroSerie =
   | 'oj-sdi1t'
   | 'oj-sdi2'
   | 'oj-sdc'
-  | 'pn';
+  | 'pn'
+  | 'irr';
 
 export type TstLivroSituacao = 'CRIADA' | 'ALTERADA' | 'CANCELADA' | 'REVISTA';
 
