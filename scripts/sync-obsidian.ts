@@ -20,7 +20,7 @@ import { resolve } from 'path';
 
 import { runIncrementalExport } from '../lib/obsidian/incremental-export';
 import { runLessonImport } from '../lib/obsidian/import';
-import { writeSyncState } from '../lib/obsidian/sync-state';
+import { writeSyncState, VAULT_OBSIDIAN_PADRAO } from '../lib/obsidian/sync-state';
 
 // ---------------------------------------------------------------------------
 // CLI args
@@ -44,7 +44,7 @@ function parseArgs(): CliArgs {
   const dryRun = args.includes('--dry-run');
   const force = args.includes('--force');
 
-  let vaultPath = 'C:/Users/User/projetos/Cofre do obsidian/Site do Barral';
+  let vaultPath: string = VAULT_OBSIDIAN_PADRAO;
   const vaultIdx = args.indexOf('--vault');
   if (vaultIdx !== -1 && args[vaultIdx + 1]) {
     vaultPath = resolve(args[vaultIdx + 1]);
@@ -120,7 +120,7 @@ async function main() {
 
       // Update import timestamp in sync state
       if (!opts.dryRun) {
-        await writeSyncState(projectRoot, {
+        await writeSyncState(projectRoot, opts.vaultPath, {
           lastImportAt: new Date().toISOString(),
         });
       }
