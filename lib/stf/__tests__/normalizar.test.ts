@@ -76,6 +76,33 @@ describe('normalizarDocumentoStf — acórdão', () => {
   });
 });
 
+describe('decisionNumber — casos com sufixos (52% do corpus)', () => {
+  it('extrai número de título com sufixo composto (AgR-ED-ED)', () => {
+    const n = normalizarDocumentoStf({
+      ...ACORDAO,
+      titulo: 'ARE 1535561 AgR-ED-ED',
+    })!;
+    expect(n.decisionNumber).toBe('1535561');
+    expect(n.title).toBe('ARE 1535561 AgR-ED-ED');
+  });
+
+  it('extrai número de título com sufixo simples (AgR)', () => {
+    const n = normalizarDocumentoStf({
+      ...ACORDAO,
+      titulo: 'RE 1403832 AgR',
+    })!;
+    expect(n.decisionNumber).toBe('1403832');
+  });
+
+  it('cai para título quando não há dígito nenhum', () => {
+    const n = normalizarDocumentoStf({
+      ...ACORDAO,
+      titulo: 'TÍTULO SEM NÚMERO',
+    })!;
+    expect(n.decisionNumber).toBe('TÍTULO SEM NÚMERO');
+  });
+});
+
 describe('normalizarDocumentoStf — monocrática', () => {
   const n = normalizarDocumentoStf(MONOCRATICA)!;
 
@@ -93,6 +120,30 @@ describe('normalizarDocumentoStf — monocrática', () => {
 
   it('cai para relator_decisao_nome quando não há relator_processo_nome', () => {
     expect(n.relator).toBe('MINISTRO ALEXANDRE DE MORAES');
+  });
+});
+
+describe('year — fallback de publicacao_data', () => {
+  it('usa dataPublicacao quando julgamento_data está vazia', () => {
+    const n = normalizarDocumentoStf({
+      ...ACORDAO,
+      julgamento_data: undefined,
+      publicacao_data: '2019-05-10',
+    })!;
+    expect(n.year).toBe(2019);
+    expect(n.dataJulgamento).toBeNull();
+    expect(n.dataPublicacao?.toISOString().slice(0, 10)).toBe('2019-05-10');
+  });
+
+  it('usa ano corrente quando ambas as datas estão vazias', () => {
+    const n = normalizarDocumentoStf({
+      ...ACORDAO,
+      julgamento_data: undefined,
+      publicacao_data: undefined,
+    })!;
+    expect(n.year).toBe(new Date().getUTCFullYear());
+    expect(n.dataJulgamento).toBeNull();
+    expect(n.dataPublicacao).toBeNull();
   });
 });
 
