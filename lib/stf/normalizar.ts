@@ -15,6 +15,10 @@ import type { StfDocumentoBruto, StfDecisaoNormalizada } from './types';
  * O índice do STF corta `decisao_texto` em 6.000 caracteres — medido em 1.023
  * dos 1.050 registros do corpus de 16/08/2026. Marcamos o corte para que nada
  * a jusante trate o texto de monocrática como inteiro teor.
+ *
+ * Medição sobre 154 monocráticas selecionadas: 138 têm `decisao_texto` bruto
+ * com ≥ 6.000 chars (realmente truncadas). Detecção via comprimento BRUTO,
+ * antes de colapsar espaços.
  */
 export const LIMITE_TRUNCAMENTO_STF = 6000;
 
@@ -29,6 +33,12 @@ export function texto(v: string | string[] | null | undefined): string {
   if (v === null || v === undefined) return '';
   const bruto = Array.isArray(v) ? v.join(' ') : String(v);
   return bruto.replace(/\s+/g, ' ').trim();
+}
+
+/** Junta o campo sem colapsar espaços — usado só para medir o corte do índice do STF. */
+export function textoBruto(v: string | string[] | null | undefined): string {
+  if (v === null || v === undefined) return '';
+  return Array.isArray(v) ? v.join(' ') : String(v);
 }
 
 function dataISO(v: string | undefined): Date | null {
@@ -70,7 +80,7 @@ export function normalizarDocumentoStf(
         : new Date().getUTCFullYear(),
     title: titulo,
     ementa: corpo,
-    ementaTruncada: !ementaTexto && decisaoTexto.length >= LIMITE_TRUNCAMENTO_STF,
+    ementaTruncada: !ementaTexto && textoBruto(doc.decisao_texto).length >= LIMITE_TRUNCAMENTO_STF,
     relator:
       texto(doc.relator_processo_nome) ||
       texto(doc.relator_acordao_nome) ||

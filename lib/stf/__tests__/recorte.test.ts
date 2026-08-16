@@ -67,6 +67,22 @@ describe('ehRelevanteParaBase — monocráticas', () => {
     ).toBe(false);
   });
 
+  it('rejeita reclamação com classe em MAIÚSCULAS (case-insensitive)', () => {
+    expect(
+      ehRelevanteParaBase(
+        mono({ classe: 'RCL', citaLei14133: true, ementa: 'Decisão sobre licitação.' })
+      )
+    ).toBe(false);
+  });
+
+  it('rejeita reclamação com classe em minúsculas (case-insensitive)', () => {
+    expect(
+      ehRelevanteParaBase(
+        mono({ classe: 'rcl', citaLei14133: true, ementa: 'Decisão sobre licitação.' })
+      )
+    ).toBe(false);
+  });
+
   it('rejeita monocrática que cita a norma mas não fala de licitação', () => {
     expect(ehRelevanteParaBase(mono({ citaLei14133: true }))).toBe(false);
   });

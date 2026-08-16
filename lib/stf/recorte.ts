@@ -16,15 +16,18 @@ import type { StfDecisaoNormalizada } from './types';
 
 const RE_LICITACAO = /licita/i;
 
-/** Reclamação monocrática: alto volume, baixo valor jurisprudencial. */
-const CLASSES_MONOCRATICAS_EXCLUIDAS = new Set(['Rcl']);
+/**
+ * Reclamação monocrática: alto volume, baixo valor jurisprudencial.
+ * Comparação case-insensitive de propósito — fonte é externa e pode variar.
+ */
+const CLASSES_MONOCRATICAS_EXCLUIDAS = new Set(['RCL']);
 
 export function ehRelevanteParaBase(d: StfDecisaoNormalizada): boolean {
   if (d.decisionType === 'acordao') {
     return d.citaLei14133 || RE_LICITACAO.test(d.ementa);
   }
 
-  if (CLASSES_MONOCRATICAS_EXCLUIDAS.has(d.classe)) return false;
+  if (CLASSES_MONOCRATICAS_EXCLUIDAS.has(d.classe.trim().toUpperCase())) return false;
   return d.citaLei14133 && RE_LICITACAO.test(d.ementa);
 }
 

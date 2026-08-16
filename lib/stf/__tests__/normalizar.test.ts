@@ -121,6 +121,23 @@ describe('normalizarDocumentoStf — monocrática', () => {
   it('cai para relator_decisao_nome quando não há relator_processo_nome', () => {
     expect(n.relator).toBe('MINISTRO ALEXANDRE DE MORAES');
   });
+
+  it('marca truncamento medindo tamanho bruto, não colapsado', () => {
+    // 'palavra ' (8 chars) × 750 = 6000 chars brutos, mas colapsa para ~5999
+    const n = normalizarDocumentoStf({
+      ...MONOCRATICA,
+      decisao_texto: 'palavra '.repeat(750),
+    })!;
+    expect(n.ementaTruncada).toBe(true);
+  });
+
+  it('não marca truncamento para texto curto mesmo com espaços', () => {
+    const n = normalizarDocumentoStf({
+      ...MONOCRATICA,
+      decisao_texto: 'Texto da decisão com espaços e com tamanho suficiente mas bem abaixo do limite de truncamento.',
+    })!;
+    expect(n.ementaTruncada).toBe(false);
+  });
 });
 
 describe('year — fallback de publicacao_data', () => {
