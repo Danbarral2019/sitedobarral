@@ -81,6 +81,34 @@ export function montarDadosStf(
   };
 }
 
+/**
+ * Monta o payload de `update` a partir de `montarDadosStf`, preservando o
+ * que já é editorial: se um humano revisou a decisão (`reviewedBy` não
+ * nulo), o veredito dele (`approvalStatus`/`isRelevant`) não é recalculado
+ * por cima; e um resumo IA já existente nunca é apagado por um re-run cuja
+ * classificação desta rodada não gerou resumo novo (`summary === null`).
+ * O restante do conteúdo (ementa, datas, leiArticlesArr, themes etc.)
+ * sempre é atualizado normalmente.
+ */
+function montarDadosUpdateStf(
+  data: ReturnType<typeof montarDadosStf>,
+  existente: { reviewedBy: string | null }
+): Partial<ReturnType<typeof montarDadosStf>> {
+  const { approvalStatus, isRelevant, summary, ...resto } = data;
+  const dadosUpdate: Partial<ReturnType<typeof montarDadosStf>> = { ...resto };
+
+  if (!existente.reviewedBy) {
+    dadosUpdate.approvalStatus = approvalStatus;
+    dadosUpdate.isRelevant = isRelevant;
+  }
+
+  if (summary !== null) {
+    dadosUpdate.summary = summary;
+  }
+
+  return dadosUpdate;
+}
+
 export async function persistirDecisoesStf(
   decisoes: StfDecisaoNormalizada[],
   opcoes: OpcoesPersistencia
@@ -97,7 +125,7 @@ export async function persistirDecisoesStf(
     try {
       const existente = await prisma.tribunalDecision.findUnique({
         where: { fullIdentifier: d.fullIdentifier },
-        select: { id: true },
+        select: { id: true, reviewedBy: true, summary: true },
       });
 
       if (existente && !opcoes.forcar) {
@@ -133,7 +161,7 @@ export async function persistirDecisoesStf(
       if (existente) {
         await prisma.tribunalDecision.update({
           where: { fullIdentifier: d.fullIdentifier },
-          data,
+          data: montarDadosUpdateStf(data, existente),
         });
         r.atualizados++;
       } else {

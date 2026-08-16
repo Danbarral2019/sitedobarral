@@ -154,3 +154,39 @@ describe('persistirDecisoesStf', () => {
     expect(r.mensagensErro[0]).toContain('falha de rede');
   });
 });
+
+describe('persistirDecisoesStf — preserva julgamento humano em update', () => {
+  it('reviewedBy não nulo: update omite approvalStatus e isRelevant, mas mantém o resto do conteúdo', async () => {
+    mockFindUnique.mockResolvedValue({ id: 'existente', reviewedBy: 'admin@x.com', summary: 'resumo antigo' });
+    await persistirDecisoesStf([decisao()], { forcar: true });
+    const data = mockUpdate.mock.calls[0][0].data;
+    expect(data).not.toHaveProperty('approvalStatus');
+    expect(data).not.toHaveProperty('isRelevant');
+    // não virou no-op: o conteúdo do julgado continua sendo refrescado
+    expect(data).toHaveProperty('ementa');
+    expect(data).toHaveProperty('leiArticlesArr');
+  });
+
+  it('reviewedBy nulo: update grava approvalStatus e isRelevant normalmente', async () => {
+    mockFindUnique.mockResolvedValue({ id: 'existente', reviewedBy: null, summary: null });
+    await persistirDecisoesStf([decisao()], { forcar: true });
+    const data = mockUpdate.mock.calls[0][0].data;
+    expect(data).toHaveProperty('approvalStatus', CLASSIFICACAO.approvalStatus);
+    expect(data).toHaveProperty('isRelevant');
+  });
+
+  it('classificação que não é auto_approved (summary calculado null): update não sobrescreve resumo existente', async () => {
+    mockFindUnique.mockResolvedValue({ id: 'existente', reviewedBy: null, summary: 'resumo antigo' });
+    mockClassify.mockResolvedValue({ ...CLASSIFICACAO, approvalStatus: 'pending' });
+    await persistirDecisoesStf([decisao()], { forcar: true });
+    const data = mockUpdate.mock.calls[0][0].data;
+    expect(data).not.toHaveProperty('summary');
+  });
+
+  it('create de registro inédito continua incluindo approvalStatus e isRelevant', async () => {
+    await persistirDecisoesStf([decisao()], {});
+    const data = mockCreate.mock.calls[0][0].data;
+    expect(data).toHaveProperty('approvalStatus');
+    expect(data).toHaveProperty('isRelevant');
+  });
+});
