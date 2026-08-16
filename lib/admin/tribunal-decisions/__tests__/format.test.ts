@@ -60,6 +60,10 @@ describe('tribunalColor', () => {
     expect(tribunalColor('TCE-XX')).toContain('gray');
     expect(tribunalColor('')).toContain('gray');
   });
+
+  it('dá cor própria ao STF', () => {
+    expect(tribunalColor('STF')).toContain('amber');
+  });
 });
 
 describe('parseJsonArray', () => {
