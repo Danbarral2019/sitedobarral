@@ -1,0 +1,29 @@
+name: STF — coleta de jurisprudência
+
+on:
+  schedule:
+    # Segunda-feira, 8h UTC (5h BR) — depois do cron semanal de tribunais.
+    - cron: '0 8 * * 1'
+  workflow_dispatch:
+
+jobs:
+  coletar:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+
+      - run: npm ci
+
+      - run: npx playwright install --with-deps chromium
+
+      - name: Coletar no STF e enviar para ingestão
+        run: npx tsx scripts/stf-runner.ts
+        env:
+          STF_INGEST_URL: ${{ secrets.STF_INGEST_URL }}
+          CRON_SECRET: ${{ secrets.CRON_SECRET }}
