@@ -33,14 +33,41 @@ interface CorpusStf {
 
 function arg(nome: string): string | null {
   const i = process.argv.indexOf(nome);
-  return i >= 0 && process.argv[i + 1] ? process.argv[i + 1] : null;
+  return i >= 0 && process.argv[i + 1] !== undefined ? process.argv[i + 1] : null;
+}
+
+/**
+ * Lê `--limit` e valida antes de qualquer leitura de arquivo ou conexão de
+ * banco. Um valor inválido (ausente, não numérico, zero, negativo, ou outra
+ * flag consumida como valor) NÃO pode degradar em silêncio para "processar
+ * tudo": por política do projeto documentos nunca são excluídos, então um
+ * `--limit` digitado errado grava um backfill inteiro de forma irreversível.
+ */
+function lerLimiteOuAbortar(): number | null {
+  if (!process.argv.includes('--limit')) return null;
+
+  const limiteRaw = arg('--limit');
+  const numero = limiteRaw === null ? NaN : Number(limiteRaw);
+  const valido =
+    limiteRaw !== null &&
+    !limiteRaw.startsWith('--') &&
+    Number.isInteger(numero) &&
+    numero > 0;
+
+  if (!valido) {
+    console.error(
+      `--limit inválido: recebido "${limiteRaw ?? '(nenhum valor)'}", esperado um número inteiro positivo (ex.: --limit 20).`
+    );
+    process.exit(1);
+  }
+
+  return numero;
 }
 
 async function main() {
   const dryRun = process.argv.includes('--dry-run');
   const forcar = process.argv.includes('--force');
-  const limiteRaw = arg('--limit');
-  const limite = limiteRaw ? Number(limiteRaw) : null;
+  const limite = lerLimiteOuAbortar();
   const caminho = process.env.STF_DADOS_JSON || CAMINHO_PADRAO;
 
   console.log('=== Backfill STF — jurisprudência de licitações ===');
@@ -70,7 +97,7 @@ async function main() {
   console.log(`  com tese oficial firmada:   ${comTese}`);
   console.log(`  com texto truncado em 6000: ${truncados}`);
 
-  if (limite && limite > 0) {
+  if (limite !== null) {
     selecionados = selecionados.slice(0, limite);
     console.log(`Limitado a ${selecionados.length} documentos.`);
   }

@@ -140,6 +140,13 @@ describe('persistirDecisoesStf', () => {
     expect(r).toMatchObject({ criados: 1 });
   });
 
+  it('dryRun não classifica nem resume — decide só por `existente`, e ainda conta o que criaria', async () => {
+    const r = await persistirDecisoesStf([decisao()], { dryRun: true });
+    expect(mockClassify).not.toHaveBeenCalled();
+    expect(mockSummary).not.toHaveBeenCalled();
+    expect(r).toMatchObject({ criados: 1 });
+  });
+
   it('só gera resumo IA para decisão auto_approved', async () => {
     mockClassify.mockResolvedValue({ ...CLASSIFICACAO, approvalStatus: 'pending' });
     await persistirDecisoesStf([decisao()], {});

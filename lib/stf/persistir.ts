@@ -133,6 +133,15 @@ export async function persistirDecisoesStf(
         continue;
       }
 
+      // Em dry-run, a contagem depende só de `existente` — não há necessidade
+      // de classificar nem de gerar resumo (que custam Gemini) para um
+      // resultado que será jogado fora.
+      if (opcoes.dryRun) {
+        if (existente) r.atualizados++;
+        else r.criados++;
+        continue;
+      }
+
       const classification = await classifyDecision({
         title: d.title,
         ementa: d.ementa,
@@ -151,12 +160,6 @@ export async function persistirDecisoesStf(
           : null;
 
       const data = montarDadosStf(d, classification, summary);
-
-      if (opcoes.dryRun) {
-        if (existente) r.atualizados++;
-        else r.criados++;
-        continue;
-      }
 
       if (existente) {
         await prisma.tribunalDecision.update({

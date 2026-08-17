@@ -48,6 +48,7 @@ async function main() {
   const browser = await chromium.launch();
   const page = await browser.newPage();
   const documentos: unknown[] = [];
+  let erroColeta: unknown = null;
 
   try {
     await page.goto(PAGINA_BUSCA, { waitUntil: 'networkidle', timeout: 120_000 });
@@ -72,8 +73,17 @@ async function main() {
       console.log(`consulta devolveu ${lote.length} documentos`);
       documentos.push(...lote);
     }
+  } catch (err) {
+    // Não deixar a falha de coleta (ex.: WAF barrou o desafio) abortar a
+    // função antes do POST — senão o guard de "lote vazio = falha" da rota
+    // de ingestão nunca dispara justamente no caso em que ele deveria.
+    erroColeta = err;
   } finally {
     await browser.close();
+  }
+
+  if (erroColeta) {
+    console.error('Falha na coleta:', erroColeta);
   }
 
   console.log(`total coletado: ${documentos.length}`);
@@ -91,8 +101,10 @@ async function main() {
   console.log(`ingestão respondeu ${res.status}:`, JSON.stringify(json));
 
   // A rota devolve 422 para lote vazio de propósito — o job precisa ficar
-  // vermelho nesse caso, não verde e mudo.
-  if (!res.ok) process.exit(1);
+  // vermelho nesse caso, não verde e mudo. O POST agora acontece sempre
+  // (mesmo com lote vazio ou parcial por erro de coleta), então o 422
+  // passa a significar de fato "a coleta não produziu documentos".
+  if (erroColeta || !res.ok) process.exit(1);
 }
 
 main().catch(err => {
