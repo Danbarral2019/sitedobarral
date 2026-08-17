@@ -1617,34 +1617,6 @@ function req(body: unknown): NextRequest {
 beforeEach(() => {
   vi.clearAllMocks();
   mockVerify.mockReturnValue(null);
-```
-
-*(fecho de bloco de código acrescentado nesta errata só para que a seção abaixo renderize como markdown — o documento original terminava aqui, em plena Task 9, sem fechar o bloco. Nenhum caractere do conteúdo acima foi alterado.)*
-
----
-
-## Errata — estado final do código (pós-execução)
-
-Esta seção foi acrescentada após a revisão final da branch `feat/conector-stf` (16/08/2026). Os blocos de código acima registram o que foi **briefado** aos implementadores nas Tasks 1-9; eles não são reescritos aqui porque são o registro histórico do que foi passado adiante — inclusive dos pontos em que o plano errou. O código final diverge do texto do plano nos dez pontos abaixo. Ledger completo: `.superpowers/sdd/2026-08-16-conector-stf-jurisprudencia/progress.md`.
-
-| # | O plano diz | O código faz |
-|---|---|---|
-| 1 | `decisionNumber` por `/(\d[\d.]*)\s*$/` (linha 558) | `/(\d[\d.]*)/` — primeira corrida de dígitos |
-| 2 | `year` cai direto no ano corrente (linha 569) | julgamento → publicação → corrente |
-| 3 | `ementaTruncada` mede comprimento colapsado (linha 572) | mede o bruto via `textoBruto()` |
-| 4 | `new Set(['Rcl'])`, case-sensitive (linha 745) | `new Set(['RCL'])` + `.trim().toUpperCase()` |
-| 5 | `persistir.ts` sem preservação de julgamento humano | tem `montarDadosUpdateStf` |
-| 6 | "PASS — 17 testes" na T2 (e outras contagens) | 16 casos escritos; hoje 23 no arquivo |
-| 7 | T6: "criar se não existir" o arquivo de teste | o arquivo já existia; o caso foi acrescentado |
-| 8 | T9 consome `URL_API_STF` | não consome (e não deve — o fetch é same-origin) |
-| 9 | Riscos: "598 chamadas de classificação + resumo", "`classifyDecision` só cai em Gemini nos casos pendentes" | `useAI` default é `false` → **a classificação nunca chama LLM**; o gasto real é só ~208 resumos |
-| 10 | Marco da Task 6: "ao fim da Task 6 o STF está em produção com 598 julgados, filtráveis por `?tribunal=STF`" | **208** ficam visíveis (ver abaixo) |
-
-Os itens 9 e 10 merecem destaque à parte: não são deriva de implementação, e sim **afirmações factualmente erradas** — e são exatamente as duas que alguém vai consultar antes de decidir rodar o backfill.
-
-**Item 9 — o custo em LLM foi superestimado em uma ordem de grandeza.** A assinatura real é `classifyDecision(decision, useAI = false)`, e o conector chama sem o segundo argumento. Ou seja, **a classificação nunca chama LLM** — é só keyword matching, offline e de graça. O gasto real do backfill inteiro é só os resumos gerados via Gemini para os documentos `auto_approved` (~208 chamadas de ~300 tokens de saída cada), centavos de dólar, não os "598 chamadas de classificação + resumo" que a tabela de riscos do plano projetava.
-
-**Item 10 — o marco de produção está errado por um fator de ~3.** Dos 598 julgados que o recorte seleciona, o gate de aprovação de leitura (`isRelevant = true AND approvalStatus IN ('auto_approved','manually_approved')`, usado por `/api/jurisprudencia?tribunal=STF` e pelo cron de indexação) só deixa **208** visíveis — e só esses 208 ganham embeddings. Medido sobre os 598 reais: 208 `auto_approved`, 246 `pending` (ficam na fila de revisão manual — carga operacional nova, não mencionada em nenhum outro ponto do plano), 144 `auto_rejected`. O efeito é mais severo justamente onde o conector mais importa: dos **112 documentos com dispositivos da Lei 14.133 amarrados** — a amarração determinística artigo↔julgado que é a razão de existir deste trabalho — só **68** ficam visíveis; os outros 44 nascem gravados e invisíveis. Isso não é um bug do código do STF — o gate é pré-existente e funciona como projetado — mas é uma discrepância material entre o prometido e o entregue, e precisa ser decidida conscientemente antes do backfill, não descoberta depois.
   mockPersistir.mockResolvedValue({
     criados: 1, atualizados: 0, ignorados: 0, erros: 0, mensagensErro: [],
   });
@@ -2059,3 +2031,33 @@ git commit -m "feat(stf): runner Playwright no GitHub Actions para o fluxo cont�
 - **Filtro por classe processual na API pública:** exigiria alterar `z.enum` sem demanda concreta.
 - **`DocumentMetaStf`:** `sourceRawData` resolve a v1 sem migration.
 - **Inteiro teor em PDF:** `redir.stf.jus.br` está atrás do mesmo WAF.
+
+---
+
+## Errata — estado final do código (pós-execução)
+
+Esta seção foi acrescentada após a revisão final da branch `feat/conector-stf` (16/08/2026). Os blocos de código acima registram o que foi **briefado** aos implementadores nas Tasks 1-9; eles não são reescritos aqui porque são o registro histórico do que foi passado adiante — inclusive dos pontos em que o plano errou. O código final diverge do texto do plano nos dez pontos abaixo. Ledger completo: `.superpowers/sdd/2026-08-16-conector-stf-jurisprudencia/progress.md`.
+
+| # | O plano diz | O código faz |
+|---|---|---|
+| 1 | `decisionNumber` por `/(\d[\d.]*)\s*$/` (linha 558) | `/(\d[\d.]*)/` — primeira corrida de dígitos |
+| 2 | `year` cai direto no ano corrente (linha 569) | julgamento → publicação → corrente |
+| 3 | `ementaTruncada` mede comprimento colapsado (linha 572) | mede o bruto via `textoBruto()` |
+| 4 | `new Set(['Rcl'])`, case-sensitive (linha 745) | `new Set(['RCL'])` + `.trim().toUpperCase()` |
+| 5 | `persistir.ts` sem preservação de julgamento humano | tem `montarDadosUpdateStf` |
+| 6 | "PASS — 17 testes" na T2 (e outras contagens) | 16 casos escritos; hoje 23 no arquivo |
+| 7 | T6: "criar se não existir" o arquivo de teste | o arquivo já existia; o caso foi acrescentado |
+| 8 | T9 consome `URL_API_STF` | não consome (e não deve — o fetch é same-origin) |
+| 9 | Riscos: "598 chamadas de classificação + resumo", "`classifyDecision` só cai em Gemini nos casos pendentes" | `useAI` default é `false` → **a classificação nunca chama LLM**; o gasto real é só ~208 resumos |
+| 10 | Marco da Task 6: "ao fim da Task 6 o STF está em produção com 598 julgados, filtráveis por `?tribunal=STF`" | **252** ficam visíveis, após a regra de auto-aprovação por amarração (eram 208 antes dela) — ver abaixo |
+| 11 | (não previsto no plano) | Julgado com amarração à norma é **auto-aprovado**, por decisão do dono — ver abaixo |
+
+Os itens 9 e 10 merecem destaque à parte: não são deriva de implementação, e sim **afirmações factualmente erradas** — e são exatamente as duas que alguém vai consultar antes de decidir rodar o backfill.
+
+**Item 9 — o custo em LLM foi superestimado em uma ordem de grandeza.** A assinatura real é `classifyDecision(decision, useAI = false)`, e o conector chama sem o segundo argumento. Ou seja, **a classificação nunca chama LLM** — é só keyword matching, offline e de graça. O gasto real do backfill inteiro é só os resumos gerados via Gemini para os documentos `auto_approved` (~208 chamadas de ~300 tokens de saída cada), centavos de dólar, não os "598 chamadas de classificação + resumo" que a tabela de riscos do plano projetava.
+
+**Item 10 — o marco de produção está errado por um fator de ~3.** Dos 598 julgados que o recorte seleciona, o gate de aprovação de leitura (`isRelevant = true AND approvalStatus IN ('auto_approved','manually_approved')`, usado por `/api/jurisprudencia?tribunal=STF` e pelo cron de indexação) só deixa **208** visíveis — e só esses 208 ganham embeddings. Medido sobre os 598 reais: 208 `auto_approved`, 246 `pending` (ficam na fila de revisão manual — carga operacional nova, não mencionada em nenhum outro ponto do plano), 144 `auto_rejected`. O efeito é mais severo justamente onde o conector mais importa: dos **112 documentos com dispositivos da Lei 14.133 amarrados** — a amarração determinística artigo↔julgado que é a razão de existir deste trabalho — só **68** ficam visíveis; os outros 44 nascem gravados e invisíveis. Isso não é um bug do código do STF — o gate é pré-existente e funciona como projetado — mas é uma discrepância material entre o prometido e o entregue, e precisa ser decidida conscientemente antes do backfill, não descoberta depois.
+
+**Item 11 — a decisão que resolveu o item 10: auto-aprovação por amarração autoritativa.** Diante dos números acima, o dono do projeto decidiu que julgado com `artigos14133.length > 0` passa a ser aprovado automaticamente, independentemente do escore de palavra-chave do classificador. O fundamento é que `artigos14133` vem do campo estruturado `documental_legislacao_citada_texto` da própria API do STF: se o STF diz que aquele acórdão cita o art. 75 da Lei 14.133, ele é relevante para um site sobre a Lei 14.133 — fonte **autoritativa**, não heurística. Implementado em `aplicarAmarracaoAutoritativa()` (`lib/stf/persistir.ts`), aplicada logo após `classifyDecision` para que a geração de resumo enxergue o veredito sobreposto; o `reasoning` gravado registra que a aprovação veio da legislação citada, e não do escore, para quem abrir o admin. `relevanceScore`, `themes` e `confidence` continuam refletindo o que o classificador mediu. A preservação de julgamento humano vence a regra: registro com `reviewedBy` preenchido mantém o `approvalStatus` do admin.
+
+Efeito medido sobre os 598 reais, rodando o código final: visíveis **208 → 252**; fila de revisão manual **246 → 210**; e, o que motivou a decisão, amarrações à norma visíveis **68 de 112 → 112 de 112**. Custo adicional no backfill: 44 resumos Gemini.
