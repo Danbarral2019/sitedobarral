@@ -14,6 +14,7 @@ import {
 import { classifyTCUEditorial } from '@/lib/tcu-editorial-classifier';
 import { withCronTelemetry } from '@/lib/cron-telemetry';
 import { apiLogger } from '@/lib/logger';
+import { normalizeTribunalCode } from '@/lib/tribunal-scrapers/utils';
 
 /**
  * Cron Job: Sincronização automática de acórdãos do TCU
@@ -373,13 +374,17 @@ export async function GET(request: NextRequest) {
           const classification = await classifyDecision({
             title,
             ementa: sumario || titulo || '',
-            tribunalCode: 'tcu',
+            tribunalCode: normalizeTribunalCode('tcu'),
           });
 
           await prisma.tribunalDecision.upsert({
             where: { fullIdentifier: fullId },
             create: {
-              tribunalCode: 'tcu',
+              // normalizeTribunalCode e a UNICA autoridade de caixa do campo.
+              // Ate 08/2026 esta linha gravava 'tcu' literal, criando 121
+              // registros fora do filtro/boost por tribunal e forcando a
+              // comparacao case-insensitive de vector-search.ts como paliativo.
+              tribunalCode: normalizeTribunalCode('tcu'),
               tribunalName: 'Tribunal de Contas da União',
               decisionType: 'acordao',
               decisionNumber: `${num}/${ano}`,
