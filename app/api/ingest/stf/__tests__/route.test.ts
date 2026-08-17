@@ -21,7 +21,8 @@ vi.mock('@/lib/tribunal-scrapers/utils', () => ({
   normalizeTribunalCode: (c: string) => c.trim().toUpperCase(),
 }));
 
-import { POST, SCRAPER_CODE_STF } from '../route';
+import { POST } from '../route';
+import { SCRAPER_CODE_STF } from '@/lib/stf/constantes';
 
 const ACORDAO = {
   base: 'acordaos',

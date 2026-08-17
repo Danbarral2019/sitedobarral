@@ -6,18 +6,11 @@ import { normalizarDocumentoStf } from '@/lib/stf/normalizar';
 import { selecionarRecorte } from '@/lib/stf/recorte';
 import { persistirDecisoesStf } from '@/lib/stf/persistir';
 import { logScraperHealth } from '@/lib/tribunal-scrapers/utils';
+import { SCRAPER_CODE_STF } from '@/lib/stf/constantes';
 import type { StfDocumentoBruto, StfDecisaoNormalizada } from '@/lib/stf/types';
 
 export const runtime = 'nodejs';
 export const maxDuration = 300;
-
-/**
- * Código de saúde do fluxo do STF. Distinto dos scrapers do registry porque a
- * coleta acontece FORA da Vercel — num job do GitHub Actions com navegador
- * real, única via que vence o desafio JavaScript do AWS WAF do portal. O cron
- * `tribunal-scraper-health` lê este log como lê o dos demais.
- */
-export const SCRAPER_CODE_STF = 'stf-runner';
 
 /**
  * POST /api/ingest/stf
