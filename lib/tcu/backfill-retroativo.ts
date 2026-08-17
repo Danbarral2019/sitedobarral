@@ -97,7 +97,19 @@ export function montarDadosDocument(item: ItemFeed): Record<string, unknown> | n
     tcuLinkPDF: linkRtf(item),
     tcuDataJulgamento: iso ? new Date(`${iso}T00:00:00Z`) : null,
     tcuEnriquecimentoStatus: 'skipped',
-    embeddingStatus: 'skipped',
+    // embeddingStatus NAO e definido de proposito: vale o @default("pending")
+    // do schema, e o cron process-index-jobs indexa o no como qualquer outro
+    // documento.
+    //
+    // Ate 08/2026 esta linha gravava 'skipped', para poupar o custo de indexar
+    // ~13 mil nos de grafo. O efeito colateral era grande: 5.069 acordaos do
+    // TCU com sumario real (mediana de 318 chars) ficavam invisiveis a busca
+    // semantica, sem existir indexados em nenhum outro lugar.
+    //
+    // O custo foi medido antes de mudar. Indexar os 6.461 pendentes acrescentou
+    // 6.435 chunks (+31% no indice) e o eval sobre o golden set mexeu dentro do
+    // ruido: recall@5 62,8% -> 62,2%, recall@10 e MRR inalterados. Para
+    // comparacao, incluir decisoes de tribunal na mesma busca custava -5,1pp.
   };
 }
 
