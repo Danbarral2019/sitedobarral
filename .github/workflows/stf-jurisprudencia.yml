@@ -1,20 +1,32 @@
 name: STF — coleta de jurisprudência
 
 on:
-  # AGENDAMENTO DESATIVADO ATÉ A PRIMEIRA EXECUÇÃO SUPERVISIONADA.
+  # ⚠️ ESTE WORKFLOW NÃO FUNCIONA. Mantido como registro do que foi medido.
   #
-  # A hipótese central deste workflow — que o Chromium do GitHub Actions vence
-  # o desafio JavaScript do AWS WAF de jurisprudencia.stf.jus.br — nunca foi
-  # testada. Requisição server-side comum recebe HTTP 202 com corpo vazio e
-  # `x-amzn-waf-action: challenge`; se o navegador do runner também for barrado,
-  # toda a Fase 2 precisa de replanejamento.
+  # A hipótese era que o Chromium do GitHub Actions venceria o AWS WAF de
+  # jurisprudencia.stf.jus.br. Foi testada em 17/08/2026 e REFUTADA: o job
+  # rodou duas vezes e as duas receberam HTTP 403.
   #
-  # Rodar `workflow_dispatch` manualmente uma vez, conferir o job verde e o
-  # registro de `stf-runner` em ScraperHealthLog, e SÓ ENTÃO descomentar o
-  # bloco abaixo para o agendamento semanal entrar em vigor.
+  # A investigação seguinte, na máquina do Daniel, isolou a causa — não é IP
+  # de datacenter, nem o desafio JavaScript em si:
+  #
+  #   requisição server-side (curl/fetch)  → 202 + x-amzn-waf-action: challenge
+  #   Chromium HEADLESS                    → 403
+  #   Chromium HEADED (janela visível)     → 200 ✅
+  #
+  # É DETECÇÃO DE HEADLESS. Como runner do GitHub não tem display, o Chromium
+  # sai headless e é barrado.
+  #
+  # A coleta passou a ser MENSAL E MANUAL, na máquina do Daniel:
+  #     npm run stf:coletar
+  #
+  # Caminho não testado, caso um dia se queira automação completa: rodar o
+  # Chromium em modo headed sob display virtual, com
+  # `xvfb-run npx tsx scripts/stf-runner.ts` e `headless: false`. Isso PODE
+  # contornar a detecção — ninguém verificou. Se for tentar, tratar como
+  # hipótese, não como solução.
   #
   # schedule:
-  #   # Segunda-feira, 8h UTC (5h BR) — depois do cron semanal de tribunais.
   #   - cron: '0 8 * * 1'
   workflow_dispatch:
 
