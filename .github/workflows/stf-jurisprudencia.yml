@@ -1,9 +1,21 @@
 name: STF — coleta de jurisprudência
 
 on:
-  schedule:
-    # Segunda-feira, 8h UTC (5h BR) — depois do cron semanal de tribunais.
-    - cron: '0 8 * * 1'
+  # AGENDAMENTO DESATIVADO ATÉ A PRIMEIRA EXECUÇÃO SUPERVISIONADA.
+  #
+  # A hipótese central deste workflow — que o Chromium do GitHub Actions vence
+  # o desafio JavaScript do AWS WAF de jurisprudencia.stf.jus.br — nunca foi
+  # testada. Requisição server-side comum recebe HTTP 202 com corpo vazio e
+  # `x-amzn-waf-action: challenge`; se o navegador do runner também for barrado,
+  # toda a Fase 2 precisa de replanejamento.
+  #
+  # Rodar `workflow_dispatch` manualmente uma vez, conferir o job verde e o
+  # registro de `stf-runner` em ScraperHealthLog, e SÓ ENTÃO descomentar o
+  # bloco abaixo para o agendamento semanal entrar em vigor.
+  #
+  # schedule:
+  #   # Segunda-feira, 8h UTC (5h BR) — depois do cron semanal de tribunais.
+  #   - cron: '0 8 * * 1'
   workflow_dispatch:
 
 jobs:
