@@ -25,7 +25,12 @@ vi.mock('@/lib/tribunal-scrapers/classifier', () => ({
   generateDecisionSummary: (...a: unknown[]) => mockSummary(...a),
 }));
 
-import { persistirDecisoesStf, montarDadosStf, SOURCE_API_STF } from '../persistir';
+import {
+  persistirDecisoesStf,
+  montarDadosStf,
+  aplicarAmarracaoAutoritativa,
+  SOURCE_API_STF,
+} from '../persistir';
 
 function decisao(over: Partial<StfDecisaoNormalizada> = {}): StfDecisaoNormalizada {
   return {
@@ -112,6 +117,43 @@ describe('montarDadosStf', () => {
   });
 });
 
+describe('aplicarAmarracaoAutoritativa', () => {
+  it('aprova automaticamente um julgado pending que amarra artigo da 14.133', () => {
+    const d = decisao({ artigos14133: ['75'] });
+    const resultado = aplicarAmarracaoAutoritativa(d, { ...CLASSIFICACAO, approvalStatus: 'pending' });
+    expect(resultado.approvalStatus).toBe('auto_approved');
+  });
+
+  it('aprova automaticamente um julgado auto_rejected que amarra artigo da 14.133', () => {
+    const d = decisao({ artigos14133: ['75'] });
+    const resultado = aplicarAmarracaoAutoritativa(d, { ...CLASSIFICACAO, approvalStatus: 'auto_rejected' });
+    expect(resultado.approvalStatus).toBe('auto_approved');
+  });
+
+  it('não altera nada quando o julgado não amarra nenhum artigo da 14.133', () => {
+    const d = decisao({ artigos14133: [] });
+    const classification = { ...CLASSIFICACAO, approvalStatus: 'pending' as const };
+    const resultado = aplicarAmarracaoAutoritativa(d, classification);
+    expect(resultado).toEqual(classification);
+  });
+
+  it('registra no reasoning que a aprovação veio da amarração à norma, citando os artigos', () => {
+    const d = decisao({ artigos14133: ['75', '90'] });
+    const resultado = aplicarAmarracaoAutoritativa(d, { ...CLASSIFICACAO, approvalStatus: 'pending' });
+    expect(resultado.reasoning).toContain('75, 90');
+  });
+
+  it('preserva relevanceScore, themes e confidence do classificador quando a regra dispara', () => {
+    const d = decisao({ artigos14133: ['75'] });
+    const classification = { ...CLASSIFICACAO, approvalStatus: 'pending' as const, relevanceScore: 12, themes: ['x'], confidence: 33 };
+    const resultado = aplicarAmarracaoAutoritativa(d, classification);
+    expect(resultado.relevanceScore).toBe(12);
+    expect(resultado.themes).toEqual(['x']);
+    expect(resultado.confidence).toBe(33);
+    expect(resultado.suggestedCourses).toBe(classification.suggestedCourses);
+  });
+});
+
 describe('persistirDecisoesStf', () => {
   it('cria decisão inédita', async () => {
     const r = await persistirDecisoesStf([decisao()], {});
@@ -149,8 +191,20 @@ describe('persistirDecisoesStf', () => {
 
   it('só gera resumo IA para decisão auto_approved', async () => {
     mockClassify.mockResolvedValue({ ...CLASSIFICACAO, approvalStatus: 'pending' });
-    await persistirDecisoesStf([decisao()], {});
+    // Sem amarração à norma, para isolar do overlay de aplicarAmarracaoAutoritativa
+    // (testado separadamente) — aqui o que se testa é o gate por approvalStatus puro.
+    await persistirDecisoesStf([decisao({ artigos14133: [] })], {});
     expect(mockSummary).not.toHaveBeenCalled();
+  });
+
+  it('amarração à norma vira auto_approved já a tempo de gerar resumo IA (ordem: overlay antes da decisão de resumir)', async () => {
+    mockClassify.mockResolvedValue({ ...CLASSIFICACAO, approvalStatus: 'pending' });
+    const d = decisao({ artigos14133: ['75'] });
+    await persistirDecisoesStf([d], {});
+    expect(mockSummary).toHaveBeenCalledTimes(1);
+    const data = mockCreate.mock.calls[0][0].data;
+    expect(data.approvalStatus).toBe('auto_approved');
+    expect(data.isRelevant).toBe(true);
   });
 
   it('um erro num documento não aborta o lote', async () => {
@@ -185,7 +239,9 @@ describe('persistirDecisoesStf — preserva julgamento humano em update', () => 
   it('classificação que não é auto_approved (summary calculado null): update não sobrescreve resumo existente', async () => {
     mockFindUnique.mockResolvedValue({ id: 'existente', reviewedBy: null, summary: 'resumo antigo' });
     mockClassify.mockResolvedValue({ ...CLASSIFICACAO, approvalStatus: 'pending' });
-    await persistirDecisoesStf([decisao()], { forcar: true });
+    // Sem amarração à norma — senão o overlay de aplicarAmarracaoAutoritativa
+    // forçaria auto_approved e o resumo deixaria de ser null.
+    await persistirDecisoesStf([decisao({ artigos14133: [] })], { forcar: true });
     const data = mockUpdate.mock.calls[0][0].data;
     expect(data).not.toHaveProperty('summary');
   });

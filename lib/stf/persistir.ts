@@ -32,6 +32,36 @@ export interface ResultadoPersistenciaStf {
   mensagensErro: string[];
 }
 
+/**
+ * Amarração à norma (`artigos14133`) é fato, não heurística: vem do campo
+ * estruturado `documental_legislacao_citada_texto` da própria API do STF —
+ * se o STF diz que o acórdão cita art. da Lei 14.133, ele é relevante para
+ * um site sobre a Lei 14.133, independentemente do escore de palavra-chave
+ * do classificador. Por isso um julgado com amarração é aprovado
+ * automaticamente, sobrepondo o veredito do classificador.
+ *
+ * Aplicada logo após `classifyDecision` (antes da decisão de gerar resumo
+ * IA e de `montarDadosStf`), para que resumo e approvalStatus fiquem
+ * consistentes — ver `persistirDecisoesStf`.
+ *
+ * `relevanceScore`, `themes`, `confidence` e `suggestedCourses` são medidas
+ * do classificador e não são alteradas por esta sobreposição.
+ */
+export function aplicarAmarracaoAutoritativa(
+  d: StfDecisaoNormalizada,
+  classification: ClassificationResult
+): ClassificationResult {
+  if (d.artigos14133.length === 0) {
+    return classification;
+  }
+
+  return {
+    ...classification,
+    approvalStatus: 'auto_approved',
+    reasoning: `${classification.reasoning}; auto-aprovado: amarração autoritativa à Lei 14.133 (art. ${d.artigos14133.join(', ')}) via legislação citada do STF`,
+  };
+}
+
 export function montarDadosStf(
   d: StfDecisaoNormalizada,
   classification: ClassificationResult,
@@ -142,12 +172,15 @@ export async function persistirDecisoesStf(
         continue;
       }
 
-      const classification = await classifyDecision({
-        title: d.title,
-        ementa: d.ementa,
-        decisionType: d.decisionType,
-        tribunalCode: 'STF',
-      });
+      const classification = aplicarAmarracaoAutoritativa(
+        d,
+        await classifyDecision({
+          title: d.title,
+          ementa: d.ementa,
+          decisionType: d.decisionType,
+          tribunalCode: 'STF',
+        })
+      );
 
       const summary =
         classification.approvalStatus === 'auto_approved'
