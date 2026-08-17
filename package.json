@@ -30,7 +30,8 @@
     "migration:api:status": "tsx scripts/api-migration-status.ts",
     "migration:lei-articles:backfill": "tsx scripts/backfill-lei-articles-arr.ts",
     "ficha:aplicar": "dotenv -e .env.local -- tsx scripts/aplicar-ficha-atualizacao.ts",
-    "import:stf": "tsx --env-file=.env.local scripts/import-stf-jurisprudencia.ts"
+    "import:stf": "tsx --env-file=.env.local scripts/import-stf-jurisprudencia.ts",
+    "stf:coletar": "tsx --env-file=.env.local scripts/stf-runner.ts"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.78.0",

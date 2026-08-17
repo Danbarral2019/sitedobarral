@@ -1,16 +1,24 @@
 /**
- * Coleta semanal da jurisprudência do STF.
+ * Coleta mensal da jurisprudência do STF — rodada MANUALMENTE, na máquina do
+ * Daniel. Não roda em CI. Veja o porquê abaixo.
  *
- * O host jurisprudencia.stf.jus.br fica atrás de um AWS WAF que responde
- * HTTP 202 + `x-amzn-waf-action: challenge` a qualquer cliente que não execute
- * o desafio JavaScript. Verificado em 16/08/2026: nem headers completos de
- * navegador nem reuso de sessão passam. Por isso a consulta é feita DENTRO de
- * um Chromium real, via page.evaluate, e só o resultado viaja para a rota de
- * ingestão do site.
+ * O host jurisprudencia.stf.jus.br fica atrás de um AWS WAF. Medições de
+ * 16-17/08/2026, todas na mesma máquina e no mesmo minuto:
  *
- * Uso local:
- *   STF_INGEST_URL=http://localhost:3000/api/ingest/stf \
- *   CRON_SECRET=... npx tsx scripts/stf-runner.ts
+ *   requisição server-side (curl/fetch)  → 202, corpo vazio, x-amzn-waf-action: challenge
+ *   Chromium HEADLESS                    → 403
+ *   Chromium HEADED (janela visível)     → 200 ✅
+ *
+ * Ou seja: o bloqueio não é de IP nem é o desafio JavaScript em si — é
+ * DETECÇÃO DE HEADLESS. Por isso `headless: false` abaixo não é preferência,
+ * é requisito de funcionamento, e por isso este script não roda no GitHub
+ * Actions (ver o cabeçalho de .github/workflows/stf-jurisprudencia.yml).
+ *
+ * Uso:
+ *   npm run stf:coletar
+ *
+ * Abre uma janela de Chromium por ~30s e posta o resultado em
+ * POST /api/ingest/stf (produção, por padrão — ver `ingestUrl` abaixo).
  */
 
 import { chromium } from 'playwright';
@@ -19,6 +27,8 @@ import { montarCorpoConsulta } from '@/lib/stf/consulta';
 const PAGINA_BUSCA = 'https://jurisprudencia.stf.jus.br/pages/search';
 const CAMINHO_API = '/api/search/search';
 const DIAS_JANELA = 30;
+/** Tempo para o desafio JS do WAF resolver antes da primeira consulta. */
+const ESPERA_DESAFIO_MS = 12_000;
 
 function dataLimite(dias: number): string {
   const d = new Date(Date.now() - dias * 24 * 60 * 60 * 1000);
@@ -26,11 +36,19 @@ function dataLimite(dias: number): string {
 }
 
 async function main() {
-  const ingestUrl = process.env.STF_INGEST_URL;
+  // STF_INGEST_URL explícito vence; senão deriva da base do site. A guarda
+  // continua valendo: sem uma URL de destino OU sem o segredo, aborta antes
+  // de abrir o navegador.
+  const base = process.env.NEXT_PUBLIC_BASE_URL?.replace(/\/+$/, '');
+  const ingestUrl = process.env.STF_INGEST_URL || (base ? `${base}/api/ingest/stf` : null);
   const cronSecret = process.env.CRON_SECRET;
 
-  if (!ingestUrl || !cronSecret) {
-    console.error('STF_INGEST_URL e CRON_SECRET são obrigatórios.');
+  if (!ingestUrl) {
+    console.error('Defina STF_INGEST_URL, ou NEXT_PUBLIC_BASE_URL para derivá-la.');
+    process.exit(1);
+  }
+  if (!cronSecret) {
+    console.error('CRON_SECRET é obrigatório (o mesmo valor configurado na Vercel).');
     process.exit(1);
   }
 
@@ -45,13 +63,19 @@ async function main() {
     }),
   ];
 
-  const browser = await chromium.launch();
+  // headless: false é REQUISITO, não preferência — headless recebe 403. Ver
+  // o cabeçalho deste arquivo para as medições.
+  const browser = await chromium.launch({ headless: false });
   const page = await browser.newPage();
   const documentos: unknown[] = [];
   let erroColeta: unknown = null;
 
   try {
-    await page.goto(PAGINA_BUSCA, { waitUntil: 'networkidle', timeout: 120_000 });
+    // 'networkidle' NUNCA resolve aqui: o portal é um SPA que mantém conexões
+    // abertas, e a espera estourava 120s sem nunca chegar à consulta. Espera-se
+    // o DOM e então dá-se tempo explícito para o desafio do WAF resolver.
+    await page.goto(PAGINA_BUSCA, { waitUntil: 'domcontentloaded', timeout: 60_000 });
+    await page.waitForTimeout(ESPERA_DESAFIO_MS);
 
     for (const corpo of consultas) {
       const lote = await page.evaluate(
@@ -97,8 +121,17 @@ async function main() {
     body: JSON.stringify({ documentos }),
   });
 
-  const json = await res.json();
-  console.log(`ingestão respondeu ${res.status}:`, JSON.stringify(json));
+  // A resposta nem sempre é JSON (deploy fora do ar devolve HTML de 404, por
+  // exemplo). Ler como texto e só então tentar parsear evita trocar uma
+  // mensagem clara por um stack trace de JSON.parse.
+  const corpoResposta = await res.text();
+  let resumo: string;
+  try {
+    resumo = JSON.stringify(JSON.parse(corpoResposta));
+  } catch {
+    resumo = `resposta não-JSON (${corpoResposta.slice(0, 120).replace(/\s+/g, ' ')}...)`;
+  }
+  console.log(`ingestão respondeu ${res.status}: ${resumo}`);
 
   // A rota devolve 422 para lote vazio de propósito — o job precisa ficar
   // vermelho nesse caso, não verde e mudo. O POST agora acontece sempre
