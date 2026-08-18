@@ -17,9 +17,16 @@ export interface DumpMensal {
 export async function listarDumps(slug: string): Promise<DumpMensal[]> {
   const url = `${BASE_DADOS_ABERTOS_STJ}/api/3/action/package_search?q=name:${slug}&rows=1`;
   const corpo = await baixar(url);
-  const dados = JSON.parse(corpo) as {
-    result?: { results?: Array<{ resources?: Array<Record<string, unknown>> }> };
-  };
+
+  let dados: { result?: { results?: Array<{ resources?: Array<Record<string, unknown>> }> } };
+  try {
+    dados = JSON.parse(corpo);
+  } catch (err) {
+    const amostra = corpo.substring(0, 120);
+    throw new Error(
+      `Falha ao parsear JSON para dataset "${slug}": ${err instanceof Error ? err.message : String(err)}. Primeiros 120 caracteres: ${amostra}`
+    );
+  }
 
   const pacote = dados.result?.results?.[0];
   if (!pacote) return [];

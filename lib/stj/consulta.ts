@@ -10,6 +10,7 @@
  */
 
 import { BASE_DADOS_ABERTOS_STJ } from './constantes';
+import { fetchWithRetry } from '@/lib/tribunal-scrapers/utils';
 
 const CABECALHOS_NAVEGADOR: Record<string, string> = {
   'User-Agent':
@@ -36,9 +37,10 @@ export async function baixar(
   url: string,
   referer: string = `${BASE_DADOS_ABERTOS_STJ}/`
 ): Promise<string> {
-  const resposta = await fetch(url, {
+  const resposta = await fetchWithRetry(url, {
     headers: { ...CABECALHOS_NAVEGADOR, Referer: referer },
-    signal: AbortSignal.timeout(90_000),
+    timeoutMs: 90_000,
+    maxRetries: 3,
   });
 
   if (!resposta.ok) {
