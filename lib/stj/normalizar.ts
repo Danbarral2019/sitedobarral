@@ -43,7 +43,7 @@ function dataDeRotuloDiario(valor: string | null | undefined): Date | null {
 
 function limpar(valor: string | null | undefined): string {
   // Remover caracteres invisíveis (U+200B, U+200C, U+200D, U+FEFF)
-  let texto = (valor ?? '').replace(/[​‌‍﻿]/g, '');
+  const texto = (valor ?? '').replace(/[​‌‍﻿]/g, '');
   // Colapsar espaços e trim
   return texto.replace(/\s+/g, ' ').trim();
 }
