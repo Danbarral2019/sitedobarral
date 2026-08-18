@@ -248,7 +248,7 @@ export const BASE_DADOS_ABERTOS_STJ = 'https://dadosabertos.web.stj.jus.br';
  *
  * Ficam de fora Segunda Seção e Terceira/Quarta Turma (direito privado) e
  * Terceira Seção e Quinta/Sexta Turma (penal). Rendimento medido em 12 dumps
- * amostrados: 117 relevantes em 2.497 acórdãos (4,7%).
+ * amostrados: 82 relevantes em 2.497 acórdãos (3,3%).
  */
 export const DATASETS_STJ = [
   { slug: 'espelhos-de-acordaos-corte-especial', orgao: 'Corte Especial' },
@@ -261,9 +261,18 @@ export const TRIBUNAL_NAME_STJ = 'Superior Tribunal de Justiça';
 export const SOURCE_API_STJ = 'stj-espelhos-dados-abertos';
 export const SCRAPER_CODE_STJ = 'stj-espelhos';
 
-/** Vocabulário do recorte — condição 2 do critério do spec. */
+/**
+ * Vocabulário do recorte — condição 2 do critério do spec.
+ *
+ * Cada termo é ancorado em `\b` por medição, não por estilo: sem a âncora,
+ * `licita` casa dentro de "explicitação", "explicitamente" e "implicitamente",
+ * o que respondia por 29% do recorte (33 falsos positivos em 115).
+ *
+ * `inexigibilidade` exige o complemento "de licitação" — isolado, casa "ação
+ * declaratória de inexigibilidade de débito", alheia ao tema.
+ */
 export const RE_VOCABULARIO_LICITACAO =
-  /licita|contrato administrativo|preg[aã]o|dispensa de licita|inexigibilidade|concorr[eê]ncia p[uú]blica|tomada de pre[cç]o|contrata[cç][aã]o p[uú]blica/i;
+  /\blicita|\bcontrato administrativo|\bpreg[aã]o|\bdispensa de licita|\binexigibilidade de licita|\bconcorr[eê]ncia p[uú]blica|\btomada de pre[cç]o|\bcontrata[cç][aã]o p[uú]blica/i;
 
 /** Condição 1 — normas cuja citação basta para o espelho entrar. */
 export const RE_NORMAS_LICITACAO = /LEI[-:]0*(14133|8666|10520)\b/i;
@@ -404,8 +413,9 @@ Criar `lib/stj/recorte.ts`:
  *      rede de segurança para o julgado que discute o tema sem citar a
  *      norma no campo estruturado.
  *
- * Rendimento medido sobre 12 dumps (2.497 acórdãos): 117 entram, 4,7%.
- * Desvio grande desse patamar é sinal de regex frouxa.
+ * Rendimento medido sobre 12 dumps (2.497 acórdãos): 82 entram, 3,3%.
+ * Desvio grande desse patamar é sinal de regex frouxa — foi assim que os 29%
+ * de falsos positivos da primeira versão apareceram.
  */
 
 import { RE_NORMAS_LICITACAO, RE_VOCABULARIO_LICITACAO } from './constantes';
@@ -954,6 +964,9 @@ describe('aplicarAmarracaoAutoritativa', () => {
 describe('persistirDecisoesStj', () => {
   it('cria quando o julgado ainda não existe', async () => {
     mockFindUnique.mockResolvedValue(null);
+    // veredito definido: com a classificação fraca (pending) o julgado seria
+    // descartado por `descartarPendentes`, que é o default
+    mockClassify.mockResolvedValue({ ...CLASSIFICACAO_FRACA, approvalStatus: 'auto_approved' });
     const r = await persistirDecisoesStj([decisao()], {});
     expect(r.criados).toBe(1);
     expect(mockCreate).toHaveBeenCalledTimes(1);
@@ -969,6 +982,7 @@ describe('persistirDecisoesStj', () => {
 
   it('atualiza quando forcar está ligado', async () => {
     mockFindUnique.mockResolvedValue({ id: 'x', reviewedBy: null, summary: null });
+    mockClassify.mockResolvedValue({ ...CLASSIFICACAO_FRACA, approvalStatus: 'auto_approved' });
     const r = await persistirDecisoesStj([decisao()], { forcar: true });
     expect(r.atualizados).toBe(1);
     expect(mockUpdate).toHaveBeenCalledTimes(1);
@@ -976,6 +990,7 @@ describe('persistirDecisoesStj', () => {
 
   it('não recalcula o veredito de quem um humano já revisou', async () => {
     mockFindUnique.mockResolvedValue({ id: 'x', reviewedBy: 'daniel', summary: null });
+    mockClassify.mockResolvedValue({ ...CLASSIFICACAO_FRACA, approvalStatus: 'auto_approved' });
     await persistirDecisoesStj([decisao()], { forcar: true });
     const dados = mockUpdate.mock.calls[0][0].data;
     expect(dados).not.toHaveProperty('approvalStatus');
@@ -996,6 +1011,21 @@ describe('persistirDecisoesStj', () => {
     expect(mockSummary).not.toHaveBeenCalled();
   });
 
+  it('descarta o julgado que fica pending, sem gravar', async () => {
+    mockFindUnique.mockResolvedValue(null);
+    const r = await persistirDecisoesStj([decisao()], {});
+    expect(r.criados).toBe(0);
+    expect(r.ignorados).toBe(1);
+    expect(mockCreate).not.toHaveBeenCalled();
+  });
+
+  it('grava o julgado auto_rejected — veredito definido entra', async () => {
+    mockFindUnique.mockResolvedValue(null);
+    mockClassify.mockResolvedValue({ ...CLASSIFICACAO_FRACA, approvalStatus: 'auto_rejected' });
+    const r = await persistirDecisoesStj([decisao()], {});
+    expect(r.criados).toBe(1);
+  });
+
   it('em dry-run não escreve nem classifica', async () => {
     mockFindUnique.mockResolvedValue(null);
     const r = await persistirDecisoesStj([decisao()], { dryRun: true });
@@ -1005,6 +1035,7 @@ describe('persistirDecisoesStj', () => {
   });
 
   it('um erro em uma decisão não aborta as demais', async () => {
+    mockClassify.mockResolvedValue({ ...CLASSIFICACAO_FRACA, approvalStatus: 'auto_approved' });
     mockFindUnique.mockResolvedValueOnce(null).mockRejectedValueOnce(new Error('rede caiu')).mockResolvedValueOnce(null);
     const r = await persistirDecisoesStj(
       [decisao({ fullIdentifier: 'a' }), decisao({ fullIdentifier: 'b' }), decisao({ fullIdentifier: 'c' })],
@@ -1049,6 +1080,14 @@ export interface OpcoesPersistenciaStj {
   forcar?: boolean;
   /** Resumo IA custa Gemini por julgado. Default true; o backfill desliga. */
   gerarResumo?: boolean;
+  /**
+   * Descarta o julgado que o classificador deixa em `pending`, gravando só
+   * veredito definido. Default true — decisão do Daniel em 18/08: medido
+   * sobre 614 espelhos reais, o acervo inteiro despejaria ~680 pendentes numa
+   * fila de revisão que já tem 211 do STF parados. A zona cinzenta é
+   * recuperável depois; os dumps continuam publicados.
+   */
+  descartarPendentes?: boolean;
 }
 
 export interface ResultadoPersistenciaStj {
@@ -1147,6 +1186,7 @@ export async function persistirDecisoesStj(
   opcoes: OpcoesPersistenciaStj
 ): Promise<ResultadoPersistenciaStj> {
   const gerarResumo = opcoes.gerarResumo !== false;
+  const descartarPendentes = opcoes.descartarPendentes !== false;
   const r: ResultadoPersistenciaStj = {
     criados: 0,
     atualizados: 0,
@@ -1182,6 +1222,12 @@ export async function persistirDecisoesStj(
           tribunalCode: 'STJ',
         })
       );
+
+      // Zona cinzenta não entra: ver `descartarPendentes`.
+      if (descartarPendentes && classification.approvalStatus === 'pending') {
+        r.ignorados++;
+        continue;
+      }
 
       const summary =
         gerarResumo && classification.approvalStatus === 'auto_approved'
@@ -1407,12 +1453,12 @@ Em `package.json`, na seção `scripts`, logo após a linha de `stf:coletar`, ac
 - [ ] **Step 4: Rodar um dry-run curto e conferir o rendimento contra o medido**
 
 Run: `npm run stj:coletar -- --dry-run`
-Expected: 8 dumps lidos (2 por órgão), e a razão `relevantes / espelhosVistos` em torno de **4,7%**. Um número muito acima disso indica regex do recorte frouxa; muito abaixo, restritiva demais. **Não prossiga sem conferir.**
+Expected: 8 dumps lidos (2 por órgão), e a razão `relevantes / espelhosVistos` em torno de **3,3%**. Um número muito acima disso indica regex do recorte frouxa; muito abaixo, restritiva demais. **Não prossiga sem conferir.**
 
 - [ ] **Step 5: Rodar o backfill do acervo, sem resumo IA**
 
 Run: `npm run stj:coletar -- --tudo --sem-resumo`
-Expected: ~208 dumps, ~43 mil espelhos vistos, ~2.000 relevantes persistidos. Leva dezenas de minutos. `--sem-resumo` evita milhares de chamadas ao Gemini nesta etapa.
+Expected: ~208 dumps, ~43 mil espelhos vistos, ~1.400 relevantes de que só os de veredito definido são gravados (~380 aprovados + rejeitados). Leva dezenas de minutos. `--sem-resumo` evita milhares de chamadas ao Gemini nesta etapa.
 
 - [ ] **Step 6: Conferir o resultado no banco**
 

@@ -48,6 +48,18 @@ Conferido no dump de junho/2026 da Primeira Seção (84 registros):
 
 Também vêm `ministroRelator`, `nomeOrgaoJulgador`, `siglaClasse`, `numeroRegistro`, `decisao` (dispositivo), `jurisprudenciaCitada` e `acordaosSimilares`.
 
+> ## ⚠️ Errata de 18/08, posterior à aprovação — leia antes do resto
+>
+> Três premissas deste spec caíram quando o código da Task 2 rodou contra os dumps reais. O texto abaixo foi mantido como estava e corrigido aqui, para o erro não se perder:
+>
+> **1. A amarração determinística à Lei 14.133 não existe no STJ.** Este spec a deu como justificativa principal do conector. Medição: **1 acórdão em 2.497** cita 14.133/8.666/10.520 em `referenciasLegislativas`. Acórdãos inequivocamente de licitação vêm com o campo **vazio** — ex. `AREsp 202303185934` ("AÇÃO POPULAR. LICITAÇÃO. CONTRATAÇÃO DE EMPRESA… PROIBIÇÃO DE LICITAR"). O erro foi extrapolar de "50 de 84 têm `referenciasLegislativas`" sem verificar **quais leis** eram: são CPC, súmulas e Constituição. A regra de auto-aprovação por amarração continua no código, mas é praticamente inerte aqui — ao contrário do STF, onde rendeu 114 amarrações em 600 julgados.
+>
+> **2. O rendimento de 4,7% estava inflado.** O vocabulário usava `/licita/` sem fronteira de palavra, que casa dentro de *explicitação*, *explicitamente* e *implicitamente*. Eram **33 falsos positivos em 115** — 29% do recorte. Com `\b` antes de cada termo, o rendimento real é **3,3%**, projetando ~1.400 julgados e não ~2.000. O termo `inexigibilidade` também era ambíguo (casava "ação declaratória de inexigibilidade de débito") e passou a exigir o contexto: `inexigibilidade de licitação`.
+>
+> **3. O ganho real é outro, e se sustenta.** Não é a amarração — é ter **ementa jurídica em vez de capa processual**. Medido com o classificador real sobre 614 espelhos da Segunda Turma: **9 auto-aprovados, 16 pendentes, 8 rejeitados** entre os 33 relevantes. Contra **0 aprovados em 254** do DataJud. A troca de fonte continua justificada.
+>
+> **Decisão do Daniel decorrente da errata:** julgado que o classificador deixe em `pending` **não é persistido**. Só entram `auto_approved` e `auto_rejected`. Sem isso o backfill despejaria ~680 itens numa fila de revisão que já tem 211 do STF parados. A zona cinzenta é recuperável depois — os dumps continuam publicados.
+
 O formato das referências legislativas é o ponto decisivo:
 
 ```
@@ -94,9 +106,11 @@ Projeção para 4 órgãos × 52 meses (208 dumps): **~43 mil acórdãos varrido
 **Critério do recorte**, explícito para não ficar a cargo da implementação — o espelho entra se satisfizer **qualquer** das duas condições:
 
 1. `referenciasLegislativas` cita a Lei 14.133/2021, a 8.666/1993 ou a 10.520/2002 (`LEI:014133`, `LEI:008666`, `LEI:010520`); **ou**
-2. `ementa` ou `teseJuridica` casa o vocabulário de licitações: *licitação*, *contrato administrativo*, *pregão*, *dispensa de licitação*, *inexigibilidade*, *concorrência pública*, *tomada de preços*, *contratação pública*.
+2. `ementa` ou `teseJuridica` casa o vocabulário de licitações, **cada termo ancorado em fronteira de palavra (`\b`)**: *licita…*, *contrato administrativo*, *pregão*, *dispensa de licitação*, ***inexigibilidade de licitação***, *concorrência pública*, *tomada de preços*, *contratação pública*.
 
-A condição 1 sozinha é suficiente e não passa por texto livre — é a mesma amarração determinística que justifica o conector. A condição 2 é a rede de segurança para o julgado que discute o tema sem citar a norma no campo estruturado.
+A condição 1 não passa por texto livre, mas — ver Errata — dispara em 1 de 2.497 acórdãos: na prática quem seleciona é a condição 2. A âncora `\b` não é detalhe de estilo: sem ela `licita` casa dentro de *explicitação* e *implicitamente*, o que respondia por 29% do recorte. E `inexigibilidade` isolado casa "ação declaratória de inexigibilidade de débito", alheia ao tema.
+
+**Persistência restrita a veredito definido:** o espelho que passa no recorte é classificado por `classifyDecision`, e só é gravado se o resultado for `auto_approved` ou `auto_rejected`. `pending` é descartado — decisão do Daniel em 18/08, para o backfill não criar ~680 itens de fila de revisão sobre os 211 do STF já parados.
 
 ## 4. Arquitetura
 
