@@ -7,46 +7,71 @@ describe('detectQueryDomain — inclusão de jurisprudência', () => {
     expect(d.includeTribunalDecisions).toBe(true);
   });
 
-  it('NÃO inclui tribunais para query pura de Lei 14.133', () => {
+  // Este caso afirmava o contrário até 18/08/2026: `includeTribunalDecisions`
+  // era `false` para query pura de Lei 14.133. O contrato foi invertido de
+  // propósito, com medição — ver o describe "inclusão INCONDICIONAL" abaixo.
+  // A parte que continua valendo é a de baixo: pergunta administrativa comum
+  // não pode ativar o boost trabalhista.
+  it('query pura de Lei 14.133 agora INCLUI tribunais, mas sem sinal trabalhista', () => {
     const d = detectQueryDomain('prazo para recurso em pregão eletrônico na Lei 14.133', 'all');
-    expect(d.includeTribunalDecisions).toBe(false);
+    expect(d.includeTribunalDecisions).toBe(true);
     expect(d.tribunalBoost).toBeUndefined();
     expect(d.isStronglyLabor).toBe(false);
   });
 });
 
-describe('detectQueryDomain — Supremo Tribunal Federal', () => {
-  // Ate 08/2026 a lista de padroes cobria TCEs e TST/trabalhista, mas NAO o
-  // STF. O efeito pratico: as 254 decisoes do STF sobre licitacoes estavam
-  // indexadas e o chat nunca as incluia, porque o gatilho nunca disparava.
+describe('detectQueryDomain — inclusao INCONDICIONAL de decisoes de tribunal', () => {
+  // Historico, porque a decisao mudou duas vezes em dois dias e o motivo importa.
   //
-  // A inclusao e deliberadamente CONDICIONAL, no mesmo desenho ja usado para
-  // TCE e TST: so entra quando o usuario pergunta do Supremo. Medido: das 93
-  // queries do golden set, ZERO mencionam STF ou Supremo, entao o custo de
-  // retrieval no conjunto medido e exatamente nulo.
-  it('sigla STF inclui decisoes de tribunal', () => {
-    expect(detectQueryDomain('o que o STF decidiu sobre dispensa de licitacao').includeTribunalDecisions).toBe(true);
+  // Ate 08/2026 a inclusao era condicional a padroes de tribunal (TCE, TST).
+  // Em 17/08 acrescentei padroes de STF, achando que resolvia -- e o golden
+  // set nao conseguia me contradizer, porque nenhuma das 93 queries anotadas
+  // tinha decisao de tribunal como resposta certa. A balanca so tinha peso de
+  // um lado: incluir decisoes so podia atrapalhar.
+  //
+  // Com 10 queries de jurisprudencia anotadas (ground truth vindo dos
+  // metadados estruturados do STF, nao do ranking), deu para medir os dois
+  // lados. O condicional disparava em 1 de 10 perguntas, porque gente pergunta
+  // pelo ASSUNTO e nao pelo nome do tribunal:
+  //
+  //   alternativa            93 antigas   10 novas   103 total
+  //   condicional               60,9%        0,0%      51,5%
+  //   INCONDICIONAL             57,1%       70,0%      59,1%  <-- escolhida
+  //   incondicional + boost      4,2%       86,7%      16,9%  <-- armadilha
+  //
+  // O boost por tribunal foi medido e descartado: e o melhor para o STF e
+  // destroi todo o resto, porque multiplica a similaridade em qualquer
+  // pergunta.
+  it('inclui decisoes mesmo sem mencao a tribunal nenhum', () => {
+    expect(detectQueryDomain('credenciamento pode substituir a licitacao?', 'all').includeTribunalDecisions).toBe(true);
   });
 
-  it('nome por extenso inclui decisoes de tribunal', () => {
-    expect(detectQueryDomain('jurisprudencia do Supremo Tribunal Federal sobre licitacoes').includeTribunalDecisions).toBe(true);
+  it('inclui decisoes em pergunta puramente de Lei 14.133', () => {
+    expect(detectQueryDomain('prazo de vigencia dos contratos na lei 14133', 'all').includeTribunalDecisions).toBe(true);
   });
 
-  it('"supremo" isolado tambem conta', () => {
-    expect(detectQueryDomain('entendimento do Supremo sobre contratacao direta').includeTribunalDecisions).toBe(true);
+  it("respeita o opt-out explicito do scope 'no-tst'", () => {
+    expect(detectQueryDomain('qualquer pergunta', 'no-tst').scopedOptions.includeTribunalDecisions).toBe(false);
   });
 
-  it('e case-insensitive', () => {
-    expect(detectQueryDomain('decisoes do stf sobre pregao').includeTribunalDecisions).toBe(true);
+  it("'tst-only' segue forcando o ramo TST", () => {
+    const o = detectQueryDomain('qualquer', 'tst-only').scopedOptions;
+    expect(o.includeTribunalDecisions).toBe(true);
+    expect(o.tribunalCodeFilter).toBe('TST');
   });
 
-  it('NAO dispara em palavra que apenas contem as letras s-t-f', () => {
-    // Guarda do : sem ele, "manifestfoo" e afins ligariam o ramo.
-    expect(detectQueryDomain('requisitos do estudo tecnico preliminar').includeTribunalDecisions).toBe(false);
+  it('NAO ativa boost trabalhista numa pergunta sobre o Supremo', () => {
+    // Regressao: os padroes de STF acrescentados em 17/08 faziam
+    // "Supremo Tribunal Federal" casar DUAS vezes, e tribunalMatchCount >= 2
+    // ativava isStronglyLabor -> boost do TST numa pergunta do STF.
+    const d = detectQueryDomain('jurisprudencia do Supremo Tribunal Federal sobre licitacoes', 'all');
+    expect(d.isStronglyLabor).toBe(false);
+    expect(d.tribunalBoost).toBeUndefined();
   });
 
-  it('NAO ativa o boost trabalhista — STF nao e materia do TST', () => {
-    expect(detectQueryDomain('o que o STF decidiu sobre licitacao').tribunalBoost).toBeUndefined();
+  it('mantem o boost trabalhista quando o sinal e de fato trabalhista', () => {
+    const d = detectQueryDomain('responsabilidade subsidiaria do tomador na justica do trabalho', 'all');
+    expect(d.tribunalBoost).toEqual({ code: 'TST', factor: 1.2 });
   });
 });
 
