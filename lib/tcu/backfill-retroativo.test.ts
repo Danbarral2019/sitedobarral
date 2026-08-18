@@ -53,8 +53,15 @@ describe('montarDadosDocument', () => {
     expect(d.courseId).toBeNull();
   });
 
-  it('nao entra em fila de embedding nem no contador de auto-importacoes', () => {
-    expect(d.embeddingStatus).toBe('skipped');
+  it('ENTRA na fila de embedding, deixando valer o default do schema', () => {
+    // Nao define a chave: o @default("pending") do Document e quem manda, e o
+    // cron process-index-jobs indexa o no como qualquer outro documento.
+    // Definir 'skipped' aqui (comportamento ate 08/2026) deixava ~5 mil
+    // acordaos do TCU com sumario real fora da busca semantica.
+    expect('embeddingStatus' in d).toBe(false);
+  });
+
+  it('nao entra no contador de auto-importacoes', () => {
     expect(d.reviewedBy).toBe('backfill-grafo');
   });
 
