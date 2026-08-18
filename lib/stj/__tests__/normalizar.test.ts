@@ -42,6 +42,16 @@ describe('normalizarEspelho — datas', () => {
     const d = normalizarEspelho(espelho(), 'Primeira Seção')!;
     expect(d.year).toBe(2026);
   });
+
+  it('detecta overflow silencioso (31 de fevereiro)', () => {
+    const d = normalizarEspelho(espelho({ dataDecisao: '20260231' }), 'Primeira Seção')!;
+    expect(d.dataJulgamento).toBeNull();
+  });
+
+  it('detecta overflow silencioso em rótulo (mês 99)', () => {
+    const d = normalizarEspelho(espelho({ dataPublicacao: 'DJEN DATA:22/99/2026' }), 'Primeira Seção')!;
+    expect(d.dataPublicacao).toBeNull();
+  });
 });
 
 describe('normalizarEspelho — identidade', () => {
@@ -57,6 +67,23 @@ describe('normalizarEspelho — identidade', () => {
 
   it('descarta espelho sem ementa', () => {
     expect(normalizarEspelho(espelho({ ementa: '   ' }), 'Primeira Seção')).toBeNull();
+  });
+
+  it('fallback para ano corrente quando ambas datas nulas e registro inválido', () => {
+    const d = normalizarEspelho(
+      espelho({ dataDecisao: null, dataPublicacao: null, numeroRegistro: 'abc-12345-xyz' }),
+      'Primeira Seção'
+    )!;
+    const currentYear = new Date().getUTCFullYear();
+    expect(d.year).toBe(currentYear);
+  });
+
+  it('usa year do registro quando ambas datas nulas mas registro começa com ano plausível', () => {
+    const d = normalizarEspelho(
+      espelho({ dataDecisao: null, dataPublicacao: null, numeroRegistro: '201501234567' }),
+      'Primeira Seção'
+    )!;
+    expect(d.year).toBe(2015);
   });
 });
 
@@ -81,18 +108,17 @@ describe('normalizarEspelho — amarração à norma', () => {
 
 describe('normalizarEspelho — mojibake', () => {
   /**
-   * Detector de UTF-8 lido como Latin-1.
+   * Detector preciso de UTF-8 lido como Latin-1.
    *
-   * NÃO usar `/Ã[A-Z]/`: em texto maiúsculo português "ÃO" é a terminação mais
-   * comum que existe (FALCÃO, LICITAÇÃO, PREGÃO, SEÇÃO, DECISÃO), e as ementas
-   * do STJ vêm em caixa alta — aquele padrão acusa mojibake em 100% dos textos
-   * legítimos. Medido: 4 falsos positivos em 4 amostras legítimas.
+   * A estrutura de mojibake: UTF-8 lido como Latin-1 sempre produz Ã ou Â
+   * seguido de um caractere no bloco U+0080–U+00BF (Latin-1 Supplement).
    *
-   * O que de fato distingue: o caractere de substituição U+FFFD, "Ã" seguido de
-   * maiúscula que não seja O nem S (as únicas terminações legítimas em caixa
-   * alta), e as sequências clássicas em caixa baixa.
+   * Três ramos:
+   * 1. Caractere de substituição (U+FFFD)
+   * 2. Estrutura completa: [ÃÂ] seguido de qualquer byte no bloco U+0080–U+00BF
+   * 3. Caixa alta: Ã seguido de maiúscula que não seja O ou S (casos do DataJud)
    */
-  const RE_MOJIBAKE = /�|Ã(?![OS])[A-Z]|Ã[©¡­³ºç£µ]/;
+  const RE_MOJIBAKE = /�|[ÃÂ][-¿]|Ã(?![OS])[A-Z]/;
 
   it('não acusa mojibake em acentuação legítima de texto maiúsculo', () => {
     const d = normalizarEspelho(espelho(), 'Primeira Seção')!;
@@ -110,5 +136,35 @@ describe('normalizarEspelho — mojibake', () => {
   it('preserva acentuação legítima', () => {
     const d = normalizarEspelho(espelho(), 'Primeira Seção')!;
     expect(d.relator).toBe('FRANCISCO FALCÃO');
+  });
+
+  it('detecta acentos corrompidos em caixa baixa (Ã© e Ã£)', () => {
+    // "é" corrompido (Ã©): UTF-8 0xC3 0xA9 lido como Latin-1
+    // "ã" corrompido (Ã£): UTF-8 0xC3 0xA3 lido como Latin-1
+    // Ambos casam [ÃÂ][-¿] porque © (U+00A9) e £ (U+00A3) estão em U+0080–U+00BF
+    expect('PaulÃ£').toMatch(RE_MOJIBAKE);
+    expect('PaulÃ©').toMatch(RE_MOJIBAKE);
+  });
+
+  it('confirma que PREGÃO, SEÇÃO, DECISÃO continuam limpos', () => {
+    expect('PREGÃO').not.toMatch(RE_MOJIBAKE);
+    expect('SEÇÃO').not.toMatch(RE_MOJIBAKE);
+    expect('DECISÃO').not.toMatch(RE_MOJIBAKE);
+  });
+});
+
+describe('normalizarEspelho — limpeza de caracteres invisíveis', () => {
+  it('descarta ementa composta só de espaços invisíveis', () => {
+    // U+200B (zero-width space) + U+200C (zero-width non-joiner) + U+200D (zero-width joiner)
+    expect(normalizarEspelho(espelho({ ementa: '​‌‍' }), 'Primeira Seção')).toBeNull();
+  });
+
+  it('remove invisíveis e trata como espaço em branco', () => {
+    // Ementa com invisible characters misturados com texto
+    const d = normalizarEspelho(
+      espelho({ ementa: 'DIREITO​ CIVIL' }), // U+200B entre DIREITO e CIVIL
+      'Primeira Seção'
+    )!;
+    expect(d.ementa).toBe('DIREITO CIVIL');
   });
 });
