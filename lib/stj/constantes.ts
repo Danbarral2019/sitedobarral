@@ -26,11 +26,17 @@ export const SCRAPER_CODE_STJ = 'stj-espelhos';
  * `licita` casa dentro de "explicitação", "explicitamente" e "implicitamente",
  * o que respondia por 29% do recorte (33 falsos positivos em 115).
  *
+ * `\blicita` ainda casa "licitamente" (advérbio: "prova obtida licitamente"),
+ * que não é tema de licitação. A exclusão `(?!mente\b)` é preventiva — não foi
+ * observada em 698 espelhos reais (apenas palavras temáticas: licitação 11,
+ * licitar 8, licitatórios 8, licitantes 3, licitatória 1), mas "licitamente" é
+ * português jurídico válido e a amostra cobre < 2% do acervo do backfill.
+ *
  * `inexigibilidade` exige o complemento "de licitação" — isolado, casa "ação
  * declaratória de inexigibilidade de débito", alheia ao tema.
  */
 export const RE_VOCABULARIO_LICITACAO =
-  /\blicita|\bcontrato administrativo|\bpreg[aã]o|\bdispensa de licita|\binexigibilidade de licita|\bconcorr[eê]ncia p[uú]blica|\btomada de pre[cç]o|\bcontrata[cç][aã]o p[uú]blica/i;
+  /\blicita(?!mente\b)|\bcontrato administrativo|\bpreg[aã]o|\bdispensa de licita|\binexigibilidade de licita|\bconcorr[eê]ncia p[uú]blica|\btomada de pre[cç]o|\bcontrata[cç][aã]o p[uú]blica/i;
 
 /** Condição 1 — normas cuja citação basta para o espelho entrar. */
 export const RE_NORMAS_LICITACAO = /LEI[-:]0*(14133|8666|10520)\b/i;

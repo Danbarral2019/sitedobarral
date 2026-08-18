@@ -81,4 +81,24 @@ describe('ehRelevanteParaBase', () => {
     const e = espelho({ ementa: null, teseJuridica: null, referenciasLegislativas: null });
     expect(ehRelevanteParaBase(e)).toBe(false);
   });
+
+  it('fica de fora quando ementa contém "prova obtida licitamente nos autos"', () => {
+    const e = espelho({ ementa: 'PROCESSUAL CIVIL. PROVA OBTIDA LICITAMENTE NOS AUTOS.' });
+    expect(ehRelevanteParaBase(e)).toBe(false);
+  });
+
+  it('entra quando ementa contém "LICITAÇÃO. PREGÃO ELETRÔNICO."', () => {
+    const e = espelho({ ementa: 'ADMINISTRATIVO. LICITAÇÃO. PREGÃO ELETRÔNICO. CONVALIDAÇÃO.' });
+    expect(ehRelevanteParaBase(e)).toBe(true);
+  });
+
+  it('entra quando ementa contém "os licitantes foram habilitados"', () => {
+    const e = espelho({ ementa: 'LICITAÇÃO. HABILITAÇÃO. OS LICITANTES FORAM HABILITADOS CORRETAMENTE.' });
+    expect(ehRelevanteParaBase(e)).toBe(true);
+  });
+
+  it('entra quando ementa contém "processo licitatório"', () => {
+    const e = espelho({ ementa: 'ADMINISTRATIVO. PROCESSO LICITATÓRIO. NULIDADE.' });
+    expect(ehRelevanteParaBase(e)).toBe(true);
+  });
 });
