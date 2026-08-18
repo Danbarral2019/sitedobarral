@@ -51,6 +51,20 @@ export interface QueryDomain {
 // Regex em ordem temática para legibilidade. Use \b nas extremidades e
 // alternativas explícitas onde o radical pode ambiguar com outras palavras.
 const tribunalPatterns: RegExp[] = [
+  // ── Supremo Tribunal Federal ──
+  // Acrescentado em 08/2026, junto com o conector do STF. As 254 decisoes do
+  // Supremo sobre licitacoes ja estavam indexadas, mas o chat nunca as incluia
+  // porque nao havia gatilho para elas -- a lista cobria TCEs e TST.
+  //
+  // A inclusao e CONDICIONAL de proposito, no mesmo desenho de TCE e TST: so
+  // entra quando a pergunta menciona o Supremo. Ligar as decisoes de tribunal
+  // para toda pergunta custava -5,1pp de recall@5, medido; restrito a estes
+  // padroes o custo no golden set e nulo, porque nenhuma das 93 queries
+  // anotadas menciona STF ou Supremo.
+  /\bstf\b/i,
+  /\bsupremo\s+tribunal\s+federal\b/i,
+  /\bsupremo\b/i,
+
   // ── Tribunais de Contas Estaduais ──
   /\btce\b/i,
   /\btribuna(?:l|is)\s+de\s+contas\s+estadua(?:l|is)\b/i,

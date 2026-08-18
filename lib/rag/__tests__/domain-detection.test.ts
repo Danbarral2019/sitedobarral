@@ -15,6 +15,41 @@ describe('detectQueryDomain — inclusão de jurisprudência', () => {
   });
 });
 
+describe('detectQueryDomain — Supremo Tribunal Federal', () => {
+  // Ate 08/2026 a lista de padroes cobria TCEs e TST/trabalhista, mas NAO o
+  // STF. O efeito pratico: as 254 decisoes do STF sobre licitacoes estavam
+  // indexadas e o chat nunca as incluia, porque o gatilho nunca disparava.
+  //
+  // A inclusao e deliberadamente CONDICIONAL, no mesmo desenho ja usado para
+  // TCE e TST: so entra quando o usuario pergunta do Supremo. Medido: das 93
+  // queries do golden set, ZERO mencionam STF ou Supremo, entao o custo de
+  // retrieval no conjunto medido e exatamente nulo.
+  it('sigla STF inclui decisoes de tribunal', () => {
+    expect(detectQueryDomain('o que o STF decidiu sobre dispensa de licitacao').includeTribunalDecisions).toBe(true);
+  });
+
+  it('nome por extenso inclui decisoes de tribunal', () => {
+    expect(detectQueryDomain('jurisprudencia do Supremo Tribunal Federal sobre licitacoes').includeTribunalDecisions).toBe(true);
+  });
+
+  it('"supremo" isolado tambem conta', () => {
+    expect(detectQueryDomain('entendimento do Supremo sobre contratacao direta').includeTribunalDecisions).toBe(true);
+  });
+
+  it('e case-insensitive', () => {
+    expect(detectQueryDomain('decisoes do stf sobre pregao').includeTribunalDecisions).toBe(true);
+  });
+
+  it('NAO dispara em palavra que apenas contem as letras s-t-f', () => {
+    // Guarda do : sem ele, "manifestfoo" e afins ligariam o ramo.
+    expect(detectQueryDomain('requisitos do estudo tecnico preliminar').includeTribunalDecisions).toBe(false);
+  });
+
+  it('NAO ativa o boost trabalhista — STF nao e materia do TST', () => {
+    expect(detectQueryDomain('o que o STF decidiu sobre licitacao').tribunalBoost).toBeUndefined();
+  });
+});
+
 describe('detectQueryDomain — boost strong-labor', () => {
   it('sinal institucional (TST) ativa boost factor 1.2', () => {
     const d = detectQueryDomain('o que diz o TST sobre terceirização', 'all');
