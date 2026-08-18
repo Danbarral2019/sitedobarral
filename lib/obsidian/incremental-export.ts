@@ -65,6 +65,24 @@ export interface IncrementalExportOptions {
   outputDir: string;
   dryRun: boolean;
   full: boolean;
+  /**
+   * Inclui os ~13 mil acordaos que servem de combustivel ao grafo de
+   * precedentes do TCU (`category: 'acordao-grafo'`).
+   *
+   * Default `false`, que e o certo para o COFRE DO OBSIDIAN: sao notas sem
+   * curadoria, e afogariam as anotacoes do professor.
+   *
+   * O ELIC liga (`true`) porque o destino la e um indice de RAG, nao um cofre
+   * para navegar. RAG busca, nao le sequencialmente -- o argumento de
+   * "dossie ilegivel" nao transfere, e sao ~5 mil acordaos do TCU com sumario
+   * real que nao existem em nenhum outro lugar do acervo.
+   *
+   * Isto NAO afrouxa a invisibilidade nas outras superficies: nas duas rotas
+   * de busca a exclusao da categoria e o unico controle de acesso (elas nao
+   * filtram isPublic), e la ela permanece. Ver
+   * lib/tcu/invisibilidade-combustivel.test.ts.
+   */
+  incluirCombustivelDoGrafo?: boolean;
 }
 
 // ---------------------------------------------------------------------------
@@ -100,10 +118,11 @@ export async function runIncrementalExport(
     // Fetch ALL data (needed for link graph regardless of mode)
     // -----------------------------------------------------------------------
     // Exclui a categoria 'acordao-grafo' (combustivel do backfill retroativo
-    // do grafo de precedentes do TCU): esse export escreve o cofre do
-    // Obsidian, que nao pode virar dossie de 10 mil acordaos invisiveis.
+    // do grafo de precedentes do TCU) POR DESTINO, nao globalmente: o cofre
+    // do Obsidian nao pode virar dossie de 10 mil acordaos sem curadoria,
+    // mas o indice de RAG do ELIC se beneficia deles. Ver a opcao.
     const allDocuments: DbDocument[] = await prisma.document.findMany({
-      where: { category: { not: CATEGORIA_GRAFO } },
+      where: opts.incluirCombustivelDoGrafo ? {} : { category: { not: CATEGORIA_GRAFO } },
       select: EXPORT_DOC_SELECT,
     });
 
