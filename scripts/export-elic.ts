@@ -85,6 +85,10 @@ async function main() {
     outputDir: VAULT_ELIC,
     full,
     dryRun,
+    // O destino aqui e um indice de RAG, nao um cofre para navegar: os
+    // acordaos do grafo entram. O cofre do Obsidian mantem o default e
+    // continua sem eles.
+    incluirCombustivelDoGrafo: true,
   });
 
   console.log(`\n  Documentos      : ${stats.documents}`);
