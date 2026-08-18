@@ -148,12 +148,10 @@ export async function persistirDecisoesStj(
         continue;
       }
 
-      if (opcoes.dryRun) {
-        if (existente) r.atualizados++;
-        else r.criados++;
-        continue;
-      }
-
+      // `classifyDecision` não chama LLM (useAI é false por default), então
+      // classificar em dry-run não custa nada — e é o que torna o dry-run
+      // confiável: sem isso, ele conta como "criado" julgado que a rodada
+      // real descartaria por `descartarPendentes`, superestimando o total.
       const classification = aplicarAmarracaoAutoritativa(
         d,
         await classifyDecision({
@@ -167,6 +165,12 @@ export async function persistirDecisoesStj(
       // Zona cinzenta não entra: ver `descartarPendentes`.
       if (descartarPendentes && classification.approvalStatus === 'pending') {
         r.ignorados++;
+        continue;
+      }
+
+      if (opcoes.dryRun) {
+        if (existente) r.atualizados++;
+        else r.criados++;
         continue;
       }
 

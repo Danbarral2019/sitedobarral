@@ -151,12 +151,29 @@ describe('persistirDecisoesStj', () => {
     expect(r.criados).toBe(1);
   });
 
-  it('em dry-run não escreve nem classifica', async () => {
+  it('em dry-run não escreve, mas classifica — e descarta quem ficaria pending', async () => {
     mockFindUnique.mockResolvedValue(null);
+    // mock padrão do beforeEach já resolve CLASSIFICACAO_FRACA (pending)
+    const r = await persistirDecisoesStj([decisao()], { dryRun: true });
+    expect(r.criados).toBe(0);
+    expect(r.ignorados).toBe(1);
+    expect(mockClassify).toHaveBeenCalledTimes(1);
+    expect(mockCreate).not.toHaveBeenCalled();
+  });
+
+  it('em dry-run conta criados quando a classificação aprovaria, sem gravar', async () => {
+    mockFindUnique.mockResolvedValue(null);
+    mockClassify.mockResolvedValue({ ...CLASSIFICACAO_FRACA, approvalStatus: 'auto_approved' });
     const r = await persistirDecisoesStj([decisao()], { dryRun: true });
     expect(r.criados).toBe(1);
     expect(mockCreate).not.toHaveBeenCalled();
-    expect(mockClassify).not.toHaveBeenCalled();
+  });
+
+  it('em dry-run nunca chama o Gemini, mesmo com julgado que seria aprovado', async () => {
+    mockFindUnique.mockResolvedValue(null);
+    mockClassify.mockResolvedValue({ ...CLASSIFICACAO_FRACA, approvalStatus: 'auto_approved' });
+    await persistirDecisoesStj([decisao()], { dryRun: true });
+    expect(mockSummary).not.toHaveBeenCalled();
   });
 
   it('um erro em uma decisão não aborta as demais', async () => {
