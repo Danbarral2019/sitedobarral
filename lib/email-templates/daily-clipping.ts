@@ -42,6 +42,38 @@ function fmtDate(d: Date): string {
   return new Intl.DateTimeFormat('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric', timeZone: 'America/Sao_Paulo' }).format(d);
 }
 
+/**
+ * Teto de caracteres por ementa no corpo do e-mail. Existe para o corpo total
+ * não bater no limite de ~102 KB em que o Gmail trunca a mensagem e esconde os
+ * últimos itens atrás de "[Mensagem truncada]".
+ *
+ * 2000 é o padrão de facto do clipping: o TCE-PE já chega truncado nesse valor
+ * e o TCU não passa de 1672. Na prática só alcança o STF, cuja ementa mediana é
+ * de 5,5 mil caracteres (máximo observado: 31.069). O texto integral continua a
+ * um clique, no link de inteiro teor que todo bloco já traz.
+ */
+const DEFAULT_EMENTA_MAX_CHARS = 2000;
+
+function ementaMaxChars(): number {
+  const raw = process.env.CLIPPING_EMENTA_MAX_CHARS;
+  if (!raw) return DEFAULT_EMENTA_MAX_CHARS;
+  const n = parseInt(raw, 10);
+  return Number.isFinite(n) && n > 0 ? n : DEFAULT_EMENTA_MAX_CHARS;
+}
+
+/**
+ * Corta a ementa no último espaço antes do limite, para não partir palavra ao
+ * meio, e sinaliza o corte. Devolve a string intacta quando cabe.
+ */
+export function truncateEmenta(s: string, maxChars: number = ementaMaxChars()): string {
+  if (s.length <= maxChars) return s;
+  const head = s.slice(0, maxChars);
+  const lastSpace = head.lastIndexOf(' ');
+  // Sem espaço algum no trecho (ementa colada), corta no limite mesmo.
+  const cut = lastSpace > maxChars * 0.5 ? head.slice(0, lastSpace) : head;
+  return `${cut.trimEnd()} […]`;
+}
+
 function escapeHtml(s: string): string {
   return s
     .replace(/&/g, '&amp;')
@@ -302,7 +334,7 @@ function renderItemHtmlV2(rendered: ClippingItemRendered): string {
 
   const ementaHtml = item.ementa
     ? `<p style="margin:12px 0 6px;font-size:13px;color:#1f2937;line-height:1.5;"><strong style="color:#0f172a;">Ementa:</strong></p>
-       <p style="margin:0 0 12px;font-size:14px;color:#334155;line-height:1.55;font-style:italic;">${escapeHtml(item.ementa)}</p>`
+       <p style="margin:0 0 12px;font-size:14px;color:#334155;line-height:1.55;font-style:italic;">${escapeHtml(truncateEmenta(item.ementa))}</p>`
     : '';
 
   let dispositivosHtml = '';
@@ -369,7 +401,7 @@ function renderItemTextV2(rendered: ClippingItemRendered): string {
   if (item.ementa) {
     lines.push('');
     lines.push('Ementa:');
-    lines.push(item.ementa);
+    lines.push(truncateEmenta(item.ementa));
   }
   if (dispositivos && dispositivos.length > 0) {
     lines.push('');
