@@ -744,12 +744,31 @@ describe('normalizarEspelho — amarração à norma', () => {
 });
 
 describe('normalizarEspelho — mojibake', () => {
-  it('nenhum campo textual sai com mojibake', () => {
+  /**
+   * Detector de UTF-8 lido como Latin-1.
+   *
+   * NÃO usar `/Ã[A-Z]/`: em texto maiúsculo português "ÃO" é a terminação mais
+   * comum que existe (FALCÃO, LICITAÇÃO, PREGÃO, SEÇÃO, DECISÃO), e as ementas
+   * do STJ vêm em caixa alta — aquele padrão acusa mojibake em 100% dos textos
+   * legítimos. Medido: 4 falsos positivos em 4 amostras legítimas.
+   *
+   * O que de fato distingue: o caractere de substituição U+FFFD, "Ã" seguido de
+   * maiúscula que não seja O nem S (as únicas terminações legítimas em caixa
+   * alta), e as sequências clássicas em caixa baixa.
+   */
+  const RE_MOJIBAKE = /�|Ã(?![OS])[A-Z]|Ã[©¡­³ºç£µ]/;
+
+  it('não acusa mojibake em acentuação legítima de texto maiúsculo', () => {
     const d = normalizarEspelho(espelho(), 'Primeira Seção')!;
     const textos = [d.title, d.ementa, d.relator ?? '', d.orgaoJulgador ?? ''].join(' ');
-    // "Ã" seguido de maiúscula é a assinatura de UTF-8 lido como Latin-1
-    // (foi assim que o conector do DataJud gravou "VILLAS BÃAS" e "PRESIDÃNCIA")
-    expect(textos).not.toMatch(/Ã[A-Z]/);
+    expect(textos).not.toMatch(RE_MOJIBAKE);
+  });
+
+  it('reconhece o mojibake que o conector do DataJud gravava', () => {
+    // strings reais lidas do banco em 18/08/2026
+    expect('RICARDO VILLAS BÃAS CUEVA').toMatch(RE_MOJIBAKE);
+    expect('PRESIDÃNCIA').toMatch(RE_MOJIBAKE);
+    expect('NÃCLEO DE GERENCIAMENTO').toMatch(RE_MOJIBAKE);
   });
 
   it('preserva acentuação legítima', () => {

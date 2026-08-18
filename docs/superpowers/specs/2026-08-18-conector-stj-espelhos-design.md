@@ -181,11 +181,13 @@ Fixtures são dumps reais já baixados, reduzidos, versionados em `lib/stj/__tes
 | `legislacao-citada` com ambos separadores | `LEI-014133` e `LEI:014133` rendem os mesmos artigos |
 | `recorte` | espelho de licitação entra; espelho tributário fica fora |
 | `normalizar` — datas | `dataDecisao: "20260519"` vira `Date` correta, não `Invalid Date` |
-| `normalizar` — mojibake | nenhum campo normalizado contém `Ã` seguido de maiúscula |
+| `normalizar` — mojibake | o texto normalizado não casa o detector de UTF-8-lido-como-Latin-1, e o detector reconhece as strings reais que o DataJud gravou |
 | `persistir` — idempotência | processar o mesmo dump duas vezes não cria segundo registro |
 | `persistir` — auto-aprovação | espelho com artigo da 14.133 nasce aprovado mesmo com escore baixo |
 
 O guard de mojibake existe porque é exatamente o defeito que corrompeu os nomes dos ministros no conector atual, e passaria despercebido sem verificação explícita.
+
+⚠️ **O primeiro guard que este spec propôs estava errado** e só falhou ao rodar. Era `/Ã[A-Z]/`, descrito como "a assinatura de UTF-8 lido como Latin-1". Em texto maiúsculo português, porém, `ÃO` é a terminação mais comum que existe — FALCÃO, LICITAÇÃO, PREGÃO, SEÇÃO, DECISÃO — e as ementas do STJ vêm em caixa alta. Medido: **4 falsos positivos em 4 amostras legítimas**, ou seja, o guard acusaria todas as ementas do acervo. O detector correto combina o caractere de substituição `U+FFFD`, `Ã` seguido de maiúscula que não seja `O` nem `S`, e as sequências clássicas em caixa baixa (`Ã©`, `Ã¡`, `Ã§`…). Um guard que dispara em tudo é tão inútil quanto um que nunca dispara — e este teria sido "corrigido" desligando-o.
 
 ## 7. Fora de escopo
 
