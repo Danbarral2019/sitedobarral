@@ -22,6 +22,15 @@ const STJ_14133_ART92 = `LEG:FED LEI:014133 ANO:2021
  *****  NLL-21    NOVA LEI DE LICITAÇÕES
         ART:00092`;
 
+// Sufixo de letra em caixas diferentes, para provar a normalização.
+const STF_14133_ART184A_MAIUSCULO = `LEG-FED   LEI-014133 ANO-2021
+    ART-00184-A
+    LEI ORDINÁRIA`;
+
+const STF_14133_ART184A_MINUSCULO = `LEG-FED   LEI-014133 ANO-2021
+    ART-00184-a
+    LEI ORDINÁRIA`;
+
 describe('extrairArtigos14133 — separador do STF', () => {
   it('extrai artigos do bloco com hífen', () => {
     expect(extrairArtigos14133([STF_14133])).toEqual(['6', '75']);
@@ -49,6 +58,14 @@ describe('extrairArtigos14133 — separador do STJ', () => {
     const bloco = STF_14133.toLowerCase();
     expect(citaLei14133([bloco])).toBe(true);
     expect(extrairArtigos14133([bloco])).toEqual(['6', '75']);
+  });
+
+  it('normaliza o sufixo de letra para maiúscula mesmo vindo minúsculo da fonte', () => {
+    expect(extrairArtigos14133([STF_14133_ART184A_MINUSCULO])).toEqual(['184-A']);
+  });
+
+  it('continua produzindo o sufixo em maiúscula quando a fonte já vem em maiúscula', () => {
+    expect(extrairArtigos14133([STF_14133_ART184A_MAIUSCULO])).toEqual(['184-A']);
   });
 });
 

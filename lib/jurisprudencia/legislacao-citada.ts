@@ -45,7 +45,10 @@ export function extrairArtigos14133(campo: string[] | string | null | undefined)
     let m: RegExpExecArray | null;
     while ((m = RE_ARTIGO.exec(bloco)) !== null) {
       const numero = m[1].replace(/^0+/, '') || '0';
-      artigos.add(m[2] ? `${numero}-${m[2]}` : numero);
+      // Normaliza o sufixo para maiúscula no ponto de escrita: a flag `i` da
+      // regex também casa `art-00184-a`, e "184-a" não amarraria com o
+      // "184-A" já gravado no banco.
+      artigos.add(m[2] ? `${numero}-${m[2].toUpperCase()}` : numero);
     }
   }
 
