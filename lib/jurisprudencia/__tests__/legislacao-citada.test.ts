@@ -16,6 +16,12 @@ const STJ_CPC = `LEG:FED LEI:013105 ANO:2015
  *****  CPC-15    CÓDIGO DE PROCESSO CIVIL DE 2015
         ART:00967`;
 
+// Outro bloco da 14.133 no formato do STJ, com artigo distinto dos demais —
+// usado para provar que exec() não vaza lastIndex de um bloco para o outro.
+const STJ_14133_ART92 = `LEG:FED LEI:014133 ANO:2021
+ *****  NLL-21    NOVA LEI DE LICITAÇÕES
+        ART:00092`;
+
 describe('extrairArtigos14133 — separador do STF', () => {
   it('extrai artigos do bloco com hífen', () => {
     expect(extrairArtigos14133([STF_14133])).toEqual(['6', '75']);
@@ -33,6 +39,16 @@ describe('extrairArtigos14133 — separador do STJ', () => {
 
   it('separa por bloco: só os artigos do bloco da 14.133 entram', () => {
     expect(extrairArtigos14133([STJ_CPC, STJ_14133])).toEqual(['75']);
+  });
+
+  it('junta os artigos de dois blocos distintos da 14.133, um em cada formato', () => {
+    expect(extrairArtigos14133([STF_14133, STJ_14133_ART92])).toEqual(['6', '75', '92']);
+  });
+
+  it('é case-insensitive: bloco em minúsculas também tem seus artigos extraídos', () => {
+    const bloco = STF_14133.toLowerCase();
+    expect(citaLei14133([bloco])).toBe(true);
+    expect(extrairArtigos14133([bloco])).toEqual(['6', '75']);
   });
 });
 

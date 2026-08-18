@@ -12,13 +12,19 @@
  * Como cada norma vive em seu próprio bloco, filtrar o bloco pelo token da lei
  * e só então extrair os artigos dá amarração artigo↔julgado DETERMINÍSTICA —
  * sem heurística de proximidade e sem LLM. É a razão principal destes conectores.
+ *
+ * Comparação case-insensitive de propósito, pela mesma razão do `recorte.ts`
+ * do STF: a fonte é externa e pode variar de caixa. As duas regex usam a
+ * flag `i` — se só o token da lei fosse case-insensitive, um bloco em
+ * minúsculas faria `citaLei14133()` devolver `true` e `extrairArtigos14133()`
+ * devolver `[]`, o que quebraria a auto-aprovação de julgados a jusante.
  */
 
 /** Aceita `LEI-014133` e `LEI:014133`, com ou sem zeros à esquerda. */
 const RE_TOKEN_LEI_14133 = /LEI[-:]0*14133\b/i;
 
 /** `ART-00075` / `ART:00075` → `75`; `ART-00184-A` → `184-A`. Incisos não casam. */
-const RE_ARTIGO = /ART[-:](\d{1,5})(?:-([A-Z]))?/g;
+const RE_ARTIGO = /ART[-:](\d{1,5})(?:-([A-Z]))?/gi;
 
 function blocos(campo: string[] | string | null | undefined): string[] {
   if (campo === null || campo === undefined) return [];
