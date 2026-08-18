@@ -34,7 +34,37 @@ describe('ehRelevanteParaBase', () => {
   });
 
   it('entra pelo vocabulário na tese jurídica', () => {
-    const e = espelho({ teseJuridica: 'É vedada a inexigibilidade fora das hipóteses legais.' });
+    const e = espelho({ teseJuridica: 'É vedada a inexigibilidade de licitação fora das hipóteses legais.' });
+    expect(ehRelevanteParaBase(e)).toBe(true);
+  });
+
+  it('fica de fora quando ementa contém "explicitação das circunstâncias"', () => {
+    const e = espelho({ ementa: 'PROCESSUAL CIVIL. EXPLICITAÇÃO DAS CIRCUNSTÂNCIAS.' });
+    expect(ehRelevanteParaBase(e)).toBe(false);
+  });
+
+  it('fica de fora quando ementa contém "manifestou-se explicitamente sobre a matéria"', () => {
+    const e = espelho({ ementa: 'TRIBUTÁRIO. ICMS. MANIFESTOU-SE EXPLICITAMENTE SOBRE A MATÉRIA.' });
+    expect(ehRelevanteParaBase(e)).toBe(false);
+  });
+
+  it('fica de fora quando ementa contém "implicitamente reconhecido"', () => {
+    const e = espelho({ ementa: 'CIVIL. DIREITO DE FAMÍLIA. IMPLICITAMENTE RECONHECIDO.' });
+    expect(ehRelevanteParaBase(e)).toBe(false);
+  });
+
+  it('fica de fora quando ementa contém "ação declaratória de inexigibilidade de débito"', () => {
+    const e = espelho({ ementa: 'TRIBUTÁRIO. AÇÃO DECLARATÓRIA DE INEXIGIBILIDADE DE DÉBITO.' });
+    expect(ehRelevanteParaBase(e)).toBe(false);
+  });
+
+  it('entra quando ementa contém "inexigibilidade de licitação"', () => {
+    const e = espelho({ ementa: 'ADMINISTRATIVO. INEXIGIBILIDADE DE LICITAÇÃO. FUNDAMENTOS.' });
+    expect(ehRelevanteParaBase(e)).toBe(true);
+  });
+
+  it('entra quando ementa contém "LICITAÇÃO. CONTRATAÇÃO DE EMPRESA"', () => {
+    const e = espelho({ ementa: 'ADMINISTRATIVO. LICITAÇÃO. CONTRATAÇÃO DE EMPRESA.' });
     expect(ehRelevanteParaBase(e)).toBe(true);
   });
 

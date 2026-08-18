@@ -8,8 +8,9 @@
  *      rede de segurança para o julgado que discute o tema sem citar a
  *      norma no campo estruturado.
  *
- * Rendimento medido sobre 12 dumps (2.497 acórdãos): 117 entram, 4,7%.
- * Desvio grande desse patamar é sinal de regex frouxa.
+ * Rendimento medido sobre 12 dumps (2.497 acórdãos): 82 entram, 3,3%.
+ * Desvio grande desse patamar é sinal de regex frouxa — foi assim que os 29%
+ * de falsos positivos da primeira versão apareceram.
  */
 
 import { RE_NORMAS_LICITACAO, RE_VOCABULARIO_LICITACAO } from './constantes';
