@@ -2864,6 +2864,183 @@
         "annotatedBy": "claude",
         "notes": "Anotado a partir da EMENTA OFICIAL do acórdão (canon), NÃO do top-K do pipeline — evita ground-truth tautológico (ver feedback_eval_ground_truth_bias). Query cobre um dos 171 acórdãos TCU indexados pela ementa oficial em 2026-07-07, para proteger o ganho de indexação contra regressão. Revisar/validar com Daniel."
       }
+    },
+    {
+      "id": "q-stf-responsabilidade-subsidiaria-terceirizada",
+      "query": "a Administração responde subsidiariamente pelos encargos trabalhistas da empresa terceirizada?",
+      "description": "Tema 1118 de repercussão geral. O STF fixou que não há responsabilidade subsidiária amparada apenas na inversão do ônus da prova.",
+      "category": "tese-transversal",
+      "difficulty": "medium",
+      "annotations": {
+        "relevant": [
+          "e26972ce-f68d-4418-b15c-17463cb20292"
+        ],
+        "highlyRelevant": [
+          "e26972ce-f68d-4418-b15c-17463cb20292"
+        ],
+        "annotatedAt": "2026-08-18T01:23:59.593Z",
+        "annotatedBy": "claude-derivado-de-metadados-stf",
+        "notes": "Âncora = julgado que fixou a tese do Tema 1118 (campo documental_tese_texto do índice do STF). Ground truth derivado de metadados estruturados do STF e de leitura dos resumos — NUNCA do resultado da busca. Requer conferência do professor."
+      }
+    },
+    {
+      "id": "q-stf-recontratacao-dispensa-emergencia",
+      "query": "é possível recontratar a mesma empresa em nova dispensa de licitação por emergência?",
+      "description": "ADI sobre o art. 75, VIII, da Lei 14.133/2021, que veda a recontratação em dispensa por emergência ou calamidade.",
+      "category": "dispensa-inexigibilidade",
+      "difficulty": "medium",
+      "annotations": {
+        "relevant": [
+          "ad29ef03-2680-4511-8765-2c468940d6a5",
+          "0597a74d-c9a0-4690-af03-ba38e39eb067"
+        ],
+        "highlyRelevant": [
+          "ad29ef03-2680-4511-8765-2c468940d6a5",
+          "0597a74d-c9a0-4690-af03-ba38e39eb067"
+        ],
+        "annotatedAt": "2026-08-18T01:23:59.593Z",
+        "annotatedBy": "claude-derivado-de-metadados-stf",
+        "notes": "Âncora = ADI que julgou o próprio dispositivo. Há dois registros do mesmo processo (acórdão e monocrática), ambos legítimos. Ground truth derivado de metadados estruturados do STF e de leitura dos resumos — NUNCA do resultado da busca. Requer conferência do professor."
+      }
+    },
+    {
+      "id": "q-stf-inversao-fases-licitacao",
+      "query": "lei estadual ou municipal pode inverter as fases da licitação, colocando a proposta antes da habilitação?",
+      "description": "Tema 1036 de repercussão geral, sobre competência legislativa para alterar a ordem das fases do certame.",
+      "category": "modalidade-licitacao",
+      "difficulty": "hard",
+      "annotations": {
+        "relevant": [
+          "1c9e331a-c89e-4be2-a483-096aaccf926a"
+        ],
+        "highlyRelevant": [
+          "1c9e331a-c89e-4be2-a483-096aaccf926a"
+        ],
+        "annotatedAt": "2026-08-18T01:23:59.593Z",
+        "annotatedBy": "claude-derivado-de-metadados-stf",
+        "notes": "Âncora = julgado que fixou a tese do Tema 1036. Ground truth derivado de metadados estruturados do STF e de leitura dos resumos — NUNCA do resultado da busca. Requer conferência do professor."
+      }
+    },
+    {
+      "id": "q-stf-vedacao-agente-eletivo-licitacao",
+      "query": "município pode proibir agente eletivo de participar de licitação municipal?",
+      "description": "Tema 1001 de repercussão geral, sobre competência legislativa municipal suplementar em contratação pública.",
+      "category": "habilitacao",
+      "difficulty": "hard",
+      "annotations": {
+        "relevant": [
+          "3fad277d-4392-4614-a8db-518d6bff5bab"
+        ],
+        "highlyRelevant": [
+          "3fad277d-4392-4614-a8db-518d6bff5bab"
+        ],
+        "annotatedAt": "2026-08-18T01:23:59.593Z",
+        "annotatedBy": "claude-derivado-de-metadados-stf",
+        "notes": "Âncora = julgado que fixou a tese do Tema 1001. Ground truth derivado de metadados estruturados do STF e de leitura dos resumos — NUNCA do resultado da busca. Requer conferência do professor."
+      }
+    },
+    {
+      "id": "q-stf-cndt-exigencia-constitucional",
+      "query": "é constitucional exigir certidão negativa de débitos trabalhistas para contratar com a Administração?",
+      "description": "ADI sobre a CNDT do art. 642-A da CLT, com reflexo direto na habilitação em licitações.",
+      "category": "habilitacao",
+      "difficulty": "medium",
+      "annotations": {
+        "relevant": [
+          "ce9107f6-e6bb-4dbe-b285-608c25af380e"
+        ],
+        "highlyRelevant": [
+          "ce9107f6-e6bb-4dbe-b285-608c25af380e"
+        ],
+        "annotatedAt": "2026-08-18T01:23:59.593Z",
+        "annotatedBy": "claude-derivado-de-metadados-stf",
+        "notes": "Âncora = ADI cuja tese trata expressamente da CNDT. Ground truth derivado de metadados estruturados do STF e de leitura dos resumos — NUNCA do resultado da busca. Requer conferência do professor."
+      }
+    },
+    {
+      "id": "q-stf-improbidade-exige-dolo",
+      "query": "a configuração de improbidade administrativa exige dolo?",
+      "description": "Tema 309 de repercussão geral. O STF declarou inconstitucional a modalidade culposa de improbidade.",
+      "category": "sancoes",
+      "difficulty": "easy",
+      "annotations": {
+        "relevant": [
+          "c78946b3-2ff1-48ad-8324-551caefe443f"
+        ],
+        "highlyRelevant": [
+          "c78946b3-2ff1-48ad-8324-551caefe443f"
+        ],
+        "annotatedAt": "2026-08-18T01:23:59.593Z",
+        "annotatedBy": "claude-derivado-de-metadados-stf",
+        "notes": "Âncora = julgado que fixou a tese do Tema 309. Ground truth derivado de metadados estruturados do STF e de leitura dos resumos — NUNCA do resultado da busca. Requer conferência do professor."
+      }
+    },
+    {
+      "id": "q-stf-dispensa-criada-por-lei-municipal",
+      "query": "município pode criar hipótese de dispensa de licitação não prevista em lei federal?",
+      "description": "Julgados sobre normas municipais que criaram dispensas próprias para uso e cessão de bens públicos.",
+      "category": "dispensa-inexigibilidade",
+      "difficulty": "hard",
+      "annotations": {
+        "relevant": [
+          "9633d23d-c246-4253-853f-190b7b040b68",
+          "d7eddfeb-9f58-4faf-9943-9c46590db072"
+        ],
+        "annotatedAt": "2026-08-18T01:23:59.593Z",
+        "annotatedBy": "claude-derivado-de-metadados-stf",
+        "notes": "Sem tese firmada. Ambos conferidos por leitura do resumo: tratam de lei municipal criando hipótese de dispensa. Ground truth derivado de metadados estruturados do STF e de leitura dos resumos — NUNCA do resultado da busca. Requer conferência do professor."
+      }
+    },
+    {
+      "id": "q-stf-abolitio-criminis-dispensa-ilegal",
+      "query": "a revogação do art. 89 da Lei 8.666 pela Lei 14.133 gerou abolitio criminis para dispensa ilegal?",
+      "description": "Questão penal recorrente após a nova lei: se a revogação extinguiu a punibilidade do crime de dispensa indevida.",
+      "category": "sancoes",
+      "difficulty": "hard",
+      "annotations": {
+        "relevant": [
+          "2bdc1962-38ab-4c6a-8a79-827289ceb84d",
+          "297b94a5-1b0d-4c3c-944f-ceffb1d1d15e"
+        ],
+        "annotatedAt": "2026-08-18T01:23:59.593Z",
+        "annotatedBy": "claude-derivado-de-metadados-stf",
+        "notes": "Sem tese firmada. Ambos conferidos por leitura: discutem expressamente a abolitio criminis do art. 89. Ground truth derivado de metadados estruturados do STF e de leitura dos resumos — NUNCA do resultado da busca. Requer conferência do professor."
+      }
+    },
+    {
+      "id": "q-stf-inexigibilidade-servicos-advocaticios",
+      "query": "contratação direta de escritório de advocacia por inexigibilidade de licitação",
+      "description": "Conjunto de julgados sobre contratação de serviços jurídicos sem certame — tema recorrente de responsabilização.",
+      "category": "dispensa-inexigibilidade",
+      "difficulty": "medium",
+      "annotations": {
+        "relevant": [
+          "c6d6f415-b0ea-478a-99c1-1fe30de4e597",
+          "2bd3cbcb-0ea4-411a-83d2-4bbcb240364f",
+          "eb027314-569d-4df0-bb21-e6b90edf605f",
+          "cf311a0a-2d6b-41dc-8024-1a1b1c313407",
+          "abe90d41-5011-4f15-8563-ef1408f70aed",
+          "6ab22b14-38dd-457c-bc71-47a9d7f4580f"
+        ],
+        "annotatedAt": "2026-08-18T01:23:59.593Z",
+        "annotatedBy": "claude-derivado-de-metadados-stf",
+        "notes": "Sem tese firmada. Cinco julgados conferidos por leitura do resumo; todos tratam de contratação advocatícia por inexigibilidade. Ground truth derivado de metadados estruturados do STF e de leitura dos resumos — NUNCA do resultado da busca. Requer conferência do professor."
+      }
+    },
+    {
+      "id": "q-stf-credenciamento-substitui-licitacao",
+      "query": "credenciamento pode substituir a licitação tradicional?",
+      "description": "ADI sobre o modelo de credenciamento para fabricantes de placas veiculares em lugar do regime licitatório comum.",
+      "category": "modalidade-licitacao",
+      "difficulty": "hard",
+      "annotations": {
+        "relevant": [
+          "a0e10365-baff-4704-8674-a9d1fdda1917"
+        ],
+        "annotatedAt": "2026-08-18T01:23:59.593Z",
+        "annotatedBy": "claude-derivado-de-metadados-stf",
+        "notes": "Sem tese firmada. Conferido por leitura: discute credenciamento como substituto do certame. Ground truth derivado de metadados estruturados do STF e de leitura dos resumos — NUNCA do resultado da busca. Requer conferência do professor."
+      }
     }
   ]
 }

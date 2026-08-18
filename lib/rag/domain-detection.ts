@@ -51,20 +51,6 @@ export interface QueryDomain {
 // Regex em ordem temática para legibilidade. Use \b nas extremidades e
 // alternativas explícitas onde o radical pode ambiguar com outras palavras.
 const tribunalPatterns: RegExp[] = [
-  // ── Supremo Tribunal Federal ──
-  // Acrescentado em 08/2026, junto com o conector do STF. As 254 decisoes do
-  // Supremo sobre licitacoes ja estavam indexadas, mas o chat nunca as incluia
-  // porque nao havia gatilho para elas -- a lista cobria TCEs e TST.
-  //
-  // A inclusao e CONDICIONAL de proposito, no mesmo desenho de TCE e TST: so
-  // entra quando a pergunta menciona o Supremo. Ligar as decisoes de tribunal
-  // para toda pergunta custava -5,1pp de recall@5, medido; restrito a estes
-  // padroes o custo no golden set e nulo, porque nenhuma das 93 queries
-  // anotadas menciona STF ou Supremo.
-  /\bstf\b/i,
-  /\bsupremo\s+tribunal\s+federal\b/i,
-  /\bsupremo\b/i,
-
   // ── Tribunais de Contas Estaduais ──
   /\btce\b/i,
   /\btribuna(?:l|is)\s+de\s+contas\s+estadua(?:l|is)\b/i,
@@ -251,7 +237,23 @@ export function detectQueryDomain(query: string, scope: QueryScope): QueryDomain
     (n, re) => (re.test(query) ? n + 1 : n),
     0,
   );
-  const includeTribunalDecisions = tribunalMatchCount > 0;
+  // INCONDICIONAL desde 18/08/2026. Era `tribunalMatchCount > 0`, e o
+  // condicional disparava em 1 de 10 perguntas de jurisprudencia -- gente
+  // pergunta pelo ASSUNTO ("credenciamento substitui licitacao?"), nao pelo
+  // nome do tribunal. Medido contra o golden set com 10 queries de
+  // jurisprudencia anotadas (recall@5, 103 queries):
+  //
+  //   condicional            60,9% nas antigas ·  0,0% nas novas · 51,5% total
+  //   INCONDICIONAL          57,1% nas antigas · 70,0% nas novas · 59,1% total
+  //   incondicional + boost   4,2% nas antigas · 86,7% nas novas · 16,9% total
+  //
+  // O custo nas perguntas antigas e real (-3,8pp) e foi aceito: o ganho nas
+  // que hoje nao tem resposta e de outra ordem de grandeza. O boost por
+  // tribunal foi medido e DESCARTADO -- e o melhor para o STF e destroi todo
+  // o resto, porque multiplica a similaridade em qualquer pergunta.
+  //
+  // `tribunalMatchCount` continua vivo: alimenta o sinal trabalhista abaixo.
+  const includeTribunalDecisions = true;
 
   const hasInstitutionalLaborSignal = strongInstitutionalLaborPatterns.some((re) => re.test(query));
   const hasTier2LaborSignal = tier2StrongLaborPatterns.some((re) => re.test(query));
