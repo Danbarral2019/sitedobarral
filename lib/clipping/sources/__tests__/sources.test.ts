@@ -102,6 +102,83 @@ describe('fetchTcuItems', () => {
   });
 });
 
+describe('fetchTribunalItems — teto de idade por dataJulgamento', () => {
+  const linha = (over = {}) => ({
+    id: 'td-1', tribunalCode: 'STJ', tribunalName: 'STJ', decisionType: 'acordao',
+    decisionNumber: '1', title: 't', ementa: 'e', fullText: null, relator: null,
+    orgaoJulgador: null, dataJulgamento: new Date(), url: null, pdfUrl: null,
+    relevanceScore: 90, createdAt: new Date(), ...over,
+  });
+
+  it('aplica teto de 3 meses por default', async () => {
+    mockTribunalDecisionFindMany.mockResolvedValueOnce([linha()]);
+    await fetchTribunalItems({ tribunalCode: 'STJ', windowDays: 14 });
+
+    const where = mockTribunalDecisionFindMany.mock.calls[0][0].where;
+    const limite = where.dataJulgamento.gte as Date;
+    const esperado = new Date();
+    esperado.setMonth(esperado.getMonth() - 3);
+    // tolerancia de 1 dia para nao depender do instante exato da execucao
+    expect(Math.abs(limite.getTime() - esperado.getTime())).toBeLessThan(24 * 3600 * 1000);
+  });
+
+  it('mantem createdAt como janela — trocar por dataJulgamento tiraria STF e STJ do clipping', async () => {
+    mockTribunalDecisionFindMany.mockResolvedValueOnce([linha()]);
+    await fetchTribunalItems({ tribunalCode: 'STJ', windowDays: 14 });
+
+    const where = mockTribunalDecisionFindMany.mock.calls[0][0].where;
+    // as duas datas coexistem, com papeis distintos: createdAt = "novidade para
+    // nos"; dataJulgamento = "ainda e noticia". Coleta mensal leva 30-35 dias,
+    // entao um julgado nunca caberia numa janela de 14 dias por data de julgamento.
+    expect(where.createdAt).toBeDefined();
+    expect(where.dataJulgamento).toBeDefined();
+  });
+
+  it('respeita CLIPPING_MAX_IDADE_MESES', async () => {
+    const antes = process.env.CLIPPING_MAX_IDADE_MESES;
+    process.env.CLIPPING_MAX_IDADE_MESES = '12';
+    try {
+      mockTribunalDecisionFindMany.mockResolvedValueOnce([linha()]);
+      await fetchTribunalItems({ tribunalCode: 'STJ', windowDays: 14 });
+
+      const limite = mockTribunalDecisionFindMany.mock.calls[0][0].where.dataJulgamento.gte as Date;
+      const esperado = new Date();
+      esperado.setMonth(esperado.getMonth() - 12);
+      expect(Math.abs(limite.getTime() - esperado.getTime())).toBeLessThan(24 * 3600 * 1000);
+    } finally {
+      if (antes === undefined) delete process.env.CLIPPING_MAX_IDADE_MESES;
+      else process.env.CLIPPING_MAX_IDADE_MESES = antes;
+    }
+  });
+
+  it('env invalida cai no default de 3 meses em vez de quebrar', async () => {
+    const antes = process.env.CLIPPING_MAX_IDADE_MESES;
+    process.env.CLIPPING_MAX_IDADE_MESES = 'abc';
+    try {
+      mockTribunalDecisionFindMany.mockResolvedValueOnce([linha()]);
+      await fetchTribunalItems({ tribunalCode: 'STJ', windowDays: 14 });
+
+      const limite = mockTribunalDecisionFindMany.mock.calls[0][0].where.dataJulgamento.gte as Date;
+      const esperado = new Date();
+      esperado.setMonth(esperado.getMonth() - 3);
+      expect(Math.abs(limite.getTime() - esperado.getTime())).toBeLessThan(24 * 3600 * 1000);
+    } finally {
+      if (antes === undefined) delete process.env.CLIPPING_MAX_IDADE_MESES;
+      else process.env.CLIPPING_MAX_IDADE_MESES = antes;
+    }
+  });
+
+  it('parametro explicito vence a env', async () => {
+    mockTribunalDecisionFindMany.mockResolvedValueOnce([linha()]);
+    await fetchTribunalItems({ tribunalCode: 'STJ', windowDays: 14, maxIdadeMeses: 1 });
+
+    const limite = mockTribunalDecisionFindMany.mock.calls[0][0].where.dataJulgamento.gte as Date;
+    const esperado = new Date();
+    esperado.setMonth(esperado.getMonth() - 1);
+    expect(Math.abs(limite.getTime() - esperado.getTime())).toBeLessThan(24 * 3600 * 1000);
+  });
+});
+
 describe('fetchTribunalItems', () => {
   it('filtra por tribunalCode + approvalStatus + janela', async () => {
     mockTribunalDecisionFindMany.mockResolvedValueOnce([
