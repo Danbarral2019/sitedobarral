@@ -1,4 +1,15 @@
 /**
+ * APOSENTADO em 18/08/2026 — substituído por `lib/stj/`.
+ *
+ * A API pública do DataJud entrega capa processual, não jurisprudência: o
+ * campo `ementa` deste conector é concatenação de classe + assuntos + órgão
+ * julgador + movimentos. Resultado medido em produção: 0 de 254 decisões
+ * aprovadas, 254 sem dataJulgamento, ementa mediana de 214 caracteres.
+ *
+ * Mantido no repositório como registro. Fora do registry e sem cron.
+ * A env DATAJUD_API_KEY segue válida — a API cobre outros tribunais.
+ */
+/**
  * DataJud CNJ Scraper
  * API Elasticsearch publica do CNJ
  * Endpoint: https://api-publica.datajud.cnj.jus.br/api_publica_{tribunal}/_search

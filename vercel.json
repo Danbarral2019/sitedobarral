@@ -66,8 +66,8 @@
       "schedule": "0 6 1 * *"
     },
     {
-      "path": "/api/cron/sync-datajud",
-      "schedule": "0 6 * * 3"
+      "path": "/api/cron/sync-stj",
+      "schedule": "0 8 5 * *"
     },
     {
       "path": "/api/cron/sync-tribunal-decisions",
