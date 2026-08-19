@@ -118,7 +118,7 @@ describe('normalizarEspelho — mojibake', () => {
    * 2. Estrutura completa: [ÃÂ] seguido de qualquer byte no bloco U+0080–U+00BF
    * 3. Caixa alta: Ã seguido de maiúscula que não seja O ou S (casos do DataJud)
    */
-  const RE_MOJIBAKE = /�|[ÃÂ][-¿]|Ã(?![OS])[A-Z]/;
+  const RE_MOJIBAKE = /�|[ÃÂ][-¿]|Ã(?![OSE])[A-Z]/;
 
   it('não acusa mojibake em acentuação legítima de texto maiúsculo', () => {
     const d = normalizarEspelho(espelho(), 'Primeira Seção')!;
@@ -150,6 +150,14 @@ describe('normalizarEspelho — mojibake', () => {
     expect('PREGÃO').not.toMatch(RE_MOJIBAKE);
     expect('SEÇÃO').not.toMatch(RE_MOJIBAKE);
     expect('DECISÃO').not.toMatch(RE_MOJIBAKE);
+  });
+
+  it('exclui plurais em -ões e -ães: MAGALHÃES, CAPITÃES, ALEMÃES, CIDADÃES', () => {
+    // Medição contra os 384 espelhos: 16 falsos positivos, todos em MAGALHÃES
+    expect('ASSUSETE MAGALHÃES').not.toMatch(RE_MOJIBAKE);
+    expect('CAPITÃES DE INDÚSTRIA').not.toMatch(RE_MOJIBAKE);
+    expect('ALEMÃES').not.toMatch(RE_MOJIBAKE);
+    expect('CIDADÃES').not.toMatch(RE_MOJIBAKE);
   });
 });
 
