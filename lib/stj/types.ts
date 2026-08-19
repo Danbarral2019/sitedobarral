@@ -33,6 +33,8 @@ export interface StjDecisaoNormalizada {
   decisionType: 'acordao';
   classe: string;
   decisionNumber: string;
+  /** Número de registro do PROCESSO. Não identifica o acórdão — ver normalizar.ts. */
+  numeroRegistro: string;
   processNumber: string | null;
   year: number;
   title: string;
