@@ -57,8 +57,8 @@ describe('normalizarEspelho — datas', () => {
 describe('normalizarEspelho — identidade', () => {
   it('usa numeroRegistro como sourceId e monta fullIdentifier estável', () => {
     const d = normalizarEspelho(espelho(), 'Primeira Seção')!;
-    expect(d.sourceId).toBe('202402187409');
-    expect(d.fullIdentifier).toBe('stj-acordao-202402187409');
+    expect(d.sourceId).toBe('959632');
+    expect(d.fullIdentifier).toBe('stj-acordao-959632');
   });
 
   it('descarta espelho sem numeroRegistro', () => {
@@ -84,6 +84,40 @@ describe('normalizarEspelho — identidade', () => {
       'Primeira Seção'
     )!;
     expect(d.year).toBe(2015);
+  });
+});
+
+describe('normalizarEspelho — identidade do acórdão', () => {
+  it('usa o id do espelho, não o numeroRegistro, como identificador', () => {
+    const d = normalizarEspelho(espelho(), 'Primeira Seção')!;
+    expect(d.fullIdentifier).toBe('stj-acordao-959632');
+  });
+
+  it('dois acórdãos do MESMO processo geram identificadores distintos', () => {
+    // numeroRegistro identifica o processo, não o julgado: um processo rende
+    // REsp, depois AgInt, depois EDcl, todos com o mesmo número. Chavear pelo
+    // registro descartaria 1,9% do acervo (medido em 1.458 espelhos reais).
+    const resp = normalizarEspelho(
+      espelho({ id: '930995', siglaClasse: 'REsp', dataDecisao: '20251015' }),
+      'Segunda Turma'
+    )!;
+    const edcl = normalizarEspelho(
+      espelho({ id: '957349', siglaClasse: 'EDcl nos EDcl no REsp', dataDecisao: '20260506' }),
+      'Segunda Turma'
+    )!;
+    expect(resp.numeroRegistro).toBe(edcl.numeroRegistro);
+    expect(resp.fullIdentifier).not.toBe(edcl.fullIdentifier);
+  });
+
+  it('preserva o numeroRegistro em campo próprio, para a URL e a citação', () => {
+    const d = normalizarEspelho(espelho(), 'Primeira Seção')!;
+    expect(d.numeroRegistro).toBe('202402187409');
+    expect(d.url).toContain('202402187409');
+  });
+
+  it('cai no numeroRegistro quando o espelho não traz id', () => {
+    const d = normalizarEspelho(espelho({ id: undefined }), 'Primeira Seção')!;
+    expect(d.fullIdentifier).toBe('stj-acordao-202402187409');
   });
 });
 

@@ -56,6 +56,22 @@ export function normalizarEspelho(
   const ementa = limpar(e.ementa);
   if (!registro || !ementa) return null;
 
+  /**
+   * O identificador do acórdão é o `id` do espelho, NÃO o `numeroRegistro`.
+   *
+   * `numeroRegistro` identifica o PROCESSO, e um processo rende vários
+   * acórdãos ao longo da vida — o REsp, depois o AgInt, depois os EDcl —
+   * todos com o mesmo número. Medido sobre 1.458 espelhos da Segunda Turma:
+   * 1.430 números de registro para 1.458 acórdãos, ou seja, um upsert
+   * chaveado por registro descartaria 28 julgados (1,9%). O campo `id` é
+   * único: 1.458 valores distintos para os mesmos 1.458 acórdãos.
+   *
+   * Fallback para o registro só cobre espelho sem `id`, que não ocorreu na
+   * amostra; nesse caso o comportamento antigo é preferível a descartar.
+   */
+  const idEspelho = limpar(e.id);
+  const chave = idEspelho || registro;
+
   const dataJulgamento = dataDeAaaammdd(e.dataDecisao);
   const dataPublicacao = dataDeRotuloDiario(e.dataPublicacao);
   const classe = limpar(e.siglaClasse) || 'Acórdão';
@@ -75,8 +91,8 @@ export function normalizarEspelho(
   }
 
   return {
-    sourceId: registro,
-    fullIdentifier: `stj-acordao-${registro}`,
+    sourceId: chave,
+    fullIdentifier: `stj-acordao-${chave}`,
     decisionType: 'acordao',
     classe,
     decisionNumber: registro,
@@ -89,6 +105,7 @@ export function normalizarEspelho(
     dataJulgamento,
     dataPublicacao,
     url: `https://processo.stj.jus.br/processo/pesquisa/?num_registro=${encodeURIComponent(registro)}`,
+    numeroRegistro: registro,
     tema: limpar(e.tema) || null,
     tese: limpar(e.teseJuridica) || null,
     artigos14133,
