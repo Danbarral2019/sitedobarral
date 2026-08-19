@@ -27,8 +27,12 @@ async function main() {
   console.log('\n=== resultado ===');
   console.log(r);
 
+  // Alinhado com a rota de cron (app/api/cron/sync-stj/route.ts): só falha
+  // total (nenhum dump lido) vira `failure` — erro parcial é `partial_failure`.
+  const status = r.dumpsLidos === 0 ? 'failure' : r.erros > 0 ? 'partial_failure' : 'success';
+
   if (!args.includes('--dry-run')) {
-    await logScraperHealth(SCRAPER_CODE_STJ, r.erros > 0 ? 'partial_failure' : 'success', {
+    await logScraperHealth(SCRAPER_CODE_STJ, status, {
       itemsFound: r.relevantes,
       itemsNew: r.criados,
       itemsError: r.erros,

@@ -160,7 +160,9 @@ Mesma regra de produto adotada no STF: espelho com `artigos14133.length > 0` é 
 
 `fullIdentifier = stj-acordao-<numeroRegistro>`. O `numeroRegistro` é o número de registro do STJ (ex.: `202402187409`), estável e único por acórdão.
 
-O runner reprocessa sempre os **dois dumps mais recentes** de cada órgão. Como o upsert é idempotente, isso dispensa cursor de estado persistido e cobre a republicação de um mês já baixado — situação real, já que os dumps são revisados após a publicação inicial.
+O runner reprocessa sempre os **dois dumps mais recentes** de cada órgão. Como o upsert é idempotente, isso dispensa cursor de estado persistido e cobre a chegada de **julgados novos** num dump já publicado antes.
+
+> ⚠️ **Correção pós-review final (19/08).** A frase original desta seção prometia que o reprocessamento também cobria "a republicação de um mês já baixado" com conteúdo alterado. **Isso é falso no caminho de produção.** `persistirDecisoesStj` pula (`ignorados++`) todo registro cujo `fullIdentifier` já existe, a menos que a chamada passe `forcar: true` — e nem `coletarStj({ meses: 2 })` no cron, nem o modo default do runner de CLI, passam essa flag. Republicação que só **acrescenta** espelhos a um dump já visto é coberta (os novos entram normalmente); republicação que **corrige o conteúdo** de um espelho já gravado não é — fica pulada silenciosamente. Atualizar exige rodar `npm run stj:coletar -- --forcar` manualmente. Dívida conhecida, registrada aqui em vez de deixar o código e o spec discordando numa garantia explícita.
 
 ### Erros
 
@@ -203,6 +205,20 @@ O guard de mojibake existe porque é exatamente o defeito que corrompeu os nomes
 | risco | mitigação |
 |---|---|
 | WAF do STJ endurece e passa a exigir navegador | cabeçalhos centralizados em `consulta.ts`; se cair, o caminho já mapeado no STF (Chromium headed) se aplica |
-| dump republicado com conteúdo alterado | upsert por `fullIdentifier` atualiza; reprocessamento dos 2 últimos meses cobre |
+| dump republicado com conteúdo alterado | **não é coberto automaticamente** (correção pós-review de 19/08 — ver §4 "Idempotência e incremento"). O upsert por `fullIdentifier` só atualiza com `forcar: true`; nem o cron nem o runner default passam essa flag, então republicação de conteúdo é pulada em silêncio. Recuperação é manual: `npm run stj:coletar -- --forcar` |
 | recorte temático largo demais | rendimento medido em 4,7%; desvio grande é sinal de regex frouxa, verificável contra os 2.497 amostrados |
 | extração do parser regride o STF | testes de caracterização escritos antes do movimento |
+
+## 9. Pendências operacionais
+
+**7 dumps de 2022-2023 não foram coletados no backfill de 19/08** — bloqueados pelo WAF do STJ (que aqui responde com HTTP 200, então `fetchWithRetry` não repete: risco já mapeado na linha "WAF endurece" acima). Ficaram registrados só no `progress.md` local, que não viaja entre sessões; a lista abaixo é o registro durável:
+
+- `primeira-secao/20220930`
+- `primeira-turma/20230131`
+- `primeira-turma/20220930`
+- `primeira-turma/20220831`
+- `segunda-turma/20230131`
+- `segunda-turma/20221231`
+- `segunda-turma/20220930`
+
+**O cron mensal nunca vai alcançá-los** — ele só lê os 2 dumps mais recentes de cada dataset, e estes estão ~40 posições atrás. Recuperação: rodar `npm run stj:coletar -- --tudo` de novo. O upsert é idempotente, então os ~193 dumps já gravados são pulados por `fullIdentifier` já existente (`ignorados`); o custo é só o novo download dos 7 que faltam.
