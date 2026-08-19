@@ -8,7 +8,8 @@
  *      rede de segurança para o julgado que discute o tema sem citar a
  *      norma no campo estruturado.
  *
- * Rendimento medido sobre 12 dumps (2.497 acórdãos): 82 entram, 3,3%.
+ * Rendimento medido com este recorte, em dry-run sobre 8 dumps reais
+ * (2.144 espelhos): 43 entram, 2,0%.
  * Desvio grande desse patamar é sinal de regex frouxa — foi assim que os 29%
  * de falsos positivos da primeira versão apareceram.
  */

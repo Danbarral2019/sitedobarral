@@ -248,7 +248,7 @@ export const BASE_DADOS_ABERTOS_STJ = 'https://dadosabertos.web.stj.jus.br';
  *
  * Ficam de fora Segunda Seção e Terceira/Quarta Turma (direito privado) e
  * Terceira Seção e Quinta/Sexta Turma (penal). Rendimento medido em 12 dumps
- * amostrados: 82 relevantes em 2.497 acórdãos (3,3%).
+ * amostrados com o recorte JA CORRIGIDO: ~2,0%.
  */
 export const DATASETS_STJ = [
   { slug: 'espelhos-de-acordaos-corte-especial', orgao: 'Corte Especial' },
@@ -413,7 +413,8 @@ Criar `lib/stj/recorte.ts`:
  *      rede de segurança para o julgado que discute o tema sem citar a
  *      norma no campo estruturado.
  *
- * Rendimento medido sobre 12 dumps (2.497 acórdãos): 82 entram, 3,3%.
+ * Rendimento medido em dry-run sobre 8 dumps reais (2.144 espelhos):
+ * 43 entram, 2,0%.
  * Desvio grande desse patamar é sinal de regex frouxa — foi assim que os 29%
  * de falsos positivos da primeira versão apareceram.
  */
@@ -1472,7 +1473,7 @@ Em `package.json`, na seção `scripts`, logo após a linha de `stf:coletar`, ac
 - [ ] **Step 4: Rodar um dry-run curto e conferir o rendimento contra o medido**
 
 Run: `npm run stj:coletar -- --dry-run`
-Expected: 8 dumps lidos (2 por órgão), e a razão `relevantes / espelhosVistos` em torno de **3,3%**. Um número muito acima disso indica regex do recorte frouxa; muito abaixo, restritiva demais. **Não prossiga sem conferir.**
+Expected: 8 dumps lidos (2 por órgão), e a razão `relevantes / espelhosVistos` em torno de **2,0%** — medido em 19/08 sobre 2.144 espelhos: 43 relevantes, 26 gravaveis, 17 descartados por `pending`. Um numero muito acima indica regex do recorte frouxa; muito abaixo, restritiva demais. **Não prossiga sem conferir.**
 
 - [ ] **Step 5: Rodar o backfill do acervo, sem resumo IA**
 

@@ -58,7 +58,9 @@ Também vêm `ministroRelator`, `nomeOrgaoJulgador`, `siglaClasse`, `numeroRegis
 >
 > **3. O ganho real é outro, e se sustenta.** Não é a amarração — é ter **ementa jurídica em vez de capa processual**. Medido com o classificador real sobre 614 espelhos da Segunda Turma: **9 auto-aprovados, 16 pendentes, 8 rejeitados** entre os 33 relevantes. Contra **0 aprovados em 254** do DataJud. A troca de fonte continua justificada.
 >
-> **Decisão do Daniel decorrente da errata:** julgado que o classificador deixe em `pending` **não é persistido**. Só entram `auto_approved` e `auto_rejected`. Sem isso o backfill despejaria ~680 itens numa fila de revisão que já tem 211 do STF parados. A zona cinzenta é recuperável depois — os dumps continuam publicados.
+> **Decisão do Daniel decorrente da errata:** julgado que o classificador deixe em `pending` **não é persistido**. Só entram `auto_approved` e `auto_rejected`. Sem isso o backfill despejaria itens numa fila de revisão que já tem 211 do STF parados. A zona cinzenta é recuperável depois — os dumps continuam publicados.
+>
+> **4. Número final, medido em dry-run (19/08).** Com o recorte já corrigido, sobre 8 dumps reais (2.144 espelhos): **43 relevantes (2,0%), 26 graváveis, 17 descartados por `pending`**. Projetando para os 208 dumps do acervo: **~1.100 relevantes, ~680 gravados**. A queda de 3,3% para 2,0% **não é recorte restritivo demais** — é o efeito de exigir contexto em `inexigibilidade`: na mesma amostra de 698 espelhos, o vocabulário antigo pegava 33 e o atual pega 16, e os 17 excluídos são processuais ("cumprimento individual de sentença", "agravo interno nos embargos de declaração") que casavam por "inexigibilidade de débito". Cada número desta cadeia — 4,7% → 3,3% → 2,0% — corresponde a uma correção de falso positivo, não a perda de cobertura.
 
 O formato das referências legislativas é o ponto decisivo:
 

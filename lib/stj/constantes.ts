@@ -6,7 +6,9 @@ export const BASE_DADOS_ABERTOS_STJ = 'https://dadosabertos.web.stj.jus.br';
  *
  * Ficam de fora Segunda Seção e Terceira/Quarta Turma (direito privado) e
  * Terceira Seção e Quinta/Sexta Turma (penal). Rendimento medido em 12 dumps
- * amostrados: 82 relevantes em 2.497 acórdãos (3,3%).
+ * amostrados com o recorte JA CORRIGIDO: ~2,0%. (O 3,3% que circulou antes
+ * media o vocabulario com "inexigibilidade" solto, que casava "inexigibilidade
+ * de debito"; e o 4,7% original media antes da ancora de fronteira de palavra.)
  */
 export const DATASETS_STJ = [
   { slug: 'espelhos-de-acordaos-corte-especial', orgao: 'Corte Especial' },
