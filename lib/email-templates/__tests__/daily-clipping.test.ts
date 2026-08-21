@@ -120,3 +120,142 @@ describe('renderDailyClippingV2 — tamanho do corpo', () => {
     expect(html).toContain(s);
   });
 });
+
+/**
+ * Identificação técnica do julgado no cabeçalho e data do julgamento.
+ *
+ * Caso real (21/08/2026): o clipping anunciou "Decisao 1608084 — Sessão:
+ * 01/06/2026" para um julgado que o STF publica como "ARE 1608084 / SP",
+ * julgado em 02/06/2026. Nenhum dos dois erros vinha da coleta: no banco o
+ * registro tem title "ARE 1608084" e dataJulgamento 2026-06-02T00:00:00Z.
+ *
+ * Os títulos abaixo são cópias literais de registros de produção.
+ */
+function itemDe(over: Partial<ClippingItem>): ClippingItem {
+  return { ...makeItem('Ementa qualquer, longa o bastante para o corpo.'), ...over };
+}
+
+function renderItens(tribunalCode: string, tribunalName: string, itens: ClippingItem[]): string {
+  return renderDailyClippingV2({
+    sendId: 'send-1',
+    recipientName: 'Daniel',
+    unsubscribeToken: 'tok',
+    referenceDate: new Date('2026-08-17T00:00:00Z'),
+    groups: [{ tribunalCode, tribunalName, items: itens.map((item) => ({ item })) }],
+  }).html;
+}
+
+describe('renderDailyClippingV2 — identificação do julgado', () => {
+  const monocraticaStf = itemDe({
+    tribunalCode: 'STF',
+    decisionType: 'decisao',
+    decisionNumber: '1608084',
+    title: 'ARE 1608084',
+    orgaoJulgador: null,
+    relator: 'LUIZ FUX',
+    dataJulgamento: new Date('2026-06-02T00:00:00Z'),
+  });
+
+  it('usa a classe processual do julgado, não o tipo interno do banco', () => {
+    const html = renderItens('STF', 'Supremo Tribunal Federal', [monocraticaStf]);
+    expect(html).toContain('ARE 1608084');
+    expect(html).not.toContain('Decisao');
+  });
+
+  it('não repete no cabeçalho o tribunal que já titula o grupo', () => {
+    const html = renderItens('TCU', 'Tribunal de Contas da União', [
+      itemDe({
+        tribunalCode: 'TCU',
+        tribunalName: 'Tribunal de Contas da União',
+        decisionType: 'acordao',
+        decisionNumber: '2194/2026',
+        title: 'Acórdão TCU 2194/2026 - Plenário',
+        orgaoJulgador: 'Plenário',
+      }),
+    ]);
+    expect(html).toContain('Acórdão 2194/2026');
+    expect(html).not.toContain('Acórdão TCU 2194/2026');
+  });
+
+  it('não repete no cabeçalho o órgão julgador que já está na linha de metadados', () => {
+    const html = renderItens('TCU', 'Tribunal de Contas da União', [
+      itemDe({
+        tribunalCode: 'TCU',
+        tribunalName: 'Tribunal de Contas da União',
+        decisionType: 'acordao',
+        decisionNumber: '2194/2026',
+        title: 'Acórdão TCU 2194/2026 - Plenário',
+        orgaoJulgador: 'Plenário',
+      }),
+    ]);
+    expect(html).not.toContain('2194/2026 - Plenário');
+  });
+
+  it('preserva a classe recursal do STJ e descarta o sufixo do tribunal', () => {
+    const html = renderItens('STJ', 'Superior Tribunal de Justiça', [
+      itemDe({
+        tribunalCode: 'STJ',
+        tribunalName: 'Superior Tribunal de Justiça',
+        decisionType: 'acordao',
+        decisionNumber: '202600138141',
+        title: 'AgInt no AREsp 202600138141 - STJ',
+        orgaoJulgador: 'SEGUNDA TURMA',
+      }),
+    ]);
+    expect(html).toContain('AgInt no AREsp 202600138141');
+    expect(html).not.toContain('202600138141 - STJ');
+  });
+
+  it('grafa "Acórdão" por extenso quando a fonte grava o título em caixa alta sem acento', () => {
+    const html = renderItens('TCE-PE', 'Tribunal de Contas do Estado de Pernambuco', [
+      itemDe({
+        tribunalCode: 'TCE-PE',
+        tribunalName: 'Tribunal de Contas do Estado de Pernambuco',
+        decisionType: 'acordao',
+        decisionNumber: '1607/2026',
+        title: 'ACORDAO 1607/2026 TCE-PE (Medida Cautelar)',
+        orgaoJulgador: '1a. Câmara',
+      }),
+    ]);
+    expect(html).toContain('Acórdão 1607/2026 (Medida Cautelar)');
+    expect(html).not.toContain('ACORDAO');
+  });
+
+  it('cai no número da decisão quando o título vem vazio', () => {
+    const html = renderItens('STF', 'Supremo Tribunal Federal', [
+      itemDe({ ...monocraticaStf, title: '' }),
+    ]);
+    expect(html).toContain('1608084');
+  });
+});
+
+describe('renderDailyClippingV2 — data do julgamento', () => {
+  const emDoisDeJunho = itemDe({
+    tribunalCode: 'STF',
+    decisionType: 'decisao',
+    decisionNumber: '1608084',
+    title: 'ARE 1608084',
+    orgaoJulgador: null,
+    dataJulgamento: new Date('2026-06-02T00:00:00Z'),
+  });
+
+  it('imprime o dia em que o julgado foi julgado, não o anterior', () => {
+    const { html, text } = renderDailyClippingV2({
+      sendId: 'send-1',
+      recipientName: 'Daniel',
+      unsubscribeToken: 'tok',
+      referenceDate: new Date('2026-08-17T00:00:00Z'),
+      groups: [{ tribunalCode: 'STF', tribunalName: 'Supremo Tribunal Federal', items: [{ item: emDoisDeJunho }] }],
+    });
+    expect(html).toContain('02/06/2026');
+    expect(html).not.toContain('01/06/2026');
+    expect(text).toContain('02/06/2026');
+    expect(text).not.toContain('01/06/2026');
+  });
+
+  it('rotula a data como julgamento, que vale para colegiado e para monocrática', () => {
+    const html = renderItens('STF', 'Supremo Tribunal Federal', [emDoisDeJunho]);
+    expect(html).toContain('Julgamento: 02/06/2026');
+    expect(html).not.toContain('Sessão:');
+  });
+});

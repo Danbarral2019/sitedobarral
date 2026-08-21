@@ -9,13 +9,19 @@ interface ClippingArchiveDetailProps {
   showSiteHeader?: boolean;
 }
 
+/**
+ * `dataSessao` é data de calendário gravada à meia-noite UTC, e formatá-la em
+ * `America/Sao_Paulo` (UTC-3) devolvia 21h do dia anterior: um acórdão julgado
+ * em 19/08 aparecia como 18/08. `referenceDate` chega às 03:00 UTC (00:00 de
+ * Brasília, ver `startOfBrasiliaDay`) e cai no mesmo dia nos dois fusos.
+ */
 function fmtDate(d: Date | null): string {
   if (!d) return '';
   return new Intl.DateTimeFormat('pt-BR', {
     day: '2-digit',
     month: '2-digit',
     year: 'numeric',
-    timeZone: 'America/Sao_Paulo',
+    timeZone: 'UTC',
   }).format(d);
 }
 
