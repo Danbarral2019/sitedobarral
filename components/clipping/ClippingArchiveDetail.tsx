@@ -1,19 +1,22 @@
 import Link from 'next/link';
-import type { ClippingAcordao } from '@/lib/email-templates/daily-clipping';
+import type { ClippingGroup, ClippingItemRendered } from '@/lib/email-templates/daily-clipping';
+import { identificacaoDoJulgado } from '@/lib/email-templates/daily-clipping';
+import { getTribunalBrand } from '@/lib/clipping/tribunal-branding';
 
 interface ClippingArchiveDetailProps {
   referenceDate: Date;
-  acordaos: ClippingAcordao[];
+  groups: ClippingGroup[];
   missingIds: string[];
   backHref?: string;
   showSiteHeader?: boolean;
 }
 
 /**
- * `dataSessao` é data de calendário gravada à meia-noite UTC, e formatá-la em
- * `America/Sao_Paulo` (UTC-3) devolvia 21h do dia anterior: um acórdão julgado
- * em 19/08 aparecia como 18/08. `referenceDate` chega às 03:00 UTC (00:00 de
- * Brasília, ver `startOfBrasiliaDay`) e cai no mesmo dia nos dois fusos.
+ * `dataJulgamento` é data de calendário gravada à meia-noite UTC, e formatá-la
+ * em `America/Sao_Paulo` (UTC-3) devolvia 21h do dia anterior: um acórdão
+ * julgado em 19/08 aparecia como 18/08. `referenceDate` chega às 03:00 UTC
+ * (00:00 de Brasília, ver `startOfBrasiliaDay`) e cai no mesmo dia nos dois
+ * fusos.
  */
 function fmtDate(d: Date | null): string {
   if (!d) return '';
@@ -25,46 +28,52 @@ function fmtDate(d: Date | null): string {
   }).format(d);
 }
 
-function AcordaoBlock({ a }: { a: ClippingAcordao }) {
-  const dataStr = fmtDate(a.dataSessao);
-  const meta = [a.relator ? `Relator: ${a.relator}` : null, dataStr ? `Sessão: ${dataStr}` : null]
+/**
+ * Espelha `renderItemHtmlV2` do e-mail: mesma identificação do julgado, mesma
+ * ordem de blocos. O arquivo web e o e-mail mostram o mesmo conteúdo, e a
+ * identificação vem da mesma função — foi a duplicação de leitores desse mesmo
+ * campo que deixou este arquivo vazio por três meses.
+ */
+function ItemBlock({ rendered }: { rendered: ClippingItemRendered }) {
+  const { item, aiBullets, dispositivos } = rendered;
+  const dataStr = fmtDate(item.dataJulgamento);
+  const meta = [
+    item.orgaoJulgador,
+    item.relator ? `Relator: ${item.relator}` : null,
+    dataStr ? `Julgamento: ${dataStr}` : null,
+  ]
     .filter(Boolean)
     .join(' · ');
+
   return (
     <article className="border-b border-slate-200 pb-6 mb-6 last:border-b-0 last:mb-0 last:pb-0">
-      <h2 className="text-lg font-bold text-slate-900 mb-1">
-        Acórdão {a.numeroAcordao} — {a.colegiado || 'TCU'}
-      </h2>
+      <h2 className="text-lg font-bold text-slate-900 mb-1">{identificacaoDoJulgado(item)}</h2>
       {meta ? <p className="text-xs text-slate-500 mb-3">{meta}</p> : null}
-      {a.ementa ? (
+      {item.ementa ? (
         <>
-          <p className="text-sm font-semibold text-slate-900 mt-3 mb-1">Ementa (sumário oficial):</p>
-          <p className="text-sm text-slate-700 italic leading-relaxed mb-3">{a.ementa}</p>
+          <p className="text-sm font-semibold text-slate-900 mt-3 mb-1">Ementa:</p>
+          <p className="text-sm text-slate-700 italic leading-relaxed mb-3">{item.ementa}</p>
         </>
       ) : null}
-      {a.dispositivos.length > 0 ? (
+      {dispositivos && dispositivos.length > 0 ? (
         <>
           <p className="text-sm font-semibold text-slate-900 mt-3 mb-1">Dispositivos:</p>
           <ul className="list-none pl-0 space-y-2 mb-3">
-            {a.dispositivos.map((d, i) => (
+            {dispositivos.map((d, i) => (
               <li key={i} className="text-sm text-slate-800 leading-relaxed">
                 <strong className="text-slate-900">{d.numero}.</strong> {d.texto}
               </li>
             ))}
           </ul>
         </>
-      ) : a.extractMethod === 'failed' && (!a.aiBullets || a.aiBullets.length === 0) ? (
-        <p className="text-xs italic text-slate-400 my-2">
-          Dispositivos não pôde ser extraído automaticamente — consulte o inteiro teor.
-        </p>
       ) : null}
-      {a.aiBullets && a.aiBullets.length > 0 ? (
+      {aiBullets && aiBullets.length > 0 ? (
         <div className="my-3 px-4 py-3 bg-slate-50 border-l-4 border-indigo-500 rounded">
           <p className="text-xs font-semibold tracking-wider text-indigo-600 mb-1">
             CONTEXTO E TESE <span className="font-normal text-slate-400">(síntese editorial)</span>
           </p>
           <ul className="list-disc pl-5 m-0 space-y-1">
-            {a.aiBullets.map((b, i) => (
+            {aiBullets.map((b, i) => (
               <li key={i} className="text-sm text-slate-700 leading-relaxed">
                 {b}
               </li>
@@ -73,9 +82,9 @@ function AcordaoBlock({ a }: { a: ClippingAcordao }) {
         </div>
       ) : null}
       <p className="text-sm mt-2 space-x-3">
-        {a.linkPdf ? (
+        {item.linkPdf ? (
           <a
-            href={a.linkPdf}
+            href={item.linkPdf}
             target="_blank"
             rel="noopener noreferrer"
             className="text-blue-700 font-semibold no-underline hover:underline"
@@ -83,14 +92,14 @@ function AcordaoBlock({ a }: { a: ClippingAcordao }) {
             Inteiro teor (PDF) →
           </a>
         ) : null}
-        {a.linkInternal ? (
+        {item.linkExternal ? (
           <a
-            href={a.linkInternal}
+            href={item.linkExternal}
             target="_blank"
             rel="noopener noreferrer"
             className="text-slate-500 no-underline hover:underline"
           >
-            Ver no site
+            Ver no tribunal
           </a>
         ) : null}
       </p>
@@ -98,15 +107,38 @@ function AcordaoBlock({ a }: { a: ClippingAcordao }) {
   );
 }
 
+function GroupBlock({ group }: { group: ClippingGroup }) {
+  const brand = getTribunalBrand(group.tribunalCode);
+  const count = group.items.length;
+  return (
+    <section className="mb-6 last:mb-0">
+      <div
+        className="flex items-center justify-between rounded-md px-3.5 py-2.5 mb-4"
+        style={{ backgroundColor: brand.color }}
+      >
+        <span className="text-sm font-bold tracking-wide text-white">{brand.code}</span>
+        <span className="text-xs text-white/85">
+          {count} {count === 1 ? 'decisão' : 'decisões'}
+        </span>
+      </div>
+      {group.items.map((rendered) => (
+        <ItemBlock key={`${rendered.item.sourceKind}:${rendered.item.sourceId}`} rendered={rendered} />
+      ))}
+    </section>
+  );
+}
+
 export function ClippingArchiveDetail({
   referenceDate,
-  acordaos,
+  groups,
   missingIds,
   backHref,
   showSiteHeader,
 }: ClippingArchiveDetailProps) {
   const dataRef = fmtDate(referenceDate);
-  const count = acordaos.length;
+  const count = groups.reduce((n, g) => n + g.items.length, 0);
+  const tribunais = groups.length;
+
   return (
     <div className="min-h-screen bg-slate-100 py-8 px-4">
       <div className="max-w-3xl mx-auto bg-white rounded-lg shadow-sm overflow-hidden">
@@ -114,9 +146,10 @@ export function ClippingArchiveDetail({
           <p className="text-xs uppercase tracking-widest text-slate-400 mb-1">
             {showSiteHeader ? 'Prof. Daniel Barral' : 'Arquivo do Clipping'}
           </p>
-          <h1 className="text-2xl font-bold text-white m-0">Clipping TCU</h1>
+          <h1 className="text-2xl font-bold text-white m-0">Clipping Jurídico</h1>
           <p className="text-sm text-slate-300 mt-1">
             Decisões publicadas em {dataRef} · {count} {count === 1 ? 'destaque' : 'destaques'}
+            {tribunais > 1 ? ` · ${tribunais} tribunais` : ''}
           </p>
         </header>
         <div className="px-8 py-7">
@@ -127,23 +160,21 @@ export function ClippingArchiveDetail({
               </Link>
             </p>
           ) : null}
-          {acordaos.length === 0 ? (
-            <p className="text-sm text-slate-500 italic">Nenhum acórdão neste envio.</p>
+          {count === 0 ? (
+            <p className="text-sm text-slate-500 italic">Nenhuma decisão neste envio.</p>
           ) : (
-            acordaos.map((a) => <AcordaoBlock key={a.documentId} a={a} />)
+            groups.map((g) => <GroupBlock key={g.tribunalCode} group={g} />)
           )}
           {missingIds.length > 0 ? (
             <p className="text-xs text-slate-400 italic mt-6">
               {missingIds.length}{' '}
-              {missingIds.length === 1 ? 'acórdão indisponível' : 'acórdãos indisponíveis'} (removidos da
+              {missingIds.length === 1 ? 'decisão indisponível' : 'decisões indisponíveis'} (removidas da
               base após o envio).
             </p>
           ) : null}
         </div>
         <footer className="bg-slate-50 px-8 py-4 border-t border-slate-200 text-center">
-          <p className="text-xs text-slate-500 m-0">
-            Prof. Daniel Barral · profdanielbarral.com
-          </p>
+          <p className="text-xs text-slate-500 m-0">Prof. Daniel Barral · profdanielbarral.com</p>
         </footer>
       </div>
     </div>
