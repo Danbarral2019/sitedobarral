@@ -38,8 +38,16 @@ export interface RenderedEmail {
 
 const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://profdanielbarral.com';
 
+/**
+ * `dataJulgamento`/`dataSessao` são datas de calendário, não instantes: os
+ * conectores gravam o dia à meia-noite UTC — 100% dos registros de TCU (650),
+ * STF (600), STJ (396) e TCE-PE (357), medidos em 21/08/2026. Formatar isso em
+ * `America/Sao_Paulo` (UTC-3) devolve 21h do dia ANTERIOR, e o clipping saía
+ * anunciando um julgado de 02/06 como sendo de 01/06. Por isso o fuso aqui é
+ * UTC: preserva o dia que o tribunal publicou.
+ */
 function fmtDate(d: Date): string {
-  return new Intl.DateTimeFormat('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric', timeZone: 'America/Sao_Paulo' }).format(d);
+  return new Intl.DateTimeFormat('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric', timeZone: 'UTC' }).format(d);
 }
 
 /**
@@ -321,15 +329,62 @@ export interface DailyClippingInputV2 {
   showArchiveBanner?: boolean;
 }
 
+/**
+ * Identificação técnica do julgado, como o próprio tribunal a publica.
+ *
+ * O cabeçalho vinha de `decisionType` + `decisionNumber` — mas `decisionType`
+ * é um enum interno de duas vias (`decisao`/`acordao`), não a classe
+ * processual: uma monocrática em agravo em recurso extraordinário saía como
+ * "Decisao 1608084" onde o STF publica "ARE 1608084". O `title` do registro já
+ * traz a classe correta e está preenchido em 100% dos registros dos quatro
+ * tribunais do clipping.
+ *
+ * O título é usado como veio da fonte, tirando apenas o que o próprio e-mail
+ * já diz ao lado — o tribunal titula o grupo e o órgão julgador abre a linha
+ * de metadados logo abaixo, de modo que repeti-los no cabeçalho é ruído.
+ */
+export function identificacaoDoJulgado(item: {
+  title: string | null;
+  decisionNumber: string;
+  tribunalCode: string;
+  tribunalName: string;
+  orgaoJulgador: string | null;
+}): string {
+  const bruto = (item.title || '').trim();
+  if (!bruto) return item.decisionNumber;
+
+  const escapar = (v: string) => v.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  let s = bruto;
+
+  // O órgão julgador abre a linha de metadados: como sufixo do título, repete.
+  if (item.orgaoJulgador) {
+    s = s.replace(new RegExp(`\\s*[-–—]\\s*${escapar(item.orgaoJulgador.trim())}\\s*$`, 'i'), '');
+  }
+
+  // O tribunal já titula o grupo.
+  for (const marca of [item.tribunalCode, item.tribunalName]) {
+    if (marca && marca.trim()) {
+      s = s.replace(new RegExp(`\\b${escapar(marca.trim())}\\b`, 'gi'), ' ');
+    }
+  }
+
+  // TCE-PE grava "ACORDAO 1607/2026"; o termo jurídico é "Acórdão".
+  s = s.replace(/^\s*acord[aã]o\b/i, 'Acórdão');
+
+  // Sobras da remoção: separador órfão nas pontas e espaço duplicado.
+  s = s.replace(/\s+/g, ' ').replace(/^[\s\-–—]+|[\s\-–—]+$/g, '').trim();
+
+  return s || item.decisionNumber;
+}
+
 function renderItemHtmlV2(rendered: ClippingItemRendered): string {
   const { item, aiBullets, dispositivos } = rendered;
   const dataStr = item.dataJulgamento ? fmtDate(item.dataJulgamento) : '';
-  const tipoLabel = item.decisionType.charAt(0).toUpperCase() + item.decisionType.slice(1);
-  const cabecalho = `${tipoLabel} ${escapeHtml(item.decisionNumber)}`;
+  const cabecalho = escapeHtml(identificacaoDoJulgado(item));
   const meta = [
     item.orgaoJulgador ? escapeHtml(item.orgaoJulgador) : null,
     item.relator ? `Relator: ${escapeHtml(item.relator)}` : null,
-    dataStr ? `Sessão: ${dataStr}` : null,
+    dataStr ? `Julgamento: ${dataStr}` : null,
   ].filter(Boolean).join(' &middot; ');
 
   const ementaHtml = item.ementa
@@ -389,13 +444,12 @@ function renderItemHtmlV2(rendered: ClippingItemRendered): string {
 function renderItemTextV2(rendered: ClippingItemRendered): string {
   const { item, aiBullets, dispositivos } = rendered;
   const lines: string[] = [];
-  const tipoLabel = item.decisionType.charAt(0).toUpperCase() + item.decisionType.slice(1);
-  lines.push(`${tipoLabel.toUpperCase()} ${item.decisionNumber}`);
+  lines.push(identificacaoDoJulgado(item));
   const dataStr = item.dataJulgamento ? fmtDate(item.dataJulgamento) : '';
   const meta = [
     item.orgaoJulgador,
     item.relator ? `Relator: ${item.relator}` : null,
-    dataStr ? `Sessão: ${dataStr}` : null,
+    dataStr ? `Julgamento: ${dataStr}` : null,
   ].filter(Boolean).join(' · ');
   if (meta) lines.push(meta);
   if (item.ementa) {
