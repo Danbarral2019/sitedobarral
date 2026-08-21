@@ -48,16 +48,24 @@ cada exportação, e não há caminho de volta para o banco.
 ## O que está aqui
 
 Pareceres, Orientações Normativas da AGU, súmulas, notas técnicas, manuais e
-acórdãos do TCU, informativos, atos normativos e os artigos da Lei 14.133/2021
-com os comentários do professor. Os arquivos são Markdown com frontmatter e
-wikilinks no estilo Obsidian — os wikilinks são inertes fora de um cofre, mas
-preservam a relação entre as peças para quem lê.
+acórdãos do TCU, informativos, atos normativos, jurisprudência do TCU, dos
+tribunais de contas estaduais, do TST, do STF e do STJ, e os artigos da Lei
+14.133/2021 com os comentários do professor. Os arquivos são Markdown com
+frontmatter e wikilinks no estilo Obsidian — os wikilinks são inertes fora de um
+cofre, mas preservam a relação entre as peças para quem lê.
+
+Inclui também os ~13 mil acórdãos do TCU ingeridos como combustível do grafo de
+precedentes (\`category: 'acordao-grafo'\`), que **não** aparecem no cofre do
+Obsidian do professor nem nas superfícies de busca do sítio. Aqui eles entram de
+propósito: este destino é índice de RAG, e a recuperação busca em vez de ler
+sequencialmente, então o argumento do "dossiê ilegível" não se transfere. São
+milhares de acórdãos com sumário real que não existem em nenhum outro ponto do
+acervo. Sem curadoria editorial — tratar como fonte bruta.
 
 ## O que NÃO está aqui
 
-Os ~13 mil acórdãos do TCU ingeridos como combustível do grafo de precedentes
-(\`category: 'acordao-grafo'\`). São invisíveis por construção, não têm curadoria
-e transformariam este acervo num dossiê ilegível.
+Material proprietário do professor que não seja norma ou julgado público: as
+aulas do LMS, os quizzes e as anotações internas de curadoria.
 
 ## Como atualizar
 
@@ -65,8 +73,14 @@ No repositório \`sitedobarral\`:
 
 \`\`\`bash
 npm run export:elic -- --dry-run   # confere o que mudaria
-npm run export:elic                # escreve
+npm run export:elic                # escreve (incremental)
+npm run export:elic -- --full      # reescreve tudo
 \`\`\`
+
+O modo padrão é incremental: só grava o que mudou desde a última exportação.
+Depois de qualquer mudança no **escopo** do que é exportado — ligar uma
+categoria nova, afrouxar um filtro — é preciso um \`--full\`, porque o
+incremental não conhece o passivo que passou a ser elegível e nunca foi escrito.
 `;
 }
 
