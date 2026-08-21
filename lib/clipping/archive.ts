@@ -1,6 +1,8 @@
 import { prisma } from '@/lib/prisma';
-import type { ClippingAcordao } from '@/lib/email-templates/daily-clipping';
-import type { Dispositivo } from '@/lib/clipping/dispositivo-extractor';
+import type { ClippingGroup } from '@/lib/email-templates/daily-clipping';
+import { identificacaoDoJulgado } from '@/lib/email-templates/daily-clipping';
+import { parseSentItemsPayload } from '@/lib/clipping/sent-history';
+import { rehydrateSentItems } from '@/lib/clipping/rehydrate';
 
 const BR_TZ_OFFSET_HOURS = 3;
 
@@ -30,95 +32,6 @@ export function formatSentDateParam(date: Date): string {
 
 export function referenceDateFromSentDate(sentDate: Date): Date {
   return new Date(sentDate.getTime() - 24 * 60 * 60 * 1000);
-}
-
-type DocSelect = {
-  id: string;
-  title: string;
-  description: string | null;
-  url: string | null;
-  tcuNumeroAcordao: string | null;
-  tcuEmentaCompleta: string | null;
-  tcuRelator: string | null;
-  tcuOrgaoJulgador: string | null;
-  tcuLinkPDF: string | null;
-  tcuDataJulgamento: Date | null;
-  clippingExtract: {
-    dispositivos: unknown;
-    extractMethod: string;
-    aiBullets?: string | null;
-  } | null;
-};
-
-export const ACORDAO_SELECT = {
-  id: true,
-  title: true,
-  description: true,
-  url: true,
-  tcuNumeroAcordao: true,
-  tcuEmentaCompleta: true,
-  tcuRelator: true,
-  tcuOrgaoJulgador: true,
-  tcuLinkPDF: true,
-  tcuDataJulgamento: true,
-  clippingExtract: { select: { dispositivos: true, extractMethod: true, aiBullets: true } },
-} as const;
-
-function parseAiBullets(raw: string | null | undefined): string[] | undefined {
-  if (!raw) return undefined;
-  try {
-    const parsed = JSON.parse(raw);
-    if (!Array.isArray(parsed)) return undefined;
-    const filtered = parsed.filter((s): s is string => typeof s === 'string');
-    return filtered.length > 0 ? filtered : undefined;
-  } catch {
-    return undefined;
-  }
-}
-
-function parseDispositivos(raw: unknown): Dispositivo[] {
-  if (!raw) return [];
-  if (Array.isArray(raw)) {
-    return raw.filter(
-      (d): d is Dispositivo =>
-        typeof d === 'object' && d !== null && typeof (d as Dispositivo).numero === 'string' && typeof (d as Dispositivo).texto === 'string',
-    );
-  }
-  if (typeof raw === 'string') {
-    try {
-      return parseDispositivos(JSON.parse(raw));
-    } catch {
-      return [];
-    }
-  }
-  return [];
-}
-
-export function mapDocToAcordao(doc: DocSelect): ClippingAcordao {
-  return {
-    documentId: doc.id,
-    numeroAcordao: doc.tcuNumeroAcordao || doc.title || '',
-    colegiado: doc.tcuOrgaoJulgador || 'TCU',
-    relator: doc.tcuRelator,
-    dataSessao: doc.tcuDataJulgamento,
-    ementa: (doc.tcuEmentaCompleta || doc.description || '').trim(),
-    linkPdf: doc.tcuLinkPDF,
-    linkInternal: doc.url,
-    dispositivos: parseDispositivos(doc.clippingExtract?.dispositivos),
-    extractMethod:
-      (doc.clippingExtract?.extractMethod as ClippingAcordao['extractMethod'] | undefined) ?? 'failed',
-    aiBullets: parseAiBullets(doc.clippingExtract?.aiBullets),
-  };
-}
-
-function parseAcordaoIds(raw: string | null | undefined): string[] {
-  if (!raw) return [];
-  try {
-    const parsed = JSON.parse(raw);
-    return Array.isArray(parsed) ? parsed.filter((x): x is string => typeof x === 'string') : [];
-  } catch {
-    return [];
-  }
 }
 
 export interface ArchiveEntrySummary {
@@ -155,24 +68,63 @@ export async function listArchiveEntries(opts: {
     }),
   ]);
 
-  const allIds = rows.flatMap((r) => parseAcordaoIds(r.acordaoIdsIncluded));
+  const allRefs = rows.flatMap((r) => parseSentItemsPayload(r.acordaoIdsIncluded));
   const previewMap = new Map<string, string>();
-  if (allIds.length > 0) {
+
+  const docIds = allRefs.filter((r) => r.kind === 'document-tcu').map((r) => r.id);
+  const tribunalIds = allRefs.filter((r) => r.kind === 'tribunal-decision').map((r) => r.id);
+
+  if (docIds.length > 0) {
     const docs = await prisma.document.findMany({
-      where: { id: { in: allIds } },
-      select: { id: true, title: true, tcuNumeroAcordao: true, tcuEmentaCompleta: true },
+      where: { id: { in: docIds } },
+      select: {
+        id: true,
+        title: true,
+        tcuNumeroAcordao: true,
+        tcuOrgaoJulgador: true,
+        tcuEmentaCompleta: true,
+      },
     });
     for (const d of docs) {
-      const num = d.tcuNumeroAcordao || d.title;
+      const rotulo = identificacaoDoJulgado({
+        title: d.title,
+        decisionNumber: d.tcuNumeroAcordao || d.title || '',
+        tribunalCode: 'TCU',
+        tribunalName: 'Tribunal de Contas da União',
+        orgaoJulgador: d.tcuOrgaoJulgador,
+      });
       const ementa = (d.tcuEmentaCompleta || '').slice(0, 100);
-      previewMap.set(d.id, num ? `${num}${ementa ? ` — ${ementa}` : ''}` : ementa);
+      previewMap.set(`document-tcu:${d.id}`, rotulo ? `${rotulo}${ementa ? ` — ${ementa}` : ''}` : ementa);
+    }
+  }
+
+  if (tribunalIds.length > 0) {
+    const decisoes = await prisma.tribunalDecision.findMany({
+      where: { id: { in: tribunalIds } },
+      select: {
+        id: true,
+        title: true,
+        decisionNumber: true,
+        tribunalCode: true,
+        tribunalName: true,
+        orgaoJulgador: true,
+        ementa: true,
+      },
+    });
+    for (const t of decisoes) {
+      const rotulo = identificacaoDoJulgado(t);
+      const ementa = (t.ementa || '').slice(0, 100);
+      previewMap.set(
+        `tribunal-decision:${t.id}`,
+        rotulo ? `${rotulo}${ementa ? ` — ${ementa}` : ''}` : ementa
+      );
     }
   }
 
   const entries: ArchiveEntrySummary[] = rows.map((r) => {
-    const ids = parseAcordaoIds(r.acordaoIdsIncluded);
-    const previews = ids
-      .map((id) => previewMap.get(id))
+    const refs = parseSentItemsPayload(r.acordaoIdsIncluded);
+    const previews = refs
+      .map((ref) => previewMap.get(`${ref.kind}:${ref.id}`))
       .filter((s): s is string => Boolean(s));
     const preview = previews.slice(0, 2).join(' · ');
     return {
@@ -191,7 +143,13 @@ export interface ArchiveEntryDetail {
   sentDate: Date;
   referenceDate: Date;
   status: string;
-  acordaos: ClippingAcordao[];
+  /**
+   * Itens do envio agrupados por tribunal — o mesmo shape que o e-mail consome.
+   * Substituiu o antigo `acordaos: ClippingAcordao[]`, que só sabia representar
+   * o TCU e deixava de fora os itens de `TribunalDecision`.
+   */
+  groups: ClippingGroup[];
+  /** Ids que não existem mais em nenhuma das duas tabelas. */
   missingIds: string[];
 }
 
@@ -205,48 +163,15 @@ export async function getArchiveEntry(sentDate: Date): Promise<ArchiveEntryDetai
     },
   });
   if (!send) return null;
-  const ids = parseAcordaoIds(send.acordaoIdsIncluded);
-  if (ids.length === 0) {
-    return {
-      sentDate: send.sentDate,
-      referenceDate: referenceDateFromSentDate(send.sentDate),
-      status: send.status,
-      acordaos: [],
-      missingIds: [],
-    };
-  }
 
-  const docs = await prisma.document.findMany({
-    where: { id: { in: ids } },
-    select: ACORDAO_SELECT,
-  });
-  const docMap = new Map(docs.map((d) => [d.id, d]));
-  const acordaos: ClippingAcordao[] = [];
-  const missingIds: string[] = [];
-  for (const id of ids) {
-    const doc = docMap.get(id);
-    if (doc) acordaos.push(mapDocToAcordao(doc));
-    else missingIds.push(id);
-  }
-  // Dedup: envios antigos podem ter IDs de documentos duplicados (race condition
-  // no sync-tcu-acordaos). Mantém o mais completo: aiBullets > mais dispositivos.
-  const dedupKey = (a: ClippingAcordao) => `${a.numeroAcordao}|${a.colegiado}`;
-  const seen = new Map<string, ClippingAcordao>();
-  for (const a of acordaos) {
-    const key = dedupKey(a);
-    const existing = seen.get(key);
-    if (!existing) { seen.set(key, a); continue; }
-    const exHasAi = !!(existing.aiBullets && existing.aiBullets.length > 0);
-    const aHasAi = !!(a.aiBullets && a.aiBullets.length > 0);
-    if (aHasAi && !exHasAi) { seen.set(key, a); continue; }
-    if (exHasAi && !aHasAi) continue;
-    if (a.dispositivos.length > existing.dispositivos.length) seen.set(key, a);
-  }
+  const refs = parseSentItemsPayload(send.acordaoIdsIncluded);
+  const { groups, missingIds } = await rehydrateSentItems(refs);
+
   return {
     sentDate: send.sentDate,
     referenceDate: referenceDateFromSentDate(send.sentDate),
     status: send.status,
-    acordaos: Array.from(seen.values()),
+    groups,
     missingIds,
   };
 }
@@ -262,21 +187,52 @@ export async function searchArchive(query: string, limit = 30): Promise<ArchiveS
   const term = query.trim();
   if (term.length < 2) return [];
 
-  const matchingDocs = await prisma.document.findMany({
-    where: {
-      category: 'acordao',
-      OR: [
-        { title: { contains: term, mode: 'insensitive' } },
-        { tcuEmentaCompleta: { contains: term, mode: 'insensitive' } },
-        { tcuNumeroAcordao: { contains: term, mode: 'insensitive' } },
-      ],
-    },
-    select: { id: true, title: true, tcuNumeroAcordao: true, tcuEmentaCompleta: true },
-    take: 200,
-  });
-  if (matchingDocs.length === 0) return [];
-  const matchedIds = new Set(matchingDocs.map((d) => d.id));
-  const docMap = new Map(matchingDocs.map((d) => [d.id, d]));
+  // As duas origens do clipping: TCU vive em `Document`, os demais tribunais em
+  // `TribunalDecision`. Buscar só a primeira deixava os envios multi-tribunal
+  // fora do resultado.
+  const [matchingDocs, matchingDecisions] = await Promise.all([
+    prisma.document.findMany({
+      where: {
+        category: 'acordao',
+        OR: [
+          { title: { contains: term, mode: 'insensitive' } },
+          { tcuEmentaCompleta: { contains: term, mode: 'insensitive' } },
+          { tcuNumeroAcordao: { contains: term, mode: 'insensitive' } },
+        ],
+      },
+      select: { id: true, title: true, tcuNumeroAcordao: true, tcuEmentaCompleta: true },
+      take: 200,
+    }),
+    prisma.tribunalDecision.findMany({
+      where: {
+        OR: [
+          { title: { contains: term, mode: 'insensitive' } },
+          { ementa: { contains: term, mode: 'insensitive' } },
+          { decisionNumber: { contains: term, mode: 'insensitive' } },
+        ],
+      },
+      select: { id: true, title: true, decisionNumber: true, ementa: true },
+      take: 200,
+    }),
+  ]);
+
+  if (matchingDocs.length === 0 && matchingDecisions.length === 0) return [];
+
+  // Chaveado por "<kind>:<id>" para que um id de Document nunca case com um id
+  // de TribunalDecision.
+  const rotuloPorChave = new Map<string, { rotulo: string; ementa: string }>();
+  for (const d of matchingDocs) {
+    rotuloPorChave.set(`document-tcu:${d.id}`, {
+      rotulo: d.tcuNumeroAcordao || d.title || '',
+      ementa: d.tcuEmentaCompleta || '',
+    });
+  }
+  for (const t of matchingDecisions) {
+    rotuloPorChave.set(`tribunal-decision:${t.id}`, {
+      rotulo: t.title || t.decisionNumber || '',
+      ementa: t.ementa || '',
+    });
+  }
 
   const sends = await prisma.dailyClippingSend.findMany({
     where: { status: { in: ['success', 'partial'] }, acordaoCount: { gt: 0 } },
@@ -286,18 +242,17 @@ export async function searchArchive(query: string, limit = 30): Promise<ArchiveS
 
   const hits: ArchiveSearchHit[] = [];
   for (const s of sends) {
-    const ids = parseAcordaoIds(s.acordaoIdsIncluded);
-    const matched = ids.filter((id) => matchedIds.has(id));
+    const refs = parseSentItemsPayload(s.acordaoIdsIncluded);
+    const matched = refs
+      .map((ref) => rotuloPorChave.get(`${ref.kind}:${ref.id}`))
+      .filter((v): v is { rotulo: string; ementa: string } => Boolean(v));
     if (matched.length === 0) continue;
-    const matchedNumeros = matched
-      .map((id) => docMap.get(id)?.tcuNumeroAcordao || docMap.get(id)?.title || '')
-      .filter(Boolean);
-    const firstEmenta = (docMap.get(matched[0])?.tcuEmentaCompleta || '').slice(0, 200);
+
     hits.push({
       sentDate: s.sentDate,
       acordaoCount: s.acordaoCount,
-      matchedNumeros,
-      snippet: firstEmenta,
+      matchedNumeros: matched.map((m) => m.rotulo).filter(Boolean),
+      snippet: (matched[0].ementa || '').slice(0, 200),
     });
     if (hits.length >= limit) break;
   }

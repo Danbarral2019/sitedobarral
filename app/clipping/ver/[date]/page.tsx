@@ -26,7 +26,7 @@ export default async function ClippingViewPage({ params, searchParams }: PagePro
   return (
     <ClippingArchiveDetail
       referenceDate={entry.referenceDate}
-      acordaos={entry.acordaos}
+      groups={entry.groups}
       missingIds={entry.missingIds}
       showSiteHeader
     />

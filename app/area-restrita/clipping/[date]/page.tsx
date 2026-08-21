@@ -35,7 +35,7 @@ export default async function ClippingArchiveDetailPage({ params }: PageProps) {
   return (
     <ClippingArchiveDetail
       referenceDate={entry.referenceDate}
-      acordaos={entry.acordaos}
+      groups={entry.groups}
       missingIds={entry.missingIds}
       backHref="/area-restrita/clipping"
     />
